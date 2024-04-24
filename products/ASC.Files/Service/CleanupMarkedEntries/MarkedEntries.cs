@@ -26,16 +26,17 @@
 
 namespace ASC.Files.CleanupMarkedEntries;
 
-public class MarkedEntries
-{
-    public int TenantId { get; init; }
-    public Guid UserId { get; init; }
-    public FileEntryType FileEntryType { get; init; }
-    public IEnumerable<int> EntryIds { get; init; }
-}
-
-public class MarkedEntriesGroupKey(int tenantId, Guid userId)
+public class MarkedEntries(int tenantId, Guid userId)
 {
     public int TenantId { get; init; } = tenantId;
     public Guid UserId { get; init; } = userId;
+    public List<int> FolderIds { get; init; } = [];
+    public List<int> FileIds { get; init; } = [];
+}
+
+public class MarkedEntry(int tenantId, Guid userId, int entryId)
+{
+    public int TenantId { get; init; } = tenantId;
+    public Guid UserId { get; init; } = userId;
+    public int EntryId { get; init; } = entryId;
 }

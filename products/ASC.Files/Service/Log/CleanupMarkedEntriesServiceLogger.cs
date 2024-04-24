@@ -40,7 +40,7 @@ internal static partial class CleanupMarkedEntriesServiceLogger
     [LoggerMessage(Level = LogLevel.Trace, Message = "Procedure CleanupMarkedEntries: Finish.")]
     public static partial void TraceCleanupMarkedEntriesProcedureFinish(this ILogger<CleanupMarkedEntriesLauncher> logger);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "Found {count} active users")]
+    [LoggerMessage(Level = LogLevel.Information, Message = "Found {count} users with marked entries")]
     public static partial void InfoFoundUsers(this ILogger<CleanupMarkedEntriesWorker> logger, int count);
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Waiting for data. Sleep {time}.")]
