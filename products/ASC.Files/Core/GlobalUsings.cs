@@ -243,7 +243,6 @@ global using Tag = ASC.Files.Core.Tag;
 global using Thumbnail = ASC.Files.Core.Thumbnail;
 global using FileType = ASC.Web.Core.Files.FileType;
 global using Token = ASC.Web.Files.ThirdPartyApp.Token;
-global using FileShareLink = ASC.Web.Files.Utils.FileShareLink;
 global using SocketManager = ASC.Web.Files.Utils.SocketManager;
 global using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 global using ContentType = System.Net.Mime.ContentType;

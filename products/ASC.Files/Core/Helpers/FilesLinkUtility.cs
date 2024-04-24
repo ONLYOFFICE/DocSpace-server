@@ -70,7 +70,6 @@ public class FilesLinkUtility
     public const string FileUri = "fileuri";
     public const string FileTitle = "title";
     public const string Action = "action";
-    public const string DocShareKey = "doc";
     public const string TryParam = "try";
     public const string FolderUrl = "folderurl";
     public const string OutType = "outputtype";

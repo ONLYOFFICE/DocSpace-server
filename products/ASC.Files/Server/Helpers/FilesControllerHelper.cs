@@ -164,14 +164,14 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         return await _fileDtoHelper.GetAsync(file);
     }
 
-    public async Task<EditHistoryDataDto> GetEditDiffUrlAsync<T>(T fileId, int version = 0, string doc = null)
+    public async Task<EditHistoryDataDto> GetEditDiffUrlAsync<T>(T fileId, int version = 0)
     {
-        return await _fileStorageService.GetEditDiffUrlAsync(fileId, version, doc);
+        return await _fileStorageService.GetEditDiffUrlAsync(fileId, version);
     }
 
-    public async IAsyncEnumerable<EditHistoryDto> GetEditHistoryAsync<T>(T fileId, string doc = null)
+    public async IAsyncEnumerable<EditHistoryDto> GetEditHistoryAsync<T>(T fileId)
     {
-        await foreach (var f in _fileStorageService.GetEditHistoryAsync(fileId, doc))
+        await foreach (var f in _fileStorageService.GetEditHistoryAsync(fileId))
         {
             yield return new EditHistoryDto(f, apiDateTimeHelper, userManager, displayUserSettingsHelper);
         }
@@ -192,9 +192,9 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         return await _fileDtoHelper.GetAsync(result);
     }
 
-    public async IAsyncEnumerable<EditHistoryDto> RestoreVersionAsync<T>(T fileId, int version = 0, string url = null, string doc = null)
+    public async IAsyncEnumerable<EditHistoryDto> RestoreVersionAsync<T>(T fileId, int version = 0, string url = null)
     {
-        await foreach (var e in _fileStorageService.RestoreVersionAsync(fileId, version, url, doc))
+        await foreach (var e in _fileStorageService.RestoreVersionAsync(fileId, version, url))
         {
             yield return new EditHistoryDto(e, apiDateTimeHelper, userManager, displayUserSettingsHelper);
         }
