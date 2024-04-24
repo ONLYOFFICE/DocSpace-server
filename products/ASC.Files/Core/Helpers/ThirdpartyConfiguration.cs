@@ -93,10 +93,10 @@ public class ThirdpartyConfiguration(ThirdpartyConfigurationData configuration, 
         
         var providers = new List<ProviderDto>
         {
-            new("Box", ProviderTypes.Box.ToStringFast(), BoxLoginProvider.IsEnabled),
-            new("Dropbox", ProviderTypes.DropboxV2.ToStringFast(), DropboxLoginProvider.IsEnabled),
-            new("GoogleDrive", ProviderTypes.GoogleDrive.ToStringFast(), GoogleLoginProvider.IsEnabled),
-            new("OneDrive", ProviderTypes.OneDrive.ToStringFast(), OneDriveLoginProvider.IsEnabled),
+            new("Box", ProviderTypes.Box.ToStringFast(), BoxLoginProvider.IsEnabled, true, BoxLoginProvider.RedirectUri),
+            new("Dropbox", ProviderTypes.DropboxV2.ToStringFast(), DropboxLoginProvider.IsEnabled, true, DropboxLoginProvider.RedirectUri),
+            new("GoogleDrive", ProviderTypes.GoogleDrive.ToStringFast(), GoogleLoginProvider.IsEnabled, true, GoogleLoginProvider.RedirectUri),
+            new("OneDrive", ProviderTypes.OneDrive.ToStringFast(), OneDriveLoginProvider.IsEnabled, true, OneDriveLoginProvider.RedirectUri),
             new("kDrive", webDavKey, true),
             new("WebDav", webDavKey, true),
             new("Nextcloud", webDavKey, true),
