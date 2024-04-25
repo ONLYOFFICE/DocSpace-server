@@ -50,6 +50,9 @@
     <EmbeddedResource Update="Resources\WebHookResource.cs.resx">
       <DependentUpon>WebHookResource.resx</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Update="Resources\WebHookResource.de.resx">
+      <DependentUpon>WebHookResource.resx</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Update="Resources\WebHookResource.el-GR.resx">
       <DependentUpon>WebHookResource.resx</DependentUpon>
     </EmbeddedResource>
@@ -68,6 +71,9 @@
     <EmbeddedResource Update="Resources\WebHookResource.it.resx">
       <DependentUpon>WebHookResource.resx</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Update="Resources\WebHookResource.ja-JP.resx">
+      <DependentUpon>WebHookResource.resx</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Update="Resources\WebHookResource.ko-KR.resx">
       <DependentUpon>WebHookResource.resx</DependentUpon>
     </EmbeddedResource>
@@ -83,6 +89,9 @@
     <EmbeddedResource Update="Resources\WebHookResource.pt.resx">
       <DependentUpon>WebHookResource.resx</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Update="Resources\WebHookResource.pt-BR.resx">
+      <DependentUpon>WebHookResource.resx</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Update="Resources\WebHookResource.ro.resx">
       <DependentUpon>WebHookResource.resx</DependentUpon>
     </EmbeddedResource>
@@ -93,6 +102,9 @@
       <DependentUpon>WebHookResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\WebHookResource.sl.resx">
+      <DependentUpon>WebHookResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\WebHookResource.sr-Latn-RS.resx">
       <DependentUpon>WebHookResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\WebHookResource.tr.resx">

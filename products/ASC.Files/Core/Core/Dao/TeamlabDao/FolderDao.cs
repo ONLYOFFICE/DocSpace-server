@@ -545,9 +545,8 @@ internal class FolderDao(
 
         if (isNew)
         {                  
-            await IncrementCountAsync(filesDbContext, folder.Id, tenantId, FileEntryType.Folder);
+            await IncrementCountAsync(filesDbContext, folder.ParentId, tenantId, FileEntryType.Folder);
             await SetCustomOrder(filesDbContext, folder.Id, folder.ParentId);
-        
         }
 
         return folder.Id;

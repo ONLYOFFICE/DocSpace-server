@@ -374,7 +374,7 @@ public class FileOperationsManager(
         var folderDao = serviceProvider.GetService<IFolderDao<T>>();
         var fileDao = serviceProvider.GetService<IFileDao<T>>();
         var fileSecurity = serviceProvider.GetService<FileSecurity>();
-        var entryManager = serviceProvider.GetService<EntryManager>();
+        var lockerManager = serviceProvider.GetService<LockerManager>();
         var fileTracker = serviceProvider.GetService<FileTrackerHelper>();
 
         await DemandDeleteFilesPermissionAsync(fileIds, false);
@@ -414,7 +414,7 @@ public class FileOperationsManager(
                     return;
                 }
 
-                if (await entryManager.FileLockedForMeAsync(file.Id))
+                if (await lockerManager.FileLockedForMeAsync(file.Id))
                 {
                     throw new SecurityException(FilesCommonResource.ErrorMessage_LockedFile);
                 }
@@ -437,7 +437,8 @@ public class FileOperationsManager(
 
             if (folder.FolderType != FolderType.DEFAULT &&
                 folder.FolderType != FolderType.BUNCH &&
-                !DocSpaceHelper.IsRoom(folder.FolderType))
+                !DocSpaceHelper.IsRoom(folder.FolderType) &&
+                ((folder.FolderType == FolderType.FormFillingFolderDone || folder.FolderType == FolderType.FormFillingFolderInProgress) && folder.RootFolderType != FolderType.Archive))
             {
                 throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_DeleteFolder);
             }

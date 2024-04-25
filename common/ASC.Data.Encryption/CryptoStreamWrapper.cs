@@ -28,14 +28,9 @@ namespace ASC.Data.Encryption;
 
 //https://stackoverflow.com/a/22072068
 
-internal sealed class CryptoStreamWrapper : CryptoStream
+internal sealed class CryptoStreamWrapper(Stream stream, ICryptoTransform transform, CryptoStreamMode mode) : CryptoStream(stream, transform, mode)
 {
-    private readonly Stream _underlyingStream;
-
-    public CryptoStreamWrapper(Stream stream, ICryptoTransform transform, CryptoStreamMode mode) : base(stream, transform, mode)
-    {
-        _underlyingStream = stream;
-    }
+    private readonly Stream _underlyingStream = stream;
 
     protected override void Dispose(bool disposing)
     {

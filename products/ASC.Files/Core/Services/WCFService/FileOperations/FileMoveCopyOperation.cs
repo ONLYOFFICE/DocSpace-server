@@ -660,7 +660,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         }
 
         var scopeClass = scope.ServiceProvider.GetService<FileMoveCopyOperationScope>();
-        var (filesMessageService, fileMarker, fileUtility, global, entryManager, _thumbnailSettings) = scopeClass;
+        var (filesMessageService, fileMarker, fileUtility, global, lockerManager, thumbnailSettings) = scopeClass;
         var fileDao = scope.ServiceProvider.GetService<IFileDao<TTo>>();
         var fileTracker = scope.ServiceProvider.GetService<FileTrackerHelper>();
         var socketManager = scope.ServiceProvider.GetService<SocketManager>();
@@ -808,7 +808,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                             {
                                 this[Err] = FilesCommonResource.ErrorMessage_SecurityException;
                             }
-                            else if (await entryManager.FileLockedForMeAsync(conflict.Id))
+                            else if (await lockerManager.FileLockedForMeAsync(conflict.Id))
                             {
                                 this[Err] = FilesCommonResource.ErrorMessage_LockedFile;
                             }
@@ -837,7 +837,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
 
                                 if (file.ThumbnailStatus == Thumbnail.Created && !file.ProviderEntry)
                                 {
-                                    foreach (var size in _thumbnailSettings.Sizes)
+                                    foreach (var size in thumbnailSettings.Sizes)
                                     {
                                         await (await globalStorage.GetStoreAsync()).CopyAsync(String.Empty,
                                                                                 FileDao.GetUniqThumbnailPath(file, size.Width, size.Height),
@@ -923,7 +923,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
 
     private async Task<(bool isError, string message)> WithErrorAsync(IServiceScope scope, IEnumerable<File<T>> files, bool checkPermissions = true)
     {
-        var entryManager = scope.ServiceProvider.GetService<EntryManager>();
+        var lockerManager = scope.ServiceProvider.GetService<LockerManager>();
         var fileTracker = scope.ServiceProvider.GetService<FileTrackerHelper>();
         string error = null;
         foreach (var file in files)
@@ -934,7 +934,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
 
                 return (true, error);
             }
-            if (checkPermissions && await entryManager.FileLockedForMeAsync(file.Id))
+            if (checkPermissions && await lockerManager.FileLockedForMeAsync(file.Id))
             {
                 error = FilesCommonResource.ErrorMessage_LockedFile;
 
@@ -993,5 +993,5 @@ public record FileMoveCopyOperationScope(
     FileMarker FileMarker,
     FileUtility FileUtility, 
     Global Global, 
-    EntryManager EntryManager,
+    LockerManager LockerManager,
     ThumbnailSettings ThumbnailSettings);

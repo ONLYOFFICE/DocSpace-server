@@ -146,7 +146,7 @@ The deletion of personal data allowed to free $DocsSpace</value>
   <data name="pattern_saas_custom_mode_reg_data" xml:space="preserve">
     <value>h3.New portal has been registered
 
-# Portal url: "${__VirtualRootPath}":"${__VirtualRootPath}"
+# Portal URL: "${__VirtualRootPath}":"${__VirtualRootPath}"
 # First name: $UserName
 # Last name: $UserLastName
 # Email: $UserEmail

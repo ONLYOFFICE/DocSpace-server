@@ -34,20 +34,20 @@ namespace ASC.Web.Api;
 [DefaultRoute("activeconnections")]
 [ApiController]
 [ControllerName("security")]
-public class ConnectionsController(UserManager userManager,
-        SecurityContext securityContext,
-        DbLoginEventsManager dbLoginEventsManager,
-        IHttpContextAccessor httpContextAccessor,
-        DisplayUserSettingsHelper displayUserSettingsHelper,
-        CommonLinkUtility commonLinkUtility,
-        ILogger<ConnectionsController> logger,
-        WebItemSecurity webItemSecurity,
-        MessageService messageService,
-        MessageTarget messageTarget,
-        CookiesManager cookiesManager,
-        CookieStorage cookieStorage,
-        GeolocationHelper geolocationHelper,
-        ApiDateTimeHelper apiDateTimeHelper)
+public class ConnectionsController(
+    UserManager userManager,
+    SecurityContext securityContext,
+    DbLoginEventsManager dbLoginEventsManager,
+    IHttpContextAccessor httpContextAccessor,
+    DisplayUserSettingsHelper displayUserSettingsHelper,
+    CommonLinkUtility commonLinkUtility,
+    ILogger<ConnectionsController> logger,
+    WebItemSecurity webItemSecurity,
+    MessageService messageService,
+    CookiesManager cookiesManager,
+    CookieStorage cookieStorage,
+    GeolocationHelper geolocationHelper,
+    ApiDateTimeHelper apiDateTimeHelper)
     : ControllerBase
 {
     /// <summary>
@@ -150,7 +150,7 @@ public class ConnectionsController(UserManager userManager,
             var hash = auditEventDate.ToString("s", CultureInfo.InvariantCulture);
             var confirmationUrl = await commonLinkUtility.GetConfirmationEmailUrlAsync(user.Email, ConfirmType.PasswordChange, hash, user.Id);
 
-            await messageService.SendAsync(MessageAction.UserSentPasswordChangeInstructions, messageTarget.Create(user.Id), auditEventDate, userName);
+            await messageService.SendAsync(MessageAction.UserSentPasswordChangeInstructions, MessageTarget.Create(user.Id), auditEventDate, userName);
 
             return confirmationUrl;
         }
@@ -269,7 +269,7 @@ public class ConnectionsController(UserManager userManager,
         var userName = user.DisplayUserName(false, displayUserSettingsHelper);
         var auditEventDate = DateTime.UtcNow;
 
-        await messageService.SendAsync(currentUserId.Equals(user.Id) ? MessageAction.UserLogoutActiveConnections : MessageAction.UserLogoutActiveConnectionsForUser, messageTarget.Create(user.Id), auditEventDate, userName);
+        await messageService.SendAsync(currentUserId.Equals(user.Id) ? MessageAction.UserLogoutActiveConnections : MessageAction.UserLogoutActiveConnectionsForUser, MessageTarget.Create(user.Id), auditEventDate, userName);
         await cookiesManager.ResetUserCookieAsync(user.Id);
     }
 

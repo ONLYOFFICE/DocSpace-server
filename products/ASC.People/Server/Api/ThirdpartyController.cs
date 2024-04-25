@@ -29,28 +29,28 @@ using Constants = ASC.Core.Configuration.Constants;
 namespace ASC.People.Api;
 
 [DefaultRoute("thirdparty")]
-public class ThirdpartyController(AccountLinker accountLinker,
-        CookiesManager cookiesManager,
-        CoreBaseSettings coreBaseSettings,
-        DisplayUserSettingsHelper displayUserSettingsHelper,
-        IHttpClientFactory httpClientFactory,
-        MobileDetector mobileDetector,
-        ProviderManager providerManager,
-        UserHelpTourHelper userHelpTourHelper,
-        UserManagerWrapper userManagerWrapper,
-        UserPhotoManager userPhotoManager,
-        AuthContext authContext,
-        SecurityContext securityContext,
-        MessageService messageService,
-        UserManager userManager,
-        MessageTarget messageTarget,
-        StudioNotifyService studioNotifyService,
-        TenantManager tenantManager,
-        InvitationLinkService invitationLinkService,
-        FileSecurity fileSecurity,
-        UsersInRoomChecker usersInRoomChecker, 
-        IDistributedLockProvider distributedLockProvider,
-        LoginProfileTransport loginProfileTransport)
+public class ThirdpartyController(
+    AccountLinker accountLinker,
+    CookiesManager cookiesManager,
+    CoreBaseSettings coreBaseSettings,
+    DisplayUserSettingsHelper displayUserSettingsHelper,
+    IHttpClientFactory httpClientFactory,
+    MobileDetector mobileDetector,
+    ProviderManager providerManager,
+    UserHelpTourHelper userHelpTourHelper,
+    UserManagerWrapper userManagerWrapper,
+    UserPhotoManager userPhotoManager,
+    AuthContext authContext,
+    SecurityContext securityContext,
+    MessageService messageService,
+    UserManager userManager,
+    StudioNotifyService studioNotifyService,
+    TenantManager tenantManager,
+    InvitationLinkService invitationLinkService,
+    FileSecurity fileSecurity,
+    UsersInRoomChecker usersInRoomChecker, 
+    IDistributedLockProvider distributedLockProvider,
+    LoginProfileTransport loginProfileTransport)
     : ApiControllerBase
     {
     
@@ -205,7 +205,7 @@ public class ThirdpartyController(AccountLinker accountLinker,
 
             var newUser = await CreateNewUser(GetFirstName(inDto, thirdPartyProfile), GetLastName(inDto, thirdPartyProfile), GetEmailAddress(inDto, thirdPartyProfile), passwordHash, employeeType, true, invitedByEmail);
             var messageAction = employeeType == EmployeeType.RoomAdmin ? MessageAction.UserCreatedViaInvite : MessageAction.GuestCreatedViaInvite;
-            await messageService.SendAsync(MessageInitiator.System, messageAction, messageTarget.Create(newUser.Id), newUser.DisplayUserName(false, displayUserSettingsHelper));
+            await messageService.SendAsync(MessageInitiator.System, messageAction, MessageTarget.Create(newUser.Id), newUser.DisplayUserName(false, displayUserSettingsHelper));
             userId = newUser.Id;
             if (!string.IsNullOrEmpty(thirdPartyProfile.Avatar))
             {

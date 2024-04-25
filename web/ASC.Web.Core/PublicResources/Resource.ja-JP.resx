@@ -1039,4 +1039,10 @@
   <data name="UserFreeSpaceException" xml:space="preserve">
     <value>ユーザーの容量制限を超えています</value>
   </data>
+  <data name="TariffsFeature_total_size" xml:space="preserve">
+    <value>{0} 管理者/パワーユーザーごとに、リクエストに応じて容量を追加できる</value>
+  </data>
+  <data name="TariffsFeature_statistic" xml:space="preserve">
+    <value>ストレージ容量制限と統計</value>
+  </data>
 </root>

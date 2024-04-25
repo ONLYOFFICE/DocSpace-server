@@ -67,11 +67,11 @@ public class FeedAggregatorService(FeedSettings feedSettings,
         }
     }
 
-    private static async Task<bool> TryAuthenticateAsync(SecurityContext securityContext, AuthManager authManager, int tenantId, Guid userid)
+    private static async Task<bool> TryAuthenticateAsync(SecurityContext securityContext, int tenantId, Guid userid)
     {
         try
         {
-            await securityContext.AuthenticateMeWithoutCookieAsync(await authManager.GetAccountByIDAsync(tenantId, userid));
+            await securityContext.AuthenticateMeWithoutCookieAsync(tenantId, userid);
             return true;
         }
         catch
@@ -98,7 +98,6 @@ public class FeedAggregatorService(FeedSettings feedSettings,
             var feedAggregateDataProvider = scope.ServiceProvider.GetService<FeedAggregateDataProvider>();
             var tenantManager = scope.ServiceProvider.GetService<TenantManager>();
             var userManager = scope.ServiceProvider.GetService<UserManager>();
-            var authManager = scope.ServiceProvider.GetService<AuthManager>();
             var securityContext = scope.ServiceProvider.GetService<SecurityContext>();
             var socketServiceClient = scope.ServiceProvider.GetRequiredService<SocketServiceClient>();
 
@@ -148,7 +147,7 @@ public class FeedAggregatorService(FeedSettings feedSettings,
 
                         foreach (var uId in users.Select(r=> r.Id))
                         {
-                            if (await TryAuthenticateAsync(securityContext, authManager, tenant1, uId))
+                            if (await TryAuthenticateAsync(securityContext, tenant1, uId))
                             {
                                 await module.VisibleForAsync(feedsRow, uId);
                             }

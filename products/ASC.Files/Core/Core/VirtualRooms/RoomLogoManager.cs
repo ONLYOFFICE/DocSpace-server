@@ -112,6 +112,11 @@ public class RoomLogoManager(StorageFactory storageFactory,
         var folderDao = daoFactory.GetFolderDao<T>();
         var room = await folderDao.GetFolderAsync(id, true);
 
+        if (!room.SettingsHasLogo)
+        {
+            return room;
+        }
+
         if (checkPermissions && !await fileSecurity.CanEditRoomAsync(room))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
