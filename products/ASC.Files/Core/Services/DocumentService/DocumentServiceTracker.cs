@@ -139,7 +139,6 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
     ILogger<DocumentServiceTrackerHelper> logger,
     DocumentServiceHelper documentServiceHelper,
     EntryManager entryManager,
-    FileShareLink fileShareLink,
     FilesMessageService filesMessageService,
     DocumentServiceConnector documentServiceConnector,
     NotifyClient notifyClient,
@@ -242,8 +241,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
 
                 try
                 {
-                    var doc = await fileShareLink.CreateKeyAsync(fileId);
-                    file = await entryManager.TrackEditingAsync(fileId, userId, userId, doc, await tenantManager.GetCurrentTenantIdAsync());
+                    file = await entryManager.TrackEditingAsync(fileId, userId, userId, await tenantManager.GetCurrentTenantIdAsync());
                 }
                 catch (Exception e)
                 {
@@ -377,7 +375,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
 
             try
             {
-                file = await entryManager.SaveEditingAsync(fileId, fileData.Filetype, documentServiceConnector.ReplaceDocumentAddress(fileData.Url), null, string.Empty, string.Join("; ", comments), false, fileData.Encrypted, forceSaveType, true, fileData.FormsDataUrl);
+                file = await entryManager.SaveEditingAsync(fileId, fileData.Filetype, documentServiceConnector.ReplaceDocumentAddress(fileData.Url), null, string.Join("; ", comments), false, fileData.Encrypted, forceSaveType, true, fileData.FormsDataUrl);
                 saveMessage = fileData.Status is TrackerStatus.MustSave or TrackerStatus.ForceSave ? null : "Status " + fileData.Status;
             }
             catch (Exception ex)

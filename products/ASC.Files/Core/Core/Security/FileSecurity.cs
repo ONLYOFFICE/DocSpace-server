@@ -225,6 +225,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                     FilesSecurityActions.SubmitToFormGallery,
                     FilesSecurityActions.Download,
                     FilesSecurityActions.Convert,
+                    FilesSecurityActions.CreateRoomFrom,
                     FilesSecurityActions.EditForm
                 }
             },
@@ -841,7 +842,7 @@ public class FileSecurity(IDaoFactory daoFactory,
 
         if (action == FilesSecurityActions.CreateRoomFrom)
         {
-            return folder is { RootFolderType: FolderType.USER, FolderType: FolderType.DEFAULT } && folder.RootCreateBy == userId && !isCollaborator;
+            return e.RootFolderType == FolderType.USER && e.RootCreateBy == userId && !isCollaborator && (folder is { FolderType: FolderType.DEFAULT } || file != null);
         }
 
         if (e.FileEntryType == FileEntryType.Folder)

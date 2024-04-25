@@ -171,4 +171,52 @@
   <data name="MigrationUploadException" xml:space="preserve">
     <value>La migrazione è già in corso</value>
   </data>
+  <data name="CanNotAddUserInGroup" xml:space="preserve">
+    <value>Impossibile aggiungere l'utente {0} al gruppo {1}</value>
+  </data>
+  <data name="CanNotCreateFile" xml:space="preserve">
+    <value>Impossibile creare il file {0}</value>
+  </data>
+  <data name="CanNotImportUser" xml:space="preserve">
+    <value>Impossibile importare l'utente</value>
+  </data>
+  <data name="CanNotImportUserFiles" xml:space="preserve">
+    <value>Impossibile importare i file dell’utente</value>
+  </data>
+  <data name="CanNotParseArchive" xml:space="preserve">
+    <value>Impossibile analizzare l'archivio {0}</value>
+  </data>
+  <data name="CanNotParseArchives" xml:space="preserve">
+    <value>Impossibile analizzare gli archivi</value>
+  </data>
+  <data name="CanNotParseUser" xml:space="preserve">
+    <value>Impossibile analizzare l'utente {0}</value>
+  </data>
+  <data name="CanNotReadInfoFile" xml:space="preserve">
+    <value>Impossibile leggere il file di informazioni da {0}</value>
+  </data>
+  <data name="CanNotToUnzip" xml:space="preserve">
+    <value>Impossibile decomprimere {0}</value>
+  </data>
+  <data name="CreateFile" xml:space="preserve">
+    <value>Crea file {0}</value>
+  </data>
+  <data name="CreateFolder" xml:space="preserve">
+    <value>Crea cartella {0}</value>
+  </data>
+  <data name="CreateShareRoom" xml:space="preserve">
+    <value>crea stanza condivisa {0}</value>
+  </data>
+  <data name="СanNotImportCommonFiles" xml:space="preserve">
+    <value>Impossibile importare file comuni</value>
+  </data>
+  <data name="СanNotImportProjectFiles" xml:space="preserve">
+    <value>Impossibile importare i file di progetto</value>
+  </data>
+  <data name="СreateRootFolder" xml:space="preserve">
+    <value>Crea la cartella principale</value>
+  </data>
+  <data name="CanNotShare" xml:space="preserve">
+    <value>Impossibile condividere la voce da {0} a {1}</value>
+  </data>
 </root>

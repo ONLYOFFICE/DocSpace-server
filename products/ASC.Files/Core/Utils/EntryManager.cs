@@ -218,9 +218,8 @@ public class EntryManager(IDaoFactory daoFactory,
     FilesSettingsHelper filesSettingsHelper,
     UserManager userManager,
     ILogger<EntryManager> logger,
-    FileShareLink fileShareLink,
     DocumentServiceHelper documentServiceHelper,
-    ThirdpartyConfiguration thirdpartyConfiguration,
+    ThirdpartyConfiguration thirdPartyConfiguration,
     DocumentServiceConnector documentServiceConnector,
     LockerManager lockerManager,
     SettingsManager settingsManager,
@@ -590,7 +589,7 @@ public class EntryManager(IDaoFactory daoFactory,
     public async IAsyncEnumerable<Folder<string>> GetThirdPartyFoldersAsync<T>(Folder<T> parent, string searchText = null)
     {
         if ((parent.Id.Equals(await globalFolderHelper.FolderMyAsync) || parent.Id.Equals(await globalFolderHelper.FolderCommonAsync))
-            && thirdpartyConfiguration.SupportInclusion(daoFactory)
+            && thirdPartyConfiguration.SupportInclusion(daoFactory)
             && (await filesSettingsHelper.GetEnableThirdParty()))
         {
             var providerDao = daoFactory.ProviderDao;
@@ -1240,7 +1239,8 @@ public class EntryManager(IDaoFactory daoFactory,
         }
     }
 
-    public async Task<File<T>> SaveEditingAsync<T>(T fileId, string fileExtension, string downloadUri, Stream stream, string doc, string comment = null, bool checkRight = true, bool encrypted = false, ForcesaveType? forcesave = null, bool keepLink = false, string formsDataUrl = null)
+    public async Task<File<T>> SaveEditingAsync<T>(T fileId, string fileExtension, string downloadUri, Stream stream, string comment = null, bool checkRight = true, 
+        bool encrypted = false, ForcesaveType? forceSave = null, bool keepLink = false, string formsDataUrl = null)
     {
         var newExtension = string.IsNullOrEmpty(fileExtension)
                           ? FileUtility.GetFileExtension(downloadUri)
@@ -1252,16 +1252,14 @@ public class EntryManager(IDaoFactory daoFactory,
         }
 
         var fileDao = daoFactory.GetFileDao<T>();
-        var check = await fileShareLink.CheckAsync(doc, false, fileDao);
-        var editLink = check.EditLink;
-        var file = check.File ?? await fileDao.GetFileAsync(fileId);
+        var file = await fileDao.GetFileAsync(fileId);
 
         if (file == null)
         {
             throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
-        if (checkRight && !editLink && (!await fileSecurity.CanFillFormsAsync(file) || !await fileSecurity.CanEditAsync(file)))
+        if (checkRight && (!await fileSecurity.CanFillFormsAsync(file) || !await fileSecurity.CanEditAsync(file)))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
         }
@@ -1271,7 +1269,7 @@ public class EntryManager(IDaoFactory daoFactory,
             throw new Exception(FilesCommonResource.ErrorMessage_LockedFile);
         }
 
-        if (checkRight && forcesave is null or ForcesaveType.None && fileTracker.IsEditing(file.Id))
+        if (checkRight && forceSave is null or ForcesaveType.None && fileTracker.IsEditing(file.Id))
         {
             throw new Exception(FilesCommonResource.ErrorMessage_SecurityException_UpdateEditingFile);
         }
@@ -1334,7 +1332,7 @@ public class EntryManager(IDaoFactory daoFactory,
                 file.VersionGroup++;
             }
         }
-        file.Forcesave = forcesave ?? ForcesaveType.None;
+        file.Forcesave = forceSave ?? ForcesaveType.None;
 
         if (string.IsNullOrEmpty(comment))
         {
@@ -1471,7 +1469,7 @@ public class EntryManager(IDaoFactory daoFactory,
         return file;
     }
 
-    public async Task<File<T>> TrackEditingAsync<T>(T fileId, Guid tabId, Guid userId, string doc, int tenantId, bool editingAlone = false)
+    public async Task<File<T>> TrackEditingAsync<T>(T fileId, Guid tabId, Guid userId, int tenantId, bool editingAlone = false)
     {
         bool checkRight;
         if (fileTracker.GetEditingBy(fileId).Contains(userId))

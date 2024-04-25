@@ -79,21 +79,21 @@ public class FolderDto<T> : FileEntryDto<T>
     public bool Private { get; set; }
 
     /// <summary>Folder type</summary>
-    /// <type>ASC.Files.Core.FolderType, ASC.Files.Core</type>
+    /// <type>System.Nullable{ASC.Files.Core.FolderType}, System</type>
     public FolderType? Type { get; set; }
 
     public bool? InRoom { get; set; }
 
     /// <summary>Quota</summary>
-    /// <type>System.Int32, System</type>
+    /// <type>System.Nullable{System.Int64}, System</type>
     public long? QuotaLimit { get; set; }
 
-    /// <summary>Specifies if the room has a custom quota or not.</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>Specifies if the room has a custom quota or not</summary>
+    /// <type>System.Nullable{System.Boolean}, System</type>
     public bool? IsCustomQuota { get; set; }
 
     /// <summary>Counter</summary>
-    /// <type>System.Int32, System</type>
+    /// <type>System.Nullable{System.Int64}, System</type>
     public long? UsedSpace { get; set; }
     public static FolderDto<int> GetSample()
     {
