@@ -336,7 +336,7 @@ public class FileOperationsManager(
 
         if (hasData)
         {
-            var removeMarker = serviceProvider.GetService<RemoveMarker<int>>();
+            var removeMarker = serviceProvider.GetService<RemovalMarker>();
             await removeMarker.MarkAsRemovedAsync(folders.Item1, files.Item1);
 
             eventBus.Publish(new DeleteIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
@@ -552,64 +552,6 @@ public class FileOperationsManager(
     }
 }
 
-[Scope]
-public class RemoveMarker<T>(IFolderDao<T> folderDao, IFileDao<T> fileDao, SocketManager socketManager)
-{
-    public async Task MarkAsRemovedAsync(IEnumerable<T> folderIds, IEnumerable<T> filesIds)
-    {
-        await MarkFilesAsRemovedAsync(filesIds);
-        await MarkFoldersAsRemovedAsync(folderIds);
-    }
-
-    private async Task MarkFilesAsRemovedAsync(IEnumerable<T> filesIds)
-    {
-        if (!filesIds.Any() || !fileDao.CanMarkFileAsRemoved(filesIds.First()))
-        {
-            return;
-        }
-
-        await fileDao.MarkFilesAsRemovedAsync(filesIds);
-
-        await foreach (var file in fileDao.GetFilesAsync(filesIds))
-        {
-            await socketManager.DeleteFileAsync(file);
-        }
-    }
-
-    private async Task MarkFoldersAsRemovedAsync(IEnumerable<T> folderIds)
-    {
-        if (!folderIds.Any() || !folderDao.CanMarkFolderAsRemoved(folderIds.First()))
-        {
-            return;
-        }
-
-        await folderDao.MarkFoldersAsRemovedAsync(folderIds);
-
-        foreach (var folderId in folderIds)
-        {
-            var folder = await folderDao.GetFolderAsync(folderId, true);
-
-            await socketManager.DeleteFolder(folder);
-
-            if (folder.RootFolderType != FolderType.TRASH)
-            {
-                await MarkFolderContentAsRemovedAsync(folder);
-            }
-        }
-    }
-
-    private async Task MarkFolderContentAsRemovedAsync(Folder<T> folder)
-    {
-        var filesIds = await fileDao.GetFilesAsync(folder.Id).ToListAsync();
-
-        await MarkFilesAsRemovedAsync(filesIds);
-
-        var subfolderIds = await folderDao.GetFoldersAsync(folder.Id).Select(x => x.Id).ToListAsync();
-
-        await MarkFoldersAsRemovedAsync(subfolderIds);
-    }
-}
-
 public static class FileOperationsManagerExtension
 {
     public static void Register(DIHelper services)
@@ -623,8 +565,7 @@ public static class FileOperationsManagerExtension
         services.TryAdd<FileDeleteOperation>();
         services.TryAdd<FileMarkAsReadOperation>();
         services.TryAdd<FileMoveCopyOperation>();
-
-        services.TryAdd<RemoveMarker<int>>();
+        services.TryAdd<RemovalMarker>();
     }
 
     public static void RegisterQueue(this IServiceCollection services, int threadCount = 10)

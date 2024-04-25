@@ -1039,6 +1039,69 @@ public class FileMarker(
     }
 }
 
+[Scope]
+public class RemovalMarker(IDaoFactory daoFactory, SocketManager socketManager)
+{
+    public async Task MarkAsRemovedAsync(IEnumerable<int> folderIds, IEnumerable<int> filesIds)
+    {
+        var fileDao = daoFactory.GetFileDao<int>();
+        var folderDao = daoFactory.GetFolderDao<int>();
+
+        await MarkFilesAsRemovedAsync(filesIds);
+        await MarkFoldersAsRemovedAsync(folderIds);
+
+
+        async Task MarkFilesAsRemovedAsync(IEnumerable<int> filesIds)
+        {
+            if (!filesIds.Any() || !fileDao.CanMarkFileAsRemoved(filesIds.First()))
+            {
+                return;
+            }
+
+            await fileDao.MarkFilesAsRemovedAsync(filesIds);
+
+            await foreach (var file in fileDao.GetFilesAsync(filesIds))
+            {
+                await socketManager.DeleteFileAsync(file);
+            }
+        }
+
+        async Task MarkFoldersAsRemovedAsync(IEnumerable<int> folderIds)
+        {
+            if (!folderIds.Any() || !folderDao.CanMarkFolderAsRemoved(folderIds.First()))
+            {
+                return;
+            }
+
+            await folderDao.MarkFoldersAsRemovedAsync(folderIds);
+
+            foreach (var folderId in folderIds)
+            {
+                var folder = await folderDao.GetFolderAsync(folderId, true);
+
+                await socketManager.DeleteFolder(folder);
+
+                if (folder.RootFolderType != FolderType.TRASH)
+                {
+                    await MarkFolderContentAsRemovedAsync(folder);
+                }
+            }
+        }
+
+        async Task MarkFolderContentAsRemovedAsync(Folder<int> folder)
+        {
+            var filesIds = await fileDao.GetFilesAsync(folder.Id).ToListAsync();
+
+            await MarkFilesAsRemovedAsync(filesIds);
+
+            var subfolderIds = await folderDao.GetFoldersAsync(folder.Id).Select(x => x.Id).ToListAsync();
+
+            await MarkFoldersAsRemovedAsync(subfolderIds);
+        }
+
+    }
+}
+
 public class AsyncTaskData<T> : DistributedTask
 {
     public int TenantId { get; init; }
