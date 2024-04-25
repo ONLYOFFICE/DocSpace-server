@@ -242,7 +242,7 @@ internal class FolderDao(
     }
 
     public async IAsyncEnumerable<Folder<int>> GetFoldersAsync(int parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, bool withSubfolders = false,
-        bool excludeSubject = false, int offset = 0, int count = -1, int roomId = default)
+        bool excludeSubject = false, int offset = 0, int count = -1, int roomId = default, bool containingMyFiles = false)
     {
         if (CheckInvalidFilter(filterType) || count == 0)
         {
@@ -252,6 +252,13 @@ internal class FolderDao(
         var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var q = await GetFoldersQueryWithFilters(parentId, orderBy, subjectGroup, subjectID, searchText, withSubfolders, excludeSubject, roomId, filesDbContext);
+
+        if (containingMyFiles)
+        {
+            q = q.Join(filesDbContext.Files, r => r.Id, b => b.ParentId, (folder, file) => new { folder, file })
+            .Where(r => r.file.CreateBy == authContext.CurrentAccount.ID)
+            .Select(r => r.folder);
+        }
 
         q = q.Skip(offset);
 

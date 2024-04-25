@@ -86,7 +86,8 @@ public class FileStorageService //: IFileStorageService
     IDistributedLockProvider distributedLockProvider,
     IHttpClientFactory clientFactory,
     TempStream tempStream,
-    MentionWrapperCreator mentionWrapperCreator)
+    MentionWrapperCreator mentionWrapperCreator,
+    SecurityContext securityContext)
 {
     private readonly ILogger _logger = optionMonitor.CreateLogger("ASC.Files");
 
@@ -872,6 +873,27 @@ public class FileStorageService //: IFileStorageService
             }
         }
 
+        var fileExt = FileUtility.GetFileExtension(file.Title);
+        var fileType = FileUtility.GetFileTypeByExtention(fileExt);
+        if (fileType == FileType.Pdf)
+        {
+            var folderDao = daoFactory.GetFolderDao<T>();
+            var parent = await folderDao.GetFolderAsync(file.ParentId);
+
+            if (parent?.FolderType == FolderType.FillingFormsRoom)
+            {
+                var ace = await fileSharing.GetPureSharesAsync(parent, new List<Guid> { authContext.CurrentAccount.ID }).FirstOrDefaultAsync();
+                if (ace is { Access: FileShare.FillForms })
+                {
+                    var properties = await daoFactory.GetFileDao<T>().GetProperties(file.Id);
+                    if (properties == null || !properties.FormFilling.StartFilling)
+                    {
+                        return null;
+                    }
+                }
+            }
+        }
+
         return file;
     }
 
@@ -1060,13 +1082,13 @@ public class FileStorageService //: IFileStorageService
         {
             if (!authContext.IsAuthenticated && await externalShare.GetLinkIdAsync() == Guid.Empty)
             {
-                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
-            }
+                    throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+                }
 
             if (docKeyForTrack != await documentServiceHelper.GetDocKeyAsync(fileId, -1, DateTime.MinValue))
-            {
-                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
-            }
+                {
+                    throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+                }
 
             if (isFinish)
             {
@@ -1142,7 +1164,35 @@ public class FileStorageService //: IFileStorageService
             throw GenerateException(e);
         }
     }
+    public async Task StartFillingAsync<T>(T fileId)
+    {
+        var fileDao = daoFactory.GetFileDao<T>();
+        var folderDao = daoFactory.GetFolderDao<T>();
+        var file = await fileDao.GetFileAsync(fileId);
 
+        if (file == null)
+        {
+            throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+
+        var folder = await folderDao.GetFolderAsync(file.ParentId);
+
+        if (folder.FolderType == FolderType.FillingFormsRoom && FileUtility.GetFileTypeByFileName(file.Title) == FileType.Pdf)
+        {
+            if (!await fileSecurity.CanEditRoomAsync(folder))
+            {
+                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
+            }
+
+            var properties = await fileDao.GetProperties(fileId) ?? new EntryProperties { FormFilling = serviceProvider.GetService<FormFillingProperties>() };
+            properties.FormFilling.StartFilling = true;
+            await fileDao.SaveProperties(fileId, properties);
+
+            var count = await GetPureSharesCountAsync(folder.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "");
+            await socketManager.CreateFormAsync(file, securityContext.CurrentAccount.ID, count <= 1);
+            await socketManager.CreateFileAsync(file);
+        }
+    }
     public async Task<string> StartEditAsync<T>(T fileId, bool editingAlone = false)
     {
         try
@@ -1160,7 +1210,7 @@ public class FileStorageService //: IFileStorageService
                 return await documentServiceHelper.GetDocKeyAsync(fileId, -1, DateTime.MinValue);
             }
 
-            var fileOptions = await documentServiceHelper.GetParamsAsync(fileId.ToString(), -1, true, true, false);
+            var fileOptions = await documentServiceHelper.GetParamsAsync(fileId.ToString(), -1, true, true, false, true);
 
             var configuration = fileOptions.Configuration;
             if (!configuration.EditorConfig.ModeWrite || !(configuration.Document.Permissions.Edit || configuration.Document.Permissions.ModifyFilter || configuration.Document.Permissions.Review
@@ -1440,10 +1490,10 @@ public class FileStorageService //: IFileStorageService
     public async Task<EditHistoryDataDto> GetEditDiffUrlAsync<T>(T fileId, int version = 0)
     {
         var fileDao = daoFactory.GetFileDao<T>();
-        
+
         var file = version > 0
-            ? await fileDao.GetFileAsync(fileId, version)
-            : await fileDao.GetFileAsync(fileId);
+                ? await fileDao.GetFileAsync(fileId, version)
+                : await fileDao.GetFileAsync(fileId);
 
         if (file == null)
         {
@@ -2113,7 +2163,8 @@ public class FileStorageService //: IFileStorageService
 
     public async Task<string> CheckFillFormDraftAsync<T>(T fileId, int version, bool editPossible, bool view)
     {
-        var (file, configuration, _) = await documentServiceHelper.GetParamsAsync(fileId, version, editPossible, !view, true);
+        var (file, configuration, _) = await documentServiceHelper.GetParamsAsync(fileId, version, editPossible, !view, true, editPossible);
+        var properties = await daoFactory.GetFileDao<T>().GetProperties(file.Id);
 
         var linkId = await externalShare.GetLinkIdAsync();
         if (linkId != Guid.Empty)
@@ -2124,7 +2175,8 @@ public class FileStorageService //: IFileStorageService
         if (configuration.EditorConfig.ModeWrite
             && fileUtility.CanWebRestrictedEditing(file.Title)
             && await fileSecurity.CanFillFormsAsync(file)
-            && !await fileSecurity.CanEditAsync(file))
+            && !await fileSecurity.CanEditAsync(file)
+            && (properties != null && properties.FormFilling.StartFilling))
         {
             if (!await entryManager.LinkedForMeAsync(file))
             {

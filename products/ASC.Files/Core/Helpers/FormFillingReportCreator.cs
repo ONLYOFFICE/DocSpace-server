@@ -57,34 +57,23 @@ public class FormFillingReportCreator
         _clientFactory = clientFactory;
     }
 
-    public async Task<EntryProperties> UpdateFormFillingReport<T>(File<T> form, string formsDataUrl)
+    public async Task UpdateFormFillingReport<T>(T resultsFileId, string formsDataUrl)
     {
-        var linkDao = _daoFactory.GetLinkDao();
-        var sourceId = await linkDao.GetSourceAsync(form.Id.ToString());
 
-        if (sourceId != null && formsDataUrl != null)
+        if (formsDataUrl != null)
         {
-            var properties = await _daoFactory.GetFileDao<T>().GetProperties(form.Id);
             var fileDao = _daoFactory.GetFileDao<T>();
             var submitFormsData = await GetSubmitFormsData(formsDataUrl);
 
-            if (properties.FormFilling.ResultsFileID != null)
+            if (resultsFileId != null)
             {
-                var resultsFile = await fileDao.GetFileAsync((T)Convert.ChangeType(properties.FormFilling.ResultsFileID, typeof(T)));
-                var sourceFile = await fileDao.GetFileAsync((T)Convert.ChangeType(sourceId, typeof(T)));
+                var resultsFile = await fileDao.GetFileAsync(resultsFileId);
 
                 var updateDt = _exportToCSV.CreateDataTable(submitFormsData.FormsData);
                 await _exportToCSV.UpdateCsvReport(resultsFile, updateDt);
 
-                await _socketManager.DeleteFileAsync(form);
-                await _socketManager.UpdateFileAsync(sourceFile);
-                await linkDao.DeleteLinkAsync(sourceId);
-
-                return properties;
             }
         }
-
-        return null;
     }
 
     private async Task<SubmitFormsData> GetSubmitFormsData(string url)

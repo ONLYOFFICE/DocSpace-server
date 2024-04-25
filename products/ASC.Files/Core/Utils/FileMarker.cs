@@ -157,7 +157,8 @@ public class FileMarker(
             {
                 var parentFolder = parentFolders.FirstOrDefault();
                 var guids = await fileSecurity.WhoCanReadAsync(obj.FileEntry);
-                if (parentFolder.FolderType != FolderType.FormFillingFolderDone && parentFolder.FolderType != FolderType.FormFillingFolderInProgress)
+                if (parentFolder.FolderType != FolderType.FormFillingFolderDone && parentFolder.FolderType != FolderType.FormFillingFolderInProgress &&
+                    parentFolder.FolderType != FolderType.FillingFormsRoom)
                 {
                     userIDs = guids.Where(x => x != obj.CurrentAccountId).ToList();
                 }
