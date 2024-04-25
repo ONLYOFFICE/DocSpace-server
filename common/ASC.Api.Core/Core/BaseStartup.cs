@@ -26,6 +26,7 @@
 
 using ASC.Core.Data;
 using ASC.Core.Notify.Socket;
+using ASC.MessagingSystem;
 
 using Flurl.Util;
 
@@ -267,6 +268,7 @@ public abstract class BaseStartup
             options.OnRejected = (context, ct) => RateLimitMetadata.OnRejected(context.HttpContext, context.Lease, ct);
         });
 
+        services.AddSingleton<MessageSettings>();//warmup
         services.AddSingleton<EFLoggerFactory>();
 
         services.AddBaseDbContextPool<AccountLinkContext>()
@@ -465,6 +467,7 @@ public abstract class BaseStartup
             .AddStartupTask<WarmupDbTenantServiceStartupTask>()
             .AddStartupTask<WarmupDbUserServiceStartupTask>()
             .AddStartupTask<WarmupDbAzServiceStartupTask>()
+            .AddStartupTask<WarmupProtobufStartupTask>()
             .AddSingleton(services);
     }
 

@@ -490,13 +490,6 @@ public class WarmupAbstractDaoStartupTask(IServiceProvider provider) : IStartupT
 {
     public async Task ExecuteAsync(CancellationToken cancellationToken = default)
     {
-        ProtoBuf.Serializer.PrepareSerializer<TrackInfo>();
-        ProtoBuf.Serializer.PrepareSerializer<FileTracker>();
-        ProtoBuf.Serializer.PrepareSerializer<FileTrackerNotify>();
-        ProtoBuf.Serializer.PrepareSerializer<RedisCacheNotify<FileTrackerNotify>.RedisCachePubSubItem<FileTrackerNotify>>();
-        ProtoBuf.Serializer.PrepareSerializer<FileMarkerCacheItem>();
-        ProtoBuf.Serializer.PrepareSerializer<RedisCacheNotify<FileMarkerCacheItem>.RedisCachePubSubItem<FileMarkerCacheItem>>();
-        MessageSettings.GetIP(new Dictionary<string, StringValues>());
         using var scope = provider.CreateScope();
         _ = scope.ServiceProvider.GetService<FileUtilityConfiguration>();
         var dbContextFactory = scope.ServiceProvider.GetService<IDbContextFactory<FilesDbContext>>();
