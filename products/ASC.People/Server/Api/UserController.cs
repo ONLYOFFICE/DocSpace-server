@@ -25,12 +25,14 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Api.Core.Core;
+using ASC.Core.Security.Authentication;
 
 namespace ASC.People.Api;
 
 public class UserController(ICache cache,
         TenantManager tenantManager,
         CookiesManager cookiesManager,
+        CookieStorage cookieStorage,
         CustomNamingPeople customNamingPeople,
         EmployeeDtoHelper employeeDtoHelper,
         EmployeeFullDtoHelper employeeFullDtoHelper,
@@ -990,6 +992,8 @@ public class UserController(ICache cache,
         var result = await employeeFullDtoHelper.GetFullAsync(user);
 
         result.Theme = (await settingsManager.LoadForCurrentUserAsync<DarkThemeSettings>()).Theme;
+
+        result.LoginEventId = cookieStorage.GetLoginEventIdFromCookie(cookiesManager.GetCookies(CookiesType.AuthKey));
 
         return result;
     }

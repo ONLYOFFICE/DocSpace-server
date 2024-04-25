@@ -294,6 +294,11 @@
       }
   }
 
+  function logoutSession({ userId, loginEventId } = {}) {
+    logger.info(`logout user ${userId} session ${loginEventId}`);
+    filesIO.to(userId).emit("s:logout-session", loginEventId);
+ }
+
   return {
     startEdit,
     stopEdit,
@@ -308,6 +313,7 @@
     changeQuotaFeatureValue,
     changeUserQuotaFeatureValue,
     markAsNewFiles,
-    markAsNewFolders
+    markAsNewFolders,
+    logoutSession
   };
 };
