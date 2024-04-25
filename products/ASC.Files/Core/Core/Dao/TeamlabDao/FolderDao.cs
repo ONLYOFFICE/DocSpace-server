@@ -1372,11 +1372,6 @@ internal class FolderDao(
         }
     }
 
-    public bool CanMarkFolderAsRemoved(int entryId)
-    {
-        return true;
-    }
-
     public async Task MarkFoldersAsRemovedAsync(IEnumerable<int> folderIds)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();

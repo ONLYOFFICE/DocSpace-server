@@ -656,14 +656,6 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         return folder;
     }
 
-    public bool CanMarkFolderAsRemoved(string entryId)
-    {
-        var selector = _selectorFactory.GetSelector(entryId);
-        var folderDao = selector.GetFolderDao(entryId);
-
-        return folderDao.CanMarkFolderAsRemoved(entryId);
-    }
-
     public async Task MarkFoldersAsRemovedAsync(IEnumerable<string> folderIds)
     {
         foreach (var group in _selectorFactory.GetSelectors(folderIds))

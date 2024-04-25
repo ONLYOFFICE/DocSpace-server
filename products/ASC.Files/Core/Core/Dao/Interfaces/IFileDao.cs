@@ -343,8 +343,6 @@ public interface IFileDao<T>
     Task<int> GetFilesByTagCountAsync(Guid? tagOwner, TagType tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
         string searchText, string[] extension, bool searchInContent, bool excludeSubject);
 
-    bool CanMarkFileAsRemoved(T entryId);
-
     Task MarkFilesAsRemovedAsync(IEnumerable<T> fileIds);
 
     #endregion

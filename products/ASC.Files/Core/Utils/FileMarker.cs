@@ -1053,7 +1053,7 @@ public class RemovalMarker(IDaoFactory daoFactory, SocketManager socketManager)
 
         async Task MarkFilesAsRemovedAsync(IEnumerable<int> filesIds)
         {
-            if (!filesIds.Any() || !fileDao.CanMarkFileAsRemoved(filesIds.First()))
+            if (!filesIds.Any())
             {
                 return;
             }
@@ -1068,7 +1068,7 @@ public class RemovalMarker(IDaoFactory daoFactory, SocketManager socketManager)
 
         async Task MarkFoldersAsRemovedAsync(IEnumerable<int> folderIds)
         {
-            if (!folderIds.Any() || !folderDao.CanMarkFolderAsRemoved(folderIds.First()))
+            if (!folderIds.Any())
             {
                 return;
             }

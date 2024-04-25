@@ -686,11 +686,6 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         return items.Exists(item => dao.GetName(item).Equals(title, StringComparison.InvariantCultureIgnoreCase));
     }
 
-    public bool CanMarkFolderAsRemoved(string entryId)
-    {
-        return false;
-    }
-
     public Task MarkFoldersAsRemovedAsync(IEnumerable<string> folderIds)
     {
         return Task.CompletedTask;

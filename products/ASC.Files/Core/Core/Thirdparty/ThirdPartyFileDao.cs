@@ -788,11 +788,6 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         return Task.FromResult(nativeSession.BytesTransferred);
     }
 
-    public bool CanMarkFileAsRemoved(string entryId)
-    {
-        return false;
-    }
-
     public Task MarkFilesAsRemovedAsync(IEnumerable<string> fileIds)
     {
         return Task.CompletedTask;

@@ -1704,11 +1704,6 @@ internal class FileDao(
         await DeleteCustomOrder(filesDbContext, fileId, FileEntryType.File);
     }
 
-    public bool CanMarkFileAsRemoved(int entryId)
-    {
-        return true;
-    }
-
     public async Task MarkFilesAsRemovedAsync(IEnumerable<int> fileIds)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
