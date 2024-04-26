@@ -312,6 +312,7 @@ public abstract class BaseStartup
         DIHelper.TryAdd<BasicAuthHandler>();
         DIHelper.TryAdd<CookieAuthHandler>();
         DIHelper.TryAdd<WebhooksGlobalFilterAttribute>();
+        DIHelper.TryAdd<NotifySenderService>();
 
         if (!string.IsNullOrEmpty(_corsOrigin))
         {
@@ -511,6 +512,7 @@ public abstract class BaseStartup
 
         app.UseEndpoints(endpoints =>
         {
+            //endpoints.MapControllers();
             endpoints.MapCustomAsync(WebhooksEnabled, app.ApplicationServices).Wait();
 
             endpoints.MapHealthChecks("/health", new HealthCheckOptions

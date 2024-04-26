@@ -89,6 +89,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ASC.ApiSystem", "common\ser
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ASC.Migration.Core", "common\ASC.Migration\ASC.Migration.Core.csproj", "{D488CAAB-EAEC-4059-9780-B82C4B9E767F}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ASC.Plugins", "common\services\ASC.Plugins\ASC.Plugins.csproj", "{923E0BD1-2865-49A8-820C-09ADA895F21B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HelloPlugin", "plugins\HelloPlugin\HelloPlugin.csproj", "{E6308253-35B8-466E-9C3C-82150F1268B6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -251,6 +255,14 @@ Global
 		{D488CAAB-EAEC-4059-9780-B82C4B9E767F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D488CAAB-EAEC-4059-9780-B82C4B9E767F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D488CAAB-EAEC-4059-9780-B82C4B9E767F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{923E0BD1-2865-49A8-820C-09ADA895F21B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{923E0BD1-2865-49A8-820C-09ADA895F21B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{923E0BD1-2865-49A8-820C-09ADA895F21B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{923E0BD1-2865-49A8-820C-09ADA895F21B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E6308253-35B8-466E-9C3C-82150F1268B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E6308253-35B8-466E-9C3C-82150F1268B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E6308253-35B8-466E-9C3C-82150F1268B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E6308253-35B8-466E-9C3C-82150F1268B6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

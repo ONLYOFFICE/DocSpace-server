@@ -84,9 +84,9 @@ public static class EndpointExtension
             await endpoints.RegisterWebhooks(serviceProvider);
         }
 
-        var sources = endpoints.DataSources.First();
-        endpoints.DataSources.Clear();
-        endpoints.DataSources.Add(new CustomEndpointDataSource(sources));
+       // var sources = endpoints.DataSources.First();
+        //endpoints.DataSources.Clear();
+       // endpoints.DataSources.Add(new CustomEndpointDataSource(sources));
 
         return endpoints;
     }
