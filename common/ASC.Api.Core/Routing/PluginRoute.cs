@@ -24,18 +24,16 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Api.Core.Routing;
-
-using Microsoft.AspNetCore.Mvc;
-
-namespace HelloPlugin.Controllers;
-
-[PluginRoute]
-public class HelloController : ControllerBase
+namespace ASC.Api.Core.Routing;
+public class PluginRouteAttribute : RouteAttribute
 {
-    [HttpGet("test")]
-    public object Test()    
+    private static string BaseUrl { get; }
+
+    static PluginRouteAttribute()
     {
-        return "work";
+        BaseUrl = "plugin/[controller]";
     }
+
+    public PluginRouteAttribute() : base(BaseUrl) { }
+    public PluginRouteAttribute(string template) : base($"{BaseUrl}/{template}") { }
 }
