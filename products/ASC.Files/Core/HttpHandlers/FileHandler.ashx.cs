@@ -74,8 +74,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
     ThumbnailSettings thumbnailSettings,
     ExternalLinkHelper externalLinkHelper,
     ExternalShare externalShare,
-    EntryManager entryManager,
-    FileStorageService fileStorageService)
+    EntryManager entryManager)
 {
     public async Task InvokeAsync(HttpContext context)
     {
