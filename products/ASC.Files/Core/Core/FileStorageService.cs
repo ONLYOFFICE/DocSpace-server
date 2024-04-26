@@ -3010,17 +3010,6 @@ public class FileStorageService //: IFileStorageService
             {
                 var createBy = folder.CreateBy;
 
-                await SetAceObjectAsync(new AceCollection<T>
-                {
-                    Files = Array.Empty<T>(),
-                    Folders = new[] { folder.Id },
-                    Aces =
-                    [
-                        new AceWrapper { Access = FileShare.None, Id = userInfo.Id },
-                        new AceWrapper { Access = FileShare.RoomAdmin, Id = createBy }
-                    ]
-                }, false, socket: false);
-
                 var folderAccess = folder.Access;
 
                 newFolder.CreateBy = userInfo.Id;
@@ -3035,13 +3024,24 @@ public class FileStorageService //: IFileStorageService
                     var newFolderId = await folderDao.SaveFolderAsync(newFolder);
                     newFolder = await folderDao.GetFolderAsync(newFolderId);
                     newFolder.Access = folderAccess;
-                    
+
                     await entryStatusManager.SetIsFavoriteFolderAsync(folder);
                 }
 
                 await filesMessageService.SendAsync(MessageAction.FileChangeOwner, newFolder, [
                     newFolder.Title, userInfo.DisplayUserName(false, displayUserSettingsHelper)
                 ]);
+
+                await SetAceObjectAsync(new AceCollection<T>
+                {
+                    Files = [],
+                    Folders = [folder.Id],
+                    Aces =
+                    [
+                        new AceWrapper { Access = FileShare.None, Id = userInfo.Id },
+                        new AceWrapper { Access = FileShare.RoomAdmin, Id = createBy }
+                    ]
+                }, false, socket: false);
             }
 
             yield return newFolder;

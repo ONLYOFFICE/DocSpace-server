@@ -79,7 +79,7 @@ public class FileSharingAceHelper(
 
         foreach (var w in aceWrappers.OrderByDescending(ace => ace.SubjectGroup))
         {
-            if (entry.CreateBy == currentUserId && w.Id == currentUserId && w.Access != FileShare.RoomAdmin)
+            if (entry.CreateBy == w.Id && w.Access != FileShare.None)
             {
                 continue;
             }
