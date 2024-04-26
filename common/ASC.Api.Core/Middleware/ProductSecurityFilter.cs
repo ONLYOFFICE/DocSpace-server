@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,12 +29,12 @@ using CallContext = ASC.Common.Notify.Engine.CallContext;
 namespace ASC.Api.Core.Middleware;
 
 [Scope]
-public class ProductSecurityFilter : IAsyncResourceFilter
+public class ProductSecurityFilter(ILogger<ProductSecurityFilter> logger,
+        WebItemSecurity webItemSecurity,
+        AuthContext authContext)
+    : IAsyncResourceFilter
 {
-    private static readonly IDictionary<string, Guid> _products;
-    private readonly ILogger<ProductSecurityFilter> _logger;
-    private readonly WebItemSecurity _webItemSecurity;
-    private readonly AuthContext _authContext;
+    private static readonly Dictionary<string, Guid> _products;
 
     static ProductSecurityFilter()
     {
@@ -59,24 +59,14 @@ public class ProductSecurityFilter : IAsyncResourceFilter
                     { "files", WebItemManager.DocumentsProductID },
                     { "project", WebItemManager.ProjectsProductID },
                     { "calendar", WebItemManager.CalendarProductID },
-                    { "mail", WebItemManager.MailProductID },
+                    { "mail", WebItemManager.MailProductID }
                 };
     }
 
 
-    public ProductSecurityFilter(
-        ILogger<ProductSecurityFilter> logger,
-        WebItemSecurity webItemSecurity,
-        AuthContext authContext)
-    {
-        _logger = logger;
-        _webItemSecurity = webItemSecurity;
-        _authContext = authContext;
-    }
-
     public async Task OnResourceExecutionAsync(ResourceExecutingContext context, ResourceExecutionDelegate next)
     {
-        if (!_authContext.IsAuthenticated)
+        if (!authContext.IsAuthenticated)
         {
             await next();
             return;
@@ -92,10 +82,10 @@ public class ProductSecurityFilter : IAsyncResourceFilter
                     CallContext.SetData("asc.web.product_id", pid);
                 }
 
-                if (!await _webItemSecurity.IsAvailableForMeAsync(pid))
+                if (!await webItemSecurity.IsAvailableForMeAsync(pid))
                 {
                     context.Result = new StatusCodeResult((int)HttpStatusCode.Forbidden);
-                    _logger.WarningPaymentRequired(controllerActionDescriptor.ControllerName, _authContext.CurrentAccount.ID);
+                    logger.WarningPaymentRequired(controllerActionDescriptor.ControllerName, authContext.CurrentAccount.ID);
                     return;
                 }
             }

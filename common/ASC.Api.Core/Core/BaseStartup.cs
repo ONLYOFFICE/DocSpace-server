@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,7 +24,12 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Notify.Socket;
+
 using Flurl.Util;
+
+using IPNetwork = Microsoft.AspNetCore.HttpOverrides.IPNetwork;
+using SecurityContext = ASC.Core.SecurityContext;
 
 namespace ASC.Api.Core;
 
@@ -38,13 +43,11 @@ public abstract class BaseStartup
     private readonly IHostEnvironment _hostEnvironment;
     private readonly string _corsOrigin;
 
-    protected virtual bool AddControllersAsServices { get; }
-    protected virtual bool ConfirmAddScheme { get; }
-    protected virtual bool AddAndUseSession { get; }
+    protected bool AddAndUseSession { get; }
     protected DIHelper DIHelper { get; }
-    protected bool LoadProducts { get; set; } = true;
-    protected bool LoadConsumers { get; } = true;
     protected bool WebhooksEnabled { get; init; }
+
+    protected bool OpenApiEnabled { get; init; }
 
     protected BaseStartup(IConfiguration configuration, IHostEnvironment hostEnvironment)
     {
@@ -54,19 +57,26 @@ public abstract class BaseStartup
         _corsOrigin = _configuration["core:cors"];
 
         DIHelper = new DIHelper();
-
-        if (bool.TryParse(_configuration["core:products"], out var loadProducts))
-        {
-            LoadProducts = loadProducts;
-        }
+        OpenApiEnabled = _configuration.GetValue<bool>("openApi:enable");
     }
 
-    public virtual void ConfigureServices(IServiceCollection services)
+    public virtual async Task ConfigureServices(IServiceCollection services)
     {
         services.AddCustomHealthCheck(_configuration);
         services.AddHttpContextAccessor();
         services.AddMemoryCache();
+
         services.AddHttpClient();
+        services.AddHttpClient("customHttpClient", x => { }).ConfigurePrimaryHttpMessageHandler(() =>
+        {
+            return new HttpClientHandler
+            {
+                AllowAutoRedirect = false
+            };
+        });
+
+        services.AddExceptionHandler<CustomExceptionHandler>();
+        services.AddProblemDetails();
 
         services.Configure<ForwardedHeadersOptions>(options =>
         {
@@ -77,6 +87,13 @@ public abstract class BaseStartup
 
             var knownProxies = _configuration.GetSection("core:hosting:forwardedHeadersOptions:knownProxies").Get<List<String>>();
             var knownNetworks = _configuration.GetSection("core:hosting:forwardedHeadersOptions:knownNetworks").Get<List<String>>();
+            var allowedHosts = _configuration.GetSection("core:hosting:forwardedHeadersOptions:allowedHosts").Get<List<String>>();
+
+            if (allowedHosts is { Count: > 0 })
+            {
+                options.ForwardedHeaders |= ForwardedHeaders.XForwardedHost;
+                options.AllowedHosts = allowedHosts;
+            }
 
             if (knownProxies is { Count: > 0 })
             {
@@ -99,8 +116,7 @@ public abstract class BaseStartup
             }
         });
 
-        var redisOptions = _configuration.GetSection("Redis").Get<RedisConfiguration>().ConfigurationOptions;
-        var connectionMultiplexer = ConnectionMultiplexer.Connect(redisOptions);
+        var connectionMultiplexer = await services.GetRedisConnectionMultiplexerAsync(_configuration, GetType().Namespace);
 
         services.AddRateLimiter(options =>
         {
@@ -136,7 +152,8 @@ public abstract class BaseStartup
             options.GlobalLimiter = PartitionedRateLimiter.CreateChained(
             PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
             {
-                var userId = httpContext?.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value;
+                var userId = httpContext?.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value ??
+                             httpContext?.Connection.RemoteIpAddress.ToInvariantString();
 
                 var remoteIpAddress = httpContext?.Connection.RemoteIpAddress;
 
@@ -145,10 +162,7 @@ public abstract class BaseStartup
                     return RateLimitPartition.GetNoLimiter("no_limiter");
                 }
 
-                if (userId == null)
-                {
-                    userId = remoteIpAddress.ToInvariantString();
-                }
+                userId ??= remoteIpAddress.ToInvariantString();
 
                 var permitLimit = 1500;
 
@@ -174,10 +188,7 @@ public abstract class BaseStartup
                         return RateLimitPartition.GetNoLimiter("no_limiter");
                     }
 
-                    if (userId == null)
-                    {
-                        userId = remoteIpAddress.ToInvariantString();
-                    }
+                    userId ??= remoteIpAddress.ToInvariantString();
 
                     if (String.Compare(httpContext?.Request.Method, "GET", StringComparison.OrdinalIgnoreCase) == 0)
                     {
@@ -200,7 +211,8 @@ public abstract class BaseStartup
                 }),
                 PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
                    {
-                       var userId = httpContext?.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value;
+                       var userId = httpContext?.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value ??
+                                    httpContext?.Connection.RemoteIpAddress.ToInvariantString();
 
                        var remoteIpAddress = httpContext?.Connection.RemoteIpAddress;
 
@@ -209,10 +221,7 @@ public abstract class BaseStartup
                            return RateLimitPartition.GetNoLimiter("no_limiter");
                        }
 
-                       if (userId == null)
-                       {
-                           userId = remoteIpAddress.ToInvariantString();
-                       }
+                       userId ??= remoteIpAddress.ToInvariantString();
 
                        var partitionKey = $"fw_post_put_{userId}";
                        var permitLimit = 10000;
@@ -232,9 +241,11 @@ public abstract class BaseStartup
                    }
             ));
 
-            options.AddPolicy("sensitive_api", httpContext =>
+            options.AddPolicy(RateLimiterPolicy.SensitiveApi, httpContext =>
             {
-                var userId = httpContext?.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value;
+                var userId = httpContext?.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value ??
+                                    httpContext?.Connection.RemoteIpAddress.ToInvariantString();
+
                 var permitLimit = 5;
                 var path = httpContext.Request.Path.ToString();
                 var partitionKey = $"sensitive_api_{userId}|{path}";
@@ -256,7 +267,7 @@ public abstract class BaseStartup
             options.OnRejected = (context, ct) => RateLimitMetadata.OnRejected(context.HttpContext, context.Lease, ct);
         });
 
-        services.AddScoped<EFLoggerFactory>();
+        services.AddSingleton<EFLoggerFactory>();
 
         services.AddBaseDbContextPool<AccountLinkContext>()
                 .AddBaseDbContextPool<CoreDbContext>()
@@ -302,7 +313,6 @@ public abstract class BaseStartup
         DIHelper.TryAdd<CookieAuthHandler>();
         DIHelper.TryAdd<WebhooksGlobalFilterAttribute>();
 
-
         if (!string.IsNullOrEmpty(_corsOrigin))
         {
             services.AddCors(options =>
@@ -311,9 +321,9 @@ public abstract class BaseStartup
                                   policy =>
                                   {
                                       policy.WithOrigins(_corsOrigin)
-                                            .SetIsOriginAllowedToAllowWildcardSubdomains()
-                                            .AllowAnyHeader()
-                                            .AllowAnyMethod();                                            
+                                      .SetIsOriginAllowedToAllowWildcardSubdomains()
+                                      .AllowAnyHeader()
+                                            .AllowAnyMethod();
 
                                       if (_corsOrigin != "*")
                                       {
@@ -323,23 +333,20 @@ public abstract class BaseStartup
             });
         }
 
-        services.AddDistributedCache(_configuration);
-        services.AddEventBus(_configuration);
-        services.AddDistributedTaskQueue();
-        services.AddCacheNotify(_configuration);
+
+        services.AddDistributedCache(connectionMultiplexer)
+                .AddEventBus(_configuration)
+                .AddDistributedTaskQueue()
+                .AddCacheNotify(_configuration)
+                .AddDistributedLock(_configuration);
 
         services.RegisterFeature();
 
         DIHelper.TryAdd(typeof(IWebhookPublisher), typeof(WebhookPublisher));
 
-        if (LoadProducts)
-        {
-            DIHelper.RegisterProducts(_configuration, _hostEnvironment.ContentRootPath);
-        }
-
         services.AddOptions();
 
-        services.AddMvcCore(config =>
+        var mvcBuilder = services.AddMvcCore(config =>
         {
             config.Conventions.Add(new ControllerNameAttributeConvention());
 
@@ -351,9 +358,15 @@ public abstract class BaseStartup
             config.Filters.Add(new TypeFilterAttribute(typeof(IpSecurityFilter)));
             config.Filters.Add(new TypeFilterAttribute(typeof(ProductSecurityFilter)));
             config.Filters.Add(new CustomResponseFilterAttribute());
-            config.Filters.Add<CustomExceptionFilterAttribute>();
+            //config.Filters.Add<CustomExceptionFilterAttribute>();
             config.Filters.Add(new TypeFilterAttribute(typeof(WebhooksGlobalFilterAttribute)));
         });
+
+        if (OpenApiEnabled)
+        {
+            mvcBuilder.AddApiExplorer();
+            services.AddOpenApi();
+        }
 
         services.AddAuthentication(options =>
         {
@@ -378,7 +391,7 @@ public abstract class BaseStartup
                     {
                         using var scope = ctx.HttpContext.RequestServices.CreateScope();
 
-                        var securityContext = scope.ServiceProvider.GetService<ASC.Core.SecurityContext>();
+                        var securityContext = scope.ServiceProvider.GetService<SecurityContext>();
 
                         var claimUserId = ctx.Principal.FindFirstValue("userId");
 
@@ -411,7 +424,7 @@ public abstract class BaseStartup
 
                     if (authorizationHeader.StartsWith("Bearer "))
                     {
-                        var token = authorizationHeader.Substring("Bearer ".Length).Trim();
+                        var token = authorizationHeader["Bearer ".Length..].Trim();
                         var jwtHandler = new JwtSecurityTokenHandler();
 
                         if (jwtHandler.CanReadToken(token))
@@ -435,8 +448,13 @@ public abstract class BaseStartup
         services.AddSingleton(Channel.CreateUnbounded<NotifyRequest>());
         services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Writer);
-        services.AddActivePassiveHostedService<NotifySenderService>(DIHelper);
-        services.AddActivePassiveHostedService<NotifySchedulerService>(DIHelper);
+        services.AddHostedService<NotifySenderService>();
+        
+        services.AddSingleton(Channel.CreateUnbounded<SocketData>());
+        services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Reader);
+        services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Writer);
+        services.AddHostedService<SocketService>();
+        DIHelper.TryAdd<SocketService>();
 
 
         if (!_hostEnvironment.IsDevelopment())
@@ -454,7 +472,7 @@ public abstract class BaseStartup
     public virtual void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
         app.UseForwardedHeaders();
-
+        app.UseExceptionHandler();
         app.UseRouting();
 
         if (!string.IsNullOrEmpty(_corsOrigin))
@@ -485,15 +503,21 @@ public abstract class BaseStartup
 
         app.UseLoggerMiddleware();
 
+
+        if (OpenApiEnabled)
+        {
+            app.UseOpenApi();
+        }
+
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapCustomAsync(WebhooksEnabled, app.ApplicationServices).Wait();
 
-            endpoints.MapHealthChecks("/health", new HealthCheckOptions()
+            endpoints.MapHealthChecks("/health", new HealthCheckOptions
             {
                 Predicate = _ => true,
                 ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
-            });
+            }).ShortCircuit();
 
             endpoints.MapHealthChecks("/ready", new HealthCheckOptions
             {
@@ -520,7 +544,7 @@ public abstract class BaseStartup
 
     public void ConfigureContainer(ContainerBuilder builder)
     {
-        builder.Register(_configuration, LoadProducts, LoadConsumers);
+        builder.Register(_configuration);
     }
 }
 

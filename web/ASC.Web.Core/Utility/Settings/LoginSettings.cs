@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -47,18 +47,11 @@ public class LoginSettings : ISettings<LoginSettings>
     }
 }
 
-public class LoginSettingsWrapper
+public class LoginSettingsWrapper(LoginSettings loginSettings)
 {
-    private readonly LoginSettings _loginSettings;
+    public int AttemptCount { get => loginSettings.AttemptCount; }
 
-    public int AttemptCount { get => _loginSettings.AttemptCount; }
+    public TimeSpan BlockTime { get => TimeSpan.FromSeconds(loginSettings.BlockTime); }
 
-    public TimeSpan BlockTime { get => TimeSpan.FromSeconds(_loginSettings.BlockTime); }
-
-    public TimeSpan CheckPeriod { get => TimeSpan.FromSeconds(_loginSettings.CheckPeriod); }
-
-    public LoginSettingsWrapper(LoginSettings loginSettings)
-    {
-        _loginSettings = loginSettings;
-    }
+    public TimeSpan CheckPeriod { get => TimeSpan.FromSeconds(loginSettings.CheckPeriod); }
 }

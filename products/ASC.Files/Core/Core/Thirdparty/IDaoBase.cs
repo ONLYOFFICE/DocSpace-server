@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -45,6 +45,7 @@ internal interface IDaoBase<TFile, TFolder, TItem>
     Folder<string> ToFolder(TFolder folder);
     File<string> ToFile(TFile file);
     Task<Folder<string>> GetRootFolderAsync();
+    Task<TFolder> CreateFolderAsync(string title, string folderId);
     Task<TFolder> GetFolderAsync(string folderId);
     Task<TFile> GetFileAsync(string fileId);
     Task<IEnumerable<string>> GetChildrenAsync(string folderId);
@@ -52,4 +53,5 @@ internal interface IDaoBase<TFile, TFolder, TItem>
     Task<string> GetAvailableTitleAsync(string requestTitle, string parentFolderId, Func<string, string, Task<bool>> isExist);
     bool CheckInvalidFilter(FilterType filterType);
     Task<string> MappingIDAsync(string id, bool saveIfNotExist = false);
+    Task UpdateIdAsync(string oldValue, string newValue);
 }

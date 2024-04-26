@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -67,13 +67,11 @@ public class CustomMySqlMigrationsSqlGenerator : MySqlMigrationsSqlGenerator
     }
 }
 
-public class CustomMigrationCommandListBuilder : MigrationCommandListBuilder
+public class CustomMigrationCommandListBuilder
+    (MigrationsSqlGeneratorDependencies dependencies) : MigrationCommandListBuilder(dependencies)
 {
     private string _operationContainer;
     private bool _isIndexOperation;
-
-    public CustomMigrationCommandListBuilder(MigrationsSqlGeneratorDependencies dependencies)
-    : base(dependencies) { }
 
     public override MigrationCommandListBuilder Append(string o)
     {

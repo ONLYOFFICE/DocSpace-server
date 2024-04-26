@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,14 +26,8 @@
 
 namespace ASC.Web.Api.Routing;
 
-[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
-public class AllowNotPaymentAttribute : Attribute
-{
+[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
+public class AllowNotPaymentAttribute : Attribute;
 
-}
-
-[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
-public class AllowSuspendedAttribute : Attribute
-{
-
-}
+[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
+public class AllowSuspendedAttribute : Attribute;

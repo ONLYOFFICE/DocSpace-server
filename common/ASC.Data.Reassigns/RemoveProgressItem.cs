@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,12 +24,14 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Web.Core.WebZones;
+
 namespace ASC.Data.Reassigns;
 
 /// <summary>
 /// </summary>
 [Transient]
-public class RemoveProgressItem : DistributedTaskProgress
+public class RemoveProgressItem(IServiceScopeFactory serviceScopeFactory) : DistributedTaskProgress
 {
     /// <summary>ID of the user whose data is deleted</summary>
     /// <type>System.Guid, System</type>
@@ -39,7 +41,6 @@ public class RemoveProgressItem : DistributedTaskProgress
     /// <type>ASC.Core.Users.UserInfo, ASC.Core.Common</type>
     public UserInfo User { get; private set; }
 
-    private readonly IServiceScopeFactory _serviceScopeFactory;
     //private readonly IFileStorageService _docService;
     //private readonly MailGarbageEngine _mailEraser;
 
@@ -49,12 +50,8 @@ public class RemoveProgressItem : DistributedTaskProgress
     private bool _notify;
     private bool _deleteProfile;
 
-    public RemoveProgressItem(IServiceScopeFactory serviceScopeFactory)
-    {
-        _serviceScopeFactory = serviceScopeFactory;
-        //_docService = Web.Files.Classes.Global.FileStorageService;
-        //_mailEraser = new MailGarbageEngine();
-    }
+    //_docService = Web.Files.Classes.Global.FileStorageService;
+    //_mailEraser = new MailGarbageEngine();
 
     public void Init(IDictionary<string, StringValues> httpHeaders, int tenantId, UserInfo user, Guid currentUserId, bool notify, bool deleteProfile)
     {
@@ -74,12 +71,12 @@ public class RemoveProgressItem : DistributedTaskProgress
 
     protected override async Task DoJob()
     {
-        await using var scope = _serviceScopeFactory.CreateAsyncScope();
+        await using var scope = serviceScopeFactory.CreateAsyncScope();
         var scopeClass = scope.ServiceProvider.GetService<RemoveProgressItemScope>();
         var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, userPhotoManager, messageTarget, webItemManagerSecurity,  userFormatter, options) = scopeClass;
         var logger = options.CreateLogger("ASC.Web");
         await tenantManager.SetCurrentTenantAsync(_tenantId);
-        var userName = userFormatter.GetUserName(User, DisplayUserNameFormat.Default);
+        var userName = userFormatter.GetUserName(User);
 
         try
         {
@@ -89,22 +86,22 @@ public class RemoveProgressItem : DistributedTaskProgress
             await securityContext.AuthenticateMeWithoutCookieAsync(_currentUserId);
 
             Percentage = 5;
-            PublishChanges();
+            await PublishChanges();
 
             await fileStorageService.DemandPermissionToDeletePersonalDataAsync(User);
 
             Percentage = 10;
-            PublishChanges();
+            await PublishChanges();
 
             var wrapper = await GetUsageSpace(webItemManagerSecurity);
 
             Percentage = 30;
-            PublishChanges();
+            await PublishChanges();
 
             await fileStorageService.DeletePersonalDataAsync<int>(FromUser);
 
             Percentage = 95;
-            PublishChanges();
+            await PublishChanges();
 
             //_mailEraser.ClearUserMail(_userId);
             //await DeleteTalkStorage(storageFactory);
@@ -130,7 +127,7 @@ public class RemoveProgressItem : DistributedTaskProgress
         {
             logger.LogInformation("data deletion is complete");
             IsCompleted = true;
-            PublishChanges();
+            await PublishChanges();
         }
     }
 
@@ -143,7 +140,7 @@ public class RemoveProgressItem : DistributedTaskProgress
     {
         var usageSpaceWrapper = new UsageSpaceWrapper();
 
-        var webItems = webItemManagerSecurity.GetItems(Web.Core.WebZones.WebZoneType.All, ItemAvailableState.All);
+        var webItems = webItemManagerSecurity.GetItems(WebZoneType.All, ItemAvailableState.All);
 
         foreach (var item in webItems)
         {
@@ -229,71 +226,18 @@ public class RemoveProgressItem : DistributedTaskProgress
 }
 
 [Scope]
-public class RemoveProgressItemScope
-{
-    private readonly TenantManager _tenantManager;
-    private readonly MessageService _messageService;
-    private readonly FileStorageService _fileStorageService;
-    private readonly StudioNotifyService _studioNotifyService;
-    private readonly SecurityContext _securityContext;
-    private readonly UserManager _userManager;
-    private readonly UserPhotoManager _userPhotoManager;
-    private readonly MessageTarget _messageTarget;
-    private readonly WebItemManagerSecurity _webItemManagerSecurity;
-    private readonly UserFormatter _userFormatter;
-    private readonly ILoggerProvider _options;
-
-    public RemoveProgressItemScope(
-        TenantManager tenantManager,
-        MessageService messageService,
-        FileStorageService fileStorageService,
-        StudioNotifyService studioNotifyService,
-        SecurityContext securityContext,
-        UserManager userManager,
-        UserPhotoManager userPhotoManager,
-        MessageTarget messageTarget,
-        WebItemManagerSecurity webItemManagerSecurity,
-        UserFormatter userFormatter,
-        ILoggerProvider options)
-    {
-        _tenantManager = tenantManager;
-        _messageService = messageService;
-        _fileStorageService = fileStorageService;
-        _studioNotifyService = studioNotifyService;
-        _securityContext = securityContext;
-        _userManager = userManager;
-        _userPhotoManager = userPhotoManager;
-        _messageTarget = messageTarget;
-        _webItemManagerSecurity = webItemManagerSecurity;
-        _userFormatter = userFormatter;
-        _options = options;
-    }
-
-    public void Deconstruct(out TenantManager tenantManager,
-        out MessageService messageService,
-        out FileStorageService fileStorageService,
-        out StudioNotifyService studioNotifyService,
-        out SecurityContext securityContext,
-        out UserManager userManager,
-        out UserPhotoManager userPhotoManager,
-        out MessageTarget messageTarget,
-        out WebItemManagerSecurity webItemManagerSecurity,
-        out UserFormatter userFormatter,
-        out ILoggerProvider optionsMonitor)
-    {
-        tenantManager = _tenantManager;
-        messageService = _messageService;
-        fileStorageService = _fileStorageService;
-        studioNotifyService = _studioNotifyService;
-        securityContext = _securityContext;
-        userManager = _userManager;
-        userPhotoManager = _userPhotoManager;
-        messageTarget = _messageTarget;
-        webItemManagerSecurity = _webItemManagerSecurity;
-        userFormatter = _userFormatter;
-        optionsMonitor = _options;
-    }
-}
+public record RemoveProgressItemScope(
+    TenantManager TenantManager,
+    MessageService MessageService,
+    FileStorageService FileStorageService,
+    StudioNotifyService StudioNotifyService,
+    SecurityContext SecurityContext,
+    UserManager UserManager,
+    UserPhotoManager UserPhotoManager,
+    MessageTarget MessageTarget,
+    WebItemManagerSecurity WebItemManagerSecurity,
+    UserFormatter UserFormatter,
+    ILoggerProvider Options);
 
 class UsageSpaceWrapper
 {

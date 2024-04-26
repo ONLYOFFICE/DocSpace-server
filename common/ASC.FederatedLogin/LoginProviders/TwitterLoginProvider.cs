@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -40,7 +40,7 @@ public class TwitterLoginProvider : BaseLoginProvider<TwitterLoginProvider>
     public override string ClientSecret { get { return this["twitterSecret"]; } }
     public override string CodeUrl { get { return "https://api.twitter.com/oauth/request_token"; } }
 
-    private static readonly IAuthenticationRequestStore _myAuthRequestStore = new LocalAuthenticationRequestStore();
+    private static readonly LocalAuthenticationRequestStore _myAuthRequestStore = new();
 
     public override bool IsEnabled
     {
@@ -60,10 +60,8 @@ public class TwitterLoginProvider : BaseLoginProvider<TwitterLoginProvider>
         IConfiguration configuration,
         ICacheNotify<ConsumerCacheItem> cache,
         ConsumerFactory consumerFactory,
-        Signature signature,
-        InstanceCrypto instanceCrypto,
         string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null)
-            : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, signature, instanceCrypto, name, order, props, additional)
+            : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, props, additional)
     {
     }
 
@@ -72,7 +70,7 @@ public class TwitterLoginProvider : BaseLoginProvider<TwitterLoginProvider>
     {
         if (!string.IsNullOrEmpty(context.Request.Query["denied"]))
         {
-            return LoginProfile.FromError(Signature, InstanceCrypto, new Exception("Canceled at provider"));
+            return new LoginProfile(new Exception("Canceled at provider"));
         }
 
         var appClient = new TwitterClient(ClientID, ClientSecret);
@@ -129,7 +127,7 @@ public class TwitterLoginProvider : BaseLoginProvider<TwitterLoginProvider>
 
         return user == null
                    ? null
-                   : new LoginProfile(Signature, InstanceCrypto)
+                   : new LoginProfile
                    {
                        Name = user.Name,
                        DisplayName = user.ScreenName,
@@ -141,7 +139,7 @@ public class TwitterLoginProvider : BaseLoginProvider<TwitterLoginProvider>
 
     }
 
-    protected override OAuth20Token Auth(HttpContext context, string scopes, out bool redirect, IDictionary<string, string> additionalArgs = null, IDictionary<string, string> additionalStateArgs = null)
+    protected override OAuth20Token Auth(HttpContext context, out bool redirect, IDictionary<string, string> additionalArgs = null, IDictionary<string, string> additionalStateArgs = null)
     {
         throw new NotImplementedException();
     }
@@ -149,19 +147,5 @@ public class TwitterLoginProvider : BaseLoginProvider<TwitterLoginProvider>
     public override LoginProfile GetLoginProfile(string accessToken)
     {
         throw new NotImplementedException();
-    }
-
-    internal LoginProfile ProfileFromTwitter(string twitterProfile)
-    {
-        var jProfile = JObject.Parse(twitterProfile);
-        if (jProfile == null) throw new Exception("Failed to correctly process the response");
-
-        return new LoginProfile(Signature, InstanceCrypto)
-        {
-            DisplayName = jProfile.Value<string>("name"),
-            Locale = jProfile.Value<string>("lang"),
-            Id = jProfile.Value<string>("id"),
-            Provider = ProviderConstants.Twitter
-        };
     }
 }

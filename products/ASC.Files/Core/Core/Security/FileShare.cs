@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -54,17 +54,13 @@ public class FileShareConverter : System.Text.Json.Serialization.JsonConverter<F
         {
             return (FileShare)result;
         }
-        else
+
+        if (reader.TokenType == JsonTokenType.String && FileShareExtensions.TryParse(reader.GetString(), out var share))
         {
-            if (reader.TokenType == JsonTokenType.String && FileShareExtensions.TryParse(reader.GetString(), out var share))
-            {
-                return share;
-            }
-            else
-            {
-                return FileShare.None;
-            }
+            return share;
         }
+
+        return FileShare.None;
     }
 
     public override void Write(Utf8JsonWriter writer, FileShare value, JsonSerializerOptions options)
@@ -77,7 +73,7 @@ public static partial class FileShareExtensions
 {
     public static string GetAccessString(FileShare fileShare, bool useRoomFormat = false, CultureInfo cultureInfo = null)
     {
-        var prefix = useRoomFormat ? "RoleEnum_" : "AceStatusEnum_";
+        var prefix = useRoomFormat && fileShare != FileShare.ReadWrite ? "RoleEnum_" : "AceStatusEnum_";
 
         switch (fileShare)
         {

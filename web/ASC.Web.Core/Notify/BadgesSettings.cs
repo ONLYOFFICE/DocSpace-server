@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -36,7 +36,7 @@ public class BadgesSettings : ISettings<BadgesSettings>
     }
     public BadgesSettings GetDefault()
     {
-        return new BadgesSettings()
+        return new BadgesSettings
         {
             EnableBadges = true
         };
@@ -44,25 +44,18 @@ public class BadgesSettings : ISettings<BadgesSettings>
 }
 
 [Scope]
-public class BadgesSettingsHelper
+public class BadgesSettingsHelper(SettingsManager settingsManager)
 {
-    private readonly SettingsManager _settingsManager;
-    public BadgesSettingsHelper(
-        SettingsManager settingsManager)
-    {
-        _settingsManager = settingsManager;
-    }
-
     public async Task<bool> GetEnabledForCurrentUserAsync()
     {
-        var settings = await _settingsManager.LoadForCurrentUserAsync<BadgesSettings>();
+        var settings = await settingsManager.LoadForCurrentUserAsync<BadgesSettings>();
         return settings.EnableBadges;
     }
 
     public async Task SetEnabledForCurrentUserAsync(bool isEnabled)
     {
-        var settings = await _settingsManager.LoadForCurrentUserAsync<BadgesSettings>();
+        var settings = await settingsManager.LoadForCurrentUserAsync<BadgesSettings>();
         settings.EnableBadges = isEnabled;
-        await _settingsManager.SaveForCurrentUserAsync(settings);
+        await settingsManager.SaveForCurrentUserAsync(settings);
     }
 }

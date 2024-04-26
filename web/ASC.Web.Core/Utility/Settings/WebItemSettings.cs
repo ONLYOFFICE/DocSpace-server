@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,7 +26,7 @@
 
 namespace ASC.Web.Core.Utility.Settings;
 
-public class WebItemSettings : ISettings<WebItemSettings>
+public class WebItemSettings() : ISettings<WebItemSettings>
 {
     private readonly WebItemManager _webItemManager;
 
@@ -37,15 +37,11 @@ public class WebItemSettings : ISettings<WebItemSettings>
     }
 
     [JsonPropertyName("Settings")]
-    public List<WebItemOption> SettingsCollection { get; set; }
+    public List<WebItemOption> SettingsCollection { get; set; } = new();
 
     public WebItemSettings(WebItemManager webItemManager) : this()
     {
         _webItemManager = webItemManager;
-    }
-    public WebItemSettings()
-    {
-        SettingsCollection = new List<WebItemOption>();
     }
 
     public WebItemSettings GetDefault()
@@ -57,7 +53,7 @@ public class WebItemSettings : ISettings<WebItemSettings>
         {
             ItemID = w.ID,
             SortOrder = _webItemManager.GetSortOrder(w),
-            Disabled = false,
+            Disabled = false
         };
         settings.SettingsCollection.Add(opt);
     });

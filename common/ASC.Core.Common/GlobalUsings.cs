@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -57,6 +57,7 @@ global using ASC.AuditTrail.Models;
 global using ASC.Collections;
 global using ASC.Common;
 global using ASC.Common.Caching;
+global using ASC.Core.Common.Core;
 global using ASC.Common.Data;
 global using ASC.Common.Log;
 global using ASC.Common.Logging;
@@ -69,6 +70,7 @@ global using ASC.Common.Radicale.Core;
 global using ASC.Common.Security;
 global using ASC.Common.Security.Authentication;
 global using ASC.Common.Security.Authorizing;
+global using ASC.Common.Threading.DistributedLock.Abstractions;
 global using ASC.Common.Utils;
 global using ASC.Common.Web;
 global using ASC.Core;
@@ -144,6 +146,8 @@ global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Hosting;
 global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.Options;
+
+global using Microsoft.Net.Http.Headers;
 
 global using MimeKit;
 

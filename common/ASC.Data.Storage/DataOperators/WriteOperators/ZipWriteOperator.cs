@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -52,7 +52,7 @@ public class ZipWriteOperator : IDataWriteOperator
         _tarOutputStream = new TarOutputStream(gZipOutputStream, Encoding.UTF8);
     }
 
-    public async Task WriteEntryAsync(string tarKey, string domain, string path, IDataStore store, Action<Task> action)
+    public async Task WriteEntryAsync(string tarKey, string domain, string path, IDataStore store, Func<Task> action)
     {
         var fileStream = await ActionInvoker.TryAsync(async () => await store.GetReadStreamAsync(domain, path), 5, error => throw error);
         
@@ -63,15 +63,15 @@ public class ZipWriteOperator : IDataWriteOperator
         }
     }
 
-    public async Task WriteEntryAsync(string tarKey, Stream stream, Action<Task> action)
+    public async Task WriteEntryAsync(string tarKey, Stream stream, Func<Task> action)
     {
-        await using var buffered = _tempStream.GetBuffered(stream);
+        await using var buffered = await _tempStream.GetBufferedAsync(stream);
         var entry = TarEntry.CreateTarEntry(tarKey);
         entry.Size = buffered.Length;
         await _tarOutputStream.PutNextEntryAsync(entry, default);
         buffered.Position = 0;
         await buffered.CopyToAsync(_tarOutputStream);
-        await _tarOutputStream.CloseEntryAsync(default).ContinueWith(action);
+        await _tarOutputStream.CloseEntryAsync(default).ContinueWith(async _ => await action());;
     }
 
     public async ValueTask DisposeAsync()

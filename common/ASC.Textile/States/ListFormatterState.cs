@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,10 +29,10 @@ namespace Textile.States;
 /// <summary>
 /// Base formatting state for all lists.
 /// </summary>
-public abstract class ListFormatterState : FormatterState
+public abstract class ListFormatterState(TextileFormatter formatter) : FormatterState(formatter)
 {
     internal const string PatternBegin = @"^\s*(?<tag>";
-    internal const string PatternEnd = @")" + Globals.BlockModifiersPattern + @"(?:\s+)? (?<content>.*)$";
+    internal const string PatternEnd = ")" + Globals.BlockModifiersPattern + @"(?:\s+)? (?<content>.*)$";
 
     private bool _firstItem = true;
     private bool _firstItemLine = true;
@@ -43,11 +43,6 @@ public abstract class ListFormatterState : FormatterState
     protected int NestingDepth
     {
         get { return _tag.Length; }
-    }
-
-    protected ListFormatterState(TextileFormatter formatter)
-        : base(formatter)
-    {
     }
 
     public override string Consume(string input, Match m)

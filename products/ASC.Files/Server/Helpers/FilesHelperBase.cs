@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,45 +27,31 @@
 namespace ASC.Files.Helpers;
 
 [Scope]
-public abstract class FilesHelperBase
-{
-    protected readonly FilesSettingsHelper _filesSettingsHelper;
-    protected readonly FileUploader _fileUploader;
-    protected readonly SocketManager _socketManager;
-    protected readonly FileDtoHelper _fileDtoHelper;
-    protected readonly ApiContext _apiContext;
-    protected readonly FileStorageService _fileStorageService;
-    protected readonly FolderContentDtoHelper _folderContentDtoHelper;
-    protected readonly IHttpContextAccessor _httpContextAccessor;
-    protected readonly FolderDtoHelper _folderDtoHelper;
-
-    protected FilesHelperBase(
-        FilesSettingsHelper filesSettingsHelper,
+public abstract class FilesHelperBase(FilesSettingsHelper filesSettingsHelper,
         FileUploader fileUploader,
         SocketManager socketManager,
         FileDtoHelper fileDtoHelper,
         ApiContext apiContext,
-        FileStorageService fileStorageService,
+    FileStorageService fileStorageService,
         FolderContentDtoHelper folderContentDtoHelper,
         IHttpContextAccessor httpContextAccessor,
         FolderDtoHelper folderDtoHelper)
     {
-        _filesSettingsHelper = filesSettingsHelper;
-        _fileUploader = fileUploader;
-        _socketManager = socketManager;
-        _fileDtoHelper = fileDtoHelper;
-        _apiContext = apiContext;
-        _fileStorageService = fileStorageService;
-        _folderContentDtoHelper = folderContentDtoHelper;
-        _httpContextAccessor = httpContextAccessor;
-        _folderDtoHelper = folderDtoHelper;
-    }
+    protected readonly FilesSettingsHelper _filesSettingsHelper = filesSettingsHelper;
+    protected readonly FileUploader _fileUploader = fileUploader;
+    protected readonly SocketManager _socketManager = socketManager;
+    protected readonly FileDtoHelper _fileDtoHelper = fileDtoHelper;
+    protected readonly ApiContext _apiContext = apiContext;
+    protected readonly FileStorageService _fileStorageService = fileStorageService;
+    protected readonly FolderContentDtoHelper _folderContentDtoHelper = folderContentDtoHelper;
+    protected readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
+    protected readonly FolderDtoHelper _folderDtoHelper = folderDtoHelper;
 
-    public async Task<FileDto<T>> InsertFileAsync<T>(T folderId, Stream file, string title, bool? createNewIfExist, bool keepConvertStatus = false)
+    public async Task<FileDto<T>> InsertFileAsync<T>(T folderId, Stream file, string title, bool createNewIfExist, bool keepConvertStatus = false)
     {
         try
         {
-            var resultFile = await _fileUploader.ExecAsync(folderId, title, file.Length, file, createNewIfExist ?? !_filesSettingsHelper.UpdateIfExist, !keepConvertStatus);
+            var resultFile = await _fileUploader.ExecAsync(folderId, title, file.Length, file, !createNewIfExist, !keepConvertStatus);
 
             await _socketManager.CreateFileAsync(resultFile);
 
@@ -84,7 +70,7 @@ public abstract class FilesHelperBase
     public IFormFile GetFileFromRequest(IModelWithFile model)
     {
         IEnumerable<IFormFile> files = _httpContextAccessor.HttpContext.Request.Form.Files;
-        if (files != null && files.Any())
+        if (files.Any())
         {
             return files.First();
         }

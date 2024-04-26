@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,15 +34,8 @@ namespace ASC.Web.Api.Controllers;
 [Scope(Additional = typeof(BaseLoginProviderExtension))]
 [DefaultRoute]
 [ApiController]
-public class ThirdPartyController : ControllerBase
+public class ThirdPartyController(OAuth20TokenHelper oAuth20TokenHelper) : ControllerBase
 {
-    private readonly OAuth20TokenHelper _oAuth20TokenHelper;
-
-    public ThirdPartyController(OAuth20TokenHelper oAuth20TokenHelper)
-    {
-        _oAuth20TokenHelper = oAuth20TokenHelper;
-    }
-
     /// <summary>
     /// Returns a request to get the confirmation code from URL.
     /// </summary>
@@ -63,44 +56,27 @@ public class ThirdPartyController : ControllerBase
             additionals = HttpContext.Request.Query.ToDictionary(r => r.Key, r => r.Value.FirstOrDefault());
         }
 
-        switch (provider)
+        return provider switch
         {
-            case LoginProvider.Google:
-                return _oAuth20TokenHelper.RequestCode<GoogleLoginProvider>(
-                                                                    GoogleLoginProvider.GoogleScopeDrive,
-                                                                    new Dictionary<string, string>
-                                                                        {
-                                                                    { "access_type", "offline" },
-                                                                    { "prompt", "consent" }
-                                                                        }, additionalStateArgs: additionals);
-
-            case LoginProvider.Dropbox:
-                return _oAuth20TokenHelper.RequestCode<DropboxLoginProvider>(
-                                                    additionalArgs: new Dictionary<string, string>
-                                                        {
-                                                                        { "force_reauthentication", "true" },
-                                                                        { "token_access_type","offline" }
-                                                        }, additionalStateArgs: additionals);
-
-            case LoginProvider.Docusign:
-                return _oAuth20TokenHelper.RequestCode<DocuSignLoginProvider>(
-                                                                        DocuSignLoginProvider.DocuSignLoginProviderScopes,
-                                                                        new Dictionary<string, string>
-                                                                            {
-                                                                        { "prompt", "login" }
-                                                                            }, additionalStateArgs: additionals);
-            case LoginProvider.Box:
-                return _oAuth20TokenHelper.RequestCode<BoxLoginProvider>(additionalStateArgs: additionals);
-
-            case LoginProvider.OneDrive:
-                return _oAuth20TokenHelper.RequestCode<OneDriveLoginProvider>(OneDriveLoginProvider.OneDriveLoginProviderScopes, additionalStateArgs: additionals);
-
-            case LoginProvider.Wordpress:
-                return _oAuth20TokenHelper.RequestCode<WordpressLoginProvider>(additionalStateArgs: additionals);
-
-        }
-
-        return null;
+            LoginProvider.Google => oAuth20TokenHelper.RequestCode<GoogleLoginProvider>(
+                GoogleLoginProvider.GoogleScopeDrive,
+                GoogleLoginProvider.GoogleAdditionalArgs,
+                additionalStateArgs: additionals),
+            LoginProvider.Dropbox => oAuth20TokenHelper.RequestCode<DropboxLoginProvider>(
+                additionalArgs: new Dictionary<string, string>
+                {
+                    { "force_reauthentication", "true" }, { "token_access_type", "offline" }
+                }, additionalStateArgs: additionals),
+            LoginProvider.Docusign => oAuth20TokenHelper.RequestCode<DocuSignLoginProvider>(
+                DocuSignLoginProvider.DocuSignLoginProviderScopes,
+                new Dictionary<string, string> { { "prompt", "login" } }, additionalStateArgs: additionals),
+            LoginProvider.Box => oAuth20TokenHelper.RequestCode<BoxLoginProvider>(additionalStateArgs: additionals),
+            LoginProvider.OneDrive => oAuth20TokenHelper.RequestCode<OneDriveLoginProvider>(
+                OneDriveLoginProvider.OneDriveLoginProviderScopes, additionalStateArgs: additionals),
+            LoginProvider.Wordpress => oAuth20TokenHelper.RequestCode<WordpressLoginProvider>(
+                additionalStateArgs: additionals),
+            _ => null
+        };
     }
 
     /// <summary>

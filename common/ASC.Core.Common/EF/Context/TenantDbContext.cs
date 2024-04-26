@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,7 +26,7 @@
 
 namespace ASC.Core.Common.EF.Context;
 
-public class TenantDbContext : DbContext
+public class TenantDbContext(DbContextOptions<TenantDbContext> options) : DbContext(options)
 {
     public DbSet<DbTenant> Tenants { get; set; }
     public DbSet<DbTenantVersion> TenantVersion { get; set; }
@@ -34,8 +34,6 @@ public class TenantDbContext : DbContext
     public DbSet<DbTenantForbiden> TenantForbiden { get; set; }
     public DbSet<TenantIpRestrictions> TenantIpRestrictions { get; set; }
     public DbSet<DbCoreSettings> CoreSettings { get; set; }
-
-    public TenantDbContext(DbContextOptions<TenantDbContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

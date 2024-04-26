@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -51,7 +51,7 @@ public class DeletePortalTask : PortalTaskBase
 
         foreach (var module in modulesToProcess)
         {
-            DoDeleteModule(module);
+            await DoDeleteModule(module);
         }
 
         if (ProcessStorage)
@@ -62,12 +62,12 @@ public class DeletePortalTask : PortalTaskBase
         _logger.DebugEndDelete(TenantId);
     }
 
-    private void DoDeleteModule(IModuleSpecifics module)
+    private async Task DoDeleteModule(IModuleSpecifics module)
     {
         _logger.DebugBeginDeleteDataForModule(module.ModuleName);
         var tablesCount = module.Tables.Count();
         var tablesProcessed = 0;
-        using (var connection = DbFactory.OpenConnection())
+        await using (var connection = DbFactory.OpenConnection())
         {
             foreach (var table in module.GetTablesOrdered().Reverse().Where(t => !_ignoredTables.Contains(t.Name)))
             {
@@ -75,8 +75,8 @@ public class DeletePortalTask : PortalTaskBase
                     {
                         var t = (TableInfo)state;
                         module.CreateDeleteCommand(connection.Fix(), TenantId, t).WithTimeout(120).ExecuteNonQuery();
-                    }, table, 5, onFailure: error => { throw ThrowHelper.CantDeleteTable(table.Name, error); });
-                SetCurrentStepProgress((int)(++tablesProcessed * 100 / (double)tablesCount));
+                    }, table, 5, onFailure: error => throw ThrowHelper.CantDeleteTable(table.Name, error));
+                await SetCurrentStepProgress((int)(++tablesProcessed * 100 / (double)tablesCount));
             }
         }
 
@@ -98,7 +98,7 @@ public class DeletePortalTask : PortalTaskBase
                               onFailure: error => _logger.WarningCanNotDeleteFilesForDomain(domain, error));
             }
             await storage.DeleteFilesAsync("\\", "*.*", true);
-            SetCurrentStepProgress((int)(++modulesProcessed * 100 / (double)storageModules.Count));
+            await SetCurrentStepProgress((int)(++modulesProcessed * 100 / (double)storageModules.Count));
         }
 
         _logger.DebugEndDeleteStorage();

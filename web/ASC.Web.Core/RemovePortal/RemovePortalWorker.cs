@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,54 +27,46 @@
 namespace ASC.Web.Core.RemovePortal;
 
 [Singleton(Additional = typeof(RemovePortalWorkerExtension))]
-public class RemovePortalWorker
+public class RemovePortalWorker(
+    IDistributedTaskQueueFactory queueFactory,
+    IServiceProvider serviceProvider,
+    IDistributedLockProvider distributedLockProvider)
 {
-    private readonly object _locker;
-    private readonly DistributedTaskQueue _queue;
-    private readonly IServiceProvider _serviceProvider;
+    private readonly DistributedTaskQueue _queue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
 
     public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "removePortal";
 
-    public RemovePortalWorker(IDistributedTaskQueueFactory queueFactory,
-                            IServiceProvider serviceProvider)
+    public async Task StartAsync(int tenantId)
     {
-        _locker = new object();
-        _serviceProvider = serviceProvider;
-        _queue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
-    }
-
-    public void Start(int tenantId)
-    {
-        lock (_locker)
+        await using (await distributedLockProvider.TryAcquireLockAsync($"lock_{CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME}"))
         {
-            var item = _queue.GetAllTasks<RemovePortalOperation>().FirstOrDefault(t => t.TenantId == tenantId);
+            var item = (await _queue.GetAllTasks<RemovePortalOperation>()).FirstOrDefault(t => t.TenantId == tenantId);
 
             if (item is { IsCompleted: true })
             {
-                _queue.DequeueTask(item.Id);
+                await _queue.DequeueTask(item.Id);
                 item = null;
             }
             if (item == null)
             {
-
-                item = _serviceProvider.GetService<RemovePortalOperation>();
+                item = serviceProvider.GetService<RemovePortalOperation>();
 
                 item.Init(tenantId);
 
-                _queue.EnqueueTask(item);
+                await _queue.EnqueueTask(item);
             }
 
-            item.PublishChanges();
+            await item.PublishChanges();
         }
     }
 
-    public void Stop()
+    public async Task Stop()
     {
-        var tasks = _queue.GetAllTasks(DistributedTaskQueue.INSTANCE_ID);
+        var tasks = await _queue.GetAllTasks(DistributedTaskQueue.INSTANCE_ID);
 
         foreach (var t in tasks)
         {
-            _queue.DequeueTask(t.Id);
+            await _queue.DequeueTask(t.Id);
         }
     }
 }

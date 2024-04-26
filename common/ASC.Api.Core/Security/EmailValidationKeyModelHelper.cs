@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,51 +26,26 @@
 
 using static ASC.Security.Cryptography.EmailValidationKeyProvider;
 
-using Constants = ASC.Core.Users.Constants;
+using SecurityContext = ASC.Core.SecurityContext;
 
 namespace ASC.Api.Core.Security;
 
 [Transient]
-public class EmailValidationKeyModelHelper
+public class EmailValidationKeyModelHelper(IHttpContextAccessor httpContextAccessor,
+    EmailValidationKeyProvider provider,
+    AuthContext authContext,
+    UserManager userManager,
+    AuthManager authentication,
+    InvitationLinkHelper invitationLinkHelper,
+    AuditEventsRepository auditEventsRepository,
+    TenantUtil tenantUtil,
+    MessageTarget messageTarget,
+    CookiesManager cookiesManager,
+    SecurityContext securityContext)
 {
-    private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly EmailValidationKeyProvider _provider;
-    private readonly AuthContext _authContext;
-    private readonly UserManager _userManager;
-    private readonly AuthManager _authentication;
-    private readonly InvitationLinkHelper _invitationLinkHelper;
-    private readonly AuditEventsRepository _auditEventsRepository;
-    private readonly TenantUtil _tenantUtil;
-    private readonly MessageTarget _messageTarget;
-    private readonly CookiesManager _cookiesManager;
-
-    public EmailValidationKeyModelHelper(
-        IHttpContextAccessor httpContextAccessor,
-        EmailValidationKeyProvider provider,
-        AuthContext authContext,
-        UserManager userManager,
-        AuthManager authentication,
-        InvitationLinkHelper invitationLinkHelper,
-        AuditEventsRepository auditEventsRepository,
-        TenantUtil tenantUtil,
-        MessageTarget messageTarget,
-        CookiesManager cookiesManager)
-    {
-        _httpContextAccessor = httpContextAccessor;
-        _provider = provider;
-        _authContext = authContext;
-        _userManager = userManager;
-        _authentication = authentication;
-        _invitationLinkHelper = invitationLinkHelper;
-        _auditEventsRepository = auditEventsRepository;
-        _tenantUtil = tenantUtil;
-        _messageTarget = messageTarget;
-        _cookiesManager = cookiesManager;
-    }
-
     public EmailValidationKeyModel GetModel()
     {
-        var request = QueryHelpers.ParseQuery(_httpContextAccessor.HttpContext.Request.Headers["confirm"]);
+        var request = QueryHelpers.ParseQuery(httpContextAccessor.HttpContext.Request.Headers["confirm"]);
 
         var type = request.TryGetValue("type", out var value) ? value.FirstOrDefault() : null;
 
@@ -82,7 +57,7 @@ public class EmailValidationKeyModelHelper
         
         if (!request.TryGetValue("key", out var key))
         {
-            key = _httpContextAccessor.HttpContext.Request.Cookies[_cookiesManager.GetConfirmCookiesName() + $"_{type}"];
+            key = httpContextAccessor.HttpContext.Request.Cookies[cookiesManager.GetConfirmCookiesName() + $"_{type}"];
         }
 
         request.TryGetValue("emplType", out var emplType);
@@ -93,6 +68,8 @@ public class EmailValidationKeyModelHelper
         request.TryGetValue("uid", out var userIdKey);
         Guid.TryParse(userIdKey, out var userId);
 
+        request.TryGetValue("first", out var first);
+
         return new EmailValidationKeyModel
         {
             Email = _email,
@@ -100,47 +77,48 @@ public class EmailValidationKeyModelHelper
             Key = key,
             Type = cType,
             UiD = userId,
+            First = first
         };
     }
 
     public async Task<ValidationResult> ValidateAsync(EmailValidationKeyModel inDto)
     {
-        var (key, emplType, email, uiD, type, _) = inDto;
+        var (key, emplType, email, uiD, type, first) = inDto;
 
         ValidationResult checkKeyResult;
 
         switch (type)
         {
             case ConfirmType.EmpInvite:
-                checkKeyResult = await _provider.ValidateEmailKeyAsync(email + type + (int)emplType, key, _provider.ValidEmailKeyInterval);
+                checkKeyResult = await provider.ValidateEmailKeyAsync(email + type + (int)emplType, key, provider.ValidEmailKeyInterval);
                 break;
 
             case ConfirmType.LinkInvite:
-                checkKeyResult = (await _invitationLinkHelper.ValidateAsync(key, email, emplType ?? default)).Result;
+                checkKeyResult = (await invitationLinkHelper.ValidateAsync(key, email, emplType ?? default)).Result;
                 break;
 
             case ConfirmType.PortalOwnerChange:
-                checkKeyResult = await _provider.ValidateEmailKeyAsync(email + type + uiD.GetValueOrDefault(), key, _provider.ValidEmailKeyInterval);
+                checkKeyResult = await provider.ValidateEmailKeyAsync(email + type + uiD.GetValueOrDefault(), key, provider.ValidEmailKeyInterval);
                 break;
 
             case ConfirmType.EmailChange:
-                checkKeyResult = await _provider.ValidateEmailKeyAsync(email + type + uiD.GetValueOrDefault(), key, _provider.ValidEmailKeyInterval);
+                checkKeyResult = await provider.ValidateEmailKeyAsync(email + type + uiD.GetValueOrDefault(), key, provider.ValidEmailKeyInterval);
                 break;
             case ConfirmType.PasswordChange:
-                var userInfo = await _userManager.GetUserByEmailAsync(email);
-                if(userInfo == Constants.LostUser || userInfo.Id != uiD)
+                var userInfo = await userManager.GetUserByEmailAsync(email);
+                if(Equals(userInfo, Constants.LostUser) || userInfo.Id != uiD)
                 {
                     checkKeyResult = ValidationResult.Invalid;
                     break;
                 }
-                var auditEvent = (await _auditEventsRepository.GetByFilterAsync(action: MessageAction.UserSentPasswordChangeInstructions, entry: EntryType.User, target: _messageTarget.Create(userInfo.Id).ToString(), limit: 1)).FirstOrDefault();
-                var passwordStamp = await _authentication.GetUserPasswordStampAsync(userInfo.Id);
+                var auditEvent = (await auditEventsRepository.GetByFilterAsync(action: MessageAction.UserSentPasswordChangeInstructions, entry: EntryType.User, target: messageTarget.Create(userInfo.Id).ToString(), limit: 1)).FirstOrDefault();
+                var passwordStamp = await authentication.GetUserPasswordStampAsync(userInfo.Id);
 
                 string hash;
 
                 if (auditEvent != null)
                 {
-                    var auditEventDate = _tenantUtil.DateTimeToUtc(auditEvent.Date);
+                    var auditEventDate = tenantUtil.DateTimeToUtc(auditEvent.Date);
 
                     hash = (auditEventDate.CompareTo(passwordStamp) > 0 ? auditEventDate : passwordStamp).ToString("s", CultureInfo.InvariantCulture);
                 }
@@ -149,26 +127,34 @@ public class EmailValidationKeyModelHelper
                     hash = passwordStamp.ToString("s", CultureInfo.InvariantCulture);
                 }
 
-                checkKeyResult = await _provider.ValidateEmailKeyAsync(email + type + hash, key, _provider.ValidEmailKeyInterval);
+                checkKeyResult = await provider.ValidateEmailKeyAsync(email + type + hash, key, provider.ValidEmailKeyInterval);
+                
+                if (checkKeyResult is ValidationResult.Ok && userInfo.ActivationStatus is not EmployeeActivationStatus.Activated)
+                {
+                    await securityContext.AuthenticateMeWithoutCookieAsync(userInfo.Id);
+                    
+                    userInfo.ActivationStatus = EmployeeActivationStatus.Activated;
+                    await userManager.UpdateUserInfoAsync(userInfo);
+                }
                 break;
 
             case ConfirmType.Activation:
-                checkKeyResult = await _provider.ValidateEmailKeyAsync(email + type + uiD, key, _provider.ValidEmailKeyInterval);
+                checkKeyResult = await provider.ValidateEmailKeyAsync(email + type + uiD, key, provider.ValidEmailKeyInterval);
                 break;
 
             case ConfirmType.ProfileRemove:
                 // validate UiD
-                var user = await _userManager.GetUsersAsync(uiD.GetValueOrDefault());
-                if (user == null || user == Constants.LostUser || user.Status == EmployeeStatus.Terminated || _authContext.IsAuthenticated && _authContext.CurrentAccount.ID != uiD)
+                var user = await userManager.GetUsersAsync(uiD.GetValueOrDefault());
+                if (user == null || Equals(user, Constants.LostUser) || user.Status == EmployeeStatus.Terminated || authContext.IsAuthenticated && authContext.CurrentAccount.ID != uiD)
                 {
                     return ValidationResult.Invalid;
                 }
 
-                checkKeyResult = await _provider.ValidateEmailKeyAsync(email + type + uiD, key, _provider.ValidEmailKeyInterval);
+                checkKeyResult = await provider.ValidateEmailKeyAsync(email + type + uiD, key, provider.ValidEmailKeyInterval);
                 break;
 
             case ConfirmType.Wizard:
-                checkKeyResult = await _provider.ValidateEmailKeyAsync("" + type, key, _provider.ValidEmailKeyInterval);
+                checkKeyResult = await provider.ValidateEmailKeyAsync("" + type, key, provider.ValidEmailKeyInterval);
                 break;
 
             case ConfirmType.PhoneActivation:
@@ -176,15 +162,15 @@ public class EmailValidationKeyModelHelper
             case ConfirmType.TfaActivation:
             case ConfirmType.TfaAuth:
             case ConfirmType.Auth:
-                checkKeyResult = await _provider.ValidateEmailKeyAsync(email + type, key, _provider.ValidAuthKeyInterval);
+                checkKeyResult = await provider.ValidateEmailKeyAsync(email + type + first, key, provider.ValidAuthKeyInterval);
                 break;
 
             case ConfirmType.PortalContinue:
-                checkKeyResult = await _provider.ValidateEmailKeyAsync(email + type, key);
+                checkKeyResult = await provider.ValidateEmailKeyAsync(email + type, key);
                 break;
 
             default:
-                checkKeyResult = await _provider.ValidateEmailKeyAsync(email + type, key, _provider.ValidEmailKeyInterval);
+                checkKeyResult = await provider.ValidateEmailKeyAsync(email + type, key, provider.ValidEmailKeyInterval);
                 break;
         }
 

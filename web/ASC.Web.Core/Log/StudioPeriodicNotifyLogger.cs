@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -36,9 +36,6 @@ internal static partial class StudioPeriodicNotifyLogger
     [LoggerMessage(Level = LogLevel.Error, Message = "SendOpensourceLetters")]
     public static partial void ErrorSendOpensourceLetters(this ILogger logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "SendPersonalLetters")]
-    public static partial void ErrorSendPersonalLetters(this ILogger logger, Exception exception);
-
     [LoggerMessage(Level = LogLevel.Error, Message = "SendMsgWhatsNew")]
     public static partial void ErrorSendMsgWhatsNew(this ILogger logger, Exception exception);
 
@@ -60,18 +57,9 @@ internal static partial class StudioPeriodicNotifyLogger
     [LoggerMessage(Level = LogLevel.Information, Message = "End SendOpensourceTariffLetters")]
     public static partial void InformationEndSendOpensourceTariffLetters(this ILogger logger);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "Start SendLettersPersonal...")]
-    public static partial void InformationStartSendLettersPersonal(this ILogger logger);
-
     [LoggerMessage(Level = LogLevel.Information, Message = "Current tenant: {tenantId}")]
     public static partial void InformationCurrentTenant(this ILogger logger, int tenantId);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "Send letter personal '{id}' to {email} culture {culture}. tenant id: {tenantId} user culture {userCulture} create on {createDate} now date {scheduleDate}")]
-    public static partial void InformationSendLetterPersonal(this ILogger logger, string id, string email, CultureInfo culture, int tenantId, CultureInfo userCulture, DateTime createDate, DateTime scheduleDate);
-
     [LoggerMessage(Level = LogLevel.Information, Message = "Total send count: {sendCount}")]
     public static partial void InformationTotalSendCount(this ILogger logger, int sendCount);
-
-    [LoggerMessage(Level = LogLevel.Information, Message = "End SendLettersPersonal.")]
-    public static partial void InformationEndSendLettersPersonal(this ILogger logger);
 }

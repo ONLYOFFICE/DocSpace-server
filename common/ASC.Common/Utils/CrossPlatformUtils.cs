@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,7 +28,7 @@ namespace ASC.Common.Utils;
 
 public static class CrossPlatform
 {
-    private static readonly char[] _pathSplitCharacters = new char[] { '/', '\\' };
+    private static readonly char[] _pathSplitCharacters = ['/', '\\'];
 
     public static string PathCombine(string basePath, params string[] additional)
     {

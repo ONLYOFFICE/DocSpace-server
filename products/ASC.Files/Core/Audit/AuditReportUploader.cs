@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,34 +27,18 @@
 namespace ASC.AuditTrail;
 
 [Scope]
-public class AuditReportUploader
+public class AuditReportUploader(GlobalFolderHelper globalFolderHelper,
+    ILogger<AuditReportUploader> logger,
+    FileUploader fileUploader,
+    FilesLinkUtility filesLinkUtility,
+    CommonLinkUtility commonLinkUtility)
 {
-    private readonly GlobalFolderHelper _globalFolderHelper;
-    private readonly FileUploader _fileUploader;
-    private readonly FilesLinkUtility _filesLinkUtility;
-    private readonly CommonLinkUtility _commonLinkUtility;
-    private readonly ILogger<AuditReportUploader> _logger;
-
-    public AuditReportUploader(
-        GlobalFolderHelper globalFolderHelper,
-        ILogger<AuditReportUploader> logger,
-        FileUploader fileUploader,
-        FilesLinkUtility filesLinkUtility,
-        CommonLinkUtility commonLinkUtility)
-    {
-        _globalFolderHelper = globalFolderHelper;
-        _logger = logger;
-        _fileUploader = fileUploader;
-        _filesLinkUtility = filesLinkUtility;
-        _commonLinkUtility = commonLinkUtility;
-    }
-
     public async Task<string> UploadCsvReport(Stream stream, string reportName)
     {
         try
         {
-            var file = await _fileUploader.ExecAsync(await _globalFolderHelper.FolderMyAsync, reportName, stream.Length, stream, true);
-            var fileUrl = _commonLinkUtility.GetFullAbsolutePath(_filesLinkUtility.GetFileWebEditorUrl(file.Id));
+            var file = await fileUploader.ExecAsync(await globalFolderHelper.FolderMyAsync, reportName, stream.Length, stream, true);
+            var fileUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebEditorUrl(file.Id));
 
             fileUrl += string.Format("&options={{\"codePage\":{0}}}", Encoding.UTF8.CodePage);
 
@@ -62,7 +46,7 @@ public class AuditReportUploader
         }
         catch (Exception ex)
         {
-            _logger.ErrorWhileUploading(ex);
+            logger.ErrorWhileUploading(ex);
             throw;
         }
     }

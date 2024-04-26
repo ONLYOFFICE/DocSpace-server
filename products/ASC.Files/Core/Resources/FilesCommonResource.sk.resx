@@ -130,130 +130,124 @@
   <data name="DocuSignStatusVoided" xml:space="preserve">
     <value>Zrušené</value>
   </data>
-  <data name="ErrorMassage_BadRequest" xml:space="preserve">
+  <data name="ErrorMessage_BadRequest" xml:space="preserve">
     <value>Zlá požiadavka.</value>
   </data>
-  <data name="ErrorMassage_ChangeOwner" xml:space="preserve">
+  <data name="ErrorMessage_ChangeOwner" xml:space="preserve">
     <value>Nemôžete vybrať tohto používateľa</value>
   </data>
-  <data name="ErrorMassage_ConvertTimeout" xml:space="preserve">
+  <data name="ErrorMessage_ConvertTimeout" xml:space="preserve">
     <value>Konverzia trvá príliš dlho.</value>
   </data>
-  <data name="ErrorMassage_DocServiceException" xml:space="preserve">
+  <data name="ErrorMessage_DocServiceException" xml:space="preserve">
     <value>Vyskytla sa chyba v Documents Service</value>
   </data>
-  <data name="ErrorMassage_EditingCoauth" xml:space="preserve">
+  <data name="ErrorMessage_EditingCoauth" xml:space="preserve">
     <value>Súbor je otvorený na úpravu {0}. V súčasnosti nie je funkcia spoločného upravovania pre tento formát súboru podporovaná.</value>
   </data>
-  <data name="ErrorMassage_EditingMobile" xml:space="preserve">
+  <data name="ErrorMessage_EditingMobile" xml:space="preserve">
     <value>Súbor je otvorený na úpravu v mobilnej aplikácii {0}</value>
   </data>
-  <data name="ErrorMassage_EmptyFile" xml:space="preserve">
+  <data name="ErrorMessage_EmptyFile" xml:space="preserve">
     <value>Prázdny súbor</value>
   </data>
-  <data name="ErrorMassage_FileNotFound" xml:space="preserve">
+  <data name="ErrorMessage_FileNotFound" xml:space="preserve">
     <value>Požadovaný súbor nebol nájdený</value>
   </data>
-  <data name="ErrorMassage_FileSizeConvert" xml:space="preserve">
-    <value>Súbor väčší než {0} nebude konvertovaný</value>
-  </data>
-  <data name="ErrorMassage_FileSizeCopy" xml:space="preserve">
+  <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>Súbor väčší než {0} nebude skopírovaný</value>
   </data>
-  <data name="ErrorMassage_FileSizeEdit" xml:space="preserve">
-    <value>Súbor väčší než {0} nebude upravený</value>
-  </data>
-  <data name="ErrorMassage_FileSizeMove" xml:space="preserve">
+  <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>Súbor väčší než {0} nebude presunutý</value>
   </data>
-  <data name="ErrorMassage_FolderCopyError" xml:space="preserve">
+  <data name="ErrorMessage_FolderCopyError" xml:space="preserve">
     <value>Priečinok nemôžete skopírovať do jeho podpriečinku</value>
   </data>
-  <data name="ErrorMassage_FolderNotFound" xml:space="preserve">
+  <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>Požadovaný priečinok nebol nájdený</value>
   </data>
-  <data name="ErrorMassage_InvalidTitle" xml:space="preserve">
+  <data name="ErrorMessage_InvalidTitle" xml:space="preserve">
     <value>Nesprávny názov</value>
   </data>
-  <data name="ErrorMassage_LockedFile" xml:space="preserve">
+  <data name="ErrorMessage_LockedFile" xml:space="preserve">
     <value>Súbor je momentálne uzamknutý iným používateľom</value>
   </data>
-  <data name="ErrorMassage_MailMergeCount" xml:space="preserve">
+  <data name="ErrorMessage_MailMergeCount" xml:space="preserve">
     <value>Nie je možné odoslať minimálne {0} e-mailové správy. Navštívte prosím modul Mail, aby ste zistili, prečo došlo k poruche.</value>
   </data>
-  <data name="ErrorMassage_ManyDownloads" xml:space="preserve">
+  <data name="ErrorMessage_ManyDownloads" xml:space="preserve">
     <value>Príliš veľa sťahovaní.</value>
   </data>
-  <data name="ErrorMassage_NotSupportedFormat" xml:space="preserve">
+  <data name="ErrorMessage_NotSupportedFormat" xml:space="preserve">
     <value>Ľutujeme, ale formát tohto súboru nie je podporovaný</value>
   </data>
-  <data name="ErrorMassage_SaveAnonymous" xml:space="preserve">
+  <data name="ErrorMessage_SaveAnonymous" xml:space="preserve">
     <value>Autor poslednej uloženej zmeny je neznámy</value>
   </data>
-  <data name="ErrorMassage_SaveCorrupted" xml:space="preserve">
+  <data name="ErrorMessage_SaveCorrupted" xml:space="preserve">
     <value>Súbor bol poškodený, keď ste sa ho pokúsili uložiť</value>
   </data>
-  <data name="ErrorMassage_SaveUrlLost" xml:space="preserve">
+  <data name="ErrorMessage_SaveUrlLost" xml:space="preserve">
     <value>Nepodarilo sa získať súbor, ktorý chcete uložiť</value>
   </data>
-  <data name="ErrorMassage_SecurityException" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException" xml:space="preserve">
     <value>Nemáte dostatočné práva na vykonanie operácie</value>
   </data>
-  <data name="ErrorMassage_SecurityException_Auth" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_Auth" xml:space="preserve">
     <value>Nie je možné autorizovať poskytovateľa {0} s pridelenými povereniami.</value>
   </data>
-  <data name="ErrorMassage_SecurityException_Create" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_Create" xml:space="preserve">
     <value>Nemáte dostatočné práva na vytvorenie</value>
   </data>
-  <data name="ErrorMassage_SecurityException_DeleteEditingFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_DeleteEditingFile" xml:space="preserve">
     <value>Nie je možné zmazať súbor, pretože je otvorený pre úpravy</value>
   </data>
-  <data name="ErrorMassage_SecurityException_DeleteEditingFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_DeleteEditingFolder" xml:space="preserve">
     <value>Nie je možné zmazať priečinok, pretože jeden z jeho súborov je otvorený pre úpravy</value>
   </data>
-  <data name="ErrorMassage_SecurityException_DeleteFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_DeleteFile" xml:space="preserve">
     <value>Nemáte dostatočné práva na odstránenie súboru</value>
   </data>
-  <data name="ErrorMassage_SecurityException_DeleteFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_DeleteFolder" xml:space="preserve">
     <value>Nemáte dostatočné práva na odstránenie priečinka</value>
   </data>
-  <data name="ErrorMassage_SecurityException_EditFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_EditFile" xml:space="preserve">
     <value>Nemáte dostatočné oprávnenia k úprave súboru</value>
   </data>
-  <data name="ErrorMassage_SecurityException_EditFileTwice" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_EditFileTwice" xml:space="preserve">
     <value>Tento dokument upravujete na inej karte</value>
   </data>
-  <data name="ErrorMassage_SecurityException_ReadFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_ReadFile" xml:space="preserve">
     <value>Nemáte dostatočné práva na zobrazenie súboru</value>
   </data>
-  <data name="ErrorMassage_SecurityException_ReadFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_ReadFolder" xml:space="preserve">
     <value>Nemáte dostatočné práva na zobrazenie obsahu priečinka</value>
   </data>
-  <data name="ErrorMassage_SecurityException_RenameFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_RenameFile" xml:space="preserve">
     <value>Nemáte dostatočné práva k premenovaniu súboru</value>
   </data>
-  <data name="ErrorMassage_SecurityException_RenameFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_RenameFolder" xml:space="preserve">
     <value>Nemáte dostatočné práva k premenovaniu priečinka</value>
   </data>
-  <data name="ErrorMassage_SecurityException_UpdateEditingFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_UpdateEditingFile" xml:space="preserve">
     <value>Nie je možné aktualizovať súbor, pretože je otvorený pre úpravy</value>
   </data>
-  <data name="ErrorMassage_SecurityException_ViewFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_ViewFolder" xml:space="preserve">
     <value>Nemáte dostatočné práva na zobrazenie obsahu priečinka</value>
   </data>
-  <data name="ErrorMassage_SharpBoxException" xml:space="preserve">
+  <data name="ErrorMessage_SharpBoxException" xml:space="preserve">
     <value>Obsah priečinka tretej strany nie je k dispozícii. Pokúste sa znova pripojiť k účtu.</value>
   </data>
-  <data name="ErrorMassage_StartEditing" xml:space="preserve">
+  <data name="ErrorMessage_StartEditing" xml:space="preserve">
     <value>Chyba pri spustení editácie súboru</value>
   </data>
-  <data name="ErrorMassage_UpdateEditingFile" xml:space="preserve">
+  <data name="ErrorMessage_UpdateEditingFile" xml:space="preserve">
     <value>Nemôžete aktualizovať súbor, ktorý je otvorený na úpravu</value>
   </data>
-  <data name="ErrorMassage_UserNotFound" xml:space="preserve">
+  <data name="ErrorMessage_UserNotFound" xml:space="preserve">
     <value>Používateľ nebol nájdený</value>
   </data>
-  <data name="ErrorMassage_ViewTrashItem" xml:space="preserve">
+  <data name="ErrorMessage_ViewTrashItem" xml:space="preserve">
     <value>Nemáte povolené prezeranie prvkov v koši</value>
   </data>
   <data name="Everyone" xml:space="preserve">
@@ -320,13 +314,13 @@
   <data name="CommentSubmitFillForm" xml:space="preserve">
     <value>Odoslane tlačivo</value>
   </data>
-  <data name="ErrorMassage_FileUpdateToVersion" xml:space="preserve">
+  <data name="ErrorMessage_FileUpdateToVersion" xml:space="preserve">
     <value>Nová verzia nemôže byť taká istá, ako aktuálna verzia</value>
   </data>
-  <data name="ErrorMassage_SecurityException_CopyFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_CopyFile" xml:space="preserve">
     <value>Nemáte dostatočné oprávnenie na kopírovanie súboru</value>
   </data>
-  <data name="ErrorMassage_SecurityException_CopyFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_CopyFolder" xml:space="preserve">
     <value>Nemáte oprávnenie na kopírovanie priečinka</value>
   </data>
   <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
@@ -383,10 +377,10 @@
   <data name="CommentForcesave" xml:space="preserve">
     <value>Uložené</value>
   </data>
-  <data name="ErrorMassage_SecurityException_MoveFolder" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_MoveFolder" xml:space="preserve">
     <value>Nemáte dostatočné oprávnenie na presunutie priečinka</value>
   </data>
-  <data name="ErrorMassage_SecurityException_MoveFile" xml:space="preserve">
+  <data name="ErrorMessage_SecurityException_MoveFile" xml:space="preserve">
     <value>Nemáte dostatočné oprávnenie na presunutie súboru</value>
   </data>
   <data name="ProductDescriptionShort" xml:space="preserve">
@@ -427,5 +421,47 @@
   </data>
   <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
     <value>Príliš veľa krát ste skúšali zadať svoje heslo. Prosím, skúste to znova neskôr</value>
+  </data>
+  <data name="RoomIndex_Author" xml:space="preserve">
+    <value>Autor</value>
+  </data>
+  <data name="RoomIndex_Company" xml:space="preserve">
+    <value>Spoločnosť</value>
+  </data>
+  <data name="RoomIndex_Created" xml:space="preserve">
+    <value>Vytvorené</value>
+  </data>
+  <data name="RoomIndex_DateGenerated" xml:space="preserve">
+    <value>Dátum vytvorenia</value>
+  </data>
+  <data name="RoomIndex_ExportAuthor" xml:space="preserve">
+    <value>Exportovať autora</value>
+  </data>
+  <data name="RoomIndex_Folder" xml:space="preserve">
+    <value>Priečinok</value>
+  </data>
+  <data name="RoomIndex_Index" xml:space="preserve">
+    <value>Index</value>
+  </data>
+  <data name="RoomIndex_Modified" xml:space="preserve">
+    <value>Upravené</value>
+  </data>
+  <data name="RoomIndex_Name" xml:space="preserve">
+    <value>Meno</value>
+  </data>
+  <data name="RoomIndex_Room" xml:space="preserve">
+    <value>Miestnosť</value>
+  </data>
+  <data name="RoomIndex_SheetName" xml:space="preserve">
+    <value>Index miestnosti</value>
+  </data>
+  <data name="RoomIndex_Size" xml:space="preserve">
+    <value>Veľkosť (MB)</value>
+  </data>
+  <data name="RoomIndex_Total" xml:space="preserve">
+    <value>Celkom</value>
+  </data>
+  <data name="RoomIndex_Type" xml:space="preserve">
+    <value>Typ</value>
   </data>
 </root>

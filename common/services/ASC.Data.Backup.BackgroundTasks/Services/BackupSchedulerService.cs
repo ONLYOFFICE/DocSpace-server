@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,64 +24,24 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Configuration;
+
 namespace ASC.Data.Backup.Services;
 
 [Singleton]
-public sealed class BackupSchedulerService : BackgroundService
-{
-    private readonly TimeSpan _backupSchedulerPeriod;
-    private readonly ILogger<BackupSchedulerService> _logger;
-
-    private readonly CoreBaseSettings _coreBaseSettings;
-    private readonly IServiceScopeFactory _scopeFactory;
-    private readonly IEventBus _eventBus;
-
-    public BackupSchedulerService(
-        ILogger<BackupSchedulerService> logger,
+public sealed class BackupSchedulerService(ILogger<BackupSchedulerService> logger,
         IServiceScopeFactory scopeFactory,
         ConfigurationExtension configuration,
         CoreBaseSettings coreBaseSettings,
         IEventBus eventBus)
-    {
-        _logger = logger;
-        _coreBaseSettings = coreBaseSettings;
-        _backupSchedulerPeriod = configuration.GetSetting<BackupSettings>("backup").Scheduler.Period;
-        _scopeFactory = scopeFactory;
-        _eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
-    }
+     : ActivePassiveBackgroundService<BackupSchedulerService>(logger, scopeFactory)
+{
+    private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
+    private readonly IEventBus _eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        _logger.DebugBackupSchedulerServiceStarting();
+    protected override TimeSpan ExecuteTaskPeriod { get; set; } = configuration.GetSetting<BackupSettings>("backup").Scheduler.Period;
 
-        stoppingToken.Register(() => _logger.DebugBackupSchedulerServiceStopping());
-
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            await using var serviceScope = _scopeFactory.CreateAsyncScope();
-
-            var registerInstanceService = serviceScope.ServiceProvider.GetService<IRegisterInstanceManager<BackupSchedulerService>>();
-
-            if (!await registerInstanceService.IsActive(RegisterInstanceWorkerService<BackupSchedulerService>.InstanceId))
-            {
-                _logger.DebugBackupSchedulerServiceIsNotActive(RegisterInstanceWorkerService<BackupSchedulerService>.InstanceId);
-
-                await Task.Delay(1000, stoppingToken);
-
-                continue;
-            }
-
-            _logger.DebugBackupSchedulerServiceDoingWork();
-
-            await ExecuteBackupSchedulerAsync(stoppingToken);
-
-            await Task.Delay(_backupSchedulerPeriod, stoppingToken);
-        }
-
-        _logger.DebugBackupSchedulerServiceStopping();
-    }
-
-    private async Task ExecuteBackupSchedulerAsync(CancellationToken stoppingToken)
+    protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
         using var serviceScope = _scopeFactory.CreateScope();
 
@@ -90,11 +50,14 @@ public sealed class BackupSchedulerService : BackgroundService
         var backupSchedule = serviceScope.ServiceProvider.GetRequiredService<Schedule>();
         var tenantManager = serviceScope.ServiceProvider.GetRequiredService<TenantManager>();
 
-        _logger.DebugStartedToSchedule();
+        logger.DebugStartedToSchedule();
 
-        var backupsToSchedule = await (await backupRepository.GetBackupSchedulesAsync()).ToAsyncEnumerable().WhereAwait(async schedule => await backupSchedule.IsToBeProcessedAsync(schedule)).ToListAsync();
+        var backupsToSchedule = await (await backupRepository.GetBackupSchedulesAsync())
+            .ToAsyncEnumerable()
+            .WhereAwait(async schedule => await backupSchedule.IsToBeProcessedAsync(schedule))
+            .ToListAsync(cancellationToken: stoppingToken);
 
-        _logger.DebugBackupsSchedule(backupsToSchedule.Count);
+        logger.DebugBackupsSchedule(backupsToSchedule.Count);
 
         foreach (var schedule in backupsToSchedule)
         {
@@ -105,7 +68,7 @@ public sealed class BackupSchedulerService : BackgroundService
 
             try
             {
-                if (_coreBaseSettings.Standalone || (await tenantManager.GetTenantQuotaAsync(schedule.TenantId)).AutoBackupRestore)
+                if (coreBaseSettings.Standalone || (await tenantManager.GetTenantQuotaAsync(schedule.TenantId)).AutoBackupRestore)
                 {
                     var tariff = await tariffService.GetTariffAsync(schedule.TenantId);
 
@@ -115,31 +78,31 @@ public sealed class BackupSchedulerService : BackgroundService
 
                         await backupRepository.SaveBackupScheduleAsync(schedule);
 
-                        _logger.DebugStartScheduledBackup(schedule.TenantId, schedule.StorageType, schedule.StorageBasePath);
+                        logger.DebugStartScheduledBackup(schedule.TenantId, schedule.StorageType, schedule.StorageBasePath);
 
                         _eventBus.Publish(new BackupRequestIntegrationEvent(
                                                  tenantId: schedule.TenantId,
                                                  storageBasePath: schedule.StorageBasePath,
                                                  storageParams: JsonConvert.DeserializeObject<Dictionary<string, string>>(schedule.StorageParams),
                                                  storageType: schedule.StorageType,
-                                                 createBy: ASC.Core.Configuration.Constants.CoreSystem.ID,
+                                                 createBy: Constants.CoreSystem.ID,
                                                  isScheduled: true,
                                                  backupsStored: schedule.BackupsStored
                                           ));
                     }
                     else
                     {
-                        _logger.DebugNotPaid(schedule.TenantId);
+                        logger.DebugNotPaid(schedule.TenantId);
                     }
                 }
                 else
                 {
-                    _logger.DebugHaveNotAccess(schedule.TenantId);
+                    logger.DebugHaveNotAccess(schedule.TenantId);
                 }
             }
             catch (Exception error)
             {
-                _logger.ErrorBackups(error);
+                logger.ErrorBackups(error);
             }
         }
     }

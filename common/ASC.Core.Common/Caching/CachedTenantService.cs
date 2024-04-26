@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -46,14 +46,14 @@ class TenantServiceCache
         Cache = cache;
         _cacheExpiration = TimeSpan.FromMinutes(2);
 
-        cacheNotifyItem.Subscribe((t) =>
+        cacheNotifyItem.Subscribe(t =>
         {
             var tenants = GetTenantStore();
             tenants.Remove(t.TenantId);
             tenants.Clear(coreBaseSettings);
         }, CacheNotifyAction.InsertOrUpdate);
 
-        cacheNotifySettings.Subscribe((s) =>
+        cacheNotifySettings.Subscribe(s =>
         {
             Cache.Remove(s.Key);
         }, CacheNotifyAction.Remove);
@@ -162,19 +162,14 @@ class TenantServiceCache
 }
 
 [Scope]
-class CachedTenantService : ITenantService
+class CachedTenantService() : ITenantService
 {
-    private readonly ITenantService _service;
+    private readonly DbTenantService _service;
     private readonly ICacheNotify<TenantSetting> _cacheNotifySettings;
     private readonly ICacheNotify<TenantCacheItem> _cacheNotifyItem;
     private readonly TenantServiceCache _tenantServiceCache;
-    private readonly TimeSpan _settingsExpiration;
+    private static readonly TimeSpan _settingsExpiration = TimeSpan.FromMinutes(2);
     private readonly ICache _cache;
-
-    public CachedTenantService()
-    {
-        _settingsExpiration = TimeSpan.FromMinutes(2);
-    }
 
     public CachedTenantService(DbTenantService service, TenantServiceCache tenantServiceCache, ICache cache) : this()
     {
@@ -210,6 +205,14 @@ class CachedTenantService : ITenantService
         return await _service.GetTenantsAsync(ids);
     }
 
+    public async Task<Tenant> RestoreTenantAsync(int oldId, Tenant newTenant, CoreSettings coreSettings)
+    {
+        newTenant = await _service.RestoreTenantAsync(oldId, newTenant, coreSettings);
+        await _cacheNotifyItem.PublishAsync(new TenantCacheItem { TenantId = oldId }, CacheNotifyAction.InsertOrUpdate);
+        await _cacheNotifyItem.PublishAsync(new TenantCacheItem { TenantId = newTenant.Id }, CacheNotifyAction.InsertOrUpdate);
+        return newTenant;
+    }
+
     public async Task<Tenant> GetTenantAsync(int id)
     {
         var tenants = _tenantServiceCache.GetTenantStore();
@@ -242,22 +245,6 @@ class CachedTenantService : ITenantService
         return t;
     }
 
-    public Tenant GetTenant(int id)
-    {
-        var tenants = _tenantServiceCache.GetTenantStore();
-        var t = tenants.Get(id);
-        if (t == null)
-        {
-            t = _service.GetTenant(id);
-            if (t != null)
-            {
-                tenants.Insert(t);
-            }
-        }
-
-        return t;
-    }
-    
     public Tenant GetTenant(string domain)
     {
         var tenants = _tenantServiceCache.GetTenantStore();
@@ -333,13 +320,13 @@ class CachedTenantService : ITenantService
 
     public async Task<byte[]> GetTenantSettingsAsync(int tenant, string key)
     {
-        var cacheKey = $"settings/{tenant}/{key}";
+        var cacheKey = GetCacheKey(tenant, key);
         var data = _cache.Get<byte[]>(cacheKey);
         if (data == null)
         {
             data = await _service.GetTenantSettingsAsync(tenant, key);
 
-            _cache.Insert(cacheKey, data ?? Array.Empty<byte>(), DateTime.UtcNow + _settingsExpiration);
+            _cache.Insert(cacheKey, data ?? [], DateTime.UtcNow + _settingsExpiration);
         }
 
         return data == null ? null : data.Length == 0 ? null : data;
@@ -347,13 +334,13 @@ class CachedTenantService : ITenantService
 
     public byte[] GetTenantSettings(int tenant, string key)
     {
-        var cacheKey = $"settings/{tenant}/{key}";
+        var cacheKey = GetCacheKey(tenant, key);
         var data = _cache.Get<byte[]>(cacheKey);
         if (data == null)
         {
             data = _service.GetTenantSettings(tenant, key);
 
-            _cache.Insert(cacheKey, data ?? Array.Empty<byte>(), DateTime.UtcNow + _settingsExpiration);
+            _cache.Insert(cacheKey, data ?? [], DateTime.UtcNow + _settingsExpiration);
         }
 
         return data == null ? null : data.Length == 0 ? null : data;
@@ -362,7 +349,7 @@ class CachedTenantService : ITenantService
     public async Task SetTenantSettingsAsync(int tenant, string key, byte[] data)
     {
         await _service.SetTenantSettingsAsync(tenant, key, data);
-        var cacheKey = $"settings/{tenant}/{key}";
+        var cacheKey = GetCacheKey(tenant, key);
 
         await _cacheNotifySettings.PublishAsync(new TenantSetting { Key = cacheKey }, CacheNotifyAction.Remove);
     }
@@ -370,13 +357,13 @@ class CachedTenantService : ITenantService
     public void SetTenantSettings(int tenant, string key, byte[] data)
     {
         _service.SetTenantSettings(tenant, key, data);
-        var cacheKey = $"settings/{tenant}/{key}";
+        var cacheKey = GetCacheKey(tenant, key);
 
         _cacheNotifySettings.Publish(new TenantSetting { Key = cacheKey }, CacheNotifyAction.Remove);
     }
 
-    public IEnumerable<Tenant> GetTenantsWithCsp()
+    private string GetCacheKey(int tenant, string key)
     {
-        return _service.GetTenantsWithCsp();
+        return $"settings/{tenant}/{key.ToLowerInvariant()}";
     }
 }

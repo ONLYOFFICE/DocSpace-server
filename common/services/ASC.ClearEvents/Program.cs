@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -45,7 +45,7 @@ builder.Configuration.AddDefaultConfiguration(builder.Environment)
 var logger = LogManager.Setup()
                             .SetupExtensions(s =>
                             {
-                                s.RegisterLayoutRenderer("application-context", (_) => AppName);
+                                s.RegisterLayoutRenderer("application-context", _ => AppName);
                             })
                             .LoadConfiguration(builder.Configuration, builder.Environment)
                             .GetLogger("ASC.ClearEvents");
@@ -56,15 +56,15 @@ try
 
     builder.Host.ConfigureDefault();
 
-    builder.Services.AddClearEventsServices(builder.Configuration);
-    
-    builder.Host.ConfigureContainer<ContainerBuilder>((context, builder) =>
+    await builder.Services.AddClearEventsServices(builder.Configuration, Namespace);
+
+    builder.Host.ConfigureContainer<ContainerBuilder>((context, containerBuilder) =>
     {
-        builder.Register(context.Configuration, false, false);
+        containerBuilder.Register(context.Configuration, false);
 
         if (String.IsNullOrEmpty(context.Configuration["RabbitMQ:ClientProvidedName"]))
         {
-            context.Configuration["RabbitMQ:ClientProvidedName"] = Program.AppName;
+            context.Configuration["RabbitMQ:ClientProvidedName"] = AppName;
         }
     });
 
@@ -72,11 +72,11 @@ try
 
     app.UseRouting();
 
-    app.MapHealthChecks("/health", new HealthCheckOptions()
+    app.MapHealthChecks("/health", new HealthCheckOptions
     {
         Predicate = _ => true,
         ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
-    });
+    }).ShortCircuit();
 
     app.MapHealthChecks("/liveness", new HealthCheckOptions
     {
@@ -89,10 +89,7 @@ try
 }
 catch (Exception ex)
 {
-    if (logger != null)
-    {
-        logger.Error(ex, "Program terminated unexpectedly ({applicationContext})!", AppName);
-    }
+    logger?.Error(ex, "Program terminated unexpectedly ({applicationContext})!", AppName);
 
     throw;
 }
@@ -105,5 +102,5 @@ finally
 public partial class Program
 {
     public static readonly string Namespace = "ASC.ClearEvents";
-    public static readonly string AppName = Namespace.Substring(Namespace.LastIndexOf('.') + 1);
+    public static readonly string AppName = Namespace[(Namespace.LastIndexOf('.') + 1)..];
 }

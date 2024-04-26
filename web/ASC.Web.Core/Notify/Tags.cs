@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -43,11 +43,8 @@ public static class Tags
     public const string InviteLink = "InviteLink";
     public const string Date = "Date";
     public const string IP = "IP";
-    public const string WebStudioLink = "WebStudioLink";
     public const string AuthorLink = "AuthorLink";
     public const string Activities = "Activities";
-    public const string BackupUrl = "BackupUrl";
-    public const string BackupHours = "BackupHours";
 
     public const string DeactivateUrl = "DeactivateUrl";
     public const string ActivateUrl = "ActivateUrl";
@@ -88,10 +85,6 @@ public static class CommonTags
     public const string VirtualRootPath = "__VirtualRootPath";
 
     public const string ProductID = "__ProductID";
-
-    public const string ModuleID = "__ModuleID";
-
-    public const string ProductUrl = "__ProductUrl";
 
     public const string DateTime = "__DateTime";
 

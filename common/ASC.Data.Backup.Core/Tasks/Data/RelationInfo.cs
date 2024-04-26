@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,15 +33,15 @@ public enum RelationImportance
 }
 
 [DebuggerDisplay("({ParentTable},{ParentColumn})->({ChildTable},{ChildColumn})")]
-public class RelationInfo
+public class RelationInfo(string parentTable, string parentColumn, string childTable, string childColumn, Type parentModule, Func<DataRowInfo, bool> collisionResolver, RelationImportance importance)
 {
-    public string ParentTable { get; private set; }
-    public string ParentColumn { get; private set; }
-    public string ChildTable { get; private set; }
-    public string ChildColumn { get; private set; }
-    public Type ParentModule { get; private set; }
-    public RelationImportance Importance { get; private set; }
-    public Func<DataRowInfo, bool> CollisionResolver { get; private set; }
+    public string ParentTable { get; private set; } = parentTable;
+    public string ParentColumn { get; private set; } = parentColumn;
+    public string ChildTable { get; private set; } = childTable;
+    public string ChildColumn { get; private set; } = childColumn;
+    public Type ParentModule { get; private set; } = parentModule;
+    public RelationImportance Importance { get; private set; } = importance;
+    public Func<DataRowInfo, bool> CollisionResolver { get; private set; } = collisionResolver;
 
 
     public RelationInfo(string parentTable, string parentColumn, string childTable, string childColumn)
@@ -55,17 +55,6 @@ public class RelationInfo
 
     public RelationInfo(string parentTable, string parentColumn, string childTable, string childColumn, Type parentModule, Func<DataRowInfo, bool> collisionResolver)
         : this(parentTable, parentColumn, childTable, childColumn, parentModule, collisionResolver, RelationImportance.Normal) { }
-
-    public RelationInfo(string parentTable, string parentColumn, string childTable, string childColumn, Type parentModule, Func<DataRowInfo, bool> collisionResolver, RelationImportance importance)
-    {
-        ParentTable = parentTable;
-        ParentColumn = parentColumn;
-        ChildTable = childTable;
-        ChildColumn = childColumn;
-        ParentModule = parentModule;
-        CollisionResolver = collisionResolver;
-        Importance = importance;
-    }
 
     public bool FitsForTable(string tableName)
     {

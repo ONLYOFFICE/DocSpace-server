@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,20 +27,11 @@
 namespace ASC.Web.Studio.Core;
 
 [Scope]
-public class FileSizeComment
+public class FileSizeComment(SetupInfo setupInfo)
 {
-    private readonly TenantExtra _tenantExtra;
-    private readonly SetupInfo _setupInfo;
-
-    public FileSizeComment(TenantExtra tenantExtra, SetupInfo setupInfo)
-    {
-        _tenantExtra = tenantExtra;
-        _setupInfo = setupInfo;
-    }
-
     public string FileImageSizeExceptionString
     {
-        get { return GetFileSizeExceptionString(_setupInfo.MaxImageUploadSize); }
+        get { return GetFileSizeExceptionString(setupInfo.MaxImageUploadSize); }
     }
 
     public static string GetFileSizeExceptionString(long size)
@@ -48,17 +39,14 @@ public class FileSizeComment
         return $"{Resource.FileSizeMaxExceed} ({FilesSizeToString(size)}).";
     }
 
-    public static string GetPersonalFreeSpaceExceptionString(long size)
+    private static string GetRoomFreeSpaceExceptionString(long size)
     {
-        return $"{Resource.PersonalFreeSpaceException} ({FilesSizeToString(size)}).";
+        return $"{Resource.RoomFreeSpaceException} ({FilesSizeToString(size)}).";
     }
 
-    /// <summary>
-    /// The maximum file size is exceeded (1 MB).
-    /// </summary>
-    public Exception FileImageSizeException
+    private static string GetUserFreeSpaceExceptionString(long size)
     {
-        get { return new TenantQuotaException(FileImageSizeExceptionString); }
+        return $"{Resource.UserFreeSpaceException} ({FilesSizeToString(size)}).";
     }
 
     public static Exception GetFileSizeException(long size)
@@ -66,72 +54,16 @@ public class FileSizeComment
         return new TenantQuotaException(GetFileSizeExceptionString(size));
     }
 
-    public static Exception GetPersonalFreeSpaceException(long size)
+    public static Exception GetRoomFreeSpaceException(long size)
     {
-        return new TenantQuotaException(GetPersonalFreeSpaceExceptionString(size));
+        return new TenantQuotaException(GetRoomFreeSpaceExceptionString(size));
     }
 
-    /// <summary>
-    /// The maximum file size is exceeded (25 MB).
-    /// </summary>
-    public async Task<Exception> GetFileSizeExceptionAsync()
+    public static Exception GetUserFreeSpaceException(long size)
     {
-        return new TenantQuotaException(await GetFileSizeExceptionStringAsync());
+        return new TenantQuotaException(GetUserFreeSpaceExceptionString(size));
     }
-
-    public async Task<string> GetFileSizeExceptionStringAsync()
-    {
-        return GetFileSizeExceptionString(await _tenantExtra.GetMaxUploadSizeAsync());
-    }
-
-    /// <summary>
-    /// Get note about maximum file size
-    /// </summary>
-    /// <returns>Note: the file size cannot exceed 25 MB</returns>
-    public async Task<string> GetFileSizeNoteAsync()
-    {
-        return await GetFileSizeNoteAsync(true);
-    }
-
-    /// <summary>
-    /// Get note about maximum file size
-    /// </summary>
-    /// <param name="withHtmlStrong">Highlight a word about size</param>
-    /// <returns>Note: the file size cannot exceed 25 MB</returns>
-    public async Task<string> GetFileSizeNoteAsync(bool withHtmlStrong)
-    {
-        return await GetFileSizeNoteAsync(Resource.FileSizeNote, withHtmlStrong);
-    }
-
-    /// <summary>
-    /// Get note about maximum file size
-    /// </summary>
-    /// <param name="note">Resource fromat of note</param>
-    /// <param name="withHtmlStrong">Highlight a word about size</param>
-    /// <returns>Note: the file size cannot exceed 25 MB</returns>
-    public async Task<string> GetFileSizeNoteAsync(string note, bool withHtmlStrong)
-    {
-        return
-            string.Format(note,
-                          FilesSizeToString(await _tenantExtra.GetMaxUploadSizeAsync()),
-                          withHtmlStrong ? "<strong>" : string.Empty,
-                          withHtmlStrong ? "</strong>" : string.Empty);
-    }
-
-    /// <summary>
-    /// Get note about maximum file size of image
-    /// </summary>
-    /// <param name="note">Resource fromat of note</param>
-    /// <param name="withHtmlStrong">Highlight a word about size</param>
-    /// <returns>Note: the file size cannot exceed 1 MB</returns>
-    public string GetFileImageSizeNote(string note, bool withHtmlStrong)
-    {
-        return
-            string.Format(note,
-                          FilesSizeToString(_setupInfo.MaxImageUploadSize),
-                          withHtmlStrong ? "<strong>" : string.Empty,
-                          withHtmlStrong ? "</strong>" : string.Empty);
-    }
+    
 
     /// <summary>
     /// Generates a string the file size
@@ -141,8 +73,7 @@ public class FileSizeComment
     public static string FilesSizeToString(long size)
     {
         var sizeNames = !string.IsNullOrEmpty(Resource.FileSizePostfix) ? 
-            Resource.FileSizePostfix.Split(',', '،') : 
-            new[] { "bytes", "KB", "MB", "GB", "TB" };
+            Resource.FileSizePostfix.Split(',', '،') : ["bytes", "KB", "MB", "GB", "TB"];
         var power = 0;
 
         double resultSize = size;
@@ -152,6 +83,6 @@ public class FileSizeComment
             power = power < sizeNames.Length ? power : sizeNames.Length - 1;
             resultSize /= Math.Pow(1024d, power);
         }
-        return string.Format("{0:#,0.##} {1}", resultSize, sizeNames[power]);
+        return $"{resultSize:#,0.##} {sizeNames[power]}";
     }
 }

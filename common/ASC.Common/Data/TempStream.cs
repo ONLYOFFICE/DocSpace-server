@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,23 +27,16 @@
 namespace ASC.Common;
 
 [Singleton]
-public class TempStream
+public class TempStream(TempPath tempPath)
 {
-    private readonly TempPath _tempPath;
-
-    public TempStream(TempPath tempPath)
-    {
-        _tempPath = tempPath;
-    }
-
-    public Stream GetBuffered(Stream srcStream)
+    public async Task<Stream> GetBufferedAsync(Stream srcStream)
     {
         ArgumentNullException.ThrowIfNull(srcStream);
         if (!srcStream.CanSeek || srcStream.CanTimeout)
         {
             //Buffer it
             var memStream = Create();
-            srcStream.CopyTo(memStream);
+            await srcStream.CopyToAsync(memStream);
             memStream.Position = 0;
 
             return memStream;
@@ -54,12 +47,7 @@ public class TempStream
 
     public Stream Create()
     {
-        return Create(out _);
-    }
-
-    public Stream Create(out string path, string ext = "")
-    {
-        path = _tempPath.GetTempFileName(ext);
+        var path = tempPath.GetTempFileName();
         return new FileStream(path, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read, 4096, FileOptions.DeleteOnClose);
     }
 }

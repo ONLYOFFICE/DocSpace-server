@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,35 +26,22 @@
 
 namespace ASC.Web.Core.Users.Import;
 
-public class TextFileUserImporter : IUserImporter
+public class TextFileUserImporter(Stream stream) : IUserImporter
 {
-    private readonly Stream _stream;
-
     protected Dictionary<string, string> NameMapping { get; init; }
 
-    protected IList<string> ExcludeList { get; private set; }
+    protected IList<string> ExcludeList { get; private set; } = new List<string> { "ID", "Status" };
 
 
-    public Encoding Encoding { get; set; }
+    public Encoding Encoding { get; set; } = Encoding.UTF8;
 
-    public char Separator { get; set; }
+    public char Separator { get; set; } = ';';
 
     public bool HasHeader { get; set; }
 
-    public string TextDelmiter { get; set; }
+    public string TextDelmiter { get; set; } = "\"";
 
     public string DefaultHeader { get; set; }
-
-
-    public TextFileUserImporter(Stream stream)
-    {
-        this._stream = stream;
-        Encoding = Encoding.UTF8;
-        Separator = ';';
-        HasHeader = false;
-        TextDelmiter = "\"";
-        ExcludeList = new List<string> { "ID", "Status" };
-    }
 
 
     public virtual IEnumerable<UserInfo> GetDiscoveredUsers()
@@ -62,9 +49,9 @@ public class TextFileUserImporter : IUserImporter
         var users = new List<UserInfo>();
 
         var fileLines = new List<string>();
-        using (var reader = new StreamReader(_stream, Encoding, true))
+        using (var reader = new StreamReader(stream, Encoding, true))
         {
-            fileLines.AddRange(reader.ReadToEnd().Split(new[] { Environment.NewLine, "\n", "\r\n" }, StringSplitOptions.RemoveEmptyEntries));
+            fileLines.AddRange(reader.ReadToEnd().Split([Environment.NewLine, "\n", "\r\n"], StringSplitOptions.RemoveEmptyEntries));
         }
 
         if (!string.IsNullOrEmpty(DefaultHeader))
@@ -105,7 +92,7 @@ public class TextFileUserImporter : IUserImporter
                 var value = ConvertFromString(dataFields[j], propinfo.PropertyType);
                 if (value != null)
                 {
-                    propinfo.SetValue(exportedUser, value, Array.Empty<object>());
+                    propinfo.SetValue(exportedUser, value, []);
                 }
             }
         }
@@ -143,10 +130,7 @@ public class TextFileUserImporter : IUserImporter
             foreach (var info in infos)
             {
                 var propertyField = field.Trim();
-                if (NameMapping != null)
-                {
-                    NameMapping.TryGetValue(propertyField, out propertyField);
-                }
+                NameMapping?.TryGetValue(propertyField, out propertyField);
                 if (!string.IsNullOrEmpty(propertyField) && !ExcludeList.Contains(propertyField) && propertyField.Equals(info.Name, StringComparison.OrdinalIgnoreCase))
                 {
                     //Add to map
@@ -165,6 +149,6 @@ public class TextFileUserImporter : IUserImporter
     private static object ConvertFromString(string value, Type type)
     {
         var converter = TypeDescriptor.GetConverter(type);
-        return converter != null && converter.CanConvertFrom(typeof(string)) ? converter.ConvertFromString(value) : null;
+        return converter.CanConvertFrom(typeof(string)) ? converter.ConvertFromString(value) : null;
     }
 }

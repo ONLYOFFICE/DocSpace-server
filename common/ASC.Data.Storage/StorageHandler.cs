@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,31 +31,18 @@ using Microsoft.Extensions.Primitives;
 
 namespace ASC.Data.Storage.DiscStorage;
 
-public class StorageHandler
+public class StorageHandler(string storagePath, string module, string domain, bool checkAuth = true)
 {
-    private readonly string _path;
-    private readonly string _module;
-    private readonly string _domain;
-    private readonly bool _checkAuth;
-
-    public StorageHandler(string path, string module, string domain, bool checkAuth = true)
+    public async Task InvokeAsync(HttpContext context, TenantManager tenantManager, SecurityContext securityContext, StorageFactory storageFactory, EmailValidationKeyProvider emailValidationKeyProvider, UserManager userManager)
     {
-        _path = path;
-        _module = module;
-        _domain = domain;
-        _checkAuth = checkAuth;
-    }
-
-    public async ValueTask InvokeAsync(HttpContext context, TenantManager tenantManager, SecurityContext securityContext, StorageFactory storageFactory, EmailValidationKeyProvider emailValidationKeyProvider)
-    {
-        var storage = await storageFactory.GetStorageAsync((await tenantManager.GetCurrentTenantAsync()).Id, _module);
-        var path = CrossPlatform.PathCombine(_path, GetRouteValue("pathInfo", context).Replace('/', Path.DirectorySeparatorChar));
+        var storage = await storageFactory.GetStorageAsync((await tenantManager.GetCurrentTenantAsync()).Id, module);
+        var path = CrossPlatform.PathCombine(storagePath, GetRouteValue("pathInfo", context).Replace('/', Path.DirectorySeparatorChar));
         var header = context.Request.Query[Constants.QueryHeader].FirstOrDefault() ?? "";
         var auth = context.Request.Query[Constants.QueryAuth].FirstOrDefault() ?? "";
-        var storageExpire = storage.GetExpire(_domain);
+        var storageExpire = storage.GetExpire(domain);
 
-        if (_checkAuth && !securityContext.IsAuthenticated && !await SecureHelper.CheckSecureKeyHeader(header, path, emailValidationKeyProvider) 
-            || _module == "backup" && !securityContext.IsAuthenticated)
+        if (checkAuth && !securityContext.IsAuthenticated && !await SecureHelper.CheckSecureKeyHeader(header, path, emailValidationKeyProvider) 
+            || module == "backup" && (!securityContext.IsAuthenticated || !(await userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID))))
         {
             context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
             return;
@@ -77,7 +64,7 @@ public class StorageHandler
             }
         }
 
-        if (!await storage.IsFileAsync(_domain, path))
+        if (!await storage.IsFileAsync(domain, path))
         {
             context.Response.StatusCode = (int)HttpStatusCode.NotFound;
             return;
@@ -92,11 +79,11 @@ public class StorageHandler
         var headers = header.Length > 0 ? header.Split('&').Select(HttpUtility.UrlDecode) : Array.Empty<string>();
 
         const int bigSize = 5 * 1024 * 1024;
-        var fileSize = await storage.GetFileSizeAsync(_domain, path);
+        var fileSize = await storage.GetFileSizeAsync(domain, path);
 
         if (storage.IsSupportInternalUri && bigSize < fileSize)
         {
-            var uri = await storage.GetInternalUriAsync(_domain, path, TimeSpan.FromMinutes(15), headers);
+            var uri = await storage.GetInternalUriAsync(domain, path, TimeSpan.FromSeconds(15), headers);
 
             //TODO
             //context.Response.Cache.SetAllowResponseInBrowserHistory(false);
@@ -124,7 +111,7 @@ public class StorageHandler
         
         string encoding = null;
 
-        if (storage is DiscDataStore && await storage.IsFileAsync(_domain, path + ".gz"))
+        if (storage is DiscDataStore && await storage.IsFileAsync(domain, path + ".gz"))
         {
             path += ".gz";
             encoding = "gzip";
@@ -139,7 +126,7 @@ public class StorageHandler
                 continue;
             }
 
-            context.Response.Headers[toCopy] = h.Substring(toCopy.Length + 1);
+            context.Response.Headers[toCopy] = h[(toCopy.Length + 1)..];
         }
                 
         try
@@ -163,7 +150,7 @@ public class StorageHandler
         context.Response.Headers["Connection"] = "Keep-Alive";
         context.Response.Headers["Content-Length"] = length.ToString(CultureInfo.InvariantCulture);
 
-        await using (var stream = await storage.GetReadStreamAsync(_domain, path, offset))
+        await using (var stream = await storage.GetReadStreamAsync(domain, path, offset))
         {
             var responseBufferingFeature = context.Features.Get<IHttpResponseBodyFeature>();
             responseBufferingFeature?.DisableBuffering();
@@ -177,10 +164,7 @@ public class StorageHandler
 
     private long ProcessRangeHeader(HttpContext context, long fullLength, ref long offset)
     {
-        if (context == null)
-        {
-            throw new ArgumentNullException(nameof(context));
-        }
+        ArgumentNullException.ThrowIfNull(context);
 
         if (context.Request.Headers["Range"] == StringValues.Empty)
         {
@@ -191,7 +175,7 @@ public class StorageHandler
 
         var range = context.Request.Headers["Range"][0].Split('=', '-');
         offset = Convert.ToInt64(range[1]);
-        if (range.Count() > 2 && !string.IsNullOrEmpty(range[2]))
+        if (range.Length > 2 && !string.IsNullOrEmpty(range[2]))
         {
             endOffset = Convert.ToInt64(range[2]);
         }
@@ -202,7 +186,10 @@ public class StorageHandler
 
         var length = endOffset - offset + 1;
 
-        if (length <= 0) throw new HttpException(HttpStatusCode.BadRequest, "Wrong Range header");
+        if (length <= 0)
+        {
+            throw new HttpException(HttpStatusCode.BadRequest, "Wrong Range header");
+        }
 
         if (length < fullLength)
         {

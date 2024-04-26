@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -102,6 +102,10 @@ public class FileDto<T> : FileEntryDto<T>
     /// <type>System.Boolean, System</type>
     public bool DenyDownload { get; set; }
 
+    /// <summary>Is there a draft or not</summary>
+    /// <type>System.Boolean, System</type>
+    public bool? HasDraft { get; set; }
+
     /// <summary>Denies file sharing or not</summary>
     /// <type>System.Boolean, System</type>
     public bool DenySharing { get; set; }
@@ -109,7 +113,10 @@ public class FileDto<T> : FileEntryDto<T>
     /// <summary>File accessibility</summary>
     /// <type>System.Collections.IDictionary{ASC.Files.Core.Helpers.Accessibility, System.Boolean}, System.Collections</type>
     public IDictionary<Accessibility, bool> ViewAccessibility { get; set; }
-
+    public IDictionary<string, bool> AvailableExternalRights { get; set; }
+    public string RequestToken { get; set; }
+    public ApiDateTime LastOpened { get; set; }
+    
     public static FileDto<int> GetSample()
     {
         return new FileDto<int>
@@ -136,19 +143,7 @@ public class FileDto<T> : FileEntryDto<T>
 }
 
 [Scope]
-public class FileDtoHelper : FileEntryDtoHelper
-{
-    private readonly AuthContext _authContext;
-    private readonly IDaoFactory _daoFactory;
-    private readonly GlobalFolderHelper _globalFolderHelper;
-    private readonly CommonLinkUtility _commonLinkUtility;
-    private readonly FilesLinkUtility _filesLinkUtility;
-    private readonly FileUtility _fileUtility;
-    private readonly BadgesSettingsHelper _badgesSettingsHelper;
-    private readonly ExternalShare _externalShare;
-
-    public FileDtoHelper(
-        ApiDateTimeHelper apiDateTimeHelper,
+public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         EmployeeDtoHelper employeeWrapperHelper,
         AuthContext authContext,
         IDaoFactory daoFactory,
@@ -160,65 +155,51 @@ public class FileDtoHelper : FileEntryDtoHelper
         FileSharingHelper fileSharingHelper,
         BadgesSettingsHelper badgesSettingsHelper,
         FilesSettingsHelper filesSettingsHelper,
-        FileDateTime fileDateTime, 
+        FileDateTime fileDateTime,
         ExternalShare externalShare)
-        : base(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime)
-    {
-        _authContext = authContext;
-        _daoFactory = daoFactory;
-        _globalFolderHelper = globalFolderHelper;
-        _commonLinkUtility = commonLinkUtility;
-        _filesLinkUtility = filesLinkUtility;
-        _fileUtility = fileUtility;
-        _badgesSettingsHelper = badgesSettingsHelper;
-        _externalShare = externalShare;
-    }
+    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime) 
+{
+    private readonly ApiDateTimeHelper _apiDateTimeHelper = apiDateTimeHelper;
 
-    public async Task<FileDto<T>> GetAsync<T>(File<T> file, List<Tuple<FileEntry<T>, bool>> folders = null)
+    public async Task<FileDto<T>> GetAsync<T>(File<T> file, int foldersCount = 0, string order = null)
     {
-        var result = await GetFileWrapperAsync(file);
+        var result = await GetFileWrapperAsync(file, foldersCount, order);
 
         result.FolderId = file.ParentId;
-        if (file.RootFolderType == FolderType.USER
-            && !Equals(file.RootCreateBy, _authContext.CurrentAccount.ID))
+        
+        if (file.RootFolderType == FolderType.USER && !Equals(file.RootCreateBy, authContext.CurrentAccount.ID))
         {
-            result.RootFolderType = FolderType.SHARE;
-            var folderDao = _daoFactory.GetFolderDao<T>();
-
-            if (folders != null)
-            {
-                var folderWithRight = folders.Find(f => f.Item1.Id.Equals(file.ParentId));
-                if (folderWithRight == null || !folderWithRight.Item2)
-                {
-                    result.FolderId = await _globalFolderHelper.GetFolderShareAsync<T>();
-                }
-            }
-            else
-            {
-                FileEntry<T> parentFolder = await folderDao.GetFolderAsync(file.ParentId);
-                if (!await _fileSecurity.CanReadAsync(parentFolder))
-                {
-                    result.FolderId = await _globalFolderHelper.GetFolderShareAsync<T>();
-                }
-            }
+            result.RootFolderType = FolderType.Recent;
+            result.FolderId = await _globalFolderHelper.GetFolderRecentAsync<T>();
         }
-
-        result.ViewAccessibility = await _fileUtility.GetAccessibility(file);
-
+        
+        result.ViewAccessibility = await fileUtility.GetAccessibility(file);
+        result.AvailableExternalRights = _fileSecurity.GetFileAccesses(file, SubjectType.ExternalLink);
+        
         return result;
     }
 
-    private async Task<FileDto<T>> GetFileWrapperAsync<T>(File<T> file)
+    private async Task<FileDto<T>> GetFileWrapperAsync<T>(File<T> file, int foldersCount, string order)
     {
         var result = await GetAsync<FileDto<T>, T>(file);
-        var isEnabledBadges = await _badgesSettingsHelper.GetEnabledForCurrentUserAsync();
+        var isEnabledBadges = await badgesSettingsHelper.GetEnabledForCurrentUserAsync();
+
+        var extension = FileUtility.GetFileExtension(file.Title);
+        var fileType = FileUtility.GetFileTypeByExtention(extension);
+
+        if (fileType == FileType.Pdf)
+        {
+            var linkDao = daoFactory.GetLinkDao();
+            var linkedId = await linkDao.GetLinkedAsync(file.Id.ToString());
+            result.HasDraft = linkedId != null;
+        }
         
-        result.FileExst = FileUtility.GetFileExtension(file.Title);
-        result.FileType = FileUtility.GetFileTypeByExtention(result.FileExst);
+        result.FileExst = extension;
+        result.FileType = fileType;
         result.Version = file.Version;
         result.VersionGroup = file.VersionGroup;
         result.ContentLength = file.ContentLengthString;
-        result.FileStatus = file.FileStatus;
+        result.FileStatus = await file.GetFileStatus();
         result.Mute = !isEnabledBadges;
         result.PureContentLength = file.ContentLength.NullIfDefault();
         result.Comment = file.Comment;
@@ -228,12 +209,25 @@ public class FileDtoHelper : FileEntryDtoHelper
         result.DenyDownload = file.DenyDownload;
         result.DenySharing = file.DenySharing;
         result.Access = file.Access;
+        result.LastOpened = _apiDateTimeHelper.Get(file.LastOpened);
+
+        if (file.Order != 0)
+        {
+            file.Order += foldersCount;
+            result.Order = !string.IsNullOrEmpty(order) ? string.Join('.', order, file.Order) : file.Order.ToString();
+        }
 
         try
         {
-            result.ViewUrl = _externalShare.GetUrlWithShare(_commonLinkUtility.GetFullAbsolutePath(file.DownloadUrl));
+            if (file.ShareRecord is { SubjectType: SubjectType.PrimaryExternalLink or SubjectType.ExternalLink })
+            {
+                result.RequestToken = await externalShare.CreateShareKeyAsync(file.ShareRecord.Subject);
+            }
+            
+            result.ViewUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(file.DownloadUrl), result.RequestToken);
 
-            result.WebUrl = _externalShare.GetUrlWithShare(_commonLinkUtility.GetFullAbsolutePath(_filesLinkUtility.GetFileWebPreviewUrl(_fileUtility, file.Title, file.Id, file.Version)));
+            result.WebUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id, file.Version)),
+                result.RequestToken);
 
             result.ThumbnailStatus = file.ThumbnailStatus;
 
@@ -241,7 +235,9 @@ public class FileDtoHelper : FileEntryDtoHelper
 
             if (file.ThumbnailStatus == Thumbnail.Created)
             {
-                result.ThumbnailUrl = _externalShare.GetUrlWithShare(_commonLinkUtility.GetFullAbsolutePath(_filesLinkUtility.GetFileThumbnailUrl(file.Id, file.Version)) + $"&hash={cacheKey}"); 
+                result.ThumbnailUrl =
+                    externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileThumbnailUrl(file.Id, file.Version)) +
+                                                              $"&hash={cacheKey}", result.RequestToken);
             }
         }
         catch (Exception)

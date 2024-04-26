@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,34 +27,32 @@
 namespace ASC.Web.Files;
 
 [Singleton(Additional = typeof(UsersQuotaOperationExtension))]
-public class UsersQuotaSyncOperation
+public class UsersQuotaSyncOperation(IServiceProvider serviceProvider, IDistributedTaskQueueFactory queueFactory)
 {
     public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "userQuotaOperation";
 
-    private readonly DistributedTaskQueue _progressQueue;
-
-    private readonly IServiceProvider _serviceProvider;
+    private readonly DistributedTaskQueue _progressQueue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
 
 
-    public void RecalculateQuota(Tenant tenant)
+    public async Task RecalculateQuota(Tenant tenant)
     {
-        var item = _progressQueue.GetAllTasks<UsersQuotaSyncJob>().FirstOrDefault(t => t.TenantId == tenant.Id);
+        var item = (await _progressQueue.GetAllTasks<UsersQuotaSyncJob>()).FirstOrDefault(t => t.TenantId == tenant.Id);
         if (item is { IsCompleted: true })
         {
-            _progressQueue.DequeueTask(item.Id);
+            await _progressQueue.DequeueTask(item.Id);
             item = null;
         }
 
         if (item == null)
         {
-            item = _serviceProvider.GetRequiredService<UsersQuotaSyncJob>();
+            item = serviceProvider.GetRequiredService<UsersQuotaSyncJob>();
             item.InitJob(tenant);
-            _progressQueue.EnqueueTask(item.RunJobAsync, item);
+            await _progressQueue.EnqueueTask(item.RunJobAsync, item);
         }
     }
-    public TaskProgressDto CheckRecalculateQuota(Tenant tenant)
+    public async Task<TaskProgressDto> CheckRecalculateQuota(Tenant tenant)
     {
-        var item = _progressQueue.GetAllTasks<UsersQuotaSyncJob>().FirstOrDefault(t => t.TenantId == tenant.Id);
+        var item = (await _progressQueue.GetAllTasks<UsersQuotaSyncJob>()).FirstOrDefault(t => t.TenantId == tenant.Id);
         var progress = new TaskProgressDto();
 
         if (item == null)
@@ -68,19 +66,11 @@ public class UsersQuotaSyncOperation
 
         if (item.IsCompleted)
         {
-            _progressQueue.DequeueTask(item.Id);
+            await _progressQueue.DequeueTask(item.Id);
         }
 
         return progress;
     }
-
-
-    public UsersQuotaSyncOperation(IServiceProvider serviceProvider, IDistributedTaskQueueFactory queueFactory)
-    {
-        _serviceProvider = serviceProvider;
-        _progressQueue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
-    }
-
 
 
     public static class UsersQuotaOperationExtension
@@ -92,10 +82,8 @@ public class UsersQuotaSyncOperation
     }
 }
 
-public class UsersQuotaSyncJob : DistributedTaskProgress
+public class UsersQuotaSyncJob(IServiceScopeFactory serviceScopeFactory, FilesSpaceUsageStatManager filesSpaceUsageStatManager, QuotaSyncOperation quotaSyncOperation) : DistributedTaskProgress
 {
-    private readonly IServiceScopeFactory _serviceScopeFactory;
-
     private int? _tenantId;
     public int TenantId
     {
@@ -110,11 +98,6 @@ public class UsersQuotaSyncJob : DistributedTaskProgress
         }
     }
 
-    public UsersQuotaSyncJob(IServiceScopeFactory serviceScopeFactory)
-    {
-        _serviceScopeFactory = serviceScopeFactory;
-    }
-
     public void InitJob(Tenant tenant)
     {
         TenantId = tenant.Id;
@@ -124,18 +107,23 @@ public class UsersQuotaSyncJob : DistributedTaskProgress
     {
         try
         {
-           await using var scope = _serviceScopeFactory.CreateAsyncScope();
+            await using var scope = serviceScopeFactory.CreateAsyncScope();
 
             var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
+            var settingsManager = scope.ServiceProvider.GetRequiredService<SettingsManager>();
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager>();
             var authentication = scope.ServiceProvider.GetRequiredService<AuthManager>();
             var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
-            var webItemManagerSecurity = scope.ServiceProvider.GetRequiredService<WebItemManagerSecurity>();
 
-            await tenantManager.SetCurrentTenantAsync(TenantId);
+            var tenant = await tenantManager.SetCurrentTenantAsync(TenantId);
+
+            await quotaSyncOperation.RecalculateQuota(tenant);
+
+            var tenantQuotaSettings = await settingsManager.LoadAsync<TenantQuotaSettings>();
+            tenantQuotaSettings.LastRecalculateDate = DateTime.UtcNow;
+            await settingsManager.SaveAsync(tenantQuotaSettings);
 
             var users = await userManager.GetUsersAsync();
-            var webItems = webItemManagerSecurity.GetItems(Web.Core.WebZones.WebZoneType.All, ItemAvailableState.All);
 
             foreach (var user in users)
             {
@@ -146,25 +134,25 @@ public class UsersQuotaSyncJob : DistributedTaskProgress
                 }
 
                 Percentage += 1.0 * 100 / users.Length;
-                PublishChanges();
+                await PublishChanges();
 
                 var account = await authentication.GetAccountByIDAsync(TenantId, user.Id);
                 await securityContext.AuthenticateMeAsync(account);
 
-                foreach (var item in webItems)
-                {
-                    if (item.ID == WebItemManager.DocumentsProductID)
-                    {
-                        var manager = item.Context.SpaceUsageStatManager as IUserSpaceUsage;
-                        if (manager == null)
-                        {
-                            continue;
-                        }
-                        await manager.RecalculateUserQuota(TenantId, user.Id);
-                    }
-                }
+                await filesSpaceUsageStatManager.RecalculateUserQuota(TenantId, user.Id);
 
             }
+
+            var userQuotaSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
+            userQuotaSettings.LastRecalculateDate = DateTime.UtcNow;
+            await settingsManager.SaveAsync(userQuotaSettings);
+
+            await filesSpaceUsageStatManager.RecalculateFoldersUsedSpace(TenantId);
+
+            var roomQuotaSettings = await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
+            roomQuotaSettings.LastRecalculateDate = DateTime.UtcNow;
+            await settingsManager.SaveAsync(roomQuotaSettings);
+
         }
         catch (Exception ex)
         {
@@ -175,6 +163,7 @@ public class UsersQuotaSyncJob : DistributedTaskProgress
         {
             IsCompleted = true;
         }
-        PublishChanges();
+        
+        await PublishChanges();
     }
 }

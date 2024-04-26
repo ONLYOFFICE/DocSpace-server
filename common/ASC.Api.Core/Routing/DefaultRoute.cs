@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,7 +28,7 @@ namespace ASC.Web.Api.Routing;
 
 public class DefaultRouteAttribute : RouteAttribute
 {
-    public static string BaseUrl { get; set; }
+    private static string BaseUrl { get; }
 
     static DefaultRouteAttribute()
     {
@@ -36,5 +36,5 @@ public class DefaultRouteAttribute : RouteAttribute
     }
 
     public DefaultRouteAttribute() : base(BaseUrl) { }
-    public DefaultRouteAttribute(string template) : base($"{BaseUrl}{template}") { }
+    public DefaultRouteAttribute(string template) : base($"{BaseUrl}/{template}") { }
 }

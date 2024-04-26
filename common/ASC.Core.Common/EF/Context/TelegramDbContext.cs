@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,14 +26,9 @@
 
 namespace ASC.Core.Common.EF.Context;
 
-public class TelegramDbContext : DbContext
+public class TelegramDbContext(DbContextOptions<TelegramDbContext> options) : DbContext(options)
 {
     public DbSet<TelegramUser> Users { get; set; }
-
-    public TelegramDbContext(DbContextOptions<TelegramDbContext> options) : base(options)
-    {
-
-    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

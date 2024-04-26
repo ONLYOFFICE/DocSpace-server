@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,16 +34,11 @@ namespace ASC.Files.Api;
 [DefaultRoute]
 [ApiController]
 [ControllerName("files")]
-public abstract class ApiControllerBase : ControllerBase
+public abstract class ApiControllerBase(FolderDtoHelper folderDtoHelper, FileDtoHelper fileDtoHelper)
+    : ControllerBase
 {
-    protected readonly FolderDtoHelper _folderDtoHelper;
-    protected readonly FileDtoHelper _fileDtoHelper;
-
-    protected ApiControllerBase(FolderDtoHelper folderDtoHelper, FileDtoHelper fileDtoHelper)
-    {
-        _folderDtoHelper = folderDtoHelper;
-        _fileDtoHelper = fileDtoHelper;
-    }
+    protected readonly FolderDtoHelper _folderDtoHelper = folderDtoHelper;
+    protected readonly FileDtoHelper _fileDtoHelper = fileDtoHelper;
 
     protected async Task<FileEntryDto> GetFileEntryWrapperAsync(FileEntry r)
     {

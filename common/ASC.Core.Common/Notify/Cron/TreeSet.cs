@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -85,7 +85,7 @@ public class TreeSet : ArrayList, ISortedSet
 
     public ISortedSet TailSet(object limit)
     {
-        ISortedSet newList = new TreeSet();
+        var newList = new TreeSet();
         var i = 0;
         while ((i < Count) && (Comparator.Compare(this[i], limit) < 0))
         {

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,38 +27,21 @@
 namespace ASC.Files.Api;
 
 [ConstraintRoute("int")]
-public class MasterFormControllerInternal : MasterFormController<int>
-{
-    public MasterFormControllerInternal(
-        FileStorageService fileStorageServiceString,
+public class MasterFormControllerInternal(FileStorageService fileStorageServiceString,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper)
-        : base(fileStorageServiceString, folderDtoHelper, fileDtoHelper)
-    {
-    }
-}
+    : MasterFormController<int>(fileStorageServiceString, folderDtoHelper, fileDtoHelper);
 
-public class MasterFormControllerThirdparty : MasterFormController<string>
-{
-    public MasterFormControllerThirdparty(
-        FileStorageService fileStorageService,
+public class MasterFormControllerThirdparty(FileStorageService fileStorageService,
         FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper) : base(fileStorageService, folderDtoHelper, fileDtoHelper)
-    {
-    }
-}
+        FileDtoHelper fileDtoHelper)
+    : MasterFormController<string>(fileStorageService, folderDtoHelper, fileDtoHelper);
 
-public abstract class MasterFormController<T> : ApiControllerBase
-{
-    private readonly FileStorageService _fileStorageService;
-
-    public MasterFormController(FileStorageService fileStorageService,
+public abstract class MasterFormController<T>(FileStorageService fileStorageService,
         FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper) : base(folderDtoHelper, fileDtoHelper)
+        FileDtoHelper fileDtoHelper)
+    : ApiControllerBase(folderDtoHelper, fileDtoHelper)
     {
-        _fileStorageService = fileStorageService;
-    }
-
     /// <summary>
     /// Checks if the current file is a form draft which can be filled out.
     /// </summary>
@@ -69,9 +52,11 @@ public abstract class MasterFormController<T> : ApiControllerBase
     /// <returns type="System.Object, System">Link to the form</returns>
     /// <path>api/2.0/files/masterform/{fileId}/checkfillformdraft</path>
     /// <httpMethod>POST</httpMethod>
+    /// <requiresAuthorization>false</requiresAuthorization>
+    [AllowAnonymous]
     [HttpPost("masterform/{fileId}/checkfillformdraft")]
     public async Task<object> CheckFillFormDraftAsync(T fileId, CheckFillFormDraftRequestDto inDto)
     {
-        return await _fileStorageService.CheckFillFormDraftAsync(fileId, inDto.Version, inDto.Doc, !inDto.RequestEmbedded, inDto.RequestView);
+        return await fileStorageService.CheckFillFormDraftAsync(fileId, inDto.Version, inDto.Doc, !inDto.RequestEmbedded, inDto.RequestView);
     }
 }

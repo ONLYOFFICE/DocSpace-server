@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,14 +31,14 @@ public class NoTextileBlockModifier : BlockModifier
     public override string ModifyLine(string line)
     {
         line = NoTextileEncoder.EncodeNoTextileZones(line, @"(?<=^|\s)<notextile>", @"</notextile>(?=(\s|$)?)");
-        line = NoTextileEncoder.EncodeNoTextileZones(line, @"==", @"==");
+        line = NoTextileEncoder.EncodeNoTextileZones(line, "==", "==");
         return line;
     }
 
     public override string Conclude(string line)
     {
         line = NoTextileEncoder.DecodeNoTextileZones(line, @"(?<=^|\s)<notextile>", @"</notextile>(?=(\s|$)?)");
-        line = NoTextileEncoder.DecodeNoTextileZones(line, @"==", @"==");
+        line = NoTextileEncoder.DecodeNoTextileZones(line, "==", "==");
         return line;
     }
 }

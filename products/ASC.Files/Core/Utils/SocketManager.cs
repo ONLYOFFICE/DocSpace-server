@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,70 +24,60 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Threading.Channels;
+
+using ASC.Core.Billing;
+
 namespace ASC.Web.Files.Utils;
 
-public class SocketManager : SocketServiceClient
+public class SocketManager(
+    ITariffService tariffService,
+    TenantManager tenantManager,
+    ChannelWriter<SocketData> channelWriter,
+    MachinePseudoKeys machinePseudoKeys,
+    IConfiguration configuration,
+    FileDtoHelper filesWrapperHelper,
+    FolderDtoHelper folderDtoHelper,
+    FileSecurity fileSecurity,
+    UserManager userManager)
+    : SocketServiceClient(tariffService, tenantManager, channelWriter, machinePseudoKeys, configuration)
 {
-    private readonly FileDtoHelper _filesWrapperHelper;
-    private readonly FolderDtoHelper _folderDtoHelper;
-    private readonly FileSecurity _fileSecurity;
-    private readonly UserManager _userManager;
-    private readonly TenantManager _tenantManager;
-
     protected override string Hub => "files";
-
-    public SocketManager(
-        ILogger<SocketServiceClient> logger,
-        IHttpClientFactory clientFactory,
-        MachinePseudoKeys machinePseudoKeys,
-        IConfiguration configuration,
-        FileDtoHelper filesWrapperHelper,
-        TenantManager tenantManager,
-        FolderDtoHelper folderDtoHelper,
-        FileSecurity fileSecurity,
-        UserManager userManager) : base(logger, clientFactory, machinePseudoKeys, configuration)
-    {
-        _filesWrapperHelper = filesWrapperHelper;
-        _tenantManager = tenantManager;
-        _folderDtoHelper = folderDtoHelper;
-        _fileSecurity = fileSecurity;
-        _userManager = userManager;
-    }
 
     public async Task StartEditAsync<T>(T fileId)
     {
-        var room = await GetFileRoomAsync(fileId);
+        var room = await FileRoomAsync(fileId);
         await MakeRequest("start-edit", new { room, fileId });
     }
 
     public async Task StopEditAsync<T>(T fileId)
     {
-        var room = await GetFileRoomAsync(fileId);
+        var room = await FileRoomAsync(fileId);
         await MakeRequest("stop-edit", new { room, fileId });
     }
 
-    public async Task CreateFileAsync<T>(File<T> file)
-    {                
-        await MakeRequest("create-file", file, true);
+    public async Task CreateFileAsync<T>(File<T> file, IEnumerable<Guid> users = null)
+    {
+        await MakeRequest("create-file", file, true, users);
     }
 
     public async Task CreateFolderAsync<T>(Folder<T> folder, IEnumerable<Guid> users = null)
-    {         
+    {
         await MakeRequest("create-folder", folder, true, users);
     }
 
     public async Task UpdateFileAsync<T>(File<T> file)
-    {        
+    {
         await MakeRequest("update-file", file, true);
     }
 
     public async Task UpdateFolderAsync<T>(Folder<T> folder)
-    {        
+    {
         await MakeRequest("update-folder", folder, true);
     }
 
     public async Task DeleteFileAsync<T>(File<T> file, Func<Task> action = null)
-    {        
+    {
         await MakeRequest("delete-file", file, action: action);
     }
 
@@ -102,11 +92,11 @@ public class SocketManager : SocketServiceClient
         
         foreach (var g in tags.GroupBy(r => r.EntryId))
         {
-            var room = await GetFileRoomAsync(g.Key);
+            var room = await FileRoomAsync(g.Key);
             result.Add(new { room, fileId = g.Key });
         }
         
-        SendNotAwaitableRequest("mark-as-new-file", result);
+        await MakeRequest("mark-as-new-file", result);
     }
 
     public async Task ExecMarkAsNewFoldersAsync(IEnumerable<Tag> tags)
@@ -115,22 +105,22 @@ public class SocketManager : SocketServiceClient
         
         foreach (var g in tags.GroupBy(r => r.EntryId))
         {
-            var room = await GetFolderRoomAsync(g.Key);
+            var room = await FolderRoomAsync(g.Key);
             result.Add(             
                 new {
                     room,
                     folderId = g.Key,
-                    userIds = g.Select(r => new { owner = r.Owner, count = r.Count}).ToList()
+                    userIds = g.Select(r=> new { owner = r.Owner, count = r.Count}).ToList()
                 });
         }
         
-        SendNotAwaitableRequest("mark-as-new-folder", result);
+        await MakeRequest("mark-as-new-folder", result);
     }
 
     private async Task MakeRequest<T>(string method, FileEntry<T> entry, bool withData = false, IEnumerable<Guid> users = null, Func<Task> action = null)
     {        
-        var room = await GetFolderRoomAsync(entry.ParentId);
-        var whoCanRead = users ?? await GetWhoCanRead(entry);
+        var room = await FolderRoomAsync(entry.FolderIdDisplay);
+        var whoCanRead = users ?? await WhoCanRead(entry);
 
         if (action != null)
         {
@@ -151,19 +141,19 @@ public class SocketManager : SocketServiceClient
                 room, 
                 entry.Id,
                 data,
-                userIds,
+                userIds
             });
         }
     }
 
-    private async Task<string> GetFileRoomAsync<T>(T fileId)
+    private async Task<string> FileRoomAsync<T>(T fileId)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
         return $"{tenantId}-FILE-{fileId}";
     }
 
-    private async Task<string> GetFolderRoomAsync<T>(T folderId)
+    private async Task<string> FolderRoomAsync<T>(T folderId)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
@@ -174,17 +164,21 @@ public class SocketManager : SocketServiceClient
     {
         return entry switch
         {
-            File<T> file => JsonSerializer.Serialize(await _filesWrapperHelper.GetAsync(file), typeof(FileDto<T>), FileEntryDtoContext.Default),
-            Folder<T> folder => JsonSerializer.Serialize(await _folderDtoHelper.GetAsync(folder), typeof(FolderDto<T>), FileEntryDtoContext.Default),
+            File<T> file => JsonSerializer.Serialize(await filesWrapperHelper.GetAsync(file), typeof(FileDto<T>), FileEntryDtoContext.Default),
+            Folder<T> folder => JsonSerializer.Serialize(await folderDtoHelper.GetAsync(folder), typeof(FolderDto<T>), FileEntryDtoContext.Default),
             _ => string.Empty
         };
     }
-    
-    private async Task<IEnumerable<Guid>> GetWhoCanRead<T>(FileEntry<T> entry)
+
+    private async Task<List<Guid>> WhoCanRead<T>(FileEntry<T> entry)
     {
-        var whoCanRead = await _fileSecurity.WhoCanReadAsync(entry);
+        var whoCanReadTask = fileSecurity.WhoCanReadAsync(entry, true);
+        var adminsTask = Admins();
+
+        var whoCanRead = await Task.WhenAll(whoCanReadTask, adminsTask);
+        
         var userIds = whoCanRead
-            .Concat(await GetAdmins())
+            .SelectMany(r => r)
             .Concat(new []{ entry.CreateBy })
             .Distinct()
             .ToList();
@@ -193,14 +187,19 @@ public class SocketManager : SocketServiceClient
     }
     
     private List<Guid> _admins;
-    private async Task<IEnumerable<Guid>> GetAdmins()
+    private Task<IEnumerable<Guid>> Admins()
     {
         if (_admins != null)
         {
-            return _admins;
+            return Task.FromResult<IEnumerable<Guid>>(_admins);
         }
 
-        _admins = await _userManager.GetUsers(true, EmployeeStatus.Active, null, null, null, null, null, null, null, true, 0, 0)
+        return AdminsFromDb();
+    }
+    
+    private async Task<IEnumerable<Guid>> AdminsFromDb()
+    {
+        _admins = await userManager.GetUsers(true, EmployeeStatus.Active, null, null, null, null, null, null, null, false, null, true, 0, 0)
             .Select(r=> r.Id)
             .ToListAsync();
         

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,21 +27,13 @@
 namespace ASC.Data.Backup.Services;
 
 [Singleton]
-internal sealed class BackupListenerService : IHostedService
-{
-    private readonly ICacheNotify<DeleteSchedule> _cacheDeleteSchedule;
-    private readonly IServiceScopeFactory _scopeFactory;
-
-    public BackupListenerService(ICacheNotify<DeleteSchedule> cacheDeleteSchedule,
+internal sealed class BackupListenerService(ICacheNotify<DeleteSchedule> cacheDeleteSchedule,
         IServiceScopeFactory scopeFactory)
-    {
-        _cacheDeleteSchedule = cacheDeleteSchedule;
-        _scopeFactory = scopeFactory;
-    }
-
+    : IHostedService
+{
     public async Task DeleteScheldureAsync(DeleteSchedule deleteSchedule)
     {
-        using var scope = _scopeFactory.CreateScope();
+        using var scope = scopeFactory.CreateScope();
         var backupService = scope.ServiceProvider.GetService<BackupService>();
 
         await backupService.DeleteScheduleAsync(deleteSchedule.TenantId);
@@ -49,14 +41,14 @@ internal sealed class BackupListenerService : IHostedService
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        _cacheDeleteSchedule.Subscribe(async (n) => await DeleteScheldureAsync(n), CacheNotifyAction.Insert);
+        cacheDeleteSchedule.Subscribe(async n => await DeleteScheldureAsync(n), CacheNotifyAction.Insert);
 
         return Task.CompletedTask;
     }
 
     public Task StopAsync(CancellationToken cancellationToken)
     {
-        _cacheDeleteSchedule.Unsubscribe(CacheNotifyAction.Insert);
+        cacheDeleteSchedule.Unsubscribe(CacheNotifyAction.Insert);
 
         return Task.CompletedTask;
     }

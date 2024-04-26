@@ -103,19 +103,6 @@ Pokud máte nějaké dotazy nebo potřebujete pomoc, prosím neváhejte nás kon
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_change_password" xml:space="preserve">
-    <value>h1.Žádost o změnu hesla pro "${__VirtualRootPath}":"${__VirtualRootPath}" portál
-
-Požádali jste o změnu hesla používaného pro vstup do "${__VirtualRootPath}":"${__VirtualRootPath}" portálu.
-
-Prosím, pro změnu Vašeho hesla následujte odkaz níže:
-
-$OrangeButton
-
-*Poznámka*: tento odkaz je platný pouze po dobu 7 dní: Prosím, proveďte změnu hesla v rozmezí tohoto období.
-
-Pokud si nechte změnit heslo nebo jste tento e-mail obdrželi omylem, ignorujte ho prosím nebo kontaktujte Vašeho "${__VirtualRootPath}":"${__VirtualRootPath}" administrátora portálu a zjistěte více informací.</value>
-  </data>
   <data name="pattern_change_phone" xml:space="preserve">
     <value>h1.Žádost o změnu mobilního telefonu
 
@@ -133,19 +120,6 @@ Pokud nechcete změnit svůj mobilní telefon nebo jste tento e-mail obdrželi o
 Vážený $OwnerName,
 
 Byla podaná žádost o změnu "${__VirtualRootPath}":"${__VirtualRootPath}" vlastníka portálu na $UserName.
-
-Postupujte prosím podle následujícího odkazu:
-
-$OrangeButton
-
-*Poznámka*: tento odkaz je platný pouze 7 dní. Prosím, proveďte proces změny vlastníka portálu v tomto období.</value>
-  </data>
-  <data name="pattern_dns_change" xml:space="preserve">
-    <value>h1.Změna adresy portálu
-
-Vážený $OwnerName,
-
-Byla podaná žádost o změnu "${__VirtualRootPath}":"${__VirtualRootPath}" adresy portálu na "$PortalAddress":"$PortalAddress" #if($PortalDns != "") ("$PortalDns":"$PortalDns" )#end.
 
 Postupujte prosím podle následujícího odkazu:
 
@@ -187,7 +161,7 @@ Vítejte v ONLYOFFICE DocSpace! Váš uživatelský profil byl úspěšně přid
 
 &lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Spolupracujte na dokumentech&lt;/b&gt; pomocí dvou režimů spoluautorství: v reálném čase nebo s uzamčením odstavce. Sledujte změny, komunikujte v reálném čase pomocí vestavěného chatu nebo uskutečňujte audio a video hovory.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Využijte plugin pomocníka AI:&lt;/b&gt; shrnujte a překládejte texty, generujte obrázky a klíčová slova, analyzujte slova atd.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Využívejte pomocný plugin AI:&lt;/b&gt; shrnujte a překládejte texty, generujte obrázky a klíčová slova, analyzujte slova atd.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $OrangeButton
 
@@ -209,7 +183,7 @@ Vítejte v ONLYOFFICE DocSpace! Váš uživatelský profil byl úspěšně přid
 
 &lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Spolupracujte na dokumentech&lt;/b&gt; pomocí dvou režimů spoluautorství: v reálném čase nebo s uzamčením odstavce. Sledujte změny, komunikujte v reálném čase pomocí vestavěného chatu nebo uskutečňujte audio a video hovory.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Využijte plugin pomocníka AI:&lt;/b&gt; shrnujte a překládejte texty, generujte obrázky a klíčová slova, analyzujte slova atd.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Využívejte pomocný plugin AI:&lt;/b&gt; shrnujte a překládejte texty, generujte obrázky a klíčová slova, analyzujte slova atd.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $OrangeButton
 
@@ -231,7 +205,7 @@ Vítejte v ONLYOFFICE DocSpace! Váš uživatelský profil byl úspěšně přid
 
 &lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Spolupracujte na dokumentech&lt;/b&gt; pomocí dvou režimů spoluautorství: v reálném čase nebo s uzamčením odstavce. Sledujte změny, komunikujte v reálném čase pomocí vestavěného chatu nebo uskutečňujte audio a video hovory.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Využijte plugin pomocníka AI:&lt;/b&gt; shrnujte a překládejte texty, generujte obrázky a klíčová slova, analyzujte slova atd.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Využívejte pomocný plugin AI:&lt;/b&gt; shrnujte a překládejte texty, generujte obrázky a klíčová slova, analyzujte slova atd.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $OrangeButton
 
@@ -253,7 +227,7 @@ Vítejte v ONLYOFFICE DocSpace! Váš uživatelský profil byl úspěšně přid
 
 &lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Spolupracujte na dokumentech&lt;/b&gt; pomocí dvou režimů spoluautorství: v reálném čase nebo s uzamčením odstavce. Sledujte změny, komunikujte v reálném čase pomocí vestavěného chatu nebo uskutečňujte audio a video hovory.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Využijte plugin pomocníka AI:&lt;/b&gt; shrnujte a překládejte texty, generujte obrázky a klíčová slova, analyzujte slova atd.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Využívejte pomocný plugin AI:&lt;/b&gt; shrnujte a překládejte texty, generujte obrázky a klíčová slova, analyzujte slova atd.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $OrangeButton
 
@@ -464,9 +438,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_confirm_owner_change" xml:space="preserve">
     <value>${LetterLogoText}. Změna vlastníka portálu</value>
-  </data>
-  <data name="subject_dns_change" xml:space="preserve">
-    <value>${LetterLogoText}. Změna adresy portálu</value>
   </data>
   <data name="subject_enterprise_guest_welcome_v1" xml:space="preserve">
     <value>Vítejte v ONLYOFFICE DocSpace!</value>
@@ -680,9 +651,9 @@ Doufáme, že se vám používání ONLYOFFICE DocSpace bude líbit. Nabízíme 
 
 &lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG3" alt="authors pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#3. Využívejte efektivního spoluautorství.&lt;/b&gt;&lt;br/&gt;Spolupracujte na dokumentech ve dvou režimech spoluautorství: v reálném čase nebo s uzamčením odstavce. Sledujte změny, komunikujte v reálném čase pomocí vestavěného chatu nebo uskutečňujte audio a video hovory. &lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. Spolupracujte bezpečně.&lt;/b&gt; &lt;br/&gt; Dolaďte přístup do celého prostoru nebo samostatných místností pomocí flexibilních oprávnění a uživatelských rolí. &lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. Spolupracujte bezpečně.&lt;/b&gt; &lt;br/&gt; Dolaďte přístup do celého prostoru nebo do jednotlivých místností pomocí flexibilních oprávnění a uživatelských rolí. &lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. Využijte plugin pomocníka AI.&lt;/b&gt;&lt;br/&gt;Shrnujte a překládejte texty, generujte obrázky a klíčová slova, analyzujte slova atd. &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. Využívejte pomocný plugin AI.&lt;/b&gt;&lt;br/&gt; Shrnujte a překládejte texty, generujte obrázky a klíčová slova, analyzujte slova atd &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $OrangeButton
 
@@ -702,9 +673,9 @@ Doufáme, že se vám používání ONLYOFFICE DocSpace bude líbit. Nabízíme 
 
 &lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG3" alt="authors pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#3. Využívejte efektivního spoluautorství.&lt;/b&gt;&lt;br/&gt;Spolupracujte na dokumentech ve dvou režimech spoluautorství: v reálném čase nebo s uzamčením odstavce. Sledujte změny, komunikujte v reálném čase pomocí vestavěného chatu nebo uskutečňujte audio a video hovory. &lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. Spolupracujte bezpečně.&lt;/b&gt; &lt;br/&gt; Dolaďte přístup do celého prostoru nebo samostatných místností pomocí flexibilních oprávnění a uživatelských rolí. &lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. Spolupracujte bezpečně.&lt;/b&gt; &lt;br/&gt; Dolaďte přístup do celého prostoru nebo do jednotlivých místností pomocí flexibilních oprávnění a uživatelských rolí. &lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. Využijte plugin pomocníka AI.&lt;/b&gt;&lt;br/&gt;Shrnujte a překládejte texty, generujte obrázky a klíčová slova, analyzujte slova atd. &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. Využívejte pomocný plugin AI.&lt;/b&gt;&lt;br/&gt; Shrnujte a překládejte texty, generujte obrázky a klíčová slova, analyzujte slova atd &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $OrangeButton
 
@@ -724,9 +695,9 @@ Doufáme, že se vám používání ONLYOFFICE DocSpace bude líbit. Nabízíme 
 
 &lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG3" alt="authors pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#3. Využívejte efektivního spoluautorství.&lt;/b&gt;&lt;br/&gt;Spolupracujte na dokumentech ve dvou režimech spoluautorství: v reálném čase nebo s uzamčením odstavce. Sledujte změny, komunikujte v reálném čase pomocí vestavěného chatu nebo uskutečňujte audio a video hovory. &lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. Spolupracujte bezpečně.&lt;/b&gt; &lt;br/&gt; Dolaďte přístup do celého prostoru nebo samostatných místností pomocí flexibilních oprávnění a uživatelských rolí. &lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. Spolupracujte bezpečně.&lt;/b&gt; &lt;br/&gt; Dolaďte přístup do celého prostoru nebo do jednotlivých místností pomocí flexibilních oprávnění a uživatelských rolí. &lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. Využijte plugin pomocníka AI.&lt;/b&gt;&lt;br/&gt;Shrnujte a překládejte texty, generujte obrázky a klíčová slova, analyzujte slova atd. &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. Využívejte pomocný plugin AI.&lt;/b&gt;&lt;br/&gt; Shrnujte a překládejte texty, generujte obrázky a klíčová slova, analyzujte slova atd &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $OrangeButton
 
@@ -746,9 +717,9 @@ Doufáme, že se vám používání ONLYOFFICE DocSpace bude líbit. Nabízíme 
 
 &lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG3" alt="authors pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#3. Využívejte efektivního spoluautorství.&lt;/b&gt;&lt;br/&gt;Spolupracujte na dokumentech ve dvou režimech spoluautorství: v reálném čase nebo s uzamčením odstavce. Sledujte změny, komunikujte v reálném čase pomocí vestavěného chatu nebo uskutečňujte audio a video hovory. &lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. Spolupracujte bezpečně.&lt;/b&gt; &lt;br/&gt; Dolaďte přístup do celého prostoru nebo samostatných místností pomocí flexibilních oprávnění a uživatelských rolí. &lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. Spolupracujte bezpečně.&lt;/b&gt; &lt;br/&gt; Dolaďte přístup do celého prostoru nebo do jednotlivých místností pomocí flexibilních oprávnění a uživatelských rolí. &lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. Využijte plugin pomocníka AI.&lt;/b&gt;&lt;br/&gt;Shrnujte a překládejte texty, generujte obrázky a klíčová slova, analyzujte slova atd. &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. Využívejte pomocný plugin AI.&lt;/b&gt;&lt;br/&gt; Shrnujte a překládejte texty, generujte obrázky a klíčová slova, analyzujte slova atd &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $OrangeButton
 
@@ -908,7 +879,7 @@ Vítejte v ONLYOFFICE DocSpace! Váš uživatelský profil byl úspěšně přid
 
 &lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Spolupracujte na dokumentech&lt;/b&gt; pomocí dvou režimů spoluautorství: v reálném čase nebo s uzamčením odstavce. Sledujte změny, komunikujte v reálném čase pomocí vestavěného chatu nebo uskutečňujte audio a video hovory.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Využijte plugin pomocníka AI:&lt;/b&gt; shrnujte a překládejte texty, generujte obrázky a klíčová slova, analyzujte slova atd.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Využívejte pomocný plugin AI:&lt;/b&gt; shrnujte a překládejte texty, generujte obrázky a klíčová slova, analyzujte slova atd.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $OrangeButton
 
@@ -930,7 +901,7 @@ Vítejte v ONLYOFFICE DocSpace! Váš uživatelský profil byl úspěšně přid
 
 &lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Spolupracujte na dokumentech&lt;/b&gt; pomocí dvou režimů spoluautorství: v reálném čase nebo s uzamčením odstavce. Sledujte změny, komunikujte v reálném čase pomocí vestavěného chatu nebo uskutečňujte audio a video hovory.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Využijte plugin pomocníka AI:&lt;/b&gt; shrnujte a překládejte texty, generujte obrázky a klíčová slova, analyzujte slova atd.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Využívejte pomocný plugin AI:&lt;/b&gt; shrnujte a překládejte texty, generujte obrázky a klíčová slova, analyzujte slova atd.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $OrangeButton
 
@@ -952,7 +923,7 @@ Vítejte v ONLYOFFICE DocSpace! Váš uživatelský profil byl úspěšně přid
 
 &lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Spolupracujte na dokumentech&lt;/b&gt; pomocí dvou režimů spoluautorství: v reálném čase nebo s uzamčením odstavce. Sledujte změny, komunikujte v reálném čase pomocí vestavěného chatu nebo uskutečňujte audio a video hovory.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Využijte plugin pomocníka AI:&lt;/b&gt; shrnujte a překládejte texty, generujte obrázky a klíčová slova, analyzujte slova atd.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Využívejte pomocný plugin AI:&lt;/b&gt; shrnujte a překládejte texty, generujte obrázky a klíčová slova, analyzujte slova atd.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $OrangeButton
 
@@ -974,7 +945,7 @@ Vítejte v ONLYOFFICE DocSpace! Váš uživatelský profil byl úspěšně přid
 
 &lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Spolupracujte na dokumentech&lt;/b&gt; pomocí dvou režimů spoluautorství: v reálném čase nebo s uzamčením odstavce. Sledujte změny, komunikujte v reálném čase pomocí vestavěného chatu nebo uskutečňujte audio a video hovory.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Využijte plugin pomocníka AI:&lt;/b&gt; shrnujte a překládejte texty, generujte obrázky a klíčová slova, analyzujte slova atd.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Využívejte pomocný plugin AI:&lt;/b&gt; shrnujte a překládejte texty, generujte obrázky a klíčová slova, analyzujte slova atd.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $OrangeButton
 
@@ -991,20 +962,6 @@ E-mail: $UserEmail
 
 $Body</value>
   </data>
-  <data name="pattern_personal_after_registration14_v1" xml:space="preserve">
-    <value>h1. Získejte &lt;span style="color:#FF6F3D;"&gt;bezplatné&lt;/span&gt; aplikace ONLYOFFICE
-
-
-Dobrý den, $UserName!
-
-Získejte bezplatné aplikace ONLYOFFICE a pracujte na dokumentech z libovolného zařízení.
-
-&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Chcete-li pracovat s dokumenty offline, stáhněte si ONLYOFFICE Desktop Editors pro&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 155px; padding-right: 155px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG1" alt="Windows" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="macOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG3" alt="Linux" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-
-&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Chcete-li upravovat dokumenty na mobilních zařízeních, pořiďte si aplikaci Dokumenty ONLYOFFICE pro&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 190px; padding-right: 190px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 29px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="29" height="32" src="$IMG4" alt="Android" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="iOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>h1. Získejte &lt;span style="color:#FF6F3D;"&gt;bezplatné&lt;/span&gt; aplikace ONLYOFFICE
 
@@ -1018,24 +975,6 @@ Získejte bezplatné aplikace ONLYOFFICE a pracujte na dokumentech z libovolnéh
 &lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Chcete-li upravovat dokumenty na mobilních zařízeních, pořiďte si aplikaci Dokumenty ONLYOFFICE pro&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 190px; padding-right: 190px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 29px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="29" height="32" src="$IMG4" alt="Android" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="iOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $TrulyYours</value>
-  </data>
-  <data name="pattern_personal_already_exist" xml:space="preserve">
-    <value>Dobrý den!
-Pomocí tohoto e-mailu byl proveden pokus o registraci nového účtu "ONLYOFFICE Personal":"$PortalUrl". Pokud jste to byli vy, chceme vás informovat, že účet již existuje - pokračujte na ONLYOFFICE Personal a přihlaste se.
-Pokud jste heslo zapomněli či ztratili, můžete jej obnovit na stránce "stránku pro obnovení hesla":"$LinkToRecovery".
-Pokud jste se nepokusili zaregistrovat nový účet, pravděpodobně to omylem udělal někdo jiný. V takovém případě tento e-mail ignorujte.
-
-Hezký den!
-Tým ONLYOFFICE</value>
-  </data>
-  <data name="pattern_personal_change_password_v115" xml:space="preserve">
-    <value>Chcete změnit heslo ke svému osobnímu účtu ONLYOFFICE? Pro potvrzení klikněte na tlačítko níže.
-
-$OrangeButton 
-
-Odkaz je platný 7 dní.
-
-Nechcete měnit heslo? Tuto zprávu ignorujte.</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
     <value>h1. Služba ONLYOFFICE DocSpace byla &lt;span style="color:#FF6F3D;"&gt;deaktivována&lt;/span&gt;
@@ -1140,7 +1079,7 @@ $TrulyYours</value>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>Dobrý den!
 
-Jste zváni do místnosti $Message na adrese "${__VirtualRootPath}":"${__VirtualRootPath}". Přijměte pozvánku kliknutím na odkaz:
+Jste zváni do místnosti DocSpace na adrese "${__VirtualRootPath}":"${__VirtualRootPath}". Přijměte pozvánku kliknutím na odkaz:
 
 $OrangeButton
 
@@ -1180,9 +1119,6 @@ $TrulyYours</value>
   </data>
   <data name="ButtonConfirmEmail" xml:space="preserve">
     <value>POTVRDIT</value>
-  </data>
-  <data name="ButtonConfirmPortalAddressChange" xml:space="preserve">
-    <value>Potvrzení změny adresy portálu</value>
   </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
     <value>Potvrzení aktualizace vlastníka portálu</value>
@@ -1355,80 +1291,6 @@ Odkaz je platný pouze 7 dní.
 
 Získáte další tipy, jak používat webovou kancelář. Odběry můžete kdykoli zrušit na stránce svého profilu a také je znovu povolit.</value>
   </data>
-  <data name="pattern_personal_activate" xml:space="preserve">
-    <value>Dobrý den, $UserName
-byl/a jste úspěšně zaregistrován/a v ONLYOFFICE Personal "${__VirtualRootPath}":"${__VirtualRootPath}".
-
-Připojte své oblíbené cloudové úložiště: Dropbox, Disk Google, OneDrive nebo Box. Vytvořte si jednotný pracovní prostor pro své dokumenty, který bude přístupný odkudkoli.
-
-Více informací o ONLYOFFICE Personal se dozvíte na "našem blogu":"$TagBlogLink".
-
-Jsme rádi, že jste tady. Zůstaňte s námi!
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_personal_after_registration1" xml:space="preserve">
-    <value>h1.Vítejte v ONLYOFFICE Personal
-
-Právě jste si vytvořili osobní kancelář v cloudu.
-
-h3.Je to virtuální pracovní prostor, v němž můžete upravovat a ukládat dokumenty, pracovat s nimi odkudkoli a udělovat k nim přístup svým přátelům nebo kolegům.
-
-h3.Nejprve se podívejte, co můžete v ONLYOFFICE dělat:
-
-- Vytvářet, prohlížet a upravovat textové dokumenty, tabulky a prezentace.
-
-- Pracovat se všemi oblíbenými formáty. Nejvyšší kompatibilita se soubory MS Office.
-
-- Vytvářet a spolueditovat "formuláře připravené k vyplnění":"https://www.onlyoffice.com/form-creator.aspx".
-
-- Sdílet dokumenty a spolupracovat na nich online.
-
-- Pomocí různých zásuvných modulů můžete používat další funkce.
-
-- Získat snadný přístup k osobnímu cloudu prostřednictvím "rozšíření Chrome":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=cs".
-
-Dokumenty můžete také upravovat offline pomocí našich bezplatných "desktopových editorů":"https://www.onlyoffice.com/download-desktop.aspx" nebo si pořiďte mobilní editační sadu pro zařízení se systémem "iOS":"https://apps.apple.com/app/onlyoffice-documents/id944896972" nebo "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents".
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_personal_change_email_v115" xml:space="preserve">
-    <value>Chcete změnit e-mail na svém účtu ONLYOFFICE?
-
-Klikněte na tlačítko níže a přihlaste se* do svého cloudu.
-
-$OrangeButton
-
-Odkaz je platný 7 dní.
-
-*Pokud nejste v tomto prohlížeči přihlášeni do služby ONLYOFFICE, budete muset pro potvrzení použít svůj starý e-mail.
-
-Nechcete změnit svůj e-mail? Tuto zprávu ignorujte.</value>
-  </data>
-  <data name="pattern_personal_confirmation" xml:space="preserve">
-    <value>Dobrý den,
-
-právě jste si zaregistrovali účet v řešení ONLYOFFICE pro osobní použití. Kliknutím na "zde":"$InviteLink" potvrďte registraci a vytvořte si heslo.
-
-Pokud nemůžete odkaz otevřít, zkopírujte následující "$InviteLink":"$InviteLink" a vložte jej do adresního řádku prohlížeče.
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_personal_profile_delete" xml:space="preserve">
-    <value>Požádali jste o ukončení svého účtu na personal.onlyoffice.com. Žádost dokončete pomocí odkazu (odkaz je aktivní po dobu 7 dnů): 
-
-$OrangeButton
-
-*Poznámka*: Po smazání bude váš účet a všechny údaje s ním spojené trvale vymazány v souladu s naším "Prohlášením o ochraně osobních údajů":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0".
-
-"Více informací o ukončení účtu":"${__HelpLink}/administration/configuration.aspx"
-
-Pokud nechcete pokračovat, ignorujte tento e-mail. 
-
-V případě dotazů nás prosím kontaktujte na adrese "${__SalesEmail}":"mailto:${__SalesEmail}"
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_portal_deactivate_tg" xml:space="preserve">
     <value>Deaktivace portálu [${__VirtualRootPath}](${__VirtualRootPath})
 
@@ -1503,7 +1365,7 @@ Zpráva o výjimce: $Message</value>
 
 proces odstranění dat uživatele "$FromUserName":"$FromUserLink" byl úspěšně dokončen.
 
-Výmaz osobních údajů povolen $DocsSpace</value>
+Vymazání osobních údajů umožnilo uvolnit $DocsSpace</value>
   </data>
   <data name="pattern_remove_user_data_failed" xml:space="preserve">
     <value>Vážený/vážená $UserName,
@@ -1621,9 +1483,6 @@ Odkaz je platný pouze 7 dní.</value>
   <data name="subject_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
     <value>5 tipů pro efektivní práci na dokumentech</value>
   </data>
-  <data name="subject_personal_after_registration14_v1" xml:space="preserve">
-    <value>Získejte bezplatné aplikace ONLYOFFICE</value>
-  </data>
   <data name="subject_opensource_user_welcome_v1" xml:space="preserve">
     <value>Vítejte v ONLYOFFICE DocSpace!</value>
   </data>
@@ -1632,9 +1491,6 @@ Odkaz je platný pouze 7 dní.</value>
   </data>
   <data name="subject_opensource_user_activation_v1" xml:space="preserve">
     <value>Připojte se k ONLYOFFICE DocSpace</value>
-  </data>
-  <data name="subject_personal_already_exist" xml:space="preserve">
-    <value>Přihlaste se do svého osobního účtu ONLYOFFICE</value>
   </data>
   <data name="subject_opensource_admin_docs_tips_v1" xml:space="preserve">
     <value>5 tipů pro efektivní práci na dokumentech</value>
@@ -1662,15 +1518,6 @@ Odkaz je platný pouze 7 dní.</value>
   </data>
   <data name="subject_opensource_guest_activation_v11" xml:space="preserve">
     <value>Připojte se k ${__VirtualRootPath}</value>
-  </data>
-  <data name="subject_personal_profile_delete" xml:space="preserve">
-    <value>Ukončení osobního účtu ONLYOFFICE</value>
-  </data>
-  <data name="subject_personal_after_registration1" xml:space="preserve">
-    <value>Vítejte v ONLYOFFICE Personal</value>
-  </data>
-  <data name="subject_personal_confirmation" xml:space="preserve">
-    <value>ONLYOFFICE Personal. Aktivujte prosím svou e-mailovou adresu</value>
   </data>
   <data name="subject_profile_has_deleted_itself" xml:space="preserve">
     <value>Uživatel smazal svůj profil</value>
@@ -1795,9 +1642,6 @@ $Body</value>
   <data name="subject_mailbox_password_changed" xml:space="preserve">
     <value>${LetterLogoText}. Změna hesla poštovní schránky</value>
   </data>
-  <data name="subject_personal_activate" xml:space="preserve">
-    <value>Vítejte v ONLYOFFICE pro osobní použití!</value>
-  </data>
   <data name="subject_reassigns_failed" xml:space="preserve">
     <value>${LetterLogoText}. Změna přiřazení uživatelských údajů se nezdařila</value>
   </data>
@@ -1838,5 +1682,24 @@ Pro vaše pohodlí jsme pro vás připravili videonávody, abyste si mohli ONLYO
 $OrangeButton
 
 $TrulyYours</value>
+  </data>
+  <data name="pattern_zoom_welcome" xml:space="preserve">
+    <value>h1. na &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Dobrý den, $UserName!
+
+Právě jste vytvořili ONLYOFFICE DocSpace, centrum dokumentů, kde můžete posílit spolupráci se svým týmem, zákazníky, partnery a dalšími. Jeho adresa je "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+Váš aktuální tarifní plán je STARTUP. Je zcela zdarma a zahrnuje:
+
+&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;100 administrátorů/oprávněných uživatelů&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Až 100 pokojů&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;100 GB místa na disku&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+
+*Vychutnejte si nový způsob spolupráce na dokumentech!*
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_zoom_welcome" xml:space="preserve">
+    <value>Vítejte v ONLYOFFICE DocSpace!</value>
   </data>
 </root>

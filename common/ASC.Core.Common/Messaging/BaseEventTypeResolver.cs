@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -45,17 +45,10 @@ public class BaseEventTypeIpResolver : IValueResolver<DbLoginEvent, BaseEvent, s
 }
 
 [Scope]
-public class BaseEventTypeDateResolver : IValueResolver<DbLoginEvent, BaseEvent, DateTime>
+public class BaseEventTypeDateResolver(TenantUtil tenantUtil) : IValueResolver<DbLoginEvent, BaseEvent, DateTime>
 {
-    private readonly TenantUtil _tenantUtil;
-
-    public BaseEventTypeDateResolver(TenantUtil tenantUtil)
-    {
-        _tenantUtil = tenantUtil;
-    }
-
     public DateTime Resolve(DbLoginEvent source, BaseEvent destination, DateTime destMember, ResolutionContext context)
     {
-        return _tenantUtil.DateTimeFromUtc(source.Date);
+        return tenantUtil.DateTimeFromUtc(source.Date);
     }
 }

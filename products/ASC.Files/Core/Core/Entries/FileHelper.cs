@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,41 +27,28 @@
 namespace ASC.Files.Core;
 
 [Scope]
-public class FileHelper
+public class FileHelper(FileTrackerHelper fileTracker, FilesLinkUtility filesLinkUtility, FileUtility fileUtility, FileConverter fileConverter)
 {
-    private readonly FileTrackerHelper _fileTracker;
-    private readonly FilesLinkUtility _filesLinkUtility;
-    private readonly FileUtility _fileUtility;
-    private readonly FileConverter _fileConverter;
-
-    public FileHelper(FileTrackerHelper fileTracker, FilesLinkUtility filesLinkUtility, FileUtility fileUtility, FileConverter fileConverter)
-    {
-        _fileTracker = fileTracker;
-        _filesLinkUtility = filesLinkUtility;
-        _fileUtility = fileUtility;
-        _fileConverter = fileConverter;
-    }
-
     internal string GetTitle<T>(File<T> file)
     {
         return string.IsNullOrEmpty(file.ConvertedType)
                     ? file.PureTitle
-                    : FileUtility.ReplaceFileExtension(file.PureTitle, _fileUtility.GetInternalExtension(file.PureTitle));
+                    : FileUtility.ReplaceFileExtension(file.PureTitle, fileUtility.GetInternalExtension(file.PureTitle));
     }
 
-    internal FileStatus GetFileStatus<T>(File<T> file, ref FileStatus currentStatus)
+    internal async Task<FileStatus> GetFileStatus<T>(File<T> file, FileStatus currentStatus)
     {
-        if (_fileTracker.IsEditing(file.Id))
+        if (fileTracker.IsEditing(file.Id))
         {
             currentStatus |= FileStatus.IsEditing;
         }
 
-        if (_fileTracker.IsEditingAlone(file.Id))
+        if (fileTracker.IsEditingAlone(file.Id))
         {
             currentStatus |= FileStatus.IsEditingAlone;
         }
 
-        if (_fileConverter.IsConverting(file))
+        if (await fileConverter.IsConverting(file))
         {
             currentStatus |= FileStatus.IsConverting;
         }
@@ -71,6 +58,6 @@ public class FileHelper
 
     public string GetDownloadUrl<T>(FileEntry<T> fileEntry)
     {
-        return _filesLinkUtility.GetFileDownloadUrl(fileEntry.Id);
+        return filesLinkUtility.GetFileDownloadUrl(fileEntry.Id);
     }
 }

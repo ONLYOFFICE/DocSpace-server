@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,6 +30,7 @@ public class MessageSettings
 {
     private const string UserAgentHeader = "User-Agent";
     private const string RefererHeader = "Referer";
+    private const string XRealIPHeader = "X-Real-IP";
     private const string EditorsUAHeader = "AscDesktopEditor";
     private const string EditorsName = "Desktop Editors";
 
@@ -45,8 +46,37 @@ public class MessageSettings
         return Parser.Parse(uaHeader);
     }
 
+    public static IDictionary<string, StringValues> GetHttpHeaders(HttpRequest request)
+    {
+        if (request == null)
+        {
+            return null;
+        }
+
+        var headers = request.Headers.ToDictionary(k => k.Key, v => v.Value);
+
+        if (!headers.TryGetValue(XRealIPHeader, out _))
+        {
+            var remoteIpAddress = GetIP(request);
+
+            if (!string.IsNullOrEmpty(remoteIpAddress))
+            {
+                headers.Add(XRealIPHeader, remoteIpAddress);
+            }
+        }
+
+        return headers;
+    }
+
     public static string GetUAHeader(HttpRequest request)
     {
+        var result = request?.Query?["request-user-agent"].FirstOrDefault();
+
+        if (result != null)
+        {
+            return result;
+        }
+
         return request?.Headers[UserAgentHeader].FirstOrDefault();
     }
 
@@ -67,7 +97,19 @@ public class MessageSettings
 
     public static string GetIP(HttpRequest request)
     {
+        var result = request?.Query?["request-x-real-ip"].FirstOrDefault();
+
+        if (result != null)
+        {
+            return result;
+        }
+
         return request?.HttpContext?.Connection.RemoteIpAddress?.ToString();
+    }
+
+    public static string GetIP(IDictionary<string, StringValues> headers)
+    {
+        return headers.TryGetValue(XRealIPHeader, out var header) ? header.FirstOrDefault() : null;
     }
 
     public static void AddInfoMessage(EventMessage message, Dictionary<string, ClientInfo> dict = null)

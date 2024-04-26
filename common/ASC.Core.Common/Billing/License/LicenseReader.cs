@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,45 +30,34 @@ namespace ASC.Core.Billing;
 public class LicenseReaderConfig
 {
     public readonly string LicensePath;
+    public readonly string LicensePathTemp;
+
     public LicenseReaderConfig(IConfiguration configuration)
     {
         LicensePath = configuration["license:file:path"] ?? "";
+        LicensePathTemp = LicensePath + ".tmp";
     }
 }
 
 [Scope]
-public class LicenseReader
+public class LicenseReader(
+    TenantManager tenantManager,
+    ITariffService tariffService,
+    CoreSettings coreSettings,
+    LicenseReaderConfig licenseReaderConfig,
+    ILogger<LicenseReader> logger)
 {
-    private readonly TenantManager _tenantManager;
-    private readonly ITariffService _tariffService;
-    private readonly CoreSettings _coreSettings;
-    private readonly ILogger<LicenseReader> _logger;
-    public readonly string LicensePath;
-    private readonly string _licensePathTemp;
+    public readonly string LicensePath = licenseReaderConfig.LicensePath;
+    private readonly string _licensePathTemp = licenseReaderConfig.LicensePathTemp;
 
     public const string CustomerIdKey = "CustomerId";
 
-    public LicenseReader(
-        TenantManager tenantManager,
-        ITariffService tariffService,
-        CoreSettings coreSettings,
-        LicenseReaderConfig licenseReaderConfig,
-        ILogger<LicenseReader> logger)
-    {
-        _tenantManager = tenantManager;
-        _tariffService = tariffService;
-        _coreSettings = coreSettings;
-        LicensePath = licenseReaderConfig.LicensePath;
-        _licensePathTemp = LicensePath + ".tmp";
-        _logger = logger;
-    }
-
     public async Task SetCustomerIdAsync(string value)
     {
-        await _coreSettings.SaveSettingAsync(CustomerIdKey, value);
+        await coreSettings.SaveSettingAsync(CustomerIdKey, value);
     }
 
-    private Stream GetLicenseStream(bool temp = false)
+    private FileStream GetLicenseStream(bool temp = false)
     {
         var path = temp ? _licensePathTemp : LicensePath;
         if (!File.Exists(path))
@@ -91,7 +80,7 @@ public class LicenseReader
             File.Delete(LicensePath);
         }
 
-        await _tariffService.DeleteDefaultBillingInfoAsync();
+        await tariffService.DeleteDefaultBillingInfoAsync();
     }
 
     public async Task RefreshLicenseAsync()
@@ -101,7 +90,7 @@ public class LicenseReader
             var temp = true;
             if (!File.Exists(_licensePathTemp))
             {
-                _logger.DebugTempLicenseNotFound();
+                logger.DebugTempLicenseNotFound();
 
                 if (!File.Exists(LicensePath))
                 {
@@ -190,7 +179,7 @@ public class LicenseReader
 
         await SetCustomerIdAsync(license.CustomerId);
 
-        var defaultQuota = await _tenantManager.GetTenantQuotaAsync(Tenant.DefaultTenant);
+        var defaultQuota = await tenantManager.GetTenantQuotaAsync(Tenant.DefaultTenant);
 
         var quota = new TenantQuota(-1000)
         {
@@ -205,37 +194,37 @@ public class LicenseReader
             Oauth = true,
             ContentSearch = true,
             MaxFileSize = defaultQuota.MaxFileSize,
-            MaxTotalSize = defaultQuota.MaxTotalSize,
             DocsEdition = true,
-            Customization = license.Customization
+            Customization = license.Customization,
+            Statistic = true
         };
 
-        await _tenantManager.SaveTenantQuotaAsync(quota);
+        await tenantManager.SaveTenantQuotaAsync(quota);
 
         var tariff = new Tariff
         {
-            Quotas = new List<Quota> { new(quota.TenantId, 1) },
-            DueDate = license.DueDate,
+            Quotas = [new(quota.TenantId, 1)],
+            DueDate = license.DueDate
         };
 
-        await _tariffService.SetTariffAsync(Tenant.DefaultTenant, tariff, new List<TenantQuota> { quota });
+        await tariffService.SetTariffAsync(Tenant.DefaultTenant, tariff, [quota]);
     }
 
     private void LogError(Exception error)
     {
         if (error is BillingNotFoundException)
         {
-            _logger.DebugLicenseNotFound(error.Message);
+            logger.DebugLicenseNotFound(error.Message);
         }
         else
         {
-            if (_logger.IsEnabled(LogLevel.Debug))
+            if (logger.IsEnabled(LogLevel.Debug))
             {
-                _logger.ErrorWithException(error);
+                logger.ErrorWithException(error);
             }
             else
             {
-                _logger.ErrorWithException(error);
+                logger.ErrorWithException(error);
             }
         }
     }

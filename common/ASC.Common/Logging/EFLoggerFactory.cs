@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,14 +27,9 @@
 namespace ASC.Common.Logging;
 
 [Singleton]
-public class EFLoggerFactory : ILoggerFactory
+public class EFLoggerFactory(ILoggerProvider loggerProvider) : ILoggerFactory
 {
-    private readonly ILogger _logger;
-
-    public EFLoggerFactory(ILoggerProvider loggerProvider)
-    {
-        _logger = new EFLogger(loggerProvider.CreateLogger("ASC.SQL"));
-    }
+    private readonly ILogger _logger = new EFLogger(loggerProvider.CreateLogger("ASC.SQL"));
 
     public void AddProvider(ILoggerProvider provider)
     {
@@ -48,22 +43,16 @@ public class EFLoggerFactory : ILoggerFactory
     public void Dispose() { }
 }
 
-public class EFLogger : ILogger
+public class EFLogger(ILogger logger) : ILogger
 {
-    private readonly ILogger _logger;
-    public EFLogger(ILogger logger)
-    {
-        _logger = logger;
-    }
-
     public IDisposable BeginScope<TState>(TState state)
     {
-        return _logger.BeginScope(state);
+        return logger.BeginScope(state);
     }
 
     public bool IsEnabled(LogLevel logLevel)
     {
-        return _logger.IsEnabled(logLevel);
+        return logger.IsEnabled(logLevel);
     }
 
     public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
@@ -71,47 +60,12 @@ public class EFLogger : ILogger
         switch (eventId.Id)
         {
             case 20101:
-                var keyValuePairs = state as IEnumerable<KeyValuePair<string, object>>;
-                var ev = new EFLogEvent("");
-
-                foreach (var kv in keyValuePairs)
-                {
-                    ev.WithProperty(kv.Key, kv.Value);
-                }
-
-                _logger.Log(LogLevel.Debug,
-                        default(EventId),
-                        ev,
+                logger.Log(LogLevel.Debug,
+                        default,
+                        state,
                         exception,
-                        EFLogEvent.Formatter);
+                        formatter);
                 break;
         }
     }
-
-    class EFLogEvent : IEnumerable<KeyValuePair<string, object>>
-    {
-        readonly List<KeyValuePair<string, object>> _properties = new();
-
-        public string Message { get; }
-
-        public EFLogEvent(string message)
-        {
-            Message = message;
-        }
-
-        public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
-        {
-            return _properties.GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
-
-        public void WithProperty(string name, object value)
-        {
-            _properties.Add(new KeyValuePair<string, object>(name, value));
-        }
-
-        public static Func<EFLogEvent, Exception, string> Formatter { get; } = (l, _) => l.Message;
-    }
-
 }

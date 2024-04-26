@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,8 +26,9 @@
 
 namespace ASC.Core.Common.EF;
 
-public class UserDbContext : DbContext
+public class UserDbContext(DbContextOptions<UserDbContext> dbContextOptions) : DbContext(dbContextOptions)
 {
+    public DbSet<DbTenant> Tenants { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<UserSecurity> UserSecurity { get; set; }
     public DbSet<UserPhoto> Photos { get; set; }
@@ -37,11 +38,9 @@ public class UserDbContext : DbContext
     public DbSet<Subscription> Subscriptions { get; set; }
     public DbSet<DbSubscriptionMethod> SubscriptionMethods { get; set; }
     public DbSet<UserDav> UsersDav { get; set; }
-
-    public UserDbContext(DbContextOptions<UserDbContext> dbContextOptions) : base(dbContextOptions)
-    {
-
-    }
+    public DbSet<AccountLinks> AccountLinks { get; set; }
+    public DbSet<DbWebstudioSettings> WebstudioSettings { get; set; }
+    public DbSet<DbQuotaRow> QuotaRow { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -56,6 +55,9 @@ public class UserDbContext : DbContext
         .AddUserGroup()
         .AddSubscription()
         .AddUserDav()
-        .AddDbTenant();
+        .AddDbTenant()
+        .AddAccountLinks()
+        .AddWebstudioSettings()
+        .AddDbQuotaRow();
     }
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -36,10 +36,11 @@ public static class DocSpaceHelper
             FolderType.ReviewRoom or 
             FolderType.ReadOnlyRoom or 
             FolderType.FillingFormsRoom or
-            FolderType.PublicRoom;
+            FolderType.PublicRoom or
+            FolderType.FormRoom;
     }
 
-    public static RoomType? GetRoomType(FolderType folderType)
+    public static RoomType? MapToRoomType(FolderType folderType)
     {
         return folderType switch
         {
@@ -49,7 +50,23 @@ public static class DocSpaceHelper
             FolderType.ReadOnlyRoom => RoomType.ReadOnlyRoom,
             FolderType.CustomRoom => RoomType.CustomRoom,
             FolderType.PublicRoom => RoomType.PublicRoom,
-            _ => null,
+            FolderType.FormRoom => RoomType.FormRoom,
+            _ => null
+        };
+    }
+
+    public static FolderType MapToFolderType(RoomType roomType)
+    {
+        return roomType switch
+        {
+            RoomType.FillingFormsRoom => FolderType.FillingFormsRoom,
+            RoomType.EditingRoom => FolderType.EditingRoom,
+            RoomType.ReviewRoom => FolderType.ReviewRoom,
+            RoomType.ReadOnlyRoom => FolderType.ReadOnlyRoom,
+            RoomType.CustomRoom => FolderType.CustomRoom,
+            RoomType.PublicRoom => FolderType.PublicRoom,
+            RoomType.FormRoom => FolderType.FormRoom,
+            _ => throw new ArgumentOutOfRangeException(nameof(roomType), roomType, null)
         };
     }
 
@@ -58,6 +75,6 @@ public static class DocSpaceHelper
         var parents = await folderDao.GetParentFoldersAsync(file.ParentId).ToListAsync();
         var room = parents.Find(f => IsRoom(f.FolderType));
 
-        return room is { Private: true };
+        return room is { SettingsPrivate: true };
     }
 }

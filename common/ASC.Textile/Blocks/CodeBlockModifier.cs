@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -43,8 +43,8 @@ public class CodeBlockModifier : BlockModifier
         // Encode the contents of the "<code>" tags so that we don't
         // generate formatting out of it.
         line = NoTextileEncoder.EncodeNoTextileZones(line,
-                                @"(?<=(^|\s)<code(" + Globals.HtmlAttributesPattern + @")>)",
-                                @"(?=</code>)");
+                                @"(?<=(^|\s)<code(" + Globals.HtmlAttributesPattern + ")>)",
+                                "(?=</code>)");
         return line;
     }
 
@@ -52,9 +52,9 @@ public class CodeBlockModifier : BlockModifier
     {
         // Recode everything except "<" and ">";
         line = NoTextileEncoder.DecodeNoTextileZones(line,
-                                @"(?<=(^|\s)<code(" + Globals.HtmlAttributesPattern + @")>)",
-                                @"(?=</code>)",
-                                new[] { "<", ">" });
+                                @"(?<=(^|\s)<code(" + Globals.HtmlAttributesPattern + ")>)",
+                                "(?=</code>)",
+                                ["<", ">"]);
         return line;
     }
 

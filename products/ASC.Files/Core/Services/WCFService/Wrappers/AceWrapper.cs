@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -69,58 +69,19 @@ public class AceWrapper : IMapFrom<RoomInvitation>
 
 /// <summary>
 /// </summary>
-public class AceShortWrapper
+public class AceShortWrapper(string subjectName, string permission, bool isLink)
 {
     /// <summary>User</summary>
     /// <type>System.String, System</type>
-    public string User { get; set; }
+    public string User { get; init; } = subjectName;
 
     /// <summary>User access rights to the file</summary>
     /// <type>System.String, System</type>
-    public string Permissions { get; set; }
+    public string Permissions { get; init; } = permission;
 
-    /// <summary>Specifies if the external link is available or not</summary>
-    /// <type>System.Nullable{System.Boolean}, System</type>
-    public bool? IsLink { get; set; }
-
-    public AceShortWrapper(AceWrapper aceWrapper)
-    {
-        var permission = string.Empty;
-
-        switch (aceWrapper.Access)
-        {
-            case FileShare.Read:
-                permission = FilesCommonResource.AceStatusEnum_Read;
-                break;
-            case FileShare.ReadWrite:
-                permission = FilesCommonResource.AceStatusEnum_ReadWrite;
-                break;
-            case FileShare.CustomFilter:
-                permission = FilesCommonResource.AceStatusEnum_CustomFilter;
-                break;
-            case FileShare.Review:
-                permission = FilesCommonResource.AceStatusEnum_Review;
-                break;
-            case FileShare.FillForms:
-                permission = FilesCommonResource.AceStatusEnum_FillForms;
-                break;
-            case FileShare.Comment:
-                permission = FilesCommonResource.AceStatusEnum_Comment;
-                break;
-            case FileShare.Restrict:
-                permission = FilesCommonResource.AceStatusEnum_Restrict;
-                break;
-        }
-
-        User = aceWrapper.SubjectName;
-        if (aceWrapper.Id.Equals(FileConstant.ShareLinkId))
-        {
-            IsLink = true;
-            User = FilesCommonResource.AceShareLink;
-        }
-
-        Permissions = permission;
-    }
+    /// <summary>Is link</summary>
+    /// <type>System.Boolean, System</type>
+    public bool isLink { get; init; } = isLink;
 }
 
 public class AceAdvancedSettingsWrapper

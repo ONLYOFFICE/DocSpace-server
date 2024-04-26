@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,12 +29,6 @@ namespace ASC.Common.Security;
 public class SecurityCallContext
 {
     public object UserData { get; set; }
-    public List<ISecurityObjectId> ObjectsStack { get; private set; }
-    public List<IRole> RolesList { get; private set; }
-
-    public SecurityCallContext()
-    {
-        ObjectsStack = new List<ISecurityObjectId>();
-        RolesList = new List<IRole>();
+    public List<ISecurityObjectId> ObjectsStack { get; private set; } = new();
+    public List<IRole> RolesList { get; private set; } = new();
     }
-}

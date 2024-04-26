@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,18 +30,22 @@ using ASC.Common.Logging;
 namespace ASC.ClearEvents.Extensions;
 public static class ServiceCollectionExtension
 {
-    public static IServiceCollection AddClearEventsServices(this IServiceCollection services, IConfiguration configuration)
+    public static async Task<IServiceCollection> AddClearEventsServices(this IServiceCollection services, IConfiguration configuration, string @namespace)
     {
         var diHelper = new DIHelper(services);
 
-        services.AddScoped<EFLoggerFactory>();
+        services.AddSingleton<EFLoggerFactory>();
 
         services.AddHostedService<ClearEventsService>();
         diHelper.TryAdd<ClearEventsService>();
         services.AddBaseDbContextPool<MessagesContext>();
 
         services.AddCustomHealthCheck(configuration);
+        
+        var connectionMultiplexer = await services.GetRedisConnectionMultiplexerAsync(configuration, @namespace);
 
+        services.AddDistributedCache(connectionMultiplexer);
+            
         return services;
 
     }

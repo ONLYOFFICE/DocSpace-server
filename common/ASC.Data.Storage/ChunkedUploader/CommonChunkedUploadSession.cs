@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,18 +26,16 @@
 
 namespace ASC.Core.ChunkedUploader;
 
-public class CommonChunkedUploadSession : ICloneable
+public class CommonChunkedUploadSession(long bytesTotal) : ICloneable
 {
-    public string Id { get; init; }
-    public DateTime Created { get; set; }
+    public string Id { get; init; } = Guid.NewGuid().ToString("N");
+    public DateTime Created { get; set; } = DateTime.UtcNow;
     public DateTime Expired { get; set; }
     public string Location { get; set; }
-    public long BytesUploaded { get; set; }
-    public long BytesTotal { get; set; }
-    public bool LastChunk { get; set; }
+    public long BytesTotal { get; set; } = bytesTotal;
     public int TenantId { get; set; }
     public Guid UserId { get; set; }
-    public bool UseChunks { get; set; }
+    public bool UseChunks { get; set; } = true;
     public string CultureName { get; set; }
     public Dictionary<string, object> Items { get; set; } = new();
 
@@ -66,78 +64,78 @@ public class CommonChunkedUploadSession : ICloneable
     private const string UploadIdKey = "UploadId";
     private const string ChunksBufferKey = "ChunksBuffer";
 
-    public CommonChunkedUploadSession(long bytesTotal)
-    {
-        Id = Guid.NewGuid().ToString("N");
-        Created = DateTime.UtcNow;
-        BytesUploaded = 0;
-        BytesTotal = bytesTotal;
-        UseChunks = true;
-        LastChunk = false;
-    }
-
     public T GetItemOrDefault<T>(string key)
     {
-        if (Items.ContainsKey(key) && Items[key] != null)
+        if (!Items.TryGetValue(key, out var obj) || obj == null)
         {
-            if (Items[key] is T)
-            {
-                return (T)Items[key];
-            }
-
-            var jToken = Items[key] as Newtonsoft.Json.Linq.JToken;
-            if (jToken != null)
-            {
-                var item = jToken.ToObject<T>();
-                Items[key] = item;
-                return item;
-            }
+            return default;
         }
-        return default(T);
-    }
 
-    public virtual Stream Serialize()
-    {
-        return null;
+        switch (obj)
+        {
+            case T value:
+                return value;
+            case JsonElement element:
+                {
+                    T item;
+
+                    try
+                    {
+                        item = element.Deserialize<T>();
+                    }
+                    catch (Exception)
+                    {
+                        return default;
+                    }
+                
+                    Items[key] = item;
+                    return item;
+                }
+        }
+
+        return default;
     }
 
     public void TransformItems()
     {
         var newItems = new Dictionary<string, object>();
 
-        foreach (var item in Items)
+        foreach (var item in Items.Where(item => item.Value != null))
         {
-            if (item.Value != null)
+            if (item.Value is JsonElement value)
             {
-                if (item.Value is JsonElement)
+                switch (value.ValueKind)
                 {
-                    var value = (JsonElement)item.Value;
-
-                    switch (value.ValueKind)
-                    {
-                        case JsonValueKind.String:
-                            newItems.Add(item.Key, item.Value.ToString());
-                            break;
-                        case JsonValueKind.Number:
-                            newItems.Add(item.Key, Int32.Parse(item.Value.ToString()));
-                            break;
-                        case JsonValueKind.Array:
-                            newItems.Add(item.Key, value.EnumerateArray().Select(o => o.ToString()).ToList());
-                            break;
-                        case JsonValueKind.Object:
-                            newItems.Add(item.Key, JsonSerializer.Deserialize<Dictionary<int, string>>(item.Value.ToString()));
-                            break;
-                        default:
-                            newItems.Add(item.Key, item.Value);
-                            break;
-                    }
-                }
-                else
-                {
-                    newItems.Add(item.Key, item.Value);
+                    case JsonValueKind.String:
+                        newItems.Add(item.Key, value.ToString());
+                        break;
+                    case JsonValueKind.Number:
+                        newItems.Add(item.Key, Int32.Parse(value.ToString()));
+                        break;
+                    case JsonValueKind.Array:
+                        newItems.Add(item.Key, value.EnumerateArray().Select(o => o.ToString()).ToList());
+                        break;
+                    case JsonValueKind.Object:
+                        try
+                        {
+                            newItems.Add(item.Key, JsonSerializer.Deserialize<Dictionary<int, string>>(value.ToString()));
+                        }
+                        catch
+                        {
+                            newItems.Add(item.Key, value);
+                        }
+                        break;
+                    default:
+                        newItems.Add(item.Key, value);
+                        break;
                 }
             }
+            else
+            {
+                newItems.Add(item.Key, item.Value);
+            }
         }
+        
         Items = newItems;
     }
 

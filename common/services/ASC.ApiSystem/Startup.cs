@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,6 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Threading.Channels;
+
+using ASC.Core.Notify.Socket;
+
 namespace ASC.ApiSystem;
 
 public class Startup
@@ -40,21 +44,22 @@ public class Startup
         _hostEnvironment = hostEnvironment;
         _diHelper = new DIHelper();
         _corsOrigin = _configuration["core:cors"];
-
         if (String.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
         {
             configuration["RabbitMQ:ClientProvidedName"] = Program.AppName;
         }
     }
 
-    public void ConfigureServices(IServiceCollection services)
+    public async Task ConfigureServices(IServiceCollection services)
     {
         services.AddCustomHealthCheck(_configuration);
         services.AddHttpContextAccessor();
         services.AddMemoryCache();
         services.AddHttpClient();
+        services.AddExceptionHandler<Classes.CustomExceptionHandler>();
+        services.AddProblemDetails();
 
-        services.AddScoped<EFLoggerFactory>();
+        services.AddSingleton<EFLoggerFactory>();
         services.AddBaseDbContextPool<AccountLinkContext>();
         services.AddBaseDbContextPool<CoreDbContext>();
         services.AddBaseDbContextPool<TenantDbContext>();
@@ -69,6 +74,7 @@ public class Startup
         services.AddBaseDbContextPool<FeedDbContext>();
         services.AddBaseDbContextPool<MessagesContext>();
         services.AddBaseDbContextPool<WebhooksDbContext>();
+        services.AddBaseDbContextPool<FilesDbContext>();
 
         services.AddSession();
 
@@ -95,6 +101,8 @@ public class Startup
         _diHelper.TryAdd<BasicAuthHandler>();
         _diHelper.TryAdd<CookieAuthHandler>();
         _diHelper.TryAdd<WebhooksGlobalFilterAttribute>();
+        _diHelper.TryAdd<FilesSpaceUsageStatManager>();
+        _diHelper.TryAdd<ApiSystemAuthHandlerHelper>();
 
         if (!string.IsNullOrEmpty(_corsOrigin))
         {
@@ -117,16 +125,20 @@ public class Startup
             });
         }
 
-        services.AddDistributedCache(_configuration);
-        services.AddEventBus(_configuration);
-        services.AddDistributedTaskQueue();
-        services.AddCacheNotify(_configuration);
+        var connectionMultiplexer = await services.GetRedisConnectionMultiplexerAsync(_configuration, GetType().Namespace);
+
+        services.AddDistributedCache(connectionMultiplexer)
+                .AddEventBus(_configuration)
+                .AddDistributedTaskQueue()
+                .AddCacheNotify(_configuration)
+                .AddDistributedLock(_configuration);
 
         services.RegisterFeature();
 
-        _diHelper.TryAdd(typeof(IWebhookPublisher), typeof(WebhookPublisher));
+        services.AddScoped<ITenantQuotaFeatureStat<CountRoomFeature, int>, CountRoomCheckerStatistic>();
+        services.AddScoped<CountRoomCheckerStatistic>();
 
-        _diHelper.RegisterProducts(_configuration, _hostEnvironment.ContentRootPath);
+        _diHelper.TryAdd(typeof(IWebhookPublisher), typeof(WebhookPublisher));
 
         services.AddAutoMapper(BaseStartup.GetAutoMapperProfileAssemblies());
 
@@ -135,18 +147,28 @@ public class Startup
             services.AddStartupTask<WarmupServicesStartupTask>()
                     .TryAddSingleton(services);
         }
-
-        services.AddAuthentication()
+        
+        services.AddSingleton(Channel.CreateUnbounded<SocketData>());
+        services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Reader);
+        services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Writer);
+        _diHelper.TryAdd<SocketService>();
+        
+        services
+            .AddAuthentication()
             .AddScheme<AuthenticationSchemeOptions, AuthHandler>("auth:allowskip:default", _ => { })
-            .AddScheme<AuthenticationSchemeOptions, AuthHandler>("auth:allowskip:registerportal", _ => { });
+            .AddScheme<AuthenticationSchemeOptions, AuthHandler>("auth:allowskip:registerportal", _ => { })
+            .AddScheme<AuthenticationSchemeOptions, ApiSystemAuthHandler>("auth:portal", _ => { })
+            .AddScheme<AuthenticationSchemeOptions, ApiSystemBasicAuthHandler>("auth:portalbasic", _ => { });
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
+        app.UseExceptionHandler();
+
         app.UseRouting();
 
         if (!string.IsNullOrEmpty(_corsOrigin))
-        {
+        { 
             app.UseCors(CustomCorsPolicyName);
         }
 
@@ -160,11 +182,11 @@ public class Startup
         {
             endpoints.MapCustomAsync().Wait();
 
-            endpoints.MapHealthChecks("/health", new HealthCheckOptions()
+            endpoints.MapHealthChecks("/health", new HealthCheckOptions
             {
                 Predicate = _ => true,
                 ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
-            });
+            }).ShortCircuit();
 
             endpoints.MapHealthChecks("/liveness", new HealthCheckOptions
             {

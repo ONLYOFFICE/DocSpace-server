@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,36 +27,20 @@
 namespace ASC.Web.Core;
 
 [Scope]
-public class BruteForceLoginManager
+public class BruteForceLoginManager(
+    IHttpContextAccessor httpContextAccessor,
+    SettingsManager settingsManager,
+    UserManager userManager,
+    IDistributedCache distributedCache,
+    SetupInfo setupInfo,
+    Recaptcha recaptcha, 
+    IDistributedLockProvider distributedLockProvider)
 {
-    private readonly SettingsManager _settingsManager;
-    private readonly UserManager _userManager;
-    private readonly TenantManager _tenantManager;
-    private readonly IDistributedCache _distributedCache;
-    private readonly SetupInfo _setupInfo;
-    private readonly Recaptcha _recaptcha;
-    private static readonly SemaphoreSlim _semaphore = new(1);
-
-    public BruteForceLoginManager(SettingsManager settingsManager,
-        UserManager userManager,
-        TenantManager tenantManager,
-        IDistributedCache distributedCache,
-        SetupInfo setupInfo,
-        Recaptcha recaptcha)
-    {
-        _settingsManager = settingsManager;
-        _userManager = userManager;
-        _tenantManager = tenantManager;
-        _distributedCache = distributedCache;
-        _setupInfo = setupInfo;
-        _recaptcha = recaptcha;
-    }
-
-    public async Task<(bool, bool)> IncrementAsync(string key, string requestIp, bool throwException, string exceptionMessage = null)
+    public async Task<(bool Result, bool ShowRecaptcha)> IncrementAsync(string key, string requestIp, bool throwException, string exceptionMessage = null)
     {
         var blockCacheKey = GetBlockCacheKey(key, requestIp);
         
-        if (GetFromCache<string>(blockCacheKey) != null)
+        if (await GetFromCache<string>(blockCacheKey) != null)
         {
             if (throwException)
             {
@@ -66,18 +50,16 @@ public class BruteForceLoginManager
             return (false, true);
         }
 
-        try
+        await using (await distributedLockProvider.TryAcquireFairLockAsync(GetLockKey(requestIp, key)))
         {
-            await _semaphore.WaitAsync();
-            
-            if (GetFromCache<string>(blockCacheKey) != null)
+            if (await GetFromCache<string>(blockCacheKey) != null)
             {
                 throw new BruteForceCredentialException(exceptionMessage);
             }
 
             var historyCacheKey = GetHistoryCacheKey(key, requestIp);
-            var settings = new LoginSettingsWrapper(_settingsManager.Load<LoginSettings>());
-            var history = GetFromCache<List<DateTime>>(historyCacheKey) ?? new List<DateTime>();
+            var settings = new LoginSettingsWrapper(await settingsManager.LoadAsync<LoginSettings>());
+            var history = await GetFromCache<List<DateTime>>(historyCacheKey) ?? new List<DateTime>();
 
             var now = DateTime.UtcNow;
             var checkTime = now.Subtract(settings.CheckPeriod);
@@ -89,8 +71,8 @@ public class BruteForceLoginManager
 
             if (history.Count > settings.AttemptCount)
             {
-                SetToCache(blockCacheKey, "block", now.Add(settings.BlockTime));
-                await _distributedCache.RemoveAsync(historyCacheKey);
+                await SetToCache(blockCacheKey, "block", now.Add(settings.BlockTime));
+                await distributedCache.RemoveAsync(historyCacheKey);
 
                 if (throwException)
                 {
@@ -100,58 +82,48 @@ public class BruteForceLoginManager
                 return (false, showRecaptcha);
             }
 
-            SetToCache(historyCacheKey, history, now.Add(settings.CheckPeriod));
+            await SetToCache(historyCacheKey, history, now.Add(settings.CheckPeriod));
 
             return (true, showRecaptcha);
-        }
-        finally
-        {
-            _semaphore.Release();
         }
     }
 
     public async Task DecrementAsync(string key, string requestIp)
     {
-        try
+        await using (await distributedLockProvider.TryAcquireFairLockAsync(GetLockKey(requestIp, key)))
         {
-            await _semaphore.WaitAsync();
-
-            var settings = new LoginSettingsWrapper(_settingsManager.Load<LoginSettings>());
+            var settings = new LoginSettingsWrapper(await settingsManager.LoadAsync<LoginSettings>());
             var historyCacheKey = GetHistoryCacheKey(key, requestIp);
-            var history = GetFromCache<List<DateTime>>(historyCacheKey) ?? new List<DateTime>();
+            var history = await GetFromCache<List<DateTime>>(historyCacheKey) ?? new List<DateTime>();
 
             if (history.Count > 0)
             {
                 history.RemoveAt(history.Count - 1);
             }
 
-            SetToCache(historyCacheKey, history, DateTime.UtcNow.Add(settings.CheckPeriod));
-        }
-        finally
-        {
-            _semaphore.Release();
+            await SetToCache(historyCacheKey, history, DateTime.UtcNow.Add(settings.CheckPeriod));
         }
     }
 
-    public async Task<UserInfo> AttemptAsync(string login, string passwordHash, string requestIp, string recaptchaResponse)
+    public async Task<UserInfo> AttemptAsync(string login,  string recaptchaResponse,  Func<Task<UserInfo>> getUser)
     {
         UserInfo user;
 
+        var requestIp = MessageSettings.GetIP(httpContextAccessor.HttpContext?.Request);
         var secretEmail = SetupInfo.IsSecretEmail(login);
 
         var recaptchaPassed = secretEmail || await CheckRecaptchaAsync(recaptchaResponse, requestIp);
 
         var blockCacheKey = GetBlockCacheKey(login, requestIp);
 
-        if (!recaptchaPassed && GetFromCache<string>(blockCacheKey) != null)
+        if (!recaptchaPassed && await GetFromCache<string>(blockCacheKey) != null)
         {
             throw new BruteForceCredentialException();
         }
 
-        try
+        await using (await distributedLockProvider.TryAcquireFairLockAsync(GetLockKey(requestIp, login)))
         {
-            await _semaphore.WaitAsync();
-            if (!recaptchaPassed && GetFromCache<string>(blockCacheKey) != null)
+            if (!recaptchaPassed && await GetFromCache<string>(blockCacheKey) != null)
             {
                 throw new BruteForceCredentialException();
             }
@@ -165,43 +137,38 @@ public class BruteForceLoginManager
             {
                 historyCacheKey = GetHistoryCacheKey(login, requestIp);
 
-                settings = new LoginSettingsWrapper(await _settingsManager.LoadAsync<LoginSettings>());
+                settings = new LoginSettingsWrapper(await settingsManager.LoadAsync<LoginSettings>());
                 var checkTime = now.Subtract(settings.CheckPeriod);
 
-                history = GetFromCache<List<DateTime>>(historyCacheKey) ?? new List<DateTime>();
+                history = await GetFromCache<List<DateTime>>(historyCacheKey) ?? new List<DateTime>();
                 history = history.Where(item => item > checkTime).ToList();
                 history.Add(now);
 
                 if (history.Count > settings.AttemptCount)
                 {
-                    SetToCache(blockCacheKey, "block", now.Add(settings.BlockTime));
-                    await _distributedCache.RemoveAsync(historyCacheKey);
+                    await SetToCache(blockCacheKey, "block", now.Add(settings.BlockTime));
+                    await distributedCache.RemoveAsync(historyCacheKey);
                     throw new BruteForceCredentialException();
                 }
 
-                SetToCache(historyCacheKey, history, now.Add(settings.CheckPeriod));
+                await SetToCache(historyCacheKey, history, now.Add(settings.CheckPeriod));
             }
 
-            user = await _userManager.GetUsersByPasswordHashAsync(
-                   await _tenantManager.GetCurrentTenantIdAsync(),
-                   login,
-                   passwordHash);
+            user = await getUser();
 
-            if (user == null || !_userManager.UserExists(user))
+            if (user == null || !userManager.UserExists(user))
             {
                 throw new Exception("user not found");
             }
 
-            if (!recaptchaPassed)
+            if (recaptchaPassed)
             {
-                history.RemoveAt(history.Count - 1);
-
-                SetToCache(historyCacheKey, history, now.Add(settings.CheckPeriod));
+                return user;
             }
-        }
-        finally
-        {
-            _semaphore.Release();
+
+            history.RemoveAt(history.Count - 1);
+
+            await SetToCache(historyCacheKey, history, now.Add(settings.CheckPeriod));
         }
 
         return user;
@@ -211,11 +178,11 @@ public class BruteForceLoginManager
     {
         var recaptchaPassed = false;
 
-        if (!string.IsNullOrEmpty(_setupInfo.RecaptchaPublicKey) &&
-            !string.IsNullOrEmpty(_setupInfo.RecaptchaPrivateKey) &&
+        if (!string.IsNullOrEmpty(setupInfo.RecaptchaPublicKey) &&
+            !string.IsNullOrEmpty(setupInfo.RecaptchaPrivateKey) &&
             !string.IsNullOrEmpty(recaptchaResponse))
         {
-            recaptchaPassed = await _recaptcha.ValidateRecaptchaAsync(recaptchaResponse, requestIp);
+            recaptchaPassed = await recaptcha.ValidateRecaptchaAsync(recaptchaResponse, requestIp);
 
             if (!recaptchaPassed)
             {
@@ -226,9 +193,9 @@ public class BruteForceLoginManager
         return recaptchaPassed;
     }
 
-    private T GetFromCache<T>(string key)
+    private async Task<T> GetFromCache<T>(string key)
     {
-        var serializedObject = _distributedCache.Get(key);
+        var serializedObject = await distributedCache.GetAsync(key);
 
         if (serializedObject == null)
         {
@@ -240,19 +207,21 @@ public class BruteForceLoginManager
         return Serializer.Deserialize<T>(ms);
     }
 
-    private void SetToCache<T>(string key, T value, DateTime ExpirationPeriod)
+    private async Task SetToCache<T>(string key, T value, DateTime expirationPeriod)
     {
         using var ms = new MemoryStream();
 
         Serializer.Serialize(ms, value);
 
-        _distributedCache.Set(key, ms.ToArray(), new DistributedCacheEntryOptions
+        await distributedCache.SetAsync(key, ms.ToArray(), new DistributedCacheEntryOptions
         {
-            AbsoluteExpiration = ExpirationPeriod
+            AbsoluteExpiration = expirationPeriod
         });
     }
 
     private static string GetBlockCacheKey(string login, string requestIp) => $"loginblock/{login.ToLowerInvariant()}/{requestIp}";
 
     private static string GetHistoryCacheKey(string login, string requestIp) => $"loginsec/{login.ToLowerInvariant()}/{requestIp}";
+
+    private static string GetLockKey(string ip, string key) => $"brut_force_{ip}_{key}";
 }

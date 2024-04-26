@@ -543,19 +543,6 @@ Email: $UserEmail
  
 $Body</value>
   </data>
-  <data name="pattern_personal_after_registration14_v1" xml:space="preserve">
-    <value>h1. Obțineți aplicații ONLYOFFICE &lt;span style="color:#FF6F3D;"&gt;gratuit&lt;/span&gt;
-
-Stimate, $UserName!
-
-Obțineți gratuit aplicația ONLYOFFICE pentru a lucra cu documente de pe orice dispozitiv.
-
-&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Pentru a lucra cu documente, încărcați aplicația de editare desktop ONLYOFFICE pe&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 155px; padding-right: 155px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG1" alt="Windows" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="macOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG3" alt="Linux" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-
-&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Pentru a edita documente de pe diqpozitive mobile, obțineți aplicația ONLYOFFICE Documents pe&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 190px; padding-right: 190px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 29px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="29" height="32" src="$IMG4" alt="Android" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="iOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>h1. Obțineți aplicații ONLYOFFICE &lt;span style="color:#FF6F3D;"&gt;gratuit&lt;/span&gt;
 
@@ -569,15 +556,6 @@ Obțineți gratuit aplicația ONLYOFFICE pentru a lucra cu documente de pe orice
 &lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Pentru a edita documente de pe diqpozitive mobile, obțineți aplicația ONLYOFFICE Documents pe&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 190px; padding-right: 190px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 29px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="29" height="32" src="$IMG4" alt="Android" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="iOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $TrulyYours</value>
-  </data>
-  <data name="pattern_personal_already_exist" xml:space="preserve">
-    <value>Salut!
-S-a încercat înregistrarea unui nou cont ONLYOFFICE Personal:"$PortalUrl" pe baza acestei adrese e-mail. Dacă dumneavoastră ați întreprins înregistrarea, vă informăm că contul există deja, accesaţi pagina ONLYOFFICE Personal și vă conectați.
-Dacă v-ați uitat sau ați pierdut parola, este posibil să o recuperați de pe pagina de recuperare a parolei:"$LinkToRecovery".
-Dacă nu s-a încercat înregistrarea unui nou cont, probabil altcineva a făcut-o din greșeală. În acest caz, ignorați acest e-mail.
-
-Să aveți o zi bună!
-Echipa ONLYOFFICE</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
     <value>h1. Spațiul ONLYOFFICE DocSpace a &lt;span style="color:#FF6F3D;"&gt;fost activat&lt;/span&gt;
@@ -671,22 +649,13 @@ $TrulyYours</value>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>Bună!
 
-Sunteţi invitat să vă asociaţi la sala $Message la "${__VirtualRootPath}":"${__VirtualRootPath}". Faceți clic pe linkul pentru a accepta invitația:
+Sunteţi invitat să vă asociaţi la sala DocSpace la "${__VirtualRootPath}":"${__VirtualRootPath}". Faceți clic pe linkul pentru a accepta invitația:
 
 $OrangeButton
 
 Odată ce faceți clic pe linkul de invitație, setați o nouă parolă pentru contul dvs.
 
 $TrulyYours</value>
-  </data>
-  <data name="pattern_personal_change_password_v115" xml:space="preserve">
-    <value>Doriți să modificați parola contului dvs ONLYOFFICE Personal? Faceți clic pe butonul de mai jos pentru a confirma.
-
-$OrangeButton 
-
-Linkul este valabil timp de 7 zile.
-
-Nu doriți să modificați parola? Atunci ignorați acest mesaj.</value>
   </data>
   <data name="ActionFileCreated" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; a creat un document nou: &lt;a href={1}&gt;{2}&lt;/a&gt; în sală: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
@@ -752,9 +721,6 @@ Nu doriți să modificați parola? Atunci ignorați acest mesaj.</value>
     <value>${LetterLogoText}. Schimbare parola pentru cutia poștală</value>
   </data>
   <data name="subject_portal_rename" xml:space="preserve">
-    <value>${LetterLogoText}. Schimbare adresă portal</value>
-  </data>
-  <data name="subject_dns_change" xml:space="preserve">
     <value>${LetterLogoText}. Schimbare adresă portal</value>
   </data>
   <data name="subject_confirm_owner_change" xml:space="preserve">
@@ -903,9 +869,6 @@ Echipă de Asistență ONLYOFFICE™
   <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
     <value>Confirmare invitație la DocSpace</value>
   </data>
-  <data name="ButtonConfirmPortalAddressChange" xml:space="preserve">
-    <value>Confirmarea schimbării adresei de portal</value>
-  </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
     <value>Confirmarea actualizării proprietarului de portal</value>
   </data>
@@ -940,9 +903,6 @@ Echipă de Asistență ONLYOFFICE™
     <value>Obțineți aplicații ONLYOFFICE gratuit</value>
   </data>
   <data name="subject_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
-    <value>Obțineți aplicații ONLYOFFICE gratuit</value>
-  </data>
-  <data name="subject_personal_after_registration14_v1" xml:space="preserve">
     <value>Obțineți aplicații ONLYOFFICE gratuit</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
@@ -999,9 +959,6 @@ Echipă de Asistență ONLYOFFICE™
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>Lasati un feedback</value>
   </data>
-  <data name="subject_personal_already_exist" xml:space="preserve">
-    <value>Conectați-vă la contul dvs ONLYOFFICE Personal</value>
-  </data>
   <data name="subject_saas_video_guides_v1" xml:space="preserve">
     <value>Stăpânește spațiul ONLYOFFICE DocSpace cu ajutorul ghidurilor video</value>
   </data>
@@ -1014,12 +971,6 @@ Echipă de Asistență ONLYOFFICE™
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
     <value>Spațiul ONLYOFFICE DocSpace a fost activat</value>
-  </data>
-  <data name="subject_personal_profile_delete" xml:space="preserve">
-    <value>Închiderea contului ONLYOFFICE Personal</value>
-  </data>
-  <data name="subject_personal_confirmation" xml:space="preserve">
-    <value>ONLYOFFICE Personal. Activați adresa dvs de e-mail</value>
   </data>
   <data name="ButtonRemoveProfile" xml:space="preserve">
     <value>Eliminare profil</value>
@@ -1099,12 +1050,6 @@ Echipă de Asistență ONLYOFFICE™
   <data name="subject_enterprise_guest_welcome_v1" xml:space="preserve">
     <value>Bun venit în spaţiul ONLYOFFICE DocSpace!</value>
   </data>
-  <data name="subject_personal_activate" xml:space="preserve">
-    <value>Bun venit la soluția personală ONLYOFFICE!</value>
-  </data>
-  <data name="subject_personal_after_registration1" xml:space="preserve">
-    <value>Bun venit la ONLYOFFICE Personal</value>
-  </data>
   <data name="subject_send_whats_new" xml:space="preserve">
     <value>Ce este nou pe portalul dvs. în data de $Date</value>
   </data>
@@ -1119,31 +1064,6 @@ Echipă de Asistență ONLYOFFICE™
   </data>
   <data name="subject_profile_updated" xml:space="preserve">
     <value>Profilul dvs pe ${__VirtualRootPath} a fost schimbat</value>
-  </data>
-  <data name="pattern_personal_after_registration1" xml:space="preserve">
-    <value>h1.Bun venit pe ONLYOFFICE Personal
-
-Tocmai v-ați creat un birou personal în cloud.
-
-h3.Este un spațiu virtual de lucru în care puteți edita și stoca documente, puteți lucra cu documente de oriunde și oferi acces prietenilor sau colegilor dumneavoastră.
-
-h3.Pentru un start rapid, iată ce puteți face cu ONLYOFFICE:
-
-- Creare, vizualizare și editare a documentelor text, foilor de calcul și prezentărilor.
-
-- Lucru cu formate de fișiere cele mai uzuale. Compatibilitatea maximă cu fișiere MS Office.
-
-- Creare și co-editare "formularelor gata de completare":"https://www.onlyoffice.com/form-creator.aspx".
-
-- Partajare și colaborare online pe documente.
-
-- Utilizarea diferitor pluginuri pentru a încorpora noile funcții.
-
-- Un acces ușor la cloud Personal utilizând "Extensia Chrome":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=ro".
-
-De asemenea, puteți edita documente offline cu ajutorul "editorului de birou":"https://www.onlyoffice.com/download-desktop.aspx" gratuit sau instalați aplicația de editare pentru dispozitivul "iOS":"https://apps.apple.com/app/onlyoffice-documents/id944896972" sau "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents".
-
-$TrulyYours</value>
   </data>
   <data name="pattern_saas_video_guides_v1" xml:space="preserve">
     <value>h1. Stăpânește spațiul ONLYOFFICE DocSpace cu &lt;span style="color:#FF6F3D;"&gt;ghidurilor video&lt;/span&gt;
@@ -1235,19 +1155,6 @@ Urmăriţi linkul de mai jos pentru a confirma acţiunea:
 $OrangeButton
 
 *Menţiune*: Acest link este valabil doar timp de 7 zile. Finalizați procedura de schimbare a proprietarului de portal în perioada dată.</value>
-  </data>
-  <data name="pattern_dns_change" xml:space="preserve">
-    <value>h1.Schimbarea adresei de portal
-
-Stimată/Stimate $OwnerName,
-
-Am primit o solicitare de schimbare a adresei de portal "${__VirtualRootPath}":"${__VirtualRootPath}" în "$PortalAddress":"$PortalAddress" #if($PortalDns != "") ("$PortalDns":"$PortalDns" )#end.
-
-Urmăriţi linkul de mai jos pentru a confirma acţiunea:
-
-$OrangeButton
-
-*Menţiune*: Acest link este valabil doar timp de 7 zile. Finalizați procedura de schimbare a adresei de portal în perioada dată.</value>
   </data>
   <data name="pattern_enterprise_guest_activation_v10" xml:space="preserve">
     <value>h1. Asociați-vă spaţiului &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
@@ -1401,55 +1308,6 @@ Sunteţi invitat să vă asociaţi la "${__VirtualRootPath}":"${__VirtualRootPat
 Linkul este valabil numai timp de 7 zile.
 
 Veți primi și mai multe sfaturi despre cum să vă folosiți biroul dvs web. Puteți anula abonamentele pe pagina de Profil în orice moment, precum și să le reactivați.</value>
-  </data>
-  <data name="pattern_personal_activate" xml:space="preserve">
-    <value>Salut, $UserName
-V-ați înregistrat cu succes pe ONLYOFFICE Personal "${__VirtualRootPath}":"${__VirtualRootPath}".
-
-Conectați serviciu de stocare în cloud preferat: Dropbox, Google Drive, OneDrive sau Box pentru a crea un spaţiu unic de lucru pentru documentele dvs pe care le puteti accesa oriunde.
-
-Aflați mai multe despre ONLYOFFICE Personal în "blog-ul noastră":"$TagBlogLink".
-
-Suntem bucuroși că sunteți aici. Rămâneți la curent!
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_personal_change_email_v115" xml:space="preserve">
-    <value>Doriți să modificați adresa de e-mail pentru contul dvs ONLYOFFICE?
-
-Apăsați pe butonul de mai jos și vă conectați* la contul dvs cloud.
-
-$OrangeButton
-
-Linkul este valabil timp de 7 zile.
-
-*Dacă nu v-ați conectat la ONLYOFFICE din acest browser, utilizați adresa dvs de e-mail veche pentru confirmare.
-
-Nu doriți să modificați adresa de e-mail? Atunci ignorați acest mesaj.</value>
-  </data>
-  <data name="pattern_personal_confirmation" xml:space="preserve">
-    <value>Salut,
-
-Tocmai v-ați înregistrat contul în cadrul soluției personale ONLYOFFICE. Faceți clic "aici":"$InviteLink" pentru a confirma înregistrarea și pentru a crea parola.
-
-Dacă nu puteți deschide linkul, copiați acest link "$InviteLink":"$InviteLink" și lipiți-l în bara de adrese a browserului.
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_personal_profile_delete" xml:space="preserve">
-    <value>Referitor la solicitarea dumneavoastră de închiderea contului pe personal.onlyoffice.com. Urmăriţi linkul pentru a finaliza acțiunea (link-ul este valabil timp de 7 zile): 
-
-$OrangeButton
-
-*Mențiune*: După demararea procesului de ştergere, contul dvs și toate datele asociate vor fi şterse definitiv conform "Declaraţiei de Confidențialitate":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0".
-
-"Aflați mai multe despre închiderea contului":"${__HelpLink}/administration/configuration.aspx"
-
-Ignorați acest mesaj, dacă nu doriți să continuați. 
-
-Dacă aveți întrebări, ne contactați la "${__SalesEmail}":"mailto:${__SalesEmail}"
-
-$TrulyYours</value>
   </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1.Dezactivarea portalului "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -1884,5 +1742,24 @@ Portalul dvs este din nou disponibil.</value>
 Datele utilizatorului "$FromUserName":"$FromUserLink" au fost eliminate cu succes.
 
 Ștergerea datelor cu caracter personal a permis eliberarea $DocsSpace</value>
+  </data>
+  <data name="subject_zoom_welcome" xml:space="preserve">
+    <value>Bun venit în spaţiul ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="pattern_zoom_welcome" xml:space="preserve">
+    <value>h1. în &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+ 
+ 
+Stimate, $UserName!
+ 
+Tocmai ați creat spațiul ONLYOFFICE DocSpace, un hub de documente pentru a oferi un impuls colaborării în echipa, cu clienții și partenerii dvs și nu numai. Adresa spațiului "${__VirtualRootPath}":"${__VirtualRootPath}".
+ 
+Planul dvs tarifar actual est STARTUP. Acest abonament este absolut gratuit și include:
+ 
+&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: &amp;apos;Open Sans&amp;apos;, Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: &amp;apos;Open Sans&amp;apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;100 de administratori/utilizatori avansați&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: &amp;apos;Open Sans&amp;apos;, Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: &amp;apos;Open Sans&amp;apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Până la 100 săli&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: &amp;apos;Open Sans&amp;apos;, Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: &amp;apos;Open Sans&amp;apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;100 GB de spațiu de stocare&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+ 
+*Descoperiți un nou mod de colaborare asupra documentelor!*
+ 
+$TrulyYours</value>
   </data>
 </root>

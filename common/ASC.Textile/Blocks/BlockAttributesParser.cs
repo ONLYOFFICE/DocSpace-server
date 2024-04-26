@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -82,7 +82,7 @@ public static class BlockAttributesParser
                 rowspan = m.Groups[1].Value;
             }
             // vertical align
-            m = Regex.Match(matched, @"(" + Globals.VerticalAlignPattern + @")");
+            m = Regex.Match(matched, "(" + Globals.VerticalAlignPattern + ")");
             if (m.Success)
             {
                 style += "vertical-align:" + Globals.VerticalAlign[m.Captures[0].Value] + ";";
@@ -113,7 +113,7 @@ public static class BlockAttributesParser
             matched = matched.Replace(m.ToString(), "");
 
             // Separate the public class and the ID
-            m = Regex.Match(cssClass, @"^(.*)#(.*)$");
+            m = Regex.Match(cssClass, "^(.*)#(.*)$");
             if (m.Success)
             {
                 cssClass = m.Groups[1].Value;
@@ -127,7 +127,7 @@ public static class BlockAttributesParser
         }
 
         // Get the padding on the left
-        m = Regex.Match(matched, @"([(]+)");
+        m = Regex.Match(matched, "([(]+)");
         if (m.Success)
         {
             style += "padding-left:" + m.Groups[1].Length + "em;";
@@ -135,7 +135,7 @@ public static class BlockAttributesParser
         }
 
         // Get the padding on the right
-        m = Regex.Match(matched, @"([)]+)");
+        m = Regex.Match(matched, "([)]+)");
         if (m.Success)
         {
             style += "padding-right:" + m.Groups[1].Length + "em;";

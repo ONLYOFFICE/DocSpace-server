@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,36 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-/*
- *
- * (c) Copyright Ascensio System Limited 2010-2020
- *
- * This program is freeware. You can redistribute it and/or modify it under the terms of the GNU 
- * General Public License (GPL) version 3 as published by the Free Software Foundation (https://www.gnu.org/copyleft/gpl.html). 
- * In accordance with Section 7(a) of the GNU GPL its Section 15 shall be amended to the effect that 
- * Ascensio System SIA expressly excludes the warranty of non-infringement of any third-party rights.
- *
- * THIS PROGRAM IS DISTRIBUTED WITHOUT ANY WARRANTY; WITHOUT EVEN THE IMPLIED WARRANTY OF MERCHANTABILITY OR
- * FITNESS FOR A PARTICULAR PURPOSE. For more details, see GNU GPL at https://www.gnu.org/copyleft/gpl.html
- *
- * You can contact Ascensio System SIA by email at sales@onlyoffice.com
- *
- * The interactive user interfaces in modified source and object code versions of ONLYOFFICE must display 
- * Appropriate Legal Notices, as required under Section 5 of the GNU GPL version 3.
- *
- * Pursuant to Section 7 § 3(b) of the GNU GPL you must retain the original ONLYOFFICE logo which contains 
- * relevant author attributions when distributing the software. If the display of the logo in its graphic 
- * form is not reasonably feasible for technical reasons, you must include the words "Powered by ONLYOFFICE" 
- * in every copy of the program you distribute. 
- * Pursuant to Section 7 § 3(e) we decline to grant you any rights under trademark law for use of our trademarks.
- *
-*/
-
 
 namespace ASC.Data.Encryption;
 
 [Transient]
-public class Metadata
+public class Metadata(IConfiguration configuration)
 {
     private const string prefixString = "AscEncrypted";
 
@@ -76,12 +51,7 @@ public class Metadata
 
     private static int? iterations; // Rfc2898DeriveBytes: The minimum recommended number of iterations is 1000.
 
-    private IConfiguration Configuration { get; set; }
-
-    public Metadata(IConfiguration configuration)
-    {
-        Configuration = configuration;
-    }
+    private IConfiguration Configuration { get; set; } = configuration;
 
     private int Iterations
     {
@@ -140,7 +110,7 @@ public class Metadata
         Password = password;
 
         Prefix = Encoding.UTF8.GetBytes(prefixString);
-        Version = new byte[versionLength] { version };
+        Version = [version];
         Size = LongToByteArray(fileSize);
 
         Salt = GenerateRandom(saltLength);
@@ -158,28 +128,55 @@ public class Metadata
         try
         {
             var readed = stream.Read(Prefix, 0, prefixLength);
-            if (readed < prefixLength) return false;
+            if (readed < prefixLength)
+            {
+                return false;
+            }
 
-            if (Encoding.UTF8.GetString(Prefix) != prefixString) return false;
+            if (Encoding.UTF8.GetString(Prefix) != prefixString)
+            {
+                return false;
+            }
 
             readed = stream.Read(Version, 0, versionLength);
-            if (readed < versionLength) return false;
+            if (readed < versionLength)
+            {
+                return false;
+            }
 
-            if (Version[0] != cryptVersion) return false;
+            if (Version[0] != cryptVersion)
+            {
+                return false;
+            }
 
             readed = stream.Read(Size, 0, sizeLength);
-            if (readed < sizeLength) return false;
+            if (readed < sizeLength)
+            {
+                return false;
+            }
 
-            if (ByteArrayToLong(Size) < 0) return false;
+            if (ByteArrayToLong(Size) < 0)
+            {
+                return false;
+            }
 
             readed = stream.Read(Salt, 0, saltLength);
-            if (readed < saltLength) return false;
+            if (readed < saltLength)
+            {
+                return false;
+            }
 
             readed = stream.Read(HmacHash, 0, hmacHashLength);
-            if (readed < hmacHashLength) return false;
+            if (readed < hmacHashLength)
+            {
+                return false;
+            }
 
             readed = stream.Read(IV, 0, ivLength);
-            if (readed < ivLength) return false;
+            if (readed < ivLength)
+            {
+                return false;
+            }
 
             return true;
         }
@@ -294,7 +291,9 @@ public class Metadata
         var result = BitConverter.GetBytes(value);
 
         if (!BitConverter.IsLittleEndian)
+        {
             Array.Reverse(result);
+        }
 
         return result;
     }
@@ -302,7 +301,9 @@ public class Metadata
     private long ByteArrayToLong(byte[] value)
     {
         if (!BitConverter.IsLittleEndian)
+        {
             Array.Reverse(value);
+        }
 
         try
         {

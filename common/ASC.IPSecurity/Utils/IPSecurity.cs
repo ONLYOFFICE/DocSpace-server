@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,67 +24,78 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Users;
+
 namespace ASC.IPSecurity;
 
 [Scope]
-public class IPSecurity
+public class IPSecurity(
+    IConfiguration configuration,
+    IHttpContextAccessor httpContextAccessor,
+    AuthContext authContext,
+    TenantManager tenantManager,
+    IPRestrictionsService iPRestrictionsService,
+    UserManager userManager,
+    SettingsManager settingsManager,
+    ILogger<IPSecurity> logger)
 {
-    private readonly bool _ipSecurityEnabled;
-    private readonly ILogger<IPSecurity> _logger;
-    private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly AuthContext _authContext;
-    private readonly TenantManager _tenantManager;
-    private readonly IPRestrictionsService _ipRestrictionsService;
-    private readonly string _currentIpForTest;
-    private readonly string _myNetworks;
-    private readonly UserManager _userManager;
-    private readonly SettingsManager _settingsManager;
-
-    public IPSecurity(
-        IConfiguration configuration,
-        IHttpContextAccessor httpContextAccessor,
-        AuthContext authContext,
-        TenantManager tenantManager,
-        IPRestrictionsService iPRestrictionsService,
-        UserManager userManager,
-        SettingsManager settingsManager,
-        ILogger<IPSecurity> logger)
+    private string _currentIpForTest;
+    private string CurrentIpForTest
     {
-        _logger = logger;
-        _httpContextAccessor = httpContextAccessor;
-        _authContext = authContext;
-        _tenantManager = tenantManager;
-        _ipRestrictionsService = iPRestrictionsService;
-        _userManager = userManager;
-        _settingsManager = settingsManager;
-        _currentIpForTest = configuration["ipsecurity:test"];
-        _myNetworks = configuration["ipsecurity:mynetworks"];
-        var hideSettings = (configuration["web:hide-settings"] ?? "").Split(',', ';', ' ');
-        _ipSecurityEnabled = !hideSettings.Contains("IpSecurity", StringComparer.CurrentCultureIgnoreCase);
+        get
+        {
+            return _currentIpForTest ??= configuration["ipsecurity:test"];
+        }
     }
 
+    private string _myNetworks;
+    private string MyNetworks
+    {
+        get
+        {
+            return _myNetworks ??= configuration["ipsecurity:mynetworks"];
+        }
+    }
+
+    private bool? _ipSecurityEnabled;
+    private bool IpSecurityEnabled
+    {
+        get
+        {
+            if (_ipSecurityEnabled.HasValue)
+            {
+                return _ipSecurityEnabled.Value;
+            }
+            
+            var hideSettings = (configuration["web:hide-settings"] ?? "").Split(',', ';', ' ');
+            _ipSecurityEnabled = !hideSettings.Contains("IpSecurity", StringComparer.CurrentCultureIgnoreCase);
+            return _ipSecurityEnabled.Value;
+        }
+    }
+    
+    
     public async Task<bool> VerifyAsync()
     {
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        var tenant = await tenantManager.GetCurrentTenantAsync();
 
-        if (!_ipSecurityEnabled)
+        if (!IpSecurityEnabled)
         {
             return true;
         }
         
-        var enable = (await _settingsManager.LoadAsync<IPRestrictionsSettings>()).Enable;
+        var enable = (await settingsManager.LoadAsync<IPRestrictionsSettings>()).Enable;
 
         if (!enable)
         {
             return true;
         }
         
-        if (_httpContextAccessor?.HttpContext == null)
+        if (httpContextAccessor?.HttpContext == null)
         {
             return true;
         }
 
-        if (tenant == null || _authContext.CurrentAccount.ID == tenant.OwnerId && !_authContext.IsFromInvite())
+        if (tenant == null || authContext.CurrentAccount.ID == tenant.OwnerId && !authContext.IsFromInvite())
         {
             return true;
         }
@@ -92,25 +103,25 @@ public class IPSecurity
         string requestIps = null;
         try
         {
-            var restrictions = (await _ipRestrictionsService.GetAsync(tenant.Id)).ToList();
+            var restrictions = (await iPRestrictionsService.GetAsync(tenant.Id)).ToList();
 
             if (restrictions.Count == 0)
             {
                 return true;
             }
 
-            requestIps = _currentIpForTest;
+            requestIps = CurrentIpForTest;
 
             if (string.IsNullOrWhiteSpace(requestIps))
             {
-                requestIps = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress?.ToString();
+                requestIps = httpContextAccessor.HttpContext.Connection.RemoteIpAddress?.ToString();
             }
 
             var ips = string.IsNullOrWhiteSpace(requestIps)
-                          ? Array.Empty<string>()
-                          : requestIps.Split(new[] { ",", " " }, StringSplitOptions.RemoveEmptyEntries);
+                          ? []
+                          : requestIps.Split([",", " "], StringSplitOptions.RemoveEmptyEntries);
 
-            var isDocSpaceAdmin = await _userManager.IsUserInGroupAsync(_authContext.CurrentAccount.ID, Core.Users.Constants.GroupAdmin.ID);
+            var isDocSpaceAdmin = await userManager.IsUserInGroupAsync(authContext.CurrentAccount.ID, Constants.GroupAdmin.ID);
 
             if (ips.Any(requestIp => restrictions.Exists(restriction => (!restriction.ForAdmin || isDocSpaceAdmin) && IPAddressRange.MatchIPs(requestIp, restriction.Ip))))
             {
@@ -124,12 +135,12 @@ public class IPSecurity
         }
         catch (Exception ex)
         {
-            _logger.ErrorCantVerifyRequest(requestIps ?? "", tenant, ex);
+            logger.ErrorCantVerifyRequest(requestIps ?? "", tenant, ex);
 
             return false;
         }
 
-        _logger.InformationRestricted(requestIps, tenant, _httpContextAccessor.HttpContext.Request.GetDisplayUrl());
+        logger.InformationRestricted(requestIps, tenant, httpContextAccessor.HttpContext.Request.GetDisplayUrl());
 
         return false;
     }
@@ -140,9 +151,9 @@ public class IPSecurity
     {
         try
         {
-            if (!string.IsNullOrEmpty(_myNetworks))
+            if (!string.IsNullOrEmpty(MyNetworks))
             {
-                var myNetworkIps = _myNetworks.Split(new[] { ",", " " }, StringSplitOptions.RemoveEmptyEntries);
+                var myNetworkIps = MyNetworks.Split([",", " "], StringSplitOptions.RemoveEmptyEntries);
 
                 if (ips.Any(requestIp => myNetworkIps.Any(ipAddress => IPAddressRange.MatchIPs(requestIp, ipAddress))))
                 {
@@ -166,7 +177,7 @@ public class IPSecurity
         }
         catch (Exception ex)
         {
-            _logger.ErrorCantVerifyLocalNetWork(string.Join(",", ips), ex);
+            logger.ErrorCantVerifyLocalNetWork(string.Join(",", ips), ex);
         }
 
         return false;

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,13 +27,7 @@
 namespace ASC.Web.Files.Core.Search;
 
 [Scope(Additional = typeof(FactoryIndexerFolderExtension))]
-public class FactoryIndexerFolder : FactoryIndexer<DbFolder>
-{
-    private readonly IDbContextFactory<FilesDbContext> _dbContextFactory;
-    private readonly Settings _settings;
-
-    public FactoryIndexerFolder(
-        ILoggerProvider options,
+public class FactoryIndexerFolder(ILoggerProvider options,
         TenantManager tenantManager,
         SearchSettingsHelper searchSettingsHelper,
         FactoryIndexer factoryIndexer,
@@ -42,12 +36,8 @@ public class FactoryIndexerFolder : FactoryIndexer<DbFolder>
         IDbContextFactory<FilesDbContext> dbContextFactory,
         ICache cache,
         Settings settings)
-        : base(options, tenantManager, searchSettingsHelper, factoryIndexer, baseIndexer, serviceProvider, cache)
-    {
-        _dbContextFactory = dbContextFactory;
-        _settings = settings;
-    }
-
+    : FactoryIndexer<DbFolder>(options, tenantManager, searchSettingsHelper, factoryIndexer, baseIndexer, serviceProvider, cache)
+{
     public override async Task IndexAllAsync()
     {
         try
@@ -55,10 +45,10 @@ public class FactoryIndexerFolder : FactoryIndexer<DbFolder>
             var j = 0;
             var tasks = new List<Task>();
             var now = DateTime.UtcNow;
-            
+
             await foreach (var data in _indexer.IndexAllAsync(GetCount, GetIds, GetData))
             {
-                if (_settings.Threads == 1)
+                if (settings.Threads == 1)
                 {
                     await Index(data);
                 }
@@ -66,7 +56,7 @@ public class FactoryIndexerFolder : FactoryIndexer<DbFolder>
                 {
                     tasks.Add(Index(data));
                     j++;
-                    if (j >= _settings.Threads)
+                    if (j >= settings.Threads)
                     {
                         Task.WaitAll(tasks.ToArray());
                         tasks = new List<Task>();
@@ -79,7 +69,7 @@ public class FactoryIndexerFolder : FactoryIndexer<DbFolder>
             {
                 Task.WaitAll(tasks.ToArray());
             }
-            
+
             await _indexer.OnComplete(now);
         }
         catch (Exception e)
@@ -95,7 +85,7 @@ public class FactoryIndexerFolder : FactoryIndexer<DbFolder>
             var start = 0;
             var result = new List<int>();
 
-            using var filesDbContext = _dbContextFactory.CreateDbContext();
+            using var filesDbContext = dbContextFactory.CreateDbContext();
 
             while (true)
             {
@@ -116,13 +106,13 @@ public class FactoryIndexerFolder : FactoryIndexer<DbFolder>
 
         List<DbFolder> GetData(long start, long stop, DateTime lastIndexed)
         {
-            using var filesDbContext = _dbContextFactory.CreateDbContext();
+            using var filesDbContext = dbContextFactory.CreateDbContext();
             return Queries.FolderData(filesDbContext, lastIndexed, start, stop).ToList();
         }
 
         (int, int, int) GetCount(DateTime lastIndexed)
-        {
-            using var filesDbContext = _dbContextFactory.CreateDbContext();
+            {
+            using var filesDbContext = dbContextFactory.CreateDbContext();
 
             var minId = Queries.FolderMinId(filesDbContext, lastIndexed);
 
@@ -131,9 +121,9 @@ public class FactoryIndexerFolder : FactoryIndexer<DbFolder>
             var count = Queries.FoldersCount(filesDbContext, lastIndexed);
 
             return new(count, maxId, minId);
+            }
         }
-    }
-}
+        }
 
 class FolderTenant
 {
@@ -182,8 +172,7 @@ static file class Queries
                     .Where(r => r.ModifiedOn >= lastIndexed)
                     .Join(ctx.Tenants, r => r.TenantId, r => r.Id,
                         (f, t) => new FolderTenant { DbFolder = f, DbTenant = t })
-                    .Where(r => r.DbTenant.Status == TenantStatus.Active)
-                    .Count());
+                    .Count(r => r.DbTenant.Status == TenantStatus.Active));
 
     public static readonly Func<FilesDbContext, DateTime, long, int> FolderId =
         EF.CompileQuery(

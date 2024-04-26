@@ -429,7 +429,7 @@
   <data name="LoginSuccess" xml:space="preserve">
     <value>Login Success</value>
   </data>
-  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+  <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
     <value>Login Via Social Account Success</value>
   </data>
   <data name="LoginSuccessSocialApp" xml:space="preserve">
@@ -794,5 +794,8 @@
   </data>
   <data name="FileOpenedForChange" xml:space="preserve">
     <value>File Opened For Change: {0}</value>
+  </data>
+  <data name="PortalRenamed" xml:space="preserve">
+    <value>Portal Renamed</value>
   </data>
 </root>

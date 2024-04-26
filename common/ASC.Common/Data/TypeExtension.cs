@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,7 +34,7 @@ public static class TypeExtension
             var genericArguments = type.GetGenericArguments()
                                 .Select(x => x.Name)
                                 .Aggregate((x1, x2) => $"{x1}, {x2}");
-            return $"{type.Name.Substring(0, type.Name.IndexOf("`"))}"
+            return $"{type.Name[..type.Name.IndexOf("`")]}"
                  + $"<{genericArguments}>";
         }
         return type.Name;

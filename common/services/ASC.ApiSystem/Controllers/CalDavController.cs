@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,34 +29,15 @@ namespace ASC.ApiSystem.Controllers;
 [Scope]
 [ApiController]
 [Route("[controller]")]
-public class CalDavController : ControllerBase
-{
-    private readonly CommonMethods _commonMethods;
-    private readonly EmailValidationKeyProvider _emailValidationKeyProvider;
-    private readonly CoreSettings _coreSettings;
-    private readonly CommonConstants _commonConstants;
-    private readonly InstanceCrypto _instanceCrypto;
-    private readonly ILogger<CalDavController> _log;
-    private readonly IHttpClientFactory _clientFactory;
-
-    public CalDavController(
-        CommonMethods commonMethods,
+public class CalDavController(CommonMethods commonMethods,
         EmailValidationKeyProvider emailValidationKeyProvider,
         CoreSettings coreSettings,
         CommonConstants commonConstants,
         InstanceCrypto instanceCrypto,
         ILogger<CalDavController> logger,
         IHttpClientFactory httpClientFactory)
-    {
-        _commonMethods = commonMethods;
-        _emailValidationKeyProvider = emailValidationKeyProvider;
-        _coreSettings = coreSettings;
-        _commonConstants = commonConstants;
-        _instanceCrypto = instanceCrypto;
-        _log = logger;
-        _clientFactory = httpClientFactory;
-    }
-
+    : ControllerBase
+{
     #region For TEST api
 
     [HttpGet("test")]
@@ -83,13 +64,13 @@ public class CalDavController : ControllerBase
 
         try
         {
-            var validationKey = _emailValidationKeyProvider.GetEmailKey(tenant.Id, change + ConfirmType.Auth);
+            var validationKey = emailValidationKeyProvider.GetEmailKey(tenant.Id, change + ConfirmType.Auth);
 
-            SendToApi(Request.Scheme, tenant, "calendar/change_to_storage", new Dictionary<string, string> { { "change", change }, { "key", validationKey } });
+            await SendToApi(Request.Scheme, tenant, "calendar/change_to_storage", new Dictionary<string, string> { { "change", change }, { "key", validationKey } });
         }
         catch (Exception ex)
         {
-            _log.LogError(ex, "Error change_to_storage");
+            logger.LogError(ex, "Error change_to_storage");
 
             return StatusCode(StatusCodes.Status500InternalServerError, new
             {
@@ -113,13 +94,13 @@ public class CalDavController : ControllerBase
 
         try
         {
-            var validationKey = _emailValidationKeyProvider.GetEmailKey(tenant.Id, eventInfo + ConfirmType.Auth);
+            var validationKey = emailValidationKeyProvider.GetEmailKey(tenant.Id, eventInfo + ConfirmType.Auth);
 
-            SendToApi(Request.Scheme, tenant, "calendar/caldav_delete_event", new Dictionary<string, string> { { "eventInfo", eventInfo }, { "key", validationKey } });
+            await SendToApi(Request.Scheme, tenant, "calendar/caldav_delete_event", new Dictionary<string, string> { { "eventInfo", eventInfo }, { "key", validationKey } });
         }
         catch (Exception ex)
         {
-            _log.LogError(ex, "Error caldav_delete_event");
+            logger.LogError(ex, "Error caldav_delete_event");
 
             return StatusCode(StatusCodes.Status500InternalServerError, new
             {
@@ -137,7 +118,7 @@ public class CalDavController : ControllerBase
     {
         if (userPassword == null || string.IsNullOrEmpty(userPassword.User) || string.IsNullOrEmpty(userPassword.Password))
         {
-            _log.LogError("CalDav authenticated data is null");
+            logger.LogError("CalDav authenticated data is null");
 
             return BadRequest(new
             {
@@ -155,9 +136,9 @@ public class CalDavController : ControllerBase
 
         try
         {
-            _log.LogInformation(string.Format("Caldav auth user: {0}, tenant: {1}", email, tenant.Id));
+            logger.LogInformation(string.Format("Caldav auth user: {0}, tenant: {1}", email, tenant.Id));
 
-            if (_instanceCrypto.Encrypt(email) == userPassword.Password)
+            if (instanceCrypto.Encrypt(email) == userPassword.Password)
             {
                 return Ok(new
                 {
@@ -165,11 +146,11 @@ public class CalDavController : ControllerBase
                 });
             }
 
-            var validationKey = _emailValidationKeyProvider.GetEmailKey(tenant.Id, email + userPassword.Password + ConfirmType.Auth);
+            var validationKey = emailValidationKeyProvider.GetEmailKey(tenant.Id, email + userPassword.Password + ConfirmType.Auth);
 
             var authData = $"userName={HttpUtility.UrlEncode(email)}&password={HttpUtility.UrlEncode(userPassword.Password)}&key={HttpUtility.UrlEncode(validationKey)}";
 
-            SendToApi(Request.Scheme, tenant, "authentication/login", null, WebRequestMethods.Http.Post, authData);
+            await SendToApi(Request.Scheme, tenant, "authentication/login", null, WebRequestMethods.Http.Post, authData);
 
             return Ok(new
             {
@@ -178,7 +159,7 @@ public class CalDavController : ControllerBase
         }
         catch (Exception ex)
         {
-            _log.LogError(ex, "Caldav authenticated");
+            logger.LogError(ex, "Caldav authenticated");
 
             return StatusCode(StatusCodes.Status500InternalServerError, new
             {
@@ -194,12 +175,11 @@ public class CalDavController : ControllerBase
 
     private async Task<(bool, Tenant, object)> GetTenantAsync(string calendarParam)
     {
-        Tenant tenant = null;
         object error;
 
         if (string.IsNullOrEmpty(calendarParam))
         {
-            _log.LogError("calendarParam is empty");
+            logger.LogError("calendarParam is empty");
 
             error = new
             {
@@ -211,23 +191,21 @@ public class CalDavController : ControllerBase
             return (false, null, error);
         }
 
-        _log.LogInformation($"CalDav calendarParam: {calendarParam}");
+        logger.LogInformation($"CalDav calendarParam: {calendarParam}");
 
         var userParam = calendarParam.Split('/')[0];
-        (var succ, _, tenant, error) = await GetUserDataAsync(userParam);
+        (var succ, _, var tenant, error) = await GetUserDataAsync(userParam);
 
         return (succ, tenant, error);
     }
 
     private async Task<(bool, string, Tenant, object)> GetUserDataAsync(string userParam)
     {
-        string email = null;
-        Tenant tenant = null;
-        object error = null;
+        object error;
 
         if (string.IsNullOrEmpty(userParam))
         {
-            _log.LogError("userParam is empty");
+            logger.LogError("userParam is empty");
 
             error = new
             {
@@ -243,7 +221,7 @@ public class CalDavController : ControllerBase
 
         if (userData.Length < 3)
         {
-            _log.LogError($"Error Caldav username: {userParam}");
+            logger.LogError($"Error Caldav username: {userParam}");
 
             error = new
             {
@@ -255,25 +233,25 @@ public class CalDavController : ControllerBase
             return (false, null, null, error);
         }
 
-        email = string.Join("@", userData[0], userData[1]);
+        var email = string.Join("@", userData[0], userData[1]);
 
         var tenantName = userData[2];
 
-        var baseUrl = _coreSettings.BaseDomain;
+        var baseUrl = coreSettings.BaseDomain;
 
         if (!string.IsNullOrEmpty(baseUrl) && tenantName.EndsWith("." + baseUrl, StringComparison.InvariantCultureIgnoreCase))
         {
             tenantName = tenantName.Replace("." + baseUrl, "");
         }
 
-        _log.LogInformation($"CalDav: user:{userParam} tenantName:{tenantName}");
+        logger.LogInformation($"CalDav: user:{userParam} tenantName:{tenantName}");
 
         var tenantModel = new TenantModel { PortalName = tenantName };
 
-        (var succ, tenant) = await _commonMethods.TryGetTenantAsync(tenantModel);
+        var (succ, tenant) = await commonMethods.TryGetTenantAsync(tenantModel);
         if (!succ)
         {
-            _log.LogError("Model without tenant");
+            logger.LogError("Model without tenant");
 
             error = new
             {
@@ -287,7 +265,7 @@ public class CalDavController : ControllerBase
 
         if (tenant == null)
         {
-            _log.LogError("Tenant not found " + tenantName);
+            logger.LogError("Tenant not found " + tenantName);
 
             error = new
             {
@@ -302,20 +280,21 @@ public class CalDavController : ControllerBase
         return (true, email, tenant, null);
     }
 
-    private void SendToApi(string requestUriScheme,
-                            Tenant tenant,
-                            string path,
-                            IEnumerable<KeyValuePair<string, string>> args = null,
-                            string httpMethod = WebRequestMethods.Http.Get,
-                            string data = null)
+    private async Task SendToApi(
+        string requestUriScheme,
+        Tenant tenant,
+        string path,
+        IEnumerable<KeyValuePair<string, string>> args = null,
+        string httpMethod = WebRequestMethods.Http.Get,
+        string data = null)
     {
         var query = args == null
                         ? null
                         : string.Join("&", args.Select(arg => HttpUtility.UrlEncode(arg.Key) + "=" + HttpUtility.UrlEncode(arg.Value)).ToArray());
 
-        var url = $"{requestUriScheme}{Uri.SchemeDelimiter}{tenant.GetTenantDomain(_coreSettings)}{_commonConstants.WebApiBaseUrl}{path}{(string.IsNullOrEmpty(query) ? "" : "?" + query)}";
+        var url = $"{requestUriScheme}{Uri.SchemeDelimiter}{tenant.GetTenantDomain(coreSettings)}{commonConstants.WebApiBaseUrl}{path}{(string.IsNullOrEmpty(query) ? "" : "?" + query)}";
 
-        _log.LogInformation($"CalDav: SendToApi: {url}");
+        logger.LogInformation($"CalDav: SendToApi: {url}");
 
         var request = new HttpRequestMessage
         {
@@ -324,14 +303,14 @@ public class CalDavController : ControllerBase
         };
         request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
-        var httpClient = _clientFactory.CreateClient();
+        var httpClient = httpClientFactory.CreateClient();
 
         if (data != null)
         {
             request.Content = new StringContent(data, Encoding.UTF8, "application/x-www-form-urlencoded");
         }
 
-        httpClient.Send(request);
+        await httpClient.SendAsync(request);
     }
 
     #endregion

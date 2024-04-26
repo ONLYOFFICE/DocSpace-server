@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -37,9 +37,9 @@ public class Startup : BaseStartup
         }
     }
 
-    public override void ConfigureServices(IServiceCollection services)
+    public override async Task ConfigureServices(IServiceCollection services)
     {
-        base.ConfigureServices(services);
+        await base.ConfigureServices(services);
 
         var maxRequestLimit = 1024L * 1024L * 1024L;
         services.Configure<KestrelServerOptions>(options =>

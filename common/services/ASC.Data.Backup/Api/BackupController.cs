@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,33 +33,19 @@ namespace ASC.Data.Backup.Controllers;
 [Scope]
 [DefaultRoute]
 [ApiController]
-public class BackupController : ControllerBase
-{
-    private readonly BackupAjaxHandler _backupHandler;
-    private readonly IEventBus _eventBus;
-    private readonly CoreBaseSettings _coreBaseSettings;
-    private readonly CoreSettings _coreSettings;
-    private readonly CommonLinkUtility _commonLinkUtility;
-    private readonly Guid _currentUserId;
-    private readonly int _tenantId;
-
-    public BackupController(
+public class BackupController(
         BackupAjaxHandler backupAjaxHandler,
         TenantManager tenantManager,
         SecurityContext securityContext,
-        IEventBus eventBus,
         CoreBaseSettings coreBaseSettings,
-        CoreSettings coreSettings,
-        CommonLinkUtility commonLinkUtility)
-    {
-        _currentUserId = securityContext.CurrentAccount.ID;
-        _tenantId = tenantManager.GetCurrentTenant().Id;
-        _backupHandler = backupAjaxHandler;
-        _eventBus = eventBus;
-        _coreBaseSettings = coreBaseSettings;
-        _coreSettings = coreSettings;
-        _commonLinkUtility = commonLinkUtility;
-    }
+        TenantExtra tenantExtra,
+        IEventBus eventBus,
+        CommonLinkUtility commonLinkUtility,
+        CoreSettings coreSettings)
+    : ControllerBase
+{
+    private readonly Guid _currentUserId = securityContext.CurrentAccount.ID;
+
     /// <summary>
     /// Returns the backup schedule of the current portal.
     /// </summary>
@@ -70,7 +56,12 @@ public class BackupController : ControllerBase
     [HttpGet("getbackupschedule")]
     public async Task<BackupAjaxHandler.Schedule> GetBackupSchedule()
     {
-        return await _backupHandler.GetScheduleAsync();
+        if (coreBaseSettings.Standalone)
+        {
+            await tenantExtra.DemandAccessSpacePermissionAsync();
+        }
+
+        return await backupAjaxHandler.GetScheduleAsync();
     }
 
     /// <summary>
@@ -84,14 +75,19 @@ public class BackupController : ControllerBase
     [HttpPost("createbackupschedule")]
     public async Task<bool> CreateBackupScheduleAsync(BackupScheduleDto inDto)
     {
+        if (coreBaseSettings.Standalone)
+        {
+            await tenantExtra.DemandAccessSpacePermissionAsync();
+        }
+
         var storageType = inDto.StorageType == null ? BackupStorageType.Documents : (BackupStorageType)Int32.Parse(inDto.StorageType);
         var storageParams = inDto.StorageParams == null ? new Dictionary<string, string>() : inDto.StorageParams.ToDictionary(r => r.Key.ToString(), r => r.Value.ToString());
         var backupStored = inDto.BackupsStored == null ? 0 : Int32.Parse(inDto.BackupsStored);
-        var cron = new CronParams()
+        var cron = new CronParams
         {
             Period = inDto.CronParams.Period == null ? BackupPeriod.EveryDay : (BackupPeriod)Int32.Parse(inDto.CronParams.Period),
             Hour = inDto.CronParams.Hour == null ? 0 : Int32.Parse(inDto.CronParams.Hour),
-            Day = inDto.CronParams.Day == null ? 0 : Int32.Parse(inDto.CronParams.Day),
+            Day = inDto.CronParams.Day == null ? 0 : Int32.Parse(inDto.CronParams.Day)
         };
 
         if (storageType == BackupStorageType.Documents)
@@ -99,14 +95,14 @@ public class BackupController : ControllerBase
 
             if (int.TryParse(storageParams["folderId"], out var fId))
             {
-                await _backupHandler.CheckAccessToFolderAsync(fId);
+                await backupAjaxHandler.CheckAccessToFolderAsync(fId);
             }
             else
             {
-                await _backupHandler.CheckAccessToFolderAsync(storageParams["folderId"]);
+                await backupAjaxHandler.CheckAccessToFolderAsync(storageParams["folderId"]);
             }
         }
-        await _backupHandler.CreateScheduleAsync(storageType, storageParams, backupStored, cron);
+        await backupAjaxHandler.CreateScheduleAsync(storageType, storageParams, backupStored, cron, inDto.Dump);
         return true;
     }
 
@@ -120,7 +116,12 @@ public class BackupController : ControllerBase
     [HttpDelete("deletebackupschedule")]
     public async Task<bool> DeleteBackupSchedule()
     {
-        await _backupHandler.DeleteScheduleAsync();
+        if (coreBaseSettings.Standalone)
+        {
+            await tenantExtra.DemandAccessSpacePermissionAsync();
+        }
+
+        await backupAjaxHandler.DeleteScheduleAsync();
 
         return true;
     }
@@ -137,35 +138,62 @@ public class BackupController : ControllerBase
     [HttpPost("startbackup")]
     public async Task<BackupProgress> StartBackupAsync(BackupDto inDto)
     {
+        if (coreBaseSettings.Standalone)
+        {
+            await tenantExtra.DemandAccessSpacePermissionAsync();
+        }
+
         var storageType = inDto.StorageType == null ? BackupStorageType.Documents : (BackupStorageType)Int32.Parse(inDto.StorageType);
         var storageParams = inDto.StorageParams == null ? new Dictionary<string, string>() : inDto.StorageParams.ToDictionary(r => r.Key.ToString(), r => r.Value.ToString());
+
+        var canParse = false;
+        if (storageParams.ContainsKey("folderId"))
+        {
+            canParse = int.TryParse(storageParams["folderId"], out _);
+        }
+        if (storageType == BackupStorageType.Documents && !canParse
+            || storageType == BackupStorageType.ThridpartyDocuments && canParse)
+        {
+            throw new ArgumentException("wrong folder type");
+        }
+
+        if (!coreBaseSettings.Standalone && inDto.Dump)
+        {
+            throw new ArgumentException("backup can`t start as dump");
+        }
 
         if (storageType == BackupStorageType.Documents)
         {
 
             if (int.TryParse(storageParams["folderId"], out var fId))
             {
-                await _backupHandler.CheckAccessToFolderAsync(fId);
+                await backupAjaxHandler.CheckAccessToFolderAsync(fId);
             }
             else
             {
-                await _backupHandler.CheckAccessToFolderAsync(storageParams["folderId"]);
+                await backupAjaxHandler.CheckAccessToFolderAsync(storageParams["folderId"]);
             }
         }
+        
 
-        var serverBaseUri = _coreBaseSettings.Standalone && await _coreSettings.GetSettingAsync("BaseDomain") == null
-            ? _commonLinkUtility.GetFullAbsolutePath("")
+        var serverBaseUri = coreBaseSettings.Standalone && await coreSettings.GetSettingAsync("BaseDomain") == null
+            ? commonLinkUtility.GetFullAbsolutePath("")
             : default;
-
-        _eventBus.Publish(new BackupRequestIntegrationEvent(
-             tenantId: _tenantId,
+        
+        var taskId = await backupAjaxHandler.StartBackupAsync(storageType, storageParams, serverBaseUri, inDto.Dump, false);
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        
+        eventBus.Publish(new BackupRequestIntegrationEvent(
+             tenantId: tenantId,
              storageParams: storageParams,
              storageType: storageType,
              createBy: _currentUserId,
+             dump: inDto.Dump,
+             taskId: taskId,
              serverBaseUri: serverBaseUri
         ));
 
-        return await _backupHandler.GetBackupProgressAsync();
+        return await backupAjaxHandler.GetBackupProgressAsync();
     }
 
     /// <summary>
@@ -179,7 +207,12 @@ public class BackupController : ControllerBase
     [HttpGet("getbackupprogress")]
     public async Task<BackupProgress> GetBackupProgressAsync()
     {
-        return await _backupHandler.GetBackupProgressAsync();
+        if (coreBaseSettings.Standalone)
+        {
+            await tenantExtra.DemandAccessSpacePermissionAsync();
+        }
+
+        return await backupAjaxHandler.GetBackupProgressAsync();
     }
 
     /// <summary>
@@ -193,7 +226,12 @@ public class BackupController : ControllerBase
     [HttpGet("getbackuphistory")]
     public async Task<List<BackupHistoryRecord>> GetBackupHistory()
     {
-        return await _backupHandler.GetBackupHistory();
+        if (coreBaseSettings.Standalone)
+        {
+            await tenantExtra.DemandAccessSpacePermissionAsync();
+        }
+
+        return await backupAjaxHandler.GetBackupHistory();
     }
 
     /// <summary>
@@ -204,10 +242,15 @@ public class BackupController : ControllerBase
     /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
     /// <httpMethod>DELETE</httpMethod>
     /// <path>api/2.0/backup/deletebackup/{id}</path>
-    [HttpDelete("deletebackup/{id}")]
+    [HttpDelete("deletebackup/{id:guid}")]
     public async Task<bool> DeleteBackup(Guid id)
     {
-        await _backupHandler.DeleteBackupAsync(id);
+        if (coreBaseSettings.Standalone)
+        {
+            await tenantExtra.DemandAccessSpacePermissionAsync();
+        }
+
+        await backupAjaxHandler.DeleteBackupAsync(id);
         return true;
     }
 
@@ -221,7 +264,11 @@ public class BackupController : ControllerBase
     [HttpDelete("deletebackuphistory")]
     public async Task<bool> DeleteBackupHistory()
     {
-        await _backupHandler.DeleteAllBackupsAsync();
+        if (coreBaseSettings.Standalone)
+        {
+            await tenantExtra.DemandAccessSpacePermissionAsync();
+        }
+        await backupAjaxHandler.DeleteAllBackupsAsync();
         return true;
     }
 
@@ -236,14 +283,23 @@ public class BackupController : ControllerBase
     [HttpPost("startrestore")]
     public async Task<BackupProgress> StartBackupRestoreAsync(BackupRestoreDto inDto)
     {
+        if (coreBaseSettings.Standalone)
+        {
+            await tenantExtra.DemandAccessSpacePermissionAsync();
+        }
+
+        await backupAjaxHandler.DemandPermissionsRestoreAsync();
+
         var storageParams = inDto.StorageParams == null ? new Dictionary<string, string>() : inDto.StorageParams.ToDictionary(r => r.Key.ToString(), r => r.Value.ToString());
 
-        var serverBaseUri = _coreBaseSettings.Standalone && await _coreSettings.GetSettingAsync("BaseDomain") == null
-            ? _commonLinkUtility.GetFullAbsolutePath("")
+        var serverBaseUri = coreBaseSettings.Standalone && await coreSettings.GetSettingAsync("BaseDomain") == null
+            ? commonLinkUtility.GetFullAbsolutePath("")
             : default;
-
-        _eventBus.Publish(new BackupRestoreRequestIntegrationEvent(
-                             tenantId: _tenantId,
+        
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        
+        eventBus.Publish(new BackupRestoreRequestIntegrationEvent(
+                             tenantId: tenantId,
                              createBy: _currentUserId,
                              storageParams: storageParams,
                              storageType: (BackupStorageType)Int32.Parse(inDto.StorageType.ToString()),
@@ -253,7 +309,7 @@ public class BackupController : ControllerBase
                         ));
 
 
-        return await _backupHandler.GetRestoreProgressAsync();
+        return await backupAjaxHandler.GetRestoreProgressAsync();
     }
 
     /// <summary>
@@ -269,7 +325,12 @@ public class BackupController : ControllerBase
     [AllowNotPayment]
     public async Task<BackupProgress> GetRestoreProgressAsync()
     {
-        return await _backupHandler.GetRestoreProgressAsync();
+        if (coreBaseSettings.Standalone)
+        {
+            await tenantExtra.DemandAccessSpacePermissionAsync();
+        }
+
+        return await backupAjaxHandler.GetRestoreProgressAsync();
     }
 
     /// <summary>
@@ -281,8 +342,13 @@ public class BackupController : ControllerBase
     /// <path>api/2.0/backup/backuptmp</path>
     ///<visible>false</visible>
     [HttpGet("backuptmp")]
-    public object GetTempPath()
+    public async Task<object> GetTempPath()
     {
-        return _backupHandler.GetTmpFolder();
+        if (coreBaseSettings.Standalone)
+        {
+            await tenantExtra.DemandAccessSpacePermissionAsync();
+        }
+
+        return backupAjaxHandler.GetTmpFolder();
     }
 }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,7 +30,6 @@ namespace ASC.Core.Common;
 public class BaseCommonLinkUtility
 {
     private const string LocalHost = "localhost";
-    private const int LocalPort = 8092;
 
     private UriBuilder _serverRoot;
     private string _vpath;
@@ -68,7 +67,7 @@ public class BaseCommonLinkUtility
 
                 _serverRoot = new UriBuilder(u.Scheme, LocalHost, u.Port);
             }
-            else if (_serverRoot == null)
+            else
             {
                 var serverRoot = coreBaseSettings.ServerRoot;
 
@@ -128,15 +127,6 @@ public class BaseCommonLinkUtility
                 // take values from db if localhost or no http context thread
                 var tenant = _tenantManager.GetCurrentTenant();
                 result.Host = tenant.GetTenantDomain(_coreSettings);
-
-#if DEBUG
-                // for Visual Studio debug
-                if (tenant.Alias == LocalHost)
-                {
-                    result.Host = LocalHost;
-                    result.Port = LocalPort;
-                }
-#endif
 
                 if (!string.IsNullOrEmpty(tenant.MappedDomain))
                 {

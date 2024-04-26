@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,14 +30,8 @@ using Folder = Microsoft.SharePoint.Client.Folder;
 namespace ASC.Files.Thirdparty.SharePoint;
 
 [Scope(Additional = typeof(SharePointDaoSelectorExtension))]
-internal class SharePointDaoSelector : RegexDaoSelectorBase<File, Folder, ClientObject>
+internal class SharePointDaoSelector(IServiceProvider serviceProvider, IDaoFactory daoFactory) : RegexDaoSelectorBase<File, Folder, ClientObject>(serviceProvider, daoFactory)
 {
-
-    public SharePointDaoSelector(IServiceProvider serviceProvider, IDaoFactory daoFactory)
-        : base(serviceProvider, daoFactory)
-    {
-    }
-
     public override IFileDao<string> GetFileDao(string id)
     {
         var fileDao = _serviceProvider.GetService<SharePointFileDao>();

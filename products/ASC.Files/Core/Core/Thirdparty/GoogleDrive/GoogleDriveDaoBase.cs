@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,21 +29,21 @@ using DriveFile = Google.Apis.Drive.v3.Data.File;
 namespace ASC.Files.Thirdparty.GoogleDrive;
 
 [Scope]
-internal class GoogleDriveDaoBase : ThirdPartyProviderDao<DriveFile, DriveFile, DriveFile>, IDaoBase<DriveFile, DriveFile, DriveFile>
+internal class GoogleDriveDaoBase(
+    IServiceProvider serviceProvider,
+    UserManager userManager,
+    TenantManager tenantManager,
+    TenantUtil tenantUtil,
+    IDbContextFactory<FilesDbContext> dbContextFactory,
+    SetupInfo setupInfo,
+    FileUtility fileUtility,
+    TempPath tempPath,
+    RegexDaoSelectorBase<DriveFile, DriveFile, DriveFile> regexDaoSelectorBase)
+    : ThirdPartyProviderDao<DriveFile, DriveFile, DriveFile>(serviceProvider, userManager, tenantManager, tenantUtil,
+            dbContextFactory, setupInfo, fileUtility, tempPath, regexDaoSelectorBase),
+        IDaoBase<DriveFile, DriveFile, DriveFile>
 {
     private GoogleDriveProviderInfo _providerInfo;
-    public GoogleDriveDaoBase(IServiceProvider serviceProvider,
-        UserManager userManager,
-        TenantManager tenantManager,
-        TenantUtil tenantUtil, 
-        IDbContextFactory<FilesDbContext> dbContextFactory, 
-        SetupInfo setupInfo,
-        FileUtility fileUtility,
-        TempPath tempPath,
-        AuthContext authContext,
-        RegexDaoSelectorBase<DriveFile, DriveFile, DriveFile> regexDaoSelectorBase) : base(serviceProvider, userManager, tenantManager, tenantUtil, dbContextFactory, setupInfo, fileUtility, tempPath, regexDaoSelectorBase)
-    {
-    }
 
     public void Init(string pathPrefix, IProviderInfo<DriveFile, DriveFile, DriveFile> providerInfo)
     {
@@ -73,7 +73,7 @@ internal class GoogleDriveDaoBase : ThirdPartyProviderDao<DriveFile, DriveFile, 
 
     public string GetParentFolderId(DriveFile driveEntry)
     {
-        return driveEntry == null || driveEntry.Parents == null || driveEntry.Parents.Count == 0
+        return driveEntry?.Parents == null || driveEntry.Parents.Count == 0
                    ? null
                    : driveEntry.Parents[0];
     }
@@ -116,13 +116,15 @@ internal class GoogleDriveDaoBase : ThirdPartyProviderDao<DriveFile, DriveFile, 
         var title = driveFile.Name;
 
         var gExt = MimeMapping.GetExtention(driveFile.MimeType);
-        if (GoogleLoginProvider.GoogleDriveExt.Contains(gExt))
+        if (!GoogleLoginProvider.GoogleDriveExt.Contains(gExt))
         {
-            var downloadableExtension = _fileUtility.GetGoogleDownloadableExtension(gExt);
-            if (!downloadableExtension.Equals(FileUtility.GetFileExtension(title)))
-            {
-                title += downloadableExtension;
-            }
+            return Global.ReplaceInvalidCharsAndTruncate(title);
+        }
+
+        var downloadableExtension = _fileUtility.GetGoogleDownloadableExtension(gExt);
+        if (!downloadableExtension.Equals(FileUtility.GetFileExtension(title)))
+        {
+            title += downloadableExtension;
         }
 
         return Global.ReplaceInvalidCharsAndTruncate(title);
@@ -130,15 +132,12 @@ internal class GoogleDriveDaoBase : ThirdPartyProviderDao<DriveFile, DriveFile, 
 
     public Folder<string> ToFolder(DriveFile driveEntry)
     {
-        if (driveEntry == null)
+        switch (driveEntry)
         {
-            return null;
-        }
-
-        if (driveEntry is ErrorDriveEntry)
-        {
-            //Return error entry
-            return ToErrorFolder(driveEntry as ErrorDriveEntry);
+            case null:
+                return null;
+            case ErrorDriveEntry entry:
+                return ToErrorFolder(entry);
         }
 
         if (driveEntry.MimeType != GoogleLoginProvider.GoogleDriveMimeTypeFolder)
@@ -152,13 +151,13 @@ internal class GoogleDriveDaoBase : ThirdPartyProviderDao<DriveFile, DriveFile, 
 
         folder.Id = MakeId(driveEntry);
         folder.ParentId = isRoot ? null : MakeId(GetParentFolderId(driveEntry));
-        folder.CreateOn = isRoot ? ProviderInfo.CreateOn : (driveEntry.CreatedTimeDateTimeOffset?.DateTime ?? default);
-        folder.ModifiedOn = isRoot ? ProviderInfo.CreateOn : (driveEntry.ModifiedTimeDateTimeOffset?.DateTime ?? default);
-        folder.Private = ProviderInfo.Private;
-        folder.HasLogo = ProviderInfo.HasLogo;
-        SetFolderType(folder, isRoot);
-
         folder.Title = MakeFolderTitle(driveEntry);
+        folder.CreateOn = isRoot ? ProviderInfo.CreateOn : (driveEntry.CreatedTimeDateTimeOffset?.DateTime ?? default);
+        folder.ModifiedOn = isRoot ? ProviderInfo.ModifiedOn : (driveEntry.ModifiedTimeDateTimeOffset?.DateTime ?? default);
+        folder.SettingsPrivate = ProviderInfo.Private;
+        folder.SettingsHasLogo = ProviderInfo.HasLogo;
+        folder.SettingsColor = ProviderInfo.Color;
+        ProcessFolderAsRoom(folder);
 
         if (folder.CreateOn != DateTime.MinValue && folder.CreateOn.Kind == DateTimeKind.Utc)
         {
@@ -178,7 +177,7 @@ internal class GoogleDriveDaoBase : ThirdPartyProviderDao<DriveFile, DriveFile, 
         return IsDriveFolder(driveFolder) && GetParentFolderId(driveFolder) == null;
     }
 
-    private bool IsDriveFolder(DriveFile driveFolder)
+    private static bool IsDriveFolder(DriveFile driveFolder)
     {
         return driveFolder != null && driveFolder.MimeType == GoogleLoginProvider.GoogleDriveMimeTypeFolder;
     }
@@ -213,27 +212,23 @@ internal class GoogleDriveDaoBase : ThirdPartyProviderDao<DriveFile, DriveFile, 
 
     public File<string> ToFile(DriveFile driveFile)
     {
-        if (driveFile == null)
+        switch (driveFile)
         {
-            return null;
-        }
-
-        if (driveFile is ErrorDriveEntry)
-        {
-            //Return error entry
-            return ToErrorFile(driveFile as ErrorDriveEntry);
+            case null:
+                return null;
+            case ErrorDriveEntry entry:
+                return ToErrorFile(entry);
         }
 
         var file = GetFile();
 
         file.Id = MakeId(driveFile.Id);
-        file.ContentLength = driveFile.Size.HasValue ? (long)driveFile.Size : 0;
+        file.ContentLength = driveFile.Size ?? 0;
         file.CreateOn = driveFile.CreatedTimeDateTimeOffset.HasValue ? _tenantUtil.DateTimeFromUtc(driveFile.CreatedTimeDateTimeOffset.Value.UtcDateTime) : default;
         file.ParentId = MakeId(GetParentFolderId(driveFile));
         file.ModifiedOn = driveFile.ModifiedTimeDateTimeOffset.HasValue ? _tenantUtil.DateTimeFromUtc(driveFile.ModifiedTimeDateTimeOffset.Value.UtcDateTime) : default;
-        file.NativeAccessor = driveFile;
         file.Title = MakeFileTitle(driveFile);
-        file.ThumbnailStatus = Thumbnail.Created;
+        file.ThumbnailStatus = driveFile.HasThumbnail.HasValue && driveFile.HasThumbnail.Value ? Thumbnail.Created : Thumbnail.Creating;
         file.Encrypted = ProviderInfo.Private;
 
         return file;
@@ -257,6 +252,11 @@ internal class GoogleDriveDaoBase : ThirdPartyProviderDao<DriveFile, DriveFile, 
         {
             return new ErrorDriveEntry(ex, driveId);
         }
+    }
+    
+    public async Task<DriveFile> CreateFolderAsync(string title, string folderId)
+    {
+        return await _providerInfo.CreateFolderAsync(title, MakeThirdId(folderId), GetId);
     }
 
     public async Task<DriveFile> GetFolderAsync(string entryId)
@@ -288,10 +288,8 @@ internal class GoogleDriveDaoBase : ThirdPartyProviderDao<DriveFile, DriveFile, 
         {
             return await _providerInfo.GetItemsAsync(parentDriveId);
         }
-        else
-        {
-            return await _providerInfo.GetItemsAsync(parentDriveId, folder);
-        }
+
+        return await _providerInfo.GetItemsAsync(parentDriveId, folder);
     }
 
     public Task<string> GetAvailableTitleAsync(string requestTitle, string parentFolderId, Func<string, string, Task<bool>> isExist)
@@ -299,10 +297,10 @@ internal class GoogleDriveDaoBase : ThirdPartyProviderDao<DriveFile, DriveFile, 
         return Task.FromResult(requestTitle);
     }
 
-    protected sealed class ErrorDriveEntry : DriveFile, IErrorItem
+    private sealed class ErrorDriveEntry : DriveFile, IErrorItem
     {
-        public string Error { get; set; }
-        public string ErrorId { get; private set; }
+        public string Error { get; }
+        public string ErrorId { get; }
 
         public ErrorDriveEntry(Exception e, object id)
         {

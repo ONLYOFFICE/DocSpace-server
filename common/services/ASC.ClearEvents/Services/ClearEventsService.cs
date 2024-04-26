@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,21 +27,14 @@
 namespace ASC.ClearEvents.Services;
 
 [Scope]
-public class ClearEventsService : IHostedService, IDisposable
+public class ClearEventsService(ILogger<ClearEventsService> logger, IServiceScopeFactory serviceScopeFactory)
+    : IHostedService, IDisposable
 {
-    private readonly ILogger<ClearEventsService> _logger;
-    private readonly IServiceScopeFactory _serviceScopeFactory;
     private Timer _timer;
-
-    public ClearEventsService(ILogger<ClearEventsService> logger, IServiceScopeFactory serviceScopeFactory)
-    {
-        _logger = logger;
-        _serviceScopeFactory = serviceScopeFactory;
-    }
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        _logger.InformationTimerRunnig();
+        logger.InformationTimerRunnig();
 
         _timer = new Timer(async state => await DeleteOldEventsAsync(state), null, TimeSpan.Zero,
             TimeSpan.FromDays(1));
@@ -51,7 +44,7 @@ public class ClearEventsService : IHostedService, IDisposable
 
     public Task StopAsync(CancellationToken cancellationToken)
     {
-        _logger.InformationTimerStopping();
+        logger.InformationTimerStopping();
 
         _timer?.Change(Timeout.Infinite, 0);
 
@@ -84,7 +77,7 @@ public class ClearEventsService : IHostedService, IDisposable
         }
         catch (Exception ex)
         {
-            _logger.ErrorWithException(ex);
+            logger.ErrorWithException(ex);
         }
     }
 
@@ -94,7 +87,7 @@ public class ClearEventsService : IHostedService, IDisposable
         var compile = func.Compile();
         do
         {
-            using var scope = _serviceScopeFactory.CreateScope();
+            using var scope = serviceScopeFactory.CreateScope();
             await using var ef = await scope.ServiceProvider.GetService<IDbContextFactory<MessagesContext>>().CreateDbContextAsync();
             var table = compile.Invoke(ef);
 
@@ -110,7 +103,7 @@ public class ClearEventsService : IHostedService, IDisposable
                 .Where(r => r.Date < DateTime.UtcNow.AddDays(-Convert.ToDouble(
                     ef.WebstudioSettings
                     .Where(a => a.TenantId == r.TenantId && a.Id == TenantAuditSettings.Guid)
-                    .Select(r => DbFunctionsExtension.JsonValue(nameof(r.Data).ToLower(), settings))
+                    .Select(dbWebstudioSettings => DbFunctionsExtension.JsonValue(nameof(dbWebstudioSettings.Data).ToLower(), settings))
                     .FirstOrDefault() ?? TenantAuditSettings.MaxLifeTime.ToString())))
                 .Take(1000);
 

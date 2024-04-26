@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,20 +24,15 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Microsoft.AspNetCore.Diagnostics;
+
 namespace ASC.Api.Core.Middleware;
 
-public class CustomExceptionFilterAttribute : ExceptionFilterAttribute
+public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IExceptionHandler
 {
-    private readonly ILogger<CustomExceptionFilterAttribute> _logger;
-
-    public CustomExceptionFilterAttribute(ILogger<CustomExceptionFilterAttribute> logger)
+    public async ValueTask<bool> TryHandleAsync(HttpContext context, Exception exception, CancellationToken cancellationToken)
     {
-        _logger = logger;
-    }
-
-    public override void OnException(ExceptionContext context)
-    {
-        var status = (HttpStatusCode)context.HttpContext.Response.StatusCode;
+        var status = (HttpStatusCode)context.Response.StatusCode;
         string message = null;
 
         if (status == HttpStatusCode.OK)
@@ -46,8 +41,6 @@ public class CustomExceptionFilterAttribute : ExceptionFilterAttribute
         }
 
         var withStackTrace = true;
-
-        var exception = context.Exception.GetBaseException();
 
         switch (exception)
         {
@@ -79,21 +72,25 @@ public class CustomExceptionFilterAttribute : ExceptionFilterAttribute
             case BillingNotFoundException:
                 status = HttpStatusCode.PaymentRequired;
                 break;
-            case CustomHttpException:
-                status = (HttpStatusCode)((CustomHttpException)exception).StatusCode;
+            case CustomHttpException httpException:
+                status = (HttpStatusCode)httpException.StatusCode;
+                withStackTrace = false;
+                break;
+            case NotSupportedException:
+                status = HttpStatusCode.UnsupportedMediaType;
                 withStackTrace = false;
                 break;
         }
 
-        _logger.LogCritical(exception,
-    $"error during executing {context.HttpContext.Request.Method}: {context.HttpContext.Request.Path.Value}");
+        logger.LogCritical(exception, "error during executing {RequestMethod}: {PathValue}", context.Request.Method, context.Request.Path.Value);
 
-        var result = new ObjectResult(new ErrorApiResponse(status, exception, message, withStackTrace))
-        {
-            StatusCode = (int)status
-        };
+        var result = new ErrorApiResponse(status, exception, message, withStackTrace);
 
-        context.Result = result;
+        context.Response.StatusCode = (int)status;
+
+        await context.Response.WriteAsJsonAsync(result, cancellationToken);
+        
+        return true;
     }
 }
 

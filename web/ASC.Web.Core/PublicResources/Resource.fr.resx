@@ -481,9 +481,6 @@
   <data name="CustomNamingPeopleSchema" xml:space="preserve">
     <value>Personnel</value>
   </data>
-  <data name="DnsChangeMsg" xml:space="preserve">
-    <value>Un lien pour confirmer l'opération a été envoyé à {0}(l'adresse e-mail du propriétaire du portail).</value>
-  </data>
   <data name="EmailAndPasswordIncorrectAmiId" xml:space="preserve">
     <value>Identifiant de l'instance n'est pas valide.</value>
   </data>
@@ -769,9 +766,6 @@
   <data name="Owner" xml:space="preserve">
     <value>Propriétaire</value>
   </data>
-  <data name="PersonalFreeSpaceException" xml:space="preserve">
-    <value>Quota d'espace disque est dépassé</value>
-  </data>
   <data name="PortalSecurity" xml:space="preserve">
     <value>Accès au portail</value>
   </data>
@@ -867,9 +861,6 @@
   </data>
   <data name="TariffsFeature_sso" xml:space="preserve">
     <value>SSO</value>
-  </data>
-  <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} d’espace de stockage</value>
   </data>
   <data name="TariffsFeature_total_size_exception" xml:space="preserve">
     <value>La taille d'espace utilisé ne peut pas dépasser {0}</value>
@@ -1008,5 +999,44 @@
   </data>
   <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
     <value>Trop de tentatives de connexion. Veuillez réessayer plus tard</value>
+  </data>
+  <data name="ErrorCannotDeleteLastSpace" xml:space="preserve">
+    <value>Impossible de supprimer le dernier espace avec un accès complet</value>
+  </data>
+  <data name="ErrorWebPluginArchive" xml:space="preserve">
+    <value>Mauvaise archive de plug-ins</value>
+  </data>
+  <data name="ErrorWebPluginExist" xml:space="preserve">
+    <value>Ce plug-in existe déjà</value>
+  </data>
+  <data name="ErrorWebPluginFileExtension" xml:space="preserve">
+    <value>Mauvaise extension de fichier</value>
+  </data>
+  <data name="ErrorWebPluginFileSize" xml:space="preserve">
+    <value>Taille de fichier hors limite</value>
+  </data>
+  <data name="ErrorWebPluginForbiddenSystem" xml:space="preserve">
+    <value>Toute modification des plug-ins de système est interdite</value>
+  </data>
+  <data name="ErrorWebPluginName" xml:space="preserve">
+    <value>Mauvais nom de plug-in</value>
+  </data>
+  <data name="ErrorWebPluginNoInputFile" xml:space="preserve">
+    <value>Aucun fichier d'entrée</value>
+  </data>
+  <data name="ErrorWebPluginNotFound" xml:space="preserve">
+    <value>Plug-in introuvable</value>
+  </data>
+  <data name="ErrorWebPluginToManyInputFiles" xml:space="preserve">
+    <value>Nombre de fichiers d'entrée trop élevé</value>
+  </data>
+  <data name="QuotaGreaterPortalError" xml:space="preserve">
+    <value>Échec d'allocation de mémoire - le quota de mémoire que vous essayez de définir est supérieur au quota des portails.</value>
+  </data>
+  <data name="RoomFreeSpaceException" xml:space="preserve">
+    <value>Le quota de stockage pour la salle est dépassé</value>
+  </data>
+  <data name="UserFreeSpaceException" xml:space="preserve">
+    <value>Le quota de stockage pour l'utilisateur est dépassé</value>
   </data>
 </root>

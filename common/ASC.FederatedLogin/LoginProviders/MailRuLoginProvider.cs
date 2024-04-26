@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -48,11 +48,9 @@ public class MailRuLoginProvider : BaseLoginProvider<MailRuLoginProvider>
         IConfiguration configuration,
         ICacheNotify<ConsumerCacheItem> cache,
         ConsumerFactory consumerFactory,
-        Signature signature,
-        InstanceCrypto instanceCrypto,
-            RequestHelper requestHelper,
+        RequestHelper requestHelper,
         string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null)
-        : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, signature, instanceCrypto, name, order, props, additional)
+        : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, props, additional)
     {
         _requestHelper = requestHelper;
     }
@@ -61,7 +59,7 @@ public class MailRuLoginProvider : BaseLoginProvider<MailRuLoginProvider>
     {
         try
         {
-            var token = Auth(context, Scopes, out var redirect);
+            var token = Auth(context, out var redirect);
 
             if (redirect)
             {
@@ -83,7 +81,7 @@ public class MailRuLoginProvider : BaseLoginProvider<MailRuLoginProvider>
         }
         catch (Exception ex)
         {
-            return LoginProfile.FromError(Signature, InstanceCrypto, ex);
+            return new LoginProfile(ex);
         }
     }
 
@@ -100,7 +98,7 @@ public class MailRuLoginProvider : BaseLoginProvider<MailRuLoginProvider>
                     { "method", "users.getInfo" },
                     { "secure", "1" },
                     { "session_key", accessToken },
-                    { "uids", uid },
+                    { "uids", uid }
                 };
 
         var sortedKeys = queryDictionary.Keys.ToList();
@@ -133,14 +131,13 @@ public class MailRuLoginProvider : BaseLoginProvider<MailRuLoginProvider>
             throw new Exception("Failed to correctly process the response");
         }
 
-        var profile = new LoginProfile(Signature, InstanceCrypto)
+        var profile = new LoginProfile
         {
             EMail = mailRuProfiles[0].Email,
             Id = mailRuProfiles[0].Uid,
             FirstName = mailRuProfiles[0].FirstName,
             LastName = mailRuProfiles[0].LastName,
-
-            Provider = ProviderConstants.MailRu,
+            Provider = ProviderConstants.MailRu
         };
 
         return profile;

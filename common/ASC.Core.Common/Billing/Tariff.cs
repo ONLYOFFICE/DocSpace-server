@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -81,21 +81,15 @@ public class Tariff
 
 /// <summary>
 /// </summary>
-public class Quota : IEquatable<Quota>
+public class Quota(int id, int quantity) : IEquatable<Quota>
 {
     /// <summary>ID</summary>
     /// <type>System.Int32, System</type>
-    public int Id { get; set; }
+    public int Id { get; set; } = id;
 
     /// <summary>Quantity</summary>
     /// <type>System.Int32, System</type>
-    public int Quantity { get; set; }
-
-    public Quota(int id, int quantity)
-    {
-        Id = id;
-        Quantity = quantity;
-    }
+    public int Quantity { get; set; } = quantity;
 
     public bool Equals(Quota other)
     {

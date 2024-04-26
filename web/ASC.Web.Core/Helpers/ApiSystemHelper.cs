@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,6 +30,8 @@ using Amazon;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
 
+using JsonSerializer = System.Text.Json.JsonSerializer;
+
 namespace ASC.Web.Core.Helpers;
 
 [Scope]
@@ -45,7 +47,6 @@ public class ApiSystemHelper
     private readonly byte[] _skey;
     private readonly CommonLinkUtility _commonLinkUtility;
     private readonly IHttpClientFactory _clientFactory;
-    private readonly TenantDomainValidator _tenantDomainValidator;
     private readonly CoreBaseSettings _coreBaseSettings;
     private readonly DynamoDbSettings _dynamoDbSettings;
     private const string TenantRegionKey = "tenant_region";
@@ -64,11 +65,10 @@ public class ApiSystemHelper
         _commonLinkUtility = commonLinkUtility;
         _skey = machinePseudoKeys.GetMachineConstant();
         _clientFactory = clientFactory;
-        _tenantDomainValidator = tenantDomainValidator;
         _coreBaseSettings = coreBaseSettings;
         _dynamoDbSettings = configuration.GetSetting<DynamoDbSettings>("aws:dynamoDB");
-        _regionTableName = !string.IsNullOrEmpty(_dynamoDbSettings.TableName) ? _dynamoDbSettings.TableName : "docspace-tenants_region";
-    }
+        _regionTableName = !string.IsNullOrEmpty(_dynamoDbSettings.TableName) ? _dynamoDbSettings.TableName: "docspace-tenants_region";
+        }
 
     public string CreateAuthToken(string pkey)
     {
@@ -87,7 +87,7 @@ public class ApiSystemHelper
             PortalName = HttpUtility.UrlEncode(domain)
         };
 
-        var dataJson = System.Text.Json.JsonSerializer.Serialize(data);
+        var dataJson = JsonSerializer.Serialize(data);
         var result = await SendToApiAsync(ApiSystemUrl, "portal/validateportalname", WebRequestMethods.Http.Post, userId, dataJson);
         var resObj = JsonNode.Parse(result)?.AsObject();
         if (resObj?["error"] != null)
@@ -111,7 +111,7 @@ public class ApiSystemHelper
     {
         if (String.IsNullOrEmpty(tenantRegion))
         {
-           throw new ArgumentNullException("tenantRegion");
+           throw new ArgumentNullException(nameof(tenantRegion));
         }
 
         using var awsDynamoDbClient = GetDynamoDBClient();
@@ -121,12 +121,12 @@ public class ApiSystemHelper
             TableName = _regionTableName,
             Item = new Dictionary<string, AttributeValue>
             {
-                { TenantDomainKey, new AttributeValue
+                { TenantDomainKey, new AttributeValue 
                     {
                         S = tenantDomain
                     }
                 },
-                { TenantRegionKey, new AttributeValue
+                { TenantRegionKey, new AttributeValue 
                     {
                         S = tenantRegion
                     }
@@ -168,7 +168,7 @@ public class ApiSystemHelper
             Key = new Dictionary<string, AttributeValue>
             {
                 { TenantDomainKey, new AttributeValue { S = tenantDomain } }
-            },
+            }
         };
 
         await awsDynamoDbClient.DeleteItemAsync(request);
@@ -195,7 +195,10 @@ public class ApiSystemHelper
 
         var getItemResponse = await awsDynamoDbClient.GetItemAsync(getItemRequest);
 
-        if (getItemResponse.Item.Count == 0) return null;
+        if (getItemResponse.Item.Count == 0)
+        {
+            return null;
+        }
 
         //// cut number suffix
         //while (true)
@@ -227,12 +230,12 @@ public class ApiSystemHelper
     }
 
     #endregion
-
+    
     private AmazonDynamoDBClient GetDynamoDBClient()
     {
         return new AmazonDynamoDBClient(_dynamoDbSettings.AccessKeyId, _dynamoDbSettings.SecretAccessKey, RegionEndpoint.GetBySystemName(_dynamoDbSettings.Region));
     }
-
+    
     private async Task<string> SendToApiAsync(string absoluteApiUrl, string apiPath, string httpMethod, Guid userId, string data = null)
     {
         if (!Uri.TryCreate(absoluteApiUrl, UriKind.Absolute, out _))
@@ -258,9 +261,7 @@ public class ApiSystemHelper
 
         var httpClient = _clientFactory.CreateClient();
         using var response = await httpClient.SendAsync(request);
-        await using var stream = await response.Content.ReadAsStreamAsync();
-        using var reader = new StreamReader(stream, Encoding.UTF8);
-        return await reader.ReadToEndAsync();
+        return await response.Content.ReadAsStringAsync();
     }
 }
 

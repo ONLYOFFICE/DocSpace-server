@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,40 +24,43 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Threading.Channels;
+
 namespace ASC.Core.Common.Quota;
-public class QuotaSocketManager : SocketServiceClient
+public class QuotaSocketManager(
+    ITariffService tariffService,
+    TenantManager tenantManager,
+    ChannelWriter<SocketData> channelWriter,
+    MachinePseudoKeys machinePseudoKeys,
+    IConfiguration configuration)
+    : SocketServiceClient(tariffService, tenantManager, channelWriter, machinePseudoKeys, configuration)
 {
-    private readonly TenantManager _tenantManager;
-
     protected override string Hub => "files";
-
-    public QuotaSocketManager(
-        ILogger<SocketServiceClient> logger, 
-        IHttpClientFactory clientFactory, 
-        MachinePseudoKeys machinePseudoKeys,
-        TenantManager tenantManager,
-        IConfiguration configuration) : base(logger, clientFactory, machinePseudoKeys, configuration)
-    {
-        _tenantManager = tenantManager;
-    }
 
     public async Task ChangeQuotaUsedValueAsync(string featureId, object value)
     {
-        var room = GetQuotaRoom();
+        var room = await GetQuotaRoom();
 
         await MakeRequest("change-quota-used-value", new { room, featureId, value });
     }
 
+    public async Task ChangeCustomQuotaUsedValueAsync(int tenantId, string customQuotaFeature, bool enableQuota, long usedSpace, long quotaLimit, List<Guid> userIds)
+    {
+        var room = $"{tenantId}-QUOTA";
+
+        await MakeRequest("change-user-quota-used-value", new { room, customQuotaFeature, enableQuota, usedSpace, quotaLimit, userIds });
+    }
+
     public async Task ChangeQuotaFeatureValue(string featureId, object value)
     {
-        var room = GetQuotaRoom();
+        var room = await GetQuotaRoom();
 
         await MakeRequest("change-quota-feature-value", new { room, featureId, value });
     }
 
-    private string GetQuotaRoom()
+    private async Task<string> GetQuotaRoom()
     {
-        var tenantId = _tenantManager.GetCurrentTenant().Id;
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
         return $"{tenantId}-quota";
     }

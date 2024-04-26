@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -38,7 +38,7 @@ public class SubscriptionMethod : IMapFrom<DbSubscriptionMethod>
 
     public static implicit operator SubscriptionMethod(SubscriptionMethodCache cache)
     {
-        return new SubscriptionMethod()
+        return new SubscriptionMethod
         {
             Tenant = cache.Tenant,
             Source = cache.SourceId,

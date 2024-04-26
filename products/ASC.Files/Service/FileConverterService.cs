@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,78 +24,38 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Security;
+
+using SecurityContext = ASC.Core.SecurityContext;
+
 namespace ASC.Files.ThumbnailBuilder;
 
 [Singleton(Additional = typeof(FileConverterQueueExtension))]
-internal class FileConverterService<T> : BackgroundService
-{
-    private readonly IServiceScopeFactory _serviceScopeFactory;
-    private readonly int _timerDelay = 1000;
-    private readonly ILogger<FileConverterService<T>> _logger;
-
-    public FileConverterService(
-        IServiceScopeFactory serviceScopeFactory,
+internal class FileConverterService<T>(
+        IServiceScopeFactory scopeFactory,
         ILogger<FileConverterService<T>> logger)
+     : ActivePassiveBackgroundService<FileConverterService<T>>(logger, scopeFactory)
+ {
+    private static readonly int _timerDelay = 1000;
+    private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
+
+    protected override TimeSpan ExecuteTaskPeriod { get; set; } = TimeSpan.FromMilliseconds(_timerDelay);
+    protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
-        _logger = logger;
-        _serviceScopeFactory = serviceScopeFactory;
-    }
-
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        _logger.DebugFileConverterServiceRuning();
-
-        stoppingToken.Register(() => _logger.DebugFileConverterServiceStopping());
-
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            await using var serviceScope = _serviceScopeFactory.CreateAsyncScope();
-
-            var registerInstanceService = serviceScope.ServiceProvider.GetService<IRegisterInstanceManager<FileConverterService<T>>>();
-
-            if (!await registerInstanceService.IsActive(RegisterInstanceWorkerService<FileConverterService<T>>.InstanceId))
-            {
-                await Task.Delay(1000, stoppingToken);
-
-                continue;
-            }
-
-            await ExecuteCheckFileConverterStatusAsync(serviceScope);
-
-            await Task.Delay(_timerDelay, stoppingToken);
-        }
-    }
-
-    private async Task ExecuteCheckFileConverterStatusAsync(IServiceScope scope)
-    {
-        TenantManager tenantManager;
-        UserManager userManager;
-        SecurityContext securityContext;
-        IDaoFactory daoFactory;
-        FileSecurity fileSecurity;
-        PathProvider pathProvider;
-        SetupInfo setupInfo;
-        FileUtility fileUtility;
-        DocumentServiceHelper documentServiceHelper;
-        DocumentServiceConnector documentServiceConnector;
-        EntryStatusManager entryManager;
-        FileConverter fileConverter;
-        FileConverterQueue fileConverterQueue;
-
-        var logger = scope.ServiceProvider.GetService<ILogger<FileConverterQueue>>();
-
         try
         {
-            fileConverterQueue = scope.ServiceProvider.GetService<FileConverterQueue>();
+            await using var serviceScope = _scopeFactory.CreateAsyncScope();
 
-            var _conversionQueue = fileConverterQueue.GetAllTask<T>().ToList();
+            var fileConverterQueue = serviceScope.ServiceProvider.GetService<FileConverterQueue>();
 
-            if (_conversionQueue.Count > 0)
+            var conversionQueue = (await fileConverterQueue.GetAllTaskAsync<T>()).ToList();
+
+            if (conversionQueue.Count > 0)
             {
-                logger.DebugRunCheckConvertFilesStatus(_conversionQueue.Count);
+                logger.DebugRunCheckConvertFilesStatus(conversionQueue.Count);
             }
 
-            var filesIsConverting = _conversionQueue
+            var filesIsConverting = conversionQueue
                                     .Where(x => string.IsNullOrEmpty(x.Processed))
                                     .ToList();
 
@@ -103,17 +63,19 @@ internal class FileConverterService<T> : BackgroundService
             {
                 converter.Processed = "1";
 
-                var fileId = JsonDocument.Parse(converter.Source).RootElement.GetProperty("id").Deserialize<T>();
-                var fileVersion = JsonDocument.Parse(converter.Source).RootElement.GetProperty("version").Deserialize<int>();
+                var parsed = JsonDocument.Parse(converter.Source).RootElement;
+                var fileId = parsed.GetProperty("id").Deserialize<T>();
+                var fileVersion = parsed.GetProperty("version").Deserialize<int>();
+                var updateIfExist = parsed.GetProperty("updateIfExist").Deserialize<bool>();
 
                 int operationResultProgress;
                 var password = converter.Password;
 
-                var commonLinkUtility = scope.ServiceProvider.GetService<CommonLinkUtility>();
+                var commonLinkUtility = serviceScope.ServiceProvider.GetService<CommonLinkUtility>();
                 commonLinkUtility.ServerUri = converter.ServerRootPath;
 
-                var scopeClass = scope.ServiceProvider.GetService<FileConverterQueueScope>();
-                (_, tenantManager, userManager, securityContext, daoFactory, fileSecurity, pathProvider, setupInfo, fileUtility, documentServiceHelper, documentServiceConnector, entryManager, fileConverter) = scopeClass;
+                var scopeClass = serviceScope.ServiceProvider.GetService<FileConverterQueueScope>();
+                var (tenantManager, userManager, securityContext, daoFactory, fileSecurity, pathProvider, fileUtility, documentServiceHelper, documentServiceConnector, entryManager, fileConverter) = scopeClass;
 
                 await tenantManager.SetCurrentTenantAsync(converter.TenantId);
 
@@ -127,13 +89,6 @@ internal class FileConverterService<T> : BackgroundService
 
                 try
                 {
-                    var externalShare = scope.ServiceProvider.GetRequiredService<ExternalShare>();
-
-                    if (!string.IsNullOrEmpty(converter.ExternalShareData))
-                    {
-                        externalShare.SetCurrentShareData(JsonSerializer.Deserialize<ExternalShareData>(converter.ExternalShareData));
-                    }
-
                     var user = await userManager.GetUsersAsync(converter.Account);
 
                     var culture = string.IsNullOrEmpty(user.CultureName) ? (await tenantManager.GetCurrentTenantAsync()).GetCulture() : CultureInfo.GetCultureInfo(user.CultureName);
@@ -144,12 +99,7 @@ internal class FileConverterService<T> : BackgroundService
                     if (!await fileSecurity.CanReadAsync(file) && file.RootFolderType != FolderType.BUNCH)
                     {
                         //No rights in CRM after upload before attach
-                        throw new System.Security.SecurityException(FilesCommonResource.ErrorMassage_SecurityException_ReadFile);
-                    }
-
-                    if (file.ContentLength > setupInfo.AvailableFileSize)
-                    {
-                        throw new Exception(string.Format(FilesCommonResource.ErrorMassage_FileSizeConvert, FileSizeComment.FilesSizeToString(setupInfo.AvailableFileSize)));
+                        throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
                     }
 
                     fileUri = await pathProvider.GetFileStreamUrlAsync(file);
@@ -158,7 +108,7 @@ internal class FileConverterService<T> : BackgroundService
                     var fileExtension = file.ConvertedExtension;
                     var docKey = await documentServiceHelper.GetDocKeyAsync(file);
 
-                    fileUri = await documentServiceConnector.ReplaceCommunityAdressAsync(fileUri);
+                    fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(fileUri);
                     (operationResultProgress, convertedFileUrl, convertedFileType) = await documentServiceConnector.GetConvertedUriAsync(fileUri, fileExtension, toExtension, docKey, password, CultureInfo.CurrentUICulture.Name, null, null, true);
                 }
                 catch (Exception exception)
@@ -167,21 +117,19 @@ internal class FileConverterService<T> : BackgroundService
 
                     logger.ErrorConvertFileWithUrl(file.Id.ToString(), fileUri, exception);
 
-                    var operationResult = converter;
-
-                    if (operationResult.Delete)
+                    if (converter.Delete)
                     {
-                        _conversionQueue.Remove(operationResult);
+                        conversionQueue.Remove(converter);
                     }
                     else
                     {
-                        operationResult.Progress = 100;
-                        operationResult.StopDateTime = DateTime.UtcNow;
-                        operationResult.Error = exception.Message;
+                        converter.Progress = 100;
+                        converter.StopDateTime = DateTime.UtcNow;
+                        converter.Error = exception.Message;
 
                         if (password1)
                         {
-                            operationResult.Result = "password";
+                            converter.Result = "password";
                         }
                     }
 
@@ -192,21 +140,19 @@ internal class FileConverterService<T> : BackgroundService
 
                 if (operationResultProgress < 100)
                 {
-                    var operationResult = converter;
-
-                    if (DateTime.UtcNow - operationResult.StartDateTime > TimeSpan.FromMinutes(10))
+                    if (DateTime.UtcNow - converter.StartDateTime > TimeSpan.FromMinutes(10))
                     {
-                        operationResult.StopDateTime = DateTime.UtcNow;
-                        operationResult.Error = FilesCommonResource.ErrorMassage_ConvertTimeout;
+                        converter.StopDateTime = DateTime.UtcNow;
+                        converter.Error = FilesCommonResource.ErrorMessage_ConvertTimeout;
 
                         logger.ErrorCheckConvertFilesStatus(file.Id.ToString(), file.ContentLength);
                     }
                     else
                     {
-                        operationResult.Processed = "";
+                        converter.Processed = "";
                     }
 
-                    operationResult.Progress = operationResultProgress;
+                    converter.Progress = operationResultProgress;
 
                     logger.DebugCheckConvertFilesStatusIterationContinue();
 
@@ -219,7 +165,7 @@ internal class FileConverterService<T> : BackgroundService
 
                 try
                 {
-                    newFile = await fileConverter.SaveConvertedFileAsync(file, convertedFileUrl, convertedFileType);
+                    newFile = await fileConverter.SaveConvertedFileAsync(file, convertedFileUrl, convertedFileType, updateIfExist);
                 }
                 catch (Exception e)
                 {
@@ -231,11 +177,9 @@ internal class FileConverterService<T> : BackgroundService
                 }
                 finally
                 {
-                    var operationResult = converter;
-
-                    if (operationResult.Delete)
+                    if (converter.Delete)
                     {
-                        _conversionQueue.Remove(operationResult);
+                        conversionQueue.Remove(converter);
                     }
                     else
                     {
@@ -245,16 +189,16 @@ internal class FileConverterService<T> : BackgroundService
                             var folder = await folderDao.GetFolderAsync(newFile.ParentId);
                             var folderTitle = await fileSecurity.CanReadAsync(folder) ? folder.Title : null;
 
-                            operationResult.Result = fileConverterQueue.FileJsonSerializerAsync(entryManager, newFile, folderTitle).Result;
+                            converter.Result = await fileConverterQueue.FileJsonSerializerAsync(entryManager, newFile, folderTitle);
                         }
 
-                        operationResult.Progress = 100;
-                        operationResult.StopDateTime = DateTime.UtcNow;
-                        operationResult.Processed = "1";
+                        converter.Progress = 100;
+                        converter.StopDateTime = DateTime.UtcNow;
+                        converter.Processed = "1";
 
                         if (!string.IsNullOrEmpty(operationResultError))
                         {
-                            operationResult.Error = operationResultError;
+                            converter.Error = operationResultError;
                         }
                     }
                 }
@@ -262,7 +206,7 @@ internal class FileConverterService<T> : BackgroundService
                 logger.DebugCheckConvertFilesStatusIterationEnd();
             }
 
-            fileConverterQueue.SetAllTask<T>(_conversionQueue);
+            await fileConverterQueue.SetAllTask<T>(conversionQueue);
 
         }
         catch (Exception exception)
@@ -281,80 +225,15 @@ public static class FileConverterQueueExtension
 }
 
 [Scope]
-public class FileConverterQueueScope
-{
-    private readonly ILogger _options;
-    private readonly TenantManager _tenantManager;
-    private readonly UserManager _userManager;
-    private readonly SecurityContext _securityContext;
-    private readonly IDaoFactory _daoFactory;
-    private readonly FileSecurity _fileSecurity;
-    private readonly PathProvider _pathProvider;
-    private readonly SetupInfo _setupInfo;
-    private readonly FileUtility _fileUtility;
-    private readonly DocumentServiceHelper _documentServiceHelper;
-    private readonly DocumentServiceConnector _documentServiceConnector;
-    private readonly EntryStatusManager _entryManager;
-    private readonly FileConverter _fileConverter;
-
-    public FileConverterQueueScope(
-        ILogger<FileConverterQueueScope> options,
-        TenantManager tenantManager,
-        UserManager userManager,
-        SecurityContext securityContext,
-        IDaoFactory daoFactory,
-        FileSecurity fileSecurity,
-        PathProvider pathProvider,
-        SetupInfo setupInfo,
-        FileUtility fileUtility,
-        DocumentServiceHelper documentServiceHelper,
-        DocumentServiceConnector documentServiceConnector,
-        EntryStatusManager entryManager,
-        FileConverter fileConverter)
-    {
-        _options = options;
-        _tenantManager = tenantManager;
-        _userManager = userManager;
-        _securityContext = securityContext;
-        _daoFactory = daoFactory;
-        _fileSecurity = fileSecurity;
-        _pathProvider = pathProvider;
-        _setupInfo = setupInfo;
-        _fileUtility = fileUtility;
-        _documentServiceHelper = documentServiceHelper;
-        _documentServiceConnector = documentServiceConnector;
-        _entryManager = entryManager;
-        _fileConverter = fileConverter;
-    }
-
-
-    public void Deconstruct(out ILogger optionsMonitor,
-        out TenantManager tenantManager,
-        out UserManager userManager,
-        out SecurityContext securityContext,
-        out IDaoFactory daoFactory,
-        out FileSecurity fileSecurity,
-        out PathProvider pathProvider,
-        out SetupInfo setupInfo,
-        out FileUtility fileUtility,
-        out DocumentServiceHelper documentServiceHelper,
-        out DocumentServiceConnector documentServiceConnector,
-        out EntryStatusManager entryManager,
-        out FileConverter fileConverter)
-    {
-        optionsMonitor = _options;
-        tenantManager = _tenantManager;
-        userManager = _userManager;
-        securityContext = _securityContext;
-        daoFactory = _daoFactory;
-        fileSecurity = _fileSecurity;
-        pathProvider = _pathProvider;
-        setupInfo = _setupInfo;
-        fileUtility = _fileUtility;
-        documentServiceHelper = _documentServiceHelper;
-        documentServiceConnector = _documentServiceConnector;
-        entryManager = _entryManager;
-        fileConverter = _fileConverter;
-    }
-
-}
+public record FileConverterQueueScope(
+    TenantManager TenantManager,
+    UserManager UserManager,
+    SecurityContext SecurityContext,
+    IDaoFactory DaoFactory,
+    FileSecurity FileSecurity,
+    PathProvider PathProvider,
+    FileUtility FileUtility,
+    DocumentServiceHelper DocumentServiceHelper,
+    DocumentServiceConnector DocumentServiceConnector,
+    EntryStatusManager EntryManager,
+    FileConverter FileConverter);

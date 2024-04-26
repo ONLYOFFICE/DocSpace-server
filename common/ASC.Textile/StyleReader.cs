@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,13 +24,15 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Collections.Specialized;
+
 namespace Textile;
 
 public class StyleReader
 {
     private readonly Regex _styleParser = new(@"(?<selector>[^\{]+)(?<style>[^\}]+)");
     private readonly Regex _minimizer = new(@";\s+");
-    private readonly System.Collections.Specialized.StringDictionary _tagStyler = new();
+    private readonly StringDictionary _tagStyler = new();
 
     public StyleReader(string styles)
     {

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,15 +27,9 @@
 namespace ASC.Web.Core.Mobile;
 
 [Scope]
-public class MobileAppInstallRegistrator : IMobileAppInstallRegistrator
+public class MobileAppInstallRegistrator
+    (IDbContextFactory<CustomDbContext> dbContextFactory) : IMobileAppInstallRegistrator
 {
-    private readonly IDbContextFactory<CustomDbContext> _dbContextFactory;
-
-    public MobileAppInstallRegistrator(IDbContextFactory<CustomDbContext> dbContextFactory)
-    {
-        _dbContextFactory = dbContextFactory;
-    }
-
     public async Task RegisterInstallAsync(string userEmail, MobileAppType appType)
     {
         var mai = new MobileAppInstall
@@ -46,14 +40,14 @@ public class MobileAppInstallRegistrator : IMobileAppInstallRegistrator
             LastSign = DateTime.UtcNow
         };
 
-        await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         await dbContext.MobileAppInstall.AddAsync(mai);
         await dbContext.SaveChangesAsync();
     }
 
     public async Task<bool> IsInstallRegisteredAsync(string userEmail, MobileAppType? appType)
     {
-        await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         return await Queries.AnyMobileAppInstallAsync(dbContext, userEmail, appType);
     }
 }
@@ -65,6 +59,5 @@ static file class Queries
             (CustomDbContext ctx, string userEmail, MobileAppType? appType) =>
                 ctx.MobileAppInstall
                     .Where(r => r.UserEmail == userEmail)
-                    .Where(r => !appType.HasValue || r.AppType == (int)appType.Value)
-                    .Any());
+                    .Any(r => !appType.HasValue || r.AppType == (int)appType.Value));
 }

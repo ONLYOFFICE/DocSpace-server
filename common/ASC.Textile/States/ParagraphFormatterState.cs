@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,14 +29,9 @@ namespace Textile.States;
 /// <summary>
 /// Formatting state for a standard text (i.e. just paragraphs).
 /// </summary>
-[FormatterState(PatternBegin + @"p" + PatternEnd)]
-public class ParagraphFormatterState : SimpleBlockFormatterState
+[FormatterState(PatternBegin + "p" + PatternEnd)]
+public class ParagraphFormatterState(TextileFormatter f) : SimpleBlockFormatterState(f)
 {
-    public ParagraphFormatterState(TextileFormatter f)
-        : base(f)
-    {
-    }
-
     public override void Enter()
     {
         Formatter.Output.Write("<p" + FormattedStylesAndAlignment("p") + ">");

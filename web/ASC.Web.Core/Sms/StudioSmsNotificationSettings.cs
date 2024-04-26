@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -41,29 +41,15 @@ public class StudioSmsNotificationSettings : TfaSettingsBase<StudioSmsNotificati
 }
 
 [Scope]
-public class StudioSmsNotificationSettingsHelper : TfaSettingsHelperBase<StudioSmsNotificationSettings>
-{
-    private readonly CoreBaseSettings _coreBaseSettings;
-    private readonly SetupInfo _setupInfo;
-    private readonly SmsProviderManager _smsProviderManager;
-    private readonly TenantManager _tenantManager;
-
-    public StudioSmsNotificationSettingsHelper(
-        IHttpContextAccessor httpContextAccessor,
+public class StudioSmsNotificationSettingsHelper(IHttpContextAccessor httpContextAccessor,
         CoreBaseSettings coreBaseSettings,
         SetupInfo setupInfo,
         SettingsManager settingsManager,
         SmsProviderManager smsProviderManager,
         UserManager userManager,
         TenantManager tenantManager)
-        : base(settingsManager, httpContextAccessor, userManager)
-    {
-        _coreBaseSettings = coreBaseSettings;
-        _setupInfo = setupInfo;
-        _smsProviderManager = smsProviderManager;
-        _tenantManager = tenantManager;
-    }
-
+    : TfaSettingsHelperBase<StudioSmsNotificationSettings>(settingsManager, httpContextAccessor, userManager)
+{
     public async Task<bool> IsVisibleAndAvailableSettingsAsync()
     {
         return IsVisibleSettings && await IsAvailableSettingsAsync();
@@ -71,19 +57,15 @@ public class StudioSmsNotificationSettingsHelper : TfaSettingsHelperBase<StudioS
 
     public async Task<bool> IsAvailableSettingsAsync()
     {
-        var quota = await _tenantManager.GetCurrentTenantQuotaAsync();
-        return _coreBaseSettings.Standalone
-                || ((!quota.Trial || _setupInfo.SmsTrial)
+        var quota = await tenantManager.GetCurrentTenantQuotaAsync();
+        return coreBaseSettings.Standalone
+                || ((!quota.Trial || setupInfo.SmsTrial)
                     && !quota.NonProfit
                     && !quota.Free);
     }
 
-    public override bool Enable
+    public override async Task<bool> GetEnable()
     {
-        get { return base.Enable && _smsProviderManager.Enabled(); }
-        set
-        {
-            base.Enable = value;
-        }
+        return await base.GetEnable() && smsProviderManager.Enabled();
     }
 }

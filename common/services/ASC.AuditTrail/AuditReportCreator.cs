@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,15 +32,8 @@ using CsvHelper;
 namespace ASC.AuditTrail;
 
 [Scope]
-public class AuditReportCreator
+public class AuditReportCreator(ILogger<AuditReportCreator> logger)
 {
-    private readonly ILogger<AuditReportCreator> _logger;
-
-    public AuditReportCreator(
-        ILogger<AuditReportCreator> logger)
-    {
-        _logger = logger;
-    }
     public Stream CreateCsvReport<TEvent>(IEnumerable<TEvent> events) where TEvent : BaseEvent
     {
         try
@@ -60,7 +53,7 @@ public class AuditReportCreator
         }
         catch (Exception ex)
         {
-            _logger.ErrorWhileCreating(ex);
+            logger.ErrorWhileCreating(ex);
             throw;
         }
     }

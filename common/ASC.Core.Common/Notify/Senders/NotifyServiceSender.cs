@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,20 +27,13 @@
 namespace ASC.Core.Notify.Senders;
 
 [Singleton]
-public class NotifyServiceSender : INotifySender
+public class NotifyServiceSender(NotifyServiceClient notifyServiceClient) : INotifySender
 {
-    private readonly NotifyServiceClient _notifyServiceClient;
-
-    public NotifyServiceSender(NotifyServiceClient notifyServiceClient)
-    {
-        _notifyServiceClient = notifyServiceClient;
-    }
-
     public void Init(IDictionary<string, string> properties) { }
 
     public Task<NoticeSendResult> SendAsync(NotifyMessage m)
     {
-        _notifyServiceClient.SendNotifyMessage(m);
+        notifyServiceClient.SendNotifyMessage(m);
 
         return Task.FromResult(NoticeSendResult.OK);
     }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,27 +24,22 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Notify.Socket;
+
 namespace ASC.Api.Core;
 
-public class BaseWorkerStartup
+public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment hostEnvironment)
 {
-    protected IConfiguration Configuration { get; }
-    protected IHostEnvironment HostEnvironment { get; }
-    protected DIHelper DIHelper { get; }
-    public BaseWorkerStartup(IConfiguration configuration, IHostEnvironment hostEnvironment)
-    {
-        Configuration = configuration;
-        HostEnvironment = hostEnvironment;
+    protected IConfiguration Configuration { get; } = configuration;
+    protected IHostEnvironment HostEnvironment { get; } = hostEnvironment;
+    protected DIHelper DIHelper { get; } = new();
 
-        DIHelper = new DIHelper();
-    }
-
-    public virtual void ConfigureServices(IServiceCollection services)
+    public virtual async Task ConfigureServices(IServiceCollection services)
     {
         services.AddHttpContextAccessor();
         services.AddCustomHealthCheck(Configuration);
 
-        services.AddScoped<EFLoggerFactory>();
+        services.AddSingleton<EFLoggerFactory>();
         services.AddBaseDbContextPool<AccountLinkContext>();
         services.AddBaseDbContextPool<CoreDbContext>();
         services.AddBaseDbContextPool<TenantDbContext>();
@@ -72,20 +67,28 @@ public class BaseWorkerStartup
 
 
         services.AddMemoryCache();
+        
+        var connectionMultiplexer = await services.GetRedisConnectionMultiplexerAsync(Configuration, GetType().Namespace);
 
-        services.AddDistributedCache(Configuration);
-        services.AddEventBus(Configuration);
-        services.AddDistributedTaskQueue();
-        services.AddCacheNotify(Configuration);
-        services.AddHttpClient();
+        services.AddDistributedCache(connectionMultiplexer)
+                .AddEventBus(Configuration)
+                .AddDistributedTaskQueue()
+                .AddCacheNotify(Configuration)
+                .AddHttpClient()
+                .AddDistributedLock(Configuration);
 
         DIHelper.Configure(services);
 
         services.AddSingleton(Channel.CreateUnbounded<NotifyRequest>());
         services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Writer);
-        services.AddActivePassiveHostedService<NotifySenderService>(DIHelper);
-        services.AddActivePassiveHostedService<NotifySchedulerService>(DIHelper);
+        services.AddHostedService<NotifySenderService>();
+        
+        services.AddSingleton(Channel.CreateUnbounded<SocketData>());
+        services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Reader);
+        services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Writer);
+        services.AddHostedService<SocketService>();
+        DIHelper.TryAdd<SocketService>();
     }
 
     protected IEnumerable<Assembly> GetAutoMapperProfileAssemblies()
@@ -99,11 +102,11 @@ public class BaseWorkerStartup
 
         app.UseEndpoints(endpoints =>
         {
-            endpoints.MapHealthChecks("/health", new HealthCheckOptions()
+            endpoints.MapHealthChecks("/health", new HealthCheckOptions
             {
                 Predicate = _ => true,
                 ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
-            });
+            }).ShortCircuit();
             endpoints.MapHealthChecks("/liveness", new HealthCheckOptions
             {
                 Predicate = r => r.Name.Contains("self")

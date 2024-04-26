@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,50 +27,43 @@
 namespace ASC.Web.Api.Core;
 
 [Singleton(Additional = typeof(SmtpOperationExtension))]
-public class SmtpOperation
+public class SmtpOperation(IServiceProvider serviceProvider, IDistributedTaskQueueFactory queueFactory)
 {
     public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "smtp";
-    private readonly DistributedTaskQueue _progressQueue;
-    private readonly IServiceProvider _serviceProvider;
+    private readonly DistributedTaskQueue _progressQueue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
 
-    public SmtpOperation(IServiceProvider serviceProvider, IDistributedTaskQueueFactory queueFactory)
+    public async Task StartSmtpJob(SmtpSettingsDto smtpSettings, Tenant tenant, Guid user)
     {
-        _serviceProvider = serviceProvider;
-        _progressQueue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
-    }
-
-    public void StartSmtpJob(SmtpSettingsDto smtpSettings, Tenant tenant, Guid user)
-    {
-        var item = _progressQueue.GetAllTasks<SmtpJob>().FirstOrDefault(t => t.TenantId == tenant.Id);
+        var item = (await _progressQueue.GetAllTasks<SmtpJob>()).FirstOrDefault(t => t.TenantId == tenant.Id);
 
         if (item is { IsCompleted: true })
         {
-            _progressQueue.DequeueTask(item.Id);
+            await _progressQueue.DequeueTask(item.Id);
             item = null;
         }
 
         if (item == null)
         {
-            item = _serviceProvider.GetRequiredService<SmtpJob>();
+            item = serviceProvider.GetRequiredService<SmtpJob>();
             item.Init(smtpSettings, tenant.Id, user);
-            _progressQueue.EnqueueTask(item);
+            await _progressQueue.EnqueueTask(item);
         }
 
-        item.PublishChanges();
+        await item.PublishChanges();
     }
 
-    public SmtpOperationStatusRequestsDto GetStatus(Tenant tenant)
+    public async Task<SmtpOperationStatusRequestsDto> GetStatus(Tenant tenant)
     {
-        var item = _progressQueue.GetAllTasks<SmtpJob>().FirstOrDefault(t => t.TenantId == tenant.Id);
+        var item = (await _progressQueue.GetAllTasks<SmtpJob>()).FirstOrDefault(t => t.TenantId == tenant.Id);
 
         if (item == null)
         {
             return null;
         }
 
-        if (item.IsCompleted == true)
+        if (item.IsCompleted)
         {
-            _progressQueue.DequeueTask(item.Id);
+            await _progressQueue.DequeueTask(item.Id);
         }
 
         var result = new SmtpOperationStatusRequestsDto

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,24 +26,37 @@
 
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
-class FileMarkAsReadOperationData<T> : FileOperationData<T>
+[ProtoContract]
+public record FileMarkAsReadOperationData<T> : FileOperationData<T>
 {
-    public IDictionary<string, StringValues> Headers { get; }
-
-    public FileMarkAsReadOperationData(IEnumerable<T> folders, IEnumerable<T> files, Tenant tenant, IDictionary<string, StringValues> headers, ExternalShareData externalShareData,
-        bool holdResult = true) : base(folders, files, tenant, externalShareData, holdResult)
+    public FileMarkAsReadOperationData()
     {
-        Headers = headers;
+        
+    }
+
+    public FileMarkAsReadOperationData(IEnumerable<T> Folders,
+        IEnumerable<T> Files,
+        int TenantId,
+        IDictionary<string, string> Headers,
+        ExternalSessionSnapshot SessionSnapshot,
+        bool HoldResult = true) : base(Folders, Files, TenantId, Headers, SessionSnapshot, HoldResult)
+    {
     }
 }
 
 [Transient]
-class FileMarkAsReadOperation : ComposeFileOperation<FileMarkAsReadOperationData<string>, FileMarkAsReadOperationData<int>>
+public class FileMarkAsReadOperation(IServiceProvider serviceProvider) : 
+    ComposeFileOperation<FileMarkAsReadOperationData<string>, FileMarkAsReadOperationData<int>>(serviceProvider)
 {
-    public FileMarkAsReadOperation(IServiceProvider serviceProvider, FileOperation<FileMarkAsReadOperationData<string>, string> f1, FileOperation<FileMarkAsReadOperationData<int>, int> f2)
-        : base(serviceProvider, f1, f2)
+    protected override FileOperationType FileOperationType { get => FileOperationType.MarkAsRead; }
+    
+    public override Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
     {
-        this[OpType] = (int)FileOperationType.MarkAsRead;
+        DaoOperation = new FileMarkAsReadOperation<int>(_serviceProvider, Data);
+        ThirdPartyOperation = new FileMarkAsReadOperation<string>(_serviceProvider, ThirdPartyData);
+
+        return base.RunJob(distributedTask, cancellationToken);
+
     }
 }
 
@@ -54,7 +67,7 @@ class FileMarkAsReadOperation<T> : FileOperation<FileMarkAsReadOperationData<T>,
     public FileMarkAsReadOperation(IServiceProvider serviceProvider, FileMarkAsReadOperationData<T> fileOperationData)
         : base(serviceProvider, fileOperationData)
     {
-        _headers = fileOperationData.Headers;
+        _headers = fileOperationData.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value));
         this[OpType] = (int)FileOperationType.MarkAsRead;
     }
 
@@ -96,17 +109,17 @@ class FileMarkAsReadOperation<T> : FileOperation<FileMarkAsReadOperationData<T>,
                 await filesMessageService.SendAsync(MessageAction.FolderMarkedAsRead, entry, _headers, entry.Title);
             }
 
-            ProgressStep();
+            await ProgressStep();
         }
 
 
         var rootIds = new List<int>
             {
-                await globalFolder.GetFolderMyAsync(fileMarker, daoFactory),
+                await globalFolder.GetFolderMyAsync(daoFactory),
                 await globalFolder.GetFolderCommonAsync(daoFactory),
                 await globalFolder.GetFolderShareAsync(daoFactory),
                 await globalFolder.GetFolderProjectsAsync(daoFactory),
-                await globalFolder.GetFolderVirtualRoomsAsync(daoFactory),
+                await globalFolder.GetFolderVirtualRoomsAsync(daoFactory)
             };
 
         if (await PrivacyRoomSettings.GetEnabledAsync(settingsManager))
@@ -127,34 +140,8 @@ class FileMarkAsReadOperation<T> : FileOperation<FileMarkAsReadOperationData<T>,
 }
 
 [Scope]
-public class FileMarkAsReadOperationScope
-{
-    private readonly FileMarker _fileMarker;
-    private readonly GlobalFolder _globalFolder;
-    private readonly IDaoFactory _daoFactory;
-    private readonly SettingsManager _settingsManager;
-
-    public FileMarkAsReadOperationScope(
-        FileMarker fileMarker,
-        GlobalFolder globalFolder,
-        IDaoFactory daoFactory,
-        SettingsManager settingsManager)
-    {
-        _fileMarker = fileMarker;
-        _globalFolder = globalFolder;
-        _daoFactory = daoFactory;
-        _settingsManager = settingsManager;
-    }
-
-    public void Deconstruct(
-        out FileMarker fileMarker,
-        out GlobalFolder globalFolder,
-        out IDaoFactory daoFactory,
-        out SettingsManager settingsManager)
-    {
-        fileMarker = _fileMarker;
-        globalFolder = _globalFolder;
-        daoFactory = _daoFactory;
-        settingsManager = _settingsManager;
-    }
-}
+public record FileMarkAsReadOperationScope(
+    FileMarker FileMarker,
+    GlobalFolder GlobalFolder,
+    IDaoFactory DaoFactory,
+    SettingsManager SettingsManager);

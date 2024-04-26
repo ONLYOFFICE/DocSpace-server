@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -129,7 +129,8 @@ public class LicenseConverter : System.Text.Json.Serialization.JsonConverter<obj
                 }
                 return result;
             }
-            else if (reader.TokenType == JsonTokenType.Number)
+
+            if (reader.TokenType == JsonTokenType.Number)
             {
                 return reader.GetInt32();
             }

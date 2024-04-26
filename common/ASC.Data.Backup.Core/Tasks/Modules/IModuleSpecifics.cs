@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -46,7 +46,7 @@ public interface IModuleSpecifics
 
     bool TryAdjustFilePath(bool dump, ColumnMapper columnMapper, ref string filePath);
     DbCommand CreateDeleteCommand(DbConnection connection, int tenantId, TableInfo table);
-    DbCommand CreateInsertCommand(bool dump, DbConnection connection, ColumnMapper columnMapper, TableInfo table, DataRowInfo row);
+    Task<DbCommand> CreateInsertCommand(bool dump, DbConnection connection, ColumnMapper columnMapper, TableInfo table, DataRowInfo row);
     DbCommand CreateSelectCommand(DbConnection connection, int tenantId, TableInfo table, int limit, int offset);
     DbCommand CreateSelectCommand(DbConnection connection, int tenantId, TableInfo table, int limit, int offset, Guid id);
     IEnumerable<TableInfo> GetTablesOrdered();

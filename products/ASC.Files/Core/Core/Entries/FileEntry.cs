@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -50,7 +50,7 @@ public abstract class FileEntry : ICloneable
     [JsonIgnore]
     public string CreateByString
     {
-        get => !CreateBy.Equals(Guid.Empty) ? Global.GetUserName(CreateBy) : _createByString;
+        get => !CreateBy.Equals(Guid.Empty) ? Global.GetUserNameAsync(CreateBy).Result : _createByString;
         set => _createByString = value;
     }
 
@@ -59,7 +59,7 @@ public abstract class FileEntry : ICloneable
     [JsonIgnore]
     public string ModifiedByString
     {
-        get => !ModifiedBy.Equals(Guid.Empty) ? Global.GetUserName(ModifiedBy) : _modifiedByString;
+        get => !ModifiedBy.Equals(Guid.Empty) ? Global.GetUserNameAsync(ModifiedBy).Result : _modifiedByString;
         set => _modifiedByString = value;
     }
 
@@ -88,6 +88,7 @@ public abstract class FileEntry : ICloneable
     public string OriginTitle { get; set; }
     public string OriginRoomTitle { get; set; }
     public FileShareRecord ShareRecord { get; set; }
+    public int Order { get; set; }
 
     private string _modifiedByString;
     private string _createByString;
@@ -103,29 +104,27 @@ public abstract class FileEntry : ICloneable
     }
 }
 
-public interface IFileEntry
-{
-    string UniqID { get; }
-}
-
-public abstract class FileEntry<T> : FileEntry, IFileEntry, IEquatable<FileEntry<T>>
+public abstract class FileEntry<T> : FileEntry, IEquatable<FileEntry<T>>
 {
     public T Id { get; set; }
     public T ParentId { get; set; }
     public T OriginId { get; set; }
     public T OriginRoomId { get; set; }
+    public bool MutableId { get; set; }
 
     public IDictionary<FilesSecurityActions, bool> Security { get; set; }
 
     private T _folderIdDisplay;
-
+    private readonly SecurityContext _securityContext;
 
     protected FileEntry() { }
 
     protected FileEntry(
         FileHelper fileHelper,
-        Global global) : base(fileHelper, global)
+        Global global,
+        SecurityContext securityContext) : base(fileHelper, global)
     {
+        _securityContext = securityContext;
     }
 
     public T FolderIdDisplay
@@ -161,5 +160,20 @@ public abstract class FileEntry<T> : FileEntry, IFileEntry, IEquatable<FileEntry
     public override string ToString()
     {
         return Title;
+    }
+
+    public Guid GetFileQuotaOwner()
+    {
+        return
+            RootFolderType == FolderType.VirtualRooms ?
+                ASC.Core.Configuration.Constants.CoreSystem.ID :
+
+                RootFolderType == FolderType.USER || RootFolderType == FolderType.DEFAULT || RootFolderType == FolderType.TRASH ?
+                    RootCreateBy :
+
+                    RootFolderType == FolderType.Privacy && CreateBy == _securityContext.CurrentAccount.ID ?
+                        CreateBy :
+                        ASC.Core.Configuration.Constants.CoreSystem.ID;
+
     }
 }

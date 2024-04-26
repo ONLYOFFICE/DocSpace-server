@@ -206,12 +206,6 @@ $activity.Key
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Notify.Textile" resource="|pattern_remove_user_data_failed|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
 
-  <!-- dns_change -->
-  <pattern id="dns_change">
-    <subject resource="|subject_dns_change|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Notify.Textile" resource="|pattern_dns_change|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-  </pattern>
-
   <!-- owner_confirm_change -->
   <pattern id="owner_confirm_change">
     <subject resource="|subject_confirm_owner_change|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
@@ -574,83 +568,7 @@ $activity.Key
     <subject resource="|subject_opensource_user_docs_tips_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Notify.Textile" resource="|pattern_opensource_user_docs_tips_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
-
-  <!-- personal activate -->
-  <pattern id="personal_activate">
-    <subject resource="|subject_personal_activate|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core"/>
-    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Notify.Textile" resource="|pattern_personal_activate|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-  </pattern>
-
-  <!-- personal after registaration  -->
-  <pattern id="personal_after_registration1">
-    <subject resource="|subject_personal_after_registration1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Notify.Textile" resource="|pattern_personal_after_registration1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-  </pattern>
-
-  <pattern id="personal_after_registration14_v1">
-    <subject resource="|subject_personal_after_registration14_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Notify.Textile" resource="|pattern_personal_after_registration14_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-  </pattern>
-
-  <!-- personal confirmation -->
-  <pattern id="personal_confirmation">
-    <subject resource="|subject_personal_confirmation|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Notify.Textile" resource="|pattern_personal_confirmation|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-  </pattern>
-
-   <!-- personal already exist -->
-   <pattern id="personal_already_exist">
-	   <subject resource="|subject_personal_already_exist|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-	   <body styler="ASC.Notify.Textile.TextileStyler,ASC.Notify.Textile" resource="|pattern_personal_already_exist|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-   </pattern>
-
-  <!-- personal change email-->
-  <pattern id="personal_change_email_v115">
-    <subject resource="|subject_change_email_v115|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Notify.Textile" resource="|pattern_personal_change_email_v115|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-  </pattern>
 	
-	<!-- personal change password v115-->
-	<pattern id="personal_change_password_v115">
-		<subject resource="|subject_change_password_v115|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-		<body styler="ASC.Notify.Textile.TextileStyler,ASC.Notify.Textile" resource="|pattern_personal_change_password_v115|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-	</pattern>
-	
-  <!-- personal profile delete -->
-  <pattern id="personal_profile_delete">
-    <subject resource="|subject_personal_profile_delete|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Notify.Textile" resource="|pattern_personal_profile_delete|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-  </pattern>
-
-  <!-- personal custom mode after registaration  -->
-  <pattern id="personal_custom_mode_after_registration1">
-    <subject resource="|subject_personal_custom_mode_after_registration1|ASC.Web.Core.PublicResources.CustomModeResource,ASC.Web.Core" />
-    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Notify.Textile" resource="|pattern_personal_custom_mode_after_registration1|ASC.Web.Core.PublicResources.CustomModeResource,ASC.Web.Core" />
-  </pattern>
-
-  <!-- personal custom mode confirmation -->
-  <pattern id="personal_custom_mode_confirmation">
-    <subject resource="|subject_personal_custom_mode_confirmation|ASC.Web.Core.PublicResources.CustomModeResource,ASC.Web.Core" />
-    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Notify.Textile" resource="|pattern_personal_custom_mode_confirmation|ASC.Web.Core.PublicResources.CustomModeResource,ASC.Web.Core" />
-  </pattern>
-
-  <!-- personal custom mode change email-->
-  <pattern id="personal_custom_mode_change_email_v115">
-    <subject resource="|subject_change_email_v115|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Notify.Textile" resource="|pattern_personal_custom_mode_change_email_v115|ASC.Web.Core.PublicResources.CustomModeResource,ASC.Web.Core" />
-  </pattern>
-	
-	<!-- personal custom mode change password v115-->
-	<pattern id="personal_custom_mode_change_password_v115">
-		<subject resource="|subject_change_password_v115|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-		<body styler="ASC.Notify.Textile.TextileStyler,ASC.Notify.Textile" resource="|pattern_personal_custom_mode_change_password_v115|ASC.Web.Core.PublicResources.CustomModeResource,ASC.Web.Core" />
-	</pattern>
-	
-  <!-- personal custom mode profile delete -->
-  <pattern id="personal_custom_mode_profile_delete">
-    <subject resource="|subject_personal_custom_mode_profile_delete|ASC.Web.Core.PublicResources.CustomModeResource,ASC.Web.Core" />
-    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Notify.Textile" resource="|pattern_personal_custom_mode_profile_delete|ASC.Web.Core.PublicResources.CustomModeResource,ASC.Web.Core" />
-  </pattern>
   <pattern id="saas_custom_mode_reg_data">
     <subject resource="|subject_saas_custom_mode_reg_data|ASC.Web.Core.PublicResources.CustomModeResource,ASC.Web.Core" />
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Notify.Textile" resource="|pattern_saas_custom_mode_reg_data|ASC.Web.Core.PublicResources.CustomModeResource,ASC.Web.Core" />

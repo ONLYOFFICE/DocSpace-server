@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,8 +29,9 @@ namespace ASC.Common.Security;
 [Scope(typeof(PermissionResolver))]
 public interface IPermissionResolver
 {
-    Task<bool> CheckAsync(ISubject subject, ISecurityObjectId objectId, ISecurityObjectProvider securityObjProvider, params IAction[] actions);
-    Task<bool> CheckAsync(ISubject subject, params IAction[] actions);
-    Task DemandAsync(ISubject subject, ISecurityObjectId objectId, ISecurityObjectProvider securityObjProvider, params IAction[] actions);
-    Task DemandAsync(ISubject subject, params IAction[] actions);
+    Task<bool> CheckAsync(ISubject subject, ISecurityObjectId objectId, ISecurityObjectProvider securityObjProvider, IAction action);
+    Task<bool> CheckAsync(ISubject subject, IAction action);
+    Task DemandAsync(ISubject subject, ISecurityObjectId objectId, ISecurityObjectProvider securityObjProvider, IAction action);
+    Task DemandAsync(ISubject subject, IAction action);
+    Task DemandAsync(ISubject subject, IAction action1, IAction action2);
 }

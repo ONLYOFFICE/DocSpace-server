@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -37,8 +37,8 @@ class AzServiceCache
         CacheNotify = cacheNotify;
         Cache = cache;
 
-        cacheNotify.Subscribe((r) => UpdateCache(r, true), CacheNotifyAction.Remove);
-        cacheNotify.Subscribe((r) => UpdateCache(r, false), CacheNotifyAction.InsertOrUpdate);
+        cacheNotify.Subscribe(r => UpdateCache(r, true), CacheNotifyAction.Remove);
+        cacheNotify.Subscribe(r => UpdateCache(r, false), CacheNotifyAction.InsertOrUpdate);
     }
 
     private void UpdateCache(AzRecord r, bool remove)
@@ -67,20 +67,12 @@ class AzServiceCache
 }
 
 [Scope]
-class CachedAzService : IAzService
+class CachedAzService(DbAzService service, AzServiceCache azServiceCache) : IAzService
 {
-    private readonly IAzService _service;
-    private readonly ICacheNotify<AzRecordCache> _cacheNotify;
-    private readonly ICache _cache;
-    private readonly TimeSpan _cacheExpiration;
-
-    public CachedAzService(DbAzService service, AzServiceCache azServiceCache)
-    {
-        _service = service ?? throw new ArgumentNullException(nameof(service));
-        _cache = azServiceCache.Cache;
-        _cacheNotify = azServiceCache.CacheNotify;
-        _cacheExpiration = TimeSpan.FromMinutes(10);
-    }
+    private readonly DbAzService _service = service ?? throw new ArgumentNullException(nameof(service));
+    private readonly ICacheNotify<AzRecordCache> _cacheNotify = azServiceCache.CacheNotify;
+    private readonly ICache _cache = azServiceCache.Cache;
+    private readonly TimeSpan _cacheExpiration = TimeSpan.FromMinutes(10);
 
     public async Task<IEnumerable<AzRecord>> GetAcesAsync(int tenant, DateTime from)
     {

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,25 +27,13 @@
 namespace ASC.Webhooks.Core;
 
 [Scope]
-public class WebhookPublisher : IWebhookPublisher
+public class WebhookPublisher(
+    DbWorker dbWorker,
+    IEventBus eventBus,
+    SecurityContext securityContext,
+    TenantManager tenantManager)
+    : IWebhookPublisher
 {
-    private readonly DbWorker _dbWorker;
-    private readonly IEventBus _eventBus;
-    private readonly SecurityContext _securityContext;
-    private readonly TenantManager _tenantManager;
-
-    public WebhookPublisher(
-        DbWorker dbWorker,
-        IEventBus eventBus,
-        SecurityContext securityContext,
-        TenantManager tenantManager)
-    {
-        _dbWorker = dbWorker;
-        _eventBus = eventBus;
-        _securityContext = securityContext;
-        _tenantManager = tenantManager;
-    }
-
     public async Task PublishAsync(int webhookId, string requestPayload)
     {
         if (string.IsNullOrEmpty(requestPayload))
@@ -53,11 +41,11 @@ public class WebhookPublisher : IWebhookPublisher
             return;
         }
 
-        var webhookConfigs = _dbWorker.GetWebhookConfigs();
+        var webhookConfigs = await dbWorker.GetWebhookConfigs().Where(r => r.Enabled).ToListAsync();
 
-        await foreach (var config in webhookConfigs.Where(r => r.Enabled))
+        foreach (var config in webhookConfigs)
         {
-            _ = await PublishAsync(webhookId, requestPayload, config.Id);
+            await PublishAsync(webhookId, requestPayload, config.Id);
         }
     }
 
@@ -76,11 +64,11 @@ public class WebhookPublisher : IWebhookPublisher
             ConfigId = configId
         };
 
-        var webhook = await _dbWorker.WriteToJournal(webhooksLog);
+        var webhook = await dbWorker.WriteToJournal(webhooksLog);
 
-        _eventBus.Publish(new WebhookRequestIntegrationEvent(
-            _securityContext.CurrentAccount.ID,
-            (await _tenantManager.GetCurrentTenantAsync()).Id)
+        eventBus.Publish(new WebhookRequestIntegrationEvent(
+            securityContext.CurrentAccount.ID,
+            (await tenantManager.GetCurrentTenantAsync()).Id)
         {
             WebhookId = webhook.Id
         });

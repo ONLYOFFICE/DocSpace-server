@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,18 +26,14 @@
 
 namespace ASC.Notify.Model;
 
-public class TopSubscriptionProvider : ISubscriptionProvider
+public class TopSubscriptionProvider(IRecipientProvider recipientProvider,
+        ISubscriptionProvider directSubscriptionProvider)
+    : ISubscriptionProvider
 {
-    private readonly string[] _defaultSenderMethods = Array.Empty<string>();
-    private readonly ISubscriptionProvider _subscriptionProvider;
-    private readonly IRecipientProvider _recipientProvider;
+    private readonly string[] _defaultSenderMethods = [];
+    private readonly ISubscriptionProvider _subscriptionProvider = directSubscriptionProvider ?? throw new ArgumentNullException(nameof(directSubscriptionProvider));
+    private readonly IRecipientProvider _recipientProvider = recipientProvider ?? throw new ArgumentNullException(nameof(recipientProvider));
 
-
-    public TopSubscriptionProvider(IRecipientProvider recipientProvider, ISubscriptionProvider directSubscriptionProvider)
-    {
-        _recipientProvider = recipientProvider ?? throw new ArgumentNullException(nameof(recipientProvider));
-        _subscriptionProvider = directSubscriptionProvider ?? throw new ArgumentNullException(nameof(directSubscriptionProvider));
-    }
 
     public TopSubscriptionProvider(IRecipientProvider recipientProvider, ISubscriptionProvider directSubscriptionProvider, string[] defaultSenderMethods)
         : this(recipientProvider, directSubscriptionProvider)
@@ -73,7 +69,7 @@ public class TopSubscriptionProvider : ISubscriptionProvider
         ArgumentNullException.ThrowIfNull(action);
 
         var recipents = new List<IRecipient>(5);
-        var directRecipients = await _subscriptionProvider.GetRecipientsAsync(action, objectID) ?? new IRecipient[0];
+        var directRecipients = await _subscriptionProvider.GetRecipientsAsync(action, objectID) ?? [];
         recipents.AddRange(directRecipients);
 
         return recipents.ToArray();
@@ -169,17 +165,17 @@ public class TopSubscriptionProvider : ISubscriptionProvider
         ArgumentNullException.ThrowIfNull(recipient);
 
         var objects = new List<string>();
-        var direct = await _subscriptionProvider.GetSubscriptionsAsync(action, recipient, checkSubscribe) ?? Array.Empty<string>();
+        var direct = await _subscriptionProvider.GetSubscriptionsAsync(action, recipient, checkSubscribe) ?? [];
         MergeObjects(objects, direct);
         var parents = await WalkUpAsync(recipient);
         foreach (var parent in parents)
         {
-            direct = await _subscriptionProvider.GetSubscriptionsAsync(action, parent, checkSubscribe) ?? Array.Empty<string>();
-            if (recipient is IDirectRecipient)
+            direct = await _subscriptionProvider.GetSubscriptionsAsync(action, parent, checkSubscribe) ?? [];
+            if (recipient is IDirectRecipient directRecipient)
             {
                 foreach (var groupsubscr in direct)
                 {
-                    if (!objects.Contains(groupsubscr) && !await _subscriptionProvider.IsUnsubscribeAsync(recipient as IDirectRecipient, action, groupsubscr))
+                    if (!objects.Contains(groupsubscr) && !await _subscriptionProvider.IsUnsubscribeAsync(directRecipient, action, groupsubscr))
                     {
                         objects.Add(groupsubscr);
                     }
@@ -198,7 +194,7 @@ public class TopSubscriptionProvider : ISubscriptionProvider
     private async Task<List<IRecipient>> WalkUpAsync(IRecipient recipient)
     {
         var parents = new List<IRecipient>();
-        var groups = await _recipientProvider.GetGroupsAsync(recipient) ?? new IRecipientsGroup[0];
+        var groups = await _recipientProvider.GetGroupsAsync(recipient) ?? [];
         foreach (var group in groups)
         {
             parents.Add(group);

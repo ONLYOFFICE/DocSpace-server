@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,21 +28,14 @@ using ASC.Web.Api.Controllers.Settings;
 
 namespace ASC.Web.Api.Api.Settings;
 
-public class PushController : BaseSettingsController
-{
-    private readonly FirebaseHelper _firebaseHelper;
-
-    public PushController(
-        ApiContext apiContext,
+[DefaultRoute("push")]
+public class PushController(ApiContext apiContext,
         WebItemManager webItemManager,
         IMemoryCache memoryCache,
         FirebaseHelper firebaseHelper,
-        IHttpContextAccessor httpContextAccessor
-        ) : base(apiContext, memoryCache, webItemManager, httpContextAccessor)
-    {
-        _firebaseHelper = firebaseHelper;
-    }
-
+        IHttpContextAccessor httpContextAccessor)
+    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+{
     /// <summary>
     /// Saves the Firebase device token specified in the request for the Documents application.
     /// </summary>
@@ -52,10 +45,10 @@ public class PushController : BaseSettingsController
     /// <returns type="ASC.Core.Common.EF.FireBaseUser, ASC.Core.Common">FireBase user</returns>
     /// <path>api/2.0/settings/push/docregisterdevice</path>
     /// <httpMethod>POST</httpMethod>
-    [HttpPost("push/docregisterdevice")]
+    [HttpPost("docregisterdevice")]
     public async Task<FireBaseUser> DocRegisterPusnNotificationDeviceAsync(FirebaseRequestsDto inDto)
     {
-        return await _firebaseHelper.RegisterUserDeviceAsync(inDto.FirebaseDeviceToken, inDto.IsSubscribed, PushConstants.PushDocAppName);
+        return await firebaseHelper.RegisterUserDeviceAsync(inDto.FirebaseDeviceToken, inDto.IsSubscribed, PushConstants.PushDocAppName);
     }
 
     /// <summary>
@@ -67,9 +60,9 @@ public class PushController : BaseSettingsController
     /// <returns type="ASC.Core.Common.EF.FireBaseUser, ASC.Core.Common">Firebase user</returns>
     /// <path>api/2.0/settings/push/docsubscribe</path>
     /// <httpMethod>PUT</httpMethod>
-    [HttpPut("push/docsubscribe")]
+    [HttpPut("docsubscribe")]
     public async Task<FireBaseUser> SubscribeDocumentsPushNotificationAsync(FirebaseRequestsDto inDto)
     {
-        return await _firebaseHelper.UpdateUserAsync(inDto.FirebaseDeviceToken, inDto.IsSubscribed, PushConstants.PushDocAppName);
+        return await firebaseHelper.UpdateUserAsync(inDto.FirebaseDeviceToken, inDto.IsSubscribed, PushConstants.PushDocAppName);
     }
 }

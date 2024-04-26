@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -39,59 +39,46 @@ public class RoomsNotificationSettings : ISettings<RoomsNotificationSettings>
 
     public RoomsNotificationSettings GetDefault()
     {
-        return new RoomsNotificationSettings()
+        return new RoomsNotificationSettings
         {
-            DisabledRooms = new List<int>()
+            DisabledRooms = []
         };
     }
 }
 
 [Scope]
-public class RoomsNotificationSettingsHelper
+public class RoomsNotificationSettingsHelper(SettingsManager settingsManager)
 {
-    private readonly SettingsManager _settingsManager;
-    public RoomsNotificationSettingsHelper(
-        SettingsManager settingsManager)
-    {
-        _settingsManager = settingsManager;
-    }
-
     public async Task<List<int>> GetDisabledRoomsForUserAsync(Guid userId)
     {
-        var settings = await _settingsManager.LoadAsync<RoomsNotificationSettings>(userId);
+        var settings = await settingsManager.LoadAsync<RoomsNotificationSettings>(userId);
         var disabledRooms = settings.DisabledRooms;
         return disabledRooms;
     }
 
-    public IEnumerable<string> GetDisabledRoomsForCurrentUser()
+    public async Task<IEnumerable<string>> GetDisabledRoomsForCurrentUserAsync()
     {
-        var settings = _settingsManager.LoadForCurrentUser<RoomsNotificationSettings>();
+        var settings = await settingsManager.LoadForCurrentUserAsync<RoomsNotificationSettings>();
         var disabledRooms = settings.DisabledRooms;
         return disabledRooms.Select(r => r.ToString());
     }
 
-    public RoomsNotificationSettings GetSettingsForCurrentUser()
+    public async Task<RoomsNotificationSettings> GetSettingsForCurrentUserAsync()
     {
-        var settings = _settingsManager.LoadForCurrentUser<RoomsNotificationSettings>();
-        return settings;
+        return await settingsManager.LoadForCurrentUserAsync<RoomsNotificationSettings>();
     }
 
-    public bool CheckMuteForRoom(string roomsId)
+    public async Task<bool> CheckMuteForRoomAsync(string roomsId)
     {
-        var settings = _settingsManager.LoadForCurrentUser<RoomsNotificationSettings>();
+        var settings = await settingsManager.LoadForCurrentUserAsync<RoomsNotificationSettings>();
         var disabledRooms = settings.DisabledRooms.Select(r => r.ToString());
 
-        if (disabledRooms.Contains(roomsId))
-        {
-            return true;
-        }
-
-        return false;
+        return disabledRooms.Contains(roomsId);
     }
 
-    public RoomsNotificationSettings SetForCurrentUser(int roomsId, bool mute)
+    public async Task<RoomsNotificationSettings> SetForCurrentUserAsync(int roomsId, bool mute)
     {
-        var settings = _settingsManager.LoadForCurrentUser<RoomsNotificationSettings>();
+        var settings = await settingsManager.LoadForCurrentUserAsync<RoomsNotificationSettings>();
         var disabledRooms = settings.DisabledRooms;
 
         if (disabledRooms.Contains(roomsId))
@@ -109,7 +96,7 @@ public class RoomsNotificationSettingsHelper
             }
         }
 
-        _settingsManager.SaveForCurrentUser(settings);
+        await settingsManager.SaveForCurrentUserAsync(settings);
 
         return settings;
     }

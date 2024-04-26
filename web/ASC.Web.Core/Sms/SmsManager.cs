@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,34 +29,14 @@ using Constants = ASC.Core.Users.Constants;
 namespace ASC.Web.Studio.Core.SMS;
 
 [Scope]
-public class SmsManager
+public class SmsManager(UserManager userManager,
+    SecurityContext securityContext,
+    TenantManager tenantManager,
+    SmsKeyStorage smsKeyStorage,
+    SmsSender smsSender,
+    StudioSmsNotificationSettingsHelper studioSmsNotificationSettingsHelper,
+    CookiesManager cookieManager)
 {
-    private readonly UserManager _userManager;
-    private readonly SecurityContext _securityContext;
-    private readonly TenantManager _tenantManager;
-    private readonly SmsKeyStorage _smsKeyStorage;
-    private readonly SmsSender _smsSender;
-    private readonly StudioSmsNotificationSettingsHelper _studioSmsNotificationSettingsHelper;
-    private readonly CookiesManager _cookieManager;
-
-    public SmsManager(
-        UserManager userManager,
-        SecurityContext securityContext,
-        TenantManager tenantManager,
-        SmsKeyStorage smsKeyStorage,
-        SmsSender smsSender,
-        StudioSmsNotificationSettingsHelper studioSmsNotificationSettingsHelper,
-        CookiesManager cookieManager)
-    {
-        _userManager = userManager;
-        _securityContext = securityContext;
-        _tenantManager = tenantManager;
-        _smsKeyStorage = smsKeyStorage;
-        _smsSender = smsSender;
-        _studioSmsNotificationSettingsHelper = studioSmsNotificationSettingsHelper;
-        _cookieManager = cookieManager;
-    }
-
     public async ValueTask<string> SaveMobilePhoneAsync(UserInfo user, string mobilePhone)
     {
         mobilePhone = SmsSender.GetPhoneValueDigits(mobilePhone);
@@ -78,24 +58,24 @@ public class SmsManager
 
         user.MobilePhone = mobilePhone;
         user.MobilePhoneActivationStatus = MobilePhoneActivationStatus.NotActivated;
-        if (_securityContext.IsAuthenticated)
+        if (securityContext.IsAuthenticated)
         {
-            await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
+            await userManager.UpdateUserInfoWithSyncCardDavAsync(user);
         }
         else
         {
             try
             {
-                await _securityContext.AuthenticateMeWithoutCookieAsync(ASC.Core.Configuration.Constants.CoreSystem);
-                await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
+                await securityContext.AuthenticateMeWithoutCookieAsync(ASC.Core.Configuration.Constants.CoreSystem);
+                await userManager.UpdateUserInfoWithSyncCardDavAsync(user);
             }
             finally
             {
-                _securityContext.Logout();
+                securityContext.Logout();
             }
         }
 
-        if (await _studioSmsNotificationSettingsHelper.TfaEnabledForUserAsync(user.Id))
+        if (await studioSmsNotificationSettingsHelper.TfaEnabledForUserAsync(user.Id))
         {
             await PutAuthCodeAsync(user, false);
         }
@@ -110,33 +90,33 @@ public class SmsManager
             throw new Exception(Resource.ErrorUserNotFound);
         }
 
-        if (!await _studioSmsNotificationSettingsHelper.IsVisibleAndAvailableSettingsAsync() || !await _studioSmsNotificationSettingsHelper.TfaEnabledForUserAsync(user.Id))
+        if (!await studioSmsNotificationSettingsHelper.IsVisibleAndAvailableSettingsAsync() || !await studioSmsNotificationSettingsHelper.TfaEnabledForUserAsync(user.Id))
         {
             throw new MethodAccessException();
         }
 
         var mobilePhone = SmsSender.GetPhoneValueDigits(user.MobilePhone);
 
-        if (await _smsKeyStorage.ExistsKeyAsync(mobilePhone) && !again)
+        if (await smsKeyStorage.ExistsKeyAsync(mobilePhone) && !again)
         {
             return;
         }
-        var (succ, key) = await _smsKeyStorage.GenerateKeyAsync(mobilePhone);
+        var (succ, key) = await smsKeyStorage.GenerateKeyAsync(mobilePhone);
         if (!succ)
         {
             throw new Exception(Resource.SmsTooMuchError);
         }
 
-        if (await _smsSender.SendSMSAsync(mobilePhone, string.Format(Resource.SmsAuthenticationMessageToUser, key)))
+        if (await smsSender.SendSMSAsync(mobilePhone, string.Format(Resource.SmsAuthenticationMessageToUser, key)))
         {
-            await _tenantManager.SetTenantQuotaRowAsync(new TenantQuotaRow { TenantId = await _tenantManager.GetCurrentTenantIdAsync(), Path = "/sms", Counter = 1, LastModified = DateTime.UtcNow }, true);
+            await tenantManager.SetTenantQuotaRowAsync(new TenantQuotaRow { TenantId = await tenantManager.GetCurrentTenantIdAsync(), Path = "/sms", Counter = 1, LastModified = DateTime.UtcNow }, true);
         }
     }
 
     public async Task ValidateSmsCodeAsync(UserInfo user, string code, bool isEntryPoint = false)
     {
-        if (!await _studioSmsNotificationSettingsHelper.IsVisibleAndAvailableSettingsAsync()
-            || !await _studioSmsNotificationSettingsHelper.TfaEnabledForUserAsync(user.Id))
+        if (!await studioSmsNotificationSettingsHelper.IsVisibleAndAvailableSettingsAsync()
+            || !await studioSmsNotificationSettingsHelper.TfaEnabledForUserAsync(user.Id))
         {
             return;
         }
@@ -146,7 +126,7 @@ public class SmsManager
             throw new Exception(Resource.ErrorUserNotFound);
         }
 
-        var valid = await _smsKeyStorage.ValidateKeyAsync(user.MobilePhone, code);
+        var valid = await smsKeyStorage.ValidateKeyAsync(user.MobilePhone, code);
         switch (valid)
         {
             case SmsKeyStorage.Result.Empty:
@@ -163,16 +143,16 @@ public class SmsManager
             throw new Exception("Error: " + valid);
         }
 
-        if (!_securityContext.IsAuthenticated)
+        if (!securityContext.IsAuthenticated)
         {
             var action = isEntryPoint ? MessageAction.LoginSuccessViaApiSms : MessageAction.LoginSuccessViaSms;
-            await _cookieManager.AuthenticateMeAndSetCookiesAsync(user.Id, action);
+            await cookieManager.AuthenticateMeAndSetCookiesAsync(user.Id, action);
         }
 
         if (user.MobilePhoneActivationStatus == MobilePhoneActivationStatus.NotActivated)
         {
             user.MobilePhoneActivationStatus = MobilePhoneActivationStatus.Activated;
-            await _userManager.UpdateUserInfoAsync(user);
+            await userManager.UpdateUserInfoAsync(user);
         }
     }
 }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,7 +29,7 @@ namespace ASC.Data.Reassigns;
 /// <summary>
 /// </summary>
 [Transient]
-public class ReassignProgressItem : DistributedTaskProgress
+public class ReassignProgressItem(IServiceScopeFactory serviceScopeFactory) : DistributedTaskProgress
 {
     /// <summary>The user whose data is reassigned</summary>
     /// <type>System.Guid, System</type>
@@ -39,18 +39,11 @@ public class ReassignProgressItem : DistributedTaskProgress
     /// <type>System.Guid, System</type>
     public Guid ToUser { get; private set; }
 
-    private readonly IServiceScopeFactory _serviceScopeFactory;
-
     private IDictionary<string, StringValues> _httpHeaders;
     private int _tenantId;
     private Guid _currentUserId;
     private bool _notify;
     private bool _deleteProfile;
-
-    public ReassignProgressItem(IServiceScopeFactory serviceScopeFactory)
-    {
-        _serviceScopeFactory = serviceScopeFactory;
-    }
 
     public void Init(IDictionary<string, StringValues> httpHeaders, int tenantId, Guid fromUserId, Guid toUserId, Guid currentUserId, bool notify, bool deleteProfile)
     {
@@ -70,7 +63,7 @@ public class ReassignProgressItem : DistributedTaskProgress
 
     protected override async Task DoJob()
     {
-        await using var scope = _serviceScopeFactory.CreateAsyncScope();
+        await using var scope = serviceScopeFactory.CreateAsyncScope();
         var scopeClass = scope.ServiceProvider.GetService<ReassignProgressItemScope>();
         var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, userPhotoManager, displayUserSettingsHelper, messageTarget, options) = scopeClass;
         var logger = options.CreateLogger("ASC.Web");
@@ -80,11 +73,11 @@ public class ReassignProgressItem : DistributedTaskProgress
         {
             await securityContext.AuthenticateMeWithoutCookieAsync(_currentUserId);
 
-            SetPercentageAndCheckCancellation(5, true);
+            await SetPercentageAndCheckCancellation(5, true);
 
             await fileStorageService.DemandPermissionToReassignDataAsync(FromUser, ToUser);
 
-            SetPercentageAndCheckCancellation(10, true);
+            await SetPercentageAndCheckCancellation(10, true);
 
             List<int> personalFolderIds = null;
 
@@ -97,30 +90,30 @@ public class ReassignProgressItem : DistributedTaskProgress
                 personalFolderIds = await fileStorageService.GetPersonalFolderIdsAsync<int>(FromUser);
             }
 
-            SetPercentageAndCheckCancellation(30, true);
+            await SetPercentageAndCheckCancellation(30, true);
 
             await fileStorageService.ReassignProvidersAsync(FromUser, ToUser);
 
-            SetPercentageAndCheckCancellation(50, true);
+            await SetPercentageAndCheckCancellation(50, true);
 
             await fileStorageService.ReassignFoldersAsync(FromUser, ToUser, personalFolderIds);
 
-            SetPercentageAndCheckCancellation(70, true);
+            await SetPercentageAndCheckCancellation(70, true);
 
             await fileStorageService.ReassignFilesAsync(FromUser, ToUser, personalFolderIds);
 
-            SetPercentageAndCheckCancellation(90, true);
+            await SetPercentageAndCheckCancellation(90, true);
 
             await SendSuccessNotifyAsync(userManager, studioNotifyService, messageService, messageTarget, displayUserSettingsHelper);
 
-            SetPercentageAndCheckCancellation(95, true);
+            await SetPercentageAndCheckCancellation(95, true);
 
             if (_deleteProfile)
             {
                 await DeleteUserProfile(userManager, userPhotoManager, messageService, messageTarget, displayUserSettingsHelper);
             }
 
-            SetPercentageAndCheckCancellation(100, false);
+            await SetPercentageAndCheckCancellation(100, false);
 
             Status = DistributedTaskStatus.Completed;
         }
@@ -140,7 +133,7 @@ public class ReassignProgressItem : DistributedTaskProgress
         {
             logger.LogInformation($"data reassignment {Status.ToString().ToLowerInvariant()}");
             IsCompleted = true;
-            PublishChanges();
+            await PublishChanges();
         }
     }
 
@@ -149,13 +142,13 @@ public class ReassignProgressItem : DistributedTaskProgress
         return MemberwiseClone();
     }
 
-    private void SetPercentageAndCheckCancellation(double percentage, bool publish)
+    private async Task SetPercentageAndCheckCancellation(double percentage, bool publish)
     {
         Percentage = percentage;
 
         if (publish)
         {
-            PublishChanges();
+            await PublishChanges();
         }
 
         CancellationToken.ThrowIfCancellationRequested();
@@ -212,66 +205,17 @@ public class ReassignProgressItem : DistributedTaskProgress
 }
 
 [Scope]
-public class ReassignProgressItemScope
-{
-    private readonly TenantManager _tenantManager;
-    private readonly MessageService _messageService;
-    private readonly FileStorageService _fileStorageService;
-    private readonly StudioNotifyService _studioNotifyService;
-    private readonly SecurityContext _securityContext;
-    private readonly UserManager _userManager;
-    private readonly UserPhotoManager _userPhotoManager;
-    private readonly DisplayUserSettingsHelper _displayUserSettingsHelper;
-    private readonly MessageTarget _messageTarget;
-    private readonly ILoggerProvider _options;
-
-    public ReassignProgressItemScope(
-        TenantManager tenantManager,
-        MessageService messageService,
-        FileStorageService fileStorageService,
-        StudioNotifyService studioNotifyService,
-        SecurityContext securityContext,
-        UserManager userManager,
-        UserPhotoManager userPhotoManager,
-        DisplayUserSettingsHelper displayUserSettingsHelper,
-        MessageTarget messageTarget,
-        ILoggerProvider options)
-    {
-        _tenantManager = tenantManager;
-        _messageService = messageService;
-        _fileStorageService = fileStorageService;
-        _studioNotifyService = studioNotifyService;
-        _securityContext = securityContext;
-        _userManager = userManager;
-        _userPhotoManager = userPhotoManager;
-        _displayUserSettingsHelper = displayUserSettingsHelper;
-        _messageTarget = messageTarget;
-        _options = options;
-    }
-
-    public void Deconstruct(out TenantManager tenantManager,
-        out MessageService messageService,
-        out FileStorageService fileStorageService,
-        out StudioNotifyService studioNotifyService,
-        out SecurityContext securityContext,
-        out UserManager userManager,
-        out UserPhotoManager userPhotoManager,
-        out DisplayUserSettingsHelper displayUserSettingsHelper,
-        out MessageTarget messageTarget,
-        out ILoggerProvider optionsMonitor)
-    {
-        tenantManager = _tenantManager;
-        messageService = _messageService;
-        fileStorageService = _fileStorageService;
-        studioNotifyService = _studioNotifyService;
-        securityContext = _securityContext;
-        userManager = _userManager;
-        userPhotoManager = _userPhotoManager;
-        displayUserSettingsHelper = _displayUserSettingsHelper;
-        messageTarget = _messageTarget;
-        optionsMonitor = _options;
-    }
-}
+public record ReassignProgressItemScope(
+    TenantManager TenantManager,
+    MessageService MessageService,
+    FileStorageService FileStorageService,
+    StudioNotifyService StudioNotifyService,
+    SecurityContext SecurityContext,
+    UserManager UserManager,
+    UserPhotoManager UserPhotoManager,
+    DisplayUserSettingsHelper DisplayUserSettingsHelper,
+    MessageTarget MessageTarget,
+    ILoggerProvider Options);
 
 public static class ReassignProgressItemExtension
 {

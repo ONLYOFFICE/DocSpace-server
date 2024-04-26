@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,20 +27,10 @@
 namespace ASC.Core.Notify.Jabber;
 
 [Scope]
-public class JabberServiceClient
+public class JabberServiceClient(UserManager userManager, AuthContext authContext, TenantManager tenantManager)
 {
     private static readonly TimeSpan _timeout = TimeSpan.FromMinutes(2);
     private static DateTime _lastErrorTime;
-    private readonly UserManager _userManager;
-    private readonly AuthContext _authContext;
-    private readonly TenantManager _tenantManager;
-
-    public JabberServiceClient(UserManager userManager, AuthContext authContext, TenantManager tenantManager)
-    {
-        _userManager = userManager;
-        _authContext = authContext;
-        _tenantManager = tenantManager;
-    }
 
     private static bool IsServiceProbablyNotAvailable()
     {
@@ -242,7 +232,7 @@ public class JabberServiceClient
             }
 
             await using var service = GetService();
-            service.Ping(_authContext.CurrentAccount.ID.ToString(), await GetCurrentTenantIdAsync(), await GetCurrentUserNameAsync(), state);
+            service.Ping(authContext.CurrentAccount.ID.ToString(), await GetCurrentTenantIdAsync(), await GetCurrentUserNameAsync(), state);
         }
         catch (Exception error)
         {
@@ -252,12 +242,12 @@ public class JabberServiceClient
 
     private async Task<int> GetCurrentTenantIdAsync()
     {
-        return await _tenantManager.GetCurrentTenantIdAsync();
+        return await tenantManager.GetCurrentTenantIdAsync();
     }
 
     private async Task<string> GetCurrentUserNameAsync()
     {
-        return (await _userManager.GetUsersAsync(_authContext.CurrentAccount.ID)).UserName;
+        return (await userManager.GetUsersAsync(authContext.CurrentAccount.ID)).UserName;
     }
 
     private static void ProcessError(Exception error)

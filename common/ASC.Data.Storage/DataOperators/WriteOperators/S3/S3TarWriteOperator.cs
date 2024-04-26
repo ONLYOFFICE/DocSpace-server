@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -38,12 +38,13 @@ public class S3TarWriteOperator : IDataWriteOperator
     private readonly TaskScheduler _scheduler = new ConcurrentExclusiveSchedulerPair(TaskScheduler.Default, Limit).ConcurrentScheduler;
     private readonly ConcurrentQueue<int> _queue = new();
     private readonly CancellationTokenSource _cts = new();
+    private readonly AscDistributedCache _cache;
 
     public string Hash { get; private set; }
     public string StoragePath { get; private set; }
     public bool NeedUpload => false;
 
-    public S3TarWriteOperator(CommonChunkedUploadSession chunkedUploadSession, CommonChunkedUploadSessionHolder sessionHolder, TempStream tempStream)
+    public S3TarWriteOperator(CommonChunkedUploadSession chunkedUploadSession, CommonChunkedUploadSessionHolder sessionHolder, TempStream tempStream, AscDistributedCache cache)
     {
         _chunkedUploadSession = chunkedUploadSession;
         _sessionHolder = sessionHolder;
@@ -52,6 +53,7 @@ public class S3TarWriteOperator : IDataWriteOperator
         _key = _chunkedUploadSession.TempPath;
         _domain = _sessionHolder.TempDomain;
         _tempStream = tempStream;
+        _cache = cache;
 
         for (var i = 1; i <= Limit; i++)
         {
@@ -60,7 +62,7 @@ public class S3TarWriteOperator : IDataWriteOperator
     }
 
 
-    public async Task WriteEntryAsync(string tarKey, string domain, string path, IDataStore store, Action<Task> action)
+    public async Task WriteEntryAsync(string tarKey, string domain, string path, IDataStore store, Func<Task> action)
     {
         if (store is S3Storage s3Store) 
         {
@@ -85,7 +87,7 @@ public class S3TarWriteOperator : IDataWriteOperator
                     throw;
                 }
             });
-             _ = task.ContinueWith(action);
+             _ = task.ContinueWith(async _ => await action());
             _tasks.Add(task);
             task.Start(_scheduler);
         }
@@ -101,7 +103,7 @@ public class S3TarWriteOperator : IDataWriteOperator
         }
     }
 
-    public async Task WriteEntryAsync(string tarKey, Stream stream, Action<Task> action)
+    public async Task WriteEntryAsync(string tarKey, Stream stream, Func<Task> action)
     {
         if (_cts.IsCancellationRequested)
         {
@@ -110,7 +112,7 @@ public class S3TarWriteOperator : IDataWriteOperator
         var tStream = _tempStream.Create();
         stream.Position = 0;
         await stream.CopyToAsync(tStream);
-        
+
         var task = new Task(() =>
         {
             if (_cts.Token.IsCancellationRequested)
@@ -128,7 +130,7 @@ public class S3TarWriteOperator : IDataWriteOperator
             }
         });
         
-        _ = task.ContinueWith(action);
+        _ = task.ContinueWith(async _ => await action());
         _tasks.Add(task);
         task.Start(_scheduler);
     }
@@ -147,10 +149,10 @@ public class S3TarWriteOperator : IDataWriteOperator
                 await _store.DeleteAsync(_domain, _key + i);
             }
             var task = _tasks.First(t => t.Exception != null);
-            _cts.Cancel();
+            await _cts.CancelAsync();
             throw task.Exception;
         }
-        
+
         for (var i = 1; i <= Limit; i++)
         {
             var fullKey = _store.MakePath(_domain, _key + i);
@@ -167,11 +169,23 @@ public class S3TarWriteOperator : IDataWriteOperator
 
         var (uploadId, eTags, partNumber) = await _store.InitiateConcatAsync(_domain, _key, lastInit: true);
 
-        _chunkedUploadSession.BytesUploaded = contentLength;
         _chunkedUploadSession.BytesTotal = contentLength;
         _chunkedUploadSession.UploadId = uploadId;
-        _chunkedUploadSession.Items["ETag"] = eTags.ToDictionary(e => e.PartNumber, e => e.ETag);
-        _chunkedUploadSession.Items["ChunksUploaded"] = (partNumber - 1).ToString();
+        var first = true;
+        foreach (var etag in eTags)
+        {
+            var chunk = new Chunk
+            {
+                ETag = etag.ETag,
+                Length = 0
+            };
+            if (first)
+            {
+                chunk.Length = contentLength;
+                first = false;
+            }
+            await _cache.InsertAsync($"{_chunkedUploadSession.Id} - {etag.PartNumber}", chunk, TimeSpan.FromHours(12));
+        }
 
         StoragePath = await _sessionHolder.FinalizeAsync(_chunkedUploadSession);
         

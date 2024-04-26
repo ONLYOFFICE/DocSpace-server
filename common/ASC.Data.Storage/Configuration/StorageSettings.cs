@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,19 +27,10 @@
 namespace ASC.Data.Storage.Configuration;
 
 [Singleton(Additional = typeof(StorageSettingsExtension))]
-public class BaseStorageSettingsListener
+public class BaseStorageSettingsListener(IServiceProvider serviceProvider, ICacheNotify<ConsumerCacheItem> cacheNotify)
 {
-    private readonly IServiceProvider _serviceProvider;
-    private readonly ICacheNotify<ConsumerCacheItem> _cacheNotify;
-    private readonly object _locker;
+    private readonly object _locker = new();
     private volatile bool _subscribed;
-
-    public BaseStorageSettingsListener(IServiceProvider serviceProvider, ICacheNotify<ConsumerCacheItem> cacheNotify)
-    {
-        _serviceProvider = serviceProvider;
-        _cacheNotify = cacheNotify;
-        _locker = new object();
-    }
 
     public void Subscribe()
     {
@@ -57,9 +48,9 @@ public class BaseStorageSettingsListener
 
             _subscribed = true;
 
-            _cacheNotify.Subscribe(async (i) =>
+            cacheNotify.Subscribe(async i =>
             {
-                using var scope = _serviceProvider.CreateScope();
+                using var scope = serviceProvider.CreateScope();
 
                 var scopeClass = scope.ServiceProvider.GetService<BaseStorageSettingsListenerScope>();
                 var (storageSettingsHelper, settingsManager) = scopeClass;
@@ -219,29 +210,15 @@ public class StorageSettingsHelper
 
         foreach (var module in _storageFactoryConfig.GetModuleList("", true))
         {
-            await _cache.PublishAsync(new DataStoreCacheItem() { TenantId = path, Module = module }, CacheNotifyAction.Remove);
+            await _cache.PublishAsync(new DataStoreCacheItem { TenantId = path, Module = module }, CacheNotifyAction.Remove);
         }
     }
 }
 
 [Scope]
-public class BaseStorageSettingsListenerScope
-{
-    private readonly StorageSettingsHelper _storageSettingsHelper;
-    private readonly SettingsManager _settingsManager;
-
-    public BaseStorageSettingsListenerScope(StorageSettingsHelper storageSettingsHelper, SettingsManager settingsManager)
-    {
-        _storageSettingsHelper = storageSettingsHelper;
-        _settingsManager = settingsManager;
-    }
-
-    public void Deconstruct(out StorageSettingsHelper storageSettingsHelper, out SettingsManager settingsManager)
-    {
-        storageSettingsHelper = _storageSettingsHelper;
-        settingsManager = _settingsManager;
-    }
-}
+public record BaseStorageSettingsListenerScope(
+    StorageSettingsHelper StorageSettingsHelper,
+    SettingsManager SettingsManager);
 
 public static class StorageSettingsExtension
 {

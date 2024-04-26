@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,41 +24,26 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Constants = ASC.Core.Users.Constants;
+
 namespace ASC.Notify.Engine;
 
-public class NotifyRequest
+public class NotifyRequest(ILoggerProvider options, INotifySource notifySource, INotifyAction action, string objectID, IRecipient recipient)
 {
-    private readonly INotifySource _notifySource;
-    public INotifyAction NotifyAction { get; internal set; }
-    public string ObjectID { get; internal set; }
-    public IRecipient Recipient { get; internal set; }
-    public List<ITagValue> Arguments { get; internal init; }
+    private readonly INotifySource _notifySource = notifySource ?? throw new ArgumentNullException(nameof(notifySource));
+    public INotifyAction NotifyAction { get; internal set; } = action ?? throw new ArgumentNullException(nameof(action));
+    public string ObjectID { get; internal set; } = objectID;
+    public IRecipient Recipient { get; internal set; } = recipient ?? throw new ArgumentNullException(nameof(recipient));
+    public List<ITagValue> Arguments { get; internal init; } = [];
     public string CurrentSender { get; internal set; }
     public INoticeMessage CurrentMessage { get; internal set; }
-    public Hashtable Properties { get; private set; }
+    public Hashtable Properties { get; private set; } = new();
     internal string[] _senderNames;
     internal IPattern[] _patterns;
-    internal List<string> _requaredTags;
-    internal List<ISendInterceptor> _interceptors;
-    internal bool _isNeedCheckSubscriptions;
-    private readonly ILogger _log;
-    private readonly ILoggerProvider _options;
-
-    public NotifyRequest(ILoggerProvider options, INotifySource notifySource, INotifyAction action, string objectID, IRecipient recipient)
-    {
-        Properties = new Hashtable();
-        Arguments = new List<ITagValue>();
-        _requaredTags = new List<string>();
-        _interceptors = new List<ISendInterceptor>();
-        _options = options;
-        _notifySource = notifySource ?? throw new ArgumentNullException(nameof(notifySource));
-        Recipient = recipient ?? throw new ArgumentNullException(nameof(recipient));
-        NotifyAction = action ?? throw new ArgumentNullException(nameof(action));
-        ObjectID = objectID;
-
-        _isNeedCheckSubscriptions = true;
-        _log = options.CreateLogger("ASC.Notify");
-    }
+    internal List<string> _requaredTags = [];
+    internal List<ISendInterceptor> _interceptors = [];
+    internal bool _isNeedCheckSubscriptions = true;
+    private readonly ILogger _log = options.CreateLogger("ASC.Notify");
 
     internal async Task<bool> Intercept(InterceptorPlace place, IServiceScope serviceScope)
     {
@@ -106,11 +91,11 @@ public class NotifyRequest
     {
         ArgumentNullException.ThrowIfNull(recipient);
 
-        var newRequest = new NotifyRequest(_options, _notifySource, NotifyAction, ObjectID, recipient)
+        var newRequest = new NotifyRequest(options, _notifySource, NotifyAction, ObjectID, recipient)
         {
             _senderNames = _senderNames,
             _patterns = _patterns,
-            Arguments = new List<ITagValue>(Arguments),
+            Arguments = [..Arguments],
             _requaredTags = _requaredTags,
             CurrentSender = CurrentSender,
             CurrentMessage = CurrentMessage
@@ -159,7 +144,7 @@ public class NotifyRequest
 
         var user = await userManager.SearchUserAsync(Recipient.ID);
 
-        if (!Core.Users.Constants.LostUser.Equals(user) && !string.IsNullOrEmpty(user.CultureName))
+        if (!Constants.LostUser.Equals(user) && !string.IsNullOrEmpty(user.CultureName))
         {
             culture = user.GetCulture();
         }

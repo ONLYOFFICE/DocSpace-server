@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -25,11 +25,21 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using Image = SixLabors.ImageSharp.Image;
+using UnknownImageFormatException = ASC.Web.Core.Users.UnknownImageFormatException;
 
 namespace ASC.Files.Core.VirtualRooms;
 
 [Scope]
-public class RoomLogoManager
+public class RoomLogoManager(StorageFactory storageFactory,
+    TenantManager tenantManager,
+    IDaoFactory daoFactory,
+    FileSecurity fileSecurity,
+    ILogger<RoomLogoManager> logger,
+    FilesMessageService filesMessageService,
+    EmailValidationKeyProvider emailValidationKeyProvider,
+    SecurityContext securityContext,
+    FileUtilityConfiguration fileUtilityConfiguration, 
+    ExternalShare externalShare)
 {
     internal const string LogosPathSplitter = "_";
     private const string LogosPath = $"{{0}}{LogosPathSplitter}{{1}}.png";
@@ -41,53 +51,24 @@ public class RoomLogoManager
     private static readonly (SizeName, Size) _mediumLogoSize = (SizeName.Medium, new Size(32, 32));
     private static readonly (SizeName, Size) _smallLogoSize = (SizeName.Small, new Size(16, 16));
 
-    private readonly IDaoFactory _daoFactory;
-    private readonly FileSecurity _fileSecurity;
-    private readonly ILogger<RoomLogoManager> _logger;
-    private readonly StorageFactory _storageFactory;
-    private readonly TenantManager _tenantManager;
     private IDataStore _dataStore;
-    private readonly FilesMessageService _filesMessageService;
-    private readonly EmailValidationKeyProvider _emailValidationKeyProvider;
-    private readonly SecurityContext _securityContext;
-    private readonly FileUtilityConfiguration _fileUtilityConfiguration;
-    private readonly ExternalShare _externalShare;
-
-    public RoomLogoManager(
-        StorageFactory storageFactory,
-        TenantManager tenantManager,
-        IDaoFactory daoFactory,
-        FileSecurity fileSecurity,
-        ILogger<RoomLogoManager> logger,
-        FilesMessageService filesMessageService,
-        EmailValidationKeyProvider emailValidationKeyProvider,
-        SecurityContext securityContext,
-        FileUtilityConfiguration fileUtilityConfiguration, 
-        ExternalShare externalShare)
-    {
-        _storageFactory = storageFactory;
-        _tenantManager = tenantManager;
-        _daoFactory = daoFactory;
-        _fileSecurity = fileSecurity;
-        _logger = logger;
-        _filesMessageService = filesMessageService;
-        _emailValidationKeyProvider = emailValidationKeyProvider;
-        _securityContext = securityContext;
-        _fileUtilityConfiguration = fileUtilityConfiguration;
-        _externalShare = externalShare;
-    }
 
     public bool EnableAudit { get; set; } = true;
-    private int TenantId => _tenantManager.GetCurrentTenant().Id;
 
     private async ValueTask<IDataStore> GetDataStoreAsync()
     {
-        return _dataStore ??= await _storageFactory.GetStorageAsync(TenantId, ModuleName);
+        if (_dataStore == null)
+        {
+            var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+            _dataStore = await storageFactory.GetStorageAsync(tenantId, ModuleName);
+        }
+
+        return _dataStore;
     }
 
     public async Task<Folder<T>> CreateAsync<T>(T id, string tempFile, int x, int y, int width, int height)
     {
-        var folderDao = _daoFactory.GetFolderDao<T>();
+        var folderDao = daoFactory.GetFolderDao<T>();
         var room = await folderDao.GetFolderAsync(id);
 
         if (string.IsNullOrEmpty(tempFile))
@@ -100,7 +81,7 @@ public class RoomLogoManager
             throw new ItemNotFoundException();
         }
 
-        if (room.RootFolderType == FolderType.Archive || !await _fileSecurity.CanEditRoomAsync(room))
+        if (room.RootFolderType == FolderType.Archive || !await fileSecurity.CanEditRoomAsync(room))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
         }
@@ -114,20 +95,13 @@ public class RoomLogoManager
         await SaveWithProcessAsync(store, stringId, data, -1, new Point(x, y), new Size(width, height));
         await RemoveTempAsync(store, fileName);
 
-        room.HasLogo = true;
+        room.SettingsHasLogo = true;
 
-        if (room.ProviderEntry)
-        {
-            await _daoFactory.ProviderDao.UpdateProviderInfoAsync(room.ProviderId, true);
-        }
-        else
-        {
-            await folderDao.SaveFolderAsync(room);
-        }
+        await SaveRoomAsync(folderDao, room);
 
         if (EnableAudit)
         {
-            await _filesMessageService.SendAsync(MessageAction.RoomLogoCreated, room, room.Title);
+            await filesMessageService.SendAsync(MessageAction.RoomLogoCreated, room, room.Title);
         }
 
         return room;
@@ -135,10 +109,10 @@ public class RoomLogoManager
 
     public async Task<Folder<T>> DeleteAsync<T>(T id, bool checkPermissions = true)
     {
-        var folderDao = _daoFactory.GetFolderDao<T>();
+        var folderDao = daoFactory.GetFolderDao<T>();
         var room = await folderDao.GetFolderAsync(id);
 
-        if (checkPermissions && !await _fileSecurity.CanEditRoomAsync(room))
+        if (checkPermissions && !await fileSecurity.CanEditRoomAsync(room))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
         }
@@ -149,25 +123,18 @@ public class RoomLogoManager
         {
             var store = await GetDataStoreAsync(); 
             await store.DeleteFilesAsync(string.Empty, $"{ProcessFolderId(stringId)}*.*", false);
-            room.HasLogo = false;
+            room.SettingsHasLogo = false;
 
-            if (room.ProviderEntry)
-            {
-                await _daoFactory.ProviderDao.UpdateProviderInfoAsync(room.ProviderId, false);
-            }
-            else
-            {
-                await folderDao.SaveFolderAsync(room);
-            }
+            await SaveRoomAsync(folderDao, room);
 
             if (EnableAudit)
             {
-                await _filesMessageService.SendAsync(MessageAction.RoomLogoDeleted, room, room.Title);
+                await filesMessageService.SendAsync(MessageAction.RoomLogoDeleted, room, room.Title);
             }
         }
         catch (Exception e)
         {
-            _logger.ErrorRemoveRoomLogo(e);
+            logger.ErrorRemoveRoomLogo(e);
         }
 
         return room;
@@ -175,14 +142,13 @@ public class RoomLogoManager
 
     public async ValueTask<Logo> GetLogoAsync<T>(Folder<T> room)
     {
-        if (!room.HasLogo)
+        if (!room.SettingsHasLogo)
         {
-            if (string.IsNullOrEmpty(room.Color))
+            if (string.IsNullOrEmpty(room.SettingsColor))
             {
-                room.Color = GetRandomColour();
-
-                var folderDao = _daoFactory.GetFolderDao<T>();
-                await folderDao.SaveFolderAsync(room);
+                room.SettingsColor = GetRandomColour();
+                
+                await SaveRoomAsync(daoFactory.GetFolderDao<T>(), room);
             }
 
             return new Logo
@@ -191,14 +157,14 @@ public class RoomLogoManager
                 Large = string.Empty,
                 Medium = string.Empty,
                 Small = string.Empty,
-                Color = room.Color
+                Color = room.SettingsColor
             };
         }
 
         var id = GetId(room);
 
         var cacheKey = Math.Abs(room.ModifiedOn.GetHashCode());
-        var secure = !_securityContext.IsAuthenticated;
+        var secure = !securityContext.IsAuthenticated;
 
         return new Logo
         {
@@ -225,7 +191,7 @@ public class RoomLogoManager
 
         if (pathAsString.IndexOf('?') > 0)
         {
-            pathWithoutQuery = pathAsString.Substring(0, pathAsString.IndexOf('?'));
+            pathWithoutQuery = pathAsString[..pathAsString.IndexOf('?')];
         }
 
         return pathWithoutQuery;
@@ -234,15 +200,15 @@ public class RoomLogoManager
     internal string GetRandomColour()
     {
         var rand = new Random();
-        var color = _fileUtilityConfiguration.LogoColors[rand.Next(_fileUtilityConfiguration.LogoColors.Count - 1)];
+        var color = fileUtilityConfiguration.LogoColors[rand.Next(fileUtilityConfiguration.LogoColors.Count - 1)];
         var result = Color.FromRgba(color.R, color.G, color.B, 1).ToHex();
-        return result.Substring(0, result.Length - 2);//without opacity
+        return result[..^2];//without opacity
     }
 
     private async Task RemoveTempAsync(IDataStore store, string fileName)
     {
         var index = fileName.LastIndexOf('.');
-        var fileNameWithoutExt = (index != -1) ? fileName.Substring(0, index) : fileName;
+        var fileNameWithoutExt = (index != -1) ? fileName[..index] : fileName;
 
         try
         {
@@ -250,7 +216,7 @@ public class RoomLogoManager
         }
         catch (Exception e)
         {
-            _logger.ErrorRemoveTempPhoto(e);
+            logger.ErrorRemoveTempPhoto(e);
         }
     }
 
@@ -274,7 +240,7 @@ public class RoomLogoManager
 
         if (imageData is not { Length: > 0 })
         {
-            throw new Web.Core.Users.UnknownImageFormatException();
+            throw new UnknownImageFormatException();
         }
         if (maxFileSize != -1 && imageData.Length > maxFileSize)
         {
@@ -305,20 +271,20 @@ public class RoomLogoManager
         }
         catch (ArgumentException error)
         {
-            throw new Web.Core.Users.UnknownImageFormatException(error);
+            throw new UnknownImageFormatException(error);
         }
     }
 
     private async ValueTask<string> GetLogoPathAsync<T>(T id, SizeName size, int hash, bool secure = false)
     {
         var fileName = string.Format(LogosPath, ProcessFolderId(id), size.ToStringLowerFast());
-        var headers = secure ? new[] { SecureHelper.GenerateSecureKeyHeader(fileName, _emailValidationKeyProvider) } : null;
+        var headers = secure ? new[] { SecureHelper.GenerateSecureKeyHeader(fileName, emailValidationKeyProvider) } : null;
 
         var store = await GetDataStoreAsync();
 
         var uri = await store.GetPreSignedUriAsync(string.Empty, fileName, TimeSpan.MaxValue, headers);
 
-        return _externalShare.GetUrlWithShare(uri + (secure ? "&" : "?") + $"hash={hash}");
+        return externalShare.GetUrlWithShare(uri + (secure ? "&" : "?") + $"hash={hash}");
     }
 
     private async Task<byte[]> GetTempAsync(IDataStore store, string fileName)
@@ -340,6 +306,25 @@ public class RoomLogoManager
 
         return data.ToArray();
     }
+    
+    private async Task SaveRoomAsync<T>(IFolderDao<T> folderDao, Folder<T> room)
+    {
+        if (room.ProviderEntry)
+        {
+            var provider = await daoFactory.ProviderDao.UpdateRoomProviderInfoAsync(new ProviderData
+            {
+                Id = room.ProviderId,
+                HasLogo = room.SettingsHasLogo,
+                Color = room.SettingsColor
+            });
+            
+            room.ModifiedOn = provider.ModifiedOn;
+        }
+        else
+        {
+            await folderDao.SaveFolderAsync(room);
+        }
+    }
 
     private static string ProcessFolderId<T>(T id)
     {
@@ -347,27 +332,19 @@ public class RoomLogoManager
 
         return id.GetType() != typeof(string)
             ? id.ToString()
-            : id.ToString()?.Replace("-", "").Replace("|", "");
+            : id.ToString()?.Replace("|", "");
     }
 
     private static string GetId<T>(Folder<T> room)
     {
-        if (!room.ProviderEntry)
+        if (!room.MutableId)
         {
             return room.Id.ToString();
         }
 
-        if (room.Id.ToString()!.Contains(Selectors.SharpBox.Id))
-        {
-            return $"{Selectors.SharpBox.Id}-{room.ProviderId}";
-        }
+        var match = Selectors.Pattern.Match(room.Id.ToString()!);
 
-        if (room.Id.ToString()!.Contains(Selectors.SharePoint.Id))
-        {
-            return $"{Selectors.SharePoint.Id}-{room.ProviderId}";
-        }
-
-        return room.Id.ToString();
+        return $"{match.Groups["selector"]}-{match.Groups["id"]}";
     }
 }
 
@@ -377,5 +354,5 @@ public enum SizeName
     Original = 0,
     Large = 1,
     Medium = 2,
-    Small = 3,
+    Small = 3
 }

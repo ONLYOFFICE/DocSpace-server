@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -65,9 +65,6 @@ public abstract class BaseLoginProvider<T> : Consumer, ILoginProvider where T : 
     public abstract string ClientSecret { get; }
     public virtual string Scopes => string.Empty;
 
-    internal readonly Signature Signature;
-    internal readonly InstanceCrypto InstanceCrypto;
-
     protected readonly OAuth20TokenHelper _oAuth20TokenHelper;
 
     protected BaseLoginProvider() { }
@@ -80,21 +77,17 @@ public abstract class BaseLoginProvider<T> : Consumer, ILoginProvider where T : 
         IConfiguration configuration,
         ICacheNotify<ConsumerCacheItem> cache,
         ConsumerFactory consumerFactory,
-        Signature signature,
-        InstanceCrypto instanceCrypto,
         string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null)
         : base(tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, props, additional)
     {
         _oAuth20TokenHelper = oAuth20TokenHelper;
-        Signature = signature;
-        InstanceCrypto = instanceCrypto;
     }
 
     public virtual LoginProfile ProcessAuthorization(HttpContext context, IDictionary<string, string> @params, IDictionary<string, string> additionalStateArgs)
     {
         try
         {
-            var token = Auth(context, Scopes, out var redirect, @params, additionalStateArgs);
+            var token = Auth(context, out var redirect, @params, additionalStateArgs);
 
             if (redirect)
             {
@@ -109,13 +102,13 @@ public abstract class BaseLoginProvider<T> : Consumer, ILoginProvider where T : 
         }
         catch (Exception ex)
         {
-            return LoginProfile.FromError(Signature, InstanceCrypto, ex);
+            return new LoginProfile(ex);
         }
     }
 
     public abstract LoginProfile GetLoginProfile(string accessToken);
 
-    protected virtual OAuth20Token Auth(HttpContext context, string scopes, out bool redirect, IDictionary<string, string> additionalArgs = null, IDictionary<string, string> additionalStateArgs = null)
+    protected virtual OAuth20Token Auth(HttpContext context, out bool redirect, IDictionary<string, string> additionalArgs = null, IDictionary<string, string> additionalStateArgs = null)
     {
         var error = context.Request.Query["error"];
         if (!string.IsNullOrEmpty(error))
@@ -131,7 +124,7 @@ public abstract class BaseLoginProvider<T> : Consumer, ILoginProvider where T : 
         var code = context.Request.Query["code"];
         if (string.IsNullOrEmpty(code))
         {
-            context.Response.Redirect(_oAuth20TokenHelper.RequestCode<T>(scopes, additionalArgs, additionalStateArgs));
+            context.Response.Redirect(_oAuth20TokenHelper.RequestCode<T>(Scopes, additionalArgs, additionalStateArgs));
             redirect = true;
 
             return null;
@@ -139,7 +132,7 @@ public abstract class BaseLoginProvider<T> : Consumer, ILoginProvider where T : 
 
         redirect = false;
 
-        return _oAuth20TokenHelper.GetAccessToken<T>(ConsumerFactory, code);
+        return _oAuth20TokenHelper.GetAccessToken<T>(code);
     }
 
     public virtual LoginProfile GetLoginProfile(OAuth20Token token)
@@ -149,7 +142,7 @@ public abstract class BaseLoginProvider<T> : Consumer, ILoginProvider where T : 
 
     public OAuth20Token GetToken(string codeOAuth)
     {
-        return _oAuth20TokenHelper.GetAccessToken<T>(ConsumerFactory, codeOAuth);
+        return _oAuth20TokenHelper.GetAccessToken<T>(codeOAuth);
     }
 }
 

@@ -91,9 +91,6 @@
   <data name="ButtonConfirm" xml:space="preserve">
     <value>Təsdiq edin</value>
   </data>
-  <data name="ButtonConfirmPortalAddressChange" xml:space="preserve">
-    <value>Portal Ünvanının Dəyişdirilməsini Təsdiq Edin</value>
-  </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
     <value>Portal Sahibinin Yenilənməsini Təsdiq Edin</value>
   </data>
@@ -185,19 +182,6 @@ Link 7 gün ərzində etibarlıdır.
 
 E-poçtunuzu dəyişmək istəmirsiniz? Sadəcə bu mesaja əhəmiyyət verməyin.</value>
   </data>
-  <data name="pattern_change_password" xml:space="preserve">
-    <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" portalı üçün parol dəyişikliyi sorğusu: 
-
-"${__VirtualRootPath}":"${__VirtualRootPath}" portalına daxil olmaq üçün istifadə edilən parolunuzu dəyişdirmək üçün sorğu olub.
-
-Şifrənizi dəyişmək üçün aşağıdakı linkə daxil olun:
-
-$OrangeButton
-
-*Qeyd*: bu link yalnız 7 gün ərzində etibarlıdır. Bu müddət ərzində parol dəyişdirmə prosesini tamamlayın.
-
-Əgər parolunuzu dəyişmək və ya bu mesajı səhvən almaq istəmirsinizsə, zəhmət olmasa, ona məhəl qoymayın və ya əlavə məlumat üçün "${__VirtualRootPath}":"${__VirtualRootPath}" portal administratorunuzla əlaqə saxlayın.</value>
-  </data>
   <data name="pattern_change_phone" xml:space="preserve">
     <value>h1.Mobil telefon dəyişmə sorğusu
 
@@ -230,19 +214,6 @@ Salam, $OwnerName,
 $OrangeButton
 
 *Qeyd*: bu link yalnız 7 gün ərzində etibarlıdır. Bu müddət ərzində portal sahibinin dəyişdirilməsi prosesini tamamlayın.</value>
-  </data>
-  <data name="pattern_dns_change" xml:space="preserve">
-    <value>h1.Portal ünvanının dəyişdirilməsi
-
-Salam, $OwnerName,
-
-"${__VirtualRootPath}":"${__VirtualRootPath}" portal ünvanını "$PortalAddress":"$PortalAddress" #if($PortalDns != "") ("$PortalDns":"$PortalDns" )#end olaraq dəyişdirmək üçün sorğu göndərilib.
-
-Əməliyyatı təsdiqləmək üçün aşağıdakı linkə daxil olun:
-
-$OrangeButton
-
-*Qeyd*: bu link yalnız 7 gün ərzində etibarlıdır. Bu müddət ərzində portal ünvanının dəyişdirilməsi prosesini tamamlayın.</value>
   </data>
   <data name="pattern_enterprise_guest_activation_v10" xml:space="preserve">
     <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace-ə qoşulun
@@ -463,94 +434,6 @@ Köməyə ehtiyacınız varsa, "Dəstək Mərkəzimizə":"${__HelpLink}" nəzər
 
 $TrulyYours</value>
  </data>
-  <data name="pattern_personal_activate" xml:space="preserve">
-    <value>Salam, $UserName
-Siz ONLYOFFICE Personal-da"${__VirtualRootPath}":"${__VirtualRootPath}" uğurla qeydiyyatdan keçmisiniz.
-
-Sevimli bulud yaddaşınızı birləşdirin: Sənədləriniz üçün hər yerdə əlçatan olaniş sahəsi yaratmaq üçün Dropbox, Google Drive, OneDrive və ya Box-dan istifadə edin.
-
-"Bloqumuzda":"$TagBlogLink" ONLYOFFICE Personal haqqında ətraflı məlumat əldə edin.
-
-Burada olmağınıza şadıq. Bizimlə qalın!
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_personal_after_registration1" xml:space="preserve">
-    <value>h1.ONLYOFFICE Personal-a xoş gəlmisiniz
-
-Siz indicə buludda şəxsi ofisinizi yaratdınız.
-
-h3.Bu, dostlarınız və ya həmkarlarınıza girişi təmin etməklə istənilən yerdən sənədləri redaktə edə və saxlaya, onlarla işləyə biləcəyiniz virtual iş sahəsidir.
-
-h3. Sürətli başlanğıc üçün ONLYOFFICE-də edə biləcəkləriniz bunlardır:
-
-Mətn sənədləri, cədvəllər və təqdimatlar yaradın, onlara baxın və redaktə edin.
-
-- Bütün məşhur formatlarla işləyin. MS Office faylları ilə ən yüksək uyğunluq.
-
-- "Doldurmağa hazır formalar":"https://www.onlyoffice.com/form-creator.aspx" yaradın və redaktə edin.
-
-- Sənədləri onlayn paylaşın və əməkdaşlıq edin.
-
-- Əlavə funksiyaları həyata keçirmək üçün müxtəlif plaginlərdən istifadə edin;
-
-- "Chrome genişləndirilməsi":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=en-US" vasitəsilə Şəxsi buludunuza asanlıqla daxil olun.
-
-Siz həmçinin ödənişsiz "masaüstü redaktorlarımız vasitəsilə sənədləri oflayn rejimdə redaktə edə bilərsiniz":"https://www.onlyoffice.com/download-desktop.aspx" və ya "iOS":"https://apps.apple.com/app/onlyoffice-documents/id944896972" üçün mobil redaktə paketi əldə edə bilərsiniz və ya "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents" cihazı.
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_personal_change_email_v115" xml:space="preserve">
-    <value>ONLYOFFICE hesabınızdakı e-poçtu dəyişmək istəyirsiniz?
-
-Aşağıdakı düyməni basın və buludunuza daxil olun*.
-
-$OrangeButton
-
-Link 7 gün ərzində etibarlıdır.
-
-*Bu brauzerdə ONLYOFFICE-a daxil olmamısınızsa, təsdiq üçün köhnə e-poçtunuzdan istifadə etməlisiniz.
-
-E-poçtunuzu dəyişmək istəmirsiniz? Sadəcə bu mesaja əhəmiyyət verməyin.</value>
-  </data>
-  <data name="pattern_personal_change_password" xml:space="preserve">
-    <value>"${__VirtualRootPath}":"${__VirtualRootPath}" portalına daxil olmaq üçün istifadə etdiyiniz parolu dəyişmək üçün sorğu olub.
-
-Şifrənizi dəyişmək üçün aşağıdakı linkə daxil olun:
-
-$OrangeButton
-
-*Qeyd*: bu link yalnız 7 gün ərzində etibarlıdır. Zəhmət olmasa, həmin müddət ərzində parol dəyişmə prosesini tamamlayın.
-
-Əgər parolunuzu dəyişmək istəmirsinizsə və ya bu e-poçt səhvən göndərilibsə, ona əhəmiyyə verməyin.
-
-Hörmətlə,
-ONLYOFFICE komandası</value>
-  </data>
-  <data name="pattern_personal_confirmation" xml:space="preserve">
-    <value>Salam,
-
-Siz indicə şəxsi istifadə üçün ONLYOFFICE həllində hesabı qeydiyyatdan keçirdiniz. Qeydiyyatı təsdiqləmək və parol yaratmaq üçün "bura":"$InviteLink" üzərinə klikləyin.
-
-Əgər linki aça bilmirsinizsə, aşağıdakı i kopyalayın "$InviteLink":"$InviteLink" və onu brauzerinizin ünvan çubuğuna yapışdırın.
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_personal_profile_delete" xml:space="preserve">
-    <value>Personal.onlyoffice.com saytında hesabınıza xitam verilməsini xahiş etmisiniz. Sorğunu tamamlamaq üçün linkə daxil olun (link 7 gün ərzində aktivdir):
-
-$OrangeButton
-
-*Qeyd*: Silindikdən sonra hesabınız və onunla əlaqəli bütün məlumatlar "Məxfilik bəyanatımız":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0" a uyğun olaraq həmişəlik silinəcək.
-
-"Hesabın ləğvi haqqında ətraflı oxuyun":"${__HelpLink}/administration/configuration.aspx"
-
-Davam etmək istəmirsinizsə, bu e-poçta əhəmiyyət verməyin.
-
-Hər hansı sualınız varsa, "${__SalesEmail}":"mailto:${__SalesEmail}" ünvanında bizimlə əlaqə saxlayın
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" portalını deaktiv edin:
 
@@ -949,9 +832,6 @@ Link yalnız 7 gün üçün keçərli olacaq.</value>
   <data name="subject_confirm_owner_change" xml:space="preserve">
     <value>${LetterLogoText}. Portal sahibinin dəyişdirilməsi</value>
   </data>
-  <data name="subject_dns_change" xml:space="preserve">
-    <value>${LetterLogoText}. Portal ünvanının dəyişdirilməsi</value>
-  </data>
   <data name="subject_enterprise_guest_activation_v10" xml:space="preserve">
     <value>${__VirtualRootPath}-a qoşulun</value>
   </data>
@@ -987,21 +867,6 @@ Link yalnız 7 gün üçün keçərli olacaq.</value>
   </data>
   <data name="subject_opensource_guest_welcome_v1" xml:space="preserve">
     <value>ONLYOFFICE DocSpace-ə xoş gəlmisiniz!</value>
-  </data>
-  <data name="subject_personal_activate" xml:space="preserve">
-    <value>Şəxsi istifadə üçün ONLYOFFICE-a xoş gəlmisiniz!</value>
-  </data>
-  <data name="subject_personal_after_registration1" xml:space="preserve">
-    <value>ONLYOFFICE Personala xoş gəlmisiniz</value>
-  </data>
-  <data name="subject_personal_change_password" xml:space="preserve">
-    <value>ONLYOFFICE Personal parol yardımı</value>
-  </data>
-  <data name="subject_personal_confirmation" xml:space="preserve">
-    <value>ONLYOFFICE Personal. Zəhmət olmasa e-poçt ünvanınızı aktivləşdirin</value>
-  </data>
-  <data name="subject_personal_profile_delete" xml:space="preserve">
-    <value>ONLYOFFICE Personal hesabın ləğvi</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>${__VirtualRootPath} portalının deaktiv edilməsi</value>
@@ -1122,15 +987,6 @@ Link yalnız 7 gün üçün keçərli olacaq.</value>
   </data>
   <data name="ActionUserUpdated" xml:space="preserve">
     <value>DocSpace istifadəçisi yeniləndi: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
-  </data>
-  <data name="pattern_personal_change_password_v115" xml:space="preserve">
-    <value>ONLYOFFICE Şəxsi hesabınızdakı parolu dəyişmək istəyirsiniz? Təsdiqləmək üçün aşağıdakı düyməni basın.
-
-$OrangeButton
-
-Link 7 gün ərzində etibarlıdır.
-
-Parolunuzu dəyişmək istəmirsiniz? Sadəcə bu mesaja əhəmiyyət verməyin.</value>
   </data>
   <data name="pattern_change_password_v115" xml:space="preserve">
     <value>ONLYOFFICE hesabınızın şifrəsini dəyişmək istəyirsiniz? Təsdiq etmək üçün aşağıdakı düyməyə klikləyin.
@@ -1548,20 +1404,6 @@ E-poçt: $UserEmail
 
 $Body</value>
   </data>
-  <data name="pattern_personal_after_registration14_v1" xml:space="preserve">
-    <value>h1. &lt;span style="color:#FF6F3D;"&gt; ONLYOFFICE proqramlarını ödənişsiz&lt;/span&gt; əldə edin
-
-
-Salam, $UserName!
-
-İstənilən cihazınızdan sənədlər üzərində işləmək üçün pulsuz ONLYOFFICE tətbiqləri əldə edin.
-
-&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Sənədlər üzərində oflayn işləmək üçün ONLYOFFICE Desktop Redaktorları əldə edin&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 155px; padding-right: 155px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG1" alt="Windows" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="macOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG3" alt="Linux" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-
-&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Mobil cihazlarda sənədləri redaktə etmək üçün ONLYOFFICE Documents tətbiqini əldə edin&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 190px; padding-right: 190px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 29px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="29" height="32" src="$IMG4" alt="Android" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="iOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>h1. &lt;span style="color:#FF6F3D;"&gt; ONLYOFFICE proqramlarını ödənişsiz&lt;/span&gt; əldə edin
 
@@ -1575,15 +1417,6 @@ Salam, $UserName!
 &lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Mobil cihazlarda sənədləri redaktə etmək üçün ONLYOFFICE Documents tətbiqini əldə edin&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 190px; padding-right: 190px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 29px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="29" height="32" src="$IMG4" alt="Android" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="iOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $TrulyYours</value>
-  </data>
-  <data name="pattern_personal_already_exist" xml:space="preserve">
-    <value>Salam!
-Bu e-poçtdan istifadə edərək yeni "ONLYOFFICE Personal":"$PortalUrl" hesabını qeydiyyatdan keçirməyə cəhd edildi. Əgər siz idinizsə, hesabınızın artıq mövcud olduğunu bildirmək istərdik — ONLYOFFICE Personal üzərinə aşağı sürüşdürün və daxil olun.
-Əgər şifrənizi itirmisinizsə, onu "şifrə bərpa səhifəsi":"$LinkToRecovery" vasitəsilə bərpa edə bilərsiniz.
-Yeni hesabı qeydiyyatdan keçirməyə çalışmamısınızsa, yəqin ki, başqası bunu səhvən edib. Bu halda, lütfən, bu e-poçta məhəl qoymayın.
-
-Gözəl gün arzu edirik!
-ONLYOFFICE komandası</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
     <value>h1. ONLYOFFICE DocSpace &lt;span style="color:#FF6F3D;"&gt;deaktiv edilib&lt;/span&gt;
@@ -1687,7 +1520,7 @@ $TrulyYours</value>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>Salam!
 
-"${__VirtualRootPath}":"${__VirtualRootPath}" ünvanında $Message otağına qoşulmağa dəvət olunursunuz. Linkə klikləməklə dəvəti qəbul edin:
+"${__VirtualRootPath}":"${__VirtualRootPath}" ünvanında DocSpace otağına qoşulmağa dəvət olunursunuz. Linkə klikləməklə dəvəti qəbul edin:
 
 $OrangeButton
 
@@ -1743,9 +1576,6 @@ $TrulyYours</value>
   <data name="subject_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
     <value>ONLYOFFICE proqramlarını pulsuz əldə edin</value>
   </data>
-  <data name="subject_personal_after_registration14_v1" xml:space="preserve">
-    <value>ONLYOFFICE proqramlarını pulsuz əldə edin</value>
-  </data>
   <data name="subject_opensource_admin_docs_tips_v1" xml:space="preserve">
     <value>Sənədləriniz üzərində effektiv işləmək üçün 5 məsləhət</value>
   </data>
@@ -1796,9 +1626,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_for_sales_notify" xml:space="preserve">
     <value>Satış şöbəsinə müraciət</value>
-  </data>
-  <data name="subject_personal_already_exist" xml:space="preserve">
-    <value>ONLYOFFICE Şəxsi hesabınıza daxil olun</value>
   </data>
   <data name="ButtonConfirmRoomInvite" xml:space="preserve">
     <value>Otağa dəvəti təsdiqləyin</value>
@@ -1855,5 +1682,23 @@ Rahatlığınız və ONLYOFFICE DocSpace proqramını asanlıqla mənimsəməyin
 $OrangeButton
 
 $TrulyYours</value>
+  </data>
+  <data name="pattern_zoom_welcome" xml:space="preserve">
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Salam, $İstifadəçiAdı!
+
+Siz indicə ONLYOFFICE DocSpace yaratdınız, komanda, müştəri, tərəfdaşlarınız və s. ilə əməkdaşlığı gücləndirə biləcəyiniz sənəd mərkəzi. Ünvanı "${__VirtualRootPath}":"${__VirtualRootPath}"-dir.
+Cari tarif planınız STARTUP-dır. Tamamilə pulsuzdur və ona daxildir:
+
+&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;100 administrator/bacarıqlı istifadəçi&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;100 otağa qədər&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;100 GB disk sahəsi&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+
+*Sənəd əməkdaşlığının yeni üsulundan həzz alın!*
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_zoom_welcome" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace-ə xoş gəlmisiniz!</value>
   </data>
 </root>

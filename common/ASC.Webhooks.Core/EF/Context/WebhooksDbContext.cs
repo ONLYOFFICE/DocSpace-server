@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,13 +26,11 @@
 
 namespace ASC.Webhooks.Core.EF.Context;
 
-public class WebhooksDbContext : DbContext
+public class WebhooksDbContext(DbContextOptions<WebhooksDbContext> options) : DbContext(options)
 {
     public DbSet<WebhooksConfig> WebhooksConfigs { get; set; }
     public DbSet<WebhooksLog> WebhooksLogs { get; set; }
     public DbSet<DbWebhook> Webhooks { get; set; }
-
-    public WebhooksDbContext(DbContextOptions<WebhooksDbContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

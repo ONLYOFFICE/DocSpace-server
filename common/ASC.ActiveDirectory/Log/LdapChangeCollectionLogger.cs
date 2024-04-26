@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -25,7 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.ActiveDirectory.Log;
-static internal partial class LdapChangeCollectionLogger
+internal static partial class LdapChangeCollectionLogger
 {
     [LoggerMessage(Level = LogLevel.Error, Message = "GetPropChange({propName})")]
     public static partial void ErrorCanNotGetSidProperty(this ILogger logger, string propName, Exception exception);

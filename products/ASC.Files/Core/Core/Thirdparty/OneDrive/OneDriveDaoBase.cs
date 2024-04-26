@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,22 +27,20 @@
 namespace ASC.Files.Thirdparty.OneDrive;
 
 [Scope]
-internal class OneDriveDaoBase : ThirdPartyProviderDao<Item, Item, Item>, IDaoBase<Item, Item, Item>
+internal class OneDriveDaoBase(
+    IServiceProvider serviceProvider,
+    UserManager userManager,
+    TenantManager tenantManager,
+    TenantUtil tenantUtil,
+    IDbContextFactory<FilesDbContext> dbContextFactory,
+    SetupInfo setupInfo,
+    FileUtility fileUtility,
+    TempPath tempPath,
+    RegexDaoSelectorBase<Item, Item, Item> regexDaoSelectorBase)
+    : ThirdPartyProviderDao<Item, Item, Item>(serviceProvider, userManager, tenantManager, tenantUtil, dbContextFactory,
+        setupInfo, fileUtility, tempPath, regexDaoSelectorBase), IDaoBase<Item, Item, Item>
 {
     private OneDriveProviderInfo _providerInfo;
-
-    public OneDriveDaoBase(IServiceProvider serviceProvider, 
-        UserManager userManager,
-        TenantManager tenantManager, 
-        TenantUtil tenantUtil, 
-        IDbContextFactory<FilesDbContext> dbContextFactory, 
-        SetupInfo setupInfo,
-        FileUtility fileUtility,
-        TempPath tempPath, 
-        AuthContext authContext,
-        RegexDaoSelectorBase<Item, Item, Item> regexDaoSelectorBase) : base(serviceProvider, userManager, tenantManager, tenantUtil, dbContextFactory, setupInfo, fileUtility, tempPath, regexDaoSelectorBase)
-    {
-    }
 
     public void Init(string pathPrefix, IProviderInfo<Item, Item, Item> providerInfo)
     {
@@ -119,15 +117,12 @@ internal class OneDriveDaoBase : ThirdPartyProviderDao<Item, Item, Item>, IDaoBa
 
     public Folder<string> ToFolder(Item onedriveFolder)
     {
-        if (onedriveFolder == null)
+        switch (onedriveFolder)
         {
-            return null;
-        }
-
-        if (onedriveFolder is ErrorItem)
-        {
-            //Return error entry
-            return ToErrorFolder(onedriveFolder as ErrorItem);
+            case null:
+                return null;
+            case ErrorItem item:
+                return ToErrorFolder(item);
         }
 
         if (onedriveFolder.Folder == null)
@@ -141,20 +136,22 @@ internal class OneDriveDaoBase : ThirdPartyProviderDao<Item, Item, Item>, IDaoBa
 
         folder.Id = MakeId(isRoot ? string.Empty : onedriveFolder.Id);
         folder.ParentId = isRoot ? null : MakeId(GetParentFolderId(onedriveFolder));
-        folder.CreateOn = isRoot ? ProviderInfo.CreateOn : (onedriveFolder.CreatedDateTime.HasValue ? _tenantUtil.DateTimeFromUtc(onedriveFolder.CreatedDateTime.Value.DateTime) : default);
-        folder.ModifiedOn = isRoot ? ProviderInfo.CreateOn : (onedriveFolder.LastModifiedDateTime.HasValue ? _tenantUtil.DateTimeFromUtc(onedriveFolder.LastModifiedDateTime.Value.DateTime) : default);
-        folder.Private = ProviderInfo.Private;
-        folder.HasLogo = ProviderInfo.HasLogo;
-        SetFolderType(folder, isRoot);
-
         folder.Title = MakeFolderTitle(onedriveFolder);
+        folder.CreateOn = isRoot ? ProviderInfo.CreateOn : (onedriveFolder.CreatedDateTime.HasValue 
+            ? _tenantUtil.DateTimeFromUtc(onedriveFolder.CreatedDateTime.Value.DateTime) : default);
+        folder.ModifiedOn = isRoot ? ProviderInfo.ModifiedOn : (onedriveFolder.LastModifiedDateTime.HasValue 
+            ? _tenantUtil.DateTimeFromUtc(onedriveFolder.LastModifiedDateTime.Value.DateTime) : default);
+        folder.SettingsPrivate = ProviderInfo.Private;
+        folder.SettingsHasLogo = ProviderInfo.HasLogo;
+        folder.SettingsColor = ProviderInfo.Color;
+        ProcessFolderAsRoom(folder);
 
         return folder;
     }
 
     public bool IsRoot(Item onedriveFolder)
     {
-        return onedriveFolder.ParentReference == null || onedriveFolder.ParentReference.Id == null;
+        return onedriveFolder.ParentReference?.Id == null;
     }
 
     private File<string> ToErrorFile(ErrorItem onedriveFile)
@@ -187,15 +184,12 @@ internal class OneDriveDaoBase : ThirdPartyProviderDao<Item, Item, Item>, IDaoBa
 
     public File<string> ToFile(Item onedriveFile)
     {
-        if (onedriveFile == null)
+        switch (onedriveFile)
         {
-            return null;
-        }
-
-        if (onedriveFile is ErrorItem)
-        {
-            //Return error entry
-            return ToErrorFile(onedriveFile as ErrorItem);
+            case null:
+                return null;
+            case ErrorItem item:
+                return ToErrorFile(item);
         }
 
         if (onedriveFile.File == null)
@@ -206,11 +200,10 @@ internal class OneDriveDaoBase : ThirdPartyProviderDao<Item, Item, Item>, IDaoBa
         var file = GetFile();
 
         file.Id = MakeId(onedriveFile.Id);
-        file.ContentLength = onedriveFile.Size.HasValue ? (long)onedriveFile.Size : 0;
+        file.ContentLength = onedriveFile.Size ?? 0;
         file.CreateOn = onedriveFile.CreatedDateTime.HasValue ? _tenantUtil.DateTimeFromUtc(onedriveFile.CreatedDateTime.Value.DateTime) : default;
         file.ParentId = MakeId(GetParentFolderId(onedriveFile));
         file.ModifiedOn = onedriveFile.LastModifiedDateTime.HasValue ? _tenantUtil.DateTimeFromUtc(onedriveFile.LastModifiedDateTime.Value.DateTime) : default;
-        file.NativeAccessor = onedriveFile;
         file.Title = MakeFileTitle(onedriveFile);
         file.ThumbnailStatus = Thumbnail.Created;
         file.Encrypted = ProviderInfo.Private;
@@ -234,6 +227,11 @@ internal class OneDriveDaoBase : ThirdPartyProviderDao<Item, Item, Item>, IDaoBa
         {
             return new ErrorItem(ex, onedriveId);
         }
+    }
+    
+    public async Task<Item> CreateFolderAsync(string title, string folderId)
+    {
+        return await _providerInfo.CreateFolderAsync(title, MakeThirdId(folderId), GetId);
     }
 
     public async Task<Item> GetFolderAsync(string itemId)
@@ -261,23 +259,18 @@ internal class OneDriveDaoBase : ThirdPartyProviderDao<Item, Item, Item>, IDaoBa
         var onedriveFolderId = MakeThirdId(parentId);
         var items = await _providerInfo.GetItemsAsync(onedriveFolderId);
 
-        if (folder.HasValue)
+        if (!folder.HasValue)
         {
-            if (folder.Value)
-            {
-                return items.Where(i => i.Folder != null).ToList();
-            }
-
-            return items.Where(i => i.File != null).ToList();
+            return items;
         }
 
-        return items;
+        return folder.Value ? items.Where(i => i.Folder != null).ToList() : items.Where(i => i.File != null).ToList();
     }
 
-    public sealed class ErrorItem : Item, IErrorItem
+    private sealed class ErrorItem : Item, IErrorItem
     {
-        public string Error { get; set; }
-        public string ErrorId { get; private set; }
+        public string Error { get; }
+        public string ErrorId { get; }
 
         public ErrorItem(Exception e, object id)
         {
@@ -303,9 +296,9 @@ internal class OneDriveDaoBase : ThirdPartyProviderDao<Item, Item, Item>, IDaoBa
         if (!match.Success)
         {
             var insertIndex = requestTitle.Length;
-            if (requestTitle.LastIndexOf(".", StringComparison.InvariantCulture) != -1)
+            if (requestTitle.LastIndexOf('.') != -1)
             {
-                insertIndex = requestTitle.LastIndexOf(".", StringComparison.InvariantCulture);
+                insertIndex = requestTitle.LastIndexOf('.');
             }
 
             requestTitle = requestTitle.Insert(insertIndex, " (1)");
@@ -319,11 +312,11 @@ internal class OneDriveDaoBase : ThirdPartyProviderDao<Item, Item, Item>, IDaoBa
         return requestTitle;
     }
 
-    private string MatchEvaluator(Match match)
+    private static string MatchEvaluator(Match match)
     {
         var index = Convert.ToInt32(match.Groups[2].Value);
-        var staticText = match.Value.Substring(string.Format(" ({0})", index).Length);
+        var staticText = match.Value[$" ({index})".Length..];
 
-        return string.Format(" ({0}){1}", index + 1, staticText);
+        return $" ({index + 1}){staticText}";
     }
 }

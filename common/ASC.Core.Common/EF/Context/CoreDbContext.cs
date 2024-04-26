@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,14 +26,12 @@
 
 namespace ASC.Core.Common.EF;
 
-public class CoreDbContext : DbContext
+public class CoreDbContext(DbContextOptions<CoreDbContext> options) : DbContext(options)
 {
     public DbSet<DbTariff> Tariffs { get; set; }
     public DbSet<DbTariffRow> TariffRows { get; set; }
     public DbSet<DbQuota> Quotas { get; set; }
     public DbSet<DbQuotaRow> QuotaRows { get; set; }
-
-    public CoreDbContext(DbContextOptions<CoreDbContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

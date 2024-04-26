@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,5 +33,6 @@ public static class Constants
     public const string QueryAuth = "auth";
     public const string QueryExpire = "expire";
     public const string QueryHeader = "headers";
+    public const string QueryHash = "hash";
     public const string SecureKeyHeader = "secure-key";
 }

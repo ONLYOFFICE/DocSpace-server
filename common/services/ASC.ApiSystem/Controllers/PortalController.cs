@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,67 +31,27 @@ namespace ASC.ApiSystem.Controllers;
 [Scope]
 [ApiController]
 [Route("[controller]")]
-public class PortalController : ControllerBase
-{
-    private readonly IConfiguration _configuration;
-    private readonly SecurityContext _securityContext;
-    private readonly TenantManager _tenantManager;
-    private readonly SettingsManager _settingsManager;
-    private readonly ApiSystemHelper _apiSystemHelper;
-    private readonly CommonMethods _commonMethods;
-    private readonly HostedSolution _hostedSolution;
-    private readonly CoreSettings _coreSettings;
-    private readonly TenantDomainValidator _tenantDomainValidator;
-    private readonly UserFormatter _userFormatter;
-    private readonly UserManagerWrapper _userManagerWrapper;
-    private readonly CommonConstants _commonConstants;
-    private readonly TimeZonesProvider _timeZonesProvider;
-    private readonly TimeZoneConverter _timeZoneConverter;
-    private readonly PasswordHasher _passwordHasher;
-    private readonly CspSettingsHelper _cspSettingsHelper;
-    private readonly ILogger<PortalController> _log;
-    private readonly CoreBaseSettings _coreBaseSettings;
-
-    public PortalController(
+public class PortalController(
         IConfiguration configuration,
-        SecurityContext securityContext,
         TenantManager tenantManager,
         SettingsManager settingsManager,
         ApiSystemHelper apiSystemHelper,
         CommonMethods commonMethods,
         HostedSolution hostedSolution,
         CoreSettings coreSettings,
-        CoreBaseSettings coreBaseSettings,
         TenantDomainValidator tenantDomainValidator,
         UserFormatter userFormatter,
-        UserManagerWrapper userManagerWrapper,
         CommonConstants commonConstants,
         ILogger<PortalController> option,
         TimeZonesProvider timeZonesProvider,
         TimeZoneConverter timeZoneConverter,
         PasswordHasher passwordHasher,
-        CspSettingsHelper cspSettingsHelper)
-    {
-        _configuration = configuration;
-        _securityContext = securityContext;
-        _tenantManager = tenantManager;
-        _settingsManager = settingsManager;
-        _apiSystemHelper = apiSystemHelper;
-        _commonMethods = commonMethods;
-        _hostedSolution = hostedSolution;
-        _coreSettings = coreSettings;
-        _tenantDomainValidator = tenantDomainValidator;
-        _userFormatter = userFormatter;
-        _userManagerWrapper = userManagerWrapper;
-        _commonConstants = commonConstants;
-        _timeZonesProvider = timeZonesProvider;
-        _timeZoneConverter = timeZoneConverter;
-        _passwordHasher = passwordHasher;
-        _cspSettingsHelper = cspSettingsHelper;
-        _log = option;
-        _coreBaseSettings = coreBaseSettings;
-    }
-
+        CspSettingsHelper cspSettingsHelper,
+        CoreBaseSettings coreBaseSettings,
+        QuotaUsageManager quotaUsageManager,
+        PasswordSettingsManager passwordSettingsManager)
+    : ControllerBase
+{
     #region For TEST api
 
     [HttpGet("test")]
@@ -108,8 +68,8 @@ public class PortalController : ControllerBase
     #region API methods
 
     [HttpPost("register")]
-    [AllowCrossSiteJson]
-    [Authorize(AuthenticationSchemes = "auth:allowskip:registerportal")]
+    //[AllowCrossSiteJson]
+    [Authorize(AuthenticationSchemes = "auth:allowskip:registerportal,auth:portal,auth:portalbasic")]
     public async ValueTask<IActionResult> RegisterAsync(TenantModel model)
     {
         if (model == null)
@@ -149,7 +109,7 @@ public class PortalController : ControllerBase
 
             if (!string.IsNullOrEmpty(model.Password))
             {
-                model.PasswordHash = _passwordHasher.GetClientPassword(model.Password);
+                model.PasswordHash = passwordHasher.GetClientPassword(model.Password);
             }
 
         }
@@ -173,11 +133,11 @@ public class PortalController : ControllerBase
             return BadRequest(error);
         }
 
-        _log.LogDebug("PortalName = {0}; Elapsed ms. CheckExistingNamePortal: {1}", model.PortalName, sw.ElapsedMilliseconds);
+        option.LogDebug("PortalName = {0}; Elapsed ms. CheckExistingNamePortal: {1}", model.PortalName, sw.ElapsedMilliseconds);
 
-        var clientIP = _commonMethods.GetClientIp();
+        var clientIP = commonMethods.GetClientIp();
 
-        if (_commonMethods.CheckMuchRegistration(model, clientIP, sw))
+        if (commonMethods.CheckMuchRegistration(model, clientIP, sw))
         {
             return BadRequest(new
             {
@@ -186,31 +146,33 @@ public class PortalController : ControllerBase
             });
         }
 
-        if (!CheckRecaptcha(model, clientIP, sw, out error))
+        error = await GetRecaptchaError(model, clientIP, sw);
+            
+        if (error != null)
         {
             return BadRequest(error);
         }
 
         var language = model.Language ?? string.Empty;
 
-        var tz = _timeZonesProvider.GetCurrentTimeZoneInfo(language);
+        var tz = timeZonesProvider.GetCurrentTimeZoneInfo(language);
 
-        _log.LogDebug("PortalName = {0}; Elapsed ms. TimeZonesProvider.GetCurrentTimeZoneInfo: {1}", model.PortalName, sw.ElapsedMilliseconds);
+        option.LogDebug("PortalName = {0}; Elapsed ms. TimeZonesProvider.GetCurrentTimeZoneInfo: {1}", model.PortalName, sw.ElapsedMilliseconds);
 
         if (!string.IsNullOrEmpty(model.TimeZoneName))
         {
-            tz = _timeZoneConverter.GetTimeZone(model.TimeZoneName.Trim(), false) ?? tz;
+            tz = timeZoneConverter.GetTimeZone(model.TimeZoneName.Trim(), false) ?? tz;
 
-            _log.LogDebug("PortalName = {0}; Elapsed ms. TimeZonesProvider.OlsonTimeZoneToTimeZoneInfo: {1}", model.PortalName, sw.ElapsedMilliseconds);
+            option.LogDebug("PortalName = {0}; Elapsed ms. TimeZonesProvider.OlsonTimeZoneToTimeZoneInfo: {1}", model.PortalName, sw.ElapsedMilliseconds);
         }
 
-        var lang = _timeZonesProvider.GetCurrentCulture(language);
+        var lang = timeZonesProvider.GetCurrentCulture(language);
 
-        _log.LogDebug("PortalName = {0}; model.Language = {1}, resultLang.DisplayName = {2}", model.PortalName, language, lang.DisplayName);
+        option.LogDebug("PortalName = {0}; model.Language = {1}, resultLang.DisplayName = {2}", model.PortalName, language, lang.DisplayName);
 
         var info = new TenantRegistrationInfo
         {
-            Name = _configuration["web:portal-name"] ?? "",
+            Name = configuration["web:portal-name"] ?? "",
             Address = model.PortalName,
             Culture = lang,
             FirstName = model.FirstName,
@@ -222,7 +184,8 @@ public class PortalController : ControllerBase
             Industry = (TenantIndustry)model.Industry,
             Spam = model.Spam,
             Calls = model.Calls,
-            HostedRegion = model.Region
+            HostedRegion = model.Region,
+            LimitedAccessSpace = model.LimitedAccessSpace
         };
 
         if (!string.IsNullOrEmpty(model.AffiliateId))
@@ -245,28 +208,28 @@ public class PortalController : ControllerBase
         {
             /****REGISTRATION!!!*****/
 
-            t = await _hostedSolution.RegisterTenantAsync(info);
+            t = await hostedSolution.RegisterTenantAsync(info);
 
-            _tenantManager.SetCurrentTenant(t);
+            tenantManager.SetCurrentTenant(t);
 
-            await _cspSettingsHelper.SaveAsync(null, true);
+            await cspSettingsHelper.SaveAsync(null);
 
-            if (!_coreBaseSettings.Standalone && _apiSystemHelper.ApiCacheEnable)
+            if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
             { 
-                await _apiSystemHelper.AddTenantToCacheAsync(t.GetTenantDomain(_coreSettings), model.AWSRegion);
+                await apiSystemHelper.AddTenantToCacheAsync(t.GetTenantDomain(coreSettings), model.AWSRegion);
 
-                _log.LogDebug("PortalName = {0}; Elapsed ms. CacheController.AddTenantToCache: {1}", model.PortalName, sw.ElapsedMilliseconds);
+                option.LogDebug("PortalName = {0}; Elapsed ms. CacheController.AddTenantToCache: {1}", model.PortalName, sw.ElapsedMilliseconds);
             }
 
             /*********/
 
-            _log.LogDebug("PortalName = {0}; Elapsed ms. HostedSolution.RegisterTenant: {1}", model.PortalName, sw.ElapsedMilliseconds);
+            option.LogDebug("PortalName = {0}; Elapsed ms. HostedSolution.RegisterTenant: {1}", model.PortalName, sw.ElapsedMilliseconds);
         }
         catch (Exception e)
         {
             sw.Stop();
 
-            _log.LogError(e, "");
+            option.LogError(e, "");
 
             return StatusCode(StatusCodes.Status500InternalServerError, new
             {
@@ -276,23 +239,23 @@ public class PortalController : ControllerBase
             });
         }
 
-        var trialQuota = _configuration["quota:id"];
+        var trialQuota = configuration["quota:id"];
         if (!string.IsNullOrEmpty(trialQuota))
         {
             if (int.TryParse(trialQuota, out var trialQuotaId))
             {
                 var dueDate = DateTime.MaxValue;
-                if (int.TryParse(_configuration["quota:due"], out var dueTrial))
+                if (int.TryParse(configuration["quota:due"], out var dueTrial))
                 {
                     dueDate = DateTime.UtcNow.AddDays(dueTrial);
                 }
 
                 var tariff = new Tariff
                 {
-                    Quotas = new List<Quota> { new(trialQuotaId, 1) },
+                    Quotas = [new(trialQuotaId, 1)],
                     DueDate = dueDate
                 };
-                await _hostedSolution.SetTariffAsync(t.Id, tariff);
+                await hostedSolution.SetTariffAsync(t.Id, tariff);
             }
         }
 
@@ -301,49 +264,50 @@ public class PortalController : ControllerBase
 
         if (!string.IsNullOrEmpty(model.PasswordHash))
         {
-            isFirst = !_commonMethods.SendCongratulations(Request.Scheme, t, model.SkipWelcome, out sendCongratulationsAddress);
+            sendCongratulationsAddress = await commonMethods.SendCongratulations(Request.Scheme, t, model.SkipWelcome);
+            isFirst = sendCongratulationsAddress != null;
         }
-        else if (_configuration["core:base-domain"] == "localhost")
+        else if (configuration["core:base-domain"] == "localhost")
         {
             try
             {
                 /* set wizard not completed*/
-                _tenantManager.SetCurrentTenant(t);
+                tenantManager.SetCurrentTenant(t);
 
-                var settings = await _settingsManager.LoadAsync<WizardSettings>();
+                var settings = await settingsManager.LoadAsync<WizardSettings>();
 
                 settings.Completed = false;
 
-                await _settingsManager.SaveAsync(settings);
+                await settingsManager.SaveAsync(settings);
             }
             catch (Exception e)
             {
-                _log.LogError(e, "RegisterAsync");
+                option.LogError(e, "RegisterAsync");
             }
         }
 
-        var reference = _commonMethods.CreateReference(t.Id, Request.Scheme, t.GetTenantDomain(_coreSettings), info.Email, isFirst);
-        _log.LogDebug("PortalName = {0}; Elapsed ms. CreateReferenceByCookie...: {1}", model.PortalName, sw.ElapsedMilliseconds);
+        var reference = commonMethods.CreateReference(t.Id, Request.Scheme, t.GetTenantDomain(coreSettings), info.Email, isFirst);
+        option.LogDebug("PortalName = {0}; Elapsed ms. CreateReferenceByCookie...: {1}", model.PortalName, sw.ElapsedMilliseconds);
 
         sw.Stop();
 
         return Ok(new
         {
             reference,
-            tenant = _commonMethods.ToTenantWrapper(t),
+            tenant = commonMethods.ToTenantWrapper(t),
             referenceWelcome = sendCongratulationsAddress
         });
     }
 
     [HttpDelete("remove")]
     [AllowCrossSiteJson]
-    [Authorize(AuthenticationSchemes = "auth:allowskip:default")]
+    [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
     public async Task<IActionResult> RemoveAsync([FromQuery] TenantModel model)
     {
-        var (succ, tenant) = await _commonMethods.TryGetTenantAsync(model);
+        var (succ, tenant) = await commonMethods.TryGetTenantAsync(model);
         if (!succ)
         {
-            _log.LogError("Model without tenant");
+            option.LogError("Model without tenant");
 
             return BadRequest(new
             {
@@ -354,7 +318,7 @@ public class PortalController : ControllerBase
 
         if (tenant == null)
         {
-            _log.LogError("Tenant not found");
+            option.LogError("Tenant not found");
 
             return BadRequest(new
             {
@@ -363,23 +327,23 @@ public class PortalController : ControllerBase
             });
         }
 
-        await _hostedSolution.RemoveTenantAsync(tenant);
+        await hostedSolution.RemoveTenantAsync(tenant);
 
         return Ok(new
         {
-            tenant = _commonMethods.ToTenantWrapper(tenant)
+            tenant = commonMethods.ToTenantWrapper(tenant)
         });
     }
 
     [HttpPut("status")]
     [AllowCrossSiteJson]
-    [Authorize(AuthenticationSchemes = "auth:allowskip:default")]
+    [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
     public async Task<IActionResult> ChangeStatusAsync(TenantModel model)
     {
-        var (succ, tenant) = await _commonMethods.TryGetTenantAsync(model);
+        var (succ, tenant) = await commonMethods.TryGetTenantAsync(model);
         if (!succ)
         {
-            _log.LogError("Model without tenant");
+            option.LogError("Model without tenant");
 
             return BadRequest(new
             {
@@ -390,7 +354,7 @@ public class PortalController : ControllerBase
 
         if (tenant == null)
         {
-            _log.LogError("Tenant not found");
+            option.LogError("Tenant not found");
 
             return BadRequest(new
             {
@@ -408,11 +372,11 @@ public class PortalController : ControllerBase
 
         tenant.SetStatus(active);
 
-        await _hostedSolution.SaveTenantAsync(tenant);
+        await hostedSolution.SaveTenantAsync(tenant);
 
         return Ok(new
         {
-            tenant = _commonMethods.ToTenantWrapper(tenant)
+            tenant = commonMethods.ToTenantWrapper(tenant)
         });
     }
 
@@ -444,52 +408,49 @@ public class PortalController : ControllerBase
 
     [HttpGet("get")]
     [AllowCrossSiteJson]
-    [Authorize(AuthenticationSchemes = "auth:allowskip:default")]
-    public async Task<IActionResult> GetPortalsAsync([FromQuery] TenantModel model)
+    [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
+    public async Task<IActionResult> GetPortalsAsync([FromQuery] TenantModel model, [FromQuery] bool statistics)
     {
+        if (!coreBaseSettings.Standalone)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new
+            {
+                error = "error",
+                message = "Method for server edition only."
+            });
+        }
+
         try
         {
-            var tenants = new List<Tenant>();
-            var empty = true;
-
-            if (!string.IsNullOrWhiteSpace((model.Email ?? "")))
-            {
-                empty = false;
-                tenants.AddRange(await _hostedSolution.FindTenantsAsync((model.Email ?? "").Trim()));
-            }
-
-            if (!string.IsNullOrWhiteSpace((model.PortalName ?? "")))
-            {
-                empty = false;
-                var tenant = (await _hostedSolution.GetTenantAsync((model.PortalName ?? "").Trim()));
-
-                if (tenant != null)
-                {
-                    tenants.Add(tenant);
-                }
-            }
-
-            if (model.TenantId.HasValue)
-            {
-                empty = false;
-                var tenant = await _hostedSolution.GetTenantAsync(model.TenantId.Value);
-
-                if (tenant != null)
-                {
-                    tenants.Add(tenant);
-                }
-            }
-
-            if (empty)
-            {
-                tenants.AddRange((await _hostedSolution.GetTenantsAsync(DateTime.MinValue)).OrderBy(t => t.Id).ToList());
-            }
-
-            var tenantsWrapper = tenants
+            var tenants = (await commonMethods.GetTenantsAsync(model))
                 .Distinct()
                 .Where(t => t.Status == TenantStatus.Active)
-                .OrderBy(t => t.Id)
-                .Select(_commonMethods.ToTenantWrapper);
+                .OrderBy(t => t.Id);
+
+            var tenantsWrapper = new List<object>();
+
+            var owners = statistics
+                ? (await hostedSolution.FindUsersAsync(tenants.Select(t => t.OwnerId))).Select(owner => new TenantOwnerDto
+                    {
+                        Id = owner.Id,
+                        Email = owner.Email,
+                        DisplayName = userFormatter.GetUserName(owner)
+                    })
+                : null;
+
+            foreach (var t in tenants)
+            {
+                if (statistics)
+                {
+                    var quotaUsage = await quotaUsageManager.Get(t);
+                    var owner = owners.FirstOrDefault(o => o.Id == t.OwnerId);
+                    tenantsWrapper.Add(commonMethods.ToTenantWrapper(t, quotaUsage, owner));
+                }
+                else
+                {
+                    tenantsWrapper.Add(commonMethods.ToTenantWrapper(t));
+                }
+            }
 
             return Ok(new
             {
@@ -498,7 +459,7 @@ public class PortalController : ControllerBase
         }
         catch (Exception ex)
         {
-            _log.LogError(ex, "");
+            option.LogError(ex, "GetPortalsAsync");
 
             return StatusCode(StatusCodes.Status500InternalServerError, new
             {
@@ -516,11 +477,11 @@ public class PortalController : ControllerBase
     private async Task ValidateTenantAliasAsync(string alias)
     {
         // size
-        _tenantDomainValidator.ValidateDomainLength(alias);
+        tenantDomainValidator.ValidateDomainLength(alias);
         // characters
-        _tenantDomainValidator.ValidateDomainCharacters(alias);
+        tenantDomainValidator.ValidateDomainCharacters(alias);
 
-        var sameAliasTenants = await _apiSystemHelper.FindTenantsInCacheAsync(alias);
+        var sameAliasTenants = await apiSystemHelper.FindTenantsInCacheAsync(alias);
 
         if (sameAliasTenants != null)
         {
@@ -530,7 +491,7 @@ public class PortalController : ControllerBase
 
     private async ValueTask<(bool, object)> CheckExistingNamePortalAsync(string portalName)
     {
-        object error = null;
+        object error;
         if (string.IsNullOrEmpty(portalName))
         {
             error = new { error = "portalNameEmpty", message = "PortalName is required" };
@@ -541,13 +502,13 @@ public class PortalController : ControllerBase
 
         try
         {
-            if (!_coreBaseSettings.Standalone && _apiSystemHelper.ApiCacheEnable)
+            if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
             {
                 await ValidateTenantAliasAsync(portalName);
             }
             else
             {
-                await _hostedSolution.CheckTenantAddressAsync(portalName);
+                await hostedSolution.CheckTenantAddressAsync(portalName);
             }
         }
         catch (TenantAlreadyExistsException ex)
@@ -568,7 +529,7 @@ public class PortalController : ControllerBase
         }
         catch (Exception ex)
         {
-            _log.LogError(ex, "CheckExistingNamePortal");
+            option.LogError(ex, "CheckExistingNamePortal");
             error = new { error = "error", message = ex.Message, stacktrace = ex.StackTrace };
             return (false, error);
         }
@@ -585,7 +546,7 @@ public class PortalController : ControllerBase
             return false;
         }
 
-        if (!_userFormatter.IsValidUserName(name, string.Empty))
+        if (!userFormatter.IsValidUserName(name, string.Empty))
         {
             error = new { error = "error", message = "name is incorrect" };
             return false;
@@ -603,9 +564,9 @@ public class PortalController : ControllerBase
             return true;
         }
 
-        var passwordSettings = _settingsManager.GetDefault<PasswordSettings>();
+        var passwordSettings = settingsManager.GetDefault<PasswordSettings>();
 
-        if (!_userManagerWrapper.CheckPasswordRegex(passwordSettings, pwd))
+        if (!passwordSettingsManager.CheckPasswordRegex(passwordSettings, pwd))
         {
             error = new { error = "passPolicyError", message = "Password is incorrect" };
             return false;
@@ -617,35 +578,32 @@ public class PortalController : ControllerBase
 
     #region Recaptcha
 
-    private bool CheckRecaptcha(TenantModel model, string clientIP, Stopwatch sw, out object error)
+    private async Task<object> GetRecaptchaError(TenantModel model, string clientIP, Stopwatch sw)
     {
-        error = null;
-        if (_commonConstants.RecaptchaRequired
-            && !_commonMethods.IsTestEmail(model.Email))
+        if (commonConstants.RecaptchaRequired && !commonMethods.IsTestEmail(model.Email))
         {
-            if (!string.IsNullOrEmpty(model.AppKey) && _commonConstants.AppSecretKeys.Contains(model.AppKey))
+            if (!string.IsNullOrEmpty(model.AppKey) && commonConstants.AppSecretKeys.Contains(model.AppKey))
             {
-                _log.LogDebug("PortalName = {0}; Elapsed ms. ValidateRecaptcha via app key: {1}. {2}", model.PortalName, model.AppKey, sw.ElapsedMilliseconds);
-                return true;
+                option.LogDebug("PortalName = {0}; Elapsed ms. ValidateRecaptcha via app key: {1}. {2}", model.PortalName, model.AppKey, sw.ElapsedMilliseconds);
+                return null;
             }
 
             var data = $"{model.PortalName} {model.FirstName} {model.LastName} {model.Email} {model.Phone} {model.RecaptchaType}";
 
             /*** validate recaptcha ***/
-            if (!_commonMethods.ValidateRecaptcha(model.RecaptchaResponse, model.RecaptchaType, clientIP))
+            if (!await commonMethods.ValidateRecaptcha(model.RecaptchaResponse, model.RecaptchaType, clientIP))
             {
-                _log.LogDebug("PortalName = {0}; Elapsed ms. ValidateRecaptcha error: {1} {2}", model.PortalName, sw.ElapsedMilliseconds, data);
+                option.LogDebug("PortalName = {0}; Elapsed ms. ValidateRecaptcha error: {1} {2}", model.PortalName, sw.ElapsedMilliseconds, data);
                 sw.Stop();
 
-                error = new { error = "recaptchaInvalid", message = "Recaptcha is invalid" };
-                return false;
+                return new { error = "recaptchaInvalid", message = "Recaptcha is invalid" };
 
             }
 
-            _log.LogDebug("PortalName = {0}; Elapsed ms. ValidateRecaptcha: {1} {2}", model.PortalName, sw.ElapsedMilliseconds, data);
+            option.LogDebug("PortalName = {0}; Elapsed ms. ValidateRecaptcha: {1} {2}", model.PortalName, sw.ElapsedMilliseconds, data);
         }
 
-        return true;
+        return null;
     }
 
     #endregion

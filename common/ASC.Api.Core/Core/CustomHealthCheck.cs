@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -43,8 +43,7 @@ public static class CustomHealthCheck
                                     : HealthCheckResult.Unhealthy())
                  .AddDatabase(configuration)
                  .AddDistibutedCache(configuration)
-                 .AddMessageQueue(configuration)
-                 .AddSearch(configuration);
+                 .AddMessageQueue(configuration);
 
         return services;
     }
@@ -52,47 +51,14 @@ public static class CustomHealthCheck
     public static IHealthChecksBuilder AddDistibutedCache(
         this IHealthChecksBuilder hcBuilder, IConfiguration configuration)
     {
-        var redisConfiguration = configuration.GetSection("Redis").Get<RedisConfiguration>();
+        var redisConfiguration = configuration.GetSection("Redis");
 
         if (redisConfiguration != null)
         {
-            //  https://github.com/imperugo/StackExchange.Redis.Extensions/issues/513
-            if (configuration.GetSection("Redis").GetValue<string>("User") != null)
-            {
-                redisConfiguration.ConfigurationOptions.User = configuration.GetSection("Redis").GetValue<string>("User");
-            }
-
-
-            hcBuilder.AddRedis(redisConfiguration.ConfigurationOptions.ToString(),
+            hcBuilder.AddRedis(x => x.GetRequiredService<RedisPersistentConnection>().GetConnection(),
                                name: "redis",
                                tags: new[] { "redis", "services" },
                                timeout: new TimeSpan(0, 0, 15));
-        }
-
-        return hcBuilder;
-    }
-
-
-
-    public static IHealthChecksBuilder AddSearch(
-   this IHealthChecksBuilder hcBuilder, IConfiguration configuration)
-    {
-        var elasticSettings = configuration.GetSection("elastic");
-
-        if (elasticSettings.GetChildren().Any())
-        {
-            var host = elasticSettings.GetSection("Host").Value ?? "localhost";
-            var scheme = elasticSettings.GetSection("Scheme").Value ?? "http";
-            var port = elasticSettings.GetSection("Port").Value ?? "9200";
-            var elasticSearchUri = $"{scheme}://{host}:{port}";
-
-            if (Uri.IsWellFormedUriString(elasticSearchUri, UriKind.Absolute))
-            {
-                hcBuilder.AddElasticsearch(elasticSearchUri,
-                                          name: "elasticsearch",
-                                          tags: new[] { "elasticsearch", "services" },
-                                          timeout: new TimeSpan(0, 0, 15));
-            }
         }
 
         return hcBuilder;

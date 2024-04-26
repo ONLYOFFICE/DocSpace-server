@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,88 +27,62 @@
 namespace ASC.Core.Common.Hosting;
 
 [Singleton]
-public class RegisterInstanceWorkerService<T> : BackgroundService where T : IHostedService
+public class RegisterInstanceWorkerService<T>(
+    ILogger<RegisterInstanceWorkerService<T>> logger,
+    IServiceProvider serviceProvider,
+    IHostApplicationLifetime applicationLifetime,
+    IOptions<InstanceWorkerOptions<T>> optionsSettings)
+    : BackgroundService where T : IHostedService
 {
-    private readonly ILogger _logger;
-    private readonly IHostApplicationLifetime _applicationLifetime;
-    private readonly IServiceProvider _serviceProvider;
-    private readonly int _intervalCheckRegisterInstanceInSeconds;
-    public static readonly string InstanceId =
-        $"{typeof(T).GetFormattedName()}_{DateTime.UtcNow.Ticks}";
-    private readonly bool _isSingletoneMode;
-
-    public RegisterInstanceWorkerService(
-        ILogger<RegisterInstanceWorkerService<T>> logger,
-        IServiceProvider serviceProvider,
-        IHostApplicationLifetime applicationLifetime,
-        IConfiguration configuration)
-    {
-        _logger = logger;
-        _serviceProvider = serviceProvider;
-        _applicationLifetime = applicationLifetime;
-
-        if (!int.TryParse(configuration["core:hosting:intervalCheckRegisterInstanceInSeconds"], out _intervalCheckRegisterInstanceInSeconds))
-        {
-            _intervalCheckRegisterInstanceInSeconds = 1;
-        }
-
-        if (!bool.TryParse(configuration["core:hosting:singletonMode"], out _isSingletoneMode))
-        {
-            _isSingletoneMode = true;
-        }
-
-
-        _intervalCheckRegisterInstanceInSeconds = _intervalCheckRegisterInstanceInSeconds * 1000;
-    }
+    private readonly InstanceWorkerOptions<T> _settings = optionsSettings.Value;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        if (_isSingletoneMode)
+        if (_settings.SingletonMode)
         {
-            _logger.InformationWorkerSingletone();
+            logger.InformationWorkerSingletone();
 
             return;
         }
+        
+        await using var scope = serviceProvider.CreateAsyncScope();
 
         while (!stoppingToken.IsCancellationRequested)
         {
             try
             {
-                await using var scope = _serviceProvider.CreateAsyncScope();
-
                 var registerInstanceService = scope.ServiceProvider.GetService<IRegisterInstanceManager<T>>();
 
-                await registerInstanceService.Register(InstanceId);
-                await registerInstanceService.DeleteOrphanInstances();
+                await registerInstanceService.Register();
 
-                _logger.TraceWorkingRunnging(DateTimeOffset.Now);
+                logger.TraceWorkingRunnging(DateTimeOffset.Now);
 
-                await Task.Delay(_intervalCheckRegisterInstanceInSeconds, stoppingToken);
+                await Task.Delay(TimeSpan.FromSeconds(_settings.IntervalCheckRegisterInstanceInSeconds), stoppingToken);
             }
             catch (Exception ex)
             {
-                _logger.CriticalError(ex);
-                _applicationLifetime.StopApplication();
+                logger.CriticalError(ex);
+                applicationLifetime.StopApplication();
             }
         }
     }
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
-        if (!_isSingletoneMode)
+        if (!_settings.SingletonMode)
         {
             try
             {
-                await using var scope = _serviceProvider.CreateAsyncScope();
+                await using var scope = serviceProvider.CreateAsyncScope();
 
                 var registerInstanceService = scope.ServiceProvider.GetService<IRegisterInstanceManager<T>>();
 
-                await registerInstanceService.UnRegister(InstanceId);
+                await registerInstanceService.UnRegister();
 
-                _logger.InformationUnRegister(InstanceId, DateTimeOffset.Now);
+                logger.InformationUnRegister(_settings.InstanceId, DateTimeOffset.Now);
             }
             catch
             {
-                _logger.ErrorUnableToUnRegister(InstanceId, DateTimeOffset.Now);
+                logger.ErrorUnableToUnRegister(_settings.InstanceId, DateTimeOffset.Now);
             }
         }
 

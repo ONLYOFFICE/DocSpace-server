@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -51,11 +51,9 @@ public class ZoomLoginProvider : BaseLoginProvider<ZoomLoginProvider>
         IConfiguration configuration,
         ICacheNotify<ConsumerCacheItem> cache,
         ConsumerFactory consumerFactory,
-        Signature signature,
-        InstanceCrypto instanceCrypto,
         RequestHelper requestHelper,
         string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null)
-            : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, signature, instanceCrypto, name, order, props, additional)
+            : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, props, additional)
     {
         _requestHelper = requestHelper;
     }
@@ -91,7 +89,7 @@ public class ZoomLoginProvider : BaseLoginProvider<ZoomLoginProvider>
         }
         catch (Exception ex)
         {
-            return LoginProfile.FromError(Signature, InstanceCrypto, ex);
+            return new LoginProfile(ex);
         }
     }
 
@@ -101,7 +99,7 @@ public class ZoomLoginProvider : BaseLoginProvider<ZoomLoginProvider>
         var clientPair = $"{ClientID}:{ClientSecret}";
         var base64ClientPair = Convert.ToBase64String(Encoding.UTF8.GetBytes(clientPair));
 
-        var body = new Dictionary<string, string>()
+        var body = new Dictionary<string, string>
         {
             { "code", code },
             { "grant_type", "authorization_code" },
@@ -147,7 +145,7 @@ public class ZoomLoginProvider : BaseLoginProvider<ZoomLoginProvider>
 
     public LoginProfile GetMinimalProfile(string uid)
     {
-        return new LoginProfile(Signature, InstanceCrypto)
+        return new LoginProfile
         {
             Id = uid,
             Provider = ProviderConstants.Zoom
@@ -158,7 +156,7 @@ public class ZoomLoginProvider : BaseLoginProvider<ZoomLoginProvider>
     {
         var jsonProfile = JsonConvert.DeserializeObject<ZoomProfile>(zoomProfile);
 
-        var profile = new LoginProfile(Signature, InstanceCrypto)
+        var profile = new LoginProfile
         {
             Id = jsonProfile.Id,
             Avatar = jsonProfile.PicUrl?.ToString(),
@@ -168,7 +166,7 @@ public class ZoomLoginProvider : BaseLoginProvider<ZoomLoginProvider>
             Locale = jsonProfile.Language,
             TimeZone = jsonProfile.Timezone,
             DisplayName = jsonProfile.DisplayName,
-            Provider = ProviderConstants.Zoom,
+            Provider = ProviderConstants.Zoom
         };
 
         return (profile, jsonProfile);

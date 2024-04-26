@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -39,7 +39,7 @@ public class FFmpegService
         {
             if (string.IsNullOrEmpty(_fFmpegPath))
             {
-                return new List<string>();
+                return [];
             }
 
             return _convertableMedia;
@@ -47,7 +47,7 @@ public class FFmpegService
     }
 
     private readonly List<string> _convertableMedia;
-    private readonly List<string> _fFmpegExecutables = new() { "ffmpeg", "avconv" };
+    private readonly List<string> _fFmpegExecutables = ["ffmpeg", "avconv"];
     private readonly string _fFmpegPath;
     private readonly string _fFmpegArgs;
     private readonly string _fFmpegThumbnailsArgs;
@@ -97,7 +97,7 @@ public class FFmpegService
         var ffMpegFormats = configuration.GetSection("files:ffmpeg:thumbnails:formats").Get<List<string>>();
         _fFmpegFormats = ffMpegFormats != null ? ffMpegFormats.ToImmutableList() : FileUtility.ExtsVideo;
 
-        _convertableMedia = (configuration.GetSection("files:ffmpeg:exts").Get<string[]>() ?? Array.Empty<string>()).ToList();
+        _convertableMedia = (configuration.GetSection("files:ffmpeg:exts").Get<string[]>() ?? []).ToList();
 
         if (string.IsNullOrEmpty(_fFmpegPath))
         {

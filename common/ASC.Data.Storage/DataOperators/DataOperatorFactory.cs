@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -40,15 +40,27 @@ public static class DataOperatorFactory
         return new ZipWriteOperator(tempStream, backupFilePath);
     }
 
-    public static IDataReadOperator GetReadOperator(string targetFile)
+    public static IDataReadOperator GetReadOperator(string targetFile, bool removeTarget = true)
     {
-        if (targetFile.EndsWith("tar.gz")) 
+        if (targetFile.EndsWith("tar.gz"))
         {
-            return new ZipReadOperator(targetFile);
+            return new ZipReadOperator(targetFile, removeTarget);
         }
         else
         {
-            return new TarReadOperator(targetFile);
+            return new TarReadOperator(targetFile, removeTarget);
+        }
+    }
+
+    public static IDataReadOperator GetReadOperator(string targetFile, CancellationToken token, bool removeTarget = true)
+    {
+        if (targetFile.EndsWith("tar.gz"))
+        {
+            return new ZipReadOperator(targetFile, token, removeTarget);
+        }
+        else
+        {
+            return new TarReadOperator(targetFile, token, removeTarget);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,12 +26,10 @@
 
 namespace ASC.Core.Common.EF.Context;
 
-public class AccountLinkContext : DbContext
+public class AccountLinkContext(DbContextOptions<AccountLinkContext> options) : DbContext(options)
 {
     public DbSet<AccountLinks> AccountLinks { get; set; }
     public DbSet<User> Users { get; set; }
-
-    public AccountLinkContext(DbContextOptions<AccountLinkContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

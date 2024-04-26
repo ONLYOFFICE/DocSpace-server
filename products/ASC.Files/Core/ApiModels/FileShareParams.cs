@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -41,15 +41,8 @@ public class FileShareParams
 }
 
 [Scope]
-public class FileShareParamsHelper
+public class FileShareParamsHelper(UserManager userManager)
 {
-    private readonly UserManager _userManager;
-
-    public FileShareParamsHelper(UserManager userManager)
-    {
-        _userManager = userManager;
-    }
-
     public async Task<AceWrapper> ToAceObjectAsync(FileShareParams fileShareParams)
     {
         return new AceWrapper
@@ -57,7 +50,7 @@ public class FileShareParamsHelper
             Access = fileShareParams.Access,
             Id = fileShareParams.ShareTo,
             Email = fileShareParams.Email,
-            SubjectGroup = string.IsNullOrEmpty(fileShareParams.Email) && !await _userManager.UserExistsAsync(fileShareParams.ShareTo)
+            SubjectGroup = string.IsNullOrEmpty(fileShareParams.Email) && !await userManager.UserExistsAsync(fileShareParams.ShareTo)
         };
     }
 }

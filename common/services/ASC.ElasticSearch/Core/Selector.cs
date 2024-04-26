@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,18 +27,14 @@
 namespace ASC.ElasticSearch;
 
 [Scope]
-public class Selector<T> where T : class, ISearchItem
+public class Selector<T>(IServiceProvider serviceProvider)
+    where T : class, ISearchItem
 {
-    private readonly IServiceProvider _serviceProvider;
+    private readonly IServiceProvider _serviceProvider = serviceProvider;
     private readonly QueryContainerDescriptor<T> _queryContainerDescriptor = new();
     private SortDescriptor<T> _sortContainerDescriptor = new();
     private QueryContainer _queryContainer = new();
     private int _limit = 1000, _offset;
-
-    public Selector(IServiceProvider serviceProvider)
-    {
-        _serviceProvider = serviceProvider;
-    }
 
     public Selector<T> Where<TProperty>(Expression<Func<T, TProperty>> selector, TProperty value)
     {
@@ -103,7 +99,7 @@ public class Selector<T> where T : class, ISearchItem
         return this;
     }
 
-    public Selector<T> InAll<TValue>(Expression<Func<T, object>> selector, TValue[] values)
+    public Selector<T> InAll<TValue>(Expression<Func<T, object>> selector, IEnumerable<TValue> values)
     {
         foreach (var v in values)
         {
@@ -395,8 +391,7 @@ public class Selector<T> where T : class, ISearchItem
 
         foreach (var field in fields)
         {
-            var field1 = field;
-            qcWildCard = qcWildCard || Wrap(field1, (a, w) => w.Match(r => r.Field(a).Query(value.ToLower())));
+            qcWildCard = qcWildCard || Wrap(field, (a, w) => w.Match(r => r.Field(a).Query(value.ToLower())));
         }
 
         return qcWildCard;

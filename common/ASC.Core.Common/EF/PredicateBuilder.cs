@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,8 +32,7 @@ public static class PredicateBuilder
 
         var p = a.Parameters[0];
 
-        var visitor = new SubstExpressionVisitor();
-        visitor.Subst[b.Parameters[0]] = p;
+        var visitor = new SubstExpressionVisitor { Subst = { [b.Parameters[0]] = p } };
 
         Expression body = Expression.AndAlso(a.Body, visitor.Visit(b.Body));
         return Expression.Lambda<Func<T, bool>>(body, p);
@@ -43,8 +42,7 @@ public static class PredicateBuilder
     {
         var p = a.Parameters[0];
 
-        var visitor = new SubstExpressionVisitor();
-        visitor.Subst[b.Parameters[0]] = p;
+        var visitor = new SubstExpressionVisitor { Subst = { [b.Parameters[0]] = p } };
 
         Expression body = Expression.OrElse(a.Body, visitor.Visit(b.Body));
         return Expression.Lambda<Func<T, bool>>(body, p);
@@ -57,10 +55,6 @@ internal class SubstExpressionVisitor : ExpressionVisitor
 
     protected override Expression VisitParameter(ParameterExpression node)
     {
-        if (Subst.TryGetValue(node, out var newValue))
-        {
-            return newValue;
-        }
-        return node;
+        return Subst.GetValueOrDefault(node, node);
     }
 }

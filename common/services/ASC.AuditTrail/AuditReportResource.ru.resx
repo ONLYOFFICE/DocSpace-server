@@ -370,7 +370,7 @@
   <data name="LoginSuccess" xml:space="preserve">
     <value>Успешный вход в систему</value>
   </data>
-  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+  <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
     <value>Успешный вход через аккаунт социальной сети</value>
   </data>
   <data name="LoginSuccessSocialApp" xml:space="preserve">
@@ -732,5 +732,11 @@
   </data>
   <data name="RoomExternalLinkUpdated" xml:space="preserve">
     <value>Внешняя ссылка обновлена: {0}. Роль: {1}</value>
+  </data>
+  <data name="FileOpenedForChange" xml:space="preserve">
+    <value>Файл открыт для изменения: {0}</value>
+  </data>
+  <data name="PortalRenamed" xml:space="preserve">
+    <value>Портал переименован</value>
   </data>
 </root>

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,7 +26,5 @@
 
 namespace Textile;
 
-[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
-public sealed class BlockModifierAttribute : Attribute
-{
-}
+[AttributeUsage(AttributeTargets.Class, Inherited = false)]
+public sealed class BlockModifierAttribute : Attribute;

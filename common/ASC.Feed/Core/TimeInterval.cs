@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,16 +26,8 @@
 
 namespace ASC.Feed;
 
-public struct TimeInterval
+public readonly struct TimeInterval(DateTime fromTime, DateTime toTime)
 {
-    public DateTime From { get; }
-    public DateTime To => _toTime != default ? _toTime : DateTime.MaxValue;
-
-    private readonly DateTime _toTime;
-
-    public TimeInterval(DateTime fromTime, DateTime toTime)
-    {
-        From = fromTime;
-        _toTime = toTime;
-    }
+    public DateTime From { get; } = fromTime;
+    public DateTime To => toTime != default ? toTime : DateTime.MaxValue;
 }

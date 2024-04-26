@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -49,11 +49,9 @@ public class VKLoginProvider : BaseLoginProvider<VKLoginProvider>
         IConfiguration configuration,
         ICacheNotify<ConsumerCacheItem> cache,
         ConsumerFactory consumerFactory,
-        Signature signature,
-        InstanceCrypto instanceCrypto,
-            RequestHelper requestHelper,
+        RequestHelper requestHelper,
         string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null)
-        : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, signature, instanceCrypto, name, order, props, additional)
+        : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, props, additional)
     {
         _requestHelper = requestHelper;
     }
@@ -63,7 +61,7 @@ public class VKLoginProvider : BaseLoginProvider<VKLoginProvider>
     {
         try
         {
-            var token = Auth(context, Scopes, out var redirect, context.Request.Query["access_type"] == "offline"
+            var token = Auth(context, out var redirect, context.Request.Query["access_type"] == "offline"
                 ? new Dictionary<string, string>
                 {
                         { "revoke", "1" }
@@ -92,7 +90,7 @@ public class VKLoginProvider : BaseLoginProvider<VKLoginProvider>
         }
         catch (Exception ex)
         {
-            return LoginProfile.FromError(Signature, InstanceCrypto, ex);
+            return new LoginProfile(ex);
         }
     }
 
@@ -141,13 +139,13 @@ public class VKLoginProvider : BaseLoginProvider<VKLoginProvider>
             throw new Exception("Failed to correctly process the response");
         }
 
-        var profile = new LoginProfile(Signature, InstanceCrypto)
+        var profile = new LoginProfile
         {
             Id = vkProfiles[0].Id,
             FirstName = vkProfiles[0].FirstName,
             LastName = vkProfiles[0].LastName,
 
-            Provider = ProviderConstants.VK,
+            Provider = ProviderConstants.VK
         };
 
         return profile;

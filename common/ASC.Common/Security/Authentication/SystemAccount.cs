@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,8 +26,4 @@
 
 namespace ASC.Common.Security.Authentication;
 
-public class SystemAccount : Account, ISystemAccount
-{
-    public SystemAccount(Guid id, string name, bool authenticated)
-        : base(id, name, authenticated) { }
-}
+public class SystemAccount(Guid id, string name, bool authenticated) : Account(id, name, authenticated), ISystemAccount;
