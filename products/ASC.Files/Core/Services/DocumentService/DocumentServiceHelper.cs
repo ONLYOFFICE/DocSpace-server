@@ -41,8 +41,8 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         ExternalShare externalShare,
         AuthContext authContext)
     {
-    public async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(T fileId, int version, bool editPossible, bool tryEdit, 
-        bool tryCoAuthoring)
+
+    public async Task<(File<T> File, bool LastVersion)> GetCurFileInfoAsync<T>(T fileId, int version)
     {
         var lastVersion = true;
 
@@ -51,16 +51,36 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         var file = await fileDao.GetFileAsync(fileId);
         if (file != null && 0 < version && version < file.Version)
         {
-            file = await fileDao.GetFileAsync(fileId, version);
-            lastVersion = false;
+                file = await fileDao.GetFileAsync(fileId, version);
+                lastVersion = false;
+            }
+
+        if (file == null)
+        {
+            throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
-        return await GetParamsAsync(file, lastVersion, true, true, editPossible, tryEdit, tryCoAuthoring);
+        return (file, lastVersion);
+    }
+    public async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(File<T> file, bool lastVersion, bool editPossible, bool tryEdit, bool tryCoauth, bool fillFormsPossible, EditorType editorType)
+    {
+        var docParams = await GetParamsAsync(file, lastVersion, true, editPossible, editPossible, tryEdit, tryCoauth, fillFormsPossible);
+        docParams.Configuration.EditorType = editorType;
+        return docParams;
     }
 
-    private async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(File<T> file, bool lastVersion, bool rightToRename, 
-        bool rightToEdit, bool editPossible, bool tryEdit, bool tryCoAuthoring)
+    public async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(T fileId, int version, bool editPossible, bool tryEdit,
+        bool tryCoAuthoring, bool fillFormsPossible)
     {
+        (var file, var lastVersion) = await GetCurFileInfoAsync(fileId, version);
+
+        return await GetParamsAsync(file, lastVersion, true, true, editPossible, tryEdit, tryCoAuthoring, fillFormsPossible);
+    }
+
+    private async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(File<T> file, bool lastVersion, bool rightToRename,
+        bool rightToEdit, bool editPossible, bool tryEdit, bool tryCoAuthoring, bool fillFormsPossible)
+    {
+
         if (file == null)
         {
             throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
@@ -74,8 +94,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         var rightToReview = rightToEdit;
         var reviewPossible = editPossible;
 
-        var rightToFillForms = rightToEdit;
-        var fillFormsPossible = editPossible;
+        var rightToFillForms = fillFormsPossible;
 
         var rightToComment = rightToEdit;
         var commentPossible = editPossible;
@@ -195,9 +214,9 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
                 {
                     var editingBy = fileTracker.GetEditingBy(file.Id).FirstOrDefault();
                     strError = string.Format(!canCoAuthoring 
-                            ? FilesCommonResource.ErrorMessage_EditingCoauth 
-                            : FilesCommonResource.ErrorMessage_EditingMobile, 
-                        await global.GetUserNameAsync(editingBy, true));
+                                                 ? FilesCommonResource.ErrorMessage_EditingCoauth
+                                                 : FilesCommonResource.ErrorMessage_EditingMobile,
+                                             await global.GetUserNameAsync(editingBy, true));
                 }
                 
                 rightToEdit = editPossible = reviewPossible = fillFormsPossible = commentPossible = false;
@@ -244,7 +263,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
         if (!lastVersion)
         {
-            configuration.Document.Title = $"{file.Title} ({file.CreateOnString})";
+            configuration.Document.Title =  $"{file.Title} ({file.CreateOnString})";
         }
 
         if (fileUtility.CanWebRestrictedEditing(file.Title))

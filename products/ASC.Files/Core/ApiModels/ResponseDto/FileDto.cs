@@ -106,6 +106,10 @@ public class FileDto<T> : FileEntryDto<T>
     /// <type>System.Boolean, System</type>
     public bool? HasDraft { get; set; }
 
+    /// <summary>Specifies if the filling has started or not</summary>
+    /// <type>System.Boolean, System</type>
+    public bool? StartFilling { get; set; }
+
     /// <summary>Denies file sharing or not</summary>
     /// <type>System.Boolean, System</type>
     public bool DenySharing { get; set; }
@@ -156,7 +160,8 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         BadgesSettingsHelper badgesSettingsHelper,
         FilesSettingsHelper filesSettingsHelper,
         FileDateTime fileDateTime,
-        ExternalShare externalShare)
+        ExternalShare externalShare,
+        FileSharing fileSharing)
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime) 
 {
     private readonly ApiDateTimeHelper _apiDateTimeHelper = apiDateTimeHelper;
@@ -190,10 +195,28 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         if (fileType == FileType.Pdf)
         {
             var linkDao = daoFactory.GetLinkDao();
-            var linkedId = await linkDao.GetLinkedAsync(file.Id.ToString());
+            var folderDao = daoFactory.GetFolderDao<T>();
+
+            var linkedIdTask = linkDao.GetLinkedAsync(file.Id.ToString());
+            var propertiesTask = daoFactory.GetFileDao<T>().GetProperties(file.Id);
+            var roomTask = folderDao.GetFolderAsync((T)Convert.ChangeType(file.ParentId, typeof(T)));
+            await Task.WhenAll(linkedIdTask, propertiesTask, roomTask);
+
+            var linkedId = await linkedIdTask;
+            var properties = await propertiesTask;
+            var room = await roomTask;
+
+            var ace = await fileSharing.GetPureSharesAsync(room, new List<Guid> { authContext.CurrentAccount.ID }).FirstOrDefaultAsync();
+
+            if (ace is { Access: FileShare.FillForms })
+            {
+                result.Security[FileSecurity.FilesSecurityActions.EditForm] = false;
+            }
+
             result.HasDraft = linkedId != null;
+            result.StartFilling = properties?.FormFilling?.StartFilling ?? false;
         }
-        
+
         result.FileExst = extension;
         result.FileType = fileType;
         result.Version = file.Version;

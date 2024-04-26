@@ -119,7 +119,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
     }
 
     public IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, 
-        bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default)
+        bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default, bool containingMyFiles = false)
     {
         if (dao.CheckInvalidFilter(filterType))
         {
