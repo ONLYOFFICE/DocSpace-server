@@ -57,8 +57,7 @@ public class PluginManager(PluginConfigSettings pluginConfigSettings,
     ILogger<PluginManager> log,
     SettingsManager settingsManager,
     InstanceCrypto instanceCrypto,
-    PluginControllerManager pluginControllerManager,
-    PluginContextManager pluginContextManager)
+    PluginControllerManager pluginControllerManager)
 {
     private const string StorageSystemModuleName = "systemplugins";
     private const string StorageModuleName = "plugins";
@@ -173,7 +172,6 @@ public class PluginManager(PluginConfigSettings pluginConfigSettings,
     private Assembly LoadPlugin(string path)
     {
         var loadContext = new PluginLoadContext(path);
-        pluginContextManager.Add(path, loadContext);
         return loadContext.LoadFromAssemblyName(new AssemblyName(Path.GetFileNameWithoutExtension(path)));
     }
 

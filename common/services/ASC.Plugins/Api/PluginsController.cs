@@ -30,7 +30,6 @@ using System.Reflection;
 using ASC.Common;
 using ASC.Common.Web;
 using ASC.Core;
-using ASC.PluginsLibrary;
 using ASC.Web.Api.Routing;
 using ASC.Web.Core.PublicResources;
 using ASC.Web.Studio.Core;
@@ -45,8 +44,7 @@ namespace ASC.Plugins.Api;
 [Scope]
 [DefaultRoute]
 [ApiController]
-public class PluginsController(PluginContextManager pluginContextManager,
-    PermissionContext permissionContext,
+public class PluginsController(PermissionContext permissionContext,
     PluginManager pluginManager,
     TenantManager tenantManager,
     IEnumerable<EndpointDataSource> endpointSources) : ControllerBase
