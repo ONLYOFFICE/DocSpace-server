@@ -440,7 +440,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
 
             var message = fileData.MailMerge.Message;
             Stream attach = null;
-            var httpClient = clientFactory.CreateClient();
+            var httpClient = clientFactory.CreateClient(nameof(ASC.Files.Core.Helpers.DocumentService));
             switch (fileData.MailMerge.Type)
             {
                 case MailMergeType.AttachDocx:
@@ -558,7 +558,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
                 RequestUri = new Uri(downloadUri)
             };
 
-            var httpClient = clientFactory.CreateClient();
+            var httpClient = clientFactory.CreateClient(nameof(ASC.Files.Core.Helpers.DocumentService));
             using (var response = await httpClient.SendAsync(request))
             await using (var stream = await response.Content.ReadAsStreamAsync())
             await using (var fileStream = new ResponseStream(stream, stream.Length))
@@ -598,7 +598,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
                 RequestUri = new Uri(differenceUrl)
             };
 
-            var httpClient = clientFactory.CreateClient();
+            var httpClient = clientFactory.CreateClient(nameof(ASC.Files.Core.Helpers.DocumentService));
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
             await using var differenceStream = await ResponseStream.FromMessageAsync(response);
             await fileDao.SaveEditHistoryAsync(file, changes, differenceStream);
