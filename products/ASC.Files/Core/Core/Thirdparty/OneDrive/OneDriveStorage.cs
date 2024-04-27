@@ -104,20 +104,22 @@ internal class OneDriveStorage(IHttpClientFactory clientFactory, OAuth20TokenHel
         {
             return await GetItemRequest(itemId).Request().GetAsync();
         }
-        catch (Exception ex)
+        catch (NullReferenceException)
         {
-            var serviceException = (ServiceException)ex.InnerException;
-            if (serviceException is { StatusCode: HttpStatusCode.NotFound })
-            {
-                return null;
-            }
-            throw;
+            return null;
         }
     }
 
     public async Task<List<Item>> GetItemsAsync(string folderId)
     {
-        return [..await GetItemRequest(folderId).Children.Request().GetAsync()];
+        try
+        {
+            return [..await GetItemRequest(folderId).Children.Request().GetAsync()];
+        }
+        catch (NullReferenceException)
+        {
+            return [];
+        }
     }
 
     public async Task<Stream> DownloadStreamAsync(Item file, int offset = 0)

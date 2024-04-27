@@ -54,4 +54,6 @@ internal interface IDaoBase<TFile, TFolder, TItem>
     bool CheckInvalidFilter(FilterType filterType);
     Task<string> MappingIDAsync(string id, bool saveIfNotExist = false);
     Task UpdateIdAsync(string oldValue, string newValue);
+    Folder<string> GetErrorRoom();
+    bool IsRoom(string folderId);
 }
