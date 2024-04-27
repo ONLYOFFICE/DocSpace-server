@@ -48,6 +48,7 @@ public abstract class BaseStorage(TempStream tempStream,
     public virtual bool IsSupportCdnUri => false;
     public virtual bool IsSupportedPreSignedUri => true;
     public virtual bool IsSupportChunking => false;
+    public virtual bool ContentAsAttachment => false;
     internal string Modulename { get; set; }
     internal bool Cache { get; set; }
     internal DataList DataList { get; set; }
