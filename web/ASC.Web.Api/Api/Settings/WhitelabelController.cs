@@ -69,7 +69,7 @@ public class WhitelabelController(ApiContext apiContext,
         }
         else
         {
-            await DemandWhiteLabelPermissionAsync();
+            await tenantLogoManager.DemandWhiteLabelPermissionAsync();
 
             await SaveWhiteLabelSettingsForCurrentTenantAsync(inDto);
         }
@@ -145,7 +145,7 @@ public class WhitelabelController(ApiContext apiContext,
         }
         else
         {
-            await DemandWhiteLabelPermissionAsync();
+            await tenantLogoManager.DemandWhiteLabelPermissionAsync();
 
             await SaveWhiteLabelSettingsFromFilesForCurrentTenantAsync();
         }
@@ -366,7 +366,7 @@ public class WhitelabelController(ApiContext apiContext,
         }
         else
         {
-            await DemandWhiteLabelPermissionAsync();
+            await tenantLogoManager.DemandWhiteLabelPermissionAsync();
 
             await RestoreWhiteLabelOptionsForCurrentTenantAsync();
         }
@@ -659,16 +659,9 @@ public class WhitelabelController(ApiContext apiContext,
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        return coreBaseSettings.Standalone || tenantLogoManager.WhiteLabelEnabled && await tenantLogoManager.GetWhiteLabelPaidAsync();
+        return await tenantLogoManager.GetEnableWhitelabelAsync();
     }
-
-    private async Task DemandWhiteLabelPermissionAsync()
-    {
-        if (!coreBaseSettings.Standalone && (!tenantLogoManager.WhiteLabelEnabled || !await tenantLogoManager.GetWhiteLabelPaidAsync()))
-        {
-            throw new BillingException(Resource.ErrorNotAllowedOption, "WhiteLabel");
-        }
-    }
+    
 
     private async Task DemandRebrandingPermissionAsync()
     {
@@ -678,6 +671,6 @@ public class WhitelabelController(ApiContext apiContext,
         {
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
-        await DemandWhiteLabelPermissionAsync();
+        await tenantLogoManager.DemandWhiteLabelPermissionAsync();
     }
 }
