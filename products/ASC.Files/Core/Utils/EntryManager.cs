@@ -396,6 +396,11 @@ public class EntryManager(IDaoFactory daoFactory,
             var folders = await folderDao.GetFoldersAsync(parent.Id, orderBy, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders, excludeSubject, from, count, roomId, containingMyFiles)
                 .ToListAsync();
 
+            if (containingMyFiles)
+            {
+                folders = folders.GroupBy(folder => folder.Id).Select(f => f.First()).ToList();
+            }
+
             var filesCount = count - folders.Count;
             var filesOffset = Math.Max(folders.Count > 0 ? 0 : from - await allFoldersCountTask, 0);
 
