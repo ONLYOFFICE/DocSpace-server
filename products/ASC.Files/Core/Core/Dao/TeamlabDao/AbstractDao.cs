@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Reflection;
+
 using ASC.Api.Core.Extensions;
 
 namespace ASC.Files.Core.Data;
@@ -80,11 +82,11 @@ public class AbstractDao
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         
-        var folders = await Queries.FoldersAsync(filesDbContext, tenantId, folderId).ToListAsync();
+        var folders = await filesDbContext.FoldersAsync(tenantId, folderId).ToListAsync();
         
         foreach (var f in folders)
         {
-            f.FilesCount = await Queries.FilesCountAsync(filesDbContext, f.TenantId, f.Id);
+            f.FilesCount = await filesDbContext.FilesCountAsync(f.TenantId, f.Id);
         }
         
         await filesDbContext.SaveChangesAsync();
@@ -104,11 +106,11 @@ public class AbstractDao
     {
         if (fileEntryType == FileEntryType.File)
         {
-            await Queries.ChangeFilesCountAsync(filesDbContext, tenantId, folderId, counter);
+            await filesDbContext.ChangeFilesCountAsync(tenantId, folderId, counter);
         }
         else
         {
-            await Queries.ChangeFoldersCountAsync(filesDbContext, tenantId, folderId, counter);
+            await filesDbContext.ChangeFoldersCountAsync(tenantId, folderId, counter);
         }
 
         await filesDbContext.SaveChangesAsync();
@@ -149,7 +151,7 @@ public class AbstractDao
         {
             await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
             var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-            result = await Queries.IdAsync(filesDbContext, tenantId, id.ToString());
+            result = await filesDbContext.IdAsync(tenantId, id.ToString());
         }
 
         if (saveIfNotExist)
@@ -291,18 +293,18 @@ public class AbstractDao
     internal async Task SetCustomOrder(FilesDbContext filesDbContext, int fileId, int parentFolderId, FileEntryType fileEntryType, int order = 0)
     {            
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        var indexing = await Queries.IsIndexingAsync(filesDbContext, tenantId, parentFolderId, fileEntryType);
+        var indexing = await filesDbContext.IsIndexingAsync(tenantId, parentFolderId, fileEntryType);
         
         if(!indexing)
         {
             return;
         }
 
-        var fileOrder = await Queries.GetFileOrderAsync(filesDbContext, tenantId, fileId, fileEntryType);
+        var fileOrder = await filesDbContext.GetFileOrderAsync(tenantId, fileId, fileEntryType);
 
         if (order == 0 || fileOrder?.ParentFolderId != parentFolderId)
         {
-            var lastOrder = await Queries.GetLastFileOrderAsync(filesDbContext, tenantId, parentFolderId, fileEntryType);
+            var lastOrder = await filesDbContext.GetLastFileOrderAsync(tenantId, parentFolderId, fileEntryType);
             order = ++lastOrder;
         }
 
@@ -319,11 +321,11 @@ public class AbstractDao
                 
                 if (currentOrder > order)
                 {
-                    await Queries.IncreaseFileOrderAsync(filesDbContext, tenantId, parentFolderId, order, currentOrder);
+                    await filesDbContext.IncreaseFileOrderAsync(tenantId, parentFolderId, order, currentOrder);
                 }
                 else
                 {
-                    await Queries.DecreaseFileOrderAsync(filesDbContext, tenantId, parentFolderId, order, currentOrder);
+                    await filesDbContext.DecreaseFileOrderAsync(tenantId, parentFolderId, order, currentOrder);
                 }
             }
 
@@ -350,7 +352,7 @@ public class AbstractDao
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        await Queries.ClearFileOrderAsync(filesDbContext, tenantId, parentFolderId, entryType);
+        await filesDbContext.ClearFileOrderAsync(tenantId, parentFolderId, entryType);
         
         await filesDbContext.FileOrder.AddRangeAsync(fileIds.Select((r, i) => new DbFileOrder
         {
@@ -367,7 +369,7 @@ public class AbstractDao
     internal async Task DeleteCustomOrder(FilesDbContext filesDbContext, int fileId, FileEntryType fileEntryType)
     {        
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        var fileOrder = await Queries.GetFileOrderAsync(filesDbContext, tenantId, fileId, fileEntryType);
+        var fileOrder = await filesDbContext.GetFileOrderAsync(tenantId, fileId, fileEntryType);
         if (fileOrder != null)
         {
             filesDbContext.Remove(fileOrder);
@@ -381,129 +383,5 @@ public class AbstractDao
         Start,
         End,
         Any
-    }
-}
-
-static file class Queries
-{
-    public static readonly Func<FilesDbContext, int, int, IAsyncEnumerable<DbFolder>> FoldersAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int folderId) =>
-                ctx.Folders
-                    .AsTracking()
-                    .Where(r => r.TenantId == tenantId)
-                    .Where(r => ctx.Tree.Any(a => a.FolderId == folderId && a.ParentId == r.Id)));
-
-    public static readonly Func<FilesDbContext, int, int, Task<int>> FilesCountAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int folderId) =>
-                ctx.Files
-                    .Join(ctx.Tree, a => a.ParentId, b => b.FolderId, (file, tree) => new { file, tree })
-                    .Where(r => r.file.TenantId == tenantId)
-                    .Where(r => r.tree.ParentId == folderId)
-                    .Select(r => r.file.Id)
-                    .Distinct()
-                    .Count());
-
-    public static readonly Func<FilesDbContext, int, string, Task<string>> IdAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, string hashId) =>
-                ctx.ThirdpartyIdMapping
-                    .Where(r => r.TenantId == tenantId)
-                    .Where(r => r.HashId == hashId)
-                    .Select(r => r.Id)
-                    .FirstOrDefault());
-
-    public static readonly Func<FilesDbContext, int, int, FileEntryType, Task<bool>> IsIndexingAsync =
-    Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-        (FilesDbContext ctx, int tenantId, int parentFolderId, FileEntryType entryType) =>
-            (from rs in ctx.RoomSettings 
-                where rs.TenantId == tenantId && rs.RoomId ==
-                    (from t in ctx.Tree
-                        where t.FolderId == parentFolderId
-                        orderby t.Level descending
-                        select t.ParentId
-                    ).Skip(1).FirstOrDefault()
-                select rs.Indexing).FirstOrDefault());
-    
-    public static readonly Func<FilesDbContext, int, int, FileEntryType, Task<DbFileOrder>> GetFileOrderAsync =
-    Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-        (FilesDbContext ctx, int tenantId, int entryId, FileEntryType entryType) =>
-            ctx.FileOrder
-                .AsTracking()
-                .FirstOrDefault(r =>  r.TenantId == tenantId && r.EntryId == entryId && r.EntryType == entryType));
-
-    public static readonly Func<FilesDbContext, int, int, FileEntryType, Task> ClearFileOrderAsync =
-    Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-        (FilesDbContext ctx, int tenantId, int parentFolderId, FileEntryType entryType) =>
-            ctx.FileOrder
-                .Where(r => r.TenantId == tenantId && r.EntryType == entryType && r.ParentFolderId == parentFolderId)
-                .ExecuteDelete());
-
-
-    public static readonly Func<FilesDbContext, int, int, FileEntryType, Task<int>> GetLastFileOrderAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int parentFolderId, FileEntryType entryType) =>
-                ctx.FileOrder
-                    .AsTracking()
-                    .Where(r => r.TenantId == tenantId)
-                    .Where(r => r.ParentFolderId == parentFolderId)
-                    .Where(r => r.EntryType == entryType)
-                    .OrderBy(r => r.Order)
-                    .Select(r => r.Order)
-                    .LastOrDefault());
-
-    public static readonly Func<FilesDbContext, int, int, int, int, Task> IncreaseFileOrderAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int parentFolderId, int newOrder, int currentOrder) =>
-                ctx.FileOrder
-                    .Where(r => r.TenantId == tenantId)
-                    .Where(r => r.ParentFolderId == parentFolderId)
-                    .Where(r => r.Order >= newOrder && r.Order < currentOrder)
-                    .ExecuteUpdate(f => f.SetProperty(p => p.Order, p => p.Order + 1)));
-
-    public static readonly Func<FilesDbContext, int, int, int, int, Task> DecreaseFileOrderAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int parentFolderId, int newOrder, int currentOrder) =>
-                ctx.FileOrder
-                    .Where(r => r.TenantId == tenantId)
-                    .Where(r => r.ParentFolderId == parentFolderId)
-                    .Where(r => r.Order <= newOrder && r.Order > currentOrder)
-                    .ExecuteUpdate(f => f.SetProperty(p => p.Order, p => p.Order - 1)));
-    
-    public static readonly Func<FilesDbContext, int, int, int, Task> ChangeFilesCountAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int folderId, int counter) =>
-                ctx.Folders
-                    .Where(r => r.TenantId == tenantId && ctx.Tree.Any(a => a.FolderId == folderId && a.ParentId == r.Id))
-                    .ExecuteUpdate(r => r.SetProperty(a => a.FilesCount, a => a.FilesCount + counter)));
-    
-    public static readonly Func<FilesDbContext, int, int, int, Task> ChangeFoldersCountAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int folderId, int counter) =>
-                ctx.Folders
-                    .Where(r => r.TenantId == tenantId && ctx.Tree.Any(a => a.FolderId == folderId && a.ParentId == r.Id))
-                    .ExecuteUpdate(r => r.SetProperty(a => a.FoldersCount, a => a.FoldersCount + counter)));
-}
-
-public class WarmupAbstractDaoStartupTask(IServiceProvider provider) : IStartupTask
-{
-    public async Task ExecuteAsync(CancellationToken cancellationToken = default)
-    {
-        using var scope = provider.CreateScope();
-        _ = scope.ServiceProvider.GetService<FileUtilityConfiguration>();
-        var dbContextFactory = scope.ServiceProvider.GetService<IDbContextFactory<FilesDbContext>>();
-        await using var context = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-        await Queries.FoldersAsync(context, int.MinValue, int.MinValue).ToListAsync(cancellationToken: cancellationToken);
-        await Queries.FilesCountAsync(context, int.MinValue, int.MinValue);
-        await Queries.IdAsync(context, int.MinValue, string.Empty);
-        await Queries.IsIndexingAsync(context, int.MinValue, int.MinValue, FileEntryType.File);
-        await Queries.GetFileOrderAsync(context, int.MinValue, int.MinValue, FileEntryType.File);
-        await Queries.ClearFileOrderAsync(context, int.MinValue, int.MinValue, FileEntryType.File);
-        await Queries.GetLastFileOrderAsync(context, int.MinValue, int.MinValue, FileEntryType.File);
-        await Queries.IncreaseFileOrderAsync(context, int.MinValue, int.MinValue, int.MinValue, int.MinValue);
-        await Queries.DecreaseFileOrderAsync(context, int.MinValue, int.MinValue, int.MinValue, int.MinValue);
-        await Queries.ChangeFilesCountAsync(context, int.MinValue, int.MinValue, int.MinValue);
-        await Queries.ChangeFoldersCountAsync(context, int.MinValue, int.MinValue, int.MinValue);
     }
 }

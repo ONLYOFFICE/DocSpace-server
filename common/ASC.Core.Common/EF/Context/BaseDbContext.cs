@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Api.Core.Extensions;
+
 namespace ASC.Core.Common.EF;
 
 public enum Provider
@@ -125,4 +127,102 @@ public static class BaseDbContextExtension
 public abstract class BaseEntity
 {
     public abstract object[] GetKeys();
+}
+
+public class WarmupBaseDbContextStartupTask(IServiceProvider provider, ILogger<WarmupBaseDbContextStartupTask> logger) : IStartupTask
+{
+    public Task ExecuteAsync(CancellationToken cancellationToken = default)
+    {
+        var emptyEnumerableMethod = typeof(Enumerable).GetMethod("Empty");
+        var assemblies = AppDomain.CurrentDomain.GetAssemblies().Where(x =>
+        {
+            var name = x.GetName().Name;
+            return !string.IsNullOrEmpty(name) && name.StartsWith("ASC.");
+        });
+
+        var types = assemblies.SelectMany(r => r.GetTypes().Where(t => t.IsSubclassOf(typeof(DbContext))));
+
+        foreach (var t in types)
+        {
+            using var scope = provider.CreateScope();
+            var dbContextFactory = scope.ServiceProvider.GetService(typeof(IDbContextFactory<>).MakeGenericType(t));
+            var createDbContextMethod = dbContextFactory?.GetType().GetMethod("CreateDbContext");
+            if (createDbContextMethod == null)
+            {
+                continue;
+            }
+
+            var context = createDbContextMethod.Invoke(dbContextFactory, null);
+
+            var queries = t.GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public)
+                .Where(r => !r.IsSpecialName);
+
+            foreach (var q in queries)
+            {
+                try
+                {
+                    var @params = q.GetParameters();
+                    var parameters = new List<object>(@params.Length);
+
+                    foreach (var p in @params)
+                    {                    
+                        var nullable = Nullable.GetUnderlyingType(p.ParameterType);
+                        if (p.ParameterType == typeof(int) || nullable == typeof(int))
+                        {
+                            parameters.Add(int.MaxValue);
+                        }
+                        else if (p.ParameterType == typeof(long) || nullable == typeof(long))
+                        {
+                            parameters.Add(long.MaxValue);
+                        }
+                        else if (p.ParameterType == typeof(DateTime) || nullable == typeof(DateTime))
+                        {
+                            parameters.Add(DateTime.MinValue);
+                        }
+                        else if (p.ParameterType.IsEnum || nullable is { IsEnum: true })
+                        {
+                            parameters.Add(0);
+                        }
+                        else if (p.ParameterType == typeof(string)|| nullable == typeof(string))
+                        {
+                            parameters.Add(string.Empty);
+                        }
+                        else if (typeof(Array).IsAssignableFrom(p.ParameterType) || typeof(IList).IsAssignableFrom(p.ParameterType))
+                        {
+                            parameters.Add(Activator.CreateInstance(p.ParameterType, 0));
+                        }
+                        else if (p.ParameterType is { IsInterface: true, IsGenericType: true })
+                        {
+                            var enumerable = p.ParameterType.GetInterfaces().FirstOrDefault(r => r == typeof(IEnumerable));
+                            if (enumerable != null && emptyEnumerableMethod != null)
+                            {
+                                parameters.Add(emptyEnumerableMethod.MakeGenericMethod(p.ParameterType.GenericTypeArguments).Invoke(null, null));
+                            }
+                        }
+                        else if (p.ParameterType == typeof(Guid) || nullable == typeof(Guid))
+                        {
+                            parameters.Add(Guid.Empty);
+                        }
+                        else if (p.ParameterType == typeof(bool) || nullable == typeof(bool))
+                        {
+                            parameters.Add(false);
+                        }
+                        else
+                        {
+                            
+                        }
+                    }
+
+                    q.Invoke(context, parameters.ToArray());
+                    logger.LogDebug(q.Name);
+                }
+                catch (Exception e)
+                {
+                    logger.LogDebug(e, q.Name);
+                }
+            }
+        }
+
+        return Task.CompletedTask;
+    }
 }

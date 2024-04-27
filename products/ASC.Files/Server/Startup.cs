@@ -76,12 +76,6 @@ public class Startup : BaseStartup
         services.AddScoped<UsersInRoomStatistic>();
         services.AddScoped<IWebItem, ProductEntryPoint>();
         services.AddDocumentServiceHttpClient();
-
-        services
-            .AddStartupTask<WarmupFolderDaoStartupTask>()
-            .AddStartupTask<WarmupAbstractDaoStartupTask>()
-            .AddStartupTask<WarmupTagDaoStartupTask>()
-            ;
     }
 
     public override void Configure(IApplicationBuilder app, IWebHostEnvironment env)

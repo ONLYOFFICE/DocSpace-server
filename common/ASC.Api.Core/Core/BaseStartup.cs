@@ -468,6 +468,7 @@ public abstract class BaseStartup
             .AddStartupTask<WarmupDbUserServiceStartupTask>()
             .AddStartupTask<WarmupDbAzServiceStartupTask>()
             .AddStartupTask<WarmupProtobufStartupTask>()
+            .AddStartupTask<WarmupBaseDbContextStartupTask>()
             .AddSingleton(services);
     }
 
