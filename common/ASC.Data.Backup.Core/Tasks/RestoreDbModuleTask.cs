@@ -177,6 +177,28 @@ public class RestoreDbModuleTask : PortalTaskBase
                     _columnMapper.SetMapping(tableInfo.Name, tableInfo.IdColumn, oldIdValue, newIdValue);
                 }
 
+                if (tableInfo.Name == "files_thirdparty_account")
+                {
+                    try
+                    {
+                        var ids = string.Join("-|", Selectors.All.Select(s => s.Id));
+                        var sboxId = Regex.Replace(row[12].ToString(), @"(?<=(?:" + $"{ids}-" + @"))\d+", match =>
+                        {
+                            var folderId = _columnMapper.GetMapping(tableInfo.Name, tableInfo.IdColumn, match.Value);
+
+                            return Convert.ToString(folderId);
+                        }, RegexOptions.Compiled);
+
+                        var command = connection.CreateCommand();
+                        command.CommandText = $"update {tableInfo.Name} set folder_id = '{sboxId}' where {tableInfo.IdColumn} = '{_columnMapper.GetMapping(tableInfo.Name, tableInfo.IdColumn, row[0])}'";
+                        await command.WithTimeout(120).ExecuteNonQueryAsync();
+                    }
+                    catch(Exception e)
+                    {
+
+                    }
+                }
+
                 _columnMapper.Commit();
 
                 foreach (var relation in lowImportanceRelations)
