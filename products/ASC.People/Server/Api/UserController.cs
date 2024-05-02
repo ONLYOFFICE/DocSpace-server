@@ -1479,6 +1479,7 @@ public class UserController(ICache cache,
             .ToAsyncEnumerable()
             .Where(userId => !_userManager.IsSystemUser(userId))
             .SelectAwait(async userId => await _userManager.GetUsersAsync(userId))
+            .Where(r => r.Status == EmployeeStatus.Active)
             .ToListAsync();
 
         foreach (var user in users)
