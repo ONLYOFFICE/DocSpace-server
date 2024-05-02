@@ -41,10 +41,8 @@ public class FileSharingAceHelper(
     InvitationLinkService invitationLinkService,
     StudioNotifyService studioNotifyService,
     UserManagerWrapper userManagerWrapper,
-    CountPaidUserChecker countPaidUserChecker,
     IUrlShortener urlShortener,
     IDistributedLockProvider distributedLockProvider,
-    TenantManager tenantManager,
     SocketManager socketManager,
     FilesLinkUtility filesLinkUtility)
 {
@@ -167,18 +165,9 @@ public class FileSharingAceHelper(
                 {
                     throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
                 }
-
-                IDistributedLockHandle quotaLockHandle = null;
-                var tenantId = await tenantManager.GetCurrentTenantIdAsync();
-
+                
                 try
                 {
-                    if (!correctAccess && currentUserType == EmployeeType.User)
-                    {
-                        quotaLockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenantId));
-                        await countPaidUserChecker.CheckAppend();
-                    }
-
                     userType = FileSecurity.GetTypeByShare(w.Access);
 
                     if (!emailInvite && currentUserType != EmployeeType.DocSpaceAdmin)
@@ -201,13 +190,6 @@ public class FileSharingAceHelper(
                 {
                     warning ??= e.Message;
                     continue;
-                }
-                finally
-                {
-                    if (quotaLockHandle != null)
-                    {
-                        await quotaLockHandle.ReleaseAsync();
-                    }
                 }
 
                 if (emailInvite)
@@ -234,7 +216,7 @@ public class FileSharingAceHelper(
 
             var share = w.Access;
 
-            IDistributedLockHandle linkLockHandle = null;
+            IDistributedLockHandle handle = null;
 
             try
             {
@@ -250,7 +232,7 @@ public class FileSharingAceHelper(
 
                     if (maxCount > 0)
                     {
-                        linkLockHandle = await distributedLockProvider.TryAcquireFairLockAsync($"{entry.Id}_{entry.FileEntryType}_links");
+                        handle = await distributedLockProvider.TryAcquireFairLockAsync($"{entry.Id}_{entry.FileEntryType}_links");
 
                         var linksCount = await fileSecurity.GetPureSharesCountAsync(entry, filter, null, null);
                         if (linksCount >= maxCount)
@@ -265,9 +247,9 @@ public class FileSharingAceHelper(
             }
             finally
             {
-                if (linkLockHandle != null)
+                if (handle != null)
                 {
-                    await linkLockHandle.ReleaseAsync();
+                    await handle.ReleaseAsync();
                 }
             }
 

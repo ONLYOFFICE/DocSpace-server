@@ -175,14 +175,8 @@
   <data name="ErrorMessage_FileNotFound" xml:space="preserve">
     <value>找不到该文件</value>
   </data>
-  <data name="ErrorMessage_FileSizeConvert" xml:space="preserve">
-    <value>文件{0}不会被转换</value>
-  </data>
   <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>超过{0}的文件将不被复制</value>
-  </data>
-  <data name="ErrorMessage_FileSizeEdit" xml:space="preserve">
-    <value>该文件比{0}不能被编辑较大</value>
   </data>
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>超过{0}的文件将不被移动</value>
