@@ -835,6 +835,7 @@ internal class FileDao(
         var folderDao = daoFactory.GetFolderDao<int>();
         var toFolder = await folderDao.GetFolderAsync(toFolderId);
         var file = await GetFileAsync(fileId);
+        var fromFolder = await folderDao.GetFolderAsync(file.ParentId);
         var fileContentLength = file.ContentLength;
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
@@ -852,7 +853,9 @@ internal class FileDao(
                     }
                 }
             }
-        }else if (toFolder.FolderType == FolderType.USER || toFolder.FolderType == FolderType.DEFAULT)
+        }else if (((toFolder.FolderType == FolderType.USER || toFolder.FolderType == FolderType.DEFAULT) && 
+                (fromFolder.FolderType != FolderType.TRASH && fromFolder.FolderType != FolderType.USER && fromFolder.FolderType != FolderType.DEFAULT)) ||
+                (DocSpaceHelper.IsRoom(fromFolder.FolderType)) && (toFolder.FolderType == FolderType.TRASH || toFolder.FolderType == FolderType.USER || toFolder.FolderType == FolderType.DEFAULT))
         {
             var quotaUserSettings = await _settingsManager.LoadAsync<TenantUserQuotaSettings>();
             if (quotaUserSettings.EnableQuota)
