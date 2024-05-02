@@ -90,7 +90,7 @@ public class BackupController(
             Day = inDto.CronParams.Day == null ? 0 : Int32.Parse(inDto.CronParams.Day)
         };
 
-        if (storageType == BackupStorageType.Documents)
+        if (storageType is BackupStorageType.Documents or BackupStorageType.ThridpartyDocuments)
         {
 
             if (int.TryParse(storageParams["folderId"], out var fId))
@@ -162,7 +162,7 @@ public class BackupController(
             throw new ArgumentException("backup can`t start as dump");
         }
 
-        if (storageType == BackupStorageType.Documents)
+        if (storageType is BackupStorageType.Documents or BackupStorageType.ThridpartyDocuments)
         {
 
             if (int.TryParse(storageParams["folderId"], out var fId))
