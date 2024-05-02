@@ -153,9 +153,6 @@
   <data name="MigrationCommonFiles" xml:space="preserve">
     <value>迁移通用文件</value>
   </data>
-  <data name="MigrationInitException" xml:space="preserve">
-    <value>初始化 {0} 迁移器时出错</value>
-  </data>
   <data name="MigrationNotFoundException" xml:space="preserve">
     <value>没有这样的迁移提供方</value>
   </data>
@@ -164,12 +161,6 @@
   </data>
   <data name="MigrationProjectFiles" xml:space="preserve">
     <value>迁移项目文件</value>
-  </data>
-  <data name="MigrationStartException" xml:space="preserve">
-    <value>解析仍在进行中</value>
-  </data>
-  <data name="MigrationUploadException" xml:space="preserve">
-    <value>迁移已在进行中</value>
   </data>
   <data name="CanNotAddUserInGroup" xml:space="preserve">
     <value>无法将用户 {0} 添加到 {1} 群组</value>
