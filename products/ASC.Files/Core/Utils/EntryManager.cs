@@ -237,7 +237,9 @@ public class EntryManager(IDaoFactory daoFactory,
     SecurityContext securityContext,
     FormFillingReportCreator formFillingReportCreator,
     TenantUtil tenantUtil,
-    IDistributedLockProvider distributedLockProvider)
+    IDistributedLockProvider distributedLockProvider,
+    IQuotaService quotaService,
+    TenantManager tenantManager)
 {
     private const string UpdateList = "filesUpdateList";
 
@@ -1511,6 +1513,54 @@ public class EntryManager(IDaoFactory daoFactory,
         {
             throw new Exception(FilesCommonResource.ErrorMessage_UpdateEditingFile);
         }
+
+        var folderDao = daoFactory.GetFolderDao<T>();
+        var currentFolder = await folderDao.GetFolderAsync(file.FolderIdDisplay);
+        var (folderId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(currentFolder);
+
+        if (int.TryParse(folderId.ToString(), out var roomId))
+        {
+            if (roomId != -1)
+            {
+                var currentRoom = await folderDao.GetFolderAsync((T)Convert.ChangeType(roomId, typeof(T)));
+                var quotaRoomSettings = await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
+                if (quotaRoomSettings.EnableQuota)
+                {
+                    var roomQuotaLimit = currentRoom.SettingsQuota == TenantEntityQuotaSettings.DefaultQuotaValue ? quotaRoomSettings.DefaultQuota : currentRoom.SettingsQuota;
+                    if (roomQuotaLimit != TenantEntityQuotaSettings.NoQuota)
+                    {
+                        if (roomQuotaLimit - currentRoom.Counter < file.ContentLength)
+                        {
+                            throw FileSizeComment.GetRoomFreeSpaceException(roomQuotaLimit);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+                var quotaUserSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
+                if (quotaUserSettings.EnableQuota)
+                {
+                    var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+                    var userQuotaData = await settingsManager.LoadAsync<UserQuotaSettings>(user);
+
+                    var userQuotaLimit = userQuotaData.UserQuota == userQuotaData.GetDefault().UserQuota ? quotaUserSettings.DefaultQuota : userQuotaData.UserQuota;
+
+                    if (userQuotaLimit != UserQuotaSettings.NoQuota)
+                    {
+                        var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenantId, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
+
+                        if (userQuotaLimit - userUsedSpace < file.ContentLength)
+                        {
+                            throw FileSizeComment.GetUserFreeSpaceException(userQuotaLimit);
+                        }
+                    }
+                }
+            }
+        }
+
+
 
         cache.Insert(UpdateList + fileId, fileId.ToString(), TimeSpan.FromMinutes(2));
 
