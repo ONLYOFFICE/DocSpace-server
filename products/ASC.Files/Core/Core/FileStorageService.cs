@@ -2555,7 +2555,7 @@ public class FileStorageService //: IFileStorageService
         return link;
     }
 
-    public async Task<string> SetAceObjectAsync<T>(AceCollection<T> aceCollection, bool notify, string culture = null, bool socket = true)
+    public async Task<string> SetAceObjectAsync<T>(AceCollection<T> aceCollection, bool notify, string culture = null, bool socket = true, bool beforeOwnerChange = false)
     {
         var fileDao = daoFactory.GetFileDao<T>();
         var folderDao = daoFactory.GetFolderDao<T>();
@@ -2577,7 +2577,7 @@ public class FileStorageService //: IFileStorageService
         {
             try
             {
-                var result = await fileSharingAceHelper.SetAceObjectAsync(aceCollection.Aces, entry, notify, aceCollection.Message, aceCollection.AdvancedSettings, culture, socket);
+                var result = await fileSharingAceHelper.SetAceObjectAsync(aceCollection.Aces, entry, notify, aceCollection.Message, aceCollection.AdvancedSettings, culture, socket, beforeOwnerChange);
                 warning ??= result.Warning;
 
                 if (!result.Changed)
@@ -3012,14 +3012,14 @@ public class FileStorageService //: IFileStorageService
 
                 await SetAceObjectAsync(new AceCollection<T>
                 {
-                    Files = Array.Empty<T>(),
-                    Folders = new[] { folder.Id },
+                    Files = [],
+                    Folders = [folder.Id],
                     Aces =
                     [
                         new AceWrapper { Access = FileShare.None, Id = userInfo.Id },
                         new AceWrapper { Access = FileShare.RoomAdmin, Id = createBy }
                     ]
-                }, false, socket: false);
+                }, false, socket: false, beforeOwnerChange: true);
 
                 var folderAccess = folder.Access;
 
@@ -3030,12 +3030,12 @@ public class FileStorageService //: IFileStorageService
                     var providerDao = daoFactory.ProviderDao;
                     await providerDao.UpdateRoomProviderInfoAsync(new ProviderData { Id = folder.ProviderId, CreateBy = userInfo.Id });
                 }
-                else 
+                else
                 {
                     var newFolderId = await folderDao.SaveFolderAsync(newFolder);
                     newFolder = await folderDao.GetFolderAsync(newFolderId);
                     newFolder.Access = folderAccess;
-                    
+
                     await entryStatusManager.SetIsFavoriteFolderAsync(folder);
                 }
 
