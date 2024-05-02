@@ -53,7 +53,7 @@ public class FileSharingAceHelper(
     private const int MaxPrimaryExternalLinks = 1;
 
     public async Task<AceProcessingResult> SetAceObjectAsync<T>(List<AceWrapper> aceWrappers, FileEntry<T> entry, bool notify, string message,
-        AceAdvancedSettingsWrapper advancedSettings, string culture = null, bool socket = true)
+        AceAdvancedSettingsWrapper advancedSettings, string culture = null, bool socket = true, bool beforeOwnerChange = false)
     {
         if (entry == null)
         {
@@ -75,11 +75,10 @@ public class FileSharingAceHelper(
         var changed = false;
         string warning = null;
         var shares = await fileSecurity.GetPureSharesAsync(entry, aceWrappers.Select(a => a.Id)).ToDictionaryAsync(r => r.Subject);
-        var currentUserId = authContext.CurrentAccount.ID;
 
         foreach (var w in aceWrappers.OrderByDescending(ace => ace.SubjectGroup))
         {
-            if (entry.CreateBy == w.Id && w.Access != FileShare.None)
+            if (entry.CreateBy == w.Id && (!beforeOwnerChange || w.Access != FileShare.RoomAdmin))
             {
                 continue;
             }

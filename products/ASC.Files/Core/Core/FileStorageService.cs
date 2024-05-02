@@ -2555,7 +2555,7 @@ public class FileStorageService //: IFileStorageService
         return link;
     }
 
-    public async Task<string> SetAceObjectAsync<T>(AceCollection<T> aceCollection, bool notify, string culture = null, bool socket = true)
+    public async Task<string> SetAceObjectAsync<T>(AceCollection<T> aceCollection, bool notify, string culture = null, bool socket = true, bool beforeOwnerChange = false)
     {
         var fileDao = daoFactory.GetFileDao<T>();
         var folderDao = daoFactory.GetFolderDao<T>();
@@ -2577,7 +2577,7 @@ public class FileStorageService //: IFileStorageService
         {
             try
             {
-                var result = await fileSharingAceHelper.SetAceObjectAsync(aceCollection.Aces, entry, notify, aceCollection.Message, aceCollection.AdvancedSettings, culture, socket);
+                var result = await fileSharingAceHelper.SetAceObjectAsync(aceCollection.Aces, entry, notify, aceCollection.Message, aceCollection.AdvancedSettings, culture, socket, beforeOwnerChange);
                 warning ??= result.Warning;
 
                 if (!result.Changed)
@@ -3010,6 +3010,17 @@ public class FileStorageService //: IFileStorageService
             {
                 var createBy = folder.CreateBy;
 
+                await SetAceObjectAsync(new AceCollection<T>
+                {
+                    Files = [],
+                    Folders = [folder.Id],
+                    Aces =
+                    [
+                        new AceWrapper { Access = FileShare.None, Id = userInfo.Id },
+                        new AceWrapper { Access = FileShare.RoomAdmin, Id = createBy }
+                    ]
+                }, false, socket: false, beforeOwnerChange: true);
+
                 var folderAccess = folder.Access;
 
                 newFolder.CreateBy = userInfo.Id;
@@ -3019,7 +3030,7 @@ public class FileStorageService //: IFileStorageService
                     var providerDao = daoFactory.ProviderDao;
                     await providerDao.UpdateRoomProviderInfoAsync(new ProviderData { Id = folder.ProviderId, CreateBy = userInfo.Id });
                 }
-                else 
+                else
                 {
                     var newFolderId = await folderDao.SaveFolderAsync(newFolder);
                     newFolder = await folderDao.GetFolderAsync(newFolderId);
@@ -3031,17 +3042,6 @@ public class FileStorageService //: IFileStorageService
                 await filesMessageService.SendAsync(MessageAction.FileChangeOwner, newFolder, [
                     newFolder.Title, userInfo.DisplayUserName(false, displayUserSettingsHelper)
                 ]);
-
-                await SetAceObjectAsync(new AceCollection<T>
-                {
-                    Files = [],
-                    Folders = [folder.Id],
-                    Aces =
-                    [
-                        new AceWrapper { Access = FileShare.None, Id = userInfo.Id },
-                        new AceWrapper { Access = FileShare.RoomAdmin, Id = createBy }
-                    ]
-                }, false, socket: false);
             }
 
             yield return newFolder;
