@@ -297,6 +297,19 @@ public class BackupController(
             : default;
         
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+
+        var storageType = inDto.StorageType == null ? BackupStorageType.Documents : (BackupStorageType)Int32.Parse(inDto.StorageType.ToString());
+        if (storageType is BackupStorageType.Documents or BackupStorageType.ThridpartyDocuments)
+        {
+            if (int.TryParse(storageParams["filePath"], out var fId))
+            {
+                await backupAjaxHandler.CheckAccessToFileAsync(fId);
+            }
+            else
+            {
+                await backupAjaxHandler.CheckAccessToFileAsync(storageParams["filePath"]);
+            }
+        }
         
         eventBus.Publish(new BackupRestoreRequestIntegrationEvent(
                              tenantId: tenantId,
