@@ -27,7 +27,8 @@
 namespace ASC.Web.Api.Core;
 
 [Scope]
-public class CspSettingsHelper(SettingsManager settingsManager,
+public class CspSettingsHelper(
+    SettingsManager settingsManager,
     FilesLinkUtility filesLinkUtility,
     TenantManager tenantManager,
     CoreSettings coreSettings,
@@ -37,7 +38,7 @@ public class CspSettingsHelper(SettingsManager settingsManager,
     IHttpContextAccessor httpContextAccessor,
     IConfiguration configuration)
 {
-    public async Task<string> SaveAsync(IEnumerable<string> domains)
+    public async Task<string> SaveAsync(IEnumerable<string> domains, bool updateInDb = true)
     {
         var tenant = await tenantManager.GetCurrentTenantAsync();
         var domain = tenant.GetTenantDomain(coreSettings);
@@ -93,10 +94,13 @@ public class CspSettingsHelper(SettingsManager settingsManager,
             await Parallel.ForEachAsync(headerKeys, async (headerKey, cs) => await distributedCache.RemoveAsync(headerKey, cs));
         }
 
-        await settingsManager.ManageAsync<CspSettings>(current =>
+        if (updateInDb)
         {
-            current.Domains = domains;
-        });
+            await settingsManager.ManageAsync<CspSettings>(current =>
+            {
+                current.Domains = domains;
+            });
+        }
 
         return headerValue;
     }

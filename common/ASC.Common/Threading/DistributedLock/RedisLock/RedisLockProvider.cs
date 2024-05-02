@@ -92,7 +92,7 @@ public class RedisLockProvider : Abstractions.IDistributedLockProvider
         var messageWaiter = new TaskCompletionSource();
         var channel = new RedisChannel($"{ChannelName}:{lockId}", RedisChannel.PatternMode.Auto);
 
-        await database.SubscribeAsync<int>(channel, _ =>
+        await database.SubscribeAsync<byte>(channel, _ =>
         {
             messageWaiter.TrySetResult();
             return Task.CompletedTask;
@@ -125,7 +125,7 @@ public class RedisLockProvider : Abstractions.IDistributedLockProvider
         }
         finally
         {
-            await database.UnsubscribeAsync<int>(channel, _ => Task.CompletedTask);
+            await database.UnsubscribeAsync<byte>(channel, _ => Task.CompletedTask);
         }
 
         if (status != LockStatus.Acquired)

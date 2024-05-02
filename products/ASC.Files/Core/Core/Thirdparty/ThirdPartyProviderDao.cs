@@ -695,6 +695,34 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(IServicePro
             ProviderInfo = null;
         }
     }
+    
+    public Folder<string> GetErrorRoom()
+    {
+        var folder = GetFolder();
+        folder.Id = ProviderInfo.FolderId;
+        folder.Title = ProviderInfo.CustomerTitle;
+        folder.FolderType = ProviderInfo.FolderType;
+        folder.CreateBy = ProviderInfo.Owner;
+        folder.CreateOn = ProviderInfo.CreateOn;
+        folder.ModifiedOn = ProviderInfo.ModifiedOn;
+        folder.RootFolderType = ProviderInfo.RootFolderType;
+        folder.SettingsPrivate = ProviderInfo.Private;
+        folder.SettingsHasLogo = ProviderInfo.HasLogo;
+        folder.ProviderId = ProviderInfo.ProviderId;
+        folder.ProviderKey = ProviderInfo.ProviderKey;
+        folder.SettingsColor = ProviderInfo.Color;
+        folder.RootCreateBy = ProviderInfo.Owner;
+        folder.RootId = MakeId();
+        folder.ParentId = MakeId();
+        folder.Error = FilesCommonResource.ErrorMessage_InvalidThirdPartyFolder;
+
+        return folder;
+    }
+    
+    public bool IsRoom(string folderId)
+    {
+        return MakeId(folderId) == ProviderInfo.FolderId;
+    }
 }
 
 internal class ErrorEntry(string error, string errorId)
