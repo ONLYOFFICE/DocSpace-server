@@ -256,7 +256,7 @@ internal class FolderDao(
         if (containingMyFiles)
         {
             q = q.Join(filesDbContext.Files, r => r.Id, b => b.ParentId, (folder, file) => new { folder, file })
-            .Where(r => r.file.CreateBy == authContext.CurrentAccount.ID)
+            .Where(r => r.file.CreateBy == _authContext.CurrentAccount.ID)
             .Select(r => r.folder);
         }
 
