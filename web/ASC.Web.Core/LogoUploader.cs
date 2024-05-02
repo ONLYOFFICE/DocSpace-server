@@ -38,13 +38,15 @@ public class LogoUploader
         (HttpContext context,
         PermissionContext permissionContext,
         SetupInfo setupInfo,
-        UserPhotoManager userPhotoManager)
+        UserPhotoManager userPhotoManager,
+        TenantLogoManager tenantLogoManager)
     {
         var result = new FileUploadResult();
         try
         {
             await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-
+            await tenantLogoManager.DemandWhiteLabelPermissionAsync();
+            
             var type = (WhiteLabelLogoType)Convert.ToInt32(context.Request.Form["logotype"]);
             var width = Convert.ToInt32(context.Request.Form["width"]);
             var height = Convert.ToInt32(context.Request.Form["height"]);
