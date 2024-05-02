@@ -48,9 +48,11 @@ public class DiscDataStore(TempStream tempStream,
     public override bool IsSupportInternalUri => false;
     public override bool IsSupportedPreSignedUri => false;
     public override bool IsSupportChunking => true;
+    public override bool ContentAsAttachment => _contentAsAttachment;
 
     private readonly Dictionary<string, MappedPath> _mappedPaths = new();
     private ICrypt _crypt;
+    private bool _contentAsAttachment;
 
     public override IDataStore Configure(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props, IDataStoreValidator validator)
     {
@@ -58,6 +60,8 @@ public class DiscDataStore(TempStream tempStream,
         //Fill map path
         Modulename = moduleConfig.Name;
         DataList = new DataList(moduleConfig);
+
+        _contentAsAttachment = moduleConfig.ContentAsAttachment;
 
         foreach (var domain in moduleConfig.Domain)
         {

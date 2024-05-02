@@ -76,7 +76,12 @@ public class StorageHandler(string storagePath, string module, string domain, bo
             return;
         }
 
-        var headers = header.Length > 0 ? header.Split('&').Select(HttpUtility.UrlDecode) : Array.Empty<string>();
+        var headers = header.Length > 0 ? header.Split('&').Select(HttpUtility.UrlDecode).ToList() : [];
+
+        if (storage.ContentAsAttachment)
+        {
+            headers.Add("Content-Disposition:attachment");
+        }
 
         const int bigSize = 5 * 1024 * 1024;
         var fileSize = await storage.GetFileSizeAsync(domain, path);
