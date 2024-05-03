@@ -26,6 +26,8 @@
 
 using static ASC.Security.Cryptography.EmailValidationKeyProvider;
 
+using SecurityContext = ASC.Core.SecurityContext;
+
 namespace ASC.Api.Core.Security;
 
 [Transient]
@@ -37,7 +39,8 @@ public class EmailValidationKeyModelHelper(IHttpContextAccessor httpContextAcces
     InvitationLinkHelper invitationLinkHelper,
     AuditEventsRepository auditEventsRepository,
     TenantUtil tenantUtil,
-    CookiesManager cookiesManager)
+    CookiesManager cookiesManager,
+    SecurityContext securityContext)
 {
     public EmailValidationKeyModel GetModel()
     {
@@ -124,6 +127,14 @@ public class EmailValidationKeyModelHelper(IHttpContextAccessor httpContextAcces
                 }
 
                 checkKeyResult = await provider.ValidateEmailKeyAsync(email + type + hash, key, provider.ValidEmailKeyInterval);
+                
+                if (checkKeyResult is ValidationResult.Ok && userInfo.ActivationStatus is not EmployeeActivationStatus.Activated)
+                {
+                    await securityContext.AuthenticateMeWithoutCookieAsync(userInfo.Id);
+                    
+                    userInfo.ActivationStatus = EmployeeActivationStatus.Activated;
+                    await userManager.UpdateUserInfoAsync(userInfo);
+                }
                 break;
 
             case ConfirmType.Activation:

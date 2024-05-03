@@ -70,7 +70,6 @@ public class FilesLinkUtility
     public const string FileUri = "fileuri";
     public const string FileTitle = "title";
     public const string Action = "action";
-    public const string DocShareKey = "doc";
     public const string TryParam = "try";
     public const string FolderUrl = "folderurl";
     public const string OutType = "outputtype";
@@ -147,7 +146,10 @@ public class FilesLinkUtility
             }
         }
 
-        await SetUrlSettingAsync(InternalUrlKey, GetDocServiceUrlInternal() != value ? value : null);
+        if (GetDocServiceUrlInternal() != value)
+        {
+            await SetUrlSettingAsync(InternalUrlKey, value);
+        }
     }
 
     private const string ApiUrlKey = "api";

@@ -33,8 +33,4 @@ public class StartEditRequestDto
     /// <summary>Specifies whether to share a file with other users for editing or not</summary>
     /// <type>System.Boolean, System</type>
     public bool EditingAlone { get; set; }
-
-    /// <summary>Shared token</summary>
-    /// <type>System.String, System</type>
-    public string Doc { get; set; }
 }

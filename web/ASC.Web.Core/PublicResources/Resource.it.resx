@@ -1039,4 +1039,10 @@
   <data name="UserFreeSpaceException" xml:space="preserve">
     <value>È stata superata la quota di spazio utente</value>
   </data>
+  <data name="TariffsFeature_statistic" xml:space="preserve">
+    <value>Quote e statistiche di archivio</value>
+  </data>
+  <data name="TariffsFeature_total_size" xml:space="preserve">
+    <value>{0} per amministratore/utente esperto e possibilità di aggiungere spazio su richiesta</value>
+  </data>
 </root>

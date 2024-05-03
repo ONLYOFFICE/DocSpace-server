@@ -26,6 +26,9 @@
 
 namespace ASC.Core.Tenants;
 
+/// <summary>
+/// 
+/// </summary>
 [Serializable]
 public class TenantQuotaSettings : ISettings<TenantQuotaSettings>
 {
@@ -35,8 +38,16 @@ public class TenantQuotaSettings : ISettings<TenantQuotaSettings>
         get { return new Guid("{62609D95-35D3-4F14-A6BA-2118979E04EA}"); }
     }
 
+    /// <summary>Specifies if the quota is enabled or not</summary>
+    /// <type>System.Boolean, System</type>
     public bool EnableQuota { get; set; }
+
+    /// <summary>Quota</summary>
+    /// <type>System.Int64, System</type>
     public long Quota { get; set; }
+
+    /// <summary>Date of the last quota recalculation</summary>
+    /// <type>System.Nullable{System.DateTime}, System</type>
     public DateTime? LastRecalculateDate { get; set; }
 
     public TenantQuotaSettings GetDefault()

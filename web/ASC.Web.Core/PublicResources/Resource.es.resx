@@ -1039,4 +1039,10 @@
   <data name="UserFreeSpaceException" xml:space="preserve">
     <value>Se ha superado la cuota de espacio de usuario</value>
   </data>
+  <data name="TariffsFeature_total_size" xml:space="preserve">
+    <value>{0} por administrador/usuario avanzado y posibilidad de añadir espacio bajo solicitud</value>
+  </data>
+  <data name="TariffsFeature_statistic" xml:space="preserve">
+    <value>Cuotas de almacenamiento y estadísticas</value>
+  </data>
 </root>

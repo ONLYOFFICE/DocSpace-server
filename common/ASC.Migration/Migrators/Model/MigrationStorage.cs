@@ -72,6 +72,11 @@ public class MigrationFolder
     public int ParentId { get; set; }
     public string Title { get; set; }
     public int Level { get; set; }
+
+    /*only projects*/
+
+    public bool Private { get; set; }
+    public string Owner { get; set; }
 }
 
 public class MigrationSecurity

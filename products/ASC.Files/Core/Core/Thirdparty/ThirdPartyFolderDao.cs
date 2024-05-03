@@ -54,6 +54,17 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
     public async Task<Folder<string>> GetFolderAsync(string folderId)
     {
         var folder = dao.ToFolder(await dao.GetFolderAsync(folderId));
+        if (folder == null)
+        {
+            if (dao.IsRoom(folderId))
+            {
+                folder = dao.GetErrorRoom();
+            }
+            else
+            {
+                return null;
+            }
+        }
 
         if (folder.FolderType is not (FolderType.CustomRoom or FolderType.PublicRoom))
         {
@@ -119,7 +130,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
     }
 
     public IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, 
-        bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default)
+        bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default, bool containingMyFiles = false)
     {
         if (dao.CheckInvalidFilter(filterType))
         {
@@ -187,7 +198,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         {
             var folder = await dao.GetFolderAsync(folderId);
 
-            if (folder is IErrorItem)
+            if (folder is null or IErrorItem)
             {
                 folderId = null;
             }

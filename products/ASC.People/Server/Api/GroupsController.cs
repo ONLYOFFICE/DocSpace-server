@@ -30,7 +30,6 @@ namespace ASC.People.Api;
 /// Groups API.
 ///</summary>
 ///<name>group</name>
-///<visible>false</visible>
 [Scope]
 [DefaultRoute]
 [ApiController]
@@ -50,7 +49,9 @@ public class GroupController(
     /// <short>
     /// Get groups
     /// </short>
-    /// <returns type="ASC.Web.Api.Models.GroupSummaryDto, ASC.Api.Core">List of groups</returns>
+    /// <param type="System.Nullable{System.Guid}, System" name="userId">User ID</param>
+    /// <param type="System.Nullable{System.Boolean}, System" name="manager">Specifies if the user is a manager or not</param>
+    /// <returns type="ASC.People.ApiModels.ResponseDto.GroupDto, ASC.People">List of groups</returns>
     /// <remarks>
     /// This method returns partial group information.
     /// </remarks>
@@ -60,7 +61,8 @@ public class GroupController(
     [HttpGet]
     public async IAsyncEnumerable<GroupDto> GetGroupsAsync(Guid? userId, bool? manager)
     {
-        await permissionContext.DemandPermissionsAsync(Constants.Action_EditGroups, Constants.Action_AddRemoveUser);
+        await permissionContext.DemandPermissionsAsync(Constants.Action_ReadGroups);
+        
         var offset = Convert.ToInt32(apiContext.StartIndex);
         var count = Convert.ToInt32(apiContext.Count);
         var text = apiContext.FilterValue;
@@ -90,7 +92,7 @@ public class GroupController(
     /// Get a group
     /// </short>
     /// <param type="System.Guid, System" method="url" name="id">Group ID</param>
-    /// <returns type="ASC.People.ApiModels.ResponseDto.GroupDto, ASC.People">Group with the following parameters</returns>
+    /// <returns type="ASC.People.ApiModels.ResponseDto.GroupDto, ASC.People">Group with the detailed information</returns>
     /// <remarks>
     /// This method returns full group information.
     /// </remarks>
@@ -99,7 +101,8 @@ public class GroupController(
     [HttpGet("{id:guid}")]
     public async Task<GroupDto> GetGroupAsync(Guid id)
     {
-        await permissionContext.DemandPermissionsAsync(Constants.Action_EditGroups, Constants.Action_AddRemoveUser);
+        await permissionContext.DemandPermissionsAsync(Constants.Action_ReadGroups);
+        
         return await groupFullDtoHelper.Get(await GetGroupInfoAsync(id), true);
     }
 
@@ -111,12 +114,13 @@ public class GroupController(
     /// </short>
     /// <param type="System.Guid, System" method="url" name="userid">User ID</param>
     /// <returns type="ASC.Web.Api.Models.GroupSummaryDto, ASC.Api.Core">List of groups</returns>
-    /// <path>api/2.0/groups/member/{id}</path>
+    /// <path>api/2.0/groups/user/{userid}</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [HttpGet("user/{userid:guid}")]
     public async Task<IEnumerable<GroupSummaryDto>> GetByUserIdAsync(Guid userid)
     {
+        await permissionContext.DemandPermissionsAsync(Constants.Action_ReadGroups);
         var groups = await userManager.GetUserGroupsAsync(userid);
         List<GroupSummaryDto> result = new(groups.Count);
         
@@ -135,7 +139,7 @@ public class GroupController(
     /// Add a new group
     /// </short>
     /// <param type="ASC.People.ApiModels.RequestDto.GroupRequestDto, ASC.People" name="inDto">Group request parameters</param>
-    /// <returns type="ASC.People.ApiModels.ResponseDto.GroupDto, ASC.People">Newly created group with the following parameters</returns>
+    /// <returns type="ASC.People.ApiModels.ResponseDto.GroupDto, ASC.People">Newly created group with the detailed information</returns>
     /// <path>api/2.0/groups</path>
     /// <httpMethod>POST</httpMethod>
     [HttpPost]
@@ -167,8 +171,8 @@ public class GroupController(
     /// Update a group
     /// </short>
     /// <param type="System.Guid, System" method="url" name="id">Group ID</param>
-    /// <param type="ASC.People.ApiModels.RequestDto.GroupRequestDto, ASC.People" name="inDto">Group request parameters</param>
-    /// <returns type="ASC.People.ApiModels.ResponseDto.GroupDto, ASC.People">Updated group with the following parameters</returns>
+    /// <param type="ASC.People.ApiModels.RequestDto.UpdateGroupRequestDto, ASC.People" name="inDto">Group request parameters</param>
+    /// <returns type="ASC.People.ApiModels.ResponseDto.GroupDto, ASC.People">Updated group with the detailed information</returns>
     /// <path>api/2.0/groups/{id}</path>
     /// <httpMethod>PUT</httpMethod>
     [HttpPut("{id:guid}")]
@@ -211,7 +215,7 @@ public class GroupController(
     /// Delete a group
     /// </short>
     /// <param type="System.Guid, System" method="url" name="id">Group ID</param>
-    /// <returns type="ASC.People.ApiModels.ResponseDto.GroupDto, ASC.People">Group with the following parameters</returns>
+    /// <returns type="Microsoft.AspNetCore.Mvc.NoContentResult, Microsoft.AspNetCore.Mvc">No content</returns>
     /// <path>api/2.0/groups/{id}</path>
     /// <httpMethod>DELETE</httpMethod>
     [HttpDelete("{id:guid}")]
@@ -237,8 +241,8 @@ public class GroupController(
     /// </short>
     /// <param type="System.Guid, System" method="url" name="fromId">Group ID to move from</param>
     /// <param type="System.Guid, System" method="url" name="toId">Group ID to move to</param>
-    /// <returns type="ASC.People.ApiModels.ResponseDto.GroupDto, ASC.People">Group with the following parameters</returns>
-    /// <path>api/2.0/groups/{fromId}/members/transfer/{toId}</path>
+    /// <returns type="ASC.People.ApiModels.ResponseDto.GroupDto, ASC.People">Group with the detailed information</returns>
+    /// <path>api/2.0/groups/{fromId}/members/{toId}</path>
     /// <httpMethod>PUT</httpMethod>
     [HttpPut("{fromId:guid}/members/{toId:guid}")]
     public async Task<GroupDto> TransferMembersToAsync(Guid fromId, Guid toId)
@@ -266,7 +270,7 @@ public class GroupController(
     /// </short>
     /// <param type="System.Guid, System" method="url" name="id">Group ID</param>
     /// <param type="ASC.People.ApiModels.RequestDto.GroupRequestDto, ASC.People" name="inDto">Group request parameters</param>
-    /// <returns type="ASC.People.ApiModels.ResponseDto.GroupDto, ASC.People">Group with the following parameters</returns>
+    /// <returns type="ASC.People.ApiModels.ResponseDto.GroupDto, ASC.People">Group with the detailed information</returns>
     /// <path>api/2.0/groups/{id}/members</path>
     /// <httpMethod>POST</httpMethod>
     [HttpPost("{id:guid}/members")]
@@ -286,7 +290,7 @@ public class GroupController(
     /// </short>
     /// <param type="System.Guid, System" method="url" name="id">Group ID</param>
     /// <param type="ASC.People.ApiModels.RequestDto.GroupRequestDto, ASC.People" name="inDto">Group request parameters</param>
-    /// <returns type="ASC.People.ApiModels.ResponseDto.GroupDto, ASC.People">Group with the following parameters</returns>
+    /// <returns type="ASC.People.ApiModels.ResponseDto.GroupDto, ASC.People">Group with the detailed information</returns>
     /// <path>api/2.0/groups/{id}/members</path>
     /// <httpMethod>PUT</httpMethod>
     [HttpPut("{id:guid}/members")]
@@ -312,7 +316,7 @@ public class GroupController(
     /// </short>
     /// <param type="System.Guid, System" method="url" name="id">Group ID</param>
     /// <param type="ASC.People.ApiModels.RequestDto.SetManagerRequestDto, ASC.People" name="inDto">Request parameters for setting a group manager</param>
-    /// <returns type="ASC.People.ApiModels.ResponseDto.GroupDto, ASC.People">Group with the following parameters</returns>
+    /// <returns type="ASC.People.ApiModels.ResponseDto.GroupDto, ASC.People">Group with the detailed information</returns>
     /// <path>api/2.0/groups/{id}/manager</path>
     /// <httpMethod>PUT</httpMethod>
     [HttpPut("{id:guid}/manager")]
@@ -340,7 +344,7 @@ public class GroupController(
     /// </short>
     /// <param type="System.Guid, System" method="url" name="id">Group ID</param>
     /// <param type="ASC.People.ApiModels.RequestDto.GroupRequestDto, ASC.People" name="inDto">Group request parameters</param>
-    /// <returns type="ASC.People.ApiModels.ResponseDto.GroupDto, ASC.People">Group with the following parameters</returns>
+    /// <returns type="ASC.People.ApiModels.ResponseDto.GroupDto, ASC.People">Group with the detailed information</returns>
     /// <path>api/2.0/groups/{id}/members</path>
     /// <httpMethod>DELETE</httpMethod>
     [HttpDelete("{id:guid}/members")]
