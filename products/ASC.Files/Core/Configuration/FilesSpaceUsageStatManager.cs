@@ -90,7 +90,12 @@ public class FilesSpaceUsageStatManager(IDbContextFactory<FilesDbContext> dbCont
 
     }
 
-
+    public async Task<long> GetPortalSpaceUsageAsync()
+    {
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
+        return await Queries.SumPortalContentLengthAsync(filesDbContext, tenantId);
+    }
     public async Task<long> GetUserSpaceUsageAsync(Guid userId)
     {
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
@@ -136,6 +141,17 @@ public class FilesSpaceUsageStatManager(IDbContextFactory<FilesDbContext> dbCont
         await filesDbContext.SaveChangesAsync();
 
     }
+    public async Task RecalculateQuota(int tenantId)
+    {
+        await tenantManager.SetCurrentTenantAsync(tenantId);
+
+        var size = await GetPortalSpaceUsageAsync();
+
+        await tenantManager.SetTenantQuotaRowAsync(
+           new TenantQuotaRow { TenantId = tenantId, Path = $"/{FileConstant.ModuleId}/", Counter = size, Tag = WebItemManager.DocumentsProductID.ToString(), UserId = Guid.Empty, LastModified = DateTime.UtcNow },
+           false);
+    }
+
     public async Task RecalculateUserQuota(int tenantId, Guid userId)
     {
         await tenantManager.SetCurrentTenantAsync(tenantId);
@@ -158,6 +174,13 @@ public static class FilesSpaceUsageStatExtension
 
 static file class Queries
 {
+    public static readonly Func<FilesDbContext, int, Task<long>> SumPortalContentLengthAsync =
+       EF.CompileAsyncQuery(
+           (FilesDbContext ctx, int tenantId) =>
+               ctx.Files
+                   .Where(r => r.TenantId == tenantId)
+                   .Sum(r => r.ContentLength));
+
     public static readonly Func<FilesDbContext, int, Guid, int, int, Task<long>> SumContentLengthAsync =
         EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, Guid userId, int my, int trash) =>
