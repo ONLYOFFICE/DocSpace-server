@@ -53,7 +53,7 @@ public class MaxEmailInvitationsAttribute : ValidationAttribute
                 return ValidationResult.Success;
             }
 
-            var helper = (UserInvitationLimitHelper)validationContext.GetService(typeof(UserInvitationLimitHelper));
+            var helper = validationContext.GetRequiredService<UserInvitationLimitHelper>();
             var limit = helper.GetLimit().Result;
 
             if (count > limit)

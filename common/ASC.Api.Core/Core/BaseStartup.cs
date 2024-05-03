@@ -42,6 +42,7 @@ public abstract class BaseStartup
     protected readonly IConfiguration _configuration;
     private readonly IHostEnvironment _hostEnvironment;
     private readonly string _corsOrigin;
+    private static readonly JsonSerializerOptions _serializerOptions = new() { PropertyNameCaseInsensitive = true };
 
     protected bool AddAndUseSession { get; }
     protected DIHelper DIHelper { get; }
@@ -299,8 +300,7 @@ public abstract class BaseStartup
 
                     var json = new StreamReader(httpContext.Request.Body).ReadToEndAsync().Result;
 
-                    var jsonOptions = new JsonSerializerOptions() { PropertyNameCaseInsensitive = true };
-                    var userInvitationsDto = JsonSerializer.Deserialize<EmailInvitationsDto>(json, jsonOptions);
+                    var userInvitationsDto = JsonSerializer.Deserialize<EmailInvitationsDto>(json, _serializerOptions);
                     invitationsCount = userInvitationsDto.Invitations.Count(x => !string.IsNullOrEmpty(x.Email));
 
                     httpContext.Request.Body.Position = 0;
