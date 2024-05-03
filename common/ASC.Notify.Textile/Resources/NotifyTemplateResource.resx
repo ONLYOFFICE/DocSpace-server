@@ -129,7 +129,11 @@
                             &lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;
                                 &lt;tbody&gt;
                                     %TOPIMAGE%
-                                    %CONTENT%
+                                    &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
+                                        &lt;td style="margin: 0; text-align: center; vertical-align: top; width: 600px;"&gt;
+                                            %CONTENT%
+                                        &lt;/td&gt;
+                                    &lt;/tr&gt;
                                 &lt;/tbody&gt;
                             &lt;/table&gt;
                             &lt;table background="#F5F5F5" cellspacing="0" cellpadding="0" style="background-color: #F5F5F5; border: 0 none; border-collapse: collapse; border-spacing: 0; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: center;"&gt;
@@ -185,16 +189,16 @@
   </data>
   <data name="TextForFooterUnsubsribeDocSpace" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
-    &lt;td class="fol" style="color: #666666; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding: 40px 110px 10px; vertical-align: top;"&gt;
+    &lt;td class="fol" style="color: #666666; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; margin: 0; padding: 40px 0 8px; vertical-align: top;"&gt;
         For any purchase questions, email us at &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="mailto:sales@onlyoffice.com"&gt;sales@onlyoffice.com&lt;/a&gt;.
     &lt;/td&gt;
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
-    &lt;td class="fol" style="color: #666666; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding: 0px 100px 0px; vertical-align: top;"
+    &lt;td class="fol" style="color: #666666; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; margin: 0; padding: 0; vertical-align: top;"&gt;
         In case of technical problems please contact our &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://www.onlyoffice.com/support-contact-form.aspx"&gt;support team&lt;/a&gt;.
     &lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
-    &lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding: 10px 110px 0; vertical-align: top;"&gt;
+    &lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; margin: 0; padding: 8px 0 0; vertical-align: top;"&gt;
         &lt;a href="{1}" style="color: #FF6F3D; text-decoration: underline; white-space: nowrap;" target="_blank"&gt;Click here to unsubscribe&lt;/a&gt;
     &lt;/td&gt;
 &lt;/tr&gt;</value>
@@ -202,7 +206,7 @@
   <data name="TopGif" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
     &lt;td style="margin: 0; text-align: center; vertical-align: top; width: 600px;"&gt;
-        &lt;a href="%SITEURL%" style="color: #333333; display: block; font-size: 16px; font-weight: bold; line-height: 22px; padding-top: 22px; text-decoration: none;" target="_blank"&gt;
+        &lt;a href="%SITEURL%" style="color: #333333; display: block; font-size: 16px; font-weight: bold; line-height: 22px; margin-bottom: 32px; text-decoration: none;" target="_blank"&gt;
             &lt;img src="%LOGO%" style="border: 0 none; height: 360px; width: 600px; color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 40px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em;" alt="%LOGOTEXT%" /&gt;
         &lt;/a&gt;
     &lt;/td&gt;
