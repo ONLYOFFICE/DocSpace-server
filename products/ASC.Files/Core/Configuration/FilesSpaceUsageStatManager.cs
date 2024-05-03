@@ -98,7 +98,9 @@ public class FilesSpaceUsageStatManager(IDbContextFactory<FilesDbContext> dbCont
         var trash = await globalFolder.GetFolderTrashAsync(daoFactory);
 
         await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
-        return await Queries.SumContentLengthAsync(filesDbContext, tenantId, userId, my, trash);
+        var sum = await Queries.SumContentLengthAsync(filesDbContext, tenantId, userId, my, trash);
+        var sumFromRoom = await Queries.SumFromRoomContentLengthAsync(filesDbContext, tenantId, userId);
+        return Math.Max(sum - sumFromRoom, 0);
     }
 
     public async Task RecalculateFoldersUsedSpace(int TenantId)
@@ -166,4 +168,20 @@ static file class Queries
                     .Where(r => r.file.TenantId == tenantId)
                     .Where(r => r.bunch.RightNode.StartsWith("files/my/" + userId.ToString()) || r.bunch.RightNode.StartsWith("files/trash/" + userId.ToString()))
                     .Sum(r => r.file.ContentLength));
+
+    public static readonly Func<FilesDbContext, int, Guid, Task<long>>
+        SumFromRoomContentLengthAsync = EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, Guid userId) =>
+                ctx.Tag
+                    .Where(r => r.TenantId == tenantId)
+                    .Join(ctx.TagLink, r => r.Id, l => l.TagId,
+                        (tag, link) => new TagLinkData { Tag = tag, Link = link })
+                    .Where(r => r.Link.TenantId == r.Tag.TenantId)
+                    .Where(r => r.Tag.Type == TagType.FromRoom)
+                    .Where(r => r.Tag.Owner == userId)
+                    .Join(ctx.Files,
+                        r => Regex.IsMatch(r.Link.EntryId, "^[0-9]+$") ? Convert.ToInt32(r.Link.EntryId) : -1,
+                        f => f.Id, (tagLink, file) => new { tagLink, file })
+                    .Sum(r => r.file.ContentLength));
+
 }

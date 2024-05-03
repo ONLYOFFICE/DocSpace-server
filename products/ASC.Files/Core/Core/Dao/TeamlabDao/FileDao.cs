@@ -853,9 +853,10 @@ internal class FileDao(
                     }
                 }
             }
-        }else if (((toFolder.FolderType == FolderType.USER || toFolder.FolderType == FolderType.DEFAULT) && 
-                (fromFolder.FolderType != FolderType.TRASH && fromFolder.FolderType != FolderType.USER && fromFolder.FolderType != FolderType.DEFAULT)) ||
-                (DocSpaceHelper.IsRoom(fromFolder.FolderType)) && (toFolder.FolderType == FolderType.TRASH || toFolder.FolderType == FolderType.USER || toFolder.FolderType == FolderType.DEFAULT))
+        }else if ((toFolder.FolderType == FolderType.USER || toFolder.FolderType == FolderType.DEFAULT) && 
+                fromFolder.FolderType != FolderType.TRASH && 
+                fromFolder.FolderType != FolderType.USER && 
+                fromFolder.FolderType != FolderType.DEFAULT)
         {
             var quotaUserSettings = await _settingsManager.LoadAsync<TenantUserQuotaSettings>();
             if (quotaUserSettings.EnableQuota)
