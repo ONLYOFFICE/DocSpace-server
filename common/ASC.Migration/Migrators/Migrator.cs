@@ -401,6 +401,7 @@ public abstract class Migrator : IAsyncDisposable
                 newFile.Version = file.Version;
                 newFile.VersionGroup = file.VersionGroup;
                 newFile.Comment = file.Comment;
+                newFile.CreateOn = file.Created;
                 if (matchingFilesIds.ContainsKey($"{_fileKey}-{file.Id}"))
                 {
                     newFile.Id = matchingFilesIds[$"{_fileKey}-{file.Id}"].Id;
@@ -408,11 +409,11 @@ public abstract class Migrator : IAsyncDisposable
                 if (!storage.ShouldImportSharedFolders || !storage.Securities.Any(s => s.EntryId == file.Folder && s.EntryType == 1) && newFile.ParentId != 0)
                 {
                     newFile = await fileDao.SaveFileAsync(newFile, fs);
+                    Log(string.Format(MigrationResource.CreateFile, file.Title));
                 }
-                if (!matchingFilesIds.ContainsKey($"{_fileKey}-{file.Id}"))
+                if (!matchingFilesIds.ContainsKey($"{_fileKey}-{file.Id}") && newFile.Id != 0)
                 {
                     matchingFilesIds.Add($"{_fileKey}-{file.Id}", newFile);
-                    Log(string.Format(MigrationResource.CreateFile, file.Title));
                 }
             }
             catch (Exception ex)
@@ -444,6 +445,10 @@ public abstract class Migrator : IAsyncDisposable
                 if (entryIsFile && storage.ShouldImportSharedFiles)
                 {
                     var key = $"{_fileKey}-{security.EntryId}";
+                    if(!matchingFilesIds.ContainsKey(key))
+                    {
+                        continue;
+                    }
                     await SecurityContext.AuthenticateMeAsync(user.Info.Id);
                     AceWrapper ace = null;
                     if (!aces.ContainsKey($"{security.Security}{matchingFilesIds[key].Id}"))
@@ -552,8 +557,17 @@ public abstract class Migrator : IAsyncDisposable
                             newFile.ContentLength = fs.Length;
                             newFile.Version = file.Version;
                             newFile.VersionGroup = file.VersionGroup;
+                            newFile.CreateOn = file.Created;
+                            if (matchingFilesIds.ContainsKey($"{_fileKey}-{file.Id}"))
+                            {
+                                newFile.Id = matchingFilesIds[$"{_fileKey}-{file.Id}"].Id;
+                            }
                             newFile = await fileDao.SaveFileAsync(newFile, fs);
-                            Log(string.Format(MigrationResource.CreateFile, newFile.Title));
+                            Log(string.Format(MigrationResource.CreateFile, file.Title));
+                            if (!matchingFilesIds.ContainsKey($"{_fileKey}-{file.Id}"))
+                            {
+                                matchingFilesIds.Add($"{_fileKey}-{file.Id}", newFile);
+                            }
                         }
                     }
                     if (_usersForImport.ContainsKey(security.Subject) && _currentUser.ID == _usersForImport[security.Subject].Info.Id)

@@ -64,6 +64,7 @@ public class MigrationFile
     public string Comment { get; set; }
     public int Folder { get; set; }
     public string Path { get; set; }
+    public DateTime Created { get; set; }
 }
 
 public class MigrationFolder
