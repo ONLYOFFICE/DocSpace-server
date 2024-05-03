@@ -48,9 +48,18 @@ public class ExternalShare(Global global,
         switch (entry)
         {
             case File<T> file:
-                url = fileUtility.CanWebView(file.Title)
-                    ? filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id)
-                    : file.DownloadUrl;
+                if (fileUtility.CanWebView(file.Title))
+                {
+                    url = filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id);
+                }
+                else if (fileUtility.CanImageView(file.Title) || fileUtility.CanMediaView(file.Title))
+                {
+                    url = $"share/preview/{file.Id}";
+                }
+                else
+                {
+                    url = file.DownloadUrl;
+                }
                 
                 url = QueryHelpers.AddQueryString(url, FilesLinkUtility.ShareKey, key);
                 break;
