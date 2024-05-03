@@ -2040,7 +2040,20 @@ static file class Queries
                                          s.SubjectType == SubjectType.PrimaryExternalLink),
                             Settings = (from f in ctx.RoomSettings 
                                 where f.TenantId == r.TenantId && f.RoomId == r.Id 
-                                select f).FirstOrDefault()
+                                select f).FirstOrDefault(),
+                            Order = (
+                                from f in ctx.FileOrder
+                                where (
+                                    from rs in ctx.RoomSettings 
+                                    where rs.TenantId == f.TenantId && rs.RoomId ==
+                                        (from t in ctx.Tree
+                                            where t.FolderId == r.ParentId
+                                            orderby t.Level descending
+                                            select t.ParentId
+                                        ).Skip(1).FirstOrDefault()
+                                    select rs.Indexing).FirstOrDefault() && f.EntryId == r.Id && f.TenantId == r.TenantId && f.EntryType == FileEntryType.Folder
+                                select f.Order
+                            ).FirstOrDefault(),
                         }
                     ).SingleOrDefault());
 

@@ -156,12 +156,13 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         BadgesSettingsHelper badgesSettingsHelper,
         FilesSettingsHelper filesSettingsHelper,
         FileDateTime fileDateTime,
-        ExternalShare externalShare)
+        ExternalShare externalShare,
+        BreadCrumbsManager breadCrumbsManager)
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime) 
 {
     private readonly ApiDateTimeHelper _apiDateTimeHelper = apiDateTimeHelper;
 
-    public async Task<FileDto<T>> GetAsync<T>(File<T> file, int foldersCount = 0, string order = null)
+    public async Task<FileDto<T>> GetAsync<T>(File<T> file, int? foldersCount = null, string order = null)
     {
         var result = await GetFileWrapperAsync(file, foldersCount, order);
 
@@ -179,7 +180,7 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         return result;
     }
 
-    private async Task<FileDto<T>> GetFileWrapperAsync<T>(File<T> file, int foldersCount, string order)
+    private async Task<FileDto<T>> GetFileWrapperAsync<T>(File<T> file, int? foldersCount, string order)
     {
         var result = await GetAsync<FileDto<T>, T>(file);
         var isEnabledBadges = await badgesSettingsHelper.GetEnabledForCurrentUserAsync();
@@ -212,9 +213,17 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         result.LastOpened = _apiDateTimeHelper.Get(file.LastOpened);
 
         if (file.Order != 0)
-        {
-            file.Order += foldersCount;
-            result.Order = !string.IsNullOrEmpty(order) ? string.Join('.', order, file.Order) : file.Order.ToString();
+        {            
+            var folderDao = daoFactory.GetFolderDao<T>();
+            var fileOrder = file.Order;
+            fileOrder += foldersCount ?? await folderDao.GetFoldersCountAsync(file.ParentId, FilterType.None, false, Guid.Empty, string.Empty);
+            
+            if (string.IsNullOrEmpty(order))
+            {
+                order = await breadCrumbsManager.GetBreadCrumbsOrderAsync(file.ParentId);
+            }
+            
+            result.Order = !string.IsNullOrEmpty(order) ? string.Join('.', order, fileOrder) : file.Order.ToString();
         }
 
         try

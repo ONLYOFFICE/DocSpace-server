@@ -119,21 +119,23 @@ public class FolderDto<T> : FileEntryDto<T>
 }
 
 [Scope]
-public class FolderDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
-        EmployeeDtoHelper employeeWrapperHelper,
-        AuthContext authContext,
-        IDaoFactory daoFactory,
-        FileSecurity fileSecurity,
-        GlobalFolderHelper globalFolderHelper,
-        FileSharingHelper fileSharingHelper,
-        RoomLogoManager roomLogoManager,
-        BadgesSettingsHelper badgesSettingsHelper,
-        RoomsNotificationSettingsHelper roomsNotificationSettingsHelper,
-        FilesSettingsHelper filesSettingsHelper,
-        FileDateTime fileDateTime,
-        SettingsManager settingsManager,
-        CoreBaseSettings coreBaseSettings,
-        TenantManager tenantManager)
+public class FolderDtoHelper(
+    ApiDateTimeHelper apiDateTimeHelper,
+    EmployeeDtoHelper employeeWrapperHelper,
+    AuthContext authContext,
+    IDaoFactory daoFactory,
+    FileSecurity fileSecurity,
+    GlobalFolderHelper globalFolderHelper,
+    FileSharingHelper fileSharingHelper,
+    RoomLogoManager roomLogoManager,
+    BadgesSettingsHelper badgesSettingsHelper,
+    RoomsNotificationSettingsHelper roomsNotificationSettingsHelper,
+    FilesSettingsHelper filesSettingsHelper,
+    FileDateTime fileDateTime,
+    SettingsManager settingsManager,
+    CoreBaseSettings coreBaseSettings,
+    BreadCrumbsManager breadCrumbsManager,
+    TenantManager tenantManager)
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime)
     {
 
@@ -203,6 +205,11 @@ public class FolderDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
 
         if (folder.Order != 0)
         {
+            if (string.IsNullOrEmpty(order))
+            {
+                order = await breadCrumbsManager.GetBreadCrumbsOrderAsync(folder.ParentId);
+            }
+            
             result.Order = !string.IsNullOrEmpty(order) ? string.Join('.', order, folder.Order) : folder.Order.ToString();
         }
 
