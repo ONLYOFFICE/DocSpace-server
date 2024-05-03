@@ -414,7 +414,21 @@ public class Builder<T>(ThumbnailSettings settings,
     }
 
     private Image GetImageThumbnail(Image sourceBitmap, int thumbnailWidth, int thumbnailHeight, ResizeMode resizeMode, AnchorPositionMode anchorPositionMode)
-    {
+    {      
+        if (resizeMode == ResizeMode.Manual)
+        {
+            resizeMode = ResizeMode.Max;
+
+            if ((sourceBitmap.Bounds.Width > sourceBitmap.Bounds.Height && thumbnailWidth < thumbnailHeight) ||
+                (sourceBitmap.Bounds.Width < sourceBitmap.Bounds.Height && thumbnailWidth > thumbnailHeight))
+            {
+                var originThumbnailHeight = thumbnailHeight;
+
+                thumbnailHeight = thumbnailWidth;
+                thumbnailWidth = originThumbnailHeight;               
+            }
+        }
+
         return sourceBitmap.Clone(x =>
         {
             x.Resize(new ResizeOptions

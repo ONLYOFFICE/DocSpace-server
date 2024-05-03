@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,36 +24,27 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core.Core.Thirdparty;
+namespace ASC.Files.Core.ApiModels.ResponseDto;
 
-[Scope]
-internal interface IDaoBase<TFile, TFolder, TItem>
-    where TFile : class, TItem
-    where TFolder : class, TItem
-    where TItem : class
+public record ProviderDto(string Name, string Key, bool Connected, bool Oauth = false, string RedirectUrl = null)
 {
-    void Init(string pathPrefix, IProviderInfo<TFile, TFolder, TItem> providerInfo);
-    string GetName(TItem item);
-    string GetId(TItem item);
-    bool IsRoot(TFolder folder);
-    string MakeThirdId(object entryId);
-    string GetParentFolderId(TItem item);
-    string MakeId(TItem item);
-    string MakeId(string path = null);
-    string MakeFolderTitle(TFolder folder);
-    string MakeFileTitle(TFile file);
-    Folder<string> ToFolder(TFolder folder);
-    File<string> ToFile(TFile file);
-    Task<Folder<string>> GetRootFolderAsync();
-    Task<TFolder> CreateFolderAsync(string title, string folderId);
-    Task<TFolder> GetFolderAsync(string folderId);
-    Task<TFile> GetFileAsync(string fileId);
-    Task<IEnumerable<string>> GetChildrenAsync(string folderId);
-    Task<List<TItem>> GetItemsAsync(string parentId, bool? folder = null);
-    Task<string> GetAvailableTitleAsync(string requestTitle, string parentFolderId, Func<string, string, Task<bool>> isExist);
-    bool CheckInvalidFilter(FilterType filterType);
-    Task<string> MappingIDAsync(string id, bool saveIfNotExist = false);
-    Task UpdateIdAsync(string oldValue, string newValue);
-    Folder<string> GetErrorRoom();
-    bool IsRoom(string folderId);
+    /// <summary>Provider name</summary>
+    /// <type>System.String, System</type>
+    public string Name { get; init; } = Name;
+
+    /// <summary>Provider key</summary>
+    /// <type>System.String, System</type>
+    public string Key { get; init; } = Key;
+
+    /// <summary>Connected flag</summary>
+    /// <type>System.Boolean, System</type>
+    public bool Connected { get; init; } = Connected;
+
+    /// <summary>Oauth flag</summary>
+    /// <type>System.Boolean, System</type>
+    public bool Oauth { get; init; } = Oauth;
+
+    /// <summary>Redirect url</summary>
+    // <type>System.String, System</type>
+    public string RedirectUrl { get; init; } = RedirectUrl;
 }

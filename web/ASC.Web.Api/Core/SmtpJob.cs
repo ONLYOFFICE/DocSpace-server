@@ -66,6 +66,7 @@ public class SmtpJob(UserManager userManager,
     public void Init(SmtpSettingsDto smtpSettings, int tenant, Guid user)
     {
         TenantId = tenant;
+        CurrentOperation = string.Empty;
         _currentUser = user;
         _smtpSettings = smtpSettings;
     }

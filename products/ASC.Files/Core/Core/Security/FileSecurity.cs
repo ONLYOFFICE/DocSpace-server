@@ -118,9 +118,9 @@ public class FileSecurity(IDaoFactory daoFactory,
                 FolderType.FillingFormsRoom,
                 new Dictionary<SubjectType, HashSet<FileShare>>
             {
-                    { SubjectType.User, [FileShare.RoomAdmin, FileShare.Collaborator, FileShare.FillForms, FileShare.Read, FileShare.None] },
-                    { SubjectType.Group , [FileShare.FillForms, FileShare.Read, FileShare.None] },
-                    { SubjectType.InvitationLink, [FileShare.RoomAdmin, FileShare.Collaborator, FileShare.FillForms, FileShare.Read, FileShare.None] }
+                    { SubjectType.User, [FileShare.RoomAdmin, FileShare.Collaborator, FileShare.FillForms, FileShare.None] },
+                    { SubjectType.Group , [FileShare.FillForms, FileShare.None] },
+                    { SubjectType.InvitationLink, [FileShare.RoomAdmin, FileShare.Collaborator, FileShare.FillForms, FileShare.None] }
                 }.ToFrozenDictionary()
                 },
                 {
@@ -224,7 +224,9 @@ public class FileSecurity(IDaoFactory daoFactory,
                     FilesSecurityActions.Duplicate,
                     FilesSecurityActions.SubmitToFormGallery,
                     FilesSecurityActions.Download,
-                    FilesSecurityActions.Convert
+                    FilesSecurityActions.Convert,
+                    FilesSecurityActions.CreateRoomFrom,
+                    FilesSecurityActions.EditForm
                 }
             },
             {
@@ -840,7 +842,7 @@ public class FileSecurity(IDaoFactory daoFactory,
 
         if (action == FilesSecurityActions.CreateRoomFrom)
         {
-            return folder is { RootFolderType: FolderType.USER, FolderType: FolderType.DEFAULT } && folder.RootCreateBy == userId && !isCollaborator;
+            return e.RootFolderType == FolderType.USER && e.RootCreateBy == userId && !isCollaborator && (folder is { FolderType: FolderType.DEFAULT } || file != null);
         }
 
         if (e.FileEntryType == FileEntryType.Folder)
@@ -2159,6 +2161,7 @@ public class FileSecurity(IDaoFactory daoFactory,
         CopySharedLink,
         ReadLinks,
         Reconnect,
-        CreateRoomFrom
+        CreateRoomFrom,
+        EditForm
     }
 }
