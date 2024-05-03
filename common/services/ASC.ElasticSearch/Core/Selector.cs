@@ -424,15 +424,10 @@ public class Selector<T>(IServiceProvider serviceProvider)
 
 internal static class StringExtension
 {
-    private static bool Any(this string value, UnicodeCategory category)
-    {
-        return !string.IsNullOrWhiteSpace(value)
-        && value.Any(@char => char.GetUnicodeCategory(@char) == category);
-    }
-
     public static bool HasOtherLetter(this string value)
-    {
-        return value.Any(UnicodeCategory.OtherLetter);
+    {      
+        var specialChar = @"-=+;/\|№&#^<>()[]{}$%";
+        return specialChar.Any(value.Contains);
     }
 
     public static string WrapAsterisk(this string value)

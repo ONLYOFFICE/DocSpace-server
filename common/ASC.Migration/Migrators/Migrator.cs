@@ -29,7 +29,7 @@ using Constants = ASC.Core.Users.Constants;
 namespace ASC.Migration.Core.Migrators;
 
 [Transient]
-public abstract class Migrator : IDisposable
+public abstract class Migrator : IAsyncDisposable
 {
     protected SecurityContext SecurityContext { get; }
     protected UserManager UserManager { get; }
@@ -89,7 +89,7 @@ public abstract class Migrator : IDisposable
         UserManagerWrapper = userManagerWrapper;
     }
     
-    public abstract Task InitAsync(string path, CancellationToken cancellationToken, OperationType operation);
+    public abstract void Init(string path, CancellationToken cancellationToken, OperationType operation);
     public abstract Task<MigrationApiInfo> ParseAsync(bool reportProgress = true);
 
     protected async Task ReportProgressAsync(double value, string status)
@@ -591,11 +591,11 @@ public abstract class Migrator : IDisposable
         }
     }
 
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
         if (MigrationLogger != null)
         {
-            MigrationLogger.Dispose();
+            await MigrationLogger.DisposeAsync();
         }
     }
 }

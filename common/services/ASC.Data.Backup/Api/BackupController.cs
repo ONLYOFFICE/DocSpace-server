@@ -82,15 +82,19 @@ public class BackupController(
 
         var storageType = inDto.StorageType == null ? BackupStorageType.Documents : (BackupStorageType)Int32.Parse(inDto.StorageType);
         var storageParams = inDto.StorageParams == null ? new Dictionary<string, string>() : inDto.StorageParams.ToDictionary(r => r.Key.ToString(), r => r.Value.ToString());
-        var backupStored = inDto.BackupsStored == null ? 0 : Int32.Parse(inDto.BackupsStored);
+        var backupStored = inDto.BackupsStored == null ? 1 : Int32.Parse(inDto.BackupsStored);
         var cron = new CronParams
         {
             Period = inDto.CronParams.Period == null ? BackupPeriod.EveryDay : (BackupPeriod)Int32.Parse(inDto.CronParams.Period),
             Hour = inDto.CronParams.Hour == null ? 0 : Int32.Parse(inDto.CronParams.Hour),
             Day = inDto.CronParams.Day == null ? 0 : Int32.Parse(inDto.CronParams.Day)
         };
+        if(backupStored > 30 || backupStored < 1)
+        {
+            throw new ArgumentException("backupStored must be 1 - 30");
+        }
 
-        if (storageType == BackupStorageType.Documents)
+        if (storageType is BackupStorageType.Documents or BackupStorageType.ThridpartyDocuments)
         {
 
             if (int.TryParse(storageParams["folderId"], out var fId))
@@ -162,7 +166,7 @@ public class BackupController(
             throw new ArgumentException("backup can`t start as dump");
         }
 
-        if (storageType == BackupStorageType.Documents)
+        if (storageType is BackupStorageType.Documents or BackupStorageType.ThridpartyDocuments)
         {
 
             if (int.TryParse(storageParams["folderId"], out var fId))
@@ -297,6 +301,19 @@ public class BackupController(
             : default;
         
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+
+        var storageType = inDto.StorageType == null ? BackupStorageType.Documents : (BackupStorageType)Int32.Parse(inDto.StorageType.ToString());
+        if (storageType is BackupStorageType.Documents or BackupStorageType.ThridpartyDocuments)
+        {
+            if (int.TryParse(storageParams["filePath"], out var fId))
+            {
+                await backupAjaxHandler.CheckAccessToFileAsync(fId);
+            }
+            else
+            {
+                await backupAjaxHandler.CheckAccessToFileAsync(storageParams["filePath"]);
+            }
+        }
         
         eventBus.Publish(new BackupRestoreRequestIntegrationEvent(
                              tenantId: tenantId,
