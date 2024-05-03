@@ -69,7 +69,7 @@ public class BreadCrumbsManager(
     {
         if (folderId == null)
         {
-            return new List<FileEntry>();
+            return [];
         }
 
         var breadCrumbs = await fileSecurity.FilterReadAsync(folderDao.GetParentFoldersAsync(folderId)).Cast<FileEntry>().ToListAsync();
@@ -80,7 +80,7 @@ public class BreadCrumbsManager(
         {
             rootId = await globalFolderHelper.FolderShareAsync;
         }
-        else if (firstVisible.ProviderEntry && firstVisible.ProviderMapped && (firstVisible.RootFolderType is FolderType.VirtualRooms or FolderType.Archive))
+        else if (firstVisible.ProviderMapped && (firstVisible.RootFolderType is FolderType.VirtualRooms or FolderType.Archive))
         {
             if (authContext.IsAuthenticated && firstVisible.ShareRecord is not { IsLink: true })
             {
@@ -90,6 +90,14 @@ public class BreadCrumbsManager(
             }
                 
             breadCrumbs = breadCrumbs.SkipWhile(f => f is Folder<T> folder && !DocSpaceHelper.IsRoom(folder.FolderType)).ToList();
+        }
+        else if (!firstVisible.ProviderEntry && firstVisible.RootFolderType is FolderType.VirtualRooms or FolderType.Archive && authContext.IsAuthenticated)
+        {
+            var room = breadCrumbs.FirstOrDefault(e => e is Folder<T> folder && DocSpaceHelper.IsRoom(folder.FolderType));
+            if (room is { ShareRecord.IsLink: true })
+            {
+                breadCrumbs = breadCrumbs.SkipWhile(f => f is Folder<T> folder && !DocSpaceHelper.IsRoom(folder.FolderType)).ToList();
+            }
         }
         else
         {
