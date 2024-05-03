@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -42,34 +42,12 @@ public class FilesControllerInternal(FilesControllerHelper filesControllerHelper
 public class FilesControllerThirdparty(FilesControllerHelper filesControllerHelper,
         FileStorageService fileStorageService,
         FileOperationsManager fileOperationsManager,
-        ThirdPartySelector thirdPartySelector,
-        DocumentServiceHelper documentServiceHelper,
         FileOperationDtoHelper fileOperationDtoHelper,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
     ApiContext apiContext,
         FileShareDtoHelper fileShareDtoHelper)
-        : FilesController<string>(filesControllerHelper, fileStorageService, fileOperationsManager, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper, apiContext, fileShareDtoHelper)
-{
-    /// <summary>
-    /// Returns the detailed information about a third-party file with the ID specified in the request.
-    /// </summary>
-    /// <short>Get third-party file information</short>
-    /// <param type="System.String, System" method="url" name="fileId">File ID</param>
-    /// <category>Files</category>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileEntryDto, ASC.Files.Core">File entry information</returns>
-    /// <path>api/2.0/files/file/app-{fileId}</path>
-    /// <httpMethod>GET</httpMethod>
-    [HttpGet("file/app-{fileId}", Order = 1)]
-    public async Task<FileEntryDto> GetFileInfoThirdPartyAsync(string fileId)
-    {
-        fileId = "app-" + fileId;
-        var app = thirdPartySelector.GetAppByFileId(fileId);
-        var (file, editable) = await app.GetFileAsync(fileId);
-        var docParams = await documentServiceHelper.GetParamsAsync(file, true, editable ? FileShare.ReadWrite : FileShare.Read, false, editable, editable, editable, false);
-        return await GetFileEntryWrapperAsync(docParams.File);
-    }
-}
+        : FilesController<string>(filesControllerHelper, fileStorageService, fileOperationsManager, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper, apiContext, fileShareDtoHelper);
 
 public abstract class FilesController<T>(FilesControllerHelper filesControllerHelper,
         FileStorageService fileStorageService,
@@ -228,7 +206,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     {
         await fileOperationsManager.PublishDelete(new List<T>(), new List<T> { fileId }, false, !inDto.DeleteAfter, inDto.Immediately);
         
-        foreach (var e in fileOperationsManager.GetOperationResults())
+        foreach (var e in await fileOperationsManager.GetOperationResults())
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
@@ -241,16 +219,15 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <category>Files</category>
     /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
     /// <param type="System.Int32, System" name="version">File version</param>
-    /// <param type="System.String, System" name="doc">Shared token</param>
     /// <returns type="ASC.Files.Core.EditHistoryDataDto, ASC.Files.Core">File version history data</returns>
     /// <path>api/2.0/files/file/{fileId}/edit/diff</path>
     /// <httpMethod>GET</httpMethod>
     /// <requiresAuthorization>false</requiresAuthorization>
     [AllowAnonymous]
     [HttpGet("file/{fileId}/edit/diff")]
-    public async Task<EditHistoryDataDto> GetEditDiffUrlAsync(T fileId, int version = 0, string doc = null)
+    public async Task<EditHistoryDataDto> GetEditDiffUrlAsync(T fileId, int version = 0)
     {
-        return await filesControllerHelper.GetEditDiffUrlAsync(fileId, version, doc);
+        return await filesControllerHelper.GetEditDiffUrlAsync(fileId, version);
     }
 
     /// <summary>
@@ -259,7 +236,6 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <short>Get version history</short>
     /// <category>Files</category>
     /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
-    /// <param type="System.String, System" name="doc">Shared token</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.EditHistoryDto, ASC.Files.Core">Version history data</returns>
     /// <path>api/2.0/files/file/{fileId}/edit/history</path>
     /// <httpMethod>GET</httpMethod>
@@ -267,9 +243,9 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <collection>list</collection>
     [AllowAnonymous]
     [HttpGet("file/{fileId}/edit/history")]
-    public IAsyncEnumerable<EditHistoryDto> GetEditHistoryAsync(T fileId, string doc = null)
+    public IAsyncEnumerable<EditHistoryDto> GetEditHistoryAsync(T fileId)
     {
-        return filesControllerHelper.GetEditHistoryAsync(fileId, doc);
+        return filesControllerHelper.GetEditHistoryAsync(fileId);
     }
 
     /// <summary>
@@ -282,6 +258,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileDto, ASC.Files.Core">File information</returns>
     /// <path>api/2.0/files/file/{fileId}</path>
     /// <httpMethod>GET</httpMethod>
+    /// <requiresAuthorization>false</requiresAuthorization>
     [AllowAnonymous]
     [HttpGet("file/{fileId}")]
     public async Task<FileDto<T>> GetFileInfoAsync(T fileId, int version = -1)
@@ -300,6 +277,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <path>api/2.0/files/file/{fileId}/history</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    /// <requiresAuthorization>false</requiresAuthorization>
     [AllowAnonymous]
     [HttpGet("file/{fileId}/history")]
     public IAsyncEnumerable<FileDto<T>> GetFileVersionInfoAsync(T fileId)
@@ -331,7 +309,6 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
     /// <param type="System.Int32, System" name="version">File version</param>
     /// <param type="System.String, System" name="url">File version URL</param>
-    /// <param type="System.String, System" name="doc">Shared token</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.EditHistoryDto, ASC.Files.Core">Version history data: file ID, key, file version, version group, a user who updated a file, creation time, history changes in the string format, list of history changes, server version</returns>
     /// <path>api/2.0/files/file/{fileId}/restoreversion</path>
     /// <httpMethod>GET</httpMethod>
@@ -339,9 +316,9 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <collection>list</collection>
     [AllowAnonymous]
     [HttpGet("file/{fileId}/restoreversion")]
-    public IAsyncEnumerable<EditHistoryDto> RestoreVersionAsync(T fileId, int version = 0, string url = null, string doc = null)
+    public IAsyncEnumerable<EditHistoryDto> RestoreVersionAsync(T fileId, int version = 0, string url = null)
     {
-        return filesControllerHelper.RestoreVersionAsync(fileId, version, url, doc);
+        return filesControllerHelper.RestoreVersionAsync(fileId, version, url);
     }
 
     /// <summary>
@@ -390,6 +367,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileDto, ASC.Files.Core">Updated file information</returns>
     /// <path>api/2.0/files/file/{fileId}</path>
     /// <httpMethod>PUT</httpMethod>
+    /// <requiresAuthorization>false</requiresAuthorization>
     [AllowAnonymous]
     [HttpPut("file/{fileId}")]
     public async Task<FileDto<T>> UpdateFileAsync(T fileId, UpdateFileRequestDto inDto)
@@ -415,12 +393,12 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     }
 
     /// <summary>
-    /// Returns the primary external link with the identifier specified in the request.
+    /// Returns the primary external link by the identifier specified in the request.
     /// </summary>
-    /// <short>Returns primary external link</short>
+    /// <short>Get primary external link</short>
     /// <category>Files</category>
     /// <param type="System.Int32, System" method="url" name="id">File ID</param>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">Security information of file</returns>
+    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">File security information</returns>
     /// <path>api/2.0/files/file/{id}/link</path>
     /// <httpMethod>GET</httpMethod>
     [HttpGet("file/{id}/link")]
@@ -436,15 +414,15 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     {
         await fileStorageService.SetFileOrder(fileId, inDto.Order);
     }
-    
+
     /// <summary>
     /// Returns the external links of a file with the ID specified in the request.
     /// </summary>
-    /// <short>Returns file external links</short>
+    /// <short>Get file external links</short>
     /// <category>Files</category>
     /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">File security info</returns>
-    /// <path>api/2.0/files/file/{id}/links</path>
+    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">File security information</returns>
+    /// <path>api/2.0/files/file/{fileId}/links</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [HttpGet("file/{fileId}/links")]
@@ -464,13 +442,13 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     }
 
     /// <summary>
-    /// Sets an external link with the ID specified in the request.
+    /// Sets an external link to a file with the ID specified in the request.
     /// </summary>
     /// <short>Set an external link</short>
     /// <category>Files</category>
     /// <param type="System.Int32, System" method="url" name="id">File ID</param>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.FileLinkRequestDto, ASC.Files.Core" name="inDto">External link request parameters</param>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">Security information of file</returns>
+    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">File security information</returns>
     /// <path>api/2.0/files/file/{id}/links</path>
     /// <httpMethod>PUT</httpMethod>
     [HttpPut("file/{id}/links")]
@@ -479,7 +457,23 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
         var linkAce = await fileStorageService.SetExternalLinkAsync(id, FileEntryType.File, inDto.LinkId, null, inDto.Access, requiredAuth: inDto.Internal, 
             primary: inDto.Primary, expirationDate: inDto.ExpirationDate);
 
-        return await fileShareDtoHelper.Get(linkAce);
+        return linkAce is not null ? await fileShareDtoHelper.Get(linkAce) : null;
+    }
+
+    /// <summary>
+    /// Saves a file with the identifier specified in the request as a PDF document
+    /// </summary>
+    /// <short>Save as pdf</short>
+    /// <category>Files</category>
+    /// <param type="System.Int32, System" method="url" name="id">File ID</param>
+    /// <param type="ASC.Files.Core.ApiModels.RequestDto.SaveAsPdfRequestDto, ASC.Files.Core" name="inDto">Request parameters</param>
+    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileDto, ASC.Files.Core">New file information</returns>
+    /// <path>api/2.0/files/file/{id}/saveaspdf</path>
+    /// <httpMethod>POST</httpMethod>
+    [HttpPost("file/{id}/saveaspdf")]
+    public async Task<FileDto<T>> SaveAsPdf(T id, SaveAsPdfRequestDto<T> inDto)
+    {
+        return await filesControllerHelper.SaveAsPdf(id, inDto.FolderId, inDto.Title);
     }
 }
 
@@ -579,6 +573,7 @@ public class FilesControllerCommon(
     /// <path>api/2.0/files/thumbnails</path>
     /// <httpMethod>POST</httpMethod>
     /// <collection>list</collection>
+    /// <requiresAuthorization>false</requiresAuthorization>
     [AllowAnonymous]
     [HttpPost("thumbnails")]
     public async Task<IEnumerable<JsonElement>> CreateThumbnailsAsync(BaseBatchRequestDto inDto)

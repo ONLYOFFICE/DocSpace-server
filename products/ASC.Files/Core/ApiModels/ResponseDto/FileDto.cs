@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -106,6 +106,10 @@ public class FileDto<T> : FileEntryDto<T>
     /// <type>System.Boolean, System</type>
     public bool? HasDraft { get; set; }
 
+    /// <summary>Specifies if the filling has started or not</summary>
+    /// <type>System.Boolean, System</type>
+    public bool? StartFilling { get; set; }
+
     /// <summary>Denies file sharing or not</summary>
     /// <type>System.Boolean, System</type>
     public bool DenySharing { get; set; }
@@ -156,38 +160,22 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         BadgesSettingsHelper badgesSettingsHelper,
         FilesSettingsHelper filesSettingsHelper,
         FileDateTime fileDateTime,
-        ExternalShare externalShare)
+        ExternalShare externalShare,
+        FileSharing fileSharing)
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime) 
 {
     private readonly ApiDateTimeHelper _apiDateTimeHelper = apiDateTimeHelper;
 
-    public async Task<FileDto<T>> GetAsync<T>(File<T> file, List<Tuple<FileEntry<T>, bool>> folders = null, int foldersCount = 0, string order = null)
+    public async Task<FileDto<T>> GetAsync<T>(File<T> file, int foldersCount = 0, string order = null)
     {
         var result = await GetFileWrapperAsync(file, foldersCount, order);
 
         result.FolderId = file.ParentId;
-        if (file.RootFolderType == FolderType.USER
-            && !Equals(file.RootCreateBy, authContext.CurrentAccount.ID))
+        
+        if (file.RootFolderType == FolderType.USER && authContext.IsAuthenticated && !Equals(file.RootCreateBy, authContext.CurrentAccount.ID))
         {
-            result.RootFolderType = FolderType.SHARE;
-            var folderDao = daoFactory.GetFolderDao<T>();
-
-            if (folders != null)
-            {
-                var folderWithRight = folders.Find(f => f.Item1.Id.Equals(file.ParentId));
-                if (folderWithRight == null || !folderWithRight.Item2)
-                {
-                    result.FolderId = await _globalFolderHelper.GetFolderShareAsync<T>();
-                }
-            }
-            else
-            {
-                FileEntry<T> parentFolder = await folderDao.GetFolderAsync(file.ParentId);
-                if (!await _fileSecurity.CanReadAsync(parentFolder))
-                {
-                    result.FolderId = await _globalFolderHelper.GetFolderShareAsync<T>();
-                }
-            }
+            result.RootFolderType = FolderType.Recent;
+            result.FolderId = await _globalFolderHelper.GetFolderRecentAsync<T>();
         }
         
         result.ViewAccessibility = await fileUtility.GetAccessibility(file);
@@ -201,22 +189,40 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         var result = await GetAsync<FileDto<T>, T>(file);
         var isEnabledBadges = await badgesSettingsHelper.GetEnabledForCurrentUserAsync();
 
-        var fileExst = FileUtility.GetFileExtension(file.Title);
-        var fileType = FileUtility.GetFileTypeByExtention(fileExst);
+        var extension = FileUtility.GetFileExtension(file.Title);
+        var fileType = FileUtility.GetFileTypeByExtention(extension);
 
         if (fileType == FileType.Pdf)
         {
             var linkDao = daoFactory.GetLinkDao();
-            var linkedId = await linkDao.GetLinkedAsync(file.Id.ToString());
+            var folderDao = daoFactory.GetFolderDao<T>();
+
+            var linkedIdTask = linkDao.GetLinkedAsync(file.Id.ToString());
+            var propertiesTask = daoFactory.GetFileDao<T>().GetProperties(file.Id);
+            var roomTask = folderDao.GetFolderAsync((T)Convert.ChangeType(file.ParentId, typeof(T)));
+            await Task.WhenAll(linkedIdTask, propertiesTask, roomTask);
+
+            var linkedId = await linkedIdTask;
+            var properties = await propertiesTask;
+            var room = await roomTask;
+
+            var ace = await fileSharing.GetPureSharesAsync(room, new List<Guid> { authContext.CurrentAccount.ID }).FirstOrDefaultAsync();
+
+            if (ace is { Access: FileShare.FillForms })
+            {
+                result.Security[FileSecurity.FilesSecurityActions.EditForm] = false;
+            }
+
             result.HasDraft = linkedId != null;
+            result.StartFilling = properties?.FormFilling?.StartFilling ?? false;
         }
-        
-        result.FileExst = fileExst;
+
+        result.FileExst = extension;
         result.FileType = fileType;
         result.Version = file.Version;
         result.VersionGroup = file.VersionGroup;
         result.ContentLength = file.ContentLengthString;
-        result.FileStatus = file.FileStatus;
+        result.FileStatus = await file.GetFileStatus();
         result.Mute = !isEnabledBadges;
         result.PureContentLength = file.ContentLength.NullIfDefault();
         result.Comment = file.Comment;

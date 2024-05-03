@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -50,7 +50,7 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
             .ProjectTo<Group>(mapper.ConfigurationProvider)
             .ToListAsync();
     }
-
+    
     public async IAsyncEnumerable<Group> GetGroupsAsync(int tenant, string text, Guid userId, bool manager, GroupSortType sortBy, bool sortOrderAsc, int offset = 0, int count = -1)
     {
         if (count == 0)
@@ -60,53 +60,32 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
         
         await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
 
-        var q = userDbContext.Groups.Where(g => g.TenantId == tenant && !g.Removed);
-
+        var q = BuildBaseGroupQuery(tenant, userDbContext);
         q = BuildTextSearch(text, q);
 
         if (userId != Guid.Empty)
         {
-            var q1 = BuildUserGroupSearch(userId, manager, q, userDbContext);
+            q = BuildUserGroupSearch(userId, manager, q, userDbContext);
+        }
 
-            if (sortBy == GroupSortType.Manager)
+        if (sortBy == GroupSortType.Manager)
+        {
+            var q1 = q.Select(g => new
             {
-                var q2 = q1.Join(userDbContext.UserGroups, group => group.Id, userGroup => userGroup.UserGroupId,
-                    (group, userGroup) => new { group, userGroup })
-                    .Where(r => !r.userGroup.Removed && r.userGroup.RefType == UserGroupRefType.Manager)
-                    .Join(userDbContext.Users, record => record.userGroup.Userid, 
-                        user => user.Id, (record, user) => new { record.group, user });
-                
-                q = (sortOrderAsc ? q2.OrderBy(r => r.user.FirstName) : q2.OrderByDescending(r => r.user.FirstName))
-                    .Select(r => r.group);
-            }
-            else
-            { 
-                q = sortOrderAsc ? q1.OrderBy(g => g.Name) : q1.OrderByDescending(g => g.Name);
-            }
+                Group = g,
+                Manager = userDbContext.UserGroups
+                    .Where(ug => ug.TenantId == tenant && !ug.Removed && ug.UserGroupId == g.Id && ug.RefType == UserGroupRefType.Manager)
+                    .Join(userDbContext.Users, ug => ug.Userid, u => u.Id, (ug, u) => u)
+                    .FirstOrDefault()
+            });
+            
+            q = (sortOrderAsc ? 
+                q1.OrderBy(r => r.Manager.FirstName) : 
+                q1.OrderByDescending(r => r.Manager.FirstName)).Select(r => r.Group);
         }
         else
         {
-            if (sortBy == GroupSortType.Manager)
-            {
-                var q1 = from dbGroup in q
-                    join userGroup in userDbContext.UserGroups on dbGroup.Id equals userGroup.UserGroupId
-                        into userGroups
-                    from userGroup in userGroups.DefaultIfEmpty()
-                    where userGroup == null || (userGroup.RefType == UserGroupRefType.Manager && !userGroup.Removed)
-                    join user in userDbContext.Users on userGroup.Userid equals user.Id
-                        into users
-                    from user in users.DefaultIfEmpty()
-                    select new { dbGroup, user };
-            
-                q = (sortOrderAsc 
-                        ? q1.OrderBy(r => r.user == null).ThenBy(r => r.user.FirstName) 
-                        : q1.OrderBy(r => r.user == null).ThenByDescending(r => r.user.FirstName))
-                    .Select(r => r.dbGroup);
-            }
-            else
-            {
-                q = sortOrderAsc ? q.OrderBy(g => g.Name) : q.OrderByDescending(g => g.Name);
-            }
+            q = sortOrderAsc ? q.OrderBy(g => g.Name) : q.OrderByDescending(g => g.Name);
         }
 
         if (offset > 0)
@@ -129,7 +108,7 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
     {
         await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
 
-        var q = userDbContext.Groups.Where(g => g.TenantId == tenant && !g.Removed);
+        var q = BuildBaseGroupQuery(tenant, userDbContext);
 
         q = BuildTextSearch(text, q);
 
@@ -308,7 +287,7 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
 
         var photo = await Queries.PhotoAsync(userDbContext, tenant, id);
 
-        return photo ?? Array.Empty<byte>();
+        return photo ?? [];
     }
 
     public async Task<IEnumerable<UserInfo>> GetUsersAsync(int tenant)
@@ -393,7 +372,7 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
             case UserSortType.UsedSpace:
                 {
                     var q2 = from user in q
-                             join quota in userDbContext.QuotaRow.Where(qr => qr.UserId != Guid.Empty && qr.Tag != Guid.Empty.ToString())
+                             join quota in userDbContext.QuotaRow.Where(qr => qr.UserId != Guid.Empty && qr.Tag != Guid.Empty.ToString() && qr.Tag != "")
                                 on user.Id equals quota.UserId into quotaRow
                              from @quota in quotaRow.DefaultIfEmpty()
 
@@ -711,17 +690,10 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
     private IQueryable<User> GetUserQuery(UserDbContext userDbContext, int tenant)
     {
         var q = userDbContext.Users.AsQueryable();
-        var where = false;
 
         if (tenant != Tenant.DefaultTenant)
         {
             q = q.Where(r => r.TenantId == tenant);
-            where = true;
-        }
-
-        if (!where)
-        {
-            q = q.Where(r => 1 == 0);
         }
 
         return q;
@@ -925,7 +897,7 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
         if (string.IsNullOrEmpty(text))
         {
             return q;
-}
+        }
 
         text = text.ToLower().Trim();
             
@@ -942,6 +914,11 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
                 (group, userGroup) => new { group, userGroup })
             .Where(r => !r.userGroup.Removed && r.userGroup.Userid == userId && r.userGroup.RefType == refType).Select(r => r.group);
         return q1;
+    }
+    
+    private static IQueryable<DbGroup> BuildBaseGroupQuery(int tenant, UserDbContext userDbContext)
+    {
+        return userDbContext.Groups.Where(g => g.TenantId == tenant && !g.Removed);
     }
 }
 

@@ -1,31 +1,28 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
-//
+﻿// (c) Copyright Ascensio System SIA 2009-2024
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
-
-using Apache.NMS;
-using ASC.EventBus.Serializers;
 
 namespace ASC.Api.Core.Extensions;
 
@@ -33,17 +30,17 @@ public static class ServiceCollectionExtension
 {
     public static IServiceCollection AddCacheNotify(this IServiceCollection services, IConfiguration configuration)
     {
-        var redisConfiguration = configuration.GetSection("Redis");
+        var redisConfiguration = configuration.GetSection("Redis").Get<RedisConfiguration>();
         var kafkaConfiguration = configuration.GetSection("kafka").Get<KafkaSettings>();
-        var rabbitMQConfiguration = configuration.GetSection("RabbitMQ").Get<RabbitMQSettings>();
+        var rabbitMqConfiguration = configuration.GetSection("RabbitMQ").Get<RabbitMQSettings>();
 
         if (redisConfiguration != null)
         {
-            services.AddStackExchangeRedisExtensions<NewtonsoftSerializer>(serviceProvider => new List<RedisConfiguration> { serviceProvider.GetRequiredService<RedisConfiguration>() });
+            services.AddStackExchangeRedisExtensions<RedisProtobufSerializer>(serviceProvider => new List<RedisConfiguration> { serviceProvider.GetRequiredService<RedisConfiguration>() });
 
             services.AddSingleton(typeof(ICacheNotify<>), typeof(RedisCacheNotify<>));
         }
-        else if (rabbitMQConfiguration != null)
+        else if (rabbitMqConfiguration != null)
         {
             services.AddSingleton(typeof(ICacheNotify<>), typeof(RabbitMQCache<>));
         }
@@ -78,40 +75,7 @@ public static class ServiceCollectionExtension
 
     public static IServiceCollection AddDistributedLock(this IServiceCollection services, IConfiguration configuration)
     {
-        var zooKeeperConfiguration = configuration.GetSection("Zookeeper").Get<ZooKeeperConfiguration>();
-
-        if (zooKeeperConfiguration != null)
-        {
-            services.AddSingleton<Medallion.Threading.IDistributedLockProvider>(_ =>
-            {
-                return new ZooKeeperDistributedSynchronizationProvider(new ZooKeeperPath(zooKeeperConfiguration.DirectoryPath), zooKeeperConfiguration.Connection,
-                    options =>
-                {
-                    if (zooKeeperConfiguration.ConnectionTimeout.HasValue)
-                    {
-                        options.ConnectTimeout(zooKeeperConfiguration.ConnectionTimeout.Value);
-                    }
-
-                    if (zooKeeperConfiguration.SessionTimeout.HasValue)
-                    {
-                        options.SessionTimeout(zooKeeperConfiguration.SessionTimeout.Value);
-                    }
-                });
-            });
-
-            return services.AddSingleton<IDistributedLockProvider, ZooKeeperDistributedLockProvider>(sp =>
-            {
-                var internalProvider = sp.GetRequiredService<Medallion.Threading.IDistributedLockProvider>();
-                var logger = sp.GetRequiredService<ILogger<ZooKeeperDistributedLockProvider>>();
-                var cfg = sp.GetRequiredService<IConfiguration>();
-                
-                return TimeSpan.TryParse(cfg["core:lock:minTimeout"], out var minTimeout) 
-                    ? new ZooKeeperDistributedLockProvider(internalProvider, logger, minTimeout) 
-                    : new ZooKeeperDistributedLockProvider(internalProvider, logger);
-            });
-        }
-        
-        var redisConfiguration = configuration.GetSection("Redis");
+        var redisConfiguration = configuration.GetSection("Redis").Get<RedisConfiguration>();
 
         if (redisConfiguration != null)
         {            
@@ -172,6 +136,39 @@ public static class ServiceCollectionExtension
             });
         }
 
+        var zooKeeperConfiguration = configuration.GetSection("Zookeeper").Get<ZooKeeperConfiguration>();
+
+        if (zooKeeperConfiguration != null)
+        {
+            services.AddSingleton<Medallion.Threading.IDistributedLockProvider>(_ =>
+            {
+                return new ZooKeeperDistributedSynchronizationProvider(new ZooKeeperPath(zooKeeperConfiguration.DirectoryPath), zooKeeperConfiguration.Connection,
+                    options =>
+                    {
+                        if (zooKeeperConfiguration.ConnectionTimeout.HasValue)
+                        {
+                            options.ConnectTimeout(zooKeeperConfiguration.ConnectionTimeout.Value);
+                        }
+
+                        if (zooKeeperConfiguration.SessionTimeout.HasValue)
+                        {
+                            options.SessionTimeout(zooKeeperConfiguration.SessionTimeout.Value);
+                        }
+                    });
+            });
+
+            return services.AddSingleton<IDistributedLockProvider, ZooKeeperDistributedLockProvider>(sp =>
+            {
+                var internalProvider = sp.GetRequiredService<Medallion.Threading.IDistributedLockProvider>();
+                var logger = sp.GetRequiredService<ILogger<ZooKeeperDistributedLockProvider>>();
+                var cfg = sp.GetRequiredService<IConfiguration>();
+                
+                return TimeSpan.TryParse(cfg["core:lock:minTimeout"], out var minTimeout) 
+                    ? new ZooKeeperDistributedLockProvider(internalProvider, logger, minTimeout) 
+                    : new ZooKeeperDistributedLockProvider(internalProvider, logger);
+            });
+        }
+
         throw new NotImplementedException("DistributedLock: Provider not found.");
     }
 
@@ -179,10 +176,10 @@ public static class ServiceCollectionExtension
     {
         services.AddSingleton<IEventBusSubscriptionsManager, InMemoryEventBusSubscriptionsManager>();
 
-        var rabbitMQConfiguration = configuration.GetSection("RabbitMQ").Get<RabbitMQSettings>();
-        var activeMQConfiguration = configuration.GetSection("ActiveMQ").Get<ActiveMQSettings>();
+        var rabbitMqConfiguration = configuration.GetSection("RabbitMQ").Get<RabbitMQSettings>();
+        var activeMqConfiguration = configuration.GetSection("ActiveMQ").Get<ActiveMQSettings>();
 
-        if (rabbitMQConfiguration != null)
+        if (rabbitMqConfiguration != null)
         {
             services.AddSingleton<IRabbitMQPersistentConnection>(sp =>
             {
@@ -190,7 +187,7 @@ public static class ServiceCollectionExtension
 
                 var logger = sp.GetRequiredService<ILogger<DefaultRabbitMQPersistentConnection>>();
 
-                var connectionFactory = rabbitMQConfiguration.GetConnectionFactory();
+                var connectionFactory = rabbitMqConfiguration.GetConnectionFactory();
 
                 var retryCount = 5;
 
@@ -206,10 +203,10 @@ public static class ServiceCollectionExtension
             {
                 var cfg = sp.GetRequiredService<IConfiguration>();
 
-                var rabbitMQPersistentConnection = sp.GetRequiredService<IRabbitMQPersistentConnection>();
+                var rabbitMqPersistentConnection = sp.GetRequiredService<IRabbitMQPersistentConnection>();
                 var iLifetimeScope = sp.GetRequiredService<ILifetimeScope>();
                 var logger = sp.GetRequiredService<ILogger<EventBusRabbitMQ>>();
-                var eventBusSubcriptionsManager = sp.GetRequiredService<IEventBusSubscriptionsManager>();
+                var eventBusSubscriptionsManager = sp.GetRequiredService<IEventBusSubscriptionsManager>();
 
                 var serializer = new ProtobufSerializer();
 
@@ -227,10 +224,10 @@ public static class ServiceCollectionExtension
                     retryCount = int.Parse(cfg["core:eventBus:connectRetryCount"]);
                 }
 
-                return new EventBusRabbitMQ(rabbitMQPersistentConnection, logger, iLifetimeScope, eventBusSubcriptionsManager, serializer, subscriptionClientName, retryCount);
+                return new EventBusRabbitMQ(rabbitMqPersistentConnection, logger, iLifetimeScope, eventBusSubscriptionsManager, serializer, subscriptionClientName, retryCount);
             });
         }
-        else if (activeMQConfiguration != null)
+        else if (activeMqConfiguration != null)
         {
             services.AddSingleton<IActiveMQPersistentConnection>(sp =>
             {
@@ -238,7 +235,7 @@ public static class ServiceCollectionExtension
 
                 var logger = sp.GetRequiredService<ILogger<DefaultActiveMQPersistentConnection>>();
 
-                var factory = new NMSConnectionFactory(activeMQConfiguration.Uri);
+                var factory = new NMSConnectionFactory(activeMqConfiguration.Uri);
 
                 var retryCount = 5;
 
@@ -254,10 +251,10 @@ public static class ServiceCollectionExtension
             {
                 var cfg = sp.GetRequiredService<IConfiguration>();
 
-                var activeMQPersistentConnection = sp.GetRequiredService<IActiveMQPersistentConnection>();
+                var activeMqPersistentConnection = sp.GetRequiredService<IActiveMQPersistentConnection>();
                 var iLifetimeScope = sp.GetRequiredService<ILifetimeScope>();
                 var logger = sp.GetRequiredService<ILogger<EventBusActiveMQ>>();
-                var eventBusSubcriptionsManager = sp.GetRequiredService<IEventBusSubscriptionsManager>();
+                var eventBusSubscriptionsManager = sp.GetRequiredService<IEventBusSubscriptionsManager>();
 
                 var serializer = new ProtobufSerializer();
 
@@ -275,7 +272,7 @@ public static class ServiceCollectionExtension
                     retryCount = int.Parse(cfg["core:eventBus:connectRetryCount"]);
                 }
 
-                return new EventBusActiveMQ(activeMQPersistentConnection, logger, iLifetimeScope, eventBusSubcriptionsManager, serializer, subscriptionClientName, retryCount);
+                return new EventBusActiveMQ(activeMqPersistentConnection, logger, iLifetimeScope, eventBusSubscriptionsManager, serializer, subscriptionClientName, retryCount);
             });
         }
         else
@@ -286,21 +283,42 @@ public static class ServiceCollectionExtension
         return services;
     }
 
+
+    private static readonly List<string> _registeredActivePassiveHostedService = [];
+    private static readonly object _locker = new();
+
     /// <remarks>
     /// Add a IHostedService for given type. 
     /// Only one copy of this instance type will active in multi process architecture.
     /// </remarks>
-    public static void AddActivePassiveHostedService<T>(this IServiceCollection services, DIHelper diHelper, IConfiguration configuration) where T : class, IHostedService
+    public static void AddActivePassiveHostedService<T>(this IServiceCollection services, DIHelper diHelper, 
+                                                                                          IConfiguration configuration,
+                                                                                          string workerTypeName = null) where T : ActivePassiveBackgroundService<T>
     {
+        var typeName = workerTypeName ?? typeof(T).GetFormattedName();
+
+        lock (_locker)
+        {
+            if (_registeredActivePassiveHostedService.Contains(typeName))
+            {
+                throw new Exception($"Service with name '{typeName}' already registered. Please, rename service name");
+            }
+
+            _registeredActivePassiveHostedService.Add(typeName);
+        }
+
         diHelper.TryAdd<IRegisterInstanceDao<T>, RegisterInstanceDao<T>>();
         diHelper.TryAdd<IRegisterInstanceManager<T>, RegisterInstanceManager<T>>();
-
         services.AddHostedService<RegisterInstanceWorkerService<T>>();
-        services.Configure<HostingSettings>(configuration.GetSection("core:hosting"));
+        services.Configure<InstanceWorkerOptions<T>>(x =>
+        {
+            configuration.GetSection("core:hosting").Bind(x);
+            x.WorkerTypeName = workerTypeName ?? typeof(T).GetFormattedName();
+        });
+
 
         diHelper.TryAdd<T>();
         services.AddHostedService<T>();
-
     }
 
     public static IServiceCollection AddDistributedTaskQueue(this IServiceCollection services)
@@ -318,5 +336,28 @@ public static class ServiceCollectionExtension
         services.AddTransient<IStartupTask, T>();
 
         return services;
+    }
+
+    public static async Task<IConnectionMultiplexer> GetRedisConnectionMultiplexerAsync(this IServiceCollection services, IConfiguration configuration, string clientName)
+    {
+        var redisConfiguration = configuration.GetSection("Redis").Get<RedisConfiguration>();
+
+        if (redisConfiguration == null)
+        {
+            return null;
+        }
+
+        var configurationOption = redisConfiguration.ConfigurationOptions;
+
+        configurationOption.ClientName = clientName;
+
+        var redisConnection = await RedisPersistentConnection.InitializeAsync(configurationOption);
+
+        services
+            .AddSingleton(redisConfiguration)
+            .AddSingleton(redisConnection);
+
+        return redisConnection.GetConnection();
+
     }
 }

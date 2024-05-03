@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -55,11 +55,9 @@ public class ThirdpartyController(
     [HttpGet("thirdparty/capabilities")]
     public async Task<List<List<string>>> CapabilitiesAsync()
     {
-        var result = new List<List<string>>();
-
-        if (await userManager.IsUserAsync(securityContext.CurrentAccount.ID) || !await filesSettingsHelper.GetEnableThirdParty())
+        if (!await CheckAccessAsync())
         {
-            return result;
+            return [];
         }
 
         return thirdPartyConfiguration.GetProviders();
@@ -253,8 +251,7 @@ public class ThirdpartyController(
         var thirdPartyParams = new ThirdPartyParams
         {
             AuthData = new AuthData(inDto.Url, inDto.Login, inDto.Password, inDto.Token),
-            Corporate = !inDto.IsRoomsStorage && inDto.IsCorporate,
-            RoomsStorage = !inDto.IsCorporate && inDto.IsRoomsStorage,
+            RoomsStorage = true,
             CustomerTitle = inDto.CustomerTitle,
             ProviderId = inDto.ProviderId,
             ProviderKey = inDto.ProviderKey
@@ -342,5 +339,31 @@ public class ThirdpartyController(
                 success = false
             };
         }
+    }
+    
+    /// <summary>
+    /// Returns a list of the all providers.
+    /// </summary>
+    /// <short>Get all providers</short>
+    /// <category>Third-party integration</category>
+    /// <returns type="System.Collections.Generic.List{ASC.Files.Core.ApiModels.ResponseDto.ProviderDto}, System.Collections.Generic">List of provider</returns>
+    /// <remarks>Available provider keys: Dropbox, Box, WebDav, OneDrive, GoogleDrive, kDrive, ownCloud, Nextcloud</remarks>
+    /// <path>api/2.0/files/thirdparty/providers</path>
+    /// <httpMethod>GET</httpMethod>
+    /// <collection>list</collection>
+    [HttpGet("thirdparty/providers")]
+    public async Task<List<ProviderDto>> GetAllProvidersAsync()
+    {
+        if (!await CheckAccessAsync())
+        {
+            return [];
+        }
+        
+        return thirdPartyConfiguration.GetAllProviders();
+    }
+    
+    private async Task<bool> CheckAccessAsync()
+    {
+        return !await userManager.IsUserAsync(securityContext.CurrentAccount.ID) && await filesSettingsHelper.GetEnableThirdParty();
     }
 }

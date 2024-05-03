@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,46 +29,27 @@ using System.Text.Json.Serialization;
 namespace ASC.MessagingSystem.Core;
 
 [Scope]
-public class MessageService
+public class MessageService(
+    IConfiguration configuration,
+    IHttpContextAccessor httpContextAccessor,
+    MessageFactory messageFactory,
+    DbMessageSender sender,
+    MessagePolicy messagePolicy,
+    ILogger<MessageService> logger)
 {
-    private readonly ILogger<MessageService> _logger;
-    private readonly DbMessageSender _sender;
-    private readonly HttpRequest _request;
-    private readonly MessageFactory _messageFactory;
-    private readonly MessagePolicy _messagePolicy;
-
-    private static readonly JsonSerializerOptions _serializerOptions = 
-        new() { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull };
-
-    public MessageService(
-        IConfiguration configuration,
-        MessageFactory messageFactory,
-        DbMessageSender sender,
-        MessagePolicy messagePolicy,
-        ILogger<MessageService> logger)
+    private bool? _enabled;
+    private DbMessageSender Sender
     {
-        if (configuration["messaging:enabled"] != "true")
+        get
         {
-            return;
+            _enabled ??= configuration["messaging:enabled"] == "true";
+            return _enabled.Value ? sender : null;
         }
-
-        _sender = sender;
-        _messagePolicy = messagePolicy;
-        _messageFactory = messageFactory;
-        _logger = logger;
     }
+    
+    private HttpRequest Request => httpContextAccessor?.HttpContext?.Request;
 
-    public MessageService(
-        IConfiguration configuration,
-        IHttpContextAccessor httpContextAccessor,
-        MessageFactory messageFactory,
-        DbMessageSender sender,
-        MessagePolicy messagePolicy,
-        ILogger<MessageService> logger)
-        : this(configuration, messageFactory, sender, messagePolicy, logger)
-    {
-        _request = httpContextAccessor?.HttpContext?.Request;
-    }
+    private static readonly JsonSerializerOptions _serializerOptions = new() { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull };
 
     #region HttpRequest
 
@@ -154,25 +135,25 @@ public class MessageService
 
     private async Task SendRequestMessageAsync(MessageAction action, MessageTarget target = null, string loginName = null, DateTime? dateTime = null, params string[] description)
     {
-        if (_sender == null)
+        if (Sender == null)
         {
             return;
         }
 
-        if (_request == null)
+        if (Request == null)
         {
-            _logger.DebugEmptyHttpRequest(action);
+            logger.DebugEmptyHttpRequest(action);
 
             return;
         }
 
-        var message = await _messageFactory.CreateAsync(_request, loginName, dateTime, action, target, description);
-        if (!_messagePolicy.Check(message))
+        var message = await messageFactory.CreateAsync(Request, loginName, dateTime, action, target, description);
+        if (!messagePolicy.Check(message))
         {
             return;
         }
 
-        _ = _sender.SendAsync(message);
+        _ = Sender.SendAsync(message);
     }
 
     #region HttpHeaders
@@ -198,23 +179,23 @@ public class MessageService
 
     private async Task SendRequestHeadersMessageAsync(MessageAction action, MessageTarget target = null, IDictionary<string, StringValues> httpHeaders = null, params string[] description)
     {
-        if (_sender == null)
+        if (Sender == null)
         {
             return;
         }
 
-        if (httpHeaders == null && _request != null)
+        if (httpHeaders == null && Request != null)
         {
-            httpHeaders = _request.Headers.ToDictionary(k => k.Key, v => v.Value);
+            httpHeaders = Request.Headers.ToDictionary(k => k.Key, v => v.Value);
         }
 
-        var message = await _messageFactory.CreateAsync(httpHeaders, action, target, description);
-        if (!_messagePolicy.Check(message))
+        var message = await messageFactory.CreateAsync(httpHeaders, action, target, description);
+        if (!messagePolicy.Check(message))
         {
             return;
         }
 
-        _ = _sender.SendAsync(message);
+        _ = Sender.SendAsync(message);
     }
 
     #endregion
@@ -239,33 +220,33 @@ public class MessageService
 
     private async Task SendInitiatorMessageAsync(string initiator, MessageAction action, MessageTarget target, params string[] description)
     {
-        if (_sender == null)
+        if (Sender == null)
         {
             return;
         }
 
-        var message = await _messageFactory.CreateAsync(_request, initiator, null, action, target, description);
-        if (!_messagePolicy.Check(message))
+        var message = await messageFactory.CreateAsync(Request, initiator, null, action, target, description);
+        if (!messagePolicy.Check(message))
         {
             return;
         }
 
-        _ = _sender.SendAsync(message);
+        _ = Sender.SendAsync(message);
     }
     public async Task<int> SendLoginMessageAsync(MessageUserData userData, MessageAction action)
     {
-        if (_sender == null)
+        if (Sender == null)
         {
             return 0;
         }
 
-        var message = await _messageFactory.CreateAsync(_request, userData, action);
-        if (!_messagePolicy.Check(message))
+        var message = await messageFactory.CreateAsync(Request, userData, action);
+        if (!messagePolicy.Check(message))
         {
             return 0;
         }
 
-        return await _sender.SendAsync(message);
+        return await Sender.SendAsync(message);
     }
 
     private static bool TryAddNotificationParam(MessageAction action, Guid userId, out string parameter)

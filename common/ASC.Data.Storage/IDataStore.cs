@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -195,6 +195,8 @@ public interface IDataStore
 
     bool IsSupportedPreSignedUri { get; }
 
+    bool ContentAsAttachment { get; }
+
     ///<summary>
     /// Deletes file
     ///</summary>
@@ -363,4 +365,6 @@ public interface IDataStore
                          string contentDisposition);
 
     Task<string> GetFileEtagAsync(string domain, string path);
+
+    Task<string> GetUrlWithHashAsync(string domain, string path);
 }

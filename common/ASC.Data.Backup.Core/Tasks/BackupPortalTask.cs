@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -120,7 +120,7 @@ public class BackupPortalTask(DbFactory dbFactory,
 
         using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(true.ToString())))
         {
-            await writer.WriteEntryAsync(KeyHelper.GetDumpKey(), stream, (t) => { });
+            await writer.WriteEntryAsync(KeyHelper.GetDumpKey(), stream, () => Task.CompletedTask);
         }
 
         var files = new List<BackupFileInfo>();
@@ -204,14 +204,15 @@ public class BackupPortalTask(DbFactory dbFactory,
             for (var j = 0; j < TasksLimit && i + j < tables.Count; j++)
             {
                 var t = tables[i + j];
-                tasks.Add(Task.Run(() => DumpTableScheme(t, schemeDir, connectionString)));
-                if (!excluded.Exists(t.StartsWith))
+                var ignore = excluded.Exists(t.StartsWith);
+                tasks.Add(Task.Run(async () => await DumpTableScheme(t, schemeDir, connectionString, ignore)));
+                if (!ignore)
                 {
-                    tasks.Add(Task.Run(() => DumpTableData(t, dataDir, dict[t], connectionString)));
+                    tasks.Add(Task.Run(async () => await DumpTableData(t, dataDir, dict[t], connectionString)));
                 }
                 else
                 {
-                    SetStepCompleted(2);
+                    await SetStepCompleted(2);
                 }
             }
 
@@ -232,7 +233,7 @@ public class BackupPortalTask(DbFactory dbFactory,
 
     }
 
-    private void DumpTableScheme(string t, string dir, string connectionString)
+    private async Task DumpTableScheme(string t, string dir, string connectionString, bool ignore)
     {
         try
         {
@@ -243,21 +244,32 @@ public class BackupPortalTask(DbFactory dbFactory,
                 command.CommandText = $"SHOW CREATE TABLE `{t}`";
                 var createScheme = ExecuteList(command);
                 var creates = new StringBuilder();
-                creates.Append($"DROP TABLE IF EXISTS `{t}`;");
-                creates.AppendLine();
-                creates.Append(createScheme
-                        .Select(r => Convert.ToString(r[1]))
-                        .FirstOrDefault());
-                creates.Append(';');
+                if (ignore)
+                {
+                    creates.Append(createScheme
+                            .Select(r => Convert.ToString(r[1]).Replace("CREATE TABLE ", "CREATE TABLE IF NOT EXISTS "))
+                            .FirstOrDefault());
+                    creates.Append(';');
+                }
+                else
+                {
+
+                    creates.Append($"DROP TABLE IF EXISTS `{t}`;");
+                    creates.AppendLine();
+                    creates.Append(createScheme
+                            .Select(r => Convert.ToString(r[1]))
+                            .FirstOrDefault());
+                    creates.Append(';');
+                }
 
                 var path = CrossPlatform.PathCombine(dir, t);
-                using (var stream = File.OpenWrite(path))
+                await using (var stream = File.OpenWrite(path))
                 {
                     var bytes = Encoding.UTF8.GetBytes(creates.ToString());
                     stream.Write(bytes, 0, bytes.Length);
                 }
 
-                SetStepCompleted();
+                await SetStepCompleted();
             }
 
             logger.DebugDumpTableSchemeStop(t);
@@ -290,14 +302,14 @@ public class BackupPortalTask(DbFactory dbFactory,
 
     }
 
-    private void DumpTableData(string t, string dir, int count, string connectionString)
+    private async Task DumpTableData(string t, string dir, int count, string connectionString)
     {
         try
         {
             if (count == 0)
             {
                 logger.DebugDumpTableDataStop(t);
-                SetStepCompleted(2);
+                await SetStepCompleted(2);
 
                 return;
             }
@@ -380,7 +392,7 @@ public class BackupPortalTask(DbFactory dbFactory,
             } while (true);
 
 
-            SetStepCompleted();
+            await SetStepCompleted();
             logger.DebugDumpTableDataStop(t);
         }
         catch (Exception e)
@@ -511,7 +523,7 @@ public class BackupPortalTask(DbFactory dbFactory,
         await using (var tmpFile = new FileStream(tmpPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read, 4096, FileOptions.DeleteOnClose))
         {
             restoreInfoXml.WriteTo(tmpFile);
-            await writer.WriteEntryAsync(KeyHelper.GetStorageRestoreInfoZipKey(), tmpFile, t => SetStepCompleted());
+            await writer.WriteEntryAsync(KeyHelper.GetStorageRestoreInfoZipKey(), tmpFile, async () => await SetStepCompleted());
         }
         Directory.Delete(subDir, true);
 
@@ -542,7 +554,7 @@ public class BackupPortalTask(DbFactory dbFactory,
             await fileStream.CopyToAsync(tmpFile);
         }
 
-        SetStepCompleted();
+        await SetStepCompleted();
     }
 
     private async Task ArchiveDir(IDataWriteOperator writer, string subDir)
@@ -557,7 +569,7 @@ public class BackupPortalTask(DbFactory dbFactory,
             }
 
             await using var tmpFile = new FileStream(f, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read, 4096, FileOptions.DeleteOnClose);
-            await writer.WriteEntryAsync(enumerateFile[subDir.Length..], tmpFile, task => SetStepCompleted());
+            await writer.WriteEntryAsync(enumerateFile[subDir.Length..], tmpFile, async () => await SetStepCompleted());
         }
 
         logger.DebugArchiveDirEnd(subDir);
@@ -628,9 +640,9 @@ public class BackupPortalTask(DbFactory dbFactory,
                     await writer.WriteEntryAsync(KeyHelper.GetTableZipKey(module, data.TableName), file, SetProgress);
                 }
 
-                void SetProgress(Task task)
+                async Task SetProgress()
                 {
-                    SetCurrentStepProgress((int)(++tablesProcessed * 100 / (double)tablesCount));
+                    await SetCurrentStepProgress((int)(++tablesProcessed * 100 / (double)tablesCount));
                 }
 
                 logger.DebugEndSavingTable(table.Name);
@@ -649,9 +661,9 @@ public class BackupPortalTask(DbFactory dbFactory,
             var filesProcessed = 0;
             var filesCount = group.Count();
 
-            void SetProgress(Task task)
+            async Task SetProgress()
             {
-                SetCurrentStepProgress((int)(++filesProcessed * 100 / (double)filesCount));
+                await SetCurrentStepProgress((int)(++filesProcessed * 100 / (double)filesCount));
             }
 
             foreach (var file in group)
@@ -670,7 +682,7 @@ public class BackupPortalTask(DbFactory dbFactory,
         await using (var tmpFile = tempStream.Create())
         {
             restoreInfoXml.WriteTo(tmpFile);
-            await writer.WriteEntryAsync(KeyHelper.GetStorageRestoreInfoZipKey(), tmpFile, task => {});
+            await writer.WriteEntryAsync(KeyHelper.GetStorageRestoreInfoZipKey(), tmpFile, () => Task.CompletedTask);
         }
 
         logger.DebugEndBackupStorage();

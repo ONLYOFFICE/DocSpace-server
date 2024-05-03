@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,11 +31,10 @@ public class RegisterInstanceWorkerService<T>(
     ILogger<RegisterInstanceWorkerService<T>> logger,
     IServiceProvider serviceProvider,
     IHostApplicationLifetime applicationLifetime,
-    IOptions<HostingSettings> optionsSettings)
+    IOptions<InstanceWorkerOptions<T>> optionsSettings)
     : BackgroundService where T : IHostedService
 {
-    private readonly HostingSettings _settings = optionsSettings.Value;
-    public static readonly string InstanceId = $"{typeof(T).GetFormattedName()}_{DateTime.UtcNow.Ticks}";
+    private readonly InstanceWorkerOptions<T> _settings = optionsSettings.Value;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -54,7 +53,7 @@ public class RegisterInstanceWorkerService<T>(
             {
                 var registerInstanceService = scope.ServiceProvider.GetService<IRegisterInstanceManager<T>>();
 
-                await registerInstanceService.Register(InstanceId);
+                await registerInstanceService.Register();
 
                 logger.TraceWorkingRunnging(DateTimeOffset.Now);
 
@@ -77,13 +76,13 @@ public class RegisterInstanceWorkerService<T>(
 
                 var registerInstanceService = scope.ServiceProvider.GetService<IRegisterInstanceManager<T>>();
 
-                await registerInstanceService.UnRegister(InstanceId);
+                await registerInstanceService.UnRegister();
 
-                logger.InformationUnRegister(InstanceId, DateTimeOffset.Now);
+                logger.InformationUnRegister(_settings.InstanceId, DateTimeOffset.Now);
             }
             catch
             {
-                logger.ErrorUnableToUnRegister(InstanceId, DateTimeOffset.Now);
+                logger.ErrorUnableToUnRegister(_settings.InstanceId, DateTimeOffset.Now);
             }
         }
 

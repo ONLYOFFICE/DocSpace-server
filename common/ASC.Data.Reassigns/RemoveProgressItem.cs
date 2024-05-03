@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -73,7 +73,7 @@ public class RemoveProgressItem(IServiceScopeFactory serviceScopeFactory) : Dist
     {
         await using var scope = serviceScopeFactory.CreateAsyncScope();
         var scopeClass = scope.ServiceProvider.GetService<RemoveProgressItemScope>();
-        var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, userPhotoManager, messageTarget, webItemManagerSecurity,  userFormatter, options) = scopeClass;
+        var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, userPhotoManager, webItemManagerSecurity,  userFormatter, options) = scopeClass;
         var logger = options.CreateLogger("ASC.Web");
         await tenantManager.SetCurrentTenantAsync(_tenantId);
         var userName = userFormatter.GetUserName(User);
@@ -86,32 +86,32 @@ public class RemoveProgressItem(IServiceScopeFactory serviceScopeFactory) : Dist
             await securityContext.AuthenticateMeWithoutCookieAsync(_currentUserId);
 
             Percentage = 5;
-            PublishChanges();
+            await PublishChanges();
 
             await fileStorageService.DemandPermissionToDeletePersonalDataAsync(User);
 
             Percentage = 10;
-            PublishChanges();
+            await PublishChanges();
 
             var wrapper = await GetUsageSpace(webItemManagerSecurity);
 
             Percentage = 30;
-            PublishChanges();
+            await PublishChanges();
 
             await fileStorageService.DeletePersonalDataAsync<int>(FromUser);
 
             Percentage = 95;
-            PublishChanges();
+            await PublishChanges();
 
             //_mailEraser.ClearUserMail(_userId);
             //await DeleteTalkStorage(storageFactory);
 
             if (_deleteProfile)
             {
-                await DeleteUserProfile(userManager, userPhotoManager, messageService, messageTarget, userName);
+                await DeleteUserProfile(userManager, userPhotoManager, messageService, userName);
             }
 
-            await SendSuccessNotifyAsync(studioNotifyService, messageService, messageTarget, userName, wrapper);
+            await SendSuccessNotifyAsync(studioNotifyService, messageService, userName, wrapper);
 
             Percentage = 100;
             Status = DistributedTaskStatus.Completed;
@@ -127,7 +127,7 @@ public class RemoveProgressItem(IServiceScopeFactory serviceScopeFactory) : Dist
         {
             logger.LogInformation("data deletion is complete");
             IsCompleted = true;
-            PublishChanges();
+            await PublishChanges();
         }
     }
 
@@ -182,22 +182,22 @@ public class RemoveProgressItem(IServiceScopeFactory serviceScopeFactory) : Dist
         return usageSpaceWrapper;
     }
 
-    private async Task DeleteUserProfile(UserManager userManager, UserPhotoManager userPhotoManager, MessageService messageService, MessageTarget messageTarget, string userName)
+    private async Task DeleteUserProfile(UserManager userManager, UserPhotoManager userPhotoManager, MessageService messageService, string userName)
     {
         await userPhotoManager.RemovePhotoAsync(FromUser);
         await userManager.DeleteUserAsync(FromUser);
 
         if (_httpHeaders != null)
         {
-            await messageService.SendHeadersMessageAsync(MessageAction.UserDeleted, messageTarget.Create(FromUser), _httpHeaders, userName);
+            await messageService.SendHeadersMessageAsync(MessageAction.UserDeleted, MessageTarget.Create(FromUser), _httpHeaders, userName);
         }
         else
         {
-            await messageService.SendAsync(MessageAction.UserDeleted, messageTarget.Create(FromUser), userName);
+            await messageService.SendAsync(MessageAction.UserDeleted, MessageTarget.Create(FromUser), userName);
         }
     }
 
-    private async Task SendSuccessNotifyAsync(StudioNotifyService studioNotifyService, MessageService messageService, MessageTarget messageTarget, string userName, UsageSpaceWrapper wrapper)
+    private async Task SendSuccessNotifyAsync(StudioNotifyService studioNotifyService, MessageService messageService, string userName, UsageSpaceWrapper wrapper)
     {
         if (_notify)
         {
@@ -206,11 +206,11 @@ public class RemoveProgressItem(IServiceScopeFactory serviceScopeFactory) : Dist
 
         if (_httpHeaders != null)
         {
-            await messageService.SendHeadersMessageAsync(MessageAction.UserDataRemoving, messageTarget.Create(FromUser), _httpHeaders, userName);
+            await messageService.SendHeadersMessageAsync(MessageAction.UserDataRemoving, MessageTarget.Create(FromUser), _httpHeaders, userName);
         }
         else
         {
-            await messageService.SendAsync(MessageAction.UserDataRemoving, messageTarget.Create(FromUser), userName);
+            await messageService.SendAsync(MessageAction.UserDataRemoving, MessageTarget.Create(FromUser), userName);
         }
     }
 
@@ -234,7 +234,6 @@ public record RemoveProgressItemScope(
     SecurityContext SecurityContext,
     UserManager UserManager,
     UserPhotoManager UserPhotoManager,
-    MessageTarget MessageTarget,
     WebItemManagerSecurity WebItemManagerSecurity,
     UserFormatter UserFormatter,
     ILoggerProvider Options);

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -142,7 +142,7 @@ public class NotifyEngine(Context context,
 
                     try
                     {
-                        var recipients = await recipientProvider.GetGroupEntriesAsync(request.Recipient as IRecipientsGroup) ?? Array.Empty<IRecipient>();
+                        var recipients = await recipientProvider.GetGroupEntriesAsync(request.Recipient as IRecipientsGroup) ?? [];
                         foreach (var recipient in recipients)
                         {
                             try
@@ -356,7 +356,7 @@ public class NotifyEngine(Context context,
             var subscriptionProvider = request.GetSubscriptionProvider(serviceScope);
 
             var senderNames = new List<string>();
-            senderNames.AddRange(await subscriptionProvider.GetSubscriptionMethodAsync(request.NotifyAction, request.Recipient) ?? Array.Empty<string>());
+            senderNames.AddRange(await subscriptionProvider.GetSubscriptionMethodAsync(request.NotifyAction, request.Recipient) ?? []);
             senderNames.AddRange(request.Arguments.OfType<AdditionalSenderTag>().Select(tag => (string)tag.Value));
 
             request._senderNames = senderNames.ToArray();
@@ -409,7 +409,7 @@ public class NotifyEngine(Context context,
             {
                 if (formatter != null)
                 {
-                    tags = formatter.GetTags(pattern) ?? Array.Empty<string>();
+                    tags = formatter.GetTags(pattern) ?? [];
                 }
             }
             catch (Exception exc)

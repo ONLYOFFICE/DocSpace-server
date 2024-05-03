@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -62,7 +62,7 @@ public class GosUslugiLoginProvider : BaseLoginProvider<GosUslugiLoginProvider>
     {
         try
         {
-            var token = Auth(context, Scopes, out var redirect);
+            var token = Auth(context, out var redirect);
 
             if (redirect)
             {
@@ -82,7 +82,7 @@ public class GosUslugiLoginProvider : BaseLoginProvider<GosUslugiLoginProvider>
         }
         catch (Exception ex)
         {
-            return LoginProfile.FromError(ex);
+            return  new LoginProfile(ex);
         }
     }
 
@@ -149,7 +149,7 @@ public class GosUslugiLoginProvider : BaseLoginProvider<GosUslugiLoginProvider>
         return profile;
     }
 
-    protected override OAuth20Token Auth(HttpContext context, string scopes, out bool redirect, IDictionary<string, string> additionalArgs = null, IDictionary<string, string> additionalStateArgs = null)
+    protected override OAuth20Token Auth(HttpContext context, out bool redirect, IDictionary<string, string> additionalArgs = null, IDictionary<string, string> additionalStateArgs = null)
     {
         var error = context.Request.Query["error"];
         if (!string.IsNullOrEmpty(error))
@@ -165,7 +165,7 @@ public class GosUslugiLoginProvider : BaseLoginProvider<GosUslugiLoginProvider>
         var code = context.Request.Query["code"];
         if (string.IsNullOrEmpty(code))
         {
-            RequestCode(context, scopes);
+            RequestCode(context);
             redirect = true;
 
             return null;
@@ -177,12 +177,11 @@ public class GosUslugiLoginProvider : BaseLoginProvider<GosUslugiLoginProvider>
         return GetAccessToken(state, code);
     }
 
-    private void RequestCode(HttpContext context, string scope = null)
+    private void RequestCode(HttpContext context)
     {
         var timestamp = DateTime.UtcNow.ToString("yyyy.MM.dd HH:mm:ss +0000", CultureInfo.InvariantCulture);
         var state = Guid.NewGuid().ToString();//HttpContext.Current.Request.Url().AbsoluteUri;
-
-        var msg = scope + timestamp + ClientID + state;
+        var msg = Scopes + timestamp + ClientID + state;
         var encodedSignature = SignMsg(msg);
         var clientSecret = WebEncoders.Base64UrlEncode(encodedSignature);
 
@@ -191,7 +190,7 @@ public class GosUslugiLoginProvider : BaseLoginProvider<GosUslugiLoginProvider>
                     { "client_id", ClientID },
                     { "client_secret", clientSecret },
                     { "redirect_uri", RedirectUri },
-                    { "scope", scope },
+                    { "scope", Scopes },
                     { "response_type", "code" },
                     { "state", state },
                     { "timestamp", timestamp },

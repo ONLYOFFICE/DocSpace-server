@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -48,6 +48,7 @@ public abstract class BaseStorage(TempStream tempStream,
     public virtual bool IsSupportCdnUri => false;
     public virtual bool IsSupportedPreSignedUri => true;
     public virtual bool IsSupportChunking => false;
+    public virtual bool ContentAsAttachment => false;
     internal string Modulename { get; set; }
     internal bool Cache { get; set; }
     internal DataList DataList { get; set; }
@@ -361,6 +362,8 @@ public abstract class BaseStorage(TempStream tempStream,
     {
         if (QuotaController != null)
         {
+            ownerId = ownerId == Guid.Empty && Modulename != "files" ? Core.Configuration.Constants.CoreSystem.ID : ownerId;
+
             await QuotaController.QuotaUsedAddAsync(Modulename, domain, DataList.GetData(domain), size, ownerId, quotaCheckFileSize);
             var(name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<MaxTotalSizeFeature, long>();
             _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
@@ -394,7 +397,7 @@ public abstract class BaseStorage(TempStream tempStream,
             var userQuotaLimit = userQuotaData.UserQuota == userQuotaData.GetDefault().UserQuota ? quotaUserSettings.DefaultQuota : userQuotaData.UserQuota;
             var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(currentTenant.Id, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
 
-            _ = quotaSocketManager.ChangeCustomQuotaUsedValueAsync(currentTenant.Id, customQuota.GetFeature<UserCustomQuotaFeature>().Name, quotaUserSettings.EnableQuota, userUsedSpace, userQuotaLimit, new List<Guid>() { user.Id });
+            _ = quotaSocketManager.ChangeCustomQuotaUsedValueAsync(currentTenant.Id, customQuota.GetFeature<UserCustomQuotaFeature>().Name, quotaUserSettings.EnableQuota, userUsedSpace, userQuotaLimit, new List<Guid> { user.Id });
         }
     }
 
@@ -404,6 +407,15 @@ public abstract class BaseStorage(TempStream tempStream,
     }
 
     public abstract Task<string> GetFileEtagAsync(string domain, string path);
+
+    public async Task<string> GetUrlWithHashAsync(string domain, string path)
+    {
+        var uri = (await GetUriAsync(domain, path)).ToString();
+
+        var hash = (await GetFileEtagAsync(domain, path)).Trim('"');
+
+        return QueryHelpers.AddQueryString(uri, Constants.QueryHash, hash);
+    }
 
     private sealed class MonoUri : Uri
     {

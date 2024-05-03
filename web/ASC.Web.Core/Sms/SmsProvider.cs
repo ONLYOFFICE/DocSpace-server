@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -150,9 +150,7 @@ public abstract class SmsProvider : Consumer
             httpClient.Timeout = TimeSpan.FromMilliseconds(15000);
 
             using var response = await httpClient.SendAsync(request);
-            await using var stream = await response.Content.ReadAsStreamAsync();
-            using var reader = new StreamReader(stream);
-            var result = await reader.ReadToEndAsync();
+            var result = await response.Content.ReadAsStringAsync();
             Log.InformationSMSWasSend(number, result);
             return true;
         }
@@ -245,15 +243,10 @@ public class SmscProvider : SmsProvider, IValidateKeysProvider
                 httpClient.Timeout = TimeSpan.FromMilliseconds(1000);
 
                 using var response = await httpClient.SendAsync(request);
-                await using var stream = await response.Content.ReadAsStreamAsync();
-                if (stream != null)
-                {
-                    using var reader = new StreamReader(stream);
-                    var result = await reader.ReadToEndAsync();
-                    Log.InformationSmsBalaceReturned(result);
+                var result = await response.Content.ReadAsStringAsync();
+                Log.InformationSmsBalaceReturned(result);
 
-                    balance = result;
-                }
+                balance = result;
             }
             catch (Exception ex)
             {

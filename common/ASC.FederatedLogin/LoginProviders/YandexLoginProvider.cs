@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -60,7 +60,7 @@ public class YandexLoginProvider : BaseLoginProvider<YandexLoginProvider>
     {
         try
         {
-            var token = Auth(context, Scopes, out var redirect, context.Request.Query["access_type"] == "offline"
+            var token = Auth(context, out var redirect, context.Request.Query["access_type"] == "offline"
                 ? new Dictionary<string, string>
                 {
                         { "force_confirm", "true" }
@@ -80,7 +80,7 @@ public class YandexLoginProvider : BaseLoginProvider<YandexLoginProvider>
         }
         catch (Exception ex)
         {
-            return LoginProfile.FromError(ex);
+            return new LoginProfile(ex);
         }
     }
 

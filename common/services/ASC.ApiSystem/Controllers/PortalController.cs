@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -41,7 +41,6 @@ public class PortalController(
         CoreSettings coreSettings,
         TenantDomainValidator tenantDomainValidator,
         UserFormatter userFormatter,
-        UserManagerWrapper userManagerWrapper,
         CommonConstants commonConstants,
         ILogger<PortalController> option,
         TimeZonesProvider timeZonesProvider,
@@ -49,7 +48,8 @@ public class PortalController(
         PasswordHasher passwordHasher,
         CspSettingsHelper cspSettingsHelper,
         CoreBaseSettings coreBaseSettings,
-        QuotaUsageManager quotaUsageManager)
+        QuotaUsageManager quotaUsageManager,
+        PasswordSettingsManager passwordSettingsManager)
     : ControllerBase
 {
     #region For TEST api
@@ -68,8 +68,8 @@ public class PortalController(
     #region API methods
 
     [HttpPost("register")]
-    [AllowCrossSiteJson]
-    [Authorize(AuthenticationSchemes = "auth:allowskip:registerportal,auth:portal")]
+    //[AllowCrossSiteJson]
+    [Authorize(AuthenticationSchemes = "auth:allowskip:registerportal,auth:portal,auth:portalbasic")]
     public async ValueTask<IActionResult> RegisterAsync(TenantModel model)
     {
         if (model == null)
@@ -146,7 +146,9 @@ public class PortalController(
             });
         }
 
-        if (!CheckRecaptcha(model, clientIP, sw, out error))
+        error = await GetRecaptchaError(model, clientIP, sw);
+            
+        if (error != null)
         {
             return BadRequest(error);
         }
@@ -210,7 +212,7 @@ public class PortalController(
 
             tenantManager.SetCurrentTenant(t);
 
-            await cspSettingsHelper.SaveAsync(null, true);
+            await cspSettingsHelper.SaveAsync(null);
 
             if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
             { 
@@ -262,7 +264,8 @@ public class PortalController(
 
         if (!string.IsNullOrEmpty(model.PasswordHash))
         {
-            isFirst = !commonMethods.SendCongratulations(Request.Scheme, t, model.SkipWelcome, out sendCongratulationsAddress);
+            sendCongratulationsAddress = await commonMethods.SendCongratulations(Request.Scheme, t, model.SkipWelcome);
+            isFirst = sendCongratulationsAddress != null;
         }
         else if (configuration["core:base-domain"] == "localhost")
         {
@@ -298,7 +301,7 @@ public class PortalController(
 
     [HttpDelete("remove")]
     [AllowCrossSiteJson]
-    [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal")]
+    [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
     public async Task<IActionResult> RemoveAsync([FromQuery] TenantModel model)
     {
         var (succ, tenant) = await commonMethods.TryGetTenantAsync(model);
@@ -334,7 +337,7 @@ public class PortalController(
 
     [HttpPut("status")]
     [AllowCrossSiteJson]
-    [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal")]
+    [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
     public async Task<IActionResult> ChangeStatusAsync(TenantModel model)
     {
         var (succ, tenant) = await commonMethods.TryGetTenantAsync(model);
@@ -405,7 +408,7 @@ public class PortalController(
 
     [HttpGet("get")]
     [AllowCrossSiteJson]
-    [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal")]
+    [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
     public async Task<IActionResult> GetPortalsAsync([FromQuery] TenantModel model, [FromQuery] bool statistics)
     {
         if (!coreBaseSettings.Standalone)
@@ -563,7 +566,7 @@ public class PortalController(
 
         var passwordSettings = settingsManager.GetDefault<PasswordSettings>();
 
-        if (!userManagerWrapper.CheckPasswordRegex(passwordSettings, pwd))
+        if (!passwordSettingsManager.CheckPasswordRegex(passwordSettings, pwd))
         {
             error = new { error = "passPolicyError", message = "Password is incorrect" };
             return false;
@@ -575,35 +578,32 @@ public class PortalController(
 
     #region Recaptcha
 
-    private bool CheckRecaptcha(TenantModel model, string clientIP, Stopwatch sw, out object error)
+    private async Task<object> GetRecaptchaError(TenantModel model, string clientIP, Stopwatch sw)
     {
-        error = null;
-        if (commonConstants.RecaptchaRequired
-            && !commonMethods.IsTestEmail(model.Email))
+        if (commonConstants.RecaptchaRequired && !commonMethods.IsTestEmail(model.Email))
         {
             if (!string.IsNullOrEmpty(model.AppKey) && commonConstants.AppSecretKeys.Contains(model.AppKey))
             {
                 option.LogDebug("PortalName = {0}; Elapsed ms. ValidateRecaptcha via app key: {1}. {2}", model.PortalName, model.AppKey, sw.ElapsedMilliseconds);
-                return true;
+                return null;
             }
 
             var data = $"{model.PortalName} {model.FirstName} {model.LastName} {model.Email} {model.Phone} {model.RecaptchaType}";
 
             /*** validate recaptcha ***/
-            if (!commonMethods.ValidateRecaptcha(model.RecaptchaResponse, model.RecaptchaType, clientIP))
+            if (!await commonMethods.ValidateRecaptcha(model.RecaptchaResponse, model.RecaptchaType, clientIP))
             {
                 option.LogDebug("PortalName = {0}; Elapsed ms. ValidateRecaptcha error: {1} {2}", model.PortalName, sw.ElapsedMilliseconds, data);
                 sw.Stop();
 
-                error = new { error = "recaptchaInvalid", message = "Recaptcha is invalid" };
-                return false;
+                return new { error = "recaptchaInvalid", message = "Recaptcha is invalid" };
 
             }
 
             option.LogDebug("PortalName = {0}; Elapsed ms. ValidateRecaptcha: {1} {2}", model.PortalName, sw.ElapsedMilliseconds, data);
         }
 
-        return true;
+        return null;
     }
 
     #endregion

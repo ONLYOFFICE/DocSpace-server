@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,22 +29,29 @@ using ThumbnailSize = Dropbox.Api.Files.ThumbnailSize;
 namespace ASC.Files.Thirdparty.Dropbox;
 
 [Transient]
-internal class DropboxStorage(TempStream tempStream) : IThirdPartyStorage<FileMetadata, FolderMetadata, Metadata>,
+internal class DropboxStorage(TempStream tempStream, IHttpClientFactory httpClientFactory) : IThirdPartyStorage<FileMetadata, FolderMetadata, Metadata>,
     IDisposable
 {
     public bool IsOpened { get; private set; }
+    public AuthScheme AuthScheme => AuthScheme.OAuth;
+    
     private const long MaxChunkedUploadFileSize = 20L * 1024L * 1024L * 1024L;
-
     private DropboxClient _dropboxClient;
 
-    public void Open(OAuth20Token token)
+    public void Open(AuthData authData)
     {
         if (IsOpened)
         {
             return;
         }
+        
+        var httpClient = httpClientFactory.CreateClient();
 
-        _dropboxClient = new DropboxClient(token.AccessToken);
+        _dropboxClient = new DropboxClient(authData.Token.AccessToken, config: new DropboxClientConfig
+        {
+            HttpClient = httpClient,
+            LongPollHttpClient = httpClient
+        });
 
         IsOpened = true;
     }
@@ -74,7 +81,6 @@ internal class DropboxStorage(TempStream tempStream) : IThirdPartyStorage<FileMe
         }
     }
 
-
     public async Task<FolderMetadata> GetFolderAsync(string folderId)
     {
         if (string.IsNullOrEmpty(folderId) || folderId == "/")
@@ -88,13 +94,13 @@ internal class DropboxStorage(TempStream tempStream) : IThirdPartyStorage<FileMe
 
             return metadata.AsFolder;
         }
-        catch (AggregateException ex)
+        catch (ApiException<GetMetadataError> ex)
         {
-            if (ex.InnerException is ApiException<GetMetadataError>
-                && ex.InnerException.Message.StartsWith("path/not_found/"))
+            if (ex.Message.StartsWith("path/not_found/"))
             {
                 return null;
             }
+            
             throw;
         }
     }
@@ -123,11 +129,22 @@ internal class DropboxStorage(TempStream tempStream) : IThirdPartyStorage<FileMe
         }
     }
 
-
     public async Task<List<Metadata>> GetItemsAsync(string folderId)
     {
-        var data = await _dropboxClient.Files.ListFolderAsync(folderId);
-        return [..data.Entries];
+        try
+        {
+            var data = await _dropboxClient.Files.ListFolderAsync(folderId);
+            return [..data.Entries];
+        }
+        catch (ApiException<ListFolderError> ex)
+        {
+            if (ex.Message.StartsWith("path/not_found/"))
+            {
+                return [];
+            }
+            
+            throw;
+        }
     }
 
     public async Task<Stream> GetThumbnailAsync(string fileId, int width, int height)
@@ -147,7 +164,7 @@ internal class DropboxStorage(TempStream tempStream) : IThirdPartyStorage<FileMe
         }
     }
 
-    private ThumbnailSize Convert(int width)
+    private static ThumbnailSize Convert(int width)
     {
         if (width > 368)
         {
@@ -163,21 +180,25 @@ internal class DropboxStorage(TempStream tempStream) : IThirdPartyStorage<FileMe
         ArgumentException.ThrowIfNullOrEmpty(filePath);
 
         using var response = await _dropboxClient.Files.DownloadAsync(filePath);
+        
         var tempBuffer = tempStream.Create();
+        
         await using var str = await response.GetContentAsStreamAsync();
-        if (str != null)
+        if (str == null)
         {
-            await str.CopyToAsync(tempBuffer);
-            await tempBuffer.FlushAsync();
-            tempBuffer.Seek(offset, SeekOrigin.Begin);
+            return tempBuffer;
         }
+
+        await str.CopyToAsync(tempBuffer);
+        await tempBuffer.FlushAsync();
+        tempBuffer.Seek(offset, SeekOrigin.Begin);
 
         return tempBuffer;
     }
 
-    public long GetFileSize(FileMetadata file)
+    public Task<long> GetFileSizeAsync(FileMetadata file)
     {
-        return (long)file.Size;
+        return Task.FromResult((long)file.Size);
     }
     
     public async Task<FolderMetadata> CreateFolderAsync(string title, string parentId)
@@ -323,5 +344,10 @@ internal class DropboxStorage(TempStream tempStream) : IThirdPartyStorage<FileMe
     public void Dispose()
     {
         _dropboxClient?.Dispose();
+    }
+
+    public IDataWriteOperator CreateDataWriteOperator(CommonChunkedUploadSession chunkedUploadSession, CommonChunkedUploadSessionHolder sessionHolder)
+    {
+        return null;
     }
 }

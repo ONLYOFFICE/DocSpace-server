@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -103,7 +103,7 @@ public class FilesSpaceUsageStatManager(IDbContextFactory<FilesDbContext> dbCont
 
     public async Task RecalculateFoldersUsedSpace(int TenantId)
     {
-        await using var filesDbContext = dbContextFactory.CreateDbContext();
+        await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
 
         var queryGroup = filesDbContext.Folders
                     .Join(filesDbContext.Tree, r => r.Id, a => a.ParentId, (folder, tree) => new { folder, tree })

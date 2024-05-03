@@ -117,38 +117,8 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="OnlyofficeModuleNameCalendar" xml:space="preserve">
-    <value>Lịch</value>
-  </data>
-  <data name="ModuleNameCalendar" xml:space="preserve">
-    <value>Lịch</value>
-  </data>
-  <data name="OnlyofficeModuleNamePeople" xml:space="preserve">
-    <value>Con người</value>
-  </data>
-  <data name="OnlyofficeModuleNameMail" xml:space="preserve">
-    <value>Thư</value>
-  </data>
-  <data name="ModuleNameMail" xml:space="preserve">
-    <value>Thư</value>
-  </data>
-  <data name="ModuleNameGroups" xml:space="preserve">
-    <value>Nhóm</value>
-  </data>
-  <data name="ModuleNameUsers" xml:space="preserve">
-    <value>Người dùng</value>
-  </data>
-  <data name="NextcloudModuleNameContacts" xml:space="preserve">
-    <value>Thông tin liên hệ</value>
-  </data>
   <data name="DataProcessing" xml:space="preserve">
     <value>Đang xử lý dữ liệu...</value>
-  </data>
-  <data name="OnlyofficeModuleNameDocuments" xml:space="preserve">
-    <value>Tài liệu</value>
-  </data>
-  <data name="GoogleModuleNameDocuments" xml:space="preserve">
-    <value>Tập tin Google Drive</value>
   </data>
   <data name="DumpParse" xml:space="preserve">
     <value>Đang phân tích cơ sở dữ liệu</value>
@@ -156,20 +126,8 @@
   <data name="DataProcessingCompleted" xml:space="preserve">
     <value>Đã hoàn thành xử lý dữ liệu</value>
   </data>
-  <data name="ClearingTemporaryData" xml:space="preserve">
-    <value>Đang xóa dữ liệu tạm thời</value>
-  </data>
-  <data name="UserSkipped" xml:space="preserve">
-    <value>Không thể nhập người dùng: {0} ({1}/{2})</value>
-  </data>
   <data name="GroupMigration" xml:space="preserve">
     <value>Di chuyển nhóm {0} ({1}/{2})</value>
-  </data>
-  <data name="GoogleModuleNameContacts" xml:space="preserve">
-    <value>Thông tin liên hệ của Mail</value>
-  </data>
-  <data name="NextcloudModuleNameDocuments" xml:space="preserve">
-    <value>Tập tin của người dùng</value>
   </data>
   <data name="Unzipping" xml:space="preserve">
     <value>Đang giải nén...</value>
@@ -183,22 +141,34 @@
   <data name="StartOfDataProcessing" xml:space="preserve">
     <value>Đang bắt đầu xử lý dữ liệu...</value>
   </data>
-  <data name="UserCalendarMigration" xml:space="preserve">
-    <value>Di chuyển lịch người dùng {0} ({1}/{2})</value>
-  </data>
   <data name="UserMigration" xml:space="preserve">
     <value>Di chuyển người dùng {0} ({1}/{2})</value>
-  </data>
-  <data name="MigrationCanceled" xml:space="preserve">
-    <value>Đã hủy di chuyển</value>
   </data>
   <data name="MigrationCompleted" xml:space="preserve">
     <value>Đã hoàn thành di chuyển</value>
   </data>
-  <data name="MigratingUserContacts" xml:space="preserve">
-    <value>Di chuyển thông tin liên hệ người dùng {0} ({1}/{2})</value>
-  </data>
   <data name="MigratingUserFiles" xml:space="preserve">
     <value>Di chuyển tập tin người dùng {0} ({1}/{2})</value>
+  </data>
+  <data name="MigrationCommonFiles" xml:space="preserve">
+    <value>Di chuyển các tập tin phổ biến</value>
+  </data>
+  <data name="MigrationInitException" xml:space="preserve">
+    <value>Đã xảy ra lỗi khi khởi tạo {0} trình di chuyển</value>
+  </data>
+  <data name="MigrationNotFoundException" xml:space="preserve">
+    <value>Không có nhà cung cấp dịch vụ di chuyển</value>
+  </data>
+  <data name="MigrationProgressException" xml:space="preserve">
+    <value>Không có di chuyển nào đang được tiến hành</value>
+  </data>
+  <data name="MigrationProjectFiles" xml:space="preserve">
+    <value>Di chuyển tập tin dự án</value>
+  </data>
+  <data name="MigrationStartException" xml:space="preserve">
+    <value>Việc phân tích cú pháp (parsing) vẫn đang được tiến hành</value>
+  </data>
+  <data name="MigrationUploadException" xml:space="preserve">
+    <value>Quá trình di chuyển đã được tiến hành</value>
   </data>
 </root>

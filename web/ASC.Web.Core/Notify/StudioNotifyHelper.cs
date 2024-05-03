@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,49 +29,27 @@ using Constants = ASC.Core.Users.Constants;
 namespace ASC.Web.Studio.Core.Notify;
 
 [Scope]
-public class StudioNotifyHelper
+public class StudioNotifyHelper(
+    StudioNotifySource studioNotifySource,
+    UserManager userManager,
+    SettingsManager settingsManager,
+    MailWhiteLabelSettingsHelper mailWhiteLabelSettingsHelper,
+    CommonLinkUtility commonLinkUtility,
+    TenantManager tenantManager,
+    TenantExtra tenantExtra,
+    WebImageSupplier webImageSupplier,
+    IConfiguration configuration,
+    ILogger<StudioNotifyHelper> logger)
 {
-    public readonly string SiteLink;
-    public readonly StudioNotifySource NotifySource;
-    private readonly ISubscriptionProvider _subscriptionProvider;
-    private readonly IRecipientProvider _recipientsProvider;
-
-    private readonly UserManager _userManager;
-    private readonly SettingsManager _settingsManager;
-    private readonly CommonLinkUtility _commonLinkUtility;
-    private readonly TenantManager _tenantManager;
-    private readonly TenantExtra _tenantExtra;
-    private readonly WebImageSupplier _webImageSupplier;
-    private readonly IConfiguration _configuration;
-    private readonly ILogger<StudioNotifyHelper> _logger;
-
-    public StudioNotifyHelper(
-        StudioNotifySource studioNotifySource,
-        UserManager userManager,
-        SettingsManager settingsManager,
-        MailWhiteLabelSettingsHelper mailWhiteLabelSettingsHelper,
-        CommonLinkUtility commonLinkUtility,
-        TenantManager tenantManager,
-        TenantExtra tenantExtra,
-        CoreBaseSettings coreBaseSettings,
-        WebImageSupplier webImageSupplier,
-        IConfiguration configuration,
-        ILogger<StudioNotifyHelper> logger)
-    {
-        SiteLink = commonLinkUtility.GetSiteLink(mailWhiteLabelSettingsHelper);
-        NotifySource = studioNotifySource;
-        _userManager = userManager;
-        _settingsManager = settingsManager;
-        _commonLinkUtility = commonLinkUtility;
-        _tenantManager = tenantManager;
-        _tenantExtra = tenantExtra;
-        _webImageSupplier = webImageSupplier;
-        _configuration = configuration;
-        _subscriptionProvider = NotifySource.GetSubscriptionProvider();//TODO: remove from constructor
-        _recipientsProvider = NotifySource.GetRecipientsProvider();
-        _logger = logger;
-    }
-
+    public string SiteLink => commonLinkUtility.GetSiteLink(mailWhiteLabelSettingsHelper);
+    
+    private ISubscriptionProvider _subscriptionProvider;
+    private ISubscriptionProvider SubscriptionProvider => _subscriptionProvider ??= NotifySource.GetSubscriptionProvider();
+    
+    private IRecipientProvider _recipientsProvider;
+    private IRecipientProvider RecipientsProvider => _recipientsProvider ??= NotifySource.GetRecipientsProvider();
+    
+    public readonly StudioNotifySource NotifySource = studioNotifySource;
 
     public async Task<IEnumerable<UserInfo>> GetRecipientsAsync(bool toadmins, bool tousers, bool toguests)
     {
@@ -81,36 +59,36 @@ public class StudioNotifyHelper
             {
                 if (toguests)
                 {
-                    return (await _userManager.GetUsersAsync());
+                    return (await userManager.GetUsersAsync());
                 }
 
-                return await _userManager.GetUsersAsync(EmployeeStatus.Default, EmployeeType.RoomAdmin);
+                return await userManager.GetUsersAsync(EmployeeStatus.Default, EmployeeType.RoomAdmin);
             }
 
             if (toguests)
             {
-                return (await _userManager.GetUsersByGroupAsync(Constants.GroupAdmin.ID))
-                               .Concat(await _userManager.GetUsersAsync(EmployeeStatus.Default, EmployeeType.User));
+                return (await userManager.GetUsersByGroupAsync(Constants.GroupAdmin.ID))
+                               .Concat(await userManager.GetUsersAsync(EmployeeStatus.Default, EmployeeType.User));
             }
 
-            return await _userManager.GetUsersByGroupAsync(Constants.GroupAdmin.ID);
+            return await userManager.GetUsersByGroupAsync(Constants.GroupAdmin.ID);
         }
 
         if (tousers)
         {
             if (toguests)
             {
-                return await (await _userManager.GetUsersAsync()).ToAsyncEnumerable()
-                                  .WhereAwait(async u => !await _userManager.IsUserInGroupAsync(u.Id, Constants.GroupAdmin.ID)).ToListAsync();
+                return await (await userManager.GetUsersAsync()).ToAsyncEnumerable()
+                                  .WhereAwait(async u => !await userManager.IsUserInGroupAsync(u.Id, Constants.GroupAdmin.ID)).ToListAsync();
             }
 
-            return await (await _userManager.GetUsersAsync(EmployeeStatus.Default, EmployeeType.RoomAdmin)).ToAsyncEnumerable()
-                              .WhereAwait(async u => !await _userManager.IsUserInGroupAsync(u.Id, Constants.GroupAdmin.ID)).ToListAsync();
+            return await (await userManager.GetUsersAsync(EmployeeStatus.Default, EmployeeType.RoomAdmin)).ToAsyncEnumerable()
+                              .WhereAwait(async u => !await userManager.IsUserInGroupAsync(u.Id, Constants.GroupAdmin.ID)).ToListAsync();
         }
 
         if (toguests)
         {
-            return await _userManager.GetUsersAsync(EmployeeStatus.Default, EmployeeType.User);
+            return await userManager.GetUsersAsync(EmployeeStatus.Default, EmployeeType.User);
         }
 
         return new List<UserInfo>();
@@ -118,7 +96,7 @@ public class StudioNotifyHelper
 
     public async Task<IRecipient> ToRecipientAsync(Guid userId)
     {
-        return await _recipientsProvider.GetRecipientAsync(userId.ToString());
+        return await RecipientsProvider.GetRecipientAsync(userId.ToString());
     }
 
     public async Task<IRecipient[]> RecipientFromEmailAsync(string email, bool checkActivation)
@@ -139,16 +117,16 @@ public class StudioNotifyHelper
                          Select(email => email.ToLower()).
                          Select(e => new DirectRecipient(e, null, [e], checkActivation)));
 
-        int.TryParse(_configuration["core:notify:countspam"], out var countMailsToNotActivated);
+        int.TryParse(configuration["core:notify:countspam"], out var countMailsToNotActivated);
         if (!checkActivation
             && countMailsToNotActivated > 0
-            && _tenantExtra.Saas)
+            && tenantExtra.Saas)
         {
-            var tenant = await _tenantManager.GetCurrentTenantAsync();
-            var tariff = await _tenantManager.GetTenantQuotaAsync(tenant.Id);
+            var tenant = await tenantManager.GetCurrentTenantAsync();
+            var tariff = await tenantManager.GetTenantQuotaAsync(tenant.Id);
             if (tariff.Free || tariff.Trial)
             {
-                var spamEmailSettings = await _settingsManager.LoadAsync<SpamEmailSettings>();
+                var spamEmailSettings = await settingsManager.LoadAsync<SpamEmailSettings>();
                 var sended = spamEmailSettings.MailsSended;
 
                 var mayTake = Math.Max(0, countMailsToNotActivated - sended);
@@ -157,10 +135,10 @@ public class StudioNotifyHelper
                 {
                     res = res.Take(mayTake).ToList();
 
-                    _logger.WarningFreeTenant(tenant.Id, tryCount, mayTake);
+                    logger.WarningFreeTenant(tenant.Id, tryCount, mayTake);
                 }
                 spamEmailSettings.MailsSended = sended + tryCount;
-                await _settingsManager.SaveAsync(spamEmailSettings);
+                await settingsManager.SaveAsync(spamEmailSettings);
             }
         }
 
@@ -169,12 +147,12 @@ public class StudioNotifyHelper
 
     public string GetNotificationImageUrl(string imageFileName)
     { 
-        var notificationImagePath = _configuration["web:notification:image:path"];
+        var notificationImagePath = configuration["web:notification:image:path"];
         if (string.IsNullOrEmpty(notificationImagePath))
         {
             return
-                _commonLinkUtility.GetFullAbsolutePath(
-                    _webImageSupplier.GetAbsoluteWebPath("notifications/" + imageFileName));
+                commonLinkUtility.GetFullAbsolutePath(
+                    webImageSupplier.GetAbsoluteWebPath("notifications/" + imageFileName));
         }
 
         return notificationImagePath.TrimEnd('/') + "/" + imageFileName;
@@ -188,7 +166,7 @@ public class StudioNotifyHelper
 
     public async Task<bool> IsSubscribedToNotifyAsync(IRecipient recipient, INotifyAction notifyAction)
     {
-        return recipient != null && await _subscriptionProvider.IsSubscribedAsync(_logger, notifyAction, recipient, null);
+        return recipient != null && await SubscriptionProvider.IsSubscribedAsync(logger, notifyAction, recipient, null);
     }
 
     public async Task SubscribeToNotifyAsync(Guid userId, INotifyAction notifyAction, bool subscribe)
@@ -205,11 +183,11 @@ public class StudioNotifyHelper
 
         if (subscribe)
         {
-            await _subscriptionProvider.SubscribeAsync(notifyAction, null, recipient);
+            await SubscriptionProvider.SubscribeAsync(notifyAction, null, recipient);
         }
         else
         {
-            await _subscriptionProvider.UnSubscribeAsync(notifyAction, null, recipient);
+            await SubscriptionProvider.UnSubscribeAsync(notifyAction, null, recipient);
         }
     }
 }

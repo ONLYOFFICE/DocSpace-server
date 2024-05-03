@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -55,12 +55,7 @@ public class SetupInfo
         return Math.Min(AvailableFileSize, await MaxChunkedUploadSize(tenantManager, maxTotalSizeStatistic));
     }
 
-    public long AvailableFileSize
-    {
-        get;
-        private set;
-    }
-
+    public long AvailableFileSize { get; }
     public string TeamlabSiteRedirect { get; private set; }
     public long ChunkUploadSize { get; set; }
     public long ProviderMaxUploadSize { get; private set; }
@@ -140,7 +135,6 @@ public class SetupInfo
 
         MaxImageUploadSize = GetAppSettings<long>("web:max-upload-size", 1024 * 1024);
         AvailableFileSize = GetAppSettings("web:available-file-size", 100L * 1024L * 1024L);
-        AvailableFileSize = GetAppSettings("web.available-file-size", 100L * 1024L * 1024L);
 
         TeamlabSiteRedirect = GetAppSettings("web:teamlab-site", string.Empty);
         ChunkUploadSize = GetAppSettings("files:uploader:chunk-size", 10 * 1024 * 1024);

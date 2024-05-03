@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -39,7 +39,6 @@ public abstract class FileOperation : DistributedTaskProgress
     public const string Process = "Processed";
     public const string Finish = "Finished";
     public const string Hold = "Hold";
-    public const string Data = "Data";
 
     protected readonly IPrincipal _principal;
     protected readonly string _culture;
@@ -81,29 +80,30 @@ public abstract class FileOperation : DistributedTaskProgress
     protected abstract Task DoJob(IServiceScope serviceScope);
 }
 
-internal abstract class ComposeFileOperation<T1, T2>(IServiceProvider serviceProvider) : FileOperation(serviceProvider)
+public abstract class ComposeFileOperation<T1, T2>(IServiceProvider serviceProvider) : FileOperation(serviceProvider)
     where T1 : FileOperationData<string>
     where T2 : FileOperationData<int>
 {
     protected abstract FileOperationType FileOperationType { get; }
     protected FileOperation<T1, string> ThirdPartyOperation { get; set; }
     protected FileOperation<T2, int> DaoOperation { get; set; }
+    
+    protected  T1 ThirdPartyData { get; set; }
+    protected  T2 Data { get; set; }
 
-    public virtual void Init<T>(T data) where T : FileOperationData<JsonElement>
+
+    public void Init(bool holdResult)
     {
         this[OpType] = (int)FileOperationType;
-        this[Data] = JsonSerializer.Serialize(data);
-        this[Hold] = data.HoldResult;
+        this[Hold] = holdResult;
     }
 
-    public virtual T Init<T>(string jsonData, string taskId) where T : FileOperationData<JsonElement>
+    public virtual void Init(T2 data, T1 thirdPartyData, string taskId)
     {
-        var data = JsonSerializer.Deserialize<T>(jsonData);
-        this[OpType] = (int)FileOperationType;
-        this[Data] = jsonData;
-        this[Hold] = data.HoldResult;
+        Data = data;
+        ThirdPartyData = thirdPartyData;
         Id = taskId;
-        return data;
+        Init(data.HoldResult);
     }
 
     public override async Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
@@ -127,7 +127,7 @@ internal abstract class ComposeFileOperation<T1, T2>(IServiceProvider servicePro
         }
     }
 
-    public virtual void PublishChanges(DistributedTask task)
+    protected virtual async Task PublishChanges(DistributedTask task)
     {
         var thirdpartyTask = ThirdPartyOperation;
         var daoTask = DaoOperation;
@@ -184,7 +184,7 @@ internal abstract class ComposeFileOperation<T1, T2>(IServiceProvider servicePro
         }
 
         this[Progress] = progress < 100 ? progress : 100;
-        PublishChanges();
+        await PublishChanges();
     }
 
     protected override Task DoJob(IServiceScope serviceScope)
@@ -193,9 +193,52 @@ internal abstract class ComposeFileOperation<T1, T2>(IServiceProvider servicePro
     }
 }
 
-abstract record FileOperationData<T>(IEnumerable<T> Folders, IEnumerable<T> Files, int TenantId, IDictionary<string, string> Headers, bool HoldResult = true);
+[ProtoContract]
+[ProtoInclude(100, typeof(FileDeleteOperationData<string>))]
+[ProtoInclude(101, typeof(FileDeleteOperationData<int>))]
+[ProtoInclude(102, typeof(FileMoveCopyOperationData<int>))]
+[ProtoInclude(103, typeof(FileMoveCopyOperationData<string>))]
+[ProtoInclude(104, typeof(FileMarkAsReadOperationData<int>))]
+[ProtoInclude(105, typeof(FileMarkAsReadOperationData<string>))]
+[ProtoInclude(106, typeof(FileDownloadOperationData<int>))]
+[ProtoInclude(107, typeof(FileDownloadOperationData<string>))]
+public record FileOperationData<T>
+{
+    [ProtoMember(1)]
+    public IEnumerable<T> Folders { get; set; }
+    
+    [ProtoMember(2)]
+    public IEnumerable<T> Files { get; set; }
+    
+    [ProtoMember(3)]
+    public int TenantId { get; set; }
+    
+    [ProtoMember(4)]
+    public IDictionary<string, string> Headers { get; set; }
+    
+    [ProtoMember(5)]
+    public ExternalSessionSnapshot SessionSnapshot { get; set; }
+    
+    [ProtoMember(6)]
+    public bool HoldResult { get; set; }
 
-abstract class FileOperation<T, TId> : FileOperation where T : FileOperationData<TId>
+    public FileOperationData()
+    {
+        
+    }
+
+    public FileOperationData(IEnumerable<T> folders, IEnumerable<T> files, int tenantId, IDictionary<string, string> headers, ExternalSessionSnapshot sessionSnapshot, bool holdResult = true)
+    {
+        Folders = folders;
+        Files = files;
+        TenantId = tenantId;
+        Headers = headers;
+        SessionSnapshot = sessionSnapshot;
+        HoldResult = holdResult;
+    }
+}
+
+public abstract class FileOperation<T, TId> : FileOperation where T : FileOperationData<TId>
 {
     protected int CurrentTenantId { get; }
     protected FileSecurity FilesSecurity { get; private set; }
@@ -208,21 +251,23 @@ abstract class FileOperation<T, TId> : FileOperation where T : FileOperationData
     protected internal List<TId> Folders { get; }
     protected internal List<TId> Files { get; }
     protected IDictionary<string, StringValues> Headers { get; }
+    protected ExternalSessionSnapshot SessionSnapshot { get; }
 
     protected FileOperation(IServiceProvider serviceProvider, T fileOperationData) : base(serviceProvider)
     {
-        Files = fileOperationData.Files?.ToList() ?? new List<TId>();
-        Folders = fileOperationData.Folders?.ToList() ?? new List<TId>();
+        Files = fileOperationData.Files?.ToList() ?? [];
+        Folders = fileOperationData.Folders?.ToList() ?? [];
         this[Hold] = fileOperationData.HoldResult;
         CurrentTenantId = fileOperationData.TenantId;
         Headers = fileOperationData.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value));
+        SessionSnapshot = fileOperationData.SessionSnapshot;
 
         using var scope = _serviceProvider.CreateScope();
         var tenantManager = scope.ServiceProvider.GetService<TenantManager>();
         tenantManager.SetCurrentTenantAsync(CurrentTenantId).Wait();
 
         var externalShare = scope.ServiceProvider.GetRequiredService<ExternalShare>();
-        externalShare.Init(fileOperationData.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value)));
+        externalShare.Initialize(SessionSnapshot);
 
         var daoFactory = scope.ServiceProvider.GetService<IDaoFactory>();
         FolderDao = daoFactory.GetFolderDao<TId>();
@@ -243,7 +288,7 @@ abstract class FileOperation<T, TId> : FileOperation where T : FileOperationData
             await tenantManager.SetCurrentTenantAsync(CurrentTenantId);
 
             var externalShare = scope.ServiceProvider.GetRequiredService<ExternalShare>();
-            externalShare.Init(Headers);
+            externalShare.Initialize(SessionSnapshot);
 
             CustomSynchronizationContext.CurrentContext.CurrentPrincipal = _principal;
             CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo(_culture);
@@ -278,7 +323,7 @@ abstract class FileOperation<T, TId> : FileOperation where T : FileOperationData
             try
             {
                 this[Finish] = true;
-                PublishTaskInfo();
+                await PublishTaskInfo();
             }
             catch
             {
@@ -293,7 +338,7 @@ abstract class FileOperation<T, TId> : FileOperation where T : FileOperationData
         var tenantManager = scope.ServiceProvider.GetService<TenantManager>();
         await tenantManager.SetCurrentTenantAsync(CurrentTenantId);
         var externalShare = scope.ServiceProvider.GetRequiredService<ExternalShare>();
-        externalShare.Init(Headers);
+        externalShare.Initialize(SessionSnapshot);
 
         return scope;
     }
@@ -306,14 +351,14 @@ abstract class FileOperation<T, TId> : FileOperation where T : FileOperationData
         return count;
     }
 
-    protected void ProgressStep(TId folderId = default, TId fileId = default)
+    protected async Task ProgressStep(TId folderId = default, TId fileId = default)
     {
         if (Equals(folderId, default(TId)) && Equals(fileId, default(TId))
             || !Equals(folderId, default(TId)) && Folders.Contains(folderId)
             || !Equals(fileId, default(TId)) && Files.Contains(fileId))
         {
             IncrementProgress();
-            PublishTaskInfo();
+            await PublishTaskInfo();
         }
     }
 
@@ -343,9 +388,9 @@ abstract class FileOperation<T, TId> : FileOperation where T : FileOperationData
         return false;
     }
 
-    protected void PublishTaskInfo()
+    protected async Task PublishTaskInfo()
     {
-        PublishChanges();
+        await PublishChanges();
     }
 }
 

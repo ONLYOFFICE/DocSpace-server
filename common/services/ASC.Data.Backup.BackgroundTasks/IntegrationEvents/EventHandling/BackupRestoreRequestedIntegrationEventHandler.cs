@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,10 +29,9 @@ namespace ASC.Data.Backup.IntegrationEvents.EventHandling;
 [Scope]
 public class BackupRestoreRequestedIntegrationEventHandler(
         BackupAjaxHandler backupAjaxHandler,
-        ILogger logger,
+        ILogger<BackupRestoreRequestedIntegrationEventHandler> logger,
         TenantManager tenantManager,
         SecurityContext securityContext,
-        AuthManager authManager,
         BackupWorker backupWorker)
     : IIntegrationEventHandler<BackupRestoreRequestIntegrationEvent>
 {
@@ -43,13 +42,13 @@ public class BackupRestoreRequestedIntegrationEventHandler(
         {
             logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
 
-            if (!@event.Redelivered && backupWorker.IsInstanceTooBusy())
+            if (!@event.Redelivered && await backupWorker.IsInstanceTooBusy())
             {
                 throw new IntegrationEventRejectExeption(@event.Id);
             }
 
             await tenantManager.SetCurrentTenantAsync(@event.TenantId);
-            await securityContext.AuthenticateMeWithoutCookieAsync(await authManager.GetAccountByIDAsync(@event.TenantId, @event.CreateBy));
+            await securityContext.AuthenticateMeWithoutCookieAsync(@event.TenantId, @event.CreateBy);
 
             await backupAjaxHandler.StartRestoreAsync(@event.BackupId,
                                             @event.StorageType,

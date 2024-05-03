@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -48,6 +48,7 @@ public class S3Storage(TempStream tempStream,
     public override bool IsSupportCdnUri => true;
     public static long ChunkSize => 1000 * 1024 * 1024;
     public override bool IsSupportChunking => true;
+    public override bool ContentAsAttachment => _contentAsAttachment;
 
     private readonly List<string> _domains = new();
     private Dictionary<string, S3CannedACL> _domainsAcl;
@@ -73,6 +74,8 @@ public class S3Storage(TempStream tempStream,
 
     private EncryptionMethod _encryptionMethod = EncryptionMethod.None;
     private string _encryptionKey;
+
+    private bool _contentAsAttachment;
 
     public Uri GetUriInternal(string path)
     {
@@ -1020,6 +1023,8 @@ public class S3Storage(TempStream tempStream,
         {
             Modulename = moduleConfig.Name;
             DataList = new DataList(moduleConfig);
+
+            _contentAsAttachment = moduleConfig.ContentAsAttachment;
             _domains.AddRange(moduleConfig.Domain.Select(x => $"{x.Name}/"));
 
             //Make expires

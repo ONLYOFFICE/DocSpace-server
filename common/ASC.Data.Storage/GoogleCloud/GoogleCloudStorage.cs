@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -46,6 +46,7 @@ public class GoogleCloudStorage(TempStream tempStream,
     : BaseStorage(tempStream, tenantManager, pathUtils, emailValidationKeyProvider, httpContextAccessor, factory, options, clientFactory, tenantQuotaFeatureStatHelper, quotaSocketManager, settingsManager, quotaService, userManager, customQuota)
 {
     public override bool IsSupportChunking => true;
+    public override bool ContentAsAttachment => _contentAsAttachment;
 
     private string _subDir = string.Empty;
     private Dictionary<string, PredefinedObjectAcl> _domainsAcl;
@@ -55,6 +56,7 @@ public class GoogleCloudStorage(TempStream tempStream,
     private Uri _bucketRoot;
     private Uri _bucketSSlRoot;
     private bool _lowerCasing = true;
+    private bool _contentAsAttachment;
 
     public override IDataStore Configure(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props, IDataStoreValidator dataStoreValidator)
     {
@@ -64,6 +66,8 @@ public class GoogleCloudStorage(TempStream tempStream,
         {
             Modulename = moduleConfig.Name;
             DataList = new DataList(moduleConfig);
+
+            _contentAsAttachment = moduleConfig.ContentAsAttachment;
 
             DomainsExpires = moduleConfig.Domain.Where(x => x.Expires != TimeSpan.Zero).ToDictionary(x => x.Name, y => y.Expires);
 
@@ -288,7 +292,7 @@ public class GoogleCloudStorage(TempStream tempStream,
     }
     public override async Task DeleteFilesAsync(string domain, string folderPath, string pattern, bool recursive, Guid ownerId)
     {
-        using var storage = GetStorage();
+        using var storage = await GetStorageAsync();
 
         IAsyncEnumerable<Object> objToDel;
 
@@ -400,7 +404,7 @@ public class GoogleCloudStorage(TempStream tempStream,
 
     public override async Task<Uri> MoveAsync(string srcDomain, string srcPath, string newDomain, string newPath, Guid ownerId, bool quotaCheckFileSize = true)
     {
-        using var storage = GetStorage();
+        using var storage = await GetStorageAsync();
 
         var srcKey = MakePath(srcDomain, srcPath);
         var dstKey = MakePath(newDomain, newPath);
@@ -431,20 +435,7 @@ public class GoogleCloudStorage(TempStream tempStream,
         return GetObjectsAsync(domain, path, recursive)
                .Select(x => x.Name[MakePath(domain, path + "/").Length..]);
     }
-
-    private IEnumerable<Object> GetObjects(string domain, string path, bool recursive)
-    {
-        using var storage = GetStorage();
-
-        var items = storage.ListObjects(_bucket, MakePath(domain, path));
-
-        if (recursive)
-        {
-            return items;
-        }
-
-        return items.Where(x => x.Name.IndexOf('/', MakePath(domain, path + "/").Length) == -1);
-    }
+    
 
     private IAsyncEnumerable<Object> GetObjectsAsync(string domain, string path, bool recursive)
     {
@@ -486,10 +477,9 @@ public class GoogleCloudStorage(TempStream tempStream,
     }
     public override async Task DeleteDirectoryAsync(string domain, string path, Guid ownerId)
     {
-        using var storage = GetStorage();
+        using var storage = await GetStorageAsync();
 
-        var objToDel = storage
-                          .ListObjectsAsync(_bucket, MakePath(domain, path));
+        var objToDel = storage.ListObjectsAsync(_bucket, MakePath(domain, path));
 
         await foreach (var obj in objToDel)
         {

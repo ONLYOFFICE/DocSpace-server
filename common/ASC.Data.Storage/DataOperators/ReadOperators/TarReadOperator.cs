@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,7 +27,7 @@
 namespace ASC.Data.Storage.DataOperators;
 public class TarReadOperator: BaseReadOperator
 {
-    public TarReadOperator(string targetFile)
+    public TarReadOperator(string targetFile, bool removeTarget = true)
     {
         _tmpdir = Path.Combine(Path.GetDirectoryName(targetFile), Path.GetFileNameWithoutExtension(targetFile).Replace('>', '_').Replace(':', '_').Replace('?', '_'));
 
@@ -37,6 +37,25 @@ public class TarReadOperator: BaseReadOperator
             tarOutputStream.ExtractContents(_tmpdir);
         }
 
-        File.Delete(targetFile);
+        if (removeTarget)
+        {
+            File.Delete(targetFile);
+        }
+    }
+
+    public TarReadOperator(string targetFile, CancellationToken token, bool removeTarget = true)
+    {
+        _tmpdir = Path.Combine(Path.GetDirectoryName(targetFile), Path.GetFileNameWithoutExtension(targetFile).Replace('>', '_').Replace(':', '_').Replace('?', '_'));
+
+        using (var stream = File.OpenRead(targetFile))
+        using (var tarOutputStream = TarArchive.CreateInputTarArchive(stream, Encoding.UTF8))
+        {
+            tarOutputStream.ExtractContents(_tmpdir, false, token);
+        }
+
+        if (removeTarget)
+        {
+            File.Delete(targetFile);
+        }
     }
 }

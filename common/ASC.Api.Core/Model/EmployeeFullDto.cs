@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -163,7 +163,7 @@ public class EmployeeFullDto : EmployeeDto
     public double? UsedSpace { get; set; }
     public bool? Shared { get; set; }
 
-    /// <summary>Specifies if the user has a custom quota or not.</summary>
+    /// <summary>Specifies if the user has a custom quota or not</summary>
     /// <type>System.Boolean, System</type>
     public bool? IsCustomQuota { get; set; }
 

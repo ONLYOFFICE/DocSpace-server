@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,8 +27,8 @@
 namespace ASC.Api.Core.Security;
 
 [Scope]
-public class InvitationLinkHelper(IHttpContextAccessor httpContextAccessor,
-    MessageTarget messageTarget,
+public class InvitationLinkHelper(
+    IHttpContextAccessor httpContextAccessor,
     MessageService messageService,
     Signature signature,
     IDbContextFactory<MessagesContext> dbContextFactory,
@@ -61,16 +61,23 @@ public class InvitationLinkHelper(IHttpContextAccessor httpContextAccessor,
         var commonLinkResult = await emailValidationKeyProvider.ValidateEmailKeyAsync(ConfirmType.LinkInvite.ToStringFast() + (int)employeeType,
             key, emailValidationKeyProvider.ValidEmailKeyInterval);
 
-        if (commonLinkResult == EmailValidationKeyProvider.ValidationResult.Invalid)
+        if (commonLinkResult != EmailValidationKeyProvider.ValidationResult.Invalid)
         {
-            commonLinkResult = await emailValidationKeyProvider.ValidateEmailKeyAsync(email + ConfirmType.EmpInvite.ToStringFast() + (int)employeeType,
-                key, emailValidationKeyProvider.ValidEmailKeyInterval);
+            validationResult.Result = commonLinkResult;
+            validationResult.LinkType = InvitationLinkType.Common;
+            validationResult.ConfirmType = ConfirmType.LinkInvite;
+
+            return validationResult;
         }
+
+        commonLinkResult = await emailValidationKeyProvider.ValidateEmailKeyAsync(email + ConfirmType.EmpInvite.ToStringFast() + (int)employeeType,
+            key, emailValidationKeyProvider.ValidEmailKeyInterval);
 
         if (commonLinkResult != EmailValidationKeyProvider.ValidationResult.Invalid)
         {
             validationResult.Result = commonLinkResult;
             validationResult.LinkType = InvitationLinkType.Common;
+            validationResult.ConfirmType = ConfirmType.EmpInvite;
 
             return validationResult;
         }
@@ -84,6 +91,7 @@ public class InvitationLinkHelper(IHttpContextAccessor httpContextAccessor,
 
         validationResult.Result = individualLinkResult;
         validationResult.LinkType = InvitationLinkType.Individual;
+        validationResult.ConfirmType = ConfirmType.LinkInvite;
 
         return validationResult;
     }
@@ -130,7 +138,7 @@ public class InvitationLinkHelper(IHttpContextAccessor httpContextAccessor,
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        var target = messageTarget.Create(email);
+        var target = MessageTarget.Create(email);
         var description = JsonSerializer.Serialize(new[] { key });
 
         var message = await Queries.AuditEventsAsync(context, tenantId, target.ToString(), description);
@@ -141,7 +149,7 @@ public class InvitationLinkHelper(IHttpContextAccessor httpContextAccessor,
     private async Task SaveLinkVisitMessageAsync(string email, string key)
     {
         var headers = httpContextAccessor?.HttpContext?.Request.Headers;
-        var target = messageTarget.Create(email);
+        var target = MessageTarget.Create(email);
 
         await messageService.SendHeadersMessageAsync(MessageAction.RoomInviteLinkUsed, target, headers, key);
     }
@@ -157,6 +165,7 @@ public enum InvitationLinkType
 public class LinkValidationResult
 {
     public EmailValidationKeyProvider.ValidationResult Result { get; set; }
+    public ConfirmType? ConfirmType { get; set; }
     public InvitationLinkType LinkType { get; set; }
     public Guid LinkId { get; set; }
 }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -45,7 +45,7 @@ public class DisplayUserSettings : ISettings<DisplayUserSettings>
 [Scope]
 public class DisplayUserSettingsHelper(UserManager userManager, UserFormatter userFormatter, IConfiguration configuration)
 {
-    private readonly string _removedProfileName = configuration["web:removed-profile-name"] ?? "profile removed";
+    private string RemovedProfileName => configuration["web:removed-profile-name"] ?? "profile removed";
 
     public async Task<string> GetFullUserNameAsync(Guid userID, bool withHtmlEncode = true)
     {
@@ -77,11 +77,11 @@ public class DisplayUserSettingsHelper(UserManager userManager, UserFormatter us
                     resourceValue = (string)resourceProperty.GetValue(null);
                 }
 
-                return string.IsNullOrEmpty(resourceValue) ? _removedProfileName : resourceValue;
+                return string.IsNullOrEmpty(resourceValue) ? RemovedProfileName : resourceValue;
             }
             catch (Exception)
             {
-                return _removedProfileName;
+                return RemovedProfileName;
             }
         }
         var result = userFormatter.GetUserName(userInfo, format);

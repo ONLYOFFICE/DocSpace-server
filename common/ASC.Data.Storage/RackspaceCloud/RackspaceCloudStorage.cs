@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -47,6 +47,7 @@ public class RackspaceCloudStorage(TempPath tempPath,
     : BaseStorage(tempStream, tenantManager, pathUtils, emailValidationKeyProvider, httpContextAccessor, options, logger, httpClient, tenantQuotaFeatureStatHelper, quotaSocketManager, settingsManager, quotaService, userManager, customQuota)
 {
     public override bool IsSupportChunking => true;
+    public override bool ContentAsAttachment => _contentAsAttachment;
     public TempPath TempPath { get; } = tempPath;
 
     private string _region;
@@ -61,6 +62,7 @@ public class RackspaceCloudStorage(TempPath tempPath,
     private Uri _cname;
     private Uri _cnameSSL;
     private readonly List<string> _domains = new();
+    private bool _contentAsAttachment;
 
     public override IDataStore Configure(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props, IDataStoreValidator dataStoreValidator)
     {
@@ -70,6 +72,9 @@ public class RackspaceCloudStorage(TempPath tempPath,
         {
             Modulename = moduleConfig.Name;
             DataList = new DataList(moduleConfig);
+
+            _contentAsAttachment = moduleConfig.ContentAsAttachment;
+
             _domains.AddRange(moduleConfig.Domain.Select(x => $"{x.Name}/"));
             DomainsExpires = moduleConfig.Domain.Where(x => x.Expires != TimeSpan.Zero).ToDictionary(x => x.Name, y => y.Expires);
             DomainsExpires.Add(string.Empty, moduleConfig.Expires);

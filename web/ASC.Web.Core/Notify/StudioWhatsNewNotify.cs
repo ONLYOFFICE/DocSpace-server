@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,7 +33,6 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
     StudioNotifyHelper studioNotifyHelper,
     UserManager userManager,
     SecurityContext securityContext,
-    AuthManager authManager,
     CoreSettings coreSettings,
     IConfiguration configuration,
     WorkContext workContext,
@@ -131,7 +130,7 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
 
                 _log.Debug($"SendMsgWhatsNew checking subscription complete: {user.Email}");//temp
 
-                await securityContext.AuthenticateMeWithoutCookieAsync(await authManager.GetAccountByIDAsync(tenant.Id, user.Id));
+                await securityContext.AuthenticateMeWithoutCookieAsync(tenant.Id, user.Id);
 
                 var culture = string.IsNullOrEmpty(user.CultureName) ? tenant.GetCulture() : user.GetCulture();
 
@@ -147,7 +146,7 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
 
                 _log.Debug($"SendMsgWhatsNew auditEvents count : {auditEvents.Count}");//temp
 
-                var userActivities = new List<string>();
+                var userActivities = new HashSet<string>();
 
                 foreach (var e in auditEvents)
                 {

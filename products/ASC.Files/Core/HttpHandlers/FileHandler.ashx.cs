@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -54,7 +54,6 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
     FileMarker fileMarker,
-    SetupInfo setupInfo,
     FileUtility fileUtility,
     Global global,
     EmailValidationKeyProvider emailValidationKeyProvider,
@@ -64,7 +63,6 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
     UserManager userManager,
     DocumentServiceTrackerHelper documentServiceTrackerHelper,
     FilesMessageService filesMessageService,
-    FileShareLink fileShareLink,
     FileConverter fileConverter,
     FFmpegService fFmpegService,
     IServiceProvider serviceProvider,
@@ -75,13 +73,10 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
     IHttpClientFactory clientFactory,
     ThumbnailSettings thumbnailSettings,
     ExternalLinkHelper externalLinkHelper,
-    ExternalShare externalShare)
+    ExternalShare externalShare,
+    EntryManager entryManager,
+    IPSecurity.IPSecurity ipSecurity)
 {
-    public string FileHandlerPath
-    {
-        get { return filesLinkUtility.FileHandlerPath; }
-    }
-
     public async Task InvokeAsync(HttpContext context)
     {
         if (await tenantExtra.IsNotPaidAsync())
@@ -90,7 +85,14 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             //context.Response.StatusDescription = "Payment Required.";
             return;
         }
-
+        
+        if (authContext.IsAuthenticated && !(await ipSecurity.VerifyAsync()))
+        { 
+            context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+            await context.Response.WriteAsync(Resource.ErrorIpSecurity);
+            return;
+        }
+        
         try
         {
             switch ((context.Request.Query[FilesLinkUtility.Action].FirstOrDefault() ?? "").ToLower())
@@ -245,40 +247,21 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
         var flushed = false;
         try
         {
-            var doc = context.Request.Query[FilesLinkUtility.DocShareKey].FirstOrDefault() ?? "";
-
             var fileDao = daoFactory.GetFileDao<T>();
-            var version = 0;
-            var (readLink, file, linkShare) = await fileShareLink.CheckAsync(doc, true, fileDao);
-            if (!readLink && file == null)
-            {
-                await fileDao.InvalidateCacheAsync(id);
+            
+            await fileDao.InvalidateCacheAsync(id);
 
-                file = int.TryParse(context.Request.Query[FilesLinkUtility.Version], out version) && version > 0
-                           ? await fileDao.GetFileAsync(id, version)
-                           : await fileDao.GetFileAsync(id);
-            }
+            var file = int.TryParse(context.Request.Query[FilesLinkUtility.Version], out var version) && version > 0 
+                ? await fileDao.GetFileAsync(id, version) 
+                : await fileDao.GetFileAsync(id);
 
             if (file == null)
             {
                 context.Response.StatusCode = (int)HttpStatusCode.NotFound;
-
                 return;
             }
 
-            if (!readLink && !await fileSecurity.CanDownloadAsync(file))
-            {
-                var linkId = await externalShare.GetLinkIdAsync();
-
-                if (!(fileUtility.CanImageView(file.Title) || fileUtility.CanMediaView(file.Title) || FileUtility.GetFileExtension(file.Title) == ".pdf") ||
-                    linkId == Guid.Empty || !await fileSecurity.CanReadAsync(file, linkId))
-                {
-                    context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
-                    return;
-                }
-            }
-
-            if (readLink && linkShare is FileShare.Comment or FileShare.Read && file.DenyDownload)
+            if (!await fileSecurity.CanDownloadAsync(file))
             {
                 context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
                 return;
@@ -295,6 +278,16 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                 context.Response.StatusCode = (int)HttpStatusCode.NotFound;
 
                 return;
+            }
+            
+            if (authContext.IsAuthenticated && file.RootFolderType == FolderType.USER && !file.ProviderEntry && file.CreateBy != authContext.CurrentAccount.ID
+                && (fileUtility.CanImageView(file.Title) || fileUtility.CanMediaView(file.Title) || !fileUtility.CanWebView(file.Title)))
+            {
+                var linkId = await externalShare.GetLinkIdAsync();
+                if (linkId != Guid.Empty)
+                {
+                    await entryManager.MarkAsRecentByLink(file, linkId);
+                }
             }
 
             await fileMarker.RemoveMarkAsNewAsync(file);
@@ -343,8 +336,6 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                 {
                     var title = file.Title;
 
-                    if (file.ContentLength <= setupInfo.AvailableFileSize)
-                    {
                         var ext = FileUtility.GetFileExtension(file.Title);
 
                         var outType = (context.Request.Query[FilesLinkUtility.OutType].FirstOrDefault() ?? "").Trim();
@@ -385,7 +376,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                         {
                             if (!await fileConverter.EnableConvertAsync(file, ext))
                             {
-                                if (!readLink && await fileDao.IsSupportedPreSignedUriAsync(file))
+                                if (await fileDao.IsSupportedPreSignedUriAsync(file))
                                 {
                                     var url = (await fileDao.GetPreSignedUriAsync(file, TimeSpan.FromHours(1), externalShare.GetKey()));
                                     
@@ -410,26 +401,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                         }
 
                         flushed = await SendStreamByChunksAsync(context, length, offset, fullLength, title, fileStream);
-                    }
-                    else
-                    {
-                        if (!readLink && await fileDao.IsSupportedPreSignedUriAsync(file))
-                        {
-                            var url = (await fileDao.GetPreSignedUriAsync(file, TimeSpan.FromHours(1), externalShare.GetKey()));
-                            
-                            context.Response.Redirect(url, true);
 
-                            return;
-                        }
-                        
-                        var fullLength = await fileDao.GetFileSizeAsync(file);
-            
-                        long offset = 0;
-                        var length = ProcessRangeHeader(context, fullLength, ref offset);
-                        fileStream = await fileDao.GetFileStreamAsync(file, offset, length);
-            
-                        flushed = await SendStreamByChunksAsync(context, length, offset, fullLength, title, fileStream);
-                    }
                 }
                 catch (ThreadAbortException tae)
                 {
@@ -579,34 +551,10 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             {
                 version = 0;
             }
-            var doc = context.Request.Query[FilesLinkUtility.DocShareKey];
-            var share = context.Request.Query[FilesLinkUtility.ShareKey];
-
+            
             await fileDao.InvalidateCacheAsync(id);
 
-            var linkRight = FileShare.Restrict;
-            File<T> file = null;
-
-            if (!string.IsNullOrEmpty(share))
-            {
-                var result = await externalLinkHelper.ValidateAsync(share);
-
-                if (result.Access != FileShare.Restrict)
-                {
-                    file = version > 0
-                        ? await fileDao.GetFileAsync(id, version)
-                        : await fileDao.GetFileAsync(id);
-
-                    if (file != null && await fileSecurity.CanDownloadAsync(file))
-                    {
-                        linkRight = result.Access;
-                    }
-                }
-            }
-            else if (!string.IsNullOrEmpty(doc))
-            {
-                (linkRight, file) = await fileShareLink.CheckAsync(doc, fileDao);
-            }
+            var (linkRight, file) = await CheckLinkAsync(id, version, fileDao);
 
             if (linkRight == FileShare.Restrict && !securityContext.IsAuthenticated)
             {
@@ -730,6 +678,34 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
         {
             logger.ErrorStreamFile(he);
         }
+    }
+
+    private async Task<(FileShare, File<T>)> CheckLinkAsync<T>(T id, int version, IFileDao<T> fileDao)
+    {
+        var linkRight = FileShare.Restrict;
+
+        var key = externalShare.GetKey();
+        if (string.IsNullOrEmpty(key))
+        {
+            return (linkRight, null);
+        }
+
+        var result = await externalLinkHelper.ValidateAsync(key);
+        if (result.Access == FileShare.Restrict)
+        {
+            return (linkRight, null);
+        }
+
+        var file = version > 0
+            ? await fileDao.GetFileAsync(id, version)
+            : await fileDao.GetFileAsync(id);
+
+        if (file != null && await fileSecurity.CanDownloadAsync(file))
+        {
+            linkRight = result.Access;
+        }
+
+        return (linkRight, file);
     }
 
     private async Task EmptyFile(HttpContext context)
@@ -892,10 +868,13 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
         try
         {
             var fileDao = daoFactory.GetFileDao<T>();
-            int.TryParse(context.Request.Query[FilesLinkUtility.Version].FirstOrDefault() ?? "", out var version);
-            var doc = context.Request.Query[FilesLinkUtility.DocShareKey];
 
-            var (linkRight, file) = await fileShareLink.CheckAsync(doc, fileDao);
+            if (!int.TryParse(context.Request.Query[FilesLinkUtility.Version].FirstOrDefault() ?? "", out var version))
+            {
+                version = 0;
+            }
+            
+            var (linkRight, file) = await CheckLinkAsync(id, version, fileDao);
             if (linkRight == FileShare.Restrict && !securityContext.IsAuthenticated)
             {
                 var auth = context.Request.Query[FilesLinkUtility.AuthKey].FirstOrDefault();
@@ -1218,6 +1197,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             }
 
             await socketManager.CreateFileAsync(file);
+
         }
         catch (Exception ex)
         {

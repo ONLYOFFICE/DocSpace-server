@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,7 +27,7 @@
 namespace ASC.Web.Files.Helpers;
 
 [Scope]
-public class WordpressToken(TokenHelper tokenHelper, ConsumerFactory consumerFactory, OAuth20TokenHelper oAuth20TokenHelper)
+public class WordpressToken(TokenHelper tokenHelper, OAuth20TokenHelper oAuth20TokenHelper)
 {
     public const string AppAttr = "wordpress";
 
@@ -45,7 +45,7 @@ public class WordpressToken(TokenHelper tokenHelper, ConsumerFactory consumerFac
 
     public async Task<OAuth20Token> SaveTokenFromCodeAsync(string code)
     {
-        var token = oAuth20TokenHelper.GetAccessToken<WordpressLoginProvider>(consumerFactory, code);
+        var token = oAuth20TokenHelper.GetAccessToken<WordpressLoginProvider>(code);
         ArgumentNullException.ThrowIfNull(token);
 
         await tokenHelper.SaveTokenAsync(new Token(token, AppAttr));

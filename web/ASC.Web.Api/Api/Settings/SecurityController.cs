@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,24 +27,26 @@
 namespace ASC.Web.Api.Controllers.Settings;
 
 [DefaultRoute("security")]
-public class SecurityController(TenantManager tenantManager,
-        TenantExtra tenantExtra,
-        CoreBaseSettings coreBaseSettings,
-        MessageService messageService,
-        ApiContext apiContext,
-        UserManager userManager,
-        AuthContext authContext,
-        WebItemSecurity webItemSecurity,
-        PermissionContext permissionContext,
-        SettingsManager settingsManager,
-        WebItemManager webItemManager,
-        WebItemManagerSecurity webItemManagerSecurity,
-        DisplayUserSettingsHelper displayUserSettingsHelper,
-        EmployeeDtoHelper employeeWraperHelper,
-        MessageTarget messageTarget,
-        IMemoryCache memoryCache,
-        IMapper mapper,
-        IHttpContextAccessor httpContextAccessor)
+public class SecurityController(
+    TenantManager tenantManager,
+    TenantExtra tenantExtra,
+    CoreBaseSettings coreBaseSettings,
+    MessageService messageService,
+    ApiContext apiContext,
+    UserManager userManager,
+    AuthContext authContext,
+    WebItemSecurity webItemSecurity,
+    PermissionContext permissionContext,
+    SettingsManager settingsManager,
+    WebItemManager webItemManager,
+    WebItemManagerSecurity webItemManagerSecurity,
+    DisplayUserSettingsHelper displayUserSettingsHelper,
+    EmployeeDtoHelper employeeWrapperHelper,
+    IMemoryCache memoryCache,
+    IMapper mapper,
+    IHttpContextAccessor httpContextAccessor,
+    PasswordSettingsConverter passwordSettingsConverter,
+    PasswordSettingsManager passwordSettingsManager)
     : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
@@ -85,7 +87,7 @@ public class SecurityController(TenantManager tenantManager,
 
             foreach (var e in i.Users)
             {
-                s.Users.Add(await employeeWraperHelper.GetAsync(e));
+                s.Users.Add(await employeeWrapperHelper.GetAsync(e));
             }
 
             yield return s;
@@ -144,9 +146,10 @@ public class SecurityController(TenantManager tenantManager,
     [HttpGet("password")]
     [AllowNotPayment]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Everyone")]
-    public async Task<PasswordSettings> GetPasswordSettingsAsync()
+    public async Task<PasswordSettingsDto> GetPasswordSettingsAsync()
     {
-        return await settingsManager.LoadAsync<PasswordSettings>();
+        var settings = await settingsManager.LoadAsync<PasswordSettings>();
+        return passwordSettingsConverter.Convert(settings);
     }
 
     /// <summary>
@@ -161,12 +164,17 @@ public class SecurityController(TenantManager tenantManager,
     /// <path>api/2.0/settings/security/password</path>
     /// <httpMethod>PUT</httpMethod>
     [HttpPut("password")]
-    public async Task<PasswordSettings> UpdatePasswordSettingsAsync(PasswordSettingsRequestsDto inDto)
+    public async Task<PasswordSettingsDto> UpdatePasswordSettingsAsync(PasswordSettingsRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var userPasswordSettings = await settingsManager.LoadAsync<PasswordSettings>();
 
+        if (!passwordSettingsManager.CheckLengthInRange(inDto.MinLength))
+        {
+            throw new ArgumentException(nameof(inDto.MinLength));
+        }
+        
         userPasswordSettings.MinLength = inDto.MinLength;
         userPasswordSettings.UpperCase = inDto.UpperCase;
         userPasswordSettings.Digits = inDto.Digits;
@@ -176,7 +184,7 @@ public class SecurityController(TenantManager tenantManager,
 
         await messageService.SendAsync(MessageAction.PasswordStrengthSettingsUpdated);
 
-        return userPasswordSettings;
+        return passwordSettingsConverter.Convert(userPasswordSettings);
     }
 
     /// <summary>
@@ -308,7 +316,7 @@ public class SecurityController(TenantManager tenantManager,
 
         foreach (var a in admins)
         {
-            yield return await employeeWraperHelper.GetAsync(a);
+            yield return await employeeWrapperHelper.GetAsync(a);
         }
     }
 
@@ -363,7 +371,7 @@ public class SecurityController(TenantManager tenantManager,
             var messageAction = inDto.Administrator
                 ? MessageAction.AdministratorOpenedFullAccess
                 : MessageAction.AdministratorDeleted;
-            await messageService.SendAsync(messageAction, messageTarget.Create(admin.Id),
+            await messageService.SendAsync(messageAction, MessageTarget.Create(admin.Id),
                 admin.DisplayUserName(false, displayUserSettingsHelper));
         }
         else
@@ -371,7 +379,7 @@ public class SecurityController(TenantManager tenantManager,
             var messageAction = inDto.Administrator
                 ? MessageAction.ProductAddedAdministrator
                 : MessageAction.ProductDeletedAdministrator;
-            await messageService.SendAsync(messageAction, messageTarget.Create(admin.Id),
+            await messageService.SendAsync(messageAction, MessageTarget.Create(admin.Id),
                 GetProductName(inDto.ProductId), admin.DisplayUserName(false, displayUserSettingsHelper));
         }
 

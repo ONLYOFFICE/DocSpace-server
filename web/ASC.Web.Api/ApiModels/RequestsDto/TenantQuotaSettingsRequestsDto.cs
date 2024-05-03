@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,11 +30,11 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 /// </summary>
 public class TenantQuotaSettingsRequestsDto
 {
-    /// <summary>Specifies if the quota settings are enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>Tenant ID</summary>
+    /// <type>System.Int32, System</type>
     public int TenantId { get; set; }
 
-    /// <summary>Default quota value</summary>
+    /// <summary>Quota</summary>
     /// <type>System.Int64, System</type>
     public long Quota { get; set; }
 }

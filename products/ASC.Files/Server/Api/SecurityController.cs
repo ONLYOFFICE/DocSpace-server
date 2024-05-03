@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -58,23 +58,6 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
-    /// Returns an external link to the shared file with the ID specified in the request.
-    /// </summary>
-    /// <short>Get the shared link</short>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.GenerateSharedLinkRequestDto, ASC.Files.Core" name="inDto">Request parameters for generating the shared link</param>
-    /// <category>Sharing</category>
-    /// <returns type="System.Object, System">Shared file link</returns>
-    /// <path>api/2.0/files/{fileId}/sharedlinkAsync</path>
-    /// <httpMethod>PUT</httpMethod>
-    /// <visible>false</visible>
-    [HttpPut("{fileId}/sharedlinkAsync")]
-    public async Task<object> GenerateSharedLinkAsync(T fileId, GenerateSharedLinkRequestDto inDto)
-    {
-        return await securityControllerHelper.GenerateSharedLinkAsync(fileId, inDto.Share);
-    }
-
-    /// <summary>
     /// Returns the detailed information about the shared file with the ID specified in the request.
     /// </summary>
     /// <short>Get the shared file information</short>
@@ -112,23 +95,6 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
         {
             yield return s;
         }
-    }
-
-    /// <summary>
-    /// Sets the access status for the external link to the file with the ID specified in the request.
-    /// </summary>
-    /// <short>Set the link access status</short>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.GenerateSharedLinkRequestDto, ASC.Files.Core" name="inDto">Request parameters for generating the sharing link</param>
-    /// <category>Sharing</category>
-    /// <returns type="System.Boolean, System">Boolean value: true if the file is successfully shared</returns>
-    /// <path>api/2.0/files/{fileId}/setacelink</path>
-    /// <httpMethod>PUT</httpMethod>
-    /// <visible>false</visible>
-    [HttpPut("{fileId}/setacelink")]
-    public async Task<bool> SetAceLinkAsync(T fileId, [FromBody] GenerateSharedLinkRequestDto inDto)
-    {
-        return await fileStorageService.SetAceLinkAsync(fileId, inDto.Share);
     }
 
     /// <summary>
@@ -217,7 +183,7 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
         var folder = await daoFactory.GetFolderDao<T>().GetFolderAsync(folderId);
         var totalCount = await fileSharing.GetGroupMembersCountAsync(folder, groupId, apiContext.FilterValue);
 
-        apiContext.SetCount(Math.Min(totalCount - offset, count)).SetTotalCount(totalCount);
+        apiContext.SetCount(Math.Min(Math.Max(totalCount - offset, 0), count)).SetTotalCount(totalCount);
 
         await foreach (var memberSecurity in fileSharing.GetGroupMembersAsync(folder, groupId, apiContext.FilterValue, offset, count))
         {
@@ -226,8 +192,9 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
                 User = await employeeFullDtoHelper.GetFullAsync(memberSecurity.User),
                 GroupAccess = memberSecurity.GroupShare,
                 CanEditAccess = memberSecurity.CanEditAccess,
-                UserAccess = memberSecurity.UserShare != FileShare.None ? memberSecurity.UserShare : null,
-                Overridden = memberSecurity.UserShare != FileShare.None
+                UserAccess = memberSecurity.UserShare,
+                Overridden = memberSecurity.UserShare.HasValue,
+                Owner = memberSecurity.Owner
             };
         }
     }
@@ -355,6 +322,7 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// <path>api/2.0/files/share/{key}</path>
     /// <httpMethod>GET</httpMethod>
     /// <visible>false</visible>
+    /// <requiresAuthorization>false</requiresAuthorization>
     [AllowAnonymous]
     [HttpGet("share/{key}")]
     public async Task<ExternalShareDto> GetExternalShareDataAsync(string key)
@@ -375,6 +343,7 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// <path>api/2.0/files/share/{key}/password</path>
     /// <httpMethod>POST</httpMethod>
     /// <visible>false</visible>
+    /// <requiresAuthorization>false</requiresAuthorization>
     [AllowAnonymous]
     [HttpPost("share/{key}/password")]
     public async Task<ExternalShareDto> ApplyExternalSharePasswordAsync(string key, ExternalShareRequestDto inDto)

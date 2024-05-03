@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,27 +27,13 @@
 namespace ASC.Web.Files.Helpers;
 
 [Scope]
-public class FilesMessageService(ILoggerProvider options,
-    MessageTarget messageTarget,
+public class FilesMessageService(
+    ILogger<FilesMessageService> logger,
     MessageService messageService,
+    IHttpContextAccessor httpContextAccessor,
     IDaoFactory daoFactory)
 {
-    private readonly ILogger _logger = options.CreateLogger("ASC.Messaging");
-    private readonly IHttpContextAccessor _httpContextAccessor;
-
-    private static readonly JsonSerializerOptions _serializerOptions = 
-        new() { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull };
-
-    public FilesMessageService(
-        ILoggerProvider options,
-        MessageTarget messageTarget,
-        MessageService messageService,
-        IHttpContextAccessor httpContextAccessor,
-        IDaoFactory daoFactory)
-        : this(options, messageTarget, messageService, daoFactory)
-    {
-        _httpContextAccessor = httpContextAccessor;
-    }
+    private static readonly JsonSerializerOptions _serializerOptions = new() { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull };
 
     public async Task SendAsync(MessageAction action, params string[] description)
     {
@@ -96,12 +82,12 @@ public class FilesMessageService(ILoggerProvider options,
 
         if (headers == null)//todo check need if
         {
-            _logger.DebugEmptyRequestHeaders(action);
+            logger.DebugEmptyRequestHeaders(action);
 
             return;
         }
 
-        await messageService.SendHeadersMessageAsync(action, messageTarget.Create(entry.Id), headers, description);
+        await messageService.SendHeadersMessageAsync(action, MessageTarget.Create(entry.Id), headers, description);
     }
 
     private async Task SendAsync<T>(MessageAction action, FileEntry<T> entry, string oldTitle = null, Guid userId = default, FileShare userRole = FileShare.None, params string[] description)
@@ -118,7 +104,7 @@ public class FilesMessageService(ILoggerProvider options,
             description = description.Append(additionalParam).ToArray();
         }
 
-        await messageService.SendHeadersMessageAsync(action, messageTarget.Create(entry.Id), null, description);
+        await messageService.SendHeadersMessageAsync(action, MessageTarget.Create(entry.Id), null, description);
     }
 
     public async Task SendAsync<T1, T2>(MessageAction action, FileEntry<T1> entry1, FileEntry<T2> entry2, IDictionary<string, StringValues> headers, params string[] description)
@@ -137,12 +123,12 @@ public class FilesMessageService(ILoggerProvider options,
 
         if (headers == null)//todo check need if
         {
-            _logger.DebugEmptyRequestHeaders(action);
+            logger.DebugEmptyRequestHeaders(action);
 
             return;
         }
 
-        await messageService.SendHeadersMessageAsync(action, messageTarget.Create((IEnumerable<string>)new List<string> {entry1.Id.ToString(), entry2.Id.ToString()}), headers, description);
+        await messageService.SendHeadersMessageAsync(action, MessageTarget.Create((IEnumerable<string>)new List<string> {entry1.Id.ToString(), entry2.Id.ToString()}), headers, description);
     }
 
     public async Task SendAsync<T>(MessageAction action, FileEntry<T> entry, string description)
@@ -152,9 +138,9 @@ public class FilesMessageService(ILoggerProvider options,
             return;
         }
 
-        if (_httpContextAccessor == null)
+        if (httpContextAccessor == null)
         {
-            _logger.DebugEmptyHttpRequest(action);
+            logger.DebugEmptyHttpRequest(action);
 
             return;
         }
@@ -163,11 +149,11 @@ public class FilesMessageService(ILoggerProvider options,
 
         if (additionalParam != "")
         {
-            await messageService.SendAsync(action, messageTarget.Create(entry.Id), description, additionalParam);
+            await messageService.SendAsync(action, MessageTarget.Create(entry.Id), description, additionalParam);
         }
         else
         {
-            await messageService.SendAsync(action, messageTarget.Create(entry.Id), description);
+            await messageService.SendAsync(action, MessageTarget.Create(entry.Id), description);
         }
     }
 
@@ -178,13 +164,13 @@ public class FilesMessageService(ILoggerProvider options,
             return;
         }
 
-        if (_httpContextAccessor == null)
+        if (httpContextAccessor == null)
         {
-            _logger.DebugEmptyHttpRequest(action);
+            logger.DebugEmptyHttpRequest(action);
             return;
         }
 
-        await messageService.SendAsync(action, messageTarget.Create(entry.Id), d1, d2);
+        await messageService.SendAsync(action, MessageTarget.Create(entry.Id), d1, d2);
     }
 
     public async Task SendAsync<T>(MessageAction action, FileEntry<T> entry, MessageInitiator initiator, params string[] description)
@@ -201,7 +187,7 @@ public class FilesMessageService(ILoggerProvider options,
             description = description.Append(additionalParam).ToArray();
         }
 
-        await messageService.SendAsync(initiator, action, messageTarget.Create(entry.Id), description);
+        await messageService.SendAsync(initiator, action, MessageTarget.Create(entry.Id), description);
     }
 
     private async Task<string> GetAdditionalNotificationParamAsync<T>(FileEntry<T> entry, MessageAction action, string oldTitle = null, Guid userid = default, FileShare userRole = FileShare.None)

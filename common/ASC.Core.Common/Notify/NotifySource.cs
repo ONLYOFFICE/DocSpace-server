@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,8 +28,8 @@ namespace ASC.Core.Notify;
 
 public abstract class NotifySource : INotifySource
 {
-    private readonly Dictionary<CultureInfo, IActionProvider> _actions = new();
-    private readonly Dictionary<CultureInfo, IPatternProvider> _patterns = new();
+    private static readonly Dictionary<CultureInfo, IActionProvider> _actions = new();
+    private static readonly Dictionary<CultureInfo, IPatternProvider> _patterns = new();
 
     private readonly IRecipientProvider _recipientsProvider;
     public string Id { get; }

@@ -368,14 +368,8 @@ docx, xlsx, pptx와 최고의 호환성이 보장됩니다.</value>
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>{0}보다 큰 파일은 이동되지 않습니다</value>
   </data>
-  <data name="ErrorMessage_FileSizeEdit" xml:space="preserve">
-    <value>{0}보다 큰 파일은 편집되지 않습니다</value>
-  </data>
   <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>{0}보다 큰 파일은 복사되지 않습니다</value>
-  </data>
-  <data name="ErrorMessage_FileSizeConvert" xml:space="preserve">
-    <value>{0}보다 큰 파일은 변환되지 않습니다</value>
   </data>
   <data name="ErrorMessage_StartEditing" xml:space="preserve">
     <value>파일 편집 시작 오류</value>
@@ -427,5 +421,47 @@ docx, xlsx, pptx와 최고의 호환성이 보장됩니다.</value>
   </data>
   <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
     <value>비밀번호를 입력하려는 시도가 너무 많았습니다. 나중에 다시 시도해 주세요</value>
+  </data>
+  <data name="RoomIndex_Author" xml:space="preserve">
+    <value>작성자</value>
+  </data>
+  <data name="RoomIndex_Company" xml:space="preserve">
+    <value>회사</value>
+  </data>
+  <data name="RoomIndex_Created" xml:space="preserve">
+    <value>생성됨</value>
+  </data>
+  <data name="RoomIndex_DateGenerated" xml:space="preserve">
+    <value>생성 날짜</value>
+  </data>
+  <data name="RoomIndex_ExportAuthor" xml:space="preserve">
+    <value>작성자 내보내기</value>
+  </data>
+  <data name="RoomIndex_Folder" xml:space="preserve">
+    <value>폴더</value>
+  </data>
+  <data name="RoomIndex_Index" xml:space="preserve">
+    <value>색인</value>
+  </data>
+  <data name="RoomIndex_Modified" xml:space="preserve">
+    <value>수정됨</value>
+  </data>
+  <data name="RoomIndex_Name" xml:space="preserve">
+    <value>이름</value>
+  </data>
+  <data name="RoomIndex_Room" xml:space="preserve">
+    <value>방</value>
+  </data>
+  <data name="RoomIndex_SheetName" xml:space="preserve">
+    <value>방 색인</value>
+  </data>
+  <data name="RoomIndex_Size" xml:space="preserve">
+    <value>크기(MB)</value>
+  </data>
+  <data name="RoomIndex_Total" xml:space="preserve">
+    <value>합계</value>
+  </data>
+  <data name="RoomIndex_Type" xml:space="preserve">
+    <value>타입</value>
   </data>
 </root>

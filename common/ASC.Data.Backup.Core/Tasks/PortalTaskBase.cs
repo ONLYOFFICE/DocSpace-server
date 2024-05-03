@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -23,6 +23,7 @@
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+
 namespace ASC.Data.Backup.Tasks;
 
 public class ProgressChangedEventArgs(int progress) : EventArgs
@@ -50,6 +51,7 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
     public void Init(int tenantId)
     {
         TenantId = tenantId;
+        IgnoreTable("hosting_instance_registration");
     }
 
     public void IgnoreModule(ModuleName moduleName)
@@ -133,7 +135,7 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
 
     #region Progress
 
-    public event EventHandler<ProgressChangedEventArgs> ProgressChanged;
+    public Func<ProgressChangedEventArgs, Task> ProgressChanged;
 
     private int _stepsCount = 1;
     private volatile int _stepsCompleted;
@@ -148,7 +150,7 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
         Logger.DebugCountSteps(+_stepsCount);
     }
 
-    protected void SetStepCompleted(int increment = 1)
+    protected async Task SetStepCompleted(int increment = 1)
     {
         if (_stepsCount == 1)
         {
@@ -159,10 +161,10 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
             throw new InvalidOperationException("All steps completed.");
         }
         _stepsCompleted += increment;
-        SetProgress(100 * _stepsCompleted / _stepsCount);
+        await SetProgress(100 * _stepsCompleted / _stepsCount);
     }
 
-    protected void SetCurrentStepProgress(int value)
+    protected async Task SetCurrentStepProgress(int value)
     {
         if (value is < 0 or > 100)
         {
@@ -170,27 +172,30 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
         }
         if (value == 100)
         {
-            SetStepCompleted();
+            await SetStepCompleted();
         }
         else
         {
-            SetProgress((100 * _stepsCompleted + value) / _stepsCount);
+            await SetProgress((100 * _stepsCompleted + value) / _stepsCount);
         }
     }
 
-    protected void SetProgress(int value)
+    private async Task SetProgress(int value)
     {
         if (value is < 0 or > 100)
         {
             throw new ArgumentOutOfRangeException(nameof(value));
         }
         Progress = value;
-        OnProgressChanged(new ProgressChangedEventArgs(value));
+        await OnProgressChanged(new ProgressChangedEventArgs(value));
     }
 
-    protected void OnProgressChanged(ProgressChangedEventArgs eventArgs)
+    private async Task OnProgressChanged(ProgressChangedEventArgs eventArgs)
     {
-        ProgressChanged?.Invoke(this, eventArgs);
+        if (ProgressChanged != null)
+        {
+            await ProgressChanged(eventArgs);
+        }
     }
 
     #endregion

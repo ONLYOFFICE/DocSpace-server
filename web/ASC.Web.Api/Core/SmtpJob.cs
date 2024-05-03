@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -66,6 +66,7 @@ public class SmtpJob(UserManager userManager,
     public void Init(SmtpSettingsDto smtpSettings, int tenant, Guid user)
     {
         TenantId = tenant;
+        CurrentOperation = string.Empty;
         _currentUser = user;
         _smtpSettings = smtpSettings;
     }
@@ -74,19 +75,19 @@ public class SmtpJob(UserManager userManager,
     {
         try
         {
-            SetProgress(5, "Setup tenant");
+            await SetProgress(5, "Setup tenant");
 
             await tenantManager.SetCurrentTenantAsync(TenantId);
 
-            SetProgress(10, "Setup user");
+            await SetProgress(10, "Setup user");
 
             await securityContext.AuthenticateMeWithoutCookieAsync(_currentUser);
 
-            SetProgress(15, "Find user data");
+            await SetProgress(15, "Find user data");
 
             var currentUser = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
 
-            SetProgress(20, "Create mime message");
+            await SetProgress(20, "Create mime message");
 
             var toAddress = new MailboxAddress(currentUser.UserName, currentUser.Email);
 
@@ -103,7 +104,7 @@ public class SmtpJob(UserManager userManager,
 
             var bodyBuilder = new BodyBuilder
             {
-                TextBody = WebstudioNotifyPatternResource.pattern_smtp_test
+                TextBody = WebstudioNotifyPatternResource.pattern_smtp_test.Replace("$TrulyYours", WebstudioNotifyPatternResource.TrulyYoursText)
             };
 
             mimeMessage.Body = bodyBuilder.ToMessageBody();
@@ -111,14 +112,14 @@ public class SmtpJob(UserManager userManager,
             mimeMessage.Headers.Add("Auto-Submitted", "auto-generated");
 
             using var client = GetSmtpClient();
-            SetProgress(40, "Connect to host");
+            await SetProgress(40, "Connect to host");
 
             await client.ConnectAsync(_smtpSettings.Host, _smtpSettings.Port.GetValueOrDefault(25),
                 _smtpSettings.EnableSSL ? SecureSocketOptions.Auto : SecureSocketOptions.None);
 
             if (_smtpSettings.EnableAuth)
             {
-                SetProgress(60, "Authenticate");
+                await SetProgress(60, "Authenticate");
 
                 if (_smtpSettings.UseNtlm)
                 {
@@ -132,7 +133,7 @@ public class SmtpJob(UserManager userManager,
                 }
             }
 
-            SetProgress(80, "Send test message");
+            await SetProgress(80, "Send test message");
 
             await client.SendAsync(FormatOptions.Default, mimeMessage);
 
@@ -167,7 +168,7 @@ public class SmtpJob(UserManager userManager,
             try
             {
                 IsCompleted = true;
-                PublishChanges();
+                await PublishChanges();
 
                 securityContext.Logout();
             }
@@ -178,11 +179,11 @@ public class SmtpJob(UserManager userManager,
         }
     }
 
-    private void SetProgress(int percentage, string? status = null)
+    private async Task SetProgress(int percentage, string? status = null)
     {
         Percentage = percentage;
         CurrentOperation = status ?? CurrentOperation;
-        PublishChanges();
+        await PublishChanges();
     }
 
     private SmtpClient GetSmtpClient()

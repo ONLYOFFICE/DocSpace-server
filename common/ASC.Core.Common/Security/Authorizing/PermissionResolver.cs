@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -79,7 +79,7 @@ class PermissionResolver(AzManager azManager) : IPermissionResolver
     
     private async Task<DenyResult[]> GetDenyActionsAsync(ISubject subject, IAction[] actions, ISecurityObjectId objectId, ISecurityObjectProvider securityObjProvider)
     {
-        actions ??= Array.Empty<IAction>();
+        actions ??= [];
 
         if (subject == null)
         {
@@ -88,7 +88,7 @@ class PermissionResolver(AzManager azManager) : IPermissionResolver
 
         if (subject is ISystemAccount && subject.ID == Constants.CoreSystem.ID)
         {
-            return Array.Empty<DenyResult>();
+            return [];
         }
         
         var denyActions = new List<DenyResult>();

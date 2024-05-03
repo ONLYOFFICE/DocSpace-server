@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -66,5 +66,4 @@ global using Microsoft.IdentityModel.Tokens;
 global using Newtonsoft.Json;
 global using Newtonsoft.Json.Linq;
 
-global using SecurityContext = ASC.Core.SecurityContext;
 global using JsonSerializer = System.Text.Json.JsonSerializer;

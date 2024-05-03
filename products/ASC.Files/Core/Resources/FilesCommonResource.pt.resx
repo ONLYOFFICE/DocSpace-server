@@ -347,14 +347,8 @@ Alta compatibilidade com docx, xlsx, pptx.</value>
   <data name="ErrorMessage_EditingCoauth" xml:space="preserve">
     <value>O ficheiro foi aberto para edição por {0}. Atualmente, a função de coedição não é suportada para este formato de ficheiro.</value>
   </data>
-  <data name="ErrorMessage_FileSizeConvert" xml:space="preserve">
-    <value>Ficheiro maior que {0}, não será convertido</value>
-  </data>
   <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>O ficheiro é maior que {0}, ele não será copiado</value>
-  </data>
-  <data name="ErrorMessage_FileSizeEdit" xml:space="preserve">
-    <value>O ficheiro é maior que {0}, ele não será editado</value>
   </data>
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>O ficheiro é maior que {0}, ele não será movido</value>
@@ -427,5 +421,47 @@ Alta compatibilidade com docx, xlsx, pptx.</value>
   </data>
   <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
     <value>Você tentou muitas vezes inserir sua senha. Por favor, tente novamente mais tarde</value>
+  </data>
+  <data name="RoomIndex_Author" xml:space="preserve">
+    <value>Autor</value>
+  </data>
+  <data name="RoomIndex_Company" xml:space="preserve">
+    <value>Empresa</value>
+  </data>
+  <data name="RoomIndex_Created" xml:space="preserve">
+    <value>Criada</value>
+  </data>
+  <data name="RoomIndex_DateGenerated" xml:space="preserve">
+    <value>Data gerada</value>
+  </data>
+  <data name="RoomIndex_ExportAuthor" xml:space="preserve">
+    <value>Autor de exportação</value>
+  </data>
+  <data name="RoomIndex_Folder" xml:space="preserve">
+    <value>Pasta</value>
+  </data>
+  <data name="RoomIndex_Index" xml:space="preserve">
+    <value>Índice</value>
+  </data>
+  <data name="RoomIndex_Modified" xml:space="preserve">
+    <value>Modificado</value>
+  </data>
+  <data name="RoomIndex_Name" xml:space="preserve">
+    <value>Nome</value>
+  </data>
+  <data name="RoomIndex_Room" xml:space="preserve">
+    <value>Sala</value>
+  </data>
+  <data name="RoomIndex_SheetName" xml:space="preserve">
+    <value>Índice de salas</value>
+  </data>
+  <data name="RoomIndex_Size" xml:space="preserve">
+    <value>Tamanho (MB)</value>
+  </data>
+  <data name="RoomIndex_Total" xml:space="preserve">
+    <value>Total</value>
+  </data>
+  <data name="RoomIndex_Type" xml:space="preserve">
+    <value>Tipo</value>
   </data>
 </root>

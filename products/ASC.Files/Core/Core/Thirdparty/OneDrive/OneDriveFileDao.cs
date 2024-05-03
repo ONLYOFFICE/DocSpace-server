@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -63,7 +63,7 @@ internal class OneDriveFileDao(UserManager userManager,
         }
 
         var storage = (OneDriveStorage)await ProviderInfo.StorageAsync;
-        var onedriveSession = await storage.CreateResumableSessionAsync(onedriveFile, contentLength);
+        var onedriveSession = await storage.CreateRenewableSessionAsync(onedriveFile, contentLength);
         if (onedriveSession != null)
         {
             uploadSession.Items[UploadSessionKey] = onedriveSession;

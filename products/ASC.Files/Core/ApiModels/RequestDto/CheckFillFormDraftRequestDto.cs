@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,11 +33,7 @@ public class CheckFillFormDraftRequestDto
     /// <summary>File version</summary>
     /// <type>System.Int32, System</type>
     public int Version { get; set; }
-
-    /// <summary>Shared token</summary>
-    /// <type>System.String, System</type>
-    public string Doc { get; set; }
-
+    
     /// <summary>Action with a form</summary>
     /// <type>System.String, System</type>
     public string Action { get; set; }
@@ -48,6 +44,5 @@ public class CheckFillFormDraftRequestDto
 
     /// <summary>Specifies whether to request an embedded form or not</summary>
     /// <type>System.Boolean, System</type>
-    public bool RequestEmbedded => (Action ?? "").Equals("embedded", StringComparison.InvariantCultureIgnoreCase)
-                && !string.IsNullOrEmpty(Doc);
+    public bool RequestEmbedded => (Action ?? "").Equals("embedded", StringComparison.InvariantCultureIgnoreCase);
 }

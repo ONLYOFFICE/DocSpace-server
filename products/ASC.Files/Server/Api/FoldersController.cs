@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,31 +27,37 @@
 namespace ASC.Files.Api;
 
 [ConstraintRoute("int")]
-public class FoldersControllerInternal(EntryManager entryManager,
-        FoldersControllerHelper foldersControllerHelper,
-        FileStorageService fileStorageService,
-        FileOperationsManager fileOperationsManager,
-        FileOperationDtoHelper fileOperationDtoHelper,
-        FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper)
-    : FoldersController<int>(entryManager, foldersControllerHelper, fileStorageService, fileOperationsManager, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper);
+public class FoldersControllerInternal(
+    BreadCrumbsManager breadCrumbsManager,
+    FolderContentDtoHelper folderContentDtoHelper,
+    FileStorageService fileStorageService,
+    FileOperationsManager fileOperationsManager,
+    FileOperationDtoHelper fileOperationDtoHelper,
+    FolderDtoHelper folderDtoHelper,
+    FileDtoHelper fileDtoHelper,
+    PermissionContext permissionContext)
+    : FoldersController<int>(breadCrumbsManager, folderContentDtoHelper, fileStorageService, fileOperationsManager, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper, permissionContext);
 
-public class FoldersControllerThirdparty(EntryManager entryManager,
-        FoldersControllerHelper foldersControllerHelper,
-        FileStorageService fileStorageService,
-        FileOperationsManager fileOperationsManager,
-        FileOperationDtoHelper fileOperationDtoHelper,
-        FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper)
-    : FoldersController<string>(entryManager, foldersControllerHelper, fileStorageService, fileOperationsManager, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper);
+public class FoldersControllerThirdparty(
+    BreadCrumbsManager breadCrumbsManager,
+    FolderContentDtoHelper folderContentDtoHelper,
+    FileStorageService fileStorageService,
+    FileOperationsManager fileOperationsManager,
+    FileOperationDtoHelper fileOperationDtoHelper,
+    FolderDtoHelper folderDtoHelper,
+    FileDtoHelper fileDtoHelper,
+    PermissionContext permissionContext)
+    : FoldersController<string>(breadCrumbsManager, folderContentDtoHelper, fileStorageService, fileOperationsManager, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper, permissionContext);
 
-public abstract class FoldersController<T>(EntryManager entryManager,
-        FoldersControllerHelper foldersControllerHelper,
-        FileStorageService fileStorageService,
-        FileOperationsManager fileOperationsManager,
-        FileOperationDtoHelper fileOperationDtoHelper,
-        FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper)
+public abstract class FoldersController<T>(
+    BreadCrumbsManager breadCrumbsManager,
+    FolderContentDtoHelper folderContentDtoHelper,
+    FileStorageService fileStorageService,
+    FileOperationsManager fileOperationsManager,
+    FileOperationDtoHelper fileOperationDtoHelper,
+    FolderDtoHelper folderDtoHelper,
+    FileDtoHelper fileDtoHelper,
+    PermissionContext permissionContext)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -69,7 +75,9 @@ public abstract class FoldersController<T>(EntryManager entryManager,
     [HttpPost("folder/{folderId}")]
     public async Task<FolderDto<T>> CreateFolderAsync(T folderId, CreateFolderRequestDto inDto)
     {
-        return await foldersControllerHelper.CreateFolderAsync(folderId, inDto.Title);
+        var folder = await fileStorageService.CreateFolderAsync(folderId, inDto.Title);
+
+        return await _folderDtoHelper.GetAsync(folder);
     }
 
     /// <summary>
@@ -88,7 +96,7 @@ public abstract class FoldersController<T>(EntryManager entryManager,
     {
         await fileOperationsManager.PublishDelete(new List<T> { folderId }, new List<T>(), false, !inDto.DeleteAfter, inDto.Immediately);
         
-        foreach (var e in fileOperationsManager.GetOperationResults())
+        foreach (var e in await fileOperationsManager.GetOperationResults())
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
@@ -116,10 +124,11 @@ public abstract class FoldersController<T>(EntryManager entryManager,
     /// <param type="System.Nullable{System.Boolean}, System" name="excludeSubject">Specifies whether to exclude a subject or not</param>
     /// <param type="System.Nullable{ASC.Files.Core.Core.ApplyFilterOption}, System" name="applyFilterOption">Specifies whether to return only files, only folders or all elements from the specified folder</param>
     /// <param type="System.String, System" name="extension">Specifies whether to search for a specific file extension</param>
-    /// <param type="System.Nullable{ASC.Files.Core.VirtualRooms.SearchArea}, ASC.Files.Core" name="searchArea" optional="true" remark="Allowed values: Active (0), Archive (1), Any (2), RecentByLinks (3)">Search area</param>
+    /// <param type="ASC.Files.Core.VirtualRooms.SearchArea, ASC.Files.Core" name="searchArea" optional="true" remark="Allowed values: Active (0), Archive (1), Any (2), RecentByLinks (3)">Search area</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FolderContentDto, ASC.Files.Core">Folder contents</returns>
     /// <path>api/2.0/files/{folderId}</path>
     /// <httpMethod>GET</httpMethod>
+    /// <requiresAuthorization>false</requiresAuthorization>
     [AllowAnonymous]
     [HttpGet("{folderId}")]
     public async Task<FolderContentDto<T>> GetFolderAsync(T folderId, Guid? userIdOrGroupId, FilterType? filterType, T roomId, bool? searchInContent, bool? withsubfolders, bool? excludeSubject,
@@ -127,7 +136,7 @@ public abstract class FoldersController<T>(EntryManager entryManager,
     {
 
         var split = extension == null ? [] : extension.Split(",");
-        var folder = await foldersControllerHelper.GetFolderAsync(folderId, userIdOrGroupId, filterType, roomId, searchInContent, withsubfolders, excludeSubject, applyFilterOption, searchArea, split);
+        var folder = await folderContentDtoHelper.GetAsync(folderId, userIdOrGroupId, filterType, roomId, searchInContent, withsubfolders, excludeSubject, applyFilterOption, searchArea, split);
 
         return folder.NotFoundIfNull();
     }
@@ -141,11 +150,14 @@ public abstract class FoldersController<T>(EntryManager entryManager,
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FolderDto, ASC.Files.Core">Folder parameters</returns>
     /// <path>api/2.0/files/folder/{folderId}</path>
     /// <httpMethod>GET</httpMethod>
+    /// <requiresAuthorization>false</requiresAuthorization>
     [AllowAnonymous]
     [HttpGet("folder/{folderId}")]
     public async Task<FolderDto<T>> GetFolderInfoAsync(T folderId)
-    {
-        return await foldersControllerHelper.GetFolderInfoAsync(folderId);
+    {        
+        var folder = await fileStorageService.GetFolderAsync(folderId).NotFoundIfNull("Folder not found");
+
+        return await _folderDtoHelper.GetAsync(folder);
     }
 
     /// <summary>
@@ -161,7 +173,7 @@ public abstract class FoldersController<T>(EntryManager entryManager,
     [HttpGet("folder/{folderId}/path")]
     public async IAsyncEnumerable<FileEntryDto> GetFolderPathAsync(T folderId)
     {
-        var breadCrumbs = await entryManager.GetBreadCrumbsAsync(folderId);
+        var breadCrumbs = await breadCrumbsManager.GetBreadCrumbsAsync(folderId);
 
         foreach (var e in breadCrumbs)
         {
@@ -224,29 +236,36 @@ public abstract class FoldersController<T>(EntryManager entryManager,
     /// <httpMethod>PUT</httpMethod>
     [HttpPut("folder/{folderId}")]
     public async Task<FolderDto<T>> RenameFolderAsync(T folderId, CreateFolderRequestDto inDto)
-    {
-        return await foldersControllerHelper.RenameFolderAsync(folderId, inDto.Title);
+    {        
+        var folder = await fileStorageService.FolderRenameAsync(folderId, inDto.Title);
+
+        return await _folderDtoHelper.GetAsync(folder);
     }
 
     /// <summary>
-    /// Returns the used space in root folders.
+    /// Returns the used space of files in the root folders.
     /// </summary>
-    /// <short>Returns the used space in root foldersю</short>
+    /// <short>Get used space of files</short>
     /// <category>Folders</category>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FilesStatisticsResultDto, ASC.Files.Core">Used space in root folders</returns>
+    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FilesStatisticsResultDto, ASC.Files.Core">Used space of files in the root folders</returns>
     /// <path>api/2.0/files/filesusedspace</path>
     /// <httpMethod>GET</httpMethod>
     [HttpGet("filesusedspace")]
     public async Task<FilesStatisticsResultDto> GetFilesUsedSpace()
     {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
         return await fileStorageService.GetFilesUsedSpace();
     }
 }
 
-public class FoldersControllerCommon(GlobalFolderHelper globalFolderHelper,
-        FoldersControllerHelper foldersControllerHelper,
-        FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper)
+public class FoldersControllerCommon(
+    GlobalFolderHelper globalFolderHelper,
+    FolderContentDtoHelper folderContentDtoHelper,
+    FolderDtoHelper folderDtoHelper,
+    FileDtoHelper fileDtoHelper,
+    UserManager userManager,
+    SecurityContext securityContext)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -265,7 +284,7 @@ public class FoldersControllerCommon(GlobalFolderHelper globalFolderHelper,
     [HttpGet("@common")]
     public async Task<FolderContentDto<int>> GetCommonFolderAsync(Guid? userIdOrGroupId, FilterType? filterType, bool? searchInContent, bool? withsubfolders)
     {
-        return await foldersControllerHelper.GetFolderAsync(await globalFolderHelper.FolderCommonAsync, userIdOrGroupId, filterType, default, searchInContent, withsubfolders,
+        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderCommonAsync, userIdOrGroupId, filterType, default, searchInContent, withsubfolders,
             false, ApplyFilterOption.All, null);
     }
 
@@ -285,7 +304,7 @@ public class FoldersControllerCommon(GlobalFolderHelper globalFolderHelper,
     [HttpGet("@favorites")]
     public async Task<FolderContentDto<int>> GetFavoritesFolderAsync(Guid? userIdOrGroupId, FilterType? filterType, bool? searchInContent, bool? withsubfolders)
     {
-        return await foldersControllerHelper.GetFolderAsync(await globalFolderHelper.FolderFavoritesAsync, userIdOrGroupId, filterType, default, searchInContent, withsubfolders,
+        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderFavoritesAsync, userIdOrGroupId, filterType, default, searchInContent, withsubfolders,
             false, ApplyFilterOption.All, null);
     }
 
@@ -305,7 +324,7 @@ public class FoldersControllerCommon(GlobalFolderHelper globalFolderHelper,
     [HttpGet("@my")]
     public async Task<FolderContentDto<int>> GetMyFolderAsync(Guid? userIdOrGroupId, FilterType? filterType, bool? searchInContent, bool? withsubfolders, ApplyFilterOption? applyFilterOption)
     {
-        return await foldersControllerHelper.GetFolderAsync(await globalFolderHelper.FolderMyAsync, userIdOrGroupId, filterType, default, searchInContent, withsubfolders,
+        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderMyAsync, userIdOrGroupId, filterType, default, searchInContent, withsubfolders,
             false, applyFilterOption, null);
     }
 
@@ -329,7 +348,7 @@ public class FoldersControllerCommon(GlobalFolderHelper globalFolderHelper,
             throw new SecurityException();
         }
 
-        return await foldersControllerHelper.GetFolderAsync(await globalFolderHelper.FolderPrivacyAsync, userIdOrGroupId, filterType, default, searchInContent, withsubfolders,
+        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderPrivacyAsync, userIdOrGroupId, filterType, default, searchInContent, withsubfolders,
             false, ApplyFilterOption.All, null);
     }
 
@@ -349,7 +368,7 @@ public class FoldersControllerCommon(GlobalFolderHelper globalFolderHelper,
     [HttpGet("@projects")]
     public async Task<FolderContentDto<string>> GetProjectsFolderAsync(Guid? userIdOrGroupId, FilterType? filterType, bool? searchInContent, bool? withsubfolders)
     {
-        return await foldersControllerHelper.GetFolderAsync(await globalFolderHelper.GetFolderProjectsAsync<string>(), userIdOrGroupId, filterType, default, searchInContent, withsubfolders,
+        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.GetFolderProjectsAsync<string>(), userIdOrGroupId, filterType, default, searchInContent, withsubfolders,
             false, ApplyFilterOption.All, null);
     }
 
@@ -374,7 +393,7 @@ public class FoldersControllerCommon(GlobalFolderHelper globalFolderHelper,
     public async Task<FolderContentDto<int>> GetRecentFolderAsync(Guid? userIdOrGroupId, FilterType? filterType, bool? searchInContent, bool? withsubfolders, bool? excludeSubject, 
         ApplyFilterOption? applyFilterOption, SearchArea? searchArea, string[] extension)
     {
-        return await foldersControllerHelper.GetFolderAsync(await globalFolderHelper.FolderRecentAsync, userIdOrGroupId, filterType, default, searchInContent, withsubfolders,
+        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderRecentAsync, userIdOrGroupId, filterType, default, searchInContent, withsubfolders,
             excludeSubject, applyFilterOption, searchArea, extension);
     }
 
@@ -395,12 +414,11 @@ public class FoldersControllerCommon(GlobalFolderHelper globalFolderHelper,
     [HttpGet("@root")]
     public async IAsyncEnumerable<FolderContentDto<int>> GetRootFoldersAsync(Guid? userIdOrGroupId, FilterType? filterType, bool? withsubfolders, bool? withoutTrash, bool? searchInContent)
     {
-        var foldersIds = foldersControllerHelper.GetRootFoldersIdsAsync(withoutTrash ?? false);
+        var foldersIds = GetRootFoldersIdsAsync(withoutTrash ?? false);
 
         await foreach (var folder in foldersIds)
         {
-            yield return await foldersControllerHelper.GetFolderAsync(folder, userIdOrGroupId, filterType, default, searchInContent, withsubfolders, false,
-                ApplyFilterOption.All, null);
+            yield return await folderContentDtoHelper.GetAsync(folder, userIdOrGroupId, filterType, default, searchInContent, withsubfolders, false, ApplyFilterOption.All, null);
         }
     }
 
@@ -420,7 +438,7 @@ public class FoldersControllerCommon(GlobalFolderHelper globalFolderHelper,
     [HttpGet("@share")]
     public async Task<FolderContentDto<int>> GetShareFolderAsync(Guid? userIdOrGroupId, FilterType? filterType, bool? searchInContent, bool? withsubfolders)
     {
-        return await foldersControllerHelper.GetFolderAsync(await globalFolderHelper.FolderShareAsync, userIdOrGroupId, filterType, default, searchInContent, withsubfolders,
+        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderShareAsync, userIdOrGroupId, filterType, default, searchInContent, withsubfolders,
             false, ApplyFilterOption.All, null);
     }
 
@@ -440,7 +458,7 @@ public class FoldersControllerCommon(GlobalFolderHelper globalFolderHelper,
     [HttpGet("@templates")]
     public async Task<FolderContentDto<int>> GetTemplatesFolderAsync(Guid? userIdOrGroupId, FilterType? filterType, bool? searchInContent, bool? withsubfolders)
     {
-        return await foldersControllerHelper.GetFolderAsync(await globalFolderHelper.FolderTemplatesAsync, userIdOrGroupId, filterType, default, searchInContent, withsubfolders,
+        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderTemplatesAsync, userIdOrGroupId, filterType, default, searchInContent, withsubfolders,
             false, ApplyFilterOption.All, null);
     }
 
@@ -460,7 +478,32 @@ public class FoldersControllerCommon(GlobalFolderHelper globalFolderHelper,
     [HttpGet("@trash")]
     public async Task<FolderContentDto<int>> GetTrashFolderAsync(Guid? userIdOrGroupId, FilterType? filterType, bool? searchInContent, bool? withsubfolders, ApplyFilterOption? applyFilterOption)
     {
-        return await foldersControllerHelper.GetFolderAsync(Convert.ToInt32(await globalFolderHelper.FolderTrashAsync), userIdOrGroupId, filterType, default, searchInContent, withsubfolders,
+        return await folderContentDtoHelper.GetAsync(Convert.ToInt32(await globalFolderHelper.FolderTrashAsync), userIdOrGroupId, filterType, default, searchInContent, withsubfolders,
             false, applyFilterOption, null);
+    }
+    
+    private async IAsyncEnumerable<int> GetRootFoldersIdsAsync(bool withoutTrash)
+    {
+        var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
+        var isUser = await userManager.IsUserAsync(user);
+        var isOutsider = await userManager.IsOutsiderAsync(user);
+
+        if (isOutsider)
+        {
+            withoutTrash = true;
+        }
+
+        if (!isUser)
+        {
+            yield return await globalFolderHelper.FolderMyAsync;
+        }
+
+        if (!withoutTrash && !isUser)
+        {
+            yield return await globalFolderHelper.FolderTrashAsync;
+        }
+
+        yield return await globalFolderHelper.FolderVirtualRoomsAsync;
+        yield return await globalFolderHelper.FolderArchiveAsync;
     }
 }

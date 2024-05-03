@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -90,7 +90,7 @@ internal class DropboxFileDao(UserManager userManager,
             }
 
             await ProviderInfo.CacheResetAsync(Dao.MakeThirdId(dropboxFile));
-            await ProviderInfo.CacheResetAsync(Dao.GetParentFolderId(dropboxFile), false);
+            await ProviderInfo.CacheResetAsync(Dao.GetParentFolderId(dropboxFile));
 
             return Dao.ToFile(dropboxFile.AsFile);
         }

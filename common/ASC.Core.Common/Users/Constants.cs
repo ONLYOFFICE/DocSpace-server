@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -134,6 +134,9 @@ public sealed class Constants(IConfiguration configuration)
     public static readonly Action Action_EditGroups = new(
         new Guid("{1D4FEEAC-0BF3-4aa9-B096-6D6B104B79B5}"),
         "Edit categories and groups");
+    public static readonly Action Action_ReadGroups = new(
+        new Guid("{3E74AFF2-7C0C-4089-B209-6495B8643471}"),
+        "Read categories and groups");
 
     #endregion
 }

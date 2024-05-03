@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -71,9 +71,9 @@ public class FileMarkerHelper(
     private readonly ILogger _logger = logger;
     private readonly DistributedTaskQueue _tasks = queueFactory.CreateQueue(CustomDistributedTaskQueueName);
 
-    internal void Add<T>(AsyncTaskData<T> taskData)
+    internal async Task Add<T>(AsyncTaskData<T> taskData)
     {
-        _tasks.EnqueueTask(async (_, _) => await ExecMarkFileAsNewAsync(taskData), taskData);
+        await _tasks.EnqueueTask(async (_, _) => await ExecMarkFileAsNewAsync(taskData), taskData);
     }
 
     private async Task ExecMarkFileAsNewAsync<T>(AsyncTaskData<T> obj)
@@ -157,7 +157,8 @@ public class FileMarker(
             {
                 var parentFolder = parentFolders.FirstOrDefault();
                 var guids = await fileSecurity.WhoCanReadAsync(obj.FileEntry);
-                if (parentFolder.FolderType != FolderType.FormFillingFolderDone && parentFolder.FolderType != FolderType.FormFillingFolderInProgress)
+                if (parentFolder.FolderType != FolderType.FormFillingFolderDone && parentFolder.FolderType != FolderType.FormFillingFolderInProgress &&
+                    parentFolder.FolderType != FolderType.FillingFormsRoom)
                 {
                     userIDs = guids.Where(x => x != obj.CurrentAccountId).ToList();
                 }
@@ -475,7 +476,7 @@ public class FileMarker(
             taskData.UserIDs = projectTeam;
         }
 
-        fileMarkerHelper.Add(taskData);
+        await fileMarkerHelper.Add(taskData);
     }
 
     public async ValueTask RemoveMarkAsNewAsync<T>(FileEntry<T> fileEntry, Guid userId = default)

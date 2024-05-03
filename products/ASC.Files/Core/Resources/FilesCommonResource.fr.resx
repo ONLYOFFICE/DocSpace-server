@@ -178,14 +178,8 @@
   <data name="ErrorMessage_FileNotFound" xml:space="preserve">
     <value>Le fichier requis n'a pas été trouvé</value>
   </data>
-  <data name="ErrorMessage_FileSizeConvert" xml:space="preserve">
-    <value>Le fichier de plus de {0} ne sera pas converti</value>
-  </data>
   <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>Fichier de plus de {0} ne sera pas copié</value>
-  </data>
-  <data name="ErrorMessage_FileSizeEdit" xml:space="preserve">
-    <value>Fichier de plus de {0} ne sera pas modifié</value>
   </data>
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>Fichier de plus de {0} ne sera pas déplacé</value>
@@ -427,5 +421,47 @@ Compatibilité maximale avec docx, xlsx, pptx.</value>
   </data>
   <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
     <value>Vous avez essayé à plusieurs reprises de saisir votre mot de passe. Veuillez réessayer plus tard</value>
+  </data>
+  <data name="RoomIndex_Author" xml:space="preserve">
+    <value>Auteur</value>
+  </data>
+  <data name="RoomIndex_Company" xml:space="preserve">
+    <value>Société</value>
+  </data>
+  <data name="RoomIndex_Created" xml:space="preserve">
+    <value>Créé le</value>
+  </data>
+  <data name="RoomIndex_DateGenerated" xml:space="preserve">
+    <value>Date de génération</value>
+  </data>
+  <data name="RoomIndex_ExportAuthor" xml:space="preserve">
+    <value>Auteur de l'exportation</value>
+  </data>
+  <data name="RoomIndex_Folder" xml:space="preserve">
+    <value>Dossier</value>
+  </data>
+  <data name="RoomIndex_Index" xml:space="preserve">
+    <value>Index</value>
+  </data>
+  <data name="RoomIndex_Modified" xml:space="preserve">
+    <value>Modifié le</value>
+  </data>
+  <data name="RoomIndex_Name" xml:space="preserve">
+    <value>Nom</value>
+  </data>
+  <data name="RoomIndex_Room" xml:space="preserve">
+    <value>Salle</value>
+  </data>
+  <data name="RoomIndex_SheetName" xml:space="preserve">
+    <value>Index de la salle</value>
+  </data>
+  <data name="RoomIndex_Size" xml:space="preserve">
+    <value>Taille (Mo)</value>
+  </data>
+  <data name="RoomIndex_Total" xml:space="preserve">
+    <value>Total</value>
+  </data>
+  <data name="RoomIndex_Type" xml:space="preserve">
+    <value>Type</value>
   </data>
 </root>

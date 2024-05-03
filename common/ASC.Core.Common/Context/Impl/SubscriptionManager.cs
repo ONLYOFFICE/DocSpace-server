@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -129,7 +129,7 @@ public class SubscriptionManager(CachedSubscriptionService service, TenantManage
         var m = methods.FirstOrDefault(x => x.Action.Equals(actionID, StringComparison.OrdinalIgnoreCase)) ?? 
                 methods.FirstOrDefault();
 
-        return m != null ? m.Methods : Array.Empty<string>();
+        return m != null ? m.Methods : [];
     }
 
     public async Task<string[]> GetRecipientsAsync(string sourceID, string actionID, string objectID)
