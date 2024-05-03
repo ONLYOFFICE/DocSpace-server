@@ -54,7 +54,8 @@ internal class FolderDao(
               maxTotalSizeStatistic,
               settingsManager,
               authContext,
-        serviceProvider), IFolderDao<int>
+              serviceProvider, 
+              distributedLockProvider), IFolderDao<int>
     {
     private const string My = "my";
     private const string Common = "common";
@@ -752,9 +753,9 @@ internal class FolderDao(
                     }
                     if(oldParentId == trashId)
                     {
-                    await tagDao.RemoveTagLinksAsync(folderId, FileEntryType.Folder, TagType.Origin);
+                        await tagDao.RemoveTagLinksAsync(folderId, FileEntryType.Folder, TagType.Origin);
                         await tagDao.RemoveTagLinksAsync(folderId, FileEntryType.Folder, TagType.FromRoom);
-                }
+                    }
                 }
 
 
@@ -1232,7 +1233,7 @@ internal class FolderDao(
         
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
-        await using (await distributedLockProvider.TryAcquireFairLockAsync($"{key}_{tenantId}"))
+        await using (await _distributedLockProvider.TryAcquireFairLockAsync($"{key}_{tenantId}"))
         {
             folderId = await InternalGetFolderIDAsync(key);
 

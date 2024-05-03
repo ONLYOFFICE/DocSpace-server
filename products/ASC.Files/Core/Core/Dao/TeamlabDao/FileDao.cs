@@ -65,7 +65,8 @@ internal class FileDao(
               maxTotalSizeStatistic,
               settingsManager,
               authContext,
-        serviceProvider), IFileDao<int>
+            serviceProvider,
+            distributedLockProvider), IFileDao<int>
 {
 
     private const string LockKey = "file";
@@ -424,7 +425,7 @@ internal class FileDao(
 
             var parentFoldersIds = parentFolders.Select(r => r.ParentId).ToList();
             
-            await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKey))
+            await using (await _distributedLockProvider.TryAcquireFairLockAsync(LockKey))
             {
                 var strategy = filesDbContext.Database.CreateExecutionStrategy();
                 await strategy.ExecuteAsync(async () =>
@@ -594,7 +595,7 @@ internal class FileDao(
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         DbFile toUpdate = null;
 
-        await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKey))
+        await using (await _distributedLockProvider.TryAcquireFairLockAsync(LockKey))
         {
             await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
             var strategy = filesDbContext.Database.CreateExecutionStrategy();

@@ -46,7 +46,8 @@ internal abstract class BaseTagDao<T>(
         maxTotalSizeStatistic,
         settingsManager,
         authContext,
-        serviceProvider), ITagDao<T>
+        serviceProvider,
+        distributedLockProvider), ITagDao<T>
 {
     public async IAsyncEnumerable<Tag> GetTagsAsync(Guid subject, TagType tagType, IEnumerable<FileEntry<T>> fileEntries)
     {
@@ -199,7 +200,7 @@ internal abstract class BaseTagDao<T>(
         
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
-        await using (await distributedLockProvider.TryAcquireLockAsync(GetLockKey(tenantId), TimeSpan.FromMinutes(5)))
+        await using (await _distributedLockProvider.TryAcquireLockAsync(GetLockKey(tenantId), TimeSpan.FromMinutes(5)))
         {
             await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
             var strategy = filesDbContext.Database.CreateExecutionStrategy();
@@ -288,7 +289,7 @@ internal abstract class BaseTagDao<T>(
         
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         
-        await using (await distributedLockProvider.TryAcquireLockAsync(GetLockKey(tenantId)))
+        await using (await _distributedLockProvider.TryAcquireLockAsync(GetLockKey(tenantId)))
         {
             await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
             var strategy = filesDbContext.Database.CreateExecutionStrategy();
@@ -386,7 +387,7 @@ internal abstract class BaseTagDao<T>(
         
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
-        await using (await distributedLockProvider.TryAcquireLockAsync(GetLockKey(tenantId), TimeSpan.FromMinutes(5)))
+        await using (await _distributedLockProvider.TryAcquireLockAsync(GetLockKey(tenantId), TimeSpan.FromMinutes(5)))
         {
             await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
             var strategy = filesDbContext.Database.CreateExecutionStrategy();
@@ -420,7 +421,7 @@ internal abstract class BaseTagDao<T>(
 
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         
-        await using (await distributedLockProvider.TryAcquireLockAsync(GetLockKey(tenantId), TimeSpan.FromMinutes(5)))
+        await using (await _distributedLockProvider.TryAcquireLockAsync(GetLockKey(tenantId), TimeSpan.FromMinutes(5)))
         {
             await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
             var strategy = filesDbContext.Database.CreateExecutionStrategy();
@@ -451,7 +452,7 @@ internal abstract class BaseTagDao<T>(
         
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
-        await using (await distributedLockProvider.TryAcquireLockAsync(GetLockKey(tenantId)))
+        await using (await _distributedLockProvider.TryAcquireLockAsync(GetLockKey(tenantId)))
         {
             var createOn = _tenantUtil.DateTimeToUtc(_tenantUtil.DateTimeNow());
 
@@ -486,7 +487,7 @@ internal abstract class BaseTagDao<T>(
         
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         
-        await using (await distributedLockProvider.TryAcquireLockAsync(GetLockKey(tenantId)))
+        await using (await _distributedLockProvider.TryAcquireLockAsync(GetLockKey(tenantId)))
         {
             await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
             var strategy = filesDbContext.Database.CreateExecutionStrategy();
@@ -526,7 +527,7 @@ internal abstract class BaseTagDao<T>(
         
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
-        await using (await distributedLockProvider.TryAcquireLockAsync(GetLockKey(tenantId), TimeSpan.FromMinutes(5)))
+        await using (await _distributedLockProvider.TryAcquireLockAsync(GetLockKey(tenantId), TimeSpan.FromMinutes(5)))
         {
             await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
             var strategy = filesDbContext.Database.CreateExecutionStrategy();

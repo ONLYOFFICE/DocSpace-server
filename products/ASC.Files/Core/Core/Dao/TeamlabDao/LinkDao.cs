@@ -36,7 +36,8 @@ internal class LinkDao(
     MaxTotalSizeStatistic maxTotalSizeStatistic,
     SettingsManager settingsManager,
     AuthContext authContext,
-    IServiceProvider serviceProvider)
+    IServiceProvider serviceProvider,
+    IDistributedLockProvider distributedLockProvider)
     : AbstractDao(dbContextManager,
         userManager,
         tenantManager,
@@ -45,7 +46,8 @@ internal class LinkDao(
         maxTotalSizeStatistic,
         settingsManager,
         authContext,
-        serviceProvider), ILinkDao
+        serviceProvider,
+        distributedLockProvider), ILinkDao
 {
     public async Task AddLinkAsync(string sourceId, string linkedId)
     {
