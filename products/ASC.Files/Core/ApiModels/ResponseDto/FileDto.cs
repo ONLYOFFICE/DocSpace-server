@@ -199,12 +199,25 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
 
             var linkedIdTask = linkDao.GetLinkedAsync(file.Id.ToString());
             var propertiesTask = daoFactory.GetFileDao<T>().GetProperties(file.Id);
-            var roomTask = folderDao.GetFolderAsync((T)Convert.ChangeType(file.ParentId, typeof(T)));
-            await Task.WhenAll(linkedIdTask, propertiesTask, roomTask);
+            var currentFolderTask = folderDao.GetFolderAsync((T)Convert.ChangeType(file.ParentId, typeof(T)));
+            await Task.WhenAll(linkedIdTask, propertiesTask, currentFolderTask);
 
             var linkedId = await linkedIdTask;
             var properties = await propertiesTask;
-            var room = await roomTask;
+            var room = await currentFolderTask;
+
+            if (!DocSpaceHelper.IsRoom(room.FolderType))
+            {
+                var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(room);
+                if (int.TryParse(roomId.ToString(), out var curRoomId) && curRoomId != -1)
+                {
+                    room = await folderDao.GetFolderAsync(roomId);
+                }
+            }
+            if (room.FolderType == FolderType.FillingFormsRoom && properties != null && properties.FormFilling.StartFilling)
+            {
+                result.Security[FileSecurity.FilesSecurityActions.Lock] = false;
+            }
 
             var ace = await fileSharing.GetPureSharesAsync(room, new List<Guid> { authContext.CurrentAccount.ID }).FirstOrDefaultAsync();
 
