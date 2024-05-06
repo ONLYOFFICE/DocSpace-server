@@ -115,13 +115,13 @@ public class WarmupProtobufStartupTask(ILogger<WarmupProtobufStartupTask> logger
                         var redis = redisGeneric.MakeGenericType(t, t);
                         genericMethod = methodInfo.MakeGenericMethod(redis);
                         genericMethod.Invoke(null, null);
-                        logger.LogDebug("PrepareSerializer:{ProtoBufFullName}", t.FullName);
                     }
+                    logger.LogTrace("PrepareSerializer:{ProtoBufFullName}", t.FullName);
                 }
             }
             catch (Exception e)
             {
-                logger.LogDebug(e, t.FullName);
+                logger.LogTrace(e, t.FullName);
             }
         }
 
