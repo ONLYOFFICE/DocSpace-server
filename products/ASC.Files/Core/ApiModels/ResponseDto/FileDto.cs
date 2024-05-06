@@ -110,6 +110,14 @@ public class FileDto<T> : FileEntryDto<T>
     /// <type>System.Boolean, System</type>
     public bool? StartFilling { get; set; }
 
+    /// <summary>InProcess folder ID</summary>
+    /// <type>System.Int32, System</type>
+    public int? InProcessFolderId { get; set; }
+
+    /// <summary>InProcess folder title</summary>
+    /// <type>System.String, System</type>
+    public string InProcessFolderTitle { get; set; }
+
     /// <summary>Denies file sharing or not</summary>
     /// <type>System.Boolean, System</type>
     public bool DenySharing { get; set; }
@@ -120,7 +128,7 @@ public class FileDto<T> : FileEntryDto<T>
     public IDictionary<string, bool> AvailableExternalRights { get; set; }
     public string RequestToken { get; set; }
     public ApiDateTime LastOpened { get; set; }
-    
+
     public static FileDto<int> GetSample()
     {
         return new FileDto<int>
@@ -226,8 +234,12 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
                 result.Security[FileSecurity.FilesSecurityActions.EditForm] = false;
             }
 
-            result.HasDraft = linkedId != null;
             result.StartFilling = properties?.FormFilling?.StartFilling ?? false;
+
+            result.HasDraft = linkedId != null;
+            result.InProcessFolderId = properties?.FormFilling != null && int.TryParse(properties.FormFilling.ToFolderId, out var inProcessFolderId) ? inProcessFolderId : null;
+            result.InProcessFolderTitle = properties?.FormFilling?.Title ?? null;
+
         }
 
         result.FileExst = extension;
