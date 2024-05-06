@@ -222,6 +222,11 @@ public partial class FilesDbContext
     {
         return FileQueries.DeleteFilesPropertiesAsync(this, tenantId, entryId);
     }
+    
+    public IAsyncEnumerable<FilesConverts> FilesConvertsAsync()
+    {
+        return FileQueries.FilesConvertsAsync(this);
+    }
 }
 
 static file class FileQueries
@@ -697,4 +702,7 @@ static file class FileQueries
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.EntryId == entryId)
                     .ExecuteDelete());
+    
+    public static readonly Func<FilesDbContext, IAsyncEnumerable<FilesConverts>> FilesConvertsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx) => ctx.FilesConverts);
 }

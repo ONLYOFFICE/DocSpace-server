@@ -357,9 +357,13 @@ public class FileUtility(
         {
             return _extsConvertible;
         }
-
-        await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
-        var list = await Queries.FoldersAsync(filesDbContext).ToListAsync();
+        
+        List<FilesConverts> list;
+        
+        await using (var filesDbContext = await dbContextFactory.CreateDbContextAsync())
+        {
+            list = await filesDbContext.FilesConvertsAsync().ToListAsync();
+        }
 
         foreach (var item in list)
         {
@@ -623,10 +627,4 @@ public class FileUtility(
     public bool GetCanForcesave() => fileUtilityConfiguration.GetCanForcesave();
 
     #endregion
-}
-
-static file class Queries
-{
-    public static readonly Func<FilesDbContext, IAsyncEnumerable<FilesConverts>> FoldersAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx) => ctx.FilesConverts);
 }
