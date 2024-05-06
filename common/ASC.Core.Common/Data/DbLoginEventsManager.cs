@@ -110,7 +110,7 @@ public class DbLoginEventsManager(
         }
 
         await using var loginEventContext = await dbContextFactory.CreateDbContextAsync();
-        loginEvent = await Queries.LoginEventsByIdAsync(loginEventContext, tenantId, id);
+        loginEvent = await loginEventContext.LoginEventsByIdAsync(tenantId, id);
 
         if (loginEvent != null)
         {
@@ -126,7 +126,7 @@ public class DbLoginEventsManager(
 
         await using var loginEventContext = await dbContextFactory.CreateDbContextAsync();
 
-        var loginInfo = await Queries.LoginEventsAsync(loginEventContext, tenantId, userId, _loginActions, date).ToListAsync();
+        var loginInfo = await loginEventContext.LoginEventsAsync(tenantId, userId, _loginActions, date).ToListAsync();
 
         return mapper.Map<List<DbLoginEvent>, List<BaseEvent>>(loginInfo);
     }
@@ -135,7 +135,7 @@ public class DbLoginEventsManager(
     {
         await using var loginEventContext = await dbContextFactory.CreateDbContextAsync();
 
-        await Queries.DeleteLoginEventsAsync(loginEventContext, tenantId, loginEventId);
+        await loginEventContext.DeleteLoginEventsAsync(tenantId, loginEventId);
 
         await cache.RemoveAsync([loginEventId]);
     }
@@ -144,7 +144,7 @@ public class DbLoginEventsManager(
     {
         await using var loginEventContext = await dbContextFactory.CreateDbContextAsync();
 
-        var loginEvents = await Queries.LoginEventsByUserIdAsync(loginEventContext, tenantId, userId).ToListAsync();
+        var loginEvents = await loginEventContext.LoginEventsByUserIdAsync(tenantId, userId).ToListAsync();
 
         await InnerLogOutAsync(loginEventContext, loginEvents);
     }
@@ -153,7 +153,7 @@ public class DbLoginEventsManager(
     {
         await using var loginEventContext = await dbContextFactory.CreateDbContextAsync();
 
-        var loginEvents = await Queries.LoginEventsByTenantIdAsync(loginEventContext, tenantId).ToListAsync();
+        var loginEvents = await loginEventContext.LoginEventsByTenantIdAsync(tenantId).ToListAsync();
 
         await InnerLogOutAsync(loginEventContext, loginEvents);
     }
@@ -162,7 +162,7 @@ public class DbLoginEventsManager(
     {
         await using var loginEventContext = await dbContextFactory.CreateDbContextAsync();
 
-        var loginEvents = await Queries.LoginEventsExceptThisAsync(loginEventContext, tenantId, userId, loginEventId).ToListAsync();
+        var loginEvents = await loginEventContext.LoginEventsExceptThisAsync(tenantId, userId, loginEventId).ToListAsync();
 
         await InnerLogOutAsync(loginEventContext, loginEvents);
     }
@@ -183,66 +183,5 @@ public class DbLoginEventsManager(
 
         loginEventContext.UpdateRange(loginEvents);
         await loginEventContext.SaveChangesAsync();
-    }
-}
-
-static file class Queries
-{
-    public static readonly Func<MessagesContext, int, Guid, IEnumerable<int>, DateTime, IAsyncEnumerable<DbLoginEvent>> LoginEventsAsync =
-        EF.CompileAsyncQuery(
-            (MessagesContext ctx, int tenantId, Guid userId, IEnumerable<int> loginActions, DateTime date) =>
-                ctx.LoginEvents
-                    .Where(r => r.TenantId == tenantId
-                                && r.UserId == userId
-                                && loginActions.Contains(r.Action ?? 0)
-                                && r.Date >= date
-                                && r.Active)
-                    .OrderByDescending(r => r.Id)
-                    .AsQueryable());
-
-    public static readonly Func<MessagesContext, int, int, Task<int>> DeleteLoginEventsAsync =
-        EF.CompileAsyncQuery(
-            (MessagesContext ctx, int tenantId, int loginEventId) =>
-                ctx.LoginEvents
-                    .Where(r => r.TenantId == tenantId && r.Id == loginEventId)
-                    .ExecuteUpdate(r => r.SetProperty(p => p.Active, false)));
-
-    public static readonly Func<MessagesContext, int, Guid, IAsyncEnumerable<DbLoginEvent>> LoginEventsByUserIdAsync =
-        EF.CompileAsyncQuery(
-            (MessagesContext ctx, int tenantId, Guid userId) =>
-                ctx.LoginEvents
-                    .Where(r => r.TenantId == tenantId
-                                && r.UserId == userId
-                                && r.Active));
-
-    public static readonly Func<MessagesContext, int, IAsyncEnumerable<DbLoginEvent>> LoginEventsByTenantIdAsync =
-        EF.CompileAsyncQuery((MessagesContext ctx, int tenantId) => ctx.LoginEvents.Where(r => r.TenantId == tenantId && r.Active));
-
-    public static readonly Func<MessagesContext, int, int, Task<DbLoginEvent>> LoginEventsByIdAsync =
-        EF.CompileAsyncQuery((MessagesContext ctx, int tenantId, int id) => ctx.LoginEvents.SingleOrDefault(e => e.TenantId == tenantId && e.Id == id));
-
-    public static readonly Func<MessagesContext, int, Guid, int, IAsyncEnumerable<DbLoginEvent>> LoginEventsExceptThisAsync =
-        EF.CompileAsyncQuery(
-            (MessagesContext ctx, int tenantId, Guid userId, int loginEventId) =>
-                ctx.LoginEvents
-                    .Where(r => r.TenantId == tenantId
-                                && r.UserId == userId
-                                && r.Id != loginEventId
-                                && r.Active));
-}
-
-public class WarmupDbLoginEventsStartupTask(IServiceProvider provider) : IStartupTask
-{
-    public async Task ExecuteAsync(CancellationToken cancellationToken = default)
-    {
-        using var scope = provider.CreateScope();
-        var dbContextFactory = scope.ServiceProvider.GetService<IDbContextFactory<MessagesContext>>();
-        await using var context = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-        await Queries.LoginEventsAsync(context, int.MaxValue, Guid.Empty, [], DateTime.MinValue).ToListAsync(cancellationToken: cancellationToken);
-        await Queries.DeleteLoginEventsAsync(context, int.MinValue, int.MinValue);
-        await Queries.LoginEventsExceptThisAsync(context, int.MinValue, Guid.Empty, int.MinValue).ToListAsync(cancellationToken: cancellationToken);
-        await Queries.LoginEventsByTenantIdAsync(context, int.MinValue).ToListAsync(cancellationToken: cancellationToken);
-        await Queries.LoginEventsByUserIdAsync(context, int.MinValue, Guid.Empty).ToListAsync(cancellationToken: cancellationToken);
-        await Queries.LoginEventsByIdAsync(context, int.MinValue, int.MinValue);
     }
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,25 +24,36 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.MessagingSystem.EF.Context;
+namespace ASC.Core.Common.EF.Context;
 
-public partial class MessagesContext(DbContextOptions<MessagesContext> options) : DbContext(options)
+public partial class WebstudioDbContext
 {
-    public DbSet<DbAuditEvent> AuditEvents { get; set; }
-    public DbSet<DbLoginEvent> LoginEvents { get; set; }
-    public DbSet<DbWebstudioSettings> WebstudioSettings { get; set; }
-    public DbSet<DbTenant> Tenants { get; set; }
-    public DbSet<User> Users { get; set; }
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    public Task<string> DataAsync(int tenantId, Guid id, Guid userId)
     {
-        ModelBuilderWrapper
-            .From(modelBuilder, Database)
-            .AddAuditEvent()
-            .AddLoginEvents()
-            .AddUser()
-            .AddWebstudioSettings()
-            .AddDbTenant()
-            .AddDbFunctions();
+        return Queries.DataAsync(this, tenantId, id, userId);
     }
+
+    public Task<DbWebstudioSettings> WebStudioSettingsAsync(int tenantId, Guid id, Guid userId)
+    {
+        return Queries.WebStudioSettingsAsync(this, tenantId, id, userId);
+    }
+}
+
+static file class Queries
+{
+    public static readonly Func<WebstudioDbContext, int, Guid, Guid, Task<string>> DataAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (WebstudioDbContext ctx, int tenantId, Guid id, Guid userId) =>
+                ctx.WebstudioSettings
+                    .Where(r => r.Id == id)
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => r.UserId == userId)
+                    .Select(r => r.Data)
+                    .FirstOrDefault());
+    
+    public static readonly Func<WebstudioDbContext, int, Guid, Guid, Task<DbWebstudioSettings>> WebStudioSettingsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (WebstudioDbContext ctx, int tenantId, Guid id, Guid userId) =>
+                ctx.WebstudioSettings
+                    .FirstOrDefault(r => r.Id == id && r.TenantId == tenantId && r.UserId == userId));
 }

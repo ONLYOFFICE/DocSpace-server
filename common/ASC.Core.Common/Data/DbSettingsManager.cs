@@ -178,7 +178,7 @@ public class SettingsManager(
     private async Task<T> LoadАFromDbAsync<T>(int tenantId, Guid userId, T def, string key) where T : class, ISettings<T>
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
-        var result = await Queries.DataAsync(context, tenantId, def.ID, userId);
+        var result = await context.DataAsync(tenantId, def.ID, userId);
 
         var settings = result != null ? Deserialize<T>(result) : def;
 
@@ -203,7 +203,7 @@ public class SettingsManager(
 
             if (data.SequenceEqual(defaultData))
             {
-                var s = await Queries.WebStudioSettingsAsync(context, tenantId, settings.ID, userId);
+                var s = await context.WebStudioSettingsAsync(tenantId, settings.ID, userId);
 
                 if (s != null)
                 {
@@ -249,37 +249,5 @@ public class SettingsManager(
     private string Serialize<T>(T settings)
     {
         return JsonSerializer.Serialize(settings);
-    }
-}
-
-static file class Queries
-{
-    public static readonly Func<WebstudioDbContext, int, Guid, Guid, Task<string>> DataAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (WebstudioDbContext ctx, int tenantId, Guid id, Guid userId) =>
-                ctx.WebstudioSettings
-                    .Where(r => r.Id == id)
-                    .Where(r => r.TenantId == tenantId)
-                    .Where(r => r.UserId == userId)
-                    .Select(r => r.Data)
-                    .FirstOrDefault());
-    
-    public static readonly Func<WebstudioDbContext, int, Guid, Guid, Task<DbWebstudioSettings>> WebStudioSettingsAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (WebstudioDbContext ctx, int tenantId, Guid id, Guid userId) =>
-                ctx.WebstudioSettings
-                    .FirstOrDefault(r => r.Id == id && r.TenantId == tenantId && r.UserId == userId));
-}
-
-
-public class WarmupDbSettingsStartupTask(IServiceProvider provider) : IStartupTask
-{
-    public async Task ExecuteAsync(CancellationToken cancellationToken = default)
-    {
-        using var scope = provider.CreateScope();
-        var dbContextFactory = scope.ServiceProvider.GetService<IDbContextFactory<WebstudioDbContext>>();
-        await using var context = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-        await Queries.DataAsync(context, int.MaxValue, Guid.Empty, Guid.Empty);
-        await Queries.WebStudioSettingsAsync(context, int.MaxValue, Guid.Empty, Guid.Empty);
     }
 }

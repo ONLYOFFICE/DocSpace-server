@@ -459,14 +459,6 @@ public abstract class BaseStartup
 
         services
             .AddStartupTask<WarmupServicesStartupTask>()
-            .AddStartupTask<WarmupWebhooksServicesStartupTask>()
-            .AddStartupTask<WarmupQuotaStartupTask>()
-            .AddStartupTask<WarmupTariffStartupTask>()
-            .AddStartupTask<WarmupDbSettingsStartupTask>()
-            .AddStartupTask<WarmupDbLoginEventsStartupTask>()
-            .AddStartupTask<WarmupDbTenantServiceStartupTask>()
-            .AddStartupTask<WarmupDbUserServiceStartupTask>()
-            .AddStartupTask<WarmupDbAzServiceStartupTask>()
             .AddStartupTask<WarmupProtobufStartupTask>()
             .AddStartupTask<WarmupBaseDbContextStartupTask>()
             .AddSingleton(services);
