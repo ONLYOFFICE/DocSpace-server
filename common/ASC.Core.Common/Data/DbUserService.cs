@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Api.Core.Extensions;
-
 using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Core.Data;
@@ -127,7 +125,8 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
     public async Task<UserInfo> GetUserAsync(int tenant, Guid id)
     {
         await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
-        return mapper.Map<UserInfo>(await userDbContext.UserByIdAsync(tenant, id));
+        var user = await userDbContext.UserByIdAsync(tenant, id);
+        return mapper.Map<UserInfo>(user);
     }
 
     public UserInfo GetUser(int tenant, Guid id)

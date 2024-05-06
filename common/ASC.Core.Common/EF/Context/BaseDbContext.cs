@@ -214,11 +214,10 @@ public class WarmupBaseDbContextStartupTask(IServiceProvider provider, ILogger<W
                     }
 
                     q.Invoke(context, parameters.ToArray());
-                    logger.LogDebug(q.Name);
                 }
                 catch (Exception e)
                 {
-                    logger.LogDebug(e, q.Name);
+                    logger.LogTrace(e, q.Name);
                 }
             }
         }

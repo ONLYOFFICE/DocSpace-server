@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Api.Core.Extensions;
+using ASC.EventBus.Events;
 
 using SerializationContext = Confluent.Kafka.SerializationContext;
 
@@ -91,6 +92,7 @@ public class WarmupProtobufStartupTask(ILogger<WarmupProtobufStartupTask> logger
         });
 
         var redisGeneric = typeof(RedisCacheNotify<>.RedisCachePubSubItem<>);
+        var integrationEvent = typeof(IntegrationEvent);
         var types = aasemblies.SelectMany(r => r.GetTypes().Where(t => t.GetCustomAttribute<ProtoContractAttribute>() != null));
 
         foreach (var t in types)
@@ -103,19 +105,23 @@ public class WarmupProtobufStartupTask(ILogger<WarmupProtobufStartupTask> logger
 
             try
             {
-                if (t != redisGeneric)
+                if (t != redisGeneric && t != integrationEvent)
                 {
                     var genericMethod = methodInfo.MakeGenericMethod(t);
                     genericMethod.Invoke(null, null);
-                    var redis = redisGeneric.MakeGenericType(t, t);
-                    genericMethod = methodInfo.MakeGenericMethod(redis);
-                    genericMethod.Invoke(null, null);
-                    logger.LogTrace("PrepareSerializer:{ProtoBufFullName}", t.FullName);
+                    
+                    if (!t.IsSubclassOf(integrationEvent))
+                    {
+                        var redis = redisGeneric.MakeGenericType(t, t);
+                        genericMethod = methodInfo.MakeGenericMethod(redis);
+                        genericMethod.Invoke(null, null);
+                        logger.LogDebug("PrepareSerializer:{ProtoBufFullName}", t.FullName);
+                    }
                 }
             }
             catch (Exception e)
             {
-                logger.LogTrace(e, t.FullName);
+                logger.LogDebug(e, t.FullName);
             }
         }
 

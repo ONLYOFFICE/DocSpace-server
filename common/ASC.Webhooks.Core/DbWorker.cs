@@ -26,12 +26,9 @@
 
 using System.Security;
 
-using ASC.Api.Core.Extensions;
-
 using AutoMapper;
 
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace ASC.Webhooks.Core;
 
