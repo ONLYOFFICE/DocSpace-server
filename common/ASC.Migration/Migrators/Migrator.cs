@@ -430,9 +430,10 @@ public abstract class Migrator : IAsyncDisposable
 
         var aces = new Dictionary<string, AceWrapper>();
         var matchingRoomIds = new Dictionary<int, FileEntry<int>>();
-        foreach (var security in storage.Securities)
+        var innerFolders = new List<int>();
+        var orderedSecurity = storage.Securities.OrderBy(s => OrderSecurity(storage,s));
+        foreach (var security in orderedSecurity)
         {
-            var localMatchingRoomIds = new Dictionary<int, FileEntry<int>>();
             try
             {
                 if (!MigrationInfo.Users.ContainsKey(security.Subject) && !MigrationInfo.Groups.ContainsKey(security.Subject))
@@ -493,7 +494,13 @@ public abstract class Migrator : IAsyncDisposable
                 }
                 else if (storage.ShouldImportSharedFolders)
                 {
+                    var localMatchingRoomIds = new Dictionary<int, FileEntry<int>>();
                     var key = $"{_folderKey}-{security.EntryId}";
+
+                    if (innerFolders.Contains(security.EntryId))
+                    {
+                        continue;
+                    }
                     if (!matchingRoomIds.ContainsKey(security.EntryId))
                     {
                         if (storage.Type == FolderType.BUNCH)
@@ -544,6 +551,7 @@ public abstract class Migrator : IAsyncDisposable
                         {
                             newFolder = await FileStorageService.CreateFolderAsync(matchingRoomIds[folder.ParentId].Id, folder.Title);
                             matchingRoomIds.Add(folder.Id, newFolder);
+                            innerFolders.Add(folder.Id);
                             Log(string.Format(MigrationResource.CreateFolder, newFolder.Title));
                         }
                         foreach (var file in storage.Files.Where(f => localMatchingRoomIds.ContainsKey(f.Folder)))
@@ -603,6 +611,16 @@ public abstract class Migrator : IAsyncDisposable
                 MigrationInfo.Errors.Add(string.Format(MigrationResource.CanNotShare, security.EntryId, security.Subject));
             }
         }
+    }
+
+    private int OrderSecurity(MigrationStorage storage, MigrationSecurity security)
+    {
+        if(security.EntryType == 2)
+        {
+            return 0;
+        }
+        var folder = storage.Folders.FirstOrDefault(f => f.Id == security.EntryId);
+        return folder.Level;
     }
 
     public async ValueTask DisposeAsync()
