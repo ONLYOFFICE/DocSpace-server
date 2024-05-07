@@ -25,7 +25,25 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Api.Core.Core;
+
 public static class RateLimiterPolicy
 {
     public const string SensitiveApi = "sensitive_api";
+    public const string EmailInvitationApi = "email_invitation_api";
+}
+
+public class LooppedRedisFixedWindowRateLimiter<T>(T partitionKey, RedisFixedWindowRateLimiterOptions options, int loopCount)
+    : RedisFixedWindowRateLimiter<T>(partitionKey, options)
+{
+    protected override async ValueTask<RateLimitLease> AcquireAsyncCore(int permitCount, CancellationToken cancellationToken)
+    {
+        RateLimitLease res = null;
+
+        for (var i = 0; i < loopCount; i++)
+        {
+            res = await base.AcquireAsyncCore(permitCount, cancellationToken);
+        }
+
+        return res;
+    }
 }

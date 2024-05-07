@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,15 +24,44 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core.ApiModels.RequestDto;
+using System.ComponentModel.DataAnnotations;
 
-/// <summary>
-/// </summary>
-public class RoomInvitation : EmailInvitationDto
+namespace ASC.Web.Api.Models;
+
+public class EmailInvitationsDto
 {
-    /// <summary>ID of the user with whom we want to share a room</summary>
-    public Guid Id { get; set; }
+    public List<EmailInvitationDto> Invitations { get; set; }
+}
 
-    /// <summary>Sharing rights (None, ReadWrite, Read, Restrict, Varies, Review, Comment, FillForms, CustomFilter, RoomAdmin, Editing)</summary>
-    public FileShare Access { get; set; }
+public class EmailInvitationDto
+{
+    /// <summary>Email address</summary>
+    /// <type>System.String, System</type>
+    public string Email { get; set; }
+}
+
+public class MaxEmailInvitationsAttribute : ValidationAttribute
+{
+    protected override ValidationResult IsValid(object value, ValidationContext validationContext)
+    {
+        if (value is IEnumerable<EmailInvitationDto> invitations)
+        {
+            var count = invitations.Count(x => !string.IsNullOrEmpty(x.Email));
+
+            if (count == 0)
+            {
+                return ValidationResult.Success;
+            }
+
+            var helper = validationContext.GetRequiredService<UserInvitationLimitHelper>();
+            var limit = helper.GetLimit().Result;
+
+            if (count > limit)
+            {
+                return new ValidationResult(Resource.ErrorInvitationLimitExceeded);
+            }
+        }
+
+        return ValidationResult.Success;
+    }
 }

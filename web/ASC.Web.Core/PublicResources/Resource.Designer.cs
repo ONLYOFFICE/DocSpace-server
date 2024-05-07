@@ -1753,6 +1753,16 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invitation limit is exceeded.
+        /// </summary>
+        public static string ErrorInvitationLimitExceeded
+        {
+            get {
+                return ResourceManager.GetString("ErrorInvitationLimitExceeded", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to The access to the portal is restricted.
         /// </summary>
         public static string ErrorIpSecurity {
