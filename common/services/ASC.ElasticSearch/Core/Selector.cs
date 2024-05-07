@@ -322,7 +322,14 @@ public class Selector<T>(IServiceProvider serviceProvider)
             }
             else
             {
-                _queryContainer = _queryContainer && MultiWildCard(props, value.WrapAsterisk());
+                if (value.Any(c => (uint)c >= 0x4E00 && (uint)c <= 0x2FA1F))
+                {
+                    _queryContainer = _queryContainer && (MultiMatch(props, value.TrimQuotes()) || MultiWildCard(props, value.WrapAsterisk()));
+                }
+                else
+                {
+                    _queryContainer = _queryContainer && MultiWildCard(props, value.WrapAsterisk());
+                }
             }
         }
 
