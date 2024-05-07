@@ -222,9 +222,10 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
                     room = await folderDao.GetFolderAsync(roomId);
                 }
             }
-            if (room.FolderType == FolderType.FillingFormsRoom && properties != null && properties.FormFilling.StartFilling)
+            if (properties != null)
             {
-                result.Security[FileSecurity.FilesSecurityActions.Lock] = false;
+                if (room.FolderType == FolderType.FillingFormsRoom && properties.FormFilling.StartFilling)
+                    result.Security[FileSecurity.FilesSecurityActions.Lock] = false;
             }
 
             var ace = await fileSharing.GetPureSharesAsync(room, new List<Guid> { authContext.CurrentAccount.ID }).FirstOrDefaultAsync();
