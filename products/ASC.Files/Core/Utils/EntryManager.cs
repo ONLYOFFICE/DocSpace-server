@@ -1432,25 +1432,21 @@ public class EntryManager(IDaoFactory daoFactory,
                         var sourceId = await linkDao.GetSourceAsync(file.Id.ToString());
                         var sourceFile = await fileDao.GetFileAsync((T)Convert.ChangeType(sourceId, typeof(T)));
 
-                        try
-                        {
-                            await linkDao.DeleteLinkAsync(sourceId);
-                            await socketManager.UpdateFileAsync(sourceFile);
+                        await linkDao.DeleteLinkAsync(sourceId);
+                        await socketManager.UpdateFileAsync(sourceFile);
 
-                            await fileDao.SaveProperties(result.Id, properties);
-                            await fileMarker.MarkAsNewAsync(result);
-                            await socketManager.CreateFileAsync(result);
+                        await fileDao.SaveProperties(result.Id, properties);
+                        await fileMarker.MarkAsNewAsync(result);
+                        await socketManager.CreateFileAsync(result);
 
-                            await fileMarker.RemoveMarkAsNewForAllAsync(file);
+                        await fileMarker.RemoveMarkAsNewForAllAsync(file);
 
-                            await linkDao.DeleteAllLinkAsync(file.Id.ToString());
-                            await fileDao.SaveProperties(file.Id, null);
-                            await fileDao.DeleteFileAsync(file.Id);
+                        await linkDao.DeleteAllLinkAsync(file.Id.ToString());
+                        await fileDao.SaveProperties(file.Id, null);
 
-                        }catch(Exception ex)
-                        {
-                            logger.Error(ex.Message);
-                        }
+                        fileTracker.Remove(file.Id);
+                        await fileDao.DeleteFileAsync(file.Id, Guid.Empty);
+
                         return result;
                     }
                 }
