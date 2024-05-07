@@ -118,6 +118,10 @@ public class FileDto<T> : FileEntryDto<T>
     /// <type>System.String, System</type>
     public string InProcessFolderTitle { get; set; }
 
+    /// <summary>Draft info</summary>
+    /// <type>ASC.File.Core.ApiModels.ResponseDto.DraftLocation, ASC.Files.Core</type>
+    public DraftLocation<T> DraftLocation { get; set; }
+
     /// <summary>Denies file sharing or not</summary>
     /// <type>System.Boolean, System</type>
     public bool DenySharing { get; set; }
@@ -240,8 +244,23 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
             if (formFilling != null)
             {
                 result.StartFilling = formFilling.StartFilling;
-                result.InProcessFolderId = int.TryParse(formFilling.ToFolderId, out var inProcessFolderId) ? inProcessFolderId : null;
-                result.InProcessFolderTitle = formFilling.Title;
+                if (linkedId != null)
+                {
+                    var draftLocation = new DraftLocation<T>()
+                    {
+                        FolderId = (T)Convert.ChangeType(formFilling.ToFolderId, typeof(T)),
+                        FolderTitle = formFilling.Title,
+                        FileId = (T)Convert.ChangeType(linkedId, typeof(T))
+                    };
+
+                    var fileDao = daoFactory.GetFileDao<T>();
+                    var draft = await fileDao.GetFileAsync((T)Convert.ChangeType(linkedId, typeof(T)));
+                    if (draft != null)
+                    {
+                        draftLocation.FileTitle = draft.Title;
+                    }
+                    result.DraftLocation = draftLocation;
+                }
             }
         }
 
@@ -298,4 +317,23 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
 
         return result;
     }
+}
+
+public class DraftLocation<T>
+{
+    /// <summary>InProcess folder ID</summary>
+    /// <type>System.Int32, System</type>
+    public T FolderId { get; set; }
+
+    /// <summary>InProcess folder title</summary>
+    /// <type>System.String, System</type>
+    public string FolderTitle { get; set; }
+
+    /// <summary>Draft ID</summary>
+    /// <type>System.Int32, System</type>
+    public T FileId { get; set; }
+
+    /// <summary>Draft title</summary>
+    /// <type>System.String, System</type>
+    public string FileTitle { get; set; }
 }
