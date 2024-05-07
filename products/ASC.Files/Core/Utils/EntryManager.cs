@@ -1444,10 +1444,7 @@ public class EntryManager(IDaoFactory daoFactory,
                             await fileMarker.RemoveMarkAsNewForAllAsync(file);
 
                             await linkDao.DeleteAllLinkAsync(file.Id.ToString());
-                            await fileDao.SaveProperties(file.Id, null);
 
-                            fileTracker.Remove(file.Id);
-                            await fileDao.DeleteFileAsync(file.Id, Guid.Empty);
                         }
                         catch(Exception ex)
                         {
