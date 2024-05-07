@@ -30,11 +30,11 @@ namespace ASC.Files.Core.Helpers;
 public class FormFillingReportCreator
 {
     private readonly ExportToCSV _exportToCSV;
-    private readonly SocketManager _socketManager;
     private readonly UserManager _userManager;
     private readonly SecurityContext _securityContext;
     private readonly IDaoFactory _daoFactory;
     private readonly IHttpClientFactory _clientFactory;
+    private readonly TenantUtil _tenantUtil;
 
     private static readonly JsonSerializerOptions _options = new() {
         AllowTrailingCommas = true,
@@ -43,18 +43,18 @@ public class FormFillingReportCreator
 
     public FormFillingReportCreator(
         ExportToCSV exportToCSV,
-        SocketManager socketManager,
         UserManager userManager,
         SecurityContext securityContext,
         IDaoFactory daoFactory,
-        IHttpClientFactory clientFactory)
+        IHttpClientFactory clientFactory,
+        TenantUtil tenantUtil)
     {
         _exportToCSV = exportToCSV;
-        _socketManager = socketManager;
         _userManager = userManager;
         _securityContext = securityContext;
         _daoFactory = daoFactory;
         _clientFactory = clientFactory;
+        _tenantUtil = tenantUtil;
     }
 
     public async Task UpdateFormFillingReport<T>(T resultsFileId, string formsDataUrl)
@@ -88,13 +88,17 @@ public class FormFillingReportCreator
         var data = await response.Content.ReadAsStringAsync();
 
         var u = await _userManager.GetUsersAsync(_securityContext.CurrentAccount.ID);
-
         var name = new List<FormsItemData>()
         {
             new FormsItemData()
             {
-                Key= FilesCommonResource.UnknownFirstName,
+                Key= FilesCommonResource.User,
                 Value = $"{u.FirstName} {u.LastName}"
+            },
+            new FormsItemData()
+            {
+                Key= FilesCommonResource.Date,
+                Value = $"{_tenantUtil.DateTimeNow().ToString("dd.MM.yyyy H:mm:ss")}"
             },
         };
 

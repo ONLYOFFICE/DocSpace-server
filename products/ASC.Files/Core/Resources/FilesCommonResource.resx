@@ -523,4 +523,10 @@ Highest compatibility with docx, xlsx, pptx.</value>
   <data name="RoomIndex_Folder" xml:space="preserve">
     <value>Folder</value>
   </data>
+  <data name="Date" xml:space="preserve">
+    <value>Date</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>User</value>
+  </data>
 </root>

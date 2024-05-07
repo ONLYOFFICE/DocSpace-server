@@ -42,6 +42,7 @@ public abstract class BaseStartup
     protected readonly IConfiguration _configuration;
     private readonly IHostEnvironment _hostEnvironment;
     private readonly string _corsOrigin;
+    private static readonly JsonSerializerOptions _serializerOptions = new() { PropertyNameCaseInsensitive = true };
 
     protected bool AddAndUseSession { get; }
     protected DIHelper DIHelper { get; }
@@ -248,7 +249,7 @@ public abstract class BaseStartup
 
                 var permitLimit = 5;
                 var path = httpContext.Request.Path.ToString();
-                var partitionKey = $"sensitive_api_{userId}|{path}";
+                var partitionKey = $"{RateLimiterPolicy.SensitiveApi}_{userId}|{path}";
                 var remoteIpAddress = httpContext?.Connection.RemoteIpAddress;
 
                 if (EnableNoLimiter(remoteIpAddress))
@@ -262,6 +263,66 @@ public abstract class BaseStartup
                     Window = TimeSpan.FromMinutes(15),
                     ConnectionMultiplexerFactory = () => connectionMultiplexer
                 });
+            });
+
+            options.AddPolicy(RateLimiterPolicy.EmailInvitationApi, httpContext =>
+            {
+                if (!int.TryParse(_configuration["core:hosting:rateLimiterOptions:maxEmailInvitationsPerDay"], out var invitationLimitPerDay))
+                {
+                    return RateLimitPartition.GetNoLimiter("no_limiter");
+                }
+
+                var remoteIpAddress = httpContext?.Connection.RemoteIpAddress;
+
+                if (EnableNoLimiter(remoteIpAddress))
+                {
+                    return RateLimitPartition.GetNoLimiter("no_limiter");
+                }
+
+                var tenantManager = httpContext.RequestServices.GetRequiredService<TenantManager>();
+                var tenant = tenantManager.GetCurrentTenant(false);
+
+                if (tenant == null)
+                {
+                    return RateLimitPartition.GetNoLimiter("no_limiter");
+                }
+
+                var invitationsCount = 0;
+
+                if (httpContext.Request.ContentLength > 0)
+                {
+                    if (!httpContext.Request.Body.CanSeek)
+                    {
+                        httpContext.Request.EnableBuffering();
+                    }
+
+                    httpContext.Request.Body.Position = 0;
+
+                    var json = new StreamReader(httpContext.Request.Body).ReadToEndAsync().Result;
+
+                    var userInvitationsDto = JsonSerializer.Deserialize<EmailInvitationsDto>(json, _serializerOptions);
+                    invitationsCount = userInvitationsDto.Invitations.Count(x => !string.IsNullOrEmpty(x.Email));
+
+                    httpContext.Request.Body.Position = 0;
+                }
+
+                if (invitationsCount == 0)
+                {
+                    return RateLimitPartition.GetNoLimiter("no_limiter");
+                }
+
+                var partitionKey = $"{RateLimiterPolicy.EmailInvitationApi}_{tenant.Id}";
+
+                RedisFixedWindowRateLimiterOptions optionFactory(string key) => new RedisFixedWindowRateLimiterOptions
+                {
+                    PermitLimit = invitationLimitPerDay,
+                    Window = TimeSpan.FromDays(1),
+                    ConnectionMultiplexerFactory = () => connectionMultiplexer
+                };
+
+                RateLimiter limitterFactory(string key) => new LooppedRedisFixedWindowRateLimiter<string>(key, optionFactory(key), invitationsCount);
+
+                return RateLimitPartition.Get(partitionKey, limitterFactory);
             });
 
             options.OnRejected = (context, ct) => RateLimitMetadata.OnRejected(context.HttpContext, context.Lease, ct);

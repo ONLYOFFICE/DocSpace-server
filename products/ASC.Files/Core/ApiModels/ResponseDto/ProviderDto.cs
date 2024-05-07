@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,15 +24,27 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core.ApiModels.RequestDto;
+namespace ASC.Files.Core.ApiModels.ResponseDto;
 
-/// <summary>
-/// </summary>
-public class RoomInvitation : EmailInvitationDto
+public record ProviderDto(string Name, string Key, bool Connected, bool Oauth = false, string RedirectUrl = null)
 {
-    /// <summary>ID of the user with whom we want to share a room</summary>
-    public Guid Id { get; set; }
+    /// <summary>Provider name</summary>
+    /// <type>System.String, System</type>
+    public string Name { get; init; } = Name;
 
-    /// <summary>Sharing rights (None, ReadWrite, Read, Restrict, Varies, Review, Comment, FillForms, CustomFilter, RoomAdmin, Editing)</summary>
-    public FileShare Access { get; set; }
+    /// <summary>Provider key</summary>
+    /// <type>System.String, System</type>
+    public string Key { get; init; } = Key;
+
+    /// <summary>Connected flag</summary>
+    /// <type>System.Boolean, System</type>
+    public bool Connected { get; init; } = Connected;
+
+    /// <summary>Oauth flag</summary>
+    /// <type>System.Boolean, System</type>
+    public bool Oauth { get; init; } = Oauth;
+
+    /// <summary>Redirect url</summary>
+    // <type>System.String, System</type>
+    public string RedirectUrl { get; init; } = RedirectUrl;
 }

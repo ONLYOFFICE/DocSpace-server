@@ -35,7 +35,6 @@ public class MigrationOperation(
     TenantManager tenantManager,
     SecurityContext securityContext,
     IServiceProvider serviceProvider,
-    StorageFactory storageFactory,
     IDistributedCache cache)
     : DistributedTaskProgress, IDisposable
 {

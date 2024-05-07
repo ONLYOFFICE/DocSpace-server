@@ -189,12 +189,25 @@ public class Builder<T>(ThumbnailSettings settings,
         var attempt = 1;
 
         var maxSize = settings.Sizes.MaxBy(r => r.Width + r.Height);
-        
+        var thumbnailHeight = maxSize.Height;
+        var thumbnailWidth = maxSize.Width;
+
+        if (maxSize.ResizeMode == ResizeMode.Manual)
+        {
+            if (maxSize.Width > maxSize.Height) // change thumbnail orientation
+            {
+                var originThumbnailHeight = thumbnailHeight;
+
+                thumbnailHeight = thumbnailWidth;
+                thumbnailWidth = originThumbnailHeight;
+            }
+        }
+
         do
         {
             try
             {
-                (resultPercent, thumbnailUrl) = await GetThumbnailUrl(file, global.DocThumbnailExtension.ToString(), maxSize.Width, maxSize.Height);
+                (resultPercent, thumbnailUrl) = await GetThumbnailUrl(file, global.DocThumbnailExtension.ToString(), thumbnailWidth, thumbnailHeight);
 
                 if (resultPercent == 100)
                 {
@@ -269,10 +282,10 @@ public class Builder<T>(ThumbnailSettings settings,
         var docKey = await documentServiceHelper.GetDocKeyAsync(file);
         var thumbnail = new ThumbnailData
         {
-            Aspect = 2,
-            First = true
-            //Height = height,
-            //Width = width
+            Aspect = 1,
+            First = true,
+            Height = height,
+            Width = width
         };
         var spreadsheetLayout = new SpreadsheetLayout
         {
@@ -414,7 +427,21 @@ public class Builder<T>(ThumbnailSettings settings,
     }
 
     private Image GetImageThumbnail(Image sourceBitmap, int thumbnailWidth, int thumbnailHeight, ResizeMode resizeMode, AnchorPositionMode anchorPositionMode)
-    {
+    {      
+        if (resizeMode == ResizeMode.Manual)
+        {
+            resizeMode = ResizeMode.Max;
+
+            if ((sourceBitmap.Bounds.Width > sourceBitmap.Bounds.Height && thumbnailWidth < thumbnailHeight) ||
+                (sourceBitmap.Bounds.Width < sourceBitmap.Bounds.Height && thumbnailWidth > thumbnailHeight))
+            {
+                var originThumbnailHeight = thumbnailHeight;
+
+                thumbnailHeight = thumbnailWidth;
+                thumbnailWidth = originThumbnailHeight;               
+            }
+        }
+
         return sourceBitmap.Clone(x =>
         {
             x.Resize(new ResizeOptions

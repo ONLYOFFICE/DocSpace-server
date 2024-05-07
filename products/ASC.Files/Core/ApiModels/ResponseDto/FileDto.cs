@@ -172,7 +172,7 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
 
         result.FolderId = file.ParentId;
         
-        if (file.RootFolderType == FolderType.USER && !Equals(file.RootCreateBy, authContext.CurrentAccount.ID))
+        if (file.RootFolderType == FolderType.USER && authContext.IsAuthenticated && !Equals(file.RootCreateBy, authContext.CurrentAccount.ID))
         {
             result.RootFolderType = FolderType.Recent;
             result.FolderId = await _globalFolderHelper.GetFolderRecentAsync<T>();

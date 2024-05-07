@@ -71,5 +71,10 @@
     res.end();
   });
 
+  router.post("/change-invitation-limit-value", (req, res) => {
+    files.changeInvitationLimitValue(req.body);
+    res.end();
+  });
+
   return router;
 };
