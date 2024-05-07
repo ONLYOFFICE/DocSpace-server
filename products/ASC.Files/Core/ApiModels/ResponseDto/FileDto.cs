@@ -234,13 +234,15 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
             {
                 result.Security[FileSecurity.FilesSecurityActions.EditForm] = false;
             }
-
-            result.StartFilling = properties?.FormFilling?.StartFilling ?? false;
-
             result.HasDraft = linkedId != null;
-            result.InProcessFolderId = properties?.FormFilling != null && int.TryParse(properties.FormFilling.ToFolderId, out var inProcessFolderId) ? inProcessFolderId : null;
-            result.InProcessFolderTitle = properties?.FormFilling?.Title ?? null;
 
+            var formFilling = properties?.FormFilling;
+            if (formFilling != null)
+            {
+                result.StartFilling = formFilling.StartFilling;
+                result.InProcessFolderId = int.TryParse(formFilling.ToFolderId, out var inProcessFolderId) ? inProcessFolderId : null;
+                result.InProcessFolderTitle = formFilling.Title;
+            }
         }
 
         result.FileExst = extension;
