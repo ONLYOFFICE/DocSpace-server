@@ -556,25 +556,33 @@ public abstract class Migrator : IAsyncDisposable
                         }
                         foreach (var file in storage.Files.Where(f => localMatchingRoomIds.ContainsKey(f.Folder)))
                         {
-                            await using var fs = new FileStream(file.Path, FileMode.Open);
+                            try
+                            {
+                                await using var fs = new FileStream(file.Path, FileMode.Open);
 
-                            var newFile = ServiceProvider.GetService<File<int>>();
-                            newFile.ParentId = localMatchingRoomIds[security.EntryId].Id;
-                            newFile.Comment = FilesCommonResource.CommentCreate;
-                            newFile.Title = Path.GetFileName(file.Title);
-                            newFile.ContentLength = fs.Length;
-                            newFile.Version = file.Version;
-                            newFile.VersionGroup = file.VersionGroup;
-                            newFile.CreateOn = file.Created;
-                            if (matchingFilesIds.ContainsKey($"{_fileKey}-{file.Id}"))
-                            {
-                                newFile.Id = matchingFilesIds[$"{_fileKey}-{file.Id}"].Id;
+                                var newFile = ServiceProvider.GetService<File<int>>();
+                                newFile.ParentId = localMatchingRoomIds[security.EntryId].Id;
+                                newFile.Comment = FilesCommonResource.CommentCreate;
+                                newFile.Title = Path.GetFileName(file.Title);
+                                newFile.ContentLength = fs.Length;
+                                newFile.Version = file.Version;
+                                newFile.VersionGroup = file.VersionGroup;
+                                newFile.CreateOn = file.Created;
+                                if (matchingFilesIds.ContainsKey($"{_fileKey}-{file.Id}"))
+                                {
+                                    newFile.Id = matchingFilesIds[$"{_fileKey}-{file.Id}"].Id;
+                                }
+                                newFile = await fileDao.SaveFileAsync(newFile, fs);
+                                Log(string.Format(MigrationResource.CreateFile, file.Title));
+                                if (!matchingFilesIds.ContainsKey($"{_fileKey}-{file.Id}"))
+                                {
+                                    matchingFilesIds.Add($"{_fileKey}-{file.Id}", newFile);
+                                }
                             }
-                            newFile = await fileDao.SaveFileAsync(newFile, fs);
-                            Log(string.Format(MigrationResource.CreateFile, file.Title));
-                            if (!matchingFilesIds.ContainsKey($"{_fileKey}-{file.Id}"))
+                            catch(Exception ex)
                             {
-                                matchingFilesIds.Add($"{_fileKey}-{file.Id}", newFile);
+                                Log(string.Format(MigrationResource.CanNotCreateFile, file.Title), ex);
+                                MigrationInfo.Errors.Add(string.Format(MigrationResource.CanNotCreateFile, file.Title));
                             }
                         }
                     }
