@@ -176,7 +176,7 @@ public class GroupController(UserManager userManager,
 
         group.Name = inDto.GroupName ?? group.Name;
         await userManager.SaveGroupInfoAsync(group);
-
+        
         await TransferUserToDepartmentAsync(inDto.GroupManager, group, true);
 
         if (inDto.MembersToAdd != null)
@@ -372,9 +372,22 @@ public class GroupController(UserManager userManager,
             return;
         }
 
+        var user = await userManager.GetUsersAsync(userId);
+        if (userId == Guid.Empty || !userManager.UserExists(user))
+        {
+            return;
+        }
+
         if (setAsManager)
         {
-            await userManager.SetDepartmentManagerAsync(group.ID, userId);
+            if (user.Status == EmployeeStatus.Active)
+            {
+                await userManager.SetDepartmentManagerAsync(group.ID, userId);
+            }
+            else
+            {
+                throw new ItemNotFoundException();
+            }
         }
         
         await userManager.AddUserIntoGroupAsync(userId, group.ID, notifyWebSocket: false);
