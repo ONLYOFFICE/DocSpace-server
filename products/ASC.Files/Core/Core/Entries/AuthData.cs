@@ -27,13 +27,12 @@
 namespace ASC.Files.Core;
 
 [DebuggerDisplay("{Login} {Password} {RawToken} {Url}")]
-public class AuthData(string url = null, string login = null, string password = null, string token = null, string provider = null)
+public class AuthData(string url = null, string login = null, string password = null, string token = null)
 {
     public string Login { get; init; } = login ?? string.Empty;
     public string Password { get; init; } = password ?? string.Empty;
     public string RawToken { get; init; } = token ?? string.Empty;
     public string Url { get; set; } = url ?? string.Empty;
-    public string Provider { get; init; } = provider ?? string.Empty;
 
     public OAuth20Token Token
     {

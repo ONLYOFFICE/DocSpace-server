@@ -36,11 +36,12 @@ public enum ProviderTypes
     SharePoint,
     WebDav,
     kDrive,
-    Yandex
+    Yandex,
+    Nextcloud
 }
 
 [Scope]
-internal class ProviderAccountDao(
+internal partial class ProviderAccountDao(
     IServiceProvider serviceProvider,
     TenantUtil tenantUtil,
     TenantManager tenantManager,
@@ -51,6 +52,8 @@ internal class ProviderAccountDao(
     ILogger<ProviderAccountDao> logger)
     : IProviderDao
 {
+    private static readonly Regex _nextcloudUrlPattern = NextcloudUrlPattern();
+    
     private int TenantID
     {
         get
@@ -130,44 +133,40 @@ internal class ProviderAccountDao(
         }
         catch (Exception)
         {
-            throw new ArgumentException("Unrecognize ProviderType");
+            throw new ArgumentException("Unrecognized ProviderType");
         }
 
         authData = GetEncodedAccessToken(authData, prKey);
 
-        if (!await CheckProviderInfoAsync(ToProviderInfo(0, prKey, customerTitle, authData, securityContext.CurrentAccount.ID, folderType, tenantUtil.DateTimeToUtc(tenantUtil.DateTimeNow()))))
+        var info = ToProviderInfo(0, prKey, customerTitle, authData, securityContext.CurrentAccount.ID, folderType, tenantUtil.DateTimeToUtc(tenantUtil.DateTimeNow()));
+        if (!await CheckProviderInfoAsync(info))
         {
-            throw new UnauthorizedAccessException(string.Format(FilesCommonResource.ErrorMessage_SecurityException_Auth, providerKey));
+            throw new UnauthorizedAccessException(string.Format(FilesCommonResource.ErrorMessage_SecurityException_Auth, info.ProviderKey));
         }
 
         var now = tenantUtil.DateTimeToUtc(tenantUtil.DateTimeNow());
 
-        var dbFilesThirdpartyAccount = new DbFilesThirdpartyAccount
+        var dbFilesThirdPartyAccount = new DbFilesThirdpartyAccount
         {
             Id = 0,
             TenantId = TenantID,
-            Provider = providerKey,
+            Provider = info.ProviderKey,
             Title = Global.ReplaceInvalidCharsAndTruncate(customerTitle),
-            UserName = authData.Login ?? "",
+            UserName = authData.Login ?? string.Empty,
             Password = EncryptPassword(authData.Password),
             FolderType = folderType,
             CreateOn = now,
             ModifiedOn = now,
             UserId = securityContext.CurrentAccount.ID,
-            Token = EncryptPassword(authData.RawToken ?? ""),
-            Url = authData.Url ?? ""
+            Token = EncryptPassword(authData.RawToken ?? string.Empty),
+            Url = authData.Url ?? string.Empty
         };
 
         await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
-        var res = await filesDbContext.AddOrUpdateAsync(r => r.ThirdpartyAccount, dbFilesThirdpartyAccount);
+        var res = await filesDbContext.AddOrUpdateAsync(r => r.ThirdpartyAccount, dbFilesThirdPartyAccount);
         await filesDbContext.SaveChangesAsync();
 
         return res.Id;
-    }
-
-    public async Task<bool> CheckProviderInfoAsync(IProviderInfo providerInfo)
-    {
-        return providerInfo != null && await providerInfo.CheckAccessAsync();
     }
     
     public async Task<IProviderInfo> UpdateRoomProviderInfoAsync(ProviderData data)
@@ -293,7 +292,8 @@ internal class ProviderAccountDao(
                 authData = GetEncodedAccessToken(authData, key);
             }
 
-            if (!await CheckProviderInfoAsync(ToProviderInfo(0, key, customerTitle, authData, securityContext.CurrentAccount.ID, folderType, tenantUtil.DateTimeToUtc(tenantUtil.DateTimeNow()))))
+            if (!await CheckProviderInfoAsync(ToProviderInfo(0, key, customerTitle, authData, securityContext.CurrentAccount.ID, folderType, 
+                    tenantUtil.DateTimeToUtc(tenantUtil.DateTimeNow()))))
             {
                 throw new UnauthorizedAccessException(string.Format(FilesCommonResource.ErrorMessage_SecurityException_Auth, key));
             }
@@ -450,13 +450,25 @@ internal class ProviderAccountDao(
         var folderId = input.FolderId;
         var createOn = tenantUtil.DateTimeFromUtc(input.CreateOn);
         var modifiedOn = tenantUtil.DateTimeFromUtc(input.ModifiedOn);
-        var authData = new AuthData(input.Url, input.UserName, DecryptPassword(input.Password, id), token, input.Provider);
+        var authData = new AuthData(input.Url, input.UserName, DecryptPassword(input.Password, id), token);
         var hasLogo = input.HasLogo;
         var color = input.Color;
 
         if (key == ProviderTypes.kDrive)
         {
             authData.Url = "https://connect.drive.infomaniak.com";
+        }
+
+        if (key == ProviderTypes.Nextcloud)
+        {
+            var match = _nextcloudUrlPattern.Match(authData.Url);
+            if (!match.Success)
+            {
+                throw new ArgumentException(string.Format(FilesCommonResource.ErrorMessage_SecurityException_Auth, key));
+            }
+
+            key = ProviderTypes.WebDav;
+            input.Provider = ProviderTypes.WebDav.ToStringFast();
         }
 
         if (key == ProviderTypes.Box)
@@ -669,6 +681,7 @@ internal class ProviderAccountDao(
                 return new AuthData(token: token.ToJson());
             case ProviderTypes.SharePoint:
             case ProviderTypes.WebDav:
+            case ProviderTypes.Nextcloud:
                 break;
 
             default:
@@ -709,6 +722,14 @@ internal class ProviderAccountDao(
             return token ?? "";
         }
     }
+    
+    private static async Task<bool> CheckProviderInfoAsync(IProviderInfo providerInfo)
+    {
+        return providerInfo != null && await providerInfo.CheckAccessAsync();
+    }
+
+    [GeneratedRegex(@"https?://[^/]+/remote\.php/dav/files/([^/]+)/?")]
+    private static partial Regex NextcloudUrlPattern();
 }
 
 public static class ProviderAccountDaoExtension
