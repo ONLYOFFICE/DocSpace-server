@@ -110,6 +110,18 @@ public class FileDto<T> : FileEntryDto<T>
     /// <type>System.Boolean, System</type>
     public bool? StartFilling { get; set; }
 
+    /// <summary>InProcess folder ID</summary>
+    /// <type>System.Int32, System</type>
+    public int? InProcessFolderId { get; set; }
+
+    /// <summary>InProcess folder title</summary>
+    /// <type>System.String, System</type>
+    public string InProcessFolderTitle { get; set; }
+
+    /// <summary>Draft info</summary>
+    /// <type>ASC.File.Core.ApiModels.ResponseDto.DraftLocation, ASC.Files.Core</type>
+    public DraftLocation<T> DraftLocation { get; set; }
+
     /// <summary>Denies file sharing or not</summary>
     /// <type>System.Boolean, System</type>
     public bool DenySharing { get; set; }
@@ -120,7 +132,7 @@ public class FileDto<T> : FileEntryDto<T>
     public IDictionary<string, bool> AvailableExternalRights { get; set; }
     public string RequestToken { get; set; }
     public ApiDateTime LastOpened { get; set; }
-    
+
     public static FileDto<int> GetSample()
     {
         return new FileDto<int>
@@ -199,12 +211,26 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
 
             var linkedIdTask = linkDao.GetLinkedAsync(file.Id.ToString());
             var propertiesTask = daoFactory.GetFileDao<T>().GetProperties(file.Id);
-            var roomTask = folderDao.GetFolderAsync((T)Convert.ChangeType(file.ParentId, typeof(T)));
-            await Task.WhenAll(linkedIdTask, propertiesTask, roomTask);
+            var currentFolderTask = folderDao.GetFolderAsync((T)Convert.ChangeType(file.ParentId, typeof(T)));
+            await Task.WhenAll(linkedIdTask, propertiesTask, currentFolderTask);
 
             var linkedId = await linkedIdTask;
             var properties = await propertiesTask;
-            var room = await roomTask;
+            var room = await currentFolderTask;
+
+            if (!DocSpaceHelper.IsRoom(room.FolderType))
+            {
+                var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(room);
+                if (int.TryParse(roomId.ToString(), out var curRoomId) && curRoomId != -1)
+                {
+                    room = await folderDao.GetFolderAsync(roomId);
+                }
+            }
+            if (properties != null)
+            {
+                if (room.FolderType == FolderType.FillingFormsRoom && properties.FormFilling.StartFilling)
+                    result.Security[FileSecurity.FilesSecurityActions.Lock] = false;
+            }
 
             var ace = await fileSharing.GetPureSharesAsync(room, new List<Guid> { authContext.CurrentAccount.ID }).FirstOrDefaultAsync();
 
@@ -212,9 +238,30 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
             {
                 result.Security[FileSecurity.FilesSecurityActions.EditForm] = false;
             }
-
             result.HasDraft = linkedId != null;
-            result.StartFilling = properties?.FormFilling?.StartFilling ?? false;
+
+            var formFilling = properties?.FormFilling;
+            if (formFilling != null)
+            {
+                result.StartFilling = formFilling.StartFilling;
+                if (linkedId != null)
+                {
+                    var draftLocation = new DraftLocation<T>()
+                    {
+                        FolderId = (T)Convert.ChangeType(formFilling.ToFolderId, typeof(T)),
+                        FolderTitle = formFilling.Title,
+                        FileId = (T)Convert.ChangeType(linkedId, typeof(T))
+                    };
+
+                    var fileDao = daoFactory.GetFileDao<T>();
+                    var draft = await fileDao.GetFileAsync((T)Convert.ChangeType(linkedId, typeof(T)));
+                    if (draft != null)
+                    {
+                        draftLocation.FileTitle = draft.Title;
+                    }
+                    result.DraftLocation = draftLocation;
+                }
+            }
         }
 
         result.FileExst = extension;
@@ -270,4 +317,23 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
 
         return result;
     }
+}
+
+public class DraftLocation<T>
+{
+    /// <summary>InProcess folder ID</summary>
+    /// <type>System.Int32, System</type>
+    public T FolderId { get; set; }
+
+    /// <summary>InProcess folder title</summary>
+    /// <type>System.String, System</type>
+    public string FolderTitle { get; set; }
+
+    /// <summary>Draft ID</summary>
+    /// <type>System.Int32, System</type>
+    public T FileId { get; set; }
+
+    /// <summary>Draft title</summary>
+    /// <type>System.String, System</type>
+    public string FileTitle { get; set; }
 }

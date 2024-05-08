@@ -184,7 +184,6 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
         switch (fileData.Status)
         {
             case TrackerStatus.NotFound:
-            case TrackerStatus.Closed:
                 fileTracker.Remove(fileId);
                 await socketManager.StopEditAsync(fileId);
 
@@ -195,6 +194,28 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
                 break;
 
             case TrackerStatus.MustSave:
+            case TrackerStatus.Closed:
+                var fileDao = daoFactory.GetFileDao<T>();
+                var properties = await fileDao.GetProperties(fileId);
+                if(properties?.FormFilling != null)
+                {
+                    var fileForDeletion = await documentServiceHelper.CheckNeedDeletion(fileDao, fileId, properties.FormFilling);
+                    if (fileForDeletion != null)
+                    {
+                        await fileDao.SaveProperties(fileForDeletion.Id, null);
+                        await socketManager.DeleteFileAsync(fileForDeletion);
+                        await fileDao.DeleteFileAsync(fileForDeletion.Id);
+                        break;
+                    }
+                }
+                if (fileData.Status == TrackerStatus.Closed)
+                {
+                    fileTracker.Remove(fileId);
+                    await socketManager.StopEditAsync(fileId);
+
+                    break;
+                }
+                return await ProcessSaveAsync(fileId, fileData);
             case TrackerStatus.Corrupted:
             case TrackerStatus.ForceSave:
             case TrackerStatus.CorruptedForceSave:
