@@ -167,6 +167,8 @@ public class DocumentConfigDto<T>
     public string Title { get; set; }
 
     public string Url { get; set; }
+
+    public Options Options { get; set; }
 }
 
 public class InfoConfigDto
@@ -373,7 +375,8 @@ public class DocumentConfigConverter<T>(InfoConfigConverter<T> configConverter)
             SharedLinkKey = source.SharedLinkKey,
             ReferenceData = await source.GetReferenceData(file),
             Title = source.Title ?? file.Title,
-            Url = await source.GetUrl(file)
+            Url = await source.GetUrl(file),
+            Options = source.Options,
         };
 
         return result;
