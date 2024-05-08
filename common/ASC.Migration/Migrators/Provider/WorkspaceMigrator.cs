@@ -307,7 +307,8 @@ public class WorkspaceMigrator : Migrator
                     Title = row["title"].ToString(),
                     Version = int.Parse(row["version"].ToString()),
                     VersionGroup = int.Parse(row["version_group"].ToString()),
-                    Comment = row["comment"].ToString()
+                    Comment = row["comment"].ToString(),
+                    Created = DateTime.Parse(row["create_on"].ToString())
                 };
                 file.Path = Path.Combine(_dataReader.GetFolder(),$"{folderFiles}_{(Convert.ToInt32(file.Id) / 1000 + 1) * 1000}/file_{file.Id}/v{file.Version}/content{FileUtility.GetFileExtension(file.Title)}");
                 storage.Files.Add(file);
