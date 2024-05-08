@@ -69,6 +69,8 @@ public class Worker(ILogger<Worker> logger, IServiceScopeFactory serviceScopeFac
 
         try
         {
+            CustomSynchronizationContext.CreateContext(true);
+
             await using var scope = serviceScopeFactory.CreateAsyncScope();
             var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
             await tenantManager.SetCurrentTenantAsync(tenantUser.TenantId);
