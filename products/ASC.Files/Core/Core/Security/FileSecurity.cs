@@ -1145,6 +1145,23 @@ public class FileSecurity(IDaoFactory daoFactory,
                         break;
                 }
                 break;
+            case FilesSecurityActions.EditForm:
+                switch (e.RootFolderType)
+                {
+                    case FolderType.USER:
+                        if (e.Access is FileShare.Editing or FileShare.Review or FileShare.FillForms)
+                        {
+                            return true;
+                        }
+                        break;
+                    default:
+                        if (e.Access is FileShare.RoomAdmin or FileShare.Editing or FileShare.Collaborator)
+                        {
+                            return true;
+                        }
+                        break;
+                }
+                break;
             case FilesSecurityActions.Review:
                 switch (e.RootFolderType)
                 {
