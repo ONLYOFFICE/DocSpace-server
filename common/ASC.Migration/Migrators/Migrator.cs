@@ -402,6 +402,7 @@ public abstract class Migrator : IAsyncDisposable
                 newFile.VersionGroup = file.VersionGroup;
                 newFile.Comment = file.Comment;
                 newFile.CreateOn = file.Created;
+                newFile.ModifiedOn = file.Modified;
                 if (matchingFilesIds.ContainsKey($"{_fileKey}-{file.Id}"))
                 {
                     newFile.Id = matchingFilesIds[$"{_fileKey}-{file.Id}"].Id;
@@ -568,6 +569,7 @@ public abstract class Migrator : IAsyncDisposable
                                 newFile.Version = file.Version;
                                 newFile.VersionGroup = file.VersionGroup;
                                 newFile.CreateOn = file.Created;
+                                newFile.ModifiedOn = file.Modified;
                                 if (matchingFilesIds.ContainsKey($"{_fileKey}-{file.Id}"))
                                 {
                                     newFile.Id = matchingFilesIds[$"{_fileKey}-{file.Id}"].Id;

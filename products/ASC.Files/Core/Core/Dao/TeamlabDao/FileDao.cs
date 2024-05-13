@@ -444,7 +444,10 @@ internal class FileDao(
                     file.Title = FileUtility.ReplaceFileExtension(file.Title, FileUtility.GetFileExtension(file.Title));
 
                     file.ModifiedBy = _authContext.CurrentAccount.ID;
-                    file.ModifiedOn = _tenantUtil.DateTimeNow();
+                    if (file.ModifiedOn == default)
+                    {
+                        file.ModifiedOn = _tenantUtil.DateTimeNow();
+                    }
                     if (file.CreateBy == default)
                     {
                         file.CreateBy = _authContext.CurrentAccount.ID;
