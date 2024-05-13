@@ -367,27 +367,15 @@ public class GroupController(UserManager userManager,
 
     private async Task TransferUserToDepartmentAsync(Guid userId, GroupInfo group, bool setAsManager)
     {
-        if (userId == Guid.Empty || !await userManager.UserExistsAsync(userId))
-        {
-            return;
-        }
-
         var user = await userManager.GetUsersAsync(userId);
-        if (userId == Guid.Empty || !userManager.UserExists(user))
+        if (userId == Guid.Empty || !userManager.UserExists(user) || user.Status != EmployeeStatus.Active)
         {
             return;
         }
 
         if (setAsManager)
         {
-            if (user.Status == EmployeeStatus.Active)
-            {
-                await userManager.SetDepartmentManagerAsync(group.ID, userId);
-            }
-            else
-            {
-                throw new ItemNotFoundException();
-            }
+            await userManager.SetDepartmentManagerAsync(group.ID, userId);
         }
         
         await userManager.AddUserIntoGroupAsync(userId, group.ID, notifyWebSocket: false);
