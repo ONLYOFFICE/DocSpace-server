@@ -103,7 +103,8 @@ public class Global(
     CoreSettings coreSettings,
     DisplayUserSettingsHelper displayUserSettingsHelper,
     CustomNamingPeople customNamingPeople,
-    FileSecurityCommon fileSecurityCommon)
+    FileSecurityCommon fileSecurityCommon,
+    IDistributedLockProvider distributedLockProvider)
 {
     #region Property
 
@@ -172,17 +173,28 @@ public class Global(
     public async Task<string> GetDocDbKeyAsync()
     {
         const string dbKey = "UniqueDocument";
+        
+        // check without lock
         var resultKey = await coreSettings.GetSettingAsync(dbKey);
-
         if (!string.IsNullOrEmpty(resultKey))
         {
             return resultKey;
         }
+        
+        await using (await distributedLockProvider.TryAcquireFairLockAsync(dbKey))
+        {
+            // check again with lock
+            resultKey = await coreSettings.GetSettingAsync(dbKey);
+            if (!string.IsNullOrEmpty(resultKey))
+            {
+                return resultKey;
+            }
+            
+            resultKey = Guid.NewGuid().ToString();
+            await coreSettings.SaveSettingAsync(dbKey, resultKey);
 
-        resultKey = Guid.NewGuid().ToString();
-        await coreSettings.SaveSettingAsync(dbKey, resultKey);
-
-        return resultKey;
+            return resultKey;
+        }
     }
 
     #endregion
