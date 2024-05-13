@@ -35,9 +35,9 @@ public class CustomSynchronizationContext
     private static readonly AsyncLocal<CustomSynchronizationContext> _context = new();
     public static CustomSynchronizationContext CurrentContext => _context.Value;
 
-    public static void CreateContext(bool force = false)
+    public static void CreateContext()
     {
-        if (CurrentContext == null || force)
+        if (CurrentContext == null)
         {
             var context = new CustomSynchronizationContext();
             _context.Value = context;
