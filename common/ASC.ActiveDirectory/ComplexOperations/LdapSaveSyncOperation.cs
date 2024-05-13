@@ -44,8 +44,7 @@ public class LdapSaveSyncOperation(IServiceProvider serviceProvider,
         }
         if (item == null)
         {
-            using var scope = serviceProvider.CreateScope();
-            item = scope.ServiceProvider.GetRequiredService<LdapOperationJob>();
+            item = serviceProvider.GetRequiredService<LdapOperationJob>();
             await item.InitJobAsync(settings, tenant, operationType, resource, userId);
             await _progressQueue.EnqueueTask(item);
         }

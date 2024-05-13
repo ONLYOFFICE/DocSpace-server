@@ -29,20 +29,19 @@ using SecurityContext = ASC.Core.SecurityContext;
 
 namespace ASC.ActiveDirectory.ComplexOperations;
 [Transient(Additional = typeof(LdapOperationExtension))]
-public class LdapOperationJob(TenantManager tenantManager,
-        SecurityContext securityContext,
+public class LdapOperationJob(SecurityContext securityContext,
         LdapUserManager ldapUserManager,
         NovellLdapHelper novellLdapHelper,
         NovellLdapUserImporter novellLdapUserImporter,
         LdapChangeCollection ldapChanges,
         UserFormatter userFormatter,
-        SettingsManager settingsManager,
         UserPhotoManager userPhotoManager,
         WebItemSecurity webItemSecurity,
         UserManager userManager,
         DisplayUserSettingsHelper displayUserSettingsHelper,
         NovellLdapSettingsChecker novellLdapSettingsChecker,
-        ILogger<LdapOperationJob> logger)
+        ILogger<LdapOperationJob> logger,
+        IServiceScopeFactory serviceScopeFactory)
     : DistributedTaskProgress
 {
     private string _culture;
@@ -70,6 +69,8 @@ public class LdapOperationJob(TenantManager tenantManager,
     private LdapOperationType _operationType;
     private static LdapLocalization _resource;
 
+    private static TenantManager _tenantManager;
+    private static SettingsManager _settingsManager;
 
     private UserInfo _currentUser;
 
@@ -83,7 +84,6 @@ public class LdapOperationJob(TenantManager tenantManager,
         _currentUser = userId != null ? await userManager.GetUsersAsync(Guid.Parse(userId)) : null;
 
         TenantId = tenant.Id;
-        tenantManager.SetCurrentTenant(tenant);
 
         _operationType = operationType;
 
@@ -107,6 +107,12 @@ public class LdapOperationJob(TenantManager tenantManager,
     {
         try
         {
+            await using var scope = serviceScopeFactory.CreateAsyncScope();
+            _tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
+            _settingsManager = scope.ServiceProvider.GetRequiredService<SettingsManager>();
+
+            await _tenantManager.SetCurrentTenantAsync(TenantId);
+
             await securityContext.AuthenticateMeAsync(Constants.CoreSystem);
 
             CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo(_culture);
@@ -224,7 +230,7 @@ public class LdapOperationJob(TenantManager tenantManager,
 
                 _ldapSettings.IsDefault = _ldapSettings.Equals(_ldapSettings.GetDefault());
 
-                if (!await settingsManager.SaveAsync(_ldapSettings))
+                if (!await _settingsManager.SaveAsync(_ldapSettings))
                 {
                     logger.ErrorSaveLdapSettings();
                     _error = _resource.LdapSettingsErrorCantSaveLdapSettings;
@@ -267,11 +273,11 @@ public class LdapOperationJob(TenantManager tenantManager,
                 logger.DebugTurnOffLDAP();
 
                 await TurnOffLDAPAsync();
-                var ldapCurrentUserPhotos = (await settingsManager.LoadAsync<LdapCurrentUserPhotos>()).GetDefault();
-                await settingsManager.SaveAsync(ldapCurrentUserPhotos);
+                var ldapCurrentUserPhotos = (await _settingsManager.LoadAsync<LdapCurrentUserPhotos>()).GetDefault();
+                await _settingsManager.SaveAsync(ldapCurrentUserPhotos);
 
-                var ldapCurrentAccessSettings = (await settingsManager.LoadAsync<LdapCurrentAcccessSettings>()).GetDefault();
-                await settingsManager.SaveAsync(ldapCurrentAccessSettings);
+                var ldapCurrentAccessSettings = (await _settingsManager.LoadAsync<LdapCurrentAcccessSettings>()).GetDefault();
+                await _settingsManager.SaveAsync(ldapCurrentAccessSettings);
                 // don't remove permissions on shutdown
                 //var rights = new List<LdapSettings.AccessRight>();
                 //TakeUsersRights(rights);
@@ -359,12 +365,12 @@ public class LdapOperationJob(TenantManager tenantManager,
 
     private async Task SyncLDAPAsync()
     {
-        var currentDomainSettings = await settingsManager.LoadAsync<LdapCurrentDomain>();
+        var currentDomainSettings = await _settingsManager.LoadAsync<LdapCurrentDomain>();
 
         if (string.IsNullOrEmpty(currentDomainSettings.CurrentDomain) || currentDomainSettings.CurrentDomain != novellLdapUserImporter.LDAPDomain)
         {
             currentDomainSettings.CurrentDomain = novellLdapUserImporter.LDAPDomain;
-            await settingsManager.SaveAsync(currentDomainSettings);
+            await _settingsManager.SaveAsync(currentDomainSettings);
         }
 
         if (!_ldapSettings.GroupMembership)
@@ -391,7 +397,7 @@ public class LdapOperationJob(TenantManager tenantManager,
 
         if (!_ldapSettings.LdapMapping.ContainsKey(LdapSettings.MappingFields.AvatarAttribute))
         {
-            var ph = await settingsManager.LoadAsync<LdapCurrentUserPhotos>();
+            var ph = await _settingsManager.LoadAsync<LdapCurrentUserPhotos>();
 
             if (ph.CurrentPhotos == null || ph.CurrentPhotos.Count == 0)
             {
@@ -406,11 +412,11 @@ public class LdapOperationJob(TenantManager tenantManager,
             }
 
             ph.CurrentPhotos = null;
-            await settingsManager.SaveAsync(ph);
+            await _settingsManager.SaveAsync(ph);
             return;
         }
 
-        var photoSettings = await settingsManager.LoadAsync<LdapCurrentUserPhotos>();
+        var photoSettings = await _settingsManager.LoadAsync<LdapCurrentUserPhotos>();
 
         photoSettings.CurrentPhotos ??= new Dictionary<Guid, string>();
 
@@ -460,7 +466,7 @@ public class LdapOperationJob(TenantManager tenantManager,
             }
         }
 
-        await settingsManager.SaveAsync(photoSettings);
+        await _settingsManager.SaveAsync(photoSettings);
     }
 
     private async Task SyncLdapAccessRights()
@@ -480,12 +486,12 @@ public class LdapOperationJob(TenantManager tenantManager,
             _warning = _resource.LdapSettingsErrorLostRights;
         }
 
-        await settingsManager.SaveAsync(_ldapSettings);
+        await _settingsManager.SaveAsync(_ldapSettings);
     }
 
     private async Task TakeUsersRightsAsync(List<LdapSettings.AccessRight> currentUserRights)
     {
-        var current = await settingsManager.LoadAsync<LdapCurrentAcccessSettings>();
+        var current = await _settingsManager.LoadAsync<LdapCurrentAcccessSettings>();
 
         if (current.CurrentAccessRights == null || current.CurrentAccessRights.Count == 0)
         {
@@ -513,12 +519,12 @@ public class LdapOperationJob(TenantManager tenantManager,
         }
 
         current.CurrentAccessRights = null;
-        await settingsManager.SaveAsync(current);
+        await _settingsManager.SaveAsync(current);
     }
 
     private async Task GiveUsersRights(Dictionary<LdapSettings.AccessRight, string> accessRightsSettings, List<LdapSettings.AccessRight> currentUserRights)
     {
-        var current = await settingsManager.LoadAsync<LdapCurrentAcccessSettings>();
+        var current = await _settingsManager.LoadAsync<LdapCurrentAcccessSettings>();
         var currentAccessRights = new Dictionary<LdapSettings.AccessRight, List<string>>();
         var usersWithRightsFlat = current.CurrentAccessRights == null ? new List<string>() : current.CurrentAccessRights.SelectMany(x => x.Value).Distinct().ToList();
 
@@ -596,7 +602,7 @@ public class LdapOperationJob(TenantManager tenantManager,
         }
 
         current.CurrentAccessRights = currentAccessRights;
-        await settingsManager.SaveAsync(current);
+        await _settingsManager.SaveAsync(current);
     }
 
     private async Task SyncLDAPUsersAsync()
@@ -955,7 +961,7 @@ public class LdapOperationJob(TenantManager tenantManager,
                 case LdapOperationType.Save:
                 case LdapOperationType.Sync:
                     removedUser.Sid = null;
-                    if (!removedUser.IsOwner(await tenantManager.GetCurrentTenantAsync()) && !(_currentUser != null && _currentUser.Id == removedUser.Id && await userManager.IsDocSpaceAdminAsync(removedUser)))
+                    if (!removedUser.IsOwner(await _tenantManager.GetCurrentTenantAsync()) && !(_currentUser != null && _currentUser.Id == removedUser.Id && await userManager.IsDocSpaceAdminAsync(removedUser)))
                     {
                         removedUser.Status = EmployeeStatus.Terminated; // Disable user on portal
                     }
