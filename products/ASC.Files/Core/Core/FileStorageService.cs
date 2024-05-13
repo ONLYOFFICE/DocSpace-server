@@ -3290,6 +3290,11 @@ public class FileStorageService //: IFileStorageService
 
         if (expirationDateUtc != DateTime.MinValue && expirationDateUtc > DateTime.UtcNow)
         {
+            if (expirationDateUtc > DateTime.UtcNow.AddYears(FilesLinkUtility.MaxLinkLifeTimeInYears))
+            {
+                throw new ArgumentException(nameof(expirationDate));
+            }
+            
             options.ExpirationDate = expirationDateUtc;
         }
 
