@@ -34,6 +34,10 @@ public class CapabilitiesDto
     /// <type>System.Boolean, System</type>
     public bool LdapEnabled { get; set; }
 
+    /// <summary>Ldap domain</summary>
+    /// <type>System.String, System</type>
+    public string LdapDomain { get; set; }
+
     /// <summary>List of providers</summary>
     /// <type>System.Collections.Generic.List{System.String}, System.Collections.Generic</type>
     public List<string> Providers { get; set; }

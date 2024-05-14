@@ -75,7 +75,9 @@ public class CapabilitiesController(CoreBaseSettings coreBaseSettings,
                         && quota.Ldap)
             {
                 var settings = await settingsManager.LoadAsync<LdapSettings>();
+                var currentDomainSettings = await settingsManager.LoadAsync<LdapCurrentDomain>();
                 result.LdapEnabled = settings.EnableLdapAuthentication;
+                result.LdapDomain = currentDomainSettings.CurrentDomain;
             }
         }
         catch (Exception ex)
