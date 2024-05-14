@@ -74,10 +74,8 @@ public class CapabilitiesController(CoreBaseSettings coreBaseSettings,
                     || SetupInfo.IsVisibleSettings(ManagementType.LdapSettings.ToString())
                         && quota.Ldap)
             {
-                //var settings = SettingsManager.Load<LdapSettings>();
-
-                //result.LdapEnabled = settings.EnableLdapAuthentication;
-                result.LdapEnabled = false;
+                var settings = await settingsManager.LoadAsync<LdapSettings>();
+                result.LdapEnabled = settings.EnableLdapAuthentication;
             }
         }
         catch (Exception ex)
