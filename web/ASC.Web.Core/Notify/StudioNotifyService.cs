@@ -107,7 +107,11 @@ public class StudioNotifyService(UserManager userManager,
 
     public async Task SendEmailChangeInstructionsAsync(UserInfo user, string email)
     {
-        var confirmationUrl = await commonLinkUtility.GetConfirmationEmailUrlAsync(email, ConfirmType.EmailChange, authContext.CurrentAccount.ID, authContext.CurrentAccount.ID);
+        var auditEventDate = DateTime.UtcNow;
+
+        var postfix = auditEventDate.ToString("s", CultureInfo.InvariantCulture);
+
+        var confirmationUrl = await commonLinkUtility.GetConfirmationEmailUrlAsync(email, ConfirmType.EmailChange, hash, user.Id);
 
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonChangeEmail", await GetCulture(user));
 
@@ -119,6 +123,10 @@ public class StudioNotifyService(UserManager userManager,
                     [EMailSenderName],
                 TagValues.OrangeButton(orangeButtonText, confirmationUrl),
                 new TagValue(CommonTags.Culture, user.GetCulture().Name));
+
+        var displayUserName = user.DisplayUserName(false, displayUserSettingsHelper);
+
+        await messageService.SendAsync(MessageAction.UserSentEmailChangeInstructions, messageTarget.Create(user.Id), auditEventDate, displayUserName);
     }
 
     public async Task SendEmailActivationInstructionsAsync(UserInfo user, string email)

@@ -1078,9 +1078,8 @@ public class UserController(ICache cache,
             await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
             await cookiesManager.ResetUserCookieAsync(user.Id);
             await studioNotifyService.SendEmailActivationInstructionsAsync(user, email);
+            await messageService.SendAsync(MessageAction.UserSentEmailChangeInstructions, messageTarget.Create(user.Id), DateTime.UtcNow, user.DisplayUserName(false, displayUserSettingsHelper));
         }
-
-        await messageService.SendAsync(MessageAction.UserSentEmailChangeInstructions, user.DisplayUserName(false, displayUserSettingsHelper));
 
         return string.Format(Resource.MessageEmailChangeInstuctionsSentOnEmail, email);
     }
