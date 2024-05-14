@@ -109,6 +109,16 @@ public class StudioNotifyService(UserManager userManager,
     {
         var auditEventDate = DateTime.UtcNow;
 
+        auditEventDate = new DateTime(
+            auditEventDate.Year,
+            auditEventDate.Month,
+            auditEventDate.Day,
+            auditEventDate.Hour,
+            auditEventDate.Minute,
+            auditEventDate.Second,
+            0,
+            DateTimeKind.Utc);
+
         var postfix = auditEventDate.ToString("s", CultureInfo.InvariantCulture);
 
         var confirmationUrl = await commonLinkUtility.GetConfirmationEmailUrlAsync(email, ConfirmType.EmailChange, postfix, user.Id);
