@@ -345,12 +345,13 @@ public class FileConverter(
         }
 
         var fileUri = await pathProvider.GetFileStreamUrlAsync(file);
-        var docKey = await documentServiceHelper.GetDocKeyAsync(file);
         fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(fileUri);
 
         var folderDao = daoFactory.GetFolderDao<T>();
         var (watermarkSettings, room) = await DocSpaceHelper.GetWatermarkSettings(file, folderDao);
         var options = documentServiceHelper.GetOptions(watermarkSettings, room);
+
+        var docKey = await documentServiceHelper.GetDocKeyAsync(file, options);
 
         var uriTuple = await documentServiceConnector.GetConvertedUriAsync(fileUri, file.ConvertedExtension, toExtension, docKey, password, CultureInfo.CurrentUICulture.Name, null, null, options, false);
         var convertUri = uriTuple.ConvertedDocumentUri;

@@ -34,6 +34,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         FileUtility fileUtility,
         MachinePseudoKeys machinePseudoKeys,
         Global global,
+        TenantUtil tenantUtil,
         DocumentServiceConnector documentServiceConnector,
         LockerManager lockerManager,
         FileTrackerHelper fileTracker,
@@ -172,7 +173,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         }
 
         var locatedInPrivateRoom = false;
-        var options = new Options();
+        Options options = null;
         if (file.RootFolderType == FolderType.VirtualRooms)
         {
             var folderDao = daoFactory.GetFolderDao<T>();
@@ -245,7 +246,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             fileStable = await fileDao.GetFileStableAsync(file.Id, file.Version);
         }
 
-        var docKey = await GetDocKeyAsync(fileStable);
+        var docKey = await GetDocKeyAsync(fileStable, options);
         var modeWrite = (editPossible || reviewPossible || fillFormsPossible || commentPossible) && tryEdit;
 
         if (file.ParentId != null)
@@ -344,32 +345,32 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         if (watermarkSettings.Additions.HasFlag(WatermarkAdditions.UserName))
         {
             runs.Add(new Run(userInfo.UserName));
-            runs.Add(new Run(Environment.NewLine));
+            runs.Add(new Run(Environment.NewLine, false));
         }
         if(watermarkSettings.Additions.HasFlag(WatermarkAdditions.UserEmail))
         {
             runs.Add(new Run(userInfo.Email));
-            runs.Add(new Run(Environment.NewLine));
+            runs.Add(new Run(Environment.NewLine, false));
         }
         if (watermarkSettings.Additions.HasFlag(WatermarkAdditions.UserIpAdress))
         {
             runs.Add(new Run(ip));
-            runs.Add(new Run(Environment.NewLine));
+            runs.Add(new Run(Environment.NewLine, false));
         }
         if (watermarkSettings.Additions.HasFlag(WatermarkAdditions.CurrentDate))
         {
-            runs.Add(new Run(DateTime.Now.ToString()));
-            runs.Add(new Run(Environment.NewLine));
+            runs.Add(new Run(tenantUtil.DateTimeNow().ToString(), false));
+            runs.Add(new Run(Environment.NewLine, false));
         }
         if (watermarkSettings.Additions.HasFlag(WatermarkAdditions.RoomName))
         {
             runs.Add(new Run(room.Title));
-            runs.Add(new Run(Environment.NewLine));
+            runs.Add(new Run(Environment.NewLine, false));
         }
         if (!string.IsNullOrWhiteSpace(watermarkSettings.Text))
         {
             runs.Add(new Run(watermarkSettings.Text));
-            runs.Add(new Run(Environment.NewLine));
+            runs.Add(new Run(Environment.NewLine, false));
         }
         if (runs.Any())
         {
@@ -383,14 +384,14 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         };
         return options;
     }
-    public async Task<string> GetDocKeyAsync<T>(File<T> file)
+    public async Task<string> GetDocKeyAsync<T>(File<T> file, Options options = null)
     {
-        return await GetDocKeyAsync(file.Id, file.Version, file.ProviderEntry ? file.ModifiedOn : file.CreateOn);
+        return await GetDocKeyAsync(file.Id, file.Version, file.ProviderEntry ? file.ModifiedOn : file.CreateOn, options);
     }
 
-    public async Task<string> GetDocKeyAsync<T>(T fileId, int fileVersion, DateTime modified)
+    public async Task<string> GetDocKeyAsync<T>(T fileId, int fileVersion, DateTime modified, Options options = null)
     {
-        var str = $"teamlab_{fileId}_{fileVersion}_{modified.GetHashCode().ToString(CultureInfo.InvariantCulture)}_{await global.GetDocDbKeyAsync()}";
+        var str = $"teamlab_{fileId}_{fileVersion}_{modified.GetHashCode().ToString(CultureInfo.InvariantCulture)}{options?.GetMD5Hash()}_{await global.GetDocDbKeyAsync()}";
 
         var keyDoc = Encoding.UTF8.GetBytes(str)
                              .AsEnumerable()
