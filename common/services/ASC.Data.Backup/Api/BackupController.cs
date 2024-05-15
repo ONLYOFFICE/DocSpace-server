@@ -56,11 +56,6 @@ public class BackupController(
     [HttpGet("getbackupschedule")]
     public async Task<BackupAjaxHandler.Schedule> GetBackupSchedule()
     {
-        if (coreBaseSettings.Standalone)
-        {
-            await tenantExtra.DemandAccessSpacePermissionAsync();
-        }
-
         return await backupAjaxHandler.GetScheduleAsync();
     }
 
@@ -75,7 +70,7 @@ public class BackupController(
     [HttpPost("createbackupschedule")]
     public async Task<bool> CreateBackupScheduleAsync(BackupScheduleDto inDto)
     {
-        if (coreBaseSettings.Standalone)
+        if (inDto.Dump) 
         {
             await tenantExtra.DemandAccessSpacePermissionAsync();
         }
@@ -120,11 +115,6 @@ public class BackupController(
     [HttpDelete("deletebackupschedule")]
     public async Task<bool> DeleteBackupSchedule()
     {
-        if (coreBaseSettings.Standalone)
-        {
-            await tenantExtra.DemandAccessSpacePermissionAsync();
-        }
-
         await backupAjaxHandler.DeleteScheduleAsync();
 
         return true;
@@ -142,7 +132,7 @@ public class BackupController(
     [HttpPost("startbackup")]
     public async Task<BackupProgress> StartBackupAsync(BackupDto inDto)
     {
-        if (coreBaseSettings.Standalone)
+        if (inDto.Dump)
         {
             await tenantExtra.DemandAccessSpacePermissionAsync();
         }
@@ -211,11 +201,6 @@ public class BackupController(
     [HttpGet("getbackupprogress")]
     public async Task<BackupProgress> GetBackupProgressAsync()
     {
-        if (coreBaseSettings.Standalone)
-        {
-            await tenantExtra.DemandAccessSpacePermissionAsync();
-        }
-
         return await backupAjaxHandler.GetBackupProgressAsync();
     }
 
@@ -230,11 +215,6 @@ public class BackupController(
     [HttpGet("getbackuphistory")]
     public async Task<List<BackupHistoryRecord>> GetBackupHistory()
     {
-        if (coreBaseSettings.Standalone)
-        {
-            await tenantExtra.DemandAccessSpacePermissionAsync();
-        }
-
         return await backupAjaxHandler.GetBackupHistory();
     }
 
@@ -249,11 +229,6 @@ public class BackupController(
     [HttpDelete("deletebackup/{id:guid}")]
     public async Task<bool> DeleteBackup(Guid id)
     {
-        if (coreBaseSettings.Standalone)
-        {
-            await tenantExtra.DemandAccessSpacePermissionAsync();
-        }
-
         await backupAjaxHandler.DeleteBackupAsync(id);
         return true;
     }
@@ -268,10 +243,6 @@ public class BackupController(
     [HttpDelete("deletebackuphistory")]
     public async Task<bool> DeleteBackupHistory()
     {
-        if (coreBaseSettings.Standalone)
-        {
-            await tenantExtra.DemandAccessSpacePermissionAsync();
-        }
         await backupAjaxHandler.DeleteAllBackupsAsync();
         return true;
     }
@@ -287,11 +258,6 @@ public class BackupController(
     [HttpPost("startrestore")]
     public async Task<BackupProgress> StartBackupRestoreAsync(BackupRestoreDto inDto)
     {
-        if (coreBaseSettings.Standalone)
-        {
-            await tenantExtra.DemandAccessSpacePermissionAsync();
-        }
-
         await backupAjaxHandler.DemandPermissionsRestoreAsync();
 
         var storageParams = inDto.StorageParams == null ? new Dictionary<string, string>() : inDto.StorageParams.ToDictionary(r => r.Key.ToString(), r => r.Value.ToString());
@@ -342,11 +308,6 @@ public class BackupController(
     [AllowNotPayment]
     public async Task<BackupProgress> GetRestoreProgressAsync()
     {
-        if (coreBaseSettings.Standalone)
-        {
-            await tenantExtra.DemandAccessSpacePermissionAsync();
-        }
-
         return await backupAjaxHandler.GetRestoreProgressAsync();
     }
 
@@ -359,13 +320,8 @@ public class BackupController(
     /// <path>api/2.0/backup/backuptmp</path>
     ///<visible>false</visible>
     [HttpGet("backuptmp")]
-    public async Task<object> GetTempPath()
+    public object GetTempPath()
     {
-        if (coreBaseSettings.Standalone)
-        {
-            await tenantExtra.DemandAccessSpacePermissionAsync();
-        }
-
         return backupAjaxHandler.GetTmpFolder();
     }
 }
