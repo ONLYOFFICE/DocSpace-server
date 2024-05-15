@@ -63,7 +63,7 @@ public class WatermarkManager
         _roomLogoManager = roomLogoManager;
     }
 
-    public async Task<WatermarkSettings> SetWatermarkAsync<T>(T roomId, WatermarkRequestDto watermarkRequestDto)
+    public async Task<WatermarkSettings> SetWatermarkAsync<T>(T roomId, WatermarkRequestDto<T> watermarkRequestDto)
     {
         var folderDao = _daoFactory.GetFolderDao<T>();
 
@@ -93,6 +93,13 @@ public class WatermarkManager
             watermarkSettings.ImageHeight = watermarkRequestDto.ImageHeight;
             watermarkSettings.ImageWidth = watermarkRequestDto.ImageWidth;
             watermarkSettings.ImageUrl = await _roomLogoManager.CreateWatermarkImageAsync(room, watermarkRequestDto.ImageUrl);
+        }
+        else if(watermarkRequestDto.ImageId != null)
+        {
+            watermarkSettings.ImageScale = watermarkRequestDto.ImageScale;
+            watermarkSettings.ImageHeight = watermarkRequestDto.ImageHeight;
+            watermarkSettings.ImageWidth = watermarkRequestDto.ImageWidth;
+            watermarkSettings.ImageUrl = await _roomLogoManager.CreateWatermarkAsync(room, watermarkRequestDto.ImageId);
         }
 
         await folderDao.SetWatermarkSettings(watermarkSettings, room);

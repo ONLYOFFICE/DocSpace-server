@@ -40,11 +40,12 @@ public class RoomLogoManager(StorageFactory storageFactory,
     SecurityContext securityContext,
     FileUtilityConfiguration fileUtilityConfiguration,
     CommonLinkUtility commonLinkUtility, 
-    ExternalShare externalShare)
+    ExternalShare externalShare,
+    GlobalStore globalStore)
 {
     internal const string LogosPathSplitter = "_";
     private const string LogosPath = $"{{0}}{LogosPathSplitter}{{1}}.png";
-    private const string ImageWatermarkPath = $"watermark{LogosPathSplitter}{{0}}.png";
+    private const string ImageWatermarkPath = $"{{0}}{LogosPathSplitter}watermark.png";
     private const string ModuleName = "room_logos";
     private const string TempDomainPath = "logos_temp";
 
@@ -120,6 +121,25 @@ public class RoomLogoManager(StorageFactory storageFactory,
 
         var uri = await GetWatermarkImageAsync(room);
         
+        var imgUrl = commonLinkUtility.GetFullAbsolutePath(uri);
+
+        return imgUrl;
+    }
+    public async Task<string> CreateWatermarkAsync<T>(Folder<T> room, T imageId)
+    {
+        var fileDao = daoFactory.GetFileDao<T>();
+        var file = await fileDao.GetFileAsync(imageId);
+        var stringId = GetId(room);
+        var store = await globalStore.GetStoreAsync();
+
+        var data = await GetImageAsync(store, file);
+
+        var storeLogo = await GetDataStoreAsync();
+
+        await SaveWatermarkImageAsync(storeLogo, stringId, data, -1);
+
+        var uri = await GetWatermarkImageAsync(room);
+
         var imgUrl = commonLinkUtility.GetFullAbsolutePath(uri);
 
         return imgUrl;
@@ -212,9 +232,8 @@ public class RoomLogoManager(StorageFactory storageFactory,
         var id = GetId(room);
 
         var cacheKey = Math.Abs(room.ModifiedOn.GetHashCode());
-        var secure = !securityContext.IsAuthenticated;
 
-        return await GetWatermarkImagePathAsync(id, cacheKey, secure);
+        return await GetWatermarkImagePathAsync(id, cacheKey, true);
     }
 
     public async Task<string> SaveTempAsync(byte[] data, long maxFileSize)
@@ -379,6 +398,26 @@ public class RoomLogoManager(StorageFactory storageFactory,
         return data.ToArray();
     }
 
+    private async Task<byte[]> GetImageAsync<T>(IDataStore store, File<T> file)
+    {
+        var fileDao = daoFactory.GetFileDao<T>();
+        await using var stream = await store.GetReadStreamAsync(string.Empty, fileDao.GetUniqFilePath(file, "content" + FileUtility.GetFileExtension(file.PureTitle)));
+        var data = new MemoryStream();
+        var buffer = new byte[1024 * 10];
+        while (true)
+        {
+            var count = await stream.ReadAsync(buffer);
+            if (count == 0)
+            {
+                break;
+            }
+
+            await data.WriteAsync(buffer.AsMemory(0, count));
+        }
+
+        return data.ToArray();
+
+    }
     private async Task SaveRoomAsync<T>(IFolderDao<T> folderDao, Folder<T> room)
     {
         if (room.ProviderEntry)
