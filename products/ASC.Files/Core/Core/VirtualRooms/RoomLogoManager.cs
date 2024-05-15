@@ -40,8 +40,7 @@ public class RoomLogoManager(StorageFactory storageFactory,
     SecurityContext securityContext,
     FileUtilityConfiguration fileUtilityConfiguration,
     CommonLinkUtility commonLinkUtility, 
-    ExternalShare externalShare,
-    GlobalStore globalStore)
+    ExternalShare externalShare)
 {
     internal const string LogosPathSplitter = "_";
     private const string LogosPath = $"{{0}}{LogosPathSplitter}{{1}}.png";
@@ -108,42 +107,47 @@ public class RoomLogoManager(StorageFactory storageFactory,
 
         return room;
     }
+
     public async Task<string> CreateWatermarkImageAsync<T>(Folder<T> room, string imageUrl)
     {
         var store = await GetDataStoreAsync();
         var fileName = Path.GetFileName(imageUrl);
         var data = await GetTempAsync(store, fileName);
 
+        var uri = await CreateWatermarkImageAsync(room, store, data);
+
+        await RemoveTempAsync(store, fileName);
+
+        return uri;
+    }
+
+    public async Task<string> CreateWatermarkImageAsync<T>(Folder<T> room, Stream stream)
+    {
+        var store = await GetDataStoreAsync();
+
+        var data = await ReadStreamToByteArrayAsync(stream);
+
+        var uri = await CreateWatermarkImageAsync(room, store, data);
+
+        return uri;
+    }
+
+    private async Task<string> CreateWatermarkImageAsync<T>(Folder<T> room, IDataStore store, byte[] data)
+    {
+        if (data == null)
+        {
+            return null;
+        }
+
         var stringId = GetId(room);
 
         await SaveWatermarkImageAsync(store, stringId, data, -1);
-        await RemoveTempAsync(store, fileName);
-
-        var uri = await GetWatermarkImageAsync(room);
-        
-        var imgUrl = commonLinkUtility.GetFullAbsolutePath(uri);
-
-        return imgUrl;
-    }
-    public async Task<string> CreateWatermarkAsync<T>(Folder<T> room, T imageId)
-    {
-        var fileDao = daoFactory.GetFileDao<T>();
-        var file = await fileDao.GetFileAsync(imageId);
-        var stringId = GetId(room);
-        var store = await globalStore.GetStoreAsync();
-
-        var data = await GetImageAsync(store, file);
-
-        var storeLogo = await GetDataStoreAsync();
-
-        await SaveWatermarkImageAsync(storeLogo, stringId, data, -1);
 
         var uri = await GetWatermarkImageAsync(room);
 
-        var imgUrl = commonLinkUtility.GetFullAbsolutePath(uri);
-
-        return imgUrl;
+        return commonLinkUtility.GetFullAbsolutePath(uri);
     }
+
     public async Task<Folder<T>> DeleteWatermarkImageAsync<T>(Folder<T> room)
     {
         var stringId = GetId(room);
@@ -382,42 +386,26 @@ public class RoomLogoManager(StorageFactory storageFactory,
     {
         await using var stream = await store.GetReadStreamAsync(TempDomainPath, fileName);
 
-        var data = new MemoryStream();
-        var buffer = new byte[1024 * 10];
-        while (true)
-        {
-            var count = await stream.ReadAsync(buffer);
-            if (count == 0)
-            {
-                break;
-            }
+        var data = await ReadStreamToByteArrayAsync(stream);
 
-            await data.WriteAsync(buffer.AsMemory(0, count));
-        }
-
-        return data.ToArray();
+        return data;
     }
 
-    private async Task<byte[]> GetImageAsync<T>(IDataStore store, File<T> file)
+    private static async Task<byte[]> ReadStreamToByteArrayAsync(Stream inputStream)
     {
-        var fileDao = daoFactory.GetFileDao<T>();
-        await using var stream = await store.GetReadStreamAsync(string.Empty, fileDao.GetUniqFilePath(file, "content" + FileUtility.GetFileExtension(file.PureTitle)));
-        var data = new MemoryStream();
-        var buffer = new byte[1024 * 10];
-        while (true)
+        if (inputStream == null)
         {
-            var count = await stream.ReadAsync(buffer);
-            if (count == 0)
-            {
-                break;
-            }
-
-            await data.WriteAsync(buffer.AsMemory(0, count));
+            return null;
         }
 
-        return data.ToArray();
-
+        await using (inputStream)
+        {
+            using var memoryStream = new MemoryStream();
+            await inputStream.CopyToAsync(memoryStream);
+            return memoryStream.ToArray();
+        }
     }
+
     private async Task SaveRoomAsync<T>(IFolderDao<T> folderDao, Folder<T> room)
     {
         if (room.ProviderEntry)

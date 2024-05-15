@@ -87,19 +87,31 @@ public class WatermarkManager
             Rotate = watermarkRequestDto.Rotate
         };
 
-        if(!string.IsNullOrEmpty(watermarkRequestDto.ImageUrl))
+        string imageUrl = null;
+
+        if (!string.IsNullOrEmpty(watermarkRequestDto.ImageUrl))
         {
-            watermarkSettings.ImageScale = watermarkRequestDto.ImageScale;
-            watermarkSettings.ImageHeight = watermarkRequestDto.ImageHeight;
-            watermarkSettings.ImageWidth = watermarkRequestDto.ImageWidth;
-            watermarkSettings.ImageUrl = await _roomLogoManager.CreateWatermarkImageAsync(room, watermarkRequestDto.ImageUrl);
+            imageUrl = await _roomLogoManager.CreateWatermarkImageAsync(room, watermarkRequestDto.ImageUrl);
         }
-        else if(watermarkRequestDto.ImageId != null)
+        else if (watermarkRequestDto.ImageId != null)
+        {
+            var fileDao = _daoFactory.GetFileDao<T>();
+            var file = await fileDao.GetFileAsync(watermarkRequestDto.ImageId);
+
+            if (file != null && await _fileSecurity.CanReadAsync(file))
+            {
+                await using var stream = await fileDao.GetFileStreamAsync(file);
+
+                imageUrl = await _roomLogoManager.CreateWatermarkImageAsync(room, stream);
+            }
+        }
+
+        if (!string.IsNullOrEmpty(imageUrl))
         {
             watermarkSettings.ImageScale = watermarkRequestDto.ImageScale;
             watermarkSettings.ImageHeight = watermarkRequestDto.ImageHeight;
             watermarkSettings.ImageWidth = watermarkRequestDto.ImageWidth;
-            watermarkSettings.ImageUrl = await _roomLogoManager.CreateWatermarkAsync(room, watermarkRequestDto.ImageId);
+            watermarkSettings.ImageUrl = imageUrl;
         }
 
         await folderDao.SetWatermarkSettings(watermarkSettings, room);
