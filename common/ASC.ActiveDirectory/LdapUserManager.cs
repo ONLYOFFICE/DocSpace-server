@@ -40,7 +40,8 @@ public class LdapUserManager(ILogger<LdapUserManager> logger,
     SettingsManager settingsManager,
     DisplayUserSettingsHelper displayUserSettingsHelper,
     UserFormatter userFormatter,
-    NovellLdapUserImporter novellLdapUserImporter)
+    NovellLdapUserImporter novellLdapUserImporter,
+    IServiceScopeFactory serviceScopeFactory)
 {
     private LdapLocalization _resource;
 
@@ -614,7 +615,7 @@ public class LdapUserManager(ILogger<LdapUserManager> logger,
 
                 var tenant = await tenantManager.GetCurrentTenantAsync();
 
-                Action().Start();
+                Task.Run(Action);
 
                 if (ldapUserInfo.Item2.IsDisabled)
                 {
@@ -626,10 +627,9 @@ public class LdapUserManager(ILogger<LdapUserManager> logger,
 
                 async Task Action()
                 {
-                    using var scope = serviceProvider.CreateScope();
+                    await using var scope = serviceScopeFactory.CreateAsyncScope();
                     var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
                     var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
-                    var novellLdapUserImporter = scope.ServiceProvider.GetRequiredService<NovellLdapUserImporter>();
                     var userManager = scope.ServiceProvider.GetRequiredService<UserManager>();
                     var cookiesManager = scope.ServiceProvider.GetRequiredService<CookiesManager>();
                     var log = scope.ServiceProvider.GetRequiredService<ILogger<LdapUserManager>>();
