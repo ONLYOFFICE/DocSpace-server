@@ -93,7 +93,7 @@ public class WatermarkManager
         {
             imageUrl = await _roomLogoManager.CreateWatermarkImageAsync(room, watermarkRequestDto.ImageUrl);
         }
-        else if (watermarkRequestDto.ImageId != null)
+        else if (!Equals(watermarkRequestDto.ImageId, default(T)))
         {
             var fileDao = _daoFactory.GetFileDao<T>();
             var file = await fileDao.GetFileAsync(watermarkRequestDto.ImageId);
