@@ -240,8 +240,6 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                     }
                     else
                     {
-                        var files = await FileDao.GetFilesAsync(folder.Id, new OrderBy(SortedByType.AZ, true), FilterType.FilesOnly, false, Guid.Empty, string.Empty, null, false, withSubfolders: true).ToListAsync();
-
                         if (immediately)
                         {
                             var aces = new List<AceWrapper>();
