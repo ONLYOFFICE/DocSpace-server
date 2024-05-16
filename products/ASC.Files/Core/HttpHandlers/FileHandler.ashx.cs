@@ -1147,7 +1147,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             //var refererURL = context.Request.GetUrlRewriter().AbsoluteUri;
 
             //context.Session["refererURL"] = refererURL;
-            const string authUrl = "~/Auth.aspx";
+            const string authUrl = "login";
             context.Response.Redirect(authUrl, true);
             return;
         }
