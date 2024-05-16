@@ -474,7 +474,7 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/watermark</path>
     /// <httpMethod>PUT</httpMethod>
     [HttpPut("{id}/watermark")]
-    public async Task<WatermarkDto> AddWaterMarksAsync(T id, WatermarkRequestDto inDto)
+    public async Task<WatermarkDto> AddWaterMarksAsync(T id, WatermarkRequestDto<T> inDto)
     {
         var watermarkSettings = await watermarkManager.SetWatermarkAsync(id, inDto);
 
