@@ -30,6 +30,7 @@ namespace ASC.Web.Files.Services.DocumentService;
 public class DocumentServiceHelper(IDaoFactory daoFactory,
         FileShareLink fileShareLink,
         UserManager userManager,
+        DisplayUserSettingsHelper displayUserSettingsHelper,
         FileSecurity fileSecurity,
         FileUtility fileUtility,
         MachinePseudoKeys machinePseudoKeys,
@@ -246,7 +247,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             fileStable = await fileDao.GetFileStableAsync(file.Id, file.Version);
         }
 
-        var docKey = await GetDocKeyAsync(fileStable, options);
+        var docKey = await GetDocKeyAsync(fileStable);
         var modeWrite = (editPossible || reviewPossible || fillFormsPossible || commentPossible) && tryEdit;
 
         if (file.ParentId != null)
@@ -344,7 +345,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
         if (watermarkSettings.Additions.HasFlag(WatermarkAdditions.UserName))
         {
-            runs.Add(new Run(userInfo.UserName));
+            runs.Add(new Run(userInfo.DisplayUserName(false, displayUserSettingsHelper)));
             runs.Add(new Run(Environment.NewLine, false));
         }
         if(watermarkSettings.Additions.HasFlag(WatermarkAdditions.UserEmail))
@@ -352,7 +353,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             runs.Add(new Run(userInfo.Email));
             runs.Add(new Run(Environment.NewLine, false));
         }
-        if (watermarkSettings.Additions.HasFlag(WatermarkAdditions.UserIpAdress))
+        if (watermarkSettings.Additions.HasFlag(WatermarkAdditions.UserIpAdress) && !string.IsNullOrWhiteSpace(ip))
         {
             runs.Add(new Run(ip));
             runs.Add(new Run(Environment.NewLine, false));
@@ -384,14 +385,20 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         };
         return options;
     }
-    public async Task<string> GetDocKeyAsync<T>(File<T> file, Options options = null)
+
+    public async Task<string> GetDocKeyAsync<T>(File<T> file, string extraKey = null)
     {
-        return await GetDocKeyAsync(file.Id, file.Version, file.ProviderEntry ? file.ModifiedOn : file.CreateOn, options);
+        return await GetDocKeyAsync(file.Id, file.Version, file.ProviderEntry ? file.ModifiedOn : file.CreateOn, extraKey);
     }
 
-    public async Task<string> GetDocKeyAsync<T>(T fileId, int fileVersion, DateTime modified, Options options = null)
+    public async Task<string> GetDocKeyAsync<T>(T fileId, int fileVersion, DateTime modified, string extraKey = null)
     {
-        var str = $"teamlab_{fileId}_{fileVersion}_{modified.GetHashCode().ToString(CultureInfo.InvariantCulture)}{options?.GetMD5Hash()}_{await global.GetDocDbKeyAsync()}";
+        var str = $"teamlab_{fileId}_{fileVersion}_{modified.GetHashCode().ToString(CultureInfo.InvariantCulture)}_{await global.GetDocDbKeyAsync()}";
+
+        if (!string.IsNullOrEmpty(extraKey))
+        {
+            str += $"_{extraKey}";
+        }
 
         var keyDoc = Encoding.UTF8.GetBytes(str)
                              .AsEnumerable()

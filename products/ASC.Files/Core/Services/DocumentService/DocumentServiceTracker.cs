@@ -215,11 +215,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
 
         var fileStable = await daoFactory.GetFileDao<T>().GetFileStableAsync(fileId);
 
-        var folderDao = daoFactory.GetFolderDao<T>();
-        var (watermarkSettings, room) = await DocSpaceHelper.GetWatermarkSettings(fileStable, folderDao);
-        var options = documentServiceHelper.GetOptions(watermarkSettings, room);
-
-        var docKey = await documentServiceHelper.GetDocKeyAsync(fileStable, options);
+        var docKey = await documentServiceHelper.GetDocKeyAsync(fileStable);
 
         if (!fileData.Key.Equals(docKey))
         {
@@ -298,11 +294,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
 
         var fileStable = await daoFactory.GetFileDao<T>().GetFileStableAsync(fileId);
 
-        var folderDao = daoFactory.GetFolderDao<T>();
-        var (watermarkSettings, room) = await DocSpaceHelper.GetWatermarkSettings(fileStable, folderDao);
-        var options = documentServiceHelper.GetOptions(watermarkSettings, room);
-
-        var docKey = await documentServiceHelper.GetDocKeyAsync(fileStable, options);
+        var docKey = await documentServiceHelper.GetDocKeyAsync(fileStable);
         if (!fileData.Key.Equals(docKey))
         {
             logger.ErrorDocServiceSavingFile(fileId.ToString(), docKey, fileData.Key);
