@@ -51,7 +51,7 @@ public class MessagesRepository : IDisposable
         _logger = logger;
         _serviceScopeFactory = serviceScopeFactory;
 
-        _timer = new Timer(async state => await FlushCacheAsync(state));
+        _timer = new Timer(Callback);
 
         _mapper = mapper;
 
@@ -60,6 +60,9 @@ public class MessagesRepository : IDisposable
 
         _cacheTime = int.TryParse(minutes, out var cacheTime) ? TimeSpan.FromMinutes(cacheTime) : TimeSpan.FromMinutes(1);
         _cacheLimit = int.TryParse(limit, out var cacheLimit) ? cacheLimit : 100;
+        return;
+
+        async void Callback(object state) => await FlushCacheAsync(state);
     }
 
     ~MessagesRepository()
@@ -67,7 +70,7 @@ public class MessagesRepository : IDisposable
         FlushCache();
     }
 
-    private bool ForseSave(EventMessage message)
+    private bool ForceSave(EventMessage message)
     {
         // messages with action code < 2000 are related to login-history
         if ((int)message.Action < 2000)
@@ -80,12 +83,12 @@ public class MessagesRepository : IDisposable
 
     public async Task<int> AddAsync(EventMessage message)
     {
-        if (ForseSave(message))
+        if (ForceSave(message))
         {
-            _logger.LogDebug("ForseSave: {action}", message.Action.ToStringFast());
+            _logger.LogDebug("ForceSave: {Action}", message.Action.ToStringFast());
             
             int id;
-            if (!string.IsNullOrEmpty(message.UAHeader))
+            if (!string.IsNullOrEmpty(message.UaHeader))
             {
                 try
                 {
@@ -131,7 +134,7 @@ public class MessagesRepository : IDisposable
         }
         return 0;
     }
-    private async Task FlushCacheAsync(object state)
+    private async Task FlushCacheAsync(object _)
     {
         await FlushCacheAsync();
     }
@@ -177,7 +180,7 @@ public class MessagesRepository : IDisposable
             {
                 foreach (var message in group)
                 {
-                    if (!string.IsNullOrEmpty(message.UAHeader))
+                    if (!string.IsNullOrEmpty(message.UaHeader))
                     {
                         try
                         {
@@ -189,7 +192,7 @@ public class MessagesRepository : IDisposable
                         }
                     }
 
-                    if (!ForseSave(message))
+                    if (!ForceSave(message))
                     {
                         // messages with action code < 2000 are related to login-history
                         if ((int)message.Action < 2000)
@@ -245,7 +248,7 @@ public class MessagesRepository : IDisposable
             {
                 foreach (var message in group)
                 {
-                    if (!string.IsNullOrEmpty(message.UAHeader))
+                    if (!string.IsNullOrEmpty(message.UaHeader))
                     {
                         try
                         {
@@ -257,7 +260,7 @@ public class MessagesRepository : IDisposable
                         }
                     }
 
-                    if (!ForseSave(message))
+                    if (!ForceSave(message))
                     {
                         // messages with action code < 2000 are related to login-history
                         if ((int)message.Action < 2000)

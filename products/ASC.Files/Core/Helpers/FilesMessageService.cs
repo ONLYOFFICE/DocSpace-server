@@ -33,7 +33,7 @@ public class FilesMessageService(
     IHttpContextAccessor httpContextAccessor,
     IDaoFactory daoFactory)
 {
-    private static readonly JsonSerializerOptions _serializerOptions = new() { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull };
+    private static readonly JsonSerializerOptions _serializerOptions = new() { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault };
 
     public async Task SendAsync(MessageAction action, params string[] description)
     {
@@ -62,23 +62,21 @@ public class FilesMessageService(
 
     public async Task SendAsync<T>(MessageAction action, FileEntry<T> entry, Guid userId, FileShare userRole, bool useRoomFormat = false, params string[] description)
     {
-        description = description.Append(FileShareExtensions.GetAccessString(userRole, useRoomFormat)).ToArray();
+        description = ExtendAppend(description, FileShareExtensions.GetAccessString(userRole, useRoomFormat));
+        
         await SendAsync(action, entry, null, userId, userRole, description);
     }
 
-    private async Task SendAsync<T>(MessageAction action, FileEntry<T> entry, IDictionary<string, StringValues> headers, string oldTitle = null, Guid userId = default, FileShare userRole = FileShare.None, params string[] description)
+    private async Task SendAsync<T>(MessageAction action, FileEntry<T> entry, IDictionary<string, StringValues> headers, string oldTitle = null, Guid userId = default, 
+        FileShare userRole = FileShare.None, params string[] description)
     {
         if (entry == null)
         {
             return;
         }
 
-        var additionalParam = await GetAdditionalNotificationParamAsync(entry, action, oldTitle, userId, userRole);
-
-        if (additionalParam != "")
-        {
-            description = description.Append(additionalParam).ToArray();
-        }
+        var additionalParam = await GetAdditionalEntryDataAsync(entry, action, oldTitle, userId, userRole);
+        description = ExtendAppend(description, additionalParam.DescriptionPart);
 
         if (headers == null)//todo check need if
         {
@@ -87,7 +85,7 @@ public class FilesMessageService(
             return;
         }
 
-        await messageService.SendHeadersMessageAsync(action, MessageTarget.Create(entry.Id), headers, description);
+        await messageService.SendHeadersMessageAsync(action, MessageTarget.Create(entry.Id), headers, description, additionalParam.References);
     }
 
     private async Task SendAsync<T>(MessageAction action, FileEntry<T> entry, string oldTitle = null, Guid userId = default, FileShare userRole = FileShare.None, params string[] description)
@@ -97,14 +95,10 @@ public class FilesMessageService(
             return;
         }
 
-        var additionalParam = await GetAdditionalNotificationParamAsync(entry, action, oldTitle, userId, userRole);
+        var additionalParam = await GetAdditionalEntryDataAsync(entry, action, oldTitle, userId, userRole);
+        description = ExtendAppend(description, additionalParam.DescriptionPart);
 
-        if (additionalParam != "")
-        {
-            description = description.Append(additionalParam).ToArray();
-        }
-
-        await messageService.SendHeadersMessageAsync(action, MessageTarget.Create(entry.Id), null, description);
+        await messageService.SendHeadersMessageAsync(action, MessageTarget.Create(entry.Id), null, description, additionalParam.References);
     }
 
     public async Task SendAsync<T1, T2>(MessageAction action, FileEntry<T1> entry1, FileEntry<T2> entry2, IDictionary<string, StringValues> headers, params string[] description)
@@ -114,12 +108,8 @@ public class FilesMessageService(
             return;
         }
 
-        var additionalParams = await GetAdditionalNotificationParamAsync(entry1, action);
-
-        if (!string.IsNullOrEmpty(additionalParams))
-        {
-            description = description.Append(additionalParams).ToArray();
-        }
+        var additionalParams = await GetAdditionalEntryDataAsync(entry1, action);
+        description = ExtendAppend(description, additionalParams.DescriptionPart);
 
         if (headers == null)//todo check need if
         {
@@ -128,7 +118,7 @@ public class FilesMessageService(
             return;
         }
 
-        await messageService.SendHeadersMessageAsync(action, MessageTarget.Create((IEnumerable<string>)new List<string> {entry1.Id.ToString(), entry2.Id.ToString()}), headers, description);
+        await messageService.SendHeadersMessageAsync(action, MessageTarget.Create([entry1.Id.ToString(), entry2.Id.ToString()]), headers, description, additionalParams.References);
     }
 
     public async Task SendAsync<T>(MessageAction action, FileEntry<T> entry, string description)
@@ -145,16 +135,9 @@ public class FilesMessageService(
             return;
         }
 
-        var additionalParam = await GetAdditionalNotificationParamAsync(entry, action);
-
-        if (additionalParam != "")
-        {
-            await messageService.SendAsync(action, MessageTarget.Create(entry.Id), description, additionalParam);
-        }
-        else
-        {
-            await messageService.SendAsync(action, MessageTarget.Create(entry.Id), description);
-        }
+        var additionalParam = await GetAdditionalEntryDataAsync(entry, action);
+        
+        await messageService.SendAsync(action, MessageTarget.Create(entry.Id), description, additionalParam.DescriptionPart, additionalParam.References);
     }
 
     public async Task SendAsync<T>(MessageAction action, FileEntry<T> entry, string d1, string d2)
@@ -163,6 +146,8 @@ public class FilesMessageService(
         {
             return;
         }
+        
+        var additionalParam = await GetAdditionalEntryDataAsync(entry, action);
 
         if (httpContextAccessor == null)
         {
@@ -170,7 +155,7 @@ public class FilesMessageService(
             return;
         }
 
-        await messageService.SendAsync(action, MessageTarget.Create(entry.Id), d1, d2);
+        await messageService.SendAsync(action, MessageTarget.Create(entry.Id), d1, d2, additionalParam.References);
     }
 
     public async Task SendAsync<T>(MessageAction action, FileEntry<T> entry, MessageInitiator initiator, params string[] description)
@@ -180,25 +165,66 @@ public class FilesMessageService(
             return;
         }
 
-        var additionalParam = await GetAdditionalNotificationParamAsync(entry, action);
+        var additionalParam = await GetAdditionalEntryDataAsync(entry, action);
+        description = ExtendAppend(description, additionalParam.DescriptionPart);
 
-        if (additionalParam != "")
-        {
-            description = description.Append(additionalParam).ToArray();
-        }
-
-        await messageService.SendAsync(initiator, action, MessageTarget.Create(entry.Id), description);
+        await messageService.SendAsync(initiator, action, MessageTarget.Create(entry.Id), additionalParam.References, description);
     }
 
-    private async Task<string> GetAdditionalNotificationParamAsync<T>(FileEntry<T> entry, MessageAction action, string oldTitle = null, Guid userid = default, FileShare userRole = FileShare.None)
-    {
-        var folderDao = daoFactory.GetFolderDao<T>();
-        var roomInfo = await folderDao.GetParentRoomInfoFromFileEntryAsync(entry);
+    private async Task<FileEntryData> GetAdditionalEntryDataAsync<T>(FileEntry<T> entry, MessageAction action, string oldTitle = null, Guid userid = default,
+        FileShare userRole = FileShare.None)
+    { 
+        return entry switch
+        {
+            FileEntry<int> entryInt => await GetAdditionalEntryDataAsync(entryInt, action, oldTitle, userid, userRole),
+            FileEntry<string> entryString => await GetAdditionalEntryDataAsync(entryString, action, oldTitle, userid, userRole),
+            _ => throw new NotSupportedException()
+        };
+    }
 
+    private async Task<FileEntryData> GetAdditionalEntryDataAsync(FileEntry<int> entry, MessageAction action, string oldTitle = null, Guid userid = default, 
+        FileShare userRole = FileShare.None)
+    {
+        var folderDao = daoFactory.GetFolderDao<int>();
+        
+        var parents = await folderDao.GetParentFoldersAsync(entry.ParentId).Where(x => !x.IsRoot).ToListAsync();
+        var room = parents.FirstOrDefault(x => DocSpaceHelper.IsRoom(x.FolderType));
+
+        var serializedParam = GetNotificationDescription(entry, action, oldTitle, userid, userRole, room?.Id ?? -1, room?.Title);
+
+        var references = parents.Select(x => new FilesAuditReference
+        {
+            EntryId = x.Id,
+            EntryType = (byte)x.FileEntryType
+        }).ToList();
+        
+        references.Add(new FilesAuditReference
+        {
+            EntryId = entry.Id,
+            EntryType = (byte)entry.FileEntryType
+        });
+        
+        return new FileEntryData(serializedParam, references);
+    }
+    
+    private async Task<FileEntryData> GetAdditionalEntryDataAsync(FileEntry<string> entry, MessageAction action, string oldTitle = null, Guid userid = default, 
+        FileShare userRole = FileShare.None)
+    {
+        var folderDao = daoFactory.GetFolderDao<string>();
+
+        var (roomId, roomTitle) = await folderDao.GetParentRoomInfoFromFileEntryAsync(entry);
+
+        var serializedParam = GetNotificationDescription(entry, action, oldTitle, userid, userRole, roomId, roomTitle);
+        
+        return new FileEntryData(serializedParam, null);
+    }
+
+    private static string GetNotificationDescription<T>(FileEntry<T> entry, MessageAction action, string oldTitle, Guid userid, FileShare userRole, T roomId, string roomTitle)
+    {
         var info = new AdditionalNotificationInfo<T>
         {
-            RoomTitle = roomInfo.RoomTitle, 
-            RoomId = roomInfo.RoomId
+            RoomId = roomId,
+            RoomTitle = roomTitle
         };
 
         switch (action)
@@ -223,7 +249,17 @@ public class FilesMessageService(
         };
 
         var serializedParam = JsonSerializer.Serialize(info, _serializerOptions);
-
         return serializedParam;
+    }
+
+    private record struct FileEntryData(string DescriptionPart, IEnumerable<FilesAuditReference> References);
+    
+    private static string[] ExtendAppend(string[] description, string append)
+    {
+        var newArray = new string[description.Length + 1];
+        Array.Copy(description, newArray, description.Length);
+        newArray[^1] = append;
+        
+        return newArray;
     }
 }

@@ -76,6 +76,7 @@ global using ASC.Core.Common.Configuration;
 global using ASC.Core.Common.EF;
 global using ASC.Core.Common.EF.Context;
 global using ASC.Core.Common.EF.Model;
+global using ASC.Core.Common.Messaging;
 global using ASC.Core.Common.Quota;
 global using ASC.Core.Common.Quota.Features;
 global using ASC.Core.Common.Security;

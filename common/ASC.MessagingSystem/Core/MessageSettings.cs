@@ -119,15 +119,15 @@ public class MessageSettings
         ClientInfo clientInfo;
         if (dict != null)
         {
-            if (!dict.TryGetValue(message.UAHeader, out clientInfo))
+            if (!dict.TryGetValue(message.UaHeader, out clientInfo))
             {
-                clientInfo = GetClientInfo(message.UAHeader);
-                dict.Add(message.UAHeader, clientInfo);
+                clientInfo = GetClientInfo(message.UaHeader);
+                dict.Add(message.UaHeader, clientInfo);
             }
         }
         else
         {
-            clientInfo = GetClientInfo(message.UAHeader);
+            clientInfo = GetClientInfo(message.UaHeader);
         }
         if (clientInfo != null)
         {

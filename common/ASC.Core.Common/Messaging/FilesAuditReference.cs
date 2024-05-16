@@ -24,23 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.MessagingSystem.EF.Model;
+namespace ASC.Core.Common.Messaging;
 
-public class EventMessage
+public class FilesAuditReference
 {
-    public int Id { get; set; }
-    public string Ip { get; set; }
-    public string Initiator { get; init; }
-    public string Browser { get; set; }
-    public string Platform { get; set; }
-    public DateTime Date { get; set; }
-    public int TenantId { get; init; }
-    public Guid UserId { get; init; }
-    public string Page { get; set; }
-    public MessageAction Action { get; init; }
-    public IList<string> Description { get; init; }
-    public MessageTarget Target { get; init; }
-    public string UaHeader { get; set; }
-    public bool Active { get; init; }
-    public IEnumerable<FilesAuditReference> References { get; init; }
+    public int EntryId { get; init; }
+    public byte EntryType { get; init; }
 }

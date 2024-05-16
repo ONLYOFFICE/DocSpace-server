@@ -111,4 +111,5 @@ public class Folder<T> : FileEntry<T>, IFolder
     }
 
     public override string UniqID => $"folder_{Id}";
+    public bool IsRoot => FolderType == RootFolderType;
 }

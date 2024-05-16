@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Text.Json.Serialization;
-
 namespace ASC.MessagingSystem.Core;
 
 [Scope]
@@ -104,9 +102,9 @@ public class MessageService(
         }
     }
 
-    public async Task SendAsync(MessageAction action, MessageTarget target, string d1, string d2)
+    public async Task SendAsync(MessageAction action, MessageTarget target, string d1, string d2, IEnumerable<FilesAuditReference> references = null)
     {
-        await SendRequestMessageAsync(action, target, description: [d1, d2]);
+        await SendRequestMessageAsync(action, target, description: [d1, d2], references: references);
     }
 
     public async Task SendAsync(MessageAction action, MessageTarget target, IEnumerable<string> d1)
@@ -133,7 +131,8 @@ public class MessageService(
 
     #endregion
 
-    private async Task SendRequestMessageAsync(MessageAction action, MessageTarget target = null, string loginName = null, DateTime? dateTime = null, params string[] description)
+    private async Task SendRequestMessageAsync(MessageAction action, MessageTarget target = null, string loginName = null, DateTime? dateTime = null, 
+        IEnumerable<FilesAuditReference> references = null, params string[] description)
     {
         if (Sender == null)
         {
@@ -147,7 +146,7 @@ public class MessageService(
             return;
         }
 
-        var message = await messageFactory.CreateAsync(Request, loginName, dateTime, action, target, description);
+        var message = await messageFactory.CreateAsync(Request, loginName, dateTime, action, target, references, description);
         if (!messagePolicy.Check(message))
         {
             return;
@@ -162,6 +161,7 @@ public class MessageService(
     {
         await SendRequestHeadersMessageAsync(action);
     }
+    
     public async Task SendHeadersMessageAsync(MessageAction action, params string[] description)
     {
         await SendRequestHeadersMessageAsync(action, description: description);
@@ -169,15 +169,17 @@ public class MessageService(
 
     public async Task SendHeadersMessageAsync(MessageAction action, MessageTarget target, IDictionary<string, StringValues> httpHeaders, string d1)
     {
-        await SendRequestHeadersMessageAsync(action, target, httpHeaders, d1);
+        await SendRequestHeadersMessageAsync(action, target, httpHeaders, null, d1);
     }
 
-    public async Task SendHeadersMessageAsync(MessageAction action, MessageTarget target, IDictionary<string, StringValues> httpHeaders, IEnumerable<string> d1)
+    public async Task SendHeadersMessageAsync(MessageAction action, MessageTarget target, IDictionary<string, StringValues> httpHeaders, IEnumerable<string> d1, 
+        IEnumerable<FilesAuditReference> references = null)
     {
-        await SendRequestHeadersMessageAsync(action, target, httpHeaders, d1?.ToArray());
+        await SendRequestHeadersMessageAsync(action, target, httpHeaders, references, d1?.ToArray());
     }
 
-    private async Task SendRequestHeadersMessageAsync(MessageAction action, MessageTarget target = null, IDictionary<string, StringValues> httpHeaders = null, params string[] description)
+    private async Task SendRequestHeadersMessageAsync(MessageAction action, MessageTarget target = null, IDictionary<string, StringValues> httpHeaders = null, 
+        IEnumerable<FilesAuditReference> references = null, params string[] description)
     {
         if (Sender == null)
         {
@@ -189,7 +191,7 @@ public class MessageService(
             httpHeaders = Request.Headers.ToDictionary(k => k.Key, v => v.Value);
         }
 
-        var message = await messageFactory.CreateAsync(httpHeaders, action, target, description);
+        var message = await messageFactory.CreateAsync(httpHeaders, action, target, references, description);
         if (!messagePolicy.Check(message))
         {
             return;
@@ -204,28 +206,29 @@ public class MessageService(
 
     public async Task SendAsync(MessageInitiator initiator, MessageAction action, params string[] description)
     {
-        await SendInitiatorMessageAsync(initiator.ToString(), action, null, description);
+        await SendInitiatorMessageAsync(initiator.ToString(), action, null, null, description);
     }
 
     #endregion
 
     #region Initiator & Target
 
-    public async Task SendAsync(MessageInitiator initiator, MessageAction action, MessageTarget target, params string[] description)
+    public async Task SendAsync(MessageInitiator initiator, MessageAction action, MessageTarget target, IEnumerable<FilesAuditReference> references = null,
+        params string[] description)
     {
-        await SendInitiatorMessageAsync(initiator.ToString(), action, target, description);
+        await SendInitiatorMessageAsync(initiator.ToString(), action, target, references, description);
     }
 
     #endregion
 
-    private async Task SendInitiatorMessageAsync(string initiator, MessageAction action, MessageTarget target, params string[] description)
+    private async Task SendInitiatorMessageAsync(string initiator, MessageAction action, MessageTarget target, IEnumerable<FilesAuditReference> references = null, params string[] description)
     {
         if (Sender == null)
         {
             return;
         }
 
-        var message = await messageFactory.CreateAsync(Request, initiator, null, action, target, description);
+        var message = await messageFactory.CreateAsync(Request, initiator, null, action, target, references, description);
         if (!messagePolicy.Check(message))
         {
             return;
@@ -233,6 +236,7 @@ public class MessageService(
 
         _ = Sender.SendAsync(message);
     }
+    
     public async Task<int> SendLoginMessageAsync(MessageUserData userData, MessageAction action)
     {
         if (Sender == null)
