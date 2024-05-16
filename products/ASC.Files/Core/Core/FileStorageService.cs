@@ -1172,7 +1172,9 @@ public class FileStorageService //: IFileStorageService
 
         if (folder.FolderType == FolderType.FillingFormsRoom && FileUtility.GetFileTypeByFileName(file.Title) == FileType.Pdf)
         {
-            if (!await fileSecurity.CanEditRoomAsync(folder))
+            var ace = await fileSharing.GetPureSharesAsync(folder, new List<Guid> { authContext.CurrentAccount.ID }).FirstOrDefaultAsync();
+
+            if (ace is { Access: FileShare.FillForms })
             {
                 throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
             }

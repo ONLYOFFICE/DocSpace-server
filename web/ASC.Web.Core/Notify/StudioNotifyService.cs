@@ -40,6 +40,7 @@ public class StudioNotifyService(
     CommonLinkUtility commonLinkUtility,
     SetupInfo setupInfo,
     DisplayUserSettingsHelper displayUserSettingsHelper,
+    UserInvitationLimitHelper userInvitationLimitHelper,
     SettingsManager settingsManager,
     MessageService messageService,
     ILoggerProvider option)
@@ -137,7 +138,7 @@ public class StudioNotifyService(
                     new TagValue(Tags.UserDisplayName, (user.DisplayUserName(displayUserSettingsHelper) ?? string.Empty).Trim()));
     }
 
-    public async Task SendEmailRoomInviteAsync(string email, string roomTitle, string confirmationUrl, string culture = null)
+    public async Task SendEmailRoomInviteAsync(string email, string roomTitle, string confirmationUrl, string culture = null, bool limitation = false)
     {
         var cultureInfo = string.IsNullOrEmpty(culture) ? (await GetCulture(null)) : new CultureInfo(culture);
 
@@ -158,9 +159,14 @@ public class StudioNotifyService(
                 await studioNotifyHelper.RecipientFromEmailAsync(email, false),
                 [EMailSenderName],
                 tags.ToArray());
+
+        if (limitation)
+        {
+            await userInvitationLimitHelper.ReduceLimit();
+        }
     }
 
-    public async Task SendDocSpaceInviteAsync(string email, string confirmationUrl, string culture = "")
+    public async Task SendDocSpaceInviteAsync(string email, string confirmationUrl, string culture = "", bool limitation = false)
     {
         var cultureInfo = string.IsNullOrEmpty(culture) ? (await GetCulture(null)) : new CultureInfo(culture);
 
@@ -181,6 +187,11 @@ public class StudioNotifyService(
                 await studioNotifyHelper.RecipientFromEmailAsync(email, false),
                 [EMailSenderName],
                 tags.ToArray());
+
+        if (limitation)
+        {
+            await userInvitationLimitHelper.ReduceLimit();
+        }
     }
 
     #endregion

@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Common.Quota.Features;
+
 namespace ASC.Web.Api.Core;
 
 [Scope]
@@ -116,7 +118,8 @@ public class QuotaHelper(TenantManager tenantManager, IServiceProvider servicePr
 
             object used = null;
             var currentUserId = authContext.CurrentAccount.ID;
-            var isUsedAvailable = !await userManager.IsUserAsync(currentUserId) && !await userManager.IsCollaboratorAsync(currentUserId);
+            var isUsedAvailable = !await userManager.IsUserAsync(currentUserId) && 
+                                  (!await userManager.IsCollaboratorAsync(currentUserId) || feature.Name == MaxTotalSizeFeature.MaxTotalSizeFeatureName);
 
             if (feature is TenantQuotaFeatureSize size)
             {

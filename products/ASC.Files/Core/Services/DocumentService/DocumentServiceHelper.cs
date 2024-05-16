@@ -39,7 +39,8 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         EntryStatusManager entryStatusManager,
         IServiceProvider serviceProvider,
         ExternalShare externalShare,
-        AuthContext authContext)
+        AuthContext authContext,
+        SecurityContext securityContext)
     {
 
     public async Task<(File<T> File, bool LastVersion)> GetCurFileInfoAsync<T>(T fileId, int version)
@@ -294,6 +295,23 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         return JsonWebToken.Encode(payload, fileUtility.SignatureSecret);
     }
 
+    public async Task<File<T>> CheckNeedDeletion<T>(IFileDao<T> fileDao, T fileId, FormFillingProperties formFillingProperties)
+    {
+        var file = await fileDao.GetFileAsync(fileId);
+
+        if (formFillingProperties.ToFolderId == file.ParentId.ToString())
+        {
+            await securityContext.AuthenticateMeAsync(file.CreateBy);
+
+            var linkDao = daoFactory.GetLinkDao();
+            var sourceId = await linkDao.GetSourceAsync(file.Id.ToString());
+            if (sourceId == null)
+            {
+                return file;
+            }
+        }
+        return null;
+    }
 
     public async Task<string> GetDocKeyAsync<T>(File<T> file)
     {
