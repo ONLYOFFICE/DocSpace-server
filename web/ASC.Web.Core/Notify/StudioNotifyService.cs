@@ -862,6 +862,48 @@ public class StudioNotifyService(
 
     #endregion
 
+    #region Migration Personal to Docspace
+
+    public async Task MigrationPersonalToDocspaceAsync(UserInfo userInfo)
+    {
+        var auditEventDate = DateTime.UtcNow;
+
+        auditEventDate = new DateTime(
+            auditEventDate.Year,
+            auditEventDate.Month,
+            auditEventDate.Day,
+            auditEventDate.Hour,
+            auditEventDate.Minute,
+            auditEventDate.Second,
+            0,
+            DateTimeKind.Utc);
+
+        var hash = auditEventDate.ToString("s", CultureInfo.InvariantCulture);
+
+        var confirmationUrl = await commonLinkUtility.GetConfirmationEmailUrlAsync(userInfo.Email, ConfirmType.PasswordChange, hash, userInfo.Id);
+
+        var cultureInfo = await GetCulture(userInfo);
+
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetStarted", cultureInfo);
+
+        var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", cultureInfo);
+
+        await studioNotifyServiceHelper.SendNoticeToAsync(
+                Actions.MigrationPersonalToDocspace,
+                await studioNotifyHelper.RecipientFromEmailAsync(userInfo.Email, false),
+                [EMailSenderName],
+                TagValues.OrangeButton(orangeButtonText, confirmationUrl),
+                TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
+                new TagValue(CommonTags.Culture, cultureInfo.Name),
+                new TagValue(CommonTags.Footer, "social"));
+
+        var displayUserName = userInfo.DisplayUserName(false, displayUserSettingsHelper);
+
+        await messageService.SendAsync(MessageAction.UserSentPasswordChangeInstructions, MessageTarget.Create(userInfo.Id), auditEventDate, displayUserName);
+    }
+
+    #endregion
+
     private async Task<CultureInfo> GetCulture(UserInfo user)
     {
         CultureInfo culture = null;

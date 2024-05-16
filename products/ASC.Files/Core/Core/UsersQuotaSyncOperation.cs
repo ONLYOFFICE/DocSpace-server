@@ -82,7 +82,7 @@ public class UsersQuotaSyncOperation(IServiceProvider serviceProvider, IDistribu
     }
 }
 
-public class UsersQuotaSyncJob(IServiceScopeFactory serviceScopeFactory, FilesSpaceUsageStatManager filesSpaceUsageStatManager, QuotaSyncOperation quotaSyncOperation) : DistributedTaskProgress
+public class UsersQuotaSyncJob(IServiceScopeFactory serviceScopeFactory, FilesSpaceUsageStatManager filesSpaceUsageStatManager) : DistributedTaskProgress
 {
     private int? _tenantId;
     public int TenantId
@@ -117,7 +117,7 @@ public class UsersQuotaSyncJob(IServiceScopeFactory serviceScopeFactory, FilesSp
 
             var tenant = await tenantManager.SetCurrentTenantAsync(TenantId);
 
-            await quotaSyncOperation.RecalculateQuota(tenant);
+            await filesSpaceUsageStatManager.RecalculateQuota(tenant.Id);
 
             var tenantQuotaSettings = await settingsManager.LoadAsync<TenantQuotaSettings>();
             tenantQuotaSettings.LastRecalculateDate = DateTime.UtcNow;
