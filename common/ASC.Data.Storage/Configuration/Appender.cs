@@ -98,5 +98,6 @@ public class Module
     public bool DisabledEncryption { get; set; }
     public IEnumerable<Module> Domain { get; set; }
     public string ValidatorType { get; set; }
+    public bool ContentAsAttachment { get; set; }
 }
 

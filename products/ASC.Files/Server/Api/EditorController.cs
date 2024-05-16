@@ -80,7 +80,6 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     protected readonly DocumentServiceHelper _documentServiceHelper = documentServiceHelper;
     protected readonly EncryptionKeyPairDtoHelper _encryptionKeyPairDtoHelper = encryptionKeyPairDtoHelper;
     protected readonly SettingsManager _settingsManager = settingsManager;
-    protected readonly EntryManager _entryManager = entryManager;
 
     /// <summary>
     /// Saves edits to a file with the ID specified in the request.
@@ -274,11 +273,11 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
 
             if (linkId != default && file.RootFolderType == FolderType.USER && file.CreateBy != authContext.CurrentAccount.ID)
             {
-                await _entryManager.MarkAsRecentByLink(file, linkId);
+                await entryManager.MarkAsRecentByLink(file, linkId);
             }
             else
             {
-                await _entryManager.MarkAsRecent(file);
+                await entryManager.MarkAsRecent(file);
             }
         }
         if (fileType == FileType.Pdf) result.StartFilling = canStartEdit;

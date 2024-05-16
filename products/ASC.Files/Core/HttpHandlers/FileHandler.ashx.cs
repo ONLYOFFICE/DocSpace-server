@@ -75,7 +75,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
     ExternalLinkHelper externalLinkHelper,
     ExternalShare externalShare,
     EntryManager entryManager,
-    FileStorageService fileStorageService)
+    IPSecurity.IPSecurity ipSecurity)
 {
     public async Task InvokeAsync(HttpContext context)
     {
@@ -85,7 +85,14 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             //context.Response.StatusDescription = "Payment Required.";
             return;
         }
-
+        
+        if (authContext.IsAuthenticated && !(await ipSecurity.VerifyAsync()))
+        { 
+            context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+            await context.Response.WriteAsync(Resource.ErrorIpSecurity);
+            return;
+        }
+        
         try
         {
             switch ((context.Request.Query[FilesLinkUtility.Action].FirstOrDefault() ?? "").ToLower())

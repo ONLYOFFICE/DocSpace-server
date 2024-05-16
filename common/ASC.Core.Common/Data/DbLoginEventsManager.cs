@@ -39,9 +39,13 @@ public class LoginEventsCache
         _cache = cache;
         _cacheNotify = cacheNotify;
         
-        _cacheNotify.Subscribe(i =>
+        _cacheNotify.Subscribe(loginEventCacheItem =>
         {
-            foreach (var id in i.Ids)
+            if (loginEventCacheItem?.Ids == null)
+            {
+                return;
+            }
+            foreach (var id in loginEventCacheItem.Ids)
             {
                 _cache.Remove(BuildKey(id));
             }
@@ -60,7 +64,7 @@ public class LoginEventsCache
 
     public void Remove(IEnumerable<int> ids)
     {
-        _cacheNotify.Publish(new LoginEventCacheItem { Ids = ids.ToList() }, CacheNotifyAction.Remove);
+        _cacheNotify.Publish(new LoginEventCacheItem { Ids = ids?.ToList() }, CacheNotifyAction.Remove);
     }
 
     private static string BuildKey(int id)
@@ -163,6 +167,11 @@ public class DbLoginEventsManager(
 
     private async Task InnerLogOutAsync(MessagesContext loginEventContext, List<DbLoginEvent> loginEvents)
     {
+        if (loginEvents.Count == 0)
+        {
+            return;
+        }
+
         cache.Remove(loginEvents.Select(e => e.Id));
 
         foreach (var loginEvent in loginEvents)

@@ -257,7 +257,7 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
         });
 
         return !response.IsSuccessful
-            ? null
+            ? []
             : response.Resources.Skip(1).Select(ToEntry).ToList(); // Skip the folder itself
     }
     

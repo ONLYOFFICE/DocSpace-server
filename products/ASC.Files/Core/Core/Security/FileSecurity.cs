@@ -982,6 +982,20 @@ public class FileSecurity(IDaoFactory daoFactory,
                         return false;
                     }
                 }
+                if((action == FilesSecurityActions.Delete ||
+                    action == FilesSecurityActions.Rename ||
+                    action == FilesSecurityActions.Lock ||
+                    action == FilesSecurityActions.Move ||
+                    action == FilesSecurityActions.Duplicate ||
+                    action == FilesSecurityActions.EditHistory ||
+                    action == FilesSecurityActions.ReadHistory) && file != null )
+                {
+                    var fileFolder = await daoFactory.GetFolderDao<T>().GetFolderAsync(file.ParentId);
+                    if ((fileFolder.FolderType == FolderType.FormFillingFolderInProgress) || fileFolder.FolderType == FolderType.FormFillingFolderDone)
+                    {
+                        return false;
+                    }
+                }
                 if (await HasFullAccessAsync(e, userId, isUser, isDocSpaceAdmin, isRoom, isCollaborator))
                 {
                     return true;
@@ -1125,6 +1139,23 @@ public class FileSecurity(IDaoFactory daoFactory,
                         break;
                     default:
                         if (e.Access is FileShare.FillForms or FileShare.RoomAdmin or FileShare.Editing or FileShare.Collaborator)
+                        {
+                            return true;
+                        }
+                        break;
+                }
+                break;
+            case FilesSecurityActions.EditForm:
+                switch (e.RootFolderType)
+                {
+                    case FolderType.USER:
+                        if (e.Access is FileShare.Editing or FileShare.Review or FileShare.FillForms)
+                        {
+                            return true;
+                        }
+                        break;
+                    default:
+                        if (e.Access is FileShare.RoomAdmin or FileShare.Editing or FileShare.Collaborator)
                         {
                             return true;
                         }

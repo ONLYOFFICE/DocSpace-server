@@ -396,6 +396,11 @@ public class EntryManager(IDaoFactory daoFactory,
             var folders = await folderDao.GetFoldersAsync(parent.Id, orderBy, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders, excludeSubject, from, count, roomId, containingMyFiles)
                 .ToListAsync();
 
+            if (containingMyFiles)
+            {
+                folders = folders.GroupBy(folder => folder.Id).Select(f => f.First()).ToList();
+            }
+
             var filesCount = count - folders.Count;
             var filesOffset = Math.Max(folders.Count > 0 ? 0 : from - await allFoldersCountTask, 0);
 
@@ -1385,7 +1390,7 @@ public class EntryManager(IDaoFactory daoFactory,
                     RequestUri = new Uri(downloadUri)
                 };
 
-                var httpClient = clientFactory.CreateClient();
+                var httpClient = clientFactory.CreateClient(nameof(DocumentService));
                 using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
                 await using var editedFileStream = await response.Content.ReadAsStreamAsync();
                 await editedFileStream.CopyToAsync(tmpStream);
@@ -1423,22 +1428,28 @@ public class EntryManager(IDaoFactory daoFactory,
                             result = await fileDao.SaveFileAsync(pdfFile, buffered);
                         }
 
-                        var linkDao = daoFactory.GetLinkDao();
-                        var sourceId = await linkDao.GetSourceAsync(file.Id.ToString());
-                        var sourceFile = await fileDao.GetFileAsync((T)Convert.ChangeType(sourceId, typeof(T)));
+                        try
+                        {
+                            var linkDao = daoFactory.GetLinkDao();
+                            var sourceId = await linkDao.GetSourceAsync(file.Id.ToString());
+                            var sourceFile = await fileDao.GetFileAsync((T)Convert.ChangeType(sourceId, typeof(T)));
 
-                        await linkDao.DeleteLinkAsync(sourceId);
-                        await socketManager.UpdateFileAsync(sourceFile);
+                            await linkDao.DeleteLinkAsync(sourceId);
+                            await socketManager.UpdateFileAsync(sourceFile);
 
-                        await fileDao.SaveProperties(result.Id, properties);
-                        await fileMarker.MarkAsNewAsync(result);
-                        await socketManager.CreateFileAsync(result);
+                            await fileDao.SaveProperties(result.Id, properties);
+                            await fileMarker.MarkAsNewAsync(result);
+                            await socketManager.CreateFileAsync(result);
 
-                        await fileMarker.RemoveMarkAsNewForAllAsync(file);
+                            await fileMarker.RemoveMarkAsNewForAllAsync(file);
 
-                        await linkDao.DeleteAllLinkAsync(file.Id.ToString());
-                        await fileDao.SaveProperties(file.Id, null);
-                        await fileDao.DeleteFileAsync(file.Id);
+                            await linkDao.DeleteAllLinkAsync(file.Id.ToString());
+
+                        }
+                        catch(Exception ex)
+                        {
+                            logger.LogError(ex, "Form submission error");
+                        }
 
                         return result;
                     }

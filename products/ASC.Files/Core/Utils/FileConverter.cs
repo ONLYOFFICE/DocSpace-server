@@ -353,7 +353,7 @@ public class FileConverter(
             RequestUri = new Uri(convertUri)
         };
 
-        var httpClient = clientFactory.CreateClient();
+        var httpClient = clientFactory.CreateClient(nameof(DocumentService));
         var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
 
         return await ResponseStream.FromMessageAsync(response);
@@ -531,7 +531,7 @@ public class FileConverter(
             RequestUri = new Uri(convertedFileUrl)
         };
 
-        var httpClient = clientFactory.CreateClient();
+        var httpClient = clientFactory.CreateClient(nameof(DocumentService));
 
         try
         {
