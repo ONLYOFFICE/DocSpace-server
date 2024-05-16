@@ -223,7 +223,7 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
                 order = await breadCrumbsManager.GetBreadCrumbsOrderAsync(file.ParentId);
             }
             
-            result.Order = !string.IsNullOrEmpty(order) ? string.Join('.', order, fileOrder) : file.Order.ToString();
+            result.Order = !string.IsNullOrEmpty(order) ? string.Join('.', order, fileOrder) : fileOrder.ToString();
         }
 
         try

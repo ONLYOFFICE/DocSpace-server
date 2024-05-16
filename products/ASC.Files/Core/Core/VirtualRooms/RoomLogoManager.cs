@@ -44,7 +44,7 @@ public class RoomLogoManager(StorageFactory storageFactory,
 {
     internal const string LogosPathSplitter = "_";
     private const string LogosPath = $"{{0}}{LogosPathSplitter}{{1}}.png";
-    private const string ImageWatermarkPath = $"watermark{LogosPathSplitter}{{0}}.png";
+    private const string ImageWatermarkPath = $"{{0}}{LogosPathSplitter}watermark.png";
     private const string ModuleName = "room_logos";
     private const string TempDomainPath = "logos_temp";
 
@@ -107,23 +107,47 @@ public class RoomLogoManager(StorageFactory storageFactory,
 
         return room;
     }
+
     public async Task<string> CreateWatermarkImageAsync<T>(Folder<T> room, string imageUrl)
     {
         var store = await GetDataStoreAsync();
         var fileName = Path.GetFileName(imageUrl);
         var data = await GetTempAsync(store, fileName);
 
+        var uri = await CreateWatermarkImageAsync(room, store, data);
+
+        await RemoveTempAsync(store, fileName);
+
+        return uri;
+    }
+
+    public async Task<string> CreateWatermarkImageAsync<T>(Folder<T> room, Stream stream)
+    {
+        var store = await GetDataStoreAsync();
+
+        var data = await ReadStreamToByteArrayAsync(stream);
+
+        var uri = await CreateWatermarkImageAsync(room, store, data);
+
+        return uri;
+    }
+
+    private async Task<string> CreateWatermarkImageAsync<T>(Folder<T> room, IDataStore store, byte[] data)
+    {
+        if (data == null)
+        {
+            return null;
+        }
+
         var stringId = GetId(room);
 
         await SaveWatermarkImageAsync(store, stringId, data, -1);
-        await RemoveTempAsync(store, fileName);
 
         var uri = await GetWatermarkImageAsync(room);
-        
-        var imgUrl = commonLinkUtility.GetFullAbsolutePath(uri);
 
-        return imgUrl;
+        return commonLinkUtility.GetFullAbsolutePath(uri);
     }
+
     public async Task<Folder<T>> DeleteWatermarkImageAsync<T>(Folder<T> room)
     {
         var stringId = GetId(room);
@@ -212,9 +236,8 @@ public class RoomLogoManager(StorageFactory storageFactory,
         var id = GetId(room);
 
         var cacheKey = Math.Abs(room.ModifiedOn.GetHashCode());
-        var secure = !securityContext.IsAuthenticated;
 
-        return await GetWatermarkImagePathAsync(id, cacheKey, secure);
+        return await GetWatermarkImagePathAsync(id, cacheKey, true);
     }
 
     public async Task<string> SaveTempAsync(byte[] data, long maxFileSize)
@@ -363,20 +386,24 @@ public class RoomLogoManager(StorageFactory storageFactory,
     {
         await using var stream = await store.GetReadStreamAsync(TempDomainPath, fileName);
 
-        var data = new MemoryStream();
-        var buffer = new byte[1024 * 10];
-        while (true)
-        {
-            var count = await stream.ReadAsync(buffer);
-            if (count == 0)
-            {
-                break;
-            }
+        var data = await ReadStreamToByteArrayAsync(stream);
 
-            await data.WriteAsync(buffer.AsMemory(0, count));
+        return data;
+    }
+
+    private static async Task<byte[]> ReadStreamToByteArrayAsync(Stream inputStream)
+    {
+        if (inputStream == null)
+        {
+            return null;
         }
 
-        return data.ToArray();
+        await using (inputStream)
+        {
+            using var memoryStream = new MemoryStream();
+            await inputStream.CopyToAsync(memoryStream);
+            return memoryStream.ToArray();
+        }
     }
 
     private async Task SaveRoomAsync<T>(IFolderDao<T> folderDao, Folder<T> room)
