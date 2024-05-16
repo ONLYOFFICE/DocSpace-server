@@ -489,6 +489,43 @@ public class Options
 {
     [JsonPropertyName("watermark_on_draw")]
     public WatermarkOnDraw WatermarkOnDraw { get; set; }
+
+    public string GetMD5Hash()
+    {
+        if (WatermarkOnDraw == null)
+        {
+            return null;
+        }
+
+        var stringBuilder = new StringBuilder();
+
+        _ = stringBuilder.Append(WatermarkOnDraw.Width.ToString(CultureInfo.InvariantCulture));
+        _ = stringBuilder.Append(WatermarkOnDraw.Height.ToString(CultureInfo.InvariantCulture));
+        _ = stringBuilder.Append(WatermarkOnDraw.Fill);
+        _ = stringBuilder.Append(WatermarkOnDraw.Rotate);
+        _ = stringBuilder.Append(WatermarkOnDraw.Transparent.ToString(CultureInfo.InvariantCulture));
+
+        if (WatermarkOnDraw.Paragraphs != null)
+        {
+            foreach (var paragraph in WatermarkOnDraw.Paragraphs)
+            {
+                if (paragraph.Runs != null)
+                {
+                    foreach (var run in paragraph.Runs)
+                    {
+                        if (run.UsedInHash)
+                        {
+                            _ = stringBuilder.Append(run.Text);
+                        }
+                    }
+                }
+            }
+        }
+
+        var bytes = MD5.HashData(Encoding.UTF8.GetBytes(stringBuilder.ToString()));
+
+        return BitConverter.ToString(bytes).Replace("-", "").ToLower();
+    }
 }
 
 public class WatermarkOnDraw
@@ -535,11 +572,17 @@ public class Paragraph
 }
 public class Run
 {
-    public Run(string text)
+    private readonly bool _usedInHash;
+
+    internal bool UsedInHash => _usedInHash;
+
+    public Run(string text, bool usedInHash = true)
     {
         FontSize = "42";
         Fill = [124, 124, 124];
         Text = text;
+
+        _usedInHash = usedInHash;
     }
 
     [JsonPropertyName("fill")]

@@ -172,7 +172,7 @@ public static class DocumentService
             Title = title,
             Thumbnail = thumbnail,
             SpreadsheetLayout = spreadsheetLayout,
-            Watermark = options == null ? null : options.WatermarkOnDraw,
+            Watermark = options?.WatermarkOnDraw,
             Url = documentUri,
             Region = region
         };

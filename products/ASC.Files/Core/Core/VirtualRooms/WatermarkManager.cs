@@ -37,7 +37,7 @@ public enum WatermarkAdditions
 }
 public class WatermarkSettings
 {
-    public bool Enabled { get; set; }      
+    public bool Enabled { get; set; }
     public string Text { get; set; }
     public WatermarkAdditions Additions { get; set; }
     public int Rotate { get; set; }
