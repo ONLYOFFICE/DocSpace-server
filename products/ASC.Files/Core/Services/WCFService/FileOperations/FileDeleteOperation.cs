@@ -29,13 +29,13 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations;
 [ProtoContract]
 public record FileDeleteOperationData<T> : FileOperationData<T>
 {
-    [ProtoMember(7)]
+    [ProtoMember(8)]
     public bool Immediately { get; set; }
     
-    [ProtoMember(8)]
+    [ProtoMember(9)]
     public bool IsEmptyTrash { get; set; }
 
-    [ProtoMember(9)]
+    [ProtoMember(10)]
     public bool HiddenOperation { get; set; }
 
     public FileDeleteOperationData()
