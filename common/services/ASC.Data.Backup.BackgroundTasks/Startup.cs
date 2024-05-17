@@ -65,7 +65,6 @@ public class Startup : BaseStartup
         DIHelper.TryAdd<BackupListenerService>();
         services.AddHostedService<BackupListenerService>();
 
-        DIHelper.TryAdd<BackupCleanerTempFileService>();
         services.AddHostedService<BackupCleanerTempFileService>();
 
         services.AddHostedService<BackupWorkerService>();

@@ -842,15 +842,7 @@ public static class ConfigurationFilesExtension
         services.TryAdd<EditorConfiguration<string>>();
         services.TryAdd<EditorConfiguration<int>>();
 
-        services.TryAdd<EmbeddedConfig>();
-
         services.TryAdd<CustomizationConfig<string>>();
         services.TryAdd<CustomizationConfig<int>>();
-
-        services.TryAdd<CustomerConfig>();
-        services.TryAdd<CustomerConfig>();
-
-        services.TryAdd<LogoConfig>();
-        services.TryAdd<LogoConfig>();
     }
 }

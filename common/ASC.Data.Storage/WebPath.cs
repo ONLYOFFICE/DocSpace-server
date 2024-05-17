@@ -124,7 +124,7 @@ public class WebPathSettings
     }
 }
 
-[Scope(Additional = typeof(StaticUploaderExtension))]
+[Scope]
 public class WebPath(
     WebPathSettings webPathSettings,
     IServiceProvider serviceProvider,
@@ -159,13 +159,5 @@ public class WebPath(
         }
 
         return webPathSettings.GetPath(httpContextAccessor?.HttpContext, options, relativePath);
-    }
-}
-
-public class StaticUploaderExtension
-{
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<StaticUploader>();
     }
 }

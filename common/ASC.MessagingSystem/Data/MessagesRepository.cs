@@ -26,7 +26,7 @@
 
 namespace ASC.MessagingSystem.Data;
 
-[Singleton(Additional = typeof(MessagesRepositoryExtension))]
+[Singleton]
 public class MessagesRepository : IDisposable
 {
     private DateTime _lastSave = DateTime.UtcNow;
@@ -304,13 +304,5 @@ public class MessagesRepository : IDisposable
     public void Dispose()
     {
         _timer?.Dispose();
-    }
-}
-
-public static class MessagesRepositoryExtension
-{
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<EventTypeConverter>();
     }
 }

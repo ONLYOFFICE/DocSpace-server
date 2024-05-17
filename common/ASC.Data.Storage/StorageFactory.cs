@@ -98,7 +98,7 @@ public static class StorageFactoryExtenstion
     }
 }
 
-[Scope(Additional = typeof(StorageFactoryExtension))]
+[Scope]
 public class StorageFactory(IServiceProvider serviceProvider,
     StorageFactoryConfig storageFactoryConfig,
     SettingsManager settingsManager,
@@ -204,17 +204,5 @@ public class StorageFactory(IServiceProvider serviceProvider,
             .Configure(tenantPath, handler, moduleElement, props, validator)
             .SetQuotaController(moduleElement.Count ? controller : null
             /*don't count quota if specified on module*/);
-    }
-}
-
-public static class StorageFactoryExtension
-{
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<DiscDataStore>();
-        services.TryAdd<GoogleCloudStorage>();
-        services.TryAdd<RackspaceCloudStorage>();
-        services.TryAdd<S3Storage>();
-        services.TryAdd<TenantQuotaController>();
     }
 }

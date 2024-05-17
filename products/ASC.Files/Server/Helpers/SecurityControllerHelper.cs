@@ -26,6 +26,7 @@
 
 namespace ASC.Files.Helpers;
 
+[Scope]
 public class SecurityControllerHelper(FilesSettingsHelper filesSettingsHelper,
         FileUploader fileUploader,
         SocketManager socketManager,

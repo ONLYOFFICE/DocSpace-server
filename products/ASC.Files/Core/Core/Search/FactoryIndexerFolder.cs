@@ -26,7 +26,7 @@
 
 namespace ASC.Web.Files.Core.Search;
 
-[Scope(Additional = typeof(FactoryIndexerFolderExtension))]
+[Scope]
 public class FactoryIndexerFolder(ILoggerProvider options,
         TenantManager tenantManager,
         SearchSettingsHelper searchSettingsHelper,
@@ -129,14 +129,6 @@ class FolderTenant
 {
     public DbTenant DbTenant { get; init; }
     public DbFolder DbFolder { get; init; }
-}
-
-public static class FactoryIndexerFolderExtension
-{
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<DbFolder>();
-    }
 }
 
 static file class Queries

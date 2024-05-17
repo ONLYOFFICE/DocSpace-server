@@ -26,7 +26,7 @@
 
 namespace ASC.Files.Core.Services.DocumentBuilderService;
 
-[Singleton(Additional = typeof(DocumentBuilderTaskManagerHelperExtension))]
+[Singleton]
 public class DocumentBuilderTaskManager
 {
     private static readonly SemaphoreSlim _semaphore = new(1);
@@ -98,13 +98,5 @@ public class DocumentBuilderTaskManager
         {
             _semaphore.Release();
         }
-    }
-}
-
-public static class DocumentBuilderTaskManagerHelperExtension
-{
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<DocumentBuilderTask>();
     }
 }

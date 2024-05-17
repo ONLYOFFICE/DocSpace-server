@@ -77,8 +77,11 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
                 .AddHttpClient()
                 .AddDistributedLock(Configuration);
 
-        DIHelper.Configure(services);
 
+        DIHelper.Configure(services);
+        
+        DIHelper.Scan();
+        
         services.AddSingleton(Channel.CreateUnbounded<NotifyRequest>());
         services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Writer);
@@ -88,7 +91,6 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
         services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Writer);
         services.AddHostedService<SocketService>();
-        DIHelper.TryAdd<SocketService>();
     }
 
     protected IEnumerable<Assembly> GetAutoMapperProfileAssemblies()

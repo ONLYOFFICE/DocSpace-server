@@ -150,6 +150,18 @@ public class DIHelper()
         }
     }
 
+    public void Scan()
+    {
+        var types = AppDomain.CurrentDomain.GetAssemblies()
+            .Where(x => x.GetName().Name.StartsWith("ASC."))
+            .SelectMany(r => r.GetTypes().Where(t => t.GetCustomAttribute<DIAttribute>() != null));
+        
+        foreach (var a in types)
+        {
+            _ = TryAdd(a, withDependencies: false);
+        }
+    }
+    
     public bool TryAdd<TService>() where TService : class
     {
         return TryAdd(typeof(TService));
@@ -160,7 +172,7 @@ public class DIHelper()
         return TryAdd(typeof(TService), typeof(TImplementation));
     }
 
-    public bool TryAdd(Type service, Type implementation = null)
+    public bool TryAdd(Type service, Type implementation = null, bool withDependencies = true)
     {
         Type serviceGenericTypeDefinition = null;
 
@@ -366,7 +378,7 @@ public class DIHelper()
             }
         }
 
-        if (isnew)
+        if (isnew && withDependencies)
         {
             ConstructorInfo[] props = null;
 

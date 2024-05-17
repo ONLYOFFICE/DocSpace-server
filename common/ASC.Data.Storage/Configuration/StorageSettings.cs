@@ -26,7 +26,7 @@
 
 namespace ASC.Data.Storage.Configuration;
 
-[Singleton(Additional = typeof(StorageSettingsExtension))]
+[Singleton]
 public class BaseStorageSettingsListener(IServiceProvider serviceProvider, ICacheNotify<ConsumerCacheItem> cacheNotify)
 {
     private readonly object _locker = new();
@@ -219,11 +219,3 @@ public class StorageSettingsHelper
 public record BaseStorageSettingsListenerScope(
     StorageSettingsHelper StorageSettingsHelper,
     SettingsManager SettingsManager);
-
-public static class StorageSettingsExtension
-{
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<BaseStorageSettingsListenerScope>();
-    }
-}

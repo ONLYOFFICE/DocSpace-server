@@ -156,17 +156,3 @@ public class NotifyTransferRequest(TenantManager tenantManager) : INotifyEngineA
         request.Properties.Add("Tenant", await tenantManager.GetCurrentTenantAsync(false));
     }
 }
-
-public static class WorkContextExtension
-{
-    public static void Register(DIHelper dIHelper)
-    {
-        dIHelper.TryAdd<NotifyTransferRequest>();
-        dIHelper.TryAdd<TelegramHelper>();
-        dIHelper.TryAdd<TelegramSenderSinkMessageCreator>();
-        dIHelper.TryAdd<JabberSenderSinkMessageCreator>();
-        dIHelper.TryAdd<PushSenderSinkMessageCreator>();
-        dIHelper.TryAdd<EmailSenderSinkMessageCreator>();
-        dIHelper.TryAdd<NotifyClientImpl>();
-    }
-}

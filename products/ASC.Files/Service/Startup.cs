@@ -81,7 +81,6 @@ public class Startup : BaseWorkerStartup
             DIHelper.TryAdd<RoomIndexExportIntegrationEventHandler>();
             DIHelper.TryAdd<DeleteIntegrationEventHandler>();
             DIHelper.TryAdd<MoveOrCopyIntegrationEventHandler>();
-            DIHelper.TryAdd<BulkDownloadIntegrationEventHandler>();
             DIHelper.TryAdd<MarkAsReadIntegrationEventHandler>();
             DIHelper.TryAdd<EmptyTrashIntegrationEventHandler>();
 

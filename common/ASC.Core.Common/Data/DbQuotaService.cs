@@ -26,7 +26,7 @@
 
 namespace ASC.Core.Data;
 
-[Scope(Additional = typeof(DbQuotaServiceExtensions))]
+[Scope]
 class DbQuotaService(IDbContextFactory<CoreDbContext> dbContextManager, IMapper mapper)
     : IQuotaService
 {
@@ -114,14 +114,6 @@ class DbQuotaService(IDbContextFactory<CoreDbContext> dbContextManager, IMapper 
         }
 
         return await q.ProjectTo<TenantQuotaRow>(mapper.ConfigurationProvider).ToListAsync();
-    }
-}
-
-public static class DbQuotaServiceExtensions
-{
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<TenantQuotaPriceResolver>();
     }
 }
 

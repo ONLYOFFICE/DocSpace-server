@@ -28,7 +28,7 @@ using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Web.Studio.Core.Notify;
 
-[Singleton(Additional = typeof(WorkContextExtension))]
+[Singleton]
 public class NotifyConfiguration(NotifyEngine notifyEngine, WorkContext workContext)
 {
     private static bool _configured;

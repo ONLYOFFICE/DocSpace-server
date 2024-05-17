@@ -711,19 +711,6 @@ internal class ProviderAccountDao(
     }
 }
 
-public static class ProviderAccountDaoExtension
-{
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<BoxProviderInfo>();
-        services.TryAdd<DropboxProviderInfo>();
-        services.TryAdd<SharePointProviderInfo>();
-        services.TryAdd<GoogleDriveProviderInfo>();
-        services.TryAdd<OneDriveProviderInfo>();
-        services.TryAdd<WebDavProviderInfo>();
-    }
-}
-
 public class ProviderData
 {
     public int Id { get; init; }

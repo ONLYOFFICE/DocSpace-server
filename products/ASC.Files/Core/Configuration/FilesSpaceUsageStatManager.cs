@@ -26,7 +26,7 @@
 
 namespace ASC.Web.Files;
 
-[Scope(Additional = typeof(FilesSpaceUsageStatExtension))]
+[Scope]
 public class FilesSpaceUsageStatManager(IDbContextFactory<FilesDbContext> dbContextFactory,
         TenantManager tenantManager,
         UserManager userManager,
@@ -161,14 +161,6 @@ public class FilesSpaceUsageStatManager(IDbContextFactory<FilesDbContext> dbCont
         await tenantManager.SetTenantQuotaRowAsync(
            new TenantQuotaRow { TenantId = tenantId, Path = $"/{FileConstant.ModuleId}/", Counter = size, Tag = WebItemManager.DocumentsProductID.ToString(), UserId = userId, LastModified = DateTime.UtcNow },
            false);
-    }
-}
-
-public static class FilesSpaceUsageStatExtension
-{
-    public static void Register(DIHelper services)
-    {
-        services.ServiceCollection.AddBaseDbContextPool<FilesDbContext>();
     }
 }
 

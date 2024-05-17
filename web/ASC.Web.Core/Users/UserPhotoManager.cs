@@ -172,7 +172,7 @@ public class UserPhotoManagerCache
     }
 }
 
-[Scope(Additional = typeof(ResizeWorkerItemExtension))]
+[Scope]
 public class UserPhotoManager(UserManager userManager,
     WebImageSupplier webImageSupplier,
     TenantManager tenantManager,
@@ -973,17 +973,5 @@ public static class SizeExtend
     public static void Deconstruct(this Size size, out int w, out int h)
     {
         (w, h) = (size.Width, size.Height);
-    }
-}
-
-public static class ResizeWorkerItemExtension
-{
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<ResizeWorkerItem>();
-        services.Configure<DistributedTaskQueueFactoryOptions>(UserPhotoManager.CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME, options =>
-        {
-            options.MaxThreadsCount = 2;
-        });
     }
 }

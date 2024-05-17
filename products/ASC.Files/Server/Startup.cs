@@ -49,7 +49,10 @@ public class Startup : BaseStartup
 
         await base.ConfigureServices(services);
 
-        services.RegisterQueue();
+        services.Configure<DistributedTaskQueueFactoryOptions>(FileOperationsManagerHolder.CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME, x =>
+        {
+            x.MaxThreadsCount = 10;
+        });
 
         DIHelper.TryAdd<FileHandlerService>();
         DIHelper.TryAdd<ChunkedUploaderHandlerService>();

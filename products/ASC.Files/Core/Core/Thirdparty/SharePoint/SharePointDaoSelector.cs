@@ -78,10 +78,7 @@ public static class SharePointDaoSelectorExtension
 {
     public static void Register(DIHelper services)
     {
-        services.TryAdd<SharePointFileDao>();
-        services.TryAdd<SharePointFolderDao>();
         services.TryAdd<IProviderInfo<File, Folder, ClientObject>, SharePointProviderInfo>();
-        services.TryAdd<SharePointTagDao>();
         services.TryAdd<IDaoSelector<File, Folder, ClientObject>, SharePointDaoSelector>();
     }
 }

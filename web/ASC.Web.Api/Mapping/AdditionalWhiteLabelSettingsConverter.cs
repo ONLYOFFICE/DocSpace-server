@@ -27,7 +27,7 @@
 namespace ASC.Web.Api.Mapping;
 
 
-[Scope(Additional = typeof(AdditionalWhiteLabelSettingsConverterExtension))]
+[Scope]
 public class AdditionalWhiteLabelSettingsConverter(
         AdditionalWhiteLabelSettingsHelper additionalWhiteLabelSettingsHelper)
     : ITypeConverter<AdditionalWhiteLabelSettings, AdditionalWhiteLabelSettingsDto>
@@ -52,14 +52,6 @@ public class AdditionalWhiteLabelSettingsConverter(
         };
 
         return result;
-    }
-}
-
-public static class AdditionalWhiteLabelSettingsConverterExtension
-{
-    public static void Register(DIHelper dIHelper)
-    {
-        dIHelper.TryAdd<AdditionalWhiteLabelSettingsHelper>();
     }
 }
 

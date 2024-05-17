@@ -52,7 +52,6 @@ public class Startup : BaseWorkerStartup
         DIHelper.TryAdd<ServiceLauncher>();
         NotifyConfigurationExtension.Register(DIHelper);
         DIHelper.TryAdd<EmailSenderSink>();
-        DIHelper.TryAdd<NotifyItemIntegrationEventHandler>();
         DIHelper.TryAdd<ProductEntryPoint>();
         services.AddScoped<IWebItem, ProductEntryPoint>();
         
