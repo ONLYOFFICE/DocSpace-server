@@ -598,6 +598,8 @@ internal class FolderDao(
             await Queries.DeleteBunchObjectsAsync(context, tenantId, folderId.ToString());
 
             await DeleteCustomOrder(filesDbContext, folderId);
+            
+            await DeleteFilesAuditReferencesAsync(filesDbContext, folderId, FileEntryType.Folder);
 
             await context.SaveChangesAsync();
             await tx.CommitAsync();
@@ -2484,5 +2486,4 @@ static file class Queries
                     .ExecuteUpdate(toUpdate => toUpdate
                             .SetProperty(p => p.folder.Counter, p => p.folder.Counter + size)
                         ));
-
 }

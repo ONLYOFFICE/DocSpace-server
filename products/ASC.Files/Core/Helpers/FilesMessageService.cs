@@ -197,12 +197,15 @@ public class FilesMessageService(
             EntryId = x.Id,
             EntryType = (byte)x.FileEntryType
         }).ToList();
-        
-        references.Add(new FilesAuditReference
+
+        if (action is not (MessageAction.FileDeleted or MessageAction.FolderDeleted or MessageAction.RoomDeleted))
         {
-            EntryId = entry.Id,
-            EntryType = (byte)entry.FileEntryType
-        });
+            references.Add(new FilesAuditReference
+            {
+                EntryId = entry.Id,
+                EntryType = (byte)entry.FileEntryType
+            });
+        }
         
         return new FileEntryData(serializedParam, references);
     }
@@ -245,7 +248,7 @@ public class FilesMessageService(
         {
             FolderType.USER => FilesUCResource.MyFiles,
             FolderType.TRASH => FilesUCResource.Trash,
-            _ => string.Empty
+            _ => null
         };
 
         var serializedParam = JsonSerializer.Serialize(info, _serializerOptions);

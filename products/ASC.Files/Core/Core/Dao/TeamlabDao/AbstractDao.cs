@@ -374,6 +374,11 @@ public class AbstractDao
         }
     }
 
+    protected static Task DeleteFilesAuditReferencesAsync(FilesDbContext filesDbContext, int entryId, FileEntryType entryType)
+    {
+        return Queries.DeleteFoldersAuditReferencesAsync(filesDbContext, entryId, entryType);
+    }
+
     internal enum SearchType
     {
         Start,
@@ -482,4 +487,12 @@ static file class Queries
                 ctx.Folders
                     .Where(r => r.TenantId == tenantId && ctx.Tree.Any(a => a.FolderId == folderId && a.ParentId == r.Id))
                     .ExecuteUpdate(r => r.SetProperty(a => a.FoldersCount, a => a.FoldersCount + counter)));
+    
+    public static readonly Func<FilesDbContext, int, FileEntryType, Task> DeleteFoldersAuditReferencesAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int entryId, FileEntryType entryType) =>
+                ctx.FilesAuditReference
+                    .Where(r => r.EntryId == entryId)
+                    .Where(r => r.EntryType == (byte)entryType)
+                    .ExecuteDelete());
 }

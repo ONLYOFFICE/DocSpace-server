@@ -771,6 +771,8 @@ internal class FileDao(
 
             await DeleteCustomOrder(filesDbContext, fileId);
 
+            await DeleteFilesAuditReferencesAsync(filesDbContext, fileId, FileEntryType.File);
+
             await context.SaveChangesAsync();
             await tx.CommitAsync();
 
