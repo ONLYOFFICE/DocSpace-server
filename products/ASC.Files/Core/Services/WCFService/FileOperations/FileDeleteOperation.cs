@@ -73,8 +73,8 @@ public class FileDeleteOperation(IServiceProvider serviceProvider) : ComposeFile
 
     public override Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
     {
-        DaoOperation = new FileDeleteOperation<int>(_serviceProvider, Data);
-        ThirdPartyOperation = new FileDeleteOperation<string>(_serviceProvider, ThirdPartyData);
+        DaoOperation = new FileDeleteOperation<int>(_serviceProvider, Data ?? new FileDeleteOperationData<int>());
+        ThirdPartyOperation = new FileDeleteOperation<string>(_serviceProvider, ThirdPartyData ?? new FileDeleteOperationData<string>());
 
         return base.RunJob(distributedTask, cancellationToken);
     }

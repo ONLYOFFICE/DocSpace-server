@@ -342,8 +342,7 @@ public class FileOperationsManager(
             eventBus.Publish(new DeleteIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
             {
                 TaskId = Guid.NewGuid().ToString(),
-                Data = new FileDeleteOperationData<int>(folders.Item1, files.Item1, tenantId, headers, sessionSnapshot, holdResult, immediately, isEmptyTrash, true),
-                ThirdPartyData = new FileDeleteOperationData<string>([], [], tenantId, headers, sessionSnapshot, holdResult, immediately, isEmptyTrash, true)
+                Data = new FileDeleteOperationData<int>(folders.Item1, files.Item1, tenantId, headers, sessionSnapshot, holdResult, immediately, isEmptyTrash, true)
             });
 
             if (!hasThirdPartyData)
@@ -364,7 +363,6 @@ public class FileOperationsManager(
         eventBus.Publish(new DeleteIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
         {
             TaskId = taskId,
-            Data = new FileDeleteOperationData<int>([], [], tenantId, headers, sessionSnapshot, holdResult, immediately, isEmptyTrash),
             ThirdPartyData = new FileDeleteOperationData<string>(folders.Item2, files.Item2, tenantId, headers, sessionSnapshot, holdResult, immediately, isEmptyTrash)
         });
     }
