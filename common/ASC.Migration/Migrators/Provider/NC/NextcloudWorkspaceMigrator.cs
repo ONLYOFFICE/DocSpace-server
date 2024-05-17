@@ -55,9 +55,9 @@ public class NextcloudWorkspaceMigrator : Migrator
         MigrationInfo = new MigrationInfo { Name = "Nextcloud" };
     }
 
-    public override async Task InitAsync(string path, CancellationToken cancellationToken, OperationType operation)
+    public override void Init(string path, CancellationToken cancellationToken, OperationType operation)
     {
-        await MigrationLogger.InitAsync();
+        MigrationLogger.Init();
         _cancellationToken = cancellationToken;
 
         MigrationInfo.Operation = operation;

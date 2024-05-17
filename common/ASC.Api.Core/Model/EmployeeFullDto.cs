@@ -203,6 +203,7 @@ public class EmployeeFullDto : EmployeeDto
 
 [Scope]
 public class EmployeeFullDtoHelper(
+        SetupInfo setupInfo,
         ApiContext httpContext,
         UserManager userManager,
         AuthContext authContext,
@@ -345,7 +346,7 @@ public class EmployeeFullDtoHelper(
 
         if (!string.IsNullOrEmpty(userInfo.CultureName))
         {
-            result.CultureName = userInfo.CultureName;
+            result.CultureName = setupInfo.GetRightCultureName(userInfo.GetCulture());
         }
 
         FillConacts(result, userInfo);

@@ -1098,4 +1098,10 @@
   <data name="UserFreeSpaceException" xml:space="preserve">
     <value>Օգտատիրոջ տարածքի չափաբաժինը գերազանցել է</value>
   </data>
+  <data name="TariffsFeature_statistic" xml:space="preserve">
+    <value>Պահպանման քվոտաներ և վիճակագրություն</value>
+  </data>
+  <data name="TariffsFeature_total_size" xml:space="preserve">
+    <value>{0} յուրաքանչյուր ադմինիստրատորի/հզոր օգտատիրոջ համար և տարածք ավելացնելու հնարավորություն, հայտի դեպքում</value>
+  </data>
 </root>

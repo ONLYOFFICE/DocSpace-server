@@ -32,6 +32,7 @@ public class FilesLinkUtility
     public const string FilesBaseVirtualPath = "~/";
     public const string EditorPage = "doceditor";
     public TimeSpan DefaultLinkLifeTime { get; }
+    public const int MaxLinkLifeTimeInYears = 10;
     
     private readonly string _filesUploaderUrl;
     private readonly CommonLinkUtility _commonLinkUtility;

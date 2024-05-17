@@ -120,6 +120,30 @@ public class BackupAjaxHandler(
         return await backupService.GetBackupHistoryAsync(await GetCurrentTenantIdAsync());
     }
 
+    public async Task CheckAccessToFileAsync<T>(T fileId)
+    {
+        var fileDao = daoFactory.GetFileDao<T>();
+        var file = await fileDao.GetFileAsync(fileId);
+
+        if (file == null)
+        {
+            throw new DirectoryNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+
+        var folderDao = daoFactory.GetFolderDao<T>();
+        var folder = await folderDao.GetFolderAsync(file.ParentId);
+
+        if (folder == null)
+        {
+            throw new DirectoryNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
+
+        if (folder.FolderType == FolderType.VirtualRooms || folder.FolderType == FolderType.Archive || !await fileSecurity.CanCreateAsync(folder))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
+        }
+    }
+
     public async Task CheckAccessToFolderAsync<T>(T folderId)
     {
         var folderDao = daoFactory.GetFolderDao<T>();

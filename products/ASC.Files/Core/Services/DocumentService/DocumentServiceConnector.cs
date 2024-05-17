@@ -190,6 +190,32 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
 
     public async Task CheckDocServiceUrlAsync()
     {
+        if (!string.IsNullOrEmpty(filesLinkUtility.DocServiceApiUrl))
+        {
+            try
+            {
+                var request = new HttpRequestMessage
+                {
+                    RequestUri = new Uri(filesLinkUtility.DocServiceApiUrl),
+                    Method = HttpMethod.Head
+                };
+
+                using var httpClient = clientFactory.CreateClient();
+                using var response = await httpClient.SendAsync(request);
+
+                if (response.StatusCode != HttpStatusCode.OK)
+                {
+                    throw new Exception("Api url is not available");
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.ErrorDocumentDocServiceCheckError(ex);
+
+                throw new Exception("Api url: " + ex.Message);
+            }
+        }
+
         if (!string.IsNullOrEmpty(filesLinkUtility.DocServiceHealthcheckUrl))
         {
             try

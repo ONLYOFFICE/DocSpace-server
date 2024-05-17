@@ -323,18 +323,27 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                 await fileMarker.RemoveMarkAsNewForAllAsync(file);
                 if (!_immediately && FileDao.UseTrashForRemove(file))
                 {
-                    await socketManager.DeleteFileAsync(file, action: async () => await FileDao.MoveFileAsync(file.Id, _trashId, file.RootFolderType == FolderType.USER));
-                    
-                    if (isNeedSendActions)
+                    try
                     {
-                        await filesMessageService.SendAsync(MessageAction.FileMovedToTrash, file, _headers, file.Title);
-                    }
+                        await socketManager.DeleteFileAsync(file, action: async () => await FileDao.MoveFileAsync(file.Id, _trashId, file.RootFolderType == FolderType.USER));
 
-                    if (file.ThumbnailStatus == Thumbnail.Waiting)
-                    {
-                        file.ThumbnailStatus = Thumbnail.NotRequired;
-                        await FileDao.SetThumbnailStatusAsync(file, Thumbnail.NotRequired);
+                        if (isNeedSendActions)
+                        {
+                            await filesMessageService.SendAsync(MessageAction.FileMovedToTrash, file, _headers, file.Title);
+                        }
+
+                        if (file.ThumbnailStatus == Thumbnail.Waiting)
+                        {
+                            file.ThumbnailStatus = Thumbnail.NotRequired;
+                            await FileDao.SetThumbnailStatusAsync(file, Thumbnail.NotRequired);
+                        }
                     }
+                    catch (Exception ex)
+                    {
+                        this[Err] = ex.Message;
+                        Logger.ErrorWithException(ex);
+                    }
+                    
                 }
                 else
                 {

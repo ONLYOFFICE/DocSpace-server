@@ -184,7 +184,7 @@ public class GroupController(
 
         group.Name = inDto.GroupName ?? group.Name;
         await userManager.SaveGroupInfoAsync(group);
-
+        
         await TransferUserToDepartmentAsync(inDto.GroupManager, group, true);
 
         if (inDto.MembersToAdd != null)
@@ -375,7 +375,8 @@ public class GroupController(
 
     private async Task TransferUserToDepartmentAsync(Guid userId, GroupInfo group, bool setAsManager)
     {
-        if (userId == Guid.Empty || !await userManager.UserExistsAsync(userId))
+        var user = await userManager.GetUsersAsync(userId);
+        if (userId == Guid.Empty || !userManager.UserExists(user) || user.Status != EmployeeStatus.Active)
         {
             return;
         }
