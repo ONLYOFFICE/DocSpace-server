@@ -210,7 +210,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
                 }
                 if (fileData.Status == TrackerStatus.Closed)
                 {
-                    fileTracker.Remove(fileId);
+                    await fileTracker.RemoveAsync(fileId);
                     await socketManager.StopEditAsync(fileId);
 
                     break;
