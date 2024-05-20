@@ -80,5 +80,6 @@ public static class SharePointDaoSelectorExtension
     {
         services.TryAdd<IProviderInfo<File, Folder, ClientObject>, SharePointProviderInfo>();
         services.TryAdd<IDaoSelector<File, Folder, ClientObject>, SharePointDaoSelector>();
+        services.TryAdd<RegexDaoSelectorBase<File, Folder, ClientObject>, SharePointDaoSelector>();
     }
 }

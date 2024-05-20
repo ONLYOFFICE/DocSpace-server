@@ -55,16 +55,15 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
         services.AddBaseDbContextPool<MessagesContext>();
         services.AddBaseDbContextPool<WebhooksDbContext>();
 
+
         services.RegisterFeature();
 
         services.AddAutoMapper(GetAutoMapperProfileAssemblies());
 
         if (!HostEnvironment.IsDevelopment())
         {
-            services.AddStartupTask<WarmupServicesStartupTask>()
-                    .TryAddSingleton(services);
+            services.AddStartupTask<WarmupServicesStartupTask>().TryAddSingleton(services);
         }
-
 
         services.AddMemoryCache();
         
@@ -79,14 +78,9 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
 
 
         DIHelper.Configure(services);
-        
-        AppDomain.CurrentDomain.AssemblyLoad += (_, args) =>
-        {
-            DIHelper.Scan(args.LoadedAssembly);
-        };
-        
         DIHelper.Scan();
         
+        DIHelper.TryAdd(typeof(IWebhookPublisher), typeof(WebhookPublisher));//hack
         services.AddSingleton(Channel.CreateUnbounded<NotifyRequest>());
         services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Writer);

@@ -202,6 +202,11 @@ public class UploadOperationProgress : DistributedTaskProgress
     private readonly IEnumerable<string> _directoryFiles;
     private readonly IServiceProvider _serviceProvider;
 
+    public UploadOperationProgress()
+    {
+        
+    }
+    
     public UploadOperationProgress(IServiceProvider serviceProvider, string key, int tenantId, string relativePath, string mappedPath)
     {
         _serviceProvider = serviceProvider;

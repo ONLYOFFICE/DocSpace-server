@@ -27,11 +27,22 @@
 namespace ASC.Web.Files.Core.Search;
 
 [Scope]
+public class BaseIndexerFolder(
+    Client client,
+    ILogger<BaseIndexerFolder> log,
+    IDbContextFactory<WebstudioDbContext> dbContextManager,
+    TenantManager tenantManager,
+    BaseIndexerHelper baseIndexerHelper,
+    Settings settings,
+    IServiceProvider serviceProvider)
+    : BaseIndexer<DbFolder>(client, log, dbContextManager, tenantManager, baseIndexerHelper, settings, serviceProvider);
+
+[Scope]
 public class FactoryIndexerFolder(ILoggerProvider options,
         TenantManager tenantManager,
         SearchSettingsHelper searchSettingsHelper,
         FactoryIndexer factoryIndexer,
-        BaseIndexer<DbFolder> baseIndexer,
+        BaseIndexerFolder baseIndexer,
         IServiceProvider serviceProvider,
         IDbContextFactory<FilesDbContext> dbContextFactory,
         ICache cache,

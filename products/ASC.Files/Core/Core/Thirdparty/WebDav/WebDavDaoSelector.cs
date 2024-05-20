@@ -36,5 +36,6 @@ public static class WebDavDaoSelectorExtension
         services.TryAdd<IDaoBase<WebDavEntry, WebDavEntry, WebDavEntry>, WebDavDaoBase>();
         services.TryAdd<IProviderInfo<WebDavEntry, WebDavEntry, WebDavEntry>, WebDavProviderInfo>();
         services.TryAdd<IDaoSelector<WebDavEntry, WebDavEntry, WebDavEntry>, RegexDaoSelectorBase<WebDavEntry, WebDavEntry, WebDavEntry>>();
+        services.TryAdd<RegexDaoSelectorBase<WebDavEntry, WebDavEntry, WebDavEntry>>();
     }
 }

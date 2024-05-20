@@ -38,12 +38,9 @@ public class WarmupServicesStartupTask(IServiceCollection services, IServiceProv
         var startTime = DateTime.UtcNow;
 
         using var scope = provider.CreateScope();
-        var tenantManager = scope.ServiceProvider.GetService<TenantManager>();
         var logger = scope.ServiceProvider.GetService<ILogger<WarmupServicesStartupTask>>();
 
         logger.TraceWarmupStarted();
-
-        await tenantManager.SetCurrentTenantAsync("localhost");
             
         foreach (var service in GetServices(services))
         {
@@ -57,7 +54,7 @@ public class WarmupServicesStartupTask(IServiceCollection services, IServiceProv
             {
                 processedFailed++;
 
-                logger.DebugWarmupFailed(processedFailed, service.FullName, ex.Message);
+                logger.DebugWarmupFailed(processedFailed, service.FullName, ex);
             }
         }
 

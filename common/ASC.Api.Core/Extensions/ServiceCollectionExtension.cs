@@ -315,9 +315,7 @@ public static class ServiceCollectionExtension
             configuration.GetSection("core:hosting").Bind(x);
             x.WorkerTypeName = workerTypeName ?? typeof(T).GetFormattedName();
         });
-
-
-        diHelper.TryAdd<T>();
+        
         services.AddHostedService<T>();
     }
 

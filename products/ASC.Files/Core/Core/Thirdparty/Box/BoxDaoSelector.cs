@@ -38,5 +38,6 @@ public static class BoxDaoSelectorExtension
         services.TryAdd<ThirdPartyTagDao<BoxFile, BoxFolder, BoxItem>>();
         services.TryAdd<IDaoBase<BoxFile, BoxFolder, BoxItem>, BoxDaoBase>();
         services.TryAdd<IDaoSelector<BoxFile, BoxFolder, BoxItem>, RegexDaoSelectorBase<BoxFile, BoxFolder, BoxItem>>();
+        services.TryAdd<RegexDaoSelectorBase<BoxFile, BoxFolder, BoxItem>>();
     }
 }

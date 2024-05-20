@@ -79,6 +79,7 @@ public class Startup
         services.AddSession();
 
         _diHelper.Configure(services);
+        _diHelper.Scan();
 
         Action<JsonOptions> jsonOptions = options =>
         {
@@ -91,8 +92,6 @@ public class Startup
             .AddJsonOptions(jsonOptions);
 
         services.AddSingleton(jsonOptions);
-
-        _diHelper.AddControllers();
 
         if (!string.IsNullOrEmpty(_corsOrigin))
         {
@@ -126,7 +125,6 @@ public class Startup
         services.RegisterFeature();
 
         services.AddScoped<ITenantQuotaFeatureStat<CountRoomFeature, int>, CountRoomCheckerStatistic>();
-        services.AddScoped<CountRoomCheckerStatistic>();
 
         _diHelper.TryAdd(typeof(IWebhookPublisher), typeof(WebhookPublisher));
 

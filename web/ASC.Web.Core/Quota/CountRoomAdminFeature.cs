@@ -28,8 +28,11 @@ using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Web.Core.Quota;
 
-public class CountPaidUserChecker(ITenantQuotaFeatureStat<CountPaidUserFeature, int> tenantQuotaFeatureStatistic,
-        TenantManager tenantManager, ITariffService tariffService)
+[Scope]
+public class CountPaidUserChecker(
+    ITenantQuotaFeatureStat<CountPaidUserFeature, int> tenantQuotaFeatureStatistic, 
+    TenantManager tenantManager, 
+    ITariffService tariffService)
     : TenantQuotaFeatureCheckerCount<CountPaidUserFeature>(tenantQuotaFeatureStatistic, tenantManager)
 {
 
@@ -48,6 +51,7 @@ public class CountPaidUserChecker(ITenantQuotaFeatureStat<CountPaidUserFeature, 
     }
 }
 
+[Scope]
 public class CountPaidUserStatistic(IServiceProvider serviceProvider) : ITenantQuotaFeatureStat<CountPaidUserFeature, int>
 {
     public async Task<int> GetValueAsync()

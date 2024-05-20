@@ -108,6 +108,8 @@ public abstract class DIAttribute : Attribute
     protected internal Type Implementation { get; }
     protected internal Type Service { get; }
     public Type Additional { get; init; }
+    
+    public Type[] GenericArguments { get; init; }
 
     protected DIAttribute() { }
 
@@ -134,26 +136,17 @@ public class DIHelper()
         { DIAttributeType.Transient, [] }
     };
     private readonly List<string> _added = [];
-    private readonly List<string> _configured = [];
-    public IServiceCollection ServiceCollection { get; private set; }
-
-    public DIHelper(IServiceCollection serviceCollection) : this()
-    {
-        ServiceCollection = serviceCollection;
-    }
-
-    public void AddControllers()
-    {
-        foreach (var a in Assembly.GetEntryAssembly().GetTypes().Where(r => r.IsAssignableTo<ControllerBase>() && !r.IsAbstract))
-        {
-            _ = TryAdd(a);
-        }
-    }
+    private IServiceCollection _serviceCollection;
 
     readonly HashSet<string> _visited = new();
     
     public void Scan()
-    {
+    {        
+        AppDomain.CurrentDomain.AssemblyLoad += (_, args) =>
+        {
+            Scan(args.LoadedAssembly);
+        };
+        
         foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies().OrderBy(r=> r.FullName))
         {
             Scan(assembly);
@@ -166,7 +159,7 @@ public class DIHelper()
         }
     }
     
-    public void Scan(Assembly assembly)
+    private void Scan(Assembly assembly)
     {
         var assemblyName = assembly.GetName();
         if (!CheckAssemblyName(assemblyName) || _visited.Contains(assemblyName.Name))
@@ -180,7 +173,7 @@ public class DIHelper()
         
         foreach (var a in types)
         {
-            _ = TryAdd(a, withDependencies: false);
+            TryAdd(a);
         }
     }
 
@@ -190,45 +183,59 @@ public class DIHelper()
         return assemblyName != null && assemblyName.StartsWith("ASC.");
     }
     
-    public bool TryAdd<TService>() where TService : class
+    public void TryAdd<TService>() where TService : class
     {
-        return TryAdd(typeof(TService));
+        TryAdd(typeof(TService));
     }
 
-    public bool TryAdd<TService, TImplementation>() where TService : class
+    public void TryAdd<TService, TImplementation>() where TService : class
     {
-        return TryAdd(typeof(TService), typeof(TImplementation));
+        TryAdd(typeof(TService), typeof(TImplementation));
     }
 
-    public bool TryAdd(Type service, Type implementation = null, bool withDependencies = true)
+    public void TryAdd(Type service, Type implementation = null)
     {
         Type serviceGenericTypeDefinition = null;
-
+        
         if (service.IsGenericType)
         {
             serviceGenericTypeDefinition = service.GetGenericTypeDefinition();
         }
 
-        if (service.IsInterface && serviceGenericTypeDefinition != null && implementation == null &&
-            (
-            serviceGenericTypeDefinition == typeof(IOptionsSnapshot<>) ||
-            serviceGenericTypeDefinition == typeof(IOptions<>) ||
-            serviceGenericTypeDefinition == typeof(IOptionsMonitor<>)
-            ))
+        if (serviceGenericTypeDefinition != null)
         {
-            service = service.GetGenericArguments().FirstOrDefault();
-
-            if (service == null)
+            if (service.IsInterface && implementation == null &&
+                (
+                    serviceGenericTypeDefinition == typeof(IOptionsSnapshot<>) ||
+                    serviceGenericTypeDefinition == typeof(IOptions<>) ||
+                    serviceGenericTypeDefinition == typeof(IOptionsMonitor<>)
+                ))
             {
-                return false;
+                service = service.GetGenericArguments().FirstOrDefault();
+
+                if (service == null)
+                {
+                    return;
+                }
             }
+            // else
+            // {
+            //     var attr = service.GetCustomAttribute<DIAttribute>();
+            //     if (attr?.GenericArguments != null && attr.GenericArguments.Length != 0)
+            //     {
+            //         foreach (var g in attr.GenericArguments)
+            //         {
+            //             TryAdd(service.MakeGenericType(g));
+            //         }
+            //     }
+            // }
         }
 
         var serviceName = $"{service}{implementation}";
 
         if (_added.Contains(serviceName))
         {
-            return false;
+            return;
         }
 
         _added.Add(serviceName);
@@ -239,7 +246,6 @@ public class DIHelper()
             serviceGenericTypeDefinition == typeof(IOptionsMonitor<>)
             ) && implementation != null ? implementation.GetCustomAttribute<DIAttribute>() : service.GetCustomAttribute<DIAttribute>();
 
-        var isnew = false;
 
         if (di != null)
         {
@@ -251,10 +257,10 @@ public class DIHelper()
 
             if (!service.IsInterface || implementation != null)
             {
-                isnew = implementation != null ? Register(service, implementation) : Register(service);
+                var isnew = implementation != null ? Register(service, implementation) : Register(service);
                 if (!isnew)
                 {
-                    return false;
+                    return;
                 }
             }
 
@@ -325,7 +331,7 @@ public class DIHelper()
                     {
                         if (di.Implementation == null)
                         {
-                            isnew = Register(service, di.Service);
+                            Register(service, di.Service);
                             TryAdd(di.Service);
                         }
                         else
@@ -400,72 +406,27 @@ public class DIHelper()
 
                     else
                     {
-                        isnew = TryAdd(service, di.Implementation);
+                        TryAdd(service, di.Implementation);
                     }
                 }
             }
         }
-
-        if (isnew && withDependencies)
-        {
-            ConstructorInfo[] props = null;
-
-            if (!service.IsInterface)
-            {
-                props = service.GetConstructors();
-            }
-            else if (implementation != null)
-            {
-                props = implementation.GetConstructors();
-            }
-            else if (di.Service != null)
-            {
-                props = di.Service.GetConstructors();
-            }
-
-            if (props != null)
-            {
-                var par = props.SelectMany(r => r.GetParameters()).Distinct();
-
-                foreach (var p1 in par)
-                {
-                    TryAdd(p1.ParameterType);
-                }
-            }
-        }
-
-        return isnew;
     }
 
-    public DIHelper TryAddSingleton<TService>(Func<IServiceProvider, TService> implementationFactory) where TService : class
+    public void TryAddSingleton<TService>(Func<IServiceProvider, TService> implementationFactory) where TService : class
     {
         var serviceName = $"{typeof(TService)}";
 
         if (!_services[DIAttributeType.Singleton].Contains(serviceName))
         {
             _services[DIAttributeType.Singleton].Add(serviceName);
-            ServiceCollection.TryAddSingleton(implementationFactory);
+            _serviceCollection.TryAddSingleton(implementationFactory);
         }
-
-        return this;
     }
 
     public void Configure(IServiceCollection serviceCollection)
     {
-        ServiceCollection = serviceCollection;
-    }
-
-    public DIHelper Configure<TOptions>(string name, Action<TOptions> configureOptions) where TOptions : class
-    {
-        var serviceName = $"{typeof(TOptions)}{name}";
-
-        if (!_configured.Contains(serviceName))
-        {
-            _configured.Add(serviceName);
-            ServiceCollection.Configure(name, configureOptions);
-        }
-
-        return this;
+        _serviceCollection = serviceCollection;
     }
 
     private bool Register(Type service, Type implementation = null)
@@ -493,7 +454,7 @@ public class DIHelper()
 
         if (!_services[c.DiAttributeType].Contains(serviceName))
         {
-            c.TryAdd(ServiceCollection, service, implementation);
+            c.TryAdd(_serviceCollection, service, implementation);
             _services[c.DiAttributeType].Add(serviceName);
 
             return true;

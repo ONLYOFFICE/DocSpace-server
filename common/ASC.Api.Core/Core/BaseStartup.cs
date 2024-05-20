@@ -333,15 +333,8 @@ public abstract class BaseStartup
         services.AddControllers().AddJsonOptions(jsonOptions);
 
         services.AddSingleton(jsonOptions);
-
-
-        AppDomain.CurrentDomain.AssemblyLoad += (_, args) =>
-        {
-            DIHelper.Scan(args.LoadedAssembly);
-        };
         
         DIHelper.Scan();
-        DIHelper.AddControllers();
         
         if (!string.IsNullOrEmpty(_corsOrigin))
         {
@@ -488,8 +481,7 @@ public abstract class BaseStartup
 
         if (!_hostEnvironment.IsDevelopment())
         {
-            services.AddStartupTask<WarmupServicesStartupTask>()
-                .TryAddSingleton(services);
+            services.AddStartupTask<WarmupServicesStartupTask>().TryAddSingleton(services);
         }
     }
 
