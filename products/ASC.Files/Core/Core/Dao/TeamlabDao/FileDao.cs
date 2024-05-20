@@ -909,9 +909,16 @@ internal class FileDao(
 
                 var tagDao = daoFactory.GetTagDao<int>();
                 var oldFolder = await folderDao.GetFolderAsync(oldParentId.Value);
-                var (toFolderRoomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(toFolder);
-                var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(oldFolder);
-                var archiveId = await folderDao.GetFolderIDArchive(false);
+
+                var toFolderRoomIdTask = folderDao.GetParentRoomInfoFromFileEntryAsync(toFolder);
+                var roomIdTask = folderDao.GetParentRoomInfoFromFileEntryAsync(oldFolder);
+                var archiveIdTask = folderDao.GetFolderIDArchive(false);
+
+                await Task.WhenAll(toFolderRoomIdTask, roomIdTask, archiveIdTask);
+
+                var (toFolderRoomId, _) = await toFolderRoomIdTask;
+                var (roomId, _) = await roomIdTask;
+                var archiveId = await archiveIdTask;
 
                 if (toFolderId == trashId && oldParentId.HasValue)
                 {
