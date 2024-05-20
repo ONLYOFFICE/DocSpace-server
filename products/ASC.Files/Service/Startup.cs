@@ -53,17 +53,11 @@ public class Startup : BaseWorkerStartup
         if (elasticLaunchType != ElasticLaunchType.Disabled)
         {
             services.AddHostedService<ElasticSearchIndexService>();
-            DIHelper.TryAdd<FactoryIndexer>();
-            DIHelper.TryAdd<ElasticSearchService>();
-            //DIHelper.TryAdd<FileConverter>();
-            DIHelper.TryAdd<FactoryIndexerFile>();
-            DIHelper.TryAdd<FactoryIndexerFolder>();
         }
 
         if (elasticLaunchType != ElasticLaunchType.Exclusive)
         {
             services.AddHostedService<FeedAggregatorService>();
-            DIHelper.TryAdd<FeedAggregatorService>();
 
             //services.AddHostedService<FeedCleanerService>();
             //DIHelper.TryAdd<FeedCleanerService>();
@@ -75,35 +69,13 @@ public class Startup : BaseWorkerStartup
             DIHelper.TryAdd<FileConverterService<string>>();
 
             services.AddHostedService<ThumbnailBuilderService>();
-            DIHelper.TryAdd<ThumbnailBuilderService>();
-
-            DIHelper.TryAdd<ThumbnailRequestedIntegrationEventHandler>();
-            DIHelper.TryAdd<RoomIndexExportIntegrationEventHandler>();
-            DIHelper.TryAdd<DeleteIntegrationEventHandler>();
-            DIHelper.TryAdd<MoveOrCopyIntegrationEventHandler>();
-            DIHelper.TryAdd<MarkAsReadIntegrationEventHandler>();
-            DIHelper.TryAdd<EmptyTrashIntegrationEventHandler>();
-
             services.AddHostedService<Launcher>();
-            DIHelper.TryAdd<Launcher>();
-
             services.AddHostedService<DeleteExpiredService>();
-            DIHelper.TryAdd<DeleteExpiredService>();
         }
 
-        DIHelper.TryAdd<AuthManager>();
-        DIHelper.TryAdd<BaseCommonLinkUtility>();
-        DIHelper.TryAdd<FeedAggregateDataProvider>();
-        DIHelper.TryAdd<SecurityContext>();
-        DIHelper.TryAdd<TenantManager>();
-        DIHelper.TryAdd<UserManager>();
-        DIHelper.TryAdd<SocketServiceClient>();
-        DIHelper.TryAdd<FileStorageService>();
+
         DIHelper.TryAdd<Builder<int>>();
-        DIHelper.TryAdd<DistributedTaskProgress>();
         DIHelper.TryAdd<DocumentBuilderTask<int>>();
-        DIHelper.TryAdd<AdditionalWhiteLabelSettingsHelperInit>();
-        DIHelper.TryAdd<NotifyConfiguration>();
 
         services.AddScoped<ITenantQuotaFeatureChecker, CountRoomChecker>();
         services.AddScoped<CountRoomChecker>();

@@ -80,6 +80,11 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
 
         DIHelper.Configure(services);
         
+        AppDomain.CurrentDomain.AssemblyLoad += (_, args) =>
+        {
+            DIHelper.Scan(args.LoadedAssembly);
+        };
+        
         DIHelper.Scan();
         
         services.AddSingleton(Channel.CreateUnbounded<NotifyRequest>());

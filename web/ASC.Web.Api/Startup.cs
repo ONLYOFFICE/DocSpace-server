@@ -47,7 +47,6 @@ public class Startup : BaseStartup
         if (!_configuration.GetValue<bool>("disableLdapNotifyService"))
         {
             services.AddHostedService<LdapNotifyService>();
-            DIHelper.TryAdd<LdapNotifyService>();
         }
 
         services.AddBaseDbContextPool<FilesDbContext>();
@@ -55,8 +54,6 @@ public class Startup : BaseStartup
 
         MigrationCore.Register(DIHelper);
         services.RegisterQuotaFeature();
-
-        DIHelper.TryAdd<AdditionalWhiteLabelSettingsConverter>();
 
         services.AddStartupTask<CspStartupTask>()
                    .TryAddSingleton(services);

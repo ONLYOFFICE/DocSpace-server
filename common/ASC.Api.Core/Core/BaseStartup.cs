@@ -334,11 +334,15 @@ public abstract class BaseStartup
 
         services.AddSingleton(jsonOptions);
 
+
+        AppDomain.CurrentDomain.AssemblyLoad += (_, args) =>
+        {
+            DIHelper.Scan(args.LoadedAssembly);
+        };
+        
         DIHelper.Scan();
         DIHelper.AddControllers();
-        DIHelper.TryAdd<CultureMiddleware>();
-        DIHelper.TryAdd<LoggerMiddleware>();
-        DIHelper.TryAdd<PathUtils>();
+        
         if (!string.IsNullOrEmpty(_corsOrigin))
         {
             services.AddCors(options =>

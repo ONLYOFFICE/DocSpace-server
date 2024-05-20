@@ -53,14 +53,8 @@ public class Startup : BaseStartup
         {
             x.MaxThreadsCount = 10;
         });
-
-        DIHelper.TryAdd<FileHandlerService>();
-        DIHelper.TryAdd<ChunkedUploaderHandlerService>();
-        DIHelper.TryAdd<DocuSignHandlerService>();
-        DIHelper.TryAdd<DistributedTaskProgress>();
+        
         DIHelper.TryAdd<DocumentBuilderTask<int>>();
-
-        NotifyConfigurationExtension.Register(DIHelper);
 
         services.AddBaseDbContextPool<FilesDbContext>();
 

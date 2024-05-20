@@ -45,26 +45,8 @@ public class Startup : BaseStartup
         {
             x.MaxThreadsCount = 5;
         });
-
-
-        DIHelper.TryAdd<BackupProgressItem>();
-        DIHelper.TryAdd<RestoreProgressItem>();
-        DIHelper.TryAdd<TransferProgressItem>();
-
-        DIHelper.TryAdd<BackupPortalTask>();
-
-        DIHelper.TryAdd<BackupWorkerService>();
-
-        NotifyConfigurationExtension.Register(DIHelper);
-
-        DIHelper.TryAdd<Schedule>();
-        DIHelper.TryAdd<BackupDeleteScheldureRequestedIntegrationEventHandler>();
-        DIHelper.TryAdd<BackupRequestedIntegrationEventHandler>();
-        DIHelper.TryAdd<BackupRestoreRequestedIntegrationEventHandler>();
-
-        DIHelper.TryAdd<BackupListenerService>();
+        
         services.AddHostedService<BackupListenerService>();
-
         services.AddHostedService<BackupCleanerTempFileService>();
 
         services.AddHostedService<BackupWorkerService>();

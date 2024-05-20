@@ -150,16 +150,44 @@ public class DIHelper()
         }
     }
 
+    readonly HashSet<string> _visited = new();
+    
     public void Scan()
     {
-        var types = AppDomain.CurrentDomain.GetAssemblies()
-            .Where(x => x.GetName().Name.StartsWith("ASC."))
-            .SelectMany(r => r.GetTypes().Where(t => t.GetCustomAttribute<DIAttribute>() != null));
+        foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies().OrderBy(r=> r.FullName))
+        {
+            Scan(assembly);
+            
+            var references = assembly.GetReferencedAssemblies();
+            foreach(var reference in references.Where(CheckAssemblyName))
+            {
+                Assembly.Load(reference);
+            }
+        }
+    }
+    
+    public void Scan(Assembly assembly)
+    {
+        var assemblyName = assembly.GetName();
+        if (!CheckAssemblyName(assemblyName) || _visited.Contains(assemblyName.Name))
+        {
+            return;
+        }
+        
+        _visited.Add(assembly.FullName);
+        
+        var types = assembly.GetTypes().Where(t => t.GetCustomAttribute<DIAttribute>() != null && !t.IsGenericType);
         
         foreach (var a in types)
         {
             _ = TryAdd(a, withDependencies: false);
         }
+    }
+
+    private bool CheckAssemblyName(AssemblyName assembly)
+    {
+        var assemblyName = assembly.Name;
+        return assemblyName != null && assemblyName.StartsWith("ASC.");
     }
     
     public bool TryAdd<TService>() where TService : class

@@ -74,8 +74,6 @@ public class MigrationCore(
 
     public static void Register(DIHelper services)
     {
-        services.TryAdd<MigrationCore>();
-
         services.TryAdd<Migrator, WorkspaceMigrator>();
         services.TryAdd<Migrator, GoogleWorkspaceMigrator>();
         services.TryAdd<Migrator, NextcloudWorkspaceMigrator>();

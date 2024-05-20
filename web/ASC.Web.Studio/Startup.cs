@@ -79,30 +79,12 @@ public class Startup : BaseStartup
         services.AddMemoryCache();
         services.AddBaseDbContextPool<FilesDbContext>();
         
-        DIHelper.TryAdd<Login>();
-        DIHelper.TryAdd<PathUtils>();
-        DIHelper.TryAdd<StorageFactory>();
-        DIHelper.TryAdd<GoogleLoginProvider>();
-        DIHelper.TryAdd<FacebookLoginProvider>();
-        DIHelper.TryAdd<LinkedInLoginProvider>();
-        DIHelper.TryAdd<SsoHandlerService>();
-        DIHelper.TryAdd<RemovePortalIntegrationEventHandler>();
-        DIHelper.TryAdd<RoomLogoValidator>();
-        DIHelper.TryAdd<FileValidator>();
-        DIHelper.TryAdd<MigrationIntegrationEventHandler>();
-
         MigrationCore.Register(DIHelper);
-        services.RegisterQuotaFeature();
         
+        services.RegisterQuotaFeature();
         services.AddHttpClient();
-
-        DIHelper.TryAdd<DbWorker>();
-
         services.AddHostedService<WorkerService>();
-        DIHelper.TryAdd<WorkerService>();
-
         services.TryAddSingleton(new ConcurrentQueue<WebhookRequestIntegrationEvent>());
-        DIHelper.TryAdd<WebhookRequestIntegrationEventHandler>();
 
         var lifeTime = TimeSpan.FromMinutes(5);
 

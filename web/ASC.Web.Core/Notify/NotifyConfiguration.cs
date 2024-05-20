@@ -182,18 +182,6 @@ public class ProductSecurityInterceptor(TenantManager tenantManager,
     }
 }
 
-public static class NotifyConfigurationExtension
-{
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<NotifyTransferRequest>();
-        services.TryAdd<ProductSecurityInterceptor>();
-        services.TryAdd<TextileStyler>();
-        services.TryAdd<JabberStyler>();
-        services.TryAdd<PushStyler>();
-    }
-}
-
 [Scope]
 public class NotifyTransferRequest(TenantManager tenantManager,
         AuthContext authContext,

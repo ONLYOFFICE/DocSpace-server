@@ -53,12 +53,6 @@ public class Startup : BaseStartup
 
         services.AddBaseDbContextPool<BackupsContext>();
         services.AddBaseDbContextPool<FilesDbContext>();
-
-        DIHelper.TryAdd<BackupProgressItem>();
-        DIHelper.TryAdd<RestoreProgressItem>();
-        DIHelper.TryAdd<TransferProgressItem>();
-
-        NotifyConfigurationExtension.Register(DIHelper);
     }
 
     public override void Configure(IApplicationBuilder app, IWebHostEnvironment env)
