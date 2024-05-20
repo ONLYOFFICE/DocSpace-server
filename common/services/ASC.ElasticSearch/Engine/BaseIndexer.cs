@@ -394,7 +394,7 @@ public class BaseIndexer<T>(Client client,
         var tenant = await _tenantManager.GetCurrentTenantAsync();
         var descriptor = func(selector).Where(r => r.TenantId, tenant.Id);
 
-        return client.Instance.Search(descriptor.GetDescriptor(this, onlyId)).Documents;
+        return (await client.Instance.SearchAsync(descriptor.GetDescriptor(this, onlyId))).Documents;
     }
 
     internal async Task<(IReadOnlyCollection<T>, long)> SelectWithTotalAsync(Expression<Func<Selector<T>, Selector<T>>> expression, bool onlyId)
@@ -599,7 +599,7 @@ public class BaseIndexer<T>(Client client,
         if (member == null && expr is UnaryExpression unary)
         {
                 member = unary.Operand as MemberExpression;
-            }
+        }
 
         return member == null ? "" : member.Member.Name.ToLowerCamelCase();
     }
