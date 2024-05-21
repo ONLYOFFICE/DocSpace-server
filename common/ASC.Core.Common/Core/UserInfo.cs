@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -177,7 +177,7 @@ public sealed class UserInfo : IDirectRecipient, ICloneable, IMapFrom<User>
         return string.IsNullOrEmpty(CultureName) ? CultureInfo.CurrentCulture : CultureInfo.GetCultureInfo(CultureName);
     }
 
-    string[] IDirectRecipient.Addresses => !string.IsNullOrEmpty(Email) ? [Email] : Array.Empty<string>();
+    string[] IDirectRecipient.Addresses => !string.IsNullOrEmpty(Email) ? [Email] : [];
     public bool CheckActivation => !IsActive; /*if user already active we don't need activation*/
     string IRecipient.ID => Id.ToString();
     string IRecipient.Name => ToString();

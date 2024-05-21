@@ -8,12 +8,10 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-using System.CodeDom.Compiler;
-using System.Diagnostics.CodeAnalysis;
-using System.Resources;
-using System.Runtime.CompilerServices;
-
 namespace ASC.Web.Core.PublicResources {
+    using System;
+    
+    
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -21,27 +19,27 @@ namespace ASC.Web.Core.PublicResources {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [GeneratedCode("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
-    [DebuggerNonUserCode()]
-    [CompilerGenerated()]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+    [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class WebstudioNotifyPatternResource {
         
-        private static ResourceManager resourceMan;
+        private static global::System.Resources.ResourceManager resourceMan;
         
-        private static CultureInfo resourceCulture;
+        private static global::System.Globalization.CultureInfo resourceCulture;
         
-        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
+        [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         internal WebstudioNotifyPatternResource() {
         }
         
         /// <summary>
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
-        [EditorBrowsable(EditorBrowsableState.Advanced)]
-        public static ResourceManager ResourceManager {
+        [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
+        public static global::System.Resources.ResourceManager ResourceManager {
             get {
-                if (ReferenceEquals(resourceMan, null)) {
-                    ResourceManager temp = new ResourceManager("ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource", typeof(WebstudioNotifyPatternResource).Assembly);
+                if (object.ReferenceEquals(resourceMan, null)) {
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource", typeof(WebstudioNotifyPatternResource).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -52,8 +50,8 @@ namespace ASC.Web.Core.PublicResources {
         ///   Overrides the current thread's CurrentUICulture property for all
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
-        [EditorBrowsable(EditorBrowsableState.Advanced)]
-        public static CultureInfo Culture {
+        [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
+        public static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -374,6 +372,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string ButtonDeletePortal {
             get {
                 return ResourceManager.GetString("ButtonDeletePortal", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Get started.
+        /// </summary>
+        public static string ButtonGetStarted {
+            get {
+                return ResourceManager.GetString("ButtonGetStarted", resourceCulture);
             }
         }
         
@@ -992,6 +999,29 @@ namespace ASC.Web.Core.PublicResources {
         public static string pattern_migration_error {
             get {
                 return ResourceManager.GetString("pattern_migration_error", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Hello!
+        ///
+        ///The data migration process from ONLYOFFICE Personal to your new ONLYOFFICE DocSpace is successfully completed.
+        ///
+        ///To access your DocSpace with the imported data, just click the button below:
+        ///
+        ///$OrangeButton
+        ///
+        ///Your current DocSpace plan is STARTUP. It is absolutely free.
+        ///
+        ///==If necessary, you can change the name of your new DocSpace. Just switch to Settings -&gt; Customization -&gt; DocSpace Renaming.==
+        ///
+        ///Enjoy a new way of document collaboration!
+        ///
+        ///$TrulyYours.
+        /// </summary>
+        public static string pattern_migration_personal_to_docspace {
+            get {
+                return ResourceManager.GetString("pattern_migration_personal_to_docspace", resourceCulture);
             }
         }
         
@@ -1746,7 +1776,7 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello!
         ///
-        ///You are invited to join $Message room at &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;. Accept the invitation by clicking the link:
+        ///You are invited to join a DocSpace room at &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;. Accept the invitation by clicking the link:
         ///
         ///$OrangeButton
         ///
@@ -2249,6 +2279,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string subject_migration_error {
             get {
                 return ResourceManager.GetString("subject_migration_error", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Data migration to ONLYOFFICE DocSpace successfully completed.
+        /// </summary>
+        public static string subject_migration_personal_to_docspace {
+            get {
+                return ResourceManager.GetString("subject_migration_personal_to_docspace", resourceCulture);
             }
         }
         

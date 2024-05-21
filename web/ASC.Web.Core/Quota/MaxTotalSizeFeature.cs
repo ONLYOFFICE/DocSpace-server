@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,7 +30,10 @@ public class MaxTotalSizeChecker(ITenantQuotaFeatureStat<MaxTotalSizeFeature, lo
         TenantManager tenantManager)
     : TenantQuotaFeatureChecker<MaxTotalSizeFeature, long>(tenantQuotaFeatureStatistic, tenantManager)
 {
-    public override string Exception => Resource.TariffsFeature_total_size_exception;
+    public override string GetExceptionMessage(long size)
+    {
+        return string.Format(Resource.TariffsFeature_total_size_exception, FileSizeComment.FilesSizeToString(size));
+    }
 }
 
 public class MaxTotalSizeStatistic(IServiceProvider serviceProvider) : ITenantQuotaFeatureStat<MaxTotalSizeFeature, long>

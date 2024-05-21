@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -23,8 +23,6 @@
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
-
-using ASC.Api.Core.Core;
 
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -55,16 +53,15 @@ public class Startup : BaseStartup
         services.AddBaseDbContextPool<FilesDbContext>();
         services.AddBaseDbContextPool<BackupsContext>();
 
-        services.AddScoped<ITenantQuotaFeatureChecker, CountRoomChecker>();
-        services.AddScoped<CountRoomChecker>();
-
-        services.AddScoped<ITenantQuotaFeatureStat<CountRoomFeature, int>, CountRoomCheckerStatistic>();
-        services.AddScoped<CountRoomCheckerStatistic>();
+        MigrationCore.Register(DIHelper);
+        services.RegisterQuotaFeature();
 
         DIHelper.TryAdd<AdditionalWhiteLabelSettingsConverter>();
 
         services.AddStartupTask<CspStartupTask>()
                    .TryAddSingleton(services);
+                
+        services.AddActivePassiveHostedService<NotifySchedulerService>(DIHelper, _configuration, "WebApiNotifySchedulerService");
     }
 
     public override void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -79,6 +76,13 @@ public class Startup : BaseStartup
             });
 
         app.MapWhen(
+            context => context.Request.Path.ToString().EndsWith("logo.ashx"),
+            appBranch =>
+            {
+                appBranch.UseLogoHandler();
+            });
+
+        app.MapWhen(
             context => context.Request.Path.ToString().EndsWith("payment.ashx"),
             appBranch =>
             {
@@ -90,6 +94,13 @@ public class Startup : BaseStartup
             appBranch =>
             {
                 appBranch.UseUrlShortRewriter();
+            });
+
+        app.MapWhen(
+            context => context.Request.Path.ToString().EndsWith("migrationFileUpload.ashx"),
+            appBranch =>
+            {
+                appBranch.UseMigrationFileUploadHandler();
             });
     }
 }

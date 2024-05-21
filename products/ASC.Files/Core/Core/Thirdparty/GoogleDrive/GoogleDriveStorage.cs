@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -25,11 +25,12 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using DriveFile = Google.Apis.Drive.v3.Data.File;
+using IHttpClientFactory = System.Net.Http.IHttpClientFactory;
 
 namespace ASC.Files.Thirdparty.GoogleDrive;
 
 [Transient]
-internal class GoogleDriveStorage(ConsumerFactory consumerFactory,
+internal class GoogleDriveStorage(
         FileUtility fileUtility,
         ILoggerProvider monitor,
         TempStream tempStream,
@@ -37,8 +38,8 @@ internal class GoogleDriveStorage(ConsumerFactory consumerFactory,
         IHttpClientFactory clientFactory)
     : IThirdPartyStorage<DriveFile, DriveFile, DriveFile>, IGoogleDriveItemStorage<DriveFile>, IDisposable
 {
-    private OAuth20Token _token;
-
+    public bool IsOpened { get; private set; }
+    public AuthScheme AuthScheme => AuthScheme.OAuth;
     private string AccessToken
     {
         get
@@ -50,28 +51,28 @@ internal class GoogleDriveStorage(ConsumerFactory consumerFactory,
 
             if (_token.IsExpired)
             {
-                _token = oAuth20TokenHelper.RefreshToken<GoogleLoginProvider>(consumerFactory, _token);
+                _token = oAuth20TokenHelper.RefreshToken<GoogleLoginProvider>(_token);
             }
 
             return _token.AccessToken;
         }
     }
 
+    private const long MaxChunkedUploadFileSize = 2L * 1024L * 1024L * 1024L;
     private readonly ILogger _logger = monitor.CreateLogger("ASC.Files");
-    public bool IsOpened { get; private set; }
-
     private DriveService _driveService;
+    private OAuth20Token _token;
+    
+    private static readonly Lazy<CachedHttpClientFactory> _cachedHttpClientFactory = new(() => new CachedHttpClientFactory());
 
-    public const long MaxChunkedUploadFileSize = 2L * 1024L * 1024L * 1024L;
-
-    public void Open(OAuth20Token token)
+    public void Open(AuthData authData)
     {
         if (IsOpened)
         {
             return;
         }
 
-        _token = token ?? throw new UnauthorizedAccessException("Cannot create GoogleDrive session with given token");
+        _token = authData.Token ?? throw new UnauthorizedAccessException("Cannot create GoogleDrive session with given token");
 
         var tokenResponse = new TokenResponse
         {
@@ -94,7 +95,8 @@ internal class GoogleDriveStorage(ConsumerFactory consumerFactory,
 
         _driveService = new DriveService(new BaseClientService.Initializer
         {
-            HttpClientInitializer = new UserCredential(apiCodeFlow, string.Empty, tokenResponse)
+            HttpClientInitializer = new UserCredential(apiCodeFlow, string.Empty, tokenResponse),
+            HttpClientFactory = _cachedHttpClientFactory.Value
         });
 
         IsOpened = true;
@@ -102,14 +104,19 @@ internal class GoogleDriveStorage(ConsumerFactory consumerFactory,
 
     public void Close()
     {
-        _driveService.Dispose();
-
         IsOpened = false;
     }
 
-    public long GetFileSize(DriveFile file)
+    public async Task<long> GetFileSizeAsync(DriveFile file)
     {
-        return file.Size ?? 0;
+        var ext = MimeMapping.GetExtention(file.MimeType);
+        if (!GoogleLoginProvider.GoogleDriveExt.Contains(ext))
+        {
+            return file.Size ?? 0;
+        }
+
+        using var response = await SendDownloadRequestAsync(file, HttpCompletionOption.ResponseHeadersRead);
+        return response.Content.Headers.ContentLength ?? 0;
     }
     
     public async Task<bool> CheckAccessAsync()
@@ -150,6 +157,30 @@ internal class GoogleDriveStorage(ConsumerFactory consumerFactory,
     {
         ArgumentNullException.ThrowIfNull(file);
 
+        var response = await SendDownloadRequestAsync(file);
+
+        if (response.Content.Headers.ContentLength.HasValue)
+        {
+            file.Size = response.Content.Headers.ContentLength.Value;
+        }
+
+        if (offset == 0 && file.Size is > 0)
+        {
+            return new ResponseStream(await response.Content.ReadAsStreamAsync(), file.Size.Value);
+        }
+
+        var tempBuffer = tempStream.Create();
+        await using var str = await response.Content.ReadAsStreamAsync();
+        await str.CopyToAsync(tempBuffer);
+        await tempBuffer.FlushAsync();
+        tempBuffer.Seek(offset, SeekOrigin.Begin);
+
+        return tempBuffer;
+    }
+
+    private async Task<HttpResponseMessage> SendDownloadRequestAsync(DriveFile file, 
+        HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead)
+    {
         var downloadArg = $"{file.Id}?alt=media";
 
         var ext = MimeMapping.GetExtention(file.MimeType);
@@ -166,23 +197,12 @@ internal class GoogleDriveStorage(ConsumerFactory consumerFactory,
             RequestUri = new Uri(GoogleLoginProvider.GoogleUrlFile + downloadArg),
             Method = HttpMethod.Get
         };
-        request.Headers.Add("Authorization", "Bearer " + AccessToken);
+        
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AccessToken);
 
         var httpClient = clientFactory.CreateClient();
-        var response = await httpClient.SendAsync(request);
-
-        if (offset == 0 && file.Size is > 0)
-        {
-            return new ResponseStream(await response.Content.ReadAsStreamAsync(), file.Size.Value);
-        }
-
-        var tempBuffer = tempStream.Create();
-        await using var str = await response.Content.ReadAsStreamAsync();
-        await str.CopyToAsync(tempBuffer);
-        await tempBuffer.FlushAsync();
-        tempBuffer.Seek(offset, SeekOrigin.Begin);
-
-        return tempBuffer;
+        var response = await httpClient.SendAsync(request, completionOption);
+        return response;
     }
 
     public async Task<Stream> GetThumbnailAsync(string fileId, int width, int height)
@@ -259,10 +279,7 @@ internal class GoogleDriveStorage(ConsumerFactory consumerFactory,
         return about.MaxUploadSize ?? MaxChunkedUploadFileSize;
     }
 
-    public void Dispose()
-    {
-        _driveService?.Dispose();
-    }
+    public void Dispose() { }
 
     public static DriveFile FileConstructor(string title = null, string mimeType = null, string folderId = null)
     {
@@ -286,7 +303,7 @@ internal class GoogleDriveStorage(ConsumerFactory consumerFactory,
         return file;
     }
 
-    public async ValueTask<ResumableUploadSession> CreateResumableSessionAsync(DriveFile driveFile, long contentLength)
+    public async ValueTask<RenewableUploadSession> CreateRenewableSessionAsync(DriveFile driveFile, long contentLength)
     {
         ArgumentNullException.ThrowIfNull(driveFile);
 
@@ -321,20 +338,20 @@ internal class GoogleDriveStorage(ConsumerFactory consumerFactory,
         var httpClient = clientFactory.CreateClient();
         using var response = await httpClient.SendAsync(request);
 
-        var uploadSession = new ResumableUploadSession(driveFile.Id, folderId, contentLength)
+        var uploadSession = new RenewableUploadSession(driveFile.Id, folderId, contentLength)
         {
-            Location = response.Headers.Location.ToString(),
-            Status = ResumableUploadSessionStatus.Started
+            Location = response.Headers.Location?.ToString(),
+            Status = RenewableUploadSessionStatus.Started
         };
 
         return uploadSession;
     }
 
-    public async ValueTask TransferAsync(ResumableUploadSession googleDriveSession, Stream stream, long chunkLength, bool lastChunk)
+    public async ValueTask TransferAsync(RenewableUploadSession googleDriveSession, Stream stream, long chunkLength, bool lastChunk)
     {
         ArgumentNullException.ThrowIfNull(stream);
 
-        if (googleDriveSession.Status != ResumableUploadSessionStatus.Started)
+        if (googleDriveSession.Status != RenewableUploadSessionStatus.Started)
         {
             throw new InvalidOperationException("Can't upload chunk for given upload session.");
         }
@@ -349,26 +366,27 @@ internal class GoogleDriveStorage(ConsumerFactory consumerFactory,
         if (googleDriveSession.BytesToTransfer > 0)
         {
             request.Content.Headers.ContentRange = new ContentRangeHeaderValue(
-                                                       googleDriveSession.BytesTransfered,
-                                                       googleDriveSession.BytesTransfered + chunkLength - 1,
+                                                       googleDriveSession.BytesTransferred,
+                                                       googleDriveSession.BytesTransferred + chunkLength - 1,
                                                        googleDriveSession.BytesToTransfer);
         }
         else
         {
+            var bytesToTransfer = googleDriveSession.BytesTransferred + chunkLength;
+            
             if (lastChunk)
             {
-                var bytesToTransfer = googleDriveSession.BytesTransfered + chunkLength;
 
                 request.Content.Headers.ContentRange = new ContentRangeHeaderValue(
-                                               googleDriveSession.BytesTransfered,
-                                               googleDriveSession.BytesTransfered + chunkLength - 1,
+                                               googleDriveSession.BytesTransferred,
+                                               bytesToTransfer - 1,
                                                bytesToTransfer);
             }
             else
             {
                 request.Content.Headers.ContentRange = new ContentRangeHeaderValue(
-                                               googleDriveSession.BytesTransfered,
-                                               googleDriveSession.BytesTransfered + chunkLength - 1);
+                                               googleDriveSession.BytesTransferred,
+                                               bytesToTransfer - 1);
             }
         }
         var httpClient = clientFactory.CreateClient();
@@ -384,11 +402,10 @@ internal class GoogleDriveStorage(ConsumerFactory consumerFactory,
             throw;
         }
 
-        if (response == null || response.StatusCode != HttpStatusCode.Created && response.StatusCode != HttpStatusCode.OK)
+        if (response.StatusCode != HttpStatusCode.Created && response.StatusCode != HttpStatusCode.OK)
         {
-            googleDriveSession.BytesTransfered += chunkLength;
+            googleDriveSession.BytesTransferred += chunkLength;
 
-            if (response != null)
             {
                 var locationHeader = response.Headers.Location;
 
@@ -400,23 +417,19 @@ internal class GoogleDriveStorage(ConsumerFactory consumerFactory,
         }
         else
         {
-            googleDriveSession.Status = ResumableUploadSessionStatus.Completed;
+            googleDriveSession.BytesTransferred += chunkLength;
+            googleDriveSession.Status = RenewableUploadSessionStatus.Completed;
 
-            await using var responseStream = await response.Content.ReadAsStreamAsync();
-            if (responseStream == null)
-            {
-                return;
-            }
-
-            string responseString;
-            using (var readStream = new StreamReader(responseStream))
-            {
-                responseString = await readStream.ReadToEndAsync();
-            }
+            var responseString =  await response.Content.ReadAsStringAsync();
             var responseJson = JObject.Parse(responseString);
 
             googleDriveSession.FileId = responseJson.Value<string>("id");
         }
+    }
+    
+    public IDataWriteOperator CreateDataWriteOperator(CommonChunkedUploadSession chunkedUploadSession, CommonChunkedUploadSessionHolder sessionHolder)
+    {
+        return new ChunkZipWriteOperator(tempStream, chunkedUploadSession, sessionHolder);
     }
 
     private async Task<DriveFile> InternalCopyFileAsync(string toFolderId, string originEntryId, string newTitle)
@@ -568,35 +581,35 @@ internal class GoogleDriveStorage(ConsumerFactory consumerFactory,
 
         var request = _driveService.Files.Update(file, fileId, fileStream, mimeType);
         request.Fields = GoogleLoginProvider.FilesFields;
+        
         var result = await request.UploadAsync();
-        if (result.Exception != null)
+        if (result.Exception == null)
         {
-            if (request.ResponseBody == null)
-            {
-                throw result.Exception;
-            }
-
-            _logger.ErrorWhileTryingToInsertEntity(result.Exception);
+            return request.ResponseBody;
         }
+
+        if (request.ResponseBody == null)
+        {
+            throw result.Exception;
+        }
+
+        _logger.ErrorWhileTryingToInsertEntity(result.Exception);
 
         return request.ResponseBody;
     }
-}
 
-public enum ResumableUploadSessionStatus
-{
-    None,
-    Started,
-    Completed,
-    Aborted
+    private class CachedHttpClientFactory : Google.Apis.Http.HttpClientFactory
+    {
+        private static HttpMessageHandler _handler;
+        
+        protected override HttpMessageHandler CreateHandler(Google.Apis.Http.CreateHttpClientArgs args)
+        {
+            return _handler ??= base.CreateHandler(args);
+        }
+        
+        ~CachedHttpClientFactory()
+        {
+            _handler?.Dispose();
+        }
+    }
 }
-
-internal class ResumableUploadSession(string fileId, string folderId, long bytesToTransfer)
-{
-    public long BytesToTransfer { get; set; } = bytesToTransfer;
-    public long BytesTransfered { get; set; }
-    public string FileId { get; set; } = fileId;
-    public string FolderId { get; set; } = folderId;
-    public ResumableUploadSessionStatus Status { get; set; } = ResumableUploadSessionStatus.None;
-    public string Location { get; set; }
-} 

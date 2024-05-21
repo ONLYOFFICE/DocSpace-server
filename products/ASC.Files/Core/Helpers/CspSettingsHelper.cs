@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,7 +27,8 @@
 namespace ASC.Web.Api.Core;
 
 [Scope]
-public class CspSettingsHelper(SettingsManager settingsManager,
+public class CspSettingsHelper(
+    SettingsManager settingsManager,
     FilesLinkUtility filesLinkUtility,
     TenantManager tenantManager,
     CoreSettings coreSettings,
@@ -37,33 +38,39 @@ public class CspSettingsHelper(SettingsManager settingsManager,
     IHttpContextAccessor httpContextAccessor,
     IConfiguration configuration)
 {
-    public async Task<string> SaveAsync(IEnumerable<string> domains, bool setDefaultIfEmpty)
+    public async Task<string> SaveAsync(IEnumerable<string> domains, bool updateInDb = true)
     {
         var tenant = await tenantManager.GetCurrentTenantAsync();
         var domain = tenant.GetTenantDomain(coreSettings);
-        List<string> headerKeys = [GetKey(domain)];
+        HashSet<string> headerKeys = [GetKey(domain)];
 
         if (domain == Tenant.LocalHost && tenant.Alias == Tenant.LocalHost)
         {
             var domainsKey = $"{GetKey(domain)}:keys";
             if (httpContextAccessor.HttpContext != null)
             {
-                var keys = new List<string>
+                var keys = new HashSet<string>
                 {
                     GetKey(Tenant.HostName)
                 };
 
                 var ips = await Dns.GetHostAddressesAsync(Dns.GetHostName(), AddressFamily.InterNetwork);
 
-                keys.AddRange(ips.Select(ip => GetKey(ip.ToString())));
+                keys.UnionWith(ips.Select(ip => GetKey(ip.ToString())));
 
                 if (httpContextAccessor.HttpContext.Connection.RemoteIpAddress != null)
                 {
                     keys.Add(GetKey(httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString()));
                 }
 
+                var host = httpContextAccessor.HttpContext.Request.Host.Value;
+                if (!string.IsNullOrEmpty(host))
+                {
+                    keys.Add(GetKey(host));
+                }
+
                 await distributedCache.SetStringAsync(domainsKey, string.Join(';', keys));
-                headerKeys.AddRange(keys);
+                headerKeys.UnionWith(keys);
             }
             else
             {
@@ -71,12 +78,12 @@ public class CspSettingsHelper(SettingsManager settingsManager,
 
                 if (!string.IsNullOrEmpty(domainsValue))
                 {
-                    headerKeys.AddRange(domainsValue.Split(';'));
+                    headerKeys.UnionWith(domainsValue.Split(';'));
                 }
             }
         }
 
-        var headerValue = await CreateHeaderAsync(domains, setDefaultIfEmpty);
+        var headerValue = await CreateHeaderAsync(domains);
 
         if (!string.IsNullOrEmpty(headerValue))
         {
@@ -87,11 +94,13 @@ public class CspSettingsHelper(SettingsManager settingsManager,
             await Parallel.ForEachAsync(headerKeys, async (headerKey, cs) => await distributedCache.RemoveAsync(headerKey, cs));
         }
 
-        await settingsManager.ManageAsync<CspSettings>(current =>
+        if (updateInDb)
         {
-            current.Domains = domains;
-            current.SetDefaultIfEmpty = setDefaultIfEmpty;
-        });
+            await settingsManager.ManageAsync<CspSettings>(current =>
+            {
+                current.Domains = domains;
+            });
+        }
 
         return headerValue;
     }
@@ -112,19 +121,9 @@ public class CspSettingsHelper(SettingsManager settingsManager,
         }
     }
 
-    public async Task<string> CreateHeaderAsync(IEnumerable<string> domains, bool setDefaultIfEmpty = false, bool currentTenant = true)
+    public async Task<string> CreateHeaderAsync(IEnumerable<string> domains, bool currentTenant = true)
     {
-        if (domains == null || !domains.Any())
-        {
-            if (setDefaultIfEmpty)
-            {
-                domains = Enumerable.Empty<string>();
-            }
-            else
-            {
-                return null;
-            }
-        }
+        domains ??= Enumerable.Empty<string>();
 
         var options = domains.Select(r => new CspOptions(r)).ToList();
 

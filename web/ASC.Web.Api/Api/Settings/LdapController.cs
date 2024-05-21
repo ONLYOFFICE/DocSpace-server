@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,18 +28,19 @@ namespace ASC.Web.Api.Controllers.Settings;
 
 /// <visible>false</visible>
 [DefaultRoute("ldap")]
-public class LdapController(ApiContext apiContext,
-        WebItemManager webItemManager,
-        IMemoryCache memoryCache,
-        SettingsManager settingsManager,
-        TenantManager tenantManager,
-        LdapNotifyService ldapNotifyHelper,
-        LdapSaveSyncOperation ldapSaveSyncOperation,
-        AuthContext authContext,
-        PermissionContext permissionContext,
-        CoreBaseSettings coreBaseSettings,
-        IHttpContextAccessor httpContextAccessor,
-        IMapper mapper)
+public class LdapController(
+    ApiContext apiContext,
+    WebItemManager webItemManager,
+    IMemoryCache memoryCache,
+    SettingsManager settingsManager,
+    TenantManager tenantManager,
+    LdapNotifyService ldapNotifyHelper,
+    LdapSaveSyncOperation ldapSaveSyncOperation,
+    AuthContext authContext,
+    PermissionContext permissionContext,
+    CoreBaseSettings coreBaseSettings,
+    IHttpContextAccessor httpContextAccessor,
+    IMapper mapper)
     : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
@@ -102,12 +103,7 @@ public class LdapController(ApiContext apiContext,
     {
         await CheckLdapPermissionsAsync();
 
-        var settings = await settingsManager.LoadAsync<LdapCronSettings>();
-
-        if (settings == null)
-        {
-            settings = new LdapCronSettings().GetDefault();
-        }
+        var settings = await settingsManager.LoadAsync<LdapCronSettings>() ?? new LdapCronSettings().GetDefault();
 
         if (string.IsNullOrEmpty(settings.Cron))
         {
@@ -146,12 +142,7 @@ public class LdapController(ApiContext apiContext,
             }
         }
 
-        var settings = await settingsManager.LoadAsync<LdapCronSettings>();
-
-        if (settings == null)
-        {
-            settings = new LdapCronSettings();
-        }
+        var settings = await settingsManager.LoadAsync<LdapCronSettings>() ?? new LdapCronSettings();
 
         settings.Cron = cron;
         await settingsManager.SaveAsync(settings);
@@ -297,7 +288,7 @@ public class LdapController(ApiContext apiContext,
 
         var tenant = await tenantManager.GetCurrentTenantAsync();
         
-        var result = ldapSaveSyncOperation.ToLdapOperationStatus(tenant.Id);
+        var result = await ldapSaveSyncOperation.ToLdapOperationStatus(tenant.Id);
 
         return mapper.Map<LdapOperationStatus, LdapStatusDto>(result);
     }

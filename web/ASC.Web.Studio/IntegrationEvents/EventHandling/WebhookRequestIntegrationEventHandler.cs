@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,26 +27,17 @@
 namespace ASC.Web.Studio.IntegrationEvents.EventHandling;
 
 [Scope]
-public class WebhookRequestIntegrationEventHandler : IIntegrationEventHandler<WebhookRequestIntegrationEvent>
+public class WebhookRequestIntegrationEventHandler(
+    ILogger<WebhookRequestIntegrationEventHandler> logger,
+    ConcurrentQueue<WebhookRequestIntegrationEvent> concurrentQueue) : IIntegrationEventHandler<WebhookRequestIntegrationEvent>
 {
-    private readonly ConcurrentQueue<WebhookRequestIntegrationEvent> _queue;
-    private readonly ILogger _logger;
-
-    public WebhookRequestIntegrationEventHandler(
-        ILogger<WebhookRequestIntegrationEventHandler> logger,
-        ConcurrentQueue<WebhookRequestIntegrationEvent> concurrentQueue)
-    {
-        _queue = concurrentQueue;
-        _logger = logger;
-    }
-
     public async Task Handle(WebhookRequestIntegrationEvent @event)
     {
-        using (_logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
+        using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
         {
-            _logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
+            logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
 
-            _queue.Enqueue(@event);
+            concurrentQueue.Enqueue(@event);
 
             await Task.CompletedTask;
         }

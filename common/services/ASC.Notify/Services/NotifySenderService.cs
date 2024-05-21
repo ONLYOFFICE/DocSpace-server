@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,44 +31,24 @@ public class NotifySenderService(IOptions<NotifyServiceCfg> notifyServiceCfg,
         NotifyConfiguration notifyConfiguration,
         DbWorker dbWorker,
         IServiceScopeFactory scopeFactory,
-        ILoggerProvider options)
-    : BackgroundService
+        ILogger<NotifySenderService> logger)
+    : ActivePassiveBackgroundService<NotifySenderService>(logger, scopeFactory)
+
 {
-    private readonly ILogger _logger = options.CreateLogger("ASC.NotifySender");
+    private readonly ILogger<NotifySenderService> _logger = logger;
     private readonly NotifyServiceCfg _notifyServiceCfg = notifyServiceCfg.Value;
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override TimeSpan ExecuteTaskPeriod { get; set; } = TimeSpan.Zero;
+    protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
-        _logger.InformationNotifySenderRunning();
-
-        stoppingToken.Register(() => _logger.Debug("NotifySenderService background task is stopping."));
-
         if (_notifyServiceCfg.Schedulers != null && _notifyServiceCfg.Schedulers.Any())
         {
             InitializeNotifySchedulers();
         }
 
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            await using var serviceScope = scopeFactory.CreateAsyncScope();
-
-            var registerInstanceService = serviceScope.ServiceProvider.GetService<IRegisterInstanceManager<NotifySenderService>>();
-
-            if (!await registerInstanceService.IsActive(RegisterInstanceWorkerService<NotifySenderService>.InstanceId))
-            {
-                _logger.Debug($"Notify Sender Service background task with instance id {RegisterInstanceWorkerService<NotifySenderService>.InstanceId} is't active.");
-
-                await Task.Delay(1000, stoppingToken);
-
-                continue;
-            }
-
-            await ThreadManagerWorkAsync(stoppingToken);
-        }
-
-        _logger.InformationNotifySenderStopping();
+        await ThreadManagerWorkAsync(stoppingToken);
     }
-
+       
     private void InitializeNotifySchedulers()
     {
         notifyConfiguration.Configure();

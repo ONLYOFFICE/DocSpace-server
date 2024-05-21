@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -42,10 +42,12 @@ internal class SharePointTagDao(IServiceProvider serviceProvider,
     : SharePointDaoBase(serviceProvider, userManager, tenantManager, tenantUtil, dbContextFactory, setupInfo,
         fileUtility, tempPath, regexDaoSelectorBase), IThirdPartyTagDao
 {
+    private readonly TenantManager _tenantManager = tenantManager;
+
     public async IAsyncEnumerable<Tag> GetNewTagsAsync(Guid subject, Folder<string> parentFolder, bool deepSearch)
     {
         var folderId = DaoSelector.ConvertId(parentFolder.Id);
-
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var entryIds = await Queries.HashIdsAsync(filesDbContext, PathPrefix).ToListAsync();
 
@@ -54,7 +56,7 @@ internal class SharePointTagDao(IServiceProvider serviceProvider,
             yield break;
         }
 
-        var qList = await Queries.TagLinkTagPairAsync(filesDbContext, TenantId, entryIds, subject).ToListAsync();
+        var qList = await Queries.TagLinkTagPairAsync(filesDbContext, tenantId, entryIds, subject).ToListAsync();
 
         var tags = new List<Tag>();
 

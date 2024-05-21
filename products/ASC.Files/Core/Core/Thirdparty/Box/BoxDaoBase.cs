@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -53,6 +53,7 @@ internal class BoxDaoBase(
     {
         return item.Name;
     }
+    
     public string GetId(BoxItem item)
     {
         return item.Id;
@@ -69,9 +70,7 @@ internal class BoxDaoBase(
 
     public string GetParentFolderId(BoxItem boxItem)
     {
-        return boxItem == null || boxItem.Parent == null
-                   ? null
-                   : boxItem.Parent.Id;
+        return boxItem?.Parent?.Id;
     }
 
     public string MakeId(BoxItem boxItem)
@@ -114,15 +113,12 @@ internal class BoxDaoBase(
 
     public Folder<string> ToFolder(BoxFolder boxFolder)
     {
-        if (boxFolder == null)
+        switch (boxFolder)
         {
-            return null;
-        }
-
-        if (boxFolder is ErrorFolder errorFolder)
-        {
-            //Return error entry
-            return ToErrorFolder(errorFolder);
+            case null:
+                return null;
+            case ErrorFolder errorFolder:
+                return ToErrorFolder(errorFolder);
         }
 
         var isRoot = IsRoot(boxFolder);
@@ -140,7 +136,7 @@ internal class BoxDaoBase(
         folder.SettingsPrivate = ProviderInfo.Private;
         folder.SettingsHasLogo = ProviderInfo.HasLogo;
         folder.SettingsColor = ProviderInfo.Color;
-        SetFolderType(folder, isRoot);
+        ProcessFolderAsRoom(folder);
 
         if (folder.CreateOn != DateTime.MinValue && folder.CreateOn.Kind == DateTimeKind.Utc)
         {
@@ -190,15 +186,12 @@ internal class BoxDaoBase(
 
     public File<string> ToFile(BoxFile boxFile)
     {
-        if (boxFile == null)
+        switch (boxFile)
         {
-            return null;
-        }
-
-        if (boxFile is ErrorFile errorFile)
-        {
-            //Return error entry
-            return ToErrorFile(errorFile);
+            case null:
+                return null;
+            case ErrorFile errorFile:
+                return ToErrorFile(errorFile);
         }
 
         var file = GetFile();
@@ -208,7 +201,6 @@ internal class BoxDaoBase(
         file.CreateOn = boxFile.CreatedAt.HasValue ? _tenantUtil.DateTimeFromUtc(boxFile.CreatedAt.Value.UtcDateTime) : default;
         file.ParentId = MakeId(GetParentFolderId(boxFile));
         file.ModifiedOn = boxFile.ModifiedAt.HasValue ? _tenantUtil.DateTimeFromUtc(boxFile.ModifiedAt.Value.UtcDateTime) : default;
-        file.NativeAccessor = boxFile;
         file.Title = MakeFileTitle(boxFile);
         file.ThumbnailStatus = Thumbnail.Created;
         file.Encrypted = ProviderInfo.Private;
@@ -219,6 +211,11 @@ internal class BoxDaoBase(
     public async Task<Folder<string>> GetRootFolderAsync()
     {
         return ToFolder(await GetFolderAsync("0"));
+    }
+    
+    public async Task<BoxFolder> CreateFolderAsync(string title, string folderId)
+    {
+        return await _providerInfo.CreateFolderAsync(title, MakeThirdId(folderId), GetId);
     }
 
     public async Task<BoxFolder> GetFolderAsync(string folderId)
@@ -263,23 +260,18 @@ internal class BoxDaoBase(
         var boxFolderId = MakeThirdId(parentId);
         var items = await _providerInfo.GetItemsAsync(boxFolderId);
 
-        if (folder.HasValue)
+        if (!folder.HasValue)
         {
-            if (folder.Value)
-            {
-                return items.Where(i => i is BoxFolder).ToList();
-            }
-
-            return items.Where(i => i is BoxFile).ToList();
+            return items;
         }
 
-        return items;
+        return folder.Value ? items.Where(i => i is BoxFolder).ToList() : items.Where(i => i is BoxFile).ToList();
     }
 
-    protected sealed class ErrorFolder : BoxFolder, IErrorItem
+    private sealed class ErrorFolder : BoxFolder, IErrorItem
     {
-        public string Error { get; set; }
-        public string ErrorId { get; private set; }
+        public string Error { get; }
+        public string ErrorId { get; }
 
         public ErrorFolder(Exception e, object id)
         {
@@ -291,10 +283,10 @@ internal class BoxDaoBase(
         }
     }
 
-    protected sealed class ErrorFile : BoxFile, IErrorItem
+    private sealed class ErrorFile : BoxFile, IErrorItem
     {
-        public string Error { get; set; }
-        public string ErrorId { get; private set; }
+        public string Error { get; }
+        public string ErrorId { get; }
 
         public ErrorFile(Exception e, object id)
         {
@@ -319,9 +311,9 @@ internal class BoxDaoBase(
         if (!match.Success)
         {
             var insertIndex = requestTitle.Length;
-            if (requestTitle.LastIndexOf(".", StringComparison.InvariantCulture) != -1)
+            if (requestTitle.LastIndexOf('.') != -1)
             {
-                insertIndex = requestTitle.LastIndexOf(".", StringComparison.InvariantCulture);
+                insertIndex = requestTitle.LastIndexOf('.');
             }
 
             requestTitle = requestTitle.Insert(insertIndex, " (1)");
@@ -335,11 +327,11 @@ internal class BoxDaoBase(
         return requestTitle;
     }
 
-    private string MatchEvaluator(Match match)
+    private static string MatchEvaluator(Match match)
     {
         var index = Convert.ToInt32(match.Groups[2].Value);
-        var staticText = match.Value[string.Format(" ({0})", index).Length..];
+        var staticText = match.Value[$" ({index})".Length..];
 
-        return string.Format(" ({0}){1}", index + 1, staticText);
+        return $" ({index + 1}){staticText}";
     }
 }

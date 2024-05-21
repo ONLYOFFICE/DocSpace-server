@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -138,4 +138,6 @@ public static class Actions
     public static readonly INotifyAction SaasAdminVideoGuides = new NotifyAction("saas_video_guides_v1");
 
     public static readonly INotifyAction ZoomWelcome = new NotifyAction("zoom_welcome");
+
+    public static readonly INotifyAction MigrationPersonalToDocspace = new NotifyAction("migration_personal_to_docspace");
 } 

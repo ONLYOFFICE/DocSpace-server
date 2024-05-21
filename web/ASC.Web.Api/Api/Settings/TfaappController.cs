@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,28 +28,28 @@ using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Web.Api.Controllers.Settings;
 
-public class TfaappController(MessageService messageService,
-        StudioNotifyService studioNotifyService,
-        ApiContext apiContext,
-        UserManager userManager,
-        AuthContext authContext,
-        CookiesManager cookiesManager,
-        PermissionContext permissionContext,
-        SettingsManager settingsManager,
-        TfaManager tfaManager,
-        WebItemManager webItemManager,
-        CommonLinkUtility commonLinkUtility,
-        DisplayUserSettingsHelper displayUserSettingsHelper,
-        MessageTarget messageTarget,
-        StudioSmsNotificationSettingsHelper studioSmsNotificationSettingsHelper,
-        TfaAppAuthSettingsHelper tfaAppAuthSettingsHelper,
-        SmsProviderManager smsProviderManager,
-        IMemoryCache memoryCache,
-        InstanceCrypto instanceCrypto,
-        Signature signature,
-        SecurityContext securityContext,
-        IHttpContextAccessor httpContextAccessor,
-        TenantManager tenantManager)
+public class TfaappController(
+    MessageService messageService,
+    StudioNotifyService studioNotifyService,
+    ApiContext apiContext,
+    UserManager userManager,
+    AuthContext authContext,
+    CookiesManager cookiesManager,
+    PermissionContext permissionContext,
+    SettingsManager settingsManager,
+    TfaManager tfaManager,
+    WebItemManager webItemManager,
+    CommonLinkUtility commonLinkUtility,
+    DisplayUserSettingsHelper displayUserSettingsHelper,
+    StudioSmsNotificationSettingsHelper studioSmsNotificationSettingsHelper,
+    TfaAppAuthSettingsHelper tfaAppAuthSettingsHelper,
+    SmsProviderManager smsProviderManager,
+    IMemoryCache memoryCache,
+    InstanceCrypto instanceCrypto,
+    Signature signature,
+    SecurityContext securityContext,
+    IHttpContextAccessor httpContextAccessor,
+    TenantManager tenantManager)
     : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
@@ -205,9 +205,9 @@ public class TfaappController(MessageService messageService,
 
                 action = MessageAction.TwoFactorAuthenticationEnabledBySms;
 
-                if (tfaAppAuthSettingsHelper.Enable)
+                if (await tfaAppAuthSettingsHelper.GetEnable())
                 {
-                    tfaAppAuthSettingsHelper.Enable = false;
+                    await tfaAppAuthSettingsHelper.SetEnable(false);
                 }
 
                 result = true;
@@ -227,9 +227,9 @@ public class TfaappController(MessageService messageService,
 
                 action = MessageAction.TwoFactorAuthenticationEnabledByTfaApp;
 
-                if (await studioSmsNotificationSettingsHelper.IsVisibleAndAvailableSettingsAsync() && studioSmsNotificationSettingsHelper.Enable)
+                if (await studioSmsNotificationSettingsHelper.IsVisibleAndAvailableSettingsAsync() && await studioSmsNotificationSettingsHelper.GetEnable())
                 {
-                    studioSmsNotificationSettingsHelper.Enable = false;
+                    await studioSmsNotificationSettingsHelper.SetEnable(false);
                 }
 
                 result = true;
@@ -237,14 +237,14 @@ public class TfaappController(MessageService messageService,
                 break;
 
             default:
-                if (tfaAppAuthSettingsHelper.Enable)
+                if (await tfaAppAuthSettingsHelper.GetEnable())
                 {
-                    tfaAppAuthSettingsHelper.Enable = false;
+                    await tfaAppAuthSettingsHelper.SetEnable(false);
                 }
 
-                if (await studioSmsNotificationSettingsHelper.IsVisibleAndAvailableSettingsAsync() && studioSmsNotificationSettingsHelper.Enable)
+                if (await studioSmsNotificationSettingsHelper.IsVisibleAndAvailableSettingsAsync() && await studioSmsNotificationSettingsHelper.GetEnable())
                 {
-                    studioSmsNotificationSettingsHelper.Enable = false;
+                    await studioSmsNotificationSettingsHelper.SetEnable(false);
                 }
 
                 action = MessageAction.TwoFactorAuthenticationDisabled;
@@ -371,7 +371,7 @@ public class TfaappController(MessageService messageService,
         }
 
         var codes = (await tfaManager.GenerateBackupCodesAsync()).Select(r => new { r.IsUsed, Code = r.GetEncryptedCode(instanceCrypto, signature) }).ToList();
-        await messageService.SendAsync(MessageAction.UserConnectedTfaApp, messageTarget.Create(currentUser.Id), currentUser.DisplayUserName(false, displayUserSettingsHelper));
+        await messageService.SendAsync(MessageAction.UserConnectedTfaApp, MessageTarget.Create(currentUser.Id), currentUser.DisplayUserName(false, displayUserSettingsHelper));
         return codes;
     }
 
@@ -397,7 +397,8 @@ public class TfaappController(MessageService messageService,
             throw new SecurityAccessDeniedException(Resource.ErrorAccessDenied);
         }
 
-        if (!isMe && tenantManager.GetCurrentTenant().OwnerId != authContext.CurrentAccount.ID)
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        if (!isMe && tenant.OwnerId != authContext.CurrentAccount.ID)
         {
             throw new SecurityAccessDeniedException(Resource.ErrorAccessDenied);
         }
@@ -413,7 +414,7 @@ public class TfaappController(MessageService messageService,
         }
 
         await TfaAppUserSettings.DisableForUserAsync(settingsManager, user.Id);
-        await messageService.SendAsync(MessageAction.UserDisconnectedTfaApp, messageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
+        await messageService.SendAsync(MessageAction.UserDisconnectedTfaApp, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
 
         await cookiesManager.ResetUserCookieAsync(user.Id);
         if (isMe)

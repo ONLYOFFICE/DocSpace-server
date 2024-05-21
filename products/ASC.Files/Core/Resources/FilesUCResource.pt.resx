@@ -97,4 +97,7 @@
   <data name="Recent" xml:space="preserve">
     <value>Recente</value>
   </data>
+  <data name="InProcessFormFolder" xml:space="preserve">
+    <value>Em processo</value>
+  </data>
 </root>

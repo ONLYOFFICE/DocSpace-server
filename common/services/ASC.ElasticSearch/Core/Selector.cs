@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -322,7 +322,14 @@ public class Selector<T>(IServiceProvider serviceProvider)
             }
             else
             {
-                _queryContainer = _queryContainer && MultiWildCard(props, value.WrapAsterisk());
+                if (value.Any(c => (uint)c >= 0x4E00 && (uint)c <= 0x2FA1F))
+                {
+                    _queryContainer = _queryContainer && (MultiMatch(props, value.TrimQuotes()) || MultiWildCard(props, value.WrapAsterisk()));
+                }
+                else
+                {
+                    _queryContainer = _queryContainer && MultiWildCard(props, value.WrapAsterisk());
+                }
             }
         }
 
@@ -424,15 +431,10 @@ public class Selector<T>(IServiceProvider serviceProvider)
 
 internal static class StringExtension
 {
-    private static bool Any(this string value, UnicodeCategory category)
-    {
-        return !string.IsNullOrWhiteSpace(value)
-        && value.Any(@char => char.GetUnicodeCategory(@char) == category);
-    }
-
     public static bool HasOtherLetter(this string value)
-    {
-        return value.Any(UnicodeCategory.OtherLetter);
+    {      
+        var specialChar = @"-=+;/\|№&#^<>()[]{}$%";
+        return specialChar.Any(value.Contains);
     }
 
     public static string WrapAsterisk(this string value)

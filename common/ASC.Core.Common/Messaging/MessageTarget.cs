@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,28 +26,22 @@
 
 namespace ASC.MessagingSystem.EF.Model;
 
-[Singleton]
-public class MessageTarget()
+public class MessageTarget
 {
     private IEnumerable<string> _items;
-
-    public MessageTarget Create<T>(T value)
+    private string _item;
+    
+    public static MessageTarget Create<T>(T value)
     {
-        var res = new List<string>(1);
-        if (value != null)
+        return new MessageTarget
         {
-            res.Add(value.ToString());
-        }
-
-        return new MessageTarget()
-        {
-            _items = res
+            _item = value?.ToString()
         };
     }
 
-    public MessageTarget  Create<T>(IEnumerable<T> value)
+    public static MessageTarget Create<T>(IEnumerable<T> value)
     {
-        var res = new MessageTarget()
+        var res = new MessageTarget
         {
             _items = new List<string>()
         };
@@ -60,7 +54,7 @@ public class MessageTarget()
         return res;
     }
 
-    public MessageTarget Parse(string value)
+    public static MessageTarget Parse(string value)
     {
         if (string.IsNullOrEmpty(value))
         {
@@ -74,14 +68,19 @@ public class MessageTarget()
             return null;
         }
 
-        return new MessageTarget()
+        return new MessageTarget
         {
             _items = items
         };
     }
-    public IEnumerable<string> GetItems() { return _items.ToList(); }
+    public IEnumerable<string> GetItems() { return _items ?? new [] { _item }; }
     public override string ToString()
     {
+        if (!string.IsNullOrEmpty(_item))
+        {
+            return _item;
+        }
+        
         return _items != null ? string.Join(",", _items) : null;
     }
 }

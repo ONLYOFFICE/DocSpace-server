@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -64,12 +64,8 @@ public class StudioSmsNotificationSettingsHelper(IHttpContextAccessor httpContex
                     && !quota.Free);
     }
 
-    public override bool Enable
+    public override async Task<bool> GetEnable()
     {
-        get { return base.Enable && smsProviderManager.Enabled(); }
-        set
-        {
-            base.Enable = value;
-        }
+        return await base.GetEnable() && smsProviderManager.Enabled();
     }
 }

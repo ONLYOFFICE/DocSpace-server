@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -107,10 +107,10 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                 case ChunkedRequestType.Upload:
                     {
                         var resumedSession = await fileUploader.UploadChunkAsync<T>(request.UploadId, await request.ChunkStream(), await request.ChunkSize());
-
-                        var chunks = await chunkedUploadSessionHolder.GetChunksAsync(resumedSession);
-                        var bytesUploaded = chunks.Sum(c => c.Value?.Length ?? 0);
-                        if (bytesUploaded == resumedSession.BytesTotal)
+                        await chunkedUploadSessionHolder.StoreSessionAsync(resumedSession);
+                        
+                        var transferredBytes = await fileUploader.GetTransferredBytesCountAsync(resumedSession);
+                        if (transferredBytes == resumedSession.BytesTotal || !resumedSession.UseChunks)
                         {
                             if (resumedSession.UseChunks)
                             {

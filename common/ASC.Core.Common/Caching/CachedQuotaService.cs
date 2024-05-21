@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -57,7 +57,7 @@ class QuotaServiceCache
 [Scope]
 class CachedQuotaService() : IQuotaService
 {
-    private readonly IQuotaService _service;
+    private readonly DbQuotaService _service;
     private readonly ICache _cache;
     private readonly ICacheNotify<QuotaCacheItem> _cacheNotify;
     private readonly QuotaServiceCache _quotaServiceCache;

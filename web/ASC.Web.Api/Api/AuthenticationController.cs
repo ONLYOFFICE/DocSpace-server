@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Api.Core.Core;
-
 using AuthenticationException = System.Security.Authentication.AuthenticationException;
 using Constants = ASC.Core.Users.Constants;
 
@@ -40,43 +38,42 @@ namespace ASC.Web.Api.Controllers;
 [ApiController]
 [AllowAnonymous]
 [WebhookDisable]
-public class AuthenticationController(UserManager userManager,
-        TenantManager tenantManager,
-        SecurityContext securityContext,
-        TenantCookieSettingsHelper tenantCookieSettingsHelper,
-        CookiesManager cookiesManager,
-        PasswordHasher passwordHasher,
-        EmailValidationKeyModelHelper emailValidationKeyModelHelper,
-        SetupInfo setupInfo,
-        MessageService messageService,
-        ProviderManager providerManager,
-        AccountLinker accountLinker,
-        CoreBaseSettings coreBaseSettings,
-        PersonalSettingsHelper personalSettingsHelper,
-        StudioNotifyService studioNotifyService,
-        UserManagerWrapper userManagerWrapper,
-        UserHelpTourHelper userHelpTourHelper,
-        Signature signature,
-        InstanceCrypto instanceCrypto,
-        DisplayUserSettingsHelper displayUserSettingsHelper,
-        MessageTarget messageTarget,
-        StudioSmsNotificationSettingsHelper studioSmsNotificationSettingsHelper,
-        SettingsManager settingsManager,
-        SmsManager smsManager,
-        TfaManager tfaManager,
-        TimeZoneConverter timeZoneConverter,
-        SmsKeyStorage smsKeyStorage,
-        CommonLinkUtility commonLinkUtility,
-        ApiContext apiContext,
-        AuthContext authContext,
-        CookieStorage cookieStorage,
-        DbLoginEventsManager dbLoginEventsManager,
-        BruteForceLoginManager bruteForceLoginManager,
-        TfaAppAuthSettingsHelper tfaAppAuthSettingsHelper,
-        EmailValidationKeyProvider emailValidationKeyProvider,
-        ILogger<AuthenticationController> logger,
-        InvitationLinkService invitationLinkService,
-        IMapper mapper)
+public class AuthenticationController(
+    UserManager userManager,
+    TenantManager tenantManager,
+    SecurityContext securityContext,
+    TenantCookieSettingsHelper tenantCookieSettingsHelper,
+    CookiesManager cookiesManager,
+    PasswordHasher passwordHasher,
+    EmailValidationKeyModelHelper emailValidationKeyModelHelper,
+    SetupInfo setupInfo,
+    MessageService messageService,
+    ProviderManager providerManager,
+    AccountLinker accountLinker,
+    CoreBaseSettings coreBaseSettings,
+    StudioNotifyService studioNotifyService,
+    UserManagerWrapper userManagerWrapper,
+    UserHelpTourHelper userHelpTourHelper,
+    Signature signature,
+    DisplayUserSettingsHelper displayUserSettingsHelper,
+    StudioSmsNotificationSettingsHelper studioSmsNotificationSettingsHelper,
+    SettingsManager settingsManager,
+    SmsManager smsManager,
+    TfaManager tfaManager,
+    TimeZoneConverter timeZoneConverter,
+    SmsKeyStorage smsKeyStorage,
+    CommonLinkUtility commonLinkUtility,
+    ApiContext apiContext,
+    AuthContext authContext,
+    CookieStorage cookieStorage,
+    DbLoginEventsManager dbLoginEventsManager,
+    BruteForceLoginManager bruteForceLoginManager,
+    TfaAppAuthSettingsHelper tfaAppAuthSettingsHelper,
+    EmailValidationKeyProvider emailValidationKeyProvider,
+    ILogger<AuthenticationController> logger,
+    InvitationLinkService invitationLinkService,
+    LoginProfileTransport loginProfileTransport,
+    IMapper mapper)
     : ControllerBase
 {
     /// <summary>
@@ -86,6 +83,7 @@ public class AuthenticationController(UserManager userManager,
     /// <httpMethod>GET</httpMethod>
     /// <path>api/2.0/authentication</path>
     /// <returns type="System.Boolean, System">Boolean value: true if the current user is authenticated</returns>
+    /// <requiresAuthorization>false</requiresAuthorization>
     [AllowNotPayment]
     [HttpGet]
     public bool GetIsAuthentificated()
@@ -103,6 +101,7 @@ public class AuthenticationController(UserManager userManager,
     /// <httpMethod>POST</httpMethod>
     /// <path>api/2.0/authentication/{code}</path>
     /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.AuthenticationTokenDto, ASC.Web.Api">Authentication data</returns>
+    /// <requiresAuthorization>false</requiresAuthorization>
     [AllowNotPayment]
     [HttpPost("{code}", Order = 1)]
     public async Task<AuthenticationTokenDto> AuthenticateMeFromBodyWithCode(AuthRequestsDto inDto)
@@ -122,7 +121,7 @@ public class AuthenticationController(UserManager userManager,
             {
                 if (await tfaManager.ValidateAuthCodeAsync(user, inDto.Code, true, true))
                 {
-                    await messageService.SendAsync(MessageAction.UserConnectedTfaApp, messageTarget.Create(user.Id));
+                    await messageService.SendAsync(MessageAction.UserConnectedTfaApp, MessageTarget.Create(user.Id));
                 }
             }
             else
@@ -156,7 +155,7 @@ public class AuthenticationController(UserManager userManager,
             await messageService.SendAsync(user.DisplayUserName(false, displayUserSettingsHelper), sms
                                                                           ? MessageAction.LoginFailViaApiSms
                                                                           : MessageAction.LoginFailViaApiTfa,
-                                messageTarget.Create(user.Id));
+                                MessageTarget.Create(user.Id));
             logger.ErrorWithException(ex);
             throw new AuthenticationException("User authentication failed");
         }
@@ -176,6 +175,7 @@ public class AuthenticationController(UserManager userManager,
     /// <httpMethod>POST</httpMethod>
     /// <path>api/2.0/authentication</path>
     /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.AuthenticationTokenDto, ASC.Web.Api">Authentication data</returns>
+    /// <requiresAuthorization>false</requiresAuthorization>
     [AllowNotPayment]
     [HttpPost]
     public async Task<AuthenticationTokenDto> AuthenticateMeAsync(AuthRequestsDto inDto)
@@ -276,6 +276,7 @@ public class AuthenticationController(UserManager userManager,
     /// <httpMethod>POST</httpMethod>
     /// <path>api/2.0/authentication/logout</path>
     /// <returns></returns>
+    /// <requiresAuthorization>false</requiresAuthorization>
     [AllowNotPayment]
     [HttpPost("logout")]
     [HttpGet("logout")]// temp fix
@@ -298,7 +299,7 @@ public class AuthenticationController(UserManager userManager,
 
         if (!string.IsNullOrEmpty(user.SsoNameId))
         {
-            var settings = settingsManager.Load<SsoSettingsV2>();
+            var settings = await settingsManager.LoadAsync<SsoSettingsV2>();
 
             if (settings.EnableSso.GetValueOrDefault() && !string.IsNullOrEmpty(settings.IdpSettings.SloUrl))
             {
@@ -325,6 +326,7 @@ public class AuthenticationController(UserManager userManager,
     /// <httpMethod>POST</httpMethod>
     /// <path>api/2.0/authentication/confirm</path>
     /// <returns type="ASC.Security.Cryptography.EmailValidationKeyProvider.ValidationResult, ASC.Security.Cryptography">Validation result: Ok, Invalid, or Expired</returns>
+    /// <requiresAuthorization>false</requiresAuthorization>
     [AllowNotPayment, AllowSuspended]
     [HttpPost("confirm")]
     public async Task<ConfirmDto> CheckConfirm(EmailValidationKeyModel inDto)
@@ -354,6 +356,7 @@ public class AuthenticationController(UserManager userManager,
     /// <httpMethod>POST</httpMethod>
     /// <path>api/2.0/authentication/setphone</path>
     /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.AuthenticationTokenDto, ASC.Web.Api">Authentication data</returns>
+    /// <requiresAuthorization>false</requiresAuthorization>
     [AllowNotPayment]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PhoneActivation")]
     [HttpPost("setphone")]
@@ -362,7 +365,7 @@ public class AuthenticationController(UserManager userManager,
         await apiContext.AuthByClaimAsync();
         var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
         inDto.MobilePhone = await smsManager.SaveMobilePhoneAsync(user, inDto.MobilePhone);
-        await messageService.SendAsync(MessageAction.UserUpdatedMobileNumber, messageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper), inDto.MobilePhone);
+        await messageService.SendAsync(MessageAction.UserUpdatedMobileNumber, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper), inDto.MobilePhone);
 
         return new AuthenticationTokenDto
         {
@@ -382,6 +385,7 @@ public class AuthenticationController(UserManager userManager,
     /// <httpMethod>POST</httpMethod>
     /// <path>api/2.0/authentication/sendsms</path>
     /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.AuthenticationTokenDto, ASC.Web.Api">Authentication data</returns>
+    /// <requiresAuthorization>false</requiresAuthorization>
     [AllowNotPayment]
     [HttpPost("sendsms")]
     public async Task<AuthenticationTokenDto> SendSmsCodeAsync(AuthRequestsDto inDto)
@@ -453,9 +457,11 @@ public class AuthenticationController(UserManager userManager,
                     }
                 }
 
-                var requestIp = MessageSettings.GetIP(Request);
-
-                user = await bruteForceLoginManager.AttemptAsync(inDto.UserName, inDto.PasswordHash, requestIp, inDto.RecaptchaResponse);
+                user = await bruteForceLoginManager.AttemptAsync(inDto.UserName, inDto.RecaptchaResponse, async () => 
+                    await userManager.GetUsersByPasswordHashAsync(
+                    await tenantManager.GetCurrentTenantIdAsync(),
+                    inDto.UserName,
+                    inDto.PasswordHash));
             }
             else
             {
@@ -466,12 +472,12 @@ public class AuthenticationController(UserManager userManager,
                 wrapper.ViaEmail = false;
                 action = MessageAction.LoginFailViaApiSocialAccount;
                 var thirdPartyProfile = !string.IsNullOrEmpty(inDto.SerializedProfile) ? 
-                    LoginProfile.FromTransport(instanceCrypto, inDto.SerializedProfile) : 
+                    await loginProfileTransport.FromTransport(inDto.SerializedProfile) : 
                     providerManager.GetLoginProfile(inDto.Provider, inDto.AccessToken, inDto.CodeOAuth);
 
                 inDto.UserName = thirdPartyProfile.EMail;
-
-                user = await GetUserByThirdParty(thirdPartyProfile);
+                
+                user = await bruteForceLoginManager.AttemptAsync(inDto.UserName, inDto.RecaptchaResponse, async () => await GetUserByThirdParty(thirdPartyProfile));
             }
         }
         catch (BruteForceCredentialException)
@@ -543,8 +549,7 @@ public class AuthenticationController(UserManager userManager,
                 //}
 
                 await studioNotifyService.UserHasJoinAsync();
-                userHelpTourHelper.IsNewUser = true;
-                personalSettingsHelper.IsNewUser = true;
+                await userHelpTourHelper.SetIsNewUser(true); 
             }
 
             return userInfo;
@@ -558,7 +563,7 @@ public class AuthenticationController(UserManager userManager,
         }
     }
 
-    private async Task<UserInfo> JoinByThirdPartyAccount(LoginProfile loginProfile)
+        private async Task<UserInfo> JoinByThirdPartyAccount(LoginProfile loginProfile)
     {
         if (string.IsNullOrEmpty(loginProfile.EMail))
         {
@@ -618,7 +623,6 @@ public class AuthenticationController(UserManager userManager,
 
         return userInfo;
     }
-
     private async Task<(bool, Guid)> TryGetUserByHashAsync(string hashId)
     {
         var userId = Guid.Empty;

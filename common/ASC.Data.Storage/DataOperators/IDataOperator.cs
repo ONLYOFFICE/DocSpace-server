@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,8 +28,8 @@ namespace ASC.Data.Storage.DataOperators;
 
 public interface IDataWriteOperator : IAsyncDisposable
 {
-    Task WriteEntryAsync(string tarKey, Stream stream, Action<Task> action);
-    Task WriteEntryAsync(string tarKey, string domain, string path, IDataStore store, Action<Task> action);
+    Task WriteEntryAsync(string tarKey, Stream stream, Func<Task> action);
+    Task WriteEntryAsync(string tarKey, string domain, string path, IDataStore store, Func<Task> action);
     bool NeedUpload { get; }
     string Hash { get; }
     string StoragePath { get; }
@@ -37,6 +37,7 @@ public interface IDataWriteOperator : IAsyncDisposable
 
 public interface IDataReadOperator : IDisposable
 {
+    string GetFolder();
     Stream GetEntry(string key);
     IEnumerable<string> GetEntries(string key);
     IEnumerable<string> GetDirectories(string key);

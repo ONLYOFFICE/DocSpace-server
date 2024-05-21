@@ -346,7 +346,7 @@
   <data name="LoginSuccess" xml:space="preserve">
     <value>Đăng nhập thành công</value>
   </data>
-  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+  <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
     <value>Đăng nhập qua Tài khoản Xã hội thành công</value>
   </data>
   <data name="LoginSuccessViaApi" xml:space="preserve">
@@ -732,5 +732,11 @@
   </data>
   <data name="RoomExternalLinkUpdated" xml:space="preserve">
     <value>Đã cập nhật liên kết bên ngoài: {0}. Vai trò: {1}</value>
+  </data>
+  <data name="FileOpenedForChange" xml:space="preserve">
+    <value>Tập tin được Mở để Thay đổi: {0}</value>
+  </data>
+  <data name="PortalRenamed" xml:space="preserve">
+    <value>Cổng thông tin đã được đổi tên</value>
   </data>
 </root>

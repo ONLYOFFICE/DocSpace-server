@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -94,15 +94,17 @@ public class FeedController(FeedReadedDataProvider feedReadDataProvider,
         bool? withRelated,
         ApiDateTime timeReaded)
     {
+        FileEntry entry = null;
+        
         if (!string.IsNullOrEmpty(id))
         {
             if (int.TryParse(id, out var intId))
             {
-                await CheckAccessAsync(intId, module);
+                entry = await CheckAccessAsync(intId, module);
             }
             else
             {
-                await CheckAccessAsync(id, module);
+                entry = await CheckAccessAsync(id, module);
             }
         }
         
@@ -133,18 +135,18 @@ public class FeedController(FeedReadedDataProvider feedReadDataProvider,
             filter.To = to != null ? to.UtcTime : DateTime.MaxValue;
         }
 
-        var lastTimeReaded = DateTime.UtcNow;
-        var readedDate = lastTimeReaded;
+        var lastTimeRead = DateTime.UtcNow;
+        var readDate = lastTimeRead;
 
         if (string.IsNullOrEmpty(id))
         {
-            lastTimeReaded = await feedReadDataProvider.GetTimeReadedAsync();
-            readedDate = timeReaded != null ? timeReaded.UtcTime : lastTimeReaded;
+            lastTimeRead = await feedReadDataProvider.GetTimeReadedAsync();
+            readDate = timeReaded != null ? timeReaded.UtcTime : lastTimeRead;
         }
 
         if (filter.OnlyNew)
         {
-            filter.From = lastTimeReaded;
+            filter.From = lastTimeRead;
             filter.Max = 100;
         }
         else if (timeReaded == null)
@@ -153,49 +155,55 @@ public class FeedController(FeedReadedDataProvider feedReadDataProvider,
             newFeedsCountCache.Remove(Key);
         }
 
+        if (entry is { FileEntryType: FileEntryType.File })
+        {
+            filter.From = tenantUtil.DateTimeToUtc(entry.CreateOn);
+            filter.To = tenantUtil.DateTimeToUtc(entry.ModifiedOn);
+        }
+
         var feeds = (await feedAggregateDataProvider
             .GetFeedsAsync(filter))
-            .GroupBy(n => n.GroupId,
-                     n => mapper.Map<FeedResultItem, FeedDto>(n),
-                     (_, group) =>
-                     {
-                         var firstFeed = group.First();
-                         firstFeed.GroupedFeeds = group.Skip(1);
-                         return firstFeed;
-                     })
+            .GroupBy(n => n.GroupId, mapper.Map<FeedResultItem, FeedDto>, (_, group) => 
+            { 
+                var firstFeed = group.First(); 
+                firstFeed.GroupedFeeds = group.Skip(1); 
+                return firstFeed; 
+            })
             .OrderByDescending(f => f.ModifiedDate)
             .ToList();
 
-        return new { feeds, readedDate };
+        return new { feeds, readedDate = readDate };
 
-        async Task CheckAccessAsync<T>(T entryId, string fModule)
+        async Task<FileEntry> CheckAccessAsync<T>(T entryId, string fModule)
         {
-            FileEntry<T> entry = null;
+            FileEntry<T> fileEntry = null;
 
             switch (fModule)
             {
                 case Constants.RoomsModule:
                 case Constants.FoldersModule:
                     {
-                        entry = await daoFactory.GetFolderDao<T>().GetFolderAsync(entryId);
+                        fileEntry = await daoFactory.GetFolderDao<T>().GetFolderAsync(entryId);
                         break;
                     }
                 case Constants.FilesModule:
                     {
-                        entry = await daoFactory.GetFileDao<T>().GetFileAsync(entryId);
+                        fileEntry = await daoFactory.GetFileDao<T>().GetFileAsync(entryId);
                         break;
                     }
             }
 
-            if (entry == null)
+            if (fileEntry == null)
             {
                 throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
             }
 
-            if (!await fileSecurity.CanReadAsync(entry))
+            if (!await fileSecurity.CanReadAsync(fileEntry))
             {
                 throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
             }
+
+            return fileEntry;
         }
     }
 

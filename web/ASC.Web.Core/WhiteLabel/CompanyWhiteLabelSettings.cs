@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -23,6 +23,8 @@
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+
+using System.ComponentModel.DataAnnotations;
 
 namespace ASC.Web.Core.WhiteLabel;
 
@@ -49,10 +51,12 @@ public class CompanyWhiteLabelSettings : ISettings<CompanyWhiteLabelSettings>
 
     /// <summary>Site</summary>
     /// <type>System.String, System</type>
+    [Url]
     public string Site { get; set; }
 
     /// <summary>Email address</summary>
     /// <type>System.String, System</type>
+    [EmailAddress]
     public string Email { get; set; }
 
     /// <summary>Address</summary>
@@ -61,6 +65,7 @@ public class CompanyWhiteLabelSettings : ISettings<CompanyWhiteLabelSettings>
 
     /// <summary>Phone</summary>
     /// <type>System.String, System</type>
+    [Phone]
     public string Phone { get; set; }
 
     /// <summary>Specifies if a company is a licensor or not</summary>

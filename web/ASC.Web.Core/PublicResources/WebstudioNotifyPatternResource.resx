@@ -2083,7 +2083,7 @@ $TrulyYours</comment>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>Hello!
 
-You are invited to join $Message room at "${__VirtualRootPath}":"${__VirtualRootPath}". Accept the invitation by clicking the link:
+You are invited to join a DocSpace room at "${__VirtualRootPath}":"${__VirtualRootPath}". Accept the invitation by clicking the link:
 
 $OrangeButton
 
@@ -2290,5 +2290,28 @@ $TrulyYours</value>
   </data>
   <data name="subject_zoom_welcome" xml:space="preserve">
     <value>Welcome to ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="ButtonGetStarted" xml:space="preserve">
+    <value>Get started</value>
+  </data>
+  <data name="pattern_migration_personal_to_docspace" xml:space="preserve">
+    <value>Hello!
+
+The data migration process from ONLYOFFICE Personal to your new ONLYOFFICE DocSpace is successfully completed.
+
+To access your DocSpace with the imported data, just click the button below:
+
+$OrangeButton
+
+Your current DocSpace plan is STARTUP. It is absolutely free.
+
+==If necessary, you can change the name of your new DocSpace. Just switch to Settings -&gt; Customization -&gt; DocSpace Renaming.==
+
+Enjoy a new way of document collaboration!
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_migration_personal_to_docspace" xml:space="preserve">
+    <value>Data migration to ONLYOFFICE DocSpace successfully completed</value>
   </data>
 </root>

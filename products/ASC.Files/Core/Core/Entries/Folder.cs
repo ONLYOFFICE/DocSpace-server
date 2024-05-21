@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -84,6 +84,8 @@ public class Folder<T> : FileEntry<T>, IFolder
     public bool SettingsHasLogo { get; set; }
     public string SettingsColor { get; set; }
     public bool SettingsIndexing { get; set; }
+    public long SettingsQuota { get; set; }
+    public long Counter { get; set; }
     public override bool IsNew
     {
         get => Convert.ToBoolean(NewForMe);
@@ -91,6 +93,7 @@ public class Folder<T> : FileEntry<T>, IFolder
     }
 
     public bool IsFavorite { get; set; }
+    public bool ProviderMapped { get; set; }
 
     public Folder()
     {
@@ -100,7 +103,8 @@ public class Folder<T> : FileEntry<T>, IFolder
 
     public Folder(
         FileHelper fileHelper,
-        Global global) : base(fileHelper, global)
+        Global global,
+        SecurityContext securityContext) : base(fileHelper, global, securityContext)
     {
         Title = string.Empty;
         FileEntryType = FileEntryType.Folder;

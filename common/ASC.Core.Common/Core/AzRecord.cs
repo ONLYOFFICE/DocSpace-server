@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,12 +26,22 @@
 
 namespace ASC.Core;
 
+[ProtoContract]
 public class AzRecord : IMapFrom<Acl>
 {
+    [ProtoMember(1)]
     public Guid Subject { get; set; }
+    
+    [ProtoMember(2)]
     public Guid Action { get; set; }
+    
+    [ProtoMember(3)]
     public string Object { get; set; }
+    
+    [ProtoMember(4)]
     public AceType AceType { get; set; }
+    
+    [ProtoMember(5)]
     public int TenantId { get; set; }
 
     public AzRecord() { }

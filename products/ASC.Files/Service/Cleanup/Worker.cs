@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -23,6 +23,8 @@
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+
+using ASC.Web.Files.Services.WCFService.FileOperations;
 
 using Constants = ASC.Core.Configuration.Constants;
 
@@ -74,7 +76,7 @@ public class Worker(ILogger<Worker> logger, IServiceScopeFactory serviceScopeFac
             var authManager = scope.ServiceProvider.GetRequiredService<AuthManager>();
             var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
             var daoFactory = scope.ServiceProvider.GetRequiredService<IDaoFactory>();
-            var fileStorageService = scope.ServiceProvider.GetRequiredService<FileStorageService>();
+            var fileOperationsManager = scope.ServiceProvider.GetRequiredService<FileOperationsManager>();
             var fileDateTime = scope.ServiceProvider.GetRequiredService<FileDateTime>();
 
             var userAccount = await authManager.GetAccountByIDAsync(tenantUser.TenantId, tenantUser.UserId);
@@ -109,13 +111,13 @@ public class Worker(ILogger<Worker> logger, IServiceScopeFactory serviceScopeFac
 
             logger.InfoCleanUp(tenantUser.TenantId, trashId);
 
-            await fileStorageService.DeleteItemsAsync(filesList, foldersList, true, false, true);
-
+            await fileOperationsManager.PublishDelete(foldersList, filesList, true, true, true);
+            
             logger.InfoCleanUpWait(tenantUser.TenantId, trashId);
 
             while (true)
             {
-                var statuses = fileStorageService.GetTasksStatuses();
+                var statuses = await fileOperationsManager.GetOperationResults();
 
                 if (statuses.TrueForAll(r => r.Finished))
                 {

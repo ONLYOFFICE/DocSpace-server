@@ -8,13 +8,10 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-using System.CodeDom.Compiler;
-using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
-using System.Resources;
-using System.Runtime.CompilerServices;
-
 namespace ASC.Files.Core.Resources {
+    using System;
+    
+    
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -22,27 +19,27 @@ namespace ASC.Files.Core.Resources {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [GeneratedCode("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
-    [DebuggerNonUserCode()]
-    [CompilerGenerated()]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+    [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class FilesCommonResource {
         
-        private static ResourceManager resourceMan;
+        private static global::System.Resources.ResourceManager resourceMan;
         
-        private static CultureInfo resourceCulture;
+        private static global::System.Globalization.CultureInfo resourceCulture;
         
-        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
+        [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         internal FilesCommonResource() {
         }
         
         /// <summary>
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
-        [EditorBrowsable(EditorBrowsableState.Advanced)]
-        public static ResourceManager ResourceManager {
+        [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
+        public static global::System.Resources.ResourceManager ResourceManager {
             get {
-                if (ReferenceEquals(resourceMan, null)) {
-                    ResourceManager temp = new ResourceManager("ASC.Files.Core.Resources.FilesCommonResource", typeof(FilesCommonResource).Assembly);
+                if (object.ReferenceEquals(resourceMan, null)) {
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("ASC.Files.Core.Resources.FilesCommonResource", typeof(FilesCommonResource).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -53,8 +50,8 @@ namespace ASC.Files.Core.Resources {
         ///   Overrides the current thread's CurrentUICulture property for all
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
-        [EditorBrowsable(EditorBrowsableState.Advanced)]
-        public static CultureInfo Culture {
+        [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
+        public static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -334,6 +331,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Date.
+        /// </summary>
+        public static string Date {
+            get {
+                return ResourceManager.GetString("Date", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Shared link.
         /// </summary>
         public static string DefaultExternalLinkTitle {
@@ -469,29 +475,11 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to File larger than {0} will not be converted.
-        /// </summary>
-        public static string ErrorMessage_FileSizeConvert {
-            get {
-                return ResourceManager.GetString("ErrorMessage_FileSizeConvert", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to File larger than {0} will not be copied.
         /// </summary>
         public static string ErrorMessage_FileSizeCopy {
             get {
                 return ResourceManager.GetString("ErrorMessage_FileSizeCopy", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to File larger than {0} will not be edited.
-        /// </summary>
-        public static string ErrorMessage_FileSizeEdit {
-            get {
-                return ResourceManager.GetString("ErrorMessage_FileSizeEdit", resourceCulture);
             }
         }
         
@@ -532,11 +520,38 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid provider.
+        /// </summary>
+        public static string ErrorMessage_InvalidProvider {
+            get {
+                return ResourceManager.GetString("ErrorMessage_InvalidProvider", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to It is not possible to use this folder to store the room.
+        /// </summary>
+        public static string ErrorMessage_InvalidThirdPartyFolder {
+            get {
+                return ResourceManager.GetString("ErrorMessage_InvalidThirdPartyFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Incorrect title.
         /// </summary>
         public static string ErrorMessage_InvalidTitle {
             get {
                 return ResourceManager.GetString("ErrorMessage_InvalidTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The invitation link is invalid or its validity has expired.
+        /// </summary>
+        public static string ErrorMessage_InvintationLink {
+            get {
+                return ResourceManager.GetString("ErrorMessage_InvintationLink", resourceCulture);
             }
         }
         
@@ -568,11 +583,38 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The maximum number of links may not exceed {0}.
+        /// </summary>
+        public static string ErrorMessage_MaxLinksCount {
+            get {
+                return ResourceManager.GetString("ErrorMessage_MaxLinksCount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Sorry, this file format isn&apos;t supported.
         /// </summary>
         public static string ErrorMessage_NotSupportedFormat {
             get {
                 return ResourceManager.GetString("ErrorMessage_NotSupportedFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This provider is already connected to the room.
+        /// </summary>
+        public static string ErrorMessage_ProviderAlreadyConnect {
+            get {
+                return ResourceManager.GetString("ErrorMessage_ProviderAlreadyConnect", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The role is not available for this user type.
+        /// </summary>
+        public static string ErrorMessage_RoleNotAvailable {
+            get {
+                return ResourceManager.GetString("ErrorMessage_RoleNotAvailable", resourceCulture);
             }
         }
         
@@ -613,6 +655,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to You don&apos;t have enough permission to archive the room.
+        /// </summary>
+        public static string ErrorMessage_SecurityException_ArchiveRoom {
+            get {
+                return ResourceManager.GetString("ErrorMessage_SecurityException_ArchiveRoom", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Can&apos;t authorize at {0} provider with given credentials..
         /// </summary>
         public static string ErrorMessage_SecurityException_Auth {
@@ -636,6 +687,15 @@ namespace ASC.Files.Core.Resources {
         public static string ErrorMessage_SecurityException_CopyFolder {
             get {
                 return ResourceManager.GetString("ErrorMessage_SecurityException_CopyFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You don&apos;t have permission to copy to this folder.
+        /// </summary>
+        public static string ErrorMessage_SecurityException_CopyToFolder {
+            get {
+                return ResourceManager.GetString("ErrorMessage_SecurityException_CopyToFolder", resourceCulture);
             }
         }
         
@@ -703,6 +763,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to You don&apos;t have permission to edit the room.
+        /// </summary>
+        public static string ErrorMessage_SecurityException_EditRoom {
+            get {
+                return ResourceManager.GetString("ErrorMessage_SecurityException_EditRoom", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to You don&apos;t have enough permission to move the file.
         /// </summary>
         public static string ErrorMessage_SecurityException_MoveFile {
@@ -717,6 +786,15 @@ namespace ASC.Files.Core.Resources {
         public static string ErrorMessage_SecurityException_MoveFolder {
             get {
                 return ResourceManager.GetString("ErrorMessage_SecurityException_MoveFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You don&apos;t have permission to move to this folder.
+        /// </summary>
+        public static string ErrorMessage_SecurityException_MoveToFolder {
+            get {
+                return ResourceManager.GetString("ErrorMessage_SecurityException_MoveToFolder", resourceCulture);
             }
         }
         
@@ -757,6 +835,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to You don&apos;t have enough permission to unarchive the room.
+        /// </summary>
+        public static string ErrorMessage_SecurityException_UnarchiveRoom {
+            get {
+                return ResourceManager.GetString("ErrorMessage_SecurityException_UnarchiveRoom", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cannot update the file because it&apos;s opened for editing.
         /// </summary>
         public static string ErrorMessage_SecurityException_UpdateEditingFile {
@@ -775,6 +862,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to You have tried too many times to enter your password. Please try again later.
+        /// </summary>
+        public static string ErrorMessage_SharePasswordManyAttempts {
+            get {
+                return ResourceManager.GetString("ErrorMessage_SharePasswordManyAttempts", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The content of third party folder are not available. Try to reconnect the account..
         /// </summary>
         public static string ErrorMessage_SharpBoxException {
@@ -789,6 +885,15 @@ namespace ASC.Files.Core.Resources {
         public static string ErrorMessage_StartEditing {
             get {
                 return ResourceManager.GetString("ErrorMessage_StartEditing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You cannot edit archived rooms.
+        /// </summary>
+        public static string ErrorMessage_UpdateArchivedRoom {
+            get {
+                return ResourceManager.GetString("ErrorMessage_UpdateArchivedRoom", resourceCulture);
             }
         }
         
@@ -816,123 +921,6 @@ namespace ASC.Files.Core.Resources {
         public static string ErrorMessage_ViewTrashItem {
             get {
                 return ResourceManager.GetString("ErrorMessage_ViewTrashItem", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Invalid provider.
-        /// </summary>
-        public static string ErrorMessage_InvalidProvider {
-            get {
-                return ResourceManager.GetString("ErrorMessage_InvalidProvider", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to It is not possible to use this folder to store the room.
-        /// </summary>
-        public static string ErrorMessage_InvalidThirdPartyFolder {
-            get {
-                return ResourceManager.GetString("ErrorMessage_InvalidThirdPartyFolder", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The invitation link is invalid or its validity has expired.
-        /// </summary>
-        public static string ErrorMessage_InvintationLink {
-            get {
-                return ResourceManager.GetString("ErrorMessage_InvintationLink", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The maximum number of links may not exceed {0}.
-        /// </summary>
-        public static string ErrorMessage_MaxLinksCount {
-            get {
-                return ResourceManager.GetString("ErrorMessage_MaxLinksCount", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to This provider is already connected to the room.
-        /// </summary>
-        public static string ErrorMessage_ProviderAlreadyConnect {
-            get {
-                return ResourceManager.GetString("ErrorMessage_ProviderAlreadyConnect", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The role is not available for this user type.
-        /// </summary>
-        public static string ErrorMessage_RoleNotAvailable {
-            get {
-                return ResourceManager.GetString("ErrorMessage_RoleNotAvailable", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to You don&apos;t have enough permission to archive the room.
-        /// </summary>
-        public static string ErrorMessage_SecurityException_ArchiveRoom {
-            get {
-                return ResourceManager.GetString("ErrorMessage_SecurityException_ArchiveRoom", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to You don&apos;t have permission to copy to this folder.
-        /// </summary>
-        public static string ErrorMessage_SecurityException_CopyToFolder {
-            get {
-                return ResourceManager.GetString("ErrorMessage_SecurityException_CopyToFolder", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to You don&apos;t have permission to edit the room.
-        /// </summary>
-        public static string ErrorMessage_SecurityException_EditRoom {
-            get {
-                return ResourceManager.GetString("ErrorMessage_SecurityException_EditRoom", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to You don&apos;t have permission to move to this folder.
-        /// </summary>
-        public static string ErrorMessage_SecurityException_MoveToFolder {
-            get {
-                return ResourceManager.GetString("ErrorMessage_SecurityException_MoveToFolder", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to You don&apos;t have enough permission to unarchive the room.
-        /// </summary>
-        public static string ErrorMessage_SecurityException_UnarchiveRoom {
-            get {
-                return ResourceManager.GetString("ErrorMessage_SecurityException_UnarchiveRoom", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to You have tried too many times to enter your password. Please try again later.
-        /// </summary>
-        public static string ErrorMessage_SharePasswordManyAttempts {
-            get {
-                return ResourceManager.GetString("ErrorMessage_SharePasswordManyAttempts", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to You cannot edit archived rooms.
-        /// </summary>
-        public static string ErrorMessage_UpdateArchivedRoom {
-            get {
-                return ResourceManager.GetString("ErrorMessage_UpdateArchivedRoom", resourceCulture);
             }
         }
         
@@ -1294,6 +1282,15 @@ namespace ASC.Files.Core.Resources {
         public static string UnlockComment {
             get {
                 return ResourceManager.GetString("UnlockComment", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User.
+        /// </summary>
+        public static string User {
+            get {
+                return ResourceManager.GetString("User", resourceCulture);
             }
         }
     }

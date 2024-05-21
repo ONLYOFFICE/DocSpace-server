@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -62,6 +62,12 @@ public class FilesMappingAction(TenantUtil tenantUtil) : IMappingAction<DbFolder
                 break;
             case FolderType.Archive:
                 destination.Title = FilesUCResource.Archive;
+                break;
+            case FolderType.ReadyFormFolder:
+                destination.Title = FilesUCResource.ReadyFormFolder;
+                break;
+            case FolderType.InProcessFormFolder:
+                destination.Title = FilesUCResource.InProcessFormFolder;
                 break;
             case FolderType.BUNCH:
                 try

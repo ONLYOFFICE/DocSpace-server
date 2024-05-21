@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -58,15 +58,15 @@ public interface IFolderDao<T>
     Task<Folder<T>> GetRootFolderByFileAsync(T fileId);
 
     IAsyncEnumerable<Folder<T>> GetRoomsAsync(IEnumerable<T> parentsIds, FilterType filterType, IEnumerable<string> tags, Guid subjectId, string searchText, bool withSubfolders,
-        bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds);
+        bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds, QuotaFilter quotaFilter);
 
     IAsyncEnumerable<Folder<T>> GetRoomsAsync(IEnumerable<T> roomsIds, FilterType filterType, IEnumerable<string> tags, Guid subjectId, string searchText, bool withSubfolders,
         bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds, IEnumerable<int> parentsIds = null);
 
-    IAsyncEnumerable<Folder<T>> GetFakeRoomsAsync(SearchArea searchArea, FilterType filterType, IEnumerable<string> tags, Guid subjectId, string searchText, bool withoutTags, 
+    IAsyncEnumerable<Folder<T>> GetProviderBasedRoomsAsync(SearchArea searchArea, FilterType filterType, IEnumerable<string> tags, Guid subjectId, string searchText, bool withoutTags, 
         bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds);
 
-    IAsyncEnumerable<Folder<T>> GetFakeRoomsAsync(SearchArea searchArea, IEnumerable<T> roomsIds, FilterType filterType, IEnumerable<string> tags,
+    IAsyncEnumerable<Folder<T>> GetProviderBasedRoomsAsync(SearchArea searchArea, IEnumerable<T> roomsIds, FilterType filterType, IEnumerable<string> tags,
         Guid subjectId, string searchText, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds);
 
     /// <summary>
@@ -96,9 +96,10 @@ public interface IFolderDao<T>
     /// <param name="offset"></param>
     /// <param name="count"></param>
     /// <param name="roomId"></param>
+    /// <param name="containingMyFiles"></param>
     /// <returns></returns>
     IAsyncEnumerable<Folder<T>> GetFoldersAsync(T parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
-        bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, T roomId = default);
+        bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, T roomId = default, bool containingMyFiles = false);
 
     /// <summary>
     /// Gets the folder (s) by ID (s)
@@ -176,6 +177,14 @@ public interface IFolderDao<T>
     Task<T> RenameFolderAsync(Folder<T> folder, string newTitle);
 
     /// <summary>
+    ///    Update folder
+    /// </summary>
+    /// <param name="folder"></param>
+    /// <param name="newTitle">new name</param>
+    /// <param name="newQuota">new name</param>
+    Task<T> UpdateFolderAsync(Folder<T> folder, string newTitle, long newQuota);
+
+    /// <summary>
     ///    Gets the number of files and folders to the container in your
     /// </summary>
     /// <param name="folderId">folder id</param>
@@ -225,7 +234,7 @@ public interface IFolderDao<T>
             T folderId,
             CommonChunkedUploadSession chunkedUploadSession,
             CommonChunkedUploadSessionHolder sessionHolder);
-
+    
 
     Task<string> GetBackupExtensionAsync(T folderId);
 
@@ -258,6 +267,22 @@ public interface IFolderDao<T>
     /// <param name="createIfNotExists"></param>
     /// <returns></returns>
     Task<T> GetFolderIDAsync(string module, string bunch, string data, bool createIfNotExists);
+
+    /// <summary>
+    /// Only in TMFolderDao
+    /// </summary>
+    /// <param name="folder"></param>
+    /// <param name="quota">new quota</param>
+    /// <returns></returns>
+    Task<T> ChangeFolderQuotaAsync(Folder<T> folder, long quota);
+
+    /// <summary>
+    /// Only in TMFolderDao
+    /// </summary>
+    /// <param name="folderId"></param>
+    /// <param name="size">folder size</param>
+    /// <returns></returns>
+    Task<T> ChangeTreeFolderSizeAsync(T folderId, long size);
 
     IAsyncEnumerable<T> GetFolderIDsAsync(string module, string bunch, IEnumerable<string> data, bool createIfNotExists);
 
@@ -381,9 +406,10 @@ public interface IFolderDao<T>
     /// <param name="entry"></param>
     /// <returns></returns>
     Task<(T RoomId, string RoomTitle)> GetParentRoomInfoFromFileEntryAsync(FileEntry<T> entry);
+    Task<FolderType> GetFirstParentTypeFromFileEntryAsync(FileEntry<T> entry);
     Task<int> GetFoldersCountAsync(T parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool withSubfolders = false, bool excludeSubject = false,
         T roomId = default);
-
+    Task<FilesStatisticsResultDto> GetFilesUsedSpace();
     Task SetCustomOrder(T folderId, T parentFolderId, int order);
 
     Task InitCustomOrder(IEnumerable<T> folderIds, T parentFolderId);

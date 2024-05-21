@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,6 +31,8 @@ namespace ASC.Web.Core.WhiteLabel;
 public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
 {
     public const string DefaultLogoText = BaseWhiteLabelSettings.DefaultLogoText;
+
+    public static readonly List<string> AvailableExtensions = [".bmp", ".jpg", ".jpeg", ".ico", ".png", ".svg"];
 
     #region Logos information: extension, isDefault, text for img auto generating
 
@@ -318,6 +320,7 @@ public class TenantWhiteLabelSettingsHelper(WebImageSupplier webImageSupplier,
     WhiteLabelHelper whiteLabelHelper,
     TenantManager tenantManager,
     SettingsManager settingsManager,
+    IConfiguration configuration,
     ILogger<TenantWhiteLabelSettingsHelper> logger)
 {
     private const string ModuleName = "whitelabel";
@@ -504,8 +507,10 @@ public class TenantWhiteLabelSettingsHelper(WebImageSupplier webImageSupplier,
                 return (logoData, extNotification);
             case "svg":
                 return (GetLogoDataFromSvg(), extNotification);
+            case "bmp":
             case "jpg":
             case "jpeg":
+            case "ico":
                 return (GetLogoDataFromJpg(), extNotification);
             default:
                 return (null, extNotification);
@@ -570,7 +575,7 @@ public class TenantWhiteLabelSettingsHelper(WebImageSupplier webImageSupplier,
             stream.CopyTo(memoryStream);
             return memoryStream.ToArray();
         }
-        return Array.Empty<byte>();
+        return [];
     }
 
     #endregion
@@ -594,7 +599,7 @@ public class TenantWhiteLabelSettingsHelper(WebImageSupplier webImageSupplier,
 
         if (await store.IsFileAsync(fileName))
         {
-            return (await store.GetUriAsync(fileName)).ToString();
+            return await store.GetUrlWithHashAsync(string.Empty, fileName);
         }
         return await GetAbsoluteDefaultLogoPathAsync(type, dark);
     }
@@ -620,7 +625,13 @@ public class TenantWhiteLabelSettingsHelper(WebImageSupplier webImageSupplier,
             _ => "logo/"
         };
 
-        return webImageSupplier.GetAbsoluteWebPath(path + BuildLogoFileName(type, ext, dark));
+        var fileName = BuildLogoFileName(type, ext, dark);
+
+        var version = configuration["version:number"];
+
+        var hash = string.IsNullOrEmpty(version) ? string.Empty : $"?{Data.Storage.Constants.QueryHash}={version}";
+
+        return webImageSupplier.GetAbsoluteWebPath($"{path}{fileName}{hash}");
     }
 
     private async Task<string> GetPartnerStorageLogoPathAsync(WhiteLabelLogoType type, bool dark)
@@ -641,7 +652,7 @@ public class TenantWhiteLabelSettingsHelper(WebImageSupplier webImageSupplier,
 
         var logoPath = BuildLogoFileName(type, partnerSettings.GetExt(type, dark), dark);
 
-        return (await partnerStorage.IsFileAsync(logoPath)) ? (await partnerStorage.GetUriAsync(logoPath)).ToString() : null;
+        return (await partnerStorage.IsFileAsync(logoPath)) ? (await partnerStorage.GetUrlWithHashAsync(string.Empty, logoPath)) : null;
     }
 
     #endregion

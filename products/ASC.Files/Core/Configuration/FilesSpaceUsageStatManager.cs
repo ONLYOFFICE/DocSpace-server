@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -90,7 +90,12 @@ public class FilesSpaceUsageStatManager(IDbContextFactory<FilesDbContext> dbCont
 
     }
 
-
+    public async Task<long> GetPortalSpaceUsageAsync()
+    {
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
+        return await Queries.SumPortalContentLengthAsync(filesDbContext, tenantId);
+    }
     public async Task<long> GetUserSpaceUsageAsync(Guid userId)
     {
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
@@ -98,12 +103,59 @@ public class FilesSpaceUsageStatManager(IDbContextFactory<FilesDbContext> dbCont
         var trash = await globalFolder.GetFolderTrashAsync(daoFactory);
 
         await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
-        return await Queries.SumContentLengthAsync(filesDbContext, tenantId, userId, my, trash);
+        var sum = await Queries.SumContentLengthAsync(filesDbContext, tenantId, userId, my, trash);
+        var sumFromRoom = await Queries.SumFromRoomContentLengthAsync(filesDbContext, tenantId, userId);
+        return Math.Max(sum - sumFromRoom, 0);
+    }
+
+    public async Task RecalculateFoldersUsedSpace(int TenantId)
+    {
+        await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
+
+        var queryGroup = filesDbContext.Folders
+                    .Join(filesDbContext.Tree, r => r.Id, a => a.ParentId, (folder, tree) => new { folder, tree })
+                    .Join(filesDbContext.Files, r => r.tree.FolderId, b => b.ParentId, (temp, file) => new { temp.folder, file })
+                    .Where(r => r.file.TenantId == r.folder.TenantId)
+                    .Where(r => r.folder.TenantId == TenantId)
+                    .GroupBy(temp => temp.folder.Id)
+                    .Select(group => new
+                    {
+                        Id = group.Key,
+                        Sum = group.Sum(temp => temp.file.ContentLength)
+                    });
+
+        var query = filesDbContext.Folders
+                        .Join(queryGroup,
+                            folder => folder.Id,
+                            result => result.Id,
+                            (folder, result) =>
+                                new { Folder = folder, Result = result })
+                        .ToList();
+
+        foreach (var item in query)
+        {
+            item.Folder.Counter = item.Result.Sum;
+            filesDbContext.Update(item.Folder);
+        }
+
+        await filesDbContext.SaveChangesAsync();
+
+    }
+    public async Task RecalculateQuota(int tenantId)
+    {
+        await tenantManager.SetCurrentTenantAsync(tenantId);
+
+        var size = await GetPortalSpaceUsageAsync();
+
+        await tenantManager.SetTenantQuotaRowAsync(
+           new TenantQuotaRow { TenantId = tenantId, Path = $"/{FileConstant.ModuleId}/", Counter = size, Tag = WebItemManager.DocumentsProductID.ToString(), UserId = Guid.Empty, LastModified = DateTime.UtcNow },
+           false);
     }
 
     public async Task RecalculateUserQuota(int tenantId, Guid userId)
     {
         await tenantManager.SetCurrentTenantAsync(tenantId);
+
         var size = await GetUserSpaceUsageAsync(userId);
 
         await tenantManager.SetTenantQuotaRowAsync(
@@ -122,11 +174,37 @@ public static class FilesSpaceUsageStatExtension
 
 static file class Queries
 {
+    public static readonly Func<FilesDbContext, int, Task<long>> SumPortalContentLengthAsync =
+       EF.CompileAsyncQuery(
+           (FilesDbContext ctx, int tenantId) =>
+               ctx.Files
+                   .Where(r => r.TenantId == tenantId)
+                   .Sum(r => r.ContentLength));
+
     public static readonly Func<FilesDbContext, int, Guid, int, int, Task<long>> SumContentLengthAsync =
         EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, Guid userId, int my, int trash) =>
                 ctx.Files
-                    .Where(r => r.TenantId == tenantId && r.CreateBy == userId &&
-                                (r.ParentId == my || r.ParentId == trash))
-                    .Sum(r => r.ContentLength));
+                    .Join(ctx.Tree, a => a.ParentId, b => b.FolderId, (file, tree) => new { file, tree })
+                    .Join(ctx.BunchObjects, a => a.tree.ParentId.ToString(), b => b.LeftNode, (fileTree, bunch) => new { fileTree.file, fileTree.tree, bunch })
+                    .Where(r => r.file.TenantId == r.bunch.TenantId)
+                    .Where(r => r.file.TenantId == tenantId)
+                    .Where(r => r.bunch.RightNode.StartsWith("files/my/" + userId.ToString()) || r.bunch.RightNode.StartsWith("files/trash/" + userId.ToString()))
+                    .Sum(r => r.file.ContentLength));
+
+    public static readonly Func<FilesDbContext, int, Guid, Task<long>>
+        SumFromRoomContentLengthAsync = EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, Guid userId) =>
+                ctx.Tag
+                    .Where(r => r.TenantId == tenantId)
+                    .Join(ctx.TagLink, r => r.Id, l => l.TagId,
+                        (tag, link) => new TagLinkData { Tag = tag, Link = link })
+                    .Where(r => r.Link.TenantId == r.Tag.TenantId)
+                    .Where(r => r.Tag.Type == TagType.FromRoom)
+                    .Where(r => r.Tag.Owner == userId)
+                    .Join(ctx.Files,
+                        r => Regex.IsMatch(r.Link.EntryId, "^[0-9]+$") ? Convert.ToInt32(r.Link.EntryId) : -1,
+                        f => f.Id, (tagLink, file) => new { tagLink, file })
+                    .Sum(r => r.file.ContentLength));
+
 }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,7 +27,8 @@
 namespace ASC.Web.Studio.UserControls.FirstTime;
 
 [Transient]
-public class FirstTimeTenantSettings(ILogger<FirstTimeTenantSettings> logger,
+public class FirstTimeTenantSettings(
+    ILogger<FirstTimeTenantSettings> logger,
     TenantManager tenantManager,
     TenantExtra tenantExtra,
     SettingsManager settingsManager,
@@ -40,7 +41,8 @@ public class FirstTimeTenantSettings(ILogger<FirstTimeTenantSettings> logger,
     TimeZoneConverter timeZoneConverter,
     CoreBaseSettings coreBaseSettings,
     IHttpClientFactory clientFactory,
-    CookiesManager cookiesManager)
+    CookiesManager cookiesManager,
+    CspSettingsHelper cspSettingsHelper)
 {
     public async Task<WizardSettings> SaveDataAsync(WizardRequestsDto inDto)
     {
@@ -55,7 +57,7 @@ public class FirstTimeTenantSettings(ILogger<FirstTimeTenantSettings> logger,
                 throw new Exception("Wizard passed.");
             }
 
-            if (!string.IsNullOrEmpty(setupInfo.AmiMetaUrl) && IncorrectAmiId(amiid))
+            if (!string.IsNullOrEmpty(setupInfo.AmiMetaUrl) && await IncorrectAmiId(amiid))
             {
                 //throw new Exception(Resource.EmailAndPasswordIncorrectAmiId); TODO
             }
@@ -93,7 +95,7 @@ public class FirstTimeTenantSettings(ILogger<FirstTimeTenantSettings> logger,
 
             await userManager.UpdateUserInfoAsync(currentUser);
 
-            if (tenantExtra.EnableTariffSettings && tenantExtra.Enterprise)
+            if (await tenantExtra.GetEnableTariffSettings() && tenantExtra.Enterprise)
             {
                 await TariffSettings.SetLicenseAcceptAsync(settingsManager);
                 await messageService.SendAsync(MessageAction.LicenseKeyUploaded);
@@ -109,13 +111,14 @@ public class FirstTimeTenantSettings(ILogger<FirstTimeTenantSettings> logger,
             tenant.TimeZone = timeZoneConverter.GetTimeZone(timeZone).Id;
 
             await tenantManager.SaveTenantAsync(tenant);
-
+            await cspSettingsHelper.SaveAsync(null);
+            
             await studioNotifyService.SendCongratulationsAsync(currentUser);
             await studioNotifyService.SendRegDataAsync(currentUser);
 
             if (subscribeFromSite && tenantExtra.Opensource && !coreBaseSettings.CustomMode)
             {
-                SubscribeFromSite(currentUser);
+                await SubscribeFromSite(currentUser);
             }
 
             await cookiesManager.AuthenticateMeAndSetCookiesAsync(currentUser.Id);
@@ -141,13 +144,11 @@ public class FirstTimeTenantSettings(ILogger<FirstTimeTenantSettings> logger,
         }
     }
 
-    public bool RequestLicense
+    public async Task<bool> GetRequestLicense()
     {
-        get
-        {
-            return tenantExtra.EnableTariffSettings && tenantExtra.Enterprise
-                && !File.Exists(licenseReader.LicensePath);
-        }
+        return await tenantExtra.GetEnableTariffSettings() && 
+               tenantExtra.Enterprise &&
+               !File.Exists(licenseReader.LicensePath);
     }
 
     private void TrySetLanguage(Tenant tenant, string lng)
@@ -170,7 +171,7 @@ public class FirstTimeTenantSettings(ILogger<FirstTimeTenantSettings> logger,
 
     private static string _amiId;
 
-    private bool IncorrectAmiId(string customAmiId)
+    private async Task<bool> IncorrectAmiId(string customAmiId)
     {
         customAmiId = (customAmiId ?? "").Trim();
         if (string.IsNullOrEmpty(customAmiId))
@@ -189,11 +190,9 @@ public class FirstTimeTenantSettings(ILogger<FirstTimeTenantSettings> logger,
             try
             {
                 var httpClient = clientFactory.CreateClient();
-                using (var response = httpClient.Send(request))
-                using (var responseStream = response.Content.ReadAsStream())
-                using (var reader = new StreamReader(responseStream))
+                using (var response = await httpClient.SendAsync(request))
                 {
-                    _amiId = reader.ReadToEnd();
+                    _amiId = await response.Content.ReadAsStringAsync();
                 }
 
                 logger.DebugInstanceId(_amiId);
@@ -207,7 +206,7 @@ public class FirstTimeTenantSettings(ILogger<FirstTimeTenantSettings> logger,
         return string.IsNullOrEmpty(_amiId) || _amiId != customAmiId;
     }
 
-    private void SubscribeFromSite(UserInfo user)
+    private async Task SubscribeFromSite(UserInfo user)
     {
         try
         {
@@ -233,7 +232,7 @@ public class FirstTimeTenantSettings(ILogger<FirstTimeTenantSettings> logger,
             request.Content = new StringContent(data);
 
             var httpClient = clientFactory.CreateClient();
-            using var response = httpClient.Send(request);
+            using var response = await httpClient.SendAsync(request);
 
             logger.DebugSubscribeResponse(response);//toto write
 

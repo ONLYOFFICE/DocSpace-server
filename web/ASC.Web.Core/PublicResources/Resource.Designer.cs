@@ -8,12 +8,10 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-using System.CodeDom.Compiler;
-using System.Diagnostics.CodeAnalysis;
-using System.Resources;
-using System.Runtime.CompilerServices;
-
 namespace ASC.Web.Core.PublicResources {
+    using System;
+    
+    
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -21,27 +19,27 @@ namespace ASC.Web.Core.PublicResources {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [GeneratedCode("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
-    [DebuggerNonUserCode()]
-    [CompilerGenerated()]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+    [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class Resource {
         
-        private static ResourceManager resourceMan;
+        private static global::System.Resources.ResourceManager resourceMan;
         
-        private static CultureInfo resourceCulture;
+        private static global::System.Globalization.CultureInfo resourceCulture;
         
-        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
+        [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         internal Resource() {
         }
         
         /// <summary>
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
-        [EditorBrowsable(EditorBrowsableState.Advanced)]
-        public static ResourceManager ResourceManager {
+        [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
+        public static global::System.Resources.ResourceManager ResourceManager {
             get {
-                if (ReferenceEquals(resourceMan, null)) {
-                    ResourceManager temp = new ResourceManager("ASC.Web.Core.PublicResources.Resource", typeof(Resource).Assembly);
+                if (object.ReferenceEquals(resourceMan, null)) {
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("ASC.Web.Core.PublicResources.Resource", typeof(Resource).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -52,8 +50,8 @@ namespace ASC.Web.Core.PublicResources {
         ///   Overrides the current thread's CurrentUICulture property for all
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
-        [EditorBrowsable(EditorBrowsableState.Advanced)]
-        public static CultureInfo Culture {
+        [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
+        public static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -1755,6 +1753,16 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invitation limit is exceeded.
+        /// </summary>
+        public static string ErrorInvitationLimitExceeded
+        {
+            get {
+                return ResourceManager.GetString("ErrorInvitationLimitExceeded", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to The access to the portal is restricted.
         /// </summary>
         public static string ErrorIpSecurity {
@@ -1989,7 +1997,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to To many input files.
+        ///   Looks up a localized string similar to Too many input files.
         /// </summary>
         public static string ErrorWebPluginToManyInputFiles {
             get {
@@ -2529,6 +2537,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The password change instruction has been sent to {0} email address..
+        /// </summary>
+        public static string MessagePasswordSendedToEmail {
+            get {
+                return ResourceManager.GetString("MessagePasswordSendedToEmail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to If a user with the {0} email exists, the password change instruction has been sent to this email address..
         /// </summary>
         public static string MessageYourPasswordSendedToEmail {
@@ -2565,15 +2582,6 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Disk space quota exceeded.
-        /// </summary>
-        public static string PersonalFreeSpaceException {
-            get {
-                return ResourceManager.GetString("PersonalFreeSpaceException", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Cloud space for your office docs.
         /// </summary>
         public static string PortalName {
@@ -2592,6 +2600,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Failed to set the memory quota - the memory quota you set is greater than portals quota..
+        /// </summary>
+        public static string QuotaGreaterPortalError {
+            get {
+                return ResourceManager.GetString("QuotaGreaterPortalError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Data reassign process for {0} is not complete..
         /// </summary>
         public static string ReassignDataRemoveUserError {
@@ -2606,6 +2623,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string RecaptchaInvalid {
             get {
                 return ResourceManager.GetString("RecaptchaInvalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Room space quota exceeded.
+        /// </summary>
+        public static string RoomFreeSpaceException {
+            get {
+                return ResourceManager.GetString("RoomFreeSpaceException", resourceCulture);
             }
         }
         
@@ -2835,6 +2861,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Storage quotas &amp; statistic.
+        /// </summary>
+        public static string TariffsFeature_statistic {
+            get {
+                return ResourceManager.GetString("TariffsFeature_statistic", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Third-party integrations.
         /// </summary>
         public static string TariffsFeature_thirdparty {
@@ -2844,7 +2879,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} storage space.
+        ///   Looks up a localized string similar to {0} per admin/power user and ability to add space on request.
         /// </summary>
         public static string TariffsFeature_total_size {
             get {
@@ -2975,6 +3010,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string TfaTooMuchError {
             get {
                 return ResourceManager.GetString("TfaTooMuchError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User space quota exceeded.
+        /// </summary>
+        public static string UserFreeSpaceException {
+            get {
+                return ResourceManager.GetString("UserFreeSpaceException", resourceCulture);
             }
         }
         

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,67 +26,60 @@
 
 namespace ASC.Web.Files.Core;
 
-public class ResponseStream : Stream
+public class ResponseStream(Stream stream, long length) : Stream
 {
-    private readonly Stream _stream;
-    private readonly long _length;
+    private HttpResponseMessage _response;
 
-    public ResponseStream(Stream stream, long length)
+    public static async Task<ResponseStream> FromMessageAsync(HttpResponseMessage response)
     {
-        _stream = stream;
-        _length = length;
+        var stream = await response.Content.ReadAsStreamAsync();
+        var length = response.Content.Headers.ContentLength ?? stream.Length;
+        
+        var result = new ResponseStream(stream, length) { _response = response };
+        return result;
     }
 
-    public ResponseStream(HttpResponseMessage response)
-    {
-        _stream = response.Content.ReadAsStream();
-        _length = _stream.Length;
-        _response = response;
-    }
-
-    public override bool CanRead => _stream.CanRead;
-    public override bool CanSeek => _stream.CanSeek;
-    public override bool CanWrite => _stream.CanWrite;
-    public override long Length => _length;
+    public override bool CanRead => stream.CanRead;
+    public override bool CanSeek => stream.CanSeek;
+    public override bool CanWrite => stream.CanWrite;
+    public override long Length => length;
 
     public override long Position
     {
-        get => _stream.Position;
-        set => _stream.Position = value;
+        get => stream.Position;
+        set => stream.Position = value;
     }
-
-    private readonly HttpResponseMessage _response;
 
     public override void Flush()
     {
-        _stream.Flush();
+        stream.Flush();
     }
 
     public override int Read(byte[] buffer, int offset, int count)
     {
-        return _stream.Read(buffer, offset, count);
+        return stream.Read(buffer, offset, count);
     }
 
     public override long Seek(long offset, SeekOrigin origin)
     {
-        return _stream.Seek(offset, origin);
+        return stream.Seek(offset, origin);
     }
 
     public override void SetLength(long value)
     {
-        _stream.SetLength(value);
+        stream.SetLength(value);
     }
 
     public override void Write(byte[] buffer, int offset, int count)
     {
-        _stream.Write(buffer, offset, count);
+        stream.Write(buffer, offset, count);
     }
 
     protected override void Dispose(bool disposing)
     {
         if (disposing)
         {
-            _stream.Dispose();
+            stream.Dispose();
             _response?.Dispose();
         }
         base.Dispose(disposing);
@@ -94,7 +87,7 @@ public class ResponseStream : Stream
 
     public override void Close()
     {
-        _stream.Close();
+        stream.Close();
         base.Close();
     }
 }

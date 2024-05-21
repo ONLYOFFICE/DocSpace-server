@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2023
-//
+// (c) Copyright Ascensio System SIA 2009-2024
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -49,7 +49,7 @@ public class FileConverterQueue(IDistributedCache distributedCache, IDistributed
 
         await using (await distributedLockProvider.TryAcquireLockAsync($"lock_{cacheKey}"))
         {
-            var task = PeekTask(file, cacheKey);
+            var task = await PeekTask(file, cacheKey);
 
             if (task != null)
             {
@@ -58,7 +58,7 @@ public class FileConverterQueue(IDistributedCache distributedCache, IDistributed
                     return;
                 }
 
-                Dequeue(task, cacheKey);
+                await DequeueAsync(task, cacheKey);
             }
 
             var queueResult = new FileConverterOperationResult
@@ -80,62 +80,61 @@ public class FileConverterQueue(IDistributedCache distributedCache, IDistributed
                 Headers = headers
             };
 
-            Enqueue(queueResult, cacheKey);
+            await EnqueueAsync(queueResult, cacheKey);
         }
     }
 
-    private void Enqueue(FileConverterOperationResult val, string cacheKey)
+    private async Task EnqueueAsync(FileConverterOperationResult val, string cacheKey)
     {
-        var fromCache = LoadFromCache(cacheKey).ToList();
+        var fromCache = (await LoadFromCacheAsync(cacheKey)).ToList();
 
         fromCache.Add(val);
 
-        SaveToCache(fromCache, cacheKey);
+        await SaveToCacheAsync(fromCache, cacheKey);
     }
 
-    private void Dequeue(FileConverterOperationResult val, string cacheKey)
+    private async Task DequeueAsync(FileConverterOperationResult val, string cacheKey)
     {
-        var fromCache = LoadFromCache(cacheKey).ToList();
+        var fromCache = (await LoadFromCacheAsync(cacheKey)).ToList();
 
         fromCache.Remove(val);
 
-        SaveToCache(fromCache, cacheKey);
+        await SaveToCacheAsync(fromCache, cacheKey);
     }
 
-    private FileConverterOperationResult PeekTask<T>(File<T> file, string cacheKey)
+    private async Task<FileConverterOperationResult> PeekTask<T>(File<T> file, string cacheKey)
     {
-        var exist = LoadFromCache(cacheKey);
+        var exist = await LoadFromCacheAsync(cacheKey);
 
         return exist.LastOrDefault(x =>
                 {
                     var fileId = JsonDocument.Parse(x.Source).RootElement.GetProperty("id").Deserialize<T>();
-
-            return string.Compare(file.Id?.ToString(), fileId.ToString(), StringComparison.OrdinalIgnoreCase) == 0;
+                    return string.Compare(file.Id?.ToString(), fileId.ToString(), StringComparison.OrdinalIgnoreCase) == 0;
                 });
     }
 
-    internal bool IsConverting<T>(File<T> file, string cacheKey)
+    internal async Task<bool> IsConverting<T>(File<T> file, string cacheKey)
     {
-        var result = PeekTask(file, cacheKey);
+        var result = await PeekTask(file, cacheKey);
 
         return result != null && result.Progress != 100 && string.IsNullOrEmpty(result.Error);
     }
 
 
-    public IEnumerable<FileConverterOperationResult> GetAllTask<T>()
+    public async Task<IEnumerable<FileConverterOperationResult>> GetAllTaskAsync<T>()
     {
         var cacheKey = GetCacheKey<T>();
-        var queueTasks = LoadFromCache(cacheKey);
+        var queueTasks = await LoadFromCacheAsync(cacheKey);
 
-        queueTasks = DeleteOrphanCacheItem(queueTasks, cacheKey);
+        queueTasks = await DeleteOrphanCacheItemAsync(queueTasks, cacheKey);
 
         return queueTasks;
     }
 
-    public void SetAllTask<T>(IEnumerable<FileConverterOperationResult> queueTasks)
+    public async Task SetAllTask<T>(IEnumerable<FileConverterOperationResult> queueTasks)
     {
         var cacheKey = GetCacheKey<T>();
-        SaveToCache(queueTasks, cacheKey);
+        await SaveToCacheAsync(queueTasks, cacheKey);
     }
 
 
@@ -143,13 +142,13 @@ public class FileConverterQueue(IDistributedCache distributedCache, IDistributed
     {
         var cacheKey = GetCacheKey<T>();
         var file = pair.Key;
-        var operation = PeekTask(file, cacheKey);
+        var operation = await PeekTask(file, cacheKey);
 
         if (operation != null && (pair.Value || await fileSecurity.CanReadAsync(file)))
         {
             if (operation.Progress == 100)
             {
-                Dequeue(operation, cacheKey);
+                await DequeueAsync(operation, cacheKey);
             }
 
             return operation;
@@ -159,14 +158,14 @@ public class FileConverterQueue(IDistributedCache distributedCache, IDistributed
     }
 
 
-    public async Task<string> FileJsonSerializerAsync<T>(EntryStatusManager EntryManager, File<T> file, string folderTitle)
+    public async Task<string> FileJsonSerializerAsync<T>(EntryStatusManager entryManager, File<T> file, string folderTitle)
     {
         if (file == null)
         {
             return string.Empty;
         }
 
-        await EntryManager.SetFileStatusAsync(file);
+        await entryManager.SetFileStatusAsync(file);
 
         var options = new JsonSerializerOptions
         {
@@ -194,23 +193,23 @@ public class FileConverterQueue(IDistributedCache distributedCache, IDistributed
                                DateTime.UtcNow - x.StopDateTime > TimeSpan.FromMinutes(10));
     }
 
-    private IEnumerable<FileConverterOperationResult> DeleteOrphanCacheItem(IEnumerable<FileConverterOperationResult> queueTasks, string cacheKey)
+    private async Task<List<FileConverterOperationResult>> DeleteOrphanCacheItemAsync(IEnumerable<FileConverterOperationResult> queueTasks, string cacheKey)
     {
         var listTasks = queueTasks.ToList();
 
         if (listTasks.RemoveAll(IsOrphanCacheItem) > 0)
         {
-            SaveToCache(listTasks, cacheKey);
+            await SaveToCacheAsync(listTasks, cacheKey);
         }
 
         return listTasks;
     }
 
-    private void SaveToCache(IEnumerable<FileConverterOperationResult> queueTasks, string cacheKey)
+    private async Task SaveToCacheAsync(IEnumerable<FileConverterOperationResult> queueTasks, string cacheKey)
     {
         if (!queueTasks.Any())
         {
-            distributedCache.Remove(cacheKey);
+            await distributedCache.RemoveAsync(cacheKey);
 
             return;
         }
@@ -219,7 +218,7 @@ public class FileConverterQueue(IDistributedCache distributedCache, IDistributed
 
         Serializer.Serialize(ms, queueTasks);
 
-        distributedCache.Set(cacheKey, ms.ToArray(), new DistributedCacheEntryOptions
+        await distributedCache.SetAsync(cacheKey, ms.ToArray(), new DistributedCacheEntryOptions
         {
             SlidingExpiration = TimeSpan.FromMinutes(15)
         });
@@ -230,13 +229,13 @@ public class FileConverterQueue(IDistributedCache distributedCache, IDistributed
         return $"{Cache_key_prefix}_{typeof(T).Name}".ToLowerInvariant();
     }
 
-    private IEnumerable<FileConverterOperationResult> LoadFromCache(string cacheKey)
+    private async Task<List<FileConverterOperationResult>> LoadFromCacheAsync(string cacheKey)
     {
-        var serializedObject = distributedCache.Get(cacheKey);
+        var serializedObject = await distributedCache.GetAsync(cacheKey);
 
         if (serializedObject == null)
         {
-            return new List<FileConverterOperationResult>();
+            return [];
         }
 
         using var ms = new MemoryStream(serializedObject);
@@ -256,65 +255,30 @@ public class FileJsonSerializerData<T>
 }
 
 [Scope(Additional = typeof(FileConverterExtension))]
-public class FileConverter(FileUtility fileUtility,
-        FilesLinkUtility filesLinkUtility,
-        IDaoFactory daoFactory,
-        SetupInfo setupInfo,
-        PathProvider pathProvider,
-        FileSecurity fileSecurity,
-        FileMarker fileMarker,
-        TenantManager tenantManager,
-        AuthContext authContext,
-        EntryManager entryManager,
-        FilesSettingsHelper filesSettingsHelper,
-        GlobalFolderHelper globalFolderHelper,
-        FilesMessageService filesMessageService,
-        FileShareLink fileShareLink,
-        DocumentServiceHelper documentServiceHelper,
-        DocumentServiceConnector documentServiceConnector,
-        FileTrackerHelper fileTracker,
-        BaseCommonLinkUtility baseCommonLinkUtility,
-        EntryStatusManager entryStatusManager,
-        IServiceProvider serviceProvider,
-        IHttpClientFactory clientFactory,
-        SocketManager socketManager,
-        FileConverterQueue fileConverterQueue)
-    {
-    private readonly IHttpContextAccessor _httpContextAccessor;
-
-    public FileConverter(
-        FileUtility fileUtility,
-        FilesLinkUtility filesLinkUtility,
-        IDaoFactory daoFactory,
-        SetupInfo setupInfo,
-        PathProvider pathProvider,
-        FileSecurity fileSecurity,
-        FileMarker fileMarker,
-        TenantManager tenantManager,
-        AuthContext authContext,
-        EntryManager entryManager,
-        FilesSettingsHelper filesSettingsHelper,
-        GlobalFolderHelper globalFolderHelper,
-        FilesMessageService filesMessageService,
-        FileShareLink fileShareLink,
-        DocumentServiceHelper documentServiceHelper,
-        DocumentServiceConnector documentServiceConnector,
-        FileTrackerHelper fileTracker,
-        BaseCommonLinkUtility baseCommonLinkUtility,
-        EntryStatusManager entryStatusManager,
-        IServiceProvider serviceProvider,
-        IHttpContextAccessor httpContextAccessor,
-        IHttpClientFactory clientFactory,
-        SocketManager socketManager,
-        FileConverterQueue fileConverterQueue)
-        : this(fileUtility, filesLinkUtility, daoFactory, setupInfo, pathProvider, fileSecurity,
-              fileMarker, tenantManager, authContext, entryManager, filesSettingsHelper,
-              globalFolderHelper, filesMessageService, fileShareLink, documentServiceHelper, documentServiceConnector, fileTracker,
-              baseCommonLinkUtility, entryStatusManager, serviceProvider, clientFactory, socketManager, fileConverterQueue)
-    {
-        _httpContextAccessor = httpContextAccessor;
-    }
-
+public class FileConverter(
+    FileUtility fileUtility,
+    FilesLinkUtility filesLinkUtility,
+    IDaoFactory daoFactory,
+    PathProvider pathProvider,
+    FileSecurity fileSecurity,
+    FileMarker fileMarker,
+    TenantManager tenantManager,
+    AuthContext authContext,
+    LockerManager lockerManager,
+    FilesSettingsHelper filesSettingsHelper,
+    GlobalFolderHelper globalFolderHelper,
+    FilesMessageService filesMessageService,
+    DocumentServiceHelper documentServiceHelper,
+    DocumentServiceConnector documentServiceConnector,
+    FileTrackerHelper fileTracker,
+    BaseCommonLinkUtility baseCommonLinkUtility,
+    EntryStatusManager entryStatusManager,
+    IServiceProvider serviceProvider,
+    IHttpClientFactory clientFactory,
+    SocketManager socketManager,
+    FileConverterQueue fileConverterQueue,
+    IHttpContextAccessor httpContextAccessor)
+{
     public bool EnableAsUploaded => fileUtility.ExtsMustConvert.Count > 0 && !string.IsNullOrEmpty(filesLinkUtility.DocServiceConverterUrl);
 
     public bool MustConvert<T>(File<T> file)
@@ -329,9 +293,9 @@ public class FileConverter(FileUtility fileUtility,
         return fileUtility.ExtsMustConvert.Contains(ext);
     }
 
-    private IDictionary<string, string> GetHttpHeaders()
+    private Dictionary<string, string> GetHttpHeaders()
     {
-        var request = _httpContextAccessor?.HttpContext?.Request;
+        var request = httpContextAccessor?.HttpContext?.Request;
 
         return MessageSettings.GetHttpHeaders(request)?
             .ToDictionary(x => x.Key, x => x.Value.ToString());
@@ -374,46 +338,34 @@ public class FileConverter(FileUtility fileUtility,
         if (!await EnableConvertAsync(file, toExtension))
         {
             var fileDao = daoFactory.GetFileDao<T>();
-
             return await fileDao.GetFileStreamAsync(file);
-        }
-
-        if (file.ContentLength > setupInfo.AvailableFileSize)
-        {
-            throw new Exception(string.Format(FilesCommonResource.ErrorMessage_FileSizeConvert, FileSizeComment.FilesSizeToString(setupInfo.AvailableFileSize)));
         }
 
         var fileUri = await pathProvider.GetFileStreamUrlAsync(file);
         var docKey = await documentServiceHelper.GetDocKeyAsync(file);
         fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(fileUri);
 
-        var uriTuple = await documentServiceConnector.GetConvertedUriAsync(fileUri, file.ConvertedExtension, toExtension, docKey, password, CultureInfo.CurrentUICulture.Name, null, null, false);
+        var uriTuple = await documentServiceConnector.GetConvertedUriAsync(fileUri, file.ConvertedExtension, toExtension, docKey, password, 
+            CultureInfo.CurrentUICulture.Name, null, null, false);
         var convertUri = uriTuple.ConvertedDocumentUri;
         var request = new HttpRequestMessage
         {
             RequestUri = new Uri(convertUri)
         };
 
-        var httpClient = clientFactory.CreateClient();
-        var response = await httpClient.SendAsync(request);
+        var httpClient = clientFactory.CreateClient(nameof(DocumentService));
+        var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
 
-        return new ResponseStream(response);
+        return await ResponseStream.FromMessageAsync(response);
     }
 
-    public async Task<FileOperationResult> ExecSynchronouslyAsync<T>(File<T> file, string doc, bool updateIfExist)
+    public async Task<FileOperationResult> ExecSynchronouslyAsync<T>(File<T> file, bool updateIfExist)
     {
-        var fileDao = daoFactory.GetFileDao<T>();
-
         if (!await fileSecurity.CanReadAsync(file))
         {
-            (var readLink, file, _) = await fileShareLink.CheckAsync(doc, true, fileDao);
             if (file == null)
             {
                 throw new ArgumentNullException(nameof(file), FilesCommonResource.ErrorMessage_FileNotFound);
-            }
-            if (!readLink)
-            {
-                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
             }
         }
 
@@ -424,9 +376,8 @@ public class FileConverter(FileUtility fileUtility,
 
         fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(fileUri);
 
-        var uriTuple = await documentServiceConnector.GetConvertedUriAsync(fileUri, fileExtension, toExtension, docKey, null, CultureInfo.CurrentUICulture.Name, null, null, false);
-        var convertUri = uriTuple.ConvertedDocumentUri;
-        var convertType = uriTuple.convertedFileType;
+        var (_, convertUri, convertType) = await documentServiceConnector.GetConvertedUriAsync(fileUri, fileExtension, toExtension, docKey, 
+            null, CultureInfo.CurrentUICulture.Name, null, null, false);
 
         var operationResult = new FileConverterOperationResult
         {
@@ -441,7 +392,7 @@ public class FileConverter(FileUtility fileUtility,
             Account = authContext.CurrentAccount.ID,
             Delete = false,
             StartDateTime = DateTime.UtcNow,
-            Url = _httpContextAccessor?.HttpContext?.Request.GetDisplayUrl(),
+            Url = httpContextAccessor?.HttpContext?.Request.GetDisplayUrl(),
             Password = null,
             ServerRootPath = baseCommonLinkUtility.ServerRootPath,
             Headers = GetHttpHeaders()
@@ -487,20 +438,20 @@ public class FileConverter(FileUtility fileUtility,
         await fileConverterQueue.AddAsync(file, password, (await tenantManager.GetCurrentTenantAsync()).Id, 
             authContext.CurrentAccount, 
             deleteAfter, 
-            _httpContextAccessor?.HttpContext?.Request.GetDisplayUrl(),
+            httpContextAccessor?.HttpContext?.Request.GetDisplayUrl(),
             baseCommonLinkUtility.ServerRootPath, 
             updateIfExist,
             GetHttpHeaders());
     }
 
-    public bool IsConverting<T>(File<T> file)
+    public async Task<bool> IsConverting<T>(File<T> file)
     {
         if (!MustConvert(file) || !string.IsNullOrEmpty(file.ConvertedType))
         {
             return false;
         }
 
-        return fileConverterQueue.IsConverting(file, FileConverterQueue.GetCacheKey<T>());
+        return await fileConverterQueue.IsConverting(file, FileConverterQueue.GetCacheKey<T>());
     }
 
     public async IAsyncEnumerable<FileOperationResult> GetStatusAsync<T>(IEnumerable<KeyValuePair<File<T>, bool>> filesPair)
@@ -525,7 +476,7 @@ public class FileConverter(FileUtility fileUtility,
         var isNewFile = false;
         var newFileTitle = FileUtility.ReplaceFileExtension(file.Title, convertedFileType);
 
-        if (!filesSettingsHelper.StoreOriginalFiles && await fileSecurity.CanEditAsync(file))
+        if (!await filesSettingsHelper.GetStoreOriginalFiles() && await fileSecurity.CanEditAsync(file))
         {
             newFile = (File<T>)file.Clone();
             newFile.Version++;
@@ -551,7 +502,7 @@ public class FileConverter(FileUtility fileUtility,
             if (updateIfExist && (parent != null && !folderId.Equals(parent.Id) || !file.ProviderEntry))
             {
                 newFile = await fileDao.GetFileAsync(folderId, newFileTitle);
-                if (newFile != null && await fileSecurity.CanEditAsync(newFile) && !await entryManager.FileLockedForMeAsync(newFile.Id) && !fileTracker.IsEditing(newFile.Id))
+                if (newFile != null && await fileSecurity.CanEditAsync(newFile) && !await lockerManager.FileLockedForMeAsync(newFile.Id) && !fileTracker.IsEditing(newFile.Id))
                 {
                     newFile.Version++;
                     newFile.VersionGroup++;
@@ -580,12 +531,12 @@ public class FileConverter(FileUtility fileUtility,
             RequestUri = new Uri(convertedFileUrl)
         };
 
-        var httpClient = clientFactory.CreateClient();
+        var httpClient = clientFactory.CreateClient(nameof(DocumentService));
 
         try
         {
-            using var response = await httpClient.SendAsync(request);
-            await using var convertedFileStream = new ResponseStream(response);
+            using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+            await using var convertedFileStream = await ResponseStream.FromMessageAsync(response);
             newFile.ContentLength = convertedFileStream.Length;
             newFile = await fileDao.SaveFileAsync(newFile, convertedFileStream);
 

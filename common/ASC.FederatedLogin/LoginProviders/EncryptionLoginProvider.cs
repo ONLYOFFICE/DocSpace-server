@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,7 +29,7 @@ namespace ASC.Web.Studio.Core;
 [Scope]
 public class EncryptionLoginProvider(
     ILogger<EncryptionLoginProvider> logger,
-    SecurityContext securityContext,
+    AuthContext authContext,
     InstanceCrypto instanceCrypto,
     AccountLinker accountLinker)
 {
@@ -51,7 +51,7 @@ public class EncryptionLoginProvider(
 
     public async Task<string> GetKeysAsync()
     {
-        return await GetKeysAsync(securityContext.CurrentAccount.ID);
+        return await GetKeysAsync(authContext.CurrentAccount.ID);
     }
 
     public async Task<string> GetKeysAsync(Guid userId)

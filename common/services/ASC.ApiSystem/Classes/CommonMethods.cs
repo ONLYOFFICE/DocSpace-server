@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,7 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-
 namespace ASC.ApiSystem.Controllers;
 
 [Scope]
@@ -44,10 +43,13 @@ public class CommonMethods(
 {
     public object ToTenantWrapper(Tenant t, QuotaUsageDto quotaUsage = null, TenantOwnerDto owner = null)
     {
+        var tenantQuotaSettings = hostedSolution.GetTenantQuotaSettings(t.Id).Result;
+        var tariffMaxTotalSize = hostedSolution.GetTenantQuotaAsync(t.Id).Result.MaxTotalSize;
         return new
         {
             created = t.CreationDateTime,
-            domain = t.GetTenantDomain(coreSettings),
+            domain = t.GetTenantDomain(coreSettings, false),
+            mappedDomain = t.MappedDomain,
             hostedRegion = t.HostedRegion,
             industry = t.Industry,
             language = t.Language,
@@ -59,6 +61,9 @@ public class CommonMethods(
             tenantId = t.Id,
             timeZoneName = timeZoneConverter.GetTimeZone(t.TimeZone).DisplayName,
             quotaUsage,
+            customQuota = tenantQuotaSettings.EnableQuota && tenantQuotaSettings.Quota <= tariffMaxTotalSize ? 
+                    tenantQuotaSettings.Quota :
+                    tariffMaxTotalSize == long.MaxValue ? -1 : tariffMaxTotalSize,
             owner
         };
     }
@@ -69,11 +74,11 @@ public class CommonMethods(
         return $"{requestUriScheme}{Uri.SchemeDelimiter}{tenantDomain}/{url}{(first ? "&first=true" : "")}";
     }
 
-    public bool SendCongratulations(string requestUriScheme, Tenant tenant, bool skipWelcome, out string url)
+    public async Task<string> SendCongratulations(string requestUriScheme, Tenant tenant, bool skipWelcome)
     {
         var validationKey = emailValidationKeyProvider.GetEmailKey(tenant.Id, tenant.OwnerId.ToString() + ConfirmType.Auth);
 
-        url = string.Format("{0}{1}{2}{3}{4}?userid={5}&key={6}",
+        var url = string.Format("{0}{1}{2}{3}{4}?userid={5}&key={6}",
                             requestUriScheme,
                             Uri.SchemeDelimiter,
                             tenant.GetTenantDomain(coreSettings),
@@ -85,7 +90,7 @@ public class CommonMethods(
         if (skipWelcome)
         {
             log.LogDebug("congratulations skiped");
-            return false;
+            return url;
         }
 
         var request = new HttpRequestMessage
@@ -98,26 +103,23 @@ public class CommonMethods(
         try
         {
             var httpClient = clientFactory.CreateClient();
-            using var response = httpClient.Send(request);
+            using var response = await httpClient.SendAsync(request);
 
             log.LogDebug("congratulations result = {0}", response.StatusCode);
 
             if (response.StatusCode != HttpStatusCode.OK)
             {
-                using var stream = response.Content.ReadAsStream();
-                using var reader = new StreamReader(stream, Encoding.UTF8);
-                var result = reader.ReadToEnd();
+                var result = await response.Content.ReadAsStringAsync();
                 throw new Exception(result);
             }
         }
         catch (Exception ex)
         {
             log.LogError(ex, "SendCongratulations error");
-            return false;
+            return url;
         }
 
-        url = null;
-        return true;
+        return null;
     }
 
     public async Task<(bool, Tenant)> TryGetTenantAsync(IModel model)
@@ -272,7 +274,7 @@ public class CommonMethods(
         return hostEntry.AddressList.Select(ip => ip.ToString());
     }
 
-    public bool ValidateRecaptcha(string response, RecaptchaType recaptchaType, string ip)
+    public async Task<bool> ValidateRecaptcha(string response, RecaptchaType recaptchaType, string ip)
     {
         try
         {
@@ -294,11 +296,8 @@ public class CommonMethods(
             };
 
             var httpClient = clientFactory.CreateClient();
-            using var httpClientResponse = httpClient.Send(request);
-            using var stream = httpClientResponse.Content.ReadAsStream();
-            using var reader = new StreamReader(stream);
-
-            var resp = reader.ReadToEnd();
+            using var httpClientResponse = await httpClient.SendAsync(request);
+            var resp =  await httpClientResponse.Content.ReadAsStringAsync();
             var resObj = JObject.Parse(resp);
 
             if (resObj["success"] != null && resObj.Value<bool>("success"))

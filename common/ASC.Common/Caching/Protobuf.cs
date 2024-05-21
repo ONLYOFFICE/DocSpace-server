@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -41,6 +41,20 @@ public class ProtobufDeserializer<T> : IDeserializer<T> where T : new()
     public T Deserialize(ReadOnlySpan<byte> data, bool isNull, SerializationContext context)
     {
         return BaseProtobufSerializer.Deserialize<T>(data);
+    }
+}
+
+
+public class RedisProtobufSerializer: ISerializer
+{
+    public byte[] Serialize<T>(T item)
+    {
+        return BaseProtobufSerializer.Serialize(item);
+    }
+
+    public T Deserialize<T>(byte[] serializedObject)
+    {
+        return BaseProtobufSerializer.Deserialize<T>(serializedObject);
     }
 }
 

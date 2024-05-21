@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,7 +33,7 @@ namespace ASC.Data.Storage.DiscStorage;
 
 public class StorageHandler(string storagePath, string module, string domain, bool checkAuth = true)
 {
-    public async ValueTask InvokeAsync(HttpContext context, TenantManager tenantManager, SecurityContext securityContext, StorageFactory storageFactory, EmailValidationKeyProvider emailValidationKeyProvider)
+    public async Task InvokeAsync(HttpContext context, TenantManager tenantManager, AuthContext authContext, StorageFactory storageFactory, EmailValidationKeyProvider emailValidationKeyProvider, UserManager userManager)
     {
         var storage = await storageFactory.GetStorageAsync((await tenantManager.GetCurrentTenantAsync()).Id, module);
         var path = CrossPlatform.PathCombine(storagePath, GetRouteValue("pathInfo", context).Replace('/', Path.DirectorySeparatorChar));
@@ -41,8 +41,8 @@ public class StorageHandler(string storagePath, string module, string domain, bo
         var auth = context.Request.Query[Constants.QueryAuth].FirstOrDefault() ?? "";
         var storageExpire = storage.GetExpire(domain);
 
-        if (checkAuth && !securityContext.IsAuthenticated && !await SecureHelper.CheckSecureKeyHeader(header, path, emailValidationKeyProvider) 
-            || module == "backup" && !securityContext.IsAuthenticated)
+        if (checkAuth && !authContext.IsAuthenticated && !await SecureHelper.CheckSecureKeyHeader(header, path, emailValidationKeyProvider) 
+            || module == "backup" && (!authContext.IsAuthenticated || !(await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))))
         {
             context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
             return;
@@ -76,14 +76,19 @@ public class StorageHandler(string storagePath, string module, string domain, bo
             return;
         }
 
-        var headers = header.Length > 0 ? header.Split('&').Select(HttpUtility.UrlDecode) : Array.Empty<string>();
+        var headers = header.Length > 0 ? header.Split('&').Select(HttpUtility.UrlDecode).ToList() : [];
+
+        if (storage.ContentAsAttachment)
+        {
+            headers.Add("Content-Disposition:attachment");
+        }
 
         const int bigSize = 5 * 1024 * 1024;
         var fileSize = await storage.GetFileSizeAsync(domain, path);
 
         if (storage.IsSupportInternalUri && bigSize < fileSize)
         {
-            var uri = await storage.GetInternalUriAsync(domain, path, TimeSpan.FromMinutes(15), headers);
+            var uri = await storage.GetInternalUriAsync(domain, path, TimeSpan.FromSeconds(15), headers);
 
             //TODO
             //context.Response.Cache.SetAllowResponseInBrowserHistory(false);
@@ -164,10 +169,7 @@ public class StorageHandler(string storagePath, string module, string domain, bo
 
     private long ProcessRangeHeader(HttpContext context, long fullLength, ref long offset)
     {
-        if (context == null)
-        {
-            throw new ArgumentNullException(nameof(context));
-        }
+        ArgumentNullException.ThrowIfNull(context);
 
         if (context.Request.Headers["Range"] == StringValues.Empty)
         {

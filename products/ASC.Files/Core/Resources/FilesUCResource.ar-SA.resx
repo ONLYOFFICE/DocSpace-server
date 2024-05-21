@@ -156,4 +156,7 @@
   <data name="VirtualRooms" xml:space="preserve">
     <value>غرف</value>
   </data>
+  <data name="InProcessFormFolder" xml:space="preserve">
+    <value>قيد التنفيذ</value>
+  </data>
 </root>

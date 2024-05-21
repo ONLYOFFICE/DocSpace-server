@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -76,24 +76,33 @@ public class UserServiceCache
     }
     private void InvalidateCache(GroupCacheItem groupCacheItem)
     {
-        if (groupCacheItem != null)
+        if (groupCacheItem == null)
         {
-            var key = GetGroupCacheKey(groupCacheItem.Tenant, new Guid(groupCacheItem.Id));
-            Cache.Remove(key);
+            return;
         }
+
+        Cache.Remove(GetGroupCacheKey(groupCacheItem.Tenant, new Guid(groupCacheItem.Id)));
+        Cache.Remove(GetGroupCacheKey(groupCacheItem.Tenant));
     }
 
     private void UpdateUserGroupRefCache(UserGroupRef r)
     {
         var key = GetRefCacheKey(r.TenantId);
-        var refs = Cache.Get<UserGroupRefStore>(key);
-        if (refs != null)
+        var usersRefs = Cache.Get<UserGroupRefStore>(key);
+        if (usersRefs != null)
         {
-            lock (refs)
+            lock (usersRefs)
             {
-                refs[r.CreateKey()] = r;
+                usersRefs[r.CreateKey()] = r;
             }
         }
+
+        var groupRef = GetRefCacheKey(r.TenantId, r.GroupId, r.RefType);
+
+        if (groupRef != null && r.Removed)
+        {
+            Cache.Remove(groupRef);
+    }
     }
 
     public static string GetUserPhotoCacheKey(int tenant, Guid userId)
@@ -134,7 +143,7 @@ public class UserServiceCache
 [Scope]
 public class CachedUserService : IUserService, ICachedService
 {
-    private readonly IUserService _service;
+    private readonly EFUserService _service;
     private readonly ICache _cache;
     private readonly ICacheNotify<UserInfoCacheItem> _cacheUserInfoItem;
     private readonly ICacheNotify<UserPhotoCacheItem> _cacheUserPhotoItem;
@@ -170,9 +179,11 @@ public class CachedUserService : IUserService, ICachedService
         List<Tuple<List<List<Guid>>, List<Guid>>> combinedGroups,
         EmployeeActivationStatus? activationStatus,
         AccountLoginType? accountLoginType,
-        string text)
+        QuotaFilter? quotaFilter,
+        string text,
+        bool withoutGroup)
     {
-        return _service.GetUsersCountAsync(tenant, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, text);
+        return _service.GetUsersCountAsync(tenant, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, quotaFilter, text, withoutGroup);
     }
 
     public IAsyncEnumerable<UserInfo> GetUsers(
@@ -184,14 +195,16 @@ public class CachedUserService : IUserService, ICachedService
         List<Tuple<List<List<Guid>>, List<Guid>>> combinedGroups,
         EmployeeActivationStatus? activationStatus,
         AccountLoginType? accountLoginType,
+        QuotaFilter? quotaFilter,
         string text,
+        bool withoutGroup,
         Guid ownerId,
-        string sortBy,
+        UserSortType sortBy,
         bool sortOrderAsc,
         long limit,
         long offset)
     {
-        return _service.GetUsers(tenant, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, text, ownerId, sortBy, 
+        return _service.GetUsers(tenant, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, quotaFilter, text, withoutGroup, ownerId, sortBy, 
             sortOrderAsc, limit, offset);
     }
 
@@ -433,6 +446,16 @@ public class CachedUserService : IUserService, ICachedService
         }
 
         return groups;
+    }
+
+    public IAsyncEnumerable<Group> GetGroupsAsync(int tenant, string text, Guid userId, bool manager, GroupSortType sortBy, bool sortOrderAsc, int offset = 0, int count = -1)
+    {
+        return _service.GetGroupsAsync(tenant, text, userId, manager, sortBy, sortOrderAsc, offset, count);
+    }
+
+    public Task<int> GetGroupsCountAsync(int tenant, string text, Guid userId, bool manager)
+    {
+        return _service.GetGroupsCountAsync(tenant, text, userId, manager);
     }
 
     public void InvalidateCache()

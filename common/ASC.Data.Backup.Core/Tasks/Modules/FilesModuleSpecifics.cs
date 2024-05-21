@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -60,7 +60,8 @@ public class FilesModuleSpecifics(ILogger<ModuleProvider> logger, Helpers helper
                 UserIDColumns = ["user_id"],
                 DateColumns = new Dictionary<string, bool> {{"create_on", false}}
             },
-            new("files_thirdparty_id_mapping", "tenant_id")
+            new("files_thirdparty_id_mapping", "tenant_id"),
+            new("files_room_settings", "tenant_id")
     ];
 
     private readonly RelationInfo[] _tableRelations =
@@ -76,6 +77,7 @@ public class FilesModuleSpecifics(ILogger<ModuleProvider> logger, Helpers helper
             new("core_group", "id", "files_security", "subject", typeof(TenantsModuleSpecifics)),
 
             new("files_folder", "id", "files_bunch_objects", "left_node"),
+            new("files_folder", "id", "files_room_settings", "room_id"),
             new("files_folder", "id", "files_file", "folder_id"),
             new("files_folder", "id", "files_folder", "parent_id"),
             new("files_folder", "id", "files_folder_tree", "folder_id"),
@@ -167,7 +169,7 @@ public class FilesModuleSpecifics(ILogger<ModuleProvider> logger, Helpers helper
 
             object folderId = null;
             var ids = string.Join("-|", Selectors.All.Select(s => s.Id));
-            var sboxId = Regex.Replace(row[1].ToString(), @"(?<=(?:" + $"{ids}-" + @"))\d+", match =>
+            var sboxId = Regex.Replace(row[2].ToString(), @"(?<=(?:" + $"{ids}-" + @"))\d+", match =>
             {
                 folderId = columnMapper.GetMapping("files_thirdparty_account", "id", match.Value);
 
@@ -217,7 +219,7 @@ public class FilesModuleSpecifics(ILogger<ModuleProvider> logger, Helpers helper
                 }
             }
 
-            return false;
+            return true;
         }
 
         return base.TryPrepareValue(dump, connection, columnMapper, table, columnName, relationList, ref value);

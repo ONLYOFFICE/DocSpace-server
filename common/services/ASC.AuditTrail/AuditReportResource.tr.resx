@@ -343,7 +343,7 @@
   <data name="LoginSuccess" xml:space="preserve">
     <value>Giriş Başarılı</value>
   </data>
-  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+  <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
     <value>Sosyal Hesapla Giriş Başarılı</value>
   </data>
   <data name="LoginSuccessViaApi" xml:space="preserve">
@@ -732,5 +732,11 @@
   </data>
   <data name="RoomExternalLinkUpdated" xml:space="preserve">
     <value>Harici bağlantı güncellendi: {0}. Rol: {1}</value>
+  </data>
+  <data name="FileOpenedForChange" xml:space="preserve">
+    <value>Değişiklik İçin Açılan Dosya: {0}</value>
+  </data>
+  <data name="PortalRenamed" xml:space="preserve">
+    <value>Portalın Adı Değiştirildi</value>
   </data>
 </root>

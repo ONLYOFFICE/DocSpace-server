@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,19 +28,17 @@ namespace ASC.Core.Users;
 
 public class UserQuotaSettings : ISettings<UserQuotaSettings>
 {
-    public long UserQuota { get; init; }
-
-    public UserQuotaSettings GetDefault()
-    {
-        return new UserQuotaSettings
-        {
-            UserQuota = -1
-        };
-    }
+    public const int NoQuota = -1;
 
     [JsonIgnore]
     public Guid ID
     {
         get { return new Guid("{5A097CFA-1A8E-45CB-A4BB-FE8D2B5E5908}"); }
+    }
+    public long UserQuota { get; set; } = -2;
+
+    public UserQuotaSettings GetDefault()
+    {
+        return new UserQuotaSettings();
     }
 }

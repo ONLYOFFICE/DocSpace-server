@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -65,6 +65,10 @@ public class ConfigurationDto<T>
     /// <summary>Error message</summary>
     /// <type>System.String, System</type>
     public string ErrorMessage { get; set; }
+
+    /// <summary>Specifies if the filling has started or not</summary>
+    /// <type>System.Boolean, System</type>
+    public bool? StartFilling { get; set; }
 }
 
 public class EditorConfigurationDto<T>
@@ -100,6 +104,7 @@ public class CustomizationConfigDto<T>
     public bool About { get; set; }
 
     public CustomerConfigDto Customer { get; set; }
+    public AnonymousConfigDto Anonymous { get; set; }
 
     public FeedbackConfig Feedback  { get; set; }
 
@@ -125,6 +130,11 @@ public class LogoConfigDto
     public string ImageEmbedded { get; set; }
 
     public string Url { get; set; }
+}
+
+public class AnonymousConfigDto
+{
+    public bool Request { get; set; }
 }
 
 public class CustomerConfigDto
@@ -227,7 +237,7 @@ public class EditorConfigurationConverter<T>(CustomizationConfigConverter<T> con
         var result = new EditorConfigurationDto<T>
         {
             CallbackUrl = await source.GetCallbackUrl(file.Id.ToString()),
-            CoEditing = source.CoEditing,
+            CoEditing = await source.GetCoEditingAsync(),
             CreateUrl = await source.GetCreateUrl(configuration.EditorType, fileType),
             Customization = await configConverter.Convert(configuration, file),
             Embedded = source.GetEmbedded(configuration.EditorType),
@@ -236,9 +246,8 @@ public class EditorConfigurationConverter<T>(CustomizationConfigConverter<T> con
             Mode = source.Mode,
             ModeWrite = source.ModeWrite,
             Plugins = source.Plugins,
-            Recent = await source.GetRecent(fileType, file.Id).ToListAsync(),
             Templates = await source.GetTemplates(fileType, configuration.Document.Title),
-            User = source.User
+            User = await source.GetUserAsync()
         };
 
         return result;
@@ -249,7 +258,8 @@ public class EditorConfigurationConverter<T>(CustomizationConfigConverter<T> con
 public class CustomizationConfigConverter<T>(
     LogoConfigConverter<T> configConverter, 
     CustomerConfigConverter customerConfigConverter,
-    CoreBaseSettings coreBaseSettings)
+    CoreBaseSettings coreBaseSettings,
+    AnonymousConfigConverter<T> anonymousConfigConverter)
 {
     public async Task<CustomizationConfigDto<T>> Convert(Configuration<T> configuration, File<T> file)
     {    
@@ -264,13 +274,14 @@ public class CustomizationConfigConverter<T>(
         {
             About = source.About,
             Customer = coreBaseSettings.Standalone ? await customerConfigConverter.Convert(source.Customer) : null,
-            Feedback = source.Feedback,
+            Feedback = await source.GetFeedback(),
             Forcesave = source.GetForceSave(file),
             Goback = await source.GetGoBack(configuration.EditorType, file),
             Logo = await configConverter.Convert(configuration),
             MentionShare = await source.GetMentionShare(file),
             ReviewDisplay = source.GetReviewDisplay(configuration.EditorConfig.ModeWrite),
-            SubmitForm = await source.GetSubmitForm(file, configuration.EditorConfig.ModeWrite)
+            SubmitForm = await source.GetSubmitForm(file, configuration.EditorConfig.ModeWrite),
+            Anonymous = anonymousConfigConverter.Convert(configuration)
         };
 
         return result;
@@ -302,6 +313,27 @@ public class LogoConfigConverter<T>
 }
 
 [Scope]
+public class AnonymousConfigConverter<T>
+{
+    public AnonymousConfigDto Convert(Configuration<T> configuration)
+    {
+        var source = configuration.EditorConfig?.Customization?.Logo;
+
+        if (source == null)
+        {
+            return null;
+        }
+
+        var result = new AnonymousConfigDto
+        {
+            Request = configuration.Document.Permissions.Chat
+        };
+
+        return result;
+    }
+}
+
+[Scope]
 public class CustomerConfigConverter
 {
     public async Task<CustomerConfigDto> Convert(CustomerConfig source)
@@ -313,11 +345,11 @@ public class CustomerConfigConverter
 
         var result = new CustomerConfigDto
         {
-            Address = source.Address,
+            Address = await source.GetAddress(),
             Logo = await source.GetLogo(),
-            Mail = source.Mail,
-            Name = source.Name,
-            Www = source.Www
+            Mail = await source.GetMail(),
+            Name = await source.GetName(),
+            Www = await source.GetWww()
         };
 
         return result;
@@ -361,7 +393,9 @@ public class InfoConfigConverter<T>
         {
             return null;
         }
-
+        
+        source.SetFavorite(null);//TODO: add display favorite settings to config
+        
         var result = new InfoConfigDto
         {
             Favorite = await source.GetFavorite(file),
@@ -370,7 +404,7 @@ public class InfoConfigConverter<T>
             SharingSettings = await source.GetSharingSettings(file),
             Type = source.Type,
             Uploaded = source.GetUploaded(file)
-        };
+        }; 
 
         return result;
     }

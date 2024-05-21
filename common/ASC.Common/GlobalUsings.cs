@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,7 +32,6 @@ global using System.Globalization;
 global using System.Net;
 global using System.Net.Mail;
 global using System.Reflection;
-global using System.Runtime.Loader;
 global using System.Security.Authentication;
 global using System.Security.Cryptography;
 global using System.Security.Principal;
@@ -48,7 +47,6 @@ global using System.Xml.XPath;
 
 global using ASC.Common;
 global using ASC.Common.Caching;
-global using ASC.Common.DependencyInjection;
 global using ASC.Common.Log;
 global using ASC.Common.Mapping.PrimitiveTypeConverters;
 global using ASC.Common.Security;
@@ -104,6 +102,7 @@ global using RabbitMQ.Client;
 global using RabbitMQ.Client.Events;
 
 global using StackExchange.Redis;
+global using StackExchange.Redis.Extensions.Core;
 global using StackExchange.Redis.Extensions.Core.Abstractions;
 
 global using ILogger = Microsoft.Extensions.Logging.ILogger;

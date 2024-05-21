@@ -394,9 +394,6 @@
   <data name="TariffsFeature_sso" xml:space="preserve">
     <value>SSO</value>
   </data>
-  <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} úložného prostoru</value>
-  </data>
   <data name="TariffsFeature_total_size_exception" xml:space="preserve">
     <value>Velikost použitého úložiště by neměla překročit {0}</value>
   </data>
@@ -985,9 +982,6 @@
   <data name="MessageYourPasswordSendedToEmail" xml:space="preserve">
     <value>Pokud existuje uživatel s e-mailovou adresou {0}, byl na tuto e-mailovou adresu zaslán pokyn ke změně hesla.</value>
   </data>
-  <data name="PersonalFreeSpaceException" xml:space="preserve">
-    <value>Překročena kvóta místa na disku</value>
-  </data>
   <data name="ConsumersZoom" xml:space="preserve">
     <value>Zoom</value>
   </data>
@@ -1005,5 +999,44 @@
   </data>
   <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
     <value>Příliš mnoho pokusů o přihlášení. Zkuste to prosím později</value>
+  </data>
+  <data name="ErrorCannotDeleteLastSpace" xml:space="preserve">
+    <value>Poslední plný přístupový prostor nelze odstranit</value>
+  </data>
+  <data name="ErrorWebPluginArchive" xml:space="preserve">
+    <value>Špatný archiv zásuvných modulů</value>
+  </data>
+  <data name="ErrorWebPluginExist" xml:space="preserve">
+    <value>Plugin již existuje</value>
+  </data>
+  <data name="ErrorWebPluginFileExtension" xml:space="preserve">
+    <value>Špatná přípona souboru</value>
+  </data>
+  <data name="ErrorWebPluginFileSize" xml:space="preserve">
+    <value>Velikost souboru překračuje limit</value>
+  </data>
+  <data name="ErrorWebPluginForbiddenSystem" xml:space="preserve">
+    <value>Změny systémových zásuvných modulů jsou zakázány</value>
+  </data>
+  <data name="ErrorWebPluginName" xml:space="preserve">
+    <value>Špatný název zásuvného modulu</value>
+  </data>
+  <data name="ErrorWebPluginNoInputFile" xml:space="preserve">
+    <value>Žádný vstupní soubor</value>
+  </data>
+  <data name="ErrorWebPluginNotFound" xml:space="preserve">
+    <value>Zásuvný modul nebyl nalezen</value>
+  </data>
+  <data name="ErrorWebPluginToManyInputFiles" xml:space="preserve">
+    <value>Příliš mnoho vstupních souborů</value>
+  </data>
+  <data name="QuotaGreaterPortalError" xml:space="preserve">
+    <value>Nepodařilo se nastavit kvótu paměti - nastavená kvóta paměti je větší než kvóta portálů.</value>
+  </data>
+  <data name="RoomFreeSpaceException" xml:space="preserve">
+    <value>Překročení kvóty místa v místnosti</value>
+  </data>
+  <data name="UserFreeSpaceException" xml:space="preserve">
+    <value>Překročení kvóty uživatelského prostoru</value>
   </data>
 </root>

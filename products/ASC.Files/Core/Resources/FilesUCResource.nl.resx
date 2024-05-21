@@ -97,4 +97,7 @@
   <data name="PrivacyRoom" xml:space="preserve">
     <value>Privé Kamer</value>
   </data>
+  <data name="InProcessFormFolder" xml:space="preserve">
+    <value>In uitvoering</value>
+  </data>
 </root>

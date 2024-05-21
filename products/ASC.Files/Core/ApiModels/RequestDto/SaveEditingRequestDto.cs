@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -41,10 +41,6 @@ public class SaveEditingRequestDto : IModelWithFile
     /// <summary>Request file stream</summary>
     /// <type>Microsoft.AspNetCore.Http.IFormFile, Microsoft.AspNetCore.Http</type>
     public IFormFile File { get; set; }
-
-    /// <summary>Shared token</summary>
-    /// <type>System.String, System</type>
-    public string Doc { get; set; }
 
     /// <summary>Specifies whether to force save a file or not</summary>
     /// <type>System.Boolean, System</type>

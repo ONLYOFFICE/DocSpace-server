@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30104.148
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34309.116
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppLimit.CloudComputing.SharpBox", "thirdparty\AppLimit.CloudComputing.SharpBox\AppLimit.CloudComputing.SharpBox.csproj", "{2CBD1C65-D521-4160-950D-875B3443174D}"
 EndProject
@@ -16,6 +16,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleRestServices.v4.0", "thirdparty\SimpleRestServices\src\SimpleRestServices\SimpleRestServices.v4.0.csproj", "{A2EB7FD6-B1AF-455A-B5FE-04006F01C371}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "websocket-sharp", "thirdparty\websocket-sharp-master\websocket-sharp\websocket-sharp.csproj", "{EC1AFACB-8640-44E5-8511-A8B4506A4D67}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ICSharpCode.SharpZipLib", "thirdparty\SharpZipLib\src\ICSharpCode.SharpZipLib\ICSharpCode.SharpZipLib.csproj", "{6E2E04C2-6FFB-4FE3-865A-741CABC77F26}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,6 +53,10 @@ Global
 		{EC1AFACB-8640-44E5-8511-A8B4506A4D67}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EC1AFACB-8640-44E5-8511-A8B4506A4D67}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EC1AFACB-8640-44E5-8511-A8B4506A4D67}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E2E04C2-6FFB-4FE3-865A-741CABC77F26}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E2E04C2-6FFB-4FE3-865A-741CABC77F26}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E2E04C2-6FFB-4FE3-865A-741CABC77F26}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E2E04C2-6FFB-4FE3-865A-741CABC77F26}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

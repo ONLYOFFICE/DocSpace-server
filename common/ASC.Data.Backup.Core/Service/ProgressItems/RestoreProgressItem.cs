@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,31 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-/*
- *
- * (c) Copyright Ascensio System Limited 2010-2020
- *
- * This program is freeware. You can redistribute it and/or modify it under the terms of the GNU 
- * General Public License (GPL) version 3 as published by the Free Software Foundation (https://www.gnu.org/copyleft/gpl.html). 
- * In accordance with Section 7(a) of the GNU GPL its Section 15 shall be amended to the effect that 
- * Ascensio System SIA expressly excludes the warranty of non-infringement of any third-party rights.
- *
- * THIS PROGRAM IS DISTRIBUTED WITHOUT ANY WARRANTY; WITHOUT EVEN THE IMPLIED WARRANTY OF MERCHANTABILITY OR
- * FITNESS FOR A PARTICULAR PURPOSE. For more details, see GNU GPL at https://www.gnu.org/copyleft/gpl.html
- *
- * You can contact Ascensio System SIA by email at sales@onlyoffice.com
- *
- * The interactive user interfaces in modified source and object code versions of ONLYOFFICE must display 
- * Appropriate Legal Notices, as required under Section 5 of the GNU GPL version 3.
- *
- * Pursuant to Section 7 § 3(b) of the GNU GPL you must retain the original ONLYOFFICE logo which contains 
- * relevant author attributions when distributing the software. If the display of the logo in its graphic 
- * form is not reasonably feasible for technical reasons, you must include the words "Powered by ONLYOFFICE" 
- * in every copy of the program you distribute. 
- * Pursuant to Section 7 § 3(e) we decline to grant you any rights under trademark law for use of our trademarks.
- *
-*/
-
 namespace ASC.Data.Backup.Services;
 
 [Transient(Additional = typeof(RestoreProgressItemExtention))]
@@ -61,7 +36,6 @@ public class RestoreProgressItem : BaseBackupProgressItem
     private BackupStorageFactory _backupStorageFactory;
     private readonly NotifyHelper _notifyHelper;
     private BackupRepository _backupRepository;
-    private RestorePortalTask _restorePortalTask;
     private readonly CoreBaseSettings _coreBaseSettings;
 
     private string _region;
@@ -126,7 +100,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
             tenant.SetStatus(TenantStatus.Restoring);
             await _tenantManager.SaveTenantAsync(tenant);
 
-            _restorePortalTask = scope.ServiceProvider.GetService<RestorePortalTask>();
+            var restoreTask = scope.ServiceProvider.GetService<RestorePortalTask>();
 
             var storage = await _backupStorageFactory.GetBackupStorageAsync(StorageType, TenantId, StorageParams);
 
@@ -155,12 +129,11 @@ public class RestoreProgressItem : BaseBackupProgressItem
             columnMapper.SetMapping("tenants_tenants", "alias", tenant.Alias, Guid.Parse(Id).ToString("N"));
             columnMapper.Commit();
 
-            var restoreTask = _restorePortalTask;
             restoreTask.Init(_region, tempFile, TenantId, columnMapper, _upgradesPath);
-            restoreTask.ProgressChanged += (_, args) =>
+            restoreTask.ProgressChanged = async (args) =>
             {
                 Percentage = Percentage = 10d + 0.65 * args.Progress;
-                PublishChanges();
+                await PublishChanges();
             };
             await restoreTask.RunJob();
 
@@ -179,8 +152,6 @@ public class RestoreProgressItem : BaseBackupProgressItem
             }
             else
             {
-                await _tenantManager.RemoveTenantAsync(tenant.Id);
-
                 var restoredTenant = await _tenantManager.GetTenantAsync(columnMapper.GetTenantMapping());
                 restoredTenant.SetStatus(TenantStatus.Active);
                 restoredTenant.Alias = tenant.Alias;
@@ -191,8 +162,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
                     restoredTenant.MappedDomain = tenant.MappedDomain;
                 }
 
-                await _tenantManager.SaveTenantAsync(restoredTenant);
-                _tenantManager.SetCurrentTenant(restoredTenant);
+                await _tenantManager.RestoreTenantAsync(tenant.Id, restoredTenant);
                 TenantId = restoredTenant.Id;
 
                 await _notifyHelper.SendAboutRestoreCompletedAsync(restoredTenant, Notify);
@@ -200,7 +170,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
 
             Percentage = 75;
 
-            PublishChanges();
+            await PublishChanges();
 
             File.Delete(tempFile);
 
@@ -223,7 +193,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
         {
             try
             {
-                PublishChanges();
+                await PublishChanges();
             }
             catch (Exception error)
             {

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -60,42 +60,12 @@ public class EFLogger(ILogger logger) : ILogger
         switch (eventId.Id)
         {
             case 20101:
-                var keyValuePairs = state as IEnumerable<KeyValuePair<string, object>>;
-                var ev = new EFLogEvent("");
-
-                foreach (var kv in keyValuePairs)
-                {
-                    ev.WithProperty(kv.Key, kv.Value);
-                }
-
                 logger.Log(LogLevel.Debug,
                         default,
-                        ev,
+                        state,
                         exception,
-                        EFLogEvent.Formatter);
+                        formatter);
                 break;
         }
     }
-
-    class EFLogEvent(string message) : IEnumerable<KeyValuePair<string, object>>
-    {
-        readonly List<KeyValuePair<string, object>> _properties = new();
-
-        public string Message { get; } = message;
-
-        public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
-        {
-            return _properties.GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
-
-        public void WithProperty(string name, object value)
-        {
-            _properties.Add(new KeyValuePair<string, object>(name, value));
-        }
-
-        public static Func<EFLogEvent, Exception, string> Formatter { get; } = (l, _) => l.Message;
-    }
-
 }

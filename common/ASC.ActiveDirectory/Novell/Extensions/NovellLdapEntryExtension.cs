@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -126,10 +126,7 @@ public class NovellLdapEntryExtension(ILogger logger)
     /// <returns>LDAPObject</returns>
     public LdapObject ToLdapObject(LdapEntry ldapEntry, string ldapUniqueIdAttribute = null)
     {
-        if (ldapEntry == null)
-        {
-            throw new ArgumentNullException(nameof(ldapEntry));
-        }
+        ArgumentNullException.ThrowIfNull(ldapEntry);
 
         var novellLdapObject = new NovellLdapObject(logger, this);
         novellLdapObject.Init(ldapEntry, ldapUniqueIdAttribute);

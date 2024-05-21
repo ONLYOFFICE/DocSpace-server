@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -98,12 +98,7 @@ public class CommonLinkUtility(IHttpContextAccessor httpContextAccessor,
         return ToAbsolute("~/profile/notifications");
     }
 
-    public string GetEmployees()
-    {
-        return GetEmployees(EmployeeStatus.Active);
-    }
-
-    public string GetEmployees(EmployeeStatus empStatus)
+    public string GetEmployees(EmployeeStatus empStatus = EmployeeStatus.Active)
     {
         return ToAbsolute("~/products/people/") +
                (empStatus == EmployeeStatus.Terminated ? "#type=disabled" : string.Empty);
@@ -223,9 +218,9 @@ public class CommonLinkUtility(IHttpContextAccessor httpContextAccessor,
         return string.IsNullOrEmpty(mail) ? string.Empty : mail;
     }
 
-    public string GetFeedbackAndSupportLink(SettingsManager settingsManager, bool inCurrentCulture = true)
+    public async Task<string> GetFeedbackAndSupportLink(SettingsManager settingsManager, bool inCurrentCulture = true)
     {
-        var settings = settingsManager.LoadForDefaultTenant<AdditionalWhiteLabelSettings>();
+        var settings = await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>();
 
         return !settings.FeedbackAndSupportEnabled || string.IsNullOrEmpty(settings.FeedbackAndSupportUrl)
             ? string.Empty

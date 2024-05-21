@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -57,7 +57,7 @@ public class GeolocationHelper(IDbContextFactory<CustomDbContext> dbContextFacto
         {
             if (!IPAddress.TryParse(ip, out var address))
             {
-                return new[] { string.Empty, string.Empty };
+                return [string.Empty, string.Empty];
             }
             var location = await GetIPGeolocationAsync(address);
             if (string.IsNullOrEmpty(location.Key) || (location.Key == "ZZ"))

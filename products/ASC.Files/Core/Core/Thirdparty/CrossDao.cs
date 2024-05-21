@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -128,12 +128,13 @@ internal class CrossDao //Additional SharpBox
 
         if (toFolder == null)
         {
-            await socketManager.CreateFolderAsync(toFolder1);
+            await socketManager.CreateFolderAsync(await toFolderDao.GetFolderAsync(toConverter(toFolderId)));
         }
 
         var foldersToCopy = await fromFolderDao.GetFoldersAsync(fromConverter(fromFolderId)).ToListAsync();
         var fileIdsToCopy = await fromFileDao.GetFilesAsync(fromConverter(fromFolderId)).ToListAsync();
         Exception copyException = null;
+        
         //Copy files first
         foreach (var fileId in fileIdsToCopy)
         {
@@ -150,6 +151,7 @@ internal class CrossDao //Additional SharpBox
                 copyException = ex;
             }
         }
+        
         foreach (var folder in foldersToCopy)
         {
             cancellationToken?.ThrowIfCancellationRequested();

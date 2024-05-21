@@ -343,7 +343,7 @@
   <data name="LoginSuccess" xml:space="preserve">
     <value>Inloggen Gelukt</value>
   </data>
-  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+  <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
     <value>Inloggen via Social Media Gelukt</value>
   </data>
   <data name="LoginSuccessViaApi" xml:space="preserve">
@@ -732,5 +732,11 @@
   </data>
   <data name="RoomExternalLinkUpdated" xml:space="preserve">
     <value>Externe link bijgewerkt: {0}. Rol: {1}</value>
+  </data>
+  <data name="FileOpenedForChange" xml:space="preserve">
+    <value>Bestand Geopend Om Te Wijzigen: {0}</value>
+  </data>
+  <data name="PortalRenamed" xml:space="preserve">
+    <value>Portaal hernoemd</value>
   </data>
 </root>

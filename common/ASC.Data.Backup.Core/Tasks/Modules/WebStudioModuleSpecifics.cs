@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -39,7 +39,7 @@ public class WebStudioModuleSpecifics(Helpers helpers) : ModuleSpecificsBase(hel
             new("webstudio_uservisit", "tenantid") {InsertMethod = InsertMethod.None}
     ];
 
-    private readonly RelationInfo[] _relations = Array.Empty<RelationInfo>();
+    private readonly RelationInfo[] _relations = [];
 
     protected override bool TryPrepareValue(DbConnection connection, ColumnMapper columnMapper, RelationInfo relation, ref object value)
     {

@@ -370,7 +370,7 @@
   <data name="LoginSuccess" xml:space="preserve">
     <value>Login bem-sucedido</value>
   </data>
-  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+  <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
     <value>Login por conta social bem-sucedido</value>
   </data>
   <data name="LoginSuccessSocialApp" xml:space="preserve">
@@ -732,5 +732,11 @@
   </data>
   <data name="RoomExternalLinkUpdated" xml:space="preserve">
     <value>Link externo atualizado: {0}. Função: {1}</value>
+  </data>
+  <data name="FileOpenedForChange" xml:space="preserve">
+    <value>Arquivo aberto para alteração: {0}</value>
+  </data>
+  <data name="PortalRenamed" xml:space="preserve">
+    <value>Portal renomeado</value>
   </data>
 </root>

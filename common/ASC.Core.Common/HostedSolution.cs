@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -65,11 +65,6 @@ public class HostedSolution(ITenantService tenantService,
         return await tenantService.GetTenantAsync(id);
     }
 
-    public Tenant GetTenant(int id)
-    {
-        return tenantService.GetTenant(id);
-    }
-
     public async Task CheckTenantAddressAsync(string address)
     {
         await tenantService.ValidateDomainAsync(address);
@@ -104,6 +99,8 @@ public class HostedSolution(ITenantService tenantService,
         {
             registrationInfo.PasswordHash = Guid.NewGuid().ToString();
         }
+
+        tenantService.ValidateTenantName(registrationInfo.Name);
 
         // create tenant
         var tenant = new Tenant(registrationInfo.Address.ToLowerInvariant())
@@ -184,9 +181,19 @@ public class HostedSolution(ITenantService tenantService,
         return await tariffService.GetTariffAsync(tenant, withRequestToPaymentSystem);
     }
 
+    public async Task<TenantQuotaSettings> GetTenantQuotaSettings(int tenantId)
+    {
+        return await settingsManager.LoadAsync<TenantQuotaSettings>(tenantId, Guid.Empty);
+    }
+
     public async Task<TenantQuota> GetTenantQuotaAsync(int tenant)
     {
         return await clientTenantManager.GetTenantQuotaAsync(tenant);
+    }
+
+    public async Task<List<TenantQuotaRow>> FindTenantQuotaRowsAsync(int tenant)
+    {
+        return await clientTenantManager.FindTenantQuotaRowsAsync(tenant);
     }
 
     public async Task<IEnumerable<TenantQuota>> GetTenantQuotasAsync()

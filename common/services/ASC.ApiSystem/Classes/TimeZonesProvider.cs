@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -23,7 +23,6 @@
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
-
 
 namespace ASC.ApiSystem.Classes;
 
@@ -60,26 +59,35 @@ public class TimeZonesProvider(ILogger<TimeZonesProvider> logger, CommonConstant
     private static readonly Dictionary<string, CultureInfo> _cultureUiMap = new()
     {
         { "", CultureInfo.GetCultureInfo("en-US") },
-        { "fr", CultureInfo.GetCultureInfo("fr-FR") },
-        { "es", CultureInfo.GetCultureInfo("es-ES") },
-        { "de", CultureInfo.GetCultureInfo("de-DE") },
-        { "ru", CultureInfo.GetCultureInfo("ru-RU") },
-        { "lv", CultureInfo.GetCultureInfo("lv-LV") },
-        { "pt", CultureInfo.GetCultureInfo("pt-BR") },
-        { "it", CultureInfo.GetCultureInfo("it-IT") },
-        { "tr", CultureInfo.GetCultureInfo("tr-TR") },
-
-        { "id", CultureInfo.GetCultureInfo("id-ID") },
+        { "en", CultureInfo.GetCultureInfo("en-GB") },
+        { "az", CultureInfo.GetCultureInfo("az") },
+        { "cs", CultureInfo.GetCultureInfo("cs") },
+        { "de", CultureInfo.GetCultureInfo("de") },
+        { "es", CultureInfo.GetCultureInfo("es") },
+        { "fr", CultureInfo.GetCultureInfo("fr") },
+        { "it", CultureInfo.GetCultureInfo("it") },
+        { "lv", CultureInfo.GetCultureInfo("lv") },
+        { "nl", CultureInfo.GetCultureInfo("nl") },
+        { "pl", CultureInfo.GetCultureInfo("pl") },
+        { "pt", CultureInfo.GetCultureInfo("pt") },
+        { "ro", CultureInfo.GetCultureInfo("ro") },
+        { "sk", CultureInfo.GetCultureInfo("sk") },
+        { "sl", CultureInfo.GetCultureInfo("sl") },
+        { "fi", CultureInfo.GetCultureInfo("fi") },
+        { "vi", CultureInfo.GetCultureInfo("vi") },
+        { "tr", CultureInfo.GetCultureInfo("tr") },
+        { "el", CultureInfo.GetCultureInfo("el-GR") },
+        { "bg", CultureInfo.GetCultureInfo("bg") },
+        { "ru", CultureInfo.GetCultureInfo("ru") },
+        { "sr", CultureInfo.GetCultureInfo("sr-Latn-RS") },
+        { "uk", CultureInfo.GetCultureInfo("uk-UA") },
+        { "hy", CultureInfo.GetCultureInfo("hy-AM") },
+        { "ar", CultureInfo.GetCultureInfo("ar-SA") },
+        { "si", CultureInfo.GetCultureInfo("si") },
+        { "lo", CultureInfo.GetCultureInfo("lo-LA") },
         { "zh", CultureInfo.GetCultureInfo("zh-CN") },
         { "ja", CultureInfo.GetCultureInfo("ja-JP") },
-        { "ko", CultureInfo.GetCultureInfo("ko-KR") },
-        { "az", CultureInfo.GetCultureInfo("az-Latn-AZ") },
-        { "cs", CultureInfo.GetCultureInfo("cs-CZ") },
-        { "el", CultureInfo.GetCultureInfo("el-GR") },
-        { "fi", CultureInfo.GetCultureInfo("fi-FI") },
-        { "pl", CultureInfo.GetCultureInfo("pl-PL") },
-        { "uk", CultureInfo.GetCultureInfo("uk-UA") },
-        { "vi", CultureInfo.GetCultureInfo("vi-VN") }
+        { "ko", CultureInfo.GetCultureInfo("ko-KR") }
     };
 
     #endregion

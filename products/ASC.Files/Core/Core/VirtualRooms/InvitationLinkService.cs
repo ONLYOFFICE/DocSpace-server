@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -123,12 +123,13 @@ public class InvitationLinkService(CommonLinkUtility commonLinkUtility,
 
         if ((await tariffService.GetTariffAsync(tenant.Id)).State > TariffState.Paid)
         {
-            return new InvitationLinkData { Result = EmailValidationKeyProvider.ValidationResult.Invalid };
+            return linkData;
         }
-        
+
         var validationResult = await invitationLinkHelper.ValidateAsync(key, email, employeeType);
         linkData.Result = validationResult.Result;
         linkData.LinkType = validationResult.LinkType;
+        linkData.ConfirmType = validationResult.ConfirmType;
         linkData.EmployeeType = employeeType;
 
         if (validationResult.LinkId == default)
@@ -137,7 +138,6 @@ public class InvitationLinkService(CommonLinkUtility commonLinkUtility,
             {
                 linkData.Result = EmailValidationKeyProvider.ValidationResult.TariffLimit;
             }
-            
             return linkData;
         }
 
@@ -152,7 +152,7 @@ public class InvitationLinkService(CommonLinkUtility commonLinkUtility,
         linkData.Result = record.Options.ExpirationDate > DateTime.UtcNow 
             ? EmailValidationKeyProvider.ValidationResult.Ok 
             : EmailValidationKeyProvider.ValidationResult.Expired;
-        
+
         linkData.Share = record.Share;
         linkData.RoomId = record.EntryId.ToString();
         linkData.EmployeeType = FileSecurity.GetTypeByShare(record.Share);
@@ -254,6 +254,7 @@ public class InvitationLinkData
     public string RoomId { get; set; }
     public FileShare Share { get; set; }
     public InvitationLinkType LinkType { get; set; }
+    public ConfirmType? ConfirmType { get; set; }
     public EmployeeType EmployeeType { get; set; }
     public EmailValidationKeyProvider.ValidationResult Result { get; set; }
     public bool IsCorrect => Result == EmailValidationKeyProvider.ValidationResult.Ok;

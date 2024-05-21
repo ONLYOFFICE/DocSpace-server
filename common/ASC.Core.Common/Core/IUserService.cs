@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -39,7 +39,9 @@ public interface IUserService
         List<Tuple<List<List<Guid>>, List<Guid>>> combinedGroups,
         EmployeeActivationStatus? activationStatus,
         AccountLoginType? accountLoginType,
-        string text);
+        QuotaFilter? quotaFilter,
+        string text,
+        bool withoutGroup);
     IAsyncEnumerable<UserInfo> GetUsers(
         int tenant,
         bool isDocSpaceAdmin,
@@ -49,9 +51,11 @@ public interface IUserService
         List<Tuple<List<List<Guid>>, List<Guid>>> combinedGroups,
         EmployeeActivationStatus? activationStatus,
         AccountLoginType? accountLoginType,
+        QuotaFilter? quotaFilter,
         string text,
+        bool withoutGroup,
         Guid ownerId,
-        string sortBy,
+        UserSortType sortBy,
         bool sortOrderAsc,
         long limit,
         long offset);
@@ -62,6 +66,8 @@ public interface IUserService
     Task<IDictionary<string, UserGroupRef>> GetUserGroupRefsAsync(int tenant);
     IDictionary<string, UserGroupRef> GetUserGroupRefs(int tenant);
     Task<IEnumerable<Group>> GetGroupsAsync(int tenant);
+    IAsyncEnumerable<Group> GetGroupsAsync(int tenant, string text, Guid userId, bool manager, GroupSortType sortBy, bool sortOrderAsc, int offset = 0, int count = -1);
+    Task<int> GetGroupsCountAsync(int tenant, string text, Guid userId, bool manager);
     Task<IEnumerable<UserInfo>> GetUsersAllTenantsAsync(IEnumerable<Guid> userIds);
     Task<UserGroupRef> GetUserGroupRefAsync(int tenant, Guid groupId, UserGroupRefType refType);
     UserGroupRef GetUserGroupRef(int tenant, Guid groupId, UserGroupRefType refType);

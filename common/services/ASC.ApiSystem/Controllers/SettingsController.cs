@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -54,7 +54,7 @@ public class SettingsController(CommonMethods commonMethods,
     #region API methods
 
     [HttpGet("get")]
-    [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal")]
+    [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
     public async Task<IActionResult> GetSettingsAsync([FromQuery] SettingsModel model)
     {
         var (succ, tenantId, error) = await GetTenantAsync(model);
@@ -81,7 +81,7 @@ public class SettingsController(CommonMethods commonMethods,
     }
 
     [HttpPost("save")]
-    [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal")]
+    [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
     public async Task<IActionResult> SaveSettingsAsync([FromBody] SettingsModel model)
     {
         var (succ, tenantId, error) = await GetTenantAsync(model);
@@ -108,6 +108,18 @@ public class SettingsController(CommonMethods commonMethods,
             });
         }
 
+        if (model.Key.Equals("BaseDomain", StringComparison.InvariantCultureIgnoreCase))
+        {
+            if (Uri.CheckHostName(model.Value) != UriHostNameType.Dns)
+            {
+                return BadRequest(new
+                {
+                    error = "params",
+                    message = "BaseDomain is not valid"
+                });
+            }
+        }
+
         Log.LogDebug("Set {0} value {1} for {2}", model.Key, model.Value, tenantId.ToString());
 
         await CoreSettings.SaveSettingAsync(model.Key, model.Value, tenantId);
@@ -121,7 +133,7 @@ public class SettingsController(CommonMethods commonMethods,
     }
 
     [HttpPost("checkdomain")]
-    [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal")]
+    [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
     public async Task<IActionResult> CheckDomain([FromBody] DomainModel model)
     {
         if (model == null || string.IsNullOrEmpty(model.HostName))

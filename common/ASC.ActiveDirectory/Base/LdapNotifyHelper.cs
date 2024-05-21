@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,6 +29,7 @@ namespace ASC.ActiveDirectory.Base;
 [Singleton(Additional = typeof(LdapNotifyHelperExtension))]
 public class LdapNotifyService(IServiceScopeFactory serviceScopeFactory,
         WorkContext workContext,
+        NotifyConfiguration notifyConfiguration,
         LdapSaveSyncOperation ldapSaveSyncOperation)
     : BackgroundService
 {
@@ -36,6 +37,8 @@ public class LdapNotifyService(IServiceScopeFactory serviceScopeFactory,
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        notifyConfiguration.Configure();
+
         using var scope = serviceScopeFactory.CreateScope();
         var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
         var settingsManager = scope.ServiceProvider.GetRequiredService<SettingsManager>();

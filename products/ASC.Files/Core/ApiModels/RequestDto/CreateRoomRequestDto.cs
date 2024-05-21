@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -51,8 +51,6 @@ public class CreateRoomRequestDto
     /// <type>ASC.Files.Core.ApiModels.RequestDto.RoomType, ASC.Files.Core</type>
     public RoomType RoomType { get; set; }
 
-    /// <summary>Private room or not</summary>
-    /// <type>System.Boolean, System</type>
     public bool Private { get; set; }
 
     /// <summary>Collection of sharing parameters</summary>
@@ -66,6 +64,10 @@ public class CreateRoomRequestDto
     /// <summary>Message to send when notifying about the shared room</summary>
     /// <type>System.String, System</type>
     public string SharingMessage { get; set; }
+
+    /// <summary>Room quota</summary>
+    /// <type>System.Int64, System</type>
+    public long Quota { get; set; }
     
     public bool Indexing { get; set; }
 }

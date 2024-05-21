@@ -16,6 +16,11 @@
     res.end();
   });
 
+  router.post("/create-form", (req, res) => {
+    files.createForm(req.body);
+    res.end();
+  });
+
   router.post("/create-folder", (req, res) => {
     files.createFolder(req.body);
     res.end();
@@ -58,6 +63,16 @@
 
   router.post("/change-quota-feature-value", (req, res) => {
     files.changeQuotaFeatureValue(req.body);
+    res.end();
+  });
+
+  router.post("/change-user-quota-used-value", (req, res) => {
+    files.changeUserQuotaFeatureValue(req.body);
+    res.end();
+  });
+
+  router.post("/change-invitation-limit-value", (req, res) => {
+    files.changeInvitationLimitValue(req.body);
     res.end();
   });
 

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,14 +30,15 @@ namespace ASC.Core.Tenants;
 public class TenantDomainValidator
 {
     private readonly Regex _validDomain;
+    private readonly Regex _validName;
 
     public string Regex { get; }
     public int MinLength { get; }
     public int MaxLength { get; }
 
-    public TenantDomainValidator(IConfiguration configuration)
+    public TenantDomainValidator(IConfiguration configuration, CoreBaseSettings coreBaseSettings)
     {
-        MaxLength = 100;
+        MaxLength = 63;
 
         if (int.TryParse(configuration["web:alias:max"], out var defaultMaxLength))
         {
@@ -60,6 +61,12 @@ public class TenantDomainValidator
         }
 
         _validDomain = new Regex(Regex, RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
+
+        var nameRegexpFromConfig = configuration["core:tenantname:regex"];
+        if (!coreBaseSettings.Standalone && !string.IsNullOrEmpty(nameRegexpFromConfig))
+        {
+            _validName = new Regex(nameRegexpFromConfig, RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
+        }
     }
 
     public void ValidateDomainLength(string domain)
@@ -76,6 +83,14 @@ public class TenantDomainValidator
         if (!_validDomain.IsMatch(domain))
         {
             throw new TenantIncorrectCharsException("Domain contains invalid characters.");
+        }
+    }
+
+    public void ValidateTenantName(string name)
+    {
+        if (!string.IsNullOrEmpty(name) && _validName != null && !_validName.IsMatch(name))
+        {
+            throw new TenantIncorrectCharsException("Name contains invalid characters.");
         }
     }
 }

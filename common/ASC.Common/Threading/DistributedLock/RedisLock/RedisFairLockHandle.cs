@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,6 +31,7 @@ public class RedisFairLockHandle : LockHandleBase
     private readonly string _id, _resource, _channelName, _queueKey, _queueItemTimeoutKey;
     private readonly IRedisDatabase _database;
     private PeriodicTimer _timer;
+    private byte[] Message => _database.Serializer.Serialize<byte>(0);
     
     internal RedisFairLockHandle(
         IRedisDatabase database, 
@@ -64,7 +65,8 @@ public class RedisFairLockHandle : LockHandleBase
             channel = _channelName,
             queueTimeout = _queueItemTimeoutKey,
             id = _id,
-            currentTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+            currentTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+            message = Message
         });
 
         _disposed = true;
@@ -84,7 +86,8 @@ public class RedisFairLockHandle : LockHandleBase
             channel = _channelName,
             queueTimeout = _queueItemTimeoutKey,
             id = _id,
-            currentTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+            currentTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+            message = Message
         });
         
         _disposed = true;
@@ -116,7 +119,7 @@ public class RedisFairLockHandle : LockHandleBase
         if (redis.call('exists', @lockKey) == 0) then
             local nextLockId = redis.call('lindex', @queue, 0);
             if nextLockId ~= false then
-                redis.call('publish', @channel .. ':' .. nextLockId, 0);
+                redis.call('publish', @channel .. ':' .. nextLockId, @message);
             end;
             return 1;
         end;
@@ -125,7 +128,7 @@ public class RedisFairLockHandle : LockHandleBase
             redis.call('del', @lockKey)
             local nextLockId = redis.call('lindex', @queue, 0);
             if nextLockId ~= false then
-                redis.call('publish', @channel .. ':' .. nextLockId, 0);
+                redis.call('publish', @channel .. ':' .. nextLockId, @message);
             end;
             return 1;
         end

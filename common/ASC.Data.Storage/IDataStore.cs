@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -155,6 +155,17 @@ public interface IDataStore
     /// </summary>
     /// <param name="domain"></param>
     /// <param name="path"></param>
+    /// <param name="ownerId"></param>
+    /// <param name="stream"></param>
+    /// <param name="attachmentFileName"></param>
+    /// <returns></returns>
+    Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string attachmentFileName);
+
+    /// <summary>
+    /// Saves the contents of the stream in the repository.
+    /// </summary>
+    /// <param name="domain"></param>
+    /// <param name="path"></param>
     /// <param name="stream"></param>
     /// <param name="contentType"></param>
     /// <param name="contentDisposition"></param>
@@ -183,6 +194,8 @@ public interface IDataStore
     bool IsSupportChunking { get; }
 
     bool IsSupportedPreSignedUri { get; }
+
+    bool ContentAsAttachment { get; }
 
     ///<summary>
     /// Deletes file
@@ -235,6 +248,18 @@ public interface IDataStore
     ///<param name="quotaCheckFileSize"></param>
     ///<returns></returns>
     Task<Uri> MoveAsync(string srcDomain, string srcPath, string newDomain, string newPath, bool quotaCheckFileSize = true);
+
+    ///<summary>
+    /// Moves file
+    ///</summary>
+    ///<param name="srcdomain"></param>
+    ///<param name="srcpath"></param>
+    ///<param name="newdomain"></param>
+    ///<param name="newpath"></param>
+    ///<param name="ownerId"></param>
+    ///<param name="quotaCheckFileSize"></param>
+    ///<returns></returns>
+    Task<Uri> MoveAsync(string srcdomain, string srcpath, string newdomain, string newpath, Guid ownerId, bool quotaCheckFileSize = true);
 
     ///<summary>
     /// Saves the file in the temp. In fact, almost no different from the usual Save except that generates the file name itself. An inconvenient thing.
@@ -318,6 +343,7 @@ public interface IDataStore
     Task<bool> IsFileAsync(string path);
     Task<bool> IsDirectoryAsync(string path);
     Task DeleteDirectoryAsync(string path);
+    Task DeleteDirectoryAsync(Guid ownerId, string path);
     Task<long> GetFileSizeAsync(string path);
     Task<long> GetDirectorySizeAsync(string path);
     Task<Uri> CopyAsync(string path, string newDomain, string newPath);
@@ -339,4 +365,6 @@ public interface IDataStore
                          string contentDisposition);
 
     Task<string> GetFileEtagAsync(string domain, string path);
+
+    Task<string> GetUrlWithHashAsync(string domain, string path);
 }

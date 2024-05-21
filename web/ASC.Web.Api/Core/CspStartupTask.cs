@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,8 +26,7 @@
 
 namespace ASC.Api.Core.Core;
 
-public class CspStartupTask(IServiceProvider provider, IDistributedCache distributedCache)
-    : IStartupTask
+public class CspStartupTask(IServiceProvider provider, IDistributedCache distributedCache) : IStartupTask
 {
     private const string HeaderKey = "csp";
 
@@ -36,24 +35,38 @@ public class CspStartupTask(IServiceProvider provider, IDistributedCache distrib
         await using var scope = provider.CreateAsyncScope();
         var serviceProvider = scope.ServiceProvider;
         var helper = serviceProvider.GetService<CspSettingsHelper>();
-        var tenantManager = serviceProvider.GetService<TenantManager>();
-        var settingsManager = serviceProvider.GetService<SettingsManager>();
 
         var oldHeaderValue = await distributedCache.GetStringAsync(HeaderKey, token: cancellationToken);
-        var currentHeaderValue = await helper.CreateHeaderAsync(null, true, false);
+        var currentHeaderValue = await helper.CreateHeaderAsync(null, false);
 
         if (oldHeaderValue != currentHeaderValue)
-        {
-            var tenantService = serviceProvider.GetService<ITenantService>();
-
-            foreach (var t in tenantService.GetTenantsWithCsp())
+        {        
+            var tenantService = provider.GetService<ITenantService>();
+            var tenants = await tenantService.GetTenantsAsync((DateTime)default);
+            var t = Task.Run(async () =>
             {
-                tenantManager.SetCurrentTenant(t);
-                var current = settingsManager.Load<CspSettings>();
-                await helper.SaveAsync(current.Domains, current.SetDefaultIfEmpty);
-            }
-
-            await distributedCache.SetStringAsync(HeaderKey, currentHeaderValue, token: cancellationToken);
+                await Update(tenants, currentHeaderValue, cancellationToken);
+            }, cancellationToken);
+            _ = t.ConfigureAwait(false);
         }
+    }
+
+    private async Task Update(IEnumerable<Tenant> tenants, string currentHeaderValue, CancellationToken cancellationToken)
+    {
+        foreach (var t in tenants)
+        {        
+            await using var tenantScope = provider.CreateAsyncScope();
+            var tenantServiceProvider = tenantScope.ServiceProvider;
+            
+            var helper = tenantServiceProvider.GetService<CspSettingsHelper>();
+            var tenantManager = tenantServiceProvider.GetService<TenantManager>();
+            var settingsManager = tenantServiceProvider.GetService<SettingsManager>();
+            
+            tenantManager.SetCurrentTenant(t);
+            var current = await settingsManager.LoadAsync<CspSettings>();
+            await helper.SaveAsync(current.Domains, false);
+        }
+
+        await distributedCache.SetStringAsync(HeaderKey, currentHeaderValue, token: cancellationToken);
     }
 }
