@@ -28,7 +28,7 @@ using Document = ASC.ElasticSearch.Document;
 
 namespace ASC.Files.Core.Data;
 
-[Scope]
+[Scope(typeof(IFileDao<int>))]
 internal class FileDao(
         ILogger<FileDao> logger,
         FactoryIndexerFile factoryIndexer,

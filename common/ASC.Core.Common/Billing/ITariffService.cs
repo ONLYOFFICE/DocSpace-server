@@ -26,7 +26,6 @@
 
 namespace ASC.Core.Billing;
 
-[Scope(typeof(TariffService))]
 public interface ITariffService
 {
     IDictionary<string, Dictionary<string, decimal>> GetProductPriceInfo(string partnerId, params string[] productIds);

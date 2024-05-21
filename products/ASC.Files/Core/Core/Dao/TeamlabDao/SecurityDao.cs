@@ -805,7 +805,7 @@ internal abstract class SecurityBaseDao<T>(
     }
 }
 
-[Scope]
+[Scope(typeof(ISecurityDao<int>))]
 internal class SecurityDao(UserManager userManager,
         IDbContextFactory<FilesDbContext> dbContextFactory,
         TenantManager tenantManager,
@@ -887,7 +887,7 @@ internal class SecurityDao(UserManager userManager,
     }
 }
 
-[Scope]
+[Scope(typeof(ISecurityDao<string>))]
 internal class ThirdPartySecurityDao(UserManager userManager,
         IDbContextFactory<FilesDbContext> dbContextFactory,
         TenantManager tenantManager,

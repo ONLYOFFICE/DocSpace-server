@@ -78,9 +78,6 @@ public class Startup : BaseStartup
 
         services.AddMemoryCache();
         services.AddBaseDbContextPool<FilesDbContext>();
-        
-        MigrationCore.Register(DIHelper);
-        
         services.RegisterQuotaFeature();
         services.AddHttpClient();
         services.AddHostedService<WorkerService>();

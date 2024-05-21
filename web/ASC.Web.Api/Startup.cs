@@ -51,8 +51,6 @@ public class Startup : BaseStartup
 
         services.AddBaseDbContextPool<FilesDbContext>();
         services.AddBaseDbContextPool<BackupsContext>();
-
-        MigrationCore.Register(DIHelper);
         services.RegisterQuotaFeature();
 
         services.AddStartupTask<CspStartupTask>()

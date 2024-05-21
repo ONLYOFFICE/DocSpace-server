@@ -32,9 +32,6 @@ public static class DropboxDaoSelectorExtension
 {
     public static void Register(DIHelper services)
     {
-        services.TryAdd<ThirdPartyFileDao<FileMetadata, FolderMetadata, Metadata>, DropboxFileDao>();
-        services.TryAdd<IProviderInfo<FileMetadata, FolderMetadata, Metadata>, DropboxProviderInfo>();
-        services.TryAdd<IDaoBase<FileMetadata, FolderMetadata, Metadata>, DropboxDaoBase>();
         services.TryAdd<IDaoSelector<FileMetadata, FolderMetadata, Metadata>, RegexDaoSelectorBase<FileMetadata, FolderMetadata, Metadata>>();
         
         services.TryAdd<ThirdPartyFolderDao<FileMetadata, FolderMetadata, Metadata>>();

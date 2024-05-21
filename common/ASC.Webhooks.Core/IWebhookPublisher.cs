@@ -26,7 +26,6 @@
 
 namespace ASC.Webhooks.Core;
 
-[Scope(typeof(WebhookPublisher))]
 public interface IWebhookPublisher
 {
     public Task PublishAsync(int webhookId, string requestPayload);

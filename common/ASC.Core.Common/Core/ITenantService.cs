@@ -26,7 +26,6 @@
 
 namespace ASC.Core;
 
-[Scope(typeof(CachedTenantService))]
 public interface ITenantService
 {
     Task<byte[]> GetTenantSettingsAsync(int tenant, string key);

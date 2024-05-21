@@ -26,7 +26,7 @@
 
 namespace ASC.Files.Core.Data;
 
-[Scope]
+[Scope(typeof(ILinkDao))]
 internal class LinkDao(
     UserManager userManager,
     IDbContextFactory<FilesDbContext> dbContextManager,

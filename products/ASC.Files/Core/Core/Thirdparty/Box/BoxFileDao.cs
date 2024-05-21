@@ -28,7 +28,7 @@ using File = System.IO.File;
 
 namespace ASC.Files.Core.Core.Thirdparty.Box;
 
-[Scope]
+[Scope(typeof(ThirdPartyFileDao<BoxFile, BoxFolder, BoxItem>))]
 internal class BoxFileDao(UserManager userManager,
         IDbContextFactory<FilesDbContext> dbContextFactory,
         IDaoSelector<BoxFile, BoxFolder, BoxItem> daoSelector,

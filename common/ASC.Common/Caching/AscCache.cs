@@ -48,7 +48,7 @@ public class AscCacheNotify
     }
 }
 
-[Singleton]
+[Singleton(typeof(ICache))]
 public sealed class AscCache(IMemoryCache memoryCache) : ICache, IDisposable
 {
     private CancellationTokenSource _resetCacheToken = new();

@@ -26,7 +26,6 @@
 
 namespace ASC.Core;
 
-[Scope(typeof(CachedUserService))]
 public interface IUserService
 {
     Task<IEnumerable<UserInfo>> GetUsersAsync(int tenant);

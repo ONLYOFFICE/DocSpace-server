@@ -291,9 +291,11 @@ public static class ServiceCollectionExtension
     /// Add a IHostedService for given type. 
     /// Only one copy of this instance type will active in multi process architecture.
     /// </remarks>
-    public static void AddActivePassiveHostedService<T>(this IServiceCollection services, DIHelper diHelper, 
-                                                                                          IConfiguration configuration,
-                                                                                          string workerTypeName = null) where T : ActivePassiveBackgroundService<T>
+    public static void AddActivePassiveHostedService<T>(
+        this IServiceCollection services,
+        DIHelper diHelper, 
+        IConfiguration configuration, 
+        string workerTypeName = null) where T : ActivePassiveBackgroundService<T>
     {
         var typeName = workerTypeName ?? typeof(T).GetFormattedName();
 

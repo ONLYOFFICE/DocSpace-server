@@ -652,7 +652,7 @@ internal abstract class BaseTagDao<T>(
 }
 
 
-[Scope]
+[Scope(typeof(ITagDao<int>))]
 internal class TagDao(UserManager userManager,
         IDbContextFactory<FilesDbContext> dbContextManager,
         TenantManager tenantManager,
@@ -777,7 +777,7 @@ internal class TagDao(UserManager userManager,
     }
 }
 
-[Scope]
+[Scope(typeof(ITagDao<string>))]
 internal class ThirdPartyTagDao(UserManager userManager,
         IDbContextFactory<FilesDbContext> dbContextManager,
         TenantManager tenantManager,

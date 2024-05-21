@@ -102,6 +102,7 @@ public class SingletonAttribute : DIAttribute
     }
 }
 
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface, AllowMultiple = true)]
 public abstract class DIAttribute : Attribute
 {
     public abstract DIAttributeType DiAttributeType { get; }
@@ -169,7 +170,7 @@ public class DIHelper()
         
         _visited.Add(assembly.FullName);
         
-        var types = assembly.GetTypes().Where(t => t.GetCustomAttribute<DIAttribute>() != null);
+        var types = assembly.GetTypes().Where(t => t.GetCustomAttributes<DIAttribute>().Any());
         
         foreach (var a in types)
         {
@@ -220,13 +221,16 @@ public class DIHelper()
             }
             else if(service.IsGenericTypeDefinition)
             {
-                var attr = service.GetCustomAttribute<DIAttribute>();
-                if (attr?.GenericArguments != null && attr.GenericArguments.Length != 0)
+                var attributes = service.GetCustomAttributes<DIAttribute>();
+                foreach (var attr in attributes)
                 {
-                    foreach (var g in attr.GenericArguments)
+                    if (attr.GenericArguments == null || attr.GenericArguments.Length == 0)
                     {
-                        TryAdd(service.MakeGenericType(g));
+                        continue;
                     }
+                    
+                    TryAdd(service.MakeGenericType(attr.GenericArguments));
+                    return;
                 }
             }
         }
@@ -240,14 +244,14 @@ public class DIHelper()
 
         _added.Add(serviceName);
 
-        var di = serviceGenericTypeDefinition != null && (
+        var dis = serviceGenericTypeDefinition != null && (
             serviceGenericTypeDefinition == typeof(IConfigureOptions<>) ||
             serviceGenericTypeDefinition == typeof(IPostConfigureOptions<>) ||
             serviceGenericTypeDefinition == typeof(IOptionsMonitor<>)
-            ) && implementation != null ? implementation.GetCustomAttribute<DIAttribute>() : service.GetCustomAttribute<DIAttribute>();
+            ) && implementation != null ? implementation.GetCustomAttributes<DIAttribute>() : service.GetCustomAttributes<DIAttribute>();
 
 
-        if (di != null)
+        foreach (var di in dis)
         {
             if (di.Additional != null)
             {
@@ -257,7 +261,7 @@ public class DIHelper()
 
             if (!service.IsInterface || implementation != null)
             {
-                var isnew = implementation != null ? Register(service, implementation) : Register(service);
+                var isnew = implementation != null ? Register(di, service, implementation) : Register(di, service);
                 if (!isnew)
                 {
                     return;
@@ -331,12 +335,13 @@ public class DIHelper()
                     {
                         if (di.Implementation == null)
                         {
-                            Register(service, di.Service);
-                            TryAdd(di.Service);
+                            Register(di, di.Service, service);
+                            TryAdd(service);
                         }
                         else
                         {
-                            Register(di.Service);
+                            Register(di, di.Service, di.Implementation);
+                            Register(di, service);
                         }
                     }
                 }
@@ -403,11 +408,6 @@ public class DIHelper()
                             //a, di.Service
                         }
                     }
-
-                    else
-                    {
-                        TryAdd(service, di.Implementation);
-                    }
                 }
             }
         }
@@ -429,26 +429,13 @@ public class DIHelper()
         _serviceCollection = serviceCollection;
     }
 
-    private bool Register(Type service, Type implementation = null)
+    private bool Register(DIAttribute c, Type service, Type implementation = null)
     {
         if (service.IsSubclassOf(typeof(ControllerBase)) || service.GetInterfaces().Contains(typeof(IResourceFilter))
             || service.GetInterfaces().Contains(typeof(IDictionary<string, string>)))
         {
             return true;
         }
-
-        Type serviceGenericTypeDefinition = null;
-
-        if (service.IsGenericType)
-        {
-            serviceGenericTypeDefinition = service.GetGenericTypeDefinition();
-        }
-
-        var c = serviceGenericTypeDefinition != null && (
-            serviceGenericTypeDefinition == typeof(IConfigureOptions<>) ||
-            serviceGenericTypeDefinition == typeof(IPostConfigureOptions<>) ||
-            serviceGenericTypeDefinition == typeof(IOptionsMonitor<>)
-            ) && implementation != null ? implementation.GetCustomAttribute<DIAttribute>() : service.GetCustomAttribute<DIAttribute>();
 
         var serviceName = $"{service}{implementation}";
 

@@ -39,7 +39,7 @@ public enum ProviderTypes
     Yandex
 }
 
-[Scope]
+[Scope(typeof(IProviderDao))]
 internal class ProviderAccountDao(
     IServiceProvider serviceProvider,
     TenantUtil tenantUtil,

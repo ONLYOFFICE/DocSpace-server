@@ -32,11 +32,7 @@ public static class BoxDaoSelectorExtension
 {
     public static void Register(DIHelper services)
     {
-        services.TryAdd<ThirdPartyFileDao<BoxFile, BoxFolder, BoxItem>, BoxFileDao>();
-        services.TryAdd<IProviderInfo<BoxFile, BoxFolder, BoxItem>, BoxProviderInfo>();
-        services.TryAdd<IDaoBase<BoxFile, BoxFolder, BoxItem>, BoxDaoBase>();
         services.TryAdd<IDaoSelector<BoxFile, BoxFolder, BoxItem>, RegexDaoSelectorBase<BoxFile, BoxFolder, BoxItem>>();
-        
         services.TryAdd<ThirdPartyFolderDao<BoxFile, BoxFolder, BoxItem>>();
         services.TryAdd<ThirdPartyTagDao<BoxFile, BoxFolder, BoxItem>>();
         services.TryAdd<RegexDaoSelectorBase<BoxFile, BoxFolder, BoxItem>>();

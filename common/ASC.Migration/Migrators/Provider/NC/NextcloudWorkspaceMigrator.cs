@@ -29,7 +29,7 @@ using ASCShare = ASC.Files.Core.Security.FileShare;
 
 namespace ASC.Migration.Core.Migrators.Provider.NC;
 
-[Transient]
+[Transient(typeof(Migrator))]
 public class NextcloudWorkspaceMigrator : Migrator
 {
     private CancellationToken _cancellationToken;

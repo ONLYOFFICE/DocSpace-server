@@ -26,13 +26,12 @@
 
 namespace ASC.Web.Core.Utility;
 
-[Scope(typeof(BaseUrlShortener))]
 public interface IUrlShortener
 {
     Task<string> GetShortenLinkAsync(string shareLink);
 }
 
-[Scope]
+[Scope(typeof(IUrlShortener))]
 public class BaseUrlShortener(ConsumerFactory consumerFactory, IServiceProvider serviceProvider) : IUrlShortener
 {
     public Task<string> GetShortenLinkAsync(string shareLink)

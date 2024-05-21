@@ -26,7 +26,7 @@
 
 namespace ASC.Files.Core.Core.Thirdparty.WebDav;
 
-[Scope]
+[Scope(typeof(IDaoBase<WebDavEntry, WebDavEntry, WebDavEntry>))]
 internal class WebDavDaoBase(IServiceProvider serviceProvider,
     UserManager userManager,
     TenantManager tenantManager,

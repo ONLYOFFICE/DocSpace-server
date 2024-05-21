@@ -140,7 +140,7 @@ public class UserServiceCache
     }
 }
 
-[Scope]
+[Scope(typeof(IUserService))]
 public class CachedUserService : IUserService, ICachedService
 {
     private readonly EFUserService _service;

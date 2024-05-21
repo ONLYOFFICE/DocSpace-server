@@ -26,7 +26,7 @@
 
 namespace ASC.Files.Core.Data;
 
-[Scope]
+[Scope(typeof(IDaoFactory))]
 public class DaoFactory(IServiceProvider serviceProvider, IProviderDao providerDao) : IDaoFactory
 {
     public IProviderDao ProviderDao { get; } = providerDao;
@@ -54,24 +54,5 @@ public class DaoFactory(IServiceProvider serviceProvider, IProviderDao providerD
     public ILinkDao GetLinkDao()
     {
         return serviceProvider.GetService<ILinkDao>();
-    }
-}
-
-public static class DaoFactoryExtension
-{
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<IFileDao<int>, FileDao>();
-        services.TryAdd<IFileDao<string>, ProviderFileDao>();
-        services.TryAdd<IFolderDao<int>, FolderDao>();
-        services.TryAdd<IFolderDao<string>, ProviderFolderDao>();
-
-        services.TryAdd<ISecurityDao<int>, SecurityDao>();
-        services.TryAdd<ISecurityDao<string>, ThirdPartySecurityDao>();
-
-        services.TryAdd<ITagDao<int>, TagDao>();
-        services.TryAdd<ITagDao<string>, ThirdPartyTagDao>();
-
-        services.TryAdd<ILinkDao, LinkDao>();
     }
 }

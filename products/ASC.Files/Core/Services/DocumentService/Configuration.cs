@@ -72,7 +72,8 @@ public class CoEditingConfig
     }
 }
 
-[Scope(GenericArguments = [typeof(int), typeof(string)])]
+[Scope(GenericArguments = [typeof(int)])]
+[Scope(GenericArguments = [typeof(string)])]
 public class Configuration<T>(
     DocumentConfig<T> document,
     EditorConfiguration<T> editorConfig)
@@ -135,7 +136,8 @@ public class Configuration<T>(
 
 #region Nested Classes
 
-[Transient(GenericArguments = [typeof(int), typeof(string)])]
+[Transient(GenericArguments = [typeof(int)])]
+[Transient(GenericArguments = [typeof(string)])]
 public class DocumentConfig<T>(
     DocumentServiceConnector documentServiceConnector, 
     PathProvider pathProvider, 
@@ -188,7 +190,8 @@ public class DocumentConfig<T>(
     }
 }
 
-[Transient(GenericArguments = [typeof(int), typeof(string)])]
+[Transient(GenericArguments = [typeof(int)])]
+[Transient(GenericArguments = [typeof(string)])]
 public class EditorConfiguration<T>(
     UserManager userManager,
     AuthContext authContext,
@@ -389,7 +392,8 @@ public class EditorConfiguration<T>(
     }
 }
 
-[Transient(GenericArguments = [typeof(int), typeof(string)])]
+[Transient(GenericArguments = [typeof(int)])]
+[Transient(GenericArguments = [typeof(string)])]
 public class InfoConfig<T>(
     BreadCrumbsManager breadCrumbsManager,
     FileSharing fileSharing,
@@ -552,7 +556,8 @@ public class CustomerConfig(
     public async Task<string> GetWww() => (await settingsManager.LoadForDefaultTenantAsync<CompanyWhiteLabelSettings>()).Site;
 }
 
-[Transient(GenericArguments = [typeof(int), typeof(string)])]
+[Transient(GenericArguments = [typeof(int)])]
+[Transient(GenericArguments = [typeof(string)])]
 public class CustomizationConfig<T>(
     CoreBaseSettings coreBaseSettings,
     SettingsManager settingsManager,
