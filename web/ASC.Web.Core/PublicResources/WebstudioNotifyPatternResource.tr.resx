@@ -1178,7 +1178,7 @@ Yedekleme prosedürü hakkında daha fazla bilgi almak için lütfen [Veri Yede�
 Herhangi bir sorunuz veya yardıma ihtiyacınız olması halinde lütfen [${__SupportLink}](${__SupportLink}) adresinden bizimle iletişime geçin.
 
 Saygılarımızla,
-ONLYOFFICE™ Destek Ekibi
+ONLYOFFICE Destek Ekibi
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
@@ -1318,7 +1318,7 @@ Aşağıdaki bağlantıya tıklayarak portalınızı istediğiniz zaman yeniden 
 Herhangi bir sorunuz veya yardıma ihtiyacınız olması halinde lütfen [${__SalesEmail}](mailto:${__SalesEmail}) adresinden bizimle iletişime geçin.
 
 Saygılarımızla,
-ONLYOFFICE™ Destek Ekibi
+ONLYOFFICE Destek Ekibi
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete_tg" xml:space="preserve">
@@ -1343,7 +1343,7 @@ $OrangeButton
 Herhangi bir sorunuz veya yardıma ihtiyacınız olması halinde lütfen [${__SalesEmail}](mailto:${__SalesEmail}) adresinden bizimle iletişime geçin.
 
 Saygılarımızla,
-ONLYOFFICE™ Destek Ekibi
+ONLYOFFICE Destek Ekibi
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">

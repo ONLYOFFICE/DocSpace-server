@@ -1102,7 +1102,7 @@ $OwnerName님,
 문의 사항이 있거나 도움이 필요한 경우 언제든지 연락주세요: [${__SupportLink}](${__SupportLink})
 
 감사합니다,
-ONLYOFFICE™ 지원팀
+ONLYOFFICE 지원팀
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
@@ -1405,7 +1405,7 @@ _알림_: 이 링크는 7일 동안만 유효합니다. 기간 내에 포털 비
 문의 사항이 있거나 도움이 필요한 경우 언제든지 연락주세요: [${__SalesEmail}](mailto:${__SalesEmail})
 
 감사합니다,
-ONLYOFFICE™ 지원팀
+ONLYOFFICE 지원팀
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
@@ -1453,7 +1453,7 @@ _알림_: 이 링크는 7일 동안만 유효합니다. 기간 내에 포털 삭
 문의 사항이 있거나 도움이 필요한 경우 언제든지 연락주세요: [${__SalesEmail}](mailto:${__SalesEmail})
 
 감사합니다,
-ONLYOFFICE™ 지원팀
+ONLYOFFICE 지원팀
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_rename" xml:space="preserve">

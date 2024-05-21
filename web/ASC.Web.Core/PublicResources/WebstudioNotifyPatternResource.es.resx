@@ -146,7 +146,7 @@ Este enlace es válido sólo por 7 días. Por favor, complete la activación den
 
 Buenos días $OwnerName,
 
-Un archivo de copia de seguridad con los datos de su portal ONLYOFFICE™ "${__VirtualRootPath}":"${__VirtualRootPath}" ha sido creado.
+Un archivo de copia de seguridad con los datos de su portal ONLYOFFICE "${__VirtualRootPath}":"${__VirtualRootPath}" ha sido creado.
 
 Para obtener más información sobre procedimiento de creación de copia de seguridad/restauración por favor consulte nuestra guía de usuario "¿Cómo crear y restaurar la copia de seguridad de portal ONLYOFFICE":"${__HelpLink}/administration/docspace-settings.aspx#CreatingBackup_block".
 
@@ -167,7 +167,7 @@ Para obtener más información sobre el procedimiento de copia de seguridad, con
 Si tiene alguna pregunta o necesita ayuda por favor no dude en contactarnos en [${__SupportLink}](${__SupportLink})
 
 Cordialmente,
-Equipo de soporte ONLYOFFICE™
+Equipo de soporte ONLYOFFICE
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
@@ -405,7 +405,7 @@ Puede volver a activar su portal en cualquier momento haciendo clic en el siguie
 Si tiene alguna pregunta o necesita ayuda, por favor no dude en contactarnos en [${__SalesEmail}](mailto:${__SalesEmail})
 
 Cordialmente,
-Equipo de soporte ONLYOFFICE™
+Equipo de soporte ONLYOFFICE
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
@@ -453,7 +453,7 @@ _Nota_: este enlace es válido sólo por 7 días. Por favor, complete el proceso
 Si tiene alguna pregunta o necesita ayuda, no dude en contactarnos a través de [${__SalesEmail}](mailto:${__SalesEmail})
 
 Cordialmente,
-Equipo de soporte ONLYOFFICE™ 
+Equipo de soporte ONLYOFFICE 
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_rename" xml:space="preserve">

@@ -1394,7 +1394,7 @@ Bạn có thể kích hoạt lại cổng thông tin của mình bất cứ lúc
 Nếu bạn có bất kỳ câu hỏi gì hoặc cần trợ giúp, xin vui lòng liên hệ với chúng tôi tại [${__SalesEmail}](mailto:${__SalesEmail})
 
 Trân trọng,
-Nhóm hỗ trợ ONLYOFFICE™
+Nhóm hỗ trợ ONLYOFFICE
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete_tg" xml:space="preserve">
@@ -1419,7 +1419,7 @@ _Lưu ý_: liên kết này chỉ có giá trị trong 7 ngày. Vui lòng hoàn 
 Nếu bạn có bất kỳ câu hỏi gì hoặc cần trợ giúp, xin vui lòng liên hệ với chúng tôi tại [${__SalesEmail}](mailto:${__SalesEmail})
 
 Trân trọng,
-Nhóm hỗ trợ ONLYOFFICE™
+Nhóm hỗ trợ ONLYOFFICE
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
@@ -1647,7 +1647,7 @@ Tập tin sao lưu chứa dữ liệu từ cổng thông tin [${__VirtualRootPat
 Nếu bạn có bất kỳ câu hỏi gì hoặc cần trợ giúp, xin vui lòng liên hệ với chúng tôi tại [${__SupportLink}](${__SupportLink})
 
 Trân trọng,
-Nhóm hỗ trợ ONLYOFFICE™
+Nhóm hỗ trợ ONLYOFFICE
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="ButtonChangeTfa" xml:space="preserve">

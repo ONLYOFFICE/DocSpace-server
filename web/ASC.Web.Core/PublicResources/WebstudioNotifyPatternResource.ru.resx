@@ -167,7 +167,7 @@ $TrulyYours</value>
 Если у Вас есть какие-то вопросы, Вы всегда можете написать нам по адресу [${__SupportLink}](${__SupportLink})
 
 С уважением,
-команда ONLYOFFICE™
+команда ONLYOFFICE
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
@@ -471,7 +471,7 @@ _Обратите внимание_: эта ссылка действитель�
 Если у Вас есть какие-то вопросы, Вы всегда можете написать нам по адресу [${__SalesEmail}](mailto:${__SalesEmail})
 
 С уважением,
-команда ONLYOFFICE™
+команда ONLYOFFICE
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
@@ -519,7 +519,7 @@ _Обратите внимание_: эта ссылка действитель�
 Если у Вас есть какие-то вопросы, Вы всегда можете написать нам по адресу [${__SalesEmail}](mailto:${__SalesEmail})
 
 С уважением,
-команда ONLYOFFICE™
+команда ONLYOFFICE
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_rename" xml:space="preserve">

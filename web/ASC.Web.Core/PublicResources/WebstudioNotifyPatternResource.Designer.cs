@@ -532,7 +532,7 @@ namespace ASC.Web.Core.PublicResources {
         ///If you have any questions or need assistance please feel free to contact us at [${__SupportLink}](${__SupportLink})
         ///
         ///Best regards,
-        ///ONLYOFFICE™ Support Team
+        ///ONLYOFFICE Support Team
         ///[www.onlyof [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_backup_created_tg {
