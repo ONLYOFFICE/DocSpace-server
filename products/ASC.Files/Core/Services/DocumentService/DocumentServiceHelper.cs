@@ -26,7 +26,7 @@
 
 namespace ASC.Web.Files.Services.DocumentService;
 
-[Scope(Additional = typeof(ConfigurationFilesExtension))]
+[Scope]
 public class DocumentServiceHelper(IDaoFactory daoFactory,
         UserManager userManager,
         FileSecurity fileSecurity,

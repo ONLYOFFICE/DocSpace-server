@@ -365,8 +365,6 @@ public abstract class BaseStartup
 
         services.RegisterFeature();
 
-        DIHelper.TryAdd(typeof(IWebhookPublisher), typeof(WebhookPublisher));
-
         services.AddOptions();
 
         var mvcBuilder = services.AddMvcCore(config =>

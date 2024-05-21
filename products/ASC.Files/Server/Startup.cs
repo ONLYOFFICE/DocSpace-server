@@ -54,8 +54,6 @@ public class Startup : BaseStartup
             x.MaxThreadsCount = 10;
         });
         
-        DIHelper.TryAdd<DocumentBuilderTask<int>>();
-
         services.AddBaseDbContextPool<FilesDbContext>();
 
         services.AddScoped<ITenantQuotaFeatureChecker, CountRoomChecker>();

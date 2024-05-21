@@ -63,20 +63,14 @@ public class Startup : BaseWorkerStartup
             //DIHelper.TryAdd<FeedCleanerService>();
 
             services.AddActivePassiveHostedService<FileConverterService<int>>(DIHelper, Configuration);
-            DIHelper.TryAdd<FileConverterService<int>>();
-
             services.AddActivePassiveHostedService<FileConverterService<string>>(DIHelper, Configuration);
-            DIHelper.TryAdd<FileConverterService<string>>();
 
             services.AddHostedService<ThumbnailBuilderService>();
             services.AddHostedService<Launcher>();
             services.AddHostedService<DeleteExpiredService>();
         }
 
-
-        DIHelper.TryAdd<Builder<int>>();
-        DIHelper.TryAdd<DocumentBuilderTask<int>>();
-
+        
         services.AddScoped<ITenantQuotaFeatureChecker, CountRoomChecker>();
         services.AddScoped<ITenantQuotaFeatureStat<CountRoomFeature, int>, CountRoomCheckerStatistic>();
         services.AddScoped<ITenantQuotaFeatureStat<UsersInRoomFeature, int>, UsersInRoomStatistic>();

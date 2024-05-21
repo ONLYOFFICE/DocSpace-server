@@ -80,7 +80,6 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
         DIHelper.Configure(services);
         DIHelper.Scan();
         
-        DIHelper.TryAdd(typeof(IWebhookPublisher), typeof(WebhookPublisher));//hack
         services.AddSingleton(Channel.CreateUnbounded<NotifyRequest>());
         services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Writer);

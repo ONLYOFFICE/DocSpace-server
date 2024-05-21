@@ -98,7 +98,6 @@ public static class SelectorFactoryExtension
 {
     public static void Register(DIHelper services)
     {
-        services.TryAdd<SharePointDaoSelector>();
         OneDriveDaoSelectorExtension.Register(services);
         GoogleDriveDaoSelectorExtension.Register(services);
         DropboxDaoSelectorExtension.Register(services);

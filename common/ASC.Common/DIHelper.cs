@@ -169,7 +169,7 @@ public class DIHelper()
         
         _visited.Add(assembly.FullName);
         
-        var types = assembly.GetTypes().Where(t => t.GetCustomAttribute<DIAttribute>() != null && !t.IsGenericType);
+        var types = assembly.GetTypes().Where(t => t.GetCustomAttribute<DIAttribute>() != null);
         
         foreach (var a in types)
         {
@@ -193,7 +193,7 @@ public class DIHelper()
         TryAdd(typeof(TService), typeof(TImplementation));
     }
 
-    public void TryAdd(Type service, Type implementation = null)
+    private void TryAdd(Type service, Type implementation = null)
     {
         Type serviceGenericTypeDefinition = null;
         
@@ -218,17 +218,17 @@ public class DIHelper()
                     return;
                 }
             }
-            // else
-            // {
-            //     var attr = service.GetCustomAttribute<DIAttribute>();
-            //     if (attr?.GenericArguments != null && attr.GenericArguments.Length != 0)
-            //     {
-            //         foreach (var g in attr.GenericArguments)
-            //         {
-            //             TryAdd(service.MakeGenericType(g));
-            //         }
-            //     }
-            // }
+            else if(service.IsGenericTypeDefinition)
+            {
+                var attr = service.GetCustomAttribute<DIAttribute>();
+                if (attr?.GenericArguments != null && attr.GenericArguments.Length != 0)
+                {
+                    foreach (var g in attr.GenericArguments)
+                    {
+                        TryAdd(service.MakeGenericType(g));
+                    }
+                }
+            }
         }
 
         var serviceName = $"{service}{implementation}";

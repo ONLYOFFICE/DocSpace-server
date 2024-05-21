@@ -35,11 +35,12 @@ public static class GoogleDriveDaoSelectorExtension
     public static void Register(DIHelper services)
     {
         services.TryAdd<ThirdPartyFileDao<DriveFile, DriveFile, DriveFile>, GoogleDriveFileDao>();
-        services.TryAdd<ThirdPartyFolderDao<DriveFile, DriveFile, DriveFile>>();
-        services.TryAdd<RegexDaoSelectorBase<DriveFile, DriveFile, DriveFile>>();
-        services.TryAdd<ThirdPartyTagDao<DriveFile, DriveFile, DriveFile>>();
         services.TryAdd<IDaoBase<DriveFile, DriveFile, DriveFile>, GoogleDriveDaoBase>();
         services.TryAdd<IProviderInfo<DriveFile, DriveFile, DriveFile>, GoogleDriveProviderInfo>();
         services.TryAdd<IDaoSelector<DriveFile, DriveFile, DriveFile>, RegexDaoSelectorBase<DriveFile, DriveFile, DriveFile>>();
+        
+        services.TryAdd<ThirdPartyFolderDao<DriveFile, DriveFile, DriveFile>>();
+        services.TryAdd<RegexDaoSelectorBase<DriveFile, DriveFile, DriveFile>>();
+        services.TryAdd<ThirdPartyTagDao<DriveFile, DriveFile, DriveFile>>();
     }
 }

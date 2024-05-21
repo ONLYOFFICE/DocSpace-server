@@ -126,8 +126,6 @@ public class Startup
 
         services.AddScoped<ITenantQuotaFeatureStat<CountRoomFeature, int>, CountRoomCheckerStatistic>();
 
-        _diHelper.TryAdd(typeof(IWebhookPublisher), typeof(WebhookPublisher));
-
         services.AddAutoMapper(BaseStartup.GetAutoMapperProfileAssemblies());
 
         if (!_hostEnvironment.IsDevelopment())

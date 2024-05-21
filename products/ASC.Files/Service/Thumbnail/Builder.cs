@@ -31,7 +31,7 @@ using FileShare = System.IO.FileShare;
 
 namespace ASC.Files.ThumbnailBuilder;
 
-[Scope]
+[Scope(GenericArguments = [typeof(int)])]
 public class Builder<T>(ThumbnailSettings settings,
     TenantManager tenantManager,
     IDaoFactory daoFactory,

@@ -30,7 +30,7 @@ using SecurityContext = ASC.Core.SecurityContext;
 
 namespace ASC.Files.ThumbnailBuilder;
 
-[Singleton]
+[Singleton(GenericArguments = [typeof(int), typeof(string)])]
 internal class FileConverterService<T>(
         IServiceScopeFactory scopeFactory,
         ILogger<FileConverterService<T>> logger)

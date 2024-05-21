@@ -70,7 +70,7 @@ public interface IFolder
 }
 
 [DebuggerDisplay("{Title} ({Id})")]
-[Transient]
+[Transient(GenericArguments = [typeof(int), typeof(string)])]
 public class Folder<T> : FileEntry<T>, IFolder
 {
     public FolderType FolderType { get; set; }

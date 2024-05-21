@@ -31,7 +31,7 @@ namespace ASC.Api.Core.Core;
 /// </summary>
 public class WarmupServicesStartupTask(IServiceCollection services, IServiceProvider provider) : IStartupTask
 {
-    public async Task ExecuteAsync(CancellationToken cancellationToken = default)
+    public Task ExecuteAsync(CancellationToken cancellationToken = default)
     {      
         var processedFailed = 0;
         var processedSuccessed = 0;
@@ -64,6 +64,8 @@ public class WarmupServicesStartupTask(IServiceCollection services, IServiceProv
             processedSuccessed,
             processedFailed,
             (DateTime.UtcNow - startTime).TotalMilliseconds);
+        
+        return Task.CompletedTask;
     }
 
     static IEnumerable<Type> GetServices(IServiceCollection services)

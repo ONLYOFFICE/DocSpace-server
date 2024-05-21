@@ -31,11 +31,12 @@ public static class WebDavDaoSelectorExtension
     public static void Register(DIHelper services)
     {
         services.TryAdd<ThirdPartyFileDao<WebDavEntry, WebDavEntry, WebDavEntry>, WebDavFileDao>();
-        services.TryAdd<ThirdPartyFolderDao<WebDavEntry, WebDavEntry, WebDavEntry>>();
-        services.TryAdd<ThirdPartyTagDao<WebDavEntry, WebDavEntry, WebDavEntry>>();
         services.TryAdd<IDaoBase<WebDavEntry, WebDavEntry, WebDavEntry>, WebDavDaoBase>();
         services.TryAdd<IProviderInfo<WebDavEntry, WebDavEntry, WebDavEntry>, WebDavProviderInfo>();
         services.TryAdd<IDaoSelector<WebDavEntry, WebDavEntry, WebDavEntry>, RegexDaoSelectorBase<WebDavEntry, WebDavEntry, WebDavEntry>>();
+        
+        services.TryAdd<ThirdPartyFolderDao<WebDavEntry, WebDavEntry, WebDavEntry>>();
+        services.TryAdd<ThirdPartyTagDao<WebDavEntry, WebDavEntry, WebDavEntry>>();
         services.TryAdd<RegexDaoSelectorBase<WebDavEntry, WebDavEntry, WebDavEntry>>();
     }
 }
