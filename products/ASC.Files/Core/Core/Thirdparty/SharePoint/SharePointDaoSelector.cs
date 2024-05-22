@@ -73,11 +73,3 @@ internal class SharePointDaoSelector(IServiceProvider serviceProvider, IDaoFacto
         return base.ConvertId(null);
     }
 }
-
-public static class SharePointDaoSelectorExtension
-{
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<RegexDaoSelectorBase<File, Folder, ClientObject>, SharePointDaoSelector>();
-    }
-}

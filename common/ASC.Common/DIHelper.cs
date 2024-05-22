@@ -128,7 +128,7 @@ public abstract class DIAttribute : Attribute
     public abstract void TryAdd(IServiceCollection services, Type service, Type implementation = null);
 }
 
-public class DIHelper()
+public class DIHelper
 {
     private readonly Dictionary<DIAttributeType, List<string>> _services = new()
     {
@@ -183,18 +183,8 @@ public class DIHelper()
         var assemblyName = assembly.Name;
         return assemblyName != null && assemblyName.StartsWith("ASC.");
     }
-    
-    public void TryAdd<TService>() where TService : class
-    {
-        TryAdd(typeof(TService));
-    }
 
-    public void TryAdd<TService, TImplementation>() where TService : class
-    {
-        TryAdd(typeof(TService), typeof(TImplementation));
-    }
-
-    private void TryAdd(Type service, Type implementation = null)
+    private void TryAdd(Type service, Type implementation = null, DIAttribute di = null)
     {
         Type serviceGenericTypeDefinition = null;
         
@@ -229,9 +219,9 @@ public class DIHelper()
                         continue;
                     }
                     
-                    TryAdd(service.MakeGenericType(attr.GenericArguments));
-                    return;
+                    TryAdd(service.MakeGenericType(attr.GenericArguments), di: attr);
                 }
+                return;
             }
         }
 
@@ -244,15 +234,15 @@ public class DIHelper()
 
         _added.Add(serviceName);
 
-        var dis = serviceGenericTypeDefinition != null && (
+        di ??= serviceGenericTypeDefinition != null && (
             serviceGenericTypeDefinition == typeof(IConfigureOptions<>) ||
             serviceGenericTypeDefinition == typeof(IPostConfigureOptions<>) ||
             serviceGenericTypeDefinition == typeof(IOptionsMonitor<>)
-            ) && implementation != null ? implementation.GetCustomAttributes<DIAttribute>() : service.GetCustomAttributes<DIAttribute>();
+            ) && implementation != null ? 
+            implementation.GetCustomAttributes<DIAttribute>().FirstOrDefault() : 
+            service.GetCustomAttributes<DIAttribute>().FirstOrDefault();
 
-
-        foreach (var di in dis)
-        {
+        
             if (di.Additional != null)
             {
                 var m = di.Additional.GetMethod("Register", BindingFlags.Public | BindingFlags.Static);
@@ -410,7 +400,7 @@ public class DIHelper()
                     }
                 }
             }
-        }
+        
     }
 
     public void TryAddSingleton<TService>(Func<IServiceProvider, TService> implementationFactory) where TService : class

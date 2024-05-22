@@ -309,8 +309,8 @@ public static class ServiceCollectionExtension
             _registeredActivePassiveHostedService.Add(typeName);
         }
 
-        diHelper.TryAdd<IRegisterInstanceDao<T>, RegisterInstanceDao<T>>();
-        diHelper.TryAdd<IRegisterInstanceManager<T>, RegisterInstanceManager<T>>();
+        services.AddScoped<IRegisterInstanceDao<T>, RegisterInstanceDao<T>>();
+        services.AddScoped<IRegisterInstanceManager<T>, RegisterInstanceManager<T>>();
         services.AddHostedService<RegisterInstanceWorkerService<T>>();
         services.Configure<InstanceWorkerOptions<T>>(x =>
         {

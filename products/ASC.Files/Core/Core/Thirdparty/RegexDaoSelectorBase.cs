@@ -24,11 +24,16 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using DriveFile = Google.Apis.Drive.v3.Data.File;
+
 namespace ASC.Files.Thirdparty;
 
-[Scope]
-internal class RegexDaoSelectorBase<TFile, TFolder, TItem>(IServiceProvider serviceProvider,
-        IDaoFactory daoFactory)
+[Scope(typeof(IDaoSelector<BoxFile, BoxFolder, BoxItem>), GenericArguments = [typeof(BoxFile), typeof(BoxFolder), typeof(BoxItem)])]
+[Scope(typeof(IDaoSelector<FileMetadata, FolderMetadata, Metadata>), GenericArguments = [typeof(FileMetadata), typeof(FolderMetadata), typeof(Metadata)])]
+[Scope(typeof(IDaoSelector<DriveFile, DriveFile, DriveFile>), GenericArguments = [typeof(DriveFile), typeof(DriveFile), typeof(DriveFile)])]
+[Scope(typeof(IDaoSelector<Item, Item, Item>), GenericArguments = [typeof(Item), typeof(Item), typeof(Item)])]
+[Scope(typeof(IDaoSelector<WebDavEntry, WebDavEntry, WebDavEntry>), GenericArguments = [typeof(WebDavEntry), typeof(WebDavEntry), typeof(WebDavEntry)])]
+internal class RegexDaoSelectorBase<TFile, TFolder, TItem>(IServiceProvider serviceProvider, IDaoFactory daoFactory)
     : IDaoSelector<TFile, TFolder, TItem>
     where TFile : class, TItem
     where TFolder : class, TItem
