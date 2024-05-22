@@ -108,7 +108,6 @@ public abstract class DIAttribute : Attribute
     public abstract DIAttributeType DiAttributeType { get; }
     protected internal Type Implementation { get; }
     protected internal Type Service { get; }
-    public Type Additional { get; init; }
     
     public Type[] GenericArguments { get; init; }
 
@@ -241,13 +240,6 @@ public class DIHelper
             ) && implementation != null ? 
             implementation.GetCustomAttributes<DIAttribute>().FirstOrDefault() : 
             service.GetCustomAttributes<DIAttribute>().FirstOrDefault();
-
-        
-            if (di.Additional != null)
-            {
-                var m = di.Additional.GetMethod("Register", BindingFlags.Public | BindingFlags.Static);
-                m.Invoke(null, [this]);
-            }
 
             if (!service.IsInterface || implementation != null)
             {
@@ -401,17 +393,6 @@ public class DIHelper
                 }
             }
         
-    }
-
-    public void TryAddSingleton<TService>(Func<IServiceProvider, TService> implementationFactory) where TService : class
-    {
-        var serviceName = $"{typeof(TService)}";
-
-        if (!_services[DIAttributeType.Singleton].Contains(serviceName))
-        {
-            _services[DIAttributeType.Singleton].Add(serviceName);
-            _serviceCollection.TryAddSingleton(implementationFactory);
-        }
     }
 
     public void Configure(IServiceCollection serviceCollection)
