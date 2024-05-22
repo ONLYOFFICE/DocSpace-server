@@ -28,13 +28,9 @@ namespace ASC.Data.Storage.Configuration;
 
 public static class StorageConfigExtension
 {
-    public static void Register(DIHelper services)
+    public static Storage GetStorage(IConfiguration configuration)
     {
-        services.TryAddSingleton(r =>
-        {
-            var config = new ConfigurationExtension(r.GetService<IConfiguration>());
-            return config.GetSetting<Storage>($"{RegionSettings.Current}storage");
-        });
+        return configuration.GetSection($"{RegionSettings.Current}storage").Get<Storage>();
     }
 }
 
