@@ -266,11 +266,6 @@ public class FilesModuleSpecifics(ILogger<ModuleProvider> logger, Helpers helper
             }
             return true;
         }
-        if (table.Name == "files_thirdparty_account" && columnName is "color" or "folder_id" && value == null)
-        {
-            value = string.Empty;
-            return true;
-        }
         if (table.Name == "files_folder" && columnName is "create_by" or "modified_by")
         {
             base.TryPrepareValue(connection, columnMapper, table, columnName, ref value);
