@@ -179,7 +179,7 @@
           &lt;/td&gt;
         &lt;/tr&gt;</value>
   </data>
-  <data name="TextForFooterUnsubsribeDocSpace" xml:space="preserve">
+  <data name="TextForFooterUnsubsribe" xml:space="preserve">
     <value>Satınalma ilə bağlı suallarınız üçün bizimlə əlaqə saxlayın &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="mailto:sales@onlyoffice.com"&gt;sales@onlyoffice.com&lt;/a&gt;.&lt;br /&gt; Texniki problemlərlə bağlı əlaqə saxlayın &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://www.onlyoffice.com/support-contact-form.aspx"&gt;dəstək komandası&lt;/a&gt;.&lt;br /&gt; &lt;a href="{1}" style="color: #FF6F3D; text-decoration: underline; white-space: nowrap;" target="_blank"&gt;Abunəlikdən çıxmaq üçün bura klikləyin&lt;/a&gt;&lt;br /&gt;</value>
   </data>
   <data name="TopGif" xml:space="preserve">

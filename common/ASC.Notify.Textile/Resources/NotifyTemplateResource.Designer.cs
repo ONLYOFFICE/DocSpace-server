@@ -113,9 +113,9 @@ namespace ASC.Notify.Textile.Resources {
         /// <summary>
         ///   Looks up a localized string similar to For any purchase questions, email us at &lt;a style=&quot;color: #FF6F3D; text-decoration: underline;&quot; target=&quot;_blank&quot; href=&quot;mailto:sales@onlyoffice.com&quot;&gt;sales@onlyoffice.com&lt;/a&gt;.&lt;br /&gt; In case of technical problems please contact our &lt;a style=&quot;color: #FF6F3D; text-decoration: underline;&quot; target=&quot;_blank&quot; href=&quot;https://www.onlyoffice.com/support-contact-form.aspx&quot;&gt;support team&lt;/a&gt;.&lt;br /&gt; &lt;a href=&quot;{1}&quot; style=&quot;color: #FF6F3D; text-decoration: underline; white-space: nowrap;&quot; target=&quot;_blank&quot;&gt;Click here to unsubscribe&lt;/ [rest of string was truncated]&quot;;.
         /// </summary>
-        public static string TextForFooterUnsubsribeDocSpace {
+        public static string TextForFooterUnsubsribe {
             get {
-                return ResourceManager.GetString("TextForFooterUnsubsribeDocSpace", resourceCulture);
+                return ResourceManager.GetString("TextForFooterUnsubsribe", resourceCulture);
             }
         }
         

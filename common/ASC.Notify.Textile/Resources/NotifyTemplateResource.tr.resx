@@ -150,7 +150,7 @@
             &lt;/td&gt;
         &lt;/tr&gt;</value>
   </data>
-  <data name="TextForFooterUnsubsribeDocSpace" xml:space="preserve">
+  <data name="TextForFooterUnsubsribe" xml:space="preserve">
     <value>Satın alma ile ilgili sorularınız için bize şu adresten ulaşabilirsiniz &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="mailto:sales@onlyoffice.com"&gt;sales@onlyoffice.com&lt;/a&gt;.&lt;br /&gt; Teknik sorunlar olması halinde ise lütfen &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://www.onlyoffice.com/support-contact-form.aspx"&gt;destek ekibi&lt;/a&gt;.&lt;br /&gt; &lt;a href="{1}" style="color: #FF6F3D; text-decoration: underline; white-space: nowrap;" target="_blank"&gt;Abonelikten çıkmak için buraya tıklayın&lt;/a&gt;&lt;br /&gt;</value>
   </data>
   <data name="TopGif" xml:space="preserve">
