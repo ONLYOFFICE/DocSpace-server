@@ -106,8 +106,6 @@ public class BackupWorker(
                 }
             }
 
-            await item.PublishChanges();
-
             return ToBackupProgress(item);
         }
     }
