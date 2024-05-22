@@ -177,7 +177,7 @@ public class RestoreDbModuleTask : PortalTaskBase
                     _columnMapper.SetMapping(tableInfo.Name, tableInfo.IdColumn, oldIdValue, newIdValue);
                 }
 
-                if (tableInfo.Name == "files_thirdparty_account" && row[12] is "")
+                if (tableInfo.Name == "files_thirdparty_account" && row[12] != null && row[12].ToString() != "")
                 {
                     var ids = string.Join("-|", Selectors.All.Select(s => s.Id));
                     var sboxId = Regex.Replace(row[12].ToString(), @"(?<=(?:" + $"{ids}-" + @"))\d+", match =>
