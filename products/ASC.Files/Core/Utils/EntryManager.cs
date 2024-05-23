@@ -241,7 +241,7 @@ public class EntryManager(IDaoFactory daoFactory,
 {
     private const string UpdateList = "filesUpdateList";
 
-    public async Task<(IEnumerable<FileEntry> Entries, int Total)> GetEntriesAsync<T>(Folder<T> parent, int from, int count, FilterType filterType, bool subjectGroup, Guid subjectId,
+    public async Task<(IEnumerable<FileEntry> Entries, int Total)> GetEntriesAsync<T>(Folder<T> parent, Folder<T> room, int from, int count, FilterType filterType, bool subjectGroup, Guid subjectId,
         string searchText, string[] extension, bool searchInContent, bool withSubfolders, OrderBy orderBy, T roomId = default, SearchArea searchArea = SearchArea.Active, bool withoutTags = false, IEnumerable<string> tagNames = null,
         bool excludeSubject = false, ProviderFilter provider = ProviderFilter.None, SubjectFilter subjectFilter = SubjectFilter.Owner, ApplyFilterOption applyFilterOption = ApplyFilterOption.All, QuotaFilter quotaFilter = QuotaFilter.All)
     {
@@ -286,7 +286,7 @@ public class EntryManager(IDaoFactory daoFactory,
             if (applyFilterOption == ApplyFilterOption.All)
             {
                 filterType = foldersFilterType = FilterType.FilesOnly;
-        }
+            }
         }
         
         var (filesFilterType, filesSearchText, fileExtension) = applyFilterOption != ApplyFilterOption.Folders ? (filterType, searchText, extension) : (FilterType.None, string.Empty, new string[] {});
@@ -379,21 +379,36 @@ public class EntryManager(IDaoFactory daoFactory,
 
             var allFoldersCountTask = folderDao.GetFoldersCountAsync(parent.Id, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders, excludeSubject, roomId);
             var allFilesCountTask = fileDao.GetFilesCountAsync(parent.Id, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders, excludeSubject, roomId);
+            var filesToUpdate = new List<File<T>>();
+            
+            if (room is { FolderType: FolderType.VirtualDataRoom, SettingsIndexing: true })
+            {
+                orderBy.SortedBy = SortedByType.CustomOrder;
+                
+                var folders = folderDao.GetFoldersAsync(parent.Id, orderBy, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders, excludeSubject, 0, -1, roomId);
+                var files = fileDao.GetFilesAsync(parent.Id, orderBy, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders, excludeSubject, 0, -1, roomId, withShared);
+                
+                entries = await files.Concat(folders.Cast<FileEntry>())
+                    .OrderBy(r => r.Order)
+                    .Skip(from)
+                    .Take(count)
+                    .ToListAsync();
+                
+                filesToUpdate = entries.OfType<File<T>>().ToList();
+            }
+            else
+            {
+                var folders = await folderDao.GetFoldersAsync(parent.Id, orderBy, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders, excludeSubject, from, count, roomId).ToListAsync();
+                var filesCount = count - folders.Count;
+                var filesOffset = Math.Max(folders.Count > 0 ? 0 : from - await allFoldersCountTask, 0);
+                var files = await fileDao.GetFilesAsync(parent.Id, orderBy, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders, excludeSubject, filesOffset, filesCount, roomId, withShared).ToListAsync();
+                
+                entries = new List<FileEntry>(folders.Count + files.Count);
+                entries.AddRange(folders);
+                entries.AddRange(files);
+            }
 
-            var folders = await folderDao.GetFoldersAsync(parent.Id, orderBy, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders, excludeSubject, from, count, roomId)
-                .ToListAsync();
-
-            var filesCount = count - folders.Count;
-            var filesOffset = Math.Max(folders.Count > 0 ? 0 : from - await allFoldersCountTask, 0);
-
-            var files = await fileDao.GetFilesAsync(parent.Id, orderBy, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders, excludeSubject, filesOffset, filesCount, roomId, withShared)
-                .ToListAsync();
-
-            entries = new List<FileEntry>(folders.Count + files.Count);
-            entries.AddRange(folders);
-            entries.AddRange(files);
-
-            var fileStatusTask = entryStatusManager.SetFileStatusAsync(files);
+            var fileStatusTask = entryStatusManager.SetFileStatusAsync(filesToUpdate);
             var tagsNewTask = fileMarker.SetTagsNewAsync(parent, entries);
             var originsTask = SetOriginsAsync(parent, entries);
 

@@ -162,9 +162,9 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
 {
     private readonly ApiDateTimeHelper _apiDateTimeHelper = apiDateTimeHelper;
 
-    public async Task<FileDto<T>> GetAsync<T>(File<T> file, int? foldersCount = null, string order = null)
+    public async Task<FileDto<T>> GetAsync<T>(File<T> file, string order = null)
     {
-        var result = await GetFileWrapperAsync(file, foldersCount, order);
+        var result = await GetFileWrapperAsync(file, order);
 
         result.FolderId = file.ParentId;
         
@@ -176,11 +176,12 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         
         result.ViewAccessibility = await fileUtility.GetAccessibility(file);
         result.AvailableExternalRights = _fileSecurity.GetFileAccesses(file, SubjectType.ExternalLink);
+        result.FileEntryType = FileEntryType.File;
         
         return result;
     }
 
-    private async Task<FileDto<T>> GetFileWrapperAsync<T>(File<T> file, int? foldersCount, string order)
+    private async Task<FileDto<T>> GetFileWrapperAsync<T>(File<T> file, string order)
     {
         var result = await GetAsync<FileDto<T>, T>(file);
         var isEnabledBadges = await badgesSettingsHelper.GetEnabledForCurrentUserAsync();
@@ -214,16 +215,12 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
 
         if (file.Order != 0)
         {            
-            var folderDao = daoFactory.GetFolderDao<T>();
-            var fileOrder = file.Order;
-            fileOrder += foldersCount ?? await folderDao.GetFoldersCountAsync(file.ParentId, FilterType.None, false, Guid.Empty, string.Empty);
-            
             if (string.IsNullOrEmpty(order))
             {
                 order = await breadCrumbsManager.GetBreadCrumbsOrderAsync(file.ParentId);
             }
             
-            result.Order = !string.IsNullOrEmpty(order) ? string.Join('.', order, fileOrder) : fileOrder.ToString();
+            result.Order = !string.IsNullOrEmpty(order) ? string.Join('.', order, file.Order) : file.Order.ToString();
         }
 
         try
