@@ -181,11 +181,11 @@ public class ProductEntryPoint : Product
                     break;
             }
 
-            AdditionalNotificationInfo<JsonElement> additionalInfo;
+            EventDescription<JsonElement> additionalInfo;
 
             try
             {
-                additionalInfo = JsonSerializer.Deserialize<AdditionalNotificationInfo<JsonElement>>(e.Description.LastOrDefault()!);
+                additionalInfo = JsonSerializer.Deserialize<EventDescription<JsonElement>>(e.Description.LastOrDefault()!);
             }
             catch (Exception ex)
             {
