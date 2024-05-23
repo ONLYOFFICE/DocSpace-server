@@ -62,7 +62,7 @@ public class FilesMessageService(
 
     public async Task SendAsync<T>(MessageAction action, FileEntry<T> entry, Guid userId, FileShare userRole, bool useRoomFormat = false, params string[] description)
     {
-        description = ExtendAppend(description, FileShareExtensions.GetAccessString(userRole, useRoomFormat));
+        description = Append(description, FileShareExtensions.GetAccessString(userRole, useRoomFormat));
         
         await SendAsync(action, entry, null, userId, userRole, description);
     }
@@ -76,7 +76,7 @@ public class FilesMessageService(
         }
 
         var additionalParam = await GetAdditionalEntryDataAsync(entry, action, oldTitle, userId, userRole);
-        description = ExtendAppend(description, additionalParam.DescriptionPart);
+        description = Append(description, additionalParam.DescriptionPart);
 
         if (headers == null)//todo check need if
         {
@@ -96,7 +96,7 @@ public class FilesMessageService(
         }
 
         var additionalParam = await GetAdditionalEntryDataAsync(entry, action, oldTitle, userId, userRole);
-        description = ExtendAppend(description, additionalParam.DescriptionPart);
+        description = Append(description, additionalParam.DescriptionPart);
 
         await messageService.SendHeadersMessageAsync(action, MessageTarget.Create(entry.Id), null, description, additionalParam.References);
     }
@@ -109,7 +109,7 @@ public class FilesMessageService(
         }
 
         var additionalParams = await GetAdditionalEntryDataAsync(entry1, action);
-        description = ExtendAppend(description, additionalParams.DescriptionPart);
+        description = Append(description, additionalParams.DescriptionPart);
 
         if (headers == null)//todo check need if
         {
@@ -155,7 +155,7 @@ public class FilesMessageService(
             return;
         }
 
-        await messageService.SendAsync(action, MessageTarget.Create(entry.Id), d1, d2, additionalParam.References);
+        await messageService.SendAsync(action, MessageTarget.Create(entry.Id), [d1, d2, additionalParam.DescriptionPart], additionalParam.References);
     }
 
     public async Task SendAsync<T>(MessageAction action, FileEntry<T> entry, MessageInitiator initiator, params string[] description)
@@ -166,7 +166,7 @@ public class FilesMessageService(
         }
 
         var additionalParam = await GetAdditionalEntryDataAsync(entry, action);
-        description = ExtendAppend(description, additionalParam.DescriptionPart);
+        description = Append(description, additionalParam.DescriptionPart);
 
         await messageService.SendAsync(initiator, action, MessageTarget.Create(entry.Id), additionalParam.References, description);
     }
@@ -186,11 +186,14 @@ public class FilesMessageService(
         FileShare userRole = FileShare.None)
     {
         var folderDao = daoFactory.GetFolderDao<int>();
-        
-        var parents = await folderDao.GetParentFoldersAsync(entry.ParentId).Where(x => !x.IsRoot).ToListAsync();
-        var room = parents.FirstOrDefault(x => DocSpaceHelper.IsRoom(x.FolderType));
 
-        var serializedParam = GetNotificationDescription(entry, action, oldTitle, userid, userRole, room?.Id ?? -1, room?.Title);
+        var parents = await folderDao.GetParentFoldersAsync(entry.ParentId).Where(x => !x.IsRoot).ToListAsync();
+        
+        var room = entry is Folder<int> folder && DocSpaceHelper.IsRoom(folder.FolderType) 
+            ? folder 
+            : parents.FirstOrDefault(x => DocSpaceHelper.IsRoom(x.FolderType));
+
+        var desc = GetEventDescription(entry, action, oldTitle, userid, userRole, room?.Id ?? -1, room?.Title);
 
         var references = parents.Select(x => new FilesAuditReference
         {
@@ -207,7 +210,16 @@ public class FilesMessageService(
             });
         }
         
-        return new FileEntryData(serializedParam, references);
+        var parent = parents.LastOrDefault();
+        if (parent != null)
+        {
+            desc.ParentId = parent.Id;
+            desc.ParentTitle = parent.Title;
+        }
+        
+        var json = JsonSerializer.Serialize(desc, _serializerOptions);
+        
+        return new FileEntryData(json, references);
     }
     
     private async Task<FileEntryData> GetAdditionalEntryDataAsync(FileEntry<string> entry, MessageAction action, string oldTitle = null, Guid userid = default, 
@@ -217,14 +229,15 @@ public class FilesMessageService(
 
         var (roomId, roomTitle) = await folderDao.GetParentRoomInfoFromFileEntryAsync(entry);
 
-        var serializedParam = GetNotificationDescription(entry, action, oldTitle, userid, userRole, roomId, roomTitle);
+        var desc = GetEventDescription(entry, action, oldTitle, userid, userRole, roomId, roomTitle);
+        var json = JsonSerializer.Serialize(desc, _serializerOptions);
         
-        return new FileEntryData(serializedParam, null);
+        return new FileEntryData(json, null);
     }
 
-    private static string GetNotificationDescription<T>(FileEntry<T> entry, MessageAction action, string oldTitle, Guid userid, FileShare userRole, T roomId, string roomTitle)
+    private static EventDescription<T> GetEventDescription<T>(FileEntry<T> entry, MessageAction action, string oldTitle, Guid userid, FileShare userRole, T roomId, string roomTitle)
     {
-        var info = new AdditionalNotificationInfo<T>
+        var desc = new EventDescription<T>
         {
             RoomId = roomId,
             RoomTitle = roomTitle
@@ -233,36 +246,35 @@ public class FilesMessageService(
         switch (action)
         {
             case MessageAction.RoomRenamed when !string.IsNullOrEmpty(oldTitle):
-                info.RoomOldTitle = oldTitle;
+                desc.RoomOldTitle = oldTitle;
                 break;
             case MessageAction.RoomCreateUser or MessageAction.RoomRemoveUser when userid != Guid.Empty:
-                info.UserIds = [userid];
+                desc.UserIds = [userid];
                 break;
             case MessageAction.RoomUpdateAccessForUser when (userRole != FileShare.None) && userid != Guid.Empty:
-                info.UserIds = [userid];
-                info.UserRole = (int)userRole;
+                desc.UserIds = [userid];
+                desc.UserRole = (int)userRole;
                 break;
         }
 
-        info.RootFolderTitle = entry.RootFolderType switch
+        desc.RootFolderTitle = entry.RootFolderType switch
         {
             FolderType.USER => FilesUCResource.MyFiles,
             FolderType.TRASH => FilesUCResource.Trash,
             _ => null
         };
 
-        var serializedParam = JsonSerializer.Serialize(info, _serializerOptions);
-        return serializedParam;
+        return desc;
     }
-
-    private record struct FileEntryData(string DescriptionPart, IEnumerable<FilesAuditReference> References);
     
-    private static string[] ExtendAppend(string[] description, string append)
+    private static string[] Append(string[] description, string value)
     {
         var newArray = new string[description.Length + 1];
         Array.Copy(description, newArray, description.Length);
-        newArray[^1] = append;
+        newArray[^1] = value;
         
         return newArray;
     }
+    
+    private record struct FileEntryData(string DescriptionPart, IEnumerable<FilesAuditReference> References);
 }

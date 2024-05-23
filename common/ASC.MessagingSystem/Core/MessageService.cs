@@ -106,6 +106,11 @@ public class MessageService(
     {
         await SendRequestMessageAsync(action, target, description: [d1, d2], references: references);
     }
+    
+    public async Task SendAsync(MessageAction action, MessageTarget target, string[] description, IEnumerable<FilesAuditReference> references = null)
+    {
+        await SendRequestMessageAsync(action, target, description: description, references: references);
+    }
 
     public async Task SendAsync(MessageAction action, MessageTarget target, IEnumerable<string> d1)
     {
@@ -265,14 +270,14 @@ public class MessageService(
         switch (action)
         {
             case MessageAction.UsersUpdatedType:
-                parameter = JsonSerializer.Serialize(new AdditionalNotificationInfo<int>
+                parameter = JsonSerializer.Serialize(new EventDescription<int>
                 {
                     UserIds = userIds,
                     UserRole = (int)userType
                 }, _serializerOptions);
                 break;
             case MessageAction.UserCreated or MessageAction.UserUpdated:
-                parameter = JsonSerializer.Serialize(new AdditionalNotificationInfo<int>
+                parameter = JsonSerializer.Serialize(new EventDescription<int>
                 {
                     UserIds = userIds
                 }, _serializerOptions);
@@ -285,7 +290,7 @@ public class MessageService(
     }
 }
 
-public class AdditionalNotificationInfo<T>
+public class EventDescription<T>
 {
     public T RoomId { get; set; }
     public string RoomTitle { get; set; }
@@ -293,4 +298,6 @@ public class AdditionalNotificationInfo<T>
     public string RootFolderTitle { get; set; }
     public int UserRole { get; set; }
     public List<Guid> UserIds { get; set; }
+    public T ParentId { get; set; }
+    public string ParentTitle { get; set; }
 }
