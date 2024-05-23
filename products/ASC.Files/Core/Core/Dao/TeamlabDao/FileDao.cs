@@ -444,7 +444,10 @@ internal class FileDao(
                     file.Title = FileUtility.ReplaceFileExtension(file.Title, FileUtility.GetFileExtension(file.Title));
 
                     file.ModifiedBy = _authContext.CurrentAccount.ID;
-                    file.ModifiedOn = _tenantUtil.DateTimeNow();
+                    if (file.ModifiedOn == default)
+                    {
+                        file.ModifiedOn = _tenantUtil.DateTimeNow();
+                    }
                     if (file.CreateBy == default)
                     {
                         file.CreateBy = _authContext.CurrentAccount.ID;
@@ -835,6 +838,7 @@ internal class FileDao(
         var folderDao = daoFactory.GetFolderDao<int>();
         var toFolder = await folderDao.GetFolderAsync(toFolderId);
         var file = await GetFileAsync(fileId);
+        var fromFolder = await folderDao.GetFolderAsync(file.ParentId);
         var fileContentLength = file.ContentLength;
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
@@ -852,7 +856,10 @@ internal class FileDao(
                     }
                 }
             }
-        }else if (toFolder.FolderType == FolderType.USER || toFolder.FolderType == FolderType.DEFAULT)
+        }else if ((toFolder.FolderType == FolderType.USER || toFolder.FolderType == FolderType.DEFAULT) && 
+                fromFolder.FolderType != FolderType.TRASH && 
+                fromFolder.FolderType != FolderType.USER && 
+                fromFolder.FolderType != FolderType.DEFAULT)
         {
             var quotaUserSettings = await _settingsManager.LoadAsync<TenantUserQuotaSettings>();
             if (quotaUserSettings.EnableQuota)

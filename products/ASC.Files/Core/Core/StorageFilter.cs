@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,17 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Web.Api.ApiModel.RequestsDto;
+namespace ASC.Files.Core.Core;
 
-/// <summary>
-/// </summary>
-public class QuotaSettingsRequestsDto
+public enum StorageFilter
 {
-    /// <summary>Specifies if the quota settings are enabled or not</summary>
-    /// <type>System.Boolean, System</type>
-    public bool EnableQuota { get; set; }
-
-    /// <summary>Default quota value</summary>
-    /// <type>System.Int64, System</type>
-    public JsonElement DefaultQuota { get; set; }
+    None = 0,
+    Internal = 1,
+    ThirdParty = 2
 }
