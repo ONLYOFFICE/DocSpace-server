@@ -45,6 +45,87 @@
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>MigrationResource.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <EmbeddedResource Update="Resources\MigrationResource.ar-SA.resx">
+      <DependentUpon>MigrationResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\MigrationResource.az.resx">
+      <DependentUpon>MigrationResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\MigrationResource.bg.resx">
+      <DependentUpon>MigrationResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\MigrationResource.cs.resx">
+      <DependentUpon>MigrationResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\MigrationResource.de.resx">
+      <DependentUpon>MigrationResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\MigrationResource.el-GR.resx">
+      <DependentUpon>MigrationResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\MigrationResource.es.resx">
+      <DependentUpon>MigrationResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\MigrationResource.fi.resx">
+      <DependentUpon>MigrationResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\MigrationResource.fr.resx">
+      <DependentUpon>MigrationResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\MigrationResource.hy-AM.resx">
+      <DependentUpon>MigrationResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\MigrationResource.it.resx">
+      <DependentUpon>MigrationResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\MigrationResource.ja-JP.resx">
+      <DependentUpon>MigrationResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\MigrationResource.ko-KR.resx">
+      <DependentUpon>MigrationResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\MigrationResource.lv.resx">
+      <DependentUpon>MigrationResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\MigrationResource.nl.resx">
+      <DependentUpon>MigrationResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\MigrationResource.pl.resx">
+      <DependentUpon>MigrationResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\MigrationResource.pt.resx">
+      <DependentUpon>MigrationResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\MigrationResource.pt-BR.resx">
+      <DependentUpon>MigrationResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\MigrationResource.ro.resx">
+      <DependentUpon>MigrationResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\MigrationResource.ru.resx">
+      <DependentUpon>MigrationResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\MigrationResource.sk.resx">
+      <DependentUpon>MigrationResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\MigrationResource.sl.resx">
+      <DependentUpon>MigrationResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\MigrationResource.sr-Latn-RS.resx">
+      <DependentUpon>MigrationResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\MigrationResource.tr.resx">
+      <DependentUpon>MigrationResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\MigrationResource.uk-UA.resx">
+      <DependentUpon>MigrationResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\MigrationResource.vi.resx">
+      <DependentUpon>MigrationResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\MigrationResource.zh-CN.resx">
+      <DependentUpon>MigrationResource.resx</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   
 </Project>

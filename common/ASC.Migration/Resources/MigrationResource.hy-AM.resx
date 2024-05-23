@@ -153,9 +153,6 @@
   <data name="MigrationCommonFiles" xml:space="preserve">
     <value>Ընդհանուր ֆայլերի միգրացիա</value>
   </data>
-  <data name="MigrationInitException" xml:space="preserve">
-    <value>Սխալ {0} միգրատորը սկզբնավորելիս</value>
-  </data>
   <data name="MigrationNotFoundException" xml:space="preserve">
     <value>Նման միգրացիոն մատակարար չկա</value>
   </data>
@@ -165,10 +162,52 @@
   <data name="MigrationProjectFiles" xml:space="preserve">
     <value>Միգրացիոն նախագծի ֆայլեր</value>
   </data>
-  <data name="MigrationStartException" xml:space="preserve">
-    <value>Վերլուծությունը դեռ ընթացքի մեջ է</value>
+  <data name="CanNotShare" xml:space="preserve">
+    <value>Չհաջողվեց կիսվել {0} գրառումով {1}-ի հետ</value>
   </data>
-  <data name="MigrationUploadException" xml:space="preserve">
-    <value>Միգրացիան արդեն ընթացքի մեջ է</value>
+  <data name="CanNotAddUserInGroup" xml:space="preserve">
+    <value>Չհաջողվեց օգտվողին ավելացնել {0}  խմբին {1}</value>
+  </data>
+  <data name="CanNotCreateFile" xml:space="preserve">
+    <value>Չհաջողվեց ֆայլ ստեղծել {0}</value>
+  </data>
+  <data name="CanNotImportUser" xml:space="preserve">
+    <value>Չհաջողվեց ներմուծել օգտվողին</value>
+  </data>
+  <data name="CanNotImportUserFiles" xml:space="preserve">
+    <value>Չհաջողվեց ներմուծել օգտվողի ֆայլերը</value>
+  </data>
+  <data name="CanNotParseArchive" xml:space="preserve">
+    <value>Չհաջողվեց վերլուծել {0} արխիվը</value>
+  </data>
+  <data name="CanNotParseArchives" xml:space="preserve">
+    <value>Չհաջողվեց վերլուծել արխիվները</value>
+  </data>
+  <data name="CanNotParseUser" xml:space="preserve">
+    <value>Չհաջողվեց վերլուծել օգտվողին {0}</value>
+  </data>
+  <data name="CanNotReadInfoFile" xml:space="preserve">
+    <value>Չհաջողվեց կարդալ ֆայլի տեղեկատվությունը {0}</value>
+  </data>
+  <data name="CanNotToUnzip" xml:space="preserve">
+    <value>Չհաջողվեց բացել {0}</value>
+  </data>
+  <data name="CreateFile" xml:space="preserve">
+    <value>Ստեղծել ֆայլ {0}</value>
+  </data>
+  <data name="CreateFolder" xml:space="preserve">
+    <value>Ստեղծել պանակ {0}</value>
+  </data>
+  <data name="CreateShareRoom" xml:space="preserve">
+    <value>ստեղծել ընդհանուր սենյակ {0}</value>
+  </data>
+  <data name="СanNotImportCommonFiles" xml:space="preserve">
+    <value>Չհաջողվեց ներմուծել ընդհանուր ֆայլերը</value>
+  </data>
+  <data name="СanNotImportProjectFiles" xml:space="preserve">
+    <value>Չհաջողվեց ներմուծել նախագծի ֆայլերը</value>
+  </data>
+  <data name="СreateRootFolder" xml:space="preserve">
+    <value>Ստեղծել արմատական թղթապանակ</value>
   </data>
 </root>

@@ -52,9 +52,9 @@ public class WorkspaceMigrator : Migrator
         MigrationInfo = new MigrationInfo { Name = "Workspace" };
     }
 
-    public override async Task InitAsync(string path, CancellationToken cancellationToken, OperationType operation)
+    public override void Init(string path, CancellationToken cancellationToken, OperationType operation)
     {
-        await MigrationLogger.InitAsync();
+        MigrationLogger.Init();
         _cancellationToken = cancellationToken;
 
         MigrationInfo.Operation = operation;
@@ -272,7 +272,7 @@ public class WorkspaceMigrator : Migrator
                 var owner = "";
                 if (storage.Type == FolderType.BUNCH)
                 {
-                    if (row["parent_id"].ToString() == "0" && row["title"].ToString().StartsWith("projects_project"))
+                    if (projectTitle.ContainsKey(id))
                     {
                         var split = row["title"].ToString().Split('_');
                         title = projectTitle[id].Item1;
@@ -307,7 +307,9 @@ public class WorkspaceMigrator : Migrator
                     Title = row["title"].ToString(),
                     Version = int.Parse(row["version"].ToString()),
                     VersionGroup = int.Parse(row["version_group"].ToString()),
-                    Comment = row["comment"].ToString()
+                    Comment = row["comment"].ToString(),
+                    Created = DateTime.Parse(row["create_on"].ToString()),
+                    Modified = DateTime.Parse(row["modified_on"].ToString())
                 };
                 file.Path = Path.Combine(_dataReader.GetFolder(),$"{folderFiles}_{(Convert.ToInt32(file.Id) / 1000 + 1) * 1000}/file_{file.Id}/v{file.Version}/content{FileUtility.GetFileExtension(file.Title)}");
                 storage.Files.Add(file);
@@ -371,7 +373,11 @@ public class WorkspaceMigrator : Migrator
 
         foreach (var row in data.Rows.Cast<DataRow>())
         {
-            var id = int.Parse(row["entry_id"].ToString());
+            var result = int.TryParse(row["entry_id"].ToString(), out var id);
+            if (!result)
+            {
+                continue;
+            }
             if (row["owner"].ToString() == createBy && (storage.Files.Select(f => f.Id).ToList().Contains(id) || storage.Folders.Select(f=> f.Id).ToList().Contains(id)))
             {
                 var security = new MigrationSecurity

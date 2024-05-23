@@ -38,7 +38,8 @@ public class MigrationFileUploadHandler
         StorageFactory storageFactory,
         UserManager userManager,
         AuthContext authContext,
-        ILogger<MigrationFileUploadHandler> logger)
+        ILogger<MigrationFileUploadHandler> logger,
+        IDistributedCache cache)
     {
         MigrationFileUploadResult result = null;
         try
@@ -49,21 +50,35 @@ public class MigrationFileUploadHandler
             }
 
             var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+            var key = $"migration folder - {tenantId}";
             if (context.Request.Query["Init"].ToString() == "true")
             {
-                
+
                 try
                 {
                     logger.Information("start migration upload file");
                     var discStore = await storageFactory.GetStorageAsync(tenantId, "migration", (IQuotaController)null) as DiscDataStore;
-                    var folder = discStore.GetPhysicalPath("", "");
-                    if (Directory.Exists(folder))
+
+                    var path = await cache.GetStringAsync(key);
+                    if (!string.IsNullOrEmpty(path))
                     {
-                        logger.Information("start delete migration folder");
-                        Directory.Delete(folder, true);
-                        logger.Information("end delete migration folder");
+                        _ = Task.Factory.StartNew(() =>
+                        {
+                            if (Directory.Exists(path))
+                            {
+                                Directory.Delete(path, true);
+                            }
+                        });
                     }
-                    Directory.CreateDirectory(folder);
+
+                    var newPath = Path.GetRandomFileName();
+                    var newFolder = discStore.GetPhysicalPath("", newPath);
+                    Directory.CreateDirectory(newFolder);
+                    await cache.SetStringAsync(key, newFolder, new DistributedCacheEntryOptions
+                    {
+                        SlidingExpiration = TimeSpan.FromDays(1)
+                    });
+
                     int.TryParse(configuration["files:uploader:chunk-size"], out var chunkSize);
                     chunkSize = chunkSize == 0 ? 10 * 1024 * 1024 : chunkSize;
 
@@ -76,11 +91,11 @@ public class MigrationFileUploadHandler
             }
             else
             {
+                var path = await cache.GetStringAsync(key);
                 var file = context.Request.Form.Files[0];
                 using var stream = file.OpenReadStream();
-
-                var path = await GetTmpFilePathAsync(context.Request.Query["Name"].ToString(), storageFactory, tenantId);
-                using var fs = File.Open(path, FileMode.Append);
+                var folder = Path.Combine(path, Path.GetFileName(context.Request.Query["Name"].ToString()));
+                using var fs = File.Open(folder, FileMode.Append);
                 await stream.CopyToAsync(fs);
 
                 result = Success();
@@ -113,19 +128,6 @@ public class MigrationFileUploadHandler
             Success = false,
             Message = string.Format(messageFormat, args)
         };
-    }
-
-    private async Task<string> GetTmpFilePathAsync(string name, StorageFactory storageFactory, int tenantId)
-    {
-        var discStore = await storageFactory.GetStorageAsync(tenantId, "migration", (IQuotaController)null) as DiscDataStore;
-        var folder = discStore.GetPhysicalPath("", "");
-
-        if (!Directory.Exists(folder))
-        {
-            Directory.CreateDirectory(folder);
-        }
-
-        return Path.Combine(folder, name);
     }
 }
 

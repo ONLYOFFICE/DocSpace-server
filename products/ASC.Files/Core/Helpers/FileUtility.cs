@@ -659,7 +659,9 @@ public class FileUtility(
                 ".pdf", ".djvu", ".fb2", ".epub", ".xps",".oxps",
                 ".sxw", ".stw", ".wps", ".wpt",
                 ".doct", ".docy",
-                ".gdoc"
+                ".gdoc",
+                ".drawio",
+                ".md", ".markdown"
             }.ToImmutableList();
 
     public static readonly ImmutableList<string> ExtsFormTemplate = new List<string>

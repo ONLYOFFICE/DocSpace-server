@@ -66,6 +66,7 @@ public class SmtpJob(UserManager userManager,
     public void Init(SmtpSettingsDto smtpSettings, int tenant, Guid user)
     {
         TenantId = tenant;
+        CurrentOperation = string.Empty;
         _currentUser = user;
         _smtpSettings = smtpSettings;
     }
@@ -103,7 +104,7 @@ public class SmtpJob(UserManager userManager,
 
             var bodyBuilder = new BodyBuilder
             {
-                TextBody = WebstudioNotifyPatternResource.pattern_smtp_test
+                TextBody = WebstudioNotifyPatternResource.pattern_smtp_test.Replace("$TrulyYours", WebstudioNotifyPatternResource.TrulyYoursText)
             };
 
             mimeMessage.Body = bodyBuilder.ToMessageBody();
