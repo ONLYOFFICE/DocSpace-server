@@ -798,4 +798,13 @@
   <data name="PortalRenamed" xml:space="preserve">
     <value>Portal Renamed</value>
   </data>
+  <data name="RoomGroupAdded" xml:space="preserve">
+    <value>Added group: {0}. Role: {1}</value>
+  </data>
+  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
+    <value>{0} appointed: {1}</value>
+  </data>
+  <data name="RoomGroupRemove" xml:space="preserve">
+    <value>Deleted group: {0}</value>
+  </data>
 </root>

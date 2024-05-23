@@ -806,7 +806,7 @@ public class FileStorageService //: IFileStorageService
             }
             else
             {
-                await filesMessageService.SendAsync(MessageAction.FolderRenamed, renamedFolder, renamedFolder.Title);
+                await filesMessageService.SendAsync(MessageAction.FolderRenamed, renamedFolder, renamedFolder.Title, oldTitle);
             }
 
             //if (!folder.ProviderEntry)
@@ -1244,6 +1244,8 @@ public class FileStorageService //: IFileStorageService
         {
             var file = await daoFactory.GetFileDao<T>().GetFileAsync(fileId);
             FileOptions<T> result = null;
+            
+            var oldTitle = file.Title;
 
             if (file.MutableId)
             {
@@ -1261,7 +1263,7 @@ public class FileStorageService //: IFileStorageService
 
             if (result.Renamed)
             {
-                await filesMessageService.SendAsync(MessageAction.FileRenamed, file, file.Title);
+                await filesMessageService.SendAsync(MessageAction.FileRenamed, file, file.Title, oldTitle);
 
                 //if (!file.ProviderEntry)
                 //{
@@ -2640,35 +2642,65 @@ public class FileStorageService //: IFileStorageService
                         continue;
                     }
 
-                    var user = !string.IsNullOrEmpty(ace.Email)
-                        ? await userManager.GetUserByEmailAsync(ace.Email)
-                        : await userManager.GetUsersAsync(ace.Id);
-
-                    var name = user.DisplayUserName(false, displayUserSettingsHelper);
-
-                    if (entry is Folder<T> folder && DocSpaceHelper.IsRoom(folder.FolderType))
-                        {
-                        switch (eventType)
+                    switch (ace.SubjectType)
+                    {
+                        case SubjectType.User:
                             {
-                                case EventType.Create:
-                                await filesMessageService.SendAsync(MessageAction.RoomCreateUser, entry, user.Id, ace.Access, true, name);
-                                    break;
-                                case EventType.Remove:
-                                await filesMessageService.SendAsync(MessageAction.RoomRemoveUser, entry, user.Id, name);
-                                    break;
-                                case EventType.Update:
-                                await filesMessageService.SendAsync(MessageAction.RoomUpdateAccessForUser, entry, user.Id, ace.Access, true, name);
-                                    break;
+                                var user = !string.IsNullOrEmpty(ace.Email)
+                                    ? await userManager.GetUserByEmailAsync(ace.Email)
+                                    : await userManager.GetUsersAsync(ace.Id);
+
+                                var name = user.DisplayUserName(false, displayUserSettingsHelper);
+
+                                if (entry is Folder<T> folder && DocSpaceHelper.IsRoom(folder.FolderType))
+                                {
+                                    switch (eventType)
+                                    {
+                                        case EventType.Create:
+                                            await filesMessageService.SendAsync(MessageAction.RoomCreateUser, entry, user.Id, ace.Access, true, name);
+                                            break;
+                                        case EventType.Remove:
+                                            await filesMessageService.SendAsync(MessageAction.RoomRemoveUser, entry, user.Id, name);
+                                            break;
+                                        case EventType.Update:
+                                            await filesMessageService.SendAsync(MessageAction.RoomUpdateAccessForUser, entry, user.Id, ace.Access, true, name);
+                                            break;
+                                    }
+                                }
+                                else
+                                {
+                                    await filesMessageService.SendAsync(
+                                        entry.FileEntryType == FileEntryType.Folder ? MessageAction.FolderUpdatedAccessFor : MessageAction.FileUpdatedAccessFor,entry,
+                                        entry.Title, name, FileShareExtensions.GetAccessString(ace.Access));
+                                }
+
+                                break;
                             }
-                        }
-                        else
-                        {
-                        await filesMessageService.SendAsync(
-                            entry.FileEntryType == FileEntryType.Folder ? MessageAction.FolderUpdatedAccessFor : MessageAction.FileUpdatedAccessFor,entry,
-                            entry.Title, name, FileShareExtensions.GetAccessString(ace.Access));
-                        }
+                        case SubjectType.Group:
+                            {
+                                var group = await userManager.GetGroupInfoAsync(ace.Id);
+                        
+                                if (entry is Folder<T> folder && DocSpaceHelper.IsRoom(folder.FolderType))
+                                {
+                                    switch (eventType)
+                                    {
+                                        case EventType.Create:
+                                            await filesMessageService.SendAsync(MessageAction.RoomGroupAdded, entry, group.ID, ace.Access, true, group.Name);
+                                            break;
+                                        case EventType.Remove:
+                                            await filesMessageService.SendAsync(MessageAction.RoomUpdateAccessForGroup, entry, group.ID, group.Name);
+                                            break;
+                                        case EventType.Update:
+                                            await filesMessageService.SendAsync(MessageAction.RoomGroupRemove, entry, group.ID, ace.Access, true, group.Name);
+                                            break;
+                                    }
+                                }
+
+                                break;
+                            }
                     }
                 }
+            }
             catch (Exception e)
             {
                 throw GenerateException(e);
