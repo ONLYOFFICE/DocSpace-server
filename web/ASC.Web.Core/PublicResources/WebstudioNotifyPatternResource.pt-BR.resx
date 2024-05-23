@@ -1084,9 +1084,6 @@ $TrulyYours</value>
   <data name="subject_enterprise_admin_activation_v1" xml:space="preserve">
     <value>Bem-vindo ao ONLYOFFICE DocSpace!</value>
   </data>
-  <data name="AcceptDocSpace" xml:space="preserve">
-    <value>ACEITAR</value>
-  </data>
   <data name="pattern_change_password_v115" xml:space="preserve">
     <value>Deseja alterar a senha da sua conta do ONLYOFFICE? Clique no botão abaixo para confirmar.
  
@@ -1584,10 +1581,10 @@ $TrulyYours</value>
   <data name="subject_saas_user_welcome_v1" xml:space="preserve">
     <value>Bem-vindo ao ONLYOFFICE DocSpace!</value>
   </data>
-  <data name="ButtonCollaborateDocSpace" xml:space="preserve">
+  <data name="ButtonCollaborate" xml:space="preserve">
     <value>Colaborar no DocSpace</value>
   </data>
-  <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
+  <data name="ButtonConfirmInvite" xml:space="preserve">
     <value>Confirmar o convite do DocSpace</value>
   </data>
   <data name="ButtonConfirmRoomInvite" xml:space="preserve">

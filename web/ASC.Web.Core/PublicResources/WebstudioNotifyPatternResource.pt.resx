@@ -663,13 +663,10 @@ $TrulyYours</value>
   <data name="ButtonAccept" xml:space="preserve">
     <value>Aceitar</value>
   </data>
-  <data name="AcceptDocSpace" xml:space="preserve">
-    <value>ACEITAR</value>
-  </data>
-  <data name="ButtonCollaborateDocSpace" xml:space="preserve">
+  <data name="ButtonCollaborate" xml:space="preserve">
     <value>Colabore no DocSpace</value>
   </data>
-  <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
+  <data name="ButtonConfirmInvite" xml:space="preserve">
     <value>Confirmar Convite para o DocSpace</value>
   </data>
   <data name="ButtonConfirmEmail" xml:space="preserve">

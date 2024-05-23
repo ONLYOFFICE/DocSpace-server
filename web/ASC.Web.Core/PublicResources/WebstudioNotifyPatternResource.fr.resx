@@ -1602,9 +1602,6 @@ $Body</value>
   <data name="subject_for_sales_notify" xml:space="preserve">
     <value>Demande du service des ventes</value>
   </data>
-  <data name="AcceptDocSpace" xml:space="preserve">
-    <value>ACCEPTER</value>
-  </data>
   <data name="subject_saas_docspace_invite" xml:space="preserve">
     <value>Rejoindre ONLYOFFICE DocSpace</value>
   </data>
@@ -1636,10 +1633,10 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="ButtonCollaborateDocSpace" xml:space="preserve">
+  <data name="ButtonCollaborate" xml:space="preserve">
     <value>Collaborer à DocSpace</value>
   </data>
-  <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
+  <data name="ButtonConfirmInvite" xml:space="preserve">
     <value>Confirmer l’invitation à DocSpace</value>
   </data>
   <data name="ButtonConfirmRoomInvite" xml:space="preserve">

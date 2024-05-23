@@ -809,9 +809,6 @@ Echipă de Asistență ONLYOFFICE
   <data name="ButtonAccept" xml:space="preserve">
     <value>Acceptare</value>
   </data>
-  <data name="AcceptDocSpace" xml:space="preserve">
-    <value>ACCEPTARE</value>
-  </data>
   <data name="ButtonAccessControlPanel" xml:space="preserve">
     <value>Accesare Panou de Control</value>
   </data>
@@ -839,7 +836,7 @@ Echipă de Asistență ONLYOFFICE
   <data name="ButtonJoin" xml:space="preserve">
     <value>Faceți clic aici pentru a vă asocia la portalul</value>
   </data>
-  <data name="ButtonCollaborateDocSpace" xml:space="preserve">
+  <data name="ButtonCollaborate" xml:space="preserve">
     <value>Colaborare în spațiul DocSpace</value>
   </data>
   <data name="ButtonConfigureRightNow" xml:space="preserve">
@@ -866,7 +863,7 @@ Echipă de Asistență ONLYOFFICE
   <data name="subject_change_password_v115" xml:space="preserve">
     <value>Confirmare schimbare parolă</value>
   </data>
-  <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
+  <data name="ButtonConfirmInvite" xml:space="preserve">
     <value>Confirmare invitație la DocSpace</value>
   </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">

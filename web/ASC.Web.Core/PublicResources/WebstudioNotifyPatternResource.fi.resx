@@ -316,16 +316,13 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="AcceptDocSpace" xml:space="preserve">
-    <value>HYVÄKSY</value>
-  </data>
   <data name="ButtonAccept" xml:space="preserve">
     <value>Hyväksy</value>
   </data>
-  <data name="ButtonCollaborateDocSpace" xml:space="preserve">
+  <data name="ButtonCollaborate" xml:space="preserve">
     <value>Tee yhteistyötä DocSpacessa</value>
   </data>
-  <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
+  <data name="ButtonConfirmInvite" xml:space="preserve">
     <value>Vahvista DocSpace-kutsusi</value>
   </data>
   <data name="ButtonConfirm" xml:space="preserve">

@@ -699,9 +699,6 @@ $TrulyYours</value>
   <data name="ActionUserUpdated" xml:space="preserve">
     <value>DocSpace 사용자가 업데이트되었습니다: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
-  <data name="AcceptDocSpace" xml:space="preserve">
-    <value>수락</value>
-  </data>
   <data name="subject_saas_user_welcome_v1" xml:space="preserve">
     <value>ONLYOFFICE DocSpace에 오신 것을 환영합니다!</value>
   </data>
@@ -852,7 +849,7 @@ $TrulyYours</value>
   <data name="ButtonChangeTfa" xml:space="preserve">
     <value>인증 앱 구성</value>
   </data>
-  <data name="ButtonCollaborateDocSpace" xml:space="preserve">
+  <data name="ButtonCollaborate" xml:space="preserve">
     <value>DocSpace에서 공동 작업</value>
   </data>
   <data name="ButtonConfigureRightNow" xml:space="preserve">
@@ -864,7 +861,7 @@ $TrulyYours</value>
   <data name="ButtonConfirmEmail" xml:space="preserve">
     <value>확인</value>
   </data>
-  <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
+  <data name="ButtonConfirmInvite" xml:space="preserve">
     <value>DocSpace 초대 확인</value>
   </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">

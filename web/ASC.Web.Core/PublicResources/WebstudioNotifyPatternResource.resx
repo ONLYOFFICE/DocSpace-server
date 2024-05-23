@@ -1116,7 +1116,7 @@ $Body</value>
   <data name="subject_for_sales_notify" xml:space="preserve">
     <value>Sales department request</value>
   </data>
-  <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
+  <data name="ButtonConfirmInvite" xml:space="preserve">
     <value>Confirm DocSpace Invite</value>
   </data>
   <data name="ButtonConfirmEmail" xml:space="preserve">
@@ -1439,7 +1439,7 @@ $TrulyYours</comment>
   <data name="subject_saas_admin_welcome_v1" xml:space="preserve">
     <value>Discover business subscription of ONLYOFFICE DocSpace</value>
   </data>
-  <data name="ButtonCollaborateDocSpace" xml:space="preserve">
+  <data name="ButtonCollaborate" xml:space="preserve">
     <value>Collaborate in DocSpace</value>
   </data>
   <data name="pattern_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
@@ -1855,9 +1855,6 @@ $TrulyYours</comment>
   </data>
   <data name="subject_saas_user_welcome_v1" xml:space="preserve">
     <value>Welcome to ONLYOFFICE DocSpace!</value>
-  </data>
-  <data name="AcceptDocSpace" xml:space="preserve">
-    <value>ACCEPT</value>
   </data>
   <data name="pattern_enterprise_user_activation_v1" xml:space="preserve">
     <value>h1. Join &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace

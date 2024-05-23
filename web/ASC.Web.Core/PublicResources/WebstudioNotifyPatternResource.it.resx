@@ -1358,10 +1358,7 @@ $TrulyYours</value>
   <data name="ButtonConfirmEmail" xml:space="preserve">
     <value>CONFERMA</value>
   </data>
-  <data name="AcceptDocSpace" xml:space="preserve">
-    <value>ACCETTARE</value>
-  </data>
-  <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
+  <data name="ButtonConfirmInvite" xml:space="preserve">
     <value>Conferma invito DocSpace</value>
   </data>
   <data name="ButtonConfirmRoomInvite" xml:space="preserve">
@@ -1630,7 +1627,7 @@ Il tuo portale è di nuovo disponibile.</value>
   <data name="subject_for_sales_notify" xml:space="preserve">
     <value>Richiesta ufficio vendite</value>
   </data>
-  <data name="ButtonCollaborateDocSpace" xml:space="preserve">
+  <data name="ButtonCollaborate" xml:space="preserve">
     <value>Collaborate in DocSpace</value>
   </data>
   <data name="subject_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">

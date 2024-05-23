@@ -1085,10 +1085,7 @@ $TrulyYours</value>
   <data name="ButtonAccept" xml:space="preserve">
     <value>Прийняти</value>
   </data>
-  <data name="AcceptDocSpace" xml:space="preserve">
-    <value>ПРИЙНЯТИ</value>
-  </data>
-  <data name="ButtonCollaborateDocSpace" xml:space="preserve">
+  <data name="ButtonCollaborate" xml:space="preserve">
     <value>Співпрацювати в DocSpace</value>
   </data>
   <data name="ButtonConfirmEmail" xml:space="preserve">
@@ -1097,7 +1094,7 @@ $TrulyYours</value>
   <data name="ButtonConfirm" xml:space="preserve">
     <value>Підтвердити</value>
   </data>
-  <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
+  <data name="ButtonConfirmInvite" xml:space="preserve">
     <value>Підтвердити запрошення до DocSpace</value>
   </data>
   <data name="ButtonConfirmRoomInvite" xml:space="preserve">

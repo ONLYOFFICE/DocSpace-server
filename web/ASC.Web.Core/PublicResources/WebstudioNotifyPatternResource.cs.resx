@@ -1090,9 +1090,6 @@ $TrulyYours</value>
   <data name="ButtonAccept" xml:space="preserve">
     <value>Přijmout</value>
   </data>
-  <data name="AcceptDocSpace" xml:space="preserve">
-    <value>PŘIJMOUT</value>
-  </data>
   <data name="ButtonActivateEmail" xml:space="preserve">
     <value>Kliknutím zde aktivujete svou e-mailovou adresu</value>
   </data>
@@ -1108,13 +1105,13 @@ $TrulyYours</value>
   <data name="ButtonChangeTfa" xml:space="preserve">
     <value>Konfigurace aplikace ověřovatele</value>
   </data>
-  <data name="ButtonCollaborateDocSpace" xml:space="preserve">
+  <data name="ButtonCollaborate" xml:space="preserve">
     <value>Spolupráce v DocSpace</value>
   </data>
   <data name="ButtonConfirm" xml:space="preserve">
     <value>Potvrdit</value>
   </data>
-  <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
+  <data name="ButtonConfirmInvite" xml:space="preserve">
     <value>Potvrzení pozvánky DocSpace</value>
   </data>
   <data name="ButtonConfirmEmail" xml:space="preserve">

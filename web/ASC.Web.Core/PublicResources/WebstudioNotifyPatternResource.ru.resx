@@ -1546,7 +1546,7 @@ $TrulyYours</value>
   <data name="subject_for_sales_notify" xml:space="preserve">
     <value>Запрос в отдел продаж</value>
   </data>
-  <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
+  <data name="ButtonConfirmInvite" xml:space="preserve">
     <value>Подтвердите приглашение в DocSpace</value>
   </data>
   <data name="ButtonConfirmEmail" xml:space="preserve">
@@ -1618,9 +1618,6 @@ $TrulyYours</value>
   <data name="subject_saas_user_welcome_v1" xml:space="preserve">
     <value>Добро пожаловать в ONLYOFFICE DocSpace!</value>
   </data>
-  <data name="AcceptDocSpace" xml:space="preserve">
-    <value>ПРИНЯТЬ</value>
-  </data>
   <data name="subject_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
     <value>5 советов для эффективной работы с документами</value>
   </data>
@@ -1633,7 +1630,7 @@ $TrulyYours</value>
   <data name="subject_saas_admin_user_docs_tips_v1" xml:space="preserve">
     <value>Несколько советов для эффективной работы с документами</value>
   </data>
-  <data name="ButtonCollaborateDocSpace" xml:space="preserve">
+  <data name="ButtonCollaborate" xml:space="preserve">
     <value>Работайте совместно в DocSpace</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">

@@ -553,10 +553,7 @@ Użytkownik "$__AuthorName":"$__AuthorUrl" dołączył do portalu "${__VirtualRo
   <data name="ButtonConfirmEmail" xml:space="preserve">
     <value>POTWIERDŹ</value>
   </data>
-  <data name="AcceptDocSpace" xml:space="preserve">
-    <value>AKCEPTUJ</value>
-  </data>
-  <data name="ButtonCollaborateDocSpace" xml:space="preserve">
+  <data name="ButtonCollaborate" xml:space="preserve">
     <value>Współpracuj w DocSpace</value>
   </data>
   <data name="ButtonConfirmRoomInvite" xml:space="preserve">
@@ -1172,7 +1169,7 @@ $TrulyYours</value>
   <data name="subject_saas_user_welcome_v1" xml:space="preserve">
     <value>Witaj w ONLYOFFICE DocSpace!</value>
   </data>
-  <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
+  <data name="ButtonConfirmInvite" xml:space="preserve">
     <value>Potwierdź zaproszenie DocSpace</value>
   </data>
   <data name="ButtonActivateEmail" xml:space="preserve">

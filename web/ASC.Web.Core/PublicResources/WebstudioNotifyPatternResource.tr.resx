@@ -1133,16 +1133,13 @@ $TrulyYours</value>
   <data name="subject_change_password_v115" xml:space="preserve">
     <value>Parolanızı değiştirmeyi onaylayın</value>
   </data>
-  <data name="AcceptDocSpace" xml:space="preserve">
-    <value>KABUL ET</value>
-  </data>
-  <data name="ButtonCollaborateDocSpace" xml:space="preserve">
+  <data name="ButtonCollaborate" xml:space="preserve">
     <value>DocSpace'te iş birliği yapın</value>
   </data>
   <data name="ButtonConfirmEmail" xml:space="preserve">
     <value>ONAYLA</value>
   </data>
-  <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
+  <data name="ButtonConfirmInvite" xml:space="preserve">
     <value>DocSpace Davetini Onaylayın</value>
   </data>
   <data name="ButtonConfirmRoomInvite" xml:space="preserve">

@@ -1107,9 +1107,6 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="AcceptDocSpace" xml:space="preserve">
-    <value>接受</value>
-  </data>
   <data name="ButtonActivateEmail" xml:space="preserve">
     <value>点击此处以激活您的邮件地址</value>
   </data>
@@ -1122,13 +1119,13 @@ $TrulyYours</value>
   <data name="ButtonChangeTfa" xml:space="preserve">
     <value>配置身份验证器应用</value>
   </data>
-  <data name="ButtonCollaborateDocSpace" xml:space="preserve">
+  <data name="ButtonCollaborate" xml:space="preserve">
     <value>在协作空间中进行协作</value>
   </data>
   <data name="ButtonConfirm" xml:space="preserve">
     <value>确认</value>
   </data>
-  <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
+  <data name="ButtonConfirmInvite" xml:space="preserve">
     <value>确认协作空间邀请</value>
   </data>
   <data name="ButtonConfirmEmail" xml:space="preserve">
