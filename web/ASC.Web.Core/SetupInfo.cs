@@ -200,15 +200,6 @@ public class SetupInfo
         return ChunkUploadSize;
     }
 
-    public string GetRightCultureName(CultureInfo cultureInfo)
-    {
-        return EnabledCultures.Contains(cultureInfo)
-            ? cultureInfo.Name
-            : EnabledCultures.Contains(cultureInfo.Parent)
-                ? cultureInfo.Parent.Name
-                : "en-US";
-    }
-
     private string GetAppSettings(string key, string defaultValue)
     {
         var result = _configuration[key] ?? defaultValue;

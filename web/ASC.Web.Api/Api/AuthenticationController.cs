@@ -243,7 +243,7 @@ public class AuthenticationController(
             if (!string.IsNullOrEmpty(inDto.Culture))
             {
                 await userManager.ChangeUserCulture(user, inDto.Culture);
-                await messageService.SendAsync(MessageAction.UserUpdatedLanguage, messageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
+                await messageService.SendAsync(MessageAction.UserUpdatedLanguage, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
             }
 
             var outDto = new AuthenticationTokenDto

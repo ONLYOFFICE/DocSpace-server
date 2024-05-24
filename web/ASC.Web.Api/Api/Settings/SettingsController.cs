@@ -94,7 +94,7 @@ public partial class SettingsController(MessageService messageService,
 
         var settings = new SettingsDto
         {
-            Culture = setupInfo.GetRightCultureName(tenant.GetCulture()),
+            Culture = coreBaseSettings.GetRightCultureName(tenant.GetCulture()),
             GreetingSettings = tenant.Name == "" ? Resource.PortalName : tenant.Name,
             DocSpace = true,
             Standalone = coreBaseSettings.Standalone,

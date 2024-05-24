@@ -48,6 +48,15 @@ public class CoreBaseSettings(IConfiguration configuration)
         .Distinct()
         .Select(l => CultureInfo.GetCultureInfo(l.Trim()))
         .ToList();
+    
+    public string GetRightCultureName(CultureInfo cultureInfo)
+    {
+        return EnabledCultures.Contains(cultureInfo)
+            ? cultureInfo.Name
+            : EnabledCultures.Contains(cultureInfo.Parent)
+                ? cultureInfo.Parent.Name
+                : "en-US";
+    }
 }
 
 /// <summary>
