@@ -255,8 +255,6 @@ public class StudioNotifyService(
         {
             tags.Add(new TagValue(CommonTags.Culture, culture));
         }
-
-        await studioNotifyServiceHelper.SendNoticeAsync(Actions.UserMessageToAdmin, tags.ToArray());
         
         await studioNotifyServiceHelper.SendNoticeToAsync(
             Actions.JoinUsers,
