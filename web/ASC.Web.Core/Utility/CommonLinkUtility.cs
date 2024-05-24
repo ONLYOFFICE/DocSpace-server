@@ -54,30 +54,22 @@ public enum ManagementType
 }
 
 [Scope]
-public class CommonLinkUtility(IHttpContextAccessor httpContextAccessor,
+public class CommonLinkUtility(
+    IHttpContextAccessor httpContextAccessor,
         CoreBaseSettings coreBaseSettings,
         CoreSettings coreSettings,
         TenantManager tenantManager,
         UserManager userManager,
         EmailValidationKeyProvider emailValidationKeyProvider,
-        ILoggerProvider options)
+        MailWhiteLabelSettingsHelper mailWhiteLabelSettingsHelper,
+        ILoggerProvider options,
+        AdditionalWhiteLabelSettingsHelperInit additionalWhiteLabelSettingsHelper)
     : BaseCommonLinkUtility(httpContextAccessor, coreBaseSettings, coreSettings, tenantManager, options)
 {
     public const string ParamName_UserUserID = "uid";
     public const string AbsoluteAccountsPath = "/accounts/";
     public const string VirtualAccountsPath = "~/accounts/";
-
-    public CommonLinkUtility(
-        CoreBaseSettings coreBaseSettings,
-        CoreSettings coreSettings,
-        TenantManager tenantManager,
-        UserManager userManager,
-        EmailValidationKeyProvider emailValidationKeyProvider,
-        ILoggerProvider options) :
-        this(null, coreBaseSettings, coreSettings, tenantManager, userManager, emailValidationKeyProvider, options)
-    {
-    }
-
+    
     public string Logout
     {
         get { return ToAbsolute("~/auth.aspx") + "?t=logout"; }
@@ -144,7 +136,7 @@ public class CommonLinkUtility(IHttpContextAccessor httpContextAccessor,
         return HttpUtility.UrlEncode(user.UserName.ToLowerInvariant());
     }
 
-    public async Task<string> GetUserForumLinkAsync(SettingsManager settingsManager, AdditionalWhiteLabelSettingsHelperInit additionalWhiteLabelSettingsHelper, bool inCurrentCulture = true)
+    public async Task<string> GetUserForumLinkAsync(SettingsManager settingsManager, bool inCurrentCulture = true)
     {
         if (!(await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>()).UserForumEnabled)
         {
@@ -163,7 +155,7 @@ public class CommonLinkUtility(IHttpContextAccessor httpContextAccessor,
     
     #region Help Centr
 
-    public async Task<string> GetHelpLinkAsync(SettingsManager settingsManager, AdditionalWhiteLabelSettingsHelperInit additionalWhiteLabelSettingsHelper, bool inCurrentCulture = true)
+    public async Task<string> GetHelpLinkAsync(SettingsManager settingsManager, bool inCurrentCulture = true)
     {
         if (!(await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>()).HelpCenterEnabled)
         {
@@ -180,7 +172,7 @@ public class CommonLinkUtility(IHttpContextAccessor httpContextAccessor,
         return GetRegionalUrl(url, inCurrentCulture ? CultureInfo.CurrentCulture.TwoLetterISOLanguageName : null);
     }
 
-    public async Task<string> GetSupportLinkAsync(SettingsManager settingsManager, AdditionalWhiteLabelSettingsHelperInit additionalWhiteLabelSettingsHelper, bool inCurrentCulture = true)
+    public async Task<string> GetSupportLinkAsync(SettingsManager settingsManager, bool inCurrentCulture = true)
     {
         if (!(await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>()).FeedbackAndSupportEnabled)
         {
@@ -197,21 +189,21 @@ public class CommonLinkUtility(IHttpContextAccessor httpContextAccessor,
         return GetRegionalUrl(url, inCurrentCulture ? CultureInfo.CurrentCulture.TwoLetterISOLanguageName : null);
     }
 
-    public string GetSiteLink(MailWhiteLabelSettingsHelper mailWhiteLabelSettingsHelper)
+    public string GetSiteLink()
     {
         var url = mailWhiteLabelSettingsHelper.DefaultMailSiteUrl;
 
         return string.IsNullOrEmpty(url) ? string.Empty : url;
     }
 
-    public string GetSupportEmail(MailWhiteLabelSettingsHelper mailWhiteLabelSettingsHelper)
+    public string GetSupportEmail()
     {
         var url = mailWhiteLabelSettingsHelper.DefaultMailSupportEmail;
 
         return string.IsNullOrEmpty(url) ? string.Empty : url;
     }
 
-    public string GetSalesEmail(AdditionalWhiteLabelSettingsHelperInit additionalWhiteLabelSettingsHelper)
+    public string GetSalesEmail()
     {
         var mail = additionalWhiteLabelSettingsHelper.DefaultMailSalesEmail;
 
