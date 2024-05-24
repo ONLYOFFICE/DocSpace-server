@@ -122,7 +122,7 @@ public class FileUtilityConfiguration(IConfiguration configuration)
     private string _masterFormExtension;
     public string MasterFormExtension
     {
-        get => _masterFormExtension ??= configuration["files:docservice:internal-form"] ?? ".docxf";
+        get => _masterFormExtension ??= configuration["files:docservice:internal-form"] ?? ".pdf";
     }
 
     private List<LogoColor> _logoColors;
@@ -329,7 +329,7 @@ public class FileUtility(
             {
                 Accessibility.ImageView => CanImageView(fileName),
                 Accessibility.MediaView => CanMediaView(fileName),
-                Accessibility.WebView => CanWebView(fileName),
+                Accessibility.WebView => GetWebViewAccessibility(fileName),
                 Accessibility.WebEdit => CanWebEdit(fileName),
                 Accessibility.WebReview => CanWebReview(fileName),
                 Accessibility.WebCustomFilterEditing => CanWebCustomFilterEditing(fileName),
@@ -358,7 +358,11 @@ public class FileUtility(
         var ext = GetFileExtension(fileName);
         return ExtsMediaPreviewed.Exists(r => r.Equals(ext, StringComparison.OrdinalIgnoreCase));
     }
-
+    public bool GetWebViewAccessibility(string fileName)
+    {
+        var ext = GetFileExtension(fileName).ToLower();
+        return !ext.Equals(".pdf") && ExtsWebPreviewed.Contains(ext);
+    }
     public bool CanWebView(string fileName)
     {
         var ext = GetFileExtension(fileName);
@@ -659,7 +663,9 @@ public class FileUtility(
                 ".pdf", ".djvu", ".fb2", ".epub", ".xps",".oxps",
                 ".sxw", ".stw", ".wps", ".wpt",
                 ".doct", ".docy",
-                ".gdoc"
+                ".gdoc",
+                ".drawio",
+                ".md", ".markdown"
             }.ToImmutableList();
 
     public static readonly ImmutableList<string> ExtsFormTemplate = new List<string>

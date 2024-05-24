@@ -65,7 +65,7 @@
     <value>Tài liệu Cộng tác</value>
   </data>
   <data name="MyFiles" xml:space="preserve">
-    <value>Tài liệu của tôi</value>
+    <value>Tài liệu</value>
   </data>
   <data name="ProjectFiles" xml:space="preserve">
     <value>Tài liệu Dự án</value>
@@ -96,5 +96,8 @@
   </data>
   <data name="Recent" xml:space="preserve">
     <value>Gần đây</value>
+  </data>
+  <data name="InProcessFormFolder" xml:space="preserve">
+    <value>Đang tiến hành</value>
   </data>
 </root>

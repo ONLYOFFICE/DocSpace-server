@@ -39,6 +39,7 @@ public class ExternalShare(Global global,
     private Guid _sessionId;
     private string _passwordKey;
     private string _dbKey;
+    private const string RoomLinkPattern = "rooms/share?key={0}";
 
     public async Task<LinkData> GetLinkDataAsync<T>(FileEntry<T> entry, Guid linkId)
     {
@@ -48,14 +49,26 @@ public class ExternalShare(Global global,
         switch (entry)
         {
             case File<T> file:
-                url = fileUtility.CanWebView(file.Title)
-                    ? filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id)
-                    : file.DownloadUrl;
+                if (fileUtility.CanWebView(file.Title))
+                {
+                    url = filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id);
+                }
+                else if (fileUtility.CanImageView(file.Title) || fileUtility.CanMediaView(file.Title))
+                {
+                    url = $"share/preview/{file.Id}";
+                }
+                else
+                {
+                    url = file.DownloadUrl;
+                }
                 
                 url = QueryHelpers.AddQueryString(url, FilesLinkUtility.ShareKey, key);
                 break;
             case Folder<T> folder when DocSpaceHelper.IsRoom(folder.FolderType):
-                url = $"rooms/share?key={key}";
+                url = string.Format(RoomLinkPattern, key);
+                break;
+            case Folder<T> { RootFolderType: FolderType.VirtualRooms } folder:
+                url = QueryHelpers.AddQueryString(string.Format(RoomLinkPattern, key), "folder", HttpUtility.UrlEncode(folder.Id.ToString()!));
                 break;
         }
         

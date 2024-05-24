@@ -1000,4 +1000,49 @@
   <data name="ConsumersZoomInstruction" xml:space="preserve">
     <value>Подключите это приложение, чтобы пользователи могли входить в ONLYOFFICE, используя Zoom. {0}Перейдите на сайт Сеть разработчиков Zoom и создайте новое приложение для интеграции ONLYOFFICE. Вставьте полученные данные ниже:</value>
   </data>
+  <data name="ErrorCannotDeleteLastSpace" xml:space="preserve">
+    <value>Последнее пространство с полным доступом не может быть удалено</value>
+  </data>
+  <data name="ErrorWebPluginArchive" xml:space="preserve">
+    <value>Неправильный архив плагина</value>
+  </data>
+  <data name="ErrorWebPluginExist" xml:space="preserve">
+    <value>Плагин уже существует</value>
+  </data>
+  <data name="ErrorWebPluginFileExtension" xml:space="preserve">
+    <value>Неправильное расширение файла</value>
+  </data>
+  <data name="ErrorWebPluginFileSize" xml:space="preserve">
+    <value>Размер файла превышает ограничение</value>
+  </data>
+  <data name="ErrorWebPluginForbiddenSystem" xml:space="preserve">
+    <value>Изменения в системных плагинах запрещены</value>
+  </data>
+  <data name="ErrorWebPluginName" xml:space="preserve">
+    <value>Неправильное имя плагина</value>
+  </data>
+  <data name="ErrorWebPluginNoInputFile" xml:space="preserve">
+    <value>Нет исходного файла</value>
+  </data>
+  <data name="ErrorWebPluginNotFound" xml:space="preserve">
+    <value>Плагин не найден</value>
+  </data>
+  <data name="ErrorWebPluginToManyInputFiles" xml:space="preserve">
+    <value>Слишком много исходных файлов</value>
+  </data>
+  <data name="QuotaGreaterPortalError" xml:space="preserve">
+    <value>Не удалось установить квоту памяти: установленная вами квота памяти превышает квоту порталов.</value>
+  </data>
+  <data name="RoomFreeSpaceException" xml:space="preserve">
+    <value>Превышена квота пространства на комнату</value>
+  </data>
+  <data name="UserFreeSpaceException" xml:space="preserve">
+    <value>Превышена квота пространства на пользователя</value>
+  </data>
+  <data name="TariffsFeature_total_size" xml:space="preserve">
+    <value>{0} на администратора / опытного пользователя и возможность добавлять пространство по запросу</value>
+  </data>
+  <data name="TariffsFeature_statistic" xml:space="preserve">
+    <value>Квота хранилища и статистика</value>
+  </data>
 </root>

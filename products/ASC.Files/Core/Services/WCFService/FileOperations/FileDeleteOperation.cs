@@ -158,7 +158,8 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                 this[Err] = FilesCommonResource.ErrorMessage_FolderNotFound;
             }
             else if (folder.FolderType != FolderType.DEFAULT && folder.FolderType != FolderType.BUNCH
-                && !DocSpaceHelper.IsRoom(folder.FolderType))
+                && !DocSpaceHelper.IsRoom(folder.FolderType)
+                && ((folder.FolderType == FolderType.FormFillingFolderDone || folder.FolderType == FolderType.FormFillingFolderInProgress) && folder.RootFolderType != FolderType.Archive))
             {
                 this[Err] = FilesCommonResource.ErrorMessage_SecurityException_DeleteFolder;
             }
@@ -322,18 +323,27 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                 await fileMarker.RemoveMarkAsNewForAllAsync(file);
                 if (!_immediately && FileDao.UseTrashForRemove(file))
                 {
-                    await socketManager.DeleteFileAsync(file, action: async () => await FileDao.MoveFileAsync(file.Id, _trashId, file.RootFolderType == FolderType.USER));
-                    
-                    if (isNeedSendActions)
+                    try
                     {
-                        await filesMessageService.SendAsync(MessageAction.FileMovedToTrash, file, _headers, file.Title);
-                    }
+                        await socketManager.DeleteFileAsync(file, action: async () => await FileDao.MoveFileAsync(file.Id, _trashId, file.RootFolderType == FolderType.USER));
 
-                    if (file.ThumbnailStatus == Thumbnail.Waiting)
-                    {
-                        file.ThumbnailStatus = Thumbnail.NotRequired;
-                        await FileDao.SetThumbnailStatusAsync(file, Thumbnail.NotRequired);
+                        if (isNeedSendActions)
+                        {
+                            await filesMessageService.SendAsync(MessageAction.FileMovedToTrash, file, _headers, file.Title);
+                        }
+
+                        if (file.ThumbnailStatus == Thumbnail.Waiting)
+                        {
+                            file.ThumbnailStatus = Thumbnail.NotRequired;
+                            await FileDao.SetThumbnailStatusAsync(file, Thumbnail.NotRequired);
+                        }
                     }
+                    catch (Exception ex)
+                    {
+                        this[Err] = ex.Message;
+                        Logger.ErrorWithException(ex);
+                    }
+                    
                 }
                 else
                 {
@@ -387,7 +397,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
 
     private async Task<(bool isError, string message)> WithErrorAsync(IServiceScope scope, IEnumerable<File<T>> files, bool folder, bool checkPermissions)
     {
-        var entryManager = scope.ServiceProvider.GetService<EntryManager>();
+        var lockerManager = scope.ServiceProvider.GetService<LockerManager>();
         var fileTracker = scope.ServiceProvider.GetService<FileTrackerHelper>();
 
         foreach (var file in files)
@@ -399,7 +409,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
 
                 return (true, error);
             }
-            if (checkPermissions && await entryManager.FileLockedForMeAsync(file.Id))
+            if (checkPermissions && await lockerManager.FileLockedForMeAsync(file.Id))
             {
                 error = FilesCommonResource.ErrorMessage_LockedFile;
 

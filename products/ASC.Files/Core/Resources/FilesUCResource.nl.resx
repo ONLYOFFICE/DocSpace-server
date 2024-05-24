@@ -68,7 +68,7 @@
     <value>Favorieten</value>
   </data>
   <data name="MyFiles" xml:space="preserve">
-    <value>Mijn documenten</value>
+    <value>Documenten</value>
   </data>
   <data name="ProjectFiles" xml:space="preserve">
     <value>Projectdocumenten</value>
@@ -96,5 +96,8 @@
   </data>
   <data name="PrivacyRoom" xml:space="preserve">
     <value>Privé Kamer</value>
+  </data>
+  <data name="InProcessFormFolder" xml:space="preserve">
+    <value>In uitvoering</value>
   </data>
 </root>

@@ -74,7 +74,7 @@
     <value>Os arquivos serão compactados no arquivo {0}.zip{1}</value>
   </data>
   <data name="MyFiles" xml:space="preserve">
-    <value>Meus Documentos</value>
+    <value>Documentos</value>
   </data>
   <data name="PrivacyRoom" xml:space="preserve">
     <value>Sala Privada</value>
@@ -96,5 +96,8 @@
   </data>
   <data name="Personal" xml:space="preserve">
     <value>Pessoal</value>
+  </data>
+  <data name="InProcessFormFolder" xml:space="preserve">
+    <value>Em processo</value>
   </data>
 </root>

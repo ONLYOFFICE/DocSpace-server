@@ -45,7 +45,7 @@ public enum IdType
 public class TableInfo(string name, string tenantColumn = null, string idColumn = null, IdType idType = IdType.Autoincrement)
 {
     public string[] Columns { get; set; }
-    public string[] UserIDColumns { get; init; } = Array.Empty<string>();
+    public string[] UserIDColumns { get; init; } = [];
     public Dictionary<string, bool> DateColumns { get; init; } = new();
     public InsertMethod InsertMethod { get; init; } = InsertMethod.Insert;
     public string Name { get; private set; } = name;

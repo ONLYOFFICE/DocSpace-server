@@ -170,7 +170,8 @@ public static class DocumentService
             Thumbnail = thumbnail,
             SpreadsheetLayout = spreadsheetLayout,
             Url = documentUri,
-            Region = region
+            Region = region,
+            Pdf = toExtension == ".pdf" ? new PdfData() { Form = true} : null
         };
 
         if (!string.IsNullOrEmpty(password))
@@ -535,6 +536,11 @@ public static class DocumentService
         public string UserData { get; set; }
     }
 
+    public class PdfData
+    {
+        public bool Form { get; set; }
+    }
+
     [DebuggerDisplay("{Title}")]
     public class MetaData
     {
@@ -598,6 +604,8 @@ public static class DocumentService
         public required string Url { get; set; }
         public required string Region { get; set; }
         public string Token { get; set; }
+        public PdfData Pdf { get; set; }
+
     }
 
     [DebuggerDisplay("{Key}")]
@@ -714,6 +722,12 @@ public static class DocumentServiceHttpClientExtension
             .AddPolicyHandler((_, _) => 
                 HttpPolicyExtensions
                 .HandleTransientHttpError()
+                .OrResult(response =>
+                {
+                    return response.IsSuccessStatusCode
+                        ? false
+                        : throw new HttpRequestException($"Response status code: {response.StatusCode}", null, response.StatusCode);
+                })
                 .WaitAndRetryAsync(MaxTry, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))));
     }
 }

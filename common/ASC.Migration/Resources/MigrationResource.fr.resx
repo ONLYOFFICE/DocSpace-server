@@ -150,4 +150,64 @@
   <data name="UserMigration" xml:space="preserve">
     <value>Migration de l'utilisateur {0} ({1}/{2})</value>
   </data>
+  <data name="MigrationCommonFiles" xml:space="preserve">
+    <value>Migration fichiers communs</value>
+  </data>
+  <data name="MigrationNotFoundException" xml:space="preserve">
+    <value>Aucun fournisseur de services de migration</value>
+  </data>
+  <data name="MigrationProgressException" xml:space="preserve">
+    <value>Aucune migration en cours d'exécution</value>
+  </data>
+  <data name="MigrationProjectFiles" xml:space="preserve">
+    <value>Migration fichiers de projets</value>
+  </data>
+  <data name="CanNotShare" xml:space="preserve">
+    <value>Impossible de partager l'entrée {0} à {1}</value>
+  </data>
+  <data name="CanNotAddUserInGroup" xml:space="preserve">
+    <value>Impossible d'ajouter l'utilisateur {0} au groupe {1}</value>
+  </data>
+  <data name="CanNotCreateFile" xml:space="preserve">
+    <value>Impossible de créer le fichier {0}</value>
+  </data>
+  <data name="CanNotImportUser" xml:space="preserve">
+    <value>Impossible d'importer l'utilisateur</value>
+  </data>
+  <data name="CanNotImportUserFiles" xml:space="preserve">
+    <value>Impossible d'importer les fichiers de l'utilisateur</value>
+  </data>
+  <data name="CanNotParseArchive" xml:space="preserve">
+    <value>Impossible d'analyser l'archive {0}</value>
+  </data>
+  <data name="CanNotParseArchives" xml:space="preserve">
+    <value>Impossible d'analyser les archives</value>
+  </data>
+  <data name="CanNotParseUser" xml:space="preserve">
+    <value>Impossible d'analyser l'utilisateur {0}</value>
+  </data>
+  <data name="CanNotReadInfoFile" xml:space="preserve">
+    <value>Impossible de lire le fichier d'information à partir de {0}</value>
+  </data>
+  <data name="CanNotToUnzip" xml:space="preserve">
+    <value>Impossible de décompresser {0}</value>
+  </data>
+  <data name="CreateFile" xml:space="preserve">
+    <value>Créer le fichier {0}</value>
+  </data>
+  <data name="CreateFolder" xml:space="preserve">
+    <value>Créer le dossier {0}</value>
+  </data>
+  <data name="CreateShareRoom" xml:space="preserve">
+    <value>créer une salle partagée {0}</value>
+  </data>
+  <data name="СanNotImportCommonFiles" xml:space="preserve">
+    <value>Impossible d'importer les fichiers communs</value>
+  </data>
+  <data name="СanNotImportProjectFiles" xml:space="preserve">
+    <value>Impossible d'importer les fichiers de projet</value>
+  </data>
+  <data name="СreateRootFolder" xml:space="preserve">
+    <value>Créer un dossier racine</value>
+  </data>
 </root>

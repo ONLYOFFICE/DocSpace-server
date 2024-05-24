@@ -117,9 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AcceptDocSpace" xml:space="preserve">
-    <value>قبول</value>
-  </data>
   <data name="ActionFileCreated" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; قام بانشاء مستند جديد: &lt;a href={1}&gt;{2}&lt;/a&gt; في الغرفة: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
@@ -189,7 +186,7 @@
   <data name="ButtonChangeTfa" xml:space="preserve">
     <value>تهيئة تطبيق المصادقة</value>
   </data>
-  <data name="ButtonCollaborateDocSpace" xml:space="preserve">
+  <data name="ButtonCollaborate" xml:space="preserve">
     <value>تعاون في DocSpace</value>
   </data>
   <data name="ButtonConfigureRightNow" xml:space="preserve">
@@ -198,7 +195,7 @@
   <data name="ButtonConfirm" xml:space="preserve">
     <value>تأكيد</value>
   </data>
-  <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
+  <data name="ButtonConfirmInvite" xml:space="preserve">
     <value>تأكيد دعوة DocSpace</value>
   </data>
   <data name="ButtonConfirmEmail" xml:space="preserve">
@@ -397,7 +394,7 @@
     <value>حذف مدخل ${__VirtualRootPath}</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
-    <value>تم إلغاء تنشيط Onlyoffice DocSpace</value>
+    <value>تم إلغاء تنشيط ONLYOFFICE DocSpace</value>
   </data>
   <data name="subject_portal_rename" xml:space="preserve">
     <value>${LetterLogoText}.تغيير عنوان البوابة الإلكترونية</value>
@@ -448,7 +445,7 @@
     <value>فترة السماح ل ONLYOFFICE DocSpace الخاص بك تنشيط</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>اشتراك Onlyoffice DocSpace على وشك الانتهاء</value>
+    <value>اشتراك ONLYOFFICE DocSpace على وشك الانتهاء</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>انتهت صلاحية فترة السماح ل ONLYOFFICE DocSpace الخاص بك</value>
@@ -590,7 +587,7 @@ $TrulyYours</value>
 إذا كان لديك أي أسئلة أو كنت بحاجة إلى مساعدة ، فلا تتردد في الاتصال بنا على [${__SupportLink}](${__SupportLink})
 
 مع خالص تحياتي
-فريق دعم ONLYOFFICE™
+فريق دعم ONLYOFFICE
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_password_v115" xml:space="preserve">
@@ -705,9 +702,9 @@ $TrulyYours</value>
 
 إذا كان لديك إجابة واحدة على الأقل ب "نعم"، فاختر خطة تعريفة للأعمال التي تسمح لك بإضافة أي عدد مطلوب من المديرين إلى ONLYOFFICE DocSpace بالإضافة إلى تطبيق خيارات العلامة التجارية.
 
-للقيام بذلك، يرجى الرجوع إلى "قسم المدفوعات":"$PricingPage" من Onlyoffice DocSpace الخاص بك. هناك، ستجد رابطا فرديا إلى بوابة عملاء Stripe حيث يمكنك بسهولة التعامل مع جميع تفاصيل الدفع.
+للقيام بذلك، يرجى الرجوع إلى "قسم المدفوعات":"$PricingPage" من ONLYOFFICE DocSpace الخاص بك. هناك، ستجد رابطا فرديا إلى بوابة عملاء Stripe حيث يمكنك بسهولة التعامل مع جميع تفاصيل الدفع.
 
-&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: right; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt; يرجى الملاحظة: الشخص الذي يدفع الاشتراك يصبح الدافع. فقط الدافع قادر على إجراء تغييرات على الاشتراك (ضبط عدد المديرين). لا يمكن للمستخدمين الوصول إلى تفاصيل الدفع. مالك حساب Onlyoffice DocSpace قادر على إعادة تعيين الدافع في أي وقت لاحق&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: right; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt; يرجى الملاحظة: الشخص الذي يدفع الاشتراك يصبح الدافع. فقط الدافع قادر على إجراء تغييرات على الاشتراك (ضبط عدد المديرين). لا يمكن للمستخدمين الوصول إلى تفاصيل الدفع. مالك حساب ONLYOFFICE DocSpace قادر على إعادة تعيين الدافع في أي وقت لاحق&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $TrulyYours</value>
     <comment>h1. Discover business subscription of &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
@@ -823,9 +820,9 @@ $TrulyYours</value>
 
 إذا كان لديك إجابة واحدة على الأقل ب "نعم"، فاختر خطة تعريفة للأعمال التي تسمح لك بإضافة أي عدد مطلوب من المديرين إلى ONLYOFFICE DocSpace بالإضافة إلى تطبيق خيارات العلامة التجارية.
 
-للقيام بذلك، يرجى الرجوع إلى "قسم المدفوعات":"$PricingPage" من Onlyoffice DocSpace الخاص بك. هناك، ستجد رابطا فرديا إلى بوابة عملاء Stripe حيث يمكنك بسهولة التعامل مع جميع تفاصيل الدفع.
+للقيام بذلك، يرجى الرجوع إلى "قسم المدفوعات":"$PricingPage" من ONLYOFFICE DocSpace الخاص بك. هناك، ستجد رابطا فرديا إلى بوابة عملاء Stripe حيث يمكنك بسهولة التعامل مع جميع تفاصيل الدفع.
 
-&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: right; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt; يرجى الملاحظة: الشخص الذي يدفع الاشتراك يصبح الدافع. فقط الدافع قادر على إجراء تغييرات على الاشتراك (ضبط عدد المديرين). لا يمكن للمستخدمين الوصول إلى تفاصيل الدفع. مالك حساب Onlyoffice DocSpace قادر على إعادة تعيين الدافع في أي وقت لاحق&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: right; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt; يرجى الملاحظة: الشخص الذي يدفع الاشتراك يصبح الدافع. فقط الدافع قادر على إجراء تغييرات على الاشتراك (ضبط عدد المديرين). لا يمكن للمستخدمين الوصول إلى تفاصيل الدفع. مالك حساب ONLYOFFICE DocSpace قادر على إعادة تعيين الدافع في أي وقت لاحق&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $TrulyYours</value>
   </data>
@@ -1068,9 +1065,9 @@ $TrulyYours</value>
 
 إذا كان لديك إجابة واحدة على الأقل ب "نعم"، فاختر خطة تعريفة للأعمال التي تسمح لك بإضافة أي عدد مطلوب من المديرين إلى ONLYOFFICE DocSpace بالإضافة إلى تطبيق خيارات العلامة التجارية.
 
-للقيام بذلك، يرجى الرجوع إلى "قسم المدفوعات":"$PricingPage" من Onlyoffice DocSpace الخاص بك. هناك، ستجد رابطا فرديا إلى بوابة عملاء Stripe حيث يمكنك بسهولة التعامل مع جميع تفاصيل الدفع.
+للقيام بذلك، يرجى الرجوع إلى "قسم المدفوعات":"$PricingPage" من ONLYOFFICE DocSpace الخاص بك. هناك، ستجد رابطا فرديا إلى بوابة عملاء Stripe حيث يمكنك بسهولة التعامل مع جميع تفاصيل الدفع.
 
-&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: right; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt; يرجى الملاحظة: الشخص الذي يدفع الاشتراك يصبح الدافع. فقط الدافع قادر على إجراء تغييرات على الاشتراك (ضبط عدد المديرين). لا يمكن للمستخدمين الوصول إلى تفاصيل الدفع. مالك حساب Onlyoffice DocSpace قادر على إعادة تعيين الدافع في أي وقت لاحق&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: right; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt; يرجى الملاحظة: الشخص الذي يدفع الاشتراك يصبح الدافع. فقط الدافع قادر على إجراء تغييرات على الاشتراك (ضبط عدد المديرين). لا يمكن للمستخدمين الوصول إلى تفاصيل الدفع. مالك حساب ONLYOFFICE DocSpace قادر على إعادة تعيين الدافع في أي وقت لاحق&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $TrulyYours</value>
     <comment>h1. Discover business subscription of &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
@@ -1267,7 +1264,7 @@ _ملاحظة_: هذا الرابط صالح لمدة 7 أيام فقط. يرج�
 إذا كان لديك أي أسئلة أو تحتاج إلى مساعدة فلا تتردد في الاتصال بنا على [${__SalesEmail}](mailto:${__SalesEmail})
 
 مع أطيب التحيات،
-فريق دعم ONLYOFFICE™
+فريق دعم ONLYOFFICE
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
@@ -1325,7 +1322,7 @@ _ملاحظة_: هذا الرابط صالح لمدة 7 أيام فقط. يرج�
 إذا كان لديك أي أسئلة أو تحتاج إلى مساعدة فلا تتردد في الاتصال بنا على [${__SalesEmail}](mailto:${__SalesEmail})
 
  مع أطيب التحيات،
-فريق دعم ONLYOFFICE™
+فريق دعم ONLYOFFICE
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_rename" xml:space="preserve">
@@ -1591,9 +1588,9 @@ $TrulyYours</value>
 
 إذا كان لديك إجابة واحدة على الأقل ب "نعم"، فاختر خطة تعريفة للأعمال التي تسمح لك بإضافة أي عدد مطلوب من المديرين إلى ONLYOFFICE DocSpace بالإضافة إلى تطبيق خيارات العلامة التجارية.
 
-للقيام بذلك، يرجى الرجوع إلى "قسم المدفوعات":"$PricingPage" من Onlyoffice DocSpace الخاص بك. هناك، ستجد رابطا فرديا إلى بوابة عملاء Stripe حيث يمكنك بسهولة التعامل مع جميع تفاصيل الدفع.
+للقيام بذلك، يرجى الرجوع إلى "قسم المدفوعات":"$PricingPage" من ONLYOFFICE DocSpace الخاص بك. هناك، ستجد رابطا فرديا إلى بوابة عملاء Stripe حيث يمكنك بسهولة التعامل مع جميع تفاصيل الدفع.
 
-&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: right; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt; يرجى الملاحظة: الشخص الذي يدفع الاشتراك يصبح الدافع. فقط الدافع قادر على إجراء تغييرات على الاشتراك (ضبط عدد المديرين). لا يمكن للمستخدمين الوصول إلى تفاصيل الدفع. مالك حساب Onlyoffice DocSpace قادر على إعادة تعيين الدافع في أي وقت لاحق&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: right; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt; يرجى الملاحظة: الشخص الذي يدفع الاشتراك يصبح الدافع. فقط الدافع قادر على إجراء تغييرات على الاشتراك (ضبط عدد المديرين). لا يمكن للمستخدمين الوصول إلى تفاصيل الدفع. مالك حساب ONLYOFFICE DocSpace قادر على إعادة تعيين الدافع في أي وقت لاحق&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $TrulyYours</value>
   </data>
@@ -1833,5 +1830,24 @@ $TrulyYours</value>
   </data>
   <data name="TrulyYoursText" xml:space="preserve">
     <value>شكرًا لك، فريق ONLYOFFICE</value>
+  </data>
+  <data name="subject_zoom_welcome" xml:space="preserve">
+    <value>مرحبا بك في !ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="pattern_zoom_welcome" xml:space="preserve">
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+مرحبا $UserName!
+
+لقد قمت للتو بإنشاء ONLYOFFICE DocSpace، وهو مركز مستندات حيث يمكنك تعزيز التعاون مع فريقك وعملائك وشركائك والمزيد. عنوانها هو "${VirtualRootPath}":"${VirtualRootPath}".
+
+الخطة التعريفة الحالية الخاصة بك هي STARTUP. إنه مجاني تماما ويشمل:
+
+&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;100 مسؤول / مستخدم ذو صلاحية&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;100 غرفة&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;مساحة القرص 100 جيجابايت&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+
+*استمتع بطريقة جديدة للتعاون في المستندات!*
+
+$TrulyYours</value>
   </data>
 </root>

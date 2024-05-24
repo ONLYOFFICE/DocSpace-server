@@ -41,9 +41,7 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         UserManager userManager,
         DisplayUserSettingsHelper displayUserSettingsHelper,
         FileConverter fileConverter,
-        PathProvider pathProvider,
-        IDaoFactory daoFactory,
-        SecurityContext securityContext)
+        PathProvider pathProvider)
     : FilesHelperBase(filesSettingsHelper,
             fileUploader,
             socketManager,
@@ -164,14 +162,14 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         return await _fileDtoHelper.GetAsync(file);
     }
 
-    public async Task<EditHistoryDataDto> GetEditDiffUrlAsync<T>(T fileId, int version = 0, string doc = null)
+    public async Task<EditHistoryDataDto> GetEditDiffUrlAsync<T>(T fileId, int version = 0)
     {
-        return await _fileStorageService.GetEditDiffUrlAsync(fileId, version, doc);
+        return await _fileStorageService.GetEditDiffUrlAsync(fileId, version);
     }
 
-    public async IAsyncEnumerable<EditHistoryDto> GetEditHistoryAsync<T>(T fileId, string doc = null)
+    public async IAsyncEnumerable<EditHistoryDto> GetEditHistoryAsync<T>(T fileId)
     {
-        await foreach (var f in _fileStorageService.GetEditHistoryAsync(fileId, doc))
+        await foreach (var f in _fileStorageService.GetEditHistoryAsync(fileId))
         {
             yield return new EditHistoryDto(f, apiDateTimeHelper, userManager, displayUserSettingsHelper);
         }
@@ -192,9 +190,9 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         return await _fileDtoHelper.GetAsync(result);
     }
 
-    public async IAsyncEnumerable<EditHistoryDto> RestoreVersionAsync<T>(T fileId, int version = 0, string url = null, string doc = null)
+    public async IAsyncEnumerable<EditHistoryDto> RestoreVersionAsync<T>(T fileId, int version = 0, string url = null)
     {
-        await foreach (var e in _fileStorageService.RestoreVersionAsync(fileId, version, url, doc))
+        await foreach (var e in _fileStorageService.RestoreVersionAsync(fileId, version, url))
         {
             yield return new EditHistoryDto(e, apiDateTimeHelper, userManager, displayUserSettingsHelper);
         }
@@ -275,21 +273,6 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
 
         await using var fileStream = await fileConverter.ExecAsync(file, destExt, password);
         var controller = serviceProvider.GetService<FilesControllerHelper>();
-        var resultFile = await controller.InsertFileAsync(destFolderId, fileStream, destTitle, true);
-
-        if (FileUtility.GetFileTypeByFileName(resultFile.Title) == FileType.Pdf)
-        {
-            var folderDao = daoFactory.GetFolderDao<T>();
-            var fileDao = daoFactory.GetFileDao<T>();
-
-            var form = await fileDao.GetFileAsync((T)Convert.ChangeType(resultFile.Id, typeof(T)));
-            var folder = await folderDao.GetFolderAsync(form.ParentId);
-            if (folder.FolderType == FolderType.FillingFormsRoom)
-            {
-                var count = await _fileStorageService.GetPureSharesCountAsync(folder.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "");
-                await _socketManager.CreateFormAsync(form, securityContext.CurrentAccount.ID, count <= 1);
-            }
-        }
-        return resultFile;
+        return await controller.InsertFileAsync(destFolderId, fileStream, destTitle, true);
     }
 }

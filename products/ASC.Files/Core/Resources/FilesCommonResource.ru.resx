@@ -318,7 +318,7 @@
     <value>Документы</value>
   </data>
   <data name="ProductUserOpportunities" xml:space="preserve">
-    <value>Создавать и редактировать свои документы, а также те, к которым предоставлен доступ с соответствующими правами|Предоставлять другим пользователям доступ к документам и папкам с правами на чтение/редактирование|Подключать аккаунты Dropbox, Box и другие в разделе 'Мои документы'</value>
+    <value>Создавать и редактировать свои документы, а также те, к которым предоставлен доступ с соответствующими правами|Предоставлять другим пользователям доступ к документам и папкам с правами на чтение/редактирование|Подключать аккаунты Dropbox, Box и другие в разделе 'Документы'</value>
   </data>
   <data name="UnknownFirstName" xml:space="preserve">
     <value>Имя</value>
@@ -421,5 +421,47 @@
   </data>
   <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
     <value>Вы сделали слишком много попыток ввода пароля. Пожалуйста, повторите попытку позже</value>
+  </data>
+  <data name="RoomIndex_Author" xml:space="preserve">
+    <value>Автор</value>
+  </data>
+  <data name="RoomIndex_Company" xml:space="preserve">
+    <value>Компания</value>
+  </data>
+  <data name="RoomIndex_Created" xml:space="preserve">
+    <value>Создано</value>
+  </data>
+  <data name="RoomIndex_DateGenerated" xml:space="preserve">
+    <value>Дата создания</value>
+  </data>
+  <data name="RoomIndex_ExportAuthor" xml:space="preserve">
+    <value>Автор экспорта</value>
+  </data>
+  <data name="RoomIndex_Folder" xml:space="preserve">
+    <value>Папка</value>
+  </data>
+  <data name="RoomIndex_Index" xml:space="preserve">
+    <value>Индекс</value>
+  </data>
+  <data name="RoomIndex_Modified" xml:space="preserve">
+    <value>Изменено</value>
+  </data>
+  <data name="RoomIndex_Name" xml:space="preserve">
+    <value>Имя</value>
+  </data>
+  <data name="RoomIndex_Room" xml:space="preserve">
+    <value>Комната</value>
+  </data>
+  <data name="RoomIndex_SheetName" xml:space="preserve">
+    <value>Индекс комнаты</value>
+  </data>
+  <data name="RoomIndex_Size" xml:space="preserve">
+    <value>Размер (Мб)</value>
+  </data>
+  <data name="RoomIndex_Total" xml:space="preserve">
+    <value>Итого</value>
+  </data>
+  <data name="RoomIndex_Type" xml:space="preserve">
+    <value>Тип</value>
   </data>
 </root>

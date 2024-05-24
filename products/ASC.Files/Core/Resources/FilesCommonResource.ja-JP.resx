@@ -303,7 +303,7 @@ docx、xlsx、pptxとの100％の互換性が保証されています。</value>
     <value>文書</value>
   </data>
   <data name="ProductUserOpportunities" xml:space="preserve">
-    <value>独自の文書だけでなく、適切なアクセス権を持つ共有ドキュメントを作成および編集|読書/文書やフォルダに他のユーザーへのアクセス権を編集を進呈|"マイドキュメント"セクションのリンクDropboxは、Boxと他のアカウント</value>
+    <value>独自の文書だけでなく、適切なアクセス権を持つ共有ドキュメントを作成および編集|読書/文書やフォルダに他のユーザーへのアクセス権を編集を進呈|"文書"セクションのリンクDropboxは、Boxと他のアカウント</value>
   </data>
   <data name="UnknownFirstName" xml:space="preserve">
     <value>名</value>
@@ -421,5 +421,47 @@ docx、xlsx、pptxとの100％の互換性が保証されています。</value>
   </data>
   <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
     <value>パスワードの入力を何度も試行しすぎました。後で再試行してください</value>
+  </data>
+  <data name="RoomIndex_Author" xml:space="preserve">
+    <value>作成者</value>
+  </data>
+  <data name="RoomIndex_Company" xml:space="preserve">
+    <value>会社</value>
+  </data>
+  <data name="RoomIndex_Created" xml:space="preserve">
+    <value>作成済み</value>
+  </data>
+  <data name="RoomIndex_DateGenerated" xml:space="preserve">
+    <value>作成日</value>
+  </data>
+  <data name="RoomIndex_ExportAuthor" xml:space="preserve">
+    <value>作成者のエクスポート</value>
+  </data>
+  <data name="RoomIndex_Folder" xml:space="preserve">
+    <value>フォルダ</value>
+  </data>
+  <data name="RoomIndex_Index" xml:space="preserve">
+    <value>インデックス</value>
+  </data>
+  <data name="RoomIndex_Modified" xml:space="preserve">
+    <value>変更済み</value>
+  </data>
+  <data name="RoomIndex_Name" xml:space="preserve">
+    <value>名前</value>
+  </data>
+  <data name="RoomIndex_Room" xml:space="preserve">
+    <value>ルーム</value>
+  </data>
+  <data name="RoomIndex_SheetName" xml:space="preserve">
+    <value>ルームインデックス</value>
+  </data>
+  <data name="RoomIndex_Size" xml:space="preserve">
+    <value>サイズ（MB）</value>
+  </data>
+  <data name="RoomIndex_Total" xml:space="preserve">
+    <value>トータル</value>
+  </data>
+  <data name="RoomIndex_Type" xml:space="preserve">
+    <value>タイプ</value>
   </data>
 </root>

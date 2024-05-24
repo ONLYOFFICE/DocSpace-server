@@ -26,6 +26,9 @@
 
 namespace ASC.Core;
 
+/// <summary>
+/// 
+/// </summary>
 public enum QuotaFilter
 {
     All = 0,

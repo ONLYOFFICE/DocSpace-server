@@ -65,7 +65,7 @@
     <value>Bežné dokumenty</value>
   </data>
   <data name="MyFiles" xml:space="preserve">
-    <value>Moje dokumenty</value>
+    <value>Dokumenty</value>
   </data>
   <data name="ProjectFiles" xml:space="preserve">
     <value>Dokumenty projektu</value>
@@ -96,5 +96,8 @@
   </data>
   <data name="FilesWillBeCompressedTarGz" xml:space="preserve">
     <value>Súbory budú komprimované do súboru {0}.tar.gz{1}</value>
+  </data>
+  <data name="InProcessFormFolder" xml:space="preserve">
+    <value>V procese</value>
   </data>
 </root>

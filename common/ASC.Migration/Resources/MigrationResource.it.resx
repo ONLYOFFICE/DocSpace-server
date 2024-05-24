@@ -150,4 +150,64 @@
   <data name="UserMigration" xml:space="preserve">
     <value>Migrazione dell'utente {0} ({1}/{2})</value>
   </data>
+  <data name="MigrationCommonFiles" xml:space="preserve">
+    <value>File comuni di migrazione</value>
+  </data>
+  <data name="MigrationNotFoundException" xml:space="preserve">
+    <value>Nessun fornitore di migrazione di questo tipo</value>
+  </data>
+  <data name="MigrationProgressException" xml:space="preserve">
+    <value>Non è in corso alcuna migrazione</value>
+  </data>
+  <data name="MigrationProjectFiles" xml:space="preserve">
+    <value>File di progetto di migrazione</value>
+  </data>
+  <data name="CanNotAddUserInGroup" xml:space="preserve">
+    <value>Impossibile aggiungere l'utente {0} al gruppo {1}</value>
+  </data>
+  <data name="CanNotCreateFile" xml:space="preserve">
+    <value>Impossibile creare il file {0}</value>
+  </data>
+  <data name="CanNotImportUser" xml:space="preserve">
+    <value>Impossibile importare l'utente</value>
+  </data>
+  <data name="CanNotImportUserFiles" xml:space="preserve">
+    <value>Impossibile importare i file dell’utente</value>
+  </data>
+  <data name="CanNotParseArchive" xml:space="preserve">
+    <value>Impossibile analizzare l'archivio {0}</value>
+  </data>
+  <data name="CanNotParseArchives" xml:space="preserve">
+    <value>Impossibile analizzare gli archivi</value>
+  </data>
+  <data name="CanNotParseUser" xml:space="preserve">
+    <value>Impossibile analizzare l'utente {0}</value>
+  </data>
+  <data name="CanNotReadInfoFile" xml:space="preserve">
+    <value>Impossibile leggere il file di informazioni da {0}</value>
+  </data>
+  <data name="CanNotToUnzip" xml:space="preserve">
+    <value>Impossibile decomprimere {0}</value>
+  </data>
+  <data name="CreateFile" xml:space="preserve">
+    <value>Crea file {0}</value>
+  </data>
+  <data name="CreateFolder" xml:space="preserve">
+    <value>Crea cartella {0}</value>
+  </data>
+  <data name="CreateShareRoom" xml:space="preserve">
+    <value>crea stanza condivisa {0}</value>
+  </data>
+  <data name="СanNotImportCommonFiles" xml:space="preserve">
+    <value>Impossibile importare file comuni</value>
+  </data>
+  <data name="СanNotImportProjectFiles" xml:space="preserve">
+    <value>Impossibile importare i file di progetto</value>
+  </data>
+  <data name="СreateRootFolder" xml:space="preserve">
+    <value>Crea la cartella principale</value>
+  </data>
+  <data name="CanNotShare" xml:space="preserve">
+    <value>Impossibile condividere la voce da {0} a {1}</value>
+  </data>
 </root>

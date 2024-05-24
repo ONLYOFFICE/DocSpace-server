@@ -34,7 +34,8 @@ public class TenantLogoManager(
     TenantManager tenantManager,
     AuthContext authContext,
     IConfiguration configuration,
-    IDistributedCache distributedCache)
+    IDistributedCache distributedCache,
+    CoreBaseSettings coreBaseSettings)
 {
     public bool WhiteLabelEnabled
     {
@@ -134,9 +135,22 @@ public class TenantLogoManager(
         return !authContext.IsAuthenticated;
     }
 
-    public async Task<bool> GetWhiteLabelPaidAsync()
+    private async Task<bool> GetWhiteLabelPaidAsync()
     {
         return (await tenantManager.GetTenantQuotaAsync(await tenantManager.GetCurrentTenantIdAsync())).WhiteLabel;
+    }
+    
+    public async Task<bool> GetEnableWhitelabelAsync()
+    {
+        return coreBaseSettings.Standalone || WhiteLabelEnabled && await GetWhiteLabelPaidAsync();
+    }
+    
+    public async Task DemandWhiteLabelPermissionAsync()
+    {
+        if (!await GetEnableWhitelabelAsync())
+        {
+            throw new BillingException(Resource.ErrorNotAllowedOption, "WhiteLabel");
+        }
     }
     
     /// <summary>

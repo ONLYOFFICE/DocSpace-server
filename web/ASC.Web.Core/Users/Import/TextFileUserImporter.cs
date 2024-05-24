@@ -92,7 +92,7 @@ public class TextFileUserImporter(Stream stream) : IUserImporter
                 var value = ConvertFromString(dataFields[j], propinfo.PropertyType);
                 if (value != null)
                 {
-                    propinfo.SetValue(exportedUser, value, Array.Empty<object>());
+                    propinfo.SetValue(exportedUser, value, []);
                 }
             }
         }

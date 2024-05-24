@@ -65,7 +65,7 @@
     <value>Загальні документи</value>
   </data>
   <data name="MyFiles" xml:space="preserve">
-    <value>Мої документи</value>
+    <value>Документи</value>
   </data>
   <data name="ProjectFiles" xml:space="preserve">
     <value>Документи проекту</value>
@@ -96,5 +96,8 @@
   </data>
   <data name="Recent" xml:space="preserve">
     <value>Останні</value>
+  </data>
+  <data name="InProcessFormFolder" xml:space="preserve">
+    <value>У процесі</value>
   </data>
 </root>

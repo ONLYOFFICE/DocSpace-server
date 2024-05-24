@@ -395,6 +395,7 @@ public class SecurityController(PermissionContext permissionContext,
         return new CspDto { Domains = request.Domains, Header = header };
     }
 
+    /// <requiresAuthorization>false</requiresAuthorization>
     [AllowAnonymous]
     [HttpGet("csp")]
     public async Task<CspDto> Csp()

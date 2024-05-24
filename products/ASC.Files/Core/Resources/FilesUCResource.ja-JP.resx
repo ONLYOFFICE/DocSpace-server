@@ -68,7 +68,7 @@
     <value>お気に入り</value>
   </data>
   <data name="MyFiles" xml:space="preserve">
-    <value>私の文書</value>
+    <value>文書</value>
   </data>
   <data name="PrivacyRoom" xml:space="preserve">
     <value>個室</value>
@@ -96,5 +96,11 @@
   </data>
   <data name="FilesWillBeCompressedZip" xml:space="preserve">
     <value>ファイルは{0}.zipファイル{1}に圧縮されます</value>
+  </data>
+  <data name="InProcessFormFolder" xml:space="preserve">
+    <value>進行中</value>
+  </data>
+  <data name="ReadyFormFolder" xml:space="preserve">
+    <value>完成</value>
   </data>
 </root>

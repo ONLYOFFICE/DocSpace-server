@@ -32,6 +32,7 @@ public class FilesLinkUtility
     public const string FilesBaseVirtualPath = "~/";
     public const string EditorPage = "doceditor";
     public TimeSpan DefaultLinkLifeTime { get; }
+    public const int MaxLinkLifeTimeInYears = 10;
     
     private readonly string _filesUploaderUrl;
     private readonly CommonLinkUtility _commonLinkUtility;
@@ -70,7 +71,6 @@ public class FilesLinkUtility
     public const string FileUri = "fileuri";
     public const string FileTitle = "title";
     public const string Action = "action";
-    public const string DocShareKey = "doc";
     public const string TryParam = "try";
     public const string FolderUrl = "folderurl";
     public const string OutType = "outputtype";
@@ -146,7 +146,10 @@ public class FilesLinkUtility
                 }
             }
 
-            SetUrlSetting(InternalUrlKey, DocServiceUrlInternal != value ? value : null);
+            if (DocServiceUrlInternal != value)
+            {
+                SetUrlSetting(InternalUrlKey, value);
+            }
         }
     }
 

@@ -74,7 +74,7 @@
     <value>Dateien werden zu einem {0}ZIP-Archiv{1} hinzugefügt</value>
   </data>
   <data name="MyFiles" xml:space="preserve">
-    <value>Meine Dokumente</value>
+    <value>Dokumente</value>
   </data>
   <data name="PrivacyRoom" xml:space="preserve">
     <value>Privater Raum</value>
@@ -96,5 +96,8 @@
   </data>
   <data name="Personal" xml:space="preserve">
     <value>Persönlich</value>
+  </data>
+  <data name="InProcessFormFolder" xml:space="preserve">
+    <value>Im Gange</value>
   </data>
 </root>

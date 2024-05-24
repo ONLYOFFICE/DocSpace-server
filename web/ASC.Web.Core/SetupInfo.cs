@@ -105,6 +105,8 @@ public class SetupInfo
     public string RecaptchaPrivateKey { get; private set; }
     public string RecaptchaVerifyUrl { get; private set; }
     public string AmiMetaUrl { get; private set; }
+    public int InvitationLimit { get; private set; }
+
     private readonly IConfiguration _configuration;
 
     public SetupInfo(IConfiguration configuration)
@@ -170,6 +172,8 @@ public class SetupInfo
         TfaAppSender = GetAppSettings("web.tfaapp.backup.title", "ONLYOFFICE");
 
         AmiMetaUrl = GetAppSettings("web:ami:meta", "");
+
+        InvitationLimit = GetAppSettings("web:invitation-limit", int.MaxValue);
     }
 
 
@@ -194,6 +198,15 @@ public class SetupInfo
             return Math.Min(freeSize, diskQuota.MaxFileSize);
         }
         return ChunkUploadSize;
+    }
+
+    public string GetRightCultureName(CultureInfo cultureInfo)
+    {
+        return EnabledCultures.Contains(cultureInfo)
+            ? cultureInfo.Name
+            : EnabledCultures.Contains(cultureInfo.Parent)
+                ? cultureInfo.Parent.Name
+                : "en-US";
     }
 
     private string GetAppSettings(string key, string defaultValue)

@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.ComponentModel.DataAnnotations;
+
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
@@ -32,9 +34,10 @@ public class RoomLinkRequestDto : LinkRequestDtoBase
 {
     /// <summary>Link name</summary>
     /// <type>System.String, System</type>
+    [StringLength(255)]
     public string Title { get; set; }
 
-    /// <summary>Link type</summary>
+    /// <summary>Link type (Invitation or External)</summary>
     /// <type>ASC.Files.Core.ApiModels.ResponseDto.LinkType, ASC.Files.Core</type>
     public LinkType LinkType { get; set; }
 

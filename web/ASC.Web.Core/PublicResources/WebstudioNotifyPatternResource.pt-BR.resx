@@ -167,7 +167,7 @@ Para saber mais sobre o procedimento de backup, consulte nosso guia do usuário 
 Se você tiver alguma dúvida ou precisar de assistência, sinta-se à vontade para nos contatar em [${__SupportLink}](${__SupportLink})
 
 Com os melhores cumprimentos,
-ONLYOFFICE™ Equipe de suporte
+ONLYOFFICE Equipe de suporte
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
@@ -506,7 +506,7 @@ Você pode reativar seu portal a qualquer momento, clicando no link a seguir:
 Se você tiver alguma dúvida ou precisar de assistência, sinta-se à vontade para entrar em contato conosco [${__SalesEmail}](mailto:${__SalesEmail})
 
 Com os melhores cumprimentos,
-ONLYOFFICE™ Equipe de suporte
+ONLYOFFICE Equipe de suporte
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
@@ -554,7 +554,7 @@ _Nota_: este link é válido por apenas 7 dias. Favor completar o processo de ex
 Se você tiver alguma dúvida ou precisar de assistência, sinta-se à vontade para entrar em contato conosco [${__SalesEmail}](mailto:${__SalesEmail})
 
 Com os melhores cumprimentos,
-ONLYOFFICE™ Equipe de suporte
+ONLYOFFICE Equipe de suporte
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_rename" xml:space="preserve">
@@ -1084,9 +1084,6 @@ $TrulyYours</value>
   <data name="subject_enterprise_admin_activation_v1" xml:space="preserve">
     <value>Bem-vindo ao ONLYOFFICE DocSpace!</value>
   </data>
-  <data name="AcceptDocSpace" xml:space="preserve">
-    <value>ACEITAR</value>
-  </data>
   <data name="pattern_change_password_v115" xml:space="preserve">
     <value>Deseja alterar a senha da sua conta do ONLYOFFICE? Clique no botão abaixo para confirmar.
  
@@ -1552,7 +1549,7 @@ $TrulyYours</value>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>Olá!
 
-Você foi convidado para entrar na sala do Docspace em "${__VirtualRootPath}":"${__VirtualRootPath}". Aceite o convite clicando no link:
+Você foi convidado para entrar na sala do DocSpace em "${__VirtualRootPath}":"${__VirtualRootPath}". Aceite o convite clicando no link:
 
 $OrangeButton
 
@@ -1584,10 +1581,10 @@ $TrulyYours</value>
   <data name="subject_saas_user_welcome_v1" xml:space="preserve">
     <value>Bem-vindo ao ONLYOFFICE DocSpace!</value>
   </data>
-  <data name="ButtonCollaborateDocSpace" xml:space="preserve">
+  <data name="ButtonCollaborate" xml:space="preserve">
     <value>Colaborar no DocSpace</value>
   </data>
-  <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
+  <data name="ButtonConfirmInvite" xml:space="preserve">
     <value>Confirmar o convite do DocSpace</value>
   </data>
   <data name="ButtonConfirmRoomInvite" xml:space="preserve">
@@ -1699,5 +1696,24 @@ Para sua comodidade, preparamos tutoriais em vídeo para que você possa dominar
 $OrangeButton
 
 $TrulyYours</value>
+  </data>
+  <data name="pattern_zoom_welcome" xml:space="preserve">
+    <value>h1. para &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Olá, $UserName!
+
+Você acabou de criar o ONLYOFFICE DocSpace, um hub de documentos onde você pode aumentar a colaboração com sua equipe, clientes, parceiros e muito mais. Seu endereço é "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+Seu plano tarifário atual é STARTUP. É totalmente gratuito e inclui:
+
+&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;100 administradores/usuários avançados&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Até 100 salas&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;100 GB de espaço em disco&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+
+* Desfrute de uma nova forma de colaboração de documentos!*
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_zoom_welcome" xml:space="preserve">
+    <value>Bem-vindo ao ONLYOFFICE DocSpace!</value>
   </data>
 </root>

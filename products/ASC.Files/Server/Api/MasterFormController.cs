@@ -52,10 +52,11 @@ public abstract class MasterFormController<T>(FileStorageService fileStorageServ
     /// <returns type="System.Object, System">Link to the form</returns>
     /// <path>api/2.0/files/masterform/{fileId}/checkfillformdraft</path>
     /// <httpMethod>POST</httpMethod>
+    /// <requiresAuthorization>false</requiresAuthorization>
     [AllowAnonymous]
     [HttpPost("masterform/{fileId}/checkfillformdraft")]
     public async Task<object> CheckFillFormDraftAsync(T fileId, CheckFillFormDraftRequestDto inDto)
     {
-        return await fileStorageService.CheckFillFormDraftAsync(fileId, inDto.Version, inDto.Doc, !inDto.RequestEmbedded, inDto.RequestView);
+        return await fileStorageService.CheckFillFormDraftAsync(fileId, inDto.Version,!inDto.RequestEmbedded, inDto.RequestView);
     }
 }

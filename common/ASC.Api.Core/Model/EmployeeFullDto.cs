@@ -163,7 +163,7 @@ public class EmployeeFullDto : EmployeeDto
     public double? UsedSpace { get; set; }
     public bool? Shared { get; set; }
 
-    /// <summary>Specifies if the user has a custom quota or not.</summary>
+    /// <summary>Specifies if the user has a custom quota or not</summary>
     /// <type>System.Boolean, System</type>
     public bool? IsCustomQuota { get; set; }
 
@@ -203,6 +203,7 @@ public class EmployeeFullDto : EmployeeDto
 
 [Scope]
 public class EmployeeFullDtoHelper(
+        SetupInfo setupInfo,
         ApiContext httpContext,
         UserManager userManager,
         AuthContext authContext,
@@ -344,7 +345,7 @@ public class EmployeeFullDtoHelper(
 
         if (!string.IsNullOrEmpty(userInfo.CultureName))
         {
-            result.CultureName = userInfo.CultureName;
+            result.CultureName = setupInfo.GetRightCultureName(userInfo.GetCulture());
         }
 
         FillConacts(result, userInfo);

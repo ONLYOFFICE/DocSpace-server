@@ -133,7 +133,7 @@
     <value>Ֆայլերը կսեղմվեն {0}.zip ֆայլի մեջ{1}</value>
   </data>
   <data name="MyFiles" xml:space="preserve">
-    <value>Իմ փաստաթղթերը</value>
+    <value>փաստաթղթերը</value>
   </data>
   <data name="Personal" xml:space="preserve">
     <value>Անձնական</value>
@@ -155,5 +155,8 @@
   </data>
   <data name="VirtualRooms" xml:space="preserve">
     <value>Սենյակներ</value>
+  </data>
+  <data name="InProcessFormFolder" xml:space="preserve">
+    <value>Ընթացքի մեջ</value>
   </data>
 </root>

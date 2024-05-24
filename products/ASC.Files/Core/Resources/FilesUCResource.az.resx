@@ -74,7 +74,7 @@
     <value>Fayllar  {0}.zip faylına{1} sıxılacaq</value>
   </data>
   <data name="MyFiles" xml:space="preserve">
-    <value>Sənədlərim</value>
+    <value>Sənədlər</value>
   </data>
   <data name="PrivacyRoom" xml:space="preserve">
     <value>Şəxsi Otaq</value>
@@ -96,5 +96,8 @@
   </data>
   <data name="Personal" xml:space="preserve">
     <value>Şəxsi</value>
+  </data>
+  <data name="InProcessFormFolder" xml:space="preserve">
+    <value>Prosesdədir</value>
   </data>
 </root>

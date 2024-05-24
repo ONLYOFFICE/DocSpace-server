@@ -273,7 +273,7 @@
     <value>Dokumenty</value>
   </data>
   <data name="ProductUserOpportunities" xml:space="preserve">
-    <value>Vytvárajte a upravujte vlastné dokumenty, rovnako ako zdieľané dokumenty s príslušnými prístupovými právami|Udeľte práva na čítanie/úpravu ostatným používateľom na dokumenty a priečinky|Prepojte Dropbox, Box a iné kontá v sekcii 'Moje dokumenty'</value>
+    <value>Vytvárajte a upravujte vlastné dokumenty, rovnako ako zdieľané dokumenty s príslušnými prístupovými právami|Udeľte práva na čítanie/úpravu ostatným používateľom na dokumenty a priečinky|Prepojte Dropbox, Box a iné kontá v sekcii 'Dokumenty'</value>
   </data>
   <data name="UnknownFirstName" xml:space="preserve">
     <value>Krstné meno</value>
@@ -421,5 +421,47 @@
   </data>
   <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
     <value>Príliš veľa krát ste skúšali zadať svoje heslo. Prosím, skúste to znova neskôr</value>
+  </data>
+  <data name="RoomIndex_Author" xml:space="preserve">
+    <value>Autor</value>
+  </data>
+  <data name="RoomIndex_Company" xml:space="preserve">
+    <value>Spoločnosť</value>
+  </data>
+  <data name="RoomIndex_Created" xml:space="preserve">
+    <value>Vytvorené</value>
+  </data>
+  <data name="RoomIndex_DateGenerated" xml:space="preserve">
+    <value>Dátum vytvorenia</value>
+  </data>
+  <data name="RoomIndex_ExportAuthor" xml:space="preserve">
+    <value>Exportovať autora</value>
+  </data>
+  <data name="RoomIndex_Folder" xml:space="preserve">
+    <value>Priečinok</value>
+  </data>
+  <data name="RoomIndex_Index" xml:space="preserve">
+    <value>Index</value>
+  </data>
+  <data name="RoomIndex_Modified" xml:space="preserve">
+    <value>Upravené</value>
+  </data>
+  <data name="RoomIndex_Name" xml:space="preserve">
+    <value>Meno</value>
+  </data>
+  <data name="RoomIndex_Room" xml:space="preserve">
+    <value>Miestnosť</value>
+  </data>
+  <data name="RoomIndex_SheetName" xml:space="preserve">
+    <value>Index miestnosti</value>
+  </data>
+  <data name="RoomIndex_Size" xml:space="preserve">
+    <value>Veľkosť (MB)</value>
+  </data>
+  <data name="RoomIndex_Total" xml:space="preserve">
+    <value>Celkom</value>
+  </data>
+  <data name="RoomIndex_Type" xml:space="preserve">
+    <value>Typ</value>
   </data>
 </root>

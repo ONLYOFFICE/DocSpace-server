@@ -51,8 +51,6 @@ public class CreateRoomRequestDto
     /// <type>ASC.Files.Core.ApiModels.RequestDto.RoomType, ASC.Files.Core</type>
     public RoomType RoomType { get; set; }
 
-    /// <summary>Private room or not</summary>
-    /// <type>System.Boolean, System</type>
     public bool Private { get; set; }
 
     /// <summary>Collection of sharing parameters</summary>

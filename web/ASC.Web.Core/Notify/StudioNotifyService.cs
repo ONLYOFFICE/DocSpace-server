@@ -29,20 +29,21 @@ using Constants = ASC.Core.Configuration.Constants;
 namespace ASC.Web.Studio.Core.Notify;
 
 [Scope]
-public class StudioNotifyService(UserManager userManager,
-        StudioNotifyHelper studioNotifyHelper,
-        StudioNotifyServiceHelper studioNotifyServiceHelper,
-        TenantExtra tenantExtra,
-        AuthContext authContext,
-        TenantManager tenantManager,
-        CoreBaseSettings coreBaseSettings,
-        CommonLinkUtility commonLinkUtility,
-        SetupInfo setupInfo,
-        DisplayUserSettingsHelper displayUserSettingsHelper,
-        SettingsManager settingsManager,
-        MessageService messageService,
-        MessageTarget messageTarget,
-        ILoggerProvider option)
+public class StudioNotifyService(
+    UserManager userManager,
+    StudioNotifyHelper studioNotifyHelper,
+    StudioNotifyServiceHelper studioNotifyServiceHelper,
+    TenantExtra tenantExtra,
+    AuthContext authContext,
+    TenantManager tenantManager,
+    CoreBaseSettings coreBaseSettings,
+    CommonLinkUtility commonLinkUtility,
+    SetupInfo setupInfo,
+    DisplayUserSettingsHelper displayUserSettingsHelper,
+    UserInvitationLimitHelper userInvitationLimitHelper,
+    SettingsManager settingsManager,
+    MessageService messageService,
+    ILoggerProvider option)
 {
     public static string EMailSenderName { get { return Constants.NotifyEMailSenderSysName; } }
 
@@ -109,7 +110,7 @@ public class StudioNotifyService(UserManager userManager,
 
         var displayUserName = userInfo.DisplayUserName(false, displayUserSettingsHelper);
 
-        await messageService.SendAsync(MessageAction.UserSentPasswordChangeInstructions, messageTarget.Create(userInfo.Id), auditEventDate, displayUserName);
+        await messageService.SendAsync(MessageAction.UserSentPasswordChangeInstructions, MessageTarget.Create(userInfo.Id), auditEventDate, displayUserName);
     }
 
     #endregion
@@ -148,7 +149,7 @@ public class StudioNotifyService(UserManager userManager,
                     new TagValue(Tags.UserDisplayName, (user.DisplayUserName(displayUserSettingsHelper) ?? string.Empty).Trim()));
     }
 
-    public async Task SendEmailRoomInviteAsync(string email, string roomTitle, string confirmationUrl, string culture = null)
+    public async Task SendEmailRoomInviteAsync(string email, string roomTitle, string confirmationUrl, string culture = null, bool limitation = false)
     {
         var cultureInfo = string.IsNullOrEmpty(culture) ? (await GetCulture(null)) : new CultureInfo(culture);
 
@@ -169,9 +170,14 @@ public class StudioNotifyService(UserManager userManager,
                 await studioNotifyHelper.RecipientFromEmailAsync(email, false),
                 [EMailSenderName],
                 tags.ToArray());
+
+        if (limitation)
+        {
+            await userInvitationLimitHelper.ReduceLimit();
+        }
     }
 
-    public async Task SendDocSpaceInviteAsync(string email, string confirmationUrl, string culture = "")
+    public async Task SendDocSpaceInviteAsync(string email, string confirmationUrl, string culture = "", bool limitation = false)
     {
         var cultureInfo = string.IsNullOrEmpty(culture) ? (await GetCulture(null)) : new CultureInfo(culture);
 
@@ -192,6 +198,11 @@ public class StudioNotifyService(UserManager userManager,
                 await studioNotifyHelper.RecipientFromEmailAsync(email, false),
                 [EMailSenderName],
                 tags.ToArray());
+
+        if (limitation)
+        {
+            await userInvitationLimitHelper.ReduceLimit();
+        }
     }
 
     #endregion
@@ -285,7 +296,7 @@ public class StudioNotifyService(UserManager userManager,
         }
 
         var culture = await GetCulture(newUserInfo);
-        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonCollaborateDocSpace", culture);
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonCollaborate", culture);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
         var img1 = studioNotifyHelper.GetNotificationImageUrl("users.png");
@@ -869,6 +880,48 @@ public class StudioNotifyService(UserManager userManager,
         {
             _log.ErrorSendCongratulations(error);
         }
+    }
+
+    #endregion
+
+    #region Migration Personal to Docspace
+
+    public async Task MigrationPersonalToDocspaceAsync(UserInfo userInfo)
+    {
+        var auditEventDate = DateTime.UtcNow;
+
+        auditEventDate = new DateTime(
+            auditEventDate.Year,
+            auditEventDate.Month,
+            auditEventDate.Day,
+            auditEventDate.Hour,
+            auditEventDate.Minute,
+            auditEventDate.Second,
+            0,
+            DateTimeKind.Utc);
+
+        var hash = auditEventDate.ToString("s", CultureInfo.InvariantCulture);
+
+        var confirmationUrl = await commonLinkUtility.GetConfirmationEmailUrlAsync(userInfo.Email, ConfirmType.PasswordChange, hash, userInfo.Id);
+
+        var cultureInfo = await GetCulture(userInfo);
+
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetStarted", cultureInfo);
+
+        var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", cultureInfo);
+
+        await studioNotifyServiceHelper.SendNoticeToAsync(
+                Actions.MigrationPersonalToDocspace,
+                await studioNotifyHelper.RecipientFromEmailAsync(userInfo.Email, false),
+                [EMailSenderName],
+                TagValues.OrangeButton(orangeButtonText, confirmationUrl),
+                TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
+                new TagValue(CommonTags.Culture, cultureInfo.Name),
+                new TagValue(CommonTags.Footer, "social"));
+
+        var displayUserName = userInfo.DisplayUserName(false, displayUserSettingsHelper);
+
+        await messageService.SendAsync(MessageAction.UserSentPasswordChangeInstructions, MessageTarget.Create(userInfo.Id), auditEventDate, displayUserName);
     }
 
     #endregion

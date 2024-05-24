@@ -1090,9 +1090,6 @@ $TrulyYours</value>
   <data name="ButtonAccept" xml:space="preserve">
     <value>Přijmout</value>
   </data>
-  <data name="AcceptDocSpace" xml:space="preserve">
-    <value>PŘIJMOUT</value>
-  </data>
   <data name="ButtonActivateEmail" xml:space="preserve">
     <value>Kliknutím zde aktivujete svou e-mailovou adresu</value>
   </data>
@@ -1108,13 +1105,13 @@ $TrulyYours</value>
   <data name="ButtonChangeTfa" xml:space="preserve">
     <value>Konfigurace aplikace ověřovatele</value>
   </data>
-  <data name="ButtonCollaborateDocSpace" xml:space="preserve">
+  <data name="ButtonCollaborate" xml:space="preserve">
     <value>Spolupráce v DocSpace</value>
   </data>
   <data name="ButtonConfirm" xml:space="preserve">
     <value>Potvrdit</value>
   </data>
-  <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
+  <data name="ButtonConfirmInvite" xml:space="preserve">
     <value>Potvrzení pozvánky DocSpace</value>
   </data>
   <data name="ButtonConfirmEmail" xml:space="preserve">
@@ -1168,7 +1165,7 @@ Další informace o postupu zálohování naleznete v naší uživatelské pří
 Pokud máte jakékoli dotazy nebo potřebujete pomoc, neváhejte nás kontaktovat na adrese [${__SupportLink}](${__SupportLink}).
 
 S pozdravem,
-tým podpory ONLYOFFICE™
+tým podpory ONLYOFFICE
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
@@ -1308,7 +1305,7 @@ Svůj portál můžete kdykoli znovu aktivovat kliknutím na následující odka
 V případě jakýchkoli dotazů nebo potřeby pomoci nás neváhejte kontaktovat na adrese [${__SalesEmail}](mailto:${__SalesEmail}).
 
 S pozdravem,
-tým podpory ONLYOFFICE™
+tým podpory ONLYOFFICE
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete_tg" xml:space="preserve">
@@ -1333,7 +1330,7 @@ _Poznámka_: tento odkaz je platný pouze 7 dní. V této lhůtě dokončete pro
 V případě jakýchkoli dotazů nebo potřeby pomoci nás neváhejte kontaktovat na adrese [${__SalesEmail}](mailto:${__SalesEmail})
 
 S pozdravem,
-tým podpory ONLYOFFICE™
+tým podpory ONLYOFFICE
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
@@ -1682,5 +1679,24 @@ Pro vaše pohodlí jsme pro vás připravili videonávody, abyste si mohli ONLYO
 $OrangeButton
 
 $TrulyYours</value>
+  </data>
+  <data name="pattern_zoom_welcome" xml:space="preserve">
+    <value>h1. na &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Dobrý den, $UserName!
+
+Právě jste vytvořili ONLYOFFICE DocSpace, centrum dokumentů, kde můžete posílit spolupráci se svým týmem, zákazníky, partnery a dalšími. Jeho adresa je "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+Váš aktuální tarifní plán je STARTUP. Je zcela zdarma a zahrnuje:
+
+&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;100 administrátorů/oprávněných uživatelů&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Až 100 pokojů&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;100 GB místa na disku&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+
+*Vychutnejte si nový způsob spolupráce na dokumentech!*
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_zoom_welcome" xml:space="preserve">
+    <value>Vítejte v ONLYOFFICE DocSpace!</value>
   </data>
 </root>

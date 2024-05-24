@@ -74,7 +74,7 @@
     <value>文件将被压缩成{0}.zip文件{1}</value>
   </data>
   <data name="MyFiles" xml:space="preserve">
-    <value>我的文档</value>
+    <value>文档</value>
   </data>
   <data name="PrivacyRoom" xml:space="preserve">
     <value>私人房间</value>
@@ -96,5 +96,8 @@
   </data>
   <data name="Personal" xml:space="preserve">
     <value>个人</value>
+  </data>
+  <data name="InProcessFormFolder" xml:space="preserve">
+    <value>正在处理中</value>
   </data>
 </root>

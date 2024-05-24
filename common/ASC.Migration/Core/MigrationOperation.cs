@@ -35,9 +35,10 @@ public class MigrationOperation(
     TenantManager tenantManager,
     SecurityContext securityContext,
     IServiceProvider serviceProvider,
-    StorageFactory storageFactory)
-    : DistributedTaskProgress
+    IDistributedCache cache)
+    : DistributedTaskProgress, IDisposable
 {
+    private readonly SemaphoreSlim _semaphore = new(1);
     private string _migratorName;
     private Guid _userId;
 
@@ -123,9 +124,8 @@ public class MigrationOperation(
                 throw new ItemNotFoundException(MigrationResource.MigrationNotFoundException);
             }
 
-            var discStore = await storageFactory.GetStorageAsync(TenantId, "migration", (IQuotaController)null) as DiscDataStore;
-            var folder = discStore.GetPhysicalPath("", "");
-            await migrator.InitAsync(folder, CancellationToken, onlyParse ? OperationType.Parse : OperationType.Migration);
+            var folder = await cache.GetStringAsync($"migration folder - {TenantId}");
+            migrator.Init(folder, CancellationToken, onlyParse ? OperationType.Parse : OperationType.Migration);
 
             var result = await migrator.ParseAsync(onlyParse);
             if (!onlyParse)
@@ -148,9 +148,9 @@ public class MigrationOperation(
             {
                 ImportedUsers = migrator.GetGuidImportedUsers();
                 LogName = migrator.GetLogName();
-                migrator.Dispose();
+                await migrator.DisposeAsync();
             }
-            if (!CancellationToken.IsCancellationRequested) 
+            if (!CancellationToken.IsCancellationRequested)
             {
                 IsCompleted = true;
                 await PublishChanges();
@@ -170,8 +170,21 @@ public class MigrationOperation(
 
     public async Task CopyLogsAsync(Stream stream)
     {
-        using var logger = serviceProvider.GetService<MigrationLogger>();
-        await logger.InitAsync(LogName);
-        await logger.GetStream().CopyToAsync(stream);
+        try
+        {
+            await _semaphore.WaitAsync();
+            await using var logger = serviceProvider.GetService<MigrationLogger>();
+            logger.Init(LogName);
+            await (await logger.GetStreamAsync()).CopyToAsync(stream);
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
+    }
+
+    public void Dispose()
+    {
+        _semaphore.Dispose();
     }
 }

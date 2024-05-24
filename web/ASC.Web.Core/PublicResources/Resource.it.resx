@@ -1000,4 +1000,49 @@
   <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
     <value>Troppi tentativi di accesso. Ti preghiamo di riprovare più tardi</value>
   </data>
+  <data name="ErrorCannotDeleteLastSpace" xml:space="preserve">
+    <value>Non è possibile eliminare l'ultimo spazio ad accesso completo</value>
+  </data>
+  <data name="ErrorWebPluginArchive" xml:space="preserve">
+    <value>Archivio plugin errato</value>
+  </data>
+  <data name="ErrorWebPluginExist" xml:space="preserve">
+    <value>Il plugin esiste già</value>
+  </data>
+  <data name="ErrorWebPluginFileExtension" xml:space="preserve">
+    <value>Estensione file errata</value>
+  </data>
+  <data name="ErrorWebPluginFileSize" xml:space="preserve">
+    <value>La dimensione del file supera il limite</value>
+  </data>
+  <data name="ErrorWebPluginForbiddenSystem" xml:space="preserve">
+    <value>Sono vietate modifiche ai plugin di sistema</value>
+  </data>
+  <data name="ErrorWebPluginName" xml:space="preserve">
+    <value>Nome del plugin sbagliato</value>
+  </data>
+  <data name="ErrorWebPluginNoInputFile" xml:space="preserve">
+    <value>Nessun file di input</value>
+  </data>
+  <data name="ErrorWebPluginNotFound" xml:space="preserve">
+    <value>Plugin non trovato</value>
+  </data>
+  <data name="ErrorWebPluginToManyInputFiles" xml:space="preserve">
+    <value>Troppi file di input</value>
+  </data>
+  <data name="QuotaGreaterPortalError" xml:space="preserve">
+    <value>Impossibile impostare la quota di memoria: la quota di memoria impostata è maggiore della quota dei portali.</value>
+  </data>
+  <data name="RoomFreeSpaceException" xml:space="preserve">
+    <value>È stata superata la quota di spazio delle stanza</value>
+  </data>
+  <data name="UserFreeSpaceException" xml:space="preserve">
+    <value>È stata superata la quota di spazio utente</value>
+  </data>
+  <data name="TariffsFeature_statistic" xml:space="preserve">
+    <value>Quote e statistiche di archivio</value>
+  </data>
+  <data name="TariffsFeature_total_size" xml:space="preserve">
+    <value>{0} per amministratore/utente esperto e possibilità di aggiungere spazio su richiesta</value>
+  </data>
 </root>

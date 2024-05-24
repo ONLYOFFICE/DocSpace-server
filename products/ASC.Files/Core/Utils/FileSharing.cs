@@ -41,10 +41,8 @@ public class FileSharingAceHelper(
     InvitationLinkService invitationLinkService,
     StudioNotifyService studioNotifyService,
     UserManagerWrapper userManagerWrapper,
-    CountPaidUserChecker countPaidUserChecker,
     IUrlShortener urlShortener,
     IDistributedLockProvider distributedLockProvider,
-    TenantManager tenantManager,
     SocketManager socketManager,
     FilesLinkUtility filesLinkUtility)
 {
@@ -53,7 +51,7 @@ public class FileSharingAceHelper(
     private const int MaxPrimaryExternalLinks = 1;
 
     public async Task<AceProcessingResult> SetAceObjectAsync<T>(List<AceWrapper> aceWrappers, FileEntry<T> entry, bool notify, string message,
-        AceAdvancedSettingsWrapper advancedSettings, string culture = null, bool socket = true)
+        AceAdvancedSettingsWrapper advancedSettings, string culture = null, bool socket = true, bool beforeOwnerChange = false)
     {
         if (entry == null)
         {
@@ -75,11 +73,10 @@ public class FileSharingAceHelper(
         var changed = false;
         string warning = null;
         var shares = await fileSecurity.GetPureSharesAsync(entry, aceWrappers.Select(a => a.Id)).ToDictionaryAsync(r => r.Subject);
-        var currentUserId = authContext.CurrentAccount.ID;
 
         foreach (var w in aceWrappers.OrderByDescending(ace => ace.SubjectGroup))
         {
-            if (entry.CreateBy == currentUserId && w.Id == currentUserId && w.Access != FileShare.RoomAdmin)
+            if (entry.CreateBy == w.Id && (!beforeOwnerChange || w.Access != FileShare.RoomAdmin))
             {
                 continue;
             }
@@ -167,18 +164,9 @@ public class FileSharingAceHelper(
                 {
                     throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
                 }
-
-                IDistributedLockHandle quotaLockHandle = null;
-                var tenantId = await tenantManager.GetCurrentTenantIdAsync();
-
+                
                 try
                 {
-                    if (!correctAccess && currentUserType == EmployeeType.User)
-                    {
-                        quotaLockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenantId));
-                        await countPaidUserChecker.CheckAppend();
-                    }
-
                     userType = FileSecurity.GetTypeByShare(w.Access);
 
                     if (!emailInvite && currentUserType != EmployeeType.DocSpaceAdmin)
@@ -201,13 +189,6 @@ public class FileSharingAceHelper(
                 {
                     warning ??= e.Message;
                     continue;
-                }
-                finally
-                {
-                    if (quotaLockHandle != null)
-                    {
-                        await quotaLockHandle.ReleaseAsync();
-                    }
                 }
 
                 if (emailInvite)
@@ -234,7 +215,7 @@ public class FileSharingAceHelper(
 
             var share = w.Access;
 
-            IDistributedLockHandle linkLockHandle = null;
+            IDistributedLockHandle handle = null;
 
             try
             {
@@ -250,7 +231,7 @@ public class FileSharingAceHelper(
 
                     if (maxCount > 0)
                     {
-                        linkLockHandle = await distributedLockProvider.TryAcquireFairLockAsync($"{entry.Id}_{entry.FileEntryType}_links");
+                        handle = await distributedLockProvider.TryAcquireFairLockAsync($"{entry.Id}_{entry.FileEntryType}_links");
 
                         var linksCount = await fileSecurity.GetPureSharesCountAsync(entry, filter, null, null);
                         if (linksCount >= maxCount)
@@ -265,9 +246,9 @@ public class FileSharingAceHelper(
             }
             finally
             {
-                if (linkLockHandle != null)
+                if (handle != null)
                 {
-                    await linkLockHandle.ReleaseAsync();
+                    await handle.ReleaseAsync();
                 }
             }
 
@@ -291,7 +272,7 @@ public class FileSharingAceHelper(
                 var link = await invitationLinkService.GetInvitationLinkAsync(w.Email, share, authContext.CurrentAccount.ID, entry.Id.ToString(), culture);
                 var shortenLink = await urlShortener.GetShortenLinkAsync(link);
 
-                await studioNotifyService.SendEmailRoomInviteAsync(w.Email, entry.Title, shortenLink, culture);
+                await studioNotifyService.SendEmailRoomInviteAsync(w.Email, entry.Title, shortenLink, culture, true);
             }
 
             entry.Access = share;

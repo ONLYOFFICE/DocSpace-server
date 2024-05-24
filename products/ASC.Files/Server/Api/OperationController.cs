@@ -46,6 +46,7 @@ public class OperationController(
     /// <path>api/2.0/files/fileops/bulkdownload</path>
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
+    /// <requiresAuthorization>false</requiresAuthorization>
     [AllowAnonymous]
     [HttpPut("bulkdownload")]
     public async IAsyncEnumerable<FileOperationDto> BulkDownload(DownloadRequestDto inDto)
@@ -134,6 +135,7 @@ public class OperationController(
     /// <path>api/2.0/files/fileops</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    /// <requiresAuthorization>false</requiresAuthorization>
     [AllowAnonymous]
     [HttpGet("")]
     public async IAsyncEnumerable<FileOperationDto> GetOperationStatuses()
@@ -229,6 +231,7 @@ public class OperationController(
     /// <path>api/2.0/files/fileops/terminate/{id}</path>
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
+    /// <requiresAuthorization>false</requiresAuthorization>
     [AllowAnonymous]
     [HttpPut("terminate/{id?}")]
     public async IAsyncEnumerable<FileOperationDto> TerminateTasks(string id = null)

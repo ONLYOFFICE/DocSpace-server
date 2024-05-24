@@ -138,4 +138,6 @@ public static class Actions
     public static readonly INotifyAction SaasAdminVideoGuides = new NotifyAction("saas_video_guides_v1");
 
     public static readonly INotifyAction ZoomWelcome = new NotifyAction("zoom_welcome");
+
+    public static readonly INotifyAction MigrationPersonalToDocspace = new NotifyAction("migration_personal_to_docspace");
 } 

@@ -318,7 +318,7 @@ Massima compatibilità con docx, xlsx, pptx.</value>
     <value>Documenti</value>
   </data>
   <data name="ProductUserOpportunities" xml:space="preserve">
-    <value>Creare e modificare i propri documenti e anche i documenti condivisi con i diritti di accesso adatti|Concedere l'accesso agli altri utenti per leggere/modificare i documenti e le cartelle|Collegare Dropbox, Box e altri account nella sezione 'I miei documenti'</value>
+    <value>Creare e modificare i propri documenti e anche i documenti condivisi con i diritti di accesso adatti|Concedere l'accesso agli altri utenti per leggere/modificare i documenti e le cartelle|Collegare Dropbox, Box e altri account nella sezione 'Documenti'</value>
   </data>
   <data name="UnknownFirstName" xml:space="preserve">
     <value>Nome</value>
@@ -421,5 +421,47 @@ Massima compatibilità con docx, xlsx, pptx.</value>
   </data>
   <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
     <value>Hai tentato troppe volte di inserire la tua password. Ti preghiamo di riprovare più tardi</value>
+  </data>
+  <data name="RoomIndex_Author" xml:space="preserve">
+    <value>Autore</value>
+  </data>
+  <data name="RoomIndex_Company" xml:space="preserve">
+    <value>Azienda</value>
+  </data>
+  <data name="RoomIndex_Created" xml:space="preserve">
+    <value>Creato</value>
+  </data>
+  <data name="RoomIndex_DateGenerated" xml:space="preserve">
+    <value>Data di creazione</value>
+  </data>
+  <data name="RoomIndex_ExportAuthor" xml:space="preserve">
+    <value>Esporta autore</value>
+  </data>
+  <data name="RoomIndex_Folder" xml:space="preserve">
+    <value>Cartella</value>
+  </data>
+  <data name="RoomIndex_Index" xml:space="preserve">
+    <value>Indice</value>
+  </data>
+  <data name="RoomIndex_Modified" xml:space="preserve">
+    <value>Modificato</value>
+  </data>
+  <data name="RoomIndex_Name" xml:space="preserve">
+    <value>Nome</value>
+  </data>
+  <data name="RoomIndex_Room" xml:space="preserve">
+    <value>Stanza</value>
+  </data>
+  <data name="RoomIndex_SheetName" xml:space="preserve">
+    <value>Indice delle stanze</value>
+  </data>
+  <data name="RoomIndex_Size" xml:space="preserve">
+    <value>Dimensioni (MB)</value>
+  </data>
+  <data name="RoomIndex_Total" xml:space="preserve">
+    <value>Totale</value>
+  </data>
+  <data name="RoomIndex_Type" xml:space="preserve">
+    <value>Tipo</value>
   </data>
 </root>

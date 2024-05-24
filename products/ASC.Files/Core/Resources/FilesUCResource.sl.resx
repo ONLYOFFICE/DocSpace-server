@@ -65,7 +65,7 @@
     <value>Pogosti dokumenti</value>
   </data>
   <data name="MyFiles" xml:space="preserve">
-    <value>Moji Dokumenti</value>
+    <value>Dokumenti</value>
   </data>
   <data name="ProjectFiles" xml:space="preserve">
     <value>Dokumenti projekta</value>
@@ -96,5 +96,8 @@
   </data>
   <data name="Recent" xml:space="preserve">
     <value>Zadnje</value>
+  </data>
+  <data name="InProcessFormFolder" xml:space="preserve">
+    <value>V procesiranju</value>
   </data>
 </root>

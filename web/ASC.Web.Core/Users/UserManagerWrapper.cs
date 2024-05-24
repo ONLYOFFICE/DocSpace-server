@@ -341,7 +341,7 @@ public sealed class UserManagerWrapper(
         {
             return string.Format(Resource.ErrorUserNotFoundByEmail, email);
         }
-        if (userInfo.Status == EmployeeStatus.Terminated || userInfo.ActivationStatus == EmployeeActivationStatus.Pending)
+        if (userInfo.Status == EmployeeStatus.Terminated)
         {
             return Resource.ErrorDisabledProfile;
         }

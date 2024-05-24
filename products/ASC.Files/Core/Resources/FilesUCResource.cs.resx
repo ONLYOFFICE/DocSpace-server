@@ -65,7 +65,7 @@
     <value>Společné dokumenty</value>
   </data>
   <data name="MyFiles" xml:space="preserve">
-    <value>Moje dokumenty</value>
+    <value>Dokumenty</value>
   </data>
   <data name="ProjectFiles" xml:space="preserve">
     <value>Dokumenty projektu</value>
@@ -96,5 +96,8 @@
   </data>
   <data name="PrivacyRoom" xml:space="preserve">
     <value>Soukromá místnost</value>
+  </data>
+  <data name="InProcessFormFolder" xml:space="preserve">
+    <value>V procesu</value>
   </data>
 </root>

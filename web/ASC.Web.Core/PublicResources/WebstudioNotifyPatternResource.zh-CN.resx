@@ -1107,9 +1107,6 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="AcceptDocSpace" xml:space="preserve">
-    <value>接受</value>
-  </data>
   <data name="ButtonActivateEmail" xml:space="preserve">
     <value>点击此处以激活您的邮件地址</value>
   </data>
@@ -1122,13 +1119,13 @@ $TrulyYours</value>
   <data name="ButtonChangeTfa" xml:space="preserve">
     <value>配置身份验证器应用</value>
   </data>
-  <data name="ButtonCollaborateDocSpace" xml:space="preserve">
+  <data name="ButtonCollaborate" xml:space="preserve">
     <value>在协作空间中进行协作</value>
   </data>
   <data name="ButtonConfirm" xml:space="preserve">
     <value>确认</value>
   </data>
-  <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
+  <data name="ButtonConfirmInvite" xml:space="preserve">
     <value>确认协作空间邀请</value>
   </data>
   <data name="ButtonConfirmEmail" xml:space="preserve">
@@ -1179,7 +1176,7 @@ $TrulyYours</value>
 如果您有任何问题或是需要协助，欢迎随时通过[${__SupportLink}](${__SupportLink}) 联系我们
 
 祝好，
-ONLYOFFICE™ 支持团队
+ONLYOFFICE 支持团队
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
@@ -1319,7 +1316,7 @@ _注意_：此链接仅在 7 天内可用。请在这一期限内完成门户停
 如果您有任何问题或是需要协助，欢迎随时通过[${__SalesEmail}](mailto:${__SalesEmail})
 
 祝好，
-ONLYOFFICE™ 支持团队
+ONLYOFFICE 支持团队
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete_tg" xml:space="preserve">
@@ -1344,7 +1341,7 @@ _注意_：此链接仅在 7 天内可用。请在这一期限内完成门户删
 如果您有任何问题或是需要协助，欢迎随时通过[${__SalesEmail}](mailto:${__SalesEmail})
 
 祝好，
-ONLYOFFICE™ 支持团队
+ONLYOFFICE 支持团队
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
@@ -1696,5 +1693,24 @@ $OrangeButton
 $OrangeButton
 
 $TrulyYours</value>
+  </data>
+  <data name="pattern_zoom_welcome" xml:space="preserve">
+    <value>h1. 致 &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; 协作空间！
+ 
+ 
+尊敬的 $UserName，您好！
+ 
+您刚创建了 ONLYOFFICE 协作空间。您可以使用它作为文档管理中心，提升与团队、客户、合作伙伴等的协作。其地址是 "${__VirtualRootPath}":"${__VirtualRootPath}".
+ 
+您当前的资费方案是初创版。这个方案完全免费，包括：
+
+&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;100 名管理员/高级用户&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;最多 100 个房间&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;100 GB 储存空间&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+ 
+*用新方式开启文档协作！*
+ 
+$TrulyYours</value>
+  </data>
+  <data name="subject_zoom_welcome" xml:space="preserve">
+    <value>欢迎使用 ONLYOFFICE 协作空间！</value>
   </data>
 </root>

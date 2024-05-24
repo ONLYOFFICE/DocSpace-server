@@ -287,7 +287,7 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
 
         var photo = await Queries.PhotoAsync(userDbContext, tenant, id);
 
-        return photo ?? Array.Empty<byte>();
+        return photo ?? [];
     }
 
     public async Task<IEnumerable<UserInfo>> GetUsersAsync(int tenant)
