@@ -757,9 +757,6 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="AcceptDocSpace" xml:space="preserve">
-    <value>承認</value>
-  </data>
   <data name="ButtonAccept" xml:space="preserve">
     <value>承認</value>
   </data>
@@ -787,7 +784,7 @@ $TrulyYours</value>
   <data name="ButtonChangeTfa" xml:space="preserve">
     <value>認証アプリを設定する</value>
   </data>
-  <data name="ButtonCollaborateDocSpace" xml:space="preserve">
+  <data name="ButtonCollaborate" xml:space="preserve">
     <value>DocSpaceでコラボレーションする</value>
   </data>
   <data name="ButtonConfigureRightNow" xml:space="preserve">
@@ -799,7 +796,7 @@ $TrulyYours</value>
   <data name="ButtonConfirmEmail" xml:space="preserve">
     <value>確認</value>
   </data>
-  <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
+  <data name="ButtonConfirmInvite" xml:space="preserve">
     <value>DocSpaceの招待を確認する</value>
   </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
@@ -896,7 +893,7 @@ $OwnerName 様
 ご質問やサポートが必要な場合は、[${__SupportLink}](${__SupportLink}) までお気軽にお問い合わせください。
 
 何卒よろしくお願いいたします。
-ONLYOFFICE™ サポートチーム
+ONLYOFFICE サポートチーム
 [www.onlyoffice.com](http://onlyoffice.com/ja)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
@@ -1157,7 +1154,7 @@ _ご注意_: このリンクは7日間のみ有効です。期間内にポータ
 ご質問やサポートが必要な場合は、[${__SalesEmail}](mailto:${__SalesEmail}) までお気軽にお問い合わせください。
 
 よろしくお願いいたします
-ONLYOFFICE™ サポートチーム
+ONLYOFFICE サポートチーム
 [www.onlyoffice.com](http://onlyoffice.com/ja/)</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
@@ -1264,7 +1261,7 @@ _ご注意_: このリンクは7日間のみ有効です。期間内にポータ
 ご質問やサポートが必要な場合は、[${__SalesEmail}](mailto:${__SalesEmail}) までお気軽にお問い合わせください。
 
 どうぞよろしくお願いいたします。
-ONLYOFFICE™ サポートチーム
+ONLYOFFICE サポートチーム
 [www.onlyoffice.com](http://onlyoffice.com/ja/)</value>
   </data>
   <data name="pattern_profile_delete" xml:space="preserve">

@@ -166,7 +166,7 @@ Schauen Sie in unser Benutzerhandbuch [Daten-Backup](${__HelpLink}/tipstricks/da
 Sollten Sie noch Fragen haben oder Hilfe benötigen, kontaktieren Sie  uns unter [${__SupportLink}](${__SupportLink})
 
 Mit freundlichen Grüßen,
-ONLYOFFICE™ Support Team
+ONLYOFFICE Support Team
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
@@ -469,7 +469,7 @@ Mit folgendem Link können Sie Ihr Portal jederzeit wieder aktivieren:
 Haben Sie Fragen oder benötigen Sie Hilfe, können Sie uns unter [${__SalesEmail}](mailto:${__SalesEmail})
 
 Mit freundlichen Grüßen,
-ONLYOFFICE™ Support Team
+ONLYOFFICE Support Team
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
@@ -517,7 +517,7 @@ _Hinweis_: dieser Link ist nur für 7 Tage gültig. Bitte schließen Sie das Lö
 Haben Sie Fragen oder benötigen Sie Hilfe, können Sie uns unter [${__SalesEmail}](mailto:${__SalesEmail}) kontaktieren.
 
 Mit freundlichen Grüßen,
-ONLYOFFICE™ Support Team
+ONLYOFFICE Support Team
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_rename" xml:space="preserve">
@@ -1588,17 +1588,14 @@ $TrulyYours</value>
   <data name="ButtonConfirmRoomInvite" xml:space="preserve">
     <value>Bestätigen Sie die Einladung zum Raum</value>
   </data>
-  <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
+  <data name="ButtonConfirmInvite" xml:space="preserve">
     <value>DocSpace-Einladung bestätigen</value>
   </data>
   <data name="ButtonConfirmEmail" xml:space="preserve">
     <value>BESTÄTIGEN</value>
   </data>
-  <data name="ButtonCollaborateDocSpace" xml:space="preserve">
+  <data name="ButtonCollaborate" xml:space="preserve">
     <value>In DocSpace zusammenarbeiten</value>
-  </data>
-  <data name="AcceptDocSpace" xml:space="preserve">
-    <value>ANNEHMEN</value>
   </data>
   <data name="subject_change_password" xml:space="preserve">
     <value>${LetterLogoText} Passwort-Hilfe</value>
