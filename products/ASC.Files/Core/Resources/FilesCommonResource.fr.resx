@@ -318,7 +318,7 @@ Compatibilité maximale avec docx, xlsx, pptx.</value>
     <value>Documents</value>
   </data>
   <data name="ProductUserOpportunities" xml:space="preserve">
-    <value>Créer et modifier les documents personnels aussi que les documents partagés ayant les droits d'accès appropriés|Donner l'accès de lecture/modification des documents et des dossier à d'autres utilisateurs|Lier Dropbox, Box et d'autres comptes dans la section 'Mes documents'</value>
+    <value>Créer et modifier les documents personnels aussi que les documents partagés ayant les droits d'accès appropriés|Donner l'accès de lecture/modification des documents et des dossier à d'autres utilisateurs|Lier Dropbox, Box et d'autres comptes dans la section 'Documents'</value>
   </data>
   <data name="UnknownFirstName" xml:space="preserve">
     <value>Prénom</value>

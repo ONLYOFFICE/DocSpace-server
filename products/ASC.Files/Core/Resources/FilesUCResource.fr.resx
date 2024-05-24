@@ -74,7 +74,7 @@
     <value>Les fichiers seront compressés au {0}fichier .zip{1}</value>
   </data>
   <data name="MyFiles" xml:space="preserve">
-    <value>Mes documents</value>
+    <value>Documents</value>
   </data>
   <data name="PrivacyRoom" xml:space="preserve">
     <value>Salle privée</value>

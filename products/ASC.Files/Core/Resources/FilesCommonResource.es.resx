@@ -318,7 +318,7 @@
     <value>Documentos</value>
   </data>
   <data name="ProductUserOpportunities" xml:space="preserve">
-    <value>Crear y editar sus propios documentos y documentos compartidos con los derechos de acceso propios|Dar derechos de acceso a otros usuarios para leer/editar los documentos y carpetas|Enlazar Dropbox, Box y otras cuentas en la sección de 'Mis documentos'</value>
+    <value>Crear y editar sus propios documentos y documentos compartidos con los derechos de acceso propios|Dar derechos de acceso a otros usuarios para leer/editar los documentos y carpetas|Enlazar Dropbox, Box y otras cuentas en la sección de 'Documentos'</value>
   </data>
   <data name="UnknownFirstName" xml:space="preserve">
     <value>Nombre</value>
