@@ -74,6 +74,8 @@ public class AuthRequestsDto
     /// <type>System.String, System</type>
     public string RecaptchaResponse { get; set; }
     
+    /// <summary>Culture</summary>
+    /// <type>System.String, System</type>
     public string Culture { get; set; }
 }
 
