@@ -41,7 +41,9 @@ public class LdapUserManager(ILogger<LdapUserManager> logger,
     DisplayUserSettingsHelper displayUserSettingsHelper,
     UserFormatter userFormatter,
     NovellLdapUserImporter novellLdapUserImporter,
-    IServiceScopeFactory serviceScopeFactory)
+    IServiceScopeFactory serviceScopeFactory,
+    TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
+    QuotaSocketManager quotaSocketManager)
 {
     private LdapLocalization _resource;
 
@@ -112,7 +114,27 @@ public class LdapUserManager(ILogger<LdapUserManager> logger,
 
             logger.DebugSaveUserInfo(ldapUserInfo.GetUserInfoString());
 
-            portalUserInfo = await userManager.SaveUserInfo(ldapUserInfo);
+            var settings = await settingsManager.LoadAsync<LdapSettings>();
+
+            portalUserInfo = await userManager.SaveUserInfo(ldapUserInfo, EmployeeType.Collaborator);
+
+            var groupId = settings.UsersType switch
+            {
+                EmployeeType.User => Constants.GroupUser.ID,
+                EmployeeType.DocSpaceAdmin => Constants.GroupAdmin.ID,
+                EmployeeType.Collaborator => Constants.GroupCollaborator.ID,
+                _ => Guid.Empty
+            };
+
+            if (groupId != Guid.Empty)
+            {
+                await userManager.AddUserIntoGroupAsync(portalUserInfo.Id, groupId, true);
+            }
+            else if (settings.UsersType == EmployeeType.RoomAdmin)
+            {
+                var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountPaidUserFeature, int>();
+                _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
+            }
 
             var quotaSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
             if (quotaSettings.EnableQuota)
