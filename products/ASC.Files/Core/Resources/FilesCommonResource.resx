@@ -529,4 +529,10 @@ Highest compatibility with docx, xlsx, pptx.</value>
   <data name="User" xml:space="preserve">
     <value>User</value>
   </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>Link to form</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Open form</value>
+  </data>
 </root>

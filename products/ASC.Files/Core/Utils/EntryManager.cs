@@ -241,6 +241,7 @@ public class EntryManager(IDaoFactory daoFactory,
     SocketManager socketManager,
     FilesMessageService filesMessageService,
     BaseCommonLinkUtility commonLinkUtility,
+    FilesLinkUtility filesLinkUtility,
     SecurityContext securityContext,
     FormFillingReportCreator formFillingReportCreator,
     TenantUtil tenantUtil,
@@ -248,7 +249,8 @@ public class EntryManager(IDaoFactory daoFactory,
     TempStream tempStream,
     FileSharing fileSharing,
     IQuotaService quotaService,
-    TenantManager tenantManager)
+    TenantManager tenantManager,
+    ExternalShare externalShare)
 {
     private const string UpdateList = "filesUpdateList";
 
@@ -1438,8 +1440,6 @@ public class EntryManager(IDaoFactory daoFactory,
 
                     if (properties != null)
                     {
-                        await formFillingReportCreator.UpdateFormFillingReport((T)Convert.ChangeType(properties.FormFilling.ResultsFileID, typeof(T)), formsDataUrl);
-
                         var pdfFile = serviceProvider.GetService<File<T>>();
                         pdfFile.Title = file.Title;
                         pdfFile.ParentId = (T)Convert.ChangeType(properties.FormFilling.ResultsFolderId, typeof(T));
@@ -1470,6 +1470,9 @@ public class EntryManager(IDaoFactory daoFactory,
                             await fileDao.SaveProperties(result.Id, properties);
                             await fileMarker.MarkAsNewAsync(result);
                             await socketManager.CreateFileAsync(result);
+
+                            var resultUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, result.Title, result.Id, result.Version)));
+                            await formFillingReportCreator.UpdateFormFillingReport((T)Convert.ChangeType(properties.FormFilling.ResultsFileID, typeof(T)), formsDataUrl, resultUrl);
 
                             await fileMarker.RemoveMarkAsNewForAllAsync(file);
 
