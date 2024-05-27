@@ -133,10 +133,6 @@ public class WarmupBaseDbContextStartupTask(IServiceProvider provider, ILogger<W
 {
     public Task ExecuteAsync(CancellationToken cancellationToken = default)
     {
-        var cts = new CancellationTokenSource();
-        cts.Cancel();
-        
-        var emptyEnumerableMethod = typeof(Enumerable).GetMethod("Empty");
         var assemblies = AppDomain.CurrentDomain.GetAssemblies().Where(x =>
         {
             var name = x.GetName().Name;
