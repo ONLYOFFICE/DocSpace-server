@@ -2685,13 +2685,15 @@ public class FileStorageService //: IFileStorageService
                                     switch (eventType)
                                     {
                                         case EventType.Create:
-                                            await filesMessageService.SendAsync(MessageAction.RoomGroupAdded, entry, group.ID, ace.Access, true, group.Name);
+                                            await filesMessageService.SendAsync(MessageAction.RoomGroupAdded, entry, group.Name, 
+                                                FileShareExtensions.GetAccessString(ace.Access, true), group.ID.ToString());
                                             break;
                                         case EventType.Remove:
-                                            await filesMessageService.SendAsync(MessageAction.RoomUpdateAccessForGroup, entry, group.ID, group.Name);
+                                            await filesMessageService.SendAsync(MessageAction.RoomGroupRemove, entry, group.Name, group.ID.ToString());
                                             break;
                                         case EventType.Update:
-                                            await filesMessageService.SendAsync(MessageAction.RoomGroupRemove, entry, group.ID, ace.Access, true, group.Name);
+                                            await filesMessageService.SendAsync(MessageAction.RoomUpdateAccessForGroup, entry, group.Name, 
+                                                FileShareExtensions.GetAccessString(ace.Access, true), group.ID.ToString());
                                             break;
                                     }
                                 }
