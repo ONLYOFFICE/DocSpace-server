@@ -240,6 +240,12 @@ public class AuthenticationController(
             var action = viaEmail ? MessageAction.LoginSuccessViaApi : MessageAction.LoginSuccessViaApiSocialAccount;
             var token = await cookiesManager.AuthenticateMeAndSetCookiesAsync(user.Id, action, session);
 
+            if (!string.IsNullOrEmpty(inDto.Culture))
+            {
+                await userManager.ChangeUserCulture(user, inDto.Culture);
+                await messageService.SendAsync(MessageAction.UserUpdatedLanguage, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
+            }
+
             var outDto = new AuthenticationTokenDto
             {
                 Token = token

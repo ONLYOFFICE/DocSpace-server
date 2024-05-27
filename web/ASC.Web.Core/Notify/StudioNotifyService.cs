@@ -49,9 +49,20 @@ public class StudioNotifyService(
 
     private readonly ILogger _log = option.CreateLogger("ASC.Notify");
 
-    public async Task SendMsgToAdminFromNotAuthUserAsync(string email, string message)
+    public async Task SendMsgToAdminFromNotAuthUserAsync(string email, string message, string culture)
     {
-        await studioNotifyServiceHelper.SendNoticeAsync(Actions.UserMessageToAdmin, new TagValue(Tags.Body, message), new TagValue(Tags.UserEmail, email));
+        List<ITagValue> tags =
+        [
+            new TagValue(Tags.Body, message),
+            new TagValue(Tags.UserEmail, email)
+        ];
+
+        if (!string.IsNullOrEmpty(culture))
+        {
+            tags.Add(new TagValue(CommonTags.Culture, culture));
+        }
+
+        await studioNotifyServiceHelper.SendNoticeAsync(Actions.UserMessageToAdmin, tags.ToArray());
     }
 
     public async Task SendMsgToSalesAsync(string email, string userName, string message)
@@ -228,19 +239,28 @@ public class StudioNotifyService(
         await studioNotifyServiceHelper.SendNoticeAsync(Actions.UserHasJoin);
     }
 
-    public async Task SendJoinMsgAsync(string email, EmployeeType emplType)
+    public async Task SendJoinMsgAsync(string email, EmployeeType emplType, string culture)
     {
-        var inviteUrl = await commonLinkUtility.GetConfirmationEmailUrlAsync(email, ConfirmType.EmpInvite, (int)emplType)
-                    + string.Format("&emplType={0}", (int)emplType);
+        var inviteUrl = await commonLinkUtility.GetConfirmationEmailUrlAsync(email, ConfirmType.EmpInvite, (int)emplType) + $"&emplType={(int)emplType}";
 
         var orangeButtonText = WebstudioNotifyPatternResource.ButtonJoin;
 
+        List<ITagValue> tags =
+        [
+            new TagValue(Tags.InviteLink, inviteUrl),
+            TagValues.OrangeButton(orangeButtonText, inviteUrl)
+        ];
+
+        if (!string.IsNullOrEmpty(culture))
+        {
+            tags.Add(new TagValue(CommonTags.Culture, culture));
+        }
+        
         await studioNotifyServiceHelper.SendNoticeToAsync(
-                Actions.JoinUsers,
-                   await studioNotifyHelper.RecipientFromEmailAsync(email, true),
-                   [EMailSenderName],
-                new TagValue(Tags.InviteLink, inviteUrl),
-                TagValues.OrangeButton(orangeButtonText, inviteUrl));
+            Actions.JoinUsers,
+            await studioNotifyHelper.RecipientFromEmailAsync(email, true),
+            [EMailSenderName],
+            tags.ToArray());
     }
 
     public async Task UserInfoAddedAfterInviteAsync(UserInfo newUserInfo)
@@ -274,7 +294,7 @@ public class StudioNotifyService(
         }
 
         var culture = await GetCulture(newUserInfo);
-        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonCollaborateDocSpace", culture);
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonCollaborate", culture);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
         var img1 = studioNotifyHelper.GetNotificationImageUrl("users.png");
