@@ -33,35 +33,40 @@ public class CoreBaseSettings(IConfiguration configuration)
     private string _basedomain;
     private bool? _customMode;
     private string _serverRoot;
+    private List<CultureInfo> _enabledCultures;
 
-    private IConfiguration Configuration { get; } = configuration;
+    public string Basedomain => _basedomain ??= configuration["core:base-domain"] ?? string.Empty;
 
-    public string Basedomain
+    public string ServerRoot => _serverRoot ??= configuration["core:server-root"] ?? string.Empty;
+
+    public bool Standalone => _standalone ??= Basedomain == "localhost";
+
+    public bool CustomMode => _customMode ??= string.Equals(configuration["core:custom-mode"], "true", StringComparison.OrdinalIgnoreCase);
+
+    public List<CultureInfo> EnabledCultures => _enabledCultures ??= (configuration["web:cultures"] ?? "en-US")
+        .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+        .Distinct()
+        .Select(l => CultureInfo.GetCultureInfo(l.Trim()))
+        .ToList();
+    
+    public string GetRightCultureName(CultureInfo cultureInfo)
     {
-        get
-        {
-            return _basedomain ??= Configuration["core:base-domain"] ?? string.Empty;
-        }
+        return EnabledCultures.Contains(cultureInfo)
+            ? cultureInfo.Name
+            : EnabledCultures.Contains(cultureInfo.Parent)
+                ? cultureInfo.Parent.Name
+                : "en-US";
     }
-
-    public string ServerRoot
-    {
-        get
-        {
-            return _serverRoot ??= Configuration["core:server-root"] ?? string.Empty;
-        }
-    }
-
-    public bool Standalone => _standalone ?? (bool)(_standalone = Configuration["core:base-domain"] == "localhost");
-
-    public bool CustomMode => _customMode ?? (bool)(_customMode =
-        string.Equals(Configuration["core:custom-mode"], "true", StringComparison.OrdinalIgnoreCase));
 }
 
 /// <summary>
 /// </summary>
 [Scope]
-public class CoreSettings
+public class CoreSettings(
+    ITenantService tenantService,
+    CoreBaseSettings coreBaseSettings,
+    IConfiguration configuration,
+    IDistributedLockProvider distributedLockProvider)
 {
     /// <summary>Base domain</summary>
     /// <type>System.String, System</type>
@@ -70,20 +75,20 @@ public class CoreSettings
         get
         {
             string result;
-            if (CoreBaseSettings.Standalone || string.IsNullOrEmpty(CoreBaseSettings.Basedomain))
+            if (coreBaseSettings.Standalone || string.IsNullOrEmpty(coreBaseSettings.Basedomain))
             {
-                result = GetSetting("BaseDomain") ?? CoreBaseSettings.Basedomain;
+                result = GetSetting("BaseDomain") ?? coreBaseSettings.Basedomain;
             }
             else
             {
-                result = CoreBaseSettings.Basedomain;
+                result = coreBaseSettings.Basedomain;
             }
 
             return result;
         }
         set
         {
-            if (CoreBaseSettings.Standalone || string.IsNullOrEmpty(CoreBaseSettings.Basedomain))
+            if (coreBaseSettings.Standalone || string.IsNullOrEmpty(coreBaseSettings.Basedomain))
             {
                 SaveSetting("BaseDomain", value);
             }
@@ -91,25 +96,6 @@ public class CoreSettings
     }
 
     private const string LockKey = "core_settings";
-
-    internal ITenantService TenantService { get; set; }
-    internal CoreBaseSettings CoreBaseSettings { get; set; }
-    internal IConfiguration Configuration { get; set; }
-    private readonly IDistributedLockProvider _distributedLockProvider;
-
-    public CoreSettings() { }
-
-    public CoreSettings(
-        ITenantService tenantService,
-        CoreBaseSettings coreBaseSettings,
-        IConfiguration configuration, 
-        IDistributedLockProvider distributedLockProvider)
-    {
-        TenantService = tenantService;
-        CoreBaseSettings = coreBaseSettings;
-        Configuration = configuration;
-        _distributedLockProvider = distributedLockProvider;
-    }
 
     public string GetBaseDomain(string hostedRegion)
     {
@@ -135,7 +121,7 @@ public class CoreSettings
             bytes = Crypto.GetV(Encoding.UTF8.GetBytes(value), 2, true);
         }
 
-        await TenantService.SetTenantSettingsAsync(tenant, key, bytes);
+        await tenantService.SetTenantSettingsAsync(tenant, key, bytes);
     }
 
     public void SaveSetting(string key, string value, int tenant = Tenant.DefaultTenant)
@@ -148,14 +134,14 @@ public class CoreSettings
             bytes = Crypto.GetV(Encoding.UTF8.GetBytes(value), 2, true);
         }
 
-        TenantService.SetTenantSettings(tenant, key, bytes);
+        tenantService.SetTenantSettings(tenant, key, bytes);
     }
 
     public async Task<string> GetSettingAsync(string key, int tenant = Tenant.DefaultTenant)
     {
         ArgumentException.ThrowIfNullOrEmpty(key);
 
-        var bytes = await TenantService.GetTenantSettingsAsync(tenant, key);
+        var bytes = await tenantService.GetTenantSettingsAsync(tenant, key);
 
         var result = bytes != null ? Encoding.UTF8.GetString(Crypto.GetV(bytes, 2, false)) : null;
 
@@ -166,7 +152,7 @@ public class CoreSettings
     {
         ArgumentException.ThrowIfNullOrEmpty(key);
 
-        var bytes = TenantService.GetTenantSettings(tenant, key);
+        var bytes = tenantService.GetTenantSettings(tenant, key);
 
         var result = bytes != null ? Encoding.UTF8.GetString(Crypto.GetV(bytes, 2, false)) : null;
 
@@ -175,7 +161,7 @@ public class CoreSettings
 
     public async Task<string> GetKeyAsync(int tenant)
     {
-        if (CoreBaseSettings.Standalone)
+        if (coreBaseSettings.Standalone)
         {
             var key = await GetSettingAsync("PortalId");
             if (!string.IsNullOrEmpty(key))
@@ -183,7 +169,7 @@ public class CoreSettings
                 return key;
             }
 
-            await using (await _distributedLockProvider.TryAcquireFairLockAsync(LockKey))
+            await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKey))
             {
                 key = await GetSettingAsync("PortalId");
                 if (!string.IsNullOrEmpty(key))
@@ -198,13 +184,13 @@ public class CoreSettings
             return key;
         }
 
-        var t = await TenantService.GetTenantAsync(tenant);
+        var t = await tenantService.GetTenantAsync(tenant);
         if (t != null && !string.IsNullOrWhiteSpace(t.PaymentId))
         {
             return t.PaymentId;
         }
 
-        return Configuration["core:payment:region"] + tenant;
+        return configuration["core:payment:region"] + tenant;
     }
 }
 

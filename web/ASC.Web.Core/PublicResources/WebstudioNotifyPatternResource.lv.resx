@@ -1148,9 +1148,6 @@ $TrulyYours</value>
   <data name="ButtonAccept" xml:space="preserve">
     <value>Piekrist</value>
   </data>
-  <data name="AcceptDocSpace" xml:space="preserve">
-    <value>PIEKRIST</value>
-  </data>
   <data name="ButtonActivateEmail" xml:space="preserve">
     <value>Noklikšķiniet šeit, lai aktivizētu savu e-pasta adresi</value>
   </data>
@@ -1166,7 +1163,7 @@ $TrulyYours</value>
   <data name="ButtonChangeTfa" xml:space="preserve">
     <value>Konfigurējiet autentificētāja lietotni</value>
   </data>
-  <data name="ButtonCollaborateDocSpace" xml:space="preserve">
+  <data name="ButtonCollaborate" xml:space="preserve">
     <value>Sadarboties DocSpace</value>
   </data>
   <data name="ButtonConfirm" xml:space="preserve">
@@ -1175,7 +1172,7 @@ $TrulyYours</value>
   <data name="ButtonConfirmEmail" xml:space="preserve">
     <value>APSTIPRINĀT</value>
   </data>
-  <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
+  <data name="ButtonConfirmInvite" xml:space="preserve">
     <value>Apstiprināt DocSpace uzaicinājumu</value>
   </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
@@ -1349,7 +1346,7 @@ Lai uzzinātu vairāk par dublēšanas procedūru, skatiet mūsu [Data backup]($
 Ja tev ir kādi jautājumi vai nepieciešama palīdzība, sazinies ar mums tīmekļa vietnē [${__SupportLink}](${__SupportLink})
 
 Ar cieņu
-ONLYOFFICE™ atbalsta komanda
+ONLYOFFICE atbalsta komanda
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
@@ -1489,7 +1486,7 @@ Jūs varat atkārtoti aktivizēt savu portālu jebkurā laikā, noklikšķinot u
 Ja jums ir kādi jautājumi vai nepieciešama palīdzība, sazinies ar mums tīmekļa vietnē [${__SalesEmail}](mailto:${__SalesEmail})
 
 Ar cieņu
-ONLYOFFICE™ atbalsta komanda
+ONLYOFFICE atbalsta komanda
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete_tg" xml:space="preserve">
@@ -1514,7 +1511,7 @@ _Note_: šī saite ir derīga tikai septiņas dienas. Pabeidziet portāla dzēš
 Ja jums ir kādi jautājumi vai nepieciešama palīdzība, sazinies ar mums tīmekļa vietnē [${__SalesEmail}](mailto:${__SalesEmail})
 
 Ar cieņu
-ONLYOFFICE™ atbalsta komanda
+ONLYOFFICE atbalsta komanda
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
