@@ -148,7 +148,7 @@ public class StudioNotifyService(
 
         var displayUserName = user.DisplayUserName(false, displayUserSettingsHelper);
 
-        await messageService.SendAsync(MessageAction.UserSentEmailChangeInstructions, messageTarget.Create(user.Id), auditEventDate, displayUserName);
+        await messageService.SendAsync(MessageAction.UserSentEmailChangeInstructions, MessageTarget.Create(user.Id), auditEventDate, displayUserName);
     }
 
     public async Task SendEmailActivationInstructionsAsync(UserInfo user, string email)
