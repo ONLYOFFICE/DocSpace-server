@@ -37,8 +37,6 @@ public class FolderContentDto<T>
     /// <summary>List of folders</summary>
     /// <type>System.Collections.Generic.List{ASC.Files.Core.ApiModels.ResponseDto.FileEntryDto}, System.Collections.Generic</type>
     public List<FileEntryDto> Folders { get; set; }
-    
-    public List<FileEntryDto> Entries { get; set; }
 
     /// <summary>Current folder information</summary>
     /// <type>ASC.Files.Core.ApiModels.ResponseDto.FolderDto, ASC.Files.Core</type>
@@ -122,7 +120,10 @@ public class FolderContentDtoHelper(
         if (folderItems.ParentRoom is { FolderType: FolderType.VirtualDataRoom, SettingsIndexing: true })
         {
             var order = await breadCrumbsManager.GetBreadCrumbsOrderAsync(parentId);
-            result.Entries = await GetEntriesDto(folderItems.Entries, order).ToListAsync();
+            var entries = await GetEntriesDto(folderItems.Entries, order).ToListAsync();
+            
+            result.Files = entries.Where(r=> r.FileEntryType == FileEntryType.File).ToList();
+            result.Folders = entries.Where(r=> r.FileEntryType == FileEntryType.Folder).ToList();
         }
         else
         {
