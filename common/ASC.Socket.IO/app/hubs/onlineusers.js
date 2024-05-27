@@ -4,20 +4,16 @@ var uap = require('ua-parser-js');
 const { json } = require("express/lib/response");
 
 module.exports = async (io) => {
-  
     const logger = require("../log.js");
-    const onlineIO = io.of("/onlineusers");
+    const onlineIO = io;
     const redisOptions = config.get("Redis");
     
     const client = await redis.createClient(redisOptions).connect();
     onlineIO.on("connection", async (socket) => {
-    const session = socket.handshake.session;
-
-      if (!session) {
-        logger.error("empty session");
+      const session = socket.handshake.session;
+      if (session.system) {
         return;
       }
-
       const ipAddress = getCleanIP(socket.handshake.headers['x-forwarded-for']);
       const parser = uap(socket.request.headers['user-agent']);
       const operationSystem = parser.os.version !== undefined ?  `${parser.os.name} ${parser.os.version}` : `${parser.os.name}`;  
