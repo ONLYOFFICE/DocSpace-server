@@ -29,28 +29,28 @@ using Constants = ASC.Core.Configuration.Constants;
 namespace ASC.People.Api;
 
 [DefaultRoute("thirdparty")]
-public class ThirdpartyController(AccountLinker accountLinker,
-        CookiesManager cookiesManager,
-        CoreBaseSettings coreBaseSettings,
-        DisplayUserSettingsHelper displayUserSettingsHelper,
-        IHttpClientFactory httpClientFactory,
-        MobileDetector mobileDetector,
-        ProviderManager providerManager,
-        UserHelpTourHelper userHelpTourHelper,
-        UserManagerWrapper userManagerWrapper,
-        UserPhotoManager userPhotoManager,
-        AuthContext authContext,
-        SecurityContext securityContext,
-        MessageService messageService,
-        UserManager userManager,
-        MessageTarget messageTarget,
-        StudioNotifyService studioNotifyService,
-        TenantManager tenantManager,
-        InvitationLinkService invitationLinkService,
-        FileSecurity fileSecurity,
-        UsersInRoomChecker usersInRoomChecker, 
-        IDistributedLockProvider distributedLockProvider,
-        LoginProfileTransport loginProfileTransport)
+public class ThirdpartyController(
+    AccountLinker accountLinker,
+    CookiesManager cookiesManager,
+    CoreBaseSettings coreBaseSettings,
+    DisplayUserSettingsHelper displayUserSettingsHelper,
+    IHttpClientFactory httpClientFactory,
+    MobileDetector mobileDetector,
+    ProviderManager providerManager,
+    UserHelpTourHelper userHelpTourHelper,
+    UserManagerWrapper userManagerWrapper,
+    UserPhotoManager userPhotoManager,
+    AuthContext authContext,
+    SecurityContext securityContext,
+    MessageService messageService,
+    UserManager userManager,
+    StudioNotifyService studioNotifyService,
+    TenantManager tenantManager,
+    InvitationLinkService invitationLinkService,
+    FileSecurity fileSecurity,
+    UsersInRoomChecker usersInRoomChecker, 
+    IDistributedLockProvider distributedLockProvider,
+    LoginProfileTransport loginProfileTransport)
     : ApiControllerBase
     {
     
@@ -203,9 +203,18 @@ public class ThirdpartyController(AccountLinker accountLinker,
 
             var invitedByEmail = linkData.LinkType == InvitationLinkType.Individual;
 
-            var newUser = await CreateNewUser(GetFirstName(inDto, thirdPartyProfile), GetLastName(inDto, thirdPartyProfile), GetEmailAddress(inDto, thirdPartyProfile), passwordHash, employeeType, true, invitedByEmail);
+            var newUser = await CreateNewUser(
+                GetFirstName(inDto, thirdPartyProfile), 
+                GetLastName(inDto, thirdPartyProfile), 
+                GetEmailAddress(inDto, thirdPartyProfile), 
+                passwordHash, 
+                employeeType, 
+                true, 
+                invitedByEmail,
+                inDto.Culture);
+            
             var messageAction = employeeType == EmployeeType.RoomAdmin ? MessageAction.UserCreatedViaInvite : MessageAction.GuestCreatedViaInvite;
-            await messageService.SendAsync(MessageInitiator.System, messageAction, messageTarget.Create(newUser.Id), newUser.DisplayUserName(false, displayUserSettingsHelper));
+            await messageService.SendAsync(MessageInitiator.System, messageAction, MessageTarget.Create(newUser.Id), newUser.DisplayUserName(false, displayUserSettingsHelper));
             userId = newUser.Id;
             if (!string.IsNullOrEmpty(thirdPartyProfile.Avatar))
             {
@@ -272,7 +281,7 @@ public class ThirdpartyController(AccountLinker accountLinker,
         await messageService.SendAsync(MessageAction.UserUnlinkedSocialAccount, GetMeaningfulProviderName(provider));
     }
 
-    private async Task<UserInfo> CreateNewUser(string firstName, string lastName, string email, string passwordHash, EmployeeType employeeType, bool fromInviteLink, bool inviteByEmail)
+    private async Task<UserInfo> CreateNewUser(string firstName, string lastName, string email, string passwordHash, EmployeeType employeeType, bool fromInviteLink, bool inviteByEmail, string cultureName)
     {
         if (SetupInfo.IsSecretEmail(email))
         {
@@ -294,7 +303,12 @@ public class ThirdpartyController(AccountLinker accountLinker,
         user.FirstName = string.IsNullOrEmpty(firstName) ? UserControlsCommonResource.UnknownFirstName : firstName;
         user.LastName = string.IsNullOrEmpty(lastName) ? UserControlsCommonResource.UnknownLastName : lastName;
         user.Email = email;
-
+        
+        if (coreBaseSettings.EnabledCultures.Find(c => string.Equals(c.Name, cultureName, StringComparison.InvariantCultureIgnoreCase)) != null)
+        {
+            user.CultureName = cultureName;
+        }
+        
         return await userManagerWrapper.AddUserAsync(user, passwordHash, true, true, employeeType, fromInviteLink, updateExising: inviteByEmail);
     }
 

@@ -139,7 +139,6 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
     ILogger<DocumentServiceTrackerHelper> logger,
     DocumentServiceHelper documentServiceHelper,
     EntryManager entryManager,
-    FileShareLink fileShareLink,
     FilesMessageService filesMessageService,
     DocumentServiceConnector documentServiceConnector,
     NotifyClient notifyClient,
@@ -185,7 +184,6 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
         switch (fileData.Status)
         {
             case TrackerStatus.NotFound:
-            case TrackerStatus.Closed:
                 fileTracker.Remove(fileId);
                 await socketManager.StopEditAsync(fileId);
 
@@ -196,6 +194,28 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
                 break;
 
             case TrackerStatus.MustSave:
+            case TrackerStatus.Closed:
+                var fileDao = daoFactory.GetFileDao<T>();
+                var properties = await fileDao.GetProperties(fileId);
+                if(properties?.FormFilling != null)
+                {
+                    var fileForDeletion = await documentServiceHelper.CheckNeedDeletion(fileDao, fileId, properties.FormFilling);
+                    if (fileForDeletion != null)
+                    {
+                        await fileDao.SaveProperties(fileForDeletion.Id, null);
+                        await socketManager.DeleteFileAsync(fileForDeletion);
+                        await fileDao.DeleteFileAsync(fileForDeletion.Id);
+                        break;
+                    }
+                }
+                if (fileData.Status == TrackerStatus.Closed)
+                {
+                    fileTracker.Remove(fileId);
+                    await socketManager.StopEditAsync(fileId);
+
+                    break;
+                }
+                return await ProcessSaveAsync(fileId, fileData);
             case TrackerStatus.Corrupted:
             case TrackerStatus.ForceSave:
             case TrackerStatus.CorruptedForceSave:
@@ -242,8 +262,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
 
                 try
                 {
-                    var doc = await fileShareLink.CreateKeyAsync(fileId);
-                    file = await entryManager.TrackEditingAsync(fileId, userId, userId, doc, await tenantManager.GetCurrentTenantIdAsync());
+                    file = await entryManager.TrackEditingAsync(fileId, userId, userId, await tenantManager.GetCurrentTenantIdAsync());
                 }
                 catch (Exception e)
                 {
@@ -377,7 +396,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
 
             try
             {
-                file = await entryManager.SaveEditingAsync(fileId, fileData.Filetype, documentServiceConnector.ReplaceDocumentAddress(fileData.Url), null, string.Empty, string.Join("; ", comments), false, fileData.Encrypted, forceSaveType, true, fileData.FormsDataUrl);
+                file = await entryManager.SaveEditingAsync(fileId, fileData.Filetype, documentServiceConnector.ReplaceDocumentAddress(fileData.Url), null, string.Join("; ", comments), false, fileData.Encrypted, forceSaveType, true, fileData.FormsDataUrl);
                 saveMessage = fileData.Status is TrackerStatus.MustSave or TrackerStatus.ForceSave ? null : "Status " + fileData.Status;
             }
             catch (Exception ex)
@@ -442,7 +461,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
 
             var message = fileData.MailMerge.Message;
             Stream attach = null;
-            var httpClient = clientFactory.CreateClient();
+            var httpClient = clientFactory.CreateClient(nameof(ASC.Files.Core.Helpers.DocumentService));
             switch (fileData.MailMerge.Type)
             {
                 case MailMergeType.AttachDocx:
@@ -560,7 +579,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
                 RequestUri = new Uri(downloadUri)
             };
 
-            var httpClient = clientFactory.CreateClient();
+            var httpClient = clientFactory.CreateClient(nameof(ASC.Files.Core.Helpers.DocumentService));
             using (var response = await httpClient.SendAsync(request))
             await using (var stream = await response.Content.ReadAsStreamAsync())
             await using (var fileStream = new ResponseStream(stream, stream.Length))
@@ -600,7 +619,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
                 RequestUri = new Uri(differenceUrl)
             };
 
-            var httpClient = clientFactory.CreateClient();
+            var httpClient = clientFactory.CreateClient(nameof(ASC.Files.Core.Helpers.DocumentService));
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
             await using var differenceStream = await ResponseStream.FromMessageAsync(response);
             await fileDao.SaveEditHistoryAsync(file, changes, differenceStream);

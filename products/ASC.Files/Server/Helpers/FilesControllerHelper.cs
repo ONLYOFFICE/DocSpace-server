@@ -162,14 +162,14 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         return await _fileDtoHelper.GetAsync(file);
     }
 
-    public async Task<EditHistoryDataDto> GetEditDiffUrlAsync<T>(T fileId, int version = 0, string doc = null)
+    public async Task<EditHistoryDataDto> GetEditDiffUrlAsync<T>(T fileId, int version = 0)
     {
-        return await _fileStorageService.GetEditDiffUrlAsync(fileId, version, doc);
+        return await _fileStorageService.GetEditDiffUrlAsync(fileId, version);
     }
 
-    public async IAsyncEnumerable<EditHistoryDto> GetEditHistoryAsync<T>(T fileId, string doc = null)
+    public async IAsyncEnumerable<EditHistoryDto> GetEditHistoryAsync<T>(T fileId)
     {
-        await foreach (var f in _fileStorageService.GetEditHistoryAsync(fileId, doc))
+        await foreach (var f in _fileStorageService.GetEditHistoryAsync(fileId))
         {
             yield return new EditHistoryDto(f, apiDateTimeHelper, userManager, displayUserSettingsHelper);
         }
@@ -190,9 +190,9 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         return await _fileDtoHelper.GetAsync(result);
     }
 
-    public async IAsyncEnumerable<EditHistoryDto> RestoreVersionAsync<T>(T fileId, int version = 0, string url = null, string doc = null)
+    public async IAsyncEnumerable<EditHistoryDto> RestoreVersionAsync<T>(T fileId, int version = 0, string url = null)
     {
-        await foreach (var e in _fileStorageService.RestoreVersionAsync(fileId, version, url, doc))
+        await foreach (var e in _fileStorageService.RestoreVersionAsync(fileId, version, url))
         {
             yield return new EditHistoryDto(e, apiDateTimeHelper, userManager, displayUserSettingsHelper);
         }
@@ -230,6 +230,19 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         return await GetFileInfoAsync(file.Id);
     }
 
+    public async Task<FileDto<T>> SaveAsPdf<T>(T fileId, T folderId, string title)
+    {
+        try
+        {
+            var resultFile = await _fileStorageService.SaveAsPdf(fileId, folderId, title);
+            return await _fileDtoHelper.GetAsync(resultFile);
+        }
+        catch (FileNotFoundException e)
+        {
+            throw new ItemNotFoundException("File not found", e);
+        }
+    }
+
     public async Task<FileDto<T>> UpdateFileStreamAsync<T>(Stream file, T fileId, string fileExtension, bool encrypted = false, bool forcesave = false)
     {
         try
@@ -260,6 +273,6 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
 
         await using var fileStream = await fileConverter.ExecAsync(file, destExt, password);
         var controller = serviceProvider.GetService<FilesControllerHelper>();
-            return await controller.InsertFileAsync(destFolderId, fileStream, destTitle, true);
-        }
+        return await controller.InsertFileAsync(destFolderId, fileStream, destTitle, true);
     }
+}

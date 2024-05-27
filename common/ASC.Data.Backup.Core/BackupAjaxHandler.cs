@@ -28,24 +28,23 @@ using System.Security;
 
 using ASC.Files.Core.Security;
 
-using SecurityContext = ASC.Core.SecurityContext;
-
 namespace ASC.Data.Backup;
 
 [Scope]
-public class BackupAjaxHandler(BackupService backupService,
-        TenantManager tenantManager,
-        MessageService messageService,
-        CoreBaseSettings coreBaseSettings,
-        CoreConfiguration coreConfiguration,
-        PermissionContext permissionContext,
-        SecurityContext securityContext,
-        UserManager userManager,
-        ConsumerFactory consumerFactory,
-        StorageFactory storageFactory,
-        IDaoFactory daoFactory,
-        FileSecurity fileSecurity)
-    {
+public class BackupAjaxHandler(
+    BackupService backupService,
+    TenantManager tenantManager,
+    MessageService messageService,
+    CoreBaseSettings coreBaseSettings,
+    CoreConfiguration coreConfiguration,
+    PermissionContext permissionContext,
+    AuthContext authContext,
+    UserManager userManager,
+    ConsumerFactory consumerFactory,
+    StorageFactory storageFactory,
+    IDaoFactory daoFactory,
+    FileSecurity fileSecurity)
+{
     private const string BackupTempModule = "backup_temp";
     private const string BackupFileName = "backup";
 
@@ -58,7 +57,7 @@ public class BackupAjaxHandler(BackupService backupService,
         var backupRequest = new StartBackupRequest
         {
             TenantId = await GetCurrentTenantIdAsync(),
-            UserId = securityContext.CurrentAccount.ID,
+            UserId = authContext.CurrentAccount.ID,
             StorageType = storageType,
             StorageParams = storageParams,
             Dump = dump,
@@ -380,7 +379,7 @@ public class BackupAjaxHandler(BackupService backupService,
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var currentUser = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
+        var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
         if (!SetupInfo.IsVisibleSettings(nameof(ManagementType.Migration))
         || !currentUser.IsOwner(await tenantManager.GetCurrentTenantAsync())
         || !SetupInfo.IsSecretEmail(currentUser.Email) && !(await tenantManager.GetCurrentTenantQuotaAsync()).AutoBackupRestore)

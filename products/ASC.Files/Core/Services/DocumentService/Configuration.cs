@@ -182,7 +182,7 @@ public class DocumentConfig<T>(
         }
 
         var last = Permissions.Edit || Permissions.Review || Permissions.Comment;
-        _fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(pathProvider.GetFileStreamUrl(file, SharedLinkKey, SharedLinkParam, last));
+        _fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(pathProvider.GetFileStreamUrl(file, last));
 
         return _fileUri;
     }
@@ -203,7 +203,8 @@ public class EditorConfiguration<T>(
     IDaoFactory daoFactory,
     EntryManager entryManager,
     DocumentServiceTrackerHelper documentServiceTrackerHelper, 
-    ExternalShare externalShare)
+    ExternalShare externalShare,
+    UserPhotoManager userPhotoManager)
 {
     public PluginsConfig Plugins { get; } = pluginsConfig;
     public CustomizationConfig<T> Customization { get; } = customizationConfig;
@@ -217,29 +218,27 @@ public class EditorConfiguration<T>(
     
     private UserInfo _userInfo;
     private UserInfo UserInfo => _userInfo ??= userManager.GetUsers(authContext.CurrentAccount.ID);
-    
-    private UserConfig user;
-    public UserConfig User
-    {
-        get
-        {
-            if (user != null)
-            {
-                return user;
-                
-            }
-            
-            if (!UserInfo.Id.Equals(ASC.Core.Configuration.Constants.Guest.ID))
-            {
-                user = new UserConfig
-                {
-                    Id = UserInfo.Id.ToString(),
-                    Name = UserInfo.DisplayUserName(false, displayUserSettingsHelper)
-                };
-            }
 
-            return user;
+    private UserConfig _user;
+    public async Task<UserConfig> GetUserAsync()
+    {
+        if (_user != null)
+        {
+            return _user;
+
         }
+
+        if (!UserInfo.Id.Equals(ASC.Core.Configuration.Constants.Guest.ID))
+        {
+            _user = new UserConfig
+            {
+                Id = UserInfo.Id.ToString(),
+                Name = UserInfo.DisplayUserName(false, displayUserSettingsHelper),
+                Image = baseCommonLinkUtility.GetFullAbsolutePath(await UserInfo.GetMediumPhotoURLAsync(userPhotoManager))
+            };
+        }
+
+        return _user;
     }
 
     public async Task<string> GetCallbackUrl(string fileId)
@@ -254,14 +253,16 @@ public class EditorConfiguration<T>(
         return externalShare.GetUrlWithShare(callbackUrl);
     }
 
-    public CoEditingConfig CoEditing =>
-        !ModeWrite && User == null
+    public async Task<CoEditingConfig> GetCoEditingAsync()
+    {
+        return !ModeWrite && await GetUserAsync() == null
             ? new CoEditingConfig
             {
                 Fast = false,
                 Change = false
             }
             : null;
+    }
 
     public async Task<string> GetCreateUrl(EditorType editorType, FileType fileType)
     {
@@ -470,10 +471,12 @@ public class PermissionsConfig
 {
     public bool ChangeHistory { get; set; }
     public bool Comment { get; set; } = true;
+    public bool Chat { get; set; } = true;
     public bool Download { get; set; } = true;
     public bool Edit { get; set; } = true;
     public bool FillForms { get; set; } = true;
     public bool ModifyFilter { get; set; } = true;
+    public bool Protect { get; set; } = true;
     public bool Print { get; set; } = true;
     public bool Rename { get; set; }
     public bool Review { get; set; } = true;
@@ -820,6 +823,7 @@ public class UserConfig
 {
     public string Id { get; set; }
     public string Name { get; set; }
+    public string Image { get; set; }
 }
 
 public static class ConfigurationFilesExtension

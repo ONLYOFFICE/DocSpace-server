@@ -39,7 +39,6 @@ public class EmailValidationKeyModelHelper(IHttpContextAccessor httpContextAcces
     InvitationLinkHelper invitationLinkHelper,
     AuditEventsRepository auditEventsRepository,
     TenantUtil tenantUtil,
-    MessageTarget messageTarget,
     CookiesManager cookiesManager,
     SecurityContext securityContext)
 {
@@ -115,7 +114,7 @@ public class EmailValidationKeyModelHelper(IHttpContextAccessor httpContextAcces
                     checkKeyResult = ValidationResult.Invalid;
                     break;
                 }
-                var auditEvent = (await auditEventsRepository.GetByFilterAsync(action: MessageAction.UserSentPasswordChangeInstructions, entry: EntryType.User, target: messageTarget.Create(userInfo.Id).ToString(), limit: 1)).FirstOrDefault();
+                var auditEvent = (await auditEventsRepository.GetByFilterAsync(action: MessageAction.UserSentPasswordChangeInstructions, entry: EntryType.User, target: MessageTarget.Create(userInfo.Id).ToString(), limit: 1)).FirstOrDefault();
                 var passwordStamp = await authentication.GetUserPasswordStampAsync(userInfo.Id);
 
                 string hash;

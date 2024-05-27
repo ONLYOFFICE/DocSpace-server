@@ -416,7 +416,7 @@ Highest compatibility with docx, xlsx, pptx.</value>
     <value>Documents</value>
   </data>
   <data name="ProductUserOpportunities" xml:space="preserve">
-    <value>Create and edit own documents as well as the shared documents with the proper access rights|Give reading/editing access to other users to the documents and folders|Link Dropbox, Box and other accounts in the 'My documents' section</value>
+    <value>Create and edit own documents as well as the shared documents with the proper access rights|Give reading/editing access to other users to the documents and folders|Link Dropbox, Box and other accounts in the 'Documents' section</value>
   </data>
   <data name="UnknownFirstName" xml:space="preserve">
     <value>First Name</value>
@@ -522,5 +522,11 @@ Highest compatibility with docx, xlsx, pptx.</value>
   </data>
   <data name="RoomIndex_Folder" xml:space="preserve">
     <value>Folder</value>
+  </data>
+  <data name="Date" xml:space="preserve">
+    <value>Date</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>User</value>
   </data>
 </root>

@@ -625,12 +625,12 @@ public abstract class Migrator : IAsyncDisposable
 
     private int OrderSecurity(MigrationStorage storage, MigrationSecurity security)
     {
-        if(security.EntryType == 2)
+        if(security.EntryType != 1)
         {
             return 0;
         }
         var folder = storage.Folders.FirstOrDefault(f => f.Id == security.EntryId);
-        return folder.Level;
+        return folder == null ? 0 : folder.Level;
     }
 
     public async ValueTask DisposeAsync()

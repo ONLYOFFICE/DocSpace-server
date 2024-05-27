@@ -65,7 +65,7 @@
     <value>Yhteiset tiedostot</value>
   </data>
   <data name="MyFiles" xml:space="preserve">
-    <value>Omat Asiakirjat</value>
+    <value>Asiakirjat</value>
   </data>
   <data name="ProjectFiles" xml:space="preserve">
     <value>Projektin asiakirjat</value>
@@ -99,8 +99,5 @@
   </data>
   <data name="InProcessFormFolder" xml:space="preserve">
     <value>Työn alla</value>
-  </data>
-  <data name="ReadyFormFolder" xml:space="preserve">
-    <value>Valmis</value>
   </data>
 </root>

@@ -219,16 +219,15 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <category>Files</category>
     /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
     /// <param type="System.Int32, System" name="version">File version</param>
-    /// <param type="System.String, System" name="doc">Shared token</param>
     /// <returns type="ASC.Files.Core.EditHistoryDataDto, ASC.Files.Core">File version history data</returns>
     /// <path>api/2.0/files/file/{fileId}/edit/diff</path>
     /// <httpMethod>GET</httpMethod>
     /// <requiresAuthorization>false</requiresAuthorization>
     [AllowAnonymous]
     [HttpGet("file/{fileId}/edit/diff")]
-    public async Task<EditHistoryDataDto> GetEditDiffUrlAsync(T fileId, int version = 0, string doc = null)
+    public async Task<EditHistoryDataDto> GetEditDiffUrlAsync(T fileId, int version = 0)
     {
-        return await filesControllerHelper.GetEditDiffUrlAsync(fileId, version, doc);
+        return await filesControllerHelper.GetEditDiffUrlAsync(fileId, version);
     }
 
     /// <summary>
@@ -237,7 +236,6 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <short>Get version history</short>
     /// <category>Files</category>
     /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
-    /// <param type="System.String, System" name="doc">Shared token</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.EditHistoryDto, ASC.Files.Core">Version history data</returns>
     /// <path>api/2.0/files/file/{fileId}/edit/history</path>
     /// <httpMethod>GET</httpMethod>
@@ -245,9 +243,9 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <collection>list</collection>
     [AllowAnonymous]
     [HttpGet("file/{fileId}/edit/history")]
-    public IAsyncEnumerable<EditHistoryDto> GetEditHistoryAsync(T fileId, string doc = null)
+    public IAsyncEnumerable<EditHistoryDto> GetEditHistoryAsync(T fileId)
     {
-        return filesControllerHelper.GetEditHistoryAsync(fileId, doc);
+        return filesControllerHelper.GetEditHistoryAsync(fileId);
     }
 
     /// <summary>
@@ -311,7 +309,6 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
     /// <param type="System.Int32, System" name="version">File version</param>
     /// <param type="System.String, System" name="url">File version URL</param>
-    /// <param type="System.String, System" name="doc">Shared token</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.EditHistoryDto, ASC.Files.Core">Version history data: file ID, key, file version, version group, a user who updated a file, creation time, history changes in the string format, list of history changes, server version</returns>
     /// <path>api/2.0/files/file/{fileId}/restoreversion</path>
     /// <httpMethod>GET</httpMethod>
@@ -319,9 +316,9 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <collection>list</collection>
     [AllowAnonymous]
     [HttpGet("file/{fileId}/restoreversion")]
-    public IAsyncEnumerable<EditHistoryDto> RestoreVersionAsync(T fileId, int version = 0, string url = null, string doc = null)
+    public IAsyncEnumerable<EditHistoryDto> RestoreVersionAsync(T fileId, int version = 0, string url = null)
     {
-        return filesControllerHelper.RestoreVersionAsync(fileId, version, url, doc);
+        return filesControllerHelper.RestoreVersionAsync(fileId, version, url);
     }
 
     /// <summary>
@@ -461,6 +458,22 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
             primary: inDto.Primary, expirationDate: inDto.ExpirationDate);
 
         return linkAce is not null ? await fileShareDtoHelper.Get(linkAce) : null;
+    }
+
+    /// <summary>
+    /// Saves a file with the identifier specified in the request as a PDF document
+    /// </summary>
+    /// <short>Save as pdf</short>
+    /// <category>Files</category>
+    /// <param type="System.Int32, System" method="url" name="id">File ID</param>
+    /// <param type="ASC.Files.Core.ApiModels.RequestDto.SaveAsPdfRequestDto, ASC.Files.Core" name="inDto">Request parameters</param>
+    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileDto, ASC.Files.Core">New file information</returns>
+    /// <path>api/2.0/files/file/{id}/saveaspdf</path>
+    /// <httpMethod>POST</httpMethod>
+    [HttpPost("file/{id}/saveaspdf")]
+    public async Task<FileDto<T>> SaveAsPdf(T id, SaveAsPdfRequestDto<T> inDto)
+    {
+        return await filesControllerHelper.SaveAsPdf(id, inDto.FolderId, inDto.Title);
     }
 }
 

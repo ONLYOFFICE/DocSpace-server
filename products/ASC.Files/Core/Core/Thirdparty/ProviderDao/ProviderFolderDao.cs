@@ -175,7 +175,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
     }
 
     public async IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
-        bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default)
+        bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default, bool containingMyFiles = false)
     {
         var selector = _selectorFactory.GetSelector(parentId);
         var folderDao = selector.GetFolderDao(parentId);
@@ -608,7 +608,10 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
 
         return folder;
     }
-
+    public Task<FolderType> GetFirstParentTypeFromFileEntryAsync(FileEntry<string> entry)
+    {
+        throw new NotImplementedException();
+    }
     public Task<(string RoomId, string RoomTitle)> GetParentRoomInfoFromFileEntryAsync(FileEntry<string> entry)
     {
         var selector = _selectorFactory.GetSelector(entry.Id);

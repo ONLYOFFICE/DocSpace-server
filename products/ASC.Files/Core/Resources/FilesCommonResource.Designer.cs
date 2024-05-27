@@ -331,6 +331,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Date.
+        /// </summary>
+        public static string Date {
+            get {
+                return ResourceManager.GetString("Date", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Shared link.
         /// </summary>
         public static string DefaultExternalLinkTitle {
@@ -1034,7 +1043,7 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Create and edit own documents as well as the shared documents with the proper access rights|Give reading/editing access to other users to the documents and folders|Link Dropbox, Box and other accounts in the &apos;My documents&apos; section.
+        ///   Looks up a localized string similar to Create and edit own documents as well as the shared documents with the proper access rights|Give reading/editing access to other users to the documents and folders|Link Dropbox, Box and other accounts in the &apos;Documents&apos; section.
         /// </summary>
         public static string ProductUserOpportunities {
             get {
@@ -1273,6 +1282,15 @@ namespace ASC.Files.Core.Resources {
         public static string UnlockComment {
             get {
                 return ResourceManager.GetString("UnlockComment", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User.
+        /// </summary>
+        public static string User {
+            get {
+                return ResourceManager.GetString("User", resourceCulture);
             }
         }
     }

@@ -29,19 +29,19 @@ using Constants = ASC.Core.Users.Constants;
 namespace ASC.Web.Api.Controllers.Settings;
 
 [DefaultRoute("owner")]
-public class OwnerController(MessageService messageService,
-        CommonLinkUtility commonLinkUtility,
-        StudioNotifyService studioNotifyService,
-        ApiContext apiContext,
-        UserManager userManager,
-        TenantManager tenantManager,
-        AuthContext authContext,
-        PermissionContext permissionContext,
-        WebItemManager webItemManager,
-        DisplayUserSettingsHelper displayUserSettingsHelper,
-        MessageTarget messageTarget,
-        IMemoryCache memoryCache,
-        IHttpContextAccessor httpContextAccessor)
+public class OwnerController(
+    MessageService messageService,
+    CommonLinkUtility commonLinkUtility,
+    StudioNotifyService studioNotifyService,
+    ApiContext apiContext,
+    UserManager userManager,
+    TenantManager tenantManager,
+    AuthContext authContext,
+    PermissionContext permissionContext,
+    WebItemManager webItemManager,
+    DisplayUserSettingsHelper displayUserSettingsHelper,
+    IMemoryCache memoryCache,
+    IHttpContextAccessor httpContextAccessor)
     : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
@@ -77,7 +77,7 @@ public class OwnerController(MessageService messageService,
         var confirmLink = await commonLinkUtility.GetConfirmationEmailUrlAsync(owner.Email, ConfirmType.PortalOwnerChange, newOwner.Id, newOwner.Id);
         await studioNotifyService.SendMsgConfirmChangeOwnerAsync(owner, newOwner, confirmLink);
 
-        await messageService.SendAsync(MessageAction.OwnerSentChangeOwnerInstructions, messageTarget.Create(owner.Id), owner.DisplayUserName(false, displayUserSettingsHelper));
+        await messageService.SendAsync(MessageAction.OwnerSentChangeOwnerInstructions, MessageTarget.Create(owner.Id), owner.DisplayUserName(false, displayUserSettingsHelper));
 
         var emailLink = $"<a href=\"mailto:{owner.Email}\">{owner.Email}</a>";
         return new { Status = 1, Message = Resource.ChangePortalOwnerMsg.Replace(":email", emailLink) };

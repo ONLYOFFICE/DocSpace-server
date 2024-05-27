@@ -264,11 +264,10 @@ public class FileConverter(
     FileMarker fileMarker,
     TenantManager tenantManager,
     AuthContext authContext,
-    EntryManager entryManager,
+    LockerManager lockerManager,
     FilesSettingsHelper filesSettingsHelper,
     GlobalFolderHelper globalFolderHelper,
     FilesMessageService filesMessageService,
-    FileShareLink fileShareLink,
     DocumentServiceHelper documentServiceHelper,
     DocumentServiceConnector documentServiceConnector,
     FileTrackerHelper fileTracker,
@@ -339,7 +338,6 @@ public class FileConverter(
         if (!await EnableConvertAsync(file, toExtension))
         {
             var fileDao = daoFactory.GetFileDao<T>();
-
             return await fileDao.GetFileStreamAsync(file);
         }
 
@@ -347,33 +345,27 @@ public class FileConverter(
         var docKey = await documentServiceHelper.GetDocKeyAsync(file);
         fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(fileUri);
 
-        var uriTuple = await documentServiceConnector.GetConvertedUriAsync(fileUri, file.ConvertedExtension, toExtension, docKey, password, CultureInfo.CurrentUICulture.Name, null, null, false);
+        var uriTuple = await documentServiceConnector.GetConvertedUriAsync(fileUri, file.ConvertedExtension, toExtension, docKey, password, 
+            CultureInfo.CurrentUICulture.Name, null, null, false);
         var convertUri = uriTuple.ConvertedDocumentUri;
         var request = new HttpRequestMessage
         {
             RequestUri = new Uri(convertUri)
         };
 
-        var httpClient = clientFactory.CreateClient();
+        var httpClient = clientFactory.CreateClient(nameof(DocumentService));
         var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
 
         return await ResponseStream.FromMessageAsync(response);
     }
 
-    public async Task<FileOperationResult> ExecSynchronouslyAsync<T>(File<T> file, string doc, bool updateIfExist)
+    public async Task<FileOperationResult> ExecSynchronouslyAsync<T>(File<T> file, bool updateIfExist)
     {
-        var fileDao = daoFactory.GetFileDao<T>();
-
         if (!await fileSecurity.CanReadAsync(file))
         {
-            (var readLink, file, _) = await fileShareLink.CheckAsync(doc, true, fileDao);
             if (file == null)
             {
                 throw new ArgumentNullException(nameof(file), FilesCommonResource.ErrorMessage_FileNotFound);
-            }
-            if (!readLink)
-            {
-                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
             }
         }
 
@@ -384,9 +376,8 @@ public class FileConverter(
 
         fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(fileUri);
 
-        var uriTuple = await documentServiceConnector.GetConvertedUriAsync(fileUri, fileExtension, toExtension, docKey, null, CultureInfo.CurrentUICulture.Name, null, null, false);
-        var convertUri = uriTuple.ConvertedDocumentUri;
-        var convertType = uriTuple.convertedFileType;
+        var (_, convertUri, convertType) = await documentServiceConnector.GetConvertedUriAsync(fileUri, fileExtension, toExtension, docKey, 
+            null, CultureInfo.CurrentUICulture.Name, null, null, false);
 
         var operationResult = new FileConverterOperationResult
         {
@@ -511,7 +502,7 @@ public class FileConverter(
             if (updateIfExist && (parent != null && !folderId.Equals(parent.Id) || !file.ProviderEntry))
             {
                 newFile = await fileDao.GetFileAsync(folderId, newFileTitle);
-                if (newFile != null && await fileSecurity.CanEditAsync(newFile) && !await entryManager.FileLockedForMeAsync(newFile.Id) && !fileTracker.IsEditing(newFile.Id))
+                if (newFile != null && await fileSecurity.CanEditAsync(newFile) && !await lockerManager.FileLockedForMeAsync(newFile.Id) && !fileTracker.IsEditing(newFile.Id))
                 {
                     newFile.Version++;
                     newFile.VersionGroup++;
@@ -540,7 +531,7 @@ public class FileConverter(
             RequestUri = new Uri(convertedFileUrl)
         };
 
-        var httpClient = clientFactory.CreateClient();
+        var httpClient = clientFactory.CreateClient(nameof(DocumentService));
 
         try
         {

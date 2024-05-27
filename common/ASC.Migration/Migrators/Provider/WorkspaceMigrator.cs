@@ -373,7 +373,11 @@ public class WorkspaceMigrator : Migrator
 
         foreach (var row in data.Rows.Cast<DataRow>())
         {
-            var id = int.Parse(row["entry_id"].ToString());
+            var result = int.TryParse(row["entry_id"].ToString(), out var id);
+            if (!result)
+            {
+                continue;
+            }
             if (row["owner"].ToString() == createBy && (storage.Files.Select(f => f.Id).ToList().Contains(id) || storage.Folders.Select(f=> f.Id).ToList().Contains(id)))
             {
                 var security = new MigrationSecurity

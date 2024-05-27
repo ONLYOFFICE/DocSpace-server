@@ -63,6 +63,12 @@ public class FilesMappingAction(TenantUtil tenantUtil) : IMappingAction<DbFolder
             case FolderType.Archive:
                 destination.Title = FilesUCResource.Archive;
                 break;
+            case FolderType.ReadyFormFolder:
+                destination.Title = FilesUCResource.ReadyFormFolder;
+                break;
+            case FolderType.InProcessFormFolder:
+                destination.Title = FilesUCResource.InProcessFormFolder;
+                break;
             case FolderType.BUNCH:
                 try
                 {

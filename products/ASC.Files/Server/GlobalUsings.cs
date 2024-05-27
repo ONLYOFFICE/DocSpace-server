@@ -32,6 +32,7 @@ global using System.Text.RegularExpressions;
 
 global using ASC.Api.Core;
 global using ASC.Api.Core.Convention;
+global using ASC.Api.Core.Core;
 global using ASC.Api.Core.Extensions;
 global using ASC.Api.Core.Routing;
 global using ASC.Api.Utils;
@@ -68,6 +69,7 @@ global using ASC.MessagingSystem.Core;
 global using ASC.Web.Api.Models;
 global using ASC.Web.Api.Routing;
 global using ASC.Web.Core;
+global using ASC.Web.Core.Files;
 global using ASC.Web.Core.PublicResources;
 global using ASC.Web.Core.Users;
 global using ASC.Web.Files;
@@ -92,6 +94,7 @@ global using AutoMapper;
 
 global using Microsoft.AspNetCore.Authorization;
 global using Microsoft.AspNetCore.Mvc;
+global using Microsoft.AspNetCore.RateLimiting;
 global using Microsoft.Extensions.Hosting.WindowsServices;
 
 global using Newtonsoft.Json.Linq;

@@ -33,7 +33,7 @@ namespace ASC.Data.Storage.DiscStorage;
 
 public class StorageHandler(string storagePath, string module, string domain, bool checkAuth = true)
 {
-    public async Task InvokeAsync(HttpContext context, TenantManager tenantManager, SecurityContext securityContext, StorageFactory storageFactory, EmailValidationKeyProvider emailValidationKeyProvider, UserManager userManager)
+    public async Task InvokeAsync(HttpContext context, TenantManager tenantManager, AuthContext authContext, StorageFactory storageFactory, EmailValidationKeyProvider emailValidationKeyProvider, UserManager userManager)
     {
         var storage = await storageFactory.GetStorageAsync((await tenantManager.GetCurrentTenantAsync()).Id, module);
         var path = CrossPlatform.PathCombine(storagePath, GetRouteValue("pathInfo", context).Replace('/', Path.DirectorySeparatorChar));
@@ -41,8 +41,8 @@ public class StorageHandler(string storagePath, string module, string domain, bo
         var auth = context.Request.Query[Constants.QueryAuth].FirstOrDefault() ?? "";
         var storageExpire = storage.GetExpire(domain);
 
-        if (checkAuth && !securityContext.IsAuthenticated && !await SecureHelper.CheckSecureKeyHeader(header, path, emailValidationKeyProvider) 
-            || module == "backup" && (!securityContext.IsAuthenticated || !(await userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID))))
+        if (checkAuth && !authContext.IsAuthenticated && !await SecureHelper.CheckSecureKeyHeader(header, path, emailValidationKeyProvider) 
+            || module == "backup" && (!authContext.IsAuthenticated || !(await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))))
         {
             context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
             return;
@@ -76,7 +76,12 @@ public class StorageHandler(string storagePath, string module, string domain, bo
             return;
         }
 
-        var headers = header.Length > 0 ? header.Split('&').Select(HttpUtility.UrlDecode) : Array.Empty<string>();
+        var headers = header.Length > 0 ? header.Split('&').Select(HttpUtility.UrlDecode).ToList() : [];
+
+        if (storage.ContentAsAttachment)
+        {
+            headers.Add("Content-Disposition:attachment");
+        }
 
         const int bigSize = 5 * 1024 * 1024;
         var fileSize = await storage.GetFileSizeAsync(domain, path);

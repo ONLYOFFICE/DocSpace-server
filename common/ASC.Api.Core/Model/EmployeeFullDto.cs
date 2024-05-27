@@ -344,7 +344,7 @@ public class EmployeeFullDtoHelper(
 
         if (!string.IsNullOrEmpty(userInfo.CultureName))
         {
-            result.CultureName = userInfo.CultureName;
+            result.CultureName = coreBaseSettings.GetRightCultureName(userInfo.GetCulture());
         }
 
         FillConacts(result, userInfo);

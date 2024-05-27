@@ -30,9 +30,11 @@ namespace ASC.Files.Core.Helpers;
 public class FormFillingReportCreator
 {
     private readonly ExportToCSV _exportToCSV;
-    private readonly SocketManager _socketManager;
+    private readonly UserManager _userManager;
+    private readonly SecurityContext _securityContext;
     private readonly IDaoFactory _daoFactory;
     private readonly IHttpClientFactory _clientFactory;
+    private readonly TenantUtil _tenantUtil;
 
     private static readonly JsonSerializerOptions _options = new() {
         AllowTrailingCommas = true,
@@ -41,44 +43,37 @@ public class FormFillingReportCreator
 
     public FormFillingReportCreator(
         ExportToCSV exportToCSV,
-        SocketManager socketManager,
+        UserManager userManager,
+        SecurityContext securityContext,
         IDaoFactory daoFactory,
-        IHttpClientFactory clientFactory)
+        IHttpClientFactory clientFactory,
+        TenantUtil tenantUtil)
     {
         _exportToCSV = exportToCSV;
-        _socketManager = socketManager;
+        _userManager = userManager;
+        _securityContext = securityContext;
         _daoFactory = daoFactory;
         _clientFactory = clientFactory;
+        _tenantUtil = tenantUtil;
     }
 
-    public async Task<EntryProperties> UpdateFormFillingReport<T>(File<T> form, string formsDataUrl)
+    public async Task UpdateFormFillingReport<T>(T resultsFileId, string formsDataUrl)
     {
-        var linkDao = _daoFactory.GetLinkDao();
-        var sourceId = await linkDao.GetSourceAsync(form.Id.ToString());
 
-        if (sourceId != null && formsDataUrl != null)
+        if (formsDataUrl != null)
         {
-            var properties = await _daoFactory.GetFileDao<T>().GetProperties(form.Id);
             var fileDao = _daoFactory.GetFileDao<T>();
             var submitFormsData = await GetSubmitFormsData(formsDataUrl);
 
-            if (properties.FormFilling.ResultsFileID != null)
+            if (resultsFileId != null)
             {
-                var resultsFile = await fileDao.GetFileAsync((T)Convert.ChangeType(properties.FormFilling.ResultsFileID, typeof(T)));
-                var sourceFile = await fileDao.GetFileAsync((T)Convert.ChangeType(sourceId, typeof(T)));
+                var resultsFile = await fileDao.GetFileAsync(resultsFileId);
 
                 var updateDt = _exportToCSV.CreateDataTable(submitFormsData.FormsData);
                 await _exportToCSV.UpdateCsvReport(resultsFile, updateDt);
 
-                await _socketManager.DeleteFileAsync(form);
-                await _socketManager.UpdateFileAsync(sourceFile);
-                await linkDao.DeleteLinkAsync(sourceId);
-
-                return properties;
             }
         }
-
-        return null;
     }
 
     private async Task<SubmitFormsData> GetSubmitFormsData(string url)
@@ -92,7 +87,25 @@ public class FormFillingReportCreator
         using var response = await httpClient.SendAsync(request);
         var data = await response.Content.ReadAsStringAsync();
 
-        return JsonSerializer.Deserialize<SubmitFormsData>(data, _options);
+        var u = await _userManager.GetUsersAsync(_securityContext.CurrentAccount.ID);
+        var name = new List<FormsItemData>()
+        {
+            new FormsItemData()
+            {
+                Key= FilesCommonResource.User,
+                Value = $"{u.FirstName} {u.LastName}"
+            },
+            new FormsItemData()
+            {
+                Key= FilesCommonResource.Date,
+                Value = $"{_tenantUtil.DateTimeNow().ToString("dd.MM.yyyy H:mm:ss")}"
+            },
+        };
+
+        var result = JsonSerializer.Deserialize<SubmitFormsData>(data, _options);
+        result.FormsData = name.Concat(result.FormsData);
+
+        return result;
     }
 
 }

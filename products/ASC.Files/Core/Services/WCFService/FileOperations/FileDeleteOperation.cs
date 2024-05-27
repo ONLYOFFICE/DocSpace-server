@@ -158,7 +158,8 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                 this[Err] = FilesCommonResource.ErrorMessage_FolderNotFound;
             }
             else if (folder.FolderType != FolderType.DEFAULT && folder.FolderType != FolderType.BUNCH
-                && !DocSpaceHelper.IsRoom(folder.FolderType))
+                && !DocSpaceHelper.IsRoom(folder.FolderType)
+                && ((folder.FolderType == FolderType.FormFillingFolderDone || folder.FolderType == FolderType.FormFillingFolderInProgress) && folder.RootFolderType != FolderType.Archive))
             {
                 this[Err] = FilesCommonResource.ErrorMessage_SecurityException_DeleteFolder;
             }
@@ -396,7 +397,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
 
     private async Task<(bool isError, string message)> WithErrorAsync(IServiceScope scope, IEnumerable<File<T>> files, bool folder, bool checkPermissions)
     {
-        var entryManager = scope.ServiceProvider.GetService<EntryManager>();
+        var lockerManager = scope.ServiceProvider.GetService<LockerManager>();
         var fileTracker = scope.ServiceProvider.GetService<FileTrackerHelper>();
 
         foreach (var file in files)
@@ -408,7 +409,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
 
                 return (true, error);
             }
-            if (checkPermissions && await entryManager.FileLockedForMeAsync(file.Id))
+            if (checkPermissions && await lockerManager.FileLockedForMeAsync(file.Id))
             {
                 error = FilesCommonResource.ErrorMessage_LockedFile;
 

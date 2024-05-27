@@ -27,32 +27,23 @@
 namespace ASC.Webhooks;
 
 [Singleton]
-public class WebhookSender
+public class WebhookSender(ILoggerProvider options, IServiceScopeFactory scopeFactory, IHttpClientFactory clientFactory)
 {
-    private readonly IHttpClientFactory _clientFactory;
-    private readonly ILogger _log;
-    private readonly IServiceScopeFactory _scopeFactory;
-    private readonly JsonSerializerOptions _jsonSerializerOptions;
+    private readonly ILogger _log = options.CreateLogger("ASC.Webhooks.Core");
+
+    private readonly JsonSerializerOptions _jsonSerializerOptions = new()
+    {
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        IgnoreReadOnlyProperties = true
+    };
     private const string SignatureHeader = "x-docspace-signature-256";
 
     public const string WEBHOOK = "webhook";
     public const string WEBHOOK_SKIP_SSL = "webhookSkipSSL";
 
-    public WebhookSender(ILoggerProvider options, IServiceScopeFactory scopeFactory, IHttpClientFactory clientFactory)
-    {
-        _log = options.CreateLogger("ASC.Webhooks.Core");
-        _scopeFactory = scopeFactory;
-        _clientFactory = clientFactory;
-        _jsonSerializerOptions = new JsonSerializerOptions
-        {
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-            IgnoreReadOnlyProperties = true
-        };
-    }
-
     public async Task Send(WebhookRequestIntegrationEvent webhookRequest, CancellationToken cancellationToken)
     {
-        using var scope = _scopeFactory.CreateScope();
+        using var scope = scopeFactory.CreateScope();
         var dbWorker = scope.ServiceProvider.GetRequiredService<DbWorker>();
 
         var entry = await dbWorker.ReadJournal(webhookRequest.WebhookId);
@@ -68,7 +59,7 @@ public class WebhookSender
         {
             var clientName = ssl ? WEBHOOK : WEBHOOK_SKIP_SSL;
 
-            var httpClient = _clientFactory.CreateClient(clientName);
+            var httpClient = clientFactory.CreateClient(clientName);
             var request = new HttpRequestMessage(HttpMethod.Post, entry.Config.Uri)
             {
                 Content = new StringContent(entry.RequestPayload, Encoding.UTF8, "application/json")
