@@ -487,6 +487,7 @@ public class FileStorageService //: IFileStorageService
         switch (folder.FolderType)
     {
             case FolderType.PublicRoom:
+            case FolderType.FillingFormsRoom:
                 await SetExternalLinkAsync(folder, Guid.NewGuid(), FileShare.Read, FilesCommonResource.DefaultExternalLinkTitle, primary: true);
                 break;
             case FolderType.FormRoom:
@@ -3577,7 +3578,7 @@ public class FileStorageService //: IFileStorageService
         var (eventType, ace) = result;
         linkId = ace.Id;
 
-        if (eventType == EventType.Remove && ace.SubjectType == SubjectType.PrimaryExternalLink && entry is Folder<T> { FolderType: FolderType.PublicRoom })
+        if (eventType == EventType.Remove && ace.SubjectType == SubjectType.PrimaryExternalLink && (entry is Folder<T> { FolderType: FolderType.PublicRoom } or Folder<T> { FolderType: FolderType.FillingFormsRoom }))
         {
             linkId = Guid.NewGuid();
 

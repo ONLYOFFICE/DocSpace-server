@@ -1432,7 +1432,7 @@ internal class FolderDao(
                         where f.TenantId == r.TenantId
                         select f
                     ).FirstOrDefault(),
-                Shared = (r.FolderType == FolderType.CustomRoom || r.FolderType == FolderType.PublicRoom) &&
+                Shared = (r.FolderType == FolderType.CustomRoom || r.FolderType == FolderType.PublicRoom || r.FolderType == FolderType.FillingFormsRoom) &&
                          filesDbContext.Security.Any(s =>
                              s.TenantId == tenantId && s.EntryId == r.Id.ToString() && s.EntryType == FileEntryType.Folder && s.SubjectType == SubjectType.PrimaryExternalLink),
                 Order = (
@@ -1996,7 +1996,7 @@ static file class Queries
                                     where f.TenantId == r.TenantId
                                     select f
                                 ).FirstOrDefault(),
-                            Shared = (r.FolderType == FolderType.CustomRoom || r.FolderType == FolderType.PublicRoom) && 
+                            Shared = (r.FolderType == FolderType.CustomRoom || r.FolderType == FolderType.PublicRoom || r.FolderType == FolderType.FillingFormsRoom) && 
                                      ctx.Security.Any(s => 
                                          s.TenantId == tenantId && 
                                          s.EntryId == r.Id.ToString() && 

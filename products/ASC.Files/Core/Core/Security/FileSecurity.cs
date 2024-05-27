@@ -120,7 +120,9 @@ public class FileSecurity(IDaoFactory daoFactory,
             {
                     { SubjectType.User, [FileShare.RoomAdmin, FileShare.Collaborator, FileShare.FillForms, FileShare.None] },
                     { SubjectType.Group , [FileShare.FillForms, FileShare.None] },
-                    { SubjectType.InvitationLink, [FileShare.RoomAdmin, FileShare.Collaborator, FileShare.FillForms, FileShare.None] }
+                    { SubjectType.InvitationLink, [FileShare.RoomAdmin, FileShare.Collaborator, FileShare.FillForms, FileShare.None] },
+                    { SubjectType.ExternalLink, [FileShare.FillForms, FileShare.Read, FileShare.None] },
+                    { SubjectType.PrimaryExternalLink, [FileShare.FillForms, FileShare.Read, FileShare.None] }
                 }.ToFrozenDictionary()
                 },
                 {
@@ -885,7 +887,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                     return false;
                 }
 
-                if (action == FilesSecurityActions.CopySharedLink && folder.FolderType is not (FolderType.CustomRoom or FolderType.PublicRoom))
+                if (action == FilesSecurityActions.CopySharedLink && folder.FolderType is not (FolderType.CustomRoom or FolderType.PublicRoom or FolderType.FillingFormsRoom))
                 {
                     return false;
                 }
