@@ -897,6 +897,66 @@ public class FileStorageService //: IFileStorageService
 
         return file;
     }
+    public async Task<bool> CheckExtendedPDF<T>(File<T> file)
+    {
+        const int limit = 300;
+        var fileDao = daoFactory.GetFileDao<T>();
+        var stream = await fileDao.GetFileStreamAsync(file, 0, limit);
+
+        using var reader = new StreamReader(stream, Encoding.GetEncoding("iso-8859-1"));
+        var message = await reader.ReadToEndAsync();
+
+        return IsExtendedPDFFile(message);
+    }
+    private static bool IsExtendedPDFFile(string text)
+    {
+        if (string.IsNullOrEmpty(text))
+        {
+            return false;
+        }
+
+        const string signature = "ONLYOFFICEFORM";
+        var indexFirst = text.IndexOf("%\xCD\xCA\xD2\xA9\x0D");
+
+        if (indexFirst == -1)
+        {
+            return false;
+        }
+
+        var pFirst = text.Substring(indexFirst + 6);
+
+        if (!pFirst.StartsWith("1 0 obj\x0A<<\x0A"))
+        {
+            return false;
+        }
+
+        pFirst = pFirst.Substring(11);
+
+        var indexStream = pFirst.IndexOf("stream\x0D\x0A");
+        var indexMeta = pFirst.IndexOf(signature);
+
+        if (indexStream == -1 || indexMeta == -1 || indexStream < indexMeta)
+        {
+            return false;
+        }
+
+        var pMeta = pFirst.Substring(indexMeta + signature.Length + 3);
+
+        var indexMetaLast = pMeta.IndexOf(' ');
+        if (indexMetaLast == -1)
+        {
+            return false;
+        }
+
+        pMeta = pMeta.Substring(indexMetaLast + 1);
+        indexMetaLast = pMeta.IndexOf(' ');
+        if (indexMetaLast == -1)
+        {
+            return false;
+        }
+
+        return true;
+    }
 
     public async ValueTask<File<T>> CreateNewFileAsync<T, TTemplate>(FileModel<T, TTemplate> fileWrapper, bool enableExternalExt = false)
     {
@@ -1983,6 +2043,30 @@ public class FileStorageService //: IFileStorageService
 
     #region MoveOrCopy
 
+    
+    public async Task<List<object>> MoveOrCopyDestFolderCheckAsync<T1>(IEnumerable<JsonElement> filesId, T1 destFolderId)
+    {
+        var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(filesId);
+
+        var checkedFiles = new List<object>();
+
+        var filesInts = await MoveOrCopyDestFolderCheckAsync(fileIntIds, destFolderId);
+
+        foreach (var i in filesInts)
+        {
+            checkedFiles.Add(i);
+        }
+
+        var filesStrings = await MoveOrCopyDestFolderCheckAsync(fileStringIds, destFolderId);
+
+        foreach (var i in filesStrings)
+        {
+            checkedFiles.Add(i);
+        }
+
+        return checkedFiles;
+
+    }
     public async Task<(List<object>, List<object>)> MoveOrCopyFilesCheckAsync<T1>(IEnumerable<JsonElement> filesId, IEnumerable<JsonElement> foldersId, T1 destFolderId)
     {
         var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(foldersId);
@@ -2017,7 +2101,44 @@ public class FileStorageService //: IFileStorageService
 
         return (checkedFiles, checkedFolders);
     }
+    private async Task<List<TFrom>> MoveOrCopyDestFolderCheckAsync<TFrom, TTo>(IEnumerable<TFrom> filesId, TTo destFolderId)
+    {
+        var checkedFiles = new List<TFrom>();
 
+        var destFolderDao = daoFactory.GetFolderDao<TTo>();
+        var fileDao = daoFactory.GetFileDao<TFrom>();
+
+        var toRoom = await destFolderDao.GetFolderAsync(destFolderId);
+
+        if (!DocSpaceHelper.IsRoom(toRoom.FolderType))
+        {
+            var (roomId, _) = await destFolderDao.GetParentRoomInfoFromFileEntryAsync(toRoom);
+            toRoom = await destFolderDao.GetFolderAsync(roomId);
+        }
+        if (toRoom.FolderType == FolderType.FillingFormsRoom)
+        {
+
+            foreach (var id in filesId)
+            {
+                var file = await fileDao.GetFileAsync(id);
+
+                var extension = FileUtility.GetFileExtension(file.Title);
+                var fileType = FileUtility.GetFileTypeByExtention(extension);
+
+                if (fileType == FileType.Pdf && await CheckExtendedPDF(file))
+                {
+                    checkedFiles.Add(id);
+                }
+            }
+        }
+        else
+        {
+            checkedFiles.AddRange(filesId);
+            return checkedFiles;
+        }
+
+        return checkedFiles;
+    }
     private async Task<(List<TFrom>, List<TFrom>)> MoveOrCopyFilesCheckAsync<TFrom, TTo>(IEnumerable<TFrom> filesId, IEnumerable<TFrom> foldersId, TTo destFolderId)
     {
         var checkedFiles = new List<TFrom>();
