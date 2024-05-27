@@ -28,31 +28,37 @@ namespace ASC.MessagingSystem.EF.Context;
 
 public partial class MessagesContext
 {
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, new int[0], PreCompileQuery.DefaultDateTime])]
     public IAsyncEnumerable<DbLoginEvent> LoginEventsAsync(int tenantId, Guid userId, IEnumerable<int> loginActions, DateTime date)
     {
         return Queries.LoginEventsAsync(this, tenantId, userId, loginActions, date);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<int> DeleteLoginEventsAsync(int tenantId, int loginEventId)
     {
         return Queries.DeleteLoginEventsAsync(this, tenantId, loginEventId);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
     public IAsyncEnumerable<DbLoginEvent> LoginEventsByUserIdAsync(int tenantId, Guid userId)
     {
         return Queries.LoginEventsByUserIdAsync(this, tenantId, userId);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt])]
     public IAsyncEnumerable<DbLoginEvent> LoginEventsByTenantIdAsync(int tenantId)
     {
         return Queries.LoginEventsByTenantIdAsync(this, tenantId);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<DbLoginEvent> LoginEventsByIdAsync(int tenantId, int id)
     {
         return Queries.LoginEventsByIdAsync(this, tenantId, id);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultInt])]
     public IAsyncEnumerable<DbLoginEvent> LoginEventsExceptThisAsync(int tenantId, Guid userId, int loginEventId)
     {
         return Queries.LoginEventsExceptThisAsync(this, tenantId, userId, loginEventId);

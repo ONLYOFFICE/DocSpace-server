@@ -28,16 +28,19 @@ namespace ASC.Core.Common.EF;
 
 public partial class UserDbContext
 {
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultGuid, null, AceType.Allow])]
     public Task<bool> AnyAclAsync(int tenantId, Guid subject, Guid action, string obj, AceType aceType)
     {
         return Queries.AnyAclAsync(this, tenantId, subject, action, obj, aceType);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultGuid, null, AceType.Allow])]
     public Task<Acl> AclAsync(int tenantId, Guid subject, Guid action, string obj, AceType aceType)
     {
         return Queries.AclAsync(this, tenantId, subject, action, obj, aceType);
     }
     
+    [PreCompileQuery([])]
     public IAsyncEnumerable<Acl> AzRecordAsync()
     {
         return Queries.AzRecordAsync(this);

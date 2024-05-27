@@ -28,51 +28,61 @@ namespace ASC.Files.Core.EF;
 
 public partial class FilesDbContext
 {
-    public IAsyncEnumerable<DbFilesSecurity> ForDeleteShareRecordsAsync(FileShareRecord record)
+    [PreCompileQuery([PreCompileQuery.DefaultInt, FileEntryType.File, PreCompileQuery.DefaultGuid])]
+    public IAsyncEnumerable<DbFilesSecurity> ForDeleteShareRecordsAsync(int tenantId, FileEntryType entryType, Guid subject)
     {
-        return SecurityQueries.ForDeleteShareRecordsAsync(this, record);
+        return SecurityQueries.ForDeleteShareRecordsAsync(this, tenantId, entryType, subject);
     }
     
+    [PreCompileQuery([null])]
     public IAsyncEnumerable<int> FolderIdsAsync(string entryId)
     {
         return SecurityQueries.FolderIdsAsync(this, entryId);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public IAsyncEnumerable<string> FilesIdsAsync(int tenantId, IEnumerable<int> folders)
     {
         return SecurityQueries.FilesIdsAsync(this, tenantId, folders);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, null, FileEntryType.File])]
     public Task<int> DeleteForSetShareAsync(int tenantId, Guid subject, IEnumerable<string> entryIds, FileEntryType type)
     {
         return SecurityQueries.DeleteForSetShareAsync(this, tenantId, subject, entryIds, type);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null, FileEntryType.File])]
     public Task<bool> IsSharedAsync(int tenantId, string entryId, FileEntryType type)
     {
         return SecurityQueries.IsSharedAsync(this, tenantId, entryId, type);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public IAsyncEnumerable<DbFilesSecurity> SharesAsync(int tenantId, IEnumerable<Guid> subjects)
     {
         return SecurityQueries.SharesAsync(this, tenantId, subjects);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null, null])]
     public IAsyncEnumerable<DbFilesSecurity> PureShareRecordsDbAsync(int tenantId, IEnumerable<string> files, IEnumerable<string> folders)
     {
         return SecurityQueries.PureShareRecordsDbAsync(this, tenantId, files, folders);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
     public Task<int> RemoveBySubjectAsync(int tenantId, Guid subject)
     {
         return SecurityQueries.RemoveBySubjectAsync(this, tenantId, subject);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
     public Task<int> RemoveBySubjectWithoutOwnerAsync(int tenantId, Guid subject)
     {
         return SecurityQueries.RemoveBySubjectWithoutOwnerAsync(this, tenantId, subject);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null, FileEntryType.File, null])]
     public IAsyncEnumerable<DbFilesSecurity> EntrySharesBySubjectsAsync(int tenantId, string entryId, FileEntryType entryType, IEnumerable<Guid> subjects)
     {
         return SecurityQueries.EntrySharesBySubjectsAsync(this, tenantId, entryId, entryType, subjects);
@@ -81,13 +91,13 @@ public partial class FilesDbContext
 
 static file class SecurityQueries
 {
-    public static readonly Func<FilesDbContext, FileShareRecord, IAsyncEnumerable<DbFilesSecurity>> ForDeleteShareRecordsAsync = 
+    public static readonly Func<FilesDbContext, int, FileEntryType, Guid, IAsyncEnumerable<DbFilesSecurity>> ForDeleteShareRecordsAsync = 
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, FileShareRecord record) =>
+            (FilesDbContext ctx, int tenantId, FileEntryType entryType, Guid subject) =>
                 ctx.Security
-                    .Where(r => r.TenantId == record.TenantId)
-                    .Where(r => r.EntryType == record.EntryType)
-                    .Where(r => r.Subject == record.Subject));
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => r.EntryType == entryType)
+                    .Where(r => r.Subject == subject));
 
     public static readonly Func<FilesDbContext, string, IAsyncEnumerable<int>> FolderIdsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

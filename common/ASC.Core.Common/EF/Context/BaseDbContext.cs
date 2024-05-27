@@ -133,6 +133,9 @@ public class WarmupBaseDbContextStartupTask(IServiceProvider provider, ILogger<W
 {
     public Task ExecuteAsync(CancellationToken cancellationToken = default)
     {
+        var cts = new CancellationTokenSource();
+        cts.Cancel();
+        
         var emptyEnumerableMethod = typeof(Enumerable).GetMethod("Empty");
         var assemblies = AppDomain.CurrentDomain.GetAssemblies().Where(x =>
         {
@@ -162,66 +165,57 @@ public class WarmupBaseDbContextStartupTask(IServiceProvider provider, ILogger<W
                 try
                 {
                     var @params = q.GetParameters();
-                    var parameters = new List<object>(@params.Length);
-
-                    foreach (var p in @params)
-                    {                    
-                        var nullable = Nullable.GetUnderlyingType(p.ParameterType);
-                        if (p.ParameterType == typeof(int) || nullable == typeof(int))
+                    var paramsAttr = q.GetCustomAttribute<PreCompileQuery>();
+                    
+                    if (paramsAttr == null || paramsAttr.Data.Length != @params.Length)
+                    {
+                        continue;
+                    }
+                    
+                    var paramsToInvoke = new List<object>(@params.Length);
+                    
+                    for (var i = 0; i < @params.Length; i++)
+                    {
+                        var p = paramsAttr.Data[i];
+                        if (@params[i].ParameterType == typeof(Guid))
                         {
-                            parameters.Add(int.MaxValue);
-                        }
-                        else if (p.ParameterType == typeof(long) || nullable == typeof(long))
-                        {
-                            parameters.Add(long.MaxValue);
-                        }
-                        else if (p.ParameterType == typeof(DateTime) || nullable == typeof(DateTime))
-                        {
-                            parameters.Add(DateTime.MinValue);
-                        }
-                        else if (p.ParameterType.IsEnum || nullable is { IsEnum: true })
-                        {
-                            parameters.Add(0);
-                        }
-                        else if (p.ParameterType == typeof(string)|| nullable == typeof(string))
-                        {
-                            parameters.Add(string.Empty);
-                        }
-                        else if (typeof(Array).IsAssignableFrom(p.ParameterType) || typeof(IList).IsAssignableFrom(p.ParameterType))
-                        {
-                            parameters.Add(Activator.CreateInstance(p.ParameterType, 0));
-                        }
-                        else if (p.ParameterType is { IsInterface: true, IsGenericType: true })
-                        {
-                            var enumerable = p.ParameterType.GetInterfaces().FirstOrDefault(r => r == typeof(IEnumerable));
-                            if (enumerable != null && emptyEnumerableMethod != null)
+                            if (Guid.TryParse(p.ToString(), out var g))
                             {
-                                parameters.Add(emptyEnumerableMethod.MakeGenericMethod(p.ParameterType.GenericTypeArguments).Invoke(null, null));
+                                paramsToInvoke.Add(g);
                             }
                         }
-                        else if (p.ParameterType == typeof(Guid) || nullable == typeof(Guid))
+                        else if (@params[i].ParameterType == typeof(DateTime))
                         {
-                            parameters.Add(Guid.Empty);
-                        }
-                        else if (p.ParameterType == typeof(bool) || nullable == typeof(bool))
-                        {
-                            parameters.Add(false);
+                            if (DateTime.TryParse(p.ToString(), CultureInfo.InvariantCulture, out var d))
+                            {
+                                paramsToInvoke.Add(d);
+                            }
                         }
                         else
                         {
-                            
+                            paramsToInvoke.Add(p);
                         }
                     }
-
-                    q.Invoke(context, parameters.ToArray());
+                    
+                    q.Invoke(context, paramsToInvoke.ToArray());
                 }
                 catch (Exception e)
                 {
-                    logger.LogTrace(e, q.Name);
+                    logger.LogDebug(e, q.Name);
                 }
             }
         }
 
         return Task.CompletedTask;
     }
+}
+
+[AttributeUsage(AttributeTargets.Method)]
+public class PreCompileQuery(object[] data) : Attribute
+{
+    public object[] Data { get; } = data;
+
+    public const int DefaultInt = int.MaxValue;
+    public const string DefaultGuid = "00000000-0000-0000-0000-000000000000";
+    public const string DefaultDateTime = "01/01/0001 00:00:00";
 }

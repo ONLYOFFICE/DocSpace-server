@@ -28,11 +28,13 @@ namespace ASC.Core.Common.EF.Context;
 
 public partial class WebstudioDbContext
 {
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultGuid])]
     public Task<string> DataAsync(int tenantId, Guid id, Guid userId)
     {
         return Queries.DataAsync(this, tenantId, id, userId);
     }
 
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultGuid])]
     public Task<DbWebstudioSettings> WebStudioSettingsAsync(int tenantId, Guid id, Guid userId)
     {
         return Queries.WebStudioSettingsAsync(this, tenantId, id, userId);

@@ -28,16 +28,19 @@ namespace ASC.Core.Common.EF;
 
 public partial class CoreDbContext
 {
+    [PreCompileQuery([PreCompileQuery.DefaultInt])]
     public Task<DbQuota> QuotaAsync(int tenantId)
     {
         return QuotaQueries.QuotaAsync(this, tenantId);
     }
     
+    [PreCompileQuery([])]
     public IAsyncEnumerable<DbQuota> AllQuotasAsync()
     {
         return QuotaQueries.AllQuotasAsync(this);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, null, long.MaxValue])]
     public Task<int> UpdateCounterAsync(int tenantId, Guid userId, string path, long counter)
     {
         return QuotaQueries.UpdateCounterAsync(this, tenantId, userId, path, counter);

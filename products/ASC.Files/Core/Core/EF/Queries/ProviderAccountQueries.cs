@@ -28,56 +28,67 @@ namespace ASC.Files.Core.EF;
 
 public partial class FilesDbContext
 {
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
     public IAsyncEnumerable<DbFilesThirdpartyAccount> ThirdPartyAccountsAsync(int tenantId, Guid userId)
     {
         return Queries.ThirdPartyAccountsAsync(this, tenantId, userId);
     }
     
-    public IAsyncEnumerable<DbFilesThirdpartyAccount> ThirdPartyAccountsByFilterAsync( int tenantId, int linkId, FolderType folderType, Guid userId, string searchText)
+    [PreCompileQuery([PreCompileQuery.DefaultInt, int.MaxValue, FolderType.ThirdpartyBackup, PreCompileQuery.DefaultGuid, null])]
+    public IAsyncEnumerable<DbFilesThirdpartyAccount> ThirdPartyAccountsByFilterAsync(int tenantId, int linkId, FolderType folderType, Guid userId, string searchText)
     {
         return Queries.ThirdPartyAccountsByFilterAsync(this, tenantId, linkId, folderType, userId, searchText);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<DbFilesThirdpartyAccount> ThirdPartyAccountAsync(int tenantId, int linkId)
     {
         return Queries.ThirdPartyAccountAsync(this, tenantId, linkId);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, null, null, null, null])]
     public Task<int> UpdateThirdPartyAccountsAsync(int tenantId, int linkId, string login, string password, string token, string url)
     {
         return Queries.UpdateThirdPartyAccountsAsync(this, tenantId, linkId, login, password, token, url);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<DbFilesThirdpartyAccount> ThirdPartyAccountByLinkIdAsync(int tenantId, int linkId)
     {
         return Queries.ThirdPartyAccountByLinkIdAsync(this, tenantId, linkId);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public IAsyncEnumerable<DbFilesThirdpartyAccount> ThirdPartyAccountsByLinkIdAsync(int tenantId, int linkId)
     {
         return Queries.ThirdPartyAccountsByLinkIdAsync(this, tenantId, linkId);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<int> DeleteThirdPartyAccountsByLinkIdAsync(int tenantId, int linkId)
     {
         return Queries.DeleteThirdPartyAccountsByLinkIdAsync(this, tenantId, linkId);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt])]
     public Task<DbFilesThirdpartyAccount> ThirdPartyBackupAccountAsync(int tenantId)
     {
         return Queries.ThirdPartyBackupAccountAsync(this, tenantId);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public IAsyncEnumerable<string> HashIdsAsync(int tenantId, string folderId)
     {
         return Queries.HashIdsAsync(this, tenantId, folderId);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public Task<int> DeleteDbFilesSecuritiesAsync(int tenantId, IEnumerable<string> entryIDs)
     {
         return Queries.DeleteDbFilesSecuritiesAsync(this, tenantId, entryIDs);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public Task<int> DeleteDbFilesTagLinksAsync(int tenantId, IEnumerable<string> entryIDs)
     {
         return Queries.DeleteDbFilesTagLinksAsync(this, tenantId, entryIDs);

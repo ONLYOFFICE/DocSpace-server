@@ -42,41 +42,49 @@ public class WebhooksDbContext(DbContextOptions<WebhooksDbContext> options) : Db
         .AddDbTenant();
     }
 
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null, null])]
     public Task<WebhooksConfig> WebhooksConfigByUriAsync(int tenantId, string uri, string name)
     {
         return Queries.WebhooksConfigByUriAsync(this, tenantId, uri, name);
     }
 
+    [PreCompileQuery([PreCompileQuery.DefaultInt])]
     public IAsyncEnumerable<WebhooksConfigWithStatus> WebhooksConfigWithStatusAsync(int tenantId)
     {
         return Queries.WebhooksConfigWithStatusAsync(this, tenantId);
     }
 
+    [PreCompileQuery([PreCompileQuery.DefaultInt])]
     public IAsyncEnumerable<WebhooksConfig> WebhooksConfigsAsync(int tenantId)
     {
         return Queries.WebhooksConfigsAsync(this, tenantId);
     }
 
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<WebhooksConfig> WebhooksConfigAsync(int tenantId, int id)
     {
         return Queries.WebhooksConfigAsync(this, tenantId, id);
     }
-
+    
+    [PreCompileQuery([PreCompileQuery.DefaultInt])]
     public Task<DbWebhooks> WebhooksLogAsync(int id)
     {
         return Queries.WebhooksLogAsync(this, id);
     }
 
+    [PreCompileQuery([])]
     public IAsyncEnumerable<DbWebhook> DbWebhooksAsync()
     {
         return Queries.DbWebhooksAsync(this);
     }
-
+    
+    [PreCompileQuery([PreCompileQuery.DefaultInt])]
     public Task<DbWebhook> DbWebhookAsync(int id)
     {
         return Queries.DbWebhookAsync(this, id);
     }
 
+    [PreCompileQuery([null, null])]
     public Task<DbWebhook> DbWebhookByMethodAsync(string method, string routePattern)
     {
         return Queries.DbWebhookByMethodAsync(this, method, routePattern);

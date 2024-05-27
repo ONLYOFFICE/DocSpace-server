@@ -28,201 +28,241 @@ namespace ASC.Files.Core.EF;
 
 public partial class FilesDbContext
 {
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<DbFileQuery> DbFileQueryAsync(int tenantId, int fileId)
     {
         return FileQueries.DbFileQueryAsync(this, tenantId, fileId);
     }
     
-    public Task<DbFileQuery> DbFileQueryByFileVersionAsync( int tenantId, int fileId, int fileVersion)
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    public Task<DbFileQuery> DbFileQueryByFileVersionAsync(int tenantId, int fileId, int fileVersion)
     {
         return FileQueries.DbFileQueryByFileVersionAsync(this, tenantId, fileId, fileVersion);
     }
     
-    public Task<DbFileQuery> DbFileQueryFileStableAsync( int tenantId, int fileId, int fileVersion)
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    public Task<DbFileQuery> DbFileQueryFileStableAsync(int tenantId, int fileId, int fileVersion)
     {
         return FileQueries.DbFileQueryFileStableAsync(this, tenantId, fileId, fileVersion);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultInt])]
     public Task<DbFileQuery> DbFileQueryByTitleAsync(int tenantId, string title, int parentId)
     {
         return FileQueries.DbFileQueryByTitleAsync(this, tenantId, title, parentId);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public IAsyncEnumerable<DbFileQuery> DbFileQueriesAsync(int tenantId, int fileId)
     {
         return FileQueries.DbFileQueriesAsync(this, tenantId, fileId);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public IAsyncEnumerable<DbFileQuery> DbFileQueriesByFileIdsAsync(int tenantId, IEnumerable<int> fileIds)
     {
         return FileQueries.DbFileQueriesByFileIdsAsync(this, tenantId, fileIds);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public IAsyncEnumerable<int> FileIdsAsync(int tenantId, int parentId)
     {
         return FileQueries.FileIdsAsync(this, tenantId, parentId);
     }
     
+    [PreCompileQuery([])]
     public Task<int> FileMaxIdAsync()
     {
         return FileQueries.FileMaxIdAsync(this);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<int> DisableCurrentVersionAsync(int tenantId, int fileId)
     {
         return FileQueries.DisableCurrentVersionAsync(this, tenantId, fileId);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt])]
     public IAsyncEnumerable<DbFolderTree> DbFolderTreesAsync(int folderId)
     {
         return FileQueries.DbFolderTreesAsync(this, folderId);
     }
     
+    [PreCompileQuery([null, PreCompileQuery.DefaultDateTime, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultInt])]
     public Task<int> UpdateFoldersAsync(IEnumerable<int> parentFoldersIds, DateTime modifiedOn, Guid modifiedBy, int tenantId)
     {
         return FileQueries.UpdateFoldersAsync(this, parentFoldersIds, modifiedOn, modifiedBy, tenantId);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<DbFile> DbFileByVersionAsync(int tenantId, int id, int version)
     {
         return FileQueries.DbFileByVersionAsync(this, tenantId, id, version);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt])]
     public  IAsyncEnumerable<DbFolderTree> DbFolderTeesAsync(int parentId)
     {
         return FileQueries.DbFolderTeesAsync(this, parentId);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<int> DeleteDbFilesByVersionAsync(int tenantId, int fileId, int version)
     {
         return FileQueries.DeleteDbFilesByVersionAsync(this, tenantId, fileId, version);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<int> UpdateDbFilesByVersionAsync(int tenantId, int fileId, int version)
     {
         return FileQueries.UpdateDbFilesByVersionAsync(this, tenantId, fileId, version);
     }
     
-    public IAsyncEnumerable<int> ParentIdsAsync( int tenantId, int fileId)
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    public IAsyncEnumerable<int> ParentIdsAsync(int tenantId, int fileId)
     {
         return FileQueries.ParentIdsAsync(this, tenantId, fileId);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public Task<int> DeleteTagLinksAsync(int tenantId, string fileId)
     {
         return FileQueries.DeleteTagLinksAsync(this, tenantId, fileId);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null, TagType.Custom])]
     public Task<int> DeleteTagLinksByTypeAsync(int tenantId, string fileId, TagType type)
     {
         return FileQueries.DeleteTagLinksByTypeAsync(this, tenantId, fileId, type);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public IAsyncEnumerable<DbFile> DbFilesAsync(int tenantId, int fileId)
     {
         return FileQueries.DbFilesAsync(this, tenantId, fileId);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public Task<int> DeleteSecurityAsync(int tenantId, string fileId)
     {
         return FileQueries.DeleteSecurityAsync(this, tenantId, fileId);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultInt])]
     public  Task<bool> DbFilesAnyAsync(int tenantId, string title, int folderId)
     {
         return FileQueries.DbFilesAnyAsync(this, tenantId, title, folderId);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<DbFile> DbFileAsync(int tenantId, int fileId)
     {
         return FileQueries.DbFileAsync(this, tenantId, fileId);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, null])]
     public Task<int> UpdateDbFilesCommentAsync(int tenantId, int fileId, int fileVersion, string comment)
     {
         return FileQueries.UpdateDbFilesCommentAsync(this, tenantId, fileId, fileVersion, comment);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<int> UpdateDbFilesVersionGroupAsync(int tenantId, int fileId, int fileVersion)
     {
         return FileQueries.UpdateDbFilesVersionGroupAsync(this, tenantId, fileId, fileVersion);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<int> VersionGroupAsync(int tenantId, int fileId, int fileVersion)
     {
         return FileQueries.VersionGroupAsync(this, tenantId, fileId, fileVersion);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<int> UpdateVersionGroupAsync(int tenantId, int fileId, int fileVersion, int versionGroup)
     {
         return FileQueries.UpdateVersionGroupAsync(this, tenantId, fileId, fileVersion, versionGroup);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultGuid])]
     public Task<int> ReassignFilesAsync(int tenantId, Guid oldOwnerId, Guid newOwnerId)
     {
         return FileQueries.ReassignFilesAsync(this, tenantId, oldOwnerId, newOwnerId);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultGuid, null])]
     public Task<int> ReassignFilesPartiallyAsync(int tenantId, Guid oldOwnerId, Guid newOwnerId, IEnumerable<int> exceptFolderIds)
     {
         return FileQueries.ReassignFilesPartiallyAsync(this, tenantId, oldOwnerId, newOwnerId, exceptFolderIds);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public IAsyncEnumerable<DbFileQuery> DbFileQueriesByTextAsync(int tenantId, string text)
     {
         return FileQueries.DbFileQueriesByTextAsync(this, tenantId, text);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, null])]
     public Task<int> UpdateChangesAsync(int tenantId, int fileId, int version, string changes)
     {
         return FileQueries.UpdateChangesAsync(this, tenantId, fileId, version, changes);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public IAsyncEnumerable<DbFile> DbFilesByVersionAndWithoutForcesaveAsync(int tenantId, int fileId, int version)
     {
         return FileQueries.DbFilesByVersionAndWithoutForcesaveAsync(this, tenantId, fileId, version);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<bool> DbFileAnyAsync(int tenantId, int fileId, int version)
     {
         return FileQueries.DbFileAnyAsync(this, tenantId, fileId, version);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultDateTime, PreCompileQuery.DefaultDateTime])]
     public IAsyncEnumerable<DbFileQueryWithSecurity> DbFileQueryWithSecurityByPeriodAsync(int tenantId, DateTime from, DateTime to)
     {
         return FileQueries.DbFileQueryWithSecurityByPeriodAsync(this, tenantId, from, to);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt])]
     public IAsyncEnumerable<DbFileQueryWithSecurity> DbFileQueryWithSecurityAsync(int tenantId)
     {
         return FileQueries.DbFileQueryWithSecurityAsync(this, tenantId);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultDateTime])]
     public IAsyncEnumerable<int> TenantIdsByFilesAsync(DateTime fromTime)
     {
         return FileQueries.TenantIdsByFilesAsync(this, fromTime);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultDateTime])]
     public IAsyncEnumerable<int> TenantIdsBySecurityAsync(DateTime fromTime)
     {
         return FileQueries.TenantIdsBySecurityAsync(this, fromTime);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, Thumbnail.Created])]
     public Task<int> UpdateThumbnailStatusAsync(int tenantId, int fileId, int version, Thumbnail status)
     {
         return FileQueries.UpdateThumbnailStatusAsync(this, tenantId, fileId, version, status);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public Task<string> DataAsync(int tenantId, string entryId)
     {
         return FileQueries.DataAsync(this, tenantId, entryId);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public Task<int> DeleteFilesPropertiesAsync(int tenantId, string entryId)
     {
         return FileQueries.DeleteFilesPropertiesAsync(this, tenantId, entryId);
     }
     
+    [PreCompileQuery([])]
     public IAsyncEnumerable<FilesConverts> FilesConvertsAsync()
     {
         return FileQueries.FilesConvertsAsync(this);

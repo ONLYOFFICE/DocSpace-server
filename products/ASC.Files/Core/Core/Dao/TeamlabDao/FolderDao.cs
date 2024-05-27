@@ -1093,8 +1093,16 @@ internal class FolderDao(
         var keys = data.Select(id => $"{module}/{bunch}/{id}").ToArray();
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        var folderIdsDictionary = await filesDbContext.NodeAsync(tenantId, keys).ToDictionaryAsync(r => r.RightNode, r => r.LeftNode);
-
+        Dictionary<string, string> folderIdsDictionary;
+        if (keys.Length > 1)
+        {
+            folderIdsDictionary = await filesDbContext.NodeAsync(tenantId, keys).ToDictionaryAsync(r => r.RightNode, r => r.LeftNode);
+        }
+        else
+        {
+            folderIdsDictionary = await filesDbContext.NodeOnlyAsync(tenantId, keys[0]).ToDictionaryAsync(r => r.RightNode, r => r.LeftNode);
+        }
+            
         foreach (var key in keys)
         {
             var newFolderId = 0;

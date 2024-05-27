@@ -28,56 +28,67 @@ namespace ASC.Core.Common.EF.Context;
 
 public partial class TenantDbContext
 {
+    [PreCompileQuery([null])]
     public Task<DbTenant> TenantByDomainAsync(string domain)
     {
         return Queries.TenantByDomainAsync(this, domain);
     }
     
+    [PreCompileQuery([])]
     public Task<int> VersionIdAsync()
     {
         return Queries.VersionIdAsync(this);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt])]
     public Task<DbTenant> TenantAsync(int tenantId)
     {
         return Queries.TenantAsync(this, tenantId);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt])]
     public Task<string> GetAliasAsync(int tenantId)
     {
         return Queries.GetAliasAsync(this, tenantId);
     }
     
+    [PreCompileQuery([null])]
     public Task<int> TenantsCountAsync(string startAlias)
     {
         return Queries.TenantsCountAsync(this, startAlias);
     }
     
+    [PreCompileQuery([])]
     public IAsyncEnumerable<TenantVersion> TenantVersionsAsync()
     {
         return Queries.TenantVersionsAsync(this);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public Task<byte[]> SettingValueAsync(int tenantId, string id)
     {
         return Queries.SettingValueAsync(this, tenantId, id);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public byte[] SettingValue(int tenantId, string id)
     {
         return Queries.SettingValue(this, tenantId, id);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public Task<DbCoreSettings> CoreSettingsAsync(int tenantId, string id)
     {
         return Queries.CoreSettingsAsync(this, tenantId, id);
     }
     
+    [PreCompileQuery([])]
     public IAsyncEnumerable<string> AddressAsync()
     {
         return Queries.AddressAsync(this);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public Task<bool> AnyTenantsAsync(int tenantId, string domain)
     {
         return Queries.AnyTenantsAsync(this, tenantId, domain);
