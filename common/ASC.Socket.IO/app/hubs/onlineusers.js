@@ -60,7 +60,8 @@ module.exports = async (io) => {
       }
       if(user.sessions.size == 1)
       {
-        onlineIO.to(`p-${tenantId}`).emit("enter-in-portal", { user });
+        var stringUser = serialize(user);
+        onlineIO.to(`p-${tenantId}`).emit("enter-in-portal", { stringUser });
       }
 
       updateUser(portalUsers, user, userId, tenantId);
@@ -152,7 +153,8 @@ module.exports = async (io) => {
         _roomId = roomId
         if(user.sessions.size == 1)
         {
-          onlineIO.to(roomId).emit("enter-in-room", { user });
+          var stringUser = serialize(user);
+          onlineIO.to(roomId).emit("enter-in-room", { stringUser });
         }
         updateUser(roomUsers, user, userId, roomId);
       });
@@ -167,7 +169,8 @@ module.exports = async (io) => {
         
         user.sessions[idInRoom].status = status;
         updateUser(roomUsers, user, userId, roomId);
-        onlineIO.to(roomId).emit("user-status", { user });
+        var stringUser = serialize(user);
+        onlineIO.to(roomId).emit("user-status", { stringUser });
       });
 
       socket.on("removeStatus", async ({ roomPart }) => {
@@ -180,22 +183,23 @@ module.exports = async (io) => {
 
         user.sessions[idInRoom].status = null;
         updateUser(roomUsers, user, userId, roomId);
-        onlineIO.to(roomId).emit("user-status", { user });
+        var stringUser = serialize(user);
+        onlineIO.to(roomId).emit("user-status", { stringUser });
       });
 
       socket.on("getSessionsInRoom", async ({ roomPart }) => {
         const roomId = getRoom(roomPart);
         var users = [];
-        roomUsers.forEach(function(entry) {
-          users.push(entry);
+        Object.values(roomUsers[roomId]).forEach(function(entry) {
+          users.push(serialize(entry));
         });
         onlineIO.to(socket.id).emit("statuses-in-room", { users });
       });
 
       socket.on("getSessionsInPortal", async () => {
         var users = [];
-        portalUsers.forEach(function(entry) {
-          users.push(entry);
+        Object.values(portalUsers[tenantId]).forEach(function(entry) {
+          users.push(serialize(entry));
         });
         onlineIO.to(socket.id).emit("statuses-in-portal", { users });
       });
@@ -268,8 +272,10 @@ module.exports = async (io) => {
       }
 
       function serialize(user){
+        var sessions = user.sessions;
         user.sessions = JSON.stringify([... user.sessions]);
         let string = JSON.stringify(user);
+        user.sessions = sessions;
         return string;
       }
 
