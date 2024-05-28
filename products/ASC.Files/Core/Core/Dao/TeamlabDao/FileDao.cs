@@ -535,7 +535,12 @@ internal class FileDao(
                     {
                         var extension = FileUtility.GetFileExtension(file.Title);
                         var fileType = FileUtility.GetFileTypeByExtention(extension);
-                        if (fileType != FileType.Pdf || (fileType == FileType.Pdf && !await fileStorageService.CheckExtendedPDFstream(fileStream)))
+
+                        using var ms = new MemoryStream();
+                        await fileStream.CopyToAsync(ms, 300);
+                        ms.Position = 0;
+
+                        if (fileType != FileType.Pdf || (fileType == FileType.Pdf && !await fileStorageService.CheckExtendedPDFstream(ms)))
                         {
                             throw new Exception(FilesCommonResource.ErrorMessage_UploadToFormRoom);
                         }

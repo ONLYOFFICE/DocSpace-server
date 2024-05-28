@@ -711,20 +711,23 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                      && !fileUtility.ExtsUploadable.Contains(FileUtility.GetFileExtension(file.Title)))
             {
                 this[Err] = FilesCommonResource.ErrorMessage_NotSupportedFormat;
-            }else if (toFolder.FolderType == FolderType.FillingFormsRoom || toFolder.RootFolderType == FolderType.FillingFormsRoom)
-            {
-                var extension = FileUtility.GetFileExtension(file.Title);
-                var fileType = FileUtility.GetFileTypeByExtention(extension);
-                if (fileType != FileType.Pdf || (fileType == FileType.Pdf && !await fileStorageService.CheckExtendedPDF(file)))
-                {
-                    this[Err] = FilesCommonResource.ErrorMessage_UploadToFormRoom;
-                }
             }
             else
             {
-                var deleteLinks = file.RootFolderType == FolderType.USER && 
-                                  toFolder.RootFolderType is FolderType.VirtualRooms or FolderType.Archive or FolderType.TRASH;
-                
+                if (toFolder.FolderType == FolderType.FillingFormsRoom || toFolder.RootFolderType == FolderType.FillingFormsRoom)
+                {
+                    var extension = FileUtility.GetFileExtension(file.Title);
+                    var fileType = FileUtility.GetFileTypeByExtention(extension);
+                    if (fileType != FileType.Pdf || (fileType == FileType.Pdf && !await fileStorageService.CheckExtendedPDF(file)))
+                    {
+                        this[Err] = FilesCommonResource.ErrorMessage_UploadToFormRoom;
+                        continue;
+                    }
+                }
+
+                var deleteLinks = file.RootFolderType == FolderType.USER &&
+                                toFolder.RootFolderType is FolderType.VirtualRooms or FolderType.Archive or FolderType.TRASH;
+
                 var parentFolder = await FolderDao.GetFolderAsync(file.ParentId);
                 try
                 {
@@ -801,7 +804,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                     await LinkDao.DeleteAllLinkAsync(file.Id.ToString());
                                     await FileDao.SaveProperties(file.Id, null);
                                 }
-                                
+
                                 await socketManager.CreateFileAsync(newFile);
 
                                 if (ProcessedFile(fileId))
@@ -894,9 +897,9 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                         {
                                             await socketManager.DeleteFileAsync(file, action: async () =>
                                             {
-                                            await FileDao.DeleteFileAsync(file.Id);
+                                                await FileDao.DeleteFileAsync(file.Id);
 
-                                            await LinkDao.DeleteAllLinkAsync(file.Id.ToString());
+                                                await LinkDao.DeleteAllLinkAsync(file.Id.ToString());
                                             });
 
                                             await filesMessageService.SendAsync(MessageAction.FileMovedWithOverwriting, file, toFolder, _headers, file.Title, parentFolder.Title, toFolder.Title);
