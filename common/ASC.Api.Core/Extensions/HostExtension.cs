@@ -33,13 +33,26 @@ public static class HostExtension
     public static async Task RunWithTasksAsync(this WebApplication webHost, CancellationToken cancellationToken = default)
     {
         CustomSynchronizationContext.CreateContext();
+        
         // Load all tasks from DI
         var startupTasks = webHost.Services.GetServices<IStartupTask>();
+        var logger = webHost.Services.GetService<ILogger<IStartupTask>>();
 
         // Execute all the tasks
         foreach (var startupTask in startupTasks)
-        {
-            await startupTask.ExecuteAsync(cancellationToken);
+        {        
+            var timestamp = TimeProvider.System.GetTimestamp();
+            var t = startupTask.ExecuteAsync(cancellationToken);
+            if (startupTask is not IStartupTaskNotAwaitable)
+            {
+                await t.ConfigureAwait(false);
+            }
+
+            var totalMilliseconds = TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds;
+            if (totalMilliseconds > 20)
+            {
+                logger.LogDebug($"Service:{startupTask.GetType()},time:{totalMilliseconds.ToString(CultureInfo.InvariantCulture)}");
+            }
         }
 
         // Start the tasks as normal

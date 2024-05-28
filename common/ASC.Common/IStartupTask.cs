@@ -30,3 +30,5 @@ public interface IStartupTask
 {
     Task ExecuteAsync(CancellationToken cancellationToken = default);
 }
+
+public interface IStartupTaskNotAwaitable : IStartupTask;

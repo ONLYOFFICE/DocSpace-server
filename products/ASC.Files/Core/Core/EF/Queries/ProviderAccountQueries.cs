@@ -52,7 +52,7 @@ public partial class FilesDbContext
         return Queries.UpdateThirdPartyAccountsAsync(this, tenantId, linkId, login, password, token, url);
     }
     
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    //[PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<DbFilesThirdpartyAccount> ThirdPartyAccountByLinkIdAsync(int tenantId, int linkId)
     {
         return Queries.ThirdPartyAccountByLinkIdAsync(this, tenantId, linkId);
@@ -70,7 +70,7 @@ public partial class FilesDbContext
         return Queries.DeleteThirdPartyAccountsByLinkIdAsync(this, tenantId, linkId);
     }
     
-    [PreCompileQuery([PreCompileQuery.DefaultInt])]
+    //[PreCompileQuery([PreCompileQuery.DefaultInt])]
     public Task<DbFilesThirdpartyAccount> ThirdPartyBackupAccountAsync(int tenantId)
     {
         return Queries.ThirdPartyBackupAccountAsync(this, tenantId);

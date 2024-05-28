@@ -167,7 +167,7 @@ public partial class UserDbContext
         return Queries.UpdateUserGroupsByGroupIdAsync(this, tenantId, userId, groupId, refType);
     }
     
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    //[PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
     public Task<User> UserAsync(int tenantId, Guid userId)
     {
         return Queries.UserAsync(this, tenantId, userId);

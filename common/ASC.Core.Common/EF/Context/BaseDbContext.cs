@@ -129,9 +129,9 @@ public abstract class BaseEntity
     public abstract object[] GetKeys();
 }
 
-public class WarmupBaseDbContextStartupTask(IServiceProvider provider, ILogger<WarmupBaseDbContextStartupTask> logger) : IStartupTask
+public class WarmupBaseDbContextStartupTask(IServiceProvider provider, ILogger<WarmupBaseDbContextStartupTask> logger) : IStartupTaskNotAwaitable
 {
-    public Task ExecuteAsync(CancellationToken cancellationToken = default)
+    public async Task ExecuteAsync(CancellationToken cancellationToken = default)
     {
         var assemblies = AppDomain.CurrentDomain.GetAssemblies().Where(x =>
         {
@@ -150,8 +150,6 @@ public class WarmupBaseDbContextStartupTask(IServiceProvider provider, ILogger<W
             {
                 continue;
             }
-
-            var context = createDbContextMethod.Invoke(dbContextFactory, null);
 
             var queries = t.GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public)
                 .Where(r => !r.IsSpecialName);
@@ -193,7 +191,24 @@ public class WarmupBaseDbContextStartupTask(IServiceProvider provider, ILogger<W
                         }
                     }
                     
-                    q.Invoke(context, paramsToInvoke.ToArray());
+                    var context = createDbContextMethod.Invoke(dbContextFactory, null);
+                    if (context == null)
+                    {
+                        continue;
+                    }
+                    
+                    var res = q.Invoke(context, paramsToInvoke.ToArray());
+                    if (res is Task task)
+                    {
+                        await task.ConfigureAwait(false);
+                    }
+                    
+                    var disposeContext = context.GetType().GetMethod("Dispose");
+                    if (disposeContext == null)
+                    {
+                        continue;
+                    }
+                    disposeContext.Invoke(context, null);
                 }
                 catch (Exception e)
                 {
@@ -201,8 +216,6 @@ public class WarmupBaseDbContextStartupTask(IServiceProvider provider, ILogger<W
                 }
             }
         }
-
-        return Task.CompletedTask;
     }
 }
 

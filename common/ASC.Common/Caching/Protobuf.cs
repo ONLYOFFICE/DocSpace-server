@@ -94,30 +94,31 @@ public class WarmupProtobufStartupTask(ILogger<WarmupProtobufStartupTask> logger
         var redisGeneric = typeof(RedisCacheNotify<>.RedisCachePubSubItem<>);
         var integrationEvent = typeof(IntegrationEvent);
         var types = aasemblies.SelectMany(r => r.GetTypes().Where(t => t.GetCustomAttribute<ProtoContractAttribute>() != null));
-
+        var methodInfo = typeof(Serializer).GetMethod("PrepareSerializer");
+        if (methodInfo == null)
+        {
+            return Task.CompletedTask;
+        }
+        
         foreach (var t in types)
         {
-            var methodInfo = typeof(Serializer).GetMethod("PrepareSerializer");
-            if (methodInfo == null)
-            {
-                continue;
-            }
-
             try
             {
-                if (t != redisGeneric && t != integrationEvent)
+                if (t == redisGeneric || t == integrationEvent)
                 {
-                    var genericMethod = methodInfo.MakeGenericMethod(t);
-                    genericMethod.Invoke(null, null);
-                    
-                    if (!t.IsSubclassOf(integrationEvent))
-                    {
-                        var redis = redisGeneric.MakeGenericType(t, t);
-                        genericMethod = methodInfo.MakeGenericMethod(redis);
-                        genericMethod.Invoke(null, null);
-                    }
-                    logger.LogTrace("PrepareSerializer:{ProtoBufFullName}", t.FullName);
+                    continue;
                 }
+
+                var genericMethod = methodInfo.MakeGenericMethod(t);
+                genericMethod.Invoke(null, null);
+                    
+                if (!t.IsSubclassOf(integrationEvent))
+                {
+                    var redis = redisGeneric.MakeGenericType(t, t);
+                    genericMethod = methodInfo.MakeGenericMethod(redis);
+                    genericMethod.Invoke(null, null);
+                }
+                logger.LogTrace("PrepareSerializer:{ProtoBufFullName}", t.FullName);
             }
             catch (Exception e)
             {

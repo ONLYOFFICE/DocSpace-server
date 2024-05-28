@@ -30,6 +30,9 @@ internal static partial class WarmupServicesStartupTaskLogger
 {
     [LoggerMessage(Level = LogLevel.Trace, Message = "Warm up services is starting...")]
     public static partial void TraceWarmupStarted(this ILogger<WarmupServicesStartupTask> logger);
+    
+    [LoggerMessage(Level = LogLevel.Trace, Message = "Service:{fullName},time:{totalMilliseconds}")]
+    public static partial void TraceWarmupTime(this ILogger<WarmupServicesStartupTask> logger, string fullName, double totalMilliseconds);
 
     [LoggerMessage(Level = LogLevel.Trace, Message = "Warm up services finished. Processed: {processed}, Successed: {successed}, Failed: {failed}, Time: {processedTime} ms")]
     public static partial void TraceWarmupFinished(this ILogger<WarmupServicesStartupTask> logger, int processed, int successed, int failed, double processedTime);
