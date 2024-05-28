@@ -301,7 +301,7 @@ public class AbstractDao
 
         await using (await _distributedLockProvider.TryAcquireFairLockAsync(GetCustomOrderLockKey(tenantId, parentFolderId)))
         {
-            var fileOrder = await Queries.GetFileOrderAsync(filesDbContext, tenantId, fileId);
+            var fileOrder = await Queries.GetFileOrderAsync(filesDbContext, tenantId, fileId, fileEntryType);
 
             if (order == 0 || fileOrder?.ParentFolderId != parentFolderId)
             {
@@ -374,7 +374,7 @@ public class AbstractDao
     internal async Task DeleteCustomOrder(FilesDbContext filesDbContext, int fileId, FileEntryType fileEntryType)
     {        
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        var fileOrder = await Queries.GetFileOrderAsync(filesDbContext, tenantId, fileId);
+        var fileOrder = await Queries.GetFileOrderAsync(filesDbContext, tenantId, fileId, fileEntryType);
         if (fileOrder != null)
         {
             filesDbContext.Remove(fileOrder);
@@ -435,12 +435,12 @@ static file class Queries
                     ).Skip(1).FirstOrDefault()
                 select rs.Indexing).FirstOrDefault());
     
-    public static readonly Func<FilesDbContext, int, int, Task<DbFileOrder>> GetFileOrderAsync =
+    public static readonly Func<FilesDbContext, int, int, FileEntryType, Task<DbFileOrder>> GetFileOrderAsync =
     Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-        (FilesDbContext ctx, int tenantId, int entryId) =>
+        (FilesDbContext ctx, int tenantId, int entryId, FileEntryType entryType) =>
             ctx.FileOrder
                 .AsTracking()
-                .FirstOrDefault(r =>  r.TenantId == tenantId && r.EntryId == entryId));
+                .FirstOrDefault(r =>  r.TenantId == tenantId && r.EntryId == entryId && r.EntryType == entryType));
 
     public static readonly Func<FilesDbContext, int, int, FileEntryType, Task> ClearFileOrderAsync =
     Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
