@@ -56,7 +56,8 @@ internal class FileDao(
         EmailValidationKeyProvider emailValidationKeyProvider,
         StorageFactory storageFactory,
     TenantQuotaController tenantQuotaController,
-    IDistributedLockProvider distributedLockProvider)
+    IDistributedLockProvider distributedLockProvider,
+    FileStorageService fileStorageService)
     : AbstractDao(dbContextManager,
               userManager,
               tenantManager,
@@ -526,6 +527,20 @@ internal class FileDao(
         {
             try
             {
+                if (roomId != -1)
+                {
+                    var currentRoom = await folderDao.GetFolderAsync(roomId);
+
+                    if (currentRoom.FolderType == FolderType.FillingFormsRoom)
+                    {
+                        var extension = FileUtility.GetFileExtension(file.Title);
+                        var fileType = FileUtility.GetFileTypeByExtention(extension);
+                        if (fileType != FileType.Pdf || (fileType == FileType.Pdf && !await fileStorageService.CheckExtendedPDFstream(fileStream)))
+                        {
+                            throw new Exception(FilesCommonResource.ErrorMessage_UploadToFormRoom);
+                        }
+                    }
+                }
                 await SaveFileStreamAsync(file, fileStream, currentFolder);
             }
             catch (Exception saveException)

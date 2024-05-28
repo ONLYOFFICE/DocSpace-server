@@ -667,6 +667,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         var fileTracker = scope.ServiceProvider.GetService<FileTrackerHelper>();
         var socketManager = scope.ServiceProvider.GetService<SocketManager>();
         var globalStorage = scope.ServiceProvider.GetService<GlobalStore>();
+        var fileStorageService = scope.ServiceProvider.GetService<FileStorageService>();
 
         var toFolderId = toFolder.Id;
         var sb = new StringBuilder();
@@ -710,6 +711,14 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                      && !fileUtility.ExtsUploadable.Contains(FileUtility.GetFileExtension(file.Title)))
             {
                 this[Err] = FilesCommonResource.ErrorMessage_NotSupportedFormat;
+            }else if (toFolder.FolderType == FolderType.FillingFormsRoom || toFolder.RootFolderType == FolderType.FillingFormsRoom)
+            {
+                var extension = FileUtility.GetFileExtension(file.Title);
+                var fileType = FileUtility.GetFileTypeByExtention(extension);
+                if (fileType != FileType.Pdf || (fileType == FileType.Pdf && !await fileStorageService.CheckExtendedPDF(file)))
+                {
+                    this[Err] = FilesCommonResource.ErrorMessage_UploadToFormRoom;
+                }
             }
             else
             {

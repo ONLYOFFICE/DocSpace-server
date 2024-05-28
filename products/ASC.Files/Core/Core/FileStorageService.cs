@@ -904,6 +904,10 @@ public class FileStorageService //: IFileStorageService
         var fileDao = daoFactory.GetFileDao<T>();
         var stream = await fileDao.GetFileStreamAsync(file, 0, limit);
 
+        return await CheckExtendedPDFstream(stream);
+    }
+    public async Task<bool> CheckExtendedPDFstream(Stream stream)
+    {
         using var reader = new StreamReader(stream, Encoding.GetEncoding("iso-8859-1"));
         var message = await reader.ReadToEndAsync();
 

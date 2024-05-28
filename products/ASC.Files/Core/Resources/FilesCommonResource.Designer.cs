@@ -907,6 +907,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The file cannot be uploaded to this room. Please try to upload the PDF form.
+        /// </summary>
+        public static string ErrorMessage_UploadToFormRoom {
+            get {
+                return ResourceManager.GetString("ErrorMessage_UploadToFormRoom", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to User could not be found.
         /// </summary>
         public static string ErrorMessage_UserNotFound {
