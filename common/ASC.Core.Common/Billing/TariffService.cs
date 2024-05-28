@@ -582,7 +582,7 @@ public class TariffService(
 
         if (r == null)
         {
-            return null;
+            return await CreateDefaultAsync();
         }
 
         var tariff = await CreateDefaultAsync(true);
