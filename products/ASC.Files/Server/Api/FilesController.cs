@@ -39,15 +39,37 @@ public class FilesControllerInternal(FilesControllerHelper filesControllerHelper
         FileShareDtoHelper fileShareDtoHelper)
         : FilesController<int>(filesControllerHelper, fileStorageService, fileOperationsManager, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper, apiContext, fileShareDtoHelper);
 
-public class FilesControllerThirdparty(FilesControllerHelper filesControllerHelper,
-        FileStorageService fileStorageService,
-        FileOperationsManager fileOperationsManager,
-        FileOperationDtoHelper fileOperationDtoHelper,
-        FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper,
+public class FilesControllerThirdparty(
+    FilesControllerHelper filesControllerHelper,
+    FileStorageService fileStorageService,
+    FileOperationsManager fileOperationsManager,
+    FileOperationDtoHelper fileOperationDtoHelper,
+    FolderDtoHelper folderDtoHelper,
+    FileDtoHelper fileDtoHelper,
     ApiContext apiContext,
-        FileShareDtoHelper fileShareDtoHelper)
-        : FilesController<string>(filesControllerHelper, fileStorageService, fileOperationsManager, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper, apiContext, fileShareDtoHelper);
+    FileShareDtoHelper fileShareDtoHelper,
+    HistoryApiHelper historyApiHelper)
+    : FilesController<string>(filesControllerHelper, fileStorageService, fileOperationsManager, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper, apiContext,
+        fileShareDtoHelper)
+{
+    /// <summary>
+    /// Get the list of actions performed on the file with the specified identifier
+    /// </summary>
+    /// <short>
+    /// Get file history
+    /// </short>
+    /// <category>Files</category>
+    /// <param type="System.Int32, System" name="fileId">File ID</param>
+    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.HistoryDto, ASC.Files.Core">List of actions performed on the file</returns>
+    /// <path>api/2.0/files/file/{fileId}/log</path>
+    /// <httpMethod>GET</httpMethod>
+    /// <collection>list</collection>
+    [HttpGet("file/{fileId:int}/log")]
+    public IAsyncEnumerable<HistoryDto> GetHistoryAsync(int fileId)
+    {
+        return historyApiHelper.GetFileHistoryAsync(fileId);
+    }
+}
 
 public abstract class FilesController<T>(FilesControllerHelper filesControllerHelper,
         FileStorageService fileStorageService,
@@ -580,5 +602,4 @@ public class FilesControllerCommon(
     {
         return await fileStorageService.CreateThumbnailsAsync(inDto.FileIds.ToList());
     }
-
 }

@@ -24,42 +24,45 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using GroupInfo = ASC.Core.Users.GroupInfo;
+namespace ASC.Files.Core.Core.Entries;
 
-namespace ASC.Web.Api.Models;
-
-/// <summary>
-/// </summary>
-public class GroupSummaryDto
+public record HistoryEntry
 {
-    /// <summary>ID</summary>
-    /// <type>System.Guid, System</type>
-    public Guid Id { get; set; }
+    public HistoryAction Action { get; init; }
+    public Guid InitiatorId { get; init; }
+    public DateTime Date { get; init; }
+    public HistoryData Data { get; init; }
+    
+    private static readonly HashSet<MessageAction> _gropedActions = 
+    [
+        MessageAction.FileUploaded, 
+        MessageAction.FileMoved, 
+        MessageAction.FileCopied, 
+        MessageAction.FolderMoved, 
+        MessageAction.FolderCopied,
+        MessageAction.FileDeleted,
+        MessageAction.FolderDeleted,
+        MessageAction.RoomCreateUser,
+        MessageAction.RoomGroupAdded
+    ];
+    
+    private int _groupId;
 
-    /// <summary>Name</summary>
-    /// <type>System.String, System</type>
-    public string Name { get; init; }
-
-    /// <summary>Manager</summary>
-    /// <type>System.String, System</type>
-    public string Manager { get; set; }
-
-    public GroupSummaryDto() { }
-
-    public GroupSummaryDto(GroupInfo group, UserManager userManager)
+    public int GetGroupId()
     {
-        Id = group.ID;
-        Name = group.Name;
-        Manager = userManager.GetUsers(userManager.GetDepartmentManager(group.ID)).UserName;
-    }
-
-    public static GroupSummaryDto GetSample()
-    {
-        return new GroupSummaryDto
+        if (_groupId != 0)
         {
-            Id = Guid.Empty,
-            Manager = "Jake.Zazhitski",
-            Name = "Group Name"
-        };
+            return _groupId;
+        }
+        
+        return _groupId = HashCode.Combine(Action, InitiatorId, _gropedActions.Contains(Action.Id) 
+            ? new DateTime(Date.Year, Date.Month, Date.Day, Date.Hour, Date.Minute, 0) : Date, Data?.GetId() ?? 0);
     }
 }
+
+public abstract record HistoryData
+{
+    public virtual int GetId() => 0;
+}
+
+public record HistoryAction(MessageAction Id, string Key);
