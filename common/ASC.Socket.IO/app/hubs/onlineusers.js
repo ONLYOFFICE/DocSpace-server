@@ -217,7 +217,7 @@ module.exports = async (io) => {
             users.push(user);
           }
         }
-        onlineIO.to(socket.id).emit("statuses-in-room", { users });
+        onlineIO.to(socket.id).emit("statuses-in-portal", { users });
       });
 
       socket.on("leave", async ({ roomPart }) => {
