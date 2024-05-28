@@ -50,7 +50,6 @@ public class UserController(ICache cache,
         StudioNotifyService studioNotifyService,
         MessageService messageService,
         AuthContext authContext,
-        SetupInfo setupInfo,
         UserManager userManager,
         PermissionContext permissionContext,
         CoreBaseSettings coreBaseSettings,
@@ -198,7 +197,7 @@ public class UserController(ICache cache,
             else
             {
                 await userInvitationLimitHelper.IncreaseLimit();
-            }
+        }
         }
 
         inDto.PasswordHash = (inDto.PasswordHash ?? "").Trim();
@@ -1088,9 +1087,8 @@ public class UserController(ICache cache,
             await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
             await cookiesManager.ResetUserCookieAsync(user.Id);
             await studioNotifyService.SendEmailActivationInstructionsAsync(user, email);
+            await messageService.SendAsync(MessageAction.UserSentEmailChangeInstructions, MessageTarget.Create(user.Id), DateTime.UtcNow, user.DisplayUserName(false, displayUserSettingsHelper));
         }
-
-        await messageService.SendAsync(MessageAction.UserSentEmailChangeInstructions, user.DisplayUserName(false, displayUserSettingsHelper));
 
         return string.Format(Resource.MessageEmailChangeInstuctionsSentOnEmail, email);
     }
@@ -1128,9 +1126,9 @@ public class UserController(ICache cache,
             logger.ErrorPasswordRecovery(inDto.Email, error);
         }
 
-        var pattern = authContext.IsAuthenticated ? Resource.MessagePasswordSendedToEmail : Resource.MessageYourPasswordSendedToEmail;
-        return string.Format(pattern, inDto.Email);
-    }
+            var pattern = authContext.IsAuthenticated ? Resource.MessagePasswordSendedToEmail : Resource.MessageYourPasswordSendedToEmail;
+            return string.Format(pattern, inDto.Email);
+        }
 
     /// <summary>
     /// Sets the required activation status to the list of users with the IDs specified in the request.
@@ -1204,27 +1202,9 @@ public class UserController(ICache cache,
         }
 
         await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(user.Id), Constants.Action_EditUser);
-
-        var curLng = user.CultureName;
-
-        if (setupInfo.EnabledCultures.Find(c => string.Equals(c.Name, inDto.CultureName, StringComparison.InvariantCultureIgnoreCase)) != null && curLng != inDto.CultureName)
-        {
-            user.CultureName = inDto.CultureName;
-
-            try
-            {
-                await _userManager.UpdateUserInfoAsync(user);
-            }
-            catch
-            {
-                user.CultureName = curLng;
-                throw;
-            }
-
+        await _userManager.ChangeUserCulture(user, inDto.CultureName);
             await messageService.SendAsync(MessageAction.UserUpdatedLanguage, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
-
-        }
-
+        
         return await employeeFullDtoHelper.GetFullAsync(user);
     }
 

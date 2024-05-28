@@ -54,7 +54,6 @@ public partial class SettingsController(MessageService messageService,
         PasswordHasher passwordHasher,
         IHttpContextAccessor httpContextAccessor,
         DnsSettings dnsSettings,
-        AdditionalWhiteLabelSettingsHelperInit additionalWhiteLabelSettingsHelper,
         CustomColorThemesSettingsHelper customColorThemesSettingsHelper,
         UserInvitationLimitHelper userInvitationLimitHelper,
         QuotaSyncOperation quotaSyncOperation,
@@ -95,7 +94,7 @@ public partial class SettingsController(MessageService messageService,
 
         var settings = new SettingsDto
         {
-            Culture = setupInfo.GetRightCultureName(tenant.GetCulture()),
+            Culture = coreBaseSettings.GetRightCultureName(tenant.GetCulture()),
             GreetingSettings = tenant.Name == "" ? Resource.PortalName : tenant.Name,
             DocSpace = true,
             Standalone = coreBaseSettings.Standalone,
@@ -107,7 +106,7 @@ public partial class SettingsController(MessageService messageService,
             LegalTerms = setupInfo.LegalTerms,
             CookieSettingsEnabled = tenantCookieSettings.Enabled,
             UserNameRegex = userFormatter.UserNameRegex.ToString(),
-            ForumLink = await commonLinkUtility.GetUserForumLinkAsync(settingsManager, additionalWhiteLabelSettingsHelper)
+            ForumLink = await commonLinkUtility.GetUserForumLinkAsync(settingsManager)
         };
 
         if (!authContext.IsAuthenticated && await externalShare.GetLinkIdAsync() != default)
@@ -152,7 +151,7 @@ public partial class SettingsController(MessageService messageService,
                 IosPackageId = configuration["deeplink:iospackageid"] ?? ""
             };
 
-            settings.HelpLink = await commonLinkUtility.GetHelpLinkAsync(settingsManager, additionalWhiteLabelSettingsHelper);
+            settings.HelpLink = await commonLinkUtility.GetHelpLinkAsync(settingsManager);
             settings.ApiDocsLink = configuration["web:api-docs"];
 
             if (bool.TryParse(configuration["debug-info:enabled"], out var debugInfo))
@@ -447,7 +446,7 @@ public partial class SettingsController(MessageService messageService,
     [HttpGet("cultures")]
     public IEnumerable<string> GetSupportedCultures()
     {
-        return setupInfo.EnabledCultures.Select(r => r.Name).ToList();
+        return coreBaseSettings.EnabledCultures.Select(r => r.Name).ToList();
     }
 
     /// <summary>
@@ -781,7 +780,7 @@ public partial class SettingsController(MessageService messageService,
         var tenant = await tenantManager.GetCurrentTenantAsync();
 
         var changelng = false;
-        if (setupInfo.EnabledCultures.Find(c => string.Equals(c.Name, culture.Name, StringComparison.InvariantCultureIgnoreCase)) != null && !string.Equals(tenant.Language, culture.Name, StringComparison.InvariantCultureIgnoreCase))
+        if (coreBaseSettings.EnabledCultures.Find(c => string.Equals(c.Name, culture.Name, StringComparison.InvariantCultureIgnoreCase)) != null && !string.Equals(tenant.Language, culture.Name, StringComparison.InvariantCultureIgnoreCase))
         {
             tenant.Language = culture.Name;
             changelng = true;
