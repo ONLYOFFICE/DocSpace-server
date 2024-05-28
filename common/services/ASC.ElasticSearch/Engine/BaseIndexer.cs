@@ -51,9 +51,9 @@ public class BaseIndexerHelper
         }, CacheNotifyAction.Any);
     }
 
-    public void Clear<T>(T t) where T : class, ISearchItem
+    public async Task ClearAsync<T>(T t) where T : class, ISearchItem
     {
-        _notify.Publish(new ClearIndexAction { Id = t.IndexName }, CacheNotifyAction.Any);
+        await _notify.PublishAsync(new ClearIndexAction { Id = t.IndexName }, CacheNotifyAction.Any);
     }
 }
 
@@ -426,7 +426,7 @@ public abstract class BaseIndexer<T>(Client client,
 
         _logger.DebugIndexDeleted(Wrapper.IndexName);
         await client.Instance.Indices.DeleteAsync(Wrapper.IndexName);
-        baseIndexerHelper.Clear(Wrapper);
+        await baseIndexerHelper.ClearAsync(Wrapper);
         CreateIfNotExist(Wrapper);
     }
 
@@ -598,7 +598,7 @@ public abstract class BaseIndexer<T>(Client client,
         if (member == null && expr is UnaryExpression unary)
         {
                 member = unary.Operand as MemberExpression;
-        }
+            }
 
         return member == null ? "" : member.Member.Name.ToLowerCamelCase();
     }

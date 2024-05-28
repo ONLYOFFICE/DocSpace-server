@@ -34,10 +34,8 @@ class DbAzService(IDbContextFactory<UserDbContext> dbContextFactory, IMapper map
         await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
 
         // row with tenant = -1 - common for all tenants, but equal row with tenant != -1 escape common row for the portal
-        var commonAces = await
-            userDbContext.Acl
-            .Where(r => r.TenantId == Tenant.DefaultTenant)
-            .ProjectTo<AzRecord>(mapper.ConfigurationProvider)
+        var commonAces = await userDbContext.AzRecordAsync()
+            .Select(mapper.Map<Acl, AzRecord>)
             .ToDictionaryAsync(a => string.Concat(a.TenantId.ToString(), a.Subject.ToString(), a.Action.ToString(), a.Object));
 
         var tenantAces = await
@@ -99,13 +97,13 @@ class DbAzService(IDbContextFactory<UserDbContext> dbContextFactory, IMapper map
     private async Task<bool> ExistEscapeRecordAsync(AzRecord r)
     {
         await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
-        return await Queries.AnyAclAsync(userDbContext, Tenant.DefaultTenant, r.Subject, r.Action, r.Object ?? string.Empty, r.AceType);
+        return await userDbContext.AnyAclAsync(Tenant.DefaultTenant, r.Subject, r.Action, r.Object ?? string.Empty, r.AceType);
     }
 
     private async Task DeleteRecordAsync(AzRecord r)
     {
         await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
-        var record = await Queries.AclAsync(userDbContext, r.TenantId, r.Subject, r.Action, r.Object ?? string.Empty, r.AceType);
+        var record = await userDbContext.AclAsync(r.TenantId, r.Subject, r.Action, r.Object ?? string.Empty, r.AceType);
 
         if (record != null)
         {
@@ -120,27 +118,4 @@ class DbAzService(IDbContextFactory<UserDbContext> dbContextFactory, IMapper map
         await userDbContext.AddOrUpdateAsync(q => q.Acl, mapper.Map<AzRecord, Acl>(r));
         await userDbContext.SaveChangesAsync();
     }
-}
-
-static file class Queries
-{
-    public static readonly Func<UserDbContext, int, Guid, Guid, string, AceType, Task<bool>> AnyAclAsync =
-        EF.CompileAsyncQuery(
-            (UserDbContext ctx, int tenantId, Guid subject, Guid action, string obj, AceType aceType) =>
-                ctx.Acl
-                    .Where(r => r.TenantId == tenantId)
-                    .Where(r => r.Subject == subject)
-                    .Where(r => r.Action == action)
-                    .Where(r => r.Object == obj)
-                    .Any(r => r.AceType == aceType));
-
-    public static readonly Func<UserDbContext, int, Guid, Guid, string, AceType, Task<Acl>> AclAsync =
-        EF.CompileAsyncQuery(
-            (UserDbContext ctx, int tenantId, Guid subject, Guid action, string obj, AceType aceType) =>
-                ctx.Acl
-                    .Where(r => r.TenantId == tenantId)
-                    .Where(r => r.Subject == subject)
-                    .Where(r => r.Action == action)
-                    .Where(r => r.Object == obj)
-                    .FirstOrDefault(r => r.AceType == aceType));
 }

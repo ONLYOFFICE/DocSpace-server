@@ -33,8 +33,8 @@ class DbQuotaService(IDbContextFactory<CoreDbContext> dbContextManager, IMapper 
     public async Task<IEnumerable<TenantQuota>> GetTenantQuotasAsync()
     {
         await using var coreDbContext = await dbContextManager.CreateDbContextAsync();
-
-        return mapper.Map<List<DbQuota>, List<TenantQuota>>(await coreDbContext.Quotas.ToListAsync());
+        var res = await coreDbContext.AllQuotasAsync().ToListAsync();
+        return mapper.Map<List<DbQuota>, List<TenantQuota>>(res);
     }
 
     public async Task<TenantQuota> GetTenantQuotaAsync(int id)
@@ -59,7 +59,7 @@ class DbQuotaService(IDbContextFactory<CoreDbContext> dbContextManager, IMapper 
     {
         await using var coreDbContext = await dbContextManager.CreateDbContextAsync();
 
-        var quota = await Queries.QuotaAsync(coreDbContext, id);
+        var quota = await coreDbContext.QuotaAsync(id);
 
         if (quota != null)
         {
@@ -88,7 +88,7 @@ class DbQuotaService(IDbContextFactory<CoreDbContext> dbContextManager, IMapper 
         {
             if (exchange)
             {
-                await Queries.UpdateCounterAsync(coreDbContext, row.TenantId, row.UserId, row.Path, row.Counter);
+                await coreDbContext.UpdateCounterAsync(row.TenantId, row.UserId, row.Path, row.Counter);
             }
             else
             {

@@ -82,15 +82,15 @@ public class ThirdpartyConfiguration(ThirdpartyConfigurationData configuration, 
     public bool SupportkDriveInclusion => ThirdPartyProviders.Contains("kdrive");
 
     public bool SupportYandexInclusion => ThirdPartyProviders.Contains("yandex");
-
+    
     public bool SupportDocuSignInclusion => ThirdPartyProviders.Contains("docusign") && DocuSignLoginProvider.IsEnabled;
 
     public bool SupportGoogleDriveInclusion => ThirdPartyProviders.Contains("google") && GoogleLoginProvider.IsEnabled;
-
+    
     public List<ProviderDto> GetAllProviders()
     {
         var webDavKey = ProviderTypes.WebDav.ToStringFast();
-        
+
         var providers = new List<ProviderDto>
         {
             new("Box", ProviderTypes.Box.ToStringFast(), BoxLoginProvider.IsEnabled, true, BoxLoginProvider.RedirectUri),

@@ -147,8 +147,8 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
 
         if (subjectID != Guid.Empty)
         {
-            folders = folders.Where(x => subjectGroup
-                                             ? userManager.IsUserInGroup(x.CreateBy, subjectID)
+            folders = folders.WhereAwait(async x => subjectGroup
+                                             ? await userManager.IsUserInGroupAsync(x.CreateBy, subjectID)
                                              : x.CreateBy == subjectID);
         }
 
@@ -183,8 +183,8 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
 
         if (subjectID.HasValue && subjectID != Guid.Empty)
         {
-            folders = folders.Where(x => subjectGroup
-                                             ? userManager.IsUserInGroup(x.CreateBy, subjectID.Value)
+            folders = folders.WhereAwait(async x => subjectGroup
+                                             ? await userManager.IsUserInGroupAsync(x.CreateBy, subjectID.Value)
                                              : x.CreateBy == subjectID);
         }
 

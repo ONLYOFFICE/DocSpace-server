@@ -24,13 +24,14 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Common.Mapping;
 using ASC.Core.Notify.Socket;
 using ASC.Data.Storage;
+using ASC.MessagingSystem;
 
 using Flurl.Util;
 
 using IPNetwork = Microsoft.AspNetCore.HttpOverrides.IPNetwork;
-using SecurityContext = ASC.Core.SecurityContext;
 
 namespace ASC.Api.Core;
 
@@ -300,6 +301,7 @@ public abstract class BaseStartup
             options.OnRejected = (context, ct) => RateLimitMetadata.OnRejected(context.HttpContext, context.Lease, ct);
         });
 
+        services.AddSingleton<MessageSettings>();//warmup
         services.AddSingleton<EFLoggerFactory>();
 
         services.AddBaseDbContextPool<AccountLinkContext>()
@@ -379,7 +381,6 @@ public abstract class BaseStartup
             config.Filters.Add(new TypeFilterAttribute(typeof(IpSecurityFilter)));
             config.Filters.Add(new TypeFilterAttribute(typeof(ProductSecurityFilter)));
             config.Filters.Add(new CustomResponseFilterAttribute());
-            //config.Filters.Add<CustomExceptionFilterAttribute>();
             config.Filters.Add(new TypeFilterAttribute(typeof(WebhooksGlobalFilterAttribute)));
         });
 
@@ -403,26 +404,26 @@ public abstract class BaseStartup
 
                 options.TokenValidationParameters = new TokenValidationParameters { ValidateAudience = false };
 
-                options.Events = new JwtBearerEvents
-                {
-                    OnTokenValidated = async ctx =>
-                    {
-                        using var scope = ctx.HttpContext.RequestServices.CreateScope();
+              options.Events = new JwtBearerEvents
+              {
+                  OnTokenValidated = async ctx =>
+                  {
+                      using var scope = ctx.HttpContext.RequestServices.CreateScope();
 
-                        var securityContext = scope.ServiceProvider.GetService<SecurityContext>();
+                      var securityContext = scope.ServiceProvider.GetService<ASC.Core.SecurityContext>();
 
-                        var claimUserId = ctx.Principal.FindFirstValue("userId");
+                      var claimUserId = ctx.Principal.FindFirstValue("userId");
 
-                        if (string.IsNullOrEmpty(claimUserId))
-                        {
-                            throw new Exception("Claim 'UserId' is not present in claim list");
-                        }
+                      if (string.IsNullOrEmpty(claimUserId))
+                      {
+                          throw new Exception("Claim 'UserId' is not present in claim list");
+                      }
 
-                        var userId = new Guid(claimUserId);
+                      var userId = new Guid(claimUserId);
 
-                        await securityContext.AuthenticateMeWithoutCookieAsync(userId, ctx.Principal.Claims.ToList());
-                    }
-                };
+                      await securityContext.AuthenticateMeWithoutCookieAsync(userId, ctx.Principal.Claims.ToList());
+                  }
+              };
             })
             .AddPolicyScheme(MultiAuthSchemes, JwtBearerDefaults.AuthenticationScheme, options =>
             {
@@ -477,10 +478,12 @@ public abstract class BaseStartup
             options.MaxThreadsCount = 2;
         });
 
-        if (!_hostEnvironment.IsDevelopment())
-        {
-            services.AddStartupTask<WarmupServicesStartupTask>().TryAddSingleton(services);
-        }
+        services
+            .AddStartupTask<WarmupServicesStartupTask>()
+            .AddStartupTask<WarmupProtobufStartupTask>()
+            .AddStartupTask<WarmupBaseDbContextStartupTask>()
+            .AddStartupTask<WarmupMappingStartupTask>()
+            .TryAddSingleton(services);
     }
 
     public static IEnumerable<Assembly> GetAutoMapperProfileAssemblies()

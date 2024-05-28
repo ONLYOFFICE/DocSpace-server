@@ -179,7 +179,7 @@
           &lt;/td&gt;
         &lt;/tr&gt;</value>
   </data>
-  <data name="TextForFooterUnsubsribeDocSpace" xml:space="preserve">
+  <data name="TextForFooterUnsubsribe" xml:space="preserve">
     <value>Pour toute question relative à l'achat, contactez-nous à l'adresse suivante &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="mailto:sales@onlyoffice.com"&gt;sales@onlyoffice.com&lt;/a&gt;.&lt;br /&gt; En cas de problèmes techniques, veuillez contacter notre &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://www.onlyoffice.com/support-contact-form.aspx"&gt;équipe de support&lt;/a&gt;.&lt;br /&gt; &lt;a href="{1}" style="color: #FF6F3D; text-decoration: underline; white-space: nowrap;" target="_blank"&gt;Cliquez ici pour vous désabonner&lt;/a&gt;&lt;br /&gt;</value>
   </data>
   <data name="TopGif" xml:space="preserve">

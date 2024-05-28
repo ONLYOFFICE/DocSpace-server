@@ -502,7 +502,7 @@ public class FileConverter(
             if (updateIfExist && (parent != null && !folderId.Equals(parent.Id) || !file.ProviderEntry))
             {
                 newFile = await fileDao.GetFileAsync(folderId, newFileTitle);
-                if (newFile != null && await fileSecurity.CanEditAsync(newFile) && !await lockerManager.FileLockedForMeAsync(newFile.Id) && !fileTracker.IsEditing(newFile.Id))
+                if (newFile != null && await fileSecurity.CanEditAsync(newFile) && !await lockerManager.FileLockedForMeAsync(newFile.Id) && !await fileTracker.IsEditingAsync(newFile.Id))
                 {
                     newFile.Version++;
                     newFile.VersionGroup++;

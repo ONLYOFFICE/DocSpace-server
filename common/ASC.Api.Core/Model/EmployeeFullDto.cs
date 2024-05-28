@@ -203,7 +203,6 @@ public class EmployeeFullDto : EmployeeDto
 
 [Scope]
 public class EmployeeFullDtoHelper(
-        SetupInfo setupInfo,
         ApiContext httpContext,
         UserManager userManager,
         AuthContext authContext,
@@ -217,6 +216,7 @@ public class EmployeeFullDtoHelper(
         IQuotaService quotaService,
         TenantManager tenantManager,
         CoreBaseSettings coreBaseSettings,
+        GroupSummaryDtoHelper groupSummaryDtoHelper,
         ILogger<EmployeeDtoHelper> logger)
     : EmployeeDtoHelper(httpContext, displayUserSettingsHelper, userPhotoManager, commonLinkUtility, userManager, authContext, logger)
 {
@@ -345,7 +345,7 @@ public class EmployeeFullDtoHelper(
 
         if (!string.IsNullOrEmpty(userInfo.CultureName))
         {
-            result.CultureName = setupInfo.GetRightCultureName(userInfo.GetCulture());
+            result.CultureName = coreBaseSettings.GetRightCultureName(userInfo.GetCulture());
         }
 
         FillConacts(result, userInfo);
@@ -392,9 +392,14 @@ public class EmployeeFullDtoHelper(
             return;
         }
 
-        var groups = (await _userManager.GetUserGroupsAsync(userInfo.Id))
-            .Select(x => new GroupSummaryDto(x, _userManager))
-            .ToList();
+        var groupsFromDb = (await _userManager.GetUserGroupsAsync(userInfo.Id));
+        List<GroupSummaryDto> groups = new();
+
+        foreach (var g in groupsFromDb)
+        {
+            groups.Add(await groupSummaryDtoHelper.GetAsync(g));
+        }
+        
 
         if (groups.Count > 0)
         {

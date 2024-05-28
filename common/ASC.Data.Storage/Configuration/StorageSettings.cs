@@ -164,7 +164,7 @@ public class StorageSettingsHelper
         await SaveAsync(baseStorageSettings);
     }
 
-    public DataStoreConsumer DataStoreConsumer<T>(BaseStorageSettings<T> baseStorageSettings) where T : class, ISettings<T>, new()
+    public async Task<DataStoreConsumer> DataStoreConsumerAsync<T>(BaseStorageSettings<T> baseStorageSettings) where T : class, ISettings<T>, new()
     {
         if (string.IsNullOrEmpty(baseStorageSettings.Module) || baseStorageSettings.Props == null)
         {
@@ -173,19 +173,19 @@ public class StorageSettingsHelper
 
         var consumer = _consumerFactory.GetByKey<DataStoreConsumer>(baseStorageSettings.Module);
 
-        if (!consumer.IsSet)
+        if (!await consumer.GetIsSetAsync())
         {
             return new DataStoreConsumer();
         }
 
-        var _dataStoreConsumer = (DataStoreConsumer)consumer.Clone();
+        var dataStoreConsumer = (DataStoreConsumer)consumer.Clone();
 
         foreach (var prop in baseStorageSettings.Props)
         {
-            _dataStoreConsumer[prop.Key] = prop.Value;
+            await dataStoreConsumer.SetAsync(prop.Key, prop.Value);
         }
 
-        return _dataStoreConsumer;
+        return dataStoreConsumer;
     }
 
     public async Task<IDataStore> DataStoreAsync<T>(BaseStorageSettings<T> baseStorageSettings) where T : class, ISettings<T>, new()
@@ -195,13 +195,15 @@ public class StorageSettingsHelper
             return _dataStore;
         }
 
-        if (DataStoreConsumer(baseStorageSettings).HandlerType == null)
+        var dataStoreConsumer = await DataStoreConsumerAsync(baseStorageSettings);
+        var handlerType = dataStoreConsumer.HandlerType;
+        if (handlerType == null)
         {
             return null;
         }
 
-        return _dataStore = ((IDataStore)_serviceProvider.GetService(DataStoreConsumer(baseStorageSettings).HandlerType))
-            .Configure((await _tenantManager.GetCurrentTenantIdAsync()).ToString(), null, null, DataStoreConsumer(baseStorageSettings), null);
+        return _dataStore = ((IDataStore)_serviceProvider.GetService(handlerType))
+            .Configure((await _tenantManager.GetCurrentTenantIdAsync()).ToString(), null, null, dataStoreConsumer, null);
     }
 
     internal async Task ClearDataStoreCacheAsync()

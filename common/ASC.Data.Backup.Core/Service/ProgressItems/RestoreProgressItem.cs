@@ -49,7 +49,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
         IServiceScopeFactory serviceScopeFactory,
         NotifyHelper notifyHelper,
         CoreBaseSettings coreBaseSettings)
-        : base(logger, serviceScopeFactory)
+        : base(serviceScopeFactory)
     {
         _configuration = configuration;
         _logger = logger;
@@ -68,6 +68,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
 
     public void Init(StartRestoreRequest request, string tempFolder, string upgradesPath, string region = "current")
     {
+        Init();
         TenantId = request.TenantId;
         Notify = request.NotifyAfterCompletion;
         StoragePath = request.FilePathOrId;

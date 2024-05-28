@@ -39,15 +39,19 @@ public class WarmupServicesStartupTask(IServiceCollection services, IServiceProv
 
         using var scope = provider.CreateScope();
         var logger = scope.ServiceProvider.GetService<ILogger<WarmupServicesStartupTask>>();
-
         logger.TraceWarmupStarted();
             
         foreach (var service in GetServices(services))
         {
             try
             {
+                var timestamp = TimeProvider.System.GetTimestamp();
                 scope.ServiceProvider.GetService(service);
-
+                var totalMilliseconds = TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds;
+                if (totalMilliseconds > 10)
+                {
+                    logger.TraceWarmupTime(service.FullName, totalMilliseconds);
+                }
                 processedSuccessed++;
             }
             catch (Exception ex)
