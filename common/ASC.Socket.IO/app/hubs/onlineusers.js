@@ -1,14 +1,12 @@
-const redis = require("redis");
-const config = require("../../config");
 var uap = require('ua-parser-js');
 const { json } = require("express/lib/response");
 
 module.exports = async (io) => {
     const logger = require("../log.js");
     const onlineIO = io;
-    const redisOptions = config.get("Redis");
-    
-    const client = await redis.createClient(redisOptions).connect();
+    const portalUsers =[];
+    const roomUsers =[];
+
     onlineIO.on("connection", async (socket) => {
       const session = socket.handshake.session;
       if (session.system) {
@@ -26,7 +24,7 @@ module.exports = async (io) => {
       let id;
       let idInRoom;
       
-      var user = await client.get(`portals-${tenantId}-${userId}`);
+      var user = getUser(portalUsers, userId, tenantId);
       if (!user) 
       {
         var sessions = new Map();
@@ -48,7 +46,6 @@ module.exports = async (io) => {
       }
       else
       {
-        user = deserialize(user); 
         user.status = "online";
 
         var keys = user.sessions.keys();
@@ -65,14 +62,13 @@ module.exports = async (io) => {
       {
         onlineIO.to(`p-${tenantId}`).emit("enter-in-portal", { user });
       }
-      
-      await client.set(`portals-${tenantId}-${userId}`, serialize(user), 'EX', 60 * 60 * 24 * 3);
+
+      updateUser(portalUsers, user, userId, tenantId);
 
       socket.on("disconnect", async (reason) => {
-        var user = await client.get(`portals-${tenantId}-${userId}`);
+        var user = getUser(portalUsers, userId, tenantId);
         if (user) 
         {
-          user = deserialize(user); 
           user.sessions.delete(id);
           id = -1;
 
@@ -80,12 +76,12 @@ module.exports = async (io) => {
           {
             user.status = "offline";
             user.date = Date.now();
-            await client.set(`portals-${tenantId}-${userId}`, serialize(user));
+            updateUser(portalUsers, user, userId, tenantId);
             onlineIO.to(`p-${tenantId}`).emit("leave-in-portal", { userId });
           }
           else
           { 
-            await client.set(`portals-${tenantId}-${userId}`, serialize(user), 'EX', 60 * 60 * 24 * 3);
+            updateUser(portalUsers, user, userId, tenant);
           }
         }
 
@@ -96,10 +92,9 @@ module.exports = async (io) => {
 
         /*****************************/
 
-        user = await client.get(`rooms-${_roomId}-${userId}`);
+        var user = getUser(roomUsers, userId, _roomId);
         if (user) 
         {
-          user = deserialize(user); 
           user.sessions.delete(idInRoom);
           idInRoom = -1;
 
@@ -107,19 +102,19 @@ module.exports = async (io) => {
           {
             user.status = "offline";
             user.date = Date.now();
-            await client.set(`rooms-${_roomId}-${userId}`, serialize(user));
+            updateUser(roomUsers, user, userId, _roomId);
             onlineIO.to(_roomId).emit("leave-in-room", { userId });
           }
           else
           { 
-            await client.set(`rooms-${_roomId}-${userId}`, serialize(user),'EX', 60 * 60 * 24 * 3);
+            updateUser(roomUsers, user, userId, _roomId);
           }
         }
       });
   
       socket.on("enter", async ({ roomPart, status }) => {
         const roomId = getRoom(roomPart);
-        var user = await client.get(`rooms-${roomId}-${userId}`);
+        var user = getUser(roomUsers, userId, roomId);
         if (!user) 
         {
           var sessions = new Map();
@@ -142,7 +137,6 @@ module.exports = async (io) => {
         }
         else
         {
-          user = deserialize(user); 
           user.status = "online";
           var keys = user.sessions.keys();
           idInRoom = keys.length == 0 ? 1 : Array.from(keys).pop() + 1;
@@ -160,84 +154,69 @@ module.exports = async (io) => {
         {
           onlineIO.to(roomId).emit("enter-in-room", { user });
         }
-        await client.set(`rooms-${roomId}-${userId}`, serialize(user));
+        updateUser(roomUsers, user, userId, roomId);
       });
 
       socket.on("changeStatus", async ({ roomPart, status }) => {
         const roomId = getRoom(roomPart);
-        var user = await client.get(`rooms-${roomId}-${userId}`);
+        var user = getUser(roomUsers, userId, roomId);
         if (!user) 
         {
           return;
         }
         
-        user = deserialize(user);
         user.sessions[idInRoom].status = status;
-        await client.set(`rooms-${roomId}-${userId}`, serialize(user), 'EX', 60 * 60 * 24 * 3);
+        updateUser(roomUsers, user, userId, roomId);
         onlineIO.to(roomId).emit("user-status", { user });
       });
 
       socket.on("removeStatus", async ({ roomPart }) => {
         const roomId = getRoom(roomPart);
-        var user = await client.get(`rooms-${roomId}-${userId}`);
+        var user = getUser(roomUsers, userId, roomId);
         if (!user) 
         {
           return;
         }
-        
-        user = deserialize(user);
 
         user.sessions[idInRoom].status = null;
-        await client.set(`rooms-${roomId}-${userId}`, serialize(user), 'EX', 60 * 60 * 24 * 3);
+        updateUser(roomUsers, user, userId, roomId);
         onlineIO.to(roomId).emit("user-status", { user });
       });
 
-      socket.on("getSessionsInRoom", async ({ roomPart, userIds }) => {
+      socket.on("getSessionsInRoom", async ({ roomPart }) => {
         const roomId = getRoom(roomPart);
         var users = [];
-        for (const userId of userIds) {
-          var user = await client.get(`rooms-${roomId}-${userId}`);
-          if(user!= null)
-          {
-            user = deserialize(user);
-            users.push(user);
-          }
-        }
+        roomUsers.forEach(function(entry) {
+          users.push(entry);
+        });
         onlineIO.to(socket.id).emit("statuses-in-room", { users });
       });
 
-      socket.on("getSessionsInPortal", async ({ userIds }) => {
+      socket.on("getSessionsInPortal", async () => {
         var users = [];
-        for (const userId of userIds) 
-        {
-          var user = await client.get(`portals-${tenantId}-${userId}`);
-          if(user != null)
-          {
-            user = deserialize(user)
-            users.push(user);
-          }
-        }
+        portalUsers.forEach(function(entry) {
+          users.push(entry);
+        });
         onlineIO.to(socket.id).emit("statuses-in-portal", { users });
       });
 
       socket.on("leave", async ({ roomPart }) => {
         const roomId = getRoom(roomPart);
-        var user = await client.get(`rooms-${roomId}-${userId}`);
+        var user = getUser(roomUsers, userId, roomId);
         if (user) 
         {
-          user = deserialize(user); 
           user.sessions.delete(idInRoom);
           idInRoom = -1;
 
           if(user.sessions.length <= 0)
           {
-            await client.del(`rooms-${roomId}-${userId}`);
+            updateUser(roomUsers, user, userId, roomId);
             _roomId = undefined;
             onlineIO.to(roomId).emit("leave-in-room", { userId });
           }
           else
           { 
-            await client.set(`rooms-${roomId}-${userId}`, serialize(user), 'EX', 60 * 60 * 24 * 3);
+            updateUser(roomUsers, user, userId, roomId);
             _roomId = undefined;
           }
         }
@@ -294,10 +273,21 @@ module.exports = async (io) => {
         return string;
       }
 
-      function deserialize(string){
-        var user = JSON.parse(string);
-        user.sessions = new Map(JSON.parse(user.sessions));
-        return user;
+      function updateUser(list, user, userId, id){
+        if(!list[id])
+        {
+          list[id] = [];
+        }
+        list[id][userId] = user;
+      }
+
+      function getUser(list, userId, id){
+        if(!list[id])
+        {
+          list[id] = [];
+          return null;
+        }
+        return list[id][userId];
       }
     });
 };
