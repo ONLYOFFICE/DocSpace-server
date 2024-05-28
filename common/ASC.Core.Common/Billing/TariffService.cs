@@ -205,7 +205,7 @@ public class TariffService(
                         tariff = asynctariff;
                     }
 
-                    UpdateCache(tariff.Id);
+                    await UpdateCacheAsync(tariff.Id);
                 }
                 catch (Exception error)
                 {
@@ -241,7 +241,7 @@ public class TariffService(
                         tariff = asynctariff;
                     }
 
-                    UpdateCache(tariff.Id);
+                    await UpdateCacheAsync(tariff.Id);
                 }
             }
             else if (tenantExtraConfig.Enterprise && tariff.Id == 0 && tariff.LicenseDate == DateTime.MaxValue)
@@ -264,7 +264,7 @@ public class TariffService(
                 };
 
                 await SetTariffAsync(Tenant.DefaultTenant, tariff, [quota]);
-                UpdateCache(tariff.Id);
+                await UpdateCacheAsync(tariff.Id);
             }
         }
         else
@@ -274,9 +274,9 @@ public class TariffService(
 
         return tariff;
 
-        void UpdateCache(int tariffId)
+        async Task UpdateCacheAsync(int tariffId)
         {
-            notify.Publish(new TariffCacheItem { TenantId = tenantId, TariffId = tariffId }, CacheNotifyAction.Insert);
+            await notify.PublishAsync(new TariffCacheItem { TenantId = tenantId, TariffId = tariffId }, CacheNotifyAction.Insert);
         }
     }
 
@@ -340,7 +340,7 @@ public class TariffService(
                 return false;
             }
 
-            ClearCache(tenantId);
+            await ClearCacheAsync(tenantId);
         }
         catch (Exception error)
         {
@@ -396,9 +396,9 @@ public class TariffService(
     }
 
 
-    private void ClearCache(int tenantId)
+    private async Task ClearCacheAsync(int tenantId)
     {
-        notify.Publish(new TariffCacheItem { TenantId = tenantId, TariffId = -1 }, CacheNotifyAction.Remove);
+        await notify.PublishAsync(new TariffCacheItem { TenantId = tenantId, TariffId = -1 }, CacheNotifyAction.Remove);
     }
 
     public async Task<IEnumerable<PaymentInfo>> GetPaymentsAsync(int tenantId)
@@ -578,7 +578,7 @@ public class TariffService(
     {
         await using var coreDbContext = await coreDbContextManager.CreateDbContextAsync();
 
-        var r = await Queries.TariffAsync(coreDbContext, tenant, id);
+        var r = await coreDbContext.TariffAsync(tenant, id);
 
         if (r == null)
         {
@@ -589,7 +589,7 @@ public class TariffService(
         tariff.Id = r.Id;
         tariff.DueDate = r.Stamp.Year < 9999 ? r.Stamp : DateTime.MaxValue;
         tariff.CustomerId = r.CustomerId;
-        tariff.Quotas = await Queries.QuotasAsync(coreDbContext, r.TenantId, r.Id).ToListAsync();
+        tariff.Quotas = await coreDbContext.QuotasAsync(r.TenantId, r.Id).ToListAsync();
 
         return tariff;
     }
@@ -661,7 +661,7 @@ public class TariffService(
                 }
             }
 
-            ClearCache(tenant);
+            await ClearCacheAsync(tenant);
 
             await NotifyWebSocketAsync(currentTariff, tariffInfo);
         }
@@ -674,9 +674,9 @@ public class TariffService(
         const int tenant = Tenant.DefaultTenant;
 
         await using var coreDbContext = await coreDbContextManager.CreateDbContextAsync();
-        await Queries.DeleteTariffs(coreDbContext, tenant);
+        await coreDbContext.DeleteTariffs(tenant);
 
-        ClearCache(tenant);
+        await ClearCacheAsync(tenant);
     }
 
 
@@ -895,26 +895,4 @@ public class TariffService(
     {
         return billingClient.Configured;
     }
-}
-
-static file class Queries
-{
-    public static readonly Func<CoreDbContext, int?, int?, Task<DbTariff>> TariffAsync =
-        EF.CompileAsyncQuery(
-            (CoreDbContext ctx, int? tenantId, int? id) =>
-                ctx.Tariffs
-                    .Where(r => !tenantId.HasValue || r.TenantId == tenantId)
-                    .Where(r => !id.HasValue || r.Id == id.Value)
-                    .OrderByDescending(r => r.Id)
-                    .FirstOrDefault());
-
-    public static readonly Func<CoreDbContext, int, int, IAsyncEnumerable<Quota>> QuotasAsync =
-        EF.CompileAsyncQuery(
-            (CoreDbContext ctx, int tenantId, int id) =>
-                ctx.TariffRows
-                    .Where(r => r.TariffId == id && r.TenantId == tenantId)
-                    .Select(r => new Quota(r.Quota, r.Quantity)));
-
-    public static readonly Func<CoreDbContext, int, Task<int>> DeleteTariffs =
-        EF.CompileAsyncQuery((CoreDbContext ctx, int tenantId) => ctx.Tariffs.Where(r => r.TenantId == tenantId).ExecuteDelete());
 }

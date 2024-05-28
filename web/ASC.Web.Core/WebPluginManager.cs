@@ -73,16 +73,16 @@ public class WebPluginCache
         return _cache.Get<List<WebPlugin>>(key);
     }
 
-    public void Insert(string key, object value)
+    public async Task InsertAsync(string key, object value)
     {
-        _notify.Publish(new WebPluginCacheItem { Key = key }, CacheNotifyAction.Remove);
+        await _notify.PublishAsync(new WebPluginCacheItem { Key = key }, CacheNotifyAction.Remove);
 
         _cache.Insert(key, value, _cacheExpiration);
     }
 
-    public void Remove(string key)
+    public async Task RemoveAsync(string key)
     {
-        _notify.Publish(new WebPluginCacheItem { Key = key }, CacheNotifyAction.Remove);
+        await _notify.PublishAsync(new WebPluginCacheItem { Key = key }, CacheNotifyAction.Remove);
 
         _cache.Remove(key);
     }
@@ -332,7 +332,7 @@ public class WebPluginManager(
         {
             webPlugins = await GetWebPluginsFromStorageAsync(tenantId);
 
-            webPluginCache.Insert(key, webPlugins);
+            await webPluginCache.InsertAsync(key, webPlugins);
         }
 
         return webPlugins;
@@ -428,7 +428,7 @@ public class WebPluginManager(
 
         var key = GetCacheKey(webPlugin.System ? Tenant.DefaultTenant : tenantId);
 
-        webPluginCache.Remove(key);
+        await webPluginCache.RemoveAsync(key);
 
         return webPlugin;
     }

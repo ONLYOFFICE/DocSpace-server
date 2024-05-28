@@ -39,9 +39,9 @@ public class AccountLinkerStorage
         notify.Subscribe(c => cache.Remove(c.Obj), CacheNotifyAction.Remove);
     }
 
-    public void RemoveFromCache(string obj)
+    public async Task RemoveFromCacheAsync(string obj)
     {
-        _notify.Publish(new LinkerCacheItem { Obj = obj }, CacheNotifyAction.Remove);
+        await _notify.PublishAsync(new LinkerCacheItem { Obj = obj }, CacheNotifyAction.Remove);
     }
 
     public async Task<List<LoginProfile>> GetFromCacheAsync(string obj, Func<string, Task<List<LoginProfile>>> fromDb)
@@ -105,7 +105,7 @@ public class AccountLinker(
         await accountLinkContext.AddOrUpdateAsync(a => a.AccountLinks, accountLink);
         await accountLinkContext.SaveChangesAsync();
 
-        accountLinkerStorage.RemoveFromCache(obj.ToString());
+        await accountLinkerStorage.RemoveFromCacheAsync(obj.ToString());
     }
 
     public async Task AddLinkAsync(Guid obj, string id, string provider)
@@ -122,7 +122,7 @@ public class AccountLinker(
         accountLinkContext.AccountLinks.Remove(accountLink);
         await accountLinkContext.SaveChangesAsync();
 
-        accountLinkerStorage.RemoveFromCache(obj);
+        await accountLinkerStorage.RemoveFromCacheAsync(obj);
     }
 
     private async Task<List<LoginProfile>> GetLinkedProfilesFromDBAsync(string obj)

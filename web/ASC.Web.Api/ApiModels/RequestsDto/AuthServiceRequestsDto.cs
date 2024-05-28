@@ -54,25 +54,24 @@ public class AuthServiceRequestsDto
     /// <type>System.Collections.Generic.List{ASC.Web.Core.CookiesType.AuthKey}, System.Collections.Generic</type>
     public List<AuthKey> Props { get; set; }
 
-    public AuthServiceRequestsDto()
+    public static async Task<AuthServiceRequestsDto> From(Consumer consumer)
     {
-
-    }
-
-    public AuthServiceRequestsDto(Consumer consumer)
-    {
-        var authService = new AuthService(consumer);
-
-        Name = authService.Name;
-        Title = authService.Title;
-        Description = authService.Description;
-        Instruction = authService.Instruction;
-        CanSet = authService.CanSet;
+        var authService = await AuthService.From(consumer);
+        var result = new AuthServiceRequestsDto 
+        { 
+            Name = authService.Name, 
+            Title = authService.Title, 
+            Description = authService.Description, 
+            Instruction = authService.Instruction,
+            CanSet = authService.CanSet
+        };
 
         if (consumer.CanSet)
         {
-            Props = authService.Props;
-            CanSet = authService.CanSet;
+            result.Props = authService.Props;
+            result.CanSet = authService.CanSet;
         }
+
+        return result;
     }
 }

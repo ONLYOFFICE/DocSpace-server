@@ -144,7 +144,7 @@ public class MigrateOperation : DistributedTaskProgress
             foreach (var module in _modules)
             {
                 var oldStore = await storageFactory.GetStorageAsync(_tenantId, module);
-                var store = storageFactory.GetStorageFromConsumer(_tenantId, module, storageSettingsHelper.DataStoreConsumer(_settings));
+                var store = await storageFactory.GetStorageFromConsumerAsync(_tenantId, module, await storageSettingsHelper.DataStoreConsumerAsync(_settings));
                 var domains = _storageFactoryConfig.GetDomainList(module).ToList();
 
                 var crossModuleTransferUtility = new CrossModuleTransferUtility(options, _tempStream, oldStore, store, _cache);
@@ -175,7 +175,7 @@ public class MigrateOperation : DistributedTaskProgress
 
                 await StepDone();
 
-                MigrationPublish();
+                await MigrationPublishAsync();
             }
 
             await settingsManager.SaveAsync(_settings);
@@ -191,19 +191,18 @@ public class MigrateOperation : DistributedTaskProgress
             _logger.ErrorMigrateOperation(e);
         }
 
-        MigrationPublish();
+        await MigrationPublishAsync();
     }
 
-    private void MigrationPublish()
+    private async Task MigrationPublishAsync()
     {
-        _cacheMigrationNotify.Publish(new MigrationProgress
+        await _cacheMigrationNotify.PublishAsync(new MigrationProgress
         {
             TenantId = _tenantId,
             Progress = Percentage,
             Error = Exception.ToString(),
             IsCompleted = IsCompleted
-        },
-            CacheNotifyAction.Insert);
+        }, CacheNotifyAction.Insert);
     }
 }
 

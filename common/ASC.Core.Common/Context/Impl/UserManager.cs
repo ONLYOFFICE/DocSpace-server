@@ -669,11 +669,6 @@ public class UserManager(
         return IsUserInGroupInternal(userId, groupId, await GetRefsInternalAsync());
     }
 
-    public bool IsUserInGroup(Guid userId, Guid groupId)
-    {
-        return IsUserInGroupInternal(userId, groupId, GetRefsInternal());
-    }
-
     public async Task<UserInfo[]> GetUsersByGroupAsync(Guid groupId, EmployeeStatus employeeStatus = EmployeeStatus.Default)
     {
         var refs = await GetRefsInternalAsync();
@@ -784,34 +779,12 @@ public class UserManager(
 
 
     #region Company
-
-    public async Task<GroupInfo[]> GetDepartmentsAsync()
-    {
-        return await GetGroupsAsync();
-    }
-
+    
     public async Task<Guid> GetDepartmentManagerAsync(Guid deparmentID)
     {
         var groupRef = await userService.GetUserGroupRefAsync(Tenant.Id, deparmentID, UserGroupRefType.Manager);
 
-        if (groupRef == null)
-        {
-            return Guid.Empty;
-        }
-
-        return groupRef.UserId;
-    }
-
-    public Guid GetDepartmentManager(Guid deparmentID)
-    {
-        var groupRef = userService.GetUserGroupRef(Tenant.Id, deparmentID, UserGroupRefType.Manager);
-
-        if (groupRef == null)
-        {
-            return Guid.Empty;
-        }
-
-        return groupRef.UserId;
+        return groupRef?.UserId ?? Guid.Empty;
     }
 
     public async Task SetDepartmentManagerAsync(Guid deparmentID, Guid userID)
@@ -831,17 +804,6 @@ public class UserManager(
         }
     }
 
-    public async Task<UserInfo> GetCompanyCEOAsync()
-    {
-        var id = await GetDepartmentManagerAsync(Guid.Empty);
-
-        return id != Guid.Empty ? await GetUsersAsync(id) : null;
-    }
-
-    public async Task SetCompanyCEOAsync(Guid userId)
-    {
-        await SetDepartmentManagerAsync(Guid.Empty, userId);
-    }
 
     #endregion Company
 
@@ -978,14 +940,9 @@ public class UserManager(
             .ToList();
     }
 
-    private async Task<IDictionary<string, UserGroupRef>> GetRefsInternalAsync()
+    private Task<IDictionary<string, UserGroupRef>> GetRefsInternalAsync()
     {
-        return await userService.GetUserGroupRefsAsync(Tenant.Id);
-    }
-
-    private IDictionary<string, UserGroupRef> GetRefsInternal()
-    {
-        return userService.GetUserGroupRefs(Tenant.Id);
+        return userService.GetUserGroupRefsAsync(Tenant.Id);
     }
 
     private bool IsUserInGroupInternal(Guid userId, Guid groupId, IDictionary<string, UserGroupRef> refs)

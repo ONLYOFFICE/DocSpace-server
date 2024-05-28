@@ -292,7 +292,10 @@ public class FileSharingAceHelper(
 
             if (entryType == FileEntryType.File)
             {
-                listUsersId.ForEach(uid => fileTracker.ChangeRight(entry.Id, uid, true));
+                foreach (var uId in listUsersId)
+                {
+                    await fileTracker.ChangeRight(entry.Id, uId, true);
+                }
             }
 
             var addRecipient = share == FileShare.Read

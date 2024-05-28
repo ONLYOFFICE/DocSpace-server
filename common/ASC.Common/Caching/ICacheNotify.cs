@@ -29,8 +29,6 @@ namespace ASC.Common.Caching;
 [Singleton]
 public interface ICacheNotify<T> where T : new()
 {
-    void Publish(T obj, CacheNotifyAction action);
-
     Task PublishAsync(T obj, CacheNotifyAction action);
 
     void Subscribe(Action<T> onchange, CacheNotifyAction action);

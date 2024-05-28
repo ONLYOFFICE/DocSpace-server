@@ -354,14 +354,6 @@ class CachedTenantService() : ITenantService
         await _cacheNotifySettings.PublishAsync(new TenantSetting { Key = cacheKey }, CacheNotifyAction.Remove);
     }
 
-    public void SetTenantSettings(int tenant, string key, byte[] data)
-    {
-        _service.SetTenantSettings(tenant, key, data);
-        var cacheKey = GetCacheKey(tenant, key);
-
-        _cacheNotifySettings.Publish(new TenantSetting { Key = cacheKey }, CacheNotifyAction.Remove);
-    }
-
     private string GetCacheKey(int tenant, string key)
     {
         return $"settings/{tenant}/{key.ToLowerInvariant()}";
