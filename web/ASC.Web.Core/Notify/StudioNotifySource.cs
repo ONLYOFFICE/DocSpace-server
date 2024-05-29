@@ -92,6 +92,7 @@ public class StudioNotifySource(UserManager userManager, IRecipientProvider reci
                 Actions.StorageDecryptionError,
 
                 Actions.SaasRoomInvite,
+                Actions.SaasRoomInviteExistingUser,
                 Actions.SaasDocSpaceInvite,
 
                 Actions.SaasAdminActivationV1,

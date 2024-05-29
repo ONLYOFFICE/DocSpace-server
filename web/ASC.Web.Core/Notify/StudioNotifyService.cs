@@ -177,6 +177,29 @@ public class StudioNotifyService(
         }
     }
 
+    public async Task SendEmailRoomInviteExistingUserAsync(UserInfo user, string roomTitle, string roomUrl)
+    {
+        var cultureInfo = await GetCulture(user);
+
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonJoinRoom", cultureInfo);
+        var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", cultureInfo);
+
+        var tags = new List<ITagValue>
+        {
+            new TagValue(Tags.Message, roomTitle),
+            new TagValue(Tags.InviteLink, roomUrl),
+            TagValues.OrangeButton(orangeButtonText, roomUrl),
+            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
+            new TagValue(CommonTags.Culture, cultureInfo.Name)
+        };
+
+        await studioNotifyServiceHelper.SendNoticeToAsync(
+            Actions.SaasRoomInviteExistingUser,
+            [user],
+            [EMailSenderName],
+            tags.ToArray());
+    }
+
     public async Task SendDocSpaceInviteAsync(string email, string confirmationUrl, string culture = "", bool limitation = false)
     {
         var cultureInfo = string.IsNullOrEmpty(culture) ? (await GetCulture(null)) : new CultureInfo(culture);

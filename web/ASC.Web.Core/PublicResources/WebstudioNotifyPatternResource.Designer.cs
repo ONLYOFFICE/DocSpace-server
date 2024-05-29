@@ -304,20 +304,20 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Confirm DocSpace Invite.
-        /// </summary>
-        public static string ButtonConfirmInvite {
-            get {
-                return ResourceManager.GetString("ButtonConfirmInvite", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to CONFIRM.
         /// </summary>
         public static string ButtonConfirmEmail {
             get {
                 return ResourceManager.GetString("ButtonConfirmEmail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Confirm DocSpace Invite.
+        /// </summary>
+        public static string ButtonConfirmInvite {
+            get {
+                return ResourceManager.GetString("ButtonConfirmInvite", resourceCulture);
             }
         }
         
@@ -390,6 +390,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string ButtonJoin {
             get {
                 return ResourceManager.GetString("ButtonJoin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Join room.
+        /// </summary>
+        public static string ButtonJoinRoom {
+            get {
+                return ResourceManager.GetString("ButtonJoinRoom", resourceCulture);
             }
         }
         
@@ -524,7 +533,7 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///Best regards,
         ///ONLYOFFICE Support Team
-        ///[www.onlyof [rest of string was truncated]&quot;;.
+        ///[www.onlyoff [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_backup_created_tg {
             get {
@@ -1782,6 +1791,21 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Hello!
+        ///
+        ///You are invited to join the room &quot;$Message&quot;:&quot;$InviteLink&quot; on &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;.
+        ///
+        ///$OrangeButton
+        ///
+        ///$TrulyYours.
+        /// </summary>
+        public static string pattern_saas_room_invite_existing_user {
+            get {
+                return ResourceManager.GetString("pattern_saas_room_invite_existing_user", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to h1. Join &lt;span style=&quot;color:#FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace
         ///
         ///
@@ -2630,6 +2654,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string subject_saas_room_invite {
             get {
                 return ResourceManager.GetString("subject_saas_room_invite", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You&apos;re invited to the ONLYOFFICE DocSpace room.
+        /// </summary>
+        public static string subject_saas_room_invite_existing_user {
+            get {
+                return ResourceManager.GetString("subject_saas_room_invite_existing_user", resourceCulture);
             }
         }
         
