@@ -57,7 +57,9 @@ internal class FileDao(
         StorageFactory storageFactory,
     TenantQuotaController tenantQuotaController,
     IDistributedLockProvider distributedLockProvider,
-    FileStorageService fileStorageService)
+    FileStorageService fileStorageService,
+    SocketManager socketManager,
+    SecurityContext securityContext)
     : AbstractDao(dbContextManager,
               userManager,
               tenantManager,
@@ -559,6 +561,9 @@ internal class FileDao(
                                 properties.FormFilling.StartFilling = true;
                                 await fileDao.SaveProperties(file.Id, properties);
                                 await SaveFileStreamAsync(file, cloneStreamForSave, currentFolder);
+
+                                var count = await fileStorageService.GetPureSharesCountAsync(currentRoom.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "");
+                                await socketManager.CreateFormAsync(file, securityContext.CurrentAccount.ID, count <= 1);
                             }
                         }
                         else
