@@ -26,10 +26,8 @@
 
 namespace ASC.ActiveDirectory.Base;
 
-[Scope]
-public abstract class LdapHelper(ILogger<LdapHelper> logger,
-        InstanceCrypto instanceCrypto)
-    : IDisposable
+
+public abstract class LdapHelper(ILogger<LdapHelper> logger, InstanceCrypto instanceCrypto) : IDisposable
 {
     public LdapSettings Settings { get; private set; }
     public abstract bool IsConnected { get; }

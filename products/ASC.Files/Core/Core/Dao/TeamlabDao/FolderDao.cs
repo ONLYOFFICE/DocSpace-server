@@ -26,7 +26,7 @@
 
 namespace ASC.Files.Core.Data;
 
-[Scope]
+[Scope(typeof(IFolderDao<int>))]
 internal class FolderDao(
     FactoryIndexerFolder factoryIndexer,
     UserManager userManager,

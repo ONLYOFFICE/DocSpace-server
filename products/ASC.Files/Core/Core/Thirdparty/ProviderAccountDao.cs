@@ -39,7 +39,7 @@ public enum ProviderTypes
     Yandex
 }
 
-[Scope]
+[Scope(typeof(IProviderDao))]
 internal class ProviderAccountDao(
     IServiceProvider serviceProvider,
     TenantUtil tenantUtil,
@@ -696,19 +696,6 @@ internal class ProviderAccountDao(
             //old token in base64 without encrypt
             return token ?? "";
         }
-    }
-}
-
-public static class ProviderAccountDaoExtension
-{
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<BoxProviderInfo>();
-        services.TryAdd<DropboxProviderInfo>();
-        services.TryAdd<SharePointProviderInfo>();
-        services.TryAdd<GoogleDriveProviderInfo>();
-        services.TryAdd<OneDriveProviderInfo>();
-        services.TryAdd<WebDavProviderInfo>();
     }
 }
 

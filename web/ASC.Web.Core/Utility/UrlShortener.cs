@@ -26,16 +26,13 @@
 
 namespace ASC.Web.Core.Utility;
 
-[Scope(Additional = typeof(UrlShortenerExtension))]
 public interface IUrlShortener
 {
     Task<string> GetShortenLinkAsync(string shareLink);
 }
 
-[Scope]
-public class BaseUrlShortener(ConsumerFactory consumerFactory,
-        IServiceProvider serviceProvider)
-    : IUrlShortener
+[Scope(typeof(IUrlShortener))]
+public class BaseUrlShortener(ConsumerFactory consumerFactory, IServiceProvider serviceProvider) : IUrlShortener
 {
     public Task<string> GetShortenLinkAsync(string shareLink)
     {
@@ -133,15 +130,5 @@ public static class ShortUrl
             num = num * (ulong)_base + (ulong)Alphabet.IndexOf(str.ElementAt(i));
         }
         return num;
-    }
-}
-
-public static class UrlShortenerExtension
-{
-    public static void Register(DIHelper dIHelper)
-    {
-        dIHelper.TryAdd<IUrlShortener, BaseUrlShortener>();
-        dIHelper.TryAdd<BitLyShortener>();
-        dIHelper.TryAdd<OnlyoShortener>();
     }
 }

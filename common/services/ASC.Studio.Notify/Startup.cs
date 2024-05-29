@@ -49,11 +49,6 @@ public class Startup : BaseWorkerStartup
         services.AddHttpClient();
         services.AddAutoMapper(GetAutoMapperProfileAssemblies());//toDo
         services.AddHostedService<ServiceLauncher>();
-        DIHelper.TryAdd<ServiceLauncher>();
-        NotifyConfigurationExtension.Register(DIHelper);
-        DIHelper.TryAdd<EmailSenderSink>();
-        DIHelper.TryAdd<NotifyItemIntegrationEventHandler>();
-        DIHelper.TryAdd<ProductEntryPoint>();
         services.AddScoped<IWebItem, ProductEntryPoint>();
         
         services.AddActivePassiveHostedService<NotifySchedulerService>(DIHelper, Configuration, "StudioNotifySchedulerService");

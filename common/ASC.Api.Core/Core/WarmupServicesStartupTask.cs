@@ -58,7 +58,7 @@ public class WarmupServicesStartupTask(IServiceCollection services, IServiceProv
             {
                 processedFailed++;
 
-                logger.DebugWarmupFailed(processedFailed, service.FullName, ex.Message);
+                logger.DebugWarmupFailed(processedFailed, service.FullName, ex);
             }
         }
 
@@ -68,7 +68,7 @@ public class WarmupServicesStartupTask(IServiceCollection services, IServiceProv
             processedSuccessed,
             processedFailed,
             (DateTime.UtcNow - startTime).TotalMilliseconds);
-
+        
         return Task.CompletedTask;
     }
 

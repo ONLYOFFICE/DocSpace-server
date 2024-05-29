@@ -26,7 +26,6 @@
 
 namespace ASC.Core;
 
-[Scope(typeof(DbAzService), typeof(CachedAzService))]
 public interface IAzService
 {
     Task<AzRecord> SaveAceAsync(int tenant, AzRecord r);

@@ -254,7 +254,7 @@ public class FileJsonSerializerData<T>
     public string FileJson { get; set; }
 }
 
-[Scope(Additional = typeof(FileConverterExtension))]
+[Scope]
 public class FileConverter(
     FileUtility fileUtility,
     FilesLinkUtility filesLinkUtility,
@@ -585,10 +585,3 @@ public class FileConverter(
     }
     }
 
-public static class FileConverterExtension
-{
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<FileConverterQueue>();
-    }
-}

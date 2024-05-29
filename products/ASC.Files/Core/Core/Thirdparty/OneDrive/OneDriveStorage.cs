@@ -28,7 +28,7 @@ using Folder = Microsoft.OneDrive.Sdk.Folder;
 
 namespace ASC.Files.Thirdparty.OneDrive;
 
-[Transient]
+[Transient(typeof(IThirdPartyStorage<Item, Item, Item>))]
 internal class OneDriveStorage(IHttpClientFactory clientFactory, OAuth20TokenHelper oAuth20TokenHelper)
     : IThirdPartyStorage<Item, Item, Item>
 {

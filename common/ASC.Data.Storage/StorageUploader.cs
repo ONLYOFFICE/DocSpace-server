@@ -95,6 +95,11 @@ public class MigrateOperation : DistributedTaskProgress
         _configPath = string.Empty;
     }
 
+    public MigrateOperation()
+    {
+        
+    }
+    
     public MigrateOperation(
         IServiceProvider serviceProvider,
         ICacheNotify<MigrationProgress> cacheMigrationNotify,

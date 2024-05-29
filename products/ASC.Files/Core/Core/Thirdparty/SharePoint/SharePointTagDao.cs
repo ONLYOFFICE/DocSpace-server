@@ -38,7 +38,7 @@ internal class SharePointTagDao(IServiceProvider serviceProvider,
         SetupInfo setupInfo,
         FileUtility fileUtility,
         TempPath tempPath,
-        RegexDaoSelectorBase<File, Folder, ClientObject> regexDaoSelectorBase)
+        SharePointDaoSelector regexDaoSelectorBase)
     : SharePointDaoBase(serviceProvider, userManager, tenantManager, tenantUtil, dbContextFactory, setupInfo,
         fileUtility, tempPath, regexDaoSelectorBase), IThirdPartyTagDao
 {

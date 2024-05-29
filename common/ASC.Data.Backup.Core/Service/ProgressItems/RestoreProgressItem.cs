@@ -26,7 +26,7 @@
 
 namespace ASC.Data.Backup.Services;
 
-[Transient(Additional = typeof(RestoreProgressItemExtention))]
+[Transient]
 public class RestoreProgressItem : BaseBackupProgressItem
 {
     private readonly IConfiguration _configuration;
@@ -211,13 +211,5 @@ public class RestoreProgressItem : BaseBackupProgressItem
     public override object Clone()
     {
         return MemberwiseClone();
-    }
-}
-
-public static class RestoreProgressItemExtention
-{
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<RestorePortalTask>();
     }
 }

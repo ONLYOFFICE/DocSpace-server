@@ -38,7 +38,7 @@ public class FileSecurityCommon(UserManager userManager, WebItemSecurity webItem
     }
 }
 
-[Scope]
+[Scope(typeof(IFileSecurity))]
 public class FileSecurity(IDaoFactory daoFactory,
         UserManager userManager,
         TenantManager tenantManager,

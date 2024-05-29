@@ -29,7 +29,7 @@ using Folder = Microsoft.SharePoint.Client.Folder;
 
 namespace ASC.Files.Thirdparty.SharePoint;
 
-[Transient]
+[Transient(typeof(IProviderInfo<File, Folder, ClientObject>))]
 public class SharePointProviderInfo(ILogger<SharePointProviderInfo> logger,
         IServiceProvider serviceProvider,
         TenantUtil tenantUtil,

@@ -104,6 +104,7 @@ public class TariffServiceStorage
     }
 }
 
+[Scope(typeof(ITariffService))]
 public class TariffService(
     IQuotaService quotaService,
     ITenantService tenantService,

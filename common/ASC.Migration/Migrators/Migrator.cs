@@ -28,7 +28,6 @@ using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Migration.Core.Migrators;
 
-[Transient]
 public abstract class Migrator : IAsyncDisposable
 {
     protected SecurityContext SecurityContext { get; }

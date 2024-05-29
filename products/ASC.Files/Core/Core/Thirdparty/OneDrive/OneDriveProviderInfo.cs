@@ -26,7 +26,7 @@
 
 namespace ASC.Files.Thirdparty.OneDrive;
 
-[Transient]
+[Transient(typeof(IProviderInfo<Item, Item, Item>))]
 [DebuggerDisplay("{CustomerTitle}")]
 internal class OneDriveProviderInfo(DisposableWrapper wrapper, ProviderInfoHelper providerInfoHelper)
     : AbstractProviderInfo<Item, Item, Item, OneDriveLoginProvider>(wrapper, providerInfoHelper)

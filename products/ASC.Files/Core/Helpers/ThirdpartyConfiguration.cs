@@ -34,7 +34,7 @@ public class ThirdpartyConfigurationData(IConfiguration configuration)
         configuration.GetSection("files:thirdparty:enable").Get<HashSet<string>>() ?? [];
 }
 
-[Scope(Additional = typeof(BaseLoginProviderExtension))]
+[Scope]
 public class ThirdpartyConfiguration(ThirdpartyConfigurationData configuration, ConsumerFactory consumerFactory)
 {
     private BoxLoginProvider _boxLoginProvider;

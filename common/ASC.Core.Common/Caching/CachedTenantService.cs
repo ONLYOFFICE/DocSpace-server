@@ -161,7 +161,7 @@ class TenantServiceCache
     }
 }
 
-[Scope]
+[Scope(typeof(ITenantService))]
 class CachedTenantService() : ITenantService
 {
     private readonly DbTenantService _service;

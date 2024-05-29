@@ -29,7 +29,7 @@ using IHttpClientFactory = System.Net.Http.IHttpClientFactory;
 
 namespace ASC.Files.Thirdparty.GoogleDrive;
 
-[Transient]
+[Transient(typeof(IThirdPartyStorage<DriveFile, DriveFile, DriveFile>))]
 internal class GoogleDriveStorage(
         FileUtility fileUtility,
         ILoggerProvider monitor,

@@ -30,7 +30,8 @@ using SecurityContext = ASC.Core.SecurityContext;
 
 namespace ASC.Files.ThumbnailBuilder;
 
-[Singleton(Additional = typeof(FileConverterQueueExtension))]
+[Singleton(GenericArguments = [typeof(int)])]
+[Singleton(GenericArguments = [typeof(string)])]
 internal class FileConverterService<T>(
         IServiceScopeFactory scopeFactory,
         ILogger<FileConverterService<T>> logger)
@@ -213,14 +214,6 @@ internal class FileConverterService<T>(
         {
             logger.ErrorWithException(exception);
         }
-    }
-}
-
-public static class FileConverterQueueExtension
-{
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<FileConverterQueueScope>();
     }
 }
 

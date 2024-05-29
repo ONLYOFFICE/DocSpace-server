@@ -57,8 +57,7 @@ public class BaseIndexerHelper
     }
 }
 
-[Scope]
-public class BaseIndexer<T>(Client client,
+public abstract class BaseIndexer<T>(Client client,
         ILogger<BaseIndexer<T>> logger,
         IDbContextFactory<WebstudioDbContext> dbContextFactory,
         TenantManager tenantManager,
@@ -66,7 +65,7 @@ public class BaseIndexer<T>(Client client,
         Settings settings,
         IServiceProvider serviceProvider)
     where T : class, ISearchItem
-    {
+{
     public const int QueryLimit = 10000;
 
     protected internal T Wrapper => serviceProvider.GetService<T>();

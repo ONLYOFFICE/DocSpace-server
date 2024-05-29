@@ -26,9 +26,8 @@
 
 namespace ASC.Core.Data;
 
-[Scope]
-class DbAzService(IDbContextFactory<UserDbContext> dbContextFactory, IMapper mapper)
-    : IAzService
+[Scope(typeof(IAzService), typeof(CachedAzService))]
+class DbAzService(IDbContextFactory<UserDbContext> dbContextFactory, IMapper mapper) : IAzService
 {
     public async Task<IEnumerable<AzRecord>> GetAcesAsync(int tenant, DateTime from)
     {

@@ -28,7 +28,6 @@ namespace ASC.Common.Threading;
 
 /// <summary>
 /// </summary>
-[Transient]
 [ProtoContract(IgnoreUnknownSubTypes = true)]
 public class DistributedTaskProgress : DistributedTask
 {

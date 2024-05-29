@@ -289,7 +289,7 @@ public class ProviderInfoHelper
     }
 }
 
-[Transient(Additional = typeof(DisposableWrapperExtension))]
+[Transient]
 public class DisposableWrapper(IServiceProvider serviceProvider, OAuth20TokenHelper oAuth20TokenHelper)
     : IDisposable
 {
@@ -364,17 +364,5 @@ public class DisposableWrapper(IServiceProvider serviceProvider, OAuth20TokenHel
         _storages.TryAdd(id, storage);
 
         return storage;
-    }
-}
-
-public static class DisposableWrapperExtension
-{
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<IThirdPartyStorage<BoxFile, BoxFolder, BoxItem>, BoxStorage>();
-        services.TryAdd<IThirdPartyStorage<FileMetadata, FolderMetadata, Metadata>, DropboxStorage>();
-        services.TryAdd<IThirdPartyStorage<DriveFile, DriveFile, DriveFile>, GoogleDriveStorage>();
-        services.TryAdd<IThirdPartyStorage<Item, Item, Item>, OneDriveStorage>();
-        services.TryAdd<IThirdPartyStorage<WebDavEntry, WebDavEntry, WebDavEntry>, WebDavStorage>();
     }
 }

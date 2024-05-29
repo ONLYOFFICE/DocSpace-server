@@ -24,10 +24,16 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using DriveFile = Google.Apis.Drive.v3.Data.File;
+
 namespace ASC.Files.Core.Core.Thirdparty;
 
 /// <inheritdoc />
-[Scope]
+[Scope(GenericArguments = [typeof(BoxFile), typeof(BoxFolder), typeof(BoxItem)])]
+[Scope(GenericArguments = [typeof(FileMetadata), typeof(FolderMetadata), typeof(Metadata)])]
+[Scope(GenericArguments = [typeof(DriveFile), typeof(DriveFile), typeof(DriveFile)])]
+[Scope(GenericArguments = [typeof(Item), typeof(Item), typeof(Item)])]
+[Scope(GenericArguments = [typeof(WebDavEntry), typeof(WebDavEntry), typeof(WebDavEntry)])]
 internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
     IDbContextFactory<FilesDbContext> dbContextFactory,
     UserManager userManager,
