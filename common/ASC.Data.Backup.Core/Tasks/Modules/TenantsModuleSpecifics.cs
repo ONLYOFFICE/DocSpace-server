@@ -36,7 +36,7 @@ public class TenantsModuleSpecifics(CoreSettings coreSettings, Helpers helpers) 
     private readonly TableInfo[] _tables =
     [
         new("tenants_quota", "tenant"),
-            new("tenants_tariff", "tenant", "id"),
+            new("tenants_tariff", "tenant"),
             new("tenants_tenants", "id", "id")
             {
                 DateColumns = new Dictionary<string, bool> {{"creationdatetime", false}, {"statuschanged", false}, {"version_changed", false}}
@@ -57,7 +57,8 @@ public class TenantsModuleSpecifics(CoreSettings coreSettings, Helpers helpers) 
         new("tenants_tenants", "id", "tenants_quota", "tenant"),
             new("tenants_tenants", "id", "tenants_tariff", "tenant"),
             new("tenants_tenants", "id", "tenants_tariff", "tariff"),
-            new("tenants_tariff", "id", "tenants_tariffrow", "tariff_id"),
+            new("tenants_tenants", "id", "tenants_tariff", "id"),
+            new("tenants_tenants", "id", "tenants_tariffrow", "tariff_id"),
             new("core_user", "id", "tenants_tenants", "owner_id", null, null, RelationImportance.Low)
     ];
 
@@ -71,6 +72,16 @@ public class TenantsModuleSpecifics(CoreSettings coreSettings, Helpers helpers) 
         }
 
         return await base.TryPrepareRow(dump, connection, columnMapper, table, row);
+    }
+
+    protected override bool TryPrepareValue(bool dump, DbConnection connection, ColumnMapper columnMapper, TableInfo table, string columnName, IEnumerable<RelationInfo> relations, ref object value)
+    {
+        var result = base.TryPrepareValue(dump, connection, columnMapper, table, columnName, relations, ref value);
+        if (result && table.Name == "tenants_tariff" && columnName == "id" || table.Name == "tenants_tariffrow" && columnName == "tariff_id")
+        {
+            value = -(int)value;
+        }
+        return result;
     }
 
     protected override bool TryPrepareValue(DbConnection connection, ColumnMapper columnMapper, TableInfo table, string columnName, ref object value)
