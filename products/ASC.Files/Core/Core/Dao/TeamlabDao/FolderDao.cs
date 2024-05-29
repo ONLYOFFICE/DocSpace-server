@@ -599,7 +599,7 @@ internal class FolderDao(
 
             await DeleteCustomOrder(filesDbContext, folderId);
             
-            await DeleteFilesAuditReferencesAsync(filesDbContext, folderId, FileEntryType.Folder);
+            await filesDbContext.DeleteAuditReferencesAsync(folderId, FileEntryType.Folder);
 
             await context.SaveChangesAsync();
             await tx.CommitAsync();

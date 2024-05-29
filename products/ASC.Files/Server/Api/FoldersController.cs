@@ -46,7 +46,7 @@ public class FoldersControllerInternal(
         folderDtoHelper,
         fileDtoHelper,
         permissionContext,
-        fileShareDtoHelper);
+        fileShareDtoHelper)
 {
     /// <summary>
     /// Get the activity history of a folder with a specified identifier

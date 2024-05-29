@@ -29,17 +29,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 namespace ASC.Files.Api;
 
 [ConstraintRoute("int")]
-public class FilesControllerInternal(FilesControllerHelper filesControllerHelper,
-        FileStorageService fileStorageService,
-        FileOperationsManager fileOperationsManager,
-        FileOperationDtoHelper fileOperationDtoHelper,
-        FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper,
-    ApiContext apiContext,
-        FileShareDtoHelper fileShareDtoHelper)
-        : FilesController<int>(filesControllerHelper, fileStorageService, fileOperationsManager, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper, apiContext, fileShareDtoHelper);
-
-public class FilesControllerThirdparty(
+public class FilesControllerInternal(
     FilesControllerHelper filesControllerHelper,
     FileStorageService fileStorageService,
     FileOperationsManager fileOperationsManager,
@@ -49,7 +39,13 @@ public class FilesControllerThirdparty(
     ApiContext apiContext,
     FileShareDtoHelper fileShareDtoHelper,
     HistoryApiHelper historyApiHelper)
-    : FilesController<string>(filesControllerHelper, fileStorageService, fileOperationsManager, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper, apiContext,
+    : FilesController<int>(filesControllerHelper,
+        fileStorageService,
+        fileOperationsManager,
+        fileOperationDtoHelper,
+        folderDtoHelper,
+        fileDtoHelper,
+        apiContext,
         fileShareDtoHelper)
 {
     /// <summary>
@@ -70,6 +66,24 @@ public class FilesControllerThirdparty(
         return historyApiHelper.GetFileHistoryAsync(fileId);
     }
 }
+
+public class FilesControllerThirdparty(
+    FilesControllerHelper filesControllerHelper,
+    FileStorageService fileStorageService,
+    FileOperationsManager fileOperationsManager,
+    FileOperationDtoHelper fileOperationDtoHelper,
+    FolderDtoHelper folderDtoHelper,
+    FileDtoHelper fileDtoHelper,
+    ApiContext apiContext,
+    FileShareDtoHelper fileShareDtoHelper)
+    : FilesController<string>(filesControllerHelper,
+        fileStorageService,
+        fileOperationsManager,
+        fileOperationDtoHelper,
+        folderDtoHelper,
+        fileDtoHelper,
+        apiContext,
+        fileShareDtoHelper);
 
 public abstract class FilesController<T>(FilesControllerHelper filesControllerHelper,
         FileStorageService fileStorageService,
