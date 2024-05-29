@@ -1985,7 +1985,7 @@ public class EntryManager(IDaoFactory daoFactory,
             csvFile.Title = Global.ReplaceInvalidCharsAndTruncate(sourceTitle + ".csv");
             csvFile.CreateBy = createBy;
 
-            var file = await fileDao.SaveFileAsync(csvFile, textStream);
+            var file = await fileDao.SaveFileAsync(csvFile, textStream, false);
             properties.FormFilling.ResultsFileID = file.Id.ToString();
         }
         await fileDao.SaveProperties(sourceFileId, properties);

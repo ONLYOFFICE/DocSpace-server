@@ -359,10 +359,14 @@ internal class FileDao(
     }
     public async Task<File<int>> SaveFileAsync(File<int> file, Stream fileStream)
     {
-        return await SaveFileAsync(file, fileStream, true);
+        return await SaveFileAsync(file, fileStream, true, true);
+    }
+    public async Task<File<int>> SaveFileAsync(File<int> file, Stream fileStream, bool checkFolder)
+    {
+        return await SaveFileAsync(file, fileStream, true, checkFolder);
     }
 
-    public async Task<File<int>> SaveFileAsync(File<int> file, Stream fileStream, bool checkQuota, ChunkedUploadSession<int> uploadSession = null)
+    public async Task<File<int>> SaveFileAsync(File<int> file, Stream fileStream, bool checkQuota, bool checkFolder, ChunkedUploadSession<int> uploadSession = null)
     {
         ArgumentNullException.ThrowIfNull(file);
 
@@ -374,6 +378,7 @@ internal class FileDao(
 
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         var folderDao = daoFactory.GetFolderDao<int>();
+        var fileDao = daoFactory.GetFileDao<int>();
         var currentFolder = await folderDao.GetFolderAsync(file.FolderIdDisplay);
 
         var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(currentFolder);
@@ -527,7 +532,7 @@ internal class FileDao(
         {
             try
             {
-                if (roomId != -1)
+                if (roomId != -1 && checkFolder)
                 {
                     var currentRoom = await folderDao.GetFolderAsync(roomId);
 
@@ -543,6 +548,12 @@ internal class FileDao(
                         if (fileType != FileType.Pdf || (fileType == FileType.Pdf && !await fileStorageService.CheckExtendedPDFstream(ms)))
                         {
                             throw new Exception(FilesCommonResource.ErrorMessage_UploadToFormRoom);
+
+                        }else if(fileType == FileType.Pdf)
+                        {
+                            var properties = await fileDao.GetProperties(file.Id) ?? new EntryProperties { FormFilling = serviceProvider.GetService<FormFillingProperties>() };
+                            properties.FormFilling.StartFilling = true;
+                            await fileDao.SaveProperties(file.Id, properties);
                         }
                     }
                 }
@@ -1280,7 +1291,7 @@ internal class FileDao(
         await chunkedUploadSessionHolder.FinalizeUploadSessionAsync(uploadSession);
 
         var file = await GetFileForCommitAsync(uploadSession);
-        await SaveFileAsync(file, null, uploadSession.CheckQuota, uploadSession);
+        await SaveFileAsync(file, null, uploadSession.CheckQuota, true, uploadSession);
 
         return file;
     }

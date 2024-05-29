@@ -174,6 +174,24 @@ public interface IFileDao<T>
     /// Save in all other cases
     /// </remarks>
     Task<File<T>> SaveFileAsync(File<T> file, Stream fileStream);
+
+    /// <summary>
+    ///  Saves / updates the version of the file
+    ///  and save stream of file
+    /// </summary>
+    /// <param name="file"></param>
+    /// <param name="fileStream"> </param>
+    /// <param name="checkFolder"> </param>
+    /// <returns></returns>
+    /// <remarks>
+    /// Updates the file if:
+    /// - The file comes with the given id
+    /// - The file with that name in the folder / container exists
+    ///
+    /// Save in all other cases
+    /// </remarks>
+    Task<File<T>> SaveFileAsync(File<T> file, Stream fileStream, bool checkFolder);
+
     /// <summary>
     /// 
     /// </summary>
