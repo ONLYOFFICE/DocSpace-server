@@ -195,6 +195,11 @@ public class FilesMessageService(
 
         var desc = GetEventDescription(entry, action, oldTitle, userid, userRole, room?.Id ?? -1, room?.Title);
 
+        if (!HistoryService.TrackedActions.Contains(action))
+        {
+            return new FileEntryData(JsonSerializer.Serialize(desc, _serializerOptions), null);
+        }
+
         var references = parents.Select(x => new FilesAuditReference
         {
             EntryId = x.Id,
@@ -217,9 +222,7 @@ public class FilesMessageService(
             desc.ParentTitle = parent.Title;
         }
         
-        var json = JsonSerializer.Serialize(desc, _serializerOptions);
-        
-        return new FileEntryData(json, references);
+        return new FileEntryData(JsonSerializer.Serialize(desc, _serializerOptions), references);
     }
     
     private async Task<FileEntryData> GetAdditionalEntryDataAsync(FileEntry<string> entry, MessageAction action, string oldTitle = null, Guid userid = default, 

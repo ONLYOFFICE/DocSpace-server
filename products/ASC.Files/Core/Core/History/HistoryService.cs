@@ -36,6 +36,43 @@ public class HistoryService(
     FileSecurity fileSecurity, 
     AuditInterpreter interpreter)
 {
+    public static HashSet<MessageAction> TrackedActions => [
+        MessageAction.FileCreated, 
+        MessageAction.FileUploaded, 
+        MessageAction.UserFileUpdated, 
+        MessageAction.FileRenamed, 
+        MessageAction.FileMoved, 
+        MessageAction.FileMovedWithOverwriting, 
+        MessageAction.FileMovedToTrash, 
+        MessageAction.FileCopied, 
+        MessageAction.FileCopiedWithOverwriting, 
+        MessageAction.FileDeleted, 
+        MessageAction.FileConverted, 
+        MessageAction.FileRestoreVersion, 
+        MessageAction.FolderCreated,
+        MessageAction.FolderRenamed,
+        MessageAction.FolderMoved,
+        MessageAction.FolderMovedWithOverwriting,
+        MessageAction.FolderCopied,
+        MessageAction.FolderCopiedWithOverwriting,
+        MessageAction.FolderMovedToTrash,
+        MessageAction.FolderDeleted,
+        MessageAction.RoomCreateUser,
+        MessageAction.RoomUpdateAccessForUser,
+        MessageAction.RoomRemoveUser,
+        MessageAction.RoomGroupAdded,
+        MessageAction.RoomUpdateAccessForGroup,
+        MessageAction.RoomGroupRemove,
+        MessageAction.RoomCreated,
+        MessageAction.RoomRenamed,
+        MessageAction.AddedRoomTags,
+        MessageAction.DeletedRoomTags,
+        MessageAction.RoomLogoCreated,
+        MessageAction.RoomLogoDeleted,
+        MessageAction.RoomExternalLinkCreated,
+        MessageAction.RoomExternalLinkDeleted
+    ];
+    
     public async IAsyncEnumerable<HistoryEntry> GetHistoryAsync(int entryId, FileEntryType entryType, int offset, int count)
     {
         FileEntry<int> entry = entryType switch
@@ -64,16 +101,7 @@ public class HistoryService(
         var messageDbContext = await dbContextFactory.CreateDbContextAsync();
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
-        var events = messageDbContext.AuditEvents.Join(
-                messageDbContext.FilesAuditReferences,
-                e => e.Id,
-                r => r.AuditEventId, (@event, reference) => new { @event, reference })
-            .Where(x => x.@event.TenantId == tenantId && x.reference.EntryId == entryId && x.reference.EntryType == (byte)entryType)
-            .OrderByDescending(x => x.@event.Date)
-            .Skip(offset)
-            .Take(count)
-            .Select(x => x.@event)
-            .ToAsyncEnumerable();
+        var events = messageDbContext.GetAuditEventsByReferences(tenantId, entryId, (byte)entryType, offset, count);
 
         await foreach (var hEntry in events.SelectAwait(interpreter.ToHistoryAsync).Where(x => x != null))
         {
@@ -86,11 +114,6 @@ public class HistoryService(
         var messageDbContext = await dbContextFactory.CreateDbContextAsync();
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
-        return await messageDbContext.AuditEvents.Join(
-                messageDbContext.FilesAuditReferences,
-                e => e.Id,
-                r => r.AuditEventId, (@event, reference) => new { @event, reference })
-            .Where(x => x.@event.TenantId == tenantId && x.reference.EntryId == entryId && x.reference.EntryType == (byte)entryType)
-            .CountAsync();
+        return await messageDbContext.GetAuditEventsByReferencesTotalCount(tenantId, entryId, (byte)entryType);
     }
 }
