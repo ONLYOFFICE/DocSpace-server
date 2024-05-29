@@ -91,6 +91,7 @@ public static class Actions
     public static readonly INotifyAction StorageDecryptionError = new NotifyAction("storage_decryption_error");
 
     public static readonly INotifyAction SaasRoomInvite = new NotifyAction("saas_room_invite");
+    public static readonly INotifyAction SaasRoomInviteExistingUser = new NotifyAction("saas_room_invite_existing_user");
     public static readonly INotifyAction SaasDocSpaceInvite = new NotifyAction("saas_docspace_invite");
 
     public static readonly INotifyAction SaasAdminActivationV1 = new NotifyAction("saas_admin_activation_v1");
@@ -138,4 +139,6 @@ public static class Actions
     public static readonly INotifyAction SaasAdminVideoGuides = new NotifyAction("saas_video_guides_v1");
 
     public static readonly INotifyAction ZoomWelcome = new NotifyAction("zoom_welcome");
+
+    public static readonly INotifyAction MigrationPersonalToDocspace = new NotifyAction("migration_personal_to_docspace");
 } 

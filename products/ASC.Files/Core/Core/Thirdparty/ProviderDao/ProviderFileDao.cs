@@ -26,7 +26,7 @@
 
 namespace ASC.Files.Thirdparty.ProviderDao;
 
-[Scope]
+[Scope(typeof(IFileDao<string>))]
 internal class ProviderFileDao(IServiceProvider serviceProvider,
         TenantManager tenantManager,
         CrossDao crossDao,

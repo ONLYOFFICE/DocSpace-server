@@ -26,7 +26,6 @@
 
 namespace ASC.Common.Caching;
 
-[Singleton(typeof(AscCache))]
 public interface ICache
 {
     T Get<T>(string key) where T : class;

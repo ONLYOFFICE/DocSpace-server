@@ -26,7 +26,6 @@
 
 namespace ASC.Files.Core;
 
-[Scope]
 public interface ILinkDao
 {
     Task AddLinkAsync(string sourceId, string linkedId);

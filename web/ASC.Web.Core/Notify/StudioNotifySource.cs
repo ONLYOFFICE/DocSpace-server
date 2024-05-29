@@ -92,6 +92,7 @@ public class StudioNotifySource(UserManager userManager, IRecipientProvider reci
                 Actions.StorageDecryptionError,
 
                 Actions.SaasRoomInvite,
+                Actions.SaasRoomInviteExistingUser,
                 Actions.SaasDocSpaceInvite,
 
                 Actions.SaasAdminActivationV1,
@@ -128,7 +129,9 @@ public class StudioNotifySource(UserManager userManager, IRecipientProvider reci
                 Actions.SaasOwnerPaymentWarningGracePeriodLastDay,
                 Actions.SaasOwnerPaymentWarningGracePeriodExpired,
 
-                Actions.ZoomWelcome
+                Actions.ZoomWelcome,
+
+                Actions.MigrationPersonalToDocspace
             );
     }
 

@@ -56,30 +56,27 @@ public class TenantCookieSettings : ISettings<TenantCookieSettings>
     public Guid ID => new("{16FB8E67-E96D-4B22-B217-C80F25C5DE1B}");
 }
 
-[Scope]
-public class TenantCookieSettingsHelper(IConfiguration configuration, SettingsManager settingsManager)
+[Singleton]
+public class TenantCookieSettingsConfig(IConfiguration configuration)
 {
-    private bool? _isVisibleSettings;
-    private bool IsVisibleSettings
-    {
-        get
-        {
-            return _isVisibleSettings ??= !(configuration["web:hide-settings"] ?? string.Empty)
-                .Split(new[] { ',', ';', ' ' }, StringSplitOptions.RemoveEmptyEntries)
-                .Contains("CookieSettings", StringComparer.CurrentCultureIgnoreCase);
-        }
-    }
-    
+    public bool IsVisibleSettings { get; } = !(configuration["web:hide-settings"] ?? string.Empty)
+                    .Split(new[] { ',', ';', ' ' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Contains("CookieSettings", StringComparer.CurrentCultureIgnoreCase);
+}
+
+[Scope]
+public class TenantCookieSettingsHelper(TenantCookieSettingsConfig configuration, SettingsManager settingsManager)
+{
     public async Task<TenantCookieSettings> GetForTenantAsync(int tenantId)
     {
-        return IsVisibleSettings
+        return configuration.IsVisibleSettings
                    ? await settingsManager.LoadAsync<TenantCookieSettings>(tenantId)
                    : TenantCookieSettings.GetInstance();
     }
 
     public async Task SetForTenantAsync(int tenantId, TenantCookieSettings settings = null)
     {
-        if (!IsVisibleSettings)
+        if (!configuration.IsVisibleSettings)
         {
             return;
         }
@@ -89,21 +86,21 @@ public class TenantCookieSettingsHelper(IConfiguration configuration, SettingsMa
 
     public async Task<TenantCookieSettings> GetForUserAsync(Guid userId)
     {
-        return IsVisibleSettings
+        return configuration.IsVisibleSettings
                    ? await settingsManager.LoadAsync<TenantCookieSettings>(userId)
                    : TenantCookieSettings.GetInstance();
     }
 
     public async Task<TenantCookieSettings> GetForUserAsync(int tenantId, Guid userId)
     {
-        return IsVisibleSettings
+        return configuration.IsVisibleSettings
                    ? await settingsManager.LoadAsync<TenantCookieSettings>(tenantId, userId)
                    : TenantCookieSettings.GetInstance();
     }
 
     public async Task SetForUserAsync(Guid userId, TenantCookieSettings settings = null)
     {
-        if (!IsVisibleSettings)
+        if (!configuration.IsVisibleSettings)
         {
             return;
         }
@@ -125,7 +122,7 @@ public class TenantCookieSettingsHelper(IConfiguration configuration, SettingsMa
         {
             expires = settingsTenant.LifeTime == 0 ? DateTime.MaxValue : DateTime.UtcNow.AddMinutes(settingsTenant.LifeTime);
         }
-        
+
         return expires;
     }
 }

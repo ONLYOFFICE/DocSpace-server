@@ -41,19 +41,6 @@ public class Startup : BaseWorkerStartup
 
         services.Configure<NotifyServiceCfg>(Configuration.GetSection("notify"));
 
-        DIHelper.TryAdd<NotifySenderService>();
-        DIHelper.TryAdd<NotifyCleanerService>();
-        DIHelper.TryAdd<TenantManager>();
-        DIHelper.TryAdd<TenantWhiteLabelSettingsHelper>();
-        DIHelper.TryAdd<SettingsManager>();
-        DIHelper.TryAdd<JabberSender>();
-        DIHelper.TryAdd<SmtpSender>();
-        DIHelper.TryAdd<AWSSender>(); // fix private
-        DIHelper.TryAdd<StudioNotifyService>();
-
-        DIHelper.TryAdd<NotifyInvokeSendMethodRequestedIntegrationEventHandler>();
-        DIHelper.TryAdd<NotifySendMessageRequestedIntegrationEventHandler>();
-
         services.AddActivePassiveHostedService<NotifySenderService>(DIHelper, Configuration);
         services.AddActivePassiveHostedService<NotifyCleanerService>(DIHelper, Configuration);
 

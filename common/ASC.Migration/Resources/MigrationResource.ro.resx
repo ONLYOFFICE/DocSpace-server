@@ -138,53 +138,14 @@
   <data name="MigrationCompleted" xml:space="preserve">
     <value>Migrarea a fost finalizată</value>
   </data>
-  <data name="MigrationInitException" xml:space="preserve">
-    <value>A intervenit o eroare în timpul inițializării {0} a migratorului</value>
-  </data>
   <data name="MigrationProgressException" xml:space="preserve">
     <value>Nicio migrare în desfășurare</value>
   </data>
   <data name="MigrationProjectFiles" xml:space="preserve">
     <value>Migrare fișiere de proiect</value>
   </data>
-  <data name="MigrationStartException" xml:space="preserve">
-    <value>Analiză este încă în desfășurare</value>
-  </data>
   <data name="MigrationNotFoundException" xml:space="preserve">
     <value>Nu există un astfel de furnizor de migrare</value>
-  </data>
-  <data name="MigrationUploadException" xml:space="preserve">
-    <value>Migrare este deja în desfășurare</value>
-  </data>
-  <data name="ModuleNameCalendar" xml:space="preserve">
-    <value>Calendar</value>
-  </data>
-  <data name="ModuleNameGroups" xml:space="preserve">
-    <value>Grupuri</value>
-  </data>
-  <data name="ModuleNameMail" xml:space="preserve">
-    <value>Mail</value>
-  </data>
-  <data name="ModuleNameUsers" xml:space="preserve">
-    <value>Utilizatori</value>
-  </data>
-  <data name="NextcloudModuleNameContacts" xml:space="preserve">
-    <value>Contacte</value>
-  </data>
-  <data name="NextcloudModuleNameDocuments" xml:space="preserve">
-    <value>Fișierele utilizatorului</value>
-  </data>
-  <data name="OnlyofficeModuleNameCalendar" xml:space="preserve">
-    <value>Calendar</value>
-  </data>
-  <data name="OnlyofficeModuleNameDocuments" xml:space="preserve">
-    <value>Documente</value>
-  </data>
-  <data name="OnlyofficeModuleNameMail" xml:space="preserve">
-    <value>Mail</value>
-  </data>
-  <data name="OnlyofficeModuleNamePeople" xml:space="preserve">
-    <value>Persoane</value>
   </data>
   <data name="PreparingForMigration" xml:space="preserve">
     <value>Pregătire pentru migrare</value>
@@ -198,14 +159,8 @@
   <data name="UnzippingFinished" xml:space="preserve">
     <value>Decomprimarea finalizată...</value>
   </data>
-  <data name="UserCalendarMigration" xml:space="preserve">
-    <value>Migrarea calendarului de utilizator {0} ({1}/{2})</value>
-  </data>
   <data name="UserMigration" xml:space="preserve">
     <value>Migrarea calendarului de utilizator {0} ({1}/{2})</value>
-  </data>
-  <data name="UserSkipped" xml:space="preserve">
-    <value>Import utilizatori nu a reușit: {0} ({1}/{2})</value>
   </data>
   <data name="CanNotAddUserInGroup" xml:space="preserve">
     <value>Nu se poate adăuga utilizatorul {0} în acest grup {1}</value>

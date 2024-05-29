@@ -24,17 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core.Core.Thirdparty.WebDav;
+namespace ASC.Api.Core.Extensions;
 
-public static class WebDavDaoSelectorExtension
+public interface IStartupTask
 {
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<ThirdPartyFileDao<WebDavEntry, WebDavEntry, WebDavEntry>, WebDavFileDao>();
-        services.TryAdd<ThirdPartyFolderDao<WebDavEntry, WebDavEntry, WebDavEntry>>();
-        services.TryAdd<ThirdPartyTagDao<WebDavEntry, WebDavEntry, WebDavEntry>>();
-        services.TryAdd<IDaoBase<WebDavEntry, WebDavEntry, WebDavEntry>, WebDavDaoBase>();
-        services.TryAdd<IProviderInfo<WebDavEntry, WebDavEntry, WebDavEntry>, WebDavProviderInfo>();
-        services.TryAdd<IDaoSelector<WebDavEntry, WebDavEntry, WebDavEntry>, RegexDaoSelectorBase<WebDavEntry, WebDavEntry, WebDavEntry>>();
-    }
+    Task ExecuteAsync(CancellationToken cancellationToken = default);
 }
+
+public interface IStartupTaskNotAwaitable : IStartupTask;

@@ -28,8 +28,8 @@ namespace ASC.Core.Common.Notify;
 
 public interface ITelegramService
 {
-    void CreateOrUpdateClient(int tenantId, string token, int tokenLifespan, string proxy);
-    void DisableClient(int tenantId);
-    void RegisterUser(string userId, int tenantId, string token);
+    Task CreateOrUpdateClientAsync(int tenantId, string token, int tokenLifespan, string proxy);
+    Task DisableClientAsync(int tenantId);
+    Task RegisterUserAsync(string userId, int tenantId, string token);
     void SendMessage(NotifyMessage m);
 }

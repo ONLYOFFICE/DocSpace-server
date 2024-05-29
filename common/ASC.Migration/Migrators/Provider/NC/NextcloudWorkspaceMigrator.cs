@@ -29,7 +29,7 @@ using ASCShare = ASC.Files.Core.Security.FileShare;
 
 namespace ASC.Migration.Core.Migrators.Provider.NC;
 
-[Transient]
+[Transient(typeof(Migrator))]
 public class NextcloudWorkspaceMigrator : Migrator
 {
     private CancellationToken _cancellationToken;
@@ -55,9 +55,9 @@ public class NextcloudWorkspaceMigrator : Migrator
         MigrationInfo = new MigrationInfo { Name = "Nextcloud" };
     }
 
-    public override async Task InitAsync(string path, CancellationToken cancellationToken, OperationType operation)
+    public override void Init(string path, CancellationToken cancellationToken, OperationType operation)
     {
-        await MigrationLogger.InitAsync();
+        MigrationLogger.Init();
         _cancellationToken = cancellationToken;
 
         MigrationInfo.Operation = operation;

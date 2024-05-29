@@ -26,7 +26,6 @@
 
 namespace ASC.Files.Core;
 
-[Scope]
 public interface ITagDao<T>
 {
     IAsyncEnumerable<Tag> GetTagsAsync(Guid subject, TagType tagType, IEnumerable<FileEntry<T>> fileEntries);

@@ -79,6 +79,7 @@ public class Startup
         services.AddSession();
 
         _diHelper.Configure(services);
+        _diHelper.Scan();
 
         Action<JsonOptions> jsonOptions = options =>
         {
@@ -91,18 +92,6 @@ public class Startup
             .AddJsonOptions(jsonOptions);
 
         services.AddSingleton(jsonOptions);
-
-        _diHelper.AddControllers();
-        _diHelper.TryAdd<IpSecurityFilter>();
-        _diHelper.TryAdd<PaymentFilter>();
-        _diHelper.TryAdd<ProductSecurityFilter>();
-        _diHelper.TryAdd<TenantStatusFilter>();
-        _diHelper.TryAdd<ConfirmAuthHandler>();
-        _diHelper.TryAdd<BasicAuthHandler>();
-        _diHelper.TryAdd<CookieAuthHandler>();
-        _diHelper.TryAdd<WebhooksGlobalFilterAttribute>();
-        _diHelper.TryAdd<FilesSpaceUsageStatManager>();
-        _diHelper.TryAdd<ApiSystemAuthHandlerHelper>();
 
         if (!string.IsNullOrEmpty(_corsOrigin))
         {
@@ -136,9 +125,6 @@ public class Startup
         services.RegisterFeature();
 
         services.AddScoped<ITenantQuotaFeatureStat<CountRoomFeature, int>, CountRoomCheckerStatistic>();
-        services.AddScoped<CountRoomCheckerStatistic>();
-
-        _diHelper.TryAdd(typeof(IWebhookPublisher), typeof(WebhookPublisher));
 
         services.AddAutoMapper(BaseStartup.GetAutoMapperProfileAssemblies());
 
@@ -151,7 +137,6 @@ public class Startup
         services.AddSingleton(Channel.CreateUnbounded<SocketData>());
         services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Writer);
-        _diHelper.TryAdd<SocketService>();
         
         services
             .AddAuthentication()

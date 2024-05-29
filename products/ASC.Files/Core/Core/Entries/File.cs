@@ -40,7 +40,8 @@ public enum FileStatus
     IsFillFormDraft = 0x80
 }
 
-[Transient]
+[Transient(GenericArguments = [typeof(int)])]
+[Transient(GenericArguments = [typeof(string)])]
 [DebuggerDisplay("{Title} ({Id} v{Version})")]
 public class File<T> : FileEntry<T>
 {

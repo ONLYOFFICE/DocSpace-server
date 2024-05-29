@@ -30,7 +30,7 @@ using Folder = Microsoft.SharePoint.Client.Folder;
 
 namespace ASC.Files.Core.Core.Thirdparty.ProviderDao;
 
-[Scope(Additional = typeof(SelectorFactoryExtension))]
+[Scope]
 internal class SelectorFactory(IServiceProvider serviceProvider)
 {
     public IDaoSelector GetSelector(string id)
@@ -91,18 +91,5 @@ internal class SelectorFactory(IServiceProvider serviceProvider)
         var match = Selectors.Pattern.Match(id);
 
         return match.Success ? match.Groups["selector"].Value : "";
-    }
-}
-
-public static class SelectorFactoryExtension
-{
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<SharePointDaoSelector>();
-        OneDriveDaoSelectorExtension.Register(services);
-        GoogleDriveDaoSelectorExtension.Register(services);
-        DropboxDaoSelectorExtension.Register(services);
-        BoxDaoSelectorExtension.Register(services);
-        WebDavDaoSelectorExtension.Register(services);
     }
 }

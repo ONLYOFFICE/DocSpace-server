@@ -84,6 +84,9 @@ public class FilesSettings : ISettings<FilesSettings>
 
     [JsonPropertyName("DefaultSharingAccessRights")]
     public List<FileShare> DefaultSharingAccessRightsSetting { get; set; }
+    
+    [JsonPropertyName("OpenEditorInSameTab")]
+    public bool OpenEditorInSameTab { get; set; }
 
     public FilesSettings GetDefault()
     {
@@ -104,7 +107,8 @@ public class FilesSettings : ISettings<FilesSettings>
             HideTemplatesSetting = false,
             DownloadTarGzSetting = false,
             AutomaticallyCleanUpSetting = null,
-            DefaultSharingAccessRightsSetting = null
+            DefaultSharingAccessRightsSetting = null,
+            OpenEditorInSameTab = false
         };
     }
 
@@ -286,6 +290,18 @@ public class FilesSettingsHelper(
             setting.DefaultSortedAscSetting = value.IsAsc;
             await SaveForCurrentUser(setting);
         }
+    }
+    
+    public async Task SetOpenEditorInSameTabAsync(bool value)
+    {
+        var setting = await LoadForCurrentUser();
+        setting.OpenEditorInSameTab = value;
+        await SaveForCurrentUser(setting);
+    }
+    
+    public async Task<bool> GetOpenEditorInSameTabAsync()
+    {
+        return (await LoadForCurrentUser()).OpenEditorInSameTab;
     }
 
     public bool GetForcesave() => true;

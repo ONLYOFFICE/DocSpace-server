@@ -31,8 +31,9 @@ public class WebPathSettings
 {
     private readonly IEnumerable<Appender> _appenders;
 
-    public WebPathSettings(Configuration.Storage storage)
+    public WebPathSettings(IConfiguration configuration)
     {
+        var storage = StorageConfigExtension.GetStorage(configuration);
         if (storage != null)
         {
             _appenders = storage.Appender;
@@ -124,7 +125,7 @@ public class WebPathSettings
     }
 }
 
-[Scope(Additional = typeof(StaticUploaderExtension))]
+[Scope]
 public class WebPath(
     WebPathSettings webPathSettings,
     IServiceProvider serviceProvider,
@@ -159,13 +160,5 @@ public class WebPath(
         }
 
         return webPathSettings.GetPath(httpContextAccessor?.HttpContext, options, relativePath);
-    }
-}
-
-public class StaticUploaderExtension
-{
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<StaticUploader>();
     }
 }

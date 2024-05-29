@@ -260,26 +260,7 @@ public class ProductEntryPoint : Product
     public override Guid ProductID => ID;
     public override string Name => FilesCommonResource.ProductName;
 
-    public override string Description
-    {
-        get
-        {
-            var id = _authContext.CurrentAccount.ID;
-
-            if (_userManager.IsUserInGroup(id, Constants.GroupUser.ID))
-            {
-                return FilesCommonResource.ProductDescriptionShort;
-            }
-
-            if (_userManager.IsUserInGroup(id, Constants.GroupAdmin.ID) || _userManager.IsUserInGroup(id, ID))
-            {
-                return FilesCommonResource.ProductDescriptionEx;
-            }
-
-            return FilesCommonResource.ProductDescription;
-        }
-    }
-
+    public override string Description => "";
     public override string StartURL => ProductPath;
     public override string HelpURL => PathProvider.StartURL;
     public override string ProductClassName => "files";

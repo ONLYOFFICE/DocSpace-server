@@ -199,7 +199,8 @@ public class FeedAggregateDataProvider(AuthContext authContext,
                     break;
                 }
             case Constants.FilesModule:
-                exp = f => f.Id.StartsWith($"{Constants.FileItem}_{filter.Id}") || f.Id.StartsWith($"{Constants.SharedFileItem}_{filter.Id}");
+                exp = f => (f.Id.StartsWith($"{Constants.FileItem}_{filter.Id}") || f.Id.StartsWith($"{Constants.SharedFileItem}_{filter.Id}")) && 
+                           (f.CreatedDate == filter.From || f.ModifiedDate == filter.To);
                 break;
             case Constants.FoldersModule:
                 exp = f => f.Id == $"{Constants.FolderItem}_{filter.Id}" || f.Id.StartsWith($"{Constants.SharedFolderItem}_{filter.Id}");

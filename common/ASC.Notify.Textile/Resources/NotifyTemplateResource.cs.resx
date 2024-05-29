@@ -150,7 +150,7 @@
             &lt;/td&gt;
         &lt;/tr&gt;</value>
   </data>
-  <data name="TextForFooterUnsubsribeDocSpace" xml:space="preserve">
+  <data name="TextForFooterUnsubsribe" xml:space="preserve">
     <value>V případě jakýchkoli dotazů ohledně nákupu nám napište na &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="mailto:sales@onlyoffice.com"&gt;sales@onlyoffice.com&lt;/a&gt;.&lt;br /&gt; V případě technických problémů kontaktujte prosím náš &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://www.onlyoffice.com/support-contact-form.aspx"&gt;podporu&lt;/a&gt;.&lt;br /&gt; &lt;a href="{1}" style="color: #FF6F3D; text-decoration: underline; white-space: nowrap;" target="_blank"&gt;Klikněte zde pro odhlášení&lt;/a&gt;&lt;br /&gt;</value>
   </data>
   <data name="TopGif" xml:space="preserve">

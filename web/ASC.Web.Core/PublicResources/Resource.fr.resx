@@ -1039,4 +1039,10 @@
   <data name="UserFreeSpaceException" xml:space="preserve">
     <value>Le quota de stockage pour l'utilisateur est dépassé</value>
   </data>
+  <data name="TariffsFeature_statistic" xml:space="preserve">
+    <value>Quotas de stockage et statistiques</value>
+  </data>
+  <data name="TariffsFeature_total_size" xml:space="preserve">
+    <value>{0} par administrateur/utilisateur avancé et la possibilité d'augmenter l'espace de stockage sur demande</value>
+  </data>
 </root>

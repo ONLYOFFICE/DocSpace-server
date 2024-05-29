@@ -153,9 +153,6 @@
   <data name="MigrationCommonFiles" xml:space="preserve">
     <value>Migración de archivos comunes</value>
   </data>
-  <data name="MigrationInitException" xml:space="preserve">
-    <value>Error al inicializar el migrador {0}</value>
-  </data>
   <data name="MigrationNotFoundException" xml:space="preserve">
     <value>No existe tal proveedor de migración</value>
   </data>
@@ -164,12 +161,6 @@
   </data>
   <data name="MigrationProjectFiles" xml:space="preserve">
     <value>Migración de archivos de proyecto</value>
-  </data>
-  <data name="MigrationStartException" xml:space="preserve">
-    <value>El análisis aún está en progreso</value>
-  </data>
-  <data name="MigrationUploadException" xml:space="preserve">
-    <value>La migración ya está en marcha</value>
   </data>
   <data name="CanNotAddUserInGroup" xml:space="preserve">
     <value>No se ha podido añadir el usuario {0} al grupo {1}</value>
@@ -215,5 +206,8 @@
   </data>
   <data name="CreateShareRoom" xml:space="preserve">
     <value>crear sala compartida {0}</value>
+  </data>
+  <data name="CanNotShare" xml:space="preserve">
+    <value>No se ha podido compartir la entrada {0} con {1}</value>
   </data>
 </root>

@@ -26,9 +26,8 @@
 
 namespace ASC.Web.Core.Mobile;
 
-[Scope]
-public class MobileAppInstallRegistrator
-    (IDbContextFactory<CustomDbContext> dbContextFactory) : IMobileAppInstallRegistrator
+[Scope(typeof(IMobileAppInstallRegistrator), typeof(CachedMobileAppInstallRegistrator))]
+public class MobileAppInstallRegistrator(IDbContextFactory<CustomDbContext> dbContextFactory) : IMobileAppInstallRegistrator
 {
     public async Task RegisterInstallAsync(string userEmail, MobileAppType appType)
     {

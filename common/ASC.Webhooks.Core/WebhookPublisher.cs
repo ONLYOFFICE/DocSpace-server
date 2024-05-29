@@ -26,7 +26,7 @@
 
 namespace ASC.Webhooks.Core;
 
-[Scope]
+[Scope(typeof(IWebhookPublisher))]
 public class WebhookPublisher(
     DbWorker dbWorker,
     IEventBus eventBus,

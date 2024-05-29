@@ -266,7 +266,7 @@ public class TextileStyler(CoreBaseSettings coreBaseSettings,
 
         var rootPath = message.GetArgument("__VirtualRootPath").Value;
 
-        return string.Format(NotifyTemplateResource.TextForFooterUnsubsribeDocSpace, rootPath, unsubscribeLink);
+        return string.Format(NotifyTemplateResource.TextForFooterUnsubsribe, rootPath, unsubscribeLink);
     }
 
     private string GetPortalUnsubscribeLink(NoticeMessage message, MailWhiteLabelSettings settings)

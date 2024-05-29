@@ -42,7 +42,7 @@ internal class SharePointFolderDao(IServiceProvider serviceProvider,
         IFileDao<int> fileDao,
         IFolderDao<int> folderDao,
         TempPath tempPath,
-        RegexDaoSelectorBase<File, Folder, ClientObject> regexDaoSelectorBase)
+        SharePointDaoSelector regexDaoSelectorBase)
     : SharePointDaoBase(serviceProvider, userManager, tenantManager, tenantUtil, dbContextManager, setupInfo,
         fileUtility, tempPath, regexDaoSelectorBase), IFolderDao<string>
     {
