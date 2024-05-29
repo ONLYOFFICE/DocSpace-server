@@ -94,6 +94,7 @@ public partial class FilesDbContext
         return AbstractQueries.ChangeFoldersCountAsync(this, tenantId, folderId, counter);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, FileEntryType.File])]
     public Task<int> DeleteAuditReferencesAsync(int entryId, FileEntryType entryType)
     {
         return AbstractQueries.DeleteAuditReferencesAsync(this, entryId, entryType);
