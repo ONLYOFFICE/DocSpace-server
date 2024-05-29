@@ -25,7 +25,32 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
+
 public class OrderRequestDto
 {
+    [JsonConverter(typeof(OrderRequestDtoConverter))]
     public int Order { get; set; }
+}
+
+public class OrderRequestDtoConverter : System.Text.Json.Serialization.JsonConverter<int>
+{
+    public override int Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        var orderString = reader.GetString();
+        if (!string.IsNullOrEmpty(orderString))
+        {
+            var path = orderString.Split('.');
+            if (int.TryParse(path.Last(), out var pathOrder))
+            {
+                return pathOrder;
+            }
+        }
+
+        throw new ArgumentException("order");
+    }
+
+    public override void Write(Utf8JsonWriter writer, int value, JsonSerializerOptions options)
+    {
+        writer.WriteStringValue(value.ToString());
+    }
 }
