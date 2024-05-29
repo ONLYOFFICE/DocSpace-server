@@ -787,7 +787,6 @@ public class TariffService(
             DueDate = DateTime.MaxValue,
             DelayDueDate = DateTime.MaxValue,
             LicenseDate = DateTime.MaxValue,
-            CustomerId = "",
             Quotas = []
         };
 
