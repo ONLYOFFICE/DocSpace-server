@@ -36,6 +36,7 @@ public class FileSharingAceHelper(
     FileMarker fileMarker,
     NotifyClient notifyClient,
     GlobalFolderHelper globalFolderHelper,
+    PathProvider pathProvider,
     FileSharingHelper fileSharingHelper,
     FileTrackerHelper fileTracker,
     InvitationLinkService invitationLinkService,
@@ -67,6 +68,7 @@ public class FileSharingAceHelper(
         var handledAces = new List<Tuple<EventType, AceWrapper>>(aceWrappers.Count);
         var ownerId = entry.RootFolderType == FolderType.USER ? entry.RootCreateBy : entry.CreateBy;
         var room = entry is Folder<T> folder && DocSpaceHelper.IsRoom(folder.FolderType) ? folder : null;
+        var roomUrl = room != null ? pathProvider.GetRoomsUrl(room.Id.ToString()) : null;
         var entryType = entry.FileEntryType;
         var recipients = new Dictionary<Guid, FileShare>();
         var usersWithoutRight = new List<Guid>();
@@ -273,6 +275,15 @@ public class FileSharingAceHelper(
                 var shortenLink = await urlShortener.GetShortenLinkAsync(link);
 
                 await studioNotifyService.SendEmailRoomInviteAsync(w.Email, entry.Title, shortenLink, culture, true);
+            }
+            else
+            {
+                if (notify && room != null && eventType == EventType.Create && !w.IsLink)
+                {
+                    var user = await userManager.GetUsersAsync(w.Id);
+
+                    await studioNotifyService.SendEmailRoomInviteExistingUserAsync(user, room.Title, roomUrl);
+                }
             }
 
             entry.Access = share;
