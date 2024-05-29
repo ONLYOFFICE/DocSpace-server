@@ -535,29 +535,43 @@ internal class FileDao(
                 if (roomId != -1 && checkFolder)
                 {
                     var currentRoom = await folderDao.GetFolderAsync(roomId);
-
-                    if (currentRoom.FolderType == FolderType.FillingFormsRoom)
+                    using (var originalCopyStream = new MemoryStream())
                     {
-                        var extension = FileUtility.GetFileExtension(file.Title);
-                        var fileType = FileUtility.GetFileTypeByExtention(extension);
-
-                        using var ms = new MemoryStream();
-                        await fileStream.CopyToAsync(ms, 300);
-                        ms.Position = 0;
-
-                        if (fileType != FileType.Pdf || (fileType == FileType.Pdf && !await fileStorageService.CheckExtendedPDFstream(ms)))
+                        if (currentRoom.FolderType == FolderType.FillingFormsRoom)
                         {
-                            throw new Exception(FilesCommonResource.ErrorMessage_UploadToFormRoom);
+                            var extension = FileUtility.GetFileExtension(file.Title);
+                            var fileType = FileUtility.GetFileTypeByExtention(extension);
 
-                        }else if(fileType == FileType.Pdf)
+                            fileStream.Position = 0;
+                            await fileStream.CopyToAsync(originalCopyStream);
+
+                            var cloneStreamForCheck = CloneMemoryStream(originalCopyStream, 300);
+                            var cloneStreamForSave = CloneMemoryStream(originalCopyStream);
+
+                            if (fileType != FileType.Pdf || (fileType == FileType.Pdf && !await fileStorageService.CheckExtendedPDFstream(cloneStreamForCheck)))
+                            {
+                                throw new Exception(FilesCommonResource.ErrorMessage_UploadToFormRoom);
+
+                            }
+                            else if (fileType == FileType.Pdf)
+                            {
+                                var properties = await fileDao.GetProperties(file.Id) ?? new EntryProperties { FormFilling = serviceProvider.GetService<FormFillingProperties>() };
+                                properties.FormFilling.StartFilling = true;
+                                await fileDao.SaveProperties(file.Id, properties);
+                                await SaveFileStreamAsync(file, cloneStreamForSave, currentFolder);
+                            }
+                        }
+                        else
                         {
-                            var properties = await fileDao.GetProperties(file.Id) ?? new EntryProperties { FormFilling = serviceProvider.GetService<FormFillingProperties>() };
-                            properties.FormFilling.StartFilling = true;
-                            await fileDao.SaveProperties(file.Id, properties);
+                            await SaveFileStreamAsync(file, fileStream, currentFolder);
                         }
                     }
+
                 }
-                await SaveFileStreamAsync(file, fileStream, currentFolder);
+                else
+                {
+                    await SaveFileStreamAsync(file, fileStream, currentFolder);
+                }
             }
             catch (Exception saveException)
             {
@@ -595,6 +609,30 @@ internal class FileDao(
         return await GetFileAsync(file.Id);
     }
 
+    private MemoryStream CloneMemoryStream(MemoryStream originalStream, int limit = -1)
+    {
+        var cloneStream = new MemoryStream();
+
+        var originalPosition = originalStream.Position;
+
+        originalStream.Position = 0;
+
+        if(limit > 0)
+        {
+            originalStream.CopyTo(cloneStream, limit);
+        }
+        else
+        {
+            originalStream.CopyTo(cloneStream);
+        }
+
+
+        originalStream.Position = originalPosition;
+
+        cloneStream.Position = 0;
+
+        return cloneStream;
+    }
     public async Task<int> GetFilesCountAsync(int parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent, 
         bool withSubfolders = false, bool excludeSubject = false, int roomId = default)
     {
