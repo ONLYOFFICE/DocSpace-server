@@ -474,7 +474,7 @@
   <data name="LoginFailViaSSO" xml:space="preserve">
     <value>SSO를 통한 로그인에 실패했습니다</value>
   </data>
-  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+  <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
     <value>소셜 계정을 통한 로그인에 성공했습니다</value>
   </data>
   <data name="LoginSuccessViaSms" xml:space="preserve">
@@ -791,5 +791,11 @@
   </data>
   <data name="RoomExternalLinkUpdated" xml:space="preserve">
     <value>외부 링크가 업데이트되었습니다: {0}. 역할: {1}</value>
+  </data>
+  <data name="FileOpenedForChange" xml:space="preserve">
+    <value>변경을 위해 파일이 열렸습니다: {0}</value>
+  </data>
+  <data name="PortalRenamed" xml:space="preserve">
+    <value>포털 이름이 변경되었습니다</value>
   </data>
 </root>

@@ -97,4 +97,7 @@
   <data name="Personal" xml:space="preserve">
     <value>Persönlich</value>
   </data>
+  <data name="InProcessFormFolder" xml:space="preserve">
+    <value>Im Gange</value>
+  </data>
 </root>

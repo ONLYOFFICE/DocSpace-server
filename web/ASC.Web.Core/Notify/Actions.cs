@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -54,7 +54,6 @@ public static class Actions
     public static readonly INotifyAction RemoveUserDataCompleted = new NotifyAction("remove_user_data_completed", "remove_user_data_completed");
     public static readonly INotifyAction RemoveUserDataCompletedCustomMode = new NotifyAction("remove_user_data_completed_custom_mode");
     public static readonly INotifyAction RemoveUserDataFailed = new NotifyAction("remove_user_data_failed", "remove_user_data_failed");
-    public static readonly INotifyAction DnsChange = new NotifyAction("dns_change", "dns_change");
 
     public static readonly INotifyAction ConfirmOwnerChange = new NotifyAction("owner_confirm_change", "owner_confirm_change");
     public static readonly INotifyAction ActivateEmail = new NotifyAction("activate_email", "activate_email");

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,40 +30,22 @@ using SecurityContext = ASC.Core.SecurityContext;
 namespace ASC.Api.Core.Auth;
 
 [Transient]
-public class ConfirmAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
+public class ConfirmAuthHandler(
+    IOptionsMonitor<AuthenticationSchemeOptions> options,
+    ILoggerFactory logger,
+    UrlEncoder encoder,
+    SecurityContext securityContext,
+    UserManager userManager,
+    EmailValidationKeyModelHelper emailValidationKeyModelHelper)
+    : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
 {
-    private readonly SecurityContext _securityContext;
-    private readonly UserManager _userManager;
-    private readonly EmailValidationKeyModelHelper _emailValidationKeyModelHelper;
-
-    public ConfirmAuthHandler(
-        IOptionsMonitor<AuthenticationSchemeOptions> options,
-        ILoggerFactory logger,
-        UrlEncoder encoder) :
-        base(options, logger, encoder)
-    { }
-
-    public ConfirmAuthHandler(
-        IOptionsMonitor<AuthenticationSchemeOptions> options,
-        ILoggerFactory logger,
-        UrlEncoder encoder,
-        SecurityContext securityContext,
-        UserManager userManager,
-        EmailValidationKeyModelHelper emailValidationKeyModelHelper) :
-        base(options, logger, encoder)
-    {
-        _securityContext = securityContext;
-        _userManager = userManager;
-        _emailValidationKeyModelHelper = emailValidationKeyModelHelper;
-    }
-
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        var emailValidationKeyModel = _emailValidationKeyModelHelper.GetModel();
+        var emailValidationKeyModel = emailValidationKeyModelHelper.GetModel();
 
         if (!emailValidationKeyModel.Type.HasValue)
         {
-            return _securityContext.IsAuthenticated
+            return securityContext.IsAuthenticated
                 ? AuthenticateResult.Success(new AuthenticationTicket(Context.User, new AuthenticationProperties(), Scheme.Name))
                     : AuthenticateResult.Fail(new AuthenticationException(nameof(HttpStatusCode.Unauthorized)));
         }
@@ -71,7 +53,7 @@ public class ConfirmAuthHandler : AuthenticationHandler<AuthenticationSchemeOpti
         EmailValidationKeyProvider.ValidationResult checkKeyResult;
         try
         {
-            checkKeyResult = await _emailValidationKeyModelHelper.ValidateAsync(emailValidationKeyModel);
+            checkKeyResult = await emailValidationKeyModelHelper.ValidateAsync(emailValidationKeyModel);
         }
         catch (ArgumentNullException)
         {
@@ -86,7 +68,7 @@ public class ConfirmAuthHandler : AuthenticationHandler<AuthenticationSchemeOpti
         if (checkKeyResult == EmailValidationKeyProvider.ValidationResult.Ok)
         {
             Guid userId;
-            if (!_securityContext.IsAuthenticated)
+            if (!securityContext.IsAuthenticated)
             {
                 if (emailValidationKeyModel.UiD.HasValue && !emailValidationKeyModel.UiD.Equals(Guid.Empty))
                 {
@@ -96,15 +78,15 @@ public class ConfirmAuthHandler : AuthenticationHandler<AuthenticationSchemeOpti
                 {
                     userId = emailValidationKeyModel.Type is ConfirmType.EmailActivation or ConfirmType.EmpInvite or ConfirmType.LinkInvite ? 
                         Constants.CoreSystem.ID : 
-                        (await _userManager.GetUserByEmailAsync(emailValidationKeyModel.Email)).Id;
+                        (await userManager.GetUserByEmailAsync(emailValidationKeyModel.Email)).Id;
                 }
             }
             else
             {
-                userId = _securityContext.CurrentAccount.ID;
+                userId = securityContext.CurrentAccount.ID;
             }
 
-            await _securityContext.AuthenticateMeWithoutCookieAsync(userId, claims);
+            await securityContext.AuthenticateMeWithoutCookieAsync(userId, claims);
         }
 
         var result = checkKeyResult switch

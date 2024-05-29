@@ -343,7 +343,7 @@
   <data name="LoginSuccess" xml:space="preserve">
     <value>Sukces logowania</value>
   </data>
-  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+  <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
     <value>Zaloguj się za pomocą konta społecznościowego</value>
   </data>
   <data name="LoginSuccessViaApi" xml:space="preserve">
@@ -732,5 +732,11 @@
   </data>
   <data name="RoomExternalLinkUpdated" xml:space="preserve">
     <value>Zaktualizowany link zewnętrzny: {0}. Rola: {1}</value>
+  </data>
+  <data name="FileOpenedForChange" xml:space="preserve">
+    <value>Plik otwarty do zmiany: {0}</value>
+  </data>
+  <data name="PortalRenamed" xml:space="preserve">
+    <value>Zmieniono nazwę portalu</value>
   </data>
 </root>

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -39,8 +39,7 @@ public class EventTypeConverter : ITypeConverter<EventMessage, DbLoginEvent>, IT
 
         if (source.Description is { Count: > 0 })
         {
-            loginEvent.DescriptionRaw =
-                JsonConvert.SerializeObject(source.Description, new JsonSerializerSettings
+            loginEvent.DescriptionRaw = JsonConvert.SerializeObject(source.Description, new JsonSerializerSettings
                 {
                     DateTimeZoneHandling = DateTimeZoneHandling.Utc
                 });

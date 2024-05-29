@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -57,6 +57,18 @@ public class QuotaDto
     /// <summary>List of quota features</summary>
     /// <type>System.Collections.Generic.IEnumerable{ASC.Web.Api.ApiModels.ResponseDto.TenantQuotaFeatureDto}, ASC.Web.Api</type>
     public IEnumerable<TenantQuotaFeatureDto> Features { get; set; }
+
+    /// <summary>User quota</summary>
+    /// <type>ASC.Core.Tenants.TenantEntityQuotaSettings, ASC.Core.Common</type>
+    public TenantEntityQuotaSettings UsersQuota {  get; set; }
+
+    /// <summary>Room quota</summary>
+    /// <type>ASC.Core.Tenants.TenantEntityQuotaSettings, ASC.Core.Common</type>
+    public TenantEntityQuotaSettings RoomsQuota {  get; set; }
+
+    /// <summary>Tenant custom quota</summary>
+    /// <type>ASC.Core.Tenants.TenantQuotaSettings, ASC.Core.Common</type>
+    public TenantQuotaSettings TenantCustomQuota { get; set; }
 }
 
 /// <summary>

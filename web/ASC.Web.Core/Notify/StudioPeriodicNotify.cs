@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -341,8 +341,8 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         new TagValue(Tags.ActiveUsers, (await userManager.GetUsersAsync()).Length),
                         new TagValue(Tags.Price, rquota.Price),
                         new TagValue(Tags.PricePeriod, UserControlsCommonResource.TariffPerMonth),
-                        new TagValue(Tags.DueDate, dueDate.ToLongDateString()),
-                        new TagValue(Tags.DelayDueDate, (delayDueDateIsNotMax ? delayDueDate : dueDate).ToLongDateString()),
+                        //new TagValue(Tags.DueDate, dueDate.ToLongDateString()),
+                        //new TagValue(Tags.DelayDueDate, (delayDueDateIsNotMax ? delayDueDate : dueDate).ToLongDateString()),
                         TagValues.OrangeButton(orangeButtonText(culture), orangeButtonUrl),
                         TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours(culture)),
                         new TagValue("IMG1", img1),
@@ -391,10 +391,10 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                 var createdDate = tenant.CreationDateTime.Date;
 
                 var actualEndDate = tariff.DueDate != DateTime.MaxValue ? tariff.DueDate : tariff.LicenseDate;
-                var dueDate = actualEndDate.Date;
-
-                var delayDueDateIsNotMax = tariff.DelayDueDate != DateTime.MaxValue;
-                var delayDueDate = tariff.DelayDueDate.Date;
+                // var dueDate = actualEndDate.Date;
+                //
+                // var delayDueDateIsNotMax = tariff.DelayDueDate != DateTime.MaxValue;
+                // var delayDueDate = tariff.DelayDueDate.Date;
 
                 INotifyAction action = null;
                 var paymentMessage = true;
@@ -487,8 +487,8 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         new TagValue(Tags.ActiveUsers, (await userManager.GetUsersAsync()).Length),
                         new TagValue(Tags.Price, rquota.Price),
                         new TagValue(Tags.PricePeriod, UserControlsCommonResource.TariffPerMonth),
-                        new TagValue(Tags.DueDate, dueDate.ToLongDateString()),
-                        new TagValue(Tags.DelayDueDate, (delayDueDateIsNotMax ? delayDueDate : dueDate).ToLongDateString()),
+                        //new TagValue(Tags.DueDate, dueDate.ToLongDateString()),
+                        //new TagValue(Tags.DelayDueDate, (delayDueDateIsNotMax ? delayDueDate : dueDate).ToLongDateString()),
                         TagValues.OrangeButton(orangeButtonText(culture), orangeButtonUrl),
                         TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours(culture)),
                         new TagValue("IMG1", img1),

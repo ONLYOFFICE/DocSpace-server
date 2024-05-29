@@ -91,9 +91,6 @@
   <data name="ButtonConfirm" xml:space="preserve">
     <value>Confirmer</value>
   </data>
-  <data name="ButtonConfirmPortalAddressChange" xml:space="preserve">
-    <value>Confirmer le changement d'adresse du portail</value>
-  </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
     <value>Confirmation de mise à jour du portail propriétaire</value>
   </data>
@@ -217,19 +214,6 @@ Veuillez suivre le lien ci-dessous pour confirmer l'opération:
 $OrangeButton
 
 *Remarque*: ce lien est valable pour 7 jours seulement. Veuillez compléter le processus de changement du propriétaire du portail au courant de cette période.</value>
-  </data>
-  <data name="pattern_dns_change" xml:space="preserve">
-    <value>h1.Changement de l'adresse du portail
-
-Bonjour $OwnerName,
-
-Il y a eu une demande pour changer l'adresse du portail "${__VirtualRootPath}":"${__VirtualRootPath}" à "$PortalAddress":"$PortalAddress" #if($PortalDns != "") ("$PortalDns":"$PortalDns" )#end.
-
-Veuillez suivre le lien ci-dessous pour confirmer l'opération:
-
-$OrangeButton
-
-*Remarque* : ce lien est valable pour 7 jours seulement. Veuillez compléter le processus de changementle de l'adresse du portail au courant de cette période.</value>
   </data>
   <data name="pattern_enterprise_guest_activation_v10" xml:space="preserve">
     <value>h1. Inscrivez-vous sur &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
@@ -757,9 +741,6 @@ Le lien est valide pendant 7 jours.</value>
   <data name="subject_confirm_owner_change" xml:space="preserve">
     <value>${LetterLogoText}. Changement du propriétaire du portail</value>
   </data>
-  <data name="subject_dns_change" xml:space="preserve">
-    <value>${LetterLogoText}. Changement de l'adresse du portail</value>
-  </data>
   <data name="subject_enterprise_guest_activation_v10" xml:space="preserve">
     <value>Inscrivez-vous sur le portail ${__VirtualRootPath}</value>
   </data>
@@ -1239,7 +1220,7 @@ $TrulyYours</value>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>Bonjour !
 
-Vous êtes invité à rejoindre la salle $Message à "${__VirtualRootPath}":"${__VirtualRootPath}". Acceptez l'invitation en cliquant sur le lien :
+Vous êtes invité à rejoindre la salle de DocSpace à "${__VirtualRootPath}":"${__VirtualRootPath}". Acceptez l'invitation en cliquant sur le lien :
 
 $OrangeButton
 
@@ -1701,5 +1682,24 @@ Pour vous faciliter la tâche, nous avons préparé des tutoriels vidéo afin qu
 $OrangeButton
 
 $TrulyYours</value>
+  </data>
+  <data name="pattern_zoom_welcome" xml:space="preserve">
+    <value>h1. à &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+ 
+ 
+Bonjour, $UserName!
+ 
+Vous venez de créer ONLYOFFICE DocSpace, un centre documentaire où vous pouvez optimiser la collaboration avec votre équipe, vos clients, vos partenaires, et plus encore.  Son adresse est "${__VirtualRootPath}":"${__VirtualRootPath}".
+ 
+Votre plan tarifaire actuel est STARTUP.  Ce plan est totalement gratuit et comprend:
+ 
+&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;100 administrateurs/utilisateurs avancés&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Jusqu'à 100 salles&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;100 Go espace de stockage&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+ 
+*Profitez d'un nouveau mode de collaboration documentaire!
+ 
+$TrulyYours</value>
+  </data>
+  <data name="subject_zoom_welcome" xml:space="preserve">
+    <value>Bienvenue à ONLYOFFICE DocSpace!</value>
   </data>
 </root>

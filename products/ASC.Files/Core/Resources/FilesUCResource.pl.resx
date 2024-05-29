@@ -97,4 +97,7 @@
   <data name="PrivacyRoom" xml:space="preserve">
     <value>Prywatny pokój</value>
   </data>
+  <data name="InProcessFormFolder" xml:space="preserve">
+    <value>W toku</value>
+  </data>
 </root>

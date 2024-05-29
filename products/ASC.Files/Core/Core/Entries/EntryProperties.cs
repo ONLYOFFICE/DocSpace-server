@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -72,6 +72,10 @@ public class FormFillingProperties()
     /// <summary>Specifies whether to collect the data from the filled forms or not</summary>
     /// <type>System.Boolean, System</type>
     public bool CollectFillForm { get; set; }
+
+    /// <summary>Specifies if the filling has started or not</summary>
+    /// <type>System.Boolean, System</type>
+    public bool StartFilling { get; set; }
 
     /// <summary>Folder ID where a file will be saved</summary>
     /// <type>System.String, System</type>

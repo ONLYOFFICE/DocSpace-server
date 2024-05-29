@@ -154,14 +154,8 @@
   <data name="ErrorMessage_FileNotFound" xml:space="preserve">
     <value>Požadovaný soubor nebyl nalezen</value>
   </data>
-  <data name="ErrorMessage_FileSizeConvert" xml:space="preserve">
-    <value>Soubor větší než {0} nebude konvertován</value>
-  </data>
   <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>Soubor větší než {0} nebude zkopírován</value>
-  </data>
-  <data name="ErrorMessage_FileSizeEdit" xml:space="preserve">
-    <value>Soubor větší než {0} nebude upraven</value>
   </data>
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>Soubor větší než {0} nebude přesunut</value>
@@ -427,5 +421,47 @@ Je garantována 100% kompatibilita s MS Office formáty.</value>
   </data>
   <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
     <value>Heslo jste se pokoušeli zadat příliš mnohokrát. Zkuste to prosím později</value>
+  </data>
+  <data name="RoomIndex_Author" xml:space="preserve">
+    <value>Autor</value>
+  </data>
+  <data name="RoomIndex_Company" xml:space="preserve">
+    <value>Společnost</value>
+  </data>
+  <data name="RoomIndex_Created" xml:space="preserve">
+    <value>Vytvořeno</value>
+  </data>
+  <data name="RoomIndex_DateGenerated" xml:space="preserve">
+    <value>Datum generování</value>
+  </data>
+  <data name="RoomIndex_ExportAuthor" xml:space="preserve">
+    <value>Autor exportu</value>
+  </data>
+  <data name="RoomIndex_Folder" xml:space="preserve">
+    <value>Složka</value>
+  </data>
+  <data name="RoomIndex_Index" xml:space="preserve">
+    <value>Index</value>
+  </data>
+  <data name="RoomIndex_Modified" xml:space="preserve">
+    <value>Upraveno</value>
+  </data>
+  <data name="RoomIndex_Name" xml:space="preserve">
+    <value>Název</value>
+  </data>
+  <data name="RoomIndex_Room" xml:space="preserve">
+    <value>Pokoj</value>
+  </data>
+  <data name="RoomIndex_SheetName" xml:space="preserve">
+    <value>Index místnosti</value>
+  </data>
+  <data name="RoomIndex_Size" xml:space="preserve">
+    <value>Velikost (MB)</value>
+  </data>
+  <data name="RoomIndex_Total" xml:space="preserve">
+    <value>Celkem</value>
+  </data>
+  <data name="RoomIndex_Type" xml:space="preserve">
+    <value>Typ</value>
   </data>
 </root>

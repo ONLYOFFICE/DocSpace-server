@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -63,7 +63,7 @@ public static class DbQuotaExtension
                     TenantId = -1,
                     Name = "trial",
                     Description = null,
-                    Features = "trial,audit,ldap,sso,whitelabel,thirdparty,restore,oauth,total_size:107374182400,file_size:100,manager:1",
+                    Features = "trial,audit,ldap,sso,whitelabel,thirdparty,restore,oauth,total_size:107374182400,file_size:100,manager:1,statistic",
                     Price = 0,
                     ProductId = null,
                     Visible = false
@@ -72,11 +72,11 @@ public static class DbQuotaExtension
                 {
                     TenantId = -2,
                     Name = "admin",
-                    Description = null,
-                    Features = "audit,ldap,sso,whitelabel,thirdparty,restore,oauth,contentsearch,total_size:107374182400,file_size:1024,manager:1",
+                    Description = "until 01.04.2024",
+                    Features = "audit,ldap,sso,whitelabel,thirdparty,restore,oauth,contentsearch,total_size:107374182400,file_size:1024,manager:1,statistic",
                     Price = 15,
                     ProductId = "1002",
-                    Visible = true
+                    Visible = false
                 },
                 new DbQuota
                 {
@@ -113,7 +113,7 @@ public static class DbQuotaExtension
                     TenantId = -6,
                     Name = "subscription",
                     Description = null,
-                    Features = "audit,ldap,sso,whitelabel,thirdparty,restore,oauth,contentsearch,file_size:1024",
+                    Features = "audit,ldap,sso,whitelabel,thirdparty,restore,oauth,contentsearch,file_size:1024,statistic",
                     Price = 0,
                     ProductId = "1001",
                     Visible = false
@@ -123,7 +123,7 @@ public static class DbQuotaExtension
                     TenantId = -7,
                     Name = "nonprofit",
                     Description = null,
-                    Features = "non-profit,audit,ldap,sso,thirdparty,restore,oauth,contentsearch,total_size:2147483648,file_size:1024,manager:20",
+                    Features = "non-profit,audit,ldap,sso,thirdparty,restore,oauth,contentsearch,total_size:2147483648,file_size:1024,manager:20,statistic",
                     Price = 0,
                     ProductId = null,
                     Visible = false
@@ -133,15 +133,25 @@ public static class DbQuotaExtension
                     TenantId = -8,
                     Name = "zoom",
                     Description = null,
-                    Features = "free,total_size:107374182400,manager:100,room:100",
+                    Features = "free,oauth,total_size:107374182400,manager:100,room:100",
                     Price = 0,
                     ProductId = null,
                     Visible = false
+                },
+                new DbQuota
+                {
+                    TenantId = -9,
+                    Name = "admin",
+                    Description = "since 01.04.2024",
+                    Features = "audit,ldap,sso,whitelabel,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic",
+                    Price = 20,
+                    ProductId = "1006",
+                    Visible = true
                 }
                 );
         return modelBuilder;
     }
-
+    
     public static void MySqlAddDbQuota(this ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<DbQuota>(entity =>

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,19 +34,20 @@ namespace ASC.Web.Api;
 [DefaultRoute("activeconnections")]
 [ApiController]
 [ControllerName("security")]
-public class ConnectionsController(UserManager userManager,
-        SecurityContext securityContext,
-        DbLoginEventsManager dbLoginEventsManager,
-        IHttpContextAccessor httpContextAccessor,
-        DisplayUserSettingsHelper displayUserSettingsHelper,
-        CommonLinkUtility commonLinkUtility,
-        ILogger<ConnectionsController> logger,
-        WebItemSecurity webItemSecurity,
-        MessageService messageService,
-        MessageTarget messageTarget,
-        CookiesManager cookiesManager,
-        CookieStorage cookieStorage,
-        GeolocationHelper geolocationHelper)
+public class ConnectionsController(
+    UserManager userManager,
+    SecurityContext securityContext,
+    DbLoginEventsManager dbLoginEventsManager,
+    IHttpContextAccessor httpContextAccessor,
+    DisplayUserSettingsHelper displayUserSettingsHelper,
+    CommonLinkUtility commonLinkUtility,
+    ILogger<ConnectionsController> logger,
+    WebItemSecurity webItemSecurity,
+    MessageService messageService,
+    CookiesManager cookiesManager,
+    CookieStorage cookieStorage,
+    GeolocationHelper geolocationHelper,
+    ApiDateTimeHelper apiDateTimeHelper)
     : ControllerBase
 {
     /// <summary>
@@ -60,7 +61,7 @@ public class ConnectionsController(UserManager userManager,
     /// <path>api/2.0/security/activeconnections</path>
     /// <httpMethod>GET</httpMethod>
     [HttpGet("")]
-    public async Task<object> GetAllActiveConnections()
+    public async Task<ActiveConnectionsDto> GetAllActiveConnections()
     {
         var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
         var loginEvents = await dbLoginEventsManager.GetLoginEventsAsync(user.TenantId, user.Id);
@@ -100,12 +101,25 @@ public class ConnectionsController(UserManager userManager,
             }
         }
 
-        var result = new
+        return new ActiveConnectionsDto
         {
-            Items = listLoginEvents,
-            LoginEvent = loginEventId
+            LoginEvent = loginEventId,
+            Items = listLoginEvents.Select(q => new ActiveConnectionsItemDto
+            {
+                Id = q.Id,
+                Browser = q.Browser,
+                City = q.City,
+                Country = q.Country,
+                Date = apiDateTimeHelper.Get(q.Date),
+                Ip = q.IP,
+                Mobile = q.Mobile,
+                Page = q.Page,
+                TenantId = q.TenantId,
+                Platform = q.Platform,
+                UserId = q.UserId
+
+            }).ToList()
         };
-        return result;
     }
 
     /// <summary>
@@ -136,7 +150,7 @@ public class ConnectionsController(UserManager userManager,
             var hash = auditEventDate.ToString("s", CultureInfo.InvariantCulture);
             var confirmationUrl = await commonLinkUtility.GetConfirmationEmailUrlAsync(user.Email, ConfirmType.PasswordChange, hash, user.Id);
 
-            await messageService.SendAsync(MessageAction.UserSentPasswordChangeInstructions, messageTarget.Create(user.Id), auditEventDate, userName);
+            await messageService.SendAsync(MessageAction.UserSentPasswordChangeInstructions, MessageTarget.Create(user.Id), auditEventDate, userName);
 
             return confirmationUrl;
         }
@@ -220,17 +234,23 @@ public class ConnectionsController(UserManager userManager,
         try
         {
             var currentUserId = securityContext.CurrentAccount.ID;
-            var loginEvent = await dbLoginEventsManager.GetByIdAsync(loginEventId);
-            
-            if (loginEvent.UserId.HasValue && currentUserId != loginEvent.UserId && !await userManager.IsDocSpaceAdminAsync(currentUserId))
+            var user = await userManager.GetUsersAsync(currentUserId);
+
+            var loginEvent = await dbLoginEventsManager.GetByIdAsync(user.TenantId, loginEventId);
+
+            if (loginEvent == null)
+            {
+                return false;
+            }
+
+            if (loginEvent.UserId.HasValue && currentUserId != loginEvent.UserId && !await userManager.IsDocSpaceAdminAsync(user))
             {
                 throw new SecurityException("Method not available");
             }
-            
-            var user = await userManager.GetUsersAsync(currentUserId);
+
             var userName = user.DisplayUserName(false, displayUserSettingsHelper);
 
-            await dbLoginEventsManager.LogOutEventAsync(loginEventId);
+            await dbLoginEventsManager.LogOutEventAsync(loginEvent.TenantId, loginEvent.Id);
 
             await messageService.SendAsync(MessageAction.UserLogoutActiveConnection, userName);
             return true;
@@ -249,7 +269,7 @@ public class ConnectionsController(UserManager userManager,
         var userName = user.DisplayUserName(false, displayUserSettingsHelper);
         var auditEventDate = DateTime.UtcNow;
 
-        await messageService.SendAsync(currentUserId.Equals(user.Id) ? MessageAction.UserLogoutActiveConnections : MessageAction.UserLogoutActiveConnectionsForUser, messageTarget.Create(user.Id), auditEventDate, userName);
+        await messageService.SendAsync(currentUserId.Equals(user.Id) ? MessageAction.UserLogoutActiveConnections : MessageAction.UserLogoutActiveConnectionsForUser, MessageTarget.Create(user.Id), auditEventDate, userName);
         await cookiesManager.ResetUserCookieAsync(user.Id);
     }
 

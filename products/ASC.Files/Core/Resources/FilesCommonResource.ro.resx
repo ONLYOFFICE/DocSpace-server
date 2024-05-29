@@ -245,14 +245,8 @@ Compatibilitate garantată 100% cu formatele MS Office.</value>
   <data name="ErrorMessage_FileNotFound" xml:space="preserve">
     <value>Fișierul solicitat nu a fost găsit</value>
   </data>
-  <data name="ErrorMessage_FileSizeConvert" xml:space="preserve">
-    <value>Fișierul mai mare de {0} nu va fi convertit</value>
-  </data>
   <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>Fișierul mai mare de {0} nu va fi copiat</value>
-  </data>
-  <data name="ErrorMessage_FileSizeEdit" xml:space="preserve">
-    <value>Fișierul mai mare de {0} nu va fi editat</value>
   </data>
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>Fișierul mai mare de {0} nu va fi deplasat</value>
@@ -427,5 +421,47 @@ Compatibilitate garantată 100% cu formatele MS Office.</value>
   </data>
   <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
     <value>Prea multe încercări incorecte. Încercați din nou mai târziu</value>
+  </data>
+  <data name="RoomIndex_Author" xml:space="preserve">
+    <value>Autor</value>
+  </data>
+  <data name="RoomIndex_Company" xml:space="preserve">
+    <value>Companie</value>
+  </data>
+  <data name="RoomIndex_Created" xml:space="preserve">
+    <value>Creată</value>
+  </data>
+  <data name="RoomIndex_DateGenerated" xml:space="preserve">
+    <value>Data a fost generată</value>
+  </data>
+  <data name="RoomIndex_ExportAuthor" xml:space="preserve">
+    <value>Autor de export</value>
+  </data>
+  <data name="RoomIndex_Folder" xml:space="preserve">
+    <value>Folder</value>
+  </data>
+  <data name="RoomIndex_Index" xml:space="preserve">
+    <value>Index</value>
+  </data>
+  <data name="RoomIndex_Modified" xml:space="preserve">
+    <value>Modificat</value>
+  </data>
+  <data name="RoomIndex_Name" xml:space="preserve">
+    <value>Numele</value>
+  </data>
+  <data name="RoomIndex_Room" xml:space="preserve">
+    <value>Sală</value>
+  </data>
+  <data name="RoomIndex_SheetName" xml:space="preserve">
+    <value>Index sală</value>
+  </data>
+  <data name="RoomIndex_Size" xml:space="preserve">
+    <value>Dimensiune (MB)</value>
+  </data>
+  <data name="RoomIndex_Total" xml:space="preserve">
+    <value>Total</value>
+  </data>
+  <data name="RoomIndex_Type" xml:space="preserve">
+    <value>Tip</value>
   </data>
 </root>

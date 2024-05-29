@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -35,6 +35,23 @@ public class LoginProfile
     public const string QuerySessionParamName = "sup";
     public const string QueryCacheParamName = "cup";
 
+    public LoginProfile()
+    {
+        
+    }
+
+    public LoginProfile([NotNull]string serialized)
+    {
+        ArgumentNullException.ThrowIfNull(serialized);
+
+        _fields = serialized.Split(PairSeparator).ToDictionary(x => x.Split(KeyValueSeparator)[0], y => y.Split(KeyValueSeparator)[1]);
+    }
+    
+    public LoginProfile(Exception e)
+    {
+        AuthorizationError = e.Message;
+    }
+    
     public string Id
     {
         get => GetField(WellKnownFields.Id);
@@ -149,7 +166,7 @@ public class LoginProfile
     private const char KeyValueSeparator = '→';
     private const char PairSeparator = '·';
 
-    private IDictionary<string, string> _fields = new Dictionary<string, string>();
+    private readonly Dictionary<string, string> _fields = new();
     
     private string GetField(string name)
     {
@@ -166,53 +183,28 @@ public class LoginProfile
         }
         else
         {
-            if (_fields.ContainsKey(name))
-            {
-                _fields.Remove(name);
-            }
+            _fields.Remove(name);
         }
     }
 
-    internal static LoginProfile FromError(Exception e)
+    public override string ToString()
     {
-        var profile = new LoginProfile { AuthorizationError = e.Message };
+        return string.Join(new string(PairSeparator, 1), _fields.Select(x => string.Join(new string(KeyValueSeparator, 1), x.Key, x.Value)).ToArray());
+    }
+}
 
-        return profile;
+[Scope]
+public class LoginProfileTransport(InstanceCrypto instanceCrypto, TenantManager tenantManager)
+{
+    public async Task<string> ToString(LoginProfile profile)
+    {
+        return WebEncoders.Base64UrlEncode(instanceCrypto.Encrypt(Encoding.UTF8.GetBytes(profile.ToString() + await tenantManager.GetCurrentTenantIdAsync())));
     }
 
-    internal string ToSerializedString()
-    {
-        return string.Join(new string(PairSeparator, 1),
-            _fields.Select(x => string.Join(new string(KeyValueSeparator, 1), x.Key, x.Value)).ToArray());
-    }
-
-    internal static LoginProfile CreateFromSerializedString(string serialized)
-    {
-        var profile = new LoginProfile();
-        profile.FromSerializedString(serialized);
-
-        return profile;
-    }
-
-    private void FromSerializedString([NotNull]string serialized)
-    {
-        ArgumentNullException.ThrowIfNull(serialized);
-
-        _fields = serialized.Split(PairSeparator)
-            .ToDictionary(x => x.Split(KeyValueSeparator)[0], y => y.Split(KeyValueSeparator)[1]);
-    }
-
-    public string Transport(InstanceCrypto instanceCrypto)
-    {
-        return WebEncoders.Base64UrlEncode(instanceCrypto.Encrypt(Encoding.UTF8.GetBytes(ToSerializedString())));
-    }
-
-    public static LoginProfile FromTransport(InstanceCrypto instanceCrypto, string transportString)
+    public async Task<LoginProfile> FromTransport(string transportString)
     {
         var serialized = instanceCrypto.Decrypt(WebEncoders.Base64UrlDecode(transportString));
-        
-        var result = new LoginProfile();
-        result.FromSerializedString(serialized);
-        return result;
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        return new LoginProfile(serialized.Substring(0, serialized.LastIndexOf(tenantId.ToString(), StringComparison.Ordinal)));
     }
 }

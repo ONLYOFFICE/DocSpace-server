@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -101,9 +101,43 @@ public class FilesSpaceUsageStatManager(IDbContextFactory<FilesDbContext> dbCont
         return await Queries.SumContentLengthAsync(filesDbContext, tenantId, userId, my, trash);
     }
 
+    public async Task RecalculateFoldersUsedSpace(int TenantId)
+    {
+        await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
+
+        var queryGroup = filesDbContext.Folders
+                    .Join(filesDbContext.Tree, r => r.Id, a => a.ParentId, (folder, tree) => new { folder, tree })
+                    .Join(filesDbContext.Files, r => r.tree.FolderId, b => b.ParentId, (temp, file) => new { temp.folder, file })
+                    .Where(r => r.file.TenantId == r.folder.TenantId)
+                    .Where(r => r.folder.TenantId == TenantId)
+                    .GroupBy(temp => temp.folder.Id)
+                    .Select(group => new
+                    {
+                        Id = group.Key,
+                        Sum = group.Sum(temp => temp.file.ContentLength)
+                    });
+
+        var query = filesDbContext.Folders
+                        .Join(queryGroup,
+                            folder => folder.Id,
+                            result => result.Id,
+                            (folder, result) =>
+                                new { Folder = folder, Result = result })
+                        .ToList();
+
+        foreach (var item in query)
+        {
+            item.Folder.Counter = item.Result.Sum;
+            filesDbContext.Update(item.Folder);
+        }
+
+        await filesDbContext.SaveChangesAsync();
+
+    }
     public async Task RecalculateUserQuota(int tenantId, Guid userId)
     {
         await tenantManager.SetCurrentTenantAsync(tenantId);
+
         var size = await GetUserSpaceUsageAsync(userId);
 
         await tenantManager.SetTenantQuotaRowAsync(
@@ -126,7 +160,10 @@ static file class Queries
         EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, Guid userId, int my, int trash) =>
                 ctx.Files
-                    .Where(r => r.TenantId == tenantId && r.CreateBy == userId &&
-                                (r.ParentId == my || r.ParentId == trash))
-                    .Sum(r => r.ContentLength));
+                    .Join(ctx.Tree, a => a.ParentId, b => b.FolderId, (file, tree) => new { file, tree })
+                    .Join(ctx.BunchObjects, a => a.tree.ParentId.ToString(), b => b.LeftNode, (fileTree, bunch) => new { fileTree.file, fileTree.tree, bunch })
+                    .Where(r => r.file.TenantId == r.bunch.TenantId)
+                    .Where(r => r.file.TenantId == tenantId)
+                    .Where(r => r.bunch.RightNode.StartsWith("files/my/" + userId.ToString()) || r.bunch.RightNode.StartsWith("files/trash/" + userId.ToString()))
+                    .Sum(r => r.file.ContentLength));
 }

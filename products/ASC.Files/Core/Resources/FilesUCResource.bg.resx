@@ -97,4 +97,7 @@
   <data name="Recent" xml:space="preserve">
     <value>Скорошни</value>
   </data>
+  <data name="InProcessFormFolder" xml:space="preserve">
+    <value>В процес</value>
+  </data>
 </root>

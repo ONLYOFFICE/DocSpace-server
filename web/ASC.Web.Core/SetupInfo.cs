@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -38,6 +38,7 @@ public class SetupInfo
     public string DemoOrder { get; private set; }
     public string RequestTraining { get; private set; }
     public string ZendeskKey { get; private set; }
+    public string TagManagerId { get; private set; }
     public string BookTrainingEmail { get; private set; }
     public string DocumentationEmail { get; private set; }
     public string UserVoiceURL { get; private set; }
@@ -54,12 +55,7 @@ public class SetupInfo
         return Math.Min(AvailableFileSize, await MaxChunkedUploadSize(tenantManager, maxTotalSizeStatistic));
     }
 
-    public long AvailableFileSize
-    {
-        get;
-        private set;
-    }
-
+    public long AvailableFileSize { get; }
     public string TeamlabSiteRedirect { get; private set; }
     public long ChunkUploadSize { get; set; }
     public long ProviderMaxUploadSize { get; private set; }
@@ -110,6 +106,8 @@ public class SetupInfo
     public string RecaptchaPrivateKey { get; private set; }
     public string RecaptchaVerifyUrl { get; private set; }
     public string AmiMetaUrl { get; private set; }
+    public int InvitationLimit { get; private set; }
+
     private readonly IConfiguration _configuration;
 
     public SetupInfo(IConfiguration configuration)
@@ -120,6 +118,7 @@ public class SetupInfo
         UserVoiceURL = GetAppSettings("web.uservoice", string.Empty);
         DemoOrder = GetAppSettings("web.demo-order", string.Empty);
         ZendeskKey = GetAppSettings("web:zendesk-key", string.Empty);
+        TagManagerId = GetAppSettings("web:tagmanager-id", string.Empty);
         BookTrainingEmail = GetAppSettings("web:book-training-email", string.Empty);
         DocumentationEmail = GetAppSettings("web:documentation-email", string.Empty);
         RequestTraining = GetAppSettings("web.request-training", string.Empty);
@@ -138,7 +137,6 @@ public class SetupInfo
 
         MaxImageUploadSize = GetAppSettings<long>("web:max-upload-size", 1024 * 1024);
         AvailableFileSize = GetAppSettings("web:available-file-size", 100L * 1024L * 1024L);
-        AvailableFileSize = GetAppSettings("web.available-file-size", 100L * 1024L * 1024L);
 
         TeamlabSiteRedirect = GetAppSettings("web:teamlab-site", string.Empty);
         ChunkUploadSize = GetAppSettings("files:uploader:chunk-size", 10 * 1024 * 1024);
@@ -181,6 +179,8 @@ public class SetupInfo
         TfaAppSender = GetAppSettings("web.tfaapp.backup.title", "ONLYOFFICE");
 
         AmiMetaUrl = GetAppSettings("web:ami:meta", "");
+
+        InvitationLimit = GetAppSettings("web:invitation-limit", int.MaxValue);
     }
 
 

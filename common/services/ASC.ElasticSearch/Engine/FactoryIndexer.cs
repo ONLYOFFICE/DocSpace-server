@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -195,7 +195,7 @@ public class FactoryIndexer<T>(ILoggerProvider options,
         {
             await _indexer.IndexAsync(data, immediately);
         }
-        catch (ElasticsearchClientException e)
+        catch (OpenSearchClientException e)
         {
             Logger.ErrorIndex(e);
 
@@ -223,14 +223,14 @@ public class FactoryIndexer<T>(ILoggerProvider options,
                 }
             }
         }
-        catch (AggregateException e) //ElasticsearchClientException
+        catch (AggregateException e) //OpenSearchClientException
         {
             if (e.InnerExceptions.Count == 0)
             {
                 throw;
             }
 
-            var inner = e.InnerExceptions.OfType<ElasticsearchClientException>().FirstOrDefault();
+            var inner = e.InnerExceptions.OfType<OpenSearchClientException>().FirstOrDefault();
 
 
             if (inner != null)

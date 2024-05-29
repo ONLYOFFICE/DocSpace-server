@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -310,7 +310,6 @@ public class SharePointProviderInfo(ILogger<SharePointProviderInfo> logger,
         result.ParentId = MakeId(GetParentFolderId(file.ServerRelativeUrl));
         result.ModifiedBy = Owner;
         result.ModifiedOn = file.TimeLastModified.Kind == DateTimeKind.Utc ? tenantUtil.DateTimeFromUtc(file.TimeLastModified) : file.TimeLastModified;
-        result.NativeAccessor = file;
         result.ProviderId = ID;
         result.ProviderKey = ProviderKey;
         result.Title = MakeTitle(file.Name);

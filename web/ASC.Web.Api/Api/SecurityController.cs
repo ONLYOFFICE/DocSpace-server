@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -388,18 +388,19 @@ public class SecurityController(PermissionContext permissionContext,
                     uriString = string.Concat(Uri.UriSchemeHttp, Uri.SchemeDelimiter, uriString);
                 }
 
-                if (!Uri.TryCreate(uriString, UriKind.Absolute, out _))
+                if (!Uri.TryCreate(uriString, UriKind.Absolute, out _) || (Encoding.UTF8.GetByteCount(domain) != domain.Length))
                 {
                     throw new ArgumentException(domain, nameof(request.Domains));
                 }
             }
         }
 
-        var header = await cspSettingsHelper.SaveAsync(request.Domains, request.SetDefaultIfEmpty);
+        var header = await cspSettingsHelper.SaveAsync(request.Domains);
 
         return new CspDto { Domains = request.Domains, Header = header };
     }
 
+    /// <requiresAuthorization>false</requiresAuthorization>
     [AllowAnonymous]
     [EnableCors(PolicyName = CorsPoliciesEnums.AllowAllCorsPolicyName)]
     [HttpGet("csp")]
@@ -410,7 +411,7 @@ public class SecurityController(PermissionContext permissionContext,
         return new CspDto
         {
             Domains = settings.Domains,
-            Header = await cspSettingsHelper.CreateHeaderAsync(settings.Domains, settings.SetDefaultIfEmpty)
+            Header = await cspSettingsHelper.CreateHeaderAsync(settings.Domains)
         };
     }
 

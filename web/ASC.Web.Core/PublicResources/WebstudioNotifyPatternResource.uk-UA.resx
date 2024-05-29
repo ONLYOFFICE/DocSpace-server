@@ -132,19 +132,6 @@ $OrangeButton
 
 *Примітка*: це посилання дійсно лише 7 днів. Будь ласка, завершіть процес зміни власника порталу протягом цього періоду.</value>
   </data>
-  <data name="pattern_dns_change" xml:space="preserve">
-    <value>h1.Зміна адреси порталу
-
-Шановний $OwnerName,
-
-Було запропоновано змінити адресу порталу ${__VirtualRootPath}:"${__VirtualRootPath}" на "$PortalAddress":"$PortalAddress" #if($PortalDns != "") ("$PortalDns":"$PortalDns" )#end.
-
-Будь ласка, перейдіть за посиланням нижче, щоб підтвердити операцію:
-
-$OrangeButton
-
-*Примітка*: це посилання дійсно лише 7 днів. Будь ласка, завершіть процес зміни адреси порталу протягом цього періоду.</value>
-  </data>
   <data name="pattern_enterprise_guest_welcome_v1" xml:space="preserve">
     <value>h1. до &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
 
@@ -451,9 +438,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_confirm_owner_change" xml:space="preserve">
     <value>${LetterLogoText}. Зміна власника порталу</value>
-  </data>
-  <data name="subject_dns_change" xml:space="preserve">
-    <value>${LetterLogoText}. Зміна адреси порталу</value>
   </data>
   <data name="subject_enterprise_guest_welcome_v1" xml:space="preserve">
     <value>Ласкаво просимо до ONLYOFFICE DocSpace!</value>
@@ -1087,7 +1071,7 @@ $TrulyYours</value>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>Вітаємо!
 
-Вас запросили приєднатися до кімнати $Message за адресою "${__VirtualRootPath}":"${__VirtualRootPath}". Щоб прийняти запрошення, натисніть на посилання:
+Вас запросили приєднатися до кімнати DocSpace за адресою "${__VirtualRootPath}":"${__VirtualRootPath}". Щоб прийняти запрошення, натисніть на посилання:
 
 $OrangeButton
 
@@ -1142,9 +1126,6 @@ $TrulyYours</value>
   </data>
   <data name="ButtonChangeTfa" xml:space="preserve">
     <value>Настроїти застосунок для аутентифікації</value>
-  </data>
-  <data name="ButtonConfirmPortalAddressChange" xml:space="preserve">
-    <value>Підтвердити зміну адреси порталу</value>
   </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
     <value>Підтвердити оновлення власника порталу</value>
@@ -1707,5 +1688,25 @@ $OrangeButton
 $OrangeButton
 
 $TrulyYours</value>
+  </data>
+  <data name="pattern_zoom_welcome" xml:space="preserve">
+    <value>h1. до простору &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Вітаємо, $UserName!
+
+Ви тільки що створили простір ONLYOFFICE DocSpace — центр документів, де можна активно співпрацювати з командою, клієнтами, партнерами тощо. Його адреса: "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+Ваш поточний тарифний план — STARTUP. Він абсолютно безплатний і містить:
+
+
+&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;100 адміністраторів/досвідчених користувачів&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;До 100 кімнат&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;100 ГБ дискового простору&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+
+*Отримайте задоволення від нового способу спільної роботи над документами!*
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_zoom_welcome" xml:space="preserve">
+    <value>Ласкаво просимо до простору ONLYOFFICE DocSpace!</value>
   </data>
 </root>

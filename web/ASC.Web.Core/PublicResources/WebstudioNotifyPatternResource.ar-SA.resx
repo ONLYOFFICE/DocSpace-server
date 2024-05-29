@@ -204,9 +204,6 @@
   <data name="ButtonConfirmEmail" xml:space="preserve">
     <value>تأكيد</value>
   </data>
-  <data name="ButtonConfirmPortalAddressChange" xml:space="preserve">
-    <value>تأكيد تغيير عنوان البوابة</value>
-  </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
     <value>تأكيد تحديث مالك البوابة</value>
   </data>
@@ -275,9 +272,6 @@
   </data>
   <data name="subject_confirm_owner_change" xml:space="preserve">
     <value>${LetterLogoText}. تغيير مالك البوابة الإلكترونية</value>
-  </data>
-  <data name="subject_dns_change" xml:space="preserve">
-    <value>${LetterLogoText}.تغيير عنوان البوابة الإلكترونية</value>
   </data>
   <data name="subject_enterprise_admin_activation_v1" xml:space="preserve">
     <value>مرحبا بكم في ONLYOFFICE DocSpace!</value>
@@ -641,19 +635,6 @@ $OrangeButton
 
 
 *ملاحظة*: هذا الرابط صالح لمدة 7 أيام فقط. يرجى إكمال عملية تغيير مالك البوابة خلال تلك الفترة.</value>
-  </data>
-  <data name="pattern_dns_change" xml:space="preserve">
-    <value>h1.تغيير عنوان البوابة الإلكترونية
-
-عزيزي $OwnerName ،
-
-كان هناك طلب لتغيير عنوان البوابة الإلكترونية "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}" الى "$PortalAddress":"$PortalAddress" #if($PortalDns != "") ("$PortalDns":"$PortalDns" )#end.
-
-يرجى اتباع الرابط أدناه لتأكيد العملية:
-
-$OrangeButton
-
-*ملاحظة*: هذا الرابط صالح لمدة 7 أيام فقط. يرجى إكمال عملية تغيير عنوان البوابة خلال تلك الفترة.</value>
   </data>
   <data name="pattern_enterprise_admin_activation_v1" xml:space="preserve">
     <value>h1. في &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!!
@@ -1714,7 +1695,7 @@ $TrulyYours</value>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>مرحبا!
 
-أنت مدعو للانضمام إلى $Message الغرفة على "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}". اقبل الدعوة بالنقر على الرابط:
+أنت مدعو للانضمام إلى DocSpace الغرفة على "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}". اقبل الدعوة بالنقر على الرابط:
 
 $OrangeButton
 
@@ -1852,5 +1833,24 @@ $TrulyYours</value>
   </data>
   <data name="TrulyYoursText" xml:space="preserve">
     <value>شكرًا لك، فريق ONLYOFFICE</value>
+  </data>
+  <data name="subject_zoom_welcome" xml:space="preserve">
+    <value>مرحبا بك في !ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="pattern_zoom_welcome" xml:space="preserve">
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+مرحبا $UserName!
+
+لقد قمت للتو بإنشاء ONLYOFFICE DocSpace، وهو مركز مستندات حيث يمكنك تعزيز التعاون مع فريقك وعملائك وشركائك والمزيد. عنوانها هو "${VirtualRootPath}":"${VirtualRootPath}".
+
+الخطة التعريفة الحالية الخاصة بك هي STARTUP. إنه مجاني تماما ويشمل:
+
+&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;100 مسؤول / مستخدم ذو صلاحية&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;100 غرفة&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;مساحة القرص 100 جيجابايت&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+
+*استمتع بطريقة جديدة للتعاون في المستندات!*
+
+$TrulyYours</value>
   </data>
 </root>

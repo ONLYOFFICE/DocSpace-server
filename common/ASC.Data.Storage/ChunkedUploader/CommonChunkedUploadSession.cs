@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -23,8 +23,6 @@
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
-
-using Newtonsoft.Json.Linq;
 
 namespace ASC.Core.ChunkedUploader;
 
@@ -68,20 +66,33 @@ public class CommonChunkedUploadSession(long bytesTotal) : ICloneable
 
     public T GetItemOrDefault<T>(string key)
     {
-        if (Items.ContainsKey(key) && Items[key] != null)
+        if (!Items.TryGetValue(key, out var obj) || obj == null)
         {
-            if (Items[key] is T)
-            {
-                return (T)Items[key];
-            }
-
-            if (Items[key] is JToken jToken)
-            {
-                var item = jToken.ToObject<T>();
-                Items[key] = item;
-                return item;
-            }
+            return default;
         }
+
+        switch (obj)
+        {
+            case T value:
+                return value;
+            case JsonElement element:
+                {
+                    T item;
+
+                    try
+                    {
+                        item = element.Deserialize<T>();
+                    }
+                    catch (Exception)
+                    {
+                        return default;
+                    }
+                
+                    Items[key] = item;
+                    return item;
+                }
+        }
+
         return default;
     }
 
@@ -89,37 +100,42 @@ public class CommonChunkedUploadSession(long bytesTotal) : ICloneable
     {
         var newItems = new Dictionary<string, object>();
 
-        foreach (var item in Items)
+        foreach (var item in Items.Where(item => item.Value != null))
         {
-            if (item.Value != null)
+            if (item.Value is JsonElement value)
             {
-                if (item.Value is JsonElement value)
+                switch (value.ValueKind)
                 {
-                    switch (value.ValueKind)
-                    {
-                        case JsonValueKind.String:
-                            newItems.Add(item.Key, value.ToString());
-                            break;
-                        case JsonValueKind.Number:
-                            newItems.Add(item.Key, Int32.Parse(value.ToString()));
-                            break;
-                        case JsonValueKind.Array:
-                            newItems.Add(item.Key, value.EnumerateArray().Select(o => o.ToString()).ToList());
-                            break;
-                        case JsonValueKind.Object:
+                    case JsonValueKind.String:
+                        newItems.Add(item.Key, value.ToString());
+                        break;
+                    case JsonValueKind.Number:
+                        newItems.Add(item.Key, Int32.Parse(value.ToString()));
+                        break;
+                    case JsonValueKind.Array:
+                        newItems.Add(item.Key, value.EnumerateArray().Select(o => o.ToString()).ToList());
+                        break;
+                    case JsonValueKind.Object:
+                        try
+                        {
                             newItems.Add(item.Key, JsonSerializer.Deserialize<Dictionary<int, string>>(value.ToString()));
-                            break;
-                        default:
+                        }
+                        catch
+                        {
                             newItems.Add(item.Key, value);
-                            break;
-                    }
-                }
-                else
-                {
-                    newItems.Add(item.Key, item.Value);
+                        }
+                        break;
+                    default:
+                        newItems.Add(item.Key, value);
+                        break;
                 }
             }
+            else
+            {
+                newItems.Add(item.Key, item.Value);
+            }
         }
+        
         Items = newItems;
     }
 

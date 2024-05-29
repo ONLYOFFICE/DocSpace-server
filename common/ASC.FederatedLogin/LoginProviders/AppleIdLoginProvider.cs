@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -66,7 +66,7 @@ public class AppleIdLoginProvider : BaseLoginProvider<AppleIdLoginProvider>
     {
         try
         {
-            var token = Auth(context, Scopes, out _, @params, additionalStateArgs);
+            var token = Auth(context, out _, @params, additionalStateArgs);
             var claims = ValidateIdToken(JObject.Parse(token.OriginJson).Value<string>("id_token"));
             return GetProfileFromClaims(claims);
         }
@@ -76,7 +76,7 @@ public class AppleIdLoginProvider : BaseLoginProvider<AppleIdLoginProvider>
         }
         catch (Exception ex)
         {
-            return LoginProfile.FromError(ex);
+            return new LoginProfile(ex);
         }
     }
 
@@ -87,7 +87,7 @@ public class AppleIdLoginProvider : BaseLoginProvider<AppleIdLoginProvider>
             throw new Exception("Login failed");
         }
 
-        var token = _oAuth20TokenHelper.GetAccessToken<AppleIdLoginProvider>(ConsumerFactory, authCode);
+        var token = _oAuth20TokenHelper.GetAccessToken<AppleIdLoginProvider>(authCode);
         var claims = ValidateIdToken(JObject.Parse(token.OriginJson).Value<string>("id_token"));
         return GetProfileFromClaims(claims);
     }

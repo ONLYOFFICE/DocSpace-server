@@ -349,7 +349,7 @@
   <data name="LoginSuccess" xml:space="preserve">
     <value>Veiksmīga pieteikšanās</value>
   </data>
-  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+  <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
     <value>Ieeja ar sociālā tīkla kontu izdevās</value>
   </data>
   <data name="LoginSuccessViaApi" xml:space="preserve">
@@ -732,5 +732,11 @@
   </data>
   <data name="RoomExternalLinkUpdated" xml:space="preserve">
     <value>Atjaunināta ārējā saite: {0}. Loma: {1}</value>
+  </data>
+  <data name="FileOpenedForChange" xml:space="preserve">
+    <value>Fails atvērts izmaiņām: {0}</value>
+  </data>
+  <data name="PortalRenamed" xml:space="preserve">
+    <value>Portāls pārdēvēts</value>
   </data>
 </root>

@@ -172,14 +172,8 @@
   <data name="ErrorMessage_FileNotFound" xml:space="preserve">
     <value>必要なファイルが見つかりませんでした</value>
   </data>
-  <data name="ErrorMessage_FileSizeConvert" xml:space="preserve">
-    <value>{0}より大きくファイルが変換されません</value>
-  </data>
   <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>{0}より大きくファイルがコピーされません</value>
-  </data>
-  <data name="ErrorMessage_FileSizeEdit" xml:space="preserve">
-    <value>{0}より大きくファイルが編集されません</value>
   </data>
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>{0}より大きくファイルが移動されません</value>
@@ -427,5 +421,47 @@ docx、xlsx、pptxとの100％の互換性が保証されています。</value>
   </data>
   <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
     <value>パスワードの入力を何度も試行しすぎました。後で再試行してください</value>
+  </data>
+  <data name="RoomIndex_Author" xml:space="preserve">
+    <value>作成者</value>
+  </data>
+  <data name="RoomIndex_Company" xml:space="preserve">
+    <value>会社</value>
+  </data>
+  <data name="RoomIndex_Created" xml:space="preserve">
+    <value>作成済み</value>
+  </data>
+  <data name="RoomIndex_DateGenerated" xml:space="preserve">
+    <value>作成日</value>
+  </data>
+  <data name="RoomIndex_ExportAuthor" xml:space="preserve">
+    <value>作成者のエクスポート</value>
+  </data>
+  <data name="RoomIndex_Folder" xml:space="preserve">
+    <value>フォルダ</value>
+  </data>
+  <data name="RoomIndex_Index" xml:space="preserve">
+    <value>インデックス</value>
+  </data>
+  <data name="RoomIndex_Modified" xml:space="preserve">
+    <value>変更済み</value>
+  </data>
+  <data name="RoomIndex_Name" xml:space="preserve">
+    <value>名前</value>
+  </data>
+  <data name="RoomIndex_Room" xml:space="preserve">
+    <value>ルーム</value>
+  </data>
+  <data name="RoomIndex_SheetName" xml:space="preserve">
+    <value>ルームインデックス</value>
+  </data>
+  <data name="RoomIndex_Size" xml:space="preserve">
+    <value>サイズ（MB）</value>
+  </data>
+  <data name="RoomIndex_Total" xml:space="preserve">
+    <value>トータル</value>
+  </data>
+  <data name="RoomIndex_Type" xml:space="preserve">
+    <value>タイプ</value>
   </data>
 </root>

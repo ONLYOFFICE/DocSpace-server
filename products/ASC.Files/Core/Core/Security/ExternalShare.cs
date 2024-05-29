@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -39,7 +39,6 @@ public class ExternalShare(Global global,
     private Guid _sessionId;
     private string _passwordKey;
     private string _dbKey;
-    private IReadOnlyDictionary<string, StringValues> _headers;
 
     public async Task<LinkData> GetLinkDataAsync<T>(FileEntry<T> entry, Guid linkId)
     {
@@ -49,11 +48,20 @@ public class ExternalShare(Global global,
         switch (entry)
         {
             case File<T> file:
-                url = fileUtility.CanWebView(file.Title)
-                    ? filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id)
-                    : file.DownloadUrl;
-
-                url += $"&{FilesLinkUtility.ShareKey}={key}";
+                if (fileUtility.CanWebView(file.Title))
+                {
+                    url = filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id);
+                }
+                else if (fileUtility.CanImageView(file.Title) || fileUtility.CanMediaView(file.Title))
+                {
+                    url = $"share/preview/{file.Id}";
+                }
+                else
+                {
+                    url = file.DownloadUrl;
+                }
+                
+                url = QueryHelpers.AddQueryString(url, FilesLinkUtility.ShareKey, key);
                 break;
             case Folder<T> folder when DocSpaceHelper.IsRoom(folder.FolderType):
                 url = $"rooms/share?key={key}";
@@ -65,7 +73,6 @@ public class ExternalShare(Global global,
             Url = commonLinkUtility.GetFullAbsolutePath(url),
             Token = key
         };
-        
     }
     
     public async Task<Status> ValidateAsync(Guid linkId, bool isAuthenticated)
@@ -100,7 +107,7 @@ public class ExternalShare(Global global,
         
         if (string.IsNullOrEmpty(_passwordKey))
         {
-            _passwordKey = GetFromHeaders(CookiesType.ShareLink, record.Subject.ToString());
+            _passwordKey = cookiesManager.GetCookies(CookiesType.ShareLink, record.Subject.ToString(), true);
         }
 
         if (_passwordKey == record.Options.Password)
@@ -138,11 +145,6 @@ public class ExternalShare(Global global,
 
     public string GetKey()
     {
-        if (_headers is { Count: > 0 } && _headers.TryGetValue(HttpRequestExtensions.RequestTokenHeader, out var internalKey))
-        {
-            return internalKey;
-        }
-        
         var key = httpContextAccessor.HttpContext?.Request.Headers[HttpRequestExtensions.RequestTokenHeader].FirstOrDefault();
         if (string.IsNullOrEmpty(key))
         {
@@ -177,10 +179,8 @@ public class ExternalShare(Global global,
         {
             return Guid.Empty;
         }
-        
-        _linkId = linkId;
 
-        return linkId;
+        return _linkId = linkId;
     }
 
     public Guid GetSessionId()
@@ -194,8 +194,13 @@ public class ExternalShare(Global global,
         {
             return _sessionId;
         }
+
+        if (CustomSynchronizationContext.CurrentContext?.CurrentPrincipal?.Identity is AnonymousSession anonymous)
+        {
+            return _sessionId = anonymous.SessionId;
+        }
         
-        var sessionKey = GetFromHeaders(CookiesType.AnonymousSessionKey);
+        var sessionKey = cookiesManager.GetCookies(CookiesType.AnonymousSessionKey);
         if (string.IsNullOrEmpty(sessionKey))
         {
             return Guid.Empty;
@@ -207,9 +212,7 @@ public class ExternalShare(Global global,
             return Guid.Empty;
         }
 
-        _sessionId = id;
-
-        return id;
+        return _sessionId = id;
     }
 
     public async Task<string> CreateDownloadSessionKeyAsync()
@@ -255,26 +258,37 @@ public class ExternalShare(Global global,
             : url;
     }
     
+    public async Task<ExternalSessionSnapshot> TakeSessionSnapshotAsync()
+    {
+        var linkId = await GetLinkIdAsync();
+        var sessionId = await GetSessionIdAsync();
+        var passwordKey = string.IsNullOrEmpty(_passwordKey) 
+            ? cookiesManager.GetCookies(CookiesType.ShareLink, _linkId.ToString(), true) 
+            : _passwordKey;
+
+        return new ExternalSessionSnapshot(linkId, sessionId, passwordKey);
+    }
+    
+    public void Initialize(ExternalSessionSnapshot snapshot)
+    {
+        if (snapshot == null)
+        {
+            return;
+        }
+        
+        _linkId = snapshot.LinkId;
+        _sessionId = snapshot.SessionId;
+        _passwordKey = snapshot.PasswordKey;
+    }
+    
     public async Task<string> CreateShareKeyAsync(Guid linkId)
     {
         return Signature.Create(linkId, await GetDbKeyAsync());
-    }
-    
-    public void Init(IDictionary<string, StringValues> headers)
-    {
-        _headers = headers.AsReadOnly();
     }
 
     private async Task<string> GetDbKeyAsync()
     {
         return _dbKey ??= await global.GetDocDbKeyAsync();
-    }
-    
-    private string GetFromHeaders(CookiesType type, string itemId = null)
-    {
-        return _headers is { Count: > 0 } 
-            ? cookiesManager.GetCookies(_headers, type, itemId) 
-            : cookiesManager.GetCookies(type, itemId, true);
     }
 }
 
@@ -325,14 +339,37 @@ public class ValidationInfo
     public Guid LinkId { get; set; }
 }
 
-public class DownloadSession
+public record DownloadSession
 {
     public Guid Id { get; init; }
     public Guid LinkId { get; init; }
 }
 
-/// <summary>
-/// </summary>
+[ProtoContract]
+public class ExternalSessionSnapshot
+{
+    public ExternalSessionSnapshot()
+    {
+        
+    }
+    
+    public ExternalSessionSnapshot(Guid LinkId, Guid SessionId, string PasswordKey)
+    {
+        this.LinkId = LinkId;
+        this.SessionId = SessionId;
+        this.PasswordKey = PasswordKey;
+    }
+
+    [ProtoMember(1)]
+    public Guid LinkId { get; init; }
+    
+    [ProtoMember(2)]
+    public Guid SessionId { get; init; }
+    
+    [ProtoMember(3)]
+    public string PasswordKey { get; init; }
+}
+
 public enum Status
 {
     Ok,

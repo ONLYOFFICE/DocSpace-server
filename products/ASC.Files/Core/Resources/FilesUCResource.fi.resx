@@ -97,4 +97,7 @@
   <data name="Recent" xml:space="preserve">
     <value>Viimeaikainen</value>
   </data>
+  <data name="InProcessFormFolder" xml:space="preserve">
+    <value>Työn alla</value>
+  </data>
 </root>

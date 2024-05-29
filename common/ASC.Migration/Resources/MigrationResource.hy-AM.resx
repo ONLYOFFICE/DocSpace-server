@@ -126,56 +126,14 @@
   <data name="DumpParse" xml:space="preserve">
     <value>Տվյալների բազայի վերլուծություն</value>
   </data>
-  <data name="GoogleModuleNameContacts" xml:space="preserve">
-    <value>Փոստի կոնտակտներ</value>
-  </data>
-  <data name="GoogleModuleNameDocuments" xml:space="preserve">
-    <value>Google Drive-ի ֆայլերը</value>
-  </data>
   <data name="GroupMigration" xml:space="preserve">
     <value>Խմբային միգրացիա {0} ({1}/{2})</value>
-  </data>
-  <data name="MigratingUserContacts" xml:space="preserve">
-    <value>Օգտվողների կոնտակտների տեղափոխում {0} ({1}/{2})</value>
   </data>
   <data name="MigratingUserFiles" xml:space="preserve">
     <value>Օգտվողի ֆայլերի տեղափոխում {0} ({1}/{2})</value>
   </data>
-  <data name="MigrationCanceled" xml:space="preserve">
-    <value>Միգրացիան չեղարկվել է</value>
-  </data>
   <data name="MigrationCompleted" xml:space="preserve">
     <value>Միգրացիան ավարտված է</value>
-  </data>
-  <data name="ModuleNameCalendar" xml:space="preserve">
-    <value>Օրացույց</value>
-  </data>
-  <data name="OnlyofficeModuleNameCalendar" xml:space="preserve">
-    <value>Օրացույց</value>
-  </data>
-  <data name="ModuleNameGroups" xml:space="preserve">
-    <value>Խմբեր</value>
-  </data>
-  <data name="ModuleNameMail" xml:space="preserve">
-    <value>Փոստ</value>
-  </data>
-  <data name="ModuleNameUsers" xml:space="preserve">
-    <value>Օգտվողներ</value>
-  </data>
-  <data name="OnlyofficeModuleNameMail" xml:space="preserve">
-    <value>Փոստ</value>
-  </data>
-  <data name="NextcloudModuleNameContacts" xml:space="preserve">
-    <value>Կոնտակտներ</value>
-  </data>
-  <data name="NextcloudModuleNameDocuments" xml:space="preserve">
-    <value>Օգտագործողի ֆայլեր</value>
-  </data>
-  <data name="OnlyofficeModuleNameDocuments" xml:space="preserve">
-    <value>Փաստաթղթեր</value>
-  </data>
-  <data name="OnlyofficeModuleNamePeople" xml:space="preserve">
-    <value>Մարդիկ</value>
   </data>
   <data name="PreparingForMigration" xml:space="preserve">
     <value>Պատրաստվում է միգրացիայի</value>
@@ -189,16 +147,28 @@
   <data name="UnzippingFinished" xml:space="preserve">
     <value>Ապանեղմումը ավարտված է...</value>
   </data>
-  <data name="UserCalendarMigration" xml:space="preserve">
-    <value>Օգտագործողի օրացույցի միգրացիա {0} ({1}/{2})</value>
-  </data>
   <data name="UserMigration" xml:space="preserve">
     <value>Օգտվողների միգրացիա {0} ({1}/{2})</value>
   </data>
-  <data name="UserSkipped" xml:space="preserve">
-    <value>Չհաջողվեց ներմուծել օգտվողին: {0} ({1}/{2})</value>
+  <data name="MigrationCommonFiles" xml:space="preserve">
+    <value>Ընդհանուր ֆայլերի միգրացիա</value>
   </data>
-  <data name="ClearingTemporaryData" xml:space="preserve">
-    <value>Ժամանակավոր տվյալների մաքրում</value>
+  <data name="MigrationInitException" xml:space="preserve">
+    <value>Սխալ {0} միգրատորը սկզբնավորելիս</value>
+  </data>
+  <data name="MigrationNotFoundException" xml:space="preserve">
+    <value>Նման միգրացիոն մատակարար չկա</value>
+  </data>
+  <data name="MigrationProgressException" xml:space="preserve">
+    <value>Ոչ մի միգրացիա չի ընթանում</value>
+  </data>
+  <data name="MigrationProjectFiles" xml:space="preserve">
+    <value>Միգրացիոն նախագծի ֆայլեր</value>
+  </data>
+  <data name="MigrationStartException" xml:space="preserve">
+    <value>Վերլուծությունը դեռ ընթացքի մեջ է</value>
+  </data>
+  <data name="MigrationUploadException" xml:space="preserve">
+    <value>Միգրացիան արդեն ընթացքի մեջ է</value>
   </data>
 </root>

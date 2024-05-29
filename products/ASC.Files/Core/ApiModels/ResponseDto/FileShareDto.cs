@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -49,6 +49,7 @@ public class FileShareDto
     /// <summary>Spceifies if this user can edit the access to the specified file or not</summary>
     /// <type>System.Boolean, System</type>
     public bool CanEditAccess { get; set; }
+    public SubjectType SubjectType { get; set; }
 
     public static FileShareDto GetSample()
     {
@@ -96,7 +97,8 @@ public class FileShareDtoHelper(UserManager userManager,
         {
             IsOwner = aceWrapper.Owner,
             IsLocked = aceWrapper.LockedRights,
-            CanEditAccess = aceWrapper.CanEditAccess
+            CanEditAccess = aceWrapper.CanEditAccess,
+            SubjectType = aceWrapper.SubjectType
         };
 
         if (aceWrapper.SubjectGroup)
@@ -124,7 +126,7 @@ public class FileShareDtoHelper(UserManager userManager,
                     IsExpired = expired,
                     Primary = aceWrapper.SubjectType == SubjectType.PrimaryExternalLink,
                     Internal = aceWrapper.FileShareOptions?.Internal,
-                    RequestToken = aceWrapper.RequestToken,
+                    RequestToken = aceWrapper.RequestToken
                 };
             }
             else

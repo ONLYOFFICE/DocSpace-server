@@ -14,15 +14,15 @@
     <None Remove="Services\DocumentBuilderService\ScriptTemplates\RoomIndexExport.docbuilder" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AppLimit.CloudComputing.SharpBox" Version="1.2.0.1" />
-    <PackageReference Include="Box.V2.Core" Version="5.2.2" />
-    <PackageReference Include="DocuSign.eSign.dll" Version="6.5.0" />
+    <PackageReference Include="Box.V2.Core" Version="5.7.0" />
+    <PackageReference Include="DocuSign.eSign.dll" Version="6.8.0" />
     <PackageReference Include="Dropbox.Api" Version="6.37.0" />
-    <PackageReference Include="Google.Apis.Drive.v3" Version="1.61.0.3120" />
+    <PackageReference Include="Google.Apis.Drive.v3" Version="1.67.0.3373" />
     <PackageReference Include="Joonasw.AspNetCore.SecurityHeaders" Version="5.0.0" />
     <PackageReference Include="Microsoft.OneDriveSDK" Version="2.1.0" />
     <PackageReference Include="Microsoft.SharePoint.Client" Version="14.0.4762.1000" />
-    <PackageReference Include="SharpZipLib" Version="1.4.2" />
+    <PackageReference Include="SharpZipLib" Version="2.4.3" />
+    <PackageReference Include="WebDav.Client" Version="2.8.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\common\ASC.Api.Core\ASC.Api.Core.csproj" />
@@ -113,6 +113,9 @@
       <DependentUpon>FilesPatternResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="Services\NotifyService\FilesPatternResource.sl.resx">
+      <DependentUpon>FilesPatternResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Services\NotifyService\FilesPatternResource.sr-Latn-RS.resx">
       <DependentUpon>FilesPatternResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="Services\NotifyService\FilesPatternResource.tr.resx">
@@ -228,6 +231,9 @@
     <EmbeddedResource Update="Resources\FilesCommonResource.sl.resx">
       <DependentUpon>FilesCommonResource.resx</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Update="Resources\FilesCommonResource.sr-Latn-RS.resx">
+      <DependentUpon>FilesCommonResource.resx</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Update="Resources\FilesCommonResource.tr.resx">
       <DependentUpon>FilesCommonResource.resx</DependentUpon>
     </EmbeddedResource>
@@ -310,6 +316,9 @@
     <EmbeddedResource Update="Resources\FilesJSResource.sl.resx">
       <DependentUpon>FilesJSResource.resx</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Update="Resources\FilesJSResource.sr-Latn-RS.resx">
+      <DependentUpon>FilesJSResource.resx</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Update="Resources\FilesJSResource.tr.resx">
       <DependentUpon>FilesJSResource.resx</DependentUpon>
     </EmbeddedResource>
@@ -390,6 +399,9 @@
       <DependentUpon>FilesUCResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\FilesUCResource.sl.resx">
+      <DependentUpon>FilesUCResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\FilesUCResource.sr-Latn-RS.resx">
       <DependentUpon>FilesUCResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\FilesUCResource.tr.resx">

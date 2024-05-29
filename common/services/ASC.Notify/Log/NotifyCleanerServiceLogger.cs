@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,16 +26,7 @@
 
 namespace ASC.Notify.Log;
 internal static partial class NotifyCleanerServiceLogger
-{
-    [LoggerMessage(Level = LogLevel.Information, Message = "Notify Cleaner Service running.")]
-    public static partial void InformationNotifyCleanerRunning(this ILogger logger);   
-    
-    [LoggerMessage(Level = LogLevel.Information, Message = "Notify Cleaner Service is stopping.")]
-    public static partial void InformationNotifyCleanerStopping(this ILogger logger);  
-    
-    [LoggerMessage(Level = LogLevel.Information, Message = "Clear notify messages: notify_info({infoCount}), notify_queue ({queueCount})")]
-    public static partial void InformationClearNotifyMessages(this ILogger logger, int infoCount, int queueCount);
-    
+{        
     [LoggerMessage(Level = LogLevel.Error, Message = "Clear")]
-    public static partial void ErrorClear(this ILogger logger, Exception exception);
+    public static partial void ErrorClear(this ILogger<NotifyCleanerService> logger, Exception exception);
 }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -142,14 +142,15 @@ public interface IFileDao<T>
     Task<Stream> GetFileStreamAsync(File<T> file, long offset, long length);
 
     Task<long> GetFileSizeAsync(File<T> file);
-    
+
     /// <summary>
     /// Get presigned uri
     /// </summary>
     /// <param name="file"></param>
     /// <param name="expires"></param>
+    /// <param name="shareKey"></param>
     /// <returns>Stream uri</returns>
-    Task<Uri> GetPreSignedUriAsync(File<T> file, TimeSpan expires);
+    Task<string> GetPreSignedUriAsync(File<T> file, TimeSpan expires, string shareKey = null);
 
     /// <summary>
     ///  Check is supported PreSignedUri
@@ -185,6 +186,12 @@ public interface IFileDao<T>
     /// </summary>
     /// <param name="fileId">file id</param>
     Task DeleteFileAsync(T fileId);
+    /// <summary>
+    ///   Deletes a file including all previous versions
+    /// </summary>
+    /// <param name="fileId">file id</param>
+    /// <param name="ownerId">file owner id</param>
+    Task DeleteFileAsync(T fileId, Guid ownerId);
     /// <summary>
     ///     Checks whether or not file
     /// </summary>
@@ -254,6 +261,8 @@ public interface IFileDao<T>
     Task<File<T>> UploadChunkAsync(ChunkedUploadSession<T> uploadSession, Stream chunkStream, long chunkLength, int? chunkNumber = null);
     Task<File<T>> FinalizeUploadSessionAsync(ChunkedUploadSession<T> uploadSession);
     Task AbortUploadSessionAsync(ChunkedUploadSession<T> uploadSession);
+    Task<long> GetTransferredBytesCountAsync(ChunkedUploadSession<T> uploadSession);
+    
     #endregion
 
     #region Only in TMFileDao

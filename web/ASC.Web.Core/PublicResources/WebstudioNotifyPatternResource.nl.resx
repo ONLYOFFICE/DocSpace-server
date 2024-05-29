@@ -128,19 +128,6 @@ $OrangeButton
 
 *Let op*: deze link is maar 7 dagen geldig. Voltooi het proces om de portaaleigenaar te veranderen alstublieft binnen die periode.</value>
   </data>
-  <data name="pattern_dns_change" xml:space="preserve">
-    <value>h1.Verandering van portaaladres
-
-Beste $OwnerName,
-
-Er is een verzoek binnengekomen om het "${__VirtualRootPath}":"${__VirtualRootPath}" portaaladres te veranderen naar "$PortalAddress":"$PortalAddress" #if($PortalDns != "") ("$PortalDns":"$PortalDns" )#end.
-
-Klik alstublieft op de link hieronder om de actie te bevestigen: 
-
-$OrangeButton
-
-*Let op*: deze link is maar 7 dagen geldig. Voltooi het proces om het portaaladres te veranderen alstublieft binnen die periode.</value>
-  </data>
   <data name="pattern_enterprise_guest_welcome_v1" xml:space="preserve">
     <value>h1. bij &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
 
@@ -447,9 +434,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_confirm_owner_change" xml:space="preserve">
     <value>${LetterLogoText}. Verandering van Portaal eigenaar</value>
-  </data>
-  <data name="subject_dns_change" xml:space="preserve">
-    <value>${LetterLogoText}. Verandering van Portaal adres</value>
   </data>
   <data name="subject_enterprise_guest_welcome_v1" xml:space="preserve">
     <value>Welkom bij ONLYOFFICE DocSpace!</value>
@@ -1088,7 +1072,7 @@ $TrulyYours</value>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>Hallo!
 
-U bent uitgenodigd om deel te nemen aan $Message kamer op "${__VirtualRootPath}":"${__VirtualRootPath}". Accepteer de uitnodiging door op de link te klikken:
+U bent uitgenodigd om deel te nemen aan een DocSpace-kamer op "${__VirtualRootPath}":"${__VirtualRootPath}". Accepteer de uitnodiging door op de link te klikken:
 
 $OrangeButton
 
@@ -1236,9 +1220,6 @@ $TrulyYours</value>
   </data>
   <data name="ButtonChangeTfa" xml:space="preserve">
     <value>Configureer de authenticator app</value>
-  </data>
-  <data name="ButtonConfirmPortalAddressChange" xml:space="preserve">
-    <value>Bevestig wijziging portaaladres</value>
   </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
     <value>Bevestig update portaaleigenaar</value>
@@ -1700,6 +1681,25 @@ Voor uw gemak hebben wij video-handleidingen gemaakt, zodat u ONLYOFFICE DocSpac
 &lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 32px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG5" alt="administration pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px; width: 424px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; font-weight: 700; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;Beheer&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/psxZ0fDXiUo"&gt;Beheer beveiligingsinstellingen&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/2ed2iSxLCwk"&gt;Back-up maken en herstellen&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_zoom_welcome" xml:space="preserve">
+    <value>Welkom bij ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="pattern_zoom_welcome" xml:space="preserve">
+    <value>h1. naar &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Hallo, $UserName!
+
+U hebt zojuist ONLYOFFICE DocSpace gecreëerd, een document hub waar u de samenwerking met uw team, klanten, partners en meer kunt stimuleren. Het adres is "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+Uw huidige tariefplan is STARTUP. Het is helemaal gratis en bestaat uit:
+
+&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;100 beheerders/power users&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Tot 100 kamers&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;100 GB schijfruimte&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+
+*Beleef een nieuwe manier van samenwerken aan documenten!*
 
 $TrulyYours</value>
   </data>

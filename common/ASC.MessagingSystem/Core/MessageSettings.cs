@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,6 +33,8 @@ public class MessageSettings
     private const string XRealIPHeader = "X-Real-IP";
     private const string EditorsUAHeader = "AscDesktopEditor";
     private const string EditorsName = "Desktop Editors";
+    private const string ZoomAppsUAHeader = "ZoomApps";
+    private const string ZoomBrowserUAHeader = "ZoomWebKit";
 
     static MessageSettings()
     {
@@ -55,7 +57,7 @@ public class MessageSettings
 
         var headers = request.Headers.ToDictionary(k => k.Key, v => v.Value);
 
-        if (!headers.TryGetValue(XRealIPHeader, out var header))
+        if (!headers.TryGetValue(XRealIPHeader, out _))
         {
             var remoteIpAddress = GetIP(request);
 
@@ -70,6 +72,13 @@ public class MessageSettings
 
     public static string GetUAHeader(HttpRequest request)
     {
+        var result = request?.Query?["request-user-agent"].FirstOrDefault();
+
+        if (result != null)
+        {
+            return result;
+        }
+
         return request?.Headers[UserAgentHeader].FirstOrDefault();
     }
 
@@ -90,7 +99,14 @@ public class MessageSettings
 
     public static string GetIP(HttpRequest request)
     {
-        return request.HttpContext?.Connection.RemoteIpAddress?.ToString();
+        var result = request?.Query?["request-x-real-ip"].FirstOrDefault();
+
+        if (result != null)
+        {
+            return result;
+        }
+
+        return request?.HttpContext?.Connection.RemoteIpAddress?.ToString();
     }
 
     public static string GetIP(IDictionary<string, StringValues> headers)
@@ -127,16 +143,16 @@ public class MessageSettings
             return null;
         }
 
-        if (clientInfo.String.Contains(EditorsUAHeader))
+        if (TryGetCustomUAData(clientInfo.String, EditorsUAHeader, EditorsName, out var customBrowser))
         {
-            var data = clientInfo.String.Split(" ").FirstOrDefault(r=> r.StartsWith(EditorsUAHeader));
-            if (data != null)
-            {
-                var parts = data.Split("/");
-                return $"{EditorsName} {parts[1]}";
-            }
+            return customBrowser;
         }
-        
+
+        if (TryGetCustomUAData(clientInfo.String, ZoomBrowserUAHeader, ZoomBrowserUAHeader, out customBrowser))
+        {
+            return customBrowser;
+        }
+
         return $"{clientInfo.UA.Family} {clientInfo.UA.Major}".Trim();
     }
 
@@ -146,7 +162,32 @@ public class MessageSettings
         {
             return null;
         }
-        
+
+        if (TryGetCustomUAData(clientInfo.String, ZoomAppsUAHeader, ZoomAppsUAHeader, out var customDevice))
+        {
+            return customDevice;
+        }
+
         return $"{clientInfo.OS.Family} {clientInfo.OS.Major} {clientInfo.Device.Brand} {clientInfo.Device.Model}".Trim();
+    }
+
+    private static bool TryGetCustomUAData(string ua, string pattern, string displayName, out string result)
+    {
+        result = null;
+        if (!ua.Contains(pattern))
+        {
+            return false;
+        }
+
+        var data = ua.Split(" ").FirstOrDefault(r => r.StartsWith(pattern));
+        if (data == null)
+        {
+            return false;
+        }
+
+        var parts = data.Split("/");
+        var version = parts.Length > 1 ? parts[1] : null;
+        result = $"{displayName} {version}";
+        return true;
     }
 }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,7 +32,7 @@ public class MessagesRepository : IDisposable
     private DateTime _lastSave = DateTime.UtcNow;
     private bool _timerStarted;
     private readonly TimeSpan _cacheTime;
-    private readonly IDictionary<string, EventMessage> _cache;
+    private readonly Dictionary<string, EventMessage> _cache;
     private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly IMapper _mapper;
     private readonly ILogger<MessagesRepository> _logger;
@@ -82,6 +82,8 @@ public class MessagesRepository : IDisposable
     {
         if (ForseSave(message))
         {
+            _logger.LogDebug("ForseSave: {action}", message.Action.ToStringFast());
+            
             int id;
             if (!string.IsNullOrEmpty(message.UAHeader))
             {
@@ -110,12 +112,11 @@ public class MessagesRepository : IDisposable
         }
 
         var now = DateTime.UtcNow;
-        var key = string.Format("{0}|{1}|{2}|{3}", message.TenantId, message.UserId, message.Id, now.Ticks);
-
-        await _semaphore.WaitAsync();
+        var key = $"{message.TenantId}|{message.UserId}|{message.Id}|{now.Ticks}";
 
         try
         {
+            await _semaphore.WaitAsync();
             _cache[key] = message;
 
             if (!_timerStarted)
@@ -141,8 +142,9 @@ public class MessagesRepository : IDisposable
 
         if (DateTime.UtcNow > _lastSave.Add(_cacheTime) || _cache.Count > _cacheLimit)
         {
-            lock (_cache)
+            try
             {
+                await _semaphore.WaitAsync();
                 _timer.Change(-1, -1);
                 _timerStarted = false;
 
@@ -150,12 +152,18 @@ public class MessagesRepository : IDisposable
                 _cache.Clear();
                 _lastSave = DateTime.UtcNow;
             }
+            finally
+            {
+                _semaphore.Release();
+            }
         }
 
         if (events == null)
         {
             return;
         }
+        
+        _logger.LogDebug("FlushCache: events count {Count}", events.Count);
 
         using var scope = _serviceScopeFactory.CreateScope();
         await using var ef = await scope.ServiceProvider.GetService<IDbContextFactory<MessagesContext>>().CreateDbContextAsync();
@@ -210,14 +218,19 @@ public class MessagesRepository : IDisposable
     {
         List<EventMessage> events;
 
-        lock (_cache)
+        try
         {
+            _semaphore.Wait();
             _timer.Change(-1, -1);
             _timerStarted = false;
 
             events = [.._cache.Values];
             _cache.Clear();
             _lastSave = DateTime.UtcNow;
+        }
+        finally
+        {
+            _semaphore.Release();
         }
 
         using var scope = _serviceScopeFactory.CreateScope();

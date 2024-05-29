@@ -117,9 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ClearingTemporaryData" xml:space="preserve">
-    <value>Изчистване на временните данни</value>
-  </data>
   <data name="DataProcessing" xml:space="preserve">
     <value>Обработка на данни...</value>
   </data>
@@ -129,56 +126,14 @@
   <data name="DumpParse" xml:space="preserve">
     <value>Разбор на база данни</value>
   </data>
-  <data name="GoogleModuleNameContacts" xml:space="preserve">
-    <value>Контакти на пощата</value>
-  </data>
-  <data name="GoogleModuleNameDocuments" xml:space="preserve">
-    <value>Google Drive файлове</value>
-  </data>
   <data name="GroupMigration" xml:space="preserve">
     <value>Групова миграция {0} ({1}/{2})</value>
-  </data>
-  <data name="MigratingUserContacts" xml:space="preserve">
-    <value>Мигриране на потребителски контакти {0} ({1}/{2})</value>
   </data>
   <data name="MigratingUserFiles" xml:space="preserve">
     <value>Мигриране на потребителски файлове {0} ({1}/{2})</value>
   </data>
-  <data name="MigrationCanceled" xml:space="preserve">
-    <value>Миграцията е отменена</value>
-  </data>
   <data name="MigrationCompleted" xml:space="preserve">
     <value>Миграцията е завършена</value>
-  </data>
-  <data name="ModuleNameCalendar" xml:space="preserve">
-    <value>Календар</value>
-  </data>
-  <data name="ModuleNameGroups" xml:space="preserve">
-    <value>Групи</value>
-  </data>
-  <data name="ModuleNameMail" xml:space="preserve">
-    <value>Поща</value>
-  </data>
-  <data name="ModuleNameUsers" xml:space="preserve">
-    <value>Потребители</value>
-  </data>
-  <data name="NextcloudModuleNameContacts" xml:space="preserve">
-    <value>Контакти</value>
-  </data>
-  <data name="NextcloudModuleNameDocuments" xml:space="preserve">
-    <value>Потребителски файлове</value>
-  </data>
-  <data name="OnlyofficeModuleNameDocuments" xml:space="preserve">
-    <value>Документи</value>
-  </data>
-  <data name="OnlyofficeModuleNameCalendar" xml:space="preserve">
-    <value>Календар</value>
-  </data>
-  <data name="OnlyofficeModuleNameMail" xml:space="preserve">
-    <value>Поща</value>
-  </data>
-  <data name="OnlyofficeModuleNamePeople" xml:space="preserve">
-    <value>Хора</value>
   </data>
   <data name="PreparingForMigration" xml:space="preserve">
     <value>Подготовка за миграция</value>
@@ -192,13 +147,28 @@
   <data name="UnzippingFinished" xml:space="preserve">
     <value>Разархивирането завърши...</value>
   </data>
-  <data name="UserCalendarMigration" xml:space="preserve">
-    <value>Мигриране на потребителски календар {0} ({1}/{2})</value>
-  </data>
   <data name="UserMigration" xml:space="preserve">
     <value>Мигриране на потребители {0} ({1}/{2})</value>
   </data>
-  <data name="UserSkipped" xml:space="preserve">
-    <value>Неуспешно импортиране на потребител: {0} ({1}/{2})</value>
+  <data name="MigrationCommonFiles" xml:space="preserve">
+    <value>Общи файлове за миграция</value>
+  </data>
+  <data name="MigrationInitException" xml:space="preserve">
+    <value>Грешка при инициализиране мигратора на {0}</value>
+  </data>
+  <data name="MigrationNotFoundException" xml:space="preserve">
+    <value>Няма такъв доставчик на миграция</value>
+  </data>
+  <data name="MigrationProgressException" xml:space="preserve">
+    <value>Не се извършва миграция</value>
+  </data>
+  <data name="MigrationProjectFiles" xml:space="preserve">
+    <value>Проектни файлове за миграция</value>
+  </data>
+  <data name="MigrationStartException" xml:space="preserve">
+    <value>Анализът все още се изпълнява</value>
+  </data>
+  <data name="MigrationUploadException" xml:space="preserve">
+    <value>Миграцията вече се изпълнява</value>
   </data>
 </root>

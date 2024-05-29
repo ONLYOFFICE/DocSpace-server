@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,7 +34,7 @@ public class RoomLinkRequestDto : LinkRequestDtoBase
     /// <type>System.String, System</type>
     public string Title { get; set; }
 
-    /// <summary>Link type</summary>
+    /// <summary>Link type (Invitation or External)</summary>
     /// <type>ASC.Files.Core.ApiModels.ResponseDto.LinkType, ASC.Files.Core</type>
     public LinkType LinkType { get; set; }
 

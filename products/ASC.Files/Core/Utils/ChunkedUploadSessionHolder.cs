@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -23,8 +23,6 @@
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
-
-using ASC.Data.Storage.ChunkedUploader;
 
 namespace ASC.Web.Files.Utils;
 
@@ -90,7 +88,11 @@ public class ChunkedUploadSessionHolder(
 
     public async Task MoveAsync<T>(ChunkedUploadSession<T> chunkedUploadSession, string newPath)
     {
-        await (await CommonSessionHolderAsync()).MoveAsync(chunkedUploadSession, newPath, chunkedUploadSession.CheckQuota);
+        await MoveAsync(chunkedUploadSession, newPath, Guid.Empty);
+    }
+    public async Task MoveAsync<T>(ChunkedUploadSession<T> chunkedUploadSession, string newPath, Guid ownerId)
+    {
+        await (await CommonSessionHolderAsync()).MoveAsync(chunkedUploadSession, newPath, ownerId, chunkedUploadSession.CheckQuota);
     }
 
     public async Task AbortUploadSessionAsync<T>(ChunkedUploadSession<T> uploadSession)
@@ -102,21 +104,9 @@ public class ChunkedUploadSessionHolder(
     {
         if (currentTenant)
         {
-            if (_currentHolder == null)
-            {
-                _currentHolder = new CommonChunkedUploadSessionHolder(await globalStore.GetStoreAsync(), FileConstant.StorageDomainTmp, cache, setupInfo.ChunkUploadSize);
-            }
-
-            return _currentHolder;
+            return _currentHolder ??= new CommonChunkedUploadSessionHolder(await globalStore.GetStoreAsync(), FileConstant.StorageDomainTmp, cache, setupInfo.ChunkUploadSize);
         }
-        else
-        {
-            if (_holder == null)
-            {
-                _holder = new CommonChunkedUploadSessionHolder(await globalStore.GetStoreAsync(false), FileConstant.StorageDomainTmp, cache, setupInfo.ChunkUploadSize);
-            }
 
-            return _holder;
-        }
+        return _holder ??= new CommonChunkedUploadSessionHolder(await globalStore.GetStoreAsync(false), FileConstant.StorageDomainTmp, cache, setupInfo.ChunkUploadSize);
     }
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,46 +27,30 @@
 namespace ASC.Webhooks.Service.Services;
 
 [Singleton]
-public class WorkerService : BackgroundService
+public class WorkerService(
+    WebhookSender webhookSender,
+    ILogger<WorkerService> logger,
+    Settings settings,
+    IEventBus eventBus,
+    ConcurrentQueue<WebhookRequestIntegrationEvent> concurrentQueue)
+    : BackgroundService
 {
-    private readonly ILogger<WorkerService> _logger;
-    private readonly int? _threadCount;
-    private readonly WebhookSender _webhookSender;
-    private readonly TimeSpan _waitingPeriod;
-    private readonly ConcurrentQueue<WebhookRequestIntegrationEvent> _queue;
-    private readonly IEventBus _eventBus;
-
-    public WorkerService(
-        WebhookSender webhookSender,
-        ILogger<WorkerService> logger,
-        Settings settings,
-        IEventBus eventBus,
-        ConcurrentQueue<WebhookRequestIntegrationEvent> concurrentQueue)
-    {
-        _queue = concurrentQueue;
-        _logger = logger;
-        _webhookSender = webhookSender;
-        _threadCount = settings.ThreadCount;
-        _waitingPeriod = TimeSpan.FromSeconds(5);
-        _eventBus = eventBus;
-    }
+    private readonly int? _threadCount = settings.ThreadCount;
+    private readonly TimeSpan _waitingPeriod = TimeSpan.FromSeconds(5);
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _eventBus.Subscribe<WebhookRequestIntegrationEvent, WebhookRequestIntegrationEventHandler>();
+        eventBus.Subscribe<WebhookRequestIntegrationEvent, WebhookRequestIntegrationEventHandler>();
 
-        stoppingToken.Register(() =>
-        {
-            _eventBus.Unsubscribe<WebhookRequestIntegrationEvent, WebhookRequestIntegrationEventHandler>();
-        });
+        stoppingToken.Register(eventBus.Unsubscribe<WebhookRequestIntegrationEvent, WebhookRequestIntegrationEventHandler>);
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            var queueSize = _queue.Count;
+            var queueSize = concurrentQueue.Count;
 
             if (queueSize == 0) // change to "<= threadCount"
             {
-                _logger.TraceProcedure(_waitingPeriod);
+                logger.TraceProcedure(_waitingPeriod);
 
                 await Task.Delay(_waitingPeriod, stoppingToken);
 
@@ -83,12 +67,12 @@ public class WorkerService : BackgroundService
                     return;
                 }
 
-                if (!_queue.TryDequeue(out var entry))
+                if (!concurrentQueue.TryDequeue(out var entry))
                 {
                     break;
                 }
 
-                tasks.Add(_webhookSender.Send(entry, stoppingToken));
+                tasks.Add(webhookSender.Send(entry, stoppingToken));
                 counter++;
 
                 if (counter >= _threadCount)
@@ -100,7 +84,7 @@ public class WorkerService : BackgroundService
             }
 
             await Task.WhenAll(tasks);
-            _logger.DebugProcedureFinish();
+            logger.DebugProcedureFinish();
         }
     }
 }

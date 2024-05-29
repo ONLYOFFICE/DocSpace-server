@@ -8,12 +8,10 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-using System.CodeDom.Compiler;
-using System.Diagnostics.CodeAnalysis;
-using System.Resources;
-using System.Runtime.CompilerServices;
-
 namespace ASC.Web.Core.PublicResources {
+    using System;
+    
+    
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -21,27 +19,27 @@ namespace ASC.Web.Core.PublicResources {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [GeneratedCode("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
-    [DebuggerNonUserCode()]
-    [CompilerGenerated()]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+    [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class WebstudioNotifyPatternResource {
         
-        private static ResourceManager resourceMan;
+        private static global::System.Resources.ResourceManager resourceMan;
         
-        private static CultureInfo resourceCulture;
+        private static global::System.Globalization.CultureInfo resourceCulture;
         
-        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
+        [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         internal WebstudioNotifyPatternResource() {
         }
         
         /// <summary>
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
-        [EditorBrowsable(EditorBrowsableState.Advanced)]
-        public static ResourceManager ResourceManager {
+        [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
+        public static global::System.Resources.ResourceManager ResourceManager {
             get {
-                if (ReferenceEquals(resourceMan, null)) {
-                    ResourceManager temp = new ResourceManager("ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource", typeof(WebstudioNotifyPatternResource).Assembly);
+                if (object.ReferenceEquals(resourceMan, null)) {
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource", typeof(WebstudioNotifyPatternResource).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -52,8 +50,8 @@ namespace ASC.Web.Core.PublicResources {
         ///   Overrides the current thread's CurrentUICulture property for all
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
-        [EditorBrowsable(EditorBrowsableState.Advanced)]
-        public static CultureInfo Culture {
+        [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
+        public static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -329,15 +327,6 @@ namespace ASC.Web.Core.PublicResources {
         public static string ButtonConfirmEmail {
             get {
                 return ResourceManager.GetString("ButtonConfirmEmail", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Confirm Portal Address Change.
-        /// </summary>
-        public static string ButtonConfirmPortalAddressChange {
-            get {
-                return ResourceManager.GetString("ButtonConfirmPortalAddressChange", resourceCulture);
             }
         }
         
@@ -625,25 +614,6 @@ namespace ASC.Web.Core.PublicResources {
         public static string pattern_confirm_owner_change {
             get {
                 return ResourceManager.GetString("pattern_confirm_owner_change", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to h1.Change of portal address
-        ///
-        ///Dear $OwnerName,
-        ///
-        ///There has been a request to change the &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal address to &quot;$PortalAddress&quot;:&quot;$PortalAddress&quot; #if($PortalDns != &quot;&quot;) (&quot;$PortalDns&quot;:&quot;$PortalDns&quot; )#end.
-        ///
-        ///Please follow the link below to confirm the operation:
-        ///
-        ///$OrangeButton
-        ///
-        ///*Note*: this link is valid for 7 days only. Please complete the portal address change process within that period..
-        /// </summary>
-        public static string pattern_dns_change {
-            get {
-                return ResourceManager.GetString("pattern_dns_change", resourceCulture);
             }
         }
         
@@ -1774,7 +1744,7 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello!
         ///
-        ///You are invited to join $Message room at &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;. Accept the invitation by clicking the link:
+        ///You are invited to join a DocSpace room at &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;. Accept the invitation by clicking the link:
         ///
         ///$OrangeButton
         ///
@@ -2097,15 +2067,6 @@ namespace ASC.Web.Core.PublicResources {
         public static string subject_confirm_owner_change {
             get {
                 return ResourceManager.GetString("subject_confirm_owner_change", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to ${LetterLogoText}. Change of portal address.
-        /// </summary>
-        public static string subject_dns_change {
-            get {
-                return ResourceManager.GetString("subject_dns_change", resourceCulture);
             }
         }
         

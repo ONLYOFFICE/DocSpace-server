@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -62,7 +62,7 @@ public class S3TarWriteOperator : IDataWriteOperator
     }
 
 
-    public async Task WriteEntryAsync(string tarKey, string domain, string path, IDataStore store, Action<Task> action)
+    public async Task WriteEntryAsync(string tarKey, string domain, string path, IDataStore store, Func<Task> action)
     {
         if (store is S3Storage s3Store) 
         {
@@ -87,7 +87,7 @@ public class S3TarWriteOperator : IDataWriteOperator
                     throw;
                 }
             });
-             _ = task.ContinueWith(action);
+             _ = task.ContinueWith(async _ => await action());
             _tasks.Add(task);
             task.Start(_scheduler);
         }
@@ -103,7 +103,7 @@ public class S3TarWriteOperator : IDataWriteOperator
         }
     }
 
-    public async Task WriteEntryAsync(string tarKey, Stream stream, Action<Task> action)
+    public async Task WriteEntryAsync(string tarKey, Stream stream, Func<Task> action)
     {
         if (_cts.IsCancellationRequested)
         {
@@ -130,7 +130,7 @@ public class S3TarWriteOperator : IDataWriteOperator
             }
         });
         
-        _ = task.ContinueWith(action);
+        _ = task.ContinueWith(async _ => await action());
         _tasks.Add(task);
         task.Start(_scheduler);
     }
@@ -149,7 +149,7 @@ public class S3TarWriteOperator : IDataWriteOperator
                 await _store.DeleteAsync(_domain, _key + i);
             }
             var task = _tasks.First(t => t.Exception != null);
-            _cts.Cancel();
+            await _cts.CancelAsync();
             throw task.Exception;
         }
 

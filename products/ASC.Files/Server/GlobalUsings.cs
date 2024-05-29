@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,6 +32,7 @@ global using System.Text.RegularExpressions;
 
 global using ASC.Api.Core;
 global using ASC.Api.Core.Convention;
+global using ASC.Api.Core.Core;
 global using ASC.Api.Core.Extensions;
 global using ASC.Api.Core.Routing;
 global using ASC.Api.Utils;
@@ -63,8 +64,12 @@ global using ASC.Files.Core.VirtualRooms;
 global using ASC.Files.Extension;
 global using ASC.Files.Helpers;
 global using ASC.Files.Log;
+global using ASC.MessagingSystem;
 global using ASC.MessagingSystem.Core;
+global using ASC.Web.Api.Models;
 global using ASC.Web.Api.Routing;
+global using ASC.Web.Core;
+global using ASC.Web.Core.Files;
 global using ASC.Web.Core.PublicResources;
 global using ASC.Web.Core.Users;
 global using ASC.Web.Files;
@@ -89,6 +94,7 @@ global using AutoMapper;
 
 global using Microsoft.AspNetCore.Authorization;
 global using Microsoft.AspNetCore.Mvc;
+global using Microsoft.AspNetCore.RateLimiting;
 global using Microsoft.Extensions.Hosting.WindowsServices;
 
 global using Newtonsoft.Json.Linq;

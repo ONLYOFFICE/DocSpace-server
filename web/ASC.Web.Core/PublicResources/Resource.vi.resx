@@ -82,9 +82,6 @@
   <data name="CustomNamingPeopleSchema" xml:space="preserve">
     <value>Tuỳ chỉnh</value>
   </data>
-  <data name="DnsChangeMsg" xml:space="preserve">
-    <value>Một liên kết xác nhận hoạt động này đã được gửi đến {0} (địa chỉ email của người sở hữu cổng).</value>
-  </data>
   <data name="EmailAndPasswordIncorrectEmail" xml:space="preserve">
     <value>Địa chỉ email không chính xác</value>
   </data>
@@ -396,9 +393,6 @@
   </data>
   <data name="TariffsFeature_sso" xml:space="preserve">
     <value>SSO</value>
-  </data>
-  <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>không gian lưu trữ {0}</value>
   </data>
   <data name="TariffsFeature_total_size_exception" xml:space="preserve">
     <value>Kích thước lưu trữ đã sử dụng không được vượt quá {0}</value>
@@ -970,9 +964,6 @@
   <data name="MessageYourPasswordSendedToEmail" xml:space="preserve">
     <value>Nếu tồn tại người dùng có email {0}, hướng dẫn thay đổi mật khẩu đã được gửi đến địa chỉ email này.</value>
   </data>
-  <data name="PersonalFreeSpaceException" xml:space="preserve">
-    <value>Vượt quá không gian đĩa được phép</value>
-  </data>
   <data name="PortalName" xml:space="preserve">
     <value>Không gian đám mây cho tài liệu văn phòng của bạn</value>
   </data>
@@ -1008,5 +999,44 @@
   </data>
   <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
     <value>Quá nhiều lần đăng nhập. Xin vui lòng thử lại sau</value>
+  </data>
+  <data name="ErrorCannotDeleteLastSpace" xml:space="preserve">
+    <value>Không thể xóa không gian truy cập đầy đủ cuối cùng</value>
+  </data>
+  <data name="ErrorWebPluginArchive" xml:space="preserve">
+    <value>Lưu trữ plugin sai</value>
+  </data>
+  <data name="ErrorWebPluginExist" xml:space="preserve">
+    <value>Plugin đã tồn tại</value>
+  </data>
+  <data name="ErrorWebPluginFileExtension" xml:space="preserve">
+    <value>Phần mở rộng tập tin sai</value>
+  </data>
+  <data name="ErrorWebPluginFileSize" xml:space="preserve">
+    <value>Tập tin vượt quá giới hạn</value>
+  </data>
+  <data name="ErrorWebPluginForbiddenSystem" xml:space="preserve">
+    <value>Các thay đổi đối với plugin hệ thống đều bị cấm</value>
+  </data>
+  <data name="ErrorWebPluginName" xml:space="preserve">
+    <value>Tên plugin sai</value>
+  </data>
+  <data name="ErrorWebPluginNoInputFile" xml:space="preserve">
+    <value>Không có tập tin đầu vào</value>
+  </data>
+  <data name="ErrorWebPluginNotFound" xml:space="preserve">
+    <value>Không tìm thấy plugin</value>
+  </data>
+  <data name="ErrorWebPluginToManyInputFiles" xml:space="preserve">
+    <value>Quá nhiều tập tin đầu vào</value>
+  </data>
+  <data name="QuotaGreaterPortalError" xml:space="preserve">
+    <value>Không thể đặt hạn mức bộ nhớ - hạn mức bộ nhớ bạn đặt lớn hơn hạn mức cổng thông tin.</value>
+  </data>
+  <data name="RoomFreeSpaceException" xml:space="preserve">
+    <value>Đã vượt quá hạn mức không gian phòng</value>
+  </data>
+  <data name="UserFreeSpaceException" xml:space="preserve">
+    <value>Đã vượt quá hạn mức không gian người dùng</value>
   </data>
 </root>

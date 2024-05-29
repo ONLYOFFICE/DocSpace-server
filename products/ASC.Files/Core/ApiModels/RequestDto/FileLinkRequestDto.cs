@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,9 +26,11 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// </summary>
 public class FileLinkRequestDto : LinkRequestDtoBase
 {
-    /// <summary>Scope of the link</summary>
+    /// <summary>Link scope</summary>
     /// <type>System.Boolean, System</type>
     public bool Internal { get; set; }
     

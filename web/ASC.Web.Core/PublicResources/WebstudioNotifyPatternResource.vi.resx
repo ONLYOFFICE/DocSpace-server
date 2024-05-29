@@ -128,19 +128,6 @@ $OrangeButton
 
 *Lưu ý*: liên kết này chỉ có hiệu lực trong 7 ngày. Vui lòng hoàn tất quá trình thay đổi người sở hữu cổng thông tin trong khoảng thời gian đó.</value>
   </data>
-  <data name="pattern_dns_change" xml:space="preserve">
-    <value>h1.Thay đổi địa chỉ cổng thông tin
-
-Thân gửi $OwnerName,
-
-Đã có yêu cầu thay đổi địa chỉ cổng "${__VirtualRootPath}":"${__VirtualRootPath}" thành "$PortalAddress":"$PortalAddress" #if($PortalDns != "") ("$PortalDns":"$PortalDns" )#end.
-
-Vui lòng truy cập liên kết dưới đây để xác nhận hoạt động:
-
-$OrangeButton
-
-*Lưu ý*: liên kết này chỉ có hiệu lực trong 7 ngày. Vui lòng hoàn tất quá trình thay đổi địa chỉ cổng thông tin trong khoảng thời gian đó.</value>
-  </data>
   <data name="pattern_enterprise_guest_welcome_v1" xml:space="preserve">
     <value>h1. bạn đến với &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
 
@@ -453,9 +440,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_confirm_owner_change" xml:space="preserve">
     <value>${LetterLogoText}. Thay đổi người sở hữu cổng</value>
-  </data>
-  <data name="subject_dns_change" xml:space="preserve">
-    <value>${LetterLogoText}. Thay đổi địa chỉ cổng</value>
   </data>
   <data name="subject_enterprise_guest_welcome_v1" xml:space="preserve">
     <value>Chào mừng bạn đến với ONLYOFFICE DocSpace!</value>
@@ -1119,9 +1103,9 @@ $OrangeButton
 $TrulyYours</value>
   </data>
   <data name="pattern_saas_room_invite" xml:space="preserve">
-    <value>Xin chào! 
+    <value>Xin chào!
 
-Bạn được mời tham gia phòng $Message tại "${__VirtualRootPath}":"${__VirtualRootPath}". Hãy chấp nhận lời mời bằng cách nhấp vào liên kết:
+Bạn được mời tham gia phòng DocSpace tại "${__VirtualRootPath}":"${__VirtualRootPath}". Hãy chấp nhận lời mời bằng cách nhấp vào liên kết:
 
 $OrangeButton
 
@@ -1215,9 +1199,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
     <value>ONLYOFFICE DocSpace của bạn sẽ bị xóa</value>
-  </data>
-  <data name="ButtonConfirmPortalAddressChange" xml:space="preserve">
-    <value>Xác nhận thay đổi địa chỉ cổng thông tin</value>
   </data>
   <data name="ButtonConfirmTermination" xml:space="preserve">
     <value>Xác nhận chấm dứt tài khoản</value>
@@ -1701,6 +1682,25 @@ Xin chào $UserName!
 &lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 32px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG5" alt="administration pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px; width: 424px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; font-weight: 700; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;Quản lý&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/psxZ0fDXiUo"&gt;Quản lý cài đặt bảo mật&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/2ed2iSxLCwk"&gt;Sao lưu và khôi phục&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_zoom_welcome" xml:space="preserve">
+    <value>Chào mừng bạn đến với ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="pattern_zoom_welcome" xml:space="preserve">
+    <value>h1. đến với &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Xin chào $UserName!
+
+Bạn vừa tạo ONLYOFFICE DocSpace, một trung tâm tài liệu nơi bạn có thể tăng cường hợp tác với nhóm, khách hàng, đối tác của mình và hơn thế nữa. Địa chỉ của nó là "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+Gói dịch vụ hiện tại của bạn là STARTUP. Nó hoàn toàn miễn phí và bao gồm:
+
+&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;100 quản trị viên/người dùng cấp cao&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Lên đến 100 phòng&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;Dung lượng đĩa 100 GB&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+
+*Tận hưởng một cách cộng tác tài liệu mới!*
 
 $TrulyYours</value>
   </data>

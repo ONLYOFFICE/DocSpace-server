@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -122,7 +122,6 @@ global using Microsoft.Extensions.Caching.Distributed;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Logging;
-global using Microsoft.Extensions.Primitives;
 global using Microsoft.Net.Http.Headers;
 
 global using MimeKit.Utils;

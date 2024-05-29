@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,6 +29,7 @@ global using System.Net.Mail;
 global using System.Security;
 global using System.Security.Claims;
 global using System.ServiceModel.Security;
+global using System.Text.Json;
 global using System.Web;
 
 global using ASC.Api.Core;
@@ -41,13 +42,16 @@ global using ASC.Api.Core.Routing;
 global using ASC.Api.Utils;
 global using ASC.Common;
 global using ASC.Common.Caching;
+global using ASC.Core.Common.Core;
 global using ASC.Common.Threading;
 global using ASC.Common.Threading.DistributedLock.Abstractions;
 global using ASC.Common.Utils;
 global using ASC.Common.Web;
 global using ASC.Core;
+global using ASC.Core.Billing;
 global using ASC.Core.Common.EF;
 global using ASC.Core.Common.Quota;
+global using ASC.Core.Common.Quota.Custom;
 global using ASC.Core.Common.Quota.Features;
 global using ASC.Core.Common.Settings;
 global using ASC.Core.Tenants;

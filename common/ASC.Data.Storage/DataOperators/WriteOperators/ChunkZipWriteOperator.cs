@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -64,7 +64,7 @@ public class ChunkZipWriteOperator : IDataWriteOperator
         _sha = SHA256.Create();
     }
 
-    public async Task WriteEntryAsync(string tarKey, string domain, string path, IDataStore store, Action<Task> action)
+    public async Task WriteEntryAsync(string tarKey, string domain, string path, IDataStore store, Func<Task> action)
     {
         var fileStream = await ActionInvoker.TryAsync(async () => await store.GetReadStreamAsync(domain, path), 5, error => throw error);
         
@@ -75,7 +75,7 @@ public class ChunkZipWriteOperator : IDataWriteOperator
         }
     }
 
-    public async Task WriteEntryAsync(string tarKey, Stream stream, Action<Task> action)
+    public async Task WriteEntryAsync(string tarKey, Stream stream, Func<Task> action)
     {
         if (_fileStream == null)
         {
@@ -91,7 +91,7 @@ public class ChunkZipWriteOperator : IDataWriteOperator
             buffered.Position = 0;
             await buffered.CopyToAsync(_tarOutputStream);
             await _tarOutputStream.FlushAsync();
-            await _tarOutputStream.CloseEntryAsync(default).ContinueWith(action);
+            await _tarOutputStream.CloseEntryAsync(default).ContinueWith(async _ => await action());
         }
 
         if (_fileStream.Length > _sessionHolder.MaxChunkUploadSize)
@@ -120,8 +120,9 @@ public class ChunkZipWriteOperator : IDataWriteOperator
                 }
                     
                 theMemStream.Position = 0;
-                await _sessionHolder.UploadChunkAsync(_chunkedUploadSession, theMemStream, theMemStream.Length, _chunkNumber++);
-                _chunkedUploadSession.BytesTotal += theMemStream.Length;
+                var length = theMemStream.Length;
+                await _sessionHolder.UploadChunkAsync(_chunkedUploadSession, theMemStream, length, _chunkNumber++);
+                _chunkedUploadSession.BytesTotal += length;
                 _sha.TransformBlock(buffer, 0, bytesRead, buffer, 0);
             }
             else

@@ -649,7 +649,7 @@ $TrulyYours</value>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>Bună!
 
-Sunteţi invitat să vă asociaţi la sala $Message la "${__VirtualRootPath}":"${__VirtualRootPath}". Faceți clic pe linkul pentru a accepta invitația:
+Sunteţi invitat să vă asociaţi la sala DocSpace la "${__VirtualRootPath}":"${__VirtualRootPath}". Faceți clic pe linkul pentru a accepta invitația:
 
 $OrangeButton
 
@@ -721,9 +721,6 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Schimbare parola pentru cutia poștală</value>
   </data>
   <data name="subject_portal_rename" xml:space="preserve">
-    <value>${LetterLogoText}. Schimbare adresă portal</value>
-  </data>
-  <data name="subject_dns_change" xml:space="preserve">
     <value>${LetterLogoText}. Schimbare adresă portal</value>
   </data>
   <data name="subject_confirm_owner_change" xml:space="preserve">
@@ -871,9 +868,6 @@ Echipă de Asistență ONLYOFFICE™
   </data>
   <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
     <value>Confirmare invitație la DocSpace</value>
-  </data>
-  <data name="ButtonConfirmPortalAddressChange" xml:space="preserve">
-    <value>Confirmarea schimbării adresei de portal</value>
   </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
     <value>Confirmarea actualizării proprietarului de portal</value>
@@ -1161,19 +1155,6 @@ Urmăriţi linkul de mai jos pentru a confirma acţiunea:
 $OrangeButton
 
 *Menţiune*: Acest link este valabil doar timp de 7 zile. Finalizați procedura de schimbare a proprietarului de portal în perioada dată.</value>
-  </data>
-  <data name="pattern_dns_change" xml:space="preserve">
-    <value>h1.Schimbarea adresei de portal
-
-Stimată/Stimate $OwnerName,
-
-Am primit o solicitare de schimbare a adresei de portal "${__VirtualRootPath}":"${__VirtualRootPath}" în "$PortalAddress":"$PortalAddress" #if($PortalDns != "") ("$PortalDns":"$PortalDns" )#end.
-
-Urmăriţi linkul de mai jos pentru a confirma acţiunea:
-
-$OrangeButton
-
-*Menţiune*: Acest link este valabil doar timp de 7 zile. Finalizați procedura de schimbare a adresei de portal în perioada dată.</value>
   </data>
   <data name="pattern_enterprise_guest_activation_v10" xml:space="preserve">
     <value>h1. Asociați-vă spaţiului &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
@@ -1761,5 +1742,24 @@ Portalul dvs este din nou disponibil.</value>
 Datele utilizatorului "$FromUserName":"$FromUserLink" au fost eliminate cu succes.
 
 Ștergerea datelor cu caracter personal a permis eliberarea $DocsSpace</value>
+  </data>
+  <data name="subject_zoom_welcome" xml:space="preserve">
+    <value>Bun venit în spaţiul ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="pattern_zoom_welcome" xml:space="preserve">
+    <value>h1. în &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+ 
+ 
+Stimate, $UserName!
+ 
+Tocmai ați creat spațiul ONLYOFFICE DocSpace, un hub de documente pentru a oferi un impuls colaborării în echipa, cu clienții și partenerii dvs și nu numai. Adresa spațiului "${__VirtualRootPath}":"${__VirtualRootPath}".
+ 
+Planul dvs tarifar actual est STARTUP. Acest abonament este absolut gratuit și include:
+ 
+&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: &amp;apos;Open Sans&amp;apos;, Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: &amp;apos;Open Sans&amp;apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;100 de administratori/utilizatori avansați&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: &amp;apos;Open Sans&amp;apos;, Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: &amp;apos;Open Sans&amp;apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Până la 100 săli&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: &amp;apos;Open Sans&amp;apos;, Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: &amp;apos;Open Sans&amp;apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;100 GB de spațiu de stocare&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+ 
+*Descoperiți un nou mod de colaborare asupra documentelor!*
+ 
+$TrulyYours</value>
   </data>
 </root>

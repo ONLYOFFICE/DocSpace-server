@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,20 +28,20 @@ using UnknownImageFormatException = ASC.Web.Core.Users.UnknownImageFormatExcepti
 
 namespace ASC.People.Api;
 
-public class PhotoController(UserManager userManager,
-        PermissionContext permissionContext,
-        ApiContext apiContext,
-        UserPhotoManager userPhotoManager,
-        MessageService messageService,
-        MessageTarget messageTarget,
-        DisplayUserSettingsHelper displayUserSettingsHelper,
-        SecurityContext securityContext,
-        SettingsManager settingsManager,
-        FileSizeComment fileSizeComment,
-        SetupInfo setupInfo,
-        IHttpClientFactory httpClientFactory,
-        IHttpContextAccessor httpContextAccessor,
-        TenantManager tenantManager)
+public class PhotoController(
+    UserManager userManager,
+    PermissionContext permissionContext,
+    ApiContext apiContext,
+    UserPhotoManager userPhotoManager,
+    MessageService messageService,
+    DisplayUserSettingsHelper displayUserSettingsHelper,
+    SecurityContext securityContext,
+    SettingsManager settingsManager,
+    FileSizeComment fileSizeComment,
+    SetupInfo setupInfo,
+    IHttpClientFactory httpClientFactory,
+    IHttpContextAccessor httpContextAccessor,
+    TenantManager tenantManager)
     : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
 {
     /// <summary>
@@ -97,7 +97,7 @@ public class PhotoController(UserManager userManager,
         }
 
         await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
-        await messageService.SendAsync(MessageAction.UserUpdatedAvatarThumbnails, messageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
+        await messageService.SendAsync(MessageAction.UserUpdatedAvatarThumbnails, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
         return await ThumbnailsDataDto.Create(user, _userPhotoManager);
     }
 
@@ -132,7 +132,7 @@ public class PhotoController(UserManager userManager,
 
         await _userPhotoManager.RemovePhotoAsync(user.Id);
         await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
-        await messageService.SendAsync(MessageAction.UserDeletedAvatar, messageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
+        await messageService.SendAsync(MessageAction.UserDeletedAvatar, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
 
         return await ThumbnailsDataDto.Create(user, _userPhotoManager);
     }
@@ -195,7 +195,7 @@ public class PhotoController(UserManager userManager,
         }
 
         await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
-        await messageService.SendAsync(MessageAction.UserAddedAvatar, messageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
+        await messageService.SendAsync(MessageAction.UserAddedAvatar, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
 
         return await ThumbnailsDataDto.Create(user, _userPhotoManager);
     }

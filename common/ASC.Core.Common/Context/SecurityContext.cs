@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,7 +29,9 @@ using Constants = ASC.Core.Configuration.Constants;
 namespace ASC.Core;
 
 [Scope]
-public class SecurityContext(UserManager userManager,
+public class SecurityContext(
+    IHttpContextAccessor httpContextAccessor,
+    UserManager userManager,
     AuthManager authentication,
     AuthContext authContext,
     TenantManager tenantManager,
@@ -42,25 +44,6 @@ public class SecurityContext(UserManager userManager,
     public IAccount CurrentAccount => authContext.CurrentAccount;
     public bool IsAuthenticated => authContext.IsAuthenticated;
 
-    private readonly IHttpContextAccessor _httpContextAccessor;
-
-    public SecurityContext(
-        IHttpContextAccessor httpContextAccessor,
-        UserManager userManager,
-        AuthManager authentication,
-        AuthContext authContext,
-        TenantManager tenantManager,
-        UserFormatter userFormatter,
-        CookieStorage cookieStorage,
-        TenantCookieSettingsHelper tenantCookieSettingsHelper,
-        ILogger<SecurityContext> logger,
-        DbLoginEventsManager dbLoginEventsManager
-        ) : this(userManager, authentication, authContext, tenantManager, userFormatter, cookieStorage, tenantCookieSettingsHelper, logger, dbLoginEventsManager)
-    {
-        _httpContextAccessor = httpContextAccessor;
-    }
-
-
     public async Task<string> AuthenticateMeAsync(string login, string passwordHash, Func<Task<int>> funcLoginEvent = null, List<Claim> additionalClaims = null)
     {
         ArgumentNullException.ThrowIfNull(login);
@@ -72,7 +55,7 @@ public class SecurityContext(UserManager userManager,
         return await AuthenticateMeAsync(new UserAccount(u, tenantid, userFormatter), funcLoginEvent,additionalClaims);
     }
 
-    public async Task<bool> AuthenticateMe(string cookie)
+    public async Task<bool> AuthenticateMeAsync(string cookie)
     {
         if (string.IsNullOrEmpty(cookie))
         {
@@ -85,13 +68,13 @@ public class SecurityContext(UserManager userManager,
             {
                 var ipFrom = string.Empty;
                 var address = string.Empty;
-                if (_httpContextAccessor?.HttpContext != null)
+                if (httpContextAccessor?.HttpContext != null)
                 {
-                    var request = _httpContextAccessor?.HttpContext.Request;
+                    var request = httpContextAccessor?.HttpContext.Request;
 
                     ArgumentNullException.ThrowIfNull(request);
 
-                    ipFrom = "from " + _httpContextAccessor?.HttpContext.Connection.RemoteIpAddress;
+                    ipFrom = "from " + httpContextAccessor?.HttpContext.Connection.RemoteIpAddress;
                     address = "for " + request.Url();
                 }
                 logger.InformationEmptyBearer(ipFrom, address);
@@ -100,14 +83,14 @@ public class SecurityContext(UserManager userManager,
             {
                 var ipFrom = string.Empty;
                 var address = string.Empty;
-                if (_httpContextAccessor?.HttpContext != null)
+                if (httpContextAccessor?.HttpContext != null)
                 {
-                    var request = _httpContextAccessor?.HttpContext.Request;
+                    var request = httpContextAccessor?.HttpContext.Request;
 
                     ArgumentNullException.ThrowIfNull(request);
 
                     address = "for " + request.Url();
-                    ipFrom = "from " + _httpContextAccessor?.HttpContext.Connection.RemoteIpAddress;
+                    ipFrom = "from " + httpContextAccessor?.HttpContext.Connection.RemoteIpAddress;
                 }
 
                 logger.WarningCanNotDecrypt(cookie, ipFrom, address);
@@ -143,7 +126,7 @@ public class SecurityContext(UserManager userManager,
 
             if (loginEventId != 0)
             {
-                var loginEventById = await dbLoginEventsManager.GetByIdAsync(loginEventId);
+                var loginEventById = await dbLoginEventsManager.GetByIdAsync(tenant, loginEventId);
                 if (loginEventById == null || !loginEventById.Active)
                 {
                     return false;
@@ -202,11 +185,19 @@ public class SecurityContext(UserManager userManager,
         return cookie;
     }
 
-    public async Task AuthenticateMeWithoutCookieAsync(IAccount account, List<Claim> additionalClaims = null)
+    public async Task AuthenticateMeWithoutCookieAsync(IAccount account, List<Claim> additionalClaims = null, Guid session = default)
     {
         if (account == null || account.Equals(Constants.Guest))
         {
-            throw new InvalidCredentialException("account");
+            if (session == default || session == Constants.Guest.ID)
+            {
+                throw new InvalidCredentialException(nameof(account));
+            }
+
+            var anonymousSession = new AnonymousSession(Constants.Guest.ID, Constants.Guest.Name, session);
+            authContext.Principal = new CustomClaimsPrincipal(new ClaimsIdentity(anonymousSession, []), anonymousSession);
+                
+            return;
         }
 
         var roles = new List<string> { Role.Everyone };
@@ -247,7 +238,7 @@ public class SecurityContext(UserManager userManager,
 
             roles.Add(Role.RoomAdministrators);
 
-            account = new UserAccount(u, await tenantManager.GetCurrentTenantIdAsync(), userFormatter);
+            account = new UserAccount(u, tenant.Id, userFormatter);
         }
 
         var claims = new List<Claim>
@@ -267,11 +258,15 @@ public class SecurityContext(UserManager userManager,
 
     public async Task AuthenticateMeWithoutCookieAsync(Guid userId, List<Claim> additionalClaims = null)
     {
-        var account = await authentication.GetAccountByIDAsync(await tenantManager.GetCurrentTenantIdAsync(), userId);
-
-        await AuthenticateMeWithoutCookieAsync(account, additionalClaims);
+        await AuthenticateMeWithoutCookieAsync(await tenantManager.GetCurrentTenantIdAsync(), userId, additionalClaims);
     }
 
+    public async Task AuthenticateMeWithoutCookieAsync(int tenantId, Guid userId, List<Claim> additionalClaims = null)
+    {
+        var account = await authentication.GetAccountByIDAsync(tenantId, userId);
+        await AuthenticateMeWithoutCookieAsync(account, additionalClaims);
+    }
+    
     public void Logout()
     {
         authContext.Logout();
@@ -325,22 +320,11 @@ public class PermissionContext(IPermissionResolver permissionResolver, AuthConte
 }
 
 [Scope]
-public class AuthContext
+public class AuthContext(IHttpContextAccessor httpContextAccessor)
 {
-    private IHttpContextAccessor HttpContextAccessor { get; }
-    private static readonly List<string> _typesCheck =
-        [ConfirmType.LinkInvite.ToString(), ConfirmType.EmpInvite.ToString()];
-
-    public AuthContext()
-    {
-
-    }
-
-    public AuthContext(IHttpContextAccessor httpContextAccessor)
-    {
-        HttpContextAccessor = httpContextAccessor;
-    }
-
+    private IHttpContextAccessor HttpContextAccessor { get; } = httpContextAccessor;
+    private static readonly List<string> _typesCheck = [ConfirmType.LinkInvite.ToString(), ConfirmType.EmpInvite.ToString()];
+    
     public IAccount CurrentAccount => Principal?.Identity as IAccount ?? Constants.Guest;
 
     public bool IsAuthenticated => CurrentAccount.IsAuthenticated;

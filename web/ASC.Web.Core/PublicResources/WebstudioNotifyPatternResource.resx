@@ -150,9 +150,6 @@
   <data name="ButtonConfirm" xml:space="preserve">
     <value>Confirm</value>
   </data>
-  <data name="ButtonConfirmPortalAddressChange" xml:space="preserve">
-    <value>Confirm Portal Address Change</value>
-  </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
     <value>Confirm Portal Owner Update</value>
   </data>
@@ -266,19 +263,6 @@ Please follow the link below to confirm the operation:
 $OrangeButton
 
 *Note*: this link is valid for 7 days only. Please complete the portal owner change process within that period.</value>
-  </data>
-  <data name="pattern_dns_change" xml:space="preserve">
-    <value>h1.Change of portal address
-
-Dear $OwnerName,
-
-There has been a request to change the "${__VirtualRootPath}":"${__VirtualRootPath}" portal address to "$PortalAddress":"$PortalAddress" #if($PortalDns != "") ("$PortalDns":"$PortalDns" )#end.
-
-Please follow the link below to confirm the operation:
-
-$OrangeButton
-
-*Note*: this link is valid for 7 days only. Please complete the portal address change process within that period.</value>
   </data>
   <data name="pattern_enterprise_guest_activation_v10" xml:space="preserve">
     <value>h1. Join &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
@@ -973,9 +957,6 @@ The link is only valid for 7 days.</value>
   </data>
   <data name="subject_confirm_owner_change" xml:space="preserve">
     <value>${LetterLogoText}. Change of portal owner</value>
-  </data>
-  <data name="subject_dns_change" xml:space="preserve">
-    <value>${LetterLogoText}. Change of portal address</value>
   </data>
   <data name="subject_enterprise_guest_activation_v10" xml:space="preserve">
     <value>Join ${__VirtualRootPath}</value>
@@ -2102,7 +2083,7 @@ $TrulyYours</comment>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>Hello!
 
-You are invited to join $Message room at "${__VirtualRootPath}":"${__VirtualRootPath}". Accept the invitation by clicking the link:
+You are invited to join a DocSpace room at "${__VirtualRootPath}":"${__VirtualRootPath}". Accept the invitation by clicking the link:
 
 $OrangeButton
 

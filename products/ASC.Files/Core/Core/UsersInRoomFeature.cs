@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,7 +30,10 @@ public class UsersInRoomChecker(ITenantQuotaFeatureStat<UsersInRoomFeature, int>
         TenantManager tenantManager)
     : TenantQuotaFeatureCheckerCount<UsersInRoomFeature>(tenantQuotaFeatureStatistic, tenantManager)
 {
-    public override string Exception => Resource.TariffsFeature_usersInRoom_exception;
+    public override string GetExceptionMessage(long count)
+    {
+        return string.Format(Resource.TariffsFeature_usersInRoom_exception, count);
+    }
 }
 
 public class UsersInRoomStatistic(IServiceProvider serviceProvider) : ITenantQuotaFeatureStat<UsersInRoomFeature, int>
@@ -51,6 +54,6 @@ public class UsersInRoomStatistic(IServiceProvider serviceProvider) : ITenantQuo
             return 0;
         }
 
-        return await securityDao.GetPureSharesCountAsync(folder, ShareFilterType.User, null);
+        return await securityDao.GetPureSharesCountAsync(folder, ShareFilterType.User, null, null);
     }
 }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,7 +29,7 @@ namespace ASC.Web.Files.Api;
 [Scope]
 public class FilesIntegration(IDaoFactory daoFactory)
 {
-    private static readonly IDictionary<string, IFileSecurityProvider> _providers = new Dictionary<string, IFileSecurityProvider>();
+    private static readonly Dictionary<string, IFileSecurityProvider> _providers = new();
 
     public async Task<T> RegisterBunchAsync<T>(string module, string bunch, string data)
     {

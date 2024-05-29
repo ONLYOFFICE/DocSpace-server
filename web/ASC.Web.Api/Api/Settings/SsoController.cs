@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -50,6 +50,7 @@ public class SsoController(TenantManager tenantManager,
     /// <returns type="ASC.Web.Studio.UserControls.Management.SingleSignOnSettings.SsoSettingsV2, ASC.Web.Core">SSO settings</returns>
     /// <path>api/2.0/settings/ssov2</path>
     /// <httpMethod>GET</httpMethod>
+    /// <requiresAuthorization>false</requiresAuthorization>
     [HttpGet("")]
     [AllowAnonymous, AllowNotPayment]
     public async Task<SsoSettingsV2> GetSsoSettingsV2()

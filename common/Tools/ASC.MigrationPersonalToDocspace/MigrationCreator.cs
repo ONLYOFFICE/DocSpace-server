@@ -192,7 +192,7 @@ public class MigrationCreator
             using var userDbContextToregion = _creatorDbContext.CreateDbContext<UserDbContext>(_toRegion);
             var usersCount = userDbContextToregion.Users
                 .Join(userDbContextToregion.UserGroups, u => u.Id, ug => ug.Userid, (u, ug) => new { u, ug })
-                .Where(q => q.u.TenantId == tenant.Id && q.ug.UserGroupId == Common.Security.Authorizing.AuthConstants.DocSpaceAdmin.ID).Count();
+                .Where(q => q.u.TenantId == tenant.Id && q.ug.UserGroupId == ASC.Common.Security.Authorizing.AuthConstants.DocSpaceAdmin.ID).Count();
             if (usersCount > qouta.CountRoomAdmin)
             {
                 throw new ArgumentException("user count exceed");
@@ -221,11 +221,17 @@ public class MigrationCreator
             {
                 foreach (var table in tablesToProcess)
                 {
-                    if (table.Name == "files_thirdparty_account" || table.Name == "files_thirdparty_id_mapping" || table.Name == "core_subscription" || table.Name == "files_security")
+                    try
                     {
-                        continue;
+                        await ArhiveTable(table, writer, module, connection, id);
                     }
-                    await ArhiveTable(table, writer, module, connection, id);
+                    catch
+                    {
+                        if (table.Name != "files_thirdparty_account" && table.Name != "files_thirdparty_id_mapping" && table.Name != "core_subscription" || table.Name == "files_security")
+                        {
+                            throw;
+                        }
+                    }
                 }
             }
         }
@@ -269,7 +275,7 @@ public class MigrationCreator
 
                 await WriteEnrty(data, writer, module);
             }
-            catch(MySqlException e)
+            catch(MySqlException)
             {
                 if (table.Name != "tenants_tariffrow")
                 {
@@ -281,13 +287,11 @@ public class MigrationCreator
 
     private async Task WriteEnrty(DataTable data, IDataWriteOperator writer, IModuleSpecifics module)
     {
-        using (var file = _tempStream.Create())
-        {
-            data.WriteXml(file, XmlWriteMode.WriteSchema);
-            data.Clear();
+        await using var file = _tempStream.Create();
+        data.WriteXml(file, XmlWriteMode.WriteSchema);
+        data.Clear();
 
-            await writer.WriteEntryAsync(KeyHelper.GetTableZipKey(module, data.TableName), file, t => { });
-        }
+        await writer.WriteEntryAsync(KeyHelper.GetTableZipKey(module, data.TableName), file, () => Task.CompletedTask);
     }
 
     private void ChangeAlias(DataTable data)
@@ -383,7 +387,7 @@ public class MigrationCreator
                 {
                     var f = (BackupFileInfo)state;
                     using var fileStream = await storage.GetReadStreamAsync(f.Domain, f.Path);
-                    await writer.WriteEntryAsync(file1.GetZipKey(), fileStream, t => { });
+                    await writer.WriteEntryAsync(file1.GetZipKey(), fileStream, () => Task.CompletedTask);
                 }, file, 5);
             }
             Console.WriteLine($"end backup fileGroup: {group.Key}");
@@ -398,7 +402,7 @@ public class MigrationCreator
         using (var tmpFile = _tempStream.Create())
         {
             restoreInfoXml.WriteTo(tmpFile);
-            await writer.WriteEntryAsync(KeyHelper.GetStorageRestoreInfoZipKey(), tmpFile, t => { });
+            await writer.WriteEntryAsync(KeyHelper.GetStorageRestoreInfoZipKey(), tmpFile, () => Task.CompletedTask);
         }
         Console.WriteLine($"end backup storage");
     }

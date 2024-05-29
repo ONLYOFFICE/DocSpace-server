@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -38,10 +38,15 @@ public class GoogleCloudStorage(TempStream tempStream,
         ILogger<GoogleCloudStorage> options,
         IHttpClientFactory clientFactory,
         TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
-        QuotaSocketManager quotaSocketManager)
-    : BaseStorage(tempStream, tenantManager, pathUtils, emailValidationKeyProvider, httpContextAccessor, factory, options, clientFactory, tenantQuotaFeatureStatHelper, quotaSocketManager)
+        QuotaSocketManager quotaSocketManager,
+        SettingsManager settingsManager,
+        IQuotaService quotaService,
+        UserManager userManager,
+        CustomQuota customQuota)
+    : BaseStorage(tempStream, tenantManager, pathUtils, emailValidationKeyProvider, httpContextAccessor, factory, options, clientFactory, tenantQuotaFeatureStatHelper, quotaSocketManager, settingsManager, quotaService, userManager, customQuota)
 {
     public override bool IsSupportChunking => true;
+    public override bool ContentAsAttachment => _contentAsAttachment;
 
     private string _subDir = string.Empty;
     private Dictionary<string, PredefinedObjectAcl> _domainsAcl;
@@ -51,6 +56,7 @@ public class GoogleCloudStorage(TempStream tempStream,
     private Uri _bucketRoot;
     private Uri _bucketSSlRoot;
     private bool _lowerCasing = true;
+    private bool _contentAsAttachment;
 
     public override IDataStore Configure(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props, IDataStoreValidator dataStoreValidator)
     {
@@ -60,6 +66,8 @@ public class GoogleCloudStorage(TempStream tempStream,
         {
             Modulename = moduleConfig.Name;
             DataList = new DataList(moduleConfig);
+
+            _contentAsAttachment = moduleConfig.ContentAsAttachment;
 
             DomainsExpires = moduleConfig.Domain.Where(x => x.Expires != TimeSpan.Zero).ToDictionary(x => x.Name, y => y.Expires);
 
@@ -180,6 +188,11 @@ public class GoogleCloudStorage(TempStream tempStream,
         return SaveAsync(domain, path, stream, string.Empty, string.Empty);
     }
 
+    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, Guid ownerId)
+    {
+        return SaveAsync(domain, path, ownerId, stream, string.Empty, string.Empty);
+    }
+
     public override Task<Uri> SaveAsync(string domain, string path, Stream stream, ACL acl)
     {
         return SaveAsync(domain, path, stream, null, null, acl);
@@ -187,7 +200,11 @@ public class GoogleCloudStorage(TempStream tempStream,
 
     public override Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentType, string contentDisposition)
     {
-        return SaveAsync(domain, path, stream, contentType, contentDisposition, ACL.Auto);
+        return SaveAsync(domain, path, Guid.Empty, stream, contentType, contentDisposition);
+    }
+    public override Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string contentType, string contentDisposition)
+    {
+        return SaveAsync(domain, path, ownerId, stream, contentType, contentDisposition, ACL.Auto);
     }
 
     public override Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentEncoding, int cacheDays)
@@ -201,6 +218,12 @@ public class GoogleCloudStorage(TempStream tempStream,
     }
 
     public async Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentType,
+                 string contentDisposition, ACL acl, string contentEncoding = null, int cacheDays = 5)
+    {
+        return await SaveAsync(domain, path, Guid.Empty, stream, contentType,
+                  contentDisposition, acl, contentEncoding, cacheDays);
+    }
+    public async Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string contentType,
                   string contentDisposition, ACL acl, string contentEncoding = null, int cacheDays = 5)
     {
 
@@ -208,7 +231,7 @@ public class GoogleCloudStorage(TempStream tempStream,
 
         if (EnableQuotaCheck(domain))
         {
-            await QuotaController.QuotaUsedCheckAsync(buffered.Length);
+            await QuotaController.QuotaUsedCheckAsync(buffered.Length, ownerId);
         }
 
         var mime = string.IsNullOrEmpty(contentType)
@@ -265,6 +288,10 @@ public class GoogleCloudStorage(TempStream tempStream,
 
     public override async Task DeleteFilesAsync(string domain, string folderPath, string pattern, bool recursive)
     {
+        await DeleteFilesAsync(domain, folderPath, pattern, recursive, Guid.Empty);
+    }
+    public override async Task DeleteFilesAsync(string domain, string folderPath, string pattern, bool recursive, Guid ownerId)
+    {
         using var storage = await GetStorageAsync();
 
         IAsyncEnumerable<Object> objToDel;
@@ -283,7 +310,7 @@ public class GoogleCloudStorage(TempStream tempStream,
         await foreach (var obj in objToDel)
         {
             await storage.DeleteObjectAsync(_bucket, obj.Name);
-            await QuotaUsedDeleteAsync(domain, Convert.ToInt64(obj.Size));
+            await QuotaUsedDeleteAsync(domain, Convert.ToInt64(obj.Size), ownerId);
         }
     }
 
@@ -372,6 +399,11 @@ public class GoogleCloudStorage(TempStream tempStream,
 
     public override async Task<Uri> MoveAsync(string srcDomain, string srcPath, string newDomain, string newPath, bool quotaCheckFileSize = true)
     {
+        return await MoveAsync(srcDomain, srcPath, newDomain, newPath, Guid.Empty, quotaCheckFileSize);
+    }
+
+    public override async Task<Uri> MoveAsync(string srcDomain, string srcPath, string newDomain, string newPath, Guid ownerId, bool quotaCheckFileSize = true)
+    {
         using var storage = await GetStorageAsync();
 
         var srcKey = MakePath(srcDomain, srcPath);
@@ -386,7 +418,7 @@ public class GoogleCloudStorage(TempStream tempStream,
         await DeleteAsync(srcDomain, srcPath);
 
         await QuotaUsedDeleteAsync(srcDomain, size);
-        await QuotaUsedAddAsync(newDomain, size, quotaCheckFileSize);
+        await QuotaUsedAddAsync(newDomain, size, ownerId, quotaCheckFileSize);
 
         return await GetUriAsync(newDomain, newPath);
     }
@@ -403,20 +435,7 @@ public class GoogleCloudStorage(TempStream tempStream,
         return GetObjectsAsync(domain, path, recursive)
                .Select(x => x.Name[MakePath(domain, path + "/").Length..]);
     }
-
-    private IEnumerable<Object> GetObjects(string domain, string path, bool recursive)
-    {
-        using var storage = GetStorage();
-
-        var items = storage.ListObjects(_bucket, MakePath(domain, path));
-
-        if (recursive)
-        {
-            return items;
-        }
-
-        return items.Where(x => x.Name.IndexOf('/', MakePath(domain, path + "/").Length) == -1);
-    }
+    
 
     private IAsyncEnumerable<Object> GetObjectsAsync(string domain, string path, bool recursive)
     {
@@ -454,10 +473,13 @@ public class GoogleCloudStorage(TempStream tempStream,
 
     public override async Task DeleteDirectoryAsync(string domain, string path)
     {
+        await DeleteDirectoryAsync(domain, path, Guid.Empty);
+    }
+    public override async Task DeleteDirectoryAsync(string domain, string path, Guid ownerId)
+    {
         using var storage = await GetStorageAsync();
 
-        var objToDel = storage
-                          .ListObjectsAsync(_bucket, MakePath(domain, path));
+        var objToDel = storage.ListObjectsAsync(_bucket, MakePath(domain, path));
 
         await foreach (var obj in objToDel)
         {
@@ -468,7 +490,7 @@ public class GoogleCloudStorage(TempStream tempStream,
                 if (string.IsNullOrEmpty(QuotaController.ExcludePattern) ||
                     !Path.GetFileName(obj.Name).StartsWith(QuotaController.ExcludePattern))
                 {
-                    await QuotaUsedDeleteAsync(domain, Convert.ToInt64(obj.Size));
+                    await QuotaUsedDeleteAsync(domain, Convert.ToInt64(obj.Size), ownerId);
                 }
             }
         }
@@ -773,12 +795,16 @@ public class GoogleCloudStorage(TempStream tempStream,
 
     protected override Task<Uri> SaveWithAutoAttachmentAsync(string domain, string path, Stream stream, string attachmentFileName)
     {
+        return SaveWithAutoAttachmentAsync(domain, path, Guid.Empty, stream, attachmentFileName);
+    }
+    protected override Task<Uri> SaveWithAutoAttachmentAsync(string domain, string path, Guid ownerId, Stream stream, string attachmentFileName)
+    {
         var contentDisposition = $"attachment; filename={HttpUtility.UrlPathEncode(attachmentFileName)};";
         if (attachmentFileName.Any(c => c >= 0 && c <= 127))
         {
             contentDisposition = $"attachment; filename*=utf-8''{HttpUtility.UrlPathEncode(attachmentFileName)};";
         }
-        return SaveAsync(domain, path, stream, null, contentDisposition);
+        return SaveAsync(domain, path, ownerId, stream, null, contentDisposition);
     }
 
     private StorageClient GetStorage()

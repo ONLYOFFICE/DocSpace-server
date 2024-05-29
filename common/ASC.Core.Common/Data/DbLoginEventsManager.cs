@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,12 +26,60 @@
 
 namespace ASC.Core.Data;
 
-[Scope]
-public class DbLoginEventsManager(IDbContextFactory<MessagesContext> dbContextFactory,
-    IMapper mapper,
-    ICache cache)
+[Singleton]
+public class LoginEventsCache
 {
+    private readonly ICache _cache;
+    private readonly ICacheNotify<LoginEventCacheItem> _cacheNotify;
+    private readonly TimeSpan _expiration = TimeSpan.FromMinutes(10);
     private const string GuidLoginEvent = "F4D8BBF6-EB63-4781-B55E-5885EAB3D759";
+
+    public LoginEventsCache(ICache cache, ICacheNotify<LoginEventCacheItem> cacheNotify)
+    {
+        _cache = cache;
+        _cacheNotify = cacheNotify;
+        
+        _cacheNotify.Subscribe(loginEventCacheItem =>
+        {
+            if (loginEventCacheItem?.Ids == null)
+            {
+                return;
+            }
+            foreach (var id in loginEventCacheItem.Ids)
+            {
+                _cache.Remove(BuildKey(id));
+            }
+        }, CacheNotifyAction.Remove);
+    }
+
+    public void Insert(DbLoginEvent loginEvent)
+    {
+        _cache.Insert(BuildKey(loginEvent.Id), loginEvent, _expiration);
+    }
+
+    public DbLoginEvent Get(int id)
+    {
+        return _cache.Get<DbLoginEvent>(BuildKey(id));
+    }
+
+    public void Remove(IEnumerable<int> ids)
+    {
+        _cacheNotify.Publish(new LoginEventCacheItem { Ids = ids?.ToList() }, CacheNotifyAction.Remove);
+    }
+
+    private static string BuildKey(int id)
+    {
+        return $"{GuidLoginEvent} - {id}";
+    }
+}
+
+
+[Scope]
+public class DbLoginEventsManager(
+    IDbContextFactory<MessagesContext> dbContextFactory,
+    LoginEventsCache cache,
+    IMapper mapper)
+{
     private static readonly List<int> _loginActions =
     [
         (int)MessageAction.LoginSuccess,
@@ -46,21 +94,27 @@ public class DbLoginEventsManager(IDbContextFactory<MessagesContext> dbContextFa
         (int)MessageAction.LoginSuccessViaApiTfa
     ];
 
-    public async Task<DbLoginEvent> GetByIdAsync(int id)
+    public async Task<DbLoginEvent> GetByIdAsync(int tenantId, int id)
     {
-        if (id < 0)
+        if (tenantId < 0 || id < 0)
         {
             return null;
         }
-
-        var loginEvent = cache.Get<DbLoginEvent>($"{GuidLoginEvent} - {id}");
-        if(loginEvent == null)
+        
+        var loginEvent = cache.Get(id);
+        if (loginEvent != null)
         {
-            await using var loginEventContext = await dbContextFactory.CreateDbContextAsync();
-            loginEvent = await loginEventContext.LoginEvents.FindAsync(id);
-
-            cache.Insert($"{GuidLoginEvent} - {id}", loginEvent, TimeSpan.FromMinutes(10));
+            return loginEvent;
         }
+
+        await using var loginEventContext = await dbContextFactory.CreateDbContextAsync();
+        loginEvent = await loginEventContext.LoginEvents.SingleOrDefaultAsync(e => e.TenantId == tenantId && e.Id == id);
+
+        if (loginEvent != null)
+        {
+            cache.Insert(loginEvent);
+        }
+        
         return loginEvent;
     }
 
@@ -75,13 +129,13 @@ public class DbLoginEventsManager(IDbContextFactory<MessagesContext> dbContextFa
         return mapper.Map<List<DbLoginEvent>, List<BaseEvent>>(loginInfo);
     }
 
-    public async Task LogOutEventAsync(int loginEventId)
+    public async Task LogOutEventAsync(int tenantId, int loginEventId)
     {
         await using var loginEventContext = await dbContextFactory.CreateDbContextAsync();
 
-        await Queries.DeleteLoginEventsAsync(loginEventContext, loginEventId);
+        await Queries.DeleteLoginEventsAsync(loginEventContext, tenantId, loginEventId);
 
-        ResetCache(loginEventId);
+        cache.Remove([loginEventId]);
     }
 
     public async Task LogOutAllActiveConnectionsAsync(int tenantId, Guid userId)
@@ -113,7 +167,12 @@ public class DbLoginEventsManager(IDbContextFactory<MessagesContext> dbContextFa
 
     private async Task InnerLogOutAsync(MessagesContext loginEventContext, List<DbLoginEvent> loginEvents)
     {
-        ResetCache(loginEvents);
+        if (loginEvents.Count == 0)
+        {
+            return;
+        }
+
+        cache.Remove(loginEvents.Select(e => e.Id));
 
         foreach (var loginEvent in loginEvents)
         {
@@ -122,19 +181,6 @@ public class DbLoginEventsManager(IDbContextFactory<MessagesContext> dbContextFa
 
         loginEventContext.UpdateRange(loginEvents);
         await loginEventContext.SaveChangesAsync();
-    }
-
-    private void ResetCache(int id)
-    {
-        cache.Remove($"{GuidLoginEvent} - {id}");
-    }
-
-    private void ResetCache(List<DbLoginEvent> loginEvents)
-    {
-        foreach(var loginEvent in loginEvents)
-        {
-            cache.Remove($"{GuidLoginEvent} - {loginEvent.Id}");
-        }
     }
 }
 
@@ -152,11 +198,11 @@ static file class Queries
                     .OrderByDescending(r => r.Id)
                     .AsQueryable());
 
-    public static readonly Func<MessagesContext, int, Task<int>> DeleteLoginEventsAsync =
+    public static readonly Func<MessagesContext, int, int, Task<int>> DeleteLoginEventsAsync =
         EF.CompileAsyncQuery(
-            (MessagesContext ctx, int loginEventId) =>
+            (MessagesContext ctx, int tenantId, int loginEventId) =>
                 ctx.LoginEvents
-                    .Where(r => r.Id == loginEventId)
+                    .Where(r => r.TenantId == tenantId && r.Id == loginEventId)
                     .ExecuteUpdate(r => r.SetProperty(p => p.Active, false)));
 
     public static readonly Func<MessagesContext, int, Guid, IAsyncEnumerable<DbLoginEvent>> LoginEventsByUserIdAsync =

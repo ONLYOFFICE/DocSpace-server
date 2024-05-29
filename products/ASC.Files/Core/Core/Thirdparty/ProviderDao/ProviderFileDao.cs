@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -234,7 +234,7 @@ internal class ProviderFileDao(IServiceProvider serviceProvider,
         return isSupported;
     }
 
-    public async Task<Uri> GetPreSignedUriAsync(File<string> file, TimeSpan expires)
+    public async Task<string> GetPreSignedUriAsync(File<string> file, TimeSpan expires, string shareKey = null)
     {
         ArgumentNullException.ThrowIfNull(file);
 
@@ -243,7 +243,7 @@ internal class ProviderFileDao(IServiceProvider serviceProvider,
         file.Id = selector.ConvertId(fileId);
 
         var fileDao = selector.GetFileDao(fileId);
-        var streamUri = await fileDao.GetPreSignedUriAsync(file, expires);
+        var streamUri = await fileDao.GetPreSignedUriAsync(file, expires, shareKey);
         file.Id = fileId; //Restore id
 
         return streamUri;
@@ -315,10 +315,14 @@ internal class ProviderFileDao(IServiceProvider serviceProvider,
 
     public async Task DeleteFileAsync(string fileId)
     {
+        await DeleteFileAsync(fileId, Guid.Empty);
+    }
+    public async Task DeleteFileAsync(string fileId, Guid ownerId)
+    {
         var selector = _selectorFactory.GetSelector(fileId);
         var fileDao = selector.GetFileDao(fileId);
 
-        await fileDao.DeleteFileAsync(selector.ConvertId(fileId));
+        await fileDao.DeleteFileAsync(selector.ConvertId(fileId), ownerId);
     }
 
     public async Task<bool> IsExistAsync(string title, object folderId)
@@ -403,9 +407,19 @@ internal class ProviderFileDao(IServiceProvider serviceProvider,
     public async Task<string> FileRenameAsync(File<string> file, string newTitle)
     {
         var selector = _selectorFactory.GetSelector(file.Id);
+        var fileId = file.Id;
+        var parentId = file.ParentId;
+        
         var fileDao = selector.GetFileDao(file.Id);
+        file.Id = ConvertId(file.Id);
+        file.ParentId = ConvertId(file.ParentId);
 
-        return await fileDao.FileRenameAsync(ConvertId(file), newTitle);
+        var newFileId = await fileDao.FileRenameAsync(file, newTitle);
+
+        file.Id = fileId;
+        file.ParentId = parentId;
+        
+        return newFileId;
     }
 
     public async Task<string> UpdateCommentAsync(string fileId, int fileVersion, string comment)
@@ -532,6 +546,13 @@ internal class ProviderFileDao(IServiceProvider serviceProvider,
         var selector = _selectorFactory.GetSelector(parentFolderId);
         var fileDao = selector.GetFileDao(parentFolderId);
         await fileDao.InitCustomOrder(fileIds, parentFolderId);
+    }
+
+    public Task<long> GetTransferredBytesCountAsync(ChunkedUploadSession<string> uploadSession)
+    {
+        var fileDao = GetFileDao(uploadSession.File);
+        uploadSession.File = ConvertId(uploadSession.File);
+        return fileDao.GetTransferredBytesCountAsync(uploadSession);
     }
 
     #endregion

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,9 +26,9 @@
 
 namespace ASC.Web.Core.Notify;
 [Scope]
-public class NotificationControllerHelper(StudioNotifyHelper studioNotifyHelper,
+public class NotificationControllerHelper(
+    StudioNotifyHelper studioNotifyHelper,
     AuthContext authContext,
-    RoomsNotificationSettingsHelper roomsNotificationSettingsHelper,
     BadgesSettingsHelper badgesSettingsHelper)
 {
     private readonly Guid _userId = authContext.CurrentAccount.ID;
@@ -73,17 +73,6 @@ public class NotificationControllerHelper(StudioNotifyHelper studioNotifyHelper,
                 break;
         }
     }
-
-    public RoomsNotificationSettings GetSettings()
-    {
-        return roomsNotificationSettingsHelper.GetSettingsForCurrentUser();
-    }
-
-    public RoomsNotificationSettings SetRoomsNotificationStatus(int roomsId, bool mute)
-    {
-        return roomsNotificationSettingsHelper.SetForCurrentUser(roomsId, mute);
-    }
-
 }
 
 /// <summary>

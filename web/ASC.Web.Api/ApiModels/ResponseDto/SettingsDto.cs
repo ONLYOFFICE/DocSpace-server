@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -146,6 +146,10 @@ public class SettingsDto
     /// <type>System.String, System</type>
     public string ZendeskKey { get; set; }
 
+    /// <summary>Tag manager ID</summary>
+    /// <type>System.String, System</type>
+    public string TagManagerId { get; set; }
+
     /// <summary>Email for training booking</summary>
     /// <type>System.String, System</type>
     public string BookTrainingEmail { get; set; }
@@ -166,6 +170,10 @@ public class SettingsDto
     /// <summary>User name validation regex</summary>
     /// <type>System.String, System</type>
     public string UserNameRegex { get; set; }
+
+    /// <summary>Invitation limit</summary>
+    /// <type>System.Nullable{System.Int32}, System</type>
+    public int? InvitationLimit { get; set; }
 
     /// <summary>Plugins</summary>
     /// <type>ASC.Web.Api.ApiModel.ResponseDto.PluginsDto, ASC.Web.Api</type>

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -46,8 +46,7 @@ public class BaseIndexerFile(Client client,
 
         if (daoFactory.GetFileDao<int>() is FileDao fileDao)
         {
-            await _tenantManager.SetCurrentTenantAsync(data.TenantId);
-            await fileDao.InitDocumentAsync(data);
+            await fileDao.InitDocumentAsync(data, data.TenantId);
         }
 
         return true;

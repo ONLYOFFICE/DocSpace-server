@@ -151,6 +151,20 @@
     filesIO.to(room).emit("s:modify-folder", { cmd, id, type, data });
   }
 
+  function modifyFormRoom(room, cmd, id, type, data, isOneMember) {
+    filesIO.to(room).emit("s:modify-room", { cmd, id, type, data, isOneMember });
+  }
+
+  function createForm({ id, room, data, userIds, isOneMember } = {}) {
+    logger.info(`create new form ${id} in room ${room}`);
+      if (userIds) {
+          userIds.forEach(userId => modifyFormRoom(`${room}-${userId}`, "create-form", id, "file", data, isOneMember));
+      }
+      else {
+          modifyFormRoom(room, "create-form", id, "file", data, isOneMember);
+      }
+  }
+
   function createFile({ id, room, data, userIds } = {}) {
     logger.info(`create new file ${id} in room ${room}`);
 
@@ -255,14 +269,41 @@
   }
 
   function changeQuotaFeatureValue({ featureId, value, room } = {}) {
-    logger.info(`changeQuotaFeatureValue in room ${room}`, { featureId, value });
-    filesIO.to(room).emit("s:change-quota-feature-value", { featureId, value });
+     logger.info(`changeQuotaFeatureValue in room ${room}`, { featureId, value });
+     filesIO.to(room).emit("s:change-quota-feature-value", { featureId, value });
   }
+
+  function changeUserQuotaFeatureValue({ customQuotaFeature,enableQuota, usedSpace, quotaLimit, userIds, room } = {}) {
+
+    logger.info(`changeUserQuotaFeatureValue feature ${customQuotaFeature}, room ${room}`, { customQuotaFeature, enableQuota, usedSpace, quotaLimit });
+
+    if (userIds) {
+      userIds.forEach(userId => changeCustomQuota(`${room}-${userId}`, customQuotaFeature, enableQuota, usedSpace, quotaLimit));
+    }
+    else {
+      changeCustomQuota(room, customQuotaFeature,enableQuota, usedSpace, quotaLimit);
+    }
+  }
+
+  function changeCustomQuota(room, customQuotaFeature, enableQuota, usedSpace, quotaLimit) {
+      
+      if (customQuotaFeature == "tenant_custom_quota") {
+          filesIO.to(room).emit("s:change-user-quota-used-value", { customQuotaFeature, enableQuota, quota: quotaLimit });
+      } else {
+          filesIO.to(room).emit("s:change-user-quota-used-value", { customQuotaFeature, usedSpace, quotaLimit });
+      }
+  }
+
+  function changeInvitationLimitValue({ value, room } = {}) {
+    logger.info(`changed user invitation limit in room ${room}, value ${value}`);
+    filesIO.to(room).emit("s:change-invitation-limit-value", value);
+ }
 
   return {
     startEdit,
     stopEdit,
     createFile,
+    createForm,
     createFolder,
     deleteFile,
     deleteFolder,
@@ -270,7 +311,9 @@
     updateFolder,
     changeQuotaUsedValue,
     changeQuotaFeatureValue,
+    changeUserQuotaFeatureValue,
     markAsNewFiles,
-    markAsNewFolders
+    markAsNewFolders,
+    changeInvitationLimitValue
   };
 };

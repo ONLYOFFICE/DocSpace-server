@@ -123,62 +123,17 @@
   <data name="DataProcessingCompleted" xml:space="preserve">
     <value>Tietojen käsittely suoritettu</value>
   </data>
-  <data name="ClearingTemporaryData" xml:space="preserve">
-    <value>Väliaikaisten tietojen tyhjennys</value>
-  </data>
   <data name="DumpParse" xml:space="preserve">
     <value>Tietokannan jäsennys</value>
-  </data>
-  <data name="GoogleModuleNameContacts" xml:space="preserve">
-    <value>Postin yhteystiedot</value>
-  </data>
-  <data name="GoogleModuleNameDocuments" xml:space="preserve">
-    <value>Google Driven tiedostot</value>
   </data>
   <data name="GroupMigration" xml:space="preserve">
     <value>Ryhmän siirto {0} ({1}/{2})</value>
   </data>
-  <data name="MigratingUserContacts" xml:space="preserve">
-    <value>Siirretään käyttäjäkontakteja {0} ({1}/{2})</value>
-  </data>
   <data name="MigratingUserFiles" xml:space="preserve">
     <value>Siirretään käyttäjätiedostoja {0} ({1}/{2})</value>
   </data>
-  <data name="MigrationCanceled" xml:space="preserve">
-    <value>Siirtäminen peruutettu</value>
-  </data>
   <data name="MigrationCompleted" xml:space="preserve">
     <value>Siirtäminen suoritettu</value>
-  </data>
-  <data name="ModuleNameCalendar" xml:space="preserve">
-    <value>Kalenteri</value>
-  </data>
-  <data name="ModuleNameGroups" xml:space="preserve">
-    <value>Ryhmät</value>
-  </data>
-  <data name="ModuleNameMail" xml:space="preserve">
-    <value>Posti</value>
-  </data>
-  <data name="OnlyofficeModuleNameMail" xml:space="preserve">
-    <value>Posti</value>
-  </data>
-  <data name="ModuleNameUsers" xml:space="preserve">
-    <value>Käyttäjät</value>
-  </data>
-  <data name="NextcloudModuleNameContacts" xml:space="preserve">
-    <value>Yhteystiedot</value>
-  </data>
-  <data name="NextcloudModuleNameDocuments" xml:space="preserve">
-    <value>Käyttäjän tiedostot</value>
-  </data>
-  <data name="OnlyofficeModuleNameCalendar" xml:space="preserve">
-    <value>Kalenteri</value>
-  </data>
-  <data name="OnlyofficeModuleNameDocuments" xml:space="preserve">
-    <value>Asiakirjat</value>
-  </data>
-  <data name="OnlyofficeModuleNamePeople" xml:space="preserve">
-    <value>Ihmiset</value>
   </data>
   <data name="PreparingForMigration" xml:space="preserve">
     <value>Valmistaudutaan siirtoon</value>
@@ -192,13 +147,28 @@
   <data name="UnzippingFinished" xml:space="preserve">
     <value>Purkaminen suoritettu...</value>
   </data>
-  <data name="UserCalendarMigration" xml:space="preserve">
-    <value>Käyttäjäkalenterin siirto {0} ({1}/{2})</value>
-  </data>
   <data name="UserMigration" xml:space="preserve">
     <value>Käyttäjien siirto {0} ({1}/{2})</value>
   </data>
-  <data name="UserSkipped" xml:space="preserve">
-    <value>Käyttäjän tuonti epäonnistui: {0} ({1}/{2})</value>
+  <data name="MigrationCommonFiles" xml:space="preserve">
+    <value>Yleisten tiedostojen siirto</value>
+  </data>
+  <data name="MigrationInitException" xml:space="preserve">
+    <value>Virhe aloittaessa {0} siirtoa</value>
+  </data>
+  <data name="MigrationNotFoundException" xml:space="preserve">
+    <value>Annettua siirtopalveluntarjoajaa ei löydy</value>
+  </data>
+  <data name="MigrationProgressException" xml:space="preserve">
+    <value>Siirto ei ole käynnissä</value>
+  </data>
+  <data name="MigrationProjectFiles" xml:space="preserve">
+    <value>Siirtoprojektitiedostot</value>
+  </data>
+  <data name="MigrationStartException" xml:space="preserve">
+    <value>Jäsentäminen on vielä käynnissä</value>
+  </data>
+  <data name="MigrationUploadException" xml:space="preserve">
+    <value>Siirto on jo käynnissä</value>
   </data>
 </root>

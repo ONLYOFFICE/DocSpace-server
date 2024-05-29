@@ -151,14 +151,8 @@
   <data name="ErrorMessage_FileNotFound" xml:space="preserve">
     <value>Потрібний файл не знайдено</value>
   </data>
-  <data name="ErrorMessage_FileSizeConvert" xml:space="preserve">
-    <value>Файл більше {0} не буде сконвертовано</value>
-  </data>
   <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
     <value>Файл, більший за {0}, не буде скопійовано</value>
-  </data>
-  <data name="ErrorMessage_FileSizeEdit" xml:space="preserve">
-    <value>Файл, більший за {0}, не буде відреаговано</value>
   </data>
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>Файл, більший за {0}, не буде переміщений</value>
@@ -427,5 +421,47 @@
   </data>
   <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
     <value>Ви намагалися ввести свій пароль забагато разів. Повторіть спробу пізніше</value>
+  </data>
+  <data name="RoomIndex_Author" xml:space="preserve">
+    <value>Автор</value>
+  </data>
+  <data name="RoomIndex_Company" xml:space="preserve">
+    <value>Компанія</value>
+  </data>
+  <data name="RoomIndex_Created" xml:space="preserve">
+    <value>Створено</value>
+  </data>
+  <data name="RoomIndex_DateGenerated" xml:space="preserve">
+    <value>Дата створення</value>
+  </data>
+  <data name="RoomIndex_ExportAuthor" xml:space="preserve">
+    <value>Автор експорту</value>
+  </data>
+  <data name="RoomIndex_Folder" xml:space="preserve">
+    <value>Папка</value>
+  </data>
+  <data name="RoomIndex_Index" xml:space="preserve">
+    <value>Індекс</value>
+  </data>
+  <data name="RoomIndex_Modified" xml:space="preserve">
+    <value>Змінено</value>
+  </data>
+  <data name="RoomIndex_Name" xml:space="preserve">
+    <value>Ім'я</value>
+  </data>
+  <data name="RoomIndex_Room" xml:space="preserve">
+    <value>Кімната</value>
+  </data>
+  <data name="RoomIndex_SheetName" xml:space="preserve">
+    <value>Індекс кімнати</value>
+  </data>
+  <data name="RoomIndex_Size" xml:space="preserve">
+    <value>Розмір (МБ)</value>
+  </data>
+  <data name="RoomIndex_Total" xml:space="preserve">
+    <value>Всього</value>
+  </data>
+  <data name="RoomIndex_Type" xml:space="preserve">
+    <value>Тип</value>
   </data>
 </root>

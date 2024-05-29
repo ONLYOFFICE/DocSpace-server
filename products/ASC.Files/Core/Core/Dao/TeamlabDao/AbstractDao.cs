@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,8 +34,6 @@ public class AbstractDao
     protected readonly TenantUtil _tenantUtil;
     protected readonly SetupInfo _setupInfo;
     protected readonly MaxTotalSizeStatistic _maxTotalSizeStatistic;
-    protected readonly CoreBaseSettings _coreBaseSettings;
-    protected readonly CoreConfiguration _coreConfiguration;
     protected readonly SettingsManager _settingsManager;
     protected readonly AuthContext _authContext;
     protected readonly IServiceProvider _serviceProvider;
@@ -47,8 +45,6 @@ public class AbstractDao
         TenantUtil tenantUtil,
         SetupInfo setupInfo,
         MaxTotalSizeStatistic maxTotalSizeStatistic,
-        CoreBaseSettings coreBaseSettings,
-        CoreConfiguration coreConfiguration,
         SettingsManager settingsManager,
         AuthContext authContext,
         IServiceProvider serviceProvider)
@@ -59,8 +55,6 @@ public class AbstractDao
         _tenantUtil = tenantUtil;
         _setupInfo = setupInfo;
         _maxTotalSizeStatistic = maxTotalSizeStatistic;
-        _coreBaseSettings = coreBaseSettings;
-        _coreConfiguration = coreConfiguration;
         _settingsManager = settingsManager;
         _authContext = authContext;
         _serviceProvider = serviceProvider;
@@ -79,19 +73,42 @@ public class AbstractDao
         return (await Query(filesDbContext.Files))
             .Where(where);
     }
-
-    protected async Task GetRecalculateFilesCountUpdateAsync(int folderId)
+    
+    protected async Task RecalculateFilesCountUpdateAsync(FilesDbContext filesDbContext, int folderId)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-
-        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         
         var folders = await Queries.FoldersAsync(filesDbContext, tenantId, folderId).ToListAsync();
-
+        
         foreach (var f in folders)
         {
             f.FilesCount = await Queries.FilesCountAsync(filesDbContext, f.TenantId, f.Id);
         }
+        
+        await filesDbContext.SaveChangesAsync();
+    }
+    
+    protected async Task IncrementCountAsync(FilesDbContext filesDbContext, int folderId, int tenantId, FileEntryType fileEntryType)
+    {
+        await ChangeCountAsync(filesDbContext, folderId, tenantId, fileEntryType, 1);
+    }
+    
+    protected async Task DecrementCountAsync(FilesDbContext filesDbContext, int folderId, int tenantId,FileEntryType fileEntryType)
+    {
+        await ChangeCountAsync(filesDbContext, folderId, tenantId, fileEntryType, -1);
+    }
+    
+    private async Task ChangeCountAsync(FilesDbContext filesDbContext, int folderId, int tenantId, FileEntryType fileEntryType, int counter)
+    {
+        if (fileEntryType == FileEntryType.File)
+        {
+            await Queries.ChangeFilesCountAsync(filesDbContext, tenantId, folderId, counter);
+        }
+        else
+        {
+            await Queries.ChangeFoldersCountAsync(filesDbContext, tenantId, folderId, counter);
+        }
+
         await filesDbContext.SaveChangesAsync();
     }
 
@@ -176,7 +193,7 @@ public class AbstractDao
             SearchType.Start => query.Where(r => r.Entry.Title.ToLower().StartsWith(lowerText)),
             SearchType.End => query.Where(r => r.Entry.Title.ToLower().EndsWith(lowerText)),
             SearchType.Any => query.Where(r => r.Entry.Title.ToLower().Contains(lowerText)),
-            _ => query,
+            _ => query
         };
     }
     internal static IQueryable<TQuery> BuildSearch<TQuery, TEntry>(IQueryable<TQuery> query, IEnumerable<string> text, SearchType searchType) 
@@ -373,7 +390,7 @@ static file class Queries
                 ctx.Folders
                     .AsTracking()
                     .Where(r => r.TenantId == tenantId)
-                    .Where(r => ctx.Tree.Where(t => t.FolderId == folderId).Any(a => a.ParentId == r.Id)));
+                    .Where(r => ctx.Tree.Any(a => a.FolderId == folderId && a.ParentId == r.Id)));
 
     public static readonly Func<FilesDbContext, int, int, Task<int>> FilesCountAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
@@ -451,4 +468,18 @@ static file class Queries
                     .Where(r => r.ParentFolderId == parentFolderId)
                     .Where(r => r.Order <= newOrder && r.Order > currentOrder)
                     .ExecuteUpdate(f => f.SetProperty(p => p.Order, p => p.Order - 1)));
+    
+    public static readonly Func<FilesDbContext, int, int, int, Task> ChangeFilesCountAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int folderId, int counter) =>
+                ctx.Folders
+                    .Where(r => r.TenantId == tenantId && ctx.Tree.Any(a => a.FolderId == folderId && a.ParentId == r.Id))
+                    .ExecuteUpdate(r => r.SetProperty(a => a.FilesCount, a => a.FilesCount + counter)));
+    
+    public static readonly Func<FilesDbContext, int, int, int, Task> ChangeFoldersCountAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int folderId, int counter) =>
+                ctx.Folders
+                    .Where(r => r.TenantId == tenantId && ctx.Tree.Any(a => a.FolderId == folderId && a.ParentId == r.Id))
+                    .ExecuteUpdate(r => r.SetProperty(a => a.FoldersCount, a => a.FoldersCount + counter)));
 }

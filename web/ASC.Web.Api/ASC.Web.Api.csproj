@@ -33,6 +33,7 @@
       <None Remove="img\total_size.svg" />
       <None Remove="img\users.svg" />
       <None Remove="img\whitelabel.svg" />
+	  <None Remove="img\statistic.svg" />
     </ItemGroup>
     <ItemGroup>
       <EmbeddedResource Include="img\audit.svg" />
@@ -43,6 +44,7 @@
       <EmbeddedResource Include="img\total_size.svg" />
       <EmbeddedResource Include="img\users.svg" />
       <EmbeddedResource Include="img\whitelabel.svg" />
+      <EmbeddedResource Include="img\statistic.svg" />
     </ItemGroup>
     <ItemGroup>
     <ProjectReference Include="..\..\common\ASC.Api.Core\ASC.Api.Core.csproj" />
@@ -50,6 +52,7 @@
     <ProjectReference Include="..\..\common\ASC.Core.Common\ASC.Core.Common.csproj" />
     <ProjectReference Include="..\..\common\ASC.Data.Backup.Core\ASC.Data.Backup.Core.csproj" />
     <ProjectReference Include="..\..\common\ASC.Feed\ASC.Feed.csproj" />
+    <ProjectReference Include="..\..\common\ASC.Migration\ASC.Migration.Core.csproj" />
     <ProjectReference Include="..\..\common\services\ASC.AuditTrail\ASC.AuditTrail.csproj" />
     <ProjectReference Include="..\ASC.Web.Core\ASC.Web.Core.csproj" />
   </ItemGroup>
@@ -111,6 +114,9 @@
       <DependentUpon>AuditResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="Core\AuditResource.sl.resx">
+      <DependentUpon>AuditResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Core\AuditResource.sr-Latn-RS.resx">
       <DependentUpon>AuditResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="Core\AuditResource.tr.resx">

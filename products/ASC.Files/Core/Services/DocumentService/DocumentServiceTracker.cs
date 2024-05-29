@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -139,33 +139,35 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
     ILogger<DocumentServiceTrackerHelper> logger,
     DocumentServiceHelper documentServiceHelper,
     EntryManager entryManager,
-    FileShareLink fileShareLink,
     FilesMessageService filesMessageService,
     DocumentServiceConnector documentServiceConnector,
     NotifyClient notifyClient,
     MailMergeTaskRunner mailMergeTaskRunner,
     FileTrackerHelper fileTracker,
-        IHttpClientFactory clientFactory,
-        ThirdPartySelector thirdPartySelector)
+    IHttpClientFactory clientFactory,
+    IHttpContextAccessor httpContextAccessor)
 {
     public async Task<string> GetCallbackUrlAsync<T>(T fileId)
     {
-        var callbackUrl = baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FileHandlerPath
-                                                                + "?" + FilesLinkUtility.Action + "=track"
-                                                                + "&" + FilesLinkUtility.FileId + "=" + HttpUtility.UrlEncode(fileId.ToString())
-                                                                + "&" + FilesLinkUtility.AuthKey + "=" + await emailValidationKeyProvider.GetEmailKeyAsync(fileId.ToString()));
-        callbackUrl = await documentServiceConnector.ReplaceCommunityAdressAsync(callbackUrl);
+        var queryParams = HttpUtility.ParseQueryString(String.Empty);
 
-        return callbackUrl;
-    }
+        queryParams[FilesLinkUtility.Action] = "track";
+        queryParams[FilesLinkUtility.FileId] = fileId.ToString();
+        queryParams[FilesLinkUtility.AuthKey] = await emailValidationKeyProvider.GetEmailKeyAsync(fileId.ToString());
 
-    public string GetCallbackUrl<T>(T fileId)
-    {
-        var callbackUrl = baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FileHandlerPath
-                                                                + "?" + FilesLinkUtility.Action + "=track"
-                                                                + "&" + FilesLinkUtility.FileId + "=" + HttpUtility.UrlEncode(fileId.ToString())
-                                                                + "&" + FilesLinkUtility.AuthKey + "=" + emailValidationKeyProvider.GetEmailKey(fileId.ToString()));
-        callbackUrl = documentServiceConnector.ReplaceCommunityAdress(callbackUrl);
+        if (httpContextAccessor?.HttpContext != null)
+        {
+            queryParams["request-x-real-ip"] = httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString();
+
+            if (httpContextAccessor.HttpContext.Request.Headers.TryGetValue("User-Agent", out var header))
+            {
+                queryParams["request-user-agent"] = header.First();
+            }
+        }
+        
+        var callbackUrl = baseCommonLinkUtility.GetFullAbsolutePath($"{filesLinkUtility.FileHandlerPath}?{queryParams.ToString()}"); 
+
+        callbackUrl = await documentServiceConnector.ReplaceCommunityAddressAsync(callbackUrl);
 
         return callbackUrl;
     }
@@ -182,7 +184,6 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
         switch (fileData.Status)
         {
             case TrackerStatus.NotFound:
-            case TrackerStatus.Closed:
                 fileTracker.Remove(fileId);
                 await socketManager.StopEditAsync(fileId);
 
@@ -193,6 +194,28 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
                 break;
 
             case TrackerStatus.MustSave:
+            case TrackerStatus.Closed:
+                var fileDao = daoFactory.GetFileDao<T>();
+                var properties = await fileDao.GetProperties(fileId);
+                if(properties?.FormFilling != null)
+                {
+                    var fileForDeletion = await documentServiceHelper.CheckNeedDeletion(fileDao, fileId, properties.FormFilling);
+                    if (fileForDeletion != null)
+                    {
+                        await fileDao.SaveProperties(fileForDeletion.Id, null);
+                        await socketManager.DeleteFileAsync(fileForDeletion);
+                        await fileDao.DeleteFileAsync(fileForDeletion.Id);
+                        break;
+                    }
+                }
+                if (fileData.Status == TrackerStatus.Closed)
+                {
+                    fileTracker.Remove(fileId);
+                    await socketManager.StopEditAsync(fileId);
+
+                    break;
+                }
+                return await ProcessSaveAsync(fileId, fileData);
             case TrackerStatus.Corrupted:
             case TrackerStatus.ForceSave:
             case TrackerStatus.CorruptedForceSave:
@@ -206,27 +229,13 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
 
     private async Task ProcessEditAsync<T>(T fileId, TrackerData fileData)
     {
-        if (thirdPartySelector.GetAppByFileId(fileId.ToString()) != null)
-        {
-            return;
-        }
-
         var users = fileTracker.GetEditingBy(fileId);
         var usersDrop = new List<string>();
         File<T> file = null;
 
-        string docKey;
-        var app = thirdPartySelector.GetAppByFileId(fileId.ToString());
-        if (app == null)
-        {
-            var fileStable = await daoFactory.GetFileDao<T>().GetFileStableAsync(fileId);
+        var fileStable = await daoFactory.GetFileDao<T>().GetFileStableAsync(fileId);
 
-            docKey = await documentServiceHelper.GetDocKeyAsync(fileStable);
-        }
-        else
-        {
-            docKey = fileData.Key;
-        }
+        var docKey = await documentServiceHelper.GetDocKeyAsync(fileStable);
 
         if (!fileData.Key.Equals(docKey))
         {
@@ -253,8 +262,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
 
                 try
                 {
-                    var doc = await fileShareLink.CreateKeyAsync(fileId);
-                    file = await entryManager.TrackEditingAsync(fileId, userId, userId, doc, await tenantManager.GetCurrentTenantIdAsync());
+                    file = await entryManager.TrackEditingAsync(fileId, userId, userId, await tenantManager.GetCurrentTenantIdAsync());
                 }
                 catch (Exception e)
                 {
@@ -266,7 +274,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
 
         if (usersDrop.Count > 0 && !await documentServiceHelper.DropUserAsync(fileData.Key, usersDrop.ToArray(), fileId))
         {
-                logger.ErrorDocServiceDropFailed(usersDrop);
+            logger.ErrorDocServiceDropFailed(usersDrop);
         }
 
         foreach (var removeUserId in users)
@@ -303,20 +311,16 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
             userId = Guid.Empty;
         }
 
-        var app = thirdPartySelector.GetAppByFileId(fileId.ToString());
-        if (app == null)
+        var fileStable = await daoFactory.GetFileDao<T>().GetFileStableAsync(fileId);
+
+        var docKey = await documentServiceHelper.GetDocKeyAsync(fileStable);
+        if (!fileData.Key.Equals(docKey))
         {
-            var fileStable = await daoFactory.GetFileDao<T>().GetFileStableAsync(fileId);
+            logger.ErrorDocServiceSavingFile(fileId.ToString(), docKey, fileData.Key);
 
-            var docKey = await documentServiceHelper.GetDocKeyAsync(fileStable);
-            if (!fileData.Key.Equals(docKey))
-            {
-                logger.ErrorDocServiceSavingFile(fileId.ToString(), docKey, fileData.Key);
+            await StoringFileAfterErrorAsync(fileId, userId.ToString(), documentServiceConnector.ReplaceDocumentAddress(fileData.Url), fileData.Filetype);
 
-                await StoringFileAfterErrorAsync(fileId, userId.ToString(), documentServiceConnector.ReplaceDocumentAdress(fileData.Url), fileData.Filetype);
-
-                return new TrackResponse { Message = "Expected key " + docKey };
-            }
+            return new TrackResponse { Message = "Expected key " + docKey };
         }
 
         UserInfo user = null;
@@ -392,7 +396,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
 
             try
             {
-                file = await entryManager.SaveEditingAsync(fileId, fileData.Filetype, documentServiceConnector.ReplaceDocumentAdress(fileData.Url), null, string.Empty, string.Join("; ", comments), false, fileData.Encrypted, forceSaveType, true, fileData.FormsDataUrl);
+                file = await entryManager.SaveEditingAsync(fileId, fileData.Filetype, documentServiceConnector.ReplaceDocumentAddress(fileData.Url), null, string.Join("; ", comments), false, fileData.Encrypted, forceSaveType, true, fileData.FormsDataUrl);
                 saveMessage = fileData.Status is TrackerStatus.MustSave or TrackerStatus.ForceSave ? null : "Status " + fileData.Status;
             }
             catch (Exception ex)
@@ -400,7 +404,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
                 logger.ErrorDocServiceSave(fileId.ToString(), userId, fileData.Key, fileData.Url, ex);
                 saveMessage = ex.Message;
 
-                await StoringFileAfterErrorAsync(fileId, userId.ToString(), documentServiceConnector.ReplaceDocumentAdress(fileData.Url), fileData.Filetype);
+                await StoringFileAfterErrorAsync(fileId, userId.ToString(), documentServiceConnector.ReplaceDocumentAddress(fileData.Url), fileData.Filetype);
             }
         }
 
@@ -419,7 +423,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
 
             if (!forceSave)
             {
-                await SaveHistoryAsync(file, (fileData.History ?? "").ToString(), documentServiceConnector.ReplaceDocumentAdress(fileData.ChangesUrl));
+                await SaveHistoryAsync(file, (fileData.History ?? "").ToString(), documentServiceConnector.ReplaceDocumentAddress(fileData.ChangesUrl));
             }
 
         }
@@ -457,14 +461,14 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
 
             var message = fileData.MailMerge.Message;
             Stream attach = null;
-            var httpClient = clientFactory.CreateClient();
+            var httpClient = clientFactory.CreateClient(nameof(ASC.Files.Core.Helpers.DocumentService));
             switch (fileData.MailMerge.Type)
             {
                 case MailMergeType.AttachDocx:
                 case MailMergeType.AttachPdf:
                     var requestDownload = new HttpRequestMessage
                     {
-                        RequestUri = new Uri(documentServiceConnector.ReplaceDocumentAdress(fileData.Url))
+                        RequestUri = new Uri(documentServiceConnector.ReplaceDocumentAddress(fileData.Url))
                     };
 
                     using (var responseDownload = await httpClient.SendAsync(requestDownload))
@@ -500,14 +504,14 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
                 case MailMergeType.Html:
                     var httpRequest = new HttpRequestMessage
                     {
-                        RequestUri = new Uri(documentServiceConnector.ReplaceDocumentAdress(fileData.Url))
+                        RequestUri = new Uri(documentServiceConnector.ReplaceDocumentAddress(fileData.Url))
                     };
 
                     using (var httpResponse = await httpClient.SendAsync(httpRequest))
                     await using (var stream = await httpResponse.Content.ReadAsStreamAsync())
                     {
-                            using var reader = new StreamReader(stream, Encoding.GetEncoding(Encoding.UTF8.WebName));
-                            message = await reader.ReadToEndAsync();
+                        using var reader = new StreamReader(stream, Encoding.GetEncoding(Encoding.UTF8.WebName));
+                        message = await reader.ReadToEndAsync();
                     }
 
                     break;
@@ -575,7 +579,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
                 RequestUri = new Uri(downloadUri)
             };
 
-            var httpClient = clientFactory.CreateClient();
+            var httpClient = clientFactory.CreateClient(nameof(ASC.Files.Core.Helpers.DocumentService));
             using (var response = await httpClient.SendAsync(request))
             await using (var stream = await response.Content.ReadAsStreamAsync())
             await using (var fileStream = new ResponseStream(stream, stream.Length))
@@ -615,11 +619,9 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
                 RequestUri = new Uri(differenceUrl)
             };
 
-            var httpClient = clientFactory.CreateClient();
-            using var response = await httpClient.SendAsync(request);
-            await using var stream = await response.Content.ReadAsStreamAsync();
-
-            await using var differenceStream = new ResponseStream(stream, stream.Length);
+            var httpClient = clientFactory.CreateClient(nameof(ASC.Files.Core.Helpers.DocumentService));
+            using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+            await using var differenceStream = await ResponseStream.FromMessageAsync(response);
             await fileDao.SaveEditHistoryAsync(file, changes, differenceStream);
         }
         catch (Exception ex)
