@@ -2294,26 +2294,82 @@ public class FileStorageService //: IFileStorageService
         }
 
         var folderDao = daoFactory.GetFolderDao<T>();
-        if (folderDao == null)
+        var fileDao = daoFactory.GetFileDao<T>();
+        var linkDao = daoFactory.GetLinkDao();
+
+        if (folderDao == null || fileDao == null || linkDao == null)
         {
             return;
         }
 
         _logger.InformationDeletePersonalData(userFromId);
 
-        var folderIdFromMy = await folderDao.GetFolderIDUserAsync(false, userFromId);
-        if (!Equals(folderIdFromMy, 0))
+        var folderIdMy = await folderDao.GetFolderIDUserAsync(false, userFromId);
+        var folderIdTrash = await folderDao.GetFolderIDTrashAsync(false, userFromId);
+
+        if (!Equals(folderIdMy, 0))
         {
-            await folderDao.DeleteFolderAsync(folderIdFromMy);
+            var fileIdsFromMy = await fileDao.GetFilesAsync(folderIdMy).ToListAsync();
+            var folderIdsFromMy = await folderDao.GetFoldersAsync(folderIdMy).ToListAsync();
+
+            await DeleteFilesAsync(fileIdsFromMy);
+            await DeleteFoldersAsync(folderIdsFromMy);
+
+            await folderDao.DeleteFolderAsync(folderIdMy);
         }
 
-        var folderIdFromTrash = await folderDao.GetFolderIDTrashAsync(false, userFromId);
-        if (!Equals(folderIdFromTrash, 0))
+        if (!Equals(folderIdTrash, 0))
         {
-            await folderDao.DeleteFolderAsync(folderIdFromTrash);
+            var fileIdsFromTrash = await fileDao.GetFilesAsync(folderIdTrash).ToListAsync();
+            var folderIdsFromTrash = await folderDao.GetFoldersAsync(folderIdTrash).ToListAsync();
+
+            await DeleteFilesAsync(fileIdsFromTrash);
+            await DeleteFoldersAsync(folderIdsFromTrash);
+
+            await folderDao.DeleteFolderAsync(folderIdTrash);
         }
 
         await fileSecurity.RemoveSubjectAsync(userFromId, true);
+
+        async Task DeleteFilesAsync(IEnumerable<T> fileIds)
+        {
+            foreach (var fileId in fileIds)
+            {
+                var file = await fileDao.GetFileAsync(fileId);
+
+                await fileMarker.RemoveMarkAsNewForAllAsync(file);
+
+                await fileDao.DeleteFileAsync(file.Id, file.GetFileQuotaOwner());
+
+                if (file.RootFolderType == FolderType.TRASH && !Equals(folderIdTrash, 0))
+                {
+                    await folderDao.ChangeTreeFolderSizeAsync(folderIdTrash, (-1) * file.ContentLength);
+                }
+
+                await linkDao.DeleteAllLinkAsync(file.Id.ToString());
+
+                await fileDao.SaveProperties(file.Id, null);
+            }
+        }
+
+        async Task DeleteFoldersAsync(IEnumerable<Folder<T>> folders)
+        {
+            foreach (var folder in folders)
+            {
+                await fileMarker.RemoveMarkAsNewForAllAsync(folder);
+
+                var files = await fileDao.GetFilesAsync(folder.Id).ToListAsync();
+                await DeleteFilesAsync(files);
+
+                var subfolders = await folderDao.GetFoldersAsync(folder.Id).ToListAsync();
+                await DeleteFoldersAsync(subfolders);
+
+                if (await folderDao.IsEmptyAsync(folder.Id))
+                {
+                    await folderDao.DeleteFolderAsync(folder.Id);
+                }
+            }
+        }
     }
 
     public async Task ReassignProvidersAsync(Guid userFromId, Guid userToId, bool checkPermission = false)
