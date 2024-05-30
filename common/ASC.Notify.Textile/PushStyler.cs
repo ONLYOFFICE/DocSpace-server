@@ -33,7 +33,7 @@ public class PushStyler : IPatternStyler
         = new(NVelocityPatternFormatter.NoStylePreffix + "(?'arg'.*?)" + NVelocityPatternFormatter.NoStyleSuffix,
             RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
 
-    public void ApplyFormating(NoticeMessage message)
+    public Task ApplyFormatingAsync(NoticeMessage message)
     {
         if (!string.IsNullOrEmpty(message.Subject))
         {
@@ -45,5 +45,6 @@ public class PushStyler : IPatternStyler
             message.Body = _velocityArgumentsRegex.Replace(message.Body, m => m.Groups["arg"].Value);
             message.Body = message.Body.Replace(Environment.NewLine, " ").Trim();
         }
+        return Task.CompletedTask;
     }
 }

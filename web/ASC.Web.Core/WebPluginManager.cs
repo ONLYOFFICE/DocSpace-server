@@ -314,7 +314,7 @@ public class WebPluginManager(
                 if (enabledPlugins.TryGetValue(webPlugin.Name, out var webPluginState))
                 {
                     webPlugin.Enabled = webPluginState.Enabled;
-                    webPlugin.Settings = string.IsNullOrEmpty(webPluginState.Settings) ? null : instanceCrypto.Decrypt(webPluginState.Settings);
+                    webPlugin.Settings = string.IsNullOrEmpty(webPluginState.Settings) ? null : await instanceCrypto.DecryptAsync(webPluginState.Settings);
                 }
             }
         }
@@ -404,7 +404,7 @@ public class WebPluginManager(
 
         var enabledPlugins = webPluginSettings?.EnabledPlugins ?? new Dictionary<string, WebPluginState>();
 
-        var encryptedSettings = string.IsNullOrEmpty(settings) ? null : instanceCrypto.Encrypt(settings);
+        var encryptedSettings = string.IsNullOrEmpty(settings) ? null : await instanceCrypto.EncryptAsync(settings);
 
         if (enabled || encryptedSettings != null)
         {

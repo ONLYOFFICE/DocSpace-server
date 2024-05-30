@@ -60,7 +60,7 @@ public class JabberStyler : IPatternStyler
         = new(@"(?:\r\n|\r(?!\n)|(?!<\r)\n){3,}",
             RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
-    public void ApplyFormating(NoticeMessage message)
+    public Task ApplyFormatingAsync(NoticeMessage message)
     {
         var sb = new StringBuilder();
         if (!string.IsNullOrEmpty(message.Subject))
@@ -70,7 +70,7 @@ public class JabberStyler : IPatternStyler
         }
         if (string.IsNullOrEmpty(message.Body))
         {
-            return;
+            return Task.CompletedTask;
         }
 
         var lines = message.Body.Split([Environment.NewLine, "\n"], StringSplitOptions.None);
@@ -98,6 +98,7 @@ public class JabberStyler : IPatternStyler
         body = _tagReplacer.Replace(body, "");
         body = _multiLineBreaksReplacer.Replace(body, Environment.NewLine);
         message.Body = body;
+        return Task.CompletedTask;
     }
 
     private string EvalLink(Match match)

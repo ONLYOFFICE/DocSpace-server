@@ -68,9 +68,8 @@ public class EncryptionSettingsHelper(CoreConfiguration coreConfiguration, AscCa
 
     public async Task SaveAsync(EncryptionSettings encryptionSettings)
     {
-        var settings = Serialize(encryptionSettings);
+        var settings = await SerializeAsync(encryptionSettings);
         await coreConfiguration.SaveSettingAsync(Key, settings);
-
         await ascCacheNotify.ClearCacheAsync();
     }
 
@@ -78,7 +77,7 @@ public class EncryptionSettingsHelper(CoreConfiguration coreConfiguration, AscCa
     {
         var settings = await coreConfiguration.GetSettingAsync(Key);
 
-        return Deserialize(settings);
+        return await DeserializeAsync(settings);
     }
 
     public EncryptionSettings Load()
@@ -88,10 +87,12 @@ public class EncryptionSettingsHelper(CoreConfiguration coreConfiguration, AscCa
         return Deserialize(settings);
     }
 
-    public string Serialize(EncryptionSettings encryptionSettings)
+    private async Task<string> SerializeAsync(EncryptionSettings encryptionSettings)
     {
         return string.Join("#",
-            string.IsNullOrEmpty(encryptionSettings.Pass) ? string.Empty : instanceCrypto.Encrypt(encryptionSettings.Pass),
+            string.IsNullOrEmpty(encryptionSettings.Pass) ? 
+                string.Empty : 
+                await instanceCrypto.EncryptAsync(encryptionSettings.Pass),
             (int)encryptionSettings.Status,
             encryptionSettings.NotifyUsers
         );
@@ -107,6 +108,27 @@ public class EncryptionSettingsHelper(CoreConfiguration coreConfiguration, AscCa
         var parts = value.Split(new[] { '#' }, StringSplitOptions.None);
 
         var password = string.IsNullOrEmpty(parts[0]) ? string.Empty : instanceCrypto.Decrypt(parts[0]);
+        var status = int.Parse(parts[1]);
+        var notifyUsers = bool.Parse(parts[2]);
+
+        return new EncryptionSettings
+        {
+            Password = password,
+            Status = (EncryprtionStatus)status,
+            NotifyUsers = notifyUsers
+        };
+    }
+
+    public async Task<EncryptionSettings> DeserializeAsync(string value)
+    {
+        if (string.IsNullOrEmpty(value))
+        {
+            return new EncryptionSettings();
+        }
+
+        var parts = value.Split(new[] { '#' }, StringSplitOptions.None);
+
+        var password = string.IsNullOrEmpty(parts[0]) ? string.Empty : await instanceCrypto.DecryptAsync(parts[0]);
         var status = int.Parse(parts[1]);
         var notifyUsers = bool.Parse(parts[2]);
 

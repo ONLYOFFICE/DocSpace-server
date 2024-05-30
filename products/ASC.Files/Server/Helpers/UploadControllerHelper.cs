@@ -94,7 +94,7 @@ public class UploadControllerHelper(FilesSettingsHelper filesSettingsHelper,
         return await CreateUploadSessionAsync(file, encrypted, createOn, keepVersion);
     }
 
-    public async Task<object> CreateUploadSessionAsync<T>(File<T> file, bool encrypted, ApiDateTime createOn, bool keepVersion = false)
+    private async Task<object> CreateUploadSessionAsync<T>(File<T> file, bool encrypted, ApiDateTime createOn, bool keepVersion = false)
     {
         if (filesLinkUtility.IsLocalFileUploader)
         {
@@ -109,7 +109,7 @@ public class UploadControllerHelper(FilesSettingsHelper filesSettingsHelper,
             };
         }
 
-        var createSessionUrl = filesLinkUtility.GetInitiateUploadSessionUrl(await tenantManager.GetCurrentTenantIdAsync(), file.ParentId, file.Id, file.Title, file.ContentLength, encrypted, securityContext);
+        var createSessionUrl = await filesLinkUtility.GetInitiateUploadSessionUrlAsync(await tenantManager.GetCurrentTenantIdAsync(), file.ParentId, file.Id, file.Title, file.ContentLength, encrypted, securityContext);
 
         var httpClient = httpClientFactory.CreateClient();
 

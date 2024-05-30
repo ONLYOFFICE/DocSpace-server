@@ -46,7 +46,7 @@ public class TokenHelper(IDbContextFactory<FilesDbContext> dbContextFactory,
         var dbFilesThirdpartyApp = new DbFilesThirdpartyApp
         {
             App = token.App,
-            Token = EncryptToken(token),
+            Token = await EncryptTokenAsync(token),
             UserId = authContext.CurrentAccount.ID,
             TenantId = await tenantManager.GetCurrentTenantIdAsync(),
             ModifiedOn = DateTime.UtcNow
@@ -73,7 +73,7 @@ public class TokenHelper(IDbContextFactory<FilesDbContext> dbContextFactory,
             return null;
         }
 
-        return new Token(DecryptToken(oAuth20Token), app);
+        return new Token(await DecryptTokenAsync(oAuth20Token), app);
     }
 
     public async Task DeleteTokenAsync(string app, Guid? userId = null)
@@ -83,16 +83,16 @@ public class TokenHelper(IDbContextFactory<FilesDbContext> dbContextFactory,
         await Queries.DeleteTokenAsync(filesDbContext, tenant.Id, userId ?? authContext.CurrentAccount.ID, app);
     }
 
-    private string EncryptToken(OAuth20Token token)
+    private async Task<string> EncryptTokenAsync(OAuth20Token token)
     {
         var t = token.ToJson();
 
-        return string.IsNullOrEmpty(t) ? string.Empty : instanceCrypto.Encrypt(t);
+        return string.IsNullOrEmpty(t) ? string.Empty : await instanceCrypto.EncryptAsync(t);
     }
 
-    private OAuth20Token DecryptToken(string token)
+    private async Task<OAuth20Token> DecryptTokenAsync(string token)
     {
-        return string.IsNullOrEmpty(token) ? null : OAuth20Token.FromJson(instanceCrypto.Decrypt(token));
+        return string.IsNullOrEmpty(token) ? null : OAuth20Token.FromJson(await instanceCrypto.DecryptAsync(token));
     }
 }
 

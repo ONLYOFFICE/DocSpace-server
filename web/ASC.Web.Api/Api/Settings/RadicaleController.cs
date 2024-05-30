@@ -66,12 +66,12 @@ public class RadicaleController(RadicaleClient radicaleClient,
         var myUri = HttpContext.Request.Url();
         var currUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
         var userName = currUser.Email.ToLower();
-        var currentAccountPaswd = crypto.Encrypt(userName);
+        var currentAccountPaswd = await crypto.EncryptAsync(userName);
         var cardBuilder = await CardDavAllSerializationAsync();
 
 
         var userAuthorization = userName + ":" + currentAccountPaswd;
-        var rootAuthorization = cardDavAddressbook.GetSystemAuthorization();
+        var rootAuthorization = await cardDavAddressbook.GetSystemAuthorizationAsync();
         var sharedCardUrl = cardDavAddressbook.GetRadicaleUrl(myUri.ToString(), userName, true, true, true);
         var getResponse = await cardDavAddressbook.GetCollection(sharedCardUrl, userAuthorization, myUri.ToString());
         if (getResponse.Completed)
@@ -130,7 +130,7 @@ public class RadicaleController(RadicaleClient radicaleClient,
     {
         var currUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
         var currentUserEmail = currUser.Email;
-        var authorization = cardDavAddressbook.GetSystemAuthorization();
+        var authorization = await cardDavAddressbook.GetSystemAuthorizationAsync();
         var myUri = HttpContext.Request.Url();
         var requestUrlBook = cardDavAddressbook.GetRadicaleUrl(myUri.ToString(), currentUserEmail, true, true);
         var tenant = await tenantManager.GetCurrentTenantIdAsync();
