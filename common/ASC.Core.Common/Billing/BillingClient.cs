@@ -51,16 +51,16 @@ public class BillingClient
         }
     }
 
-    public string GetAccountLink(string portalId, string backUrl)
+    public async Task<string> GetAccountLinkAsync(string portalId, string backUrl)
     {
-        var result = Request("GetAccountLink", portalId, [Tuple.Create("BackRef", backUrl)]);
+        var result = await RequestAsync("GetAccountLink", portalId, [Tuple.Create("BackRef", backUrl)]);
         var link = JsonConvert.DeserializeObject<string>(result);
         return link;
     }
 
-    public PaymentLast[] GetCurrentPayments(string portalId, bool refresh)
+    public async Task<PaymentLast[]> GetCurrentPaymentsAsync(string portalId, bool refresh)
     {
-        var result = Request(GetCurrentPaymentsUri, portalId, addPolicy: refresh);
+        var result = await RequestAsync(GetCurrentPaymentsUri, portalId, addPolicy: refresh);
         var payments = JsonSerializer.Deserialize<PaymentLast[]>(result);
 
         if (!_configuration.Test)
@@ -71,76 +71,15 @@ public class BillingClient
         return payments;
     }
 
-    public IEnumerable<PaymentInfo> GetPayments(string portalId)
+    public async Task<IEnumerable<PaymentInfo>> GetPaymentsAsync(string portalId)
     {
-        var result = Request("GetPayments", portalId);
+        var result = await RequestAsync("GetPayments", portalId);
         var payments = JsonSerializer.Deserialize<List<PaymentInfo>>(result);
 
         return payments;
     }
 
-    public IDictionary<string, Uri> GetPaymentUrls(string portalId, string[] products, string affiliateId = null, string partnerId = null, string campaign = null, string currency = null, string language = null, string customerId = null, string quantity = null)
-    {
-        var urls = new Dictionary<string, Uri>();
-
-        var additionalParameters = new List<Tuple<string, string>> { Tuple.Create("PaymentSystemId", StripePaymentSystemId.ToString()) };
-        if (!string.IsNullOrEmpty(affiliateId))
-        {
-            additionalParameters.Add(Tuple.Create("AffiliateId", affiliateId));
-        }
-        if (!string.IsNullOrEmpty(partnerId))
-        {
-            additionalParameters.Add(Tuple.Create("PartnerId", partnerId));
-        }
-        if (!string.IsNullOrEmpty(campaign))
-        {
-            additionalParameters.Add(Tuple.Create("campaign", campaign));
-        }
-        if (!string.IsNullOrEmpty(currency))
-        {
-            additionalParameters.Add(Tuple.Create("Currency", currency));
-        }
-        if (!string.IsNullOrEmpty(language))
-        {
-            additionalParameters.Add(Tuple.Create("Language", language));
-        }
-        if (!string.IsNullOrEmpty(customerId))
-        {
-            additionalParameters.Add(Tuple.Create("CustomerID", customerId));
-        }
-        if (!string.IsNullOrEmpty(quantity))
-        {
-            additionalParameters.Add(Tuple.Create("Quantity", quantity));
-        }
-
-        var parameters = products
-            .Distinct()
-            .Select(p => Tuple.Create("ProductId", p))
-            .Concat(additionalParameters)
-            .ToArray();
-
-        //max 100 products
-        var result = Request("GetPaymentUrl", portalId, parameters);
-        var paymentUrls = JsonSerializer.Deserialize<Dictionary<string, string>>(result);
-
-        foreach (var p in products)
-        {
-            var paymentUrl = (Uri)null;
-            if (paymentUrls.TryGetValue(p, out var url))
-            {
-                url = ToUrl(url);
-                if (!string.IsNullOrEmpty(url))
-                {
-                    paymentUrl = new Uri(url);
-                }
-            }
-            urls[p] = paymentUrl;
-        }
-
-        return urls;
-    }
-
-    public string GetPaymentUrl(string portalId, IEnumerable<string> products, string affiliateId = null, string partnerId = null, string campaign = null, string currency = null, string language = null, string customerEmail = null, string quantity = null, string backUrl = null)
+    public async Task<string> GetPaymentUrlAsync(string portalId, IEnumerable<string> products, string affiliateId = null, string partnerId = null, string campaign = null, string currency = null, string language = null, string customerEmail = null, string quantity = null, string backUrl = null)
     {
         var additionalParameters = new List<Tuple<string, string>> { Tuple.Create("PaymentSystemId", StripePaymentSystemId.ToString()) };
         if (!string.IsNullOrEmpty(affiliateId))
@@ -183,25 +122,25 @@ public class BillingClient
             .Concat(additionalParameters)
             .ToArray();
 
-        var result = Request("GetSinglePaymentUrl", portalId, parameters);
+        var result = await RequestAsync("GetSinglePaymentUrl", portalId, parameters);
         var paymentUrl = JsonConvert.DeserializeObject<string>(result);
 
         return paymentUrl;
     }
 
-    public bool ChangePayment(string portalId, IEnumerable<string> products, IEnumerable<int> quantity)
+    public async Task<bool> ChangePaymentAsync(string portalId, IEnumerable<string> products, IEnumerable<int> quantity)
     {
         var parameters = products.Select(p => Tuple.Create("ProductId", p))
             .Concat(quantity.Select(q => Tuple.Create("ProductQty", q.ToString())))
             .ToArray();
 
-        var result = Request("ChangeSubscription", portalId, parameters);
+        var result = await RequestAsync("ChangeSubscription", portalId, parameters);
         var changed = JsonConvert.DeserializeObject<bool>(result);
 
         return changed;
     }
 
-    public IDictionary<string, Dictionary<string, decimal>> GetProductPriceInfo(string partnerId, params string[] productIds)
+    public async Task<IDictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync(string partnerId, params string[] productIds)
     {
         ArgumentNullException.ThrowIfNull(productIds);
 
@@ -213,7 +152,7 @@ public class BillingClient
             parameters.Add(Tuple.Create("PartnerId", partnerId));
         }
         
-        var result = Request("GetProductsPrices", null, parameters.ToArray());
+        var result = await RequestAsync("GetProductsPrices", null, parameters.ToArray());
         var prices = JsonSerializer.Deserialize<Dictionary<int, Dictionary<string, Dictionary<string, decimal>>>>(result);
 
         if (prices.TryGetValue(StripePaymentSystemId, out var pricesPaymentSystem))
@@ -239,10 +178,10 @@ public class BillingClient
         var now = DateTime.UtcNow.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture);
         var hash = WebEncoders.Base64UrlEncode(hasher.ComputeHash(Encoding.UTF8.GetBytes(string.Join("\n", now, pkey))));
 
-        return "ASC " + pkey + ":" + now + ":" + hash;
+        return $"ASC {pkey}:{now}:{hash}";
     }
 
-    private string Request(string method, string portalId, Tuple<string, string>[] parameters = null, bool addPolicy = false)
+    private async Task<string> RequestAsync(string method, string portalId, Tuple<string, string>[] parameters = null, bool addPolicy = false)
     {
         var url = _configuration.Url + method;
 
@@ -286,8 +225,8 @@ public class BillingClient
         request.Content = new StringContent(body, Encoding.UTF8, "application/json");
 
         string result;
-        using (var response = httpClient.SendAsync(request).Result) //hack for polly
-        using (var stream = response.Content.ReadAsStream())
+        using (var response = await httpClient.SendAsync(request))
+        await using (var stream = await response.Content.ReadAsStreamAsync())
         {
             if (stream == null)
             {
@@ -295,7 +234,7 @@ public class BillingClient
             }
             using (var readStream = new StreamReader(stream))
             {
-                result = readStream.ReadToEnd();
+                result = await readStream.ReadToEndAsync();
             }
         }
 
@@ -316,27 +255,6 @@ public class BillingClient
 
         throw new BillingException(result, info);
     }
-
-    private string ToUrl(string s)
-    {
-        s = s.Trim();
-        if (s.StartsWith("error", StringComparison.InvariantCultureIgnoreCase))
-        {
-            return string.Empty;
-        }
-
-        if (_configuration.Test && !s.Contains("&DOTEST = 1"))
-        {
-            s += "&DOTEST=1";
-        }
-
-        return s;
-    }
-}
-
-internal class CustomResponse
-{
-    public string Message { get; set; }
 }
 
 public static class BillingHttplClientExtension
