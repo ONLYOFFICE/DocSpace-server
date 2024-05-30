@@ -48,8 +48,8 @@ module.exports = async (io) => {
       {
         user.status = "online";
 
-        var keys = user.sessions.keys();
-        id = keys.length == 0 ? 1 : Array.from(keys).pop() + 1;
+        var keys = Array.from(user.sessions.keys());
+        id = keys.length == 0 ? 1 : keys + 1;
         user.sessions.set(
           id,
           {
@@ -61,7 +61,7 @@ module.exports = async (io) => {
       if(user.sessions.size == 1)
       {
         var stringUser = serialize(user);
-        onlineIO.to(`p-${tenantId}`).emit("enter-in-portal", { stringUser });
+        onlineIO.to(`p-${tenantId}`).emit("enter-in-portal", stringUser );
       }
 
       updateUser(portalUsers, user, userId, tenantId);
@@ -78,7 +78,7 @@ module.exports = async (io) => {
             user.status = "offline";
             user.date = new Date().toString();
             updateUser(portalUsers, user, userId, tenantId);
-            onlineIO.to(`p-${tenantId}`).emit("leave-in-portal", { userId });
+            onlineIO.to(`p-${tenantId}`).emit("leave-in-portal",  userId );
           }
           else
           { 
@@ -104,7 +104,7 @@ module.exports = async (io) => {
             user.status = "offline";
             user.date = new Date().toString();
             updateUser(roomUsers, user, userId, _roomId);
-            onlineIO.to(_roomId).emit("leave-in-room", { userId });
+            onlineIO.to(_roomId).emit("leave-in-room",  userId );
           }
           else
           { 
@@ -154,7 +154,7 @@ module.exports = async (io) => {
         if(user.sessions.size == 1)
         {
           var stringUser = serialize(user);
-          onlineIO.to(roomId).emit("enter-in-room", { stringUser });
+          onlineIO.to(roomId).emit("enter-in-room", stringUser );
         }
         updateUser(roomUsers, user, userId, roomId);
       });
@@ -170,7 +170,7 @@ module.exports = async (io) => {
         user.sessions[idInRoom].status = status;
         updateUser(roomUsers, user, userId, roomId);
         var stringUser = serialize(user);
-        onlineIO.to(roomId).emit("user-status", { stringUser });
+        onlineIO.to(roomId).emit("user-status",  stringUser );
       });
 
       socket.on("removeStatus", async ({ roomPart }) => {
@@ -184,7 +184,7 @@ module.exports = async (io) => {
         user.sessions[idInRoom].status = null;
         updateUser(roomUsers, user, userId, roomId);
         var stringUser = serialize(user);
-        onlineIO.to(roomId).emit("user-status", { stringUser });
+        onlineIO.to(roomId).emit("user-status",  stringUser );
       });
 
       socket.on("getSessionsInRoom", async ({ roomPart }) => {
@@ -193,7 +193,7 @@ module.exports = async (io) => {
         Object.values(roomUsers[roomId]).forEach(function(entry) {
           users.push(serialize(entry));
         });
-        onlineIO.to(socket.id).emit("statuses-in-room", { users });
+        onlineIO.to(socket.id).emit("statuses-in-room",  users );
       });
 
       socket.on("getSessionsInPortal", async () => {
@@ -201,8 +201,37 @@ module.exports = async (io) => {
         Object.values(portalUsers[tenantId]).forEach(function(entry) {
           users.push(serialize(entry));
         });
-        onlineIO.to(socket.id).emit("statuses-in-portal", { users });
+        onlineIO.to(socket.id).emit("statuses-in-portal",  users );
       });
+
+      socket.on("logoutUserInPortal", async (date) => {
+        var user = getUser(portalUsers, date.userId, tenantId);
+        if (user) 
+        {
+          user.status = "offline";
+          user.date = new Date().toString();
+          user.sessions = new Map();
+          updateUser(portalUsers, user, date.userId, tenantId);
+          onlineIO.to(`p-${tenantId}`).emit("leave-in-portal",  date.userId );
+        }
+      });
+
+      socket.on("logoutSessionUserInPortal", async (date) => 
+      {
+        var user = getUser(portalUsers, date.userIds, tenantId);
+        if (user) 
+        {
+          user.sessions.delete(1);
+
+          if(user.sessions.size <= 0)
+          {
+            user.status = "offline";
+            user.date = new Date().toString();
+            updateUser(portalUsers, user, date.userId, tenantId);
+            onlineIO.to(`p-${tenantId}`).emit("leave-in-portal",  date.userId );
+          }
+        }
+    });
 
       socket.on("leave", async ({ roomPart }) => {
         const roomId = getRoom(roomPart);
@@ -216,7 +245,7 @@ module.exports = async (io) => {
           {
             updateUser(roomUsers, user, userId, roomId);
             _roomId = undefined;
-            onlineIO.to(roomId).emit("leave-in-room", { userId });
+            onlineIO.to(roomId).emit("leave-in-room", userId );
           }
           else
           { 
@@ -272,12 +301,20 @@ module.exports = async (io) => {
       }
 
       function serialize(user){
-        var sessions = user.sessions;
-        user.sessions = JSON.stringify([... user.sessions]);
-        let string = JSON.stringify(user);
-        user.sessions = sessions;
-        return string;
+        
+        var serUser = {
+          id: user.userId,
+          displayName: user.displayName,
+          page: user.page,
+          sessions: Array.from(user.sessions, ([name, value]) => {
+            value.id = name;
+            return value;
+          }),
+          status: user.status
+        };
+        return serUser;
       }
+
 
       function updateUser(list, user, userId, id){
         if(!list[id])
