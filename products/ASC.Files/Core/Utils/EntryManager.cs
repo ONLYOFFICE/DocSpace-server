@@ -1449,13 +1449,13 @@ public class EntryManager(IDaoFactory daoFactory,
                         if (tmpStream.CanSeek)
                         {
                             pdfFile.ContentLength = tmpStream.Length;
-                            result = await fileDao.SaveFileAsync(pdfFile, tmpStream);
+                            result = await fileDao.SaveFileAsync(pdfFile, tmpStream, false);
                         }
                         else
                         {
                             await using var buffered = await tempStream.GetBufferedAsync(tmpStream);
                             pdfFile.ContentLength = buffered.Length;
-                            result = await fileDao.SaveFileAsync(pdfFile, buffered);
+                            result = await fileDao.SaveFileAsync(pdfFile, buffered, false);
                         }
 
                         try
