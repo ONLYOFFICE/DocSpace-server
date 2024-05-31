@@ -6,6 +6,7 @@ module.exports = async (io) => {
     const onlineIO = io;
     const portalUsers =[];
     const roomUsers =[];
+    const mapperIds = [];
 
     onlineIO.on("connection", async (socket) => {
       const session = socket.handshake.session;
@@ -22,7 +23,9 @@ module.exports = async (io) => {
       const tenantId = session?.portal?.tenantId;
       var _roomId;
       let id;
+      let sessionId = session?.user?.connection;
       let idInRoom;
+      mapperIds[sessionId] = id;
       
       var user = getUser(portalUsers, userId, tenantId);
       if (!user) 
@@ -31,6 +34,7 @@ module.exports = async (io) => {
         sessions.set(
           1,
           {
+            id: sessionId,
             platform: operationSystem,
             browser: parser.browser.name + " " + browserVersion,
             ip: ipAddress
@@ -53,6 +57,7 @@ module.exports = async (io) => {
         user.sessions.set(
           id,
           {
+            id: sessionId,
             platform: operationSystem,
             browser: parser.browser.name + " " + browserVersion,
             ip: ipAddress
@@ -113,7 +118,7 @@ module.exports = async (io) => {
         }
       });
   
-      socket.on("enter", async ({ roomPart, status }) => {
+      socket.on("enterInRoom", async ({ roomPart, status }) => {
         const roomId = getRoom(roomPart);
         var user = getUser(roomUsers, userId, roomId);
         if (!user) 
@@ -122,6 +127,7 @@ module.exports = async (io) => {
           sessions.set(
             1,
             {
+              id: sessionId,
               platform: operationSystem,
               browser: parser.browser.name + " " + browserVersion,
               ip: ipAddress,
@@ -144,6 +150,7 @@ module.exports = async (io) => {
           sessions.set(
             idInRoom,
             {
+              id: sessionId,
               platform: operationSystem,
               browser: parser.browser.name + " " + browserVersion,
               ip: ipAddress,
@@ -218,10 +225,10 @@ module.exports = async (io) => {
 
       socket.on("logoutSessionUserInPortal", async (date) => 
       {
-        var user = getUser(portalUsers, date.userIds, tenantId);
+        var user = getUser(portalUsers, date.userId, tenantId);
         if (user) 
         {
-          user.sessions.delete(1);
+          user.sessions.delete(mapperIds[date.id]);
 
           if(user.sessions.size <= 0)
           {
@@ -233,7 +240,7 @@ module.exports = async (io) => {
         }
     });
 
-      socket.on("leave", async ({ roomPart }) => {
+      socket.on("leaveRoom", async ({ roomPart }) => {
         const roomId = getRoom(roomPart);
         var user = getUser(roomUsers, userId, roomId);
         if (user) 
@@ -307,7 +314,6 @@ module.exports = async (io) => {
           displayName: user.displayName,
           page: user.page,
           sessions: Array.from(user.sessions, ([name, value]) => {
-            value.id = name;
             return value;
           }),
           status: user.status

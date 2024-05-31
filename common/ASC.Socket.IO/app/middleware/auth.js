@@ -66,6 +66,15 @@ module.exports = (socket, next) => {
         basePath,
       });
     };
+
+    const getConnection = () => {
+      return request({
+        method: "get",
+        url: "/security/activeconnections/getthisconnection",
+        headers,
+        basePath,
+      });
+    };
     
     const validateLink = () => {
       if (!share) {
@@ -75,12 +84,12 @@ module.exports = (socket, next) => {
       return validateExternalLink();
     }
 
-    return Promise.all([getUser(), getPortal(), validateLink()])
-      .then(([user, portal, { status, linkId } = { }]) => {
+    return Promise.all([getUser(), getPortal(), getConnection(), validateLink()])
+      .then(([user, portal, connection, { status, linkId } = { }]) => {
         logger.info(`WS: save account info in sessionId='sess:${session.id}'`, { user, portal });
         session.user = user;
         session.portal = portal;
-        
+        session.user.connection = connection;
         if (status === 0){
           session.linkId = linkId;
         }

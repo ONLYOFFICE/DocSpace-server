@@ -64,6 +64,29 @@ public class ConnectionsController(
     public async Task<ActiveConnectionsDto> GetAllActiveConnections()
     {
         var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
+        return await GetAllActiveConnectionsInnerAsync(user);
+    }
+
+    /// <summary>
+    /// Returns all the active connections to the portal.
+    /// </summary>
+    /// <short>
+    /// Get active connections
+    /// </short>
+    /// <category>Active connections</category>=
+    /// <param type="System.Guid, System" method="url" name="userId">User ID</param>
+    /// <returns type="System.Object, System">Active portal connections</returns>
+    /// <path>api/2.0/security/activeconnections/{userId}</path>
+    /// <httpMethod>GET</httpMethod>
+    [HttpGet("/{userId:guid}")]
+    public async Task<ActiveConnectionsDto> GetAllActiveConnections(Guid userId)
+    {
+        var user = await userManager.GetUsersAsync(userId);
+        return await GetAllActiveConnectionsInnerAsync(user);
+    }
+
+    private async Task<ActiveConnectionsDto> GetAllActiveConnectionsInnerAsync(UserInfo user)
+    {
         var loginEvents = await dbLoginEventsManager.GetLoginEventsAsync(user.TenantId, user.Id);
         var tasks = loginEvents.ConvertAll(async r => await geolocationHelper.AddGeolocationAsync(r));
         var listLoginEvents = (await Task.WhenAll(tasks)).ToList();
@@ -215,6 +238,13 @@ public class ConnectionsController(
             logger.ErrorWithException(ex);
             return null;
         }
+    }
+
+    [HttpGet("getthisconnection")]
+    public int GetThisConnection()
+    {
+        var auth = httpContextAccessor.HttpContext?.Request.Headers["Authorization"];
+        return cookieStorage.GetLoginEventIdFromCookie(auth);
     }
 
     /// <summary>
