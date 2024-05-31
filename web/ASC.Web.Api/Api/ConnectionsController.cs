@@ -229,7 +229,9 @@ public class ConnectionsController(
             var userName = user.DisplayUserName(false, displayUserSettingsHelper);
             var loginEventFromCookie = GetLoginEventIdFromCookie();
 
-            await LogOutAllExceptThisConnection(loginEventFromCookie);
+            await dbLoginEventsManager.LogOutAllActiveConnectionsExceptThisAsync(loginEventFromCookie, user.TenantId, user.Id);
+
+            await messageService.SendAsync(MessageAction.UserLogoutActiveConnections, userName);
             return userName;
         }
         catch (Exception ex)
