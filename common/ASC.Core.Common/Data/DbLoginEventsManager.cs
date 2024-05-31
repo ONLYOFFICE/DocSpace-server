@@ -156,6 +156,17 @@ public class DbLoginEventsManager(
         await InnerLogOutAsync(loginEventContext, loginEvents);
     }
 
+    public async Task<Guid> LogOutAllActiveConnectionsExceptThisAsync(int loginEventId, int tenantId)
+    {
+        await using var loginEventContext = await dbContextFactory.CreateDbContextAsync();
+
+        var loginEvent = await loginEventContext.LoginEvents.SingleOrDefaultAsync(e => e.TenantId == tenantId && e.Id == loginEventId);
+        var loginEvents = await Queries.LoginEventsExceptThisAsync(loginEventContext, tenantId, loginEvent.UserId.Value, loginEventId).ToListAsync();
+
+        await InnerLogOutAsync(loginEventContext, loginEvents);
+        return loginEvent.UserId.Value;
+    }
+
     public async Task LogOutAllActiveConnectionsExceptThisAsync(int loginEventId, int tenantId, Guid userId)
     {
         await using var loginEventContext = await dbContextFactory.CreateDbContextAsync();

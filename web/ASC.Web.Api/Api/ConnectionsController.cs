@@ -47,7 +47,8 @@ public class ConnectionsController(
     CookiesManager cookiesManager,
     CookieStorage cookieStorage,
     GeolocationHelper geolocationHelper,
-    ApiDateTimeHelper apiDateTimeHelper)
+    ApiDateTimeHelper apiDateTimeHelper,
+    TenantManager tenantManager)
     : ControllerBase
 {
     /// <summary>
@@ -228,7 +229,35 @@ public class ConnectionsController(
             var userName = user.DisplayUserName(false, displayUserSettingsHelper);
             var loginEventFromCookie = GetLoginEventIdFromCookie();
 
-            await dbLoginEventsManager.LogOutAllActiveConnectionsExceptThisAsync(loginEventFromCookie, user.TenantId, user.Id);
+            await LogOutAllExceptThisConnection(loginEventFromCookie);
+            return userName;
+        }
+        catch (Exception ex)
+        {
+            logger.ErrorWithException(ex);
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Logs out from all the active connections except the current connection.
+    /// </summary>
+    /// <short>
+    /// Log out from all connections
+    /// </short>
+    /// <category>Active connections</category>
+    /// <returns type="System.Object, System">Current user name</returns>
+    /// <path>api/2.0/security/activeconnections/logoutallexceptthis</path>
+    /// <httpMethod>PUT</httpMethod>
+    [HttpPut("logoutallexceptthis/{loginEventId:int}")]
+    public async Task<object> LogOutAllExceptThisConnection(int loginEventId)
+    {
+        try
+        {
+            var userId = await dbLoginEventsManager.LogOutAllActiveConnectionsExceptThisAsync(loginEventId, await tenantManager.GetCurrentTenantIdAsync());
+
+            var user = await userManager.GetUsersAsync(userId);
+            var userName = user.DisplayUserName(false, displayUserSettingsHelper);
 
             await messageService.SendAsync(MessageAction.UserLogoutActiveConnections, userName);
             return userName;
