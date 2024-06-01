@@ -79,8 +79,8 @@ public class ConnectionsController(
     /// <returns type="System.Object, System">Active portal connections</returns>
     /// <path>api/2.0/security/activeconnections/{userId}</path>
     /// <httpMethod>GET</httpMethod>
-    [HttpGet("/{userId:guid}")]
-    public async Task<ActiveConnectionsDto> GetAllActiveConnections(Guid userId)
+    [HttpGet("user/{userId:guid}")]
+    public async Task<ActiveConnectionsDto> GetAllActive1Connections(Guid userId)
     {
         var user = await userManager.GetUsersAsync(userId);
         return await GetAllActiveConnectionsInnerAsync(user);
