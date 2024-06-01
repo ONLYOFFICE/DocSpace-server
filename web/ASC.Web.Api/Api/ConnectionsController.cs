@@ -48,7 +48,9 @@ public class ConnectionsController(
     CookieStorage cookieStorage,
     GeolocationHelper geolocationHelper,
     ApiDateTimeHelper apiDateTimeHelper,
-    TenantManager tenantManager)
+    TenantManager tenantManager,
+    UserPhotoManager userPhotoManager,
+    DisplayUserSettingsHelper displayUserSettings)
     : ControllerBase
 {
     /// <summary>
@@ -80,10 +82,30 @@ public class ConnectionsController(
     /// <path>api/2.0/security/activeconnections/{userId}</path>
     /// <httpMethod>GET</httpMethod>
     [HttpGet("user/{userId:guid}")]
-    public async Task<ActiveConnectionsDto> GetAllActive1Connections(Guid userId)
+    public async Task<ActiveConnectionsForUserDto> GetAllActiveConnections(Guid userId)
     {
         var user = await userManager.GetUsersAsync(userId);
-        return await GetAllActiveConnectionsInnerAsync(user);
+        var connections = await GetAllActiveConnectionsInnerAsync(user);
+        var currentType = await userManager.GetUserTypeAsync(userId);
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var cacheKey = Math.Abs(user.LastModified.GetHashCode());
+
+        var dto = new ActiveConnectionsForUserDto();
+
+        dto.Id = user.Id;
+        dto.DisplayName = user.DisplayUserName(displayUserSettings);
+        
+        dto.IsOwner = user.IsOwner(tenant);
+        dto.IsVisitor = await userManager.IsUserAsync(user);
+        dto.IsAdmin = currentType is EmployeeType.DocSpaceAdmin;
+        dto.IsRoomAdmin = currentType is EmployeeType.RoomAdmin;
+        dto.IsOwner = user.IsOwner(tenant);
+        dto.IsCollaborator = currentType is EmployeeType.Collaborator;
+
+        dto.Avatar = await userPhotoManager.GetPhotoAbsoluteWebPath(user.Id) + $"?hash={cacheKey}";
+
+        dto.Connections = connections.Items;
+        return dto;
     }
 
     private async Task<ActiveConnectionsDto> GetAllActiveConnectionsInnerAsync(UserInfo user)
