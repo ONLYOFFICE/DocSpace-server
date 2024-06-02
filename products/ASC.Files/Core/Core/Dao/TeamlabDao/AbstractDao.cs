@@ -74,19 +74,6 @@ public class AbstractDao
             .Where(where);
     }
     
-    protected async Task RecalculateFilesCountUpdateAsync(FilesDbContext filesDbContext, int folderId)
-    {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        
-        var folders = await filesDbContext.FoldersAsync(tenantId, folderId).ToListAsync();
-        
-        foreach (var f in folders)
-        {
-            f.FilesCount = await filesDbContext.FilesCountAsync(f.TenantId, f.Id);
-        }
-        
-        await filesDbContext.SaveChangesAsync();
-    }
     
     protected async Task IncrementCountAsync(FilesDbContext filesDbContext, int folderId, int tenantId, FileEntryType fileEntryType)
     {

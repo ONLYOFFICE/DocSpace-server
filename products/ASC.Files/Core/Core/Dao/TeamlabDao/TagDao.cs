@@ -27,6 +27,7 @@
 namespace ASC.Files.Core.Data;
 
 internal abstract class BaseTagDao<T>(
+    ILogger<FolderDao> logger,
     UserManager userManager,
     IDbContextFactory<FilesDbContext> dbContextManager,
     TenantManager tenantManager,
@@ -182,7 +183,8 @@ internal abstract class BaseTagDao<T>(
     }
 
     public async Task<IEnumerable<Tag>> SaveTagsAsync(IEnumerable<Tag> tags, Guid createdBy = default)
-    {
+    {        
+        var timestamp = TimeProvider.System.GetTimestamp();
         var result = new List<Tag>();
 
         if (tags == null)
@@ -199,6 +201,7 @@ internal abstract class BaseTagDao<T>(
         
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
+        logger.LogDebug("SaveTagsAsync1, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
         await using (await distributedLockProvider.TryAcquireLockAsync(GetLockKey(tenantId), TimeSpan.FromMinutes(5)))
         {
             await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
@@ -209,14 +212,14 @@ internal abstract class BaseTagDao<T>(
                 await using var internalFilesDbContext = await _dbContextFactory.CreateDbContextAsync();
                 await using var tx = await internalFilesDbContext.Database.BeginTransactionAsync();
 
-                await DeleteTagsBeforeSave();
-
+                await DeleteTagsBeforeSave(internalFilesDbContext, tenantId);
+                logger.LogDebug("SaveTagsAsync2, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
                 var createOn = _tenantUtil.DateTimeToUtc(_tenantUtil.DateTimeNow());
                 var cachedTags = new Dictionary<string, DbFilesTag>();
 
                 foreach (var t in tags)
                 {
-                    var key = await GetCacheKey(t);
+                    var key = GetCacheKey(t, tenantId);
 
                     if (cachedTags.ContainsKey(key))
                     {
@@ -243,10 +246,10 @@ internal abstract class BaseTagDao<T>(
                 }
 
                 await internalFilesDbContext.SaveChangesAsync();
-
+                logger.LogDebug("SaveTagsAsync3, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
                 foreach (var t in tags)
                 {
-                    var key = await GetCacheKey(t);
+                    var key = GetCacheKey(t, tenantId);
 
                     var linkToInsert = new DbFilesTagLink
                     {
@@ -264,7 +267,7 @@ internal abstract class BaseTagDao<T>(
                 }
 
                 await internalFilesDbContext.SaveChangesAsync();
-
+                logger.LogDebug("SaveTagsAsync4, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
                 await tx.CommitAsync();
             });
         }
@@ -298,7 +301,7 @@ internal abstract class BaseTagDao<T>(
                 await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
                 await using var tx = await filesDbContext.Database.BeginTransactionAsync();
 
-                await DeleteTagsBeforeSave();
+                await DeleteTagsBeforeSave(filesDbContext, tenantId);
 
                 var createOn = _tenantUtil.DateTimeToUtc(_tenantUtil.DateTimeNow());
                 var cacheTagId = new Dictionary<string, int>();
@@ -312,18 +315,10 @@ internal abstract class BaseTagDao<T>(
         return result;
     }
 
-    private async Task DeleteTagsBeforeSave()
+    private async Task DeleteTagsBeforeSave(FilesDbContext filesDbContext, int tenantId)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var date = _tenantUtil.DateTimeNow().AddMonths(-1);
-        var mustBeDeleted = filesDbContext.MustBeDeletedFilesAsync(tenantId, date);
-
-        await foreach (var row in mustBeDeleted)
-        {
-            await filesDbContext.DeleteTagLinksByTagLinkDataAsync(tenantId, row.Link.TagId, row.Link.EntryId, row.Link.EntryType);
-        }
-
+        await filesDbContext.MustBeDeletedFilesAsync(tenantId, date);
         await filesDbContext.DeleteTagAsync();
     }
 
@@ -638,9 +633,8 @@ internal abstract class BaseTagDao<T>(
         }
         return result;
     }
-    private async Task<string> GetCacheKey(Tag tag)
+    private string GetCacheKey(Tag tag, int tenantId)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         return string.Join("/", tenantId.ToString(), tag.Owner.ToString(), tag.Name, ((int)tag.Type).ToString(CultureInfo.InvariantCulture));
     }
 
@@ -652,7 +646,9 @@ internal abstract class BaseTagDao<T>(
 
 
 [Scope(typeof(ITagDao<int>))]
-internal class TagDao(UserManager userManager,
+internal class TagDao(
+    ILogger<FolderDao> logger,
+    UserManager userManager,
         IDbContextFactory<FilesDbContext> dbContextManager,
         TenantManager tenantManager,
         TenantUtil tenantUtil,
@@ -663,7 +659,9 @@ internal class TagDao(UserManager userManager,
         IServiceProvider serviceProvider,
         IMapper mapper,
         IDistributedLockProvider distributedLockProvider)
-    : BaseTagDao<int>(userManager,
+    : BaseTagDao<int>(
+        logger,
+        userManager,
               dbContextManager,
               tenantManager,
               tenantUtil,
@@ -777,7 +775,9 @@ internal class TagDao(UserManager userManager,
 }
 
 [Scope(typeof(ITagDao<string>))]
-internal class ThirdPartyTagDao(UserManager userManager,
+internal class ThirdPartyTagDao(
+    ILogger<FolderDao> logger,
+    UserManager userManager,
         IDbContextFactory<FilesDbContext> dbContextManager,
         TenantManager tenantManager,
         TenantUtil tenantUtil,
@@ -789,7 +789,9 @@ internal class ThirdPartyTagDao(UserManager userManager,
         IMapper mapper,
         IThirdPartyTagDao thirdPartyTagDao,
         IDistributedLockProvider distributedLockProvider)
-    : BaseTagDao<string>(userManager,
+    : BaseTagDao<string>(
+        logger,
+        userManager,
               dbContextManager,
               tenantManager,
               tenantUtil,
