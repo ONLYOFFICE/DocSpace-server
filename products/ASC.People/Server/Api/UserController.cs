@@ -494,10 +494,10 @@ public class UserController(ICache cache,
         await cookiesManager.ResetUserCookieAsync(user.Id);
         await messageService.SendAsync(MessageAction.CookieSettingsUpdated);
 
-            //StudioNotifyService.Instance.SendMsgProfileHasDeletedItself(user);
-            //StudioNotifyService.SendMsgProfileDeletion(Tenant.TenantId, user);
+        await studioNotifyService.SendMsgProfileHasDeletedItselfAsync(user);
+
         return await employeeFullDtoHelper.GetFullAsync(user);
-        }
+    }
 
     /// <summary>
     /// Returns a list of users matching the status filter and search query.
