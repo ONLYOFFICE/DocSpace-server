@@ -488,7 +488,7 @@ public class FileStorageService //: IFileStorageService
     {
             case FolderType.PublicRoom:
             case FolderType.FillingFormsRoom:
-                await SetExternalLinkAsync(folder, Guid.NewGuid(), FileShare.Read, FilesCommonResource.DefaultExternalLinkTitle, primary: true);
+                await SetExternalLinkAsync(folder, Guid.NewGuid(), folder.FolderType == FolderType.FillingFormsRoom ? FileShare.FillForms : FileShare.Read, FilesCommonResource.DefaultExternalLinkTitle, primary: true);
                 break;
             case FolderType.FormRoom:
                 var task1 = InternalCreateFolderAsync(folder.Id, FilesUCResource.ReadyFormFolder, FolderType.ReadyFormFolder);
@@ -1254,6 +1254,7 @@ public class FileStorageService //: IFileStorageService
 
             var properties = await fileDao.GetProperties(fileId) ?? new EntryProperties { FormFilling = serviceProvider.GetService<FormFillingProperties>() };
             properties.FormFilling.StartFilling = true;
+
             await fileDao.SaveProperties(fileId, properties);
 
             var count = await GetPureSharesCountAsync(folder.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "");

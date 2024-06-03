@@ -210,7 +210,6 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
 
                             await fileMarker.MarkAsNewAsync(formDraft);
                             await socketManager.CreateFileAsync(formDraft);
-                            await linkDao.AddLinkAsync(fileId.ToString(), formDraft.Id.ToString());
                             await socketManager.UpdateFileAsync(file);
 
                             file = formDraft;

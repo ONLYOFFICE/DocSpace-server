@@ -923,6 +923,10 @@ public class FileSecurity(IDaoFactory daoFactory,
                     {
                         return action == FilesSecurityActions.MoveTo;
                     }
+                    if (folder.FolderType == FolderType.FillingFormsRoom)
+                    {
+                        return true;
+                    }
                 }
             }
             else if (isAuthenticated)

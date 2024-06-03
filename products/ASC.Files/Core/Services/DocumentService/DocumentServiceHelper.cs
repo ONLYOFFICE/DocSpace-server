@@ -301,6 +301,10 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
         if (formFillingProperties.ToFolderId == file.ParentId.ToString())
         {
+            if (file.CreateBy.Equals(ASC.Core.Configuration.Constants.Guest.ID))
+            {
+                return file;
+            }
             await securityContext.AuthenticateMeAsync(file.CreateBy);
 
             var linkDao = daoFactory.GetLinkDao();

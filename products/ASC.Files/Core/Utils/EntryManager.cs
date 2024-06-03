@@ -1164,7 +1164,7 @@ public class EntryManager(IDaoFactory daoFactory,
                 }
                 var properties = await fileDao.GetProperties(sourceFile.Id);
                 var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
-                title = $"{user.FirstName} {user.LastName} - {sourceFile.Title}";
+                title = user.Id.Equals(ASC.Core.Configuration.Constants.Guest.ID) ? $"{properties.FormFilling.GuestFormId + 1} - {sourceFile.Title}" : $"{user.FirstName} {user.LastName} - {sourceFile.Title}";
 
                 if (properties.FormFilling.ResultsFileID == null)
                 {
@@ -1174,6 +1174,11 @@ public class EntryManager(IDaoFactory daoFactory,
                 else
                 {
                     linkedFile.ParentId = (T)Convert.ChangeType(properties.FormFilling.ToFolderId, typeof(T));
+                }
+                if (user.Id.Equals(ASC.Core.Configuration.Constants.Guest.ID))
+                {
+                    properties.FormFilling.GuestFormId ++;
+                    await fileDao.SaveProperties(sourceFile.Id, properties);
                 }
 
             }
@@ -1216,7 +1221,9 @@ public class EntryManager(IDaoFactory daoFactory,
 
             await socketManager.CreateFileAsync(linkedFile);
 
-            await linkDao.AddLinkAsync(sourceFile.Id.ToString(), linkedFile.Id.ToString());
+            if (!securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID)) {
+                await linkDao.AddLinkAsync(sourceFile.Id.ToString(), linkedFile.Id.ToString());
+            }
 
             await socketManager.UpdateFileAsync(sourceFile);
         }
@@ -1461,11 +1468,14 @@ public class EntryManager(IDaoFactory daoFactory,
                         try
                         {
                             var linkDao = daoFactory.GetLinkDao();
-                            var sourceId = await linkDao.GetSourceAsync(file.Id.ToString());
-                            var sourceFile = await fileDao.GetFileAsync((T)Convert.ChangeType(sourceId, typeof(T)));
+                            if (!file.CreateBy.Equals(ASC.Core.Configuration.Constants.Guest.ID))
+                            {
+                                var sourceId = await linkDao.GetSourceAsync(file.Id.ToString());
+                                var sourceFile = await fileDao.GetFileAsync((T)Convert.ChangeType(sourceId, typeof(T)));
 
-                            await linkDao.DeleteLinkAsync(sourceId);
-                            await socketManager.UpdateFileAsync(sourceFile);
+                                await linkDao.DeleteLinkAsync(sourceId);
+                                await socketManager.UpdateFileAsync(sourceFile);
+                            }
 
                             await fileDao.SaveProperties(result.Id, properties);
                             await fileMarker.MarkAsNewAsync(result);
