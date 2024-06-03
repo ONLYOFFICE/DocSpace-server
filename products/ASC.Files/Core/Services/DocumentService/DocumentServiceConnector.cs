@@ -311,7 +311,12 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
             docServicePortalUrl = "https://" + tenant.GetTenantDomain(coreSettings, false);
         }
 
-        var uri = new UriBuilder(url);
+        if (!Uri.TryCreate(url, UriKind.Absolute, out var absoluteUri))
+        {
+            return url;
+        }
+
+        var uri = new UriBuilder(absoluteUri);
         if (new UriBuilder(baseCommonLinkUtility.ServerRootPath).Host != uri.Host)
         {
             return url;
