@@ -55,10 +55,7 @@ public class Startup : BaseStartup
         });
         
         services.AddBaseDbContextPool<FilesDbContext>();
-
-        services.AddScoped<ITenantQuotaFeatureChecker, CountRoomChecker>();
-        services.AddScoped<ITenantQuotaFeatureStat<CountRoomFeature, int>, CountRoomCheckerStatistic>();
-        services.AddScoped<ITenantQuotaFeatureStat<UsersInRoomFeature, int>, UsersInRoomStatistic>();
+        services.RegisterQuotaFeature();
         services.AddScoped<IWebItem, ProductEntryPoint>();
         services.AddDocumentServiceHttpClient();
     }
