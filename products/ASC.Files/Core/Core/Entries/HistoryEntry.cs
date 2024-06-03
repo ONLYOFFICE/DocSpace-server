@@ -54,9 +54,13 @@ public record HistoryEntry
         {
             return _groupId;
         }
+
+        if (_gropedActions.Contains(Action.Id))
+        {
+            return _groupId = HashCode.Combine(Action.Id, InitiatorId, new DateTime(Date.Year, Date.Month, Date.Day, Date.Hour, Date.Minute, 0), Data?.GetId() ?? 0);
+        }
         
-        return _groupId = HashCode.Combine(Action, InitiatorId, _gropedActions.Contains(Action.Id) 
-            ? new DateTime(Date.Year, Date.Month, Date.Day, Date.Hour, Date.Minute, 0) : Date, Data?.GetId() ?? 0);
+        return _groupId = HashCode.Combine(Action.Id, InitiatorId, Date, Data?.GetId() ?? 0, Random.Shared.Next(Int32.MaxValue));
     }
 }
 
