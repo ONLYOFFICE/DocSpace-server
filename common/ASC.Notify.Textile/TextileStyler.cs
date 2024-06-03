@@ -45,7 +45,7 @@ public class TextileStyler(CoreBaseSettings coreBaseSettings,
         BlockAttributesParser.Styler = new StyleReader(reader.ReadToEnd().Replace("\n", "").Replace("\r", ""));
     }
 
-    public void ApplyFormating(NoticeMessage message)
+    public async Task ApplyFormatingAsync(NoticeMessage message)
     {
         var output = new StringBuilderTextileFormatter();
         var formatter = new TextileFormatter(output);
@@ -65,7 +65,7 @@ public class TextileStyler(CoreBaseSettings coreBaseSettings,
         var template = GetTemplate(message);
         var imagePath = GetImagePath(message);
         var mailSettings = GetMailSettings(message);
-        var unsubscribeText = GetUnsubscribeText(message, mailSettings);
+        var unsubscribeText = await GetUnsubscribeTextAsync(message, mailSettings);
 
         InitTopImage(message, mailSettings, out var topImage);
         InitFooter(message, mailSettings, out var footerContent, out var footerSocialContent);
@@ -248,7 +248,7 @@ public class TextileStyler(CoreBaseSettings coreBaseSettings,
         }
     }
 
-    private string GetUnsubscribeText(NoticeMessage message, MailWhiteLabelSettings settings)
+    private async Task<string> GetUnsubscribeTextAsync(NoticeMessage message, MailWhiteLabelSettings settings)
     {
         var withoutUnsubscribe = message.GetArgument("WithoutUnsubscribe");
 
@@ -257,7 +257,7 @@ public class TextileStyler(CoreBaseSettings coreBaseSettings,
             return string.Empty;
         }
 
-        var unsubscribeLink = GetPortalUnsubscribeLink(message, settings);
+        var unsubscribeLink = await GetPortalUnsubscribeLinkAsync(message, settings);
 
         if (string.IsNullOrEmpty(unsubscribeLink))
         {
@@ -269,7 +269,7 @@ public class TextileStyler(CoreBaseSettings coreBaseSettings,
         return string.Format(NotifyTemplateResource.TextForFooterUnsubsribe, rootPath, unsubscribeLink);
     }
 
-    private string GetPortalUnsubscribeLink(NoticeMessage message, MailWhiteLabelSettings settings)
+    private async Task<string> GetPortalUnsubscribeLinkAsync(NoticeMessage message, MailWhiteLabelSettings settings)
     {
         var subscriptionConfigArgument = message.GetArgument("RecipientSubscriptionConfigURL");
 
@@ -289,10 +289,10 @@ public class TextileStyler(CoreBaseSettings coreBaseSettings,
             return unsubscribeLink + "/notification";
         }
 
-        return GetSiteUnsubscribeLink(message, settings);
+        return await GetSiteUnsubscribeLinkAsync(message, settings);
     }
 
-    private string GetSiteUnsubscribeLink(NoticeMessage message, MailWhiteLabelSettings settings)
+    private async Task<string> GetSiteUnsubscribeLinkAsync(NoticeMessage message, MailWhiteLabelSettings settings)
     {
         var mail = message.Recipient.Addresses.FirstOrDefault(r => r.Contains('@'));
 
@@ -309,8 +309,7 @@ public class TextileStyler(CoreBaseSettings coreBaseSettings,
                        ? mailWhiteLabelSettingsHelper.DefaultMailSiteUrl
                        : settings.SiteUrl;
 
-        return string.Format(format, site,
-            WebEncoders.Base64UrlEncode(instanceCrypto.Encrypt(
-                Encoding.UTF8.GetBytes(mail.ToLowerInvariant()))));
+        var input = await instanceCrypto.EncryptAsync(Encoding.UTF8.GetBytes(mail.ToLowerInvariant()));
+        return string.Format(format, site, WebEncoders.Base64UrlEncode(input));
     }
 }

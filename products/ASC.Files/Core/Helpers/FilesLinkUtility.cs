@@ -398,14 +398,14 @@ public class FilesLinkUtility
     }
 
 
-    public string GetInitiateUploadSessionUrl(int tenantId, object folderId, object fileId, string fileName, long contentLength, bool encrypted, SecurityContext securityContext)
+    public async Task<string> GetInitiateUploadSessionUrlAsync(int tenantId, object folderId, object fileId, string fileName, long contentLength, bool encrypted, SecurityContext securityContext)
     {
         var queryString = string.Format("?initiate=true&{0}={1}&fileSize={2}&tid={3}&userid={4}&culture={5}&encrypted={6}",
                                         FileTitle,
                                         HttpUtility.UrlEncode(fileName),
                                         contentLength,
                                         tenantId,
-                                        HttpUtility.UrlEncode(_instanceCrypto.Encrypt(securityContext.CurrentAccount.ID.ToString())),
+                                        HttpUtility.UrlEncode(await _instanceCrypto.EncryptAsync(securityContext.CurrentAccount.ID.ToString())),
                                         CultureInfo.CurrentUICulture.Name,
                                         encrypted.ToString().ToLower());
 

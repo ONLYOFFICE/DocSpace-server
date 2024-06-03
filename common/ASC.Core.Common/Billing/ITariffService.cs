@@ -28,7 +28,7 @@ namespace ASC.Core.Billing;
 
 public interface ITariffService
 {
-    IDictionary<string, Dictionary<string, decimal>> GetProductPriceInfo(string partnerId, params string[] productIds);
+    Task<IDictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync(string partnerId, params string[] productIds);
     Task<IEnumerable<PaymentInfo>> GetPaymentsAsync(int tenantId);
     Task<Tariff> GetTariffAsync(int tenantId, bool withRequestToPaymentSystem = true, bool refresh = false);
     Task<Uri> GetShoppingUriAsync(int tenant, string affiliateId, string partnerId, string currency = null, string language = null, string customerEmail = null, Dictionary<string, int> quantity = null, string backUrl = null);

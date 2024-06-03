@@ -118,7 +118,7 @@ internal class ProviderAccountDao(
 
         authData = GetEncodedAccessToken(authData, prKey);
 
-        if (!await CheckProviderInfoAsync(ToProviderInfo(0, prKey, customerTitle, authData, authContext.CurrentAccount.ID, folderType, tenantUtil.DateTimeToUtc(tenantUtil.DateTimeNow()))))
+        if (!await CheckProviderInfoAsync(await ToProviderInfoAsync(0, prKey, customerTitle, authData, authContext.CurrentAccount.ID, folderType, tenantUtil.DateTimeToUtc(tenantUtil.DateTimeNow()))))
         {
             throw new UnauthorizedAccessException(string.Format(FilesCommonResource.ErrorMessage_SecurityException_Auth, providerKey));
         }
@@ -133,12 +133,12 @@ internal class ProviderAccountDao(
             Provider = providerKey,
             Title = Global.ReplaceInvalidCharsAndTruncate(customerTitle),
             UserName = authData.Login ?? "",
-            Password = EncryptPassword(authData.Password),
+            Password = await EncryptPasswordAsync(authData.Password),
             FolderType = folderType,
             CreateOn = now,
             ModifiedOn = now,
             UserId = authContext.CurrentAccount.ID,
-            Token = EncryptPassword(authData.RawToken ?? ""),
+            Token = await EncryptPasswordAsync(authData.RawToken ?? ""),
             Url = authData.Url ?? ""
         };
 
@@ -171,15 +171,15 @@ internal class ProviderAccountDao(
             var updatedAuthData = GetEncodedAccessToken(data.AuthData, key);
             updatedAuthData.Url = forUpdate.Url;
             
-            if (!await CheckProviderInfoAsync(ToProviderInfo(0, key, forUpdate.Title, updatedAuthData, authContext.CurrentAccount.ID, forUpdate.FolderType, 
+            if (!await CheckProviderInfoAsync(await ToProviderInfoAsync(0, key, forUpdate.Title, updatedAuthData, authContext.CurrentAccount.ID, forUpdate.FolderType, 
                     tenantUtil.DateTimeToUtc(tenantUtil.DateTimeNow()))))
             {
                 throw new UnauthorizedAccessException(string.Format(FilesCommonResource.ErrorMessage_SecurityException_Auth, key));
             }
             
             forUpdate.UserName = updatedAuthData.Login ?? string.Empty;
-            forUpdate.Password = EncryptPassword(updatedAuthData.Password);
-            forUpdate.Token = EncryptPassword(updatedAuthData.RawToken);
+            forUpdate.Password = await EncryptPasswordAsync(updatedAuthData.Password);
+            forUpdate.Token = await EncryptPasswordAsync(updatedAuthData.RawToken);
         }
 
         if (!string.IsNullOrEmpty(data.Title))
@@ -235,8 +235,8 @@ internal class ProviderAccountDao(
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
         var login = authData.Login ?? "";
-        var password = EncryptPassword(authData.Password);
-        var token = EncryptPassword(authData.RawToken ?? "");
+        var password = await EncryptPasswordAsync(authData.Password);
+        var token = await EncryptPasswordAsync(authData.RawToken ?? "");
         var url = authData.Url ?? "";
 
         var forUpdateCount = await filesDbContext.UpdateThirdPartyAccountsAsync(tenantId, linkId, login, password, token, url);
@@ -279,7 +279,7 @@ internal class ProviderAccountDao(
                 authData = GetEncodedAccessToken(authData, key);
             }
 
-            if (!await CheckProviderInfoAsync(ToProviderInfo(0, key, customerTitle, authData, authContext.CurrentAccount.ID, folderType, tenantUtil.DateTimeToUtc(tenantUtil.DateTimeNow()))))
+            if (!await CheckProviderInfoAsync(await ToProviderInfoAsync(0, key, customerTitle, authData, authContext.CurrentAccount.ID, folderType, tenantUtil.DateTimeToUtc(tenantUtil.DateTimeNow()))))
             {
                 throw new UnauthorizedAccessException(string.Format(FilesCommonResource.ErrorMessage_SecurityException_Auth, key));
             }
@@ -308,8 +308,8 @@ internal class ProviderAccountDao(
             if (!authData.IsEmpty())
             {
                 t.UserName = authData.Login ?? "";
-                t.Password = EncryptPassword(authData.Password);
-                t.Token = EncryptPassword(authData.RawToken ?? "");
+                t.Password = await EncryptPasswordAsync(authData.Password);
+                t.Token = await EncryptPasswordAsync(authData.RawToken ?? "");
                 t.Url = authData.Url ?? "";
             }
             
@@ -351,7 +351,7 @@ internal class ProviderAccountDao(
                 newAuthData = GetEncodedAccessToken(newAuthData, key);
             }
 
-            if (!await CheckProviderInfoAsync(ToProviderInfo(0, key, customerTitle, newAuthData, authContext.CurrentAccount.ID, FolderType.ThirdpartyBackup, tenantUtil.DateTimeToUtc(tenantUtil.DateTimeNow()))).ConfigureAwait(false))
+            if (!await CheckProviderInfoAsync(await ToProviderInfoAsync(0, key, customerTitle, newAuthData, authContext.CurrentAccount.ID, FolderType.ThirdpartyBackup, tenantUtil.DateTimeToUtc(tenantUtil.DateTimeNow()))).ConfigureAwait(false))
             {
                 throw new UnauthorizedAccessException(string.Format(FilesCommonResource.ErrorMessage_SecurityException_Auth, key));
             }
@@ -368,8 +368,8 @@ internal class ProviderAccountDao(
         if (newAuthData != null && !newAuthData.IsEmpty())
         {
             thirdParty.UserName = newAuthData.Login ?? "";
-            thirdParty.Password = EncryptPassword(newAuthData.Password);
-            thirdParty.Token = EncryptPassword(newAuthData.RawToken ?? "");
+            thirdParty.Password = await EncryptPasswordAsync(newAuthData.Password);
+            thirdParty.Token = await EncryptPasswordAsync(newAuthData.RawToken ?? "");
             thirdParty.Url = newAuthData.Url ?? "";
         }
         
@@ -401,17 +401,17 @@ internal class ProviderAccountDao(
             await tr.CommitAsync();
         });
     }
-
-    private IProviderInfo ToProviderInfo(int id, ProviderTypes providerKey, string customerTitle, AuthData authData, Guid owner, FolderType type, DateTime createOn)
+    
+    private async Task<IProviderInfo> ToProviderInfoAsync(int id, ProviderTypes providerKey, string customerTitle, AuthData authData, Guid owner, FolderType type, DateTime createOn)
     {
         var dbFilesThirdPartyAccount = new DbFilesThirdpartyAccount
         {
             Id = id,
             Title = customerTitle,
-            Token = EncryptPassword(authData.RawToken),
+            Token = await EncryptPasswordAsync(authData.RawToken),
             Url = authData.Url,
             UserName = authData.Login,
-            Password = EncryptPassword(authData.Password),
+            Password = await EncryptPasswordAsync(authData.Password),
             UserId = owner,
             FolderType = type,
             CreateOn = createOn,
@@ -666,10 +666,12 @@ internal class ProviderAccountDao(
 
         return authData;
     }
-
-    private string EncryptPassword(string password)
+    
+    private async Task<string> EncryptPasswordAsync(string password)
     {
-        return string.IsNullOrEmpty(password) ? string.Empty : instanceCrypto.Encrypt(password);
+        return string.IsNullOrEmpty(password) ? 
+            string.Empty : 
+            await instanceCrypto.EncryptAsync(password);
     }
 
     private string DecryptPassword(string password, int id)

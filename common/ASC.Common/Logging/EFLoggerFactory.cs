@@ -57,15 +57,15 @@ public class EFLogger(ILogger logger) : ILogger
 
     public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
     {
-        // switch (eventId.Id)
-        // {
-        //     case 20101:
+        switch (eventId.Id)
+        {
+            case 20101:
                 logger.Log(LogLevel.Debug,
                         default,
                         state,
                         exception,
                         formatter);
-        //         break;
-        // }
+                break;
+        }
     }
 }

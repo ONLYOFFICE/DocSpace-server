@@ -299,7 +299,7 @@ public class StudioNotifyService(
         
         await studioNotifyServiceHelper.SendNoticeToAsync(
             Actions.JoinUsers,
-            await studioNotifyHelper.RecipientFromEmailAsync(email, true),
+            await studioNotifyHelper.RecipientFromEmailAsync(email, false),
             [EMailSenderName],
             tags.ToArray());
     }

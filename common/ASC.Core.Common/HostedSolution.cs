@@ -173,7 +173,7 @@ public class HostedSolution(ITenantService tenantService,
         var expires = tenantSettings.IsDefault() ? DateTime.UtcNow.AddYears(1) : DateTime.UtcNow.AddMinutes(tenantSettings.LifeTime);
         var userSettings = await settingsManager.LoadAsync<TenantCookieSettings>(tenantId, user.Id);
 
-        return cookieStorage.EncryptCookie(tenantId, user.Id, tenantSettings.Index, expires, userSettings.Index, 0);
+        return await cookieStorage.EncryptCookieAsync(tenantId, user.Id, tenantSettings.Index, expires, userSettings.Index, 0);
     }
 
     public async Task<Tariff> GetTariffAsync(int tenant, bool withRequestToPaymentSystem = true)

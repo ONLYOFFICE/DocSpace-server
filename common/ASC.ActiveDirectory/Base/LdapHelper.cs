@@ -128,13 +128,13 @@ public abstract class LdapHelper(ILogger<LdapHelper> logger, InstanceCrypto inst
         return password;
     }
 
-    public byte[] GetPasswordBytes(string password)
+    public async Task<byte[]> GetPasswordBytesAsync(string password)
     {
         byte[] passwordBytes;
 
         try
         {
-            passwordBytes = _instanceCrypto.Encrypt(new UnicodeEncoding().GetBytes(password));
+            passwordBytes = await _instanceCrypto.EncryptAsync(new UnicodeEncoding().GetBytes(password));
         }
         catch (Exception)
         {

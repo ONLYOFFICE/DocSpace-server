@@ -444,7 +444,7 @@ public class UserManager(
                     (cache.Get<string>("REWRITE_URL" + tenant.Id) != null) ?
                     new Uri(cache.Get<string>("REWRITE_URL" + tenant.Id)).ToString() : tenant.GetTenantDomain(coreSettings);
 
-        var rootAuthorization = cardDavAddressBook.GetSystemAuthorization();
+        var rootAuthorization = await cardDavAddressBook.GetSystemAuthorizationAsync();
 
         if (rootAuthorization != null)
         {
@@ -452,7 +452,7 @@ public class UserManager(
 
             if (oldUserData != null && oldUserData.Status != newUser.Status && newUser.Status == EmployeeStatus.Terminated)
             {
-                var userAuthorization = oldUserData.Email.ToLower() + ":" + instanceCrypto.Encrypt(oldUserData.Email);
+                var userAuthorization = oldUserData.Email.ToLower() + ":" + await instanceCrypto.EncryptAsync(oldUserData.Email);
                 var requestUrlBook = cardDavAddressBook.GetRadicaleUrl(myUri, newUser.Email.ToLower(), true, true);
                 var collection = await cardDavAddressBook.GetCollection(requestUrlBook, userAuthorization, myUri);
                 if (collection.Completed && collection.StatusCode != 404)
@@ -530,9 +530,9 @@ public class UserManager(
         try
         {
             var currentMail = delUser.Email.ToLower();
-            var currentAccountPassword = instanceCrypto.Encrypt(currentMail);
+            var currentAccountPassword = await instanceCrypto.EncryptAsync(currentMail);
             var userAuthorization = currentMail + ":" + currentAccountPassword;
-            var rootAuthorization = cardDavAddressBook.GetSystemAuthorization();
+            var rootAuthorization = await cardDavAddressBook.GetSystemAuthorizationAsync();
             var myUri = (httpContextAccessor?.HttpContext != null) ? httpContextAccessor.HttpContext.Request.GetDisplayUrl() :
                 (cache.Get<string>("REWRITE_URL" + tenant.Id) != null) ?
                 new Uri(cache.Get<string>("REWRITE_URL" + tenant.Id)).ToString() : tenant.GetTenantDomain(coreSettings);

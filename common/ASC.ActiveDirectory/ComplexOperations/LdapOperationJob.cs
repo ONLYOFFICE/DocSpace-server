@@ -131,7 +131,7 @@ public class LdapOperationJob(TenantManager tenantManager,
 
                     logger.DebugPrepareSettings();
 
-                    PrepareSettings(_ldapSettings);
+                    await PrepareSettingsAsync(_ldapSettings);
 
                     if (!string.IsNullOrEmpty(_error))
                     {
@@ -1169,7 +1169,7 @@ public class LdapOperationJob(TenantManager tenantManager,
         //SetProperty(PROCESSED, successProcessed);
     }
 
-    private void PrepareSettings(LdapSettings settings)
+    private async Task PrepareSettingsAsync(LdapSettings settings)
     {
         if (settings == null)
         {
@@ -1314,7 +1314,7 @@ public class LdapOperationJob(TenantManager tenantManager,
         {
             if (!string.IsNullOrEmpty(settings.Password))
             {
-                settings.PasswordBytes = novellLdapHelper.GetPasswordBytes(settings.Password);
+                settings.PasswordBytes = await novellLdapHelper.GetPasswordBytesAsync(settings.Password);
 
                 if (settings.PasswordBytes == null)
                 {

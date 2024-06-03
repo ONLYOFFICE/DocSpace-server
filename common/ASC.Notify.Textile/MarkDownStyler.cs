@@ -41,7 +41,7 @@ public class MarkDownStyler : IPatternStyler
     static readonly Regex _italicReplacer = new(@"<(em|\/em)\\>", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
     static readonly Regex _hTMLLinkReplacer = new(@"<a.*?href=""(.*?)"".*?>(.*?)<\/a>", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
-    public void ApplyFormating(NoticeMessage message)
+    public Task ApplyFormatingAsync(NoticeMessage message)
     {
         var body = string.Empty;
         if (!string.IsNullOrEmpty(message.Subject))
@@ -51,7 +51,7 @@ public class MarkDownStyler : IPatternStyler
         }
         if (string.IsNullOrEmpty(message.Body))
         {
-            return;
+            return Task.CompletedTask;
         }
 
         var lines = message.Body.Split([Environment.NewLine, "\n"], StringSplitOptions.None);
@@ -74,6 +74,7 @@ public class MarkDownStyler : IPatternStyler
         body = _tagReplacer.Replace(body, "");
         body = _multiLineBreaksReplacer.Replace(body, Environment.NewLine);
         message.Body = body;
+        return Task.CompletedTask;
     }
 
     private static string EvalLink(Match match)

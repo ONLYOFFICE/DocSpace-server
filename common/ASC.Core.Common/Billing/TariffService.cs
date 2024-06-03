@@ -152,7 +152,7 @@ public class TariffService(
             {
                 try
                 {
-                    var currentPayments = billingClient.GetCurrentPayments(await coreSettings.GetKeyAsync(tenantId), refresh);
+                    var currentPayments = await billingClient.GetCurrentPaymentsAsync(await coreSettings.GetKeyAsync(tenantId), refresh);
                     if (currentPayments.Length == 0)
                     {
                         throw new BillingNotFoundException("Empty PaymentLast");
@@ -334,7 +334,7 @@ public class TariffService(
 
         try
         {
-            var changed = billingClient.ChangePayment(await coreSettings.GetKeyAsync(tenantId), productIds.ToArray(), quantity.Values.ToArray());
+            var changed = await billingClient.ChangePaymentAsync(await coreSettings.GetKeyAsync(tenantId), productIds.ToArray(), quantity.Values.ToArray());
 
             if (!changed)
             {
@@ -414,7 +414,7 @@ public class TariffService(
                 try
                 {
                     var quotas = await quotaService.GetTenantQuotasAsync();
-                    foreach (var pi in billingClient.GetPayments(await coreSettings.GetKeyAsync(tenantId)))
+                    foreach (var pi in await billingClient.GetPaymentsAsync(await coreSettings.GetKeyAsync(tenantId)))
                     {
                         var quota = quotas.SingleOrDefault(q => q.ProductId == pi.ProductRef.ToString());
                         if (quota != null)
@@ -486,7 +486,7 @@ public class TariffService(
                 try
                 {
                     url =
-                        billingClient.GetPaymentUrl(
+                        await billingClient.GetPaymentUrlAsync(
                             "__Tenant__",
                             productIds.ToArray(),
                             affiliateId,
@@ -524,7 +524,7 @@ public class TariffService(
         return result;
     }
 
-    public IDictionary<string, Dictionary<string, decimal>> GetProductPriceInfo(string partnerId = "", params string[] productIds)
+    public async Task<IDictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync(string partnerId, params string[] productIds)
     {
         ArgumentNullException.ThrowIfNull(productIds);
 
@@ -540,7 +540,7 @@ public class TariffService(
                 var result = cache.Get<IDictionary<string, Dictionary<string, decimal>>>(key);
                 if (result == null)
                 {
-                    result = billingClient.GetProductPriceInfo(partnerId, productIds);
+                    result = await billingClient.GetProductPriceInfoAsync(partnerId, productIds);
                     cache.Insert(key, result, DateTime.Now.AddHours(1));
                 }
 
@@ -563,7 +563,7 @@ public class TariffService(
         {
             try
             {
-                url = billingClient.GetAccountLink(await coreSettings.GetKeyAsync(tenant), backUrl);
+                url = await billingClient.GetAccountLinkAsync(await coreSettings.GetKeyAsync(tenant), backUrl);
                 cache.Insert(key, url, DateTime.UtcNow.Add(TimeSpan.FromMinutes(10)));
             }
             catch (Exception error)

@@ -162,7 +162,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
         }
         else
         {
-            filename = instanceCrypto.Decrypt(Uri.UnescapeDataString(filename));
+            filename = await instanceCrypto.DecryptAsync(Uri.UnescapeDataString(filename));
         }
 
         string path;
