@@ -1095,13 +1095,13 @@ public class EntryManager(IDaoFactory daoFactory,
         File<T> linkedFile = null;
         var fileDao = daoFactory.GetFileDao<T>();
         var sourceFileDao = daoFactory.GetFileDao<T>();
-        var linkDao = daoFactory.GetLinkDao();
+        var linkDao = daoFactory.GetLinkDao<T>();
 
         await using (await distributedLockProvider.TryAcquireFairLockAsync(sourceFile.Id + "_draft"))
         {
-            var linkedId = await linkDao.GetLinkedAsync(sourceFile.Id.ToString());
+            var linkedId = await linkDao.GetLinkedAsync(sourceFile.Id);
 
-            if (linkedId != null)
+            if (!Equals(linkedId, default(T)))
             {
                 linkedFile = await fileDao.GetFileAsync((T)Convert.ChangeType(linkedId, typeof(T)));
                 if (linkedFile == null
@@ -1109,7 +1109,7 @@ public class EntryManager(IDaoFactory daoFactory,
                     || await lockerManager.FileLockedForMeAsync(linkedFile.Id)
                     || linkedFile.RootFolderType == FolderType.TRASH)
                 {
-                    await linkDao.DeleteLinkAsync(sourceFile.Id.ToString());
+                    await linkDao.DeleteLinkAsync(sourceFile.Id);
                     linkedFile = null;
                 }
             }
@@ -1214,7 +1214,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
                 await socketManager.CreateFileAsync(linkedFile);
 
-                await linkDao.AddLinkAsync(sourceFile.Id.ToString(), linkedFile.Id.ToString());
+                await linkDao.AddLinkAsync(sourceFile.Id, linkedFile.Id);
 
                 await socketManager.UpdateFileAsync(sourceFile);
             }
@@ -1230,10 +1230,10 @@ public class EntryManager(IDaoFactory daoFactory,
             return false;
         }
 
-        var linkDao = daoFactory.GetLinkDao();
-        var sourceId = await linkDao.GetSourceAsync(file.Id.ToString());
+        var linkDao = daoFactory.GetLinkDao<T>();
+        var sourceId = await linkDao.GetSourceAsync(file.Id);
 
-        return !string.IsNullOrEmpty(sourceId);
+        return !Equals(sourceId, default(T));
     }
 
     public async Task<bool> CheckFillFormDraftAsync<T>(File<T> linkedFile)
@@ -1243,35 +1243,26 @@ public class EntryManager(IDaoFactory daoFactory,
             return false;
         }
 
-        var linkDao = daoFactory.GetLinkDao();
-        var sourceId = await linkDao.GetSourceAsync(linkedFile.Id.ToString());
-        if (sourceId == null)
+        var linkDao = daoFactory.GetLinkDao<T>();
+        var sourceId = await linkDao.GetSourceAsync(linkedFile.Id);
+        if (Equals(sourceId, default(T)))
         {
             return false;
         }
-
-        if (int.TryParse(sourceId, out var sId))
+        
+        var fileDao = daoFactory.GetFileDao<T>();
+        var sourceFile = await fileDao.GetFileAsync(sourceId);
+        if (sourceFile == null
+            || !await fileSecurity.CanFillFormsAsync(sourceFile)
+            || sourceFile.Access != FileShare.FillForms)
         {
-            return await CheckAsync(sId);
+            await linkDao.DeleteLinkAsync(sourceId);
+
+            return false;
         }
 
-        return await CheckAsync(sourceId);
-
-        async Task<bool> CheckAsync<T1>(T1 id)
-        {
-            var fileDao = daoFactory.GetFileDao<T1>();
-            var sourceFile = await fileDao.GetFileAsync(id);
-            if (sourceFile == null
-                || !await fileSecurity.CanFillFormsAsync(sourceFile)
-                || sourceFile.Access != FileShare.FillForms)
-            {
-                await linkDao.DeleteLinkAsync(id.ToString());
-
-                return false;
-            }
-
-            return true;
-        }
+        return true;
+        
     }
 
     public async Task<File<T>> SaveEditingAsync<T>(T fileId, string fileExtension, string downloadUri, Stream stream, string comment = null, bool checkRight = true, 
@@ -1460,9 +1451,9 @@ public class EntryManager(IDaoFactory daoFactory,
 
                         try
                         {
-                            var linkDao = daoFactory.GetLinkDao();
-                            var sourceId = await linkDao.GetSourceAsync(file.Id.ToString());
-                            var sourceFile = await fileDao.GetFileAsync((T)Convert.ChangeType(sourceId, typeof(T)));
+                            var linkDao = daoFactory.GetLinkDao<T>();
+                            var sourceId = await linkDao.GetSourceAsync(file.Id);
+                            var sourceFile = await fileDao.GetFileAsync(sourceId);
 
                             await linkDao.DeleteLinkAsync(sourceId);
                             await socketManager.UpdateFileAsync(sourceFile);
@@ -1473,7 +1464,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
                             await fileMarker.RemoveMarkAsNewForAllAsync(file);
 
-                            await linkDao.DeleteAllLinkAsync(file.Id.ToString());
+                            await linkDao.DeleteAllLinkAsync(file.Id);
 
                         }
                         catch(Exception ex)
@@ -1499,8 +1490,8 @@ public class EntryManager(IDaoFactory daoFactory,
                || (!file.ProviderEntry && file.CreateBy != authContext.CurrentAccount.ID)
                || !await LinkedForMeAsync(file))
             {
-                var linkDao = daoFactory.GetLinkDao();
-                await linkDao.DeleteAllLinkAsync(file.Id.ToString());
+                var linkDao = daoFactory.GetLinkDao<T>();
+                await linkDao.DeleteAllLinkAsync(file.Id);
             }
         }
 
@@ -1728,8 +1719,8 @@ public class EntryManager(IDaoFactory daoFactory,
             }
 
 
-            var linkDao = daoFactory.GetLinkDao();
-            await linkDao.DeleteAllLinkAsync(newFile.Id.ToString());
+            var linkDao = daoFactory.GetLinkDao<T>();
+            await linkDao.DeleteAllLinkAsync(newFile.Id);
 
             await fileMarker.MarkAsNewAsync(newFile);
 

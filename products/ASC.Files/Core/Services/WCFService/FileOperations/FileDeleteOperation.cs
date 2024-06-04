@@ -388,8 +388,6 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                         if (file.RootFolderType == FolderType.Archive)
                         {
                             var archiveId = await folderDao.GetFolderIDArchive(false);
-                            var virtualRoomsId = await folderDao.GetFolderIDVirtualRooms(false);
-
                             await folderDao.ChangeTreeFolderSizeAsync(archiveId, (-1) * file.ContentLength);
 
                         }
@@ -416,7 +414,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                         Logger.ErrorWithException(ex);
                     }
 
-                    await LinkDao.DeleteAllLinkAsync(file.Id.ToString());
+                    await LinkDao.DeleteAllLinkAsync(file.Id);
                     await FileDao.SaveProperties(file.Id, null);
                 }
 

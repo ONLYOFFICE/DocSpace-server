@@ -27,6 +27,7 @@
 namespace ASC.Files.Core.Data;
 
 internal abstract class BaseTagDao<T>(
+    IDaoFactory daoFactory,
     ILogger<FolderDao> logger,
     UserManager userManager,
     IDbContextFactory<FilesDbContext> dbContextManager,
@@ -51,13 +52,13 @@ internal abstract class BaseTagDao<T>(
 {
     public async IAsyncEnumerable<Tag> GetTagsAsync(Guid subject, TagType tagType, IEnumerable<FileEntry<T>> fileEntries)
     {
+        var mapping = daoFactory.GetMapping<T>();
         var filesId = new HashSet<string>();
         var foldersId = new HashSet<string>();
 
         foreach (var f in fileEntries)
         {
-            var idObj = f.Id is int fid ? MappingIDAsync(fid) : await MappingIDAsync(f.Id);
-            var id = idObj.ToString();
+            var id = await mapping.MappingIdAsync(f.Id);
             if (f.FileEntryType == FileEntryType.File)
             {
                 filesId.Add(id);
@@ -94,9 +95,10 @@ internal abstract class BaseTagDao<T>(
         return GetTagsAsync(Guid.Empty, tagType, fileEntries);
     }
 
-    public async IAsyncEnumerable<Tag> GetTagsAsync(T entryID, FileEntryType entryType, TagType? tagType)
+    public async IAsyncEnumerable<Tag> GetTagsAsync(T entryId, FileEntryType entryType, TagType? tagType)
     {
-        var mappedId = (entryID is int fid ? MappingIDAsync(fid) : await MappingIDAsync(entryID)).ToString();
+        var mapping = daoFactory.GetMapping<T>();
+        var mappedId = await mapping.MappingIdAsync(entryId);
 
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         List<TagLinkData> fromDb;
@@ -243,32 +245,29 @@ internal abstract class BaseTagDao<T>(
                     }
 
                     cachedTags.Add(key, toAdd);
-                }
-
-                await internalFilesDbContext.SaveChangesAsync();
-                logger.LogDebug("SaveTagsAsync3, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
-                foreach (var t in tags)
-                {
-                    var key = GetCacheKey(t, tenantId);
+                
+                    logger.LogDebug("SaveTagsAsync3, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
 
                     var linkToInsert = new DbFilesTagLink
                     {
                         TenantId = tenantId,
-                        TagId = cachedTags.Get(key).Id,
-                        EntryId = (await MappingIDAsync(t.EntryId, true)).ToString(),
+                        TagId = toAdd.Id,
+                        EntryId = int.TryParse(t.EntryId.ToString(), out var n) ? n.ToString() : (await MappingIdAsync(t.EntryId, true)).ToString(),
                         EntryType = t.EntryType,
                         CreateBy = createdBy != Guid.Empty ? createdBy : _authContext.CurrentAccount.ID,
                         CreateOn = createOn,
                         Count = t.Count
                     };
 
-                    await internalFilesDbContext.AddOrUpdateAsync(r => r.TagLink, linkToInsert);
+                    await internalFilesDbContext.TagLink.AddOrUpdateAsync(linkToInsert);
                     result.Add(t);
                 }
-
-                await internalFilesDbContext.SaveChangesAsync();
+                
                 logger.LogDebug("SaveTagsAsync4, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
+                await internalFilesDbContext.SaveChangesAsync();
+                logger.LogDebug("SaveTagsAsync5, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
                 await tx.CommitAsync();
+                logger.LogDebug("SaveTagsAsync6, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
             });
         }
 
@@ -359,7 +358,7 @@ internal abstract class BaseTagDao<T>(
         {
             TenantId = tenantId,
             TagId = id,
-            EntryId = (await MappingIDAsync(t.EntryId, true)).ToString(),
+            EntryId = (await MappingIdAsync(t.EntryId, true)).ToString(),
             EntryType = t.EntryType,
             CreateBy = createdBy != Guid.Empty ? createdBy : _authContext.CurrentAccount.ID,
             CreateOn = createOn,
@@ -395,7 +394,7 @@ internal abstract class BaseTagDao<T>(
 
                 foreach (var tagsGroup in tags.GroupBy(t => new { t.EntryId, t.EntryType }))
                 {
-                    var mappedId = (await MappingIDAsync(tagsGroup.Key.EntryId)).ToString();
+                    var mappedId = (await MappingIdAsync(tagsGroup.Key.EntryId)).ToString();
                     
                     await filesDbContext.IncrementNewTagsAsync(tenantId, tagsGroup.Select(t => t.Id), tagsGroup.Key.EntryType, mappedId, createdBy, createOn);
                 }
@@ -462,7 +461,7 @@ internal abstract class BaseTagDao<T>(
         
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        var mappedId = (await MappingIDAsync(tag.EntryId)).ToString();
+        var mappedId = (await MappingIdAsync(tag.EntryId)).ToString();
         var tagId = tag.Id;
         var tagEntryType = tag.EntryType;
 
@@ -499,7 +498,7 @@ internal abstract class BaseTagDao<T>(
     public async Task RemoveTagsAsync(FileEntry<T> entry, IEnumerable<int> tagsIds)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        var entryId = (entry.Id is int fid ? MappingIDAsync(fid) : await MappingIDAsync(entry.Id)).ToString();
+        var entryId = await daoFactory.GetMapping<T>().MappingIdAsync(entry.Id);
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         await filesDbContext.DeleteTagLinksAsync(tenantId, tagsIds, entryId, entry.FileEntryType);
@@ -544,7 +543,7 @@ internal abstract class BaseTagDao<T>(
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        var mappedId = (await MappingIDAsync(entryId)).ToString();
+        var mappedId = await daoFactory.GetMapping<T>().MappingIdAsync(entryId);
 
         return await filesDbContext.DeleteTagLinksByEntryIdAsync(tenantId, mappedId, entryType, tagType);
 
@@ -564,7 +563,7 @@ internal abstract class BaseTagDao<T>(
 
         if (id != 0)
         {
-            var entryId = (tag.EntryId is int fid ? MappingIDAsync(fid) : await MappingIDAsync(tag.EntryId)).ToString();
+            var entryId = (tag.EntryId is int fid ? fid : await MappingIdAsync(tag.EntryId)).ToString();
 
             await filesDbContext.DeleteTagLinksByTagIdAsync(tenantId, id, entryId, tag.EntryType);
 
@@ -588,8 +587,7 @@ internal abstract class BaseTagDao<T>(
 
         foreach (var r in fileEntries)
         {
-            var idObj = r.Id is int fid ? MappingIDAsync(fid) : await MappingIDAsync(r.Id);
-            var id = idObj.ToString();
+            var id = await daoFactory.GetMapping<T>().MappingIdAsync(r.Id);
             var entryType = (r.FileEntryType == FileEntryType.File) ? FileEntryType.File : FileEntryType.Folder;
 
             entryIds.Add(id);
@@ -617,10 +615,11 @@ internal abstract class BaseTagDao<T>(
         var result = mapper.Map<DbFilesTag, Tag>(r.Tag);
         mapper.Map(r.Link, result);
 
-        result.EntryId = await MappingIDAsync(r.Link.EntryId);
+        result.EntryId = await MappingIdAsync(r.Link.EntryId);
 
         return result;
     }
+    
     protected async ValueTask<TagInfo> ToTagAsyncInfo(TagLinkData r)
     {
         var result = mapper.Map<DbFilesTag, TagInfo>(r.Tag);
@@ -628,7 +627,7 @@ internal abstract class BaseTagDao<T>(
 
         if(r.Link != null)
         {
-            result.EntryId = await MappingIDAsync(r.Link.EntryId);
+            result.EntryId = await MappingIdAsync(r.Link.EntryId);
             result.EntryType = r.Link.EntryType;
         }
         return result;
@@ -647,19 +646,21 @@ internal abstract class BaseTagDao<T>(
 
 [Scope(typeof(ITagDao<int>))]
 internal class TagDao(
+    IDaoFactory daoFactory,
     ILogger<FolderDao> logger,
     UserManager userManager,
-        IDbContextFactory<FilesDbContext> dbContextManager,
-        TenantManager tenantManager,
-        TenantUtil tenantUtil,
-        SetupInfo setupInfo,
-        MaxTotalSizeStatistic maxTotalSizeStatistic,
-        SettingsManager settingsManager,
-        AuthContext authContext,
-        IServiceProvider serviceProvider,
-        IMapper mapper,
-        IDistributedLockProvider distributedLockProvider)
+    IDbContextFactory<FilesDbContext> dbContextManager,
+    TenantManager tenantManager,
+    TenantUtil tenantUtil,
+    SetupInfo setupInfo,
+    MaxTotalSizeStatistic maxTotalSizeStatistic,
+    SettingsManager settingsManager,
+    AuthContext authContext,
+    IServiceProvider serviceProvider,
+    IMapper mapper,
+    IDistributedLockProvider distributedLockProvider)
     : BaseTagDao<int>(
+        daoFactory,
         logger,
         userManager,
               dbContextManager,
@@ -776,6 +777,7 @@ internal class TagDao(
 
 [Scope(typeof(ITagDao<string>))]
 internal class ThirdPartyTagDao(
+    IDaoFactory daoFactory,
     ILogger<FolderDao> logger,
     UserManager userManager,
         IDbContextFactory<FilesDbContext> dbContextManager,
@@ -790,6 +792,7 @@ internal class ThirdPartyTagDao(
         IThirdPartyTagDao thirdPartyTagDao,
         IDistributedLockProvider distributedLockProvider)
     : BaseTagDao<string>(
+        daoFactory,
         logger,
         userManager,
               dbContextManager,

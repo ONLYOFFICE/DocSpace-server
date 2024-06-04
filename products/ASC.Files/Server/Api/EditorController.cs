@@ -181,12 +181,12 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
             {
                 case FolderType.FillingFormsRoom:
                     var properties = await daoFactory.GetFileDao<T>().GetProperties(file.Id);
-                    var linkDao = daoFactory.GetLinkDao();
+                    var linkDao = daoFactory.GetLinkDao<T>();
                     var fileDao = daoFactory.GetFileDao<T>();
                     canStartEdit = true;
                     if (edit)
                     {
-                        await linkDao.DeleteAllLinkAsync(file.Id.ToString());
+                        await linkDao.DeleteAllLinkAsync(file.Id);
                         await fileDao.SaveProperties(file.Id, null);
                         canEdit = true;
                         canFill = false;
@@ -195,8 +195,8 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                     {
                         if (properties != null && properties.FormFilling.StartFilling)
                         {
-                            var linkedId = await linkDao.GetLinkedAsync(file.Id.ToString());
-                            var formDraft = linkedId != null ?
+                            var linkedId = await linkDao.GetLinkedAsync(file.Id);
+                            var formDraft = !Equals(linkedId, default(T)) ?
                                 await fileDao.GetFileAsync((T)Convert.ChangeType(linkedId, typeof(T))) :
                                 (await entryManager.GetFillFormDraftAsync(file)).file;
 
@@ -207,7 +207,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
 
                             await fileMarker.MarkAsNewAsync(formDraft);
                             await socketManager.CreateFileAsync(formDraft);
-                            await linkDao.AddLinkAsync(fileId.ToString(), formDraft.Id.ToString());
+                            await linkDao.AddLinkAsync(fileId, formDraft.Id);
                             await socketManager.UpdateFileAsync(file);
 
                             file = formDraft;

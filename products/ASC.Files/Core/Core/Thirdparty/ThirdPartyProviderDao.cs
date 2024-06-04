@@ -423,71 +423,34 @@ internal abstract class ThirdPartyProviderDao
     #endregion
 }
 
-internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(IServiceProvider serviceProvider,
-        UserManager userManager,
-        TenantManager tenantManager,
-        TenantUtil tenantUtil,
-        IDbContextFactory<FilesDbContext> dbContextFactory,
-        SetupInfo setupInfo,
-        FileUtility fileUtility,
-        TempPath tempPath,
-        RegexDaoSelectorBase<TFile, TFolder, TItem> regexDaoSelectorBase)
+internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(
+    IDaoFactory daoFactory,
+    IServiceProvider serviceProvider,
+    UserManager userManager,
+    TenantManager tenantManager,
+    TenantUtil tenantUtil,
+    IDbContextFactory<FilesDbContext> dbContextFactory,
+    FileUtility fileUtility,
+    RegexDaoSelectorBase<TFile, TFolder, TItem> regexDaoSelectorBase)
     : ThirdPartyProviderDao, IDisposable
     where TFile : class, TItem
     where TFolder : class, TItem
     where TItem : class
 {
-    protected readonly IServiceProvider _serviceProvider = serviceProvider;
     protected readonly UserManager _userManager = userManager;
     protected readonly TenantUtil _tenantUtil = tenantUtil;
     protected readonly IDbContextFactory<FilesDbContext> _dbContextFactory = dbContextFactory;
-    protected readonly SetupInfo _setupInfo = setupInfo;
     protected readonly FileUtility _fileUtility = fileUtility;
-    protected readonly TempPath _tempPath = tempPath;
+    protected readonly IDaoFactory _daoFactory = daoFactory;
     internal RegexDaoSelectorBase<TFile, TFolder, TItem> DaoSelector { get; set; } = regexDaoSelectorBase;
     protected IProviderInfo<TFile, TFolder, TItem> ProviderInfo { get; set; }
     protected string PathPrefix { get; set; }
 
     protected string Id { get => ProviderInfo.Selector.Id; }
 
-    public async Task<string> MappingIDAsync(string id, bool saveIfNotExist = false)
-    {
-        if (id == null)
-        {
-            return null;
-        }
-        
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
-        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-
-        string result;
-        if (id.StartsWith(Id))
-        {
-            result = Regex.Replace(BitConverter.ToString(Hasher.Hash(id, HashAlg.MD5)), "-", "").ToLower();
-        }
-        else
-        {
-            result = await Queries.IdAsync(filesDbContext, id);
-        }
-        if (saveIfNotExist)
-        {
-            var newMapping = new DbFilesThirdpartyIdMapping
-            {
-                Id = id,
-                HashId = result,
-                TenantId = tenantId
-            };
-
-            await filesDbContext.ThirdpartyIdMapping.AddAsync(newMapping);
-            await filesDbContext.SaveChangesAsync();
-        }
-
-        return result;
-    }
-
     protected Folder<string> GetFolder()
     {
-        var folder = _serviceProvider.GetService<Folder<string>>();
+        var folder = serviceProvider.GetService<Folder<string>>();
 
         InitFileEntry(folder);
 
@@ -512,7 +475,7 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(IServicePro
 
     protected File<string> GetFile()
     {
-        var file = _serviceProvider.GetService<File<string>>();
+        var file = serviceProvider.GetService<File<string>>();
 
         InitFileEntry(file);
 
@@ -596,12 +559,13 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(IServicePro
             await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
             await using var tx = await dbContext.Database.BeginTransactionAsync();
             var oldIds = Queries.IdsAsync(dbContext, tenantId, oldValue);
-
+            var mapping = _daoFactory.GetMapping<string>();
+            
             await foreach (var oldId in oldIds)
             {
-                var oldHashId = await MappingIDAsync(oldId);
+                var oldHashId = await mapping.MappingIdAsync(oldId);
                 var newId = oldId.Replace(oldValue, newValue);
-                var newHashId = await MappingIDAsync(newId);
+                var newHashId = await mapping.MappingIdAsync(newId);
 
                 var mappingForDelete = await Queries.ThirdPartyIdMappingsAsync(dbContext, tenantId, oldHashId).ToListAsync();
 

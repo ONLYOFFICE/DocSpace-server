@@ -685,17 +685,15 @@ public class CustomizationConfig<T>(
             return false;
         }
 
-        var linkDao = daoFactory.GetLinkDao();
-        var sourceId = await linkDao.GetSourceAsync(file.Id.ToString());
+        var linkDao = daoFactory.GetLinkDao<T>();
+        var sourceId = await linkDao.GetSourceAsync(file.Id);
 
-        if (sourceId == null)
+        if (Equals(sourceId, default(T)))
         {
             return false;
         }
 
-        var properties = int.TryParse(sourceId, out var sourceInt)
-            ? await daoFactory.GetFileDao<int>().GetProperties(sourceInt)
-            : await daoFactory.GetFileDao<string>().GetProperties(sourceId);
+        var properties = await daoFactory.GetFileDao<T>().GetProperties(sourceId);
 
         return properties is { FormFilling.CollectFillForm: true };
     }

@@ -99,12 +99,7 @@ public class AbstractDao
         await filesDbContext.SaveChangesAsync();
     }
 
-    protected int MappingIDAsync(int id)
-    {
-        return id;
-    }
-
-    protected ValueTask<object> MappingIDAsync(object id, bool saveIfNotExist = false)
+    protected ValueTask<object> MappingIdAsync(object id, bool saveIfNotExist = false)
     {
         if (id == null)
         {
@@ -118,10 +113,10 @@ public class AbstractDao
             return ValueTask.FromResult<object>(n);
         }
 
-        return InternalMappingIDAsync(id, saveIfNotExist);
+        return InternalMappingIdAsync(id, saveIfNotExist);
     }
 
-    private async ValueTask<object> InternalMappingIDAsync(object id, bool saveIfNotExist = false)
+    private async ValueTask<object> InternalMappingIdAsync(object id, bool saveIfNotExist = false)
     {
         object result;
 
