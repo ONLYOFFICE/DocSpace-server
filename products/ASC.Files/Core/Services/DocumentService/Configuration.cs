@@ -764,6 +764,11 @@ public class LogoConfig(
     {
         get => commonLinkUtility.GetFullAbsolutePath(commonLinkUtility.GetDefault());
     }
+
+    public bool GetVisible(EditorType editorType)
+    {
+        return editorType != EditorType.Mobile;
+    }
 }
 
 [Transient]
