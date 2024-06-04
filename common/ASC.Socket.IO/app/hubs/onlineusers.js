@@ -25,7 +25,6 @@ module.exports = async (io) => {
       let id;
       let sessionId = session?.user?.connection;
       let idInRoom;
-      mapperIds[sessionId] = id;
       
       var user = getUser(portalUsers, userId, tenantId);
       if (!user) 
@@ -37,7 +36,8 @@ module.exports = async (io) => {
             id: sessionId,
             platform: operationSystem,
             browser: parser.browser.name + " " + browserVersion,
-            ip: ipAddress
+            ip: ipAddress,
+            status: "online"
           });
         id = 1;
         user = {
@@ -45,7 +45,8 @@ module.exports = async (io) => {
           displayName: userName,
           page: session?.user?.profileUrl,
           sessions: sessions,
-          status: "online"
+          status: "online",
+          offlineSessions: new Map()
         };
       }
       else
@@ -53,7 +54,7 @@ module.exports = async (io) => {
         user.status = "online";
 
         var keys = Array.from(user.sessions.keys());
-        id = keys.length == 0 ? 1 : keys + 1;
+        id = keys.length == 0 ? 1 : keys[keys.length - 1] + 1;
         user.sessions.set(
           id,
           {
@@ -63,6 +64,8 @@ module.exports = async (io) => {
             ip: ipAddress
           });
       }
+      
+      user.offlineSessions.delete(sessionId);
       if(user.sessions.size == 1)
       {
         var stringUser = serialize(user);
@@ -75,7 +78,23 @@ module.exports = async (io) => {
         var user = getUser(portalUsers, userId, tenantId);
         if (user) 
         {
+          var session = user.sessions.get(id);
           user.sessions.delete(id);
+          var array = Array.from(user.sessions, ([name, value]) => {
+            return value;
+          })
+          if(!array.find(e=> e.id == session.id))
+          {
+            user.offlineSessions.set(session.id,
+              {
+                id: session.id,
+                platform: session.platform,
+                browser: session.browser,
+                ip: session.ip,
+                status: "offline",
+                date: new Date().toString()
+            });
+          }
           id = -1;
 
           if(user.sessions.size <= 0)
@@ -211,35 +230,6 @@ module.exports = async (io) => {
         onlineIO.to(socket.id).emit("statuses-in-portal",  users );
       });
 
-      socket.on("logoutUserInPortal", async (date) => {
-        var user = getUser(portalUsers, date.userId, tenantId);
-        if (user) 
-        {
-          user.status = "offline";
-          user.date = new Date().toString();
-          user.sessions = new Map();
-          updateUser(portalUsers, user, date.userId, tenantId);
-          onlineIO.to(`p-${tenantId}`).emit("leave-in-portal",  date.userId );
-        }
-      });
-
-      socket.on("logoutSessionUserInPortal", async (date) => 
-      {
-        var user = getUser(portalUsers, date.userId, tenantId);
-        if (user) 
-        {
-          user.sessions.delete(mapperIds[date.id]);
-
-          if(user.sessions.size <= 0)
-          {
-            user.status = "offline";
-            user.date = new Date().toString();
-            updateUser(portalUsers, user, date.userId, tenantId);
-            onlineIO.to(`p-${tenantId}`).emit("leave-in-portal",  date.userId );
-          }
-        }
-    });
-
       socket.on("leaveRoom", async ({ roomPart }) => {
         const roomId = getRoom(roomPart);
         var user = getUser(roomUsers, userId, roomId);
@@ -307,8 +297,8 @@ module.exports = async (io) => {
               }
       }
 
-      function serialize(user){
-        
+      function serialize(user)
+      {
         var serUser = {
           id: user.id,
           displayName: user.displayName,
@@ -318,6 +308,9 @@ module.exports = async (io) => {
           }),
           status: user.status
         };
+        serUser.sessions = serUser.sessions.concat(Array.from(user.offlineSessions, ([name, value]) => {
+          return value;
+        }));
         return serUser;
       }
 
