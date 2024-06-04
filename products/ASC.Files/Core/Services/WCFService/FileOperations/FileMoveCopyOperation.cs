@@ -757,7 +757,6 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                 needToMark.Add(newFile);
 
                                 await socketManager.CreateFileAsync(newFile);
-                                if (isPdfForm) await socketManager.CreateFormAsync(newFile, securityContext.CurrentAccount.ID, numberRoomMembers <= 1);
 
                                 if (ProcessedFile(fileId))
                                 {
