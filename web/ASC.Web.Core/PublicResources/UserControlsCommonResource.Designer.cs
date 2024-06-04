@@ -88,7 +88,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to New Document.
+        ///   Looks up a localized string similar to New document.
         /// </summary>
         public static string NewDocument {
             get {

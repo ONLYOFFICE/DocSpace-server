@@ -117,52 +117,103 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="pattern_remove_user_data_completed_custom_mode" xml:space="preserve">
-    <value>Dragi $UserName,
-
-Proces uklanjanja podata od korisnika "$FromUserName":"$FromUserLink" je uspešno završen.
-
-Brisanje ličnih podataka je oslobodilo $DocsSpace</value>
+  <data name="CommonAddUsers" xml:space="preserve">
+    <value>Додај кориснике</value>
   </data>
-  <data name="ProductAdminOpportunitiesCustomMode" xml:space="preserve">
-    <value>Uradite isto kao korisnik|Povežite Dropbox, Box i druge naloge u 'Zajedničkom' odeljku|Podesite prava pristupa dokumentima i folderima u 'Zajedničkom' odeljku</value>
+  <data name="CommonGroup" xml:space="preserve">
+    <value>Група</value>
   </data>
-  <data name="ProductUserOpportunitiesCustomMode" xml:space="preserve">
-    <value>Kreirajte i uređujte svoje dokumente, kao i deljene dokumente sa odgovarajućim pravima pristupa|Dajte pristup za čitanje/uređivanje drugim korisnicima za dokumente i foldere|Povežite Dropbox, Box i druge naloge u 'Dokumenti' odeljku</value>
+  <data name="CommonGroupHead" xml:space="preserve">
+    <value>Вођа</value>
   </data>
-  <data name="subject_remove_user_data_completed_custom_mode" xml:space="preserve">
-    <value>${LetterLogoText}. Uklanjanje korisničkih podataka je završeno</value>
+  <data name="CommonGroups" xml:space="preserve">
+    <value>Групе</value>
   </data>
-  <data name="subject_saas_custom_mode_reg_data" xml:space="preserve">
-    <value>Novi portal je registrovan</value>
+  <data name="CommonGuest" xml:space="preserve">
+    <value>Гост</value>
   </data>
-  <data name="pattern_enterprise_whitelabel_user_welcome_custom_mode_v1" xml:space="preserve">
-    <value>Zdravo, $UserName!
-
-Dobrodošli na ONLYOFFICE DocSpace! Vaš korisnički profil je uspešno dodat na "${__VirtualRootPath}":"${__VirtualRootPath}". Sada možete:
-
-* Radite sa drugim korisnicima u sobi u koju ste pozvani: *sobe za saradnju za koautorstvo u realnom vremenu ili prilagođene sobe sa fleksibilnim postavkama za bilo koju svrhu*.
-
-* *Radite sa datotekama različitih formata*: tekst dokumenti, proračunske tebele, prezentacije, digitalni obrasci, PDF-ovi, e-knjige, multimedija.
-
-* *Sarađujete na dokumentima* sa dva kouređivačka modela: u realnom vremenu ili zaključavanjem paragrafa. Pratite promene, komunicirajte u realnom vremenu koristeći ugrađeni čet ili obavljajte audio i video pozive.
-
-* *Povežite bilo koje oblak skladište* i radite bez menjanja između aplikacija.
-
-$OrangeButton
-
-Ako vam treba pomoć, pregledajte naš "Centar za Pomoć":"${__HelpLink}" ili pitajte naš "tim za podršku":"${__SupportLink}".
-
-$TrulyYours</value>
+  <data name="EducationGuest" xml:space="preserve">
+    <value>Гост</value>
   </data>
-  <data name="pattern_saas_custom_mode_reg_data" xml:space="preserve">
-    <value>h3.Novi portal je registrovan
-
-# URL portala: "${__VirtualRootPath}":"${__VirtualRootPath}"
-# Ime: $UserName
-# Prezime: $UserLastName
-# Email: $UserEmail
-# Telefon: $Phone
-# Datum kreiranja: $Date</value>
+  <data name="CommonGuests" xml:space="preserve">
+    <value>Гости</value>
+  </data>
+  <data name="EducationGuests" xml:space="preserve">
+    <value>Гости</value>
+  </data>
+  <data name="EducationGroups" xml:space="preserve">
+    <value>Групе</value>
+  </data>
+  <data name="EducationGroup" xml:space="preserve">
+    <value>Група</value>
+  </data>
+  <data name="CommonRegDate" xml:space="preserve">
+    <value>Датум регистрације</value>
+  </data>
+  <data name="CommonSchemaName" xml:space="preserve">
+    <value>Заједничко</value>
+  </data>
+  <data name="CommonUser" xml:space="preserve">
+    <value>Корисник</value>
+  </data>
+  <data name="CommonUsers" xml:space="preserve">
+    <value>Корисници</value>
+  </data>
+  <data name="CommonUserTitle" xml:space="preserve">
+    <value>Звање</value>
+  </data>
+  <data name="DefaultAddUsers" xml:space="preserve">
+    <value>Додај запослене</value>
+  </data>
+  <data name="DefaultGroup" xml:space="preserve">
+    <value>Одељење</value>
+  </data>
+  <data name="DefaultGroupHead" xml:space="preserve">
+    <value>Вођа</value>
+  </data>
+  <data name="DefaultGroups" xml:space="preserve">
+    <value>Одељење</value>
+  </data>
+  <data name="DefaultGuest" xml:space="preserve">
+    <value>Гост</value>
+  </data>
+  <data name="DefaultGuests" xml:space="preserve">
+    <value>Гости</value>
+  </data>
+  <data name="EducationGroupHead" xml:space="preserve">
+    <value>Лидер групе</value>
+  </data>
+  <data name="EducationRegDate" xml:space="preserve">
+    <value>Датум регистрације</value>
+  </data>
+  <data name="EducationSchemaName" xml:space="preserve">
+    <value>Образовна институција</value>
+  </data>
+  <data name="EducationUser" xml:space="preserve">
+    <value>Учитељ/Студент</value>
+  </data>
+  <data name="EducationUsers" xml:space="preserve">
+    <value>Учитељи/Студенти</value>
+  </data>
+  <data name="DefaultRegDate" xml:space="preserve">
+    <value>Запослен дана</value>
+  </data>
+  <data name="DefaultSchemaName" xml:space="preserve">
+    <value>Корпоративни</value>
+  </data>
+  <data name="DefaultUser" xml:space="preserve">
+    <value>Запослени</value>
+  </data>
+  <data name="DefaultUsers" xml:space="preserve">
+    <value>Запослени</value>
+  </data>
+  <data name="DefaultUserTitle" xml:space="preserve">
+    <value>Позиција</value>
+  </data>
+  <data name="EducationAddUsers" xml:space="preserve">
+    <value>Додај учитеље/студенте</value>
+  </data>
+  <data name="EducationUserTitle" xml:space="preserve">
+    <value>Звање</value>
   </data>
 </root>
