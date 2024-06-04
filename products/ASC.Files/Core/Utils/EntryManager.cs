@@ -439,23 +439,14 @@ public class EntryManager(IDaoFactory daoFactory,
             var files = await fileDao.GetFilesAsync(parent.Id, orderBy, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders, excludeSubject, filesOffset, filesCount, roomId, withShared)
                 .ToListAsync();
 
-            if (parent.FolderType == FolderType.FillingFormsRoom )
+            if (parent.FolderType == FolderType.FillingFormsRoom && securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))
             {
-                var ace = await fileSharing.GetPureSharesAsync(parent, new List<Guid> { authContext.CurrentAccount.ID }).FirstOrDefaultAsync();
 
-                if (ace is { Access: FileShare.FillForms })
+                for (var i = folders.Count - 1; i >= 0; i--)
                 {
-                    for (var i = files.Count - 1; i >= 0; i--)
+                    if (folders[i].FolderType == FolderType.ReadyFormFolder || folders[i].FolderType == FolderType.InProcessFormFolder)
                     {
-                        var fileExt = FileUtility.GetFileExtension(files[i].Title);
-                        var fileType = FileUtility.GetFileTypeByExtention(fileExt);
-
-                        var properties = await daoFactory.GetFileDao<T>().GetProperties(files[i].Id);
-                        if (fileType == FileType.Pdf && (properties == null || !properties.FormFilling.StartFilling))
-                        {
-                            files.Remove(files[i]);
-                        }
-
+                        folders.Remove(folders[i]);
                     }
                 }
             }

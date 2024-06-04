@@ -859,6 +859,14 @@ public class FileSecurity(IDaoFactory daoFactory,
                 return false;
             }
 
+            if(userId.Equals(ASC.Core.Configuration.Constants.Guest.ID) && (folder.FolderType == FolderType.ReadyFormFolder ||
+                    folder.FolderType == FolderType.InProcessFormFolder ||
+                    folder.FolderType == FolderType.FormFillingFolderDone ||
+                    folder.FolderType == FolderType.FormFillingFolderInProgress))
+            {
+                return false;
+            }
+
             if (action != FilesSecurityActions.Read)
             {
                 if (action is FilesSecurityActions.Duplicate or
@@ -923,10 +931,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                     {
                         return action == FilesSecurityActions.MoveTo;
                     }
-                    if (folder.FolderType == FolderType.FillingFormsRoom)
-                    {
-                        return true;
-                    }
+                  
                 }
             }
             else if (isAuthenticated)
