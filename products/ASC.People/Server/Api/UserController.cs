@@ -1512,12 +1512,12 @@ public class UserController(ICache cache,
     /// Check quota recalculation
     /// </short>
     /// <category>Quota</category>
-    /// <returns type="ASC.Api.Core.Model.TaskProgressDto, ASC.Api.Core.Model">Task progress</returns>
+    /// <returns type="System.Boolean, System">Boolean value: true - quota recalculation process is enabled, false - quota recalculation process is disabled</returns>
     /// <path>api/2.0/people/checkrecalculatequota</path>
     /// <httpMethod>GET</httpMethod>
     /// <visible>false</visible>
     [HttpGet("checkrecalculatequota")]
-    public async Task<TaskProgressDto> CheckRecalculateQuotaAsync()
+    public async Task<bool> CheckRecalculateQuotaAsync()
     {
         await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         return await usersQuotaSyncOperation.CheckRecalculateQuota(await tenantManager.GetCurrentTenantAsync());

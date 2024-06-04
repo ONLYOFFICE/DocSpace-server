@@ -50,7 +50,7 @@ public class UsersQuotaSyncOperation(IServiceProvider serviceProvider, IDistribu
             await _progressQueue.EnqueueTask(item.RunJobAsync, item);
         }
     }
-    public async Task<TaskProgressDto> CheckRecalculateQuota(Tenant tenant)
+    public async Task<bool> CheckRecalculateQuota(Tenant tenant)
     {
         var item = (await _progressQueue.GetAllTasks<UsersQuotaSyncJob>()).FirstOrDefault(t => t.TenantId == tenant.Id);
         var progress = new TaskProgressDto();
@@ -58,7 +58,7 @@ public class UsersQuotaSyncOperation(IServiceProvider serviceProvider, IDistribu
         if (item == null)
         {
             progress.IsCompleted = true;
-            return progress;
+            return !progress.IsCompleted;
         }
 
         progress.IsCompleted = item.IsCompleted;
@@ -69,7 +69,8 @@ public class UsersQuotaSyncOperation(IServiceProvider serviceProvider, IDistribu
             await _progressQueue.DequeueTask(item.Id);
         }
 
-        return progress;
+        return !progress.IsCompleted;
+
     }
 }
 
