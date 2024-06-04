@@ -1077,7 +1077,7 @@ public class EntryManager(IDaoFactory daoFactory,
         }
     }
 
-    public async Task<(File<T> file, Folder<T> folderIfNew)> GetFillFormDraftAsync<T>(File<T> sourceFile)
+    public async Task<(File<T> file, Folder<T> folderIfNew)> GetFillFormDraftAsync<T>(File<T> sourceFile, T folderId)
     {
         if (sourceFile == null)
         {
@@ -1109,7 +1109,6 @@ public class EntryManager(IDaoFactory daoFactory,
 
         if (linkedFile == null)
         {
-            var folderId = sourceFile.ParentId;
             var folderDao = daoFactory.GetFolderDao<T>();
             folderIfNew = await folderDao.GetFolderAsync(folderId);
             if (folderIfNew == null)

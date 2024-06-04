@@ -2316,7 +2316,7 @@ public class FileStorageService //: IFileStorageService
                 File<T> form;
                 try
                 {
-                    (form, folderIfNew) = await entryManager.GetFillFormDraftAsync(file);
+                    (form, folderIfNew) = await entryManager.GetFillFormDraftAsync(file, file.ParentId);
                 }
                 catch (Exception ex)
                 {

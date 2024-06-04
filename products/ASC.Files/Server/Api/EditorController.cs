@@ -179,6 +179,18 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
         {
             var folderDao = daoFactory.GetFolderDao<T>();
             var rootFolder = await folderDao.GetFolderAsync(file.ParentId);
+            if (!DocSpaceHelper.IsRoom(rootFolder.FolderType) && rootFolder.FolderType != FolderType.FormFillingFolderInProgress && rootFolder.FolderType != FolderType.FormFillingFolderDone)
+            {
+                var (rId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(rootFolder);
+                if (int.TryParse(rId.ToString(), out var roomId) && roomId != -1)
+                {
+                    var room = await folderDao.GetFolderAsync((T)Convert.ChangeType(roomId, typeof(T)));
+                    if (room.FolderType == FolderType.FillingFormsRoom)
+                    {
+                        rootFolder = room;
+                    }
+                }
+            }
 
             switch (rootFolder.FolderType)
             {
@@ -201,7 +213,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                             var linkedId = await linkDao.GetLinkedAsync(file.Id.ToString());
                             var formDraft = linkedId != null ?
                                 await fileDao.GetFileAsync((T)Convert.ChangeType(linkedId, typeof(T))) :
-                                (await entryManager.GetFillFormDraftAsync(file)).file;
+                                (await entryManager.GetFillFormDraftAsync(file, rootFolder.Id)).file;
 
 
                             canEdit = false;
