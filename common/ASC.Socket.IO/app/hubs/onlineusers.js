@@ -310,7 +310,7 @@ module.exports = async (io) => {
       function serialize(user){
         
         var serUser = {
-          id: user.userId,
+          id: user.id,
           displayName: user.displayName,
           page: user.page,
           sessions: Array.from(user.sessions, ([name, value]) => {
