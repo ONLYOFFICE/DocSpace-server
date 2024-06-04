@@ -814,7 +814,13 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                 }
 
                                 await socketManager.CreateFileAsync(newFile);
-                                if (isPdfForm) await socketManager.CreateFormAsync(newFile, securityContext.CurrentAccount.ID, numberRoomMembers <= 1);
+                                if (isPdfForm)
+                                {
+                                    var properties = await fileDao.GetProperties(newFile.Id) ?? new EntryProperties() { FormFilling = new FormFillingProperties()};
+                                    properties.FormFilling.StartFilling = true;
+                                    await fileDao.SaveProperties(newFile.Id, properties);
+                                    await socketManager.CreateFormAsync(newFile, securityContext.CurrentAccount.ID, numberRoomMembers <= 1);
+                                };
 
                                 if (ProcessedFile(fileId))
                                 {

@@ -1252,7 +1252,7 @@ public class FileStorageService //: IFileStorageService
                 throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
             }
 
-            var properties = await fileDao.GetProperties(fileId) ?? new EntryProperties { FormFilling = serviceProvider.GetService<FormFillingProperties>() };
+            var properties = await fileDao.GetProperties(fileId) ?? new EntryProperties() { FormFilling = new FormFillingProperties() };
             properties.FormFilling.StartFilling = true;
 
             await fileDao.SaveProperties(fileId, properties);

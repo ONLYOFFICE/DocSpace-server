@@ -557,7 +557,7 @@ internal class FileDao(
                             }
                             else if (fileType == FileType.Pdf)
                             {
-                                var properties = await fileDao.GetProperties(file.Id) ?? new EntryProperties { FormFilling = serviceProvider.GetService<FormFillingProperties>() };
+                                var properties = await fileDao.GetProperties(file.Id) ?? new EntryProperties() { FormFilling = new FormFillingProperties() };
                                 properties.FormFilling.StartFilling = true;
                                 await fileDao.SaveProperties(file.Id, properties);
                                 await SaveFileStreamAsync(file, cloneStreamForSave, currentFolder);
