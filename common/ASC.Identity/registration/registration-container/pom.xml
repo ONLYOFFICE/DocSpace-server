@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.asc</groupId>
+        <artifactId>registration</artifactId>
+        <version>1.0.0</version>
+    </parent>
+
+    <artifactId>registration-container</artifactId>
+
+    <properties>
+        <logback.gelf.version>5.0.1</logback.gelf.version>
+        <logback.logstash.version>7.4</logback.logstash.version>
+    </properties>
+
+    <dependencies>
+        <!-- Internal Dependencies -->
+        <dependency>
+            <groupId>com.asc</groupId>
+            <artifactId>common-application</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.asc</groupId>
+            <artifactId>registration-application</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.asc</groupId>
+            <artifactId>registration-data</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.asc</groupId>
+            <artifactId>registration-domain</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.asc</groupId>
+            <artifactId>registration-messaging</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.asc</groupId>
+            <artifactId>registration-service</artifactId>
+        </dependency>
+
+        <!-- Spring Boot Dependencies -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+        </dependency>
+
+        <!-- Logging Dependencies -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>de.siegmar</groupId>
+            <artifactId>logback-gelf</artifactId>
+            <version>${logback.gelf.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.logstash.logback</groupId>
+            <artifactId>logstash-logback-encoder</artifactId>
+            <version>${logback.logstash.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.janino</groupId>
+            <artifactId>janino</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <image>
+                        <name>onlyoffice-registration-service:${project.version}</name>
+                    </image>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>build-image</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

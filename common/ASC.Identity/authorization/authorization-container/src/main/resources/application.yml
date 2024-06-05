@@ -1,0 +1,130 @@
+application:
+  secret: ${CIPHER_SECRET:secret}
+
+bucket4j:
+  redis:
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
+    username: ${REDIS_USERNAME:}
+    password: ${REDIS_PASSWORD:}
+    ssl: ${REDIS_SSL:false}
+  rate-limits:
+    client-rate-limit:
+      capacity: ${CLIENT_RATE_LIMITER_CAPACITY:200}
+      refill:
+        tokens: ${CLIENT_RATE_LIMITER_REFILL:200}
+        period: ${CLIENT_RATE_LIMITER_REFILL_PERIOD:1}
+        time-unit: ${CLIENT_RATE_LIMITER_REFILL_UNIT:MINUTES}
+
+management:
+  endpoint:
+    env:
+      post:
+        enabled: true
+    health:
+      probes:
+        enabled: true
+      show-details: always
+  endpoints:
+    web:
+      base-path: null
+      exposure:
+        include: health
+      path-mapping:
+        health: /health
+  health:
+    diskspace:
+      enabled: false
+    livenessState:
+      enabled: true
+    readinessState:
+      enabled: true
+    refresh:
+      enabled: false
+
+resilience4j:
+  ratelimiter:
+    instances:
+      globalRateLimiter:
+        eventConsumerBufferSize: ${RESILIENCE4J_RATELIMITER_GLOBAL_EVENT_BUFFER_SIZE:100}
+        limitForPeriod: ${GLOBAL_RATE_LIMITER_CAPACITY:500}
+        limitRefreshPeriod: ${GLOBAL_RATE_LIMITER_REFRESH_PERIOD:1s}
+        timeoutDuration: ${GLOBAL_RATE_LIMITER_TIMEOUT_DURATION:0}
+        registerHealthIndicator: ${GLOBAL_RATE_LIMITER_HEALTH_INDICATOR:true}
+
+server:
+  servlet:
+    session:
+      tracking-modes: cookie
+  host: ${SERVER_HOST:127.0.0.1}
+  port: ${SERVER_PORT:8080}
+  shutdown: ${SERVER_SHUTDOWN:graceful}
+
+spring:
+  application:
+    name: ${SPRING_APPLICATION_NAME:ASC.Identity.Authorization}
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
+  datasource:
+    driver-class-name: ${JDBC_DRIVER:com.mysql.cj.jdbc.Driver}
+    password: ${JDBC_PASSWORD:my-secret-pw}
+    url: jdbc:mysql://${JDBC_URL:localhost:33060}/${JDBC_DATABASE:docspace}
+    username: ${JDBC_USER_NAME:root}
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        generate_statistics: ${JPA_HIBERNATE_GENERATE_STATS:false}
+        jdbc:
+          batch_size: ${JDBC_BATCH_SIZE:100}
+          time_zone: ${JDBC_TIME_ZONE:UTC}
+        order_inserts: ${JPA_HIBERNATE_ORDER_INSERTS:true}
+    show-sql: ${JPA_SHOW_SQL:false}
+  threads:
+    virtual:
+      enabled: true
+  lifecycle:
+    timeout-per-shutdown-phase: ${SPRING_LIFECYCLE_TIMEOUT:1m}
+  profiles:
+    active: ${PROFILE:dev}
+  security:
+    oauth2:
+      registeredClient:
+        accessTokenMinutesTTL: ${REGISTERED_CLIENT_ACCESS_TOKEN_TTL:60}
+        authorizationCodeMinutesTTL: ${AUTHORIZATION_CODE_TTL:1}
+        refreshTokenDaysTTL: ${REFRESH_TOKEN_TTL:365}
+
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: ${FEIGN_CLIENT_CONNECT_TIMEOUT:2500}
+        readTimeout: ${FEIGN_CLIENT_READ_TIMEOUT:1250}
+  circuitbreaker:
+    enabled: ${FEIGN_CIRCUITBREAKER_ENABLED:true}
+
+asc-service:
+  url: ${ASC_SERVICE_URL:http://127.0.0.1}
+
+web:
+  api: ${WEB_API:/api/2.0}
+---
+logging:
+  level:
+    com:
+      asc: DEBUG
+    org:
+      hibernate:
+        SQL: DEBUG
+        stat: DEBUG
+    root: INFO
+spring:
+  config:
+    activate:
+      on-profile:
+        - development
+        - dev
+        - d
+  output:
+    ansi:
+      enabled: always

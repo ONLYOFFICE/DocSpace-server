@@ -10,13 +10,14 @@
         <version>1.0.0</version>
     </parent>
 
-    <artifactId>authorization</artifactId>
+    <artifactId>common</artifactId>
     <packaging>pom</packaging>
 
     <modules>
-        <module>authorization-application</module>
-        <module>authorization-container</module>
-        <module>authorization-data</module>
-        <module>authorization-messaging</module>
+        <module>common-application</module>
+        <module>common-core</module>
+        <module>common-data</module>
+        <module>common-messaging</module>
+        <module>common-utilities</module>
     </modules>
 </project>

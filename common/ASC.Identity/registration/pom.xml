@@ -10,13 +10,14 @@
         <version>1.0.0</version>
     </parent>
 
-    <artifactId>authorization</artifactId>
+    <artifactId>registration</artifactId>
     <packaging>pom</packaging>
 
     <modules>
-        <module>authorization-application</module>
-        <module>authorization-container</module>
-        <module>authorization-data</module>
-        <module>authorization-messaging</module>
+        <module>registration-application</module>
+        <module>registration-container</module>
+        <module>registration-core</module>
+        <module>registration-data</module>
+        <module>registration-messaging</module>
     </modules>
 </project>

@@ -6,17 +6,15 @@
 
     <parent>
         <groupId>com.asc</groupId>
-        <artifactId>identity</artifactId>
+        <artifactId>registration</artifactId>
         <version>1.0.0</version>
     </parent>
 
-    <artifactId>authorization</artifactId>
+    <artifactId>registration-core</artifactId>
     <packaging>pom</packaging>
 
     <modules>
-        <module>authorization-application</module>
-        <module>authorization-container</module>
-        <module>authorization-data</module>
-        <module>authorization-messaging</module>
+        <module>registration-domain</module>
+        <module>registration-service</module>
     </modules>
 </project>
