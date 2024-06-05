@@ -58,7 +58,7 @@ public class LicenseController(ILoggerProvider option,
     [AllowNotPayment]
     public async Task<bool> RefreshLicenseAsync()
     {
-        if (!coreBaseSettings.Standalone)
+        if (!tenantExtra.Enterprise)
         {
             return false;
         }
@@ -81,9 +81,9 @@ public class LicenseController(ILoggerProvider option,
     [HttpPost("accept")]
     public async Task<object> AcceptLicenseAsync()
     {
-        if (!coreBaseSettings.Standalone)
+        if (!tenantExtra.Enterprise)
         {
-            return "";
+            return Resource.ErrorNotAllowedOption;
         }
 
         await TariffSettings.SetLicenseAcceptAsync(settingsManager);
@@ -225,9 +225,9 @@ public class LicenseController(ILoggerProvider option,
                 throw new SecurityException(Resource.PortalSecurity);
             }
 
-            if (!coreBaseSettings.Standalone)
+            if (!tenantExtra.Enterprise)
             {
-                throw new NotSupportedException();
+                throw new NotSupportedException(Resource.ErrorNotAllowedOption);
             }
 
             if (!inDto.Files.Any())
@@ -236,7 +236,7 @@ public class LicenseController(ILoggerProvider option,
             }
 
             var licenseFile = inDto.Files.First();
-            var dueDate = licenseReader.SaveLicenseTemp(licenseFile.OpenReadStream());
+            var dueDate = await licenseReader.SaveLicenseTemp(licenseFile.OpenReadStream());
 
             return dueDate >= DateTime.UtcNow.Date
                                     ? Resource.LicenseUploaded
@@ -247,6 +247,16 @@ public class LicenseController(ILoggerProvider option,
                                                     "",
                                                     "",
                                                     dueDate.Date.ToLongDateString());
+        }
+        catch (SecurityException ex)
+        {
+            _log.ErrorLicenseUpload(ex);
+            throw;
+        }
+        catch (NotSupportedException ex)
+        {
+            _log.ErrorLicenseUpload(ex);
+            throw;
         }
         catch (LicenseExpiredException ex)
         {
