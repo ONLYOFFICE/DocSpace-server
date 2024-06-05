@@ -31,33 +31,34 @@ namespace ASC.Api.Core.Core;
 /// </summary>
 public class WarmupServicesStartupTask(IServiceCollection services, IServiceProvider provider) : IStartupTask
 {
-    public async Task ExecuteAsync(CancellationToken cancellationToken = default)
+    public Task ExecuteAsync(CancellationToken cancellationToken = default)
     {      
         var processedFailed = 0;
         var processedSuccessed = 0;
         var startTime = DateTime.UtcNow;
 
         using var scope = provider.CreateScope();
-        var tenantManager = scope.ServiceProvider.GetService<TenantManager>();
         var logger = scope.ServiceProvider.GetService<ILogger<WarmupServicesStartupTask>>();
-
         logger.TraceWarmupStarted();
-
-        await tenantManager.SetCurrentTenantAsync("localhost");
             
         foreach (var service in GetServices(services))
         {
             try
             {
+                var timestamp = TimeProvider.System.GetTimestamp();
                 scope.ServiceProvider.GetService(service);
-
+                var totalMilliseconds = TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds;
+                if (totalMilliseconds > 10)
+                {
+                    logger.TraceWarmupTime(service.FullName, totalMilliseconds);
+                }
                 processedSuccessed++;
             }
             catch (Exception ex)
             {
                 processedFailed++;
 
-                logger.DebugWarmupFailed(processedFailed, service.FullName, ex.Message);
+                logger.DebugWarmupFailed(processedFailed, service.FullName, ex);
             }
         }
 
@@ -67,6 +68,8 @@ public class WarmupServicesStartupTask(IServiceCollection services, IServiceProv
             processedSuccessed,
             processedFailed,
             (DateTime.UtcNow - startTime).TotalMilliseconds);
+        
+        return Task.CompletedTask;
     }
 
     static IEnumerable<Type> GetServices(IServiceCollection services)

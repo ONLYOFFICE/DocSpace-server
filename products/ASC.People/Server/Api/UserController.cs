@@ -45,11 +45,11 @@ public class UserController(ICache cache,
         WebItemSecurity webItemSecurity,
         WebItemSecurityCache webItemSecurityCache,
         DisplayUserSettingsHelper displayUserSettingsHelper,
+        UserInvitationLimitHelper userInvitationLimitHelper,
         SecurityContext securityContext,
         StudioNotifyService studioNotifyService,
         MessageService messageService,
         AuthContext authContext,
-        SetupInfo setupInfo,
         UserManager userManager,
         PermissionContext permissionContext,
         CoreBaseSettings coreBaseSettings,
@@ -194,6 +194,10 @@ public class UserController(ICache cache,
             {
                 throw new SecurityException(FilesCommonResource.ErrorMessage_InvintationLink);
             }
+            else
+            {
+                await userInvitationLimitHelper.IncreaseLimit();
+        }
         }
 
         inDto.PasswordHash = (inDto.PasswordHash ?? "").Trim();
@@ -294,13 +298,19 @@ public class UserController(ICache cache,
     /// <httpMethod>POST</httpMethod>
     /// <collection>list</collection>
     [HttpPost("invite")]
+    [EnableRateLimiting(RateLimiterPolicy.EmailInvitationApi)]
     public async Task<List<EmployeeDto>> InviteUsersAsync(InviteUsersRequestDto inDto)
     {
+        ArgumentNullException.ThrowIfNull(inDto);
+        ArgumentNullException.ThrowIfNull(inDto.Invitations);
+
         var currentUser = await _userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+
+        var tenant = await tenantManager.GetCurrentTenantAsync();
 
         foreach (var invite in inDto.Invitations)
         {
-            if ((invite.Type == EmployeeType.DocSpaceAdmin && !currentUser.IsOwner(await tenantManager.GetCurrentTenantAsync())) ||
+            if ((invite.Type == EmployeeType.DocSpaceAdmin && !currentUser.IsOwner(tenant)) ||
                 !await _permissionContext.CheckPermissionsAsync(new UserSecurityProvider(Guid.Empty, invite.Type), Constants.Action_AddRemoveUser))
             {
                 continue;
@@ -310,7 +320,7 @@ public class UserController(ICache cache,
             var link = await invitationLinkService.GetInvitationLinkAsync(user.Email, invite.Type, authContext.CurrentAccount.ID, inDto.Culture);
             var shortenLink = await urlShortener.GetShortenLinkAsync(link);
 
-            await studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink, inDto.Culture);
+            await studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink, inDto.Culture, true);
         }
 
         var result = new List<EmployeeDto>();
@@ -484,10 +494,10 @@ public class UserController(ICache cache,
         await cookiesManager.ResetUserCookieAsync(user.Id);
         await messageService.SendAsync(MessageAction.CookieSettingsUpdated);
 
-            //StudioNotifyService.Instance.SendMsgProfileHasDeletedItself(user);
-            //StudioNotifyService.SendMsgProfileDeletion(Tenant.TenantId, user);
+        await studioNotifyService.SendMsgProfileHasDeletedItselfAsync(user);
+
         return await employeeFullDtoHelper.GetFullAsync(user);
-        }
+    }
 
     /// <summary>
     /// Returns a list of users matching the status filter and search query.
@@ -1077,9 +1087,8 @@ public class UserController(ICache cache,
             await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
             await cookiesManager.ResetUserCookieAsync(user.Id);
             await studioNotifyService.SendEmailActivationInstructionsAsync(user, email);
+            await messageService.SendAsync(MessageAction.UserSentEmailChangeInstructions, MessageTarget.Create(user.Id), DateTime.UtcNow, user.DisplayUserName(false, displayUserSettingsHelper));
         }
-
-        await messageService.SendAsync(MessageAction.UserSentEmailChangeInstructions, user.DisplayUserName(false, displayUserSettingsHelper));
 
         return string.Format(Resource.MessageEmailChangeInstuctionsSentOnEmail, email);
     }
@@ -1117,9 +1126,9 @@ public class UserController(ICache cache,
             logger.ErrorPasswordRecovery(inDto.Email, error);
         }
 
-        var pattern = authContext.IsAuthenticated ? Resource.MessagePasswordSendedToEmail : Resource.MessageYourPasswordSendedToEmail;
-        return string.Format(pattern, inDto.Email);
-    }
+            var pattern = authContext.IsAuthenticated ? Resource.MessagePasswordSendedToEmail : Resource.MessageYourPasswordSendedToEmail;
+            return string.Format(pattern, inDto.Email);
+        }
 
     /// <summary>
     /// Sets the required activation status to the list of users with the IDs specified in the request.
@@ -1193,27 +1202,9 @@ public class UserController(ICache cache,
         }
 
         await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(user.Id), Constants.Action_EditUser);
-
-        var curLng = user.CultureName;
-
-        if (setupInfo.EnabledCultures.Find(c => string.Equals(c.Name, inDto.CultureName, StringComparison.InvariantCultureIgnoreCase)) != null && curLng != inDto.CultureName)
-        {
-            user.CultureName = inDto.CultureName;
-
-            try
-            {
-                await _userManager.UpdateUserInfoAsync(user);
-            }
-            catch
-            {
-                user.CultureName = curLng;
-                throw;
-            }
-
+        await _userManager.ChangeUserCulture(user, inDto.CultureName);
             await messageService.SendAsync(MessageAction.UserUpdatedLanguage, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
-
-        }
-
+        
         return await employeeFullDtoHelper.GetFullAsync(user);
     }
 
@@ -1479,6 +1470,7 @@ public class UserController(ICache cache,
             .ToAsyncEnumerable()
             .Where(userId => !_userManager.IsSystemUser(userId))
             .SelectAwait(async userId => await _userManager.GetUsersAsync(userId))
+            .Where(r => r.Status == EmployeeStatus.Active)
             .ToListAsync();
 
         foreach (var user in users)

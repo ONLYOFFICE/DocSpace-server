@@ -203,7 +203,16 @@ public class ThirdpartyController(
 
             var invitedByEmail = linkData.LinkType == InvitationLinkType.Individual;
 
-            var newUser = await CreateNewUser(GetFirstName(inDto, thirdPartyProfile), GetLastName(inDto, thirdPartyProfile), GetEmailAddress(inDto, thirdPartyProfile), passwordHash, employeeType, true, invitedByEmail);
+            var newUser = await CreateNewUser(
+                GetFirstName(inDto, thirdPartyProfile), 
+                GetLastName(inDto, thirdPartyProfile), 
+                GetEmailAddress(inDto, thirdPartyProfile), 
+                passwordHash, 
+                employeeType, 
+                true, 
+                invitedByEmail,
+                inDto.Culture);
+            
             var messageAction = employeeType == EmployeeType.RoomAdmin ? MessageAction.UserCreatedViaInvite : MessageAction.GuestCreatedViaInvite;
             await messageService.SendAsync(MessageInitiator.System, messageAction, MessageTarget.Create(newUser.Id), newUser.DisplayUserName(false, displayUserSettingsHelper));
             userId = newUser.Id;
@@ -272,7 +281,7 @@ public class ThirdpartyController(
         await messageService.SendAsync(MessageAction.UserUnlinkedSocialAccount, GetMeaningfulProviderName(provider));
     }
 
-    private async Task<UserInfo> CreateNewUser(string firstName, string lastName, string email, string passwordHash, EmployeeType employeeType, bool fromInviteLink, bool inviteByEmail)
+    private async Task<UserInfo> CreateNewUser(string firstName, string lastName, string email, string passwordHash, EmployeeType employeeType, bool fromInviteLink, bool inviteByEmail, string cultureName)
     {
         if (SetupInfo.IsSecretEmail(email))
         {
@@ -294,7 +303,12 @@ public class ThirdpartyController(
         user.FirstName = string.IsNullOrEmpty(firstName) ? UserControlsCommonResource.UnknownFirstName : firstName;
         user.LastName = string.IsNullOrEmpty(lastName) ? UserControlsCommonResource.UnknownLastName : lastName;
         user.Email = email;
-
+        
+        if (coreBaseSettings.EnabledCultures.Find(c => string.Equals(c.Name, cultureName, StringComparison.InvariantCultureIgnoreCase)) != null)
+        {
+            user.CultureName = cultureName;
+        }
+        
         return await userManagerWrapper.AddUserAsync(user, passwordHash, true, true, employeeType, fromInviteLink, updateExising: inviteByEmail);
     }
 

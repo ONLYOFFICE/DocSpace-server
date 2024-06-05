@@ -43,10 +43,6 @@ public class Startup : BaseStartup
         await base.ConfigureServices(services);
 
         services.AddBaseDbContextPool<FilesDbContext>();
-
         services.RegisterQuotaFeature();
-
-        DIHelper.TryAdd<ReassignProgressItem>();
-        DIHelper.TryAdd<RemoveProgressItem>();
     }
 }

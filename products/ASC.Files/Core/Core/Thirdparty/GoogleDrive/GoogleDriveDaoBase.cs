@@ -28,7 +28,7 @@ using DriveFile = Google.Apis.Drive.v3.Data.File;
 
 namespace ASC.Files.Thirdparty.GoogleDrive;
 
-[Scope]
+[Scope(typeof(IDaoBase<DriveFile, DriveFile, DriveFile>))]
 internal class GoogleDriveDaoBase(
     IServiceProvider serviceProvider,
     UserManager userManager,
@@ -39,8 +39,7 @@ internal class GoogleDriveDaoBase(
     FileUtility fileUtility,
     TempPath tempPath,
     RegexDaoSelectorBase<DriveFile, DriveFile, DriveFile> regexDaoSelectorBase)
-    : ThirdPartyProviderDao<DriveFile, DriveFile, DriveFile>(serviceProvider, userManager, tenantManager, tenantUtil,
-            dbContextFactory, setupInfo, fileUtility, tempPath, regexDaoSelectorBase),
+    : ThirdPartyProviderDao<DriveFile, DriveFile, DriveFile>(serviceProvider, userManager, tenantManager, tenantUtil, dbContextFactory, setupInfo, fileUtility, tempPath, regexDaoSelectorBase),
         IDaoBase<DriveFile, DriveFile, DriveFile>
 {
     private GoogleDriveProviderInfo _providerInfo;

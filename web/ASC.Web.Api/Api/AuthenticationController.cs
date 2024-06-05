@@ -240,6 +240,12 @@ public class AuthenticationController(
             var action = viaEmail ? MessageAction.LoginSuccessViaApi : MessageAction.LoginSuccessViaApiSocialAccount;
             var token = await cookiesManager.AuthenticateMeAndSetCookiesAsync(user.Id, action, session);
 
+            if (!string.IsNullOrEmpty(inDto.Culture))
+            {
+                await userManager.ChangeUserCulture(user, inDto.Culture);
+                await messageService.SendAsync(MessageAction.UserUpdatedLanguage, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
+            }
+
             var outDto = new AuthenticationTokenDto
             {
                 Token = token
@@ -632,10 +638,14 @@ public class AuthenticationController(
         }
 
         var linkedProfiles = await accountLinker.GetLinkedObjectsByHashIdAsync(hashId);
-        var tmp = Guid.Empty;
-        if (linkedProfiles.Any(profileId => Guid.TryParse(profileId, out tmp) && userManager.UserExists(tmp)))
+        
+        foreach (var profileId in linkedProfiles)
         {
-            userId = tmp;
+            if (Guid.TryParse(profileId, out var tmp) && await userManager.UserExistsAsync(tmp))
+            {
+                userId = tmp;
+                break;
+            }
         }
 
         return (true, userId);

@@ -184,8 +184,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
         switch (fileData.Status)
         {
             case TrackerStatus.NotFound:
-            case TrackerStatus.Closed:
-                fileTracker.Remove(fileId);
+                await fileTracker.RemoveAsync(fileId);
                 await socketManager.StopEditAsync(fileId);
 
                 break;
@@ -195,6 +194,28 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
                 break;
 
             case TrackerStatus.MustSave:
+            case TrackerStatus.Closed:
+                var fileDao = daoFactory.GetFileDao<T>();
+                var properties = await fileDao.GetProperties(fileId);
+                if(properties?.FormFilling != null)
+                {
+                    var fileForDeletion = await documentServiceHelper.CheckNeedDeletion(fileDao, fileId, properties.FormFilling);
+                    if (fileForDeletion != null)
+                    {
+                        await fileDao.SaveProperties(fileForDeletion.Id, null);
+                        await socketManager.DeleteFileAsync(fileForDeletion);
+                        await fileDao.DeleteFileAsync(fileForDeletion.Id);
+                        break;
+                    }
+                }
+                if (fileData.Status == TrackerStatus.Closed)
+                {
+                    await fileTracker.RemoveAsync(fileId);
+                    await socketManager.StopEditAsync(fileId);
+
+                    break;
+                }
+                return await ProcessSaveAsync(fileId, fileData);
             case TrackerStatus.Corrupted:
             case TrackerStatus.ForceSave:
             case TrackerStatus.CorruptedForceSave:
@@ -208,7 +229,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
 
     private async Task ProcessEditAsync<T>(T fileId, TrackerData fileData)
     {
-        var users = fileTracker.GetEditingBy(fileId);
+        var users = await fileTracker.GetEditingByAsync(fileId);
         var usersDrop = new List<string>();
         File<T> file = null;
 
@@ -258,7 +279,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
 
         foreach (var removeUserId in users)
         {
-            fileTracker.Remove(fileId, userId: removeUserId);
+            await fileTracker.RemoveAsync(fileId, userId: removeUserId);
         }
 
         await socketManager.StartEditAsync(fileId);
@@ -389,7 +410,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
 
         if (!forceSave)
         {
-            fileTracker.Remove(fileId);
+            await fileTracker.RemoveAsync(fileId);
             await socketManager.StopEditAsync(fileId);
         }
 
@@ -414,7 +435,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
     {
         if (fileData.Users == null || fileData.Users.Count == 0 || !Guid.TryParse(fileData.Users[0], out var userId))
         {
-            userId = fileTracker.GetEditingBy(fileId).FirstOrDefault();
+            userId = (await fileTracker.GetEditingByAsync(fileId)).FirstOrDefault();
         }
 
         string saveMessage;

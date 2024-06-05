@@ -30,7 +30,7 @@ using Constants = ASC.Core.Configuration.Constants;
 
 namespace ASC.Web.Studio.Core.Notify;
 
-[Singleton(Additional = typeof(ServiceLauncherExtension))]
+[Singleton]
 public class StudioNotifyServiceSender(IServiceScopeFactory serviceProvider,
     IConfiguration configuration,
     WorkContext workContext,
@@ -116,15 +116,5 @@ public class StudioNotifyWorker(TenantManager tenantManager,
             item.Tags?
                 .Select(r => (ITagValue)new TagValue(r.Key, r.Value))
                 .ToArray());
-    }
-}
-
-public static class ServiceLauncherExtension
-{
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<StudioNotifyWorker>();
-        services.TryAdd<StudioPeriodicNotify>();
-        services.TryAdd<StudioWhatsNewNotify>();
     }
 }

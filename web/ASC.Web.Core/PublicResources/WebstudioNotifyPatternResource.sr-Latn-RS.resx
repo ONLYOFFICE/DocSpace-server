@@ -117,9 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AcceptDocSpace" xml:space="preserve">
-    <value>PRIHVATI</value>
-  </data>
   <data name="ActionFileCreated" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; je napravio novi dokument: &lt;a href={1}&gt;{2}&lt;/a&gt; u sobi: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
@@ -192,7 +189,7 @@
   <data name="ButtonChangeTfa" xml:space="preserve">
     <value>Konfiguriši autentifikator aplikaciju</value>
   </data>
-  <data name="ButtonCollaborateDocSpace" xml:space="preserve">
+  <data name="ButtonCollaborate" xml:space="preserve">
     <value>Sarađujte u DocSpace-u</value>
   </data>
   <data name="ButtonConfigureRightNow" xml:space="preserve">
@@ -201,7 +198,7 @@
   <data name="ButtonConfirm" xml:space="preserve">
     <value>Potvrdi</value>
   </data>
-  <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
+  <data name="ButtonConfirmInvite" xml:space="preserve">
     <value>Potvrdite poziv za DocSpace</value>
   </data>
   <data name="ButtonConfirmEmail" xml:space="preserve">
@@ -533,7 +530,7 @@ Ako imate bilo koja pitanja ili vam treba pomoć molimo kontaktirajte nas na
 [${__SupportLink}](${__SupportLink})
 
 Srdačan pozdrav,
-ONLYOFFICE™ Tim Za Podršku
+ONLYOFFICE Tim Za Podršku
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
@@ -1322,7 +1319,7 @@ Svoj portal možete ponovo aktivirati u bilo kom trenutku klikom na sledeći li
 Ako imate bilo kakvih pitanja ili vam je potrebna pomoć, slobodno nas kontaktirajte na [${__SalesEmail}](mailto:${__SalesEmail})
 
 Srdačan pozdrav,
-ONLYOFFICE™ tim za podršku
+ONLYOFFICE tim za podršku
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
@@ -1383,7 +1380,7 @@ _Napomena_: ova veza važi samo 7 dana. Dovršite proces brisanja portala u tom 
 Ako imate bilo kakvih pitanja ili vam je potrebna pomoć, slobodno nas kontaktirajte na [${__SalesEmail}](mailto:${__SalesEmail})
 
 Srdačan pozdrav,
-ONLYOFFICE™ Tim Za Podršku
+ONLYOFFICE Tim Za Podršku
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_rename" xml:space="preserve">

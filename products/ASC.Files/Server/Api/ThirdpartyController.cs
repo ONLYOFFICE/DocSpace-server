@@ -27,7 +27,6 @@
 namespace ASC.Files.Api;
 
 public class ThirdpartyController(
-    EntryManager entryManager,
         FilesSettingsHelper filesSettingsHelper,
         FileStorageService fileStorageService,
         GlobalFolderHelper globalFolderHelper,
@@ -151,7 +150,7 @@ public class ThirdpartyController(
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [HttpGet("thirdparty/common")]
-    public async IAsyncEnumerable<FolderDto<string>> GetCommonThirdPartyFoldersAsync()
+    public async IAsyncEnumerable<FolderDto<string>> GetCommonThirdPartyFoldersAsync([FromServices] EntryManager entryManager)
     {
         var parent = await fileStorageService.GetFolderAsync(await globalFolderHelper.FolderCommonAsync);
         var thirdpartyFolders = entryManager.GetThirdPartyFoldersAsync(parent);

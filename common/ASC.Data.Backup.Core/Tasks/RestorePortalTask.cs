@@ -111,7 +111,7 @@ public class RestorePortalTask(DbFactory dbFactory,
                 if (coreBaseSettings.Standalone)
                 {
                     options.DebugClearCache();
-                    ascCacheNotify.ClearCache();
+                    await ascCacheNotify.ClearCacheAsync();
                 }
 
                 await DoRestoreStorage(dataReader);
@@ -136,7 +136,7 @@ public class RestorePortalTask(DbFactory dbFactory,
             }
 
             options.DebugClearCache();
-            ascCacheNotify.ClearCache();
+            await ascCacheNotify.ClearCacheAsync();
         }
 
         options.DebugEndRestorePortal();

@@ -47,9 +47,9 @@ public class BackupCode
         }
     }
 
-    public void SetEncryptedCode(InstanceCrypto InstanceCrypto, string code)
+    public async Task SetEncryptedCodeAsync(InstanceCrypto InstanceCrypto, string code)
     {
-        Code = InstanceCrypto.Encrypt(code);
+        Code = await InstanceCrypto.EncryptAsync(code);
     }
 }
 
@@ -152,7 +152,7 @@ public class TfaManager(SettingsManager settingsManager,
             }
 
             var code = new BackupCode();
-            code.SetEncryptedCode(instanceCrypto, result.ToString());
+            await code.SetEncryptedCodeAsync(instanceCrypto, result.ToString());
             list.Add(code);
         }
         var settings = await settingsManager.LoadForCurrentUserAsync<TfaAppUserSettings>();

@@ -26,8 +26,8 @@
 
 namespace ASC.Data.Storage;
 
-[Singleton(Additional = typeof(StorageConfigExtension))]
-public class StorageFactoryConfig(Configuration.Storage storage, ConfigurationExtension configurationExtension)
+[Singleton]
+public class StorageFactoryConfig(IConfiguration configuration)
 {
     public IEnumerable<string> GetModuleList(string region = "current", bool exceptDisabledMigration = false)
     {
@@ -53,7 +53,9 @@ public class StorageFactoryConfig(Configuration.Storage storage, ConfigurationEx
 
     public Configuration.Storage GetStorage(string region)
     {
-        return region == "current" ? storage : configurationExtension.GetSetting<Configuration.Storage>($"regions:{region}:storage");
+        return region == "current" ? 
+            StorageConfigExtension.GetStorage(configuration) : 
+            configuration.GetSection($"regions:{region}:storage").Get<Configuration.Storage>();
     }
 }
 
@@ -67,8 +69,9 @@ public static class StorageFactoryExtenstion
         //    throw new InvalidOperationException("Application not hosted.");
         //}
 
-        var section = builder.ServiceProvider.GetService<Configuration.Storage>();
-        builder.ServiceProvider.GetService<PathUtils>();
+        var configuration = builder.ServiceProvider.GetService<IConfiguration>();
+        var section = StorageConfigExtension.GetStorage(configuration);
+        
         if (section is { Module: not null })
         {
             foreach (var m in section.Module.Where(r => string.IsNullOrEmpty(module) || r.Name == module))
@@ -98,7 +101,7 @@ public static class StorageFactoryExtenstion
     }
 }
 
-[Scope(Additional = typeof(StorageFactoryExtension))]
+[Scope]
 public class StorageFactory(IServiceProvider serviceProvider,
     StorageFactoryConfig storageFactoryConfig,
     SettingsManager settingsManager,
@@ -129,10 +132,10 @@ public class StorageFactory(IServiceProvider serviceProvider,
 
         var settings = await settingsManager.LoadAsync<StorageSettings>(tenant.Value);
         //TODO:GetStoreAndCache
-        return GetDataStore(tenantPath, module, storageSettingsHelper.DataStoreConsumer(settings), controller, region);
+        return await GetDataStoreAsync(tenantPath, module, await storageSettingsHelper.DataStoreConsumerAsync(settings), controller, region);
     }
 
-    public IDataStore GetStorageFromConsumer(int? tenant, string module, DataStoreConsumer consumer, string region = "current")
+    public async Task<IDataStore> GetStorageFromConsumerAsync(int? tenant, string module, DataStoreConsumer consumer, string region = "current")
     {
         var tenantPath = tenant != null ? TenantPath.CreatePath(tenant.Value) : TenantPath.CreatePath(DefaultTenantName);
 
@@ -145,7 +148,7 @@ public class StorageFactory(IServiceProvider serviceProvider,
         var tenantQuotaController = serviceProvider.GetService<TenantQuotaController>();
         tenantQuotaController.Init(tenant.GetValueOrDefault());
 
-        return GetDataStore(tenantPath, module, consumer, tenantQuotaController);
+        return await GetDataStoreAsync(tenantPath, module, consumer, tenantQuotaController);
     }
 
     public async Task QuotaUsedAddAsync(int? tenant, string module, string domain, string dataTag, long size, Guid ownerId)
@@ -164,7 +167,7 @@ public class StorageFactory(IServiceProvider serviceProvider,
         await tenantQuotaController.QuotaUserUsedDeleteAsync(module, domain, dataTag, size, ownerId);
     }
 
-    private IDataStore GetDataStore(string tenantPath, string module, DataStoreConsumer consumer, IQuotaController controller, string region = "current")
+    private async Task<IDataStore> GetDataStoreAsync(string tenantPath, string module, DataStoreConsumer consumer, IQuotaController controller, string region = "current")
     {
         var storage = storageFactoryConfig.GetStorage(region);
         var moduleElement = storage.GetModuleElement(module);
@@ -179,7 +182,7 @@ public class StorageFactory(IServiceProvider serviceProvider,
 
         if (coreBaseSettings.Standalone &&
             !moduleElement.DisableMigrate &&
-            consumer.IsSet)
+            await consumer.GetIsSetAsync())
         {
             instanceType = consumer.HandlerType;
             props = consumer;
@@ -204,17 +207,5 @@ public class StorageFactory(IServiceProvider serviceProvider,
             .Configure(tenantPath, handler, moduleElement, props, validator)
             .SetQuotaController(moduleElement.Count ? controller : null
             /*don't count quota if specified on module*/);
-    }
-}
-
-public static class StorageFactoryExtension
-{
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<DiscDataStore>();
-        services.TryAdd<GoogleCloudStorage>();
-        services.TryAdd<RackspaceCloudStorage>();
-        services.TryAdd<S3Storage>();
-        services.TryAdd<TenantQuotaController>();
     }
 }

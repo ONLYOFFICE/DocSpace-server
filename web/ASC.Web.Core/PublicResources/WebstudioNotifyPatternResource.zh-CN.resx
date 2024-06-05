@@ -1107,9 +1107,6 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="AcceptDocSpace" xml:space="preserve">
-    <value>接受</value>
-  </data>
   <data name="ButtonActivateEmail" xml:space="preserve">
     <value>点击此处以激活您的邮件地址</value>
   </data>
@@ -1122,13 +1119,13 @@ $TrulyYours</value>
   <data name="ButtonChangeTfa" xml:space="preserve">
     <value>配置身份验证器应用</value>
   </data>
-  <data name="ButtonCollaborateDocSpace" xml:space="preserve">
+  <data name="ButtonCollaborate" xml:space="preserve">
     <value>在协作空间中进行协作</value>
   </data>
   <data name="ButtonConfirm" xml:space="preserve">
     <value>确认</value>
   </data>
-  <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
+  <data name="ButtonConfirmInvite" xml:space="preserve">
     <value>确认协作空间邀请</value>
   </data>
   <data name="ButtonConfirmEmail" xml:space="preserve">
@@ -1179,7 +1176,7 @@ $TrulyYours</value>
 如果您有任何问题或是需要协助，欢迎随时通过[${__SupportLink}](${__SupportLink}) 联系我们
 
 祝好，
-ONLYOFFICE™ 支持团队
+ONLYOFFICE 支持团队
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
@@ -1319,7 +1316,7 @@ _注意_：此链接仅在 7 天内可用。请在这一期限内完成门户停
 如果您有任何问题或是需要协助，欢迎随时通过[${__SalesEmail}](mailto:${__SalesEmail})
 
 祝好，
-ONLYOFFICE™ 支持团队
+ONLYOFFICE 支持团队
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete_tg" xml:space="preserve">
@@ -1344,7 +1341,7 @@ _注意_：此链接仅在 7 天内可用。请在这一期限内完成门户删
 如果您有任何问题或是需要协助，欢迎随时通过[${__SalesEmail}](mailto:${__SalesEmail})
 
 祝好，
-ONLYOFFICE™ 支持团队
+ONLYOFFICE 支持团队
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">

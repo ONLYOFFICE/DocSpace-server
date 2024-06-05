@@ -26,7 +26,7 @@
 
 namespace ASC.AuditTrail.Repositories;
 
-[Scope(Additional = typeof(AuditEventsRepositoryExtensions))]
+[Scope]
 public class AuditEventsRepository(AuditActionMapper auditActionMapper,
         TenantManager tenantManager,
         IDbContextFactory<MessagesContext> dbContextFactory,
@@ -206,14 +206,6 @@ public class AuditEventsRepository(AuditActionMapper auditActionMapper,
         await using var feedDbContext = await dbContextFactory.CreateDbContextAsync();
 
         return await Queries.TenantsAsync(feedDbContext, from, to).ToListAsync();
-    }
-}
-
-public static class AuditEventsRepositoryExtensions
-{
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<EventTypeConverter>();
     }
 }
 

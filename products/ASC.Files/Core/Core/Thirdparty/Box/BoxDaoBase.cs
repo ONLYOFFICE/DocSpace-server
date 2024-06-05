@@ -26,7 +26,7 @@
 
 namespace ASC.Files.Thirdparty.Box;
 
-[Scope]
+[Scope(typeof(IDaoBase<BoxFile, BoxFolder, BoxItem>))]
 internal class BoxDaoBase(
     IServiceProvider serviceProvider,
     UserManager userManager,

@@ -65,7 +65,7 @@
     <value>Documentos comuns</value>
   </data>
   <data name="MyFiles" xml:space="preserve">
-    <value>Os Meus Documentos</value>
+    <value>Documentos</value>
   </data>
   <data name="ProjectFiles" xml:space="preserve">
     <value>Documentos do projeto</value>
@@ -99,8 +99,5 @@
   </data>
   <data name="InProcessFormFolder" xml:space="preserve">
     <value>Em processo</value>
-  </data>
-  <data name="ReadyFormFolder" xml:space="preserve">
-    <value>Preparar</value>
   </data>
 </root>

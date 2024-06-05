@@ -84,10 +84,7 @@ builder.Services.AddSingleton(redisConfiguration)
 var diHelper = new DIHelper();
 diHelper.Configure(builder.Services);
 
-diHelper.TryAdd<MigrationCreator>();
-diHelper.TryAdd<MigrationRunner>();
-
-
+diHelper.Scan();
 
 if (string.IsNullOrEmpty(param.UserName) && string.IsNullOrEmpty(param.Mail))
 {
@@ -113,10 +110,12 @@ if (Directory.Exists(AppContext.BaseDirectory + "\\temp"))
 }
 
 Console.WriteLine("migration was success");
+
 if (!string.IsNullOrEmpty(migrationCreator.NewAlias))
 {
     Console.WriteLine($"new alias is - {migrationCreator.NewAlias}");
 }
+
 public sealed class Options
 {
     [Option('a', "fromAlias", Required = true)]
