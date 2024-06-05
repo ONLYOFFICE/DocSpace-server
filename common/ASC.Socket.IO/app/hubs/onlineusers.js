@@ -100,7 +100,6 @@ module.exports = async (io) => {
           if(user.sessions.size <= 0)
           {
             user.status = "offline";
-            user.date = new Date().toString();
             updateUser(portalUsers, user, userId, tenantId);
             onlineIO.to(`p-${tenantId}`).emit("leave-in-portal",  userId );
           }
@@ -126,7 +125,6 @@ module.exports = async (io) => {
           if(user.sessions.size <= 0)
           {
             user.status = "offline";
-            user.date = new Date().toString();
             updateUser(roomUsers, user, userId, _roomId);
             onlineIO.to(_roomId).emit("leave-in-room",  userId );
           }
