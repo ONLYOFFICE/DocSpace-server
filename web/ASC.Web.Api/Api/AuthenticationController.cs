@@ -463,7 +463,7 @@ public class AuthenticationController(
                     }
                 }
 
-                user = await bruteForceLoginManager.AttemptAsync(inDto.UserName, inDto.RecaptchaResponse, async () => 
+                user = await bruteForceLoginManager.AttemptAsync(inDto.UserName, inDto.RecaptchaType, inDto.RecaptchaResponse, async () => 
                     await userManager.GetUsersByPasswordHashAsync(
                     await tenantManager.GetCurrentTenantIdAsync(),
                     inDto.UserName,
@@ -483,7 +483,7 @@ public class AuthenticationController(
 
                 inDto.UserName = thirdPartyProfile.EMail;
                 
-                user = await bruteForceLoginManager.AttemptAsync(inDto.UserName, inDto.RecaptchaResponse, async () => await GetUserByThirdParty(thirdPartyProfile));
+                user = await bruteForceLoginManager.AttemptAsync(inDto.UserName, inDto.RecaptchaType, inDto.RecaptchaResponse, async () => await GetUserByThirdParty(thirdPartyProfile));
             }
         }
         catch (BruteForceCredentialException)

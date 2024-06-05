@@ -274,7 +274,7 @@ public class CommonMethods(
         return hostEntry.AddressList.Select(ip => ip.ToString());
     }
 
-    public async Task<bool> ValidateRecaptcha(string response, RecaptchaType recaptchaType, string ip)
+    public async Task<bool> ValidateRecaptcha(RecaptchaType recaptchaType, string response, string ip)
     {
         try
         {
