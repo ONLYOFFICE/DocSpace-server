@@ -159,4 +159,7 @@
   <data name="VirtualRooms" xml:space="preserve">
     <value>Собе</value>
   </data>
+  <data name="ReadyFormFolder" xml:space="preserve">
+    <value>Spremno</value>
+  </data>
 </root>
