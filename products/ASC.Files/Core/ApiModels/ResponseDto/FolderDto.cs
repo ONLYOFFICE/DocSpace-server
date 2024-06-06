@@ -136,7 +136,7 @@ public class FolderDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime)
     {
 
-    public async Task<FolderDto<T>> GetAsync<T>(Folder<T> folder, List<FileShareRecord> currentUserRecords = null, string order = null)
+    public async Task<FolderDto<T>> GetAsync<T>(Folder<T> folder, List<FileShareRecord<T>> currentUserRecords = null, string order = null)
     {
         var result = await GetFolderWrapperAsync(folder);
 

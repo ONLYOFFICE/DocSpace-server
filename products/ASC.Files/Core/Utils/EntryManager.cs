@@ -94,7 +94,7 @@ public class BreadCrumbsManager(
         else if (!firstVisible.ProviderEntry && firstVisible.RootFolderType is FolderType.VirtualRooms or FolderType.Archive && authContext.IsAuthenticated)
         {
             var room = breadCrumbs.FirstOrDefault(e => e is Folder<T> folder && DocSpaceHelper.IsRoom(folder.FolderType));
-            if (room is { ShareRecord.IsLink: true })
+            if (room is Folder<int> { ShareRecord.IsLink: true })
             {
                 breadCrumbs = breadCrumbs.SkipWhile(f => f is Folder<T> folder && !DocSpaceHelper.IsRoom(folder.FolderType)).ToList();
             }

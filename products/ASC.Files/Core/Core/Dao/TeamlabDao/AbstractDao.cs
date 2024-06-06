@@ -99,58 +99,6 @@ public class AbstractDao
         await filesDbContext.SaveChangesAsync();
     }
 
-    protected ValueTask<object> MappingIdAsync(object id, bool saveIfNotExist = false)
-    {
-        if (id == null)
-        {
-            return ValueTask.FromResult<object>(null);
-        }
-
-        var isNumeric = int.TryParse(id.ToString(), out var n);
-
-        if (isNumeric)
-        {
-            return ValueTask.FromResult<object>(n);
-        }
-
-        return InternalMappingIdAsync(id, saveIfNotExist);
-    }
-
-    private async ValueTask<object> InternalMappingIdAsync(object id, bool saveIfNotExist = false)
-    {
-        object result;
-
-        var sId = id.ToString();
-        if (Selectors.All.Exists(s => sId.StartsWith(s.Id)))
-        {
-            result = Regex.Replace(BitConverter.ToString(Hasher.Hash(id.ToString(), HashAlg.MD5)), "-", "").ToLower();
-        }
-        else
-        {
-            await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-            var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-            result = await filesDbContext.IdAsync(tenantId, id.ToString());
-        }
-
-        if (saveIfNotExist)
-        {
-            var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-            
-            var newItem = new DbFilesThirdpartyIdMapping
-            {
-                Id = id.ToString(),
-                HashId = result.ToString(),
-                TenantId = tenantId
-            };
-
-            await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-            await filesDbContext.AddOrUpdateAsync(r => r.ThirdpartyIdMapping, newItem);
-            await filesDbContext.SaveChangesAsync();
-        }
-
-        return result;
-    }
-
     internal static IQueryable<T> BuildSearch<T>(IQueryable<T> query, string text, SearchType searchType) where T : IDbSearch
     {
         var lowerText = GetSearchText(text);
