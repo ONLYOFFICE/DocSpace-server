@@ -569,6 +569,17 @@ public class DiscDataStore(TempStream tempStream,
         throw new NotSupportedException("This operation supported only on s3 storage");
     }
 
+    public override string GetRootDirectory(string domain)
+    {
+        var targetDir = GetTarget(domain , "");
+        var dir = GetTarget("", "");
+        if (!string.IsNullOrEmpty(targetDir) && !targetDir.EndsWith(Path.DirectorySeparatorChar.ToString()))
+        {
+            return targetDir[dir.Length..].Trim('\\');
+        }
+        return string.Empty;
+    }
+
     public override IAsyncEnumerable<string> ListDirectoriesRelativeAsync(string domain, string path, bool recursive)
     {
         ArgumentNullException.ThrowIfNull(path);
@@ -582,11 +593,9 @@ public class DiscDataStore(TempStream tempStream,
 
         if (Directory.Exists(targetDir))
         {
-            var entries = Directory.GetDirectories(targetDir, "*", recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
-            var tmp = Array.ConvertAll(
-            entries,
-            x => x[targetDir.Length..]);
-            return tmp.ToAsyncEnumerable();
+            var entries = Directory.EnumerateDirectories(targetDir, "*", recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)
+                .Select(e => e[targetDir.Length..]);
+            return entries.ToAsyncEnumerable();
         }
         return AsyncEnumerable.Empty<string>();
     }
@@ -604,11 +613,9 @@ public class DiscDataStore(TempStream tempStream,
 
         if (Directory.Exists(targetDir))
         {
-            var entries = Directory.GetFiles(targetDir, pattern, recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
-            var tmp = Array.ConvertAll(
-            entries,
-            x => x[targetDir.Length..]);
-            return tmp.ToAsyncEnumerable();
+            var entries = Directory.EnumerateFiles(targetDir, pattern, recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)
+                .Select(e=> e[targetDir.Length..]);
+            return entries.ToAsyncEnumerable();
         }
         return AsyncEnumerable.Empty<string>();
     }

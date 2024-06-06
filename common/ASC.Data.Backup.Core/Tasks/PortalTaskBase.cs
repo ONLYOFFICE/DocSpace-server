@@ -77,28 +77,42 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
         return ModuleProvider.AllModules.Where(module => !_ignoredModules.Contains(module.ModuleName));
     }
 
-    protected async Task<IEnumerable<BackupFileInfo>> GetFilesToProcess(int tenantId)
+    protected async IAsyncEnumerable<BackupFileInfo> GetFilesToProcess(int tenantId)
     {
-        var files = new List<BackupFileInfo>();
+        IAsyncEnumerable<BackupFileInfo> files = null;
         foreach (var module in StorageFactoryConfig.GetModuleList().Where(IsStorageModuleAllowed))
         {
             var store = await StorageFactory.GetStorageAsync(tenantId, module);
-            var domains = StorageFactoryConfig.GetDomainList(module).ToArray();
+            var domainFolders = new List<string>();
 
-            foreach (var domain in domains)
+            foreach(var domain in StorageFactoryConfig.GetDomainList(module, false))
             {
-                files.AddRange(
-                        (await store.ListFilesRelativeAsync(domain, "\\", "*.*", true).ToArrayAsync())
+                domainFolders.Add(store.GetRootDirectory(domain));
+            }
+            if (files == null)
+            {
+                files = store.ListFilesRelativeAsync(string.Empty, "\\", "*.*", true)
+                          .Where(path => domainFolders.All(domain => !path.Contains(domain + "/") && !path.Contains(domain + "\\")))
+                         .Select(path => new BackupFileInfo(string.Empty, module, path, tenantId));
+            }
+            else
+            {
+
+                files = files.Union(
+                        store.ListFilesRelativeAsync(string.Empty, "\\", "*.*", true)
+                         .Select(path => new BackupFileInfo(string.Empty, module, path, tenantId)));
+            }
+            foreach (var domain in StorageFactoryConfig.GetDomainList(module))
+            {
+                files = files.Union(
+                        store.ListFilesRelativeAsync(domain, "\\", "*.*", true)
                     .Select(path => new BackupFileInfo(domain, module, path, tenantId)));
             }
-
-            files.AddRange(
-                    (await store.ListFilesRelativeAsync(string.Empty, "\\", "*.*", true).ToArrayAsync())
-                     .Where(path => domains.All(domain => !path.Contains(domain + "/")))
-                     .Select(path => new BackupFileInfo(string.Empty, module, path, tenantId)));
         }
-
-        return files.Distinct();
+        await foreach (var file in files.Distinct())
+        {
+           yield return file;
+        }
     }
 
     protected bool IsStorageModuleAllowed(string storageModuleName)

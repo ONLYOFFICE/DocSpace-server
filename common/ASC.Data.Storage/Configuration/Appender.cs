@@ -92,7 +92,7 @@ public class Module
     public bool DisableMigrate { get; set; }
     public bool Count { get; set; } = true;
     public bool DisabledEncryption { get; set; }
-    public IEnumerable<Module> Domain { get; set; }
+    public IEnumerable<Module> Domain { get; set; } = new List<Module>();
     public string ValidatorType { get; set; }
     public bool ContentAsAttachment { get; set; }
 }
