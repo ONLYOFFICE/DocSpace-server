@@ -85,20 +85,14 @@ public class LicenseReader(
 
     public async Task RefreshLicenseAsync()
     {
+        if (string.IsNullOrEmpty(LicensePath))
+        {
+            throw new BillingNotFoundException("Empty license path");
+        }
+
         try
         {
-            var temp = true;
-            if (!File.Exists(_licensePathTemp))
-            {
-                logger.DebugTempLicenseNotFound();
-
-                if (!File.Exists(LicensePath))
-                {
-                    throw new BillingNotFoundException("License not found");
-                }
-
-                temp = false;
-            }
+            var temp = File.Exists(_licensePathTemp);
 
             await using (var licenseStream = GetLicenseStream(temp))
             using (var reader = new StreamReader(licenseStream))
@@ -110,7 +104,7 @@ public class LicenseReader(
 
                 if (temp)
                 {
-                    SaveLicense(licenseStream, LicensePath);
+                    await SaveLicenseAsync(licenseStream, LicensePath);
                 }
             }
 
@@ -127,8 +121,13 @@ public class LicenseReader(
         }
     }
 
-    public DateTime SaveLicenseTemp(Stream licenseStream)
+    public async Task<DateTime> SaveLicenseTemp(Stream licenseStream)
     {
+        if (string.IsNullOrEmpty(LicensePath))
+        {
+            throw new BillingNotFoundException("Empty license path");
+        }
+
         try
         {
             using var reader = new StreamReader(licenseStream);
@@ -137,7 +136,7 @@ public class LicenseReader(
 
             var dueDate = Validate(license);
 
-            SaveLicense(licenseStream, _licensePathTemp);
+            await SaveLicenseAsync(licenseStream, _licensePathTemp);
 
             return dueDate;
         }
@@ -149,7 +148,7 @@ public class LicenseReader(
         }
     }
 
-    private static void SaveLicense(Stream licenseStream, string path)
+    private static async Task SaveLicenseAsync(Stream licenseStream, string path)
     {
         ArgumentNullException.ThrowIfNull(licenseStream);
 
@@ -159,7 +158,8 @@ public class LicenseReader(
         }
 
         using var fs = File.Open(path, FileMode.Create);
-        licenseStream.CopyTo(fs);
+
+        await licenseStream.CopyToAsync(fs);
     }
 
     private DateTime Validate(License license)
