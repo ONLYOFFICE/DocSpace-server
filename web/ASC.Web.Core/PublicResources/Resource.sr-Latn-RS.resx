@@ -253,7 +253,7 @@
     <value>EasyBib</value>
   </data>
   <data name="ConsumerseasyBibappkey" xml:space="preserve">
-    <value>Ključ Aplikacije</value>
+    <value>Ključ aplikacije</value>
   </data>
   <data name="ConsumersEasyBibDescription" xml:space="preserve">
     <value>Omogućite ovoj aplikaciji da kreira bibliografske liste u dokumentima sa EasyBib-om.</value>
@@ -265,7 +265,7 @@
     <value>Facebook</value>
   </data>
   <data name="ConsumersfacebookAccessToken_Default" xml:space="preserve">
-    <value>Aplikacijski Token</value>
+    <value>Aplikacijski token</value>
   </data>
   <data name="ConsumersfacebookClientId" xml:space="preserve">
     <value>Facebook ID</value>
@@ -385,7 +385,7 @@
     <value>Povežite uslugu Rackspace Cloud Storage da biste napravili rezervnu kopiju i čuvali podatke sa vašeg portala.</value>
   </data>
   <data name="ConsumersRackspaceInstruction" xml:space="preserve">
-    <value>Povežite uslugu Rackspace Cloud Storage da biste napravili rezervnu kopiju i čuvali podatke sa vašeg portala. {0}U bezbednosnim postavkama Rackspace Cloud Control Panel kliknite na link Prikaži pored Rackspace API ključa. Nalepite podatke koje ste dobili u nastavku:</value>
+    <value>Povežite uslugu Rackspace Cloud Storage da biste napravili rezervnu kopiju i čuvali podatke sa vašeg portala. {0}U bezbednosnim postavkama Rackspace Cloud kontrolne table kliknite na link Prikaži pored Rackspace API ključa. Nalepite podatke koje ste dobili u nastavku:</value>
   </data>
   <data name="ConsumersRackspaceprivate_container" xml:space="preserve">
     <value>Privatni kontejner</value>
@@ -460,7 +460,7 @@
     <value>OneDrive</value>
   </data>
   <data name="Consumersskydriveappkey" xml:space="preserve">
-    <value>ID Aplikacije</value>
+    <value>ID aplikacije</value>
   </data>
   <data name="Consumersskydriveappsecret" xml:space="preserve">
     <value>Tajna klijenta</value>
@@ -532,7 +532,7 @@
     <value>Omogućite aplikaciju da biste se prijavili na portal koristeći Twitter nalog.</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>Omogućite ovu aplikaciju da biste svojim korisnicima omogućili da se prijave na ONLYOFFICE koristeći svoj Twitter i povežu Twitter naloge svojih klijenata sa CRM modulom. {0}Idite na Tvitter Developers Portal i napravite novu integraciju aplikacije ONLYOFFICE. Unesite podatke koje ste primili ispod:</value>
+    <value>Omogućite ovu aplikaciju da biste svojim korisnicima omogućili da se prijave na ONLYOFFICE koristeći svoj Twitter i povežu Twitter naloge svojih klijenata sa CRM modulom. {0}Idite na Twitter Developers portal i napravite novu integraciju aplikacije ONLYOFFICE. Unesite podatke koje ste primili ispod:</value>
   </data>
   <data name="ConsumersTwitterKey" xml:space="preserve">
     <value>API ključ</value>
@@ -547,7 +547,7 @@
     <value>VK</value>
   </data>
   <data name="ConsumersVkClientId" xml:space="preserve">
-    <value>ID Aplikacije</value>
+    <value>ID aplikacije</value>
   </data>
   <data name="ConsumersVkClientSecret" xml:space="preserve">
     <value>Sigurni ključ</value>
@@ -628,7 +628,7 @@
     <value>Netačan ID Instance.</value>
   </data>
   <data name="CustomNamingPeopleSchema" xml:space="preserve">
-    <value>Prilagođeno</value>
+    <value>Prilagođeni</value>
   </data>
   <data name="EmailAndPasswordIncorrectEmail" xml:space="preserve">
     <value>Netačna email adresa</value>
@@ -805,7 +805,7 @@
     <value>Nema pronađenih grupa.</value>
   </data>
   <data name="LdapSettingsErrorIncorrectLdapFilter" xml:space="preserve">
-    <value>Nevažeća vrednost korisničkog filtera.</value>
+    <value>Nevažeća vrednost Korisničkog filtera.</value>
   </data>
   <data name="LdapSettingsErrorLostRights" xml:space="preserve">
     <value>Pokušali ste sebi da oduzmete administratorska prava. Vaša administratorska prava nisu promenjena.</value>
@@ -1012,7 +1012,7 @@
     <value>Instrukcije za brisanje vašeg profila su poslate na {0} email adresu</value>
   </data>
   <data name="Tariffs_admin" xml:space="preserve">
-    <value>Posao</value>
+    <value>Business</value>
   </data>
   <data name="Tariffs_startup" xml:space="preserve">
     <value>Startup</value>
