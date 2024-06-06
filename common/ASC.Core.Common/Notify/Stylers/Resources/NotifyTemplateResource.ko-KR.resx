@@ -214,7 +214,20 @@
         &lt;/tr&gt;</value>
   </data>
   <data name="TextForFooterUnsubsribe" xml:space="preserve">
-    <value>구매에 관한 질문이 있는 경우 &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="mailto:sales@onlyoffice.com"&gt;sales@onlyoffice.com&lt;/a&gt;으로 이메일을 보내주세요.&lt;br /&gt; 기술적인 문제가 발생한 경우 &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://www.onlyoffice.com/support-contact-form.aspx"&gt;지원팀&lt;/a&gt; 에 문의하세요.&lt;br /&gt; &lt;a href="{1}" style="color: #FF6F3D; text-decoration: underline; white-space: nowrap;" target="_blank"&gt;구독을 취소하려면 여기를 클릭하세요&lt;/a&gt;&lt;br /&gt;</value>
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
+    &lt;td class="fol" style="color: #666666; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; margin: 0; padding: 40px 0 8px; vertical-align: top;"&gt;
+        구매에 관한 질문이 있는 경우 &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="mailto:sales@onlyoffice.com"&gt;sales@onlyoffice.com&lt;/a&gt;으로 이메일을 보내주세요.
+    &lt;/td&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
+    &lt;td class="fol" style="color: #666666; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; margin: 0; padding: 0; vertical-align: top;"&gt;
+        기술적인 문제가 발생한 경우 &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://www.onlyoffice.com/support-contact-form.aspx"&gt;지원팀&lt;/a&gt; 에 문의하세요.
+    &lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
+    &lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; margin: 0; padding: 8px 0 0; vertical-align: top;"&gt;
+        &lt;a href="{1}" style="color: #FF6F3D; text-decoration: underline; white-space: nowrap;" target="_blank"&gt;구독을 취소하려면 여기를 클릭하세요&lt;/a&gt;
+    &lt;/td&gt;
+&lt;/tr&gt;</value>
   </data>
   <data name="TopGif" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;

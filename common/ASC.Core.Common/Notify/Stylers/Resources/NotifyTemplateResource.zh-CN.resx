@@ -125,7 +125,20 @@
 &lt;/body&gt;</value>
   </data>
   <data name="TextForFooterUnsubsribe" xml:space="preserve">
-    <value>如在购买时遇到任何问题，请给我们发送电子邮件，地址为 &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="mailto:sales@onlyoffice.com"&gt;sales@onlyoffice.com&lt;/a&gt;.&lt;br /&gt; 如遇到技术问题，请联系我们的 &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://www.onlyoffice.com/support-contact-form.aspx"&gt;支持团队&lt;/a&gt;.&lt;br /&gt; &lt;a href="{1}" style="color: #FF6F3D; text-decoration: underline; white-space: nowrap;" target="_blank"&gt;点击此处取消订阅&lt;/a&gt;&lt;br /&gt;</value>
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
+    &lt;td class="fol" style="color: #666666; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; margin: 0; padding: 40px 0 8px; vertical-align: top;"&gt;
+       如在购买时遇到任何问题，请给我们发送电子邮件，地址为 &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="mailto:sales@onlyoffice.com"&gt;sales@onlyoffice.com&lt;/a&gt;.
+    &lt;/td&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
+    &lt;td class="fol" style="color: #666666; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; margin: 0; padding: 0; vertical-align: top;"&gt;
+        如遇到技术问题，请联系我们的 &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://www.onlyoffice.com/support-contact-form.aspx"&gt;支持团队&lt;/a&gt;.
+    &lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
+    &lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; margin: 0; padding: 8px 0 0; vertical-align: top;"&gt;
+        &lt;a href="{1}" style="color: #FF6F3D; text-decoration: underline; white-space: nowrap;" target="_blank"&gt;点击此处取消订阅&lt;/a&gt;
+    &lt;/td&gt;
+&lt;/tr&gt;</value>
   </data>
   <data name="FooterOpensourceV10" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td colspan="3" style="height: 10px; line-height: 10px; background: #fff; padding: 0; margin: 0;"&gt;&amp;nbsp;&lt;/td&gt;&lt;/tr&gt;

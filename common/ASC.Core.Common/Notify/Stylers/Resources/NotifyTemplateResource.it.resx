@@ -188,7 +188,20 @@
 &lt;/table&gt;</value>
   </data>
   <data name="TextForFooterUnsubsribe" xml:space="preserve">
-    <value>Per qualsiasi questione d'acquisto, inviaci un'e-mail a &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="mailto:sales@onlyoffice.com"&gt;sales@onlyoffice.com&lt;/a&gt;.&lt;br /&gt; In caso di problemi tecnici contatta il nostro &lt;a style="color: #FF6F3D; text -decorazione: sottolineatura;" target="_blank" href="https://www.onlyoffice.com/support-contact-form.aspx"&gt;team di supporto&lt;/a&gt;.&lt;br /&gt; &lt;a href="{1}" style=" colore: #FF6F3D; decorazione del testo: sottolineato; spazio bianco: nowrap;" target="_blank"&gt;Clicca qui per annullare l'iscrizione&lt;/a&gt;&lt;br /&gt;</value>
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
+    &lt;td class="fol" style="color: #666666; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; margin: 0; padding: 40px 0 8px; vertical-align: top;"&gt;
+        Per qualsiasi questione d'acquisto, inviaci un'e-mail a &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="mailto:sales@onlyoffice.com"&gt;sales@onlyoffice.com&lt;/a&gt;.
+    &lt;/td&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
+    &lt;td class="fol" style="color: #666666; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; margin: 0; padding: 0; vertical-align: top;"&gt;
+        In caso di problemi tecnici contatta il nostro &lt;a style="color: #FF6F3D; text -decorazione: sottolineatura;" target="_blank" href="https://www.onlyoffice.com/support-contact-form.aspx"&gt;team di supporto&lt;/a&gt;.
+    &lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
+    &lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; margin: 0; padding: 8px 0 0; vertical-align: top;"&gt;
+        &lt;a href="{1}" style=" colore: #FF6F3D; decorazione del testo: sottolineato; spazio bianco: nowrap;" target="_blank"&gt;Clicca qui per annullare l'iscrizione&lt;/a&gt;
+    &lt;/td&gt;
+&lt;/tr&gt;</value>
   </data>
   <data name="TopGif" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
