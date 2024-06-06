@@ -121,35 +121,39 @@
     <value>Vă invităm să contactați echipa noastră pentru orice întrebări legate de achiziționare &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="mailto:sales@onlyoffice.com"&gt;sales@onlyoffice.com&lt;/a&gt;.&lt;br /&gt; Dacă aveți probleme tehnice, vă rugăm să ne contactați la adresă &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://www.onlyoffice.com/support-contact-form.aspx"&gt;support team&lt;/a&gt;.&lt;br /&gt; &lt;a href="{1}" style="color: #FF6F3D; text-decoration: underline; white-space: nowrap;" target="_blank"&gt;Faceți clic aici pentru a vă dezabona&lt;/a&gt;&lt;br /&gt;</value>
   </data>
   <data name="HtmlMaster" xml:space="preserve">
-    <value>&lt;body style="background: linear-gradient(#ffffff, #ffffff); background-color: #ffffff; margin: 0; padding: 0; text-align: center; width: 100%; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; color: #333; font-size: 18px;"&gt;
-&lt;div style="background-color: #fff; width: 600px; margin: 0 auto; text-align: center;"&gt;
-    &lt;table cellspacing="0" cellpadding="0" style="font-family: Arial; font-size: 14px; color: #333; background: #fff; text-align: center; width: 600px; margin: 0; padding: 0; border: 0 none; border-collapse: collapse; empty-cells: show; border-spacing: 0;"&gt;
-      &lt;tbody&gt;
-    %TOPIMAGE%
-        &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
-        &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
-          &lt;td colspan="3" style="margin: 0; padding: 15px 40px 15px; background-color: #fff; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px;"&gt;
-            &lt;div style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; color: #333; margin: 0; padding: 0; width: 520px; height: auto; overflow: hidden; word-wrap: break-word; vertical-align: top; text-align: center; border: 0 none;"&gt;
-              %CONTENT%
-            &lt;/div&gt;
-          &lt;/td&gt;
-        &lt;/tr&gt;
-      &lt;/tbody&gt;
-    &lt;/table&gt;
-
-    &lt;table cellspacing="0" cellpadding="0" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; background-color: #F5F5F5; color: #333; text-align: center; vertical-align: top; width: 600px; margin: 0; padding: 0; border-collapse: collapse; border: 0; border-spacing: 0;"&gt;
-      &lt;tbody&gt;
-        &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
-          &lt;td colspan="6" style="width: 600px; vertical-align: top; margin: 0; padding: 20px 30px 15px;"&gt;
-              &lt;p style="color: #666666; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px;line-height: 20px; margin: 0; padding: 0; text-align: center; width: 540px;"&gt;
-              %TEXTFOOTER%
-              &lt;/p&gt;
-          &lt;/td&gt;
-        &lt;/tr&gt;
-     %FOOTERSOCIAL%
-      &lt;/tbody&gt;
-    &lt;/table&gt;
-&lt;/div&gt;
+    <value>&lt;body background="#ffffff" style="background: linear-gradient(#ffffff, #ffffff); background-color: #ffffff; font-family: Helvetica, Arial, Tahoma, sans-serif; margin: 0; padding: 0; text-align: center; width: 100%;"&gt;   
+&lt;center style="table-layout:fixed; width:100%; -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%;" &gt;
+        &lt;div style="margin-bottom:0; margin-left:auto; margin-right:auto; margin-top:0; max-width:600px;" &gt;
+            &lt;table background="#ffffff" cellspacing="0" cellpadding="0" style="background-color:#ffffff; border: 0; border-collapse: collapse; border: 0; border-spacing: 0; empty-cells: show; max-width: 600px; margin: 0 auto; padding: 0; text-align: center; vertical-align: top; width: 100%; border-left: 1px solid #f5f5f5; border-right: 1px solid #f5f5f5; border-top: 1px solid #f5f5f5; border-bottom: 1px solid #f5f5f5;"&gt;
+                &lt;tbody&gt;
+                    &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
+                        &lt;td style="margin: 0 auto; padding: 0; text-align: center; vertical-align: top; width: 100%;"&gt;
+                            &lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;
+                                &lt;tbody&gt;
+                                    %TOPIMAGE%
+                                    &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
+                                        &lt;td style="margin: 0; text-align: center; vertical-align: top; width: 600px;"&gt;
+                                            %CONTENT%
+                                        &lt;/td&gt;
+                                    &lt;/tr&gt;
+                                &lt;/tbody&gt;
+                            &lt;/table&gt;
+                            &lt;table background="#F5F5F5" cellspacing="0" cellpadding="0" style="background-color: #F5F5F5; border: 0 none; border-collapse: collapse; border-spacing: 0; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: center;"&gt;
+                                &lt;tbody&gt;
+                                    %TEXTFOOTER%
+                                    &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
+                                        &lt;td style="margin: 0; padding-top: 32px; padding-bottom: 40px;"&gt;
+                                            %FOOTERSOCIAL%
+                                        &lt;/td&gt;
+                                    &lt;/tr&gt;
+                                &lt;/tbody&gt;
+                            &lt;/table&gt;
+                        &lt;/td&gt;
+                    &lt;/tr&gt;
+                &lt;/tbody&gt; 
+            &lt;/table&gt;
+        &lt;/div&gt;
+    &lt;/center&gt;
 &lt;/body&gt;</value>
   </data>
   <data name="FooterCommonV10" xml:space="preserve">
