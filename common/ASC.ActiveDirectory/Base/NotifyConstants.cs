@@ -36,33 +36,31 @@ public static class NotifyConstants
 
     public static ITagValue TagOrangeButton(string btnText, string btnUrl)
     {
-        var value = $@"<table cellspacing=""0"" cellpadding=""0"" style=""border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"">
-            <tbody>
-                <tr border=""0"" cellspacing=""0"" cellpadding=""0"">
-                    <td style=""width: 180px;""></td>
-                    <!--[if mso]>
-                        <td class=""body-text"" border=""0"" style=""margin: 0; padding: 0; text-align: center; width: 230px;"">
-                            <v:roundrect xmlns:v=""urn:schemas-microsoft-com:vml"" xmlns:w=""urn:schemas-microsoft-com:office:word"" href=""{btnUrl}"" style=""v-text-anchor: middle; box-sizing: border-box; font-weight: 600; font-size: 12px; height: 56px; text-decoration: none; width: 230px;"" arcsize=""5%"" strokecolor=""#FF6F3D"" fillcolor=""#FF6F3D"" alt=""{btnText}"" target=""_blank"">
-                                <w:anchorlock/>
-                            <center class=""fol"" style=""color:#ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-weight: 600; font-size: 12px; letter-spacing: 0.04em; text-align: center; text-decoration: none; text-transform: uppercase; white-space: nowrap;"">
-                               {btnText}
-                            </center>
-                            </v:roundrect>
-                        </td>
-                    <![endif]-->
-                    <!--[if !mso]> <!-->
-                        <td>
-                            <a class=""fol"" href=""{btnUrl}"" style=""background-color:#FF6F3D; border:1px solid #FF6F3D; border-radius: 3px; color:#ffffff; display: inline-block; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 12px; font-weight: 600; padding-top: 15px; padding-right: 83px; padding-bottom: 15px; padding-left: 83px; text-align: center; text-decoration: none; text-transform: uppercase; -webkit-text-size-adjust: none; mso-hide: all; white-space: nowrap; letter-spacing: 0.04em;"" alt=""{btnText}"" target=""_blank"">
-                                {btnText}
-                            </a>
-                        </td>
-                    <!-- <![endif]-->
-                    <td style=""width: 180px;""></td>
-                 </tr>
-            </tbody>
-        </table>";
+        var sb = new StringBuilder();
 
-        return new TagValue("OrangeButton", value);
+        sb.Append(@"<table cellspacing=""0"" cellpadding=""0"" style=""border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"">");
+        sb.Append("<tbody>");
+        sb.Append(@"<tr border=""0"" cellspacing=""0"" cellpadding=""0"">");
+        sb.Append(@"<td style=""width: 180px;""></td>");
+        sb.Append("<!--[if mso]>");
+        sb.Append(@"<td class=""body-text"" border=""0"" style=""margin: 0; padding: 0; text-align: center; width: 230px;"">");
+        sb.Append($@"<v:roundrect xmlns:v=""urn:schemas-microsoft-com:vml"" xmlns:w=""urn:schemas-microsoft-com:office:word"" href=""{btnUrl}"" style=""v-text-anchor: middle; box-sizing: border-box; font-weight: 600; font-size: 12px; height: 56px; text-decoration: none; width: 230px;"" arcsize=""5%"" strokecolor=""#FF6F3D"" fillcolor=""#FF6F3D"" alt=""{btnText}"" target=""_blank"">");
+        sb.Append("<w:anchorlock/>");
+        sb.Append($@"<center class=""fol"" style=""color:#ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-weight: 600; font-size: 12px; letter-spacing: 0.04em; text-align: center; text-decoration: none; text-transform: uppercase; white-space: nowrap;"">{btnText}</center>");
+        sb.Append("</v:roundrect>");
+        sb.Append("</td>");
+        sb.Append("<![endif]-->");
+        sb.Append("<!--[if !mso]> <!-->");
+        sb.Append("<td>");
+        sb.Append($@"<a class=""fol"" href=""{btnUrl}"" style=""background-color:#FF6F3D; border:1px solid #FF6F3D; border-radius: 3px; color:#ffffff; display: inline-block; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 12px; font-weight: 600; padding-top: 15px; padding-right: 83px; padding-bottom: 15px; padding-left: 83px; text-align: center; text-decoration: none; text-transform: uppercase; -webkit-text-size-adjust: none; mso-hide: all; white-space: nowrap; letter-spacing: 0.04em;"" alt=""{btnText}"" target=""_blank"">{btnText}</a>");
+        sb.Append("</td>");
+        sb.Append("<!-- <![endif]-->");
+        sb.Append(@"<td style=""width: 180px;""></td>");
+        sb.Append("</tr>");
+        sb.Append("</tbody>");
+        sb.Append("</table>");
+
+        return new TagValue("OrangeButton", sb.ToString());
     }
 }
 
