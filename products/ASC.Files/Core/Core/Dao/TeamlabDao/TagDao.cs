@@ -28,7 +28,6 @@ namespace ASC.Files.Core.Data;
 
 internal abstract class BaseTagDao<T>(
     IDaoFactory daoFactory,
-    ILogger<FolderDao> logger,
     UserManager userManager,
     IDbContextFactory<FilesDbContext> dbContextManager,
     TenantManager tenantManager,
@@ -185,8 +184,7 @@ internal abstract class BaseTagDao<T>(
     }
 
     public async Task<IEnumerable<Tag>> SaveTagsAsync(IEnumerable<Tag> tags, Guid createdBy = default)
-    {        
-        var timestamp = TimeProvider.System.GetTimestamp();
+    {
         var result = new List<Tag>();
 
         if (tags == null)
@@ -203,7 +201,6 @@ internal abstract class BaseTagDao<T>(
         
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
-        logger.LogDebug("SaveTagsAsync1, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
         await using (await distributedLockProvider.TryAcquireLockAsync(GetLockKey(tenantId), TimeSpan.FromMinutes(5)))
         {
             await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
@@ -215,7 +212,6 @@ internal abstract class BaseTagDao<T>(
                 await using var tx = await internalFilesDbContext.Database.BeginTransactionAsync();
 
                 await DeleteTagsBeforeSave(internalFilesDbContext, tenantId);
-                logger.LogDebug("SaveTagsAsync2, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
                 var createOn = _tenantUtil.DateTimeToUtc(_tenantUtil.DateTimeNow());
                 var cachedTags = new Dictionary<string, DbFilesTag>();
 
@@ -245,8 +241,6 @@ internal abstract class BaseTagDao<T>(
                     }
 
                     cachedTags.Add(key, toAdd);
-                
-                    logger.LogDebug("SaveTagsAsync3, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
 
                     var linkToInsert = new DbFilesTagLink
                     {
@@ -263,11 +257,8 @@ internal abstract class BaseTagDao<T>(
                     result.Add(t);
                 }
                 
-                logger.LogDebug("SaveTagsAsync4, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
                 await internalFilesDbContext.SaveChangesAsync();
-                logger.LogDebug("SaveTagsAsync5, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
                 await tx.CommitAsync();
-                logger.LogDebug("SaveTagsAsync6, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
             });
         }
 
@@ -699,7 +690,6 @@ internal abstract class BaseTagDao<T>(
 [Scope(typeof(ITagDao<int>))]
 internal class TagDao(
     IDaoFactory daoFactory,
-    ILogger<FolderDao> logger,
     UserManager userManager,
     IDbContextFactory<FilesDbContext> dbContextManager,
     TenantManager tenantManager,
@@ -713,18 +703,17 @@ internal class TagDao(
     IDistributedLockProvider distributedLockProvider)
     : BaseTagDao<int>(
         daoFactory,
-        logger,
         userManager,
-              dbContextManager,
-              tenantManager,
-              tenantUtil,
-              setupInfo,
-              maxTotalSizeStatistic,
-              settingsManager,
-              authContext,
-              serviceProvider,
-              distributedLockProvider,
-              mapper)
+          dbContextManager,
+          tenantManager,
+          tenantUtil,
+          setupInfo,
+          maxTotalSizeStatistic,
+          settingsManager,
+          authContext,
+          serviceProvider,
+          distributedLockProvider,
+          mapper)
     {
     public override IAsyncEnumerable<Tag> GetNewTagsAsync(Guid subject, Folder<int> parentFolder, bool deepSearch)
     {
@@ -830,7 +819,6 @@ internal class TagDao(
 [Scope(typeof(ITagDao<string>))]
 internal class ThirdPartyTagDao(
     IDaoFactory daoFactory,
-    ILogger<FolderDao> logger,
     UserManager userManager,
         IDbContextFactory<FilesDbContext> dbContextManager,
         TenantManager tenantManager,
@@ -845,18 +833,17 @@ internal class ThirdPartyTagDao(
         IDistributedLockProvider distributedLockProvider)
     : BaseTagDao<string>(
         daoFactory,
-        logger,
         userManager,
-              dbContextManager,
-              tenantManager,
-              tenantUtil,
-              setupInfo,
-              maxTotalSizeStatistic,
-              settingsManager,
-              authContext,
-              serviceProvider,
-              distributedLockProvider,
-              mapper)
+          dbContextManager,
+          tenantManager,
+          tenantUtil,
+          setupInfo,
+          maxTotalSizeStatistic,
+          settingsManager,
+          authContext,
+          serviceProvider,
+          distributedLockProvider,
+          mapper)
     {
     public override IAsyncEnumerable<Tag> GetNewTagsAsync(Guid subject, Folder<string> parentFolder, bool deepSearch)
     {

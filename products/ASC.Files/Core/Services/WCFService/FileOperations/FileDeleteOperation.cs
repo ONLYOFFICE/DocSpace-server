@@ -96,15 +96,11 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
         var folderDao = serviceScope.ServiceProvider.GetService<IFolderDao<int>>();
         var filesMessageService = serviceScope.ServiceProvider.GetService<FilesMessageService>();
         var tenantManager = serviceScope.ServiceProvider.GetService<TenantManager>();
-        var logger = serviceScope.ServiceProvider.GetService<ILogger<FileDeleteOperation<T>>>();
-        var timestamp = TimeProvider.System.GetTimestamp();
         
         await tenantManager.SetCurrentTenantAsync(CurrentTenantId);
-        logger.LogDebug("DoJob, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
         
         var externalShare = serviceScope.ServiceProvider.GetRequiredService<ExternalShare>();
         externalShare.Initialize(SessionSnapshot);
-        logger.LogDebug("DoJob1, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
         _trashId = await folderDao.GetFolderIDTrashAsync(true);
 
         Folder<T> root = null;
@@ -131,23 +127,18 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
         else
         {
             await DeleteFilesAsync(Files, serviceScope, true);
-            logger.LogDebug("DoJob2, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
             await DeleteFoldersAsync(Folders, serviceScope, true);
-            logger.LogDebug("DoJob3, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
         }
     }
 
     private async Task DeleteFoldersAsync(IEnumerable<T> folderIds, IServiceScope scope, bool isNeedSendActions = false, bool checkPermissions = true)
-    {        
-        var logger = scope.ServiceProvider.GetService<ILogger<FileDeleteOperation<T>>>();
-        var timestamp = TimeProvider.System.GetTimestamp();
+    {
         var scopeClass = scope.ServiceProvider.GetService<FileDeleteOperationScope>();
         var socketManager = scope.ServiceProvider.GetService<SocketManager>();
         var fileSharing = scope.ServiceProvider.GetService<FileSharing>();
         var authContext = scope.ServiceProvider.GetService<AuthContext>();
         var notifyClient = scope.ServiceProvider.GetService<NotifyClient>();
 
-        logger.LogDebug("DeleteFoldersAsync1, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
         var (fileMarker, filesMessageService, roomLogoManager) = scopeClass;
         roomLogoManager.EnableAudit = false;
         
@@ -158,11 +149,9 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
             var folder = await FolderDao.GetFolderAsync(folderId);
             var isRoom = DocSpaceHelper.IsRoom(folder.FolderType);
 
-            logger.LogDebug("DeleteFoldersAsync2, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
             var canDelete = await FilesSecurity.CanDeleteAsync(folder);
             checkPermissions = isRoom ? !canDelete : checkPermissions;
 
-            logger.LogDebug("DeleteFoldersAsync3, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
             T canCalculate = default;
             if (folder == null)
             {
@@ -183,11 +172,8 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
             else
             {
                 canCalculate = FolderDao.CanCalculateSubitems(folderId) ? default : folderId;
-
-                logger.LogDebug("DeleteFoldersAsync4, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
                 await fileMarker.RemoveMarkAsNewForAllAsync(folder);
                 
-                logger.LogDebug("DeleteFoldersAsync5, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
                 if (folder.ProviderEntry && ((folder.Id.Equals(folder.RootId) || isRoom)))
                 {
                     if (ProviderDao != null)
@@ -224,18 +210,14 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                 else
                 {
                     var immediately = _immediately || !FolderDao.UseTrashForRemoveAsync(folder);
-                    
-                    logger.LogDebug("DeleteFoldersAsync6, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
                     if (immediately && FolderDao.UseRecursiveOperation(folder.Id, default(T)))
                     {
                         var files = await FileDao.GetFilesAsync(folder.Id).ToListAsync();
                         await DeleteFilesAsync(files, scope, checkPermissions: checkPermissions);
 
-                        logger.LogDebug("DeleteFoldersAsync7, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
                         var folders = await FolderDao.GetFoldersAsync(folder.Id).ToListAsync();
                         await DeleteFoldersAsync(folders.Select(f => f.Id).ToList(), scope, checkPermissions: checkPermissions);
 
-                        logger.LogDebug("DeleteFoldersAsync8, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
                         if (await FolderDao.IsEmptyAsync(folder.Id))
                         {
                             var aces = new List<AceWrapper>();
@@ -246,10 +228,8 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                                 aces = await fileSharing.GetSharedInfoAsync(folder);
                             }
 
-                            logger.LogDebug("DeleteFoldersAsync9, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
                             await socketManager.DeleteFolder(folder, action: async () => await FolderDao.DeleteFolderAsync(folder.Id));
-
-                            logger.LogDebug("DeleteFoldersAsync10, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
+                            
                             if (isRoom)
                             {
                                 await notifyClient.SendRoomRemovedAsync(folder, aces, authContext.CurrentAccount.ID);
@@ -260,10 +240,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                                 await filesMessageService.SendAsync(MessageAction.FolderDeleted, folder, _headers, folder.Title);
                             }
 
-                            logger.LogDebug("DeleteFoldersAsync11, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
                             ProcessedFolder(folderId);
-                            
-                            logger.LogDebug("DeleteFoldersAsync12, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
                         }
                     }
                     else
@@ -271,7 +248,6 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                         var files = await FileDao.GetFilesAsync(folder.Id, new OrderBy(SortedByType.AZ, true), FilterType.FilesOnly, false, Guid.Empty, string.Empty, null, false, withSubfolders: true).ToListAsync();
                         var (isError, message) = await WithErrorAsync(scope, files, true, checkPermissions);
                         
-                        logger.LogDebug("DeleteFoldersAsync13, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
                         if (!_ignoreException && isError)
                         {
                             this[Err] = message;
@@ -307,26 +283,19 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                             else
                             {
                                 await socketManager.DeleteFolder(folder, action: async () => await FolderDao.MoveFolderAsync(folder.Id, _trashId, CancellationToken));
-
-                                logger.LogDebug("DeleteFoldersAsync14, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
+                                
                                 if (isNeedSendActions)
                                 {
                                     await filesMessageService.SendAsync(MessageAction.FolderMovedToTrash, folder, _headers, folder.Title);
                                 }
-                                
-                                logger.LogDebug("DeleteFoldersAsync15, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
                             }
 
                             ProcessedFolder(folderId);
-                            
-                            logger.LogDebug("DeleteFoldersAsync16, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
                         }
                     }
                 }
             }
             await ProgressStep(canCalculate);
-            
-            logger.LogDebug("DeleteFoldersAsync17, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
         }
     }
 

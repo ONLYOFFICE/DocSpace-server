@@ -28,7 +28,6 @@ namespace ASC.Files.Core.Data;
 
 [Scope(typeof(IFolderDao<int>))]
 internal class FolderDao(
-    ILogger<FolderDao> logger,
     FactoryIndexerFolder factoryIndexer,
     UserManager userManager,
     IDbContextFactory<FilesDbContext> dbContextManager,
@@ -624,19 +623,16 @@ internal class FolderDao(
     }
 
     public async Task<int> MoveFolderAsync(int folderId, int toFolderId, CancellationToken? cancellationToken)
-    {        
-        var timestamp = TimeProvider.System.GetTimestamp();
+    {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         var currentAccount = _authContext.CurrentAccount.ID;
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var strategy = filesDbContext.Database.CreateExecutionStrategy();
         var trashIdTask = globalFolder.GetFolderTrashAsync(daoFactory);
-        logger.LogDebug("MoveFolderAsync1, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
         await strategy.ExecuteAsync(async () =>
         {
             await using var context = await _dbContextFactory.CreateDbContextAsync();
             await using var tx = await context.Database.BeginTransactionAsync();
-            logger.LogDebug("MoveFolderAsync2, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
             var folder = await GetFolderAsync(folderId);
             var oldParentId = folder.ParentId;
 
@@ -645,13 +641,10 @@ internal class FolderDao(
                 throw new ArgumentException("It is forbidden to move the System folder.", nameof(folderId));
             }
             
-            logger.LogDebug("MoveFolderAsync3, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
             await filesDbContext.UpdateFoldersAsync(tenantId, folderId, toFolderId, currentAccount);
-            logger.LogDebug("MoveFolderAsync4, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
             var subfolders = await filesDbContext.SubfolderAsync(folderId).ToDictionaryAsync(r => r.FolderId, r => r.Level);
 
             await filesDbContext.DeleteTreesBySubfoldersDictionaryAsync(subfolders.Select(r => r.Key));
-            logger.LogDebug("MoveFolderAsync5, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
             var toInsert = await filesDbContext.TreesOrderByLevel(toFolderId).ToListAsync();
 
             foreach (var subfolder in subfolders)
@@ -668,14 +661,11 @@ internal class FolderDao(
                 }
             }
             
-            logger.LogDebug("MoveFolderAsync6, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
             var trashId = await trashIdTask;
             var tagDao = daoFactory.GetTagDao<int>();
             var toFolder = await GetFolderAsync(toFolderId);
-            logger.LogDebug("MoveFolderAsync7, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
             var (roomId, _) = await GetParentRoomInfoFromFileEntryAsync(folder);
             var (toFolderRoomId, _) = await GetParentRoomInfoFromFileEntryAsync(toFolder);
-            logger.LogDebug("MoveFolderAsync8, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
             if (toFolderId == trashId)
             {
                 var tagList = new List<Tag>();
@@ -685,17 +675,14 @@ internal class FolderDao(
                     tagList.Add(Tag.FromRoom(folder.Id, FileEntryType.Folder, currentAccount));
                 }
 
-                logger.LogDebug("MoveFolderAsync9, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
                 var origin = Tag.Origin(folderId, FileEntryType.Folder, oldParentId, currentAccount);
                 tagList.Add(origin);
                 await tagDao.SaveTagsAsync(tagList);
-                logger.LogDebug("MoveFolderAsync10, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
             }
             else if (oldParentId == trashId || roomId != -1 || toFolderRoomId != -1)
             {
                 var archiveId = await GetFolderIDArchive(false);
                 var fromRoomTag = await tagDao.GetTagsAsync(folder.Id, FileEntryType.Folder, TagType.FromRoom).FirstOrDefaultAsync();
-                logger.LogDebug("MoveFolderAsync9, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
                 if ((folder.ParentId != archiveId && toFolder.Id != archiveId) && 
                     toFolderRoomId == -1 && 
                     ((oldParentId == trashId && fromRoomTag != null) || roomId != -1))
@@ -706,7 +693,7 @@ internal class FolderDao(
                         WebItemManager.DocumentsProductID.ToString(), 
                         folder.Counter, toFolder.RootCreateBy);
                 }
-                logger.LogDebug("MoveFolderAsync10, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
+                
                 if ((folder.ParentId != archiveId && toFolder.Id != archiveId) && 
                     toFolderRoomId != -1 && 
                     ((oldParentId == trashId && fromRoomTag == null) || (oldParentId != trashId && roomId == -1)))
@@ -717,13 +704,12 @@ internal class FolderDao(
                         WebItemManager.DocumentsProductID.ToString(), 
                         folder.Counter, toFolder.RootCreateBy);
                 }
-                logger.LogDebug("MoveFolderAsync11, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
+                
                 if(oldParentId == trashId)
                 {
                     await tagDao.RemoveTagLinksAsync(folderId, FileEntryType.Folder, TagType.Origin);
                     await tagDao.RemoveTagLinksAsync(folderId, FileEntryType.Folder, TagType.FromRoom);
                 }
-                logger.LogDebug("MoveFolderAsync12, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
             }
 
             if (!trashId.Equals(toFolderId))
@@ -735,25 +721,19 @@ internal class FolderDao(
                 await DeleteCustomOrder(context, folderId);
             }
             
-            logger.LogDebug("MoveFolderAsync13, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
             await context.SaveChangesAsync();
             await tx.CommitAsync();
-            logger.LogDebug("MoveFolderAsync14, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
             await ChangeTreeFolderSizeAsync(toFolderId, folder.Counter);
             await ChangeTreeFolderSizeAsync(folder.ParentId, (-1)*folder.Counter);
-            logger.LogDebug("MoveFolderAsync15, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
             var recalcFolders = new HashSet<int> { toFolderId, folderId };
             await filesDbContext.UpdateFoldersCountsAsync(tenantId, recalcFolders);
-            logger.LogDebug("MoveFolderAsync16, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
 
              await foreach (var f in filesDbContext.FoldersAsync(tenantId, recalcFolders))
              {
                  f.FilesCount = await filesDbContext.FilesCountAsync(f.TenantId, f.Id);
              }
              
-            logger.LogDebug("MoveFolderAsync17, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
             await filesDbContext.SaveChangesAsync();
-            logger.LogDebug("MoveFolderAsync18, time:{0}", (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
         });
 
         return folderId;
