@@ -97,11 +97,13 @@ namespace ASC.Core.Common.Notify.Stylers.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;table style=&quot;border-collapse: collapse; border: 0; border-spacing: 0; height: 24px; margin: auto; min-width: 180px; padding: 0; text-align: center; vertical-align: top; width: 31%;&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;
+        ///&lt;td style=&quot;margin: 0; padding-top: 40px;&quot;&gt;
+        ///&lt;table style=&quot;border-collapse: collapse; border: 0; border-spacing: 0; height: 24px; margin: auto; min-width: 180px; padding: 0; text-align: center; vertical-align: top; width: 31%;&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;
         ///    &lt;tbody&gt;
         ///        &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;
         ///            &lt;td style=&quot;margin: 0; padding: 0; vertical-align: bottom;&quot;&gt;
-        ///                &lt;a href=&quot;https://www.facebook.com/pages/OnlyOffice/833032526736775&quot; style=&quot;border: 0; display: block; height: auto; margin: 0 auto; padd [rest of string was truncated]&quot;;.
+        ///                &lt;a href=&quot;https://www.facebook.com/pages/Onl [rest of string was truncated]&quot;;.
         /// </summary>
         public static string SocialNetworksFooter {
             get {

@@ -198,10 +198,9 @@
                             &lt;table background="#F5F5F5" cellspacing="0" cellpadding="0" style="background-color: #F5F5F5; border: 0 none; border-collapse: collapse; border-spacing: 0; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: center;"&gt;
                                 &lt;tbody&gt;
                                     %TEXTFOOTER%
+                                    %FOOTERSOCIAL%
                                     &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
-                                        &lt;td style="margin: 0; padding-top: 32px; padding-bottom: 40px;"&gt;
-                                            %FOOTERSOCIAL%
-                                        &lt;/td&gt;
+                                        &lt;td style="margin: 0; padding-bottom: 40px;"&gt;&lt;/td&gt;
                                     &lt;/tr&gt;
                                 &lt;/tbody&gt;
                             &lt;/table&gt;
@@ -214,7 +213,9 @@
 &lt;/body&gt;</value>
   </data>
   <data name="SocialNetworksFooter" xml:space="preserve">
-    <value>&lt;table style="border-collapse: collapse; border: 0; border-spacing: 0; height: 24px; margin: auto; min-width: 180px; padding: 0; text-align: center; vertical-align: top; width: 31%;" cellspacing="0" cellpadding="0"&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
+&lt;td style="margin: 0; padding-top: 40px;"&gt;
+&lt;table style="border-collapse: collapse; border: 0; border-spacing: 0; height: 24px; margin: auto; min-width: 180px; padding: 0; text-align: center; vertical-align: top; width: 31%;" cellspacing="0" cellpadding="0"&gt;
     &lt;tbody&gt;
         &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
             &lt;td style="margin: 0; padding: 0; vertical-align: bottom;"&gt;
@@ -244,7 +245,9 @@
             &lt;/td&gt;
         &lt;/tr&gt;
     &lt;/tbody&gt;
-&lt;/table&gt;</value>
+&lt;/table&gt;
+&lt;/td&gt;
+&lt;/tr&gt;</value>
   </data>
   <data name="TextForFooterUnsubsribe" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
