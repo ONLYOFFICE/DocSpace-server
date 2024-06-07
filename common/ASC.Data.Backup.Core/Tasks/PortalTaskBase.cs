@@ -79,7 +79,6 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
 
     protected async IAsyncEnumerable<BackupFileInfo> GetFilesToProcess(int tenantId)
     {
-        IAsyncEnumerable<BackupFileInfo> files = null;
         foreach (var module in StorageFactoryConfig.GetModuleList().Where(IsStorageModuleAllowed))
         {
             var store = await StorageFactory.GetStorageAsync(tenantId, module);
@@ -89,29 +88,26 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
             {
                 domainFolders.Add(store.GetRootDirectory(domain));
             }
-            if (files == null)
-            {
-                files = store.ListFilesRelativeAsync(string.Empty, "\\", "*.*", true)
+            var files = store.ListFilesRelativeAsync(string.Empty, "\\", "*.*", true)
                           .Where(path => domainFolders.All(domain => !path.Contains(domain + "/") && !path.Contains(domain + "\\")))
                          .Select(path => new BackupFileInfo(string.Empty, module, path, tenantId));
-            }
-            else
-            {
 
-                files = files.Union(
-                        store.ListFilesRelativeAsync(string.Empty, "\\", "*.*", true)
-                         .Select(path => new BackupFileInfo(string.Empty, module, path, tenantId)));
+            await foreach (var file in files)
+            {
+                yield return file;
             }
+
             foreach (var domain in StorageFactoryConfig.GetDomainList(module))
             {
                 files = files.Union(
                         store.ListFilesRelativeAsync(domain, "\\", "*.*", true)
                     .Select(path => new BackupFileInfo(domain, module, path, tenantId)));
+
+                await foreach (var file in files)
+                {
+                    yield return file;
+                }
             }
-        }
-        await foreach (var file in files.Distinct())
-        {
-           yield return file;
         }
     }
 

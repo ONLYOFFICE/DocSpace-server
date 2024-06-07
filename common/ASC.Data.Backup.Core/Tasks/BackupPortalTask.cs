@@ -579,7 +579,7 @@ public class BackupPortalTask(DbFactory dbFactory,
 
     private async IAsyncEnumerable<BackupFileInfo> GetFiles(int tenantId)
     {
-        var files = GetFilesToProcess(tenantId);
+        var files = GetFilesToProcess(tenantId).Distinct();
 
         await using var backupRecordContext = await dbContextFactory.CreateDbContextAsync();
         var exclude = await Queries.BackupRecordsAsync(backupRecordContext, tenantId).ToListAsync();
@@ -663,22 +663,25 @@ public class BackupPortalTask(DbFactory dbFactory,
 
         var filesProcessed = 0;
         var filesCount = await files.CountAsync();
-        var restoreInfoXml = new XElement("storage_restore");
         async Task SetProgress()
         {
             await SetCurrentStepProgress((int)(++filesProcessed * 100 / (double)filesCount));
         }
 
         await using var tmpFile = tempStream.Create();
+        var bytes = Encoding.UTF8.GetBytes("<storage_restore>");
+        tmpFile.Write(bytes, 0, bytes.Length);
         await foreach (var file in files)
         {
             var storage = await StorageFactory.GetStorageAsync(TenantId, file.Module);
             await writer.WriteEntryAsync(file.GetZipKey(), file.Domain, file.Path, storage, SetProgress);
 
-            restoreInfoXml.Add(file.ToXElement());
+            var restoreInfoXml = file.ToXElement();
+            restoreInfoXml.WriteTo(tmpFile);
         }
 
-        restoreInfoXml.WriteTo(tmpFile);
+        bytes = Encoding.UTF8.GetBytes("</storage_restore>");
+        tmpFile.Write(bytes, 0, bytes.Length);
         await writer.WriteEntryAsync(KeyHelper.GetStorageRestoreInfoZipKey(), tmpFile, () => Task.CompletedTask);
 
         logger.DebugEndBackupStorage();
