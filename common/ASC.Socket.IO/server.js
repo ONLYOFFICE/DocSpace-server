@@ -60,6 +60,7 @@ if (redisOptions != null) {
   redisClient = redis.createClient(redisOptions);
   redisClient.on('error', err => winston.error('Redis Client Error', err));
   redisClient.connect();
+  winston.info('Redis connect');
   store = new RedisStore({ client: redisClient });
 } else {
   store = new MemoryStore();
@@ -68,7 +69,7 @@ if (redisOptions != null) {
 const session = expressSession({
   store: store,
   secret: secret,
-  resave: true,
+  resave: false,
   saveUninitialized: true,
   cookie: {
     path: "/",
