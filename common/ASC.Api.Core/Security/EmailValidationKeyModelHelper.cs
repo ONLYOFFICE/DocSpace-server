@@ -36,7 +36,7 @@ public class EmailValidationKeyModelHelper(IHttpContextAccessor httpContextAcces
     AuthContext authContext,
     UserManager userManager,
     AuthManager authentication,
-    InvitationLinkHelper invitationLinkHelper,
+    InvitationValidator invitationValidator,
     AuditEventsRepository auditEventsRepository,
     TenantUtil tenantUtil,
     CookiesManager cookiesManager,
@@ -93,7 +93,7 @@ public class EmailValidationKeyModelHelper(IHttpContextAccessor httpContextAcces
                 break;
 
             case ConfirmType.LinkInvite:
-                checkKeyResult = (await invitationLinkHelper.ValidateAsync(key, email, emplType ?? default)).Result;
+                checkKeyResult = (await invitationValidator.ValidateAsync(key, email, emplType ?? default)).Status;
                 break;
 
             case ConfirmType.PortalOwnerChange:

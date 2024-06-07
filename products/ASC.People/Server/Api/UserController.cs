@@ -58,7 +58,7 @@ public class UserController(ICache cache,
         IHttpClientFactory httpClientFactory,
         IHttpContextAccessor httpContextAccessor,
         SettingsManager settingsManager,
-        InvitationLinkService invitationLinkService,
+        InvitationService invitationService,
         FileSecurity fileSecurity,
         UsersQuotaSyncOperation usersQuotaSyncOperation,
         CountPaidUserChecker countPaidUserChecker,
@@ -165,7 +165,7 @@ public class UserController(ICache cache,
     {
         await _apiContext.AuthByClaimAsync();
 
-        var linkData = inDto.FromInviteLink ? await invitationLinkService.GetProcessedLinkDataAsync(inDto.Key, inDto.Email, inDto.Type) : null;
+        var linkData = inDto.FromInviteLink ? await invitationService.GetInvitationDataAsync(inDto.Key, inDto.Email, inDto.Type) : null;
         if (linkData is { IsCorrect: false })
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_InvintationLink);
@@ -253,7 +253,7 @@ public class UserController(ICache cache,
             await UpdatePhotoUrlAsync(inDto.Files, user);
         }
 
-        if (linkData is { LinkType: InvitationLinkType.CommonWithRoom })
+        if (linkData is { LinkType: InvitationLinkType.CommonToRoom })
         {
             var success = int.TryParse(linkData.RoomId, out var id);
             var tenantId = await tenantManager.GetCurrentTenantIdAsync();
@@ -317,7 +317,7 @@ public class UserController(ICache cache,
             }
 
             var user = await userManagerWrapper.AddInvitedUserAsync(invite.Email, invite.Type, inDto.Culture);
-            var link = await invitationLinkService.GetInvitationLinkAsync(user.Email, invite.Type, authContext.CurrentAccount.ID, inDto.Culture);
+            var link = await invitationService.GetInvitationLinkAsync(user.Email, invite.Type, authContext.CurrentAccount.ID, inDto.Culture);
             var shortenLink = await urlShortener.GetShortenLinkAsync(link);
 
             await studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink, inDto.Culture, true);
@@ -912,7 +912,7 @@ public class UserController(ICache cache,
                     continue;
                 }
 
-                var link = await invitationLinkService.GetInvitationLinkAsync(user.Email, type, authContext.CurrentAccount.ID, user.GetCulture()?.Name);
+                var link = await invitationService.GetInvitationLinkAsync(user.Email, type, authContext.CurrentAccount.ID, user.GetCulture()?.Name);
                 var shortenLink = await urlShortener.GetShortenLinkAsync(link);
 
                 await studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink);
