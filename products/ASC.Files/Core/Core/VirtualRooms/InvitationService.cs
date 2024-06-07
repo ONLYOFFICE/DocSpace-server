@@ -143,19 +143,21 @@ public class InvitationService(
                     {
                         query = query.Where(x => x.Target == data.RoomId);
                     }
+
+                    var userId = authContext.CurrentAccount.ID;
                 
                     await foreach(var auditEvent in query.ToAsyncEnumerable())
                     {
                         var description = JsonSerializer.Deserialize<List<string>>(auditEvent.DescriptionRaw);
                         var info = JsonSerializer.Deserialize<AdditionalNotificationInfo<JsonElement>>(description.Last());
 
-                        if (info.UserIds.Contains(authContext.CurrentAccount.ID))
+                        if (info.UserIds.Contains(userId) && auditEvent.UserId != userId)
                         {
                             return false;
                         }
                     }
                     
-                    if (FileSecurity.PaidShares.Contains(data.Share) && await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID) is EmployeeType.User)
+                    if (FileSecurity.PaidShares.Contains(data.Share) && await userManager.GetUserTypeAsync(userId) is EmployeeType.User)
                     {
                         data.Share = FileSecurity.GetHighFreeRole(folder.FolderType);
 
@@ -167,18 +169,18 @@ public class InvitationService(
                         }
                     }
 
-                    var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+                    var user = await userManager.GetUsersAsync(userId);
                     
-                    await fileSecurity.ShareAsync(folder.Id, FileEntryType.Folder, authContext.CurrentAccount.ID, data.Share);
+                    await fileSecurity.ShareAsync(folder.Id, FileEntryType.Folder, userId, data.Share);
 
                     switch (entry)
                     {
                         case FileEntry<int> entryInt:
-                            await filesMessageService.SendAsync(MessageAction.RoomCreateUser, entryInt, authContext.CurrentAccount.ID, data.Share, true, 
+                            await filesMessageService.SendAsync(MessageAction.RoomCreateUser, entryInt, userId, data.Share, true, 
                                 user.DisplayUserName(false, displayUserSettingsHelper));
                             break;
                         case FileEntry<string> entryString:
-                            await filesMessageService.SendAsync(MessageAction.RoomCreateUser, entryString, authContext.CurrentAccount.ID, data.Share, true, 
+                            await filesMessageService.SendAsync(MessageAction.RoomCreateUser, entryString, userId, data.Share, true, 
                                 user.DisplayUserName(false, displayUserSettingsHelper));
                             break;
                     }
