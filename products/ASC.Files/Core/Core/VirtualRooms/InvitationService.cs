@@ -129,9 +129,20 @@ public class InvitationService(
 
                     var query = context.AuditEvents.Where(x => x.TenantId == tenantId && x.Action == (int)MessageAction.RoomRemoveUser);
 
-                    query = entry.ProviderEntry 
-                        ? query.Where(x => x.Target.StartsWith($"{entry.ProviderKey}-{entry.ProviderId}-")) 
-                        : query.Where(x => x.Target == data.RoomId);
+                    if (entry.ProviderEntry)
+                    {
+                        var match = Selectors.Pattern.Match(data.RoomId);
+                        if (!match.Success)
+                        {
+                            return false;
+                        }
+                        
+                        query = query.Where(x => x.Target.StartsWith($"{match.Groups[2]}-{entry.ProviderId}-"));
+                    }
+                    else
+                    {
+                        query = query.Where(x => x.Target == data.RoomId);
+                    }
                 
                     await foreach(var auditEvent in query.ToAsyncEnumerable())
                     {
@@ -291,7 +302,7 @@ public class InvitationService(
         }
 
         var thirdPartyRoom = await daoFactory.GetFolderDao<string>().GetFolderAsync(provider.FolderId);
-        if (await CheckRoomAsync(thirdPartyRoom))
+        if (!await CheckRoomAsync(thirdPartyRoom))
         {
             return (null, null);
         }
