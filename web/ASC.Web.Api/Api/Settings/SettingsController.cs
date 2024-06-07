@@ -180,6 +180,7 @@ public partial class SettingsController(MessageService messageService,
             settings.FormGallery = mapper.Map<FormGalleryDto>(formGallerySettings);
 
             settings.InvitationLimit = await userInvitationLimitHelper.GetLimit();
+            settings.MaxImageUploadSize = setupInfo.MaxImageUploadSize;
         }
         else
         {
