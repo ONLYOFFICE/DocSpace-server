@@ -40,7 +40,7 @@ public class MessagesRepository : IDisposable
     private readonly int _cacheLimit;
     private readonly SemaphoreSlim _semaphore = new(1);
     private readonly HashSet<MessageAction> _forceSaveAuditActions =
-        [MessageAction.RoomInviteLinkUsed, MessageAction.UserSentEmailChangeInstructions, MessageAction.UserSentPasswordChangeInstructions];
+        [MessageAction.RoomInviteLinkUsed, MessageAction.UserSentEmailChangeInstructions, MessageAction.UserSentPasswordChangeInstructions, MessageAction.RoomRemoveUser];
 
     public MessagesRepository(IServiceScopeFactory serviceScopeFactory, ILogger<MessagesRepository> logger, IMapper mapper, IConfiguration configuration)
     {
