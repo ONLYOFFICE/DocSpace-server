@@ -185,9 +185,14 @@ public class AuthenticationController(
         var user = wrapper.UserInfo;
         var session = inDto.Session;
 
-        if (user == null || Equals(user, Constants.LostUser) || user.Status != EmployeeStatus.Active)
+        if (user == null || Equals(user, Constants.LostUser))
         {
             throw new Exception(Resource.ErrorUserNotFound);
+        }
+
+        if (user.Status != EmployeeStatus.Active)
+        {
+            throw new Exception(Resource.ErrorUserDisabled);
         }
 
         if (await studioSmsNotificationSettingsHelper.IsVisibleAndAvailableSettingsAsync() && await studioSmsNotificationSettingsHelper.TfaEnabledForUserAsync(user.Id))
