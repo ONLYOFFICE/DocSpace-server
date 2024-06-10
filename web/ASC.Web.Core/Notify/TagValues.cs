@@ -64,12 +64,17 @@ public static class TagValues
 
     public static ITagValue TrulyYours(StudioNotifyHelper studioNotifyHelper, string text)
     {
+        var sb = new StringBuilder();
         var url = studioNotifyHelper.SiteLink;
         var urlText = new Uri(url).Host;
-        const string tdStyle = "color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 1.6em; margin: 0; padding: 0px 190px 40px; vertical-align: top; text-align: center;";
-        const string astyle = "color: #FF6F3D; text-decoration: none;";
-        var action = $@"<tr border=""0"" cellspacing=""0"" cellpadding=""0""><td class=""fol"" style=""{tdStyle}"">{text} <br /><a style=""{astyle}"" target=""_blank"" href=""{url}"">{urlText}</a></td></tr>";
-        return new TagValue("TrulyYours", action);
+
+        sb.Append(@"<tr border=""0"" cellspacing=""0"" cellpadding=""0"">");
+        sb.Append(@"<td class=""fol"" style=""color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 1.6em; Margin: 0; padding: 0px 40px 44px; vertical-align: top; text-align: center;"">");
+        sb.Append($@"{text} <br />");
+        sb.Append($@"<a style=""color: #FF6F3D; text-decoration: none;"" target=""_blank"" href=""{url}"">{urlText}</a>");
+        sb.Append("</td>");
+        sb.Append("</tr>");
+        return new TagValue("TrulyYours", sb.ToString());
     }
     public static ITagValue TableTop()
     {

@@ -618,12 +618,13 @@ public class StudioNotifyService(
             //notifyAction = Actions.OpensourceAdminWelcomeV1;
             //tagValues.Add(new TagValue(CommonTags.Footer, "opensource"));
         }
-
+        var culture = await GetCulture(newUserInfo);
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonUpgrade", culture);
         var notifyAction = Actions.SaasAdminWelcomeV1;
         tagValues.Add(new TagValue(CommonTags.Footer, "common"));
 
         tagValues.Add(new TagValue(Tags.UserName, newUserInfo.FirstName.HtmlEncode()));
-        tagValues.Add(new TagValue(Tags.PricingPage, commonLinkUtility.GetFullAbsolutePath("~/portal-settings/payments/portal-payments")));
+        tagValues.Add(TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~/portal-settings/payments/portal-payments")));
         tagValues.Add(TagValues.TrulyYours(studioNotifyHelper, WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", await GetCulture(newUserInfo))));
         tagValues.Add(new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("discover_business_subscription.gif")));
 
