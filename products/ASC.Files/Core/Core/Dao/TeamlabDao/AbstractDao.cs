@@ -349,24 +349,23 @@ public class AbstractDao
         }
     }
 
-    internal async Task InitCustomOrder(IEnumerable<int> fileIds, int parentFolderId, FileEntryType entryType)
+    internal async Task InitCustomOrder(Dictionary<int, int> fileIds, int parentFolderId, FileEntryType entryType)
     {
+        var ids = fileIds.Select(r => r.Key).ToList();
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         await using (await _distributedLockProvider.TryAcquireFairLockAsync(GetCustomOrderLockKey(tenantId, parentFolderId)))
         {
             await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-            await Queries.ClearFileOrderAsync(filesDbContext, tenantId, parentFolderId, entryType);
+            var order = filesDbContext.FileOrder
+                .AsTracking()
+                .Where(r => r.TenantId == tenantId && r.EntryType == entryType && ids.Contains(r.EntryId));
 
-            await filesDbContext.FileOrder.AddRangeAsync(fileIds.Select((r, i) => new DbFileOrder
+            foreach (var o in order)
             {
-                TenantId = tenantId,
-                ParentFolderId = parentFolderId,
-                EntryId = r,
-                EntryType = entryType,
-                Order = i + 1
-            }));
-
+                o.Order = fileIds[o.EntryId];
+            }
+            
             await filesDbContext.SaveChangesAsync();
         }
     }

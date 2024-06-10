@@ -628,7 +628,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         await folderDao.SetCustomOrder(folderId, parentFolderId, order);
     }
 
-    public async Task InitCustomOrder(IEnumerable<string> folderIds, string parentFolderId)
+    public async Task InitCustomOrder(Dictionary<string, int> folderIds, string parentFolderId)
     {
         var selector = _selectorFactory.GetSelector(parentFolderId);
         var folderDao = selector.GetFolderDao(parentFolderId);

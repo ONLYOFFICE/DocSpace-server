@@ -2952,7 +2952,7 @@ public class FileStorageService //: IFileStorageService
             {
                 if (indexing)
                 {
-                    await ReOrder(room.Id, true);
+                    await ReOrderAsync(room.Id, true);
                 }
                 
                 room.SettingsIndexing = indexing;
@@ -2964,7 +2964,7 @@ public class FileStorageService //: IFileStorageService
     }
     
     
-    public async Task<Folder<T>> ReOrder<T>(T folderId, bool subfolders = false)
+    public async Task<Folder<T>> ReOrderAsync<T>(T folderId, bool subfolders = false)
     {        
         var folderDao = daoFactory.GetFolderDao<T>();
         var fileDao = daoFactory.GetFileDao<T>();
@@ -2980,18 +2980,48 @@ public class FileStorageService //: IFileStorageService
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
         }
-
-        var folders = await folderDao.GetFoldersAsync(folderId, new OrderBy(SortedByType.AZ, true), FilterType.None, false, Guid.Empty, null).Select(r => r.Id).ToListAsync();
-        await folderDao.InitCustomOrder(folders, folderId);
         
-        var files = await fileDao.GetFilesAsync(folderId, new OrderBy(SortedByType.AZ, true), FilterType.None, false, Guid.Empty, null, null, false).Select(r=> r.Id).ToListAsync();
-        await fileDao.InitCustomOrder(files, folderId);
+        
+        var folders = folderDao.GetFoldersAsync(folderId, new OrderBy(SortedByType.CustomOrder, true), FilterType.None, false, Guid.Empty, null);
+        var files = fileDao.GetFilesAsync(folderId, new OrderBy(SortedByType.CustomOrder, true), FilterType.None, false, Guid.Empty, null, null, false);
+        
+        var entries = await files.Concat(folders.Cast<FileEntry>())
+            .OrderBy(r => r.Order)
+            .ToListAsync();
 
+        Dictionary<T, int> fileIds = new();
+        Dictionary<T, int> folderIds = new();
+        
+        for (var i = 1; i <= entries.Count; i++)
+        {
+            var entry = entries[i-1];
+            if (entry.Order != i)
+            {
+                if (entry is File<T> file)
+                {
+                    fileIds.Add(file.Id, i);
+                } else if (entry is Folder<T> folder)
+                {                    
+                    folderIds.Add(folder.Id, i);
+                }
+            }
+        }
+
+        if (fileIds.Count != 0)
+        {
+            await fileDao.InitCustomOrder(fileIds, folderId);
+        }
+
+        if (folderIds.Count != 0)
+        {
+            await folderDao.InitCustomOrder(folderIds, folderId);
+        }
+        
         if (subfolders)
         {
-            foreach (var t in folders)
+            foreach (var t in folderIds)
             {
-                await ReOrder(t, true);
+                await ReOrderAsync(t.Key, true);
             }
         }
 

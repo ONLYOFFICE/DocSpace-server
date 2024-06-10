@@ -614,7 +614,7 @@ public abstract class VirtualRoomsController<T>(
     [HttpPut("{id}/reorder")]
     public async Task<FolderDto<T>> ReorderAsync(T id)
     {
-        var room = await _fileStorageService.ReOrder(id);
+        var room = await _fileStorageService.ReOrderAsync(id);
 
         return await _folderDtoHelper.GetAsync(room);
     }

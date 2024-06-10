@@ -457,7 +457,7 @@ internal class SharePointFolderDao(IServiceProvider serviceProvider,
         return Task.CompletedTask;
     }
 
-    public Task InitCustomOrder(IEnumerable<string> folderIds, string parentFolderId)
+    public Task InitCustomOrder(Dictionary<string, int> folderIds, string parentFolderId)
     {
         return Task.CompletedTask;
     }

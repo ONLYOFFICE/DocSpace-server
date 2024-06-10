@@ -411,7 +411,7 @@ public interface IFolderDao<T>
     Task<FilesStatisticsResultDto> GetFilesUsedSpace();
     Task SetCustomOrder(T folderId, T parentFolderId, int order);
 
-    Task InitCustomOrder(IEnumerable<T> folderIds, T parentFolderId);
+    Task InitCustomOrder(Dictionary<T, int> folderIds, T parentFolderId);
     Task<T> SetWatermarkSettings(WatermarkSettings waterMarks, Folder<T> folder);
     Task<WatermarkSettings> GetWatermarkSettings(Folder<T> room);
     Task<Folder<T>> DeleteWatermarkSettings(Folder<T> room);
