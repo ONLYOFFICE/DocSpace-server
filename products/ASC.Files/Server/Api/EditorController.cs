@@ -174,7 +174,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
         Configuration<T> configuration;
         bool canEdit;
         bool canFill;
-        var canStartEdit = false;
+        var canStartFilling = true;
         var isSubmitOnly = false;
         if (fileType == FileType.Pdf)
         {
@@ -199,6 +199,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                     var properties = await daoFactory.GetFileDao<T>().GetProperties(file.Id);
                     var linkDao = daoFactory.GetLinkDao();
                     var fileDao = daoFactory.GetFileDao<T>();
+                    canStartFilling = false;
 
                     if (securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))
                     {
@@ -208,7 +209,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                         break;
                     }
 
-                    canStartEdit = true;
+                   
                     if (edit)
                     {
                         await linkDao.DeleteAllLinkAsync(file.Id.ToString());
@@ -301,7 +302,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                 await entryManager.MarkAsRecent(file);
             }
         }
-        if (fileType == FileType.Pdf) result.StartFilling = canStartEdit;
+        if (fileType == FileType.Pdf) result.StartFilling = canStartFilling;
         
         return result;
     }
