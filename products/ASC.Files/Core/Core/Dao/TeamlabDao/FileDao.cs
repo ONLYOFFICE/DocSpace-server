@@ -559,6 +559,7 @@ internal class FileDao(
                             {
                                 var properties = await fileDao.GetProperties(file.Id) ?? new EntryProperties() { FormFilling = new FormFillingProperties() };
                                 properties.FormFilling.StartFilling = true;
+                                properties.FormFilling.CollectFillForm = true;
                                 await fileDao.SaveProperties(file.Id, properties);
                                 await SaveFileStreamAsync(file, cloneStreamForSave, currentFolder);
 

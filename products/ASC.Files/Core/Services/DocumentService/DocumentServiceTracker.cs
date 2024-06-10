@@ -316,11 +316,15 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
         var docKey = await documentServiceHelper.GetDocKeyAsync(fileStable);
         if (!fileData.Key.Equals(docKey))
         {
-            logger.ErrorDocServiceSavingFile(fileId.ToString(), docKey, fileData.Key);
+            if (fileData.ForceSaveType != TrackerData.ForceSaveInitiator.UserSubmit ||
+                !documentServiceHelper.IsDocSubmitKey(docKey, fileData.Key))
+            {
+                logger.ErrorDocServiceSavingFile(fileId.ToString(), docKey, fileData.Key);
 
-            await StoringFileAfterErrorAsync(fileId, userId.ToString(), documentServiceConnector.ReplaceDocumentAddress(fileData.Url), fileData.Filetype);
+                await StoringFileAfterErrorAsync(fileId, userId.ToString(), documentServiceConnector.ReplaceDocumentAddress(fileData.Url), fileData.Filetype);
 
-            return new TrackResponse { Message = "Expected key " + docKey };
+                return new TrackResponse { Message = "Expected key " + docKey };
+            }
         }
 
         UserInfo user = null;

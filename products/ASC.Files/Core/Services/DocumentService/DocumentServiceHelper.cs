@@ -63,10 +63,16 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
         return (file, lastVersion);
     }
-    public async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(File<T> file, bool lastVersion, bool editPossible, bool tryEdit, bool tryCoauth, bool fillFormsPossible, EditorType editorType)
+    public async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(File<T> file, bool lastVersion, bool editPossible, bool tryEdit, bool tryCoauth, bool fillFormsPossible, EditorType editorType, bool isSubmitOnly = false)
     {
         var docParams = await GetParamsAsync(file, lastVersion, true, editPossible, editPossible, tryEdit, tryCoauth, fillFormsPossible);
         docParams.Configuration.EditorType = editorType;
+
+        if (isSubmitOnly)
+        {
+            docParams.Configuration.Document.Key = GetDocSubmitKeyAsync(docParams.Configuration.Document.Key);
+        }
+
         return docParams;
     }
 
@@ -301,10 +307,6 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
         if (formFillingProperties.ToFolderId == file.ParentId.ToString())
         {
-            if (file.CreateBy.Equals(ASC.Core.Configuration.Constants.Guest.ID))
-            {
-                return file;
-            }
             await securityContext.AuthenticateMeAsync(file.CreateBy);
 
             var linkDao = daoFactory.GetLinkDao();
@@ -332,6 +334,40 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
                              .ToArray();
 
         return DocumentServiceConnector.GenerateRevisionId(Hasher.Base64Hash(keyDoc, HashAlg.SHA256));
+    }
+
+    public string GetDocSubmitKeyAsync(string key)
+    {
+        var rnd = Guid.NewGuid();
+        return Convert.ToBase64String(Encoding.UTF8.GetBytes($"submit_{rnd}_{key}"));
+    }
+
+    public bool IsDocSubmitKey(string docKey, string key)
+    {
+        var submitKey = Encoding.UTF8.GetString(Convert.FromBase64String(ReplaceLastUnderscoresWithEquals(key)));
+
+        var keySplit = submitKey.Split(Convert.ToChar("_"), 3);
+
+        if (keySplit.Length == 3 && keySplit[0] == "submit" && docKey.Equals(keySplit[2]))
+        {
+            return true;
+        }
+        return false;
+    }
+    private string ReplaceLastUnderscoresWithEquals(string inputString)
+    {
+        var charToReplace = '_';
+        var replaceWith = '=';
+
+        var lastCharIndex = inputString.LastIndexOf(charToReplace);
+
+        while (lastCharIndex != -1)
+        {
+            inputString = inputString.Substring(0, lastCharIndex) + replaceWith + inputString.Substring(lastCharIndex + 1);
+            lastCharIndex = inputString.LastIndexOf(charToReplace);
+        }
+
+        return inputString;
     }
 
     public async Task CheckUsersForDropAsync<T>(File<T> file)

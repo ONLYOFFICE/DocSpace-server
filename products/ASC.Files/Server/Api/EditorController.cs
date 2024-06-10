@@ -41,8 +41,9 @@ public class EditorControllerInternal(FileStorageService fileStorageService,
         ConfigurationConverter<int> configurationConverter,
         IDaoFactory daoFactory,
         FileMarker fileMarker,
-        SocketManager socketManager)
-        : EditorController<int>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, daoFactory, fileMarker, socketManager);
+        SocketManager socketManager,
+        SecurityContext securityContext)
+        : EditorController<int>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, daoFactory, fileMarker, socketManager, securityContext);
 
 [DefaultRoute("file")]
 public class EditorControllerThirdparty(FileStorageService fileStorageService,
@@ -58,8 +59,9 @@ public class EditorControllerThirdparty(FileStorageService fileStorageService,
         ConfigurationConverter<string> configurationConverter,
         IDaoFactory daoFactory,
         FileMarker fileMarker,
-        SocketManager socketManager)
-        : EditorController<string>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, daoFactory, fileMarker, socketManager);
+        SocketManager socketManager,
+        SecurityContext securityContext)
+        : EditorController<string>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, daoFactory, fileMarker, socketManager, securityContext);
 
 public abstract class EditorController<T>(FileStorageService fileStorageService,
         DocumentServiceHelper documentServiceHelper,
@@ -74,7 +76,8 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
         ConfigurationConverter<T> configurationConverter,
         IDaoFactory daoFactory,
         FileMarker fileMarker,
-        SocketManager socketManager)
+        SocketManager socketManager,
+        SecurityContext securityContext)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     protected readonly DocumentServiceHelper _documentServiceHelper = documentServiceHelper;
@@ -175,6 +178,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
         bool canEdit;
         bool canFill;
         var canStartEdit = false;
+        var isSubmitOnly = false;
         if (fileType == FileType.Pdf)
         {
             var folderDao = daoFactory.GetFolderDao<T>();
@@ -198,6 +202,15 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                     var properties = await daoFactory.GetFileDao<T>().GetProperties(file.Id);
                     var linkDao = daoFactory.GetLinkDao();
                     var fileDao = daoFactory.GetFileDao<T>();
+
+                    if (securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))
+                    {
+                        canEdit = false;
+                        canFill = true;
+                        isSubmitOnly = true;
+                        break;
+                    }
+
                     canStartEdit = true;
                     if (edit)
                     {
@@ -258,7 +271,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
             canFill = true;
         }
 
-        docParams = await _documentServiceHelper.GetParamsAsync(file, lastVersion, canEdit, !view, true, canFill, editorType);
+        docParams = await _documentServiceHelper.GetParamsAsync(file, lastVersion, canEdit, !view, true, canFill, editorType, isSubmitOnly);
         configuration = docParams.Configuration;
         file = docParams.File;
 

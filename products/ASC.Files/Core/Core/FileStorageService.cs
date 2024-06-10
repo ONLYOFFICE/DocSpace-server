@@ -1254,6 +1254,7 @@ public class FileStorageService //: IFileStorageService
 
             var properties = await fileDao.GetProperties(fileId) ?? new EntryProperties() { FormFilling = new FormFillingProperties() };
             properties.FormFilling.StartFilling = true;
+            properties.FormFilling.CollectFillForm = true;
 
             await fileDao.SaveProperties(fileId, properties);
 
