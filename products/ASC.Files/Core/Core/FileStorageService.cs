@@ -1165,7 +1165,7 @@ public class FileStorageService //: IFileStorageService
         var file = await fileDao.GetFileAsync(fileId);
 
         if (file == null)
-    {
+        { 
             throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
@@ -1174,7 +1174,6 @@ public class FileStorageService //: IFileStorageService
         if (folder.FolderType == FolderType.FillingFormsRoom && FileUtility.GetFileTypeByFileName(file.Title) == FileType.Pdf)
         {
             var ace = await fileSharing.GetPureSharesAsync(folder, new List<Guid> { authContext.CurrentAccount.ID }).FirstOrDefaultAsync();
-
             if (ace is { Access: FileShare.FillForms })
             {
                 throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
@@ -2685,7 +2684,7 @@ public class FileStorageService //: IFileStorageService
                     continue;
                 }
 
-                foreach (var (eventType, ace) in result.HandledAces)
+                foreach (var (eventType, _, ace) in result.ProcessedItems)
                 {
                     if (ace.IsLink)
                     {
@@ -2814,16 +2813,20 @@ public class FileStorageService //: IFileStorageService
     {
         var room = (await daoFactory.GetFolderDao<T>().GetFolderAsync(roomId)).NotFoundIfNull();
 
-        var options = new FileShareOptions { Title = !string.IsNullOrEmpty(title) ? title : FilesCommonResource.DefaultInvitationLinkTitle, ExpirationDate = DateTime.UtcNow.Add(invitationLinkHelper.IndividualLinkExpirationInterval) };
-
-        var result = await SetAceLinkAsync(room, SubjectType.InvitationLink, linkId, share, options, _roomMessageActions[SubjectType.InvitationLink]);
-
-        if (result != null)
+        var options = new FileShareOptions
         {
-            linkId = result.Item2.Id;
-        }
+            Title = !string.IsNullOrEmpty(title)
+                ? title
+                : FilesCommonResource.DefaultInvitationLinkTitle,
+            ExpirationDate = DateTime.UtcNow.Add(invitationLinkHelper.IndividualLinkExpirationInterval)
+        };
 
-        return (await fileSharing.GetPureSharesAsync(room, new[] { linkId }).FirstOrDefaultAsync());
+        var result = await SetAceLinkAsync(room, SubjectType.InvitationLink, linkId, share, options);
+        
+        await filesMessageService.SendAsync(_roomMessageActions[SubjectType.InvitationLink][result.EventType], room, result.Ace.Id, result.Ace.FileShareOptions?.Title,
+            FileShareExtensions.GetAccessString(result.Ace.Access, true));
+
+        return (await fileSharing.GetPureSharesAsync(room, new[] { result.Ace.Id }).FirstOrDefaultAsync());
     }
 
     public async Task<File<T>> SaveAsPdf<T>(T fileId, T folderId, string title)
@@ -3508,12 +3511,11 @@ public class FileStorageService //: IFileStorageService
         var options = new FileShareOptions { Title = !string.IsNullOrEmpty(title) ? title : FilesCommonResource.DefaultExternalLinkTitle, DenyDownload = denyDownload, Internal = requiredAuth };
 
         var expirationDateUtc = tenantUtil.DateTimeToUtc(expirationDate);
-
         if (expirationDateUtc != DateTime.MinValue && expirationDateUtc > DateTime.UtcNow)
         {
             if (expirationDateUtc > DateTime.UtcNow.AddYears(FilesLinkUtility.MaxLinkLifeTimeInYears))
             {
-                throw new ArgumentException(nameof(expirationDate));
+                throw new ArgumentException(null, nameof(expirationDate));
             }
             
             options.ExpirationDate = expirationDateUtc;
@@ -3528,30 +3530,53 @@ public class FileStorageService //: IFileStorageService
             ? _fileMessageActions
             : _roomMessageActions;
 
-        var result = await SetAceLinkAsync(entry, primary ? SubjectType.PrimaryExternalLink : SubjectType.ExternalLink, linkId, share, options,
-            actions[SubjectType.ExternalLink]);
-
+        var result = await SetAceLinkAsync(entry, primary ? SubjectType.PrimaryExternalLink : SubjectType.ExternalLink, linkId, share, options);
         if (result == null)
         {
             return (await fileSharing.GetPureSharesAsync(entry, new[] { linkId }).FirstOrDefaultAsync());
         }
+        
+        var (eventType, previousRecord, ace) = result;
 
-        var (eventType, ace) = result;
         linkId = ace.Id;
 
         if (eventType == EventType.Remove && ace.SubjectType == SubjectType.PrimaryExternalLink && entry is Folder<T> { FolderType: FolderType.PublicRoom })
         {
             linkId = Guid.NewGuid();
 
-            await SetAceLinkAsync(entry, SubjectType.PrimaryExternalLink, linkId, FileShare.Read, new FileShareOptions { Title = FilesCommonResource.DefaultExternalLinkTitle },
-                actions[SubjectType.ExternalLink]);
+            result = await SetAceLinkAsync(entry, SubjectType.PrimaryExternalLink, linkId, FileShare.Read, 
+                new FileShareOptions { Title = FilesCommonResource.DefaultExternalLinkTitle });
+            
+            await filesMessageService.SendAsync(MessageAction.RoomExternalLinkRevoked, entry, linkId.ToString(), ace.FileShareOptions?.Title, 
+                result.Ace.FileShareOptions?.Title);
+            
+            return (await fileSharing.GetPureSharesAsync(entry, new[] { linkId }).FirstOrDefaultAsync());
         }
+        
+        var isRoom = entry is Folder<T> folder && DocSpaceHelper.IsRoom(folder.FolderType);
+
+        PastLinkData pastLinkData = null;
+
+        if (eventType is EventType.Update)
+        {
+            var previousTitle = previousRecord.Options?.Title != ace.FileShareOptions?.Title 
+                ? previousRecord.Options?.Title 
+                : null;
+            
+            var previousRole = previousRecord.Share != ace.Access 
+                ? FileShareExtensions.GetAccessString(previousRecord.Share, isRoom)
+                : null;
+
+            pastLinkData = new PastLinkData(previousTitle, previousRole);
+        }
+        
+        await filesMessageService.SendAsync(actions[SubjectType.ExternalLink][eventType], entry, ace.FileShareOptions?.Title,
+            FileShareExtensions.GetAccessString(ace.Access, isRoom), ace.Id.ToString(), pastLinkData?.ToString());
 
         return (await fileSharing.GetPureSharesAsync(entry, new[] { linkId }).FirstOrDefaultAsync());
     }
 
-    private async Task<Tuple<EventType, AceWrapper>> SetAceLinkAsync<T>(FileEntry<T> entry, SubjectType subjectType, Guid linkId, FileShare share, FileShareOptions options,
-        IReadOnlyDictionary<EventType, MessageAction> messageActions)
+    private async Task<ProcessedItem> SetAceLinkAsync<T>(FileEntry<T> entry, SubjectType subjectType, Guid linkId, FileShare share, FileShareOptions options)
     {
         if (linkId == Guid.Empty)
         {
@@ -3572,24 +3597,14 @@ public class FileStorageService //: IFileStorageService
         try
         {
             var result = await fileSharingAceHelper.SetAceObjectAsync(aces, entry, false, null, null);
-
             if (!string.IsNullOrEmpty(result.Warning))
             {
                 throw GenerateException(new InvalidOperationException(result.Warning));
             }
 
-            if (!result.Changed)
-            {
-                return result.HandledAces[0];
-            }
-
-            var (eventType, ace) = result.HandledAces[0];
-            var isRoom = entry is Folder<T> folder && DocSpaceHelper.IsRoom(folder.FolderType);
-
-            await filesMessageService.SendAsync(messageActions[eventType], entry, ace.Id, ace.FileShareOptions?.Title,
-                FileShareExtensions.GetAccessString(ace.Access, isRoom));
-
-            return result.HandledAces[0];
+            var processedItem = result.ProcessedItems[0];
+            
+            return !result.Changed ? processedItem : result.ProcessedItems[0];
         }
         catch (Exception e)
         {
@@ -3653,8 +3668,8 @@ public class FileStorageService //: IFileStorageService
         await SetAceObjectAsync(aceCollection, false);
     }
 
-    private static readonly IReadOnlyDictionary<SubjectType, IReadOnlyDictionary<EventType, MessageAction>> _roomMessageActions =
-        new Dictionary<SubjectType, IReadOnlyDictionary<EventType, MessageAction>>
+    private static readonly FrozenDictionary<SubjectType, FrozenDictionary<EventType, MessageAction>> _roomMessageActions =
+        new Dictionary<SubjectType, FrozenDictionary<EventType, MessageAction>>
         {
             {
                 SubjectType.InvitationLink, new Dictionary<EventType, MessageAction>
@@ -3662,7 +3677,7 @@ public class FileStorageService //: IFileStorageService
                     { EventType.Create, MessageAction.RoomInvitationLinkCreated },
                     { EventType.Update, MessageAction.RoomInvitationLinkUpdated },
                     { EventType.Remove, MessageAction.RoomInvitationLinkDeleted }
-                }
+                }.ToFrozenDictionary()
             },
             {
                 SubjectType.ExternalLink, new Dictionary<EventType, MessageAction>
@@ -3670,12 +3685,12 @@ public class FileStorageService //: IFileStorageService
                     { EventType.Create, MessageAction.RoomExternalLinkCreated },
                     { EventType.Update, MessageAction.RoomExternalLinkUpdated },
                     { EventType.Remove, MessageAction.RoomExternalLinkDeleted }
-                }
+                }.ToFrozenDictionary()
             }
-        };
+        }.ToFrozenDictionary();
 
-    private static readonly IReadOnlyDictionary<SubjectType, IReadOnlyDictionary<EventType, MessageAction>> _fileMessageActions =
-        new Dictionary<SubjectType, IReadOnlyDictionary<EventType, MessageAction>>
+    private static readonly FrozenDictionary<SubjectType, FrozenDictionary<EventType, MessageAction>> _fileMessageActions =
+        new Dictionary<SubjectType, FrozenDictionary<EventType, MessageAction>>
         {
             {
                 SubjectType.ExternalLink, new Dictionary<EventType, MessageAction>
@@ -3683,9 +3698,9 @@ public class FileStorageService //: IFileStorageService
                     { EventType.Create, MessageAction.FileExternalLinkCreated },
                     { EventType.Update, MessageAction.FileExternalLinkUpdated },
                     { EventType.Remove, MessageAction.FileExternalLinkDeleted }
-                }
+                }.ToFrozenDictionary()
             }
-        };
+        }.ToFrozenDictionary();
 }
 
 public class FileModel<T, TTempate>

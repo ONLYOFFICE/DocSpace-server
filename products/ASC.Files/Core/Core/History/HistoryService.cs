@@ -70,7 +70,9 @@ public class HistoryService(
         MessageAction.RoomLogoCreated,
         MessageAction.RoomLogoDeleted,
         MessageAction.RoomExternalLinkCreated,
-        MessageAction.RoomExternalLinkDeleted
+        MessageAction.RoomExternalLinkUpdated,
+        MessageAction.RoomExternalLinkDeleted,
+        MessageAction.RoomExternalLinkRevoked
     ];
     
     public async IAsyncEnumerable<HistoryEntry> GetHistoryAsync(int entryId, FileEntryType entryType, int offset, int count)

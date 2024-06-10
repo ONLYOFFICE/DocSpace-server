@@ -212,7 +212,7 @@ public enum MessageAction
     
     RoomGroupAdded = 5094,
     RoomUpdateAccessForGroup = 5095,
-    RoomGroupRemove = 5096, // last
+    RoomGroupRemove = 5096,
 
     TagCreated = 5076,
     TagsDeleted = 5077,
@@ -225,6 +225,7 @@ public enum MessageAction
     RoomExternalLinkCreated = 5088,
     RoomExternalLinkUpdated = 5089,
     RoomExternalLinkDeleted = 5090,
+    RoomExternalLinkRevoked = 5097, // last
     
     FileExternalLinkCreated = 5091,
     FileExternalLinkUpdated = 5092,

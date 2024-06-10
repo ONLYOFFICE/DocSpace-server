@@ -65,7 +65,7 @@ public class FileSharingAceHelper(
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
-        var handledAces = new List<Tuple<EventType, AceWrapper>>(aceWrappers.Count);
+        var handledAces = new List<ProcessedItem>(aceWrappers.Count);
         var ownerId = entry.RootFolderType == FolderType.USER ? entry.RootCreateBy : entry.CreateBy;
         var room = entry is Folder<T> folder && DocSpaceHelper.IsRoom(folder.FolderType) ? folder : null;
         var roomUrl = room != null ? pathProvider.GetRoomsUrl(room.Id.ToString()) : null;
@@ -267,7 +267,7 @@ public class FileSharingAceHelper(
             }
 
             changed = true;
-            handledAces.Add(new Tuple<EventType, AceWrapper>(eventType, w));
+            handledAces.Add(new ProcessedItem(eventType, existedShare, w));
 
             if (emailInvite)
             {
@@ -935,12 +935,8 @@ public class FileSharing(
     }
 }
 
-public class AceProcessingResult(bool changed, string warning, IReadOnlyList<Tuple<EventType, AceWrapper>> handledAces)
-{
-    public bool Changed { get; } = changed;
-    public string Warning { get; } = warning;
-    public IReadOnlyList<Tuple<EventType, AceWrapper>> HandledAces { get; } = handledAces;
-}
+public record AceProcessingResult(bool Changed, string Warning, IReadOnlyList<ProcessedItem> ProcessedItems);
+public record ProcessedItem(EventType EventType, FileShareRecord PastRecord, AceWrapper Ace);
 
 public enum EventType
 {
