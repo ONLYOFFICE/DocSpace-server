@@ -64,13 +64,13 @@ public partial class MessagesContext
         return Queries.LoginEventsExceptThisAsync(this, tenantId, userId, loginEventId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, 0, 0, 0])]
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, (byte)0, 0, 0])]
     public IAsyncEnumerable<DbAuditEvent> GetAuditEventsByReferences(int tenantId, int entryId, byte entryType, int offset, int count)
     {
         return Queries.GetAuditEventsByReferences(this, tenantId, entryId, entryType, offset, count);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, 0])]
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, (byte)0])]
     public Task<int> GetAuditEventsByReferencesTotalCount(int tenantId, int entryId, byte entryType)
     {
         return Queries.GetAuditEventsByReferencesTotalCount(this, tenantId, entryId, entryType);
