@@ -132,7 +132,7 @@ public class FileUploader(
                && await fileSecurity.CanEditAsync(file)
                && !await userManager.IsUserAsync(authContext.CurrentAccount.ID)
                && !await lockerManager.FileLockedForMeAsync(file.Id)
-               && !fileTracker.IsEditing(file.Id)
+               && !await fileTracker.IsEditingAsync(file.Id)
                && file.RootFolderType != FolderType.TRASH
                && !file.Encrypted;
     }

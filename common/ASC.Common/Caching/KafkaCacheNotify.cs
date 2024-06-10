@@ -56,44 +56,6 @@ public class KafkaCacheNotify<T> : IDisposable, ICacheNotify<T> where T : new()
         _adminClientConfig = new AdminClientConfig { BootstrapServers = settings.BootstrapServers };
     }
 
-    public void Publish(T obj, CacheNotifyAction notifyAction)
-    {
-        try
-        {
-            _producer ??= new ProducerBuilder<AscCacheItem, T>(new ProducerConfig(_clientConfig))
-                .SetErrorHandler((_, e) => _logger.Error(e.ToString()))
-                .SetKeySerializer(_keySerializer)
-                .SetValueSerializer(_valueSerializer)
-                .Build();
-
-            var channelName = GetChannelName(notifyAction);
-
-            if (_actions.TryGetValue(channelName, out var onchange))
-            {
-                onchange(obj);
-            }
-
-            var message = new Message<AscCacheItem, T>
-            {
-                Value = obj,
-                Key = new AscCacheItem
-                {
-                    Id = _key.ToString()
-                }
-            };
-
-            _producer.ProduceAsync(channelName, message);
-        }
-        catch (ProduceException<Null, string> e)
-        {
-            _logger.ErrorKafkaCacheNotifyPublish(e);
-        }
-        catch (Exception e)
-        {
-            _logger.ErrorKafkaCacheNotifyPublish(e);
-        }
-    }
-
     public async Task PublishAsync(T obj, CacheNotifyAction cacheNotifyAction)
     {
         try

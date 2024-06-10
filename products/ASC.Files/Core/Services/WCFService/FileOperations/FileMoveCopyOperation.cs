@@ -841,7 +841,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                             {
                                 this[Err] = FilesCommonResource.ErrorMessage_LockedFile;
                             }
-                            else if (fileTracker.IsEditing(conflict.Id))
+                            else if (await fileTracker.IsEditingAsync(conflict.Id))
                             {
                                 this[Err] = FilesCommonResource.ErrorMessage_SecurityException_UpdateEditingFile;
                             }
@@ -970,7 +970,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
 
                 return (true, error);
             }
-            if (fileTracker.IsEditing(file.Id))
+            if (await fileTracker.IsEditingAsync(file.Id))
             {
                 error = FilesCommonResource.ErrorMessage_SecurityException_UpdateEditingFile;
 

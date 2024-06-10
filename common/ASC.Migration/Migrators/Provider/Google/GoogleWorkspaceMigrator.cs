@@ -28,7 +28,7 @@ using ASCShare = ASC.Files.Core.Security.FileShare;
 
 namespace ASC.Migration.Core.Migrators.Provider.Google;
 
-[Transient]
+[Transient(typeof(Migrator))]
 public class GoogleWorkspaceMigrator : Migrator
 {
 

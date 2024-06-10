@@ -28,7 +28,7 @@ using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Web.Studio.Core.Notify;
 
-[Singleton(Additional = typeof(WorkContextExtension))]
+[Singleton]
 public class NotifyConfiguration(NotifyEngine notifyEngine, WorkContext workContext)
 {
     private static bool _configured;
@@ -179,18 +179,6 @@ public class ProductSecurityInterceptor(TenantManager tenantManager,
         }
 
         return false;
-    }
-}
-
-public static class NotifyConfigurationExtension
-{
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<NotifyTransferRequest>();
-        services.TryAdd<ProductSecurityInterceptor>();
-        services.TryAdd<TextileStyler>();
-        services.TryAdd<JabberStyler>();
-        services.TryAdd<PushStyler>();
     }
 }
 

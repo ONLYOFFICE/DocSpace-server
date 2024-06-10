@@ -244,11 +244,3 @@ class UsageSpaceWrapper
     public long MailSpace { get; set; }
     public long TalkSpace { get; set; }
 }
-
-public static class RemoveProgressItemExtension
-{
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<RemoveProgressItemScope>();
-    }
-}

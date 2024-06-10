@@ -26,7 +26,6 @@
 
 namespace ASC.Files.Core;
 
-[Scope(typeof(DaoFactory), Additional = typeof(DaoFactoryExtension))]
 public interface IDaoFactory
 {
     IProviderDao ProviderDao { get; }

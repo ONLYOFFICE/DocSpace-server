@@ -76,17 +76,6 @@ public static class UserExtensions
         return group.ID == Constants.LostGroupInfo.ID || group.CategoryID == Constants.SysGroupCategoryId;
     }
 
-    public static bool IsUser(this UserManager userManager, Guid id)
-    {
-        var ui = userManager.GetUsers(id);
-        return userManager.IsUser(ui);
-    }
-    
-    public static bool IsUser(this UserManager userManager, UserInfo ui)
-    {
-        return ui != null && userManager.IsUserInGroup(ui.Id, Constants.GroupUser.ID);
-    }
-
     public static async Task<bool> IsCollaboratorAsync(this UserManager userManager, UserInfo userInfo)
     {
         return userInfo != null && await userManager.IsUserInGroupAsync(userInfo.Id, Constants.GroupCollaborator.ID);

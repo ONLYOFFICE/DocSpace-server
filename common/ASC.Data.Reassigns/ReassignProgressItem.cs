@@ -215,11 +215,3 @@ public record ReassignProgressItemScope(
     UserPhotoManager UserPhotoManager,
     DisplayUserSettingsHelper DisplayUserSettingsHelper,
     ILoggerProvider Options);
-
-public static class ReassignProgressItemExtension
-{
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<ReassignProgressItemScope>();
-    }
-}

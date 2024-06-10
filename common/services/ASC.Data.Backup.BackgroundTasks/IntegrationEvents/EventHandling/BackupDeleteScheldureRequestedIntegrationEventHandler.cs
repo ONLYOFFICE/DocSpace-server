@@ -28,7 +28,7 @@ namespace ASC.Data.Backup.IntegrationEvents.EventHandling;
 
 [Scope]
 public class BackupDeleteScheldureRequestedIntegrationEventHandler(
-        ILogger logger,
+        ILogger<BackupDeleteScheldureRequestedIntegrationEventHandler> logger,
         BackupService backupService)
     : IIntegrationEventHandler<IntegrationEvent>
     {

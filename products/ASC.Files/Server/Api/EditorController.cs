@@ -80,9 +80,6 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
         SecurityContext securityContext)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
-    protected readonly DocumentServiceHelper _documentServiceHelper = documentServiceHelper;
-    protected readonly EncryptionKeyPairDtoHelper _encryptionKeyPairDtoHelper = encryptionKeyPairDtoHelper;
-    protected readonly SettingsManager _settingsManager = settingsManager;
 
     /// <summary>
     /// Saves edits to a file with the ID specified in the request.
@@ -169,7 +166,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     [HttpGet("{fileId}/openedit")]
     public async Task<ConfigurationDto<T>> OpenEditAsync(T fileId, int version, bool view, EditorType editorType, bool edit)
     {
-        (var file, var lastVersion) = await _documentServiceHelper.GetCurFileInfoAsync(fileId, version);
+        (var file, var lastVersion) = await documentServiceHelper.GetCurFileInfoAsync(fileId, version);
         var extension = FileUtility.GetFileExtension(file.Title);
         var fileType = FileUtility.GetFileTypeByExtention(extension);
 
@@ -271,13 +268,13 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
             canFill = true;
         }
 
-        docParams = await _documentServiceHelper.GetParamsAsync(file, lastVersion, canEdit, !view, true, canFill, editorType, isSubmitOnly);
+        docParams = await documentServiceHelper.GetParamsAsync(file, lastVersion, canEdit, !view, true, canFill, editorType, isSubmitOnly);
         configuration = docParams.Configuration;
         file = docParams.File;
 
-        if (file.RootFolderType == FolderType.Privacy && await PrivacyRoomSettings.GetEnabledAsync(_settingsManager) || docParams.LocatedInPrivateRoom)
+        if (file.RootFolderType == FolderType.Privacy && await PrivacyRoomSettings.GetEnabledAsync(settingsManager) || docParams.LocatedInPrivateRoom)
         {
-            var keyPair = await _encryptionKeyPairDtoHelper.GetKeyPairAsync();
+            var keyPair = await encryptionKeyPairDtoHelper.GetKeyPairAsync();
             if (keyPair != null)
             {
                 configuration.EditorConfig.EncryptionKeys = new EncryptionKeysConfig
@@ -305,7 +302,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
             }
         }
         if (fileType == FileType.Pdf) result.StartFilling = canStartEdit;
-
+        
         return result;
     }
 
@@ -413,9 +410,9 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         
-        var currentDocServiceUrl = filesLinkUtility.DocServiceUrl;
-        var currentDocServiceUrlInternal = filesLinkUtility.DocServiceUrlInternal;
-        var currentDocServicePortalUrl = filesLinkUtility.DocServicePortalUrl;
+        var currentDocServiceUrl = filesLinkUtility.GetDocServiceUrl();
+        var currentDocServiceUrlInternal = filesLinkUtility.GetDocServiceUrlInternal();
+        var currentDocServicePortalUrl = filesLinkUtility.GetDocServicePortalUrl();
 
         if (!ValidateUrl(inDto.DocServiceUrl) ||
             !ValidateUrl(inDto.DocServiceUrlInternal) ||
@@ -424,13 +421,13 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
             throw new Exception("Invalid input urls");
         }
 
-        filesLinkUtility.DocServiceUrl = inDto.DocServiceUrl;
-        filesLinkUtility.DocServiceUrlInternal = inDto.DocServiceUrlInternal;
-        filesLinkUtility.DocServicePortalUrl = inDto.DocServiceUrlPortal;
+        await filesLinkUtility.SetDocServiceUrlAsync(inDto.DocServiceUrl);
+        await filesLinkUtility.SetDocServiceUrlInternalAsync(inDto.DocServiceUrlInternal);
+        await filesLinkUtility.SetDocServicePortalUrlAsync(inDto.DocServiceUrlPortal);
 
         var https = new Regex(@"^https://", RegexOptions.IgnoreCase);
         var http = new Regex(@"^http://", RegexOptions.IgnoreCase);
-        if (https.IsMatch(commonLinkUtility.GetFullAbsolutePath("")) && http.IsMatch(filesLinkUtility.DocServiceUrl))
+        if (https.IsMatch(commonLinkUtility.GetFullAbsolutePath("")) && http.IsMatch(filesLinkUtility.GetDocServiceUrl()))
         {
             throw new Exception("Mixed Active Content is not allowed. HTTPS address for Document Server is required.");
         }
@@ -443,9 +440,9 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
         }
         catch (Exception)
         {        
-            filesLinkUtility.DocServiceUrl = currentDocServiceUrl;
-            filesLinkUtility.DocServiceUrlInternal = currentDocServiceUrlInternal;
-            filesLinkUtility.DocServicePortalUrl = currentDocServicePortalUrl;
+            await filesLinkUtility.SetDocServiceUrlAsync(currentDocServiceUrl);
+            await filesLinkUtility.SetDocServiceUrlInternalAsync(currentDocServiceUrlInternal);
+            await filesLinkUtility.SetDocServicePortalUrlAsync(currentDocServicePortalUrl);
           
             throw new Exception("Unable to establish a connection with the Document Server.");
         }
@@ -498,9 +495,9 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
         {
             Version = dsVersion,
             DocServiceUrlApi = url,
-            DocServiceUrl = filesLinkUtility.DocServiceUrl,
-            DocServiceUrlInternal =filesLinkUtility.DocServiceUrlInternal,
-            DocServicePortalUrl = filesLinkUtility.DocServicePortalUrl,
+            DocServiceUrl = filesLinkUtility.GetDocServiceUrl(),
+            DocServiceUrlInternal =filesLinkUtility.GetDocServiceUrlInternal(),
+            DocServicePortalUrl = filesLinkUtility.GetDocServicePortalUrl(),
             IsDefault = filesLinkUtility.IsDefault
         };
     }

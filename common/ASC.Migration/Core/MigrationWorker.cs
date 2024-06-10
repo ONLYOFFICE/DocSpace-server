@@ -26,7 +26,7 @@
 
 namespace ASC.Migration.Core;
 
-[Singleton(Additional = typeof(MigrationWorkerExtension))]
+[Singleton]
 public class MigrationWorker(
     IDistributedTaskQueueFactory queueFactory,
     IServiceProvider serviceProvider)
@@ -99,13 +99,5 @@ public class MigrationWorker(
     public async Task<MigrationOperation> GetStatusAsync(int tenantId)
     {
         return (await _queue.GetAllTasks<MigrationOperation>()).FirstOrDefault(t => t.TenantId == tenantId);
-    }
-}
-
-public static class MigrationWorkerExtension
-{
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<MigrationOperation>();
     }
 }

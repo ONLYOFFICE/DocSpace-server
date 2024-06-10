@@ -26,7 +26,6 @@
 
 namespace ASC.Files.Helpers;
 
-[Scope]
 public abstract class FilesHelperBase(FilesSettingsHelper filesSettingsHelper,
         FileUploader fileUploader,
         SocketManager socketManager,

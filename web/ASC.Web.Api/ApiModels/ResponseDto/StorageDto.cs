@@ -50,33 +50,28 @@ public class StorageDto
     /// <type>System.Boolean, System</type>
     public bool IsSet { get; set; }
 
-    public StorageDto(DataStoreConsumer consumer, StorageSettings current)
+    public static async Task<StorageDto> StorageWrapperInit<T>(DataStoreConsumer consumer, BaseStorageSettings<T> current) where T : class, ISettings<T>, new()
     {
-        StorageWrapperInit(consumer, current);
-    }
+        var result = new StorageDto
+        {
+            Id = consumer.Name, 
+            Title = ConsumerExtension.GetResourceString(consumer.Name) ?? consumer.Name, 
+            Current = consumer.Name == current.Module, 
+            IsSet = await consumer.GetIsSetAsync()
+        };
 
-    public StorageDto(DataStoreConsumer consumer, CdnStorageSettings current)
-    {
-        StorageWrapperInit(consumer, current);
-    }
-
-    private void StorageWrapperInit<T>(DataStoreConsumer consumer, BaseStorageSettings<T> current) where T : class, ISettings<T>, new()
-    {
-        Id = consumer.Name;
-        Title = ConsumerExtension.GetResourceString(consumer.Name) ?? consumer.Name;
-        Current = consumer.Name == current.Module;
-        IsSet = consumer.IsSet;
-
-        var props = Current
+        var props = result.Current
             ? current.Props
-            : current.Switch(consumer).AdditionalKeys.ToDictionary(r => r, a => consumer[a]);
+            : await current.Switch(consumer).AdditionalKeys.ToAsyncEnumerable().ToDictionaryAwaitAsync(ValueTask.FromResult, async a => await consumer.GetAsync(a));
 
-        Properties = props.Select(
+        result.Properties = props.Select(
             r => new AuthKey
             {
                 Name = r.Key,
                 Value = r.Value,
                 Title = ConsumerExtension.GetResourceString(consumer.Name + r.Key) ?? r.Key
             }).ToList();
+        
+        return result;
     }
 }

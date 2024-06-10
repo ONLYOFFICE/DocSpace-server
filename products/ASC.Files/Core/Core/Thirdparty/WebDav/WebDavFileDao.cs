@@ -28,7 +28,7 @@ using File = System.IO.File;
 
 namespace ASC.Files.Core.Core.Thirdparty.WebDav;
 
-[Scope]
+[Scope(typeof(ThirdPartyFileDao<WebDavEntry, WebDavEntry, WebDavEntry>))]
 internal class WebDavFileDao(UserManager userManager,
     IDbContextFactory<FilesDbContext> dbContextFactory,
     RegexDaoSelectorBase<WebDavEntry, WebDavEntry, WebDavEntry> daoSelector,
@@ -37,7 +37,8 @@ internal class WebDavFileDao(UserManager userManager,
     IDaoBase<WebDavEntry, WebDavEntry, WebDavEntry> dao,
     TempPath tempPath,
     SetupInfo setupInfo,
-    TenantManager tenantManager) : ThirdPartyFileDao<WebDavEntry, WebDavEntry, WebDavEntry>(userManager, dbContextFactory, daoSelector, crossDao, fileDao, dao, tenantManager)
+    TenantManager tenantManager) : 
+    ThirdPartyFileDao<WebDavEntry, WebDavEntry, WebDavEntry>(userManager, dbContextFactory, daoSelector, crossDao, fileDao, dao, tenantManager)
 {
     protected override string UploadSessionKey => "WebDavSession";
     

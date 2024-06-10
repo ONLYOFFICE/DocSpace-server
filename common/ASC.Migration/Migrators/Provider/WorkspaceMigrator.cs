@@ -28,7 +28,7 @@ using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Migration.Core.Migrators.Provider;
 
-[Transient]
+[Transient(typeof(Migrator))]
 public class WorkspaceMigrator : Migrator
 {
     private CancellationToken _cancellationToken;

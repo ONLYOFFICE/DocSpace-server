@@ -55,9 +55,9 @@ public class WebItemSecurityCache
         return $"{tenantId}:webitemsecurity";
     }
 
-    public void Publish(int tenantId)
+    public async Task PublishAsync(int tenantId)
     {
-        _cacheNotify.Publish(new WebItemSecurityNotifier { Tenant = tenantId }, CacheNotifyAction.Any);
+        await _cacheNotify.PublishAsync(new WebItemSecurityNotifier { Tenant = tenantId }, CacheNotifyAction.Any);
     }
 
     public Dictionary<string, bool> Get(int tenantId)
@@ -192,7 +192,7 @@ public class WebItemSecurity(UserManager userManager,
             await authorizationManager.AddAceAsync(a);
         }
 
-        webItemSecurityCache.Publish(await tenantManager.GetCurrentTenantIdAsync());
+        await webItemSecurityCache.PublishAsync(await tenantManager.GetCurrentTenantIdAsync());
     }
 
     public async Task<WebItemSecurityInfo> GetSecurityInfoAsync(string id)
@@ -288,7 +288,7 @@ public class WebItemSecurity(UserManager userManager,
             await userManager.RemoveUserFromGroupAsync(userid, productId);
         }
 
-        webItemSecurityCache.Publish(await tenantManager.GetCurrentTenantIdAsync());
+        await webItemSecurityCache.PublishAsync(await tenantManager.GetCurrentTenantIdAsync());
     }
 
     public async Task<bool> IsProductAdministratorAsync(Guid productId, Guid userid)

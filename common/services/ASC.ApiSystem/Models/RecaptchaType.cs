@@ -30,5 +30,6 @@ public enum RecaptchaType
 {
     Default = 0,
     AndroidV2 = 1,
-    iOSV2 = 2
+    iOSV2 = 2,
+    hCaptcha = 3
 }

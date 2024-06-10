@@ -26,7 +26,7 @@
 
 namespace ASC.Web.Files.Services.DocumentService;
 
-[Scope(Additional = typeof(ConfigurationFilesExtension))]
+[Scope]
 public class DocumentServiceHelper(IDaoFactory daoFactory,
         UserManager userManager,
         FileSecurity fileSecurity,
@@ -62,9 +62,9 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         }
 
         return (file, lastVersion);
-    }
+            }
     public async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(File<T> file, bool lastVersion, bool editPossible, bool tryEdit, bool tryCoauth, bool fillFormsPossible, EditorType editorType, bool isSubmitOnly = false)
-    {
+            {
         var docParams = await GetParamsAsync(file, lastVersion, true, editPossible, editPossible, tryEdit, tryCoauth, fillFormsPossible);
         docParams.Configuration.EditorType = editorType;
 
@@ -74,7 +74,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         }
 
         return docParams;
-    }
+            }
 
     public async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(T fileId, int version, bool editPossible, bool tryEdit,
         bool tryCoAuthoring, bool fillFormsPossible)
@@ -208,7 +208,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
         var rightChangeHistory = rightToEdit && !file.Encrypted;
 
-        if (fileTracker.IsEditing(file.Id))
+        if (await fileTracker.IsEditingAsync(file.Id))
         {
             rightChangeHistory = false;
 
@@ -219,7 +219,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             {
                 if (tryEdit)
                 {
-                    var editingBy = fileTracker.GetEditingBy(file.Id).FirstOrDefault();
+                    var editingBy = (await fileTracker.GetEditingByAsync(file.Id)).FirstOrDefault();
                     strError = string.Format(!canCoAuthoring 
                                                  ? FilesCommonResource.ErrorMessage_EditingCoauth
                                                  : FilesCommonResource.ErrorMessage_EditingMobile,
@@ -374,7 +374,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
     {
         var usersDrop = new List<string>();
 
-        foreach (var uid in fileTracker.GetEditingBy(file.Id))
+        foreach (var uid in await fileTracker.GetEditingByAsync(file.Id))
         {
             if (!await userManager.UserExistsAsync(uid))
             {

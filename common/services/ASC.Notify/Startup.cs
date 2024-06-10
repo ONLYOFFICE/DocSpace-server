@@ -24,6 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.Core;
+using ASC.Files.Core.EF;
+
 namespace ASC.Notify;
 public class Startup : BaseWorkerStartup
 {
@@ -41,22 +44,11 @@ public class Startup : BaseWorkerStartup
 
         services.Configure<NotifyServiceCfg>(Configuration.GetSection("notify"));
 
-        DIHelper.TryAdd<NotifySenderService>();
-        DIHelper.TryAdd<NotifyCleanerService>();
-        DIHelper.TryAdd<TenantManager>();
-        DIHelper.TryAdd<TenantWhiteLabelSettingsHelper>();
-        DIHelper.TryAdd<SettingsManager>();
-        DIHelper.TryAdd<JabberSender>();
-        DIHelper.TryAdd<SmtpSender>();
-        DIHelper.TryAdd<AWSSender>(); // fix private
-        DIHelper.TryAdd<StudioNotifyService>();
-
-        DIHelper.TryAdd<NotifyInvokeSendMethodRequestedIntegrationEventHandler>();
-        DIHelper.TryAdd<NotifySendMessageRequestedIntegrationEventHandler>();
-
         services.AddActivePassiveHostedService<NotifySenderService>(DIHelper, Configuration);
         services.AddActivePassiveHostedService<NotifyCleanerService>(DIHelper, Configuration);
 
         services.AddBaseDbContextPool<NotifyDbContext>();
+        services.AddBaseDbContextPool<FilesDbContext>();
+        services.RegisterQuotaFeature();
     }
 }

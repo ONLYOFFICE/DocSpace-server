@@ -28,7 +28,7 @@ using DriveFile = Google.Apis.Drive.v3.Data.File;
 
 namespace ASC.Files.Thirdparty.GoogleDrive;
 
-[Transient]
+[Transient(typeof(IProviderInfo<DriveFile, DriveFile, DriveFile>))]
 [DebuggerDisplay("{CustomerTitle}")]
 internal class GoogleDriveProviderInfo(DisposableWrapper wrapper, ProviderInfoHelper providerInfoHelper)
     : AbstractProviderInfo<DriveFile, DriveFile, DriveFile, GoogleLoginProvider>(wrapper, providerInfoHelper)

@@ -28,7 +28,8 @@ using Constants = ASC.Core.Configuration.Constants;
 using SecurityContext = ASC.Core.SecurityContext;
 
 namespace ASC.ActiveDirectory.ComplexOperations;
-[Transient(Additional = typeof(LdapOperationExtension))]
+
+[Transient]
 public class LdapOperationJob(TenantManager tenantManager,
         SecurityContext securityContext,
         LdapUserManager ldapUserManager,
@@ -130,7 +131,7 @@ public class LdapOperationJob(TenantManager tenantManager,
 
                     logger.DebugPrepareSettings();
 
-                    PrepareSettings(_ldapSettings);
+                    await PrepareSettingsAsync(_ldapSettings);
 
                     if (!string.IsNullOrEmpty(_error))
                     {
@@ -1168,7 +1169,7 @@ public class LdapOperationJob(TenantManager tenantManager,
         //SetProperty(PROCESSED, successProcessed);
     }
 
-    private void PrepareSettings(LdapSettings settings)
+    private async Task PrepareSettingsAsync(LdapSettings settings)
     {
         if (settings == null)
         {
@@ -1313,7 +1314,7 @@ public class LdapOperationJob(TenantManager tenantManager,
         {
             if (!string.IsNullOrEmpty(settings.Password))
             {
-                settings.PasswordBytes = novellLdapHelper.GetPasswordBytes(settings.Password);
+                settings.PasswordBytes = await novellLdapHelper.GetPasswordBytesAsync(settings.Password);
 
                 if (settings.PasswordBytes == null)
                 {
@@ -1358,14 +1359,5 @@ public class LdapOperationJob(TenantManager tenantManager,
             LdapSettingsStatus.CertificateRequest => _resource.LdapSettingsStatusCertificateVerification,
             _ => _resource.LdapSettingsErrorUnknownError
         };
-    }
-
-    public static class LdapOperationExtension
-    {
-        public static void Register(DIHelper services)
-        {
-            services.TryAdd<NovellLdapSettingsChecker>();
-            services.TryAdd<LdapChangeCollection>();
-        }
     }
 }

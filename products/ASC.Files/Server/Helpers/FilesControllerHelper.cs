@@ -26,6 +26,7 @@
 
 namespace ASC.Files.Helpers;
 
+[Scope]
 public class FilesControllerHelper(IServiceProvider serviceProvider,
         FilesSettingsHelper filesSettingsHelper,
         FileUploader fileUploader,
