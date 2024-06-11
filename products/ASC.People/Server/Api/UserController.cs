@@ -322,7 +322,7 @@ public class UserController(
             var shortenLink = await urlShortener.GetShortenLinkAsync(link);
 
             await studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink, inDto.Culture, true);
-            await messageService.SendAsync(MessageAction.SendJoinInvite, MessageTarget.Create(user.Email));
+            await messageService.SendAsync(MessageAction.SendJoinInvite, MessageTarget.Create(user.Id), currentUser.DisplayUserName(displayUserSettingsHelper), user.Email);
         }
 
         var result = new List<EmployeeDto>();
@@ -916,7 +916,7 @@ public class UserController(
 
                 var link = await commonLinkUtility.GetInvitationLinkAsync(user.Email, type, authContext.CurrentAccount.ID, user.GetCulture()?.Name);
                 var shortenLink = await urlShortener.GetShortenLinkAsync(link);
-                await messageService.SendAsync(MessageAction.SendJoinInvite, MessageTarget.Create(user.Email));
+                await messageService.SendAsync(MessageAction.SendJoinInvite, MessageTarget.Create(user.Id), viewer.DisplayUserName(displayUserSettingsHelper), user.Email);
                 await studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink);
             }
             else

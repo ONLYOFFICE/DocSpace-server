@@ -53,7 +53,11 @@ internal class UsersActionMapper : IModuleActionMapper
                 new Dictionary<ActionType, MessageAction[]>
                 {
                     { 
-                        ActionType.Create, [MessageAction.UserCreated, MessageAction.GuestCreated, MessageAction.UserCreatedViaInvite, MessageAction.GuestCreatedViaInvite]
+                        ActionType.Create, [
+                            MessageAction.UserCreated, MessageAction.GuestCreated, 
+                            MessageAction.UserCreatedViaInvite, MessageAction.GuestCreatedViaInvite,
+                            MessageAction.SendJoinInvite
+                        ]
                     },
                     {
                         ActionType.Update, [
