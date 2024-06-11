@@ -2684,7 +2684,7 @@ public class FileStorageService //: IFileStorageService
                     continue;
                 }
 
-                foreach (var (eventType, _, ace) in result.ProcessedItems)
+                foreach (var (eventType, pastRecord, ace) in result.ProcessedItems)
                 {
                     if (ace.IsLink)
                     {
@@ -2706,13 +2706,13 @@ public class FileStorageService //: IFileStorageService
                                     switch (eventType)
                                     {
                                         case EventType.Create:
-                                            await filesMessageService.SendAsync(MessageAction.RoomCreateUser, entry, user.Id, ace.Access, true, name);
+                                            await filesMessageService.SendAsync(MessageAction.RoomCreateUser, entry, user.Id, ace.Access, null, true, name);
                                             break;
                                         case EventType.Remove:
                                             await filesMessageService.SendAsync(MessageAction.RoomRemoveUser, entry, user.Id, name);
                                             break;
                                         case EventType.Update:
-                                            await filesMessageService.SendAsync(MessageAction.RoomUpdateAccessForUser, entry, user.Id, ace.Access, true, name);
+                                            await filesMessageService.SendAsync(MessageAction.RoomUpdateAccessForUser, entry, user.Id, ace.Access, pastRecord.Share, true, name);
                                             break;
                                     }
                                 }
@@ -2742,7 +2742,8 @@ public class FileStorageService //: IFileStorageService
                                             break;
                                         case EventType.Update:
                                             await filesMessageService.SendAsync(MessageAction.RoomUpdateAccessForGroup, entry, group.Name, 
-                                                FileShareExtensions.GetAccessString(ace.Access, true), group.ID.ToString());
+                                                FileShareExtensions.GetAccessString(ace.Access, true), group.ID.ToString(), 
+                                                FileShareExtensions.GetAccessString(pastRecord.Share, true));
                                             break;
                                     }
                                 }

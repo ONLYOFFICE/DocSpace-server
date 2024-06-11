@@ -60,11 +60,16 @@ public class FilesMessageService(
         await SendAsync(action, entry, null, userId, FileShare.None, description);
     }
 
-    public async Task SendAsync<T>(MessageAction action, FileEntry<T> entry, Guid userId, FileShare userRole, bool useRoomFormat = false, params string[] description)
+    public async Task SendAsync<T>(MessageAction action, FileEntry<T> entry, Guid userId, FileShare currentRole, FileShare? oldRole = null , bool useRoomFormat = false, params string[] description)
     {
-        description = Append(description, FileShareExtensions.GetAccessString(userRole, useRoomFormat));
+        var desc = description.Append(FileShareExtensions.GetAccessString(currentRole, useRoomFormat));
+
+        if (oldRole.HasValue)
+        {
+            desc = desc.Append(FileShareExtensions.GetAccessString(oldRole.Value, useRoomFormat));
+        }
         
-        await SendAsync(action, entry, null, userId, userRole, description);
+        await SendAsync(action, entry, null, userId, currentRole, desc.ToArray());
     }
 
     private async Task SendAsync<T>(MessageAction action, FileEntry<T> entry, IDictionary<string, StringValues> headers, string oldTitle = null, Guid userId = default, 

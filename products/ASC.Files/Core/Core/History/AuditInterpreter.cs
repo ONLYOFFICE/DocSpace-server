@@ -39,8 +39,6 @@ public class AuditInterpreter(IServiceProvider serviceProvider)
     private static readonly FileCopiedInterpreter _fileCopiedInterpreter = new();
     private static readonly RoomLogoChangedInterpreter _roomLogoChangedInterpreter = new();
     private static readonly FileUpdatedInterpreter _fileUpdatedInterpreter = new();
-    private static readonly RoomUserAccessInterpreter _roomUserAccessBaseInterpreter = new();
-    private static readonly RoomGroupAccessInterpreter _roomGroupAccessInterpreter = new();
     private static readonly RoomTagsInterpreter _roomTagsInterpreter = new();
     
     private static readonly FrozenDictionary<int, ActionInterpreter> _interpreters = new Dictionary<int, ActionInterpreter>
@@ -65,11 +63,11 @@ public class AuditInterpreter(IServiceProvider serviceProvider)
         { (int)MessageAction.FolderCopiedWithOverwriting, _folderCopiedInterpreter },
         { (int)MessageAction.FolderMovedToTrash, _folderDeletedInterpreter },
         { (int)MessageAction.FolderDeleted, _folderDeletedInterpreter },
-        { (int)MessageAction.RoomCreateUser, _roomUserAccessBaseInterpreter },
-        { (int)MessageAction.RoomUpdateAccessForUser, _roomUserAccessBaseInterpreter },
+        { (int)MessageAction.RoomCreateUser, new RoomUserAddedInterpreter() },
+        { (int)MessageAction.RoomUpdateAccessForUser, new RoomUserUpdatedAccessInterpreter() },
         { (int)MessageAction.RoomRemoveUser, new RoomUserRemovedInterpreter() },
-        { (int)MessageAction.RoomGroupAdded, _roomGroupAccessInterpreter },
-        { (int)MessageAction.RoomUpdateAccessForGroup, _roomGroupAccessInterpreter },
+        { (int)MessageAction.RoomGroupAdded, new RoomGroupAddedInterpreter() },
+        { (int)MessageAction.RoomUpdateAccessForGroup, new RoomGroupAccessUpdatedInterpreter() },
         { (int)MessageAction.RoomGroupRemove, new RoomRemovedGroupInterpreter() },
         { (int)MessageAction.RoomCreated, new RoomCreateInterpreter() },
         { (int)MessageAction.RoomRenamed, new RoomRenamedInterpreter() },

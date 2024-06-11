@@ -85,16 +85,24 @@ public abstract class RoomUserAccessBaseInterpreter: ActionInterpreter
         return new UserHistoryData
         {
             User = await employeeDtoHelper.GetAsync(user),
-            Access = GetAccess(description)
+            Access = GetAccess(description),
+            OldAccess = GetOldAccess(description)
         };
     }
 
     protected abstract string GetAccess(List<string> description);
+    protected virtual string GetOldAccess(List<string> description) => null;
 }
 
-public class RoomUserAccessInterpreter : RoomUserAccessBaseInterpreter
+public class RoomUserAddedInterpreter : RoomUserAccessBaseInterpreter
 {
     protected override string GetAccess(List<string> description) => description[1];
+}
+
+public class RoomUserUpdatedAccessInterpreter : RoomUserAccessBaseInterpreter
+{
+    protected override string GetAccess(List<string> description) => description[1];
+    protected override string GetOldAccess(List<string> description) => description[2];
 }
 
 public class RoomUserRemovedInterpreter : RoomUserAccessBaseInterpreter
@@ -102,7 +110,7 @@ public class RoomUserRemovedInterpreter : RoomUserAccessBaseInterpreter
     protected override string GetAccess(List<string> description) => null;
 }
 
-public class RoomGroupAccessInterpreter: ActionInterpreter
+public class RoomGroupAddedInterpreter: ActionInterpreter
 {
     protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
     {
@@ -113,6 +121,22 @@ public class RoomGroupAccessInterpreter: ActionInterpreter
             {
                 Group = new GroupSummaryDto { Id = groupId, Name = description[0] }, 
                 Access = description[1]
+            });
+    }
+}
+
+public class RoomGroupAccessUpdatedInterpreter : ActionInterpreter
+{
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
+    {
+        var groupId = Guid.Parse(description[2]);
+
+        return ValueTask.FromResult<HistoryData>(
+            new GroupHistoryData
+            {
+                Group = new GroupSummaryDto { Id = groupId, Name = description[0] }, 
+                Access = description[1],
+                OldAccess = description[3]
             });
     }
 }
@@ -168,10 +192,12 @@ public record UserHistoryData : HistoryData
 {
     public EmployeeDto User { get; set; }
     public string Access { get; set; }
+    public string OldAccess { get; set; }
 }
 
 public record GroupHistoryData : HistoryData
 {
     public GroupSummaryDto Group { get; set; }
     public string Access { get; set; }
+    public string OldAccess { get; set; }
 }
