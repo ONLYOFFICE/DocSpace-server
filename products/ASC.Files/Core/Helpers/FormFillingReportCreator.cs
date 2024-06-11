@@ -87,30 +87,19 @@ public class FormFillingReportCreator
         using var response = await httpClient.SendAsync(request);
         var data = await response.Content.ReadAsStringAsync();
 
-        //TODO Room improvements for filling out forms.
-        /*var u = await _userManager.GetUsersAsync(_securityContext.CurrentAccount.ID);
-        var name = new List<FormsItemData>()
-        {
-            new FormsItemData()
-            {
-                Key= FilesCommonResource.User,
-                Value = $"{u.FirstName} {u.LastName}"
-            },
-            new FormsItemData()
-            {
-                Key= FilesCommonResource.Date,
-                Value = $"{_tenantUtil.DateTimeNow().ToString("dd.MM.yyyy H:mm:ss")}"
-            },
-        };*/
         var formLink = new FormsItemData()
         {
             Key = FilesCommonResource.LinkToForm,
             Value = $"=HYPERLINK(\"{resultUrl}\";\"{FilesCommonResource.OpenForm}\")"
         };
-
+        var date = new FormsItemData()
+        {
+            Key = FilesCommonResource.Date,
+            Value = $"{_tenantUtil.DateTimeNow().ToString("dd.MM.yyyy H:mm:ss")}"
+        };
         var result = JsonSerializer.Deserialize<SubmitFormsData>(data, _options);
+        result.FormsData = result.FormsData.Append(date);
         result.FormsData = result.FormsData.Append(formLink);
-        //result.FormsData = name.Concat(result.FormsData);
 
         return result;
     }
