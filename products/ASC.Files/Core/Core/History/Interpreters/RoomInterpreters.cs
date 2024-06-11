@@ -163,12 +163,11 @@ public class RoomExternalLinkCreatedInterpreter : ActionInterpreter
     }
 }
 
-public class RoomExternalLinkUpdatedInterpreter : ActionInterpreter
+public class RoomExternalLinkRenamedInterpreter : ActionInterpreter
 {
     protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
     {
-        var updateInfo = JsonSerializer.Deserialize<PastLinkData>(description[3]);
-        return ValueTask.FromResult<HistoryData>(new LinkData(description[0], description[1], description[2], updateInfo.OldTitle, updateInfo.OldAccess));
+        return ValueTask.FromResult<HistoryData>(new LinkData(description[1], null, description[0], description[2]));
     }
 }
 

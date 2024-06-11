@@ -225,7 +225,8 @@ public enum MessageAction
     RoomExternalLinkCreated = 5088,
     RoomExternalLinkUpdated = 5089,
     RoomExternalLinkDeleted = 5090,
-    RoomExternalLinkRevoked = 5097, // last
+    RoomExternalLinkRevoked = 5097, 
+    RoomExternalLinkRenamed = 5098, // last
     
     FileExternalLinkCreated = 5091,
     FileExternalLinkUpdated = 5092,

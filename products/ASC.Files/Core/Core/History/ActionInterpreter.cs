@@ -73,7 +73,7 @@ public record EntryData(int Id, string Title, int? ParentId = null, string Paren
 }
 
 public record RenameEntryData(int? Id, string OldTitle, string NewTitle, int? ParentId = null, string ParentTitle = null) : HistoryData;
-public record LinkData(string Title, string Access, string Id = null, string OldTitle = null, string OldAccess = null) : HistoryData;
+public record LinkData(string Title, string Access, string Id = null, string OldTitle = null) : HistoryData;
 
 public record EntryOperationData(int Id, string Title, int ToFolderId, string ToFolderTitle) : HistoryData
 {

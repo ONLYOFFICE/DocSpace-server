@@ -3556,23 +3556,21 @@ public class FileStorageService //: IFileStorageService
         
         var isRoom = entry is Folder<T> folder && DocSpaceHelper.IsRoom(folder.FolderType);
 
-        PastLinkData pastLinkData = null;
-
         if (eventType is EventType.Update)
         {
             var previousTitle = previousRecord.Options?.Title != ace.FileShareOptions?.Title 
                 ? previousRecord.Options?.Title 
                 : null;
-            
-            var previousRole = previousRecord.Share != ace.Access 
-                ? FileShareExtensions.GetAccessString(previousRecord.Share, isRoom)
-                : null;
 
-            pastLinkData = new PastLinkData(previousTitle, previousRole);
+            if (!string.IsNullOrEmpty(previousTitle))
+            {
+                await filesMessageService.SendAsync(MessageAction.RoomExternalLinkRenamed, entry, ace.Id.ToString(), ace.FileShareOptions?.Title, 
+                    previousRecord.Options?.Title);
+            }
         }
         
         await filesMessageService.SendAsync(actions[SubjectType.ExternalLink][eventType], entry, ace.FileShareOptions?.Title,
-            FileShareExtensions.GetAccessString(ace.Access, isRoom), ace.Id.ToString(), pastLinkData?.ToString());
+            FileShareExtensions.GetAccessString(ace.Access, isRoom), ace.Id.ToString());
 
         return (await fileSharing.GetPureSharesAsync(entry, new[] { linkId }).FirstOrDefaultAsync());
     }

@@ -76,7 +76,7 @@ public class AuditInterpreter(IServiceProvider serviceProvider)
         { (int)MessageAction.RoomLogoCreated, _roomLogoChangedInterpreter },
         { (int)MessageAction.RoomLogoDeleted, _roomLogoChangedInterpreter },
         { (int)MessageAction.RoomExternalLinkCreated, new RoomExternalLinkCreatedInterpreter() },
-        { (int)MessageAction.RoomExternalLinkUpdated, new RoomExternalLinkUpdatedInterpreter() },
+        { (int)MessageAction.RoomExternalLinkRenamed, new RoomExternalLinkRenamedInterpreter() },
         { (int)MessageAction.RoomExternalLinkDeleted, new RoomExternalLinkDeletedInterpreter() },
         { (int)MessageAction.RoomExternalLinkRevoked, new RoomExternalLinkRevokedInterpreter() }
     }.ToFrozenDictionary();

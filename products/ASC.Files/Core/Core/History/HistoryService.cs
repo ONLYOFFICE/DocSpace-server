@@ -70,7 +70,7 @@ public class HistoryService(
         MessageAction.RoomLogoCreated,
         MessageAction.RoomLogoDeleted,
         MessageAction.RoomExternalLinkCreated,
-        MessageAction.RoomExternalLinkUpdated,
+        MessageAction.RoomExternalLinkRenamed,
         MessageAction.RoomExternalLinkDeleted,
         MessageAction.RoomExternalLinkRevoked
     ];
