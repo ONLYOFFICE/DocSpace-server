@@ -239,8 +239,12 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
 
         if (!fileData.Key.Equals(docKey))
         {
-            logger.InformationDocServiceEditingFile(fileId.ToString(), docKey, fileData.Key, fileData.Users);
-            usersDrop = fileData.Users;
+            if (!documentServiceHelper.IsDocSubmitKey(docKey, fileData.Key))
+            {
+                logger.InformationDocServiceEditingFile(fileId.ToString(), docKey, fileData.Key, fileData.Users);
+                usersDrop = fileData.Users;
+            }
+            return;
         }
         else
         {
