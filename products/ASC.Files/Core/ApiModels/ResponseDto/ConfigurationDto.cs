@@ -130,6 +130,7 @@ public class LogoConfigDto
     public string ImageEmbedded { get; set; }
 
     public string Url { get; set; }
+    public bool Visible { get; set; }
 }
 
 public class AnonymousConfigDto
@@ -309,7 +310,8 @@ public class LogoConfigConverter<T>
             Image = await source.GetImage(configuration.EditorType),
             ImageDark = await source.GetImageDark(),
             ImageEmbedded = await source.GetImageEmbedded(configuration.EditorType),
-            Url = source.Url
+            Url = source.Url,
+            Visible = source.GetVisible(configuration.EditorType)
         };
 
         return result;

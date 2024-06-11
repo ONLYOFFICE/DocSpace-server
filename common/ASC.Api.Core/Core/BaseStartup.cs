@@ -390,11 +390,16 @@ public abstract class BaseStartup
             services.AddOpenApi();
         }
 
-        services.AddAuthentication(options =>
+        services.AddScoped<CookieAuthHandler>();
+        services.AddScoped<BasicAuthHandler>();
+        services.AddScoped<ConfirmAuthHandler>();
+        services
+            .AddAuthentication(options =>
             {
                 options.DefaultScheme = MultiAuthSchemes;
                 options.DefaultChallengeScheme = MultiAuthSchemes;
-            }).AddScheme<AuthenticationSchemeOptions, CookieAuthHandler>(CookieAuthenticationDefaults.AuthenticationScheme, _ => { })
+            })
+            .AddScheme<AuthenticationSchemeOptions, CookieAuthHandler>(CookieAuthenticationDefaults.AuthenticationScheme, _ => { })
             .AddScheme<AuthenticationSchemeOptions, BasicAuthHandler>(BasicAuthScheme, _ => { })
             .AddScheme<AuthenticationSchemeOptions, ConfirmAuthHandler>("confirm", _ => { })
             .AddJwtBearer("Bearer", options =>

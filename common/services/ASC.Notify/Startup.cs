@@ -24,6 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.Core;
+using ASC.Files.Core.EF;
+
 namespace ASC.Notify;
 public class Startup : BaseWorkerStartup
 {
@@ -45,5 +48,7 @@ public class Startup : BaseWorkerStartup
         services.AddActivePassiveHostedService<NotifyCleanerService>(DIHelper, Configuration);
 
         services.AddBaseDbContextPool<NotifyDbContext>();
+        services.AddBaseDbContextPool<FilesDbContext>();
+        services.RegisterQuotaFeature();
     }
 }

@@ -36,6 +36,14 @@
     <Compile Remove="Notify\Jabber\IReverseJabberService.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Remove="Notify\Stylers\Resources\master.htm" />
+    <None Remove="Notify\Stylers\Resources\style.css" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Notify\Stylers\Resources\master.htm" />
+    <EmbeddedResource Include="Notify\Stylers\Resources\style.css" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="AWSSDK.Core" Version="3.7.304.7" />
     <PackageReference Include="AWSSDK.SimpleEmail" Version="3.7.300.97" />
     <PackageReference Include="FirebaseAdmin" Version="3.0.0" />
@@ -46,5 +54,99 @@
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.2" />
     <PackageReference Include="System.Linq.Async" Version="6.0.1" />
     <PackageReference Include="Telegram.Bot" Version="19.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Notify\Stylers\Resources\NotifyTemplateResource.Designer.cs">
+      <DependentUpon>NotifyTemplateResource.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Update="Notify\Stylers\Resources\NotifyTemplateResource.ar-SA.resx">
+      <DependentUpon>NotifyTemplateResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Notify\Stylers\Resources\NotifyTemplateResource.az.resx">
+      <DependentUpon>NotifyTemplateResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Notify\Stylers\Resources\NotifyTemplateResource.bg.resx">
+      <DependentUpon>NotifyTemplateResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Notify\Stylers\Resources\NotifyTemplateResource.cs.resx">
+      <DependentUpon>NotifyTemplateResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Notify\Stylers\Resources\NotifyTemplateResource.de.resx">
+      <DependentUpon>NotifyTemplateResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Notify\Stylers\Resources\NotifyTemplateResource.el-GR.resx">
+      <DependentUpon>NotifyTemplateResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Notify\Stylers\Resources\NotifyTemplateResource.es.resx">
+      <DependentUpon>NotifyTemplateResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Notify\Stylers\Resources\NotifyTemplateResource.fi.resx">
+      <DependentUpon>NotifyTemplateResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Notify\Stylers\Resources\NotifyTemplateResource.fr.resx">
+      <DependentUpon>NotifyTemplateResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Notify\Stylers\Resources\NotifyTemplateResource.hy-AM.resx">
+      <DependentUpon>NotifyTemplateResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Notify\Stylers\Resources\NotifyTemplateResource.it.resx">
+      <DependentUpon>NotifyTemplateResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Notify\Stylers\Resources\NotifyTemplateResource.ja-JP.resx">
+      <DependentUpon>NotifyTemplateResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Notify\Stylers\Resources\NotifyTemplateResource.ko-KR.resx">
+      <DependentUpon>NotifyTemplateResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Notify\Stylers\Resources\NotifyTemplateResource.lv.resx">
+      <DependentUpon>NotifyTemplateResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Notify\Stylers\Resources\NotifyTemplateResource.nl.resx">
+      <DependentUpon>NotifyTemplateResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Notify\Stylers\Resources\NotifyTemplateResource.pl.resx">
+      <DependentUpon>NotifyTemplateResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Notify\Stylers\Resources\NotifyTemplateResource.pt-BR.resx">
+      <DependentUpon>NotifyTemplateResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Notify\Stylers\Resources\NotifyTemplateResource.pt.resx">
+      <DependentUpon>NotifyTemplateResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Notify\Stylers\Resources\NotifyTemplateResource.resx">
+      <LastGenOutput>NotifyTemplateResource.Designer.cs</LastGenOutput>
+      <Generator>PublicResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Notify\Stylers\Resources\NotifyTemplateResource.ro.resx">
+      <DependentUpon>NotifyTemplateResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Notify\Stylers\Resources\NotifyTemplateResource.ru.resx">
+      <DependentUpon>NotifyTemplateResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Notify\Stylers\Resources\NotifyTemplateResource.sk.resx">
+      <DependentUpon>NotifyTemplateResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Notify\Stylers\Resources\NotifyTemplateResource.sl.resx">
+      <DependentUpon>NotifyTemplateResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Notify\Stylers\Resources\NotifyTemplateResource.sr-Latn-RS.resx">
+      <DependentUpon>NotifyTemplateResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Notify\Stylers\Resources\NotifyTemplateResource.tr.resx">
+      <DependentUpon>NotifyTemplateResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Notify\Stylers\Resources\NotifyTemplateResource.uk-UA.resx">
+      <DependentUpon>NotifyTemplateResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Notify\Stylers\Resources\NotifyTemplateResource.vi.resx">
+      <DependentUpon>NotifyTemplateResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Notify\Stylers\Resources\NotifyTemplateResource.zh-CN.resx">
+      <DependentUpon>NotifyTemplateResource.resx</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>
