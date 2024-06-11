@@ -659,7 +659,7 @@ public class FileStorageService //: IFileStorageService
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
         var tenantSpaceQuota = await tenantManager.GetTenantQuotaAsync(tenantId);
-        var maxTotalSize = tenantSpaceQuota != null ? tenantSpaceQuota.MaxTotalSize : -1;
+        var maxTotalSize = tenantSpaceQuota?.MaxTotalSize ?? -1;
 
         if (updateData.Quota != null && maxTotalSize < updateData.Quota)
         {
@@ -668,44 +668,46 @@ public class FileStorageService //: IFileStorageService
 
         var tagDao = daoFactory.GetTagDao<T>();
         var folderDao = daoFactory.GetFolderDao<T>();
+        
         var folder = await folderDao.GetFolderAsync(folderId);
         if (folder == null)
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FolderNotFound);
         }
-        var canEdit = DocSpaceHelper.IsRoom(folder.FolderType) ? folder.RootFolderType != FolderType.Archive && await fileSecurity.CanEditRoomAsync(folder)
+        
+        var canEdit = DocSpaceHelper.IsRoom(folder.FolderType) 
+            ? folder.RootFolderType != FolderType.Archive && await fileSecurity.CanEditRoomAsync(folder)
             : await fileSecurity.CanRenameAsync(folder);
 
         if (!canEdit)
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_RenameFolder);
         }
-        if (!canEdit && await userManager.IsUserAsync(authContext.CurrentAccount.ID))
+
+        switch (folder.RootFolderType)
         {
-            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_RenameFolder);
+            case FolderType.TRASH:
+                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_ViewTrashItem);
+            case FolderType.Archive:
+                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_UpdateArchivedRoom);
         }
-        if (folder.RootFolderType == FolderType.TRASH)
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_ViewTrashItem);
-        }
-        if (folder.RootFolderType == FolderType.Archive)
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_UpdateArchivedRoom);
-        }
+
         var folderAccess = folder.Access;
 
         if (!string.Equals(folder.Title, updateData.Title, StringComparison.OrdinalIgnoreCase) || (folder.SettingsQuota != updateData.Quota && updateData.Quota != null))
         {
-            var newFolderID = await folderDao.UpdateFolderAsync(
+            var oldTitle = folder.Title;
+            
+            var newFolderId = await folderDao.UpdateFolderAsync(
                  folder,
                  !string.Equals(folder.Title, updateData.Title, StringComparison.OrdinalIgnoreCase) && updateData.Title != null ? updateData.Title : folder.Title,
                  folder.SettingsQuota != updateData.Quota && updateData.Quota != null ? (long)updateData.Quota : folder.SettingsQuota);
 
-            folder = await folderDao.GetFolderAsync(newFolderID);
+            folder = await folderDao.GetFolderAsync(newFolderId);
             folder.Access = folderAccess;
-            if (!string.Equals(folder.Title, updateData.Title, StringComparison.OrdinalIgnoreCase))
+            
+            if (!string.Equals(oldTitle, updateData.Title, StringComparison.OrdinalIgnoreCase))
             {
-                var oldTitle = folder.Title;
                 if (DocSpaceHelper.IsRoom(folder.FolderType))
                 {
                     _ = filesMessageService.SendAsync(MessageAction.RoomRenamed, oldTitle, folder, folder.Title);
