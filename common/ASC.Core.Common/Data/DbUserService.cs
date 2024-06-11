@@ -771,7 +771,9 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
         {
             switch (employeeStatus)
             {
-                case EmployeeStatus.LeaveOfAbsence:
+                case EmployeeStatus.Pending:
+                    q = q.Where(u => u.Status == EmployeeStatus.Pending);
+                    break;
                 case EmployeeStatus.Terminated:
                     q = isDocSpaceAdmin ? q.Where(u => u.Status == EmployeeStatus.Terminated) : q.Where(u => false);
                     break;

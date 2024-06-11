@@ -28,50 +28,52 @@ using ASC.Api.Core.Core;
 
 namespace ASC.People.Api;
 
-public class UserController(ICache cache,
-        TenantManager tenantManager,
-        CookiesManager cookiesManager,
-        CustomNamingPeople customNamingPeople,
-        EmployeeDtoHelper employeeDtoHelper,
-        EmployeeFullDtoHelper employeeFullDtoHelper,
-        ILogger<UserController> logger,
-        PasswordHasher passwordHasher,
-        QueueWorkerReassign queueWorkerReassign,
-        QueueWorkerRemove queueWorkerRemove,
-        TenantUtil tenantUtil,
-        UserFormatter userFormatter,
-        UserManagerWrapper userManagerWrapper,
-        WebItemManager webItemManager,
-        WebItemSecurity webItemSecurity,
-        WebItemSecurityCache webItemSecurityCache,
-        DisplayUserSettingsHelper displayUserSettingsHelper,
-        UserInvitationLimitHelper userInvitationLimitHelper,
-        SecurityContext securityContext,
-        StudioNotifyService studioNotifyService,
-        MessageService messageService,
-        AuthContext authContext,
-        UserManager userManager,
-        PermissionContext permissionContext,
-        CoreBaseSettings coreBaseSettings,
-        ApiContext apiContext,
-        UserPhotoManager userPhotoManager,
-        IHttpClientFactory httpClientFactory,
-        IHttpContextAccessor httpContextAccessor,
-        SettingsManager settingsManager,
-        InvitationLinkService invitationLinkService,
-        FileSecurity fileSecurity,
-        UsersQuotaSyncOperation usersQuotaSyncOperation,
-        CountPaidUserChecker countPaidUserChecker,
-        CountUserChecker activeUsersChecker,
-        UsersInRoomChecker usersInRoomChecker,
-        IUrlShortener urlShortener,
-        FileSecurityCommon fileSecurityCommon, 
-        IDistributedLockProvider distributedLockProvider,
-        QuotaSocketManager quotaSocketManager,
-        IQuotaService quotaService,
-        CustomQuota customQuota)
+public class UserController(
+    CommonLinkUtility commonLinkUtility,
+    ICache cache,
+    TenantManager tenantManager,
+    CookiesManager cookiesManager,
+    CustomNamingPeople customNamingPeople,
+    EmployeeDtoHelper employeeDtoHelper,
+    EmployeeFullDtoHelper employeeFullDtoHelper,
+    ILogger<UserController> logger,
+    PasswordHasher passwordHasher,
+    QueueWorkerReassign queueWorkerReassign,
+    QueueWorkerRemove queueWorkerRemove,
+    TenantUtil tenantUtil,
+    UserFormatter userFormatter,
+    UserManagerWrapper userManagerWrapper,
+    WebItemManager webItemManager,
+    WebItemSecurity webItemSecurity,
+    WebItemSecurityCache webItemSecurityCache,
+    DisplayUserSettingsHelper displayUserSettingsHelper,
+    UserInvitationLimitHelper userInvitationLimitHelper,
+    SecurityContext securityContext,
+    StudioNotifyService studioNotifyService,
+    MessageService messageService,
+    AuthContext authContext,
+    UserManager userManager,
+    PermissionContext permissionContext,
+    CoreBaseSettings coreBaseSettings,
+    ApiContext apiContext,
+    UserPhotoManager userPhotoManager,
+    IHttpClientFactory httpClientFactory,
+    IHttpContextAccessor httpContextAccessor,
+    SettingsManager settingsManager,
+    InvitationLinkService invitationLinkService,
+    FileSecurity fileSecurity,
+    UsersQuotaSyncOperation usersQuotaSyncOperation,
+    CountPaidUserChecker countPaidUserChecker,
+    CountUserChecker activeUsersChecker,
+    UsersInRoomChecker usersInRoomChecker,
+    IUrlShortener urlShortener,
+    FileSecurityCommon fileSecurityCommon, 
+    IDistributedLockProvider distributedLockProvider,
+    QuotaSocketManager quotaSocketManager,
+    IQuotaService quotaService,
+    CustomQuota customQuota)
     : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
-    {
+{
     
 
     /// <summary>
@@ -194,10 +196,8 @@ public class UserController(ICache cache,
             {
                 throw new SecurityException(FilesCommonResource.ErrorMessage_InvintationLink);
             }
-            else
-            {
-                await userInvitationLimitHelper.IncreaseLimit();
-        }
+
+            await userInvitationLimitHelper.IncreaseLimit();
         }
 
         inDto.PasswordHash = (inDto.PasswordHash ?? "").Trim();
@@ -238,7 +238,8 @@ public class UserController(ICache cache,
         
         user.BirthDate = inDto.Birthday != null && inDto.Birthday != DateTime.MinValue ? tenantUtil.DateTimeFromUtc(inDto.Birthday) : null;
         user.WorkFromDate = inDto.Worksfrom != null && inDto.Worksfrom != DateTime.MinValue ? tenantUtil.DateTimeFromUtc(inDto.Worksfrom) : DateTime.UtcNow.Date;
-
+        user.Status = EmployeeStatus.Active;
+        
         await UpdateContactsAsync(inDto.Contacts, user, !inDto.FromInviteLink);
 
         cache.Insert("REWRITE_URL" + await tenantManager.GetCurrentTenantIdAsync(), HttpContext.Request.GetDisplayUrl(), TimeSpan.FromMinutes(5));
@@ -317,10 +318,11 @@ public class UserController(ICache cache,
             }
 
             var user = await userManagerWrapper.AddInvitedUserAsync(invite.Email, invite.Type, inDto.Culture);
-            var link = await invitationLinkService.GetInvitationLinkAsync(user.Email, invite.Type, authContext.CurrentAccount.ID, inDto.Culture);
+            var link = await commonLinkUtility.GetInvitationLinkAsync(user.Email, invite.Type, authContext.CurrentAccount.ID, inDto.Culture);
             var shortenLink = await urlShortener.GetShortenLinkAsync(link);
 
             await studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink, inDto.Culture, true);
+            await messageService.SendAsync(MessageAction.SendJoinInvite, MessageTarget.Create(user.Id));
         }
 
         var result = new List<EmployeeDto>();
@@ -912,9 +914,9 @@ public class UserController(ICache cache,
                     continue;
                 }
 
-                var link = await invitationLinkService.GetInvitationLinkAsync(user.Email, type, authContext.CurrentAccount.ID, user.GetCulture()?.Name);
+                var link = await commonLinkUtility.GetInvitationLinkAsync(user.Email, type, authContext.CurrentAccount.ID, user.GetCulture()?.Name);
                 var shortenLink = await urlShortener.GetShortenLinkAsync(link);
-
+                await messageService.SendAsync(MessageAction.SendJoinInvite, MessageTarget.Create(user.Id));
                 await studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink);
             }
             else
@@ -1126,9 +1128,9 @@ public class UserController(ICache cache,
             logger.ErrorPasswordRecovery(inDto.Email, error);
         }
 
-            var pattern = authContext.IsAuthenticated ? Resource.MessagePasswordSendedToEmail : Resource.MessageYourPasswordSendedToEmail;
-            return string.Format(pattern, inDto.Email);
-        }
+        var pattern = authContext.IsAuthenticated ? Resource.MessagePasswordSendedToEmail : Resource.MessageYourPasswordSendedToEmail;
+        return string.Format(pattern, inDto.Email);
+    }
 
     /// <summary>
     /// Sets the required activation status to the list of users with the IDs specified in the request.

@@ -52,8 +52,8 @@ internal class UsersActionMapper : IModuleActionMapper
                 EntryType.User,
                 new Dictionary<ActionType, MessageAction[]>
                 {
-                    { ActionType.Create, [MessageAction.UserCreated, MessageAction.GuestCreated, MessageAction.UserCreatedViaInvite, MessageAction.GuestCreatedViaInvite
-                        ]
+                    { 
+                        ActionType.Create, [MessageAction.UserCreated, MessageAction.GuestCreated, MessageAction.UserCreatedViaInvite, MessageAction.GuestCreatedViaInvite]
                     },
                     {
                         ActionType.Update, [
@@ -63,13 +63,11 @@ internal class UsersActionMapper : IModuleActionMapper
                             MessageAction.UsersUpdatedStatus, MessageAction.UsersSentActivationInstructions
                         ]
                     },
-                    { ActionType.Delete, [MessageAction.UserDeletedAvatar, MessageAction.UserDeleted, MessageAction.UsersDeleted, MessageAction.UserDataRemoving
-                        ]
+                    { 
+                        ActionType.Delete, [MessageAction.UserDeletedAvatar, MessageAction.UserDeleted, MessageAction.UsersDeleted, MessageAction.UserDataRemoving]
                     },
                     { ActionType.Import, [MessageAction.UserImported, MessageAction.GuestImported] },
-                    { ActionType.Logout, [MessageAction.UserLogoutActiveConnections, MessageAction.UserLogoutActiveConnection, MessageAction.UserLogoutActiveConnectionsForUser
-                        ]
-                    }
+                    { ActionType.Logout, [MessageAction.UserLogoutActiveConnections, MessageAction.UserLogoutActiveConnection, MessageAction.UserLogoutActiveConnectionsForUser] }
                 },
                 new Dictionary<ActionType, MessageAction>
                 {
