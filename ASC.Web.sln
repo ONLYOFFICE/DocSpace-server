@@ -93,6 +93,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ASC.Plugins", "common\servi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HelloPlugin", "plugins\HelloPlugin\HelloPlugin.csproj", "{E6308253-35B8-466E-9C3C-82150F1268B6}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ASC.PluginLibrary", "common\ASC.PluginLibrary\ASC.PluginLibrary.csproj", "{833C5698-91A8-4850-BE33-0ECAA271F7CC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -263,6 +265,10 @@ Global
 		{E6308253-35B8-466E-9C3C-82150F1268B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E6308253-35B8-466E-9C3C-82150F1268B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E6308253-35B8-466E-9C3C-82150F1268B6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{833C5698-91A8-4850-BE33-0ECAA271F7CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{833C5698-91A8-4850-BE33-0ECAA271F7CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{833C5698-91A8-4850-BE33-0ECAA271F7CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{833C5698-91A8-4850-BE33-0ECAA271F7CC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
