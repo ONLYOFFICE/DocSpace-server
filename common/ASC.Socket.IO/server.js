@@ -41,6 +41,7 @@ const config = require("./config");
 const auth = require("./app/middleware/auth.js");
 const winston = require("./app/log.js");
 
+(async () => {
 winston.stream = {
   write: (message) => winston.info(message),
 };
@@ -59,7 +60,7 @@ let redisClient;
 if (redisOptions != null) {
   redisClient = redis.createClient(redisOptions);
   redisClient.on('error', err => winston.error('Redis Client Error', err));
-  redisClient.connect();
+  await redisClient.connect();
   winston.info('Redis connect');
   store = new RedisStore({ client: redisClient });
 } else {
@@ -149,3 +150,4 @@ process.on('uncaughtException', (error) => {
 });
 
 module.exports = io;
+})();
