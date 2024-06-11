@@ -99,9 +99,8 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
 
             foreach (var domain in StorageFactoryConfig.GetDomainList(module))
             {
-                files = files.Union(
-                        store.ListFilesRelativeAsync(domain, "\\", "*.*", true)
-                    .Select(path => new BackupFileInfo(domain, module, path, tenantId)));
+                files = store.ListFilesRelativeAsync(domain, "\\", "*.*", true)
+                    .Select(path => new BackupFileInfo(domain, module, path, tenantId));
 
                 await foreach (var file in files)
                 {
