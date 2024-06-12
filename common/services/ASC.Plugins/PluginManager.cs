@@ -57,7 +57,8 @@ public class PluginManager(PluginConfigSettings pluginConfigSettings,
     ILogger<PluginManager> log,
     SettingsManager settingsManager,
     InstanceCrypto instanceCrypto,
-    PluginControllerManager pluginControllerManager)
+    PluginControllerManager pluginControllerManager,
+    TempPath tempPath)
 {
     private const string StorageSystemModuleName = "systemplugins";
     private const string StorageModuleName = "plugins";
@@ -140,6 +141,7 @@ public class PluginManager(PluginConfigSettings pluginConfigSettings,
 
             if (await storage.IsDirectoryAsync(config.Name))
             {
+                pluginControllerManager.RemoveControllers(config.Name);
                 await storage.DeleteDirectoryAsync(config.Name);
             }
 
@@ -163,15 +165,29 @@ public class PluginManager(PluginConfigSettings pluginConfigSettings,
 
         config = await UpdatePluginAsync(tenantId, config, true, null);
 
-        var path = storage.GetPhysicalPath("", Path.Combine(config.Name, config.Name + ".dll"));
-        var assembly = LoadPlugin(path);
+        var path = storage.GetPhysicalPath("", config.Name);
+        var path1 = storage.GetPhysicalPath("", Path.Combine(config.Name, config.Name + ".dll"));
+        var assembly = await LoadPluginAsync(path, config.Name + ".dll", storage);
         pluginControllerManager.AddControllers(assembly);
         return config;
     }
 
-    private Assembly LoadPlugin(string path)
+    private async Task<Assembly> LoadPluginAsync(string path, string target, DiscDataStore storage)
     {
-        var loadContext = new PluginLoadContext(path);
+        var temp = Path.Combine(tempPath.GetTempPath(), Path.GetFileNameWithoutExtension(Path.GetRandomFileName()));
+        Directory.CreateDirectory(temp);
+        var files = storage.ListFilesRelativeAsync("", path, "", true);
+        var folders = storage.ListDirectoriesRelativeAsync("", path, true);
+        await foreach (var folder in folders)
+        {
+            Directory.CreateDirectory(Path.Combine(temp, folder));
+        }
+        await foreach(var file in files)
+        {
+            File.Copy(Path.Combine(path, file), Path.Combine(temp, file), true);
+        }
+
+        var loadContext = new PluginLoadContext(Path.Combine(temp, target));
         return loadContext.LoadFromAssemblyName(new AssemblyName(Path.GetFileNameWithoutExtension(path)));
     }
 

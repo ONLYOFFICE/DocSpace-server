@@ -35,7 +35,7 @@ using Microsoft.Extensions.Primitives;
 namespace ASC.Plugins;
 
 [Transient]
-public class PluginControllerManager(ApplicationPartManager applicationPartManager, IServiceProvider serviceProvider)
+public class PluginControllerManager(ApplicationPartManager applicationPartManager)
 {
 
     public void AddControllers(Assembly assembly)
@@ -48,7 +48,7 @@ public class PluginControllerManager(ApplicationPartManager applicationPartManag
 
     public void RemoveControllers(string pluginId)
     {
-        var last = applicationPartManager.ApplicationParts.First(m => m.Name == pluginId);
+        var last = applicationPartManager.ApplicationParts.FirstOrDefault(m => m.Name == pluginId);
         applicationPartManager.ApplicationParts.Remove(last);
 
         ResetControllActions();

@@ -52,6 +52,10 @@ public class Startup : BaseStartup
     public override void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
         base.Configure(app, env);
+        var tempPath = app.ApplicationServices.GetService<TempPath>();
+        var temp = tempPath.GetTempPath();
+        Directory.Delete(temp, true);
+        Directory.CreateDirectory(temp);
     }
 }
 
