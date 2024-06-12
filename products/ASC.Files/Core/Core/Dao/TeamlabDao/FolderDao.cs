@@ -475,7 +475,8 @@ internal class FolderDao(
                     HasLogo = folder.SettingsHasLogo,
                     Color = folder.SettingsColor,
                     Indexing = folder.SettingsIndexing,
-                    Quota = folder.SettingsQuota
+                    Quota = folder.SettingsQuota,
+                    Lifetime = folder.SettingsLifetime
                 };
             }
 
@@ -514,7 +515,8 @@ internal class FolderDao(
                     HasLogo = folder.SettingsHasLogo,
                     Color = folder.SettingsColor,
                     Indexing = folder.SettingsIndexing,
-                    Quota = folder.SettingsQuota
+                    Quota = folder.SettingsQuota,
+                    Lifetime = folder.SettingsLifetime
                 };
             }
             
@@ -933,7 +935,8 @@ internal class FolderDao(
                 HasLogo = folder.SettingsHasLogo,
                 Color = folder.SettingsColor,
                 Indexing = folder.SettingsIndexing,
-                Quota = quota >= TenantEntityQuotaSettings.NoQuota ? quota : TenantEntityQuotaSettings.DefaultQuotaValue
+                Quota = quota >= TenantEntityQuotaSettings.NoQuota ? quota : TenantEntityQuotaSettings.DefaultQuotaValue,
+                Lifetime = folder.SettingsLifetime
             };
         };
         
