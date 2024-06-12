@@ -193,7 +193,7 @@
     <value>Sarađujte u DocSpace-u</value>
   </data>
   <data name="ButtonConfigureRightNow" xml:space="preserve">
-    <value>Konfiguriši Sada</value>
+    <value>Konfiguriši sada</value>
   </data>
   <data name="ButtonConfirm" xml:space="preserve">
     <value>Potvrdi</value>
@@ -520,11 +520,11 @@ $TrulyYours</value>
   <data name="pattern_backup_created_tg" xml:space="preserve">
     <value>[${__VirtualRootPath}](${__VirtualRootPath}) rezervna kopija portala kreirana
 
-Dear $OwnerName,
+Dragi $OwnerName,
 
 Rezervna datoteka koja sadrži podatke sa vašeg [${__VirtualRootPath}](${__VirtualRootPath}) portala je kreirana.
 
-Da biste naučili više o proceduri rezervne kopije molimo pogledajte naše [Data backup](${__HelpLink}/tipstricks/data-backup-restore.aspx) uputstvo za upotrebu.
+Da biste naučili više o proceduri rezervne kopije molimo pogledajte naše [Rezervna kopija podataka](${__HelpLink}/tipstricks/data-backup-restore.aspx) uputstvo za upotrebu.
 
 Ako imate bilo koja pitanja ili vam treba pomoć molimo kontaktirajte nas na
 [${__SupportLink}](${__SupportLink})
@@ -556,7 +556,7 @@ Link važi 7 dana.
 Ne želite da promenite lozinku? Samo ignorišite ovu poruku</value>
   </data>
   <data name="pattern_change_phone" xml:space="preserve">
-    <value>h1. Zahtev za promenu mobilnog telefona
+    <value>h1.Zahtev za promenu mobilnog telefona
 
 Zahtevali ste da promenite svoj mobilni telefon koji se koristi za ulazak na portal ${LetterLogoText}.
 
@@ -1078,7 +1078,7 @@ $TrulyYours</value>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>Zdravo!
 
-Pozvani ste da se pridružite sobi $Message room at "${__VirtualRootPath}":"${__VirtualRootPath}". Prihvatite poziv klikom na link:
+Pozvani ste da se pridružite sobi $Message na "${__VirtualRootPath}":"${__VirtualRootPath}". Prihvatite poziv klikom na link:
 
 $OrangeButton
 
@@ -1162,7 +1162,7 @@ Email: $UserEmail
 $Body</value>
   </data>
   <data name="pattern_for_sales_notify" xml:space="preserve">
-    <value>h1. Poruka sa portala "${__VirtualRootPath}":"${__VirtualRootPath}"
+    <value>h1.Poruka sa portala "${__VirtualRootPath}":"${__VirtualRootPath}"
 
 Ime: $UserName
 
@@ -1214,7 +1214,7 @@ Dolazna pošta (IMAP):
       Ako ste greškom primili ovaj email, zanemarite ga ili kontaktirajte administratora portala da biste saznali detalje.</value>
   </data>
   <data name="pattern_migration_server_failure" xml:space="preserve">
-    <value>h1. Još jedna greška pri migraciji portala regiona
+    <value>h1.Još jedna greška pri migraciji portala regiona
 
 Došlo je do greške prilikom migracije u drugi region. Molim vas, pokušajte ponovo kasnije.
 Vaš portal je sada dostupan na staroj adresi "$PortalUrl":"$PortalUrl"
@@ -1227,13 +1227,13 @@ $TrulyYours
   </data>
   <data name="pattern_mailbox_without_settings_created" xml:space="preserve">
     <value>Poštovani, $UserName,
-      
+
       Administrator je napravio novo &lt;b&gt;$Address&lt;/b&gt; poštansko sanduče za vas na portalu "${__VirtualRootPath}":"${__VirtualRootPath}".
 
       Ako ste greškom primili ovaj email, zanemarite ga ili kontaktirajte administratora portala da biste saznali detalje.</value>
   </data>
   <data name="pattern_migration_error" xml:space="preserve">
-    <value>h1. Još jedna greška pri migraciji portala regiona
+    <value>h1.Još jedna greška pri migraciji portala regiona
 
 Došlo je do greške pri migraciji na region $RegionName. Molim vas, pokušajte ponovo kasnije.
 Vaš portal je sada dostupan na staroj adresi "$PortalUrl":"$PortalUrl"
@@ -1245,7 +1245,7 @@ $TrulyYours
 ^Da biste promenili tip obaveštenja, upravljajte svojim "podešavanjima pretplate":"$RecipientSubscriptionConfigURL".^</value>
   </data>
   <data name="pattern_migration_start" xml:space="preserve">
-    <value>h1. Počela je migracija portala drugog regiona
+    <value>h1.Počela je migracija portala drugog regiona
 
 Započela je migracija portala na region $RegionName. Može potrajati neko vreme u zavisnosti od količine podataka.
 
@@ -1289,7 +1289,7 @@ $TrulyYours</value>
 
 Poštovani $OwnerName,
 
-Zahtevali ste privremenu deaktivaciju vašeg "${__VirtualRootPath}":"${__VirtualRootPath}" portala. Molimo vas da pratite donjI link da potvrdite operaciju:
+Zahtevali ste privremenu deaktivaciju vašeg "${__VirtualRootPath}":"${__VirtualRootPath}" portala. Molimo vas da pratite donji link da potvrdite operaciju:
 
 $OrangeButton
 
@@ -1323,7 +1323,7 @@ ONLYOFFICE tim za podršku
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
-    <value>h1. Brisanje "${__VirtualRootPath}":"${__VirtualRootPath}" prostora
+    <value>h1.Brisanje "${__VirtualRootPath}":"${__VirtualRootPath}" prostora
 
 Poštovani $OwnerName,
 
@@ -1474,7 +1474,7 @@ h3.Email
 h3.Telefon
 $Phone
 
-h3.Veb-sajt Kompanije
+h3.Veb-sajt kompanije
 $Website
 
 h3.Naziv kompanije
@@ -1483,7 +1483,7 @@ $CompanyTitle
 h3.Veličina kompanije
 $CompanySize
 
-h3.Sadržaj Zahteva 
+h3.Sadržaj zahteva 
 $Body
 
 
@@ -1670,7 +1670,7 @@ Vaš portal je ponovo dostupan.</value>
 
 Proces šifrovanja datoteke na portalu "${PortalUrl}":"${PortalUrl}" nije uspeo.
 
-Neke datoteke nisu mogle da se šifruju. Pronađite više detalja u "Kontrolnoj Tabli":"${ControlPanelUrl}/storage".</value>
+Neke datoteke nisu mogle da se šifruju. Pronađite više detalja u "Kontrolnoj tabli":"${ControlPanelUrl}/storage".</value>
   </data>
   <data name="pattern_storage_encryption_start" xml:space="preserve">
     <value>Zdravo, $UserName!
@@ -1750,7 +1750,7 @@ $TrulyYours</value>
 
 Zdravo, $UserName!
 
-$__AuthorName has invited you as a guest user to "${__VirtualRootPath}":"${__VirtualRootPath}". Prihvati pozivnicu klikom na link:
+$__AuthorName vas je pozvao kao gost korisnika na "${__VirtualRootPath}":"${__VirtualRootPath}". Prihvati pozivnicu klikom na link:
 
 $OrangeButton
 
@@ -1758,10 +1758,10 @@ Link je validan samo za 7 dana.
 
 Dobićete više saveta o tome kako da koristite svoju veb kancelariju. Možete da otkažete pretplate na stranici profila u bilo kom trenutku, kao i da ih ponovo omogućite.</value>
   </data>
-  <data name="ButtonJoin" xml:space="preserve">
-    <value>Klikni ovde</value>
-  </data>
   <data name="subject_change_password" xml:space="preserve">
     <value>${LetterLogoText} pomoć oko lozinke</value>
+  </data>
+  <data name="ButtonGetStarted" xml:space="preserve">
+    <value>Započnite</value>
   </data>
 </root>

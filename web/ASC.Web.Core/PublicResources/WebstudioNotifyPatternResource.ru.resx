@@ -321,7 +321,6 @@ $OrangeButton
       Администратор создал для вас новый почтовый ящик &lt;b&gt;$Address&lt;/b&gt; на портале "${__VirtualRootPath}":"${__VirtualRootPath}".
 
       Используйте следующие настройки для других почтовых клиентов:
-
       Логин: &lt;b&gt;$Login&lt;/b&gt;
       Пароль: "&lt;b&gt;задать пароль&lt;/b&gt;":"$MyStaffLink"
 
