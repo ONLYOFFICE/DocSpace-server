@@ -166,7 +166,7 @@ public class DiscDataStore(TempStream tempStream,
     {
         Logger.DebugSavePath(path);
 
-        var buffered = await _tempStream.GetBufferedAsync(stream);
+        await using var buffered = await _tempStream.GetBufferedAsync(stream);
             
         if (EnableQuotaCheck(domain))
         {
