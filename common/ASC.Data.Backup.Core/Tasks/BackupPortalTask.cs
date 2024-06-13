@@ -74,17 +74,13 @@ public class BackupPortalTask(DbFactory dbFactory,
 
                 var modulesToProcess = GetModulesToProcess().ToList();
                 var files = GetFiles();
+                var stepscount = ProcessStorage ? 3 : 0;
+                SetStepsCount(1 + stepscount);
 
-                var stepscount = ProcessStorage ? 1 : 0;
-                SetStepsCount(modulesToProcess.Count + stepscount);
-
-                foreach (var module in modulesToProcess)
-                {
-                    await DoBackupModule(WriteOperator, module);
-                }
+                await DoBackupModule(WriteOperator, modulesToProcess);
                 if (ProcessStorage)
                 {
-                    await DoBackupStorageAsync(WriteOperator, files);
+                    await DoBackupStorageAsync(WriteOperator, files, stepscount);
                 }
             }
         }
@@ -592,80 +588,87 @@ public class BackupPortalTask(DbFactory dbFactory,
         }
     }
 
-    private async Task DoBackupModule(IDataWriteOperator writer, IModuleSpecifics module)
+    private async Task DoBackupModule(IDataWriteOperator writer, List<IModuleSpecifics> modules)
     {
-        logger.DebugBeginSavingDataForModule(module.ModuleName);
-        var tablesToProcess = module.Tables.Where(t => !_ignoredTables.Contains(t.Name) && t.InsertMethod != InsertMethod.None).ToList();
-        var tablesCount = tablesToProcess.Count;
+        var tablesCount = modules.Select(m=> m.Tables.Where(t => !_ignoredTables.Contains(t.Name) && t.InsertMethod != InsertMethod.None).Count()).Sum();
         var tablesProcessed = 0;
-
-        await using (var connection = DbFactory.OpenConnection())
+        foreach (var module in modules)
         {
-            foreach (var table in tablesToProcess)
+            logger.DebugBeginSavingDataForModule(module.ModuleName);
+            var tablesToProcess = module.Tables.Where(t => !_ignoredTables.Contains(t.Name) && t.InsertMethod != InsertMethod.None).ToList();
+
+            await using (var connection = DbFactory.OpenConnection())
             {
-                logger.DebugBeginLoadTable(table.Name);
-                using var data = new DataTable(table.Name);
-                ActionInvoker.Try(
-                    state =>
-                    {
-                        data.Clear();
-                        int counts;
-                        var offset = 0;
-                        do
+                foreach (var table in tablesToProcess)
+                {
+                    logger.DebugBeginLoadTable(table.Name);
+                    using var data = new DataTable(table.Name);
+                    ActionInvoker.Try(
+                        state =>
                         {
-                            var t = (TableInfo)state;
-                            var dataAdapter = DbFactory.CreateDataAdapter();
-                            dataAdapter.SelectCommand = module.CreateSelectCommand(connection.Fix(), TenantId, t, Limit, offset).WithTimeout(600);
-                            counts = ((DbDataAdapter)dataAdapter).Fill(data);
-                            offset += Limit;
-                        } while (counts == Limit);
+                            data.Clear();
+                            int counts;
+                            var offset = 0;
+                            do
+                            {
+                                var t = (TableInfo)state;
+                                var dataAdapter = DbFactory.CreateDataAdapter();
+                                dataAdapter.SelectCommand = module.CreateSelectCommand(connection.Fix(), TenantId, t, Limit, offset).WithTimeout(600);
+                                counts = ((DbDataAdapter)dataAdapter).Fill(data);
+                                offset += Limit;
+                            } while (counts == Limit);
 
-                    },
-                    table,
-                    maxAttempts: 5,
-                    onFailure: error => throw ThrowHelper.CantBackupTable(table.Name, error),
-                    onAttemptFailure: logger.WarningBackupAttemptFailure);
+                        },
+                        table,
+                        maxAttempts: 5,
+                        onFailure: error => throw ThrowHelper.CantBackupTable(table.Name, error),
+                        onAttemptFailure: logger.WarningBackupAttemptFailure);
 
-                foreach (var col in data.Columns.Cast<DataColumn>().Where(col => col.DataType == typeof(DateTime)))
-                {
-                    col.DateTimeMode = DataSetDateTime.Unspecified;
+                    foreach (var col in data.Columns.Cast<DataColumn>().Where(col => col.DataType == typeof(DateTime)))
+                    {
+                        col.DateTimeMode = DataSetDateTime.Unspecified;
+                    }
+
+                    module.PrepareData(data);
+
+                    logger.DebugEndLoadTable(table.Name);
+
+                    logger.DebugBeginSavingTable(table.Name);
+
+                    await using (var file = tempStream.Create())
+                    {
+                        data.WriteXml(file, XmlWriteMode.WriteSchema);
+                        data.Clear();
+
+                        await writer.WriteEntryAsync(KeyHelper.GetTableZipKey(module, data.TableName), file, SetProgress);
+                    }
+
+                    async Task SetProgress()
+                    {
+                        await SetCurrentStepProgress((int)(++tablesProcessed * 100 / (double)tablesCount));
+                    }
+
+                    logger.DebugEndSavingTable(table.Name);
                 }
-
-                module.PrepareData(data);
-
-                logger.DebugEndLoadTable(table.Name);
-
-                logger.DebugBeginSavingTable(table.Name);
-
-                await using (var file = tempStream.Create())
-                {
-                    data.WriteXml(file, XmlWriteMode.WriteSchema);
-                    data.Clear();
-
-                    await writer.WriteEntryAsync(KeyHelper.GetTableZipKey(module, data.TableName), file, SetProgress);
-                }
-
-                async Task SetProgress()
-                {
-                    await SetCurrentStepProgress((int)(++tablesProcessed * 100 / (double)tablesCount));
-                }
-
-                logger.DebugEndSavingTable(table.Name);
             }
-        }
 
-        logger.DebugEndSavingDataForModule(module.ModuleName);
+            logger.DebugEndSavingDataForModule(module.ModuleName);
+        }
     }
 
-    private async Task DoBackupStorageAsync(IDataWriteOperator writer, IAsyncEnumerable<BackupFileInfo> files)
+    private async Task DoBackupStorageAsync(IDataWriteOperator writer, IAsyncEnumerable<BackupFileInfo> files, int steps)
     {
         logger.DebugBeginBackupStorage();
 
         var filesProcessed = 0;
-        var filesCount = await files.CountAsync();
+        var filesCount = await files.CountAsync() / steps;
         async Task SetProgress()
         {
             await SetCurrentStepProgress((int)(++filesProcessed * 100 / (double)filesCount));
+            if (filesCount == filesProcessed)
+            {
+                filesProcessed = 0;
+            }
         }
 
         await using var tmpFile = tempStream.Create();
