@@ -88,7 +88,8 @@ public class S3ZipWriteOperator : IDataWriteOperator
             _gZipOutputStream.baseOutputStream_ = _fileStream;
         }
 
-        await using (var buffered = await _tempStream.GetBufferedAsync(stream))
+        (var buffered, var isNew) = await _tempStream.TryGetBufferedAsync(stream);
+        try
         {
             var entry = TarEntry.CreateTarEntry(tarKey);
             entry.Size = buffered.Length;
@@ -97,6 +98,13 @@ public class S3ZipWriteOperator : IDataWriteOperator
             await buffered.CopyToAsync(_tarOutputStream);
             await _tarOutputStream.FlushAsync();
             await _tarOutputStream.CloseEntryAsync(default).ContinueWith(async _ => await action());
+        }
+        finally
+        {
+            if (isNew)
+            {
+                await buffered.DisposeAsync();
+            }
         }
 
         if (_fileStream.Length > _sessionHolder.MaxChunkUploadSize)

@@ -2971,9 +2971,19 @@ public class FileStorageService //: IFileStorageService
             }
             else
             {
-                await using var buffered = await tempStream.GetBufferedAsync(fileStream);
-                pdfFile.ContentLength = buffered.Length;
-                result = await fileDao.SaveFileAsync(pdfFile, buffered);
+                (var buffered, var isNew) = await tempStream.TryGetBufferedAsync(fileStream);
+                try
+                {
+                    pdfFile.ContentLength = buffered.Length;
+                    result = await fileDao.SaveFileAsync(pdfFile, buffered);
+                }
+                finally
+                {
+                    if (isNew)
+                    {
+                        await buffered.DisposeAsync();
+                    }
+                }
             }
             if (result != null)
             {

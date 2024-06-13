@@ -65,13 +65,23 @@ public class ZipWriteOperator : IDataWriteOperator
 
     public async Task WriteEntryAsync(string tarKey, Stream stream, Func<Task> action)
     {
-        await using var buffered = await _tempStream.GetBufferedAsync(stream);
-        var entry = TarEntry.CreateTarEntry(tarKey);
-        entry.Size = buffered.Length;
-        await _tarOutputStream.PutNextEntryAsync(entry, default);
-        buffered.Position = 0;
-        await buffered.CopyToAsync(_tarOutputStream);
-        await _tarOutputStream.CloseEntryAsync(default).ContinueWith(async _ => await action());;
+        (var buffered, var isNew) = await _tempStream.TryGetBufferedAsync(stream);
+        try
+        {
+            var entry = TarEntry.CreateTarEntry(tarKey);
+            entry.Size = buffered.Length;
+            await _tarOutputStream.PutNextEntryAsync(entry, default);
+            buffered.Position = 0;
+            await buffered.CopyToAsync(_tarOutputStream);
+            await _tarOutputStream.CloseEntryAsync(default).ContinueWith(async _ => await action());
+        }
+        finally
+        {
+            if (isNew)
+            {
+                await buffered.DisposeAsync();
+            }
+        }
     }
 
     public async ValueTask DisposeAsync()
