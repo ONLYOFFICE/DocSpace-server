@@ -274,7 +274,7 @@ public class CommonMethods(
         return hostEntry.AddressList.Select(ip => ip.ToString());
     }
 
-    public async Task<bool> ValidateRecaptcha(string response, RecaptchaType recaptchaType, string ip)
+    public async Task<bool> ValidateRecaptcha(RecaptchaType recaptchaType, string response, string ip)
     {
         try
         {
@@ -282,11 +282,15 @@ public class CommonMethods(
             {
                 RecaptchaType.AndroidV2 => configuration["recaptcha:private-key:android"],
                 RecaptchaType.iOSV2 => configuration["recaptcha:private-key:ios"],
+                RecaptchaType.hCaptcha => configuration["hcaptcha:private-key"],
                 _ => configuration["recaptcha:private-key:default"]
             };
 
             var data = $"secret={privateKey}&remoteip={ip}&response={response}";
-            var url = configuration["recaptcha:verify-url"] ?? "https://www.recaptcha.net/recaptcha/api/siteverify";
+
+            var url = recaptchaType is RecaptchaType.hCaptcha
+                ? configuration["hcaptcha:verify-url"] ?? "https://api.hcaptcha.com/siteverify"
+                : configuration["recaptcha:verify-url"] ?? "https://www.recaptcha.net/recaptcha/api/siteverify";
 
             var request = new HttpRequestMessage
             {

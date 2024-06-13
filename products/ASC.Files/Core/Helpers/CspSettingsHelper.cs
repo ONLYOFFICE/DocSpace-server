@@ -192,6 +192,15 @@ public class CspSettingsHelper(
             }
         }
 
+        if (!string.IsNullOrEmpty(configuration["web:recaptcha:public-key"]) || !string.IsNullOrEmpty(configuration["web:hcaptcha:public-key"]))
+        {
+            var oformOptions = configuration.GetSection("csp:captcha").Get<CspOptions>();
+            if (oformOptions != null)
+            {
+                options.Add(oformOptions);
+            }
+        }
+
         var csp = new CspBuilder();
 
         foreach (var domain in options.SelectMany(r => r.Def).Distinct())

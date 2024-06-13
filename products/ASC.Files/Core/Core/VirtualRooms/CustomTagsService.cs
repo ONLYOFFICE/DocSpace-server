@@ -27,11 +27,13 @@
 namespace ASC.Files.Core.VirtualRooms;
 
 [Scope]
-public class CustomTagsService(IDaoFactory daoFactory,
+public class CustomTagsService(
+    IDaoFactory daoFactory,
     FileSecurity fileSecurity,
     AuthContext authContext,
     FilesMessageService filesMessageService,
-    UserManager userManager)
+    UserManager userManager,
+    FileSecurityCommon fileSecurityCommon)
 {
     public async Task<string> CreateTagAsync(string name)
     {
@@ -140,6 +142,27 @@ public class CustomTagsService(IDaoFactory daoFactory,
 
     public async IAsyncEnumerable<object> GetTagsInfoAsync<T>(string searchText, TagType tagType, int from, int count)
     {
+        if (!await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID))
+        {
+            var rooms = await fileSecurity.GetVirtualRoomsAsync(FilterType.None, Guid.Empty, string.Empty, false, false, SearchArea.Active, false, [], false, ProviderFilter.None, SubjectFilter.Member, QuotaFilter.All, StorageFilter.None);
+            var tags = rooms.SelectMany(r => r.Tags)
+                .Where(r => r.Type == tagType);
+
+            if (!string.IsNullOrEmpty(searchText))
+            {
+                var lowerText = searchText.ToLower().Trim().Replace("%", "\\%").Replace("_", "\\_");
+                
+                tags = tags.Where(r => r.Name.Contains(lowerText, StringComparison.CurrentCultureIgnoreCase));
+            }
+            
+            foreach (var tagInfo in tags.Skip(from).Take(count))
+            { 
+                yield return tagInfo.Name;
+            }
+            
+            yield break;
+        }
+
         await foreach (var tagInfo in daoFactory.GetTagDao<T>().GetTagsInfoAsync(searchText, tagType, false, from, count))
         {
             yield return tagInfo.Name;

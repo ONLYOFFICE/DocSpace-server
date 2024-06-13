@@ -116,6 +116,19 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     }
 
     /// <summary>
+    /// Checks if the PDF file is form or not.
+    /// </summary>
+    /// <short>Check the PDF file</short>
+    /// <returns type="System.Boolean, System">Boolean value: true - the PDF file is form, false - the PDF file is not a form.</returns>
+    /// <path>api/2.0/files/file/{fileId}/isformpdf</path>
+    /// <httpMethod>GET</httpMethod>
+    [HttpGet("file/{fileId}/isformpdf")]
+    public async Task<bool> isFormPDF(T fileId)
+    {
+        return await filesControllerHelper.isFormPDF(fileId);
+    }
+
+    /// <summary>
     /// Copies (and converts if possible) an existing file to the specified folder.
     /// </summary>
     /// <short>Copy a file</short>

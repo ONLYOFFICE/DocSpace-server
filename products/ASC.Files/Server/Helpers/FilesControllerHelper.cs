@@ -66,6 +66,19 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         }
     }
 
+    public async Task<bool> isFormPDF<T>(T fileId)
+    {
+        var file = await _fileStorageService.GetFileAsync(fileId, -1);
+        var extension = FileUtility.GetFileExtension(file.Title);
+        var fileType = FileUtility.GetFileTypeByExtention(extension);
+
+        if (fileType == FileType.Pdf)
+        {
+            return await fileStorageService.CheckExtendedPDF(file);
+        }
+        return false;
+    }
+
     public async Task<string> GetPresignedUri<T>(T fileId)
     {
         var file = await _fileStorageService.GetFileAsync(fileId, -1);
