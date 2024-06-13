@@ -43,6 +43,22 @@ public class EmployeeDto
     /// <summary>Title</summary>
     /// <type>System.String, System</type>
     public string Title { get; set; }
+    
+    /// <summary>Avatar</summary>
+    /// <type>System.String, System</type>
+    public string Avatar { get; set; }
+    
+    /// <summary>Original size avatar</summary>
+    /// <type>System.String, System</type>
+    public string AvatarOriginal { get; set; }
+
+    /// <summary>Maximum size avatar</summary>
+    /// <type>System.String, System</type>
+    public string AvatarMax { get; set; }
+
+    /// <summary>Medium size avatar</summary>
+    /// <type>System.String, System</type>
+    public string AvatarMedium { get; set; }
 
     /// <summary>Small avatar</summary>
     /// <type>System.String, System</type>
@@ -126,6 +142,26 @@ public class EmployeeDtoHelper(
         if (_httpContext.Check("avatarSmall"))
         {
             result.AvatarSmall = await _userPhotoManager.GetSmallPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
+        }
+        
+        if (_httpContext.Check("avatarOriginal"))
+        {
+            result.AvatarOriginal = await _userPhotoManager.GetPhotoAbsoluteWebPath(userInfo.Id) + $"?hash={cacheKey}";
+        }
+
+        if (_httpContext.Check("avatarMax"))
+        {
+            result.AvatarMax = await _userPhotoManager.GetMaxPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
+        }
+
+        if (_httpContext.Check("avatarMedium"))
+        {
+            result.AvatarMedium = await _userPhotoManager.GetMediumPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
+        }
+
+        if (_httpContext.Check("avatar"))
+        {
+            result.Avatar = await _userPhotoManager.GetBigPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
         }
 
         if (result.Id != Guid.Empty)
