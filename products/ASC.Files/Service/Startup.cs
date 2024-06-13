@@ -57,11 +57,6 @@ public class Startup : BaseWorkerStartup
 
         if (elasticLaunchType != ElasticLaunchType.Exclusive)
         {
-            services.AddHostedService<FeedAggregatorService>();
-
-            //services.AddHostedService<FeedCleanerService>();
-            //DIHelper.TryAdd<FeedCleanerService>();
-
             services.AddActivePassiveHostedService<FileConverterService<int>>(DIHelper, Configuration);
             services.AddActivePassiveHostedService<FileConverterService<string>>(DIHelper, Configuration);
 
