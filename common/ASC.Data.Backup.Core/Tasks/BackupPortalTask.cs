@@ -75,7 +75,7 @@ public class BackupPortalTask(
                 var modulesToProcess = GetModulesToProcess().ToList();
                 var files = GetFiles();
                 SetStepsCount(1);
-                var count = await files.CountAsync() + modulesToProcess.Select(m => m.Tables.Where(t => !_ignoredTables.Contains(t.Name) && t.InsertMethod != InsertMethod.None).Count()).Sum();
+                var count = await files.CountAsync() + modulesToProcess.Select(m => m.Tables.Count(t => !_ignoredTables.Contains(t.Name) && t.InsertMethod != InsertMethod.None)).Sum();
 
                 var completedCount = await DoBackupModule(WriteOperator, modulesToProcess, count);
                 if (ProcessStorage)
