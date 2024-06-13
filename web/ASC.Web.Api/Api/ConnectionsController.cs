@@ -233,6 +233,24 @@ public class ConnectionsController(
         await LogOutAllActiveConnections(userId);
     }
 
+    [HttpPut("logoutall")]
+    public async Task LogOutAllActiveConnectionsForUsersAsync(LogoutUsersDto dto)
+    {
+        var currentUserId = securityContext.CurrentAccount.ID;
+        var currentUser = await userManager.GetUsersAsync(currentUserId);
+        foreach (var userId in dto.UserIds) 
+        {
+            if (!await userManager.IsDocSpaceAdminAsync(currentUserId) &&
+                !await webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, currentUserId) ||
+                (currentUserId != userId && await userManager.IsDocSpaceAdminAsync(userId) && !currentUser.IsOwner(await tenantManager.GetCurrentTenantAsync())))
+            {
+                throw new SecurityException("Method not available");
+            }
+
+            await LogOutAllActiveConnections(userId);
+        }
+    }
+
     /// <summary>
     /// Logs out from all the active connections except the current connection.
     /// </summary>
