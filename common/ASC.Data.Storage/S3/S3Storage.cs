@@ -271,8 +271,7 @@ public class S3Storage(TempStream tempStream,
             throw;
         }
     }
-    public override Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string contentType,
-                string contentDisposition)
+    public override Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string contentType, string contentDisposition)
     {
         return SaveAsync(domain, path, ownerId, stream, contentType, contentDisposition, ACL.Auto);
     }
@@ -1814,6 +1813,16 @@ public class S3Storage(TempStream tempStream,
             return _response.ResponseStream.Read(buffer, offset, count);
         }
 
+        public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            return _response.ResponseStream.ReadAsync(buffer, offset, count, cancellationToken);
+        }
+
+        public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return _response.ResponseStream.ReadAsync(buffer, cancellationToken);
+        }
+
         public override long Seek(long offset, SeekOrigin origin)
         {
             return _response.ResponseStream.Seek(offset, origin);
@@ -1829,9 +1838,34 @@ public class S3Storage(TempStream tempStream,
             _response.ResponseStream.Write(buffer, offset, count);
         }
 
+        public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            return _response.ResponseStream.WriteAsync(buffer, offset, count, cancellationToken);
+        }
+
+        public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return _response.ResponseStream.WriteAsync(buffer, cancellationToken);
+        }
+        
+        public override Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken)
+        {
+            return _response.ResponseStream.CopyToAsync(destination, bufferSize, cancellationToken);
+        }
+        
         public override void Flush()
         {
             _response.ResponseStream.Flush();
+        }
+
+        public override Task FlushAsync(CancellationToken cancellationToken)
+        {
+            return _response.ResponseStream.FlushAsync(cancellationToken);
+        }
+
+        public override ValueTask DisposeAsync()
+        {
+            return _response.ResponseStream.DisposeAsync();
         }
 
         protected override void Dispose(bool disposing)
