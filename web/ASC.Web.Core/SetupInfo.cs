@@ -104,6 +104,9 @@ public class SetupInfo
     public string RecaptchaPublicKey { get; private set; }
     public string RecaptchaPrivateKey { get; private set; }
     public string RecaptchaVerifyUrl { get; private set; }
+    public string HcaptchaPublicKey { get; private set; }
+    public string HcaptchaPrivateKey { get; private set; }
+    public string HcaptchaVerifyUrl { get; private set; }
     public string AmiMetaUrl { get; private set; }
     public int InvitationLimit { get; private set; }
 
@@ -151,6 +154,10 @@ public class SetupInfo
         RecaptchaPublicKey = GetAppSettings("web:recaptcha:public-key", null);
         RecaptchaPrivateKey = GetAppSettings("web:recaptcha:private-key", null);
         RecaptchaVerifyUrl = GetAppSettings("web:recaptcha:verify-url", "https://www.recaptcha.net/recaptcha/api/siteverify");
+
+        HcaptchaPublicKey = GetAppSettings("web:hcaptcha:public-key", null);
+        HcaptchaPrivateKey = GetAppSettings("web:hcaptcha:private-key", null);
+        HcaptchaVerifyUrl = GetAppSettings("web:hcaptcha:verify-url", "https://api.hcaptcha.com/siteverify");
 
         _webDisplayMobappsBanner = (configuration["web.display.mobapps.banner"] ?? "").Trim().Split(new[] { ',', ';', ' ' }, StringSplitOptions.RemoveEmptyEntries);
         ShareTwitterUrl = GetAppSettings("web.share.twitter", "https://twitter.com/intent/tweet?text={0}");
