@@ -104,6 +104,7 @@ global using ASC.Files.Core.Core;
 global using ASC.Files.Core.Core.Entries;
 global using ASC.Files.Core.Core.Thirdparty;
 global using ASC.Files.Core.Core.Thirdparty.ProviderDao;
+global using ASC.Files.Core.Core.VirtualRooms;
 global using ASC.Files.Core.Data;
 global using ASC.Files.Core.EF;
 global using ASC.Files.Core.Exceptions;

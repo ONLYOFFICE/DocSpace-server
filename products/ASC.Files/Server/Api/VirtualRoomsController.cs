@@ -68,7 +68,7 @@ public class VirtualRoomsInternalController(GlobalFolderHelper globalFolderHelpe
     [HttpPost("")]
     public async Task<FolderDto<int>> CreateRoomAsync(CreateRoomRequestDto inDto)
     {
-        var room = await _fileStorageService.CreateRoomAsync(inDto.Title, inDto.RoomType, inDto.Private, inDto.Indexing, inDto.Share, inDto.Quota, inDto.Lifetime);
+        var room = await _fileStorageService.CreateRoomAsync(inDto.Title, inDto.RoomType, inDto.Private, inDto.Indexing, inDto.Share, inDto.Quota, inDto.Lifetime.Serialize());
 
         return await _folderDtoHelper.GetAsync(room);
     }
@@ -682,6 +682,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
             RoomType.CustomRoom => FilterType.CustomRooms,
             RoomType.PublicRoom => FilterType.PublicRooms,
             RoomType.FormRoom => FilterType.FormRooms,
+            RoomType.VirtualDataRoom => FilterType.VirtualDataRooms,
             _ => FilterType.None
         };
 
