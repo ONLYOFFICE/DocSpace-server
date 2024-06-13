@@ -186,6 +186,8 @@ public class SettingsDto
     public DeepLinkDto DeepLink { get; set; }
 
     public FormGalleryDto FormGallery { get; set; }
+    
+    public long MaxImageUploadSize { get; set; }
 
     public static SettingsDto GetSample()
     {
