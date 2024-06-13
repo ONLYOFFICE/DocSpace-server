@@ -222,9 +222,10 @@ public class ConnectionsController(
     public async Task LogOutAllActiveConnectionsForUserAsync(Guid userId)
     {
         var currentUserId = securityContext.CurrentAccount.ID;
+        var currentUser = await userManager.GetUsersAsync(currentUserId);
         if (!await userManager.IsDocSpaceAdminAsync(currentUserId) && 
             !await webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, currentUserId) || 
-            (currentUserId != userId && await userManager.IsDocSpaceAdminAsync(userId)))
+            (currentUserId != userId && await userManager.IsDocSpaceAdminAsync(userId) && !currentUser.IsOwner(await tenantManager.GetCurrentTenantAsync())))
         {
             throw new SecurityException("Method not available");
         }
