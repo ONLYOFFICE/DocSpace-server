@@ -899,7 +899,7 @@ public class FileStorageService //: IFileStorageService
 
         using (var memStream = new MemoryStream())
         {
-            stream.CopyTo(stream);
+            stream.CopyTo(memStream);
             memStream.Seek(0, SeekOrigin.Begin);
 
             return await CheckExtendedPDFstream(memStream);
