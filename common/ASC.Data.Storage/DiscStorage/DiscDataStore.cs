@@ -166,7 +166,7 @@ public class DiscDataStore(TempStream tempStream,
     {
         Logger.DebugSavePath(path);
 
-        (var buffered, var result) = await _tempStream.TryGetBufferedAsync(stream);
+        (var buffered, var isNew) = await _tempStream.TryGetBufferedAsync(stream);
         try
         {
             if (EnableQuotaCheck(domain))
@@ -210,7 +210,7 @@ public class DiscDataStore(TempStream tempStream,
         }
         finally
         {
-            if (result)
+            if (isNew)
             {
                 await buffered.DisposeAsync();
             }

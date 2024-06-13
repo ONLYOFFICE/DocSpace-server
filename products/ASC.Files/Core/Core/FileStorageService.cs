@@ -2965,7 +2965,7 @@ public class FileStorageService //: IFileStorageService
             }
             else
             {
-                (var buffered, var resultGet) = await tempStream.TryGetBufferedAsync(fileStream);
+                (var buffered, var isNew) = await tempStream.TryGetBufferedAsync(fileStream);
                 try
                 {
                     pdfFile.ContentLength = buffered.Length;
@@ -2973,7 +2973,7 @@ public class FileStorageService //: IFileStorageService
                 }
                 finally
                 {
-                    if (resultGet)
+                    if (isNew)
                     {
                         await buffered.DisposeAsync();
                     }

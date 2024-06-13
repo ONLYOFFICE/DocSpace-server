@@ -227,7 +227,7 @@ public class GoogleCloudStorage(TempStream tempStream,
                   string contentDisposition, ACL acl, string contentEncoding = null, int cacheDays = 5)
     {
 
-        (var buffered, var result) = await _tempStream.TryGetBufferedAsync(stream);
+        (var buffered, var isNew) = await _tempStream.TryGetBufferedAsync(stream);
         try
         {
             if (EnableQuotaCheck(domain))
@@ -276,7 +276,7 @@ public class GoogleCloudStorage(TempStream tempStream,
         }
         finally
         {
-            if (result)
+            if (isNew)
             {
                 await buffered.DisposeAsync();
             }
@@ -625,7 +625,7 @@ public class GoogleCloudStorage(TempStream tempStream,
     {
         using var storage = await GetStorageAsync();
 
-        (var buffered, var result) = await _tempStream.TryGetBufferedAsync(stream);
+        (var buffered, var isNew) = await _tempStream.TryGetBufferedAsync(stream);
 
         try
         {
@@ -648,7 +648,7 @@ public class GoogleCloudStorage(TempStream tempStream,
         }
         finally
         {
-            if (result)
+            if (isNew)
             {
                 await buffered.DisposeAsync();
             }

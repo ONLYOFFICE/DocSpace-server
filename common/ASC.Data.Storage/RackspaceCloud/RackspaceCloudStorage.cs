@@ -222,7 +222,7 @@ public class RackspaceCloudStorage(TempPath tempPath,
                       string contentDisposition, ACL acl, string contentEncoding = null, int cacheDays = 5,
     DateTime? deleteAt = null, long? deleteAfter = null)
     {
-        (var buffered, var result) = await _tempStream.TryGetBufferedAsync(stream);
+        (var buffered, var isNew) = await _tempStream.TryGetBufferedAsync(stream);
 
         try
         {
@@ -315,7 +315,7 @@ public class RackspaceCloudStorage(TempPath tempPath,
         }
         finally
         {
-            if (result)
+            if (isNew)
             {
                 await buffered.DisposeAsync();
             }
