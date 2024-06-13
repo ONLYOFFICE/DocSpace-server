@@ -1045,4 +1045,10 @@
   <data name="TariffsFeature_statistic" xml:space="preserve">
     <value>Квота хранилища и статистика</value>
   </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>Превышен лимит приглашений</value>
+  </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>Инструкция по смене пароля была отправлена ​​на адрес электронной почты {0}.</value>
+  </data>
 </root>

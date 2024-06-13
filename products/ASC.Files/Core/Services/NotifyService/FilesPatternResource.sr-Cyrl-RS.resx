@@ -117,52 +117,98 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="pattern_remove_user_data_completed_custom_mode" xml:space="preserve">
-    <value>Dragi $UserName,
+  <data name="pattern_DocuSignComplete" xml:space="preserve">
+    <value>h1. Сви потписници завршили $DocumentTitle
 
-Proces uklanjanja podata od korisnika "$FromUserName":"$FromUserLink" je uspešno završen.
-
-Brisanje ličnih podataka je oslobodilo $DocsSpace</value>
+Ово је емаил нотификација да вас обавести да су сви потписници завршили "$DocumentTitle":"$DocumentURL".</value>
   </data>
-  <data name="ProductAdminOpportunitiesCustomMode" xml:space="preserve">
-    <value>Uradite isto kao korisnik|Povežite Dropbox, Box i druge naloge u 'Zajedničkom' odeljku|Podesite prava pristupa dokumentima i folderima u 'Zajedničkom' odeljku</value>
+  <data name="pattern_DocuSignStatus" xml:space="preserve">
+    <value>h1. $Message: $DocumentTitle
+
+Пријави се на свој DocuSign налог за више информација.</value>
   </data>
-  <data name="ProductUserOpportunitiesCustomMode" xml:space="preserve">
-    <value>Kreirajte i uređujte svoje dokumente, kao i deljene dokumente sa odgovarajućim pravima pristupa|Dajte pristup za čitanje/uređivanje drugim korisnicima za dokumente i foldere|Povežite Dropbox, Box i druge naloge u 'Dokumenti' odeljku</value>
+  <data name="pattern_EditorMentions" xml:space="preserve">
+    <value>h1. $__AuthorName вас је поменуо у коментару документа
+
+$__AuthorName вас је поменуо у коментару "$DocumentTitle":"$DocumentURL" документа у соби "$RoomTitle":"$RoomURL":
+
+$Message</value>
   </data>
-  <data name="subject_remove_user_data_completed_custom_mode" xml:space="preserve">
-    <value>${LetterLogoText}. Uklanjanje korisničkih podataka je završeno</value>
+  <data name="pattern_MailMergeEnd" xml:space="preserve">
+    <value>h1. Слање завршено
+
+Ово је емаил нотификација да вас обавести да сте тражили слање $MailsCount порука и процес је сада комплетан. $Message
+
+Успешно послате маил поруке сада могу бити пронађене у вашем "Послато":"$__VirtualRootPath/addons/mail/#sent " фолдеру Маил модула.</value>
   </data>
-  <data name="subject_saas_custom_mode_reg_data" xml:space="preserve">
-    <value>Novi portal je registrovan</value>
+  <data name="pattern_RoomRemoved" xml:space="preserve">
+    <value>h1. $__AuthorName је избрисао собу
+
+$__AuthorName је избрисао собу: $RoomTitle</value>
   </data>
-  <data name="pattern_enterprise_whitelabel_user_welcome_custom_mode_v1" xml:space="preserve">
-    <value>Zdravo, $UserName!
+  <data name="pattern_ShareDocument" xml:space="preserve">
+    <value>h1. Приступ дозвољен документу:"$DocumentTitle":"$DocumentURL"
 
-Dobrodošli na ONLYOFFICE DocSpace! Vaš korisnički profil je uspešno dodat na "${__VirtualRootPath}":"${__VirtualRootPath}". Sada možete:
+$__DateTime "$__AuthorName":"$__AuthorUrl" вам је дозволио приступ "$DocumentTitle":"$DocumentURL" документу са следећим правима приступа: "$AccessRights". 
 
-* Radite sa drugim korisnicima u sobi u koju ste pozvani: *sobe za saradnju za koautorstvo u realnom vremenu ili prilagođene sobe sa fleksibilnim postavkama za bilo koju svrhu*.
-
-* *Radite sa datotekama različitih formata*: tekst dokumenti, proračunske tebele, prezentacije, digitalni obrasci, PDF-ovi, e-knjige, multimedija.
-
-* *Sarađujete na dokumentima* sa dva kouređivačka modela: u realnom vremenu ili zaključavanjem paragrafa. Pratite promene, komunicirajte u realnom vremenu koristeći ugrađeni čet ili obavljajte audio i video pozive.
-
-* *Povežite bilo koje oblak skladište* i radite bez menjanja između aplikacija.
-
-$OrangeButton
-
-Ako vam treba pomoć, pregledajte naš "Centar za Pomoć":"${__HelpLink}" ili pitajte naš "tim za podršku":"${__SupportLink}".
-
-$TrulyYours</value>
+$Message</value>
   </data>
-  <data name="pattern_saas_custom_mode_reg_data" xml:space="preserve">
-    <value>h3.Novi portal je registrovan
+  <data name="pattern_ShareFolder" xml:space="preserve">
+    <value>h1. Приступ дозвољен фолдеру:"$DocumentTitle":"$DocumentURL"
 
-# URL portala: "${__VirtualRootPath}":"${__VirtualRootPath}"
-# Ime: $UserName
-# Prezime: $UserLastName
-# Email: $UserEmail
-# Telefon: $Phone
-# Datum kreiranja: $Date</value>
+$__DateTime "$__AuthorName":"$__AuthorUrl " вам је дозволио приступ "$DocumentTitle":"$DocumentURL" фолдеру са следећим правима приступа: "$AccessRights".
+
+$Message</value>
+  </data>
+  <data name="subject_DocuSignComplete" xml:space="preserve">
+    <value>Документи. Сви потписници завршили $DocumentTitle</value>
+  </data>
+  <data name="subject_DocuSignComplete_push" xml:space="preserve">
+    <value>Сви потписници завршили $DocumentTitle</value>
+  </data>
+  <data name="subject_DocuSignComplete_tg" xml:space="preserve">
+    <value>Документи. Сви потписници завршили [$DocumentTitle]($DocumentURL)</value>
+  </data>
+  <data name="subject_DocuSignStatus" xml:space="preserve">
+    <value>Документи. Статус потписа промењен</value>
+  </data>
+  <data name="subject_DocuSignStatus_push" xml:space="preserve">
+    <value>Статус потписа промењен</value>
+  </data>
+  <data name="subject_EditorMentions" xml:space="preserve">
+    <value>DocSpace нотификација. Споменуто у документу</value>
+  </data>
+  <data name="subject_EditorMentions_push" xml:space="preserve">
+    <value>Споменуто у документу</value>
+  </data>
+  <data name="subject_MailMergeEnd" xml:space="preserve">
+    <value>Документи. Слање је завршено.</value>
+  </data>
+  <data name="subject_MailMergeEnd_push" xml:space="preserve">
+    <value>Слање је завршено.</value>
+  </data>
+  <data name="subject_RoomRemoved" xml:space="preserve">
+    <value>DocSpace нотификација. Соба обрисана</value>
+  </data>
+  <data name="subject_ShareDocument" xml:space="preserve">
+    <value>Документи. Приступ дозвољен документу: $DocumentTitle</value>
+  </data>
+  <data name="subject_ShareDocument_push" xml:space="preserve">
+    <value>Приступ дозвољен документу: $DocumentTitle</value>
+  </data>
+  <data name="subject_ShareDocument_tg" xml:space="preserve">
+    <value>Документи. Приступ дозвољен документу: [$DocumentTitle]($DocumentURL)</value>
+  </data>
+  <data name="subject_ShareEncryptedDocument_push" xml:space="preserve">
+    <value>Приступ дозвољен документу: $DocumentTitle</value>
+  </data>
+  <data name="subject_ShareFolder" xml:space="preserve">
+    <value>Документи. Приступ дозвољен фолдеру: $DocumentTitle</value>
+  </data>
+  <data name="subject_ShareFolder_push" xml:space="preserve">
+    <value>Приступ дозвољен фолдеру: $DocumentTitle</value>
+  </data>
+  <data name="subject_ShareFolder_tg" xml:space="preserve">
+    <value>Документи. Приступ дозвољен фолдеру: [$DocumentTitle]($DocumentURL)</value>
   </data>
 </root>

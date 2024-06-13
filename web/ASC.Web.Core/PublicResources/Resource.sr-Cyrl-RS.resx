@@ -1,0 +1,1101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ActivateMobilePhoneEmptyCode" xml:space="preserve">
+    <value>Поље за валидацију кода не може бити празно</value>
+  </data>
+  <data name="ActivateMobilePhoneEmptyPhoneNumber" xml:space="preserve">
+    <value>Унеси број мобилног телефона</value>
+  </data>
+  <data name="ActivateTfaAppEmptyCode" xml:space="preserve">
+    <value>Поље за валидацију кода не може бити празно</value>
+  </data>
+  <data name="AdministratorNotifySenderTypeName" xml:space="preserve">
+    <value>Администратор нотификације</value>
+  </data>
+  <data name="AdminMessageSent" xml:space="preserve">
+    <value>Ваша порука је успешно послата. Бићете контактирани од стране администратора за портал.</value>
+  </data>
+  <data name="ButtonSmsEnable" xml:space="preserve">
+    <value>Путем SMS-а</value>
+  </data>
+  <data name="ButtonTfaAppEnable" xml:space="preserve">
+    <value>Путем аутентификатор апликације</value>
+  </data>
+  <data name="ChangePortalOwnerMsg" xml:space="preserve">
+    <value>Линк за потврду операције је послат на :email (емаил адреса власника портала).</value>
+  </data>
+  <data name="Consumersacesskey" xml:space="preserve">
+    <value>S3 accesskey</value>
+  </data>
+  <data name="ConsumersapiKey" xml:space="preserve">
+    <value>Rackspace apiKey</value>
+  </data>
+  <data name="ConsumersAppleId" xml:space="preserve">
+    <value>Apple ID</value>
+  </data>
+  <data name="ConsumersappleIdClientId" xml:space="preserve">
+    <value>ID апликације</value>
+  </data>
+  <data name="ConsumersAppleIdDescription" xml:space="preserve">
+    <value>Омогућите апликацији да се пријави на портал користећи Apple ID налог.</value>
+  </data>
+  <data name="ConsumersAppleIdInstruction" xml:space="preserve">
+    <value>Омогућите овој апликацији да омогући корисницима да се пријаве на ONLYOFFICE користећи Apple ID. {0}Идите на Apple Developers Portal и креирајте нову апликацију за ONLYOFFICE интеграцију. Унесите податке које сте добили испод:</value>
+  </data>
+  <data name="ConsumersappleIdKeyId" xml:space="preserve">
+    <value>Идентификатор кључа од 10 знакова генерисан за пријаву са Apple приватни кључ</value>
+  </data>
+  <data name="ConsumersappleIdPrivateKey" xml:space="preserve">
+    <value>Приватни кључ преузет са Apple Developer</value>
+  </data>
+  <data name="ConsumersappleIdTeamId" xml:space="preserve">
+    <value>ID тима од 10 знакова за развојнички налог</value>
+  </data>
+  <data name="ConsumersauthPwd" xml:space="preserve">
+    <value>Selectel authPwd</value>
+  </data>
+  <data name="ConsumersauthUser" xml:space="preserve">
+    <value>Selectel authUser</value>
+  </data>
+  <data name="ConsumersBitly" xml:space="preserve">
+    <value>Bitly</value>
+  </data>
+  <data name="ConsumersbitlyClientId" xml:space="preserve">
+    <value>login</value>
+  </data>
+  <data name="ConsumersbitlyClientSecret" xml:space="preserve">
+    <value>apiKey</value>
+  </data>
+  <data name="ConsumersBitlyDescription" xml:space="preserve">
+    <value>Омогућите овој апликацији да скраћује линкове за позивнице на портал и дељене линкове у Документи модулу са Bitly сервисом.</value>
+  </data>
+  <data name="ConsumersBitlyInstruction" xml:space="preserve">
+    <value>Омогућите овој апликацији да скраћује позивнице и линкове ка документима. {0}Унесите свој Bitly логин и API кључ испод:</value>
+  </data>
+  <data name="ConsumersBox" xml:space="preserve">
+    <value>Box</value>
+  </data>
+  <data name="ConsumersboxClientId" xml:space="preserve">
+    <value>Box ID</value>
+  </data>
+  <data name="ConsumersboxClientSecret" xml:space="preserve">
+    <value>Box кључ</value>
+  </data>
+  <data name="ConsumersBoxDescription" xml:space="preserve">
+    <value>Омогућите апликацији управљање Box датотекама и фолдерима.</value>
+  </data>
+  <data name="ConsumersBoxInstruction" xml:space="preserve">
+    <value>Омогућите овој апликацији да повеже ваш Box налог са модулом Документи. Моћи ћете управљати, уређивати и делити датотеке са Box корисницима ONLYOFFICE-а. {0}Пријавите се на свој налог на Box developers страници и креирајте нову апликацију за ONLYOFFICE интеграцију. Унесите податке које сте добили испод:</value>
+  </data>
+  <data name="ConsumersClickatell" xml:space="preserve">
+    <value>Clickatell</value>
+  </data>
+  <data name="ConsumersclickatellapiKey" xml:space="preserve">
+    <value>apiKey</value>
+  </data>
+  <data name="ConsumersClickatellDescription" xml:space="preserve">
+    <value>Омогући апликацију за двофакторску аутентификацију путем Clickatell-а.</value>
+  </data>
+  <data name="ConsumersClickatellInstruction" xml:space="preserve">
+    <value>Користите ову апликацију како бисте омогућили двофакторску аутентификацију са Clickatell сервисом. {0}Пријавите се на свој SMS Platform налог и креирајте нову интеграцију за ONLYOFFICE. Копирајте apiKey и унесите га испод:</value>
+  </data>
+  <data name="ConsumersDocuSign" xml:space="preserve">
+    <value>DocuSign</value>
+  </data>
+  <data name="ConsumersdocuSignClientId" xml:space="preserve">
+    <value>DocuSign кључ</value>
+  </data>
+  <data name="ConsumersdocuSignClientSecret" xml:space="preserve">
+    <value>Тајни кључ за DocuSign</value>
+  </data>
+  <data name="ConsumersDocuSignDescription" xml:space="preserve">
+    <value>Омогући апликацију да дигитално потписујеш своје документе са DocuSign.</value>
+  </data>
+  <data name="ConsumersdocuSignHost" xml:space="preserve">
+    <value>DocuSign крајња тачка аутентификације</value>
+  </data>
+  <data name="ConsumersDocuSignInstruction" xml:space="preserve">
+    <value>Омогући ову апликацију да дигитално потписујеш документа користећи DocuSign. {0}Иди на своју DocuSign Admin конзолу и додај ONLYOFFICE интеграцију. Унеси податке које си примио испод:</value>
+  </data>
+  <data name="ConsumersDropBox" xml:space="preserve">
+    <value>DropBox</value>
+  </data>
+  <data name="ConsumersDropBoxDescription" xml:space="preserve">
+    <value>Омогући апликацију да управљаш DropBox датотекама и фолдерима.</value>
+  </data>
+  <data name="ConsumersDropBoxInstruction" xml:space="preserve">
+    <value>Омогућите овој апликацији да повеже ваш DropBox налог са модулом Документи. Моћи ћете управљати, уређивати и делити датотеке са DropBox корисницима ONLYOFFICE-а. {0}Пријавите се на свој налог на Dropbox Developers веб сајту и креирајте нову апликацију за ONLYOFFICE интеграцију. Унесите податке које сте добили испод:</value>
+  </data>
+  <data name="ConsumersDropBoxKey" xml:space="preserve">
+    <value>DropBox ID</value>
+  </data>
+  <data name="ConsumersDropBoxSecret" xml:space="preserve">
+    <value>DropBox кључ</value>
+  </data>
+  <data name="ConsumersEasyBib" xml:space="preserve">
+    <value>EasyBib</value>
+  </data>
+  <data name="ConsumerseasyBibappkey" xml:space="preserve">
+    <value>Кључ апликације</value>
+  </data>
+  <data name="ConsumersEasyBibDescription" xml:space="preserve">
+    <value>Омогућите овој апликацији да креира библиографске листе у документима са EasyBib-ом.</value>
+  </data>
+  <data name="ConsumersEasyBibInstruction" xml:space="preserve">
+    <value>Омогућите овој апликацији да креира библиографије у ONLYOFFICE уређивачима. {0}Идите на страницу за пријаву на EasyBib и попуните образац како бисте додали интеграцију са ONLYOFFICE-ом. Након што добијете кључ апликације, налепите га испод:</value>
+  </data>
+  <data name="ConsumersFacebook" xml:space="preserve">
+    <value>Facebook</value>
+  </data>
+  <data name="ConsumersfacebookAccessToken_Default" xml:space="preserve">
+    <value>Апликацијски токен</value>
+  </data>
+  <data name="ConsumersfacebookClientId" xml:space="preserve">
+    <value>Facebook ID</value>
+  </data>
+  <data name="ConsumersfacebookClientSecret" xml:space="preserve">
+    <value>Facebook кључ</value>
+  </data>
+  <data name="ConsumersFacebookDescription" xml:space="preserve">
+    <value>Омогућите апликацији да се пријави на портал користећи Facebook налог.</value>
+  </data>
+  <data name="ConsumersFacebookInstruction" xml:space="preserve">
+    <value>Омогућите овој апликацији да омогући вашим корисницима да се пријаве на ONLYOFFICE користећи Facebook и повежу своје Facebook налоге купаца са CRM модулом. {0}Идите на Facebook Developers Portal и креирајте нову апликацију за ONLYOFFICE интеграцију. Унесите податке које сте добили испод:</value>
+  </data>
+  <data name="ConsumersFirebase" xml:space="preserve">
+    <value>Firebase</value>
+  </data>
+  <data name="Consumersfirebase_apiKey" xml:space="preserve">
+    <value>Web API key</value>
+  </data>
+  <data name="Consumersfirebase_authorization" xml:space="preserve">
+    <value>Server key</value>
+  </data>
+  <data name="Consumersfirebase_messagingSenderId" xml:space="preserve">
+    <value>ID пошиљаоца</value>
+  </data>
+  <data name="Consumersfirebase_projectId" xml:space="preserve">
+    <value>ID пројекта</value>
+  </data>
+  <data name="ConsumersFirebaseDescription" xml:space="preserve">
+    <value>Омогуц́ите ову апликацију да прима обавештења о порукама које су вам послате помоц́у Firebase Cloud Messaging.</value>
+  </data>
+  <data name="ConsumersFirebaseInstruction" xml:space="preserve">
+    <value>Омогуц́ите ову апликацију да бисте својим корисницима омогуц́или да примају обавештења о порукама чак и ван мреже. {0}Идите на Firebase конзолу и додајте нови пројекат за ONLYOFFICE интеграцију. Унесите податке које сте добили испод:</value>
+  </data>
+  <data name="ConsumersGoogle" xml:space="preserve">
+    <value>Google</value>
+  </data>
+  <data name="ConsumersgoogleClientId" xml:space="preserve">
+    <value>Google ID</value>
+  </data>
+  <data name="ConsumersgoogleClientSecret" xml:space="preserve">
+    <value>Google кључ</value>
+  </data>
+  <data name="ConsumersGoogleCloud" xml:space="preserve">
+    <value>Google Cloud Storage</value>
+  </data>
+  <data name="ConsumersGoogleCloudbucket" xml:space="preserve">
+    <value>Кофа</value>
+  </data>
+  <data name="ConsumersGoogleCloudbucketDescription" xml:space="preserve">
+    <value>Унесите име Google Cloud кофе за складиштење резервних копија.</value>
+  </data>
+  <data name="ConsumersGoogleCloudDescription" xml:space="preserve">
+    <value>Повежите услугу Google Cloud Storage за прављење резервних копија и складиштење података са вашег портала.</value>
+  </data>
+  <data name="ConsumersGoogleCloudInstruction" xml:space="preserve">
+    <value>Повежите услугу Google Cloud Storage за прављење резервних копија и складиштење података са вашег портала. {0}Идите на конзолу Google Cloud Platform и направите нови налог услуге за ONLYOFFICE. Налепите податке које сте добили у наставку:</value>
+  </data>
+  <data name="ConsumersGoogleCloudjson" xml:space="preserve">
+    <value>GoogleCloud json</value>
+  </data>
+  <data name="ConsumersGoogleDescription" xml:space="preserve">
+    <value>Повежите пројекат да бисте се пријавили на портал помоц́у Google налога и управљали датотекама и фолдерима Google Drive-а.</value>
+  </data>
+  <data name="ConsumersGoogleInstruction" xml:space="preserve">
+    <value>Омогуц́ите ову апликацију да повежете свој налог на Google Drive са модулом Документи. Моц́и ц́ете да управљате, мењате и делите датотеке са Google Drive-а са ONLYOFFICE корисницима. {0}Идите на конзолу Google API-ја и направите нови пројекат за ONLYOFFICE интеграцију. Унесите податке које сте добили испод:</value>
+  </data>
+  <data name="ConsumersLinkedIn" xml:space="preserve">
+    <value>LinkedIn</value>
+  </data>
+  <data name="ConsumersLinkedInDescription" xml:space="preserve">
+    <value>Омогуц́ите апликацији да се пријави на портал помоц́у LinkedIn налога.</value>
+  </data>
+  <data name="ConsumersLinkedInInstruction" xml:space="preserve">
+    <value>Омогуц́ите ову апликацију да бисте својим корисницима омогуц́или да се пријаве на ONLYOFFICE користец́и своје LinkedIn налоге. {0}Идите на веб локацију LinkedIn Developers и направите нову интеграцију апликације ONLYOFFICE. Унесите податке које сте добили испод:</value>
+  </data>
+  <data name="ConsumersLinkedInKey" xml:space="preserve">
+    <value>Linkedin ID</value>
+  </data>
+  <data name="ConsumersLinkedInSecret" xml:space="preserve">
+    <value>Linkedin кључ</value>
+  </data>
+  <data name="ConsumersMailru" xml:space="preserve">
+    <value>Mail.ru</value>
+  </data>
+  <data name="ConsumersMailruClientId" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="ConsumersMailruClientSecret" xml:space="preserve">
+    <value>Тајни кључ</value>
+  </data>
+  <data name="ConsumersMailruDescription" xml:space="preserve">
+    <value>Омогуц́ите апликацији да се пријави на портал користец́и Mail.ru налог.</value>
+  </data>
+  <data name="ConsumersMailruInstruction" xml:space="preserve">
+    <value>Када додате апликацију Mail.ru, можете омогуц́ити пријављивање на портал користец́и Mail.ru налог на страници вашег профила.</value>
+  </data>
+  <data name="ConsumersMicrosoft" xml:space="preserve">
+    <value>Microsoft</value>
+  </data>
+  <data name="ConsumersmicrosoftClientId" xml:space="preserve">
+    <value>ID клијента апликације</value>
+  </data>
+  <data name="ConsumersmicrosoftClientSecret" xml:space="preserve">
+    <value>Тајна клијента</value>
+  </data>
+  <data name="ConsumersMicrosoftDescription" xml:space="preserve">
+    <value>Омогуц́ите апликацији да се пријави на портал помоц́у Microsoft налога.</value>
+  </data>
+  <data name="ConsumersMicrosoftInstruction" xml:space="preserve">
+    <value>Омогуц́ите ову апликацију да бисте својим корисницима омогуц́или да се пријаве на ONLYOFFICE користец́и Microsoft.{0}Идите на Microsoft Azure и направите нову интеграцију апликације ONLYOFFICE. Унесите податке које сте добили испод:</value>
+  </data>
+  <data name="ConsumersRackspace" xml:space="preserve">
+    <value>Rackspace Cloud Storage</value>
+  </data>
+  <data name="ConsumersRackspaceDescription" xml:space="preserve">
+    <value>Повежите услугу Rackspace Cloud Storage да бисте направили резервну копију и чували податке са вашег портала.</value>
+  </data>
+  <data name="ConsumersRackspaceInstruction" xml:space="preserve">
+    <value>Повежите услугу Rackspace Cloud Storage да бисте направили резервну копију и чували податке са вашег портала. {0}У безбедносним поставкама Rackspace Cloud контролне табле кликните на линк Прикажи поред Rackspace API кључа. Налепите податке које сте добили у наставку:</value>
+  </data>
+  <data name="ConsumersRackspaceprivate_container" xml:space="preserve">
+    <value>Приватни контејнер</value>
+  </data>
+  <data name="ConsumersRackspaceprivate_containerDescription" xml:space="preserve">
+    <value>Унесите URL адресу приватног контејнера Rackspace за чување резервних копија.</value>
+  </data>
+  <data name="ConsumersRackspacepublic_container" xml:space="preserve">
+    <value>Јавни контејнер</value>
+  </data>
+  <data name="ConsumersRackspacepublic_containerDescription" xml:space="preserve">
+    <value>Унесите URL адресу јавног контејнера Rackspace за чување резервних копија.</value>
+  </data>
+  <data name="ConsumersRackspaceregion" xml:space="preserve">
+    <value>Регион</value>
+  </data>
+  <data name="ConsumersRackspaceregionDescription" xml:space="preserve">
+    <value>Унесите регион у којем се налазе ваши Rackspace контејнери.</value>
+  </data>
+  <data name="ConsumersS3" xml:space="preserve">
+    <value>Amazon AWS S3</value>
+  </data>
+  <data name="ConsumersS3bucket" xml:space="preserve">
+    <value>Кофа</value>
+  </data>
+  <data name="ConsumersS3bucketDescription" xml:space="preserve">
+    <value>Унесите јединствено име Amazon кофе за чување резервних копија.</value>
+  </data>
+  <data name="ConsumersS3Description" xml:space="preserve">
+    <value>Повежите Amazon AVS S3 за прављење резервних копија и складиштење података са вашег портала.</value>
+  </data>
+  <data name="ConsumersS3Instruction" xml:space="preserve">
+    <value>Повежите Amazon AVS S3 за прављење резервних копија и складиштење података са вашег портала. {0}Идите на AVS управљачку конзолу и направите приступне кључеве за ONLYOFFICE. Налепите податке које сте добили у наставку:</value>
+  </data>
+  <data name="ConsumersS3region" xml:space="preserve">
+    <value>Регион</value>
+  </data>
+  <data name="ConsumersS3regionDescription" xml:space="preserve">
+    <value>Унесите AVS регион у коме се налази ваша Amazon кофа.</value>
+  </data>
+  <data name="Consumerssecretaccesskey" xml:space="preserve">
+    <value>S3 тајни приступни кључ</value>
+  </data>
+  <data name="ConsumersSelectel" xml:space="preserve">
+    <value>Selectel Cloud Storage</value>
+  </data>
+  <data name="ConsumersSelectelauthPwd" xml:space="preserve">
+    <value>Лозинка за приступ складишту</value>
+  </data>
+  <data name="ConsumersSelectelauthUser" xml:space="preserve">
+    <value>Auth Корисник</value>
+  </data>
+  <data name="ConsumersSelectelDescription" xml:space="preserve">
+    <value>Повежите услугу Selectel Cloud Storage за прављење резервних копија и складиштење података са вашег портала.</value>
+  </data>
+  <data name="ConsumersSelectelInstruction" xml:space="preserve">
+    <value>Повежите услугу Selectel Cloud Storage за прављење резервних копија и складиштење података са вашег портала. {0}Преузмите приступне податке за корисника са правима Читања/Писања за контејнере у које планирате да чувате резервне копије и налепите их у наставку:</value>
+  </data>
+  <data name="ConsumersSelectelprivate_container" xml:space="preserve">
+    <value>Приватни контејнер</value>
+  </data>
+  <data name="ConsumersSelectelprivate_containerDescription" xml:space="preserve">
+    <value>Унесите назив приватног контејнера Selectel за чување резервних копија.</value>
+  </data>
+  <data name="ConsumersSelectelpublic_container" xml:space="preserve">
+    <value>Јавни контејнер</value>
+  </data>
+  <data name="ConsumersSelectelpublic_containerDescription" xml:space="preserve">
+    <value>Унесите назив јавног контејнера Selectel за чување резервних копија.</value>
+  </data>
+  <data name="ConsumersSkyDrive" xml:space="preserve">
+    <value>OneDrive</value>
+  </data>
+  <data name="Consumersskydriveappkey" xml:space="preserve">
+    <value>ID Апликације</value>
+  </data>
+  <data name="Consumersskydriveappsecret" xml:space="preserve">
+    <value>Тајна клијента</value>
+  </data>
+  <data name="ConsumersSkyDriveDescription" xml:space="preserve">
+    <value>Омогуц́ите апликацији да управља OneDrive датотекама и фолдерима.</value>
+  </data>
+  <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
+    <value>Омогуц́ите ову апликацију да повежете свој OneDrive налог са модулом Документи. Моц́и ц́ете да управљате, мењате и делите датотеке са OneDrive-а са ONLYOFFICE корисницима. {0}Пријавите се на свој Microsoft Azure налог и направите нову апликацију за ONLYOFFICE интеграцију. Унесите податке које сте добили испод:</value>
+  </data>
+  <data name="ConsumersSmsc" xml:space="preserve">
+    <value>SMS центар</value>
+  </data>
+  <data name="ConsumersSmscDescription" xml:space="preserve">
+    <value>Омогуц́ите апликацију за двофакторску аутентификацију преко SMS центра.</value>
+  </data>
+  <data name="ConsumersSmscInstruction" xml:space="preserve">
+    <value>Користите ову апликацију да омогуц́ите двофакторску аутентификацију са услугом SMS центер. {0}Унесите податке за пријаву на smsc налог и лозинку (или MD5 хеш лозинке) малим словима:</value>
+  </data>
+  <data name="Consumerssmsclogin" xml:space="preserve">
+    <value>Пријава</value>
+  </data>
+  <data name="Consumerssmscpsw" xml:space="preserve">
+    <value>Лозинка или лозинка MD5 хеш у малим словима</value>
+  </data>
+  <data name="ConsumersTelegram" xml:space="preserve">
+    <value>Telegram</value>
+  </data>
+  <data name="ConsumersTelegramBotName" xml:space="preserve">
+    <value>Корисничко име за бот</value>
+  </data>
+  <data name="ConsumersTelegramBotToken" xml:space="preserve">
+    <value>Бот токен</value>
+  </data>
+  <data name="ConsumersTelegramDescription" xml:space="preserve">
+    <value>Повежите Telegram налог да бисте примали обавештења портала путем Telegram.</value>
+  </data>
+  <data name="ConsumersTelegramInstruction" xml:space="preserve">
+    <value>Да бисте добијали обавештења портала преко Telegram, омогуц́ите Telegram бот. Можете креирати новог бота користец́и BotFather у Telegram Desktop. Да би користили овог бота, корисници портала треба да омогуц́е Telegram обавештења на својој страници профила. {0}Налепите корисничко име бота и токен који сте примили у поља у наставку.</value>
+  </data>
+  <data name="ConsumersTwilio" xml:space="preserve">
+    <value>Twilio</value>
+  </data>
+  <data name="ConsumerstwilioAccountSid" xml:space="preserve">
+    <value>Sid налога</value>
+  </data>
+  <data name="ConsumerstwilioAuthToken" xml:space="preserve">
+    <value>Auth токен</value>
+  </data>
+  <data name="ConsumersTwilioDescription" xml:space="preserve">
+    <value>Омогућите ову апликацију да позива CRM контакте са Twilio.</value>
+  </data>
+  <data name="ConsumersTwilioInstruction" xml:space="preserve">
+    <value>Омогућите ову апликацију да дозволите вашим корисницима да позивају њихове контакте са CRM модула користећи Twilio. {0}Идите на конзолу Twilio и налепите следеће податке испод:</value>
+  </data>
+  <data name="Consumerstwiliosender" xml:space="preserve">
+    <value>Број телефона са Twilio (потребно за SMS ауторизацију)</value>
+  </data>
+  <data name="ConsumersTwitter" xml:space="preserve">
+    <value>Twitter</value>
+  </data>
+  <data name="ConsumerstwitterAccessToken_Default" xml:space="preserve">
+    <value>ID клијента</value>
+  </data>
+  <data name="ConsumerstwitterAccessTokenSecret_Default" xml:space="preserve">
+    <value>Тајна клијента</value>
+  </data>
+  <data name="ConsumersTwitterDescription" xml:space="preserve">
+    <value>Омогућите апликацију да бисте се пријавили на портал користећи Twitter налог.</value>
+  </data>
+  <data name="ConsumersTwitterInstruction" xml:space="preserve">
+    <value>Омогуц́ите ову апликацију да бисте својим корисницима омогуц́или да се пријаве на ONLYOFFICE користец́и свој Тwиттер и повежу Twitter налоге својих клијената са CRM модулом. {0}Идите на Twitter Developers портал и направите нову интеграцију апликације ONLYOFFICE. Унесите податке које сте примили испод:</value>
+  </data>
+  <data name="ConsumersTwitterKey" xml:space="preserve">
+    <value>API кључ</value>
+  </data>
+  <data name="ConsumersTwitterSecret" xml:space="preserve">
+    <value>API тајни кључ</value>
+  </data>
+  <data name="Consumersusername" xml:space="preserve">
+    <value>Rackspace корисничко име</value>
+  </data>
+  <data name="ConsumersVk" xml:space="preserve">
+    <value>VK</value>
+  </data>
+  <data name="ConsumersVkClientId" xml:space="preserve">
+    <value>ID апликације</value>
+  </data>
+  <data name="ConsumersVkClientSecret" xml:space="preserve">
+    <value>Сигурни кључ</value>
+  </data>
+  <data name="ConsumersVkDescription" xml:space="preserve">
+    <value>Омогуц́ите апликацији да се пријави на портал помоц́у VK налога.</value>
+  </data>
+  <data name="ConsumersVkInstruction" xml:space="preserve">
+    <value>Када додате VK апликацију, можете омогуц́ити пријављивање на портал користец́и VK налог на страници вашег профила.</value>
+  </data>
+  <data name="ConsumersWordpress" xml:space="preserve">
+    <value>WordPress</value>
+  </data>
+  <data name="ConsumersWordpressDescription" xml:space="preserve">
+    <value>Омогуц́ите апликацију за објављивање докумената директно у WordPress.</value>
+  </data>
+  <data name="ConsumersWordpressInstruction" xml:space="preserve">
+    <value>Омогуц́ите апликацију за лако објављивање докумената на ваш WordPress веб сајт. {0}На WordPress Developers страници, креирајте нову апликацију за ONLYOFFICE интеграцију. Налепите податке које сте добили испод:</value>
+  </data>
+  <data name="ConsumerswpClientId" xml:space="preserve">
+    <value>WordPress кључ</value>
+  </data>
+  <data name="ConsumerswpClientSecret" xml:space="preserve">
+    <value>WordPress тајна</value>
+  </data>
+  <data name="ConsumersYahoo" xml:space="preserve">
+    <value>Yahoo</value>
+  </data>
+  <data name="ConsumersyahooClientId" xml:space="preserve">
+    <value>ID клијента</value>
+  </data>
+  <data name="ConsumersyahooClientSecret" xml:space="preserve">
+    <value>Тајна клијента</value>
+  </data>
+  <data name="ConsumersYahooDescription" xml:space="preserve">
+    <value>Омогућите апликацији увоз корисника са Yahoo сервиса.</value>
+  </data>
+  <data name="ConsumersYahooInstruction" xml:space="preserve">
+    <value>Омогуц́ите ову апликацију да бисте додали нове кориснике портала са своје Yahoo листе контаката. {0}Идите на страницу Креирај апликацију у Yahoo Developer Network-у и направите нову апликацију за ONLYOFFICE интеграцију. Унесите податке које сте добили испод:</value>
+  </data>
+  <data name="ConsumersYandex" xml:space="preserve">
+    <value>Yandex</value>
+  </data>
+  <data name="ConsumersYandexClientId" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="ConsumersYandexClientSecret" xml:space="preserve">
+    <value>Лозинка</value>
+  </data>
+  <data name="ConsumersYandexDescription" xml:space="preserve">
+    <value>Омогућите апликацији пријаву на портал коришћењем Yandex налога.</value>
+  </data>
+  <data name="ConsumersYandexInstruction" xml:space="preserve">
+    <value>Када додате Yandex апликацију, можете омогуц́ити пријављивање на портал помоц́у Yandex налога на страници вашег профила.</value>
+  </data>
+  <data name="ConsumersZoom" xml:space="preserve">
+    <value>Zoom</value>
+  </data>
+  <data name="ConsumersZoomClientId" xml:space="preserve">
+    <value>ID Zoom клијента</value>
+  </data>
+  <data name="ConsumersZoomClientSecret" xml:space="preserve">
+    <value>Тајна Zoom клијента</value>
+  </data>
+  <data name="ConsumersZoomDescription" xml:space="preserve">
+    <value>Омогућите апликацију да се пријави на портал користећи Zoom налог.</value>
+  </data>
+  <data name="ConsumersZoomInstruction" xml:space="preserve">
+    <value>Омогуц́ите ову апликацију да бисте својим корисницима омогуц́или да се пријаве на ONLYOFFICE користец́и своје Zoom налоге. {0}Идите на веб сајт Zoom Developers и направите нову интеграцију апликације ONLYOFFICE. Унесите податке које сте добили испод:</value>
+  </data>
+  <data name="CouldNotRecoverPasswordForLdapUser" xml:space="preserve">
+    <value>Операција повратка лозинке је забрањена за LDAP корисника</value>
+  </data>
+  <data name="CouldNotRecoverPasswordForSsoUser" xml:space="preserve">
+    <value>Операција повратка лозинке је забрањена за SSO корисника</value>
+  </data>
+  <data name="CustomNamingPeopleSchema" xml:space="preserve">
+    <value>Прилагођени</value>
+  </data>
+  <data name="EmailAndPasswordIncorrectAmiId" xml:space="preserve">
+    <value>Нетачан ID инстанце.</value>
+  </data>
+  <data name="EmailAndPasswordIncorrectEmail" xml:space="preserve">
+    <value>Нетачна емаил адреса</value>
+  </data>
+  <data name="ErrorAccessDenied" xml:space="preserve">
+    <value>Нема дозвола за извршавање ове акције</value>
+  </data>
+  <data name="ErrorAccessRestricted" xml:space="preserve">
+    <value>Приступ порталу је забрањен.</value>
+  </data>
+  <data name="ErrorBadKeys" xml:space="preserve">
+    <value>Лоши кључеви</value>
+  </data>
+  <data name="ErrorCannotDeleteLastSpace" xml:space="preserve">
+    <value>Ваш профил је суспендован</value>
+  </data>
+  <data name="ErrorDisabledProfile" xml:space="preserve">
+    <value>{!User} са овим емаил-ом је већ регистрован</value>
+  </data>
+  <data name="ErrorEmailAlreadyExists" xml:space="preserve">
+    <value>Емаил-ови са овог домена нису дозвољени за регистрацију</value>
+  </data>
+  <data name="ErrorEmailDomainNotAllowed" xml:space="preserve">
+    <value>Емаил поље је празно</value>
+  </data>
+  <data name="ErrorEmailEmpty" xml:space="preserve">
+    <value>Тренутни емаил и нови емаил су исти</value>
+  </data>
+  <data name="ErrorEmailsAreTheSame" xml:space="preserve">
+    <value>Молимо попуните сва поља</value>
+  </data>
+  <data name="ErrorEmptyFields" xml:space="preserve">
+    <value>Текст порука је празна</value>
+  </data>
+  <data name="ErrorEmptyMessage" xml:space="preserve">
+    <value>Отпремљена датотека не може бити пронађена</value>
+  </data>
+  <data name="ErrorEmptyUploadFileSelected" xml:space="preserve">
+    <value>Непознати тип датотеке слике</value>
+  </data>
+  <data name="ErrorFileNotImage" xml:space="preserve">
+    <value>Величина слике превазилази дозвољене параметре</value>
+  </data>
+  <data name="ErrorImageSize" xml:space="preserve">
+    <value>Величина датотеке слике је превелика</value>
+  </data>
+  <data name="ErrorImageWeightLimit" xml:space="preserve">
+    <value>Нетачно име или презиме</value>
+  </data>
+  <data name="ErrorIncorrectUserName" xml:space="preserve">
+    <value>Приступ порталу је ограничен</value>
+  </data>
+  <data name="ErrorPasswordLength" xml:space="preserve">
+    <value>од {0} до {1} знакова</value>
+  </data>
+  <data name="ErrorPasswordEmpty" xml:space="preserve">
+    <value>Лозинка је празна.</value>
+  </data>
+  <data name="ErrorNotCorrectTrustedDomain" xml:space="preserve">
+    <value>Неважеће име домена</value>
+  </data>
+  <data name="ErrorNotCorrectEmail" xml:space="preserve">
+    <value>Нетачан емаил</value>
+  </data>
+  <data name="ErrorNotAllowedOption" xml:space="preserve">
+    <value>Ваш тарифни план не подржава ову опцију</value>
+  </data>
+  <data name="ErrorIpSecurity" xml:space="preserve">
+    <value>Приступ порталу је ограничен</value>
+  </data>
+  <data name="ErrorPasswordMessage" xml:space="preserve">
+    <value>Лозинка мора садржати</value>
+  </data>
+  <data name="ErrorPasswordNoDigits" xml:space="preserve">
+    <value>цифре</value>
+  </data>
+  <data name="ErrorPasswordNoSpaces" xml:space="preserve">
+    <value>без простора</value>
+  </data>
+  <data name="ErrorPasswordNoSpecialSymbols" xml:space="preserve">
+    <value>специјални знакови</value>
+  </data>
+  <data name="ErrorPasswordNoUpperCase" xml:space="preserve">
+    <value>велика слова</value>
+  </data>
+  <data name="ErrorPasswordOnlyLatinLetters" xml:space="preserve">
+    <value>само слова латинице</value>
+  </data>
+  <data name="ErrorRequestLimitExceeded" xml:space="preserve">
+    <value>Ограничење захтева је прекорачено</value>
+  </data>
+  <data name="ErrorTenantTooShort" xml:space="preserve">
+    <value>Доменско име закупца не може бити празно.</value>
+  </data>
+  <data name="ErrorTenantTooShortFormat" xml:space="preserve">
+    <value>Име домена мора бити између {0} и {1} знакова дугачко.</value>
+  </data>
+  <data name="ErrorUserNotFoundByEmail" xml:space="preserve">
+    <value>Корисник са "{0}" емаил-ом није могао бити пронађен</value>
+  </data>
+  <data name="ErrorUserNotFound" xml:space="preserve">
+    <value>Корисник није могао бити пронађен</value>
+  </data>
+  <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
+    <value>Превише покушаја пријаве. Молимо покушајте поново касније</value>
+  </data>
+  <data name="ErrorWebPluginArchive" xml:space="preserve">
+    <value>Погрешна архива додатака</value>
+  </data>
+  <data name="ErrorWebPluginExist" xml:space="preserve">
+    <value>Додатак већ постоји</value>
+  </data>
+  <data name="ErrorWebPluginFileExtension" xml:space="preserve">
+    <value>Погрешна екстензија датотеке</value>
+  </data>
+  <data name="ErrorWebPluginFileSize" xml:space="preserve">
+    <value>Величина датотеке прекорачује границу</value>
+  </data>
+  <data name="ErrorWebPluginForbiddenSystem" xml:space="preserve">
+    <value>Промене системских додатака су забрањене</value>
+  </data>
+  <data name="ErrorWebPluginName" xml:space="preserve">
+    <value>Погрешно име додатка</value>
+  </data>
+  <data name="ErrorWebPluginNoInputFile" xml:space="preserve">
+    <value>Нема улазне датотеке</value>
+  </data>
+  <data name="ErrorWebPluginNotFound" xml:space="preserve">
+    <value>Додатак није пронађен</value>
+  </data>
+  <data name="ErrorWebPluginToManyInputFiles" xml:space="preserve">
+    <value>Превише улазних датотека</value>
+  </data>
+  <data name="EuServerRegion" xml:space="preserve">
+    <value>EU (Frankfurt) Регија</value>
+  </data>
+  <data name="FileSizeMaxExceed" xml:space="preserve">
+    <value>Максимална величина датотеке је прекорачена</value>
+  </data>
+  <data name="FileSizeNote" xml:space="preserve">
+    <value>Обрати пажњу: величина датотеке не сме прекорачити {1}{0}{2}</value>
+  </data>
+  <data name="FileSizePostfix" xml:space="preserve">
+    <value>бајтови,КБ,МБ,ГБ,ТБ</value>
+  </data>
+  <data name="FinishInviteJoinEmailMessage" xml:space="preserve">
+    <value>Линк за потврду вашег налога је послат на наведен емаил</value>
+  </data>
+  <data name="FirstName" xml:space="preserve">
+    <value>Име</value>
+  </data>
+  <data name="LastName" xml:space="preserve">
+    <value>Презиме</value>
+  </data>
+  <data name="LdapSettingsConnectError" xml:space="preserve">
+    <value>Грешка у конекцији</value>
+  </data>
+  <data name="LdapSettingsErrorCantCreateUsers" xml:space="preserve">
+    <value>Корисници нису могли бити креирани, примљени подаци су нетачни.</value>
+  </data>
+  <data name="LdapSettingsErrorCantGetLdapSettings" xml:space="preserve">
+    <value>Сервер није могао добити подешавања.</value>
+  </data>
+  <data name="LdapSettingsErrorCantSaveLdapSettings" xml:space="preserve">
+    <value>Сервер није могао сачувати подешавања.</value>
+  </data>
+  <data name="LdapSettingsErrorCredentialsNotValid" xml:space="preserve">
+    <value>Нетачна пријава или лозинка.</value>
+  </data>
+  <data name="LdapSettingsErrorDomainNotFound" xml:space="preserve">
+    <value>LDAP домен није пронађен.</value>
+  </data>
+  <data name="LdapSettingsErrorGroupsNotFound" xml:space="preserve">
+    <value>Нема пронађених група.</value>
+  </data>
+  <data name="LdapSettingsErrorIncorrectLdapFilter" xml:space="preserve">
+    <value>Неважећа вредност Корисничког филтера.</value>
+  </data>
+  <data name="LdapSettingsErrorLostRights" xml:space="preserve">
+    <value>Покушали сте себи да одузмете администраторска права. Ваша администраторска права нису промењена.</value>
+  </data>
+  <data name="LdapSettingsErrorRemovedYourself" xml:space="preserve">
+    <value>Ваш налог није повезан са LDAP директоријумом и ваша LDAP лозинка више није активна. Промените или поставите лозинку за свој налог на страници подешавања профила.</value>
+  </data>
+  <data name="LdapSettingsErrorUnknownError" xml:space="preserve">
+    <value>Непозната грешка.</value>
+  </data>
+  <data name="LdapSettingsErrorUsersNotFound" xml:space="preserve">
+    <value>Није пронађен ниједан корисник.</value>
+  </data>
+  <data name="LdapSettingsErrorWrongGroupAttribute" xml:space="preserve">
+    <value>Није могуц́е добити Атрибут групе за једну или више група.</value>
+  </data>
+  <data name="LdapSettingsErrorWrongGroupFilter" xml:space="preserve">
+    <value>Нетачан Филтер групе.</value>
+  </data>
+  <data name="LdapSettingsErrorWrongGroupNameAttribute" xml:space="preserve">
+    <value>Није могуће добити Атрибут имена групе за једну или више група.</value>
+  </data>
+  <data name="LdapSettingsErrorWrongLoginAttribute" xml:space="preserve">
+    <value>Није могуц́е добити Атрибут за пријаву за једног или више корисника.</value>
+  </data>
+  <data name="LdapSettingsErrorWrongServerOrPort" xml:space="preserve">
+    <value>Није могуц́е повезати се са LDAP сервером. Проверите да ли су адреса сервера и број порта тачни.</value>
+  </data>
+  <data name="LdapSettingsErrorWrongUserAttribute" xml:space="preserve">
+    <value>Није могуц́е добити Атрибут корисника за једног или више корисника.</value>
+  </data>
+  <data name="LdapSettingsInternalServerError" xml:space="preserve">
+    <value>Интерна грешка сервера.</value>
+  </data>
+  <data name="LdapSettingsModifyLdapUsers" xml:space="preserve">
+    <value>Модификација LDAP корисника у обичне кориснике портала</value>
+  </data>
+  <data name="LdapSettingsStatusAddingGroupUser" xml:space="preserve">
+    <value>додавање корисника</value>
+  </data>
+  <data name="LdapSettingsStatusCertificateVerification" xml:space="preserve">
+    <value>Верификација сертификата</value>
+  </data>
+  <data name="LdapSettingsStatusCheckingLdapSettings" xml:space="preserve">
+    <value>Провера подешавања LDAP подршке</value>
+  </data>
+  <data name="LdapSettingsStatusDisconnecting" xml:space="preserve">
+    <value>LDAP искључивање</value>
+  </data>
+  <data name="LdapSettingsStatusGettingGroupsFromLdap" xml:space="preserve">
+    <value>Враћање листе групе са LDAP сервера</value>
+  </data>
+  <data name="LdapSettingsStatusGettingUsersFromLdap" xml:space="preserve">
+    <value>Враћање корисничке листе са LDAP сервера</value>
+  </data>
+  <data name="LdapSettingsStatusGivingRights" xml:space="preserve">
+    <value>Постављање корисника {0} као {1} админ</value>
+  </data>
+  <data name="LdapSettingsStatusLoadingBaseInfo" xml:space="preserve">
+    <value>Учитавање основних информација LDAP-а</value>
+  </data>
+  <data name="LdapSettingsStatusRemovingGroupUser" xml:space="preserve">
+    <value>уклањање корисника</value>
+  </data>
+  <data name="LdapSettingsStatusRemovingOldGroups" xml:space="preserve">
+    <value>Уклањање застарелих група које су раније учитаване преко LDAP-а</value>
+  </data>
+  <data name="LdapSettingsStatusRemovingOldRights" xml:space="preserve">
+    <value>Уклањање застарелих права приступа који су раније учитавани преко LDAP-а</value>
+  </data>
+  <data name="LdapSettingsStatusRemovingOldUsers" xml:space="preserve">
+    <value>Онемогућавање застарелих корисничких профила који су раније учитавани преко LDAP-а</value>
+  </data>
+  <data name="LdapSettingsStatusSavingGroups" xml:space="preserve">
+    <value>Чување група</value>
+  </data>
+  <data name="LdapSettingsStatusSavingSettings" xml:space="preserve">
+    <value>Чување подешавања</value>
+  </data>
+  <data name="LdapSettingsStatusSavingUserPhoto" xml:space="preserve">
+    <value>Чување слике</value>
+  </data>
+  <data name="LdapSettingsStatusSavingUsers" xml:space="preserve">
+    <value>Чување корисника</value>
+  </data>
+  <data name="LdapSettingsStatusSyncingUsers" xml:space="preserve">
+    <value>Синхронизација корисника</value>
+  </data>
+  <data name="LdapSettingsStatusUpdatingAccessRights" xml:space="preserve">
+    <value>Ажурирање права приступа корисника</value>
+  </data>
+  <data name="LdapSettingsStatusUpdatingUserPhotos" xml:space="preserve">
+    <value>Ажурирање слика корисника</value>
+  </data>
+  <data name="LdapSettingsStrongAuthRequired" xml:space="preserve">
+    <value>Потребан је сигурнији тип аутентификације. Молимо користите шифровану конекцију или омогућите обичну аутентификацију на серверу.</value>
+  </data>
+  <data name="LdapSettingsTenantQuotaSettled" xml:space="preserve">
+    <value>Постигнут је тренутни лимит корисничког тарифног плана</value>
+  </data>
+  <data name="LdapSettingsTlsNotSupported" xml:space="preserve">
+    <value>StartTLS није подржан за тренутни LDAP сервер.</value>
+  </data>
+  <data name="LdapSettingsTooManyOperations" xml:space="preserve">
+    <value>Превише LDAP операција.</value>
+  </data>
+  <data name="LdapSettingsWrongSidAttribute" xml:space="preserve">
+    <value>Није могуц́е добити јединствени ID за објекте корисника/групе. Подразумевано, систем ц́е покушати да усклади један од следец́их идентификатора: entryUUID, nsuniqueid, GUID, objectSid. Ако ниједан од атрибута не одговара вашем LDAP серверу, наведите потребан атрибут у поставци ldap.unique.id датотеке web.appsettings.config.</value>
+  </data>
+  <data name="LicenseError" xml:space="preserve">
+    <value>Лиценца није исправна</value>
+  </data>
+  <data name="LicenseErrorExpired" xml:space="preserve">
+    <value>Лиценца није важећа за ову верзију портала.</value>
+  </data>
+  <data name="LicenseErrorPortal" xml:space="preserve">
+    <value>Број портала прекорачује број дозвољен од стране лиценце</value>
+  </data>
+  <data name="LicenseErrorQuota" xml:space="preserve">
+    <value>Број корисника прекорачује број дозвољен од стране лиценце</value>
+  </data>
+  <data name="LicenseUploaded" xml:space="preserve">
+    <value>Отпремљено успешно</value>
+  </data>
+  <data name="LicenseUploadedOverdue" xml:space="preserve">
+    <value>Успешно отпремљено. {0}Подршка и ажурирања нису доступни за ову лиценцу од {2}.{1}</value>
+  </data>
+  <data name="LicenseUploadedOverdueSupport" xml:space="preserve">
+    <value>Успешно отпремљено. {0}Подршка није доступна за ову лиценцу од {2}.{1}</value>
+  </data>
+  <data name="MessageEmailChangeInstuctionsSentOnEmail" xml:space="preserve">
+    <value>Инструкције за промену емаил-а су успешно послате</value>
+  </data>
+  <data name="MessageYourPasswordSendedToEmail" xml:space="preserve">
+    <value>Ако корисник са {0} емаил-ом постоји, инструкције за промену лозинке су послате на ову емаил адресу.</value>
+  </data>
+  <data name="MobilePhoneMustErase" xml:space="preserve">
+    <value>Да бисте променили број, морате обрисати ваш тренутни број телефона</value>
+  </data>
+  <data name="OrgServerRegion" xml:space="preserve">
+    <value>ORG Регион</value>
+  </data>
+  <data name="Owner" xml:space="preserve">
+    <value>Власник</value>
+  </data>
+  <data name="PortalName" xml:space="preserve">
+    <value>Облак простор за ваше канцеларијске документе</value>
+  </data>
+  <data name="PortalSecurity" xml:space="preserve">
+    <value>Приступ порталу</value>
+  </data>
+  <data name="ReassignDataRemoveUserError" xml:space="preserve">
+    <value>Процес прерасподеле података за {0} није завршен.</value>
+  </data>
+  <data name="QuotaGreaterPortalError" xml:space="preserve">
+    <value>Неуспело постављање квоте меморије - квота меморије коју сте поставили је већа од квоте портала.</value>
+  </data>
+  <data name="RecaptchaInvalid" xml:space="preserve">
+    <value>Неважећа Recaptcha</value>
+  </data>
+  <data name="RoomFreeSpaceException" xml:space="preserve">
+    <value>Квота простора за собу прекорачена</value>
+  </data>
+  <data name="SgServerRegion" xml:space="preserve">
+    <value>Азија Пацифик (Сингапур)</value>
+  </data>
+  <data name="SmsAuthenticationMessageError" xml:space="preserve">
+    <value>Нетачан код</value>
+  </data>
+  <data name="SmsAuthenticationMessageToUser" xml:space="preserve">
+    <value>Код: {0}</value>
+  </data>
+  <data name="SmsAuthenticationTimeout" xml:space="preserve">
+    <value>Време коришћења кода је истекло. Молимо затражите нову текстуалну поруку.</value>
+  </data>
+  <data name="SmsNotAvailable" xml:space="preserve">
+    <value>SMS подешавања нису доступна</value>
+  </data>
+  <data name="SmsTooMuchError" xml:space="preserve">
+    <value>Послали сте превише текстуалних порука. Молимо покушајте поново касније.</value>
+  </data>
+  <data name="SsoSettingsCantSaveSettings" xml:space="preserve">
+    <value>Није могуће сачувати подешавања</value>
+  </data>
+  <data name="SsoSettingsCouldNotBeNull" xml:space="preserve">
+    <value>Подешавања не могу бити празна</value>
+  </data>
+  <data name="SsoSettingsInvalidBinding" xml:space="preserve">
+    <value>Неважеће везивање: {0}</value>
+  </data>
+  <data name="SsoSettingsInvalidEntityId" xml:space="preserve">
+    <value>Неважећи entityID</value>
+  </data>
+  <data name="SsoSettingsInvalidMapping" xml:space="preserve">
+    <value>Неважеће мапирање поља</value>
+  </data>
+  <data name="SuccessfullySaveGreetingSettingsMessage" xml:space="preserve">
+    <value>Подешавања Добродошли странице су успешно сачувана</value>
+  </data>
+  <data name="SuccessfullySaveSettingsMessage" xml:space="preserve">
+    <value>Подешавања су успешно ажурирана</value>
+  </data>
+  <data name="SuccessfullySentNotificationDeleteUserInfoMessage" xml:space="preserve">
+    <value>Инструкције за брисање вашег профила су послате на {0} емаил адресу</value>
+  </data>
+  <data name="Tariffs_admin" xml:space="preserve">
+    <value>Business</value>
+  </data>
+  <data name="Tariffs_startup" xml:space="preserve">
+    <value>Startup</value>
+  </data>
+  <data name="TariffsFeature_audit" xml:space="preserve">
+    <value>Праћење корисничких пријава и акција</value>
+  </data>
+  <data name="TariffsFeature_file_size" xml:space="preserve">
+    <value>Максимална величина датотеке</value>
+  </data>
+  <data name="TariffsFeature_file_size_exception" xml:space="preserve">
+    <value>Величина датотеке не би требало да прекорачи {0}</value>
+  </data>
+  <data name="TariffsFeature_manager_exception" xml:space="preserve">
+    <value>Број админа не би требало да прекорачи {0}</value>
+  </data>
+  <data name="TariffsFeature_manager_price_count" xml:space="preserve">
+    <value>Број админа</value>
+  </data>
+  <data name="TariffsFeature_restore" xml:space="preserve">
+    <value>Аутоматска резервна копија и опоравак</value>
+  </data>
+  <data name="TariffsFeature_room" xml:space="preserve">
+    <value>Неограничен број активних соба</value>
+  </data>
+  <data name="TariffsFeature_room_exception" xml:space="preserve">
+    <value>Број соба не би требало да прекорачи {0}</value>
+  </data>
+  <data name="TariffsFeature_sso" xml:space="preserve">
+    <value>SSO</value>
+  </data>
+  <data name="TariffsFeature_thirdparty" xml:space="preserve">
+    <value>Интеграције треће стране</value>
+  </data>
+  <data name="TariffsFeature_total_size_exception" xml:space="preserve">
+    <value>Коришћена величина складишта не би требало да прекорачи {0}</value>
+  </data>
+  <data name="TariffsFeature_total_size_price_count" xml:space="preserve">
+    <value>Складишни простор</value>
+  </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>Број админа/напредних корисника:</value>
+  </data>
+  <data name="TariffsFeature_used_room" xml:space="preserve">
+    <value>Собе:</value>
+  </data>
+  <data name="TariffsFeature_used_total_size" xml:space="preserve">
+    <value>Складишни простор искоришћен:</value>
+  </data>
+  <data name="TariffsFeature_used_usersInRoom" xml:space="preserve">
+    <value>Корисници у соби:</value>
+  </data>
+  <data name="TariffsFeature_users" xml:space="preserve">
+    <value>Неограничен број корисника</value>
+  </data>
+  <data name="TariffsFeature_users_exception" xml:space="preserve">
+    <value>Број корисника не би требало да прекорачи {0}</value>
+  </data>
+  <data name="TariffsFeature_usersInRoom" xml:space="preserve">
+    <value>Корисници у соби</value>
+  </data>
+  <data name="TariffsFeature_usersInRoom_exception" xml:space="preserve">
+    <value>Број корисника у соби не би требало да прекорачи {0}</value>
+  </data>
+  <data name="TariffsFeature_whitelabel" xml:space="preserve">
+    <value>Брендирање и прилагођавање</value>
+  </data>
+  <data name="TfaAppAuthMessageError" xml:space="preserve">
+    <value>Нетачан код</value>
+  </data>
+  <data name="TfaAppNotAvailable" xml:space="preserve">
+    <value>Подешавања TFA апликације нису доступна</value>
+  </data>
+  <data name="TfaTooMuchError" xml:space="preserve">
+    <value>Послали сте превише текстуалних порука. Молимо покушајте поново касније.</value>
+  </data>
+  <data name="UserFreeSpaceException" xml:space="preserve">
+    <value>Корисничка квота простора прекорачена</value>
+  </data>
+  <data name="UsServerRegion" xml:space="preserve">
+    <value>Западна Регија SAD (Орегон)</value>
+  </data>
+  <data name="WhatsNewSubscriptionName" xml:space="preserve">
+    <value>Шта је ново</value>
+  </data>
+</root>

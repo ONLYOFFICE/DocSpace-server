@@ -117,416 +117,416 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Date" xml:space="preserve">
+    <value>Датум</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>Корисник</value>
+  </data>
   <data name="AceShareLink" xml:space="preserve">
-    <value>Spoljašnji portal</value>
+    <value>Спољашњи портал</value>
   </data>
   <data name="AceStatusEnum_Comment" xml:space="preserve">
-    <value>Komentar</value>
-  </data>
-  <data name="AceStatusEnum_Collaborator" xml:space="preserve">
-    <value>Saradnik</value>
+    <value>Коментар</value>
   </data>
   <data name="AceStatusEnum_CustomFilter" xml:space="preserve">
-    <value>Prilagođeni filter</value>
-  </data>
-  <data name="AceStatusEnum_Editing" xml:space="preserve">
-    <value>Uređivač</value>
+    <value>Прилагођени филтер</value>
   </data>
   <data name="AceStatusEnum_FillForms" xml:space="preserve">
-    <value>Popunjavanje obrasca</value>
+    <value>Попуњавање обрасца</value>
   </data>
   <data name="AceStatusEnum_Read" xml:space="preserve">
-    <value>Samo-za-čitanje</value>
+    <value>Само-за-читање</value>
   </data>
   <data name="AceStatusEnum_ReadWrite" xml:space="preserve">
-    <value>Potpun pristup</value>
+    <value>Потпун приступ</value>
   </data>
   <data name="AceStatusEnum_Restrict" xml:space="preserve">
-    <value>Obij pristup</value>
+    <value>Обиј приступ</value>
   </data>
   <data name="AceStatusEnum_Review" xml:space="preserve">
-    <value>Pregled</value>
-  </data>
-  <data name="AceStatusEnum_RoomAdmin" xml:space="preserve">
-    <value>Administrator sobe</value>
+    <value>Преглед</value>
   </data>
   <data name="Admin" xml:space="preserve">
-    <value>Administrator</value>
+    <value>Администратор</value>
   </data>
   <data name="AppAccessDenied" xml:space="preserve">
-    <value>Da biste radili sa datotekom morate odobriti pristup</value>
+    <value>Да бисте радили са датотеком морате одобрити приступ</value>
   </data>
   <data name="Author_Me" xml:space="preserve">
-    <value>Ja</value>
+    <value>Ја</value>
   </data>
   <data name="CommentAutosave" xml:space="preserve">
-    <value>Automatski sačuvano</value>
-  </data>
-  <data name="CommentConvert" xml:space="preserve">
-    <value>Konvertovano od {0}</value>
+    <value>Аутоматски сачувано</value>
   </data>
   <data name="CommentChangeOwner" xml:space="preserve">
-    <value>Promenjen vlasnik</value>
+    <value>Промењен власник</value>
+  </data>
+  <data name="CommentConvert" xml:space="preserve">
+    <value>Конвертовано од {0}</value>
   </data>
   <data name="CommentCopy" xml:space="preserve">
-    <value>Kopirano</value>
+    <value>Копирано</value>
   </data>
   <data name="CommentCreate" xml:space="preserve">
-    <value>Kreirano</value>
+    <value>Креирано</value>
   </data>
   <data name="CommentCreateByDocuSign" xml:space="preserve">
-    <value>Kreirano od strane DocuSign</value>
+    <value>Креирано од стране DocuSign</value>
   </data>
   <data name="CommentCreateFillFormDraft" xml:space="preserve">
-    <value>Kreirano da popuni obrazac</value>
+    <value>Креирано да попуни образац</value>
   </data>
   <data name="CommentEdit" xml:space="preserve">
-    <value>Uređeno</value>
+    <value>Уређено</value>
   </data>
   <data name="CommentEditEncrypt" xml:space="preserve">
-    <value>Uređeno sa enkripcijom</value>
+    <value>Уређено са енкрипцијом</value>
   </data>
   <data name="CommentEncrypted" xml:space="preserve">
-    <value>Šifrovano</value>
+    <value>Шифровано</value>
   </data>
   <data name="CommentForcesave" xml:space="preserve">
-    <value>Sačuvano</value>
+    <value>Сачувано</value>
   </data>
   <data name="CommentOverwrite" xml:space="preserve">
-    <value>Prepisano</value>
+    <value>Преписано</value>
   </data>
   <data name="CommentRevert" xml:space="preserve">
-    <value>Povraćeno iz revizije od {0}</value>
+    <value>Повраћено из ревизије од {0}</value>
   </data>
   <data name="CommentRevertChanges" xml:space="preserve">
-    <value>Povraćeno iz promene dokumenta od {0}</value>
+    <value>Повраћено из промене документа од {0}</value>
   </data>
   <data name="CommentSubmitFillForm" xml:space="preserve">
-    <value>Podnešen obrazac</value>
+    <value>Поднешен образац</value>
   </data>
   <data name="CommentUpload" xml:space="preserve">
-    <value>Otpremljeno</value>
+    <value>Отпремљено</value>
   </data>
-  <data name="DocuSignStatusDeclined" xml:space="preserve">
-    <value>Odbijeno</value>
+  <data name="AceStatusEnum_Collaborator" xml:space="preserve">
+    <value>Сарадник</value>
+  </data>
+  <data name="AceStatusEnum_Editing" xml:space="preserve">
+    <value>Уређивач</value>
+  </data>
+  <data name="AceStatusEnum_RoomAdmin" xml:space="preserve">
+    <value>Администратор собе</value>
   </data>
   <data name="DefaultExternalLinkTitle" xml:space="preserve">
-    <value>Deljeni link</value>
+    <value>Дељени линк</value>
   </data>
   <data name="DefaultInvitationLinkTitle" xml:space="preserve">
-    <value>Pozivni link</value>
+    <value>Позивни линк</value>
+  </data>
+  <data name="DocuSignStatusDeclined" xml:space="preserve">
+    <value>Одбијено</value>
   </data>
   <data name="DocuSignStatusError" xml:space="preserve">
-    <value>Bila je greška u toku pošalji operacije</value>
+    <value>Била је грешка у току пошаљи операције</value>
   </data>
   <data name="DocuSignStatusNotSended" xml:space="preserve">
-    <value>Slanje dokumenta putem DocuSign je otkazano</value>
+    <value>Слање документа путем DocuSign је отказано</value>
   </data>
   <data name="DocuSignStatusSended" xml:space="preserve">
-    <value>Dokument je poslat na potpisivanje putem DocuSign</value>
+    <value>Документ је послат на потписивање путем DocuSign</value>
   </data>
   <data name="DocuSignStatusVoided" xml:space="preserve">
-    <value>Poništeno</value>
+    <value>Поништено</value>
   </data>
   <data name="ErrorMessage_BadRequest" xml:space="preserve">
-    <value>Loš zahtev.</value>
+    <value>Лош захтев.</value>
   </data>
   <data name="ErrorMessage_ChangeOwner" xml:space="preserve">
-    <value>Ne možete odabrati ovog korisnika</value>
+    <value>Не можете одабрати овог корисника</value>
   </data>
   <data name="ErrorMessage_ConvertTimeout" xml:space="preserve">
-    <value>Konverzija zahteva puno vremena.</value>
+    <value>Конверзија захтева пуно времена.</value>
   </data>
   <data name="ErrorMessage_DocServiceException" xml:space="preserve">
-    <value>Došlo je do greške u Servisu za dokumente</value>
+    <value>Дошло је до грешке у Сервису за документе</value>
   </data>
   <data name="ErrorMessage_EditingCoauth" xml:space="preserve">
-    <value>Datoteka je otvorena za uređivanje {0}. Trenutno, funkcija zajedničkog uređivanja nije podržana za ovaj format datoteke.</value>
+    <value>Датотека је отворена за уређивање {0}. Тренутно, функција заједничког уређивања није подржана за овај формат датотеке.</value>
   </data>
   <data name="ErrorMessage_EditingMobile" xml:space="preserve">
-    <value>Datoteka je otvorena za uređivanje u mobilnoj aplikaciji od strane {0}</value>
+    <value>Датотека је отворена за уређивање у мобилној апликацији од стране {0}</value>
   </data>
   <data name="ErrorMessage_EmptyFile" xml:space="preserve">
-    <value>Prazna datoteka</value>
+    <value>Празна датотека</value>
   </data>
   <data name="ErrorMessage_FileNotFound" xml:space="preserve">
-    <value>Potrebna datoteka nike pronađena</value>
+    <value>Потребна датотека нике пронађена</value>
   </data>
   <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
-    <value>Datoteka veća od {0} neće biti kopirana</value>
+    <value>Датотека већа од {0} неће бити копирана</value>
   </data>
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
-    <value>Datoteka veća od {0} neće biti pomerena</value>
+    <value>Датотека већа од {0} неће бити померена</value>
   </data>
   <data name="ErrorMessage_FileUpdateToVersion" xml:space="preserve">
-    <value>Nova verzija ne može biti ista kao trenutna</value>
+    <value>Нова верзија не може бити иста као тренутна</value>
   </data>
   <data name="ErrorMessage_FolderCopyError" xml:space="preserve">
-    <value>Ne možete kopirati folder u njegov podfolder</value>
+    <value>Не можете копирати фолдер у његов подфолдер</value>
   </data>
   <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
-    <value>Potreban folder nije pronađen</value>
+    <value>Потребан фолдер није пронађен</value>
   </data>
   <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
-    <value>Nevažeći provajder</value>
+    <value>Нетачан наслов</value>
   </data>
   <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
-    <value>Nije moguće koristiti ovaj folder za čuvanje sobe</value>
+    <value>Није могуће користити овај фолдер за чување собе</value>
   </data>
   <data name="ErrorMessage_InvalidTitle" xml:space="preserve">
-    <value>Netačan naslov</value>
+    <value>Нетачан наслов</value>
   </data>
   <data name="ErrorMessage_InvintationLink" xml:space="preserve">
-    <value>Pozivni link je nevažeći ili je istekla njegova validnost</value>
+    <value>Позивни линк је неважећи или је истекла његова валидност</value>
   </data>
   <data name="ErrorMessage_LockedFile" xml:space="preserve">
-    <value>Datoteka je trenutno zaključana od strane drugog korisnika</value>
+    <value>Датотека је тренутно закључана од стране другог корисника</value>
   </data>
   <data name="ErrorMessage_MailMergeCount" xml:space="preserve">
-    <value>Najmanje {0} mail poruka nije moglo biti poslato. Molimo posetite Mail modul da vidite šta bi mogao biti razlog za neuspeh.</value>
+    <value>Најмање {0} маил порука није могло бити послато. Молимо посетите Маил модул да видите шта би могао бити разлог за неуспех.</value>
   </data>
   <data name="ErrorMessage_ManyDownloads" xml:space="preserve">
-    <value>Previše preuzimanja.</value>
+    <value>Превише преузимања.</value>
   </data>
   <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
-    <value>Maksimalni broj linkova možda neće prekoračiti {0}</value>
+    <value>Максимални број линкова можда неће прекорачити {0}</value>
   </data>
   <data name="ErrorMessage_NotSupportedFormat" xml:space="preserve">
-    <value>Žao nam je, ovaj format nije podržan</value>
+    <value>Жао нам је, овај формат није подржан</value>
   </data>
   <data name="ErrorMessage_ProviderAlreadyConnect" xml:space="preserve">
-    <value>Ovaj provajder je već povezan na sobu</value>
+    <value>Овај провајдер је већ повезан на собу</value>
   </data>
   <data name="ErrorMessage_RoleNotAvailable" xml:space="preserve">
-    <value>Uloga nije dostupna za ovaj tip korisnika</value>
+    <value>Улога није доступна за овај тип корисника</value>
   </data>
   <data name="ErrorMessage_SaveAnonymous" xml:space="preserve">
-    <value>Autor čuvanja je nepoznat</value>
+    <value>Аутор чувања је непознат</value>
   </data>
   <data name="ErrorMessage_SaveCorrupted" xml:space="preserve">
-    <value>Datoteka je postala oštećena kada ste pokušali da je sačuvate</value>
+    <value>Датотека је постала оштећена када сте покушали да је сачувате</value>
   </data>
   <data name="ErrorMessage_SaveUrlLost" xml:space="preserve">
-    <value>Neuspelo čuvanje datoteke</value>
+    <value>Неуспело чување датотеке</value>
   </data>
   <data name="ErrorMessage_SecurityException" xml:space="preserve">
-    <value>Nemate dovoljno dozvola da izvršite operaciju</value>
+    <value>Немате довољно дозвола да извршите операцију</value>
   </data>
   <data name="ErrorMessage_SecurityException_ArchiveRoom" xml:space="preserve">
-    <value>Nemate dovoljno dozvola da arhivirate sobu</value>
+    <value>Немате довољно дозвола да архивирате собу</value>
   </data>
   <data name="ErrorMessage_SecurityException_Auth" xml:space="preserve">
-    <value>Nemoguće je autorizovati se na {0} provajderu sa datim pristupnim podacima.</value>
+    <value>Немогуће је ауторизовати се на {0} провајдеру са датим приступним подацима.</value>
   </data>
   <data name="ErrorMessage_SecurityException_CopyFile" xml:space="preserve">
-    <value>Nemate dovoljno dozvola da kopirate datoteku</value>
+    <value>Немате довољно дозвола да копирате датотеку</value>
   </data>
   <data name="ErrorMessage_SecurityException_CopyFolder" xml:space="preserve">
-    <value>Nemate dovoljno dozvola da kopirate folder</value>
+    <value>Немате довољно дозвола да копирате фолдер</value>
   </data>
   <data name="ErrorMessage_SecurityException_CopyToFolder" xml:space="preserve">
-    <value>Nemate dozvolu da kopirate ovaj folder</value>
+    <value>Немате дозволу да копирате овај фолдер</value>
   </data>
   <data name="ErrorMessage_SecurityException_Create" xml:space="preserve">
-    <value>Nemate dovoljno dozvola da kreirate</value>
+    <value>Немате довољно дозвола да креирате</value>
   </data>
   <data name="ErrorMessage_SecurityException_DeleteEditingFile" xml:space="preserve">
-    <value>Nemoguće obrisati datoteku zato što je otvorena za uređivanje</value>
+    <value>Немогуће обрисати датотеку зато што је отворена за уређивање</value>
   </data>
   <data name="ErrorMessage_SecurityException_DeleteEditingFolder" xml:space="preserve">
-    <value>Nemoguće obrisati folder zato što je jedna od datoteka otvorena za uređivanje</value>
+    <value>Немогуће обрисати фолдер зато што је једна од датотека отворена за уређивање</value>
   </data>
   <data name="ErrorMessage_SecurityException_DeleteFile" xml:space="preserve">
-    <value>Nemate dovoljno dozvola da obrišete datoteku</value>
+    <value>Немате довољно дозвола да обришете датотеку</value>
   </data>
   <data name="ErrorMessage_SecurityException_DeleteFolder" xml:space="preserve">
-    <value>Nemate dovoljno dozvola da obrišete folder</value>
+    <value>Немате довољно дозвола да обришете фолдер</value>
   </data>
   <data name="ErrorMessage_SecurityException_EditFile" xml:space="preserve">
-    <value>Nemate dovoljno dozvola da uredite datoteku</value>
+    <value>Немате довољно дозвола да уредите датотеку</value>
   </data>
   <data name="ErrorMessage_SecurityException_EditFileTwice" xml:space="preserve">
-    <value>Ovaj dokument vi uređujete u drugoj kartici</value>
+    <value>Овај документ ви уређујете у другој картици</value>
   </data>
   <data name="ErrorMessage_SecurityException_EditRoom" xml:space="preserve">
-    <value>Nemate dozvolu da uredite sobu</value>
+    <value>Немате дозволу да уредите собу</value>
   </data>
   <data name="ErrorMessage_SecurityException_MoveFile" xml:space="preserve">
-    <value>Nemate dovoljno dozvola da pomerite datoteku</value>
+    <value>Немате довољно дозвола да померите датотеку</value>
   </data>
   <data name="ErrorMessage_SecurityException_MoveFolder" xml:space="preserve">
-    <value>Nemate dovoljno dozvola da pomerite folder</value>
+    <value>Немате довољно дозвола да померите фолдер</value>
   </data>
   <data name="ErrorMessage_SecurityException_MoveToFolder" xml:space="preserve">
-    <value>Nemate dozvolu da pomerite ovaj folder</value>
+    <value>Немате дозволу да померите овај фолдер</value>
   </data>
   <data name="ErrorMessage_SecurityException_ReadFile" xml:space="preserve">
-    <value>Nemate dovoljno dozvola da vidite datoteku</value>
+    <value>Немате довољно дозвола да видите датотеку</value>
   </data>
   <data name="ErrorMessage_SecurityException_ReadFolder" xml:space="preserve">
-    <value>Nemate dovoljno dozvola da vidite sadržaj foldera</value>
+    <value>Немате довољно дозвола да видите садржај фолдера</value>
   </data>
   <data name="ErrorMessage_SecurityException_RenameFile" xml:space="preserve">
-    <value>Nemate dovoljno dozvola da preimenujete datoteku</value>
+    <value>Немате довољно дозвола да преименујете датотеку</value>
   </data>
   <data name="ErrorMessage_SecurityException_RenameFolder" xml:space="preserve">
-    <value>Nemate dovoljno dozvola da preimenujete folder</value>
+    <value>Немате довољно дозвола да преименујете фолдер</value>
   </data>
   <data name="ErrorMessage_SecurityException_UnarchiveRoom" xml:space="preserve">
-    <value>Nemate dovoljno dozvole da razarhivirate sobu</value>
+    <value>Немате довољно дозволе да разархивирате собу</value>
   </data>
   <data name="ErrorMessage_SecurityException_UpdateEditingFile" xml:space="preserve">
-    <value>Nemoguće ažurirati datoteku zato što je otvorena za uređivanje</value>
+    <value>Немогуће ажурирати датотеку зато што је отворена за уређивање</value>
   </data>
   <data name="ErrorMessage_SecurityException_ViewFolder" xml:space="preserve">
-    <value>Nemate dovoljno dozvola da vidite sadržaj foldera</value>
+    <value>Немате довољно дозвола да видите садржај фолдера</value>
   </data>
   <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
-    <value>Previše puta ste pokušali da unesete vašu lozinku. Molimo pokušajte ponovo kasnije</value>
+    <value>Превише пута сте покушали да унесете вашу лозинку. Молимо покушајте поново касније</value>
   </data>
   <data name="ErrorMessage_SharpBoxException" xml:space="preserve">
-    <value>Sadržaj foldera treće strane nije dostupan. Pokušajte da ponovo povežete nalog.</value>
+    <value>Садржај фолдера треће стране није доступан. Покушајте да поново повежете налог.</value>
   </data>
   <data name="ErrorMessage_StartEditing" xml:space="preserve">
-    <value>Greška u početku uređivanja datoteke</value>
+    <value>Грешка у почетку уређивања датотеке</value>
   </data>
   <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
-    <value>Ne možete urediti arhivirane sobe</value>
+    <value>Не можете уредити архивиране собе</value>
   </data>
   <data name="ErrorMessage_UpdateEditingFile" xml:space="preserve">
-    <value>Ne možete ažurirati datoteku koja je otvorena za uređivanje</value>
+    <value>Не можете ажурирати датотеку која је отворена за уређивање</value>
   </data>
   <data name="ErrorMessage_UserNotFound" xml:space="preserve">
-    <value>Korisnik nije pronađen</value>
+    <value>Корисник није пронађен</value>
   </data>
   <data name="ErrorMessage_ViewTrashItem" xml:space="preserve">
-    <value>Nije vam dozvoljeno da prethodno pregledate elemente u Otpadu</value>
+    <value>Није вам дозвољено да претходно прегледате елементе у Отпаду</value>
   </data>
   <data name="ErrorrMessage_PinRoom" xml:space="preserve">
-    <value>Ne možete prikačiti sobu</value>
+    <value>Не можете прикачити собу</value>
   </data>
   <data name="Everyone" xml:space="preserve">
-    <value>Svi</value>
+    <value>Сви</value>
   </data>
   <data name="Guest" xml:space="preserve">
-    <value>Anonimno</value>
+    <value>Анонимно</value>
   </data>
   <data name="IndexTitle" xml:space="preserve">
-    <value>Pretraži u sadržaju dokumenta</value>
+    <value>Претражи у садржају документа</value>
   </data>
   <data name="MessageFileCreated" xml:space="preserve">
-    <value>Datoteka kreirana u folderu "{0}"</value>
+    <value>Датотека креирана у фолдеру "{0}"</value>
   </data>
   <data name="MessageFileCreatedForm" xml:space="preserve">
-    <value>Popunjujući PDF dokument je spreman. Sačuvano je u {0}</value>
+    <value>Попуњујући PDF документ је спреман. Сачувано је у {0}</value>
   </data>
   <data name="MessageFillFormDraftCreated" xml:space="preserve">
-    <value>Kopija PDF je kreirana u {0} folderu. Molimo popunite obrazac i preuzmite rezultat kao PDF ili DOCX datoteku.</value>
+    <value>Копија PDF је креирана у {0} фолдеру. Молимо попуните образац и преузмите резултат као PDF или DOCX датотеку.</value>
   </data>
   <data name="MessageFillFormDraftDiscard" xml:space="preserve">
-    <value>Datoteka više nije nacrt za popunjavanje obrasca.</value>
+    <value>Датотека више није нацрт за попуњавање обрасца.</value>
   </data>
   <data name="ProductAdminOpportunities" xml:space="preserve">
-    <value>Uradite isto kao korisnik|Povežite Dropbox, Box i druge naloge u "Zajedničkom" odeljku|Postavite prava pristupa dokumentima i folderima u "Zajedničkom" odeljku</value>
+    <value>Урадите исто као корисник |Повежите Dropbox, Box и друге налоге у "Заједничком" одељку |Поставите права приступа документима и фолдерима у "Заједничком" одељку</value>
   </data>
   <data name="ProductDescription" xml:space="preserve">
-    <value>Kreirajte, uređujte i delite kancelarijske dokumente. Sarađujte na njima u realnom vremenu. Zagarantovana najveća kompatibilnost sa docx, xlsx, pptx.</value>
+    <value>Креирајте, уређујте и делите канцеларијске документе. Сарађујте на њима у реалном времену. Загарантована највец́а компатибилност са docx, xlsx, pptx.</value>
   </data>
   <data name="ProductDescriptionEx" xml:space="preserve">
-    <value>Uređujte, delite i sarađujte na kancelarijskim dokumentima u realnom vremenu. Kreirajte i upravljajte zajedničkim dokumentima za pristup celom timu.
-Najviša kompatibilnost sa docx, xlsx, pptx.</value>
+    <value>Уређујте, делите и сарађујте на канцеларијским документима у реалном времену.
+Креирајте и управљајте заједничким документима за приступ целом тиму.</value>
   </data>
   <data name="ProductDescriptionShort" xml:space="preserve">
-    <value>Gledajte i preuzimajte deljene dokumente. Otpremite datoteke u deljene foldere. Najviša kompatibilnost sa docx, xlsx, pptx garantovana.</value>
+    <value>Гледајте и преузимајте дељене документе. Отпремите датотеке у дељене фолдере. Највиша компатибилност са docx, xlsx, pptx гарантована.</value>
   </data>
   <data name="ProductName" xml:space="preserve">
-    <value>Dokumenti</value>
+    <value>Документи</value>
   </data>
   <data name="ProductUserOpportunities" xml:space="preserve">
-    <value>Kreirajte i uređujte sopstvene dokumente kao i deljene dokumente sa odgovarajućim pravima pristupa|Omogućite pristup za čitanje/uređivanje drugim korisnicima dokumentima i folderima|Povežite Dropbox, Box i druge naloge u odeljku 'Dokumenti'</value>
+    <value>Креирајте и уређујте сопствене документе као и дељене документе са одговарајуц́им правима приступа |Омогуц́ите приступ за читање/уређивање другим корисницима документима и фолдерима |Повежите Dropbox, Box и друге налоге у одељку 'Документи'</value>
   </data>
   <data name="RoleEnum_Collaborator" xml:space="preserve">
-    <value>Saradnik</value>
+    <value>Сарадник</value>
   </data>
   <data name="RoleEnum_Comment" xml:space="preserve">
-    <value>Komentator</value>
+    <value>Коментатор</value>
   </data>
   <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
-    <value>DocSpace Administrator</value>
+    <value>DocSpace Администратор</value>
   </data>
   <data name="RoleEnum_Editing" xml:space="preserve">
-    <value>Uređivač</value>
+    <value>Уређивач</value>
   </data>
   <data name="RoleEnum_FillForms" xml:space="preserve">
-    <value>Popunjivač obrasca</value>
+    <value>Попуњивач обрасца</value>
   </data>
   <data name="RoleEnum_Read" xml:space="preserve">
-    <value>Posmatrač</value>
+    <value>Посматрач</value>
   </data>
   <data name="RoleEnum_Review" xml:space="preserve">
-    <value>Pregledač</value>
+    <value>Прегледач</value>
   </data>
   <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>Administrator sobe</value>
+    <value>Администратор собе</value>
   </data>
   <data name="RoleEnum_User" xml:space="preserve">
-    <value>Korisnik</value>
+    <value>Корисник</value>
   </data>
   <data name="RoomIndex_Author" xml:space="preserve">
-    <value>Autor</value>
+    <value>Аутор</value>
   </data>
   <data name="RoomIndex_Company" xml:space="preserve">
-    <value>Kompanija</value>
+    <value>Компанија</value>
   </data>
   <data name="RoomIndex_Created" xml:space="preserve">
-    <value>Kreirano</value>
+    <value>Креирано</value>
   </data>
   <data name="RoomIndex_DateGenerated" xml:space="preserve">
-    <value>Datum generisan</value>
+    <value>Датум генерисан</value>
   </data>
   <data name="RoomIndex_ExportAuthor" xml:space="preserve">
-    <value>Izvoz autor</value>
-  </data>
-  <data name="RoomIndex_Folder" xml:space="preserve">
-    <value>Folder</value>
+    <value>Извоз аутор</value>
   </data>
   <data name="RoomIndex_Index" xml:space="preserve">
     <value>Index</value>
   </data>
+  <data name="RoomIndex_Folder" xml:space="preserve">
+    <value>Фолдер</value>
+  </data>
   <data name="RoomIndex_Modified" xml:space="preserve">
-    <value>Modifikovano</value>
+    <value>Модификовано</value>
   </data>
   <data name="RoomIndex_Name" xml:space="preserve">
-    <value>Ime</value>
+    <value>Име</value>
   </data>
   <data name="RoomIndex_Room" xml:space="preserve">
-    <value>Soba</value>
+    <value>Презиме</value>
   </data>
   <data name="RoomIndex_SheetName" xml:space="preserve">
-    <value>Index sobe</value>
+    <value>Index собе</value>
   </data>
   <data name="RoomIndex_Size" xml:space="preserve">
-    <value>Veličina (MB)</value>
+    <value>Величина (MB)</value>
   </data>
   <data name="RoomIndex_Total" xml:space="preserve">
-    <value>Totalno</value>
+    <value>Тотално</value>
   </data>
   <data name="RoomIndex_Type" xml:space="preserve">
-    <value>Tip</value>
+    <value>Тип</value>
   </data>
   <data name="UnknownFirstName" xml:space="preserve">
-    <value>Ime</value>
+    <value>Име</value>
   </data>
   <data name="UnknownLastName" xml:space="preserve">
-    <value>Prezime</value>
+    <value>Презиме</value>
   </data>
   <data name="UnlockComment" xml:space="preserve">
-    <value>Datoteka je otključana</value>
-  </data>
-  <data name="Date" xml:space="preserve">
-    <value>Datum</value>
-  </data>
-  <data name="User" xml:space="preserve">
-    <value>Korisnik</value>
+    <value>Датотека је откључана</value>
   </data>
 </root>

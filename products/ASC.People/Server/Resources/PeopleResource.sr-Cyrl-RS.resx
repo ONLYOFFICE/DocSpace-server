@@ -117,52 +117,28 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="pattern_remove_user_data_completed_custom_mode" xml:space="preserve">
-    <value>Dragi $UserName,
-
-Proces uklanjanja podata od korisnika "$FromUserName":"$FromUserLink" je uspešno završen.
-
-Brisanje ličnih podataka je oslobodilo $DocsSpace</value>
+  <data name="ErrorEmptyUploadFileSelected" xml:space="preserve">
+    <value>Отпремљена датотека не може бити пронађена</value>
   </data>
-  <data name="ProductAdminOpportunitiesCustomMode" xml:space="preserve">
-    <value>Uradite isto kao korisnik|Povežite Dropbox, Box i druge naloge u 'Zajedničkom' odeljku|Podesite prava pristupa dokumentima i folderima u 'Zajedničkom' odeljku</value>
+  <data name="ErrorImageSizetLimit" xml:space="preserve">
+    <value>Величина слике је превелика</value>
   </data>
-  <data name="ProductUserOpportunitiesCustomMode" xml:space="preserve">
-    <value>Kreirajte i uređujte svoje dokumente, kao i deljene dokumente sa odgovarajućim pravima pristupa|Dajte pristup za čitanje/uređivanje drugim korisnicima za dokumente i foldere|Povežite Dropbox, Box i druge naloge u 'Dokumenti' odeljku</value>
+  <data name="ErrorImageWeightLimit" xml:space="preserve">
+    <value>Величина датотеке слике је превелика</value>
   </data>
-  <data name="subject_remove_user_data_completed_custom_mode" xml:space="preserve">
-    <value>${LetterLogoText}. Uklanjanje korisničkih podataka je završeno</value>
+  <data name="ErrorUnknownFileImageType" xml:space="preserve">
+    <value>Непознати тип датотеке слике</value>
   </data>
-  <data name="subject_saas_custom_mode_reg_data" xml:space="preserve">
-    <value>Novi portal je registrovan</value>
+  <data name="ProductAdminOpportunities" xml:space="preserve">
+    <value>Чини исто као корисник |Креирај профиле и групе |Увези профиле |Позивај кориснике</value>
   </data>
-  <data name="pattern_enterprise_whitelabel_user_welcome_custom_mode_v1" xml:space="preserve">
-    <value>Zdravo, $UserName!
-
-Dobrodošli na ONLYOFFICE DocSpace! Vaš korisnički profil je uspešno dodat na "${__VirtualRootPath}":"${__VirtualRootPath}". Sada možete:
-
-* Radite sa drugim korisnicima u sobi u koju ste pozvani: *sobe za saradnju za koautorstvo u realnom vremenu ili prilagođene sobe sa fleksibilnim postavkama za bilo koju svrhu*.
-
-* *Radite sa datotekama različitih formata*: tekst dokumenti, proračunske tebele, prezentacije, digitalni obrasci, PDF-ovi, e-knjige, multimedija.
-
-* *Sarađujete na dokumentima* sa dva kouređivačka modela: u realnom vremenu ili zaključavanjem paragrafa. Pratite promene, komunicirajte u realnom vremenu koristeći ugrađeni čet ili obavljajte audio i video pozive.
-
-* *Povežite bilo koje oblak skladište* i radite bez menjanja između aplikacija.
-
-$OrangeButton
-
-Ako vam treba pomoć, pregledajte naš "Centar za Pomoć":"${__HelpLink}" ili pitajte naš "tim za podršku":"${__SupportLink}".
-
-$TrulyYours</value>
+  <data name="ProductDescription" xml:space="preserve">
+    <value>Додај нове кориснике, позивај их или увези. Управљај корисницима и гледај њихове детаљне информације.</value>
   </data>
-  <data name="pattern_saas_custom_mode_reg_data" xml:space="preserve">
-    <value>h3.Novi portal je registrovan
-
-# URL portala: "${__VirtualRootPath}":"${__VirtualRootPath}"
-# Ime: $UserName
-# Prezime: $UserLastName
-# Email: $UserEmail
-# Telefon: $Phone
-# Datum kreiranja: $Date</value>
+  <data name="ProductName" xml:space="preserve">
+    <value>Људи</value>
+  </data>
+  <data name="ProductUserOpportunities" xml:space="preserve">
+    <value>Гледај профиле и групе</value>
   </data>
 </root>

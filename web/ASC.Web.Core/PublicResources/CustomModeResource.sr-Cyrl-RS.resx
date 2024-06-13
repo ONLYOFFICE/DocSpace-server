@@ -117,52 +117,52 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="pattern_remove_user_data_completed_custom_mode" xml:space="preserve">
-    <value>Dragi $UserName,
-
-Proces uklanjanja podata od korisnika "$FromUserName":"$FromUserLink" je uspešno završen.
-
-Brisanje ličnih podataka je oslobodilo $DocsSpace</value>
-  </data>
-  <data name="ProductAdminOpportunitiesCustomMode" xml:space="preserve">
-    <value>Uradite isto kao korisnik|Povežite Dropbox, Box i druge naloge u 'Zajedničkom' odeljku|Podesite prava pristupa dokumentima i folderima u 'Zajedničkom' odeljku</value>
-  </data>
-  <data name="ProductUserOpportunitiesCustomMode" xml:space="preserve">
-    <value>Kreirajte i uređujte svoje dokumente, kao i deljene dokumente sa odgovarajućim pravima pristupa|Dajte pristup za čitanje/uređivanje drugim korisnicima za dokumente i foldere|Povežite Dropbox, Box i druge naloge u 'Dokumenti' odeljku</value>
-  </data>
-  <data name="subject_remove_user_data_completed_custom_mode" xml:space="preserve">
-    <value>${LetterLogoText}. Uklanjanje korisničkih podataka je završeno</value>
-  </data>
-  <data name="subject_saas_custom_mode_reg_data" xml:space="preserve">
-    <value>Novi portal je registrovan</value>
-  </data>
   <data name="pattern_enterprise_whitelabel_user_welcome_custom_mode_v1" xml:space="preserve">
-    <value>Zdravo, $UserName!
+    <value>Здраво, $UserName!
 
-Dobrodošli na ONLYOFFICE DocSpace! Vaš korisnički profil je uspešno dodat na "${__VirtualRootPath}":"${__VirtualRootPath}". Sada možete:
+Добродошли на ONLYOFFICE DocSpace! Ваш кориснички профил је успешно додат на "${__VirtualRootPath}":"${__VirtualRootPath}". Сада можете:
 
-* Radite sa drugim korisnicima u sobi u koju ste pozvani: *sobe za saradnju za koautorstvo u realnom vremenu ili prilagođene sobe sa fleksibilnim postavkama za bilo koju svrhu*.
+* Радите са другим корисницима у соби у коју сте позвани: *собе за сарадњу за коауторство у реалном времену или прилагођене собе са флексибилним поставкама за било коју сврху*.
 
-* *Radite sa datotekama različitih formata*: tekst dokumenti, proračunske tebele, prezentacije, digitalni obrasci, PDF-ovi, e-knjige, multimedija.
+* *Радите са датотекама различитих формата*: текст документи, прорачунске тебеле, презентације, дигитални обрасци, PDF-ови, е-књиге, мултимедија.
 
-* *Sarađujete na dokumentima* sa dva kouređivačka modela: u realnom vremenu ili zaključavanjem paragrafa. Pratite promene, komunicirajte u realnom vremenu koristeći ugrađeni čet ili obavljajte audio i video pozive.
+* *Сарађујете на документима* са два коуређивачка модела: у реалном времену или закључавањем параграфа. Пратите промене, комуницирајте у реалном времену користећи уграђени чет или обављајте аудио и видео позиве.
 
-* *Povežite bilo koje oblak skladište* i radite bez menjanja između aplikacija.
+* *Повежите било које облак складиште* и радите без мењања између апликација.
 
 $OrangeButton
 
-Ako vam treba pomoć, pregledajte naš "Centar za Pomoć":"${__HelpLink}" ili pitajte naš "tim za podršku":"${__SupportLink}".
+Ако вам треба помоћ, прегледајте наш "Центар за Помоћ":"${__HelpLink}" или питајте наш "тим за подршку":"${__SupportLink}".
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_custom_mode_reg_data" xml:space="preserve">
-    <value>h3.Novi portal je registrovan
+  <data name="pattern_remove_user_data_completed_custom_mode" xml:space="preserve">
+    <value>Драги $UserName,
 
-# URL portala: "${__VirtualRootPath}":"${__VirtualRootPath}"
-# Ime: $UserName
-# Prezime: $UserLastName
-# Email: $UserEmail
-# Telefon: $Phone
-# Datum kreiranja: $Date</value>
+Процес уклањања подата од корисника "$FromUserName":"$FromUserLink" је успешно завршен.
+
+Брисање личних података је ослободило $DocsSpace</value>
+  </data>
+  <data name="pattern_saas_custom_mode_reg_data" xml:space="preserve">
+    <value>h3. Нови портал је регистрован
+
+# URL портала: "${__VirtualRootPath}":"${__VirtualRootPath}"
+# Име: $UserName
+# Презиме: $UserLastName
+# Емаил: $UserEmail
+# Телефон: $Phone
+# Датум креирања: $Date</value>
+  </data>
+  <data name="ProductAdminOpportunitiesCustomMode" xml:space="preserve">
+    <value>Урадите исто као корисник |Повежите Dropbox, Box и друге налоге у 'Заједничком' одељку |Подесите права приступа документима и фолдерима у 'Заједничком' одељку</value>
+  </data>
+  <data name="ProductUserOpportunitiesCustomMode" xml:space="preserve">
+    <value>Креирајте и уређујте своје документе, као и дељене документе са одговарајућим правима приступа |Дајте приступ за читање/уређивање другим корисницима за документе и фолдере |Повежите Dropbox, Box и друге налоге у 'Документи' одељку</value>
+  </data>
+  <data name="subject_remove_user_data_completed_custom_mode" xml:space="preserve">
+    <value>${LetterLogoText}. Уклањање корисничких података је завршено</value>
+  </data>
+  <data name="subject_saas_custom_mode_reg_data" xml:space="preserve">
+    <value>Нови портал је регистрован</value>
   </data>
 </root>
