@@ -73,11 +73,17 @@ public class BackupPortalTask(
             else
             {
                 var modulesToProcess = GetModulesToProcess().ToList();
-                var files = GetFiles();
                 SetStepsCount(1);
-                var count = await files.CountAsync() + modulesToProcess.Select(m => m.Tables.Count(t => !_ignoredTables.Contains(t.Name) && t.InsertMethod != InsertMethod.None)).Sum();
+                var count = modulesToProcess.Select(m => m.Tables.Count(t => !_ignoredTables.Contains(t.Name) && t.InsertMethod != InsertMethod.None)).Sum();
+                IAsyncEnumerable<BackupFileInfo> files = null;
+                if (ProcessStorage)
+                {
+                    files = GetFiles();
+                    count += await files.CountAsync();
+                }
 
                 var completedCount = await DoBackupModule(WriteOperator, modulesToProcess, count);
+
                 if (ProcessStorage)
                 {
                     await DoBackupStorageAsync(WriteOperator, files, completedCount, count);
@@ -120,27 +126,18 @@ public class BackupPortalTask(
         }
 
         IAsyncEnumerable<BackupFileInfo> files = null;
-
-        var stepscount = 0;
-        foreach (var db in databases)
-        {
-            stepscount += db.Value.Count * 4; // (schema + data) * (dump + zip)
-        }
+        
+        var count = databases.Select(d => d.Value.Count * 4).Sum(); // (schema + data) * (dump + zip)
+        var completedCount = count;
 
         if (ProcessStorage)
         {
             var tenants = (await tenantManager.GetTenantsAsync(false)).Select(r => r.Id);
-            foreach (var t in tenants)
-            {
-                files = files == null ? GetFiles(t) : files.Union(GetFiles(t));
-            }
-
-            var count = await files.CountAsync();
-            stepscount += count * 2 + 1;
+            files = GetFilesTenants(tenants);
             logger.DebugFilesCount(count);
+            count += await files.CountAsync();
         }
-
-        SetStepsCount(stepscount);
+        SetStepsCount(1);
 
         foreach (var db in databases)
         {
@@ -155,7 +152,7 @@ public class BackupPortalTask(
 
         if (ProcessStorage)
         {
-            await DoDumpStorage(writer, files);
+            await DoBackupStorageAsync(writer, files, completedCount, count, true);
         }
     }
 
@@ -470,88 +467,6 @@ public class BackupPortalTask(
         }
     }
 
-    private async Task DoDumpStorage(IDataWriteOperator writer, IAsyncEnumerable<BackupFileInfo> files)
-    {
-        logger.DebugBeginBackupStorage();
-
-        var dir = Path.GetDirectoryName(BackupFilePath);
-        var subDir = CrossPlatform.PathCombine(dir, Path.GetFileNameWithoutExtension(BackupFilePath));
-
-        var storageDir = CrossPlatform.PathCombine(subDir, KeyHelper.GetStorage());
-
-        if (!Directory.Exists(storageDir))
-        {
-            Directory.CreateDirectory(storageDir);
-        }
-
-        var tasks = new List<Task>(TasksLimit);
-        var restoreInfoXml = new XElement("storage_restore");
-        await foreach (var file in files)
-        {
-            if (tasks.Count < TasksLimit)
-            {
-                tasks.Add(Task.Run(() => DoDumpFileAsync(file, storageDir)));
-            }
-            else
-            {
-                Task.WaitAll(tasks.ToArray());
-                tasks.Clear();
-                await ArchiveDir(writer, subDir);
-            }
-
-            restoreInfoXml.Add(file.ToXElement());
-        }
-
-        if (tasks.Count != 0)
-        {
-            Task.WaitAll(tasks.ToArray());
-            tasks.Clear();
-            await ArchiveDir(writer, subDir);
-        }
-
-        Directory.Delete(storageDir, true);
-
-        var tmpPath = CrossPlatform.PathCombine(subDir, KeyHelper.GetStorageRestoreInfoZipKey());
-        Directory.CreateDirectory(Path.GetDirectoryName(tmpPath));
-
-        await using (var tmpFile = new FileStream(tmpPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read, 4096, FileOptions.DeleteOnClose))
-        {
-            restoreInfoXml.WriteTo(tmpFile);
-            await writer.WriteEntryAsync(KeyHelper.GetStorageRestoreInfoZipKey(), tmpFile, async () => await SetStepCompleted());
-        }
-
-        Directory.Delete(subDir, true);
-
-        logger.DebugEndBackupStorage();
-    }
-
-    private async Task DoDumpFileAsync(BackupFileInfo file, string dir)
-    {
-        var storage = await StorageFactory.GetStorageAsync(file.Tenant, file.Module);
-        var filePath = CrossPlatform.PathCombine(dir, file.GetZipKey());
-        var dirName = Path.GetDirectoryName(filePath);
-
-        logger.DebugBackupFile(filePath);
-
-        if (!Directory.Exists(dirName) && !string.IsNullOrEmpty(dirName))
-        {
-            Directory.CreateDirectory(dirName);
-        }
-
-        if (!WorkContext.IsMono && filePath.Length > MaxLength)
-        {
-            filePath = @"\\?\" + filePath;
-        }
-
-        await using (var fileStream = await storage.GetReadStreamAsync(file.Domain, file.Path))
-        await using (var tmpFile = File.OpenWrite(filePath))
-        {
-            await fileStream.CopyToAsync(tmpFile);
-        }
-
-        await SetStepCompleted();
-    }
-
     private async Task ArchiveDir(IDataWriteOperator writer, string subDir)
     {
         logger.DebugArchiveDirStart(subDir);
@@ -573,6 +488,18 @@ public class BackupPortalTask(
     private IAsyncEnumerable<BackupFileInfo> GetFiles()
     {
         return GetFiles(TenantId);
+    }
+
+    private async IAsyncEnumerable<BackupFileInfo> GetFilesTenants(IEnumerable<int> tenantIds)
+    {
+        foreach(var tenantId in tenantIds)
+        {
+            var files = GetFiles(tenantId);
+            await foreach(var file in files)
+            {
+                yield return file;
+            }
+        }
     }
 
     private async IAsyncEnumerable<BackupFileInfo> GetFiles(int tenantId)
@@ -657,7 +584,7 @@ public class BackupPortalTask(
         return tablesProcessed;
     }
 
-    private async Task DoBackupStorageAsync(IDataWriteOperator writer, IAsyncEnumerable<BackupFileInfo> files, int completedCount, int count)
+    private async Task DoBackupStorageAsync(IDataWriteOperator writer, IAsyncEnumerable<BackupFileInfo> files, int completedCount, int count, bool dump = false)
     {
         logger.DebugBeginBackupStorage();
 
@@ -684,7 +611,12 @@ public class BackupPortalTask(
                 storage = await StorageFactory.GetStorageAsync(TenantId, file.Module);
                 storages.Add(file.Module, storage);
             }
-            await writer.WriteEntryAsync(file.GetZipKey(), file.Domain, file.Path, storage, SetProgress);
+            var path = file.GetZipKey();
+            if (dump) 
+            {
+                path = Path.Combine("\\storage", path);
+            }
+            await writer.WriteEntryAsync(path, file.Domain, file.Path, storage, SetProgress);
 
             var restoreInfoXml = file.ToXElement();
             restoreInfoXml.WriteTo(tmpFile);
