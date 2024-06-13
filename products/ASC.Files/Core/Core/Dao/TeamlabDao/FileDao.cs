@@ -544,7 +544,6 @@ internal class FileDao(
                             var extension = FileUtility.GetFileExtension(file.Title);
                             var fileType = FileUtility.GetFileTypeByExtention(extension);
 
-                            fileStream.Position = 0;
                             await fileStream.CopyToAsync(originalCopyStream);
 
                             var cloneStreamForCheck = CloneMemoryStream(originalCopyStream, 300);

@@ -897,9 +897,15 @@ public class FileStorageService //: IFileStorageService
         var fileDao = daoFactory.GetFileDao<T>();
         var stream = await fileDao.GetFileStreamAsync(file, 0, limit);
 
-        return await CheckExtendedPDFstream(stream);
+        using (var memStream = new MemoryStream())
+        {
+            stream.CopyTo(stream);
+            memStream.Seek(0, SeekOrigin.Begin);
+
+            return await CheckExtendedPDFstream(memStream);
+        }
     }
-    public async Task<bool> CheckExtendedPDFstream(Stream stream)
+    public async Task<bool> CheckExtendedPDFstream(MemoryStream stream)
     {
         using var reader = new StreamReader(stream, Encoding.GetEncoding("iso-8859-1"));
         var message = await reader.ReadToEndAsync();
