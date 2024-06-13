@@ -671,16 +671,23 @@ public class BackupPortalTask(
         await using var tmpFile = tempStream.Create();
         var bytes = "<storage_restore>"u8.ToArray();
         await tmpFile.WriteAsync(bytes);
-        await foreach (var module in files.GroupBy(r=> r.Module))
+        var storages = new Dictionary<string, IDataStore>();
+        await foreach (var file in files)
         {
-            var storage = await StorageFactory.GetStorageAsync(TenantId, module.Key);
-            await foreach (var file in module)
+            IDataStore storage = null;
+            if (storages.ContainsKey(file.Module))
             {
-                await writer.WriteEntryAsync(file.GetZipKey(), file.Domain, file.Path, storage, SetProgress);
-
-                var restoreInfoXml = file.ToXElement();
-                restoreInfoXml.WriteTo(tmpFile);
+                storage = storages[file.Module];
             }
+            else
+            {
+                storage = await StorageFactory.GetStorageAsync(TenantId, file.Module);
+                storages.Add(file.Module, storage);
+            }
+            await writer.WriteEntryAsync(file.GetZipKey(), file.Domain, file.Path, storage, SetProgress);
+
+            var restoreInfoXml = file.ToXElement();
+            restoreInfoXml.WriteTo(tmpFile);
         }
 
         bytes = "</storage_restore>"u8.ToArray();
