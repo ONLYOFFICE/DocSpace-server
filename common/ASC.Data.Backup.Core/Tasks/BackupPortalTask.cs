@@ -74,13 +74,13 @@ public class BackupPortalTask(DbFactory dbFactory,
 
                 var modulesToProcess = GetModulesToProcess().ToList();
                 var files = GetFiles();
-                var stepscount = ProcessStorage ? 3 : 0;
-                SetStepsCount(1 + stepscount);
+                SetStepsCount(1);
+                var count = await files.CountAsync() + modulesToProcess.Select(m => m.Tables.Where(t => !_ignoredTables.Contains(t.Name) && t.InsertMethod != InsertMethod.None).Count()).Sum();
 
-                await DoBackupModule(WriteOperator, modulesToProcess);
+                var completedCount = await DoBackupModule(WriteOperator, modulesToProcess, count);
                 if (ProcessStorage)
                 {
-                    await DoBackupStorageAsync(WriteOperator, files, stepscount);
+                    await DoBackupStorageAsync(WriteOperator, files, completedCount, count);
                 }
             }
         }
@@ -588,9 +588,8 @@ public class BackupPortalTask(DbFactory dbFactory,
         }
     }
 
-    private async Task DoBackupModule(IDataWriteOperator writer, List<IModuleSpecifics> modules)
+    private async Task<int> DoBackupModule(IDataWriteOperator writer, List<IModuleSpecifics> modules, int count)
     {
-        var tablesCount = modules.Select(m=> m.Tables.Where(t => !_ignoredTables.Contains(t.Name) && t.InsertMethod != InsertMethod.None).Count()).Sum();
         var tablesProcessed = 0;
         foreach (var module in modules)
         {
@@ -645,7 +644,7 @@ public class BackupPortalTask(DbFactory dbFactory,
 
                     async Task SetProgress()
                     {
-                        await SetCurrentStepProgress((int)(++tablesProcessed * 100 / (double)tablesCount));
+                        await SetCurrentStepProgress((int)(++tablesProcessed * 100 / (double)count));
                     }
 
                     logger.DebugEndSavingTable(table.Name);
@@ -654,21 +653,17 @@ public class BackupPortalTask(DbFactory dbFactory,
 
             logger.DebugEndSavingDataForModule(module.ModuleName);
         }
+        return tablesProcessed;
     }
 
-    private async Task DoBackupStorageAsync(IDataWriteOperator writer, IAsyncEnumerable<BackupFileInfo> files, int steps)
+    private async Task DoBackupStorageAsync(IDataWriteOperator writer, IAsyncEnumerable<BackupFileInfo> files, int completedCount, int count)
     {
         logger.DebugBeginBackupStorage();
 
-        var filesProcessed = 0;
-        var filesCount = await files.CountAsync() / steps;
+        var filesProcessed = completedCount;
         async Task SetProgress()
         {
-            await SetCurrentStepProgress((int)(++filesProcessed * 100 / (double)filesCount));
-            if (filesCount == filesProcessed)
-            {
-                filesProcessed = 0;
-            }
+            await SetCurrentStepProgress((int)(++filesProcessed * 100 / (double)count));
         }
 
         await using var tmpFile = tempStream.Create();
