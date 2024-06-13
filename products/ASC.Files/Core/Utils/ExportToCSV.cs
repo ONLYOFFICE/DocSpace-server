@@ -82,7 +82,7 @@ public class ExportToCSV
             file.Version++;
             file.ContentLength = textStream.Length;
 
-            await fileDao.SaveFileAsync(file, textStream);
+            await fileDao.SaveFileAsync(file, textStream, false);
             return file.Id;
         }
         catch (Exception ex)

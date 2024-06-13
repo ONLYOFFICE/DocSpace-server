@@ -57,13 +57,13 @@ public class FormFillingReportCreator
         _tenantUtil = tenantUtil;
     }
 
-    public async Task UpdateFormFillingReport<T>(T resultsFileId, string formsDataUrl)
+    public async Task UpdateFormFillingReport<T>(T resultsFileId, string formsDataUrl, string resultUrl)
     {
 
         if (formsDataUrl != null)
         {
             var fileDao = _daoFactory.GetFileDao<T>();
-            var submitFormsData = await GetSubmitFormsData(formsDataUrl);
+            var submitFormsData = await GetSubmitFormsData(formsDataUrl, resultUrl);
 
             if (resultsFileId != null)
             {
@@ -76,7 +76,7 @@ public class FormFillingReportCreator
         }
     }
 
-    private async Task<SubmitFormsData> GetSubmitFormsData(string url)
+    private async Task<SubmitFormsData> GetSubmitFormsData(string url, string resultUrl)
     {
         var request = new HttpRequestMessage
         {
@@ -87,23 +87,19 @@ public class FormFillingReportCreator
         using var response = await httpClient.SendAsync(request);
         var data = await response.Content.ReadAsStringAsync();
 
-        var u = await _userManager.GetUsersAsync(_securityContext.CurrentAccount.ID);
-        var name = new List<FormsItemData>()
+        var formLink = new FormsItemData()
         {
-            new FormsItemData()
-            {
-                Key= FilesCommonResource.User,
-                Value = $"{u.FirstName} {u.LastName}"
-            },
-            new FormsItemData()
-            {
-                Key= FilesCommonResource.Date,
-                Value = $"{_tenantUtil.DateTimeNow().ToString("dd.MM.yyyy H:mm:ss")}"
-            },
+            Key = FilesCommonResource.LinkToForm,
+            Value = $"=HYPERLINK(\"{resultUrl}\";\"{FilesCommonResource.OpenForm}\")"
         };
-
+        var date = new FormsItemData()
+        {
+            Key = FilesCommonResource.Date,
+            Value = $"{_tenantUtil.DateTimeNow().ToString("dd.MM.yyyy H:mm:ss")}"
+        };
         var result = JsonSerializer.Deserialize<SubmitFormsData>(data, _options);
-        result.FormsData = name.Concat(result.FormsData);
+        result.FormsData = result.FormsData.Append(date);
+        result.FormsData = result.FormsData.Append(formLink);
 
         return result;
     }

@@ -308,6 +308,11 @@ internal class SharePointFileDao(IServiceProvider serviceProvider,
         return Task.FromResult(false);
     }
 
+    public async Task<File<string>> SaveFileAsync(File<string> file, Stream fileStream, bool checkFolder)
+    {
+        return await SaveFileAsync(file, fileStream);
+    }
+
     public async Task<File<string>> SaveFileAsync(File<string> file, Stream fileStream)
     {
         ArgumentNullException.ThrowIfNull(fileStream);

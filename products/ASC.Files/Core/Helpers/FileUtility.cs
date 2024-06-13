@@ -51,7 +51,8 @@ public class FileUtilityConfiguration(IConfiguration configuration)
         {
                 { FileType.Document, configuration["files:docservice:internal-doc"] ?? ".docx" },
                 { FileType.Spreadsheet, configuration["files:docservice:internal-xls"] ?? ".xlsx" },
-                { FileType.Presentation, configuration["files:docservice:internal-ppt"] ?? ".pptx" }
+                { FileType.Presentation, configuration["files:docservice:internal-ppt"] ?? ".pptx" },
+                { FileType.Pdf, configuration["files:docservice:internal-pdf"] ?? ".pdf" }
         };
     
     internal string GetSignatureSecret()
