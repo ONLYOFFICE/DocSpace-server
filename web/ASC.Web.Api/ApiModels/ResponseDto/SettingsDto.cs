@@ -106,6 +106,10 @@ public class SettingsDto
     /// <type>System.String, System</type>
     public string Version { get; set; }
 
+    /// <summary>Type of captcha</summary>
+    /// <type>ASC.Web.Core.RecaptchaType, ASC.Web.Core</type>
+    public RecaptchaType RecaptchaType { get; set; }
+
     /// <summary>ReCAPTCHA public key</summary>
     /// <type>System.String, System</type>
     public string RecaptchaPublicKey { get; set; }
