@@ -320,7 +320,7 @@ module.exports = (io) => {
 
   function changeCustomQuota(room, customQuotaFeature, enableQuota, usedSpace, quotaLimit) {
       
-      if (customQuotaFeature == "tenant_custom_quota") {
+      if (customQuotaFeature === "tenant_custom_quota") {
           filesIO.to(room).emit("s:change-user-quota-used-value", { customQuotaFeature, enableQuota, quota: quotaLimit });
       } else {
           filesIO.to(room).emit("s:change-user-quota-used-value", { customQuotaFeature, usedSpace, quotaLimit });
@@ -330,8 +330,13 @@ module.exports = (io) => {
   function changeInvitationLimitValue({ value, room } = {}) {
     logger.info(`changed user invitation limit in room ${room}, value ${value}`);
     filesIO.to(room).emit("s:change-invitation-limit-value", value);
- }
-
+  }
+  
+  function updateHistory({ room, id, type } = {}) {
+    logger.info(`update ${type} history ${id} in room ${room}`);
+    filesIO.to(room).emit("s:update-history", { id, type });
+  }
+  
   return {
     startEdit,
     stopEdit,
@@ -347,6 +352,7 @@ module.exports = (io) => {
     changeUserQuotaFeatureValue,
     markAsNewFiles,
     markAsNewFolders,
-    changeInvitationLimitValue
+    changeInvitationLimitValue,
+    updateHistory,
   };
 };
