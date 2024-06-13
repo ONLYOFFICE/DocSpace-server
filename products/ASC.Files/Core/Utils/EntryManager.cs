@@ -1450,9 +1450,19 @@ public class EntryManager(IDaoFactory daoFactory,
                         }
                         else
                         {
-                            await using var buffered = await tempStream.GetBufferedAsync(tmpStream);
-                            pdfFile.ContentLength = buffered.Length;
-                            result = await fileDao.SaveFileAsync(pdfFile, buffered, false);
+                            (var buffered, var resultGet) = await tempStream.TryGetBufferedAsync(tmpStream);
+                            try
+                            {
+                                pdfFile.ContentLength = buffered.Length;
+                                result = await fileDao.SaveFileAsync(pdfFile, buffered, false);
+                            }
+                            finally
+                            {
+                                if (resultGet)
+                                {
+                                    await buffered.DisposeAsync();
+                                }
+                            }
                         }
 
                         try

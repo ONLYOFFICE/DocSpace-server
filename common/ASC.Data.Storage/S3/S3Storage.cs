@@ -296,67 +296,77 @@ public class S3Storage(TempStream tempStream,
     public async Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string contentType,
                          string contentDisposition, ACL acl, string contentEncoding = null, int cacheDays = 5)
     {
-        var buffered = await _tempStream.GetBufferedAsync(stream);
+        (var buffered, var result) = await _tempStream.TryGetBufferedAsync(stream);
 
-        if (EnableQuotaCheck(domain))
+        try
         {
-            await QuotaController.QuotaUsedCheckAsync(buffered.Length, ownerId);
+            if (EnableQuotaCheck(domain))
+            {
+                await QuotaController.QuotaUsedCheckAsync(buffered.Length, ownerId);
+            }
+
+            using var client = GetClient();
+            using var uploader = new TransferUtility(client);
+            var mime = string.IsNullOrEmpty(contentType)
+                ? MimeMapping.GetMimeMapping(Path.GetFileName(path))
+                : contentType;
+
+            var request = new TransferUtilityUploadRequest
+            {
+                BucketName = _bucket,
+                Key = MakePath(domain, path),
+                ContentType = mime,
+                ServerSideEncryptionMethod = _sse,
+                InputStream = buffered,
+                AutoCloseStream = false
+            };
+
+            if (client is not IAmazonS3Encryption)
+            {
+                request.ServerSideEncryptionMethod = GetServerSideEncryptionMethod(out var kmsKeyId);
+                request.ServerSideEncryptionKeyManagementServiceKeyId = kmsKeyId;
+            }
+
+            switch (acl)
+            {
+                case ACL.Auto:
+                    request.CannedACL = GetDomainACL(domain);
+                    break;
+                case ACL.Read:
+                case ACL.Private:
+                    request.CannedACL = GetS3Acl(acl);
+                    break;
+            }
+
+            if (!string.IsNullOrEmpty(contentDisposition))
+            {
+                request.Headers.ContentDisposition = contentDisposition;
+            }
+            else if (mime == "application/octet-stream")
+            {
+                request.Headers.ContentDisposition = "attachment";
+            }
+
+            if (!string.IsNullOrEmpty(contentEncoding))
+            {
+                request.Headers.ContentEncoding = contentEncoding;
+            }
+
+            await uploader.UploadAsync(request);
+
+            //await InvalidateCloudFrontAsync(MakePath(domain, path));
+
+            await QuotaUsedAddAsync(domain, buffered.Length, ownerId);
+
+            return await GetUriAsync(domain, path);
         }
-
-        using var client = GetClient();
-        using var uploader = new TransferUtility(client);
-        var mime = string.IsNullOrEmpty(contentType)
-            ? MimeMapping.GetMimeMapping(Path.GetFileName(path))
-            : contentType;
-
-        var request = new TransferUtilityUploadRequest
+        finally
         {
-            BucketName = _bucket,
-            Key = MakePath(domain, path),
-            ContentType = mime,
-            ServerSideEncryptionMethod = _sse,
-            InputStream = buffered,
-            AutoCloseStream = false
-        };
-
-        if (client is not IAmazonS3Encryption)
-        {
-            request.ServerSideEncryptionMethod = GetServerSideEncryptionMethod(out var kmsKeyId);
-            request.ServerSideEncryptionKeyManagementServiceKeyId = kmsKeyId;
+            if (result)
+            {
+                await buffered.DisposeAsync();
+            }
         }
-
-        switch (acl)
-        {
-            case ACL.Auto:
-                request.CannedACL = GetDomainACL(domain);
-                break;
-            case ACL.Read:
-            case ACL.Private:
-                request.CannedACL = GetS3Acl(acl);
-                break;
-        }
-
-        if (!string.IsNullOrEmpty(contentDisposition))
-        {
-            request.Headers.ContentDisposition = contentDisposition;
-        }
-        else if (mime == "application/octet-stream")
-        {
-            request.Headers.ContentDisposition = "attachment";
-        }
-
-        if (!string.IsNullOrEmpty(contentEncoding))
-        {
-            request.Headers.ContentEncoding = contentEncoding;
-        }
-
-        await uploader.UploadAsync(request);
-
-        //await InvalidateCloudFrontAsync(MakePath(domain, path));
-
-        await QuotaUsedAddAsync(domain, buffered.Length, ownerId);
-
-        return await GetUriAsync(domain, path);
     }
 
     public override Task<Uri> SaveAsync(string domain, string path, Stream stream, Guid ownerId)
@@ -724,25 +734,35 @@ public class S3Storage(TempStream tempStream,
         using var client = GetClient();
         using var uploader = new TransferUtility(client);
         var objectKey = MakePath(domain, path);
-        var buffered = await _tempStream.GetBufferedAsync(stream);
-        var request = new TransferUtilityUploadRequest
+        (var buffered, var result) = await _tempStream.TryGetBufferedAsync(stream);
+        try
         {
-            BucketName = _bucket,
-            Key = objectKey,
-            CannedACL = S3CannedACL.BucketOwnerFullControl,
-            ContentType = "application/octet-stream",
-            InputStream = buffered,
-            Headers =
+            var request = new TransferUtilityUploadRequest
+            {
+                BucketName = _bucket,
+                Key = objectKey,
+                CannedACL = S3CannedACL.BucketOwnerFullControl,
+                ContentType = "application/octet-stream",
+                InputStream = buffered,
+                Headers =
                     {
                         CacheControl = string.Format("public, maxage={0}", (int)TimeSpan.FromDays(5).TotalSeconds),
                         ExpiresUtc = DateTime.UtcNow.Add(TimeSpan.FromDays(5)),
                         ContentDisposition = "attachment"
                     }
-        };
+            };
 
-        request.Metadata.Add("private-expire", expires.ToFileTimeUtc().ToString(CultureInfo.InvariantCulture));
+            request.Metadata.Add("private-expire", expires.ToFileTimeUtc().ToString(CultureInfo.InvariantCulture));
 
-        await uploader.UploadAsync(request);
+            await uploader.UploadAsync(request);
+        }
+        finally
+        {
+            if (result)
+            {
+                await buffered.DisposeAsync();
+            }
+        }
 
         //Get presigned url                
         var pUrlRequest = new GetPreSignedUrlRequest
