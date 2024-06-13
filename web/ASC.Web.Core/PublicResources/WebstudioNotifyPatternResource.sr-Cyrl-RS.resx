@@ -519,7 +519,7 @@ $OrangeButton
 
 Направљена је резервна датотека која садржи податке са вашег "${__VirtualRootPath}":"${__VirtualRootPath}" портала.
 
-Да бисте сазнали више о процедури прављења резервних копија, погледајте наш кориснички водич "Резервна копија података":"${__HelpLink}/administration/docspace-settings.aspk#CreatingBackup_block.
+Да бисте сазнали више о процедури прављења резервних копија, погледајте наш кориснички водич "Резервна копија података":"${__HelpLink}/administration/docspace-settings.aspx#CreatingBackup_block.
 
 Ако имате било каквих питања или вам је потребна помоц́, слободно нас контактирајте на "${__SupportLink}":"${__SupportLink}"
 
@@ -825,7 +825,7 @@ $OrangeButton
 $TrulyYours</value>
   </data>
   <data name="pattern_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
-    <value>h1. Преузмите &lt;span style="color:#FF6F3D;"&gt;бесплатне&lt;/span&gt; ONLIOFFICE апликације
+    <value>h1. Преузмите &lt;span style="color:#FF6F3D;"&gt;бесплатне&lt;/span&gt; ONLYOFFICE апликације
 
 
 Здраво, $UserName!
@@ -839,7 +839,7 @@ $TrulyYours</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
-    <value>h1. Преузмите &lt;span style="color:#FF6F3D;"&gt;бесплатне&lt;/span&gt; ONLIOFFICE апликације
+    <value>h1. Преузмите &lt;span style="color:#FF6F3D;"&gt;бесплатне&lt;/span&gt; ONLYOFFICE апликације
 
 
 Здраво, $UserName!
@@ -858,7 +858,7 @@ $TrulyYours</value>
 
 Здраво, $UserName!
 
-Добродошли у ONLIOFFICE DocSpace! Ваш кориснички профил је успешно додат у "${__VirtualRootPath}":"${__VirtualRootPath}". Сада можете:
+Добродошли у ONLYOFFICE DocSpace! Ваш кориснички профил је успешно додат у "${__VirtualRootPath}":"${__VirtualRootPath}". Сада можете:
 
 &lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt; Радите са другим корисницима у просторији у коју сте позвани: &lt;b&gt;собе за сарадњу за коауторство у реалном времену или прилагођене собе са флексибилним подешавањима за било коју сврху&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
@@ -880,7 +880,7 @@ $TrulyYours</value>
 
 Здраво, $UserName!
 
-Добродошли у ONLIOFFICE DocSpace! Ваш кориснички профил је успешно додат у "${__VirtualRootPath}":"${__VirtualRootPath}". Сада можете:
+Добродошли у ONLYOFFICE DocSpace! Ваш кориснички профил је успешно додат у "${__VirtualRootPath}":"${__VirtualRootPath}". Сада можете:
 
 &lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt; Радите са другим корисницима у просторији у коју сте позвани: &lt;b&gt;собе за сарадњу за коауторство у реалном времену или прилагођене собе са флексибилним подешавањима за било коју сврху&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
@@ -902,7 +902,7 @@ $TrulyYours</value>
 
 Здраво, $UserName!
 
-Добродошли у ONLIOFFICE DocSpace! Ваш кориснички профил је успешно додат у "${__VirtualRootPath}":"${__VirtualRootPath}". Сада можете:
+Добродошли у ONLYOFFICE DocSpace! Ваш кориснички профил је успешно додат у "${__VirtualRootPath}":"${__VirtualRootPath}". Сада можете:
 
 &lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt; Радите са другим корисницима у просторији у коју сте позвани: &lt;b&gt;собе за сарадњу за коауторство у реалном времену или прилагођене собе са флексибилним подешавањима за било коју сврху&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
@@ -924,7 +924,7 @@ $TrulyYours</value>
 
 Здраво, $UserName!
 
-Добродошли у ONLIOFFICE DocSpace! Ваш кориснички профил је успешно додат у "${__VirtualRootPath}":"${__VirtualRootPath}". Сада можете:
+Добродошли у ONLYOFFICE DocSpace! Ваш кориснички профил је успешно додат у "${__VirtualRootPath}":"${__VirtualRootPath}". Сада можете:
 
 &lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt; Радите са другим корисницима у просторији у коју сте позвани: &lt;b&gt;собе за сарадњу за коауторство у реалном времену или прилагођене собе са флексибилним подешавањима за било коју сврху&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
@@ -946,7 +946,7 @@ $TrulyYours</value>
 
 Здраво, $UserName!
 
-Добродошли у ONLIOFFICE DocSpace! Ваш кориснички профил је успешно додат у "${__VirtualRootPath}":"${__VirtualRootPath}". Сада можете:
+Добродошли у ONLYOFFICE DocSpace! Ваш кориснички профил је успешно додат у "${__VirtualRootPath}":"${__VirtualRootPath}". Сада можете:
 
 &lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt; Радите са другим корисницима у просторији у коју сте позвани: &lt;b&gt;собе за сарадњу за коауторство у реалном времену или прилагођене собе са флексибилним подешавањима за било коју сврху&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
@@ -968,7 +968,7 @@ $TrulyYours</value>
 
 Здраво, $UserName!
 
-Добродошли у ONLIOFFICE DocSpace! Ваш кориснички профил је успешно додат у "${__VirtualRootPath}":"${__VirtualRootPath}". Сада можете:
+Добродошли у ONLYOFFICE DocSpace! Ваш кориснички профил је успешно додат у "${__VirtualRootPath}":"${__VirtualRootPath}". Сада можете:
 
 &lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt; Радите са другим корисницима у просторији у коју сте позвани: &lt;b&gt;собе за сарадњу за коауторство у реалном времену или прилагођене собе са флексибилним подешавањима за било коју сврху&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
@@ -990,7 +990,7 @@ $TrulyYours</value>
 
 Здраво, $UserName!
 
-Добродошли у ONLIOFFICE DocSpace! Ваш кориснички профил је успешно додат у "${__VirtualRootPath}":"${__VirtualRootPath}". Сада можете:
+Добродошли у ONLYOFFICE DocSpace! Ваш кориснички профил је успешно додат у "${__VirtualRootPath}":"${__VirtualRootPath}". Сада можете:
 
 &lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt; Радите са другим корисницима у просторији у коју сте позвани: &lt;b&gt;собе за сарадњу за коауторство у реалном времену или прилагођене собе са флексибилним подешавањима за било коју сврху&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
@@ -1012,7 +1012,7 @@ $TrulyYours</value>
 
 Здраво, $UserName!
 
-Добродошли у ONLIOFFICE DocSpace! Ваш кориснички профил је успешно додат у "${__VirtualRootPath}":"${__VirtualRootPath}". Сада можете:
+Добродошли у ONLYOFFICE DocSpace! Ваш кориснички профил је успешно додат у "${__VirtualRootPath}":"${__VirtualRootPath}". Сада можете:
 
 &lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt; Радите са другим корисницима у просторији у коју сте позвани: &lt;b&gt;собе за сарадњу за коауторство у реалном времену или прилагођене собе са флексибилним подешавањима за било коју сврху&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
