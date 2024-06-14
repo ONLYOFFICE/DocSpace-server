@@ -159,8 +159,7 @@ internal class FolderDao(
         ProviderFilter provider,
         SubjectFilter subjectFilter,
         IEnumerable<string> subjectEntriesIds,
-        QuotaFilter quotaFilter = QuotaFilter.All,
-        RoomDataLifetimeFilter lifetimeFilter = RoomDataLifetimeFilter.All)
+        QuotaFilter quotaFilter = QuotaFilter.All)
     {
         if (CheckInvalidFilter(filterType) || (provider != ProviderFilter.None && provider != ProviderFilter.Storage))
         {
@@ -175,7 +174,7 @@ internal class FolderDao(
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var q = await GetFolderQuery(filesDbContext, r => parentsIds.Contains(r.ParentId));
 
-        q = !withSubfolders ? BuildRoomsQuery(filesDbContext, q, filter, tags, subjectId, searchByTags, withoutTags, searchByTypes, false, excludeSubject, subjectFilter, subjectEntriesIds, quotaFilter, lifetimeFilter)
+        q = !withSubfolders ? BuildRoomsQuery(filesDbContext, q, filter, tags, subjectId, searchByTags, withoutTags, searchByTypes, false, excludeSubject, subjectFilter, subjectEntriesIds, quotaFilter)
             : await BuildRoomsWithSubfoldersQuery(filesDbContext, parentsIds, filter, tags, searchByTags, searchByTypes, withoutTags, excludeSubject, subjectId, subjectFilter, subjectEntriesIds);
 
         if (!string.IsNullOrEmpty(searchText))
@@ -1731,7 +1730,7 @@ internal class FolderDao(
     }
 
     private IQueryable<DbFolder> BuildRoomsQuery(FilesDbContext filesDbContext, IQueryable<DbFolder> query, FolderType filterByType, IEnumerable<string> tags, Guid subjectId, bool searchByTags, bool withoutTags,
-        bool searchByFilter, bool withSubfolders, bool excludeSubject, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds, QuotaFilter quotaFilter = QuotaFilter.All, RoomDataLifetimeFilter lifetimeFilter = RoomDataLifetimeFilter.All)
+        bool searchByFilter, bool withSubfolders, bool excludeSubject, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds, QuotaFilter quotaFilter = QuotaFilter.All)
     {
         if (subjectId != Guid.Empty)
         {
@@ -1756,13 +1755,6 @@ internal class FolderDao(
             query = quotaFilter == QuotaFilter.Default
                 ? query.Where(f => f.Settings.Quota == TenantEntityQuotaSettings.DefaultQuotaValue)
                 : query.Where(f => f.Settings.Quota != TenantEntityQuotaSettings.DefaultQuotaValue);
-        }
-
-        if (lifetimeFilter != RoomDataLifetimeFilter.All)
-        {
-            query = lifetimeFilter == RoomDataLifetimeFilter.LifetimeEnabled
-                ? query.Where(f => !string.IsNullOrEmpty(f.Settings.Lifetime))
-                : query.Where(f => string.IsNullOrEmpty(f.Settings.Lifetime));
         }
 
         if (withoutTags)

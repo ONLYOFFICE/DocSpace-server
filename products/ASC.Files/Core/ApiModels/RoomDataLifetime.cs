@@ -62,10 +62,3 @@ public enum RoomDataLifetimePeriod
     Month = 1,
     Year = 2
 }
-
-public enum RoomDataLifetimeFilter
-{
-    All = 0,
-    LifetimeEnabled = 1,
-    LifetimeDisabled = 2
-}
