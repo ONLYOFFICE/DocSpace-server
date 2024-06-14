@@ -206,6 +206,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                         canEdit = false;
                         canFill = true;
                         isSubmitOnly = true;
+                        editorType = EditorType.Embedded;
                         break;
                     }
 
