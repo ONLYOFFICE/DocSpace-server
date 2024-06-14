@@ -32,11 +32,8 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         FileUploader fileUploader,
         SocketManager socketManager,
         FileDtoHelper fileDtoHelper,
-        ApiContext apiContext,
         FileStorageService fileStorageService,
-        FolderContentDtoHelper folderContentDtoHelper,
         IHttpContextAccessor httpContextAccessor,
-        FolderDtoHelper folderDtoHelper,
         ILogger<FilesControllerHelper> logger,
         ApiDateTimeHelper apiDateTimeHelper,
         UserManager userManager,
@@ -47,11 +44,8 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
             fileUploader,
             socketManager,
             fileDtoHelper,
-            apiContext,
             fileStorageService,
-            folderContentDtoHelper,
-            httpContextAccessor,
-            folderDtoHelper)
+            httpContextAccessor)
     {
     private readonly ILogger _logger = logger;
 
@@ -74,7 +68,7 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
 
         if (fileType == FileType.Pdf)
         {
-            return await fileStorageService.CheckExtendedPDF(file);
+            return await _fileStorageService.CheckExtendedPDF(file);
         }
         return false;
     }
