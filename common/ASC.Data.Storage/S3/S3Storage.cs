@@ -295,7 +295,7 @@ public class S3Storage(TempStream tempStream,
     public async Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string contentType,
                          string contentDisposition, ACL acl, string contentEncoding = null, int cacheDays = 5)
     {
-        (var buffered, var isNew) = await _tempStream.TryGetBufferedAsync(stream);
+        var (buffered, isNew) = await _tempStream.TryGetBufferedAsync(stream);
 
         try
         {
@@ -733,7 +733,7 @@ public class S3Storage(TempStream tempStream,
         using var client = GetClient();
         using var uploader = new TransferUtility(client);
         var objectKey = MakePath(domain, path);
-        (var buffered, var isNew) = await _tempStream.TryGetBufferedAsync(stream);
+        var (buffered, isNew) = await _tempStream.TryGetBufferedAsync(stream);
         try
         {
             var request = new TransferUtilityUploadRequest

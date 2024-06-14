@@ -166,7 +166,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     [HttpGet("{fileId}/openedit")]
     public async Task<ConfigurationDto<T>> OpenEditAsync(T fileId, int version, bool view, EditorType editorType, bool edit)
     {
-        (var file, var lastVersion) = await documentServiceHelper.GetCurFileInfoAsync(fileId, version);
+        var (file, lastVersion) = await documentServiceHelper.GetCurFileInfoAsync(fileId, version);
         var extension = FileUtility.GetFileExtension(file.Title);
         var fileType = FileUtility.GetFileTypeByExtention(extension);
 

@@ -79,7 +79,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
     public async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(T fileId, int version, bool editPossible, bool tryEdit,
         bool tryCoAuthoring, bool fillFormsPossible)
     {
-        (var file, var lastVersion) = await GetCurFileInfoAsync(fileId, version);
+        var (file, lastVersion) = await GetCurFileInfoAsync(fileId, version);
 
         return await GetParamsAsync(file, lastVersion, true, true, editPossible, tryEdit, tryCoAuthoring, fillFormsPossible);
     }

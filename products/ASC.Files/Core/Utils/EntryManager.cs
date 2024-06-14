@@ -1450,7 +1450,7 @@ public class EntryManager(IDaoFactory daoFactory,
                         }
                         else
                         {
-                            (var buffered, var isNew) = await tempStream.TryGetBufferedAsync(tmpStream);
+                            var (buffered, isNew) = await tempStream.TryGetBufferedAsync(tmpStream);
                             try
                             {
                                 pdfFile.ContentLength = buffered.Length;

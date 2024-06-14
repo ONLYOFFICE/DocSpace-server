@@ -88,7 +88,7 @@ public class S3ZipWriteOperator : IDataWriteOperator
             _gZipOutputStream.baseOutputStream_ = _fileStream;
         }
 
-        (var buffered, var isNew) = await _tempStream.TryGetBufferedAsync(stream);
+        var (buffered, isNew) = await _tempStream.TryGetBufferedAsync(stream);
         try
         {
             var entry = TarEntry.CreateTarEntry(tarKey);
