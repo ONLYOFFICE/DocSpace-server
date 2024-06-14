@@ -294,9 +294,9 @@ static file class FileQueries
                         Shared = ctx.Security.Any(x => 
                             x.TenantId == r.TenantId && 
                             (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
-                            (x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.File) || 
-                            (ctx.Tree.Where(y => y.FolderId == r.ParentId).Select(y => y.ParentId.ToString()).Contains(x.EntryId) && 
-                             x.EntryType == FileEntryType.Folder))
+                            ((x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.File) || 
+                             (ctx.Tree.Where(y => y.FolderId == r.ParentId).Select(y => y.ParentId.ToString()).Contains(x.EntryId) && 
+                              x.EntryType == FileEntryType.Folder)))
                     })
                     .SingleOrDefault());
 
@@ -323,9 +323,9 @@ static file class FileQueries
                         Shared = ctx.Security.Any(x => 
                             x.TenantId == r.TenantId && 
                             (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
-                            (x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.File) || 
-                            (ctx.Tree.Where(y => y.FolderId == r.ParentId).Select(y => y.ParentId.ToString()).Contains(x.EntryId) && 
-                             x.EntryType == FileEntryType.Folder))
+                            ((x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.File) || 
+                             (ctx.Tree.Where(y => y.FolderId == r.ParentId).Select(y => y.ParentId.ToString()).Contains(x.EntryId) && 
+                              x.EntryType == FileEntryType.Folder)))
                     })
                     .SingleOrDefault());
 
