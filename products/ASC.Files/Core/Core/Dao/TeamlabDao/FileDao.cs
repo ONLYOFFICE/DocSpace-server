@@ -1928,8 +1928,8 @@ internal class FileDao(
                 LastOpened = r.TagLink.CreateOn
             });
     }
-    
-    protected IQueryable<DbFileQuery> FromQueryWithShared(FilesDbContext filesDbContext, IQueryable<DbFile> dbFiles)
+
+    private static IQueryable<DbFileQuery> FromQueryWithShared(FilesDbContext filesDbContext, IQueryable<DbFile> dbFiles)
     {
         return dbFiles
             .Select(r => new DbFileQuery
@@ -1945,13 +1945,15 @@ internal class FileDao(
                         where f.TenantId == r.TenantId
                         select f
                     ).FirstOrDefault(),
-                Shared = filesDbContext.Security.Any(s => 
-                    s.TenantId == r.TenantId && s.EntryId == r.Id.ToString() && s.EntryType == FileEntryType.File && 
-                    (s.SubjectType == SubjectType.PrimaryExternalLink || s.SubjectType == SubjectType.ExternalLink))
+                Shared = filesDbContext.Security.Any(x => 
+                    x.TenantId == r.TenantId && 
+                    (x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.File) || 
+                    (filesDbContext.Tree.Where(y => y.FolderId == r.ParentId).Select(y => y.ParentId.ToString()).Contains(x.EntryId) && 
+                     x.EntryType == FileEntryType.Folder))
             });
     }
-    
-    private readonly IDictionary<int, bool> _currentTenantStore = new ConcurrentDictionary<int, bool>();
+
+    private readonly ConcurrentDictionary<int, bool> _currentTenantStore = new();
     
     protected internal async Task<DbFile> InitDocumentAsync(DbFile dbFile, int? tenantId = null)
     {
