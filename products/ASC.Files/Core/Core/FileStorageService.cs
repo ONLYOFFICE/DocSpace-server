@@ -175,7 +175,7 @@ public class FileStorageService //: IFileStorageService
             {
                 throw new Exception(parent.Error);
             }
-            if (parent.RootFolderType == FolderType.VirtualRooms && !DocSpaceHelper.IsRoom(parent.FolderType) && parent.FolderType != FolderType.VirtualRooms)
+            if (parent.RootFolderType == FolderType.VirtualRooms && !DocSpaceHelper.IsRoom(parent.FolderType) && parent.FolderType != FolderType.VirtualRooms && !parent.ProviderEntry)
             {
                 parent.ParentRoomType = await folderDao.GetFirstParentTypeFromFileEntryAsync(parent);
             }
