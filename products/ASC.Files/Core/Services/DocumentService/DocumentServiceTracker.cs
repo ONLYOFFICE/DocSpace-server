@@ -487,9 +487,9 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
                         var buffer = new byte[bufferSize];
                         int readed;
                         attach = new MemoryStream();
-                        while ((readed = await downloadStream.ReadAsync(buffer, 0, bufferSize)) > 0)
+                        while ((readed = await downloadStream.ReadAsync(buffer.AsMemory(0, bufferSize))) > 0)
                         {
-                            await attach.WriteAsync(buffer, 0, readed);
+                            await attach.WriteAsync(buffer.AsMemory(0, readed));
                         }
 
                         attach.Position = 0;

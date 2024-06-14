@@ -681,9 +681,9 @@ public class RackspaceCloudStorage(TempPath tempPath,
         {
             var buffer = new byte[BufferSize];
             int readed;
-            while ((readed = await stream.ReadAsync(buffer, 0, BufferSize)) != 0)
+            while ((readed = await stream.ReadAsync(buffer.AsMemory(0, BufferSize))) != 0)
             {
-                await fs.WriteAsync(buffer, 0, readed);
+                await fs.WriteAsync(buffer.AsMemory(0, readed));
             }
         }
 

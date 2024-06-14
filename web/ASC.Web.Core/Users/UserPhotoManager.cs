@@ -740,13 +740,13 @@ public class UserPhotoManager(UserManager userManager,
 
         while (true)
         {
-            var count = await s.ReadAsync(buffer, 0, buffer.Length);
+            var count = await s.ReadAsync(buffer);
             if (count == 0)
             {
                 break;
             }
 
-            await data.WriteAsync(buffer, 0, count);
+            await data.WriteAsync(buffer.AsMemory(0, count));
         }
 
         return data.ToArray();
@@ -822,14 +822,15 @@ public class UserPhotoManager(UserManager userManager,
             var buffer = new byte[1024 * 10];
             while (true)
             {
-                var count = await s.ReadAsync(buffer, 0, buffer.Length);
+                var count = await s.ReadAsync(buffer);
                 if (count == 0)
                 {
                     break;
                 }
 
-                data.Write(buffer, 0, count);
+                await data.WriteAsync(buffer.AsMemory(0, count));
             }
+            
             return data.ToArray();
         }
         catch (Exception err)

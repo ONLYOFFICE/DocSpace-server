@@ -115,10 +115,10 @@ public class ChunkZipWriteOperator : IDataWriteOperator
         var buffer = new byte[chunkUploadSize];
         int bytesRead;
         _fileStream.Position = 0;
-        while ((bytesRead = await _fileStream.ReadAsync(buffer, 0, (int)chunkUploadSize)) > 0)
+        while ((bytesRead = await _fileStream.ReadAsync(buffer.AsMemory(0, (int)chunkUploadSize))) > 0)
         {
             using var theMemStream = new MemoryStream();
-            await theMemStream.WriteAsync(buffer, 0, bytesRead);
+            await theMemStream.WriteAsync(buffer.AsMemory(0, bytesRead));
             theMemStream.Position = 0;
             if (bytesRead == chunkUploadSize || last)
             {
