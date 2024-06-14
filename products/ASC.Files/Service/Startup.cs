@@ -69,11 +69,8 @@ public class Startup : BaseWorkerStartup
             services.AddHostedService<Launcher>();
             services.AddHostedService<DeleteExpiredService>();
         }
-
         
-        services.AddScoped<ITenantQuotaFeatureChecker, CountRoomChecker>();
-        services.AddScoped<ITenantQuotaFeatureStat<CountRoomFeature, int>, CountRoomCheckerStatistic>();
-        services.AddScoped<ITenantQuotaFeatureStat<UsersInRoomFeature, int>, UsersInRoomStatistic>();
+        services.RegisterQuotaFeature();
         services.AddBaseDbContextPool<FilesDbContext>();
         services.AddScoped<IWebItem, ProductEntryPoint>();
 

@@ -523,4 +523,10 @@ Najviša kompatibilnost sa docx, xlsx, pptx.</value>
   <data name="UnlockComment" xml:space="preserve">
     <value>Datoteka je otključana</value>
   </data>
+  <data name="Date" xml:space="preserve">
+    <value>Datum</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>Korisnik</value>
+  </data>
 </root>

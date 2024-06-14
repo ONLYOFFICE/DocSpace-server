@@ -680,20 +680,8 @@ public class CustomizationConfig<T>(
 
     public async Task<bool> GetSubmitForm(File<T> file, bool modeWrite)
     {
-        if (!modeWrite || FileUtility.GetFileTypeByFileName(file.Title) != FileType.Pdf)
-        {
-            return false;
-        }
 
-        var linkDao = daoFactory.GetLinkDao<T>();
-        var sourceId = await linkDao.GetSourceAsync(file.Id);
-
-        if (Equals(sourceId, default(T)))
-        {
-            return false;
-        }
-
-        var properties = await daoFactory.GetFileDao<T>().GetProperties(sourceId);
+        var properties = await daoFactory.GetFileDao<T>().GetProperties(file.Id);
 
         return properties is { FormFilling.CollectFillForm: true };
     }
@@ -761,6 +749,11 @@ public class LogoConfig(
     public string Url
     {
         get => commonLinkUtility.GetFullAbsolutePath(commonLinkUtility.GetDefault());
+    }
+
+    public bool GetVisible(EditorType editorType)
+    {
+        return editorType != EditorType.Mobile;
     }
 }
 

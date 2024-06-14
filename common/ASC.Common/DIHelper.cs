@@ -150,19 +150,13 @@ public class DIHelper
         foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies().OrderBy(r=> r.FullName))
         {
             Scan(assembly);
-            
-            var references = assembly.GetReferencedAssemblies();
-            foreach(var reference in references.Where(CheckAssemblyName))
-            {
-                Assembly.Load(reference);
-            }
         }
     }
     
     private void Scan(Assembly assembly)
     {
         var assemblyName = assembly.GetName();
-        if (!CheckAssemblyName(assemblyName) || _visited.Contains(assemblyName.Name))
+        if (!CheckAssemblyName(assemblyName) || _visited.Contains(assemblyName.FullName))
         {
             return;
         }
@@ -174,6 +168,12 @@ public class DIHelper
         foreach (var a in types)
         {
             TryAdd(a);
+        }
+        
+        var references = assembly.GetReferencedAssemblies();
+        foreach(var reference in references.Where(r => CheckAssemblyName(r) && !_visited.Contains(r.FullName)))
+        {
+            Assembly.Load(reference);
         }
     }
 

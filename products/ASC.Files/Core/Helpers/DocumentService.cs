@@ -638,6 +638,7 @@ public static class DocumentService
             }
             var errorMessage = code switch
             {
+                ErrorCode.SizeLimit => "size limit exceeded",
                 ErrorCode.OutputType => "output format not defined",
                 ErrorCode.Vkey => "document signature",
                 ErrorCode.TaskQueue => "database",
@@ -654,6 +655,7 @@ public static class DocumentService
         [EnumExtensions]
         public enum ErrorCode
         {
+            SizeLimit = -10,
             OutputType = -9,
             Vkey = -8,
             TaskQueue = -6,

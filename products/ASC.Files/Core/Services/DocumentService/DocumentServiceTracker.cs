@@ -239,8 +239,12 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
 
         if (!fileData.Key.Equals(docKey))
         {
-            logger.InformationDocServiceEditingFile(fileId.ToString(), docKey, fileData.Key, fileData.Users);
-            usersDrop = fileData.Users;
+            if (!documentServiceHelper.IsDocSubmitKey(docKey, fileData.Key))
+            {
+                logger.InformationDocServiceEditingFile(fileId.ToString(), docKey, fileData.Key, fileData.Users);
+                usersDrop = fileData.Users;
+            }
+            return;
         }
         else
         {
@@ -316,11 +320,15 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
         var docKey = await documentServiceHelper.GetDocKeyAsync(fileStable);
         if (!fileData.Key.Equals(docKey))
         {
-            logger.ErrorDocServiceSavingFile(fileId.ToString(), docKey, fileData.Key);
+            if (fileData.ForceSaveType != TrackerData.ForceSaveInitiator.UserSubmit ||
+                !documentServiceHelper.IsDocSubmitKey(docKey, fileData.Key))
+            {
+                logger.ErrorDocServiceSavingFile(fileId.ToString(), docKey, fileData.Key);
 
-            await StoringFileAfterErrorAsync(fileId, userId.ToString(), documentServiceConnector.ReplaceDocumentAddress(fileData.Url), fileData.Filetype);
+                await StoringFileAfterErrorAsync(fileId, userId.ToString(), documentServiceConnector.ReplaceDocumentAddress(fileData.Url), fileData.Filetype);
 
-            return new TrackResponse { Message = "Expected key " + docKey };
+                return new TrackResponse { Message = "Expected key " + docKey };
+            }
         }
 
         UserInfo user = null;
@@ -479,9 +487,9 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
                         var buffer = new byte[bufferSize];
                         int readed;
                         attach = new MemoryStream();
-                        while ((readed = await downloadStream.ReadAsync(buffer, 0, bufferSize)) > 0)
+                        while ((readed = await downloadStream.ReadAsync(buffer.AsMemory(0, bufferSize))) > 0)
                         {
-                            await attach.WriteAsync(buffer, 0, readed);
+                            await attach.WriteAsync(buffer.AsMemory(0, readed));
                         }
 
                         attach.Position = 0;

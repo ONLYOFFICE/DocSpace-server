@@ -798,4 +798,7 @@
   <data name="PortalRenamed" xml:space="preserve">
     <value>Portal Renamed</value>
   </data>
+  <data name="SendJoinInvite" xml:space="preserve">
+    <value>User {0} sent an invitation to {1} to join this DocSpace</value>
+  </data>
 </root>

@@ -83,5 +83,6 @@ public class FormFillingProperties()
     public string ToFolderId { get; set; }
     public string ResultsFolderId { get; set; }
     public string ResultsFileID { get; set; }
+    public int GuestFormId { get; set; }
 
 }

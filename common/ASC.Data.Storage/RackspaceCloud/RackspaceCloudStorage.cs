@@ -222,95 +222,104 @@ public class RackspaceCloudStorage(TempPath tempPath,
                       string contentDisposition, ACL acl, string contentEncoding = null, int cacheDays = 5,
     DateTime? deleteAt = null, long? deleteAfter = null)
     {
-        var buffered = await _tempStream.GetBufferedAsync(stream);
+        (var buffered, var isNew) = await _tempStream.TryGetBufferedAsync(stream);
 
-        if (EnableQuotaCheck(domain))
+        try
         {
-            await QuotaController.QuotaUsedCheckAsync(buffered.Length, ownerId);
-        }
-
-        var client = GetClient();
-
-        var mime = string.IsNullOrEmpty(contentType)
-                             ? MimeMapping.GetMimeMapping(Path.GetFileName(path))
-                             : contentType;
-
-
-        var customHeaders = new Dictionary<string, string>();
-
-        if (cacheDays > 0)
-        {
-            customHeaders.Add("Cache-Control", string.Format("public, maxage={0}", (int)TimeSpan.FromDays(cacheDays).TotalSeconds));
-            customHeaders.Add("Expires", DateTime.UtcNow.Add(TimeSpan.FromDays(cacheDays)).ToString());
-        }
-
-        if (deleteAt.HasValue)
-        {
-            var ts = deleteAt.Value - new DateTime(1970, 1, 1, 0, 0, 0);
-            var unixTimestamp = (long)ts.TotalSeconds;
-
-            customHeaders.Add("X-Delete-At", unixTimestamp.ToString());
-        }
-
-        if (deleteAfter.HasValue)
-        {
-            customHeaders.Add("X-Delete-After", deleteAfter.ToString());
-        }
-
-        if (!string.IsNullOrEmpty(contentEncoding))
-        {
-            customHeaders.Add("Content-Encoding", contentEncoding);
-        }
-
-        var cannedACL = acl == ACL.Auto ? GetDomainACL(domain) : ACL.Read;
-
-        if (cannedACL == ACL.Read)
-        {
-            try
+            if (EnableQuotaCheck(domain))
             {
-                await using (var emptyStream = _tempStream.Create())
-                {
+                await QuotaController.QuotaUsedCheckAsync(buffered.Length, ownerId);
+            }
 
-                    var headers = new Dictionary<string, string>
+            var client = GetClient();
+
+            var mime = string.IsNullOrEmpty(contentType)
+                                 ? MimeMapping.GetMimeMapping(Path.GetFileName(path))
+                                 : contentType;
+
+
+            var customHeaders = new Dictionary<string, string>();
+
+            if (cacheDays > 0)
+            {
+                customHeaders.Add("Cache-Control", string.Format("public, maxage={0}", (int)TimeSpan.FromDays(cacheDays).TotalSeconds));
+                customHeaders.Add("Expires", DateTime.UtcNow.Add(TimeSpan.FromDays(cacheDays)).ToString());
+            }
+
+            if (deleteAt.HasValue)
+            {
+                var ts = deleteAt.Value - new DateTime(1970, 1, 1, 0, 0, 0);
+                var unixTimestamp = (long)ts.TotalSeconds;
+
+                customHeaders.Add("X-Delete-At", unixTimestamp.ToString());
+            }
+
+            if (deleteAfter.HasValue)
+            {
+                customHeaders.Add("X-Delete-After", deleteAfter.ToString());
+            }
+
+            if (!string.IsNullOrEmpty(contentEncoding))
+            {
+                customHeaders.Add("Content-Encoding", contentEncoding);
+            }
+
+            var cannedACL = acl == ACL.Auto ? GetDomainACL(domain) : ACL.Read;
+
+            if (cannedACL == ACL.Read)
+            {
+                try
+                {
+                    await using (var emptyStream = _tempStream.Create())
+                    {
+
+                        var headers = new Dictionary<string, string>
                         {
                             { "X-Object-Manifest", $"{_private_container}/{MakePath(domain, path)}" }
                         };
-                    // create symlink
-                    client.CreateObject(_public_container,
-                               emptyStream,
-                               MakePath(domain, path),
-                               mime,
-                               4096,
-                               headers,
-                               _region
-                              );
+                        // create symlink
+                        client.CreateObject(_public_container,
+                                   emptyStream,
+                                   MakePath(domain, path),
+                                   mime,
+                                   4096,
+                                   headers,
+                                   _region
+                                  );
 
-                    emptyStream.Close();
+                        emptyStream.Close();
+                    }
+
+                    client.PurgeObjectFromCDN(_public_container, MakePath(domain, path));
                 }
-
-                client.PurgeObjectFromCDN(_public_container, MakePath(domain, path));
+                catch (Exception exp)
+                {
+                    logger.ErrorInvalidationFailed(_public_container + "/" + MakePath(domain, path), exp);
+                }
             }
-            catch (Exception exp)
+
+            stream.Position = 0;
+
+            client.CreateObject(_private_container,
+                                stream,
+                                MakePath(domain, path),
+                                mime,
+                                4096,
+                                customHeaders,
+                                _region
+                               );
+
+            await QuotaUsedAddAsync(domain, buffered.Length, ownerId);
+
+            return await GetUriAsync(domain, path);
+        }
+        finally
+        {
+            if (isNew)
             {
-                logger.ErrorInvalidationFailed(_public_container + "/" + MakePath(domain, path), exp);
+                await buffered.DisposeAsync();
             }
         }
-
-        stream.Position = 0;
-
-        client.CreateObject(_private_container,
-                            stream,
-                            MakePath(domain, path),
-                            mime,
-                            4096,
-                            customHeaders,
-                            _region
-                           );
-
-        await QuotaUsedAddAsync(domain, buffered.Length, ownerId);
-
-        return await GetUriAsync(domain, path);
-
     }
 
     public override async Task DeleteAsync(string domain, string path)
@@ -672,9 +681,9 @@ public class RackspaceCloudStorage(TempPath tempPath,
         {
             var buffer = new byte[BufferSize];
             int readed;
-            while ((readed = await stream.ReadAsync(buffer, 0, BufferSize)) != 0)
+            while ((readed = await stream.ReadAsync(buffer.AsMemory(0, BufferSize))) != 0)
             {
-                await fs.WriteAsync(buffer, 0, readed);
+                await fs.WriteAsync(buffer.AsMemory(0, readed));
             }
         }
 

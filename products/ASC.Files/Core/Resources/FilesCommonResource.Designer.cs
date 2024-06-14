@@ -907,6 +907,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The file cannot be uploaded to this room. Please try to upload the PDF form.
+        /// </summary>
+        public static string ErrorMessage_UploadToFormRoom {
+            get {
+                return ResourceManager.GetString("ErrorMessage_UploadToFormRoom", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to User could not be found.
         /// </summary>
         public static string ErrorMessage_UserNotFound {
@@ -961,6 +970,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Link to form.
+        /// </summary>
+        public static string LinkToForm {
+            get {
+                return ResourceManager.GetString("LinkToForm", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to File created in folder &quot;{0}&quot;.
         /// </summary>
         public static string MessageFileCreated {
@@ -993,6 +1011,15 @@ namespace ASC.Files.Core.Resources {
         public static string MessageFillFormDraftDiscard {
             get {
                 return ResourceManager.GetString("MessageFillFormDraftDiscard", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Open form.
+        /// </summary>
+        public static string OpenForm {
+            get {
+                return ResourceManager.GetString("OpenForm", resourceCulture);
             }
         }
         

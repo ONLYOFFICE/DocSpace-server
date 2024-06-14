@@ -166,46 +166,55 @@ public class DiscDataStore(TempStream tempStream,
     {
         Logger.DebugSavePath(path);
 
-        var buffered = await _tempStream.GetBufferedAsync(stream);
-            
-        if (EnableQuotaCheck(domain))
+        (var buffered, var isNew) = await _tempStream.TryGetBufferedAsync(stream);
+        try
         {
-            await QuotaController.QuotaUsedCheckAsync(buffered.Length, ownerId);
+            if (EnableQuotaCheck(domain))
+            {
+                await QuotaController.QuotaUsedCheckAsync(buffered.Length, ownerId);
+            }
+
+            ArgumentNullException.ThrowIfNull(path);
+            ArgumentNullException.ThrowIfNull(stream);
+
+            //Try seek to start
+            if (buffered.CanSeek)
+            {
+                buffered.Seek(0, SeekOrigin.Begin);
+            }
+
+            //Lookup domain
+            var target = GetTarget(domain, path);
+            CreateDirectory(target);
+            //Copy stream
+
+            //optimaze disk file copy
+            long fslen;
+            if (buffered is FileStream fileStream)
+            {
+                File.Copy(fileStream.Name, target, true);
+                fslen = fileStream.Length;
+            }
+            else
+            {
+                await using var fs = File.Open(target, FileMode.Create);
+                await buffered.CopyToAsync(fs);
+                fslen = fs.Length;
+            }
+
+            await QuotaUsedAddAsync(domain, fslen, ownerId);
+
+            _crypt.EncryptFile(target);
+
+            return await GetUriAsync(domain, path);
         }
-
-        ArgumentNullException.ThrowIfNull(path);
-        ArgumentNullException.ThrowIfNull(stream);
-
-        //Try seek to start
-        if (buffered.CanSeek)
+        finally
         {
-            buffered.Seek(0, SeekOrigin.Begin);
+            if (isNew)
+            {
+                await buffered.DisposeAsync();
+            }
         }
-
-        //Lookup domain
-        var target = GetTarget(domain, path);
-        CreateDirectory(target);
-        //Copy stream
-
-        //optimaze disk file copy
-        long fslen;
-        if (buffered is FileStream fileStream)
-        {
-            File.Copy(fileStream.Name, target, true);
-            fslen = fileStream.Length;
-        }
-        else
-        {
-            await using var fs = File.Open(target, FileMode.Create);
-            await buffered.CopyToAsync(fs);
-            fslen = fs.Length;
-        }
-
-        await QuotaUsedAddAsync(domain, fslen, ownerId);
-
-        _crypt.EncryptFile(target);
-
-        return await GetUriAsync(domain, path);
     }
 
     public override Task<Uri> SaveAsync(string domain, string path, Stream stream, ACL acl)

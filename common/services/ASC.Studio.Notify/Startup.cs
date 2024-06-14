@@ -24,10 +24,12 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Common.EF;
 using ASC.Core.Common.Notify.Engine;
+using ASC.Files.Core.Core;
+using ASC.Files.Core.EF;
 using ASC.Web.Core;
 using ASC.Web.Files.Configuration;
-using ASC.Web.Studio.IntegrationEvents;
 
 namespace ASC.Studio.Notify;
 
@@ -50,7 +52,8 @@ public class Startup : BaseWorkerStartup
         services.AddAutoMapper(GetAutoMapperProfileAssemblies());//toDo
         services.AddHostedService<ServiceLauncher>();
         services.AddScoped<IWebItem, ProductEntryPoint>();
-        
+        services.AddBaseDbContextPool<FilesDbContext>();
         services.AddActivePassiveHostedService<NotifySchedulerService>(DIHelper, Configuration, "StudioNotifySchedulerService");
+        services.RegisterQuotaFeature();
     }
 }
