@@ -82,7 +82,7 @@ public class MigrationLogger(
         if (_migrationLog != null)
         {
             await SaveLogAsync();
-            _migrationLog.Dispose();
+            await _migrationLog.DisposeAsync();
         }
     }
 

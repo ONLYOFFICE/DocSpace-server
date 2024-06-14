@@ -515,7 +515,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                                           .Where(x => x.Status == EmployeeStatus.Active).Select(y => y.Id).Distinct();
                     }
 
-                    return Enumerable.Empty<Guid>();
+                    return [];
                 }
 
                 break;

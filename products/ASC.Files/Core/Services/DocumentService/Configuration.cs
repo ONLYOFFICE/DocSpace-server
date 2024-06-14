@@ -184,7 +184,7 @@ public class DocumentConfig<T>(
         }
 
         var last = Permissions.Edit || Permissions.Review || Permissions.Comment;
-        _fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(pathProvider.GetFileStreamUrl(file, last));
+        _fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(await pathProvider.GetFileStreamUrlAsync(file, last));
 
         return _fileUri;
     }

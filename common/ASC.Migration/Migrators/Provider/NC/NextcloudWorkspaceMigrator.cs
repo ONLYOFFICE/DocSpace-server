@@ -76,7 +76,7 @@ public class NextcloudWorkspaceMigrator : Migrator
                 break;
             }
         }
-        MigrationInfo.Files = new List<string> { Path.GetFileName(_takeout) };
+        MigrationInfo.Files = [Path.GetFileName(_takeout)];
         TmpFolder = path;
     }
 
@@ -91,32 +91,30 @@ public class NextcloudWorkspaceMigrator : Migrator
             double progress = 5;
             try
             {
-                using (var archive = ZipFile.OpenRead(_takeout))
+                using var archive = ZipFile.OpenRead(_takeout);
+                foreach (var entry in archive.Entries)
                 {
-                    foreach (var entry in archive.Entries)
+                    if (reportProgress)
                     {
-                        if (reportProgress)
+                        progress += 45d / archive.Entries.Count;
+                        await ReportProgressAsync(progress, MigrationResource.Unzipping);
+                    }
+                    if (string.IsNullOrEmpty(entry.Name))
+                    {
+                        Directory.CreateDirectory(Path.Combine(TmpFolder, entry.FullName));
+                    }
+                    else
+                    {
+                        var dir = Path.GetDirectoryName(Path.Combine(TmpFolder, entry.FullName));
+                        if (!Directory.Exists(dir))
                         {
-                            progress += 45d / archive.Entries.Count;
-                            await ReportProgressAsync(progress, MigrationResource.Unzipping);
+                            Directory.CreateDirectory(dir);
                         }
-                        if (string.IsNullOrEmpty(entry.Name))
-                        {
-                            Directory.CreateDirectory(Path.Combine(TmpFolder, entry.FullName));
-                        }
-                        else
-                        {
-                            var dir = Path.GetDirectoryName(Path.Combine(TmpFolder, entry.FullName));
-                            if (!Directory.Exists(dir))
-                            {
-                                Directory.CreateDirectory(dir);
-                            }
-                            entry.ExtractToFile(Path.Combine(TmpFolder, entry.FullName));
-                        }
-                        if (_cancellationToken.IsCancellationRequested && reportProgress)
-                        {
-                            return null;
-                        }
+                        entry.ExtractToFile(Path.Combine(TmpFolder, entry.FullName));
+                    }
+                    if (_cancellationToken.IsCancellationRequested && reportProgress)
+                    {
+                        return null;
                     }
                 }
             }
@@ -256,8 +254,7 @@ public class NextcloudWorkspaceMigrator : Migrator
 
         var entryRegex = new Regex(@"(\(.*?\))[,;]");
         var accountDataMatches = entryRegex.Matches(match.Groups[1].Value + ";");
-        return accountDataMatches.Cast<Match>()
-            .Select(m => m.Groups[1].Value.Trim(new[] { '(', ')' }));
+        return accountDataMatches.Select(m => m.Groups[1].Value.Trim(['(', ')']));
     }
 
     private Dictionary<string, MigrationUser> DbExtractUser(string dbFile)
@@ -522,7 +519,7 @@ public class NextcloudWorkspaceMigrator : Migrator
         }
         else
         {
-            if (Array.Exists(new int[] { 1, 17, 9, 25, 5, 21, 13, 29, 3, 19, 11, 27 }, el => el == role))
+            if (Array.Exists([1, 17, 9, 25, 5, 21, 13, 29, 3, 19, 11, 27], el => el == role))
             {
                 return ASCShare.Read;
             }

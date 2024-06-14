@@ -123,7 +123,7 @@ public class CspSettingsHelper(
 
     public async Task<string> CreateHeaderAsync(IEnumerable<string> domains, bool currentTenant = true)
     {
-        domains ??= Enumerable.Empty<string>();
+        domains ??= [];
 
         var options = domains.Select(r => new CspOptions(r)).ToList();
 

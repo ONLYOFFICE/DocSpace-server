@@ -897,13 +897,11 @@ public class FileStorageService //: IFileStorageService
         var fileDao = daoFactory.GetFileDao<T>();
         var stream = await fileDao.GetFileStreamAsync(file, 0, limit);
 
-        using (var memStream = new MemoryStream())
-        {
-            stream.CopyTo(memStream);
-            memStream.Seek(0, SeekOrigin.Begin);
+        using var memStream = new MemoryStream();
+        await stream.CopyToAsync(memStream);
+        memStream.Seek(0, SeekOrigin.Begin);
 
-            return await CheckExtendedPDFstream(memStream);
-        }
+        return await CheckExtendedPDFstream(memStream);
     }
     public async Task<bool> CheckExtendedPDFstream(MemoryStream stream)
     {
@@ -3095,7 +3093,7 @@ public class FileStorageService //: IFileStorageService
 
         var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(file);
 
-        var access = await fileSharing.GetSharedInfoAsync(Enumerable.Empty<T>(), new[] { roomId });
+        var access = await fileSharing.GetSharedInfoAsync([], new[] { roomId });
         var usersIdWithAccess = access.Where(aceWrapper => !aceWrapper.SubjectGroup
                                                            && aceWrapper.Access != FileShare.Restrict)
             .Select(aceWrapper => aceWrapper.Id);

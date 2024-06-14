@@ -537,41 +537,39 @@ internal class FileDao(
                 if (roomId != -1 && checkFolder)
                 {
                     var currentRoom = await folderDao.GetFolderAsync(roomId);
-                    using (var originalCopyStream = new MemoryStream())
+                    using var originalCopyStream = new MemoryStream();
+                    if (currentRoom.FolderType == FolderType.FillingFormsRoom)
                     {
-                        if (currentRoom.FolderType == FolderType.FillingFormsRoom)
+                        var extension = FileUtility.GetFileExtension(file.Title);
+                        var fileType = FileUtility.GetFileTypeByExtention(extension);
+
+                        await fileStream.CopyToAsync(originalCopyStream);
+
+                        var cloneStreamForCheck = CloneMemoryStream(originalCopyStream, 300);
+                        var cloneStreamForSave = CloneMemoryStream(originalCopyStream);
+
+                        if (fileType != FileType.Pdf || (fileType == FileType.Pdf && !await fileStorageService.CheckExtendedPDFstream(cloneStreamForCheck)))
                         {
-                            var extension = FileUtility.GetFileExtension(file.Title);
-                            var fileType = FileUtility.GetFileTypeByExtention(extension);
+                            throw new Exception(FilesCommonResource.ErrorMessage_UploadToFormRoom);
 
-                            await fileStream.CopyToAsync(originalCopyStream);
-
-                            var cloneStreamForCheck = CloneMemoryStream(originalCopyStream, 300);
-                            var cloneStreamForSave = CloneMemoryStream(originalCopyStream);
-
-                            if (fileType != FileType.Pdf || (fileType == FileType.Pdf && !await fileStorageService.CheckExtendedPDFstream(cloneStreamForCheck)))
-                            {
-                                throw new Exception(FilesCommonResource.ErrorMessage_UploadToFormRoom);
-
-                            }
-                            else if (fileType == FileType.Pdf)
-                            {
-                                var properties = await fileDao.GetProperties(file.Id) ?? new EntryProperties() { FormFilling = new FormFillingProperties() };
-                                properties.FormFilling.StartFilling = true;
-                                properties.FormFilling.CollectFillForm = true;
-                                await fileDao.SaveProperties(file.Id, properties);
-                                await SaveFileStreamAsync(file, cloneStreamForSave, currentFolder);
-
-                                var count = await fileStorageService.GetPureSharesCountAsync(currentRoom.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "");
-                                await socketManager.CreateFormAsync(file, securityContext.CurrentAccount.ID, count <= 1);
-                            }
                         }
-                        else
+
+                        if (fileType == FileType.Pdf)
                         {
-                            await SaveFileStreamAsync(file, fileStream, currentFolder);
+                            var properties = await fileDao.GetProperties(file.Id) ?? new EntryProperties() { FormFilling = new FormFillingProperties() };
+                            properties.FormFilling.StartFilling = true;
+                            properties.FormFilling.CollectFillForm = true;
+                            await fileDao.SaveProperties(file.Id, properties);
+                            await SaveFileStreamAsync(file, cloneStreamForSave, currentFolder);
+
+                            var count = await fileStorageService.GetPureSharesCountAsync(currentRoom.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "");
+                            await socketManager.CreateFormAsync(file, securityContext.CurrentAccount.ID, count <= 1);
                         }
                     }
-
+                    else
+                    {
+                        await SaveFileStreamAsync(file, fileStream, currentFolder);
+                    }
                 }
                 else
                 {

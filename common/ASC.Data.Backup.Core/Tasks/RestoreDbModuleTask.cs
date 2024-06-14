@@ -228,7 +228,7 @@ public class RestoreDbModuleTask : PortalTaskBase
     {
         if (xmlStream == null)
         {
-            return Enumerable.Empty<DataRowInfo>();
+            return [];
         }
 
         var rows = DataRowInfoReader.ReadFromStream(xmlStream);

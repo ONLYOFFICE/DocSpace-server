@@ -183,14 +183,14 @@ public abstract class Migrator : IAsyncDisposable
         }
 
         MigrationInfo.FailedUsers = _failedUsers.Count;
-        MigrationInfo.SuccessedUsers = _usersForImport.Count() - MigrationInfo.FailedUsers;
+        MigrationInfo.SuccessedUsers = _usersForImport.Count - MigrationInfo.FailedUsers;
         await ReportProgressAsync(100, MigrationResource.MigrationCompleted);
     }
 
     private async Task MigrateUsersAsync()
     {
         var i = 1;
-        var progressStep = _usersForImport.Count() == 0 ? 30 : 30 / _usersForImport.Count();
+        var progressStep = !_usersForImport.Any() ? 30 : 30 / _usersForImport.Count;
         foreach (var kv in MigrationInfo.Users)
         {
             var key = kv.Key;
@@ -328,7 +328,7 @@ public abstract class Migrator : IAsyncDisposable
 
     private async Task MigrateStorageAsync(MigrationStorage storage, MigrationUser user = null)
     {
-        if (!storage.ShouldImport || storage.Files.Count() == 0)
+        if (!storage.ShouldImport || storage.Files.Count == 0)
         {
             return;
         }
@@ -481,8 +481,8 @@ public abstract class Migrator : IAsyncDisposable
                         else
                         {
                             var users = UserManager.GetUsers(false, EmployeeStatus.Active,
-                                new List<List<Guid>> { new List<Guid> { MigrationInfo.Groups[security.Subject].Info.ID } },
-                                new List<Guid>(), new List<Tuple<List<List<Guid>>, List<Guid>>>(), null, null, null, "", false, "firstname",
+                                [[MigrationInfo.Groups[security.Subject].Info.ID]],
+                                [], [], null, null, null, "", false, "firstname",
                                 true, 100000, 0).Where(u => u.Id != user.Info.Id);
                             await foreach (var u in users)
                             {

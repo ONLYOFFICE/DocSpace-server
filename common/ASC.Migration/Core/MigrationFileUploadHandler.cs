@@ -93,9 +93,9 @@ public class MigrationFileUploadHandler
             {
                 var path = await cache.GetStringAsync(key);
                 var file = context.Request.Form.Files[0];
-                using var stream = file.OpenReadStream();
+                await using var stream = file.OpenReadStream();
                 var folder = Path.Combine(path, Path.GetFileName(context.Request.Query["Name"].ToString()));
-                using var fs = File.Open(folder, FileMode.Append);
+                await using var fs = File.Open(folder, FileMode.Append);
                 await stream.CopyToAsync(fs);
 
                 result = Success();

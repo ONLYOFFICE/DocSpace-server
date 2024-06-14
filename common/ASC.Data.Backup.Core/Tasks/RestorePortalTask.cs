@@ -411,7 +411,7 @@ public class RestorePortalTask(DbFactory dbFactory,
         using var stream = dataReader.GetEntry(KeyHelper.GetStorageRestoreInfoZipKey());
         if (stream == null)
         {
-            return Enumerable.Empty<BackupFileInfo>();
+            return [];
         }
 
         var restoreInfo = XElement.Load(new StreamReader(stream));

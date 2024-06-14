@@ -26,22 +26,11 @@
 
 namespace ASC.Web.Files.Utils;
 [Transient]
-public class ExportToCSV
+public class ExportToCSV(
+    ILogger<AuditReportUploader> logger,
+    IServiceProvider serviceProvider,
+    IDaoFactory daoFactory)
 {
-    private readonly ILogger<AuditReportUploader> _logger;
-    private readonly IServiceProvider _serviceProvider;
-    private readonly IDaoFactory _daoFactory;
-
-    public ExportToCSV(
-        ILogger<AuditReportUploader> logger,
-        IServiceProvider serviceProvider,
-        IDaoFactory daoFactory)
-    {
-        _logger = logger;
-        _serviceProvider = serviceProvider;
-        _daoFactory = daoFactory;
-    }
-
     public async Task<T> UploadCsvReport<T>(T parentId, string title, DataTable dataTable)
     {
         try
@@ -49,18 +38,18 @@ public class ExportToCSV
             var data = DataTableToCsv(dataTable);
             using var textStream = new MemoryStream(Encoding.UTF8.GetBytes(data));
 
-            var csvFile = _serviceProvider.GetService<File<T>>();
+            var csvFile = serviceProvider.GetService<File<T>>();
             csvFile.ParentId = parentId;
             csvFile.Title = Global.ReplaceInvalidCharsAndTruncate(title + ".csv");
 
-            var fileDao = _daoFactory.GetFileDao<T>();
+            var fileDao = daoFactory.GetFileDao<T>();
             var file = await fileDao.SaveFileAsync(csvFile, textStream);
 
             return file.Id;
         }
         catch (Exception ex)
         {
-            _logger.ErrorWhileUploading(ex);
+            logger.ErrorWhileUploading(ex);
             throw;
         }
     }
@@ -69,7 +58,7 @@ public class ExportToCSV
     {
         try
         {
-            var fileDao = _daoFactory.GetFileDao<T>();
+            var fileDao = daoFactory.GetFileDao<T>();
 
             await using var source = await fileDao.GetFileStreamAsync(file);
             using var reader = new StreamReader(source);
@@ -87,7 +76,7 @@ public class ExportToCSV
         }
         catch (Exception ex)
         {
-            _logger.ErrorWhileUploading(ex);
+            logger.ErrorWhileUploading(ex);
             throw;
         }
     }
