@@ -235,7 +235,6 @@ public class BackupWorker(
 
     internal static async Task<string> GetBackupHashMD5Async(string path, long chunkSize)
     {
-        using var md5 = MD5.Create();
         await using var fileStream = File.OpenRead(path);
         var multipartSplitCount = 0;
         var splitCount = fileStream.Length / chunkSize;
@@ -246,18 +245,18 @@ public class BackupWorker(
         {
             var offset = i == 0 ? 0 : chunkSize * i;
             var chunk = await GetChunkAsync(fileStream, offset, (int)chunkSize);
-            var hash = md5.ComputeHash(chunk);
+            var hash = MD5.HashData(chunk);
             concatHash = concatHash.Concat(hash);
             multipartSplitCount++;
         }
         if (mod != 0)
         {
             var chunk = await GetChunkAsync(fileStream, chunkSize * splitCount, mod);
-            var hash = md5.ComputeHash(chunk);
+            var hash = MD5.HashData(chunk);
             concatHash = concatHash.Concat(hash);
             multipartSplitCount++;
         }
-        var multipartHash = BitConverter.ToString(md5.ComputeHash(concatHash.ToArray())).Replace("-", string.Empty);
+        var multipartHash = BitConverter.ToString(MD5.HashData(concatHash.ToArray())).Replace("-", string.Empty);
         return multipartHash + "-" + multipartSplitCount;
     }
 

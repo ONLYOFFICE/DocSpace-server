@@ -427,11 +427,7 @@ public class LdapOperationJob(TenantManager tenantManager,
                 continue;
             }
 
-            string hash;
-            using (var md5 = MD5.Create())
-            {
-                hash = Convert.ToBase64String(md5.ComputeHash((byte[])image));
-            }
+            var hash = Convert.ToBase64String(MD5.HashData((byte[])image));
 
             var user = await userManager.GetUserBySidAsync(ldapUser.Sid);
 
