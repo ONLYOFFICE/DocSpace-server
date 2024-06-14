@@ -139,7 +139,7 @@ public class TransferPortalTask(DbFactory dbFactory,
     private async Task DoTransferStorageAsync(ColumnMapper columnMapper)
     {
         options.DebugBeginTransferStorage();
-        var fileGroups = (await GetFilesToProcess(TenantId)).GroupBy(file => file.Module).ToList();
+        var fileGroups = (await GetFilesToProcess(TenantId).ToListAsync()).GroupBy(file => file.Module).ToList();
         var groupsProcessed = 0;
         foreach (var group in fileGroups)
         {
