@@ -619,7 +619,7 @@ public class BackupPortalTask(
             await writer.WriteEntryAsync(path, file.Domain, file.Path, storage, SetProgress);
 
             var restoreInfoXml = file.ToXElement();
-            restoreInfoXml.WriteTo(tmpFile);
+            await restoreInfoXml.WriteToAsync(tmpFile);
         }
 
         bytes = "</storage_restore>"u8.ToArray();
