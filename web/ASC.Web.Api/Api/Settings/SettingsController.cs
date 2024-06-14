@@ -43,6 +43,7 @@ public partial class SettingsController(MessageService messageService,
         CommonLinkUtility commonLinkUtility,
         IConfiguration configuration,
         SetupInfo setupInfo,
+        GeolocationHelper geolocationHelper,
         StatisticManager statisticManager,
         ConsumerFactory consumerFactory,
         TimeZoneConverter timeZoneConverter,
@@ -180,6 +181,7 @@ public partial class SettingsController(MessageService messageService,
             settings.FormGallery = mapper.Map<FormGalleryDto>(formGallerySettings);
 
             settings.InvitationLimit = await userInvitationLimitHelper.GetLimit();
+            settings.MaxImageUploadSize = setupInfo.MaxImageUploadSize;
         }
         else
         {
@@ -201,7 +203,11 @@ public partial class SettingsController(MessageService messageService,
 
             settings.ThirdpartyEnable = setupInfo.ThirdPartyAuthEnabled && providerManager.IsNotEmpty;
 
-            settings.RecaptchaPublicKey = setupInfo.RecaptchaPublicKey;
+            var country = (await geolocationHelper.GetIPGeolocationFromHttpContextAsync()).Key;
+
+            settings.RecaptchaType = country == "CN" ? RecaptchaType.hCaptcha : RecaptchaType.Default;
+
+            settings.RecaptchaPublicKey = settings.RecaptchaType is RecaptchaType.hCaptcha ? setupInfo.HcaptchaPublicKey : setupInfo.RecaptchaPublicKey;
         }
 
         if (!authContext.IsAuthenticated || (withpassword.HasValue && withpassword.Value))

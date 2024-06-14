@@ -98,7 +98,7 @@ public sealed class UserManagerWrapper(
             LastName = string.Empty,
             FirstName = string.Empty,
             ActivationStatus = EmployeeActivationStatus.Pending,
-            Status = EmployeeStatus.Active,
+            Status = EmployeeStatus.Pending,
             CultureName = culture
         };
 
@@ -353,9 +353,8 @@ public sealed class UserManagerWrapper(
         {
             return Resource.CouldNotRecoverPasswordForSsoUser;
         }
-
+        
         await studioNotifyService.UserPasswordChangeAsync(userInfo);
-
         return null;
     }
 

@@ -1572,6 +1572,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to User {0} sent an invitation to {1} to join this DocSpace.
+        /// </summary>
+        public static string SendJoinInvite {
+            get {
+                return ResourceManager.GetString("SendJoinInvite", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invite Instructions Sent: {0}.
         /// </summary>
         public static string SentInviteInstructions {

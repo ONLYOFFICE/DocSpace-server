@@ -72,6 +72,7 @@ public enum MessageAction
     GuestCreated = 4001,
     UserCreatedViaInvite = 4002,
     GuestCreatedViaInvite = 4003,
+    SendJoinInvite = 4037,
 
     UserActivated = 4004,
     GuestActivated = 4005,

@@ -700,7 +700,7 @@ public class GlobalFolder(
             await using (var stream = await storeTemplate.GetReadStreamAsync("", filePath))
             {
                 newFile.ContentLength = stream.CanSeek ? stream.Length : await storeTemplate.GetFileSizeAsync("", filePath);
-                newFile = await fileDao.SaveFileAsync(newFile, stream, false);
+                newFile = await fileDao.SaveFileAsync(newFile, stream, false, true);
             }
 
             await fileMarker.MarkAsNewAsync(newFile);

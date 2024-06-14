@@ -65,10 +65,9 @@ public static class DocumentService
     {
         expectedKey ??= "";
         const int maxLength = 128;
-        using var sha256 = SHA256.Create();
         if (expectedKey.Length > maxLength)
         {
-            expectedKey = Convert.ToBase64String(sha256.ComputeHash(Encoding.UTF8.GetBytes(expectedKey)));
+            expectedKey = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(expectedKey)));
         }
 
         var key = Regex.Replace(expectedKey, "[^0-9a-zA-Z_]", "_");

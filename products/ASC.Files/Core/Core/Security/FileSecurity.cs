@@ -120,7 +120,9 @@ public class FileSecurity(IDaoFactory daoFactory,
             {
                     { SubjectType.User, [FileShare.RoomAdmin, FileShare.Collaborator, FileShare.FillForms, FileShare.None] },
                     { SubjectType.Group , [FileShare.FillForms, FileShare.None] },
-                    { SubjectType.InvitationLink, [FileShare.RoomAdmin, FileShare.Collaborator, FileShare.FillForms, FileShare.None] }
+                    { SubjectType.InvitationLink, [FileShare.RoomAdmin, FileShare.Collaborator, FileShare.FillForms, FileShare.None] },
+                    { SubjectType.ExternalLink, [FileShare.FillForms, FileShare.Read, FileShare.None] },
+                    { SubjectType.PrimaryExternalLink, [FileShare.FillForms, FileShare.Read, FileShare.None] }
                 }.ToFrozenDictionary()
                 },
                 {
@@ -857,6 +859,14 @@ public class FileSecurity(IDaoFactory daoFactory,
                 return false;
             }
 
+            if(userId.Equals(ASC.Core.Configuration.Constants.Guest.ID) && (folder.FolderType == FolderType.ReadyFormFolder ||
+                    folder.FolderType == FolderType.InProcessFormFolder ||
+                    folder.FolderType == FolderType.FormFillingFolderDone ||
+                    folder.FolderType == FolderType.FormFillingFolderInProgress))
+            {
+                return false;
+            }
+
             if (action != FilesSecurityActions.Read)
             {
                 if (action is FilesSecurityActions.Duplicate or
@@ -885,7 +895,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                     return false;
                 }
 
-                if (action == FilesSecurityActions.CopySharedLink && folder.FolderType is not (FolderType.CustomRoom or FolderType.PublicRoom))
+                if (action == FilesSecurityActions.CopySharedLink && folder.FolderType is not (FolderType.CustomRoom or FolderType.PublicRoom or FolderType.FillingFormsRoom))
                 {
                     return false;
                 }
@@ -921,6 +931,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                     {
                         return action == FilesSecurityActions.MoveTo;
                     }
+                  
                 }
             }
             else if (isAuthenticated)

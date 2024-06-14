@@ -54,17 +54,6 @@ public static class StringExtension
         return !string.IsNullOrEmpty(emailAddress) && _reStrict.IsMatch(emailAddress);
     }
 
-    public static string GetMD5Hash(this string str)
-    {
-        var bytes = Encoding.Unicode.GetBytes(str);
-
-        using var CSP = MD5.Create();
-
-        var byteHash = CSP.ComputeHash(bytes);
-
-        return byteHash.Aggregate(string.Empty, (current, b) => current + string.Format("{0:x2}", b));
-    }
-
     public static int EnumerableComparer(this string x, string y)
     {
         var xIndex = 0;

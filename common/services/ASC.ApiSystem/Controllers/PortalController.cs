@@ -591,7 +591,7 @@ public class PortalController(
             var data = $"{model.PortalName} {model.FirstName} {model.LastName} {model.Email} {model.Phone} {model.RecaptchaType}";
 
             /*** validate recaptcha ***/
-            if (!await commonMethods.ValidateRecaptcha(model.RecaptchaResponse, model.RecaptchaType, clientIP))
+            if (!await commonMethods.ValidateRecaptcha(model.RecaptchaType, model.RecaptchaResponse, clientIP))
             {
                 option.LogDebug("PortalName = {0}; Elapsed ms. ValidateRecaptcha error: {1} {2}", model.PortalName, sw.ElapsedMilliseconds, data);
                 sw.Stop();

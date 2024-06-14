@@ -56,7 +56,10 @@ internal class FileDao(
         EmailValidationKeyProvider emailValidationKeyProvider,
         StorageFactory storageFactory,
     TenantQuotaController tenantQuotaController,
-    IDistributedLockProvider distributedLockProvider)
+    IDistributedLockProvider distributedLockProvider,
+    FileStorageService fileStorageService,
+    SocketManager socketManager,
+    SecurityContext securityContext)
     : AbstractDao(dbContextManager,
               userManager,
               tenantManager,
@@ -358,10 +361,14 @@ internal class FileDao(
     }
     public async Task<File<int>> SaveFileAsync(File<int> file, Stream fileStream)
     {
-        return await SaveFileAsync(file, fileStream, true);
+        return await SaveFileAsync(file, fileStream, true, true);
+    }
+    public async Task<File<int>> SaveFileAsync(File<int> file, Stream fileStream, bool checkFolder)
+    {
+        return await SaveFileAsync(file, fileStream, true, checkFolder);
     }
 
-    public async Task<File<int>> SaveFileAsync(File<int> file, Stream fileStream, bool checkQuota, ChunkedUploadSession<int> uploadSession = null)
+    public async Task<File<int>> SaveFileAsync(File<int> file, Stream fileStream, bool checkQuota, bool checkFolder, ChunkedUploadSession<int> uploadSession = null)
     {
         ArgumentNullException.ThrowIfNull(file);
 
@@ -373,6 +380,7 @@ internal class FileDao(
 
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         var folderDao = daoFactory.GetFolderDao<int>();
+        var fileDao = daoFactory.GetFileDao<int>();
         var currentFolder = await folderDao.GetFolderAsync(file.FolderIdDisplay);
 
         var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(currentFolder);
@@ -526,7 +534,49 @@ internal class FileDao(
         {
             try
             {
-                await SaveFileStreamAsync(file, fileStream, currentFolder);
+                if (roomId != -1 && checkFolder)
+                {
+                    var currentRoom = await folderDao.GetFolderAsync(roomId);
+                    using (var originalCopyStream = new MemoryStream())
+                    {
+                        if (currentRoom.FolderType == FolderType.FillingFormsRoom)
+                        {
+                            var extension = FileUtility.GetFileExtension(file.Title);
+                            var fileType = FileUtility.GetFileTypeByExtention(extension);
+
+                            await fileStream.CopyToAsync(originalCopyStream);
+
+                            var cloneStreamForCheck = CloneMemoryStream(originalCopyStream, 300);
+                            var cloneStreamForSave = CloneMemoryStream(originalCopyStream);
+
+                            if (fileType != FileType.Pdf || (fileType == FileType.Pdf && !await fileStorageService.CheckExtendedPDFstream(cloneStreamForCheck)))
+                            {
+                                throw new Exception(FilesCommonResource.ErrorMessage_UploadToFormRoom);
+
+                            }
+                            else if (fileType == FileType.Pdf)
+                            {
+                                var properties = await fileDao.GetProperties(file.Id) ?? new EntryProperties() { FormFilling = new FormFillingProperties() };
+                                properties.FormFilling.StartFilling = true;
+                                properties.FormFilling.CollectFillForm = true;
+                                await fileDao.SaveProperties(file.Id, properties);
+                                await SaveFileStreamAsync(file, cloneStreamForSave, currentFolder);
+
+                                var count = await fileStorageService.GetPureSharesCountAsync(currentRoom.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "");
+                                await socketManager.CreateFormAsync(file, securityContext.CurrentAccount.ID, count <= 1);
+                            }
+                        }
+                        else
+                        {
+                            await SaveFileStreamAsync(file, fileStream, currentFolder);
+                        }
+                    }
+
+                }
+                else
+                {
+                    await SaveFileStreamAsync(file, fileStream, currentFolder);
+                }
             }
             catch (Exception saveException)
             {
@@ -564,6 +614,30 @@ internal class FileDao(
         return await GetFileAsync(file.Id);
     }
 
+    private MemoryStream CloneMemoryStream(MemoryStream originalStream, int limit = -1)
+    {
+        var cloneStream = new MemoryStream();
+
+        var originalPosition = originalStream.Position;
+
+        originalStream.Position = 0;
+
+        if(limit > 0)
+        {
+            originalStream.CopyTo(cloneStream, limit);
+        }
+        else
+        {
+            originalStream.CopyTo(cloneStream);
+        }
+
+
+        originalStream.Position = originalPosition;
+
+        cloneStream.Position = 0;
+
+        return cloneStream;
+    }
     public async Task<int> GetFilesCountAsync(int parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent, 
         bool withSubfolders = false, bool excludeSubject = false, int roomId = default)
     {
@@ -1262,7 +1336,7 @@ internal class FileDao(
         await chunkedUploadSessionHolder.FinalizeUploadSessionAsync(uploadSession);
 
         var file = await GetFileForCommitAsync(uploadSession);
-        await SaveFileAsync(file, null, uploadSession.CheckQuota, uploadSession);
+        await SaveFileAsync(file, null, uploadSession.CheckQuota, true, uploadSession);
 
         return file;
     }

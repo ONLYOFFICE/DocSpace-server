@@ -233,6 +233,10 @@ public abstract class BaseStorage(TempStream tempStream,
     public abstract Task<Uri> MoveAsync(string srcDomain, string srcPath, string newDomain, string newPath, bool quotaCheckFileSize = true);
     public abstract Task<Uri> MoveAsync(string srcdomain, string srcpath, string newdomain, string newpath, Guid ownerId, bool quotaCheckFileSize = true);
     public abstract Task<(Uri, string)> SaveTempAsync(string domain, Stream stream);
+    public virtual string GetRootDirectory(string domain)
+    {
+        return domain;
+    }
     public abstract IAsyncEnumerable<string> ListDirectoriesRelativeAsync(string domain, string path, bool recursive);
     public abstract IAsyncEnumerable<string> ListFilesRelativeAsync(string domain, string path, string pattern, bool recursive);
 

@@ -529,4 +529,13 @@ Highest compatibility with docx, xlsx, pptx.</value>
   <data name="User" xml:space="preserve">
     <value>User</value>
   </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>Link to form</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Open form</value>
+  </data>
+  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
+    <value>The file cannot be uploaded to this room. Please try to upload the PDF form</value>
+  </data>
 </root>

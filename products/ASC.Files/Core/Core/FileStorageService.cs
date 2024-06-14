@@ -480,7 +480,8 @@ public class FileStorageService //: IFileStorageService
         switch (folder.FolderType)
         {
             case FolderType.PublicRoom:
-                await SetExternalLinkAsync(folder, Guid.NewGuid(), FileShare.Read, FilesCommonResource.DefaultExternalLinkTitle, primary: true);
+            case FolderType.FillingFormsRoom:
+                await SetExternalLinkAsync(folder, Guid.NewGuid(), folder.FolderType == FolderType.FillingFormsRoom ? FileShare.FillForms : FileShare.Read, FilesCommonResource.DefaultExternalLinkTitle, primary: true);
                 break;
             case FolderType.FormRoom:
                 var task1 = InternalCreateFolderAsync(folder.Id, FilesUCResource.ReadyFormFolder, FolderType.ReadyFormFolder);
@@ -892,6 +893,76 @@ public class FileStorageService //: IFileStorageService
 
         return file;
     }
+    public async Task<bool> CheckExtendedPDF<T>(File<T> file)
+    {
+        const int limit = 300;
+        var fileDao = daoFactory.GetFileDao<T>();
+        var stream = await fileDao.GetFileStreamAsync(file, 0, limit);
+
+        using (var memStream = new MemoryStream())
+        {
+            stream.CopyTo(memStream);
+            memStream.Seek(0, SeekOrigin.Begin);
+
+            return await CheckExtendedPDFstream(memStream);
+        }
+    }
+    public async Task<bool> CheckExtendedPDFstream(MemoryStream stream)
+    {
+        using var reader = new StreamReader(stream, Encoding.GetEncoding("iso-8859-1"));
+        var message = await reader.ReadToEndAsync();
+
+        return IsExtendedPDFFile(message);
+    }
+    private static bool IsExtendedPDFFile(string text)
+    {
+        if (string.IsNullOrEmpty(text))
+        {
+            return false;
+        }
+
+        const string signature = "ONLYOFFICEFORM";
+        var indexFirst = text.IndexOf("%\xCD\xCA\xD2\xA9\x0D");
+
+        if (indexFirst == -1)
+        {
+            return false;
+        }
+
+        var pFirst = text.Substring(indexFirst + 6);
+
+        if (!pFirst.StartsWith("1 0 obj\x0A<<\x0A"))
+        {
+            return false;
+        }
+
+        pFirst = pFirst.Substring(11);
+
+        var indexStream = pFirst.IndexOf("stream\x0D\x0A");
+        var indexMeta = pFirst.IndexOf(signature);
+
+        if (indexStream == -1 || indexMeta == -1 || indexStream < indexMeta)
+        {
+            return false;
+        }
+
+        var pMeta = pFirst.Substring(indexMeta + signature.Length + 3);
+
+        var indexMetaLast = pMeta.IndexOf(' ');
+        if (indexMetaLast == -1)
+        {
+            return false;
+        }
+
+        pMeta = pMeta.Substring(indexMetaLast + 1);
+        indexMetaLast = pMeta.IndexOf(' ');
+        if (indexMetaLast == -1)
+        {
+            return false;
+        }
+
+        return true;
+    }
 
     public async ValueTask<File<T>> CreateNewFileAsync<T, TTemplate>(FileModel<T, TTemplate> fileWrapper, bool enableExternalExt = false)
     {
@@ -1181,8 +1252,10 @@ public class FileStorageService //: IFileStorageService
                 throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
             }
 
-            var properties = await fileDao.GetProperties(fileId) ?? new EntryProperties { FormFilling = serviceProvider.GetService<FormFillingProperties>() };
+            var properties = await fileDao.GetProperties(fileId) ?? new EntryProperties() { FormFilling = new FormFillingProperties() };
             properties.FormFilling.StartFilling = true;
+            properties.FormFilling.CollectFillForm = true;
+
             await fileDao.SaveProperties(fileId, properties);
 
             var count = await GetPureSharesCountAsync(folder.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "");
@@ -1979,6 +2052,30 @@ public class FileStorageService //: IFileStorageService
 
     #region MoveOrCopy
 
+    
+    public async Task<List<object>> MoveOrCopyDestFolderCheckAsync<T1>(IEnumerable<JsonElement> filesId, T1 destFolderId)
+    {
+        var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(filesId);
+
+        var checkedFiles = new List<object>();
+
+        var filesInts = await MoveOrCopyDestFolderCheckAsync(fileIntIds, destFolderId);
+
+        foreach (var i in filesInts)
+        {
+            checkedFiles.Add(i);
+        }
+
+        var filesStrings = await MoveOrCopyDestFolderCheckAsync(fileStringIds, destFolderId);
+
+        foreach (var i in filesStrings)
+        {
+            checkedFiles.Add(i);
+        }
+
+        return checkedFiles;
+
+    }
     public async Task<(List<object>, List<object>)> MoveOrCopyFilesCheckAsync<T1>(IEnumerable<JsonElement> filesId, IEnumerable<JsonElement> foldersId, T1 destFolderId)
     {
         var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(foldersId);
@@ -2013,7 +2110,44 @@ public class FileStorageService //: IFileStorageService
 
         return (checkedFiles, checkedFolders);
     }
+    private async Task<List<TFrom>> MoveOrCopyDestFolderCheckAsync<TFrom, TTo>(IEnumerable<TFrom> filesId, TTo destFolderId)
+    {
+        var checkedFiles = new List<TFrom>();
 
+        var destFolderDao = daoFactory.GetFolderDao<TTo>();
+        var fileDao = daoFactory.GetFileDao<TFrom>();
+
+        var toRoom = await destFolderDao.GetFolderAsync(destFolderId);
+
+        if (!DocSpaceHelper.IsRoom(toRoom.FolderType))
+        {
+            var (roomId, _) = await destFolderDao.GetParentRoomInfoFromFileEntryAsync(toRoom);
+            toRoom = await destFolderDao.GetFolderAsync(roomId);
+        }
+        if (toRoom.FolderType == FolderType.FillingFormsRoom)
+        {
+
+            foreach (var id in filesId)
+            {
+                var file = await fileDao.GetFileAsync(id);
+
+                var extension = FileUtility.GetFileExtension(file.Title);
+                var fileType = FileUtility.GetFileTypeByExtention(extension);
+
+                if (fileType == FileType.Pdf && await CheckExtendedPDF(file))
+                {
+                    checkedFiles.Add(id);
+                }
+            }
+        }
+        else
+        {
+            checkedFiles.AddRange(filesId);
+            return checkedFiles;
+        }
+
+        return checkedFiles;
+    }
     private async Task<(List<TFrom>, List<TFrom>)> MoveOrCopyFilesCheckAsync<TFrom, TTo>(IEnumerable<TFrom> filesId, IEnumerable<TFrom> foldersId, TTo destFolderId)
     {
         var checkedFiles = new List<TFrom>();
@@ -2185,7 +2319,7 @@ public class FileStorageService //: IFileStorageService
                 File<T> form;
                 try
                 {
-                    (form, folderIfNew) = await entryManager.GetFillFormDraftAsync(file);
+                    (form, folderIfNew) = await entryManager.GetFillFormDraftAsync(file, file.ParentId);
                 }
                 catch (Exception ex)
                 {
@@ -2877,9 +3011,19 @@ public class FileStorageService //: IFileStorageService
             }
             else
             {
-                await using var buffered = await tempStream.GetBufferedAsync(fileStream);
-                pdfFile.ContentLength = buffered.Length;
-                result = await fileDao.SaveFileAsync(pdfFile, buffered);
+                var (buffered, isNew) = await tempStream.TryGetBufferedAsync(fileStream);
+                try
+                {
+                    pdfFile.ContentLength = buffered.Length;
+                    result = await fileDao.SaveFileAsync(pdfFile, buffered);
+                }
+                finally
+                {
+                    if (isNew)
+                    {
+                        await buffered.DisposeAsync();
+                    }
+                }
             }
             if (result != null)
             {
@@ -3543,7 +3687,7 @@ public class FileStorageService //: IFileStorageService
 
         linkId = ace.Id;
 
-        if (eventType == EventType.Remove && ace.SubjectType == SubjectType.PrimaryExternalLink && entry is Folder<T> { FolderType: FolderType.PublicRoom })
+        if (eventType == EventType.Remove && ace.SubjectType == SubjectType.PrimaryExternalLink && (entry is Folder<T> { FolderType: FolderType.PublicRoom } or Folder<T> { FolderType: FolderType.FillingFormsRoom }))
         {
             linkId = Guid.NewGuid();
 

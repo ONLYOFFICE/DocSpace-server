@@ -680,22 +680,8 @@ public class CustomizationConfig<T>(
 
     public async Task<bool> GetSubmitForm(File<T> file, bool modeWrite)
     {
-        if (!modeWrite || FileUtility.GetFileTypeByFileName(file.Title) != FileType.Pdf)
-        {
-            return false;
-        }
 
-        var linkDao = daoFactory.GetLinkDao();
-        var sourceId = await linkDao.GetSourceAsync(file.Id.ToString());
-
-        if (sourceId == null)
-        {
-            return false;
-        }
-
-        var properties = int.TryParse(sourceId, out var sourceInt)
-            ? await daoFactory.GetFileDao<int>().GetProperties(sourceInt)
-            : await daoFactory.GetFileDao<string>().GetProperties(sourceId);
+        var properties = await daoFactory.GetFileDao<T>().GetProperties(file.Id);
 
         return properties is { FormFilling.CollectFillForm: true };
     }

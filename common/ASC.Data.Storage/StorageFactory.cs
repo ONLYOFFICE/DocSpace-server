@@ -36,7 +36,7 @@ public class StorageFactoryConfig(IConfiguration configuration)
             .Select(x => x.Name);
     }
 
-    public IEnumerable<string> GetDomainList(string modulename, string region = "current")
+    public IEnumerable<string> GetDomainList(string modulename, bool onlyVisible = true, string region = "current")
     {
         var section = GetStorage(region);
         if (section == null)
@@ -47,7 +47,7 @@ public class StorageFactoryConfig(IConfiguration configuration)
         return section.Module
             .Single(x => x.Name.Equals(modulename, StringComparison.OrdinalIgnoreCase))
             .Domain
-            .Where(x => x.Visible)
+            .Where(x => !onlyVisible || x.Visible)
             .Select(x => x.Name);
     }
 
