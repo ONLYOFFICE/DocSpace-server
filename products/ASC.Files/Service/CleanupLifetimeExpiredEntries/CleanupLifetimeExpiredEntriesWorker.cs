@@ -154,7 +154,7 @@ static file class Queries
                         TenantId = r.settings.TenantId,
                         RoomId = r.settings.RoomId,
                         UserId = r.room.CreateBy,
-                        Lifetime = RoomDataLifetime.Deserialize(r.settings.Lifetime)
+                        Lifetime = RoomDataLifetimeDto.Deserialize(r.settings.Lifetime)
                     }));
 
     public static readonly Func<FilesDbContext, int, int, DateTime, IAsyncEnumerable<int>>

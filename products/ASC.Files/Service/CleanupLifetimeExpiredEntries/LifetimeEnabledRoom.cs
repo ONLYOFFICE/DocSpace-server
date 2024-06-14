@@ -31,6 +31,6 @@ public class LifetimeEnabledRoom
     public int TenantId { get; init; }
     public int RoomId { get; init; }
     public Guid UserId { get; init; }
-    public RoomDataLifetime Lifetime { get; init; }
+    public RoomDataLifetimeDto Lifetime { get; init; }
     public List<int> ExipiredFiles { get; set; }
 }

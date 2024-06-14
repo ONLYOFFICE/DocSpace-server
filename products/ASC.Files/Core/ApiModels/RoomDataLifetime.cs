@@ -26,11 +26,11 @@
 
 using System.ComponentModel.DataAnnotations;
 
-namespace ASC.Files.Core.Core.VirtualRooms;
+namespace ASC.Files.Core.ApiModels;
 
 /// <summary>
 /// </summary>
-public class RoomDataLifetime
+public class RoomDataLifetimeDto
 {
     /// <summary>Specifies action</summary>
     /// <type>System.Boolean, System</type>
@@ -50,9 +50,9 @@ public class RoomDataLifetime
         return JsonSerializer.Serialize(this);
     }
 
-    public static RoomDataLifetime Deserialize(string json)
+    public static RoomDataLifetimeDto Deserialize(string json)
     {
-        return string.IsNullOrEmpty(json) ? null : JsonSerializer.Deserialize<RoomDataLifetime>(json);
+        return string.IsNullOrEmpty(json) ? null : JsonSerializer.Deserialize<RoomDataLifetimeDto>(json);
     }
 }
 

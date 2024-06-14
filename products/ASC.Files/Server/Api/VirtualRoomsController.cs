@@ -612,7 +612,7 @@ public abstract class VirtualRoomsController<T>(
     }
 
     [HttpPut("{id}/lifetime")]
-    public async Task<FolderDto<T>> UpdateLifetimeSettingsAsync(T id, ASC.Files.Core.Core.VirtualRooms.RoomDataLifetime inDto)
+    public async Task<FolderDto<T>> UpdateLifetimeSettingsAsync(T id, RoomDataLifetimeDto inDto)
     {
         var room = await _fileStorageService.SetRoomLifetimeSettingsAsync(id, inDto.Serialize());
 

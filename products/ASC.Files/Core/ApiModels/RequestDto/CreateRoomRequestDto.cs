@@ -74,5 +74,5 @@ public class CreateRoomRequestDto
 
     public bool Indexing { get; set; }
 
-    public RoomDataLifetime Lifetime { get; set; }
+    public RoomDataLifetimeDto Lifetime { get; set; }
 }
