@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Xml;
+
 namespace ASC.Migration.PersonalToDocspace.Creator;
 
 [Scope]
@@ -386,7 +388,7 @@ public class MigrationCreator
                 await ActionInvoker.TryAsync(async state =>
                 {
                     var f = (BackupFileInfo)state;
-                    using var fileStream = await storage.GetReadStreamAsync(f.Domain, f.Path);
+                    await using var fileStream = await storage.GetReadStreamAsync(f.Domain, f.Path);
                     await writer.WriteEntryAsync(file1.GetZipKey(), fileStream, () => Task.CompletedTask);
                 }, file, 5);
             }
@@ -399,11 +401,17 @@ public class MigrationCreator
                 .SelectMany(group => group.Select(file => (object)file.ToXElement()))
                 .ToArray());
 
-        using (var tmpFile = _tempStream.Create())
+        await using (var tmpFile = _tempStream.Create())
         {
-            restoreInfoXml.WriteTo(tmpFile);
+            await using (var xmlWriter = XmlWriter.Create(tmpFile))
+            {
+                restoreInfoXml.WriteTo(xmlWriter);
+            }
+            
+            tmpFile.Position = 0;
             await writer.WriteEntryAsync(KeyHelper.GetStorageRestoreInfoZipKey(), tmpFile, () => Task.CompletedTask);
         }
+        
         Console.WriteLine($"end backup storage");
     }
 
