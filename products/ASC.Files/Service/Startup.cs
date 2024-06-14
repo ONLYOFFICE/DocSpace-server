@@ -90,6 +90,9 @@ public class Startup : BaseWorkerStartup
 
             services.AddHostedService<DeleteExpiredService>();
             DIHelper.TryAdd<DeleteExpiredService>();
+
+            services.AddHostedService<CleanupLifetimeExpiredEntriesLauncher>();
+            DIHelper.TryAdd<CleanupLifetimeExpiredEntriesLauncher>();
         }
 
         DIHelper.TryAdd<AuthManager>();
