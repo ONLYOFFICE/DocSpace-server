@@ -604,17 +604,17 @@ public abstract class VirtualRoomsController<T>(
     }
 
     [HttpPut("{id}/settings")]
-    public async Task<FolderDto<T>> UpdateIndexingSettingsAsync(T id, SettingsRoomRequestDto inDto)
+    public async Task<FolderDto<T>> UpdateSettingsAsync(T id, SettingsRoomRequestDto inDto)
     {
-        var room = await _fileStorageService.SetRoomIndexingSettingsAsync(id, inDto.Indexing);
+        var room = await _fileStorageService.SetRoomSettingsAsync(id, inDto.Indexing);
 
         return await _folderDtoHelper.GetAsync(room);
     }
 
     [HttpPut("{id}/lifetime")]
-    public async Task<FolderDto<T>> UpdateLifetimeSettingsAsync(T id, SettingsRoomRequestDto inDto)
+    public async Task<FolderDto<T>> UpdateLifetimeSettingsAsync(T id, ASC.Files.Core.Core.VirtualRooms.RoomDataLifetime inDto)
     {
-        var room = await _fileStorageService.SetRoomLifetimeSettingsAsync(id, inDto.Lifetime);
+        var room = await _fileStorageService.SetRoomLifetimeSettingsAsync(id, inDto.Serialize());
 
         return await _folderDtoHelper.GetAsync(room);
     }
