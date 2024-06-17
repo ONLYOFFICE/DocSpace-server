@@ -30,7 +30,7 @@ namespace ASC.Files.AutoCleanUp;
 public class CleanupLifetimeExpiredEntriesLauncher(ILogger<CleanupLifetimeExpiredEntriesLauncher> logger, CleanupLifetimeExpiredEntriesWorker worker, IConfiguration configuration)
     : BackgroundService
 {
-    private readonly TimeSpan _period = TimeSpan.Parse(configuration.GetValue<string>("files:cleanupLifetimeExpiredEntries:period") ?? "0:1:0");
+    private readonly TimeSpan _period = TimeSpan.Parse(configuration.GetValue<string>("files:cleanupLifetimeExpiredEntries:period") ?? "0:5:0");
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
