@@ -69,8 +69,9 @@ public class ExportToCSV(
             using var textStream = new MemoryStream(Encoding.UTF8.GetBytes(resultData));
 
             file.Version++;
+            file.VersionGroup++;
             file.ContentLength = textStream.Length;
-
+            file.ModifiedOn = DateTime.UtcNow;
             await fileDao.SaveFileAsync(file, textStream, false);
             return file.Id;
         }
