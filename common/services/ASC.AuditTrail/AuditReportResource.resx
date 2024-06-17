@@ -810,4 +810,7 @@
   <data name="RoomGroupRemove" xml:space="preserve">
     <value>Deleted group: {0}</value>
   </data>
+  <data name="FileUploadedWithOverwriting" xml:space="preserve">
+    <value>File uploaded with overwriting: {0}</value>
+  </data>
 </root>

@@ -636,6 +636,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to File uploaded with overwriting: {0}.
+        /// </summary>
+        public static string FileUploadedWithOverwriting {
+            get {
+                return ResourceManager.GetString("FileUploadedWithOverwriting", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Folders [{0}]. Copied To Folder: {1}.
         /// </summary>
         public static string FolderCopied {

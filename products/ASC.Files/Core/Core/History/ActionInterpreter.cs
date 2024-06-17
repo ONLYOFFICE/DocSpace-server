@@ -37,7 +37,8 @@ public abstract class ActionInterpreter
         { MessageAction.FolderCopiedWithOverwriting, MessageAction.FolderCopied },
         { MessageAction.FolderMovedToTrash, MessageAction.FolderDeleted },
         { MessageAction.FileConverted, MessageAction.UserFileUpdated },
-        { MessageAction.FileRestoreVersion, MessageAction.UserFileUpdated }
+        { MessageAction.FileRestoreVersion, MessageAction.UserFileUpdated },
+        { MessageAction.FileUploadedWithOverwriting, MessageAction.UserFileUpdated }
     }.ToFrozenDictionary();
     
     public async ValueTask<HistoryEntry> InterpretAsync(DbAuditEvent @event, IServiceProvider serviceProvider)

@@ -146,6 +146,7 @@ public enum MessageAction
 
     FileUploaded = 5011,
     FileImported = 5012,
+    FileUploadedWithOverwriting = 5099, // last
 
     FileCopied = 5013,
     FileCopiedWithOverwriting = 5014,
@@ -227,7 +228,7 @@ public enum MessageAction
     RoomExternalLinkUpdated = 5089,
     RoomExternalLinkDeleted = 5090,
     RoomExternalLinkRevoked = 5097, 
-    RoomExternalLinkRenamed = 5098, // last
+    RoomExternalLinkRenamed = 5098,
     
     FileExternalLinkCreated = 5091,
     FileExternalLinkUpdated = 5092,

@@ -38,7 +38,8 @@ public class HistoryService(
 {
     public static HashSet<MessageAction> TrackedActions => [
         MessageAction.FileCreated, 
-        MessageAction.FileUploaded, 
+        MessageAction.FileUploaded,
+        MessageAction.FileUploadedWithOverwriting,
         MessageAction.UserFileUpdated, 
         MessageAction.FileRenamed, 
         MessageAction.FileMoved, 
