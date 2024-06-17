@@ -40,6 +40,7 @@ namespace ASC.Web.Api.Controllers;
 [WebhookDisable]
 public class AuthenticationController(
     UserManager userManager,
+    LdapUserManager ldapUserManager,
     TenantManager tenantManager,
     SecurityContext securityContext,
     TenantCookieSettingsHelper tenantCookieSettingsHelper,
@@ -460,12 +461,22 @@ public class AuthenticationController(
                         inDto.PasswordHash = passwordHasher.GetClientPassword(inDto.Password);
                     }
                 }
+                var ldapSettings = await settingsManager.LoadAsync<LdapSettings>();
 
-                user = await bruteForceLoginManager.AttemptAsync(inDto.UserName, inDto.RecaptchaType, inDto.RecaptchaResponse, async () => 
-                    await userManager.GetUsersByPasswordHashAsync(
-                    await tenantManager.GetCurrentTenantIdAsync(),
-                    inDto.UserName,
-                    inDto.PasswordHash));
+                user = await bruteForceLoginManager.AttemptAsync(inDto.UserName, inDto.RecaptchaType, inDto.RecaptchaResponse, async () =>
+                {
+                    if (ldapSettings.EnableLdapAuthentication && !string.IsNullOrEmpty(inDto.Password))
+                    {
+                        return await ldapUserManager.TryGetAndSyncLdapUserInfo(inDto.UserName, inDto.Password);
+                    }
+                    else
+                    {
+                        return await userManager.GetUsersByPasswordHashAsync(
+                         await tenantManager.GetCurrentTenantIdAsync(),
+                         inDto.UserName,
+                         inDto.PasswordHash);
+                    }
+                });
             }
             else
             {
