@@ -658,14 +658,9 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to h1. &lt;span style=&quot;color:#FF6F3D;&quot;&gt;5 tips&lt;/span&gt; for effective work on your docs
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 24px 40px 44px; text-align: center;&quot;&gt;&lt;span style=&quot;color: #FF6F3D;&quot;&gt;5 tips&lt;/span&gt; for effective work on your docs&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///
-        ///Hello, $UserName!
-        ///
-        ///We hope you enjoy using your ONLYOFFICE DocSpace. Here are some tips on how to make work on documents more effective.
-        ///
-        ///&lt;table cellspacing=&quot;0&quot; cellpadding=&quot;0&quot; style=&quot;border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;&quot;&gt;&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td style=&quot;di [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; li [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_enterprise_admin_user_docs_tips_v1 {
             get {
@@ -1029,14 +1024,9 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to h1. &lt;span style=&quot;color:#FF6F3D;&quot;&gt;5 tips&lt;/span&gt; for effective work on your docs
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 24px 40px 44px; text-align: center;&quot;&gt;&lt;span style=&quot;color: #FF6F3D;&quot;&gt;5 tips&lt;/span&gt; for effective work on your docs&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///
-        ///Hello, $UserName!
-        ///
-        ///We hope you enjoy using your ONLYOFFICE DocSpace. Here are some tips on how to make work on documents more effective.
-        ///
-        ///&lt;table cellspacing=&quot;0&quot; cellpadding=&quot;0&quot; style=&quot;border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;&quot;&gt;&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td style=&quot;di [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; li [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_opensource_admin_docs_tips_v1 {
             get {
@@ -1098,14 +1088,9 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to h1. &lt;span style=&quot;color:#FF6F3D;&quot;&gt;5 tips&lt;/span&gt; for effective work on your docs
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 24px 40px 44px; text-align: center;&quot;&gt;&lt;span style=&quot;color: #FF6F3D;&quot;&gt;5 tips&lt;/span&gt; for effective work on your docs&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///
-        ///Hello, $UserName!
-        ///
-        ///We hope you enjoy using your ONLYOFFICE DocSpace. Here are some tips on how to make work on documents more effective.
-        ///
-        ///&lt;table cellspacing=&quot;0&quot; cellpadding=&quot;0&quot; style=&quot;border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;&quot;&gt;&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td style=&quot;di [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; li [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_opensource_user_docs_tips_v1 {
             get {
@@ -1495,14 +1480,9 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to h1. &lt;span style=&quot;color:#FF6F3D;&quot;&gt;5 tips&lt;/span&gt; for effective work on your docs
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 24px 40px 44px; text-align: center;&quot;&gt;&lt;span style=&quot;color: #FF6F3D;&quot;&gt;5 tips&lt;/span&gt; for effective work on your docs&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///	
-        ///Hello, $UserName!
-        ///
-        ///We hope you enjoy using your ONLYOFFICE DocSpace. Here are some tips on how to make work on documents more effective.
-        ///
-        ///&lt;table cellspacing=&quot;0&quot; cellpadding=&quot;0&quot; style=&quot;border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;&quot;&gt;&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td style=&quot;d [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; li [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_saas_admin_user_docs_tips_v1 {
             get {
