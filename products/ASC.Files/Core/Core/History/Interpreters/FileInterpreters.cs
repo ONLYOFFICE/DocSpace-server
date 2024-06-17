@@ -94,3 +94,13 @@ public class FileCopiedInterpreter : ActionInterpreter
         return new ValueTask<HistoryData>(new EntryOperationData(int.Parse(splitTarget[0]), description[0], int.Parse(splitTarget[1]), description[2]));
     }
 }
+
+public class FileConvertedInterpreter : ActionInterpreter
+{
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
+    {
+        var additionalDescription = GetAdditionalDescription(description);
+
+        return new ValueTask<HistoryData>(new EntryData(int.Parse(target), description[0], additionalDescription.ParentId, additionalDescription.ParentTitle));
+    }
+}

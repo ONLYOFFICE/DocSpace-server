@@ -53,7 +53,7 @@ public class AuditInterpreter(IServiceProvider serviceProvider)
         { (int)MessageAction.FileCopied, _fileCopiedInterpreter },
         { (int)MessageAction.FileCopiedWithOverwriting, _fileCopiedInterpreter },
         { (int)MessageAction.FileDeleted, _fileDeletedInterpreter },
-        { (int)MessageAction.FileConverted, _fileUpdatedInterpreter },
+        { (int)MessageAction.FileConverted, new FileConvertedInterpreter() },
         { (int)MessageAction.FileRestoreVersion, _fileUpdatedInterpreter },
         { (int)MessageAction.FolderCreated, new FolderCreatedInterpreter() },
         { (int)MessageAction.FolderRenamed, new FolderRenamedInterpreter() },
