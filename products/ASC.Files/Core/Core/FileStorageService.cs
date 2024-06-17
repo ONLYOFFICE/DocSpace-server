@@ -480,8 +480,10 @@ public class FileStorageService //: IFileStorageService
         switch (folder.FolderType)
         {
             case FolderType.PublicRoom:
+                await SetExternalLinkAsync(folder, Guid.NewGuid(), FileShare.Read, FilesCommonResource.DefaultExternalLinkTitle, primary: true);
+                break;
             case FolderType.FillingFormsRoom:
-                await SetExternalLinkAsync(folder, Guid.NewGuid(), folder.FolderType == FolderType.FillingFormsRoom ? FileShare.FillForms : FileShare.Read, FilesCommonResource.DefaultExternalLinkTitle, primary: true);
+                await SetExternalLinkAsync(folder, Guid.NewGuid(), FileShare.FillForms, FilesCommonResource.FillOutExternalLinkTitle, primary: true);
                 break;
             case FolderType.FormRoom:
                 var task1 = InternalCreateFolderAsync(folder.Id, FilesUCResource.ReadyFormFolder, FolderType.ReadyFormFolder);

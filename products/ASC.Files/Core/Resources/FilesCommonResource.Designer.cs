@@ -952,6 +952,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Link to fill out.
+        /// </summary>
+        public static string FillOutExternalLinkTitle {
+            get {
+                return ResourceManager.GetString("FillOutExternalLinkTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Anonymous.
         /// </summary>
         public static string Guest {
