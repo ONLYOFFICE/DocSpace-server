@@ -26,7 +26,6 @@
 
 namespace ASC.Files.Core.Security;
 
-[Scope]
 public interface ISecurityDao<T>
 {
     Task SetShareAsync(FileShareRecord r);

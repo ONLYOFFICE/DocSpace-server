@@ -48,6 +48,8 @@ public static class FilesConvertsExtension
            new FilesConverts { Input = ".csv", Output = ".xltm" },
            new FilesConverts { Input = ".csv", Output = ".xltx" },
 
+           new FilesConverts { Input = ".djvu", Output = ".pdf" },
+
            new FilesConverts { Input = ".doc", Output = ".docx" },
            new FilesConverts { Input = ".doc", Output = ".docm" },
            new FilesConverts { Input = ".doc", Output = ".dotm" },
@@ -313,6 +315,8 @@ public static class FilesConvertsExtension
            new FilesConverts { Input = ".ots", Output = ".xltm" },
            new FilesConverts { Input = ".ots", Output = ".xltx" },
            new FilesConverts { Input = ".ots", Output = ".xlsx" },
+
+           new FilesConverts { Input = ".oform", Output = ".pdf" },
 
            new FilesConverts { Input = ".odt", Output = ".docx" },
            new FilesConverts { Input = ".odt", Output = ".pdf" },

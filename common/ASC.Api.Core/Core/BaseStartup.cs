@@ -24,12 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Common.Mapping;
 using ASC.Core.Notify.Socket;
+using ASC.MessagingSystem;
 
 using Flurl.Util;
 
 using IPNetwork = Microsoft.AspNetCore.HttpOverrides.IPNetwork;
-using SecurityContext = ASC.Core.SecurityContext;
 
 namespace ASC.Api.Core;
 
@@ -68,13 +69,7 @@ public abstract class BaseStartup
         services.AddMemoryCache();
 
         services.AddHttpClient();
-        services.AddHttpClient("customHttpClient", x => { }).ConfigurePrimaryHttpMessageHandler(() =>
-        {
-            return new HttpClientHandler
-            {
-                AllowAutoRedirect = false
-            };
-        });
+        services.AddHttpClient("customHttpClient", _ => { }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
 
         services.AddExceptionHandler<CustomExceptionHandler>();
         services.AddProblemDetails();
@@ -151,34 +146,29 @@ public abstract class BaseStartup
 
 
             options.GlobalLimiter = PartitionedRateLimiter.CreateChained(
-            PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
-            {
-                var userId = httpContext?.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value ??
-                             httpContext?.Connection.RemoteIpAddress.ToInvariantString();
-
-                var remoteIpAddress = httpContext?.Connection.RemoteIpAddress;
-
-                if (EnableNoLimiter(remoteIpAddress))
-                {
-                    return RateLimitPartition.GetNoLimiter("no_limiter");
-                }
-
-                userId ??= remoteIpAddress.ToInvariantString();
-
-                var permitLimit = 1500;
-
-                var partitionKey = $"sw_{userId}";
-
-                return RedisRateLimitPartition.GetSlidingWindowRateLimiter(partitionKey, _ => new RedisSlidingWindowRateLimiterOptions
-                {
-                    PermitLimit = permitLimit,
-                    Window = TimeSpan.FromMinutes(1),
-                    ConnectionMultiplexerFactory = () => connectionMultiplexer
-                });
-            }),
                 PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
                 {
-                    var userId = httpContext?.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value;
+                    var userId = httpContext?.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value ??
+                                 httpContext?.Connection.RemoteIpAddress.ToInvariantString();
+
+                    var remoteIpAddress = httpContext?.Connection.RemoteIpAddress;
+
+                    if (EnableNoLimiter(remoteIpAddress))
+                    {
+                        return RateLimitPartition.GetNoLimiter("no_limiter");
+                    }
+
+                    userId ??= remoteIpAddress.ToInvariantString();
+
+                    var permitLimit = 1500;
+
+                    var partitionKey = $"sw_{userId}";
+
+                    return RedisRateLimitPartition.GetSlidingWindowRateLimiter(partitionKey, _ => new RedisSlidingWindowRateLimiterOptions { PermitLimit = permitLimit, Window = TimeSpan.FromMinutes(1), ConnectionMultiplexerFactory = () => connectionMultiplexer });
+                }),
+                PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
+                {
+                    var userId = httpContext?.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value;
                     string partitionKey;
                     int permitLimit;
 
@@ -195,7 +185,6 @@ public abstract class BaseStartup
                     {
                         permitLimit = 50;
                         partitionKey = $"cr_read_{userId}";
-
                     }
                     else
                     {
@@ -203,52 +192,42 @@ public abstract class BaseStartup
                         partitionKey = $"cr_write_{userId}";
                     }
 
-                    return RedisRateLimitPartition.GetConcurrencyRateLimiter(partitionKey, _ => new RedisConcurrencyRateLimiterOptions
-                    {
-                        PermitLimit = permitLimit,
-                        QueueLimit = 0,
-                        ConnectionMultiplexerFactory = () => connectionMultiplexer
-                    });
+                    return RedisRateLimitPartition.GetConcurrencyRateLimiter(partitionKey, _ => new RedisConcurrencyRateLimiterOptions { PermitLimit = permitLimit, QueueLimit = 0, ConnectionMultiplexerFactory = () => connectionMultiplexer });
                 }),
                 PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
-                   {
-                       var userId = httpContext?.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value ??
-                                    httpContext?.Connection.RemoteIpAddress.ToInvariantString();
+                    {
+                        var userId = httpContext?.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value ??
+                                     httpContext?.Connection.RemoteIpAddress.ToInvariantString();
 
-                       var remoteIpAddress = httpContext?.Connection.RemoteIpAddress;
+                        var remoteIpAddress = httpContext?.Connection.RemoteIpAddress;
 
-                       if (EnableNoLimiter(remoteIpAddress))
-                       {
-                           return RateLimitPartition.GetNoLimiter("no_limiter");
-                       }
+                        if (EnableNoLimiter(remoteIpAddress))
+                        {
+                            return RateLimitPartition.GetNoLimiter("no_limiter");
+                        }
 
-                       userId ??= remoteIpAddress.ToInvariantString();
+                        userId ??= remoteIpAddress.ToInvariantString();
 
-                       var partitionKey = $"fw_post_put_{userId}";
-                       var permitLimit = 10000;
+                        var partitionKey = $"fw_post_put_{userId}";
+                        var permitLimit = 10000;
 
-                       if (!(String.Compare(httpContext?.Request.Method, "POST", StringComparison.OrdinalIgnoreCase) == 0 ||
-                             String.Compare(httpContext?.Request.Method, "PUT", StringComparison.OrdinalIgnoreCase) == 0))
-                       {
-                           return RateLimitPartition.GetNoLimiter("no_limiter");
-                       }
+                        if (!(String.Compare(httpContext?.Request.Method, "POST", StringComparison.OrdinalIgnoreCase) == 0 ||
+                              String.Compare(httpContext?.Request.Method, "PUT", StringComparison.OrdinalIgnoreCase) == 0))
+                        {
+                            return RateLimitPartition.GetNoLimiter("no_limiter");
+                        }
 
-                       return RedisRateLimitPartition.GetFixedWindowRateLimiter(partitionKey, _ => new RedisFixedWindowRateLimiterOptions
-                       {
-                           PermitLimit = permitLimit,
-                           Window = TimeSpan.FromDays(1),
-                           ConnectionMultiplexerFactory = () => connectionMultiplexer
-                       });
-                   }
-            ));
+                        return RedisRateLimitPartition.GetFixedWindowRateLimiter(partitionKey, _ => new RedisFixedWindowRateLimiterOptions { PermitLimit = permitLimit, Window = TimeSpan.FromDays(1), ConnectionMultiplexerFactory = () => connectionMultiplexer });
+                    }
+                ));
 
             options.AddPolicy(RateLimiterPolicy.SensitiveApi, httpContext =>
             {
-                var userId = httpContext?.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value ??
-                                    httpContext?.Connection.RemoteIpAddress.ToInvariantString();
+                var userId = httpContext?.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value ??
+                             httpContext?.Connection.RemoteIpAddress.ToInvariantString();
 
                 var permitLimit = 5;
-                var path = httpContext.Request.Path.ToString();
+                var path = httpContext?.Request.Path.ToString();
                 var partitionKey = $"{RateLimiterPolicy.SensitiveApi}_{userId}|{path}";
                 var remoteIpAddress = httpContext?.Connection.RemoteIpAddress;
 
@@ -257,12 +236,7 @@ public abstract class BaseStartup
                     return RateLimitPartition.GetNoLimiter("no_limiter");
                 }
 
-                return RedisRateLimitPartition.GetSlidingWindowRateLimiter(partitionKey, _ => new RedisSlidingWindowRateLimiterOptions
-                {
-                    PermitLimit = permitLimit,
-                    Window = TimeSpan.FromMinutes(15),
-                    ConnectionMultiplexerFactory = () => connectionMultiplexer
-                });
+                return RedisRateLimitPartition.GetSlidingWindowRateLimiter(partitionKey, _ => new RedisSlidingWindowRateLimiterOptions { PermitLimit = permitLimit, Window = TimeSpan.FromMinutes(15), ConnectionMultiplexerFactory = () => connectionMultiplexer });
             });
 
             options.AddPolicy(RateLimiterPolicy.EmailInvitationApi, httpContext =>
@@ -313,12 +287,7 @@ public abstract class BaseStartup
 
                 var partitionKey = $"{RateLimiterPolicy.EmailInvitationApi}_{tenant.Id}";
 
-                RedisFixedWindowRateLimiterOptions optionFactory(string key) => new RedisFixedWindowRateLimiterOptions
-                {
-                    PermitLimit = invitationLimitPerDay,
-                    Window = TimeSpan.FromDays(1),
-                    ConnectionMultiplexerFactory = () => connectionMultiplexer
-                };
+                RedisFixedWindowRateLimiterOptions optionFactory(string key) => new RedisFixedWindowRateLimiterOptions { PermitLimit = invitationLimitPerDay, Window = TimeSpan.FromDays(1), ConnectionMultiplexerFactory = () => connectionMultiplexer };
 
                 RateLimiter limitterFactory(string key) => new LooppedRedisFixedWindowRateLimiter<string>(key, optionFactory(key), invitationsCount);
 
@@ -328,22 +297,23 @@ public abstract class BaseStartup
             options.OnRejected = (context, ct) => RateLimitMetadata.OnRejected(context.HttpContext, context.Lease, ct);
         });
 
+        services.AddSingleton<MessageSettings>();//warmup
         services.AddSingleton<EFLoggerFactory>();
 
         services.AddBaseDbContextPool<AccountLinkContext>()
-                .AddBaseDbContextPool<CoreDbContext>()
-                .AddBaseDbContextPool<TenantDbContext>()
-                .AddBaseDbContextPool<UserDbContext>()
-                .AddBaseDbContextPool<TelegramDbContext>()
-                .AddBaseDbContextPool<FirebaseDbContext>()
-                .AddBaseDbContextPool<CustomDbContext>()
-                .AddBaseDbContextPool<UrlShortenerDbContext>()
-                .AddBaseDbContextPool<WebstudioDbContext>()
-                .AddBaseDbContextPool<InstanceRegistrationContext>()
-                .AddBaseDbContextPool<IntegrationEventLogContext>()
-                .AddBaseDbContextPool<FeedDbContext>()
-                .AddBaseDbContextPool<MessagesContext>()
-                .AddBaseDbContextPool<WebhooksDbContext>();
+            .AddBaseDbContextPool<CoreDbContext>()
+            .AddBaseDbContextPool<TenantDbContext>()
+            .AddBaseDbContextPool<UserDbContext>()
+            .AddBaseDbContextPool<TelegramDbContext>()
+            .AddBaseDbContextPool<FirebaseDbContext>()
+            .AddBaseDbContextPool<CustomDbContext>()
+            .AddBaseDbContextPool<UrlShortenerDbContext>()
+            .AddBaseDbContextPool<WebstudioDbContext>()
+            .AddBaseDbContextPool<InstanceRegistrationContext>()
+            .AddBaseDbContextPool<IntegrationEventLogContext>()
+            .AddBaseDbContextPool<FeedDbContext>()
+            .AddBaseDbContextPool<MessagesContext>()
+            .AddBaseDbContextPool<WebhooksDbContext>();
 
         if (AddAndUseSession)
         {
@@ -353,57 +323,45 @@ public abstract class BaseStartup
         DIHelper.Configure(services);
 
         Action<JsonOptions> jsonOptions = options =>
-            {
-                options.JsonSerializerOptions.WriteIndented = false;
-                options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-            };
+        {
+            options.JsonSerializerOptions.WriteIndented = false;
+            options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+        };
 
         services.AddControllers().AddJsonOptions(jsonOptions);
 
         services.AddSingleton(jsonOptions);
-
-        DIHelper.AddControllers();
-        DIHelper.TryAdd<CultureMiddleware>();
-        DIHelper.TryAdd<LoggerMiddleware>();
-        DIHelper.TryAdd<IpSecurityFilter>();
-        DIHelper.TryAdd<PaymentFilter>();
-        DIHelper.TryAdd<ProductSecurityFilter>();
-        DIHelper.TryAdd<TenantStatusFilter>();
-        DIHelper.TryAdd<ConfirmAuthHandler>();
-        DIHelper.TryAdd<BasicAuthHandler>();
-        DIHelper.TryAdd<CookieAuthHandler>();
-        DIHelper.TryAdd<WebhooksGlobalFilterAttribute>();
-
+        
+        DIHelper.Scan();
+        
         if (!string.IsNullOrEmpty(_corsOrigin))
         {
             services.AddCors(options =>
             {
                 options.AddPolicy(name: CustomCorsPolicyName,
-                                  policy =>
-                                  {
-                                      policy.WithOrigins(_corsOrigin)
-                                      .SetIsOriginAllowedToAllowWildcardSubdomains()
-                                      .AllowAnyHeader()
-                                            .AllowAnyMethod();
+                    policy =>
+                    {
+                        policy.WithOrigins(_corsOrigin)
+                            .SetIsOriginAllowedToAllowWildcardSubdomains()
+                            .AllowAnyHeader()
+                            .AllowAnyMethod();
 
-                                      if (_corsOrigin != "*")
-                                      {
-                                          policy.AllowCredentials();
-                                      }
-                                  });
+                        if (_corsOrigin != "*")
+                        {
+                            policy.AllowCredentials();
+                        }
+                    });
             });
         }
 
 
         services.AddDistributedCache(connectionMultiplexer)
-                .AddEventBus(_configuration)
-                .AddDistributedTaskQueue()
-                .AddCacheNotify(_configuration)
-                .AddDistributedLock(_configuration);
+            .AddEventBus(_configuration)
+            .AddDistributedTaskQueue()
+            .AddCacheNotify(_configuration)
+            .AddDistributedLock(_configuration);
 
         services.RegisterFeature();
-
-        DIHelper.TryAdd(typeof(IWebhookPublisher), typeof(WebhookPublisher));
 
         services.AddOptions();
 
@@ -419,7 +377,6 @@ public abstract class BaseStartup
             config.Filters.Add(new TypeFilterAttribute(typeof(IpSecurityFilter)));
             config.Filters.Add(new TypeFilterAttribute(typeof(ProductSecurityFilter)));
             config.Filters.Add(new CustomResponseFilterAttribute());
-            //config.Filters.Add<CustomExceptionFilterAttribute>();
             config.Filters.Add(new TypeFilterAttribute(typeof(WebhooksGlobalFilterAttribute)));
         });
 
@@ -429,45 +386,47 @@ public abstract class BaseStartup
             services.AddOpenApi();
         }
 
-        services.AddAuthentication(options =>
-        {
-            options.DefaultScheme = MultiAuthSchemes;
-            options.DefaultChallengeScheme = MultiAuthSchemes;
-        }).AddScheme<AuthenticationSchemeOptions, CookieAuthHandler>(CookieAuthenticationDefaults.AuthenticationScheme, _ => { })
-          .AddScheme<AuthenticationSchemeOptions, BasicAuthHandler>(BasicAuthScheme, _ => { })
-          .AddScheme<AuthenticationSchemeOptions, ConfirmAuthHandler>("confirm", _ => { })
-          .AddJwtBearer("Bearer", options =>
+        services.AddScoped<CookieAuthHandler>();
+        services.AddScoped<BasicAuthHandler>();
+        services.AddScoped<ConfirmAuthHandler>();
+        services
+            .AddAuthentication(options =>
+            {
+                options.DefaultScheme = MultiAuthSchemes;
+                options.DefaultChallengeScheme = MultiAuthSchemes;
+            })
+            .AddScheme<AuthenticationSchemeOptions, CookieAuthHandler>(CookieAuthenticationDefaults.AuthenticationScheme, _ => { })
+            .AddScheme<AuthenticationSchemeOptions, BasicAuthHandler>(BasicAuthScheme, _ => { })
+            .AddScheme<AuthenticationSchemeOptions, ConfirmAuthHandler>("confirm", _ => { })
+            .AddJwtBearer("Bearer", options =>
             {
                 options.Authority = _configuration["core:oidc:authority"];
                 options.IncludeErrorDetails = true;
 
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateAudience = false
-                };
+                options.TokenValidationParameters = new TokenValidationParameters { ValidateAudience = false };
 
-                options.Events = new JwtBearerEvents
-                {
-                    OnTokenValidated = async ctx =>
-                    {
-                        using var scope = ctx.HttpContext.RequestServices.CreateScope();
+              options.Events = new JwtBearerEvents
+              {
+                  OnTokenValidated = async ctx =>
+                  {
+                      using var scope = ctx.HttpContext.RequestServices.CreateScope();
 
-                        var securityContext = scope.ServiceProvider.GetService<SecurityContext>();
+                      var securityContext = scope.ServiceProvider.GetService<ASC.Core.SecurityContext>();
 
-                        var claimUserId = ctx.Principal.FindFirstValue("userId");
+                      var claimUserId = ctx.Principal.FindFirstValue("userId");
 
-                        if (string.IsNullOrEmpty(claimUserId))
-                        {
-                            throw new Exception("Claim 'UserId' is not present in claim list");
-                        }
+                      if (string.IsNullOrEmpty(claimUserId))
+                      {
+                          throw new Exception("Claim 'UserId' is not present in claim list");
+                      }
 
-                        var userId = new Guid(claimUserId);
+                      var userId = new Guid(claimUserId);
 
-                        await securityContext.AuthenticateMeWithoutCookieAsync(userId, ctx.Principal.Claims.ToList());
-                    }
-                };
+                      await securityContext.AuthenticateMeWithoutCookieAsync(userId, ctx.Principal.Claims.ToList());
+                  }
+              };
             })
-          .AddPolicyScheme(MultiAuthSchemes, JwtBearerDefaults.AuthenticationScheme, options =>
+            .AddPolicyScheme(MultiAuthSchemes, JwtBearerDefaults.AuthenticationScheme, options =>
             {
                 options.ForwardDefaultSelector = context =>
                 {
@@ -510,19 +469,22 @@ public abstract class BaseStartup
         services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Writer);
         services.AddHostedService<NotifySenderService>();
-        
+
         services.AddSingleton(Channel.CreateUnbounded<SocketData>());
         services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Writer);
         services.AddHostedService<SocketService>();
-        DIHelper.TryAdd<SocketService>();
-
-
-        if (!_hostEnvironment.IsDevelopment())
+        services.Configure<DistributedTaskQueueFactoryOptions>(UserPhotoManager.CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME, options =>
         {
-            services.AddStartupTask<WarmupServicesStartupTask>()
-                    .TryAddSingleton(services);
-        }
+            options.MaxThreadsCount = 2;
+        });
+
+        services
+            .AddStartupTask<WarmupServicesStartupTask>()
+            .AddStartupTask<WarmupProtobufStartupTask>()
+            .AddStartupTask<WarmupBaseDbContextStartupTask>()
+            .AddStartupTask<WarmupMappingStartupTask>()
+            .TryAddSingleton(services);
     }
 
     public static IEnumerable<Assembly> GetAutoMapperProfileAssemblies()
@@ -574,21 +536,11 @@ public abstract class BaseStartup
         {
             endpoints.MapCustomAsync(WebhooksEnabled, app.ApplicationServices).Wait();
 
-            endpoints.MapHealthChecks("/health", new HealthCheckOptions
-            {
-                Predicate = _ => true,
-                ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
-            }).ShortCircuit();
+            endpoints.MapHealthChecks("/health", new HealthCheckOptions { Predicate = _ => true, ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse }).ShortCircuit();
 
-            endpoints.MapHealthChecks("/ready", new HealthCheckOptions
-            {
-                Predicate = r => r.Name.Contains("services")
-            });
+            endpoints.MapHealthChecks("/ready", new HealthCheckOptions { Predicate = r => r.Name.Contains("services") });
 
-            endpoints.MapHealthChecks("/liveness", new HealthCheckOptions
-            {
-                Predicate = r => r.Name.Contains("self")
-            });
+            endpoints.MapHealthChecks("/liveness", new HealthCheckOptions { Predicate = r => r.Name.Contains("self") });
         });
 
         app.Map("/switch", appBuilder =>
@@ -599,8 +551,6 @@ public abstract class BaseStartup
                 await context.Response.WriteAsync($"{Environment.MachineName} running {CustomHealthCheck.Running}");
             });
         });
-
-
     }
 
     public void ConfigureContainer(ContainerBuilder builder)
@@ -608,4 +558,3 @@ public abstract class BaseStartup
         builder.Register(_configuration);
     }
 }
-

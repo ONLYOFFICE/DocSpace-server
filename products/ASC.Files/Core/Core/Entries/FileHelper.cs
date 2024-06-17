@@ -38,7 +38,7 @@ public class FileHelper(FileTrackerHelper fileTracker, FilesLinkUtility filesLin
 
     internal async Task<FileStatus> GetFileStatus<T>(File<T> file, FileStatus currentStatus)
     {
-        if (fileTracker.IsEditing(file.Id))
+        if (await fileTracker.IsEditingAsync(file.Id))
         {
             currentStatus |= FileStatus.IsEditing;
         }

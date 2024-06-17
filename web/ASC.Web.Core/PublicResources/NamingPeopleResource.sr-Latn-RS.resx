@@ -184,13 +184,13 @@
     <value>Pozicija</value>
   </data>
   <data name="EducationAddUsers" xml:space="preserve">
-    <value>Dodaj učitelje/Studente</value>
+    <value>Dodaj učitelje/studente</value>
   </data>
   <data name="EducationGroup" xml:space="preserve">
     <value>Grupa</value>
   </data>
   <data name="EducationGroupHead" xml:space="preserve">
-    <value>Lider Grupe</value>
+    <value>Lider grupe</value>
   </data>
   <data name="EducationGroups" xml:space="preserve">
     <value>Grupe</value>
@@ -205,7 +205,7 @@
     <value>Datum registracije</value>
   </data>
   <data name="EducationSchemaName" xml:space="preserve">
-    <value>Obrazovna Institucija</value>
+    <value>Obrazovna institucija</value>
   </data>
   <data name="EducationUser" xml:space="preserve">
     <value>Učitelj/Student</value>

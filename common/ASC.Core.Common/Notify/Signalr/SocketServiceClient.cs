@@ -123,6 +123,7 @@ public class SocketService(
                 {        
                     try
                     {
+
                         var httpClient = clientFactory.CreateClient();
                         await httpClient.SendAsync(socketData.RequestMessage, HttpCompletionOption.ResponseHeadersRead, stoppingToken);
                     }

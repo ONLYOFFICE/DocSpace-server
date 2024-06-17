@@ -73,16 +73,16 @@ public class WebPluginCache
         return _cache.Get<List<WebPlugin>>(key);
     }
 
-    public void Insert(string key, object value)
+    public async Task InsertAsync(string key, object value)
     {
-        _notify.Publish(new WebPluginCacheItem { Key = key }, CacheNotifyAction.Remove);
+        await _notify.PublishAsync(new WebPluginCacheItem { Key = key }, CacheNotifyAction.Remove);
 
         _cache.Insert(key, value, _cacheExpiration);
     }
 
-    public void Remove(string key)
+    public async Task RemoveAsync(string key)
     {
-        _notify.Publish(new WebPluginCacheItem { Key = key }, CacheNotifyAction.Remove);
+        await _notify.PublishAsync(new WebPluginCacheItem { Key = key }, CacheNotifyAction.Remove);
 
         _cache.Remove(key);
     }
@@ -314,7 +314,7 @@ public class WebPluginManager(
                 if (enabledPlugins.TryGetValue(webPlugin.Name, out var webPluginState))
                 {
                     webPlugin.Enabled = webPluginState.Enabled;
-                    webPlugin.Settings = string.IsNullOrEmpty(webPluginState.Settings) ? null : instanceCrypto.Decrypt(webPluginState.Settings);
+                    webPlugin.Settings = string.IsNullOrEmpty(webPluginState.Settings) ? null : await instanceCrypto.DecryptAsync(webPluginState.Settings);
                 }
             }
         }
@@ -332,7 +332,7 @@ public class WebPluginManager(
         {
             webPlugins = await GetWebPluginsFromStorageAsync(tenantId);
 
-            webPluginCache.Insert(key, webPlugins);
+            await webPluginCache.InsertAsync(key, webPlugins);
         }
 
         return webPlugins;
@@ -404,7 +404,7 @@ public class WebPluginManager(
 
         var enabledPlugins = webPluginSettings?.EnabledPlugins ?? new Dictionary<string, WebPluginState>();
 
-        var encryptedSettings = string.IsNullOrEmpty(settings) ? null : instanceCrypto.Encrypt(settings);
+        var encryptedSettings = string.IsNullOrEmpty(settings) ? null : await instanceCrypto.EncryptAsync(settings);
 
         if (enabled || encryptedSettings != null)
         {
@@ -428,7 +428,7 @@ public class WebPluginManager(
 
         var key = GetCacheKey(webPlugin.System ? Tenant.DefaultTenant : tenantId);
 
-        webPluginCache.Remove(key);
+        await webPluginCache.RemoveAsync(key);
 
         return webPlugin;
     }

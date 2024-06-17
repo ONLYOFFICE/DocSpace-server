@@ -34,6 +34,7 @@ namespace ASC.People.Api;
 [DefaultRoute]
 [ApiController]
 public class GroupController(
+    GroupSummaryDtoHelper groupSummaryDtoHelper,
     UserManager userManager,
     ApiContext apiContext,
     GroupFullDtoHelper groupFullDtoHelper,
@@ -120,8 +121,15 @@ public class GroupController(
     public async Task<IEnumerable<GroupSummaryDto>> GetByUserIdAsync(Guid userid)
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_ReadGroups);
+        var groups = await userManager.GetUserGroupsAsync(userid);
+        List<GroupSummaryDto> result = new(groups.Count);
         
-        return (await userManager.GetUserGroupsAsync(userid)).Select(x => new GroupSummaryDto(x, userManager));
+        foreach (var g in groups)
+        {
+            result.Add(await groupSummaryDtoHelper.GetAsync(g));
+        }
+
+        return result;
     }
 
     /// <summary>

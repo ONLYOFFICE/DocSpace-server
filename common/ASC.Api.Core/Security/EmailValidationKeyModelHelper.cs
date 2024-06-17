@@ -109,7 +109,7 @@ public class EmailValidationKeyModelHelper(IHttpContextAccessor httpContextAcces
                 break;
             case ConfirmType.PasswordChange:
                 var userInfo = await userManager.GetUserByEmailAsync(email);
-                if(Equals(userInfo, Constants.LostUser) || userInfo.Id != uiD)
+                if(Equals(userInfo, Constants.LostUser) || userInfo.Id != uiD || userInfo.Status == EmployeeStatus.Terminated)
                 {
                     checkKeyResult = ValidationResult.Invalid;
                     break;

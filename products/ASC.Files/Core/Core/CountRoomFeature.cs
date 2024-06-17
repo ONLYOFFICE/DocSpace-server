@@ -28,8 +28,11 @@ using ASC.Core.Billing;
 
 namespace ASC.Files.Core.Core;
 
-public class CountRoomChecker(ITenantQuotaFeatureStat<CountRoomFeature, int> tenantQuotaFeatureStatistic,
-        TenantManager tenantManager, ITariffService tariffService)
+[Scope]
+public class CountRoomChecker(
+    ITenantQuotaFeatureStat<CountRoomFeature, int> tenantQuotaFeatureStatistic, 
+    TenantManager tenantManager, 
+    ITariffService tariffService)
     : TenantQuotaFeatureCheckerCount<CountRoomFeature>(tenantQuotaFeatureStatistic, tenantManager)
 {
     public override string GetExceptionMessage(long count)
@@ -47,6 +50,7 @@ public class CountRoomChecker(ITenantQuotaFeatureStat<CountRoomFeature, int> ten
     }
 }
 
+[Scope]
 public class CountRoomCheckerStatistic(IServiceProvider serviceProvider) : ITenantQuotaFeatureStat<CountRoomFeature, int>
 {
     public async Task<int> GetValueAsync()
@@ -70,15 +74,8 @@ public static class QuotaFeatureRegister
 {
     public static void RegisterQuotaFeature(this IServiceCollection services)
     {
-        services.AddScoped<UsersInRoomChecker>();
-
         services.AddScoped<ITenantQuotaFeatureStat<UsersInRoomFeature, int>, UsersInRoomStatistic>();
-        services.AddScoped<UsersInRoomStatistic>();
-
         services.AddScoped<ITenantQuotaFeatureChecker, CountRoomChecker>();
-        services.AddScoped<CountRoomChecker>();
-
         services.AddScoped<ITenantQuotaFeatureStat<CountRoomFeature, int>, CountRoomCheckerStatistic>();
-        services.AddScoped<CountRoomCheckerStatistic>();
     }
 }

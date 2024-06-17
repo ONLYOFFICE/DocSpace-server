@@ -26,7 +26,6 @@
 
 namespace ASC.Files.Core;
 
-[Scope(typeof(ProviderAccountDao), Additional = typeof(ProviderAccountDaoExtension))]
 public interface IProviderDao
 {
     Task<IProviderInfo> GetProviderInfoAsync(int linkId);

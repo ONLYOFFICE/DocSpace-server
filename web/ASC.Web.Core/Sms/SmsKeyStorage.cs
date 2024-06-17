@@ -37,9 +37,9 @@ public class SmsKeyStorageCache
         _keyCacheNotify.Subscribe(r => cache.Remove(r.Key), CacheNotifyAction.Remove);
     }
 
-    public void RemoveFromCache(string cacheKey)
+    public async Task RemoveFromCacheAsync(string cacheKey)
     {
-        _keyCacheNotify.Publish(new SmsKeyCacheKey { Key = cacheKey }, CacheNotifyAction.Remove);
+        await _keyCacheNotify.PublishAsync(new SmsKeyCacheKey { Key = cacheKey }, CacheNotifyAction.Remove);
     }
 }
 
@@ -96,14 +96,12 @@ public class SmsKeyStorage
             await _semaphore.WaitAsync();
             var cacheKey = await BuildCacheKeyAsync(phone);
             var phoneKeys = _keyCache.Get<Dictionary<string, DateTime>>(cacheKey) ?? new Dictionary<string, DateTime>();
-            string key;
             if (phoneKeys.Count > _attemptCount)
             {
-                key = null;
-                return (false, key);
+                return (false, null);
             }
 
-            key = RandomNumberGenerator.GetInt32((int)Math.Pow(10, _keyLength - 1), (int)Math.Pow(10, _keyLength)).ToString(CultureInfo.InvariantCulture);
+            var key = RandomNumberGenerator.GetInt32((int)Math.Pow(10, _keyLength - 1), (int)Math.Pow(10, _keyLength)).ToString(CultureInfo.InvariantCulture);
             phoneKeys[key] = DateTime.UtcNow;
 
             _keyCache.Insert(cacheKey, phoneKeys, DateTime.UtcNow.Add(StoreInterval));
@@ -162,13 +160,12 @@ public class SmsKeyStorage
                 return Result.Timeout;
             }
 
-            if (!phoneKeys.ContainsKey(key))
+            if (!phoneKeys.TryGetValue(key, out var createDate))
             {
                 return Result.Invalide;
             }
 
-            var createDate = phoneKeys[key];
-            _smsKeyStorageCache.RemoveFromCache(cacheKey);
+            await _smsKeyStorageCache.RemoveFromCacheAsync(cacheKey);
             if (createDate.Add(StoreInterval) < DateTime.UtcNow)
             {
                 return Result.Timeout;

@@ -26,7 +26,6 @@
 
 namespace ASC.Core;
 
-[Scope(typeof(CachedTenantService))]
 public interface ITenantService
 {
     Task<byte[]> GetTenantSettingsAsync(int tenant, string key);
@@ -45,7 +44,6 @@ public interface ITenantService
     Task RemoveTenantAsync(int id, bool auto = false);
     Task SetTenantSettingsAsync(int tenant, string key, byte[] data);
     Task PermanentlyRemoveTenantAsync(int id);
-    void SetTenantSettings(int tenant, string key, byte[] data);
     Task ValidateDomainAsync(string domain);
     void ValidateTenantName(string name);
 }

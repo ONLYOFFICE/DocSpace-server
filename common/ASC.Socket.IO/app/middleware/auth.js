@@ -111,8 +111,14 @@ module.exports = (socket, next) => {
           session.linkId = linkId;
         }
         
-        session.save();
-        next();
+        session.save(function (err){
+          if(err) {
+            logger.error(err);
+            next(err);
+          }else{
+            next();
+          }
+        });
       })
       .catch((err) => {
         logger.error("Error of getting account info", err);

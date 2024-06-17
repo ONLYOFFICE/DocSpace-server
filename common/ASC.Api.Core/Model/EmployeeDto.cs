@@ -113,7 +113,7 @@ public class EmployeeDtoHelper(
     protected async Task<EmployeeDto> InitAsync(EmployeeDto result, UserInfo userInfo)
     {
         result.Id = userInfo.Id;
-        result.DisplayName = displayUserSettingsHelper.GetFullUserName(userInfo);
+        result.DisplayName = displayUserSettingsHelper.GetFullUserName(userInfo, false);
         result.HasAvatar = await _userPhotoManager.UserHasAvatar(userInfo.Id);
 
         if (!string.IsNullOrEmpty(userInfo.Title))

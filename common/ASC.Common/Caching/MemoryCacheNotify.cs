@@ -30,15 +30,7 @@ namespace ASC.Common.Caching;
 public class MemoryCacheNotify<T> : ICacheNotify<T> where T : new()
 {
     private readonly ConcurrentDictionary<string, List<Action<T>>> _actions = new();
-
-    public void Publish(T obj, CacheNotifyAction notifyAction)
-    {
-        if (_actions.TryGetValue(GetKey(notifyAction), out var onchange) && onchange != null)
-        {
-            Parallel.ForEach(onchange, a => a(obj));
-        }
-    }
-
+    
     public Task PublishAsync(T obj, CacheNotifyAction action)
     {
         if (_actions.TryGetValue(GetKey(action), out var onchange) && onchange != null)

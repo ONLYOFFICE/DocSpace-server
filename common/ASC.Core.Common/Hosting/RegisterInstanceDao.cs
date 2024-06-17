@@ -26,7 +26,6 @@
 
 namespace ASC.Core.Common.Hosting;
 
-[Scope]
 public class RegisterInstanceDao<T>(
     ILogger<RegisterInstanceDao<T>> logger,
     IDbContextFactory<InstanceRegistrationContext> dbContextFactory) : IRegisterInstanceDao<T> where T : IHostedService

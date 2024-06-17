@@ -31,7 +31,7 @@ namespace ASC.Web.Api.Controllers;
 ///</summary>
 ///<name>thirdparty</name>
 ///<visible>false</visible>
-[Scope(Additional = typeof(BaseLoginProviderExtension))]
+[Scope]
 [DefaultRoute]
 [ApiController]
 public class ThirdPartyController(OAuth20TokenHelper oAuth20TokenHelper) : ControllerBase

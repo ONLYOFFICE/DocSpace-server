@@ -104,6 +104,7 @@ public class TariffServiceStorage
     }
 }
 
+[Scope(typeof(ITariffService))]
 public class TariffService(
     IQuotaService quotaService,
     ITenantService tenantService,
@@ -151,7 +152,7 @@ public class TariffService(
             {
                 try
                 {
-                    var currentPayments = billingClient.GetCurrentPayments(await coreSettings.GetKeyAsync(tenantId), refresh);
+                    var currentPayments = await billingClient.GetCurrentPaymentsAsync(await coreSettings.GetKeyAsync(tenantId), refresh);
                     if (currentPayments.Length == 0)
                     {
                         throw new BillingNotFoundException("Empty PaymentLast");
@@ -205,7 +206,7 @@ public class TariffService(
                         tariff = asynctariff;
                     }
 
-                    UpdateCache(tariff.Id);
+                    await UpdateCacheAsync(tariff.Id);
                 }
                 catch (Exception error)
                 {
@@ -241,7 +242,7 @@ public class TariffService(
                         tariff = asynctariff;
                     }
 
-                    UpdateCache(tariff.Id);
+                    await UpdateCacheAsync(tariff.Id);
                 }
             }
             else if (tenantExtraConfig.Enterprise && tariff.Id == 0 && tariff.LicenseDate == DateTime.MaxValue)
@@ -264,7 +265,7 @@ public class TariffService(
                 };
 
                 await SetTariffAsync(Tenant.DefaultTenant, tariff, [quota]);
-                UpdateCache(tariff.Id);
+                await UpdateCacheAsync(tariff.Id);
             }
         }
         else
@@ -274,9 +275,9 @@ public class TariffService(
 
         return tariff;
 
-        void UpdateCache(int tariffId)
+        async Task UpdateCacheAsync(int tariffId)
         {
-            notify.Publish(new TariffCacheItem { TenantId = tenantId, TariffId = tariffId }, CacheNotifyAction.Insert);
+            await notify.PublishAsync(new TariffCacheItem { TenantId = tenantId, TariffId = tariffId }, CacheNotifyAction.Insert);
         }
     }
 
@@ -333,14 +334,14 @@ public class TariffService(
 
         try
         {
-            var changed = billingClient.ChangePayment(await coreSettings.GetKeyAsync(tenantId), productIds.ToArray(), quantity.Values.ToArray());
+            var changed = await billingClient.ChangePaymentAsync(await coreSettings.GetKeyAsync(tenantId), productIds.ToArray(), quantity.Values.ToArray());
 
             if (!changed)
             {
                 return false;
             }
 
-            ClearCache(tenantId);
+            await ClearCacheAsync(tenantId);
         }
         catch (Exception error)
         {
@@ -396,9 +397,9 @@ public class TariffService(
     }
 
 
-    private void ClearCache(int tenantId)
+    private async Task ClearCacheAsync(int tenantId)
     {
-        notify.Publish(new TariffCacheItem { TenantId = tenantId, TariffId = -1 }, CacheNotifyAction.Remove);
+        await notify.PublishAsync(new TariffCacheItem { TenantId = tenantId, TariffId = -1 }, CacheNotifyAction.Remove);
     }
 
     public async Task<IEnumerable<PaymentInfo>> GetPaymentsAsync(int tenantId)
@@ -413,7 +414,7 @@ public class TariffService(
                 try
                 {
                     var quotas = await quotaService.GetTenantQuotasAsync();
-                    foreach (var pi in billingClient.GetPayments(await coreSettings.GetKeyAsync(tenantId)))
+                    foreach (var pi in await billingClient.GetPaymentsAsync(await coreSettings.GetKeyAsync(tenantId)))
                     {
                         var quota = quotas.SingleOrDefault(q => q.ProductId == pi.ProductRef.ToString());
                         if (quota != null)
@@ -485,7 +486,7 @@ public class TariffService(
                 try
                 {
                     url =
-                        billingClient.GetPaymentUrl(
+                        await billingClient.GetPaymentUrlAsync(
                             "__Tenant__",
                             productIds.ToArray(),
                             affiliateId,
@@ -523,7 +524,7 @@ public class TariffService(
         return result;
     }
 
-    public IDictionary<string, Dictionary<string, decimal>> GetProductPriceInfo(string partnerId = "", params string[] productIds)
+    public async Task<IDictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync(string partnerId, params string[] productIds)
     {
         ArgumentNullException.ThrowIfNull(productIds);
 
@@ -539,7 +540,7 @@ public class TariffService(
                 var result = cache.Get<IDictionary<string, Dictionary<string, decimal>>>(key);
                 if (result == null)
                 {
-                    result = billingClient.GetProductPriceInfo(partnerId, productIds);
+                    result = await billingClient.GetProductPriceInfoAsync(partnerId, productIds);
                     cache.Insert(key, result, DateTime.Now.AddHours(1));
                 }
 
@@ -562,7 +563,7 @@ public class TariffService(
         {
             try
             {
-                url = billingClient.GetAccountLink(await coreSettings.GetKeyAsync(tenant), backUrl);
+                url = await billingClient.GetAccountLinkAsync(await coreSettings.GetKeyAsync(tenant), backUrl);
                 cache.Insert(key, url, DateTime.UtcNow.Add(TimeSpan.FromMinutes(10)));
             }
             catch (Exception error)
@@ -578,7 +579,7 @@ public class TariffService(
     {
         await using var coreDbContext = await coreDbContextManager.CreateDbContextAsync();
 
-        var r = await Queries.TariffAsync(coreDbContext, tenant, id);
+        var r = await coreDbContext.TariffAsync(tenant, id);
 
         if (r == null)
         {
@@ -589,7 +590,7 @@ public class TariffService(
         tariff.Id = r.Id;
         tariff.DueDate = r.Stamp.Year < 9999 ? r.Stamp : DateTime.MaxValue;
         tariff.CustomerId = r.CustomerId;
-        tariff.Quotas = await Queries.QuotasAsync(coreDbContext, r.TenantId, r.Id).ToListAsync();
+        tariff.Quotas = await coreDbContext.QuotasAsync(r.TenantId, r.Id).ToListAsync();
 
         return tariff;
     }
@@ -661,7 +662,7 @@ public class TariffService(
                 }
             }
 
-            ClearCache(tenant);
+            await ClearCacheAsync(tenant);
 
             await NotifyWebSocketAsync(currentTariff, tariffInfo);
         }
@@ -674,9 +675,9 @@ public class TariffService(
         const int tenant = Tenant.DefaultTenant;
 
         await using var coreDbContext = await coreDbContextManager.CreateDbContextAsync();
-        await Queries.DeleteTariffs(coreDbContext, tenant);
+        await coreDbContext.DeleteTariffs(tenant);
 
-        ClearCache(tenant);
+        await ClearCacheAsync(tenant);
     }
 
 
@@ -895,26 +896,4 @@ public class TariffService(
     {
         return billingClient.Configured;
     }
-}
-
-static file class Queries
-{
-    public static readonly Func<CoreDbContext, int?, int?, Task<DbTariff>> TariffAsync =
-        EF.CompileAsyncQuery(
-            (CoreDbContext ctx, int? tenantId, int? id) =>
-                ctx.Tariffs
-                    .Where(r => !tenantId.HasValue || r.TenantId == tenantId)
-                    .Where(r => !id.HasValue || r.Id == id.Value)
-                    .OrderByDescending(r => r.Id)
-                    .FirstOrDefault());
-
-    public static readonly Func<CoreDbContext, int, int, IAsyncEnumerable<Quota>> QuotasAsync =
-        EF.CompileAsyncQuery(
-            (CoreDbContext ctx, int tenantId, int id) =>
-                ctx.TariffRows
-                    .Where(r => r.TariffId == id && r.TenantId == tenantId)
-                    .Select(r => new Quota(r.Quota, r.Quantity)));
-
-    public static readonly Func<CoreDbContext, int, Task<int>> DeleteTariffs =
-        EF.CompileAsyncQuery((CoreDbContext ctx, int tenantId) => ctx.Tariffs.Where(r => r.TenantId == tenantId).ExecuteDelete());
 }

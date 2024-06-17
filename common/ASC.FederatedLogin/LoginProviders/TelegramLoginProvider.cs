@@ -60,11 +60,11 @@ public class TelegramLoginProvider : Consumer, IValidateKeysProvider, ITelegramL
     {
         if (TelegramBotToken.Length == 0)
         {
-            _telegramHelper.DisableClient((await TenantManager.GetCurrentTenantAsync()).Id);
+            await _telegramHelper.DisableClientAsync((await TenantManager.GetCurrentTenantAsync()).Id);
 
             return true;
         }
 
-        return _telegramHelper.CreateClient((await TenantManager.GetCurrentTenantAsync()).Id, TelegramBotToken, TelegramAuthTokenLifespan, TelegramProxy);
+        return await _telegramHelper.CreateClientAsync((await TenantManager.GetCurrentTenantAsync()).Id, TelegramBotToken, TelegramAuthTokenLifespan, TelegramProxy);
     }
 }

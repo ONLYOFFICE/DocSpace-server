@@ -315,7 +315,7 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
 
     public async Task<string> ReplaceCommunityAddressAsync(string url)
     {
-        var docServicePortalUrl = filesLinkUtility.DocServicePortalUrl;
+        var docServicePortalUrl = filesLinkUtility.GetDocServicePortalUrl();
 
         if (string.IsNullOrEmpty(url))
         {
@@ -361,14 +361,14 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
         }
 
         var uri = new UriBuilder(url).ToString();
-        var externalUri = new UriBuilder(baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.DocServiceUrl)).ToString();
-        var internalUri = new UriBuilder(baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.DocServiceUrlInternal)).ToString();
+        var externalUri = new UriBuilder(baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetDocServiceUrl())).ToString();
+        var internalUri = new UriBuilder(baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetDocServiceUrlInternal())).ToString();
         if (uri.StartsWith(internalUri, true, CultureInfo.InvariantCulture) || !uri.StartsWith(externalUri, true, CultureInfo.InvariantCulture))
         {
             return url;
         }
 
-        uri = uri.Replace(externalUri, filesLinkUtility.DocServiceUrlInternal);
+        uri = uri.Replace(externalUri, filesLinkUtility.GetDocServiceUrlInternal());
 
         return uri;
     }

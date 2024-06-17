@@ -32,7 +32,7 @@ const logger = require("morgan");
 const redis = require("redis");
 const expressSession = require("express-session");
 const cookieParser = require("cookie-parser");
-const RedisStore = require("connect-redis")(expressSession);
+const RedisStore = require("connect-redis").default;
 const MemoryStore = require("memorystore")(expressSession);
 const sharedsession = require("express-socket.io-session");
 const process = require('process');
@@ -41,6 +41,7 @@ const config = require("./config");
 const auth = require("./app/middleware/auth.js");
 const winston = require("./app/log.js");
 
+(async () => {
 winston.stream = {
   write: (message) => winston.info(message),
 };
@@ -55,8 +56,12 @@ const baseCookieParser = cookieParser();
 const redisOptions = config.get("Redis");
 
 let store;
+let redisClient;
 if (redisOptions != null) {
-  const redisClient = redis.createClient(redisOptions);
+  redisClient = redis.createClient(redisOptions);
+  redisClient.on('error', err => winston.error('Redis Client Error', err));
+  await redisClient.connect();
+  winston.info('Redis connect');
   store = new RedisStore({ client: redisClient });
 } else {
   store = new MemoryStore();
@@ -65,7 +70,7 @@ if (redisOptions != null) {
 const session = expressSession({
   store: store,
   secret: secret,
-  resave: true,
+  resave: false,
   saveUninitialized: true,
   cookie: {
     path: "/",
@@ -115,11 +120,13 @@ io.use(sharedsession(session, secretCookieParser, { autoSave: true }))
     auth(socket, next);
   });
 
-if (redisOptions != null) 
+if (redisClient != null) 
 {
-  const pubClient = redis.createClient(redisOptions);
+  const pubClient = redisClient;
   const subClient = pubClient.duplicate();
-
+  subClient.on('error',  err => winston.error('Redis Client Error', err));
+  subClient.connect();
+  
   io.adapter(createAdapter(pubClient, subClient));
 }
 
@@ -143,3 +150,4 @@ process.on('uncaughtException', (error) => {
 });
 
 module.exports = io;
+})();

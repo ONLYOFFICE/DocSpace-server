@@ -92,6 +92,7 @@ public class StudioNotifySource(UserManager userManager, IRecipientProvider reci
                 Actions.StorageDecryptionError,
 
                 Actions.SaasRoomInvite,
+                Actions.SaasRoomInviteExistingUser,
                 Actions.SaasDocSpaceInvite,
 
                 Actions.SaasAdminActivationV1,
@@ -206,7 +207,8 @@ public class StudioNotifySource(UserManager userManager, IRecipientProvider reci
         {
             if (Actions.SelfProfileUpdated.ID == action.ID ||
                 Actions.UserHasJoin.ID == action.ID ||
-                Actions.UserMessageToAdmin.ID == action.ID
+                Actions.UserMessageToAdmin.ID == action.ID ||
+                Actions.ProfileHasDeletedItself.ID == action.ID
                )
             {
                 return Actions.AdminNotify;

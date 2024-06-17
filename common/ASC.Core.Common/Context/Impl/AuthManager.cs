@@ -31,11 +31,6 @@ namespace ASC.Core;
 [Scope]
 public class AuthManager(IUserService service, UserManager userManager, UserFormatter userFormatter, TenantManager tenantManager)
 {
-    public async Task<IUserAccount[]> GetUserAccountsAsync(Tenant tenant)
-    {
-        return (await userManager.GetUsersAsync(EmployeeStatus.Active)).Select(u => ToAccount(tenant.Id, u)).ToArray();
-    }
-
     public async Task SetUserPasswordHashAsync(Guid userID, string passwordHash)
     {
         await service.SetUserPasswordHashAsync(await tenantManager.GetCurrentTenantIdAsync(), userID, passwordHash);

@@ -2311,4 +2311,19 @@ $TrulyYours</value>
   <data name="subject_migration_personal_to_docspace" xml:space="preserve">
     <value>Data migration to ONLYOFFICE DocSpace successfully completed</value>
   </data>
+  <data name="ButtonJoinRoom" xml:space="preserve">
+    <value>Join room</value>
+  </data>
+  <data name="pattern_saas_room_invite_existing_user" xml:space="preserve">
+    <value>Hello!
+
+You are invited to join the room "$Message":"$InviteLink" on "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_saas_room_invite_existing_user" xml:space="preserve">
+    <value>You're invited to the ONLYOFFICE DocSpace room</value>
+  </data>
 </root>

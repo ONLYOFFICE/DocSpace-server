@@ -28,7 +28,7 @@ using Tenant = ASC.Core.Tenants.Tenant;
 
 namespace ASC.Data.Storage.Encryption;
 
-[Transient(Additional = typeof(EncryptionOperationExtension))]
+[Transient]
 public class EncryptionOperation(IServiceScopeFactory serviceScopeFactory) : DistributedTaskProgress
 {
     private const string ProgressFileName = "EncryptionProgress.tmp";
@@ -329,11 +329,3 @@ public record EncryptionOperationScope(
     NotifyHelper NotifyHelper,
     EncryptionSettingsHelper EncryptionSettingsHelper,
     IConfiguration Configuration);
-
-public static class EncryptionOperationExtension
-{
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<EncryptionOperationScope>();
-    }
-}

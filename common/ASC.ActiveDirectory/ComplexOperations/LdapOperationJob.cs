@@ -28,7 +28,8 @@ using Constants = ASC.Core.Configuration.Constants;
 using SecurityContext = ASC.Core.SecurityContext;
 
 namespace ASC.ActiveDirectory.ComplexOperations;
-[Transient(Additional = typeof(LdapOperationExtension))]
+
+[Transient]
 public class LdapOperationJob(SecurityContext securityContext,
         LdapUserManager ldapUserManager,
         NovellLdapHelper novellLdapHelper,
@@ -143,7 +144,7 @@ public class LdapOperationJob(SecurityContext securityContext,
 
                     logger.DebugPrepareSettings();
 
-                    PrepareSettings(_ldapSettings);
+                    await PrepareSettingsAsync(_ldapSettings);
 
                     if (!string.IsNullOrEmpty(_error))
                     {
@@ -439,11 +440,7 @@ public class LdapOperationJob(SecurityContext securityContext,
                 continue;
             }
 
-            string hash;
-            using (var md5 = MD5.Create())
-            {
-                hash = Convert.ToBase64String(md5.ComputeHash((byte[])image));
-            }
+            var hash = Convert.ToBase64String(MD5.HashData((byte[])image));
 
             var user = await _userManager.GetUserBySidAsync(ldapUser.Sid);
 
@@ -1181,7 +1178,7 @@ public class LdapOperationJob(SecurityContext securityContext,
         //SetProperty(PROCESSED, successProcessed);
     }
 
-    private void PrepareSettings(LdapSettings settings)
+    private async Task PrepareSettingsAsync(LdapSettings settings)
     {
         if (settings == null)
         {
@@ -1326,7 +1323,7 @@ public class LdapOperationJob(SecurityContext securityContext,
         {
             if (!string.IsNullOrEmpty(settings.Password))
             {
-                settings.PasswordBytes = novellLdapHelper.GetPasswordBytes(settings.Password);
+                settings.PasswordBytes = await novellLdapHelper.GetPasswordBytesAsync(settings.Password);
 
                 if (settings.PasswordBytes == null)
                 {
@@ -1371,14 +1368,5 @@ public class LdapOperationJob(SecurityContext securityContext,
             LdapSettingsStatus.CertificateRequest => _resource.LdapSettingsStatusCertificateVerification,
             _ => _resource.LdapSettingsErrorUnknownError
         };
-    }
-
-    public static class LdapOperationExtension
-    {
-        public static void Register(DIHelper services)
-        {
-            services.TryAdd<NovellLdapSettingsChecker>();
-            services.TryAdd<LdapChangeCollection>();
-        }
     }
 }

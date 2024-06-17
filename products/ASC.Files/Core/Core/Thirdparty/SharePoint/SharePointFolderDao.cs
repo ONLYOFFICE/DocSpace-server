@@ -24,7 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using File = Microsoft.SharePoint.Client.File;
 using Folder = Microsoft.SharePoint.Client.Folder;
 
 namespace ASC.Files.Thirdparty.SharePoint;
@@ -42,7 +41,7 @@ internal class SharePointFolderDao(IServiceProvider serviceProvider,
         IFileDao<int> fileDao,
         IFolderDao<int> folderDao,
         TempPath tempPath,
-        RegexDaoSelectorBase<File, Folder, ClientObject> regexDaoSelectorBase)
+        SharePointDaoSelector regexDaoSelectorBase)
     : SharePointDaoBase(serviceProvider, userManager, tenantManager, tenantUtil, dbContextManager, setupInfo,
         fileUtility, tempPath, regexDaoSelectorBase), IFolderDao<string>
     {

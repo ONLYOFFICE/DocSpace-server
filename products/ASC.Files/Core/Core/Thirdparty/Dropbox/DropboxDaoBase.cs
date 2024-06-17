@@ -26,7 +26,7 @@
 
 namespace ASC.Files.Thirdparty.Dropbox;
 
-[Scope]
+[Scope(typeof(IDaoBase<FileMetadata, FolderMetadata, Metadata>))]
 internal class DropboxDaoBase(
     IServiceProvider serviceProvider,
     UserManager userManager,
@@ -37,8 +37,7 @@ internal class DropboxDaoBase(
     FileUtility fileUtility,
     TempPath tempPath,
     RegexDaoSelectorBase<FileMetadata, FolderMetadata, Metadata> regexDaoSelectorBase)
-    : ThirdPartyProviderDao<FileMetadata, FolderMetadata, Metadata>(serviceProvider, userManager, tenantManager,
-            tenantUtil, dbContextFactory, setupInfo, fileUtility, tempPath, regexDaoSelectorBase),
+    : ThirdPartyProviderDao<FileMetadata, FolderMetadata, Metadata>(serviceProvider, userManager, tenantManager, tenantUtil, dbContextFactory, setupInfo, fileUtility, tempPath, regexDaoSelectorBase),
         IDaoBase<FileMetadata, FolderMetadata, Metadata>
 {
     private DropboxProviderInfo _providerInfo;

@@ -195,6 +195,29 @@ public class StudioNotifyService(
         }
     }
 
+    public async Task SendEmailRoomInviteExistingUserAsync(UserInfo user, string roomTitle, string roomUrl)
+    {
+        var cultureInfo = await GetCulture(user);
+
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonJoinRoom", cultureInfo);
+        var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", cultureInfo);
+
+        var tags = new List<ITagValue>
+        {
+            new TagValue(Tags.Message, roomTitle),
+            new TagValue(Tags.InviteLink, roomUrl),
+            TagValues.OrangeButton(orangeButtonText, roomUrl),
+            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
+            new TagValue(CommonTags.Culture, cultureInfo.Name)
+        };
+
+        await studioNotifyServiceHelper.SendNoticeToAsync(
+            Actions.SaasRoomInviteExistingUser,
+            [user],
+            [EMailSenderName],
+            tags.ToArray());
+    }
+
     public async Task SendDocSpaceInviteAsync(string email, string confirmationUrl, string culture = "", bool limitation = false)
     {
         var cultureInfo = string.IsNullOrEmpty(culture) ? (await GetCulture(null)) : new CultureInfo(culture);
@@ -276,7 +299,7 @@ public class StudioNotifyService(
         
         await studioNotifyServiceHelper.SendNoticeToAsync(
             Actions.JoinUsers,
-            await studioNotifyHelper.RecipientFromEmailAsync(email, true),
+            await studioNotifyHelper.RecipientFromEmailAsync(email, false),
             [EMailSenderName],
             tags.ToArray());
     }
@@ -492,6 +515,26 @@ public class StudioNotifyService(
         TagValues.OrangeButton(orangeButtonText, confirmationUrl),
         TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
         new TagValue(CommonTags.Culture, user.GetCulture().Name));
+    }
+
+    public async Task SendMsgProfileHasDeletedItselfAsync(UserInfo user)
+    {
+        var userName = user.DisplayUserName(displayUserSettingsHelper);
+        var userLink = await GetUserProfileLinkAsync(user.Id);
+        var recipients = await userManager.GetUsersByGroupAsync(ASC.Core.Users.Constants.GroupAdmin.ID);
+
+        foreach (var recipient in recipients)
+        {
+            var culture = await GetCulture(recipient);
+
+            await studioNotifyServiceHelper.SendNoticeToAsync(
+                Actions.ProfileHasDeletedItself,
+                [recipient],
+                [EMailSenderName],
+                new TagValue(Tags.FromUserName, userName),
+                new TagValue(Tags.FromUserLink, userLink),
+                new TagValue(CommonTags.Culture, culture.Name));
+        }
     }
 
     public async Task SendMsgReassignsCompletedAsync(Guid recipientId, UserInfo fromUser, UserInfo toUser)

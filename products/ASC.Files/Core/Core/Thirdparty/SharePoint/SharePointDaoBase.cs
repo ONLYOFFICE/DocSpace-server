@@ -38,7 +38,7 @@ internal class SharePointDaoBase(
     SetupInfo setupInfo,
     FileUtility fileUtility,
     TempPath tempPath,
-    RegexDaoSelectorBase<File, Folder, ClientObject> regexDaoSelectorBase)
+    SharePointDaoSelector regexDaoSelectorBase)
     : ThirdPartyProviderDao<File, Folder, ClientObject>(serviceProvider, userManager, tenantManager, tenantUtil,
         dbContextFactory, setupInfo, fileUtility, tempPath, regexDaoSelectorBase)
 {
