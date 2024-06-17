@@ -601,12 +601,7 @@ public class BackupPortalTask(
         var storages = new Dictionary<string, IDataStore>();
         await foreach (var file in files)
         {
-            IDataStore storage = null;
-            if (storages.ContainsKey(file.Module))
-            {
-                storage = storages[file.Module];
-            }
-            else
+            if (!storages.TryGetValue(file.Module, out var storage))
             {
                 storage = await StorageFactory.GetStorageAsync(TenantId, file.Module);
                 storages.Add(file.Module, storage);

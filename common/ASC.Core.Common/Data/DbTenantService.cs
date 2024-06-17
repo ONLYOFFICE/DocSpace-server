@@ -141,9 +141,9 @@ public class DbTenantService(
     {
         await using var tenantDbContext = await dbContextFactory.CreateDbContextAsync();
 
-        var oldTenant = await InnerRemoveTenantAsync(tenantDbContext, oldId, false);
+        _ = await InnerRemoveTenantAsync(tenantDbContext, oldId);
 
-        var dbtenant = await InnerSaveTenantAsync(tenantDbContext, coreSettings, newTenant);
+        _ = await InnerSaveTenantAsync(tenantDbContext, coreSettings, newTenant);
 
         await tenantDbContext.SaveChangesAsync();
 

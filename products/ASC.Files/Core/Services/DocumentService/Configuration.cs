@@ -758,7 +758,7 @@ public class LogoConfig(
 }
 
 [Transient]
-public class PluginsConfig()
+public class PluginsConfig
     // ConsumerFactory consumerFactory,
     // BaseCommonLinkUtility baseCommonLinkUtility,
     // CoreBaseSettings coreBaseSettings,

@@ -48,11 +48,11 @@ public class MigrationLogger(
         }
     }
 
-    public async Task SaveLogAsync()
+    private async Task SaveLogAsync()
     {
         var store = await storageFactory.GetStorageAsync(await tenantManager.GetCurrentTenantIdAsync(), "migration_log", (IQuotaController)null);
         _migrationStream.Position = 0;
-        var folder = await store.SaveAsync("", _logName, _migrationStream);
+        await store.SaveAsync("", _logName, _migrationStream);
     }
 
     public void Log(string msg, Exception exception = null)

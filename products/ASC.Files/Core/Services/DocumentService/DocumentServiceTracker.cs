@@ -157,7 +157,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
 
         if (httpContextAccessor?.HttpContext != null)
         {
-            queryParams["request-x-real-ip"] = httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString();
+            queryParams["request-x-real-ip"] = httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
 
             if (httpContextAccessor.HttpContext.Request.Headers.TryGetValue("User-Agent", out var header))
             {
@@ -165,7 +165,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
             }
         }
         
-        var callbackUrl = baseCommonLinkUtility.GetFullAbsolutePath($"{filesLinkUtility.FileHandlerPath}?{queryParams.ToString()}"); 
+        var callbackUrl = baseCommonLinkUtility.GetFullAbsolutePath($"{filesLinkUtility.FileHandlerPath}?{queryParams}"); 
 
         callbackUrl = await documentServiceConnector.ReplaceCommunityAddressAsync(callbackUrl);
 
@@ -246,37 +246,34 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
             if (!documentServiceHelper.IsDocSubmitKey(docKey, fileData.Key))
             {
                 logger.InformationDocServiceEditingFile(fileId.ToString(), docKey, fileData.Key, fileData.Users);
-                usersDrop = fileData.Users;
             }
             return;
         }
-        else
-        {
-            foreach (var user in fileData.Users)
-            {
-                if (!Guid.TryParse(user, out var userId))
-                {
-                    if (!string.IsNullOrEmpty(user) && user.StartsWith("uid-"))
-                    {
-                        userId = Guid.Empty;
-                    }
-                    else
-                    {
-                        logger.InformationDocServiceUserIdIsNotGuid(user);
-                        continue;
-                    }
-                }
-                users.Remove(userId);
 
-                try
+        foreach (var user in fileData.Users)
+        {
+            if (!Guid.TryParse(user, out var userId))
+            {
+                if (!string.IsNullOrEmpty(user) && user.StartsWith("uid-"))
                 {
-                    file = await entryManager.TrackEditingAsync(fileId, userId, userId, await tenantManager.GetCurrentTenantIdAsync());
+                    userId = Guid.Empty;
                 }
-                catch (Exception e)
+                else
                 {
-                    logger.DebugDropCommand(fileId.ToString(), fileData.Key, user, e);
-                    usersDrop.Add(userId.ToString());
+                    logger.InformationDocServiceUserIdIsNotGuid(user);
+                    continue;
                 }
+            }
+            users.Remove(userId);
+
+            try
+            {
+                file = await entryManager.TrackEditingAsync(fileId, userId, userId, await tenantManager.GetCurrentTenantIdAsync());
+            }
+            catch (Exception e)
+            {
+                logger.DebugDropCommand(fileId.ToString(), fileData.Key, user, e);
+                usersDrop.Add(userId.ToString());
             }
         }
 

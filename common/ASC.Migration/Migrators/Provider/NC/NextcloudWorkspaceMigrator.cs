@@ -164,7 +164,7 @@ public class NextcloudWorkspaceMigrator : Migrator
                         else
                         {
                             user.Value.PathToPhoto = File.Exists(Path.Combine(drivePath, "avatar_upload")) ? Directory.GetFiles(drivePath, "avatar_upload")[0] : null;
-                            user.Value.HasPhoto = user.Value.PathToPhoto != null ? true : false;
+                            user.Value.HasPhoto = user.Value.PathToPhoto != null;
                         }
 
                         if (!user.Value.HasPhoto)
@@ -174,7 +174,7 @@ public class NextcloudWorkspaceMigrator : Migrator
                             {
                                 var pathToAvatarDir = Path.Combine(appdataDir, "avatar", user.Key);
                                 user.Value.PathToPhoto = File.Exists(Path.Combine(pathToAvatarDir, "generated")) ? null : Path.Combine(pathToAvatarDir, "avatar.jpg");
-                                user.Value.HasPhoto = user.Value.PathToPhoto != null ? true : false;
+                                user.Value.HasPhoto = user.Value.PathToPhoto != null;
                             }
                         }
                         ParseStorage(user.Key, user.Value, dbFile);

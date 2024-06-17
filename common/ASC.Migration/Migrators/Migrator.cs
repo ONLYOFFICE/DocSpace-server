@@ -263,14 +263,8 @@ public abstract class Migrator : IAsyncDisposable
 
     private void DataСhange(MigrationUser user)
     {
-        if (user.Info.UserName == null)
-        {
-            user.Info.UserName = user.Info.Email.Split('@').First();
-        }
-        if (user.Info.LastName == null)
-        {
-            user.Info.LastName = user.Info.FirstName;
-        }
+        user.Info.UserName ??= user.Info.Email.Split('@').First();
+        user.Info.LastName ??= user.Info.FirstName;
     }
 
     private async Task MigrateGroupAsync()

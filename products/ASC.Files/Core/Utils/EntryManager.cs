@@ -800,7 +800,7 @@ public class EntryManager(IDaoFactory daoFactory,
     {
         if (entries == null)
         {
-            return entries;
+            return null;
         }
 
         if (subjectId != Guid.Empty)
