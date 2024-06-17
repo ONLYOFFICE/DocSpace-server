@@ -536,7 +536,7 @@ Highest compatibility with docx, xlsx, pptx.</value>
     <value>Open form</value>
   </data>
   <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>The file cannot be uploaded to this room. Please try to upload the PDF form</value>
+    <value>The file cannot be moved to this room. Please try to move the ONLYOFFICE PDF form.</value>
   </data>
   <data name="FillOutExternalLinkTitle" xml:space="preserve">
     <value>Link to fill out</value>

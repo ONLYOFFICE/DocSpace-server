@@ -907,7 +907,7 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The file cannot be uploaded to this room. Please try to upload the PDF form.
+        ///   Looks up a localized string similar to The file cannot be moved to this room. Please try to move the ONLYOFFICE PDF form..
         /// </summary>
         public static string ErrorMessage_UploadToFormRoom {
             get {
