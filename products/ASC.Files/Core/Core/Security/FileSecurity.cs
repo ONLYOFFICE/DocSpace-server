@@ -998,8 +998,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                     action == FilesSecurityActions.Lock ||
                     action == FilesSecurityActions.Move ||
                     action == FilesSecurityActions.Duplicate ||
-                    action == FilesSecurityActions.EditHistory ||
-                    action == FilesSecurityActions.ReadHistory) && file != null )
+                    action == FilesSecurityActions.EditHistory) && file != null )
                 {
                     var fileFolder = await daoFactory.GetFolderDao<T>().GetFolderAsync(file.ParentId);
                     if ((fileFolder.FolderType == FolderType.FormFillingFolderInProgress) || fileFolder.FolderType == FolderType.FormFillingFolderDone)

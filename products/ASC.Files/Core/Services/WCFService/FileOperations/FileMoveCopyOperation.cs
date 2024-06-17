@@ -717,21 +717,29 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
             }
             else
             {
-                if (toFolder.FolderType == FolderType.FillingFormsRoom || toFolder.RootFolderType == FolderType.FillingFormsRoom)
-                {
-                    var extension = FileUtility.GetFileExtension(file.Title);
-                    var fileType = FileUtility.GetFileTypeByExtention(extension);
-                    if (fileType != FileType.Pdf || (fileType == FileType.Pdf && !await fileStorageService.CheckExtendedPDF(file)))
+                if (toFolder.RootFolderType == FolderType.VirtualRooms) {
+                    var folderDao = scope.ServiceProvider.GetService<IFolderDao<TTo>>();
+                    var (rId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(toFolder);
+                    if (int.TryParse(rId.ToString(), out var roomId) && roomId != -1)
                     {
-                        this[Err] = FilesCommonResource.ErrorMessage_UploadToFormRoom;
-                        continue;
-                    }else if (fileType == FileType.Pdf)
-                    {
-                        isPdfForm = true;
-                        numberRoomMembers = await fileStorageService.GetPureSharesCountAsync(toFolder.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "");
+                        var room = await folderDao.GetFolderAsync((TTo)Convert.ChangeType(roomId, typeof(TTo)));
+                        if (room.FolderType == FolderType.FillingFormsRoom)
+                        {
+                            var extension = FileUtility.GetFileExtension(file.Title);
+                            var fileType = FileUtility.GetFileTypeByExtention(extension);
+                            if (fileType != FileType.Pdf || (fileType == FileType.Pdf && !await fileStorageService.CheckExtendedPDF(file)))
+                            {
+                                this[Err] = FilesCommonResource.ErrorMessage_UploadToFormRoom;
+                                continue;
+                            }
+                            else if (fileType == FileType.Pdf)
+                            {
+                                isPdfForm = true;
+                                numberRoomMembers = await fileStorageService.GetPureSharesCountAsync(toFolder.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "");
+                            }
+                        }
                     }
                 }
-
                 var deleteLinks = file.RootFolderType == FolderType.USER &&
                                 toFolder.RootFolderType is FolderType.VirtualRooms or FolderType.Archive or FolderType.TRASH;
 

@@ -29,7 +29,8 @@ namespace ASC.Web.Files.Utils;
 public class ExportToCSV(
     ILogger<AuditReportUploader> logger,
     IServiceProvider serviceProvider,
-    IDaoFactory daoFactory)
+    IDaoFactory daoFactory,
+    TenantUtil tenantUtil)
 {
     public async Task<T> UploadCsvReport<T>(T parentId, string title, DataTable dataTable)
     {
@@ -54,7 +55,7 @@ public class ExportToCSV(
         }
     }
 
-    public async Task<T> UpdateCsvReport<T>(File<T> file, DataTable dataTable)
+    public async Task UpdateCsvReport<T>(File<T> file, DataTable dataTable)
     {
         try
         {
@@ -69,10 +70,10 @@ public class ExportToCSV(
             using var textStream = new MemoryStream(Encoding.UTF8.GetBytes(resultData));
 
             file.Version++;
+            file.VersionGroup++;
             file.ContentLength = textStream.Length;
-
+            file.ModifiedOn = tenantUtil.DateTimeNow();
             await fileDao.SaveFileAsync(file, textStream, false);
-            return file.Id;
         }
         catch (Exception ex)
         {
