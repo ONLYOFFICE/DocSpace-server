@@ -31,9 +31,9 @@ public class WebPathSettings
 {
     private readonly IEnumerable<Appender> _appenders;
 
-    public WebPathSettings(IConfiguration configuration)
+    public WebPathSettings(StorageConfigExtension storageConfigExtension)
     {
-        var storage = StorageConfigExtension.GetStorage(configuration);
+        var storage = storageConfigExtension.Storage;
         if (storage != null)
         {
             _appenders = storage.Appender;

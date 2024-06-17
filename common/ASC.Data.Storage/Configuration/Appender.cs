@@ -26,12 +26,10 @@
 
 namespace ASC.Data.Storage.Configuration;
 
-public static class StorageConfigExtension
+[Singleton]
+public class StorageConfigExtension(IConfiguration configuration)
 {
-    public static Storage GetStorage(IConfiguration configuration)
-    {
-        return configuration.GetSection($"{RegionSettings.Current}storage").Get<Storage>();
-    }
+    public Storage Storage { get; init; } = configuration.GetSection($"storage").Get<Storage>();
 }
 
 
