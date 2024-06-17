@@ -54,7 +54,7 @@ public class ExportToCSV(
         }
     }
 
-    public async Task<T> UpdateCsvReport<T>(File<T> file, DataTable dataTable)
+    public async Task UpdateCsvReport<T>(File<T> file, DataTable dataTable)
     {
         try
         {
@@ -73,7 +73,6 @@ public class ExportToCSV(
             file.ContentLength = textStream.Length;
             file.ModifiedOn = DateTime.UtcNow;
             await fileDao.SaveFileAsync(file, textStream, false);
-            return file.Id;
         }
         catch (Exception ex)
         {
