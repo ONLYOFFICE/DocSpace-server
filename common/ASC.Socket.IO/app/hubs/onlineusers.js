@@ -9,8 +9,7 @@ module.exports = async (io) => {
     const mapperIds = [];
 
     onlineIO.on("connection", async (socket) => {
-      const session = socket.handshake.session;
-      if (session.system) {
+      if (socket.handshake.session.system) {
         return;
       }
       const ipAddress = getCleanIP(socket.handshake.headers['x-forwarded-for']);
@@ -18,15 +17,16 @@ module.exports = async (io) => {
       const operationSystem = parser.os.version !== undefined ?  `${parser.os.name} ${parser.os.version}` : `${parser.os.name}`;  
       const browserVersion = parser.browser.version ? parser.browser.version : '';
   
-      const userId = session?.user?.id;
-      const userName = (session?.user?.userName || "").toLowerCase();
-      const tenantId = session?.portal?.tenantId;
+      const userId = socket.handshake.session?.user?.id;
+      const userName = (socket.handshake.session?.user?.userName || "").toLowerCase();
+      const tenantId = socket.handshake.session?.portal?.tenantId;
       var _roomId;
       let id;
-      let sessionId = session?.user?.connection;
+      let sessionId = socket.handshake.session?.user?.connection;
       let idInRoom;
       
       var user = getUser(portalUsers, userId, tenantId);
+      var session;
       if (!user) 
       {
         var sessions = new Map();
@@ -55,14 +55,16 @@ module.exports = async (io) => {
 
         var keys = Array.from(user.sessions.keys());
         id = keys.length == 0 ? 1 : keys[keys.length - 1] + 1;
+        session = {
+          id: sessionId,
+          platform: operationSystem,
+          browser: parser.browser.name + " " + browserVersion,
+          ip: ipAddress
+        };
         user.sessions.set(
           id,
-          {
-            id: sessionId,
-            platform: operationSystem,
-            browser: parser.browser.name + " " + browserVersion,
-            ip: ipAddress
-          });
+          session
+        );
       }
       
       user.offlineSessions.delete(sessionId);
@@ -70,6 +72,10 @@ module.exports = async (io) => {
       {
         var stringUser = serialize(user);
         onlineIO.to(`p-${tenantId}`).emit("enter-in-portal", stringUser );
+      }
+      else
+      {
+        onlineIO.to(`p-${tenantId}`).emit("enter-session-in-portal", session );
       }
 
       updateUser(portalUsers, user, userId, tenantId);
@@ -95,7 +101,6 @@ module.exports = async (io) => {
                 date: new Date().toString()
             });
           }
-          id = -1;
 
           if(user.sessions.size <= 0)
           {
@@ -104,9 +109,12 @@ module.exports = async (io) => {
             onlineIO.to(`p-${tenantId}`).emit("leave-in-portal",  userId );
           }
           else
-          { 
-            updateUser(portalUsers, user, userId, tenant);
+          {
+            updateUser(portalUsers, user, userId, tenantId);
+            onlineIO.to(`p-${tenantId}`).emit("leave-session-in-portal",  sessionId );
           }
+          id = -1;
+          sessionId = -1;
         }
 
         if(!_roomId)
