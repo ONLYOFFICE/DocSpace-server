@@ -935,11 +935,11 @@ public class FileSharing(
     }
 }
 
-public class AceProcessingResult(bool changed, string warning, IReadOnlyList<Tuple<EventType, AceWrapper>> handledAces)
+public class AceProcessingResult(bool changed, string warning, List<Tuple<EventType, AceWrapper>> handledAces)
 {
     public bool Changed { get; } = changed;
     public string Warning { get; } = warning;
-    public IReadOnlyList<Tuple<EventType, AceWrapper>> HandledAces { get; } = handledAces;
+    public List<Tuple<EventType, AceWrapper>> HandledAces { get; } = handledAces;
 }
 
 public enum EventType

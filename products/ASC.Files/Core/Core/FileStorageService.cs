@@ -3709,7 +3709,7 @@ public class FileStorageService //: IFileStorageService
 
             if (!result.Changed)
             {
-                return result.HandledAces[0];
+                return result.HandledAces.FirstOrDefault();
             }
 
             var (eventType, ace) = result.HandledAces[0];
