@@ -900,7 +900,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                     return false;
                 }
 
-                if (action is FilesSecurityActions.Copy or FilesSecurityActions.Duplicate && isRoom)
+                if (action is FilesSecurityActions.Copy && isRoom)
                 {
                     return false;
                 }
