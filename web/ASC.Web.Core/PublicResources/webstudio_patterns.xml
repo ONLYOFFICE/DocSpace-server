@@ -627,7 +627,13 @@ $activity.Key
     <subject resource="|subject_saas_docspace_invite|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core"/>
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_docspace_invite|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
-
+	
+  <!-- saas docspace registration-->
+  <pattern id="saas_docspace_registration">
+	  <subject resource="|subject_saas_docspace_registration|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core"/>
+	  <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_docspace_registration|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+  </pattern>
+	
   <!-- zoom welcome -->
   <pattern id="zoom_welcome">
     <subject resource="|subject_zoom_welcome|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core"/>

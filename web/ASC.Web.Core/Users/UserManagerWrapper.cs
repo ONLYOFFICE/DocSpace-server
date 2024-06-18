@@ -366,7 +366,7 @@ public sealed class UserManagerWrapper(
             var link = await commonLinkUtility.GetInvitationLinkAsync(userInfo.Email, type, createBy ??  (await tenantManager.GetCurrentTenantAsync()).OwnerId, userInfo.GetCulture()?.Name);
             var shortenLink = await urlShortener.GetShortenLinkAsync(link);
 
-            await studioNotifyService.SendDocSpaceInviteAsync(userInfo.Email, shortenLink);
+            await studioNotifyService.SendDocSpaceRegistration(userInfo.Email, shortenLink);
             return null;
         }
         
