@@ -54,8 +54,12 @@ public abstract class ActivePassiveBackgroundService<T>(ILogger logger,
                 continue;
             }
 
+            logger.TraceActivePassiveBackgroundServiceIsRunning(serviceName);
+
             await ExecuteTaskAsync(stoppingToken);
 
+            logger.TraceActivePassiveBackgroundServiceIsSleeping(serviceName, ExecuteTaskPeriod);
+            
             await Task.Delay(ExecuteTaskPeriod, stoppingToken);
         }
 
