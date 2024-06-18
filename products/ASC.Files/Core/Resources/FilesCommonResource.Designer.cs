@@ -493,6 +493,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Moving several files to the Form Filling room is not supported. Move one ONLYOFFICE PDF form at a time..
+        /// </summary>
+        public static string ErrorMessage_FilesMoveFormFillingError {
+            get {
+                return ResourceManager.GetString("ErrorMessage_FilesMoveFormFillingError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The new version cannot be the same as the current one.
         /// </summary>
         public static string ErrorMessage_FileUpdateToVersion {
@@ -507,6 +516,15 @@ namespace ASC.Files.Core.Resources {
         public static string ErrorMessage_FolderCopyError {
             get {
                 return ResourceManager.GetString("ErrorMessage_FolderCopyError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Moving folders to the Form Filling room is not supported. Move one ONLYOFFICE PDF form at a time..
+        /// </summary>
+        public static string ErrorMessage_FolderMoveFormFillingError {
+            get {
+                return ResourceManager.GetString("ErrorMessage_FolderMoveFormFillingError", resourceCulture);
             }
         }
         
@@ -588,6 +606,15 @@ namespace ASC.Files.Core.Resources {
         public static string ErrorMessage_MaxLinksCount {
             get {
                 return ResourceManager.GetString("ErrorMessage_MaxLinksCount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The file cannot be moved to this room. Please try to move the ONLYOFFICE PDF form..
+        /// </summary>
+        public static string ErrorMessage_MoveToFormRoom {
+            get {
+                return ResourceManager.GetString("ErrorMessage_MoveToFormRoom", resourceCulture);
             }
         }
         
@@ -907,7 +934,7 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The file cannot be moved to this room. Please try to move the ONLYOFFICE PDF form..
+        ///   Looks up a localized string similar to The file cannot be uploaded to this room. Please try to upload the ONLYOFFICE PDF form..
         /// </summary>
         public static string ErrorMessage_UploadToFormRoom {
             get {
