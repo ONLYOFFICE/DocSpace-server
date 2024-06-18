@@ -33,7 +33,6 @@ namespace ASC.ActiveDirectory.ComplexOperations;
 public class LdapOperationJob(SecurityContext securityContext,
         LdapUserManager ldapUserManager,
         NovellLdapHelper novellLdapHelper,
-        NovellLdapUserImporter novellLdapUserImporter,
         LdapChangeCollection ldapChanges,
         UserFormatter userFormatter,
         UserPhotoManager userPhotoManager,
