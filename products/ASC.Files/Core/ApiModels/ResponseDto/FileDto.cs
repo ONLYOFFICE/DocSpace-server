@@ -116,7 +116,8 @@ public class FileDto<T> : FileEntryDto<T>
     public IDictionary<string, bool> AvailableExternalRights { get; set; }
     public string RequestToken { get; set; }
     public ApiDateTime LastOpened { get; set; }
-    
+    public ApiDateTime Expired { get; set; }
+
     public static FileDto<int> GetSample()
     {
         return new FileDto<int>
@@ -162,7 +163,7 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
 {
     private readonly ApiDateTimeHelper _apiDateTimeHelper = apiDateTimeHelper;
 
-    public async Task<FileDto<T>> GetAsync<T>(File<T> file, int? foldersCount = null, string order = null)
+    public async Task<FileDto<T>> GetAsync<T>(File<T> file, int? foldersCount = null, string order = null, TimeSpan? expiration = null)
     {
         var result = await GetFileWrapperAsync(file, foldersCount, order);
 
@@ -173,7 +174,12 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
             result.RootFolderType = FolderType.Recent;
             result.FolderId = await _globalFolderHelper.GetFolderRecentAsync<T>();
         }
-        
+
+        if (expiration.HasValue)
+        {
+            result.Expired = new ApiDateTime(result.Updated.UtcTime + expiration.Value, result.Updated.TimeZoneOffset);
+        }
+
         result.ViewAccessibility = await fileUtility.GetAccessibility(file);
         result.AvailableExternalRights = _fileSecurity.GetFileAccesses(file, SubjectType.ExternalLink);
         

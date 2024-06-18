@@ -51,21 +51,7 @@ public class CleanupLifetimeExpiredEntriesWorker(ILogger<CleanupLifetimeExpiredE
 
             foreach (var room in lifetimeEnabledRooms)
             {
-                var expiration = DateTime.UtcNow;
-                switch (room.Lifetime.Period)
-                {
-                    case RoomDataLifetimePeriod.Day:
-                        expiration = expiration.AddDays(-room.Lifetime.Value);
-                        break;
-                    case RoomDataLifetimePeriod.Month:
-                        expiration = expiration.AddMonths(-room.Lifetime.Value);
-                        break;
-                    case RoomDataLifetimePeriod.Year:
-                        expiration = expiration.AddYears(-room.Lifetime.Value);
-                        break;
-                    default:
-                        return;
-                }
+                var expiration = room.Lifetime.GetExpirationUtc();
 
                 room.ExipiredFiles = await GetExpiredFilesAsync(dbContext, room.TenantId, room.RoomId, expiration);
 

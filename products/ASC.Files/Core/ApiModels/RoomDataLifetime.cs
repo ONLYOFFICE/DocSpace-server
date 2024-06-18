@@ -45,6 +45,21 @@ public class RoomDataLifetimeDto
     [Range(1, 9999)]
     public int Value { get; set; }
 
+    public DateTime GetExpirationUtc()
+    {
+        var expiration = DateTime.UtcNow;
+
+        expiration = Period switch
+        {
+            RoomDataLifetimePeriod.Day => expiration.AddDays(-Value),
+            RoomDataLifetimePeriod.Month => expiration.AddMonths(-Value),
+            RoomDataLifetimePeriod.Year => expiration.AddYears(-Value),
+            _ => throw new Exception("Unknown lifetime period"),
+        };
+
+        return expiration;
+    }
+
     public string Serialize()
     {
         return JsonSerializer.Serialize(this);
