@@ -2077,6 +2077,18 @@ After clicking on the invitation link, please set a new password for your accoun
 
 $TrulyYours</comment>
   </data>
+  <data name="pattern_saas_docspace_registration" xml:space="preserve">
+    <value>h1. ONLYOFFICE DocSpace: complete registration
+
+
+Hello!
+
+You are invited to complete registration for ONLYOFFICE DocSpace at "${__VirtualRootPath}":"${__VirtualRootPath}". Enter your name and set a password by clicking the link:
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>Hello!
 
@@ -2090,6 +2102,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_docspace_invite" xml:space="preserve">
     <value>Join ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="subject_saas_docspace_registration" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace: complete registration</value>
   </data>
   <data name="subject_saas_room_invite" xml:space="preserve">
     <value>Join ONLYOFFICE DocSpace</value>
@@ -2325,5 +2340,8 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_room_invite_existing_user" xml:space="preserve">
     <value>You're invited to the ONLYOFFICE DocSpace room</value>
+  </data>
+  <data name="ButtonRegister" xml:space="preserve">
+    <value>REGISTER</value>
   </data>
 </root>

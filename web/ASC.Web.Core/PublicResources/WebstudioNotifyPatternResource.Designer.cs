@@ -412,6 +412,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to REGISTER.
+        /// </summary>
+        public static string ButtonRegister {
+            get {
+                return ResourceManager.GetString("ButtonRegister", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Remove profile.
         /// </summary>
         public static string ButtonRemoveProfile {
@@ -1670,6 +1679,24 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to h1. ONLYOFFICE DocSpace: complete registration
+        ///
+        ///
+        ///Hello!
+        ///
+        ///You are invited to complete registration for ONLYOFFICE DocSpace at &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;. Enter your name and set a password by clicking the link:
+        ///
+        ///$OrangeButton
+        ///
+        ///$TrulyYours.
+        /// </summary>
+        public static string pattern_saas_docspace_registration {
+            get {
+                return ResourceManager.GetString("pattern_saas_docspace_registration", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to h1. Join &lt;span style=&quot;color:#FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace
         ///
         ///
@@ -2591,6 +2618,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string subject_saas_docspace_invite {
             get {
                 return ResourceManager.GetString("subject_saas_docspace_invite", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ONLYOFFICE DocSpace: complete registration.
+        /// </summary>
+        public static string subject_saas_docspace_registration {
+            get {
+                return ResourceManager.GetString("subject_saas_docspace_registration", resourceCulture);
             }
         }
         
