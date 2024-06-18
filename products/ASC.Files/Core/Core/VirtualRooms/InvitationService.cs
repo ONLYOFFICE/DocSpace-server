@@ -54,28 +54,7 @@ public class InvitationService(
     public async Task<string> GetInvitationLinkAsync(string email, FileShare share, Guid createdBy, string roomId, string culture = null)
     {
         var type = FileSecurity.GetTypeByShare(share);
-        
-        var link = await commonLinkUtility.GetConfirmationEmailUrlAsync(email, ConfirmType.LinkInvite, type, createdBy)
-                   + $"&emplType={type:d}&roomId={roomId}";
-
-        if (!string.IsNullOrEmpty(culture))
-        {
-            link += $"&culture={culture}";
-        }
-        
-        return link;
-    }
-
-    public async Task<string> GetInvitationLinkAsync(string email, EmployeeType employeeType, Guid createdBy, string culture = null)
-    {
-        var link = await commonLinkUtility.GetConfirmationEmailUrlAsync(email, ConfirmType.LinkInvite, employeeType, createdBy)
-            + $"&emplType={employeeType:d}";
-        
-        if (!string.IsNullOrEmpty(culture))
-        {
-            link += $"&culture={culture}";
-        }
-        
+        var link = await commonLinkUtility.GetInvitationLinkAsync(email, type, createdBy, culture) + $"&roomId={roomId}";
         return link;
     }
     
