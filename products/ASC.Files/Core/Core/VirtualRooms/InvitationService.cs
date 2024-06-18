@@ -151,20 +151,25 @@ public class InvitationService(
                         var description = JsonSerializer.Deserialize<List<string>>(auditEvent.DescriptionRaw);
                         var info = JsonSerializer.Deserialize<AdditionalNotificationInfo<JsonElement>>(description.Last());
 
-                        if (info.UserIds.Contains(userId) && auditEvent.UserId != userId)
+                        if (!info.UserIds.Contains(userId) || auditEvent.UserId == userId)
                         {
-                            return false;
+                            continue;
                         }
+
+                        validation.Result = EmailValidationKeyProvider.ValidationResult.UserExcluded;
+                        return false;
                     }
                     
                     if (FileSecurity.PaidShares.Contains(data.Share) && await userManager.GetUserTypeAsync(userId) is EmployeeType.User)
                     {
                         data.Share = FileSecurity.GetHighFreeRole(folder.FolderType);
 
-                        if (!FileSecurity.AvailableRoomAccesses.TryGetValue(folder.FolderType, out var availableRoles) || 
+                        if (data.Share == FileShare.None || 
+                            !FileSecurity.AvailableRoomAccesses.TryGetValue(folder.FolderType, out var availableRoles) || 
                             !availableRoles.TryGetValue(SubjectType.InvitationLink, out var availableRolesBySubject) || 
                             !availableRolesBySubject.Contains(data.Share))
                         {
+                            validation.Result = EmailValidationKeyProvider.ValidationResult.QuotaFailed;
                             return false;
                         }
                     }
@@ -193,7 +198,11 @@ public class InvitationService(
 
         if (isAuth || data.Result is EmailValidationKeyProvider.ValidationResult.UserExisted)
         {
-            validation.Result = EmailValidationKeyProvider.ValidationResult.UserExisted;
+            if (validation.Result is not (EmailValidationKeyProvider.ValidationResult.UserExcluded or EmailValidationKeyProvider.ValidationResult.QuotaFailed))
+            {
+                validation.Result = EmailValidationKeyProvider.ValidationResult.UserExisted;
+            }
+
             return validation;
         }
         
