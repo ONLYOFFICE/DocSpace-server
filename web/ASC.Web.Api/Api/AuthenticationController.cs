@@ -40,6 +40,7 @@ namespace ASC.Web.Api.Controllers;
 [WebhookDisable]
 public class AuthenticationController(
     UserManager userManager,
+    LdapUserManager ldapUserManager,
     TenantManager tenantManager,
     SecurityContext securityContext,
     TenantCookieSettingsHelper tenantCookieSettingsHelper,
@@ -51,9 +52,7 @@ public class AuthenticationController(
     ProviderManager providerManager,
     AccountLinker accountLinker,
     CoreBaseSettings coreBaseSettings,
-    StudioNotifyService studioNotifyService,
     UserManagerWrapper userManagerWrapper,
-    UserHelpTourHelper userHelpTourHelper,
     Signature signature,
     DisplayUserSettingsHelper displayUserSettingsHelper,
     StudioSmsNotificationSettingsHelper studioSmsNotificationSettingsHelper,
@@ -462,12 +461,22 @@ public class AuthenticationController(
                         inDto.PasswordHash = passwordHasher.GetClientPassword(inDto.Password);
                     }
                 }
+                var ldapSettings = await settingsManager.LoadAsync<LdapSettings>();
 
-                user = await bruteForceLoginManager.AttemptAsync(inDto.UserName, inDto.RecaptchaResponse, async () => 
-                    await userManager.GetUsersByPasswordHashAsync(
-                    await tenantManager.GetCurrentTenantIdAsync(),
-                    inDto.UserName,
-                    inDto.PasswordHash));
+                user = await bruteForceLoginManager.AttemptAsync(inDto.UserName, inDto.RecaptchaType, inDto.RecaptchaResponse, async () =>
+                {
+                    if (ldapSettings.EnableLdapAuthentication && !string.IsNullOrEmpty(inDto.Password))
+                    {
+                        return await ldapUserManager.TryGetAndSyncLdapUserInfo(inDto.UserName, inDto.Password);
+                    }
+                    else
+                    {
+                        return await userManager.GetUsersByPasswordHashAsync(
+                         await tenantManager.GetCurrentTenantIdAsync(),
+                         inDto.UserName,
+                         inDto.PasswordHash);
+                    }
+                });
             }
             else
             {
@@ -483,7 +492,7 @@ public class AuthenticationController(
 
                 inDto.UserName = thirdPartyProfile.EMail;
                 
-                user = await bruteForceLoginManager.AttemptAsync(inDto.UserName, inDto.RecaptchaResponse, async () => await GetUserByThirdParty(thirdPartyProfile));
+                user = await bruteForceLoginManager.AttemptAsync(inDto.UserName, inDto.RecaptchaType, inDto.RecaptchaResponse, async () => await GetUserByThirdParty(thirdPartyProfile));
             }
         }
         catch (BruteForceCredentialException)
@@ -528,35 +537,35 @@ public class AuthenticationController(
                 userInfo = await userManager.GetUsersAsync(userId);
             }
 
-            var isNew = false;
-
-            if (isNew)
-            {
-                //TODO:
-                //var spam = HttpContext.Current.Request["spam"];
-                //if (spam != "on")
-                //{
-                //    try
-                //    {
-                //        const string _databaseID = "com";
-                //        using (var db = DbManager.FromHttpContext(_databaseID))
-                //        {
-                //            db.ExecuteNonQuery(new SqlInsert("template_unsubscribe", false)
-                //                                   .InColumnValue("email", userInfo.Email.ToLowerInvariant())
-                //                                   .InColumnValue("reason", "personal")
-                //                );
-                //            Log.Debug(string.Format("Write to template_unsubscribe {0}", userInfo.Email.ToLowerInvariant()));
-                //        }
-                //    }
-                //    catch (Exception ex)
-                //    {
-                //        Log.Debug(string.Format("ERROR write to template_unsubscribe {0}, email:{1}", ex.Message, userInfo.Email.ToLowerInvariant()));
-                //    }
-                //}
-
-                await studioNotifyService.UserHasJoinAsync();
-                await userHelpTourHelper.SetIsNewUser(true); 
-            }
+            // var isNew = false;
+            //
+            // if (isNew)
+            // {
+            //     //TODO:
+            //     //var spam = HttpContext.Current.Request["spam"];
+            //     //if (spam != "on")
+            //     //{
+            //     //    try
+            //     //    {
+            //     //        const string _databaseID = "com";
+            //     //        using (var db = DbManager.FromHttpContext(_databaseID))
+            //     //        {
+            //     //            db.ExecuteNonQuery(new SqlInsert("template_unsubscribe", false)
+            //     //                                   .InColumnValue("email", userInfo.Email.ToLowerInvariant())
+            //     //                                   .InColumnValue("reason", "personal")
+            //     //                );
+            //     //            Log.Debug(string.Format("Write to template_unsubscribe {0}", userInfo.Email.ToLowerInvariant()));
+            //     //        }
+            //     //    }
+            //     //    catch (Exception ex)
+            //     //    {
+            //     //        Log.Debug(string.Format("ERROR write to template_unsubscribe {0}, email:{1}", ex.Message, userInfo.Email.ToLowerInvariant()));
+            //     //    }
+            //     //}
+            //
+            //     await studioNotifyService.UserHasJoinAsync();
+            //     await userHelpTourHelper.SetIsNewUser(true); 
+            // }
 
             return userInfo;
         }

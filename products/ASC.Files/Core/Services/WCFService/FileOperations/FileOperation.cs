@@ -214,7 +214,7 @@ public record FileOperationData<T>
     public int TenantId { get; set; }
     
     [ProtoMember(4)]
-    public IDictionary<string, string> Headers { get; set; }
+    public IDictionary<string, string> Headers { get; set; } = new Dictionary<string, string>();
     
     [ProtoMember(5)]
     public ExternalSessionSnapshot SessionSnapshot { get; set; }
@@ -250,7 +250,7 @@ public abstract class FileOperation<T, TId> : FileOperation where T : FileOperat
     protected ILogger Logger { get; private set; }
     protected internal List<TId> Folders { get; }
     protected internal List<TId> Files { get; }
-    protected IDictionary<string, StringValues> Headers { get; }
+    protected IDictionary<string, StringValues> Headers { get; } = new Dictionary<string, StringValues>();  
     protected ExternalSessionSnapshot SessionSnapshot { get; }
 
     protected FileOperation(IServiceProvider serviceProvider, T fileOperationData) : base(serviceProvider)

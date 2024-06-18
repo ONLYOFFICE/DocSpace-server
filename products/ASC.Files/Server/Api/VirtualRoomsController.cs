@@ -736,19 +736,17 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
 
                 if (roomLogo.Length > setupInfo.MaxImageUploadSize)
                 {
-                    result.Success = false;
-                    result.Message = fileSizeComment.FileImageSizeExceptionString;
-
-                    return result;
+                    throw new Exception(fileSizeComment.FileImageSizeExceptionString);
                 }
-
-                var data = new byte[roomLogo.Length];
-                await using var inputStream = roomLogo.OpenReadStream();
-
-                var br = new BinaryReader(inputStream);
-                _ = br.Read(data, 0, (int)roomLogo.Length);
-                br.Close();
-
+                
+                byte[] data;
+                await using(var inputStream = roomLogo.OpenReadStream())
+                using (var ms = new MemoryStream())
+                {
+                    await inputStream.CopyToAsync(ms);
+                    data = ms.ToArray();
+                }
+                
                 UserPhotoThumbnailManager.CheckImgFormat(data);
 
                 result.Data = await roomLogoManager.SaveTempAsync(data, setupInfo.MaxImageUploadSize);

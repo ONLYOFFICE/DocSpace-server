@@ -277,7 +277,7 @@ internal class FolderDao(
         var fileRootFolders = new List<FolderType> { FolderType.USER, FolderType.Archive, FolderType.TRASH, FolderType.VirtualRooms };
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        var result = new FilesStatisticsResultDto { };
+        var result = new FilesStatisticsResultDto();
         await foreach (var rootFolder in filesDbContext.FolderTypeUsedSpaceAsync(tenantId, fileRootFolders))
         {
             switch (rootFolder.FolderType)
@@ -1440,7 +1440,7 @@ internal class FolderDao(
                         where f.TenantId == r.TenantId
                         select f
                     ).FirstOrDefault(),
-                Shared = (r.FolderType == FolderType.CustomRoom || r.FolderType == FolderType.PublicRoom) &&
+                Shared = (r.FolderType == FolderType.CustomRoom || r.FolderType == FolderType.PublicRoom || r.FolderType == FolderType.FillingFormsRoom) &&
                          filesDbContext.Security.Any(s =>
                              s.TenantId == tenantId && s.EntryId == r.Id.ToString() && s.EntryType == FileEntryType.Folder && s.SubjectType == SubjectType.PrimaryExternalLink),
                 Order = (
@@ -1635,10 +1635,10 @@ internal class FolderDao(
             return Task.FromResult((entryId, entry.Title));
         }
 
-        return ParentRoomInfoFromFileEntryFromDbAsync(entry, folderId);
+        return ParentRoomInfoFromFileEntryFromDbAsync(folderId);
     }
 
-    private async Task<(int RoomId, string RoomTitle)> ParentRoomInfoFromFileEntryFromDbAsync(FileEntry<int> entry, int folderId)
+    private async Task<(int RoomId, string RoomTitle)> ParentRoomInfoFromFileEntryFromDbAsync(int folderId)
     {
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 

@@ -51,7 +51,7 @@ public static class CustomHealthCheck
     public static IHealthChecksBuilder AddDistibutedCache(
         this IHealthChecksBuilder hcBuilder, IConfiguration configuration)
     {
-        var redisConfiguration = configuration.GetSection("Redis");
+        var redisConfiguration = configuration.GetSection("Redis").Get<RedisConfiguration>();
 
         if (redisConfiguration != null)
         {

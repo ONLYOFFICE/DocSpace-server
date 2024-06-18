@@ -101,7 +101,6 @@ global using ASC.Web.Core.Helpers;
 global using ASC.Web.Core.PublicResources;
 global using ASC.Web.Core.Quota;
 global using ASC.Web.Core.Users;
-global using ASC.Web.Studio.Core;
 global using ASC.Web.Studio.Utility;
 global using ASC.Webhooks.Core;
 global using ASC.Webhooks.Core.EF.Context;
@@ -161,6 +160,5 @@ global using RedisRateLimiting.AspNetCore;
 global using StackExchange.Redis;
 global using StackExchange.Redis.Extensions.Core.Abstractions;
 global using StackExchange.Redis.Extensions.Core.Configuration;
-global using StackExchange.Redis.Extensions.Newtonsoft;
 
 global using LogLevel = Microsoft.Extensions.Logging.LogLevel;

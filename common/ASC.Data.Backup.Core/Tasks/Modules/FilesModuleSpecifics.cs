@@ -181,7 +181,7 @@ public class FilesModuleSpecifics(ILogger<ModuleProvider> logger, Helpers helper
                 return (false, null);
             }
 
-            var hashBytes = MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(sboxId));
+            var hashBytes = MD5.HashData(Encoding.UTF8.GetBytes(sboxId));
             var hashedId = BitConverter.ToString(hashBytes).Replace("-", "").ToLower();
 
             preparedRow.Add("hash_id", hashedId);

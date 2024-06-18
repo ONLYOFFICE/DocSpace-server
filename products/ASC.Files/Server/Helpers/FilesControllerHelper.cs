@@ -32,11 +32,8 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         FileUploader fileUploader,
         SocketManager socketManager,
         FileDtoHelper fileDtoHelper,
-        ApiContext apiContext,
         FileStorageService fileStorageService,
-        FolderContentDtoHelper folderContentDtoHelper,
         IHttpContextAccessor httpContextAccessor,
-        FolderDtoHelper folderDtoHelper,
         ILogger<FilesControllerHelper> logger,
         ApiDateTimeHelper apiDateTimeHelper,
         UserManager userManager,
@@ -47,11 +44,8 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
             fileUploader,
             socketManager,
             fileDtoHelper,
-            apiContext,
             fileStorageService,
-            folderContentDtoHelper,
-            httpContextAccessor,
-            folderDtoHelper)
+            httpContextAccessor)
     {
     private readonly ILogger _logger = logger;
 
@@ -64,6 +58,19 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         {
             yield return await _fileDtoHelper.GetAsync(e);
         }
+    }
+
+    public async Task<bool> isFormPDF<T>(T fileId)
+    {
+        var file = await _fileStorageService.GetFileAsync(fileId, -1);
+        var extension = FileUtility.GetFileExtension(file.Title);
+        var fileType = FileUtility.GetFileTypeByExtention(extension);
+
+        if (fileType == FileType.Pdf)
+        {
+            return await _fileStorageService.CheckExtendedPDF(file);
+        }
+        return false;
     }
 
     public async Task<string> GetPresignedUri<T>(T fileId)

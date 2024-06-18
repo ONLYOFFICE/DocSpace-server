@@ -69,7 +69,7 @@ namespace ASC.Web.Core.PublicResources {
         ///  &lt;!-- self_profile_updated --&gt;
         ///  &lt;pattern id=&quot;self_profile_updated&quot; sender=&quot;email.sender&quot;&gt;
         ///    &lt;subject resource=&quot;|subject_self_profile_updated|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core&quot; /&gt;
-        ///    &lt;body styler=&quot;ASC.Notify.Textile.TextileStyler,ASC.Notify.Textile&quot; resource=&quot;|pattern_self_profile_updated|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core&quot; / [rest of string was truncated]&quot;;.
+        ///    &lt;body styler=&quot;ASC.Notify.Textile.TextileStyler,ASC.Core.Common&quot; resource=&quot;|pattern_self_profile_updated|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core&quot; / [rest of string was truncated]&quot;;.
         /// </summary>
         public static string webstudio_patterns {
             get {

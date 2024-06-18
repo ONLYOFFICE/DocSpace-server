@@ -667,9 +667,13 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         var fileTracker = scope.ServiceProvider.GetService<FileTrackerHelper>();
         var socketManager = scope.ServiceProvider.GetService<SocketManager>();
         var globalStorage = scope.ServiceProvider.GetService<GlobalStore>();
+        var fileStorageService = scope.ServiceProvider.GetService<FileStorageService>();
+        var securityContext = scope.ServiceProvider.GetService<SecurityContext>();
 
         var toFolderId = toFolder.Id;
         var sb = new StringBuilder();
+        var isPdfForm = false;
+        var numberRoomMembers = 0;
         foreach (var fileId in fileIds)
         {
             CancellationToken.ThrowIfCancellationRequested();
@@ -713,9 +717,32 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
             }
             else
             {
-                var deleteLinks = file.RootFolderType == FolderType.USER && 
-                                  toFolder.RootFolderType is FolderType.VirtualRooms or FolderType.Archive or FolderType.TRASH;
-                
+                if (toFolder.RootFolderType == FolderType.VirtualRooms) {
+                    var folderDao = scope.ServiceProvider.GetService<IFolderDao<TTo>>();
+                    var (rId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(toFolder);
+                    if (int.TryParse(rId.ToString(), out var roomId) && roomId != -1)
+                    {
+                        var room = await folderDao.GetFolderAsync((TTo)Convert.ChangeType(roomId, typeof(TTo)));
+                        if (room.FolderType == FolderType.FillingFormsRoom)
+                        {
+                            var extension = FileUtility.GetFileExtension(file.Title);
+                            var fileType = FileUtility.GetFileTypeByExtention(extension);
+                            if (fileType != FileType.Pdf || (fileType == FileType.Pdf && !await fileStorageService.CheckExtendedPDF(file)))
+                            {
+                                this[Err] = FilesCommonResource.ErrorMessage_UploadToFormRoom;
+                                continue;
+                            }
+                            else if (fileType == FileType.Pdf)
+                            {
+                                isPdfForm = true;
+                                numberRoomMembers = await fileStorageService.GetPureSharesCountAsync(toFolder.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "");
+                            }
+                        }
+                    }
+                }
+                var deleteLinks = file.RootFolderType == FolderType.USER &&
+                                toFolder.RootFolderType is FolderType.VirtualRooms or FolderType.Archive or FolderType.TRASH;
+
                 var parentFolder = await FolderDao.GetFolderAsync(file.ParentId);
                 try
                 {
@@ -792,8 +819,16 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                     await LinkDao.DeleteAllLinkAsync(file.Id.ToString());
                                     await FileDao.SaveProperties(file.Id, null);
                                 }
-                                
+
                                 await socketManager.CreateFileAsync(newFile);
+                                if (isPdfForm)
+                                {
+                                    var properties = await fileDao.GetProperties(newFile.Id) ?? new EntryProperties() { FormFilling = new FormFillingProperties()};
+                                    properties.FormFilling.StartFilling = true;
+                                    properties.FormFilling.CollectFillForm = true;
+                                    await fileDao.SaveProperties(newFile.Id, properties);
+                                    await socketManager.CreateFormAsync(newFile, securityContext.CurrentAccount.ID, numberRoomMembers <= 1);
+                                };
 
                                 if (ProcessedFile(fileId))
                                 {
@@ -857,6 +892,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                 needToMark.Add(newFile);
 
                                 await socketManager.CreateFileAsync(newFile);
+                                if (isPdfForm) await socketManager.CreateFormAsync(newFile, securityContext.CurrentAccount.ID, numberRoomMembers <= 1);
 
                                 if (copy)
                                 {
@@ -885,9 +921,9 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                         {
                                             await socketManager.DeleteFileAsync(file, action: async () =>
                                             {
-                                            await FileDao.DeleteFileAsync(file.Id);
+                                                await FileDao.DeleteFileAsync(file.Id);
 
-                                            await LinkDao.DeleteAllLinkAsync(file.Id.ToString());
+                                                await LinkDao.DeleteAllLinkAsync(file.Id.ToString());
                                             });
 
                                             await filesMessageService.SendAsync(MessageAction.FileMovedWithOverwriting, file, toFolder, _headers, file.Title, parentFolder.Title, toFolder.Title);

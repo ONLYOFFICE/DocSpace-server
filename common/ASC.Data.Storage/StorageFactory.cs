@@ -27,7 +27,7 @@
 namespace ASC.Data.Storage;
 
 [Singleton]
-public class StorageFactoryConfig(IConfiguration configuration)
+public class StorageFactoryConfig(IConfiguration configuration, StorageConfigExtension storageConfigExtension)
 {
     public IEnumerable<string> GetModuleList(string region = "current", bool exceptDisabledMigration = false)
     {
@@ -36,7 +36,7 @@ public class StorageFactoryConfig(IConfiguration configuration)
             .Select(x => x.Name);
     }
 
-    public IEnumerable<string> GetDomainList(string modulename, string region = "current")
+    public IEnumerable<string> GetDomainList(string modulename, bool onlyVisible = true, string region = "current")
     {
         var section = GetStorage(region);
         if (section == null)
@@ -47,14 +47,14 @@ public class StorageFactoryConfig(IConfiguration configuration)
         return section.Module
             .Single(x => x.Name.Equals(modulename, StringComparison.OrdinalIgnoreCase))
             .Domain
-            .Where(x => x.Visible)
+            .Where(x => !onlyVisible || x.Visible)
             .Select(x => x.Name);
     }
 
     public Configuration.Storage GetStorage(string region)
     {
         return region == "current" ? 
-            StorageConfigExtension.GetStorage(configuration) : 
+            storageConfigExtension.Storage : 
             configuration.GetSection($"regions:{region}:storage").Get<Configuration.Storage>();
     }
 }
@@ -69,8 +69,8 @@ public static class StorageFactoryExtenstion
         //    throw new InvalidOperationException("Application not hosted.");
         //}
 
-        var configuration = builder.ServiceProvider.GetService<IConfiguration>();
-        var section = StorageConfigExtension.GetStorage(configuration);
+        var storageConfigExtension = builder.ServiceProvider.GetService<StorageConfigExtension>();
+        var section = storageConfigExtension.Storage;
         
         if (section is { Module: not null })
         {

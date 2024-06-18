@@ -137,7 +137,7 @@ public class WarmupMappingStartupTask(ILogger<WarmupMappingStartupTask> logger, 
                 }
             }
         }
-        var configuration = new MapperConfiguration(cfg => {});
+        var configuration = new MapperConfiguration(_ => {});
         configuration.CompileMappings();
         
         return Task.CompletedTask;

@@ -223,6 +223,19 @@ public class CommonLinkUtility(
 
     #region confirm links
 
+    public async Task<string> GetInvitationLinkAsync(string email, EmployeeType employeeType, Guid createdBy, string culture = null)
+    {
+        var link = await GetConfirmationEmailUrlAsync(email, ConfirmType.LinkInvite, employeeType, createdBy)
+                   + $"&emplType={employeeType:d}";
+        
+        if (!string.IsNullOrEmpty(culture))
+        {
+            link += $"&culture={culture}";
+        }
+        
+        return link;
+    }
+    
     public async Task<(string, string)> GetConfirmationUrlAndKeyAsync(string email, ConfirmType confirmType, object postfix = null, Guid userId = default)
     {
         var url = GetFullAbsolutePath($"confirm/{confirmType}?{GetTokenWithoutKey(email, confirmType, userId)}");
@@ -236,7 +249,7 @@ public class CommonLinkUtility(
     {
         return GetFullAbsolutePath(await GetConfirmationUrlRelativeAsync(email, confirmType, postfix, userId));
     }
-
+    
     public string GetConfirmationUrl(string key, ConfirmType confirmType, Guid userId = default)
     {
         return GetFullAbsolutePath(GetConfirmationUrlRelative(key, confirmType, userId));
