@@ -28,7 +28,7 @@ namespace ASC.Files.Core.EF;
 
 public partial class FilesDbContext
 {
-    [PreCompileQuery([PreCompileQuery.DefaultInt, int.MaxValue])]
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public IAsyncEnumerable<DbFolder> FoldersAsync(int tenantId, IEnumerable<int> folderId)
     {
         return AbstractQueries.FoldersAsync(this, tenantId, folderId);
