@@ -367,6 +367,24 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to GET FREE APP.
+        /// </summary>
+        public static string ButtonGetFreeApp {
+            get {
+                return ResourceManager.GetString("ButtonGetFreeApp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to GET STARTED.
+        /// </summary>
+        public static string ButtonGetStart {
+            get {
+                return ResourceManager.GetString("ButtonGetStart", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Get started.
         /// </summary>
         public static string ButtonGetStarted {
@@ -1447,6 +1465,17 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;color: #333333; font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 24px 40px 32px; text-align: center;&quot;&gt;ONLYOFFICE DocSpace: Explore useful &lt;span style=&quot;color: #FF6F3D;&quot;&gt;integrations&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+        ///
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;color: #333333; font-family: &apos;Open Sans&apos;, Helvetica, Ar [rest of string was truncated]&quot;;.
+        /// </summary>
+        public static string pattern_saas_admin_integrations_v1 {
+            get {
+                return ResourceManager.GetString("pattern_saas_admin_integrations_v1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;color: #333333; font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 44px 40px 32px; text-align: center;&quot;&gt;Configure your &lt;span style=&quot;color: #FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace&lt;/td&gt;&lt;/tr&gt;
         ///
         ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font- [rest of string was truncated]&quot;;.
@@ -2358,6 +2387,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string subject_saas_admin_activation_v1 {
             get {
                 return ResourceManager.GetString("subject_saas_admin_activation_v1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Explore useful integrations for ONLYOFFICE DocSpace.
+        /// </summary>
+        public static string subject_saas_admin_integrations_v1 {
+            get {
+                return ResourceManager.GetString("subject_saas_admin_integrations_v1", resourceCulture);
             }
         }
         

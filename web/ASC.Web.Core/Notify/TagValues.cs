@@ -33,7 +33,7 @@ public static class TagValues
         return new TagValue(CommonTags.WithoutUnsubscribe, true);
     }
 
-    public static ITagValue OrangeButton(string btnText, string btnUrl)
+    public static ITagValue OrangeButton(string btnText, string btnUrl, string tag)
     {
         var sb = new StringBuilder();
 
@@ -59,7 +59,14 @@ public static class TagValues
         sb.Append("</tbody>");
         sb.Append("</table>");
 
-        return new TagValue("OrangeButton", sb.ToString());
+        if(string.IsNullOrEmpty(tag))
+        {
+            return new TagValue("OrangeButton", sb.ToString());
+        }
+        else
+        {
+            return new TagValue(tag, sb.ToString());
+        }
     }
 
     public static ITagValue TrulyYours(StudioNotifyHelper studioNotifyHelper, string text)

@@ -140,6 +140,7 @@ public class StudioNotifySource(UserManager userManager, IRecipientProvider reci
                 Actions.SaasOwnerPaymentWarningGracePeriodExpired,
 
                 Actions.SaasAdminVideoGuides,
+                Actions.SaasAdminIntegrations,
 
                 Actions.ZoomWelcome,
 

@@ -87,12 +87,21 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                 Func<CultureInfo, string> orangeButtonText = _ => string.Empty;
                 var orangeButtonUrl = string.Empty;
+                Func<CultureInfo, string> orangeButtonText1 = _ => string.Empty;
+                var orangeButtonUrl1 = string.Empty;
+                Func<CultureInfo, string> orangeButtonText2 = _ => string.Empty;
+                var orangeButtonUrl2 = string.Empty;
+                Func<CultureInfo, string> orangeButtonText3 = _ => string.Empty;
+                var orangeButtonUrl3 = string.Empty;
+                Func<CultureInfo, string> orangeButtonText4 = _ => string.Empty;
+                var orangeButtonUrl4 = string.Empty;
 
                 var img1 = string.Empty;
                 var img2 = string.Empty;
                 var img3 = string.Empty;
                 var img4 = string.Empty;
                 var img5 = string.Empty;
+                var img6 = string.Empty;
                 Func<CultureInfo, string> txtTrulyYours = c =>  WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", c);
                 var topGif = string.Empty;
                 
@@ -160,6 +169,31 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                     }
 
                     #endregion
+
+                    else if( createdDate.AddDays(10) == nowDate)
+                    {
+                        action = Actions.SaasAdminIntegrations;
+                        paymentMessage = false;
+                        toadmins = true;
+
+                        img1 = studioNotifyHelper.GetNotificationImageUrl("onlyoffice.png");
+                        img2 = studioNotifyHelper.GetNotificationImageUrl("connect.png");
+                        img3 = studioNotifyHelper.GetNotificationImageUrl("zoom.png");
+                        img4 = studioNotifyHelper.GetNotificationImageUrl("zapier.png");
+                        img5 = studioNotifyHelper.GetNotificationImageUrl("wordpress.png");
+                        img6 = studioNotifyHelper.GetNotificationImageUrl("drupal.png");
+
+                        orangeButtonText1 = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetFreeApp", c);
+                        orangeButtonUrl1 = "https://marketplace.zoom.us/apps/OW6rOq-nRgCihG5eps_p-g";
+                        orangeButtonText2 = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetStart", c);
+                        orangeButtonUrl2 = "https://zapier.com/apps/onlyoffice-docspace/integrations";
+                        orangeButtonText3 = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetFreeApp", c);
+                        orangeButtonUrl3 = "https://wordpress.org/plugins/onlyoffice-docspace/";
+                        orangeButtonText4 = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetFreeApp", c);
+                        orangeButtonUrl4 = "https://www.drupal.org/project/onlyoffice_docspace";
+
+                        topGif = studioNotifyHelper.GetNotificationImageUrl("integration.gif");
+                    }
 
                     #region 14 days after registration to admins and users SAAS TRIAL
 
@@ -343,13 +377,18 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         new TagValue(Tags.PricePeriod, UserControlsCommonResource.TariffPerMonth),
                         //new TagValue(Tags.DueDate, dueDate.ToLongDateString()),
                         //new TagValue(Tags.DelayDueDate, (delayDueDateIsNotMax ? delayDueDate : dueDate).ToLongDateString()),
-                        TagValues.OrangeButton(orangeButtonText(culture), orangeButtonUrl),
+                        TagValues.OrangeButton(orangeButtonText(culture), orangeButtonUrl, null),
+                        TagValues.OrangeButton(orangeButtonText1(culture), orangeButtonUrl1, "OrangeButton1"),
+                        TagValues.OrangeButton(orangeButtonText2(culture), orangeButtonUrl2, "OrangeButton2"),
+                        TagValues.OrangeButton(orangeButtonText3(culture), orangeButtonUrl3, "OrangeButton3"),
+                        TagValues.OrangeButton(orangeButtonText4(culture), orangeButtonUrl4, "OrangeButton4"),
                         TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours(culture)),
                         new TagValue("IMG1", img1),
                         new TagValue("IMG2", img2),
                         new TagValue("IMG3", img3),
                         new TagValue("IMG4", img4),
                         new TagValue("IMG5", img5),
+                        new TagValue("IMG6", img6),
                         new TagValue(CommonTags.TopGif, topGif),
                         new TagValue(Tags.PaymentDelay, tariffService.GetPaymentDelay()),
                         new TagValue(CommonTags.Footer, await userManager.IsDocSpaceAdminAsync(u) ? "common" : "social"));
@@ -489,7 +528,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         new TagValue(Tags.PricePeriod, UserControlsCommonResource.TariffPerMonth),
                         //new TagValue(Tags.DueDate, dueDate.ToLongDateString()),
                         //new TagValue(Tags.DelayDueDate, (delayDueDateIsNotMax ? delayDueDate : dueDate).ToLongDateString()),
-                        TagValues.OrangeButton(orangeButtonText(culture), orangeButtonUrl),
+                        TagValues.OrangeButton(orangeButtonText(culture), orangeButtonUrl, null),
                         TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours(culture)),
                         new TagValue("IMG1", img1),
                         new TagValue("IMG2", img2),
@@ -566,7 +605,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                             new TagValue(CommonTags.Culture, culture.Name),
                             new TagValue(Tags.UserName, u.DisplayUserName(displayUserSettingsHelper)),
                             new TagValue(CommonTags.Footer, "opensource"),
-                            TagValues.OrangeButton(orangeButtonText(culture), orangeButtonUrl),
+                            TagValues.OrangeButton(orangeButtonText(culture), orangeButtonUrl, null),
                             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours(culture)),
                             new TagValue("IMG1", img1),
                             new TagValue("IMG2", img2),

@@ -125,7 +125,7 @@ public class NotifyHelper(UserManager userManager,
                 Actions.RestoreCompletedV115,
                 user,
                 StudioNotifyService.EMailSenderName,
-                TagValues.OrangeButton(orangeButtonText, confirmationUrl));
+                TagValues.OrangeButton(orangeButtonText, confirmationUrl, null));
         }
     }
 
@@ -156,7 +156,7 @@ public class NotifyHelper(UserManager userManager,
                     var culture = user.GetCulture();
 
                     var orangeButtonText = BackupResource.ResourceManager.GetString("ButtonSetPassword", culture);
-                    currentArgs.Add(TagValues.OrangeButton(orangeButtonText, confirmationUrl));
+                    currentArgs.Add(TagValues.OrangeButton(orangeButtonText, confirmationUrl, null));
 
                     var bestReagardsTxt = WebstudioNotifyPatternResource.ResourceManager.GetString("BestRegardsText", culture);
                     currentArgs.Add(TagValues.TrulyYours(studioNotifyHelper, bestReagardsTxt));
