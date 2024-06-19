@@ -1958,7 +1958,19 @@ public class EntryManager(IDaoFactory daoFactory,
         T inProcessFormFolderId;
         T readyFormFolderId;
 
-        (readyFormFolderId, inProcessFormFolderId) = await InitSystemFormFillingFolders(folder.Id, folderDao);
+        var inProcessFormFolder = (await folderDao.GetFoldersAsync(folder.Id, FolderType.InProcessFormFolder).ToListAsync()).FirstOrDefault();
+        var readyFormFolder = (await folderDao.GetFoldersAsync(folder.Id, FolderType.ReadyFormFolder).ToListAsync()).FirstOrDefault();
+
+        if (inProcessFormFolder == null && readyFormFolder == null)
+        {
+            (readyFormFolderId, inProcessFormFolderId) = await InitSystemFormFillingFolders(folder.Id, folderDao);
+        }
+        else
+        {
+            inProcessFormFolderId = inProcessFormFolder.Id;
+            readyFormFolderId = readyFormFolder.Id;
+        }
+
         var systemFormFillingFolders = new List<Folder<T>>()
         {
             await folderDao.GetFolderAsync(readyFormFolderId),
