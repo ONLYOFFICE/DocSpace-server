@@ -563,8 +563,8 @@ public class FileConverter(
 
         await filesMessageService.SendAsync(MessageAction.FileConverted, newFile, MessageInitiator.DocsService, newFile.Title);
 
-        var linkDao = daoFactory.GetLinkDao();
-        await linkDao.DeleteAllLinkAsync(file.Id.ToString());
+        var linkDao = daoFactory.GetLinkDao<T>();
+        await linkDao.DeleteAllLinkAsync(file.Id);
 
         await fileMarker.MarkAsNewAsync(newFile);
 

@@ -24,38 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core.Security;
+namespace ASC.Files.Core;
 
-[Scope]
-public class FileValidator(FileSecurity fileSecurity, IDaoFactory daoFactory) : IDataStoreValidator
+public interface IMappingId<in T>
 {
-    public async Task<bool> Validate(string path)
-    {
-        ArgumentException.ThrowIfNullOrEmpty(path, nameof(path));
-        
-        if (FileDao.TryGetFileId(path, out var fileId))
-        {
-            var file = await daoFactory.GetFileDao<int>().GetFileAsync(fileId);
-            if (file == null)
-            {
-                return false;
-            }
-
-            return await fileSecurity.CanDownloadAsync(file);
-        }
-
-        var pathPart = path.Split(Path.DirectorySeparatorChar).FirstOrDefault();
-        if (string.IsNullOrEmpty(pathPart) || !Guid.TryParse(pathPart, out var id))
-        {
-            return true;
-        }
-
-        var record = await daoFactory.GetSecurityDao<string>().GetSharesAsync(new[] { id }).FirstOrDefaultAsync();
-        if (record is { IsLink: true, Options: not null })
-        {
-            return !record.Options.DenyDownload;
-        }
-
-        return true;
-    }
+    ValueTask<string> MappingIdAsync(T id, bool saveIfNotExist = false);
 }

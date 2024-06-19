@@ -30,17 +30,15 @@ using Folder = Microsoft.SharePoint.Client.Folder;
 namespace ASC.Files.Thirdparty.SharePoint;
 
 internal class SharePointDaoBase(
+    IDaoFactory daoFactory,
     IServiceProvider serviceProvider,
     UserManager userManager,
     TenantManager tenantManager,
     TenantUtil tenantUtil,
     IDbContextFactory<FilesDbContext> dbContextFactory,
-    SetupInfo setupInfo,
     FileUtility fileUtility,
-    TempPath tempPath,
     SharePointDaoSelector regexDaoSelectorBase)
-    : ThirdPartyProviderDao<File, Folder, ClientObject>(serviceProvider, userManager, tenantManager, tenantUtil,
-        dbContextFactory, setupInfo, fileUtility, tempPath, regexDaoSelectorBase)
+    : ThirdPartyProviderDao<File, Folder, ClientObject>(daoFactory, serviceProvider, userManager, tenantManager, tenantUtil, dbContextFactory, fileUtility, regexDaoSelectorBase)
 {
     private readonly TenantManager _tenantManager = tenantManager;
     internal SharePointProviderInfo SharePointProviderInfo { get; private set; }
@@ -131,6 +129,7 @@ internal class SharePointDaoBase(
 
         await strategy.ExecuteAsync(async () =>
         {
+            var mapping = _daoFactory.GetMapping<string>();
             await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
             await using var tx = await dbContext.Database.BeginTransactionAsync();
 
@@ -138,9 +137,9 @@ internal class SharePointDaoBase(
 
             await foreach (var oldId in oldIds)
             {
-                var oldHashId = await MappingIDAsync(oldId);
+                var oldHashId = await mapping.MappingIdAsync(oldId);
                 var newId = oldId.Replace(oldValue, newValue);
-                var newHashId = await MappingIDAsync(newId);
+                var newHashId = await mapping.MappingIdAsync(newId);
 
                 var mappingForDelete = await Queries.ThirdpartyIdMappingsAsync(dbContext, tenantId, oldHashId).ToListAsync();
                 var mappingForInsert = mappingForDelete.Select(m => new DbFilesThirdpartyIdMapping

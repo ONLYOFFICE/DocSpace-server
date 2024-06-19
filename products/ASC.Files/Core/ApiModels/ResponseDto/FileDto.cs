@@ -206,10 +206,10 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
 
         if (fileType == FileType.Pdf)
         {
-            var linkDao = daoFactory.GetLinkDao();
+            var linkDao = daoFactory.GetLinkDao<T>();
             var folderDao = daoFactory.GetFolderDao<T>();
 
-            var linkedIdTask = linkDao.GetLinkedAsync(file.Id.ToString());
+            var linkedIdTask = linkDao.GetLinkedAsync(file.Id);
             var propertiesTask = daoFactory.GetFileDao<T>().GetProperties(file.Id);
             var currentFolderTask = folderDao.GetFolderAsync((T)Convert.ChangeType(file.ParentId, typeof(T)));
             await Task.WhenAll(linkedIdTask, propertiesTask, currentFolderTask);
