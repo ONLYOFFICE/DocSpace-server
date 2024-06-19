@@ -536,9 +536,18 @@ Highest compatibility with docx, xlsx, pptx.</value>
     <value>Open form</value>
   </data>
   <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>The file cannot be moved to this room. Please try to move the ONLYOFFICE PDF form.</value>
+    <value>The file cannot be uploaded to this room. Please try to upload the ONLYOFFICE PDF form.</value>
   </data>
   <data name="FillOutExternalLinkTitle" xml:space="preserve">
     <value>Link to fill out</value>
+  </data>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>Moving several files to the Form Filling room is not supported. Move one ONLYOFFICE PDF form at a time.</value>
+  </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>Moving folders to the Form Filling room is not supported. Move one ONLYOFFICE PDF form at a time.</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>The file cannot be moved to this room. Please try to move the ONLYOFFICE PDF form.</value>
   </data>
 </root>
