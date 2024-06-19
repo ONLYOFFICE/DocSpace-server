@@ -757,9 +757,6 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="AcceptDocSpace" xml:space="preserve">
-    <value>承認</value>
-  </data>
   <data name="ButtonAccept" xml:space="preserve">
     <value>承認</value>
   </data>
@@ -787,7 +784,7 @@ $TrulyYours</value>
   <data name="ButtonChangeTfa" xml:space="preserve">
     <value>認証アプリを設定する</value>
   </data>
-  <data name="ButtonCollaborateDocSpace" xml:space="preserve">
+  <data name="ButtonCollaborate" xml:space="preserve">
     <value>DocSpaceでコラボレーションする</value>
   </data>
   <data name="ButtonConfigureRightNow" xml:space="preserve">
@@ -799,7 +796,7 @@ $TrulyYours</value>
   <data name="ButtonConfirmEmail" xml:space="preserve">
     <value>確認</value>
   </data>
-  <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
+  <data name="ButtonConfirmInvite" xml:space="preserve">
     <value>DocSpaceの招待を確認する</value>
   </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
@@ -827,7 +824,7 @@ $TrulyYours</value>
     <value>フィードバックを書く</value>
   </data>
   <data name="ButtonRemoveProfile" xml:space="preserve">
-    <value>プロフィールを削除する</value>
+    <value>アカウントを無効にする</value>
   </data>
   <data name="ButtonRenewNow" xml:space="preserve">
     <value>今すぐ更新する</value>
@@ -896,7 +893,7 @@ $OwnerName 様
 ご質問やサポートが必要な場合は、[${__SupportLink}](${__SupportLink}) までお気軽にお問い合わせください。
 
 何卒よろしくお願いいたします。
-ONLYOFFICE™ サポートチーム
+ONLYOFFICE サポートチーム
 [www.onlyoffice.com](http://onlyoffice.com/ja)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
@@ -1157,7 +1154,7 @@ _ご注意_: このリンクは7日間のみ有効です。期間内にポータ
 ご質問やサポートが必要な場合は、[${__SalesEmail}](mailto:${__SalesEmail}) までお気軽にお問い合わせください。
 
 よろしくお願いいたします
-ONLYOFFICE™ サポートチーム
+ONLYOFFICE サポートチーム
 [www.onlyoffice.com](http://onlyoffice.com/ja/)</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
@@ -1264,19 +1261,19 @@ _ご注意_: このリンクは7日間のみ有効です。期間内にポータ
 ご質問やサポートが必要な場合は、[${__SalesEmail}](mailto:${__SalesEmail}) までお気軽にお問い合わせください。
 
 どうぞよろしくお願いいたします。
-ONLYOFFICE™ サポートチーム
+ONLYOFFICE サポートチーム
 [www.onlyoffice.com](http://onlyoffice.com/ja/)</value>
   </data>
   <data name="pattern_profile_delete" xml:space="preserve">
-    <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}"ポータルからのプロファイルの削除
+    <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}"でのアカウントの無効化
 
-お客様に、"${__VirtualRootPath}":"${__VirtualRootPath}"ポータルからお客様のプロフィールを永久に削除するリクエストをいただきました。
+DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" のアカウントを無効にするようリクエストを受け付けました。
 
-プロフィールを削除したい場合は、以下のリンクに従って操作をご確認ください：
+それでもアカウントを無効にしたい場合は、以下のリンクから操作をご確認ください:
 
 $OrangeButton
 
-*ご注意*：このリンクは7日間のみ有効です。期間内にプロファイルの削除を完了してください。</value>
+*注意*：このリンクは7日間のみ有効です。期間内にアカウントの無効化プロセスを完了してください。</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
     <value>"$FromUserName":"$FromUserLink"ユーザーがプロフィールを削除しました。すべてのユーザーのファイルはまだそのユーザーに割り当てられており、ディスク領域を占有しています。
@@ -1594,7 +1591,7 @@ $OrangeButton
     <value>${LetterLogoText}.ポータルアドレス変更</value>
   </data>
   <data name="subject_profile_delete" xml:space="preserve">
-    <value>${__VirtualRootPath}ポータルからのプロフィールの削除</value>
+    <value>${__VirtualRootPath}のアカウントを無効にします</value>
   </data>
   <data name="subject_profile_has_deleted_itself" xml:space="preserve">
     <value>ユーザーが自分のプロフィールを解除しました</value>
@@ -1703,5 +1700,14 @@ $TrulyYours</value>
   </data>
   <data name="subject_zoom_welcome" xml:space="preserve">
     <value>ONLYOFFICE DocSpaceへようこそ！</value>
+  </data>
+  <data name="pattern_saas_room_invite_existing_user" xml:space="preserve">
+    <value>こんにちは！
+
+$__AuthorName は、"${__VirtualRootPath}":"$_VirtualRootPath}"のルーム"$Message":"$InviteLink"にあなたを招待しました。
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
 </root>

@@ -172,7 +172,7 @@
     <value>Leave Feedback</value>
   </data>
   <data name="ButtonRemoveProfile" xml:space="preserve">
-    <value>Remove profile</value>
+    <value>Disable account</value>
   </data>
   <data name="ButtonRenewNow" xml:space="preserve">
     <value>Renew now</value>
@@ -226,7 +226,7 @@ To learn more on the backup procedure please refer to our [Data backup](${__Help
 If you have any questions or need assistance please feel free to contact us at [${__SupportLink}](${__SupportLink})
 
 Best regards,
-ONLYOFFICE™ Support Team
+ONLYOFFICE Support Team
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
@@ -578,7 +578,7 @@ You can reactivate your portal any time by clicking the following link:
 If you have any questions or need assistance please feel free to contact us at [${__SalesEmail}](mailto:${__SalesEmail})
 
 Best regards,
-ONLYOFFICE™ Support Team
+ONLYOFFICE Support Team
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
@@ -626,7 +626,7 @@ _Note_: this link is valid for 7 days only. Please complete the portal deletion 
 If you have any questions or need assistance please feel free to contact us at [${__SalesEmail}](mailto:${__SalesEmail})
 
 Best regards,
-ONLYOFFICE™ Support Team
+ONLYOFFICE Support Team
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_rename" xml:space="preserve">
@@ -639,15 +639,15 @@ Your $PortalUrl portal address was changed to the new "${__VirtualRootPath}":"${
 *Note*: DNS settings and single sign-on options stop working until you change them.</value>
   </data>
   <data name="pattern_profile_delete" xml:space="preserve">
-    <value>h1.Removal of the profile from the "${__VirtualRootPath}":"${__VirtualRootPath}" portal
+    <value>h1.Disabling account on "${__VirtualRootPath}":"${__VirtualRootPath}"
 
-You have requested to permanently delete your profile from the "${__VirtualRootPath}":"${__VirtualRootPath}" portal.
+You have requested to disable your account in DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}".
 
-If you still want to delete your profile please follow the link below to confirm the operation:
+If you still want to disable your account, please follow the link below to confirm the operation:
 
 $OrangeButton
 
-*Note*: this link is valid for 7 days only. Please complete the profile deletion process within that period.</value>
+*Note*: this link is valid for 7 days only. Please complete the account disablement process within that period.</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
     <value>User "$FromUserName":"$FromUserLink" has deleted his/her profile, and this profile is now blocked. All user’s files are still assigned to him/her and occupy disk space. 
@@ -1007,7 +1007,7 @@ The link is only valid for 7 days.</value>
     <value>${LetterLogoText}. Change of portal address</value>
   </data>
   <data name="subject_profile_delete" xml:space="preserve">
-    <value>Deletion of your profile from ${__VirtualRootPath} portal</value>
+    <value>Disabling account on ${__VirtualRootPath}</value>
   </data>
   <data name="subject_profile_has_deleted_itself" xml:space="preserve">
     <value>User has deleted his/her profile</value>
@@ -1116,7 +1116,7 @@ $Body</value>
   <data name="subject_for_sales_notify" xml:space="preserve">
     <value>Sales department request</value>
   </data>
-  <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
+  <data name="ButtonConfirmInvite" xml:space="preserve">
     <value>Confirm DocSpace Invite</value>
   </data>
   <data name="ButtonConfirmEmail" xml:space="preserve">
@@ -1439,7 +1439,7 @@ $TrulyYours</comment>
   <data name="subject_saas_admin_welcome_v1" xml:space="preserve">
     <value>Discover business subscription of ONLYOFFICE DocSpace</value>
   </data>
-  <data name="ButtonCollaborateDocSpace" xml:space="preserve">
+  <data name="ButtonCollaborate" xml:space="preserve">
     <value>Collaborate in DocSpace</value>
   </data>
   <data name="pattern_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
@@ -1856,9 +1856,6 @@ $TrulyYours</comment>
   <data name="subject_saas_user_welcome_v1" xml:space="preserve">
     <value>Welcome to ONLYOFFICE DocSpace!</value>
   </data>
-  <data name="AcceptDocSpace" xml:space="preserve">
-    <value>ACCEPT</value>
-  </data>
   <data name="pattern_enterprise_user_activation_v1" xml:space="preserve">
     <value>h1. Join &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
 
@@ -2080,6 +2077,18 @@ After clicking on the invitation link, please set a new password for your accoun
 
 $TrulyYours</comment>
   </data>
+  <data name="pattern_saas_docspace_registration" xml:space="preserve">
+    <value>h1. ONLYOFFICE DocSpace: complete registration
+
+
+Hello!
+
+You are invited to complete registration for ONLYOFFICE DocSpace at "${__VirtualRootPath}":"${__VirtualRootPath}". Enter your name and set a password by clicking the link:
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>Hello!
 
@@ -2093,6 +2102,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_docspace_invite" xml:space="preserve">
     <value>Join ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="subject_saas_docspace_registration" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace: complete registration</value>
   </data>
   <data name="subject_saas_room_invite" xml:space="preserve">
     <value>Join ONLYOFFICE DocSpace</value>
@@ -2290,5 +2302,46 @@ $TrulyYours</value>
   </data>
   <data name="subject_zoom_welcome" xml:space="preserve">
     <value>Welcome to ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="ButtonGetStarted" xml:space="preserve">
+    <value>Get started</value>
+  </data>
+  <data name="pattern_migration_personal_to_docspace" xml:space="preserve">
+    <value>Hello!
+
+The data migration process from ONLYOFFICE Personal to your new ONLYOFFICE DocSpace is successfully completed.
+
+To access your DocSpace with the imported data, just click the button below:
+
+$OrangeButton
+
+Your current DocSpace plan is STARTUP. It is absolutely free.
+
+==If necessary, you can change the name of your new DocSpace. Just switch to Settings -&gt; Customization -&gt; DocSpace Renaming.==
+
+Enjoy a new way of document collaboration!
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_migration_personal_to_docspace" xml:space="preserve">
+    <value>Data migration to ONLYOFFICE DocSpace successfully completed</value>
+  </data>
+  <data name="ButtonJoinRoom" xml:space="preserve">
+    <value>Join room</value>
+  </data>
+  <data name="pattern_saas_room_invite_existing_user" xml:space="preserve">
+    <value>Hello!
+
+$__AuthorName invited you to join the room "$Message":"$InviteLink" on "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_saas_room_invite_existing_user" xml:space="preserve">
+    <value>You're invited to the ONLYOFFICE DocSpace room</value>
+  </data>
+  <data name="ButtonRegister" xml:space="preserve">
+    <value>REGISTER</value>
   </data>
 </root>

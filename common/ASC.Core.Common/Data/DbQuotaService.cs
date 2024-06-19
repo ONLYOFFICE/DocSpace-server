@@ -26,15 +26,15 @@
 
 namespace ASC.Core.Data;
 
-[Scope(Additional = typeof(DbQuotaServiceExtensions))]
+[Scope]
 class DbQuotaService(IDbContextFactory<CoreDbContext> dbContextManager, IMapper mapper)
     : IQuotaService
 {
     public async Task<IEnumerable<TenantQuota>> GetTenantQuotasAsync()
     {
         await using var coreDbContext = await dbContextManager.CreateDbContextAsync();
-
-        return mapper.Map<List<DbQuota>, List<TenantQuota>>(await coreDbContext.Quotas.ToListAsync());
+        var res = await coreDbContext.AllQuotasAsync().ToListAsync();
+        return mapper.Map<List<DbQuota>, List<TenantQuota>>(res);
     }
 
     public async Task<TenantQuota> GetTenantQuotaAsync(int id)
@@ -59,7 +59,7 @@ class DbQuotaService(IDbContextFactory<CoreDbContext> dbContextManager, IMapper 
     {
         await using var coreDbContext = await dbContextManager.CreateDbContextAsync();
 
-        var quota = await Queries.QuotaAsync(coreDbContext, id);
+        var quota = await coreDbContext.QuotaAsync(id);
 
         if (quota != null)
         {
@@ -88,7 +88,7 @@ class DbQuotaService(IDbContextFactory<CoreDbContext> dbContextManager, IMapper 
         {
             if (exchange)
             {
-                await Queries.UpdateCounterAsync(coreDbContext, row.TenantId, row.UserId, row.Path, row.Counter);
+                await coreDbContext.UpdateCounterAsync(row.TenantId, row.UserId, row.Path, row.Counter);
             }
             else
             {
@@ -115,29 +115,4 @@ class DbQuotaService(IDbContextFactory<CoreDbContext> dbContextManager, IMapper 
 
         return await q.ProjectTo<TenantQuotaRow>(mapper.ConfigurationProvider).ToListAsync();
     }
-}
-
-public static class DbQuotaServiceExtensions
-{
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<TenantQuotaPriceResolver>();
-    }
-}
-
-static file class Queries
-{
-    public static readonly Func<CoreDbContext, int, Task<DbQuota>> QuotaAsync = EF.CompileAsyncQuery(
-    (CoreDbContext ctx, int tenantId) =>
-        ctx.Quotas
-            .SingleOrDefault(r => r.TenantId == tenantId));
-
-    public static readonly Func<CoreDbContext, int, Guid, string, long, Task<int>> UpdateCounterAsync =
-        EF.CompileAsyncQuery(
-            (CoreDbContext ctx, int tenantId, Guid userId, string path, long counter) =>
-                ctx.QuotaRows
-                    .Where(r => r.Path == path
-                                && r.TenantId == tenantId
-                                && r.UserId == userId)
-                    .ExecuteUpdate(x => x.SetProperty(p => p.Counter, p => p.Counter + counter)));
 }

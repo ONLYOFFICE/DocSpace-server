@@ -26,10 +26,8 @@
 
 namespace ASC.ActiveDirectory.Base;
 
-[Scope]
-public abstract class LdapHelper(ILogger<LdapHelper> logger,
-        InstanceCrypto instanceCrypto)
-    : IDisposable
+
+public abstract class LdapHelper(ILogger<LdapHelper> logger, InstanceCrypto instanceCrypto) : IDisposable
 {
     public LdapSettings Settings { get; private set; }
     public abstract bool IsConnected { get; }
@@ -130,13 +128,13 @@ public abstract class LdapHelper(ILogger<LdapHelper> logger,
         return password;
     }
 
-    public byte[] GetPasswordBytes(string password)
+    public async Task<byte[]> GetPasswordBytesAsync(string password)
     {
         byte[] passwordBytes;
 
         try
         {
-            passwordBytes = _instanceCrypto.Encrypt(new UnicodeEncoding().GetBytes(password));
+            passwordBytes = await _instanceCrypto.EncryptAsync(new UnicodeEncoding().GetBytes(password));
         }
         catch (Exception)
         {

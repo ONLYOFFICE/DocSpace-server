@@ -27,13 +27,14 @@
 namespace ASC.Data.Backup.Services;
 
 [Singleton]
-internal sealed class BackupCleanerService(ConfigurationExtension configuration,
-        ILogger<BackupCleanerService> logger,
-        IServiceScopeFactory scopeFactory)
+internal sealed class BackupCleanerService(
+    IConfiguration configuration,
+    ILogger<BackupCleanerService> logger,
+    IServiceScopeFactory scopeFactory)
     : ActivePassiveBackgroundService<BackupCleanerService>(logger, scopeFactory)
 {
     private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
-    protected override TimeSpan ExecuteTaskPeriod { get; set; } = configuration.GetSetting<BackupSettings>("backup").Cleaner.Period;
+    protected override TimeSpan ExecuteTaskPeriod { get; set; } = configuration.GetSection("backup").Get<BackupSettings>().Cleaner.Period;
     protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
         await using var serviceScope = _scopeFactory.CreateAsyncScope();

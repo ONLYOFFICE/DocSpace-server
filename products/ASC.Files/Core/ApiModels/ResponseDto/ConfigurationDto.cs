@@ -130,6 +130,7 @@ public class LogoConfigDto
     public string ImageEmbedded { get; set; }
 
     public string Url { get; set; }
+    public bool Visible { get; set; }
 }
 
 public class AnonymousConfigDto
@@ -188,7 +189,8 @@ public class InfoConfigDto
     public string Uploaded { get; set; }
 }
 
-[Scope]
+[Scope(GenericArguments = [typeof(int)])]
+[Scope(GenericArguments = [typeof(string)])]
 public class ConfigurationConverter<T>(
     CommonLinkUtility commonLinkUtility, 
     FilesLinkUtility filesLinkUtility, 
@@ -221,7 +223,8 @@ public class ConfigurationConverter<T>(
     }
 }
 
-[Scope]
+[Scope(GenericArguments = [typeof(int)])]
+[Scope(GenericArguments = [typeof(string)])]
 public class EditorConfigurationConverter<T>(CustomizationConfigConverter<T> configConverter)
 {
     public async Task<EditorConfigurationDto<T>> Convert(Configuration<T> configuration, File<T> file)
@@ -254,7 +257,8 @@ public class EditorConfigurationConverter<T>(CustomizationConfigConverter<T> con
     }
 }
 
-[Scope]
+[Scope(GenericArguments = [typeof(int)])]
+[Scope(GenericArguments = [typeof(string)])]
 public class CustomizationConfigConverter<T>(
     LogoConfigConverter<T> configConverter, 
     CustomerConfigConverter customerConfigConverter,
@@ -288,7 +292,8 @@ public class CustomizationConfigConverter<T>(
     }
 }
 
-[Scope]
+[Scope(GenericArguments = [typeof(int)])]
+[Scope(GenericArguments = [typeof(string)])]
 public class LogoConfigConverter<T>
 {
     public async Task<LogoConfigDto> Convert(Configuration<T> configuration)
@@ -305,14 +310,16 @@ public class LogoConfigConverter<T>
             Image = await source.GetImage(configuration.EditorType),
             ImageDark = await source.GetImageDark(),
             ImageEmbedded = await source.GetImageEmbedded(configuration.EditorType),
-            Url = source.Url
+            Url = source.Url,
+            Visible = source.GetVisible(configuration.EditorType)
         };
 
         return result;
     }
 }
 
-[Scope]
+[Scope(GenericArguments = [typeof(int)])]
+[Scope(GenericArguments = [typeof(string)])]
 public class AnonymousConfigConverter<T>
 {
     public AnonymousConfigDto Convert(Configuration<T> configuration)
@@ -356,7 +363,8 @@ public class CustomerConfigConverter
     }
 }
 
-[Scope]
+[Scope(GenericArguments = [typeof(int)])]
+[Scope(GenericArguments = [typeof(string)])]
 public class DocumentConfigConverter<T>(InfoConfigConverter<T> configConverter)
 {
     public async Task<DocumentConfigDto<T>> Convert(DocumentConfig<T> source, File<T> file)
@@ -384,7 +392,8 @@ public class DocumentConfigConverter<T>(InfoConfigConverter<T> configConverter)
     }
 }
 
-[Scope]
+[Scope(GenericArguments = [typeof(int)])]
+[Scope(GenericArguments = [typeof(string)])]
 public class InfoConfigConverter<T>
 {
     public async Task<InfoConfigDto> Convert(InfoConfig<T> source, File<T> file)

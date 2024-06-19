@@ -35,8 +35,17 @@ public class FoldersControllerInternal(
     FileOperationDtoHelper fileOperationDtoHelper,
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
-    PermissionContext permissionContext)
-    : FoldersController<int>(breadCrumbsManager, folderContentDtoHelper, fileStorageService, fileOperationsManager, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper, permissionContext);
+    PermissionContext permissionContext,
+    FileShareDtoHelper fileShareDtoHelper)
+    : FoldersController<int>(breadCrumbsManager,
+        folderContentDtoHelper,
+        fileStorageService,
+        fileOperationsManager,
+        fileOperationDtoHelper,
+        folderDtoHelper,
+        fileDtoHelper,
+        permissionContext,
+        fileShareDtoHelper);
 
 public class FoldersControllerThirdparty(
     BreadCrumbsManager breadCrumbsManager,
@@ -46,8 +55,17 @@ public class FoldersControllerThirdparty(
     FileOperationDtoHelper fileOperationDtoHelper,
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
-    PermissionContext permissionContext)
-    : FoldersController<string>(breadCrumbsManager, folderContentDtoHelper, fileStorageService, fileOperationsManager, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper, permissionContext);
+    PermissionContext permissionContext,
+    FileShareDtoHelper fileShareDtoHelper)
+    : FoldersController<string>(breadCrumbsManager,
+        folderContentDtoHelper,
+        fileStorageService,
+        fileOperationsManager,
+        fileOperationDtoHelper,
+        folderDtoHelper,
+        fileDtoHelper,
+        permissionContext,
+        fileShareDtoHelper);
 
 public abstract class FoldersController<T>(
     BreadCrumbsManager breadCrumbsManager,
@@ -57,7 +75,8 @@ public abstract class FoldersController<T>(
     FileOperationDtoHelper fileOperationDtoHelper,
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
-    PermissionContext permissionContext)
+    PermissionContext permissionContext,
+    FileShareDtoHelper fileShareDtoHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -256,6 +275,23 @@ public abstract class FoldersController<T>(
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         return await fileStorageService.GetFilesUsedSpace();
+    }
+    
+    /// <summary>
+    /// Returns the primary external link by the identifier specified in the request.
+    /// </summary>
+    /// <short>Get primary external link</short>
+    /// <category>Folders</category>
+    /// <param type="System.Int32, System" method="url" name="id">Folder Id</param>
+    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">Folder security information</returns>
+    /// <path>api/2.0/files/folder/{id}/link</path>
+    /// <httpMethod>GET</httpMethod>
+    [HttpGet("folder/{id}/link")]
+    public async Task<FileShareDto> GetPrimaryExternalLinkAsync(T id)
+    {
+        var linkAce = await fileStorageService.GetPrimaryExternalLinkAsync(id, FileEntryType.Folder);
+
+        return await fileShareDtoHelper.Get(linkAce);
     }
 }
 

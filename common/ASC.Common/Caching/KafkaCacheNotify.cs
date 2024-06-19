@@ -43,55 +43,17 @@ public class KafkaCacheNotify<T> : IDisposable, ICacheNotify<T> where T : new()
     private readonly ProtobufDeserializer<AscCacheItem> _keyDeserializer = new();
     private readonly Guid _key;
 
-    public KafkaCacheNotify(ConfigurationExtension configuration, ILogger<KafkaCacheNotify<T>> logger)
+    public KafkaCacheNotify(IConfiguration configuration, ILogger<KafkaCacheNotify<T>> logger)
     {
         _logger = logger;
         _cancelationToken = new ConcurrentDictionary<string, CancellationTokenSource>();
         _actions = new ConcurrentDictionary<string, Action<T>>();
         _key = Guid.NewGuid();
 
-        var settings = configuration.GetSetting<KafkaSettings>("kafka");
+        var settings = configuration.GetSection("kafka").Get<KafkaSettings>();
 
         _clientConfig = new ClientConfig { BootstrapServers = settings.BootstrapServers };
         _adminClientConfig = new AdminClientConfig { BootstrapServers = settings.BootstrapServers };
-    }
-
-    public void Publish(T obj, CacheNotifyAction notifyAction)
-    {
-        try
-        {
-            _producer ??= new ProducerBuilder<AscCacheItem, T>(new ProducerConfig(_clientConfig))
-                .SetErrorHandler((_, e) => _logger.Error(e.ToString()))
-                .SetKeySerializer(_keySerializer)
-                .SetValueSerializer(_valueSerializer)
-                .Build();
-
-            var channelName = GetChannelName(notifyAction);
-
-            if (_actions.TryGetValue(channelName, out var onchange))
-            {
-                onchange(obj);
-            }
-
-            var message = new Message<AscCacheItem, T>
-            {
-                Value = obj,
-                Key = new AscCacheItem
-                {
-                    Id = _key.ToString()
-                }
-            };
-
-            _producer.ProduceAsync(channelName, message);
-        }
-        catch (ProduceException<Null, string> e)
-        {
-            _logger.ErrorKafkaCacheNotifyPublish(e);
-        }
-        catch (Exception e)
-        {
-            _logger.ErrorKafkaCacheNotifyPublish(e);
-        }
     }
 
     public async Task PublishAsync(T obj, CacheNotifyAction cacheNotifyAction)

@@ -24,6 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Api.Core.Extensions;
+using ASC.EventBus.Events;
+
 using SerializationContext = Confluent.Kafka.SerializationContext;
 
 namespace ASC.Common.Caching;
@@ -75,5 +78,54 @@ public class BaseProtobufSerializer
     public static T Deserialize<T>(ReadOnlySpan<byte> data)
     {
         return Serializer.Deserialize<T>(data);
+    }
+}
+
+public class WarmupProtobufStartupTask(ILogger<WarmupProtobufStartupTask> logger) : IStartupTask
+{
+    public Task ExecuteAsync(CancellationToken cancellationToken = default)
+    {
+        var aasemblies = AppDomain.CurrentDomain.GetAssemblies().Where(x =>
+        {
+            var name = x.GetName().Name;
+            return !string.IsNullOrEmpty(name) && name.StartsWith("ASC.");
+        });
+
+        var redisGeneric = typeof(RedisCacheNotify<>.RedisCachePubSubItem<>);
+        var integrationEvent = typeof(IntegrationEvent);
+        var types = aasemblies.SelectMany(r => r.GetTypes().Where(t => t.GetCustomAttribute<ProtoContractAttribute>() != null));
+        var methodInfo = typeof(Serializer).GetMethod("PrepareSerializer");
+        if (methodInfo == null)
+        {
+            return Task.CompletedTask;
+        }
+        
+        foreach (var t in types)
+        {
+            try
+            {
+                if (t == redisGeneric || t == integrationEvent)
+                {
+                    continue;
+                }
+
+                var genericMethod = methodInfo.MakeGenericMethod(t);
+                genericMethod.Invoke(null, null);
+                    
+                if (!t.IsSubclassOf(integrationEvent))
+                {
+                    var redis = redisGeneric.MakeGenericType(t, t);
+                    genericMethod = methodInfo.MakeGenericMethod(redis);
+                    genericMethod.Invoke(null, null);
+                }
+                logger.LogTrace("PrepareSerializer:{ProtoBufFullName}", t.FullName);
+            }
+            catch (Exception e)
+            {
+                logger.LogTrace(e, t.FullName);
+            }
+        }
+
+        return Task.CompletedTask;
     }
 }

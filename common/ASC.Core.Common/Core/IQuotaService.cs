@@ -26,7 +26,6 @@
 
 namespace ASC.Core;
 
-[Scope(typeof(CachedQuotaService))]
 public interface IQuotaService
 {
     Task<IEnumerable<TenantQuota>> GetTenantQuotasAsync();

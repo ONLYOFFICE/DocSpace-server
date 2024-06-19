@@ -61,15 +61,6 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ACCEPT.
-        /// </summary>
-        public static string AcceptDocSpace {
-            get {
-                return ResourceManager.GetString("AcceptDocSpace", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; created a new document: &lt;a href={1}&gt;{2}&lt;/a&gt; in the room: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;.
         /// </summary>
         public static string ActionFileCreated {
@@ -288,9 +279,9 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Collaborate in DocSpace.
         /// </summary>
-        public static string ButtonCollaborateDocSpace {
+        public static string ButtonCollaborate {
             get {
-                return ResourceManager.GetString("ButtonCollaborateDocSpace", resourceCulture);
+                return ResourceManager.GetString("ButtonCollaborate", resourceCulture);
             }
         }
         
@@ -313,20 +304,20 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Confirm DocSpace Invite.
-        /// </summary>
-        public static string ButtonConfirmDocSpaceInvite {
-            get {
-                return ResourceManager.GetString("ButtonConfirmDocSpaceInvite", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to CONFIRM.
         /// </summary>
         public static string ButtonConfirmEmail {
             get {
                 return ResourceManager.GetString("ButtonConfirmEmail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Confirm DocSpace Invite.
+        /// </summary>
+        public static string ButtonConfirmInvite {
+            get {
+                return ResourceManager.GetString("ButtonConfirmInvite", resourceCulture);
             }
         }
         
@@ -376,6 +367,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Get started.
+        /// </summary>
+        public static string ButtonGetStarted {
+            get {
+                return ResourceManager.GetString("ButtonGetStarted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invite Right Now.
         /// </summary>
         public static string ButtonInviteRightNow {
@@ -394,6 +394,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Join room.
+        /// </summary>
+        public static string ButtonJoinRoom {
+            get {
+                return ResourceManager.GetString("ButtonJoinRoom", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Leave Feedback.
         /// </summary>
         public static string ButtonLeaveFeedback {
@@ -403,7 +412,16 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Remove profile.
+        ///   Looks up a localized string similar to REGISTER.
+        /// </summary>
+        public static string ButtonRegister {
+            get {
+                return ResourceManager.GetString("ButtonRegister", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Disable account.
         /// </summary>
         public static string ButtonRemoveProfile {
             get {
@@ -523,8 +541,8 @@ namespace ASC.Web.Core.PublicResources {
         ///If you have any questions or need assistance please feel free to contact us at [${__SupportLink}](${__SupportLink})
         ///
         ///Best regards,
-        ///ONLYOFFICE™ Support Team
-        ///[www.onlyof [rest of string was truncated]&quot;;.
+        ///ONLYOFFICE Support Team
+        ///[www.onlyoff [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_backup_created_tg {
             get {
@@ -994,6 +1012,29 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Hello!
+        ///
+        ///The data migration process from ONLYOFFICE Personal to your new ONLYOFFICE DocSpace is successfully completed.
+        ///
+        ///To access your DocSpace with the imported data, just click the button below:
+        ///
+        ///$OrangeButton
+        ///
+        ///Your current DocSpace plan is STARTUP. It is absolutely free.
+        ///
+        ///==If necessary, you can change the name of your new DocSpace. Just switch to Settings -&gt; Customization -&gt; DocSpace Renaming.==
+        ///
+        ///Enjoy a new way of document collaboration!
+        ///
+        ///$TrulyYours.
+        /// </summary>
+        public static string pattern_migration_personal_to_docspace {
+            get {
+                return ResourceManager.GetString("pattern_migration_personal_to_docspace", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to h1.Another region portal migration error
         ///
         ///An error has occurred while migrating to another region. Please, try once again later.
@@ -1293,15 +1334,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to h1.Removal of the profile from the &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal
+        ///   Looks up a localized string similar to h1.Disabling account on &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;
         ///
-        ///You have requested to permanently delete your profile from the &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal.
+        ///You have requested to disable your account in DocSpace &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;.
         ///
-        ///If you still want to delete your profile please follow the link below to confirm the operation:
+        ///If you still want to disable your account, please follow the link below to confirm the operation:
         ///
         ///$OrangeButton
         ///
-        ///*Note*: this link is valid for 7 days only. Please complete the profile deletion process within that period..
+        ///*Note*: this link is valid for 7 days only. Please complete the account disablement process within that period..
         /// </summary>
         public static string pattern_profile_delete {
             get {
@@ -1638,6 +1679,24 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to h1. ONLYOFFICE DocSpace: complete registration
+        ///
+        ///
+        ///Hello!
+        ///
+        ///You are invited to complete registration for ONLYOFFICE DocSpace at &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;. Enter your name and set a password by clicking the link:
+        ///
+        ///$OrangeButton
+        ///
+        ///$TrulyYours.
+        /// </summary>
+        public static string pattern_saas_docspace_registration {
+            get {
+                return ResourceManager.GetString("pattern_saas_docspace_registration", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to h1. Join &lt;span style=&quot;color:#FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace
         ///
         ///
@@ -1755,6 +1814,21 @@ namespace ASC.Web.Core.PublicResources {
         public static string pattern_saas_room_invite {
             get {
                 return ResourceManager.GetString("pattern_saas_room_invite", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Hello!
+        ///
+        ///$__AuthorName invited you to join the room &quot;$Message&quot;:&quot;$InviteLink&quot; on &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;.
+        ///
+        ///$OrangeButton
+        ///
+        ///$TrulyYours.
+        /// </summary>
+        public static string pattern_saas_room_invite_existing_user {
+            get {
+                return ResourceManager.GetString("pattern_saas_room_invite_existing_user", resourceCulture);
             }
         }
         
@@ -2251,6 +2325,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Data migration to ONLYOFFICE DocSpace successfully completed.
+        /// </summary>
+        public static string subject_migration_personal_to_docspace {
+            get {
+                return ResourceManager.GetString("subject_migration_personal_to_docspace", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to ${LetterLogoText}. Another region portal migration started.
         /// </summary>
         public static string subject_migration_start {
@@ -2377,7 +2460,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Deletion of your profile from ${__VirtualRootPath} portal.
+        ///   Looks up a localized string similar to Disabling account on ${__VirtualRootPath}.
         /// </summary>
         public static string subject_profile_delete {
             get {
@@ -2539,6 +2622,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to ONLYOFFICE DocSpace: complete registration.
+        /// </summary>
+        public static string subject_saas_docspace_registration {
+            get {
+                return ResourceManager.GetString("subject_saas_docspace_registration", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Join ${__VirtualRootPath}.
         /// </summary>
         public static string subject_saas_guest_activation_v115 {
@@ -2598,6 +2690,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string subject_saas_room_invite {
             get {
                 return ResourceManager.GetString("subject_saas_room_invite", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You&apos;re invited to the ONLYOFFICE DocSpace room.
+        /// </summary>
+        public static string subject_saas_room_invite_existing_user {
+            get {
+                return ResourceManager.GetString("subject_saas_room_invite_existing_user", resourceCulture);
             }
         }
         

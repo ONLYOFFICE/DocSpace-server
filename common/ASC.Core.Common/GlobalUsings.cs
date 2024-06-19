@@ -58,7 +58,6 @@ global using ASC.Collections;
 global using ASC.Common;
 global using ASC.Common.Caching;
 global using ASC.Core.Common.Core;
-global using ASC.Common.Data;
 global using ASC.Common.Log;
 global using ASC.Common.Logging;
 global using ASC.Common.Mapping;
@@ -88,11 +87,13 @@ global using ASC.Core.Common.Notify;
 global using ASC.Core.Common.Notify.IntegrationEvents.Events;
 global using ASC.Core.Common.Notify.Jabber;
 global using ASC.Core.Common.Notify.Push;
+global using ASC.Core.Common.Notify.Stylers.Resources;
 global using ASC.Core.Common.Notify.Telegram;
 global using ASC.Core.Common.Quota;
 global using ASC.Core.Common.Quota.Features;
 global using ASC.Core.Common.Security;
 global using ASC.Core.Common.Settings;
+global using ASC.Core.Common.WhiteLabel;
 global using ASC.Core.Configuration;
 global using ASC.Core.Data;
 global using ASC.Core.Notify;
@@ -100,7 +101,6 @@ global using ASC.Core.Notify.Jabber;
 global using ASC.Core.Notify.Senders;
 global using ASC.Core.Notify.Socket;
 global using ASC.Core.Security.Authentication;
-global using ASC.Core.Security.Authorizing;
 global using ASC.Core.Tenants;
 global using ASC.Core.Users;
 global using ASC.EventBus.Abstractions;
@@ -120,6 +120,7 @@ global using ASC.Notify.Patterns;
 global using ASC.Notify.Recipients;
 global using ASC.Notify.Sinks;
 global using ASC.Security.Cryptography;
+global using ASC.Web.Core.WhiteLabel;
 global using ASC.Web.Studio.Utility;
 
 global using Autofac;
@@ -166,6 +167,10 @@ global using Pomelo.EntityFrameworkCore.MySql.Migrations;
 global using ProtoBuf;
 
 global using Telegram.Bot;
+
+global using Textile;
+global using Textile.Blocks;
+global using Textile.States;
 
 global using static ASC.Security.Cryptography.EmailValidationKeyProvider;
 

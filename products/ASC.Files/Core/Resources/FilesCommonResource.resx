@@ -416,7 +416,7 @@ Highest compatibility with docx, xlsx, pptx.</value>
     <value>Documents</value>
   </data>
   <data name="ProductUserOpportunities" xml:space="preserve">
-    <value>Create and edit own documents as well as the shared documents with the proper access rights|Give reading/editing access to other users to the documents and folders|Link Dropbox, Box and other accounts in the 'My documents' section</value>
+    <value>Create and edit own documents as well as the shared documents with the proper access rights|Give reading/editing access to other users to the documents and folders|Link Dropbox, Box and other accounts in the 'Documents' section</value>
   </data>
   <data name="UnknownFirstName" xml:space="preserve">
     <value>First Name</value>
@@ -528,5 +528,26 @@ Highest compatibility with docx, xlsx, pptx.</value>
   </data>
   <data name="User" xml:space="preserve">
     <value>User</value>
+  </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>Link to form</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Open form</value>
+  </data>
+  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
+    <value>The file cannot be uploaded to this room. Please try to upload the ONLYOFFICE PDF form.</value>
+  </data>
+  <data name="FillOutExternalLinkTitle" xml:space="preserve">
+    <value>Link to fill out</value>
+  </data>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>Moving several files to the Form Filling room is not supported. Move one ONLYOFFICE PDF form at a time.</value>
+  </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>Moving folders to the Form Filling room is not supported. Move one ONLYOFFICE PDF form at a time.</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>The file cannot be moved to this room. Please try to move the ONLYOFFICE PDF form.</value>
   </data>
 </root>

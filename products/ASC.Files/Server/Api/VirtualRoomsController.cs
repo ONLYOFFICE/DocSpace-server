@@ -596,17 +596,30 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     /// <param type="System.Nullable{System.Boolean}, System" name="withoutTags">Specifies whether to search by tags or not</param>
     /// <param type="System.String, System" name="tags">Tags in the serialized format</param>
     /// <param type="System.Nullable{System.Boolean}, System" name="excludeSubject">Specifies whether to exclude a subject or not</param>
-    /// <param type="System.Nullable{ASC.Files.Core.ProviderFilter}, System" name="provider">Filter by provider name (None, Box, DropBox, GoogleDrive, kDrive, OneDrive, SharePoint, WebDav, Yandex)</param>
+    /// <param type="System.Nullable{ASC.Files.Core.ProviderFilter}, System" name="provider">Filter by provider name (None, Box, DropBox, GoogleDrive, kDrive, OneDrive, WebDav)</param>
     /// <param type="System.Nullable{ASC.Files.Core.Core.SubjectFilter}, System" name="subjectFilter">Filter by subject (Owner - 1, Member - 1)</param>
     /// <param type="System.Nullable{ASC.Core.QuotaFilter}, System" name="quotaFilter">Filter by quota (Default - 1, Custom - 2)</param>
+    /// <param type="System.Nullable{ASC.Core.StorageFilter}, ASC.Files.Core" name="storageFilter">Filter by storage (Internal - 1, ThirdParty - 2)</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FolderContentDto, ASC.Files.Core">Rooms contents</returns>
     /// <path>api/2.0/files/rooms</path>
     /// <httpMethod>GET</httpMethod>
     [HttpGet("rooms")]
-    public async Task<FolderContentDto<int>> GetRoomsFolderAsync(RoomType? type, string subjectId, bool? searchInContent, bool? withSubfolders, SearchArea? searchArea, bool? withoutTags, string tags, bool? excludeSubject,
-        ProviderFilter? provider, SubjectFilter? subjectFilter, QuotaFilter? quotaFilter)
+    public async Task<FolderContentDto<int>> GetRoomsFolderAsync(
+        RoomType? type,
+        string subjectId,
+        bool? searchInContent,
+        bool? withSubfolders,
+        SearchArea? searchArea,
+        bool? withoutTags,
+        string tags,
+        bool? excludeSubject,
+        ProviderFilter? provider,
+        SubjectFilter? subjectFilter,
+        QuotaFilter? quotaFilter,
+        StorageFilter? storageFilter)
     {
-        var parentId = searchArea != SearchArea.Archive ? await globalFolderHelper.GetFolderVirtualRooms()
+        var parentId = searchArea != SearchArea.Archive 
+            ? await globalFolderHelper.GetFolderVirtualRooms()
             : await globalFolderHelper.GetFolderArchive();
 
         var filter = type switch
@@ -621,7 +634,9 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
             _ => FilterType.None
         };
 
-        var tagNames = !string.IsNullOrEmpty(tags) ? JsonSerializer.Deserialize<IEnumerable<string>>(tags) : null;
+        var tagNames = !string.IsNullOrEmpty(tags) 
+            ? JsonSerializer.Deserialize<IEnumerable<string>>(tags) 
+            : null;
 
         OrderBy orderBy = null;
         if (SortedByTypeExtensions.TryParse(apiContext.SortBy, true, out var sortBy))
@@ -634,9 +649,8 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         var filterValue = apiContext.FilterValue;
 
         var content = await fileStorageService.GetFolderItemsAsync(parentId, startIndex, count, filter, false, subjectId, filterValue,
-            [],
-            searchInContent ?? false, withSubfolders ?? false, orderBy, searchArea ?? SearchArea.Active, default, withoutTags ?? false, tagNames, excludeSubject ?? false,
-            provider ?? ProviderFilter.None, subjectFilter ?? SubjectFilter.Owner, quotaFilter: quotaFilter ?? QuotaFilter.All);
+            [], searchInContent ?? false, withSubfolders ?? false, orderBy, searchArea ?? SearchArea.Active, default, withoutTags ?? false, tagNames, excludeSubject ?? false, 
+            provider ?? ProviderFilter.None, subjectFilter ?? SubjectFilter.Owner, quotaFilter: quotaFilter ?? QuotaFilter.All, storageFilter: storageFilter ?? StorageFilter.None);
 
         var dto = await folderContentDtoHelper.GetAsync(parentId, content, startIndex);
 
@@ -723,19 +737,17 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
 
                 if (roomLogo.Length > setupInfo.MaxImageUploadSize)
                 {
-                    result.Success = false;
-                    result.Message = fileSizeComment.FileImageSizeExceptionString;
-
-                    return result;
+                    throw new Exception(fileSizeComment.FileImageSizeExceptionString);
                 }
-
-                var data = new byte[roomLogo.Length];
-                await using var inputStream = roomLogo.OpenReadStream();
-
-                var br = new BinaryReader(inputStream);
-                _ = br.Read(data, 0, (int)roomLogo.Length);
-                br.Close();
-
+                
+                byte[] data;
+                await using(var inputStream = roomLogo.OpenReadStream())
+                using (var ms = new MemoryStream())
+                {
+                    await inputStream.CopyToAsync(ms);
+                    data = ms.ToArray();
+                }
+                
                 UserPhotoThumbnailManager.CheckImgFormat(data);
 
                 result.Data = await roomLogoManager.SaveTempAsync(data, setupInfo.MaxImageUploadSize);

@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.Core;
+
 namespace ASC.Data.Backup;
 
 public class Startup : BaseStartup
@@ -53,12 +55,7 @@ public class Startup : BaseStartup
 
         services.AddBaseDbContextPool<BackupsContext>();
         services.AddBaseDbContextPool<FilesDbContext>();
-
-        DIHelper.TryAdd<BackupProgressItem>();
-        DIHelper.TryAdd<RestoreProgressItem>();
-        DIHelper.TryAdd<TransferProgressItem>();
-
-        NotifyConfigurationExtension.Register(DIHelper);
+        services.RegisterQuotaFeature();
     }
 
     public override void Configure(IApplicationBuilder app, IWebHostEnvironment env)

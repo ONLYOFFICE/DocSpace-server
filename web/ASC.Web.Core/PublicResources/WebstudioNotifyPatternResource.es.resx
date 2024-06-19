@@ -113,7 +113,7 @@
     <value>Deje comentarios</value>
   </data>
   <data name="ButtonRemoveProfile" xml:space="preserve">
-    <value>Eliminar perfil</value>
+    <value>Desactivar cuenta</value>
   </data>
   <data name="ButtonRenewNow" xml:space="preserve">
     <value>Renovar ahora</value>
@@ -146,7 +146,7 @@ Este enlace es válido sólo por 7 días. Por favor, complete la activación den
 
 Buenos días $OwnerName,
 
-Un archivo de copia de seguridad con los datos de su portal ONLYOFFICE™ "${__VirtualRootPath}":"${__VirtualRootPath}" ha sido creado.
+Un archivo de copia de seguridad con los datos de su portal ONLYOFFICE "${__VirtualRootPath}":"${__VirtualRootPath}" ha sido creado.
 
 Para obtener más información sobre procedimiento de creación de copia de seguridad/restauración por favor consulte nuestra guía de usuario "¿Cómo crear y restaurar la copia de seguridad de portal ONLYOFFICE":"${__HelpLink}/administration/docspace-settings.aspx#CreatingBackup_block".
 
@@ -167,7 +167,7 @@ Para obtener más información sobre el procedimiento de copia de seguridad, con
 Si tiene alguna pregunta o necesita ayuda por favor no dude en contactarnos en [${__SupportLink}](${__SupportLink})
 
 Cordialmente,
-Equipo de soporte ONLYOFFICE™
+Equipo de soporte ONLYOFFICE
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
@@ -405,7 +405,7 @@ Puede volver a activar su portal en cualquier momento haciendo clic en el siguie
 Si tiene alguna pregunta o necesita ayuda, por favor no dude en contactarnos en [${__SalesEmail}](mailto:${__SalesEmail})
 
 Cordialmente,
-Equipo de soporte ONLYOFFICE™
+Equipo de soporte ONLYOFFICE
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
@@ -453,7 +453,7 @@ _Nota_: este enlace es válido sólo por 7 días. Por favor, complete el proceso
 Si tiene alguna pregunta o necesita ayuda, no dude en contactarnos a través de [${__SalesEmail}](mailto:${__SalesEmail})
 
 Cordialmente,
-Equipo de soporte ONLYOFFICE™ 
+Equipo de soporte ONLYOFFICE 
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_rename" xml:space="preserve">
@@ -466,15 +466,15 @@ La dirección de su portal $PortalUrl ha cambiado a la nueva dirección "${__Vir
 *Ojo*: La configuración DNS y las opciones de inicio de sesión único dejarán de funcionar hasta que las cambie.</value>
   </data>
   <data name="pattern_profile_delete" xml:space="preserve">
-    <value>h1.Eliminación del Perfil del Portal "${__VirtualRootPath}":"${__VirtualRootPath}"
+    <value>h1.Desactivación de la cuenta en "${__VirtualRootPath}":"${__VirtualRootPath}"
 
-Ha solicitado eliminar permanentemente su perfil portal "${__VirtualRootPath}":"${__VirtualRootPath}".
+Ha solicitado desactivar su cuenta en DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}".
 
-Si todavía desea eliminar su perfil por favor siga el siguiente enlace para confirmar la operación:
+Si todavía desea desactivar su cuenta, siga el siguiente enlace para confirmar la operación:
 
 $OrangeButton
 
-*Note*: este enlace tiene una validez sólo de 7 días. Por favor, complete el proceso de eliminación de perfil dentro de ese período.</value>
+*Nota*: este enlace solo es válido durante 7 días. Por favor, complete el proceso de desactivación de la cuenta dentro de ese periodo.</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
     <value>Usuario "$FromUserName":"$FromUserLink" ha eliminado su perfil, ahora este perfil está bloqueado. Todos los archivos de este usuario aún están asignados a él/ella y ocupan espacio en disco. 
@@ -913,7 +913,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Cambio de dirección de portal</value>
   </data>
   <data name="subject_profile_delete" xml:space="preserve">
-    <value>Eliminación de su perfil en el portal ${__VirtualRootPath}</value>
+    <value>Desactivación de la cuenta en ${__VirtualRootPath}</value>
   </data>
   <data name="subject_profile_has_deleted_itself" xml:space="preserve">
     <value>Usuario ha eliminado su perfil</value>
@@ -989,9 +989,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_guest_welcome_v1" xml:space="preserve">
     <value>¡Bienvenido/a a ONLYOFFICE DocSpace!</value>
-  </data>
-  <data name="AcceptDocSpace" xml:space="preserve">
-    <value>ACEPTAR</value>
   </data>
   <data name="ButtonConfirmEmail" xml:space="preserve">
     <value>CONFIRMAR</value>
@@ -1639,10 +1636,10 @@ $TrulyYours</value>
   <data name="subject_change_password_v115" xml:space="preserve">
     <value>Confirme el cambio de su contraseña</value>
   </data>
-  <data name="ButtonCollaborateDocSpace" xml:space="preserve">
+  <data name="ButtonCollaborate" xml:space="preserve">
     <value>Colaborar en DocSpace</value>
   </data>
-  <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
+  <data name="ButtonConfirmInvite" xml:space="preserve">
     <value>Confirmar invitación a DocSpace</value>
   </data>
   <data name="ButtonConfirmRoomInvite" xml:space="preserve">
@@ -1703,6 +1700,15 @@ Tu plan tarifario actual es STARTUP. Es absolutamente gratis e incluye:
  
 *Disfruta de una nueva forma de colaboración en documentos!*
  
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_room_invite_existing_user" xml:space="preserve">
+    <value>¡Hola!
+
+$__AuthorName le ha invitado a unirse a la sala "$Message":"$InviteLink" en "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+$OrangeButton
+
 $TrulyYours</value>
   </data>
 </root>

@@ -37,7 +37,6 @@ global using ASC.Core.Common.EF;
 global using ASC.Core.Common.EF.Context;
 global using ASC.Core.Common.EF.Model;
 global using ASC.Core.Common.Hosting;
-global using ASC.Core.Common.Hosting.Interfaces;
 global using ASC.Core.Common.Notify.IntegrationEvents.Events;
 global using ASC.Core.Common.Settings;
 global using ASC.Core.Notify.Senders;

@@ -26,7 +26,7 @@
 
 namespace ASC.Data.Backup.Services;
 
-[Transient(Additional = typeof(RestoreProgressItemExtention))]
+[Transient]
 public class RestoreProgressItem : BaseBackupProgressItem
 {
     private readonly IConfiguration _configuration;
@@ -49,7 +49,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
         IServiceScopeFactory serviceScopeFactory,
         NotifyHelper notifyHelper,
         CoreBaseSettings coreBaseSettings)
-        : base(logger, serviceScopeFactory)
+        : base(serviceScopeFactory)
     {
         _configuration = configuration;
         _logger = logger;
@@ -68,6 +68,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
 
     public void Init(StartRestoreRequest request, string tempFolder, string upgradesPath, string region = "current")
     {
+        Init();
         TenantId = request.TenantId;
         Notify = request.NotifyAfterCompletion;
         StoragePath = request.FilePathOrId;
@@ -113,7 +114,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
 
                 if (record == null)
                 {
-                    var md5Hash = BackupWorker.GetBackupHashMD5(tempFile, S3Storage.ChunkSize);
+                    var md5Hash = await BackupWorker.GetBackupHashMD5Async(tempFile, S3Storage.ChunkSize);
                     record = await _backupRepository.GetBackupRecordAsync(md5Hash, TenantId);
                     if (record == null)
                     {
@@ -210,13 +211,5 @@ public class RestoreProgressItem : BaseBackupProgressItem
     public override object Clone()
     {
         return MemberwiseClone();
-    }
-}
-
-public static class RestoreProgressItemExtention
-{
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<RestorePortalTask>();
     }
 }

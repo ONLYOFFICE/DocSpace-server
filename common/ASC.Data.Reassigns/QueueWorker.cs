@@ -82,7 +82,7 @@ public class QueueWorker<T>(IHttpContextAccessor httpContextAccessor,
     }
 }
 
-[Scope(Additional = typeof(ReassignProgressItemExtension))]
+[Scope]
 public class QueueWorkerReassign(IHttpContextAccessor httpContextAccessor,
         IServiceProvider serviceProvider,
         IDistributedTaskQueueFactory queueFactory,
@@ -101,7 +101,7 @@ public class QueueWorkerReassign(IHttpContextAccessor httpContextAccessor,
     }
 }
 
-[Scope(Additional = typeof(RemoveProgressItemExtension))]
+[Scope]
 public class QueueWorkerRemove(IHttpContextAccessor httpContextAccessor,
         IServiceProvider serviceProvider,
         IDistributedTaskQueueFactory queueFactory,

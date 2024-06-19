@@ -46,5 +46,5 @@ public class TenantIncorrectCharsException(string message) : Exception(message);
 
 public class TenantAlreadyExistsException(string message, IEnumerable<string> existsTenants) : Exception(message)
 {
-    public IEnumerable<string> ExistsTenants { get; private set; } = existsTenants ?? Enumerable.Empty<string>();
+    public IEnumerable<string> ExistsTenants { get; private set; } = existsTenants ?? [];
 }

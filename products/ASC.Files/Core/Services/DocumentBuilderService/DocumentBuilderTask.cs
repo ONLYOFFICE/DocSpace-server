@@ -26,7 +26,7 @@
 
 namespace ASC.Files.Core.Services.DocumentBuilderService;
 
-[Transient]
+[Transient(GenericArguments = [typeof(int)])]
 public class DocumentBuilderTask<T>(IServiceScopeFactory serviceProvider) : DistributedTaskProgress
 {
     private string _baseUri;

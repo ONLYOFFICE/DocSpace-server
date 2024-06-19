@@ -31,6 +31,7 @@ public class Consumer() : IDictionary<string, string>
     public bool CanSet { get; private set; }
     public int Order { get; private set; }
     public string Name { get; private set; }
+    
     protected readonly Dictionary<string, string> _props = new();
     public IEnumerable<string> ManagedKeys => _props.Select(r => r.Key);
 
@@ -64,7 +65,23 @@ public class Consumer() : IDictionary<string, string>
     protected internal readonly IConfiguration Configuration;
     protected internal readonly ICacheNotify<ConsumerCacheItem> Cache;
 
-    public bool IsSet => _props.Count > 0 && !_props.All(r => string.IsNullOrEmpty(this[r.Key]));
+    public async Task<bool> GetIsSetAsync()
+    {
+        if (_props.Count == 0)
+        {
+            return false;
+        }
+
+        foreach (var r in _props)
+        {
+            if (string.IsNullOrEmpty(await GetAsync(r.Key)))
+            {
+                return false;
+            }
+        }
+        
+        return true;
+    }
 
     public Consumer(
         TenantManager tenantManager,
@@ -126,15 +143,15 @@ public class Consumer() : IDictionary<string, string>
     {
         return AllProps.GetEnumerator();
     }
-
-    IEnumerator IEnumerable.GetEnumerator()
-    {
-        return GetEnumerator();
-    }
+    
 
     public void Add(KeyValuePair<string, string> item) { }
-
     public void Clear()
+    {
+        ClearAsync().Wait();
+    }
+
+    public async Task ClearAsync()
     {
         if (!CanSet)
         {
@@ -143,10 +160,10 @@ public class Consumer() : IDictionary<string, string>
 
         foreach (var providerProp in _props)
         {
-            this[providerProp.Key] = null;
+            await SetAsync(providerProp.Key,  null);
         }
 
-        Cache.Publish(new ConsumerCacheItem { Name = this.Name }, CacheNotifyAction.Remove);
+        await Cache.PublishAsync(new ConsumerCacheItem { Name = this.Name }, CacheNotifyAction.Remove);
     }
 
     public bool Contains(KeyValuePair<string, string> item)
@@ -184,11 +201,11 @@ public class Consumer() : IDictionary<string, string>
 
     public string this[string key]
     {
-        get => Get(key);
-        set => Set(key, value);
+        get => GetAsync(key).Result;        //TODO
+        set => SetAsync(key, value).Wait(); //TODO
     }
 
-    private string Get(string name)
+    public async Task<string> GetAsync(string name)
     {
         string value = null;
 
@@ -196,9 +213,9 @@ public class Consumer() : IDictionary<string, string>
         {
             var tenant = CoreBaseSettings.Standalone
                              ? Tenant.DefaultTenant
-                             : TenantManager.GetCurrentTenant().Id;
+                             : await TenantManager.GetCurrentTenantIdAsync();
 
-            value = CoreSettings.GetSetting(GetSettingsKey(name), tenant);
+            value = await CoreSettings.GetSettingAsync(GetSettingsKey(name), tenant);
         }
 
         if (string.IsNullOrEmpty(value))
@@ -209,9 +226,8 @@ public class Consumer() : IDictionary<string, string>
         return value;
     }
 
-    private void Set(string name, string value)
+    public async Task SetAsync(string name, string value)
     {
-        
         if (!ManagedKeys.Contains(name))
         {
             _additional[name] = value;
@@ -226,13 +242,18 @@ public class Consumer() : IDictionary<string, string>
 
         var tenant = CoreBaseSettings.Standalone
                          ? Tenant.DefaultTenant
-                         : TenantManager.GetCurrentTenant().Id;
-        CoreSettings.SaveSetting(GetSettingsKey(name), value, tenant);
+                         : await TenantManager.GetCurrentTenantIdAsync();
+        await CoreSettings.SaveSettingAsync(GetSettingsKey(name), value, tenant);
     }
 
     protected virtual string GetSettingsKey(string name)
     {
         return "AuthKey_" + name;
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
     }
 }
 
@@ -269,7 +290,7 @@ public class DataStoreConsumer : Consumer, ICloneable
         string name, int order, Dictionary<string, string> additional)
         : base(tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, additional)
     {
-        Init(additional);
+        InitAsync(additional).Wait();
     }
 
     public DataStoreConsumer(
@@ -282,7 +303,7 @@ public class DataStoreConsumer : Consumer, ICloneable
         string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional)
         : base(tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, props, additional)
     {
-        Init(additional);
+        InitAsync(additional).Wait();
     }
 
     public override IEnumerable<string> AdditionalKeys => base.AdditionalKeys.Where(r => r != HandlerTypeKey && r != "cdn");
@@ -292,22 +313,22 @@ public class DataStoreConsumer : Consumer, ICloneable
         return base.GetSettingsKey(Name + name);
     }
 
-    private void Init(IReadOnlyDictionary<string, string> additional)
+    private async Task InitAsync(IReadOnlyDictionary<string, string> additional)
     {
-        if (additional == null || !additional.ContainsKey(HandlerTypeKey))
+        if (additional == null || !additional.TryGetValue(HandlerTypeKey, out var handler))
         {
             throw new ArgumentException(HandlerTypeKey);
         }
 
-        HandlerType = Type.GetType(additional[HandlerTypeKey]);
+        HandlerType = Type.GetType(handler);
 
         if (additional.TryGetValue(CdnKey, out var value))
         {
-            Cdn = GetCdn(value);
+            Cdn = await GetCdnAsync(value);
         }
     }
 
-    private DataStoreConsumer GetCdn(string cdn)
+    private async Task<DataStoreConsumer> GetCdnAsync(string cdn)
     {
         var fromConfig = ConsumerFactory.GetByKey<Consumer>(cdn);
         if (string.IsNullOrEmpty(fromConfig.Name))
@@ -315,8 +336,17 @@ public class DataStoreConsumer : Consumer, ICloneable
             return null;
         }
 
-        var props = ManagedKeys.ToDictionary(prop => prop, prop => this[prop]);
-        var additional = fromConfig.AdditionalKeys.ToDictionary(prop => prop, prop => fromConfig[prop]);
+        Dictionary<string, string> props = new ();
+        foreach (var prop in ManagedKeys)
+        {
+            props.Add(prop, await GetAsync(prop));
+        }
+        
+        Dictionary<string, string> additional = new();
+        foreach (var prop in fromConfig.AdditionalKeys)
+        {
+            props.Add(prop, await fromConfig.GetAsync(prop));
+        }
         additional.Add(HandlerTypeKey, HandlerType.AssemblyQualifiedName);
 
         return new DataStoreConsumer(fromConfig.TenantManager, fromConfig.CoreBaseSettings, fromConfig.CoreSettings, fromConfig.Configuration, fromConfig.Cache, fromConfig.ConsumerFactory, fromConfig.Name, fromConfig.Order, props, additional);

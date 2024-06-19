@@ -26,7 +26,6 @@
 
 namespace ASC.Core;
 
-[Scope(typeof(DbSubscriptionService))]
 public interface ISubscriptionService
 {
     Task<bool> IsUnsubscribeAsync(int tenant, string sourceId, string actionId, string recipientId, string objectId);

@@ -56,7 +56,7 @@ public class Startup
         services.AddHttpContextAccessor();
         services.AddMemoryCache();
         services.AddHttpClient();
-        services.AddExceptionHandler<Classes.CustomExceptionHandler>();
+        services.AddExceptionHandler<CustomExceptionHandler>();
         services.AddProblemDetails();
 
         services.AddSingleton<EFLoggerFactory>();
@@ -79,6 +79,7 @@ public class Startup
         services.AddSession();
 
         _diHelper.Configure(services);
+        _diHelper.Scan();
 
         Action<JsonOptions> jsonOptions = options =>
         {
@@ -91,18 +92,6 @@ public class Startup
             .AddJsonOptions(jsonOptions);
 
         services.AddSingleton(jsonOptions);
-
-        _diHelper.AddControllers();
-        _diHelper.TryAdd<IpSecurityFilter>();
-        _diHelper.TryAdd<PaymentFilter>();
-        _diHelper.TryAdd<ProductSecurityFilter>();
-        _diHelper.TryAdd<TenantStatusFilter>();
-        _diHelper.TryAdd<ConfirmAuthHandler>();
-        _diHelper.TryAdd<BasicAuthHandler>();
-        _diHelper.TryAdd<CookieAuthHandler>();
-        _diHelper.TryAdd<WebhooksGlobalFilterAttribute>();
-        _diHelper.TryAdd<FilesSpaceUsageStatManager>();
-        _diHelper.TryAdd<ApiSystemAuthHandlerHelper>();
 
         if (!string.IsNullOrEmpty(_corsOrigin))
         {
@@ -134,11 +123,7 @@ public class Startup
                 .AddDistributedLock(_configuration);
 
         services.RegisterFeature();
-
-        services.AddScoped<ITenantQuotaFeatureStat<CountRoomFeature, int>, CountRoomCheckerStatistic>();
-        services.AddScoped<CountRoomCheckerStatistic>();
-
-        _diHelper.TryAdd(typeof(IWebhookPublisher), typeof(WebhookPublisher));
+        services.RegisterQuotaFeature();
 
         services.AddAutoMapper(BaseStartup.GetAutoMapperProfileAssemblies());
 
@@ -151,7 +136,10 @@ public class Startup
         services.AddSingleton(Channel.CreateUnbounded<SocketData>());
         services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Writer);
-        _diHelper.TryAdd<SocketService>();
+        services.AddScoped<AuthHandler>();
+        services.AddScoped<ApiSystemAuthHandler>();
+        services.AddScoped<ApiSystemBasicAuthHandler>();
+        
         
         services
             .AddAuthentication()

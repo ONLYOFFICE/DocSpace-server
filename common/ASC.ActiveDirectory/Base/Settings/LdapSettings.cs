@@ -393,6 +393,10 @@ public class LdapSettings : ISettings<LdapSettings>, ICloneable
     /// <type>System.String, System</type>
     public string AcceptCertificateHash { get; set; }
 
+    /// <summary>Users type (All, RoomAdmin, User, DocSpaceAdmin, Collaborator)</summary>
+    /// <type>ASC.Core.Users.EmployeeType, ASC.Core.Common</type>
+    public EmployeeType UsersType { get; set; }
+
     private string GetOldSetting(MappingFields field)
     {
         LdapMapping ??= new Dictionary<MappingFields, string>();

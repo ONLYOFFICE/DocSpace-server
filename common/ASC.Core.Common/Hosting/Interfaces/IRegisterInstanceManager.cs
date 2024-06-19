@@ -26,7 +26,6 @@
 
 namespace ASC.Core.Common.Hosting.Interfaces;
 
-[Scope]
 public interface IRegisterInstanceManager<T> where T : IHostedService
 {
     Task Register();

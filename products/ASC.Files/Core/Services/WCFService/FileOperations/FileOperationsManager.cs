@@ -31,7 +31,7 @@ public class FileOperationsManagerHolder(
     IDistributedTaskQueueFactory queueFactory, 
     IServiceProvider serviceProvider)
 {
-    internal const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "files_operation";
+    public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "files_operation";
     private readonly DistributedTaskQueue _tasks = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
 
     public async Task<List<FileOperationResult>> GetOperationResults(Guid userId, bool includeHiddden = false)
@@ -108,7 +108,7 @@ public class FileOperationsManagerHolder(
     }
 }
 
-[Scope(Additional = typeof(FileOperationsManagerExtension))]
+[Scope]
 public class FileOperationsManager(
     IHttpContextAccessor httpContextAccessor,
     IEventBus eventBus,
@@ -417,7 +417,7 @@ public class FileOperationsManager(
                     throw new SecurityException(FilesCommonResource.ErrorMessage_LockedFile);
                 }
 
-                if (fileTracker.IsEditing(file.Id))
+                if (await fileTracker.IsEditingAsync(file.Id))
                 {
                     throw new SecurityException(isFolderCheck
                         ? FilesCommonResource.ErrorMessage_SecurityException_DeleteEditingFolder
@@ -547,30 +547,5 @@ public class FileOperationsManager(
         return headers == null 
             ? new Dictionary<string, string>() 
             : headers.ToDictionary(x => x.Key, x => x.Value.ToString());
-    }
-}
-
-public static class FileOperationsManagerExtension
-{
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<FileDeleteOperationScope>();
-        services.TryAdd<FileMarkAsReadOperationScope>();
-        services.TryAdd<FileMoveCopyOperationScope>();
-        services.TryAdd<FileOperationScope>();
-        services.TryAdd<CompressToArchive>();
-        services.TryAdd<FileDownloadOperation>();
-        services.TryAdd<FileDeleteOperation>();
-        services.TryAdd<FileMarkAsReadOperation>();
-        services.TryAdd<FileMoveCopyOperation>();
-        services.TryAdd<RemovalMarker>();
-    }
-
-    public static void RegisterQueue(this IServiceCollection services, int threadCount = 10)
-    {
-        services.Configure<DistributedTaskQueueFactoryOptions>(FileOperationsManagerHolder.CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME, x =>
-        {
-            x.MaxThreadsCount = threadCount;
-        });
     }
 }

@@ -443,7 +443,7 @@ Najviša kompatibilnost sa docx, xlsx, pptx.</value>
     <value>Dokumenti</value>
   </data>
   <data name="ProductUserOpportunities" xml:space="preserve">
-    <value>Kreirajte i uređujte sopstvene dokumente kao i deljene dokumente sa odgovarajućim pravima pristupa|Omogućite pristup za čitanje/uređivanje drugim korisnicima dokumentima i folderima|Povežite Dropbox, Box i druge naloge u odeljku 'Moji dokumenti'</value>
+    <value>Kreirajte i uređujte sopstvene dokumente kao i deljene dokumente sa odgovarajućim pravima pristupa|Omogućite pristup za čitanje/uređivanje drugim korisnicima dokumentima i folderima|Povežite Dropbox, Box i druge naloge u odeljku 'Dokumenti'</value>
   </data>
   <data name="RoleEnum_Collaborator" xml:space="preserve">
     <value>Saradnik</value>
@@ -522,5 +522,11 @@ Najviša kompatibilnost sa docx, xlsx, pptx.</value>
   </data>
   <data name="UnlockComment" xml:space="preserve">
     <value>Datoteka je otključana</value>
+  </data>
+  <data name="Date" xml:space="preserve">
+    <value>Datum</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>Korisnik</value>
   </data>
 </root>

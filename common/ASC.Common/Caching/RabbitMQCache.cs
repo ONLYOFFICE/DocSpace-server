@@ -144,7 +144,7 @@ public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : new()
         }
     }
 
-    public void Publish(T obj, CacheNotifyAction action)
+    public Task PublishAsync(T obj, CacheNotifyAction action)
     {
         var objAsByteArray = BaseProtobufSerializer.Serialize(obj);
 
@@ -160,11 +160,6 @@ public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : new()
                              mandatory: true,
                              basicProperties: _consumerChannel.CreateBasicProperties(),
                              body: body);
-    }
-
-    public Task PublishAsync(T obj, CacheNotifyAction action)
-    {
-        Publish(obj, action);
 
         return Task.CompletedTask;
     }

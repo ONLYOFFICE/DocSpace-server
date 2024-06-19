@@ -102,6 +102,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
         var folderDao = serviceScope.ServiceProvider.GetService<IFolderDao<int>>();
         var filesMessageService = serviceScope.ServiceProvider.GetService<FilesMessageService>();
         var tenantManager = serviceScope.ServiceProvider.GetService<TenantManager>();
+
         await tenantManager.SetCurrentTenantAsync(CurrentTenantId);
 
         var externalShare = serviceScope.ServiceProvider.GetRequiredService<ExternalShare>();
@@ -162,6 +163,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                 var isRoom = DocSpaceHelper.IsRoom(folder.FolderType);
 
                 await fileMarker.RemoveMarkAsNewForAllAsync(folder);
+
                 if (folder.ProviderEntry && (folder.Id.Equals(folder.RootId) || isRoom))
                 {
                     if (ProviderDao != null)
@@ -311,17 +313,25 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                 await fileMarker.RemoveMarkAsNewForAllAsync(file);
                 if (!_immediately && FileDao.UseTrashForRemove(file))
                 {
-                    await socketManager.DeleteFileAsync(file, action: async () => await FileDao.MoveFileAsync(file.Id, _trashId, file.RootFolderType == FolderType.USER));
-                    
-                    if (isNeedSendActions)
+                    try
                     {
-                        await filesMessageService.SendAsync(MessageAction.FileMovedToTrash, file, Headers, file.Title);
-                    }
+                        await socketManager.DeleteFileAsync(file, action: async () => await FileDao.MoveFileAsync(file.Id, _trashId, file.RootFolderType == FolderType.USER));
 
-                    if (file.ThumbnailStatus == Thumbnail.Waiting)
+                        if (isNeedSendActions)
+                        {
+                            await filesMessageService.SendAsync(MessageAction.FileMovedToTrash, file, Headers, file.Title);
+                        }
+
+                        if (file.ThumbnailStatus == Thumbnail.Waiting)
+                        {
+                            file.ThumbnailStatus = Thumbnail.NotRequired;
+                            await FileDao.SetThumbnailStatusAsync(file, Thumbnail.NotRequired);
+                        }
+                    }
+                    catch (Exception ex)
                     {
-                        file.ThumbnailStatus = Thumbnail.NotRequired;
-                        await FileDao.SetThumbnailStatusAsync(file, Thumbnail.NotRequired);
+                        this[Err] = ex.Message;
+                        Logger.ErrorWithException(ex);
                     }
                 }
                 else
@@ -342,8 +352,6 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                         if (file.RootFolderType == FolderType.Archive)
                         {
                             var archiveId = await folderDao.GetFolderIDArchive(false);
-                            var virtualRoomsId = await folderDao.GetFolderIDVirtualRooms(false);
-
                             await folderDao.ChangeTreeFolderSizeAsync(archiveId, (-1) * file.ContentLength);
 
                         }
@@ -370,7 +378,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                         Logger.ErrorWithException(ex);
                     }
 
-                    await LinkDao.DeleteAllLinkAsync(file.Id.ToString());
+                    await LinkDao.DeleteAllLinkAsync(file.Id);
                     await FileDao.SaveProperties(file.Id, null);
                 }
 

@@ -49,9 +49,20 @@ public class StudioNotifyService(
 
     private readonly ILogger _log = option.CreateLogger("ASC.Notify");
 
-    public async Task SendMsgToAdminFromNotAuthUserAsync(string email, string message)
+    public async Task SendMsgToAdminFromNotAuthUserAsync(string email, string message, string culture)
     {
-        await studioNotifyServiceHelper.SendNoticeAsync(Actions.UserMessageToAdmin, new TagValue(Tags.Body, message), new TagValue(Tags.UserEmail, email));
+        List<ITagValue> tags =
+        [
+            new TagValue(Tags.Body, message),
+            new TagValue(Tags.UserEmail, email)
+        ];
+
+        if (!string.IsNullOrEmpty(culture))
+        {
+            tags.Add(new TagValue(CommonTags.Culture, culture));
+        }
+
+        await studioNotifyServiceHelper.SendNoticeAsync(Actions.UserMessageToAdmin, tags.ToArray());
     }
 
     public async Task SendMsgToSalesAsync(string email, string userName, string message)
@@ -108,7 +119,21 @@ public class StudioNotifyService(
 
     public async Task SendEmailChangeInstructionsAsync(UserInfo user, string email)
     {
-        var confirmationUrl = await commonLinkUtility.GetConfirmationEmailUrlAsync(email, ConfirmType.EmailChange, authContext.CurrentAccount.ID, authContext.CurrentAccount.ID);
+        var auditEventDate = DateTime.UtcNow;
+
+        auditEventDate = new DateTime(
+            auditEventDate.Year,
+            auditEventDate.Month,
+            auditEventDate.Day,
+            auditEventDate.Hour,
+            auditEventDate.Minute,
+            auditEventDate.Second,
+            0,
+            DateTimeKind.Utc);
+
+        var postfix = auditEventDate.ToString("s", CultureInfo.InvariantCulture);
+
+        var confirmationUrl = await commonLinkUtility.GetConfirmationEmailUrlAsync(email, ConfirmType.EmailChange, postfix, user.Id);
 
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonChangeEmail", await GetCulture(user));
 
@@ -120,6 +145,10 @@ public class StudioNotifyService(
                     [EMailSenderName],
                 TagValues.OrangeButton(orangeButtonText, confirmationUrl),
                 new TagValue(CommonTags.Culture, user.GetCulture().Name));
+
+        var displayUserName = user.DisplayUserName(false, displayUserSettingsHelper);
+
+        await messageService.SendAsync(MessageAction.UserSentEmailChangeInstructions, MessageTarget.Create(user.Id), auditEventDate, displayUserName);
     }
 
     public async Task SendEmailActivationInstructionsAsync(UserInfo user, string email)
@@ -166,6 +195,29 @@ public class StudioNotifyService(
         }
     }
 
+    public async Task SendEmailRoomInviteExistingUserAsync(UserInfo user, string roomTitle, string roomUrl)
+    {
+        var cultureInfo = await GetCulture(user);
+
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonJoinRoom", cultureInfo);
+        var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", cultureInfo);
+
+        var tags = new List<ITagValue>
+        {
+            new TagValue(Tags.Message, roomTitle),
+            new TagValue(Tags.InviteLink, roomUrl),
+            TagValues.OrangeButton(orangeButtonText, roomUrl),
+            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
+            new TagValue(CommonTags.Culture, cultureInfo.Name)
+        };
+
+        await studioNotifyServiceHelper.SendNoticeToAsync(
+            Actions.SaasRoomInviteExistingUser,
+            [user],
+            [EMailSenderName],
+            tags.ToArray());
+    }
+
     public async Task SendDocSpaceInviteAsync(string email, string confirmationUrl, string culture = "", bool limitation = false)
     {
         var cultureInfo = string.IsNullOrEmpty(culture) ? (await GetCulture(null)) : new CultureInfo(culture);
@@ -194,6 +246,32 @@ public class StudioNotifyService(
         }
     }
 
+    public async Task SendDocSpaceRegistration(string email, string confirmationUrl, string culture = "", bool limitation = false)
+    {
+        var cultureInfo = string.IsNullOrEmpty(culture) ? (await GetCulture(null)) : new CultureInfo(culture);
+
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonRegister", cultureInfo);
+        var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", cultureInfo);
+
+        var tags = new List<ITagValue>
+        {
+                new TagValue(Tags.InviteLink, confirmationUrl),
+                TagValues.OrangeButton(orangeButtonText, confirmationUrl),
+                TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
+                new TagValue(CommonTags.Culture, cultureInfo.Name)
+        };
+
+        await studioNotifyServiceHelper.SendNoticeToAsync(
+            Actions.SaasDocSpaceRegistration,
+                await studioNotifyHelper.RecipientFromEmailAsync(email, false),
+                [EMailSenderName],
+                tags.ToArray());
+
+        if (limitation)
+        {
+            await userInvitationLimitHelper.ReduceLimit();
+        }
+    }
     #endregion
 
     public async Task SendMsgMobilePhoneChangeAsync(UserInfo userInfo)
@@ -228,19 +306,28 @@ public class StudioNotifyService(
         await studioNotifyServiceHelper.SendNoticeAsync(Actions.UserHasJoin);
     }
 
-    public async Task SendJoinMsgAsync(string email, EmployeeType emplType)
+    public async Task SendJoinMsgAsync(string email, EmployeeType emplType, string culture)
     {
-        var inviteUrl = await commonLinkUtility.GetConfirmationEmailUrlAsync(email, ConfirmType.EmpInvite, (int)emplType)
-                    + string.Format("&emplType={0}", (int)emplType);
+        var inviteUrl = await commonLinkUtility.GetConfirmationEmailUrlAsync(email, ConfirmType.EmpInvite, (int)emplType) + $"&emplType={(int)emplType}";
 
         var orangeButtonText = WebstudioNotifyPatternResource.ButtonJoin;
 
+        List<ITagValue> tags =
+        [
+            new TagValue(Tags.InviteLink, inviteUrl),
+            TagValues.OrangeButton(orangeButtonText, inviteUrl)
+        ];
+
+        if (!string.IsNullOrEmpty(culture))
+        {
+            tags.Add(new TagValue(CommonTags.Culture, culture));
+        }
+        
         await studioNotifyServiceHelper.SendNoticeToAsync(
-                Actions.JoinUsers,
-                   await studioNotifyHelper.RecipientFromEmailAsync(email, true),
-                   [EMailSenderName],
-                new TagValue(Tags.InviteLink, inviteUrl),
-                TagValues.OrangeButton(orangeButtonText, inviteUrl));
+            Actions.JoinUsers,
+            await studioNotifyHelper.RecipientFromEmailAsync(email, false),
+            [EMailSenderName],
+            tags.ToArray());
     }
 
     public async Task UserInfoAddedAfterInviteAsync(UserInfo newUserInfo)
@@ -274,7 +361,7 @@ public class StudioNotifyService(
         }
 
         var culture = await GetCulture(newUserInfo);
-        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonCollaborateDocSpace", culture);
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonCollaborate", culture);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
         var img1 = studioNotifyHelper.GetNotificationImageUrl("users.png");
@@ -454,6 +541,26 @@ public class StudioNotifyService(
         TagValues.OrangeButton(orangeButtonText, confirmationUrl),
         TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
         new TagValue(CommonTags.Culture, user.GetCulture().Name));
+    }
+
+    public async Task SendMsgProfileHasDeletedItselfAsync(UserInfo user)
+    {
+        var userName = user.DisplayUserName(displayUserSettingsHelper);
+        var userLink = await GetUserProfileLinkAsync(user.Id);
+        var recipients = await userManager.GetUsersByGroupAsync(ASC.Core.Users.Constants.GroupAdmin.ID);
+
+        foreach (var recipient in recipients)
+        {
+            var culture = await GetCulture(recipient);
+
+            await studioNotifyServiceHelper.SendNoticeToAsync(
+                Actions.ProfileHasDeletedItself,
+                [recipient],
+                [EMailSenderName],
+                new TagValue(Tags.FromUserName, userName),
+                new TagValue(Tags.FromUserLink, userLink),
+                new TagValue(CommonTags.Culture, culture.Name));
+        }
     }
 
     public async Task SendMsgReassignsCompletedAsync(Guid recipientId, UserInfo fromUser, UserInfo toUser)
@@ -858,6 +965,48 @@ public class StudioNotifyService(
         {
             _log.ErrorSendCongratulations(error);
         }
+    }
+
+    #endregion
+
+    #region Migration Personal to Docspace
+
+    public async Task MigrationPersonalToDocspaceAsync(UserInfo userInfo)
+    {
+        var auditEventDate = DateTime.UtcNow;
+
+        auditEventDate = new DateTime(
+            auditEventDate.Year,
+            auditEventDate.Month,
+            auditEventDate.Day,
+            auditEventDate.Hour,
+            auditEventDate.Minute,
+            auditEventDate.Second,
+            0,
+            DateTimeKind.Utc);
+
+        var hash = auditEventDate.ToString("s", CultureInfo.InvariantCulture);
+
+        var confirmationUrl = await commonLinkUtility.GetConfirmationEmailUrlAsync(userInfo.Email, ConfirmType.PasswordChange, hash, userInfo.Id);
+
+        var cultureInfo = await GetCulture(userInfo);
+
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetStarted", cultureInfo);
+
+        var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", cultureInfo);
+
+        await studioNotifyServiceHelper.SendNoticeToAsync(
+                Actions.MigrationPersonalToDocspace,
+                await studioNotifyHelper.RecipientFromEmailAsync(userInfo.Email, false),
+                [EMailSenderName],
+                TagValues.OrangeButton(orangeButtonText, confirmationUrl),
+                TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
+                new TagValue(CommonTags.Culture, cultureInfo.Name),
+                new TagValue(CommonTags.Footer, "social"));
+
+        var displayUserName = userInfo.DisplayUserName(false, displayUserSettingsHelper);
+
+        await messageService.SendAsync(MessageAction.UserSentPasswordChangeInstructions, MessageTarget.Create(userInfo.Id), auditEventDate, displayUserName);
     }
 
     #endregion

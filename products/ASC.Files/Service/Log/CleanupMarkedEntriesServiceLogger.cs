@@ -28,30 +28,24 @@ namespace ASC.Files.Service.Log;
 
 internal static partial class CleanupMarkedEntriesServiceLogger
 {
-    [LoggerMessage(Level = LogLevel.Information, Message = "CleanupMarkedEntries Worker running.")]
-    public static partial void InformationCleanupMarkedEntriesWorkerRunning(this ILogger<CleanupMarkedEntriesLauncher> logger);
-
-    [LoggerMessage(Level = LogLevel.Information, Message = "CleanupMarkedEntries Worker is stopping.")]
-    public static partial void InformationCleanupMarkedEntriesWorkerStopping(this ILogger<CleanupMarkedEntriesLauncher> logger);
-
     [LoggerMessage(Level = LogLevel.Trace, Message = "Procedure CleanupMarkedEntries: Start.")]
-    public static partial void TraceCleanupMarkedEntriesProcedureStart(this ILogger<CleanupMarkedEntriesLauncher> logger);
+    public static partial void TraceCleanupMarkedEntriesProcedureStart(this ILogger<CleanupMarkedEntriesService> logger);
 
     [LoggerMessage(Level = LogLevel.Trace, Message = "Procedure CleanupMarkedEntries: Finish.")]
-    public static partial void TraceCleanupMarkedEntriesProcedureFinish(this ILogger<CleanupMarkedEntriesLauncher> logger);
+    public static partial void TraceCleanupMarkedEntriesProcedureFinish(this ILogger<CleanupMarkedEntriesService> logger);
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Found {count} users with marked entries")]
-    public static partial void InfoFoundUsers(this ILogger<CleanupMarkedEntriesWorker> logger, int count);
+    public static partial void InfoFoundUsers(this ILogger<CleanupMarkedEntriesService> logger, int count);
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Waiting for data. Sleep {time}.")]
-    public static partial void InfoWaitingForData(this ILogger<CleanupMarkedEntriesWorker> logger, TimeSpan time);
+    public static partial void InfoWaitingForData(this ILogger<CleanupMarkedEntriesService> logger, TimeSpan time);
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Start CleanupMarkedEntries tenant {tenant}, user {user}, folders [{folders}], files [{files}]")]
-    public static partial void InfoCleanupMarkedEntries(this ILogger<CleanupMarkedEntriesWorker> logger, int tenant, Guid user, string folders, string files);
+    public static partial void InfoCleanupMarkedEntries(this ILogger<CleanupMarkedEntriesService> logger, int tenant, Guid user, string folders, string files);
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Waiting for tenant {tenant}, user {user}...")]
-    public static partial void InfoCleanupMarkedEntriesWait(this ILogger<CleanupMarkedEntriesWorker> logger, int tenant, Guid user);
+    public static partial void InfoCleanupMarkedEntriesWait(this ILogger<CleanupMarkedEntriesService> logger, int tenant, Guid user);
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Finish CleanupMarkedEntries tenant {tenant}, user {user}")]
-    public static partial void InfoCleanupMarkedEntriesFinish(this ILogger<CleanupMarkedEntriesWorker> logger, int tenant, Guid user);
+    public static partial void InfoCleanupMarkedEntriesFinish(this ILogger<CleanupMarkedEntriesService> logger, int tenant, Guid user);
 }

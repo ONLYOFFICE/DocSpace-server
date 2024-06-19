@@ -55,9 +55,24 @@ public class ResponseStream(Stream stream, long length) : Stream
         stream.Flush();
     }
 
+    public override Task FlushAsync(CancellationToken cancellationToken)
+    {
+        return stream.FlushAsync(cancellationToken);
+    }
+    
     public override int Read(byte[] buffer, int offset, int count)
     {
         return stream.Read(buffer, offset, count);
+    }
+
+    public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = new CancellationToken())
+    {
+        return stream.ReadAsync(buffer, cancellationToken);
+    }
+
+    public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+    {
+        return stream.ReadAsync(buffer, offset, count, cancellationToken);
     }
 
     public override long Seek(long offset, SeekOrigin origin)
@@ -73,6 +88,21 @@ public class ResponseStream(Stream stream, long length) : Stream
     public override void Write(byte[] buffer, int offset, int count)
     {
         stream.Write(buffer, offset, count);
+    }
+    
+    public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+    {
+        return stream.WriteAsync(buffer, offset, count, cancellationToken);
+    }
+
+    public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = new CancellationToken())
+    {
+        return stream.WriteAsync(buffer, cancellationToken);
+    }
+
+    public override Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken)
+    {
+        return stream.CopyToAsync(destination, bufferSize, cancellationToken);
     }
 
     protected override void Dispose(bool disposing)

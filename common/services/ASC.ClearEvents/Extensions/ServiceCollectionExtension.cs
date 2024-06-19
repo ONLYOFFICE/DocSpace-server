@@ -32,14 +32,10 @@ public static class ServiceCollectionExtension
 {
     public static async Task<IServiceCollection> AddClearEventsServices(this IServiceCollection services, IConfiguration configuration, string @namespace)
     {
-        var diHelper = new DIHelper(services);
 
         services.AddSingleton<EFLoggerFactory>();
-
         services.AddHostedService<ClearEventsService>();
-        diHelper.TryAdd<ClearEventsService>();
         services.AddBaseDbContextPool<MessagesContext>();
-
         services.AddCustomHealthCheck(configuration);
         
         var connectionMultiplexer = await services.GetRedisConnectionMultiplexerAsync(configuration, @namespace);

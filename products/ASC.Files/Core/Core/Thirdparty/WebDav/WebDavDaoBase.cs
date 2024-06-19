@@ -26,17 +26,17 @@
 
 namespace ASC.Files.Core.Core.Thirdparty.WebDav;
 
-[Scope]
-internal class WebDavDaoBase(IServiceProvider serviceProvider,
+[Scope(typeof(IDaoBase<WebDavEntry, WebDavEntry, WebDavEntry>))]
+internal class WebDavDaoBase(
+    IDaoFactory daoFactory,
+    IServiceProvider serviceProvider,
     UserManager userManager,
     TenantManager tenantManager,
     TenantUtil tenantUtil,
     IDbContextFactory<FilesDbContext> dbContextFactory,
-    SetupInfo setupInfo,
     FileUtility fileUtility,
-    TempPath tempPath,
     RegexDaoSelectorBase<WebDavEntry, WebDavEntry, WebDavEntry> regexDaoSelectorBase) 
-    : ThirdPartyProviderDao<WebDavEntry, WebDavEntry, WebDavEntry>(serviceProvider, userManager, tenantManager, tenantUtil, dbContextFactory, setupInfo, fileUtility, tempPath, regexDaoSelectorBase),
+    : ThirdPartyProviderDao<WebDavEntry, WebDavEntry, WebDavEntry>(daoFactory, serviceProvider, userManager, tenantManager, tenantUtil, dbContextFactory, fileUtility, regexDaoSelectorBase),
         IDaoBase<WebDavEntry, WebDavEntry, WebDavEntry>
 {
 
