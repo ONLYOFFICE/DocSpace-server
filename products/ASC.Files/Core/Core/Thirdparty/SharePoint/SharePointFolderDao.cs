@@ -46,7 +46,7 @@ internal class SharePointFolderDao(
     {
         private readonly TenantManager _tenantManager1 = tenantManager;
 
-        public async Task<Folder<string>> GetFolderAsync(string folderId)
+        public async Task<Folder<string>> GetFolderAsync(string folderId, bool includeRemoved = false)
     {
         
         var folder = SharePointProviderInfo.ToFolder(await SharePointProviderInfo.GetFolderByIdAsync(folderId));
@@ -110,7 +110,7 @@ internal class SharePointFolderDao(
     {
         return GetFoldersAsync(parentId);
     }
-    public async IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId)
+    public async IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId, bool includeRemoved = false)
     {
         var folderFolders = await SharePointProviderInfo.GetFolderFoldersAsync(parentId);
 
@@ -456,6 +456,11 @@ internal class SharePointFolderDao(
     }
 
     public Task InitCustomOrder(IEnumerable<string> folderIds, string parentFolderId)
+    {
+        return Task.CompletedTask;
+    }
+
+    public Task MarkFoldersAsRemovedAsync(IEnumerable<string> folderIds)
     {
         return Task.CompletedTask;
     }

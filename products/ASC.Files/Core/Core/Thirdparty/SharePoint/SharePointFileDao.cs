@@ -50,7 +50,7 @@ internal class SharePointFileDao(
         await SharePointProviderInfo.InvalidateStorageAsync();
     }
 
-    public async Task<File<string>> GetFileAsync(string fileId)
+    public async Task<File<string>> GetFileAsync(string fileId, bool includeRemoved = false)
     {
         return await GetFileAsync(fileId, 1);
     }
@@ -163,7 +163,7 @@ internal class SharePointFileDao(
         return files;
     }
 
-    public async IAsyncEnumerable<string> GetFilesAsync(string parentId)
+    public async IAsyncEnumerable<string> GetFilesAsync(string parentId, bool includeRemoved = false)
     {
         var files = await SharePointProviderInfo.GetFolderFilesAsync(parentId);
 
@@ -536,5 +536,10 @@ internal class SharePointFileDao(
         uploadSession.File = FixId(uploadSession.File);
         
         return Task.FromResult(transferred);
+    }
+
+    public Task MarkFilesAsRemovedAsync(IEnumerable<string> fileIds)
+    {
+        return Task.CompletedTask;
     }
 }

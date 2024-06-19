@@ -115,15 +115,15 @@ public class AutoCleanTrashService(
 
             logger.InfoCleanUp(tenantUser.TenantId, trashId);
 
-            await fileOperationsManager.PublishDelete(foldersList, filesList, true, true, true);
+            await fileOperationsManager.PublishDelete(foldersList, filesList, true, true);
 
             logger.InfoCleanUpWait(tenantUser.TenantId, trashId);
 
             while (true)
             {
-                var statuses = await fileOperationsManager.GetOperationResults();
+                var statuses = await fileOperationsManager.GetOperationResults(true);
 
-                if (statuses.TrueForAll(r => r.Finished))
+                if (statuses.TrueForAll(r => r.OperationType != FileOperationType.Delete || r.Finished))
                 {
                     break;
                 }

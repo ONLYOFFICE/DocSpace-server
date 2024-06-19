@@ -61,6 +61,7 @@ public class DbFile : BaseEntity, IDbFile, IDbSearch, ISearchItemDocument
     public bool Encrypted { get; set; }
     public ForcesaveType Forcesave { get; set; }
     public Thumbnail ThumbnailStatus { get; set; }
+    public bool Removed { get; set; }
 
     public DbTenant Tenant { get; set; }
 
@@ -223,6 +224,11 @@ public static class DbFileExtension
             entity.Property(e => e.VersionGroup)
                 .HasColumnName("version_group")
                 .HasDefaultValueSql("'1'");
+
+            entity.Property(e => e.Removed)
+                .HasColumnType("tinyint(1)")
+                .HasColumnName("removed")
+                .HasDefaultValueSql("'0'");
         });
 
     }
@@ -317,6 +323,8 @@ public static class DbFileExtension
             entity.Property(e => e.VersionGroup)
                 .HasColumnName("version_group")
                 .HasDefaultValueSql("1");
+
+            entity.Property(e => e.Removed).HasColumnName("removed");
         });
 
     }

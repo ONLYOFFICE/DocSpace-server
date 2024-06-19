@@ -32,8 +32,9 @@ public interface IFolderDao<T>
     ///     Get folder by id.
     /// </summary>
     /// <param name="folderId">folder id</param>
+    /// <param name="includeRemoved"></param>
     /// <returns>folder</returns>
-    Task<Folder<T>> GetFolderAsync(T folderId);
+    Task<Folder<T>> GetFolderAsync(T folderId, bool includeRemoved = false);
 
     /// <summary>
     ///     Returns the folder with the given name and id of the root
@@ -72,7 +73,8 @@ public interface IFolderDao<T>
     ///     Get a list of folders in current folder.
     /// </summary>
     /// <param name="parentId"></param>
-    IAsyncEnumerable<Folder<T>> GetFoldersAsync(T parentId);
+    /// <param name="includeRemoved"></param>
+    IAsyncEnumerable<Folder<T>> GetFoldersAsync(T parentId, bool includeRemoved = false);
 
     /// <summary>
     ///     Get a list of folders in current folder.
@@ -412,6 +414,8 @@ public interface IFolderDao<T>
     Task SetCustomOrder(T folderId, T parentFolderId, int order);
 
     Task InitCustomOrder(IEnumerable<T> folderIds, T parentFolderId);
-    
+
+    Task MarkFoldersAsRemovedAsync(IEnumerable<T> folderIds);
+
     #endregion
 }

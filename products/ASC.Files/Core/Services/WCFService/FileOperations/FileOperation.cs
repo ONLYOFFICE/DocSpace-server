@@ -39,6 +39,7 @@ public abstract class FileOperation : DistributedTaskProgress
     public const string Process = "Processed";
     public const string Finish = "Finished";
     public const string Hold = "Hold";
+    public const string Hidden = "Hidden";
 
     protected readonly IPrincipal _principal;
     protected readonly string _culture;
@@ -259,7 +260,7 @@ public abstract class FileOperation<T, TId> : FileOperation where T : FileOperat
         Folders = fileOperationData.Folders?.ToList() ?? [];
         this[Hold] = fileOperationData.HoldResult;
         CurrentTenantId = fileOperationData.TenantId;
-        Headers = fileOperationData.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value));
+        Headers = fileOperationData.Headers?.ToDictionary(x => x.Key, x => new StringValues(x.Value));
         SessionSnapshot = fileOperationData.SessionSnapshot;
 
         using var scope = _serviceProvider.CreateScope();

@@ -36,8 +36,9 @@ public interface IFileDao<T>
     ///     Receive file
     /// </summary>
     /// <param name="fileId">file id</param>
+    /// <param name="includeRemoved"></param>
     /// <returns></returns>
-    Task<File<T>> GetFileAsync(T fileId);
+    Task<File<T>> GetFileAsync(T fileId, bool includeRemoved = false);
 
     /// <summary>
     ///     Receive file
@@ -96,8 +97,9 @@ public interface IFileDao<T>
     /// 
     /// </summary>
     /// <param name="parentId"></param>
+    /// <param name="includeRemoved"></param>
     /// <returns></returns>
-    IAsyncEnumerable<T> GetFilesAsync(T parentId);
+    IAsyncEnumerable<T> GetFilesAsync(T parentId, bool includeRemoved = false);
 
     /// <summary>
     ///     Get files in folder
@@ -357,6 +359,8 @@ public interface IFileDao<T>
 
     Task<int> GetFilesByTagCountAsync(Guid? tagOwner, TagType tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
         string searchText, string[] extension, bool searchInContent, bool excludeSubject);
+
+    Task MarkFilesAsRemovedAsync(IEnumerable<T> fileIds);
 
     #endregion
 }

@@ -42,12 +42,12 @@ internal class ProviderFileDao(IServiceProvider serviceProvider,
         await fileDao.InvalidateCacheAsync(selector.ConvertId(fileId));
     }
 
-    public async Task<File<string>> GetFileAsync(string fileId)
+    public async Task<File<string>> GetFileAsync(string fileId, bool includeRemoved = false)
     {
         var selector = _selectorFactory.GetSelector(fileId);
 
         var fileDao = selector.GetFileDao(fileId);
-        var result = await fileDao.GetFileAsync(selector.ConvertId(fileId));
+        var result = await fileDao.GetFileAsync(selector.ConvertId(fileId), includeRemoved);
 
         return result;
     }
@@ -143,11 +143,11 @@ internal class ProviderFileDao(IServiceProvider serviceProvider,
         }
     }
 
-    public async IAsyncEnumerable<string> GetFilesAsync(string parentId)
+    public async IAsyncEnumerable<string> GetFilesAsync(string parentId, bool includeRemoved = false)
     {
         var selector = _selectorFactory.GetSelector(parentId);
         var fileDao = selector.GetFileDao(parentId);
-        var files = fileDao.GetFilesAsync(selector.ConvertId(parentId));
+        var files = fileDao.GetFilesAsync(selector.ConvertId(parentId), includeRemoved);
 
         await foreach (var f in files.Where(r => r != null))
         {
@@ -559,4 +559,24 @@ internal class ProviderFileDao(IServiceProvider serviceProvider,
     }
 
     #endregion
+
+    public async Task MarkFilesAsRemovedAsync(IEnumerable<string> fileIds)
+    {
+        foreach (var group in _selectorFactory.GetSelectors(fileIds))
+        {
+            var selectorLocal = group.Key;
+            if (selectorLocal == null)
+            {
+                continue;
+            }
+            var matchedIds = group.Value;
+
+            foreach (var matchedId in matchedIds.GroupBy(selectorLocal.GetIdCode))
+            {
+                var fileDao = selectorLocal.GetFileDao(matchedId.FirstOrDefault());
+
+                await fileDao.MarkFilesAsRemovedAsync(matchedId.Select(selectorLocal.ConvertId).ToList());
+            }
+        }
+    }
 }

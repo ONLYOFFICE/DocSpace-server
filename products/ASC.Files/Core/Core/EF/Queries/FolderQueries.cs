@@ -58,6 +58,12 @@ public partial class FilesDbContext
         return FolderQueries.CountTreesAsync(this, parentId);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt])]
+    public Task<int> CountChildFoldersAsync(int parentId)
+    {
+        return FolderQueries.CountChildFoldersAsync(this, parentId);
+    }
+    
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<int> FolderIdAsync(int tenantId, int folderId, int parentId)
     {
@@ -94,10 +100,10 @@ public partial class FilesDbContext
         return FolderQueries.ParentIdByIdAsync(this, tenantId, id);
     }
     
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
-    public Task<DbFolderQuery> DbFolderQueryWithSharedAsync(int tenantId, int folderId)
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, true])]
+    public Task<DbFolderQuery> DbFolderQueryWithSharedAsync(int tenantId, int folderId, bool includeRemoved)
     {
-        return FolderQueries.DbFolderQueryWithSharedAsync(this, tenantId, folderId);
+        return FolderQueries.DbFolderQueryWithSharedAsync(this, tenantId, folderId, includeRemoved);
     }
     
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
@@ -309,6 +315,12 @@ public partial class FilesDbContext
     {
         return FolderQueries.UpdateTreeFolderCounterAsync(this, tenantId, folderId, size);
     }
+    
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultDateTime, PreCompileQuery.DefaultGuid])]
+    public Task<int> MarkFoldersAsRemovedAsync(int tenantId, IEnumerable<int> folderIds, DateTime modifiedOn, Guid modifiedBy)
+    {
+        return FolderQueries.MarkFoldersAsRemovedAsync(this, tenantId, folderIds, modifiedOn, modifiedBy);
+    }
 }
 
 static file class FolderQueries
@@ -352,12 +364,13 @@ static file class FolderQueries
                         }
                     ).SingleOrDefault());
 
-    public static readonly Func<FilesDbContext, int, int, Task<DbFolderQuery>> DbFolderQueryWithSharedAsync =
+    public static readonly Func<FilesDbContext, int, int, bool, Task<DbFolderQuery>> DbFolderQueryWithSharedAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int folderId) =>
+            (FilesDbContext ctx, int tenantId, int folderId, bool includeRemoved) =>
                 ctx.Folders
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.Id == folderId)
+                    .Where(r => includeRemoved || !r.Removed)
                     .Select(r =>
                         new DbFolderQuery
                         {
@@ -674,6 +687,13 @@ static file class FolderQueries
                     .Join(ctx.Folders, tree => tree.FolderId, folder => folder.Id, (tree, folder) => tree)
                     .Count(r => r.ParentId == parentId && r.Level > 0));
 
+    public static readonly Func<FilesDbContext, int, Task<int>> CountChildFoldersAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int parentId) =>
+                ctx.Tree
+                    .Join(ctx.Folders, tree => tree.FolderId, folder => folder.Id, (tree, folder) => new { tree, folder })
+                    .Count(r => r.tree.ParentId == parentId && r.tree.Level == 1 && !r.folder.Removed));
+
     public static readonly Func<FilesDbContext, int, int, Task<int>> CountFilesAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, int folderId) =>
@@ -877,4 +897,15 @@ static file class FolderQueries
                     .ExecuteUpdate(toUpdate => toUpdate
                             .SetProperty(p => p.folder.Counter, p => p.folder.Counter + size)
                         ));
+
+    public static readonly Func<FilesDbContext, int, IEnumerable<int>, DateTime, Guid, Task<int>> MarkFoldersAsRemovedAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, IEnumerable<int> folderIds, DateTime modifiedOn, Guid modifiedBy) =>
+                ctx.Folders
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => folderIds.Contains(r.Id))
+                    .ExecuteUpdate(q => q
+                        .SetProperty(p => p.Removed, true)
+                        .SetProperty(p => p.ModifiedOn, modifiedOn)
+                        .SetProperty(p => p.ModifiedBy, modifiedBy)));
 }

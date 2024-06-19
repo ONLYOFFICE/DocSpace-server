@@ -68,6 +68,7 @@ public class Startup : BaseWorkerStartup
             services.AddHostedService<ThumbnailBuilderService>();
             services.AddActivePassiveHostedService<AutoCleanTrashService>(DIHelper, Configuration);
             services.AddActivePassiveHostedService<DeleteExpiredService>(DIHelper, Configuration);
+            services.AddActivePassiveHostedService<CleanupMarkedEntriesService>(DIHelper, Configuration);
         }
         
         services.RegisterQuotaFeature();

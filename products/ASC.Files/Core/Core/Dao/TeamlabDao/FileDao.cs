@@ -83,13 +83,13 @@ internal class FileDao(
         return Task.CompletedTask;
     }
 
-    public async Task<File<int>> GetFileAsync(int fileId)
+    public async Task<File<int>> GetFileAsync(int fileId, bool includeRemoved = false)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        var dbFile = await filesDbContext.DbFileQueryAsync(tenantId, fileId);
+        var dbFile = await filesDbContext.DbFileQueryAsync(tenantId, fileId, includeRemoved);
 
         return mapper.Map<DbFileQuery, File<int>>(dbFile);
     }
@@ -250,13 +250,13 @@ internal class FileDao(
         }
     }
 
-    public async IAsyncEnumerable<int> GetFilesAsync(int parentId)
+    public async IAsyncEnumerable<int> GetFilesAsync(int parentId, bool includeRemoved = false)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        await foreach (var e in filesDbContext.FileIdsAsync(tenantId, parentId))
+        await foreach (var e in filesDbContext.FileIdsAsync(tenantId, parentId, includeRemoved))
         {
             yield return e;
         }
@@ -274,7 +274,7 @@ internal class FileDao(
 
         var q = await GetFilesQueryWithFilters(parentId, orderBy, filterType, subjectGroup, subjectID, searchText, searchInContent, withSubfolders, excludeSubject, roomId, extension, filesDbContext);
 
-        q = q.Skip(offset);
+        q = q.Where(r => !r.Removed).Skip(offset);
 
         if (count > 0)
         {
@@ -650,8 +650,11 @@ internal class FileDao(
 
         var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        return await (await GetFilesQueryWithFilters(parentId, null, filterType, subjectGroup, subjectId, searchText, searchInContent, withSubfolders, excludeSubject, roomId, extension, filesDbContext))
-            .CountAsync();
+        var q = await GetFilesQueryWithFilters(parentId, null, filterType, subjectGroup, subjectId, searchText, searchInContent, withSubfolders, excludeSubject, roomId, extension, filesDbContext);
+
+        q = q.Where(r => !r.Removed);
+
+        return await q.CountAsync();
     }
 
     public async Task<File<int>> ReplaceFileVersionAsync(File<int> file, Stream fileStream)
@@ -989,9 +992,16 @@ internal class FileDao(
 
                 var tagDao = daoFactory.GetTagDao<int>();
                 var oldFolder = await folderDao.GetFolderAsync(oldParentId.Value);
-                var (toFolderRoomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(toFolder);
-                var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(oldFolder);
-                var archiveId = await folderDao.GetFolderIDArchive(false);
+
+                var toFolderRoomIdTask = folderDao.GetParentRoomInfoFromFileEntryAsync(toFolder);
+                var roomIdTask = folderDao.GetParentRoomInfoFromFileEntryAsync(oldFolder);
+                var archiveIdTask = folderDao.GetFolderIDArchive(false);
+
+                await Task.WhenAll(toFolderRoomIdTask, roomIdTask, archiveIdTask);
+
+                var (toFolderRoomId, _) = await toFolderRoomIdTask;
+                var (roomId, _) = await roomIdTask;
+                var archiveId = await archiveIdTask;
 
                 if (toFolderId == trashId && oldParentId.HasValue)
                 {
@@ -1786,6 +1796,15 @@ internal class FileDao(
     private async Task DeleteCustomOrder(FilesDbContext filesDbContext, int fileId)
     {
         await DeleteCustomOrder(filesDbContext, fileId, FileEntryType.File);
+    }
+
+    public async Task MarkFilesAsRemovedAsync(IEnumerable<int> fileIds)
+    {
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        await filesDbContext.MarkFilesAsRemovedAsync(tenantId, fileIds, DateTime.UtcNow, _authContext.CurrentAccount.ID);
     }
 
     #endregion

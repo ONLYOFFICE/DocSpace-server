@@ -62,12 +62,9 @@ public class FileMarkAsReadOperation(IServiceProvider serviceProvider) :
 
 class FileMarkAsReadOperation<T> : FileOperation<FileMarkAsReadOperationData<T>, T>
 {
-    private readonly IDictionary<string, StringValues> _headers;
-
     public FileMarkAsReadOperation(IServiceProvider serviceProvider, FileMarkAsReadOperationData<T> fileOperationData)
         : base(serviceProvider, fileOperationData)
     {
-        _headers = fileOperationData.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value));
         this[OpType] = (int)FileOperationType.MarkAsRead;
     }
 
@@ -101,12 +98,12 @@ class FileMarkAsReadOperation<T> : FileOperation<FileMarkAsReadOperationData<T>,
             if (entry.FileEntryType == FileEntryType.File)
             {
                 ProcessedFile(((File<T>)entry).Id);
-                await filesMessageService.SendAsync(MessageAction.FileMarkedAsRead, entry, _headers, entry.Title);
+                await filesMessageService.SendAsync(MessageAction.FileMarkedAsRead, entry, Headers, entry.Title);
             }
             else
             {
                 ProcessedFolder(((Folder<T>)entry).Id);
-                await filesMessageService.SendAsync(MessageAction.FolderMarkedAsRead, entry, _headers, entry.Title);
+                await filesMessageService.SendAsync(MessageAction.FolderMarkedAsRead, entry, Headers, entry.Title);
             }
 
             await ProgressStep();

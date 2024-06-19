@@ -28,10 +28,10 @@ namespace ASC.Files.Core.EF;
 
 public partial class FilesDbContext
 {
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
-    public Task<DbFileQuery> DbFileQueryAsync(int tenantId, int fileId)
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, true])]
+    public Task<DbFileQuery> DbFileQueryAsync(int tenantId, int fileId, bool includeRemoved)
     {
-        return FileQueries.DbFileQueryAsync(this, tenantId, fileId);
+        return FileQueries.DbFileQueryAsync(this, tenantId, fileId, includeRemoved);
     }
     
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
@@ -64,10 +64,10 @@ public partial class FilesDbContext
         return FileQueries.DbFileQueriesByFileIdsAsync(this, tenantId, fileIds);
     }
     
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
-    public IAsyncEnumerable<int> FileIdsAsync(int tenantId, int parentId)
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, true])]
+    public IAsyncEnumerable<int> FileIdsAsync(int tenantId, int parentId, bool includeRemoved)
     {
-        return FileQueries.FileIdsAsync(this, tenantId, parentId);
+        return FileQueries.FileIdsAsync(this, tenantId, parentId, includeRemoved);
     }
     
     [PreCompileQuery([])]
@@ -267,17 +267,23 @@ public partial class FilesDbContext
     {
         return FileQueries.FilesConvertsAsync(this);
     }
+    
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultDateTime, PreCompileQuery.DefaultGuid])]
+    public Task<int> MarkFilesAsRemovedAsync(int tenantId, IEnumerable<int> fileIds, DateTime modifiedOn, Guid modifiedBy)
+    {
+        return FileQueries.MarkFilesAsRemovedAsync(this, tenantId, fileIds, modifiedOn, modifiedBy);
+    }
 }
 
 static file class FileQueries
 {
-    public static readonly Func<FilesDbContext, int, int, Task<DbFileQuery>> DbFileQueryAsync =
+    public static readonly Func<FilesDbContext, int, int, bool, Task<DbFileQuery>> DbFileQueryAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int fileId) =>
+            (FilesDbContext ctx, int tenantId, int fileId, bool includeRemoved) =>
                 ctx.Files
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.Id == fileId && r.CurrentVersion)
-
+                    .Where(r => includeRemoved || !r.Removed)
                     .Select(r => new DbFileQuery
                     {
                         File = r,
@@ -417,12 +423,13 @@ static file class FileQueries
                             ).FirstOrDefault()
                     }));
 
-    public static readonly Func<FilesDbContext, int, int, IAsyncEnumerable<int>> FileIdsAsync =
+    public static readonly Func<FilesDbContext, int, int, bool, IAsyncEnumerable<int>> FileIdsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int parentId) =>
+            (FilesDbContext ctx, int tenantId, int parentId, bool includeRemoved) =>
                 ctx.Files
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.ParentId == parentId && r.CurrentVersion)
+                    .Where(r => includeRemoved || !r.Removed)
                     .Select(r => r.Id));
 
     public static readonly Func<FilesDbContext, Task<int>> FileMaxIdAsync =
@@ -745,4 +752,15 @@ static file class FileQueries
     
     public static readonly Func<FilesDbContext, IAsyncEnumerable<FilesConverts>> FilesConvertsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx) => ctx.FilesConverts);
+
+    public static readonly Func<FilesDbContext, int, IEnumerable<int>, DateTime, Guid, Task<int>> MarkFilesAsRemovedAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, IEnumerable<int> fileIds, DateTime modifiedOn, Guid modifiedBy) =>
+                ctx.Files
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => fileIds.Contains(r.Id))
+                    .ExecuteUpdate(q => q
+                        .SetProperty(p => p.Removed, true)
+                        .SetProperty(p => p.ModifiedOn, modifiedOn)
+                        .SetProperty(p => p.ModifiedBy, modifiedBy)));
 }

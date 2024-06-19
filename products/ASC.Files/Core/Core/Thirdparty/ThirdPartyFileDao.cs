@@ -66,7 +66,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         }
     }
 
-    public Task<File<string>> GetFileAsync(string fileId)
+    public Task<File<string>> GetFileAsync(string fileId, bool includeRemoved = false)
     {
         return GetFileAsync(fileId, 1);
     }
@@ -179,7 +179,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         return files;
     }
 
-    public async IAsyncEnumerable<string> GetFilesAsync(string parentId)
+    public async IAsyncEnumerable<string> GetFilesAsync(string parentId, bool includeRemoved = false)
     {
         var items = await Dao.GetItemsAsync(parentId, false);
 
@@ -789,6 +789,11 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         var nativeSession = uploadSession.GetItemOrDefault<ThirdPartyUploadSessionBase>(UploadSessionKey);
 
         return Task.FromResult(nativeSession.BytesTransferred);
+    }
+
+    public Task MarkFilesAsRemovedAsync(IEnumerable<string> fileIds)
+    {
+        return Task.CompletedTask;
     }
 }
 

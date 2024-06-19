@@ -34,7 +34,7 @@ public class FileOperationsManagerHolder(
     public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "files_operation";
     private readonly DistributedTaskQueue _tasks = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
 
-    public async Task<List<FileOperationResult>> GetOperationResults(Guid userId)
+    public async Task<List<FileOperationResult>> GetOperationResults(Guid userId, bool includeHiddden = false)
     {
         var operations = (await _tasks
             .GetAllTasks())
@@ -50,6 +50,7 @@ public class FileOperationsManagerHolder(
 
         var results = operations
             .Where(o => o[FileOperation.Hold] || o[FileOperation.Progress] != 100)
+            .Where(o => includeHiddden || !(o.HasProperty(FileOperation.Hidden) && o[FileOperation.Hidden]))
             .Select(o => new FileOperationResult
             {
                 Id = o.Id,
@@ -118,9 +119,9 @@ public class FileOperationsManager(
     ExternalShare externalShare,
     IServiceProvider serviceProvider)
 {
-    public async Task<List<FileOperationResult>> GetOperationResults()
+    public async Task<List<FileOperationResult>> GetOperationResults(bool includeHiddden = false)
     {
-        return await fileOperationsManagerHolder.GetOperationResults(GetUserId());
+        return await fileOperationsManagerHolder.GetOperationResults(GetUserId(), includeHiddden);
     }
 
     public async Task<List<FileOperationResult>> CancelOperations(string id = null)
@@ -154,8 +155,10 @@ public class FileOperationsManager(
         
         var (folderIntIds, folderStringIds) = GetIds(folderIds);
         var (fileIntIds, fileStringIds) = GetIds(fileIds);
-        var data = new FileMarkAsReadOperationData<int>(folderIntIds, fileIntIds, tenantId, GetHttpHeaders(), sessionSnapshot);
-        var thirdPartyData = new FileMarkAsReadOperationData<string>(folderStringIds, fileStringIds, tenantId, GetHttpHeaders(), sessionSnapshot);
+
+        var headers = GetHttpHeaders();
+        var data = new FileMarkAsReadOperationData<int>(folderIntIds, fileIntIds, tenantId, headers, sessionSnapshot);
+        var thirdPartyData = new FileMarkAsReadOperationData<string>(folderStringIds, fileStringIds, tenantId, headers, sessionSnapshot);
         
         eventBus.Publish(new MarkAsReadIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
         {
@@ -182,9 +185,10 @@ public class FileOperationsManager(
         
         var (folderIntIds, folderStringIds) = GetIds(folders);
         var (fileIntIds, fileStringIds) = GetIds(files);
-        
-        var data = new FileDownloadOperationData<int>(folderIntIds, fileIntIds, tenantId, GetHttpHeaders(), sessionSnapshot, baseUri);
-        var thirdPartyData = new FileDownloadOperationData<string>(folderStringIds, fileStringIds, tenantId, GetHttpHeaders(), sessionSnapshot, baseUri);
+
+        var headers = GetHttpHeaders();
+        var data = new FileDownloadOperationData<int>(folderIntIds, fileIntIds, tenantId, headers, sessionSnapshot, baseUri);
+        var thirdPartyData = new FileDownloadOperationData<string>(folderStringIds, fileStringIds, tenantId, headers, sessionSnapshot, baseUri);
         
         eventBus.Publish(new BulkDownloadIntegrationEvent(GetUserId(), tenantId)
         {
@@ -228,9 +232,10 @@ public class FileOperationsManager(
         var op = fileOperationsManagerHolder.GetService<FileMoveCopyOperation>();
         op.Init(holdResult, copy);
         var taskId = await fileOperationsManagerHolder.Publish(op);
-        
-        var data = new FileMoveCopyOperationData<int>(folderIntIds, fileIntIds, tenantId, destFolderId, copy, resolveType, holdResult, GetHttpHeaders(), sessionSnapshot); 
-        var thirdPartyData = new FileMoveCopyOperationData<string>(folderStringIds, fileStringIds, tenantId, destFolderId, copy, resolveType, holdResult, GetHttpHeaders(), sessionSnapshot);
+
+        var headers = GetHttpHeaders();
+        var data = new FileMoveCopyOperationData<int>(folderIntIds, fileIntIds, tenantId, destFolderId, copy, resolveType, holdResult, headers, sessionSnapshot); 
+        var thirdPartyData = new FileMoveCopyOperationData<string>(folderStringIds, fileStringIds, tenantId, destFolderId, copy, resolveType, holdResult, headers, sessionSnapshot);
         
         eventBus.Publish(new MoveOrCopyIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
         {
@@ -260,84 +265,204 @@ public class FileOperationsManager(
     }
 
     public Task PublishDelete<T>(
-        IEnumerable<T> folders, 
-        IEnumerable<T> files, 
-        bool ignoreException, 
+        IEnumerable<T> folders,
+        IEnumerable<T> files,
         bool holdResult,
         bool immediately,
         bool isEmptyTrash = false)
-    {        
+    {
         if ((folders == null || !folders.Any()) && (files == null || !files.Any()))
         {
             return Task.CompletedTask;
         }
-        
+
         var folderIds = (folders.OfType<int>(), folders.OfType<string>());
         var fileIds = (files.OfType<int>(), files.OfType<string>());
-        
-        return PublishDelete(folderIds, fileIds, ignoreException, holdResult, immediately, isEmptyTrash);
+
+        return PublishDelete(folderIds, fileIds, holdResult, immediately, isEmptyTrash);
     }
 
     public Task PublishDelete(
-        IEnumerable<JsonElement> folders, 
-        IEnumerable<JsonElement> files, 
-        bool ignoreException, 
+        IEnumerable<JsonElement> folders,
+        IEnumerable<JsonElement> files,
         bool holdResult,
         bool immediately,
         bool isEmptyTrash = false)
-    {        
+    {
         if ((folders == null || !folders.Any()) && (files == null || !files.Any()))
         {
             return Task.CompletedTask;
         }
-        
+
         var folderIds = GetIds(folders);
         var fileIds = GetIds(files);
 
-        return PublishDelete(folderIds, fileIds, ignoreException, holdResult, immediately, isEmptyTrash);
+        return PublishDelete(folderIds, fileIds, holdResult, immediately, isEmptyTrash);
     }
 
     private async Task PublishDelete(
-        (IEnumerable<int>, IEnumerable<string>) folders, 
-        (IEnumerable<int>, IEnumerable<string>) files, 
-        bool ignoreException, 
+        (IEnumerable<int>, IEnumerable<string>) folders,
+        (IEnumerable<int>, IEnumerable<string>) files,
         bool holdResult,
         bool immediately,
         bool isEmptyTrash = false)
-    {        
-        
+    {
+        await DemandDeletePermissionAsync(folders.Item1, files.Item1);
+        await DemandDeletePermissionAsync(folders.Item2, files.Item2);
+
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         var sessionSnapshot = await externalShare.TakeSessionSnapshotAsync();
-        
+        var headers = GetHttpHeaders();
+
         var op = fileOperationsManagerHolder.GetService<FileDeleteOperation>();
         op.Init(holdResult);
+
+        if (!immediately)
+        {
+            var moveToTrashTaskId = await fileOperationsManagerHolder.Publish(op);
+
+            eventBus.Publish(new DeleteIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
+            {
+                TaskId = moveToTrashTaskId,
+                Data = new FileDeleteOperationData<int>(folders.Item1, files.Item1, tenantId, headers, sessionSnapshot, holdResult, immediately, isEmptyTrash),
+                ThirdPartyData = new FileDeleteOperationData<string>(folders.Item2, files.Item2, tenantId, headers, sessionSnapshot, holdResult, immediately, isEmptyTrash)
+            });
+
+            return;
+        }
+
+        var hasData = (folders.Item1?.Any() ?? false) || (files.Item1?.Any() ?? false);
+        var hasThirdPartyData = (folders.Item2?.Any() ?? false) || (files.Item2?.Any() ?? false);
+
+        if (hasData)
+        {
+            var removeMarker = serviceProvider.GetService<RemovalMarker>();
+            await removeMarker.MarkAsRemovedAsync(folders.Item1, files.Item1);
+
+            eventBus.Publish(new DeleteIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
+            {
+                TaskId = Guid.NewGuid().ToString(),
+                Data = new FileDeleteOperationData<int>(folders.Item1, files.Item1, tenantId, headers, sessionSnapshot, holdResult, immediately, isEmptyTrash, true)
+            });
+
+            if (!hasThirdPartyData)
+            {
+                op[FileOperation.Progress] = 100;
+                op[FileOperation.Finish] = true;
+                op.Percentage = 100;
+                op.IsCompleted = true;
+                op.Status = DistributedTaskStatus.Completed;
+                _ = await fileOperationsManagerHolder.Publish(op);
+
+                return;
+            }
+        }
+
         var taskId = await fileOperationsManagerHolder.Publish(op);
-        
-        
-        var data = new FileDeleteOperationData<int>(folders.Item1, files.Item1, tenantId, GetHttpHeaders(), sessionSnapshot, holdResult, ignoreException, immediately, isEmptyTrash); 
-        var thirdPartyData = new FileDeleteOperationData<string>(folders.Item2, files.Item2, tenantId, GetHttpHeaders(), sessionSnapshot, holdResult, ignoreException, immediately, isEmptyTrash);
-        
-        IntegrationEvent toPublish;
-        if (isEmptyTrash)
+
+        eventBus.Publish(new DeleteIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
         {
-            toPublish = new EmptyTrashIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
-            {
-                TaskId = taskId, 
-                Data = data,
-                ThirdPartyData = thirdPartyData
-            };
-        }
-        else
+            TaskId = taskId,
+            ThirdPartyData = new FileDeleteOperationData<string>(folders.Item2, files.Item2, tenantId, headers, sessionSnapshot, holdResult, immediately, isEmptyTrash)
+        });
+    }
+
+    private async Task DemandDeletePermissionAsync<T>(IEnumerable<T> folderIds, IEnumerable<T> fileIds)
+    {
+        var folderDao = serviceProvider.GetService<IFolderDao<T>>();
+        var fileDao = serviceProvider.GetService<IFileDao<T>>();
+        var fileSecurity = serviceProvider.GetService<FileSecurity>();
+        var lockerManager = serviceProvider.GetService<LockerManager>();
+        var fileTracker = serviceProvider.GetService<FileTrackerHelper>();
+
+        await DemandDeleteFilesPermissionAsync(fileIds, false);
+
+        foreach (var folderId in folderIds)
         {
-            toPublish = new DeleteIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
-            {
-                TaskId = taskId, 
-                Data = data,
-                ThirdPartyData = thirdPartyData
-            };
+            var folder = await folderDao.GetFolderAsync(folderId);
+
+            await DemandDeleteFolderPermissionAsync(folder);
         }
-        
-        eventBus.Publish(toPublish);
+
+
+        async Task DemandDeleteFilesPermissionAsync(IEnumerable<T> fileIds, bool isFolderCheck)
+        {
+            if (!fileIds.Any())
+            {
+                return;
+            }
+
+            var files = fileDao.GetFilesAsync(fileIds);
+
+            await foreach (var file in files)
+            {
+                if (file == null)
+                {
+                    throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+                }
+
+                if (!await fileSecurity.CanDeleteAsync(file))
+                {
+                    throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_DeleteFile);
+                }
+
+                //can't edit files in trash\archive
+                if (file.RootFolderType == FolderType.TRASH || file.RootFolderType == FolderType.Archive)
+                {
+                    return;
+                }
+
+                if (await lockerManager.FileLockedForMeAsync(file.Id))
+                {
+                    throw new SecurityException(FilesCommonResource.ErrorMessage_LockedFile);
+                }
+
+                if (await fileTracker.IsEditingAsync(file.Id))
+                {
+                    throw new SecurityException(isFolderCheck
+                        ? FilesCommonResource.ErrorMessage_SecurityException_DeleteEditingFolder
+                        : FilesCommonResource.ErrorMessage_SecurityException_DeleteEditingFile);
+                }
+            }
+        }
+
+        async Task DemandDeleteFolderPermissionAsync(Folder<T> folder)
+        {
+            if (folder == null)
+            {
+                throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+            }
+
+            if (folder.FolderType != FolderType.DEFAULT &&
+                folder.FolderType != FolderType.BUNCH &&
+                !DocSpaceHelper.IsRoom(folder.FolderType) &&
+                ((folder.FolderType == FolderType.FormFillingFolderDone || folder.FolderType == FolderType.FormFillingFolderInProgress) && folder.RootFolderType != FolderType.Archive))
+            {
+                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_DeleteFolder);
+            }
+
+            if (!await fileSecurity.CanDeleteAsync(folder))
+            {
+                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_DeleteFolder);
+            }
+
+            //check parent only in trash\archive
+            if (folder.RootFolderType == FolderType.TRASH || folder.RootFolderType == FolderType.Archive)
+            {
+                return;
+            }
+
+            var fileIds = await fileDao.GetFilesAsync(folder.Id).ToListAsync();
+
+            await DemandDeleteFilesPermissionAsync(fileIds, true);
+
+            var subfolders = folderDao.GetFoldersAsync(folder.Id);
+
+            await foreach (var subfolder in subfolders)
+            {
+                await DemandDeleteFolderPermissionAsync(subfolder);
+            }
+        }
     }
 
     public static (List<int>, List<string>) GetIds(IEnumerable<JsonElement> items)

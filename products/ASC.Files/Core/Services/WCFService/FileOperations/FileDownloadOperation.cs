@@ -193,14 +193,12 @@ public class FileDownloadOperation(IServiceProvider serviceProvider) : ComposeFi
 class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
 {
     private readonly Dictionary<T, string> _files;
-    private readonly IDictionary<string, StringValues> _headers;
     private ItemNameValueCollection<T> _entriesPathId;
 
     public FileDownloadOperation(IServiceProvider serviceProvider, FileDownloadOperationData<T> fileDownloadOperationData)
         : base(serviceProvider, fileDownloadOperationData)
     {
         _files = fileDownloadOperationData.FilesDownload?.ToDictionary(r => r.Id, r => r.Ext) ?? new Dictionary<T, string>();
-        _headers = fileDownloadOperationData.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value));
         this[OpType] = (int)FileOperationType.Download;
     }
 
@@ -237,17 +235,17 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
             var key = file.Id;
             if (_files.TryGetValue(key, out var value) && !string.IsNullOrEmpty(value))
             {
-                await filesMessageService.SendAsync(MessageAction.FileDownloadedAs, file, _headers, file.Title, value);
+                await filesMessageService.SendAsync(MessageAction.FileDownloadedAs, file, Headers, file.Title, value);
             }
             else
             {
-                await filesMessageService.SendAsync(MessageAction.FileDownloaded, file, _headers, file.Title);
+                await filesMessageService.SendAsync(MessageAction.FileDownloaded, file, Headers, file.Title);
             }
         }
 
         foreach (var folder in folderForSend)
         {
-            await filesMessageService.SendAsync(MessageAction.FolderDownloaded, folder, _headers, folder.Title);
+            await filesMessageService.SendAsync(MessageAction.FolderDownloaded, folder, Headers, folder.Title);
         }
     }
 

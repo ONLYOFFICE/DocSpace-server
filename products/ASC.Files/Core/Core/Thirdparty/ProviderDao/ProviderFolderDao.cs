@@ -39,7 +39,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         SelectorFactory selectorFactory)
     : ProviderDaoBase(serviceProvider, tenantManager, crossDao, selectorFactory, securityDao), IFolderDao<string>
 {
-    public async Task<Folder<string>> GetFolderAsync(string folderId)
+    public async Task<Folder<string>> GetFolderAsync(string folderId, bool includeRemoved = false)
     {
         var selector = _selectorFactory.GetSelector(folderId);
         if (selector == null)
@@ -48,7 +48,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         }
 
         var folderDao = selector.GetFolderDao(folderId);
-        var result = await folderDao.GetFolderAsync(selector.ConvertId(folderId));
+        var result = await folderDao.GetFolderAsync(selector.ConvertId(folderId), includeRemoved);
 
         return await ResolveParentAsync(result);
     }
@@ -162,11 +162,11 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         return GetFoldersAsync(parentId);
     }
     
-    public async IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId)
+    public async IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId, bool includeRemoved = false)
     {
         var selector = _selectorFactory.GetSelector(parentId);
         var folderDao = selector.GetFolderDao(parentId);
-        var folders = folderDao.GetFoldersAsync(selector.ConvertId(parentId));
+        var folders = folderDao.GetFoldersAsync(selector.ConvertId(parentId), includeRemoved);
 
         await foreach (var folder in folders.Where(r => r != null))
         {
@@ -655,7 +655,27 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
 
         return folder;
     }
-    
+
+    public async Task MarkFoldersAsRemovedAsync(IEnumerable<string> folderIds)
+    {
+        foreach (var group in _selectorFactory.GetSelectors(folderIds))
+        {
+            var selectorLocal = group.Key;
+            if (selectorLocal == null)
+            {
+                continue;
+            }
+            var matchedIds = group.Value;
+
+            foreach (var matchedId in matchedIds.GroupBy(selectorLocal.GetIdCode))
+            {
+                var fileDao = selectorLocal.GetFolderDao(matchedId.FirstOrDefault());
+
+                await fileDao.MarkFoldersAsRemovedAsync(matchedId.Select(selectorLocal.ConvertId).ToList());
+            }
+        }
+    }
+
     private class RoomProviderQuery
     {
         public DbFilesThirdpartyAccount Account { get; init; }

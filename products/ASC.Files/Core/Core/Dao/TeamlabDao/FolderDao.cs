@@ -68,13 +68,13 @@ internal class FolderDao(
     private const string VirtualRooms = "virtualrooms";
     private const string Archive = "archive";
 
-    public async Task<Folder<int>> GetFolderAsync(int folderId)
+    public async Task<Folder<int>> GetFolderAsync(int folderId, bool includeRemoved = false)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        var dbFolder = await filesDbContext.DbFolderQueryWithSharedAsync(tenantId, folderId);
+        var dbFolder = await filesDbContext.DbFolderQueryWithSharedAsync(tenantId, folderId, includeRemoved);
 
         return mapper.Map<DbFolderQuery, Folder<int>>(dbFolder);
     }
@@ -132,9 +132,9 @@ internal class FolderDao(
         }
 
     }
-    public IAsyncEnumerable<Folder<int>> GetFoldersAsync(int parentId)
+    public IAsyncEnumerable<Folder<int>> GetFoldersAsync(int parentId, bool includeRemoved = false)
     {
-        return GetFoldersAsync(parentId, default, FilterType.None, false, default, string.Empty);
+        return GetFoldersAsync(parentId, default, FilterType.None, false, default, string.Empty, includeRemoved: includeRemoved);
     }
 
     public async IAsyncEnumerable<Folder<int>> GetRoomsAsync(
@@ -161,7 +161,7 @@ internal class FolderDao(
         var searchByTypes = filterType != FilterType.None && filterType != FilterType.FoldersOnly;
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        var q = await GetFolderQuery(filesDbContext, r => parentsIds.Contains(r.ParentId));
+        var q = await GetFolderQuery(filesDbContext, r => parentsIds.Contains(r.ParentId) && !r.Removed);
 
         q = !withSubfolders ? BuildRoomsQuery(filesDbContext, q, filter, tags, subjectId, searchByTags, withoutTags, searchByTypes, false, excludeSubject, subjectFilter, subjectEntriesIds, quotaFilter)
             : await BuildRoomsWithSubfoldersQuery(filesDbContext, parentsIds, filter, tags, searchByTags, searchByTypes, withoutTags, excludeSubject, subjectId, subjectFilter, subjectEntriesIds);
@@ -233,16 +233,24 @@ internal class FolderDao(
 
         if (filterType == FilterType.None && subjectId == default && string.IsNullOrEmpty(searchText) && !withSubfolders && !excludeSubject && roomId == default)
         {
-            return await filesDbContext.Tree.CountAsync(r => r.ParentId == parentId && r.Level == 1);
+            return await filesDbContext.CountChildFoldersAsync(parentId);
         }
 
         var q = await GetFoldersQueryWithFilters(parentId, null, subjectGroup, subjectId, searchText, withSubfolders, excludeSubject, roomId, filesDbContext);
 
+        q = q.Where(r => !r.Removed);
+
         return await q.CountAsync();
     }
 
-    public async IAsyncEnumerable<Folder<int>> GetFoldersAsync(int parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, bool withSubfolders = false,
+    public IAsyncEnumerable<Folder<int>> GetFoldersAsync(int parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, bool withSubfolders = false,
         bool excludeSubject = false, int offset = 0, int count = -1, int roomId = default, bool containingMyFiles = false)
+    {
+        return GetFoldersAsync(parentId, orderBy, filterType, subjectGroup, subjectID, searchText, withSubfolders, excludeSubject, offset, count, roomId, containingMyFiles, false);
+    }
+
+    private async IAsyncEnumerable<Folder<int>> GetFoldersAsync(int parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, bool withSubfolders = false,
+        bool excludeSubject = false, int offset = 0, int count = -1, int roomId = default, bool containingMyFiles = false, bool includeRemoved = false)
     {
         if (CheckInvalidFilter(filterType) || count == 0)
         {
@@ -258,6 +266,11 @@ internal class FolderDao(
             q = q.Join(filesDbContext.Files, r => r.Id, b => b.ParentId, (folder, file) => new { folder, file })
             .Where(r => r.file.CreateBy == _authContext.CurrentAccount.ID)
             .Select(r => r.folder);
+        }
+
+        if (!includeRemoved)
+        {
+            q = q.Where(r => !r.Removed);
         }
 
         q = q.Skip(offset);
@@ -1357,6 +1370,15 @@ internal class FolderDao(
         {
             yield return data;
         }
+    }
+
+    public async Task MarkFoldersAsRemovedAsync(IEnumerable<int> folderIds)
+    {
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        await filesDbContext.MarkFoldersAsRemovedAsync(tenantId, folderIds, DateTime.UtcNow, _authContext.CurrentAccount.ID);
     }
 
     #endregion

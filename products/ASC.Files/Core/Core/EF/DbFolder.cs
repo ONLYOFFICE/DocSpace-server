@@ -44,7 +44,8 @@ public class DbFolder : IDbFile, IDbSearch, ISearchItem
     public int FoldersCount { get; set; }
     public int FilesCount { get; set; }
     public long Counter { get; set; }
-    
+    public bool Removed { get; set; }
+
     [Ignore]
     public DbRoomSettings Settings { get; set; }
     
@@ -146,6 +147,11 @@ public static class DbFolderExtension
             entity.Property(e => e.Counter)
                 .HasColumnName("counter")
                 .HasDefaultValueSql("'0'");
+
+            entity.Property(e => e.Removed)
+                .HasColumnType("tinyint(1)")
+                .HasColumnName("removed")
+                .HasDefaultValueSql("'0'");
         });
     }
     public static void PgSqlAddDbFolder(this ModelBuilder modelBuilder)
@@ -202,6 +208,8 @@ public static class DbFolderExtension
             entity.Property(e => e.Counter)
                 .HasColumnName("counter")
                 .HasDefaultValueSql("'0'");
+
+            entity.Property(e => e.Removed).HasColumnName("removed");
         });
     }
 }

@@ -57,7 +57,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         _providerInfo = providerInfo;
     }
 
-    public async Task<Folder<string>> GetFolderAsync(string folderId)
+    public async Task<Folder<string>> GetFolderAsync(string folderId, bool includeRemoved = false)
     {
         var folder = dao.ToFolder(await dao.GetFolderAsync(folderId));
         if (folder == null)
@@ -126,7 +126,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
     {
         return GetFoldersAsync(parentId);
     }
-    public async IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId)
+    public async IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId, bool includeRemoved = false)
     {
         var items = await dao.GetItemsAsync(parentId, true);
         foreach (var i in items)
@@ -701,6 +701,11 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         var items = await dao.GetItemsAsync(folderId, true);
 
         return items.Exists(item => dao.GetName(item).Equals(title, StringComparison.InvariantCultureIgnoreCase));
+    }
+
+    public Task MarkFoldersAsRemovedAsync(IEnumerable<string> folderIds)
+    {
+        return Task.CompletedTask;
     }
 }
 

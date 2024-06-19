@@ -4,6 +4,7 @@ using ASC.Migrations.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,14 +12,16 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     [DbContext(typeof(MigrationContext))]
-    partial class MigrationContextModelSnapshot : ModelSnapshot
+    [Migration("20240404144137_MigrationContext_Upgrade20")]
+    partial class MigrationContext_Upgrade20
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn)
-                .HasAnnotation("ProductVersion", "8.0.4")
+                .HasAnnotation("ProductVersion", "8.0.2")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("ASC.Core.Common.EF.Acl", b =>
@@ -593,14 +596,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Subject = "c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e",
                             Action = "77777777-32ae-425f-99b5-83176061d1ae",
                             Object = "ASC.Web.Core.WebItemSecurity+WebItemSecurityObject|37620ae5c40b45ce855a39dd7d76a1fa",
-                            AceType = 0
-                        },
-                        new
-                        {
-                            TenantId = -1,
-                            Subject = "abef62db-11a8-4673-9d32-ef1d8af19dc0",
-                            Action = "3e74aff2-7c0c-4089-b209-6495b8643471",
-                            Object = "",
                             AceType = 0
                         });
                 });
@@ -1859,11 +1854,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         },
                         new
                         {
-                            Input = ".djvu",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
                             Input = ".doc",
                             Output = ".docx"
                         },
@@ -3081,11 +3071,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         {
                             Input = ".ots",
                             Output = ".xlsx"
-                        },
-                        new
-                        {
-                            Input = ".oform",
-                            Output = ".pdf"
                         },
                         new
                         {
