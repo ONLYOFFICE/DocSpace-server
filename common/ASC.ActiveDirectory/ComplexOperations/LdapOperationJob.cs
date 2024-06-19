@@ -30,19 +30,19 @@ using SecurityContext = ASC.Core.SecurityContext;
 namespace ASC.ActiveDirectory.ComplexOperations;
 
 [Transient]
-public class LdapOperationJob(SecurityContext securityContext,
-        LdapUserManager ldapUserManager,
-        NovellLdapHelper novellLdapHelper,
-        NovellLdapUserImporter novellLdapUserImporter,
-        LdapChangeCollection ldapChanges,
-        UserFormatter userFormatter,
-        UserPhotoManager userPhotoManager,
-        WebItemSecurity webItemSecurity,
-        UserManager userManager,
-        DisplayUserSettingsHelper displayUserSettingsHelper,
-        NovellLdapSettingsChecker novellLdapSettingsChecker,
-        ILogger<LdapOperationJob> logger,
-        IServiceScopeFactory serviceScopeFactory)
+public class LdapOperationJob(
+    SecurityContext securityContext,
+    LdapUserManager ldapUserManager,
+    NovellLdapHelper novellLdapHelper,
+    LdapChangeCollection ldapChanges,
+    UserFormatter userFormatter,
+    UserPhotoManager userPhotoManager,
+    WebItemSecurity webItemSecurity,
+    UserManager userManager,
+    DisplayUserSettingsHelper displayUserSettingsHelper,
+    NovellLdapSettingsChecker novellLdapSettingsChecker,
+    ILogger<LdapOperationJob> logger,
+    IServiceScopeFactory serviceScopeFactory)
     : DistributedTaskProgress
 {
     private string _culture;
