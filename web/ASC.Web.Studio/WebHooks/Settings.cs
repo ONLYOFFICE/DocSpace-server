@@ -33,12 +33,13 @@ public class Settings
     {
     }
 
-    public Settings(ConfigurationExtension configuration)
+    public Settings(IConfiguration configuration)
     {
-        var cfg = configuration.GetSetting<Settings>("webhooks");
+        var cfg = configuration.GetSection("webhooks").Get<Settings>();
         RepeatCount = cfg.RepeatCount ?? 5;
         ThreadCount = cfg.ThreadCount ?? 10;
     }
+    
     public int? RepeatCount { get; }
     public int? ThreadCount { get; }
 }
