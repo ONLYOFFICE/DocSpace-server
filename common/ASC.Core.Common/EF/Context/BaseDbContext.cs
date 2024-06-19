@@ -122,6 +122,21 @@ public static class BaseDbContextExtension
         b.Entry(existingBlog).State = EntityState.Modified;
         return entity;
     }
+    
+    
+    public static async Task<T> AddOrUpdateAsync<T>(this DbSet<T> dbSet, T entity) where T : BaseEntity
+    {
+        var existingBlog = await dbSet.FindAsync(entity.GetKeys());
+        if (existingBlog == null)
+        {
+            var entityEntry = await dbSet.AddAsync(entity);
+
+            return entityEntry.Entity;
+        }
+
+        dbSet.Update(entity);
+        return entity;
+    }
 }
 
 public abstract class BaseEntity

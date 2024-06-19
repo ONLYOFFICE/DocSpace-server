@@ -214,6 +214,12 @@ public partial class FilesDbContext
         return FolderQueries.UpdateFoldersCountAsync(this, tenantId, id);
     }
         
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    public Task<int> UpdateFoldersCountsAsync(int tenantId, IEnumerable<int> ids)
+    {
+        return FolderQueries.UpdateFoldersCountsAsync(this, tenantId, ids);
+    }
+        
     [PreCompileQuery([PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultInt])]
     public Task<DbFolderQuery> DbFolderQueryByTitleAndParentIdAsync(int tenantId, string title, int parentId)
     {
@@ -686,6 +692,18 @@ static file class FolderQueries
                     .Where(r => r.TenantId == tenantId)
                     .Join(ctx.Tree, r => r.Id, r => r.ParentId, (file, tree) => new { file, tree })
                     .Where(r => r.tree.FolderId == id)
+                    .Select(r => r.file)
+                    .ExecuteUpdate(q =>
+                        q.SetProperty(r => r.FoldersCount, r => ctx.Tree.Count(t => t.ParentId == r.Id) - 1)
+                    ));
+    
+    public static readonly Func<FilesDbContext, int, IEnumerable<int>, Task<int>> UpdateFoldersCountsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, IEnumerable<int> ids) =>
+                ctx.Folders
+                    .Where(r => r.TenantId == tenantId)
+                    .Join(ctx.Tree, r => r.Id, r => r.ParentId, (file, tree) => new { file, tree })
+                    .Where(r => ids.Contains(r.tree.FolderId))
                     .Select(r => r.file)
                     .ExecuteUpdate(q =>
                         q.SetProperty(r => r.FoldersCount, r => ctx.Tree.Count(t => t.ParentId == r.Id) - 1)

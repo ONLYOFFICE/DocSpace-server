@@ -30,17 +30,20 @@ using Constants = ASC.Core.Configuration.Constants;
 namespace ASC.Files.AutoCleanUp;
 
 [Singleton]
-public class AutoCleanTrashService(IServiceScopeFactory scopeFactory,
-                                   IConfiguration configuration,
-                                   ILogger<AutoCleanTrashService> logger) : ActivePassiveBackgroundService<AutoCleanTrashService>(logger, scopeFactory)
+public class AutoCleanTrashService(
+    IServiceScopeFactory scopeFactory,
+    IConfiguration configuration,
+    ILogger<AutoCleanTrashService> logger) 
+    : ActivePassiveBackgroundService<AutoCleanTrashService>(logger, scopeFactory)
 {
+    private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
     protected override TimeSpan ExecuteTaskPeriod { get; set; } = TimeSpan.Parse(configuration.GetValue<string>("files:autoCleanUp:period") ?? "0:5:0");
     
     protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
         List<TenantUserSettings> activeTenantsUsers;
 
-        await using (var scope = scopeFactory.CreateAsyncScope())
+        await using (var scope = _scopeFactory.CreateAsyncScope())
         {
             await using var userDbContext = await scope.ServiceProvider.GetRequiredService<IDbContextFactory<UserDbContext>>().CreateDbContextAsync(stoppingToken);
 
@@ -70,7 +73,7 @@ public class AutoCleanTrashService(IServiceScopeFactory scopeFactory,
 
         try
         {
-            await using var scope = scopeFactory.CreateAsyncScope();
+            await using var scope = _scopeFactory.CreateAsyncScope();
             var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
             await tenantManager.SetCurrentTenantAsync(tenantUser.TenantId);
 

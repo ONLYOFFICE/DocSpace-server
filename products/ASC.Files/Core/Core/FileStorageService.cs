@@ -2448,7 +2448,7 @@ public class FileStorageService //: IFileStorageService
 
         var folderDao = daoFactory.GetFolderDao<T>();
         var fileDao = daoFactory.GetFileDao<T>();
-        var linkDao = daoFactory.GetLinkDao();
+        var linkDao = daoFactory.GetLinkDao<T>();
 
         if (folderDao == null || fileDao == null || linkDao == null)
         {
@@ -2499,7 +2499,7 @@ public class FileStorageService //: IFileStorageService
                     await folderDao.ChangeTreeFolderSizeAsync(folderIdTrash, (-1) * file.ContentLength);
                 }
 
-                await linkDao.DeleteAllLinkAsync(file.Id.ToString());
+                await linkDao.DeleteAllLinkAsync(file.Id);
 
                 await fileDao.SaveProperties(file.Id, null);
             }

@@ -134,7 +134,7 @@ public class InvitationLinkService(
             : EmailValidationKeyProvider.ValidationResult.Expired;
 
         linkData.Share = record.Share;
-        linkData.RoomId = record.EntryId.ToString();
+        linkData.RoomId = record.EntryId;
         linkData.EmployeeType = FileSecurity.GetTypeByShare(record.Share);
 
         if (!await CheckQuota(linkData.LinkType, linkData.EmployeeType))
@@ -145,12 +145,10 @@ public class InvitationLinkService(
         return linkData;
     }
 
-    private async Task<FileShareRecord> GetLinkRecordAsync(Guid linkId)
+    private async Task<FileShareRecord<string>> GetLinkRecordAsync(Guid linkId)
     {
-        var securityDao = daoFactory.GetSecurityDao<int>();
-        var share = await securityDao.GetSharesAsync(new[] { linkId })
-            .FirstOrDefaultAsync(s => s.SubjectType == SubjectType.InvitationLink);
-
+        var securityDao = daoFactory.GetSecurityDao<string>();
+        var share = await securityDao.GetSharesAsync(new[] { linkId }).FirstOrDefaultAsync(s => s.SubjectType == SubjectType.InvitationLink);
         return share;
     }
 

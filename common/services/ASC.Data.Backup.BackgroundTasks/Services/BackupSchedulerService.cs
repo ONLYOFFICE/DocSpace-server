@@ -29,17 +29,18 @@ using ASC.Core.Configuration;
 namespace ASC.Data.Backup.Services;
 
 [Singleton]
-public sealed class BackupSchedulerService(ILogger<BackupSchedulerService> logger,
-        IServiceScopeFactory scopeFactory,
-        ConfigurationExtension configuration,
-        CoreBaseSettings coreBaseSettings,
-        IEventBus eventBus)
+public sealed class BackupSchedulerService(
+    ILogger<BackupSchedulerService> logger,
+    IServiceScopeFactory scopeFactory,
+    IConfiguration configuration,
+    CoreBaseSettings coreBaseSettings,
+    IEventBus eventBus)
      : ActivePassiveBackgroundService<BackupSchedulerService>(logger, scopeFactory)
 {
     private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
     private readonly IEventBus _eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
 
-    protected override TimeSpan ExecuteTaskPeriod { get; set; } = configuration.GetSetting<BackupSettings>("backup").Scheduler.Period;
+    protected override TimeSpan ExecuteTaskPeriod { get; set; } = configuration.GetSection("backup").Get<BackupSettings>().Scheduler.Period;
 
     protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {

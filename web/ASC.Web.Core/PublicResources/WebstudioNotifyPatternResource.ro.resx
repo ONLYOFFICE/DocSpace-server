@@ -879,7 +879,7 @@ Echipă de Asistență ONLYOFFICE
     <value>Dezactivarea portalului ${__VirtualRootPath}</value>
   </data>
   <data name="subject_profile_delete" xml:space="preserve">
-    <value>Ștergerea profilului din portalul ${__VirtualRootPath}</value>
+    <value>Dezactivarea contului ${__VirtualRootPath}</value>
   </data>
   <data name="subject_opensource_admin_welcome_v1" xml:space="preserve">
     <value>Descoperiți abonamentul ONLYOFFICE DocSpace business</value>
@@ -970,7 +970,7 @@ Echipă de Asistență ONLYOFFICE
     <value>Spațiul ONLYOFFICE DocSpace a fost activat</value>
   </data>
   <data name="ButtonRemoveProfile" xml:space="preserve">
-    <value>Eliminare profil</value>
+    <value>Dezactivare cont</value>
   </data>
   <data name="ButtonRenewNow" xml:space="preserve">
     <value>Reînnoiește acum</value>
@@ -1501,15 +1501,15 @@ Adresa de portal $PortalUrl a fost schimbată cu una nouă "${__VirtualRootPath}
 *Mențiune*: Setările DNS și opțiuni de autentificare unică nu vor funcționa până nu le schimbați.</value>
   </data>
   <data name="pattern_profile_delete" xml:space="preserve">
-    <value>h1.Ștergerea profilului pe portalul "${__VirtualRootPath}":"${__VirtualRootPath}"
+    <value>h1.Dezactivarea contului "${__VirtualRootPath}":"${__VirtualRootPath}"
 
-licitat ștergerea definitivă profilului dvs din portalul "${__VirtualRootPath}":"${__VirtualRootPath}".
+Ați solicitat dezactivarea contului dvs DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}".
 
-Dacă doriți totuși să ștergeți portalul, urmăriți linkul de mai jos pentru a confirma acțiunea:
+Dacă doriți totuși să dezactivați contul dvs, urmăriți linkul de mai jos pentru a confirma acțiunea:
 
 $OrangeButton
 
-*Menţiune*: Acest link este valabil doar timp de 7 zile. Finalizați procedura de ștergere a profilului în perioada dată.</value>
+*Mențiune*: Acest link este valabil doar timp de 7 zile. Finalizați procedura de dezactivare a contului în perioada dată.</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
     <value>Utilizatorul "$FromUserName":"$FromUserLink" și-a șters profilul, așadar acest profil este acum blocat. Toate fișierele sunt încă atribuite acestui utilizator și ocupă spațiu de stocare.
@@ -1757,6 +1757,15 @@ Planul dvs tarifar actual est STARTUP. Acest abonament este absolut gratuit și 
  
 *Descoperiți un nou mod de colaborare asupra documentelor!*
  
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_room_invite_existing_user" xml:space="preserve">
+    <value>Bună!
+
+$__AuthorName v-a invitat să participați la sala "$Message":"$InviteLink" la "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+$OrangeButton
+
 $TrulyYours</value>
   </data>
 </root>
