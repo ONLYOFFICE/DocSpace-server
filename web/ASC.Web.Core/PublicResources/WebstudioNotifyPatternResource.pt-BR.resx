@@ -564,15 +564,15 @@ Seu endereço do portal $PortalUrl foi alterado para o novo endereço "${__Virtu
 *Observe*: as configurações de DNS e opções de login único pararam de funcionar até que você as altere.</value>
   </data>
   <data name="pattern_profile_delete" xml:space="preserve">
-    <value>h1.Remoção do perfil do portal "${__VirtualRootPath}":"${__VirtualRootPath}"
+    <value>h1.Desativando conta em "${__VirtualRootPath}":"${__VirtualRootPath}"
 
-Você solicitou a exclusão permanente do seu perfil no portal "${__VirtualRootPath}":"${__VirtualRootPath}".
+Você solicitou a desativação de sua conta no DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}".
 
-Se você ainda assim quiser excluir o seu perfil, por favor, siga o link abaixo para confirmar a operação:
+Se você ainda deseja desativar sua conta, siga o link abaixo para confirmar a operação:
 
 $OrangeButton
 
-*Observe*: este link é válido apenas por 7 dias. Por favor, complete o processo de exclusão do perfil dentro do período.</value>
+*Nota*: este link é válido apenas por 7 dias. Conclua o processo de desativação da conta dentro desse período.</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
     <value>Usuário "$FromUserName":"$FromUserLink" eliminou seu perfil, e este perfil está agora bloqueado. Todos os arquivos do usuário ainda estão atribuídos a ele/ela e ocupam espaço em disco. 
@@ -884,7 +884,7 @@ O link só é válido por 7 dias.</value>
     <value>${LetterLogoText}. Alteração do endereço do portal</value>
   </data>
   <data name="subject_profile_delete" xml:space="preserve">
-    <value>Exclusão do seu perfil no portal ${__VirtualRootPath}</value>
+    <value>Desativando conta em ${__VirtualRootPath}</value>
   </data>
   <data name="subject_profile_has_deleted_itself" xml:space="preserve">
     <value>O usuário eliminou seu perfil</value>
@@ -1712,5 +1712,17 @@ $TrulyYours</value>
   </data>
   <data name="subject_zoom_welcome" xml:space="preserve">
     <value>Bem-vindo ao ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="ButtonRemoveProfile" xml:space="preserve">
+    <value>Desativar conta</value>
+  </data>
+  <data name="pattern_saas_room_invite_existing_user" xml:space="preserve">
+    <value>Olá!
+
+$__AuthorName convidou você para entrar na sala "$Message":"$InviteLink" em "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
 </root>
