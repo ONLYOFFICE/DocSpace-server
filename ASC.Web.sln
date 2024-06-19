@@ -95,6 +95,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HelloPlugin", "plugins\Hell
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ASC.PluginLibrary", "common\ASC.PluginLibrary\ASC.PluginLibrary.csproj", "{833C5698-91A8-4850-BE33-0ECAA271F7CC}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChangerNamePlugin", "plugins\ChangerNamePlugin\ChangerNamePlugin.csproj", "{518333A7-E288-4A55-BC99-C94C4B108614}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -269,6 +271,10 @@ Global
 		{833C5698-91A8-4850-BE33-0ECAA271F7CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{833C5698-91A8-4850-BE33-0ECAA271F7CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{833C5698-91A8-4850-BE33-0ECAA271F7CC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{518333A7-E288-4A55-BC99-C94C4B108614}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{518333A7-E288-4A55-BC99-C94C4B108614}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{518333A7-E288-4A55-BC99-C94C4B108614}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{518333A7-E288-4A55-BC99-C94C4B108614}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
