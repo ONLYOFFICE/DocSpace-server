@@ -342,15 +342,15 @@ $TrulyYours</value>
 *注意*：在您进行更改前，DNS 设置和单点登录选项停止工作。</value>
   </data>
   <data name="pattern_profile_delete" xml:space="preserve">
-    <value>h1.从 "${__VirtualRootPath}":"${__VirtualRootPath}" 门户删除档案
+    <value>h1.禁用"${__VirtualRootPath}":"${__VirtualRootPath}"的帐户
 
-您已请求从 "${__VirtualRootPath}":"${__VirtualRootPath}" 门户永久删除您的档案。
+您已申请禁用您协作空间的帐户"${__VirtualRootPath}":"${__VirtualRootPath}"。
 
-若您仍想删除档案，请使用以下链接确认操作：
+如果您仍想要禁用您的账户，请点击下方的链接确认一下：
 
 $OrangeButton
 
-*注意*：此链接仅7天有效。请在此期限间完成档案删除过程。</value>
+*注意*：此链接有效期仅为 7 天。请在有效期内完成禁用账户的过程。</value>
   </data>
   <data name="pattern_profile_updated" xml:space="preserve">
     <value>h1.您在 "$__VirtualRootPath":"$__VirtualRootPath" 门户的档案已被修改
@@ -497,7 +497,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}。门户地址更改</value>
   </data>
   <data name="subject_profile_delete" xml:space="preserve">
-    <value>从${__VirtualRootPath}门户删除您的档案</value>
+    <value>禁用 ${__VirtualRootPath} 的帐户</value>
   </data>
   <data name="subject_profile_updated" xml:space="preserve">
     <value>您位于${__VirtualRootPath}的档案已被修改</value>
@@ -1150,7 +1150,7 @@ $TrulyYours</value>
     <value>留下反馈</value>
   </data>
   <data name="ButtonRemoveProfile" xml:space="preserve">
-    <value>移除档案</value>
+    <value>禁用帐户</value>
   </data>
   <data name="ButtonRenewNow" xml:space="preserve">
     <value>立即续订</value>
@@ -1712,5 +1712,14 @@ $TrulyYours</value>
   </data>
   <data name="subject_zoom_welcome" xml:space="preserve">
     <value>欢迎使用 ONLYOFFICE 协作空间！</value>
+  </data>
+  <data name="pattern_saas_room_invite_existing_user" xml:space="preserve">
+    <value>你好！
+
+$__AuthorName 邀请您加入"${__VirtualRootPath}":"${__VirtualRootPath}"的"$Message":"$InviteLink "房间。
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
 </root>

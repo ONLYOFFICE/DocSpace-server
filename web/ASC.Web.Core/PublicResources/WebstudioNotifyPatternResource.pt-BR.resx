@@ -112,9 +112,6 @@
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>Deixar Feedback</value>
   </data>
-  <data name="ButtonRemoveProfile" xml:space="preserve">
-    <value>Eliminar perfil</value>
-  </data>
   <data name="ButtonRenewNow" xml:space="preserve">
     <value>Renovar agora</value>
   </data>

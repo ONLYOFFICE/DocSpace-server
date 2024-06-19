@@ -1045,4 +1045,7 @@
   <data name="TariffsFeature_statistic" xml:space="preserve">
     <value>Квота хранилища и статистика</value>
   </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>Пользователь отключен</value>
+  </data>
 </root>

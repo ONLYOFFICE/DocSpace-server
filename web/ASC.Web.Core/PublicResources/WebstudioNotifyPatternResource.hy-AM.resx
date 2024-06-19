@@ -225,9 +225,6 @@
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>Թողնել կարծիք</value>
   </data>
-  <data name="ButtonRemoveProfile" xml:space="preserve">
-    <value>Հեռացնել պրոֆիլը</value>
-  </data>
   <data name="ButtonRenewNow" xml:space="preserve">
     <value>Թարմացրեք հիմա</value>
   </data>

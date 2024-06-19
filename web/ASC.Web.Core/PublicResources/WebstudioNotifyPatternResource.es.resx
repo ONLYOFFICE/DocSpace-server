@@ -113,7 +113,7 @@
     <value>Deje comentarios</value>
   </data>
   <data name="ButtonRemoveProfile" xml:space="preserve">
-    <value>Eliminar perfil</value>
+    <value>Desactivar cuenta</value>
   </data>
   <data name="ButtonRenewNow" xml:space="preserve">
     <value>Renovar ahora</value>
@@ -466,15 +466,15 @@ La dirección de su portal $PortalUrl ha cambiado a la nueva dirección "${__Vir
 *Ojo*: La configuración DNS y las opciones de inicio de sesión único dejarán de funcionar hasta que las cambie.</value>
   </data>
   <data name="pattern_profile_delete" xml:space="preserve">
-    <value>h1.Eliminación del Perfil del Portal "${__VirtualRootPath}":"${__VirtualRootPath}"
+    <value>h1.Desactivación de la cuenta en "${__VirtualRootPath}":"${__VirtualRootPath}"
 
-Ha solicitado eliminar permanentemente su perfil portal "${__VirtualRootPath}":"${__VirtualRootPath}".
+Ha solicitado desactivar su cuenta en DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}".
 
-Si todavía desea eliminar su perfil por favor siga el siguiente enlace para confirmar la operación:
+Si todavía desea desactivar su cuenta, siga el siguiente enlace para confirmar la operación:
 
 $OrangeButton
 
-*Note*: este enlace tiene una validez sólo de 7 días. Por favor, complete el proceso de eliminación de perfil dentro de ese período.</value>
+*Nota*: este enlace solo es válido durante 7 días. Por favor, complete el proceso de desactivación de la cuenta dentro de ese periodo.</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
     <value>Usuario "$FromUserName":"$FromUserLink" ha eliminado su perfil, ahora este perfil está bloqueado. Todos los archivos de este usuario aún están asignados a él/ella y ocupan espacio en disco. 
@@ -913,7 +913,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Cambio de dirección de portal</value>
   </data>
   <data name="subject_profile_delete" xml:space="preserve">
-    <value>Eliminación de su perfil en el portal ${__VirtualRootPath}</value>
+    <value>Desactivación de la cuenta en ${__VirtualRootPath}</value>
   </data>
   <data name="subject_profile_has_deleted_itself" xml:space="preserve">
     <value>Usuario ha eliminado su perfil</value>
@@ -1700,6 +1700,15 @@ Tu plan tarifario actual es STARTUP. Es absolutamente gratis e incluye:
  
 *Disfruta de una nueva forma de colaboración en documentos!*
  
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_room_invite_existing_user" xml:space="preserve">
+    <value>¡Hola!
+
+$__AuthorName le ha invitado a unirse a la sala "$Message":"$InviteLink" en "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+$OrangeButton
+
 $TrulyYours</value>
   </data>
 </root>
