@@ -421,7 +421,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Remove profile.
+        ///   Looks up a localized string similar to Disable account.
         /// </summary>
         public static string ButtonRemoveProfile {
             get {
@@ -1334,15 +1334,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to h1.Removal of the profile from the &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal
+        ///   Looks up a localized string similar to h1.Disabling account on &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;
         ///
-        ///You have requested to permanently delete your profile from the &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal.
+        ///You have requested to disable your account in DocSpace &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;.
         ///
-        ///If you still want to delete your profile please follow the link below to confirm the operation:
+        ///If you still want to disable your account, please follow the link below to confirm the operation:
         ///
         ///$OrangeButton
         ///
-        ///*Note*: this link is valid for 7 days only. Please complete the profile deletion process within that period..
+        ///*Note*: this link is valid for 7 days only. Please complete the account disablement process within that period..
         /// </summary>
         public static string pattern_profile_delete {
             get {
@@ -1820,7 +1820,7 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello!
         ///
-        ///You are invited to join the room &quot;$Message&quot;:&quot;$InviteLink&quot; on &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;.
+        ///$__AuthorName invited you to join the room &quot;$Message&quot;:&quot;$InviteLink&quot; on &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;.
         ///
         ///$OrangeButton
         ///
@@ -2460,7 +2460,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Deletion of your profile from ${__VirtualRootPath} portal.
+        ///   Looks up a localized string similar to Disabling account on ${__VirtualRootPath}.
         /// </summary>
         public static string subject_profile_delete {
             get {
