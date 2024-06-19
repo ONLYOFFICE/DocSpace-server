@@ -417,8 +417,14 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                     {
                         if (conflictFolder != null)
                         {
+                            if (!conflictFolder.ProviderEntry)
+                            {
+                                conflictFolder.Id = default;
+                                conflictFolder.Id = await folderDao.SaveFolderAsync(conflictFolder);
+                            }
+                            
                             newFolder = conflictFolder;
-
+                            
                             if (isToFolder)
                             {
                                 needToMark.Add(conflictFolder);
@@ -459,6 +465,13 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                     {
                                         sb.Append($"folder_{newFolder.Id}{SplitChar}");
                                     }
+                                }
+                            }
+                            else
+                            {
+                                if (ProcessedFolder(folderId))
+                                {
+                                    sb.Append($"folder_{newFolder.Id}{SplitChar}");
                                 }
                             }
                         }

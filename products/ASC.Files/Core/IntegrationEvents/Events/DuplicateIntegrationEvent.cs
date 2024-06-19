@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,16 +24,24 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Web.Files.Services.WCFService.FileOperations;
+namespace ASC.Files.Core.IntegrationEvents.Events;
 
-public enum FileOperationType
+[ProtoContract]
+public record DuplicateIntegrationEvent : IntegrationEvent
 {
-    Move,
-    Copy,
-    Delete,
-    Download,
-    MarkAsRead,
-    Import,
-    Convert,
-    Duplicate
+    private DuplicateIntegrationEvent() : base() { }
+
+    public DuplicateIntegrationEvent(Guid createBy, int tenantId) : base(createBy, tenantId)
+    {
+
+    }
+    
+    [ProtoMember(1)]
+    public string TaskId { get; set;}
+    
+    [ProtoMember(2)]
+    public FileOperationData<int> Data { get; set; }
+    
+    [ProtoMember(3)]
+    public FileOperationData<string> ThirdPartyData { get; set; }
 }

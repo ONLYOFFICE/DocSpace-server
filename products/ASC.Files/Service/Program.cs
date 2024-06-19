@@ -71,6 +71,7 @@ try
     eventBus.Subscribe<RoomIndexExportIntegrationEvent, RoomIndexExportIntegrationEventHandler>();
     eventBus.Subscribe<DeleteIntegrationEvent, DeleteIntegrationEventHandler>();
     eventBus.Subscribe<MoveOrCopyIntegrationEvent, MoveOrCopyIntegrationEventHandler>();
+    eventBus.Subscribe<DuplicateIntegrationEvent, DuplicateIntegrationEventHandler>();
     eventBus.Subscribe<BulkDownloadIntegrationEvent, BulkDownloadIntegrationEventHandler>();
     eventBus.Subscribe<MarkAsReadIntegrationEvent, MarkAsReadIntegrationEventHandler>();
     eventBus.Subscribe<EmptyTrashIntegrationEvent, EmptyTrashIntegrationEventHandler>();

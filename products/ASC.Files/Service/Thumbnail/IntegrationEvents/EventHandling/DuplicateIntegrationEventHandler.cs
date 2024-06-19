@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,16 +24,28 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Web.Files.Services.WCFService.FileOperations;
+using ASC.Web.Files.Services.WCFService.FileOperations;
 
-public enum FileOperationType
+namespace ASC.Thumbnail.IntegrationEvents.EventHandling;
+
+[Scope]
+public class DuplicateIntegrationEventHandler(
+    ILogger<DuplicateIntegrationEventHandler> logger,
+    FileOperationsManager fileOperationsManager,
+    TenantManager tenantManager,
+    SecurityContext securityContext)
+    : IIntegrationEventHandler<DuplicateIntegrationEvent>
 {
-    Move,
-    Copy,
-    Delete,
-    Download,
-    MarkAsRead,
-    Import,
-    Convert,
-    Duplicate
+    public async Task Handle(DuplicateIntegrationEvent @event)
+    {
+        CustomSynchronizationContext.CreateContext();
+        using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
+        {
+            logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
+            await tenantManager.SetCurrentTenantAsync(@event.TenantId);
+            await securityContext.AuthenticateMeWithoutCookieAsync(@event.TenantId, @event.CreateBy);
+            await fileOperationsManager.Enqueue<FileDuplicateOperation, FileOperationData<string>, FileOperationData<int>>(@event.TaskId, @event.ThirdPartyData, @event.Data);
+        }
+    }
 }
+

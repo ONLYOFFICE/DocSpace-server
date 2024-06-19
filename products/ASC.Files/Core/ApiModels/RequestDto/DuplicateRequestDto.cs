@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,16 +24,15 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Web.Files.Services.WCFService.FileOperations;
+namespace ASC.Files.Core.ApiModels.RequestDto;
 
-public enum FileOperationType
+public class DuplicateRequestDto
 {
-    Move,
-    Copy,
-    Delete,
-    Download,
-    MarkAsRead,
-    Import,
-    Convert,
-    Duplicate
+    /// <summary>List of folder IDs</summary>
+    /// <type>System.Collections.Generic.IEnumerable{System.Text.Json.JsonElement}, System.Collections.Generic</type>
+    public IEnumerable<JsonElement> FolderIds { get; set; } = new List<JsonElement>();
+
+    /// <summary>List of file IDs</summary>
+    /// <type>System.Collections.Generic.IEnumerable{System.Text.Json.JsonElement}, System.Collections.Generic</type>
+    public IEnumerable<JsonElement> FileIds { get; set; } = new List<JsonElement>();
 }
