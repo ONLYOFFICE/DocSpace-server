@@ -27,29 +27,19 @@
 namespace ASC.Files.Expired;
 
 [Singleton]
-public class DeleteExpiredService(ILogger<DeleteExpiredService> log,
+public class DeleteExpiredService(
+        IServiceScopeFactory scopeFactory,
+        ILogger<DeleteExpiredService> logger,
         GlobalStore globalStore,
         IConfiguration configuration)
-    : BackgroundService
+    :  ActivePassiveBackgroundService<DeleteExpiredService>(logger, scopeFactory)
 {
-    private readonly TimeSpan _launchFrequency = TimeSpan.Parse(configuration["files:deleteExpired"] ?? "1", CultureInfo.InvariantCulture);
+    protected override TimeSpan ExecuteTaskPeriod { get; set; } = TimeSpan.Parse(configuration["files:deleteExpired"] ?? "1", CultureInfo.InvariantCulture);
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
         var dataStore = await globalStore.GetStoreAsync(false);
 
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            try
-            {
-                await dataStore.DeleteExpiredAsync(FileConstant.StorageDomainTmp, CommonChunkedUploadSessionHolder.StoragePath, CommonChunkedUploadSessionHolder.SlidingExpiration);
-            }
-            catch (Exception err)
-            {
-                log.ErrorDeleteExpired(err);
-            }
-
-            await Task.Delay(_launchFrequency, stoppingToken);
-        }
+        await dataStore.DeleteExpiredAsync(FileConstant.StorageDomainTmp, CommonChunkedUploadSessionHolder.StoragePath, CommonChunkedUploadSessionHolder.SlidingExpiration);
     }
 }

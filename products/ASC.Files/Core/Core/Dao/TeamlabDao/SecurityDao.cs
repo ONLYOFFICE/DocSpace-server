@@ -822,7 +822,7 @@ internal class SecurityDao(UserManager userManager,
     {
         if (entry == null)
         {
-            return Enumerable.Empty<FileShareRecord>();
+            return [];
         }
 
         var files = new List<string>();

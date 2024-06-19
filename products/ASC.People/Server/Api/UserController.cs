@@ -1577,10 +1577,8 @@ public class UserController(
             await settingsManager.SaveAsync(new UserQuotaSettings { UserQuota = quota }, user);
 
             var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenant.Id, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
-            var userQuotaData = await settingsManager.LoadAsync<UserQuotaSettings>(user);
             var quotaUserSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
-            var userQuotaLimit = userQuotaData.UserQuota == userQuotaData.GetDefault().UserQuota ? quotaUserSettings.DefaultQuota : userQuotaData.UserQuota;
-            _ = quotaSocketManager.ChangeCustomQuotaUsedValueAsync(tenant.Id, customQuota.GetFeature<UserCustomQuotaFeature>().Name, quotaUserSettings.EnableQuota, userUsedSpace, quota, new List<Guid> { user.Id });
+            _ = quotaSocketManager.ChangeCustomQuotaUsedValueAsync(tenant.Id, customQuota.GetFeature<UserCustomQuotaFeature>().Name, quotaUserSettings.EnableQuota, userUsedSpace, quota, [user.Id]);
 
             yield return await employeeFullDtoHelper.GetFullAsync(user);
         }
@@ -1626,7 +1624,7 @@ public class UserController(
             var userQuotaData = await settingsManager.LoadAsync<UserQuotaSettings>(user);
             var quotaUserSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
             var userQuotaLimit = userQuotaData.UserQuota == userQuotaData.GetDefault().UserQuota ? quotaUserSettings.DefaultQuota : userQuotaData.UserQuota;
-            _ = quotaSocketManager.ChangeCustomQuotaUsedValueAsync(tenant.Id, customQuota.GetFeature<UserCustomQuotaFeature>().Name, quotaUserSettings.EnableQuota, userUsedSpace, userQuotaLimit, new List<Guid> { user.Id });
+            _ = quotaSocketManager.ChangeCustomQuotaUsedValueAsync(tenant.Id, customQuota.GetFeature<UserCustomQuotaFeature>().Name, quotaUserSettings.EnableQuota, userUsedSpace, userQuotaLimit, [user.Id]);
 
             yield return await employeeFullDtoHelper.GetFullAsync(user);
         }

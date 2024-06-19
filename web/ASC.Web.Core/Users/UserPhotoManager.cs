@@ -767,7 +767,6 @@ public class UserPhotoManager(UserManager userManager,
 
     public async Task<(Image, IImageFormat)> GetPhotoImageAsync(Guid userID)
     {
-        IImageFormat format;
         try
         {
             var data = await userManager.GetUserPhotoAsync(userID);
@@ -775,14 +774,13 @@ public class UserPhotoManager(UserManager userManager,
             {
                 var img = Image.Load(data);
 
-                format = img.Metadata.DecodedImageFormat;
+                var format = img.Metadata.DecodedImageFormat;
 
                 return (img, format);
             }
         }
         catch { }
-        format = null;
-        return (null, format);
+        return (null, null);
     }
 
     public async Task<string> SaveThumbnail(Guid userID, Image img, IImageFormat format)

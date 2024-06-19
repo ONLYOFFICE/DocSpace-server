@@ -175,7 +175,7 @@ public class FileStorageService //: IFileStorageService
             {
                 throw new Exception(parent.Error);
             }
-            if (parent.RootFolderType == FolderType.VirtualRooms && !DocSpaceHelper.IsRoom(parent.FolderType) && parent.FolderType != FolderType.VirtualRooms)
+            if (parent.RootFolderType == FolderType.VirtualRooms && !DocSpaceHelper.IsRoom(parent.FolderType) && parent.FolderType != FolderType.VirtualRooms && !parent.ProviderEntry)
             {
                 parent.ParentRoomType = await folderDao.GetFirstParentTypeFromFileEntryAsync(parent);
             }
@@ -480,8 +480,10 @@ public class FileStorageService //: IFileStorageService
         switch (folder.FolderType)
         {
             case FolderType.PublicRoom:
+                await SetExternalLinkAsync(folder, Guid.NewGuid(), FileShare.Read, FilesCommonResource.DefaultExternalLinkTitle, primary: true);
+                break;
             case FolderType.FillingFormsRoom:
-                await SetExternalLinkAsync(folder, Guid.NewGuid(), folder.FolderType == FolderType.FillingFormsRoom ? FileShare.FillForms : FileShare.Read, FilesCommonResource.DefaultExternalLinkTitle, primary: true);
+                await SetExternalLinkAsync(folder, Guid.NewGuid(), FileShare.FillForms, FilesCommonResource.FillOutExternalLinkTitle, primary: true);
                 break;
             case FolderType.FormRoom:
                 var task1 = InternalCreateFolderAsync(folder.Id, FilesUCResource.ReadyFormFolder, FolderType.ReadyFormFolder);
@@ -899,13 +901,11 @@ public class FileStorageService //: IFileStorageService
         var fileDao = daoFactory.GetFileDao<T>();
         var stream = await fileDao.GetFileStreamAsync(file, 0, limit);
 
-        using (var memStream = new MemoryStream())
-        {
-            stream.CopyTo(memStream);
-            memStream.Seek(0, SeekOrigin.Begin);
+        using var memStream = new MemoryStream();
+        await stream.CopyToAsync(memStream);
+        memStream.Seek(0, SeekOrigin.Begin);
 
-            return await CheckExtendedPDFstream(memStream);
-        }
+        return await CheckExtendedPDFstream(memStream);
     }
     public async Task<bool> CheckExtendedPDFstream(MemoryStream stream)
     {
@@ -1511,7 +1511,26 @@ public class FileStorageService //: IFileStorageService
 
             if (!file.ProviderEntry)
             {
-                file = await entryManager.CompleteVersionFileAsync(file.Id, 0, false);
+                var completedFile = await entryManager.CompleteVersionFileAsync(file.Id, 0, false);
+                
+                if (file.ThumbnailStatus == Thumbnail.Created)
+                {
+                    var dataStore = await globalStore.GetStoreAsync();
+
+                    foreach (var size in thumbnailSettings.Sizes)
+                    {
+                        await dataStore.CopyAsync(string.Empty,
+                            fileDao.GetUniqThumbnailPath(file, size.Width, size.Height),
+                            string.Empty,
+                            fileDao.GetUniqThumbnailPath(completedFile, size.Width, size.Height));
+                    }
+
+                    await fileDao.SetThumbnailStatusAsync(completedFile, Thumbnail.Created);
+
+                    completedFile.ThumbnailStatus = Thumbnail.Created;
+                }
+
+                file = completedFile;
                 await UpdateCommentAsync(file.Id, file.Version, FilesCommonResource.UnlockComment);
             }
         }
@@ -3135,7 +3154,7 @@ public class FileStorageService //: IFileStorageService
 
         var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(file);
 
-        var access = await fileSharing.GetSharedInfoAsync(Enumerable.Empty<T>(), new[] { roomId });
+        var access = await fileSharing.GetSharedInfoAsync([], new[] { roomId });
         var usersIdWithAccess = access.Where(aceWrapper => !aceWrapper.SubjectGroup
                                                            && aceWrapper.Access != FileShare.Restrict)
             .Select(aceWrapper => aceWrapper.Id);

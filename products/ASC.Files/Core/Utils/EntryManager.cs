@@ -800,7 +800,7 @@ public class EntryManager(IDaoFactory daoFactory,
     {
         if (entries == null)
         {
-            return entries;
+            return null;
         }
 
         if (subjectId != Guid.Empty)
@@ -1131,8 +1131,8 @@ public class EntryManager(IDaoFactory daoFactory,
                     T inProcessFormFolderId;
                     T readyFormFolderId;
 
-                    var inProcessFormFolder = (await folderDao.GetFoldersAsync(folderId, FolderType.InProcessFormFolder).ToListAsync()).FirstOrDefault();
-                    var readyFormFolder = (await folderDao.GetFoldersAsync(folderId, FolderType.ReadyFormFolder).ToListAsync()).FirstOrDefault();
+                    var inProcessFormFolder = await folderDao.GetFoldersAsync(folderId, FolderType.InProcessFormFolder).FirstOrDefaultAsync();
+                    var readyFormFolder = await folderDao.GetFoldersAsync(folderId, FolderType.ReadyFormFolder).FirstOrDefaultAsync();
                     if (inProcessFormFolder == null && readyFormFolder == null)
                     {
                         (readyFormFolderId, inProcessFormFolderId) = await InitSystemFormFillingFolders(folderId, folderDao);
@@ -1958,7 +1958,19 @@ public class EntryManager(IDaoFactory daoFactory,
         T inProcessFormFolderId;
         T readyFormFolderId;
 
-        (readyFormFolderId, inProcessFormFolderId) = await InitSystemFormFillingFolders(folder.Id, folderDao);
+        var inProcessFormFolder = await folderDao.GetFoldersAsync(folder.Id, FolderType.InProcessFormFolder).FirstOrDefaultAsync();
+        var readyFormFolder = await folderDao.GetFoldersAsync(folder.Id, FolderType.ReadyFormFolder).FirstOrDefaultAsync();
+
+        if (inProcessFormFolder == null && readyFormFolder == null)
+        {
+            (readyFormFolderId, inProcessFormFolderId) = await InitSystemFormFillingFolders(folder.Id, folderDao);
+        }
+        else
+        {
+            inProcessFormFolderId = inProcessFormFolder.Id;
+            readyFormFolderId = readyFormFolder.Id;
+        }
+
         var systemFormFillingFolders = new List<Folder<T>>()
         {
             await folderDao.GetFolderAsync(readyFormFolderId),

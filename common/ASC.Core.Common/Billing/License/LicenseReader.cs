@@ -131,7 +131,7 @@ public class LicenseReader(
         try
         {
             using var reader = new StreamReader(licenseStream);
-            var licenseJsonString = reader.ReadToEnd();
+            var licenseJsonString = await reader.ReadToEndAsync();
             var license = License.Parse(licenseJsonString);
 
             var dueDate = Validate(license);
@@ -157,7 +157,7 @@ public class LicenseReader(
             licenseStream.Seek(0, SeekOrigin.Begin);
         }
 
-        using var fs = File.Open(path, FileMode.Create);
+        await using var fs = File.Open(path, FileMode.Create);
 
         await licenseStream.CopyToAsync(fs);
     }

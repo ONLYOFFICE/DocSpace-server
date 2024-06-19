@@ -1865,7 +1865,7 @@ public class S3Storage(TempStream tempStream,
 
         public override ValueTask DisposeAsync()
         {
-            return _response.ResponseStream.DisposeAsync();
+            return _response?.ResponseStream?.DisposeAsync() ?? ValueTask.CompletedTask;
         }
 
         protected override void Dispose(bool disposing)

@@ -47,15 +47,19 @@ public abstract class ActivePassiveBackgroundService<T>(ILogger logger,
 
             if (!await registerInstanceService.IsActive())
             {
-                logger.DebugActivePassiveBackgroundServiceIsNotActive(serviceName, workerOptions.InstanceId);
+                logger.TraceActivePassiveBackgroundServiceIsNotActive(serviceName, workerOptions.InstanceId);
 
                 await Task.Delay(1000, stoppingToken);
 
                 continue;
             }
 
+            logger.TraceActivePassiveBackgroundServiceIsRunning(serviceName);
+
             await ExecuteTaskAsync(stoppingToken);
 
+            logger.TraceActivePassiveBackgroundServiceIsSleeping(serviceName, ExecuteTaskPeriod);
+            
             await Task.Delay(ExecuteTaskPeriod, stoppingToken);
         }
 

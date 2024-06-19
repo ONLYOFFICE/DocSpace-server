@@ -165,6 +165,22 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
             return;
         }
 
+        if (!_copy && (toFolder.FolderType == FolderType.FillingFormsRoom || parentFolders.Exists(parent => parent.FolderType == FolderType.FillingFormsRoom)))
+        {
+            if (Folders.Count > 0)
+            {
+                this[Err] = FilesCommonResource.ErrorMessage_FolderMoveFormFillingError;
+
+                return;
+            }
+            if (Files.Count > 1)
+            {
+                this[Err] = FilesCommonResource.ErrorMessage_FilesMoveFormFillingError;
+
+                return;
+            }
+        }
+
         if (0 < Folders.Count)
         {
             var firstFolder = await FolderDao.GetFolderAsync(Folders[0]);
@@ -717,21 +733,29 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
             }
             else
             {
-                if (toFolder.FolderType == FolderType.FillingFormsRoom || toFolder.RootFolderType == FolderType.FillingFormsRoom)
-                {
-                    var extension = FileUtility.GetFileExtension(file.Title);
-                    var fileType = FileUtility.GetFileTypeByExtention(extension);
-                    if (fileType != FileType.Pdf || (fileType == FileType.Pdf && !await fileStorageService.CheckExtendedPDF(file)))
+                if (toFolder.RootFolderType == FolderType.VirtualRooms) {
+                    var folderDao = scope.ServiceProvider.GetService<IFolderDao<TTo>>();
+                    var (rId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(toFolder);
+                    if (int.TryParse(rId.ToString(), out var roomId) && roomId != -1)
                     {
-                        this[Err] = FilesCommonResource.ErrorMessage_UploadToFormRoom;
-                        continue;
-                    }else if (fileType == FileType.Pdf)
-                    {
-                        isPdfForm = true;
-                        numberRoomMembers = await fileStorageService.GetPureSharesCountAsync(toFolder.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "");
+                        var room = await folderDao.GetFolderAsync((TTo)Convert.ChangeType(roomId, typeof(TTo)));
+                        if (room.FolderType == FolderType.FillingFormsRoom)
+                        {
+                            var extension = FileUtility.GetFileExtension(file.Title);
+                            var fileType = FileUtility.GetFileTypeByExtention(extension);
+                            if (fileType != FileType.Pdf || (fileType == FileType.Pdf && !await fileStorageService.CheckExtendedPDF(file)))
+                            {
+                                this[Err] = _copy ? FilesCommonResource.ErrorMessage_UploadToFormRoom : FilesCommonResource.ErrorMessage_MoveToFormRoom;
+                                continue;
+                            }
+                            else if (fileType == FileType.Pdf)
+                            {
+                                isPdfForm = true;
+                                numberRoomMembers = await fileStorageService.GetPureSharesCountAsync(toFolder.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "");
+                            }
+                        }
                     }
                 }
-
                 var deleteLinks = file.RootFolderType == FolderType.USER &&
                                 toFolder.RootFolderType is FolderType.VirtualRooms or FolderType.Archive or FolderType.TRASH;
 

@@ -233,7 +233,6 @@ public class DiscDataStore(TempStream tempStream,
     public override async Task<string> UploadChunkAsync(string domain, string path, string uploadId, Stream stream, long defaultChunkSize, int chunkNumber, long chunkLength)
     {
         var target = GetTarget(domain, path + "chunks");
-        var mode = chunkNumber == 0 ? FileMode.Create : FileMode.Append;
 
         if (!Directory.Exists(target))
         {
