@@ -152,7 +152,7 @@ public class RoomRemovedGroupInterpreter : ActionInterpreter
         return ValueTask.FromResult<HistoryData>(
             new GroupHistoryData
             {
-                Group = new GroupSummaryDto { Id = groupId, Name = description[1] }
+                Group = new GroupSummaryDto { Id = groupId, Name = description[0] }
             });
     }
 }
