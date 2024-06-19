@@ -228,7 +228,9 @@ public class FileSecurity(IDaoFactory daoFactory,
                     FilesSecurityActions.Download,
                     FilesSecurityActions.Convert,
                     FilesSecurityActions.CreateRoomFrom,
-                    FilesSecurityActions.EditForm
+                    FilesSecurityActions.EditForm,
+                    FilesSecurityActions.CopyLink
+
                 }
             },
             {
@@ -250,7 +252,8 @@ public class FileSecurity(IDaoFactory daoFactory,
                     FilesSecurityActions.Download,
                     FilesSecurityActions.CopySharedLink,
                     FilesSecurityActions.Reconnect,
-                    FilesSecurityActions.CreateRoomFrom
+                    FilesSecurityActions.CreateRoomFrom,
+                    FilesSecurityActions.CopyLink
                 }
             }
     }.ToFrozenDictionary();
@@ -900,6 +903,14 @@ public class FileSecurity(IDaoFactory daoFactory,
                     return false;
                 }
 
+                if (action == FilesSecurityActions.CopyLink && folder.FolderType is (FolderType.FormFillingFolderDone or 
+                                                                                     FolderType.FormFillingFolderInProgress or 
+                                                                                     FolderType.InProcessFormFolder or
+                                                                                     FolderType.ReadyFormFolder))
+                {
+                    return false;
+                }
+
                 if (action is FilesSecurityActions.Copy or FilesSecurityActions.Duplicate && isRoom)
                 {
                     return false;
@@ -1005,6 +1016,19 @@ public class FileSecurity(IDaoFactory daoFactory,
                     {
                         return false;
                     }
+                }
+                if (action == FilesSecurityActions.CopyLink && file != null)
+                {
+                    var folderDao = daoFactory.GetFolderDao<T>();
+                    var parentFolders = await folderDao.GetParentFoldersAsync(file.ParentId).ToListAsync();
+
+                    if (parentFolders.Exists(parent => parent.FolderType is (FolderType.FormFillingFolderDone or
+                                                                                 FolderType.FormFillingFolderInProgress or
+                                                                                 FolderType.InProcessFormFolder or
+                                                                                 FolderType.ReadyFormFolder)))
+                    {
+                        return false;
+                    };
                 }
                 if (await HasFullAccessAsync(e, userId, isUser, isDocSpaceAdmin, isRoom, isCollaborator))
                 {
@@ -2248,6 +2272,7 @@ public class FileSecurity(IDaoFactory daoFactory,
         ReadLinks,
         Reconnect,
         CreateRoomFrom,
-        EditForm
+        EditForm,
+        CopyLink
     }
 }
