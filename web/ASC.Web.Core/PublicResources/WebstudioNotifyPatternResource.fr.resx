@@ -464,9 +464,9 @@ L'adresse de votre portail $PortalUrl a été changé pour la nouvelle adresse "
 *Remarque*: les paramètres DNS et les options d'authentification unique (Single Sign-On) ont arrêté le travail jusqu'à ce que vous les modifiez.</value>
   </data>
   <data name="pattern_profile_delete" xml:space="preserve">
-    <value>h1.Désactivation du compte sur "${__VirtualRootPath}" : "${__VirtualRootPath}"
+    <value>h1.Désactivation du compte sur "${__VirtualRootPath}":"${__VirtualRootPath}"
 
-Vous avez demandé la désactivation de votre compte dans DocSpace "${__VirtualRootPath}" : "${__VirtualRootPath}".
+Vous avez demandé la désactivation de votre compte dans DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}".
 
 Si vous souhaitez toujours désactiver votre compte, veuillez suivre le lien ci-dessous pour confirmer l'opération :
 
@@ -1702,7 +1702,7 @@ $TrulyYours</value>
   <data name="pattern_saas_room_invite_existing_user" xml:space="preserve">
     <value>Bonjour !
 
-$__AuthorName vous a invité à rejoindre la salle "$Message" : "$InviteLink" sur "${__VirtualRootPath}" : "${__VirtualRootPath}"
+$__AuthorName vous a invité à rejoindre la salle "$Message":"$InviteLink" sur "${__VirtualRootPath}":"${__VirtualRootPath}"
 
 $OrangeButton
 

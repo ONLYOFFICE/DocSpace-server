@@ -1761,7 +1761,7 @@ $TrulyYours</value>
   <data name="pattern_saas_room_invite_existing_user" xml:space="preserve">
     <value>Բարեւ Ձեզ!
 
-$__ՀեղինակիԱնուն-ը ձեզ հրավիրել է միանալու սենյակ "$Հաղորդագրություն":"$ՀրավերիՀղում"՝ "${__VirtualRootPath}":"${__VirtualRootPath}".
+$__AuthorName-ը ձեզ հրավիրել է միանալու սենյակ "$Message":"$InviteLink"՝ "${__VirtualRootPath}":"${__VirtualRootPath}".
 
 $OrangeButton
 

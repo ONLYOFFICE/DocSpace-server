@@ -1716,7 +1716,7 @@ $TrulyYours</value>
   <data name="pattern_saas_room_invite_existing_user" xml:space="preserve">
     <value>你好！
 
-$__AuthorName 邀请您加入"${__VirtualRootPath}":"${__VirtualRootPath}"的"$Message":"$InviteLink "房间。
+$__AuthorName 邀请您加入"${__VirtualRootPath}":"${__VirtualRootPath}"的"$Message":"$InviteLink"房间。
 
 $OrangeButton
 
