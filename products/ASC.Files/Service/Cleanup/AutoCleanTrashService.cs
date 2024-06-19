@@ -42,8 +42,11 @@ public class AutoCleanTrashService(IServiceScopeFactory scopeFactory,
 
         await using (var scope = scopeFactory.CreateAsyncScope())
         {
-            await using var dbContext = await scope.ServiceProvider.GetRequiredService<IDbContextFactory<WebstudioDbContext>>().CreateDbContextAsync(stoppingToken);
-            activeTenantsUsers = await GetTenantsUsersAsync(dbContext);
+            await using var userDbContext = await scope.ServiceProvider.GetRequiredService<IDbContextFactory<UserDbContext>>().CreateDbContextAsync(stoppingToken);
+
+            var filesSettingsId = new FilesSettings().ID;
+
+            activeTenantsUsers =  await Queries.DefaultTenantUserSettingsAsync(userDbContext).ToListAsync(); 
         }
 
         if (!activeTenantsUsers.Any())
@@ -132,32 +135,21 @@ public class AutoCleanTrashService(IServiceScopeFactory scopeFactory,
             logger.ErrorWithException(ex);
         }
     }
-
-    private async Task<List<TenantUserSettings>> GetTenantsUsersAsync(WebstudioDbContext dbContext)
-    {
-        var filesSettingsId = new FilesSettings().ID;
-        return await Queries.TenantUserSettingsAsync(dbContext, filesSettingsId).ToListAsync();
-    }
-
 }
 
 static file class Queries
 {
-    public static readonly Func<WebstudioDbContext, Guid, IAsyncEnumerable<TenantUserSettings>>
-        TenantUserSettingsAsync = EF.CompileAsyncQuery(
-            (WebstudioDbContext ctx, Guid filesSettingsId) =>
-                ctx.Tenants
-                    .Join(ctx.WebstudioSettings, a => a.Id, b => b.TenantId,
-                        (tenants, settings) => new { tenants, settings })
-                    .Where(x => x.tenants.Status == TenantStatus.Active &&
-                                x.settings.Id == filesSettingsId &&
-                                Convert.ToBoolean(DbFunctionsExtension.JsonValue(nameof(x.settings.Data).ToLower(),
-                                    "AutomaticallyCleanUp.IsAutoCleanUp")))
-                    .Select(r => new TenantUserSettings
-                    {
-                        TenantId = r.tenants.Id,
-                        UserId = r.settings.UserId,
-                        Setting = (DateToAutoCleanUp)Convert.ToInt32(
-                            DbFunctionsExtension.JsonValue(nameof(r.settings.Data).ToLower(), "AutomaticallyCleanUp.Gap"))
-                    }));
+    public static readonly Func<UserDbContext, IAsyncEnumerable<TenantUserSettings>>
+        DefaultTenantUserSettingsAsync = EF.CompileAsyncQuery(
+            (UserDbContext ctx) =>
+                ctx.Users
+                   .Join(ctx.Tenants, x => x.TenantId, y => y.Id, (users, tenants) => new { users, tenants })
+                   .Where(x => x.tenants.Status == TenantStatus.Active)
+                   .Select(r => new TenantUserSettings
+                   {
+                       TenantId = r.tenants.Id,
+                       UserId = r.users.Id,
+                       Setting = AutoCleanUpData.GetDefault().Gap
+                   }));
+
 }
