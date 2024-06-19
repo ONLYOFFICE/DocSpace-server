@@ -205,7 +205,7 @@ public class FolderDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
             result.Order = !string.IsNullOrEmpty(order) ? string.Join('.', order, folder.Order) : folder.Order.ToString();
         }
 
-        if (folder.FolderType is FolderType.InProcessFormFolder or FolderType.ReadyFormFolder or FolderType.FormFillingFolderDone or FolderType.FormFillingFolderInProgress)
+        if (DocSpaceHelper.IsFormsFillingSystemFolder(folder.FolderType))
         {
             result.Type = folder.FolderType;
         }

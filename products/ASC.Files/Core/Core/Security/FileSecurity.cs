@@ -903,10 +903,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                     return false;
                 }
 
-                if (action == FilesSecurityActions.CopyLink && folder.FolderType is (FolderType.FormFillingFolderDone or 
-                                                                                     FolderType.FormFillingFolderInProgress or 
-                                                                                     FolderType.InProcessFormFolder or
-                                                                                     FolderType.ReadyFormFolder))
+                if (action == FilesSecurityActions.CopyLink && DocSpaceHelper.IsFormsFillingSystemFolder(folder.FolderType))
                 {
                     return false;
                 }
@@ -1022,10 +1019,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                     var folderDao = daoFactory.GetFolderDao<T>();
                     var parentFolders = await folderDao.GetParentFoldersAsync(file.ParentId).ToListAsync();
 
-                    if (parentFolders.Exists(parent => parent.FolderType is (FolderType.FormFillingFolderDone or
-                                                                                 FolderType.FormFillingFolderInProgress or
-                                                                                 FolderType.InProcessFormFolder or
-                                                                                 FolderType.ReadyFormFolder)))
+                    if (parentFolders.Exists(parent => DocSpaceHelper.IsFormsFillingSystemFolder(parent.FolderType)))
                     {
                         return false;
                     };
