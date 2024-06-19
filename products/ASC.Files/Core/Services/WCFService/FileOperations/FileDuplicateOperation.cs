@@ -97,10 +97,10 @@ class FileDuplicateOperation<T>(IServiceProvider serviceProvider, FileOperationD
             value = new Dictionary<string, dynamic>();
             _tasksProps.Add(task.Id, value);
         }
-
-        var proxyData = value;
-        proxyData[Process] = task[Process];
-        proxyData[Res] = task[Res];
+        
+        value[Process] = task[Process];
+        value[Res] = task[Res];
+        value[Err] = task[Err];
 
         this[Process] = 0;
         this[Res] = "";
@@ -109,6 +109,11 @@ class FileDuplicateOperation<T>(IServiceProvider serviceProvider, FileOperationD
         {
             this[Process] += data.Value[Process];
             this[Res] += data.Value[Res];
+            var err = data.Value[Err];
+            if (!string.IsNullOrEmpty(err))
+            {
+                this[Err] = err;
+            }
         }
         
         var progressSteps = Total;

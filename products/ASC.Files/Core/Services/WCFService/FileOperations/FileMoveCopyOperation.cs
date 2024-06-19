@@ -165,17 +165,20 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
             return;
         }
 
+        var isRoom = false;
+        
         if (0 < Folders.Count)
         {
             var firstFolder = await FolderDao.GetFolderAsync(Folders[0]);
-            var isRoom = DocSpaceHelper.IsRoom(firstFolder.FolderType);
+            isRoom = DocSpaceHelper.IsRoom(firstFolder.FolderType);
 
             if (_copy && !await FilesSecurity.CanCopyAsync(firstFolder))
             {
-                this[Err] = FilesCommonResource.ErrorMessage_SecurityException_CopyFolder;
+               this[Err] = FilesCommonResource.ErrorMessage_SecurityException_CopyFolder;
 
-                return;
+               return;
             }
+            
             if (!_copy && !await FilesSecurity.CanMoveAsync(firstFolder))
             {
                 if (isRoom)
@@ -212,12 +215,13 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
             }
         }
 
-        if (_copy && !await fileSecurity.CanCopyToAsync(toFolder))
+        if (_copy && !(isRoom && toFolder.FolderType == FolderType.VirtualRooms) && !await fileSecurity.CanCopyToAsync(toFolder))
         {
             this[Err] = FilesCommonResource.ErrorMessage_SecurityException_CopyToFolder;
 
             return;
         }
+        
         if (!_copy && !await fileSecurity.CanMoveToAsync(toFolder))
         {
             this[Err] = toFolder.FolderType switch

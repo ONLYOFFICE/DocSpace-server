@@ -820,8 +820,7 @@ public class FileSecurity(IDaoFactory daoFactory,
             return false;
         }
 
-        if (action is FilesSecurityActions.ReadHistory or FilesSecurityActions.EditHistory &&
-             e.ProviderEntry)
+        if (action is FilesSecurityActions.ReadHistory or FilesSecurityActions.EditHistory && e.ProviderEntry)
         {
             return false;
         }
@@ -896,11 +895,6 @@ public class FileSecurity(IDaoFactory daoFactory,
                 }
 
                 if (action == FilesSecurityActions.CopySharedLink && folder.FolderType is not (FolderType.CustomRoom or FolderType.PublicRoom or FolderType.FillingFormsRoom))
-                {
-                    return false;
-                }
-
-                if (action is FilesSecurityActions.Copy && isRoom)
                 {
                     return false;
                 }
