@@ -321,7 +321,6 @@ $OrangeButton
       Администратор создал для вас новый почтовый ящик &lt;b&gt;$Address&lt;/b&gt; на портале "${__VirtualRootPath}":"${__VirtualRootPath}".
 
       Используйте следующие настройки для других почтовых клиентов:
-
       Логин: &lt;b&gt;$Login&lt;/b&gt;
       Пароль: "&lt;b&gt;задать пароль&lt;/b&gt;":"$MyStaffLink"
 
@@ -988,7 +987,7 @@ $OrangeButton
     <value>Добавлен новый пользователь на портале ${LetterLogoText}</value>
   </data>
   <data name="subject_user_ldap_activation" xml:space="preserve">
-    <value>Вас приглашают стать участником ${__VirtualRootPath}</value>
+    <value>Вас пригласили стать участником ${__VirtualRootPath}</value>
   </data>
   <data name="pattern_enterprise_admin_activation_v1" xml:space="preserve">
     <value>h1. в &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
@@ -1702,12 +1701,41 @@ $TrulyYours</value>
   <data name="subject_zoom_welcome" xml:space="preserve">
     <value>Добро пожаловать в ONLYOFFICE DocSpace!</value>
   </data>
+  <data name="subject_saas_room_invite_existing_user" xml:space="preserve">
+    <value>Вас пригласили в комнату ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="subject_migration_personal_to_docspace" xml:space="preserve">
+    <value>Миграция данных в ONLYOFFICE DocSpace успешно завершена</value>
+  </data>
   <data name="pattern_saas_room_invite_existing_user" xml:space="preserve">
     <value>Здравствуйте!
 
 $__AuthorName пригласил вас в комнату "$Message":"$InviteLink" на "${__VirtualRootPath}":"${__VirtualRootPath}".
 
 $OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="ButtonGetStarted" xml:space="preserve">
+    <value>Начать</value>
+  </data>
+  <data name="ButtonJoinRoom" xml:space="preserve">
+    <value>Присоединиться к комнате</value>
+  </data>
+  <data name="pattern_migration_personal_to_docspace" xml:space="preserve">
+    <value>Здравствуйте!
+
+Процесс миграции данных из ONLYOFFICE Personal в новый ONLYOFFICE DocSpace успешно завершен.
+
+Чтобы получить доступ к вашему DocSpace с импортированными данными, нажмите кнопку ниже:
+
+$OrangeButton
+
+Ваш текущий тарифный план DocSpace: STARTUP. Он абсолютно бесплатный.
+
+==При необходимости вы можете изменить наименование вашего нового DocSpace. Просто переключитесь в «Настройки» -&gt; «Настройка» -&gt; «Переименование DocSpace».==
+
+Оцените новый способ совместной работы над документами!
 
 $TrulyYours</value>
   </data>

@@ -25,7 +25,6 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 global using System.Data;
-global using System.Collections;
 global using System.Collections.Concurrent;
 global using System.Collections.Frozen;
 global using System.Collections.Immutable;
@@ -36,7 +35,6 @@ global using System.Linq.Expressions;
 global using ASC.Files.Core.Services.WCFService.Wrappers;
 global using System.Net;
 global using System.Net.Http.Headers;
-global using System.Net.Http.Json;
 global using System.Net.Mime;
 global using System.Net.Sockets;
 global using System.Runtime.Serialization;
@@ -95,7 +93,6 @@ global using ASC.EventBus.Events;
 global using ASC.FederatedLogin;
 global using ASC.FederatedLogin.Helpers;
 global using ASC.FederatedLogin.LoginProviders;
-global using ASC.FederatedLogin.Profile;
 global using ASC.Files.Core;
 global using ASC.Files.Core.ApiModels;
 global using ASC.Files.Core.ApiModels.RequestDto;
@@ -111,7 +108,6 @@ global using ASC.Files.Core.Entries;
 global using ASC.Files.Core.Helpers;
 global using ASC.Files.Core.IntegrationEvents.Events;
 global using ASC.Files.Core.Log;
-global using ASC.Files.Core.Mapping;
 global using ASC.Files.Core.Resources;
 global using ASC.Files.Core.Security;
 global using ASC.Files.Core.Services.NotifyService;
@@ -124,7 +120,6 @@ global using ASC.Files.Thirdparty.Box;
 global using ASC.Files.Thirdparty.Dropbox;
 global using ASC.Files.Thirdparty.GoogleDrive;
 global using ASC.Files.Thirdparty.OneDrive;
-global using ASC.Files.Thirdparty.ProviderDao;
 global using ASC.Files.Thirdparty.SharePoint;
 global using ASC.Files.ThumbnailBuilder;
 global using ASC.MessagingSystem;
@@ -163,7 +158,6 @@ global using ASC.Web.Files.ThirdPartyApp;
 global using ASC.Web.Files.Utils;
 global using ASC.Web.Studio.Core;
 global using ASC.Web.Studio.Core.Notify;
-global using ASC.Web.Studio.Core.Quota;
 global using ASC.Web.Studio.Utility;
 
 global using AutoMapper;

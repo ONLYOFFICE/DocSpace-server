@@ -184,7 +184,7 @@ public class DocumentConfig<T>(
         }
 
         var last = Permissions.Edit || Permissions.Review || Permissions.Comment;
-        _fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(pathProvider.GetFileStreamUrl(file, last));
+        _fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(await pathProvider.GetFileStreamUrlAsync(file, last));
 
         return _fileUri;
     }
@@ -680,22 +680,8 @@ public class CustomizationConfig<T>(
 
     public async Task<bool> GetSubmitForm(File<T> file, bool modeWrite)
     {
-        if (!modeWrite || FileUtility.GetFileTypeByFileName(file.Title) != FileType.Pdf)
-        {
-            return false;
-        }
 
-        var linkDao = daoFactory.GetLinkDao();
-        var sourceId = await linkDao.GetSourceAsync(file.Id.ToString());
-
-        if (sourceId == null)
-        {
-            return false;
-        }
-
-        var properties = int.TryParse(sourceId, out var sourceInt)
-            ? await daoFactory.GetFileDao<int>().GetProperties(sourceInt)
-            : await daoFactory.GetFileDao<string>().GetProperties(sourceId);
+        var properties = await daoFactory.GetFileDao<T>().GetProperties(file.Id);
 
         return properties is { FormFilling.CollectFillForm: true };
     }
@@ -772,7 +758,7 @@ public class LogoConfig(
 }
 
 [Transient]
-public class PluginsConfig()
+public class PluginsConfig
     // ConsumerFactory consumerFactory,
     // BaseCommonLinkUtility baseCommonLinkUtility,
     // CoreBaseSettings coreBaseSettings,

@@ -56,7 +56,7 @@ public class Startup
         services.AddHttpContextAccessor();
         services.AddMemoryCache();
         services.AddHttpClient();
-        services.AddExceptionHandler<Classes.CustomExceptionHandler>();
+        services.AddExceptionHandler<CustomExceptionHandler>();
         services.AddProblemDetails();
 
         services.AddSingleton<EFLoggerFactory>();

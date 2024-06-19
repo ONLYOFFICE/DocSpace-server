@@ -123,7 +123,7 @@ public class CspSettingsHelper(
 
     public async Task<string> CreateHeaderAsync(IEnumerable<string> domains, bool currentTenant = true)
     {
-        domains ??= Enumerable.Empty<string>();
+        domains ??= [];
 
         var options = domains.Select(r => new CspOptions(r)).ToList();
 
@@ -186,6 +186,15 @@ public class CspSettingsHelper(
         if (!string.IsNullOrEmpty(configuration["files:oform:domain"]))
         {
             var oformOptions = configuration.GetSection("csp:oform").Get<CspOptions>();
+            if (oformOptions != null)
+            {
+                options.Add(oformOptions);
+            }
+        }
+
+        if (!string.IsNullOrEmpty(configuration["web:recaptcha:public-key"]) || !string.IsNullOrEmpty(configuration["web:hcaptcha:public-key"]))
+        {
+            var oformOptions = configuration.GetSection("csp:captcha").Get<CspOptions>();
             if (oformOptions != null)
             {
                 options.Add(oformOptions);

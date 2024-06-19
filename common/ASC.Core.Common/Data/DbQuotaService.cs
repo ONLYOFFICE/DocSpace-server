@@ -116,20 +116,3 @@ class DbQuotaService(IDbContextFactory<CoreDbContext> dbContextManager, IMapper 
         return await q.ProjectTo<TenantQuotaRow>(mapper.ConfigurationProvider).ToListAsync();
     }
 }
-
-static file class Queries
-{
-    public static readonly Func<CoreDbContext, int, Task<DbQuota>> QuotaAsync = EF.CompileAsyncQuery(
-    (CoreDbContext ctx, int tenantId) =>
-        ctx.Quotas
-            .SingleOrDefault(r => r.TenantId == tenantId));
-
-    public static readonly Func<CoreDbContext, int, Guid, string, long, Task<int>> UpdateCounterAsync =
-        EF.CompileAsyncQuery(
-            (CoreDbContext ctx, int tenantId, Guid userId, string path, long counter) =>
-                ctx.QuotaRows
-                    .Where(r => r.Path == path
-                                && r.TenantId == tenantId
-                                && r.UserId == userId)
-                    .ExecuteUpdate(x => x.SetProperty(p => p.Counter, p => p.Counter + counter)));
-}

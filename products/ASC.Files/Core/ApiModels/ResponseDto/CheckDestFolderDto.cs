@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,12 +24,17 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.ApiSystem.Models;
+namespace ASC.Files.Core.ApiModels.ResponseDto;
 
-public enum RecaptchaType
+public class CheckDestFolderDto
 {
-    Default = 0,
-    AndroidV2 = 1,
-    iOSV2 = 2,
-    hCaptcha = 3
+    public CheckDestFolderResult Result { get; set; }
+    public List<FileEntryDto> Files { get; set; }
+}
+
+public enum CheckDestFolderResult
+{
+    AllAllowed,
+    PartAllowed,
+    NoneAllowed
 }

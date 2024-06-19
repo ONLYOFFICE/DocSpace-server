@@ -31,7 +31,7 @@ public class AuditModuleSpecifics(Helpers helpers) : ModuleSpecificsBase(helpers
     public override string ConnectionStringName => "core";
     public override ModuleName ModuleName => ModuleName.Audit;
     public override IEnumerable<TableInfo> Tables => _tables;
-    public override IEnumerable<RelationInfo> TableRelations => Enumerable.Empty<RelationInfo>();
+    public override IEnumerable<RelationInfo> TableRelations => [];
 
     private readonly TableInfo[] _tables =
     [

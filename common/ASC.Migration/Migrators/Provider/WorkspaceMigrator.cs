@@ -68,7 +68,7 @@ public class WorkspaceMigrator : Migrator
         }
 
         _backup = files.First(f => f.EndsWith(".gz") || f.EndsWith(".tar"));
-        MigrationInfo.Files = new List<string> { Path.GetFileName(_backup) };
+        MigrationInfo.Files = [Path.GetFileName(_backup)];
     }
 
     public override async Task<MigrationApiInfo> ParseAsync(bool reportProgress = true)
@@ -173,8 +173,7 @@ public class WorkspaceMigrator : Migrator
                 u.HasPhoto = u.PathToPhoto != null;
             }
 
-            u.Storage = new MigrationStorage();
-            u.Storage.Type = FolderType.USER;
+            u.Storage = new MigrationStorage { Type = FolderType.USER };
 
             ParseStorage(u.Storage, key);
 

@@ -120,7 +120,9 @@ public class FileSecurity(IDaoFactory daoFactory,
             {
                     { SubjectType.User, [FileShare.RoomAdmin, FileShare.Collaborator, FileShare.FillForms, FileShare.None] },
                     { SubjectType.Group , [FileShare.FillForms, FileShare.None] },
-                    { SubjectType.InvitationLink, [FileShare.RoomAdmin, FileShare.Collaborator, FileShare.FillForms, FileShare.None] }
+                    { SubjectType.InvitationLink, [FileShare.RoomAdmin, FileShare.Collaborator, FileShare.FillForms, FileShare.None] },
+                    { SubjectType.ExternalLink, [FileShare.FillForms, FileShare.Read, FileShare.None] },
+                    { SubjectType.PrimaryExternalLink, [FileShare.FillForms, FileShare.Read, FileShare.None] }
                 }.ToFrozenDictionary()
                 },
                 {
@@ -226,7 +228,9 @@ public class FileSecurity(IDaoFactory daoFactory,
                     FilesSecurityActions.Download,
                     FilesSecurityActions.Convert,
                     FilesSecurityActions.CreateRoomFrom,
-                    FilesSecurityActions.EditForm
+                    FilesSecurityActions.EditForm,
+                    FilesSecurityActions.CopyLink
+
                 }
             },
             {
@@ -248,7 +252,8 @@ public class FileSecurity(IDaoFactory daoFactory,
                     FilesSecurityActions.Download,
                     FilesSecurityActions.CopySharedLink,
                     FilesSecurityActions.Reconnect,
-                    FilesSecurityActions.CreateRoomFrom
+                    FilesSecurityActions.CreateRoomFrom,
+                    FilesSecurityActions.CopyLink
                 }
             }
     }.ToFrozenDictionary();
@@ -513,7 +518,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                                           .Where(x => x.Status == EmployeeStatus.Active).Select(y => y.Id).Distinct();
                     }
 
-                    return Enumerable.Empty<Guid>();
+                    return [];
                 }
 
                 break;
@@ -857,6 +862,14 @@ public class FileSecurity(IDaoFactory daoFactory,
                 return false;
             }
 
+            if(userId.Equals(ASC.Core.Configuration.Constants.Guest.ID) && (folder.FolderType == FolderType.ReadyFormFolder ||
+                    folder.FolderType == FolderType.InProcessFormFolder ||
+                    folder.FolderType == FolderType.FormFillingFolderDone ||
+                    folder.FolderType == FolderType.FormFillingFolderInProgress))
+            {
+                return false;
+            }
+
             if (action != FilesSecurityActions.Read)
             {
                 if (action is FilesSecurityActions.Duplicate or
@@ -885,7 +898,12 @@ public class FileSecurity(IDaoFactory daoFactory,
                     return false;
                 }
 
-                if (action == FilesSecurityActions.CopySharedLink && folder.FolderType is not (FolderType.CustomRoom or FolderType.PublicRoom))
+                if (action == FilesSecurityActions.CopySharedLink && folder.FolderType is not (FolderType.CustomRoom or FolderType.PublicRoom or FolderType.FillingFormsRoom))
+                {
+                    return false;
+                }
+
+                if (action == FilesSecurityActions.CopyLink && DocSpaceHelper.IsFormsFillingSystemFolder(folder.FolderType))
                 {
                     return false;
                 }
@@ -921,6 +939,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                     {
                         return action == FilesSecurityActions.MoveTo;
                     }
+                  
                 }
             }
             else if (isAuthenticated)
@@ -987,14 +1006,23 @@ public class FileSecurity(IDaoFactory daoFactory,
                     action == FilesSecurityActions.Lock ||
                     action == FilesSecurityActions.Move ||
                     action == FilesSecurityActions.Duplicate ||
-                    action == FilesSecurityActions.EditHistory ||
-                    action == FilesSecurityActions.ReadHistory) && file != null )
+                    action == FilesSecurityActions.EditHistory) && file != null )
                 {
                     var fileFolder = await daoFactory.GetFolderDao<T>().GetFolderAsync(file.ParentId);
                     if ((fileFolder.FolderType == FolderType.FormFillingFolderInProgress) || fileFolder.FolderType == FolderType.FormFillingFolderDone)
                     {
                         return false;
                     }
+                }
+                if (action == FilesSecurityActions.CopyLink && file != null)
+                {
+                    var folderDao = daoFactory.GetFolderDao<T>();
+                    var parentFolders = await folderDao.GetParentFoldersAsync(file.ParentId).ToListAsync();
+
+                    if (parentFolders.Exists(parent => DocSpaceHelper.IsFormsFillingSystemFolder(parent.FolderType)))
+                    {
+                        return false;
+                    };
                 }
                 if (await HasFullAccessAsync(e, userId, isUser, isDocSpaceAdmin, isRoom, isCollaborator))
                 {
@@ -2238,6 +2266,7 @@ public class FileSecurity(IDaoFactory daoFactory,
         ReadLinks,
         Reconnect,
         CreateRoomFrom,
-        EditForm
+        EditForm,
+        CopyLink
     }
 }

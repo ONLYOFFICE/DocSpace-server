@@ -41,7 +41,7 @@ public class MigrationFileUploadHandler
         ILogger<MigrationFileUploadHandler> logger,
         IDistributedCache cache)
     {
-        MigrationFileUploadResult result = null;
+        MigrationFileUploadResult result;
         try
         {
             if (!await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))
@@ -93,9 +93,9 @@ public class MigrationFileUploadHandler
             {
                 var path = await cache.GetStringAsync(key);
                 var file = context.Request.Form.Files[0];
-                using var stream = file.OpenReadStream();
+                await using var stream = file.OpenReadStream();
                 var folder = Path.Combine(path, Path.GetFileName(context.Request.Query["Name"].ToString()));
-                using var fs = File.Open(folder, FileMode.Append);
+                await using var fs = File.Open(folder, FileMode.Append);
                 await stream.CopyToAsync(fs);
 
                 result = Success();
@@ -106,7 +106,7 @@ public class MigrationFileUploadHandler
             result = Error(error.Message);
         }
 
-        await context.Response.WriteAsync(System.Text.Json.JsonSerializer.Serialize(result, new System.Text.Json.JsonSerializerOptions
+        await context.Response.WriteAsync(JsonSerializer.Serialize(result, new JsonSerializerOptions
         {
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
         }));

@@ -70,6 +70,10 @@ public class AuthRequestsDto
     /// <type>ASC.Web.Api.ApiModel.RequestsDto.ConfirmData, ASC.Web.Api</type>
     public ConfirmData ConfirmData { get; set; }
 
+    /// <summary>Type of captcha</summary>
+    /// <type>ASC.Web.Core.RecaptchaType, ASC.Web.Core</type>
+    public RecaptchaType RecaptchaType { get; set; }
+
     /// <summary>reCAPTCHA response</summary>
     /// <type>System.String, System</type>
     public string RecaptchaResponse { get; set; }

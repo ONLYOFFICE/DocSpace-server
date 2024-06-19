@@ -65,7 +65,7 @@ public class EntryProperties
 /// <summary>
 /// </summary>
 [Transient]
-public class FormFillingProperties()
+public class FormFillingProperties
 {
     public static readonly string DefaultTitleMask = "{0} - {1} ({2})";
 
@@ -83,5 +83,6 @@ public class FormFillingProperties()
     public string ToFolderId { get; set; }
     public string ResultsFolderId { get; set; }
     public string ResultsFileID { get; set; }
+    public int GuestFormId { get; set; }
 
 }

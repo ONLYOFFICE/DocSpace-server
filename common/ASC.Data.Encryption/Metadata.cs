@@ -270,10 +270,7 @@ public class Metadata(IConfiguration configuration)
 
     private byte[] GenerateHmacKey()
     {
-        using var sha512 = SHA512.Create();
-        var hmacKey = sha512.ComputeHash(Key);
-
-        return hmacKey;
+        return SHA512.HashData(Key);
     }
 
     private byte[] ComputeHmacHash(Stream stream)

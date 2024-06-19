@@ -110,9 +110,7 @@ public class TelegramHelper(ConsumerFactory consumerFactory,
 
         var buf = id.Concat(d).ToArray();
 
-        using var sha = SHA256.Create();
-
-        return Convert.ToBase64String(sha.ComputeHash(buf))
+        return Convert.ToBase64String(SHA256.HashData(buf))
             .Replace('+', '-').Replace('/', '_').Replace("=", ""); // make base64 url safe
     }
 

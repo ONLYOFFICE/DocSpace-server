@@ -41,24 +41,24 @@ public class NotifyCleanerService(IOptions<NotifyServiceCfg> notifyServiceCfg,
     protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
          try
-        {
-            var date = DateTime.UtcNow.AddDays(-_notifyServiceCfg.StoreMessagesDays);
+         {
+             var date = DateTime.UtcNow.AddDays(-_notifyServiceCfg.StoreMessagesDays);
 
-            await using var scope = _serviceScopeFactory.CreateAsyncScope();
-            await using var dbContext = await scope.ServiceProvider.GetService<IDbContextFactory<NotifyDbContext>>().CreateDbContextAsync();
+             await using var scope = _serviceScopeFactory.CreateAsyncScope();
+             await using var dbContext = await scope.ServiceProvider.GetService<IDbContextFactory<NotifyDbContext>>().CreateDbContextAsync(stoppingToken);
 
-            await Queries.DeleteNotifyInfosAsync(dbContext, date);
-            await Queries.DeleteNotifyQueuesAsync(dbContext, date);
+             await Queries.DeleteNotifyInfosAsync(dbContext, date);
+             await Queries.DeleteNotifyQueuesAsync(dbContext, date);
 
-        }
-        catch (ThreadAbortException)
-        {
-            // ignore
-        }
-        catch (Exception err)
-        {
-            _logger.ErrorClear(err);
-        }
+         }
+         catch (ThreadAbortException)
+         {
+             // ignore
+         }
+         catch (Exception err)
+         {
+             _logger.ErrorClear(err);
+         }
     }
 }
 
