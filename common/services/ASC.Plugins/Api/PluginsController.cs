@@ -25,7 +25,6 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using System.Net;
-using System.Reflection;
 
 using ASC.Common;
 using ASC.Common.Web;
@@ -33,8 +32,6 @@ using ASC.Core;
 using ASC.Web.Api.Routing;
 using ASC.Web.Core.PublicResources;
 using ASC.Web.Studio.Core;
-
-using AutoMapper;
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
@@ -82,7 +79,7 @@ public class PluginsController(PermissionContext permissionContext,
     }
 
     [HttpPost("")]
-    public async Task<string> AddWebPluginFromFile(bool system)
+    public async Task<string> AddPluginFromFile()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -98,12 +95,38 @@ public class PluginsController(PermissionContext permissionContext,
 
         var file = HttpContext.Request.Form.Files[0] ?? throw new CustomHttpException(HttpStatusCode.BadRequest, Resource.ErrorWebPluginNoInputFile);
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
-
-        var plugin = await pluginManager.AddPluginFromFileAsync(tenant.Id, file, system);
+        var plugin = await pluginManager.AddPluginFromFileAsync(file);
 
        // var outDto = mapper.Map<PluginConfig, PluginDto>(webPlugin);
 
+        return "ok";
+    }
+
+    [HttpDelete("{name}")]
+    public async Task<string> DeletePlugin(string name)
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        var plugin = await pluginManager.DeletePluginAsync(name);
+
+        // var outDto = mapper.Map<PluginConfig, PluginDto>(webPlugin);
+
+        return "ok";
+    }
+
+    [HttpPost("enable/{name}")]
+    public async Task<string> EnablePlugin(string name)
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        var plugin = await pluginManager.UpdatePluginAsync(name, true, string.Empty);
+        return "ok";
+    }
+
+    [HttpPost("disenable/{name}")]
+    public async Task<string> DisenablePlugin(string name)
+    {
+        var plugin = await pluginManager.UpdatePluginAsync(name, false, string.Empty);
         return "ok";
     }
 }

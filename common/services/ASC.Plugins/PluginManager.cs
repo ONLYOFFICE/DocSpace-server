@@ -41,7 +41,6 @@ using ASC.Core.Tenants;
 using ASC.Data.Storage;
 using ASC.Data.Storage.DiscStorage;
 using ASC.Security.Cryptography;
-using ASC.Web.Core;
 using ASC.Web.Core.PublicResources;
 
 using ICSharpCode.SharpZipLib.Zip;
@@ -60,7 +59,6 @@ public class PluginManager(PluginConfigSettings pluginConfigSettings,
     PluginControllerManager pluginControllerManager,
     TempPath tempPath)
 {
-    private const string StorageSystemModuleName = "systemplugins";
     private const string StorageModuleName = "plugins";
     private const string ConfigFileName = "config.json";
 
@@ -77,25 +75,18 @@ public class PluginManager(PluginConfigSettings pluginConfigSettings,
         }
     }
 
-    private async Task<IDataStore> GetPluginStorageAsync(int tenantId)
+    private async Task<IDataStore> GetPluginStorageAsync()
     {
-        var module = tenantId == Tenant.DefaultTenant ? StorageSystemModuleName : StorageModuleName;
-
-        var storage = await storageFactory.GetStorageAsync(tenantId, module);
+        var storage = await storageFactory.GetStorageAsync(Tenant.DefaultTenant, StorageModuleName);
 
         return storage;
     }
 
-    private static string GetCacheKey(int tenantId)
-    {
-        return $"{StorageModuleName}:{tenantId}";
-    }
-
-    public async Task<PluginConfig> AddPluginFromFileAsync(int tenantId, IFormFile file, bool system)
+    public async Task<PluginConfig> AddPluginFromFileAsync(IFormFile file)
     {
         DemandPlugins(upload: true);
 
-        if (system && !coreBaseSettings.Standalone)
+        if (!coreBaseSettings.Standalone)
         {
             throw new CustomHttpException(HttpStatusCode.Forbidden, Resource.ErrorWebPluginForbiddenSystem);
         }
@@ -119,7 +110,7 @@ public class PluginManager(PluginConfigSettings pluginConfigSettings,
             throw new CustomHttpException(HttpStatusCode.BadRequest, Resource.ErrorWebPluginArchive);
         }
 
-        var storage = await GetPluginStorageAsync(system ? Tenant.DefaultTenant : tenantId) as DiscDataStore;
+        var storage = await GetPluginStorageAsync() as DiscDataStore;
 
         PluginConfig config;
 
@@ -137,11 +128,10 @@ public class PluginManager(PluginConfigSettings pluginConfigSettings,
 
             config = JsonSerializer.Deserialize<PluginConfig>(configContent, options);
 
-            await ValidatePlugin(config, tenantId, system);
+            await ValidatePlugin(config);
 
             if (await storage.IsDirectoryAsync(config.Name))
             {
-                pluginControllerManager.RemoveControllers(config.Name);
                 await storage.DeleteDirectoryAsync(config.Name);
             }
 
@@ -161,14 +151,10 @@ public class PluginManager(PluginConfigSettings pluginConfigSettings,
             await storage.SaveAsync(Path.Combine(config.Name, zipEntry.Name), stream);
         }
 
-        config.System = system;
-
-        config = await UpdatePluginAsync(tenantId, config, true, null);
-
         var path = storage.GetPhysicalPath("", config.Name);
-        var path1 = storage.GetPhysicalPath("", Path.Combine(config.Name, config.Name + ".dll"));
         var assembly = await LoadPluginAsync(path, config.Name + ".dll", storage);
         pluginControllerManager.AddControllers(assembly);
+
         return config;
     }
 
@@ -191,7 +177,7 @@ public class PluginManager(PluginConfigSettings pluginConfigSettings,
         return loadContext.LoadFromAssemblyName(new AssemblyName(Path.GetFileNameWithoutExtension(path)));
     }
 
-    private async Task ValidatePlugin(PluginConfig plugin, int tenantId, bool system)
+    private async Task ValidatePlugin(PluginConfig plugin)
     {
         if (plugin == null)
         {
@@ -205,67 +191,20 @@ public class PluginManager(PluginConfigSettings pluginConfigSettings,
             throw new CustomHttpException(HttpStatusCode.BadRequest, Resource.ErrorWebPluginName);
         }
 
-        var systemPlugins = await GetPluginsFromCacheAsync(Tenant.DefaultTenant);
+        var plugins = await GetPluginsFromStorageAsync();
 
-        var tenantPlugins = await GetPluginsFromCacheAsync(tenantId);
-
-        if (system)
+        if (plugins.Any(x =>
+                x.Name.Equals(plugin.Name, StringComparison.InvariantCultureIgnoreCase)))
         {
-            if (tenantPlugins.Any(x =>
-                    x.Name.Equals(plugin.Name, StringComparison.InvariantCulture) ||
-                    x.Name.Equals(plugin.Name, StringComparison.InvariantCultureIgnoreCase)))
-            {
-                throw new CustomHttpException(HttpStatusCode.BadRequest, Resource.ErrorWebPluginExist);
-            }
-
-            if (systemPlugins.Any(x =>
-                    x.Name.Equals(plugin.Name, StringComparison.InvariantCulture) &&
-                    !x.Name.Equals(plugin.Name, StringComparison.InvariantCultureIgnoreCase)))
-            {
-                throw new CustomHttpException(HttpStatusCode.BadRequest, Resource.ErrorWebPluginExist);
-            }
-        }
-        else
-        {
-            if (systemPlugins.Any(x =>
-                    x.Name.Equals(plugin.Name, StringComparison.InvariantCulture) ||
-                    x.Name.Equals(plugin.Name, StringComparison.InvariantCultureIgnoreCase)))
-            {
-                throw new CustomHttpException(HttpStatusCode.BadRequest, Resource.ErrorWebPluginExist);
-            }
-
-            if (tenantPlugins.Any(x =>
-                    x.Name.Equals(plugin.Name, StringComparison.InvariantCulture) &&
-                    !x.Name.Equals(plugin.Name, StringComparison.InvariantCultureIgnoreCase)))
-            {
-                throw new CustomHttpException(HttpStatusCode.BadRequest, Resource.ErrorWebPluginExist);
-            }
+            throw new CustomHttpException(HttpStatusCode.BadRequest, Resource.ErrorWebPluginExist);
         }
     }
 
-    private async Task<List<PluginConfig>> GetPluginsFromCacheAsync(int tenantId)
-    {
-        var key = GetCacheKey(tenantId);
-
-        var plugins = pluginCache.Get(key);
-
-        if (plugins == null)
-        {
-            plugins = await GetPluginsFromStorageAsync(tenantId);
-
-            pluginCache.Insert(key, plugins);
-        }
-
-        return plugins;
-    }
-
-    private async Task<List<PluginConfig>> GetPluginsFromStorageAsync(int tenantId)
+    private async Task<List<PluginConfig>> GetPluginsFromStorageAsync()
     {
         var plugins = new List<PluginConfig>();
 
-        var system = tenantId == Tenant.DefaultTenant;
-
-        var storage = await GetPluginStorageAsync(tenantId);
+        var storage = await GetPluginStorageAsync();
 
         var configFiles = await storage.ListFilesRelativeAsync(string.Empty, string.Empty, ConfigFileName, true).ToArrayAsync();
 
@@ -286,8 +225,6 @@ public class PluginManager(PluginConfigSettings pluginConfigSettings,
 
                 var plugin = JsonSerializer.Deserialize<PluginConfig>(configContent, options);
 
-                plugin.System = system;
-
                 plugins.Add(plugin);
             }
             catch (Exception e)
@@ -299,14 +236,11 @@ public class PluginManager(PluginConfigSettings pluginConfigSettings,
         return plugins;
     }
 
-    public async Task<List<PluginConfig>> GetPluginsAsync(int tenantId)
+    public async Task<List<PluginConfig>> GetPluginsAsync()
     {
         DemandPlugins();
 
-        var plugins = new List<PluginConfig>();
-
-        plugins.AddRange((await GetPluginsFromCacheAsync(Tenant.DefaultTenant)).Select(x => x.Clone()));
-        plugins.AddRange((await GetPluginsFromCacheAsync(tenantId)).Select(x => x.Clone()));
+        var plugins = await GetPluginsFromStorageAsync();
 
         var pluginSettings = await settingsManager.LoadAsync<PluginSettings>();
 
@@ -327,23 +261,23 @@ public class PluginManager(PluginConfigSettings pluginConfigSettings,
         return plugins;
     }
 
-    public async Task<PluginConfig> GetPluginByNameAsync(int tenantId, string name)
+    public async Task<PluginConfig> GetPluginByNameAsync(string name)
     {
-        var plugins = await GetPluginsAsync(tenantId);
+        var plugins = await GetPluginsAsync();
 
         var plugin = plugins.Find(x => x.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase)) ?? throw new CustomHttpException(HttpStatusCode.NotFound, Resource.ErrorWebPluginNotFound);
 
         return plugin;
     }
 
-    public async Task<PluginConfig> UpdatePluginAsync(int tenantId, string name, bool enabled, string settings)
+    public async Task<PluginConfig> UpdatePluginAsync(string name, bool enabled, string settings)
     {
-        var plugin = await GetPluginByNameAsync(tenantId, name);
+        var plugin = await GetPluginByNameAsync(name);
 
-        return await UpdatePluginAsync(tenantId, plugin, enabled, settings);
+        return await UpdatePluginAsync(plugin, enabled, settings);
     }
 
-    private async Task<PluginConfig> UpdatePluginAsync(int tenantId, PluginConfig plugin, bool enabled, string settings)
+    private async Task<PluginConfig> UpdatePluginAsync(PluginConfig plugin, bool enabled, string settings)
     {
         var pluginSettings = await settingsManager.LoadAsync<PluginSettings>();
 
@@ -371,35 +305,34 @@ public class PluginManager(PluginConfigSettings pluginConfigSettings,
         plugin.Enabled = enabled;
         plugin.Settings = settings;
 
-        var key = GetCacheKey(plugin.System ? Tenant.DefaultTenant : tenantId);
+        var key = StorageModuleName;
 
         pluginCache.Remove(key);
 
         return plugin;
     }
 
-    public async Task<PluginConfig> DeletePluginAsync(int tenantId, string name)
+    public async Task<PluginConfig> DeletePluginAsync(string name)
     {
         DemandPlugins(delete: true);
 
-        var webPlugin = await GetPluginByNameAsync(tenantId, name);
-
-        if (webPlugin.System && !coreBaseSettings.Standalone)
+        if (!coreBaseSettings.Standalone)
         {
             throw new CustomHttpException(HttpStatusCode.Forbidden, Resource.ErrorWebPluginForbiddenSystem);
         }
 
-        var storage = await GetPluginStorageAsync(tenantId);
+        var plugin = await GetPluginByNameAsync(name);
 
-        if (!await storage.IsDirectoryAsync(webPlugin.Name))
+        var storage = await GetPluginStorageAsync();
+
+        if (!await storage.IsDirectoryAsync(plugin.Name))
         {
             throw new CustomHttpException(HttpStatusCode.NotFound, Resource.ErrorWebPluginNotFound);
         }
 
-        await storage.DeleteDirectoryAsync(webPlugin.Name);
+        await storage.DeleteDirectoryAsync(plugin.Name);
+        pluginControllerManager.RemoveControllers(plugin.Name);
 
-        await UpdatePluginAsync(tenantId, webPlugin, false, null);
-
-        return webPlugin;
+        return plugin;
     }
 }

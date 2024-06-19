@@ -40,7 +40,6 @@ public class PluginConfig
     public Guid CreateBy { get; set; }
     public DateTime CreateOn { get; set; }
     public bool Enabled { get; set; }
-    public bool System { get; set; }
     public string Settings { get; set; }
 
     public PluginConfig Clone()

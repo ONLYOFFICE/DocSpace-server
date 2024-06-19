@@ -8,9 +8,7 @@ public class PluginRouteAttribute : RouteAttribute
 
     static PluginRouteAttribute()
     {
-        BaseUrl = "plugin/[controller]";
+        BaseUrl = "plugin/{0}/[controller]";
     }
-
-    public PluginRouteAttribute() : base(BaseUrl) { }
-    public PluginRouteAttribute(string template) : base($"{BaseUrl}/{template}") { }
+    public PluginRouteAttribute(string asseblyName) : base(string.Format(BaseUrl, asseblyName)) { }
 }

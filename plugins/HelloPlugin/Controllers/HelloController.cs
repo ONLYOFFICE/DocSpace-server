@@ -31,7 +31,7 @@ using PluginLibrary;
 namespace HelloPlugin.Controllers;
 
 [ApiController]
-[PluginRoute]
+[PluginRoute("HelloPlugin")]
 public class HelloController : ControllerBase
 {
     [HttpGet("test")]
