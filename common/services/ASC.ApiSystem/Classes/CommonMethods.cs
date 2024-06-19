@@ -187,6 +187,18 @@ public class CommonMethods(
         return tenants;
     }
 
+    public async Task<List<Tenant>> GetTenantsAsync(string email, string passwordHash)
+    {
+        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(passwordHash))
+        {
+            throw new Exception("Invalid login or password.");
+        }
+
+        var tenants = await hostedSolution.FindTenantsAsync(email, passwordHash);
+
+        return tenants;
+    }
+
     public bool IsTestEmail(string email)
     {
         //the point is not needed in gmail.com
