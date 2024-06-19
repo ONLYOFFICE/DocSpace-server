@@ -238,6 +238,7 @@ internal abstract class BaseTagDao<T>(
                     if (id == 0)
                     {
                         toAdd = internalFilesDbContext.Tag.Add(toAdd).Entity;
+                        await internalFilesDbContext.SaveChangesAsync();
                     }
 
                     cachedTags.Add(key, toAdd);
