@@ -394,7 +394,7 @@
     <value>${LetterLogoText}: Պորտալի հասցեի փոփոխություն</value>
   </data>
   <data name="subject_profile_delete" xml:space="preserve">
-    <value>Ձեր պրոֆիլի ջնջում ${__VirtualRootPath} պորտալից</value>
+    <value>Հաշվի անջատումը միացված է ${__VirtualRootPath}</value>
   </data>
   <data name="subject_profile_has_deleted_itself" xml:space="preserve">
     <value>Օգտատերը ջնջել է իր պրոֆիլը</value>
@@ -1367,15 +1367,15 @@ ONLYOFFICE աջակցման թիմ
 *Նշում*. DNS-ի կարգավորումները և մեկ մուտքի ընտրանքները դադարում են աշխատել, քանի դեռ չեք փոխել դրանք.</value>
   </data>
   <data name="pattern_profile_delete" xml:space="preserve">
-    <value>h1.Պրոֆիլի հեռացում "${__VirtualRootPath}":"${__VirtualRootPath}" պորտալից
+    <value>h1.Հաշվի անջատումը միացված է"${__VirtualRootPath}":"${__VirtualRootPath}"
 
-Դուք խնդրել եք ընդմիշտ ջնջել ձեր պրոֆիլը "${__VirtualRootPath}":"${__VirtualRootPath}" պորտալից:
+Դուք դիմել եք  DocSpace-ում ձեր հաշիվը անջատելու համար"${__VirtualRootPath}":"${__VirtualRootPath}".
 
-Եթե դուք դեռ ցանկանում եք ջնջել ձեր պրոֆիլը, ապա հետևեք ստորև նշված հղմանը, որպեսզի հաստատեք գործողությունը.
+Եթե դուք դեռ ցանկանում եք անջատել ձեր հաշիվը, խնդրում ենք հետևել ստորև նշված հղմանը, որպեսզի հաստատեք գործողությունը՝
 
 $OrangeButton
 
-*Նշում*. այս հղումը գործում է միայն 7 օր: Խնդրում ենք ավարտել պրոֆիլի ջնջման գործընթացը այդ ժամանակահատվածում.</value>
+*Նշում*՝ այս հղումը գործում է միայն 7 օր։ Խնդրում ենք ավարտել հաշվի անջատման գործընթացը այդ ժամանակահատվածում:</value>
   </data>
   <data name="pattern_profile_updated" xml:space="preserve">
     <value>h1.Ձեր պրոֆիլը "$__VirtualRootPath":"$__VirtualRootPath"-ում փոխվել է
@@ -1754,5 +1754,17 @@ $TrulyYours</value>
   </data>
   <data name="subject_zoom_welcome" xml:space="preserve">
     <value>Բարի գալուստ ONLYOFFICE DocSpace:</value>
+  </data>
+  <data name="ButtonRemoveProfile" xml:space="preserve">
+    <value>Անջատել հաշիվը</value>
+  </data>
+  <data name="pattern_saas_room_invite_existing_user" xml:space="preserve">
+    <value>Բարեւ Ձեզ!
+
+$__ՀեղինակիԱնուն-ը ձեզ հրավիրել է միանալու սենյակ "$Հաղորդագրություն":"$ՀրավերիՀղում"՝ "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
 </root>
