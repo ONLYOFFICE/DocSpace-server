@@ -39,6 +39,7 @@ using ASC.Core;
 using ASC.Core.Common.Settings;
 using ASC.Core.Tenants;
 using ASC.Data.Storage;
+using ASC.Data.Storage.Configuration;
 using ASC.Data.Storage.DiscStorage;
 using ASC.Security.Cryptography;
 using ASC.Web.Core.PublicResources;
@@ -80,6 +81,19 @@ public class PluginManager(PluginConfigSettings pluginConfigSettings,
         var storage = await storageFactory.GetStorageAsync(Tenant.DefaultTenant, StorageModuleName);
 
         return storage;
+    }
+
+    public async Task AddAllPluginsAsync()
+    {
+        var plugins = await GetPluginsFromStorageAsync();
+        var storage = await GetPluginStorageAsync() as DiscDataStore;
+
+        foreach (var plugin in plugins)
+        {
+            var path = storage.GetPhysicalPath("", plugin.Name);
+            var assembly = await LoadPluginAsync(path, plugin.Name + ".dll", storage);
+            pluginControllerManager.AddControllers(assembly);
+        }
     }
 
     public async Task<PluginConfig> AddPluginFromFileAsync(IFormFile file)

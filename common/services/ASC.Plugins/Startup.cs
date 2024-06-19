@@ -64,6 +64,9 @@ public class Startup : BaseStartup
         Directory.Delete(temp, true);
         Directory.CreateDirectory(temp);
 
+        var pluginManager = app.ApplicationServices.GetService<PluginManager>();
+        pluginManager.AddAllPluginsAsync().Wait();
+
     }
 }
 
