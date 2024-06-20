@@ -122,7 +122,7 @@ public class FolderContentDtoHelper(
 
         var order = await breadCrumbsManager.GetBreadCrumbsOrderAsync(parentId);
 
-        TimeSpan? expiration = null;
+        var expiration = TimeSpan.MaxValue;
 
         if (folderItems.FolderInfo.RootFolderType == FolderType.VirtualRooms &&
             !folderItems.FolderInfo.Id.Equals(folderItems.FolderInfo.RootId))
@@ -157,7 +157,7 @@ public class FolderContentDtoHelper(
 
         return result;
 
-        async IAsyncEnumerable<FileEntryDto> GetFilesDto(IEnumerable<FileEntry> fileEntries, int foldersCount, string entriesOrder, TimeSpan? expiration)
+        async IAsyncEnumerable<FileEntryDto> GetFilesDto(IEnumerable<FileEntry> fileEntries, int foldersCount, string entriesOrder, TimeSpan expiration)
         {
             foreach (var r in fileEntries)
             {

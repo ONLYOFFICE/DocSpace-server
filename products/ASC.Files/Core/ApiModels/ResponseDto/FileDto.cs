@@ -165,7 +165,7 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
 
     public async Task<FileDto<T>> GetAsync<T>(File<T> file, int? foldersCount = null, string order = null, TimeSpan? expiration = null)
     {
-        var result = await GetFileWrapperAsync(file, foldersCount, order);
+        var result = await GetFileWrapperAsync(file, foldersCount, order, expiration);
 
         result.FolderId = file.ParentId;
         
@@ -175,18 +175,13 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
             result.FolderId = await _globalFolderHelper.GetFolderRecentAsync<T>();
         }
 
-        if (expiration.HasValue)
-        {
-            result.Expired = new ApiDateTime(result.Updated.UtcTime + expiration.Value, result.Updated.TimeZoneOffset);
-        }
-
         result.ViewAccessibility = await fileUtility.GetAccessibility(file);
         result.AvailableExternalRights = _fileSecurity.GetFileAccesses(file, SubjectType.ExternalLink);
         
         return result;
     }
 
-    private async Task<FileDto<T>> GetFileWrapperAsync<T>(File<T> file, int? foldersCount, string order)
+    private async Task<FileDto<T>> GetFileWrapperAsync<T>(File<T> file, int? foldersCount, string order, TimeSpan? expiration)
     {
         var result = await GetAsync<FileDto<T>, T>(file);
         var isEnabledBadges = await badgesSettingsHelper.GetEnabledForCurrentUserAsync();
@@ -217,6 +212,23 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         result.DenySharing = file.DenySharing;
         result.Access = file.Access;
         result.LastOpened = _apiDateTimeHelper.Get(file.LastOpened);
+
+        if (file.RootFolderType == FolderType.VirtualRooms && !expiration.HasValue)
+        {
+            var folderDao = daoFactory.GetFolderDao<T>();
+            var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(file);
+            var room = await folderDao.GetFolderAsync(roomId).NotFoundIfNull();
+            var lifetime = RoomDataLifetimeDto.Deserialize(room.SettingsLifetime);
+            if (lifetime != null)
+            {
+                expiration = DateTime.UtcNow - lifetime.GetExpirationUtc();
+            }
+        }
+
+        if (expiration.HasValue && expiration.Value != TimeSpan.MaxValue)
+        {
+            result.Expired = new ApiDateTime(result.Updated.UtcTime + expiration.Value, result.Updated.TimeZoneOffset);
+        }
 
         if (file.Order != 0)
         {            
