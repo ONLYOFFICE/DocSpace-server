@@ -33,35 +33,47 @@ public partial class MessagesContext
     {
         return Queries.LoginEventsAsync(this, tenantId, userId, loginActions, date);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<int> DeleteLoginEventsAsync(int tenantId, int loginEventId)
     {
         return Queries.DeleteLoginEventsAsync(this, tenantId, loginEventId);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
     public IAsyncEnumerable<DbLoginEvent> LoginEventsByUserIdAsync(int tenantId, Guid userId)
     {
         return Queries.LoginEventsByUserIdAsync(this, tenantId, userId);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt])]
     public IAsyncEnumerable<DbLoginEvent> LoginEventsByTenantIdAsync(int tenantId)
     {
         return Queries.LoginEventsByTenantIdAsync(this, tenantId);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<DbLoginEvent> LoginEventsByIdAsync(int tenantId, int id)
     {
         return Queries.LoginEventsByIdAsync(this, tenantId, id);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultInt])]
     public IAsyncEnumerable<DbLoginEvent> LoginEventsExceptThisAsync(int tenantId, Guid userId, int loginEventId)
     {
         return Queries.LoginEventsExceptThisAsync(this, tenantId, userId, loginEventId);
+    }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, (byte)0, 0, 0])]
+    public IAsyncEnumerable<DbAuditEvent> GetAuditEventsByReferences(int tenantId, int entryId, byte entryType, int offset, int count)
+    {
+        return Queries.GetAuditEventsByReferences(this, tenantId, entryId, entryType, offset, count);
+    }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, (byte)0])]
+    public Task<int> GetAuditEventsByReferencesTotalCount(int tenantId, int entryId, byte entryType)
+    {
+        return Queries.GetAuditEventsByReferencesTotalCount(this, tenantId, entryId, entryType);
     }
 }
 
@@ -110,4 +122,26 @@ static file class Queries
                                 && r.UserId == userId
                                 && r.Id != loginEventId
                                 && r.Active));
+
+    public static readonly Func<MessagesContext, int, int, byte, int, int, IAsyncEnumerable<DbAuditEvent>> GetAuditEventsByReferences =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (MessagesContext ctx, int tenantId, int entryId, byte entryType, int offset, int count) =>
+                ctx.AuditEvents.Join(
+                        ctx.FilesAuditReferences,
+                        e => e.Id,
+                        r => r.AuditEventId, (@event, reference) => new { @event, reference })
+                    .Where(x => x.@event.TenantId == tenantId && x.reference.EntryId == entryId && x.reference.EntryType == entryType)
+                    .OrderByDescending(x => x.@event.Date)
+                    .Skip(offset)
+                    .Take(count)
+                    .Select(x => x.@event));
+
+    public static readonly Func<MessagesContext, int, int, byte, Task<int>> GetAuditEventsByReferencesTotalCount =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (MessagesContext ctx, int tenantId, int entryId, byte entryType) =>
+                ctx.AuditEvents
+                    .Join(ctx.FilesAuditReferences,
+                        e => e.Id,
+                        r => r.AuditEventId, (@event, reference) => new { @event, reference })
+                    .Count(x => x.@event.TenantId == tenantId && x.reference.EntryId == entryId && x.reference.EntryType == entryType));
 }

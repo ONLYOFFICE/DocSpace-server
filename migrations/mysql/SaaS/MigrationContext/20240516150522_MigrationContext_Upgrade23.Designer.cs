@@ -4,6 +4,7 @@ using ASC.Migrations.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,14 +12,16 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     [DbContext(typeof(MigrationContext))]
-    partial class MigrationContextModelSnapshot : ModelSnapshot
+    [Migration("20240516150522_MigrationContext_Upgrade23")]
+    partial class MigrationContext_Upgrade23
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn)
-                .HasAnnotation("ProductVersion", "8.0.4")
+                .HasAnnotation("ProductVersion", "8.0.2")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("ASC.Core.Common.EF.Acl", b =>
@@ -1361,8 +1364,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.HasIndex("AuditEventId");
 
-                    b.HasIndex("EntryId", "EntryType");
-
                     b.ToTable("files_audit_reference", (string)null);
                 });
 
@@ -1880,11 +1881,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         {
                             Input = ".csv",
                             Output = ".xltx"
-                        },
-                        new
-                        {
-                            Input = ".djvu",
-                            Output = ".pdf"
                         },
                         new
                         {
@@ -3105,11 +3101,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         {
                             Input = ".ots",
                             Output = ".xlsx"
-                        },
-                        new
-                        {
-                            Input = ".oform",
-                            Output = ".pdf"
                         },
                         new
                         {

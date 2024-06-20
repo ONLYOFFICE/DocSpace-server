@@ -93,6 +93,12 @@ public partial class FilesDbContext
     {
         return AbstractQueries.ChangeFoldersCountAsync(this, tenantId, folderId, counter);
     }
+    
+    [PreCompileQuery([PreCompileQuery.DefaultInt, FileEntryType.File])]
+    public Task<int> DeleteAuditReferencesAsync(int entryId, FileEntryType entryType)
+    {
+        return AbstractQueries.DeleteAuditReferencesAsync(this, entryId, entryType);
+    }
 }
 
 static file class AbstractQueries
@@ -195,4 +201,12 @@ static file class AbstractQueries
                 ctx.Folders
                     .Where(r => r.TenantId == tenantId && ctx.Tree.Any(a => a.FolderId == folderId && a.ParentId == r.Id))
                     .ExecuteUpdate(r => r.SetProperty(a => a.FoldersCount, a => a.FoldersCount + counter)));
+    
+    public static readonly Func<FilesDbContext, int, FileEntryType, Task<int>> DeleteAuditReferencesAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int entryId, FileEntryType entryType) =>
+                ctx.FilesAuditReference
+                    .Where(r => r.EntryId == entryId)
+                    .Where(r => r.EntryType == (byte)entryType)
+                    .ExecuteDelete());
 }

@@ -24,31 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Data.Backup.Tasks.Modules;
+namespace ASC.Core.Common.Messaging;
 
-public class AuditModuleSpecifics(Helpers helpers) : ModuleSpecificsBase(helpers)
+public class FilesAuditReference
 {
-    public override string ConnectionStringName => "core";
-    public override ModuleName ModuleName => ModuleName.Audit;
-    public override IEnumerable<TableInfo> Tables => _tables;
-    public override IEnumerable<RelationInfo> TableRelations => _tableRelations;
-
-    private readonly TableInfo[] _tables =
-    [
-        new TableInfo("audit_events", "tenant_id", "id") { UserIDColumns = ["user_id"] },
-        new TableInfo("login_events", "tenant_id", "id") { UserIDColumns = ["user_id"] },
-        new TableInfo("files_audit_reference")
-    ];
-
-    private readonly RelationInfo[] _tableRelations =
-    [
-        new RelationInfo("audit_events", "id", "files_audit_reference", "audit_event_id")
-    ];
-
-    protected override string GetSelectCommandConditionText(int tenantId, TableInfo table)
-    {
-        return table.Name == "files_audit_reference" 
-            ? $"inner join audit_events as ae on ae.id = t.audit_event_id and ae.tenant_id = {tenantId}" 
-            : base.GetSelectCommandConditionText(tenantId, table);
-    }
+    public int EntryId { get; init; }
+    public byte EntryType { get; init; }
 }

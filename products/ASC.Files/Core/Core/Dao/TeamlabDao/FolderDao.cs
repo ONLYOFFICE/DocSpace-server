@@ -598,6 +598,8 @@ internal class FolderDao(
             await filesDbContext.DeleteBunchObjectsAsync(tenantId, folderId.ToString());
 
             await DeleteCustomOrder(filesDbContext, folderId);
+            
+            await filesDbContext.DeleteAuditReferencesAsync(folderId, FileEntryType.Folder);
 
             await context.SaveChangesAsync();
             await tx.CommitAsync();

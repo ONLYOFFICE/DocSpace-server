@@ -636,6 +636,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to File uploaded with overwriting: {0}.
+        /// </summary>
+        public static string FileUploadedWithOverwriting {
+            get {
+                return ResourceManager.GetString("FileUploadedWithOverwriting", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Folders [{0}]. Copied To Folder: {1}.
         /// </summary>
         public static string FolderCopied {
@@ -1446,6 +1455,24 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Added group: {0}. Role: {1}.
+        /// </summary>
+        public static string RoomGroupAdded {
+            get {
+                return ResourceManager.GetString("RoomGroupAdded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Deleted group: {0}.
+        /// </summary>
+        public static string RoomGroupRemove {
+            get {
+                return ResourceManager.GetString("RoomGroupRemove", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Link created. Role: {1}.
         /// </summary>
         public static string RoomInvitationLinkCreated {
@@ -1523,6 +1550,15 @@ namespace ASC.AuditTrail {
         public static string RoomUnarchived {
             get {
                 return ResourceManager.GetString("RoomUnarchived", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} appointed: {1}.
+        /// </summary>
+        public static string RoomUpdateAccessForGroup {
+            get {
+                return ResourceManager.GetString("RoomUpdateAccessForGroup", resourceCulture);
             }
         }
         

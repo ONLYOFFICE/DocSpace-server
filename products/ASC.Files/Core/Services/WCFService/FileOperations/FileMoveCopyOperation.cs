@@ -443,7 +443,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                         else
                         {
                             newFolder = await FolderDao.CopyFolderAsync(folder.Id, toFolderId, CancellationToken);
-                            await filesMessageService.SendAsync(MessageAction.FolderCopied, newFolder, toFolder, _headers, newFolder.Title, toFolder.Title);
+                            await filesMessageService.SendAsync(MessageAction.FolderCopied, newFolder, toFolder, _headers, newFolder.Title, toFolder.Title, toFolder.Id.ToString());
 
                             if (isToFolder)
                             {
@@ -487,7 +487,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                 {
                                     newFolder = await FolderDao.CopyFolderAsync(folder.Id, toFolderId, CancellationToken);
                                     newFolderId = newFolder.Id;
-                                    await filesMessageService.SendAsync(MessageAction.FolderCopiedWithOverwriting, newFolder, toFolder, _headers, newFolder.Title, toFolder.Title);
+                                    await filesMessageService.SendAsync(MessageAction.FolderCopiedWithOverwriting, newFolder, toFolder, _headers, newFolder.Title, toFolder.Title, toFolder.Id.ToString());
 
                                     if (isToFolder)
                                     {
@@ -513,7 +513,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
 
                                     newFolderId = await FolderDao.MoveFolderAsync(folder.Id, toFolderId, CancellationToken);
                                     newFolder = await folderDao.GetFolderAsync(newFolderId);
-                                    await filesMessageService.SendAsync(MessageAction.FolderMovedWithOverwriting, folder, toFolder, _headers, folder.Title, toFolder.Title);
+                                    await filesMessageService.SendAsync(MessageAction.FolderMovedWithOverwriting, folder, toFolder, _headers, folder.Title, toFolder.Title, toFolder.Id.ToString());
 
                                     if (isToFolder)
                                     {
@@ -635,7 +635,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                             }
                             else
                             {
-                                await filesMessageService.SendAsync(MessageAction.FolderMoved, folder, toFolder, _headers, folder.Title, parentFolder.Title, toFolder.Title);
+                                await filesMessageService.SendAsync(MessageAction.FolderMoved, folder, toFolder, _headers, folder.Title, parentFolder.Title, toFolder.Title, toFolder.Id.ToString());
                             }
 
 
@@ -777,7 +777,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                             try
                             {
                                 newFile = await FileDao.CopyFileAsync(file.Id, toFolderId); //Stream copy will occur inside dao
-                                await filesMessageService.SendAsync(MessageAction.FileCopied, newFile, toFolder, _headers, newFile.Title, parentFolder.Title, toFolder.Title);
+                                await filesMessageService.SendAsync(MessageAction.FileCopied, newFile, toFolder, _headers, newFile.Title, parentFolder.Title, toFolder.Title, toFolder.ToString());
 
                                 needToMark.Add(newFile);
 
@@ -812,7 +812,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                 await socketManager.DeleteFileAsync(file, action: async () => newFileId = await FileDao.MoveFileAsync(file.Id, toFolderId, deleteLinks));
                                 newFile = await fileDao.GetFileAsync(newFileId);
 
-                                await filesMessageService.SendAsync(MessageAction.FileMoved, file, toFolder, _headers, file.Title, parentFolder.Title, toFolder.Title);
+                                await filesMessageService.SendAsync(MessageAction.FileMoved, file, toFolder, _headers, file.Title, parentFolder.Title, toFolder.Title, toFolder.Id.ToString());
 
                                 if (file.RootFolderType == FolderType.TRASH && newFile.ThumbnailStatus == Thumbnail.NotRequired)
                                 {
@@ -913,7 +913,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
 
                                 if (copy)
                                 {
-                                    await filesMessageService.SendAsync(MessageAction.FileCopiedWithOverwriting, newFile, toFolder, _headers, newFile.Title, parentFolder.Title, toFolder.Title);
+                                    await filesMessageService.SendAsync(MessageAction.FileCopiedWithOverwriting, newFile, toFolder, _headers, newFile.Title, parentFolder.Title, toFolder.Title, toFolder.Id.ToString());
                                     if (ProcessedFile(fileId))
                                     {
                                         sb.Append($"file_{newFile.Id}{SplitChar}");
@@ -943,7 +943,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                                 await LinkDao.DeleteAllLinkAsync(file.Id);
                                             });
 
-                                            await filesMessageService.SendAsync(MessageAction.FileMovedWithOverwriting, file, toFolder, _headers, file.Title, parentFolder.Title, toFolder.Title);
+                                            await filesMessageService.SendAsync(MessageAction.FileMovedWithOverwriting, file, toFolder, _headers, file.Title, parentFolder.Title, toFolder.Title, toFolder.Id.ToString());
 
                                             if (ProcessedFile(fileId))
                                             {

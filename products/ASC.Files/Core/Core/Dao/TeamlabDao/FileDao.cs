@@ -850,6 +850,8 @@ internal class FileDao(
 
             await DeleteCustomOrder(filesDbContext, fileId);
 
+            await context.DeleteAuditReferencesAsync(fileId, FileEntryType.File);
+
             await context.SaveChangesAsync();
             await tx.CommitAsync();
 
