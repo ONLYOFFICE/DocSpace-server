@@ -12,16 +12,15 @@
 
     <artifactId>registration-container</artifactId>
 
-    <properties>
-        <logback.gelf.version>5.0.1</logback.gelf.version>
-        <logback.logstash.version>7.4</logback.logstash.version>
-    </properties>
-
     <dependencies>
         <!-- Internal Dependencies -->
         <dependency>
             <groupId>com.asc</groupId>
             <artifactId>common-application</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.asc</groupId>
+            <artifactId>infrastructure-configuration</artifactId>
         </dependency>
         <dependency>
             <groupId>com.asc</groupId>
@@ -52,6 +51,13 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
+        </dependency>
+
+        <!-- Hazelcast -->
+        <dependency>
+            <groupId>com.hazelcast</groupId>
+            <artifactId>hazelcast-spring</artifactId>
+            <version>${hazelcast.version}</version>
         </dependency>
 
         <!-- Logging Dependencies -->

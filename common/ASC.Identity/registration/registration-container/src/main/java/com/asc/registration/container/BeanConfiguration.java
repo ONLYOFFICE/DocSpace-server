@@ -1,7 +1,7 @@
 package com.asc.registration.container;
 
-import com.asc.common.utilities.cipher.AesEncryptionService;
-import com.asc.common.utilities.cipher.EncryptionService;
+import com.asc.common.utilities.crypto.AesEncryptionService;
+import com.asc.common.utilities.crypto.EncryptionService;
 import com.asc.registration.core.domain.ClientDomainService;
 import com.asc.registration.core.domain.CoreClientDomainService;
 import org.springframework.beans.factory.annotation.Value;
