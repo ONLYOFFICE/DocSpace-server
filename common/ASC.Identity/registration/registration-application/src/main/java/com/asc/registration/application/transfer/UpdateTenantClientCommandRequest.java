@@ -72,6 +72,10 @@ public class UpdateTenantClientCommandRequest implements Serializable {
   @JsonProperty("allow_pkce")
   private boolean allowPkce;
 
+  /** Indicates whether client is accessibly by third-party tenants * */
+  @JsonProperty("public")
+  private boolean isPublic;
+
   /** The allowed origins for the client. */
   @JsonProperty("allowed_origins")
   @URLCollection

@@ -1,7 +1,6 @@
 package com.asc.registration.application.configuration;
 
-import com.asc.registration.application.security.AscAdminCookieAuthenticationFilter;
-import com.asc.registration.application.security.AscUserCookieAuthenticationFilter;
+import com.asc.registration.application.security.AscCookieAuthenticationFilter;
 import com.asc.registration.application.security.RateLimiterFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -18,8 +17,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfiguration {
   private final RateLimiterFilter rateLimiterFilter;
-  private final AscAdminCookieAuthenticationFilter ascAdminCookieAuthenticationFilter;
-  private final AscUserCookieAuthenticationFilter ascUserCookieAuthenticationFilter;
+  private final AscCookieAuthenticationFilter ascCookieAuthenticationFilter;
 
   /**
    * Configures the security filter chain for HTTP requests.
@@ -32,9 +30,7 @@ public class SecurityConfiguration {
   SecurityFilterChain configureSecurityFilterChain(HttpSecurity http) throws Exception {
     return http.authorizeHttpRequests(
             authorizeRequests -> authorizeRequests.anyRequest().permitAll())
-        .addFilterBefore(
-            ascUserCookieAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-        .addFilterAt(ascAdminCookieAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+        .addFilterAt(ascCookieAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
         .addFilterAfter(rateLimiterFilter, UsernamePasswordAuthenticationFilter.class)
         .csrf(AbstractHttpConfigurer::disable)
         .cors(AbstractHttpConfigurer::disable)

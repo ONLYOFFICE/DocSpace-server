@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -55,7 +56,7 @@ public class RateLimiterFilter extends OncePerRequestFilter {
         response.setHeader(
             X_RATE_RESET,
             String.valueOf(TimeUnit.NANOSECONDS.toSeconds(probe.getNanosToWaitForRefill())));
-        response.setStatus(429);
+        response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
       }
     } else {
       chain.doFilter(request, response);

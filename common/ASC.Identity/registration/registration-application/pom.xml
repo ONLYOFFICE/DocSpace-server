@@ -12,20 +12,8 @@
 
     <artifactId>registration-application</artifactId>
 
-    <properties>
-        <caffeine.caching.version>3.1.8</caffeine.caching.version>
-        <bucket4j.version>8.10.1</bucket4j.version>
-        <bucket4j.lettuce.version>8.12.1</bucket4j.lettuce.version>
-        <resilience4j.version>2.2.0</resilience4j.version>
-        <spring.caching.version>2.4.0</spring.caching.version>
-        <springdoc.version>2.2.0</springdoc.version>
-    </properties>
-
     <dependencies>
-        <dependency>
-            <groupId>com.asc</groupId>
-            <artifactId>registration-service</artifactId>
-        </dependency>
+        <!-- Internal Dependencies -->
         <dependency>
             <groupId>com.asc</groupId>
             <artifactId>common-application</artifactId>
@@ -35,8 +23,19 @@
             <artifactId>common-utilities</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.asc</groupId>
+            <artifactId>registration-service</artifactId>
+        </dependency>
+
+        <!-- Spring Boot Dependencies -->
+        <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-cache</artifactId>
+            <version>${spring.caching.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -48,45 +47,47 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-actuator</artifactId>
+            <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
+        <!-- Hazelcast -->
         <dependency>
-            <groupId>com.github.ben-manes.caffeine</groupId>
-            <artifactId>caffeine</artifactId>
-            <version>${caffeine.caching.version}</version>
+            <groupId>com.hazelcast</groupId>
+            <artifactId>hazelcast-spring</artifactId>
+            <version>${hazelcast.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-cache</artifactId>
-            <version>${spring.caching.version}</version>
-        </dependency>
+
+        <!-- SpringDoc OpenAPI -->
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>${springdoc.version}</version>
         </dependency>
 
+        <!-- Resilience4j -->
         <dependency>
             <groupId>io.github.resilience4j</groupId>
             <artifactId>resilience4j-spring-boot3</artifactId>
             <version>${resilience4j.version}</version>
         </dependency>
 
+        <!-- Bucket4j -->
         <dependency>
             <groupId>com.bucket4j</groupId>
             <artifactId>bucket4j-core</artifactId>
-            <version>8.9.0</version>
+            <version>${bucket4j.version}</version>
         </dependency>
         <dependency>
             <groupId>com.bucket4j</groupId>
             <artifactId>bucket4j-redis</artifactId>
-            <version>8.9.0</version>
+            <version>${bucket4j.version}</version>
         </dependency>
+
+        <!-- Redis -->
         <dependency>
             <groupId>io.lettuce</groupId>
             <artifactId>lettuce-core</artifactId>
-            <version>6.3.1.RELEASE</version>
+            <version>${lettuce.version}</version>
         </dependency>
     </dependencies>
 </project>

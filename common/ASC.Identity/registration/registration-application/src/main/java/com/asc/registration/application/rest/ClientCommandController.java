@@ -5,51 +5,49 @@ import com.asc.common.application.transfer.response.AscSettingsResponse;
 import com.asc.common.application.transfer.response.AscTenantResponse;
 import com.asc.common.core.domain.entity.Audit;
 import com.asc.common.core.domain.value.enums.AuditCode;
+import com.asc.common.service.transfer.response.ClientResponse;
 import com.asc.common.utilities.HttpUtils;
-import com.asc.registration.application.configuration.ApplicationConfiguration;
 import com.asc.registration.application.transfer.ChangeTenantClientActivationCommandRequest;
 import com.asc.registration.application.transfer.CreateTenantClientCommandRequest;
 import com.asc.registration.application.transfer.UpdateTenantClientCommandRequest;
 import com.asc.registration.service.ports.input.service.ClientApplicationService;
+import com.asc.registration.service.ports.input.service.ScopeApplicationService;
 import com.asc.registration.service.transfer.request.create.CreateTenantClientCommand;
 import com.asc.registration.service.transfer.request.update.*;
-import com.asc.registration.service.transfer.response.ClientResponse;
 import com.asc.registration.service.transfer.response.ClientSecretResponse;
+import com.asc.registration.service.transfer.response.ScopeResponse;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
-import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
-import java.util.HashSet;
-import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+/** Controller class for handling client-related commands. */
 @Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(value = "${web.api}/clients")
 public class ClientCommandController {
-  private final ApplicationConfiguration applicationConfiguration;
+
+  /** The service for managing client applications. */
   private final ClientApplicationService clientApplicationService;
 
-  private List<String> allowedScopes;
+  /** The service for managing scopes. */
+  private final ScopeApplicationService scopeApplicationService;
 
-  @PostConstruct
-  void init() {
-    allowedScopes =
-        applicationConfiguration.getScopes().stream()
-            .map(ApplicationConfiguration.ScopeConfiguration::getName)
-            .collect(Collectors.toList());
-  }
-
+  /**
+   * Sets the logging parameters for the current request.
+   *
+   * @param person the person information
+   * @param tenant the tenant information
+   */
   private void setLoggingParameters(AscPersonResponse person, AscTenantResponse tenant) {
     MDC.put("tenant_id", String.valueOf(tenant.getTenantId()));
     MDC.put("tenant_name", tenant.getName());
@@ -59,6 +57,16 @@ public class ClientCommandController {
     MDC.put("user_email", person.getEmail());
   }
 
+  /**
+   * Creates a new client.
+   *
+   * @param request the HTTP request
+   * @param person the person information
+   * @param tenant the tenant information
+   * @param settings the settings information
+   * @param command the create client command
+   * @return the response entity containing the created client details
+   */
   @RateLimiter(name = "globalRateLimiter")
   @PostMapping
   public ResponseEntity<ClientResponse> createClient(
@@ -69,7 +77,10 @@ public class ClientCommandController {
       @RequestBody @Valid CreateTenantClientCommandRequest command) {
     try {
       setLoggingParameters(person, tenant);
-      if (!new HashSet<>(allowedScopes).containsAll(command.getScopes()))
+      if (!scopeApplicationService.getScopes().stream()
+          .map(ScopeResponse::getName)
+          .collect(Collectors.toSet())
+          .containsAll(command.getScopes()))
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
       return ResponseEntity.status(HttpStatus.CREATED)
           .body(
@@ -80,6 +91,7 @@ public class ClientCommandController {
                       .description(command.getDescription())
                       .logo(command.getLogo())
                       .allowPkce(command.isAllowPkce())
+                      .isPublic(command.isPublic())
                       .websiteUrl(command.getWebsiteUrl())
                       .termsUrl(command.getTermsUrl())
                       .policyUrl(command.getPolicyUrl())
@@ -88,18 +100,24 @@ public class ClientCommandController {
                       .logoutRedirectUri(command.getLogoutRedirectUri())
                       .scopes(command.getScopes())
                       .tenantId(tenant.getTenantId())
-                      .tenantUrl(
-                          HttpUtils.getRequestHostAddress(request).orElse(tenant.getTenantAlias()))
                       .build()));
     } finally {
       MDC.clear();
     }
   }
 
+  /**
+   * Updates an existing client.
+   *
+   * @param request the HTTP request
+   * @param person the person information
+   * @param tenant the tenant information
+   * @param settings the settings information
+   * @param clientId the client ID
+   * @param command the update client command
+   * @return the response entity indicating the status of the update
+   */
   @RateLimiter(name = "globalRateLimiter")
-  @CacheEvict(
-      cacheNames = {"clients"},
-      key = "#clientId")
   @PutMapping("/{clientId}")
   public ResponseEntity<?> updateClient(
       HttpServletRequest request,
@@ -117,6 +135,7 @@ public class ClientCommandController {
               .description(command.getDescription())
               .logo(command.getLogo())
               .allowPkce(command.isAllowPkce())
+              .isPublic(command.isPublic())
               .allowedOrigins(command.getAllowedOrigins())
               .clientId(clientId)
               .tenantId(tenant.getTenantId())
@@ -127,10 +146,17 @@ public class ClientCommandController {
     }
   }
 
+  /**
+   * Regenerates the secret for a specific client.
+   *
+   * @param request the HTTP request
+   * @param person the person information
+   * @param tenant the tenant information
+   * @param settings the settings information
+   * @param clientId the client ID
+   * @return the response entity containing the new client secret
+   */
   @RateLimiter(name = "globalRateLimiter")
-  @CacheEvict(
-      cacheNames = {"clients"},
-      key = "#clientId")
   @PatchMapping("/{clientId}/regenerate")
   public ResponseEntity<ClientSecretResponse> regenerateSecret(
       HttpServletRequest request,
@@ -152,10 +178,17 @@ public class ClientCommandController {
     }
   }
 
+  /**
+   * Revokes the consent for a specific client.
+   *
+   * @param request the HTTP request
+   * @param person the person information
+   * @param tenant the tenant information
+   * @param settings the settings information
+   * @param clientId the client ID
+   * @return the response entity indicating the status of the revocation
+   */
   @RateLimiter(name = "globalRateLimiter")
-  @CacheEvict(
-      cacheNames = {"clients"},
-      key = "#clientId")
   @DeleteMapping("/{clientId}/revoke")
   public ResponseEntity<?> revokeUserClient(
       HttpServletRequest request,
@@ -169,8 +202,7 @@ public class ClientCommandController {
           buildAudit(request, tenant, person, AuditCode.REVOKE_USER_CLIENT),
           RevokeClientConsentCommand.builder()
               .clientId(clientId)
-              .principalName(person.getEmail())
-              .tenantId(tenant.getTenantId())
+              .principalId(person.getId())
               .build());
       return ResponseEntity.status(HttpStatus.OK).build();
     } finally {
@@ -178,10 +210,17 @@ public class ClientCommandController {
     }
   }
 
+  /**
+   * Deletes a specific client.
+   *
+   * @param request the HTTP request
+   * @param person the person information
+   * @param tenant the tenant information
+   * @param settings the settings information
+   * @param clientId the client ID
+   * @return the response entity indicating the status of the deletion
+   */
   @RateLimiter(name = "globalRateLimiter")
-  @CacheEvict(
-      cacheNames = {"clients"},
-      key = "#clientId")
   @DeleteMapping("/{clientId}")
   public ResponseEntity<?> deleteClient(
       HttpServletRequest request,
@@ -203,10 +242,18 @@ public class ClientCommandController {
     }
   }
 
+  /**
+   * Changes the activation status of a specific client.
+   *
+   * @param request the HTTP request
+   * @param person the person information
+   * @param tenant the tenant information
+   * @param settings the settings information
+   * @param clientId the client ID
+   * @param command the change activation command
+   * @return the response entity indicating the status of the activation change
+   */
   @RateLimiter(name = "globalRateLimiter")
-  @CacheEvict(
-      cacheNames = {"clients"},
-      key = "#clientId")
   @PatchMapping("/{clientId}/activation")
   public ResponseEntity<?> changeActivation(
       HttpServletRequest request,
@@ -230,6 +277,15 @@ public class ClientCommandController {
     }
   }
 
+  /**
+   * Builds an audit object for logging purposes.
+   *
+   * @param request the HTTP request
+   * @param tenant the tenant information
+   * @param person the person information
+   * @param auditCode the audit code
+   * @return the audit object
+   */
   private Audit buildAudit(
       HttpServletRequest request,
       AscTenantResponse tenant,
