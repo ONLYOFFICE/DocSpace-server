@@ -12,10 +12,6 @@
 
     <artifactId>authorization-data</artifactId>
 
-    <properties>
-        <mysql.connector.version>8.0.33</mysql.connector.version>
-    </properties>
-
     <dependencies>
         <!-- Internal Dependencies -->
         <dependency>
