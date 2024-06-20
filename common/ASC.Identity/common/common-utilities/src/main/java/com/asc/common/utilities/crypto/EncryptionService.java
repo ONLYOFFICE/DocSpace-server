@@ -1,4 +1,4 @@
-package com.asc.common.utilities.cipher;
+package com.asc.common.utilities.crypto;
 
 /** The EncryptionService interface provides methods for encrypting and decrypting text. */
 public interface EncryptionService {

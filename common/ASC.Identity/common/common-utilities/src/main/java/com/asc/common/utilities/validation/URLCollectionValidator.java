@@ -28,7 +28,13 @@ public class URLCollectionValidator
    */
   public boolean isValid(Collection<String> urls, ConstraintValidatorContext context) {
     if (urls == null) return false;
-    log.debug("Validating url collection {}", String.join(",", urls));
-    return urls.size() > 0 && urls.stream().allMatch(url -> pattern.matcher(url).matches());
+    for (String url : urls) {
+      log.debug("Validating URL: {}", url);
+      if (url == null || url.isEmpty() || !pattern.matcher(url).matches()) {
+        log.warn("Invalid URL detected: {}", url);
+        return false;
+      }
+    }
+    return true;
   }
 }

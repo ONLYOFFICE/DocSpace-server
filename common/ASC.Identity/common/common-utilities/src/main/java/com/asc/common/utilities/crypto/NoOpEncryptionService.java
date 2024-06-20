@@ -1,4 +1,4 @@
-package com.asc.common.utilities.cipher;
+package com.asc.common.utilities.crypto;
 
 /**
  * The NoOpEncryptionService class provides a no-operation implementation of the EncryptionService

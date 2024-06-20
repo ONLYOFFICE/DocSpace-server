@@ -1,4 +1,4 @@
-package com.asc.common.utilities.cipher;
+package com.asc.common.utilities.crypto;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -20,6 +20,7 @@ import javax.crypto.spec.SecretKeySpec;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 
+/** Provides AES encryption and decryption services using the AES/GCM/NoPadding algorithm. */
 @Slf4j
 public class AesEncryptionService implements EncryptionService {
   private static final String ALGORITHM = "AES/GCM/NoPadding";
@@ -34,10 +35,21 @@ public class AesEncryptionService implements EncryptionService {
 
   private final String secret;
 
+  /**
+   * Constructs a new AesEncryptionService with the specified secret key.
+   *
+   * @param secret the secret key to use for encryption and decryption
+   */
   public AesEncryptionService(String secret) {
     this.secret = secret;
   }
 
+  /**
+   * Generates a random nonce of the specified length.
+   *
+   * @param length the length of the nonce to generate
+   * @return the generated nonce as a byte array
+   */
   private byte[] getRandomNonce(int length) {
     var nonce = new byte[length];
     new SecureRandom().nextBytes(nonce);
@@ -50,11 +62,13 @@ public class AesEncryptionService implements EncryptionService {
   }
 
   /**
-   * @param password
-   * @param salt
-   * @return
-   * @throws NoSuchAlgorithmException
-   * @throws InvalidKeySpecException
+   * Generates a secret key using the specified password and salt.
+   *
+   * @param password the password to use for generating the secret key
+   * @param salt the salt to use for generating the secret key
+   * @return the generated secret key
+   * @throws NoSuchAlgorithmException if the algorithm is not available in the environment
+   * @throws InvalidKeySpecException if the key specifications are invalid
    */
   private SecretKey getSecretKey(String password, byte[] salt)
       throws NoSuchAlgorithmException, InvalidKeySpecException {
@@ -68,14 +82,16 @@ public class AesEncryptionService implements EncryptionService {
   }
 
   /**
-   * @param mode
-   * @param secretKey
-   * @param iv
-   * @return
-   * @throws InvalidKeyException
-   * @throws InvalidAlgorithmParameterException
-   * @throws NoSuchPaddingException
-   * @throws NoSuchAlgorithmException
+   * Initializes a new cipher with the specified mode, secret key, and initialization vector (IV).
+   *
+   * @param mode the cipher mode (e.g., Cipher.ENCRYPT_MODE or Cipher.DECRYPT_MODE)
+   * @param secretKey the secret key to use for the cipher
+   * @param iv the initialization vector to use for the cipher
+   * @return the initialized cipher
+   * @throws InvalidKeyException if the key is invalid
+   * @throws InvalidAlgorithmParameterException if the algorithm parameters are invalid
+   * @throws NoSuchPaddingException if the padding scheme is not available
+   * @throws NoSuchAlgorithmException if the algorithm is not available in the environment
    */
   private Cipher initCipher(int mode, SecretKey secretKey, byte[] iv)
       throws InvalidKeyException,
@@ -93,9 +109,11 @@ public class AesEncryptionService implements EncryptionService {
   }
 
   /**
-   * @param plainText
-   * @return
-   * @throws EncryptionException
+   * Encrypts the specified plain text using AES encryption.
+   *
+   * @param plainText the plain text to encrypt
+   * @return the encrypted text as a Base64 encoded string
+   * @throws EncryptionException if an error occurs during encryption
    */
   public String encrypt(String plainText) throws EncryptionException {
     MDC.put("plain_text", plainText);
@@ -126,9 +144,11 @@ public class AesEncryptionService implements EncryptionService {
   }
 
   /**
-   * @param cipherText
-   * @return
-   * @throws Exception
+   * Decrypts the specified cipher text using AES decryption.
+   *
+   * @param cipherText the cipher text to decrypt
+   * @return the decrypted plain text
+   * @throws DecryptionException if an error occurs during decryption
    */
   public String decrypt(String cipherText) throws DecryptionException {
     MDC.put("cipher_text", cipherText);

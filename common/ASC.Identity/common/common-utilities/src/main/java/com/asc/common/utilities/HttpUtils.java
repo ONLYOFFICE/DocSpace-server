@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 public class HttpUtils {
   private static final String X_FORWARDED_HOST = "X-Forwarded-Host";
   private static final String X_FORWARDED_FOR = "X-Forwarded-For";
+  private static final String HOST = "Host";
   private static final String[] IP_HEADERS = {
     "X-Forwarded-Host",
     "X-Forwarded-For",
@@ -41,6 +42,20 @@ public class HttpUtils {
 
   public static Optional<String> getRequestClientAddress(HttpServletRequest request) {
     return getRequestAddress(request, X_FORWARDED_FOR);
+  }
+
+  /**
+   * Retrieves the domain name from the Host header.
+   *
+   * @param request HttpServletRequest object
+   * @return Optional containing the domain name from the Host header, or empty if not found
+   */
+  public static Optional<String> getRequestDomain(HttpServletRequest request) {
+    String host = request.getHeader(HOST);
+    if (host == null || host.isBlank()) {
+      return Optional.empty();
+    }
+    return Optional.of(String.format("%s://%s", request.getScheme(), host));
   }
 
   /**
