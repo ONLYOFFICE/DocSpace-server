@@ -20,8 +20,11 @@ public enum AuditCode {
   /** Audit code for changing a client's activation status. */
   CHANGE_CLIENT_ACTIVATION(9905),
 
+  /** Audit code for changing a client's activation status. */
+  CHANGE_CLIENT_VISIBILITY(9906),
+
   /** Audit code for revoking a user's client access. */
-  REVOKE_USER_CLIENT(9906);
+  REVOKE_USER_CLIENT(9907);
 
   private final int code;
 

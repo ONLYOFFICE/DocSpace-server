@@ -46,7 +46,6 @@ public abstract class BaseEntity<T> {
    * @param obj The reference object with which to compare.
    * @return {@code true} if this object is the same as the obj argument; {@code false} otherwise.
    */
-  @Override
   public boolean equals(Object obj) {
     if (this == obj) return true;
     if (obj == null || getClass() != obj.getClass()) return false;
