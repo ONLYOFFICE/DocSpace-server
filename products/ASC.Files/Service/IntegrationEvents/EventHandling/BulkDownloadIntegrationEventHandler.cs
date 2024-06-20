@@ -26,25 +26,26 @@
 
 using ASC.Web.Files.Services.WCFService.FileOperations;
 
-namespace ASC.Thumbnail.IntegrationEvents.EventHandling;
+namespace ASC.Files.Service.IntegrationEvents.EventHandling;
 
 [Scope]
-public class MarkAsReadIntegrationEventHandler(
-    ILogger<MarkAsReadIntegrationEventHandler> logger,
-    FileOperationsManager  fileOperationsManager,
+public class BulkDownloadIntegrationEventHandler(
+    ILogger<BulkDownloadIntegrationEvent> logger,
+    FileOperationsManager fileOperationsManager,
     TenantManager tenantManager,
-    SecurityContext securityContext)
-    : IIntegrationEventHandler<MarkAsReadIntegrationEvent>
+    SecurityContext securityContext,
+    AuthManager authManager)
+    : IIntegrationEventHandler<BulkDownloadIntegrationEvent>
 {
-    public async Task Handle(MarkAsReadIntegrationEvent @event)
+    public async Task Handle(BulkDownloadIntegrationEvent @event)
     {
         CustomSynchronizationContext.CreateContext();
         using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
         {
             logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
             await tenantManager.SetCurrentTenantAsync(@event.TenantId);
-            await securityContext.AuthenticateMeWithoutCookieAsync(@event.TenantId, @event.CreateBy);
-            await fileOperationsManager.Enqueue<FileMarkAsReadOperation, FileMarkAsReadOperationData<string>, FileMarkAsReadOperationData<int>>(@event.TaskId, @event.ThirdPartyData, @event.Data);
+            await securityContext.AuthenticateMeWithoutCookieAsync(await authManager.GetAccountByIDAsync(@event.TenantId, @event.CreateBy), session: @event.CreateBy);
+            await fileOperationsManager.Enqueue<FileDownloadOperation, FileDownloadOperationData<string>, FileDownloadOperationData<int>>(@event.TaskId, @event.ThirdPartyData, @event.Data);
         }
     }
 }

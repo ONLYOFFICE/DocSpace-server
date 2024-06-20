@@ -25,20 +25,21 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Web.Files.Services.WCFService.FileOperations;
+
 using Constants = ASC.Core.Configuration.Constants;
 
-namespace ASC.Files.AutoCleanUp;
+namespace ASC.Files.Service.Services;
 
 [Singleton]
 public class AutoCleanTrashService(
     IServiceScopeFactory scopeFactory,
     IConfiguration configuration,
-    ILogger<AutoCleanTrashService> logger) 
+    ILogger<AutoCleanTrashService> logger)
     : ActivePassiveBackgroundService<AutoCleanTrashService>(logger, scopeFactory)
 {
     private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
     protected override TimeSpan ExecuteTaskPeriod { get; set; } = TimeSpan.Parse(configuration.GetValue<string>("files:autoCleanUp:period") ?? "0:5:0");
-    
+
     protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
         List<TenantUserSettings> activeTenantsUsers;
@@ -49,7 +50,7 @@ public class AutoCleanTrashService(
 
             var filesSettingsId = new FilesSettings().ID;
 
-            activeTenantsUsers =  await Queries.DefaultTenantUserSettingsAsync(userDbContext).ToListAsync(); 
+            activeTenantsUsers = await Queries.DefaultTenantUserSettingsAsync(userDbContext).ToListAsync(stoppingToken);
         }
 
         if (!activeTenantsUsers.Any())
@@ -66,11 +67,6 @@ public class AutoCleanTrashService(
 
     private async ValueTask DeleteFilesAndFoldersAsync(TenantUserSettings tenantUser, CancellationToken cancellationToken)
     {
-        if (cancellationToken.IsCancellationRequested)
-        {
-            return;
-        }
-
         try
         {
             await using var scope = _scopeFactory.CreateAsyncScope();
@@ -128,7 +124,7 @@ public class AutoCleanTrashService(
                     break;
                 }
 
-                await Task.Delay(100, cancellationToken);
+                await Task.Delay(1000, cancellationToken);
             }
 
             logger.InfoCleanUpFinish(tenantUser.TenantId, trashId);
@@ -155,4 +151,11 @@ static file class Queries
                        Setting = AutoCleanUpData.GetDefault().Gap
                    }));
 
+}
+
+class TenantUserSettings
+{
+    public int TenantId { get; init; }
+    public Guid UserId { get; init; }
+    public DateToAutoCleanUp Setting { get; init; }
 }

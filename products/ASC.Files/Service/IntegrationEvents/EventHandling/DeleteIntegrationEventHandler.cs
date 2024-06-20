@@ -24,22 +24,26 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Expired;
+using ASC.Web.Files.Services.WCFService.FileOperations;
 
-[Singleton]
-public class DeleteExpiredService(
-        IServiceScopeFactory scopeFactory,
-        ILogger<DeleteExpiredService> logger,
-        GlobalStore globalStore,
-        IConfiguration configuration)
-    :  ActivePassiveBackgroundService<DeleteExpiredService>(logger, scopeFactory)
+namespace ASC.Files.Service.IntegrationEvents.EventHandling;
+
+[Scope]
+public class DeleteIntegrationEventHandler(
+    ILogger<DeleteIntegrationEventHandler> logger,
+    FileOperationsManager fileOperationsManager,
+    TenantManager tenantManager,
+    SecurityContext securityContext) : IIntegrationEventHandler<DeleteIntegrationEvent>
 {
-    protected override TimeSpan ExecuteTaskPeriod { get; set; } = TimeSpan.Parse(configuration["files:deleteExpired"] ?? "1", CultureInfo.InvariantCulture);
-
-    protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
+    public async Task Handle(DeleteIntegrationEvent @event)
     {
-        var dataStore = await globalStore.GetStoreAsync(false);
-
-        await dataStore.DeleteExpiredAsync(FileConstant.StorageDomainTmp, CommonChunkedUploadSessionHolder.StoragePath, CommonChunkedUploadSessionHolder.SlidingExpiration);
+        CustomSynchronizationContext.CreateContext();
+        using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
+        {
+            logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
+            await tenantManager.SetCurrentTenantAsync(@event.TenantId);
+            await securityContext.AuthenticateMeWithoutCookieAsync(@event.TenantId, @event.CreateBy);
+            await fileOperationsManager.Enqueue<FileDeleteOperation, FileDeleteOperationData<string>, FileDeleteOperationData<int>>(@event.TaskId, @event.ThirdPartyData, @event.Data);
+        }
     }
 }

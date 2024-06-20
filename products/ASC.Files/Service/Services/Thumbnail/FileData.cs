@@ -24,28 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Web.Files.Services.WCFService.FileOperations;
+namespace ASC.Files.Service.Services.Thumbnail;
 
-namespace ASC.Thumbnail.IntegrationEvents.EventHandling;
-
-[Scope]
-public class MoveOrCopyIntegrationEventHandler(
-    ILogger<MoveOrCopyIntegrationEventHandler> logger,
-    FileOperationsManager fileOperationsManager,
-    TenantManager tenantManager,
-    SecurityContext securityContext)
-    : IIntegrationEventHandler<MoveOrCopyIntegrationEvent>
-{
-    public async Task Handle(MoveOrCopyIntegrationEvent @event)
-    {
-        CustomSynchronizationContext.CreateContext();
-        using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
-        {
-            logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
-            await tenantManager.SetCurrentTenantAsync(@event.TenantId);
-            await securityContext.AuthenticateMeWithoutCookieAsync(@event.TenantId, @event.CreateBy);
-            await fileOperationsManager.Enqueue<FileMoveCopyOperation, FileMoveCopyOperationData<string>, FileMoveCopyOperationData<int>>(@event.TaskId, @event.ThirdPartyData, @event.Data);
-        }
-    }
-}
-
+public record FileData<T>(int TenantId, Guid CreatedBy, T FileId, string BaseUri, TariffState TariffState);

@@ -25,6 +25,8 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Api.Core.Extensions;
+using ASC.Files.Service.Services;
+using ASC.Files.Service.Services.Thumbnail;
 using ASC.Web.Files.Configuration;
 
 namespace ASC.Files.Service;

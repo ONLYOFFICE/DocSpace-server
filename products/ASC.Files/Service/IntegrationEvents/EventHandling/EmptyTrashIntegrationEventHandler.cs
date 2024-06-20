@@ -26,16 +26,17 @@
 
 using ASC.Web.Files.Services.WCFService.FileOperations;
 
-namespace ASC.Thumbnail.IntegrationEvents.EventHandling;
+namespace ASC.Files.Service.IntegrationEvents.EventHandling;
 
 [Scope]
-public class DeleteIntegrationEventHandler(
+public class EmptyTrashIntegrationEventHandler(
     ILogger<DeleteIntegrationEventHandler> logger,
     FileOperationsManager fileOperationsManager,
     TenantManager tenantManager,
-    SecurityContext securityContext) : IIntegrationEventHandler<DeleteIntegrationEvent>
+    SecurityContext securityContext) : IIntegrationEventHandler<EmptyTrashIntegrationEvent>
 {
-    public async Task Handle(DeleteIntegrationEvent @event)
+
+    public async Task Handle(EmptyTrashIntegrationEvent @event)
     {
         CustomSynchronizationContext.CreateContext();
         using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
@@ -47,3 +48,4 @@ public class DeleteIntegrationEventHandler(
         }
     }
 }
+

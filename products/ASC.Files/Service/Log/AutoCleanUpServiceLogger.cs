@@ -24,21 +24,23 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Service.Services;
+
 namespace ASC.Files.Service.Log;
 internal static partial class AutoCleanUpServiceLogger
 {
-    [LoggerMessage(Level = LogLevel.Information, Message = "Found {count} active users")]
+    [LoggerMessage(Level = LogLevel.Information, Message = "Found {count} users (without restrictions) in active portals")]
     public static partial void InfoFoundUsers(this ILogger<AutoCleanTrashService> logger, int count);
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Waiting for data. Sleep {time}.")]
     public static partial void InfoWaitingForData(this ILogger<AutoCleanTrashService> logger, TimeSpan time);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "Start clean up tenant {tenant}, folder {folder}")]
-    public static partial void InfoCleanUp(this ILogger<AutoCleanTrashService> logger, int tenant, int folder);
+    [LoggerMessage(Level = LogLevel.Information, Message = "Start clean up for tenant id {tenantId} with trash id {trashId}")]
+    public static partial void InfoCleanUp(this ILogger<AutoCleanTrashService> logger, int tenantId, int trashId);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "Waiting for tenant {tenant}, folder {folder}...")]
-    public static partial void InfoCleanUpWait(this ILogger<AutoCleanTrashService> logger, int tenant, int folder);
+    [LoggerMessage(Level = LogLevel.Information, Message = "Waiting for for tenant id {tenantId} with trash id {trashId}...")]
+    public static partial void InfoCleanUpWait(this ILogger<AutoCleanTrashService> logger, int tenantId, int trashId);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "Finish clean up tenant {tenant}, folder {folder}")]
-    public static partial void InfoCleanUpFinish(this ILogger<AutoCleanTrashService> logger, int tenant, int folder);
+    [LoggerMessage(Level = LogLevel.Information, Message = "Finish clean up for tenant id {tenantId} with trash id {trashId}")]
+    public static partial void InfoCleanUpFinish(this ILogger<AutoCleanTrashService> logger, int tenantId, int trashId);
 }

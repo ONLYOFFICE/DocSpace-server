@@ -26,17 +26,17 @@
 
 using ASC.Web.Files.Services.WCFService.FileOperations;
 
-namespace ASC.Thumbnail.IntegrationEvents.EventHandling;
+namespace ASC.Files.Service.IntegrationEvents.EventHandling;
 
 [Scope]
-public class EmptyTrashIntegrationEventHandler(
-    ILogger<DeleteIntegrationEventHandler> logger,
+public class MarkAsReadIntegrationEventHandler(
+    ILogger<MarkAsReadIntegrationEventHandler> logger,
     FileOperationsManager fileOperationsManager,
     TenantManager tenantManager,
-    SecurityContext securityContext) : IIntegrationEventHandler<EmptyTrashIntegrationEvent>
+    SecurityContext securityContext)
+    : IIntegrationEventHandler<MarkAsReadIntegrationEvent>
 {
-    
-    public async Task Handle(EmptyTrashIntegrationEvent @event)
+    public async Task Handle(MarkAsReadIntegrationEvent @event)
     {
         CustomSynchronizationContext.CreateContext();
         using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
@@ -44,7 +44,7 @@ public class EmptyTrashIntegrationEventHandler(
             logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
             await tenantManager.SetCurrentTenantAsync(@event.TenantId);
             await securityContext.AuthenticateMeWithoutCookieAsync(@event.TenantId, @event.CreateBy);
-            await fileOperationsManager.Enqueue<FileDeleteOperation, FileDeleteOperationData<string>, FileDeleteOperationData<int>>(@event.TaskId, @event.ThirdPartyData, @event.Data);
+            await fileOperationsManager.Enqueue<FileMarkAsReadOperation, FileMarkAsReadOperationData<string>, FileMarkAsReadOperationData<int>>(@event.TaskId, @event.ThirdPartyData, @event.Data);
         }
     }
 }

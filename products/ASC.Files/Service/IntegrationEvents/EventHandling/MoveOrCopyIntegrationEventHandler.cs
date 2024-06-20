@@ -24,57 +24,28 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Service.RoomIndexExport;
+using ASC.Web.Files.Services.WCFService.FileOperations;
+
+namespace ASC.Files.Service.IntegrationEvents.EventHandling;
 
 [Scope]
-public class RoomIndexExportIntegrationEventHandler(
-    ILogger<RoomIndexExportIntegrationEventHandler> logger,
-    CommonLinkUtility commonLinkUtility,
+public class MoveOrCopyIntegrationEventHandler(
+    ILogger<MoveOrCopyIntegrationEventHandler> logger,
+    FileOperationsManager fileOperationsManager,
     TenantManager tenantManager,
-    SecurityContext securityContext,
-    DocumentBuilderScriptHelper documentBuilderScriptHelper,
-    DocumentBuilderTaskManager documentBuilderTaskManager,
-    IServiceProvider serviceProvider)
-    : IIntegrationEventHandler<RoomIndexExportIntegrationEvent>
+    SecurityContext securityContext)
+    : IIntegrationEventHandler<MoveOrCopyIntegrationEvent>
 {
-
-    public async Task Handle(RoomIndexExportIntegrationEvent @event)
+    public async Task Handle(MoveOrCopyIntegrationEvent @event)
     {
         CustomSynchronizationContext.CreateContext();
-
         using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
         {
             logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
-
-            try
-            {
-                if (@event.Terminate)
-                {
-                    await documentBuilderTaskManager.TerminateTask(@event.TenantId, @event.CreateBy);
-                    return;
-                }
-
-                if (!string.IsNullOrEmpty(@event.BaseUri))
-                {
-                    commonLinkUtility.ServerUri = @event.BaseUri;
-                }
-
-                await tenantManager.SetCurrentTenantAsync(@event.TenantId);
-
-                await securityContext.AuthenticateMeWithoutCookieAsync(@event.TenantId, @event.CreateBy);
-
-                var (script, tempFileName, outputFileName) = await documentBuilderScriptHelper.GetRoomIndexExportScript(@event.CreateBy, @event.RoomId);
-
-                var task = serviceProvider.GetService<DocumentBuilderTask<int>>();
-
-                task.Init(@event.BaseUri, @event.TenantId, @event.CreateBy, script, tempFileName, outputFileName);
-
-                await documentBuilderTaskManager.StartTask(task);
-            }
-            catch (Exception ex)
-            {
-                logger.ErrorWithException(ex);
-            }
+            await tenantManager.SetCurrentTenantAsync(@event.TenantId);
+            await securityContext.AuthenticateMeWithoutCookieAsync(@event.TenantId, @event.CreateBy);
+            await fileOperationsManager.Enqueue<FileMoveCopyOperation, FileMoveCopyOperationData<string>, FileMoveCopyOperationData<int>>(@event.TaskId, @event.ThirdPartyData, @event.Data);
         }
     }
 }
+
