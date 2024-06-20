@@ -34,11 +34,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 name: "IX_files_audit_reference_audit_event_id",
                 table: "files_audit_reference",
                 column: "audit_event_id");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_files_audit_reference_entry_id_entry_type",
-                table: "files_audit_reference",
-                columns: new[] { "entry_id", "entry_type" });
         }
 
         /// <inheritdoc />

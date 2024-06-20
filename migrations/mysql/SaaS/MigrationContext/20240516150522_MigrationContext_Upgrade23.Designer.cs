@@ -1364,8 +1364,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.HasIndex("AuditEventId");
 
-                    b.HasIndex("EntryId", "EntryType");
-
                     b.ToTable("files_audit_reference", (string)null);
                 });
 
