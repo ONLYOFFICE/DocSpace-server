@@ -35,12 +35,13 @@ public record HistoryEntry
     
     private static readonly HashSet<MessageAction> _gropedActions = 
     [
-        MessageAction.FileUploaded, 
-        MessageAction.FileMoved, 
-        MessageAction.FileCopied, 
-        MessageAction.FolderMoved, 
+        MessageAction.FileUploaded,
+        MessageAction.FileMoved,
+        MessageAction.FileCopied,
+        MessageAction.FolderMoved,
         MessageAction.FolderCopied,
         MessageAction.FileDeleted,
+        MessageAction.FileConverted,
         MessageAction.FolderDeleted,
         MessageAction.RoomCreateUser,
         MessageAction.RoomGroupAdded
