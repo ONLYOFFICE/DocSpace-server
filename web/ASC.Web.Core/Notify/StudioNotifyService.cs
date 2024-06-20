@@ -106,7 +106,7 @@ public class StudioNotifyService(
                 action,
                     await studioNotifyHelper.RecipientFromEmailAsync(userInfo.Email, false),
                     [EMailSenderName],
-                TagValues.OrangeButton(orangeButtonText, confirmationUrl, null));
+                TagValues.OrangeButton(orangeButtonText, confirmationUrl));
 
         var displayUserName = userInfo.DisplayUserName(false, displayUserSettingsHelper);
 
@@ -143,7 +143,7 @@ public class StudioNotifyService(
                 action,
                     await studioNotifyHelper.RecipientFromEmailAsync(email, false),
                     [EMailSenderName],
-                TagValues.OrangeButton(orangeButtonText, confirmationUrl, null),
+                TagValues.OrangeButton(orangeButtonText, confirmationUrl),
                 new TagValue(CommonTags.Culture, user.GetCulture().Name));
 
         var displayUserName = user.DisplayUserName(false, displayUserSettingsHelper);
@@ -163,7 +163,7 @@ public class StudioNotifyService(
                     [EMailSenderName],
                 new TagValue(Tags.InviteLink, confirmationUrl),
                 new TagValue(CommonTags.Culture, user.GetCulture().Name),
-                TagValues.OrangeButton(orangeButtonText, confirmationUrl, null),
+                TagValues.OrangeButton(orangeButtonText, confirmationUrl),
                     new TagValue(Tags.UserDisplayName, (user.DisplayUserName(displayUserSettingsHelper) ?? string.Empty).Trim()));
     }
 
@@ -178,7 +178,7 @@ public class StudioNotifyService(
         { 
             new TagValue(Tags.Message, roomTitle),
             new TagValue(Tags.InviteLink, confirmationUrl),
-            TagValues.OrangeButton(orangeButtonText, confirmationUrl, null),
+            TagValues.OrangeButton(orangeButtonText, confirmationUrl),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.Culture, cultureInfo.Name)
         };
@@ -206,7 +206,7 @@ public class StudioNotifyService(
         {
             new TagValue(Tags.Message, roomTitle),
             new TagValue(Tags.InviteLink, roomUrl),
-            TagValues.OrangeButton(orangeButtonText, roomUrl, null),
+            TagValues.OrangeButton(orangeButtonText, roomUrl),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.Culture, cultureInfo.Name)
         };
@@ -228,7 +228,7 @@ public class StudioNotifyService(
         var tags = new List<ITagValue>
         {
                 new TagValue(Tags.InviteLink, confirmationUrl),
-                TagValues.OrangeButton(orangeButtonText, confirmationUrl, null),
+                TagValues.OrangeButton(orangeButtonText, confirmationUrl),
                 TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
                 new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("join_docspace.gif")),
                 new TagValue(CommonTags.Culture, cultureInfo.Name)
@@ -258,7 +258,7 @@ public class StudioNotifyService(
         Actions.PhoneChange,
            await studioNotifyHelper.RecipientFromEmailAsync(userInfo.Email, false),
            [EMailSenderName],
-        TagValues.OrangeButton(orangeButtonText, confirmationUrl, null));
+        TagValues.OrangeButton(orangeButtonText, confirmationUrl));
     }
 
     public async Task SendMsgTfaResetAsync(UserInfo userInfo)
@@ -271,7 +271,7 @@ public class StudioNotifyService(
         Actions.TfaChange,
            await studioNotifyHelper.RecipientFromEmailAsync(userInfo.Email, false),
            [EMailSenderName],
-        TagValues.OrangeButton(orangeButtonText, confirmationUrl, null));
+        TagValues.OrangeButton(orangeButtonText, confirmationUrl));
     }
 
 
@@ -289,7 +289,7 @@ public class StudioNotifyService(
         List<ITagValue> tags =
         [
             new TagValue(Tags.InviteLink, inviteUrl),
-            TagValues.OrangeButton(orangeButtonText, inviteUrl, null)
+            TagValues.OrangeButton(orangeButtonText, inviteUrl)
         ];
 
         if (!string.IsNullOrEmpty(culture))
@@ -349,7 +349,7 @@ public class StudioNotifyService(
            [EMailSenderName],
         new TagValue(Tags.UserName, newUserInfo.FirstName.HtmlEncode()),
         new TagValue(Tags.MyStaffLink, GetMyStaffLink()),
-            TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/'), null),
+            TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/')),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
         new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("welcome.gif")),
         new TagValue("IMG1", img1),
@@ -403,7 +403,7 @@ public class StudioNotifyService(
            [EMailSenderName],
         new TagValue(Tags.UserName, newUserInfo.FirstName.HtmlEncode()),
         new TagValue(Tags.MyStaffLink, GetMyStaffLink()),
-            TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/'), null),
+            TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/')),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
         new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("welcome.gif")),
         new TagValue("IMG1", img1),
@@ -449,7 +449,7 @@ public class StudioNotifyService(
            await studioNotifyHelper.RecipientFromEmailAsync(newUserInfo.Email, false),
            [EMailSenderName],
         new TagValue(Tags.ActivateUrl, confirmationUrl),
-        TagValues.OrangeButton(orangeButtonText, confirmationUrl, null), 
+        TagValues.OrangeButton(orangeButtonText, confirmationUrl), 
         TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
         new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("join_docspace.gif")),
         new TagValue(Tags.UserName, newUserInfo.FirstName.HtmlEncode()),
@@ -492,7 +492,7 @@ public class StudioNotifyService(
            await studioNotifyHelper.RecipientFromEmailAsync(newUserInfo.Email, false),
            [EMailSenderName],
         new TagValue(Tags.ActivateUrl, confirmationUrl),
-        TagValues.OrangeButton(orangeButtonText, confirmationUrl, null),
+        TagValues.OrangeButton(orangeButtonText, confirmationUrl),
         TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
         new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("join_docspace.gif")),
         new TagValue(Tags.UserName, newUserInfo.FirstName.HtmlEncode()),
@@ -512,7 +512,7 @@ public class StudioNotifyService(
         action,
            await studioNotifyHelper.RecipientFromEmailAsync(user.Email, false),
            [EMailSenderName],
-        TagValues.OrangeButton(orangeButtonText, confirmationUrl, null),
+        TagValues.OrangeButton(orangeButtonText, confirmationUrl),
         TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
         new TagValue(CommonTags.Culture, user.GetCulture().Name));
     }
@@ -624,7 +624,8 @@ public class StudioNotifyService(
         tagValues.Add(new TagValue(CommonTags.Footer, "common"));
 
         tagValues.Add(new TagValue(Tags.UserName, newUserInfo.FirstName.HtmlEncode()));
-        tagValues.Add(TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~/portal-settings/payments/portal-payments"), null));
+        tagValues.Add(new TagValue(Tags.PricingPage, commonLinkUtility.GetFullAbsolutePath("~/portal-settings/payments/portal-payments")));
+        tagValues.Add(TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~/portal-settings/payments/portal-payments")));
         tagValues.Add(TagValues.TrulyYours(studioNotifyHelper, WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", await GetCulture(newUserInfo))));
         tagValues.Add(new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("discover_business_subscription.gif")));
 
@@ -649,7 +650,7 @@ public class StudioNotifyService(
                 [u],
                 [EMailSenderName],
                 new TagValue(Tags.ActivateUrl, activateUrl),
-                TagValues.OrangeButton(orangeButtonText, deactivateUrl, null),
+                TagValues.OrangeButton(orangeButtonText, deactivateUrl),
                 TagValues.TrulyYours(studioNotifyHelper, bestReagardsTxt),
                     new TagValue(Tags.OwnerName, u.DisplayUserName(displayUserSettingsHelper)));
     }
@@ -665,7 +666,7 @@ public class StudioNotifyService(
                 Actions.PortalDelete,
                 [u],
                 [EMailSenderName],
-                TagValues.OrangeButton(orangeButtonText, url, null),
+                TagValues.OrangeButton(orangeButtonText, url),
                 TagValues.TrulyYours(studioNotifyHelper, bestReagardsTxt),
                 new TagValue(Tags.AutoRenew, showAutoRenewText.ToString()),
                     new TagValue(Tags.OwnerName, u.DisplayUserName(displayUserSettingsHelper)));
@@ -681,7 +682,7 @@ public class StudioNotifyService(
                 Actions.PortalDeleteSuccessV1,
                 [owner],
                 [EMailSenderName],
-                TagValues.OrangeButton(orangeButtonText, url, null),
+                TagValues.OrangeButton(orangeButtonText, url),
                 TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
                 new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("docspace_deactivated.gif")),
                     new TagValue(Tags.OwnerName, owner.DisplayUserName(displayUserSettingsHelper)));
@@ -698,7 +699,7 @@ public class StudioNotifyService(
         null,
         [owner],
         [EMailSenderName],
-        TagValues.OrangeButton(orangeButtonText, confirmOwnerUpdateUrl, null),
+        TagValues.OrangeButton(orangeButtonText, confirmOwnerUpdateUrl),
             new TagValue(Tags.UserName, newOwner.DisplayUserName(displayUserSettingsHelper)),
             new TagValue(Tags.OwnerName, owner.DisplayUserName(displayUserSettingsHelper)));
     }
@@ -740,7 +741,7 @@ public class StudioNotifyService(
                await studioNotifyHelper.RecipientFromEmailAsync(u.Email, false),
                [EMailSenderName],
             new TagValue(Tags.UserName, u.FirstName.HtmlEncode()),
-            TagValues.OrangeButton(orangeButtonText, confirmationUrl, null),
+            TagValues.OrangeButton(orangeButtonText, confirmationUrl),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("welcome.gif")),
             new TagValue(CommonTags.Footer, footer));
@@ -974,7 +975,7 @@ public class StudioNotifyService(
                 Actions.MigrationPersonalToDocspace,
                 await studioNotifyHelper.RecipientFromEmailAsync(userInfo.Email, false),
                 [EMailSenderName],
-                TagValues.OrangeButton(orangeButtonText, confirmationUrl, null),
+                TagValues.OrangeButton(orangeButtonText, confirmationUrl),
                 TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
                 new TagValue(CommonTags.Culture, cultureInfo.Name),
                 new TagValue(CommonTags.Footer, "social"));

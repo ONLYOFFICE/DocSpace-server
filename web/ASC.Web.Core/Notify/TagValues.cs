@@ -33,7 +33,7 @@ public static class TagValues
         return new TagValue(CommonTags.WithoutUnsubscribe, true);
     }
 
-    public static ITagValue OrangeButton(string btnText, string btnUrl, string tag)
+    public static ITagValue OrangeButton(string btnText, string btnUrl, string tag = null)
     {
         var sb = new StringBuilder();
 
