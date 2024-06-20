@@ -61,8 +61,6 @@ public static class FilesAuditReferenceExtension
             entity.HasKey(e => new {e.EntryId, e.EntryType, e.AuditEventId})
                 .HasName("PRIMARY");
 
-            entity.HasIndex(e => new { e.EntryId, e.EntryType });
-
             entity.Property(e => e.EntryId)
                 .HasColumnName("entry_id");
 
