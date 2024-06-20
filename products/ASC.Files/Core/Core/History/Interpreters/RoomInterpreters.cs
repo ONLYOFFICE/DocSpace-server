@@ -161,7 +161,7 @@ public class RoomExternalLinkCreatedInterpreter : ActionInterpreter
 {
     protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
     {
-        return ValueTask.FromResult<HistoryData>(new LinkData(description[0], description[1], description[2]));
+        return ValueTask.FromResult<HistoryData>(new LinkData(description[0], description[2], Access: description[1]));
     }
 }
 
@@ -169,7 +169,7 @@ public class RoomExternalLinkRenamedInterpreter : ActionInterpreter
 {
     protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
     {
-        return ValueTask.FromResult<HistoryData>(new LinkData(description[1], null, description[0], description[2]));
+        return ValueTask.FromResult<HistoryData>(new LinkData(description[1], description[0], description[2]));
     }
 }
 
@@ -177,7 +177,7 @@ public class RoomExternalLinkDeletedInterpreter : ActionInterpreter
 {
     protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
     {
-        return ValueTask.FromResult<HistoryData>(new LinkData(description[0], null));
+        return ValueTask.FromResult<HistoryData>(new LinkData(description[0]));
     }
 }
 
@@ -185,7 +185,7 @@ public class RoomExternalLinkRevokedInterpreter : ActionInterpreter
 {
     protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
     {
-        return ValueTask.FromResult<HistoryData>(new LinkData(description[1], null, description[0], description[2]));
+        return ValueTask.FromResult<HistoryData>(new LinkData(description[1], description[0], description[2]));
     }
 }
 
