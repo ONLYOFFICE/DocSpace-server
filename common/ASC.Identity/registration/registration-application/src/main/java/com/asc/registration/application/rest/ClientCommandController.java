@@ -292,7 +292,11 @@ public class ClientCommandController {
       AscPersonResponse person,
       AuditCode auditCode) {
     return Audit.Builder.builder()
-        .ip(HttpUtils.getFirstRequestIP(request))
+        .ip(
+            HttpUtils.getRequestClientAddress(request)
+                .map(HttpUtils::extractHostFromUrl)
+                .orElseGet(
+                    () -> HttpUtils.extractHostFromUrl(HttpUtils.getFirstRequestIP(request))))
         .browser(HttpUtils.getClientBrowser(request))
         .platform(HttpUtils.getClientOS(request))
         .tenantId(tenant.getTenantId())

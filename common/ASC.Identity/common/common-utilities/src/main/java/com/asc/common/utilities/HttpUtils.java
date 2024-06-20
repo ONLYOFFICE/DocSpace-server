@@ -2,10 +2,13 @@ package com.asc.common.utilities;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Optional;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/** Utility class for handling HTTP-related operations. */
 public class HttpUtils {
+  private static final String IP_PATTERN =
+      "https?://([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3})";
+  private static final String DOMAIN_PATTERN = "https?://([a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})";
   private static final String X_FORWARDED_HOST = "X-Forwarded-Host";
   private static final String X_FORWARDED_FOR = "X-Forwarded-For";
   private static final String HOST = "Host";
@@ -28,33 +31,51 @@ public class HttpUtils {
     // Private constructor to prevent instantiation
   }
 
+  /**
+   * Retrieves the address from the specified header of the request.
+   *
+   * @param request HttpServletRequest object
+   * @param header The header name to retrieve the address from
+   * @return An Optional containing the address if found, otherwise an empty Optional
+   */
   private static Optional<String> getRequestAddress(HttpServletRequest request, String header) {
-    String ip = request.getHeader(header);
-    if (ip == null || ip.isBlank()) {
-      return Optional.empty();
-    }
-    return Optional.of(String.format("%s://%s", request.getScheme(), ip));
+    var address = request.getHeader(header);
+    if (address == null || address.isBlank()) return Optional.empty();
+    return Optional.of(String.format("%s://%s", request.getScheme(), address));
   }
 
+  /**
+   * Retrieves the host address from the 'X-Forwarded-Host' header of the request.
+   *
+   * @param request HttpServletRequest object
+   * @return An Optional containing the host address if found, otherwise an empty Optional
+   */
   public static Optional<String> getRequestHostAddress(HttpServletRequest request) {
     return getRequestAddress(request, X_FORWARDED_HOST);
   }
 
+  /**
+   * Retrieves the client address from the 'X-Forwarded-For' header of the request.
+   *
+   * @param request HttpServletRequest object
+   * @return An Optional containing the client address if found, otherwise an empty Optional
+   */
   public static Optional<String> getRequestClientAddress(HttpServletRequest request) {
     return getRequestAddress(request, X_FORWARDED_FOR);
   }
 
   /**
-   * Retrieves the domain name from the Host header.
+   * Retrieves the domain from the 'Host' header of the request.
    *
    * @param request HttpServletRequest object
-   * @return Optional containing the domain name from the Host header, or empty if not found
+   * @return An Optional containing the domain if found, otherwise an empty Optional
    */
   public static Optional<String> getRequestDomain(HttpServletRequest request) {
-    String host = request.getHeader(HOST);
+    var host = request.getHeader(HOST);
     if (host == null || host.isBlank()) {
       return Optional.empty();
     }
+
     return Optional.of(String.format("%s://%s", request.getScheme(), host));
   }
 
@@ -62,51 +83,41 @@ public class HttpUtils {
    * Retrieves the first IP address from the request headers.
    *
    * @param request HttpServletRequest object
-   * @return First IP address found in the request headers or the remote address if none found
+   * @return The first IP address found in the request headers, or the remote address if none found
    */
   public static String getFirstRequestIP(HttpServletRequest request) {
-    for (String header : IP_HEADERS) {
-      String value = request.getHeader(header);
-      if (value != null && !value.isEmpty()) {
-        return value.split("\\s*,\\s*")[0];
-      }
+    for (var header : IP_HEADERS) {
+      var value = request.getHeader(header);
+      if (value != null && !value.isEmpty()) return value.split("\\s*,\\s*")[0];
     }
+
     return request.getRemoteAddr();
   }
 
   /**
-   * Determines the client's operating system and version from the User-Agent header.
+   * Determines the client's operating system from the User-Agent header.
    *
    * @param request HttpServletRequest object
-   * @return Client's operating system and version
+   * @return Client's operating system
    */
   public static String getClientOS(HttpServletRequest request) {
-    String userAgent = request.getHeader("User-Agent");
-    String os = "Unknown";
-    String osPattern = "";
+    var userAgent = request.getHeader("User-Agent");
+    var os = "Unknown";
+    var osPattern = "";
 
-    if (userAgent == null) {
-      return os;
-    }
+    if (userAgent == null) return os;
 
-    if (userAgent.toLowerCase().contains("windows")) {
-      osPattern = "Windows NT ([\\d.]+)";
-    } else if (userAgent.toLowerCase().contains("mac os x")) {
-      osPattern = "Mac OS X ([\\d_]+)";
-    } else if (userAgent.toLowerCase().contains("android")) {
-      osPattern = "Android ([\\d.]+)";
-    } else if (userAgent.toLowerCase().contains("iphone")) {
-      osPattern = "iPhone OS ([\\d_]+)";
-    } else if (userAgent.toLowerCase().contains("x11")) {
-      os = "Unix";
-    }
+    if (userAgent.toLowerCase().contains("windows")) osPattern = "Windows NT ([\\d.]+)";
+    else if (userAgent.toLowerCase().contains("mac os x")) osPattern = "Mac OS X ([\\d_]+)";
+    else if (userAgent.toLowerCase().contains("android")) osPattern = "Android ([\\d.]+)";
+    else if (userAgent.toLowerCase().contains("iphone")) osPattern = "iPhone OS ([\\d_]+)";
+    else if (userAgent.toLowerCase().contains("x11")) os = "Unix";
 
     if (!osPattern.isEmpty()) {
-      Pattern pattern = Pattern.compile(osPattern);
-      Matcher matcher = pattern.matcher(userAgent);
-      if (matcher.find()) {
+      var pattern = Pattern.compile(osPattern);
+      var matcher = pattern.matcher(userAgent);
+      if (matcher.find())
         os = matcher.group().replace('_', '.');
-      }
     }
 
     return os;
@@ -170,24 +181,65 @@ public class HttpUtils {
   }
 
   /**
-   * Retrieves the full URL of the request.
+   * Constructs the full URL of the current request.
    *
    * @param request HttpServletRequest object
-   * @return Full URL including query parameters
+   * @return Full URL of the request
    */
   public static String getFullURL(HttpServletRequest request) {
-    StringBuffer requestURL = request.getRequestURL();
-    String queryString = request.getQueryString();
+    var requestURL = request.getRequestURL();
+    var queryString = request.getQueryString();
     return queryString == null
         ? requestURL.toString()
         : requestURL.append('?').append(queryString).toString();
   }
 
+  /**
+   * Extracts the host from the given URL.
+   *
+   * @param url The URL to extract the host from
+   * @return The extracted host if found, otherwise the original URL
+   */
+  public static String extractHostFromUrl(String url) {
+    return extractPattern(url, IP_PATTERN)
+        .or(() -> extractPattern(url, DOMAIN_PATTERN))
+        .orElse(url);
+  }
+
+  /**
+   * Extracts a pattern from the given input string.
+   *
+   * @param input The input string
+   * @param pattern The pattern to extract
+   * @return An Optional containing the extracted pattern if found, otherwise an empty Optional
+   */
+  private static Optional<String> extractPattern(String input, String pattern) {
+    var compiledPattern = Pattern.compile(pattern);
+    var matcher = compiledPattern.matcher(input);
+    if (matcher.find()) return Optional.of(matcher.group(1));
+    return Optional.empty();
+  }
+
+  /**
+   * Retrieves browser information from the User-Agent string.
+   *
+   * @param userAgent The User-Agent string
+   * @param browser The browser name to look for
+   * @param replacement The replacement string for the browser name
+   * @return The formatted browser information
+   */
   private static String getBrowserInfo(String userAgent, String browser, String replacement) {
-    String substring = userAgent.substring(userAgent.indexOf(browser)).split(";")[0];
+    var substring = userAgent.substring(userAgent.indexOf(browser)).split(";")[0];
     return substring.split(" ")[0].replace(browser, replacement) + " " + substring.split(" ")[1];
   }
 
+  /**
+   * Retrieves the browser version from the User-Agent string.
+   *
+   * @param userAgent The User-Agent string
+   * @param browser The browser name to look for
+   * @return The browser version
+   */
   private static String getBrowserVersion(String userAgent, String browser) {
     return userAgent.substring(userAgent.indexOf(browser)).split(" ")[0].split("/")[1];
   }
