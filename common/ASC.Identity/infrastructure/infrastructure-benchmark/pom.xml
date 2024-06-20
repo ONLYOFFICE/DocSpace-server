@@ -6,16 +6,9 @@
 
     <parent>
         <groupId>com.asc</groupId>
-        <artifactId>identity</artifactId>
+        <artifactId>infrastructure</artifactId>
         <version>1.0.0</version>
     </parent>
 
-    <artifactId>infrastructure</artifactId>
-    <packaging>pom</packaging>
-
-    <modules>
-        <module>infrastructure-benchmark</module>
-        <module>infrastructure-migration-runner</module>
-        <module>infrastructure-configuration</module>
-    </modules>
+    <artifactId>infrastructure-benchmark</artifactId>
 </project>

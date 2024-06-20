@@ -1,0 +1,93 @@
+spring:
+  application:
+    name: ${SPRING_APPLICATION_NAME:ASC.Identity}
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
+  cache:
+    type: hazelcast
+  config:
+    import:
+      - "classpath:application-datasource.yml"
+      - "classpath:application-resilience.yml"
+      - "classpath:application-rabbitmq.yml"
+      - "classpath:application-security.yml"
+  threads:
+    virtual:
+      enabled: true
+
+application:
+  secret: ${CIPHER_SECRET:secret}
+
+management:
+  endpoint:
+    env:
+      post:
+        enabled: true
+    health:
+      probes:
+        enabled: true
+      show-details: always
+  endpoints:
+    web:
+      base-path: null
+      exposure:
+        include: health
+      path-mapping:
+        health: /health
+  health:
+    diskspace:
+      enabled: false
+    livenessState:
+      enabled: true
+    readinessState:
+      enabled: true
+    refresh:
+      enabled: false
+
+server:
+  servlet:
+    session:
+      tracking-modes: cookie
+  host: ${SERVER_HOST:127.0.0.1}
+  port: ${SERVER_PORT:9090}
+  shutdown: ${SERVER_SHUTDOWN:graceful}
+
+springdoc:
+  api-docs:
+    path: ${web.api}/oauth/info
+
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: ${FEIGN_CLIENT_CONNECT_TIMEOUT:2500}
+        readTimeout: ${FEIGN_CLIENT_READ_TIMEOUT:1250}
+  circuitbreaker:
+    enabled: ${FEIGN_CIRCUITBREAKER_ENABLED:true}
+
+asc-service:
+  url: ${ASC_SERVICE_URL:http://127.0.0.1}
+
+web:
+  api: ${WEB_API:/api/2.0}
+---
+logging:
+  level:
+    com:
+      asc: DEBUG
+      hazelcast: INFO
+    org:
+      hibernate:
+        SQL: DEBUG
+        stat: DEBUG
+    root: INFO
+spring:
+  config:
+    activate:
+      on-profile:
+        - development
+        - dev
+        - d
+  output:
+    ansi:
+      enabled: always

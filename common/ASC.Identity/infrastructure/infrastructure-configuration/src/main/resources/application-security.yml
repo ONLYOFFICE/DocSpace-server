@@ -1,0 +1,7 @@
+spring:
+  security:
+    oauth2:
+      registeredClient:
+        accessTokenMinutesTTL: ${REGISTERED_CLIENT_ACCESS_TOKEN_TTL:60}
+        authorizationCodeMinutesTTL: ${AUTHORIZATION_CODE_TTL:1}
+        refreshTokenDaysTTL: ${REFRESH_TOKEN_TTL:365}

@@ -1,0 +1,25 @@
+spring:
+  rabbitmq:
+    host: ${RABBIT_HOST:onlyoffice-rabbitmq}
+    listener:
+      simple:
+        retry:
+          enabled: ${RABBIT_LISTENER_RETRY_ENABLED:true}
+          initial-interval: ${RABBIT_LISTENER_RETRY_INITIAL_INTERVAL:1000}
+          max-attempts: ${RABBIT_LISTENER_RETRY_MAX_ATTEMPTS:3}
+          max-interval: ${RABBIT_LISTENER_RETRY_MAX_INTERVAL:3000}
+          multiplier: ${RABBIT_LISTENER_RETRY_MULTIPLIER:3}
+    password: ${RABBIT_PASSWORD:guest}
+    port: ${RABBIT_PORT:5672}
+    username: ${RABBIT_USER_NAME:guest}
+  cloud:
+    messaging:
+      rabbitmq:
+        queues:
+          audit:
+            deadExchange: ${RABBITMQ_AUDIT_DEAD_EXCHANGE:asc_identity_audit_dlx}
+            deadQueue: ${RABBITMQ_AUDIT_DEAD_QUEUE:asc_identity_audit_dlq}
+            deadRouting: ${RABBITMQ_AUDIT_DEAD_ROUTING:asc_identity_audit_dlr}
+            exchange: ${RABBITMQ_AUDIT_EXCHANGE:asc_identity_audit_exchange}
+            queue: ${RABBITMQ_AUDIT_QUEUE:asc_identity_audit_queue}
+            routing: ${RABBITMQ_AUDIT_ROUTING:asc_identity_audit_routing}
