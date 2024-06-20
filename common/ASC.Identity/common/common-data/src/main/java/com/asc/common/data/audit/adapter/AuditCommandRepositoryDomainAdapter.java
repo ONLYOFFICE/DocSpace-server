@@ -22,7 +22,6 @@ public class AuditCommandRepositoryDomainAdapter implements AuditCommandReposito
    *
    * @param audit the audit record to be saved
    */
-  @Override
   public void saveAudit(Audit audit) {
     jpaAuditRepository.save(auditDataAccessMapper.toEntity(audit));
   }

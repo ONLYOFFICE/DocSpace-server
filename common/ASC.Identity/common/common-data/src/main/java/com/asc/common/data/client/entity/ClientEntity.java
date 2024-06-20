@@ -1,11 +1,16 @@
 package com.asc.common.data.client.entity;
 
+import com.asc.common.core.domain.value.enums.AuthenticationMethod;
+import com.asc.common.data.client.converter.AuthenticationMethodConverter;
 import com.asc.common.data.consent.entity.ConsentEntity;
+import com.asc.common.data.scope.entity.ScopeEntity;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
+import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.Set;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
@@ -17,45 +22,48 @@ import org.springframework.data.annotation.LastModifiedDate;
 @AllArgsConstructor
 @Entity
 @Table(name = "identity_clients")
-public class ClientEntity {
+@NamedEntityGraphs({
+  @NamedEntityGraph(
+      name = "ClientEntity.withScopesAndAuthMethods",
+      attributeNodes = {
+        @NamedAttributeNode("scopes"),
+        @NamedAttributeNode("authenticationMethods"),
+        @NamedAttributeNode("redirectUris"),
+        @NamedAttributeNode("allowedOrigins")
+      })
+})
+public class ClientEntity implements Serializable {
 
   /** The unique identifier for the client. */
   @Id
   @Column(name = "client_id", unique = true, length = 36)
   private String clientId;
 
+  /** The identifier for the tenant associated with the client. */
+  @Column(name = "tenant_id", nullable = false)
+  private int tenantId;
+
+  /** The secret for the client. This field is unique. */
+  @Column(name = "client_secret", unique = true, nullable = false)
+  private String clientSecret;
+
   /** The name of the client. */
-  @Column(name = "client_name")
   private String name;
 
   /** The description of the client. */
   @Lob private String description;
 
-  /** The secret for the client. This field is unique. */
-  @Column(name = "client_secret", unique = true)
-  private String clientSecret;
-
   /** The logo for the client. */
   @Column(name = "logo", columnDefinition = "LONGTEXT")
   private String logo;
 
-  /** The date and time the client was issued. */
-  @CreatedDate
-  @Column(name = "client_issued_at")
-  private ZonedDateTime clientIssuedAt;
-
-  /** The authentication method for the client. */
+  @ElementCollection(targetClass = AuthenticationMethod.class, fetch = FetchType.EAGER)
+  @CollectionTable(
+      name = "identity_client_authentication_methods",
+      joinColumns = @JoinColumn(name = "client_id"))
+  @Convert(converter = AuthenticationMethodConverter.class)
   @Column(name = "authentication_method", length = 100)
-  private String authenticationMethod;
-
-  /** The identifier for the tenant associated with the client. */
-  @Column(name = "tenant_id")
-  private int tenant;
-
-  /** The URL for the tenant associated with the client. */
-  @Lob
-  @Column(name = "tenant_url")
-  private String tenantUrl;
+  private Set<AuthenticationMethod> authenticationMethods;
 
   /** The URL for the client's website. */
   @Lob
@@ -73,35 +81,51 @@ public class ClientEntity {
   private String policyUrl;
 
   /** The redirect URIs for the client. */
-  @Lob
-  @Column(name = "redirect_uris")
-  private String redirectUris;
+  @ElementCollection(fetch = FetchType.EAGER)
+  @CollectionTable(
+      name = "identity_client_redirect_uris",
+      joinColumns = @JoinColumn(name = "client_id"))
+  @Column(name = "redirect_uri")
+  private Set<String> redirectUris;
 
   /** The allowed origins for the client. */
-  @Lob
-  @Column(name = "allowed_origins")
-  private String allowedOrigins;
+  @ElementCollection(fetch = FetchType.EAGER)
+  @CollectionTable(
+      name = "identity_client_allowed_origins",
+      joinColumns = @JoinColumn(name = "client_id"))
+  @Column(name = "allowed_origin")
+  private Set<String> allowedOrigins;
 
   /** The logout redirect URI for the client. */
   @Lob
   @Column(name = "logout_redirect_uri")
   private String logoutRedirectUri;
 
+  /** Indicates whether the client is public. */
+  @Column(name = "is_public")
+  @ColumnDefault("false")
+  private boolean accessible;
+
   /** Indicates whether the client is enabled. */
-  @Column(name = "enabled")
+  @Column(name = "is_enabled")
+  @ColumnDefault("true")
   private boolean enabled;
 
   /** Indicates whether the client is invalidated. */
-  @Column(name = "invalidated")
+  @Column(name = "is_invalidated")
+  @ColumnDefault("false")
   private boolean invalidated;
 
   /** The scopes for the client. */
-  @Lob
-  @Column(name = "scopes")
-  private String scopes;
+  @ManyToMany(fetch = FetchType.EAGER)
+  @JoinTable(
+      name = "identity_client_scopes",
+      joinColumns = @JoinColumn(name = "client_id"),
+      inverseJoinColumns = @JoinColumn(name = "scope_name"))
+  private Set<ScopeEntity> scopes;
 
   /** The date and time the client was created. */
-  @LastModifiedDate
+  @CreatedDate
   @Column(name = "created_on")
   private ZonedDateTime createdOn;
 
@@ -133,7 +157,6 @@ public class ClientEntity {
     this.enabled = true;
     this.invalidated = false;
     this.createdOn = ZonedDateTime.now();
-    this.clientIssuedAt = ZonedDateTime.now();
   }
 
   /**

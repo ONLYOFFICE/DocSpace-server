@@ -21,61 +21,104 @@ public interface JpaClientRepository extends CrudRepository<ClientEntity, String
   /**
    * Finds a client entity by its ID, provided it is not invalidated.
    *
-   * @param id the ID of the client entity.
-   * @return an optional containing the found client entity, or empty if not found.
+   * @param id the ID of the client entity
+   * @return an optional containing the found client entity, or empty if not found
    */
   @Nonnull
+  @EntityGraph(
+      value = "ClientEntity.withScopesAndAuthMethods",
+      type = EntityGraph.EntityGraphType.LOAD)
   @Query("SELECT c FROM ClientEntity c WHERE c.clientId = :id AND c.invalidated = false")
   Optional<ClientEntity> findById(@Param("id") @Nonnull String id);
 
   /**
+   * Finds a client entity by its ID and visibility status, provided it is not invalidated.
+   *
+   * @param id the ID of the client entity
+   * @param accessible the visibility status of the client entity
+   * @return an optional containing the found client entity, or empty if not found
+   */
+  @Nonnull
+  @EntityGraph(
+      value = "ClientEntity.withScopesAndAuthMethods",
+      type = EntityGraph.EntityGraphType.LOAD)
+  @Query(
+      "SELECT c FROM ClientEntity c WHERE c.clientId = :id AND c.invalidated = false AND c.accessible = :accessible")
+  Optional<ClientEntity> findByIdAndVisibility(
+      @Param("id") @Nonnull String id, @Param("accessible") boolean accessible);
+
+  /**
    * Finds a client entity by its client_id, provided it is not invalidated.
    *
-   * @param clientId the client_id of the client entity.
-   * @return an optional containing the found client entity, or empty if not found.
+   * @param clientId the client_id of the client entity
+   * @return an optional containing the found client entity, or empty if not found
    */
+  @EntityGraph(
+      value = "ClientEntity.withScopesAndAuthMethods",
+      type = EntityGraph.EntityGraphType.LOAD)
   Optional<ClientEntity> findClientByClientId(String clientId);
 
   /**
-   * Deletes a client entity by its ID and tenant.
+   * Deletes a client entity by its ID and tenant ID.
    *
-   * @param id the ID of the client entity.
-   * @param tenant the tenant ID.
-   * @return the number of entities deleted.
+   * @param id the ID of the client entity
+   * @param tenant the tenant ID
+   * @return the number of entities deleted
    */
-  int deleteByClientIdAndTenant(String id, int tenant);
+  int deleteByClientIdAndTenantId(String id, int tenant);
 
   /**
-   * Finds a client entity by its ID and tenant, fetching scopes and tenant details eagerly.
+   * Finds a client entity by its ID and tenant ID, fetching scopes and tenant details eagerly.
    *
-   * @param id the ID of the client entity.
-   * @param tenant the tenant ID.
-   * @return an optional containing the found client entity, or empty if not found.
+   * @param id the ID of the client entity
+   * @param tenant the tenant ID
+   * @return an optional containing the found client entity, or empty if not found
    */
-  @EntityGraph(attributePaths = {"scopes", "tenant"})
-  Optional<ClientEntity> findClientByClientIdAndTenant(
-      @Param("id") String id, @Param("tenant") int tenant);
+  @EntityGraph(
+      value = "ClientEntity.withScopesAndAuthMethods",
+      type = EntityGraph.EntityGraphType.LOAD)
+  Optional<ClientEntity> findClientByClientIdAndTenantId(
+      @Param("id") String id, @Param("tenantId") int tenant);
 
   /**
-   * Finds all client entities for a specific tenant, with pagination.
+   * Finds all client entities for a specific tenant, with pagination support.
    *
-   * @param tenant the tenant ID.
-   * @param pageable the pagination information.
-   * @return a page of client entities.
+   * @param tenant the tenant ID
+   * @param pageable the pagination information
+   * @return a page of client entities
    */
-  Page<ClientEntity> findAllByTenant(int tenant, Pageable pageable);
+  @EntityGraph(
+      value = "ClientEntity.withScopesAndAuthMethods",
+      type = EntityGraph.EntityGraphType.LOAD)
+  @Query("SELECT c FROM ClientEntity c WHERE c.tenantId = :tenant AND c.invalidated = false")
+  Page<ClientEntity> findAllByTenantId(@Param("tenant") int tenant, Pageable pageable);
 
   /**
-   * Regenerates the client secret for a specific client entity by its ID and tenant.
+   * Finds all public clients and private clients belonging to a specific tenant, with pagination
+   * support.
    *
-   * @param tenant the tenant ID.
-   * @param clientId the ID of the client entity.
-   * @param secret the new client secret.
-   * @param modifiedOn the date and time when the modification was made.
+   * @param tenant the tenant ID
+   * @param pageable the pagination information
+   * @return a page of client entities
+   */
+  @EntityGraph(
+      value = "ClientEntity.withScopesAndAuthMethods",
+      type = EntityGraph.EntityGraphType.LOAD)
+  @Query("SELECT c FROM ClientEntity c WHERE c.accessible = true OR c.tenantId = :tenant")
+  Page<ClientEntity> findAllPublicAndPrivateByTenant(
+      @Param("tenant") int tenant, Pageable pageable);
+
+  /**
+   * Regenerates the client secret for a specific client entity by its ID and tenant ID.
+   *
+   * @param tenant the tenant ID
+   * @param clientId the ID of the client entity
+   * @param secret the new client secret
+   * @param modifiedOn the date and time when the modification was made
    */
   @Modifying
   @Query(
-      "UPDATE ClientEntity c SET c.clientSecret = :secret, c.modifiedOn = :modifiedOn WHERE c.clientId = :clientId AND c.tenant = :tenant")
+      "UPDATE ClientEntity c SET c.clientSecret = :secret, c.modifiedOn = :modifiedOn WHERE c.clientId = :clientId AND c.tenantId = :tenant")
   void regenerateClientSecretByClientId(
       @Param("tenant") int tenant,
       @Param("clientId") String clientId,
@@ -83,16 +126,33 @@ public interface JpaClientRepository extends CrudRepository<ClientEntity, String
       @Param("modifiedOn") ZonedDateTime modifiedOn);
 
   /**
-   * Changes the activation status of a specific client entity by its ID and tenant.
+   * Changes the visibility status of a specific client entity by its ID and tenant ID.
    *
-   * @param tenant the tenant ID.
-   * @param clientId the ID of the client entity.
-   * @param enabled the new activation status.
-   * @param modifiedOn the date and time when the modification was made.
+   * @param tenant the tenant ID
+   * @param clientId the ID of the client entity
+   * @param accessible the new visibility status
+   * @param modifiedOn the date and time when the modification was made
    */
   @Modifying
   @Query(
-      "UPDATE ClientEntity c SET c.enabled = :enabled, c.modifiedOn = :modifiedOn WHERE c.clientId = :clientId AND c.tenant = :tenant")
+      "UPDATE ClientEntity c SET c.accessible = :accessible, c.modifiedOn = :modifiedOn WHERE c.clientId = :clientId AND c.tenantId = :tenant")
+  void changeVisibility(
+      @Param("tenant") int tenant,
+      @Param("clientId") String clientId,
+      @Param("accessible") boolean accessible,
+      @Param("modifiedOn") ZonedDateTime modifiedOn);
+
+  /**
+   * Changes the activation status of a specific client entity by its ID and tenant ID.
+   *
+   * @param tenant the tenant ID
+   * @param clientId the ID of the client entity
+   * @param enabled the new activation status
+   * @param modifiedOn the date and time when the modification was made
+   */
+  @Modifying
+  @Query(
+      "UPDATE ClientEntity c SET c.enabled = :enabled, c.modifiedOn = :modifiedOn WHERE c.clientId = :clientId AND c.tenantId = :tenant")
   void changeActivation(
       @Param("tenant") int tenant,
       @Param("clientId") String clientId,
