@@ -67,16 +67,58 @@ public abstract class ActionInterpreter
     protected abstract ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description);
 }
 
-public record EntryData(int Id, string Title, int? ParentId = null, string ParentTitle = null) : HistoryData
+public record EntryData : HistoryData
 {
+    public int Id { get; }
+    public string Title { get; }
+    public string ParentTitle { get; }
+    public int? ParentId { get; }
+    
+    public EntryData(string id, string title, int? parentId = null, string parentTitle = null)
+    {
+        Id = int.Parse(id);
+        Title = title;
+        ParentId = parentId;
+        ParentTitle = parentTitle;
+    }
+    
     public override int GetId() => ParentId ?? 0;
 }
 
-public record RenameEntryData(int? Id, string OldTitle, string NewTitle, int? ParentId = null, string ParentTitle = null) : HistoryData;
+public record RenameEntryData : HistoryData
+{
+    public int? Id { get; }
+    public string OldTitle { get; }
+    public string NewTitle { get; }
+    public int? ParentId { get; }
+    public string ParentTitle { get; }
+    
+    public RenameEntryData(string id, string oldTitle, string newTitle, int? parentId = null, string parentTitle = null)
+    {
+        Id = string.IsNullOrEmpty(id) ? null : int.Parse(id);
+        OldTitle = oldTitle;
+        NewTitle = newTitle;
+        ParentId = parentId;
+        ParentTitle = parentTitle;
+    }
+}
 
 public record LinkData(string Title, string Id = null, string OldTitle = null, string Access = null) : HistoryData;
 
-public record EntryOperationData(int Id, string Title, int ToFolderId, string ToFolderTitle) : HistoryData
+public record EntryOperationData : HistoryData
 {
+    public int Id { get; }
+    public string Title { get; }
+    public int ToFolderId { get; }
+    public string ToFolderTitle { get; }
+    
+    public EntryOperationData(string id, string title, string toFolderId, string toFolderTitle)
+    {
+        Id = int.Parse(id);
+        Title = title;
+        ToFolderId = int.Parse(toFolderId);
+        ToFolderTitle = toFolderTitle;
+    }
+    
     public override int GetId() => ToFolderId;
 }

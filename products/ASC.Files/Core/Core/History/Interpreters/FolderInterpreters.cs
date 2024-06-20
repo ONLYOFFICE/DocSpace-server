@@ -32,7 +32,7 @@ public class FolderCreatedInterpreter : ActionInterpreter
     {
         var additionalDescription = GetAdditionalDescription(description);
 
-        return new ValueTask<HistoryData>(new EntryData(int.Parse(target), description[0], additionalDescription.ParentId, additionalDescription.ParentTitle));
+        return new ValueTask<HistoryData>(new EntryData(target, description[0], additionalDescription.ParentId, additionalDescription.ParentTitle));
     }
 }
 
@@ -42,7 +42,7 @@ public class FolderMovedInterpreter : ActionInterpreter
     {
         var splitTarget = target.Split(',');
 
-        return new ValueTask<HistoryData>(new EntryOperationData(int.Parse(splitTarget[0]), description[0], int.Parse(splitTarget[1]), description[2]));
+        return new ValueTask<HistoryData>(new EntryOperationData(splitTarget[0], description[0], splitTarget[1], description[2]));
     }
 }
 
@@ -52,7 +52,7 @@ public class FolderRenamedInterpreter : ActionInterpreter
     {
         var additionalDescription = GetAdditionalDescription(description);
         
-        return new ValueTask<HistoryData>(new RenameEntryData(int.Parse(target), description[1], description[0], additionalDescription.ParentId, 
+        return new ValueTask<HistoryData>(new RenameEntryData(target, description[1], description[0], additionalDescription.ParentId, 
             additionalDescription.ParentTitle));
     }
 }
@@ -63,7 +63,7 @@ public class FolderCopiedInterpreter : ActionInterpreter
     {
         var splitTarget = target.Split(',');
 
-        return new ValueTask<HistoryData>(new EntryOperationData(int.Parse(splitTarget[0]), description[0], int.Parse(splitTarget[1]), description[2]));
+        return new ValueTask<HistoryData>(new EntryOperationData(splitTarget[0], description[0], splitTarget[1], description[2]));
     }
 }
 
@@ -71,6 +71,6 @@ public class FolderDeletedInterpreter : ActionInterpreter
 {
     protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
     {
-        return new ValueTask<HistoryData>(new EntryData(int.Parse(target), description[0]));
+        return new ValueTask<HistoryData>(new EntryData(target, description[0]));
     }
 }

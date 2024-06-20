@@ -38,7 +38,7 @@ public class RoomCreateInterpreter : ActionInterpreter
 {
     protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
     {
-        return ValueTask.FromResult<HistoryData>(new EntryData(int.Parse(target), description[0]));
+        return ValueTask.FromResult<HistoryData>(new EntryData(target, description[0]));
     }
 }
 
@@ -48,7 +48,7 @@ public class RoomRenamedInterpreter : ActionInterpreter
     {
         var additionalDescription = GetAdditionalDescription(description);
         
-        return ValueTask.FromResult<HistoryData>(new RenameEntryData(int.Parse(target), additionalDescription.RoomOldTitle, description[0]));
+        return ValueTask.FromResult<HistoryData>(new RenameEntryData(target, additionalDescription.RoomOldTitle, description[0]));
     }
 }
 

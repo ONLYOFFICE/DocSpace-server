@@ -32,7 +32,7 @@ public class FileCreateInterpreter : ActionInterpreter
     {
         var additionalDescription = GetAdditionalDescription(description);
         
-        return new ValueTask<HistoryData>(new EntryData(int.Parse(target), description[0], additionalDescription.ParentId, additionalDescription.ParentTitle));
+        return new ValueTask<HistoryData>(new EntryData(target, description[0], additionalDescription.ParentId, additionalDescription.ParentTitle));
     }
 }
 
@@ -42,7 +42,7 @@ public class FileMovedInterpreter : ActionInterpreter
     {
         var splitTarget = target.Split(',');
 
-        return new ValueTask<HistoryData>(new EntryOperationData(int.Parse(splitTarget[0]), description[0], int.Parse(splitTarget[1]), description[2]));
+        return new ValueTask<HistoryData>(new EntryOperationData(splitTarget[0], description[0], splitTarget[1], description[2]));
     }
 }
 
@@ -52,7 +52,7 @@ public class FileUpdatedInterpreter : ActionInterpreter
     {
         var additionalDescription = GetAdditionalDescription(description);
 
-        return new ValueTask<HistoryData>(new EntryData(int.Parse(target), description[1], additionalDescription.ParentId, additionalDescription.ParentTitle));
+        return new ValueTask<HistoryData>(new EntryData(target, description[1], additionalDescription.ParentId, additionalDescription.ParentTitle));
     }
 }
 
@@ -60,7 +60,7 @@ public class FileDeletedInterpreter : ActionInterpreter
 {
     protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
     {
-        return new ValueTask<HistoryData>(new EntryData(int.Parse(target), description[0]));
+        return new ValueTask<HistoryData>(new EntryData(target, description[0]));
     }
 }
 
@@ -70,7 +70,7 @@ public class FileRenamedInterpreter : ActionInterpreter
     {
         var additionalDescription = GetAdditionalDescription(description);
         
-        return new ValueTask<HistoryData>(new RenameEntryData(int.Parse(target), description[1], description[0], additionalDescription.ParentId, 
+        return new ValueTask<HistoryData>(new RenameEntryData(target, description[1], description[0], additionalDescription.ParentId, 
             additionalDescription.ParentTitle));
     }
 }
@@ -81,7 +81,7 @@ public class FileUploadedInterpreter : ActionInterpreter
     {
         var additionalDescription = GetAdditionalDescription(description);
 
-        return new ValueTask<HistoryData>(new EntryData(int.Parse(target), description[0], additionalDescription.ParentId, additionalDescription.ParentTitle));
+        return new ValueTask<HistoryData>(new EntryData(target, description[0], additionalDescription.ParentId, additionalDescription.ParentTitle));
     }
 }
 
@@ -91,7 +91,7 @@ public class FileCopiedInterpreter : ActionInterpreter
     {
         var splitTarget = target.Split(',');
 
-        return new ValueTask<HistoryData>(new EntryOperationData(int.Parse(splitTarget[0]), description[0], int.Parse(splitTarget[1]), description[2]));
+        return new ValueTask<HistoryData>(new EntryOperationData(splitTarget[0], description[0], splitTarget[1], description[2]));
     }
 }
 
@@ -101,6 +101,6 @@ public class FileConvertedInterpreter : ActionInterpreter
     {
         var additionalDescription = GetAdditionalDescription(description);
 
-        return new ValueTask<HistoryData>(new EntryData(int.Parse(target), description[0], additionalDescription.ParentId, additionalDescription.ParentTitle));
+        return new ValueTask<HistoryData>(new EntryData(target, description[0], additionalDescription.ParentId, additionalDescription.ParentTitle));
     }
 }
