@@ -14,6 +14,8 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ClientSecretResponse implements Serializable {
+
+  /** The client secret. */
   @JsonProperty("client_secret")
   private String clientSecret;
 }

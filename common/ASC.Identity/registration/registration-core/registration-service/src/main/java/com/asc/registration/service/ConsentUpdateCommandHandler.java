@@ -10,6 +10,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * ConsentUpdateCommandHandler handles command operations related to updating client consents. It
+ * provides methods to revoke consents based on different query parameters.
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -19,13 +23,13 @@ public class ConsentUpdateCommandHandler {
   /**
    * Revokes user consent for a given client.
    *
-   * @param command the command containing client ID and principal name
+   * @param command the command containing client ID and principal id
    */
   @Transactional(timeout = 2, isolation = Isolation.REPEATABLE_READ)
   public void revokeConsent(RevokeClientConsentCommand command) {
     log.info("Trying to revoke user consent");
 
     consentCommandRepository.revokeConsent(
-        new ClientId(UUID.fromString(command.getClientId())), command.getPrincipalName());
+        new ClientId(UUID.fromString(command.getClientId())), command.getPrincipalId());
   }
 }

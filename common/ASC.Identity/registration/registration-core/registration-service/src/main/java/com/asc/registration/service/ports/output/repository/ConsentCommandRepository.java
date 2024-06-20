@@ -11,7 +11,7 @@ public interface ConsentCommandRepository {
    * Revokes the consent of a specific client for a given principal (user).
    *
    * @param clientId The unique client ID whose consent is to be revoked.
-   * @param principalName The name of the principal (user) whose consent is to be revoked.
+   * @param principalId The id of the principal (user) whose consent is to be revoked.
    */
-  void revokeConsent(ClientId clientId, String principalName);
+  void revokeConsent(ClientId clientId, String principalId);
 }

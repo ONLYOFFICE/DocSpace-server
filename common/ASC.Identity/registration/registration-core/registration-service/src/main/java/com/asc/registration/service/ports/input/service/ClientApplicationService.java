@@ -1,13 +1,14 @@
 package com.asc.registration.service.ports.input.service;
 
 import com.asc.common.core.domain.entity.Audit;
+import com.asc.common.service.transfer.response.ClientResponse;
 import com.asc.registration.service.transfer.request.create.CreateTenantClientCommand;
-import com.asc.registration.service.transfer.request.fetch.TenantClientInfoQuery;
-import com.asc.registration.service.transfer.request.fetch.TenantClientQuery;
-import com.asc.registration.service.transfer.request.fetch.TenantClientsPaginationQuery;
-import com.asc.registration.service.transfer.request.fetch.TenantConsentsPaginationQuery;
+import com.asc.registration.service.transfer.request.fetch.*;
 import com.asc.registration.service.transfer.request.update.*;
-import com.asc.registration.service.transfer.response.*;
+import com.asc.registration.service.transfer.response.ClientInfoResponse;
+import com.asc.registration.service.transfer.response.ClientSecretResponse;
+import com.asc.registration.service.transfer.response.ConsentResponse;
+import com.asc.registration.service.transfer.response.PageableResponse;
 import jakarta.validation.Valid;
 
 /**
@@ -16,8 +17,9 @@ import jakarta.validation.Valid;
  * retrieving client information, as well as handling client consents and activation states.
  */
 public interface ClientApplicationService {
+
   /**
-   * Retrieves detailed information about a specific client.
+   * Retrieves detailed information about a specific tenant client. Accessible by admin users only.
    *
    * @param query The query containing the tenant ID and client ID.
    * @return A response containing the client's details.
@@ -25,15 +27,25 @@ public interface ClientApplicationService {
   ClientResponse getClient(@Valid TenantClientQuery query);
 
   /**
-   * Retrieves basic information about a specific client.
+   * Retrieves basic information about a specific client. Fetches either only public clients with
+   * the client ID or any client with both client ID and tenant ID.
    *
    * @param query The query containing the tenant ID and client ID.
    * @return A response containing the client's basic information.
    */
-  ClientInfoResponse getClientInfo(@Valid TenantClientInfoQuery query);
+  ClientInfoResponse getClientInfo(@Valid ClientInfoQuery query);
 
   /**
-   * Retrieves a paginated list of clients for a specific tenant.
+   * Retrieves a paginated list of basic client information for a specific tenant. Fetches either
+   * only public clients or any clients for the specified tenant ID.
+   *
+   * @param query The query containing the tenant ID, pagination parameters, and other filters.
+   * @return A pageable response containing a list of client info responses.
+   */
+  PageableResponse<ClientInfoResponse> getClientsInfo(@Valid ClientInfoPaginationQuery query);
+
+  /**
+   * Retrieves a paginated list of clients for a specific tenant. Accessible by admin users only.
    *
    * @param query The query containing pagination parameters and tenant ID.
    * @return A pageable response containing a list of client responses.
@@ -41,12 +53,13 @@ public interface ClientApplicationService {
   PageableResponse<ClientResponse> getClients(@Valid TenantClientsPaginationQuery query);
 
   /**
-   * Retrieves a paginated list of consents for a specific tenant.
+   * Retrieves a paginated list of consents for a specific principal name. Returns consents for
+   * private tenant apps and all the public apps.
    *
-   * @param query The query containing pagination parameters, tenant ID, and principal name.
+   * @param query The query containing pagination parameters and principal name.
    * @return A pageable response containing a list of consent responses.
    */
-  PageableResponse<ConsentResponse> getConsents(@Valid TenantConsentsPaginationQuery query);
+  PageableResponse<ConsentResponse> getConsents(@Valid ConsentsPaginationQuery query);
 
   /**
    * Creates a new client for a specific tenant.
@@ -76,6 +89,14 @@ public interface ClientApplicationService {
   void changeActivation(@Valid Audit audit, @Valid ChangeTenantClientActivationCommand command);
 
   /**
+   * Changes the visibility state of a specific client.
+   *
+   * @param audit The audit information containing details about the user performing the operation.
+   * @param command The command containing the tenant ID, client ID, and the new visibility state.
+   */
+  void changeVisibility(@Valid Audit audit, @Valid ChangeTenantClientVisibilityCommand command);
+
+  /**
    * Updates the details of a specific client.
    *
    * @param audit The audit information containing details about the user performing the operation.
@@ -96,7 +117,7 @@ public interface ClientApplicationService {
    * Revokes the consent of a specific client.
    *
    * @param audit The audit information containing details about the user performing the operation.
-   * @param command The command containing the tenant ID, client ID, and principal name.
+   * @param command The command containing the client ID and principal name.
    */
   void revokeClientConsent(@Valid Audit audit, @Valid RevokeClientConsentCommand command);
 }

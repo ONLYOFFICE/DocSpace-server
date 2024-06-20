@@ -15,10 +15,12 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TenantClientQuery {
+  /** The tenant ID to fetch applications for. */
   @Min(value = 1, message = "tenant id must be greater than or equal to 1")
   @JsonProperty("tenant_id")
   private int tenantId;
 
+  /** The client ID to fetch. */
   @NotBlank(message = "client id must not be blank")
   @JsonProperty("client_id")
   private String clientId;

@@ -13,9 +13,19 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PageableResponse<D> {
+
+  /** The data contained in the paginated response. */
   private Iterable<D> data;
+
+  /** The current page number. */
   private int page;
+
+  /** The maximum number of items per page. */
   private int limit;
+
+  /** The next page number, if available. */
   private Integer next;
+
+  /** The previous page number, if available. */
   private Integer previous;
 }

@@ -3,6 +3,8 @@ package com.asc.registration.service.mapper;
 import com.asc.common.core.domain.value.TenantId;
 import com.asc.common.core.domain.value.enums.AuthenticationMethod;
 import com.asc.common.core.domain.value.enums.ClientStatus;
+import com.asc.common.core.domain.value.enums.ClientVisibility;
+import com.asc.common.service.transfer.response.ClientResponse;
 import com.asc.registration.core.domain.entity.Client;
 import com.asc.registration.core.domain.value.ClientInfo;
 import com.asc.registration.core.domain.value.ClientRedirectInfo;
@@ -10,7 +12,6 @@ import com.asc.registration.core.domain.value.ClientTenantInfo;
 import com.asc.registration.core.domain.value.ClientWebsiteInfo;
 import com.asc.registration.service.transfer.request.create.CreateTenantClientCommand;
 import com.asc.registration.service.transfer.response.ClientInfoResponse;
-import com.asc.registration.service.transfer.response.ClientResponse;
 import com.asc.registration.service.transfer.response.ClientSecretResponse;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -31,6 +32,9 @@ public class ClientDataMapper {
    * @return The mapped Client domain object.
    */
   public Client toDomain(CreateTenantClientCommand command) {
+    if (command == null)
+      throw new IllegalArgumentException("CreateTenantClientCommand cannot be null");
+
     return Client.Builder.builder()
         .authenticationMethods(
             command.isAllowPkce()
@@ -50,9 +54,9 @@ public class ClientDataMapper {
                 command.getRedirectUris(),
                 command.getAllowedOrigins(),
                 Set.of(command.getLogoutRedirectUri())))
-        .clientTenantInfo(
-            new ClientTenantInfo(new TenantId(command.getTenantId()), command.getTenantUrl()))
+        .clientTenantInfo(new ClientTenantInfo(new TenantId(command.getTenantId())))
         .scopes(command.getScopes())
+        .clientVisibility(command.isPublic() ? ClientVisibility.PUBLIC : ClientVisibility.PRIVATE)
         .build();
   }
 
@@ -63,6 +67,8 @@ public class ClientDataMapper {
    * @return The mapped ClientResponse DTO.
    */
   public ClientResponse toClientResponse(Client client) {
+    if (client == null) throw new IllegalArgumentException("Client cannot be null");
+
     var modified = client.getClientModificationInfo();
     var websiteInfo = client.getClientWebsiteInfo();
     return ClientResponse.builder()
@@ -79,7 +85,6 @@ public class ClientDataMapper {
                 .map(AuthenticationMethod::getMethod)
                 .collect(Collectors.toSet()))
         .tenant(client.getClientTenantInfo().tenantId().getValue())
-        .tenantUrl(client.getClientTenantInfo().tenantUrl())
         .redirectUris(client.getClientRedirectInfo().redirectUris())
         .allowedOrigins(client.getClientRedirectInfo().allowedOrigins())
         .logoutRedirectUri(client.getClientRedirectInfo().logoutRedirectUris())
@@ -94,6 +99,7 @@ public class ClientDataMapper {
             modified == null
                 ? client.getClientCreationInfo().getCreatedBy()
                 : modified.getModifiedBy())
+        .isPublic(client.getVisibility().equals(ClientVisibility.PUBLIC))
         .enabled(client.getStatus().equals(ClientStatus.ENABLED))
         .invalidated(client.getStatus().equals(ClientStatus.INVALIDATED))
         .build();
@@ -106,6 +112,8 @@ public class ClientDataMapper {
    * @return The mapped ClientSecretResponse DTO.
    */
   public ClientSecretResponse toClientSecret(Client client) {
+    if (client == null) throw new IllegalArgumentException("Client cannot be null");
+
     return ClientSecretResponse.builder().clientSecret(client.getSecret().value()).build();
   }
 
@@ -116,11 +124,36 @@ public class ClientDataMapper {
    * @return The mapped ClientInfoResponse DTO.
    */
   public ClientInfoResponse toClientInfoResponse(Client client) {
+    if (client == null) throw new IllegalArgumentException("Client cannot be null");
+
+    var modified = client.getClientModificationInfo();
     var websiteInfo = client.getClientWebsiteInfo();
     return ClientInfoResponse.builder()
         .name(client.getClientInfo().name())
-        .logo(client.getClientInfo().logo())
+        .clientId(client.getId().getValue().toString())
+        .description(client.getClientInfo().description())
         .websiteUrl(websiteInfo == null ? null : websiteInfo.getWebsiteUrl())
+        .termsUrl(websiteInfo == null ? null : websiteInfo.getTermsUrl())
+        .policyUrl(websiteInfo == null ? null : websiteInfo.getPolicyUrl())
+        .logo(client.getClientInfo().logo())
+        .authenticationMethods(
+            client.getAuthenticationMethods().stream()
+                .map(AuthenticationMethod::getMethod)
+                .collect(Collectors.toSet()))
+        .redirectUris(client.getClientRedirectInfo().redirectUris())
+        .allowedOrigins(client.getClientRedirectInfo().allowedOrigins())
+        .logoutRedirectUri(client.getClientRedirectInfo().logoutRedirectUris())
+        .scopes(client.getScopes())
+        .createdOn(client.getClientCreationInfo().getCreatedOn())
+        .createdBy(client.getClientCreationInfo().getCreatedBy())
+        .modifiedOn(
+            modified == null
+                ? client.getClientCreationInfo().getCreatedOn()
+                : modified.getModifiedOn())
+        .modifiedBy(
+            modified == null
+                ? client.getClientCreationInfo().getCreatedBy()
+                : modified.getModifiedBy())
         .build();
   }
 }

@@ -5,7 +5,8 @@ import com.asc.common.core.domain.event.DomainEventPublisher;
 import com.asc.common.core.domain.value.ClientId;
 import com.asc.common.core.domain.value.TenantId;
 import com.asc.common.core.domain.value.enums.AuthenticationMethod;
-import com.asc.common.utilities.cipher.EncryptionService;
+import com.asc.common.service.transfer.response.ClientResponse;
+import com.asc.common.utilities.crypto.EncryptionService;
 import com.asc.registration.core.domain.ClientDomainService;
 import com.asc.registration.core.domain.event.ClientEvent;
 import com.asc.registration.core.domain.exception.ClientNotFoundException;
@@ -14,11 +15,7 @@ import com.asc.registration.core.domain.value.ClientRedirectInfo;
 import com.asc.registration.service.mapper.ClientDataMapper;
 import com.asc.registration.service.ports.output.repository.ClientCommandRepository;
 import com.asc.registration.service.ports.output.repository.ClientQueryRepository;
-import com.asc.registration.service.transfer.request.update.ChangeTenantClientActivationCommand;
-import com.asc.registration.service.transfer.request.update.DeleteTenantClientCommand;
-import com.asc.registration.service.transfer.request.update.RegenerateTenantClientSecretCommand;
-import com.asc.registration.service.transfer.request.update.UpdateTenantClientCommand;
-import com.asc.registration.service.transfer.response.ClientResponse;
+import com.asc.registration.service.transfer.request.update.*;
 import com.asc.registration.service.transfer.response.ClientSecretResponse;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -37,12 +34,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @RequiredArgsConstructor
 public class ClientUpdateCommandHandler {
+  private final ClientCommandRepository clientCommandRepository;
+  private final ClientDataMapper clientDataMapper;
   private final ClientDomainService clientDomainService;
   private final ClientQueryRepository clientQueryRepository;
-  private final ClientCommandRepository clientCommandRepository;
-  private final EncryptionService encryptionService;
   private final DomainEventPublisher<ClientEvent> messagePublisher;
-  private final ClientDataMapper clientDataMapper;
+  private final EncryptionService encryptionService;
 
   /**
    * Regenerates the client secret.
@@ -58,7 +55,7 @@ public class ClientUpdateCommandHandler {
 
     var client =
         clientQueryRepository
-            .findClientByClientIdAndTenant(
+            .findByClientIdAndTenantId(
                 new ClientId(UUID.fromString(command.getClientId())),
                 new TenantId(command.getTenantId()))
             .orElseThrow(
@@ -77,9 +74,41 @@ public class ClientUpdateCommandHandler {
     MDC.remove("client_secret");
 
     messagePublisher.publish(event);
+
     var response = clientDataMapper.toClientSecret(clientCommandRepository.saveClient(client));
     response.setClientSecret(clientSecret);
+
     return response;
+  }
+
+  @Transactional(timeout = 2, isolation = Isolation.REPEATABLE_READ)
+  public void changeVisibility(Audit audit, ChangeTenantClientVisibilityCommand command) {
+    log.info("Trying to change client visibility");
+
+    var client =
+        clientQueryRepository
+            .findByClientIdAndTenantId(
+                new ClientId(UUID.fromString(command.getClientId())),
+                new TenantId(command.getTenantId()))
+            .orElseThrow(
+                () ->
+                    new ClientNotFoundException(
+                        String.format(
+                            "Client with id %s for tenant %d was not found",
+                            command.getClientId(), command.getTenantId())));
+
+    if (command.isPublic()) {
+      log.info("Changing client visibility to public");
+      var event = clientDomainService.makeClientPublic(audit, client);
+      clientCommandRepository.saveClient(client);
+      messagePublisher.publish(event);
+      return;
+    }
+
+    log.info("Changing client visibility to private");
+    var event = clientDomainService.makeClientPrivate(audit, client);
+    clientCommandRepository.saveClient(client);
+    messagePublisher.publish(event);
   }
 
   /**
@@ -95,7 +124,7 @@ public class ClientUpdateCommandHandler {
 
     var client =
         clientQueryRepository
-            .findClientByClientIdAndTenant(
+            .findByClientIdAndTenantId(
                 new ClientId(UUID.fromString(command.getClientId())),
                 new TenantId(command.getTenantId()))
             .orElseThrow(
@@ -133,7 +162,7 @@ public class ClientUpdateCommandHandler {
 
     var client =
         clientQueryRepository
-            .findClientByClientIdAndTenant(
+            .findByClientIdAndTenantId(
                 new ClientId(UUID.fromString(command.getClientId())),
                 new TenantId(command.getTenantId()))
             .orElseThrow(
@@ -169,6 +198,9 @@ public class ClientUpdateCommandHandler {
           audit, client, AuthenticationMethod.PKCE_AUTHENTICATION);
     }
 
+    if (command.isPublic()) clientDomainService.makeClientPublic(audit, client);
+    else clientDomainService.makeClientPrivate(audit, client);
+
     messagePublisher.publish(event);
     return clientDataMapper.toClientResponse(clientCommandRepository.saveClient(client));
   }
@@ -185,7 +217,7 @@ public class ClientUpdateCommandHandler {
 
     var client =
         clientQueryRepository
-            .findClientByClientIdAndTenant(
+            .findByClientIdAndTenantId(
                 new ClientId(UUID.fromString(command.getClientId())),
                 new TenantId(command.getTenantId()))
             .orElseThrow(
