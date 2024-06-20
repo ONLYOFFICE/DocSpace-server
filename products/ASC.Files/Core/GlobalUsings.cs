@@ -108,6 +108,7 @@ global using ASC.Files.Core.Exceptions;
 global using ASC.Files.Core.Entries;
 global using ASC.Files.Core.Helpers;
 global using ASC.Files.Core.Core.History;
+global using ASC.Files.Core.Core.History.Interpreters;
 global using ASC.Files.Core.IntegrationEvents.Events;
 global using ASC.Files.Core.Log;
 global using ASC.Files.Core.Resources;

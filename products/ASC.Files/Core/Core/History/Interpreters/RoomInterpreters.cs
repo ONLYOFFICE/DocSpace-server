@@ -32,8 +32,6 @@ public class RoomTagsInterpreter : ActionInterpreter
     {
         return ValueTask.FromResult<HistoryData>(new TagData(description[1].Split(',')));
     }
-    
-    private record TagData(string[] Tags) : HistoryData;
 }
 
 public class RoomCreateInterpreter : ActionInterpreter
@@ -202,3 +200,5 @@ public record GroupHistoryData : HistoryData
     public string Access { get; set; }
     public string OldAccess { get; set; }
 }
+
+public record TagData(string[] Tags) : HistoryData;

@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using LinkData = ASC.Files.Core.Core.History.LinkData;
+
 namespace ASC.Files.Core.Core.Entries;
 
 public record HistoryEntry
@@ -65,6 +67,13 @@ public record HistoryEntry
     }
 }
 
+[JsonDerivedType(typeof(EntryData))]
+[JsonDerivedType(typeof(EntryOperationData))]
+[JsonDerivedType(typeof(GroupHistoryData))]
+[JsonDerivedType(typeof(LinkData))]
+[JsonDerivedType(typeof(RenameEntryData))]
+[JsonDerivedType(typeof(TagData))]
+[JsonDerivedType(typeof(UserHistoryData))]
 public abstract record HistoryData
 {
     public virtual int GetId() => 0;

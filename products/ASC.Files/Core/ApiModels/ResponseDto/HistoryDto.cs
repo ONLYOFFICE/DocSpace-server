@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Files.Core.Core.History;
-
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public record HistoryDto
@@ -33,7 +31,7 @@ public record HistoryDto
     public HistoryAction Action { get; init; }
     public EmployeeDto Initiator { get; init; }
     public ApiDateTime Date { get; init; }
-    public object Data { get; init; }
+    public HistoryData Data { get; init; }
     public List<HistoryDto> Related { get; set; }
 }
 
