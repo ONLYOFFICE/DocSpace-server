@@ -16,13 +16,9 @@ import org.springframework.amqp.core.AmqpTemplate;
 
 @ExtendWith(MockitoExtension.class)
 public class RabbitClientAuditMessagePublisherTest {
-
   @InjectMocks private RabbitClientAuditMessagePublisher publisher;
-
   @Mock private RabbitMQConfiguration configuration;
-
   @Mock private AmqpTemplate amqpClient;
-
   @Mock private AuditMessage auditMessage;
 
   private RabbitMQGenericQueueConfiguration queueConfig;

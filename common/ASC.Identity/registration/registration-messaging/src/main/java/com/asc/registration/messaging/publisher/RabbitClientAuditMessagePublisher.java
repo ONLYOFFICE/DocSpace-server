@@ -20,7 +20,6 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class RabbitClientAuditMessagePublisher implements ClientAuditMessagePublisher {
-
   private final RabbitMQConfiguration configuration;
   private final AmqpTemplate amqpClient;
 
