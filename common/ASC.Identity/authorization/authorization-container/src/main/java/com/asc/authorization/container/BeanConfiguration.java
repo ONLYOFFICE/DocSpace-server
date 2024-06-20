@@ -1,7 +1,9 @@
 package com.asc.authorization.container;
 
-import com.asc.common.utilities.cipher.AesEncryptionService;
-import com.asc.common.utilities.cipher.EncryptionService;
+import com.asc.common.utilities.crypto.AesEncryptionService;
+import com.asc.common.utilities.crypto.EncryptionService;
+import com.asc.common.utilities.crypto.HashingService;
+import com.asc.common.utilities.crypto.SHA256HashingService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -32,5 +34,11 @@ public class BeanConfiguration {
   @ConditionalOnMissingBean
   public EncryptionService encryptionService(@Value("${application.secret}") String secret) {
     return new AesEncryptionService(secret);
+  }
+
+  @Bean
+  @ConditionalOnMissingBean
+  public HashingService hashingService() {
+    return new SHA256HashingService();
   }
 }

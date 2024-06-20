@@ -12,11 +12,6 @@
 
     <artifactId>authorization-container</artifactId>
 
-    <properties>
-        <logback.gelf.version>5.0.1</logback.gelf.version>
-        <logback.logstash.version>7.4</logback.logstash.version>
-    </properties>
-
     <dependencies>
         <!-- Internal Dependencies -->
         <dependency>
@@ -34,6 +29,10 @@
         <dependency>
             <groupId>com.asc</groupId>
             <artifactId>common-application</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.asc</groupId>
+            <artifactId>infrastructure-configuration</artifactId>
         </dependency>
 
         <!-- Spring Boot Dependencies -->
@@ -74,7 +73,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
                     <image>
-                        <name>onlyoffice-authorization-service:${project.version}</name>
+                        <name>onlyoffice-authorization:${project.version}</name>
                     </image>
                 </configuration>
                 <executions>
