@@ -1,4 +1,4 @@
-package com.asc.authorization.application.exception;
+package com.asc.authorization.application.exception.client;
 
 /** Exception thrown when a registered client does not have the necessary permissions. */
 public class RegisteredClientPermissionException extends RuntimeException {

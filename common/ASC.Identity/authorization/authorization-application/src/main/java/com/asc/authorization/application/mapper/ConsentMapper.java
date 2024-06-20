@@ -1,8 +1,9 @@
 package com.asc.authorization.application.mapper;
 
 import com.asc.common.data.consent.entity.ConsentEntity;
+import com.asc.common.data.scope.entity.ScopeEntity;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
+import java.util.stream.Collectors;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationConsent;
 import org.springframework.stereotype.Component;
 
@@ -20,8 +21,11 @@ public class ConsentMapper {
   public ConsentEntity toEntity(OAuth2AuthorizationConsent authorizationConsent) {
     return ConsentEntity.builder()
         .registeredClientId(authorizationConsent.getRegisteredClientId())
-        .principalName(authorizationConsent.getPrincipalName())
-        .scopes(String.join(",", authorizationConsent.getScopes()))
+        .principalId(authorizationConsent.getPrincipalName())
+        .scopes(
+            authorizationConsent.getScopes().stream()
+                .map(s -> ScopeEntity.builder().name(s).build())
+                .collect(Collectors.toSet()))
         .modifiedAt(ZonedDateTime.now())
         .invalidated(false)
         .build();
@@ -35,8 +39,8 @@ public class ConsentMapper {
    */
   public OAuth2AuthorizationConsent toConsent(ConsentEntity consent) {
     var registeredClientId = consent.getRegisteredClientId();
-    var builder = OAuth2AuthorizationConsent.withId(registeredClientId, consent.getPrincipalName());
-    Arrays.stream(consent.getScopes().split(",")).forEach(builder::scope);
+    var builder = OAuth2AuthorizationConsent.withId(registeredClientId, consent.getPrincipalId());
+    consent.getScopes().stream().map(ScopeEntity::getName).forEach(builder::scope);
     return builder.build();
   }
 }

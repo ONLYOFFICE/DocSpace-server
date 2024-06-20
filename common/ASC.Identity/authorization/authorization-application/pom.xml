@@ -12,14 +12,6 @@
 
     <artifactId>authorization-application</artifactId>
 
-    <properties>
-        <bucket4j.version>8.9.0</bucket4j.version>
-        <guava.version>32.1.3-jre</guava.version>
-        <lettuce.version>6.3.1.RELEASE</lettuce.version>
-        <resilience4j.version>2.2.0</resilience4j.version>
-        <spring.oauth2.server.version>1.3.0</spring.oauth2.server.version>
-    </properties>
-
     <dependencies>
         <!-- Internal Dependencies -->
         <dependency>
@@ -33,6 +25,10 @@
         <dependency>
             <groupId>com.asc</groupId>
             <artifactId>common-data</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.asc</groupId>
+            <artifactId>common-service</artifactId>
         </dependency>
         <dependency>
             <groupId>com.asc</groupId>
@@ -57,15 +53,22 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
+        <!-- Hazelcast -->
+        <dependency>
+            <groupId>com.hazelcast</groupId>
+            <artifactId>hazelcast-spring</artifactId>
+            <version>${hazelcast.version}</version>
+        </dependency>
+
         <!-- Spring Security OAuth2 -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-crypto</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-oauth2-authorization-server</artifactId>
             <version>${spring.oauth2.server.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-crypto</artifactId>
         </dependency>
 
         <!-- Resilience4j -->

@@ -16,4 +16,7 @@ public class AnonymousFilterSecurityConfigurationProperties {
 
   /** The parameter name for the client ID. Default value is "client_id". */
   private String clientIdParam = "client_id";
+
+  /** The name of the redirect header. Default value is "X-Redirect-URI". */
+  private String redirectHeader = "X-Redirect-URI";
 }

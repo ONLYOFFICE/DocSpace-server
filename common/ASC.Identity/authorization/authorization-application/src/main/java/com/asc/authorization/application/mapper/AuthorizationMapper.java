@@ -44,26 +44,22 @@ public class AuthorizationMapper {
   /**
    * Converts an {@link AuthorizationEntity} to an {@link OAuth2Authorization}.
    *
-   * @param entity the AuthorizationEntity to convert.
-   * @param client the RegisteredClient associated with the authorization.
-   * @return the OAuth2Authorization.
+   * @param entity the AuthorizationEntity to convert
+   * @param client the RegisteredClient associated with the authorization
+   * @return the OAuth2Authorization
    */
   public OAuth2Authorization fromEntity(AuthorizationEntity entity, RegisteredClient client) {
-    if (client == null) {
-      return null;
-    }
+    if (client == null) return null;
     var builder =
         OAuth2Authorization.withRegisteredClient(client)
             .id(entity.getId())
-            .principalName(entity.getPrincipalName())
+            .principalName(entity.getPrincipalId())
             .authorizationGrantType(
                 resolveAuthorizationGrantType(entity.getAuthorizationGrantType()))
             .authorizedScopes(StringUtils.commaDelimitedListToSet(entity.getAuthorizedScopes()))
             .attributes(attributes -> attributes.putAll(parseMap(entity.getAttributes())));
 
-    if (entity.getState() != null) {
-      builder.attribute(OAuth2ParameterNames.STATE, entity.getState());
-    }
+    if (entity.getState() != null) builder.attribute(OAuth2ParameterNames.STATE, entity.getState());
 
     if (entity.getAuthorizationCodeValue() != null) {
       var authorizationCode =
@@ -116,23 +112,22 @@ public class AuthorizationMapper {
   /**
    * Converts an {@link OAuth2Authorization} to an {@link AuthorizationEntity}.
    *
-   * @param authorization the OAuth2Authorization to convert.
-   * @return the AuthorizationEntity.
+   * @param authorization the OAuth2Authorization to convert
+   * @return the AuthorizationEntity
    */
   public AuthorizationEntity toEntity(OAuth2Authorization authorization) {
     var builder =
         AuthorizationEntity.builder()
             .id(authorization.getId())
             .registeredClientId(authorization.getRegisteredClientId())
-            .principalName(authorization.getPrincipalName())
+            .principalId(authorization.getPrincipalName())
             .authorizationGrantType(authorization.getAuthorizationGrantType().getValue())
             .authorizedScopes(
                 StringUtils.collectionToCommaDelimitedString(authorization.getAuthorizedScopes()))
             .attributes(writeMap(authorization.getAttributes()));
 
-    if (authorization.getAttribute(OAuth2ParameterNames.STATE) != null) {
+    if (authorization.getAttribute(OAuth2ParameterNames.STATE) != null)
       builder.state(authorization.getAttribute(OAuth2ParameterNames.STATE));
-    }
 
     var authorizationCode = authorization.getToken(OAuth2AuthorizationCode.class);
     if (authorizationCode != null) {
@@ -174,10 +169,62 @@ public class AuthorizationMapper {
   }
 
   /**
+   * Merges the fields of the update {@link AuthorizationEntity} into the existing {@link
+   * AuthorizationEntity}.
+   *
+   * @param existing the existing AuthorizationEntity to merge into
+   * @param update the AuthorizationEntity with updated fields
+   * @return the merged AuthorizationEntity
+   */
+  public AuthorizationEntity merge(AuthorizationEntity existing, AuthorizationEntity update) {
+    if (update.getId() != null) existing.setId(update.getId());
+    if (update.getRegisteredClientId() != null)
+      existing.setRegisteredClientId(update.getRegisteredClientId());
+    if (update.getPrincipalId() != null) existing.setPrincipalId(update.getPrincipalId());
+    if (update.getAuthorizationGrantType() != null)
+      existing.setAuthorizationGrantType(update.getAuthorizationGrantType());
+    if (update.getAuthorizedScopes() != null)
+      existing.setAuthorizedScopes(update.getAuthorizedScopes());
+    if (update.getAttributes() != null) existing.setAttributes(update.getAttributes());
+    if (update.getState() != null) existing.setState(update.getState());
+    if (update.getAuthorizationCodeValue() != null)
+      existing.setAuthorizationCodeValue(update.getAuthorizationCodeValue());
+    if (update.getAuthorizationCodeIssuedAt() != null)
+      existing.setAuthorizationCodeIssuedAt(update.getAuthorizationCodeIssuedAt());
+    if (update.getAuthorizationCodeExpiresAt() != null)
+      existing.setAuthorizationCodeExpiresAt(update.getAuthorizationCodeExpiresAt());
+    if (update.getAuthorizationCodeMetadata() != null)
+      existing.setAuthorizationCodeMetadata(update.getAuthorizationCodeMetadata());
+    if (update.getAccessTokenValue() != null)
+      existing.setAccessTokenValue(update.getAccessTokenValue());
+    if (update.getAccessTokenIssuedAt() != null)
+      existing.setAccessTokenIssuedAt(update.getAccessTokenIssuedAt());
+    if (update.getAccessTokenExpiresAt() != null)
+      existing.setAccessTokenExpiresAt(update.getAccessTokenExpiresAt());
+    if (update.getAccessTokenMetadata() != null)
+      existing.setAccessTokenMetadata(update.getAccessTokenMetadata());
+    if (update.getAccessTokenType() != null)
+      existing.setAccessTokenType(update.getAccessTokenType());
+    if (update.getAccessTokenScopes() != null)
+      existing.setAccessTokenScopes(update.getAccessTokenScopes());
+    if (update.getRefreshTokenValue() != null)
+      existing.setRefreshTokenValue(update.getRefreshTokenValue());
+    if (update.getRefreshTokenIssuedAt() != null)
+      existing.setRefreshTokenIssuedAt(update.getRefreshTokenIssuedAt());
+    if (update.getRefreshTokenExpiresAt() != null)
+      existing.setRefreshTokenExpiresAt(update.getRefreshTokenExpiresAt());
+    if (update.getRefreshTokenMetadata() != null)
+      existing.setRefreshTokenMetadata(update.getRefreshTokenMetadata());
+    if (update.getTenantId() != null) existing.setTenantId(update.getTenantId());
+
+    return existing;
+  }
+
+  /**
    * Parses a JSON string to a Map.
    *
-   * @param data the JSON string.
-   * @return the parsed Map.
+   * @param data the JSON string
+   * @return the parsed Map
    */
   private Map<String, Object> parseMap(String data) {
     if (data == null || data.isBlank()) {
@@ -193,8 +240,8 @@ public class AuthorizationMapper {
   /**
    * Converts a Map to a JSON string.
    *
-   * @param metadata the Map.
-   * @return the JSON string.
+   * @param metadata the Map
+   * @return the JSON string
    */
   private String writeMap(Map<String, Object> metadata) {
     try {
@@ -207,8 +254,8 @@ public class AuthorizationMapper {
   /**
    * Resolves an {@link AuthorizationGrantType} from a string.
    *
-   * @param authorizationGrantType the string representation.
-   * @return the AuthorizationGrantType.
+   * @param authorizationGrantType the string representation
+   * @return the AuthorizationGrantType
    */
   private static AuthorizationGrantType resolveAuthorizationGrantType(
       String authorizationGrantType) {

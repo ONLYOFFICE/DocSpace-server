@@ -1,10 +1,11 @@
 package com.asc.authorization.application.security.jwks;
 
 import com.asc.authorization.application.mapper.KeyPairMapper;
+import com.asc.authorization.application.security.oauth.authorities.TenantAuthority;
 import com.asc.authorization.data.key.entity.KeyPair;
 import com.asc.authorization.data.key.repository.JpaKeyPairRepository;
 import com.asc.common.core.domain.value.KeyPairType;
-import com.asc.common.utilities.cipher.EncryptionService;
+import com.asc.common.utilities.crypto.EncryptionService;
 import com.nimbusds.jose.KeySourceException;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSelector;
@@ -38,7 +39,6 @@ public class KeyPairRepositoryJWKSource
 
   private final EncryptionService encryptionService;
   private final JpaKeyPairRepository jpaKeyPairRepository;
-
   private final KeyPairMapper keyPairMapper;
 
   private List<KeyPair> keyPairs = new ArrayList<>();
@@ -55,6 +55,7 @@ public class KeyPairRepositoryJWKSource
             .filter(p -> p.getPairType().equals(keyPairGenerator.type()))
             .map(
                 pair -> {
+                  // Decrypt the private key for internal use
                   pair.setPrivateKey(encryptionService.decrypt(pair.getPrivateKey()));
                   return pair;
                 })
@@ -75,16 +76,20 @@ public class KeyPairRepositoryJWKSource
       log.debug("Found no certificates of this type. Generating a new one");
       MDC.clear();
       var pair = keyPairGenerator.generateKeyPair();
-      keyPairs.add(
-          KeyPair.builder()
-              .publicKey(keyPairMapper.toString(pair.getPublic()))
-              .privateKey(keyPairMapper.toString(pair.getPrivate()))
-              .pairType(keyPairGenerator.type())
-              .build());
-      jpaKeyPairRepository.save(
+      var keyPair =
           KeyPair.builder()
               .publicKey(keyPairMapper.toString(pair.getPublic()))
               .privateKey(encryptionService.encrypt(keyPairMapper.toString(pair.getPrivate())))
+              .pairType(keyPairGenerator.type())
+              .build();
+      // Save the encrypted private key to the repository
+      jpaKeyPairRepository.save(keyPair);
+      // Add the key pair with the decrypted private key for internal use
+      keyPairs.add(
+          KeyPair.builder()
+              .id(keyPair.getId())
+              .publicKey(keyPairMapper.toString(pair.getPublic()))
+              .privateKey(keyPairMapper.toString(pair.getPrivate()))
               .pairType(keyPairGenerator.type())
               .build());
     }
@@ -136,6 +141,8 @@ public class KeyPairRepositoryJWKSource
             .orElseThrow(
                 () -> new UnsupportedOperationException("Could not find any suitable keypair"));
 
+    log.debug("Using key pair with ID: {}", keyPair.getId());
+
     var principal = context.getPrincipal();
     var authority = principal.getAuthorities().stream().findFirst().orElse(null);
 
@@ -143,11 +150,12 @@ public class KeyPairRepositoryJWKSource
       context.getClaims().claim("cid", context.getAuthorization().getRegisteredClientId());
     if (principal.getDetails() != null)
       context.getClaims().subject(principal.getDetails().toString());
-    if (authority != null)
+    if (authority instanceof TenantAuthority tenantAuthority)
       context
           .getClaims()
-          .issuer(String.format("%s/oauth2", authority.getAuthority()))
-          .audience(Arrays.asList(authority.getAuthority()));
+          .issuer(String.format("%s/oauth2", tenantAuthority.getAuthority()))
+          .claim("tid", tenantAuthority.getTenantId())
+          .audience(Arrays.asList(tenantAuthority.getAuthority()));
 
     context
         .getJwsHeader()

@@ -17,6 +17,11 @@ import org.springframework.security.core.GrantedAuthority;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TenantAuthority implements GrantedAuthority, Serializable {
+
+  /** The ID of the tenant */
+  @JsonProperty(value = "tenant_id")
+  private int tenantId;
+
   /** The URL of the tenant. */
   @JsonProperty(value = "tenant_url")
   private String tenantUrl;
@@ -26,7 +31,6 @@ public class TenantAuthority implements GrantedAuthority, Serializable {
    *
    * @return the tenant URL as the authority.
    */
-  @Override
   @JsonIgnore
   public String getAuthority() {
     return tenantUrl;

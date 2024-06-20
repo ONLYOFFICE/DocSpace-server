@@ -1,14 +1,11 @@
 package com.asc.authorization.application.security.oauth.services;
 
-import com.asc.authorization.application.exception.RegisteredClientPermissionException;
+import com.asc.authorization.application.exception.client.RegisteredClientPermissionException;
 import com.asc.authorization.application.mapper.ClientMapper;
 import com.asc.common.core.domain.exception.DomainNotFoundException;
-import com.asc.common.data.client.repository.JpaClientRepository;
-import com.asc.common.utilities.cipher.EncryptionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.stereotype.Repository;
@@ -20,9 +17,9 @@ import org.springframework.stereotype.Repository;
 @Slf4j
 @Repository
 @RequiredArgsConstructor
-public class AscRegisteredClientRepository implements RegisteredClientRepository {
-  private final JpaClientRepository jpaClientRepository;
-  private final EncryptionService encryptionService;
+public class AscRegisteredClientService
+    implements RegisteredClientRepository, RegisteredClientAccessibilityService {
+  private final AscCacheableClientService cacheableClientService;
   private final ClientMapper clientMapper;
 
   /**
@@ -42,20 +39,21 @@ public class AscRegisteredClientRepository implements RegisteredClientRepository
    *
    * @param id the ID of the registered client.
    * @return the RegisteredClient object if found, or null if not found.
+   * @throws DomainNotFoundException if the client is not found
    */
-  @Cacheable(
-      cacheNames = {"identityClients"},
-      cacheManager = "clientCacheManager")
   public RegisteredClient findById(String id) {
     try {
       MDC.put("client_id", id);
       log.info("Trying to find registered client by id");
 
-      var result = jpaClientRepository.findById(id);
-      if (result.isEmpty())
-        throw new DomainNotFoundException("Could not find client with id " + id);
-      var client = result.get();
-      client.setClientSecret(encryptionService.decrypt(client.getClientSecret()));
+      var client = cacheableClientService.findById(id);
+      if (client == null)
+        throw new DomainNotFoundException(String.format("Client with id %s was no found", id));
+
+      if (!client.isEnabled())
+        throw new RegisteredClientPermissionException(
+            String.format("Client with id %s is disabled", id));
+
       return clientMapper.toRegisteredClient(client);
     } catch (Exception e) {
       log.warn("Could not find registered client", e);
@@ -70,25 +68,23 @@ public class AscRegisteredClientRepository implements RegisteredClientRepository
    *
    * @param clientId the client ID of the registered client.
    * @return the RegisteredClient object if found, or null if not found.
+   * @throws DomainNotFoundException if the client is not found
+   * @throws RegisteredClientPermissionException if the client is disabled
    */
-  @Cacheable(
-      cacheNames = {"identityClients"},
-      cacheManager = "clientCacheManager")
   public RegisteredClient findByClientId(String clientId) {
     try {
       MDC.put("client_id", clientId);
       log.info("Trying to get client by client id");
 
-      var result = jpaClientRepository.findClientByClientId(clientId);
-      if (result.isEmpty())
-        throw new DomainNotFoundException("Could not find client with client_id " + clientId);
+      var client = cacheableClientService.findByClientId(clientId);
+      if (client == null)
+        throw new DomainNotFoundException(
+            String.format("Client with client_id %s was no found", clientId));
 
-      var client = result.get();
       if (!client.isEnabled())
         throw new RegisteredClientPermissionException(
-            String.format("client with client_id %s is disabled", clientId));
+            String.format("Client with client_id %s is disabled", clientId));
 
-      client.setClientSecret(encryptionService.decrypt(client.getClientSecret()));
       return clientMapper.toRegisteredClient(client);
     } catch (Exception e) {
       log.warn("Could not get client by client_id", e);
@@ -96,5 +92,34 @@ public class AscRegisteredClientRepository implements RegisteredClientRepository
     } finally {
       MDC.clear();
     }
+  }
+
+  /**
+   * Validates the accessibility of the client associated with the given tenant.
+   *
+   * @param clientId the id of the registered client
+   * @param tenantId the tenant of the current caller to validate accessibility against
+   * @return true if the client is accessible, false otherwise
+   */
+  public boolean validateClientAccessibility(String clientId, int tenantId) {
+    var client = cacheableClientService.findByClientId(clientId);
+
+    if (client == null) {
+      log.warn("Registered client not found for client ID: {}", clientId);
+      return false;
+    }
+
+    if (tenantId != client.getTenant() && !client.isPublic()) {
+      log.warn(
+          "Client {} is not accessible and does not belong to this tenant", client.getClientId());
+      return false;
+    }
+
+    if (!client.isEnabled()) {
+      log.warn("Client {} is disabled", client.getClientId());
+      return false;
+    }
+
+    return true;
   }
 }

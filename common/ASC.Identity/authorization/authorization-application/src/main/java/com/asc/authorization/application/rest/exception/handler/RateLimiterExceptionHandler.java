@@ -1,4 +1,4 @@
-package com.asc.authorization.application.exception.handler;
+package com.asc.authorization.application.rest.exception.handler;
 
 import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 import jakarta.servlet.http.HttpServletRequest;

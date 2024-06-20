@@ -30,7 +30,6 @@ public class AscAuthenticationManager implements AuthenticationManager {
    * @return a fully authenticated object including credentials.
    * @throws AuthenticationException if authentication fails.
    */
-  @Override
   public Authentication authenticate(Authentication authentication) throws AuthenticationException {
     for (AuthenticationProvider provider : providers) {
       MDC.put("provider", provider.getClass().getName());

@@ -1,4 +1,4 @@
-package com.asc.authorization.application.exception.handler;
+package com.asc.authorization.application.rest.exception.handler;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;

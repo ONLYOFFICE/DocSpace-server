@@ -1,13 +1,15 @@
 package com.asc.authorization.application.security.filters;
 
 import com.asc.authorization.application.configuration.security.AnonymousFilterSecurityConfigurationProperties;
+import com.asc.authorization.application.exception.authentication.AuthenticationProcessingException;
+import com.asc.authorization.application.exception.client.RegisteredClientPermissionException;
+import com.asc.authorization.application.security.SecurityUtils;
+import com.asc.authorization.application.security.oauth.errors.AuthenticationError;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Optional;
 import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,11 +25,12 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @Component
 @RequiredArgsConstructor
 public class AnonymousReplacerAuthenticationFilter extends OncePerRequestFilter {
-  private final AuthenticationManager authenticationManager;
-  private final AnonymousFilterSecurityConfigurationProperties securityConfigProperties;
-
   private static final Pattern AUTHORIZE_PATTERN = Pattern.compile("/oauth2/authorize");
   private static final Pattern LOGIN_PATTERN = Pattern.compile("/oauth2/login");
+
+  private final AuthenticationManager authenticationManager;
+  private final SecurityUtils securityUtils;
+  private final AnonymousFilterSecurityConfigurationProperties securityConfigProperties;
 
   /**
    * Filters requests to replace anonymous authentication with actual authentication.
@@ -46,44 +49,39 @@ public class AnonymousReplacerAuthenticationFilter extends OncePerRequestFilter 
     if (clientId == null || clientId.isBlank()) {
       log.warn(
           "Missing or empty '{}' in query string", securityConfigProperties.getClientIdParam());
-      response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing or empty 'client_id'");
+      securityUtils.redirectWithError(
+          request, response, clientId, AuthenticationError.MISSING_CLIENT_ID_ERROR.getCode());
       return;
     }
 
-    var authCookie =
-        Optional.ofNullable(request.getCookies())
-            .flatMap(
-                cookies ->
-                    Arrays.stream(cookies)
-                        .filter(
-                            cookie ->
-                                securityConfigProperties
-                                    .getAuthCookieName()
-                                    .equalsIgnoreCase(cookie.getName()))
-                        .findFirst());
-
-    if (authCookie.isEmpty()) {
+    var authCookieValue = securityUtils.getAuthCookieValue(request);
+    if (authCookieValue.isEmpty()) {
       log.warn("Missing '{}' cookie", securityConfigProperties.getAuthCookieName());
-      response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Missing 'asc_auth_key' cookie");
+      securityUtils.redirectWithError(
+          request, response, clientId, AuthenticationError.MISSING_ASC_COOKIE_ERROR.getCode());
       return;
     }
-
-    var authCookieValue = authCookie.get().getValue();
-    var authenticationToken = new UsernamePasswordAuthenticationToken(clientId, authCookieValue);
 
     try {
+      var authenticationToken =
+          new UsernamePasswordAuthenticationToken(clientId, authCookieValue.get());
       var authentication = authenticationManager.authenticate(authenticationToken);
-      if (authentication.isAuthenticated()) {
+      if (authentication.isAuthenticated())
         SecurityContextHolder.getContext().setAuthentication(authentication);
-      }
-    } catch (Exception ex) {
-      log.error("Authentication failed", ex);
-      response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authentication failed");
-      return;
+      securityUtils.setSecurityHeaders(response);
+      chain.doFilter(request, response);
+    } catch (RegisteredClientPermissionException pex) {
+      securityUtils.redirectWithError(
+          request,
+          response,
+          clientId,
+          AuthenticationError.CLIENT_PERMISSION_DENIED_ERROR.getCode());
+    } catch (AuthenticationProcessingException aex) {
+      securityUtils.redirectWithError(request, response, clientId, aex.getError().getCode());
+    } catch (Exception e) {
+      securityUtils.redirectWithError(
+          request, response, clientId, AuthenticationError.SOMETHING_WENT_WRONG_ERROR.getCode());
     }
-
-    setSecurityHeaders(response);
-    chain.doFilter(request, response);
   }
 
   /**
@@ -96,19 +94,5 @@ public class AnonymousReplacerAuthenticationFilter extends OncePerRequestFilter 
     var path = request.getRequestURI();
     return !(AUTHORIZE_PATTERN.matcher(path).find()
         || (LOGIN_PATTERN.matcher(path).find() && HttpMethod.POST.matches(request.getMethod())));
-  }
-
-  /**
-   * Sets security headers to protect against various attacks.
-   *
-   * @param response the HttpServletResponse to set the headers on.
-   */
-  private void setSecurityHeaders(HttpServletResponse response) {
-    response.setHeader("X-Content-Type-Options", "nosniff");
-    response.setHeader("X-Frame-Options", "DENY");
-    response.setHeader("X-XSS-Protection", "1; mode=block");
-    response.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
-    response.setHeader("Content-Security-Policy", "default-src 'self'");
-    response.setHeader("Referrer-Policy", "no-referrer");
   }
 }

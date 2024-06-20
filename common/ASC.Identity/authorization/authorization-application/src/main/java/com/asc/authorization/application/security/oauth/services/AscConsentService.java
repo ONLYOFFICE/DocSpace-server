@@ -27,13 +27,18 @@ public class AscConsentService implements OAuth2AuthorizationConsentService {
    *
    * @param authorizationConsent the OAuth2AuthorizationConsent object to save.
    */
-  @Transactional(timeout = 2)
+  @Transactional(
+      timeout = 2,
+      rollbackFor = {Exception.class})
   public void save(OAuth2AuthorizationConsent authorizationConsent) {
     try {
       MDC.put("client_id", authorizationConsent.getRegisteredClientId());
       MDC.put("principal_name", authorizationConsent.getPrincipalName());
       log.info("Saving an authorization consent");
+
       jpaConsentRepository.save(consentMapper.toEntity(authorizationConsent));
+    } catch (Exception e) {
+      log.error("Failed to save an authorization consent", e);
     } finally {
       MDC.clear();
     }
@@ -45,7 +50,9 @@ public class AscConsentService implements OAuth2AuthorizationConsentService {
    *
    * @param authorizationConsent the OAuth2AuthorizationConsent object to remove.
    */
-  @Transactional(timeout = 2)
+  @Transactional(
+      timeout = 2,
+      rollbackFor = {Exception.class})
   public void remove(OAuth2AuthorizationConsent authorizationConsent) {
     try {
       MDC.put("client_id", authorizationConsent.getRegisteredClientId());
@@ -56,6 +63,8 @@ public class AscConsentService implements OAuth2AuthorizationConsentService {
           new ConsentEntity.ConsentId(
               authorizationConsent.getRegisteredClientId(),
               authorizationConsent.getPrincipalName()));
+    } catch (Exception e) {
+      log.error("Failed to remove an authorization consent", e);
     } finally {
       MDC.clear();
     }

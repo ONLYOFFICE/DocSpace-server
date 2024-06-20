@@ -1,20 +1,24 @@
 package com.asc.authorization.application.security.oauth.providers;
 
+import com.asc.authorization.application.exception.authentication.AuthenticationProcessingException;
 import com.asc.authorization.application.security.oauth.authorities.TenantAuthority;
+import com.asc.authorization.application.security.oauth.errors.AuthenticationError;
+import com.asc.authorization.application.security.oauth.services.CacheableRegisteredClientQueryService;
 import com.asc.common.application.client.AscApiClient;
-import com.asc.common.data.client.repository.JpaClientRepository;
+import com.asc.common.application.transfer.response.AscPersonResponse;
+import com.asc.common.application.transfer.response.AscSettingsResponse;
+import com.asc.common.application.transfer.response.AscTenantResponse;
+import com.asc.common.utilities.HttpUtils;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
+import jakarta.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
-import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -33,9 +37,7 @@ public class AscAuthenticationProvider implements AuthenticationProvider {
   private static final String ASC_AUTH_COOKIE = "asc_auth_key";
 
   private final AscApiClient apiClient;
-  private final JpaClientRepository jpaClientRepository;
-
-  private final ExecutorService executorService = Executors.newVirtualThreadPerTaskExecutor();
+  private final CacheableRegisteredClientQueryService cacheableRegisteredClientQueryService;
 
   /**
    * Authenticates the provided authentication request using an ASC authorization cookie.
@@ -45,65 +47,113 @@ public class AscAuthenticationProvider implements AuthenticationProvider {
    * @throws AuthenticationException if authentication fails.
    */
   @RateLimiter(name = "globalRateLimiter")
-  @Override
   public Authentication authenticate(Authentication authentication) throws AuthenticationException {
     log.info("Trying to authenticate a user");
 
+    var ctx = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+    if (ctx == null)
+      throw new BadCredentialsException("Authentication failed due to missing request context");
+
+    var request = ctx.getRequest();
+    var response = ctx.getResponse();
+    if (response == null)
+      throw new BadCredentialsException("Authentication failed due to missing response context");
+
+    var address =
+        HttpUtils.getRequestHostAddress(request)
+            .orElseThrow(
+                () -> new BadCredentialsException("Could not find ASC request host address"));
+    var hostAddress =
+        HttpUtils.getRequestDomain(request)
+            .orElseThrow(
+                () -> new BadCredentialsException("Could not find ASC request domain address"));
+
     var clientId = (String) authentication.getPrincipal();
-    var request =
-        ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
     var authCookie =
         Arrays.stream(request.getCookies())
             .filter(c -> c.getName().equalsIgnoreCase(ASC_AUTH_COOKIE))
             .findFirst()
-            .orElseThrow(
-                () -> new BadCredentialsException("Could not get an ASC authorization cookie"));
+            .orElse(null);
 
-    var future =
-        CompletableFuture.supplyAsync(
-                () -> {
-                  try (var ignored = MDC.putCloseable("client_id", clientId)) {
-                    log.info("Trying to get client by client id");
-                    return jpaClientRepository.findClientByClientId(clientId);
-                  }
-                },
-                executorService)
-            .thenApplyAsync(
-                response -> {
-                  if (response.isEmpty()) throw new BadCredentialsException("Client not found");
+    if (authCookie == null)
+      throw new AuthenticationProcessingException(
+          AuthenticationError.MISSING_ASC_COOKIE_ERROR,
+          "Authentication failed due to missing auth cookie");
 
-                  var client = response.get();
-                  var cookie = String.format("%s=%s", authCookie.getName(), authCookie.getValue());
+    try (var ignored = MDC.putCloseable("client_id", clientId)) {
+      var clientFuture =
+          CompletableFuture.supplyAsync(
+              () -> {
+                log.info("Trying to get client by client id");
+                return cacheableRegisteredClientQueryService.findByClientId(clientId);
+              });
 
-                  try (var ignored = MDC.putCloseable("cookie", authCookie.getValue())) {
-                    log.debug("Trying to validate an ASC authorization");
-                  }
+      var uri = URI.create(address);
+      var cookie = String.format("%s=%s", authCookie.getName(), authCookie.getValue());
 
-                  try (var ignored = MDC.putCloseable("tenant_url", client.getTenantUrl())) {
-                    log.info("Trying to get current user profile");
-                    var me = apiClient.getMe(URI.create(client.getTenantUrl()), cookie);
-                    if (me.getStatusCode() != HttpStatus.OK.value())
-                      throw new BadCredentialsException("Invalid ASC authorization");
-                    return Pair.of(client, me);
-                  }
-                },
-                executorService);
+      var meFuture = CompletableFuture.supplyAsync(() -> apiClient.getMe(uri, cookie));
+      var tenantFuture = CompletableFuture.supplyAsync(() -> apiClient.getTenant(uri, cookie));
+      var settingsFuture = CompletableFuture.supplyAsync(() -> apiClient.getSettings(uri, cookie));
 
-    try {
-      var response = future.get();
-      var client = response.getFirst();
-      var me = response.getSecond();
+      CompletableFuture.allOf(clientFuture, meFuture, tenantFuture, settingsFuture).join();
+
+      var client = clientFuture.get();
+      if (client == null)
+        throw new AuthenticationProcessingException(
+            AuthenticationError.CLIENT_NOT_FOUND_ERROR, "Authentication failed: client not found");
+
+      var me = meFuture.get();
+      var tenant = tenantFuture.get();
+      var settings = settingsFuture.get();
+
+      if (me.getStatusCode() != HttpStatus.OK.value()
+          || tenant.getStatusCode() != HttpStatus.OK.value()
+          || settings.getStatusCode() != HttpStatus.OK.value())
+        throw new AuthenticationProcessingException(
+            AuthenticationError.ASC_RETRIEVAL_ERROR,
+            "Invalid ASC authorization: could not fetch either me, tenant, settings or any combination of those");
+
+      if (!client.isEnabled())
+        throw new AuthenticationProcessingException(
+            AuthenticationError.CLIENT_DISABLED_ERROR, "Client is disabled");
+
+      var tenantResponse = tenant.getResponse();
+      if (tenantResponse.getTenantId() != client.getTenant() && !client.isPublic())
+        throw new AuthenticationProcessingException(
+            AuthenticationError.CLIENT_PERMISSION_DENIED_ERROR,
+            "Client is not public and does not belong to current user's tenant");
+
+      setRequestAttributes(request, me.getResponse(), tenantResponse, settings.getResponse());
 
       var authenticationToken =
           new UsernamePasswordAuthenticationToken(
-              me.getResponse().getEmail(),
+              me.getResponse().getId(),
               null,
-              List.of(new TenantAuthority(client.getTenantUrl())));
+              List.of(new TenantAuthority(tenant.getResponse().getTenantId(), hostAddress)));
       authenticationToken.setDetails(client.getClientId());
       return authenticationToken;
     } catch (InterruptedException | ExecutionException e) {
-      throw new BadCredentialsException("Authentication failed", e);
+      throw new AuthenticationProcessingException(
+          AuthenticationError.SOMETHING_WENT_WRONG_ERROR, "Authentication failed", e);
     }
+  }
+
+  /**
+   * Sets the request attributes for person, tenant, and settings.
+   *
+   * @param request the HTTP request.
+   * @param person the authenticated user.
+   * @param tenant the tenant information.
+   * @param settings the settings information.
+   */
+  private void setRequestAttributes(
+      HttpServletRequest request,
+      AscPersonResponse person,
+      AscTenantResponse tenant,
+      AscSettingsResponse settings) {
+    request.setAttribute("person", person);
+    request.setAttribute("tenant", tenant);
+    request.setAttribute("settings", settings);
   }
 
   /**
