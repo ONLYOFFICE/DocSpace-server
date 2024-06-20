@@ -113,7 +113,7 @@ public partial class FilesDbContext
     }
     
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultDateTime])]
-    public IAsyncEnumerable<TagLinkData> MustBeDeletedFilesAsync(int tenantId, DateTime date)
+    public Task<int> MustBeDeletedFilesAsync(int tenantId, DateTime date)
     {
         return TagQueries.MustBeDeletedFilesAsync(this, tenantId, date);
     }
@@ -134,12 +134,6 @@ public partial class FilesDbContext
     public Task<bool> AnyTagLinkByIdAsync(int tenantId, int id)
     {
         return TagQueries.AnyTagLinkByIdAsync(this, tenantId, id);
-    }
-    
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, null, FileEntryType.File])]
-    public Task<int> DeleteTagLinksByTagLinkDataAsync(int tenantId, int tagId, string entryId, FileEntryType entryType)
-    {
-        return TagQueries.DeleteTagLinksByTagLinkDataAsync(this, tenantId, tagId, entryId, entryType);
     }
     
     [PreCompileQuery([])]
@@ -450,15 +444,15 @@ static file class TagQueries
                     Link = (from f in ctx.TagLink where f.TagId == r.Id select f).FirstOrDefault()
                 }));
 
-    public static readonly Func<FilesDbContext, int, DateTime, IAsyncEnumerable<TagLinkData>> MustBeDeletedFilesAsync =
+    public static readonly Func<FilesDbContext, int, DateTime, Task<int>> MustBeDeletedFilesAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, DateTime date) =>
                 ctx.Tag.Where(r => r.TenantId == tenantId)
-                    .Join(ctx.TagLink, r => r.Id, l => l.TagId,
-                        (tag, link) => new TagLinkData { Tag = tag, Link = link })
+                    .Join(ctx.TagLink, r => r.Id, l => l.TagId, (tag, link) => new TagLinkData { Tag = tag, Link = link })
                     .Where(r => r.Link.TenantId == r.Tag.TenantId)
-                    .Where(r => (r.Tag.Type == TagType.New || r.Tag.Type == TagType.Recent) &&
-                                r.Link.CreateOn <= date));
+                    .Where(r => (r.Tag.Type == TagType.New || r.Tag.Type == TagType.Recent) && r.Link.CreateOn <= date)
+                    .Select(r=> r.Link)
+                    .ExecuteDelete());
 
     public static readonly Func<FilesDbContext, int, IEnumerable<int>, Task<bool>> AnyTagLinkByIdsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
@@ -480,16 +474,6 @@ static file class TagQueries
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, int id) =>
                 ctx.TagLink.Any(r => r.TenantId == tenantId && r.TagId == id));
-
-    public static readonly Func<FilesDbContext, int, int, string, FileEntryType, Task<int>> DeleteTagLinksByTagLinkDataAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int tagId, string entryId, FileEntryType entryType) =>
-                ctx.TagLink
-                    .Where(r => r.TenantId == tenantId)
-                    .Where(r => r.TagId == tagId)
-                    .Where(r => r.EntryId == entryId)
-                    .Where(r => r.EntryType == entryType)
-                    .ExecuteDelete());
 
     public static readonly Func<FilesDbContext, Task<int>> DeleteTagAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

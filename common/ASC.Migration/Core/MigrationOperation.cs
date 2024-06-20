@@ -56,22 +56,22 @@ public class MigrationOperation(
     private MigrationApiInfo _migrationApiInfo;
     public MigrationApiInfo MigrationApiInfo
     {
-        get => _migrationApiInfo ?? System.Text.Json.JsonSerializer.Deserialize<MigrationApiInfo>(this[nameof(_migrationApiInfo)]);
+        get => _migrationApiInfo ?? JsonSerializer.Deserialize<MigrationApiInfo>(this[nameof(_migrationApiInfo)]);
         set
         {
             _migrationApiInfo = value;
-            this[nameof(_migrationApiInfo)] = System.Text.Json.JsonSerializer.Serialize(value);
+            this[nameof(_migrationApiInfo)] = JsonSerializer.Serialize(value);
         }
     }
 
     private List<string> _importedUsers;
     public List<string> ImportedUsers
     {
-        get => _importedUsers ?? System.Text.Json.JsonSerializer.Deserialize<List<string>>(this[nameof(_importedUsers)]);
+        get => _importedUsers ?? JsonSerializer.Deserialize<List<string>>(this[nameof(_importedUsers)]);
         set
         {
             _importedUsers = value;
-            this[nameof(_importedUsers)] = System.Text.Json.JsonSerializer.Serialize(value);
+            this[nameof(_importedUsers)] = JsonSerializer.Serialize(value);
         }
     }
 
@@ -127,7 +127,7 @@ public class MigrationOperation(
             var folder = await cache.GetStringAsync($"migration folder - {TenantId}");
             migrator.Init(folder, CancellationToken, onlyParse ? OperationType.Parse : OperationType.Migration);
 
-            var result = await migrator.ParseAsync(onlyParse);
+            await migrator.ParseAsync(onlyParse);
             if (!onlyParse)
             {
                 await migrator.MigrateAsync(copyInfo);

@@ -81,12 +81,12 @@ public class ExternalShare(Global global,
     
     public async Task<Status> ValidateAsync(Guid linkId, bool isAuthenticated)
     {
-        var record = await daoFactory.GetSecurityDao<int>().GetSharesAsync(new [] { linkId }).FirstOrDefaultAsync();
+        var record = await daoFactory.GetSecurityDao<string>().GetSharesAsync(new [] { linkId }).FirstOrDefaultAsync();
 
         return record == null ? Status.Invalid : await ValidateRecordAsync(record, null, isAuthenticated);
     }
     
-    public async Task<Status> ValidateRecordAsync(FileShareRecord record, string password, bool isAuthenticated, FileEntry entry = null)
+    public async Task<Status> ValidateRecordAsync<T>(FileShareRecord<T> record, string password, bool isAuthenticated, FileEntry entry = null)
     {
         if (record.SubjectType is not (SubjectType.ExternalLink or SubjectType.PrimaryExternalLink) ||
             record.Options == null)

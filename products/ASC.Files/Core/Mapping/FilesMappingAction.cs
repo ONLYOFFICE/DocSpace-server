@@ -27,7 +27,10 @@
 namespace ASC.Files.Core.Mapping;
 
 [Scope]
-public class FilesMappingAction(TenantUtil tenantUtil) : IMappingAction<DbFolderQuery, Folder<int>>, IMappingAction<FileShareRecord, DbFilesSecurity>
+public class FilesMappingAction(TenantUtil tenantUtil) : 
+    IMappingAction<DbFolderQuery, Folder<int>>, 
+    IMappingAction<FileShareRecord<int>, DbFilesSecurity>,
+    IMappingAction<FileShareRecord<string>, DbFilesSecurity>
 {
     public void Process(DbFolderQuery source, Folder<int> destination, ResolutionContext context)
     {
@@ -99,8 +102,18 @@ public class FilesMappingAction(TenantUtil tenantUtil) : IMappingAction<DbFolder
             }
         }
     }
+    
+    public void Process(FileShareRecord<int> source, DbFilesSecurity destination, ResolutionContext context)
+    {
+        Process<int>(source, destination, context);
+    }
 
-    public void Process(FileShareRecord source, DbFilesSecurity destination, ResolutionContext context)
+    public void Process(FileShareRecord<string> source, DbFilesSecurity destination, ResolutionContext context)
+    {
+        Process<string>(source, destination, context);
+    }
+    
+    private void Process<T>(FileShareRecord<T> source, DbFilesSecurity destination, ResolutionContext context)
     {
         if (source.Options == null)
         {
@@ -109,4 +122,5 @@ public class FilesMappingAction(TenantUtil tenantUtil) : IMappingAction<DbFolder
         
         source.Options.ExpirationDate = tenantUtil.DateTimeToUtc(source.Options.ExpirationDate);
     }
+
 }

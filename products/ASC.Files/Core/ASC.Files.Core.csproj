@@ -115,6 +115,9 @@
     <EmbeddedResource Update="Services\NotifyService\FilesPatternResource.sl.resx">
       <DependentUpon>FilesPatternResource.resx</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Update="Services\NotifyService\FilesPatternResource.sr-Cyrl-RS.resx">
+      <DependentUpon>FilesPatternResource.resx</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Update="Services\NotifyService\FilesPatternResource.sr-Latn-RS.resx">
       <DependentUpon>FilesPatternResource.resx</DependentUpon>
     </EmbeddedResource>
@@ -231,6 +234,9 @@
     <EmbeddedResource Update="Resources\FilesCommonResource.sl.resx">
       <DependentUpon>FilesCommonResource.resx</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Update="Resources\FilesCommonResource.sr-Cyrl-RS.resx">
+      <DependentUpon>FilesCommonResource.resx</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Update="Resources\FilesCommonResource.sr-Latn-RS.resx">
       <DependentUpon>FilesCommonResource.resx</DependentUpon>
     </EmbeddedResource>
@@ -314,6 +320,9 @@
       <DependentUpon>FilesJSResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\FilesJSResource.sl.resx">
+      <DependentUpon>FilesJSResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\FilesJSResource.sr-Cyrl-RS.resx">
       <DependentUpon>FilesJSResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\FilesJSResource.sr-Latn-RS.resx">
@@ -402,6 +411,9 @@
       <DependentUpon>FilesUCResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\FilesUCResource.sl.resx">
+      <DependentUpon>FilesUCResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\FilesUCResource.sr-Cyrl-RS.resx">
       <DependentUpon>FilesUCResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\FilesUCResource.sr-Latn-RS.resx">

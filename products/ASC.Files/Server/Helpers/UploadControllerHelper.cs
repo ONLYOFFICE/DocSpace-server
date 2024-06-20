@@ -27,31 +27,27 @@
 namespace ASC.Files.Helpers;
 
 [Scope]
-public class UploadControllerHelper(FilesSettingsHelper filesSettingsHelper,
-        FileUploader fileUploader,
-        SocketManager socketManager,
-        FileDtoHelper fileDtoHelper,
-        ApiContext apiContext,
-        FileStorageService fileStorageService,
-        FolderContentDtoHelper folderContentDtoHelper,
-        IHttpContextAccessor httpContextAccessor,
-        FolderDtoHelper folderDtoHelper,
-        FilesLinkUtility filesLinkUtility,
-        ChunkedUploadSessionHelper chunkedUploadSessionHelper,
-        TenantManager tenantManager,
-        IHttpClientFactory httpClientFactory,
-        SecurityContext securityContext,
-        IDaoFactory daoFactory,
-        FileSecurity fileSecurity)
-    : FilesHelperBase(filesSettingsHelper,
-            fileUploader,
-            socketManager,
-            fileDtoHelper,
-            apiContext,
-            fileStorageService,
-            folderContentDtoHelper,
-            httpContextAccessor,
-            folderDtoHelper)
+public class UploadControllerHelper(
+    FilesSettingsHelper filesSettingsHelper,
+    FileUploader fileUploader,
+    SocketManager socketManager,
+    FileDtoHelper fileDtoHelper,
+    FileStorageService fileStorageService,
+    IHttpContextAccessor httpContextAccessor,
+    FilesLinkUtility filesLinkUtility,
+    ChunkedUploadSessionHelper chunkedUploadSessionHelper,
+    TenantManager tenantManager,
+    IHttpClientFactory httpClientFactory,
+    SecurityContext securityContext,
+    IDaoFactory daoFactory,
+    FileSecurity fileSecurity)
+    : FilesHelperBase(
+        filesSettingsHelper,
+        fileUploader,
+        socketManager,
+        fileDtoHelper,
+        fileStorageService,
+        httpContextAccessor)
     {
     public async Task<object> CreateEditSessionAsync<T>(T fileId, long fileSize)
     {

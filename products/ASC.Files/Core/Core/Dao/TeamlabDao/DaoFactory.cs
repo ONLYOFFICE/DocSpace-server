@@ -51,8 +51,13 @@ public class DaoFactory(IServiceProvider serviceProvider, IProviderDao providerD
         return serviceProvider.GetService<ISecurityDao<T>>();
     }
 
-    public ILinkDao GetLinkDao()
+    public ILinkDao<T> GetLinkDao<T>()
     {
-        return serviceProvider.GetService<ILinkDao>();
+        return serviceProvider.GetService<ILinkDao<T>>();
+    }
+
+    public IMappingId<T> GetMapping<T>()
+    {
+        return serviceProvider.GetService<IMappingId<T>>();
     }
 }

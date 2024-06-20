@@ -51,19 +51,29 @@ public class FilesMappingProfile : Profile
             .AfterMap<FilesMappingAction>()
             .ConstructUsingServiceLocator();
 
-        CreateMap<FileShareRecord, DbFilesSecurity>()
-            .ForMember(dest => dest.TimeStamp, cfg =>
-                cfg.MapFrom(_ => DateTime.UtcNow))
-            .ForMember(dest => dest.Options, cfg =>
-                cfg.MapFrom(src => src.Options != null ? JsonSerializer.Serialize(src.Options, JsonSerializerOptions.Default) : null))
+        CreateMap<FileShareRecord<int>, DbFilesSecurity>()
+            .ForMember(dest=> dest.EntryId, cfg => cfg.MapFrom(src => src.EntryId.ToString()))
+            .ForMember(dest => dest.TimeStamp, cfg => cfg.MapFrom(_ => DateTime.UtcNow))
+            .ForMember(dest => dest.Options, cfg => cfg.MapFrom(src => src.Options != null ? JsonSerializer.Serialize(src.Options, JsonSerializerOptions.Default) : null))
             .BeforeMap<FilesMappingAction>();
         
-        CreateMap<DbFilesSecurity, FileShareRecord>()
-            .ForMember(dest => dest.Options, cfg => 
-                cfg.MapFrom(src => JsonSerializer.Deserialize<FileShareOptions>(src.Options, JsonSerializerOptions.Default)));
+        CreateMap<FileShareRecord<string>, DbFilesSecurity>()
+            .ForMember(dest => dest.TimeStamp, cfg => cfg.MapFrom(_ => DateTime.UtcNow))
+            .ForMember(dest => dest.Options, cfg => cfg.MapFrom(src => src.Options != null ? JsonSerializer.Serialize(src.Options, JsonSerializerOptions.Default) : null))
+            .BeforeMap<FilesMappingAction>();
         
-        CreateMap<SecurityTreeRecord, FileShareRecord>()
-            .ForMember(dest => dest.Options, cfg => 
-                cfg.MapFrom(src => JsonSerializer.Deserialize<FileShareOptions>(src.Options, JsonSerializerOptions.Default)));
+        CreateMap<DbFilesSecurity, FileShareRecord<int>>()
+            .ForMember(dest => dest.EntryId, cfg => cfg.MapFrom(src => Convert.ToInt32(src.EntryId)))
+            .ForMember(dest => dest.Options, cfg => cfg.MapFrom(src => JsonSerializer.Deserialize<FileShareOptions>(src.Options, JsonSerializerOptions.Default)));
+        
+        CreateMap<DbFilesSecurity, FileShareRecord<string>>()
+            .ForMember(dest => dest.Options, cfg => cfg.MapFrom(src => JsonSerializer.Deserialize<FileShareOptions>(src.Options, JsonSerializerOptions.Default)));
+        
+        CreateMap<SecurityTreeRecord, FileShareRecord<int>>()
+            .ForMember(dest=> dest.EntryId, cfg => cfg.MapFrom(src => Convert.ToInt32(src.EntryId)))
+            .ForMember(dest => dest.Options, cfg => cfg.MapFrom(src => JsonSerializer.Deserialize<FileShareOptions>(src.Options, JsonSerializerOptions.Default)));
+        
+        CreateMap<SecurityTreeRecord, FileShareRecord<string>>()
+            .ForMember(dest => dest.Options, cfg => cfg.MapFrom(src => JsonSerializer.Deserialize<FileShareOptions>(src.Options, JsonSerializerOptions.Default)));
     }
 }
