@@ -32,21 +32,22 @@ class ClientCommandRepositoryDomainAdapterTest {
   void setUp() {
     MockitoAnnotations.openMocks(this);
 
-    client = mock(Client.class);
     clientId = new ClientId(UUID.randomUUID());
     tenantId = new TenantId(1);
+    client = mock(Client.class);
 
     when(client.getId()).thenReturn(clientId);
-    when(clientDataAccessMapper.toEntity(client)).thenReturn(mock(ClientEntity.class));
+    when(clientDataAccessMapper.toEntity(any(Client.class))).thenReturn(mock(ClientEntity.class));
     when(clientDataAccessMapper.toDomain(any(ClientEntity.class))).thenReturn(client);
   }
 
   @Test
   void saveClient() {
-    ClientEntity clientEntity = mock(ClientEntity.class);
+    var clientEntity = mock(ClientEntity.class);
+
     when(jpaClientRepository.save(any(ClientEntity.class))).thenReturn(clientEntity);
 
-    Client savedClient = clientCommandRepositoryDomainAdapter.saveClient(client);
+    var savedClient = clientCommandRepositoryDomainAdapter.saveClient(client);
 
     verify(clientDataAccessMapper).toEntity(client);
     verify(jpaClientRepository).save(any(ClientEntity.class));
@@ -56,10 +57,11 @@ class ClientCommandRepositoryDomainAdapterTest {
   }
 
   @Test
-  void regenerateClientSecretByClientId() {
-    ArgumentCaptor<String> secretCaptor = ArgumentCaptor.forClass(String.class);
-    String newSecret =
-        clientCommandRepositoryDomainAdapter.regenerateClientSecretByClientId(tenantId, clientId);
+  void regenerateClientSecretByTenantIdAndClientId() {
+    var secretCaptor = ArgumentCaptor.forClass(String.class);
+    var newSecret =
+        clientCommandRepositoryDomainAdapter.regenerateClientSecretByTenantIdAndClientId(
+            tenantId, clientId);
 
     verify(jpaClientRepository)
         .regenerateClientSecretByClientId(
@@ -72,8 +74,22 @@ class ClientCommandRepositoryDomainAdapterTest {
   }
 
   @Test
-  void changeActivation() {
-    clientCommandRepositoryDomainAdapter.changeActivation(tenantId, clientId, true);
+  void changeVisibilityByTenantIdAndClientId() {
+    clientCommandRepositoryDomainAdapter.changeVisibilityByTenantIdAndClientId(
+        tenantId, clientId, true);
+
+    verify(jpaClientRepository)
+        .changeVisibility(
+            eq(tenantId.getValue()),
+            eq(clientId.getValue().toString()),
+            eq(true),
+            any(ZonedDateTime.class));
+  }
+
+  @Test
+  void changeActivationByTenantIdAndClientId() {
+    clientCommandRepositoryDomainAdapter.changeActivationByTenantIdAndClientId(
+        tenantId, clientId, true);
 
     verify(jpaClientRepository)
         .changeActivation(
@@ -84,14 +100,81 @@ class ClientCommandRepositoryDomainAdapterTest {
   }
 
   @Test
-  void deleteByTenantAndClientId() {
-    when(jpaClientRepository.deleteByClientIdAndTenant(anyString(), anyInt())).thenReturn(1);
+  void deleteByTenantIdAndClientId() {
+    when(jpaClientRepository.deleteByClientIdAndTenantId(anyString(), anyInt())).thenReturn(1);
 
-    int result = clientCommandRepositoryDomainAdapter.deleteByTenantAndClientId(tenantId, clientId);
+    var result =
+        clientCommandRepositoryDomainAdapter.deleteByTenantIdAndClientId(tenantId, clientId);
 
     verify(jpaClientRepository)
-        .deleteByClientIdAndTenant(eq(clientId.getValue().toString()), eq(tenantId.getValue()));
+        .deleteByClientIdAndTenantId(eq(clientId.getValue().toString()), eq(tenantId.getValue()));
 
     assertEquals(1, result);
+  }
+
+  @Test
+  void regenerateClientSecretCorrectly() {
+    var secret =
+        clientCommandRepositoryDomainAdapter.regenerateClientSecretByTenantIdAndClientId(
+            tenantId, clientId);
+
+    verify(jpaClientRepository)
+        .regenerateClientSecretByClientId(
+            eq(tenantId.getValue()),
+            eq(clientId.getValue().toString()),
+            eq(secret),
+            any(ZonedDateTime.class));
+  }
+
+  @Test
+  void changeVisibilityCorrectly() {
+    clientCommandRepositoryDomainAdapter.changeVisibilityByTenantIdAndClientId(
+        tenantId, clientId, true);
+
+    verify(jpaClientRepository)
+        .changeVisibility(
+            eq(tenantId.getValue()),
+            eq(clientId.getValue().toString()),
+            eq(true),
+            any(ZonedDateTime.class));
+  }
+
+  @Test
+  void changeActivationCorrectly() {
+    clientCommandRepositoryDomainAdapter.changeActivationByTenantIdAndClientId(
+        tenantId, clientId, false);
+
+    verify(jpaClientRepository)
+        .changeActivation(
+            eq(tenantId.getValue()),
+            eq(clientId.getValue().toString()),
+            eq(false),
+            any(ZonedDateTime.class));
+  }
+
+  @Test
+  void deleteClient() {
+    when(jpaClientRepository.deleteByClientIdAndTenantId(anyString(), anyInt())).thenReturn(0);
+
+    var result =
+        clientCommandRepositoryDomainAdapter.deleteByTenantIdAndClientId(tenantId, clientId);
+
+    verify(jpaClientRepository)
+        .deleteByClientIdAndTenantId(eq(clientId.getValue().toString()), eq(tenantId.getValue()));
+
+    assertEquals(0, result);
+  }
+
+  @Test
+  void verifySaveClientInteractions() {
+    var clientEntity = mock(ClientEntity.class);
+
+    when(jpaClientRepository.save(any(ClientEntity.class))).thenReturn(clientEntity);
+
+    clientCommandRepositoryDomainAdapter.saveClient(client);
+
+    verify(clientDataAccessMapper, times(1)).toEntity(any(Client.class));
+    verify(jpaClientRepository, times(1)).save(any(ClientEntity.class));
+    verify(clientDataAccessMapper, times(1)).toDomain(any(ClientEntity.class));
   }
 }

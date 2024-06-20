@@ -4,9 +4,9 @@ import com.asc.common.core.domain.entity.Consent;
 import com.asc.common.core.domain.value.ConsentId;
 import com.asc.common.core.domain.value.enums.ConsentStatus;
 import com.asc.common.data.consent.entity.ConsentEntity;
+import com.asc.common.data.scope.entity.ScopeEntity;
 import com.asc.registration.core.domain.entity.Client;
 import com.asc.registration.core.domain.entity.ClientConsent;
-import java.util.Arrays;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -27,14 +27,14 @@ public class ConsentDataAccessMapper {
    * @return the converted domain object
    */
   public ClientConsent toClientConsent(ConsentEntity entity, Client client) {
-    var invalidated = entity.getInvalidated() != null && entity.getInvalidated();
     return new ClientConsent(
         client,
         Consent.Builder.builder()
-            .id(new ConsentId(entity.getRegisteredClientId(), entity.getPrincipalName()))
-            .scopes(Arrays.stream(entity.getScopes().split(",")).collect(Collectors.toSet()))
+            .id(new ConsentId(entity.getRegisteredClientId(), entity.getPrincipalId()))
+            .scopes(
+                entity.getScopes().stream().map(ScopeEntity::getName).collect(Collectors.toSet()))
             .modifiedOn(entity.getModifiedAt())
-            .status(invalidated ? ConsentStatus.INVALIDATED : ConsentStatus.ACTIVE)
+            .status(entity.isInvalidated() ? ConsentStatus.INVALIDATED : ConsentStatus.ACTIVE)
             .build());
   }
 }

@@ -2,6 +2,7 @@ package com.asc.registration.data.client.adapter;
 
 import com.asc.common.core.domain.value.ClientId;
 import com.asc.common.core.domain.value.TenantId;
+import com.asc.common.core.domain.value.enums.ClientVisibility;
 import com.asc.common.data.client.repository.JpaClientRepository;
 import com.asc.registration.core.domain.entity.Client;
 import com.asc.registration.data.client.mapper.ClientDataAccessMapper;
@@ -26,6 +27,21 @@ public class ClientQueryRepositoryDomainAdapter implements ClientQueryRepository
   private final ClientDataAccessMapper clientDataAccessMapper;
 
   /**
+   * Finds a client by its ID and visibility.
+   *
+   * @param clientId the client ID
+   * @param visibility the visibility status of the client
+   * @return an optional containing the found client, or empty if not found
+   */
+  public Optional<Client> findByIdAndVisibility(ClientId clientId, ClientVisibility visibility) {
+    log.debug("Querying client by client id and visibility");
+    return jpaClientRepository
+        .findByIdAndVisibility(
+            clientId.getValue().toString(), visibility.equals(ClientVisibility.PUBLIC))
+        .map(clientDataAccessMapper::toDomain);
+  }
+
+  /**
    * Finds a client by its ID.
    *
    * @param clientId the client ID
@@ -33,25 +49,24 @@ public class ClientQueryRepositoryDomainAdapter implements ClientQueryRepository
    */
   public Optional<Client> findById(ClientId clientId) {
     log.debug("Querying client by client id");
-
     return jpaClientRepository
         .findById(clientId.getValue().toString())
         .map(clientDataAccessMapper::toDomain);
   }
 
   /**
-   * Finds all clients by tenant ID with pagination support.
+   * Finds all public and private clients by tenant ID with pagination.
    *
    * @param tenant the tenant ID
    * @param page the page number
-   * @param limit the page size
-   * @return a pageable response containing the list of clients
+   * @param limit the number of clients per page
+   * @return a pageable response containing the clients
    */
-  public PageableResponse<Client> findAllByTenant(TenantId tenant, int page, int limit) {
-    log.debug("Querying clients by tenant id");
-
+  public PageableResponse<Client> findAllPublicAndPrivateByTenantId(
+      TenantId tenant, int page, int limit) {
+    log.debug("Querying all public and private clients by tenant id with pagination");
     var clients =
-        jpaClientRepository.findAllByTenant(
+        jpaClientRepository.findAllPublicAndPrivateByTenant(
             tenant.getValue(), Pageable.ofSize(limit).withPage(page));
 
     var builder =
@@ -65,24 +80,52 @@ public class ClientQueryRepositoryDomainAdapter implements ClientQueryRepository
                     .collect(Collectors.toSet()));
 
     if (clients.hasPrevious()) builder.previous(page - 1);
-
     if (clients.hasNext()) builder.next(page + 1);
 
     return builder.build();
   }
 
   /**
-   * Finds a client by its ID and tenant ID.
+   * Finds all clients by tenant ID with pagination.
+   *
+   * @param tenant the tenant ID
+   * @param page the page number
+   * @param limit the number of clients per page
+   * @return a pageable response containing the clients
+   */
+  public PageableResponse<Client> findAllByTenantId(TenantId tenant, int page, int limit) {
+    log.debug("Querying clients by tenant id with pagination");
+    var clients =
+        jpaClientRepository.findAllByTenantId(
+            tenant.getValue(), Pageable.ofSize(limit).withPage(page));
+
+    var builder =
+        PageableResponse.<Client>builder()
+            .page(page)
+            .limit(limit)
+            .data(
+                clients.stream()
+                    .filter(c -> !c.isInvalidated())
+                    .map(clientDataAccessMapper::toDomain)
+                    .collect(Collectors.toSet()));
+
+    if (clients.hasPrevious()) builder.previous(page - 1);
+    if (clients.hasNext()) builder.next(page + 1);
+
+    return builder.build();
+  }
+
+  /**
+   * Finds a client by its client ID and tenant ID.
    *
    * @param clientId the client ID
    * @param tenant the tenant ID
    * @return an optional containing the found client, or empty if not found
    */
-  public Optional<Client> findClientByClientIdAndTenant(ClientId clientId, TenantId tenant) {
+  public Optional<Client> findByClientIdAndTenantId(ClientId clientId, TenantId tenant) {
     log.debug("Querying client by client id and tenant id");
-
     return jpaClientRepository
-        .findClientByClientIdAndTenant(clientId.getValue().toString(), tenant.getValue())
+        .findClientByClientIdAndTenantId(clientId.getValue().toString(), tenant.getValue())
         .map(clientDataAccessMapper::toDomain);
   }
 }

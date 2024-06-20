@@ -26,22 +26,20 @@ public class ConsentQueryRepositoryAdapter implements ConsentQueryRepository {
   private final ConsentDataAccessMapper consentDataAccessMapper;
 
   /**
-   * Finds all user consents by tenant ID and principal name.
+   * Retrieves all consents for a specific principal (user) with pagination support.
    *
-   * @param tenantId the tenant ID
-   * @param principalName the principal (user) name
-   * @param page the page number
-   * @param limit the page size limit
-   * @return a pageable response containing the user consents
+   * @param principalId the ID of the principal (user)
+   * @param page the page number to retrieve
+   * @param limit the maximum number of items per page
+   * @return a pageable response containing the consents
    */
-  public PageableResponse<ClientConsent> findAllByTenantAndPrincipalName(
-      TenantId tenantId, String principalName, int page, int limit) {
-
-    log.debug("Querying all user's consent by tenant id");
+  public PageableResponse<ClientConsent> findAllByPrincipalId(
+      String principalId, int page, int limit) {
+    log.debug("Querying all user's consent by principal id");
 
     var consents =
-        jpaConsentRepository.findAllConsentsByPrincipalNameAndTenant(
-            principalName, tenantId.getValue(), Pageable.ofSize(limit).withPage(page));
+        jpaConsentRepository.findAllConsentsByPrincipalId(
+            principalId, Pageable.ofSize(limit).withPage(page));
 
     var builder =
         PageableResponse.<ClientConsent>builder()
@@ -55,13 +53,45 @@ public class ConsentQueryRepositoryAdapter implements ConsentQueryRepository {
                                 c, clientDataAccessMapper.toDomain(c.getClient())))
                     .collect(Collectors.toSet()));
 
-    if (consents.hasPrevious()) {
-      builder.previous(page - 1);
-    }
+    if (consents.hasPrevious()) builder.previous(page - 1);
 
-    if (consents.hasNext()) {
-      builder.next(page + 1);
-    }
+    if (consents.hasNext()) builder.next(page + 1);
+
+    return builder.build();
+  }
+
+  /**
+   * Retrieves all consents for a specific tenant and principal (user) with pagination support.
+   *
+   * @param tenantId the tenant ID
+   * @param principalId the principal (user) ID
+   * @param page the page number to retrieve
+   * @param limit the maximum number of items per page
+   * @return a pageable response containing the consents
+   */
+  public PageableResponse<ClientConsent> findAllByTenantIdAndPrincipalId(
+      TenantId tenantId, String principalId, int page, int limit) {
+    log.debug("Querying all user's consent by tenant id");
+
+    var consents =
+        jpaConsentRepository.findAllConsentsByPrincipalIdAndTenant(
+            principalId, tenantId.getValue(), Pageable.ofSize(limit).withPage(page));
+
+    var builder =
+        PageableResponse.<ClientConsent>builder()
+            .page(page)
+            .limit(limit)
+            .data(
+                consents.stream()
+                    .map(
+                        c ->
+                            consentDataAccessMapper.toClientConsent(
+                                c, clientDataAccessMapper.toDomain(c.getClient())))
+                    .collect(Collectors.toSet()));
+
+    if (consents.hasPrevious()) builder.previous(page - 1);
+
+    if (consents.hasNext()) builder.next(page + 1);
 
     return builder.build();
   }

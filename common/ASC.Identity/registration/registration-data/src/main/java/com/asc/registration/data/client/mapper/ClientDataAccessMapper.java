@@ -3,9 +3,10 @@ package com.asc.registration.data.client.mapper;
 import com.asc.common.core.domain.value.ClientId;
 import com.asc.common.core.domain.value.ClientSecret;
 import com.asc.common.core.domain.value.TenantId;
-import com.asc.common.core.domain.value.enums.AuthenticationMethod;
 import com.asc.common.core.domain.value.enums.ClientStatus;
+import com.asc.common.core.domain.value.enums.ClientVisibility;
 import com.asc.common.data.client.entity.ClientEntity;
+import com.asc.common.data.scope.entity.ScopeEntity;
 import com.asc.registration.core.domain.entity.Client;
 import com.asc.registration.core.domain.value.*;
 import java.util.Arrays;
@@ -35,24 +36,21 @@ public class ClientDataAccessMapper {
         .description(client.getClientInfo().description())
         .clientSecret(client.getSecret().value())
         .logo(client.getClientInfo().logo())
-        .clientIssuedAt(client.getClientCreationInfo().getCreatedOn())
-        .authenticationMethod(
-            String.join(
-                ",",
-                client.getAuthenticationMethods().stream()
-                    .map(AuthenticationMethod::getMethod)
-                    .collect(Collectors.toSet())))
-        .tenant(client.getClientTenantInfo().tenantId().getValue())
-        .tenantUrl(client.getClientTenantInfo().tenantUrl())
+        .authenticationMethods(client.getAuthenticationMethods())
+        .tenantId(client.getClientTenantInfo().tenantId().getValue())
         .websiteUrl(websiteInfo == null ? null : websiteInfo.getWebsiteUrl())
         .termsUrl(websiteInfo == null ? null : websiteInfo.getTermsUrl())
         .policyUrl(websiteInfo == null ? null : websiteInfo.getPolicyUrl())
-        .redirectUris(String.join(",", client.getClientRedirectInfo().redirectUris()))
-        .allowedOrigins(String.join(",", client.getClientRedirectInfo().allowedOrigins()))
+        .redirectUris(client.getClientRedirectInfo().redirectUris())
+        .allowedOrigins(client.getClientRedirectInfo().allowedOrigins())
         .logoutRedirectUri(String.join(",", client.getClientRedirectInfo().logoutRedirectUris()))
+        .accessible(client.getVisibility().equals(ClientVisibility.PUBLIC))
         .enabled(client.getStatus().equals(ClientStatus.ENABLED))
         .invalidated(client.getStatus().equals(ClientStatus.INVALIDATED))
-        .scopes(String.join(",", client.getScopes()))
+        .scopes(
+            client.getScopes().stream()
+                .map(s -> ScopeEntity.builder().name(s).build())
+                .collect(Collectors.toSet()))
         .createdOn(client.getClientCreationInfo().getCreatedOn())
         .createdBy(client.getClientCreationInfo().getCreatedBy())
         .modifiedOn(
@@ -76,14 +74,10 @@ public class ClientDataAccessMapper {
     return Client.Builder.builder()
         .id(new ClientId(UUID.fromString(entity.getClientId())))
         .secret(new ClientSecret(entity.getClientSecret()))
-        .authenticationMethods(
-            Arrays.stream(entity.getAuthenticationMethod().split(","))
-                .map(AuthenticationMethod::fromMethod)
-                .collect(Collectors.toSet()))
-        .scopes(Arrays.stream(entity.getScopes().split(",")).collect(Collectors.toSet()))
+        .authenticationMethods(entity.getAuthenticationMethods())
+        .scopes(entity.getScopes().stream().map(ScopeEntity::getName).collect(Collectors.toSet()))
         .clientInfo(new ClientInfo(entity.getName(), entity.getDescription(), entity.getLogo()))
-        .clientTenantInfo(
-            new ClientTenantInfo(new TenantId(entity.getTenant()), entity.getTenantUrl()))
+        .clientTenantInfo(new ClientTenantInfo(new TenantId(entity.getTenantId())))
         .clientWebsiteInfo(
             ClientWebsiteInfo.Builder.builder()
                 .websiteUrl(entity.getWebsiteUrl())
@@ -92,8 +86,8 @@ public class ClientDataAccessMapper {
                 .build())
         .clientRedirectInfo(
             new ClientRedirectInfo(
-                Arrays.stream(entity.getRedirectUris().split(",")).collect(Collectors.toSet()),
-                Arrays.stream(entity.getAllowedOrigins().split(",")).collect(Collectors.toSet()),
+                entity.getRedirectUris(),
+                entity.getAllowedOrigins(),
                 Arrays.stream(entity.getLogoutRedirectUri().split(","))
                     .collect(Collectors.toSet())))
         .clientCreationInfo(
@@ -110,6 +104,8 @@ public class ClientDataAccessMapper {
             entity.isInvalidated()
                 ? ClientStatus.INVALIDATED
                 : entity.isEnabled() ? ClientStatus.ENABLED : ClientStatus.DISABLED)
+        .clientVisibility(
+            entity.isAccessible() ? ClientVisibility.PUBLIC : ClientVisibility.PRIVATE)
         .build();
   }
 }

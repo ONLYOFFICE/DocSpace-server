@@ -23,13 +23,13 @@ public class ConsentCommandRepositoryAdapter implements ConsentCommandRepository
    * Revokes a user's consent for a specific client by marking it as invalidated.
    *
    * @param clientId the client ID
-   * @param principalName the principal (user) name
+   * @param principalId the principal (user) ID
    */
-  public void revokeConsent(ClientId clientId, String principalName) {
+  public void revokeConsent(ClientId clientId, String principalId) {
     log.debug("Persisting user's consent for current client as invalidated");
 
     jpaConsentRepository
-        .findById(new ConsentEntity.ConsentId(clientId.getValue().toString(), principalName))
+        .findById(new ConsentEntity.ConsentId(clientId.getValue().toString(), principalId))
         .ifPresentOrElse(
             entity -> {
               entity.setInvalidated(true);
@@ -39,7 +39,7 @@ public class ConsentCommandRepositoryAdapter implements ConsentCommandRepository
               throw new ConsentNotFoundException(
                   String.format(
                       "User %s consent for client %s was not found",
-                      principalName, clientId.getValue().toString()));
+                      principalId, clientId.getValue().toString()));
             });
   }
 }

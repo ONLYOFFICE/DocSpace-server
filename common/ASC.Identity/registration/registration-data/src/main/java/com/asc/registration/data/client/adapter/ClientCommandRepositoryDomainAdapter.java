@@ -41,13 +41,13 @@ public class ClientCommandRepositoryDomainAdapter implements ClientCommandReposi
   }
 
   /**
-   * Regenerates the client secret for a specific client and tenant.
+   * Regenerates the secret for a client identified by tenant ID and client ID.
    *
    * @param tenantId the tenant ID
    * @param clientId the client ID
-   * @return the new client secret
+   * @return the newly generated client secret
    */
-  public String regenerateClientSecretByClientId(TenantId tenantId, ClientId clientId) {
+  public String regenerateClientSecretByTenantIdAndClientId(TenantId tenantId, ClientId clientId) {
     log.debug("Regenerating and persisting a new secret");
 
     var secret = UUID.randomUUID().toString();
@@ -59,17 +59,37 @@ public class ClientCommandRepositoryDomainAdapter implements ClientCommandReposi
         clientId.getValue().toString(),
         secret,
         ZonedDateTime.now(ZoneId.of(UTC)));
+
     return secret;
   }
 
   /**
-   * Changes the activation status of a client.
+   * Changes the visibility of a client identified by tenant ID and client ID.
+   *
+   * @param tenantId the tenant ID
+   * @param clientId the client ID
+   * @param visible the new visibility status
+   */
+  public void changeVisibilityByTenantIdAndClientId(
+      TenantId tenantId, ClientId clientId, boolean visible) {
+    log.debug("Persisting client visibility changes");
+
+    jpaClientRepository.changeVisibility(
+        tenantId.getValue(),
+        clientId.getValue().toString(),
+        visible,
+        ZonedDateTime.now(ZoneId.of(UTC)));
+  }
+
+  /**
+   * Changes the activation status of a client identified by tenant ID and client ID.
    *
    * @param tenantId the tenant ID
    * @param clientId the client ID
    * @param enabled the new activation status
    */
-  public void changeActivation(TenantId tenantId, ClientId clientId, boolean enabled) {
+  public void changeActivationByTenantIdAndClientId(
+      TenantId tenantId, ClientId clientId, boolean enabled) {
     log.debug("Persisting activation changes");
 
     jpaClientRepository.changeActivation(
@@ -80,16 +100,16 @@ public class ClientCommandRepositoryDomainAdapter implements ClientCommandReposi
   }
 
   /**
-   * Deletes a client by tenant and client ID.
+   * Deletes a client identified by tenant ID and client ID.
    *
    * @param tenantId the tenant ID
    * @param clientId the client ID
-   * @return the number of deleted entities
+   * @return the number of clients deleted (typically 0 or 1)
    */
-  public int deleteByTenantAndClientId(TenantId tenantId, ClientId clientId) {
+  public int deleteByTenantIdAndClientId(TenantId tenantId, ClientId clientId) {
     log.debug("Persisting invalidated marker");
 
-    return jpaClientRepository.deleteByClientIdAndTenant(
+    return jpaClientRepository.deleteByClientIdAndTenantId(
         clientId.getValue().toString(), tenantId.getValue());
   }
 }

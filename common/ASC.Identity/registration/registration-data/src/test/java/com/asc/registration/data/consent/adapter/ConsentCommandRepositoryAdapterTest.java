@@ -21,7 +21,7 @@ class ConsentCommandRepositoryAdapterTest {
   @Mock private JpaConsentRepository jpaConsentRepository;
 
   private ClientId clientId;
-  private String principalName;
+  private String principalId;
   private ConsentEntity consentEntity;
 
   @BeforeEach
@@ -29,10 +29,10 @@ class ConsentCommandRepositoryAdapterTest {
     MockitoAnnotations.openMocks(this);
 
     clientId = new ClientId(UUID.randomUUID());
-    principalName = "principal-name";
+    principalId = "principal-id";
     consentEntity = new ConsentEntity();
     consentEntity.setRegisteredClientId(clientId.getValue().toString());
-    consentEntity.setPrincipalName(principalName);
+    consentEntity.setPrincipalId(principalId);
   }
 
   @Test
@@ -40,7 +40,7 @@ class ConsentCommandRepositoryAdapterTest {
     when(jpaConsentRepository.findById(any(ConsentEntity.ConsentId.class)))
         .thenReturn(Optional.of(consentEntity));
 
-    consentCommandRepositoryAdapter.revokeConsent(clientId, principalName);
+    consentCommandRepositoryAdapter.revokeConsent(clientId, principalId);
 
     verify(jpaConsentRepository).findById(any(ConsentEntity.ConsentId.class));
     verify(jpaConsentRepository).save(any(ConsentEntity.class));
@@ -53,7 +53,7 @@ class ConsentCommandRepositoryAdapterTest {
 
     assertThrows(
         ConsentNotFoundException.class,
-        () -> consentCommandRepositoryAdapter.revokeConsent(clientId, principalName));
+        () -> consentCommandRepositoryAdapter.revokeConsent(clientId, principalId));
 
     verify(jpaConsentRepository).findById(any(ConsentEntity.ConsentId.class));
     verify(jpaConsentRepository, never()).save(any(ConsentEntity.class));
