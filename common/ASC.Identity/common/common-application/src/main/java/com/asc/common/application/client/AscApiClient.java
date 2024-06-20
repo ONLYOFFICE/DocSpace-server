@@ -60,14 +60,14 @@ public interface AscApiClient {
   @Cacheable(
       cacheNames = {"ascMe"},
       key = "#cookie",
-      cacheManager = "ascClientCacheManager")
+      unless = "#result == null")
   AscResponseWrapper<AscPersonResponse> getMe(@RequestHeader("Cookie") String cookie);
 
   @RequestMapping(method = RequestMethod.GET, value = "${web.api}/people/email")
   @Cacheable(
       cacheNames = {"ascEmail"},
       key = "#email",
-      cacheManager = "ascClientCacheManager")
+      unless = "#result == null")
   AscResponseWrapper<AscPersonResponse> getProfile(
       @RequestHeader("Cookie") String cookie, @RequestParam("email") String email);
 
@@ -75,14 +75,14 @@ public interface AscApiClient {
   @Cacheable(
       cacheNames = {"ascTenant"},
       key = "#cookie",
-      cacheManager = "ascClientCacheManager")
+      unless = "#result == null")
   AscResponseWrapper<AscTenantResponse> getTenant(@RequestHeader("Cookie") String cookie);
 
   @RequestMapping(method = RequestMethod.GET, value = "${web.api}/settings")
   @Cacheable(
       cacheNames = {"ascSettings"},
       key = "#cookie",
-      cacheManager = "ascClientCacheManager")
+      unless = "#result == null")
   AscResponseWrapper<AscSettingsResponse> getSettings(@RequestHeader("Cookie") String cookie);
 
   // Dynamic URI calls
@@ -90,14 +90,14 @@ public interface AscApiClient {
   @Cacheable(
       cacheNames = {"ascMe"},
       key = "#cookie",
-      cacheManager = "ascClientCacheManager")
+      unless = "#result == null")
   AscResponseWrapper<AscPersonResponse> getMe(URI base, @RequestHeader("Cookie") String cookie);
 
   @RequestMapping(method = RequestMethod.GET, value = "${web.api}/people/email")
   @Cacheable(
       cacheNames = {"ascEmail"},
       key = "#email",
-      cacheManager = "ascClientCacheManager")
+      unless = "#result == null")
   AscResponseWrapper<AscPersonResponse> getProfile(
       URI base, @RequestHeader("Cookie") String cookie, @RequestParam("email") String email);
 
@@ -105,14 +105,14 @@ public interface AscApiClient {
   @Cacheable(
       cacheNames = {"ascTenant"},
       key = "#cookie",
-      cacheManager = "ascClientCacheManager")
+      unless = "#result == null")
   AscResponseWrapper<AscTenantResponse> getTenant(URI base, @RequestHeader("Cookie") String cookie);
 
   @RequestMapping(method = RequestMethod.GET, value = "${web.api}/settings")
   @Cacheable(
       cacheNames = {"ascSettings"},
       key = "#cookie",
-      cacheManager = "ascClientCacheManager")
+      unless = "#result == null")
   AscResponseWrapper<AscSettingsResponse> getSettings(
       URI base, @RequestHeader("Cookie") String cookie);
 }

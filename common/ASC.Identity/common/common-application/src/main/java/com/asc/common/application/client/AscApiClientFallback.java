@@ -128,9 +128,7 @@ public class AscApiClientFallback implements AscApiClient {
    */
   private void logFallback(String message, String... details) {
     MDC.put("fallback", AscApiClientFallback.class.getName());
-    for (int i = 0; i < details.length; i++) {
-      MDC.put("detail" + (i + 1), details[i]);
-    }
+    for (int i = 0; i < details.length; i++) MDC.put("detail" + (i + 1), details[i]);
     log.warn(message);
     MDC.clear();
   }
