@@ -11,8 +11,8 @@ public class ClientCreationInfo {
   private final String createdBy;
 
   private ClientCreationInfo(Builder builder) {
-    createdOn = builder.createdOn;
-    createdBy = builder.createdBy;
+    this.createdOn = builder.createdOn;
+    this.createdBy = builder.createdBy;
   }
 
   /**
@@ -21,7 +21,7 @@ public class ClientCreationInfo {
    * @return the creation timestamp
    */
   public ZonedDateTime getCreatedOn() {
-    return createdOn;
+    return this.createdOn;
   }
 
   /**
@@ -30,7 +30,7 @@ public class ClientCreationInfo {
    * @return the creator identifier
    */
   public String getCreatedBy() {
-    return createdBy;
+    return this.createdBy;
   }
 
   /** Builder class for constructing instances of {@link ClientCreationInfo}. */
@@ -56,7 +56,7 @@ public class ClientCreationInfo {
      * @return the Builder instance
      */
     public Builder createdOn(ZonedDateTime val) {
-      createdOn = val;
+      this.createdOn = val;
       return this;
     }
 
@@ -67,7 +67,7 @@ public class ClientCreationInfo {
      * @return the Builder instance
      */
     public Builder createdBy(String val) {
-      createdBy = val;
+      this.createdBy = val;
       return this;
     }
 

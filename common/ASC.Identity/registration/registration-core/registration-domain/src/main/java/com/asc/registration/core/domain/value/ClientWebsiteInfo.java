@@ -10,9 +10,9 @@ public class ClientWebsiteInfo {
   private final String policyUrl;
 
   private ClientWebsiteInfo(Builder builder) {
-    websiteUrl = builder.websiteUrl;
-    termsUrl = builder.termsUrl;
-    policyUrl = builder.policyUrl;
+    this.websiteUrl = builder.websiteUrl;
+    this.termsUrl = builder.termsUrl;
+    this.policyUrl = builder.policyUrl;
   }
 
   /**
@@ -21,7 +21,7 @@ public class ClientWebsiteInfo {
    * @return the website URL
    */
   public String getWebsiteUrl() {
-    return websiteUrl;
+    return this.websiteUrl;
   }
 
   /**
@@ -30,7 +30,7 @@ public class ClientWebsiteInfo {
    * @return the terms of service URL
    */
   public String getTermsUrl() {
-    return termsUrl;
+    return this.termsUrl;
   }
 
   /**
@@ -39,7 +39,7 @@ public class ClientWebsiteInfo {
    * @return the privacy policy URL
    */
   public String getPolicyUrl() {
-    return policyUrl;
+    return this.policyUrl;
   }
 
   /** Builder class for constructing instances of {@link ClientWebsiteInfo}. */
@@ -66,7 +66,7 @@ public class ClientWebsiteInfo {
      * @return the Builder instance
      */
     public Builder websiteUrl(String val) {
-      websiteUrl = val;
+      this.websiteUrl = val;
       return this;
     }
 
@@ -77,7 +77,7 @@ public class ClientWebsiteInfo {
      * @return the Builder instance
      */
     public Builder termsUrl(String val) {
-      termsUrl = val;
+      this.termsUrl = val;
       return this;
     }
 
@@ -88,7 +88,7 @@ public class ClientWebsiteInfo {
      * @return the Builder instance
      */
     public Builder policyUrl(String val) {
-      policyUrl = val;
+      this.policyUrl = val;
       return this;
     }
 

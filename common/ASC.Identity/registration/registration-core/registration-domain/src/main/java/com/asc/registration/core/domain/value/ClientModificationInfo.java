@@ -12,8 +12,8 @@ public class ClientModificationInfo {
   private final String modifiedBy;
 
   private ClientModificationInfo(Builder builder) {
-    modifiedOn = builder.modifiedOn;
-    modifiedBy = builder.modifiedBy;
+    this.modifiedOn = builder.modifiedOn;
+    this.modifiedBy = builder.modifiedBy;
   }
 
   /**
@@ -22,7 +22,7 @@ public class ClientModificationInfo {
    * @return the modification timestamp
    */
   public ZonedDateTime getModifiedOn() {
-    return modifiedOn;
+    return this.modifiedOn;
   }
 
   /**
@@ -31,7 +31,7 @@ public class ClientModificationInfo {
    * @return the modifier identifier
    */
   public String getModifiedBy() {
-    return modifiedBy;
+    return this.modifiedBy;
   }
 
   /** Builder class for constructing instances of {@link ClientModificationInfo}. */
@@ -57,7 +57,7 @@ public class ClientModificationInfo {
      * @return the Builder instance
      */
     public Builder modifiedOn(ZonedDateTime val) {
-      modifiedOn = val;
+      this.modifiedOn = val;
       return this;
     }
 
@@ -68,7 +68,7 @@ public class ClientModificationInfo {
      * @return the Builder instance
      */
     public Builder modifiedBy(String val) {
-      modifiedBy = val;
+      this.modifiedBy = val;
       return this;
     }
 

@@ -33,7 +33,7 @@ public abstract class ClientEvent implements DomainEvent<Client> {
    * @return the audit information
    */
   public Audit getAudit() {
-    return audit;
+    return this.audit;
   }
 
   /**
@@ -42,7 +42,7 @@ public abstract class ClientEvent implements DomainEvent<Client> {
    * @return the client
    */
   public Client getClient() {
-    return client;
+    return this.client;
   }
 
   /**
@@ -51,6 +51,6 @@ public abstract class ClientEvent implements DomainEvent<Client> {
    * @return the event timestamp
    */
   public ZonedDateTime getEventAt() {
-    return eventAt;
+    return this.eventAt;
   }
 }

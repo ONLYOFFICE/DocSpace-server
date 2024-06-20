@@ -5,6 +5,7 @@ import com.asc.common.core.domain.value.ClientId;
 import com.asc.common.core.domain.value.ClientSecret;
 import com.asc.common.core.domain.value.enums.AuthenticationMethod;
 import com.asc.common.core.domain.value.enums.ClientStatus;
+import com.asc.common.core.domain.value.enums.ClientVisibility;
 import com.asc.registration.core.domain.exception.ClientDomainException;
 import com.asc.registration.core.domain.value.*;
 import java.time.ZoneId;
@@ -16,8 +17,8 @@ import java.util.UUID;
 import java.util.function.Function;
 
 /**
- * Client represents the aggregate root in the domain-driven design context. It contains
- * client-specific information and behavior, managing its lifecycle and state.
+ * Represents the client aggregate root in the domain-driven design context. This class encapsulates
+ * client-specific information and behaviors, managing the lifecycle and state of a client.
  */
 public class Client extends AggregateRoot<ClientId> {
   private static final String UTC = "UTC";
@@ -32,6 +33,7 @@ public class Client extends AggregateRoot<ClientId> {
   private ClientCreationInfo clientCreationInfo;
   private ClientModificationInfo clientModificationInfo;
   private ClientStatus clientStatus;
+  private ClientVisibility clientVisibility;
 
   private Client(Builder builder) {
     super.setId(builder.id);
@@ -51,6 +53,8 @@ public class Client extends AggregateRoot<ClientId> {
     this.clientCreationInfo = builder.clientCreationInfo;
     this.clientModificationInfo = builder.clientModificationInfo;
     this.clientStatus = builder.clientStatus;
+    this.clientVisibility =
+        builder.clientVisibility == null ? ClientVisibility.PRIVATE : builder.clientVisibility;
   }
 
   /**
@@ -70,6 +74,20 @@ public class Client extends AggregateRoot<ClientId> {
             .createdOn(ZonedDateTime.now(ZoneId.of(UTC)))
             .build();
     this.clientStatus = ClientStatus.ENABLED;
+    validate();
+  }
+
+  /**
+   * Changes the visibility of the client.
+   *
+   * @param visibility the new visibility status
+   * @param modifiedBy the identifier of the modifier
+   */
+  public void changeVisibility(ClientVisibility visibility, String modifiedBy) {
+    validateStatus();
+    validateStatusInvalidated();
+    this.clientVisibility = visibility;
+    updateModificationInfo(modifiedBy);
     validate();
   }
 
@@ -99,7 +117,7 @@ public class Client extends AggregateRoot<ClientId> {
   public void invalidate(String modifiedBy) {
     validateStatus();
     changeStatus(ClientStatus.INVALIDATED, modifiedBy);
-    secret = new ClientSecret(UUID.randomUUID().toString());
+    this.secret = new ClientSecret(UUID.randomUUID().toString());
     validate();
   }
 
@@ -111,7 +129,7 @@ public class Client extends AggregateRoot<ClientId> {
   public void regenerateSecret(String modifiedBy) {
     validateStatus();
     validateStatusInvalidated();
-    secret = new ClientSecret(UUID.randomUUID().toString());
+    this.secret = new ClientSecret(UUID.randomUUID().toString());
     updateModificationInfo(modifiedBy);
     validate();
   }
@@ -138,7 +156,7 @@ public class Client extends AggregateRoot<ClientId> {
     validateStatus();
     validateStatusInvalidated();
     validateScope(scope);
-    scopes.add(scope);
+    this.scopes.add(scope);
     updateModificationInfo(modifiedBy);
     validate();
   }
@@ -154,8 +172,9 @@ public class Client extends AggregateRoot<ClientId> {
     validateStatus();
     validateStatusInvalidated();
     validateScope(scope);
-    if (scopes.size() == 1) throw new ClientDomainException("Client must have at least one scope");
-    scopes.remove(scope);
+    if (this.scopes.size() == 1)
+      throw new ClientDomainException("Client must have at least one scope");
+    this.scopes.remove(scope);
     updateModificationInfo(modifiedBy);
     validate();
   }
@@ -170,7 +189,7 @@ public class Client extends AggregateRoot<ClientId> {
     validateStatus();
     validateStatusInvalidated();
     if (newClientInfo == null) throw new ClientDomainException("New client info cannot be null");
-    clientInfo = newClientInfo;
+    this.clientInfo = newClientInfo;
     updateModificationInfo(modifiedBy);
     validate();
   }
@@ -186,7 +205,7 @@ public class Client extends AggregateRoot<ClientId> {
     validateStatusInvalidated();
     if (newClientWebsiteInfo == null)
       throw new ClientDomainException("New client website info cannot be null");
-    clientWebsiteInfo = newClientWebsiteInfo;
+    this.clientWebsiteInfo = newClientWebsiteInfo;
     updateModificationInfo(modifiedBy);
     validate();
   }
@@ -203,7 +222,7 @@ public class Client extends AggregateRoot<ClientId> {
     validateStatusInvalidated();
     if (newClientRedirectInfo == null)
       throw new ClientDomainException("New client redirect info cannot be null");
-    clientRedirectInfo = newClientRedirectInfo;
+    this.clientRedirectInfo = newClientRedirectInfo;
     updateModificationInfo(modifiedBy);
     validate();
   }
@@ -218,7 +237,7 @@ public class Client extends AggregateRoot<ClientId> {
     validateStatus();
     validateStatusInvalidated();
     if (method == null) throw new ClientDomainException("Authentication method cannot be null");
-    authenticationMethods.add(method);
+    this.authenticationMethods.add(method);
     updateModificationInfo(modifiedBy);
     validate();
   }
@@ -234,18 +253,24 @@ public class Client extends AggregateRoot<ClientId> {
     validateStatus();
     validateStatusInvalidated();
     if (method == null) throw new ClientDomainException("Authentication method cannot be null");
-    if (authenticationMethods.size() == 1 && authenticationMethods.contains(method))
+    if (this.authenticationMethods.size() == 1 && this.authenticationMethods.contains(method))
       throw new ClientDomainException(
           "Client must have at least one authentication method. Cannot remove the last one");
-    authenticationMethods.remove(method);
+    this.authenticationMethods.remove(method);
     updateModificationInfo(modifiedBy);
     validate();
   }
 
+  /**
+   * Changes the client's status.
+   *
+   * @param newStatus the new client status
+   * @param modifiedBy the identifier of the modifier
+   */
   private void changeStatus(ClientStatus newStatus, String modifiedBy) {
     validateStatus();
     validateStatusInvalidated();
-    clientStatus = newStatus;
+    this.clientStatus = newStatus;
     updateModificationInfo(modifiedBy);
     validate();
   }
@@ -256,46 +281,69 @@ public class Client extends AggregateRoot<ClientId> {
    * @throws ClientDomainException if the client state is invalid
    */
   protected void validate() {
-    if (id == null || id.getValue() == null)
+    if (this.id == null || this.id.getValue() == null)
       throw new ClientDomainException("Client is in invalid state due to missing client id");
-    if (secret == null || secret.value() == null)
+    if (this.secret == null || this.secret.value() == null)
       throw new ClientDomainException("Client is in invalid state due to missing client secret");
-    if (authenticationMethods == null || authenticationMethods.isEmpty())
+    if (this.authenticationMethods == null || this.authenticationMethods.isEmpty())
       throw new ClientDomainException(
           "Client is in invalid state due to missing authentication methods");
-    if (scopes == null || scopes.isEmpty())
+    if (this.scopes == null || this.scopes.isEmpty())
       throw new ClientDomainException("Client is in invalid state due to missing scopes");
-    if (clientInfo == null)
+    if (this.clientInfo == null)
       throw new ClientDomainException("Client is in invalid state due to missing client info");
-    if (clientTenantInfo == null)
+    if (this.clientTenantInfo == null)
       throw new ClientDomainException(
           "Client is in invalid state due to missing client tenant info");
-    if (clientRedirectInfo == null)
+    if (this.clientRedirectInfo == null)
       throw new ClientDomainException(
           "Client is in invalid state due to missing client redirect info");
-    if (clientCreationInfo == null
-        || clientCreationInfo.getCreatedBy() == null
-        || clientCreationInfo.getCreatedBy().isBlank())
+    if (this.clientCreationInfo == null
+        || this.clientCreationInfo.getCreatedBy() == null
+        || this.clientCreationInfo.getCreatedBy().isBlank())
       throw new ClientDomainException("Client is in invalid state due to invalid creator name");
-    if (clientCreationInfo.getCreatedOn() == null)
+    if (this.clientCreationInfo.getCreatedOn() == null)
       throw new ClientDomainException("Client is in invalid state due to missing creation date");
+    if (this.clientVisibility == null)
+      throw new ClientDomainException("Client must have a valid visibility level");
   }
 
+  /**
+   * Validates the client's status.
+   *
+   * @throws ClientDomainException if the client has not been initialized yet
+   */
   private void validateStatus() {
-    if (clientStatus == null)
+    if (this.clientStatus == null)
       throw new ClientDomainException("Client has not been initialized yet");
   }
 
+  /**
+   * Validates if the client status is invalidated.
+   *
+   * @throws ClientDomainException if the client has been marked for removal
+   */
   private void validateStatusInvalidated() {
-    if (clientStatus == ClientStatus.INVALIDATED)
+    if (this.clientStatus == ClientStatus.INVALIDATED)
       throw new ClientDomainException("Client has been marked for removal");
   }
 
+  /**
+   * Validates a scope.
+   *
+   * @param scope the scope to validate
+   * @throws ClientDomainException if the scope is null or blank
+   */
   private void validateScope(String scope) {
     if (scope == null || scope.isBlank())
       throw new ClientDomainException("Scope cannot be null or blank");
   }
 
+  /**
+   * Updates the client's modification information.
+   *
+   * @param modifiedBy the identifier of the modifier
+   */
   private void updateModificationInfo(String modifiedBy) {
     this.clientModificationInfo =
         ClientModificationInfo.Builder.builder()
@@ -306,48 +354,112 @@ public class Client extends AggregateRoot<ClientId> {
 
   // Getters for various fields
 
+  /**
+   * Returns the client ID.
+   *
+   * @return the client ID
+   */
   public ClientId getId() {
-    return id;
+    return this.id;
   }
 
+  /**
+   * Returns the client secret.
+   *
+   * @return the client secret
+   */
   public ClientSecret getSecret() {
-    return secret;
+    return this.secret;
   }
 
+  /**
+   * Returns the authentication methods.
+   *
+   * @return the authentication methods
+   */
   public Set<AuthenticationMethod> getAuthenticationMethods() {
-    return Collections.unmodifiableSet(authenticationMethods);
+    return Collections.unmodifiableSet(this.authenticationMethods);
   }
 
+  /**
+   * Returns the client scopes.
+   *
+   * @return the client scopes
+   */
   public Set<String> getScopes() {
-    return Collections.unmodifiableSet(scopes);
+    return Collections.unmodifiableSet(this.scopes);
   }
 
+  /**
+   * Returns the client information.
+   *
+   * @return the client information
+   */
   public ClientInfo getClientInfo() {
-    return clientInfo;
+    return this.clientInfo;
   }
 
+  /**
+   * Returns the client tenant information.
+   *
+   * @return the client tenant information
+   */
   public ClientTenantInfo getClientTenantInfo() {
-    return clientTenantInfo;
+    return this.clientTenantInfo;
   }
 
+  /**
+   * Returns the client website information.
+   *
+   * @return the client website information
+   */
   public ClientWebsiteInfo getClientWebsiteInfo() {
-    return clientWebsiteInfo;
+    return this.clientWebsiteInfo;
   }
 
+  /**
+   * Returns the client redirect information.
+   *
+   * @return the client redirect information
+   */
   public ClientRedirectInfo getClientRedirectInfo() {
-    return clientRedirectInfo;
+    return this.clientRedirectInfo;
   }
 
+  /**
+   * Returns the client creation information.
+   *
+   * @return the client creation information
+   */
   public ClientCreationInfo getClientCreationInfo() {
-    return clientCreationInfo;
+    return this.clientCreationInfo;
   }
 
+  /**
+   * Returns the client modification information.
+   *
+   * @return the client modification information
+   */
   public ClientModificationInfo getClientModificationInfo() {
-    return clientModificationInfo;
+    return this.clientModificationInfo;
   }
 
+  /**
+   * Returns the client status.
+   *
+   * @return the client status
+   */
   public ClientStatus getStatus() {
-    return clientStatus;
+    return this.clientStatus;
+  }
+
+  /**
+   * Returns the client visibility.
+   *
+   * @return the client visibility
+   */
+  public ClientVisibility getVisibility() {
+    return this.clientVisibility;
   }
 
   /** Builder class for creating instances of {@link Client}. */
@@ -363,70 +475,86 @@ public class Client extends AggregateRoot<ClientId> {
     private ClientCreationInfo clientCreationInfo;
     private ClientModificationInfo clientModificationInfo;
     private ClientStatus clientStatus;
+    private ClientVisibility clientVisibility;
 
     private Builder() {
       this.authenticationMethods = new HashSet<>();
     }
 
+    /**
+     * Returns a new Builder instance.
+     *
+     * @return a new Builder instance
+     */
     public static Builder builder() {
       return new Builder();
     }
 
     public Builder id(ClientId val) {
-      id = val;
+      this.id = val;
       return this;
     }
 
     public Builder secret(ClientSecret val) {
-      secret = val;
+      this.secret = val;
       return this;
     }
 
     public Builder authenticationMethods(Set<AuthenticationMethod> val) {
-      authenticationMethods = val;
+      this.authenticationMethods = val;
       return this;
     }
 
     public Builder scopes(Set<String> val) {
-      scopes = val;
+      this.scopes = val;
       return this;
     }
 
     public Builder clientInfo(ClientInfo val) {
-      clientInfo = val;
+      this.clientInfo = val;
       return this;
     }
 
     public Builder clientTenantInfo(ClientTenantInfo val) {
-      clientTenantInfo = val;
+      this.clientTenantInfo = val;
       return this;
     }
 
     public Builder clientWebsiteInfo(ClientWebsiteInfo val) {
-      clientWebsiteInfo = val;
+      this.clientWebsiteInfo = val;
       return this;
     }
 
     public Builder clientRedirectInfo(ClientRedirectInfo val) {
-      clientRedirectInfo = val;
+      this.clientRedirectInfo = val;
       return this;
     }
 
     public Builder clientCreationInfo(ClientCreationInfo val) {
-      clientCreationInfo = val;
+      this.clientCreationInfo = val;
       return this;
     }
 
     public Builder clientModificationInfo(ClientModificationInfo val) {
-      clientModificationInfo = val;
+      this.clientModificationInfo = val;
       return this;
     }
 
     public Builder clientStatus(ClientStatus val) {
-      clientStatus = val;
+      this.clientStatus = val;
       return this;
     }
 
+    public Builder clientVisibility(ClientVisibility val) {
+      this.clientVisibility = val;
+      return this;
+    }
+
+    /**
+     * Builds and returns a new Client instance.
+     *
+     * @return a new Client instance
+     */
     public Client build() {
       if (this.authenticationMethods.isEmpty())
         this.authenticationMethods.add(AuthenticationMethod.DEFAULT_AUTHENTICATION);

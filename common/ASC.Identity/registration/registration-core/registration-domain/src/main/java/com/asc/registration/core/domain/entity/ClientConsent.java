@@ -27,7 +27,7 @@ public class ClientConsent {
    * @return the client
    */
   public Client getClient() {
-    return client;
+    return this.client;
   }
 
   /**
@@ -36,6 +36,6 @@ public class ClientConsent {
    * @return the consent
    */
   public Consent getConsent() {
-    return consent;
+    return this.consent;
   }
 }
