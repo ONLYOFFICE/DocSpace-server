@@ -387,7 +387,7 @@ public class FilesSettingsHelper(
             return setting;
         }
 
-        setting = new AutoCleanUpData { IsAutoCleanUp = true, Gap = DateToAutoCleanUp.ThirtyDays };
+        setting = AutoCleanUpData.GetDefault();
         await SetAutomaticallyCleanUp(setting);
 
         return setting;

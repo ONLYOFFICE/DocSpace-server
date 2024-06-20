@@ -206,10 +206,10 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
 
         if (fileType == FileType.Pdf)
         {
-            var linkDao = daoFactory.GetLinkDao();
+            var linkDao = daoFactory.GetLinkDao<T>();
             var folderDao = daoFactory.GetFolderDao<T>();
 
-            var linkedIdTask = linkDao.GetLinkedAsync(file.Id.ToString());
+            var linkedIdTask = linkDao.GetLinkedAsync(file.Id);
             var propertiesTask = daoFactory.GetFileDao<T>().GetProperties(file.Id);
             var currentFolderTask = folderDao.GetFolderAsync((T)Convert.ChangeType(file.ParentId, typeof(T)));
             await Task.WhenAll(linkedIdTask, propertiesTask, currentFolderTask);
@@ -238,13 +238,14 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
             {
                 result.Security[FileSecurity.FilesSecurityActions.EditForm] = false;
             }
-            result.HasDraft = linkedId != null;
+
+            result.HasDraft = !Equals(linkedId, default(T));
 
             var formFilling = properties?.FormFilling;
             if (formFilling != null)
             {
                 result.StartFilling = formFilling.StartFilling;
-                if (linkedId != null)
+                if (!Equals(linkedId, default(T)))
                 {
                     var draftLocation = new DraftLocation<T>()
                     {

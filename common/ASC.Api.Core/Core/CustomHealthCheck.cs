@@ -90,8 +90,7 @@ public static class CustomHealthCheck
     }
 
 
-    public static IHealthChecksBuilder AddMessageQueue(
-               this IHealthChecksBuilder hcBuilder, IConfiguration configuration)
+    public static IHealthChecksBuilder AddMessageQueue(this IHealthChecksBuilder hcBuilder, IConfiguration configuration)
     {
         var rabbitMQConfiguration = configuration.GetSection("RabbitMQ").Get<RabbitMQSettings>();
 
@@ -104,8 +103,7 @@ public static class CustomHealthCheck
         }
         else
         {
-            var configurationExtension = new ConfigurationExtension(configuration);
-            var kafkaSettings = configurationExtension.GetSetting<KafkaSettings>("kafka");
+            var kafkaSettings = configuration.GetSection("kafka").Get<KafkaSettings>();
 
             if (kafkaSettings != null && !string.IsNullOrEmpty(kafkaSettings.BootstrapServers))
             {
