@@ -133,6 +133,9 @@
     <EmbeddedResource Update="Notify\Stylers\Resources\NotifyTemplateResource.sl.resx">
       <DependentUpon>NotifyTemplateResource.resx</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Update="Notify\Stylers\Resources\NotifyTemplateResource.sr-Cyrl-RS.resx">
+      <DependentUpon>NotifyTemplateResource.resx</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Update="Notify\Stylers\Resources\NotifyTemplateResource.sr-Latn-RS.resx">
       <DependentUpon>NotifyTemplateResource.resx</DependentUpon>
     </EmbeddedResource>

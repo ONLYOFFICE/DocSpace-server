@@ -519,8 +519,8 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
         var flushed = false;
         while (toRead > 0)
         {
-            var length = await fileStream.ReadAsync(buffer, 0, bufferSize);
-            await context.Response.Body.WriteAsync(buffer, 0, length, context.RequestAborted);
+            var length = await fileStream.ReadAsync(buffer.AsMemory(0, bufferSize));
+            await context.Response.Body.WriteAsync(buffer.AsMemory(0, length), context.RequestAborted);
             await context.Response.Body.FlushAsync();
             flushed = true;
             toRead -= length;
@@ -657,9 +657,11 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             
             long offset = 0;
             var length = ProcessRangeHeader(context, fullLength, ref offset);
-            var stream = await fileDao.GetFileStreamAsync(file, offset, length);
-            
-            await SendStreamByChunksAsync(context, length, offset, fullLength, file.Title, stream);
+
+            await using (var stream = await fileDao.GetFileStreamAsync(file, offset, length))
+            {
+                await SendStreamByChunksAsync(context, length, offset, fullLength, file.Title, stream);
+            }
         }
         catch (Exception ex)
         {
@@ -1317,10 +1319,19 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             return await fileDao.SaveFileAsync(file, fileStream);
         }
 
-        await using var buffered = await tempStream.GetBufferedAsync(fileStream);
-        file.ContentLength = buffered.Length;
-        return await fileDao.SaveFileAsync(file, buffered);
-
+        var (buffered, isNew) = await tempStream.TryGetBufferedAsync(fileStream);
+        try
+        {
+            file.ContentLength = buffered.Length;
+            return await fileDao.SaveFileAsync(file, buffered);
+        }
+        finally
+        {
+            if (isNew)
+            {
+                await buffered.DisposeAsync();
+            }
+        }
 
     }
 

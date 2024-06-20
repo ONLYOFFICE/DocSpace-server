@@ -272,7 +272,7 @@ public class ProductEntryPoint : Product
         var result = new Dictionary<string, bool>();
 
         var folderDao = _daoFactory.GetFolderDao<int>();
-        var securityDao = _daoFactory.GetSecurityDao<int>();
+        var securityDao = _daoFactory.GetSecurityDao<string>();
 
         var currentUserSubjects = await _fileSecurity.GetUserSubjectsAsync(userId);
         var currentUsersRecords = await securityDao.GetSharesAsync(currentUserSubjects).ToListAsync();
@@ -281,11 +281,11 @@ public class ProductEntryPoint : Product
         {
             if (record.Owner == userId || record.Share == FileShare.RoomAdmin)
             {
-                result.TryAdd(record.EntryId.ToString(), true);
+                result.TryAdd(record.EntryId, true);
             }
             else if (record.Share != FileShare.Restrict)
             {
-                result.TryAdd(record.EntryId.ToString(), false);
+                result.TryAdd(record.EntryId, false);
             }
         }
 

@@ -380,8 +380,8 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
             case UserSortType.FirstName:
             default:
                 q = sortOrderAsc
-                    ? q.OrderBy(r => r.ActivationStatus).ThenBy(u => u.FirstName)
-                    : q.OrderBy(r => r.ActivationStatus).ThenByDescending(u => u.FirstName);
+                    ? q.OrderBy(r => r.Status ==  EmployeeStatus.Pending ? 1 : 0).ThenBy(u => u.Status ==  EmployeeStatus.Pending ? u.Email : u.FirstName)
+                    : q.OrderBy(r => r.Status ==  EmployeeStatus.Pending ? 1 : 0).ThenByDescending(u => u.Status ==  EmployeeStatus.Pending ? u.Email : u.FirstName);
                 break;
         }
 
@@ -771,7 +771,9 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
         {
             switch (employeeStatus)
             {
-                case EmployeeStatus.LeaveOfAbsence:
+                case EmployeeStatus.Pending:
+                    q = q.Where(u => u.Status == EmployeeStatus.Pending);
+                    break;
                 case EmployeeStatus.Terminated:
                     q = isDocSpaceAdmin ? q.Where(u => u.Status == EmployeeStatus.Terminated) : q.Where(u => false);
                     break;

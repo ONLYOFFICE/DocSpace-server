@@ -18,7 +18,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn)
-                .HasAnnotation("ProductVersion", "8.0.2")
+                .HasAnnotation("ProductVersion", "8.0.4")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("ASC.Core.Common.EF.Acl", b =>
@@ -1859,6 +1859,11 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         },
                         new
                         {
+                            Input = ".djvu",
+                            Output = ".pdf"
+                        },
+                        new
+                        {
                             Input = ".doc",
                             Output = ".docx"
                         },
@@ -3076,6 +3081,11 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         {
                             Input = ".ots",
                             Output = ".xlsx"
+                        },
+                        new
+                        {
+                            Input = ".oform",
+                            Output = ".pdf"
                         },
                         new
                         {

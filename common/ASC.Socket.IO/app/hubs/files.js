@@ -64,24 +64,31 @@ module.exports = (io) => {
       return;
     }
 
-    const userId = session?.user?.id;
-    const tenantId = session?.portal?.tenantId;
-    const linkId = session?.linkId;
+    const userId = () => {
+      return socket.handshake.session?.user?.id;
+    }
+    const tenantId = () => {
+      return socket.handshake.session?.portal?.tenantId;
+    }
+    
+    const linkId = () => {
+      return socket.handshake.session?.linkId;
+    }
 
-    getRoom = (roomPart) => {
-      return `${tenantId}-${roomPart}`;
+    const getRoom = (roomPart) => {
+      return `${tenantId()}-${roomPart}`;
     };
 
     const connectMessage = !session.anonymous ? 
-      `connect user='${userId}' on tenant='${tenantId}' socketId='${socket.id}'` : 
-      `connect anonymous user by share key on tenant='${tenantId}' socketId='${socket.id}'`;
+      `connect user='${userId()}' on tenant='${tenantId()}' socketId='${socket.id}'` : 
+      `connect anonymous user by share key on tenant='${tenantId()}' socketId='${socket.id}'`;
 
     logger.info(connectMessage);
 
     socket.on("disconnect", (reason) => {
       const disconnectMessage = !session.anonymous ? 
-        `disconnect user='${userId}' on tenant='${tenantId}' socketId='${socket.id}' due to ${reason}` :
-        `disconnect anonymous user by share key on tenant='${tenantId}' socketId='${socket.id}' due to ${reason}`;
+        `disconnect user='${userId()}' on tenant='${tenantId()}' socketId='${socket.id}' due to ${reason}` :
+        `disconnect anonymous user by share key on tenant='${tenantId()}' socketId='${socket.id}' due to ${reason}`;
 
       logger.info(disconnectMessage)
     });
@@ -107,7 +114,7 @@ module.exports = (io) => {
       const user = sess?.user?.id || "unknown";
       const sessId = sess?.id;
 
-      logger.info(`WS: restore backup in room ${room} session=[sessionId='sess:${sessId}' tenantId=${tenant}|${tenantId} userId='${user}'|'${userId}']`);
+      logger.info(`WS: restore backup in room ${room} session=[sessionId='sess:${sessId}' tenantId=${tenant}|${tenantId()} userId='${user}'|'${userId()}']`);
       socket.to(room).emit("restore-backup");
     });
 
@@ -118,17 +125,17 @@ module.exports = (io) => {
 
       if (individual) {
         if (Array.isArray(roomParts)) {
-          changeFunc(roomParts.map((p) => `${p}-${userId}`));
+          changeFunc(roomParts.map((p) => `${p}-${userId()}`));
           
-          if (linkId) {
-            changeFunc(roomParts.map((p) => `${p}-${linkId}`));
+          if (linkId()) {
+            changeFunc(roomParts.map((p) => `${p}-${linkId()}`));
           }
           
         } else {
-          changeFunc(`${roomParts}-${userId}`);
+          changeFunc(`${roomParts}-${userId()}`);
           
-          if (linkId) {
-            changeFunc(`${roomParts}-${linkId}`);
+          if (linkId()) {
+            changeFunc(`${roomParts}-${linkId()}`);
           }
         }
       }

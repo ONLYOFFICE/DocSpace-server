@@ -26,7 +26,6 @@
 
 using ASC.Common.Mapping;
 using ASC.Core.Notify.Socket;
-using ASC.Data.Storage;
 using ASC.MessagingSystem;
 
 using Flurl.Util;
@@ -70,10 +69,7 @@ public abstract class BaseStartup
         services.AddMemoryCache();
 
         services.AddHttpClient();
-        services.AddHttpClient("customHttpClient", x => { }).ConfigurePrimaryHttpMessageHandler(() =>
-        {
-            return new HttpClientHandler { AllowAutoRedirect = false };
-        });
+        services.AddHttpClient("customHttpClient", _ => { }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
 
         services.AddExceptionHandler<CustomExceptionHandler>();
         services.AddProblemDetails();
@@ -172,7 +168,7 @@ public abstract class BaseStartup
                 }),
                 PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
                 {
-                    var userId = httpContext?.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value;
+                    var userId = httpContext?.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value;
                     string partitionKey;
                     int permitLimit;
 
@@ -200,7 +196,7 @@ public abstract class BaseStartup
                 }),
                 PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
                     {
-                        var userId = httpContext?.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value ??
+                        var userId = httpContext?.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value ??
                                      httpContext?.Connection.RemoteIpAddress.ToInvariantString();
 
                         var remoteIpAddress = httpContext?.Connection.RemoteIpAddress;
@@ -227,11 +223,11 @@ public abstract class BaseStartup
 
             options.AddPolicy(RateLimiterPolicy.SensitiveApi, httpContext =>
             {
-                var userId = httpContext?.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value ??
+                var userId = httpContext?.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value ??
                              httpContext?.Connection.RemoteIpAddress.ToInvariantString();
 
                 var permitLimit = 5;
-                var path = httpContext.Request.Path.ToString();
+                var path = httpContext?.Request.Path.ToString();
                 var partitionKey = $"{RateLimiterPolicy.SensitiveApi}_{userId}|{path}";
                 var remoteIpAddress = httpContext?.Connection.RemoteIpAddress;
 

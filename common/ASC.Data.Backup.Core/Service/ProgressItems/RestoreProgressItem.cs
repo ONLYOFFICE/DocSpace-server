@@ -114,7 +114,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
 
                 if (record == null)
                 {
-                    var md5Hash = BackupWorker.GetBackupHashMD5(tempFile, S3Storage.ChunkSize);
+                    var md5Hash = await BackupWorker.GetBackupHashMD5Async(tempFile, S3Storage.ChunkSize);
                     record = await _backupRepository.GetBackupRecordAsync(md5Hash, TenantId);
                     if (record == null)
                     {

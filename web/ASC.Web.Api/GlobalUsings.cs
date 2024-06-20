@@ -40,6 +40,7 @@ global using System.Text.Json.Serialization;
 global using System.Text.RegularExpressions;
 global using System.Web;
 
+global using ASC.ActiveDirectory;
 global using ASC.ActiveDirectory.Base;
 global using ASC.ActiveDirectory.Base.Settings;
 global using ASC.ActiveDirectory.ComplexOperations;

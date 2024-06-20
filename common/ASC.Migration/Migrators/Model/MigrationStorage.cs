@@ -43,8 +43,8 @@ public class MigrationStorage
         return new MigratingApiFiles
         {
             BytesTotal = BytesTotal,
-            FilesCount = Files.Count(),
-            FoldersCount = Folders.Count()
+            FilesCount = Files.Count,
+            FoldersCount = Folders.Count
         };
     }
 }

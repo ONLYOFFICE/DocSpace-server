@@ -187,6 +187,18 @@ public class CommonMethods(
         return tenants;
     }
 
+    public async Task<List<Tenant>> GetTenantsAsync(string email, string passwordHash)
+    {
+        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(passwordHash))
+        {
+            throw new Exception("Invalid login or password.");
+        }
+
+        var tenants = await hostedSolution.FindTenantsAsync(email, passwordHash);
+
+        return tenants;
+    }
+
     public bool IsTestEmail(string email)
     {
         //the point is not needed in gmail.com
@@ -274,7 +286,7 @@ public class CommonMethods(
         return hostEntry.AddressList.Select(ip => ip.ToString());
     }
 
-    public async Task<bool> ValidateRecaptcha(string response, RecaptchaType recaptchaType, string ip)
+    public async Task<bool> ValidateRecaptcha(RecaptchaType recaptchaType, string response, string ip)
     {
         try
         {

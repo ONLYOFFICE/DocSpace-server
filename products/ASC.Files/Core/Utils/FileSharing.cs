@@ -567,7 +567,7 @@ public class FileSharing(
             .GroupBy(r => r.Subject)
             .Select(g => g.OrderBy(r => r.Level)
                 .ThenBy(r => r.Level)
-                .ThenByDescending(r => r.Share, new FileShareRecord.ShareComparer(entry.RootFolderType)).FirstOrDefault());
+                .ThenByDescending(r => r.Share, new FileShareRecord<T>.ShareComparer(entry.RootFolderType)).FirstOrDefault());
 
         foreach (var r in records)
         {
@@ -874,7 +874,7 @@ public class FileSharing(
         yield return owner;
     }
 
-    private async Task<AceWrapper> ToAceAsync<T>(FileEntry<T> entry, FileShareRecord record, bool canEditAccess)
+    private async Task<AceWrapper> ToAceAsync<T>(FileEntry<T> entry, FileShareRecord<T> record, bool canEditAccess)
     {
         var w = new AceWrapper
         {

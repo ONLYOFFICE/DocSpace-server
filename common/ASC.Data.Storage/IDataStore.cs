@@ -367,4 +367,6 @@ public interface IDataStore
     Task<string> GetFileEtagAsync(string domain, string path);
 
     Task<string> GetUrlWithHashAsync(string domain, string path);
+
+    string GetRootDirectory(string domain);
 }

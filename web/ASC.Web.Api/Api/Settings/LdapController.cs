@@ -130,7 +130,7 @@ public class LdapController(
     {
         await CheckLdapPermissionsAsync();
 
-        var cron = inDto.Cron;
+        var cron = inDto?.Cron;
 
         if (!string.IsNullOrEmpty(cron))
         {

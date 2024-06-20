@@ -172,7 +172,7 @@
     <value>LEAVE FEEDBACK</value>
   </data>
   <data name="ButtonRemoveProfile" xml:space="preserve">
-    <value>Remove profile</value>
+    <value>Disable account</value>
   </data>
   <data name="ButtonRenewNow" xml:space="preserve">
     <value>Renew now</value>
@@ -636,15 +636,15 @@ Your $PortalUrl portal address was changed to the new "${__VirtualRootPath}":"${
 *Note*: DNS settings and single sign-on options stop working until you change them.</value>
   </data>
   <data name="pattern_profile_delete" xml:space="preserve">
-    <value>h1.Removal of the profile from the "${__VirtualRootPath}":"${__VirtualRootPath}" portal
+    <value>h1.Disabling account on "${__VirtualRootPath}":"${__VirtualRootPath}"
 
-You have requested to permanently delete your profile from the "${__VirtualRootPath}":"${__VirtualRootPath}" portal.
+You have requested to disable your account in DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}".
 
-If you still want to delete your profile please follow the link below to confirm the operation:
+If you still want to disable your account, please follow the link below to confirm the operation:
 
 $OrangeButton
 
-*Note*: this link is valid for 7 days only. Please complete the profile deletion process within that period.</value>
+*Note*: this link is valid for 7 days only. Please complete the account disablement process within that period.</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
     <value>User "$FromUserName":"$FromUserLink" has deleted his/her profile, and this profile is now blocked. All user’s files are still assigned to him/her and occupy disk space. 
@@ -1003,7 +1003,7 @@ The link is only valid for 7 days.</value>
     <value>${LetterLogoText}. Change of portal address</value>
   </data>
   <data name="subject_profile_delete" xml:space="preserve">
-    <value>Deletion of your profile from ${__VirtualRootPath} portal</value>
+    <value>Disabling account on ${__VirtualRootPath}</value>
   </data>
   <data name="subject_profile_has_deleted_itself" xml:space="preserve">
     <value>User has deleted his/her profile</value>
@@ -2045,6 +2045,18 @@ $OrangeButton
 
 $TrulyYours</comment>
   </data>
+  <data name="pattern_saas_docspace_registration" xml:space="preserve">
+    <value>h1. ONLYOFFICE DocSpace: complete registration
+
+
+Hello!
+
+You are invited to complete registration for ONLYOFFICE DocSpace at "${__VirtualRootPath}":"${__VirtualRootPath}". Enter your name and set a password by clicking the link:
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>Hello!
 
@@ -2058,6 +2070,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_docspace_invite" xml:space="preserve">
     <value>Join ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="subject_saas_docspace_registration" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace: complete registration</value>
   </data>
   <data name="subject_saas_room_invite" xml:space="preserve">
     <value>Join ONLYOFFICE DocSpace</value>
@@ -2285,7 +2300,7 @@ $TrulyYours</value>
   <data name="pattern_saas_room_invite_existing_user" xml:space="preserve">
     <value>Hello!
 
-You are invited to join the room "$Message":"$InviteLink" on "${__VirtualRootPath}":"${__VirtualRootPath}".
+$__AuthorName invited you to join the room "$Message":"$InviteLink" on "${__VirtualRootPath}":"${__VirtualRootPath}".
 
 $OrangeButton
 
@@ -2294,6 +2309,9 @@ $TrulyYours</value>
   <data name="subject_saas_room_invite_existing_user" xml:space="preserve">
     <value>You're invited to the ONLYOFFICE DocSpace room</value>
   </data>
+  <data name="ButtonRegister" xml:space="preserve">
+    <value>REGISTER</value>
+  </data> 
   <data name="ButtonUpgrade" xml:space="preserve">
     <value>UPGRADE</value>
   </data>

@@ -26,10 +26,10 @@
 
 namespace ASC.Files.Core.Security;
 
-public class FileShareRecord
+public class FileShareRecord<T>
 {
     public int TenantId { get; set; }
-    public object EntryId { get; set; }
+    public T EntryId { get; set; }
     public FileEntryType EntryType { get; set; }
     public SubjectType SubjectType { get; set; }
     public Guid Subject { get; set; }
@@ -114,7 +114,7 @@ public static class ShareCompareHelper
         }
 
         var shares = Enum.GetValues<FileShare>()
-            .Order(new FileShareRecord.ShareComparer(rootFolderType))
+            .Order(new FileShareRecord<TType>.ShareComparer(rootFolderType))
             .ToList();
 
         ConditionalExpression expression = null;

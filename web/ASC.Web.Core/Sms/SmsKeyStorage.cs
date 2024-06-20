@@ -96,14 +96,12 @@ public class SmsKeyStorage
             await _semaphore.WaitAsync();
             var cacheKey = await BuildCacheKeyAsync(phone);
             var phoneKeys = _keyCache.Get<Dictionary<string, DateTime>>(cacheKey) ?? new Dictionary<string, DateTime>();
-            string key;
             if (phoneKeys.Count > _attemptCount)
             {
-                key = null;
-                return (false, key);
+                return (false, null);
             }
 
-            key = RandomNumberGenerator.GetInt32((int)Math.Pow(10, _keyLength - 1), (int)Math.Pow(10, _keyLength)).ToString(CultureInfo.InvariantCulture);
+            var key = RandomNumberGenerator.GetInt32((int)Math.Pow(10, _keyLength - 1), (int)Math.Pow(10, _keyLength)).ToString(CultureInfo.InvariantCulture);
             phoneKeys[key] = DateTime.UtcNow;
 
             _keyCache.Insert(cacheKey, phoneKeys, DateTime.UtcNow.Add(StoreInterval));

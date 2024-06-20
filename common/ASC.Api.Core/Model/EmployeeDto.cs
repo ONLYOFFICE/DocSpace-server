@@ -56,6 +56,10 @@ public class EmployeeDto
     /// <type>System.Boolean, System</type>
     public bool HasAvatar { get; set; }
 
+    /// <summary>Specifies if the user is an anonim or not</summary>
+    /// <type>System.Boolean, System</type>
+    public bool IsAnonim { get; set; }
+
     public static EmployeeDto GetSample()
     {
         return new EmployeeDto
@@ -115,6 +119,7 @@ public class EmployeeDtoHelper(
         result.Id = userInfo.Id;
         result.DisplayName = displayUserSettingsHelper.GetFullUserName(userInfo);
         result.HasAvatar = await _userPhotoManager.UserHasAvatar(userInfo.Id);
+        result.IsAnonim = userInfo.Id.Equals(ASC.Core.Configuration.Constants.Guest.ID);
 
         if (!string.IsNullOrEmpty(userInfo.Title))
         {

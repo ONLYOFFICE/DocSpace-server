@@ -201,9 +201,9 @@ public class DocuSignHelper(DocuSignToken docuSignToken,
             var buffer = new byte[16 * 1024];
             using var ms = new MemoryStream();
             int read;
-            while ((read = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+            while ((read = await stream.ReadAsync(buffer)) > 0)
             {
-                await ms.WriteAsync(buffer, 0, read);
+                await ms.WriteAsync(buffer.AsMemory(0, read));
             }
 
             fileBytes = ms.ToArray();

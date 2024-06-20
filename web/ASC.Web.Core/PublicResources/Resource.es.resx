@@ -1045,4 +1045,7 @@
   <data name="TariffsFeature_statistic" xml:space="preserve">
     <value>Cuotas de almacenamiento y estadísticas</value>
   </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>Usuario desactivado</value>
+  </data>
 </root>

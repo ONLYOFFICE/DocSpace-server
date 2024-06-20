@@ -259,22 +259,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
             {
                 StoreExpressionVals(0, "*", Year);
             }
-            var dow = GetSet(DayOfWeek);
-            var dom = GetSet(DayOfMonth);
-
-            var dayOfMSpec = !dom.Contains(NoSpec);
-            var dayOfWSpec = !dow.Contains(NoSpec);
-            if (dayOfMSpec && !dayOfWSpec)
-            {
-            }
-            else if (dayOfWSpec && !dayOfMSpec)
-            {
-            }
-            else
-            {
-                throw new FormatException(
-                    "Support for specifying both a day-of-week AND a day-of-month parameter is not implemented.");
-            }
+           
         }
         catch (FormatException)
         {
@@ -1090,6 +1075,261 @@ public class CronExpression : ICloneable, IDeserializationCallback
         }
     }
 
+    private DateTime ProcessDayOfMonth(DateTime d, int day, int mon, DateTime afterTimeUtc, bool _lastdayOfMonth, bool _nearestWeekday, TreeSet _daysOfMonth)
+    {
+        var st = _daysOfMonth.TailSet(day);
+        var t = day;
+
+        if (_lastdayOfMonth)
+        {
+            if (!_nearestWeekday)
+            {
+                day = GetLastDayOfMonth(mon, d.Year);
+            }
+            else
+            {
+                day = AdjustLastDayOfMonth(d, mon, afterTimeUtc);
+            }
+        }
+        else if (_nearestWeekday)
+        {
+            day = AdjustNearestWeekday(d, mon, afterTimeUtc, _daysOfMonth);
+        }
+        else if (st != null && st.Count != 0)
+        {
+            day = (int)st.First();
+            var lastDay = GetLastDayOfMonth(mon, d.Year);
+            if (day > lastDay)
+            {
+                day = (int)_daysOfMonth.First();
+                mon++;
+            }
+        }
+        else
+        {
+            day = (int)_daysOfMonth.First();
+            mon++;
+        }
+
+        if (day != t)
+        {
+            if (mon > 12)
+            {
+                d = new DateTime(d.Year, 12, day, d.Hour, d.Minute, d.Second).AddMonths(mon - 12);
+            }
+            else
+            {
+                var lDay = DateTime.DaysInMonth(d.Year, mon);
+                d = day <= lDay ? new DateTime(d.Year, mon, day, d.Hour, d.Minute, d.Second) : new DateTime(d.Year, mon, lDay, d.Hour, d.Minute, d.Second).AddDays(day - lDay);
+            }
+        }
+
+        return d;
+    }
+
+    private int AdjustLastDayOfMonth(DateTime d, int mon, DateTime afterTimeUtc)
+    {
+        var day = GetLastDayOfMonth(mon, d.Year);
+        var tcal = new DateTime(d.Year, mon, day, d.Hour, d.Minute, d.Second);
+        var ldom = GetLastDayOfMonth(mon, d.Year);
+        var dow = tcal.DayOfWeek;
+
+        if (dow == System.DayOfWeek.Saturday && day == 1)
+        {
+            day += 2;
+        }
+        else if (dow == System.DayOfWeek.Saturday)
+        {
+            day -= 1;
+        }
+        else if (dow == System.DayOfWeek.Sunday && day == ldom)
+        {
+            day -= 2;
+        }
+        else if (dow == System.DayOfWeek.Sunday)
+        {
+            day += 1;
+        }
+
+        var nTime = new DateTime(tcal.Year, mon, day, tcal.Hour, tcal.Minute, tcal.Second, tcal.Millisecond);
+        if (nTime.ToUniversalTime() < afterTimeUtc)
+        {
+            day = 1;
+        }
+
+        return day;
+    }
+
+    private int AdjustNearestWeekday(DateTime d, int mon, DateTime afterTimeUtc, TreeSet _daysOfMonth)
+    {
+        var day = (int)_daysOfMonth.First();
+        var tcal = new DateTime(d.Year, mon, day, d.Hour, d.Minute, d.Second);
+        var ldom = GetLastDayOfMonth(mon, d.Year);
+        var dow = tcal.DayOfWeek;
+
+        if (dow == System.DayOfWeek.Saturday && day == 1)
+        {
+            day += 2;
+        }
+        else if (dow == System.DayOfWeek.Saturday)
+        {
+            day -= 1;
+        }
+        else if (dow == System.DayOfWeek.Sunday && day == ldom)
+        {
+            day -= 2;
+        }
+        else if (dow == System.DayOfWeek.Sunday)
+        {
+            day += 1;
+        }
+
+        tcal = new DateTime(tcal.Year, mon, day, tcal.Hour, tcal.Minute, tcal.Second);
+        if (tcal.ToUniversalTime() < afterTimeUtc)
+        {
+            day = (int)_daysOfMonth.First();
+        }
+
+        return day;
+    }
+
+    private DateTime ProcessDayOfWeek(DateTime d, int day, int mon)
+    {
+        var dow = (int)_daysOfWeek.First();
+        var cDow = (int)d.DayOfWeek;
+        var daysToAdd = cDow < dow ? dow - cDow : dow + (7 - cDow);
+        var lDay = GetLastDayOfMonth(mon, d.Year);
+
+        if (_lastdayOfWeek)
+        {
+            daysToAdd = 0;
+            if (cDow < dow)
+            {
+                daysToAdd = dow - cDow;
+            }
+            if (cDow > dow)
+            {
+                daysToAdd = dow + (7 - cDow);
+            }
+            if (day + daysToAdd > lDay)
+            {
+                if (mon == 12)
+                {
+                    if (d.Year == DateTime.MaxValue.Year)
+                    {
+                        throw new InvalidOperationException("Date exceeds maximum supported value.");
+                    }
+
+                    d = new DateTime(d.Year, mon - 11, 1, d.Hour, d.Minute, d.Second).AddYears(1);
+                }
+                else
+                {
+                    d = new DateTime(d.Year, mon + 1, 1, d.Hour, d.Minute, d.Second);
+                }
+
+            }
+
+            while ((day + daysToAdd + 7) <= lDay)
+            {
+                daysToAdd += 7;
+            }
+            day += daysToAdd;
+            if (daysToAdd > 0)
+            {
+                d = new DateTime(d.Year, mon, day, d.Hour, d.Minute, d.Second);
+            }
+        }
+        else if (_nthdayOfWeek != 0)
+        {
+            daysToAdd = 0;
+            if (cDow < dow)
+            {
+                daysToAdd = dow - cDow;
+            }
+            else if (cDow > dow)
+            {
+                daysToAdd = dow + (7 - cDow);
+            }
+            var dayShifted = daysToAdd > 0;
+            day += daysToAdd;
+            var weekOfMonth = day / 7;
+            if (day % 7 > 0)
+            {
+                weekOfMonth++;
+            }
+            daysToAdd = (_nthdayOfWeek - weekOfMonth) * 7;
+            day += daysToAdd;
+            if (daysToAdd < 0 || day > GetLastDayOfMonth(mon, d.Year))
+            {
+                if (mon == 12)
+                {
+                    if (d.Year == DateTime.MaxValue.Year)
+                    {
+                        throw new InvalidOperationException("Date exceeds maximum supported value.");
+                    }
+
+                    d = new DateTime(d.Year, mon - 11, 1, d.Hour, d.Minute, d.Second).AddYears(1);
+                }
+                else
+                {
+                    d = new DateTime(d.Year, mon + 1, 1, d.Hour, d.Minute, d.Second);
+                }
+            }
+
+            if (daysToAdd > 0 || dayShifted)
+            {
+                d = new DateTime(d.Year, mon, day, d.Hour, d.Minute, d.Second);
+            }
+        }
+        else
+        {
+            var st = _daysOfWeek.TailSet(cDow);
+            if (st is { Count: > 0 })
+            {
+                dow = (int)st.First();
+            }
+            daysToAdd = 0;
+            if (cDow < dow)
+            {
+                daysToAdd = dow - cDow;
+            }
+            if (cDow > dow)
+            {
+                daysToAdd = dow + (7 - cDow);
+            }
+            if (day + daysToAdd > lDay)
+            {
+                if (mon == 12)
+                {
+                    if (d.Year == DateTime.MaxValue.Year)
+                    {
+                        throw new InvalidOperationException("Date exceeds maximum supported value.");
+                    }
+
+                    d = new DateTime(d.Year, mon - 11, 1, d.Hour, d.Minute, d.Second).AddYears(1);
+                }
+                else
+                {
+                    d = new DateTime(d.Year, mon + 1, 1, d.Hour, d.Minute, d.Second);
+                }
+            }
+
+            if (daysToAdd > 0)
+            {
+                d = new DateTime(d.Year, mon, day + daysToAdd, d.Hour, d.Minute, d.Second);
+            }
+        }
+        return d;
+    }
+
+    private DateTime GetNearestDate(DateTime referenceDate, DateTime date1, DateTime date2)
+    {
+        var diff1 = (date1 - referenceDate).Duration();
+        var diff2 = (date2 - referenceDate).Duration();
+
+        return diff1 <= diff2 ? date1 : date2;
+    }
+
     public virtual DateTime? GetTimeAfter(DateTime afterTimeUtc)
     {
         if (afterTimeUtc == DateTime.MaxValue)
@@ -1162,9 +1402,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
                 var daysInMonth = DateTime.DaysInMonth(d.Year, d.Month);
                 if (day > daysInMonth)
                 {
-                    d =
-                        new DateTime(d.Year, d.Month, daysInMonth, d.Hour, 0, 0, d.Millisecond).AddDays(day -
-                                                                                                        daysInMonth);
+                    d = new DateTime(d.Year, d.Month, daysInMonth, d.Hour, 0, 0, d.Millisecond).AddDays(day - daysInMonth);
                 }
                 else
                 {
@@ -1177,264 +1415,41 @@ public class CronExpression : ICloneable, IDeserializationCallback
             d = new DateTime(d.Year, d.Month, d.Day, hr, d.Minute, d.Second, d.Millisecond);
             day = d.Day;
             var mon = d.Month;
-            t = -1;
-            var tmon = mon;
 
             var dayOfMSpec = !_daysOfMonth.Contains(NoSpec);
             var dayOfWSpec = !_daysOfWeek.Contains(NoSpec);
+
+            var allDayOfMSpec = _daysOfMonth.Contains(AllSpec);
+            var allDayOfWSpec = _daysOfWeek.Contains(AllSpec);
+            
             if (dayOfMSpec && !dayOfWSpec)
             {
-                st = _daysOfMonth.TailSet(day);
-                if (_lastdayOfMonth)
-                {
-                    if (!_nearestWeekday)
-                    {
-                        t = day;
-                        day = GetLastDayOfMonth(mon, d.Year);
-                    }
-                    else
-                    {
-                        t = day;
-                        day = GetLastDayOfMonth(mon, d.Year);
-                        var tcal = new DateTime(d.Year, mon, day, 0, 0, 0);
-                        var ldom = GetLastDayOfMonth(mon, d.Year);
-                        var dow = tcal.DayOfWeek;
-                        if (dow == System.DayOfWeek.Saturday && day == 1)
-                        {
-                            day += 2;
-                        }
-                        else if (dow == System.DayOfWeek.Saturday)
-                        {
-                            day -= 1;
-                        }
-                        else if (dow == System.DayOfWeek.Sunday && day == ldom)
-                        {
-                            day -= 2;
-                        }
-                        else if (dow == System.DayOfWeek.Sunday)
-                        {
-                            day += 1;
-                        }
-                        var nTime = new DateTime(tcal.Year, mon, day, hr, min, sec, d.Millisecond);
-                        if (nTime.ToUniversalTime() < afterTimeUtc)
-                        {
-                            day = 1;
-                            mon++;
-                        }
-                    }
-                }
-                else if (_nearestWeekday)
-                {
-                    t = day;
-                    day = (int)_daysOfMonth.First();
-                    var tcal = new DateTime(d.Year, mon, day, 0, 0, 0);
-                    var ldom = GetLastDayOfMonth(mon, d.Year);
-                    var dow = tcal.DayOfWeek;
-                    if (dow == System.DayOfWeek.Saturday && day == 1)
-                    {
-                        day += 2;
-                    }
-                    else if (dow == System.DayOfWeek.Saturday)
-                    {
-                        day -= 1;
-                    }
-                    else if (dow == System.DayOfWeek.Sunday && day == ldom)
-                    {
-                        day -= 2;
-                    }
-                    else if (dow == System.DayOfWeek.Sunday)
-                    {
-                        day += 1;
-                    }
-                    tcal = new DateTime(tcal.Year, mon, day, hr, min, sec);
-                    if (tcal.ToUniversalTime() < afterTimeUtc)
-                    {
-                        day = (int)_daysOfMonth.First();
-                        mon++;
-                    }
-                }
-                else if (st != null && st.Count != 0)
-                {
-                    t = day;
-                    day = (int)st.First();
-
-                    var lastDay = GetLastDayOfMonth(mon, d.Year);
-                    if (day > lastDay)
-                    {
-                        day = (int)_daysOfMonth.First();
-                        mon++;
-                    }
-                }
-                else
-                {
-                    day = (int)_daysOfMonth.First();
-                    mon++;
-                }
-                if (day != t || mon != tmon)
-                {
-                    if (mon > 12)
-                    {
-                        d = new DateTime(d.Year, 12, day, 0, 0, 0).AddMonths(mon - 12);
-                    }
-                    else
-                    {
-                        var lDay = DateTime.DaysInMonth(d.Year, mon);
-                        d = day <= lDay ? new DateTime(d.Year, mon, day, 0, 0, 0) : new DateTime(d.Year, mon, lDay, 0, 0, 0).AddDays(day - lDay);
-                    }
-
-                    continue;
-                }
+                d = ProcessDayOfMonth(d, day, mon, afterTimeUtc, _lastdayOfMonth, _nearestWeekday, _daysOfMonth);
             }
             else if (dayOfWSpec && !dayOfMSpec)
             {
-                if (_lastdayOfWeek)
-                {
-                    var dow = (int)_daysOfWeek.First();
-
-                    var cDow = (int)d.DayOfWeek;
-                    var daysToAdd = 0;
-                    if (cDow < dow)
-                    {
-                        daysToAdd = dow - cDow;
-                    }
-                    if (cDow > dow)
-                    {
-                        daysToAdd = dow + (7 - cDow);
-                    }
-                    var lDay = GetLastDayOfMonth(mon, d.Year);
-                    if (day + daysToAdd > lDay)
-                    {
-                        if (mon == 12)
-                        {
-                            if (d.Year == DateTime.MaxValue.Year)
-                            {
-                                return null;
-                            }
-
-                            d = new DateTime(d.Year, mon - 11, 1, 0, 0, 0).AddYears(1);
-                        }
-                        else
-                        {
-                            d = new DateTime(d.Year, mon + 1, 1, 0, 0, 0);
-                        }
-
-                        continue;
-                    }
-
-                    while ((day + daysToAdd + 7) <= lDay)
-                    {
-                        daysToAdd += 7;
-                    }
-                    day += daysToAdd;
-                    if (daysToAdd > 0)
-                    {
-                        d = new DateTime(d.Year, mon, day, 0, 0, 0);
-
-                        continue;
-                    }
-                }
-                else if (_nthdayOfWeek != 0)
-                {
-                    var dow = (int)_daysOfWeek.First();
-
-                    var cDow = (int)d.DayOfWeek;
-                    var daysToAdd = 0;
-                    if (cDow < dow)
-                    {
-                        daysToAdd = dow - cDow;
-                    }
-                    else if (cDow > dow)
-                    {
-                        daysToAdd = dow + (7 - cDow);
-                    }
-                    var dayShifted = daysToAdd > 0;
-                    day += daysToAdd;
-                    var weekOfMonth = day / 7;
-                    if (day % 7 > 0)
-                    {
-                        weekOfMonth++;
-                    }
-                    daysToAdd = (_nthdayOfWeek - weekOfMonth) * 7;
-                    day += daysToAdd;
-                    if (daysToAdd < 0 || day > GetLastDayOfMonth(mon, d.Year))
-                    {
-                        if (mon == 12)
-                        {
-                            if (d.Year == DateTime.MaxValue.Year)
-                            {
-                                return null;
-                            }
-
-                            d = new DateTime(d.Year, mon - 11, 1, 0, 0, 0).AddYears(1);
-                        }
-                        else
-                        {
-                            d = new DateTime(d.Year, mon + 1, 1, 0, 0, 0);
-                        }
-
-                        continue;
-                    }
-
-                    if (daysToAdd > 0 || dayShifted)
-                    {
-                        d = new DateTime(d.Year, mon, day, 0, 0, 0);
-
-                        continue;
-                    }
-                }
-                else
-                {
-                    var cDow = ((int)d.DayOfWeek) + 1;
-                    var dow = (int)_daysOfWeek.First();
-
-                    st = _daysOfWeek.TailSet(cDow);
-                    if (st is { Count: > 0 })
-                    {
-                        dow = (int)st.First();
-                    }
-                    var daysToAdd = 0;
-                    if (cDow < dow)
-                    {
-                        daysToAdd = dow - cDow;
-                    }
-                    if (cDow > dow)
-                    {
-                        daysToAdd = dow + (7 - cDow);
-                    }
-                    var lDay = GetLastDayOfMonth(mon, d.Year);
-                    if (day + daysToAdd > lDay)
-                    {
-                        if (mon == 12)
-                        {
-                            if (d.Year == DateTime.MaxValue.Year)
-                            {
-                                return null;
-                            }
-
-                            d = new DateTime(d.Year, mon - 11, 1, 0, 0, 0).AddYears(1);
-                        }
-                        else
-                        {
-                            d = new DateTime(d.Year, mon + 1, 1, 0, 0, 0);
-                        }
-
-                        continue;
-                    }
-
-                    if (daysToAdd > 0)
-                    {
-                        d = new DateTime(d.Year, mon, day + daysToAdd, 0, 0, 0);
-
-                        continue;
-                    }
-                }
+                d = ProcessDayOfWeek(d, day, mon);
             }
             else
             {
-                throw new Exception(
-                    "Support for specifying both a day-of-week AND a day-of-month parameter is not implemented.");
+                if (!allDayOfMSpec && allDayOfWSpec)
+                {
+                    d = ProcessDayOfMonth(d, day, mon, afterTimeUtc, _lastdayOfMonth, _nearestWeekday, _daysOfMonth);
+                }
+                else if (allDayOfMSpec && !allDayOfWSpec)
+                {
+                    d = ProcessDayOfWeek(d, day, mon);
+                }
+                else
+                {
+                    var tmpD = d;
+                    var d1 = ProcessDayOfMonth(tmpD, day, mon, afterTimeUtc, _lastdayOfMonth, _nearestWeekday, _daysOfMonth);
+                    var d2 = ProcessDayOfWeek(tmpD, day, mon);
+
+                    d = GetNearestDate(d, d1, d2);
+                }
             }
-            d = new DateTime(d.Year, d.Month, day, d.Hour, d.Minute, d.Second);
+
             mon = d.Month;
             var year = d.Year;
             t = -1;

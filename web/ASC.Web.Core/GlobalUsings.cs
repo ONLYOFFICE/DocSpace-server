@@ -86,7 +86,6 @@ global using ASC.Notify.Messages;
 global using ASC.Notify.Model;
 global using ASC.Notify.Patterns;
 global using ASC.Notify.Recipients;
-global using ASC.Notify.Textile;
 global using ASC.Security.Cryptography;
 global using ASC.Web.Core;
 global using ASC.Web.Core.Helpers;

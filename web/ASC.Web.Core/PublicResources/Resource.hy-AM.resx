@@ -1104,4 +1104,7 @@
   <data name="TariffsFeature_total_size" xml:space="preserve">
     <value>{0} յուրաքանչյուր ադմինիստրատորի/հզոր օգտատիրոջ համար և տարածք ավելացնելու հնարավորություն, հայտի դեպքում</value>
   </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>Օգտատերն անջատված է</value>
+  </data>
 </root>
