@@ -282,15 +282,15 @@ internal abstract class BaseTagDao<T>(
 
             await strategy.ExecuteAsync(async () =>
             {
-                await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-                await using var tx = await filesDbContext.Database.BeginTransactionAsync();
+                await using var internalFilesDbContext = await _dbContextFactory.CreateDbContextAsync();
+                await using var tx = await internalFilesDbContext.Database.BeginTransactionAsync();
 
-                await DeleteTagsBeforeSave(filesDbContext, tenantId);
+                await DeleteTagsBeforeSave(internalFilesDbContext, tenantId);
 
                 var createOn = _tenantUtil.DateTimeToUtc(_tenantUtil.DateTimeNow());
                 var cacheTagId = new Dictionary<string, int>();
 
-                result.Add(await SaveTagAsync(tag, cacheTagId, createOn));
+                result.Add(await SaveTagAsync(internalFilesDbContext, tenantId, tag, cacheTagId, createOn));
 
                 await tx.CommitAsync();
             });
@@ -306,12 +306,8 @@ internal abstract class BaseTagDao<T>(
         await filesDbContext.DeleteTagAsync();
     }
 
-    private async Task<Tag> SaveTagAsync(Tag t, Dictionary<string, int> cacheTagId, DateTime createOn, Guid createdBy = default)
+    private async Task<Tag> SaveTagAsync(FilesDbContext filesDbContext, int tenantId, Tag t, Dictionary<string, int> cacheTagId, DateTime createOn, Guid createdBy = default)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        
-        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-
         var cacheTagIdKey = string.Join("/", tenantId.ToString(), t.Owner.ToString(), t.Name, ((int)t.Type).ToString(CultureInfo.InvariantCulture));
 
         if (!cacheTagId.TryGetValue(cacheTagIdKey, out var id))
