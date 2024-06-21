@@ -304,7 +304,7 @@ public class EntryManager(IDaoFactory daoFactory,
             withSubfolders = false;
         }
 
-        if (parent.RootFolderType == FolderType.USER)
+        if (parent.RootFolderType is FolderType.USER or FolderType.VirtualRooms)
         {
             withShared = true;
         }
@@ -318,7 +318,7 @@ public class EntryManager(IDaoFactory daoFactory,
             if (applyFilterOption == ApplyFilterOption.All)
             {
                 filterType = foldersFilterType = FilterType.FilesOnly;
-        }
+            }
         }
         
         var (filesFilterType, filesSearchText, fileExtension) = applyFilterOption != ApplyFilterOption.Folders ? (filterType, searchText, extension) : (FilterType.None, string.Empty, new string[] {});
@@ -414,7 +414,7 @@ public class EntryManager(IDaoFactory daoFactory,
             var allFilesCountTask = fileDao.GetFilesCountAsync(parent.Id, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders, excludeSubject, roomId);
 
             var containingMyFiles = false;
-            if (parent.FolderType == FolderType.ReadyFormFolder || parent.FolderType == FolderType.InProcessFormFolder)
+            if (parent.FolderType is FolderType.ReadyFormFolder or FolderType.InProcessFormFolder)
             {
                 var (currentRoomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(parent);
                 var room = await folderDao.GetFolderAsync((T)Convert.ChangeType(currentRoomId, typeof(T))).NotFoundIfNull();
@@ -425,6 +425,7 @@ public class EntryManager(IDaoFactory daoFactory,
                     containingMyFiles = true;
                 }
             }
+            
             var folders = await folderDao.GetFoldersAsync(parent.Id, orderBy, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders, excludeSubject, from, count, roomId, containingMyFiles)
                 .ToListAsync();
 
