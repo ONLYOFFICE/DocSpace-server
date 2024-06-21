@@ -286,7 +286,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to CONFIGURE NOW.
+        ///   Looks up a localized string similar to Configure now.
         /// </summary>
         public static string ButtonConfigureRightNow {
             get {
@@ -300,15 +300,6 @@ namespace ASC.Web.Core.PublicResources {
         public static string ButtonConfirm {
             get {
                 return ResourceManager.GetString("ButtonConfirm", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to CONFIRM.
-        /// </summary>
-        public static string ButtonConfirmEmail {
-            get {
-                return ResourceManager.GetString("ButtonConfirmEmail", resourceCulture);
             }
         }
         
@@ -367,20 +358,11 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to GET FREE APP.
+        ///   Looks up a localized string similar to Get free app.
         /// </summary>
         public static string ButtonGetFreeApp {
             get {
                 return ResourceManager.GetString("ButtonGetFreeApp", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to GET STARTED.
-        /// </summary>
-        public static string ButtonGetStart {
-            get {
-                return ResourceManager.GetString("ButtonGetStart", resourceCulture);
             }
         }
         
@@ -421,7 +403,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to LEAVE FEEDBACK.
+        ///   Looks up a localized string similar to Leave feedback.
         /// </summary>
         public static string ButtonLeaveFeedback {
             get {
@@ -430,7 +412,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to REGISTER.
+        ///   Looks up a localized string similar to Register.
         /// </summary>
         public static string ButtonRegister {
             get {
@@ -484,7 +466,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to UPGRADE.
+        ///   Looks up a localized string similar to Upgrade.
         /// </summary>
         public static string ButtonUpgrade {
             get {
@@ -511,7 +493,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to WATCH FULL PLAYLIST.
+        ///   Looks up a localized string similar to Watch full playlist.
         /// </summary>
         public static string ButtonWatchFullPlaylist {
             get {

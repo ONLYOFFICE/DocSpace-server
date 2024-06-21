@@ -759,7 +759,7 @@ public class StudioNotifyService(
             await settingsManager.SaveAsync(new FirstEmailConfirmSettings { IsFirst = true });
 
             var culture = await GetCulture(u);
-            var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonConfirmEmail", culture);
+            var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonConfirm", culture);
             var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
             await studioNotifyServiceHelper.SendNoticeToAsync(

@@ -185,7 +185,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                         orangeButtonText1 = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetFreeApp", c);
                         orangeButtonUrl1 = "https://marketplace.zoom.us/apps/OW6rOq-nRgCihG5eps_p-g";
-                        orangeButtonText2 = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetStart", c);
+                        orangeButtonText2 = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetStarted", c);
                         orangeButtonUrl2 = "https://zapier.com/apps/onlyoffice-docspace/integrations";
                         orangeButtonText3 = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetFreeApp", c);
                         orangeButtonUrl3 = "https://wordpress.org/plugins/onlyoffice-docspace/";

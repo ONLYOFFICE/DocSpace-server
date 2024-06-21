@@ -145,7 +145,7 @@
     <value>Configure the authenticator app</value>
   </data>
   <data name="ButtonConfigureRightNow" xml:space="preserve">
-    <value>CONFIGURE NOW</value>
+    <value>Configure now</value>
   </data>
   <data name="ButtonConfirm" xml:space="preserve">
     <value>Confirm</value>
@@ -169,7 +169,7 @@
     <value>Click here to join the portal</value>
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
-    <value>LEAVE FEEDBACK</value>
+    <value>Leave feedback</value>
   </data>
   <data name="ButtonRemoveProfile" xml:space="preserve">
     <value>Disable account</value>
@@ -1114,9 +1114,6 @@ $Body</value>
   </data>
   <data name="ButtonConfirmInvite" xml:space="preserve">
     <value>Confirm DocSpace Invite</value>
-  </data>
-  <data name="ButtonConfirmEmail" xml:space="preserve">
-    <value>CONFIRM</value>
   </data>
   <data name="pattern_enterprise_admin_activation_v1" xml:space="preserve">
     <value>&lt;tr&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 44px 40px 32px; text-align: center;"&gt;to &lt;span style="color: #FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
@@ -2188,7 +2185,7 @@ $TrulyYours</value>
     <value>Best regards, ONLYOFFICE Support Team</value>
   </data>
   <data name="ButtonWatchFullPlaylist" xml:space="preserve">
-    <value>WATCH FULL PLAYLIST</value>
+    <value>Watch full playlist</value>
   </data>
   <data name="pattern_saas_video_guides_v1" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px; text-align: center;"&gt;Master ONLYOFFICE DocSpace with &lt;span style="color: #FF6F3D;"&gt;video guides&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
@@ -2310,16 +2307,13 @@ $TrulyYours</value>
     <value>You're invited to the ONLYOFFICE DocSpace room</value>
   </data>
   <data name="ButtonRegister" xml:space="preserve">
-    <value>REGISTER</value>
-  </data> 
+    <value>Register</value>
+  </data>
   <data name="ButtonUpgrade" xml:space="preserve">
-    <value>UPGRADE</value>
+    <value>Upgrade</value>
   </data>
   <data name="ButtonGetFreeApp" xml:space="preserve">
-    <value>GET FREE APP</value>
-  </data>
-  <data name="ButtonGetStart" xml:space="preserve">
-    <value>GET STARTED</value>
+    <value>Get free app</value>
   </data>
   <data name="pattern_saas_admin_integrations_v1" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 24px 40px 32px; text-align: center;"&gt;ONLYOFFICE DocSpace: Explore useful &lt;span style="color: #FF6F3D;"&gt;integrations&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
