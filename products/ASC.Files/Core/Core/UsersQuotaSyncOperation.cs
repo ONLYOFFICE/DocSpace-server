@@ -117,7 +117,7 @@ public class UsersQuotaSyncJob(IServiceScopeFactory serviceScopeFactory, FilesSp
             await settingsManager.SaveAsync(tenantQuotaSettings);
 
             var users = await userManager.GetUsersAsync();
-            System.Threading.Thread.Sleep(10000);
+
             foreach (var user in users)
             {
                 if (cancellationToken.IsCancellationRequested)
