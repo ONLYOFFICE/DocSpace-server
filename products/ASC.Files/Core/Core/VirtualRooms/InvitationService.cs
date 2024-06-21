@@ -128,7 +128,7 @@ public class InvitationService(
                     await foreach(var auditEvent in query.ToAsyncEnumerable())
                     {
                         var description = JsonSerializer.Deserialize<List<string>>(auditEvent.DescriptionRaw);
-                        var info = JsonSerializer.Deserialize<AdditionalNotificationInfo<JsonElement>>(description.Last());
+                        var info = JsonSerializer.Deserialize<EventDescription<JsonElement>>(description.Last());
 
                         if (!info.UserIds.Contains(userId) || auditEvent.UserId == userId)
                         {
@@ -160,11 +160,11 @@ public class InvitationService(
                     switch (entry)
                     {
                         case FileEntry<int> entryInt:
-                            await filesMessageService.SendAsync(MessageAction.RoomCreateUser, entryInt, userId, data.Share, true, 
+                            await filesMessageService.SendAsync(MessageAction.RoomCreateUser, entryInt, userId, data.Share, null, true, 
                                 user.DisplayUserName(false, displayUserSettingsHelper));
                             break;
                         case FileEntry<string> entryString:
-                            await filesMessageService.SendAsync(MessageAction.RoomCreateUser, entryString, userId, data.Share, true, 
+                            await filesMessageService.SendAsync(MessageAction.RoomCreateUser, entryString, userId, data.Share, null, true, 
                                 user.DisplayUserName(false, displayUserSettingsHelper));
                             break;
                     }
