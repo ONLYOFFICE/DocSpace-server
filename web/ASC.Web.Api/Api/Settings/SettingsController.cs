@@ -57,7 +57,6 @@ public partial class SettingsController(MessageService messageService,
         DnsSettings dnsSettings,
         CustomColorThemesSettingsHelper customColorThemesSettingsHelper,
         UserInvitationLimitHelper userInvitationLimitHelper,
-        QuotaSyncOperation quotaSyncOperation,
         QuotaUsageManager quotaUsageManager,
         TenantDomainValidator tenantDomainValidator,
         ExternalShare externalShare,
@@ -556,7 +555,8 @@ public partial class SettingsController(MessageService messageService,
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        return await usersQuotaSyncOperation.CheckRecalculateQuota(await tenantManager.GetCurrentTenantAsync());
+        var result = await usersQuotaSyncOperation.CheckRecalculateQuota(await tenantManager.GetCurrentTenantAsync());
+        return !result.IsCompleted;
     }
 
     /// <summary>
