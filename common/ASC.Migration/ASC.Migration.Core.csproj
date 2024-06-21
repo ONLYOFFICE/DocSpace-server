@@ -111,6 +111,9 @@
     <EmbeddedResource Update="Resources\MigrationResource.sl.resx">
       <DependentUpon>MigrationResource.resx</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Update="Resources\MigrationResource.sr-Cyrl-RS.resx">
+      <DependentUpon>MigrationResource.resx</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Update="Resources\MigrationResource.sr-Latn-RS.resx">
       <DependentUpon>MigrationResource.resx</DependentUpon>
     </EmbeddedResource>

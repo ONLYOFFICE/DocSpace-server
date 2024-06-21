@@ -40,7 +40,7 @@ public class MessagesRepository : IDisposable
     private readonly int _cacheLimit;
     private readonly SemaphoreSlim _semaphore = new(1);
     private readonly HashSet<MessageAction> _forceSaveAuditActions =
-        [MessageAction.RoomInviteLinkUsed, MessageAction.UserSentEmailChangeInstructions, MessageAction.UserSentPasswordChangeInstructions];
+        [MessageAction.RoomInviteLinkUsed, MessageAction.UserSentEmailChangeInstructions, MessageAction.UserSentPasswordChangeInstructions, MessageAction.SendJoinInvite];
 
     public MessagesRepository(IServiceScopeFactory serviceScopeFactory, ILogger<MessagesRepository> logger, IMapper mapper, IConfiguration configuration)
     {
@@ -51,7 +51,7 @@ public class MessagesRepository : IDisposable
         _logger = logger;
         _serviceScopeFactory = serviceScopeFactory;
 
-        _timer = new Timer(async state => await FlushCacheAsync(state));
+        _timer = new Timer(Callback);
 
         _mapper = mapper;
 
@@ -60,6 +60,9 @@ public class MessagesRepository : IDisposable
 
         _cacheTime = int.TryParse(minutes, out var cacheTime) ? TimeSpan.FromMinutes(cacheTime) : TimeSpan.FromMinutes(1);
         _cacheLimit = int.TryParse(limit, out var cacheLimit) ? cacheLimit : 100;
+        return;
+
+        async void Callback(object state) => await FlushCacheAsync(state);
     }
 
     ~MessagesRepository()
@@ -67,7 +70,7 @@ public class MessagesRepository : IDisposable
         FlushCache();
     }
 
-    private bool ForseSave(EventMessage message)
+    private bool ForceSave(EventMessage message)
     {
         // messages with action code < 2000 are related to login-history
         if ((int)message.Action < 2000)
@@ -80,12 +83,12 @@ public class MessagesRepository : IDisposable
 
     public async Task<int> AddAsync(EventMessage message)
     {
-        if (ForseSave(message))
+        if (ForceSave(message))
         {
-            _logger.LogDebug("ForseSave: {action}", message.Action.ToStringFast());
+            _logger.LogDebug("ForceSave: {Action}", message.Action.ToStringFast());
             
             int id;
-            if (!string.IsNullOrEmpty(message.UAHeader))
+            if (!string.IsNullOrEmpty(message.UaHeader))
             {
                 try
                 {
@@ -99,6 +102,7 @@ public class MessagesRepository : IDisposable
 
             using var scope = _serviceScopeFactory.CreateScope();
             await using var ef = await scope.ServiceProvider.GetService<IDbContextFactory<MessagesContext>>().CreateDbContextAsync();
+            var historySocketManager = scope.ServiceProvider.GetService<HistorySocketManager>();
 
             if ((int)message.Action < 2000)
             {
@@ -106,7 +110,7 @@ public class MessagesRepository : IDisposable
             }
             else
             {
-                id = await AddAuditEventAsync(message, ef);
+                id = await AddAuditEventAsync(message, ef, historySocketManager);
             }
             return id;
         }
@@ -131,7 +135,7 @@ public class MessagesRepository : IDisposable
         }
         return 0;
     }
-    private async Task FlushCacheAsync(object state)
+    private async Task FlushCacheAsync(object _)
     {
         await FlushCacheAsync();
     }
@@ -167,6 +171,7 @@ public class MessagesRepository : IDisposable
 
         using var scope = _serviceScopeFactory.CreateScope();
         await using var ef = await scope.ServiceProvider.GetService<IDbContextFactory<MessagesContext>>().CreateDbContextAsync();
+        var historySocketManager = scope.ServiceProvider.GetService<HistorySocketManager>();
 
         var dict = new Dictionary<string, ClientInfo>();
 
@@ -175,9 +180,11 @@ public class MessagesRepository : IDisposable
         {
             try
             {
+                var references = new List<DbFilesAuditReference>();
+                
                 foreach (var message in group)
                 {
-                    if (!string.IsNullOrEmpty(message.UAHeader))
+                    if (!string.IsNullOrEmpty(message.UaHeader))
                     {
                         try
                         {
@@ -189,7 +196,7 @@ public class MessagesRepository : IDisposable
                         }
                     }
 
-                    if (!ForseSave(message))
+                    if (!ForceSave(message))
                     {
                         // messages with action code < 2000 are related to login-history
                         if ((int)message.Action < 2000)
@@ -201,11 +208,23 @@ public class MessagesRepository : IDisposable
                         {
                             var auditEvent = _mapper.Map<EventMessage, DbAuditEvent>(message);
                             await ef.AuditEvents.AddAsync(auditEvent);
+                            
+                            if (auditEvent.FilesReferences is { Count: > 0 })
+                            {
+                                references.AddRange(auditEvent.FilesReferences);
+                            }
                         }
                     }
                 }
 
                 await ef.SaveChangesAsync();
+
+                if (references.Count <= 0)
+                {
+                    continue;
+                }
+
+                await historySocketManager.UpdateHistoryAsync(group.Key, references);
             }
             catch(Exception e)
             {
@@ -235,6 +254,7 @@ public class MessagesRepository : IDisposable
 
         using var scope = _serviceScopeFactory.CreateScope();
         using var ef = scope.ServiceProvider.GetService<IDbContextFactory<MessagesContext>>().CreateDbContext();
+        var historySocketManager = scope.ServiceProvider.GetService<HistorySocketManager>();
 
         var dict = new Dictionary<string, ClientInfo>();
 
@@ -243,9 +263,11 @@ public class MessagesRepository : IDisposable
         {
             try
             {
+                var references = new List<DbFilesAuditReference>();
+                
                 foreach (var message in group)
                 {
-                    if (!string.IsNullOrEmpty(message.UAHeader))
+                    if (!string.IsNullOrEmpty(message.UaHeader))
                     {
                         try
                         {
@@ -257,7 +279,7 @@ public class MessagesRepository : IDisposable
                         }
                     }
 
-                    if (!ForseSave(message))
+                    if (!ForceSave(message))
                     {
                         // messages with action code < 2000 are related to login-history
                         if ((int)message.Action < 2000)
@@ -269,10 +291,23 @@ public class MessagesRepository : IDisposable
                         {
                             var auditEvent = _mapper.Map<EventMessage, DbAuditEvent>(message);
                             ef.AuditEvents.Add(auditEvent);
+
+                            if (auditEvent.FilesReferences is { Count: > 0 })
+                            {
+                                references.AddRange(auditEvent.FilesReferences);
+                            }
                         }
                     }
                 }
+                
                 ef.SaveChanges();
+                
+                if (references.Count <= 0)
+                {
+                    continue;
+                }
+                
+                historySocketManager.UpdateHistory(group.Key, references);
             }
             catch(Exception e)
             {
@@ -291,12 +326,19 @@ public class MessagesRepository : IDisposable
         return loginEvent.Id;
     }
 
-    private async Task<int> AddAuditEventAsync(EventMessage message, MessagesContext dbContext)
+    private async Task<int> AddAuditEventAsync(EventMessage message, MessagesContext dbContext, HistorySocketManager historySocketManager)
     {
         var auditEvent = _mapper.Map<EventMessage, DbAuditEvent>(message);
 
         await dbContext.AuditEvents.AddAsync(auditEvent);
         await dbContext.SaveChangesAsync();
+
+        if (auditEvent.FilesReferences == null || auditEvent.FilesReferences.Count == 0)
+        {
+            return auditEvent.Id;
+        }
+
+        await historySocketManager.UpdateHistoryAsync(auditEvent.TenantId, auditEvent.FilesReferences);
 
         return auditEvent.Id;
     }

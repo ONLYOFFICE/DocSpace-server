@@ -57,10 +57,7 @@ public class SecurityDto
             WebItemId = Guid.Empty.ToString(),
             Enabled = true,
             IsSubItem = false,
-            Groups = new List<GroupSummaryDto>
-                    {
-                        GroupSummaryDto.GetSample()
-                    },
+            Groups = [GroupSummaryDto.GetSample()],
             Users = [EmployeeDto.GetSample()]
         };
     }

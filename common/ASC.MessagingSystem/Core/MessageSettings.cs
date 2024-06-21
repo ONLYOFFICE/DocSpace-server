@@ -72,7 +72,7 @@ public class MessageSettings
 
     public static string GetUAHeader(HttpRequest request)
     {
-        var result = request?.Query?["request-user-agent"].FirstOrDefault();
+        var result = request?.Query["request-user-agent"].FirstOrDefault();
 
         if (result != null)
         {
@@ -99,14 +99,14 @@ public class MessageSettings
 
     public static string GetIP(HttpRequest request)
     {
-        var result = request?.Query?["request-x-real-ip"].FirstOrDefault();
+        var result = request?.Query["request-x-real-ip"].FirstOrDefault();
 
         if (result != null)
         {
             return result;
         }
 
-        return request?.HttpContext?.Connection.RemoteIpAddress?.ToString();
+        return request?.HttpContext.Connection.RemoteIpAddress?.ToString();
     }
 
     public static string GetIP(IDictionary<string, StringValues> headers)
@@ -119,15 +119,15 @@ public class MessageSettings
         ClientInfo clientInfo;
         if (dict != null)
         {
-            if (!dict.TryGetValue(message.UAHeader, out clientInfo))
+            if (!dict.TryGetValue(message.UaHeader, out clientInfo))
             {
-                clientInfo = GetClientInfo(message.UAHeader);
-                dict.Add(message.UAHeader, clientInfo);
+                clientInfo = GetClientInfo(message.UaHeader);
+                dict.Add(message.UaHeader, clientInfo);
             }
         }
         else
         {
-            clientInfo = GetClientInfo(message.UAHeader);
+            clientInfo = GetClientInfo(message.UaHeader);
         }
         if (clientInfo != null)
         {

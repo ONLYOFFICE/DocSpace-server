@@ -206,8 +206,8 @@ public class OperationController(
 
         var filesTask = GetFilesDto(entries).ToListAsync();
 
-        var result = inDto.FileIds.Count() - entries.Count() != 0 ?
-                     (entries.Count() != 0 ? CheckDestFolderResult.PartAllowed : CheckDestFolderResult.NoneAllowed) : CheckDestFolderResult.AllAllowed;
+        var result = inDto.FileIds.Count() - entries.Count != 0 ?
+                     (entries.Count != 0 ? CheckDestFolderResult.PartAllowed : CheckDestFolderResult.NoneAllowed) : CheckDestFolderResult.AllAllowed;
 
         return new CheckDestFolderDto
         {

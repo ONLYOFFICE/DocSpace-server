@@ -537,42 +537,43 @@ internal class FileDao(
                 if (roomId != -1 && checkFolder)
                 {
                     var currentRoom = await folderDao.GetFolderAsync(roomId);
-                    using (var originalCopyStream = new MemoryStream())
+                    using var originalCopyStream = new MemoryStream();
+                    if (currentRoom.FolderType == FolderType.FillingFormsRoom)
                     {
-                        if (currentRoom.FolderType == FolderType.FillingFormsRoom)
+                        var extension = FileUtility.GetFileExtension(file.Title);
+                        var fileType = FileUtility.GetFileTypeByExtention(extension);
+
+                        await fileStream.CopyToAsync(originalCopyStream);
+
+                        var cloneStreamForCheck = CloneMemoryStream(originalCopyStream, 300);
+                        var cloneStreamForSave = CloneMemoryStream(originalCopyStream);
+
+                        if (fileType != FileType.Pdf || (fileType == FileType.Pdf && !await fileStorageService.CheckExtendedPDFstream(cloneStreamForCheck)))
                         {
-                            var extension = FileUtility.GetFileExtension(file.Title);
-                            var fileType = FileUtility.GetFileTypeByExtention(extension);
+                            throw new Exception(FilesCommonResource.ErrorMessage_UploadToFormRoom);
 
-                            fileStream.Position = 0;
-                            await fileStream.CopyToAsync(originalCopyStream);
+                        }
 
-                            var cloneStreamForCheck = CloneMemoryStream(originalCopyStream, 300);
-                            var cloneStreamForSave = CloneMemoryStream(originalCopyStream);
+                        if (fileType == FileType.Pdf )
+                        {
 
-                            if (fileType != FileType.Pdf || (fileType == FileType.Pdf && !await fileStorageService.CheckExtendedPDFstream(cloneStreamForCheck)))
+                            await SaveFileStreamAsync(file, cloneStreamForSave, currentFolder);
+
+                            var properties = await fileDao.GetProperties(file.Id) ?? new EntryProperties() { FormFilling = new FormFillingProperties() };
+                            if (!properties.FormFilling.CollectFillForm)
                             {
-                                throw new Exception(FilesCommonResource.ErrorMessage_UploadToFormRoom);
-
-                            }
-                            else if (fileType == FileType.Pdf)
-                            {
-                                var properties = await fileDao.GetProperties(file.Id) ?? new EntryProperties() { FormFilling = new FormFillingProperties() };
                                 properties.FormFilling.StartFilling = true;
                                 properties.FormFilling.CollectFillForm = true;
                                 await fileDao.SaveProperties(file.Id, properties);
-                                await SaveFileStreamAsync(file, cloneStreamForSave, currentFolder);
-
                                 var count = await fileStorageService.GetPureSharesCountAsync(currentRoom.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "");
                                 await socketManager.CreateFormAsync(file, securityContext.CurrentAccount.ID, count <= 1);
                             }
                         }
-                        else
-                        {
-                            await SaveFileStreamAsync(file, fileStream, currentFolder);
-                        }
                     }
-
+                    else
+                    {
+                        await SaveFileStreamAsync(file, fileStream, currentFolder);
+                    }
                 }
                 else
                 {
@@ -848,6 +849,8 @@ internal class FileDao(
             await context.DeleteSecurityAsync(tenantId, fileId.ToString());
 
             await DeleteCustomOrder(filesDbContext, fileId);
+
+            await context.DeleteAuditReferencesAsync(fileId, FileEntryType.File);
 
             await context.SaveChangesAsync();
             await tx.CommitAsync();
@@ -1741,7 +1744,11 @@ internal class FileDao(
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        return EntryProperties.Deserialize(await filesDbContext.DataAsync(tenantId, fileId.ToString()), logger);
+        if(await filesDbContext.DataAsync(tenantId, fileId.ToString()) != null)
+        {
+            return EntryProperties.Deserialize(await filesDbContext.DataAsync(tenantId, fileId.ToString()), logger);
+        }
+        return null;
     }
 
     public async Task SaveProperties(int fileId, EntryProperties entryProperties)

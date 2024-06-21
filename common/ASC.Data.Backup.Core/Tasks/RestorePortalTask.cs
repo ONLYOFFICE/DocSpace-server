@@ -379,7 +379,7 @@ public class RestorePortalTask(DbFactory dbFactory,
             foreach (var module in storageModules)
             {
                 var storage = await StorageFactory.GetStorageAsync(tenant.Id, module, _region);
-                var domains = StorageFactoryConfig.GetDomainList(module, _region).ToList();
+                var domains = StorageFactoryConfig.GetDomainList(module, region:_region).ToList();
 
                 domains.Add(string.Empty); //instead storage.DeleteFiles("\\", "*.*", true);
 
@@ -411,7 +411,7 @@ public class RestorePortalTask(DbFactory dbFactory,
         using var stream = dataReader.GetEntry(KeyHelper.GetStorageRestoreInfoZipKey());
         if (stream == null)
         {
-            return Enumerable.Empty<BackupFileInfo>();
+            return [];
         }
 
         var restoreInfo = XElement.Load(new StreamReader(stream));

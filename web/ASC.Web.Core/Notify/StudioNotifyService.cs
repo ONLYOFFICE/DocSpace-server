@@ -246,6 +246,32 @@ public class StudioNotifyService(
         }
     }
 
+    public async Task SendDocSpaceRegistration(string email, string confirmationUrl, string culture = "", bool limitation = false)
+    {
+        var cultureInfo = string.IsNullOrEmpty(culture) ? (await GetCulture(null)) : new CultureInfo(culture);
+
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonRegister", cultureInfo);
+        var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", cultureInfo);
+
+        var tags = new List<ITagValue>
+        {
+                new TagValue(Tags.InviteLink, confirmationUrl),
+                TagValues.OrangeButton(orangeButtonText, confirmationUrl),
+                TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
+                new TagValue(CommonTags.Culture, cultureInfo.Name)
+        };
+
+        await studioNotifyServiceHelper.SendNoticeToAsync(
+            Actions.SaasDocSpaceRegistration,
+                await studioNotifyHelper.RecipientFromEmailAsync(email, false),
+                [EMailSenderName],
+                tags.ToArray());
+
+        if (limitation)
+        {
+            await userInvitationLimitHelper.ReduceLimit();
+        }
+    }
     #endregion
 
     public async Task SendMsgMobilePhoneChangeAsync(UserInfo userInfo)

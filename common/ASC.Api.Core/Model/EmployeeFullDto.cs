@@ -90,22 +90,6 @@ public class EmployeeFullDto : EmployeeDto
     /// <type>System.String, System</type>
     public string Notes { get; set; }
 
-    /// <summary>Original size avatar</summary>
-    /// <type>System.String, System</type>
-    public string AvatarOriginal { get; set; }
-
-    /// <summary>Maximum size avatar</summary>
-    /// <type>System.String, System</type>
-    public string AvatarMax { get; set; }
-
-    /// <summary>Medium size avatar</summary>
-    /// <type>System.String, System</type>
-    public string AvatarMedium { get; set; }
-
-    /// <summary>Avatar</summary>
-    /// <type>System.String, System</type>
-    public string Avatar { get; set; }
-
     /// <summary>Specifies if the user is an administrator or not</summary>
     /// <type>System.Boolean, System</type>
     public bool IsAdmin { get; set; }

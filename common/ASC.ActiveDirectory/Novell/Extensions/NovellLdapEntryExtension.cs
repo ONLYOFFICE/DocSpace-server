@@ -27,8 +27,9 @@
 namespace ASC.ActiveDirectory.Novell.Extensions;
 
 [Singleton]
-public class NovellLdapEntryExtension(ILogger<NovellLdapEntryExtension> logger)
+public class NovellLdapEntryExtension(ILoggerProvider optionMonitor)
 {
+    private readonly ILogger logger = optionMonitor.CreateLogger("ASC.ActiveDirectory");
     public object GetAttributeValue(LdapEntry ldapEntry, string attributeName, bool getBytes = false)
     {
         try

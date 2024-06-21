@@ -28,8 +28,8 @@ namespace ASC.Files.Core.EF;
 
 public partial class FilesDbContext
 {
-    [PreCompileQuery([PreCompileQuery.DefaultInt, int.MaxValue])]
-    public IAsyncEnumerable<DbFolder> FoldersAsync(int tenantId, int folderId)
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    public IAsyncEnumerable<DbFolder> FoldersAsync(int tenantId, IEnumerable<int> folderId)
     {
         return AbstractQueries.FoldersAsync(this, tenantId, folderId);
     }
@@ -93,17 +93,23 @@ public partial class FilesDbContext
     {
         return AbstractQueries.ChangeFoldersCountAsync(this, tenantId, folderId, counter);
     }
+    
+    [PreCompileQuery([PreCompileQuery.DefaultInt, FileEntryType.File])]
+    public Task<int> DeleteAuditReferencesAsync(int entryId, FileEntryType entryType)
+    {
+        return AbstractQueries.DeleteAuditReferencesAsync(this, entryId, entryType);
+    }
 }
 
 static file class AbstractQueries
 {
-    public static readonly Func<FilesDbContext, int, int, IAsyncEnumerable<DbFolder>> FoldersAsync =
+    public static readonly Func<FilesDbContext, int, IEnumerable<int>, IAsyncEnumerable<DbFolder>> FoldersAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int folderId) =>
+            (FilesDbContext ctx, int tenantId, IEnumerable<int> folderIds) =>
                 ctx.Folders
                     .AsTracking()
                     .Where(r => r.TenantId == tenantId)
-                    .Where(r => ctx.Tree.Any(a => a.FolderId == folderId && a.ParentId == r.Id)));
+                    .Where(r => ctx.Tree.Any(a => folderIds.Contains(a.FolderId) && a.ParentId == r.Id)));
     
     public static readonly Func<FilesDbContext, int, int, Task<int>> FilesCountAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
@@ -195,4 +201,12 @@ static file class AbstractQueries
                 ctx.Folders
                     .Where(r => r.TenantId == tenantId && ctx.Tree.Any(a => a.FolderId == folderId && a.ParentId == r.Id))
                     .ExecuteUpdate(r => r.SetProperty(a => a.FoldersCount, a => a.FoldersCount + counter)));
+    
+    public static readonly Func<FilesDbContext, int, FileEntryType, Task<int>> DeleteAuditReferencesAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int entryId, FileEntryType entryType) =>
+                ctx.FilesAuditReference
+                    .Where(r => r.EntryId == entryId)
+                    .Where(r => r.EntryType == (byte)entryType)
+                    .ExecuteDelete());
 }

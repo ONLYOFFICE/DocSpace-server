@@ -168,7 +168,7 @@ public class TfaManager(SettingsManager settingsManager,
 
         //from Signature.Create
         var machineSalt = Encoding.UTF8.GetString(machinePseudoKeys.GetMachineConstant());
-        var token = Convert.ToBase64String(SHA256.Create().ComputeHash(Encoding.UTF8.GetBytes(userSalt + machineSalt)));
+        var token = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(userSalt + machineSalt)));
         var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
 
         return encodedToken[..10];

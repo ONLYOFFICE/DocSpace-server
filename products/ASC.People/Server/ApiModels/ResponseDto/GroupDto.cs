@@ -46,6 +46,10 @@ public class GroupDto
     /// <type>System.Guid, System</type>
     public Guid Id { get; set; }
 
+    /// <summary>Specifies if the LDAP settings are enabled for the group or not</summary>
+    /// <type>System.Boolean, System</type>
+    public bool IsLDAP { get; set; }
+
     /// <summary>Manager</summary>
     /// <type>ASC.Web.Api.Models.EmployeeDto, ASC.Api.Core</type>
     public EmployeeFullDto Manager { get; set; }
@@ -69,7 +73,8 @@ public class GroupFullDtoHelper(UserManager userManager, EmployeeFullDtoHelper e
             Category = group.CategoryID,
             Parent = group.Parent?.ID ?? Guid.Empty,
             Name = group.Name,
-            Shared = shared
+            Shared = shared,
+            IsLDAP = !string.IsNullOrEmpty(group.Sid)
         };
         
         var manager = await userManager.GetUsersAsync(await userManager.GetDepartmentManagerAsync(group.ID));

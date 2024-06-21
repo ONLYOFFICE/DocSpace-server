@@ -34,5 +34,6 @@ public interface IDaoFactory
     IFileDao<T> GetFileDao<T>();
     ITagDao<T> GetTagDao<T>();
     ISecurityDao<T> GetSecurityDao<T>();
-    ILinkDao GetLinkDao();
+    ILinkDao<T> GetLinkDao<T>();
+    IMappingId<T> GetMapping<T>();
 }

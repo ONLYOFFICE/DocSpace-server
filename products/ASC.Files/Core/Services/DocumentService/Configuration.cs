@@ -184,7 +184,7 @@ public class DocumentConfig<T>(
         }
 
         var last = Permissions.Edit || Permissions.Review || Permissions.Comment;
-        _fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(pathProvider.GetFileStreamUrl(file, last));
+        _fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(await pathProvider.GetFileStreamUrlAsync(file, last));
 
         return _fileUri;
     }
@@ -758,7 +758,7 @@ public class LogoConfig(
 }
 
 [Transient]
-public class PluginsConfig()
+public class PluginsConfig
     // ConsumerFactory consumerFactory,
     // BaseCommonLinkUtility baseCommonLinkUtility,
     // CoreBaseSettings coreBaseSettings,

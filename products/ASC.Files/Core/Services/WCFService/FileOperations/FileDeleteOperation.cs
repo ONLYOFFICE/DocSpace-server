@@ -96,11 +96,11 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
         var folderDao = serviceScope.ServiceProvider.GetService<IFolderDao<int>>();
         var filesMessageService = serviceScope.ServiceProvider.GetService<FilesMessageService>();
         var tenantManager = serviceScope.ServiceProvider.GetService<TenantManager>();
+        
         await tenantManager.SetCurrentTenantAsync(CurrentTenantId);
-
+        
         var externalShare = serviceScope.ServiceProvider.GetRequiredService<ExternalShare>();
         externalShare.Initialize(SessionSnapshot);
-
         _trashId = await folderDao.GetFolderIDTrashAsync(true);
 
         Folder<T> root = null;
@@ -120,7 +120,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
         {
             await DeleteFilesAsync(Files, serviceScope);
             await DeleteFoldersAsync(Folders, serviceScope);
-
+            
             var trash = await folderDao.GetFolderAsync(_trashId);
             await filesMessageService.SendAsync(MessageAction.TrashEmptied, trash, _headers);
         }
@@ -172,8 +172,8 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
             else
             {
                 canCalculate = FolderDao.CanCalculateSubitems(folderId) ? default : folderId;
-
                 await fileMarker.RemoveMarkAsNewForAllAsync(folder);
+                
                 if (folder.ProviderEntry && ((folder.Id.Equals(folder.RootId) || isRoom)))
                 {
                     if (ProviderDao != null)
@@ -229,7 +229,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                             }
 
                             await socketManager.DeleteFolder(folder, action: async () => await FolderDao.DeleteFolderAsync(folder.Id));
-
+                            
                             if (isRoom)
                             {
                                 await notifyClient.SendRoomRemovedAsync(folder, aces, authContext.CurrentAccount.ID);
@@ -247,6 +247,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                     {
                         var files = await FileDao.GetFilesAsync(folder.Id, new OrderBy(SortedByType.AZ, true), FilterType.FilesOnly, false, Guid.Empty, string.Empty, null, false, withSubfolders: true).ToListAsync();
                         var (isError, message) = await WithErrorAsync(scope, files, true, checkPermissions);
+                        
                         if (!_ignoreException && isError)
                         {
                             this[Err] = message;
@@ -282,7 +283,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                             else
                             {
                                 await socketManager.DeleteFolder(folder, action: async () => await FolderDao.MoveFolderAsync(folder.Id, _trashId, CancellationToken));
-
+                                
                                 if (isNeedSendActions)
                                 {
                                     await filesMessageService.SendAsync(MessageAction.FolderMovedToTrash, folder, _headers, folder.Title);
@@ -356,8 +357,6 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                         if (file.RootFolderType == FolderType.Archive)
                         {
                             var archiveId = await folderDao.GetFolderIDArchive(false);
-                            var virtualRoomsId = await folderDao.GetFolderIDVirtualRooms(false);
-
                             await folderDao.ChangeTreeFolderSizeAsync(archiveId, (-1) * file.ContentLength);
 
                         }
@@ -384,7 +383,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                         Logger.ErrorWithException(ex);
                     }
 
-                    await LinkDao.DeleteAllLinkAsync(file.Id.ToString());
+                    await LinkDao.DeleteAllLinkAsync(file.Id);
                     await FileDao.SaveProperties(file.Id, null);
                 }
 

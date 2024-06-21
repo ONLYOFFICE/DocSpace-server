@@ -128,7 +128,7 @@ Brisanje ličnih podataka je oslobodilo $DocsSpace</value>
     <value>Uradite isto kao korisnik|Povežite Dropbox, Box i druge naloge u 'Zajedničkom' odeljku|Podesite prava pristupa dokumentima i folderima u 'Zajedničkom' odeljku</value>
   </data>
   <data name="ProductUserOpportunitiesCustomMode" xml:space="preserve">
-    <value>Kreirajte i uređujte svoje dokumente, kao i deljene dokumente sa odgovarajućim pravima pristupa|Dajte pristup za čitanje/uređivanje drugim korisnicima za dokumente i foldere|Povežite Dropbox, Box i druge naloge u 'Moji dokumenti' odeljku</value>
+    <value>Kreirajte i uređujte svoje dokumente, kao i deljene dokumente sa odgovarajućim pravima pristupa|Dajte pristup za čitanje/uređivanje drugim korisnicima za dokumente i foldere|Povežite Dropbox, Box i druge naloge u 'Dokumenti' odeljku</value>
   </data>
   <data name="subject_remove_user_data_completed_custom_mode" xml:space="preserve">
     <value>${LetterLogoText}. Uklanjanje korisničkih podataka je završeno</value>
