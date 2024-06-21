@@ -304,10 +304,14 @@ public class EntryManager(IDaoFactory daoFactory,
             withSubfolders = false;
         }
 
-        if (parent.RootFolderType is FolderType.USER or FolderType.VirtualRooms)
+        if (parent.RootFolderType is FolderType.USER)
         {
             withShared = true;
         }
+        
+        var sharedTask = parent.RootFolderType is FolderType.VirtualRooms && !parent.ProviderEntry 
+            ? daoFactory.GetSecurityDao<T>().IsSharedAsync(parent, [SubjectType.PrimaryExternalLink, SubjectType.ExternalLink]) 
+            : Task.FromResult(false);
 
         var (foldersFilterType, foldersSearchText) = applyFilterOption != ApplyFilterOption.Files ? (filterType, searchText) : (FilterType.None, string.Empty);
 
@@ -437,12 +441,24 @@ public class EntryManager(IDaoFactory daoFactory,
             var filesCount = count - folders.Count;
             var filesOffset = Math.Max(folders.Count > 0 ? 0 : from - await allFoldersCountTask, 0);
 
-            var files = await fileDao.GetFilesAsync(parent.Id, orderBy, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders, excludeSubject, filesOffset, filesCount, roomId, withShared)
-                .ToListAsync();
+            var filesTask = fileDao.GetFilesAsync(parent.Id, orderBy, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders,
+                excludeSubject, filesOffset, filesCount, roomId, withShared);
+
+            var shared = await sharedTask;
+
+            if (shared)
+            {
+                filesTask = filesTask.Select(x =>
+                {
+                    x.Shared = true;
+                    return x;
+                });
+            }
+
+            var files = await filesTask.ToListAsync();
 
             if (parent.FolderType == FolderType.FillingFormsRoom && securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))
             {
-
                 for (var i = folders.Count - 1; i >= 0; i--)
                 {
                     if (folders[i].FolderType == FolderType.ReadyFormFolder || folders[i].FolderType == FolderType.InProcessFormFolder)
