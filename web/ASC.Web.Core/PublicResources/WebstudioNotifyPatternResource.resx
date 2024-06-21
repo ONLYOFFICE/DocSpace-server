@@ -479,6 +479,7 @@ h1."$PortalUrl":"$PortalUrl"
 Your portal has been migrated to a new domain. Please restore your access to the portal by specifying the password which will be used for signing in.
 
 Please follow the link below to set your password for the account:
+
 $OrangeButton
 
 *Note*: this link is valid for 7 days only. Please complete the access restore process within that period.

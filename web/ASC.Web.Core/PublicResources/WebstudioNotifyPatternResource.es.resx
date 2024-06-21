@@ -350,6 +350,7 @@ h1."$PortalUrl":"$PortalUrl"
 Su portal ha sido migrado a un nuevo dominio. Por favor, restablezca su acceso al portal especificando la contraseña que se utilizará para iniciar la sesión.
 
 Por favor, siga el siguiente enlace para establecer su contraseña para la cuenta:
+
 $OrangeButton
 
 *Nota*: este enlace es válido sólo durante 7 días. Por favor, complete el proceso de restablecimiento de acceso dentro de ese período.

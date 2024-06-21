@@ -1009,11 +1009,12 @@ namespace ASC.Web.Core.PublicResources {
         ///Your portal has been migrated to a new domain. Please restore your access to the portal by specifying the password which will be used for signing in.
         ///
         ///Please follow the link below to set your password for the account:
+        ///
         ///$OrangeButton
         ///
         ///*Note*: this link is valid for 7 days only. Please complete the access restore process within that period.
         ///
-        ///If you received this email by mistake, please ignore it or contact your &quot;$PortalUrl&quot;:&quot;$PortalUrl&quot; portal admini [rest of string was truncated]&quot;;.
+        ///If you received this email by mistake, please ignore it or contact your &quot;$PortalUrl&quot;:&quot;$PortalUrl&quot; portal admi [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_migration_success_v115 {
             get {
