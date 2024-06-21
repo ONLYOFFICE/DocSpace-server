@@ -403,14 +403,6 @@ public class EntryManager(IDaoFactory daoFactory,
             entries = await fileSecurity.GetVirtualRoomsAsync(filterType, subjectId, searchText, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject, 
                 provider, subjectFilter, quotaFilter, storageFilter);
 
-            if (parent.Shared)
-            {
-                foreach (var e in entries)
-                {
-                    e.Shared = true;
-                }
-            }
-
             CalculateTotal();
         }
         else if (!parent.ProviderEntry)
