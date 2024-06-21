@@ -238,13 +238,14 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
             {
                 result.Security[FileSecurity.FilesSecurityActions.EditForm] = false;
             }
-            result.HasDraft = linkedId != null;
+
+            result.HasDraft = !Equals(linkedId, default(T));
 
             var formFilling = properties?.FormFilling;
             if (formFilling != null)
             {
                 result.StartFilling = formFilling.StartFilling;
-                if (linkedId != null)
+                if (!Equals(linkedId, default(T)))
                 {
                     var draftLocation = new DraftLocation<T>()
                     {

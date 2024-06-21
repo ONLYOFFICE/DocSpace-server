@@ -26,7 +26,7 @@
 
 using ASC.Web.Files.Services.WCFService.FileOperations;
 
-namespace ASC.Thumbnail.IntegrationEvents.EventHandling;
+namespace ASC.Files.Service.IntegrationEvents.EventHandling;
 
 [Scope]
 public class MoveOrCopyIntegrationEventHandler(

@@ -25,6 +25,8 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Api.Core.Extensions;
+using ASC.Files.Service.Services;
+using ASC.Files.Service.Services.Thumbnail;
 using ASC.Web.Files.Configuration;
 
 namespace ASC.Files.Service;
@@ -57,11 +59,6 @@ public class Startup : BaseWorkerStartup
 
         if (elasticLaunchType != ElasticLaunchType.Exclusive)
         {
-            services.AddHostedService<FeedAggregatorService>();
-
-            //services.AddHostedService<FeedCleanerService>();
-            //DIHelper.TryAdd<FeedCleanerService>();
-
             services.AddActivePassiveHostedService<FileConverterService<int>>(DIHelper, Configuration);
             services.AddActivePassiveHostedService<FileConverterService<string>>(DIHelper, Configuration);
 

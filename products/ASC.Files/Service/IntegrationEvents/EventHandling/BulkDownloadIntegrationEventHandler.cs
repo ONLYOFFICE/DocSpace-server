@@ -26,24 +26,27 @@
 
 using ASC.Web.Files.Services.WCFService.FileOperations;
 
-namespace ASC.Thumbnail.IntegrationEvents.EventHandling;
+namespace ASC.Files.Service.IntegrationEvents.EventHandling;
 
 [Scope]
-public class DeleteIntegrationEventHandler(
-    ILogger<DeleteIntegrationEventHandler> logger,
+public class BulkDownloadIntegrationEventHandler(
+    ILogger<BulkDownloadIntegrationEvent> logger,
     FileOperationsManager fileOperationsManager,
     TenantManager tenantManager,
-    SecurityContext securityContext) : IIntegrationEventHandler<DeleteIntegrationEvent>
+    SecurityContext securityContext,
+    AuthManager authManager)
+    : IIntegrationEventHandler<BulkDownloadIntegrationEvent>
 {
-    public async Task Handle(DeleteIntegrationEvent @event)
+    public async Task Handle(BulkDownloadIntegrationEvent @event)
     {
         CustomSynchronizationContext.CreateContext();
         using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
         {
             logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
             await tenantManager.SetCurrentTenantAsync(@event.TenantId);
-            await securityContext.AuthenticateMeWithoutCookieAsync(@event.TenantId, @event.CreateBy);
-            await fileOperationsManager.Enqueue<FileDeleteOperation, FileDeleteOperationData<string>, FileDeleteOperationData<int>>(@event.TaskId, @event.ThirdPartyData, @event.Data);
+            await securityContext.AuthenticateMeWithoutCookieAsync(await authManager.GetAccountByIDAsync(@event.TenantId, @event.CreateBy), session: @event.CreateBy);
+            await fileOperationsManager.Enqueue<FileDownloadOperation, FileDownloadOperationData<string>, FileDownloadOperationData<int>>(@event.TaskId, @event.ThirdPartyData, @event.Data);
         }
     }
 }
+

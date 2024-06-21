@@ -28,7 +28,7 @@ using System.Security;
 
 using SecurityContext = ASC.Core.SecurityContext;
 
-namespace ASC.Files.ThumbnailBuilder;
+namespace ASC.Files.Service.Services;
 
 [Singleton(GenericArguments = [typeof(int)])]
 [Singleton(GenericArguments = [typeof(string)])]
@@ -36,7 +36,7 @@ internal class FileConverterService<T>(
         IServiceScopeFactory scopeFactory,
         ILogger<FileConverterService<T>> logger)
      : ActivePassiveBackgroundService<FileConverterService<T>>(logger, scopeFactory)
- {
+{
     private static readonly int _timerDelay = 1000;
     private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
 

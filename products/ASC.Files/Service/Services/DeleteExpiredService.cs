@@ -24,29 +24,22 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Web.Files.Services.WCFService.FileOperations;
+namespace ASC.Files.Service.Services;
 
-namespace ASC.Thumbnail.IntegrationEvents.EventHandling;
-
-[Scope]
-public class BulkDownloadIntegrationEventHandler(
-    ILogger<BulkDownloadIntegrationEvent> logger,
-    FileOperationsManager fileOperationsManager,
-    TenantManager tenantManager,
-    SecurityContext securityContext,
-    AuthManager authManager)
-    : IIntegrationEventHandler<BulkDownloadIntegrationEvent>
+[Singleton]
+public class DeleteExpiredService(
+        IServiceScopeFactory scopeFactory,
+        ILogger<DeleteExpiredService> logger,
+        GlobalStore globalStore,
+        IConfiguration configuration)
+    : ActivePassiveBackgroundService<DeleteExpiredService>(logger, scopeFactory)
 {
-    public async Task Handle(BulkDownloadIntegrationEvent @event)
+    protected override TimeSpan ExecuteTaskPeriod { get; set; } = TimeSpan.Parse(configuration["files:deleteExpired"] ?? "1", CultureInfo.InvariantCulture);
+
+    protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
-        CustomSynchronizationContext.CreateContext();
-        using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
-        {
-            logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
-            await tenantManager.SetCurrentTenantAsync(@event.TenantId);
-            await securityContext.AuthenticateMeWithoutCookieAsync(await authManager.GetAccountByIDAsync(@event.TenantId, @event.CreateBy), session: @event.CreateBy);
-            await fileOperationsManager.Enqueue<FileDownloadOperation, FileDownloadOperationData<string>, FileDownloadOperationData<int>>(@event.TaskId, @event.ThirdPartyData, @event.Data);
-        }
+        var dataStore = await globalStore.GetStoreAsync(false);
+
+        await dataStore.DeleteExpiredAsync(FileConstant.StorageDomainTmp, CommonChunkedUploadSessionHolder.StoragePath, CommonChunkedUploadSessionHolder.SlidingExpiration);
     }
 }
-
