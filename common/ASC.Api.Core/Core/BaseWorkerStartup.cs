@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Core.Notify.Socket;
+using ASC.MessagingSystem.Data;
 
 namespace ASC.Api.Core;
 
@@ -89,6 +90,11 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
         services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Writer);
         services.AddHostedService<SocketService>();
+        
+        services.AddSingleton(Channel.CreateUnbounded<EventData>());
+        services.AddSingleton(svc => svc.GetRequiredService<Channel<EventData>>().Reader);
+        services.AddSingleton(svc => svc.GetRequiredService<Channel<EventData>>().Writer);
+        services.AddHostedService<MessageSenderService>();
     }
 
     protected IEnumerable<Assembly> GetAutoMapperProfileAssemblies()
