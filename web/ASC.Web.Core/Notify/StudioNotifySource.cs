@@ -94,6 +94,7 @@ public class StudioNotifySource(UserManager userManager, IRecipientProvider reci
                 Actions.SaasRoomInvite,
                 Actions.SaasRoomInviteExistingUser,
                 Actions.SaasDocSpaceInvite,
+                Actions.SaasDocSpaceRegistration,
 
                 Actions.SaasAdminActivationV1,
                 Actions.EnterpriseAdminActivationV1,

@@ -554,16 +554,20 @@ internal class FileDao(
 
                         }
 
-                        if (fileType == FileType.Pdf)
+                        if (fileType == FileType.Pdf )
                         {
-                            var properties = await fileDao.GetProperties(file.Id) ?? new EntryProperties() { FormFilling = new FormFillingProperties() };
-                            properties.FormFilling.StartFilling = true;
-                            properties.FormFilling.CollectFillForm = true;
-                            await fileDao.SaveProperties(file.Id, properties);
+
                             await SaveFileStreamAsync(file, cloneStreamForSave, currentFolder);
 
-                            var count = await fileStorageService.GetPureSharesCountAsync(currentRoom.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "");
-                            await socketManager.CreateFormAsync(file, securityContext.CurrentAccount.ID, count <= 1);
+                            var properties = await fileDao.GetProperties(file.Id) ?? new EntryProperties() { FormFilling = new FormFillingProperties() };
+                            if (!properties.FormFilling.CollectFillForm)
+                            {
+                                properties.FormFilling.StartFilling = true;
+                                properties.FormFilling.CollectFillForm = true;
+                                await fileDao.SaveProperties(file.Id, properties);
+                                var count = await fileStorageService.GetPureSharesCountAsync(currentRoom.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "");
+                                await socketManager.CreateFormAsync(file, securityContext.CurrentAccount.ID, count <= 1);
+                            }
                         }
                     }
                     else
@@ -845,6 +849,8 @@ internal class FileDao(
             await context.DeleteSecurityAsync(tenantId, fileId.ToString());
 
             await DeleteCustomOrder(filesDbContext, fileId);
+
+            await context.DeleteAuditReferencesAsync(fileId, FileEntryType.File);
 
             await context.SaveChangesAsync();
             await tx.CommitAsync();

@@ -70,11 +70,11 @@ internal class FilesActionMapper : IModuleActionMapper
                     { ActionType.Download, [MessageAction.FileDownloaded, MessageAction.FileDownloadedAs, MessageAction.FileRevisionDownloaded
                         ]
                     },
-                    { ActionType.Send, [MessageAction.FileSendAccessLink, MessageAction.FileChangeOwner] }
-                },
+                    { ActionType.Send, [MessageAction.FileSendAccessLink, MessageAction.FileChangeOwner] },
+                    { ActionType.Upload, [MessageAction.FileUploaded, MessageAction.FileUploadedWithOverwriting]}
+                }, 
                 new Dictionary<ActionType, MessageAction>
                 {
-                    { ActionType.Upload, MessageAction.FileUploaded },
                     { ActionType.Import, MessageAction.FileImported },
                     { ActionType.Move, MessageAction.FileMovedToTrash }
                 }
@@ -161,7 +161,10 @@ internal class RoomsActionMapper : IModuleActionMapper
                             MessageAction.RoomInvitationLinkDeleted,
                             MessageAction.RoomExternalLinkCreated,
                             MessageAction.RoomExternalLinkUpdated,
-                            MessageAction.RoomExternalLinkDeleted
+                            MessageAction.RoomExternalLinkDeleted,
+                            MessageAction.RoomGroupAdded,
+                            MessageAction.RoomUpdateAccessForGroup,
+                            MessageAction.RoomGroupRemove
                         ]
                     },
                     {

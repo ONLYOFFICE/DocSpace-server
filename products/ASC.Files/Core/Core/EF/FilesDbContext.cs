@@ -49,6 +49,7 @@ public partial class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOp
     public DbSet<DbRoomSettings> RoomSettings { get; set; }
     public DbSet<DbGroup> Groups { get; set; }
     public DbSet<UserGroup> UserGroup { get; set; }
+    public DbSet<DbFilesAuditReference> FilesAuditReference { get; set; }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -73,6 +74,7 @@ public partial class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOp
             .AddDbRoomSettings()
             .AddDbGroup()
             .AddUserGroup()
+            .AddFilesAuditReference()
             .AddDbFunctions();
     }
 }

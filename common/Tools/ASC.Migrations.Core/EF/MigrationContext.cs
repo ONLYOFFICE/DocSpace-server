@@ -102,6 +102,7 @@ public class MigrationContext : DbContext
     public DbSet<DbFileOrder> FileOrder { get; set; }
     public DbSet<DbRoomSettings> RoomSettings { get; set; }
     public DbSet<ShortLink> ShortLink { get; set; }
+    public DbSet<DbFilesAuditReference> FilesAuditReferences { get; set; }
     public MigrationContext(DbContextOptions<MigrationContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -166,6 +167,7 @@ public class MigrationContext : DbContext
             .AddShortLinks()
             .AddDbFileOrder()
             .AddDbRoomSettings()
+            .AddFilesAuditReference()
             .AddDbFunctions();
     }
 }

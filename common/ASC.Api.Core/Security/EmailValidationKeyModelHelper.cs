@@ -96,7 +96,13 @@ public class EmailValidationKeyModelHelper(IHttpContextAccessor httpContextAcces
                 checkKeyResult = (await invitationValidator.ValidateAsync(key, email, emplType ?? default)).Status;
                 break;
 
-            case ConfirmType.PortalOwnerChange:
+            case ConfirmType.PortalOwnerChange:                
+                var newOwner = await userManager.GetUsersAsync(uiD.GetValueOrDefault());
+                if(Equals(newOwner, Constants.LostUser) || newOwner.Status == EmployeeStatus.Terminated)
+                {
+                    checkKeyResult = ValidationResult.Invalid;
+                    break;
+                }
                 checkKeyResult = await provider.ValidateEmailKeyAsync(email + type + uiD.GetValueOrDefault(), key, provider.ValidEmailKeyInterval);
                 break;
 

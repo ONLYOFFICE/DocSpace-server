@@ -108,7 +108,7 @@ public class InvitationValidator(
         }
 
         var user = await userManager.GetUserByEmailAsync(email);
-        if (user.Equals(Constants.LostUser))
+        if (user.Equals(Constants.LostUser) || user.Status == EmployeeStatus.Terminated)
         {
             return (EmailValidationKeyProvider.ValidationResult.Invalid, null);
         }

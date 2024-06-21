@@ -52,7 +52,6 @@ internal interface IDaoBase<TFile, TFolder, TItem>
     Task<List<TItem>> GetItemsAsync(string parentId, bool? folder = null);
     Task<string> GetAvailableTitleAsync(string requestTitle, string parentFolderId, Func<string, string, Task<bool>> isExist);
     bool CheckInvalidFilter(FilterType filterType);
-    Task<string> MappingIDAsync(string id, bool saveIfNotExist = false);
     Task UpdateIdAsync(string oldValue, string newValue);
     Folder<string> GetErrorRoom();
     bool IsRoom(string folderId);

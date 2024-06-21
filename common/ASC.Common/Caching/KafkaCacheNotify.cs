@@ -43,14 +43,14 @@ public class KafkaCacheNotify<T> : IDisposable, ICacheNotify<T> where T : new()
     private readonly ProtobufDeserializer<AscCacheItem> _keyDeserializer = new();
     private readonly Guid _key;
 
-    public KafkaCacheNotify(ConfigurationExtension configuration, ILogger<KafkaCacheNotify<T>> logger)
+    public KafkaCacheNotify(IConfiguration configuration, ILogger<KafkaCacheNotify<T>> logger)
     {
         _logger = logger;
         _cancelationToken = new ConcurrentDictionary<string, CancellationTokenSource>();
         _actions = new ConcurrentDictionary<string, Action<T>>();
         _key = Guid.NewGuid();
 
-        var settings = configuration.GetSetting<KafkaSettings>("kafka");
+        var settings = configuration.GetSection("kafka").Get<KafkaSettings>();
 
         _clientConfig = new ClientConfig { BootstrapServers = settings.BootstrapServers };
         _adminClientConfig = new AdminClientConfig { BootstrapServers = settings.BootstrapServers };

@@ -1045,4 +1045,7 @@
   <data name="TariffsFeature_statistic" xml:space="preserve">
     <value>Speicherplatzkontingente &amp; Statistik</value>
   </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>Benutzer deaktiviert</value>
+  </data>
 </root>

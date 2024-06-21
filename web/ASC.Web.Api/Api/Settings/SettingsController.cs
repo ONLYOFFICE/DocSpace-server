@@ -61,7 +61,6 @@ public partial class SettingsController(MessageService messageService,
         QuotaUsageManager quotaUsageManager,
         TenantDomainValidator tenantDomainValidator,
         ExternalShare externalShare,
-        ConfigurationExtension configurationExtension,
         IMapper mapper,
         UserFormatter userFormatter,
         IDistributedLockProvider distributedLockProvider,
@@ -177,7 +176,7 @@ public partial class SettingsController(MessageService messageService,
                 settings.Plugins.Delete = pluginsDelete;
             }
 
-            var formGallerySettings = configurationExtension.GetSetting<OFormSettings>("files:oform");
+            var formGallerySettings = configuration.GetSection("files:oform").Get<OFormSettings>();
             settings.FormGallery = mapper.Map<FormGalleryDto>(formGallerySettings);
 
             settings.InvitationLimit = await userInvitationLimitHelper.GetLimit();

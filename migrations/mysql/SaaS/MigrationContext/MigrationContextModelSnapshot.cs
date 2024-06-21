@@ -1342,6 +1342,30 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         });
                 });
 
+            modelBuilder.Entity("ASC.Core.Common.EF.Model.DbFilesAuditReference", b =>
+                {
+                    b.Property<int>("EntryId")
+                        .HasColumnType("int")
+                        .HasColumnName("entry_id");
+
+                    b.Property<byte>("EntryType")
+                        .HasColumnType("tinyint unsigned")
+                        .HasColumnName("entry_type");
+
+                    b.Property<int>("AuditEventId")
+                        .HasColumnType("int")
+                        .HasColumnName("audit_event_id");
+
+                    b.HasKey("EntryId", "EntryType", "AuditEventId")
+                        .HasName("PRIMARY");
+
+                    b.HasIndex("AuditEventId");
+
+                    b.HasIndex("EntryId", "EntryType");
+
+                    b.ToTable("files_audit_reference", (string)null);
+                });
+
             modelBuilder.Entity("ASC.Core.Common.EF.Model.DbIPLookup", b =>
                 {
                     b.Property<string>("AddrType")
@@ -6924,6 +6948,17 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Navigation("Tenant");
                 });
 
+            modelBuilder.Entity("ASC.Core.Common.EF.Model.DbFilesAuditReference", b =>
+                {
+                    b.HasOne("ASC.MessagingSystem.EF.Model.DbAuditEvent", "AuditEvent")
+                        .WithMany("FilesReferences")
+                        .HasForeignKey("AuditEventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AuditEvent");
+                });
+
             modelBuilder.Entity("ASC.Core.Common.EF.Model.DbTenantPartner", b =>
                 {
                     b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
@@ -7355,6 +7390,11 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
             modelBuilder.Entity("ASC.Files.Core.EF.DbFolder", b =>
                 {
                     b.Navigation("Settings");
+                });
+
+            modelBuilder.Entity("ASC.MessagingSystem.EF.Model.DbAuditEvent", b =>
+                {
+                    b.Navigation("FilesReferences");
                 });
 #pragma warning restore 612, 618
         }
