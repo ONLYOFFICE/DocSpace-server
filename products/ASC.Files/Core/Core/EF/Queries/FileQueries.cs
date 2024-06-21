@@ -295,10 +295,14 @@ static file class FileQueries
                             x.TenantId == r.TenantId && 
                             (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
                             ((x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.File) ||
-                             (x.EntryType == FileEntryType.Folder &&
-                             (ctx.Tree.Where(y => y.FolderId == r.ParentId)
-                                 .Select(y => y.ParentId.ToString())
-                                 .Contains(x.EntryId)))))
+                             (x.EntryType == FileEntryType.Folder && 
+                              x.EntryId == ctx.Tree
+                                  .Where(t => t.FolderId == r.ParentId)
+                                  .OrderByDescending(t => t.Level)
+                                  .Select(t => t.ParentId)
+                                  .Skip(1)
+                                  .FirstOrDefault()
+                                  .ToString())))
                     })
                     .SingleOrDefault());
 
@@ -326,10 +330,14 @@ static file class FileQueries
                             x.TenantId == r.TenantId && 
                             (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
                             ((x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.File) ||
-                             (x.EntryType == FileEntryType.Folder &&
-                              (ctx.Tree.Where(y => y.FolderId == r.ParentId)
-                                  .Select(y => y.ParentId.ToString())
-                                  .Contains(x.EntryId)))))
+                             (x.EntryType == FileEntryType.Folder && 
+                              x.EntryId == ctx.Tree
+                                  .Where(t => t.FolderId == r.ParentId)
+                                  .OrderByDescending(t => t.Level)
+                                  .Select(t => t.ParentId)
+                                  .Skip(1)
+                                  .FirstOrDefault()
+                                  .ToString())))
                     })
                     .SingleOrDefault());
 
