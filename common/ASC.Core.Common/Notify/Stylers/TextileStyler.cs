@@ -70,7 +70,16 @@ public class TextileStyler(CoreBaseSettings coreBaseSettings,
         InitTopImage(message, mailSettings, out var topImage);
         InitFooter(message, mailSettings, out var footerContent, out var footerSocialContent);
 
-        message.Body = template.Replace("%CONTENT%", output.GetFormattedText())
+        var content = output.GetFormattedText().Trim();
+
+        if (!content.StartsWith("<tr"))
+        {
+            content = $@"<tr border=""0"" cellspacing=""0"" cellpadding=""0"">
+                <td style=""padding: 0; margin: 0; text-align: center; vertical-align: top; width: 600px;"">{content}</td>
+            </tr>";
+        }
+
+        message.Body = template.Replace("%CONTENT%", content)
                                .Replace("%TOPIMAGE%", topImage)
                                .Replace("%FOOTER%", footerContent)
                                .Replace("%FOOTERSOCIAL%", footerSocialContent)
