@@ -141,7 +141,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonWatchFullPlaylist", c);
                         orangeButtonUrl = "https://www.youtube.com/playlist?list=PLCF48HEKMOYM8MBnwYs8q5J0ILMK9NzIx";
 
-                        topGif = studioNotifyHelper.GetNotificationImageUrl("mainpic_video_guides.png");
+                        topGif = studioNotifyHelper.GetNotificationImageUrl("video_guides.gif");
                     }
 
 
