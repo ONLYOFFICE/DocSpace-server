@@ -50,6 +50,7 @@ public partial class TextileFormatter
         RegisterFormatterState(typeof(PreFormatterState));
         RegisterFormatterState(typeof(PreCodeFormatterState));
         RegisterFormatterState(typeof(NoTextileFormatterState));
+        RegisterFormatterState(typeof(CompleteTableRowFormatterState));
 
         RegisterBlockModifier(new NoTextileBlockModifier());
         RegisterBlockModifier(new CodeBlockModifier());
