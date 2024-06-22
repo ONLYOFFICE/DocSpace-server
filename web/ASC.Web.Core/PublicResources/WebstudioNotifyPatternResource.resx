@@ -1117,7 +1117,7 @@ $Body</value>
     <value>Confirm DocSpace Invite</value>
   </data>
   <data name="pattern_enterprise_admin_activation_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 44px 40px 32px; text-align: center;"&gt;to &lt;span style="color: #FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0 40px 32px; text-align: center;"&gt;to &lt;span style="color: #FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Hello, $UserName!&lt;/td&gt;&lt;/tr&gt;
 
@@ -1144,7 +1144,7 @@ $OrangeButton
 $TrulyYours</comment>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 44px 40px 32px; text-align: center;"&gt;to &lt;span style="color: #FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0 40px 32px; text-align: center;"&gt;to &lt;span style="color: #FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Hello, $UserName!&lt;/td&gt;&lt;/tr&gt;
 
@@ -1172,7 +1172,7 @@ $OrangeButton
 $TrulyYours</comment>
   </data>
   <data name="pattern_opensource_admin_activation_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 44px 40px 32px; text-align: center;"&gt;to &lt;span style="color: #FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0 40px 32px; text-align: center;"&gt;to &lt;span style="color: #FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Hello, $UserName!&lt;/td&gt;&lt;/tr&gt;
 
@@ -1200,7 +1200,7 @@ $OrangeButton
 $TrulyYours</comment>
   </data>
   <data name="pattern_saas_admin_activation_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 44px 40px 32px; text-align: center;"&gt;to &lt;span style="color: #FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0 40px 32px; text-align: center;"&gt;to &lt;span style="color: #FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Hello, $UserName!&lt;/td&gt;&lt;/tr&gt;
 
@@ -1919,7 +1919,7 @@ $TrulyYours</comment>
     <value>Join ONLYOFFICE DocSpace</value>
   </data>
   <data name="pattern_saas_admin_modules_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 44px 40px 32px; text-align: center;"&gt;Configure your &lt;span style="color: #FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0 40px 32px; text-align: center;"&gt;Configure your &lt;span style="color: #FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 16px; text-align: center;"&gt;Hello, $UserName!&lt;/td&gt;&lt;/tr&gt;
 
