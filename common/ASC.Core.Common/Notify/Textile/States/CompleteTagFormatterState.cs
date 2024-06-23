@@ -27,10 +27,10 @@
 namespace Textile.States;
 
 /// <summary>
-/// Formatting state for complete table row.
+/// Formatting state for complete table row or paragrath.
 /// </summary>
-[FormatterState(@"^\s*<tr" + Globals.HtmlAttributesPattern + ">")]
-public class CompleteTableRowFormatterState(TextileFormatter f) : FormatterState(f)
+[FormatterState(@"^\s*(==)?<(tr|p)" + Globals.HtmlAttributesPattern + ">")]
+public class CompleteTagFormatterState(TextileFormatter f) : FormatterState(f)
 {
     public override string Consume(string input, Match m)
     {
