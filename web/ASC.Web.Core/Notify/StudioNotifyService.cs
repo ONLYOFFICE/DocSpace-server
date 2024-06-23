@@ -229,7 +229,7 @@ public class StudioNotifyService(
         {
                 new TagValue(Tags.InviteLink, confirmationUrl),
                 TagValues.OrangeButton(orangeButtonText, confirmationUrl),
-                TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
+                TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours, true),
                 new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("join_docspace.gif")),
                 new TagValue(CommonTags.Culture, cultureInfo.Name)
         };
@@ -376,7 +376,7 @@ public class StudioNotifyService(
         new TagValue(Tags.UserName, newUserInfo.FirstName.HtmlEncode()),
         new TagValue(Tags.MyStaffLink, GetMyStaffLink()),
             TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/')),
-            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
+            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours, true),
         new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("welcome.gif")),
         new TagValue("IMG1", img1),
         new TagValue("IMG2", img2),
@@ -430,7 +430,7 @@ public class StudioNotifyService(
         new TagValue(Tags.UserName, newUserInfo.FirstName.HtmlEncode()),
         new TagValue(Tags.MyStaffLink, GetMyStaffLink()),
             TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/')),
-            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
+            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours, true),
         new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("welcome.gif")),
         new TagValue("IMG1", img1),
         new TagValue("IMG2", img2),
@@ -476,7 +476,7 @@ public class StudioNotifyService(
            [EMailSenderName],
         new TagValue(Tags.ActivateUrl, confirmationUrl),
         TagValues.OrangeButton(orangeButtonText, confirmationUrl), 
-        TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
+        TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours, true),
         new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("join_docspace.gif")),
         new TagValue(Tags.UserName, newUserInfo.FirstName.HtmlEncode()),
         new TagValue(CommonTags.Footer, footer));
@@ -652,7 +652,7 @@ public class StudioNotifyService(
         tagValues.Add(new TagValue(Tags.UserName, newUserInfo.FirstName.HtmlEncode()));
         tagValues.Add(new TagValue(Tags.PricingPage, commonLinkUtility.GetFullAbsolutePath("~/portal-settings/payments/portal-payments")));
         tagValues.Add(TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~/portal-settings/payments/portal-payments")));
-        tagValues.Add(TagValues.TrulyYours(studioNotifyHelper, WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", await GetCulture(newUserInfo))));
+        tagValues.Add(TagValues.TrulyYours(studioNotifyHelper, WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", await GetCulture(newUserInfo)), true));
         tagValues.Add(new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("discover_business_subscription.gif")));
 
         await studioNotifyServiceHelper.SendNoticeToAsync(
@@ -709,7 +709,7 @@ public class StudioNotifyService(
                 [owner],
                 [EMailSenderName],
                 TagValues.OrangeButton(orangeButtonText, url),
-                TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
+                TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours, true),
                 new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("docspace_deactivated.gif")),
                     new TagValue(Tags.OwnerName, owner.DisplayUserName(displayUserSettingsHelper)));
     }
@@ -768,7 +768,7 @@ public class StudioNotifyService(
                [EMailSenderName],
             new TagValue(Tags.UserName, u.FirstName.HtmlEncode()),
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
-            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
+            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours, true),
             new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("welcome.gif")),
             new TagValue(CommonTags.Footer, footer));
         }

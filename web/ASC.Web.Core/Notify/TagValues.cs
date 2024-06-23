@@ -69,20 +69,38 @@ public static class TagValues
         }
     }
 
-    public static ITagValue TrulyYours(StudioNotifyHelper studioNotifyHelper, string text)
+    public static ITagValue TrulyYours(StudioNotifyHelper studioNotifyHelper, string text, bool asTableRow = false)
     {
         var sb = new StringBuilder();
         var url = studioNotifyHelper.SiteLink;
         var urlText = new Uri(url).Host;
 
-        sb.Append(@"<tr border=""0"" cellspacing=""0"" cellpadding=""0"">");
-        sb.Append(@"<td class=""fol"" style=""color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 1.6em; Margin: 0; padding: 0px 40px 44px; vertical-align: top; text-align: center;"">");
+        if (asTableRow)
+        {
+            sb.Append(@"<tr border=""0"" cellspacing=""0"" cellpadding=""0"">");
+            sb.Append(@"<td class=""fol"" style=""color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 1.6em; Margin: 0; padding: 0px 40px 32px; vertical-align: top; text-align: center;"">");
+        }
+        else
+        {
+            sb.Append(@"<p style=""font-size: 14px;line-height: 21px;margin: 20px 0 32px;word-wrap: break-word !important;"">");
+        }
+
         sb.Append($@"{text} <br />");
         sb.Append($@"<a style=""color: #FF6F3D; text-decoration: none;"" target=""_blank"" href=""{url}"">{urlText}</a>");
-        sb.Append("</td>");
-        sb.Append("</tr>");
+
+        if (asTableRow)
+        {
+            sb.Append("</td>");
+            sb.Append("</tr>");
+        }
+        else
+        {
+            sb.Append("</p>");
+        }
+
         return new TagValue("TrulyYours", sb.ToString());
     }
+
     public static ITagValue TableTop()
     {
         return new TagValue("TableItemsTop",
