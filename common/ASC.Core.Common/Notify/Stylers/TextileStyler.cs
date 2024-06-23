@@ -75,7 +75,7 @@ public class TextileStyler(CoreBaseSettings coreBaseSettings,
         if (!content.StartsWith("<tr"))
         {
             content = $@"<tr border=""0"" cellspacing=""0"" cellpadding=""0"">
-                <td style=""padding: 0; margin: 0; text-align: center; vertical-align: top; width: 600px;"">{content}</td>
+                <td style=""padding: 0 40px; margin: 0; text-align: center; vertical-align: top; width: 600px;"">{content}</td>
             </tr>";
         }
 
