@@ -36,25 +36,14 @@ public class CoreModuleSpecifics : ModuleSpecificsBase
     private readonly Helpers _helpers;
     private readonly TableInfo[] _tables =
     [
-        new("core_acl", "tenant") {InsertMethod = InsertMethod.Ignore},
-            new("core_subscription", "tenant"),
-            new("core_subscriptionmethod", "tenant"),
-            new("core_userphoto", "tenant") {UserIDColumns = ["userid"] },
-            new("core_usersecurity", "tenant") {UserIDColumns = ["userid"] },
-            new("core_usergroup", "tenant") {UserIDColumns = ["userid"] },
-            new("feed_aggregate", "tenant")
-            {
-                InsertMethod = InsertMethod.None,
-                DateColumns = new Dictionary<string, bool> {{"created_date", false}, {"aggregated_date", false}}
-            },
-            new("feed_readed", "tenant_id")
-            {
-                InsertMethod = InsertMethod.None,
-                DateColumns = new Dictionary<string, bool> {{"timestamp", false}}
-            },
-            new("feed_users") {InsertMethod = InsertMethod.None},
-            new("backup_schedule", "tenant_id"),
-            new("core_settings", "tenant")
+        new("core_acl", "tenant") {InsertMethod = InsertMethod.Ignore}, 
+        new("core_subscription", "tenant"), 
+        new("core_subscriptionmethod", "tenant"), 
+        new("core_userphoto", "tenant") {UserIDColumns = ["userid"] }, 
+        new("core_usersecurity", "tenant") {UserIDColumns = ["userid"] }, 
+        new("core_usergroup", "tenant") {UserIDColumns = ["userid"] }, 
+        new("backup_schedule", "tenant_id"), 
+        new("core_settings", "tenant")
     ];
 
     public CoreModuleSpecifics(Helpers helpers) : base(helpers)
@@ -63,28 +52,20 @@ public class CoreModuleSpecifics : ModuleSpecificsBase
         _tableRelations =
         [
             new RelationInfo("core_user", "id", "core_acl", "subject", typeof(TenantsModuleSpecifics)),
-                new RelationInfo("core_group", "id", "core_acl", "subject", typeof(TenantsModuleSpecifics)),
-                new RelationInfo("core_user", "id", "core_subscription", "recipient", typeof(TenantsModuleSpecifics)),
-                new RelationInfo("core_group", "id", "core_subscription", "recipient", typeof(TenantsModuleSpecifics)),
-                new RelationInfo("core_user", "id", "core_subscriptionmethod", "recipient", typeof(TenantsModuleSpecifics)),
-                new RelationInfo("core_group", "id", "core_subscriptionmethod", "recipient", typeof(TenantsModuleSpecifics)),
-                new RelationInfo("core_group", "id", "core_usergroup", "groupid", typeof(TenantsModuleSpecifics),
-                                 x => !helpers.IsEmptyOrSystemGroup(Convert.ToString(x["groupid"]))),
-
-                new RelationInfo("core_user", "id", "feed_users", "user_id", typeof(CoreModuleSpecifics)),
-
-                new RelationInfo("files_folder", "id", "backup_schedule", "storage_base_path", typeof(FilesModuleSpecifics),
-                                 x => IsDocumentsStorageType(Convert.ToString(x["storage_type"])))
+            new RelationInfo("core_group", "id", "core_acl", "subject", typeof(TenantsModuleSpecifics)),
+            new RelationInfo("core_user", "id", "core_subscription", "recipient", typeof(TenantsModuleSpecifics)),
+            new RelationInfo("core_group", "id", "core_subscription", "recipient", typeof(TenantsModuleSpecifics)),
+            new RelationInfo("core_user", "id", "core_subscriptionmethod", "recipient", typeof(TenantsModuleSpecifics)),
+            new RelationInfo("core_group", "id", "core_subscriptionmethod", "recipient", typeof(TenantsModuleSpecifics)),
+            new RelationInfo("core_group", "id", "core_usergroup", "groupid", typeof(TenantsModuleSpecifics),
+                x => !helpers.IsEmptyOrSystemGroup(Convert.ToString(x["groupid"]))),
+            new RelationInfo("files_folder", "id", "backup_schedule", "storage_base_path", typeof(FilesModuleSpecifics),
+                x => IsDocumentsStorageType(Convert.ToString(x["storage_type"])))
         ];
     }
 
     protected override string GetSelectCommandConditionText(int tenantId, TableInfo table)
     {
-        if (table.Name == "feed_users")
-        {
-            return "inner join core_user t1 on t1.id = t.user_id where t1.tenant = " + tenantId;
-        }
-
         if (table.Name == "core_settings")
         {
             return string.Format("where t.{0} = {1} and id not in ('{2}')", table.TenantColumn, tenantId, LicenseReader.CustomerIdKey);

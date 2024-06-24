@@ -291,9 +291,18 @@ static file class FileQueries
                                 where f.TenantId == r.TenantId
                                 select f
                             ).FirstOrDefault(),
-                        Shared = ctx.Security.Any(s => 
-                            s.TenantId == r.TenantId && s.EntryId == r.Id.ToString() && s.EntryType == FileEntryType.File && 
-                            (s.SubjectType == SubjectType.PrimaryExternalLink || s.SubjectType == SubjectType.ExternalLink))
+                        Shared = ctx.Security.Any(x => 
+                            x.TenantId == r.TenantId && 
+                            (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
+                            ((x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.File) ||
+                             (x.EntryType == FileEntryType.Folder && 
+                              x.EntryId == ctx.Tree
+                                  .Where(t => t.FolderId == r.ParentId)
+                                  .OrderByDescending(t => t.Level)
+                                  .Select(t => t.ParentId)
+                                  .Skip(1)
+                                  .FirstOrDefault()
+                                  .ToString())))
                     })
                     .SingleOrDefault());
 
@@ -317,9 +326,18 @@ static file class FileQueries
                                 where f.TenantId == r.TenantId
                                 select f
                             ).FirstOrDefault(),
-                        Shared = ctx.Security.Any(s => 
-                            s.TenantId == r.TenantId && s.EntryId == r.Id.ToString() && s.EntryType == FileEntryType.File && 
-                            (s.SubjectType == SubjectType.PrimaryExternalLink || s.SubjectType == SubjectType.ExternalLink))
+                        Shared = ctx.Security.Any(x => 
+                            x.TenantId == r.TenantId && 
+                            (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
+                            ((x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.File) ||
+                             (x.EntryType == FileEntryType.Folder && 
+                              x.EntryId == ctx.Tree
+                                  .Where(t => t.FolderId == r.ParentId)
+                                  .OrderByDescending(t => t.Level)
+                                  .Select(t => t.ParentId)
+                                  .Skip(1)
+                                  .FirstOrDefault()
+                                  .ToString())))
                     })
                     .SingleOrDefault());
 

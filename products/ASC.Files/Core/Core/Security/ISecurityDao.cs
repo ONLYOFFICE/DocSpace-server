@@ -28,17 +28,18 @@ namespace ASC.Files.Core.Security;
 
 public interface ISecurityDao<T>
 {
-    Task SetShareAsync(FileShareRecord r);
-    IAsyncEnumerable<FileShareRecord> GetSharesAsync(IEnumerable<Guid> subjects);
-    Task<IEnumerable<FileShareRecord>> GetSharesAsync(FileEntry<T> entry, IEnumerable<Guid> subjects = null);
+    Task SetShareAsync(FileShareRecord<T> r);
+    IAsyncEnumerable<FileShareRecord<T>> GetSharesAsync(IEnumerable<Guid> subjects);
+    Task<IEnumerable<FileShareRecord<T>>> GetSharesAsync(FileEntry<T> entry, IEnumerable<Guid> subjects = null);
     Task RemoveBySubjectAsync(Guid subject, bool withoutOwner);
-    IAsyncEnumerable<FileShareRecord> GetPureShareRecordsAsync(IEnumerable<FileEntry<T>> entries);
-    IAsyncEnumerable<FileShareRecord> GetPureShareRecordsAsync(FileEntry<T> entry);
-    Task DeleteShareRecordsAsync(IEnumerable<FileShareRecord> records);
-    Task<bool> IsSharedAsync(T entryId, FileEntryType type);
+    IAsyncEnumerable<FileShareRecord<T>> GetPureShareRecordsAsync(IEnumerable<FileEntry<T>> entries);
+    IAsyncEnumerable<FileShareRecord<T>> GetPureShareRecordsAsync(FileEntry<T> entry);
+    Task DeleteShareRecordsAsync(IEnumerable<FileShareRecord<T>> records);
+    Task<bool> IsPureSharedAsync(T entryId, FileEntryType type, IEnumerable<SubjectType> subjectTypes);
+    Task<bool> IsSharedAsync(FileEntry<T> entry, IEnumerable<SubjectType> subjectTypes);
     Task<int> GetPureSharesCountAsync(FileEntry<T> entry, ShareFilterType filterType, EmployeeActivationStatus? status, string text);
-    IAsyncEnumerable<FileShareRecord> GetPureSharesAsync(FileEntry<T> entry, ShareFilterType filterType, EmployeeActivationStatus? status, string text, int offset = 0, int count = -1);
-    IAsyncEnumerable<FileShareRecord> GetPureSharesAsync(FileEntry<T> entry, IEnumerable<Guid> subjects);
+    IAsyncEnumerable<FileShareRecord<T>> GetPureSharesAsync(FileEntry<T> entry, ShareFilterType filterType, EmployeeActivationStatus? status, string text, int offset = 0, int count = -1);
+    IAsyncEnumerable<FileShareRecord<T>> GetPureSharesAsync(FileEntry<T> entry, IEnumerable<Guid> subjects);
     IAsyncEnumerable<UserInfoWithShared> GetUsersWithSharedAsync(FileEntry<T> entry, string text, EmployeeStatus? employeeStatus, EmployeeActivationStatus? activationStatus, bool excludeShared, int offset = 0, int count = -1);
     Task<int> GetUsersWithSharedCountAsync(FileEntry<T> entry, string text, EmployeeStatus? employeeStatus, EmployeeActivationStatus? activationStatus, bool excludeShared);
     IAsyncEnumerable<GroupInfoWithShared> GetGroupsWithSharedAsync(FileEntry<T> entry, string text, bool excludeShared, int offset, int count);

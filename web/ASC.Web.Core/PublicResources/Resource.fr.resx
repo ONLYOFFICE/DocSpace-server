@@ -1045,4 +1045,7 @@
   <data name="TariffsFeature_total_size" xml:space="preserve">
     <value>{0} par administrateur/utilisateur avancé et la possibilité d'augmenter l'espace de stockage sur demande</value>
   </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>Utilisateur désactivé</value>
+  </data>
 </root>

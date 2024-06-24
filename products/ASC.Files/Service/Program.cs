@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Service.IntegrationEvents.EventHandling;
+
 using NLog;
 
 var options = new WebApplicationOptions
@@ -54,7 +56,7 @@ try
     builder.Host.ConfigureDefault();
     builder.Host.ConfigureContainer<ContainerBuilder>((context, containerBuilder) =>
     {
-        containerBuilder.Register(context.Configuration, true, "search.json", "feed.json");
+        containerBuilder.Register(context.Configuration, true, "search.json");
     });
 
     var startup = new Startup(builder.Configuration, builder.Environment);

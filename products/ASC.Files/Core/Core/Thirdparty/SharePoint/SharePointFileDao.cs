@@ -29,20 +29,19 @@ using Folder = Microsoft.SharePoint.Client.Folder;
 namespace ASC.Files.Thirdparty.SharePoint;
 
 [Scope]
-internal class SharePointFileDao(IServiceProvider serviceProvider,
-        UserManager userManager,
-        TenantManager tenantManager,
-        TenantUtil tenantUtil,
-        IDbContextFactory<FilesDbContext> dbContextManager,
-        SetupInfo setupInfo,
-        FileUtility fileUtility,
-        CrossDao crossDao,
-        SharePointDaoSelector sharePointDaoSelector,
-        IFileDao<int> fileDao,
-        TempPath tempPath,
-        SharePointDaoSelector regexDaoSelectorBase)
-    : SharePointDaoBase(serviceProvider, userManager, tenantManager, tenantUtil, dbContextManager, setupInfo,
-        fileUtility, tempPath, regexDaoSelectorBase), IFileDao<string>
+internal class SharePointFileDao(
+    IDaoFactory daoFactory,
+    IServiceProvider serviceProvider,
+    UserManager userManager,
+    TenantManager tenantManager,
+    TenantUtil tenantUtil,
+    IDbContextFactory<FilesDbContext> dbContextManager,
+    FileUtility fileUtility,
+    CrossDao crossDao,
+    SharePointDaoSelector sharePointDaoSelector,
+    IFileDao<int> fileDao,
+    SharePointDaoSelector regexDaoSelectorBase)
+    : SharePointDaoBase(daoFactory, serviceProvider, userManager, tenantManager, tenantUtil, dbContextManager, fileUtility, regexDaoSelectorBase), IFileDao<string>
 {
     private const string BytesTransferredKey = "BytesTransferred";
     

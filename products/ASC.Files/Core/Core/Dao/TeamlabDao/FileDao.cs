@@ -554,16 +554,20 @@ internal class FileDao(
 
                         }
 
-                        if (fileType == FileType.Pdf)
+                        if (fileType == FileType.Pdf )
                         {
-                            var properties = await fileDao.GetProperties(file.Id) ?? new EntryProperties() { FormFilling = new FormFillingProperties() };
-                            properties.FormFilling.StartFilling = true;
-                            properties.FormFilling.CollectFillForm = true;
-                            await fileDao.SaveProperties(file.Id, properties);
+
                             await SaveFileStreamAsync(file, cloneStreamForSave, currentFolder);
 
-                            var count = await fileStorageService.GetPureSharesCountAsync(currentRoom.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "");
-                            await socketManager.CreateFormAsync(file, securityContext.CurrentAccount.ID, count <= 1);
+                            var properties = await fileDao.GetProperties(file.Id) ?? new EntryProperties() { FormFilling = new FormFillingProperties() };
+                            if (!properties.FormFilling.CollectFillForm)
+                            {
+                                properties.FormFilling.StartFilling = true;
+                                properties.FormFilling.CollectFillForm = true;
+                                await fileDao.SaveProperties(file.Id, properties);
+                                var count = await fileStorageService.GetPureSharesCountAsync(currentRoom.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "");
+                                await socketManager.CreateFormAsync(file, securityContext.CurrentAccount.ID, count <= 1);
+                            }
                         }
                     }
                     else
@@ -845,6 +849,8 @@ internal class FileDao(
             await context.DeleteSecurityAsync(tenantId, fileId.ToString());
 
             await DeleteCustomOrder(filesDbContext, fileId);
+
+            await context.DeleteAuditReferencesAsync(fileId, FileEntryType.File);
 
             await context.SaveChangesAsync();
             await tx.CommitAsync();
@@ -1587,39 +1593,6 @@ internal class FileDao(
         return await filesDbContext.DbFileAnyAsync(tenantId, fileId, fileVersion);
     }
 
-    public async IAsyncEnumerable<FileWithShare> GetFeedsAsync(int tenant, DateTime from, DateTime to)
-    {
-        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-
-        await foreach (var e in filesDbContext.DbFileQueryWithSecurityByPeriodAsync(tenant, from, to))
-        {
-            yield return mapper.Map<DbFileQueryWithSecurity, FileWithShare>(e);
-        }
-
-        await foreach (var e in filesDbContext.DbFileQueryWithSecurityAsync(tenant))
-        {
-            yield return mapper.Map<DbFileQueryWithSecurity, FileWithShare>(e);
-        }
-    }
-
-    public async IAsyncEnumerable<int> GetTenantsWithFeedsAsync(DateTime fromTime, bool includeSecurity)
-    {
-        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-
-        await foreach (var q in filesDbContext.TenantIdsByFilesAsync(fromTime))
-        {
-            yield return q;
-        }
-
-        if (includeSecurity)
-        {
-            await foreach (var q in filesDbContext.TenantIdsBySecurityAsync(fromTime))
-            {
-                yield return q;
-            }
-        }
-    }
-
     private const string ThumbnailTitle = "thumb";
 
 
@@ -1929,8 +1902,8 @@ internal class FileDao(
                 LastOpened = r.TagLink.CreateOn
             });
     }
-    
-    protected IQueryable<DbFileQuery> FromQueryWithShared(FilesDbContext filesDbContext, IQueryable<DbFile> dbFiles)
+
+    private static IQueryable<DbFileQuery> FromQueryWithShared(FilesDbContext filesDbContext, IQueryable<DbFile> dbFiles)
     {
         return dbFiles
             .Select(r => new DbFileQuery
@@ -1951,8 +1924,8 @@ internal class FileDao(
                     (s.SubjectType == SubjectType.PrimaryExternalLink || s.SubjectType == SubjectType.ExternalLink))
             });
     }
-    
-    private readonly IDictionary<int, bool> _currentTenantStore = new ConcurrentDictionary<int, bool>();
+
+    private readonly ConcurrentDictionary<int, bool> _currentTenantStore = new();
     
     protected internal async Task<DbFile> InitDocumentAsync(DbFile dbFile, int? tenantId = null)
     {

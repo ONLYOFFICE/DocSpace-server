@@ -13,8 +13,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ASC.EventBus.Extensions.Log
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ASC.Webhooks.Core", "common\ASC.Webhooks.Core\ASC.Webhooks.Core.csproj", "{FD61091C-F0C1-47B3-B442-9B69CEA603DF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ASC.Feed", "common\ASC.Feed\ASC.Feed.csproj", "{71A964E2-0075-46A3-AE58-9F2A78F6A5BB}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ASC.Core.Common", "common\ASC.Core.Common\ASC.Core.Common.csproj", "{A51D0454-4AFA-46DE-89D4-B03D37E1816C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ASC.Migration.Creator", "common\Tools\ASC.Migration.Creator\ASC.Migration.Creator.csproj", "{4BECDA03-E5E7-4273-B2D5-65AD3B1D0AF6}"
@@ -61,10 +59,6 @@ Global
 		{FD61091C-F0C1-47B3-B442-9B69CEA603DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FD61091C-F0C1-47B3-B442-9B69CEA603DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FD61091C-F0C1-47B3-B442-9B69CEA603DF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{71A964E2-0075-46A3-AE58-9F2A78F6A5BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{71A964E2-0075-46A3-AE58-9F2A78F6A5BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{71A964E2-0075-46A3-AE58-9F2A78F6A5BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{71A964E2-0075-46A3-AE58-9F2A78F6A5BB}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A51D0454-4AFA-46DE-89D4-B03D37E1816C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A51D0454-4AFA-46DE-89D4-B03D37E1816C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A51D0454-4AFA-46DE-89D4-B03D37E1816C}.Release|Any CPU.ActiveCfg = Release|Any CPU

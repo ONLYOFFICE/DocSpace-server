@@ -1051,4 +1051,7 @@
   <data name="MessagePasswordSendedToEmail" xml:space="preserve">
     <value>Инструкция по смене пароля была отправлена ​​на адрес электронной почты {0}.</value>
   </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>Пользователь отключен</value>
+  </data>
 </root>

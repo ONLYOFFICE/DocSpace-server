@@ -29,21 +29,20 @@ using Folder = Microsoft.SharePoint.Client.Folder;
 namespace ASC.Files.Thirdparty.SharePoint;
 
 [Scope]
-internal class SharePointFolderDao(IServiceProvider serviceProvider,
-        UserManager userManager,
-        TenantManager tenantManager,
-        TenantUtil tenantUtil,
-        IDbContextFactory<FilesDbContext> dbContextManager,
-        SetupInfo setupInfo,
-        FileUtility fileUtility,
-        CrossDao crossDao,
-        SharePointDaoSelector sharePointDaoSelector,
-        IFileDao<int> fileDao,
-        IFolderDao<int> folderDao,
-        TempPath tempPath,
-        SharePointDaoSelector regexDaoSelectorBase)
-    : SharePointDaoBase(serviceProvider, userManager, tenantManager, tenantUtil, dbContextManager, setupInfo,
-        fileUtility, tempPath, regexDaoSelectorBase), IFolderDao<string>
+internal class SharePointFolderDao(
+    IDaoFactory daoFactory,
+    IServiceProvider serviceProvider,
+    UserManager userManager,
+    TenantManager tenantManager,
+    TenantUtil tenantUtil,
+    IDbContextFactory<FilesDbContext> dbContextManager,
+    FileUtility fileUtility,
+    CrossDao crossDao,
+    SharePointDaoSelector sharePointDaoSelector,
+    IFileDao<int> fileDao,
+    IFolderDao<int> folderDao,
+    SharePointDaoSelector regexDaoSelectorBase)
+    : SharePointDaoBase(daoFactory, serviceProvider, userManager, tenantManager, tenantUtil, dbContextManager, fileUtility, regexDaoSelectorBase), IFolderDao<string>
     {
         private readonly TenantManager _tenantManager1 = tenantManager;
 

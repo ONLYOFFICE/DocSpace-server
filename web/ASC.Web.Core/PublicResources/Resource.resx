@@ -1110,4 +1110,7 @@
   <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
     <value>Invitation limit is exceeded</value>
   </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>User disabled</value>
+  </data>
 </root>

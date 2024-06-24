@@ -380,8 +380,8 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
             case UserSortType.FirstName:
             default:
                 q = sortOrderAsc
-                    ? q.OrderBy(r => r.Status ==  EmployeeStatus.Pending ? 1 : 0).ThenBy(u => u.Status ==  EmployeeStatus.Pending ? u.Email : u.FirstName)
-                    : q.OrderBy(r => r.Status ==  EmployeeStatus.Pending ? 1 : 0).ThenByDescending(u => u.Status ==  EmployeeStatus.Pending ? u.Email : u.FirstName);
+                    ? q.OrderBy(r => r.Status ==  EmployeeStatus.Active ? 0 : r.Status == EmployeeStatus.Pending ? 1 : 2).ThenBy(u => u.Status ==  EmployeeStatus.Pending ? u.Email : u.FirstName)
+                    : q.OrderBy(r => r.Status ==  EmployeeStatus.Active ? 0 : r.Status == EmployeeStatus.Pending ? 1 : 2).ThenByDescending(u => u.Status ==  EmployeeStatus.Pending ? u.Email : u.FirstName);
                 break;
         }
 
@@ -396,13 +396,6 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
         {
             yield return mapper.Map<User, UserInfo>(user);
         }
-    }
-
-    public async Task<IEnumerable<int>> GetTenantsWithFeedsAsync(DateTime from)
-    {
-        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
-
-        return await userDbContext.TenantIdsAsync(from).ToListAsync();
     }
 
     public async Task RemoveGroupAsync(int tenant, Guid id)

@@ -36,7 +36,8 @@ public class FoldersControllerInternal(
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
     PermissionContext permissionContext,
-    FileShareDtoHelper fileShareDtoHelper)
+    FileShareDtoHelper fileShareDtoHelper,
+    HistoryApiHelper historyApiHelper)
     : FoldersController<int>(breadCrumbsManager,
         folderContentDtoHelper,
         fileStorageService,
@@ -45,7 +46,26 @@ public class FoldersControllerInternal(
         folderDtoHelper,
         fileDtoHelper,
         permissionContext,
-        fileShareDtoHelper);
+        fileShareDtoHelper)
+{
+    /// <summary>
+    /// Get the activity history of a folder with a specified identifier
+    /// </summary>
+    /// <short>
+    /// Get folder history
+    /// </short>
+    /// <category>Folders</category>
+    /// <param type="System.Int32, System" name="folderId">Folder ID</param>
+    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.HistoryDto, ASC.Files.Core">List of actions in the folder</returns>
+    /// <path>api/2.0/files/folder/{folderId}/log</path>
+    /// <httpMethod>GET</httpMethod>
+    /// <collection>list</collection>
+    [HttpGet("folder/{folderId:int}/log")]
+    public IAsyncEnumerable<HistoryDto> GetHistoryAsync(int folderId)
+    {
+        return historyApiHelper.GetFolderHistoryAsync(folderId);
+    }
+}
 
 public class FoldersControllerThirdparty(
     BreadCrumbsManager breadCrumbsManager,

@@ -27,11 +27,12 @@
 namespace ASC.Files.Core.Services.OFormService;
 
 [Singleton]
-public class OFormRequestManager(ILogger<OFormRequestManager> logger,
-    ConfigurationExtension configuration,
+public class OFormRequestManager(
+    ILogger<OFormRequestManager> logger,
+    IConfiguration configuration,
     IHttpClientFactory httpClientFactory)
 {
-    private readonly OFormSettings _configuration = configuration.GetSetting<OFormSettings>("files:oform");
+    private readonly OFormSettings _configuration = configuration.GetSection("files:oform").Get<OFormSettings>();
 
     private readonly JsonSerializerOptions _options = new()
     {
