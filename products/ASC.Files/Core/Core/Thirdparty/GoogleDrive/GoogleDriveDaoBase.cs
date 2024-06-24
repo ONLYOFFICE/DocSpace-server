@@ -291,7 +291,7 @@ internal class GoogleDriveDaoBase(
         return await _providerInfo.GetItemsAsync(parentDriveId, folder);
     }
 
-    public Task<string> GetAvailableTitleAsync(string requestTitle, string parentFolderId, Func<string, string, Task<bool>> isExist)
+    public override Task<string> GetAvailableTitleAsync(string requestTitle, string parentFolderId, Func<string, string, Task<bool>> isExist)
     {
         return Task.FromResult(requestTitle);
     }

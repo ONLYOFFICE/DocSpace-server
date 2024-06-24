@@ -323,7 +323,7 @@ internal class SharePointFileDao(
             if (!sharePointFile.Name.Equals(file.Title))
             {
                 var folder = await SharePointProviderInfo.GetFolderByIdAsync(file.ParentId);
-                file.Title = await GetAvailableTitleAsync(file.Title, folder, IsExistAsync);
+                file.Title = await GetAvailableTitleAsync(file.Title, folder.ServerRelativeUrl, IsExistAsync);
 
                 var id = await SharePointProviderInfo.RenameFileAsync(DaoSelector.ConvertId(resultFile.Id), file.Title);
 
@@ -336,7 +336,7 @@ internal class SharePointFileDao(
         if (file.ParentId != null)
         {
             var folder = await SharePointProviderInfo.GetFolderByIdAsync(file.ParentId);
-            file.Title = await GetAvailableTitleAsync(file.Title, folder, IsExistAsync);
+            file.Title = await GetAvailableTitleAsync(file.Title, folder.ServerRelativeUrl, IsExistAsync);
 
             return SharePointProviderInfo.ToFile(await SharePointProviderInfo.CreateFileAsync(folder.ServerRelativeUrl + "/" + file.Title, fileStream));
 
@@ -364,13 +364,7 @@ internal class SharePointFileDao(
 
         return files.Any(item => item.Name.Equals(title, StringComparison.InvariantCultureIgnoreCase));
     }
-
-    public async Task<bool> IsExistAsync(string title, Folder folder)
-    {
-        var files = await SharePointProviderInfo.GetFolderFilesAsync(folder.ServerRelativeUrl);
-
-        return files.Any(item => item.Name.Equals(title, StringComparison.InvariantCultureIgnoreCase));
-    }
+    
 
     public async Task<TTo> MoveFileAsync<TTo>(string fileId, TTo toFolderId, bool deleteLinks = false)
     {
