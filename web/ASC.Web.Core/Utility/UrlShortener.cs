@@ -127,7 +127,7 @@ public class ShortUrl
         var result = new StringBuilder();
         for (var i = 0; i < _length; i++)
         {
-            var x = rand.Next(0, 51);
+            var x = rand.Next(0, _base);
             result.Append(_alphabet.ElementAt(x));
         }
         return result.ToString();
