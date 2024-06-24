@@ -33,11 +33,10 @@ public static class ConfigurationManagerExtension
     IHostEnvironment env)
     {
         config.AddJsonFile("appsettings.services.json", optional: false, reloadOnChange: true)
-      .AddJsonFile("notify.json", optional: false, reloadOnChange: true)
-      .AddJsonFile($"notify.{env.EnvironmentName}.json", optional: true, reloadOnChange: true)
-      .AddJsonFile("elastic.json", optional: false, reloadOnChange: true)
-      .AddJsonFile($"elastic.{env.EnvironmentName}.json", optional: true, reloadOnChange: true)
-      .AddJsonFile("feed.json", optional: false, reloadOnChange: true);
+            .AddJsonFile("notify.json", optional: false, reloadOnChange: true)
+            .AddJsonFile($"notify.{env.EnvironmentName}.json", optional: true, reloadOnChange: true)
+            .AddJsonFile("elastic.json", optional: false, reloadOnChange: true)
+            .AddJsonFile($"elastic.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
 
         return config;
     }

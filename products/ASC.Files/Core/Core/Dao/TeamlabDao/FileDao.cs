@@ -1593,39 +1593,6 @@ internal class FileDao(
         return await filesDbContext.DbFileAnyAsync(tenantId, fileId, fileVersion);
     }
 
-    public async IAsyncEnumerable<FileWithShare> GetFeedsAsync(int tenant, DateTime from, DateTime to)
-    {
-        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-
-        await foreach (var e in filesDbContext.DbFileQueryWithSecurityByPeriodAsync(tenant, from, to))
-        {
-            yield return mapper.Map<DbFileQueryWithSecurity, FileWithShare>(e);
-        }
-
-        await foreach (var e in filesDbContext.DbFileQueryWithSecurityAsync(tenant))
-        {
-            yield return mapper.Map<DbFileQueryWithSecurity, FileWithShare>(e);
-        }
-    }
-
-    public async IAsyncEnumerable<int> GetTenantsWithFeedsAsync(DateTime fromTime, bool includeSecurity)
-    {
-        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-
-        await foreach (var q in filesDbContext.TenantIdsByFilesAsync(fromTime))
-        {
-            yield return q;
-        }
-
-        if (includeSecurity)
-        {
-            await foreach (var q in filesDbContext.TenantIdsBySecurityAsync(fromTime))
-            {
-                yield return q;
-            }
-        }
-    }
-
     private const string ThumbnailTitle = "thumb";
 
 

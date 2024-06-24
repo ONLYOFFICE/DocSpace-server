@@ -47,7 +47,7 @@ public class MigrationCreator
             CreateMigration(options, typeof(TeamlabSiteContext), providerInfo);
         }
         
-        Console.WriteLine($"Update migrations");
+        Console.WriteLine("Update migrations");
     }
 
     private void CreateMigration(Options options, Type contextType, ProviderInfo providerInfo)

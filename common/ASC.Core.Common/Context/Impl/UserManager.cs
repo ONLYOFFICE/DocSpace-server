@@ -505,11 +505,6 @@ public class UserManager(
         return await userService.GetDavUserEmailsAsync(await tenantManager.GetCurrentTenantIdAsync());
     }
 
-    public async Task<IEnumerable<int>> GetTenantsWithFeedsAsync(DateTime from)
-    {
-        return await userService.GetTenantsWithFeedsAsync(from);
-    }
-
     public async Task DeleteUserAsync(Guid id)
     {
         if (IsSystemUser(id))
