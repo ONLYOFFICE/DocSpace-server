@@ -441,6 +441,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                             if (!conflictFolder.ProviderEntry)
                             {
                                 conflictFolder.Id = default;
+                                conflictFolder.Title = await folderDao.GetAvailableTitleAsync(conflictFolder.Title, conflictFolder.ParentId, folderDao.IsExistAsync);
                                 conflictFolder.Id = await folderDao.SaveFolderAsync(conflictFolder);
                             }
                             
@@ -454,6 +455,9 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                         else
                         {
                             newFolder = await FolderDao.CopyFolderAsync(folder.Id, toFolderId, CancellationToken);
+                            newFolder.Title = await folderDao.GetAvailableTitleAsync(newFolder.Title, newFolder.ParentId, folderDao.IsExistAsync);
+                            newFolder.Id = await folderDao.SaveFolderAsync(newFolder);
+                            
                             if (isRoom && Equals(folder.ParentId ?? default, toFolderId))
                             {
                                 await roomLogoManager.CopyAsync(folder, newFolder);

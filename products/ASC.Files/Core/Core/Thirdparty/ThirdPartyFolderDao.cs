@@ -237,7 +237,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
             return null;
         }
 
-        folder.Title = await dao.GetAvailableTitleAsync(folder.Title, dao.MakeThirdId(folder.ParentId), IsExistAsync);
+        folder.Title = await GetAvailableTitleAsync(folder.Title, dao.MakeThirdId(folder.ParentId), IsExistAsync);
         
         var thirdFolder = await dao.CreateFolderAsync(folder.Title, folder.ParentId);
             
@@ -301,7 +301,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
 
         var fromFolderId = dao.GetParentFolderId(folder);
 
-        var newTitle = await dao.GetAvailableTitleAsync(dao.GetName(folder), dao.GetId(toFolder), IsExistAsync);
+        var newTitle = await GetAvailableTitleAsync(dao.GetName(folder), dao.GetId(toFolder), IsExistAsync);
         var storage = await _providerInfo.StorageAsync;
         var movedFolder = await storage.MoveFolderAsync(dao.GetId(folder), newTitle, dao.GetId(toFolder));
 
@@ -373,7 +373,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
             throw new Exception(errorFolder1.Error);
         }
 
-        var newTitle = await dao.GetAvailableTitleAsync(dao.GetName(folder), dao.GetId(toFolder), IsExistAsync);
+        var newTitle = await GetAvailableTitleAsync(dao.GetName(folder), dao.GetId(toFolder), IsExistAsync);
         var storage = await _providerInfo.StorageAsync;
         var newFolder = await storage.CopyFolderAsync(dao.GetId(folder), newTitle, dao.GetId(toFolder));
 
@@ -431,7 +431,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         }
         else
         {
-            newTitle = await dao.GetAvailableTitleAsync(newTitle, parentFolderId, IsExistAsync);
+            newTitle = await GetAvailableTitleAsync(newTitle, parentFolderId, IsExistAsync);
 
             //rename folder
             var storage = await _providerInfo.StorageAsync;
@@ -507,6 +507,11 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
     public Task<string> GetBackupExtensionAsync(string folderId)
     {
         return Task.FromResult("tar.gz");
+    }
+
+    public Task<string> GetAvailableTitleAsync(string requestTitle, string parentFolderPath, Func<string, string, Task<bool>> isExist)
+    {
+        return dao.GetAvailableTitleAsync(requestTitle, parentFolderPath, isExist);
     }
 
     public Task ReassignFoldersAsync(Guid oldOwnerId, Guid newOwnerId, IEnumerable<string> exceptFolderIds)
@@ -672,7 +677,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         throw new NotImplementedException();
     }
     
-    private async Task<bool> IsExistAsync(string title, string folderId)
+    public async Task<bool> IsExistAsync(string title, string folderId)
     {
         var items = await dao.GetItemsAsync(folderId, true);
 

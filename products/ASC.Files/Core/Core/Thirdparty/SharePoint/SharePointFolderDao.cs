@@ -225,7 +225,7 @@ internal class SharePointFolderDao(
         return null;
     }
 
-    private async Task<bool> IsExistAsync(string title, string folder)
+    public async Task<bool> IsExistAsync(string title, string folder)
     {
         var folderFolders = await SharePointProviderInfo.GetFolderFoldersAsync(folder);
 

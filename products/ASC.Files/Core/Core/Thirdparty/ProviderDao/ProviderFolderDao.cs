@@ -482,6 +482,20 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         return await folderDao.GetBackupExtensionAsync(folderId);
     }
 
+    public Task<string> GetAvailableTitleAsync(string requestTitle, string parentFolderPath, Func<string, string, Task<bool>> isExist)
+    {
+        var selector = _selectorFactory.GetSelector(parentFolderPath);
+        var folderDao = selector.GetFolderDao(parentFolderPath);
+        return folderDao.GetAvailableTitleAsync(requestTitle, parentFolderPath, isExist);
+    }
+
+    public Task<bool> IsExistAsync(string title, string folderId)
+    {
+        var selector = _selectorFactory.GetSelector(folderId);
+        var folderDao = selector.GetFolderDao(folderId);
+        return folderDao.IsExistAsync(title, folderId);
+    }
+
     private static IAsyncEnumerable<Folder<string>> FilterByProvider(IAsyncEnumerable<Folder<string>> folders, ProviderFilter provider)
     {
         if (provider != ProviderFilter.kDrive && provider != ProviderFilter.WebDav && provider != ProviderFilter.Yandex)
