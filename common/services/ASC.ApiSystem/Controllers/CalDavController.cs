@@ -138,7 +138,7 @@ public class CalDavController(CommonMethods commonMethods,
         {
             logger.LogInformation(string.Format("Caldav auth user: {0}, tenant: {1}", email, tenant.Id));
 
-            if (instanceCrypto.Encrypt(email) == userPassword.Password)
+            if (await instanceCrypto.EncryptAsync(email) == userPassword.Password)
             {
                 return Ok(new
                 {

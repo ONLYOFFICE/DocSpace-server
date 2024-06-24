@@ -28,6 +28,7 @@ namespace ASC.Web.Api.Controllers.Settings;
 
 [DefaultRoute("security")]
 public class SecurityController(
+    GroupSummaryDtoHelper groupSummaryDtoHelper,
     TenantManager tenantManager,
     TenantExtra tenantExtra,
     CoreBaseSettings coreBaseSettings,
@@ -79,12 +80,16 @@ public class SecurityController(
             {
                 WebItemId = i.WebItemId,
                 Enabled = i.Enabled,
-                Groups = i.Groups.Select(g => new GroupSummaryDto(g, userManager)),
-                IsSubItem = subItemList.Contains(i.WebItemId)
+                Groups = [],
+                IsSubItem = subItemList.Contains(i.WebItemId),
+                Users = []
             };
 
-            s.Users = new List<EmployeeDto>();
-
+            foreach (var e in i.Groups)
+            {
+                s.Groups.Add(await groupSummaryDtoHelper.GetAsync(e));
+            }
+            
             foreach (var e in i.Users)
             {
                 s.Users.Add(await employeeWrapperHelper.GetAsync(e));

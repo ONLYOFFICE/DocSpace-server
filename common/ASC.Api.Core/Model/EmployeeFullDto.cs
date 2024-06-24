@@ -90,22 +90,6 @@ public class EmployeeFullDto : EmployeeDto
     /// <type>System.String, System</type>
     public string Notes { get; set; }
 
-    /// <summary>Original size avatar</summary>
-    /// <type>System.String, System</type>
-    public string AvatarOriginal { get; set; }
-
-    /// <summary>Maximum size avatar</summary>
-    /// <type>System.String, System</type>
-    public string AvatarMax { get; set; }
-
-    /// <summary>Medium size avatar</summary>
-    /// <type>System.String, System</type>
-    public string AvatarMedium { get; set; }
-
-    /// <summary>Avatar</summary>
-    /// <type>System.String, System</type>
-    public string Avatar { get; set; }
-
     /// <summary>Specifies if the user is an administrator or not</summary>
     /// <type>System.Boolean, System</type>
     public bool IsAdmin { get; set; }
@@ -216,6 +200,7 @@ public class EmployeeFullDtoHelper(
         IQuotaService quotaService,
         TenantManager tenantManager,
         CoreBaseSettings coreBaseSettings,
+        GroupSummaryDtoHelper groupSummaryDtoHelper,
         ILogger<EmployeeDtoHelper> logger)
     : EmployeeDtoHelper(httpContext, displayUserSettingsHelper, userPhotoManager, commonLinkUtility, userManager, authContext, logger)
 {
@@ -344,7 +329,7 @@ public class EmployeeFullDtoHelper(
 
         if (!string.IsNullOrEmpty(userInfo.CultureName))
         {
-            result.CultureName = userInfo.CultureName;
+            result.CultureName = coreBaseSettings.GetRightCultureName(userInfo.GetCulture());
         }
 
         FillConacts(result, userInfo);
@@ -391,9 +376,14 @@ public class EmployeeFullDtoHelper(
             return;
         }
 
-        var groups = (await _userManager.GetUserGroupsAsync(userInfo.Id))
-            .Select(x => new GroupSummaryDto(x, _userManager))
-            .ToList();
+        var groupsFromDb = (await _userManager.GetUserGroupsAsync(userInfo.Id));
+        List<GroupSummaryDto> groups = new();
+
+        foreach (var g in groupsFromDb)
+        {
+            groups.Add(await groupSummaryDtoHelper.GetAsync(g));
+        }
+        
 
         if (groups.Count > 0)
         {

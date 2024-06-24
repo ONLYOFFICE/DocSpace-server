@@ -26,7 +26,6 @@
 
 namespace ASC.Files.Core;
 
-[Scope(typeof(DaoFactory), Additional = typeof(DaoFactoryExtension))]
 public interface IDaoFactory
 {
     IProviderDao ProviderDao { get; }
@@ -35,5 +34,6 @@ public interface IDaoFactory
     IFileDao<T> GetFileDao<T>();
     ITagDao<T> GetTagDao<T>();
     ISecurityDao<T> GetSecurityDao<T>();
-    ILinkDao GetLinkDao();
+    ILinkDao<T> GetLinkDao<T>();
+    IMappingId<T> GetMapping<T>();
 }

@@ -1185,16 +1185,13 @@ $TrulyYours</value>
   <data name="subject_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
     <value>Uw ONLYOFFICE DocSpace wordt verwijderd</value>
   </data>
-  <data name="AcceptDocSpace" xml:space="preserve">
-    <value>ACCEPTEREN</value>
-  </data>
   <data name="ButtonConfirmRoomInvite" xml:space="preserve">
     <value>Kameruitnodiging Bevestigen</value>
   </data>
-  <data name="ButtonCollaborateDocSpace" xml:space="preserve">
+  <data name="ButtonCollaborate" xml:space="preserve">
     <value>Samenwerken in DocSpace</value>
   </data>
-  <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
+  <data name="ButtonConfirmInvite" xml:space="preserve">
     <value>Bevestig DocSpace Uitnodiging</value>
   </data>
   <data name="ButtonConfirmEmail" xml:space="preserve">
@@ -1263,7 +1260,7 @@ Raadpleeg voor meer informatie over de back-up procedure onze gebruikershandleid
 Als u vragen hebt of hulp nodig hebt, kunt u contact met ons opnemen via [${__SupportLink}](${__SupportLink})
 
 Met vriendelijke groet,
-ONLYOFFICE™ Ondersteuningsteam
+ONLYOFFICE Ondersteuningsteam
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
@@ -1366,6 +1363,7 @@ h1."$PortalUrl":"$PortalUrl"
 Uw portaal is gemigreerd naar een nieuw domein. Herstel de toegang tot het portaal door het wachtwoord op te geven waarmee u zich kunt aanmelden.
 
 Volg de onderstaande link om uw wachtwoord voor de account in te stellen:
+
 $OrangeButton
 
 *Let op*: deze link is slechts 7 dagen geldig. Voltooi het proces voor het herstellen van de toegang binnen die periode.
@@ -1403,7 +1401,7 @@ U kunt uw portaal te allen tijde opnieuw activeren door op de volgende link te k
 Als u vragen heeft of hulp nodig heeft, neem dan gerust contact met ons op via [${__SalesEmail}](mailto:${__SalesEmail})
 
 Met vriendelijke groet,
-ONLYOFFICE™ Ondersteuningsteam
+ONLYOFFICE Ondersteuningsteam
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete_tg" xml:space="preserve">
@@ -1428,7 +1426,7 @@ _Let op_: deze link is slechts 7 dagen geldig. Voltooi het verwijderingsproces v
 Als u vragen heeft of hulp nodig heeft, neem dan gerust contact met ons op via [${__SalesEmail}](mailto:${__SalesEmail})
 
 Met vriendelijke groet,
-ONLYOFFICE™ Ondersteuningsteam
+ONLYOFFICE Ondersteuningsteam
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">

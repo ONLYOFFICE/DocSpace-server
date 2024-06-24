@@ -32,7 +32,8 @@ public class MessageFactory(AuthContext authContext,
         ILogger<MessageFactory> logger,
         IHttpContextAccessor httpContextAccessor)
     {
-    public async Task<EventMessage> CreateAsync(HttpRequest request, string initiator, DateTime? dateTime, MessageAction action, MessageTarget target, params string[] description)
+    public async Task<EventMessage> CreateAsync(HttpRequest request, string initiator, DateTime? dateTime, MessageAction action, MessageTarget target,
+        IEnumerable<FilesAuditReference> references = null, params string[] description)
     {
         try
         {
@@ -47,7 +48,8 @@ public class MessageFactory(AuthContext authContext,
                 Action = action,
                 Description = description,
                 Target = target,
-                UAHeader = MessageSettings.GetUAHeader(request)
+                UaHeader = MessageSettings.GetUAHeader(request),
+                References = references
             };
         }
         catch (Exception ex)
@@ -58,7 +60,8 @@ public class MessageFactory(AuthContext authContext,
         }
     }
 
-    public async Task<EventMessage> CreateAsync(IDictionary<string, StringValues> headers, MessageAction action, MessageTarget target, params string[] description)
+    public async Task<EventMessage> CreateAsync(IDictionary<string, StringValues> headers, MessageAction action, MessageTarget target, 
+        IEnumerable<FilesAuditReference> references = null, params string[] description)
     {
         try
         {
@@ -69,21 +72,24 @@ public class MessageFactory(AuthContext authContext,
                 UserId = authContext.CurrentAccount.ID,
                 Action = action,
                 Description = description,
-                Target = target
+                Target = target,
+                References = references
             };
 
-            if (headers != null)
+            if (headers == null)
             {
-                var userAgent = MessageSettings.GetUAHeader(headers);
-                var referer = MessageSettings.GetReferer(headers);
-
-                message.Ip = httpContextAccessor?.HttpContext != null
-                    ? MessageSettings.GetIP(httpContextAccessor.HttpContext.Request)
-                    : MessageSettings.GetIP(headers);
-
-                message.UAHeader = userAgent;
-                message.Page = referer;
+                return message;
             }
+
+            var userAgent = MessageSettings.GetUAHeader(headers);
+            var referer = MessageSettings.GetReferer(headers);
+
+            message.Ip = httpContextAccessor?.HttpContext != null
+                ? MessageSettings.GetIP(httpContextAccessor.HttpContext.Request)
+                : MessageSettings.GetIP(headers);
+
+            message.UaHeader = userAgent;
+            message.Page = referer;
 
             return message;
         }
@@ -106,7 +112,7 @@ public class MessageFactory(AuthContext authContext,
                 TenantId = await tenantManager.GetCurrentTenantIdAsync(),
                 Action = action,
                 Description = description,
-                Target = target
+                Target = target,
             };
         }
         catch (Exception ex)
@@ -137,7 +143,7 @@ public class MessageFactory(AuthContext authContext,
                 var referer = MessageSettings.GetReferer(request);
 
                 message.Ip = ip;
-                message.UAHeader = userAgent;
+                message.UaHeader = userAgent;
                 message.Page = referer;
             }
 

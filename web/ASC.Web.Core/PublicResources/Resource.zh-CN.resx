@@ -1048,4 +1048,7 @@
   <data name="TariffsFeature_statistic" xml:space="preserve">
     <value>存储配额 &amp; 统计</value>
   </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>禁用用户</value>
+  </data>
 </root>

@@ -27,83 +27,61 @@
 namespace ASC.Files.Core.Helpers;
 
 [Scope]
-public class FormFillingReportCreator
+public class FormFillingReportCreator(
+    ExportToCSV exportToCSV,
+    IDaoFactory daoFactory,
+    IHttpClientFactory clientFactory,
+    TenantUtil tenantUtil)
 {
-    private readonly ExportToCSV _exportToCSV;
-    private readonly UserManager _userManager;
-    private readonly SecurityContext _securityContext;
-    private readonly IDaoFactory _daoFactory;
-    private readonly IHttpClientFactory _clientFactory;
-    private readonly TenantUtil _tenantUtil;
 
     private static readonly JsonSerializerOptions _options = new() {
         AllowTrailingCommas = true,
         PropertyNameCaseInsensitive = true
     };
 
-    public FormFillingReportCreator(
-        ExportToCSV exportToCSV,
-        UserManager userManager,
-        SecurityContext securityContext,
-        IDaoFactory daoFactory,
-        IHttpClientFactory clientFactory,
-        TenantUtil tenantUtil)
-    {
-        _exportToCSV = exportToCSV;
-        _userManager = userManager;
-        _securityContext = securityContext;
-        _daoFactory = daoFactory;
-        _clientFactory = clientFactory;
-        _tenantUtil = tenantUtil;
-    }
-
-    public async Task UpdateFormFillingReport<T>(T resultsFileId, string formsDataUrl)
+    public async Task UpdateFormFillingReport<T>(T resultsFileId, string formsDataUrl, string resultUrl)
     {
 
         if (formsDataUrl != null)
         {
-            var fileDao = _daoFactory.GetFileDao<T>();
-            var submitFormsData = await GetSubmitFormsData(formsDataUrl);
+            var fileDao = daoFactory.GetFileDao<T>();
+            var submitFormsData = await GetSubmitFormsData(formsDataUrl, resultUrl);
 
             if (resultsFileId != null)
             {
                 var resultsFile = await fileDao.GetFileAsync(resultsFileId);
 
-                var updateDt = _exportToCSV.CreateDataTable(submitFormsData.FormsData);
-                await _exportToCSV.UpdateCsvReport(resultsFile, updateDt);
+                var updateDt = exportToCSV.CreateDataTable(submitFormsData.FormsData);
+                await exportToCSV.UpdateCsvReport(resultsFile, updateDt);
 
             }
         }
     }
 
-    private async Task<SubmitFormsData> GetSubmitFormsData(string url)
+    private async Task<SubmitFormsData> GetSubmitFormsData(string url, string resultUrl)
     {
         var request = new HttpRequestMessage
         {
             RequestUri = new Uri(url),
             Method = HttpMethod.Get
         };
-        var httpClient = _clientFactory.CreateClient();
+        var httpClient = clientFactory.CreateClient();
         using var response = await httpClient.SendAsync(request);
         var data = await response.Content.ReadAsStringAsync();
 
-        var u = await _userManager.GetUsersAsync(_securityContext.CurrentAccount.ID);
-        var name = new List<FormsItemData>()
+        var formLink = new FormsItemData()
         {
-            new FormsItemData()
-            {
-                Key= FilesCommonResource.User,
-                Value = $"{u.FirstName} {u.LastName}"
-            },
-            new FormsItemData()
-            {
-                Key= FilesCommonResource.Date,
-                Value = $"{_tenantUtil.DateTimeNow().ToString("dd.MM.yyyy H:mm:ss")}"
-            },
+            Key = FilesCommonResource.LinkToForm,
+            Value = $"=HYPERLINK(\"{resultUrl}\";\"{FilesCommonResource.OpenForm}\")"
         };
-
+        var date = new FormsItemData()
+        {
+            Key = FilesCommonResource.Date,
+            Value = $"{tenantUtil.DateTimeNow().ToString("dd.MM.yyyy H:mm:ss")}"
+        };
         var result = JsonSerializer.Deserialize<SubmitFormsData>(data, _options);
-        result.FormsData = name.Concat(result.FormsData);
+        result.FormsData = result.FormsData.Append(date);
+        result.FormsData = result.FormsData.Append(formLink);
 
         return result;
     }

@@ -26,16 +26,13 @@
 
 namespace ASC.Web.Core.Utility;
 
-[Scope(Additional = typeof(UrlShortenerExtension))]
 public interface IUrlShortener
 {
     Task<string> GetShortenLinkAsync(string shareLink);
 }
 
-[Scope]
-public class BaseUrlShortener(ConsumerFactory consumerFactory,
-        IServiceProvider serviceProvider)
-    : IUrlShortener
+[Scope(typeof(IUrlShortener))]
+public class BaseUrlShortener(ConsumerFactory consumerFactory, IServiceProvider serviceProvider) : IUrlShortener
 {
     public Task<string> GetShortenLinkAsync(string shareLink)
     {
@@ -67,7 +64,8 @@ public class BitLyShortener(ConsumerFactory consumerFactory) : IUrlShortener
 [Scope]
 public class OnlyoShortener(IDbContextFactory<UrlShortenerDbContext> contextFactory,
         CommonLinkUtility commonLinkUtility,
-        TenantManager tenantManager)
+        TenantManager tenantManager,
+        ShortUrl shortUrl)
     : IUrlShortener
 {
     public async Task<string> GetShortenLinkAsync(string shareLink)
@@ -84,8 +82,8 @@ public class OnlyoShortener(IDbContextFactory<UrlShortenerDbContext> contextFact
 
             while (true)
             {
-                var key = ShortUrl.GenerateRandomKey();
-                var id = ShortUrl.Decode(key);
+                var key = shortUrl.GenerateRandomKey();
+                var id = shortUrl.Decode(key);
                 var existId = await context.ShortLinks.AnyAsync(q => q.Id == id);
                 if (!existId)
                 {
@@ -107,41 +105,41 @@ public class OnlyoShortener(IDbContextFactory<UrlShortenerDbContext> contextFact
     }
 }
 
-public static class ShortUrl
+[Singleton]
+public class ShortUrl
 {
-    private const string Alphabet = "5XzpDt6wZRdsTrJkSY_cgPyxN4j-fnb9WKBF8vh3GH72QqmLVCM";
-    private static readonly int _base = Alphabet.Length;
+    private readonly string _alphabet;
+    private readonly int _base;
+    private readonly int _length;
 
-    public static string GenerateRandomKey()
+    public ShortUrl(IConfiguration configuration)
+    {
+        _alphabet = configuration["urlShortener:alphabet"] ?? "5XzpDt6wZRdsTrJkSY_cgPyxN4j-fnb9WKBF8vh3GH72QqmLVCM";
+        _base = _alphabet.Length;
+        if(int.TryParse(configuration["urlShortener:length"], out _length))
+        {
+            _length = 15;
+        }
+    }
+    public string GenerateRandomKey()
     {
         var rand = new Random();
-        var length = 15;
         var result = new StringBuilder();
-        for (var i = 0; i < length; i++)
+        for (var i = 0; i < _length; i++)
         {
-            var x = rand.Next(0, 51);
-            result.Append(Alphabet.ElementAt(x));
+            var x = rand.Next(0, _base);
+            result.Append(_alphabet.ElementAt(x));
         }
         return result.ToString();
     }
 
-    public static ulong Decode(string str)
+    public ulong Decode(string str)
     {
         ulong num = 0;
         for (var i = 0; i < str.Length; i++)
         {
-            num = num * (ulong)_base + (ulong)Alphabet.IndexOf(str.ElementAt(i));
+            num = num * (ulong)_base + (ulong)_alphabet.IndexOf(str.ElementAt(i));
         }
         return num;
-    }
-}
-
-public static class UrlShortenerExtension
-{
-    public static void Register(DIHelper dIHelper)
-    {
-        dIHelper.TryAdd<IUrlShortener, BaseUrlShortener>();
-        dIHelper.TryAdd<BitLyShortener>();
-        dIHelper.TryAdd<OnlyoShortener>();
     }
 }

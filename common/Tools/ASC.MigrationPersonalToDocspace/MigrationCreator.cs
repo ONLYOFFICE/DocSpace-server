@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ﻿// (c) Copyright Ascensio System SIA 2010-2022
 //
 // This program is a free software product.
@@ -474,3 +475,6 @@ public class MigrationCreator
         return string.Format("folder_{0}/file_{1}", (fileId / 1000 + 1) * 1000, fileId);
     }
 }
+=======
+﻿
+>>>>>>> develop

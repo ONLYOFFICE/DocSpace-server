@@ -28,7 +28,7 @@ using ASCShare = ASC.Files.Core.Security.FileShare;
 
 namespace ASC.Migration.Core.Migrators.Provider.Google;
 
-[Transient]
+[Transient(typeof(Migrator))]
 public class GoogleWorkspaceMigrator : Migrator
 {
 
@@ -62,9 +62,9 @@ public class GoogleWorkspaceMigrator : Migrator
         MigrationInfo = new MigrationInfo { Name = "GoogleWorkspace" };
     }
 
-    public override async Task InitAsync(string path, CancellationToken cancellationToken, OperationType operation)
+    public override void Init(string path, CancellationToken cancellationToken, OperationType operation)
     {
-        await MigrationLogger.InitAsync();
+        MigrationLogger.Init();
         _cancellationToken = cancellationToken;
 
         MigrationInfo.Operation = operation;
@@ -295,14 +295,14 @@ public class GoogleWorkspaceMigrator : Migrator
                 var substring = entry.Substring(drivePath.Length + 1);
                 var split = substring.Split('\\');
                 var path = Path.GetDirectoryName(substring);
-                if (split.Count() != 1)
+                if (split.Length != 1)
                 {
                     ParseFolders(path, foldersdictionary, i);
                 }
                 var file = new MigrationFile
                 {
                     Id = i++,
-                    Folder = split.Count() == 1 ? 0 : foldersdictionary[path].Id,
+                    Folder = split.Length == 1 ? 0 : foldersdictionary[path].Id,
                     Title = split.Last(),
                     Path = entry
                 };
@@ -484,7 +484,7 @@ public class GoogleWorkspaceMigrator : Migrator
     private void ParseRootHtml(string tmpFolder, MigrationUser user)
     {
         var htmlFiles = Directory.GetFiles(tmpFolder, "*.html");
-        if (htmlFiles.Count() != 1)
+        if (htmlFiles.Length != 1)
         {
             throw new Exception("Incorrect Takeout format.");
         }
@@ -561,7 +561,7 @@ public class GoogleWorkspaceMigrator : Migrator
         }
 
         var htmlFiles = Directory.GetFiles(accountPath, "*.SubscriberInfo.html");
-        if (htmlFiles.Count() != 1)
+        if (htmlFiles.Length != 1)
         {
             return;
         }

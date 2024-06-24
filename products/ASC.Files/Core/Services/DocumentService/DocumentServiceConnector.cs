@@ -190,6 +190,32 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
 
     public async Task CheckDocServiceUrlAsync()
     {
+        if (!string.IsNullOrEmpty(filesLinkUtility.DocServiceApiUrl))
+        {
+            try
+            {
+                var request = new HttpRequestMessage
+                {
+                    RequestUri = new Uri(filesLinkUtility.DocServiceApiUrl),
+                    Method = HttpMethod.Head
+                };
+
+                using var httpClient = clientFactory.CreateClient();
+                using var response = await httpClient.SendAsync(request);
+
+                if (response.StatusCode != HttpStatusCode.OK)
+                {
+                    throw new Exception("Api url is not available");
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.ErrorDocumentDocServiceCheckError(ex);
+
+                throw new Exception("Api url: " + ex.Message);
+            }
+        }
+
         if (!string.IsNullOrEmpty(filesLinkUtility.DocServiceHealthcheckUrl))
         {
             try
@@ -289,7 +315,7 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
 
     public async Task<string> ReplaceCommunityAddressAsync(string url)
     {
-        var docServicePortalUrl = filesLinkUtility.DocServicePortalUrl;
+        var docServicePortalUrl = filesLinkUtility.GetDocServicePortalUrl();
 
         if (string.IsNullOrEmpty(url))
         {
@@ -335,14 +361,14 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
         }
 
         var uri = new UriBuilder(url).ToString();
-        var externalUri = new UriBuilder(baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.DocServiceUrl)).ToString();
-        var internalUri = new UriBuilder(baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.DocServiceUrlInternal)).ToString();
+        var externalUri = new UriBuilder(baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetDocServiceUrl())).ToString();
+        var internalUri = new UriBuilder(baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetDocServiceUrlInternal())).ToString();
         if (uri.StartsWith(internalUri, true, CultureInfo.InvariantCulture) || !uri.StartsWith(externalUri, true, CultureInfo.InvariantCulture))
         {
             return url;
         }
 
-        uri = uri.Replace(externalUri, filesLinkUtility.DocServiceUrlInternal);
+        uri = uri.Replace(externalUri, filesLinkUtility.GetDocServiceUrlInternal());
 
         return uri;
     }

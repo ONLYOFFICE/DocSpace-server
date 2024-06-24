@@ -83,7 +83,8 @@ public class ChunkZipWriteOperator : IDataWriteOperator
             _gZipOutputStream.baseOutputStream_ = _fileStream;
         }
 
-        await using (var buffered = await _tempStream.GetBufferedAsync(stream))
+        var (buffered, isNew) = await _tempStream.TryGetBufferedAsync(stream);
+        try 
         {
             var entry = TarEntry.CreateTarEntry(tarKey);
             entry.Size = buffered.Length;
@@ -92,6 +93,13 @@ public class ChunkZipWriteOperator : IDataWriteOperator
             await buffered.CopyToAsync(_tarOutputStream);
             await _tarOutputStream.FlushAsync();
             await _tarOutputStream.CloseEntryAsync(default).ContinueWith(async _ => await action());
+        }
+        finally
+        {
+            if (isNew)
+            {
+                await buffered.DisposeAsync();
+            }
         }
 
         if (_fileStream.Length > _sessionHolder.MaxChunkUploadSize)
@@ -107,10 +115,10 @@ public class ChunkZipWriteOperator : IDataWriteOperator
         var buffer = new byte[chunkUploadSize];
         int bytesRead;
         _fileStream.Position = 0;
-        while ((bytesRead = await _fileStream.ReadAsync(buffer, 0, (int)chunkUploadSize)) > 0)
+        while ((bytesRead = await _fileStream.ReadAsync(buffer.AsMemory(0, (int)chunkUploadSize))) > 0)
         {
             using var theMemStream = new MemoryStream();
-            await theMemStream.WriteAsync(buffer, 0, bytesRead);
+            await theMemStream.WriteAsync(buffer.AsMemory(0, bytesRead));
             theMemStream.Position = 0;
             if (bytesRead == chunkUploadSize || last)
             {

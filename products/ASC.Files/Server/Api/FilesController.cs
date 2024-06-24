@@ -29,25 +29,61 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 namespace ASC.Files.Api;
 
 [ConstraintRoute("int")]
-public class FilesControllerInternal(FilesControllerHelper filesControllerHelper,
-        FileStorageService fileStorageService,
-        FileOperationsManager fileOperationsManager,
-        FileOperationDtoHelper fileOperationDtoHelper,
-        FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper,
+public class FilesControllerInternal(
+    FilesControllerHelper filesControllerHelper,
+    FileStorageService fileStorageService,
+    FileOperationsManager fileOperationsManager,
+    FileOperationDtoHelper fileOperationDtoHelper,
+    FolderDtoHelper folderDtoHelper,
+    FileDtoHelper fileDtoHelper,
     ApiContext apiContext,
-        FileShareDtoHelper fileShareDtoHelper)
-        : FilesController<int>(filesControllerHelper, fileStorageService, fileOperationsManager, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper, apiContext, fileShareDtoHelper);
+    FileShareDtoHelper fileShareDtoHelper,
+    HistoryApiHelper historyApiHelper)
+    : FilesController<int>(filesControllerHelper,
+        fileStorageService,
+        fileOperationsManager,
+        fileOperationDtoHelper,
+        folderDtoHelper,
+        fileDtoHelper,
+        apiContext,
+        fileShareDtoHelper)
+{
+    /// <summary>
+    /// Get the list of actions performed on the file with the specified identifier
+    /// </summary>
+    /// <short>
+    /// Get file history
+    /// </short>
+    /// <category>Files</category>
+    /// <param type="System.Int32, System" name="fileId">File ID</param>
+    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.HistoryDto, ASC.Files.Core">List of actions performed on the file</returns>
+    /// <path>api/2.0/files/file/{fileId}/log</path>
+    /// <httpMethod>GET</httpMethod>
+    /// <collection>list</collection>
+    [HttpGet("file/{fileId:int}/log")]
+    public IAsyncEnumerable<HistoryDto> GetHistoryAsync(int fileId)
+    {
+        return historyApiHelper.GetFileHistoryAsync(fileId);
+    }
+}
 
-public class FilesControllerThirdparty(FilesControllerHelper filesControllerHelper,
-        FileStorageService fileStorageService,
-        FileOperationsManager fileOperationsManager,
-        FileOperationDtoHelper fileOperationDtoHelper,
-        FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper,
+public class FilesControllerThirdparty(
+    FilesControllerHelper filesControllerHelper,
+    FileStorageService fileStorageService,
+    FileOperationsManager fileOperationsManager,
+    FileOperationDtoHelper fileOperationDtoHelper,
+    FolderDtoHelper folderDtoHelper,
+    FileDtoHelper fileDtoHelper,
     ApiContext apiContext,
-        FileShareDtoHelper fileShareDtoHelper)
-        : FilesController<string>(filesControllerHelper, fileStorageService, fileOperationsManager, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper, apiContext, fileShareDtoHelper);
+    FileShareDtoHelper fileShareDtoHelper)
+    : FilesController<string>(filesControllerHelper,
+        fileStorageService,
+        fileOperationsManager,
+        fileOperationDtoHelper,
+        folderDtoHelper,
+        fileDtoHelper,
+        apiContext,
+        fileShareDtoHelper);
 
 public abstract class FilesController<T>(FilesControllerHelper filesControllerHelper,
         FileStorageService fileStorageService,
@@ -113,6 +149,19 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     public async Task<string> GetPresignedUri(T fileId)
     {
         return await filesControllerHelper.GetPresignedUri(fileId);
+    }
+
+    /// <summary>
+    /// Checks if the PDF file is form or not.
+    /// </summary>
+    /// <short>Check the PDF file</short>
+    /// <returns type="System.Boolean, System">Boolean value: true - the PDF file is form, false - the PDF file is not a form.</returns>
+    /// <path>api/2.0/files/file/{fileId}/isformpdf</path>
+    /// <httpMethod>GET</httpMethod>
+    [HttpGet("file/{fileId}/isformpdf")]
+    public async Task<bool> isFormPDF(T fileId)
+    {
+        return await filesControllerHelper.isFormPDF(fileId);
     }
 
     /// <summary>
@@ -580,5 +629,4 @@ public class FilesControllerCommon(
     {
         return await fileStorageService.CreateThumbnailsAsync(inDto.FileIds.ToList());
     }
-
 }

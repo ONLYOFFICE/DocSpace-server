@@ -40,7 +40,7 @@ public class ExternalLinkHelper(ExternalShare externalShare, RoomLogoManager roo
         };
 
         var linkId = await externalShare.ParseShareKeyAsync(key);
-        var securityDao = daoFactory.GetSecurityDao<int>();
+        var securityDao = daoFactory.GetSecurityDao<string>();
 
         var record = await securityDao.GetSharesAsync(new[] { linkId }).FirstOrDefaultAsync();
 
@@ -57,7 +57,7 @@ public class ExternalLinkHelper(ExternalShare externalShare, RoomLogoManager roo
             return result;
         }
 
-        var entryId = record.EntryId.ToString();
+        var entryId = record.EntryId;
 
         var entry = int.TryParse(entryId, out var id)
             ? await GetEntryAndProcessAsync(id, result)

@@ -43,6 +43,22 @@ public class EmployeeDto
     /// <summary>Title</summary>
     /// <type>System.String, System</type>
     public string Title { get; set; }
+    
+    /// <summary>Avatar</summary>
+    /// <type>System.String, System</type>
+    public string Avatar { get; set; }
+    
+    /// <summary>Original size avatar</summary>
+    /// <type>System.String, System</type>
+    public string AvatarOriginal { get; set; }
+
+    /// <summary>Maximum size avatar</summary>
+    /// <type>System.String, System</type>
+    public string AvatarMax { get; set; }
+
+    /// <summary>Medium size avatar</summary>
+    /// <type>System.String, System</type>
+    public string AvatarMedium { get; set; }
 
     /// <summary>Small avatar</summary>
     /// <type>System.String, System</type>
@@ -55,6 +71,10 @@ public class EmployeeDto
     /// <summary>Specifies if the user has an avatar or not</summary>
     /// <type>System.Boolean, System</type>
     public bool HasAvatar { get; set; }
+
+    /// <summary>Specifies if the user is an anonim or not</summary>
+    /// <type>System.Boolean, System</type>
+    public bool IsAnonim { get; set; }
 
     public static EmployeeDto GetSample()
     {
@@ -115,6 +135,7 @@ public class EmployeeDtoHelper(
         result.Id = userInfo.Id;
         result.DisplayName = displayUserSettingsHelper.GetFullUserName(userInfo);
         result.HasAvatar = await _userPhotoManager.UserHasAvatar(userInfo.Id);
+        result.IsAnonim = userInfo.Id.Equals(ASC.Core.Configuration.Constants.Guest.ID);
 
         if (!string.IsNullOrEmpty(userInfo.Title))
         {
@@ -126,6 +147,26 @@ public class EmployeeDtoHelper(
         if (_httpContext.Check("avatarSmall"))
         {
             result.AvatarSmall = await _userPhotoManager.GetSmallPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
+        }
+        
+        if (_httpContext.Check("avatarOriginal"))
+        {
+            result.AvatarOriginal = await _userPhotoManager.GetPhotoAbsoluteWebPath(userInfo.Id) + $"?hash={cacheKey}";
+        }
+
+        if (_httpContext.Check("avatarMax"))
+        {
+            result.AvatarMax = await _userPhotoManager.GetMaxPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
+        }
+
+        if (_httpContext.Check("avatarMedium"))
+        {
+            result.AvatarMedium = await _userPhotoManager.GetMediumPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
+        }
+
+        if (_httpContext.Check("avatar"))
+        {
+            result.Avatar = await _userPhotoManager.GetBigPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
         }
 
         if (result.Id != Guid.Empty)

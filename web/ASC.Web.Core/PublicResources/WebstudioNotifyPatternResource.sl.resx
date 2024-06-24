@@ -662,13 +662,10 @@ $TrulyYours</value>
   <data name="ButtonAccept" xml:space="preserve">
     <value>Sprejmi</value>
   </data>
-  <data name="AcceptDocSpace" xml:space="preserve">
-    <value>SPREJMI</value>
-  </data>
-  <data name="ButtonCollaborateDocSpace" xml:space="preserve">
+  <data name="ButtonCollaborate" xml:space="preserve">
     <value>Sodelujte v DocSpace</value>
   </data>
-  <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
+  <data name="ButtonConfirmInvite" xml:space="preserve">
     <value>Potrdite povabilo DocSpace</value>
   </data>
   <data name="ButtonConfirmEmail" xml:space="preserve">
@@ -1068,7 +1065,7 @@ Datoteka varnostne kopije, ki vsebuje podatke iz vašega [${__VirtualRootPath}](
 Če imate kakršna koli vprašanja ali potrebujete pomoč, nas kontaktirajte na [${__SupportLink}](${__SupportLink})
 
 Lep pozdrav,
-ONLYOFFICE™ Ekipa za podporo
+ONLYOFFICE Ekipa za podporo
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
@@ -1294,6 +1291,7 @@ h1."$PortalUrl":"$PortalUrl"
 Vaš portal je bil preseljen na novo domeno. Obnovite dostop do portala tako, da navedete geslo, ki se bo uporabljalo za prijavo.
 
 Za nastavitev gesla za račun sledite spodnji povezavi:
+
 $OrangeButton
 
 *Opomba*: ta povezava velja samo 7 dni. V tem obdobju dokončajte postopek obnovitve dostopa.
@@ -1371,7 +1369,7 @@ Svoj portal lahko kadar koli znova aktivirate s klikom na naslednjo povezavo:
 Če imate kakršna koli vprašanja ali potrebujete pomoč, nas kontaktirajte na [${__SalesEmail}](mailto:${__SalesEmail})
 
 Z najlepšimi pozdravi,
-Podporna ekipa ONLYOFFICE™
+Podporna ekipa ONLYOFFICE
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
@@ -1419,7 +1417,7 @@ _Opomba_: ta povezava velja samo 7 dni. Prosimo, dokončajte postopek izbrisa po
 Če imate kakršna koli vprašanja ali potrebujete pomoč, nas kontaktirajte na [${__SalesEmail}](mailto:${__SalesEmail})
 
 Z najlepšimi pozdravi,
-Podporna ekipa ONLYOFFICE™
+Podporna ekipa ONLYOFFICE
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_rename" xml:space="preserve">

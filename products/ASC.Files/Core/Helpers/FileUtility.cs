@@ -29,121 +29,35 @@ namespace ASC.Files.Core.Helpers;
 [Singleton]
 public class FileUtilityConfiguration(IConfiguration configuration)
 {
-    private List<string> _extsIndexing;
-    public List<string> ExtsIndexing { get => _extsIndexing ??= configuration.GetSection("files:index").Get<List<string>>() ?? new List<string>(); }
-
-    private List<string> _extsImagePreviewed;
-    public List<string> ExtsImagePreviewed { get => _extsImagePreviewed ??= configuration.GetSection("files:viewed-images").Get<List<string>>() ?? new List<string>(); }
-
-    private List<string> _extsMediaPreviewed;
-    public List<string> ExtsMediaPreviewed { get => _extsMediaPreviewed ??= configuration.GetSection("files:viewed-media").Get<List<string>>() ?? new List<string>(); }
-
-    private List<string> _extsWebPreviewed;
-    public List<string> ExtsWebPreviewed
-    {
-        get
-        {
-            return _extsWebPreviewed ??= configuration.GetSection("files:docservice:viewed-docs").Get<List<string>>() ?? new List<string>();
-        }
-    }
-
-    private List<string> _extsWebEdited;
-    public List<string> ExtsWebEdited
-    {
-        get
-        {
-            return _extsWebEdited ??= configuration.GetSection("files:docservice:edited-docs").Get<List<string>>() ?? new List<string>();
-        }
-    }
-
-    private List<string> _extsWebEncrypt;
-    public List<string> ExtsWebEncrypt { get => _extsWebEncrypt ??= configuration.GetSection("files:docservice:encrypted-docs").Get<List<string>>() ?? new List<string>(); }
-
-    private List<string> _extsWebReviewed;
-    public List<string> ExtsWebReviewed
-    {
-        get
-        {
-            return _extsWebReviewed ??= configuration.GetSection("files:docservice:reviewed-docs").Get<List<string>>() ?? new List<string>();
-        }
-    }
-
-    private List<string> _extsWebCustomFilterEditing;
-    public List<string> ExtsWebCustomFilterEditing
-    {
-        get
-        {
-            return _extsWebCustomFilterEditing ??= configuration.GetSection("files:docservice:customfilter-docs").Get<List<string>>() ?? new List<string>();
-        }
-    }
-
-    private List<string> _extsWebRestrictedEditing;
-    public List<string> ExtsWebRestrictedEditing
-    {
-        get
-        {
-            return _extsWebRestrictedEditing ??= configuration.GetSection("files:docservice:formfilling-docs").Get<List<string>>() ?? new List<string>();
-        }
-    }
-
-    private List<string> _extsWebCommented;
-    public List<string> ExtsWebCommented
-    {
-        get
-        {
-            return _extsWebCommented ??= configuration.GetSection("files:docservice:commented-docs").Get<List<string>>() ?? new List<string>();
-        }
-    }
-
-    private List<string> _extsWebTemplate;
-    public List<string> ExtsWebTemplate
-    {
-        get
-        {
-            return _extsWebTemplate ??= configuration.GetSection("files:docservice:template-docs").Get<List<string>>() ?? new List<string>();
-        }
-    }
-
-    private List<string> _extsMustConvert;
-    public List<string> ExtsMustConvert
-    {
-        get
-        {
-            return _extsMustConvert ??= configuration.GetSection("files:docservice:convert-docs").Get<List<string>>() ?? new List<string>();
-        }
-    }
-
-    private List<string> _extsCoAuthoring;
-    public List<string> ExtsCoAuthoring
-    {
-        get => _extsCoAuthoring ??= configuration.GetSection("files:docservice:coauthor-docs").Get<List<string>>() ?? new List<string>();
-    }
-
-    private string _masterFormExtension;
-    public string MasterFormExtension
-    {
-        get => _masterFormExtension ??= configuration["files:docservice:internal-form"] ?? ".pdf";
-    }
-
-    private List<LogoColor> _logoColors;
-    public List<LogoColor> LogoColors
-    {
-        get => _logoColors ??= configuration.GetSection("logocolors").Get<List<LogoColor>>() ?? new List<LogoColor>();
-    }
-
-    public Dictionary<FileType, string> InternalExtension
-    {
-        get => new()
+    public readonly List<string> ExtsIndexing = configuration.GetSection("files:index").Get<List<string>>() ?? [];
+    public readonly List<string> ExtsImagePreviewed  = configuration.GetSection("files:viewed-images").Get<List<string>>() ?? [];
+    public readonly List<string> ExtsMediaPreviewed = configuration.GetSection("files:viewed-media").Get<List<string>>() ?? [];
+    public readonly List<string> ExtsWebPreviewed = configuration.GetSection("files:docservice:viewed-docs").Get<List<string>>() ?? [];
+    public readonly List<string> ExtsWebEdited = configuration.GetSection("files:docservice:edited-docs").Get<List<string>>() ?? [];
+    public readonly List<string> ExtsWebEncrypt = configuration.GetSection("files:docservice:encrypted-docs").Get<List<string>>() ?? [];
+    public readonly List<string> ExtsWebReviewed  = configuration.GetSection("files:docservice:reviewed-docs").Get<List<string>>() ?? [];
+    public readonly List<string> ExtsWebCustomFilterEditing = configuration.GetSection("files:docservice:customfilter-docs").Get<List<string>>() ?? [];
+    public readonly List<string> ExtsWebRestrictedEditing  = configuration.GetSection("files:docservice:formfilling-docs").Get<List<string>>() ?? [];
+    public readonly List<string> ExtsWebCommented = configuration.GetSection("files:docservice:commented-docs").Get<List<string>>() ?? [];
+    public readonly List<string> ExtsWebTemplate = configuration.GetSection("files:docservice:template-docs").Get<List<string>>() ?? [];
+    public readonly List<string> ExtsMustConvert = configuration.GetSection("files:docservice:convert-docs").Get<List<string>>() ?? [];
+    public readonly List<string> ExtsCoAuthoring = configuration.GetSection("files:docservice:coauthor-docs").Get<List<string>>() ?? [];
+    public readonly string MasterFormExtension = configuration["files:docservice:internal-form"] ?? ".docxf";
+    public readonly List<LogoColor> LogoColors = configuration.GetSection("logocolors").Get<List<LogoColor>>() ?? [];
+    private readonly string _signatureSecret = configuration["files:docservice:secret:value"];
+    private readonly string _signatureHeader = configuration["files:docservice:secret:header"];
+    private readonly string _forceSave = configuration["files:docservice:forcesave"];
+    public readonly Dictionary<FileType, string> InternalExtension = new()
         {
                 { FileType.Document, configuration["files:docservice:internal-doc"] ?? ".docx" },
                 { FileType.Spreadsheet, configuration["files:docservice:internal-xls"] ?? ".xlsx" },
-                { FileType.Presentation, configuration["files:docservice:internal-ppt"] ?? ".pptx" }
-            };
-    }
-
+                { FileType.Presentation, configuration["files:docservice:internal-ppt"] ?? ".pptx" },
+                { FileType.Pdf, configuration["files:docservice:internal-pdf"] ?? ".pdf" }
+        };
+    
     internal string GetSignatureSecret()
     {
-        var result = configuration["files:docservice:secret:value"] ?? "";
+        var result = _signatureSecret ?? "";
 
         var regex = new Regex(@"^\s+$");
 
@@ -157,7 +71,7 @@ public class FileUtilityConfiguration(IConfiguration configuration)
 
     internal string GetSignatureHeader()
     {
-        var result = (configuration["files:docservice:secret:header"] ?? "").Trim();
+        var result = (_signatureHeader ?? "").Trim();
         if (string.IsNullOrEmpty(result))
         {
             result = "Authorization";
@@ -169,7 +83,7 @@ public class FileUtilityConfiguration(IConfiguration configuration)
 
     internal bool GetCanForcesave()
     {
-        return !bool.TryParse(configuration["files:docservice:forcesave"] ?? "", out var canForcesave) || canForcesave;
+        return !bool.TryParse(_forceSave ?? "", out var canForcesave) || canForcesave;
     }
 }
 
@@ -320,7 +234,7 @@ public class FileUtility(
     public async Task<IDictionary<Accessibility, bool>> GetAccessibility<T>(File<T> file)
     {
         var fileName = file.Title;
-        
+
         var result = new Dictionary<Accessibility, bool>();
 
         foreach (var r in Enum.GetValues<Accessibility>())
@@ -404,7 +318,7 @@ public class FileUtility(
         var ext = GetFileExtension(fileName);
         return ExtsCoAuthoring.Exists(r => r.Equals(ext, StringComparison.OrdinalIgnoreCase));
     }
-    
+
     public async Task<bool> CanConvert<T>(File<T> file)
     {
         var ext = GetFileExtension(file.Title);
@@ -438,15 +352,19 @@ public class FileUtility(
         }
 
         await _semaphoreSlim.WaitAsync();
-        
+
         _extsConvertible = new ConcurrentDictionary<string, List<string>>();
         if (string.IsNullOrEmpty(filesLinkUtility.DocServiceConverterUrl))
         {
             return _extsConvertible;
         }
-
-        await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
-        var list = await Queries.FoldersAsync(filesDbContext).ToListAsync();
+        
+        List<FilesConverts> list;
+        
+        await using (var filesDbContext = await dbContextFactory.CreateDbContextAsync())
+        {
+            list = await filesDbContext.FilesConvertsAsync().ToListAsync();
+        }
 
         foreach (var item in list)
         {
@@ -461,7 +379,7 @@ public class FileUtility(
             output = output.ToLower().Trim();
             if (!_extsConvertible.ContainsKey(input))
             {
-                _extsConvertible[input] = new List<string>();
+                _extsConvertible[input] = [];
             }
 
             _extsConvertible[input].Add(output);
@@ -479,7 +397,7 @@ public class FileUtility(
         {
             if (_extsUploadable == null)
             {
-                _extsUploadable = new List<string>();
+                _extsUploadable = [];
                 _extsUploadable.AddRange(ExtsWebPreviewed);
                 _extsUploadable.AddRange(ExtsWebEdited);
                 _extsUploadable.AddRange(ExtsImagePreviewed);
@@ -501,7 +419,7 @@ public class FileUtility(
         {
             if (string.IsNullOrEmpty(filesLinkUtility.DocServiceApiUrl))
             {
-                return new List<string>();
+                return [];
             }
 
             return fileUtilityConfiguration.ExtsWebPreviewed;
@@ -514,7 +432,7 @@ public class FileUtility(
         {
             if (string.IsNullOrEmpty(filesLinkUtility.DocServiceApiUrl))
             {
-                return new List<string>();
+                return [];
             }
 
             return fileUtilityConfiguration.ExtsWebEdited;
@@ -529,7 +447,7 @@ public class FileUtility(
         {
             if (string.IsNullOrEmpty(filesLinkUtility.DocServiceApiUrl))
             {
-                return new List<string>();
+                return [];
             }
 
             return fileUtilityConfiguration.ExtsWebReviewed;
@@ -542,7 +460,7 @@ public class FileUtility(
         {
             if (string.IsNullOrEmpty(filesLinkUtility.DocServiceApiUrl))
             {
-                return new List<string>();
+                return [];
             }
 
             return fileUtilityConfiguration.ExtsWebCustomFilterEditing;
@@ -555,7 +473,7 @@ public class FileUtility(
         {
             if (string.IsNullOrEmpty(filesLinkUtility.DocServiceApiUrl))
             {
-                return new List<string>();
+                return [];
             }
 
             return fileUtilityConfiguration.ExtsWebRestrictedEditing;
@@ -568,7 +486,7 @@ public class FileUtility(
         {
             if (string.IsNullOrEmpty(filesLinkUtility.DocServiceApiUrl))
             {
-                return new List<string>();
+                return [];
             }
 
             return fileUtilityConfiguration.ExtsWebCommented;
@@ -586,7 +504,7 @@ public class FileUtility(
         {
             if (string.IsNullOrEmpty(filesLinkUtility.DocServiceConverterUrl))
             {
-                return new List<string>();
+                return [];
             }
 
             return fileUtilityConfiguration.ExtsMustConvert;
@@ -598,7 +516,7 @@ public class FileUtility(
         get => fileUtilityConfiguration.ExtsCoAuthoring;
     }
 
-    public static readonly ImmutableList<string> ExtsArchive =  new List<string>
+    public static readonly ImmutableList<string> ExtsArchive = new List<string>
     {
                 ".zip", ".rar", ".ace", ".arc", ".arj",
                 ".bh", ".cab", ".enc", ".gz", ".ha",
@@ -607,7 +525,7 @@ public class FileUtility(
                 ".z", ".zoo"
             }.ToImmutableList();
 
-    public static readonly ImmutableList<string> ExtsVideo =  new List<string>
+    public static readonly ImmutableList<string> ExtsVideo = new List<string>
     {
                 ".3gp", ".asf", ".avi", ".f4v",
                 ".fla", ".flv", ".m2ts", ".m4v",
@@ -616,7 +534,7 @@ public class FileUtility(
                 ".vob", ".webm", ".wmv"
             }.ToImmutableList();
 
-    public static readonly ImmutableList<string> ExtsAudio =  new List<string>
+    public static readonly ImmutableList<string> ExtsAudio = new List<string>
     {
                 ".aac", ".ac3", ".aiff", ".amr",
                 ".ape", ".cda", ".flac", ".m4a",
@@ -625,7 +543,7 @@ public class FileUtility(
                 ".raw", ".wav", ".wma"
             }.ToImmutableList();
 
-    public static readonly ImmutableList<string> ExtsImage =  new List<string>
+    public static readonly ImmutableList<string> ExtsImage = new List<string>
     {
                 ".bmp", ".cod", ".gif", ".ief", ".jpe", ".jpeg", ".jpg",
                 ".jfif", ".tiff", ".tif", ".cmx", ".ico", ".pnm", ".pbm",
@@ -663,7 +581,9 @@ public class FileUtility(
                 ".pdf", ".djvu", ".fb2", ".epub", ".xps",".oxps",
                 ".sxw", ".stw", ".wps", ".wpt",
                 ".doct", ".docy",
-                ".gdoc"
+                ".gdoc",
+                ".drawio",
+                ".md", ".markdown"
             }.ToImmutableList();
 
     public static readonly ImmutableList<string> ExtsFormTemplate = new List<string>
@@ -706,14 +626,8 @@ public class FileUtility(
     private string GetSignatureSecret() => fileUtilityConfiguration.GetSignatureSecret();
 
     private string GetSignatureHeader() => fileUtilityConfiguration.GetSignatureHeader();
-    
+
     public bool GetCanForcesave() => fileUtilityConfiguration.GetCanForcesave();
 
     #endregion
-}
-
-static file class Queries
-{
-    public static readonly Func<FilesDbContext, IAsyncEnumerable<FilesConverts>> FoldersAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx) => ctx.FilesConverts);
 }

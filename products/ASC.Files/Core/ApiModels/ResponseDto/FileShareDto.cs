@@ -87,7 +87,9 @@ public enum LinkType
 }
 
 [Scope]
-public class FileShareDtoHelper(UserManager userManager,
+public class FileShareDtoHelper(
+    GroupSummaryDtoHelper groupSummaryDtoHelper,
+    UserManager userManager,
     EmployeeFullDtoHelper employeeWraperFullHelper,
     ApiDateTimeHelper apiDateTimeHelper)
 {
@@ -132,7 +134,7 @@ public class FileShareDtoHelper(UserManager userManager,
             else
             {
                 //Shared to group
-                result.SharedTo = new GroupSummaryDto(await userManager.GetGroupInfoAsync(aceWrapper.Id), userManager);
+                result.SharedTo = await groupSummaryDtoHelper.GetAsync(await userManager.GetGroupInfoAsync(aceWrapper.Id));
             }
         }
         else

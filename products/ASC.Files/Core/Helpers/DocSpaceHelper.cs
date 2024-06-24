@@ -40,6 +40,15 @@ public static class DocSpaceHelper
             FolderType.FormRoom;
     }
 
+    public static bool IsFormsFillingSystemFolder(FolderType folderType)
+    {
+        return folderType is
+            FolderType.FormFillingFolderDone or
+            FolderType.FormFillingFolderInProgress or
+            FolderType.InProcessFormFolder or
+            FolderType.ReadyFormFolder;
+    }
+
     public static RoomType? MapToRoomType(FolderType folderType)
     {
         return folderType switch

@@ -96,16 +96,26 @@ public class EmailValidationKeyModelHelper(IHttpContextAccessor httpContextAcces
                 checkKeyResult = (await invitationLinkHelper.ValidateAsync(key, email, emplType ?? default)).Result;
                 break;
 
-            case ConfirmType.PortalOwnerChange:
+            case ConfirmType.PortalOwnerChange:                
+                var newOwner = await userManager.GetUsersAsync(uiD.GetValueOrDefault());
+                if(Equals(newOwner, Constants.LostUser) || newOwner.Status == EmployeeStatus.Terminated)
+                {
+                    checkKeyResult = ValidationResult.Invalid;
+                    break;
+                }
                 checkKeyResult = await provider.ValidateEmailKeyAsync(email + type + uiD.GetValueOrDefault(), key, provider.ValidEmailKeyInterval);
                 break;
 
             case ConfirmType.EmailChange:
-                checkKeyResult = await provider.ValidateEmailKeyAsync(email + type + uiD.GetValueOrDefault(), key, provider.ValidEmailKeyInterval);
+                var userId = uiD.GetValueOrDefault();
+                var emailChangeEvent = (await auditEventsRepository.GetByFilterAsync(action: MessageAction.UserSentEmailChangeInstructions, entry: EntryType.User, target: MessageTarget.Create(userId).ToString(), limit: 1)).FirstOrDefault();
+                var postfix = emailChangeEvent == null ? userId.ToString() : tenantUtil.DateTimeToUtc(emailChangeEvent.Date).ToString("s", CultureInfo.InvariantCulture);
+
+                checkKeyResult = await provider.ValidateEmailKeyAsync(email + type + postfix, key, provider.ValidEmailKeyInterval);
                 break;
             case ConfirmType.PasswordChange:
                 var userInfo = await userManager.GetUserByEmailAsync(email);
-                if(Equals(userInfo, Constants.LostUser) || userInfo.Id != uiD)
+                if(Equals(userInfo, Constants.LostUser) || userInfo.Id != uiD || userInfo.Status == EmployeeStatus.Terminated)
                 {
                     checkKeyResult = ValidationResult.Invalid;
                     break;

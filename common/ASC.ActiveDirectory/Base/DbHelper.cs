@@ -27,8 +27,7 @@
 namespace ASC.ActiveDirectory.Base;
 
 [Scope]
-public class DbHelper(IDbContextFactory<WebstudioDbContext> activeDirectoryDbContextFactory,
-    LdapSettings ldapSettings)
+public class DbHelper(IDbContextFactory<WebstudioDbContext> activeDirectoryDbContextFactory, LdapSettings ldapSettings)
 {
     public async Task<List<int>> TenantsAsync()
     {

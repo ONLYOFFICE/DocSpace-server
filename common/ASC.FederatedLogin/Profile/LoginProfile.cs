@@ -198,12 +198,14 @@ public class LoginProfileTransport(InstanceCrypto instanceCrypto, TenantManager 
 {
     public async Task<string> ToString(LoginProfile profile)
     {
-        return WebEncoders.Base64UrlEncode(instanceCrypto.Encrypt(Encoding.UTF8.GetBytes(profile.ToString() + await tenantManager.GetCurrentTenantIdAsync())));
+        var tenantId =  await tenantManager.GetCurrentTenantIdAsync();
+        var input =  await instanceCrypto.EncryptAsync(Encoding.UTF8.GetBytes(profile.ToString() + tenantId));
+        return WebEncoders.Base64UrlEncode(input);
     }
 
     public async Task<LoginProfile> FromTransport(string transportString)
     {
-        var serialized = instanceCrypto.Decrypt(WebEncoders.Base64UrlDecode(transportString));
+        var serialized = await instanceCrypto.DecryptAsync(WebEncoders.Base64UrlDecode(transportString));
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         return new LoginProfile(serialized.Substring(0, serialized.LastIndexOf(tenantId.ToString(), StringComparison.Ordinal)));
     }

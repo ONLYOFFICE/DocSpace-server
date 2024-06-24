@@ -39,6 +39,7 @@ public class ExternalShare(Global global,
     private Guid _sessionId;
     private string _passwordKey;
     private string _dbKey;
+    private const string RoomLinkPattern = "rooms/share?key={0}";
 
     public async Task<LinkData> GetLinkDataAsync<T>(FileEntry<T> entry, Guid linkId)
     {
@@ -64,7 +65,10 @@ public class ExternalShare(Global global,
                 url = QueryHelpers.AddQueryString(url, FilesLinkUtility.ShareKey, key);
                 break;
             case Folder<T> folder when DocSpaceHelper.IsRoom(folder.FolderType):
-                url = $"rooms/share?key={key}";
+                url = string.Format(RoomLinkPattern, key);
+                break;
+            case Folder<T> { RootFolderType: FolderType.VirtualRooms } folder:
+                url = QueryHelpers.AddQueryString(string.Format(RoomLinkPattern, key), "folder", HttpUtility.UrlEncode(folder.Id.ToString()!));
                 break;
         }
         
@@ -77,12 +81,12 @@ public class ExternalShare(Global global,
     
     public async Task<Status> ValidateAsync(Guid linkId, bool isAuthenticated)
     {
-        var record = await daoFactory.GetSecurityDao<int>().GetSharesAsync(new [] { linkId }).FirstOrDefaultAsync();
+        var record = await daoFactory.GetSecurityDao<string>().GetSharesAsync(new [] { linkId }).FirstOrDefaultAsync();
 
         return record == null ? Status.Invalid : await ValidateRecordAsync(record, null, isAuthenticated);
     }
     
-    public async Task<Status> ValidateRecordAsync(FileShareRecord record, string password, bool isAuthenticated, FileEntry entry = null)
+    public async Task<Status> ValidateRecordAsync<T>(FileShareRecord<T> record, string password, bool isAuthenticated, FileEntry entry = null)
     {
         if (record.SubjectType is not (SubjectType.ExternalLink or SubjectType.PrimaryExternalLink) ||
             record.Options == null)

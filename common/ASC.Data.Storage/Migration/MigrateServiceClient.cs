@@ -80,30 +80,28 @@ public class ServiceClient(ServiceClientListener serviceClientListener,
     public ICacheNotify<MigrationCache> CacheMigrationNotify { get; } = cacheMigrationNotify;
     public ICacheNotify<MigrationUploadCdn> UploadCdnMigrationNotify { get; } = uploadCdnMigrationNotify;
 
-    public void Migrate(int tenant, StorageSettings storageSettings)
+    public async Task MigrateAsync(int tenant, StorageSettings storageSettings)
     {
         var storSettings = new StorSettings { Id = storageSettings.ID.ToString(), Module = storageSettings.Module };
 
-        CacheMigrationNotify.Publish(new MigrationCache
+        await CacheMigrationNotify.PublishAsync(new MigrationCache
         {
             TenantId = tenant,
             StorSettings = storSettings
-        },
-                CacheNotifyAction.Insert);
+        }, CacheNotifyAction.Insert);
     }
 
-    public void UploadCdn(int tenantId, string relativePath, string mappedPath, CdnStorageSettings settings = null)
+    public async Task UploadCdnAsync(int tenantId, string relativePath, string mappedPath, CdnStorageSettings settings = null)
     {
         var cdnStorSettings = new CdnStorSettings { Id = settings.ID.ToString(), Module = settings.Module };
 
-        UploadCdnMigrationNotify.Publish(new MigrationUploadCdn
+        await UploadCdnMigrationNotify.PublishAsync(new MigrationUploadCdn
         {
             Tenant = tenantId,
             RelativePath = relativePath,
             MappedPath = mappedPath,
             CdnStorSettings = cdnStorSettings
-        },
-                CacheNotifyAction.Insert);
+        }, CacheNotifyAction.Insert);
     }
 
     public double GetProgress(int tenant)
@@ -113,8 +111,8 @@ public class ServiceClient(ServiceClientListener serviceClientListener,
         return migrationProgress.Progress;
     }
 
-    public void StopMigrate()
+    public async Task StopMigrateAsync()
     {
-        CacheMigrationNotify.Publish(new MigrationCache(), CacheNotifyAction.InsertOrUpdate);
+        await CacheMigrationNotify.PublishAsync(new MigrationCache(), CacheNotifyAction.InsertOrUpdate);
     }
 }

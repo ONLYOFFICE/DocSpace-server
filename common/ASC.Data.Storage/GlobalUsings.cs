@@ -68,7 +68,6 @@ global using ASC.Data.Storage;
 global using ASC.Data.Storage.Configuration;
 global using ASC.Data.Storage.DiscStorage;
 global using ASC.Data.Storage.Encryption;
-global using ASC.Data.Storage.GoogleCloud;
 global using ASC.Data.Storage.Log;
 global using ASC.Data.Storage.RackspaceCloud;
 global using ASC.Data.Storage.S3;

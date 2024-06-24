@@ -318,7 +318,7 @@
     <value>Документы</value>
   </data>
   <data name="ProductUserOpportunities" xml:space="preserve">
-    <value>Создавать и редактировать свои документы, а также те, к которым предоставлен доступ с соответствующими правами|Предоставлять другим пользователям доступ к документам и папкам с правами на чтение/редактирование|Подключать аккаунты Dropbox, Box и другие в разделе 'Мои документы'</value>
+    <value>Создавать и редактировать свои документы, а также те, к которым предоставлен доступ с соответствующими правами|Предоставлять другим пользователям доступ к документам и папкам с правами на чтение/редактирование|Подключать аккаунты Dropbox, Box и другие в разделе 'Документы'</value>
   </data>
   <data name="UnknownFirstName" xml:space="preserve">
     <value>Имя</value>
@@ -463,5 +463,11 @@
   </data>
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>Тип</value>
+  </data>
+  <data name="Date" xml:space="preserve">
+    <value>Дата</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>Пользователь</value>
   </data>
 </root>

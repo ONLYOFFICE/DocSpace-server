@@ -28,8 +28,7 @@ using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Migration.Core.Migrators;
 
-[Transient]
-public abstract class Migrator : IDisposable
+public abstract class Migrator : IAsyncDisposable
 {
     protected SecurityContext SecurityContext { get; }
     protected UserManager UserManager { get; }
@@ -89,7 +88,7 @@ public abstract class Migrator : IDisposable
         UserManagerWrapper = userManagerWrapper;
     }
     
-    public abstract Task InitAsync(string path, CancellationToken cancellationToken, OperationType operation);
+    public abstract void Init(string path, CancellationToken cancellationToken, OperationType operation);
     public abstract Task<MigrationApiInfo> ParseAsync(bool reportProgress = true);
 
     protected async Task ReportProgressAsync(double value, string status)
@@ -184,14 +183,14 @@ public abstract class Migrator : IDisposable
         }
 
         MigrationInfo.FailedUsers = _failedUsers.Count;
-        MigrationInfo.SuccessedUsers = _usersForImport.Count() - MigrationInfo.FailedUsers;
+        MigrationInfo.SuccessedUsers = _usersForImport.Count - MigrationInfo.FailedUsers;
         await ReportProgressAsync(100, MigrationResource.MigrationCompleted);
     }
 
     private async Task MigrateUsersAsync()
     {
         var i = 1;
-        var progressStep = _usersForImport.Count() == 0 ? 30 : 30 / _usersForImport.Count();
+        var progressStep = !_usersForImport.Any() ? 30 : 30 / _usersForImport.Count;
         foreach (var kv in MigrationInfo.Users)
         {
             var key = kv.Key;
@@ -264,14 +263,8 @@ public abstract class Migrator : IDisposable
 
     private void DataСhange(MigrationUser user)
     {
-        if (user.Info.UserName == null)
-        {
-            user.Info.UserName = user.Info.Email.Split('@').First();
-        }
-        if (user.Info.LastName == null)
-        {
-            user.Info.LastName = user.Info.FirstName;
-        }
+        user.Info.UserName ??= user.Info.Email.Split('@').First();
+        user.Info.LastName ??= user.Info.FirstName;
     }
 
     private async Task MigrateGroupAsync()
@@ -329,7 +322,7 @@ public abstract class Migrator : IDisposable
 
     private async Task MigrateStorageAsync(MigrationStorage storage, MigrationUser user = null)
     {
-        if (!storage.ShouldImport || storage.Files.Count() == 0)
+        if (!storage.ShouldImport || storage.Files.Count == 0)
         {
             return;
         }
@@ -401,6 +394,8 @@ public abstract class Migrator : IDisposable
                 newFile.Version = file.Version;
                 newFile.VersionGroup = file.VersionGroup;
                 newFile.Comment = file.Comment;
+                newFile.CreateOn = file.Created;
+                newFile.ModifiedOn = file.Modified;
                 if (matchingFilesIds.ContainsKey($"{_fileKey}-{file.Id}"))
                 {
                     newFile.Id = matchingFilesIds[$"{_fileKey}-{file.Id}"].Id;
@@ -408,11 +403,11 @@ public abstract class Migrator : IDisposable
                 if (!storage.ShouldImportSharedFolders || !storage.Securities.Any(s => s.EntryId == file.Folder && s.EntryType == 1) && newFile.ParentId != 0)
                 {
                     newFile = await fileDao.SaveFileAsync(newFile, fs);
+                    Log(string.Format(MigrationResource.CreateFile, file.Title));
                 }
-                if (!matchingFilesIds.ContainsKey($"{_fileKey}-{file.Id}"))
+                if (!matchingFilesIds.ContainsKey($"{_fileKey}-{file.Id}") && newFile.Id != 0)
                 {
                     matchingFilesIds.Add($"{_fileKey}-{file.Id}", newFile);
-                    Log(string.Format(MigrationResource.CreateFile, file.Title));
                 }
             }
             catch (Exception ex)
@@ -429,9 +424,10 @@ public abstract class Migrator : IDisposable
 
         var aces = new Dictionary<string, AceWrapper>();
         var matchingRoomIds = new Dictionary<int, FileEntry<int>>();
-        foreach (var security in storage.Securities)
+        var innerFolders = new List<int>();
+        var orderedSecurity = storage.Securities.OrderBy(s => OrderSecurity(storage,s));
+        foreach (var security in orderedSecurity)
         {
-            var localMatchingRoomIds = new Dictionary<int, FileEntry<int>>();
             try
             {
                 if (!MigrationInfo.Users.ContainsKey(security.Subject) && !MigrationInfo.Groups.ContainsKey(security.Subject))
@@ -444,6 +440,10 @@ public abstract class Migrator : IDisposable
                 if (entryIsFile && storage.ShouldImportSharedFiles)
                 {
                     var key = $"{_fileKey}-{security.EntryId}";
+                    if(!matchingFilesIds.ContainsKey(key))
+                    {
+                        continue;
+                    }
                     await SecurityContext.AuthenticateMeAsync(user.Info.Id);
                     AceWrapper ace = null;
                     if (!aces.ContainsKey($"{security.Security}{matchingFilesIds[key].Id}"))
@@ -475,8 +475,8 @@ public abstract class Migrator : IDisposable
                         else
                         {
                             var users = UserManager.GetUsers(false, EmployeeStatus.Active,
-                                new List<List<Guid>> { new List<Guid> { MigrationInfo.Groups[security.Subject].Info.ID } },
-                                new List<Guid>(), new List<Tuple<List<List<Guid>>, List<Guid>>>(), null, null, null, "", false, "firstname",
+                                [[MigrationInfo.Groups[security.Subject].Info.ID]],
+                                [], [], null, null, null, "", false, "firstname",
                                 true, 100000, 0).Where(u => u.Id != user.Info.Id);
                             await foreach (var u in users)
                             {
@@ -488,7 +488,13 @@ public abstract class Migrator : IDisposable
                 }
                 else if (storage.ShouldImportSharedFolders)
                 {
+                    var localMatchingRoomIds = new Dictionary<int, FileEntry<int>>();
                     var key = $"{_folderKey}-{security.EntryId}";
+
+                    if (innerFolders.Contains(security.EntryId))
+                    {
+                        continue;
+                    }
                     if (!matchingRoomIds.ContainsKey(security.EntryId))
                     {
                         if (storage.Type == FolderType.BUNCH)
@@ -539,21 +545,40 @@ public abstract class Migrator : IDisposable
                         {
                             newFolder = await FileStorageService.CreateFolderAsync(matchingRoomIds[folder.ParentId].Id, folder.Title);
                             matchingRoomIds.Add(folder.Id, newFolder);
+                            innerFolders.Add(folder.Id);
                             Log(string.Format(MigrationResource.CreateFolder, newFolder.Title));
                         }
                         foreach (var file in storage.Files.Where(f => localMatchingRoomIds.ContainsKey(f.Folder)))
                         {
-                            await using var fs = new FileStream(file.Path, FileMode.Open);
+                            try
+                            {
+                                await using var fs = new FileStream(file.Path, FileMode.Open);
 
-                            var newFile = ServiceProvider.GetService<File<int>>();
-                            newFile.ParentId = localMatchingRoomIds[security.EntryId].Id;
-                            newFile.Comment = FilesCommonResource.CommentCreate;
-                            newFile.Title = Path.GetFileName(file.Title);
-                            newFile.ContentLength = fs.Length;
-                            newFile.Version = file.Version;
-                            newFile.VersionGroup = file.VersionGroup;
-                            newFile = await fileDao.SaveFileAsync(newFile, fs);
-                            Log(string.Format(MigrationResource.CreateFile, newFile.Title));
+                                var newFile = ServiceProvider.GetService<File<int>>();
+                                newFile.ParentId = localMatchingRoomIds[security.EntryId].Id;
+                                newFile.Comment = FilesCommonResource.CommentCreate;
+                                newFile.Title = Path.GetFileName(file.Title);
+                                newFile.ContentLength = fs.Length;
+                                newFile.Version = file.Version;
+                                newFile.VersionGroup = file.VersionGroup;
+                                newFile.CreateOn = file.Created;
+                                newFile.ModifiedOn = file.Modified;
+                                if (matchingFilesIds.ContainsKey($"{_fileKey}-{file.Id}"))
+                                {
+                                    newFile.Id = matchingFilesIds[$"{_fileKey}-{file.Id}"].Id;
+                                }
+                                newFile = await fileDao.SaveFileAsync(newFile, fs);
+                                Log(string.Format(MigrationResource.CreateFile, file.Title));
+                                if (!matchingFilesIds.ContainsKey($"{_fileKey}-{file.Id}"))
+                                {
+                                    matchingFilesIds.Add($"{_fileKey}-{file.Id}", newFile);
+                                }
+                            }
+                            catch(Exception ex)
+                            {
+                                Log(string.Format(MigrationResource.CanNotCreateFile, file.Title), ex);
+                                MigrationInfo.Errors.Add(string.Format(MigrationResource.CanNotCreateFile, file.Title));
+                            }
                         }
                     }
                     if (_usersForImport.ContainsKey(security.Subject) && _currentUser.ID == _usersForImport[security.Subject].Info.Id)
@@ -591,11 +616,21 @@ public abstract class Migrator : IDisposable
         }
     }
 
-    public void Dispose()
+    private int OrderSecurity(MigrationStorage storage, MigrationSecurity security)
+    {
+        if(security.EntryType != 1)
+        {
+            return 0;
+        }
+        var folder = storage.Folders.FirstOrDefault(f => f.Id == security.EntryId);
+        return folder == null ? 0 : folder.Level;
+    }
+
+    public async ValueTask DisposeAsync()
     {
         if (MigrationLogger != null)
         {
-            MigrationLogger.Dispose();
+            await MigrationLogger.DisposeAsync();
         }
     }
 }

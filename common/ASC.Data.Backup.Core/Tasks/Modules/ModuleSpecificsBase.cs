@@ -144,7 +144,7 @@ public abstract class ModuleSpecificsBase(Helpers helpers) : IModuleSpecifics
         var insert = table.InsertMethod != InsertMethod.Ignore
                                               ? table.InsertMethod.ToString().ToLower()
                                                   : "insert ignore";
-        var insertCommantText = $"{insert} into {table.Name}({string.Join(",", columns)}) values({string.Join(",", columns.Select(c => "@" + c))});";
+        var insertCommantText = $"{insert} into {table.Name}({string.Join(",", columns.Select(c=> $"`{c}`"))}) values({string.Join(",", columns.Select(c => "@" + c))});";
 
         var command = connection.CreateCommand();
         command.CommandText = insertCommantText;

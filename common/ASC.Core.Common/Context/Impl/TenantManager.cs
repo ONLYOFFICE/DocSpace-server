@@ -372,7 +372,7 @@ public class TenantManager(
             .ToArray();
         
         var tenant = await GetCurrentTenantAsync(false);
-        var prices = tariffService.GetProductPriceInfo(tenant?.PartnerId, productIds);
+        var prices = await tariffService.GetProductPriceInfoAsync(tenant?.PartnerId, productIds);
         var result = prices.ToDictionary(price => quotas.First(quota => quota.ProductId == price.Key).Name, price => price.Value);
         return result;
     }
@@ -385,7 +385,7 @@ public class TenantManager(
         }
 
         var tenant = GetCurrentTenant(false);
-        var prices = tariffService.GetProductPriceInfo(tenant?.PartnerId, productId);
+        var prices = tariffService.GetProductPriceInfoAsync(tenant?.PartnerId, productId).Result;
         return prices.TryGetValue(productId, out var price) ? price : null;
     }
 

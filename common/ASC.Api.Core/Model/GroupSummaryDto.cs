@@ -44,15 +44,6 @@ public class GroupSummaryDto
     /// <type>System.String, System</type>
     public string Manager { get; set; }
 
-    protected GroupSummaryDto() { }
-
-    public GroupSummaryDto(GroupInfo group, UserManager userManager)
-    {
-        Id = group.ID;
-        Name = group.Name;
-        Manager = userManager.GetUsers(userManager.GetDepartmentManager(group.ID)).UserName;
-    }
-
     public static GroupSummaryDto GetSample()
     {
         return new GroupSummaryDto
@@ -60,6 +51,20 @@ public class GroupSummaryDto
             Id = Guid.Empty,
             Manager = "Jake.Zazhitski",
             Name = "Group Name"
+        };
+    }
+}
+
+[Scope]
+public class GroupSummaryDtoHelper(UserManager userManager)
+{
+    public async Task<GroupSummaryDto> GetAsync(GroupInfo group)
+    {
+        return new GroupSummaryDto
+        {
+            Id = group.ID, 
+            Name = group.Name, 
+            Manager = (await userManager.GetUsersAsync(await userManager.GetDepartmentManagerAsync(group.ID))).UserName
         };
     }
 }

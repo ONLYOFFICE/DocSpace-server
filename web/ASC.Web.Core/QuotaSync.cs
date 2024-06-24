@@ -26,11 +26,11 @@
 
 namespace ASC.Web.Studio.Core.Quota;
 
-[Singleton(Additional = typeof(QuotaSyncOperationExtension))]
+[Singleton]
 public class QuotaSyncOperation(IServiceProvider serviceProvider, IDistributedTaskQueueFactory queueFactory)
 {
 
-    public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "ldapOperation";
+    public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "quotaOperation";
 
     private readonly DistributedTaskQueue _progressQueue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
 
@@ -64,17 +64,9 @@ public class QuotaSyncOperation(IServiceProvider serviceProvider, IDistributedTa
 
         return item != null;
     }
-
-    public static class QuotaSyncOperationExtension
-    {
-        public static void Register(DIHelper services)
-        {
-            services.TryAdd<QuotaSyncJob>();
-        }
-    }
-
 }
 
+[Transient]
 public class QuotaSyncJob(IServiceScopeFactory serviceScopeFactory) : DistributedTaskProgress
 {
     private int? _tenantId;

@@ -117,6 +117,10 @@ public class LdapRequestsDto : IMapFrom<LdapSettings>
     /// <type>System.Boolean, System</type>
     public bool AcceptCertificate { get; set; }
 
+    /// <summary>Users type (All, RoomAdmin, User, DocSpaceAdmin, Collaborator)</summary>
+    /// <type>ASC.Core.Users.EmployeeType, ASC.Core.Common</type>
+    public EmployeeType UsersType { get; set; }
+
     public void Mapping(Profile profile)
     {
         profile.CreateMap<LdapRequestsDto, LdapSettings>();

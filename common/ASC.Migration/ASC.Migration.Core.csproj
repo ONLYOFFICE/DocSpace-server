@@ -18,8 +18,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FolkerKinzel.VCards" Version="6.2.0" />
-    <PackageReference Include="HtmlAgilityPack" Version="1.11.60" />
+    <PackageReference Include="FolkerKinzel.VCards" Version="7.0.0" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.61" />
     <PackageReference Include="Ical.Net" Version="4.2.0" />
   </ItemGroup>
 
@@ -109,6 +109,9 @@
       <DependentUpon>MigrationResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\MigrationResource.sl.resx">
+      <DependentUpon>MigrationResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\MigrationResource.sr-Cyrl-RS.resx">
       <DependentUpon>MigrationResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\MigrationResource.sr-Latn-RS.resx">

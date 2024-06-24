@@ -65,10 +65,9 @@ public static class DocumentService
     {
         expectedKey ??= "";
         const int maxLength = 128;
-        using var sha256 = SHA256.Create();
         if (expectedKey.Length > maxLength)
         {
-            expectedKey = Convert.ToBase64String(sha256.ComputeHash(Encoding.UTF8.GetBytes(expectedKey)));
+            expectedKey = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(expectedKey)));
         }
 
         var key = Regex.Replace(expectedKey, "[^0-9a-zA-Z_]", "_");
@@ -638,6 +637,7 @@ public static class DocumentService
             }
             var errorMessage = code switch
             {
+                ErrorCode.SizeLimit => "size limit exceeded",
                 ErrorCode.OutputType => "output format not defined",
                 ErrorCode.Vkey => "document signature",
                 ErrorCode.TaskQueue => "database",
@@ -654,6 +654,7 @@ public static class DocumentService
         [EnumExtensions]
         public enum ErrorCode
         {
+            SizeLimit = -10,
             OutputType = -9,
             Vkey = -8,
             TaskQueue = -6,
