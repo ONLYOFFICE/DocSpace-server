@@ -72,13 +72,14 @@ public class AscCookieAuthenticationFilter extends OncePerRequestFilter {
    * @return true if the request should be excluded from filtering, false otherwise
    */
   protected boolean shouldNotFilter(HttpServletRequest request) {
-    String path = request.getRequestURI();
+    var path = request.getRequestURI();
     return isExcludedPath(path);
   }
 
   private boolean isExcludedPath(String path) {
     return Pattern.matches(String.format("%s/oauth/info", webApi), path)
-        || Pattern.matches("/health(/.*)?", path);
+        || Pattern.matches("/health(/.*)?", path)
+        || Pattern.matches(String.format("%s/clients/.*/public/info", webApi), path);
   }
 
   private boolean isUserAllowedPath(String path) {

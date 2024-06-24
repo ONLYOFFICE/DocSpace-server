@@ -47,20 +47,12 @@ public class ClientInfoResponse implements Serializable {
   @JsonProperty("authentication_methods")
   private Set<String> authenticationMethods;
 
-  /** The redirect URIs registered for the client. */
-  @JsonProperty("redirect_uris")
-  private Set<String> redirectUris;
-
-  /** The allowed origins for the client. */
-  @JsonProperty("allowed_origins")
-  private Set<String> allowedOrigins;
-
-  /** The logout redirect URIs registered for the client. */
-  @JsonProperty("logout_redirect_uris")
-  private Set<String> logoutRedirectUri;
-
   /** The scopes assigned to the client. */
   private Set<String> scopes;
+
+  /** Indicates if the client is public. */
+  @JsonProperty("is_public")
+  private boolean isPublic;
 
   /** The date and time when the client was created. */
   @JsonProperty("created_on")

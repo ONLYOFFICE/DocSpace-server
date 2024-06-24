@@ -22,3 +22,9 @@ resilience4j:
         limitRefreshPeriod: ${GLOBAL_RATE_LIMITER_REFRESH_PERIOD:1s}
         timeoutDuration: ${GLOBAL_RATE_LIMITER_TIMEOUT_DURATION:0}
         registerHealthIndicator: ${GLOBAL_RATE_LIMITER_HEALTH_INDICATOR:true}
+      publicRateLimiter:
+        eventConsumerBufferSize: ${RESILIENCE4J_RATELIMITER_PUBLIC_EVENT_BUFFER_SIZE:50}
+        limitForPeriod: ${PUBLIC_RATE_LIMITER_CAPACITY:25}
+        limitRefreshPeriod: ${PUBLIC_RATE_LIMITER_REFRESH_PERIOD:1s}
+        timeoutDuration: ${PUBLIC_RATE_LIMITER_TIMEOUT_DURATION:0}
+        registerHealthIndicator: ${PUBLIC_RATE_LIMITER_HEALTH_INDICATOR:true}

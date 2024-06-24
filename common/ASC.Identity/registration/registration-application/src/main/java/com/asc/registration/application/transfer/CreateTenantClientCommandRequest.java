@@ -87,7 +87,7 @@ public class CreateTenantClientCommandRequest implements Serializable {
   private boolean allowPkce;
 
   /** Indicates if the client is public. */
-  @JsonProperty("public")
+  @JsonProperty("is_public")
   private boolean isPublic;
 
   /** The website URL of the client. The website URL is expected to be passed as a URL. */

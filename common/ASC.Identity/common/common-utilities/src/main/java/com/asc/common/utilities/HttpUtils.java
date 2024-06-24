@@ -116,8 +116,7 @@ public class HttpUtils {
     if (!osPattern.isEmpty()) {
       var pattern = Pattern.compile(osPattern);
       var matcher = pattern.matcher(userAgent);
-      if (matcher.find())
-        os = matcher.group().replace('_', '.');
+      if (matcher.find()) os = matcher.group().replace('_', '.');
     }
 
     return os;

@@ -16,7 +16,7 @@ import lombok.*;
 @AllArgsConstructor
 public class ClientInfoQuery {
   /** The tenant ID to fetch private applications for. Does not affect public apps */
-  @Min(value = 1, message = "tenant id must be greater than or equal to 1")
+  @Min(value = 0, message = "tenant id must be greater than or equal to 0")
   @JsonProperty("tenant_id")
   private int tenantId;
 

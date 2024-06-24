@@ -65,6 +65,17 @@ public class CoreClientApplicationService implements ClientApplicationService {
   }
 
   /**
+   * Retrieves basic client information based on client ID.
+   *
+   * @param clientId the client ID to search for.
+   * @return the client info response containing basic client information.
+   */
+  @Cacheable(value = "clientsInfo", key = "#clientId", unless = "#result == null")
+  public ClientInfoResponse getClientInfo(String clientId) {
+    return clientQueryHandler.getClientInfo(clientId);
+  }
+
+  /**
    * Retrieves a paginated list of clients for a given tenant.
    *
    * @param query the tenant clients pagination query containing tenant ID, page, and limit.

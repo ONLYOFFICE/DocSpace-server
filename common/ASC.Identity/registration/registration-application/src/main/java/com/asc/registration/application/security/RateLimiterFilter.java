@@ -1,7 +1,9 @@
 package com.asc.registration.application.security;
 
 import com.asc.common.application.transfer.response.AscPersonResponse;
+import com.asc.common.utilities.HttpUtils;
 import com.asc.registration.application.configuration.resilience.Bucket4jConfiguration;
+import io.github.bucket4j.Bucket;
 import io.github.bucket4j.BucketConfiguration;
 import io.github.bucket4j.distributed.proxy.ProxyManager;
 import jakarta.servlet.FilterChain;
@@ -30,7 +32,7 @@ public class RateLimiterFilter extends OncePerRequestFilter {
   private final ProxyManager<String> proxyManager;
 
   /**
-   * Filters requests to enforce rate limiting based on client id.
+   * Filters requests to enforce rate limiting based on client id or IP address.
    *
    * @param request the HttpServletRequest.
    * @param response the HttpServletResponse.
@@ -43,23 +45,35 @@ public class RateLimiterFilter extends OncePerRequestFilter {
       throws ServletException, IOException {
     if (request.getAttribute("person") instanceof AscPersonResponse person) {
       var bucket = proxyManager.builder().build(person.getId(), bucketConfiguration);
-      var probe = bucket.tryConsumeAndReturnRemaining(1);
-      if (probe.isConsumed()) {
-        chain.doFilter(request, response);
-      } else {
-        response.setContentType("application/json");
-        response.setHeader(
-            X_RATE_LIMIT,
-            String.valueOf(
-                bucket4jConfiguration.getRateLimits().getClientRateLimit().getCapacity()));
-        response.setHeader(X_RATE_REMAINING, String.valueOf(probe.getRemainingTokens()));
-        response.setHeader(
-            X_RATE_RESET,
-            String.valueOf(TimeUnit.NANOSECONDS.toSeconds(probe.getNanosToWaitForRefill())));
-        response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
-      }
+      handleRequest(bucket, request, response, chain);
     } else {
+      var clientIp = HttpUtils.getRequestClientAddress(request).orElse(request.getRemoteAddr());
+      if (clientIp.isEmpty()) {
+        response.setStatus(HttpStatus.FORBIDDEN.value());
+        return;
+      }
+
+      var bucket = proxyManager.builder().build(clientIp, bucketConfiguration);
+      handleRequest(bucket, request, response, chain);
+    }
+  }
+
+  private void handleRequest(
+      Bucket bucket, HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+      throws IOException, ServletException {
+    var probe = bucket.tryConsumeAndReturnRemaining(1);
+    if (probe.isConsumed()) {
       chain.doFilter(request, response);
+    } else {
+      response.setContentType("application/json");
+      response.setHeader(
+          X_RATE_LIMIT,
+          String.valueOf(bucket4jConfiguration.getRateLimits().getClientRateLimit().getCapacity()));
+      response.setHeader(X_RATE_REMAINING, String.valueOf(probe.getRemainingTokens()));
+      response.setHeader(
+          X_RATE_RESET,
+          String.valueOf(TimeUnit.NANOSECONDS.toSeconds(probe.getNanosToWaitForRefill())));
+      response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
     }
   }
 }

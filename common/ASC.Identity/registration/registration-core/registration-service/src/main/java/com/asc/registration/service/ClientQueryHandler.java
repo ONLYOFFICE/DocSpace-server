@@ -66,7 +66,7 @@ public class ClientQueryHandler {
   }
 
   /**
-   * Retrieves basic information of a client by client ID.
+   * Retrieves basic information of a client by client ID and tenant ID.
    *
    * @param query the query containing client ID
    * @return the response containing client basic information
@@ -112,6 +112,27 @@ public class ClientQueryHandler {
         .next(result.getNext())
         .previous(result.getPrevious())
         .build();
+  }
+
+  /**
+   * Retrieves basic information of a client by client ID.
+   *
+   * @param clientId the query containing client ID
+   * @return the response containing client basic information
+   */
+  @Transactional(timeout = 2)
+  public ClientInfoResponse getClientInfo(String clientId) {
+    log.info("Trying to get client basic information by client id");
+
+    var client =
+        clientQueryRepository
+            .findById(new ClientId(UUID.fromString(clientId)))
+            .orElseThrow(
+                () ->
+                    new ClientNotFoundException(
+                        String.format("Client with id %s was not found", clientId)));
+
+    return clientDataMapper.toClientInfoResponse(client);
   }
 
   /**

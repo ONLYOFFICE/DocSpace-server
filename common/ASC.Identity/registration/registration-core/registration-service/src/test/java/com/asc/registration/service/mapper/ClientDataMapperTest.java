@@ -121,10 +121,6 @@ class ClientDataMapperTest {
     assertEquals(client.getClientInfo().logo(), response.getLogo());
     assertEquals(
         client.getAuthenticationMethods().size(), response.getAuthenticationMethods().size());
-    assertEquals(client.getClientRedirectInfo().redirectUris(), response.getRedirectUris());
-    assertEquals(client.getClientRedirectInfo().allowedOrigins(), response.getAllowedOrigins());
-    assertEquals(
-        client.getClientRedirectInfo().logoutRedirectUris(), response.getLogoutRedirectUri());
     assertEquals(client.getScopes(), response.getScopes());
     assertEquals(client.getClientCreationInfo().getCreatedOn(), response.getCreatedOn());
     assertEquals(client.getClientCreationInfo().getCreatedBy(), response.getCreatedBy());

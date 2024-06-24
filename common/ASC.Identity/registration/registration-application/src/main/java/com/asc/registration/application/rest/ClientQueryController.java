@@ -192,6 +192,26 @@ public class ClientQueryController {
   }
 
   /**
+   * Handles the GET request for public client information.
+   *
+   * <p>This endpoint is rate-limited and publicly accessible without authentication. It provides
+   * client information for the specified client ID.
+   *
+   * @param clientId the ID of the client to retrieve information for. Must not be blank.
+   * @return a ResponseEntity containing the client information.
+   */
+  @RateLimiter(name = "publicRateLimiter")
+  @GetMapping("/{clientId}/public/info")
+  public ResponseEntity<ClientInfoResponse> getPublicClientInfo(
+      @PathVariable @NotBlank String clientId) {
+    try {
+      return ResponseEntity.ok(clientApplicationService.getClientInfo(clientId));
+    } finally {
+      MDC.clear();
+    }
+  }
+
+  /**
    * Retrieves a pageable list of client information.
    *
    * @param request the HTTP request

@@ -10,6 +10,7 @@ import com.asc.registration.service.transfer.response.ClientSecretResponse;
 import com.asc.registration.service.transfer.response.ConsentResponse;
 import com.asc.registration.service.transfer.response.PageableResponse;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 
 /**
  * ClientApplicationService defines the contract for client-related operations in the application
@@ -43,6 +44,14 @@ public interface ClientApplicationService {
    * @return A pageable response containing a list of client info responses.
    */
   PageableResponse<ClientInfoResponse> getClientsInfo(@Valid ClientInfoPaginationQuery query);
+
+  /**
+   * Retrieves basic information about a specific client. Fetches any existing client info
+   *
+   * @param clientId the clientId to fetch information for
+   * @return A response containing the client's basic information.
+   */
+  ClientInfoResponse getClientInfo(@NotBlank String clientId);
 
   /**
    * Retrieves a paginated list of clients for a specific tenant. Accessible by admin users only.
