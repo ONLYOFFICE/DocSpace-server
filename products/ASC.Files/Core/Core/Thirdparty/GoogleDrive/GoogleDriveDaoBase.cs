@@ -228,6 +228,7 @@ internal class GoogleDriveDaoBase(
         file.Title = MakeFileTitle(driveFile);
         file.ThumbnailStatus = driveFile.HasThumbnail.HasValue && driveFile.HasThumbnail.Value ? Thumbnail.Created : Thumbnail.Creating;
         file.Encrypted = ProviderInfo.Private;
+        file.Shared = ProviderInfo.FolderType is FolderType.PublicRoom;
 
         return file;
     }

@@ -52,7 +52,6 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
         services.AddBaseDbContextPool<WebstudioDbContext>();
         services.AddBaseDbContextPool<InstanceRegistrationContext>();
         services.AddBaseDbContextPool<IntegrationEventLogContext>();
-        services.AddBaseDbContextPool<FeedDbContext>();
         services.AddBaseDbContextPool<MessagesContext>();
         services.AddBaseDbContextPool<WebhooksDbContext>();
 

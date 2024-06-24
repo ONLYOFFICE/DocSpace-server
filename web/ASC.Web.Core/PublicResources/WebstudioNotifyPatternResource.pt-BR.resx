@@ -448,6 +448,7 @@ h1."$PortalUrl":"$PortalUrl"
 Seu portal foi migrado para um novo domínio. Por favor, restabeleça seu acesso ao portal especificando a senha que será usada para fazer o login.
 
 Por favor, siga o link abaixo para definir sua senha para a conta:
+
 $OrangeButton
 
 *Nota*: este link é válido por apenas 7 dias. Favor completar o processo de restauração de acesso dentro desse período.

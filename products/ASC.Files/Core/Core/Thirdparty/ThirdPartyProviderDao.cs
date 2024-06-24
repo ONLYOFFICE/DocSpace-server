@@ -113,16 +113,6 @@ internal abstract class ThirdPartyProviderDao
         throw new NotImplementedException();
     }
 
-    public IAsyncEnumerable<FileWithShare> GetFeedsAsync(int tenant, DateTime from, DateTime to)
-    {
-        throw new NotImplementedException();
-    }
-
-    public IAsyncEnumerable<int> GetTenantsWithFeedsAsync(DateTime fromTime, bool includeSecurity)
-    {
-        throw new NotImplementedException();
-    }
-
     #endregion
     #region FolderDao
 
@@ -208,44 +198,17 @@ internal abstract class ThirdPartyProviderDao
     {
         return Task.FromResult<string>(null);
     }
-
-    public Task<Dictionary<string, string>> GetBunchObjectIDsAsync(List<string> folderIDs)
-    {
-        return Task.FromResult<Dictionary<string, string>>(null);
-    }
-
-    public IAsyncEnumerable<FolderWithShare> GetFeedsForRoomsAsync(int tenant, DateTime from, DateTime to)
-    {
-        throw new NotImplementedException();
-    }
-
-    public IAsyncEnumerable<FolderWithShare> GetFeedsForFoldersAsync(int tenant, DateTime from, DateTime to)
-    {
-        throw new NotImplementedException();
-    }
-
-    public IAsyncEnumerable<ParentRoomPair> GetParentRoomsAsync(IEnumerable<int> foldersIds)
-    {
-        throw new NotImplementedException();
-    }
-
-    public IAsyncEnumerable<int> GetTenantsWithFoldersFeedsAsync(DateTime fromTime)
-    {
-        throw new NotImplementedException();
-    }
-
-    public IAsyncEnumerable<int> GetTenantsWithRoomsFeedsAsync(DateTime fromTime)
-    {
-        throw new NotImplementedException();
-    }
+    
     public IAsyncEnumerable<OriginData> GetOriginsDataAsync(IEnumerable<string> entriesId)
     {
         throw new NotImplementedException();
     }
+    
     public Task<FilesStatisticsResultDto> GetFilesUsedSpace()
     {
         throw new NotImplementedException();
-    }    public Task<int> GetFilesCountAsync(string parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent, bool withSubfolders = false,
+    }    
+    public Task<int> GetFilesCountAsync(string parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent, bool withSubfolders = false,
         bool excludeSubject = false, string roomId = default)
     {
         throw new NotImplementedException();

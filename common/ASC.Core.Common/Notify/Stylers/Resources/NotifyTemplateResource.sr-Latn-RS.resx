@@ -118,7 +118,20 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="TextForFooterUnsubsribe" xml:space="preserve">
-    <value>Za bilo koja pitanja o kupovini, pošaljite nam email na &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="mailto:sales@onlyoffice.com"&gt;sales@onlyoffice.com&lt;/a&gt;.&lt;br /&gt; U slučaju tehničkih problema molimo kontaktirajte naš &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://www.onlyoffice.com/support-contact-form.aspx"&gt;tim za podršku&lt;/a&gt;.&lt;br /&gt; &lt;a href="{1}" style="color: #FF6F3D; text-decoration: underline; white-space: nowrap;" target="_blank"&gt;Kliknite ovde da biste se odjavili&lt;/a&gt;&lt;br /&gt;</value>
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
+    &lt;td class="fol" style="color: #666666; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; margin: 0; padding: 40px 0 8px; vertical-align: top;"&gt;
+        Za bilo koja pitanja o kupovini, pošaljite nam email na &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="mailto:sales@onlyoffice.com"&gt;sales@onlyoffice.com&lt;/a&gt;.
+    &lt;/td&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
+    &lt;td class="fol" style="color: #666666; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; margin: 0; padding: 0; vertical-align: top;"&gt;
+        U slučaju tehničkih problema molimo kontaktirajte naš &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://www.onlyoffice.com/support-contact-form.aspx"&gt;tim za podršku&lt;/a&gt;.
+    &lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
+    &lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; margin: 0; padding: 8px 0 0; vertical-align: top;"&gt;
+        &lt;a href="{1}" style="color: #FF6F3D; text-decoration: underline; white-space: nowrap;" target="_blank"&gt;Kliknite ovde da biste se odjavili&lt;/a&gt;
+    &lt;/td&gt;
+&lt;/tr&gt;</value>
   </data>
   <data name="FooterCommonV10" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td colspan="3" style="height: 10px; line-height: 10px; background: #fff; padding: 0; margin: 0;"&gt;&amp;nbsp;&lt;/td&gt;&lt;/tr&gt;
@@ -181,76 +194,81 @@
         &lt;/tr&gt;</value>
   </data>
   <data name="HtmlMaster" xml:space="preserve">
-    <value>&lt;body style="background: linear-gradient(#ffffff, #ffffff); background-color: #ffffff; margin: 0; padding: 0; text-align: center; width: 100%; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; color: #333; font-size: 18px;"&gt;
-&lt;div style="background-color: #fff; width: 600px; margin: 0 auto; text-align: center;"&gt;
-    &lt;table cellspacing="0" cellpadding="0" style="font-family: Arial; font-size: 14px; color: #333; background: #fff; text-align: center; width: 600px; margin: 0; padding: 0; border: 0 none; border-collapse: collapse; empty-cells: show; border-spacing: 0;"&gt;
-      &lt;tbody&gt;
-    %TOPIMAGE%
-        &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
-        &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
-          &lt;td colspan="3" style="margin: 0; padding: 15px 40px 15px; background-color: #fff; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px;"&gt;
-            &lt;div style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; color: #333; margin: 0; padding: 0; width: 520px; height: auto; overflow: hidden; word-wrap: break-word; vertical-align: top; text-align: center; border: 0 none;"&gt;
-              %CONTENT%
-            &lt;/div&gt;
-          &lt;/td&gt;
-        &lt;/tr&gt;
-      &lt;/tbody&gt;
-    &lt;/table&gt;
-
-    &lt;table cellspacing="0" cellpadding="0" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; background-color: #F5F5F5; color: #333; text-align: center; vertical-align: top; width: 600px; margin: 0; padding: 0; border-collapse: collapse; border: 0; border-spacing: 0;"&gt;
-      &lt;tbody&gt;
-        &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
-          &lt;td colspan="6" style="width: 600px; vertical-align: top; margin: 0; padding: 20px 30px 15px;"&gt;
-              &lt;p style="color: #666666; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px;line-height: 20px; margin: 0; padding: 0; text-align: center; width: 540px;"&gt;
-              %TEXTFOOTER%
-              &lt;/p&gt;
-          &lt;/td&gt;
-        &lt;/tr&gt;
-     %FOOTERSOCIAL%
-      &lt;/tbody&gt;
-    &lt;/table&gt;
-&lt;/div&gt;
+    <value>&lt;body background="#ffffff" style="background: linear-gradient(#ffffff, #ffffff); background-color: #ffffff; font-family: Helvetica, Arial, Tahoma, sans-serif; margin: 0; padding: 0; text-align: center; width: 100%;"&gt;   
+&lt;center style="table-layout:fixed; width:100%; -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%;" &gt;
+        &lt;div style="margin-bottom:0; margin-left:auto; margin-right:auto; margin-top:0; max-width:600px;" &gt;
+            &lt;table background="#ffffff" cellspacing="0" cellpadding="0" style="background-color:#ffffff; border: 0; border-collapse: collapse; border: 0; border-spacing: 0; empty-cells: show; max-width: 600px; margin: 0 auto; padding: 0; text-align: center; vertical-align: top; width: 100%; border-left: 1px solid #f5f5f5; border-right: 1px solid #f5f5f5; border-top: 1px solid #f5f5f5; border-bottom: 1px solid #f5f5f5;"&gt;
+                &lt;tbody&gt;
+                    &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
+                        &lt;td style="margin: 0 auto; padding: 0; text-align: center; vertical-align: top; width: 100%;"&gt;
+                            &lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;
+                                &lt;tbody&gt;
+                                    %TOPIMAGE%
+                                    %CONTENT%
+                                &lt;/tbody&gt;
+                            &lt;/table&gt;
+                            &lt;table background="#F5F5F5" cellspacing="0" cellpadding="0" style="background-color: #F5F5F5; border: 0 none; border-collapse: collapse; border-spacing: 0; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: center;"&gt;
+                                &lt;tbody&gt;
+                                    %TEXTFOOTER%
+                                    %FOOTERSOCIAL%
+                                    &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
+                                        &lt;td style="margin: 0; padding-bottom: 40px;"&gt;&lt;/td&gt;
+                                    &lt;/tr&gt;
+                                &lt;/tbody&gt;
+                            &lt;/table&gt;
+                        &lt;/td&gt;
+                    &lt;/tr&gt;
+                &lt;/tbody&gt; 
+            &lt;/table&gt;
+        &lt;/div&gt;
+    &lt;/center&gt;
 &lt;/body&gt;</value>
   </data>
   <data name="SocialNetworksFooter" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
-          &lt;td style="width: 24px; vertical-align: top; margin: 0; padding: 32px 0 32px 208px;"&gt;
-              &lt;a href="https://www.facebook.com/pages/OnlyOffice/833032526736775" style="width: 24px; height: 24px; display: block; margin: 0; padding: 0;" target="_blank"&gt;
-                  &lt;img src="%IMAGEPATH%/social-facebook-24.png" alt="Facebook" style="width: 24px; height: 24px;" /&gt;
-              &lt;/a&gt;
-          &lt;/td&gt;
-          &lt;td style="width: 24px; vertical-align: top; margin: 0; padding: 32px 0 32px 16px;"&gt;
-              &lt;a href="https://twitter.com/ONLY_OFFICE" style="width: 24px; height: 24px; display: block; margin: 0; padding: 0;" target="_blank"&gt;
-                  &lt;img src="%IMAGEPATH%/social-twitter-24.png" alt="Twitter" style="width: 24px; height: 24px;" /&gt;
-              &lt;/a&gt;
-          &lt;/td&gt;
-          &lt;td style="width: 24px; vertical-align: top; margin: 0; padding: 32px 0 32px 16px;"&gt;
-              &lt;a href="https://www.youtube.com/user/onlyofficeTV" style="width: 24px; height: 24px; display: block; margin: 0; padding: 0;" target="_blank"&gt;
-                  &lt;img src="%IMAGEPATH%/social-youtube-24.png" alt="YouTube" style="width: 24px; height: 24px;" /&gt;
-              &lt;/a&gt;
-          &lt;/td&gt;
-          &lt;td style="width: 24px; vertical-align: top; margin: 0; padding: 32px 0 32px 16px;"&gt;
-              &lt;a href="https://www.instagram.com/the_onlyoffice/" style="width: 24px; height: 24px; display: block; margin: 0; padding: 0;" target="_blank"&gt;
-                  &lt;img src="%IMAGEPATH%/social-instagram-24.png" alt="Instagram" style="width: 24px; height: 24x;" /&gt;
-              &lt;/a&gt;
-          &lt;/td&gt;
-          &lt;td style="width: 24px; vertical-align: top; margin: 0; padding: 32px 208px 32px 16px;"&gt;
-              &lt;a href="https://vm.tiktok.com/ZMLXbFEyd/" style="width: 24px; height: 24px; display: block; margin: 0; padding: 0;" target="_blank"&gt;
-                  &lt;img src="%IMAGEPATH%/social-tik-tok-24.png" alt="Tiktok" style="width: 24px; height: 24px;" /&gt;
-              &lt;/a&gt;
-          &lt;/td&gt;
-        &lt;/tr&gt;</value>
+&lt;td style="margin: 0; padding-top: 40px;"&gt;
+&lt;table style="border-collapse: collapse; border: 0; border-spacing: 0; height: 24px; margin: auto; min-width: 180px; padding: 0; text-align: center; vertical-align: top; width: 31%;" cellspacing="0" cellpadding="0"&gt;
+    &lt;tbody&gt;
+        &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
+            &lt;td style="margin: 0; padding: 0; vertical-align: bottom;"&gt;
+                &lt;a href="https://www.facebook.com/pages/OnlyOffice/833032526736775" style="border: 0; display: block; height: auto; margin: 0 auto; padding: 0; width: 24px;" target="_blank"&gt;
+                    &lt;img src="%IMAGEPATH%/social-facebook-24.png" alt="Facebook" style="border: 0; color: #333333; font-size: 10px; display: block; height: auto; text-align: center; width: 100%;"&gt;
+                &lt;/a&gt;
+            &lt;/td&gt;
+            &lt;td style="margin: 0; padding: 0; vertical-align: bottom; padding-left: 16px;"&gt;
+                &lt;a href="https://twitter.com/ONLY_OFFICE" style="border: 0; display: block; height: auto; margin: 0 auto; padding: 0; width: 24px;" target="_blank"&gt;
+                    &lt;img src="%IMAGEPATH%/social-twitter-24.png" alt="Twitter" style="border: 0; color: #333333; font-size: 10px; display: block; height: auto; text-align: center; width: 100%;"&gt;
+                &lt;/a&gt;
+            &lt;/td&gt;
+            &lt;td style="margin: 0; padding: 0; vertical-align: bottom;padding-left: 16px;"&gt;
+                &lt;a href="https://www.youtube.com/user/onlyofficeTV" style="border: 0; display: block; height: auto; margin: 0 auto; padding: 0; width: 24px;" target="_blank"&gt;
+                    &lt;img src="%IMAGEPATH%/social-youtube-24.png" alt="YouTube" style="border: 0; color: #333333; font-size: 10px; display: block; height: auto; text-align: center; width: 100%;"&gt;
+                &lt;/a&gt;
+            &lt;/td&gt;
+            &lt;td style="margin: 0; padding: 0; vertical-align: bottom; padding-left: 16px;"&gt;
+                &lt;a href="https://www.instagram.com/the_onlyoffice/" style="border: 0; display: block; height: auto; margin: 0 auto; padding: 0; width: 24px;" target="_blank"&gt;
+                    &lt;img src="%IMAGEPATH%/social-instagram-24.png" alt="Instagram" style="border: 0; color: #333333; font-size: 10px; display: block; height: auto; text-align: center; width: 100%;"&gt;
+                &lt;/a&gt;
+            &lt;/td&gt;
+            &lt;td style="margin: 0; padding: 0; vertical-align: bottom; padding-left: 16px;"&gt;
+                &lt;a href="https://vm.tiktok.com/ZMLXbFEyd/" style="border: 0; display: block; height: auto; margin: 0 auto; padding: 0; width: 24px;" target="_blank"&gt;
+                    &lt;img src="%IMAGEPATH%/social-tik-tok-24.png" alt="Tiktok" style="border: 0; color: #333333; font-size: 10px; display: block; height: auto; text-align: center; width: 100%;"&gt;
+                &lt;/a&gt;
+            &lt;/td&gt;
+        &lt;/tr&gt;
+    &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/td&gt;
+&lt;/tr&gt;</value>
   </data>
   <data name="TopGif" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
-          &lt;td colspan="3" style="margin: 0; padding: 0; background-color: #fff; "&gt;
-            &lt;div style="text-align: left; width: 600px; margin: 0; padding: 0;"&gt;
-                &lt;a href="%SITEURL%" style="text-decoration: none; display: inline-block; width: 600px; height: 360px; margin: 0; padding: 0;" target="_blank"&gt;
-                    &lt;img src="%LOGO%" style="border: 0px none; width: 600px; margin: 0; padding: 0;" alt="ONLYOFFICE" /&gt;
-                &lt;/a&gt;
-            &lt;/div&gt;
-          &lt;/td&gt;
-        &lt;/tr&gt;</value>
+    &lt;td style="margin: 0; text-align: center; vertical-align: top; width: 600px;"&gt;
+        &lt;a href="%SITEURL%" style="color: #333333; display: block; font-size: 16px; font-weight: bold; line-height: 22px; margin-bottom: 32px; text-decoration: none;" target="_blank"&gt;
+            &lt;img src="%LOGO%" style="border: 0 none; height: 360px; width: 600px; color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 40px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em;" alt="%LOGOTEXT%" /&gt;
+        &lt;/a&gt;
+    &lt;/td&gt;
+&lt;/tr&gt;</value>
   </data>
   <data name="TopLogo" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;

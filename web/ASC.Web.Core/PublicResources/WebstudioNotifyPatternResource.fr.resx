@@ -348,6 +348,7 @@ h1."$PortalUrl":"$PortalUrl"
 Votre portail a été transféré vers un nouveau domaine. Veuillez récupérer vos accès en saisissant le mot de passe qui sera utilisé lors de la connexion. 
 
 Suivez le lien ci-dessous pour paramétrer le mot de passe de votre compte :
+
 $OrangeButton
 
 *Note* : ce lien est valide pendant 7 jours seulement. Veuillez terminer le procès de restauration durant cette période. 

@@ -66,7 +66,7 @@ internal abstract class SecurityBaseDao<T>(
         await filesDbContext.SaveChangesAsync();
     }
 
-    public async Task<bool> IsSharedAsync(T entryId, FileEntryType type)
+    public async Task<bool> IsPureSharedAsync(T entryId, FileEntryType type, IEnumerable<SubjectType> subjectTypes)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
@@ -74,7 +74,7 @@ internal abstract class SecurityBaseDao<T>(
         
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        return await filesDbContext.IsSharedAsync(tenantId, mappedId, type);
+        return await filesDbContext.IsPureSharedAsync(tenantId, mappedId, type, subjectTypes);
     }
 
     public async Task SetShareAsync(FileShareRecord<T> r)
@@ -889,6 +889,30 @@ internal class SecurityDao(
 
         return await DeleteExpiredAsync(records, filesDbContext).ToListAsync();
     }
+
+    public async Task<bool> IsSharedAsync(FileEntry<int> entry, IEnumerable<SubjectType> subjectTypes)
+    {
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        if (entry.RootFolderType is FolderType.USER)
+        {
+            return entry.FileEntryType is FileEntryType.File && 
+                   await filesDbContext.IsPureSharedAsync(tenantId, entry.Id.ToString(), FileEntryType.File, subjectTypes);
+        }
+
+        if (entry.RootFolderType is not FolderType.VirtualRooms)
+        {
+            return false;
+        }
+
+        if (entry is Folder<int> folder && DocSpaceHelper.IsRoom(folder.FolderType))
+        {
+            return await filesDbContext.IsPureSharedAsync(tenantId, entry.Id.ToString(), FileEntryType.Folder, subjectTypes);
+        }
+
+        return await filesDbContext.IsSharedAsync(tenantId, entry.ParentId, subjectTypes);
+    }
 }
 
 [Scope(typeof(ISecurityDao<string>))]
@@ -943,6 +967,11 @@ internal class ThirdPartySecurityDao(
         }
 
         return result;
+    }
+
+    public Task<bool> IsSharedAsync(FileEntry<string> entry, IEnumerable<SubjectType> subjectTypes)
+    {
+        return Task.FromResult(entry.RootFolderType is FolderType.VirtualRooms);
     }
 
     private async ValueTask GetFoldersForShareAsync(string folderId, ICollection<FileEntry<string>> folders)

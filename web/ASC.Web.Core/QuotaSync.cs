@@ -30,7 +30,7 @@ namespace ASC.Web.Studio.Core.Quota;
 public class QuotaSyncOperation(IServiceProvider serviceProvider, IDistributedTaskQueueFactory queueFactory)
 {
 
-    public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "ldapOperation";
+    public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "quotaOperation";
 
     private readonly DistributedTaskQueue _progressQueue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
 

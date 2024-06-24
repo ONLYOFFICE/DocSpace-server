@@ -205,6 +205,7 @@ internal class OneDriveDaoBase(
         file.Title = MakeFileTitle(onedriveFile);
         file.ThumbnailStatus = Thumbnail.Created;
         file.Encrypted = ProviderInfo.Private;
+        file.Shared = ProviderInfo.FolderType is FolderType.PublicRoom;
 
         return file;
     }
