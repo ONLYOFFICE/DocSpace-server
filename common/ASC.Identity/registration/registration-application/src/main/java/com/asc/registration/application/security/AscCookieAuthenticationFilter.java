@@ -78,7 +78,7 @@ public class AscCookieAuthenticationFilter extends OncePerRequestFilter {
 
   private boolean isExcludedPath(String path) {
     return Pattern.matches(String.format("%s/oauth/info", webApi), path)
-        || Pattern.matches("/health/.*", path);
+        || Pattern.matches("/health(/.*)?", path);
   }
 
   private boolean isUserAllowedPath(String path) {
