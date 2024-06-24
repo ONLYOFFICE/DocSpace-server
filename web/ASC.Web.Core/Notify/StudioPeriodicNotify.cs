@@ -43,7 +43,8 @@ public class StudioPeriodicNotify(ILoggerProvider log,
         CoreBaseSettings coreBaseSettings,
         DisplayUserSettingsHelper displayUserSettingsHelper,
         CoreSettings coreSettings,
-        IServiceProvider serviceProvider)
+        IServiceProvider serviceProvider,
+        IEventBus eventBus)
 {
     private readonly ILogger _log = log.CreateLogger("ASC.Notify");
 
@@ -209,6 +210,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         {
                             await apiSystemHelper.RemoveTenantFromCacheAsync(tenant.GetTenantDomain(coreSettings));
                         }
+                        eventBus.Publish(new RemovePortalIntegrationEvent(Guid.Empty, tenant.Id));
                     }
 
                     #endregion
@@ -298,6 +300,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         {
                             await apiSystemHelper.RemoveTenantFromCacheAsync(tenant.GetTenantDomain(coreSettings));
                         }
+                        eventBus.Publish(new RemovePortalIntegrationEvent(Guid.Empty, tenant.Id));
                     }
 
                     #endregion
