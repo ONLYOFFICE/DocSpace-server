@@ -805,6 +805,13 @@ internal class FolderDao(
             folder.FolderType == FolderType.FormFillingFolderInProgress) ? FolderType.DEFAULT : folder.FolderType;
 
         copy = await GetFolderAsync(await SaveFolderAsync(copy));
+        var tagDao = daoFactory.GetTagDao<int>();
+        var tags = await tagDao.GetTagsAsync(folder.Id, FileEntryType.Folder, TagType.Custom).ToListAsync();
+        foreach (var t in tags)
+        {
+            t.EntryId = copy.Id;
+        }
+        await tagDao.SaveTagsAsync(tags);
 
         //FactoryIndexer.IndexAsync(FoldersWrapper.GetFolderWrapper(ServiceProvider, copy));
         return copy;

@@ -30,7 +30,8 @@ using UnknownImageFormatException = ASC.Web.Core.Users.UnknownImageFormatExcepti
 namespace ASC.Files.Core.VirtualRooms;
 
 [Scope]
-public class RoomLogoManager(StorageFactory storageFactory,
+public class RoomLogoManager(
+    StorageFactory storageFactory,
     TenantManager tenantManager,
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
@@ -202,6 +203,24 @@ public class RoomLogoManager(StorageFactory storageFactory,
         return pathWithoutQuery;
     }
 
+    public async Task CopyAsync<TFrom, TTo>(Folder<TFrom> from, Folder<TTo> to)
+    {
+        if (!from.SettingsHasLogo)
+        {
+            return;
+        }
+
+        var storage = await GetDataStoreAsync();
+
+        foreach (var size in Enum.GetValues<SizeName>())
+        {
+            var fileNameFrom = GetFileName(from.Id, size);
+            var fileNameTo = GetFileName(to.Id, size);
+            await storage.CopyAsync(fileNameFrom, string.Empty, fileNameTo);
+        }
+
+    }
+    
     internal string GetRandomColour()
     {
         var rand = new Random();
@@ -228,9 +247,9 @@ public class RoomLogoManager(StorageFactory storageFactory,
     private async Task SaveWithProcessAsync(IDataStore store, string id, byte[] imageData, long maxFileSize, Point position, Size cropSize)
     {
         imageData = UserPhotoThumbnailManager.TryParseImage(imageData, maxFileSize, _originalLogoSize.Item2);
-
-        var fileName = string.Format(LogosPath, ProcessFolderId(id), SizeName.Original.ToStringLowerFast());
-
+        
+        var fileName = GetFileName(id, SizeName.Original);
+        
         if (imageData == null || imageData.Length == 0)
         {
             return;
@@ -282,7 +301,7 @@ public class RoomLogoManager(StorageFactory storageFactory,
 
     private async ValueTask<string> GetLogoPathAsync<T>(T id, SizeName size, int hash, bool secure = false)
     {
-        var fileName = string.Format(LogosPath, ProcessFolderId(id), size.ToStringLowerFast());
+        var fileName = GetFileName(id, size);
         var headers = secure ? new[] { SecureHelper.GenerateSecureKeyHeader(fileName, emailValidationKeyProvider) } : null;
 
         var store = await GetDataStoreAsync();
@@ -292,7 +311,13 @@ public class RoomLogoManager(StorageFactory storageFactory,
         return externalShare.GetUrlWithShare(uri + (secure ? "&" : "?") + $"hash={hash}");
     }
 
-    private async Task<byte[]> GetTempAsync(IDataStore store, string fileName)
+    private static string GetFileName<T>(T id, SizeName size)
+    {
+        var fileName = string.Format(LogosPath, ProcessFolderId(id), size.ToStringLowerFast());
+        return fileName;
+    }
+
+    private static async Task<byte[]> GetTempAsync(IDataStore store, string fileName)
     {
         await using var stream = await store.GetReadStreamAsync(TempDomainPath, fileName);
 

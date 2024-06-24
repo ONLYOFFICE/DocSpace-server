@@ -297,6 +297,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         var tenantManager = scope.ServiceProvider.GetService<TenantManager>();
         var quotaService = scope.ServiceProvider.GetService<IQuotaService>();
         var distributedLockProvider = scope.ServiceProvider.GetRequiredService<IDistributedLockProvider>();
+        var roomLogoManager = scope.ServiceProvider.GetRequiredService<RoomLogoManager>();
 
         var toFolderId = toFolder.Id;
         var isToFolder = Equals(toFolderId, _daoFolderId);
@@ -437,6 +438,12 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                         else
                         {
                             newFolder = await FolderDao.CopyFolderAsync(folder.Id, toFolderId, CancellationToken);
+                            if (isRoom && Equals(folder.ParentId ?? default, toFolderId))
+                            {
+                                await roomLogoManager.CopyAsync(folder, newFolder);
+                                newFolder.SettingsHasLogo = true;
+                                await folderDao.SaveFolderAsync(newFolder);
+                            }
                             await filesMessageService.SendAsync(MessageAction.FolderCopied, newFolder, toFolder, _headers, newFolder.Title, toFolder.Title);
 
                             if (isToFolder)
