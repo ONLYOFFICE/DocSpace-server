@@ -41,14 +41,12 @@ public class ConfigureNotifyServiceCfg
         {
             try
             {        
-                var sender = (INotifySender)serviceProvider.GetService(System.Type.GetType(s.Type, true));
+                var sender = (INotifySender)serviceProvider.GetService(Type.GetType(s.Type, true));
                 if (sender != null)
                 {
                     sender.Init(s.Properties);
                     s.NotifySender = sender;
                 }
-
-                s.Init(serviceProvider);
             }
             catch (Exception)
             {
@@ -104,13 +102,6 @@ public class NotifyServiceCfgSender
     public string Type { get; set; }
     public Dictionary<string, string> Properties { get; set; }
     public INotifySender NotifySender { get; set; }
-
-    public void Init(IServiceProvider serviceProvider)
-    {
-        var sender = (INotifySender)serviceProvider.GetService(System.Type.GetType(Type, true));
-        sender.Init(Properties);
-        NotifySender = sender;
-    }
 }
 
 public class NotifyServiceCfgScheduler
