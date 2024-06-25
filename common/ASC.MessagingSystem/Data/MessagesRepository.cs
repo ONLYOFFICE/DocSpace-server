@@ -27,6 +27,7 @@
 using System.Threading.Channels;
 
 using ASC.Common.Threading;
+using ASC.EventBus.Abstractions;
 
 using Microsoft.Extensions.Hosting;
 
@@ -37,8 +38,7 @@ public class MessagesRepository(
     IServiceScopeFactory serviceScopeFactory,
     ILogger<MessagesRepository> logger,
     IMapper mapper,
-    ChannelWriter<EventData> channelWriter,
-    ITariffService tariffService)
+    IEventBus eventBus)
 {
     private static readonly HashSet<MessageAction> _forceSaveAuditActions = [MessageAction.RoomInviteLinkUsed, MessageAction.UserSentEmailChangeInstructions, MessageAction.UserSentPasswordChangeInstructions, MessageAction.SendJoinInvite];
 
@@ -51,11 +51,11 @@ public class MessagesRepository(
             return await ForceSave(message);
         }
 
-        if (await channelWriter.WaitToWriteAsync())
+        eventBus.Publish(new EventDataIntegrationEvent(message.UserId, message.TenantId)
         {
-            var tariff = await tariffService.GetTariffAsync(message.TenantId);
-            await channelWriter.WriteAsync(new EventData(message, tariff.State));
-        }
+             RequestMessage = message
+        });
+
         return 0;
     }
 
@@ -121,6 +121,49 @@ public class MessagesRepository(
         await historySocketManager.UpdateHistoryAsync(auditEvent.TenantId, auditEvent.FilesReferences);
 
         return auditEvent.Id;
+    }
+}
+
+[Scope]
+public class EventDataIntegrationEventHandler : IIntegrationEventHandler<EventDataIntegrationEvent>
+{
+    private readonly ILogger _logger;
+    private readonly ChannelWriter<EventData> _channelWriter;
+    private readonly ITariffService _tariffService;
+    private readonly TenantManager _tenantManager;
+
+    private EventDataIntegrationEventHandler()
+    {
+
+    }
+
+    public EventDataIntegrationEventHandler(
+        ILogger<EventDataIntegrationEventHandler> logger,
+        ITariffService tariffService,
+        TenantManager tenantManager,
+        ChannelWriter<EventData> channelWriter)
+    {
+        _logger = logger;
+        _channelWriter = channelWriter;
+        _tariffService = tariffService;
+        _tenantManager = tenantManager;
+    }
+    
+
+    public async Task Handle(EventDataIntegrationEvent @event)
+    {
+        CustomSynchronizationContext.CreateContext();
+        using (_logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}") }))
+        {
+            
+            await _tenantManager.SetCurrentTenantAsync(@event.TenantId);
+            var tariff = await _tariffService.GetTariffAsync(@event.TenantId);
+            
+            if (await _channelWriter.WaitToWriteAsync())
+            {
+                await _channelWriter.WriteAsync(new EventData(@event.RequestMessage, tariff.State));
+            }
+        }
     }
 }
 

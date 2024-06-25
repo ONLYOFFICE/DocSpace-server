@@ -89,11 +89,6 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
         services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Writer);
         services.AddHostedService<SocketService>();
-        
-        services.AddSingleton(Channel.CreateUnbounded<EventData>());
-        services.AddSingleton(svc => svc.GetRequiredService<Channel<EventData>>().Reader);
-        services.AddSingleton(svc => svc.GetRequiredService<Channel<EventData>>().Writer);
-        services.AddHostedService<MessageSenderService>();
     }
 
     protected IEnumerable<Assembly> GetAutoMapperProfileAssemblies()
