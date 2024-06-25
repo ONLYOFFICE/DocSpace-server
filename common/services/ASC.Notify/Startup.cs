@@ -42,8 +42,8 @@ public class Startup : BaseWorkerStartup
     {
         await base.ConfigureServices(services);
         
-        services.AddActivePassiveHostedService<NotifySenderService>(DIHelper, Configuration);
-        services.AddActivePassiveHostedService<NotifyCleanerService>(DIHelper, Configuration);
+        services.AddActivePassiveHostedService<NotifySenderService>(Configuration);
+        services.AddActivePassiveHostedService<NotifyCleanerService>(Configuration);
 
         services.AddBaseDbContextPool<NotifyDbContext>();
         services.AddBaseDbContextPool<FilesDbContext>();

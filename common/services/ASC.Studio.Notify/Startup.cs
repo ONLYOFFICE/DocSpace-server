@@ -53,7 +53,7 @@ public class Startup : BaseWorkerStartup
         services.AddHostedService<ServiceLauncher>();
         services.AddScoped<IWebItem, ProductEntryPoint>();
         services.AddBaseDbContextPool<FilesDbContext>();
-        services.AddActivePassiveHostedService<NotifySchedulerService>(DIHelper, Configuration, "StudioNotifySchedulerService");
+        services.AddActivePassiveHostedService<NotifySchedulerService>(Configuration, "StudioNotifySchedulerService");
         services.RegisterQuotaFeature();
     }
 }

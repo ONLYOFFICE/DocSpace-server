@@ -42,7 +42,6 @@ public abstract class BaseStartup
     private const string MultiAuthSchemes = "MultiAuthSchemes";
 
     protected readonly IConfiguration _configuration;
-    private readonly IHostEnvironment _hostEnvironment;
     private readonly string _corsOrigin;
     private static readonly JsonSerializerOptions _serializerOptions = new() { PropertyNameCaseInsensitive = true };
 
@@ -52,10 +51,9 @@ public abstract class BaseStartup
 
     protected bool OpenApiEnabled { get; init; }
 
-    protected BaseStartup(IConfiguration configuration, IHostEnvironment hostEnvironment)
+    protected BaseStartup(IConfiguration configuration)
     {
         _configuration = configuration;
-        _hostEnvironment = hostEnvironment;
 
         _corsOrigin = _configuration["core:cors"];
 
