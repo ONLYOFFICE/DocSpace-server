@@ -26,7 +26,7 @@
 
 namespace ASC.Files.Core.Core.Thirdparty.WebDav;
 
-[Transient]
+[Transient(typeof(IProviderInfo<WebDavEntry, WebDavEntry, WebDavEntry>))]
 [DebuggerDisplay("{CustomerTitle}")]
 internal class WebDavProviderInfo(DisposableWrapper wrapper, ProviderInfoHelper providerInfoHelper) 
     : AbstractProviderInfo<WebDavEntry, WebDavEntry, WebDavEntry, MockLoginProvider>(wrapper, providerInfoHelper)

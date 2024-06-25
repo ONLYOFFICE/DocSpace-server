@@ -28,7 +28,7 @@ using File = System.IO.File;
 
 namespace ASC.Files.Core.Core.Thirdparty.OneDrive;
 
-[Scope]
+[Scope(typeof(ThirdPartyFileDao<Item, Item, Item>))]
 internal class OneDriveFileDao(UserManager userManager,
         IDbContextFactory<FilesDbContext> dbContextFactory,
         IDaoSelector<Item, Item, Item> daoSelector,

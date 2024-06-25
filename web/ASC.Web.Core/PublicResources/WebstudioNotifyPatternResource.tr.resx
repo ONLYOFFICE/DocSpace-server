@@ -1133,16 +1133,13 @@ $TrulyYours</value>
   <data name="subject_change_password_v115" xml:space="preserve">
     <value>Parolanızı değiştirmeyi onaylayın</value>
   </data>
-  <data name="AcceptDocSpace" xml:space="preserve">
-    <value>KABUL ET</value>
-  </data>
-  <data name="ButtonCollaborateDocSpace" xml:space="preserve">
+  <data name="ButtonCollaborate" xml:space="preserve">
     <value>DocSpace'te iş birliği yapın</value>
   </data>
   <data name="ButtonConfirmEmail" xml:space="preserve">
     <value>ONAYLA</value>
   </data>
-  <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
+  <data name="ButtonConfirmInvite" xml:space="preserve">
     <value>DocSpace Davetini Onaylayın</value>
   </data>
   <data name="ButtonConfirmRoomInvite" xml:space="preserve">
@@ -1178,7 +1175,7 @@ Yedekleme prosedürü hakkında daha fazla bilgi almak için lütfen [Veri Yede�
 Herhangi bir sorunuz veya yardıma ihtiyacınız olması halinde lütfen [${__SupportLink}](${__SupportLink}) adresinden bizimle iletişime geçin.
 
 Saygılarımızla,
-ONLYOFFICE™ Destek Ekibi
+ONLYOFFICE Destek Ekibi
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
@@ -1281,6 +1278,7 @@ h1."$PortalUrl":"$PortalUrl"
 Portalınız yeni bir alana taşındı. Lütfen oturum açmak için kullanılacak şifreyi belirleyerek portala erişiminizi yeniden etkin hale getirin.
 
 Hesap şifrenizi belirlemek üzere lütfen aşağıdaki bağlantıyı takip edin:
+
 $OrangeButton
 
 *Not*: Bu bağlantı yalnızca 7 gün boyunca geçerlidir. Lütfen erişimi yeniden etkin hale getirme işlemini bu süre zarfında tamamlayın.
@@ -1318,7 +1316,7 @@ Aşağıdaki bağlantıya tıklayarak portalınızı istediğiniz zaman yeniden 
 Herhangi bir sorunuz veya yardıma ihtiyacınız olması halinde lütfen [${__SalesEmail}](mailto:${__SalesEmail}) adresinden bizimle iletişime geçin.
 
 Saygılarımızla,
-ONLYOFFICE™ Destek Ekibi
+ONLYOFFICE Destek Ekibi
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete_tg" xml:space="preserve">
@@ -1343,7 +1341,7 @@ $OrangeButton
 Herhangi bir sorunuz veya yardıma ihtiyacınız olması halinde lütfen [${__SalesEmail}](mailto:${__SalesEmail}) adresinden bizimle iletişime geçin.
 
 Saygılarımızla,
-ONLYOFFICE™ Destek Ekibi
+ONLYOFFICE Destek Ekibi
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">

@@ -159,34 +159,38 @@ public class FolderContentDtoHelper(
 
         async IAsyncEnumerable<FileEntryDto> GetFoldersDto(IEnumerable<FileEntry> folderEntries, string entriesOrder)
         {
-            List<FileShareRecord> currentUsersRecords = null;
+            List<FileShareRecord<int>> currentUsersRecords = null;
+            List<FileShareRecord<string>> currentUsersRecords1 = null;
 
             foreach (var r in folderEntries)
             {
                 switch (r)
                 {
                     case Folder<int> fol1:
-                        yield return await GetFolder(fol1, entriesOrder);
+                        if (currentUsersRecords == null && 
+                            DocSpaceHelper.IsRoom(fol1.FolderType) && 
+                            await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID))
+                        {
+                            currentUsersRecords = await fileSecurity.GetUserRecordsAsync<int>().ToListAsync();
+                        }
+                
+                        yield return await folderWrapperHelper.GetAsync(fol1, currentUsersRecords, entriesOrder);
                         break;
                     case Folder<string> fol2:
-                    yield return await GetFolder(fol2, entriesOrder);
+                        if (currentUsersRecords1 == null && 
+                            DocSpaceHelper.IsRoom(fol2.FolderType) && 
+                            await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID))
+                        {
+                            currentUsersRecords1 = await fileSecurity.GetUserRecordsAsync<string>().ToListAsync();
+                        }
+                
+                        yield return await folderWrapperHelper.GetAsync(fol2, currentUsersRecords1, entriesOrder);
                         break;
                 }
             }
 
             yield break;
-
-            async Task<FolderDto<T1>> GetFolder<T1>(Folder<T1> fol1, string order1)
-            {
-                if (currentUsersRecords == null && 
-                    DocSpaceHelper.IsRoom(fol1.FolderType) && 
-                    await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID))
-                {
-                    currentUsersRecords = await fileSecurity.GetUserRecordsAsync<T>().ToListAsync();
-                }
-                
-                return await folderWrapperHelper.GetAsync(fol1, currentUsersRecords, order1);
-            }
+            
         }
     }
     

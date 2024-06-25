@@ -553,10 +553,7 @@ Użytkownik "$__AuthorName":"$__AuthorUrl" dołączył do portalu "${__VirtualRo
   <data name="ButtonConfirmEmail" xml:space="preserve">
     <value>POTWIERDŹ</value>
   </data>
-  <data name="AcceptDocSpace" xml:space="preserve">
-    <value>AKCEPTUJ</value>
-  </data>
-  <data name="ButtonCollaborateDocSpace" xml:space="preserve">
+  <data name="ButtonCollaborate" xml:space="preserve">
     <value>Współpracuj w DocSpace</value>
   </data>
   <data name="ButtonConfirmRoomInvite" xml:space="preserve">
@@ -1172,7 +1169,7 @@ $TrulyYours</value>
   <data name="subject_saas_user_welcome_v1" xml:space="preserve">
     <value>Witaj w ONLYOFFICE DocSpace!</value>
   </data>
-  <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
+  <data name="ButtonConfirmInvite" xml:space="preserve">
     <value>Potwierdź zaproszenie DocSpace</value>
   </data>
   <data name="ButtonActivateEmail" xml:space="preserve">
@@ -1304,7 +1301,7 @@ Aby dowiedzieć się więcej na temat procedury tworzenia kopii zapasowych, spra
 Jeśli masz jakiekolwiek pytania lub potrzebujesz pomocy, skontaktuj się z nami pod adresem [${__SupportLink}](${__SupportLink})
 
 Pozdrawiamy,
-Zespół pomocy technicznej ONLYOFFICE™
+Zespół pomocy technicznej ONLYOFFICE
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
@@ -1430,6 +1427,7 @@ h1."$PortalUrl":"$PortalUrl"
 Twój portal został przeniesiony na nową domenę. Przywróć swój dostęp do portalu, podając hasło, które będzie używane do logowania.
 
 Aby skonfigurować hasło dla konta, kliknij poniższy link.
+
 $OrangeButton
 
 *Uwaga*: ten link jest ważny tylko przez 7 dni. Zakończ proces odzyskiwania dostępu w tym okresie.
@@ -1467,7 +1465,7 @@ Możesz ponownie aktywować portal w dowolnej chwili, klikając poniższy link:
 Jeśli masz jakiekolwiek pytania lub potrzebujesz pomocy, skontaktuj się z nami pod adresem [${__SalesEmail}](mailto:${__SalesEmail})
 
 Pozdrawiamy,
-Zespół pomocy technicznej ONLYOFFICE™
+Zespół pomocy technicznej ONLYOFFICE
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete_tg" xml:space="preserve">
@@ -1492,7 +1490,7 @@ _Uwaga_: ten link jest ważny tylko przez 7 dni. Zakończ proces usuwania portal
 Jeśli masz jakiekolwiek pytania lub potrzebujesz pomocy, skontaktuj się z nami pod adresem [${__SalesEmail}](mailto:${__SalesEmail})
 
 Pozdrawiamy,
-Zespół wsparcia ONLYOFFICE™
+Zespół wsparcia ONLYOFFICE
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">

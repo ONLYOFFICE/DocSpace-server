@@ -61,7 +61,7 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to New Presentation.
+        ///   Looks up a localized string similar to New presentation.
         /// </summary>
         public static string TitleNewFilePresentation {
             get {
@@ -70,7 +70,7 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to New Spreadsheet.
+        ///   Looks up a localized string similar to New spreadsheet.
         /// </summary>
         public static string TitleNewFileSpreadsheet {
             get {
@@ -79,7 +79,7 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to New Document.
+        ///   Looks up a localized string similar to New document.
         /// </summary>
         public static string TitleNewFileText {
             get {

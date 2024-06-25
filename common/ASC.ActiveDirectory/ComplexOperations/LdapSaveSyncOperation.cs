@@ -26,7 +26,7 @@
 
 namespace ASC.ActiveDirectory.ComplexOperations;
 
-[Singleton(Additional = typeof(LdapOperationExtension))]
+[Singleton]
 public class LdapSaveSyncOperation(IServiceProvider serviceProvider,
     IDistributedTaskQueueFactory queueFactory)
 {
@@ -44,8 +44,7 @@ public class LdapSaveSyncOperation(IServiceProvider serviceProvider,
         }
         if (item == null)
         {
-            using var scope = serviceProvider.CreateScope();
-            item = scope.ServiceProvider.GetRequiredService<LdapOperationJob>();
+            item = serviceProvider.GetRequiredService<LdapOperationJob>();
             await item.InitJobAsync(settings, tenant, operationType, resource, userId);
             await _progressQueue.EnqueueTask(item);
         }
@@ -227,13 +226,5 @@ public class LdapSaveSyncOperation(IServiceProvider serviceProvider,
         return (await _progressQueue.GetAllTasks<LdapOperationJob>())
             .Where(t => t[LdapTaskProperty.OWNER] == tenantId)
             .ToList();
-    }
-
-    public static class LdapOperationExtension
-    {
-        public static void Register(DIHelper services)
-        {
-            services.TryAdd<LdapOperationJob>();
-        }
     }
 }

@@ -27,19 +27,20 @@
 namespace ASC.Data.Backup.Tasks;
 
 [Scope]
-public class BackupPortalTask(DbFactory dbFactory,
-        IDbContextFactory<BackupsContext> dbContextFactory,
-        ILogger<BackupPortalTask> logger,
-        TenantManager tenantManager,
-        CoreBaseSettings coreBaseSettings,
-        StorageFactory storageFactory,
-        StorageFactoryConfig storageFactoryConfig,
-        ModuleProvider moduleProvider,
-        TempStream tempStream)
+public class BackupPortalTask(
+    DbFactory dbFactory,
+    IDbContextFactory<BackupsContext> dbContextFactory,
+    ILogger<BackupPortalTask> logger,
+    TenantManager tenantManager,
+    CoreBaseSettings coreBaseSettings,
+    StorageFactory storageFactory,
+    StorageFactoryConfig storageFactoryConfig,
+    ModuleProvider moduleProvider,
+    TempStream tempStream)
     : PortalTaskBase(dbFactory, logger, storageFactory, storageFactoryConfig, moduleProvider)
 {
-    public string BackupFilePath { get; private set; }
-    public int Limit { get; private set; }
+    private string BackupFilePath { get; set; }
+    private int Limit { get; set; }
 
     private const int MaxLength = 250;
     private const int BatchLimit = 5000;
@@ -71,20 +72,21 @@ public class BackupPortalTask(DbFactory dbFactory,
             }
             else
             {
-
                 var modulesToProcess = GetModulesToProcess().ToList();
-                var fileGroups = await GetFilesGroup();
-
-                var stepscount = ProcessStorage ? fileGroups.Count : 0;
-                SetStepsCount(modulesToProcess.Count + stepscount);
-
-                foreach (var module in modulesToProcess)
-                {
-                    await DoBackupModule(WriteOperator, module);
-                }
+                SetStepsCount(1);
+                var count = modulesToProcess.Select(m => m.Tables.Count(t => !_ignoredTables.Contains(t.Name) && t.InsertMethod != InsertMethod.None)).Sum();
+                IAsyncEnumerable<BackupFileInfo> files = null;
                 if (ProcessStorage)
                 {
-                    await DoBackupStorageAsync(WriteOperator, fileGroups);
+                    files = GetFiles();
+                    count += await files.CountAsync();
+                }
+
+                var completedCount = await DoBackupModule(WriteOperator, modulesToProcess, count);
+
+                if (ProcessStorage)
+                {
+                    await DoBackupStorageAsync(WriteOperator, files, completedCount, count);
                 }
             }
         }
@@ -92,7 +94,7 @@ public class BackupPortalTask(DbFactory dbFactory,
         logger.DebugEndBackup(TenantId);
     }
 
-    public List<object[]> ExecuteList(DbCommand command)
+    private List<object[]> ExecuteList(DbCommand command)
     {
         var list = new List<object[]>();
         using var result = command.ExecuteReader();
@@ -123,32 +125,25 @@ public class BackupPortalTask(DbFactory dbFactory,
             await writer.WriteEntryAsync(KeyHelper.GetDumpKey(), stream, () => Task.CompletedTask);
         }
 
-        var files = new List<BackupFileInfo>();
-
-        var stepscount = 0;
-        foreach (var db in databases)
-        {
-            stepscount += db.Value.Count * 4;// (schema + data) * (dump + zip)
-        }
+        IAsyncEnumerable<BackupFileInfo> files = null;
+        
+        var count = databases.Select(d => d.Value.Count * 4).Sum(); // (schema + data) * (dump + zip)
+        var completedCount = count;
 
         if (ProcessStorage)
         {
             var tenants = (await tenantManager.GetTenantsAsync(false)).Select(r => r.Id);
-            foreach (var t in tenants)
-            {
-                files.AddRange(await GetFiles(t));
-            }
-
-            stepscount += files.Count * 2 + 1;
-            logger.DebugFilesCount(files.Count);
+            files = GetFilesTenants(tenants);
+            logger.DebugFilesCount(count);
+            count += await files.CountAsync();
         }
-
-        SetStepsCount(stepscount);
+        SetStepsCount(1);
 
         foreach (var db in databases)
         {
             await DoDump(writer, db.Key.Item1, db.Key.Item2, db.Value);
         }
+
         var dir = Path.GetDirectoryName(BackupFilePath);
         var subDir = Path.Combine(dir, Path.GetFileNameWithoutExtension(BackupFilePath));
         logger.DebugDirRemoveStart(subDir);
@@ -157,7 +152,7 @@ public class BackupPortalTask(DbFactory dbFactory,
 
         if (ProcessStorage)
         {
-            await DoDumpStorage(writer, files);
+            await DoBackupStorageAsync(writer, files, completedCount, count, true);
         }
     }
 
@@ -186,6 +181,7 @@ public class BackupPortalTask(DbFactory dbFactory,
         {
             Directory.CreateDirectory(schemeDir);
         }
+
         if (!Directory.Exists(dataDir))
         {
             Directory.CreateDirectory(dataDir);
@@ -196,6 +192,7 @@ public class BackupPortalTask(DbFactory dbFactory,
         {
             dict.Add(table, SelectCount(table, connectionString));
         }
+
         tables.Sort((pair1, pair2) => dict[pair1].CompareTo(dict[pair2]));
 
         for (var i = 0; i < tables.Count; i += TasksLimit)
@@ -222,23 +219,12 @@ public class BackupPortalTask(DbFactory dbFactory,
         }
     }
 
-    private async Task<IEnumerable<BackupFileInfo>> GetFiles(int tenantId)
-    {
-        await using var backupRecordContext = await dbContextFactory.CreateDbContextAsync();
-        var exclude = await Queries.BackupRecordsAsync(backupRecordContext, tenantId).ToListAsync();
-
-        var files = (await GetFilesToProcess(tenantId)).ToList();
-        files = files.Where(f => !exclude.Exists(e => f.Path.Replace('\\', '/').Contains($"/file_{e.StoragePath}/"))).ToList();
-        return files;
-
-    }
-
     private async Task DumpTableScheme(string t, string dir, string connectionString, bool ignore)
     {
         try
         {
             logger.DebugDumpTableSchemeStart(t);
-            using (var connection = DbFactory.OpenConnection(connectionString: connectionString))
+            await using (var connection = DbFactory.OpenConnection(connectionString: connectionString))
             {
                 var command = connection.CreateCommand();
                 command.CommandText = $"SHOW CREATE TABLE `{t}`";
@@ -247,18 +233,17 @@ public class BackupPortalTask(DbFactory dbFactory,
                 if (ignore)
                 {
                     creates.Append(createScheme
-                            .Select(r => Convert.ToString(r[1]).Replace("CREATE TABLE ", "CREATE TABLE IF NOT EXISTS "))
-                            .FirstOrDefault());
+                        .Select(r => Convert.ToString(r[1]).Replace("CREATE TABLE ", "CREATE TABLE IF NOT EXISTS "))
+                        .FirstOrDefault());
                     creates.Append(';');
                 }
                 else
                 {
-
                     creates.Append($"DROP TABLE IF EXISTS `{t}`;");
                     creates.AppendLine();
                     creates.Append(createScheme
-                            .Select(r => Convert.ToString(r[1]))
-                            .FirstOrDefault());
+                        .Select(r => Convert.ToString(r[1]))
+                        .FirstOrDefault());
                     creates.Append(';');
                 }
 
@@ -278,7 +263,6 @@ public class BackupPortalTask(DbFactory dbFactory,
         {
             logger.ErrorDumpTableScheme(e);
         }
-
     }
 
     private int SelectCount(string t, string dbName)
@@ -299,7 +283,6 @@ public class BackupPortalTask(DbFactory dbFactory,
             logger.ErrorSelectCount(e);
             throw;
         }
-
     }
 
     private async Task DumpTableData(string t, string dir, int count, string connectionString)
@@ -322,22 +305,21 @@ public class BackupPortalTask(DbFactory dbFactory,
 
             List<string> columns;
 
-            using (var connection = DbFactory.OpenConnection(connectionString: connectionString))
+            await using (var connection = DbFactory.OpenConnection(connectionString: connectionString))
             {
                 var command = connection.CreateCommand();
                 command.CommandText = string.Format($"SHOW COLUMNS FROM `{t}`");
                 columns = ExecuteList(command).Select(r => "`" + Convert.ToString(r[0]) + "`").ToList();
             }
 
-            using (var connection = DbFactory.OpenConnection())
+            await using (var connection = DbFactory.OpenConnection())
             {
                 var command = connection.CreateCommand();
                 command.CommandText = $"select COLUMN_NAME from information_schema.`COLUMNS` where TABLE_SCHEMA = '{connection.Database}' and TABLE_NAME = '{t}' and COLUMN_KEY = 'PRI' and DATA_TYPE = 'int'";
                 primaryIndex = ExecuteList(command).ConvertAll(r => Convert.ToString(r[0])).FirstOrDefault();
-
             }
 
-            using (var connection = DbFactory.OpenConnection())
+            await using (var connection = DbFactory.OpenConnection())
             {
                 var command = connection.CreateCommand();
                 command.CommandText = $"SHOW INDEXES FROM {t} WHERE COLUMN_NAME='{primaryIndex}' AND seq_in_index=1";
@@ -347,7 +329,7 @@ public class BackupPortalTask(DbFactory dbFactory,
 
             if (searchWithPrimary)
             {
-                using var connection = DbFactory.OpenConnection();
+                await using var connection = DbFactory.OpenConnection();
                 var command = connection.CreateCommand();
                 command.CommandText = $"select max({primaryIndex}), min({primaryIndex}) from {t}";
                 var minMax = ExecuteList(command).ConvertAll(r => new Tuple<int, int>(Convert.ToInt32(r[0]), Convert.ToInt32(r[1]))).FirstOrDefault();
@@ -388,7 +370,6 @@ public class BackupPortalTask(DbFactory dbFactory,
                 }
 
                 SaveToFile(path, t, columns, result);
-
             } while (true);
 
 
@@ -454,7 +435,7 @@ public class BackupPortalTask(DbFactory dbFactory,
                             sw.Write("0x");
                             foreach (var b in byteArray)
                                 sw.Write("{0:x2}", b);
-                            }
+                        }
                         else
                         {
                             if (obj[i] is string s)
@@ -467,6 +448,7 @@ public class BackupPortalTask(DbFactory dbFactory,
                                 ser.Serialize(writer, obj[i]);
                             }
                         }
+
                         if (i != obj.Length - 1)
                         {
                             sw.Write(",");
@@ -483,78 +465,6 @@ public class BackupPortalTask(DbFactory dbFactory,
 
             data = data.Skip(BatchLimit).ToList();
         }
-    }
-
-    private async Task DoDumpStorage(IDataWriteOperator writer, IReadOnlyList<BackupFileInfo> files)
-    {
-        logger.DebugBeginBackupStorage();
-
-        var dir = Path.GetDirectoryName(BackupFilePath);
-        var subDir = CrossPlatform.PathCombine(dir, Path.GetFileNameWithoutExtension(BackupFilePath));
-
-        for (var i = 0; i < files.Count; i += TasksLimit)
-        {
-            var storageDir = CrossPlatform.PathCombine(subDir, KeyHelper.GetStorage());
-
-            if (!Directory.Exists(storageDir))
-            {
-                Directory.CreateDirectory(storageDir);
-            }
-
-            var tasks = new List<Task>(TasksLimit);
-            for (var j = 0; j < TasksLimit && i + j < files.Count; j++)
-            {
-                var t = files[i + j];
-                tasks.Add(Task.Run(() => DoDumpFileAsync(t, storageDir)));
-            }
-
-            Task.WaitAll(tasks.ToArray());
-
-            await ArchiveDir(writer, subDir);
-
-            Directory.Delete(storageDir, true);
-        }
-
-        var restoreInfoXml = new XElement("storage_restore", files.Select(file => (object)file.ToXElement()).ToArray());
-
-        var tmpPath = CrossPlatform.PathCombine(subDir, KeyHelper.GetStorageRestoreInfoZipKey());
-        Directory.CreateDirectory(Path.GetDirectoryName(tmpPath));
-
-        await using (var tmpFile = new FileStream(tmpPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read, 4096, FileOptions.DeleteOnClose))
-        {
-            restoreInfoXml.WriteTo(tmpFile);
-            await writer.WriteEntryAsync(KeyHelper.GetStorageRestoreInfoZipKey(), tmpFile, async () => await SetStepCompleted());
-        }
-        Directory.Delete(subDir, true);
-
-        logger.DebugEndBackupStorage();
-    }
-
-    private async Task DoDumpFileAsync(BackupFileInfo file, string dir)
-    {
-        var storage = await StorageFactory.GetStorageAsync(file.Tenant, file.Module);
-        var filePath = CrossPlatform.PathCombine(dir, file.GetZipKey());
-        var dirName = Path.GetDirectoryName(filePath);
-
-        logger.DebugBackupFile(filePath);
-
-        if (!Directory.Exists(dirName) && !string.IsNullOrEmpty(dirName))
-        {
-            Directory.CreateDirectory(dirName);
-        }
-
-        if (!WorkContext.IsMono && filePath.Length > MaxLength)
-        {
-            filePath = @"\\?\" + filePath;
-        }
-
-        await using (var fileStream = await storage.GetReadStreamAsync(file.Domain, file.Path))
-        await using (var tmpFile = File.OpenWrite(filePath))
-        {
-            await fileStream.CopyToAsync(tmpFile);
-        }
-
-        await SetStepCompleted();
     }
 
     private async Task ArchiveDir(IDataWriteOperator writer, string subDir)
@@ -575,115 +485,141 @@ public class BackupPortalTask(DbFactory dbFactory,
         logger.DebugArchiveDirEnd(subDir);
     }
 
-    private async Task<List<IGrouping<string, BackupFileInfo>>> GetFilesGroup()
+    private IAsyncEnumerable<BackupFileInfo> GetFiles()
     {
-        var files = (await GetFilesToProcess(TenantId)).ToList();
-
-        await using var backupRecordContext = await dbContextFactory.CreateDbContextAsync();
-        var exclude = await Queries.BackupRecordsAsync(backupRecordContext, TenantId).ToListAsync();
-
-        files = files.Where(f => !exclude.Exists(e => f.Path.Replace('\\', '/').Contains($"/file_{e.StoragePath}/"))).ToList();
-
-        return files.GroupBy(file => file.Module).ToList();
+        return GetFiles(TenantId);
     }
 
-    private async Task DoBackupModule(IDataWriteOperator writer, IModuleSpecifics module)
+    private async IAsyncEnumerable<BackupFileInfo> GetFilesTenants(IEnumerable<int> tenantIds)
     {
-        logger.DebugBeginSavingDataForModule(module.ModuleName);
-        var tablesToProcess = module.Tables.Where(t => !_ignoredTables.Contains(t.Name) && t.InsertMethod != InsertMethod.None).ToList();
-        var tablesCount = tablesToProcess.Count;
-        var tablesProcessed = 0;
-
-        await using (var connection = DbFactory.OpenConnection())
+        foreach(var tenantId in tenantIds)
         {
-            foreach (var table in tablesToProcess)
+            var files = GetFiles(tenantId);
+            await foreach(var file in files)
             {
-                logger.DebugBeginLoadTable(table.Name);
-                using var data = new DataTable(table.Name);
-                ActionInvoker.Try(
-                    state =>
-                    {
-                        data.Clear();
-                        int counts;
-                        var offset = 0;
-                        do
-                        {
-                            var t = (TableInfo)state;
-                            var dataAdapter = DbFactory.CreateDataAdapter();
-                            dataAdapter.SelectCommand = module.CreateSelectCommand(connection.Fix(), TenantId, t, Limit, offset).WithTimeout(600);
-                            counts = ((DbDataAdapter)dataAdapter).Fill(data);
-                            offset += Limit;
-                        } while (counts == Limit);
-
-                    },
-                    table,
-                    maxAttempts: 5,
-                    onFailure: error => throw ThrowHelper.CantBackupTable(table.Name, error),
-                    onAttemptFailure: logger.WarningBackupAttemptFailure);
-
-                foreach (var col in data.Columns.Cast<DataColumn>().Where(col => col.DataType == typeof(DateTime)))
-                {
-                    col.DateTimeMode = DataSetDateTime.Unspecified;
-                }
-
-                module.PrepareData(data);
-
-                logger.DebugEndLoadTable(table.Name);
-
-                logger.DebugBeginSavingTable(table.Name);
-
-                await using (var file = tempStream.Create())
-                {
-                    data.WriteXml(file, XmlWriteMode.WriteSchema);
-                    data.Clear();
-
-                    await writer.WriteEntryAsync(KeyHelper.GetTableZipKey(module, data.TableName), file, SetProgress);
-                }
-
-                async Task SetProgress()
-                {
-                    await SetCurrentStepProgress((int)(++tablesProcessed * 100 / (double)tablesCount));
-                }
-
-                logger.DebugEndSavingTable(table.Name);
+                yield return file;
             }
         }
-
-        logger.DebugEndSavingDataForModule(module.ModuleName);
     }
 
-    private async Task DoBackupStorageAsync(IDataWriteOperator writer, List<IGrouping<string, BackupFileInfo>> fileGroups)
+    private async IAsyncEnumerable<BackupFileInfo> GetFiles(int tenantId)
+    {
+        var files = GetFilesToProcess(tenantId).Distinct();
+
+        await using var backupRecordContext = await dbContextFactory.CreateDbContextAsync();
+        var exclude = await Queries.BackupRecordsAsync(backupRecordContext, tenantId).ToListAsync();
+
+        files = files.Where(f => !exclude.Exists(e => f.Path.Replace('\\', '/').Contains($"/file_{e.StoragePath}/")));
+
+        await foreach (var file in files)
+        {
+            yield return file;
+        }
+    }
+
+    private async Task<int> DoBackupModule(IDataWriteOperator writer, List<IModuleSpecifics> modules, int count)
+    {
+        var tablesProcessed = 0;
+        foreach (var module in modules)
+        {
+            logger.DebugBeginSavingDataForModule(module.ModuleName);
+            var tablesToProcess = module.Tables.Where(t => !_ignoredTables.Contains(t.Name) && t.InsertMethod != InsertMethod.None).ToList();
+
+            await using (var connection = DbFactory.OpenConnection())
+            {
+                foreach (var table in tablesToProcess)
+                {
+                    logger.DebugBeginLoadTable(table.Name);
+                    using var data = new DataTable(table.Name);
+                    ActionInvoker.Try(
+                        state =>
+                        {
+                            data.Clear();
+                            int counts;
+                            var offset = 0;
+                            do
+                            {
+                                var t = (TableInfo)state;
+                                var dataAdapter = DbFactory.CreateDataAdapter();
+                                dataAdapter.SelectCommand = module.CreateSelectCommand(connection.Fix(), TenantId, t, Limit, offset).WithTimeout(600);
+                                counts = ((DbDataAdapter)dataAdapter).Fill(data);
+                                offset += Limit;
+                            } while (counts == Limit);
+                        },
+                        table,
+                        maxAttempts: 5,
+                        onFailure: error => throw ThrowHelper.CantBackupTable(table.Name, error),
+                        onAttemptFailure: logger.WarningBackupAttemptFailure);
+
+                    foreach (var col in data.Columns.Cast<DataColumn>().Where(col => col.DataType == typeof(DateTime)))
+                    {
+                        col.DateTimeMode = DataSetDateTime.Unspecified;
+                    }
+
+                    module.PrepareData(data);
+
+                    logger.DebugEndLoadTable(table.Name);
+
+                    logger.DebugBeginSavingTable(table.Name);
+
+                    await using (var file = tempStream.Create())
+                    {
+                        data.WriteXml(file, XmlWriteMode.WriteSchema);
+                        data.Clear();
+
+                        await writer.WriteEntryAsync(KeyHelper.GetTableZipKey(module, data.TableName), file, SetProgress);
+                    }
+
+                    async Task SetProgress()
+                    {
+                        await SetCurrentStepProgress((int)(++tablesProcessed * 100 / (double)count));
+                    }
+
+                    logger.DebugEndSavingTable(table.Name);
+                }
+            }
+
+            logger.DebugEndSavingDataForModule(module.ModuleName);
+        }
+        return tablesProcessed;
+    }
+
+    private async Task DoBackupStorageAsync(IDataWriteOperator writer, IAsyncEnumerable<BackupFileInfo> files, int completedCount, int count, bool dump = false)
     {
         logger.DebugBeginBackupStorage();
 
-        foreach (var group in fileGroups)
+        var filesProcessed = completedCount;
+
+        async Task SetProgress()
         {
-            var filesProcessed = 0;
-            var filesCount = group.Count();
-
-            async Task SetProgress()
-            {
-                await SetCurrentStepProgress((int)(++filesProcessed * 100 / (double)filesCount));
-            }
-
-            foreach (var file in group)
-            {
-                var storage = await StorageFactory.GetStorageAsync(TenantId, group.Key);
-                await writer.WriteEntryAsync(file.GetZipKey(), file.Domain, file.Path, storage, SetProgress);
-            }
+            await SetCurrentStepProgress((int)(++filesProcessed * 100 / (double)count));
         }
 
-        var restoreInfoXml = new XElement(
-            "storage_restore",
-            fileGroups
-                .SelectMany(group => group.Select(file => (object)file.ToXElement()))
-                .ToArray());
-
-        await using (var tmpFile = tempStream.Create())
+        await using var tmpFile = tempStream.Create();
+        var bytes = "<storage_restore>"u8.ToArray();
+        await tmpFile.WriteAsync(bytes);
+        var storages = new Dictionary<string, IDataStore>();
+        await foreach (var file in files)
         {
-            restoreInfoXml.WriteTo(tmpFile);
-            await writer.WriteEntryAsync(KeyHelper.GetStorageRestoreInfoZipKey(), tmpFile, () => Task.CompletedTask);
+            if (!storages.TryGetValue(file.Module, out var storage))
+            {
+                storage = await StorageFactory.GetStorageAsync(TenantId, file.Module);
+                storages.Add(file.Module, storage);
+            }
+            var path = file.GetZipKey();
+            if (dump) 
+            {
+                path = Path.Combine("\\storage", path);
+            }
+            await writer.WriteEntryAsync(path, file.Domain, file.Path, storage, SetProgress);
+
+            var restoreInfoXml = file.ToXElement();
+            await restoreInfoXml.WriteToAsync(tmpFile);
         }
+
+        bytes = "</storage_restore>"u8.ToArray();
+        await tmpFile.WriteAsync(bytes);
+        await writer.WriteEntryAsync(KeyHelper.GetStorageRestoreInfoZipKey(), tmpFile, () => Task.CompletedTask);
 
         logger.DebugEndBackupStorage();
     }
@@ -692,8 +628,8 @@ public class BackupPortalTask(DbFactory dbFactory,
 static file class Queries
 {
     public static readonly Func<BackupsContext, int, IAsyncEnumerable<BackupRecord>> BackupRecordsAsync = Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-    (BackupsContext ctx, int tenantId) =>
-        ctx.Backups.Where(b => b.TenantId == tenantId 
-            && b.StorageType == 0
-            && b.StoragePath != null));
+        (BackupsContext ctx, int tenantId) =>
+            ctx.Backups.Where(b => b.TenantId == tenantId
+                                   && b.StorageType == 0
+                                   && b.StoragePath != null));
 }

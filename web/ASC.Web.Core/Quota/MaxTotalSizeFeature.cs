@@ -26,8 +26,8 @@
 
 namespace ASC.Web.Core.Quota;
 
-public class MaxTotalSizeChecker(ITenantQuotaFeatureStat<MaxTotalSizeFeature, long> tenantQuotaFeatureStatistic,
-        TenantManager tenantManager)
+[Scope]
+public class MaxTotalSizeChecker(ITenantQuotaFeatureStat<MaxTotalSizeFeature, long> tenantQuotaFeatureStatistic, TenantManager tenantManager)
     : TenantQuotaFeatureChecker<MaxTotalSizeFeature, long>(tenantQuotaFeatureStatistic, tenantManager)
 {
     public override string GetExceptionMessage(long size)
@@ -36,6 +36,7 @@ public class MaxTotalSizeChecker(ITenantQuotaFeatureStat<MaxTotalSizeFeature, lo
     }
 }
 
+[Scope]
 public class MaxTotalSizeStatistic(IServiceProvider serviceProvider) : ITenantQuotaFeatureStat<MaxTotalSizeFeature, long>
 {
     public async Task<long> GetValueAsync()

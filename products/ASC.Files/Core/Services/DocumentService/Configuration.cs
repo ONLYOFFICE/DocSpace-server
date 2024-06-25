@@ -72,7 +72,8 @@ public class CoEditingConfig
     }
 }
 
-[Scope]
+[Scope(GenericArguments = [typeof(int)])]
+[Scope(GenericArguments = [typeof(string)])]
 public class Configuration<T>(
     DocumentConfig<T> document,
     EditorConfiguration<T> editorConfig)
@@ -135,7 +136,8 @@ public class Configuration<T>(
 
 #region Nested Classes
 
-[Transient]
+[Transient(GenericArguments = [typeof(int)])]
+[Transient(GenericArguments = [typeof(string)])]
 public class DocumentConfig<T>(
     DocumentServiceConnector documentServiceConnector, 
     PathProvider pathProvider, 
@@ -182,13 +184,14 @@ public class DocumentConfig<T>(
         }
 
         var last = Permissions.Edit || Permissions.Review || Permissions.Comment;
-        _fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(pathProvider.GetFileStreamUrl(file, last));
+        _fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(await pathProvider.GetFileStreamUrlAsync(file, last));
 
         return _fileUri;
     }
 }
 
-[Transient]
+[Transient(GenericArguments = [typeof(int)])]
+[Transient(GenericArguments = [typeof(string)])]
 public class EditorConfiguration<T>(
     UserManager userManager,
     AuthContext authContext,
@@ -389,7 +392,8 @@ public class EditorConfiguration<T>(
     }
 }
 
-[Transient]
+[Transient(GenericArguments = [typeof(int)])]
+[Transient(GenericArguments = [typeof(string)])]
 public class InfoConfig<T>(
     BreadCrumbsManager breadCrumbsManager,
     FileSharing fileSharing,
@@ -552,7 +556,8 @@ public class CustomerConfig(
     public async Task<string> GetWww() => (await settingsManager.LoadForDefaultTenantAsync<CompanyWhiteLabelSettings>()).Site;
 }
 
-[Transient]
+[Transient(GenericArguments = [typeof(int)])]
+[Transient(GenericArguments = [typeof(string)])]
 public class CustomizationConfig<T>(
     CoreBaseSettings coreBaseSettings,
     SettingsManager settingsManager,
@@ -675,22 +680,8 @@ public class CustomizationConfig<T>(
 
     public async Task<bool> GetSubmitForm(File<T> file, bool modeWrite)
     {
-        if (!modeWrite || FileUtility.GetFileTypeByFileName(file.Title) != FileType.Pdf)
-        {
-            return false;
-        }
 
-        var linkDao = daoFactory.GetLinkDao();
-        var sourceId = await linkDao.GetSourceAsync(file.Id.ToString());
-
-        if (sourceId == null)
-        {
-            return false;
-        }
-
-        var properties = int.TryParse(sourceId, out var sourceInt)
-            ? await daoFactory.GetFileDao<int>().GetProperties(sourceInt)
-            : await daoFactory.GetFileDao<string>().GetProperties(sourceId);
+        var properties = await daoFactory.GetFileDao<T>().GetProperties(file.Id);
 
         return properties is { FormFilling.CollectFillForm: true };
     }
@@ -759,10 +750,15 @@ public class LogoConfig(
     {
         get => commonLinkUtility.GetFullAbsolutePath(commonLinkUtility.GetDefault());
     }
+
+    public bool GetVisible(EditorType editorType)
+    {
+        return editorType != EditorType.Mobile;
+    }
 }
 
 [Transient]
-public class PluginsConfig()
+public class PluginsConfig
     // ConsumerFactory consumerFactory,
     // BaseCommonLinkUtility baseCommonLinkUtility,
     // CoreBaseSettings coreBaseSettings,
@@ -824,33 +820,4 @@ public class UserConfig
     public string Id { get; set; }
     public string Name { get; set; }
     public string Image { get; set; }
-}
-
-public static class ConfigurationFilesExtension
-{
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<Configuration<int>>();
-        services.TryAdd<Configuration<string>>();
-        
-        services.TryAdd<DocumentConfig<string>>();
-        services.TryAdd<DocumentConfig<int>>();
-
-        services.TryAdd<InfoConfig<string>>();
-        services.TryAdd<InfoConfig<int>>();
-
-        services.TryAdd<EditorConfiguration<string>>();
-        services.TryAdd<EditorConfiguration<int>>();
-
-        services.TryAdd<EmbeddedConfig>();
-
-        services.TryAdd<CustomizationConfig<string>>();
-        services.TryAdd<CustomizationConfig<int>>();
-
-        services.TryAdd<CustomerConfig>();
-        services.TryAdd<CustomerConfig>();
-
-        services.TryAdd<LogoConfig>();
-        services.TryAdd<LogoConfig>();
-    }
 }

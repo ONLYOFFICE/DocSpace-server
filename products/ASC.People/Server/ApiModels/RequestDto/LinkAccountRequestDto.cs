@@ -62,4 +62,8 @@ public class SignupAccountRequestDto : LinkAccountRequestDto
     /// <summary>Link key</summary>
     /// <type>System.String, System</type>
     public string Key { get; set; }
+    
+    /// <summary>Culture</summary>
+    /// <type>System.String, System</type>
+    public string Culture { get; set; }
 }

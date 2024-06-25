@@ -30,7 +30,7 @@ namespace ASC.People.Api;
 /// People API.
 /// </summary>
 /// <name>people</name>
-[Scope(Additional = typeof(BaseLoginProviderExtension))]
+[Scope]
 [DefaultRoute]
 [ApiController]
 [ControllerName("people")]

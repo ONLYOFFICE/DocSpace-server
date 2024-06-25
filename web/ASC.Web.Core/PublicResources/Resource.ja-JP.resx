@@ -1045,4 +1045,7 @@
   <data name="TariffsFeature_statistic" xml:space="preserve">
     <value>ストレージ容量制限と統計</value>
   </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>無効なユーザー</value>
+  </data>
 </root>

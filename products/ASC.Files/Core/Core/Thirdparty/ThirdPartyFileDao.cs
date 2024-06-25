@@ -120,8 +120,8 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         //Filter
         if (subjectID != Guid.Empty)
         {
-            files = files.Where(x => subjectGroup
-                ? userManager.IsUserInGroup(x.CreateBy, subjectID)
+            files = files.WhereAwait(async x => subjectGroup
+                ? await userManager.IsUserInGroupAsync(x.CreateBy, subjectID)
                 : x.CreateBy == subjectID);
         }
 
@@ -199,13 +199,13 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
 
         //Get only files
         var filesWait = await Dao.GetItemsAsync(parentId, false);
-        var files = filesWait.Select(item => Dao.ToFile(item as TFile));
+        var files = filesWait.Select(item => Dao.ToFile(item as TFile)).ToAsyncEnumerable();
 
         //Filter
         if (subjectID != Guid.Empty)
         {
-            files = files.Where(x => subjectGroup
-                ? userManager.IsUserInGroup(x.CreateBy, subjectID)
+            files = files.WhereAwait(async x => subjectGroup
+                ? await userManager.IsUserInGroupAsync(x.CreateBy, subjectID)
                 : x.CreateBy == subjectID);
         }
 
@@ -272,7 +272,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
             _ => orderBy.IsAsc ? files.OrderBy(x => x.Title) : files.OrderByDescending(x => x.Title)
         };
 
-        foreach (var f in files)
+        await foreach (var f in files)
         {
             yield return f;
         }
@@ -337,7 +337,10 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
     {
         return Task.FromResult(false);
     }
-
+    public async Task<File<string>> SaveFileAsync(File<string> file, Stream fileStream, bool checkFolder)
+    {
+        return await SaveFileAsync(file, fileStream);
+    }
     public async Task<File<string>> SaveFileAsync(File<string> file, Stream fileStream)
     {
         ArgumentNullException.ThrowIfNull(file);

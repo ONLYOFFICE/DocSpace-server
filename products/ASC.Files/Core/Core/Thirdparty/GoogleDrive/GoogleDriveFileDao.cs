@@ -29,7 +29,7 @@ using File = System.IO.File;
 
 namespace ASC.Files.Core.Core.Thirdparty.GoogleDrive;
 
-[Scope]
+[Scope(typeof(ThirdPartyFileDao<DriveFile, DriveFile, DriveFile>))]
 internal class GoogleDriveFileDao(UserManager userManager,
         IDbContextFactory<FilesDbContext> dbContextFactory,
         RegexDaoSelectorBase<DriveFile, DriveFile, DriveFile> daoSelector,

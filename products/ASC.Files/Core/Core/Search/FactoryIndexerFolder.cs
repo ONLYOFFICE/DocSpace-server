@@ -26,12 +26,23 @@
 
 namespace ASC.Web.Files.Core.Search;
 
-[Scope(Additional = typeof(FactoryIndexerFolderExtension))]
+[Scope]
+public class BaseIndexerFolder(
+    Client client,
+    ILogger<BaseIndexerFolder> log,
+    IDbContextFactory<WebstudioDbContext> dbContextManager,
+    TenantManager tenantManager,
+    BaseIndexerHelper baseIndexerHelper,
+    Settings settings,
+    IServiceProvider serviceProvider)
+    : BaseIndexer<DbFolder>(client, log, dbContextManager, tenantManager, baseIndexerHelper, settings, serviceProvider);
+
+[Scope]
 public class FactoryIndexerFolder(ILoggerProvider options,
         TenantManager tenantManager,
         SearchSettingsHelper searchSettingsHelper,
         FactoryIndexer factoryIndexer,
-        BaseIndexer<DbFolder> baseIndexer,
+        BaseIndexerFolder baseIndexer,
         IServiceProvider serviceProvider,
         IDbContextFactory<FilesDbContext> dbContextFactory,
         ICache cache,
@@ -129,14 +140,6 @@ class FolderTenant
 {
     public DbTenant DbTenant { get; init; }
     public DbFolder DbFolder { get; init; }
-}
-
-public static class FactoryIndexerFolderExtension
-{
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<DbFolder>();
-    }
 }
 
 static file class Queries

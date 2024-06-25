@@ -26,9 +26,8 @@
 
 namespace ASC.Core.Data;
 
-[Scope]
-public class DbSubscriptionService(IDbContextFactory<UserDbContext> dbContextFactory, IMapper mapper)
-    : ISubscriptionService
+[Scope(typeof(ISubscriptionService))]
+public class DbSubscriptionService(IDbContextFactory<UserDbContext> dbContextFactory, IMapper mapper) : ISubscriptionService
 {
     public async Task<string[]> GetRecipientsAsync(int tenant, string sourceId, string actionId, string objectId)
     {

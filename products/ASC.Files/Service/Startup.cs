@@ -24,7 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Web.Core.WhiteLabel;
+using ASC.Api.Core.Extensions;
+using ASC.Files.Service.Services;
+using ASC.Files.Service.Services.Thumbnail;
 using ASC.Web.Files.Configuration;
 
 namespace ASC.Files.Service;
@@ -53,71 +55,19 @@ public class Startup : BaseWorkerStartup
         if (elasticLaunchType != ElasticLaunchType.Disabled)
         {
             services.AddHostedService<ElasticSearchIndexService>();
-            DIHelper.TryAdd<FactoryIndexer>();
-            DIHelper.TryAdd<ElasticSearchService>();
-            //DIHelper.TryAdd<FileConverter>();
-            DIHelper.TryAdd<FactoryIndexerFile>();
-            DIHelper.TryAdd<FactoryIndexerFolder>();
         }
 
         if (elasticLaunchType != ElasticLaunchType.Exclusive)
         {
-            services.AddHostedService<FeedAggregatorService>();
-            DIHelper.TryAdd<FeedAggregatorService>();
-
-            //services.AddHostedService<FeedCleanerService>();
-            //DIHelper.TryAdd<FeedCleanerService>();
-
             services.AddActivePassiveHostedService<FileConverterService<int>>(DIHelper, Configuration);
-            DIHelper.TryAdd<FileConverterService<int>>();
-
             services.AddActivePassiveHostedService<FileConverterService<string>>(DIHelper, Configuration);
-            DIHelper.TryAdd<FileConverterService<string>>();
 
             services.AddHostedService<ThumbnailBuilderService>();
-            DIHelper.TryAdd<ThumbnailBuilderService>();
-
-            DIHelper.TryAdd<ThumbnailRequestedIntegrationEventHandler>();
-            DIHelper.TryAdd<RoomIndexExportIntegrationEventHandler>();
-            DIHelper.TryAdd<DeleteIntegrationEventHandler>();
-            DIHelper.TryAdd<MoveOrCopyIntegrationEventHandler>();
-            DIHelper.TryAdd<BulkDownloadIntegrationEventHandler>();
-            DIHelper.TryAdd<MarkAsReadIntegrationEventHandler>();
-            DIHelper.TryAdd<EmptyTrashIntegrationEventHandler>();
-
-            services.AddHostedService<Launcher>();
-            DIHelper.TryAdd<Launcher>();
-
-            services.AddHostedService<DeleteExpiredService>();
-            DIHelper.TryAdd<DeleteExpiredService>();
+            services.AddActivePassiveHostedService<AutoCleanTrashService>(DIHelper, Configuration);
+            services.AddActivePassiveHostedService<DeleteExpiredService>(DIHelper, Configuration);
         }
-
-        DIHelper.TryAdd<AuthManager>();
-        DIHelper.TryAdd<BaseCommonLinkUtility>();
-        DIHelper.TryAdd<FeedAggregateDataProvider>();
-        DIHelper.TryAdd<SecurityContext>();
-        DIHelper.TryAdd<TenantManager>();
-        DIHelper.TryAdd<UserManager>();
-        DIHelper.TryAdd<SocketServiceClient>();
-        DIHelper.TryAdd<FileStorageService>();
-        DIHelper.TryAdd<Builder<int>>();
-        DIHelper.TryAdd<DistributedTaskProgress>();
-        DIHelper.TryAdd<DocumentBuilderTask<int>>();
-        DIHelper.TryAdd<AdditionalWhiteLabelSettingsHelperInit>();
-        DIHelper.TryAdd<NotifyConfiguration>();
-
-        services.AddScoped<ITenantQuotaFeatureChecker, CountRoomChecker>();
-        services.AddScoped<CountRoomChecker>();
-
-        services.AddScoped<ITenantQuotaFeatureStat<CountRoomFeature, int>, CountRoomCheckerStatistic>();
-        services.AddScoped<CountRoomCheckerStatistic>();
-
-        services.AddScoped<UsersInRoomChecker>();
-
-        services.AddScoped<ITenantQuotaFeatureStat<UsersInRoomFeature, int>, UsersInRoomStatistic>();
-
-        services.AddScoped<UsersInRoomStatistic>();
-
+        
+        services.RegisterQuotaFeature();
         services.AddBaseDbContextPool<FilesDbContext>();
         services.AddScoped<IWebItem, ProductEntryPoint>();
 

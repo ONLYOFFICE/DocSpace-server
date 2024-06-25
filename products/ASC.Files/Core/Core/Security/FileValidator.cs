@@ -50,7 +50,7 @@ public class FileValidator(FileSecurity fileSecurity, IDaoFactory daoFactory) : 
             return true;
         }
 
-        var record = await daoFactory.GetSecurityDao<int>().GetSharesAsync(new[] { id }).FirstOrDefaultAsync();
+        var record = await daoFactory.GetSecurityDao<string>().GetSharesAsync(new[] { id }).FirstOrDefaultAsync();
         if (record is { IsLink: true, Options: not null })
         {
             return !record.Options.DenyDownload;

@@ -48,6 +48,7 @@ internal class CrossDao //Additional SharpBox
         }
         
         var securityDao = serviceProvider.GetService<ISecurityDao<TFrom>>();
+        var securityDaoTo = serviceProvider.GetService<ISecurityDao<TTo>>();
         var tagDao = serviceProvider.GetService<ITagDao<TFrom>>();
 
         var fromFileCopy = (File<TFrom>)fromFile.Clone();
@@ -83,8 +84,20 @@ internal class CrossDao //Additional SharpBox
 
         await foreach (var record in fromFileShareRecords.Where(x => x.EntryType == FileEntryType.File))
         {
-            record.EntryId = toFile.Id;
-            await securityDao.SetShareAsync(record);
+            var toRecord = new FileShareRecord<TTo>
+            {
+                TenantId = record.TenantId,
+                EntryId = toFile.Id,
+                EntryType = record.EntryType,
+                SubjectType = record.SubjectType,
+                Subject = record.Subject,
+                Owner = record.Owner,
+                Share = record.Share,
+                Options = record.Options,
+                Level = record.Level
+            };
+            
+            await securityDaoTo.SetShareAsync(toRecord);
         }
 
         var fromFileTags = await fromFileNewTags.ToListAsync();
@@ -171,12 +184,25 @@ internal class CrossDao //Additional SharpBox
         if (deleteSourceFolder)
         {
             var securityDao = serviceProvider.GetService<ISecurityDao<TFrom>>();
+            var securityDaoTo = serviceProvider.GetService<ISecurityDao<TTo>>();
             var fromFileShareRecords = securityDao.GetPureShareRecordsAsync(fromFolder);
 
             await foreach (var record in fromFileShareRecords.Where(x => x.EntryType == FileEntryType.Folder))
             {
-                record.EntryId = toFolderId;
-                await securityDao.SetShareAsync(record);
+                var toRecord = new FileShareRecord<TTo>
+                {
+                    TenantId = record.TenantId,
+                    EntryId = toFolderId,
+                    EntryType = record.EntryType,
+                    SubjectType = record.SubjectType,
+                    Subject = record.Subject,
+                    Owner = record.Owner,
+                    Share = record.Share,
+                    Options = record.Options,
+                    Level = record.Level
+                };
+                
+                await securityDaoTo.SetShareAsync(toRecord);
             }
 
             var tagDao = serviceProvider.GetService<ITagDao<TFrom>>();

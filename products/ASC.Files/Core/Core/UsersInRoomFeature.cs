@@ -26,8 +26,10 @@
 
 namespace ASC.Files.Core.Core;
 
-public class UsersInRoomChecker(ITenantQuotaFeatureStat<UsersInRoomFeature, int> tenantQuotaFeatureStatistic,
-        TenantManager tenantManager)
+[Scope]
+public class UsersInRoomChecker(
+    ITenantQuotaFeatureStat<UsersInRoomFeature, int> tenantQuotaFeatureStatistic,
+    TenantManager tenantManager)
     : TenantQuotaFeatureCheckerCount<UsersInRoomFeature>(tenantQuotaFeatureStatistic, tenantManager)
 {
     public override string GetExceptionMessage(long count)
@@ -36,6 +38,7 @@ public class UsersInRoomChecker(ITenantQuotaFeatureStat<UsersInRoomFeature, int>
     }
 }
 
+[Scope]
 public class UsersInRoomStatistic(IServiceProvider serviceProvider) : ITenantQuotaFeatureStat<UsersInRoomFeature, int>
 {
     public Task<int> GetValueAsync()

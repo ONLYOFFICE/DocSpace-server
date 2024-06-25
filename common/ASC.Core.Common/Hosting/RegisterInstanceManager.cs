@@ -28,7 +28,6 @@ namespace ASC.Core.Common.Hosting;
 
 #nullable enable
 
-[Scope]
 public class RegisterInstanceManager<T>(
     IRegisterInstanceDao<T> registerInstanceRepository,
     IOptions<InstanceWorkerOptions<T>> optionsSettings) : IRegisterInstanceManager<T> where T : IHostedService

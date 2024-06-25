@@ -1090,9 +1090,6 @@ $TrulyYours</value>
   <data name="ButtonAccept" xml:space="preserve">
     <value>Přijmout</value>
   </data>
-  <data name="AcceptDocSpace" xml:space="preserve">
-    <value>PŘIJMOUT</value>
-  </data>
   <data name="ButtonActivateEmail" xml:space="preserve">
     <value>Kliknutím zde aktivujete svou e-mailovou adresu</value>
   </data>
@@ -1108,13 +1105,13 @@ $TrulyYours</value>
   <data name="ButtonChangeTfa" xml:space="preserve">
     <value>Konfigurace aplikace ověřovatele</value>
   </data>
-  <data name="ButtonCollaborateDocSpace" xml:space="preserve">
+  <data name="ButtonCollaborate" xml:space="preserve">
     <value>Spolupráce v DocSpace</value>
   </data>
   <data name="ButtonConfirm" xml:space="preserve">
     <value>Potvrdit</value>
   </data>
-  <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
+  <data name="ButtonConfirmInvite" xml:space="preserve">
     <value>Potvrzení pozvánky DocSpace</value>
   </data>
   <data name="ButtonConfirmEmail" xml:space="preserve">
@@ -1168,7 +1165,7 @@ Další informace o postupu zálohování naleznete v naší uživatelské pří
 Pokud máte jakékoli dotazy nebo potřebujete pomoc, neváhejte nás kontaktovat na adrese [${__SupportLink}](${__SupportLink}).
 
 S pozdravem,
-tým podpory ONLYOFFICE™
+tým podpory ONLYOFFICE
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
@@ -1271,6 +1268,7 @@ h1."$PortalUrl":"$PortalUrl"
 Váš portál byl přesunut na novou doménu. Obnovte prosím svůj přístup k portálu zadáním hesla, které bude použito pro přihlášení.
 
 Heslo k účtu nastavíte pomocí níže uvedeného odkazu:
+
 $OrangeButton
 
 *Poznámka*: tento odkaz je platný pouze 7 dní. Během této doby dokončete proces obnovení přístupu.
@@ -1308,7 +1306,7 @@ Svůj portál můžete kdykoli znovu aktivovat kliknutím na následující odka
 V případě jakýchkoli dotazů nebo potřeby pomoci nás neváhejte kontaktovat na adrese [${__SalesEmail}](mailto:${__SalesEmail}).
 
 S pozdravem,
-tým podpory ONLYOFFICE™
+tým podpory ONLYOFFICE
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete_tg" xml:space="preserve">
@@ -1333,7 +1331,7 @@ _Poznámka_: tento odkaz je platný pouze 7 dní. V této lhůtě dokončete pro
 V případě jakýchkoli dotazů nebo potřeby pomoci nás neváhejte kontaktovat na adrese [${__SalesEmail}](mailto:${__SalesEmail})
 
 S pozdravem,
-tým podpory ONLYOFFICE™
+tým podpory ONLYOFFICE
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">

@@ -89,11 +89,9 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
     {
         return whatsNewType switch
         {
-            WhatsNewType.DailyFeed => await auditEventsRepository.GetTenantsAsync(date.Date.AddDays(-1),
-                date.Date.AddSeconds(-1)),
-            WhatsNewType.RoomsActivity => await auditEventsRepository.GetTenantsAsync(date.AddHours(-1),
-                date.AddSeconds(-1)),
-            _ => Enumerable.Empty<int>()
+            WhatsNewType.DailyFeed => await auditEventsRepository.GetTenantsAsync(date.Date.AddDays(-1), date.Date.AddSeconds(-1)),
+            WhatsNewType.RoomsActivity => await auditEventsRepository.GetTenantsAsync(date.AddHours(-1), date.AddSeconds(-1)),
+            _ => []
         };
     }
 

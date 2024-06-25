@@ -28,7 +28,7 @@ using Box.V2.Exceptions;
 
 namespace ASC.Files.Thirdparty.Box;
 
-[Transient]
+[Transient(typeof(IThirdPartyStorage<BoxFile, BoxFolder, BoxItem>))]
 internal class BoxStorage(TempStream tempStream) : IThirdPartyStorage<BoxFile, BoxFolder, BoxItem>
 {
     private BoxClient _boxClient;

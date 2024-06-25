@@ -43,6 +43,7 @@ public partial class SettingsController(MessageService messageService,
         CommonLinkUtility commonLinkUtility,
         IConfiguration configuration,
         SetupInfo setupInfo,
+        GeolocationHelper geolocationHelper,
         StatisticManager statisticManager,
         ConsumerFactory consumerFactory,
         TimeZoneConverter timeZoneConverter,
@@ -54,14 +55,11 @@ public partial class SettingsController(MessageService messageService,
         PasswordHasher passwordHasher,
         IHttpContextAccessor httpContextAccessor,
         DnsSettings dnsSettings,
-        AdditionalWhiteLabelSettingsHelperInit additionalWhiteLabelSettingsHelper,
         CustomColorThemesSettingsHelper customColorThemesSettingsHelper,
         UserInvitationLimitHelper userInvitationLimitHelper,
-        QuotaSyncOperation quotaSyncOperation,
         QuotaUsageManager quotaUsageManager,
         TenantDomainValidator tenantDomainValidator,
         ExternalShare externalShare,
-        ConfigurationExtension configurationExtension,
         IMapper mapper,
         UserFormatter userFormatter,
         IDistributedLockProvider distributedLockProvider,
@@ -95,7 +93,7 @@ public partial class SettingsController(MessageService messageService,
 
         var settings = new SettingsDto
         {
-            Culture = tenant.GetCulture().ToString(),
+            Culture = coreBaseSettings.GetRightCultureName(tenant.GetCulture()),
             GreetingSettings = tenant.Name == "" ? Resource.PortalName : tenant.Name,
             DocSpace = true,
             Standalone = coreBaseSettings.Standalone,
@@ -107,7 +105,7 @@ public partial class SettingsController(MessageService messageService,
             LegalTerms = setupInfo.LegalTerms,
             CookieSettingsEnabled = tenantCookieSettings.Enabled,
             UserNameRegex = userFormatter.UserNameRegex.ToString(),
-            ForumLink = await commonLinkUtility.GetUserForumLinkAsync(settingsManager, additionalWhiteLabelSettingsHelper)
+            ForumLink = await commonLinkUtility.GetUserForumLinkAsync(settingsManager)
         };
 
         if (!authContext.IsAuthenticated && await externalShare.GetLinkIdAsync() != default)
@@ -152,7 +150,7 @@ public partial class SettingsController(MessageService messageService,
                 IosPackageId = configuration["deeplink:iospackageid"] ?? ""
             };
 
-            settings.HelpLink = await commonLinkUtility.GetHelpLinkAsync(settingsManager, additionalWhiteLabelSettingsHelper);
+            settings.HelpLink = await commonLinkUtility.GetHelpLinkAsync(settingsManager);
             settings.ApiDocsLink = configuration["web:api-docs"];
 
             if (bool.TryParse(configuration["debug-info:enabled"], out var debugInfo))
@@ -177,10 +175,11 @@ public partial class SettingsController(MessageService messageService,
                 settings.Plugins.Delete = pluginsDelete;
             }
 
-            var formGallerySettings = configurationExtension.GetSetting<OFormSettings>("files:oform");
+            var formGallerySettings = configuration.GetSection("files:oform").Get<OFormSettings>();
             settings.FormGallery = mapper.Map<FormGalleryDto>(formGallerySettings);
 
             settings.InvitationLimit = await userInvitationLimitHelper.GetLimit();
+            settings.MaxImageUploadSize = setupInfo.MaxImageUploadSize;
         }
         else
         {
@@ -202,7 +201,11 @@ public partial class SettingsController(MessageService messageService,
 
             settings.ThirdpartyEnable = setupInfo.ThirdPartyAuthEnabled && providerManager.IsNotEmpty;
 
-            settings.RecaptchaPublicKey = setupInfo.RecaptchaPublicKey;
+            var country = (await geolocationHelper.GetIPGeolocationFromHttpContextAsync()).Key;
+
+            settings.RecaptchaType = country == "CN" ? RecaptchaType.hCaptcha : RecaptchaType.Default;
+
+            settings.RecaptchaPublicKey = settings.RecaptchaType is RecaptchaType.hCaptcha ? setupInfo.HcaptchaPublicKey : setupInfo.RecaptchaPublicKey;
         }
 
         if (!authContext.IsAuthenticated || (withpassword.HasValue && withpassword.Value))
@@ -296,11 +299,16 @@ public partial class SettingsController(MessageService messageService,
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
+        if (!inDto.DefaultQuota.TryGetInt64(out var quota))
+        {
+            throw new Exception(Resource.QuotaGreaterPortalError);
+        }
+
         var tenant = await tenantManager.GetCurrentTenantAsync();
         var tenantSpaceQuota = await tenantManager.GetTenantQuotaAsync(tenant.Id);
         var maxTotalSize = tenantSpaceQuota?.MaxTotalSize ?? -1;
 
-        if (maxTotalSize < inDto.DefaultQuota)
+        if (maxTotalSize < quota)
         {
             throw new Exception(Resource.QuotaGreaterPortalError);
         }
@@ -310,7 +318,7 @@ public partial class SettingsController(MessageService messageService,
             var tenantQuotaSetting = await settingsManager.LoadAsync<TenantQuotaSettings>();
             if (tenantQuotaSetting.EnableQuota)
             {
-                if (tenantQuotaSetting.Quota < inDto.DefaultQuota)
+                if (tenantQuotaSetting.Quota < quota)
                 {
                     throw new Exception(Resource.QuotaGreaterPortalError);
                 }
@@ -318,7 +326,7 @@ public partial class SettingsController(MessageService messageService,
         }
         var quotaSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
         quotaSettings.EnableQuota = inDto.EnableQuota;
-        quotaSettings.DefaultQuota = inDto.DefaultQuota > 0 ? inDto.DefaultQuota : 0;
+        quotaSettings.DefaultQuota = quota > 0 ? quota : 0;
 
         await settingsManager.SaveAsync(quotaSettings);
 
@@ -349,11 +357,16 @@ public partial class SettingsController(MessageService messageService,
     {
         await DemandStatisticPermissionAsync();
 
+        if (!inDto.DefaultQuota.TryGetInt64(out var quota))
+        {
+            throw new Exception(Resource.QuotaGreaterPortalError);
+        }
+
         var tenant = await tenantManager.GetCurrentTenantAsync();
         var tenantSpaceQuota = await tenantManager.GetTenantQuotaAsync(tenant.Id);
         var maxTotalSize = tenantSpaceQuota?.MaxTotalSize ?? -1;
 
-        if (maxTotalSize < inDto.DefaultQuota)
+        if (maxTotalSize < quota)
         {
             throw new Exception(Resource.QuotaGreaterPortalError);
         }
@@ -362,7 +375,7 @@ public partial class SettingsController(MessageService messageService,
             var tenantQuotaSetting = await settingsManager.LoadAsync<TenantQuotaSettings>();
             if (tenantQuotaSetting.EnableQuota)
             {
-                if (tenantQuotaSetting.Quota < inDto.DefaultQuota)
+                if (tenantQuotaSetting.Quota < quota)
                 {
                     throw new Exception(Resource.QuotaGreaterPortalError);
                 }
@@ -371,7 +384,7 @@ public partial class SettingsController(MessageService messageService,
 
         var quotaSettings = await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
         quotaSettings.EnableQuota = inDto.EnableQuota;
-        quotaSettings.DefaultQuota = inDto.DefaultQuota > 0 ? inDto.DefaultQuota : 0;
+        quotaSettings.DefaultQuota = quota > 0 ? quota : 0;
 
         await settingsManager.SaveAsync(quotaSettings);
 
@@ -437,7 +450,7 @@ public partial class SettingsController(MessageService messageService,
     [HttpGet("cultures")]
     public IEnumerable<string> GetSupportedCultures()
     {
-        return setupInfo.EnabledCultures.Select(r => r.Name).ToList();
+        return coreBaseSettings.EnabledCultures.Select(r => r.Name).ToList();
     }
 
     /// <summary>
@@ -542,7 +555,8 @@ public partial class SettingsController(MessageService messageService,
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        return await quotaSyncOperation.CheckRecalculateQuota(await tenantManager.GetCurrentTenantAsync());
+        var result = await usersQuotaSyncOperation.CheckRecalculateQuota(await tenantManager.GetCurrentTenantAsync());
+        return !result.IsCompleted;
     }
 
     /// <summary>
@@ -771,7 +785,7 @@ public partial class SettingsController(MessageService messageService,
         var tenant = await tenantManager.GetCurrentTenantAsync();
 
         var changelng = false;
-        if (setupInfo.EnabledCultures.Find(c => string.Equals(c.Name, culture.Name, StringComparison.InvariantCultureIgnoreCase)) != null && !string.Equals(tenant.Language, culture.Name, StringComparison.InvariantCultureIgnoreCase))
+        if (coreBaseSettings.EnabledCultures.Find(c => string.Equals(c.Name, culture.Name, StringComparison.InvariantCultureIgnoreCase)) != null && !string.Equals(tenant.Language, culture.Name, StringComparison.InvariantCultureIgnoreCase))
         {
             tenant.Language = culture.Name;
             changelng = true;
@@ -996,11 +1010,12 @@ public partial class SettingsController(MessageService messageService,
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        return consumerFactory.GetAll<Consumer>()
+        return await consumerFactory.GetAll<Consumer>()
             .Where(consumer => consumer.ManagedKeys.Any())
             .OrderBy(services => services.Order)
-            .Select(r => new AuthServiceRequestsDto(r))
-            .ToList();
+            .ToAsyncEnumerable()
+            .SelectAwait(async r => await AuthServiceRequestsDto.From(r))
+            .ToListAsync();
     }
 
     /// <summary>
@@ -1031,15 +1046,18 @@ public partial class SettingsController(MessageService messageService,
 
         if (inDto.Props.All(r => string.IsNullOrEmpty(r.Value)))
         {
-            consumer.Clear();
+            await consumer.ClearAsync();
             changed = true;
         }
         else
         {
-            foreach (var authKey in inDto.Props.Where(authKey => consumer[authKey.Name] != authKey.Value))
+            foreach (var authKey in inDto.Props)
             {
-                consumer[authKey.Name] = authKey.Value;
-                changed = true;
+                if (await consumer.GetAsync(authKey.Name) != authKey.Value)
+                {
+                    await consumer.SetAsync(authKey.Name, authKey.Value);
+                    changed = true;
+                }
             }
         }
 
@@ -1050,7 +1068,7 @@ public partial class SettingsController(MessageService messageService,
 
         if (validateKeyProvider != null && !await validateKeyProvider.ValidateKeysAsync() && !allPropsIsEmpty)
         {
-            consumer.Clear();
+            await consumer.ClearAsync();
             throw new ArgumentException(Resource.ErrorBadKeys);
         }
 
@@ -1116,7 +1134,7 @@ public partial class SettingsController(MessageService messageService,
 
         if (string.IsNullOrEmpty(currentLink))
         {
-            var url = telegramHelper.RegisterUser(authContext.CurrentAccount.ID, tenant.Id);
+            var url = await telegramHelper.RegisterUserAsync(authContext.CurrentAccount.ID, tenant.Id);
             return url;
         }
 

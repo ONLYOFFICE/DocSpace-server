@@ -35,7 +35,6 @@ public class ConfigureNotifyServiceCfg(IServiceProvider serviceProvider) : IConf
     }
 }
 
-[Singleton(typeof(ConfigureNotifyServiceCfg))]
 public class NotifyServiceCfg
 {
     public string ConnectionStringName { get; set; }

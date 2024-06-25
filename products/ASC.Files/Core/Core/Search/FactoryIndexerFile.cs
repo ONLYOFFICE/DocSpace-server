@@ -54,7 +54,7 @@ public class BaseIndexerFile(Client client,
 }
 
 
-[Scope(Additional = typeof(FactoryIndexerFileExtension))]
+[Scope]
 public class FactoryIndexerFile(ILoggerProvider options,
         TenantManager tenantManager,
         SearchSettingsHelper searchSettingsHelper,
@@ -173,14 +173,6 @@ public class FileTenant
 {
     public DbTenant DbTenant { get; init; }
     public DbFile DbFile { get; init; }
-}
-
-public static class FactoryIndexerFileExtension
-{
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<DbFile>();
-    }
 }
 
 sealed file class FilesFoldersPair
