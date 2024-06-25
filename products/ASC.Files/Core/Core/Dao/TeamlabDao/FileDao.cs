@@ -377,63 +377,63 @@ internal class FileDao(
         {
             throw FileSizeComment.GetFileSizeException(maxChunkedUploadSize);
         }
-
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        var folderDao = daoFactory.GetFolderDao<int>();
-        var fileDao = daoFactory.GetFileDao<int>();
-        var currentFolder = await folderDao.GetFolderAsync(file.FolderIdDisplay);
-
-        var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(currentFolder);
-
-        if (roomId != -1)
+        await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKey))
         {
-            var currentRoom = await folderDao.GetFolderAsync(roomId);
-            var quotaRoomSettings = await _settingsManager.LoadAsync<TenantRoomQuotaSettings>();
-            if (quotaRoomSettings.EnableQuota)
+            var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+            var folderDao = daoFactory.GetFolderDao<int>();
+            var fileDao = daoFactory.GetFileDao<int>();
+            var currentFolder = await folderDao.GetFolderAsync(file.FolderIdDisplay);
+
+            var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(currentFolder);
+
+            if (roomId != -1)
             {
-                var roomQuotaLimit = currentRoom.SettingsQuota == TenantEntityQuotaSettings.DefaultQuotaValue ? quotaRoomSettings.DefaultQuota : currentRoom.SettingsQuota;
-                if (roomQuotaLimit != TenantEntityQuotaSettings.NoQuota)
+                var currentRoom = await folderDao.GetFolderAsync(roomId);
+                var quotaRoomSettings = await _settingsManager.LoadAsync<TenantRoomQuotaSettings>();
+                if (quotaRoomSettings.EnableQuota)
                 {
-                    if (roomQuotaLimit - currentRoom.Counter < file.ContentLength)
+                    var roomQuotaLimit = currentRoom.SettingsQuota == TenantEntityQuotaSettings.DefaultQuotaValue ? quotaRoomSettings.DefaultQuota : currentRoom.SettingsQuota;
+                    if (roomQuotaLimit != TenantEntityQuotaSettings.NoQuota)
                     {
-                        throw FileSizeComment.GetRoomFreeSpaceException(roomQuotaLimit);
+                        if (roomQuotaLimit - currentRoom.Counter < file.ContentLength)
+                        {
+                            throw FileSizeComment.GetRoomFreeSpaceException(roomQuotaLimit);
+                        }
                     }
                 }
             }
-        }
-        else
-        {
-            var quotaUserSettings = await _settingsManager.LoadAsync<TenantUserQuotaSettings>();
-            if (quotaUserSettings.EnableQuota)
+            else
             {
-                var user = await _userManager.GetUsersAsync(file.Id == default ? _authContext.CurrentAccount.ID : file.CreateBy);
-                var userQuotaData = await _settingsManager.LoadAsync<UserQuotaSettings>(user);
-
-                var userQuotaLimit = userQuotaData.UserQuota == userQuotaData.GetDefault().UserQuota ? quotaUserSettings.DefaultQuota : userQuotaData.UserQuota ;
-
-                if (userQuotaLimit != UserQuotaSettings.NoQuota)
+                var quotaUserSettings = await _settingsManager.LoadAsync<TenantUserQuotaSettings>();
+                if (quotaUserSettings.EnableQuota)
                 {
-                    var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenantId, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
+                    var user = await _userManager.GetUsersAsync(file.Id == default ? _authContext.CurrentAccount.ID : file.CreateBy);
+                    var userQuotaData = await _settingsManager.LoadAsync<UserQuotaSettings>(user);
 
-                    if (userQuotaLimit - userUsedSpace < file.ContentLength)
+                    var userQuotaLimit = userQuotaData.UserQuota == userQuotaData.GetDefault().UserQuota ? quotaUserSettings.DefaultQuota : userQuotaData.UserQuota;
+
+                    if (userQuotaLimit != UserQuotaSettings.NoQuota)
                     {
-                        throw FileSizeComment.GetUserFreeSpaceException(userQuotaLimit);
+                        var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenantId, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
+
+                        if (userQuotaLimit - userUsedSpace < file.ContentLength)
+                        {
+                            throw FileSizeComment.GetUserFreeSpaceException(userQuotaLimit);
+                        }
                     }
                 }
             }
-        }
-       
-        var isNew = false;
-        DbFile toInsert = null;
 
-        await using (var filesDbContext = await _dbContextFactory.CreateDbContextAsync())
-        {                
-            var parentFolders = await filesDbContext.DbFolderTreesAsync(file.ParentId).ToListAsync();
+            var isNew = false;
+            DbFile toInsert = null;
 
-            var parentFoldersIds = parentFolders.Select(r => r.ParentId).ToList();
-            
-            await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKey))
+            await using (var filesDbContext = await _dbContextFactory.CreateDbContextAsync())
             {
+                var parentFolders = await filesDbContext.DbFolderTreesAsync(file.ParentId).ToListAsync();
+
+                var parentFoldersIds = parentFolders.Select(r => r.ParentId).ToList();
+
+
                 var strategy = filesDbContext.Database.CreateExecutionStrategy();
                 await strategy.ExecuteAsync(async () =>
                 {
@@ -498,10 +498,10 @@ internal class FileDao(
                         await filesDbContext.Files.AddAsync(toInsert);
                     }
                     else
-                    {                    
+                    {
                         await filesDbContext.AddOrUpdateAsync(r => r.Files, toInsert);
                     }
-                    
+
                     await filesDbContext.SaveChangesAsync();
 
                     await tx.CommitAsync();
@@ -522,52 +522,57 @@ internal class FileDao(
                 {
                     await SetCustomOrder(filesDbContext, file.Id, file.ParentId);
                 }
-            }
 
-            if (isNew)
-            {
-                await IncrementCountAsync(filesDbContext, file.ParentId, tenantId, FileEntryType.File);
-            }
-        }
-        
-        if (fileStream != null)
-        {
-            try
-            {
-                if (roomId != -1 && checkFolder)
+
+                if (isNew)
                 {
-                    var currentRoom = await folderDao.GetFolderAsync(roomId);
-                    using var originalCopyStream = new MemoryStream();
-                    if (currentRoom.FolderType == FolderType.FillingFormsRoom)
+                    await IncrementCountAsync(filesDbContext, file.ParentId, tenantId, FileEntryType.File);
+                }
+            }
+
+            if (fileStream != null)
+            {
+                try
+                {
+                    if (roomId != -1 && checkFolder)
                     {
-                        var extension = FileUtility.GetFileExtension(file.Title);
-                        var fileType = FileUtility.GetFileTypeByExtention(extension);
-
-                        await fileStream.CopyToAsync(originalCopyStream);
-
-                        var cloneStreamForCheck = CloneMemoryStream(originalCopyStream, 300);
-                        var cloneStreamForSave = CloneMemoryStream(originalCopyStream);
-
-                        if (fileType != FileType.Pdf || (fileType == FileType.Pdf && !await fileStorageService.CheckExtendedPDFstream(cloneStreamForCheck)))
+                        var currentRoom = await folderDao.GetFolderAsync(roomId);
+                        using var originalCopyStream = new MemoryStream();
+                        if (currentRoom.FolderType == FolderType.FillingFormsRoom)
                         {
-                            throw new Exception(FilesCommonResource.ErrorMessage_UploadToFormRoom);
+                            var extension = FileUtility.GetFileExtension(file.Title);
+                            var fileType = FileUtility.GetFileTypeByExtention(extension);
 
-                        }
+                            await fileStream.CopyToAsync(originalCopyStream);
 
-                        if (fileType == FileType.Pdf )
-                        {
+                            var cloneStreamForCheck = CloneMemoryStream(originalCopyStream, 300);
+                            var cloneStreamForSave = CloneMemoryStream(originalCopyStream);
 
-                            await SaveFileStreamAsync(file, cloneStreamForSave, currentFolder);
-
-                            var properties = await fileDao.GetProperties(file.Id) ?? new EntryProperties() { FormFilling = new FormFillingProperties() };
-                            if (!properties.FormFilling.CollectFillForm)
+                            if (fileType != FileType.Pdf || (fileType == FileType.Pdf && !await fileStorageService.CheckExtendedPDFstream(cloneStreamForCheck)))
                             {
-                                properties.FormFilling.StartFilling = true;
-                                properties.FormFilling.CollectFillForm = true;
-                                await fileDao.SaveProperties(file.Id, properties);
-                                var count = await fileStorageService.GetPureSharesCountAsync(currentRoom.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "");
-                                await socketManager.CreateFormAsync(file, securityContext.CurrentAccount.ID, count <= 1);
+                                throw new Exception(FilesCommonResource.ErrorMessage_UploadToFormRoom);
+
                             }
+
+                            if (fileType == FileType.Pdf)
+                            {
+
+                                await SaveFileStreamAsync(file, cloneStreamForSave, currentFolder);
+
+                                var properties = await fileDao.GetProperties(file.Id) ?? new EntryProperties() { FormFilling = new FormFillingProperties() };
+                                if (!properties.FormFilling.CollectFillForm)
+                                {
+                                    properties.FormFilling.StartFilling = true;
+                                    properties.FormFilling.CollectFillForm = true;
+                                    await fileDao.SaveProperties(file.Id, properties);
+                                    var count = await fileStorageService.GetPureSharesCountAsync(currentRoom.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "");
+                                    await socketManager.CreateFormAsync(file, securityContext.CurrentAccount.ID, count <= 1);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            await SaveFileStreamAsync(file, fileStream, currentFolder);
                         }
                     }
                     else
@@ -575,45 +580,41 @@ internal class FileDao(
                         await SaveFileStreamAsync(file, fileStream, currentFolder);
                     }
                 }
-                else
+                catch (Exception saveException)
                 {
-                    await SaveFileStreamAsync(file, fileStream, currentFolder);
-                }
-            }
-            catch (Exception saveException)
-            {
-                try
-                {
-                    if (isNew)
+                    try
                     {
-                        var stored = await (await globalStore.GetStoreAsync()).IsDirectoryAsync(GetUniqFileDirectory(file.Id));
-                        await DeleteFileAsync(file.Id, stored, file.GetFileQuotaOwner());
+                        if (isNew)
+                        {
+                            var stored = await (await globalStore.GetStoreAsync()).IsDirectoryAsync(GetUniqFileDirectory(file.Id));
+                            await DeleteFileAsync(file.Id, stored, file.GetFileQuotaOwner());
+                        }
+                        else if (!await IsExistOnStorageAsync(file))
+                        {
+                            await DeleteVersionAsync(file);
+                        }
                     }
-                    else if (!await IsExistOnStorageAsync(file))
+                    catch (Exception deleteException)
                     {
-                        await DeleteVersionAsync(file);
+                        throw new Exception(saveException.Message, deleteException);
                     }
+                    throw;
                 }
-                catch (Exception deleteException)
-                {
-                    throw new Exception(saveException.Message, deleteException);
-                }
-                throw;
             }
-        }
-        else
-        {
-            if (uploadSession != null)
+            else
             {
-                await chunkedUploadSessionHolder.MoveAsync(uploadSession, GetUniqFilePath(file), file.GetFileQuotaOwner());
+                if (uploadSession != null)
+                {
+                    await chunkedUploadSessionHolder.MoveAsync(uploadSession, GetUniqFilePath(file), file.GetFileQuotaOwner());
 
-                await folderDao.ChangeTreeFolderSizeAsync(currentFolder.Id, file.ContentLength);
+                    await folderDao.ChangeTreeFolderSizeAsync(currentFolder.Id, file.ContentLength);
+                }
             }
+
+            _ = factoryIndexer.IndexAsync(await InitDocumentAsync(toInsert));
+
+            return await GetFileAsync(file.Id);
         }
-
-        _ = factoryIndexer.IndexAsync(await InitDocumentAsync(toInsert));
-
-        return await GetFileAsync(file.Id);
     }
 
     private MemoryStream CloneMemoryStream(MemoryStream originalStream, int limit = -1)
