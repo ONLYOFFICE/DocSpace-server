@@ -532,6 +532,7 @@ public class PortalController(
         }
         finally
         {
+            eventBus.Publish(new RemovePortalIntegrationEvent(securityContext.CurrentAccount.ID, tenant.Id));
             securityContext.Logout();
         }
     }

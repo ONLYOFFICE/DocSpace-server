@@ -311,7 +311,6 @@ public abstract class BaseStartup
             .AddBaseDbContextPool<WebstudioDbContext>()
             .AddBaseDbContextPool<InstanceRegistrationContext>()
             .AddBaseDbContextPool<IntegrationEventLogContext>()
-            .AddBaseDbContextPool<FeedDbContext>()
             .AddBaseDbContextPool<MessagesContext>()
             .AddBaseDbContextPool<WebhooksDbContext>();
 

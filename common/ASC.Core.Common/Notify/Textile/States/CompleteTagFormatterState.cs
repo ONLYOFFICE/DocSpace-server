@@ -24,13 +24,58 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Feed;
+namespace Textile.States;
 
-[Flags]
-public enum FeedActions
+/// <summary>
+/// Formatting state for complete table row or paragrath.
+/// </summary>
+[FormatterState(@"^\s*(==)?<(tr|p)" + Globals.HtmlAttributesPattern + ">")]
+public class CompleteTagFormatterState(TextileFormatter f) : FormatterState(f)
 {
-    Created = 0,
-    Updated = 1,
-    Commented = 2,
-    AllDayEventCreated = 3
+    public override string Consume(string input, Match m)
+    {
+        this.Formatter.ChangeState(this);
+        return input;
+    }
+
+    public override bool ShouldNestState(FormatterState other)
+    {
+        return false;
+    }
+
+    public override void Enter()
+    {
+    }
+
+    public override void Exit()
+    {
+    }
+
+    public override void FormatLine(string input)
+    {
+        Formatter.Output.WriteLine(input);
+    }
+
+    public override bool ShouldExit(string intput)
+    {
+        return true;
+    }
+
+    public override bool ShouldFormatBlocks(string input)
+    {
+        return true;
+    }
+
+    public override bool ShouldParseForNewFormatterState(string input)
+    {
+        return false;
+    }
+
+    public override Type FallbackFormattingState
+    {
+        get
+        {
+            return null;
+        }
+    }
 }

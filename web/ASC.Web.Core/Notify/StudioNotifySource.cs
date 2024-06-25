@@ -35,19 +35,21 @@ public class StudioNotifySource(UserManager userManager, IRecipientProvider reci
     {
         return new ConstActionProvider(
                 Actions.SelfProfileUpdated,
+                Actions.UserHasJoin,
+                Actions.UserMessageToAdmin,
+                Actions.UserMessageToSales,
+                Actions.RequestTariff,
+                Actions.RequestLicense,
+
+                Actions.YourProfileUpdated,
                 Actions.JoinUsers,
                 Actions.SendWhatsNew,
-                Actions.UserHasJoin,
                 Actions.BackupCreated,
                 Actions.RestoreStarted,
                 Actions.RestoreCompletedV115,
                 Actions.PortalDeactivate,
                 Actions.PortalDelete,
-                Actions.PortalDeleteSuccessV1,
-                Actions.ConfirmOwnerChange,
-                Actions.EmailChangeV115,
-                Actions.PasswordChangeV115,
-                Actions.ActivateEmail,
+
                 Actions.ProfileDelete,
                 Actions.ProfileHasDeletedItself,
                 Actions.ReassignsCompleted,
@@ -55,13 +57,22 @@ public class StudioNotifySource(UserManager userManager, IRecipientProvider reci
                 Actions.RemoveUserDataCompleted,
                 Actions.RemoveUserDataCompletedCustomMode,
                 Actions.RemoveUserDataFailed,
+
+                Actions.ConfirmOwnerChange,
+                Actions.ActivateEmail,
+                Actions.EmailChangeV115,
+                Actions.PasswordChangeV115,
                 Actions.PhoneChange,
+                Actions.TfaChange,
                 Actions.MigrationPortalStart,
                 Actions.MigrationPortalSuccessV115,
                 Actions.MigrationPortalError,
                 Actions.MigrationPortalServerFailure,
+                Actions.PortalRename,
 
-                Actions.UserMessageToAdmin,
+                Actions.MailboxCreated,
+                Actions.MailboxWithoutSettingsCreated,
+                Actions.MailboxPasswordChanged,
 
                 Actions.SaasGuestActivationV115,
                 Actions.EnterpriseGuestActivationV10,
@@ -72,15 +83,6 @@ public class StudioNotifySource(UserManager userManager, IRecipientProvider reci
                 Actions.EnterpriseGuestWelcomeV1,
                 Actions.EnterpriseWhitelabelGuestWelcomeV1,
                 Actions.OpensourceGuestWelcomeV1,
-
-                Actions.EnterpriseAdminUserAppsTipsV1,
-
-                Actions.SaasAdminUserAppsTipsV1,
-
-                Actions.SaasAdminModulesV1,
-
-                Actions.MailboxCreated,
-                Actions.MailboxWithoutSettingsCreated,
 
                 Actions.SaasCustomModeRegData,
 
@@ -101,7 +103,6 @@ public class StudioNotifySource(UserManager userManager, IRecipientProvider reci
                 Actions.EnterpriseWhitelabelAdminActivationV1,
                 Actions.OpensourceAdminActivationV1,
 
-
                 Actions.SaasAdminWelcomeV1,
                 Actions.EnterpriseAdminWelcomeV1,
                 Actions.EnterpriseWhitelabelAdminWelcomeV1,
@@ -114,6 +115,8 @@ public class StudioNotifySource(UserManager userManager, IRecipientProvider reci
 
                 Actions.SaasAdminTrialWarningAfterHalfYearV1,
 
+                Actions.PortalDeleteSuccessV1,
+
                 Actions.SaasUserWelcomeV1,
                 Actions.EnterpriseUserWelcomeV1,
                 Actions.EnterpriseWhitelabelUserWelcomeV1,
@@ -125,10 +128,20 @@ public class StudioNotifySource(UserManager userManager, IRecipientProvider reci
                 Actions.EnterpriseWhitelabelUserActivationV1,
                 Actions.OpensourceUserActivationV1,
 
+                Actions.SaasAdminModulesV1,
+
+                Actions.SaasAdminUserAppsTipsV1,
+                Actions.EnterpriseAdminUserAppsTipsV1,
+
+                Actions.RoomsActivity,
+
                 Actions.SaasOwnerPaymentWarningGracePeriodBeforeActivation,
                 Actions.SaasOwnerPaymentWarningGracePeriodActivation,
                 Actions.SaasOwnerPaymentWarningGracePeriodLastDay,
                 Actions.SaasOwnerPaymentWarningGracePeriodExpired,
+
+                Actions.SaasAdminVideoGuides,
+                Actions.SaasAdminIntegrations,
 
                 Actions.ZoomWelcome,
 

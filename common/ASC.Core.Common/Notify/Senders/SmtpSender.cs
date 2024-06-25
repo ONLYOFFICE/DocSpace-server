@@ -283,17 +283,36 @@ public class SmtpSender(IConfiguration configuration,
                       <html>
                         <head>
                             <meta content=""text/html;charset=UTF-8"" http-equiv=""Content-Type"">
+                            <meta name=""x-apple-disable-message-reformatting"">
+                            <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"" />
                             <meta name=""color-scheme"" content=""light"">
                             <meta name=""supported-color-schemes"" content=""light only"">
+                            <link href=""https://fonts.googleapis.com/css?family=Open+Sans:900,800,700,600,500,400,300&subset=latin,latin-ext"" rel=""stylesheet"" type=""text/css"" />
                             <style type=""text/css"">
-                              :root {{
-                                color-scheme: light;
-                                supported-color-schemes: light;
-                              }}
-                              [data-ogsc] body {{ 
-                                background-color: #ffffff !important;
-                              }}
+                                :root {{ color-scheme: light; supported-color-schemes: light; }}
+                                [data-ogsc] body {{ background-color: #ffffff !important; }}
                             </style>
+                            <!--[if !mso]><!-->
+                            <meta http-equiv=""X-UA-Compatible"" content=""IE=edge"" />
+                            <!--<![endif]-->
+                            <!--[if (gte mso 9)|(IE)]>
+                            <style type=""text/css"">
+                                table {{ border-collapse: collapse !important !important !important; }}
+                            </style>
+                            <![endif]-->
+                            <!--[if mso]>
+                            <style type=""text/css"">
+                                .fol {{ font-family: Helvetica, Arial, Tahoma, sans-serif !important; }}
+                            </style>
+                            <![endif]-->
+                            <!--[if gte mso 9]>
+                                <xml>
+                                    <o:OfficeDocumentSettings>
+                                    <o:AllowPNG/>
+                                    <o:PixelsPerInch>96</o:PixelsPerInch>
+                                    </o:OfficeDocumentSettings>
+                                </xml>
+                            <![endif]-->
                         </head>
                         {body}
                       </html>";

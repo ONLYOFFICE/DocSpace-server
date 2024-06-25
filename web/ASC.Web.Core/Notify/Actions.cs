@@ -138,6 +138,7 @@ public static class Actions
     public static readonly INotifyAction SaasOwnerPaymentWarningGracePeriodExpired = new NotifyAction("saas_owner_payment_warning_grace_period_expired");
 
     public static readonly INotifyAction SaasAdminVideoGuides = new NotifyAction("saas_video_guides_v1");
+    public static readonly INotifyAction SaasAdminIntegrations = new NotifyAction("saas_admin_integrations_v1");
 
     public static readonly INotifyAction ZoomWelcome = new NotifyAction("zoom_welcome");
 

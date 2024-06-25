@@ -304,10 +304,14 @@ public class EntryManager(IDaoFactory daoFactory,
             withSubfolders = false;
         }
 
-        if (parent.RootFolderType == FolderType.USER)
+        if (parent.RootFolderType is FolderType.USER)
         {
             withShared = true;
         }
+        
+        var sharedTask = parent.RootFolderType is FolderType.VirtualRooms && !parent.ProviderEntry 
+            ? daoFactory.GetSecurityDao<T>().IsSharedAsync(parent, [SubjectType.PrimaryExternalLink, SubjectType.ExternalLink]) 
+            : Task.FromResult(false);
 
         var (foldersFilterType, foldersSearchText) = applyFilterOption != ApplyFilterOption.Files ? (filterType, searchText) : (FilterType.None, string.Empty);
 
@@ -318,7 +322,7 @@ public class EntryManager(IDaoFactory daoFactory,
             if (applyFilterOption == ApplyFilterOption.All)
             {
                 filterType = foldersFilterType = FilterType.FilesOnly;
-        }
+            }
         }
         
         var (filesFilterType, filesSearchText, fileExtension) = applyFilterOption != ApplyFilterOption.Folders ? (filterType, searchText, extension) : (FilterType.None, string.Empty, new string[] {});
@@ -414,7 +418,7 @@ public class EntryManager(IDaoFactory daoFactory,
             var allFilesCountTask = fileDao.GetFilesCountAsync(parent.Id, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders, excludeSubject, roomId);
 
             var containingMyFiles = false;
-            if (parent.FolderType == FolderType.ReadyFormFolder || parent.FolderType == FolderType.InProcessFormFolder)
+            if (parent.FolderType is FolderType.ReadyFormFolder or FolderType.InProcessFormFolder)
             {
                 var (currentRoomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(parent);
                 var room = await folderDao.GetFolderAsync((T)Convert.ChangeType(currentRoomId, typeof(T))).NotFoundIfNull();
@@ -425,6 +429,7 @@ public class EntryManager(IDaoFactory daoFactory,
                     containingMyFiles = true;
                 }
             }
+            
             var folders = await folderDao.GetFoldersAsync(parent.Id, orderBy, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders, excludeSubject, from, count, roomId, containingMyFiles)
                 .ToListAsync();
 
@@ -436,12 +441,24 @@ public class EntryManager(IDaoFactory daoFactory,
             var filesCount = count - folders.Count;
             var filesOffset = Math.Max(folders.Count > 0 ? 0 : from - await allFoldersCountTask, 0);
 
-            var files = await fileDao.GetFilesAsync(parent.Id, orderBy, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders, excludeSubject, filesOffset, filesCount, roomId, withShared)
-                .ToListAsync();
+            var filesTask = fileDao.GetFilesAsync(parent.Id, orderBy, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders,
+                excludeSubject, filesOffset, filesCount, roomId, withShared);
+
+            var shared = await sharedTask;
+
+            if (shared)
+            {
+                filesTask = filesTask.Select(x =>
+                {
+                    x.Shared = true;
+                    return x;
+                });
+            }
+
+            var files = await filesTask.ToListAsync();
 
             if (parent.FolderType == FolderType.FillingFormsRoom && securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))
             {
-
                 for (var i = folders.Count - 1; i >= 0; i--)
                 {
                     if (folders[i].FolderType == FolderType.ReadyFormFolder || folders[i].FolderType == FolderType.InProcessFormFolder)
