@@ -26,7 +26,7 @@
 
 namespace ASC.Files.Thirdparty.Box;
 
-[Transient]
+[Transient(typeof(IProviderInfo<BoxFile, BoxFolder, BoxItem>))]
 [DebuggerDisplay("{CustomerTitle}")]
 internal class BoxProviderInfo(DisposableWrapper wrapper, ProviderInfoHelper providerInfoHelper)
     : AbstractProviderInfo<BoxFile, BoxFolder, BoxItem, BoxLoginProvider>(wrapper, providerInfoHelper)

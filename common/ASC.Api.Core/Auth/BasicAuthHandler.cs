@@ -28,7 +28,6 @@ using SecurityContext = ASC.Core.SecurityContext;
 
 namespace ASC.Api.Core.Auth;
 
-[Scope]
 public class BasicAuthHandler(
     IOptionsMonitor<AuthenticationSchemeOptions> options,
     ILoggerFactory logger,

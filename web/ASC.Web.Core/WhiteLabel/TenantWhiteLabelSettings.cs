@@ -464,12 +464,11 @@ public class TenantWhiteLabelSettingsHelper(WebImageSupplier webImageSupplier,
                 }
         };
 
-        string ext = null;
-
         if (!string.IsNullOrEmpty(logo))
         {
             byte[] data;
             var format = supportedFormats.FirstOrDefault(r => logo.StartsWith($"data:{r.mime};base64,"));
+            string ext;
             if (format == null)
             {
                 var fileName = Path.GetFileName(logo);
@@ -494,7 +493,7 @@ public class TenantWhiteLabelSettingsHelper(WebImageSupplier webImageSupplier,
             return (data, ext);
         }
 
-        return (null, ext);
+        return (null, null);
     }
 
     private (byte[], string) GetNotificationLogoData(byte[] logoData, string extLogo, TenantWhiteLabelSettings tenantWhiteLabelSettings)

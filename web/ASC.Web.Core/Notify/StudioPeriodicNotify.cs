@@ -43,7 +43,8 @@ public class StudioPeriodicNotify(ILoggerProvider log,
         CoreBaseSettings coreBaseSettings,
         DisplayUserSettingsHelper displayUserSettingsHelper,
         CoreSettings coreSettings,
-        IServiceProvider serviceProvider)
+        IServiceProvider serviceProvider,
+        IEventBus eventBus)
 {
     private readonly ILogger _log = log.CreateLogger("ASC.Notify");
 
@@ -87,15 +88,26 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                 Func<CultureInfo, string> orangeButtonText = _ => string.Empty;
                 var orangeButtonUrl = string.Empty;
+                Func<CultureInfo, string> orangeButtonText1 = _ => string.Empty;
+                var orangeButtonUrl1 = string.Empty;
+                Func<CultureInfo, string> orangeButtonText2 = _ => string.Empty;
+                var orangeButtonUrl2 = string.Empty;
+                Func<CultureInfo, string> orangeButtonText3 = _ => string.Empty;
+                var orangeButtonUrl3 = string.Empty;
+                Func<CultureInfo, string> orangeButtonText4 = _ => string.Empty;
+                var orangeButtonUrl4 = string.Empty;
 
                 var img1 = string.Empty;
                 var img2 = string.Empty;
                 var img3 = string.Empty;
                 var img4 = string.Empty;
                 var img5 = string.Empty;
+                var img6 = string.Empty;
                 Func<CultureInfo, string> txtTrulyYours = c =>  WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", c);
                 var topGif = string.Empty;
-                
+
+                var trulyYoursAsTebleRow = false;
+
                 if (quota.Free)
                 {
                     #region After registration letters
@@ -111,6 +123,8 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonConfigureRightNow", c);
                         orangeButtonUrl = commonLinkUtility.GetFullAbsolutePath("~/portal-settings/");
                         topGif = studioNotifyHelper.GetNotificationImageUrl("configure_docspace.gif");
+
+                        trulyYoursAsTebleRow = true;
                     }
 
                     #endregion
@@ -132,7 +146,9 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonWatchFullPlaylist", c);
                         orangeButtonUrl = "https://www.youtube.com/playlist?list=PLCF48HEKMOYM8MBnwYs8q5J0ILMK9NzIx";
 
-                        topGif = studioNotifyHelper.GetNotificationImageUrl("mainpic_video_guides.png");
+                        topGif = studioNotifyHelper.GetNotificationImageUrl("video_guides.gif");
+
+                        trulyYoursAsTebleRow = true;
                     }
 
 
@@ -153,13 +169,40 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         img4 = studioNotifyHelper.GetNotificationImageUrl("docs_tips4.png");
                         img5 = studioNotifyHelper.GetNotificationImageUrl("docs_tips5.png");
 
-                        orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonCollaborateDocSpace", c);
+                        orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonCollaborate", c);
                         orangeButtonUrl = commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/');
 
                         topGif = studioNotifyHelper.GetNotificationImageUrl("five_tips.gif");
                     }
 
                     #endregion
+
+                    else if (createdDate.AddDays(10) == nowDate)
+                    {
+                        action = Actions.SaasAdminIntegrations;
+                        paymentMessage = false;
+                        toadmins = true;
+
+                        img1 = studioNotifyHelper.GetNotificationImageUrl("onlyoffice.png");
+                        img2 = studioNotifyHelper.GetNotificationImageUrl("connect.png");
+                        img3 = studioNotifyHelper.GetNotificationImageUrl("zoom.png");
+                        img4 = studioNotifyHelper.GetNotificationImageUrl("zapier.png");
+                        img5 = studioNotifyHelper.GetNotificationImageUrl("wordpress.png");
+                        img6 = studioNotifyHelper.GetNotificationImageUrl("drupal.png");
+
+                        orangeButtonText1 = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetFreeApp", c);
+                        orangeButtonUrl1 = "https://marketplace.zoom.us/apps/OW6rOq-nRgCihG5eps_p-g";
+                        orangeButtonText2 = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetStarted", c);
+                        orangeButtonUrl2 = "https://zapier.com/apps/onlyoffice-docspace/integrations";
+                        orangeButtonText3 = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetFreeApp", c);
+                        orangeButtonUrl3 = "https://wordpress.org/plugins/onlyoffice-docspace/";
+                        orangeButtonText4 = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetFreeApp", c);
+                        orangeButtonUrl4 = "https://www.drupal.org/project/onlyoffice_docspace";
+
+                        topGif = studioNotifyHelper.GetNotificationImageUrl("integration.gif");
+
+                        trulyYoursAsTebleRow = true;
+                    }
 
                     #region 14 days after registration to admins and users SAAS TRIAL
 
@@ -176,6 +219,8 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         img2 = studioNotifyHelper.GetNotificationImageUrl("apple.png");
                         img3 = studioNotifyHelper.GetNotificationImageUrl("linux.png");
                         img4 = studioNotifyHelper.GetNotificationImageUrl("android.png");
+
+                        trulyYoursAsTebleRow = true;
                     }
 
                     #endregion
@@ -200,6 +245,8 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                                                                          "\",\"email\":\"" + owner.Email + "\"}")));
 
                         topGif = studioNotifyHelper.GetNotificationImageUrl("docspace_deleted.gif");
+
+                        trulyYoursAsTebleRow = true;
                     }
                     else if (dueDateIsNotMax && dueDate.AddMonths(6).AddDays(7) <= nowDate)
                     {
@@ -209,6 +256,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         {
                             await apiSystemHelper.RemoveTenantFromCacheAsync(tenant.GetTenantDomain(coreSettings));
                         }
+                        eventBus.Publish(new RemovePortalIntegrationEvent(Guid.Empty, tenant.Id));
                     }
 
                     #endregion
@@ -289,6 +337,8 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                                                                          "\",\"email\":\"" + owner.Email + "\"}")));
 
                         topGif = studioNotifyHelper.GetNotificationImageUrl("docspace_deleted.gif");
+
+                        trulyYoursAsTebleRow = true;
                     }
                     else if (tariff.State == TariffState.NotPaid && dueDateIsNotMax && dueDate.AddMonths(6).AddDays(7) <= nowDate)
                     {
@@ -298,6 +348,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         {
                             await apiSystemHelper.RemoveTenantFromCacheAsync(tenant.GetTenantDomain(coreSettings));
                         }
+                        eventBus.Publish(new RemovePortalIntegrationEvent(Guid.Empty, tenant.Id));
                     }
 
                     #endregion
@@ -344,12 +395,17 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         //new TagValue(Tags.DueDate, dueDate.ToLongDateString()),
                         //new TagValue(Tags.DelayDueDate, (delayDueDateIsNotMax ? delayDueDate : dueDate).ToLongDateString()),
                         TagValues.OrangeButton(orangeButtonText(culture), orangeButtonUrl),
-                        TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours(culture)),
+                        TagValues.OrangeButton(orangeButtonText1(culture), orangeButtonUrl1, "OrangeButton1"),
+                        TagValues.OrangeButton(orangeButtonText2(culture), orangeButtonUrl2, "OrangeButton2"),
+                        TagValues.OrangeButton(orangeButtonText3(culture), orangeButtonUrl3, "OrangeButton3"),
+                        TagValues.OrangeButton(orangeButtonText4(culture), orangeButtonUrl4, "OrangeButton4"),
+                        TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours(culture), trulyYoursAsTebleRow),
                         new TagValue("IMG1", img1),
                         new TagValue("IMG2", img2),
                         new TagValue("IMG3", img3),
                         new TagValue("IMG4", img4),
                         new TagValue("IMG5", img5),
+                        new TagValue("IMG6", img6),
                         new TagValue(CommonTags.TopGif, topGif),
                         new TagValue(Tags.PaymentDelay, tariffService.GetPaymentDelay()),
                         new TagValue(CommonTags.Footer, await userManager.IsDocSpaceAdminAsync(u) ? "common" : "social"));
@@ -413,6 +469,8 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                 var img4 = string.Empty;
                 var img5 = string.Empty;
 
+                var trulyYoursAsTableRow = false;
+
                 if (quota.Trial && defaultRebranding)
                 {
                     #region After registration letters
@@ -434,8 +492,10 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                         topGif = studioNotifyHelper.GetNotificationImageUrl("five_tips.gif");
 
-                        orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonCollaborateDocSpace", c);
+                        orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonCollaborate", c);
                         orangeButtonUrl = commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/');
+
+                        trulyYoursAsTableRow = true;
                     }
 
                     #endregion
@@ -455,6 +515,8 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         img2 = studioNotifyHelper.GetNotificationImageUrl("apple.png");
                         img3 = studioNotifyHelper.GetNotificationImageUrl("linux.png");
                         img4 = studioNotifyHelper.GetNotificationImageUrl("android.png");
+
+                        trulyYoursAsTableRow = true;
                     }
 
                     #endregion
@@ -490,7 +552,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         //new TagValue(Tags.DueDate, dueDate.ToLongDateString()),
                         //new TagValue(Tags.DelayDueDate, (delayDueDateIsNotMax ? delayDueDate : dueDate).ToLongDateString()),
                         TagValues.OrangeButton(orangeButtonText(culture), orangeButtonUrl),
-                        TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours(culture)),
+                        TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours(culture), trulyYoursAsTableRow),
                         new TagValue("IMG1", img1),
                         new TagValue("IMG2", img2),
                         new TagValue("IMG3", img3),
@@ -542,7 +604,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                     var orangeButtonUrl = commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/');
 
-                    Func<CultureInfo, string> orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonCollaborateDocSpace", c);
+                    Func<CultureInfo, string> orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonCollaborate", c);
                     Func<CultureInfo, string> txtTrulyYours = c => WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", c);
 
                     var img1 = studioNotifyHelper.GetNotificationImageUrl("docs_tips1.png");
@@ -567,7 +629,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                             new TagValue(Tags.UserName, u.DisplayUserName(displayUserSettingsHelper)),
                             new TagValue(CommonTags.Footer, "opensource"),
                             TagValues.OrangeButton(orangeButtonText(culture), orangeButtonUrl),
-                            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours(culture)),
+                            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours(culture), true),
                             new TagValue("IMG1", img1),
                             new TagValue("IMG2", img2),
                             new TagValue("IMG3", img3),

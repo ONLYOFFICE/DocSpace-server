@@ -40,7 +40,7 @@ public class TransferProgressItem : BaseBackupProgressItem
         IServiceScopeFactory serviceScopeFactory,
         NotifyHelper notifyHelper,
         IConfiguration configuration) :
-        base(logger, serviceScopeFactory)
+        base(serviceScopeFactory)
     {
         _logger = logger;
         _notifyHelper = notifyHelper;
@@ -60,6 +60,7 @@ public class TransferProgressItem : BaseBackupProgressItem
         int limit,
         bool notify)
     {
+        Init();
         TenantId = tenantId;
         TargetRegion = targetRegion;
         Notify = notify;

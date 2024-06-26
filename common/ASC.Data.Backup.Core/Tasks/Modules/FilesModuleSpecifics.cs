@@ -169,7 +169,7 @@ public class FilesModuleSpecifics(ILogger<ModuleProvider> logger, Helpers helper
 
             object folderId = null;
             var ids = string.Join("-|", Selectors.All.Select(s => s.Id));
-            var sboxId = Regex.Replace(row[1].ToString(), @"(?<=(?:" + $"{ids}-" + @"))\d+", match =>
+            var sboxId = Regex.Replace(row[2].ToString(), @"(?<=(?:" + $"{ids}-" + @"))\d+", match =>
             {
                 folderId = columnMapper.GetMapping("files_thirdparty_account", "id", match.Value);
 
@@ -181,7 +181,7 @@ public class FilesModuleSpecifics(ILogger<ModuleProvider> logger, Helpers helper
                 return (false, null);
             }
 
-            var hashBytes = MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(sboxId));
+            var hashBytes = MD5.HashData(Encoding.UTF8.GetBytes(sboxId));
             var hashedId = BitConverter.ToString(hashBytes).Replace("-", "").ToLower();
 
             preparedRow.Add("hash_id", hashedId);

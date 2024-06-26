@@ -26,19 +26,17 @@
 
 namespace ASC.Files.Thirdparty.Dropbox;
 
-[Scope]
+[Scope(typeof(IDaoBase<FileMetadata, FolderMetadata, Metadata>))]
 internal class DropboxDaoBase(
+    IDaoFactory daoFactory,
     IServiceProvider serviceProvider,
     UserManager userManager,
     TenantManager tenantManager,
     TenantUtil tenantUtil,
     IDbContextFactory<FilesDbContext> dbContextFactory,
-    SetupInfo setupInfo,
     FileUtility fileUtility,
-    TempPath tempPath,
     RegexDaoSelectorBase<FileMetadata, FolderMetadata, Metadata> regexDaoSelectorBase)
-    : ThirdPartyProviderDao<FileMetadata, FolderMetadata, Metadata>(serviceProvider, userManager, tenantManager,
-            tenantUtil, dbContextFactory, setupInfo, fileUtility, tempPath, regexDaoSelectorBase),
+    : ThirdPartyProviderDao<FileMetadata, FolderMetadata, Metadata>(daoFactory, serviceProvider, userManager, tenantManager, tenantUtil, dbContextFactory, fileUtility, regexDaoSelectorBase),
         IDaoBase<FileMetadata, FolderMetadata, Metadata>
 {
     private DropboxProviderInfo _providerInfo;
@@ -228,6 +226,7 @@ internal class DropboxDaoBase(
         file.Title = MakeFileTitle(dropboxFile);
         file.ThumbnailStatus = Thumbnail.Created;
         file.Encrypted = ProviderInfo.Private;
+        file.Shared = ProviderInfo.FolderType is FolderType.PublicRoom;
 
         return file;
     }

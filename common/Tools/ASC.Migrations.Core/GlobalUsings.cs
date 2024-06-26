@@ -34,7 +34,6 @@ global using ASC.Core.Common.Hosting.Extensions;
 global using ASC.Data.Backup.EF.Model;
 global using ASC.EventBus.Extensions.Logger;
 global using ASC.EventBus.Extensions.Logger.Extensions;
-global using ASC.Feed.Model;
 global using ASC.Migrations;
 global using ASC.Files.Core.EF;
 global using ASC.MessagingSystem.EF.Model;

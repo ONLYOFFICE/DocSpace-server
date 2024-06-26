@@ -444,7 +444,7 @@ public class PortalController(
 
         var localhost = coreSettings.BaseDomain == "localhost" || tenant.Alias == "localhost";
 
-        var newAlias = alias.Trim().ToLowerInvariant();
+        var newAlias = string.Concat(alias.Where(c => !Char.IsWhiteSpace(c))).ToLowerInvariant();
         var oldAlias = tenant.Alias;
         var oldVirtualRootPath = commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/');
 
@@ -532,6 +532,7 @@ public class PortalController(
         }
         finally
         {
+            eventBus.Publish(new RemovePortalIntegrationEvent(securityContext.CurrentAccount.ID, tenant.Id));
             securityContext.Logout();
         }
     }

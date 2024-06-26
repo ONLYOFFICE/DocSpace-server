@@ -89,7 +89,6 @@ global using ASC.EventBus.ActiveMQ;
 global using ASC.EventBus.Extensions.Logger;
 global using ASC.EventBus.RabbitMQ;
 global using ASC.EventBus.Serializers;
-global using ASC.Feed.Context;
 global using ASC.MessagingSystem.Core;
 global using ASC.MessagingSystem.EF.Context;
 global using ASC.MessagingSystem.EF.Model;
@@ -161,6 +160,5 @@ global using RedisRateLimiting.AspNetCore;
 global using StackExchange.Redis;
 global using StackExchange.Redis.Extensions.Core.Abstractions;
 global using StackExchange.Redis.Extensions.Core.Configuration;
-global using StackExchange.Redis.Extensions.Newtonsoft;
 
 global using LogLevel = Microsoft.Extensions.Logging.LogLevel;

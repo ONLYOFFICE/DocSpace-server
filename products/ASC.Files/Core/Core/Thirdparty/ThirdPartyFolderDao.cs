@@ -24,10 +24,16 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using DriveFile = Google.Apis.Drive.v3.Data.File;
+
 namespace ASC.Files.Core.Core.Thirdparty;
 
 /// <inheritdoc />
-[Scope]
+[Scope(GenericArguments = [typeof(BoxFile), typeof(BoxFolder), typeof(BoxItem)])]
+[Scope(GenericArguments = [typeof(FileMetadata), typeof(FolderMetadata), typeof(Metadata)])]
+[Scope(GenericArguments = [typeof(DriveFile), typeof(DriveFile), typeof(DriveFile)])]
+[Scope(GenericArguments = [typeof(Item), typeof(Item), typeof(Item)])]
+[Scope(GenericArguments = [typeof(WebDavEntry), typeof(WebDavEntry), typeof(WebDavEntry)])]
 internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
     IDbContextFactory<FilesDbContext> dbContextFactory,
     UserManager userManager,
@@ -141,8 +147,8 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
 
         if (subjectID != Guid.Empty)
         {
-            folders = folders.Where(x => subjectGroup
-                                             ? userManager.IsUserInGroup(x.CreateBy, subjectID)
+            folders = folders.WhereAwait(async x => subjectGroup
+                                             ? await userManager.IsUserInGroupAsync(x.CreateBy, subjectID)
                                              : x.CreateBy == subjectID);
         }
 
@@ -177,8 +183,8 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
 
         if (subjectID.HasValue && subjectID != Guid.Empty)
         {
-            folders = folders.Where(x => subjectGroup
-                                             ? userManager.IsUserInGroup(x.CreateBy, subjectID.Value)
+            folders = folders.WhereAwait(async x => subjectGroup
+                                             ? await userManager.IsUserInGroupAsync(x.CreateBy, subjectID.Value)
                                              : x.CreateBy == subjectID);
         }
 
@@ -586,36 +592,6 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         return Task.FromResult<string>(null);
     }
 
-    public Task<Dictionary<string, string>> GetBunchObjectIDsAsync(List<string> folderIDs)
-    {
-        return Task.FromResult<Dictionary<string, string>>(null);
-    }
-
-    public IAsyncEnumerable<FolderWithShare> GetFeedsForRoomsAsync(int tenant, DateTime from, DateTime to)
-    {
-        throw new NotImplementedException();
-    }
-
-    public IAsyncEnumerable<FolderWithShare> GetFeedsForFoldersAsync(int tenant, DateTime from, DateTime to)
-    {
-        throw new NotImplementedException();
-    }
-
-    public IAsyncEnumerable<ParentRoomPair> GetParentRoomsAsync(IEnumerable<int> foldersIds)
-    {
-        throw new NotImplementedException();
-    }
-
-    public IAsyncEnumerable<int> GetTenantsWithFoldersFeedsAsync(DateTime fromTime)
-    {
-        throw new NotImplementedException();
-    }
-
-    public IAsyncEnumerable<int> GetTenantsWithRoomsFeedsAsync(DateTime fromTime)
-    {
-        throw new NotImplementedException();
-    }
-
     public IAsyncEnumerable<OriginData> GetOriginsDataAsync(IEnumerable<string> entriesId)
     {
         throw new NotImplementedException();
@@ -648,20 +624,24 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
     {
         throw new NotImplementedException();
     }
+    
     public Task<FolderType> GetFirstParentTypeFromFileEntryAsync(FileEntry<string> entry)
     {
         throw new NotImplementedException();
     }
+    
     public Task<(string RoomId, string RoomTitle)> GetParentRoomInfoFromFileEntryAsync(FileEntry<string> entry)
     {
         return Task.FromResult(entry.RootFolderType is not (FolderType.VirtualRooms or FolderType.Archive) 
             ? (string.Empty, string.Empty) 
             : (_providerInfo.FolderId, _providerInfo.CustomerTitle));
     }
+    
     public Task<FilesStatisticsResultDto> GetFilesUsedSpace()
     {
         throw new NotImplementedException();
     }
+    
     public Task<int> GetFoldersCountAsync(string parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool withSubfolders = false, bool excludeSubject = false, string roomId = default)
     {
         throw new NotImplementedException();
@@ -681,10 +661,12 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
     {
         return Task.CompletedTask;
     }
+    
     public Task<string> ChangeTreeFolderSizeAsync(string folderId, long size)
     {
         throw new NotImplementedException();
     }
+    
     public Task<string> ChangeFolderQuotaAsync(Folder<string> folder, long quota)
     {
         throw new NotImplementedException();

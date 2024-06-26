@@ -91,7 +91,7 @@ public static class EndpointExtension
         return endpoints;
     }
 
-    private static async Task<IEndpointRouteBuilder> RegisterWebhooks(this IEndpointRouteBuilder endpoints, IServiceProvider serviceProvider)
+    private static async Task RegisterWebhooks(this IEndpointRouteBuilder endpoints, IServiceProvider serviceProvider)
     {
         var toRegister = endpoints.DataSources.First().Endpoints
             .Cast<RouteEndpoint>()
@@ -117,7 +117,5 @@ public static class EndpointExtension
         {
             await dbWorker.Register(toRegister);
         }
-
-        return endpoints;
     }
 }

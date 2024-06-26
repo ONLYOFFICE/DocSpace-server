@@ -28,20 +28,17 @@ namespace ASC.Core.Common.Quota.Custom;
 [Scope]
 public class CustomQuota
 {
-    private readonly UserCustomQuotaFeature _userCustomQuotaFeature;
-    private readonly TenantCustomQuotaFeature _tenantCustomQuotaFeature;
-
-
-    public IReadOnlyList<CustomQuotaFeature> CustomQuotaFeatures { get; private set; }
+    private IReadOnlyList<CustomQuotaFeature> CustomQuotaFeatures { get; }
+    
     public CustomQuota()
     {
-        _userCustomQuotaFeature = new UserCustomQuotaFeature();
-        _tenantCustomQuotaFeature = new TenantCustomQuotaFeature();
+        var userCustomQuotaFeature = new UserCustomQuotaFeature();
+        var tenantCustomQuotaFeature = new TenantCustomQuotaFeature();
 
         CustomQuotaFeatures = new List<CustomQuotaFeature>
         {
-            _userCustomQuotaFeature,
-            _tenantCustomQuotaFeature
+            userCustomQuotaFeature,
+            tenantCustomQuotaFeature
         };
     }
 

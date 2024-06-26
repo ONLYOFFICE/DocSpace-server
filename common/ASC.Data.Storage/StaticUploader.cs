@@ -120,8 +120,8 @@ public class StaticUploader(IServiceProvider serviceProvider,
 
     public async Task<bool> CanUploadAsync()
     {
-        var current = storageSettingsHelper.DataStoreConsumer(await settingsManager.LoadAsync<CdnStorageSettings>());
-        if (current == null || !current.IsSet || (string.IsNullOrEmpty(current["cnamessl"]) && string.IsNullOrEmpty(current["cname"])))
+        var current = await storageSettingsHelper.DataStoreConsumerAsync(await settingsManager.LoadAsync<CdnStorageSettings>());
+        if (current == null || !await current.GetIsSetAsync() || (string.IsNullOrEmpty(await current.GetAsync("cnamessl")) && string.IsNullOrEmpty(await current.GetAsync("cname"))))
         {
             return false;
         }
@@ -202,6 +202,11 @@ public class UploadOperationProgress : DistributedTaskProgress
     private readonly IEnumerable<string> _directoryFiles;
     private readonly IServiceProvider _serviceProvider;
 
+    public UploadOperationProgress()
+    {
+        
+    }
+    
     public UploadOperationProgress(IServiceProvider serviceProvider, string key, int tenantId, string relativePath, string mappedPath)
     {
         _serviceProvider = serviceProvider;

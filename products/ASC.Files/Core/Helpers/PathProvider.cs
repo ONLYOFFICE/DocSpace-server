@@ -122,33 +122,7 @@ public class PathProvider(WebImageSupplier webImageSupplier,
 
         return uriBuilder.Uri + "?" + query;
     }
-
-    public string GetFileStreamUrl<T>(File<T> file, bool lastVersion = false)
-    {
-        if (file == null)
-        {
-            throw new ArgumentNullException(nameof(file), FilesCommonResource.ErrorMessage_FileNotFound);
-        }
-
-        //NOTE: Always build path to handler!
-        var uriBuilder = new UriBuilder(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FileHandlerPath));
-        var query = uriBuilder.Query;
-        query += FilesLinkUtility.Action + "=stream&";
-        query += FilesLinkUtility.FileId + "=" + HttpUtility.UrlEncode(file.Id.ToString()) + "&";
-        var version = 0;
-        if (!lastVersion)
-        {
-            version = file.Version;
-            query += FilesLinkUtility.Version + "=" + file.Version + "&";
-        }
-
-        query += FilesLinkUtility.AuthKey + "=" + emailValidationKeyProvider.GetEmailKey(file.Id.ToString() + version);
-
-        query = AddKey(query);
-
-        return uriBuilder.Uri + "?" + query;
-    }
-
+    
     public async Task<string> GetFileChangesUrlAsync<T>(File<T> file)
     {
         if (file == null)

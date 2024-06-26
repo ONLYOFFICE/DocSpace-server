@@ -36,5 +36,5 @@ public class QuotaSettingsRequestsDto
 
     /// <summary>Default quota value</summary>
     /// <type>System.Int64, System</type>
-    public long DefaultQuota { get; set; }
+    public JsonElement DefaultQuota { get; set; }
 }

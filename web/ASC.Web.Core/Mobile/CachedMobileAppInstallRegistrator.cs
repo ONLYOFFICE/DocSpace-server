@@ -26,8 +26,12 @@
 
 namespace ASC.Web.Core.Mobile;
 
-public class CachedMobileAppInstallRegistrator(MobileAppInstallRegistrator registrator, TimeSpan cacheExpiration,
-        TenantManager tenantManager, ICache cache)
+[Scope]
+public class CachedMobileAppInstallRegistrator(
+    MobileAppInstallRegistrator registrator,
+    TimeSpan cacheExpiration,
+    TenantManager tenantManager,
+    ICache cache)
     : IMobileAppInstallRegistrator
 {
     private readonly MobileAppInstallRegistrator _registrator = registrator ?? throw new ArgumentNullException(nameof(registrator));

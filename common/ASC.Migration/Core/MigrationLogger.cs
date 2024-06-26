@@ -30,31 +30,29 @@ namespace ASC.Migration.Core;
 public class MigrationLogger(
     ILogger<MigrationLogger> logger,
     StorageFactory storageFactory,
-    TenantManager tenantManager)
-    : IDisposable
+    TenantManager tenantManager,
+    TempStream tempStream)
+    : IAsyncDisposable
 {
-    private string _migrationLogPath;
-    private Stream _migration;
+    private Stream _migrationStream;
     private StreamWriter _migrationLog;
+    private string _logName;
 
-    public async Task InitAsync(string logName = null)
+    public void Init(string logName = null)
     {
-        _migrationLogPath = await GetTmpFilePathAsync(logName);
-        _migration = new FileStream(_migrationLogPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, System.IO.FileShare.ReadWrite);
-        _migrationLog = new StreamWriter(_migration);
+        _logName = logName ?? Path.GetRandomFileName();
+        if (logName == null)
+        {
+            _migrationStream = tempStream.Create();
+            _migrationLog = new StreamWriter(_migrationStream);
+        }
     }
 
-    public async Task<string> GetTmpFilePathAsync(string logName)
+    private async Task SaveLogAsync()
     {
-        var discStore = await storageFactory.GetStorageAsync(await tenantManager.GetCurrentTenantIdAsync(), "migration_log", (IQuotaController)null) as DiscDataStore;
-        var folder = discStore.GetPhysicalPath("", "");
-
-        if (!Directory.Exists(folder))
-        {
-            Directory.CreateDirectory(folder);
-        }
-
-        return Path.Combine(folder, logName ?? Path.GetRandomFileName());
+        var store = await storageFactory.GetStorageAsync(await tenantManager.GetCurrentTenantIdAsync(), "migration_log", (IQuotaController)null);
+        _migrationStream.Position = 0;
+        await store.SaveAsync("", _logName, _migrationStream);
     }
 
     public void Log(string msg, Exception exception = null)
@@ -79,23 +77,23 @@ public class MigrationLogger(
         catch { }
     }
 
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
-        if(_migrationLog != null)
+        if (_migrationLog != null)
         {
-            _migrationLog.Dispose();
+            await SaveLogAsync();
+            await _migrationLog.DisposeAsync();
         }
     }
 
-    public Stream GetStream()
+    public async Task<Stream> GetStreamAsync()
     {
-        logger.Information($"log path - {_migrationLogPath}");
-        logger.Information($"log Length - {_migration.Length}");
-        _migration.Position = 0;
-        return _migration;
+        var store = await storageFactory.GetStorageAsync(await tenantManager.GetCurrentTenantIdAsync(), "migration_log", (IQuotaController)null);
+        return await store.GetReadStreamAsync("", _logName);
     }
+
     public string GetLogName()
     {
-        return Path.GetFileName(_migrationLogPath);
+        return _logName;
     }
 }

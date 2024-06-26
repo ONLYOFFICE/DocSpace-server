@@ -26,7 +26,6 @@
 
 namespace ASC.Common.Security;
 
-[Scope(typeof(PermissionResolver))]
 public interface IPermissionResolver
 {
     Task<bool> CheckAsync(ISubject subject, ISecurityObjectId objectId, ISecurityObjectProvider securityObjProvider, IAction action);

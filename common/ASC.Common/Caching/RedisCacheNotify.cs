@@ -27,29 +27,15 @@
 namespace ASC.Common.Caching;
 
 [Singleton]
-public class RedisCacheNotify<T>(IRedisClient redisCacheClient) : ICacheNotify<T>
-    where T : new()
+public class RedisCacheNotify<T>(IRedisClient redisCacheClient) : ICacheNotify<T> where T : new()
 {
     private readonly IRedisDatabase _redis = redisCacheClient.GetDefaultDatabase();
     private readonly ConcurrentDictionary<CacheNotifyAction, ConcurrentBag<Action<T>>> _invocationList = new();
     private readonly Guid _instanceId = Guid.NewGuid();
 
-
-    public void Publish(T obj, CacheNotifyAction action)
-    {
-        Task.Run(async () => await _redis.PublishAsync(GetChannelName(), new RedisCachePubSubItem<T> { Id = _instanceId, Object = obj, Action = action }))
-            .GetAwaiter()
-            .GetResult();
-
-        foreach (var handler in GetInvocationList(action))
-        {
-            handler(obj);
-        }
-    }
-
     public async Task PublishAsync(T obj, CacheNotifyAction action)
     {
-        await Task.Run(async () => await _redis.PublishAsync(GetChannelName(), new RedisCachePubSubItem<T> { Id = _instanceId, Object = obj, Action = action }));
+        await _redis.PublishAsync(GetChannelName(), new RedisCachePubSubItem<T> { Id = _instanceId, Object = obj, Action = action });
 
         foreach (var handler in GetInvocationList(action))
         {
@@ -131,7 +117,7 @@ public class RedisCacheNotify<T>(IRedisClient redisCacheClient) : ICacheNotify<T
 
 
     [ProtoContract]
-    record RedisCachePubSubItem<TObject>
+    public record RedisCachePubSubItem<TObject>
     {
         [ProtoMember(1)]
         public Guid Id { get; set; }

@@ -28,7 +28,7 @@ using AuthConstants = ASC.Common.Security.Authorizing.AuthConstants;
 
 namespace ASC.Core.Security.Authorizing;
 
-[Scope]
+[Scope(typeof(IRoleProvider))]
 class RoleProvider(IServiceProvider serviceProvider) : IRoleProvider
 {
     //circ dep

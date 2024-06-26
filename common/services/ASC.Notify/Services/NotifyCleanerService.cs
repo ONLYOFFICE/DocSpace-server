@@ -27,13 +27,13 @@
 namespace ASC.Notify.Services;
 
 [Singleton]
-public class NotifyCleanerService(IOptions<NotifyServiceCfg> notifyServiceCfg, 
-                                  IServiceScopeFactory scopeFactory,
-                                  ILogger<NotifyCleanerService> logger) : ActivePassiveBackgroundService<NotifyCleanerService>(logger, scopeFactory)
+public class NotifyCleanerService(
+    ConfigureNotifyServiceCfg notifyServiceCfg, 
+    IServiceScopeFactory scopeFactory,
+    ILogger<NotifyCleanerService> logger) : ActivePassiveBackgroundService<NotifyCleanerService>(logger, scopeFactory)
 
 {
     private readonly IServiceScopeFactory _serviceScopeFactory = scopeFactory;
-    private readonly ILogger<NotifyCleanerService> _logger = logger;
     private readonly NotifyServiceCfg _notifyServiceCfg = notifyServiceCfg.Value;
 
     protected override TimeSpan ExecuteTaskPeriod { get; set; } = TimeSpan.FromMilliseconds(1000);
@@ -41,24 +41,24 @@ public class NotifyCleanerService(IOptions<NotifyServiceCfg> notifyServiceCfg,
     protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
          try
-        {
-            var date = DateTime.UtcNow.AddDays(-_notifyServiceCfg.StoreMessagesDays);
+         {
+             var date = DateTime.UtcNow.AddDays(-_notifyServiceCfg.StoreMessagesDays);
 
-            await using var scope = _serviceScopeFactory.CreateAsyncScope();
-            await using var dbContext = await scope.ServiceProvider.GetService<IDbContextFactory<NotifyDbContext>>().CreateDbContextAsync();
+             await using var scope = _serviceScopeFactory.CreateAsyncScope();
+             await using var dbContext = await scope.ServiceProvider.GetService<IDbContextFactory<NotifyDbContext>>().CreateDbContextAsync(stoppingToken);
 
-            await Queries.DeleteNotifyInfosAsync(dbContext, date);
-            await Queries.DeleteNotifyQueuesAsync(dbContext, date);
+             await Queries.DeleteNotifyInfosAsync(dbContext, date);
+             await Queries.DeleteNotifyQueuesAsync(dbContext, date);
 
-        }
-        catch (ThreadAbortException)
-        {
-            // ignore
-        }
-        catch (Exception err)
-        {
-            _logger.ErrorClear(err);
-        }
+         }
+         catch (ThreadAbortException)
+         {
+             // ignore
+         }
+         catch (Exception err)
+         {
+             logger.ErrorClear(err);
+         }
     }
 }
 

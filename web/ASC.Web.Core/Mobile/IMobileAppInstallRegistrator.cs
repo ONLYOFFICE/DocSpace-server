@@ -26,7 +26,6 @@
 
 namespace ASC.Web.Core.Mobile;
 
-[Scope(typeof(MobileAppInstallRegistrator), typeof(CachedMobileAppInstallRegistrator))]
 public interface IMobileAppInstallRegistrator
 {
     Task RegisterInstallAsync(string userEmail, MobileAppType appType);

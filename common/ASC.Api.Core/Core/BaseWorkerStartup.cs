@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Core.Notify.Socket;
+using ASC.MessagingSystem.Data;
 
 namespace ASC.Api.Core;
 
@@ -51,9 +52,9 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
         services.AddBaseDbContextPool<WebstudioDbContext>();
         services.AddBaseDbContextPool<InstanceRegistrationContext>();
         services.AddBaseDbContextPool<IntegrationEventLogContext>();
-        services.AddBaseDbContextPool<FeedDbContext>();
         services.AddBaseDbContextPool<MessagesContext>();
         services.AddBaseDbContextPool<WebhooksDbContext>();
+
 
         services.RegisterFeature();
 
@@ -61,10 +62,8 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
 
         if (!HostEnvironment.IsDevelopment())
         {
-            services.AddStartupTask<WarmupServicesStartupTask>()
-                    .TryAddSingleton(services);
+            services.AddStartupTask<WarmupServicesStartupTask>().TryAddSingleton(services);
         }
-
 
         services.AddMemoryCache();
         
@@ -77,8 +76,10 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
                 .AddHttpClient()
                 .AddDistributedLock(Configuration);
 
-        DIHelper.Configure(services);
 
+        DIHelper.Configure(services);
+        DIHelper.Scan();
+        
         services.AddSingleton(Channel.CreateUnbounded<NotifyRequest>());
         services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Writer);
@@ -88,7 +89,6 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
         services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Writer);
         services.AddHostedService<SocketService>();
-        DIHelper.TryAdd<SocketService>();
     }
 
     protected IEnumerable<Assembly> GetAutoMapperProfileAssemblies()

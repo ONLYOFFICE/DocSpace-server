@@ -26,6 +26,14 @@
 
 namespace ASC.Web.Core;
 
+public enum RecaptchaType
+{
+    Default = 0,
+    AndroidV2 = 1,
+    iOSV2 = 2,
+    hCaptcha = 3
+}
+
 public class RecaptchaException : InvalidCredentialException
 {
     public RecaptchaException()
@@ -41,15 +49,18 @@ public class RecaptchaException : InvalidCredentialException
 [Scope]
 public class Recaptcha(SetupInfo setupInfo, IHttpClientFactory clientFactory)
 {
-    public async Task<bool> ValidateRecaptchaAsync(string response, string ip)
+    public async Task<bool> ValidateRecaptchaAsync(RecaptchaType recaptchaType, string response, string ip)
     {
         try
         {
-            var data = $"secret={setupInfo.RecaptchaPrivateKey}&remoteip={ip}&response={response}";
+            var privateKey = recaptchaType is RecaptchaType.hCaptcha ? setupInfo.HcaptchaPrivateKey : setupInfo.RecaptchaPrivateKey;
+            var verifyUrl = recaptchaType is RecaptchaType.hCaptcha ? setupInfo.HcaptchaVerifyUrl : setupInfo.RecaptchaVerifyUrl;
+
+            var data = $"secret={privateKey}&remoteip={ip}&response={response}";
 
             var request = new HttpRequestMessage
             {
-                RequestUri = new Uri(setupInfo.RecaptchaVerifyUrl),
+                RequestUri = new Uri(verifyUrl),
                 Method = HttpMethod.Post,
                 Content = new StringContent(data, Encoding.UTF8, "application/x-www-form-urlencoded")
             };

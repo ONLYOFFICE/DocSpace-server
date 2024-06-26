@@ -270,7 +270,7 @@ Khả năng tương thích cao nhất với docx, xlsx, pptx.</value>
     <value>Tài liệu</value>
   </data>
   <data name="ProductUserOpportunities" xml:space="preserve">
-    <value>Tạo và chỉnh sửa tài liệu riêng cũng như tài liệu được chia sẻ với quyền truy cập thích hợp|Trao cho người dùng khác quyền đọc/chỉnh sửa tài liệu và thư mục|Liên kết Dropbox, Box và tài khoản tài khác trong mục 'Tài liệu của tôi'</value>
+    <value>Tạo và chỉnh sửa tài liệu riêng cũng như tài liệu được chia sẻ với quyền truy cập thích hợp|Trao cho người dùng khác quyền đọc/chỉnh sửa tài liệu và thư mục|Liên kết Dropbox, Box và tài khoản tài khác trong mục 'Tài liệu'</value>
   </data>
   <data name="UnknownFirstName" xml:space="preserve">
     <value>Tên</value>

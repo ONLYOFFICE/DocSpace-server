@@ -28,7 +28,7 @@ using File = System.IO.File;
 
 namespace ASC.Files.Core.Core.Thirdparty.Dropbox;
 
-[Scope]
+[Scope(typeof(ThirdPartyFileDao<FileMetadata, FolderMetadata, Metadata>))]
 internal class DropboxFileDao(UserManager userManager,
         IDbContextFactory<FilesDbContext> dbContextFactory,
         IDaoSelector<FileMetadata, FolderMetadata, Metadata> daoSelector,
