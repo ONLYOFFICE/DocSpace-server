@@ -89,9 +89,16 @@ public class WatermarkManager
 
         string imageUrl = null;
 
-        if (!string.IsNullOrEmpty(watermarkRequestDto.ImageUrl) && !Uri.IsWellFormedUriString(watermarkRequestDto.ImageUrl, UriKind.Absolute))
+        if (!string.IsNullOrEmpty(watermarkRequestDto.ImageUrl))
         {
-            imageUrl = await _roomLogoManager.CreateWatermarkImageAsync(room, watermarkRequestDto.ImageUrl);
+            if(Uri.IsWellFormedUriString(watermarkRequestDto.ImageUrl, UriKind.Absolute))
+            {
+                imageUrl = watermarkRequestDto.ImageUrl;
+            }
+            else
+            {
+                imageUrl = await _roomLogoManager.CreateWatermarkImageAsync(room, watermarkRequestDto.ImageUrl);
+            }
         }
         else if (!Equals(watermarkRequestDto.ImageId, default(T)))
         {
@@ -104,10 +111,6 @@ public class WatermarkManager
 
                 imageUrl = await _roomLogoManager.CreateWatermarkImageAsync(room, stream);
             }
-        }
-        else
-        {
-            imageUrl = watermarkRequestDto.ImageUrl;
         }
 
         if (!string.IsNullOrEmpty(imageUrl))
