@@ -31,31 +31,11 @@ namespace ASC.AuditTrail.Types;
 [EnumExtensions]
 public enum EntryType
 {
-    None,
-    File,
-    Folder,
-    Project,
-    Contact,
-    Milestone,
-    Task,
-    Comment,
-    SubTask,
-    Message,
-    TimeSpend,
-    ReportTemplate,
-    Template,
-    Relationship,
-    CRMTask,
-    Opportunity,
-    Invoice,
-    Case,
-    ListItem,
-    InvoiceItem,
-    InvoiceTax,
-    FieldDescription,
-    OpportunityMilestone,
-    User,
-    Group,
-    Room,
-    Tag
+    None = 0,
+    File = 1,
+    Folder = 2,
+    User = 23,
+    Group = 24,
+    Room = 25,
+    Tag = 26
 }

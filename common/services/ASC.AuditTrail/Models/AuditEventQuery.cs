@@ -26,10 +26,14 @@
 
 namespace ASC.AuditTrail.Models;
 
-public class AuditEventQuery
+public record AuditEventQuery
 {
     public DbAuditEvent Event { get; init; }
-    public string UserName { get; set; }
+    public UserData UserData { get; init; }
+}
+
+public record UserData
+{
     public string FirstName { get; init; }
     public string LastName { get; init; }
 }
