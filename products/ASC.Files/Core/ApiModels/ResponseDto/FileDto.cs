@@ -221,7 +221,7 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
             if (!DocSpaceHelper.IsRoom(room.FolderType))
             {
                 var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(room);
-                if (int.TryParse(roomId.ToString(), out var curRoomId) && curRoomId != -1)
+                if (int.TryParse(roomId?.ToString(), out var curRoomId) && curRoomId != -1)
                 {
                     room = await folderDao.GetFolderAsync(roomId);
                 }
