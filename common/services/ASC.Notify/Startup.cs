@@ -41,11 +41,9 @@ public class Startup : BaseWorkerStartup
     public override async Task ConfigureServices(IServiceCollection services)
     {
         await base.ConfigureServices(services);
-
-        services.Configure<NotifyServiceCfg>(Configuration.GetSection("notify"));
-
-        services.AddActivePassiveHostedService<NotifySenderService>(DIHelper, Configuration);
-        services.AddActivePassiveHostedService<NotifyCleanerService>(DIHelper, Configuration);
+        
+        services.AddActivePassiveHostedService<NotifySenderService>(Configuration);
+        services.AddActivePassiveHostedService<NotifyCleanerService>(Configuration);
 
         services.AddBaseDbContextPool<NotifyDbContext>();
         services.AddBaseDbContextPool<FilesDbContext>();

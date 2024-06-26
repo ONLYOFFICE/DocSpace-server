@@ -270,12 +270,7 @@ public class CachedUserService : IUserService, ICachedService
 
         return user;
     }
-
-    public async Task<IEnumerable<int>> GetTenantsWithFeedsAsync(DateTime from)
-    {
-        return await _service.GetTenantsWithFeedsAsync(from);
-    }
-
+    
     public async Task RemoveUserAsync(int tenant, Guid id, bool immediate = false)
     {
         await _service.RemoveUserAsync(tenant, id, immediate);

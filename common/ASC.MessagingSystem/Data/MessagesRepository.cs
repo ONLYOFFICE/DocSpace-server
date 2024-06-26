@@ -24,301 +24,81 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Threading.Channels;
+
+using ASC.Common.Threading;
+using ASC.EventBus.Abstractions;
+
+using Microsoft.Extensions.Hosting;
+
 namespace ASC.MessagingSystem.Data;
 
 [Singleton]
-public class MessagesRepository : IDisposable
+public class MessagesRepository(
+    IServiceScopeFactory serviceScopeFactory,
+    ILogger<MessagesRepository> logger,
+    IMapper mapper,
+    IEventBus eventBus)
 {
-    private DateTime _lastSave = DateTime.UtcNow;
-    private bool _timerStarted;
-    private readonly TimeSpan _cacheTime;
-    private readonly Dictionary<string, EventMessage> _cache;
-    private readonly IServiceScopeFactory _serviceScopeFactory;
-    private readonly IMapper _mapper;
-    private readonly ILogger<MessagesRepository> _logger;
-    private readonly Timer _timer;
-    private readonly int _cacheLimit;
-    private readonly SemaphoreSlim _semaphore = new(1);
-    private readonly HashSet<MessageAction> _forceSaveAuditActions =
-        [MessageAction.RoomInviteLinkUsed, MessageAction.UserSentEmailChangeInstructions, MessageAction.UserSentPasswordChangeInstructions, MessageAction.SendJoinInvite];
-
-    public MessagesRepository(IServiceScopeFactory serviceScopeFactory, ILogger<MessagesRepository> logger, IMapper mapper, IConfiguration configuration)
-    {
-        _cacheTime = TimeSpan.FromMinutes(1);
-        _cache = new Dictionary<string, EventMessage>();
-        _timerStarted = false;
-
-        _logger = logger;
-        _serviceScopeFactory = serviceScopeFactory;
-
-        _timer = new Timer(Callback);
-
-        _mapper = mapper;
-
-        var minutes = configuration["messaging:CacheTimeFromMinutes"];
-        var limit = configuration["messaging:CacheLimit"];
-
-        _cacheTime = int.TryParse(minutes, out var cacheTime) ? TimeSpan.FromMinutes(cacheTime) : TimeSpan.FromMinutes(1);
-        _cacheLimit = int.TryParse(limit, out var cacheLimit) ? cacheLimit : 100;
-        return;
-
-        async void Callback(object state) => await FlushCacheAsync(state);
-    }
-
-    ~MessagesRepository()
-    {
-        FlushCache();
-    }
-
-    private bool ForceSave(EventMessage message)
-    {
-        // messages with action code < 2000 are related to login-history
-        if ((int)message.Action < 2000)
-        {
-            return true;
-        }
-
-        return _forceSaveAuditActions.Contains(message.Action);
-    }
+    private static readonly HashSet<MessageAction> _forceSaveAuditActions = [MessageAction.RoomInviteLinkUsed, MessageAction.UserSentEmailChangeInstructions, MessageAction.UserSentPasswordChangeInstructions, MessageAction.SendJoinInvite];
 
     public async Task<int> AddAsync(EventMessage message)
     {
-        if (ForceSave(message))
+        if (IsForceSave(message))
         {
-            _logger.LogDebug("ForceSave: {Action}", message.Action.ToStringFast());
-            
-            int id;
-            if (!string.IsNullOrEmpty(message.UaHeader))
-            {
-                try
-                {
-                    MessageSettings.AddInfoMessage(message);
-                }
-                catch (Exception e)
-                {
-                    _logger.ErrorWithException("Add " + message.Id, e);
-                }
-            }
+            logger.LogDebug("ForceSave: {Action}", message.Action.ToStringFast());
 
-            using var scope = _serviceScopeFactory.CreateScope();
-            await using var ef = await scope.ServiceProvider.GetService<IDbContextFactory<MessagesContext>>().CreateDbContextAsync();
-            var historySocketManager = scope.ServiceProvider.GetService<HistorySocketManager>();
-
-            if ((int)message.Action < 2000)
-            {
-                id = await AddLoginEventAsync(message, ef);
-            }
-            else
-            {
-                id = await AddAuditEventAsync(message, ef, historySocketManager);
-            }
-            return id;
+            return await ForceSave(message);
         }
 
-        var now = DateTime.UtcNow;
-        var key = $"{message.TenantId}|{message.UserId}|{message.Id}|{now.Ticks}";
-
-        try
+        eventBus.Publish(new EventDataIntegrationEvent(message.UserId, message.TenantId)
         {
-            await _semaphore.WaitAsync();
-            _cache[key] = message;
+             RequestMessage = message
+        });
 
-            if (!_timerStarted)
-            {
-                _timer.Change(0, 100);
-                _timerStarted = true;
-            }
-        }
-        finally
-        {
-            _semaphore.Release();
-        }
         return 0;
     }
-    private async Task FlushCacheAsync(object _)
+
+    internal static bool IsForceSave(EventMessage message)
     {
-        await FlushCacheAsync();
+        // messages with action code < 2000 are related to login-history
+        return (int)message.Action < 2000 || _forceSaveAuditActions.Contains(message.Action);
     }
-
-    private async Task FlushCacheAsync()
+    
+    private async Task<int> ForceSave(EventMessage message)
     {
-        List<EventMessage> events = null;
-
-        if (DateTime.UtcNow > _lastSave.Add(_cacheTime) || _cache.Count > _cacheLimit)
+        int id;
+        if (!string.IsNullOrEmpty(message.UaHeader))
         {
             try
             {
-                await _semaphore.WaitAsync();
-                _timer.Change(-1, -1);
-                _timerStarted = false;
-
-                events = [.._cache.Values];
-                _cache.Clear();
-                _lastSave = DateTime.UtcNow;
+                MessageSettings.AddInfoMessage(message);
             }
-            finally
+            catch (Exception e)
             {
-                _semaphore.Release();
+                logger.ErrorWithException("Add " + message.Id, e);
             }
         }
 
-        if (events == null)
-        {
-            return;
-        }
-        
-        _logger.LogDebug("FlushCache: events count {Count}", events.Count);
-
-        using var scope = _serviceScopeFactory.CreateScope();
+        await using var scope = serviceScopeFactory.CreateAsyncScope();
         await using var ef = await scope.ServiceProvider.GetService<IDbContextFactory<MessagesContext>>().CreateDbContextAsync();
         var historySocketManager = scope.ServiceProvider.GetService<HistorySocketManager>();
 
-        var dict = new Dictionary<string, ClientInfo>();
-
-        var groups = events.GroupBy(e => e.TenantId);
-        foreach (var group in groups)
+        if ((int)message.Action < 2000)
         {
-            try
-            {
-                var references = new List<DbFilesAuditReference>();
-                
-                foreach (var message in group)
-                {
-                    if (!string.IsNullOrEmpty(message.UaHeader))
-                    {
-                        try
-                        {
-                            MessageSettings.AddInfoMessage(message, dict);
-                        }
-                        catch (Exception e)
-                        {
-                            _logger.ErrorFlushCache(message.Id, e);
-                        }
-                    }
-
-                    if (!ForceSave(message))
-                    {
-                        // messages with action code < 2000 are related to login-history
-                        if ((int)message.Action < 2000)
-                        {
-                            var loginEvent = _mapper.Map<EventMessage, DbLoginEvent>(message);
-                            await ef.LoginEvents.AddAsync(loginEvent);
-                        }
-                        else
-                        {
-                            var auditEvent = _mapper.Map<EventMessage, DbAuditEvent>(message);
-                            await ef.AuditEvents.AddAsync(auditEvent);
-                            
-                            if (auditEvent.FilesReferences is { Count: > 0 })
-                            {
-                                references.AddRange(auditEvent.FilesReferences);
-                            }
-                        }
-                    }
-                }
-
-                await ef.SaveChangesAsync();
-
-                if (references.Count <= 0)
-                {
-                    continue;
-                }
-
-                await historySocketManager.UpdateHistoryAsync(group.Key, references);
-            }
-            catch(Exception e)
-            {
-                _logger.ErrorFlushCache(group.Key, e);
-            }
+            id = await AddLoginEventAsync(message, ef);
         }
-    }
-
-    private void FlushCache()
-    {
-        List<EventMessage> events;
-
-        try
+        else
         {
-            _semaphore.Wait();
-            _timer.Change(-1, -1);
-            _timerStarted = false;
-
-            events = [.._cache.Values];
-            _cache.Clear();
-            _lastSave = DateTime.UtcNow;
-        }
-        finally
-        {
-            _semaphore.Release();
+            id = await AddAuditEventAsync(message, ef, historySocketManager);
         }
 
-        using var scope = _serviceScopeFactory.CreateScope();
-        using var ef = scope.ServiceProvider.GetService<IDbContextFactory<MessagesContext>>().CreateDbContext();
-        var historySocketManager = scope.ServiceProvider.GetService<HistorySocketManager>();
-
-        var dict = new Dictionary<string, ClientInfo>();
-
-        var groups = events.GroupBy(e => e.TenantId);
-        foreach (var group in groups)
-        {
-            try
-            {
-                var references = new List<DbFilesAuditReference>();
-                
-                foreach (var message in group)
-                {
-                    if (!string.IsNullOrEmpty(message.UaHeader))
-                    {
-                        try
-                        {
-                            MessageSettings.AddInfoMessage(message, dict);
-                        }
-                        catch (Exception e)
-                        {
-                            _logger.ErrorFlushCache(message.Id, e);
-                        }
-                    }
-
-                    if (!ForceSave(message))
-                    {
-                        // messages with action code < 2000 are related to login-history
-                        if ((int)message.Action < 2000)
-                        {
-                            var loginEvent = _mapper.Map<EventMessage, DbLoginEvent>(message);
-                            ef.LoginEvents.Add(loginEvent);
-                        }
-                        else
-                        {
-                            var auditEvent = _mapper.Map<EventMessage, DbAuditEvent>(message);
-                            ef.AuditEvents.Add(auditEvent);
-
-                            if (auditEvent.FilesReferences is { Count: > 0 })
-                            {
-                                references.AddRange(auditEvent.FilesReferences);
-                            }
-                        }
-                    }
-                }
-                
-                ef.SaveChanges();
-                
-                if (references.Count <= 0)
-                {
-                    continue;
-                }
-                
-                historySocketManager.UpdateHistory(group.Key, references);
-            }
-            catch(Exception e)
-            {
-                _logger.ErrorFlushCache(group.Key, e);
-            }
-        }
+        return id;
     }
 
     private async Task<int> AddLoginEventAsync(EventMessage message, MessagesContext dbContext)
     {
-        var loginEvent = _mapper.Map<EventMessage, DbLoginEvent>(message);
+        var loginEvent = mapper.Map<EventMessage, DbLoginEvent>(message);
 
         await dbContext.LoginEvents.AddAsync(loginEvent);
         await dbContext.SaveChangesAsync();
@@ -328,7 +108,7 @@ public class MessagesRepository : IDisposable
 
     private async Task<int> AddAuditEventAsync(EventMessage message, MessagesContext dbContext, HistorySocketManager historySocketManager)
     {
-        var auditEvent = _mapper.Map<EventMessage, DbAuditEvent>(message);
+        var auditEvent = mapper.Map<EventMessage, DbAuditEvent>(message);
 
         await dbContext.AuditEvents.AddAsync(auditEvent);
         await dbContext.SaveChangesAsync();
@@ -342,9 +122,151 @@ public class MessagesRepository : IDisposable
 
         return auditEvent.Id;
     }
+}
 
-    public void Dispose()
+[Scope]
+public class EventDataIntegrationEventHandler : IIntegrationEventHandler<EventDataIntegrationEvent>
+{
+    private readonly ILogger _logger;
+    private readonly ChannelWriter<EventData> _channelWriter;
+    private readonly ITariffService _tariffService;
+    private readonly TenantManager _tenantManager;
+
+    private EventDataIntegrationEventHandler()
     {
-        _timer?.Dispose();
+
+    }
+
+    public EventDataIntegrationEventHandler(
+        ILogger<EventDataIntegrationEventHandler> logger,
+        ITariffService tariffService,
+        TenantManager tenantManager,
+        ChannelWriter<EventData> channelWriter)
+    {
+        _logger = logger;
+        _channelWriter = channelWriter;
+        _tariffService = tariffService;
+        _tenantManager = tenantManager;
+    }
+    
+
+    public async Task Handle(EventDataIntegrationEvent @event)
+    {
+        CustomSynchronizationContext.CreateContext();
+        using (_logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}") }))
+        {
+            
+            await _tenantManager.SetCurrentTenantAsync(@event.TenantId);
+            var tariff = await _tariffService.GetTariffAsync(@event.TenantId);
+            
+            if (await _channelWriter.WaitToWriteAsync())
+            {
+                await _channelWriter.WriteAsync(new EventData(@event.RequestMessage, tariff.State));
+            }
+        }
     }
 }
+
+[Singleton]
+public class MessageSenderService(
+    IServiceScopeFactory serviceScopeFactory, 
+    ILogger<MessagesRepository> logger, 
+    IMapper mapper,
+    ChannelReader<EventData> channelReader,
+    IConfiguration configuration
+) : BackgroundService
+{
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    { 
+        if(!int.TryParse(configuration["messaging:maxDegreeOfParallelism"], out var maxDegreeOfParallelism))
+        {
+            maxDegreeOfParallelism = 10;
+        }
+
+        List<ChannelReader<EventData>> readers = [channelReader];
+
+        if (((int)(maxDegreeOfParallelism * 0.3)) > 0)
+        {
+            var splitter = channelReader.Split(2, (_, _, p) => p.TariffState == TariffState.Paid ? 0 : 1, stoppingToken);
+            var premiumChannels = splitter[0].Split((int)(maxDegreeOfParallelism * 0.7), null, stoppingToken);
+            var freeChannel = splitter[1].Split((int)(maxDegreeOfParallelism * 0.3), null, stoppingToken);
+            readers = premiumChannels.Union(freeChannel).ToList();
+        }
+
+        var tasks = readers.Select(reader1 => Task.Run(async () => 
+            {
+                await foreach (var eventData in reader1.ReadAllAsync(stoppingToken))
+                {        
+                    try
+                    {
+                        await using var scope = serviceScopeFactory.CreateAsyncScope();
+                        await using var ef = await scope.ServiceProvider.GetService<IDbContextFactory<MessagesContext>>().CreateDbContextAsync(stoppingToken);
+                        var historySocketManager = scope.ServiceProvider.GetService<HistorySocketManager>();
+
+                        var dict = new Dictionary<string, ClientInfo>();
+                        var message = eventData.RequestMessage;
+                        var tenantId = message.TenantId;
+                        try
+                        {
+                            var references = new List<DbFilesAuditReference>();
+                            if (!string.IsNullOrEmpty(message.UaHeader))
+                            {
+                                try
+                                {
+                                    MessageSettings.AddInfoMessage(message, dict);
+                                }
+                                catch (Exception e)
+                                {
+                                    logger.ErrorFlushCache(message.Id, e);
+                                }
+                            }
+
+                            if (!MessagesRepository.IsForceSave(message))
+                            {
+                                // messages with action code < 2000 are related to login-history
+                                if ((int)message.Action < 2000)
+                                {
+                                    var loginEvent = mapper.Map<EventMessage, DbLoginEvent>(message);
+                                    await ef.LoginEvents.AddAsync(loginEvent, stoppingToken);
+                                }
+                                else
+                                {
+                                    var auditEvent = mapper.Map<EventMessage, DbAuditEvent>(message);
+                                    await ef.AuditEvents.AddAsync(auditEvent, stoppingToken);
+                                    
+                                    if (auditEvent.FilesReferences is { Count: > 0 })
+                                    {
+                                        references.AddRange(auditEvent.FilesReferences);
+                                    }
+                                }
+                            }
+                            
+
+                            await ef.SaveChangesAsync(stoppingToken);
+
+                            if (references.Count <= 0)
+                            {
+                                continue;
+                            }
+
+                            await historySocketManager.UpdateHistoryAsync(tenantId, references);
+                        }
+                        catch(Exception e)
+                        {
+                            logger.ErrorFlushCache(tenantId, e);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        logger.ErrorSendMassage(e);
+                    }
+
+                }
+            }, stoppingToken))
+            .ToList();
+
+        await Task.WhenAll(tasks);
+    }
+}
+
+public record EventData(EventMessage RequestMessage, TariffState TariffState);
