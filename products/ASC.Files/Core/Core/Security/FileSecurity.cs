@@ -925,6 +925,12 @@ public class FileSecurity(IDaoFactory daoFactory,
                 {
                     return false;
                 }
+                
+                if (action is FilesSecurityActions.Copy or FilesSecurityActions.Duplicate && isRoom && folder.ProviderEntry)
+                {
+                    return false;
+                }
+                
                 if (folder.FolderType == FolderType.Recent)
                 {
                     return false;
