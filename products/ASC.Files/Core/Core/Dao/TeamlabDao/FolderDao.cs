@@ -990,42 +990,7 @@ internal class FolderDao(
 
     #region Only for TMFolderDao
 
-    public virtual async Task<string> GetAvailableTitleAsync(string requestTitle, int parentFolderId, Func<string, int, Task<bool>> isExist)
-    {
-        if (!await isExist(requestTitle, parentFolderId))
-        {
-            return requestTitle;
-        }
 
-        var re = new Regex(@"( \(((?<index>[0-9])+)\)(\.[^\.]*)?)$");
-        var match = re.Match(requestTitle);
-
-        if (!match.Success)
-        {
-            var insertIndex = requestTitle.Length;
-            if (requestTitle.LastIndexOf('.') != -1)
-            {
-                insertIndex = requestTitle.LastIndexOf('.');
-            }
-
-            requestTitle = requestTitle.Insert(insertIndex, " (1)");
-        }
-
-        while (await isExist(requestTitle, parentFolderId))
-        {
-            requestTitle = re.Replace(requestTitle, MatchEvaluator);
-        }
-
-        return requestTitle;
-    }
-    
-    private static string MatchEvaluator(Match match)
-    {
-        var index = Convert.ToInt32(match.Groups[2].Value);
-        var staticText = match.Value[$" ({index})".Length..];
-
-        return $" ({index + 1}){staticText}";
-    }
 
     public async Task<bool> IsExistAsync(string title, int folderId)
     {

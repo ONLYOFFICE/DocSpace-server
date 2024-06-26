@@ -236,7 +236,6 @@ public interface IFolderDao<T>
     
 
     Task<string> GetBackupExtensionAsync(T folderId);
-    Task<string> GetAvailableTitleAsync(string requestTitle, T parentFolderPath, Func<string, T, Task<bool>> isExist);
     
     Task<bool> IsExistAsync(string title, T folderId);
     

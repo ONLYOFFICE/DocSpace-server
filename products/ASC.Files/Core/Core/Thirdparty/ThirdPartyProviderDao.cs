@@ -650,43 +650,6 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(
     {
         return MakeId(folderId) == ProviderInfo.FolderId;
     }
-    
-    public virtual async Task<string> GetAvailableTitleAsync(string requestTitle, string parentFolderPath, Func<string, string, Task<bool>> isExist)
-    {
-        if (!await isExist(requestTitle, parentFolderPath))
-        {
-            return requestTitle;
-        }
-
-        var re = new Regex(@"( \(((?<index>[0-9])+)\)(\.[^\.]*)?)$");
-        var match = re.Match(requestTitle);
-
-        if (!match.Success)
-        {
-            var insertIndex = requestTitle.Length;
-            if (requestTitle.LastIndexOf('.') != -1)
-            {
-                insertIndex = requestTitle.LastIndexOf('.');
-            }
-
-            requestTitle = requestTitle.Insert(insertIndex, " (1)");
-        }
-
-        while (await isExist(requestTitle, parentFolderPath))
-        {
-            requestTitle = re.Replace(requestTitle, MatchEvaluator);
-        }
-
-        return requestTitle;
-    }
-    
-    private static string MatchEvaluator(Match match)
-    {
-        var index = Convert.ToInt32(match.Groups[2].Value);
-        var staticText = match.Value[$" ({index})".Length..];
-
-        return $" ({index + 1}){staticText}";
-    }
 }
 
 internal class ErrorEntry(string error, string errorId)

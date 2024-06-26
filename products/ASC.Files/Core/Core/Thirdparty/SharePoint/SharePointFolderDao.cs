@@ -41,7 +41,8 @@ internal class SharePointFolderDao(
     SharePointDaoSelector sharePointDaoSelector,
     IFileDao<int> fileDao,
     IFolderDao<int> folderDao,
-    SharePointDaoSelector regexDaoSelectorBase)
+    SharePointDaoSelector regexDaoSelectorBase,
+    Global global)
     : SharePointDaoBase(daoFactory, serviceProvider, userManager, tenantManager, tenantUtil, dbContextManager, fileUtility, regexDaoSelectorBase), IFolderDao<string>
     {
         private readonly TenantManager _tenantManager1 = tenantManager;
@@ -215,7 +216,7 @@ internal class SharePointFolderDao(
         {
             var parentFolder = await SharePointProviderInfo.GetFolderByIdAsync(folder.ParentId);
 
-            folder.Title = await GetAvailableTitleAsync(folder.Title, parentFolder.ServerRelativeUrl, IsExistAsync);
+            folder.Title = await global.GetAvailableTitleAsync(folder.Title, parentFolder.ServerRelativeUrl, IsExistAsync);
 
             var newFolder = await SharePointProviderInfo.CreateFolderAsync(parentFolder.ServerRelativeUrl + "/" + folder.Title);
 

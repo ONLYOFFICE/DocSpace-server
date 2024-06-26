@@ -314,6 +314,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         var quotaService = scope.ServiceProvider.GetService<IQuotaService>();
         var distributedLockProvider = scope.ServiceProvider.GetRequiredService<IDistributedLockProvider>();
         var roomLogoManager = scope.ServiceProvider.GetRequiredService<RoomLogoManager>();
+        var global = scope.ServiceProvider.GetRequiredService<Global>();
 
         var toFolderId = toFolder.Id;
         var isToFolder = Equals(toFolderId, _daoFolderId);
@@ -441,7 +442,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                             if (!conflictFolder.ProviderEntry)
                             {
                                 conflictFolder.Id = default;
-                                conflictFolder.Title = await folderDao.GetAvailableTitleAsync(conflictFolder.Title, conflictFolder.ParentId, folderDao.IsExistAsync);
+                                conflictFolder.Title = await global.GetAvailableTitleAsync(conflictFolder.Title, conflictFolder.ParentId, folderDao.IsExistAsync);
                                 conflictFolder.Id = await folderDao.SaveFolderAsync(conflictFolder);
                             }
                             
@@ -455,7 +456,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                         else
                         {
                             newFolder = await FolderDao.CopyFolderAsync(folder.Id, toFolderId, CancellationToken);
-                            newFolder.Title = await folderDao.GetAvailableTitleAsync(newFolder.Title, newFolder.ParentId, folderDao.IsExistAsync);
+                            newFolder.Title = await global.GetAvailableTitleAsync(newFolder.Title, newFolder.ParentId, folderDao.IsExistAsync);
                             newFolder.Id = await folderDao.SaveFolderAsync(newFolder);
                             
                             if (isRoom && Equals(folder.ParentId ?? default, toFolderId))
@@ -808,6 +809,8 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                             try
                             {
                                 newFile = await FileDao.CopyFileAsync(file.Id, toFolderId); //Stream copy will occur inside dao
+                                newFile.Title = await global.GetAvailableTitleAsync(newFile.Title, newFile.ParentId, fileDao.IsExistAsync);
+                                await fileDao.SaveFileAsync(newFile, null);
                                 await filesMessageService.SendAsync(MessageAction.FileCopied, newFile, toFolder, _headers, newFile.Title, parentFolder.Title, toFolder.Title, toFolder.ToString());
 
                                 needToMark.Add(newFile);

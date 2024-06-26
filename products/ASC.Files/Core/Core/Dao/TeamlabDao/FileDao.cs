@@ -874,17 +874,7 @@ internal class FileDao(
         });
     }
 
-    public async Task<bool> IsExistAsync(string title, object folderId)
-    {
-        if (folderId is int fId)
-        {
-            return await IsExistAsync(title, fId);
-        }
-
-        throw new NotImplementedException();
-    }
-
-    private async Task<bool> IsExistAsync(string title, int folderId)
+    public async Task<bool> IsExistAsync(string title, int folderId)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
