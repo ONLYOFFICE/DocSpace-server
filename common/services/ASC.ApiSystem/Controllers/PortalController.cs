@@ -473,7 +473,7 @@ public class PortalController(
     [HttpPost("signin")]
     [AllowCrossSiteJson]
     [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
-    public async Task<IActionResult> SignInToPortalAsync([FromQuery] TenantModel model)
+    public async Task<IActionResult> SignInToPortalAsync(TenantModel model)
     {
         try
         {
@@ -505,7 +505,7 @@ public class PortalController(
                                  let domain = tenant.GetTenantDomain(coreSettings)
                                  select new
                                  {
-                                     portanName = $"{Request.Scheme}{Uri.SchemeDelimiter}{domain}",
+                                     portalName = $"{Request.Scheme}{Uri.SchemeDelimiter}{domain}",
                                      portalLink = commonMethods.CreateReference(tenant.Id, Request.Scheme, domain, model.Email)
                                  };
             return Ok(new

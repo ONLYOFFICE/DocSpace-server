@@ -57,7 +57,7 @@ try
     builder.Host.ConfigureDefault();
     builder.WebHost.ConfigureDefaultKestrel();
 
-    var startup = new Startup(builder.Configuration, builder.Environment);
+    var startup = new Startup(builder.Configuration);
 
     await startup.ConfigureServices(builder.Services);
 

@@ -30,8 +30,7 @@ namespace ASC.Data.Backup.BackgroundTasks;
 
 public class Startup : BaseStartup
 {
-    public Startup(IConfiguration configuration, IHostEnvironment hostEnvironment)
-        : base(configuration, hostEnvironment)
+    public Startup(IConfiguration configuration) : base(configuration)
     {
         if (String.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
         {
@@ -52,8 +51,8 @@ public class Startup : BaseStartup
         services.AddHostedService<BackupCleanerTempFileService>();
 
         services.AddHostedService<BackupWorkerService>();
-        services.AddActivePassiveHostedService<BackupCleanerService>(DIHelper, _configuration);
-        services.AddActivePassiveHostedService<BackupSchedulerService>(DIHelper, _configuration);
+        services.AddActivePassiveHostedService<BackupCleanerService>(_configuration);
+        services.AddActivePassiveHostedService<BackupSchedulerService>(_configuration);
 
         services.AddBaseDbContextPool<BackupsContext>();
         services.AddBaseDbContextPool<FilesDbContext>();

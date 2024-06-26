@@ -30,8 +30,7 @@ namespace ASC.Files;
 
 public class Startup : BaseStartup
 {
-    public Startup(IConfiguration configuration, IHostEnvironment hostEnvironment)
-        : base(configuration, hostEnvironment)
+    public Startup(IConfiguration configuration) : base(configuration)
     {
         WebhooksEnabled = true;
 

@@ -27,31 +27,26 @@
 namespace ASC.Notify.Config;
 
 [Singleton]
-public class ConfigureNotifyServiceCfg(IServiceProvider serviceProvider) : IConfigureOptions<NotifyServiceCfg>
+public class ConfigureNotifyServiceCfg
 {
-    public void Configure(NotifyServiceCfg options)
+    public readonly NotifyServiceCfg Value;
+
+    public ConfigureNotifyServiceCfg(IConfiguration configuration, IServiceProvider serviceProvider)
     {
-        options.Init(serviceProvider);
-    }
-}
+        Value = configuration.GetSection("notify").Get<NotifyServiceCfg>();
+        
+        Value.Process.Init();
 
-public class NotifyServiceCfg
-{
-    public string ConnectionStringName { get; set; }
-    public int StoreMessagesDays { get; set; }
-    public NotifyServiceCfgProcess Process { get; set; }
-    public List<NotifyServiceCfgSender> Senders { get; set; }
-    public List<NotifyServiceCfgScheduler> Schedulers { get; set; }
-
-    public void Init(IServiceProvider serviceProvider)
-    {
-        Process.Init();
-
-        foreach (var s in Senders)
+        foreach (var s in Value.Senders)
         {
             try
-            {
-                s.Init(serviceProvider);
+            {        
+                var sender = (INotifySender)serviceProvider.GetService(Type.GetType(s.Type, true));
+                if (sender != null)
+                {
+                    sender.Init(s.Properties);
+                    s.NotifySender = sender;
+                }
             }
             catch (Exception)
             {
@@ -59,9 +54,9 @@ public class NotifyServiceCfg
             }
         }
 
-        if (Schedulers != null)
+        if (Value.Schedulers != null)
         {
-            foreach (var s in Schedulers)
+            foreach (var s in Value.Schedulers)
             {
                 try
                 {
@@ -74,6 +69,15 @@ public class NotifyServiceCfg
             }
         }
     }
+}
+
+public class NotifyServiceCfg
+{
+    public string ConnectionStringName { get; set; }
+    public int StoreMessagesDays { get; set; }
+    public NotifyServiceCfgProcess Process { get; set; }
+    public List<NotifyServiceCfgSender> Senders { get; set; }
+    public List<NotifyServiceCfgScheduler> Schedulers { get; set; }
 }
 
 public class NotifyServiceCfgProcess
@@ -98,13 +102,6 @@ public class NotifyServiceCfgSender
     public string Type { get; set; }
     public Dictionary<string, string> Properties { get; set; }
     public INotifySender NotifySender { get; set; }
-
-    public void Init(IServiceProvider serviceProvider)
-    {
-        var sender = (INotifySender)serviceProvider.GetService(System.Type.GetType(Type, true));
-        sender.Init(Properties);
-        NotifySender = sender;
-    }
 }
 
 public class NotifyServiceCfgScheduler

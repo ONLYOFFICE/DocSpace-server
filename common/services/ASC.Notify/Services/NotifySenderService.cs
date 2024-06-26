@@ -27,21 +27,21 @@
 namespace ASC.Notify.Services;
 
 [Singleton]
-public class NotifySenderService(IOptions<NotifyServiceCfg> notifyServiceCfg,
-        NotifyConfiguration notifyConfiguration,
-        DbWorker dbWorker,
-        IServiceScopeFactory scopeFactory,
-        ILogger<NotifySenderService> logger)
+public class NotifySenderService(
+    ConfigureNotifyServiceCfg notifyServiceCfg,
+    NotifyConfiguration notifyConfiguration,
+    DbWorker dbWorker,
+    IServiceScopeFactory scopeFactory,
+    ILogger<NotifySenderService> logger)
     : ActivePassiveBackgroundService<NotifySenderService>(logger, scopeFactory)
 
 {
-    private readonly ILogger<NotifySenderService> _logger = logger;
     private readonly NotifyServiceCfg _notifyServiceCfg = notifyServiceCfg.Value;
 
     protected override TimeSpan ExecuteTaskPeriod { get; set; } = TimeSpan.Zero;
     protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
-        if (_notifyServiceCfg.Schedulers != null && _notifyServiceCfg.Schedulers.Any())
+        if (_notifyServiceCfg.Schedulers != null && _notifyServiceCfg.Schedulers.Count != 0)
         {
             InitializeNotifySchedulers();
         }
@@ -55,7 +55,7 @@ public class NotifySenderService(IOptions<NotifyServiceCfg> notifyServiceCfg,
 
         foreach (var pair in _notifyServiceCfg.Schedulers.Where(r => r.MethodInfo != null))
         {
-            _logger.DebugStartScheduler(pair.Name, pair.MethodInfo);
+            logger.DebugStartScheduler(pair.Name, pair.MethodInfo);
             pair.MethodInfo.Invoke(null, null);
         }
     }
@@ -90,15 +90,15 @@ public class NotifySenderService(IOptions<NotifyServiceCfg> notifyServiceCfg,
         }
         catch (Exception e)
         {
-            _logger.ErrorThreadManagerWork(e);
+            logger.ErrorThreadManagerWork(e);
         }
     }
 
-    private async Task SendMessagesAsync(object messages, CancellationToken stoppingToken)
+    private async Task SendMessagesAsync(IDictionary<int, NotifyMessage> messages, CancellationToken stoppingToken)
     {
         try
         {
-            foreach (var m in (IDictionary<int, NotifyMessage>)messages)
+            foreach (var m in messages)
             {
                 if (stoppingToken.IsCancellationRequested)
                 {
@@ -118,12 +118,12 @@ public class NotifySenderService(IOptions<NotifyServiceCfg> notifyServiceCfg,
                         result = MailSendingState.FatalError;
                     }
 
-                    _logger.DebugNotify(m.Key);
+                    logger.DebugNotify(m.Key);
                 }
                 catch (Exception e)
                 {
                     result = MailSendingState.FatalError;
-                    _logger.ErrorWithException(e);
+                    logger.ErrorWithException(e);
                 }
 
                 await dbWorker.SetStateAsync(m.Key, result);
@@ -134,7 +134,7 @@ public class NotifySenderService(IOptions<NotifyServiceCfg> notifyServiceCfg,
         }
         catch (Exception e)
         {
-            _logger.ErrorSendMessages(e);
+            logger.ErrorSendMessages(e);
         }
     }
 }
