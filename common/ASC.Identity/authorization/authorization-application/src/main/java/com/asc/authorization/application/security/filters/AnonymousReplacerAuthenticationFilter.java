@@ -66,10 +66,11 @@ public class AnonymousReplacerAuthenticationFilter extends OncePerRequestFilter 
       var authenticationToken =
           new UsernamePasswordAuthenticationToken(clientId, authCookieValue.get());
       var authentication = authenticationManager.authenticate(authenticationToken);
-      if (authentication.isAuthenticated())
+      if (authentication.isAuthenticated()) {
         SecurityContextHolder.getContext().setAuthentication(authentication);
-      securityUtils.setSecurityHeaders(response);
-      chain.doFilter(request, response);
+        securityUtils.setSecurityHeaders(response);
+        chain.doFilter(request, response);
+      }
     } catch (RegisteredClientPermissionException pex) {
       securityUtils.redirectWithError(
           request,
@@ -92,7 +93,7 @@ public class AnonymousReplacerAuthenticationFilter extends OncePerRequestFilter 
    */
   protected boolean shouldNotFilter(HttpServletRequest request) {
     var path = request.getRequestURI();
-    return !(AUTHORIZE_PATTERN.matcher(path).find()
-        || (LOGIN_PATTERN.matcher(path).find() && HttpMethod.POST.matches(request.getMethod())));
+    return !(LOGIN_PATTERN.matcher(path).find() && HttpMethod.POST.matches(request.getMethod()))
+        && !(AUTHORIZE_PATTERN.matcher(path).find());
   }
 }

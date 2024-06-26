@@ -35,7 +35,6 @@ public class AscOAuth2AuthorizationFormConfiguration {
   SecurityFilterChain configureSecurityFilterChain(HttpSecurity http) {
     return http.authorizeHttpRequests(
             authorizeRequests -> authorizeRequests.anyRequest().permitAll())
-        .formLogin(form -> form.loginPage(login).loginProcessingUrl(login).permitAll())
         .logout(AbstractHttpConfigurer::disable)
         .csrf(AbstractHttpConfigurer::disable)
         .cors(AbstractHttpConfigurer::disable)

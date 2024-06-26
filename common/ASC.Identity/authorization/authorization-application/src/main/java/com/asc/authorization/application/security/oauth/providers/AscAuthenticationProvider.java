@@ -69,6 +69,11 @@ public class AscAuthenticationProvider implements AuthenticationProvider {
                 () -> new BadCredentialsException("Could not find ASC request domain address"));
 
     var clientId = (String) authentication.getPrincipal();
+    if (clientId == null || clientId.isBlank())
+      throw new AuthenticationProcessingException(
+          AuthenticationError.SOMETHING_WENT_WRONG_ERROR,
+          "Authentication failed due to missing client ID in principal");
+
     var authCookie =
         Arrays.stream(request.getCookies())
             .filter(c -> c.getName().equalsIgnoreCase(ASC_AUTH_COOKIE))
