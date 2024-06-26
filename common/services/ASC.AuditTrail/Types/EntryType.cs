@@ -31,11 +31,11 @@ namespace ASC.AuditTrail.Types;
 [EnumExtensions]
 public enum EntryType
 {
-    None,
-    File,
-    Folder,
-    User,
-    Group,
-    Room,
-    Tag
+    None = 0,
+    File = 1,
+    Folder = 2,
+    User = 23,
+    Group = 24,
+    Room = 25,
+    Tag = 26
 }
