@@ -31,10 +31,10 @@ namespace ASC.AuditTrail.Types;
 [EnumExtensions]
 public enum ProductType
 {
-    None,
-    Documents,
-    Login,
-    Others,
-    People,
-    Settings
+    None = 0,
+    Documents = 2,
+    Login = 3,
+    Others = 4,
+    People = 5,
+    Settings = 7
 }
