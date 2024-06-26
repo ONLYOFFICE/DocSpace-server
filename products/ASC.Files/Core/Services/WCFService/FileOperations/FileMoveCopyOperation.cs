@@ -460,10 +460,13 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                             
                             if (isRoom && Equals(folder.ParentId ?? default, toFolderId))
                             {
-                                await roomLogoManager.CopyAsync(folder, newFolder);
-                                newFolder.SettingsHasLogo = true;
-                                await folderDao.SaveFolderAsync(newFolder);
+                                if (await roomLogoManager.CopyAsync(folder, newFolder))
+                                {
+                                    newFolder.SettingsHasLogo = true;
+                                    await folderDao.SaveFolderAsync(newFolder);
+                                }
                             }
+                            
                             await filesMessageService.SendAsync(MessageAction.FolderCopied, newFolder, toFolder, _headers, newFolder.Title, toFolder.Title, toFolder.Id.ToString());
 
                             if (isToFolder)

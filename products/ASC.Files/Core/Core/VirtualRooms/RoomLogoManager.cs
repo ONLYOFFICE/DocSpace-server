@@ -203,11 +203,11 @@ public class RoomLogoManager(
         return pathWithoutQuery;
     }
 
-    public async Task CopyAsync<TFrom, TTo>(Folder<TFrom> from, Folder<TTo> to)
+    public async Task<bool> CopyAsync<TFrom, TTo>(Folder<TFrom> from, Folder<TTo> to)
     {
         if (!from.SettingsHasLogo)
         {
-            return;
+            return false;
         }
 
         var storage = await GetDataStoreAsync();
@@ -219,6 +219,7 @@ public class RoomLogoManager(
             await storage.CopyAsync(fileNameFrom, string.Empty, fileNameTo);
         }
 
+        return true;
     }
     
     internal string GetRandomColour()
