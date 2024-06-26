@@ -148,12 +148,6 @@ public partial class FilesDbContext
         return FolderQueries.DbFolderQueriesAsync(this, tenantId, folderId);
     }
     
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null, null])]
-    public IAsyncEnumerable<ParentRoomPair> ParentRoomPairAsync(int tenantId, IEnumerable<int> foldersIds, IEnumerable<FolderType> roomTypes)
-    {
-        return FolderQueries.ParentRoomPairAsync(this, tenantId, foldersIds, roomTypes);
-    }
-    
     [PreCompileQuery([PreCompileQuery.DefaultInt])]
     public IAsyncEnumerable<DbFolderTree> TreesOrderByLevel(int toFolderId)
     {
@@ -470,18 +464,6 @@ static file class FolderQueries
                     .OrderByDescending(r => r.Level)
                     .Select(r => r.ParentId)
                     .FirstOrDefault());
-
-    public static readonly
-        Func<FilesDbContext, int, IEnumerable<int>, IEnumerable<FolderType>, IAsyncEnumerable<ParentRoomPair>> ParentRoomPairAsync = 
-            Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, IEnumerable<int> foldersIds, IEnumerable<FolderType> roomTypes) =>
-                ctx.Folders
-                    .Where(r => r.TenantId == tenantId)
-                    .Join(ctx.Tree, r => r.Id, a => a.ParentId, (folder, tree) => new { folder, tree })
-                    .Where(r => foldersIds.Contains(r.tree.FolderId))
-                    .OrderByDescending(r => r.tree.Level)
-                    .Where(r => roomTypes.Contains(r.folder.FolderType))
-                    .Select(r => new ParentRoomPair { FolderId = r.tree.FolderId, ParentRoomId = r.folder.Id }));
 
     public static readonly Func<FilesDbContext, int, int, Task<DbFolder>> FolderForUpdateAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

@@ -27,13 +27,13 @@
 namespace ASC.Notify.Services;
 
 [Singleton]
-public class NotifyCleanerService(IOptions<NotifyServiceCfg> notifyServiceCfg, 
-                                  IServiceScopeFactory scopeFactory,
-                                  ILogger<NotifyCleanerService> logger) : ActivePassiveBackgroundService<NotifyCleanerService>(logger, scopeFactory)
+public class NotifyCleanerService(
+    ConfigureNotifyServiceCfg notifyServiceCfg, 
+    IServiceScopeFactory scopeFactory,
+    ILogger<NotifyCleanerService> logger) : ActivePassiveBackgroundService<NotifyCleanerService>(logger, scopeFactory)
 
 {
     private readonly IServiceScopeFactory _serviceScopeFactory = scopeFactory;
-    private readonly ILogger<NotifyCleanerService> _logger = logger;
     private readonly NotifyServiceCfg _notifyServiceCfg = notifyServiceCfg.Value;
 
     protected override TimeSpan ExecuteTaskPeriod { get; set; } = TimeSpan.FromMilliseconds(1000);
@@ -57,7 +57,7 @@ public class NotifyCleanerService(IOptions<NotifyServiceCfg> notifyServiceCfg,
          }
          catch (Exception err)
          {
-             _logger.ErrorClear(err);
+             logger.ErrorClear(err);
          }
     }
 }

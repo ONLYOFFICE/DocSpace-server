@@ -77,11 +77,6 @@ public class MigrationContext : DbContext
 
     public DbSet<IntegrationEventLogEntry> IntegrationEventLogs { get; set; }
 
-    public DbSet<FeedLast> FeedLast { get; set; }
-    public DbSet<FeedAggregate> FeedAggregates { get; set; }
-    public DbSet<FeedUsers> FeedUsers { get; set; }
-    public DbSet<FeedReaded> FeedReaded { get; set; }
-
     public DbSet<WebhooksConfig> WebhooksConfigs { get; set; }
     public DbSet<WebhooksLog> WebhooksLogs { get; set; }
     public DbSet<DbWebhook> Webhooks { get; set; }
@@ -157,10 +152,6 @@ public class MigrationContext : DbContext
             .AddBackupSchedule()
             .AddBackupRecord()
             .AddIntegrationEventLog()
-            .AddFeedUsers()
-            .AddFeedReaded()
-            .AddFeedAggregate()
-            .AddFeedLast()
             .AddDbWebhooks()
             .AddWebhooksConfig()
             .AddWebhooksLog()

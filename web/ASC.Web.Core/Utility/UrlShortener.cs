@@ -116,7 +116,7 @@ public class ShortUrl
     {
         _alphabet = configuration["urlShortener:alphabet"] ?? "5XzpDt6wZRdsTrJkSY_cgPyxN4j-fnb9WKBF8vh3GH72QqmLVCM";
         _base = _alphabet.Length;
-        if(int.TryParse(configuration["urlShortener:length"], out _length))
+        if(!int.TryParse(configuration["urlShortener:length"], out _length))
         {
             _length = 15;
         }

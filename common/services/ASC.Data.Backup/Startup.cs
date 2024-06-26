@@ -30,8 +30,7 @@ namespace ASC.Data.Backup;
 
 public class Startup : BaseStartup
 {
-    public Startup(IConfiguration configuration, IHostEnvironment hostEnvironment)
-        : base(configuration, hostEnvironment)
+    public Startup(IConfiguration configuration) : base(configuration)
     {
         if (String.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
         {

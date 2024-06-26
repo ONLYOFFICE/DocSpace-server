@@ -398,13 +398,6 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
         }
     }
 
-    public async Task<IEnumerable<int>> GetTenantsWithFeedsAsync(DateTime from)
-    {
-        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
-
-        return await userDbContext.TenantIdsAsync(from).ToListAsync();
-    }
-
     public async Task RemoveGroupAsync(int tenant, Guid id)
     {
         await RemoveGroupAsync(tenant, id, false);
