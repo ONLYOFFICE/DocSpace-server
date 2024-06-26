@@ -216,7 +216,7 @@ public class SecurityController(PermissionContext permissionContext,
     /// <httpMethod>GET</httpMethod>
     /// <requiresAuthorization>false</requiresAuthorization>
     [AllowAnonymous]
-    [HttpGet("/audit/mappers")]
+    [HttpGet("audit/mappers")]
     public object GetMappers(ProductType? productType, ModuleType? moduleType)
     {
         return auditActionMapper.Mappers
