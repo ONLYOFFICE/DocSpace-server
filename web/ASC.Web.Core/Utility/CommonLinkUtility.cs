@@ -270,7 +270,7 @@ public class CommonLinkUtility(
         return $"confirm/{confirmType}?type={confirmType}&key={key}&uid={userId}";
     }
 
-    public string GetTokenWithoutKey(string email, ConfirmType confirmType, Guid userId = default)
+    private string GetTokenWithoutKey(string email, ConfirmType confirmType, Guid userId = default)
     {
         var link = $"type={confirmType}";
 

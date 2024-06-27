@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Notify.Recipients;
+using ASC.Web.Core.Utility;
 
 namespace ASC.Data.Backup;
 
@@ -38,6 +39,7 @@ public class NotifyHelper(UserManager userManager,
     WorkContext workContext,
     CommonLinkUtility commonLinkUtility,
     TenantLogoManager tenantLogoManager,
+    IUrlShortener urlShortener,
     IServiceProvider serviceProvider)
 {
     public void SetServerBaseUri(string uri)
@@ -125,7 +127,7 @@ public class NotifyHelper(UserManager userManager,
                 Actions.RestoreCompletedV115,
                 user,
                 StudioNotifyService.EMailSenderName,
-                TagValues.OrangeButton(orangeButtonText, confirmationUrl));
+                TagValues.OrangeButton(orangeButtonText, await urlShortener.GetShortenLinkAsync(confirmationUrl)));
         }
     }
 

@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Web.Core.Utility;
+
 using Constants = ASC.Core.Users.Constants;
 using Mapping = ASC.ActiveDirectory.Base.Settings.LdapSettings.MappingFields;
 using SecurityContext = ASC.Core.SecurityContext;
@@ -274,9 +276,10 @@ public class LdapUserManager(ILogger<LdapUserManager> logger,
                     source.Init(await tenantManager.GetCurrentTenantAsync());
                     var workContext = scope.ServiceProvider.GetRequiredService<WorkContext>();
                     var client = workContext.RegisterClient(scope.ServiceProvider, source);
+                    var urlShortener = scope.ServiceProvider.GetRequiredService<IUrlShortener>();
 
                     var confirmLink = await commonLinkUtility.GetConfirmationEmailUrlAsync(ldapUserInfo.Email, ConfirmType.EmailActivation);
-
+                   
                     await client.SendNoticeToAsync(
                         NotifyConstants.ActionLdapActivation,
                         [new DirectRecipient(ldapUserInfo.Email, null, [ldapUserInfo.Email], false)],
@@ -285,7 +288,7 @@ public class LdapUserManager(ILogger<LdapUserManager> logger,
                         new TagValue(NotifyConstants.TagUserName, ldapUserInfo.DisplayUserName(displayUserSettingsHelper)),
                         new TagValue(NotifyConstants.TagUserEmail, ldapUserInfo.Email),
                         new TagValue(NotifyConstants.TagMyStaffLink, commonLinkUtility.GetFullAbsolutePath(commonLinkUtility.GetMyStaff())),
-                        NotifyConstants.TagOrangeButton(_resource.NotifyButtonJoin, confirmLink),
+                        NotifyConstants.TagOrangeButton(_resource.NotifyButtonJoin,  await urlShortener.GetShortenLinkAsync(confirmLink)),
                         new TagValue(NotifyCommonTags.WithoutUnsubscribe, true));
                 }
 
