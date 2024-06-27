@@ -2099,9 +2099,9 @@ public class FileSecurity(IDaoFactory daoFactory,
         return await GetUserSubjectsAsync<int>(userId, null);
     }
 
-    public async IAsyncEnumerable<FileShareRecord<T>> GetUserRecordsAsync<T>()
+    public async IAsyncEnumerable<FileShareRecord<string>> GetUserRecordsAsync()
     {
-        var securityDao = daoFactory.GetSecurityDao<T>();
+        var securityDao = daoFactory.GetSecurityDao<string>();
         var currentUserSubjects = await GetUserSubjectsAsync(authContext.CurrentAccount.ID);
 
         await foreach (var record in securityDao.GetSharesAsync(currentUserSubjects))
