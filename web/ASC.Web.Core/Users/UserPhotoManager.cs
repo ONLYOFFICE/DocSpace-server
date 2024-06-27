@@ -473,7 +473,10 @@ public class UserPhotoManager(UserManager userManager,
         try
         {
             var storage = await GetDataStoreAsync();
-            await storage.DeleteFilesAsync("", idUser + "*.*", false);
+            if (await storage.IsDirectoryAsync(""))
+            {
+                await storage.DeleteFilesAsync("", idUser + "*.*", false);
+            }
         }
         catch (AggregateException e)
         {
