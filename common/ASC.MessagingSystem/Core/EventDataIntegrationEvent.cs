@@ -111,7 +111,7 @@ public class EventMessageProto
             Page = message.Page,
             Action = message.Action,
             Description = message.Description,
-            Target = message.Target.GetItems(),
+            Target = message.Target?.GetItems() ?? [],
             UaHeader = message.UaHeader,
             Active = message.Active,
             References = message.References
