@@ -317,7 +317,7 @@ public class FileSharingAceHelper(
                                || share == FileShare.Comment
                                || share == FileShare.RoomAdmin
                                || share == FileShare.Editing
-                               || share == FileShare.Collaborator
+                               || share == FileShare.PowerUser
                                || (share == FileShare.None && entry.RootFolderType == FolderType.COMMON);
 
             var removeNew = share == FileShare.Restrict || (share == FileShare.None

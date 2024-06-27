@@ -43,7 +43,7 @@ public enum FileShare
     CustomFilter,
     RoomAdmin,
     Editing,
-    Collaborator
+    PowerUser
 }
 
 public class FileShareConverter : System.Text.Json.Serialization.JsonConverter<FileShare>
@@ -86,7 +86,7 @@ public static partial class FileShareExtensions
             case FileShare.Restrict:
             case FileShare.RoomAdmin:
             case FileShare.Editing:
-            case FileShare.Collaborator:
+            case FileShare.PowerUser:
             case FileShare.Varies:
             case FileShare.None:
                 return FilesCommonResource.ResourceManager.GetString(prefix + fileShare.ToStringFast(), cultureInfo);
