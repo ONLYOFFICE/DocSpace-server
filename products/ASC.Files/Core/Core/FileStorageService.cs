@@ -1511,26 +1511,6 @@ public class FileStorageService //: IFileStorageService
 
             if (!file.ProviderEntry)
             {
-                var completedFile = await entryManager.CompleteVersionFileAsync(file.Id, 0, false);
-                
-                if (file.ThumbnailStatus == Thumbnail.Created)
-                {
-                    var dataStore = await globalStore.GetStoreAsync();
-
-                    foreach (var size in thumbnailSettings.Sizes)
-                    {
-                        await dataStore.CopyAsync(string.Empty,
-                            fileDao.GetUniqThumbnailPath(file, size.Width, size.Height),
-                            string.Empty,
-                            fileDao.GetUniqThumbnailPath(completedFile, size.Width, size.Height));
-                    }
-
-                    await fileDao.SetThumbnailStatusAsync(completedFile, Thumbnail.Created);
-
-                    completedFile.ThumbnailStatus = Thumbnail.Created;
-                }
-
-                file = completedFile;
                 await UpdateCommentAsync(file.Id, file.Version, FilesCommonResource.UnlockComment);
             }
         }
