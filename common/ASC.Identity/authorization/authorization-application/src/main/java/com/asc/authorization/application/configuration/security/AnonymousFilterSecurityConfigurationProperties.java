@@ -19,4 +19,7 @@ public class AnonymousFilterSecurityConfigurationProperties {
 
   /** The name of the redirect header. Default value is "X-Redirect-URI". */
   private String redirectHeader = "X-Redirect-URI";
+
+  /** The name of the redirect header back to the beginning of oauth flow. Default value is "X-Redirect-Authorization-URI". */
+  private String redirectAuthorizationHeader = "X-Redirect-Authorization-URI";
 }
