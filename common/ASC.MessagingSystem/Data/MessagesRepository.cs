@@ -124,7 +124,6 @@ public class MessagesRepository(
     }
 }
 
-[Scope]
 public class EventDataIntegrationEventHandler : IIntegrationEventHandler<EventDataIntegrationEvent>
 {
     private readonly ILogger _logger;
@@ -167,7 +166,6 @@ public class EventDataIntegrationEventHandler : IIntegrationEventHandler<EventDa
     }
 }
 
-[Singleton]
 public class MessageSenderService(
     IServiceScopeFactory serviceScopeFactory, 
     ILogger<MessagesRepository> logger, 
