@@ -5,12 +5,11 @@ import com.asc.common.core.domain.value.ClientId;
 import com.asc.common.data.consent.entity.ConsentEntity;
 import com.asc.common.data.consent.repository.JpaConsentRepository;
 import com.asc.registration.service.ports.output.repository.ConsentCommandRepository;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
-
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 
 /**
  * Adapter class for handling consent command operations. Implements the {@link
