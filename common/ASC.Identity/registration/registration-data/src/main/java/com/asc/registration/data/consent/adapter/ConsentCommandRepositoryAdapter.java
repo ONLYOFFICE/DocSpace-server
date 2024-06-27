@@ -9,6 +9,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+
 /**
  * Adapter class for handling consent command operations. Implements the {@link
  * ConsentCommandRepository} interface.
@@ -33,6 +36,7 @@ public class ConsentCommandRepositoryAdapter implements ConsentCommandRepository
         .ifPresentOrElse(
             entity -> {
               entity.setInvalidated(true);
+              entity.setModifiedAt(ZonedDateTime.now(ZoneId.of("UTC")));
               jpaConsentRepository.save(entity);
             },
             () -> {
