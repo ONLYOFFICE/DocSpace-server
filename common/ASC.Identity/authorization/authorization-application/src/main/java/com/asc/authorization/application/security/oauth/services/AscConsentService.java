@@ -80,6 +80,7 @@ public class AscConsentService implements OAuth2AuthorizationConsentService {
   public OAuth2AuthorizationConsent findById(String registeredClientId, String principalName) {
     return jpaConsentRepository
         .findById(new ConsentEntity.ConsentId(registeredClientId, principalName))
+        .filter(c -> !c.isInvalidated())
         .map(consentMapper::toConsent)
         .orElse(null);
   }
