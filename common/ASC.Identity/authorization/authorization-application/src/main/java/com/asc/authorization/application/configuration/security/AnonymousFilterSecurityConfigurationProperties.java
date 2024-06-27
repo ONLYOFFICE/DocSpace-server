@@ -14,12 +14,15 @@ public class AnonymousFilterSecurityConfigurationProperties {
   /** The name of the authentication cookie. Default value is "asc_auth_key". */
   private String authCookieName = "asc_auth_key";
 
+  /**
+   * The name of the redirect cookie back to the beginning of oauth flow. Default value is
+   * "x-redirect-authorization-uri".
+   */
+  private String redirectAuthorizationCookie = "x-redirect-authorization-uri";
+
   /** The parameter name for the client ID. Default value is "client_id". */
   private String clientIdParam = "client_id";
 
   /** The name of the redirect header. Default value is "X-Redirect-URI". */
   private String redirectHeader = "X-Redirect-URI";
-
-  /** The name of the redirect header back to the beginning of oauth flow. Default value is "X-Redirect-Authorization-URI". */
-  private String redirectAuthorizationHeader = "X-Redirect-Authorization-URI";
 }

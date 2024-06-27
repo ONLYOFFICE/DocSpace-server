@@ -8,6 +8,7 @@ import com.asc.authorization.application.security.oauth.errors.AuthenticationErr
 import com.asc.common.utilities.HttpUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -58,7 +59,13 @@ public class AnonymousReplacerAuthenticationFilter extends OncePerRequestFilter 
     var authCookieValue = securityUtils.getAuthCookieValue(request);
     if (authCookieValue.isEmpty()) {
       log.warn("Missing '{}' cookie", securityConfigProperties.getAuthCookieName());
-      response.setHeader(securityConfigProperties.getRedirectAuthorizationHeader(), HttpUtils.getFullURL(request));
+      var cookie =
+          new Cookie(
+              securityConfigProperties.getRedirectAuthorizationCookie(),
+              HttpUtils.getFullURL(request));
+      cookie.setPath("/");
+      cookie.setMaxAge(60 * 60 * 24 * 365 * 10);
+      response.addCookie(cookie);
       securityUtils.redirectWithError(
           request, response, clientId, AuthenticationError.MISSING_ASC_COOKIE_ERROR.getCode());
       return;
