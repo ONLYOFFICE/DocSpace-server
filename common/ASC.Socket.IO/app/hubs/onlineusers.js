@@ -75,7 +75,7 @@ module.exports = async (io) => {
       }
       else
       {
-        onlineIO.to(`p-${tenantId}`).emit("enter-session-in-portal", session );
+        onlineIO.to(`p-${tenantId}`).emit("enter-session-in-portal", {userId, session} );
       }
 
       updateUser(portalUsers, user, userId, tenantId);
@@ -102,16 +102,17 @@ module.exports = async (io) => {
             });
           }
 
+          var date = new Date().toString();
           if(user.sessions.size <= 0)
           {
             user.status = "offline";
             updateUser(portalUsers, user, userId, tenantId);
-            onlineIO.to(`p-${tenantId}`).emit("leave-in-portal",  userId );
+            onlineIO.to(`p-${tenantId}`).emit("leave-in-portal",  {userId, date} );
           }
           else
           {
             updateUser(portalUsers, user, userId, tenantId);
-            onlineIO.to(`p-${tenantId}`).emit("leave-session-in-portal",  sessionId );
+            onlineIO.to(`p-${tenantId}`).emit("leave-session-in-portal",  {userId, sessionId, date} );
           }
           id = -1;
           sessionId = -1;
