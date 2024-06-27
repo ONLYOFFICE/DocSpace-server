@@ -58,7 +58,7 @@
     <PackageReference Include="Polly" Version="8.4.0" />
     <PackageReference Include="protobuf-net" Version="3.2.30" />
     <PackageReference Include="RabbitMQ.Client" Version="6.8.1" />
-    <PackageReference Include="StackExchange.Redis" Version="2.8.0" />
+    <PackageReference Include="StackExchange.Redis" Version="2.7.33" />
     <PackageReference Include="StackExchange.Redis.Extensions.Core" Version="10.2.0" />
   </ItemGroup>
   <ItemGroup>
