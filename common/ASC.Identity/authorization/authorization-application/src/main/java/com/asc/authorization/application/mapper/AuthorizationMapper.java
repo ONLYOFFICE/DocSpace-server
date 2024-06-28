@@ -177,47 +177,10 @@ public class AuthorizationMapper {
    * @return the merged AuthorizationEntity
    */
   public AuthorizationEntity merge(AuthorizationEntity existing, AuthorizationEntity update) {
-    if (update.getId() != null) existing.setId(update.getId());
-    if (update.getRegisteredClientId() != null)
-      existing.setRegisteredClientId(update.getRegisteredClientId());
-    if (update.getPrincipalId() != null) existing.setPrincipalId(update.getPrincipalId());
-    if (update.getAuthorizationGrantType() != null)
-      existing.setAuthorizationGrantType(update.getAuthorizationGrantType());
-    if (update.getAuthorizedScopes() != null)
-      existing.setAuthorizedScopes(update.getAuthorizedScopes());
-    if (update.getAttributes() != null) existing.setAttributes(update.getAttributes());
-    if (update.getState() != null) existing.setState(update.getState());
-    if (update.getAuthorizationCodeValue() != null)
-      existing.setAuthorizationCodeValue(update.getAuthorizationCodeValue());
-    if (update.getAuthorizationCodeIssuedAt() != null)
-      existing.setAuthorizationCodeIssuedAt(update.getAuthorizationCodeIssuedAt());
-    if (update.getAuthorizationCodeExpiresAt() != null)
-      existing.setAuthorizationCodeExpiresAt(update.getAuthorizationCodeExpiresAt());
-    if (update.getAuthorizationCodeMetadata() != null)
-      existing.setAuthorizationCodeMetadata(update.getAuthorizationCodeMetadata());
-    if (update.getAccessTokenValue() != null)
-      existing.setAccessTokenValue(update.getAccessTokenValue());
-    if (update.getAccessTokenIssuedAt() != null)
-      existing.setAccessTokenIssuedAt(update.getAccessTokenIssuedAt());
-    if (update.getAccessTokenExpiresAt() != null)
-      existing.setAccessTokenExpiresAt(update.getAccessTokenExpiresAt());
-    if (update.getAccessTokenMetadata() != null)
-      existing.setAccessTokenMetadata(update.getAccessTokenMetadata());
-    if (update.getAccessTokenType() != null)
-      existing.setAccessTokenType(update.getAccessTokenType());
-    if (update.getAccessTokenScopes() != null)
-      existing.setAccessTokenScopes(update.getAccessTokenScopes());
-    if (update.getRefreshTokenValue() != null)
-      existing.setRefreshTokenValue(update.getRefreshTokenValue());
-    if (update.getRefreshTokenIssuedAt() != null)
-      existing.setRefreshTokenIssuedAt(update.getRefreshTokenIssuedAt());
-    if (update.getRefreshTokenExpiresAt() != null)
-      existing.setRefreshTokenExpiresAt(update.getRefreshTokenExpiresAt());
-    if (update.getRefreshTokenMetadata() != null)
-      existing.setRefreshTokenMetadata(update.getRefreshTokenMetadata());
-    if (update.getTenantId() != null) existing.setTenantId(update.getTenantId());
+    if (update.getTenantId() == null)
+      update.setTenantId(existing.getTenantId());
 
-    return existing;
+    return update;
   }
 
   /**
