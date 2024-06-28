@@ -249,7 +249,7 @@ public class StorageController(ILoggerProvider option,
     /// <returns type="ASC.Core.Encryption.EncryptionSettings, ASC.Core.Encryption">Storage encryption settings</returns>
     /// <path>api/2.0/settings/encryption/settings</path>
     /// <httpMethod>GET</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Encryption")]
     [HttpGet("encryption/settings")]
     public async Task<EncryptionSettings> GetStorageEncryptionSettingsAsync()

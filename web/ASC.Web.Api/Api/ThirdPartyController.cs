@@ -30,7 +30,7 @@ namespace ASC.Web.Api.Controllers;
 /// Third-party API.
 ///</summary>
 ///<name>thirdparty</name>
-///<visible>false</visible>
+[ApiExplorerSettings(IgnoreApi = true)]
 [Scope]
 [DefaultRoute]
 [ApiController]

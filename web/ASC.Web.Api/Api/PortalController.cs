@@ -174,7 +174,7 @@ public class PortalController(
     /// <returns type="ASC.Web.Api.ApiModels.ResponseDto, ASC.Web.Api">Extra tenant license information</returns>
     /// <path>api/2.0/portal/tenantextra</path>
     /// <httpMethod>GET</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Portal / Quota")]
     [AllowNotPayment]
     [HttpGet("tenantextra")]
@@ -337,7 +337,7 @@ public class PortalController(
     /// <returns type="Microsoft.AspNetCore.Mvc.FileResult, Microsoft.AspNetCore.Mvc">Thumbnail</returns>
     /// <path>api/2.0/portal/thumb</path>
     /// <httpMethod>GET</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Portal / Settings")]
     [HttpGet("thumb")]
     public async Task<FileResult> GetThumb(string url)
@@ -400,7 +400,7 @@ public class PortalController(
     /// <returns></returns>
     /// <path>api/2.0/portal/mobile/registration</path>
     /// <httpMethod>POST</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Portal / Settings")]
     [HttpPost("mobile/registration")]
     public async Task RegisterMobileAppInstallAsync(MobileAppRequestsDto inDto)
@@ -420,7 +420,7 @@ public class PortalController(
     /// <returns></returns>
     /// <path>api/2.0/portal/mobile/registration</path>
     /// <httpMethod>POST</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Portal / Settings")]
     [HttpPost("mobile/registration")]
     public async Task RegisterMobileAppInstallAsync(MobileAppType type)
@@ -438,7 +438,7 @@ public class PortalController(
     /// <returns type="System.Object, System">Confirmation email about authentication to the portal with a new name</returns>
     /// <path>api/2.0/portal/portalrename</path>
     /// <httpMethod>PUT</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Portal / Settings")]
     [HttpPut("portalrename")]
     public async Task<object> UpdatePortalName(PortalRenameRequestsDto inDto)

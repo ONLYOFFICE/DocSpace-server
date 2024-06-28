@@ -339,7 +339,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <path>api/2.0/files/file/{fileId}/sharedusers</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
     [HttpGet("{fileId}/sharedusers")]
     public async Task<List<MentionWrapper>> SharedUsers(T fileId)
@@ -356,7 +356,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <returns type="ASC.Web.Files.Services.WCFService.MentionWrapper, ASC.Files.Core">List of users with their access rights to the file</returns>
     /// <path>api/2.0/files/infousers</path>
     /// <httpMethod>POST</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Files")]
     [HttpPost("infousers")]
     public async Task<List<MentionWrapper>> GetInfoUsers(GetInfoUsersRequestDto inDto)
@@ -490,7 +490,7 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
     /// <path>api/2.0/files/docservice</path>
     /// <httpMethod>GET</httpMethod>
     /// <requiresAuthorization>false</requiresAuthorization>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Settings")]
     [AllowAnonymous]
     [HttpGet("docservice")]

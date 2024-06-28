@@ -277,7 +277,7 @@ public partial class SettingsController(MessageService messageService,
     /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.QuotaUsageDto, ASC.Web.Api">Space usage and limits for upload</returns>
     /// <path>api/2.0/settings/quota</path>
     /// <httpMethod>GET</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Quota")]
     [HttpGet("quota")]
     public async Task<QuotaUsageDto> GetQuotaUsed()
@@ -296,7 +296,7 @@ public partial class SettingsController(MessageService messageService,
     /// <returns type="System.Object, System">Message about the result of saving the user quota settings</returns>
     /// <path>api/2.0/settings/userquotasettings</path>
     /// <httpMethod>POST</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Quota")]
     [HttpPost("userquotasettings")]
     public async Task<TenantUserQuotaSettings> SaveUserQuotaSettingsAsync(QuotaSettingsRequestsDto inDto)
@@ -541,7 +541,7 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/recalculatequota</path>
     /// <httpMethod>GET</httpMethod>
     /// <returns></returns>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Quota")]
     [HttpGet("recalculatequota")]
     public async Task RecalculateQuotaAsync()
@@ -561,7 +561,7 @@ public partial class SettingsController(MessageService messageService,
     /// <returns type="System.Boolean, System">Boolean value: true - quota recalculation process is enabled, false - quota recalculation process is disabled</returns>
     /// <path>api/2.0/settings/checkrecalculatequota</path>
     /// <httpMethod>GET</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Quota")]
     [HttpGet("checkrecalculatequota")]
     public async Task<bool> CheckRecalculateQuotaAsync()
@@ -619,7 +619,7 @@ public partial class SettingsController(MessageService messageService,
     /// <returns></returns>
     /// <path>api/2.0/settings/welcome/close</path>
     /// <httpMethod>PUT</httpMethod>
-    ///<visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Common settings")]
     [HttpPut("welcome/close")]
     public async Task CloseWelcomePopupAsync()
@@ -795,7 +795,7 @@ public partial class SettingsController(MessageService messageService,
     /// <returns type="System.Object, System">Message about saving settings successfully</returns>
     /// <path>api/2.0/settings/timeandlanguage</path>
     /// <httpMethod>PUT</httpMethod>
-    ///<visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Common settings")]
     [HttpPut("timeandlanguage")]
     public async Task<object> TimaAndLanguageAsync(SettingsRequestsDto inDto)
@@ -846,7 +846,7 @@ public partial class SettingsController(MessageService messageService,
     /// <returns type="System.Object, System">Message about saving settings successfully</returns>
     /// <path>api/2.0/settings/defaultpage</path>
     /// <httpMethod>PUT</httpMethod>
-    ///<visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Common settings")]
     [HttpPut("defaultpage")]
     public async Task<object> SaveDefaultPageSettingAsync(SettingsRequestsDto inDto)
@@ -1015,7 +1015,7 @@ public partial class SettingsController(MessageService messageService,
     /// <returns type="ASC.Core.Tenants.TenantControlPanelSettings, ASC.Core.Common">Tenant Control Panel settings</returns>
     /// <path>api/2.0/settings/controlpanel</path>
     /// <httpMethod>GET</httpMethod>
-    ///<visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [HttpGet("controlpanel")]
     public TenantControlPanelSettings GetTenantControlPanelSettings()
     {
@@ -1154,7 +1154,7 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/telegramlink</path>
     /// <httpMethod>GET</httpMethod>
     /// <returns type="System.Object, System">Telegram link</returns>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Telegram")]
     [HttpGet("telegramlink")]
     public async Task<object> TelegramLink()
@@ -1179,7 +1179,7 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/telegramisconnected</path>
     /// <httpMethod>GET</httpMethod>
     /// <returns type="System.Object, System">Operation result: 0 - not connected, 1 - connected, 2 - awaiting confirmation</returns>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Telegram")]
     [HttpGet("telegramisconnected")]
     public async Task<object> TelegramIsConnectedAsync()
@@ -1196,7 +1196,7 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/telegramdisconnect</path>
     /// <httpMethod>DELETE</httpMethod>
     /// <returns></returns>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Telegram")]
     [HttpDelete("telegramdisconnect")]
     public async Task TelegramDisconnectAsync()

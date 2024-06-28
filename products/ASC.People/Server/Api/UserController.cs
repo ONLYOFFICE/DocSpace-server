@@ -74,7 +74,7 @@ public class UserController(
     FilesMessageService filesMessageService)
     : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
 {
-    
+
 
     /// <summary>
     /// Adds an activated portal user with the first name, last name, email address, and several optional parameters specified in the request.
@@ -87,7 +87,7 @@ public class UserController(
     /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">Newly added user with the detailed information</returns>
     /// <path>api/2.0/people/active</path>
     /// <httpMethod>POST</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("People / Profiles")]
     [HttpPost("active")]
     public async Task<EmployeeFullDto> AddMemberAsActivatedAsync(MemberRequestDto inDto)
@@ -725,7 +725,7 @@ public class UserController(
     /// <returns type="ASC.Api.Core.Module, ASC.Api.Core">Module information</returns>
     /// <path>api/2.0/people/info</path>
     /// <httpMethod>GET</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("People / Module")]
     [HttpGet("info")]
     public Module GetModule()
@@ -1539,7 +1539,7 @@ public class UserController(
     /// <path>api/2.0/people/recalculatequota</path>
     /// <httpMethod>GET</httpMethod>
     /// <returns></returns>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("People / Quota")]
     [HttpGet("recalculatequota")]
     public async Task RecalculateQuotaAsync()
@@ -1558,7 +1558,7 @@ public class UserController(
     /// <returns type="ASC.Api.Core.Model.TaskProgressDto, ASC.Api.Core.Model">Task progress</returns>
     /// <path>api/2.0/people/checkrecalculatequota</path>
     /// <httpMethod>GET</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("People / Quota")]
     [HttpGet("checkrecalculatequota")]
     public async Task<TaskProgressDto> CheckRecalculateQuotaAsync()

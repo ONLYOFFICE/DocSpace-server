@@ -98,7 +98,7 @@ public class SettingsController(
     /// <returns type="ASC.Web.Files.Core.Compress.ICompress, ASC.Files.Core">Archive</returns>
     /// <path>api/2.0/files/settings/downloadtargz</path>
     /// <httpMethod>PUT</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Settings")]
     [HttpPut("settings/downloadtargz")]
     public async Task<ICompress> ChangeDownloadZipFromForm([FromForm] DisplayRequestDto inDto)
@@ -116,7 +116,7 @@ public class SettingsController(
     /// <returns type="System.Boolean, System">Boolean value: true if the parameter is enabled</returns>
     /// <path>api/2.0/files/settings/favorites</path>
     /// <httpMethod>PUT</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Settings")]
     [HttpPut("settings/favorites")]
     public async Task<bool> DisplayFavorite(DisplayRequestDto inDto)
@@ -134,7 +134,7 @@ public class SettingsController(
     /// <returns type="System.Boolean, System">Boolean value: true if the parameter is enabled</returns>
     /// <path>api/2.0/files/displayRecent</path>
     /// <httpMethod>PUT</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Settings")]
     [HttpPut("displayRecent")]
     public async Task<bool> DisplayRecent(DisplayRequestDto inDto)
@@ -152,7 +152,7 @@ public class SettingsController(
     /// <returns type="System.Boolean, System">Boolean value: true if the parameter is enabled</returns>
     /// <path>api/2.0/files/settings/templates</path>
     /// <httpMethod>PUT</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Settings")]
     [HttpPut("settings/templates")]
     public async Task<bool> DisplayTemplates(DisplayRequestDto inDto)
@@ -251,7 +251,7 @@ public class SettingsController(
     /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
     /// <path>api/2.0/files/hideconfirmconvert</path>
     /// <httpMethod>PUT</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Settings")]
     [HttpPut("hideconfirmconvert")]
     public async Task<bool> HideConfirmConvert(HideConfirmConvertRequestDto inDto)

@@ -52,7 +52,7 @@ public class RadicaleController(RadicaleClient radicaleClient,
     /// <returns type="ASC.Common.Radicale.DavResponse, ASC.Common.Radicale">CardDav response</returns>
     /// <path>api/2.0/settings/carddavurl</path>
     /// <httpMethod>GET</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / CardDav address book")]
     [HttpGet("carddavurl")]
     public async Task<DavResponse> GetCardDavUrl()
@@ -125,7 +125,7 @@ public class RadicaleController(RadicaleClient radicaleClient,
     /// <returns type="ASC.Common.Radicale.DavResponse, ASC.Common.Radicale">CardDav response</returns>
     /// <path>api/2.0/settings/deletebook</path>
     /// <httpMethod>DELETE</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / CardDav address book")]
     [HttpDelete("deletebook")]
     public async Task<DavResponse> DeleteCardDavAddressBook()

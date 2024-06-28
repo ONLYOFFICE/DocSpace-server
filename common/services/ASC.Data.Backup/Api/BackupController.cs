@@ -331,7 +331,7 @@ public class BackupController(
     /// <returns type="System.Object, System">Path to the temporary folder with the stored backup</returns>
     /// <httpMethod>GET</httpMethod>
     /// <path>api/2.0/backup/backuptmp</path>
-    ///<visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Backup")]
     [HttpGet("backuptmp")]
     public object GetTempPath()

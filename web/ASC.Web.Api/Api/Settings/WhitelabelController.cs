@@ -580,7 +580,7 @@ public class WhitelabelController(ApiContext apiContext,
     /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
     /// <path>api/2.0/settings/rebranding/mail</path>
     /// <httpMethod>POST</httpMethod>
-    ///<visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Rebranding")]
     [HttpPost("rebranding/mail")]
     public async Task<bool> SaveMailWhiteLabelSettingsAsync(MailWhiteLabelSettings settings)
@@ -605,7 +605,7 @@ public class WhitelabelController(ApiContext apiContext,
     /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
     /// <path>api/2.0/settings/rebranding/mail</path>
     /// <httpMethod>PUT</httpMethod>
-    ///<visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Rebranding")]
     [HttpPut("rebranding/mail")]
     public async Task<bool> UpdateMailWhiteLabelSettings(MailWhiteLabelSettingsRequestsDto inDto)
@@ -631,7 +631,7 @@ public class WhitelabelController(ApiContext apiContext,
     /// <returns type="ASC.Web.Core.WhiteLabel.MailWhiteLabelSettings, ASC.Web.Core">Mail white label settings</returns>
     /// <path>api/2.0/settings/rebranding/mail</path>
     /// <httpMethod>GET</httpMethod>
-    ///<visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Rebranding")]
     [HttpGet("rebranding/mail")]
     public async Task<MailWhiteLabelSettings> GetMailWhiteLabelSettingsAsync()
@@ -647,7 +647,7 @@ public class WhitelabelController(ApiContext apiContext,
     /// <returns type="ASC.Web.Core.WhiteLabel.MailWhiteLabelSettings, ASC.Web.Core">Default mail white label settings</returns>
     /// <path>api/2.0/settings/rebranding/mail</path>
     /// <httpMethod>DELETE</httpMethod>
-    ///<visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Rebranding")]
     [HttpDelete("rebranding/mail")]
     public async Task<MailWhiteLabelSettings> DeleteMailWhiteLabelSettingsAsync()

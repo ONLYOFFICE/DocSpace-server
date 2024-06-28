@@ -67,7 +67,7 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// <path>api/2.0/files/file/{fileId}/share</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
     [HttpGet("file/{fileId}/share")]
     public async IAsyncEnumerable<FileShareDto> GetFileSecurityInfoAsync(T fileId)
@@ -88,7 +88,7 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// <path>api/2.0/files/folder/{folderId}/share</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
     [HttpGet("folder/{folderId}/share")]
     public async IAsyncEnumerable<FileShareDto> GetFolderSecurityInfoAsync(T folderId)
@@ -110,7 +110,7 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// <path>api/2.0/files/file/{fileId}/share</path>
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
     [HttpPut("file/{fileId}/share")]
     public async IAsyncEnumerable<FileShareDto> SetFileSecurityInfoAsync(T fileId, SecurityInfoRequestDto inDto)
@@ -132,7 +132,7 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// <path>api/2.0/files/folder/{folderId}/share</path>
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
     [HttpPut("folder/{folderId}/share")]
     public async IAsyncEnumerable<FileShareDto> SetFolderSecurityInfoAsync(T folderId, SecurityInfoRequestDto inDto)
@@ -153,7 +153,7 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// <path>api/2.0/files/file/{fileId}/publickeys</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
     [HttpGet("file/{fileId}/publickeys")]
     public async Task<List<EncryptionKeyPairDto>> GetEncryptionAccess(T fileId)
@@ -172,7 +172,7 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// <path>api/2.0/files/file/{fileId}/sendeditornotify</path>
     /// <httpMethod>POST</httpMethod>
     /// <collection>list</collection>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
     [HttpPost("file/{fileId}/sendeditornotify")]
     public async Task<List<AceShortWrapper>> SendEditorNotify(T fileId, MentionMessageWrapper mentionMessage)
@@ -180,6 +180,7 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
         return await fileStorageService.SendEditorNotifyAsync(fileId, mentionMessage);
     }
 
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
     [HttpGet("folder/{folderId}/group/{groupId:guid}/share")]
     public async IAsyncEnumerable<GroupMemberSecurityDto> GetGroupsMembersWithFolderSecurityAsync(T folderId, Guid groupId)
@@ -227,7 +228,7 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// <path>api/2.0/files/owner</path>
     /// <httpMethod>POST</httpMethod>
     /// <collection>list</collection>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
     [HttpPost("owner")]
     public async IAsyncEnumerable<FileEntryDto> ChangeOwnerAsync(ChangeOwnerRequestDto inDto)
@@ -255,7 +256,7 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// <path>api/2.0/files/share</path>
     /// <httpMethod>POST</httpMethod>
     /// <collection>list</collection>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
     [HttpPost("share")]
     public async IAsyncEnumerable<FileShareDto> GetSecurityInfoAsync(BaseBatchRequestDto inDto)
@@ -281,7 +282,7 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
     /// <path>api/2.0/files/share</path>
     /// <httpMethod>DELETE</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
     [HttpDelete("share")]
     public async Task<bool> RemoveSecurityInfoAsync(BaseBatchRequestDto inDto)
@@ -306,7 +307,7 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// <path>api/2.0/files/share</path>
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
     [HttpPut("share")]
     public async IAsyncEnumerable<FileShareDto> SetSecurityInfoAsync(SecurityInfoRequestDto inDto)
@@ -332,8 +333,8 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.ExternalShareDto, ASC.Files.Core">External data</returns>
     /// <path>api/2.0/files/share/{key}</path>
     /// <httpMethod>GET</httpMethod>
-    /// <visible>false</visible>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
     [AllowAnonymous]
     [HttpGet("share/{key}")]
@@ -354,8 +355,8 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.ExternalShareDto, ASC.Files.Core">External data</returns>
     /// <path>api/2.0/files/share/{key}/password</path>
     /// <httpMethod>POST</httpMethod>
-    /// <visible>false</visible>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
     [AllowAnonymous]
     [HttpPost("share/{key}/password")]

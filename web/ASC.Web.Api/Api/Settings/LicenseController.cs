@@ -125,7 +125,7 @@ public class LicenseController(ILoggerProvider option,
     /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
     /// <path>api/2.0/settings/license/trial</path>
     /// <httpMethod>POST</httpMethod>
-    ///<visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / License")]
     [HttpPost("trial")]
     public async Task<bool> ActivateTrialAsync()

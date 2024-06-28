@@ -54,7 +54,7 @@ public abstract class TagsController<T>(FileStorageService fileStorageService,
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileDto, ASC.Files.Core">New file information</returns>
     /// <path>api/2.0/files/file/{fileId}/recent</path>
     /// <httpMethod>POST</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Files")]
     [HttpPost("file/{fileId}/recent")]
     public async Task<FileDto<T>> AddToRecentAsync(T fileId)
@@ -76,7 +76,7 @@ public abstract class TagsController<T>(FileStorageService fileStorageService,
     /// <returns type="System.Boolean, System">Boolean value: true - the file is favorite, false - the file is not favorite</returns>
     /// <path>api/2.0/files/favorites/{fileId}</path>
     /// <httpMethod>GET</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Files")]
     [HttpGet("favorites/{fileId}")]
     public async Task<bool> ToggleFileFavoriteAsync(T fileId, bool favorite)
@@ -99,7 +99,7 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
     /// <path>api/2.0/files/favorites</path>
     /// <httpMethod>POST</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Operations")]
     [HttpPost("favorites")]
     public async Task<bool> AddFavoritesAsync(BaseBatchRequestDto inDto)
@@ -140,7 +140,7 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
     /// <path>api/2.0/files/favorites</path>
     /// <httpMethod>DELETE</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Operations")]
     [HttpDelete("favorites")]
     [Consumes("application/json")]
@@ -158,7 +158,7 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
     /// <path>api/2.0/files/favorites</path>
     /// <httpMethod>DELETE</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Operations")]
     [HttpDelete("favorites")]
     public async Task<bool> DeleteFavoritesFromQueryAsync([FromQuery][ModelBinder(BinderType = typeof(BaseBatchModelBinder))] BaseBatchRequestDto inDto)

@@ -57,7 +57,7 @@ public abstract class PrivacyRoomController<T>(SettingsManager settingsManager,
     /// <path>api/2.0/privacyroom/access/{fileId}</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Private room")]
     [HttpGet("access/{fileId}")]
     public async Task<IEnumerable<EncryptionKeyPairDto>> GetPublicKeysWithAccess(T fileId)
@@ -92,7 +92,7 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
     /// <returns type="ASC.Web.Files.Core.Entries.EncryptionKeyPairDto, ASC.Files.Core">Encryption key pair: private key, public key, user ID</returns>
     /// <path>api/2.0/privacyroom/keys</path>
     /// <httpMethod>GET</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Private room")]
     [HttpGet("keys")]
     public async Task<EncryptionKeyPairDto> GetKeysAsync()
@@ -115,7 +115,7 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
     /// <returns type="System.Boolean, System">Boolean value: true - the Private Room settings are enabled, false - the Private Room settings are disabled</returns>
     /// <path>api/2.0/privacyroom</path>
     /// <httpMethod>GET</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Private room")]
     [HttpGet("")]
     public async Task<bool> PrivacyRoomAsync()
@@ -133,7 +133,7 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
     /// <returns type="System.Object, System">Boolean value: true - the key pair is set</returns>
     /// <path>api/2.0/privacyroom/keys</path>
     /// <httpMethod>PUT</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Private room")]
     [HttpPut("keys")]
     public async Task<object> SetKeysAsync(PrivacyRoomRequestDto inDto)
@@ -172,7 +172,7 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
     /// <returns type="System.Boolean, System">Boolean value: true - the Private Room settings are enabled, false - the Private Room settings are disabled</returns>
     /// <path>api/2.0/privacyroom</path>
     /// <httpMethod>PUT</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Private room")]
     [HttpPut("")]
     public async Task<bool> SetPrivacyRoomAsync(PrivacyRoomRequestDto inDto)
