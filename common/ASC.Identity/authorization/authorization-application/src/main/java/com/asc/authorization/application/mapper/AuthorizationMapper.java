@@ -177,8 +177,7 @@ public class AuthorizationMapper {
    * @return the merged AuthorizationEntity
    */
   public AuthorizationEntity merge(AuthorizationEntity existing, AuthorizationEntity update) {
-    if (update.getTenantId() == null)
-      update.setTenantId(existing.getTenantId());
+    if (update.getTenantId() == null) update.setTenantId(existing.getTenantId());
 
     return update;
   }

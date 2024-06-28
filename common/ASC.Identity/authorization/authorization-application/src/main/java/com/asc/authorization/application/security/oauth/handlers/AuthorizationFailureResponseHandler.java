@@ -81,11 +81,6 @@ public class AuthorizationFailureResponseHandler implements AuthenticationFailur
         UriComponentsBuilder.fromUriString(authRequest.getRedirectUri())
             .queryParam(OAuth2ParameterNames.ERROR, error.getErrorCode());
 
-    if (StringUtils.hasText(error.getDescription()))
-      uriBuilder.queryParam(
-          OAuth2ParameterNames.ERROR_DESCRIPTION,
-          UriUtils.encode(error.getDescription(), StandardCharsets.UTF_8));
-
     if (StringUtils.hasText(error.getUri()))
       uriBuilder.queryParam(
           OAuth2ParameterNames.ERROR_URI, UriUtils.encode(error.getUri(), StandardCharsets.UTF_8));
@@ -98,6 +93,17 @@ public class AuthorizationFailureResponseHandler implements AuthenticationFailur
     var redirectUri = uriBuilder.build(true).toUriString();
     response.setStatus(HttpStatus.OK.value());
     response.setHeader(filterSecurityConfigurationProperties.getRedirectHeader(), redirectUri);
-    response.sendRedirect(redirectUri);
+
+    if (request.getHeader(filterSecurityConfigurationProperties.getDisableRedirectHeader())
+        != null) {
+      log.debug(
+          "Disabling redirect with error code, setting header {} with redirect URL",
+          filterSecurityConfigurationProperties.getRedirectHeader());
+      response.setStatus(HttpStatus.OK.value());
+      response.setHeader(filterSecurityConfigurationProperties.getRedirectHeader(), redirectUri);
+    } else {
+      log.debug("Redirecting to URL with an error code: {}", redirectUri);
+      response.sendRedirect(redirectUri);
+    }
   }
 }

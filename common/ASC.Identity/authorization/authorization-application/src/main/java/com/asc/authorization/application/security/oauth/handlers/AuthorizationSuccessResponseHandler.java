@@ -1,9 +1,11 @@
 package com.asc.authorization.application.security.oauth.handlers;
 
+import com.asc.authorization.application.configuration.security.AnonymousFilterSecurityConfigurationProperties;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -14,9 +16,10 @@ import org.springframework.stereotype.Component;
 /** Handles successful authentication for OAuth2 authorization requests. */
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class AuthorizationSuccessResponseHandler implements AuthenticationSuccessHandler {
-  private static final String DISABLE_REDIRECT_HEADER = "X-Disable-Redirect";
-  private static final String REDIRECT_HEADER = "X-Redirect-URI";
+  private final AnonymousFilterSecurityConfigurationProperties
+      filterSecurityConfigurationProperties;
 
   /**
    * Handles successful authentication by building a redirect URI with authorization code.
@@ -74,10 +77,14 @@ public class AuthorizationSuccessResponseHandler implements AuthenticationSucces
 
     if (state != null && !state.isBlank()) redirectUrl.append(String.format("&state=%s", state));
 
-    if (request.getHeader(DISABLE_REDIRECT_HEADER) != null) {
-      log.debug("Disabling redirect, setting header {} with redirect URL", REDIRECT_HEADER);
+    if (request.getHeader(filterSecurityConfigurationProperties.getDisableRedirectHeader())
+        != null) {
+      log.debug(
+          "Disabling redirect, setting header {} with redirect URL",
+          filterSecurityConfigurationProperties.getRedirectHeader());
       response.setStatus(HttpStatus.OK.value());
-      response.setHeader(REDIRECT_HEADER, redirectUrl.toString());
+      response.setHeader(
+          filterSecurityConfigurationProperties.getRedirectHeader(), redirectUrl.toString());
     } else {
       log.debug("Redirecting to URL: {}", redirectUrl);
       response.sendRedirect(redirectUrl.toString());
