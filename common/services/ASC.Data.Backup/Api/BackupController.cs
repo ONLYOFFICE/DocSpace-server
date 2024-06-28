@@ -33,6 +33,7 @@ namespace ASC.Data.Backup.Controllers;
 [Scope]
 [DefaultRoute]
 [ApiController]
+[ControllerName("backup")]
 public class BackupController(
     BackupAjaxHandler backupAjaxHandler,
     TenantManager tenantManager,
@@ -53,6 +54,7 @@ public class BackupController(
     /// <returns type="ASC.Data.Backup.BackupAjaxHandler.Schedule, ASC.Data.Backup">Backup schedule</returns>
     /// <httpMethod>GET</httpMethod>
     /// <path>api/2.0/backup/getbackupschedule</path>
+    [Tags("Backup")]
     [HttpGet("getbackupschedule")]
     public async Task<BackupAjaxHandler.Schedule> GetBackupSchedule()
     {
@@ -67,6 +69,7 @@ public class BackupController(
     /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
     /// <httpMethod>POST</httpMethod>
     /// <path>api/2.0/backup/createbackupschedule</path>
+    [Tags("Backup")]
     [HttpPost("createbackupschedule")]
     public async Task<bool> CreateBackupScheduleAsync(BackupScheduleDto inDto)
     {
@@ -112,6 +115,7 @@ public class BackupController(
     /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
     /// <httpMethod>DELETE</httpMethod>
     /// <path>api/2.0/backup/deletebackupschedule</path>
+    [Tags("Backup")]
     [HttpDelete("deletebackupschedule")]
     public async Task<bool> DeleteBackupSchedule()
     {
@@ -128,6 +132,7 @@ public class BackupController(
     /// <returns type="System.Object, System">Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link</returns>
     /// <httpMethod>POST</httpMethod>
     /// <path>api/2.0/backup/startbackup</path>
+    [Tags("Backup")]
     [AllowNotPayment]
     [HttpPost("startbackup")]
     public async Task<BackupProgress> StartBackupAsync(BackupDto inDto)
@@ -197,6 +202,7 @@ public class BackupController(
     /// <returns type="System.Object, System">Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link</returns>
     /// <httpMethod>GET</httpMethod>
     /// <path>api/2.0/backup/getbackupprogress</path>
+    [Tags("Backup")]
     [AllowNotPayment]
     [HttpGet("getbackupprogress")]
     public async Task<BackupProgress> GetBackupProgressAsync()
@@ -212,6 +218,7 @@ public class BackupController(
     /// <httpMethod>GET</httpMethod>
     /// <path>api/2.0/backup/getbackuphistory</path>
     /// <collection>list</collection>
+    [Tags("Backup")]
     [HttpGet("getbackuphistory")]
     public async Task<List<BackupHistoryRecord>> GetBackupHistory()
     {
@@ -226,6 +233,7 @@ public class BackupController(
     /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
     /// <httpMethod>DELETE</httpMethod>
     /// <path>api/2.0/backup/deletebackup/{id}</path>
+    [Tags("Backup")]
     [HttpDelete("deletebackup/{id:guid}")]
     public async Task<bool> DeleteBackup(Guid id)
     {
@@ -240,6 +248,7 @@ public class BackupController(
     /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
     /// <httpMethod>DELETE</httpMethod>
     /// <path>api/2.0/backup/deletebackuphistory</path>
+    [Tags("Backup")]
     [HttpDelete("deletebackuphistory")]
     public async Task<bool> DeleteBackupHistory()
     {
@@ -255,6 +264,7 @@ public class BackupController(
     /// <returns type="System.Object, System">Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link</returns>
     /// <httpMethod>POST</httpMethod>
     /// <path>api/2.0/backup/startrestore</path>
+    [Tags("Backup")]
     [HttpPost("startrestore")]
     public async Task<BackupProgress> StartBackupRestoreAsync(BackupRestoreDto inDto)
     {
@@ -303,6 +313,7 @@ public class BackupController(
     /// <httpMethod>GET</httpMethod>
     /// <path>api/2.0/backup/getrestoreprogress</path>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Backup")]
     [HttpGet("getrestoreprogress")]  //NOTE: this method doesn't check payment!!!
     [AllowAnonymous]
     [AllowNotPayment]
@@ -319,6 +330,7 @@ public class BackupController(
     /// <httpMethod>GET</httpMethod>
     /// <path>api/2.0/backup/backuptmp</path>
     ///<visible>false</visible>
+    [Tags("Backup")]
     [HttpGet("backuptmp")]
     public object GetTempPath()
     {

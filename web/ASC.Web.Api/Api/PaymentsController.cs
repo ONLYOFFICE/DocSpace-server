@@ -62,6 +62,7 @@ public class PaymentController(UserManager userManager,
     /// <returns type="System.Uri, System">The URL to the payment page</returns>
     /// <path>api/2.0/portal/payment/url</path>
     /// <httpMethod>PUT</httpMethod>
+    [Tags("Portal / Payment")]
     [HttpPut("url")]
     public async Task<Uri> GetPaymentUrlAsync(PaymentUrlRequestsDto inDto)
     {
@@ -97,6 +98,7 @@ public class PaymentController(UserManager userManager,
     /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
     /// <path>api/2.0/portal/payment/update</path>
     /// <httpMethod>PUT</httpMethod>
+    [Tags("Portal / Payment")]
     [HttpPut("update")]
     public async Task<bool> PaymentUpdateAsync(PaymentUrlRequestsDto inDto)
     {
@@ -124,6 +126,7 @@ public class PaymentController(UserManager userManager,
     /// <returns type="System.Object, System">The URL to the payment account</returns>
     /// <path>api/2.0/portal/payment/account</path>
     /// <httpMethod>GET</httpMethod>
+    [Tags("Portal / Payment")]
     [HttpGet("account")]
     public async Task<object> GetPaymentAccountAsync(string backUrl)
     {
@@ -156,6 +159,7 @@ public class PaymentController(UserManager userManager,
     /// <returns type="System.Object, System">List of available portal prices</returns>
     /// <path>api/2.0/portal/payment/prices</path>
     /// <httpMethod>GET</httpMethod>
+    [Tags("Portal / Payment")]
     [HttpGet("prices")]
     public async Task<object> GetPricesAsync()
     {
@@ -177,6 +181,7 @@ public class PaymentController(UserManager userManager,
     /// <path>api/2.0/portal/payment/currencies</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    [Tags("Portal / Payment")]
     [HttpGet("currencies")]
     public async IAsyncEnumerable<CurrenciesDto> GetCurrenciesAsync()
     {
@@ -202,6 +207,7 @@ public class PaymentController(UserManager userManager,
     /// <path>api/2.0/portal/payment/quotas</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    [Tags("Portal / Payment")]
     [HttpGet("quotas")]
     public async Task<IEnumerable<QuotaDto>> GetQuotasAsync()
     {
@@ -218,6 +224,7 @@ public class PaymentController(UserManager userManager,
     /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.QuotaDto, ASC.Web.Api">Payment information about the current portal quota</returns>
     /// <path>api/2.0/portal/payment/quota</path>
     /// <httpMethod>GET</httpMethod>
+    [Tags("Portal / Payment")]
     [HttpGet("quota")]
     public async Task<QuotaDto> GetQuotaAsync(bool refresh)
     {
@@ -235,6 +242,7 @@ public class PaymentController(UserManager userManager,
     /// <returns></returns>
     /// <path>api/2.0/portal/payment/request</path>
     /// <httpMethod>POST</httpMethod>
+    [Tags("Portal / Payment")]
     [HttpPost("request")]
     public async Task SendSalesRequestAsync(SalesRequestsDto inDto)
     {

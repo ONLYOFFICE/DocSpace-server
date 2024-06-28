@@ -60,6 +60,7 @@ public class FoldersControllerInternal(
     /// <path>api/2.0/files/folder/{folderId}/log</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    [Tags("Files / Folders")]
     [HttpGet("folder/{folderId:int}/log")]
     public IAsyncEnumerable<HistoryDto> GetHistoryAsync(int folderId)
     {
@@ -111,6 +112,7 @@ public abstract class FoldersController<T>(
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FolderDto, ASC.Files.Core">New folder parameters</returns>
     /// <path>api/2.0/files/folder/{folderId}</path>
     /// <httpMethod>POST</httpMethod>
+    [Tags("Files / Folders")]
     [HttpPost("folder/{folderId}")]
     public async Task<FolderDto<T>> CreateFolderAsync(T folderId, CreateFolderRequestDto inDto)
     {
@@ -130,6 +132,7 @@ public abstract class FoldersController<T>(
     /// <path>api/2.0/files/folder/{folderId}</path>
     /// <httpMethod>DELETE</httpMethod>
     /// <collection>list</collection>
+    [Tags("Files / Folders")]
     [HttpDelete("folder/{folderId}")]
     public async IAsyncEnumerable<FileOperationDto> DeleteFolder(T folderId, DeleteFolderDto inDto)
     {
@@ -141,6 +144,7 @@ public abstract class FoldersController<T>(
         }
     }
 
+    [Tags("Files / Folders")]
     [HttpPut("folder/{folderId}/order")]
     public async Task SetOrder(T folderId, OrderRequestDto inDto)
     {
@@ -168,6 +172,7 @@ public abstract class FoldersController<T>(
     /// <path>api/2.0/files/{folderId}</path>
     /// <httpMethod>GET</httpMethod>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Files / Folders")]
     [AllowAnonymous]
     [HttpGet("{folderId}")]
     public async Task<FolderContentDto<T>> GetFolderAsync(T folderId, Guid? userIdOrGroupId, FilterType? filterType, T roomId, bool? searchInContent, bool? withsubfolders, bool? excludeSubject,
@@ -190,6 +195,7 @@ public abstract class FoldersController<T>(
     /// <path>api/2.0/files/folder/{folderId}</path>
     /// <httpMethod>GET</httpMethod>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Files / Folders")]
     [AllowAnonymous]
     [HttpGet("folder/{folderId}")]
     public async Task<FolderDto<T>> GetFolderInfoAsync(T folderId)
@@ -209,6 +215,7 @@ public abstract class FoldersController<T>(
     /// <path>api/2.0/files/folder/{folderId}/path</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    [Tags("Files / Folders")]
     [HttpGet("folder/{folderId}/path")]
     public async IAsyncEnumerable<FileEntryDto> GetFolderPathAsync(T folderId)
     {
@@ -230,6 +237,7 @@ public abstract class FoldersController<T>(
     /// <path>api/2.0/files/{folderId}/subfolders</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    [Tags("Files / Folders")]
     [HttpGet("{folderId}/subfolders")]
     public async IAsyncEnumerable<FileEntryDto> GetFoldersAsync(T folderId)
     {
@@ -250,6 +258,7 @@ public abstract class FoldersController<T>(
     /// <path>api/2.0/files/{folderId}/news</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    [Tags("Files / Folders")]
     [HttpGet("{folderId}/news")]
     public async IAsyncEnumerable<FileEntryDto> GetNewItemsAsync(T folderId)
     {
@@ -273,6 +282,7 @@ public abstract class FoldersController<T>(
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FolderDto, ASC.Files.Core">Folder parameters</returns>
     /// <path>api/2.0/files/folder/{folderId}</path>
     /// <httpMethod>PUT</httpMethod>
+    [Tags("Files / Folders")]
     [HttpPut("folder/{folderId}")]
     public async Task<FolderDto<T>> RenameFolderAsync(T folderId, CreateFolderRequestDto inDto)
     {        
@@ -289,6 +299,7 @@ public abstract class FoldersController<T>(
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FilesStatisticsResultDto, ASC.Files.Core">Used space of files in the root folders</returns>
     /// <path>api/2.0/files/filesusedspace</path>
     /// <httpMethod>GET</httpMethod>
+    [Tags("Files / Folders")]
     [HttpGet("filesusedspace")]
     public async Task<FilesStatisticsResultDto> GetFilesUsedSpace()
     {
@@ -296,7 +307,7 @@ public abstract class FoldersController<T>(
 
         return await fileStorageService.GetFilesUsedSpace();
     }
-    
+
     /// <summary>
     /// Returns the primary external link by the identifier specified in the request.
     /// </summary>
@@ -306,6 +317,7 @@ public abstract class FoldersController<T>(
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">Folder security information</returns>
     /// <path>api/2.0/files/folder/{id}/link</path>
     /// <httpMethod>GET</httpMethod>
+    [Tags("Files / Folders")]
     [HttpGet("folder/{id}/link")]
     public async Task<FileShareDto> GetPrimaryExternalLinkAsync(T id)
     {
@@ -337,6 +349,7 @@ public class FoldersControllerCommon(
     /// <path>api/2.0/files/@common</path>
     /// <httpMethod>GET</httpMethod>
     /// <visible>false</visible>
+    [Tags("Files / Folders")]
     [HttpGet("@common")]
     public async Task<FolderContentDto<int>> GetCommonFolderAsync(Guid? userIdOrGroupId, FilterType? filterType, bool? searchInContent, bool? withsubfolders)
     {
@@ -357,6 +370,7 @@ public class FoldersControllerCommon(
     /// <path>api/2.0/files/@favorites</path>
     /// <httpMethod>GET</httpMethod>
     /// <visible>false</visible>
+    [Tags("Files / Folders")]
     [HttpGet("@favorites")]
     public async Task<FolderContentDto<int>> GetFavoritesFolderAsync(Guid? userIdOrGroupId, FilterType? filterType, bool? searchInContent, bool? withsubfolders)
     {
@@ -377,6 +391,7 @@ public class FoldersControllerCommon(
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FolderContentDto, ASC.Files.Core">The "My documents" section contents</returns>
     /// <path>api/2.0/files/@my</path>
     /// <httpMethod>GET</httpMethod>
+    [Tags("Files / Folders")]
     [HttpGet("@my")]
     public async Task<FolderContentDto<int>> GetMyFolderAsync(Guid? userIdOrGroupId, FilterType? filterType, bool? searchInContent, bool? withsubfolders, ApplyFilterOption? applyFilterOption)
     {
@@ -396,6 +411,7 @@ public class FoldersControllerCommon(
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FolderContentDto, ASC.Files.Core">The "Private Room" section contents</returns>
     /// <path>api/2.0/files/@privacy</path>
     /// <httpMethod>GET</httpMethod>
+    [Tags("Files / Folders")]
     [HttpGet("@privacy")]
     public async Task<FolderContentDto<int>> GetPrivacyFolderAsync(Guid? userIdOrGroupId, FilterType? filterType, bool? searchInContent, bool? withsubfolders)
     {
@@ -421,6 +437,7 @@ public class FoldersControllerCommon(
     /// <path>api/2.0/files/@projects</path>
     /// <httpMethod>GET</httpMethod>
     /// <visible>false</visible>
+    [Tags("Files / Folders")]
     [HttpGet("@projects")]
     public async Task<FolderContentDto<string>> GetProjectsFolderAsync(Guid? userIdOrGroupId, FilterType? filterType, bool? searchInContent, bool? withsubfolders)
     {
@@ -445,6 +462,7 @@ public class FoldersControllerCommon(
     /// <path>api/2.0/files/@recent</path>
     /// <httpMethod>GET</httpMethod>
     /// <visible>false</visible>
+    [Tags("Files / Folders")]
     [HttpGet("recent")]
     public async Task<FolderContentDto<int>> GetRecentFolderAsync(Guid? userIdOrGroupId, FilterType? filterType, bool? searchInContent, bool? withsubfolders, bool? excludeSubject, 
         ApplyFilterOption? applyFilterOption, SearchArea? searchArea, string[] extension)
@@ -467,6 +485,7 @@ public class FoldersControllerCommon(
     /// <path>api/2.0/files/@root</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    [Tags("Files / Folders")]
     [HttpGet("@root")]
     public async IAsyncEnumerable<FolderContentDto<int>> GetRootFoldersAsync(Guid? userIdOrGroupId, FilterType? filterType, bool? withsubfolders, bool? withoutTrash, bool? searchInContent)
     {
@@ -491,6 +510,7 @@ public class FoldersControllerCommon(
     /// <path>api/2.0/files/@share</path>
     /// <httpMethod>GET</httpMethod>
     /// <visible>false</visible>
+    [Tags("Files / Folders")]
     [HttpGet("@share")]
     public async Task<FolderContentDto<int>> GetShareFolderAsync(Guid? userIdOrGroupId, FilterType? filterType, bool? searchInContent, bool? withsubfolders)
     {
@@ -511,6 +531,7 @@ public class FoldersControllerCommon(
     /// <path>api/2.0/files/@templates</path>
     /// <httpMethod>GET</httpMethod>
     /// <visible>false</visible>
+    [Tags("Files / Folders")]
     [HttpGet("@templates")]
     public async Task<FolderContentDto<int>> GetTemplatesFolderAsync(Guid? userIdOrGroupId, FilterType? filterType, bool? searchInContent, bool? withsubfolders)
     {
@@ -531,6 +552,7 @@ public class FoldersControllerCommon(
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FolderContentDto, ASC.Files.Core">The "Trash" section contents</returns>
     /// <path>api/2.0/files/@trash</path>
     /// <httpMethod>GET</httpMethod>
+    [Tags("Files / Folders")]
     [HttpGet("@trash")]
     public async Task<FolderContentDto<int>> GetTrashFolderAsync(Guid? userIdOrGroupId, FilterType? filterType, bool? searchInContent, bool? withsubfolders, ApplyFilterOption? applyFilterOption)
     {

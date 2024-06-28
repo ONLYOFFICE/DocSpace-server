@@ -38,6 +38,7 @@ public class WebPluginsController(ApiContext apiContext,
         IMapper mapper)
     : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
 {
+    [Tags("Settings / Webplugins")]
     [HttpPost("")]
     public async Task<WebPluginDto> AddWebPluginFromFile(bool system)
     {
@@ -66,6 +67,7 @@ public class WebPluginsController(ApiContext apiContext,
         return outDto;
     }
 
+    [Tags("Settings / Webplugins")]
     [HttpGet("")]
     public async Task<IEnumerable<WebPluginDto>> GetWebPluginsAsync(bool? enabled = null)
     {
@@ -83,6 +85,7 @@ public class WebPluginsController(ApiContext apiContext,
         return outDto;
     }
 
+    [Tags("Settings / Webplugins")]
     [HttpGet("{name}")]
     public async Task<WebPluginDto> GetWebPluginAsync(string name)
     {
@@ -95,6 +98,7 @@ public class WebPluginsController(ApiContext apiContext,
         return outDto;
     }
 
+    [Tags("Settings / Webplugins")]
     [HttpPut("{name}")]
     public async Task UpdateWebPluginAsync(string name, WebPluginRequestsDto inDto)
     {
@@ -107,6 +111,7 @@ public class WebPluginsController(ApiContext apiContext,
         await ChangeCspSettings(webPlugin, inDto.Enabled);
     }
 
+    [Tags("Settings / Webplugins")]
     [HttpDelete("{name}")]
     public async Task DeleteWebPluginAsync(string name)
     {

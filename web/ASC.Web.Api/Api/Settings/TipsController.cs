@@ -51,6 +51,7 @@ public class TipsController(ILoggerProvider option,
     /// <returns type="ASC.Web.Studio.Core.TipsSettings, ASC.Web.Core">Updated tip settings</returns>
     /// <path>api/2.0/settings/tips</path>
     /// <httpMethod>PUT</httpMethod>
+    [Tags("Settings / Tips")]
     [HttpPut("")]
     public async Task<TipsSettings> UpdateTipsSettingsAsync(SettingsRequestsDto inDto)
     {
@@ -96,6 +97,7 @@ public class TipsController(ILoggerProvider option,
     /// <returns type="System.Boolean, System">Boolean value: true if the user is subscribed to the tips</returns>
     /// <path>api/2.0/settings/tips/change/subscription</path>
     /// <httpMethod>PUT</httpMethod>
+    [Tags("Settings / Tips")]
     [HttpPut("change/subscription")]
     public async Task<bool> UpdateTipsSubscriptionAsync()
     {
@@ -110,6 +112,7 @@ public class TipsController(ILoggerProvider option,
     /// <returns type="System.Boolean, System">Boolean value: true if the user is subscribed to the tips</returns>
     /// <path>api/2.0/settings/tips/subscription</path>
     /// <httpMethod>GET</httpMethod>
+    [Tags("Settings / Tips")]
     [HttpGet("subscription")]
     public async Task<bool> GetTipsSubscriptionAsync()
     {

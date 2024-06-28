@@ -69,6 +69,7 @@ public class ThirdpartyController(
     /// <httpMethod>GET</httpMethod>
     /// <requiresAuthorization>false</requiresAuthorization>
     /// <collection>list</collection>
+    [Tags("People / Third-party accounts")]
     [AllowAnonymous, AllowNotPayment]
     [HttpGet("providers")]
     public async Task<ICollection<AccountInfoDto>> GetAuthProvidersAsync(bool inviteView, bool settingsView, string clientCallback, string fromOnly)
@@ -121,6 +122,7 @@ public class ThirdpartyController(
     /// <path>api/2.0/people/thirdparty/linkaccount</path>
     /// <httpMethod>PUT</httpMethod>
     /// <returns></returns>
+    [Tags("People / Third-party accounts")]
     [HttpPut("linkaccount")]
     public async Task LinkAccountAsync(LinkAccountRequestDto inDto)
     {
@@ -158,6 +160,7 @@ public class ThirdpartyController(
     /// <httpMethod>POST</httpMethod>
     /// <returns></returns>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("People / Third-party accounts")]
     [AllowAnonymous]
     [HttpPost("signup")]
     public async Task SignupAccountAsync(SignupAccountRequestDto inDto)
@@ -273,6 +276,7 @@ public class ThirdpartyController(
     /// <path>api/2.0/people/thirdparty/unlinkaccount</path>
     /// <httpMethod>DELETE</httpMethod>
     /// <returns></returns>
+    [Tags("People / Third-party accounts")]
     [HttpDelete("unlinkaccount")]
     public async Task UnlinkAccountAsync(string provider)
     {

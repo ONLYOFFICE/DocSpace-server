@@ -83,6 +83,7 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings</path>
     /// <httpMethod>GET</httpMethod>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Settings / Common settings")]
     [HttpGet("")]
     [AllowNotPayment, AllowSuspended, AllowAnonymous]
     public async Task<SettingsDto> GetSettingsAsync(bool? withpassword)
@@ -227,6 +228,7 @@ public partial class SettingsController(MessageService messageService,
     /// <returns type="System.Object, System">Message about the result of saving the mail domain settings</returns>
     /// <path>api/2.0/settings/maildomainsettings</path>
     /// <httpMethod>POST</httpMethod>
+    [Tags("Settings / Common settings")]
     [HttpPost("maildomainsettings")]
     public async Task<object> SaveMailDomainSettingsAsync(MailDomainSettingsRequestsDto inDto)
     {
@@ -276,6 +278,7 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/quota</path>
     /// <httpMethod>GET</httpMethod>
     /// <visible>false</visible>
+    [Tags("Settings / Quota")]
     [HttpGet("quota")]
     public async Task<QuotaUsageDto> GetQuotaUsed()
     {
@@ -294,6 +297,7 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/userquotasettings</path>
     /// <httpMethod>POST</httpMethod>
     /// <visible>false</visible>
+    [Tags("Settings / Quota")]
     [HttpPost("userquotasettings")]
     public async Task<TenantUserQuotaSettings> SaveUserQuotaSettingsAsync(QuotaSettingsRequestsDto inDto)
     {
@@ -333,6 +337,7 @@ public partial class SettingsController(MessageService messageService,
         return quotaSettings;
     }
 
+    [Tags("Settings / Quota")]
     [HttpGet("userquotasettings")]
     public async Task<object> GetUserQuotaSettings()
     {
@@ -352,6 +357,7 @@ public partial class SettingsController(MessageService messageService,
     /// <returns type="ASC.Core.Tenants.TenantRoomQuotaSettings, ASC.Core.Common">Tenant room quota settings</returns>
     /// <path>api/2.0/settings/roomquotasettings</path>
     /// <httpMethod>POST</httpMethod>
+    [Tags("Settings / Quota")]
     [HttpPost("roomquotasettings")]
     public async Task<TenantRoomQuotaSettings> SaveRoomQuotaSettingsAsync(QuotaSettingsRequestsDto inDto)
     {
@@ -402,6 +408,7 @@ public partial class SettingsController(MessageService messageService,
     /// <returns type="ASC.Core.Tenants.TenantQuotaSettings, ASC.Core.Common">Tenant quota settings</returns>
     /// <path>api/2.0/settings/tenantquotasettings</path>
     /// <httpMethod>PUT</httpMethod>
+    [Tags("Settings / Quota")]
     [HttpPut("tenantquotasettings")]
     public async Task<TenantQuotaSettings> SetTenantQuotaSettingsAsync(TenantQuotaSettingsRequestsDto inDto)
     {
@@ -445,6 +452,7 @@ public partial class SettingsController(MessageService messageService,
     /// <httpMethod>GET</httpMethod>
     /// <requiresAuthorization>false</requiresAuthorization>
     /// <collection>list</collection>
+    [Tags("Settings / Common settings")]
     [AllowAnonymous]
     [AllowNotPayment]
     [HttpGet("cultures")]
@@ -462,6 +470,7 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/timezones</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    [Tags("Settings / Common settings")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Wizard,Administrators")]
     [HttpGet("timezones")]
     [AllowNotPayment]
@@ -497,6 +506,7 @@ public partial class SettingsController(MessageService messageService,
     /// <returns type="System.Object, System">Portal hostname</returns>
     /// <path>api/2.0/settings/machine</path>
     /// <httpMethod>GET</httpMethod>
+    [Tags("Settings / Common settings")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Wizard")]
     [HttpGet("machine")]
     [AllowNotPayment]
@@ -514,6 +524,7 @@ public partial class SettingsController(MessageService messageService,
     /// <returns type="System.Object, System">Message about changing DNS</returns>
     /// <path>api/2.0/settings/dns</path>
     /// <httpMethod>PUT</httpMethod>
+    [Tags("Settings / Common settings")]
     [HttpPut("dns")]
     public async Task<object> SaveDnsSettingsAsync(DnsSettingsRequestsDto inDto)
     {
@@ -531,6 +542,7 @@ public partial class SettingsController(MessageService messageService,
     /// <httpMethod>GET</httpMethod>
     /// <returns></returns>
     /// <visible>false</visible>
+    [Tags("Settings / Quota")]
     [HttpGet("recalculatequota")]
     public async Task RecalculateQuotaAsync()
     {
@@ -550,6 +562,7 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/checkrecalculatequota</path>
     /// <httpMethod>GET</httpMethod>
     /// <visible>false</visible>
+    [Tags("Settings / Quota")]
     [HttpGet("checkrecalculatequota")]
     public async Task<bool> CheckRecalculateQuotaAsync()
     {
@@ -569,6 +582,7 @@ public partial class SettingsController(MessageService messageService,
     /// <returns type="System.Object, System">Portal logo image URL</returns>
     /// <path>api/2.0/settings/logo</path>
     /// <httpMethod>GET</httpMethod>
+    [Tags("Settings / Common settings")]
     [HttpGet("logo")]
     public async Task<object> GetLogoAsync()
     {
@@ -584,6 +598,7 @@ public partial class SettingsController(MessageService messageService,
     /// <returns type="ASC.Web.Core.Utility.Settings.WizardSettings, ASC.Web.Core">Wizard settings</returns>
     /// <path>api/2.0/settings/wizard/complete</path>
     /// <httpMethod>PUT</httpMethod>
+    [Tags("Settings / Common settings")]
     [AllowNotPayment]
     [HttpPut("wizard/complete")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Wizard")]
@@ -605,6 +620,7 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/welcome/close</path>
     /// <httpMethod>PUT</httpMethod>
     ///<visible>false</visible>
+    [Tags("Settings / Common settings")]
     [HttpPut("welcome/close")]
     public async Task CloseWelcomePopupAsync()
     {
@@ -630,6 +646,7 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/colortheme</path>
     /// <httpMethod>GET</httpMethod>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Settings / Common settings")]
     [AllowAnonymous, AllowNotPayment, AllowSuspended]
     [HttpGet("colortheme")]
     public async Task<CustomColorThemesSettingsDto> GetColorThemeAsync()
@@ -646,6 +663,7 @@ public partial class SettingsController(MessageService messageService,
     /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.CustomColorThemesSettingsDto, ASC.Web.Api">Portal theme settings</returns>
     /// <path>api/2.0/settings/colortheme</path>
     /// <httpMethod>PUT</httpMethod>
+    [Tags("Settings / Common settings")]
     [HttpPut("colortheme")]
     public async Task<CustomColorThemesSettingsDto> SaveColorThemeAsync(CustomColorThemesSettingsRequestsDto inDto)
     {
@@ -720,6 +738,7 @@ public partial class SettingsController(MessageService messageService,
     /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.CustomColorThemesSettingsDto, ASC.Web.Api">Portal theme settings: custom color theme settings, selected or not, limit</returns>
     /// <path>api/2.0/settings/colortheme</path>
     /// <httpMethod>DELETE</httpMethod>
+    [Tags("Settings / Common settings")]
     [HttpDelete("colortheme")]
     public async Task<CustomColorThemesSettingsDto> DeleteColorThemeAsync(int id)
     {
@@ -753,6 +772,7 @@ public partial class SettingsController(MessageService messageService,
     /// <returns></returns>
     /// <path>api/2.0/settings/closeadminhelper</path>
     /// <httpMethod>PUT</httpMethod>
+    [Tags("Settings / Common settings")]
     [HttpPut("closeadminhelper")]
     public async Task CloseAdminHelperAsync()
     {
@@ -776,6 +796,7 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/timeandlanguage</path>
     /// <httpMethod>PUT</httpMethod>
     ///<visible>false</visible>
+    [Tags("Settings / Common settings")]
     [HttpPut("timeandlanguage")]
     public async Task<object> TimaAndLanguageAsync(SettingsRequestsDto inDto)
     {
@@ -826,6 +847,7 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/defaultpage</path>
     /// <httpMethod>PUT</httpMethod>
     ///<visible>false</visible>
+    [Tags("Settings / Common settings")]
     [HttpPut("defaultpage")]
     public async Task<object> SaveDefaultPageSettingAsync(SettingsRequestsDto inDto)
     {
@@ -847,6 +869,7 @@ public partial class SettingsController(MessageService messageService,
     /// <returns type="ASC.Web.Studio.Core.EmailActivationSettings, ASC.Web.Studio.Core">Updated email activation settings</returns>
     /// <path>api/2.0/settings/emailactivation</path>
     /// <httpMethod>PUT</httpMethod>
+    [Tags("Settings / Common settings")]
     [HttpPut("emailactivation")]
     public async Task<EmailActivationSettings> UpdateEmailActivationSettingsAsync(EmailActivationSettings inDto)
     {
@@ -864,6 +887,7 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/statistics/spaceusage/{id}</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    [Tags("Settings / Statistics")]
     [HttpGet("statistics/spaceusage/{id:guid}")]
     public async Task<List<UsageSpaceStatItemDto>> GetSpaceUsageStatistics(Guid id)
     {
@@ -903,6 +927,7 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/statistics/visit</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    [Tags("Settings / Statistics")]
     [HttpGet("statistics/visit")]
     public async Task<List<ChartPointDto>> GetVisitStatisticsAsync(ApiDateTime fromDate, ApiDateTime toDate)
     {
@@ -966,6 +991,7 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/socket</path>
     /// <httpMethod>GET</httpMethod>
     /// <returns type="System.Object, System">Socket settings: hub URL</returns>
+    [Tags("Settings / Common settings")]
     [HttpGet("socket")]
     public object GetSocketSettings()
     {
@@ -1005,6 +1031,7 @@ public partial class SettingsController(MessageService messageService,
     /// <httpMethod>GET</httpMethod>
     /// <returns type="ASC.Web.Api.ApiModel.RequestsDto.AuthServiceRequestsDto, ASC.Web.Api">Authorization services</returns>
     /// <collection>list</collection>
+    [Tags("Settings / Authorization")]
     [HttpGet("authservice")]
     public async Task<IEnumerable<AuthServiceRequestsDto>> GetAuthServices()
     {
@@ -1027,6 +1054,7 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/authservice</path>
     /// <httpMethod>POST</httpMethod>
     /// <returns type="System.Boolean, System">Boolean value: true if the authorization keys are changed</returns>
+    [Tags("Settings / Authorization")]
     [HttpPost("authservice")]
     public async Task<bool> SaveAuthKeys(AuthServiceRequestsDto inDto)
     {
@@ -1088,6 +1116,7 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/payment</path>
     /// <httpMethod>GET</httpMethod>
     /// <returns type="System.Object, System">Payment settings: sales email, feedback and support URL, link to pay for a portal, Standalone or not, current license, maximum quota quantity</returns>
+    [Tags("Settings / Common settings")]
     [AllowNotPayment]
     [HttpGet("payment")]
     public async Task<object> PaymentSettingsAsync()
@@ -1126,6 +1155,7 @@ public partial class SettingsController(MessageService messageService,
     /// <httpMethod>GET</httpMethod>
     /// <returns type="System.Object, System">Telegram link</returns>
     /// <visible>false</visible>
+    [Tags("Settings / Telegram")]
     [HttpGet("telegramlink")]
     public async Task<object> TelegramLink()
     {
@@ -1150,6 +1180,7 @@ public partial class SettingsController(MessageService messageService,
     /// <httpMethod>GET</httpMethod>
     /// <returns type="System.Object, System">Operation result: 0 - not connected, 1 - connected, 2 - awaiting confirmation</returns>
     /// <visible>false</visible>
+    [Tags("Settings / Telegram")]
     [HttpGet("telegramisconnected")]
     public async Task<object> TelegramIsConnectedAsync()
     {
@@ -1166,6 +1197,7 @@ public partial class SettingsController(MessageService messageService,
     /// <httpMethod>DELETE</httpMethod>
     /// <returns></returns>
     /// <visible>false</visible>
+    [Tags("Settings / Telegram")]
     [HttpDelete("telegramdisconnect")]
     public async Task TelegramDisconnectAsync()
     {

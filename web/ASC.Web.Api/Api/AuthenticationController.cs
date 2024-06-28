@@ -38,6 +38,7 @@ namespace ASC.Web.Api.Controllers;
 [ApiController]
 [AllowAnonymous]
 [WebhookDisable]
+[ControllerName("authentication")]
 public class AuthenticationController(
     UserManager userManager,
     LdapUserManager ldapUserManager,
@@ -83,6 +84,7 @@ public class AuthenticationController(
     /// <path>api/2.0/authentication</path>
     /// <returns type="System.Boolean, System">Boolean value: true if the current user is authenticated</returns>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Authentication")]
     [AllowNotPayment]
     [HttpGet]
     public bool GetIsAuthentificated()
@@ -101,6 +103,7 @@ public class AuthenticationController(
     /// <path>api/2.0/authentication/{code}</path>
     /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.AuthenticationTokenDto, ASC.Web.Api">Authentication data</returns>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Authentication")]
     [AllowNotPayment]
     [HttpPost("{code}", Order = 1)]
     public async Task<AuthenticationTokenDto> AuthenticateMeFromBodyWithCode(AuthRequestsDto inDto)
@@ -175,6 +178,7 @@ public class AuthenticationController(
     /// <path>api/2.0/authentication</path>
     /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.AuthenticationTokenDto, ASC.Web.Api">Authentication data</returns>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Authentication")]
     [AllowNotPayment]
     [HttpPost]
     public async Task<AuthenticationTokenDto> AuthenticateMeAsync(AuthRequestsDto inDto)
@@ -287,6 +291,7 @@ public class AuthenticationController(
     /// <path>api/2.0/authentication/logout</path>
     /// <returns></returns>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Authentication")]
     [AllowNotPayment]
     [HttpPost("logout")]
     [HttpGet("logout")]// temp fix
@@ -337,6 +342,7 @@ public class AuthenticationController(
     /// <path>api/2.0/authentication/confirm</path>
     /// <returns type="ASC.Security.Cryptography.EmailValidationKeyProvider.ValidationResult, ASC.Security.Cryptography">Validation result: Ok, Invalid, or Expired</returns>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Authentication")]
     [AllowNotPayment, AllowSuspended]
     [HttpPost("confirm")]
     public async Task<ConfirmDto> CheckConfirm(EmailValidationKeyModel inDto)
@@ -367,6 +373,7 @@ public class AuthenticationController(
     /// <path>api/2.0/authentication/setphone</path>
     /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.AuthenticationTokenDto, ASC.Web.Api">Authentication data</returns>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Authentication")]
     [AllowNotPayment]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PhoneActivation")]
     [HttpPost("setphone")]
@@ -396,6 +403,7 @@ public class AuthenticationController(
     /// <path>api/2.0/authentication/sendsms</path>
     /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.AuthenticationTokenDto, ASC.Web.Api">Authentication data</returns>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Authentication")]
     [AllowNotPayment]
     [HttpPost("sendsms")]
     public async Task<AuthenticationTokenDto> SendSmsCodeAsync(AuthRequestsDto inDto)

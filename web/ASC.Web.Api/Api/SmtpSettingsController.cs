@@ -32,6 +32,7 @@ namespace ASC.Api.Settings;
 [Scope]
 [ApiController]
 [DefaultRoute("smtp")]
+[ControllerName("smtpsettings")]
 public class SmtpSettingsController(
         PermissionContext permissionContext,
         CoreConfiguration coreConfiguration,
@@ -52,6 +53,7 @@ public class SmtpSettingsController(
     /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.SmtpSettingsDto, ASC.Web.Api">SMTP settings</returns>
     /// <path>api/2.0/smtpsettings/smtp</path>
     /// <httpMethod>GET</httpMethod>
+    [Tags("Security / SMTP settings")]
     [HttpGet("")]
     public async Task<SmtpSettingsDto> GetSmtpSettingsAsync()
     {
@@ -81,6 +83,7 @@ public class SmtpSettingsController(
     /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.SmtpSettingsDto, ASC.Web.Api">SMTP settings</returns>
     /// <path>api/2.0/smtpsettings/smtp</path>
     /// <httpMethod>POST</httpMethod>
+    [Tags("Security / SMTP settings")]
     [HttpPost("")]
     public async Task<SmtpSettingsDto> SaveSmtpSettingsAsync(SmtpSettingsDto inDto)
     {
@@ -132,6 +135,7 @@ public class SmtpSettingsController(
     /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.SmtpSettingsDto, ASC.Web.Api">Default SMTP settings</returns>
     /// <path>api/2.0/smtpsettings/smtp</path>
     /// <httpMethod>DELETE</httpMethod>
+    [Tags("Security / SMTP settings")]
     [HttpDelete("")]
     public async Task<SmtpSettingsDto> ResetSmtpSettingsAsync()
     {
@@ -165,6 +169,7 @@ public class SmtpSettingsController(
     // <returns type="ASC.Api.Settings.Smtp.SmtpOperationStatusRequestsDto, ASC.Web.Api">SMTP operation status</returns>
     // <path>api/2.0/smtpsettings/smtp/test</path>
     // <httpMethod>GET</httpMethod>
+    [Tags("Security / SMTP settings")]
     [HttpGet("test")]
     public async Task<SmtpOperationStatusRequestsDto> TestSmtpSettings()
     {
@@ -189,6 +194,7 @@ public class SmtpSettingsController(
     // <returns type="ASC.Api.Settings.Smtp.SmtpOperationStatusRequestsDto, ASC.Web.Api">SMTP operation status</returns>
     // <path>api/2.0/smtpsettings/smtp/test/status</path>
     // <httpMethod>GET</httpMethod>
+    [Tags("Security / SMTP settings")]
     [HttpGet("test/status")]
     public async Task<SmtpOperationStatusRequestsDto> GetSmtpOperationStatus()
     {

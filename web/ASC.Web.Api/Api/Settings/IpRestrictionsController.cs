@@ -46,6 +46,7 @@ public class IpRestrictionsController(ApiContext apiContext,
     /// <path>api/2.0/settings/iprestrictions</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    [Tags("Settings / IP restrictions")]
     [HttpGet("")]
     public async Task<IEnumerable<IPRestriction>> GetIpRestrictionsAsync()
     {
@@ -64,6 +65,7 @@ public class IpRestrictionsController(ApiContext apiContext,
     /// <path>api/2.0/settings/iprestrictions</path>
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
+    [Tags("Settings / IP restrictions")]
     [HttpPut("")]
     public async Task<IEnumerable<IpRestrictionBase>> SaveIpRestrictionsAsync(IpRestrictionsRequestsDto inDto)
     {
@@ -86,6 +88,7 @@ public class IpRestrictionsController(ApiContext apiContext,
     /// <returns type="ASC.IPSecurity.IPRestrictionsSettings, ASC.IPSecurity">IP restriction settings</returns>
     /// <path>api/2.0/settings/iprestrictions/settings</path>
     /// <httpMethod>GET</httpMethod>
+    [Tags("Settings / IP restrictions")]
     [HttpGet("settings")]
     public async Task<IPRestrictionsSettings> ReadIpRestrictionsSettingsAsync()
     {
@@ -103,6 +106,7 @@ public class IpRestrictionsController(ApiContext apiContext,
     /// <returns type="ASC.IPSecurity.IPRestrictionsSettings, ASC.IPSecurity">Updated IP restriction settings</returns>
     /// <path>api/2.0/settings/iprestrictions/settings</path>
     /// <httpMethod>PUT</httpMethod>
+    [Tags("Settings / IP restrictions")]
     [HttpPut("settings")]
     public async Task<IPRestrictionsSettings> UpdateIpRestrictionsSettingsAsync(IpRestrictionsRequestsDto inDto)
     {

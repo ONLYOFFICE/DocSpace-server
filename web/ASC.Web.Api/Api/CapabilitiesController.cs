@@ -33,6 +33,7 @@ namespace ASC.Web.Api.Controllers;
 [DefaultRoute, Route("api/2.0/capabilities.json")]
 [ApiController]
 [AllowAnonymous]
+[ControllerName("capabilities")]
 public class CapabilitiesController(CoreBaseSettings coreBaseSettings,
         TenantManager tenantManager,
         ProviderManager providerManager,
@@ -54,6 +55,7 @@ public class CapabilitiesController(CoreBaseSettings coreBaseSettings,
     ///<path>api/2.0/capabilities</path>
     ///<httpMethod>GET</httpMethod>
     ///<requiresAuthorization>false</requiresAuthorization>
+    [Tags("Capabilities")]
     [HttpGet] //NOTE: this method doesn't requires auth!!!  //NOTE: this method doesn't check payment!!!
     [AllowNotPayment]
     public async Task<CapabilitiesDto> GetPortalCapabilitiesAsync()

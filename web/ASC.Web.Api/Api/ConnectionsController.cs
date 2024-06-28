@@ -60,6 +60,7 @@ public class ConnectionsController(
     /// <returns type="System.Object, System">Active portal connections</returns>
     /// <path>api/2.0/security/activeconnections</path>
     /// <httpMethod>GET</httpMethod>
+    [Tags("Security / Active connections")]
     [HttpGet("")]
     public async Task<ActiveConnectionsDto> GetAllActiveConnections()
     {
@@ -150,6 +151,7 @@ public class ConnectionsController(
     /// <returns type="System.Object, System">URL to the confirmation message for changing a password</returns>
     /// <path>api/2.0/security/activeconnections/logoutallchangepassword</path>
     /// <httpMethod>PUT</httpMethod>
+    [Tags("Security / Active connections")]
     [HttpPut("logoutallchangepassword")]
     public async Task<object> LogOutAllActiveConnectionsChangePassword()
     {
@@ -190,6 +192,7 @@ public class ConnectionsController(
     /// <path>api/2.0/security/activeconnections/logoutall/{userId}</path>
     /// <httpMethod>PUT</httpMethod>
     /// <returns></returns>
+    [Tags("Security / Active connections")]
     [HttpPut("logoutall/{userId:guid}")]
     public async Task LogOutAllActiveConnectionsForUserAsync(Guid userId)
     {
@@ -214,6 +217,7 @@ public class ConnectionsController(
     /// <returns type="System.Object, System">Current user name</returns>
     /// <path>api/2.0/security/activeconnections/logoutallexceptthis</path>
     /// <httpMethod>PUT</httpMethod>
+    [Tags("Security / Active connections")]
     [HttpPut("logoutallexceptthis")]
     public async Task<object> LogOutAllExceptThisConnection()
     {
@@ -246,6 +250,7 @@ public class ConnectionsController(
     /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
     /// <path>api/2.0/security/activeconnections/logout/{loginEventId}</path>
     /// <httpMethod>PUT</httpMethod>
+    [Tags("Security / Active connections")]
     [HttpPut("logout/{loginEventId:int}")]
     public async Task<bool> LogOutActiveConnection(int loginEventId)
     {

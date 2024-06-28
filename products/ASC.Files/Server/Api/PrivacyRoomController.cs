@@ -58,6 +58,7 @@ public abstract class PrivacyRoomController<T>(SettingsManager settingsManager,
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     /// <visible>false</visible>
+    [Tags("Files / Private room")]
     [HttpGet("access/{fileId}")]
     public async Task<IEnumerable<EncryptionKeyPairDto>> GetPublicKeysWithAccess(T fileId)
     {
@@ -92,6 +93,7 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
     /// <path>api/2.0/privacyroom/keys</path>
     /// <httpMethod>GET</httpMethod>
     /// <visible>false</visible>
+    [Tags("Files / Private room")]
     [HttpGet("keys")]
     public async Task<EncryptionKeyPairDto> GetKeysAsync()
     {
@@ -114,6 +116,7 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
     /// <path>api/2.0/privacyroom</path>
     /// <httpMethod>GET</httpMethod>
     /// <visible>false</visible>
+    [Tags("Files / Private room")]
     [HttpGet("")]
     public async Task<bool> PrivacyRoomAsync()
     {
@@ -131,6 +134,7 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
     /// <path>api/2.0/privacyroom/keys</path>
     /// <httpMethod>PUT</httpMethod>
     /// <visible>false</visible>
+    [Tags("Files / Private room")]
     [HttpPut("keys")]
     public async Task<object> SetKeysAsync(PrivacyRoomRequestDto inDto)
     {
@@ -169,6 +173,7 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
     /// <path>api/2.0/privacyroom</path>
     /// <httpMethod>PUT</httpMethod>
     /// <visible>false</visible>
+    [Tags("Files / Private room")]
     [HttpPut("")]
     public async Task<bool> SetPrivacyRoomAsync(PrivacyRoomRequestDto inDto)
     {

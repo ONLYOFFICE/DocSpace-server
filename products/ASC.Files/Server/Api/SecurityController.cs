@@ -68,6 +68,7 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     /// <visible>false</visible>
+    [Tags("Files / Sharing")]
     [HttpGet("file/{fileId}/share")]
     public async IAsyncEnumerable<FileShareDto> GetFileSecurityInfoAsync(T fileId)
     {
@@ -88,6 +89,7 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     /// <visible>false</visible>
+    [Tags("Files / Sharing")]
     [HttpGet("folder/{folderId}/share")]
     public async IAsyncEnumerable<FileShareDto> GetFolderSecurityInfoAsync(T folderId)
     {
@@ -109,6 +111,7 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
     /// <visible>false</visible>
+    [Tags("Files / Sharing")]
     [HttpPut("file/{fileId}/share")]
     public async IAsyncEnumerable<FileShareDto> SetFileSecurityInfoAsync(T fileId, SecurityInfoRequestDto inDto)
     {
@@ -130,6 +133,7 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
     /// <visible>false</visible>
+    [Tags("Files / Sharing")]
     [HttpPut("folder/{folderId}/share")]
     public async IAsyncEnumerable<FileShareDto> SetFolderSecurityInfoAsync(T folderId, SecurityInfoRequestDto inDto)
     {
@@ -150,6 +154,7 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     /// <visible>false</visible>
+    [Tags("Files / Sharing")]
     [HttpGet("file/{fileId}/publickeys")]
     public async Task<List<EncryptionKeyPairDto>> GetEncryptionAccess(T fileId)
     {
@@ -168,12 +173,14 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// <httpMethod>POST</httpMethod>
     /// <collection>list</collection>
     /// <visible>false</visible>
+    [Tags("Files / Sharing")]
     [HttpPost("file/{fileId}/sendeditornotify")]
     public async Task<List<AceShortWrapper>> SendEditorNotify(T fileId, MentionMessageWrapper mentionMessage)
     {
         return await fileStorageService.SendEditorNotifyAsync(fileId, mentionMessage);
     }
-    
+
+    [Tags("Files / Sharing")]
     [HttpGet("folder/{folderId}/group/{groupId:guid}/share")]
     public async IAsyncEnumerable<GroupMemberSecurityDto> GetGroupsMembersWithFolderSecurityAsync(T folderId, Guid groupId)
     {
@@ -221,6 +228,7 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// <httpMethod>POST</httpMethod>
     /// <collection>list</collection>
     /// <visible>false</visible>
+    [Tags("Files / Sharing")]
     [HttpPost("owner")]
     public async IAsyncEnumerable<FileEntryDto> ChangeOwnerAsync(ChangeOwnerRequestDto inDto)
     {
@@ -248,6 +256,7 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// <httpMethod>POST</httpMethod>
     /// <collection>list</collection>
     /// <visible>false</visible>
+    [Tags("Files / Sharing")]
     [HttpPost("share")]
     public async IAsyncEnumerable<FileShareDto> GetSecurityInfoAsync(BaseBatchRequestDto inDto)
     {
@@ -273,6 +282,7 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// <path>api/2.0/files/share</path>
     /// <httpMethod>DELETE</httpMethod>
     /// <visible>false</visible>
+    [Tags("Files / Sharing")]
     [HttpDelete("share")]
     public async Task<bool> RemoveSecurityInfoAsync(BaseBatchRequestDto inDto)
     {
@@ -297,6 +307,7 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
     /// <visible>false</visible>
+    [Tags("Files / Sharing")]
     [HttpPut("share")]
     public async IAsyncEnumerable<FileShareDto> SetSecurityInfoAsync(SecurityInfoRequestDto inDto)
     {
@@ -323,6 +334,7 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// <httpMethod>GET</httpMethod>
     /// <visible>false</visible>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Files / Sharing")]
     [AllowAnonymous]
     [HttpGet("share/{key}")]
     public async Task<ExternalShareDto> GetExternalShareDataAsync(string key)
@@ -344,6 +356,7 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// <httpMethod>POST</httpMethod>
     /// <visible>false</visible>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Files / Sharing")]
     [AllowAnonymous]
     [HttpPost("share/{key}/password")]
     public async Task<ExternalShareDto> ApplyExternalSharePasswordAsync(string key, ExternalShareRequestDto inDto)

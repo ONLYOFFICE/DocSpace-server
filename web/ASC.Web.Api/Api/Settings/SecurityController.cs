@@ -62,6 +62,7 @@ public class SecurityController(
     /// <path>api/2.0/settings/security</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    [Tags("Settings / Security")]
     [HttpGet("")]
     public async IAsyncEnumerable<SecurityDto> GetWebItemSecurityInfo([FromQuery] IEnumerable<string> ids)
     {
@@ -110,6 +111,7 @@ public class SecurityController(
     /// <returns type="System.Boolean, System">Boolean value: true - module is enabled, false - module is disabled</returns>
     /// <path>api/2.0/settings/security/{id}</path>
     /// <httpMethod>GET</httpMethod>
+    [Tags("Settings / Security")]
     [HttpGet("{id:guid}")]
     public async Task<bool> GetWebItemSecurityInfoAsync(Guid id)
     {
@@ -128,6 +130,7 @@ public class SecurityController(
     /// <returns type="System.Object, System">List of enabled modules</returns>
     /// <path>api/2.0/settings/security/modules</path>
     /// <httpMethod>GET</httpMethod>
+    [Tags("Settings / Security")]
     [HttpGet("modules")]
     public object GetEnabledModules()
     {
@@ -148,6 +151,7 @@ public class SecurityController(
     /// <returns type="ASC.Web.Core.Utility.PasswordSettings, ASC.Web.Core">Password settings</returns>
     /// <path>api/2.0/settings/security/password</path>
     /// <httpMethod>GET</httpMethod>
+    [Tags("Settings / Security")]
     [HttpGet("password")]
     [AllowNotPayment]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Everyone")]
@@ -168,6 +172,7 @@ public class SecurityController(
     /// <returns type="ASC.Web.Core.Utility.PasswordSettings, ASC.Web.Core">Password settings</returns>
     /// <path>api/2.0/settings/security/password</path>
     /// <httpMethod>PUT</httpMethod>
+    [Tags("Settings / Security")]
     [HttpPut("password")]
     public async Task<PasswordSettingsDto> UpdatePasswordSettingsAsync(PasswordSettingsRequestsDto inDto)
     {
@@ -204,6 +209,7 @@ public class SecurityController(
     /// <httpMethod>PUT</httpMethod>
     /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.SecurityDto, ASC.Web.Api">Security settings</returns>
     /// <collection>list</collection>
+    [Tags("Settings / Security")]
     [HttpPut("")]
     public async Task<IEnumerable<SecurityDto>> SetWebItemSecurity(WebItemSecurityRequestsDto inDto)
     {
@@ -256,6 +262,7 @@ public class SecurityController(
     /// <httpMethod>PUT</httpMethod>
     /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.SecurityDto, ASC.Web.Api">Security settings</returns>
     /// <collection>list</collection>
+    [Tags("Settings / Security")]
     [HttpPut("access")]
     public async Task<IEnumerable<SecurityDto>> SetAccessToWebItems(WebItemSecurityRequestsDto inDto)
     {
@@ -314,6 +321,7 @@ public class SecurityController(
     /// <path>api/2.0/settings/security/administrator/{productid}</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    [Tags("Settings / Security")]
     [HttpGet("administrator/{productid:guid}")]
     public async IAsyncEnumerable<EmployeeDto> GetProductAdministrators(Guid productid)
     {
@@ -337,6 +345,7 @@ public class SecurityController(
     /// <returns type="System.Object, System">Object with the user security information: product ID, user ID, administrator or not</returns>
     /// <path>api/2.0/settings/security/administrator</path>
     /// <httpMethod>GET</httpMethod>
+    [Tags("Settings / Security")]
     [HttpGet("administrator")]
     public async Task<object> IsProductAdministratorAsync(Guid productid, Guid userid)
     {
@@ -355,6 +364,7 @@ public class SecurityController(
     /// <returns type="System.Object, System">Object with the user security information: product ID, user ID, administrator or not</returns>
     /// <path>api/2.0/settings/security/administrator</path>
     /// <httpMethod>PUT</httpMethod>
+    [Tags("Settings / Security")]
     [HttpPut("administrator")]
     public async Task<object> SetProductAdministrator(SecurityRequestsDto inDto)
     {
@@ -402,6 +412,7 @@ public class SecurityController(
     /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.LoginSettingsDto, ASC.Web.Api">Updated login settings</returns>
     /// <path>api/2.0/settings/security/loginsettings</path>
     /// <httpMethod>PUT</httpMethod>
+    [Tags("Settings / Login settings")]
     [HttpPut("loginSettings")]
     public async Task<LoginSettingsDto> UpdateLoginSettingsAsync(LoginSettingsRequestDto inDto)
     {
@@ -429,6 +440,7 @@ public class SecurityController(
     /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.LoginSettingsDto, ASC.Web.Api">Login settings</returns>
     /// <path>api/2.0/settings/security/loginsettings</path>
     /// <httpMethod>GET</httpMethod>
+    [Tags("Settings / Login settings")]
     [HttpGet("loginSettings")]
     public async Task<LoginSettingsDto> GetLoginSettingsAsync()
     {

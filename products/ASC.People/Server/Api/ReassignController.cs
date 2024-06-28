@@ -46,6 +46,7 @@ public class ReassignController(
     /// <returns type="ASC.People.ApiModels.ResponseDto.TaskProgressResponseDto, ASC.People">Reassignment progress</returns>
     /// <path>api/2.0/people/reassign/progress/{userid}</path>
     /// <httpMethod>GET</httpMethod>
+    [Tags("People / User data")]
     [HttpGet("progress/{userid:guid}")]
     public async Task<TaskProgressResponseDto> GetReassignProgressAsync(Guid userId)
     {
@@ -66,6 +67,7 @@ public class ReassignController(
     /// <returns type="ASC.People.ApiModels.ResponseDto.TaskProgressResponseDto, ASC.People">Reassignment progress</returns>
     /// <path>api/2.0/people/reassign/start</path>
     /// <httpMethod>POST</httpMethod>
+    [Tags("People / User data")]
     [HttpPost("start")]
     public async Task<TaskProgressResponseDto> StartReassignAsync(StartReassignRequestDto inDto)
     {
@@ -107,6 +109,7 @@ public class ReassignController(
     /// <path>api/2.0/people/reassign/terminate</path>
     /// <httpMethod>PUT</httpMethod>
     /// <returns></returns>
+    [Tags("People / User data")]
     [HttpPut("terminate")]
     public async Task<TaskProgressResponseDto> TerminateReassignAsync(TerminateRequestDto inDto)
     {

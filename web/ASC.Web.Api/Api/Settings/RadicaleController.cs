@@ -53,6 +53,7 @@ public class RadicaleController(RadicaleClient radicaleClient,
     /// <path>api/2.0/settings/carddavurl</path>
     /// <httpMethod>GET</httpMethod>
     /// <visible>false</visible>
+    [Tags("Settings / CardDav address book")]
     [HttpGet("carddavurl")]
     public async Task<DavResponse> GetCardDavUrl()
     {
@@ -125,6 +126,7 @@ public class RadicaleController(RadicaleClient radicaleClient,
     /// <path>api/2.0/settings/deletebook</path>
     /// <httpMethod>DELETE</httpMethod>
     /// <visible>false</visible>
+    [Tags("Settings / CardDav address book")]
     [HttpDelete("deletebook")]
     public async Task<DavResponse> DeleteCardDavAddressBook()
     {

@@ -53,6 +53,7 @@ public abstract class MasterFormController<T>(FileStorageService fileStorageServ
     /// <path>api/2.0/files/masterform/{fileId}/checkfillformdraft</path>
     /// <httpMethod>POST</httpMethod>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Files / Files")]
     [AllowAnonymous]
     [HttpPost("masterform/{fileId}/checkfillformdraft")]
     public async Task<object> CheckFillFormDraftAsync(T fileId, CheckFillFormDraftRequestDto inDto)

@@ -47,6 +47,7 @@ public class ContactsController(UserManager userManager,
     /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Web.Api">Deleted user profile with the detailed information</returns>
     /// <path>api/2.0/people/{userid}/contacts</path>
     /// <httpMethod>DELETE</httpMethod>
+    [Tags("People / Contacts")]
     [HttpDelete("{userid}/contacts")]
     public async Task<EmployeeFullDto> DeleteMemberContacts(string userid, UpdateMemberRequestDto inDto)
     {
@@ -75,6 +76,7 @@ public class ContactsController(UserManager userManager,
     /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Web.Api">Updated user profile with the detailed information</returns>
     /// <path>api/2.0/people/{userid}/contacts</path>
     /// <httpMethod>POST</httpMethod>
+    [Tags("People / Contacts")]
     [HttpPost("{userid}/contacts")]
     public async Task<EmployeeFullDto> SetMemberContacts(string userid, UpdateMemberRequestDto inDto)
     {
@@ -104,6 +106,7 @@ public class ContactsController(UserManager userManager,
     /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Web.Api">Updated user profile with the detailed information</returns>
     /// <path>api/2.0/people/{userid}/contacts</path>
     /// <httpMethod>PUT</httpMethod>
+    [Tags("People / Contacts")]
     [HttpPut("{userid}/contacts")]
     public async Task<EmployeeFullDto> UpdateMemberContacts(string userid, UpdateMemberRequestDto inDto)
     {

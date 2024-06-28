@@ -34,6 +34,7 @@ namespace ASC.Web.Api.Controllers;
 [Scope]
 [DefaultRoute]
 [ApiController]
+[ControllerName("thirdparty")]
 public class ThirdPartyController(OAuth20TokenHelper oAuth20TokenHelper) : ControllerBase
 {
     /// <summary>
@@ -45,6 +46,7 @@ public class ThirdPartyController(OAuth20TokenHelper oAuth20TokenHelper) : Contr
     /// <remarks>List of providers: Google, Dropbox, Docusign, Box, OneDrive, Wordpress.</remarks>
     /// <path>api/2.0/thirdparty/{provider}</path>
     /// <httpMethod>GET</httpMethod>
+    [Tags("ThirdParty")]
     [HttpGet("{provider}")]
     public object Get(LoginProvider provider)
     {
@@ -89,6 +91,7 @@ public class ThirdPartyController(OAuth20TokenHelper oAuth20TokenHelper) : Contr
     /// <returns type="System.Object, System">Confirmation code</returns>
     /// <path>api/2.0/thirdparty/{provider}/code</path>
     /// <httpMethod>GET</httpMethod>
+    [Tags("ThirdParty")]
     [HttpGet("{provider}/code")]
     public object GetCode(string redirect, string code, string error)
     {

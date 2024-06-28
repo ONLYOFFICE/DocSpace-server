@@ -55,6 +55,7 @@ public class MessageSettingsController(MessageService messageService,
     /// <returns type="System.Object, System">Message about the result of saving new settings</returns>
     /// <path>api/2.0/settings/messagesettings</path>
     /// <httpMethod>POST</httpMethod>
+    [Tags("Settings / Messages")]
     [HttpPost("messagesettings")]
     public async Task<object> EnableAdminMessageSettingsAsync(AdminMessageSettingsRequestsDto inDto)
     {
@@ -77,6 +78,7 @@ public class MessageSettingsController(MessageService messageService,
     /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.CookieSettingsDto, ASC.Web.Api">Lifetime value in minutes</returns>
     /// <path>api/2.0/settings/cookiesettings</path>
     /// <httpMethod>GET</httpMethod>
+    [Tags("Settings / Cookies")]
     [HttpGet("cookiesettings")]
     public async Task<CookieSettingsDto> GetCookieSettings()
     {        
@@ -100,6 +102,7 @@ public class MessageSettingsController(MessageService messageService,
     /// <returns type="System.Object, System">Message about the result of saving new settings</returns>
     /// <path>api/2.0/settings/cookiesettings</path>
     /// <httpMethod>PUT</httpMethod>
+    [Tags("Settings / Cookies")]
     [HttpPut("cookiesettings")]
     public async Task<object> UpdateCookieSettings(CookieSettingsRequestsDto inDto)
     {
@@ -129,6 +132,7 @@ public class MessageSettingsController(MessageService messageService,
     /// <path>api/2.0/settings/sendadmmail</path>
     /// <httpMethod>POST</httpMethod>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Settings / Messages")]
     [AllowAnonymous, AllowNotPayment]
     [HttpPost("sendadmmail")]
     public async Task<object> SendAdmMailAsync(AdminMessageSettingsRequestsDto inDto)
@@ -173,6 +177,7 @@ public class MessageSettingsController(MessageService messageService,
     /// <path>api/2.0/settings/sendjoininvite</path>
     /// <httpMethod>POST</httpMethod>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Settings / Messages")]
     [AllowAnonymous]
     [HttpPost("sendjoininvite")]
     public async Task<object> SendJoinInviteMail(AdminMessageSettingsRequestsDto inDto)

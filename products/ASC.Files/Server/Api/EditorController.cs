@@ -91,6 +91,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileDto, ASC.Files.Core">Saved file parameters</returns>
     /// <path>api/2.0/files/file/{fileId}/saveediting</path>
     /// <httpMethod>PUT</httpMethod>
+    [Tags("Files / Files")]
     [HttpPut("{fileId}/saveediting")]
     public async Task<FileDto<T>> SaveEditingFromFormAsync(T fileId, [FromForm] SaveEditingRequestDto inDto)
     {
@@ -109,6 +110,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <returns type="System.Object, System">File key for Document Service</returns>
     /// <path>api/2.0/files/file/{fileId}/startedit</path>
     /// <httpMethod>POST</httpMethod>
+    [Tags("Files / Files")]
     [HttpPost("{fileId}/startedit")]
     public async Task<object> StartEditAsync(T fileId, StartEditRequestDto inDto)
     {
@@ -123,6 +125,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <category>Files</category>
     /// <path>api/2.0/files/file/{fileId}/startfilling</path>
     /// <httpMethod>PUT</httpMethod>
+    [Tags("Files / Files")]
     [HttpPut("{fileId}/startfilling")]
     public async Task StartFillingAsync(T fileId)
     {
@@ -141,6 +144,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <returns type="System.Collections.Generic.KeyValuePair{System.Boolean, System.String}, System.Collections.Generic">File changes</returns>
     /// <path>api/2.0/files/file/{fileId}/trackeditfile</path>
     /// <httpMethod>GET</httpMethod>
+    [Tags("Files / Files")]
     [HttpGet("{fileId}/trackeditfile")]
     public async Task<KeyValuePair<bool, string>> TrackEditFileAsync(T fileId, Guid tabId, string docKeyForTrack, bool isFinish)
     {
@@ -161,6 +165,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <path>api/2.0/files/file/{fileId}/openedit</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     /// <httpMethod>GET</httpMethod>
+    [Tags("Files / Files")]
     [AllowAnonymous]
     [AllowNotPayment]
     [HttpGet("{fileId}/openedit")]
@@ -317,6 +322,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <returns type="ASC.Files.Core.Helpers.DocumentService.FileLink, ASC.Files.Core">File download link</returns>
     /// <path>api/2.0/files/file/{fileId}/presigned</path>
     /// <httpMethod>GET</httpMethod>
+    [Tags("Files / Files")]
     [HttpGet("{fileId}/presigned")]
     public async Task<DocumentService.FileLink> GetPresignedUriAsync(T fileId)
     {
@@ -334,6 +340,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     /// <visible>false</visible>
+    [Tags("Files / Sharing")]
     [HttpGet("{fileId}/sharedusers")]
     public async Task<List<MentionWrapper>> SharedUsers(T fileId)
     {
@@ -350,6 +357,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <path>api/2.0/files/infousers</path>
     /// <httpMethod>POST</httpMethod>
     /// <visible>false</visible>
+    [Tags("Files / Files")]
     [HttpPost("infousers")]
     public async Task<List<MentionWrapper>> GetInfoUsers(GetInfoUsersRequestDto inDto)
     {
@@ -365,6 +373,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <returns type="ASC.Web.Files.Services.DocumentService.FileReference, ASC.Files.Core">File reference data</returns>
     /// <path>api/2.0/files/file/referencedata</path>
     /// <httpMethod>POST</httpMethod>
+    [Tags("Files / Files")]
     [HttpPost("referencedata")]
     public async Task<FileReference<T>> GetReferenceDataAsync(GetReferenceDataDto<T> inDto)
     {
@@ -381,6 +390,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <path>api/2.0/files/file/{fileId}/protectusers</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    [Tags("Files / Files")]
     [HttpGet("{fileId}/protectusers")]
     public async Task<List<MentionWrapper>> ProtectUsers(T fileId)
     {
@@ -407,6 +417,7 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
     /// <path>api/2.0/files/docservice</path>
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
+    [Tags("Files / Settings")]
     [HttpPut("docservice")]
     public async Task<DocServiceUrlDto> CheckDocServiceUrl(CheckDocServiceUrlRequestDto inDto)
     {
@@ -480,6 +491,7 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
     /// <httpMethod>GET</httpMethod>
     /// <requiresAuthorization>false</requiresAuthorization>
     /// <visible>false</visible>
+    [Tags("Files / Settings")]
     [AllowAnonymous]
     [HttpGet("docservice")]
     public async Task<DocServiceUrlDto> GetDocServiceUrlAsync(bool version)

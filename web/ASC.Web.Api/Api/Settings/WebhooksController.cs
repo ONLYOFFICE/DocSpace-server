@@ -49,6 +49,7 @@ public class WebhooksController(ApiContext context,
     /// <httpMethod>GET</httpMethod>
     /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.WebhooksConfigDto, ASC.Web.Api">List of tenant webhooks with their config parameters</returns>
     /// <collection>list</collection>
+    [Tags("Settings / Webhooks")]
     [HttpGet("webhook")]
     public async IAsyncEnumerable<WebhooksConfigWithStatusDto> GetTenantWebhooks()
     {
@@ -71,6 +72,7 @@ public class WebhooksController(ApiContext context,
     /// <path>api/2.0/settings/webhook</path>
     /// <httpMethod>POST</httpMethod>
     /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.WebhooksConfigDto, ASC.Web.Api">Tenant webhook with its config parameters</returns>
+    [Tags("Settings / Webhooks")]
     [HttpPost("webhook")]
     public async Task<WebhooksConfigDto> CreateWebhook(WebhooksConfigRequestsDto inDto)
     {
@@ -96,6 +98,7 @@ public class WebhooksController(ApiContext context,
     /// <path>api/2.0/settings/webhook</path>
     /// <httpMethod>PUT</httpMethod>
     /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.WebhooksConfigDto, ASC.Web.Api">Updated tenant webhook with its config parameters</returns>
+    [Tags("Settings / Webhooks")]
     [HttpPut("webhook")]
     public async Task<WebhooksConfigDto> UpdateWebhook(WebhooksConfigRequestsDto inDto)
     {
@@ -120,6 +123,7 @@ public class WebhooksController(ApiContext context,
     /// <path>api/2.0/settings/webhook</path>
     /// <httpMethod>DELETE</httpMethod>
     /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.WebhooksConfigDto, ASC.Web.Api">Tenant webhook with its config parameters</returns>
+    [Tags("Settings / Webhooks")]
     [HttpDelete("webhook/{id:int}")]
     public async Task<WebhooksConfigDto> RemoveWebhook(int id)
     {
@@ -148,6 +152,7 @@ public class WebhooksController(ApiContext context,
     /// <httpMethod>GET</httpMethod>
     /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.WebhooksLogDto, ASC.Web.Api">Logs of the webhook activities</returns>
     /// <collection>list</collection>
+    [Tags("Settings / Webhooks")]
     [HttpGet("webhooks/log")]
     public async IAsyncEnumerable<WebhooksLogDto> GetJournal(DateTime? deliveryFrom, DateTime? deliveryTo, string hookUri, int? webhookId, int? configId, int? eventId, WebhookGroupStatus? groupStatus)
     {
@@ -176,6 +181,7 @@ public class WebhooksController(ApiContext context,
     /// <path>api/2.0/settings/webhook/{id}/retry</path>
     /// <httpMethod>PUT</httpMethod>
     /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.WebhooksLogDto, ASC.Web.Api">Logs of the webhook activities</returns>
+    [Tags("Settings / Webhooks")]
     [HttpPut("webhook/{id:int}/retry")]
     public async Task<WebhooksLogDto> RetryWebhook(int id)
     {
@@ -210,6 +216,7 @@ public class WebhooksController(ApiContext context,
     /// <httpMethod>PUT</httpMethod>
     /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.WebhooksLogDto, ASC.Web.Api">Logs of the webhook activities</returns>
     /// <collection>list</collection>
+    [Tags("Settings / Webhooks")]
     [HttpPut("webhook/retry")]
     public async IAsyncEnumerable<WebhooksLogDto> RetryWebhooks(WebhookRetryRequestsDto inDto)
     {
@@ -241,6 +248,7 @@ public class WebhooksController(ApiContext context,
     /// <httpMethod>GET</httpMethod>
     /// <returns type="ASC.Webhooks.Core.Webhook, ASC.Webhooks.Core">List of webhook settings</returns>
     /// <collection>list</collection>
+    [Tags("Settings / Webhooks")]
     [HttpGet("webhooks")]
     public async IAsyncEnumerable<Webhook> Settings()
     {
@@ -264,6 +272,7 @@ public class WebhooksController(ApiContext context,
     /// <path>api/2.0/settings/webhook/{id}</path>
     /// <httpMethod>PUT</httpMethod>
     /// <returns type="ASC.Webhooks.Core.Webhook, ASC.Webhooks.Core">Webhook settings</returns>
+    [Tags("Settings / Webhooks")]
     [HttpPut("webhook/{id:int}")]
     public async Task<Webhook> DisableWebHook(int id)
     {

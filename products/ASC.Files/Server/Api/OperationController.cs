@@ -47,6 +47,7 @@ public class OperationController(
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Files / Operations")]
     [AllowAnonymous]
     [HttpPut("bulkdownload")]
     public async IAsyncEnumerable<FileOperationDto> BulkDownload(DownloadRequestDto inDto)
@@ -72,6 +73,7 @@ public class OperationController(
     /// <path>api/2.0/files/fileops/copy</path>
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
+    [Tags("Files / Operations")]
     [HttpPut("copy")]
     public async IAsyncEnumerable<FileOperationDto> CopyBatchItems(BatchRequestDto inDto)
     {
@@ -93,6 +95,7 @@ public class OperationController(
     /// <path>api/2.0/files/fileops/delete</path>
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
+    [Tags("Files / Operations")]
     [HttpPut("delete")]
     public async IAsyncEnumerable<FileOperationDto> DeleteBatchItems(DeleteBatchRequestDto inDto)
     {
@@ -113,6 +116,7 @@ public class OperationController(
     /// <path>api/2.0/files/fileops/emptytrash</path>
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
+    [Tags("Files / Operations")]
     [HttpPut("emptytrash")]
     public async IAsyncEnumerable<FileOperationDto> EmptyTrashAsync()
     {
@@ -136,6 +140,7 @@ public class OperationController(
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Files / Operations")]
     [AllowAnonymous]
     [HttpGet("")]
     public async IAsyncEnumerable<FileOperationDto> GetOperationStatuses()
@@ -156,6 +161,7 @@ public class OperationController(
     /// <path>api/2.0/files/fileops/markasread</path>
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
+    [Tags("Files / Operations")]
     [HttpPut("markasread")]
     public async IAsyncEnumerable<FileOperationDto> MarkAsRead(BaseBatchRequestDto inDto)
     {
@@ -177,6 +183,7 @@ public class OperationController(
     /// <path>api/2.0/files/fileops/move</path>
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
+    [Tags("Files / Operations")]
     [HttpPut("move")]
     public async IAsyncEnumerable<FileOperationDto> MoveBatchItems(BatchRequestDto inDto)
     {
@@ -187,6 +194,8 @@ public class OperationController(
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
     }
+
+    [Tags("Files / Operations")]
     [HttpGet("checkdestfolder")]
     public async Task<CheckDestFolderDto> MoveOrCopyDestFolderCheckAsync([ModelBinder(BinderType = typeof(BatchModelBinder))] BatchRequestDto inDto)
     {
@@ -233,6 +242,7 @@ public class OperationController(
     /// <path>api/2.0/files/fileops/move</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    [Tags("Files / Operations")]
     [HttpGet("move")]
     public async IAsyncEnumerable<FileEntryDto> MoveOrCopyBatchCheckAsync([ModelBinder(BinderType = typeof(BatchModelBinder))] BatchRequestDto inDto)
     {
@@ -267,6 +277,7 @@ public class OperationController(
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Files / Operations")]
     [AllowAnonymous]
     [HttpPut("terminate/{id?}")]
     public async IAsyncEnumerable<FileOperationDto> TerminateTasks(string id = null)

@@ -67,6 +67,7 @@ public class StorageController(ILoggerProvider option,
     /// <path>api/2.0/settings/storage</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    [Tags("Settings / Storage")]
     [HttpGet("storage")]
     public async Task<List<StorageDto>> GetAllStoragesAsync()
     {
@@ -92,6 +93,7 @@ public class StorageController(ILoggerProvider option,
     /// <returns type="System.Double, System">Storage progress</returns>
     /// <path>api/2.0/settings/storage/progress</path>
     /// <httpMethod>GET</httpMethod>
+    [Tags("Settings / Storage")]
     [AllowNotPayment]
     [HttpGet("storage/progress")]
     public async Task<double> GetStorageProgressAsync()
@@ -116,6 +118,7 @@ public class StorageController(ILoggerProvider option,
     /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
     /// <path>api/2.0/settings/encryption/start</path>
     /// <httpMethod>POST</httpMethod>
+    [Tags("Settings / Encryption")]
     [HttpPost("encryption/start")]
     public async Task<bool> StartStorageEncryptionAsync(StorageEncryptionRequestsDto inDto)
     {
@@ -247,6 +250,7 @@ public class StorageController(ILoggerProvider option,
     /// <path>api/2.0/settings/encryption/settings</path>
     /// <httpMethod>GET</httpMethod>
     /// <visible>false</visible>
+    [Tags("Settings / Encryption")]
     [HttpGet("encryption/settings")]
     public async Task<EncryptionSettings> GetStorageEncryptionSettingsAsync()
     {
@@ -287,6 +291,7 @@ public class StorageController(ILoggerProvider option,
     /// <returns type="System.Nullable{System.Double}, System">Storage encryption progress</returns>
     /// <path>api/2.0/settings/encryption/progress</path>
     /// <httpMethod>GET</httpMethod>
+    [Tags("Settings / Encryption")]
     [HttpGet("encryption/progress")]
     public async Task<double?> GetStorageEncryptionProgress()
     {
@@ -317,6 +322,7 @@ public class StorageController(ILoggerProvider option,
     /// <returns type="ASC.Data.Storage.Configuration.StorageSettings, ASC.Data.Storage">Updated storage settings</returns>
     /// <path>api/2.0/settings/storage</path>
     /// <httpMethod>PUT</httpMethod>
+    [Tags("Settings / Storage")]
     [HttpPut("storage")]
     public async Task<StorageSettings> UpdateStorageAsync(StorageRequestsDto inDto)
     {
@@ -359,6 +365,7 @@ public class StorageController(ILoggerProvider option,
     /// <path>api/2.0/settings/storage</path>
     /// <httpMethod>DELETE</httpMethod>
     /// <returns></returns>
+    [Tags("Settings / Storage")]
     [HttpDelete("storage")]
     public async Task ResetStorageToDefaultAsync()
     {
@@ -392,6 +399,7 @@ public class StorageController(ILoggerProvider option,
     /// <path>api/2.0/settings/storage/cdn</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    [Tags("Settings / Storage")]
     [HttpGet("storage/cdn")]
     public async Task<List<StorageDto>> GetAllCdnStoragesAsync()
     {
@@ -418,6 +426,7 @@ public class StorageController(ILoggerProvider option,
     /// <param type="ASC.Web.Api.ApiModel.RequestsDto.StorageRequestsDto, ASC.Web.Api" name="inDto">CDN storage settings request parameters</param>
     /// <path>api/2.0/settings/storage/cdn</path>
     /// <httpMethod>PUT</httpMethod>
+    [Tags("Settings / Storage")]
     [HttpPut("storage/cdn")]
     public async Task<CdnStorageSettings> UpdateCdnAsync(StorageRequestsDto inDto)
     {
@@ -462,6 +471,7 @@ public class StorageController(ILoggerProvider option,
     /// <path>api/2.0/settings/storage/cdn</path>
     /// <httpMethod>DELETE</httpMethod>
     /// <returns></returns>
+    [Tags("Settings / Storage")]
     [HttpDelete("storage/cdn")]
     public async Task ResetCdnToDefaultAsync()
     {
@@ -481,6 +491,7 @@ public class StorageController(ILoggerProvider option,
     /// <path>api/2.0/settings/storage/backup</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    [Tags("Settings / Storage")]
     [HttpGet("storage/backup")]
     public async Task<List<StorageDto>> GetAllBackupStorages()
     {
@@ -524,6 +535,7 @@ public class StorageController(ILoggerProvider option,
     /// <returns type="System.Object, System">List of the Amazon regions</returns>
     /// <path>api/2.0/settings/storage/s3/regions</path>
     /// <httpMethod>GET</httpMethod>
+    [Tags("Settings / Storage")]
     [HttpGet("storage/s3/regions")]
     public object GetAmazonS3Regions()
     {

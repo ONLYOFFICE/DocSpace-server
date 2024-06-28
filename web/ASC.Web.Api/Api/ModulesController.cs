@@ -34,6 +34,7 @@ namespace ASC.Web.Api.Controllers;
 [Scope]
 [DefaultRoute]
 [ApiController]
+[ControllerName("modules")]
 public class ModulesController(WebItemManagerSecurity webItemManagerSecurity) : ControllerBase
 {
     /// <summary>
@@ -46,6 +47,7 @@ public class ModulesController(WebItemManagerSecurity webItemManagerSecurity) : 
     /// <path>api/2.0/modules</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    [Tags("Modules")]
     [HttpGet]
     public IEnumerable<string> GetAll()
     {
@@ -69,6 +71,7 @@ public class ModulesController(WebItemManagerSecurity webItemManagerSecurity) : 
     /// <path>api/2.0/modules/info</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    [Tags("Modules")]
     [HttpGet("info")]
     public IEnumerable<Module> GetAllWithInfo()
     {

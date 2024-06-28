@@ -56,6 +56,7 @@ public class PhotoController(
     /// <path>api/2.0/people/{userid}/photo/thumbnails</path>
     /// <httpMethod>POST</httpMethod>
     /// <returns type="ASC.People.ApiModels.ResponseDto.ThumbnailsDataDto, ASC.People">Thumbnail parameters</returns>
+    [Tags("People / Photos")]
     [HttpPost("{userid}/photo/thumbnails")]
     public async Task<ThumbnailsDataDto> CreateMemberPhotoThumbnails(string userid, ThumbnailsRequestDto inDto)
     {
@@ -112,6 +113,7 @@ public class PhotoController(
     /// <returns type="ASC.People.ApiModels.ResponseDto.ThumbnailsDataDto, ASC.People">Thumbnail parameters: original photo, retina, maximum size photo, big, medium, small</returns>
     /// <path>api/2.0/people/{userid}/photo</path>
     /// <httpMethod>DELETE</httpMethod>
+    [Tags("People / Photos")]
     [HttpDelete("{userid}/photo")]
     public async Task<ThumbnailsDataDto> DeleteMemberPhotoAsync(string userid)
     {
@@ -148,6 +150,7 @@ public class PhotoController(
     /// <returns type="ASC.People.ApiModels.ResponseDto.ThumbnailsDataDto, ASC.People">Thumbnail parameters: original photo, retina, maximum size photo, big, medium, small</returns>
     /// <path>api/2.0/people/{userid}/photo</path>
     /// <httpMethod>GET</httpMethod>
+    [Tags("People / Photos")]
     [HttpGet("{userid}/photo")]
     public async Task<ThumbnailsDataDto> GetMemberPhoto(string userid)
     {
@@ -173,6 +176,7 @@ public class PhotoController(
     /// <returns type="ASC.People.ApiModels.ResponseDto.ThumbnailsDataDto, ASC.People">Updated thumbnail parameters: original photo, retina, maximum size photo, big, medium, small</returns>
     /// <path>api/2.0/people/{userid}/photo</path>
     /// <httpMethod>PUT</httpMethod>
+    [Tags("People / Photos")]
     [HttpPut("{userid}/photo")]
     public async Task<ThumbnailsDataDto> UpdateMemberPhoto(string userid, UpdateMemberRequestDto inDto)
     {
@@ -212,6 +216,7 @@ public class PhotoController(
     /// <path>api/2.0/people/{userid}/photo</path>
     /// <httpMethod>POST</httpMethod>
     /// <returns type="ASC.People.ApiModels.ResponseDto.FileUploadResultDto, ASC.People">Result of file uploading</returns>
+    [Tags("People / Photos")]
     [HttpPost("{userid}/photo")]
     public async Task<FileUploadResultDto> UploadMemberPhoto(string userid, IFormCollection formCollection)
     {

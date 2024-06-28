@@ -88,6 +88,7 @@ public class UserController(
     /// <path>api/2.0/people/active</path>
     /// <httpMethod>POST</httpMethod>
     /// <visible>false</visible>
+    [Tags("People / Profiles")]
     [HttpPost("active")]
     public async Task<EmployeeFullDto> AddMemberAsActivatedAsync(MemberRequestDto inDto)
     {
@@ -161,6 +162,7 @@ public class UserController(
     /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">Newly added user with the detailed information</returns>
     /// <path>api/2.0/people</path>
     /// <httpMethod>POST</httpMethod>
+    [Tags("People / Profiles")]
     [HttpPost]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "LinkInvite,Everyone")]
     public async Task<EmployeeFullDto> AddMember(MemberRequestDto inDto)
@@ -309,6 +311,7 @@ public class UserController(
     /// <path>api/2.0/people/invite</path>
     /// <httpMethod>POST</httpMethod>
     /// <collection>list</collection>
+    [Tags("People / Profiles")]
     [HttpPost("invite")]
     [EnableRateLimiting(RateLimiterPolicy.EmailInvitationApi)]
     public async Task<List<EmployeeDto>> InviteUsersAsync(InviteUsersRequestDto inDto)
@@ -358,6 +361,7 @@ public class UserController(
     /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">Detailed user information</returns>
     /// <path>api/2.0/people/{userid}/password</path>
     /// <httpMethod>PUT</httpMethod>
+    [Tags("People / Password")]
     [HttpPut("{userid:guid}/password")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PasswordChange,EmailChange,Activation,EmailActivation,Everyone")]
@@ -425,6 +429,7 @@ public class UserController(
     /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">Deleted user detailed information</returns>
     /// <path>api/2.0/people/{userid}</path>
     /// <httpMethod>DELETE</httpMethod>
+    [Tags("People / Profiles")]
     [HttpDelete("{userid}")]
     public async Task<EmployeeFullDto> DeleteMemberAsync(string userid)
     {
@@ -473,6 +478,7 @@ public class UserController(
     /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">Detailed information about my profile</returns>
     /// <path>api/2.0/people/@self</path>
     /// <httpMethod>DELETE</httpMethod>
+    [Tags("People / Profiles")]
     [HttpDelete("@self")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "ProfileRemove")]
     public async Task<EmployeeFullDto> DeleteProfile()
@@ -525,6 +531,7 @@ public class UserController(
     /// <path>api/2.0/people/status/{status}/search</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    [Tags("People / Search")]
     [HttpGet("status/{status}/search")]
     public async IAsyncEnumerable<EmployeeFullDto> GetAdvanced(EmployeeStatus status, [FromQuery] string query)
     {
@@ -558,6 +565,7 @@ public class UserController(
     /// <path>api/2.0/people</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    [Tags("People / Profiles")]
     [HttpGet]
     public IAsyncEnumerable<EmployeeFullDto> GetAll()
     {
@@ -575,6 +583,7 @@ public class UserController(
     /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">Detailed profile information</returns>
     /// <path>api/2.0/people/email</path>
     /// <httpMethod>GET</httpMethod>
+    [Tags("People / Profiles")]
     [AllowNotPayment]
     [HttpGet("email")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "LinkInvite,Everyone")]
@@ -600,6 +609,7 @@ public class UserController(
     /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">Detailed profile information</returns>
     /// <path>api/2.0/people/{username}</path>
     /// <httpMethod>GET</httpMethod>
+    [Tags("People / Profiles")]
     [AllowNotPayment]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "LinkInvite,Everyone")]
     [HttpGet("{username}", Order = 1)]
@@ -642,12 +652,14 @@ public class UserController(
     /// <short>
     /// Get profiles by status
     /// </short>
+    /// <category>User status</category>
     /// <param type="ASC.Core.Users.EmployeeStatus, ASC.Core.Common" method="url" name="status">User status</param>
     /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">List of users with the detailed information</returns>
     /// <category>User status</category>
     /// <path>api/2.0/people/status/{status}</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    [Tags("People / User status")]
     [HttpGet("status/{status}")]
     public IAsyncEnumerable<EmployeeFullDto> GetByStatus(EmployeeStatus status)
     {
@@ -683,6 +695,7 @@ public class UserController(
     /// <path>api/2.0/people/filter</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    [Tags("People / Search")]
     [HttpGet("filter")]
     public async IAsyncEnumerable<EmployeeFullDto> GetFullByFilter(EmployeeStatus? employeeStatus,
         Guid? groupId,
@@ -713,6 +726,7 @@ public class UserController(
     /// <path>api/2.0/people/info</path>
     /// <httpMethod>GET</httpMethod>
     /// <visible>false</visible>
+    [Tags("People / Module")]
     [HttpGet("info")]
     public Module GetModule()
     {
@@ -732,6 +746,7 @@ public class UserController(
     /// <path>api/2.0/people/search</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    [Tags("People / Search")]
     [HttpGet("search")]
     public IAsyncEnumerable<EmployeeDto> GetPeopleSearch([FromQuery] string query)
     {
@@ -748,6 +763,7 @@ public class UserController(
     /// <path>api/2.0/people/@search/{query}</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    [Tags("People / Search")]
     [HttpGet("@search/{query}")]
     public async IAsyncEnumerable<EmployeeFullDto> GetSearch(string query)
     {
@@ -787,6 +803,7 @@ public class UserController(
     /// <path>api/2.0/people/simple/filter</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    [Tags("People / Search")]
     [HttpGet("simple/filter")]
     public async IAsyncEnumerable<EmployeeDto> GetSimpleByFilter(EmployeeStatus? employeeStatus,
         Guid? groupId,
@@ -820,6 +837,7 @@ public class UserController(
     /// <path>api/2.0/people/delete</path>
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
+    [Tags("People / Profiles")]
     [HttpPut("delete", Order = -1)]
     public async IAsyncEnumerable<EmployeeFullDto> RemoveUsers(UpdateMembersRequestDto inDto)
     {
@@ -866,6 +884,7 @@ public class UserController(
     /// <path>api/2.0/people/invite</path>
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
+    [Tags("People / Profiles")]
     [AllowNotPayment]
     [HttpPut("invite")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
@@ -964,6 +983,7 @@ public class UserController(
     /// <returns type="ASC.Web.Core.Users.DarkThemeSettings, ASC.Web.Core">Theme</returns>
     /// <path>api/2.0/people/theme</path>
     /// <httpMethod>GET</httpMethod>
+    [Tags("People / Theme")]
     [HttpGet("theme")]
     public async Task<DarkThemeSettings> GetThemeAsync()
     {
@@ -981,6 +1001,7 @@ public class UserController(
     /// <returns type="ASC.Web.Core.Users.DarkThemeSettings, ASC.Web.Core">Theme</returns>
     /// <path>api/2.0/people/theme</path>
     /// <httpMethod>PUT</httpMethod>
+    [Tags("People / Theme")]
     [HttpPut("theme")]
     public async Task<DarkThemeSettings> ChangeThemeAsync(DarkThemeSettingsRequestDto inDto)
     {
@@ -1004,6 +1025,7 @@ public class UserController(
     /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">Detailed information about my profile</returns>
     /// <path>api/2.0/people/@self</path>
     /// <httpMethod>GET</httpMethod>
+    [Tags("People / Profiles")]
     [AllowNotPayment]
     [HttpGet("@self")]
     public async Task<EmployeeFullDto> SelfAsync()
@@ -1028,6 +1050,7 @@ public class UserController(
     /// <returns type="System.Object, System">Message text</returns>
     /// <path>api/2.0/people/email</path>
     /// <httpMethod>POST</httpMethod>
+    [Tags("People / Profiles")]
     [AllowNotPayment]
     [HttpPost("email")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
@@ -1118,6 +1141,7 @@ public class UserController(
     /// <path>api/2.0/people/password</path>
     /// <httpMethod>POST</httpMethod>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("People / Password")]
     [AllowNotPayment]
     [AllowAnonymous]
     [HttpPost("password")]
@@ -1156,6 +1180,7 @@ public class UserController(
     /// <path>api/2.0/people/activationstatus/{activationstatus}</path>
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
+    [Tags("People / User status")]
     [AllowNotPayment]
     [HttpPut("activationstatus/{activationstatus}")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Activation,Everyone")]
@@ -1204,6 +1229,7 @@ public class UserController(
     /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">Detailed user information</returns>
     /// <path>api/2.0/people/{userid}/culture</path>
     /// <httpMethod>PUT</httpMethod>
+    [Tags("People / Profiles")]
     [HttpPut("{userid}/culture")]
     public async Task<EmployeeFullDto> UpdateMemberCulture(string userid, UpdateMemberRequestDto inDto)
     {
@@ -1233,6 +1259,7 @@ public class UserController(
     /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">Updated user with the detailed information</returns>
     /// <path>api/2.0/people/{userid}</path>
     /// <httpMethod>PUT</httpMethod>
+    [Tags("People / Profiles")]
     [HttpPut("{userid}", Order = 1)]
     public async Task<EmployeeFullDto> UpdateMember(string userid, UpdateMemberRequestDto inDto)
     {
@@ -1391,6 +1418,7 @@ public class UserController(
     /// <path>api/2.0/people/status/{status}</path>
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
+    [Tags("People / User status")]
     [HttpPut("status/{status}")]
     public async IAsyncEnumerable<EmployeeFullDto> UpdateUserStatus(EmployeeStatus status, UpdateMembersRequestDto inDto)
     {
@@ -1474,6 +1502,7 @@ public class UserController(
     /// <path>api/2.0/people/type/{type}</path>
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
+    [Tags("People / User type")]
     [HttpPut("type/{type}")]
     public async IAsyncEnumerable<EmployeeFullDto> UpdateUserTypeAsync(EmployeeType type, UpdateMembersRequestDto inDto)
     {
@@ -1511,6 +1540,7 @@ public class UserController(
     /// <httpMethod>GET</httpMethod>
     /// <returns></returns>
     /// <visible>false</visible>
+    [Tags("People / Quota")]
     [HttpGet("recalculatequota")]
     public async Task RecalculateQuotaAsync()
     {
@@ -1529,6 +1559,7 @@ public class UserController(
     /// <path>api/2.0/people/checkrecalculatequota</path>
     /// <httpMethod>GET</httpMethod>
     /// <visible>false</visible>
+    [Tags("People / Quota")]
     [HttpGet("checkrecalculatequota")]
     public async Task<TaskProgressDto> CheckRecalculateQuotaAsync()
     {
@@ -1548,6 +1579,7 @@ public class UserController(
     /// <path>api/2.0/people/userquota</path>
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
+    [Tags("People / Quota")]
     [HttpPut("userquota")]
     public async IAsyncEnumerable<EmployeeFullDto> UpdateUserQuotaAsync(UpdateMembersQuotaRequestDto inDto)
     {
@@ -1607,6 +1639,7 @@ public class UserController(
     /// <path>api/2.0/people/resetquota</path>
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
+    [Tags("People / Quota")]
     [HttpPut("resetquota")]
     public async IAsyncEnumerable<EmployeeFullDto> ResetUsersQuota(UpdateMembersQuotaRequestDto inDto)
     {
@@ -1897,6 +1930,7 @@ public class UserControllerAdditional<T>(EmployeeFullDtoHelper employeeFullDtoHe
         ApiContext apiContext, 
         IDaoFactory daoFactory) : ApiControllerBase
     {
+    [Tags("People / Rooms")]
     [HttpGet("room/{id}")]
     public async IAsyncEnumerable<EmployeeFullDto> GetUsersWithRoomSharedAsync(T id, EmployeeStatus? employeeStatus, EmployeeActivationStatus? activationStatus, bool? excludeShared)
     {

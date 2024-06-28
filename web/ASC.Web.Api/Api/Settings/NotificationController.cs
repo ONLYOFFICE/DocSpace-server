@@ -46,6 +46,7 @@ public class NotificationController(
     /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.NotificationSettingsDto, ASC.Web.Api">Notification settings</returns>
     /// <path>api/2.0/settings/notification/{type}</path>
     /// <httpMethod>GET</httpMethod>
+    [Tags("Settings / Notifications")]
     [HttpGet("{type}")]
     public async Task<NotificationSettingsDto> GetSettingsAsync(NotificationType type)
     {
@@ -63,6 +64,7 @@ public class NotificationController(
     /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.NotificationSettingsDto, ASC.Web.Api">Notification settings</returns>
     /// <path>api/2.0/settings/notification</path>
     /// <httpMethod>POST</httpMethod>
+    [Tags("Settings / Notifications")]
     [HttpPost("")]
     public async Task<NotificationSettingsDto> SetSettingsAsync(NotificationSettingsRequestsDto inDto)
     {
@@ -79,6 +81,7 @@ public class NotificationController(
     /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.RoomsNotificayionSettingsDto, ASC.Web.Api">Room notification settings</returns>
     /// <path>api/2.0/settings/notification/rooms</path>
     /// <httpMethod>GET</httpMethod>
+    [Tags("Settings / Notifications")]
     [HttpGet("rooms")]
     public async Task<RoomsNotificayionSettingsDto> GetRoomsNotificationSettings()
     {
@@ -95,6 +98,7 @@ public class NotificationController(
     /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.RoomsNotificayionSettingsDto, ASC.Web.Api">Room notification settings</returns>
     /// <path>api/2.0/settings/notification/rooms</path>
     /// <httpMethod>POST</httpMethod>
+    [Tags("Settings / Notifications")]
     [HttpPost("rooms")]
     public async Task<RoomsNotificayionSettingsDto> SetRoomsNotificationStatus(RoomsNotificationsSettingsRequestDto inDto)
     {

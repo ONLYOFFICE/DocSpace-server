@@ -46,6 +46,7 @@ public class CustomNavigationController(MessageService messageService,
     /// <path>api/2.0/settings/customnavigation/getall</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    [Tags("Settings / Custom Navigation")]
     [HttpGet("getall")]
     public async Task<List<CustomNavigationItem>> GetCustomNavigationItemsAsync()
     {
@@ -60,6 +61,7 @@ public class CustomNavigationController(MessageService messageService,
     /// <returns type="ASC.Web.Studio.Core.CustomNavigationItem, ASC.Web.Core">Custom navigation item</returns>
     /// <path>api/2.0/settings/customnavigation/getsample</path>
     /// <httpMethod>GET</httpMethod>
+    [Tags("Settings / Custom Navigation")]
     [HttpGet("getsample")]
     public CustomNavigationItem GetCustomNavigationItemSample()
     {
@@ -75,6 +77,7 @@ public class CustomNavigationController(MessageService messageService,
     /// <returns type="ASC.Web.Studio.Core.CustomNavigationItem, ASC.Web.Core">Custom navigation item</returns>
     /// <path>api/2.0/settings/customnavigation/get/{id}</path>
     /// <httpMethod>GET</httpMethod>
+    [Tags("Settings / Custom Navigation")]
     [HttpGet("get/{id:guid}")]
     public async Task<CustomNavigationItem> GetCustomNavigationItemAsync(Guid id)
     {
@@ -90,6 +93,7 @@ public class CustomNavigationController(MessageService messageService,
     /// <returns type="ASC.Web.Studio.Core.CustomNavigationItem, ASC.Web.Core">Custom navigation item</returns>
     /// <path>api/2.0/settings/customnavigation/create</path>
     /// <httpMethod>POST</httpMethod>
+    [Tags("Settings / Custom Navigation")]
     [HttpPost("create")]
     public async Task<CustomNavigationItem> CreateCustomNavigationItem(CustomNavigationItem inDto)
     {
@@ -152,6 +156,7 @@ public class CustomNavigationController(MessageService messageService,
     /// <path>api/2.0/settings/customnavigation/delete/{id}</path>
     /// <httpMethod>DELETE</httpMethod>
     /// <returns></returns>
+    [Tags("Settings / Custom Navigation")]
     [HttpDelete("delete/{id:guid}")]
     public async Task DeleteCustomNavigationItem(Guid id)
     {

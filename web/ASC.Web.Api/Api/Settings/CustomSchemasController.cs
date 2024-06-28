@@ -46,6 +46,7 @@ public class CustomSchemasController(MessageService messageService,
     /// <path>api/2.0/settings/customschemas</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    [Tags("Settings / Team templates")]
     [HttpGet("")]
     public async Task<List<SchemaRequestsDto>> PeopleSchemasAsync()
     {
@@ -82,6 +83,7 @@ public class CustomSchemasController(MessageService messageService,
     /// <returns type="ASC.Web.Api.ApiModel.RequestsDto.SchemaRequestsDto, ASC.Web.Api">Team template with the following parameters</returns>
     /// <path>api/2.0/settings/customschemas</path>
     /// <httpMethod>POST</httpMethod>
+    [Tags("Settings / Team templates")]
     [HttpPost("")]
     public async Task<SchemaRequestsDto> SaveNamingSettingsAsync(SchemaRequestsDto inDto)
     {
@@ -105,6 +107,7 @@ public class CustomSchemasController(MessageService messageService,
     /// <returns type="ASC.Web.Api.ApiModel.RequestsDto.SchemaRequestsDto, ASC.Web.Api">Custom team template with the following parameters</returns>
     /// <path>api/2.0/settings/customschemas</path>
     /// <httpMethod>PUT</httpMethod>
+    [Tags("Settings / Team templates")]
     [HttpPut("")]
     public async Task<SchemaRequestsDto> SaveCustomNamingSettingsAsync(SchemaRequestsDto inDto)
     {
@@ -165,6 +168,7 @@ public class CustomSchemasController(MessageService messageService,
     /// <returns type="ASC.Web.Api.ApiModel.RequestsDto.SchemaRequestsDto, ASC.Web.Api">Team template with the following parameters</returns>
     /// <path>api/2.0/settings/customschemas/{id}</path>
     /// <httpMethod>GET</httpMethod>
+    [Tags("Settings / Team templates")]
     [HttpGet("{id}")]
     public async Task<SchemaRequestsDto> PeopleSchemaAsync(string id)
     {

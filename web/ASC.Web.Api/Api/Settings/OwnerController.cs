@@ -56,6 +56,7 @@ public class OwnerController(
     /// <returns type="System.Object, System">Message about changing the portal owner</returns>
     /// <path>api/2.0/settings/owner</path>
     /// <httpMethod>POST</httpMethod>
+    [Tags("Settings / Owner")]
     [HttpPost("")]
     public async Task<object> SendOwnerChangeInstructionsAsync(SettingsRequestsDto inDto)
     {
@@ -95,6 +96,7 @@ public class OwnerController(
     /// <returns></returns>
     /// <path>api/2.0/settings/owner</path>
     /// <httpMethod>PUT</httpMethod>
+    [Tags("Settings / Owner")]
     [HttpPut("")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PortalOwnerChange")]
     public async Task OwnerAsync(SettingsRequestsDto inDto)

@@ -61,6 +61,7 @@ public class TfaappController(
     ///<path>api/2.0/settings/tfaapp</path>
     ///<httpMethod>GET</httpMethod>
     ///<collection>list</collection>
+    [Tags("Settings / TFA settings")]
     [HttpGet("tfaapp")]
     public async Task<IEnumerable<TfaSettingsDto>> GetTfaSettingsAsync()
     {
@@ -113,6 +114,7 @@ public class TfaappController(
     /// <returns type="System.Boolean, System">True if the code is valid</returns>
     ///<path>api/2.0/settings/tfaapp/validate</path>
     ///<httpMethod>POST</httpMethod>
+    [Tags("Settings / TFA settings")]
     [HttpPost("tfaapp/validate")]
     [AllowNotPayment]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "TfaActivation,TfaAuth,Everyone")]
@@ -139,6 +141,7 @@ public class TfaappController(
     /// <returns type="System.Object, System">Confirmation email URL</returns>
     ///<path>api/2.0/settings/tfaapp/confirm</path>
     ///<httpMethod>GET</httpMethod>
+    [Tags("Settings / TFA settings")]
     [HttpGet("tfaapp/confirm")]
     public async Task<object> TfaConfirmUrlAsync()
     {
@@ -177,6 +180,7 @@ public class TfaappController(
     /// <returns type="System.Boolean, System">True if the operation is successful</returns>
     ///<path>api/2.0/settings/tfaapp</path>
     ///<httpMethod>PUT</httpMethod>
+    [Tags("Settings / TFA settings")]
     [HttpPut("tfaapp")]
     public async Task<bool> TfaSettingsAsync(TfaRequestsDto inDto)
     {
@@ -278,6 +282,7 @@ public class TfaappController(
     /// <returns type="System.Object, System">Confirmation email URL</returns>
     /// <path>api/2.0/settings/tfaappwithlink</path>
     /// <httpMethod>PUT</httpMethod>
+    [Tags("Settings / TFA settings")]
     [HttpPut("tfaappwithlink")]
     public async Task<object> TfaSettingsLink(TfaRequestsDto inDto)
     {
@@ -297,6 +302,7 @@ public class TfaappController(
     /// <returns type="Google.Authenticator.SetupCode, Google.Authenticator">Setup code</returns>
     /// <path>api/2.0/settings/tfaapp/setup</path>
     /// <httpMethod>GET</httpMethod>
+    [Tags("Settings / TFA settings")]
     [HttpGet("tfaapp/setup")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "TfaActivation")]
     public async Task<SetupCode> TfaAppGenerateSetupCodeAsync()
@@ -328,6 +334,7 @@ public class TfaappController(
     /// <path>api/2.0/settings/tfaappcodes</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    [Tags("Settings / TFA settings")]
     [HttpGet("tfaappcodes")]
     public async Task<IEnumerable<object>> TfaAppGetCodesAsync()
     {
@@ -355,6 +362,7 @@ public class TfaappController(
     /// <path>api/2.0/settings/tfaappnewcodes</path>
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
+    [Tags("Settings / TFA settings")]
     [HttpPut("tfaappnewcodes")]
     public async Task<IEnumerable<object>> TfaAppRequestNewCodesAsync()
     {
@@ -384,6 +392,7 @@ public class TfaappController(
     /// <returns type="System.Object, System">Login URL</returns>
     /// <path>api/2.0/settings/tfaappnewapp</path>
     /// <httpMethod>PUT</httpMethod>
+    [Tags("Settings / TFA settings")]
     [HttpPut("tfaappnewapp")]
     public async Task<object> TfaAppNewAppAsync(TfaRequestsDto inDto)
     {

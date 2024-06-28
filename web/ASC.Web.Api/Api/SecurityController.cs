@@ -33,6 +33,7 @@ namespace ASC.Web.Api.Controllers;
 [Scope]
 [DefaultRoute]
 [ApiController]
+[ControllerName("security")]
 public class SecurityController(PermissionContext permissionContext,
         TenantManager tenantManager,
         MessageService messageService,
@@ -58,6 +59,7 @@ public class SecurityController(PermissionContext permissionContext,
     /// <path>api/2.0/security/audit/login/last</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    [Tags("Security / Login history")]
     [HttpGet("audit/login/last")]
     public async Task<IEnumerable<LoginEventDto>> GetLastLoginEventsAsync()
     {
@@ -79,6 +81,7 @@ public class SecurityController(PermissionContext permissionContext,
     /// <path>api/2.0/security/audit/events/last</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    [Tags("Security / Audit trail data")]
     [HttpGet("audit/events/last")]
     public async Task<IEnumerable<AuditEventDto>> GetLastAuditEventsAsync()
     {
@@ -104,6 +107,7 @@ public class SecurityController(PermissionContext permissionContext,
     /// <path>api/2.0/security/audit/login/filter</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    [Tags("Security / Login history")]
     [HttpGet("audit/login/filter")]
     public async Task<IEnumerable<LoginEventDto>> GetLoginEventsByFilterAsync(Guid userId,
     MessageAction action,
@@ -148,6 +152,7 @@ public class SecurityController(PermissionContext permissionContext,
     /// <path>api/2.0/security/audit/events/filter</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    [Tags("Security / Audit trail data")]
     [HttpGet("audit/events/filter")]
     public async Task<IEnumerable<AuditEventDto>> GetAuditEventsByFilterAsync(Guid userId,
             ProductType productType,
@@ -188,6 +193,7 @@ public class SecurityController(PermissionContext permissionContext,
     /// <path>api/2.0/security/audit/types</path>
     /// <httpMethod>GET</httpMethod>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Security / Audit trail data")]
     [AllowAnonymous]
     [HttpGet("audit/types")]
     public object GetTypes()
@@ -215,6 +221,7 @@ public class SecurityController(PermissionContext permissionContext,
     /// <path>api/2.0/security/audit/mappers</path>
     /// <httpMethod>GET</httpMethod>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Security / Audit trail data")]
     [AllowAnonymous]
     [HttpGet("audit/mappers")]
     public object GetMappers(ProductType? productType, ModuleType? moduleType)
@@ -249,6 +256,7 @@ public class SecurityController(PermissionContext permissionContext,
     /// <returns type="System.Object, System">URL to the xlsx report file</returns>
     /// <path>api/2.0/security/audit/login/report</path>
     /// <httpMethod>POST</httpMethod>
+    [Tags("Security / Login history")]
     [HttpPost("audit/login/report")]
     public async Task<object> CreateLoginHistoryReport()
     {
@@ -281,6 +289,7 @@ public class SecurityController(PermissionContext permissionContext,
     /// <returns type="System.Object, System">URL to the xlsx report file</returns>
     /// <path>api/2.0/security/audit/events/report</path>
     /// <httpMethod>POST</httpMethod>
+    [Tags("Security / Audit trail data")]
     [HttpPost("audit/events/report")]
     public async Task<object> CreateAuditTrailReport()
     {
@@ -316,6 +325,7 @@ public class SecurityController(PermissionContext permissionContext,
     /// <returns type="ASC.Core.Tenants.TenantAuditSettings, ASC.Core.Common">Audit settings</returns>
     /// <path>api/2.0/security/audit/settings/lifetime</path>
     /// <httpMethod>GET</httpMethod>
+    [Tags("Security / Audit trail data")]
     [HttpGet("audit/settings/lifetime")]
     public async Task<TenantAuditSettings> GetAuditSettingsAsync()
     {
@@ -337,6 +347,7 @@ public class SecurityController(PermissionContext permissionContext,
     /// <returns type="ASC.Core.Tenants.TenantAuditSettings, ASC.Core.Common">Audit trail settings</returns>
     /// <path>api/2.0/security/audit/settings/lifetime</path>
     /// <httpMethod>POST</httpMethod>
+    [Tags("Security / Audit trail data")]
     [HttpPost("audit/settings/lifetime")]
     public async Task<TenantAuditSettings> SetAuditSettings(TenantAuditSettingsWrapper inDto)
     {
@@ -360,6 +371,7 @@ public class SecurityController(PermissionContext permissionContext,
         return inDto.Settings;
     }
 
+    [Tags("Security / CSP")]
     [HttpPost("csp")]
     public async Task<CspDto> Csp(CspRequestsDto request)
     {
@@ -396,6 +408,7 @@ public class SecurityController(PermissionContext permissionContext,
     }
 
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Security / CSP")]
     [AllowAnonymous]
     [HttpGet("csp")]
     public async Task<CspDto> Csp()
