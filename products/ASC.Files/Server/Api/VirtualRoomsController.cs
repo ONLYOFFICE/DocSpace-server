@@ -185,7 +185,7 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/roomquota</path>
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
-    [Tags("Files / Room quota")]
+    [Tags("Files / Quota")]
     [HttpPut("roomquota")]
     public async IAsyncEnumerable<FolderDto<int>> UpdateRoomsQuotaAsync(UpdateRoomsQuotaRequestDto<T> inDto)
     {
@@ -212,7 +212,7 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/resetquota</path>
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
-    [Tags("Files / Room quota")]
+    [Tags("Files / Quota")]
     [HttpPut("resetquota")]
     public async IAsyncEnumerable<FolderDto<int>> ResetRoomQuotaAsync(UpdateRoomsQuotaRequestDto<T> inDto)
     {
