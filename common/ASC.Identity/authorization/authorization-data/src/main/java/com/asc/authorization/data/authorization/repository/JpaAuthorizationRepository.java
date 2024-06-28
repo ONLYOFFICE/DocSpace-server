@@ -10,7 +10,18 @@ import org.springframework.data.repository.query.Param;
  * Repository interface for performing CRUD operations on {@link AuthorizationEntity} objects.
  * Extends {@link JpaRepository}, providing basic CRUD functionality and query methods.
  */
-public interface JpaAuthorizationRepository extends JpaRepository<AuthorizationEntity, String> {
+public interface JpaAuthorizationRepository
+    extends JpaRepository<AuthorizationEntity, AuthorizationEntity.AuthorizationId> {
+
+  /**
+   * Finds an AuthorizationEntity by its authorization ID.
+   *
+   * @param id The ID of the authorization entity to find.
+   * @return An Optional containing the found AuthorizationEntity, or an empty Optional if no entity
+   *     with the given ID is found.
+   */
+  @Query("SELECT a FROM AuthorizationEntity a WHERE a.id = :id")
+  Optional<AuthorizationEntity> findByAuthorizationId(String id);
 
   /**
    * Finds an authorization entity by registered client ID and principal ID.

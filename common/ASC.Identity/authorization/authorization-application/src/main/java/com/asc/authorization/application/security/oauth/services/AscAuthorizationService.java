@@ -87,7 +87,9 @@ public class AscAuthorizationService implements OAuth2AuthorizationService {
       MDC.put("id", authorization.getId());
       log.info("Removing authorization by id");
 
-      jpaAuthorizationRepository.deleteById(authorization.getId());
+      jpaAuthorizationRepository.deleteById(
+          new AuthorizationEntity.AuthorizationId(
+              authorization.getRegisteredClientId(), authorization.getPrincipalName()));
 
       log.info("Authorization removed successfully");
     } catch (Exception e) {
@@ -111,7 +113,7 @@ public class AscAuthorizationService implements OAuth2AuthorizationService {
 
     try {
       return jpaAuthorizationRepository
-          .findById(id)
+          .findByAuthorizationId(id)
           .filter(
               e ->
                   registeredClientAccessibilityRepository.validateClientAccessibility(
