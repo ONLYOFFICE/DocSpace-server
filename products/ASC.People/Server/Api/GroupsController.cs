@@ -59,7 +59,7 @@ public class GroupController(
     /// <path>api/2.0/groups</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
-    [Tags("Groups")]
+    [Tags("Group")]
     [HttpGet]
     public async IAsyncEnumerable<GroupDto> GetGroupsAsync(Guid? userId, bool? manager)
     {
@@ -100,7 +100,7 @@ public class GroupController(
     /// </remarks>
     /// <path>api/2.0/groups/{id}</path>
     /// <httpMethod>GET</httpMethod>
-    [Tags("Groups")]
+    [Tags("Group")]
     [HttpGet("{id:guid}")]
     public async Task<GroupDto> GetGroupAsync(Guid id)
     {
@@ -120,7 +120,7 @@ public class GroupController(
     /// <path>api/2.0/groups/user/{userid}</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
-    [Tags("Groups")]
+    [Tags("Group")]
     [HttpGet("user/{userid:guid}")]
     public async Task<IEnumerable<GroupSummaryDto>> GetByUserIdAsync(Guid userid)
     {
@@ -146,7 +146,7 @@ public class GroupController(
     /// <returns type="ASC.People.ApiModels.ResponseDto.GroupDto, ASC.People">Newly created group with the detailed information</returns>
     /// <path>api/2.0/groups</path>
     /// <httpMethod>POST</httpMethod>
-    [Tags("Groups")]
+    [Tags("Group")]
     [HttpPost]
     public async Task<GroupDto> AddGroupAsync(GroupRequestDto inDto)
     {
@@ -180,7 +180,7 @@ public class GroupController(
     /// <returns type="ASC.People.ApiModels.ResponseDto.GroupDto, ASC.People">Updated group with the detailed information</returns>
     /// <path>api/2.0/groups/{id}</path>
     /// <httpMethod>PUT</httpMethod>
-    [Tags("Groups")]
+    [Tags("Group")]
     [HttpPut("{id:guid}")]
     public async Task<GroupDto> UpdateGroupAsync(Guid id, UpdateGroupRequestDto inDto)
     {
@@ -224,7 +224,7 @@ public class GroupController(
     /// <returns type="Microsoft.AspNetCore.Mvc.NoContentResult, Microsoft.AspNetCore.Mvc">No content</returns>
     /// <path>api/2.0/groups/{id}</path>
     /// <httpMethod>DELETE</httpMethod>
-    [Tags("Groups")]
+    [Tags("Group")]
     [HttpDelete("{id:guid}")]
     public async Task<NoContentResult> DeleteGroupAsync(Guid id)
     { 
@@ -251,7 +251,7 @@ public class GroupController(
     /// <returns type="ASC.People.ApiModels.ResponseDto.GroupDto, ASC.People">Group with the detailed information</returns>
     /// <path>api/2.0/groups/{fromId}/members/{toId}</path>
     /// <httpMethod>PUT</httpMethod>
-    [Tags("Groups")]
+    [Tags("Group")]
     [HttpPut("{fromId:guid}/members/{toId:guid}")]
     public async Task<GroupDto> TransferMembersToAsync(Guid fromId, Guid toId)
     {
@@ -281,7 +281,7 @@ public class GroupController(
     /// <returns type="ASC.People.ApiModels.ResponseDto.GroupDto, ASC.People">Group with the detailed information</returns>
     /// <path>api/2.0/groups/{id}/members</path>
     /// <httpMethod>POST</httpMethod>
-    [Tags("Groups")]
+    [Tags("Group")]
     [HttpPost("{id:guid}/members")]
     public async Task<GroupDto> SetMembersToAsync(Guid id, GroupRequestDto inDto)
     {
@@ -302,7 +302,7 @@ public class GroupController(
     /// <returns type="ASC.People.ApiModels.ResponseDto.GroupDto, ASC.People">Group with the detailed information</returns>
     /// <path>api/2.0/groups/{id}/members</path>
     /// <httpMethod>PUT</httpMethod>
-    [Tags("Groups")]
+    [Tags("Group")]
     [HttpPut("{id:guid}/members")]
     public async Task<GroupDto> AddMembersToAsync(Guid id, GroupRequestDto inDto)
     {
@@ -329,7 +329,7 @@ public class GroupController(
     /// <returns type="ASC.People.ApiModels.ResponseDto.GroupDto, ASC.People">Group with the detailed information</returns>
     /// <path>api/2.0/groups/{id}/manager</path>
     /// <httpMethod>PUT</httpMethod>
-    [Tags("Groups")]
+    [Tags("Group")]
     [HttpPut("{id:guid}/manager")]
     public async Task<GroupDto> SetManagerAsync(Guid id, SetManagerRequestDto inDto)
     {
@@ -358,7 +358,7 @@ public class GroupController(
     /// <returns type="ASC.People.ApiModels.ResponseDto.GroupDto, ASC.People">Group with the detailed information</returns>
     /// <path>api/2.0/groups/{id}/members</path>
     /// <httpMethod>DELETE</httpMethod>
-    [Tags("Groups")]
+    [Tags("Group")]
     [HttpDelete("{id:guid}/members")]
     public async Task<GroupDto> RemoveMembersFromAsync(Guid id, GroupRequestDto inDto)
     {
@@ -439,7 +439,7 @@ public class GroupControllerAdditional<T>(
     FileSecurity fileSecurity,
     GroupFullDtoHelper groupFullDtoHelper) : ControllerBase
 {
-    [Tags("Groups / Rooms")]
+    [Tags("Group / Rooms")]
     [HttpGet("room/{id}")]
     public async IAsyncEnumerable<GroupDto> GetGroupsWithSharedAsync(T id, bool? excludeShared)
     {

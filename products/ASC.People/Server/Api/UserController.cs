@@ -1930,7 +1930,7 @@ public class UserControllerAdditional<T>(EmployeeFullDtoHelper employeeFullDtoHe
         ApiContext apiContext, 
         IDaoFactory daoFactory) : ApiControllerBase
     {
-    [Tags("People / Rooms")]
+    [Tags("People / Search")]
     [HttpGet("room/{id}")]
     public async IAsyncEnumerable<EmployeeFullDto> GetUsersWithRoomSharedAsync(T id, EmployeeStatus? employeeStatus, EmployeeActivationStatus? activationStatus, bool? excludeShared)
     {
