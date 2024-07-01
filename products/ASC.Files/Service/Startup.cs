@@ -59,12 +59,12 @@ public class Startup : BaseWorkerStartup
 
         if (elasticLaunchType != ElasticLaunchType.Exclusive)
         {
-            services.AddActivePassiveHostedService<FileConverterService<int>>(DIHelper, Configuration);
-            services.AddActivePassiveHostedService<FileConverterService<string>>(DIHelper, Configuration);
+            services.AddActivePassiveHostedService<FileConverterService<int>>(Configuration);
+            services.AddActivePassiveHostedService<FileConverterService<string>>(Configuration);
 
             services.AddHostedService<ThumbnailBuilderService>();
-            services.AddActivePassiveHostedService<AutoCleanTrashService>(DIHelper, Configuration);
-            services.AddActivePassiveHostedService<DeleteExpiredService>(DIHelper, Configuration);
+            services.AddActivePassiveHostedService<AutoCleanTrashService>(Configuration);
+            services.AddActivePassiveHostedService<DeleteExpiredService>(Configuration);
         }
         
         services.RegisterQuotaFeature();

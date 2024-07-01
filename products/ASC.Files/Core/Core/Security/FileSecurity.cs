@@ -85,7 +85,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 {
                     {
                         SubjectType.User, [
-                            FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Editing, FileShare.Review,
+                            FileShare.RoomAdmin, FileShare.PowerUser, FileShare.Editing, FileShare.Review,
                             FileShare.Comment, FileShare.FillForms, FileShare.Read, FileShare.None
                         ]
                 },
@@ -96,7 +96,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 },
                 {
                         SubjectType.InvitationLink, [
-                            FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Editing, FileShare.Review,
+                            FileShare.RoomAdmin, FileShare.PowerUser, FileShare.Editing, FileShare.Review,
                             FileShare.Comment, FileShare.FillForms, FileShare.Read, FileShare.None
                         ]
                 },
@@ -108,8 +108,8 @@ public class FileSecurity(IDaoFactory daoFactory,
                 FolderType.PublicRoom,
                 new Dictionary<SubjectType, HashSet<FileShare>>
                 {
-                    { SubjectType.User, [FileShare.RoomAdmin, FileShare.Collaborator, FileShare.None] },
-                    { SubjectType.InvitationLink, [FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Read, FileShare.None] },
+                    { SubjectType.User, [FileShare.RoomAdmin, FileShare.PowerUser, FileShare.None] },
+                    { SubjectType.InvitationLink, [FileShare.RoomAdmin, FileShare.PowerUser, FileShare.Read, FileShare.None] },
                     { SubjectType.ExternalLink, [FileShare.Read, FileShare.None] },
                     { SubjectType.PrimaryExternalLink, [FileShare.Read, FileShare.None] }
                 }.ToFrozenDictionary()
@@ -118,9 +118,9 @@ public class FileSecurity(IDaoFactory daoFactory,
                 FolderType.FillingFormsRoom,
                 new Dictionary<SubjectType, HashSet<FileShare>>
                 {
-                    { SubjectType.User, [FileShare.RoomAdmin, FileShare.Collaborator, FileShare.FillForms, FileShare.None] },
+                    { SubjectType.User, [FileShare.RoomAdmin, FileShare.PowerUser, FileShare.FillForms, FileShare.None] },
                     { SubjectType.Group , [FileShare.FillForms, FileShare.None] },
-                    { SubjectType.InvitationLink, [FileShare.RoomAdmin, FileShare.Collaborator, FileShare.FillForms, FileShare.None] },
+                    { SubjectType.InvitationLink, [FileShare.RoomAdmin, FileShare.PowerUser, FileShare.FillForms, FileShare.None] },
                     { SubjectType.ExternalLink, [FileShare.FillForms, FileShare.Read, FileShare.None] },
                     { SubjectType.PrimaryExternalLink, [FileShare.FillForms, FileShare.Read, FileShare.None] }
                 }.ToFrozenDictionary()
@@ -129,9 +129,9 @@ public class FileSecurity(IDaoFactory daoFactory,
                 FolderType.EditingRoom,
                 new Dictionary<SubjectType, HashSet<FileShare>>
                 {
-                    { SubjectType.User, [FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Editing, FileShare.Read, FileShare.None] },
+                    { SubjectType.User, [FileShare.RoomAdmin, FileShare.PowerUser, FileShare.Editing, FileShare.Read, FileShare.None] },
                     { SubjectType.Group , [FileShare.Editing, FileShare.Read, FileShare.None] },
-                    { SubjectType.InvitationLink, [FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Editing, FileShare.Read, FileShare.None] }
+                    { SubjectType.InvitationLink, [FileShare.RoomAdmin, FileShare.PowerUser, FileShare.Editing, FileShare.Read, FileShare.None] }
                 }.ToFrozenDictionary()
             },
             {
@@ -139,7 +139,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 {
                     {
                         SubjectType.User, [
-                            FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Review, FileShare.Comment,
+                            FileShare.RoomAdmin, FileShare.PowerUser, FileShare.Review, FileShare.Comment,
                             FileShare.Read, FileShare.None
                         ]
                     },
@@ -150,7 +150,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                     },
                     {
                         SubjectType.InvitationLink, [
-                            FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Review, FileShare.Comment,
+                            FileShare.RoomAdmin, FileShare.PowerUser, FileShare.Review, FileShare.Comment,
                             FileShare.Read, FileShare.None
                         ]
                     }
@@ -160,18 +160,18 @@ public class FileSecurity(IDaoFactory daoFactory,
                 FolderType.ReadOnlyRoom,
                 new Dictionary<SubjectType, HashSet<FileShare>>
                 {
-                    { SubjectType.User, [FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Read, FileShare.None] },
+                    { SubjectType.User, [FileShare.RoomAdmin, FileShare.PowerUser, FileShare.Read, FileShare.None] },
                     { SubjectType.Group, [FileShare.Read, FileShare.None] },
-                    { SubjectType.InvitationLink, [FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Read, FileShare.None] }
+                    { SubjectType.InvitationLink, [FileShare.RoomAdmin, FileShare.PowerUser, FileShare.Read, FileShare.None] }
                 }.ToFrozenDictionary()
             },
             {
                 FolderType.FormRoom,
                 new Dictionary<SubjectType, HashSet<FileShare>>
                     {
-                    { SubjectType.User, [FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Editing, FileShare.FillForms, FileShare.Read, FileShare.None] },
+                    { SubjectType.User, [FileShare.RoomAdmin, FileShare.PowerUser, FileShare.Editing, FileShare.FillForms, FileShare.Read, FileShare.None] },
                     { SubjectType.Group, [FileShare.Editing, FileShare.FillForms, FileShare.Read, FileShare.None] },
-                    { SubjectType.InvitationLink, [FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Editing, FileShare.Read, FileShare.None] }
+                    { SubjectType.InvitationLink, [FileShare.RoomAdmin, FileShare.PowerUser, FileShare.Editing, FileShare.Read, FileShare.None] }
                 }.ToFrozenDictionary()
             }
         }.ToFrozenDictionary();
@@ -181,13 +181,13 @@ public class FileSecurity(IDaoFactory daoFactory,
         { EmployeeType.DocSpaceAdmin, [FileShare.RoomAdmin, FileShare.None] },
         {
             EmployeeType.RoomAdmin, [
-                FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Editing, FileShare.Review, FileShare.Comment,
+                FileShare.RoomAdmin, FileShare.PowerUser, FileShare.Editing, FileShare.Review, FileShare.Comment,
                 FileShare.FillForms, FileShare.Read, FileShare.None
             ]
         },
         {
             EmployeeType.Collaborator, [
-                FileShare.Collaborator, FileShare.Editing, FileShare.Review, FileShare.Comment, FileShare.FillForms,
+                FileShare.PowerUser, FileShare.Editing, FileShare.Review, FileShare.Comment, FileShare.FillForms,
                 FileShare.Read, FileShare.None
             ]
         },
@@ -769,7 +769,7 @@ public class FileSecurity(IDaoFactory daoFactory,
         return share switch
         {
             FileShare.RoomAdmin => EmployeeType.RoomAdmin,
-            FileShare.Collaborator => EmployeeType.Collaborator,
+            FileShare.PowerUser => EmployeeType.Collaborator,
             _ => EmployeeType.User
         };
     }
@@ -1168,7 +1168,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                         }
                         break;
                     default:
-                        if (e.Access is FileShare.Comment or FileShare.Review or FileShare.RoomAdmin or FileShare.Editing or FileShare.FillForms or FileShare.Collaborator)
+                        if (e.Access is FileShare.Comment or FileShare.Review or FileShare.RoomAdmin or FileShare.Editing or FileShare.FillForms or FileShare.PowerUser)
                         {
                             return true;
                         }
@@ -1185,7 +1185,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                         }
                         break;
                     default:
-                        if (e.Access is FileShare.FillForms or FileShare.RoomAdmin or FileShare.Editing or FileShare.Collaborator)
+                        if (e.Access is FileShare.FillForms or FileShare.RoomAdmin or FileShare.Editing or FileShare.PowerUser)
                         {
                             return true;
                         }
@@ -1202,7 +1202,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                         }
                         break;
                     default:
-                        if (e.Access is FileShare.RoomAdmin or FileShare.Editing or FileShare.Collaborator)
+                        if (e.Access is FileShare.RoomAdmin or FileShare.Editing or FileShare.PowerUser)
                         {
                             return true;
                         }
@@ -1219,7 +1219,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                         }
                         break;
                     default:
-                        if (e.Access is FileShare.Review or FileShare.RoomAdmin or FileShare.Editing or FileShare.Collaborator)
+                        if (e.Access is FileShare.Review or FileShare.RoomAdmin or FileShare.Editing or FileShare.PowerUser)
                         {
                             return true;
                         }
@@ -1233,7 +1233,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                     case FolderType.USER:
                         return false;
                     default:
-                        if (e.Access is FileShare.RoomAdmin or FileShare.Collaborator)
+                        if (e.Access is FileShare.RoomAdmin or FileShare.PowerUser)
                         {
                             return true;
                         }
@@ -1250,7 +1250,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                         }
                         break;
                     default:
-                        if (e.Access is FileShare.RoomAdmin or FileShare.Collaborator || (e.Access is FileShare.Editing && !MustConvert(e)))
+                        if (e.Access is FileShare.RoomAdmin or FileShare.PowerUser || (e.Access is FileShare.Editing && !MustConvert(e)))
                         {
                             return true;
                         }
@@ -1264,7 +1264,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                         return false;
                     default:
                         if (e.Access == FileShare.RoomAdmin ||
-                            (e.Access == FileShare.Collaborator && e.CreateBy == authContext.CurrentAccount.ID))
+                            (e.Access == FileShare.PowerUser && e.CreateBy == authContext.CurrentAccount.ID))
                         {
                             if (file is { RootFolderType: FolderType.VirtualRooms })
                             {
@@ -1289,7 +1289,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                         }
                         break;
                     default:
-                        if (e.Access is FileShare.RoomAdmin or FileShare.Collaborator || (e.Access is FileShare.Editing && !MustConvert(e)))
+                        if (e.Access is FileShare.RoomAdmin or FileShare.PowerUser || (e.Access is FileShare.Editing && !MustConvert(e)))
                         {
                             return true;
                         }
@@ -1316,7 +1316,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                         return false;
                     default:
                         if (e.Access == FileShare.RoomAdmin ||
-                            (e.Access == FileShare.Collaborator && e.CreateBy == authContext.CurrentAccount.ID))
+                            (e.Access == FileShare.PowerUser && e.CreateBy == authContext.CurrentAccount.ID))
                         {
                             return true;
                         }
@@ -1333,7 +1333,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                         }
                         break;
                     default:
-                        if (e.Access is FileShare.RoomAdmin or FileShare.Editing or FileShare.Collaborator)
+                        if (e.Access is FileShare.RoomAdmin or FileShare.Editing or FileShare.PowerUser)
                         {
                             return true;
                         }
@@ -1346,7 +1346,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                     case FolderType.USER:
                         return false;
                     default:
-                        if (e.Access is FileShare.RoomAdmin or FileShare.Collaborator)
+                        if (e.Access is FileShare.RoomAdmin or FileShare.PowerUser)
                         {
                             return true;
                         }
@@ -1368,7 +1368,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                         }
                         break;
                     default:
-                        if (e.Access is FileShare.RoomAdmin or FileShare.Collaborator)
+                        if (e.Access is FileShare.RoomAdmin or FileShare.PowerUser)
                         {
                             return true;
                         }
@@ -1383,7 +1383,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                     case FolderType.USER:
                         return false;
                     default:
-                        if (e.Access is FileShare.RoomAdmin or FileShare.Collaborator)
+                        if (e.Access is FileShare.RoomAdmin or FileShare.PowerUser)
                         {
                             return true;
                         }
@@ -1402,7 +1402,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                         break;
                     default:
                         if (e.Access == FileShare.RoomAdmin ||
-                            (e.Access == FileShare.Collaborator && e.CreateBy == authContext.CurrentAccount.ID))
+                            (e.Access == FileShare.PowerUser && e.CreateBy == authContext.CurrentAccount.ID))
                         {
                             return true;
                         }
@@ -1416,7 +1416,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                         return false;
                     default:
                         if (e.Access == FileShare.RoomAdmin ||
-                            (e.Access == FileShare.Collaborator && e.CreateBy == authContext.CurrentAccount.ID))
+                            (e.Access == FileShare.PowerUser && e.CreateBy == authContext.CurrentAccount.ID))
                         {
                             return true;
                         }
@@ -1444,7 +1444,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                         return false;
                     default:
                         if ((e.Access == FileShare.RoomAdmin ||
-                             (e.Access == FileShare.Collaborator && e.CreateBy == authContext.CurrentAccount.ID))
+                             (e.Access == FileShare.PowerUser && e.CreateBy == authContext.CurrentAccount.ID))
                             && !isRoom)
                         {
                             return true;
@@ -1458,7 +1458,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                     case FolderType.USER:
                         return false;
                     default:
-                        if (e.Access is FileShare.RoomAdmin or FileShare.Collaborator && 
+                        if (e.Access is FileShare.RoomAdmin or FileShare.PowerUser &&
                             file is { FilterType: FilterType.OFormTemplateOnly })
                         {
                             return true;
@@ -2098,9 +2098,9 @@ public class FileSecurity(IDaoFactory daoFactory,
         return await GetUserSubjectsAsync<int>(userId, null);
     }
 
-    public async IAsyncEnumerable<FileShareRecord<T>> GetUserRecordsAsync<T>()
+    public async IAsyncEnumerable<FileShareRecord<string>> GetUserRecordsAsync()
     {
-        var securityDao = daoFactory.GetSecurityDao<T>();
+        var securityDao = daoFactory.GetSecurityDao<string>();
         var currentUserSubjects = await GetUserSubjectsAsync(authContext.CurrentAccount.ID);
 
         await foreach (var record in securityDao.GetSharesAsync(currentUserSubjects))

@@ -120,12 +120,12 @@ public class FileOperationsManager(
 {
     public async Task<List<FileOperationResult>> GetOperationResults()
     {
-        return await fileOperationsManagerHolder.GetOperationResults(GetUserId());
+        return await fileOperationsManagerHolder.GetOperationResults(await GetUserIdAsync());
     }
 
     public async Task<List<FileOperationResult>> CancelOperations(string id = null)
     {
-        return await fileOperationsManagerHolder.CancelOperations(GetUserId(), id);
+        return await fileOperationsManagerHolder.CancelOperations(await GetUserIdAsync(), id);
     }
     
     public async Task Enqueue<T, T1, T2>(string taskId, T1 thirdPartyData, T2 data) 
@@ -167,7 +167,7 @@ public class FileOperationsManager(
     
     public async Task PublishDownload(IEnumerable<JsonElement> folders, IEnumerable<FilesDownloadOperationItem<JsonElement>> files, string baseUri)
     {
-        await fileOperationsManagerHolder.CheckRunning(GetUserId(), FileOperationType.Download);
+        await fileOperationsManagerHolder.CheckRunning(await GetUserIdAsync(), FileOperationType.Download);
         if ((folders == null || !folders.Any()) && (files == null || !files.Any()))
         {
             return;
@@ -186,7 +186,7 @@ public class FileOperationsManager(
         var data = new FileDownloadOperationData<int>(folderIntIds, fileIntIds, tenantId, GetHttpHeaders(), sessionSnapshot, baseUri);
         var thirdPartyData = new FileDownloadOperationData<string>(folderStringIds, fileStringIds, tenantId, GetHttpHeaders(), sessionSnapshot, baseUri);
         
-        eventBus.Publish(new BulkDownloadIntegrationEvent(GetUserId(), tenantId)
+        eventBus.Publish(new BulkDownloadIntegrationEvent(await GetUserIdAsync(), tenantId)
         {
             TaskId = taskId,
             Data = data,
@@ -445,9 +445,9 @@ public class FileOperationsManager(
         return (resultInt, resultString);
     }
 
-    private Guid GetUserId()
+    private async Task<Guid> GetUserIdAsync()
     {
-        return authContext.IsAuthenticated ? authContext.CurrentAccount.ID : externalShare.GetSessionId();
+        return authContext.IsAuthenticated ? authContext.CurrentAccount.ID : await externalShare.GetSessionIdAsync();
     }
     
     private Dictionary<string, string> GetHttpHeaders()

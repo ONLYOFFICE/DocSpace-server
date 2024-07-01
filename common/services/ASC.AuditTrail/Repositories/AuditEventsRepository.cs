@@ -79,35 +79,25 @@ public class AuditEventsRepository(AuditActionMapper auditActionMapper,
         var tenant = await tenantManager.GetCurrentTenantIdAsync();
         await using var auditTrailContext = await dbContextFactory.CreateDbContextAsync();
 
-        var query =
-           from q in auditTrailContext.AuditEvents
-           from p in auditTrailContext.Users.Where(p => q.UserId == p.Id).DefaultIfEmpty()
-           where q.TenantId == tenant
-           orderby q.Date descending
-           select new AuditEventQuery
-           {
-               Event = q,
-               FirstName = p.FirstName,
-               LastName = p.LastName,
-               UserName = p.UserName
-           };
+        var q1 = auditTrailContext.AuditEvents
+            .Where(r => r.TenantId == tenant);
 
         if (userId.HasValue && userId.Value != Guid.Empty)
         {
-            query = query.Where(r => r.Event.UserId == userId.Value);
+            q1 = q1.Where(r => r.UserId == userId.Value);
         }
         else if (withoutUserId.HasValue && withoutUserId.Value != Guid.Empty)
         {
-            query = query.Where(r => r.Event.UserId != withoutUserId.Value);
+            q1 = q1.Where(r => r.UserId != withoutUserId.Value);
         }
 
-        if (actions != null && actions.Any() && actions[0] != null && actions[0] != MessageAction.None)
+        if (actions != null && actions.Count != 0 && actions[0] != null && actions[0] != MessageAction.None)
         {
-            query = query.Where(r => actions.Contains(r.Event.Action != null ? (MessageAction)r.Event.Action : MessageAction.None));
+            q1 = q1.Where(r => actions.Contains(r.Action != null ? (MessageAction)r.Action : MessageAction.None));
 
             if (target != null)
             {
-                query = query.Where(r => r.Event.Target == target);
+                q1 = q1.Where(r => r.Target == target);
             }
         }
         else
@@ -142,6 +132,7 @@ public class AuditEventsRepository(AuditActionMapper auditActionMapper,
                         .SelectMany(r => r.Mappers)
                         .SelectMany(r => r.Actions);
             }
+            
             var isNeedFindEntry = entry.HasValue && entry.Value != EntryType.None && target != null;
             if (isFindActionType || isNeedFindEntry)
             {
@@ -152,12 +143,12 @@ public class AuditEventsRepository(AuditActionMapper auditActionMapper,
 
             if (isNeedFindEntry)
             {
-                query = FindByEntry(query, entry.Value, target, actionsList);
+                q1 = FindByEntry(q1, entry.Value, target, actionsList);
             }
             else
             {
                 var keys = actionsList.Select(x => (int)x.Key).ToList();
-                query = query.Where(r => keys.Contains(r.Event.Action ?? 0));
+                q1 = q1.Where(r => keys.Contains(r.Action ?? 0));
             }
         }
 
@@ -168,36 +159,53 @@ public class AuditEventsRepository(AuditActionMapper auditActionMapper,
         {
             if (hasFromFilter)
             {
-                query = hasToFilter ? query.Where(q => q.Event.Date >= from.Value && q.Event.Date <= to.Value) : query.Where(q => q.Event.Date >= from.Value);
+                q1 = hasToFilter ? q1.Where(q => q.Date >= from.Value && q.Date <= to.Value) : q1.Where(q => q.Date >= from.Value);
             }
             else if (hasToFilter)
             {
-                query = query.Where(q => q.Event.Date <= to.Value);
+                q1 = q1.Where(q => q.Date <= to.Value);
             }
         }
+        
+        q1 = q1.OrderByDescending(r => r.Date);
 
         if (startIndex > 0)
         {
-            query = query.Skip(startIndex);
+            q1 = q1.Skip(startIndex);
         }
+        
         if (limit > 0)
         {
-            query = query.Take(limit);
+            q1 = q1.Take(limit);
         }
-        var events = mapper.Map<List<AuditEventQuery>, IEnumerable<AuditEvent>>(await query.ToListAsync());
+
+        var q2 = q1.Select(x => new AuditEventQuery
+        {
+            Event = x,
+            UserData = auditTrailContext.Users.Where(u => u.TenantId == tenant && u.Id == x.UserId).Select(u => new UserData
+            {
+                FirstName = u.FirstName,
+                LastName = u.LastName
+            }).FirstOrDefault()
+        });
+        
+        var events = mapper.Map<List<AuditEventQuery>, IEnumerable<AuditEvent>>(await q2.ToListAsync());
+        
         foreach (var e in events)
         {
             await geolocationHelper.AddGeolocationAsync(e);
         }
+        
         return events;
     }
 
-    private static IQueryable<AuditEventQuery> FindByEntry(IQueryable<AuditEventQuery> q, EntryType entry, string target, IEnumerable<KeyValuePair<MessageAction, MessageMaps>> actions)
+    private static IQueryable<DbAuditEvent> FindByEntry(IQueryable<DbAuditEvent> q, EntryType entry, string target, IEnumerable<KeyValuePair<MessageAction, MessageMaps>> actions)
     {
         var dict = actions.Where(d => d.Value.EntryType1 == entry || d.Value.EntryType2 == entry).ToDictionary(a => (int)a.Key, a => a.Value);
 
-        q = q.Where(r => dict.Keys.Contains(r.Event.Action.Value)
-            && r.Event.Target.Contains(target));
+        q = q.Where(r => dict.Keys.Contains(r.Action.Value)
+            && r.Target.Contains(target));
+        
         return q;
     }
 

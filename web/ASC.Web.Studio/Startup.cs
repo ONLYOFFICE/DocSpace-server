@@ -24,11 +24,15 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Threading.Channels;
+
+using ASC.MessagingSystem.Data;
+
 namespace ASC.Web.Studio;
 
 public class Startup : BaseStartup
 {
-    public Startup(IConfiguration configuration, IHostEnvironment hostEnvironment) : base(configuration, hostEnvironment)
+    public Startup(IConfiguration configuration) : base(configuration)
     {
         if (String.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
         {
@@ -83,6 +87,13 @@ public class Startup : BaseStartup
         services.AddHostedService<WorkerService>();
         services.TryAddSingleton(new ConcurrentQueue<WebhookRequestIntegrationEvent>());
 
+        services.AddSingleton(Channel.CreateUnbounded<EventData>());
+        services.AddSingleton(svc => svc.GetRequiredService<Channel<EventData>>().Reader);
+        services.AddSingleton(svc => svc.GetRequiredService<Channel<EventData>>().Writer);
+        services.AddScoped<EventDataIntegrationEventHandler>();
+        services.AddSingleton<MessageSenderService>();
+        services.AddHostedService<MessageSenderService>();
+        
         var lifeTime = TimeSpan.FromMinutes(5);
 
         Func<IServiceProvider, HttpRequestMessage, IAsyncPolicy<HttpResponseMessage>> policyHandler = (s, _) =>

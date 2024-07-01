@@ -32,6 +32,7 @@ global using System.Text.Json;
 global using System.Web;
 
 global using ASC.Api.Core;
+global using ASC.Api.Core.Core;
 global using ASC.Api.Core.Convention;
 global using ASC.Core.Common;
 global using ASC.Api.Core.Extensions;
@@ -64,6 +65,7 @@ global using ASC.Files.Core.EF;
 global using ASC.Files.Core.Resources;
 global using ASC.Files.Core.Security;
 global using ASC.Files.Core.VirtualRooms;
+global using ASC.Web.Files.Helpers;
 global using ASC.MessagingSystem.Core;
 global using ASC.MessagingSystem.EF.Model;
 global using ASC.People;

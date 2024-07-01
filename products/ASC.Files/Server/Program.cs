@@ -63,7 +63,7 @@ try
         serverOptions.Limits.MinResponseDataRate = null;
     });
 
-    var startup = new Startup(builder.Configuration, builder.Environment);
+    var startup = new Startup(builder.Configuration);
 
     await startup.ConfigureServices(builder.Services);
 
