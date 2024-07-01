@@ -236,7 +236,9 @@ public interface IFolderDao<T>
     
 
     Task<string> GetBackupExtensionAsync(T folderId);
-
+    
+    Task<bool> IsExistAsync(string title, T folderId);
+    
     #region Only for TMFolderDao
 
     /// <summary>

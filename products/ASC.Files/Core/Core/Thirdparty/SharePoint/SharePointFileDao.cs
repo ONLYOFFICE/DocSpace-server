@@ -40,7 +40,8 @@ internal class SharePointFileDao(
     CrossDao crossDao,
     SharePointDaoSelector sharePointDaoSelector,
     IFileDao<int> fileDao,
-    SharePointDaoSelector regexDaoSelectorBase)
+    SharePointDaoSelector regexDaoSelectorBase,
+    Global global)
     : SharePointDaoBase(daoFactory, serviceProvider, userManager, tenantManager, tenantUtil, dbContextManager, fileUtility, regexDaoSelectorBase), IFileDao<string>
 {
     private const string BytesTransferredKey = "BytesTransferred";
@@ -323,7 +324,7 @@ internal class SharePointFileDao(
             if (!sharePointFile.Name.Equals(file.Title))
             {
                 var folder = await SharePointProviderInfo.GetFolderByIdAsync(file.ParentId);
-                file.Title = await GetAvailableTitleAsync(file.Title, folder, IsExistAsync);
+                file.Title = await global.GetAvailableTitleAsync(file.Title, folder.ServerRelativeUrl, IsExistAsync);
 
                 var id = await SharePointProviderInfo.RenameFileAsync(DaoSelector.ConvertId(resultFile.Id), file.Title);
 
@@ -336,7 +337,7 @@ internal class SharePointFileDao(
         if (file.ParentId != null)
         {
             var folder = await SharePointProviderInfo.GetFolderByIdAsync(file.ParentId);
-            file.Title = await GetAvailableTitleAsync(file.Title, folder, IsExistAsync);
+            file.Title = await global.GetAvailableTitleAsync(file.Title, folder.ServerRelativeUrl, IsExistAsync);
 
             return SharePointProviderInfo.ToFile(await SharePointProviderInfo.CreateFileAsync(folder.ServerRelativeUrl + "/" + file.Title, fileStream));
 
@@ -358,19 +359,13 @@ internal class SharePointFileDao(
         await SharePointProviderInfo.DeleteFileAsync(fileId);
     }
 
-    public async Task<bool> IsExistAsync(string title, object folderId)
+    public async Task<bool> IsExistAsync(string title, string folderId)
     {
         var files = await SharePointProviderInfo.GetFolderFilesAsync(folderId);
 
         return files.Any(item => item.Name.Equals(title, StringComparison.InvariantCultureIgnoreCase));
     }
-
-    public async Task<bool> IsExistAsync(string title, Folder folder)
-    {
-        var files = await SharePointProviderInfo.GetFolderFilesAsync(folder.ServerRelativeUrl);
-
-        return files.Any(item => item.Name.Equals(title, StringComparison.InvariantCultureIgnoreCase));
-    }
+    
 
     public async Task<TTo> MoveFileAsync<TTo>(string fileId, TTo toFolderId, bool deleteLinks = false)
     {

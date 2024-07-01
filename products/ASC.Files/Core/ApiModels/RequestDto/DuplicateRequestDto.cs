@@ -24,34 +24,15 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core.Core.Thirdparty;
+namespace ASC.Files.Core.ApiModels.RequestDto;
 
-[Scope]
-internal interface IDaoBase<TFile, TFolder, TItem>
-    where TFile : class, TItem
-    where TFolder : class, TItem
-    where TItem : class
+public class DuplicateRequestDto
 {
-    void Init(string pathPrefix, IProviderInfo<TFile, TFolder, TItem> providerInfo);
-    string GetName(TItem item);
-    string GetId(TItem item);
-    bool IsRoot(TFolder folder);
-    string MakeThirdId(object entryId);
-    string GetParentFolderId(TItem item);
-    string MakeId(TItem item);
-    string MakeId(string path = null);
-    string MakeFolderTitle(TFolder folder);
-    string MakeFileTitle(TFile file);
-    Folder<string> ToFolder(TFolder folder);
-    File<string> ToFile(TFile file);
-    Task<Folder<string>> GetRootFolderAsync();
-    Task<TFolder> CreateFolderAsync(string title, string folderId);
-    Task<TFolder> GetFolderAsync(string folderId);
-    Task<TFile> GetFileAsync(string fileId);
-    Task<IEnumerable<string>> GetChildrenAsync(string folderId);
-    Task<List<TItem>> GetItemsAsync(string parentId, bool? folder = null);
-    bool CheckInvalidFilter(FilterType filterType);
-    Task UpdateIdAsync(string oldValue, string newValue);
-    Folder<string> GetErrorRoom();
-    bool IsRoom(string folderId);
+    /// <summary>List of folder IDs</summary>
+    /// <type>System.Collections.Generic.IEnumerable{System.Text.Json.JsonElement}, System.Collections.Generic</type>
+    public IEnumerable<JsonElement> FolderIds { get; set; } = new List<JsonElement>();
+
+    /// <summary>List of file IDs</summary>
+    /// <type>System.Collections.Generic.IEnumerable{System.Text.Json.JsonElement}, System.Collections.Generic</type>
+    public IEnumerable<JsonElement> FileIds { get; set; } = new List<JsonElement>();
 }
