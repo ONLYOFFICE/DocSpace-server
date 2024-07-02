@@ -101,11 +101,12 @@ public class PeopleController(
     {
         var scheme = commonMethods.GetRequestScheme();
         var tenantDomain = await GetTenantDomainAsync(user.TenantId);
-        return string.Format("{0}{1}{2}/{3}",
+        var profileUrl = await commonLinkUtility.GetUserProfileAsync(user.Id);
+        return string.Format("{0}{1}{2}{3}",
                              scheme,
                              Uri.SchemeDelimiter,
                              tenantDomain,
-                             "Products/People/Profile.aspx?" + commonLinkUtility.GetUserParamsPair(user));
+                             profileUrl.TrimStart('~'));
     }
 
     #endregion
