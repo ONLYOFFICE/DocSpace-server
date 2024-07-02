@@ -926,6 +926,7 @@ internal class FileDao(
             return default;
         }
 
+        var tagDao = daoFactory.GetTagDao<int>();
         var folderDao = daoFactory.GetFolderDao<int>();
         var toFolder = await folderDao.GetFolderAsync(toFolderId);
         var file = await GetFileAsync(fileId);
@@ -933,7 +934,15 @@ internal class FileDao(
         var fileContentLength = file.ContentLength;
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
-        if (DocSpaceHelper.IsRoom(toFolder.FolderType))
+        var (fromRoomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(fromFolder);
+        var (toRoomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(toFolder);
+
+        var fromRoomTags = tagDao.GetTagsAsync(fileId, FileEntryType.File, TagType.FromRoom);
+        var fromRoomTag = await fromRoomTags.FirstOrDefaultAsync();
+
+        var trashId = await globalFolder.GetFolderTrashAsync(daoFactory);
+
+        if (toRoomId != -1 && fromRoomId != toRoomId)
         {
             var quotaRoomSettings = await _settingsManager.LoadAsync<TenantRoomQuotaSettings>();
             if (quotaRoomSettings.EnableQuota)
@@ -947,10 +956,11 @@ internal class FileDao(
                     }
                 }
             }
-        }else if ((toFolder.FolderType == FolderType.USER || toFolder.FolderType == FolderType.DEFAULT) && 
-                fromFolder.FolderType != FolderType.TRASH && 
-                fromFolder.FolderType != FolderType.USER && 
-                fromFolder.FolderType != FolderType.DEFAULT)
+        }
+        else if (fromRoomId != -1 &&
+                (toFolder.FolderType == FolderType.USER || toFolder.FolderType == FolderType.DEFAULT) &&
+                toRoomId == -1 ||
+                (fromFolder.Id == trashId && fromRoomTag != null))
         {
             var quotaUserSettings = await _settingsManager.LoadAsync<TenantUserQuotaSettings>();
             if (quotaUserSettings.EnableQuota)
@@ -969,9 +979,6 @@ internal class FileDao(
             }
         }
 
-        var trashIdTask = globalFolder.GetFolderTrashAsync(daoFactory);
-
-
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var strategy = filesDbContext.Database.CreateExecutionStrategy();
 
@@ -985,7 +992,6 @@ internal class FileDao(
 
             await using (var tx = await context.Database.BeginTransactionAsync())
             {
-                var trashId = await trashIdTask;
                 var oldParentId = (await q.FirstOrDefaultAsync())?.ParentId;
 
                 if (trashId.Equals(toFolderId))
@@ -1002,7 +1008,6 @@ internal class FileDao(
                     await SetCustomOrder(filesDbContext, fileId, toFolderId);
                 }
 
-                var tagDao = daoFactory.GetTagDao<int>();
                 var oldFolder = await folderDao.GetFolderAsync(oldParentId.Value);
                 var (toFolderRoomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(toFolder);
                 var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(oldFolder);
@@ -1023,9 +1028,6 @@ internal class FileDao(
                 }
                 else if (oldParentId == trashId || roomId != -1 || toFolderRoomId != -1)
                 {
-                    var fromRoomTags = tagDao.GetTagsAsync(fileId, FileEntryType.File, TagType.FromRoom);
-                    var fromRoomTag = await fromRoomTags.FirstOrDefaultAsync();
-
                     if ((toFolderId != archiveId && oldFolder.Id != archiveId) && 
                         toFolderRoomId == -1 && 
                         ((oldParentId == trashId && fromRoomTag != null) || roomId != -1))

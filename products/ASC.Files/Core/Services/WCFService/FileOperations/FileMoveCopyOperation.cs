@@ -308,6 +308,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         var settingsManager = scope.ServiceProvider.GetService<SettingsManager>();
         var tenantManager = scope.ServiceProvider.GetService<TenantManager>();
         var quotaService = scope.ServiceProvider.GetService<IQuotaService>();
+        var cache = scope.ServiceProvider.GetService<ICache>();
         var distributedLockProvider = scope.ServiceProvider.GetRequiredService<IDistributedLockProvider>();
 
         var toFolderId = toFolder.Id;
@@ -320,6 +321,16 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
             CancellationToken.ThrowIfCancellationRequested();
 
             var folder = await FolderDao.GetFolderAsync(folderId);
+            var cacheKey = "parentRoomInfo" + folder.ParentId;
+
+            var parentRoomId = cache.Get<string>(cacheKey);
+
+            if (parentRoomId == null)
+            {
+                var (rId, _) = await FolderDao.GetParentRoomInfoFromFileEntryAsync(folder);
+                cache.Insert(cacheKey, rId.ToString(), TimeSpan.FromMinutes(5));
+                parentRoomId = rId.ToString();
+            }
 
             var isRoom = DocSpaceHelper.IsRoom(folder.FolderType);
             var isThirdPartyRoom = isRoom && folder.ProviderEntry;
@@ -331,21 +342,30 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
             var canUseUserQuota = true;
             long roomQuotaLimit = 0;
             long userQuotaLimit = 0;
-            if (!isRoom && DocSpaceHelper.IsRoom(toFolder.FolderType))
+
+            var toFolderRoom = toFolderParents.FirstOrDefault(f => DocSpaceHelper.IsRoom(f.FolderType));
+
+            if (!isRoom &&
+                toFolderRoom != null &&
+                !string.Equals(parentRoomId, toFolderRoom.Id.ToString()))
             {
                 var quotaRoomSettings = await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
                 if (quotaRoomSettings.EnableQuota)
                 {
-                    roomQuotaLimit = toFolder.SettingsQuota == TenantEntityQuotaSettings.DefaultQuotaValue ? quotaRoomSettings.DefaultQuota : toFolder.SettingsQuota;
+                    roomQuotaLimit = toFolderRoom.SettingsQuota == TenantEntityQuotaSettings.DefaultQuotaValue ? quotaRoomSettings.DefaultQuota : toFolderRoom.SettingsQuota;
                     if (roomQuotaLimit != TenantEntityQuotaSettings.NoQuota)
                     {
-                        if (roomQuotaLimit - toFolder.Counter < folder.Counter)
+                        if (roomQuotaLimit - toFolderRoom.Counter < folder.Counter)
                         {
                             canUseRoomQuota = false;
                         }
                     }
                 }
-            }else if (!isRoom && (toFolder.FolderType == FolderType.USER || toFolder.FolderType == FolderType.DEFAULT))
+            }
+            if (!isRoom &&
+                toFolderRoom == null &&
+                (int.TryParse(parentRoomId, out var curRId) && curRId != -1) &&
+                (toFolder.FolderType == FolderType.USER || toFolder.FolderType == FolderType.DEFAULT))
             {
                 var tenantId = await tenantManager.GetCurrentTenantIdAsync();
                 var quotaUserSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
