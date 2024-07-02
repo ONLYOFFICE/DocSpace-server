@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,36 +24,28 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Core.Common.EF;
-using ASC.Core.Common.Notify.Engine;
-using ASC.Files.Core.Core;
-using ASC.Files.Core.EF;
-using ASC.Web.Core;
-using ASC.Web.Files.Configuration;
+using ASC.Web.Files.Services.WCFService.FileOperations;
 
-namespace ASC.Studio.Notify;
+namespace ASC.Files.Service.IntegrationEvents.EventHandling;
 
-public class Startup : BaseWorkerStartup
+[Scope]
+public class DuplicateIntegrationEventHandler(
+    ILogger<DuplicateIntegrationEventHandler> logger,
+    FileOperationsManager fileOperationsManager,
+    TenantManager tenantManager,
+    SecurityContext securityContext)
+    : IIntegrationEventHandler<DuplicateIntegrationEvent>
 {
-    public Startup(IConfiguration configuration, IHostEnvironment hostEnvironment)
-        : base(configuration, hostEnvironment)
+    public async Task Handle(DuplicateIntegrationEvent @event)
     {
-        if (String.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
+        CustomSynchronizationContext.CreateContext();
+        using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
         {
-            configuration["RabbitMQ:ClientProvidedName"] = Program.AppName;
-        }        
-    }
-
-    public override async Task ConfigureServices(IServiceCollection services)
-    {
-        await base.ConfigureServices(services);
-
-        services.AddHttpClient();
-        services.AddAutoMapper(GetAutoMapperProfileAssemblies());//toDo
-        services.AddHostedService<ServiceLauncher>();
-        services.AddScoped<IWebItem, ProductEntryPoint>();
-        services.AddBaseDbContextPool<FilesDbContext>();
-        services.AddActivePassiveHostedService<NotifySchedulerService>(Configuration, "StudioNotifySchedulerService");
-        services.RegisterQuotaFeature();
+            logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
+            await tenantManager.SetCurrentTenantAsync(@event.TenantId);
+            await securityContext.AuthenticateMeWithoutCookieAsync(@event.TenantId, @event.CreateBy);
+            await fileOperationsManager.Enqueue<FileDuplicateOperation, FileOperationData<string>, FileOperationData<int>>(@event.TaskId, @event.ThirdPartyData, @event.Data);
+        }
     }
 }
+

@@ -409,7 +409,7 @@ public class SharePointProviderInfo(ILogger<SharePointProviderInfo> logger,
         return await GetFolderByIdAsync(GetParentFolderId(serverRelativeUrl));
     }
 
-    public async Task<IEnumerable<File>> GetFolderFilesAsync(object id)
+    public async Task<IEnumerable<File>> GetFolderFilesAsync(string id)
     {
         var folder = await GetFolderByIdAsync(id);
         if (folder is SharePointFolderErrorEntry)

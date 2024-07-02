@@ -1511,26 +1511,6 @@ public class FileStorageService //: IFileStorageService
 
             if (!file.ProviderEntry)
             {
-                var completedFile = await entryManager.CompleteVersionFileAsync(file.Id, 0, false);
-                
-                if (file.ThumbnailStatus == Thumbnail.Created)
-                {
-                    var dataStore = await globalStore.GetStoreAsync();
-
-                    foreach (var size in thumbnailSettings.Sizes)
-                    {
-                        await dataStore.CopyAsync(string.Empty,
-                            fileDao.GetUniqThumbnailPath(file, size.Width, size.Height),
-                            string.Empty,
-                            fileDao.GetUniqThumbnailPath(completedFile, size.Width, size.Height));
-                    }
-
-                    await fileDao.SetThumbnailStatusAsync(completedFile, Thumbnail.Created);
-
-                    completedFile.ThumbnailStatus = Thumbnail.Created;
-                }
-
-                file = completedFile;
                 await UpdateCommentAsync(file.Id, file.Version, FilesCommonResource.UnlockComment);
             }
         }
@@ -3079,7 +3059,7 @@ public class FileStorageService //: IFileStorageService
         return InternalSharedUsersAsync(fileId);
     }
 
-    public async Task<FileReference<T>> GetReferenceDataAsync<T>(T fileId, string portalName, T sourceFileId, string path)
+    public async Task<FileReference<T>> GetReferenceDataAsync<T>(T fileId, string portalName, T sourceFileId, string path, string link)
     {
         File<T> file = null;
         var fileDao = daoFactory.GetFileDao<T>();
@@ -3088,7 +3068,7 @@ public class FileStorageService //: IFileStorageService
             file = await fileDao.GetFileAsync(fileId);
         }
 
-        if (file == null)
+        if (file == null && !string.IsNullOrEmpty(path) && string.IsNullOrEmpty(link))
         {
             var source = await fileDao.GetFileAsync(sourceFileId);
 
@@ -3111,6 +3091,30 @@ public class FileStorageService //: IFileStorageService
 
             var list = fileDao.GetFilesAsync(folder.Id, new OrderBy(SortedByType.AZ, true), FilterType.FilesOnly, false, Guid.Empty, path, null, false);
             file = await list.FirstOrDefaultAsync(fileItem => fileItem.Title == path);
+        }
+
+        if (file == null
+                    && !string.IsNullOrEmpty(link)
+                    && link.StartsWith(baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath)))
+        {
+            var url = new UriBuilder(link);
+            var id = HttpUtility.ParseQueryString(url.Query)[FilesLinkUtility.FileId];
+            if (!string.IsNullOrEmpty(id))
+            {
+                if (fileId is string)
+                {
+                    var dao = daoFactory.GetFileDao<string>();
+                    file = await dao.GetFileAsync(id) as File<T>;
+                }
+                else
+                {
+                    if (int.TryParse(id, out var resultId))
+                    {
+                        var dao = daoFactory.GetFileDao<int>();
+                        file = await dao.GetFileAsync(resultId) as File<T>;
+                    }
+                }
+            }
         }
 
         if (!await fileSecurity.CanReadAsync(file))
@@ -3561,7 +3565,7 @@ public class FileStorageService //: IFileStorageService
                 var user = await userManager.GetUsersAsync(ace.Id);
 
                 var link = await invitationService.GetInvitationLinkAsync(user.Email, ace.Access, authContext.CurrentAccount.ID, room.Id.ToString());
-                await studioNotifyService.SendEmailRoomInviteAsync(user.Email, room.Title, link);
+                await studioNotifyService.SendEmailRoomInviteAsync(user.Email, room.Title, await urlShortener.GetShortenLinkAsync(link));
             }
 
             return;

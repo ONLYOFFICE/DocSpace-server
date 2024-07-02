@@ -330,7 +330,8 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
                         u.Group.UserGroupId == Constants.GroupAdmin.ID ? 1 :
                         u.Group.UserGroupId == Constants.GroupCollaborator.ID ? 3 : 4;
 
-                    q = (sortOrderAsc ? q1.OrderBy(orderByUserType) : q1.OrderByDescending(orderByUserType)).Select(r => r.User);
+                    q = (sortOrderAsc ? q1.OrderBy(orderByUserType).ThenBy(x => x.User.FirstName) 
+                        : q1.OrderByDescending(orderByUserType)).ThenBy(x => x.User.FirstName).Select(r => r.User);
                     break;
                 }
             case UserSortType.UsedSpace:

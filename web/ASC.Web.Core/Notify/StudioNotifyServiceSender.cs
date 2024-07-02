@@ -105,7 +105,11 @@ public class StudioNotifyWorker(TenantManager tenantManager,
     {
         baseCommonLinkUtility.ServerUri = item.BaseUrl;
         await tenantManager.SetCurrentTenantAsync(item.TenantId);
-        await securityContext.AuthenticateMeWithoutCookieAsync(item.TenantId, item.CreateBy);
+
+        if (item.CreateBy != Constants.Guest.ID)
+        {
+            await securityContext.AuthenticateMeWithoutCookieAsync(item.TenantId, item.CreateBy);
+        }
 
         var client = workContext.RegisterClient(serviceProvider, studioNotifyHelper.NotifySource);
 

@@ -29,16 +29,18 @@ using File = System.IO.File;
 namespace ASC.Files.Core.Core.Thirdparty.OneDrive;
 
 [Scope(typeof(ThirdPartyFileDao<Item, Item, Item>))]
-internal class OneDriveFileDao(UserManager userManager,
-        IDbContextFactory<FilesDbContext> dbContextFactory,
-        IDaoSelector<Item, Item, Item> daoSelector,
-        CrossDao crossDao,
-        IFileDao<int> fileDao,
-        IDaoBase<Item, Item, Item> dao,
-        SetupInfo setupInfo,
-        TempPath tempPath,
-        TenantManager tenantManager)
-    : ThirdPartyFileDao<Item, Item, Item>(userManager, dbContextFactory, daoSelector, crossDao, fileDao, dao, tenantManager)
+internal class OneDriveFileDao(
+    UserManager userManager,
+    IDbContextFactory<FilesDbContext> dbContextFactory,
+    IDaoSelector<Item, Item, Item> daoSelector,
+    CrossDao crossDao,
+    IFileDao<int> fileDao,
+    IDaoBase<Item, Item, Item> dao,
+    SetupInfo setupInfo,
+    TempPath tempPath,
+    TenantManager tenantManager,
+    Global global)
+    : ThirdPartyFileDao<Item, Item, Item>(userManager, dbContextFactory, daoSelector, crossDao, fileDao, dao, tenantManager, global)
 {
     protected override string UploadSessionKey => "OneDriveSession";
 

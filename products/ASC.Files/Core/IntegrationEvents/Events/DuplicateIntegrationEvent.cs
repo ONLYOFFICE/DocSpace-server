@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,36 +24,24 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Core.Common.EF;
-using ASC.Core.Common.Notify.Engine;
-using ASC.Files.Core.Core;
-using ASC.Files.Core.EF;
-using ASC.Web.Core;
-using ASC.Web.Files.Configuration;
+namespace ASC.Files.Core.IntegrationEvents.Events;
 
-namespace ASC.Studio.Notify;
-
-public class Startup : BaseWorkerStartup
+[ProtoContract]
+public record DuplicateIntegrationEvent : IntegrationEvent
 {
-    public Startup(IConfiguration configuration, IHostEnvironment hostEnvironment)
-        : base(configuration, hostEnvironment)
-    {
-        if (String.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
-        {
-            configuration["RabbitMQ:ClientProvidedName"] = Program.AppName;
-        }        
-    }
+    private DuplicateIntegrationEvent() : base() { }
 
-    public override async Task ConfigureServices(IServiceCollection services)
+    public DuplicateIntegrationEvent(Guid createBy, int tenantId) : base(createBy, tenantId)
     {
-        await base.ConfigureServices(services);
 
-        services.AddHttpClient();
-        services.AddAutoMapper(GetAutoMapperProfileAssemblies());//toDo
-        services.AddHostedService<ServiceLauncher>();
-        services.AddScoped<IWebItem, ProductEntryPoint>();
-        services.AddBaseDbContextPool<FilesDbContext>();
-        services.AddActivePassiveHostedService<NotifySchedulerService>(Configuration, "StudioNotifySchedulerService");
-        services.RegisterQuotaFeature();
     }
+    
+    [ProtoMember(1)]
+    public string TaskId { get; set;}
+    
+    [ProtoMember(2)]
+    public FileOperationData<int> Data { get; set; }
+    
+    [ProtoMember(3)]
+    public FileOperationData<string> ThirdPartyData { get; set; }
 }

@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Api.Core.Core;
-
 namespace ASC.People.Api;
 
 public class UserController(
@@ -71,7 +69,9 @@ public class UserController(
     IDistributedLockProvider distributedLockProvider,
     QuotaSocketManager quotaSocketManager,
     IQuotaService quotaService,
-    CustomQuota customQuota)
+    CustomQuota customQuota,
+    IDaoFactory daoFactory,
+    FilesMessageService filesMessageService)
     : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
 {
     
@@ -263,13 +263,11 @@ public class UserController(
             {
                 if (success)
                 {
-                    await usersInRoomChecker.CheckAppend();
-                    await fileSecurity.ShareAsync(id, FileEntryType.Folder, user.Id, linkData.Share);
+                    await AddUserToRoomAsync(id);
                 }
                 else
                 {
-                    await usersInRoomChecker.CheckAppend();
-                    await fileSecurity.ShareAsync(linkData.RoomId, FileEntryType.Folder, user.Id, linkData.Share);
+                    await AddUserToRoomAsync(linkData.RoomId);
                 }
             }
         }
@@ -284,6 +282,19 @@ public class UserController(
         }
 
         return await employeeFullDtoHelper.GetFullAsync(user);
+        
+        async Task AddUserToRoomAsync<T>(T roomId)
+        {
+            await usersInRoomChecker.CheckAppend();
+            var roomTask = daoFactory.GetFolderDao<T>().GetFolderAsync(roomId);
+
+            await fileSecurity.ShareAsync(roomId, FileEntryType.Folder, user.Id, linkData.Share);
+
+            var room = await roomTask;
+
+            await filesMessageService.SendAsync(MessageAction.RoomCreateUser, room, user.Id, linkData.Share, null, true, 
+                user.DisplayUserName(false, displayUserSettingsHelper));
+        }
     }
 
     /// <summary>

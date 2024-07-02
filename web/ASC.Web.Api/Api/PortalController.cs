@@ -560,7 +560,7 @@ public class PortalController(
         var suspendUrl = await commonLinkUtility.GetConfirmationEmailUrlAsync(owner.Email, ConfirmType.PortalSuspend);
         var continueUrl = await commonLinkUtility.GetConfirmationEmailUrlAsync(owner.Email, ConfirmType.PortalContinue);
 
-        await studioNotifyService.SendMsgPortalDeactivationAsync(tenant, suspendUrl, continueUrl);
+        await studioNotifyService.SendMsgPortalDeactivationAsync(tenant, await urlShortener.GetShortenLinkAsync(suspendUrl), await urlShortener.GetShortenLinkAsync(continueUrl));
 
         await messageService.SendAsync(MessageAction.OwnerSentPortalDeactivationInstructions, MessageTarget.Create(owner.Id), owner.DisplayUserName(false, displayUserSettingsHelper));
     }
@@ -590,7 +590,9 @@ public class PortalController(
                         (await tariffService.GetPaymentsAsync(tenant.Id)).Any() &&
                         !(await tenantManager.GetCurrentTenantQuotaAsync()).Trial;
 
-        await studioNotifyService.SendMsgPortalDeletionAsync(tenant, await commonLinkUtility.GetConfirmationEmailUrlAsync(owner.Email, ConfirmType.PortalRemove), showAutoRenewText);
+        var confirmLink = await commonLinkUtility.GetConfirmationEmailUrlAsync(owner.Email, ConfirmType.PortalRemove);
+            
+        await studioNotifyService.SendMsgPortalDeletionAsync(tenant, await urlShortener.GetShortenLinkAsync(confirmLink), showAutoRenewText);
     }
 
     /// <summary>

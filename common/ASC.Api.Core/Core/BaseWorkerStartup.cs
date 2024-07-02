@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Core.Notify.Socket;
+using ASC.MessagingSystem.Data;
 
 namespace ASC.Api.Core;
 

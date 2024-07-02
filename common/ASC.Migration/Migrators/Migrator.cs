@@ -525,7 +525,7 @@ public abstract class Migrator : IAsyncDisposable
                             {
                                 new AceWrapper
                                 {
-                                    Access = Files.Core.Security.FileShare.Collaborator,
+                                    Access = Files.Core.Security.FileShare.PowerUser,
                                     Id = user.Info.Id
                                 }
                             };

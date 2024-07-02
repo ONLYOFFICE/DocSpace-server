@@ -26,8 +26,12 @@
 
 namespace ASC.Core.Common.Messaging;
 
+[ProtoContract]
 public class FilesAuditReference
 {
+    [ProtoMember(1)]
     public int EntryId { get; init; }
+    
+    [ProtoMember(2)]
     public byte EntryType { get; init; }
 }

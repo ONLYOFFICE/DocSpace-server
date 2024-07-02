@@ -34,5 +34,6 @@ public enum FileOperationType
     Download,
     MarkAsRead,
     Import,
-    Convert
+    Convert,
+    Duplicate
 }
