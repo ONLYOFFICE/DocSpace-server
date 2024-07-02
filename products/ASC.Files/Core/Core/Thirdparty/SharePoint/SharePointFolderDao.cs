@@ -445,7 +445,7 @@ internal class SharePointFolderDao(
             : (ProviderInfo.FolderId, ProviderInfo.CustomerTitle));
     }
 
-    public Task<FolderType> GetFirstParentTypeFromFileEntryAsync(FileEntry<string> entry)
+    public Task<Folder<string>> GetFirstParentFromFileEntryAsync(FileEntry<string> entry)
     {
         throw new NotImplementedException();
     }

@@ -35,6 +35,7 @@ public class DbRoomSettings
     public string Color { get; set; }
     public bool Indexing { get; set; }
     public long Quota { get; set; }
+    public bool Stealth { get; set; }
     public DbTenant Tenant { get; set; }
     public DbFolder Room { get; set; }
 }
@@ -84,6 +85,8 @@ public static class DbRoomSettingsExtension
             entity.Property(e => e.Quota)
                 .HasColumnName("quota")
                 .HasDefaultValueSql("'-2'");
+            
+            entity.Property(e => e.Stealth).HasColumnName("stealth").HasDefaultValueSql("0");
         });
     }
 

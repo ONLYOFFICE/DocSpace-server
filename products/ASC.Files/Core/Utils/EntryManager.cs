@@ -312,6 +312,10 @@ public class EntryManager(IDaoFactory daoFactory,
         var sharedTask = parent.RootFolderType is FolderType.VirtualRooms && !parent.ProviderEntry 
             ? daoFactory.GetSecurityDao<T>().IsSharedAsync(parent, [SubjectType.PrimaryExternalLink, SubjectType.ExternalLink]) 
             : Task.FromResult(false);
+        
+        var parentRoomTask = parent.RootFolderType is FolderType.VirtualRooms or FolderType.Archive
+            ? daoFactory.GetFolderDao<T>().GetFirstParentFromFileEntryAsync(parent)
+            : Task.FromResult<Folder<T>>(null);
 
         var (foldersFilterType, foldersSearchText) = applyFilterOption != ApplyFilterOption.Files ? (filterType, searchText) : (FilterType.None, string.Empty);
 
@@ -440,6 +444,16 @@ public class EntryManager(IDaoFactory daoFactory,
 
             var filesCount = count - folders.Count;
             var filesOffset = Math.Max(folders.Count > 0 ? 0 : from - await allFoldersCountTask, 0);
+            
+            var parentRoom = await parentRoomTask;
+            var currentUserId = authContext.CurrentAccount.ID;
+
+            if (parentRoom is { SettingsStealth: true } && 
+                parentRoom.CreateBy != currentUserId && 
+                !await userManager.IsDocSpaceAdminAsync(currentUserId))
+            {
+                subjectId = currentUserId;
+            }
 
             var filesTask = fileDao.GetFilesAsync(parent.Id, orderBy, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders,
                 excludeSubject, filesOffset, filesCount, roomId, withShared);

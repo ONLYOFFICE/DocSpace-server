@@ -625,7 +625,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         throw new NotImplementedException();
     }
     
-    public Task<FolderType> GetFirstParentTypeFromFileEntryAsync(FileEntry<string> entry)
+    public Task<Folder<string>> GetFirstParentFromFileEntryAsync(FileEntry<string> entry)
     {
         throw new NotImplementedException();
     }

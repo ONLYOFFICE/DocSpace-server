@@ -608,7 +608,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
 
         return folder;
     }
-    public Task<FolderType> GetFirstParentTypeFromFileEntryAsync(FileEntry<string> entry)
+    public Task<Folder<string>> GetFirstParentFromFileEntryAsync(FileEntry<string> entry)
     {
         throw new NotImplementedException();
     }

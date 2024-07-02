@@ -256,8 +256,11 @@ public class FileSecurity(IDaoFactory daoFactory,
     }.ToFrozenDictionary();
 
     private ConcurrentDictionary<string, FileShareRecord<int>> _cachedRecordsInternal;
-    private ConcurrentDictionary<string, FileShareRecord<string>> _cachedRecordsThirdparty;
+    private ConcurrentDictionary<string, FileShareRecord<string>> _cachedRecordsThirdParty;
     private readonly ConcurrentDictionary<string, Guid> _cachedRoomOwner = new();
+
+    private ConcurrentDictionary<string, Folder<int>> _cachedRoomsInternal;
+    private ConcurrentDictionary<string, Folder<string>> _cachedRoomsThirdParty;
 
     private ConcurrentDictionary<string, FileShareRecord<T>> GetCachedRecords<T>()
     {
@@ -268,8 +271,24 @@ public class FileSecurity(IDaoFactory daoFactory,
         
         if (typeof(T) == typeof(string))
         {
-            _cachedRecordsThirdparty ??= new ConcurrentDictionary<string, FileShareRecord<string>>();
-            return (ConcurrentDictionary<string, FileShareRecord<T>>)Convert.ChangeType(_cachedRecordsThirdparty, typeof(ConcurrentDictionary<string, FileShareRecord<T>>));
+            _cachedRecordsThirdParty ??= new ConcurrentDictionary<string, FileShareRecord<string>>();
+            return (ConcurrentDictionary<string, FileShareRecord<T>>)Convert.ChangeType(_cachedRecordsThirdParty, typeof(ConcurrentDictionary<string, FileShareRecord<T>>));
+        }
+
+        return null;
+    }
+
+    private ConcurrentDictionary<string, Folder<T>> GetCachedRoom<T>()
+    {
+        if (typeof(T) == typeof(int))
+        {
+            return (ConcurrentDictionary<string, Folder<T>>)Convert.ChangeType(_cachedRoomsInternal ??= new ConcurrentDictionary<string, Folder<int>>(), typeof(ConcurrentDictionary<string, Folder<T>>));
+        }
+        
+        if (typeof(T) == typeof(string))
+        {
+            _cachedRoomsThirdParty ??= new ConcurrentDictionary<string, Folder<string>>();
+            return (ConcurrentDictionary<string, Folder<T>>)Convert.ChangeType(_cachedRecordsThirdParty, typeof(ConcurrentDictionary<string, Folder<T>>));
         }
 
         return null;
@@ -1008,10 +1027,16 @@ public class FileSecurity(IDaoFactory daoFactory,
                 }
                 break;
             case FolderType.VirtualRooms:
+                if (file != null && !await IsVisibleAsync(file))
+                {
+                    return false;
+                }
+                
                 if (action == FilesSecurityActions.Delete && isRoom)
                 {
                     return false;
                 }
+                
                 if (action == FilesSecurityActions.FillForms && file != null)
                 {
                     var fileFolder = await daoFactory.GetFolderDao<T>().GetFolderAsync(file.ParentId);
@@ -1020,6 +1045,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                         return false;
                     }
                 }
+                
                 if((action == FilesSecurityActions.Delete ||
                     action == FilesSecurityActions.Rename ||
                     action == FilesSecurityActions.Lock ||
@@ -1033,6 +1059,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                         return false;
                     }
                 }
+                
                 if (action == FilesSecurityActions.CopyLink && file != null)
                 {
                     var folderDao = daoFactory.GetFolderDao<T>();
@@ -1043,12 +1070,18 @@ public class FileSecurity(IDaoFactory daoFactory,
                         return false;
                     };
                 }
+                
                 if (await HasFullAccessAsync(e, userId, isUser, isDocSpaceAdmin, isRoom, isCollaborator))
                 {
                     return true;
                 }
                 break;
             case FolderType.Archive:
+                if (file != null && !await IsVisibleAsync(file))
+                {
+                    return false;
+                }
+                
                 if (action != FilesSecurityActions.Read &&
                     action != FilesSecurityActions.Delete &&
                     action != FilesSecurityActions.ReadHistory &&
@@ -1520,6 +1553,29 @@ public class FileSecurity(IDaoFactory daoFactory,
         bool MustConvert(FileEntry entry)
         {
             return entry.FileEntryType == FileEntryType.File && fileUtility.MustConvert(entry.Title);
+        }
+
+        async ValueTask<bool> IsVisibleAsync(File<T> checkedFile)
+        {
+            if (checkedFile.CreateBy == userId || isDocSpaceAdmin)
+            {
+                return true;
+            }
+            
+            var cachedRooms = GetCachedRoom<T>();
+            
+            var key = checkedFile.ParentId.ToString()!;
+
+            if (cachedRooms.TryGetValue(key, out var room))
+            {
+                return !room.SettingsStealth || room.CreateBy == userId;
+            }
+            
+            room = await daoFactory.GetFolderDao<T>().GetFirstParentFromFileEntryAsync(checkedFile);
+
+            cachedRooms.TryAdd(key, room);
+
+            return !room.SettingsStealth || room.CreateBy == userId;
         }
     }
 

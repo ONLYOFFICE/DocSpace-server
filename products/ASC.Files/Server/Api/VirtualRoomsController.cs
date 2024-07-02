@@ -550,7 +550,7 @@ public abstract class VirtualRoomsController<T>(
     [HttpPut("{id}/settings")]
     public async Task<FolderDto<T>> UpdateSettingsAsync(T id, SettingsRoomRequestDto inDto)
     {
-        var room = await _fileStorageService.SetRoomSettingsAsync(id, inDto.Indexing);
+        var room = await _fileStorageService.SetRoomSettingsAsync(id, inDto.Indexing, inDto.Stealth);
 
         return await _folderDtoHelper.GetAsync(room);
     }

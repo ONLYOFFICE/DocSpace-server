@@ -1444,20 +1444,19 @@ internal class FolderDao(
     {
         return AsyncEnumerable.Empty<Folder<int>>();
     }
-    public async Task<FolderType> GetFirstParentTypeFromFileEntryAsync(FileEntry<int> entry)
+    
+    public async Task<Folder<int>> GetFirstParentFromFileEntryAsync(FileEntry<int> entry)
     {
+        if (entry.RootFolderType is FolderType.VirtualRooms or FolderType.Archive && entry is Folder<int> folder && DocSpaceHelper.IsRoom(folder.FolderType))
+        {
+            return folder;
+        }
+        
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        var folderId = Convert.ToInt32(entry.ParentId);
+        var firstParent = await filesDbContext.FirstParentAsync(entry.ParentId);
 
-        var parentFolders = await filesDbContext.ParentIdTypePairAsync(folderId).ToListAsync();
-
-        if (parentFolders.Count > 1)
-        {
-            return parentFolders[1].FolderType;
-        }
-
-        return parentFolders[0].FolderType;
+        return mapper.Map<DbFolderQuery, Folder<int>>(firstParent);
     }
 
     public Task<(int RoomId, string RoomTitle)> GetParentRoomInfoFromFileEntryAsync(FileEntry<int> entry)

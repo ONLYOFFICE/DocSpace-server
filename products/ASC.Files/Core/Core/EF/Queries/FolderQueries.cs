@@ -179,9 +179,9 @@ public partial class FilesDbContext
     }
         
     [PreCompileQuery([PreCompileQuery.DefaultInt])]
-    public IAsyncEnumerable<ParentIdFolderTypePair> ParentIdTypePairAsync(int folderId)
+    public Task<DbFolderQuery> FirstParentAsync(int folderId)
     {
-        return FolderQueries.ParentIdTypePairAsync(this, folderId);
+        return FolderQueries.FirstParentAsync(this, folderId);
     }
         
     [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
@@ -828,14 +828,19 @@ static file class FolderQueries
                     .OrderByDescending(r => r.Tree.Level)
                     .Select(r => new ParentIdTitlePair { ParentId = r.Tree.ParentId, Title = r.Folders.Title }));
 
-    public static readonly Func<FilesDbContext, int, IAsyncEnumerable<ParentIdFolderTypePair>> ParentIdTypePairAsync =
+    public static readonly Func<FilesDbContext, int, Task<DbFolderQuery>> FirstParentAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int folderId) =>
-                ctx.Tree
-                    .Join(ctx.Folders, r => r.ParentId, s => s.Id, (t, f) => new { Tree = t, Folders = f })
+                ctx.Tree.Join(ctx.Folders, r => r.ParentId, s => s.Id, (t, f) => new { Tree = t, Folders = f })
                     .Where(r => r.Tree.FolderId == folderId)
                     .OrderByDescending(r => r.Tree.Level)
-                    .Select(r => new ParentIdFolderTypePair { ParentId = r.Tree.ParentId, FolderType = r.Folders.FolderType }));
+                    .Select(r => new DbFolderQuery 
+                    { 
+                        Folder = r.Folders,
+                        Settings = ctx.RoomSettings.FirstOrDefault(x => x.TenantId == r.Folders.TenantId && x.RoomId == r.Folders.Id)
+                    })
+                    .Skip(1)
+                    .FirstOrDefault());
 
     public static readonly Func<FilesDbContext, int, IEnumerable<FolderType>, IAsyncEnumerable<FolderTypeUsedSpacePair>> FolderTypeUsedSpaceAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

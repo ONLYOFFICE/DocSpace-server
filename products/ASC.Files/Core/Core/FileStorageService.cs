@@ -168,6 +168,7 @@ public class FileStorageService //: IFileStorageService
         var folderDao = daoFactory.GetFolderDao<T>();
 
         Folder<T> parent = null;
+        
         try
         {
             parent = await folderDao.GetFolderAsync(parentId);
@@ -177,7 +178,7 @@ public class FileStorageService //: IFileStorageService
             }
             if (parent.RootFolderType == FolderType.VirtualRooms && !DocSpaceHelper.IsRoom(parent.FolderType) && parent.FolderType != FolderType.VirtualRooms && !parent.ProviderEntry)
             {
-                parent.ParentRoomType = await folderDao.GetFirstParentTypeFromFileEntryAsync(parent);
+                parent.ParentRoomType = (await folderDao.GetFirstParentFromFileEntryAsync(parent)).FolderType;
             }
         }
         catch (Exception e)
@@ -3206,7 +3207,7 @@ public class FileStorageService //: IFileStorageService
         return room;
     }
 
-    public async Task<Folder<T>> SetRoomSettingsAsync<T>(T folderId, bool indexing)
+    public async Task<Folder<T>> SetRoomSettingsAsync<T>(T folderId, bool? indexing, bool? stealth)
     {
         var folderDao = daoFactory.GetFolderDao<T>();
         var room = await folderDao.GetFolderAsync(folderId);
@@ -3221,23 +3222,30 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
-        if (DocSpaceHelper.IsRoom(room.FolderType))
+        if (!DocSpaceHelper.IsRoom(room.FolderType))
         {
-            if (room.SettingsIndexing != indexing)
-            {
-                if (indexing)
-                {
-                    await ReOrder(room.Id, true);
-                }
-
-                room.SettingsIndexing = indexing;
-                await folderDao.SaveFolderAsync(room);
-            }
+            return room;
         }
+
+        if (indexing.HasValue && room.SettingsIndexing != indexing.Value)
+        {
+            if (indexing.Value)
+            {
+                await ReOrder(room.Id, true);
+            }
+
+            room.SettingsIndexing = indexing.Value;
+        }
+
+        if (stealth.HasValue && room.SettingsStealth != stealth.Value)
+        {
+            room.SettingsStealth = stealth.Value;
+        }
+        
+        await folderDao.SaveFolderAsync(room);
 
         return room;
     }
-
 
     public async Task<Folder<T>> ReOrder<T>(T folderId, bool subfolders = false)
     {
