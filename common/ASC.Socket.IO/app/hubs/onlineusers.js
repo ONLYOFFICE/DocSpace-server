@@ -331,8 +331,6 @@ module.exports = async (io) => {
             value.innerId = name;
             return value;
           });
-          var sessionId = array.find(e=> e.id == id).id;
-
           var sessions = array.filter(e=> e.id == id);
 
           Object.values(sessions).forEach(function(entry) {
@@ -350,7 +348,12 @@ module.exports = async (io) => {
           else
           {
             updateUser(portalUsers, user, userId, tenantId);
-            onlineIO.to(`p-${tenantId}`).emit("leave-session-in-portal",  {userId, sessionId, date} );
+            var session = array.find(e=> e.id == id);
+            if(session)
+            {
+              var sessionId = session.Id;
+              onlineIO.to(`p-${tenantId}`).emit("leave-session-in-portal",  {userId, sessionId, date} );
+            }
           }
         }
     }
