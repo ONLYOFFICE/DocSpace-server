@@ -937,7 +937,8 @@ internal class FileDao(
                     }
                 }
             }
-        }else if ((toFolder.FolderType == FolderType.USER || toFolder.FolderType == FolderType.DEFAULT) && 
+        }
+        else if ((toFolder.FolderType == FolderType.USER || toFolder.FolderType == FolderType.DEFAULT) && 
                 fromFolder.FolderType != FolderType.TRASH && 
                 fromFolder.FolderType != FolderType.USER && 
                 fromFolder.FolderType != FolderType.DEFAULT)
@@ -960,7 +961,6 @@ internal class FileDao(
         }
 
         var trashIdTask = globalFolder.GetFolderTrashAsync(daoFactory);
-
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var strategy = filesDbContext.Database.CreateExecutionStrategy();
@@ -1002,7 +1002,7 @@ internal class FileDao(
                 {
                     var tagList = new List<Tag>();
 
-                    if(roomId != -1)
+                    if (roomId != -1)
                     {
                         tagList.Add(Tag.FromRoom(fileId, FileEntryType.File, _authContext.CurrentAccount.ID));
                     }
@@ -1047,8 +1047,11 @@ internal class FileDao(
 
                 if (deleteLinks)
                 {
-                    await filesDbContext.DeleteTagLinksByTypeAsync(tenantId, fileId.ToString(), TagType.RecentByLink);
-                    await filesDbContext.DeleteTagsAsync( tenantId);
+                    var id = fileId.ToString();
+                    
+                    await filesDbContext.DeleteTagLinksByTypeAsync(tenantId, id, TagType.RecentByLink);
+                    await filesDbContext.DeleteTagsAsync(tenantId);
+                    await filesDbContext.DeleteLinksAsync(tenantId, id, FileEntryType.File);
                 }
 
                 await tx.CommitAsync();
