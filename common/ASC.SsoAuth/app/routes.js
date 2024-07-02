@@ -220,7 +220,7 @@ module.exports = function (app, config) {
         }
     }
     function getField(cnString, paramName) {
-        const cnPattern = new RegExp(`${paramName}=([\\w.-]+)`);
+        const cnPattern = new RegExp(`${paramName}=(.+)`);
         const match = cnString.match(cnPattern);
 
         if (match && match[1]) {
