@@ -274,6 +274,7 @@ public class ConnectionsController(
             await dbLoginEventsManager.LogOutAllActiveConnectionsExceptThisAsync(loginEventFromCookie, user.TenantId, user.Id);
 
             await messageService.SendAsync(MessageAction.UserLogoutActiveConnections, userName);
+            await socketManager.LogoutExceptThisAsync(loginEventFromCookie, user.Id);
             return userName;
         }
         catch (Exception ex)
@@ -304,6 +305,7 @@ public class ConnectionsController(
             var userName = user.DisplayUserName(false, displayUserSettingsHelper);
 
             await messageService.SendAsync(MessageAction.UserLogoutActiveConnections, userName);
+            await socketManager.LogoutExceptThisAsync(loginEventId, userId);
             return userName;
         }
         catch (Exception ex)
@@ -375,6 +377,7 @@ public class ConnectionsController(
 
         await messageService.SendAsync(currentUserId.Equals(user.Id) ? MessageAction.UserLogoutActiveConnections : MessageAction.UserLogoutActiveConnectionsForUser, MessageTarget.Create(user.Id), auditEventDate, userName);
         await cookiesManager.ResetUserCookieAsync(user.Id);
+        await socketManager.LogoutUserAsync(user.Id);
     }
 
     private int GetLoginEventIdFromCookie()

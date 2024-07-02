@@ -39,4 +39,16 @@ public class ConnectionSocket(ITariffService tariffService,
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         await MakeRequest("leave-session-in-portal", new { id, userId, tenantId });
     }
+    
+    public async Task LogoutUserAsync(Guid userId)
+    {
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        await MakeRequest("leave-in-portal", new { userId, tenantId });
+    }
+
+    public async Task LogoutExceptThisAsync(int id, Guid userId)
+    {
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        await MakeRequest("leave-expect-this-portal", new { id, userId, tenantId });
+    }
 }

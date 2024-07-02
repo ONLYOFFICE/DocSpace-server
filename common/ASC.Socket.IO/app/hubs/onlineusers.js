@@ -320,24 +320,6 @@ module.exports = async (io) => {
         }));
         return serUser;
       }
-
-
-      function updateUser(list, user, userId, id){
-        if(!list[id])
-        {
-          list[id] = [];
-        }
-        list[id][userId] = user;
-      }
-
-      function getUser(list, userId, id){
-        if(!list[id])
-        {
-          list[id] = [];
-          return null;
-        }
-        return list[id][userId];
-      }
     });
 
     function leaveSessionInPortal({id, userId, tenantId} = {}) {
@@ -349,18 +331,7 @@ module.exports = async (io) => {
             value.innerId = name;
             return value;
           });
-
-          var session = array.find(e=> e.id == id);
-          var sessionId = session.id;
-          user.offlineSessions.set(session.id,
-            {
-              id: session.id,
-              platform: session.platform,
-              browser: session.browser,
-              ip: session.ip,
-              status: "offline",
-              date: new Date().toString()
-          });
+          var sessionId = array.find(e=> e.id == id).id;
 
           var sessions = array.filter(e=> e.id == id);
 
@@ -368,6 +339,7 @@ module.exports = async (io) => {
             user.sessions.delete(entry.innerId);
           });
 
+          user.offlineSessions.delete(id);
           var date = new Date().toString();
           if(user.sessions.size <= 0)
           {
@@ -381,26 +353,84 @@ module.exports = async (io) => {
             onlineIO.to(`p-${tenantId}`).emit("leave-session-in-portal",  {userId, sessionId, date} );
           }
         }
+    }
 
-        function getUser(list, userId, id){
-          if(!list[id])
-          {
-            list[id] = [];
-            return null;
-          }
-          return list[id][userId];
-        }
+    function leaveInPortal({userId, tenantId} = {}) {
 
-        function updateUser(list, user, userId, id){
-          if(!list[id])
-          {
-            list[id] = [];
-          }
-          list[id][userId] = user;
+      var user = getUser(portalUsers, userId, tenantId);
+        if (user) 
+        {
+          user.offlineSessions = new Map();
+          user.sessions = new Map();
+
+          var date = new Date().toString();
+          user.status = "offline";
+          updateUser(portalUsers, user, userId, tenantId);
+          onlineIO.to(`p-${tenantId}`).emit("leave-in-portal",  {userId, date} );
         }
     }
+
+    function leaveExceptThisInPortal({id, userId, tenantId} = {}) {
+
+      var user = getUser(portalUsers, userId, tenantId);
+        if (user) 
+        {
+          var array = Array.from(user.sessions, ([name, value]) => {
+            value.innerId = name;
+            return value;
+          });
+          var sessions = array.filter(e=> e.id != id);
+
+          var setIds= new Set();
+          Object.values(sessions).forEach(function(entry) {
+            user.sessions.delete(entry.innerId);
+            setIds.add(entry.id);
+          });
+
+          array = Array.from(user.offlineSessions, ([name, value]) => {
+            return value;
+          });
+          Object.values(array.filter(e=> e.id != id)).forEach(function(entry) {
+            user.offlineSessions.delete(entry.id);
+          });
+          var date = new Date().toString();
+          if(user.sessions.size <= 0)
+          {
+            user.status = "offline";
+            updateUser(portalUsers, user, userId, tenantId);
+            onlineIO.to(`p-${tenantId}`).emit("leave-in-portal",  {userId, date} );
+          }
+          else
+          {
+            updateUser(portalUsers, user, userId, tenantId);
+            Object.values(setIds).forEach(function(entry) {
+              onlineIO.to(`p-${tenantId}`).emit("leave-session-in-portal",  {userId, entry, date} );
+            });
+          }
+        }
+    }
+
+    function getUser(list, userId, id){
+      if(!list[id])
+      {
+        list[id] = [];
+        return null;
+      }
+      return list[id][userId];
+    }
+
+    function updateUser(list, user, userId, id){
+      if(!list[id])
+      {
+        list[id] = [];
+      }
+      list[id][userId] = user;
+    }
+
     return {
-      leaveSessionInPortal
+      leaveSessionInPortal,
+      leaveInPortal,
+      leaveExceptThisInPortal
     };
 };
   
