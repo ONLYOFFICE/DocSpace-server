@@ -37,8 +37,9 @@ internal class WebDavFileDao(UserManager userManager,
     IDaoBase<WebDavEntry, WebDavEntry, WebDavEntry> dao,
     TempPath tempPath,
     SetupInfo setupInfo,
-    TenantManager tenantManager) : 
-    ThirdPartyFileDao<WebDavEntry, WebDavEntry, WebDavEntry>(userManager, dbContextFactory, daoSelector, crossDao, fileDao, dao, tenantManager)
+    TenantManager tenantManager,
+    Global global) : 
+    ThirdPartyFileDao<WebDavEntry, WebDavEntry, WebDavEntry>(userManager, dbContextFactory, daoSelector, crossDao, fileDao, dao, tenantManager, global)
 {
     protected override string UploadSessionKey => "WebDavSession";
     

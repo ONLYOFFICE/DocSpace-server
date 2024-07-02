@@ -887,17 +887,7 @@ internal class FileDao(
         });
     }
 
-    public async Task<bool> IsExistAsync(string title, object folderId)
-    {
-        if (folderId is int fId)
-        {
-            return await IsExistAsync(title, fId);
-        }
-
-        throw new NotImplementedException();
-    }
-
-    private async Task<bool> IsExistAsync(string title, int folderId)
+    public async Task<bool> IsExistAsync(string title, int folderId)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
@@ -1059,8 +1049,11 @@ internal class FileDao(
 
                 if (deleteLinks)
                 {
-                    await filesDbContext.DeleteTagLinksByTypeAsync(tenantId, fileId.ToString(), TagType.RecentByLink);
+                    var id = fileId.ToString();
+                    
+                    await filesDbContext.DeleteTagLinksByTypeAsync(tenantId, id, TagType.RecentByLink);
                     await filesDbContext.DeleteTagsAsync( tenantId);
+                    await filesDbContext.DeleteLinksAsync(tenantId, id, FileEntryType.File);
                 }
 
                 await tx.CommitAsync();

@@ -24,18 +24,15 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Data.Backup.Core.Log;
-internal static partial class DeletePortalTaskLogging
+namespace ASC.Files.Core.ApiModels.RequestDto;
+
+public class DuplicateRequestDto
 {
-    [LoggerMessage(Level = LogLevel.Debug, Message = "begin delete {tenantId}")]
-    public static partial void DebugBeginDelete(this ILogger<DeletePortalTask> logger, int tenantId);
+    /// <summary>List of folder IDs</summary>
+    /// <type>System.Collections.Generic.IEnumerable{System.Text.Json.JsonElement}, System.Collections.Generic</type>
+    public IEnumerable<JsonElement> FolderIds { get; set; } = new List<JsonElement>();
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "end delete {tenantId}")]
-    public static partial void DebugEndDelete(this ILogger<DeletePortalTask> logger, int tenantId);
-
-    [LoggerMessage(Level = LogLevel.Debug, Message = "begin delete data for module ({name})")]
-    public static partial void DebugBeginDeleteDataForModule(this ILogger<DeletePortalTask> logger, ModuleName name);
-
-    [LoggerMessage(Level = LogLevel.Debug, Message = "end delete data for module ({name})")]
-    public static partial void DebugEndDeleteDataForModule(this ILogger<DeletePortalTask> logger, ModuleName name);
+    /// <summary>List of file IDs</summary>
+    /// <type>System.Collections.Generic.IEnumerable{System.Text.Json.JsonElement}, System.Collections.Generic</type>
+    public IEnumerable<JsonElement> FileIds { get; set; } = new List<JsonElement>();
 }

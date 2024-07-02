@@ -24,34 +24,28 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core.Core.Thirdparty;
+using ASC.Web.Files.Services.WCFService.FileOperations;
+
+namespace ASC.Files.Service.IntegrationEvents.EventHandling;
 
 [Scope]
-internal interface IDaoBase<TFile, TFolder, TItem>
-    where TFile : class, TItem
-    where TFolder : class, TItem
-    where TItem : class
+public class DuplicateIntegrationEventHandler(
+    ILogger<DuplicateIntegrationEventHandler> logger,
+    FileOperationsManager fileOperationsManager,
+    TenantManager tenantManager,
+    SecurityContext securityContext)
+    : IIntegrationEventHandler<DuplicateIntegrationEvent>
 {
-    void Init(string pathPrefix, IProviderInfo<TFile, TFolder, TItem> providerInfo);
-    string GetName(TItem item);
-    string GetId(TItem item);
-    bool IsRoot(TFolder folder);
-    string MakeThirdId(object entryId);
-    string GetParentFolderId(TItem item);
-    string MakeId(TItem item);
-    string MakeId(string path = null);
-    string MakeFolderTitle(TFolder folder);
-    string MakeFileTitle(TFile file);
-    Folder<string> ToFolder(TFolder folder);
-    File<string> ToFile(TFile file);
-    Task<Folder<string>> GetRootFolderAsync();
-    Task<TFolder> CreateFolderAsync(string title, string folderId);
-    Task<TFolder> GetFolderAsync(string folderId);
-    Task<TFile> GetFileAsync(string fileId);
-    Task<IEnumerable<string>> GetChildrenAsync(string folderId);
-    Task<List<TItem>> GetItemsAsync(string parentId, bool? folder = null);
-    bool CheckInvalidFilter(FilterType filterType);
-    Task UpdateIdAsync(string oldValue, string newValue);
-    Folder<string> GetErrorRoom();
-    bool IsRoom(string folderId);
+    public async Task Handle(DuplicateIntegrationEvent @event)
+    {
+        CustomSynchronizationContext.CreateContext();
+        using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
+        {
+            logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
+            await tenantManager.SetCurrentTenantAsync(@event.TenantId);
+            await securityContext.AuthenticateMeWithoutCookieAsync(@event.TenantId, @event.CreateBy);
+            await fileOperationsManager.Enqueue<FileDuplicateOperation, FileOperationData<string>, FileOperationData<int>>(@event.TaskId, @event.ThirdPartyData, @event.Data);
+        }
+    }
 }
+

@@ -181,17 +181,20 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
             }
         }
 
+        var isRoom = false;
+
         if (0 < Folders.Count)
         {
             var firstFolder = await FolderDao.GetFolderAsync(Folders[0]);
-            var isRoom = DocSpaceHelper.IsRoom(firstFolder.FolderType);
+            isRoom = DocSpaceHelper.IsRoom(firstFolder.FolderType);
 
             if (_copy && !await FilesSecurity.CanCopyAsync(firstFolder))
             {
-                this[Err] = FilesCommonResource.ErrorMessage_SecurityException_CopyFolder;
+               this[Err] = FilesCommonResource.ErrorMessage_SecurityException_CopyFolder;
 
-                return;
+               return;
             }
+            
             if (!_copy && !await FilesSecurity.CanMoveAsync(firstFolder))
             {
                 if (isRoom)
@@ -228,12 +231,13 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
             }
         }
 
-        if (_copy && !await fileSecurity.CanCopyToAsync(toFolder))
+        if (_copy && !(isRoom && toFolder.FolderType == FolderType.VirtualRooms) && !await fileSecurity.CanCopyToAsync(toFolder))
         {
             this[Err] = FilesCommonResource.ErrorMessage_SecurityException_CopyToFolder;
 
             return;
         }
+        
         if (!_copy && !await fileSecurity.CanMoveToAsync(toFolder))
         {
             this[Err] = toFolder.FolderType switch
@@ -310,6 +314,8 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         var quotaService = scope.ServiceProvider.GetService<IQuotaService>();
         var cache = scope.ServiceProvider.GetService<ICache>();
         var distributedLockProvider = scope.ServiceProvider.GetRequiredService<IDistributedLockProvider>();
+        var roomLogoManager = scope.ServiceProvider.GetRequiredService<RoomLogoManager>();
+        var global = scope.ServiceProvider.GetRequiredService<Global>();
 
         var toFolderId = toFolder.Id;
         var isToFolder = Equals(toFolderId, _daoFolderId);
@@ -453,8 +459,15 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                     {
                         if (conflictFolder != null)
                         {
+                            if (!conflictFolder.ProviderEntry)
+                            {
+                                conflictFolder.Id = default;
+                                conflictFolder.Title = await global.GetAvailableTitleAsync(conflictFolder.Title, conflictFolder.ParentId, folderDao.IsExistAsync);
+                                conflictFolder.Id = await folderDao.SaveFolderAsync(conflictFolder);
+                            }
+                            
                             newFolder = conflictFolder;
-
+                            
                             if (isToFolder)
                             {
                                 needToMark.Add(conflictFolder);
@@ -463,6 +476,18 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                         else
                         {
                             newFolder = await FolderDao.CopyFolderAsync(folder.Id, toFolderId, CancellationToken);
+                            newFolder.Title = await global.GetAvailableTitleAsync(newFolder.Title, newFolder.ParentId, folderDao.IsExistAsync);
+                            newFolder.Id = await folderDao.SaveFolderAsync(newFolder);
+                            
+                            if (isRoom && Equals(folder.ParentId ?? default, toFolderId))
+                            {
+                                if (await roomLogoManager.CopyAsync(folder, newFolder))
+                                {
+                                    newFolder.SettingsHasLogo = true;
+                                    await folderDao.SaveFolderAsync(newFolder);
+                                }
+                            }
+                            
                             await filesMessageService.SendAsync(MessageAction.FolderCopied, newFolder, toFolder, _headers, newFolder.Title, toFolder.Title, toFolder.Id.ToString());
 
                             if (isToFolder)
@@ -495,6 +520,13 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                     {
                                         sb.Append($"folder_{newFolder.Id}{SplitChar}");
                                     }
+                                }
+                            }
+                            else
+                            {
+                                if (ProcessedFolder(folderId))
+                                {
+                                    sb.Append($"folder_{newFolder.Id}{SplitChar}");
                                 }
                             }
                         }
@@ -797,6 +829,8 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                             try
                             {
                                 newFile = await FileDao.CopyFileAsync(file.Id, toFolderId); //Stream copy will occur inside dao
+                                newFile.Title = await global.GetAvailableTitleAsync(newFile.Title, newFile.ParentId, fileDao.IsExistAsync);
+                                await fileDao.SaveFileAsync(newFile, null);
                                 await filesMessageService.SendAsync(MessageAction.FileCopied, newFile, toFolder, _headers, newFile.Title, parentFolder.Title, toFolder.Title, toFolder.ToString());
 
                                 needToMark.Add(newFile);

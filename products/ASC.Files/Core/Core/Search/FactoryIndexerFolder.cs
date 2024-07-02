@@ -37,7 +37,7 @@ public class BaseIndexerFolder(
     IServiceProvider serviceProvider)
     : BaseIndexer<DbFolder>(client, log, dbContextManager, tenantManager, baseIndexerHelper, settings, serviceProvider);
 
-[Scope]
+[Scope(typeof(IFactoryIndexer))]
 public class FactoryIndexerFolder(ILoggerProvider options,
         TenantManager tenantManager,
         SearchSettingsHelper searchSettingsHelper,
@@ -123,18 +123,18 @@ public class FactoryIndexerFolder(ILoggerProvider options,
 
         (int, int, int) GetCount(DateTime lastIndexed)
             {
-            using var filesDbContext = dbContextFactory.CreateDbContext();
+                using var filesDbContext = dbContextFactory.CreateDbContext();
 
-            var minId = Queries.FolderMinId(filesDbContext, lastIndexed);
+                var minId = Queries.FolderMinId(filesDbContext, lastIndexed);
 
-            var maxId = Queries.FolderMaxId(filesDbContext, lastIndexed);
+                var maxId = Queries.FolderMaxId(filesDbContext, lastIndexed);
 
-            var count = Queries.FoldersCount(filesDbContext, lastIndexed);
+                var count = Queries.FoldersCount(filesDbContext, lastIndexed);
 
-            return new(count, maxId, minId);
+                return new(count, maxId, minId);
             }
         }
-        }
+}
 
 class FolderTenant
 {
