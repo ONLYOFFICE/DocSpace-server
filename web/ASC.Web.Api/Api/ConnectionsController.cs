@@ -50,7 +50,8 @@ public class ConnectionsController(
     ApiDateTimeHelper apiDateTimeHelper,
     TenantManager tenantManager,
     UserPhotoManager userPhotoManager,
-    DisplayUserSettingsHelper displayUserSettings)
+    DisplayUserSettingsHelper displayUserSettings,
+    ConnectionSocket socketManager)
     : ControllerBase
 {
     /// <summary>
@@ -355,6 +356,7 @@ public class ConnectionsController(
             await dbLoginEventsManager.LogOutEventAsync(loginEvent.TenantId, loginEvent.Id);
 
             await messageService.SendAsync(MessageAction.UserLogoutActiveConnection, userName);
+            await socketManager.LogoutSessionAsync(loginEventId, loginEvent.UserId.Value);
             return true;
         }
         catch (Exception ex)

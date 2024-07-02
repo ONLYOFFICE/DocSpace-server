@@ -100,19 +100,19 @@ module.exports = async (io) => {
                 status: "offline",
                 date: new Date().toString()
             });
-          }
 
-          var date = new Date().toString();
-          if(user.sessions.size <= 0)
-          {
-            user.status = "offline";
-            updateUser(portalUsers, user, userId, tenantId);
-            onlineIO.to(`p-${tenantId}`).emit("leave-in-portal",  {userId, date} );
-          }
-          else
-          {
-            updateUser(portalUsers, user, userId, tenantId);
-            onlineIO.to(`p-${tenantId}`).emit("leave-session-in-portal",  {userId, sessionId, date} );
+            var date = new Date().toString();
+            if(user.sessions.size <= 0)
+            {
+              user.status = "offline";
+              updateUser(portalUsers, user, userId, tenantId);
+              onlineIO.to(`p-${tenantId}`).emit("leave-in-portal",  {userId, date} );
+            }
+            else
+            {
+              updateUser(portalUsers, user, userId, tenantId);
+              onlineIO.to(`p-${tenantId}`).emit("leave-session-in-portal",  {userId, sessionId, date} );
+            }
           }
           id = -1;
           sessionId = -1;
@@ -339,5 +339,68 @@ module.exports = async (io) => {
         return list[id][userId];
       }
     });
+
+    function leaveSessionInPortal({id, userId, tenantId} = {}) {
+
+      var user = getUser(portalUsers, userId, tenantId);
+        if (user) 
+        {
+          var array = Array.from(user.sessions, ([name, value]) => {
+            value.innerId = name;
+            return value;
+          });
+
+          var session = array.find(e=> e.id == id);
+          var sessionId = session.id;
+          user.offlineSessions.set(session.id,
+            {
+              id: session.id,
+              platform: session.platform,
+              browser: session.browser,
+              ip: session.ip,
+              status: "offline",
+              date: new Date().toString()
+          });
+
+          var sessions = array.filter(e=> e.id == id);
+
+          Object.values(sessions).forEach(function(entry) {
+            user.sessions.delete(entry.innerId);
+          });
+
+          var date = new Date().toString();
+          if(user.sessions.size <= 0)
+          {
+            user.status = "offline";
+            updateUser(portalUsers, user, userId, tenantId);
+            onlineIO.to(`p-${tenantId}`).emit("leave-in-portal",  {userId, date} );
+          }
+          else
+          {
+            updateUser(portalUsers, user, userId, tenantId);
+            onlineIO.to(`p-${tenantId}`).emit("leave-session-in-portal",  {userId, sessionId, date} );
+          }
+        }
+
+        function getUser(list, userId, id){
+          if(!list[id])
+          {
+            list[id] = [];
+            return null;
+          }
+          return list[id][userId];
+        }
+
+        function updateUser(list, user, userId, id){
+          if(!list[id])
+          {
+            list[id] = [];
+          }
+          list[id][userId] = user;
+        }
+    }
+    return {
+      leaveSessionInPortal
+    };
 };
   

@@ -42,6 +42,7 @@ global using System.Text;
 global using System.Text.Json;
 global using System.Text.Json.Serialization;
 global using System.Text.RegularExpressions;
+global using System.Threading.Channels;
 global using System.Web;
 global using System.Xml;
 
@@ -71,6 +72,7 @@ global using ASC.Core.Common.Settings;
 global using ASC.Core.Common.WhiteLabel;
 global using ASC.Core.Data;
 global using ASC.Core.Notify;
+global using ASC.Core.Notify.Socket;
 global using ASC.Core.Tenants;
 global using ASC.Core.Users;
 global using ASC.Data.Storage;
