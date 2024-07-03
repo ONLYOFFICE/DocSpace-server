@@ -108,6 +108,11 @@ public class EmailValidationKeyModelHelper(IHttpContextAccessor httpContextAcces
 
             case ConfirmType.EmailChange:
                 var userId = uiD.GetValueOrDefault();
+                if (authContext.CurrentAccount.ID != userId)
+                {
+                    checkKeyResult = ValidationResult.Invalid;
+                    break;
+                }
                 var emailChangeEvent = (await auditEventsRepository.GetByFilterAsync(action: MessageAction.UserSentEmailChangeInstructions, entry: EntryType.User, target: MessageTarget.Create(userId).ToString(), limit: 1)).FirstOrDefault();
                 var postfix = emailChangeEvent == null ? userId.ToString() : tenantUtil.DateTimeToUtc(emailChangeEvent.Date).ToString("s", CultureInfo.InvariantCulture);
 
