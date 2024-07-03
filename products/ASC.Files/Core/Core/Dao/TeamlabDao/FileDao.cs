@@ -541,8 +541,7 @@ internal class FileDao(
                     await IncrementCountAsync(filesDbContext, file.ParentId, tenantId, FileEntryType.File);
                 }
             }
-            var extension = FileUtility.GetFileExtension(file.Title);
-            var fileType = FileUtility.GetFileTypeByExtention(extension);
+
             if (fileStream != null)
             {
                 try
@@ -553,6 +552,9 @@ internal class FileDao(
                         using var originalCopyStream = new MemoryStream();
                         if (currentRoom.FolderType == FolderType.FillingFormsRoom)
                         {
+                            var extension = FileUtility.GetFileExtension(file.Title);
+                            var fileType = FileUtility.GetFileTypeByExtention(extension);
+
                             await fileStream.CopyToAsync(originalCopyStream);
 
                             var cloneStreamForCheck = CloneMemoryStream(originalCopyStream, 300);
@@ -616,6 +618,7 @@ internal class FileDao(
                 if (uploadSession != null)
                 {
                     await chunkedUploadSessionHolder.MoveAsync(uploadSession, GetUniqFilePath(file), file.GetFileQuotaOwner());
+
                     await folderDao.ChangeTreeFolderSizeAsync(currentFolder.Id, file.ContentLength);
                 }
             }
