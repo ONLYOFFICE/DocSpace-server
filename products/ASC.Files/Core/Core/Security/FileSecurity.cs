@@ -49,7 +49,8 @@ public class FileSecurity(IDaoFactory daoFactory,
         StudioNotifyHelper studioNotifyHelper,
         BadgesSettingsHelper badgesSettingsHelper,
         ExternalShare externalShare,
-        AuthManager authManager)
+        AuthManager authManager,
+        ICache cache)
     : IFileSecurity
 {
     public readonly FileShare DefaultMyShare = FileShare.Restrict;
@@ -1013,10 +1014,14 @@ public class FileSecurity(IDaoFactory daoFactory,
                 }
                 if (action == FilesSecurityActions.FillForms && file != null)
                 {
-                    var fileFolder = await daoFactory.GetFolderDao<T>().GetFolderAsync(file.ParentId);
-                    if ((fileFolder.FolderType == FolderType.FormFillingFolderInProgress && file.CreateBy != userId) || fileFolder.FolderType == FolderType.FormFillingFolderDone)
+                    var parentFolders = await GetFileParentFolders(file.ParentId);
+                    if (parentFolders != null)
                     {
-                        return false;
+                        var fileFolder = parentFolders.LastOrDefault();
+                        if ((fileFolder.FolderType == FolderType.FormFillingFolderInProgress && file.CreateBy != userId) || fileFolder.FolderType == FolderType.FormFillingFolderDone)
+                        {
+                            return false;
+                        }
                     }
                 }
                 if((action == FilesSecurityActions.Delete ||
@@ -1026,16 +1031,19 @@ public class FileSecurity(IDaoFactory daoFactory,
                     action == FilesSecurityActions.Duplicate ||
                     action == FilesSecurityActions.EditHistory) && file != null )
                 {
-                    var fileFolder = await daoFactory.GetFolderDao<T>().GetFolderAsync(file.ParentId);
-                    if ((fileFolder.FolderType == FolderType.FormFillingFolderInProgress) || fileFolder.FolderType == FolderType.FormFillingFolderDone)
+                    var parentFolders = await GetFileParentFolders(file.ParentId);
+                    if (parentFolders != null)
                     {
-                        return false;
-                    }
+                        var fileFolder = parentFolders.LastOrDefault();
+                        if ((fileFolder.FolderType == FolderType.FormFillingFolderInProgress) || fileFolder.FolderType == FolderType.FormFillingFolderDone)
+                        {
+                            return false;
+                        }
+                    }  
                 }
                 if (action == FilesSecurityActions.CopyLink && file != null)
                 {
-                    var folderDao = daoFactory.GetFolderDao<T>();
-                    var parentFolders = await folderDao.GetParentFoldersAsync(file.ParentId).ToListAsync();
+                    var parentFolders = await GetFileParentFolders(file.ParentId);
 
                     if (parentFolders.Exists(parent => DocSpaceHelper.IsFormsFillingSystemFolder(parent.FolderType)))
                     {
@@ -2212,6 +2220,22 @@ public class FileSecurity(IDaoFactory daoFactory,
         result.Add(Constants.GroupEveryone.ID);
 
         return result;
+    }
+
+    private async Task<List<Folder<T>>> GetFileParentFolders<T>(T fileParentId)
+    {
+        var folderParentsCacheKey = "FileFolderParents" + fileParentId;
+
+        var parentFolders = cache.Get<List<Folder<T>>>(folderParentsCacheKey);
+
+        if (parentFolders == null)
+        {
+            var folderDao = daoFactory.GetFolderDao<T>();
+            parentFolders = await folderDao.GetParentFoldersAsync(fileParentId).ToListAsync();
+            cache.Insert(folderParentsCacheKey, parentFolders, TimeSpan.FromMinutes(5));
+        }
+
+        return parentFolders;
     }
 
     private async Task<bool> HasFullAccessAsync<T>(FileEntry<T> entry, Guid userId, bool isUser, bool isDocSpaceAdmin, bool isRoom, bool isCollaborator)
