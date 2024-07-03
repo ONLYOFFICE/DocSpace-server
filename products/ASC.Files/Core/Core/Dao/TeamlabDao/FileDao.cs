@@ -555,21 +555,9 @@ internal class FileDao(
                             var extension = FileUtility.GetFileExtension(file.Title);
                             var fileType = FileUtility.GetFileTypeByExtention(extension);
 
-                            await fileStream.CopyToAsync(originalCopyStream);
-
-                            var cloneStreamForCheck = CloneMemoryStream(originalCopyStream, 300);
-                            var cloneStreamForSave = CloneMemoryStream(originalCopyStream);
-
-                            if (fileType != FileType.Pdf || (fileType == FileType.Pdf && !await fileStorageService.CheckExtendedPDFstream(cloneStreamForCheck)))
-                            {
-                                throw new Exception(FilesCommonResource.ErrorMessage_UploadToFormRoom);
-
-                            }
-
                             if (fileType == FileType.Pdf)
                             {
-
-                                await SaveFileStreamAsync(file, cloneStreamForSave, currentFolder);
+                                await SaveFileStreamAsync(file, fileStream, currentFolder);
 
                                 var properties = await fileDao.GetProperties(file.Id) ?? new EntryProperties() { FormFilling = new FormFillingProperties() };
                                 if (!properties.FormFilling.CollectFillForm)
