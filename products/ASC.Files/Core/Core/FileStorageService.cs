@@ -87,7 +87,8 @@ public class FileStorageService //: IFileStorageService
     IHttpClientFactory clientFactory,
     TempStream tempStream,
     MentionWrapperCreator mentionWrapperCreator,
-    SecurityContext securityContext)
+    SecurityContext securityContext,
+    IConfiguration configuration)
 {
     private readonly ILogger _logger = optionMonitor.CreateLogger("ASC.Files");
 
@@ -912,16 +913,17 @@ public class FileStorageService //: IFileStorageService
         using var reader = new StreamReader(stream, Encoding.GetEncoding("iso-8859-1"));
         var message = await reader.ReadToEndAsync();
 
-        return IsExtendedPDFFile(message);
+        var config = configuration.GetSection("files:oform").Get<OFormSettings>();
+
+        return IsExtendedPDFFile(message, config.Signature);
     }
-    private static bool IsExtendedPDFFile(string text)
+    private static bool IsExtendedPDFFile(string text, string signature)
     {
         if (string.IsNullOrEmpty(text))
         {
             return false;
         }
 
-        const string signature = "ONLYOFFICEFORM";
         var indexFirst = text.IndexOf("%\xCD\xCA\xD2\xA9\x0D");
 
         if (indexFirst == -1)

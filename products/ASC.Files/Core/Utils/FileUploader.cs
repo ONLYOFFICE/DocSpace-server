@@ -298,7 +298,7 @@ public class FileUploader(
             var currentFolder = await folderDao.GetFolderAsync(uploadSession.File.FolderIdDisplay);
             var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(currentFolder);
 
-            if (int.TryParse(roomId?.ToString(), out var curRoomId) && curRoomId != -1 && fileType == FileType.Pdf)
+            if (fileType == FileType.Pdf && int.TryParse(roomId?.ToString(), out var curRoomId) && curRoomId != -1)
             {
                 var currentRoom = await folderDao.GetFolderAsync(roomId);
                 if (currentRoom.FolderType == FolderType.FillingFormsRoom)
