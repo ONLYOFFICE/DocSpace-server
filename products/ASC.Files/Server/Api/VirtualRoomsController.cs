@@ -574,7 +574,6 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         FileSizeComment fileSizeComment,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
-        InvitationLinkService invitationLinkService,
         AuthContext authContext,
         DocumentBuilderTaskManager documentBuilderTaskManager,
         TenantManager tenantManager,
@@ -765,65 +764,6 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         }
 
         return result;
-    }
-
-    /// <summary>
-    /// Accepts an invitation to a room via an external link.
-    /// </summary>
-    /// <short>Accept an invitation</short>
-    /// <category>Rooms</category>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.AcceptInvitationDto, ASC.Files.Core" name="inDto">Request parameters for accepting invitations</param>
-    /// <returns></returns>
-    /// <path>api/2.0/files/rooms/accept</path>
-    /// <httpMethod>POST</httpMethod>
-    [HttpPost("rooms/accept")]
-    public async Task SetSecurityByLink(AcceptInvitationDto inDto)
-    {
-        var linkData = await invitationLinkService.GetProcessedLinkDataAsync(inDto.Key, null);
-
-        if (!linkData.IsCorrect)
-        {
-            throw new SecurityException(FilesCommonResource.ErrorMessage_InvintationLink);
-        }
-
-        var aces = new List<AceWrapper>
-        {
-            new()
-            {
-                Access = linkData.Share,
-                Id = authContext.CurrentAccount.ID
-            }
-        };
-
-        var settings = new AceAdvancedSettingsWrapper
-        {
-            InvitationLink = true
-        };
-
-        if (int.TryParse(linkData.RoomId, out var id))
-        {
-            var aceCollection = new AceCollection<int>
-            {
-                Aces = aces,
-                Files = Array.Empty<int>(),
-                Folders = new[] { id },
-                AdvancedSettings = settings
-            };
-
-            await fileStorageService.SetAceObjectAsync(aceCollection, false);
-        }
-        else
-        {
-            var aceCollection = new AceCollection<string>
-            {
-                Aces = aces,
-                Files = Array.Empty<string>(),
-                Folders = new[] { linkData.RoomId },
-                AdvancedSettings = settings
-            };
-
-            await fileStorageService.SetAceObjectAsync(aceCollection, false);
-        }
     }
 
     [HttpPost("rooms/{id:int}/indexexport")]

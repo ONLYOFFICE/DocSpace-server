@@ -39,7 +39,7 @@ public class FileSharingAceHelper(
     PathProvider pathProvider,
     FileSharingHelper fileSharingHelper,
     FileTrackerHelper fileTracker,
-    InvitationLinkService invitationLinkService,
+    InvitationService invitationService,
     StudioNotifyService studioNotifyService,
     UserManagerWrapper userManagerWrapper,
     IUrlShortener urlShortener,
@@ -271,7 +271,7 @@ public class FileSharingAceHelper(
 
             if (emailInvite)
             {
-                var link = await invitationLinkService.GetInvitationLinkAsync(w.Email, share, authContext.CurrentAccount.ID, entry.Id.ToString(), culture);
+                var link = await invitationService.GetInvitationLinkAsync(w.Email, share, authContext.CurrentAccount.ID, entry.Id.ToString(), culture);
                 var shortenLink = await urlShortener.GetShortenLinkAsync(link);
 
                 await studioNotifyService.SendEmailRoomInviteAsync(w.Email, entry.Title, shortenLink, culture, true);
@@ -454,7 +454,7 @@ public class FileSharing(
     DisplayUserSettingsHelper displayUserSettingsHelper,
     IDaoFactory daoFactory,
     FileSharingHelper fileSharingHelper,
-    InvitationLinkService invitationLinkService,
+    InvitationService invitationService,
     ExternalShare externalShare,
     IUrlShortener urlShortener)
 {
@@ -915,7 +915,7 @@ public class FileSharing(
 
         if (record.SubjectType == SubjectType.InvitationLink)
         {
-            link = invitationLinkService.GetInvitationLink(record.Subject, authContext.CurrentAccount.ID);
+            link = invitationService.GetInvitationLink(record.Subject, authContext.CurrentAccount.ID);
         }
         else
         {

@@ -74,8 +74,8 @@ public class FileStorageService //: IFileStorageService
     FileShareParamsHelper fileShareParamsHelper,
     EncryptionLoginProvider encryptionLoginProvider,
     CountRoomChecker countRoomChecker,
-    InvitationLinkService invitationLinkService,
-    InvitationLinkHelper invitationLinkHelper,
+    InvitationService invitationService,
+    InvitationValidator invitationValidator,
     StudioNotifyService studioNotifyService,
     TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
     QuotaSocketManager quotaSocketManager,
@@ -2956,7 +2956,7 @@ public class FileStorageService //: IFileStorageService
             Title = !string.IsNullOrEmpty(title)
                 ? title
                 : FilesCommonResource.DefaultInvitationLinkTitle,
-            ExpirationDate = DateTime.UtcNow.Add(invitationLinkHelper.IndividualLinkExpirationInterval)
+            ExpirationDate = DateTime.UtcNow.Add(invitationValidator.IndividualLinkExpirationInterval)
         };
 
         var result = await SetAceLinkAsync(room, SubjectType.InvitationLink, linkId, share, options);
@@ -3566,7 +3566,7 @@ public class FileStorageService //: IFileStorageService
             {
                 var user = await userManager.GetUsersAsync(ace.Id);
 
-                var link = await invitationLinkService.GetInvitationLinkAsync(user.Email, ace.Access, authContext.CurrentAccount.ID, room.Id.ToString());
+                var link = await invitationService.GetInvitationLinkAsync(user.Email, ace.Access, authContext.CurrentAccount.ID, room.Id.ToString());
                 await studioNotifyService.SendEmailRoomInviteAsync(user.Email, room.Title, await urlShortener.GetShortenLinkAsync(link));
             }
 
@@ -3594,7 +3594,7 @@ public class FileStorageService //: IFileStorageService
 
                 var user = await userManager.GetUsersAsync(ace.Id);
 
-                var link = await invitationLinkService.GetInvitationLinkAsync(user.Email, ace.Access, authContext.CurrentAccount.ID, id.ToString());
+                var link = await invitationService.GetInvitationLinkAsync(user.Email, ace.Access, authContext.CurrentAccount.ID, id.ToString());
                 var shortenLink = await urlShortener.GetShortenLinkAsync(link);
 
                 await studioNotifyService.SendEmailRoomInviteAsync(user.Email, room.Title, shortenLink);

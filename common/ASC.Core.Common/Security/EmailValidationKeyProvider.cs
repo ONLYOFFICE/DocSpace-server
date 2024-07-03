@@ -34,7 +34,10 @@ public class EmailValidationKeyProvider
         Ok,
         Invalid,
         Expired,
-        TariffLimit
+        TariffLimit,
+        UserExisted,
+        UserExcluded,
+        QuotaFailed
     }
 
     public TimeSpan ValidEmailKeyInterval { get; }
