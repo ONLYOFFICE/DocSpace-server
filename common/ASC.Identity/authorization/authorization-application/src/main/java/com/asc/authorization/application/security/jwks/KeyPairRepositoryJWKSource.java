@@ -148,8 +148,8 @@ public class KeyPairRepositoryJWKSource
 
     if (context.getAuthorization().getRegisteredClientId() != null)
       context.getClaims().claim("cid", context.getAuthorization().getRegisteredClientId());
-    if (principal.getDetails() != null)
-      context.getClaims().subject(principal.getDetails().toString());
+    if (principal.getPrincipal() != null)
+      context.getClaims().subject(principal.getPrincipal().toString());
     if (authority instanceof TenantAuthority tenantAuthority)
       context
           .getClaims()
