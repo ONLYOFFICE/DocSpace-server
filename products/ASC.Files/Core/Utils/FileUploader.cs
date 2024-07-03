@@ -274,44 +274,47 @@ public class FileUploader(
             throw FileSizeComment.GetFileSizeException(await setupInfo.MaxUploadSize(tenantManager, maxTotalSizeStatistic));
         }
 
-        var isFirstChunk = false;
-        if (!chunkNumber.HasValue)
+        var extension = FileUtility.GetFileExtension(uploadSession.File.Title);
+        var fileType = FileUtility.GetFileTypeByExtention(extension);
+
+        if (fileType == FileType.Pdf)
         {
-            int.TryParse(uploadSession.GetItemOrDefault<string>("ChunkNumber"), out var number);
-            if(number == 0)
+            var isFirstChunk = false;
+            if (!chunkNumber.HasValue)
+            {
+                int.TryParse(uploadSession.GetItemOrDefault<string>("ChunkNumber"), out var number);
+                if (number == 0)
+                {
+                    isFirstChunk = true;
+                }
+                number++;
+                uploadSession.Items["ChunkNumber"] = number.ToString();
+            }
+            else if (chunkNumber == 1)
             {
                 isFirstChunk = true;
             }
-            number++;
-            uploadSession.Items["ChunkNumber"] = number.ToString();
-        }
-        else if(chunkNumber == 1)
-        {
-            isFirstChunk = true;
-        }
 
-        if (isFirstChunk)
-        {
-            var extension = FileUtility.GetFileExtension(uploadSession.File.Title);
-            var fileType = FileUtility.GetFileTypeByExtention(extension);
-            var folderDao = daoFactory.GetFolderDao<T>();
-            var currentFolder = await folderDao.GetFolderAsync(uploadSession.File.FolderIdDisplay);
-            var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(currentFolder);
-
-            if (fileType == FileType.Pdf && int.TryParse(roomId?.ToString(), out var curRoomId) && curRoomId != -1)
+            if (isFirstChunk)
             {
-                var currentRoom = await folderDao.GetFolderAsync(roomId);
-                if (currentRoom.FolderType == FolderType.FillingFormsRoom)
+                var folderDao = daoFactory.GetFolderDao<T>();
+                var currentFolder = await folderDao.GetFolderAsync(uploadSession.File.FolderIdDisplay);
+                var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(currentFolder);
+
+                if (int.TryParse(roomId?.ToString(), out var curRoomId) && curRoomId != -1)
                 {
-                    var (fs, _) = await tempStream.TryGetBufferedAsync(stream);
-                    if (!await fileStorageService.CheckExtendedPDFstream(fs))
+                    var currentRoom = await folderDao.GetFolderAsync(roomId);
+                    if (currentRoom.FolderType == FolderType.FillingFormsRoom)
                     {
-                        throw new Exception(FilesCommonResource.ErrorMessage_UploadToFormRoom);
+                        var (fs, _) = await tempStream.TryGetBufferedAsync(stream);
+                        if (!await fileStorageService.CheckExtendedPDFstream(fs))
+                        {
+                            throw new Exception(FilesCommonResource.ErrorMessage_UploadToFormRoom);
+                        }
                     }
                 }
             }
         }
-
 
         var dao = daoFactory.GetFileDao<T>();
         await dao.UploadChunkAsync(uploadSession, stream, chunkLength, chunkNumber);
