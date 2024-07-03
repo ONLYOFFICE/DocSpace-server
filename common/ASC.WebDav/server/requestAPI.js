@@ -34,7 +34,7 @@ const {
     logMessage
 } = require('../helper/helper.js');
 const {
-    onlyOfficePort,
+    apiPort,
     api,
     apiFiles,
     apiAuth,

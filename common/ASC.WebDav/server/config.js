@@ -51,8 +51,8 @@ module.exports = {
   userLifeTime : 3600000,
   // Cleanup interval of expired users (msec)
   usersCleanupInterval: 600000,
-  // Port of community server OnlyOffice */
-  onlyOfficePort: ":80",
+  // Api port
+  apiPort: ":80",
   // Maximum chunk size
   maxChunkSize: 10485760,
   // Api constant
