@@ -194,9 +194,13 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
         {
             try
             {
+                var requestUri = Uri.IsWellFormedUriString(filesLinkUtility.DocServiceApiUrl, UriKind.Absolute)
+                    ? filesLinkUtility.DocServiceApiUrl
+                    : baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.DocServiceApiUrl);
+
                 var request = new HttpRequestMessage
                 {
-                    RequestUri = new Uri(filesLinkUtility.DocServiceApiUrl),
+                    RequestUri = new Uri(requestUri),
                     Method = HttpMethod.Head
                 };
 

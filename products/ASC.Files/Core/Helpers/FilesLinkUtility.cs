@@ -330,30 +330,9 @@ public class FilesLinkUtility
             + (fileVersion > 0 ? "&" + Version + "=" + fileVersion : string.Empty);
     }
 
-    public string GetFileWebEditorTryUrl(FileType fileType)
-    {
-        return FilesBaseAbsolutePath + EditorPage + "?" + TryParam + "=" + fileType;
-    }
-
     public string FileWebEditorExternalUrlString
     {
         get { return FileHandlerPath + "?" + Action + "=create&" + FileUri + "={0}&" + FileTitle + "={1}"; }
-    }
-
-    public string GetFileWebEditorExternalUrl(string fileUri, string fileTitle)
-    {
-        return GetFileWebEditorExternalUrl(fileUri, fileTitle, false);
-    }
-
-    public string GetFileWebEditorExternalUrl(string fileUri, string fileTitle, bool openFolder)
-    {
-        var url = string.Format(FileWebEditorExternalUrlString, HttpUtility.UrlEncode(fileUri), HttpUtility.UrlEncode(fileTitle));
-        if (openFolder)
-        {
-            url += "&openfolder=true";
-        }
-
-        return url;
     }
 
     public string GetFileWebPreviewUrl(FileUtility fileUtility, string fileTitle, object fileId, int fileVersion = 0)
@@ -379,11 +358,6 @@ public class FilesLinkUtility
     public string FileRedirectPreviewUrlString
     {
         get { return FileHandlerPath + "?" + Action + "=redirect"; }
-    }
-
-    public string GetFileRedirectPreviewUrl(object enrtyId, bool isFile)
-    {
-        return FileRedirectPreviewUrlString + "&" + (isFile ? FileId : FolderId) + "=" + HttpUtility.UrlEncode(enrtyId.ToString());
     }
 
     public string FileThumbnailUrlString
