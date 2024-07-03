@@ -907,7 +907,7 @@ public class FileStorageService //: IFileStorageService
 
         return await CheckExtendedPDFstream(memStream);
     }
-    public async Task<bool> CheckExtendedPDFstream(MemoryStream stream)
+    public async Task<bool> CheckExtendedPDFstream(Stream stream)
     {
         using var reader = new StreamReader(stream, Encoding.GetEncoding("iso-8859-1"));
         var message = await reader.ReadToEndAsync();
