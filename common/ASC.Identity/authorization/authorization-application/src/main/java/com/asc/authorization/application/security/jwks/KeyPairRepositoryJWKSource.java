@@ -34,7 +34,7 @@ import org.springframework.stereotype.Component;
 public class KeyPairRepositoryJWKSource
     implements JWKSource<SecurityContext>, OAuth2TokenCustomizer<JwtEncodingContext> {
   @Autowired
-  @Qualifier("ec")
+  @Qualifier("rsa")
   private JwksKeyPairGenerator keyPairGenerator;
 
   private final EncryptionService encryptionService;
