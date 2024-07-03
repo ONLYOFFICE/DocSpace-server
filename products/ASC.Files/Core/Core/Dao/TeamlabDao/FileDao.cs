@@ -615,47 +615,8 @@ internal class FileDao(
             {
                 if (uploadSession != null)
                 {
-                    try
-                    {
-                        if (roomId != -1 && checkFolder && fileType == FileType.Pdf)
-                        {
-                            var currentRoom = await folderDao.GetFolderAsync(roomId);
-                            if (currentRoom.FolderType == FolderType.FillingFormsRoom)
-                            {
-                                using (var fs = new FileStream(uploadSession.UploadId, FileMode.Open))
-                                {
-                                    if (!await fileStorageService.CheckExtendedPDFstream(fs))
-                                    {
-                                        throw new Exception(FilesCommonResource.ErrorMessage_UploadToFormRoom);
-                                    }
-                                }
-                            }
-                        }
-
-                        await chunkedUploadSessionHolder.MoveAsync(uploadSession, GetUniqFilePath(file), file.GetFileQuotaOwner());
-
-                        await folderDao.ChangeTreeFolderSizeAsync(currentFolder.Id, file.ContentLength);
-                    }
-                    catch (Exception exception)
-                    {
-                        try
-                        {
-                            if (isNew)
-                            {
-                                var stored = await (await globalStore.GetStoreAsync()).IsDirectoryAsync(GetUniqFileDirectory(file.Id));
-                                await DeleteFileAsync(file.Id, stored, file.GetFileQuotaOwner());
-                            }
-                            else if (!await IsExistOnStorageAsync(file))
-                            {
-                                await DeleteVersionAsync(file);
-                            }
-                        }
-                        catch (Exception deleteException)
-                        {
-                            throw new Exception(exception.Message, deleteException);
-                        }
-                        throw;
-                    }
+                    await chunkedUploadSessionHolder.MoveAsync(uploadSession, GetUniqFilePath(file), file.GetFileQuotaOwner());
+                    await folderDao.ChangeTreeFolderSizeAsync(currentFolder.Id, file.ContentLength);
                 }
             }
 
