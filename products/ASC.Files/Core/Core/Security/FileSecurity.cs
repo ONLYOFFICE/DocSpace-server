@@ -673,7 +673,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 }
             }
             
-            if (await CanAsync(entry, userId, action, userShares))
+            if (await CanAsync(entry, userId, action, userShares, false))
             {
                 result.Add(userId);
             }
@@ -787,7 +787,7 @@ public class FileSecurity(IDaoFactory daoFactory,
         return !entry.DenySharing || entry.Access != FileShare.ReadWrite;
     }
 
-    private async Task<bool> CanAsync<T>(FileEntry<T> entry, Guid userId, FilesSecurityActions action, IEnumerable<FileShareRecord<T>> shares = null)
+    private async Task<bool> CanAsync<T>(FileEntry<T> entry, Guid userId, FilesSecurityActions action, IEnumerable<FileShareRecord<T>> shares = null, bool setEntryAccess = true)
     {
         if (entry.Security != null && entry.Security.TryGetValue(action, out var result))
         {
@@ -807,8 +807,17 @@ public class FileSecurity(IDaoFactory daoFactory,
         var isDocSpaceAdmin = userType is EmployeeType.DocSpaceAdmin;
         var isCollaborator = userType is EmployeeType.Collaborator;
         var isAuthenticated =  authContext.IsAuthenticated || (await authManager.GetAccountByIDAsync(await tenantManager.GetCurrentTenantIdAsync(), userId)).IsAuthenticated;
+
+        var accessSnapshot = entry.Access;
         
-        return await FilterEntryAsync(entry, action, userId, shares, isOutsider, isUser, isAuthenticated, isDocSpaceAdmin, isCollaborator);
+        var haveAccess = await FilterEntryAsync(entry, action, userId, shares, isOutsider, isUser, isAuthenticated, isDocSpaceAdmin, isCollaborator);
+
+        if (!setEntryAccess)
+        {
+            entry.Access = accessSnapshot;
+        }
+
+        return haveAccess;
     }
     
     private async IAsyncEnumerable<Tuple<FileEntry<T>, bool>> CanAsync<T>(IAsyncEnumerable<FileEntry<T>> entry, Guid userId, FilesSecurityActions action)
