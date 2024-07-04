@@ -147,8 +147,7 @@ public class JwtBearerAuthHandler: AuthenticationHandler<AuthenticationSchemeOpt
     private async Task<JwtSecurityToken> ValidateToken(string token,
                                                               string issuer,
                                                               string audience,
-                                                              IConfigurationManager<OpenIdConnectConfiguration> configurationManager,
-                                                              CancellationToken ct = default(CancellationToken))
+                                                              ConfigurationManager<OpenIdConnectConfiguration> configurationManager)
     {
         ArgumentNullException.ThrowIfNull(token);
         ArgumentNullException.ThrowIfNull(issuer);
@@ -156,7 +155,7 @@ public class JwtBearerAuthHandler: AuthenticationHandler<AuthenticationSchemeOpt
 
         _logger.DebugValidateTokenInfo(token, issuer, audience);
 
-        var discoveryDocument = await configurationManager.GetConfigurationAsync(ct);
+        var discoveryDocument = await configurationManager.GetConfigurationAsync(); 
         var signingKeys = discoveryDocument.SigningKeys;
 
         var validationParameters = new TokenValidationParameters
@@ -175,7 +174,7 @@ public class JwtBearerAuthHandler: AuthenticationHandler<AuthenticationSchemeOpt
 
             ValidateIssuer = true,
             ValidIssuer = issuer,
-            ValidAlgorithms = new[] { SecurityAlgorithms.EcdsaSha256 },
+            ValidAlgorithms = new[] { SecurityAlgorithms.RsaSha256 },
 
             ClockSkew = TimeSpan.FromMinutes(2),
         };
