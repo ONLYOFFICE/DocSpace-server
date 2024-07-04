@@ -125,7 +125,7 @@ public class MigrationOperation(
             }
 
             var folder = await cache.GetStringAsync($"migration folder - {TenantId}");
-            migrator.Init(folder, CancellationToken, onlyParse ? OperationType.Parse : OperationType.Migration);
+            await migrator.InitAsync(folder, CancellationToken, onlyParse ? OperationType.Parse : OperationType.Migration);
 
             await migrator.ParseAsync(onlyParse);
             if (!onlyParse)
