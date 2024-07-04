@@ -73,7 +73,6 @@ public class ClearEventsService(ILogger<ClearEventsService> logger, IServiceScop
         try
         {
             await RemoveOldEventsAsync(r => r.LoginEvents, "LoginHistoryLifeTime");
-            await RemoveOldEventsAsync(r => r.AuditEvents, "AuditTrailLifeTime");
         }
         catch (Exception ex)
         {

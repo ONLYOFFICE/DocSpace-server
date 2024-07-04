@@ -100,7 +100,7 @@ public class MessageMaps
     {
         try
         {
-            return AuditReportResource.ResourceManager.GetString(ProductType == ProductType.CRM ? "CrmProduct" : ProductType + "Product");
+            return AuditReportResource.ResourceManager.GetString(ProductType + "Product");
         }
         catch
         {
