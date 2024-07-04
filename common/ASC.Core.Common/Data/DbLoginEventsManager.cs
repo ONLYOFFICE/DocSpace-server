@@ -133,9 +133,8 @@ public class DbLoginEventsManager(
     {
         await using var loginEventContext = await dbContextFactory.CreateDbContextAsync();
 
-        await Queries.DeleteLoginEventsAsync(loginEventContext, tenantId, loginEventId);
-
-        cache.Remove([loginEventId]);
+        var loginEvent = loginEventContext.LoginEvents.FirstOrDefault(q=> q.TenantId == tenantId && q.Id == loginEventId);
+        await InnerLogOutAsync(loginEventContext, new List<DbLoginEvent> { loginEvent });
     }
 
     public async Task LogOutAllActiveConnectionsAsync(int tenantId, Guid userId)
@@ -208,13 +207,6 @@ static file class Queries
                                 && r.Active)
                     .OrderByDescending(r => r.Id)
                     .AsQueryable());
-
-    public static readonly Func<MessagesContext, int, int, Task<int>> DeleteLoginEventsAsync =
-        EF.CompileAsyncQuery(
-            (MessagesContext ctx, int tenantId, int loginEventId) =>
-                ctx.LoginEvents
-                    .Where(r => r.TenantId == tenantId && r.Id == loginEventId)
-                    .ExecuteUpdate(r => r.SetProperty(p => p.Active, false)));
 
     public static readonly Func<MessagesContext, int, Guid, IAsyncEnumerable<DbLoginEvent>> LoginEventsByUserIdAsync =
         EF.CompileAsyncQuery(

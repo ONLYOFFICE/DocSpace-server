@@ -376,7 +376,7 @@ public class ConnectionsController(
         var auditEventDate = DateTime.UtcNow;
 
         await messageService.SendAsync(currentUserId.Equals(user.Id) ? MessageAction.UserLogoutActiveConnections : MessageAction.UserLogoutActiveConnectionsForUser, MessageTarget.Create(user.Id), auditEventDate, userName);
-        await cookiesManager.ResetUserCookieAsync(user.Id);
+        await cookiesManager.ResetUserCookieAsync(user.Id, false);
         await socketManager.LogoutUserAsync(user.Id);
     }
 
