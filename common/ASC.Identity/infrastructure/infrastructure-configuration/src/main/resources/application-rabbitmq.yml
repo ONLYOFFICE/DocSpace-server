@@ -1,6 +1,6 @@
 spring:
   rabbitmq:
-    host: ${RABBIT_HOST:onlyoffice-rabbitmq}
+    host: ${RABBIT_HOST:localhost}
     listener:
       simple:
         retry:
