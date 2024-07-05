@@ -329,7 +329,16 @@ public partial class SettingsController(MessageService messageService,
         quotaSettings.DefaultQuota = quota > 0 ? quota : 0;
 
         await settingsManager.SaveAsync(quotaSettings);
-
+        
+        if (inDto.EnableQuota)
+        {
+            await messageService.SendAsync(MessageAction.QuotaPerUserChanged, quota.ToString());
+        }
+        else
+        {
+            await messageService.SendAsync(MessageAction.QuotaPerUserDisabled);
+        }
+        
         return quotaSettings;
     }
 
@@ -387,6 +396,15 @@ public partial class SettingsController(MessageService messageService,
         quotaSettings.DefaultQuota = quota > 0 ? quota : 0;
 
         await settingsManager.SaveAsync(quotaSettings);
+        
+        if (inDto.EnableQuota)
+        {
+            await messageService.SendAsync(MessageAction.QuotaPerRoomChanged, quota.ToString());
+        }
+        else
+        {
+            await messageService.SendAsync(MessageAction.QuotaPerRoomDisabled);
+        }
 
         return quotaSettings;
     }
@@ -431,7 +449,16 @@ public partial class SettingsController(MessageService messageService,
         var admins = (await userManager.GetUsersByGroupAsync(ASC.Core.Users.Constants.GroupAdmin.ID)).Select(u => u.Id).ToList();
 
         _ = quotaSocketManager.ChangeCustomQuotaUsedValueAsync(inDto.TenantId, customQuota.GetFeature<TenantCustomQuotaFeature>().Name, tenantQuotaSetting.EnableQuota, usedSize, tenantQuotaSetting.Quota, admins);
-
+        
+        if (tenantQuotaSetting.EnableQuota)
+        {
+            await messageService.SendAsync(MessageAction.QuotaPerPortalChanged, tenantQuotaSetting.Quota.ToString());
+        }
+        else
+        {
+            await messageService.SendAsync(MessageAction.QuotaPerPortalDisabled);
+        }
+        
         return tenantQuotaSetting;
     }
 

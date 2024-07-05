@@ -798,4 +798,7 @@
   <data name="RoomUpdateAccessForUser" xml:space="preserve">
     <value>{0} именован: {1}</value>
   </data>
+  <data name="FileSizePostfix" xml:space="preserve">
+    <value>бајтови,КБ,МБ,ГБ,ТБ</value>
+  </data>
 </root>

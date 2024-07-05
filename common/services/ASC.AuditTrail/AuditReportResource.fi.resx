@@ -739,4 +739,7 @@
   <data name="PortalRenamed" xml:space="preserve">
     <value>Portaali nimetty uudelleen</value>
   </data>
+  <data name="FileSizePostfix" xml:space="preserve">
+    <value>tavua, kt, Mt, Gt, Tt</value>
+  </data>
 </root>

@@ -813,4 +813,25 @@
   <data name="FileUploadedWithOverwriting" xml:space="preserve">
     <value>File uploaded with overwriting: {0}</value>
   </data>
+  <data name="QuotaPerRoomChanged" xml:space="preserve">
+    <value>Set default storage quota for rooms: {0}</value>
+  </data>
+  <data name="QuotaPerRoomDisabled" xml:space="preserve">
+    <value>Disabled default storage quota for rooms</value>
+  </data>
+  <data name="QuotaPerUserChanged" xml:space="preserve">
+    <value>Set default storage quota for users: {0}</value>
+  </data>
+  <data name="QuotaPerUserDisabled" xml:space="preserve">
+    <value>Disabled default storage quota for users</value>
+  </data>
+  <data name="QuotaPerPortalChanged" xml:space="preserve">
+    <value>Set default storage quota: {0}</value>
+  </data>
+  <data name="QuotaPerPortalDisabled" xml:space="preserve">
+    <value>Disabled default storage quota</value>
+  </data>
+  <data name="FileSizePostfix" xml:space="preserve">
+    <value>bytes,KB,MB,GB,TB</value>
+  </data>
 </root>

@@ -739,4 +739,7 @@
   <data name="PortalRenamed" xml:space="preserve">
     <value>Portál bol premenovaný</value>
   </data>
+  <data name="FileSizePostfix" xml:space="preserve">
+    <value>bytes,KB,MB,GB,TB</value>
+  </data>
 </root>
