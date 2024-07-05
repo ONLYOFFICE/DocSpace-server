@@ -16,3 +16,9 @@ spring:
     sql-migration-suffixes: .sql
     url: jdbc:mysql://${JDBC_URL:localhost:3306}/${JDBC_DATABASE:docspace}
     user: ${JDBC_USER_NAME:dev}
+logging:
+  level:
+    org:
+      flywaydb: INFO
+      hibernate: INFO
+    root: WARN
