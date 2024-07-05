@@ -297,7 +297,7 @@ public partial class SettingsController(MessageService messageService,
     [HttpPost("userquotasettings")]
     public async Task<TenantUserQuotaSettings> SaveUserQuotaSettingsAsync(QuotaSettingsRequestsDto inDto)
     {
-        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        await DemandStatisticPermissionAsync();
 
         if (!inDto.DefaultQuota.TryGetInt64(out var quota))
         {
