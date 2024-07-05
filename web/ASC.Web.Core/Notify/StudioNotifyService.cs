@@ -310,7 +310,7 @@ public class StudioNotifyService(
 
     public async Task SendJoinMsgAsync(string email, EmployeeType emplType, string culture)
     {
-        var inviteUrl = await commonLinkUtility.GetConfirmationEmailUrlAsync(email, ConfirmType.EmpInvite, (int)emplType) + $"&emplType={(int)emplType}";
+        var inviteUrl = await commonLinkUtility.GetConfirmationEmailUrlAsync(email, ConfirmType.EmpInvite, (int)emplType + "trust") + $"&emplType={(int)emplType}";
         var shortLink = await urlShortener.GetShortenLinkAsync(inviteUrl);
         
         var orangeButtonText = WebstudioNotifyPatternResource.ButtonJoin;
