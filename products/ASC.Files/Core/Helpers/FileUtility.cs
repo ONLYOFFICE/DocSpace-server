@@ -272,11 +272,13 @@ public class FileUtility(
         var ext = GetFileExtension(fileName);
         return ExtsMediaPreviewed.Exists(r => r.Equals(ext, StringComparison.OrdinalIgnoreCase));
     }
-    public bool GetWebViewAccessibility(string fileName)
+
+    private bool GetWebViewAccessibility(string fileName)
     {
         var ext = GetFileExtension(fileName).ToLower();
-        return !ext.Equals(".pdf") && ExtsWebPreviewed.Contains(ext);
+        return ExtsWebPreviewed.Contains(ext);
     }
+    
     public bool CanWebView(string fileName)
     {
         var ext = GetFileExtension(fileName);
