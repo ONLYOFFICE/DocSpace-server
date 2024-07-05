@@ -85,7 +85,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// Saves edits to a file with the ID specified in the request.
     /// </summary>
     /// <short>Save file edits</short>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
+    /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.SaveEditingRequestDto, ASC.Files.Core" name="inDto">Request parameters for saving file edits</param>
     /// <category>Files</category>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileDto, ASC.Files.Core">Saved file parameters</returns>
@@ -104,7 +104,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// Informs about opening a file with the ID specified in the request for editing, locking it from being deleted or moved (this method is called by the mobile editors).
     /// </summary>
     /// <short>Start file editing</short>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
+    /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.StartEditRequestDto, ASC.Files.Core" name="inDto">Request parameters for starting file editing</param>
     /// <category>Files</category>
     /// <returns type="System.Object, System">File key for Document Service</returns>
@@ -121,7 +121,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// Starts filling a file with the ID specified in the request.
     /// </summary>
     /// <short>Starts filling</short>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
+    /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
     /// <category>Files</category>
     /// <path>api/2.0/files/file/{fileId}/startfilling</path>
     /// <httpMethod>PUT</httpMethod>
@@ -136,10 +136,10 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// Tracks file changes when editing.
     /// </summary>
     /// <short>Track file editing</short>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
-    /// <param type="System.Guid, System" name="tabId">Tab ID</param>
-    /// <param type="System.String, System" name="docKeyForTrack">Document key for tracking</param>
-    /// <param type="System.Boolean, System" name="isFinish">Specifies whether to finish file tracking or not</param>
+    /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
+    /// <param type="System.Guid, System" name="tabId" example="9924256A-739C-462b-AF15-E652A3B1B6EB">Tab ID</param>
+    /// <param type="System.String, System" name="docKeyForTrack" example="some text">Document key for tracking</param>
+    /// <param type="System.Boolean, System" name="isFinish" example="true">Specifies whether to finish file tracking or not</param>
     /// <category>Files</category>
     /// <returns type="System.Collections.Generic.KeyValuePair{System.Boolean, System.String}, System.Collections.Generic">File changes</returns>
     /// <path>api/2.0/files/file/{fileId}/trackeditfile</path>
@@ -155,11 +155,11 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// Returns the initialization configuration of a file to open it in the editor.
     /// </summary>
     /// <short>Open a file</short>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
-    /// <param type="System.Int32, System" name="version">File version</param>
-    /// <param type="System.Boolean, System" name="view">Specifies if a document will be opened for viewing only or not</param>
+    /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
+    /// <param type="System.Int32, System" name="version" example="1234">File version</param>
+    /// <param type="System.Boolean, System" name="view" example="true">Specifies if a document will be opened for viewing only or not</param>
     /// <param type="ASC.Web.Files.Services.DocumentService.EditorType, ASC.Files.Core" name="editorType">Editor type (Desktop, Mobile, Embedded)</param>
-    /// <param type="System.Boolean, System" name="edit"></param>
+    /// <param type="System.Boolean, System" name="edit" example="true"></param>
     /// <category>Files</category>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.ConfigurationDto, ASC.Files.Core">Configuration parameters</returns>
     /// <path>api/2.0/files/file/{fileId}/openedit</path>
@@ -318,7 +318,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// </summary>
     /// <short>Get file download link asynchronously</short>
     /// <category>Files</category>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
+    /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
     /// <returns type="ASC.Files.Core.Helpers.DocumentService.FileLink, ASC.Files.Core">File download link</returns>
     /// <path>api/2.0/files/file/{fileId}/presigned</path>
     /// <httpMethod>GET</httpMethod>
@@ -334,7 +334,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// </summary>
     /// <short>Get shared users</short>
     /// <category>Sharing</category>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
+    /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
     /// <returns type="ASC.Web.Files.Services.WCFService.MentionWrapper, ASC.Files.Core">List of users with their access rights to the file</returns>
     /// <path>api/2.0/files/file/{fileId}/sharedusers</path>
     /// <httpMethod>GET</httpMethod>
@@ -385,7 +385,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// </summary>
     /// <short>Get users with the access to the protected file</short>
     /// <category>Files</category>
-    /// <param type="System.Int32, System" name="fileId">File ID</param>
+    /// <param type="System.Int32, System" name="fileId" example="1234">File ID</param>
     /// <returns type="ASC.Web.Files.Services.WCFService.MentionWrapper, ASC.Files.Core">List of users with their access rights to the protected file</returns>
     /// <path>api/2.0/files/file/{fileId}/protectusers</path>
     /// <httpMethod>GET</httpMethod>
@@ -485,7 +485,7 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
     /// </summary>
     /// <short>Get the document service URL</short>
     /// <category>Settings</category>
-    /// <param type="System.Boolean, System" name="version">Specifies the editor version or not</param>
+    /// <param type="System.Boolean, System" name="version" example="true">Specifies the editor version or not</param>
     /// <returns type="System.Object, System">The document service URL with the editor version specified</returns>
     /// <path>api/2.0/files/docservice</path>
     /// <httpMethod>GET</httpMethod>

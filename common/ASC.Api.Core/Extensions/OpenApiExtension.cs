@@ -32,6 +32,7 @@ using Microsoft.OpenApi.Interfaces;
 using Microsoft.OpenApi.Models;
 using Microsoft.OpenApi.Writers;
 
+using SwaggerCustomFilter;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace ASC.Api.Core.Extensions;
@@ -48,7 +49,9 @@ public static class OpenApiExtension
             c.CustomSchemaIds(CustomSchemaId);
 
             c.SwaggerDoc("common", new OpenApiInfo { Title = assemblyName, Version = "v2" });
-
+            c.SchemaFilter<SwaggerSchemaCustomFilter>();
+            c.EnableAnnotations();
+            
             // ToDo: add security definitions
             c.AddSecurityDefinition("asc_auth_key", new OpenApiSecurityScheme
             {
