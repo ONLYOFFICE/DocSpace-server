@@ -316,6 +316,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         var distributedLockProvider = scope.ServiceProvider.GetRequiredService<IDistributedLockProvider>();
         var roomLogoManager = scope.ServiceProvider.GetRequiredService<RoomLogoManager>();
         var global = scope.ServiceProvider.GetRequiredService<Global>();
+        var fileSecurity = scope.ServiceProvider.GetRequiredService<FileSecurity>();
 
         var toFolderId = toFolder.Id;
         var isToFolder = Equals(toFolderId, _daoFolderId);
@@ -485,6 +486,12 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                 {
                                     newFolder.SettingsHasLogo = true;
                                     await folderDao.SaveFolderAsync(newFolder);
+                                }
+
+                                var primaryExternalLink = (await FilesSecurity.GetSharesAsync(folder)).FirstOrDefault(r => r.SubjectType == SubjectType.PrimaryExternalLink);
+                                if (primaryExternalLink != null)
+                                {
+                                    await fileSecurity.ShareAsync(newFolder.Id, newFolder.FileEntryType, primaryExternalLink.Owner, primaryExternalLink.Share, primaryExternalLink.SubjectType, primaryExternalLink.Options);
                                 }
                             }
                             
