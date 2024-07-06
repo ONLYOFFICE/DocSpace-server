@@ -66,6 +66,47 @@
         </dependency>
     </dependencies>
 
+    <profiles>
+        <profile>
+            <id>win</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.github.nikolaybespalov</groupId>
+                        <artifactId>winsw-maven-plugin</artifactId>
+                        <version>${winsw.maven.plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>process-winsw</id>
+                                <phase>prepare-package</phase>
+                                <goals>
+                                    <goal>winsw</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${project.build.directory}</outputDirectory>
+                                    <winswRepo>jar</winswRepo>
+                                    <winswVersion>2.9.0</winswVersion>
+                                    <executableFileName>${project.build.finalName}.exe</executableFileName>
+                                    <configurationFileName>${project.build.finalName}.xml</configurationFileName>
+                                    <configurationFile>
+                                        <id>identity-migration-service</id>
+                                        <name>Identity Migration Service</name>
+                                        <description>Run Identity Migration as a Service</description>
+                                        <executable>java</executable>
+                                        <arguments>-jar ${project.build.finalName}.jar</arguments>
+                                    </configurationFile>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
     <build>
         <plugins>
             <plugin>
