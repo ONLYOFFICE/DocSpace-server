@@ -37,6 +37,11 @@
 
         <!-- Spring Boot Dependencies -->
         <dependency>
+            <groupId>com.github.jpmsilva.jsystemd</groupId>
+            <artifactId>jsystemd-spring-boot-starter</artifactId>
+            <version>${jsystemd.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
         </dependency>
