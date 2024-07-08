@@ -99,7 +99,12 @@ public class ExternalShare(Global global,
             return Status.Expired;
         }
 
-        if ((record.Options.Internal && !isAuthenticated) || entry is { RootFolderType: FolderType.Archive or FolderType.TRASH })
+        if (record.Options.Internal && !isAuthenticated)
+        {
+            return Status.ExternalAccessDenied;
+        }
+
+        if (entry is { RootFolderType: FolderType.Archive or FolderType.TRASH })
         {
             return Status.Invalid;
         }
@@ -321,15 +326,7 @@ public class ValidationInfo
     /// <summary>Sharing rights</summary>
     /// <type>ASC.Files.Core.Security.FileShare, ASC.Files.Core</type>
     public FileShare Access { get; set; }
-
-    /// <summary>Type of a folder where the external data is located</summary>
-    /// <type>ASC.Files.Core.FolderType, ASC.Files.Core</type>
-    public FolderType FolderType { get; set; }
-
-    /// <summary>Room logo</summary>
-    /// <type>ASC.Files.Core.VirtualRooms.Logo, ASC.Files.Core</type>
-    public Logo Logo { get; set; }
-
+    
     /// <summary>Tenant ID</summary>
     /// <type>System.Int32, System</type>
     public int TenantId { get; set; }
@@ -380,5 +377,6 @@ public enum Status
     Invalid,
     Expired,
     RequiredPassword,
-    InvalidPassword
+    InvalidPassword,
+    ExternalAccessDenied
 }
