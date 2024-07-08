@@ -25,8 +25,8 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Core.Common.Hosting;
-public abstract class ActivePassiveBackgroundService<T>(ILogger logger,
-                                                        IServiceScopeFactory scopeFactory) : BackgroundService where T : ActivePassiveBackgroundService<T>
+public abstract class ActivePassiveBackgroundService<T>(ILogger logger, IServiceScopeFactory scopeFactory) 
+    : BackgroundService where T : ActivePassiveBackgroundService<T>
 {
     protected abstract Task ExecuteTaskAsync(CancellationToken stoppingToken);
     protected abstract TimeSpan ExecuteTaskPeriod { get; set; }
@@ -54,8 +54,12 @@ public abstract class ActivePassiveBackgroundService<T>(ILogger logger,
                 continue;
             }
 
+            logger.TraceActivePassiveBackgroundServiceIsRunning(serviceName);
+
             await ExecuteTaskAsync(stoppingToken);
 
+            logger.TraceActivePassiveBackgroundServiceIsSleeping(serviceName, ExecuteTaskPeriod);
+            
             await Task.Delay(ExecuteTaskPeriod, stoppingToken);
         }
 

@@ -30,7 +30,7 @@ namespace ASC.Web.Api;
 
 public class Startup : BaseStartup
 {
-    public Startup(IConfiguration configuration, IHostEnvironment hostEnvironment) : base(configuration, hostEnvironment)
+    public Startup(IConfiguration configuration) : base(configuration)
     {
         WebhooksEnabled = true;
 
@@ -56,7 +56,7 @@ public class Startup : BaseStartup
         services.AddStartupTask<CspStartupTask>()
                    .TryAddSingleton(services);
                 
-        services.AddActivePassiveHostedService<NotifySchedulerService>(DIHelper, _configuration, "WebApiNotifySchedulerService");
+        services.AddActivePassiveHostedService<NotifySchedulerService>(_configuration, "WebApiNotifySchedulerService");
     }
 
     public override void Configure(IApplicationBuilder app, IWebHostEnvironment env)

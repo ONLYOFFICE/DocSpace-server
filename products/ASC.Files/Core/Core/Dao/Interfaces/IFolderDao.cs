@@ -383,19 +383,6 @@ public interface IFolderDao<T>
     /// <returns></returns>
     Task<string> GetBunchObjectIDAsync(T folderID);
 
-    /// <summary>
-    /// Return ids of related objects
-    /// Only in TMFolderDao
-    /// </summary>
-    /// <param name="folderIDs"></param>
-    /// <returns></returns>
-    Task<Dictionary<string, string>> GetBunchObjectIDsAsync(List<T> folderIDs);
-    IAsyncEnumerable<FolderWithShare> GetFeedsForRoomsAsync(int tenant, DateTime from, DateTime to);
-    IAsyncEnumerable<FolderWithShare> GetFeedsForFoldersAsync(int tenant, DateTime from, DateTime to);
-    IAsyncEnumerable<ParentRoomPair> GetParentRoomsAsync(IEnumerable<int> foldersIds);
-
-    IAsyncEnumerable<int> GetTenantsWithFoldersFeedsAsync(DateTime fromTime);
-    IAsyncEnumerable<int> GetTenantsWithRoomsFeedsAsync(DateTime fromTime);
     IAsyncEnumerable<OriginData> GetOriginsDataAsync(IEnumerable<T> entriesIds);
 
     /// <summary>

@@ -57,11 +57,9 @@ public partial class SettingsController(MessageService messageService,
         DnsSettings dnsSettings,
         CustomColorThemesSettingsHelper customColorThemesSettingsHelper,
         UserInvitationLimitHelper userInvitationLimitHelper,
-        QuotaSyncOperation quotaSyncOperation,
         QuotaUsageManager quotaUsageManager,
         TenantDomainValidator tenantDomainValidator,
         ExternalShare externalShare,
-        ConfigurationExtension configurationExtension,
         IMapper mapper,
         UserFormatter userFormatter,
         IDistributedLockProvider distributedLockProvider,
@@ -177,7 +175,7 @@ public partial class SettingsController(MessageService messageService,
                 settings.Plugins.Delete = pluginsDelete;
             }
 
-            var formGallerySettings = configurationExtension.GetSetting<OFormSettings>("files:oform");
+            var formGallerySettings = configuration.GetSection("files:oform").Get<OFormSettings>();
             settings.FormGallery = mapper.Map<FormGalleryDto>(formGallerySettings);
 
             settings.InvitationLimit = await userInvitationLimitHelper.GetLimit();
@@ -557,7 +555,8 @@ public partial class SettingsController(MessageService messageService,
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        return await quotaSyncOperation.CheckRecalculateQuota(await tenantManager.GetCurrentTenantAsync());
+        var result = await usersQuotaSyncOperation.CheckRecalculateQuota(await tenantManager.GetCurrentTenantAsync());
+        return !result.IsCompleted;
     }
 
     /// <summary>

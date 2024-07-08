@@ -211,13 +211,14 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
                         await socketManager.DeleteFileAsync(fileForDeletion);
                         await fileDao.DeleteFileAsync(fileForDeletion.Id);
                     }
-                }
-                else
-                {
-                    if(fileData.Status == TrackerStatus.MustSave)
+                    else if(fileData.Status == TrackerStatus.MustSave)
                     {
                         return await ProcessSaveAsync(fileId, fileData);
                     }
+                }
+                else if(fileData.Status == TrackerStatus.MustSave)
+                {
+                    return await ProcessSaveAsync(fileId, fileData);
                 }
                 break;
             case TrackerStatus.Corrupted:

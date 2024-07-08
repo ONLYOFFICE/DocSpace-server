@@ -1906,6 +1906,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to User disabled.
+        /// </summary>
+        public static string ErrorUserDisabled {
+            get {
+                return ResourceManager.GetString("ErrorUserDisabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The user could not be found.
         /// </summary>
         public static string ErrorUserNotFound {

@@ -34,6 +34,9 @@ namespace ASC.Web.Core.Users;
 /// 
 [Scope]
 public sealed class UserManagerWrapper(
+    AuditEventsRepository auditEventsRepository,
+    CommonLinkUtility commonLinkUtility,
+    IUrlShortener urlShortener,
     StudioNotifyService studioNotifyService,
     UserManager userManager,
     SecurityContext securityContext,
@@ -352,6 +355,19 @@ public sealed class UserManagerWrapper(
         if (userInfo.IsSSO())
         {
             return Resource.CouldNotRecoverPasswordForSsoUser;
+        }
+        
+        if (userInfo.ActivationStatus == EmployeeActivationStatus.Pending && userInfo.Status == EmployeeStatus.Pending)
+        {
+            var type = await userManager.GetUserTypeAsync(userInfo.Id);
+
+            var @event = await auditEventsRepository.GetByFilterAsync(action: MessageAction.SendJoinInvite, target: userInfo.Email);
+            var createBy = @event.LastOrDefault()?.UserId;
+            var link = await commonLinkUtility.GetInvitationLinkAsync(userInfo.Email, type, createBy ??  (await tenantManager.GetCurrentTenantAsync()).OwnerId, userInfo.GetCulture()?.Name);
+            var shortenLink = await urlShortener.GetShortenLinkAsync(link);
+
+            await studioNotifyService.SendDocSpaceRegistration(userInfo.Email, shortenLink);
+            return null;
         }
         
         await studioNotifyService.UserPasswordChangeAsync(userInfo);

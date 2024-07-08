@@ -109,17 +109,17 @@ internal class EventTypeConverter(
         {
             result.UserName = AuditReportResource.GuestAccount;
         }
-        else if (!(string.IsNullOrEmpty(source.FirstName) || string.IsNullOrEmpty(source.LastName)))
+        else if (!(string.IsNullOrEmpty(source.UserData?.FirstName) || string.IsNullOrEmpty(source.UserData?.LastName)))
         {
-            result.UserName = userFormatter.GetUserName(source.FirstName, source.LastName);
+            result.UserName = userFormatter.GetUserName(source.UserData?.FirstName, source.UserData?.LastName);
         }
-        else if (!string.IsNullOrEmpty(source.FirstName))
+        else if (!string.IsNullOrEmpty(source.UserData?.FirstName))
         {
-            result.UserName = source.FirstName;
+            result.UserName = source.UserData.FirstName;
         }
-        else if (!string.IsNullOrEmpty(source.LastName))
+        else if (!string.IsNullOrEmpty(source.UserData?.LastName))
         {
-            result.UserName = source.LastName;
+            result.UserName = source.UserData.LastName;
         }
         else
         {
@@ -134,7 +134,6 @@ internal class EventTypeConverter(
             result.Product = actionMapper.GetProductText(map);
             result.Module = actionMapper.GetModuleText(map);
         }
-
 
         result.Date = tenantUtil.DateTimeFromUtc(result.Date);
         if (!string.IsNullOrEmpty(result.IP))
@@ -152,7 +151,7 @@ internal class EventTypeConverter(
 
             if (!string.IsNullOrEmpty(rawNotificationInfo) && rawNotificationInfo.StartsWith('{') && rawNotificationInfo.EndsWith('}'))
             {
-                var notificationInfo = JsonSerializer.Deserialize<AdditionalNotificationInfo<JsonElement>>(rawNotificationInfo);
+                var notificationInfo = JsonSerializer.Deserialize<EventDescription<JsonElement>>(rawNotificationInfo);
 
                 result.Context = result.Action == (int)MessageAction.RoomRenamed ? notificationInfo.RoomOldTitle :
                     !string.IsNullOrEmpty(notificationInfo.RoomTitle) ? notificationInfo.RoomTitle : notificationInfo.RootFolderTitle;

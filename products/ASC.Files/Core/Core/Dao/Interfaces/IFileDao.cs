@@ -337,10 +337,6 @@ public interface IFileDao<T>
 
     Task<Stream> GetThumbnailAsync(T fileId, int width, int height);
 
-    IAsyncEnumerable<FileWithShare> GetFeedsAsync(int tenant, DateTime from, DateTime to);
-
-    IAsyncEnumerable<int> GetTenantsWithFeedsAsync(DateTime fromTime, bool includeSecurity);
-
     Task<EntryProperties> GetProperties(T fileId);
 
     Task SaveProperties(T fileId, EntryProperties entryProperties);

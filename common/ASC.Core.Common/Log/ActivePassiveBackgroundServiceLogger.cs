@@ -33,6 +33,12 @@ internal static partial class ActivePassiveBackgroundServiceLogger
     [LoggerMessage(Level = LogLevel.Debug, Message = "{serviceName} is stopping.")]
     public static partial void DebugActivePassiveBackgroundServiceStopping(this ILogger logger, string serviceName);
 
+    [LoggerMessage(Level = LogLevel.Trace, Message = "{serviceName} is running.")]
+    public static partial void TraceActivePassiveBackgroundServiceIsRunning(this ILogger logger, string serviceName);
+
+    [LoggerMessage(Level = LogLevel.Trace, Message = "{serviceName} is sleeping for {delay}.")]
+    public static partial void TraceActivePassiveBackgroundServiceIsSleeping(this ILogger logger, string serviceName, TimeSpan delay);
+
     [LoggerMessage(Level = LogLevel.Trace, Message = "{serviceName} with instance id {instanceId} is't active.")]
     public static partial void TraceActivePassiveBackgroundServiceIsNotActive(this ILogger logger, string serviceName, string instanceId);
 }

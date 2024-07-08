@@ -637,7 +637,7 @@ public class LdapUserManager(ILogger<LdapUserManager> logger,
 
                 var tenant = await tenantManager.GetCurrentTenantAsync();
 
-                Task.Run(Action);
+                _ = Task.Run(Action);
 
                 if (ldapUserInfo.Item2.IsDisabled)
                 {

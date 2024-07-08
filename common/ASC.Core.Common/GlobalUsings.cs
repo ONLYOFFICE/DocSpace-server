@@ -61,6 +61,7 @@ global using ASC.Core.Common.Core;
 global using ASC.Common.Log;
 global using ASC.Common.Logging;
 global using ASC.Common.Mapping;
+global using ASC.Core.Common.Messaging;
 global using ASC.Common.Module;
 global using ASC.Common.Notify.Engine;
 global using ASC.Common.Notify.Patterns;

@@ -225,9 +225,6 @@
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>Թողնել կարծիք</value>
   </data>
-  <data name="ButtonRemoveProfile" xml:space="preserve">
-    <value>Հեռացնել պրոֆիլը</value>
-  </data>
   <data name="ButtonRenewNow" xml:space="preserve">
     <value>Թարմացրեք հիմա</value>
   </data>
@@ -397,7 +394,7 @@
     <value>${LetterLogoText}: Պորտալի հասցեի փոփոխություն</value>
   </data>
   <data name="subject_profile_delete" xml:space="preserve">
-    <value>Ձեր պրոֆիլի ջնջում ${__VirtualRootPath} պորտալից</value>
+    <value>Հաշվի անջատումը միացված է ${__VirtualRootPath}</value>
   </data>
   <data name="subject_profile_has_deleted_itself" xml:space="preserve">
     <value>Օգտատերը ջնջել է իր պրոֆիլը</value>
@@ -945,6 +942,7 @@ h1."$PortalUrl":"$PortalUrl"
 Ձեր պորտալը տեղափոխվել է նոր տիրույթ: Խնդրում ենք վերականգնել ձեր մուտքը դեպի պորտալ՝ նշելով գաղտնաբառը, որը կօգտագործվի մուտք գործելու համար:
 
 Խնդրում ենք հետևել ստորև բերված հղմանը` ձեր հաշվի գաղտնաբառը սահմանելու համար.
+
 $OrangeButton
 
 *Նշում*. այս հղումը գործում է միայն 7 օր: Խնդրում ենք ավարտել մուտքի վերականգնման գործընթացը այդ ժամանակահատվածում:
@@ -1370,15 +1368,15 @@ ONLYOFFICE աջակցման թիմ
 *Նշում*. DNS-ի կարգավորումները և մեկ մուտքի ընտրանքները դադարում են աշխատել, քանի դեռ չեք փոխել դրանք.</value>
   </data>
   <data name="pattern_profile_delete" xml:space="preserve">
-    <value>h1.Պրոֆիլի հեռացում "${__VirtualRootPath}":"${__VirtualRootPath}" պորտալից
+    <value>h1.Հաշվի անջատումը միացված է"${__VirtualRootPath}":"${__VirtualRootPath}"
 
-Դուք խնդրել եք ընդմիշտ ջնջել ձեր պրոֆիլը "${__VirtualRootPath}":"${__VirtualRootPath}" պորտալից:
+Դուք դիմել եք  DocSpace-ում ձեր հաշիվը անջատելու համար"${__VirtualRootPath}":"${__VirtualRootPath}".
 
-Եթե դուք դեռ ցանկանում եք ջնջել ձեր պրոֆիլը, ապա հետևեք ստորև նշված հղմանը, որպեսզի հաստատեք գործողությունը.
+Եթե դուք դեռ ցանկանում եք անջատել ձեր հաշիվը, խնդրում ենք հետևել ստորև նշված հղմանը, որպեսզի հաստատեք գործողությունը՝
 
 $OrangeButton
 
-*Նշում*. այս հղումը գործում է միայն 7 օր: Խնդրում ենք ավարտել պրոֆիլի ջնջման գործընթացը այդ ժամանակահատվածում.</value>
+*Նշում*՝ այս հղումը գործում է միայն 7 օր։ Խնդրում ենք ավարտել հաշվի անջատման գործընթացը այդ ժամանակահատվածում:</value>
   </data>
   <data name="pattern_profile_updated" xml:space="preserve">
     <value>h1.Ձեր պրոֆիլը "$__VirtualRootPath":"$__VirtualRootPath"-ում փոխվել է
@@ -1757,5 +1755,17 @@ $TrulyYours</value>
   </data>
   <data name="subject_zoom_welcome" xml:space="preserve">
     <value>Բարի գալուստ ONLYOFFICE DocSpace:</value>
+  </data>
+  <data name="ButtonRemoveProfile" xml:space="preserve">
+    <value>Անջատել հաշիվը</value>
+  </data>
+  <data name="pattern_saas_room_invite_existing_user" xml:space="preserve">
+    <value>Բարեւ Ձեզ!
+
+$__AuthorName-ը ձեզ հրավիրել է միանալու սենյակ "$Message":"$InviteLink"՝ "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
 </root>

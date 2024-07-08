@@ -51,7 +51,7 @@ public class FileSharingAceHelper(
     private const int MaxAdditionalExternalLinks = 5;
     private const int MaxPrimaryExternalLinks = 1;
 
-    public async Task<AceProcessingResult> SetAceObjectAsync<T>(List<AceWrapper> aceWrappers, FileEntry<T> entry, bool notify, string message,
+    public async Task<AceProcessingResult<T>> SetAceObjectAsync<T>(List<AceWrapper> aceWrappers, FileEntry<T> entry, bool notify, string message,
         AceAdvancedSettingsWrapper advancedSettings, string culture = null, bool socket = true, bool beforeOwnerChange = false)
     {
         if (entry == null)
@@ -65,7 +65,7 @@ public class FileSharingAceHelper(
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
-        var handledAces = new List<Tuple<EventType, AceWrapper>>(aceWrappers.Count);
+        var handledAces = new List<ProcessedItem<T>>(aceWrappers.Count);
         var ownerId = entry.RootFolderType == FolderType.USER ? entry.RootCreateBy : entry.CreateBy;
         var room = entry is Folder<T> folder && DocSpaceHelper.IsRoom(folder.FolderType) ? folder : null;
         var roomUrl = room != null ? pathProvider.GetRoomsUrl(room.Id.ToString()) : null;
@@ -267,7 +267,7 @@ public class FileSharingAceHelper(
             }
 
             changed = true;
-            handledAces.Add(new Tuple<EventType, AceWrapper>(eventType, w));
+            handledAces.Add(new ProcessedItem<T>(eventType, existedShare, w));
 
             if (emailInvite)
             {
@@ -369,7 +369,7 @@ public class FileSharingAceHelper(
             await fileMarker.RemoveMarkAsNewAsync(entry, userId);
         }
 
-        return new AceProcessingResult(changed, warning, handledAces);
+        return new AceProcessingResult<T>(changed, warning, handledAces);
     }
 
     public async Task RemoveAceAsync<T>(FileEntry<T> entry)
@@ -567,7 +567,7 @@ public class FileSharing(
             .GroupBy(r => r.Subject)
             .Select(g => g.OrderBy(r => r.Level)
                 .ThenBy(r => r.Level)
-                .ThenByDescending(r => r.Share, new FileShareRecord.ShareComparer(entry.RootFolderType)).FirstOrDefault());
+                .ThenByDescending(r => r.Share, new FileShareRecord<T>.ShareComparer(entry.RootFolderType)).FirstOrDefault());
 
         foreach (var r in records)
         {
@@ -874,7 +874,7 @@ public class FileSharing(
         yield return owner;
     }
 
-    private async Task<AceWrapper> ToAceAsync<T>(FileEntry<T> entry, FileShareRecord record, bool canEditAccess)
+    private async Task<AceWrapper> ToAceAsync<T>(FileEntry<T> entry, FileShareRecord<T> record, bool canEditAccess)
     {
         var w = new AceWrapper
         {
@@ -935,12 +935,8 @@ public class FileSharing(
     }
 }
 
-public class AceProcessingResult(bool changed, string warning, List<Tuple<EventType, AceWrapper>> handledAces)
-{
-    public bool Changed { get; } = changed;
-    public string Warning { get; } = warning;
-    public List<Tuple<EventType, AceWrapper>> HandledAces { get; } = handledAces;
-}
+public record AceProcessingResult<T>(bool Changed, string Warning, List<ProcessedItem<T>> ProcessedItems);
+public record ProcessedItem<T>(EventType EventType, FileShareRecord<T> PastRecord, AceWrapper Ace);
 
 public enum EventType
 {

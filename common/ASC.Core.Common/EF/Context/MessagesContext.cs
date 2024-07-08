@@ -33,6 +33,7 @@ public partial class MessagesContext(DbContextOptions<MessagesContext> options) 
     public DbSet<DbWebstudioSettings> WebstudioSettings { get; set; }
     public DbSet<DbTenant> Tenants { get; set; }
     public DbSet<User> Users { get; set; }
+    public DbSet<DbFilesAuditReference> FilesAuditReferences { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -43,6 +44,7 @@ public partial class MessagesContext(DbContextOptions<MessagesContext> options) 
             .AddUser()
             .AddWebstudioSettings()
             .AddDbTenant()
+            .AddFilesAuditReference()
             .AddDbFunctions();
     }
 }

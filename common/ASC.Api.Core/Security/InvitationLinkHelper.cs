@@ -108,7 +108,7 @@ public class InvitationLinkHelper(
 
         var user = await userManager.GetUserByEmailAsync(email);
 
-        if (user.Equals(Constants.LostUser) || await authManager.GetUserPasswordStampAsync(user.Id) != DateTime.MinValue)
+        if (user.Equals(Constants.LostUser) || user.Status == EmployeeStatus.Terminated || await authManager.GetUserPasswordStampAsync(user.Id) != DateTime.MinValue)
         {
             return EmailValidationKeyProvider.ValidationResult.Invalid;
         }
