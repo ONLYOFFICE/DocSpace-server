@@ -491,7 +491,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                 var primaryExternalLink = (await FilesSecurity.GetSharesAsync(folder)).FirstOrDefault(r => r.SubjectType == SubjectType.PrimaryExternalLink);
                                 if (primaryExternalLink != null)
                                 {
-                                    await fileSecurity.ShareAsync(newFolder.Id, newFolder.FileEntryType, primaryExternalLink.Owner, primaryExternalLink.Share, primaryExternalLink.SubjectType, primaryExternalLink.Options);
+                                    await fileSecurity.ShareAsync(newFolder.Id, newFolder.FileEntryType, Guid.NewGuid(), primaryExternalLink.Share, primaryExternalLink.SubjectType, primaryExternalLink.Options);
                                 }
                             }
                             
