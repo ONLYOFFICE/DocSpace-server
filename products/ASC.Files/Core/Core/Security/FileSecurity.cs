@@ -875,7 +875,7 @@ public class FileSecurity(IDaoFactory daoFactory,
             return e.RootFolderType == FolderType.USER && e.RootCreateBy == userId && !isCollaborator && (folder is { FolderType: FolderType.DEFAULT } || file != null);
         }
 
-        if (action == FilesSecurityActions.Embed && !((isRoom && folder.Shared) || (file is { Shared: true })))
+        if (action == FilesSecurityActions.Embed && !((isRoom && folder.Shared) || file is { Shared: true, RootFolderType: FolderType.VirtualRooms }))
         {
             return false;
         }
@@ -892,7 +892,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 return false;
             }
 
-            if(userId.Equals(ASC.Core.Configuration.Constants.Guest.ID) && (folder.FolderType == FolderType.ReadyFormFolder ||
+            if (userId.Equals(ASC.Core.Configuration.Constants.Guest.ID) && (folder.FolderType == FolderType.ReadyFormFolder ||
                     folder.FolderType == FolderType.InProcessFormFolder ||
                     folder.FolderType == FolderType.FormFillingFolderDone ||
                     folder.FolderType == FolderType.FormFillingFolderInProgress))
