@@ -733,7 +733,7 @@ $TrulyYours</value>
 Пользователь [$__AuthorName]($__AuthorUrl) изменил свой профиль на портале [${__VirtualRootPath}](${__VirtualRootPath}).</value>
   </data>
   <data name="pattern_send_whats_new" xml:space="preserve">
-    <value>h1.Что нового в вашем DocSpace $Date
+    <value>h1.Что нового в вашем DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" $Date
 
 #foreach($activity in $Activities)
 $activity
@@ -1532,7 +1532,7 @@ $OrangeButton
 $TrulyYours</value>
   </data>
   <data name="subject_send_whats_new" xml:space="preserve">
-    <value>Новости Вашего портала за $Date</value>
+    <value>Новости Вашего портала "${__VirtualRootPath}":"${__VirtualRootPath}" за $Date</value>
   </data>
   <data name="subject_change_password_v115" xml:space="preserve">
     <value>Подтвердите изменение пароля</value>
@@ -1739,5 +1739,16 @@ $OrangeButton
 Оцените новый способ совместной работы над документами!
 
 $TrulyYours</value>
+  </data>
+  <data name="pattern_rooms_activity" xml:space="preserve">
+    <value>h1.Что нового в вашем DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" за последний час
+
+#foreach($activity in $Activities)
+$activity
+
+#end</value>
+  </data>
+  <data name="subject_rooms_activity" xml:space="preserve">
+    <value>Новости Вашего портала "${__VirtualRootPath}":"${__VirtualRootPath}" за последний час</value>
   </data>
 </root>
