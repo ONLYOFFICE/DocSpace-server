@@ -24,6 +24,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.6" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="8.0.0" />
+    <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="7.6.2" />
     <PackageReference Include="NLog.Targets.ElasticSearch" Version="7.7.0" />
     <PackageReference Include="NLog.Web.AspNetCore" Version="5.3.11" />
     <PackageReference Include="RedisRateLimiting" Version="1.1.0" />

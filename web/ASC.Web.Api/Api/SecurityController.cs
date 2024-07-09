@@ -24,6 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Api.Core.Cors.Enums;
+
+using Microsoft.AspNetCore.Cors;
+
 namespace ASC.Web.Api.Controllers;
 
 /// <summary>
@@ -360,6 +364,7 @@ public class SecurityController(PermissionContext permissionContext,
         return inDto.Settings;
     }
 
+    [EnableCors(PolicyName = CorsPoliciesEnums.AllowAllCorsPolicyName )]
     [HttpPost("csp")]
     public async Task<CspDto> Csp(CspRequestsDto request)
     {
@@ -397,6 +402,7 @@ public class SecurityController(PermissionContext permissionContext,
 
     /// <requiresAuthorization>false</requiresAuthorization>
     [AllowAnonymous]
+    [EnableCors(PolicyName = CorsPoliciesEnums.AllowAllCorsPolicyName)]
     [HttpGet("csp")]
     public async Task<CspDto> Csp()
     {

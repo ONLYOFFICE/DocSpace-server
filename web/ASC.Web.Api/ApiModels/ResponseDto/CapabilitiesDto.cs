@@ -54,11 +54,16 @@ public class CapabilitiesDto
     /// <type>System.String, System</type>
     public string SsoUrl { get; set; }
 
+    /// <summary>Specifies if OAuth2/OpenId Identity Server is enabled or not</summary>
+    /// <type>System.Boolean, System</type>
+    public bool IdentityServerEnabled { get; set; }
+
     public static CapabilitiesDto GetSample()
     {
         return new CapabilitiesDto
         {
             LdapEnabled = false,
+            IdentityServerEnabled = false,
             // Providers = AccountLinkControl.AuthProviders,
             SsoLabel = string.Empty,
             SsoUrl = string.Empty
