@@ -12,6 +12,13 @@ spring:
     password: ${RABBIT_PASSWORD:guest}
     port: ${RABBIT_PORT:5672}
     username: ${RABBIT_USER_NAME:guest}
+    virtual-host: ${RABBIT_VIRTUAL_HOST:}
+    ssl:
+      enabled: ${RABBIT_SSL_ENABLED:false}
+      key-store: ${RABBIT_SSL_KEYSTORE:}
+      key-store-password: ${RABBIT_SSL_KEYSTORE_PASSWORD:}
+      trust-store: ${RABBIT_TRUST_STORE:}
+      trust-store-password: ${RABBIT_TRUST_STORE_PASSWORD:}
   cloud:
     messaging:
       rabbitmq:

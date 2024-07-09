@@ -2,7 +2,7 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     password: ${JDBC_PASSWORD:dev}
-    url: jdbc:mysql://${JDBC_URL:localhost:3306}/${JDBC_DATABASE:docspace}
+    url: jdbc:mysql://${JDBC_URL:localhost:3306}/${JDBC_DATABASE:docspace}?${JDBC_PARAMETERS:}
     username: ${JDBC_USER_NAME:dev}
   flyway:
     baselineOnMigrate: true
@@ -14,7 +14,7 @@ spring:
     sql-migration-prefix: V
     sql-migration-separator: __
     sql-migration-suffixes: .sql
-    url: jdbc:mysql://${JDBC_URL:localhost:3306}/${JDBC_DATABASE:docspace}
+    url: jdbc:mysql://${JDBC_URL:localhost:3306}/${JDBC_DATABASE:docspace}?${JDBC_PARAMETERS:}
     user: ${JDBC_USER_NAME:dev}
 logging:
   level:
