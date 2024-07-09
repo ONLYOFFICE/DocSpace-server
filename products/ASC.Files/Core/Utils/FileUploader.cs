@@ -46,7 +46,6 @@ public class FileUploader(
     ChunkedUploadSessionHolder chunkedUploadSessionHolder,
     FileTrackerHelper fileTracker,
     SocketManager socketManager,
-    TempStream tempStream,
     FileStorageService fileStorageService)
 {
     public async Task<File<T>> ExecAsync<T>(T folderId, string title, long contentLength, Stream data, bool createNewIfExist, bool deleteConvertStatus = true)
@@ -276,6 +275,7 @@ public class FileUploader(
 
         var extension = FileUtility.GetFileExtension(uploadSession.File.Title);
         var fileType = FileUtility.GetFileTypeByExtention(extension);
+        var dao = daoFactory.GetFileDao<T>();
 
         if (fileType == FileType.Pdf)
         {
@@ -306,17 +306,27 @@ public class FileUploader(
                     var currentRoom = await folderDao.GetFolderAsync(roomId);
                     if (currentRoom.FolderType == FolderType.FillingFormsRoom)
                     {
-                        var (fs, _) = await tempStream.TryGetBufferedAsync(stream);
-                        if (!await fileStorageService.CheckExtendedPDFstream(fs))
+                        var memoryStream = new MemoryStream();
+                        await stream.CopyToAsync(memoryStream);
+                        var cloneStreamForCheck = CloneMemoryStream(memoryStream, 300);
+                        var cloneStreamForSave = CloneMemoryStream(memoryStream);
+
+                        if (!await fileStorageService.CheckExtendedPDFstream(cloneStreamForCheck))
                         {
                             throw new Exception(FilesCommonResource.ErrorMessage_UploadToFormRoom);
                         }
+                        else
+                        {
+                            await dao.UploadChunkAsync(uploadSession, cloneStreamForSave, chunkLength, chunkNumber);
+                            return uploadSession;
+                        }
+
                     }
                 }
             }
         }
 
-        var dao = daoFactory.GetFileDao<T>();
+
         await dao.UploadChunkAsync(uploadSession, stream, chunkLength, chunkNumber);
 
         return uploadSession;
@@ -364,5 +374,29 @@ public class FileUploader(
         return await folderDao.GetMaxUploadSizeAsync(folderId, chunkedUpload);
     }
 
+    private MemoryStream CloneMemoryStream(MemoryStream originalStream, int limit = -1)
+    {
+        var cloneStream = new MemoryStream();
+
+        var originalPosition = originalStream.Position;
+
+        originalStream.Position = 0;
+
+        if (limit > 0)
+        {
+            originalStream.CopyTo(cloneStream, limit);
+        }
+        else
+        {
+            originalStream.CopyTo(cloneStream);
+        }
+
+
+        originalStream.Position = originalPosition;
+
+        cloneStream.Position = 0;
+
+        return cloneStream;
+    }
     #endregion
 }
