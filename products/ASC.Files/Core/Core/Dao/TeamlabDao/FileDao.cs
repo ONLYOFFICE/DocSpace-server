@@ -569,6 +569,10 @@ internal class FileDao(
                                     await socketManager.CreateFormAsync(file, securityContext.CurrentAccount.ID, count <= 1);
                                 }
                             }
+                            else
+                            {
+                                throw new Exception(FilesCommonResource.ErrorMessage_UploadToFormRoom);
+                            }
                         }
                         else
                         {
