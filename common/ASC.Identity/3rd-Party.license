@@ -1,0 +1,125 @@
+ASC.Identity services use code from the following 3rd party projects:
+
+bucket4j-core       - Java rate limiting library based on token-bucket algorithm. (https://github.com/bucket4j/bucket4j/tree/master/bucket4j-core)
+License:              Apache License 2.0
+License File:         bucket4j.license
+
+bucket4j-redis      - Java rate limiting library based on token-bucket algorithm. (https://github.com/bucket4j/bucket4j/tree/master/bucket4j-redis)
+License:              Apache License 2.0
+License File:         bucket4j.license
+
+guava               - Google core libraries for Java. (https://github.com/google/guava)
+License:              Apache License 2.0
+License File:         guava.license
+
+hazelcast-spring    - Hazelcast is a unified real-time data platform combining stream processing with a fast data store, allowing customers to act instantly on data-in-motion for real-time insights. (https://github.com/hazelcast/hazelcast/tree/master/hazelcast-spring)
+License:              Apache License 2.0
+License File:         hazelcast-spring.license
+
+jackson-annotations - Core annotations (annotations that only depend on jackson-core) for Jackson data processor. (https://github.com/FasterXML/jackson-annotations)
+License:              Apache License 2.0
+License File:         jackson-annotations.license
+
+jackson-datatype-jsr310 - Set of support modules for Java 8 datatypes (Optionals, date/time) and features (parameter names). (https://github.com/FasterXML/jackson-modules-java8)
+License:              Apache License 2.0
+License File:         jackson-datatype-jsr310.license
+
+janino              - Janino is a super-small, super-fast Java™ compiler. (https://github.com/janino-compiler/janino)
+License:              BSD 3-clause
+License File:         janino.license
+
+jsystemd-spring-boot-starter - Java integration library for systemd services. (https://github.com/jpmsilva/jsystemd)
+License:              Apache License 2.0
+License File:         jsystemd-spring-boot-starter.license
+
+lettuce-core        - Advanced Java Redis client for thread-safe sync, async, and reactive usage. Supports Cluster, Sentinel, Pipelining, and codecs. (https://github.com/redis/lettuce)
+License:              MIT
+License File:         lettuce-core.license
+
+logback-classic     - The reliable, generic, fast and flexible logging framework for Java. (https://github.com/qos-ch/logback)
+License:              LGPL 2.1
+License File:         logback-classic.license
+
+logback-gelf        - Logback appender for sending GELF messages with zero additional dependencies. (https://github.com/osiegmar/logback-gelf)
+License:              LGPL 2.1
+License File:         logback-gelf.license
+
+logstash-logback-encoder - Logback JSON encoder and appenders. (https://github.com/logfellow/logstash-logback-encoder)
+License:              Apache 2.0
+License File:         logstash-logback-encoder.license
+
+mockito-junit-jupiter - Most popular Mocking framework for unit tests written in Java. (https://github.com/mockito/mockito)
+License:              MIT
+License File:         mockito-junit-jupiter.license
+
+mysql-connector-j   - MySQL Connector/J. (https://github.com/mysql/mysql-connector-j)
+License:              GPL 2
+License File:         mysql-connector-j.license
+
+resilience4j-spring-boot3 - Resilience4j is a fault tolerance library designed for Java8 and functional programming. (https://github.com/resilience4j/resilience4j)
+License:              Apache 2.0
+License File:         resilience4j.license
+
+spring-boot-starter-amqp - AMQP Spring Boot Starter. (https://github.com/spring-projects/spring-boot/tree/main/spring-boot-project/spring-boot-starters)
+License:              Apache 2.0
+License File:         spring-boot-starter.license
+
+spring-boot-starter-actuator - Actuator Spring Boot Starter. (https://github.com/spring-projects/spring-boot/tree/main/spring-boot-project/spring-boot-starters)
+License:              Apache 2.0
+License File:         spring-boot-starter.license
+
+spring-boot-starter-cache - Cache Spring Boot Starter. (https://github.com/spring-projects/spring-boot/tree/main/spring-boot-project/spring-boot-starters)
+License:              Apache 2.0
+License File:         spring-boot-starter.license
+
+spring-boot-starter-data-jpa - JPA Spring Boot Starter. (https://github.com/spring-projects/spring-boot/tree/main/spring-boot-project/spring-boot-starters)
+License:              Apache 2.0
+License File:         spring-boot-starter.license
+
+spring-boot-starter-security - Security Spring Boot Starter. (https://github.com/spring-projects/spring-boot/tree/main/spring-boot-project/spring-boot-starters)
+License:              Apache 2.0
+License File:         spring-boot-starter.license
+
+spring-boot-starter-validation - Validation Spring Boot Starter. (https://github.com/spring-projects/spring-boot/tree/main/spring-boot-project/spring-boot-starters)
+License:              Apache 2.0
+License File:         spring-boot-starter.license
+
+spring-boot-starter-web - Web Spring Boot Starter. (https://github.com/spring-projects/spring-boot/tree/main/spring-boot-project/spring-boot-starters)
+License:              Apache 2.0
+License File:         spring-boot-starter.license
+
+spring-cloud-starter-loadbalancer - Common classes used in different Spring Cloud implementations. (https://github.com/spring-cloud/spring-cloud-commons/tree/main)
+License:              Apache 2.0
+License File:         spring-cloud-starter-loadbalancer.license
+
+spring-cloud-starter-openfeign - Support for using OpenFeign in Spring Cloud apps. (https://github.com/spring-cloud/spring-cloud-openfeign)
+License:              Apache 2.0
+License File:         spring-cloud-starter-openfeign.license
+
+spring-context      - Spring Framework. (https://github.com/spring-projects/spring-framework)
+License:              Apache 2.0
+License File:         spring-framework.license
+
+springdoc-openapi-starter-webmvc-ui - Library for OpenAPI 3 with spring-boot. (https://github.com/springdoc/springdoc-openapi)
+License:              Apache 2.0
+License File:         springdoc-openapi-starter-webmvc-ui.license
+
+spring-security-crypto - Spring Security Crypto. (https://github.com/spring-projects/spring-security)
+License:              Apache 2.0
+License File:         spring-security.license
+
+spring-security-oauth2-authorization-server - Spring Authorization Server. (https://github.com/spring-projects/spring-authorization-server)
+License:              Apache 2.0
+License File:         spring-authorization-server.license
+
+spring-tx           - Spring Framework. (https://github.com/spring-projects/spring-framework)
+License:              Apache 2.0
+License File:         spring-framework.license
+
+tomcat-embed-core   - Apache Tomcat. (https://github.com/apache/tomcat)
+License:              Apache 2.0
+License File:         tomcat-embed-core.license
+
+winsw-maven-plugin  - Maven plugin for WinSW. (https://github.com/nikolaybespalov/winsw-maven-plugin)
+License:              MIT
+License File:         winws-maven-plugin.license
