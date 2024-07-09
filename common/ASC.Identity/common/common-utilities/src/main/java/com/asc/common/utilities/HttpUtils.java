@@ -129,24 +129,32 @@ public class HttpUtils {
    */
   public static String getClientOS(HttpServletRequest request) {
     var userAgent = request.getHeader("User-Agent");
-    var os = "Unknown";
-    var osPattern = "";
+    if (userAgent == null) return "Unknown";
 
-    if (userAgent == null) return os;
+    var osFamily = "Unknown";
+    var osMajor = "";
+    var deviceBrand = "";
+    var deviceModel = "";
 
-    if (userAgent.toLowerCase().contains("windows")) osPattern = "Windows NT ([\\d.]+)";
-    else if (userAgent.toLowerCase().contains("mac os x")) osPattern = "Mac OS X ([\\d_]+)";
-    else if (userAgent.toLowerCase().contains("android")) osPattern = "Android ([\\d.]+)";
-    else if (userAgent.toLowerCase().contains("iphone")) osPattern = "iPhone OS ([\\d_]+)";
-    else if (userAgent.toLowerCase().contains("x11")) os = "Unix";
-
-    if (!osPattern.isEmpty()) {
-      var pattern = Pattern.compile(osPattern);
-      var matcher = pattern.matcher(userAgent);
-      if (matcher.find()) os = matcher.group().replace('_', '.');
+    if (userAgent.toLowerCase().contains("windows")) {
+      osFamily = "Windows";
+      osMajor = extractMajorVersion(userAgent, "Windows NT");
+    } else if (userAgent.toLowerCase().contains("mac os x")) {
+      osFamily = "Mac OS X";
+      osMajor = extractMajorVersion(userAgent, "Mac OS X");
+      deviceBrand = "Apple";
+      deviceModel = "Mac";
+    } else if (userAgent.toLowerCase().contains("android")) {
+      osFamily = "Android";
+      osMajor = extractMajorVersion(userAgent, "Android");
+    } else if (userAgent.toLowerCase().contains("iphone")) {
+      osFamily = "iPhone OS";
+      osMajor = extractMajorVersion(userAgent, "iPhone OS");
+    } else if (userAgent.toLowerCase().contains("x11")) {
+      osFamily = "Unix";
     }
 
-    return os;
+    return String.format("%s %s %s %s", osFamily, osMajor, deviceBrand, deviceModel).trim();
   }
 
   /**
@@ -247,26 +255,17 @@ public class HttpUtils {
   }
 
   /**
-   * Retrieves browser information from the User-Agent string.
+   * Extracts OS major version
    *
-   * @param userAgent The User-Agent string
-   * @param browser The browser name to look for
-   * @param replacement The replacement string for the browser name
-   * @return The formatted browser information
+   * @param userAgent
+   * @param identifier
+   * @return A string with a major version or an empty string
    */
-  private static String getBrowserInfo(String userAgent, String browser, String replacement) {
-    var substring = userAgent.substring(userAgent.indexOf(browser)).split(";")[0];
-    return substring.split(" ")[0].replace(browser, replacement) + " " + substring.split(" ")[1];
-  }
-
-  /**
-   * Retrieves the browser version from the User-Agent string.
-   *
-   * @param userAgent The User-Agent string
-   * @param browser The browser name to look for
-   * @return The browser version
-   */
-  private static String getBrowserVersion(String userAgent, String browser) {
-    return userAgent.substring(userAgent.indexOf(browser)).split(" ")[0].split("/")[1];
+  private static String extractMajorVersion(String userAgent, String identifier) {
+    var versionPattern = identifier + " ([\\d.]+)";
+    var pattern = Pattern.compile(versionPattern);
+    var matcher = pattern.matcher(userAgent);
+    if (matcher.find()) return matcher.group(1).split("\\.")[0];
+    return "";
   }
 }

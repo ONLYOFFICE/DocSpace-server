@@ -52,6 +52,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -62,6 +63,9 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RequestMapping(value = "${web.api}/clients")
 public class ClientCommandController {
+  /** The name of the current service. */
+  @Value("${spring.application.name}")
+  private String serviceName;
 
   /** The service for managing client applications. */
   private final ClientApplicationService clientApplicationService;
@@ -112,7 +116,7 @@ public class ClientCommandController {
       return ResponseEntity.status(HttpStatus.CREATED)
           .body(
               clientApplicationService.createClient(
-                  buildAudit(request, tenant, person, AuditCode.CREATE_CLIENT),
+                  buildAudit(null, request, tenant, person, AuditCode.CREATE_CLIENT),
                   CreateTenantClientCommand.builder()
                       .name(command.getName())
                       .description(command.getDescription())
@@ -156,7 +160,7 @@ public class ClientCommandController {
     try {
       setLoggingParameters(person, tenant);
       clientApplicationService.updateClient(
-          buildAudit(request, tenant, person, AuditCode.UPDATE_CLIENT),
+          buildAudit(clientId, request, tenant, person, AuditCode.UPDATE_CLIENT),
           UpdateTenantClientCommand.builder()
               .name(command.getName())
               .description(command.getDescription())
@@ -195,7 +199,7 @@ public class ClientCommandController {
       setLoggingParameters(person, tenant);
       return ResponseEntity.ok(
           clientApplicationService.regenerateSecret(
-              buildAudit(request, tenant, person, AuditCode.REGENERATE_SECRET),
+              buildAudit(clientId, request, tenant, person, AuditCode.REGENERATE_SECRET),
               RegenerateTenantClientSecretCommand.builder()
                   .clientId(clientId)
                   .tenantId(tenant.getTenantId())
@@ -226,7 +230,7 @@ public class ClientCommandController {
     try {
       setLoggingParameters(person, tenant);
       clientApplicationService.revokeClientConsent(
-          buildAudit(request, tenant, person, AuditCode.REVOKE_USER_CLIENT),
+          buildAudit(clientId, request, tenant, person, AuditCode.REVOKE_USER_CLIENT),
           RevokeClientConsentCommand.builder()
               .clientId(clientId)
               .principalId(person.getId())
@@ -258,7 +262,7 @@ public class ClientCommandController {
     try {
       setLoggingParameters(person, tenant);
       clientApplicationService.deleteClient(
-          buildAudit(request, tenant, person, AuditCode.DELETE_CLIENT),
+          buildAudit(clientId, request, tenant, person, AuditCode.DELETE_CLIENT),
           DeleteTenantClientCommand.builder()
               .clientId(clientId)
               .tenantId(tenant.getTenantId())
@@ -292,7 +296,7 @@ public class ClientCommandController {
     try {
       setLoggingParameters(person, tenant);
       clientApplicationService.changeActivation(
-          buildAudit(request, tenant, person, AuditCode.CHANGE_CLIENT_ACTIVATION),
+          buildAudit(clientId, request, tenant, person, AuditCode.CHANGE_CLIENT_ACTIVATION),
           ChangeTenantClientActivationCommand.builder()
               .clientId(clientId)
               .tenantId(tenant.getTenantId())
@@ -314,6 +318,7 @@ public class ClientCommandController {
    * @return the audit object
    */
   private Audit buildAudit(
+      String clientId,
       HttpServletRequest request,
       AscTenantResponse tenant,
       AscPersonResponse person,
@@ -324,6 +329,8 @@ public class ClientCommandController {
                 .map(HttpUtils::extractHostFromUrl)
                 .orElseGet(
                     () -> HttpUtils.extractHostFromUrl(HttpUtils.getFirstRequestIP(request))))
+        .initiator(serviceName)
+        .target(clientId)
         .browser(HttpUtils.getClientBrowser(request))
         .platform(HttpUtils.getClientOS(request))
         .tenantId(tenant.getTenantId())
