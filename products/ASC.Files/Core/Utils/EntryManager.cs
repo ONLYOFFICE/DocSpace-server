@@ -1113,7 +1113,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
             if (!Equals(linkedId, default(T)))
             {
-                linkedFile = await fileDao.GetFileAsync((T)Convert.ChangeType(linkedId, typeof(T)));
+                linkedFile = await fileDao.GetFileAsync(linkedId);
                 if (linkedFile == null
                     || !await fileSecurity.CanFillFormsAsync(linkedFile)
                     || await lockerManager.FileLockedForMeAsync(linkedFile.Id)
