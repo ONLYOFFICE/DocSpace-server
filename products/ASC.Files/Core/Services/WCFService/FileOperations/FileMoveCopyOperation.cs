@@ -476,8 +476,9 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                         }
                         else
                         {
+                            var title = await global.GetAvailableTitleAsync(folder.Title, toFolderId, folderDao.IsExistAsync);
                             newFolder = await FolderDao.CopyFolderAsync(folder.Id, toFolderId, CancellationToken);
-                            newFolder.Title = await global.GetAvailableTitleAsync(newFolder.Title, newFolder.ParentId, folderDao.IsExistAsync);
+                            newFolder.Title = title;
                             newFolder.Id = await folderDao.SaveFolderAsync(newFolder);
                             
                             if (isRoom && Equals(folder.ParentId ?? default, toFolderId))
@@ -835,8 +836,9 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                         {
                             try
                             {
+                                var title = await global.GetAvailableTitleAsync(file.Title, toFolderId, fileDao.IsExistAsync);
                                 newFile = await FileDao.CopyFileAsync(file.Id, toFolderId); //Stream copy will occur inside dao
-                                newFile.Title = await global.GetAvailableTitleAsync(newFile.Title, newFile.ParentId, fileDao.IsExistAsync);
+                                newFile.Title = title;
                                 await fileDao.SaveFileAsync(newFile, null);
                                 await filesMessageService.SendAsync(MessageAction.FileCopied, newFile, toFolder, _headers, newFile.Title, parentFolder.Title, toFolder.Title, toFolder.ToString());
 
