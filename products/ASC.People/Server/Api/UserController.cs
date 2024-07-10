@@ -356,7 +356,7 @@ public class UserController(
     /// </summary>
     /// <short>Change a user password</short>
     /// <category>Password</category>
-    /// <param type="System.Guid, System" method="url" name="userid">User ID</param>
+    /// <param type="System.Guid, System" method="url" name="userid" example="9924256A-739C-462b-AF15-E652A3B1B6EB">User ID</param>
     /// <param type="ASC.People.ApiModels.RequestDto.MemberRequestDto, ASC.People" name="inDto">Request parameters for setting new password</param>
     /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">Detailed user information</returns>
     /// <path>api/2.0/people/{userid}/password</path>
@@ -425,7 +425,7 @@ public class UserController(
     /// Delete a user
     /// </short>
     /// <category>Profiles</category>
-    /// <param type="System.String, System" method="url" name="userid">User ID</param>
+    /// <param type="System.String, System" method="url" name="userid" example="some text">User ID</param>
     /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">Deleted user detailed information</returns>
     /// <path>api/2.0/people/{userid}</path>
     /// <httpMethod>DELETE</httpMethod>
@@ -525,8 +525,8 @@ public class UserController(
     /// Search users by status filter
     /// </short>
     /// <category>Search</category>
-    /// <param type="ASC.Core.Users.EmployeeStatus, ASC.Core.Common" method="url" name="status">User status</param>
-    /// <param type="System.String, System" name="query">Search query</param>
+    /// <param type="ASC.Core.Users.EmployeeStatus, ASC.Core.Common" method="url" name="status" example="Active">User status</param>
+    /// <param type="System.String, System" name="query" example="some text">Search query</param>
     /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">List of users with the detailed information</returns>
     /// <path>api/2.0/people/status/{status}/search</path>
     /// <httpMethod>GET</httpMethod>
@@ -579,7 +579,7 @@ public class UserController(
     /// Get a profile by user email
     /// </short>
     /// <category>Profiles</category>
-    /// <param type="System.String, System" method="url" name="email">User email address</param>
+    /// <param type="System.String, System" method="url" name="email" example="some text">User email address</param>
     /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">Detailed profile information</returns>
     /// <path>api/2.0/people/email</path>
     /// <httpMethod>GET</httpMethod>
@@ -605,7 +605,7 @@ public class UserController(
     /// Get a profile by user name
     /// </short>
     /// <category>Profiles</category>
-    /// <param type="System.String, System" method="url" name="username">User name</param>
+    /// <param type="System.String, System" method="url" name="username" example="some text">User name</param>
     /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">Detailed profile information</returns>
     /// <path>api/2.0/people/{username}</path>
     /// <httpMethod>GET</httpMethod>
@@ -653,7 +653,7 @@ public class UserController(
     /// Get profiles by status
     /// </short>
     /// <category>User status</category>
-    /// <param type="ASC.Core.Users.EmployeeStatus, ASC.Core.Common" method="url" name="status">User status</param>
+    /// <param type="ASC.Core.Users.EmployeeStatus, ASC.Core.Common" method="url" name="status" example="Active">User status</param>
     /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">List of users with the detailed information</returns>
     /// <category>User status</category>
     /// <path>api/2.0/people/status/{status}</path>
@@ -680,17 +680,17 @@ public class UserController(
     /// Search users and their information by extended filter
     /// </short>
     /// <category>Search</category>
-    /// <param type="System.Nullable{ASC.Core.Users.EmployeeStatus}, System" name="employeeStatus">User status</param>
-    /// <param type="System.Nullable{System.Guid}, System" name="groupId">Group ID</param>
-    /// <param type="System.Nullable{ASC.Core.Users.EmployeeActivationStatus}, System" name="activationStatus">Activation status</param>
-    /// <param type="System.Nullable{ASC.Core.Users.EmployeeType}, System" name="employeeType">User type</param>
-    /// <param type="ASC.Core.Users.EmployeeType[], ASC.Core.Common" name="employeeTypes">List of user types</param>
-    /// <param type="System.Nullable{System.Boolean}, System" name="isAdministrator">Specifies if the user is an administrator or not</param>
-    /// <param type="System.Nullable{ASC.Core.Payments}, System" name="payments">User payment status</param>
-    /// <param type="System.Nullable{ASC.Core.AccountLoginType}, System" name="accountLoginType">Account login type</param>
-    /// <param type="System.Nullable{ASC.Core.QuotaFilter}, System" name="quotaFilter">Filter by quota (Default - 1, Custom - 2)</param>
-    /// <param type="System.Nullable{System.Boolean}, System" name="withoutGroup">Specifies whether the user should be a member of a group or not</param>
-    /// <param type="System.Nullable{System.Boolean}, System" name="excludeGroup">Specifies whether or not the user should be a member of the group with the specified ID</param>
+    /// <param type="System.Nullable{ASC.Core.Users.EmployeeStatus}, System" name="employeeStatus" example="Active">User status</param>
+    /// <param type="System.Nullable{System.Guid}, System" name="groupId" example="9924256A-739C-462b-AF15-E652A3B1B6EB">Group ID</param>
+    /// <param type="System.Nullable{ASC.Core.Users.EmployeeActivationStatus}, System" name="activationStatus" example="NotActivated">Activation status</param>
+    /// <param type="System.Nullable{ASC.Core.Users.EmployeeType}, System" name="employeeType" example="All">User type</param>
+    /// <param type="ASC.Core.Users.EmployeeType[], ASC.Core.Common" name="employeeTypes" example="Active">List of user types</param>
+    /// <param type="System.Nullable{System.Boolean}, System" name="isAdministrator" example="true">Specifies if the user is an administrator or not</param>
+    /// <param type="System.Nullable{ASC.Core.Payments}, System" name="payments" example="Paid">User payment status</param>
+    /// <param type="System.Nullable{ASC.Core.AccountLoginType}, System" name="accountLoginType" example="LDAP">Account login type</param>
+    /// <param type="System.Nullable{ASC.Core.QuotaFilter}, System" name="quotaFilter" example="All">Filter by quota (Default - 1, Custom - 2)</param>
+    /// <param type="System.Nullable{System.Boolean}, System" name="withoutGroup" example="true">Specifies whether the user should be a member of a group or not</param>
+    /// <param type="System.Nullable{System.Boolean}, System" name="excludeGroup" example="true">Specifies whether or not the user should be a member of the group with the specified ID</param>
     /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">List of users with the detailed information</returns>
     /// <path>api/2.0/people/filter</path>
     /// <httpMethod>GET</httpMethod>
@@ -741,7 +741,7 @@ public class UserController(
     /// </summary>
     /// <short>Search users (using query parameters)</short>
     /// <category>Search</category>
-    /// <param type="System.String, System" name="query">Search query</param>
+    /// <param type="System.String, System" name="query" example="some text">Search query</param>
     /// <returns type="ASC.Web.Api.Models.EmployeeDto, ASC.Api.Core">List of users</returns>
     /// <path>api/2.0/people/search</path>
     /// <httpMethod>GET</httpMethod>
@@ -758,7 +758,7 @@ public class UserController(
     /// </summary>
     /// <short>Search users</short>
     /// <category>Search</category>
-    /// <param type="System.String, System" method="url" name="query">Search query</param>
+    /// <param type="System.String, System" method="url" name="query" example="some text">Search query</param>
     /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">List of users with the detailed information</returns>
     /// <path>api/2.0/people/@search/{query}</path>
     /// <httpMethod>GET</httpMethod>
@@ -788,17 +788,17 @@ public class UserController(
     /// Search users by extended filter
     /// </short>
     /// <category>Search</category>
-    /// <param type="System.Nullable{ASC.Core.Users.EmployeeStatus}, System" name="employeeStatus">User status</param>
-    /// <param type="System.Nullable{System.Guid}, System" name="groupId">Group ID</param>
-    /// <param type="System.Nullable{ASC.Core.Users.EmployeeActivationStatus}, System" name="activationStatus">Activation status</param>
-    /// <param type="System.Nullable{ASC.Core.Users.EmployeeType}, System" name="employeeType">User type</param>
-    /// <param type="ASC.Core.Users.EmployeeType[], ASC.Core.Common" name="employeeTypes">List of user types</param>
-    /// <param type="System.Nullable{System.Boolean}, System" name="isAdministrator">Specifies if the user is an administrator or not</param>
-    /// <param type="System.Nullable{ASC.Core.Payments}, System" name="payments">User payment status</param>
-    /// <param type="System.Nullable{ASC.Core.AccountLoginType}, System" name="accountLoginType">Account login type</param>
-    /// <param type="System.Nullable{ASC.Core.QuotaFilter}, System" name="quotaFilter">Filter by quota (Default - 1, Custom - 2)</param>
-    /// <param type="System.Nullable{System.Boolean}, System" name="withoutGroup">Specifies whether the user should be a member of a group or not</param>
-    /// <param type="System.Nullable{System.Boolean}, System" name="excludeGroup">Specifies whether or not the user should be a member of the group with the specified ID</param>
+    /// <param type="System.Nullable{ASC.Core.Users.EmployeeStatus}, System" name="employeeStatus" example="Active">User status</param>
+    /// <param type="System.Nullable{System.Guid}, System" name="groupId" example="9924256A-739C-462b-AF15-E652A3B1B6EB">Group ID</param>
+    /// <param type="System.Nullable{ASC.Core.Users.EmployeeActivationStatus}, System" name="activationStatus" example="NotActivated">Activation status</param>
+    /// <param type="System.Nullable{ASC.Core.Users.EmployeeType}, System" name="employeeType" example="All">User type</param>
+    /// <param type="ASC.Core.Users.EmployeeType[], ASC.Core.Common" name="employeeTypes" example="Active">List of user types</param>
+    /// <param type="System.Nullable{System.Boolean}, System" name="isAdministrator" example="true">Specifies if the user is an administrator or not</param>
+    /// <param type="System.Nullable{ASC.Core.Payments}, System" name="payments" example="Paid">User payment status</param>
+    /// <param type="System.Nullable{ASC.Core.AccountLoginType}, System" name="accountLoginType" example="LDAP">Account login type</param>
+    /// <param type="System.Nullable{ASC.Core.QuotaFilter}, System" name="quotaFilter" example="All">Filter by quota (Default - 1, Custom - 2)</param>
+    /// <param type="System.Nullable{System.Boolean}, System" name="withoutGroup" example="true">Specifies whether the user should be a member of a group or not</param>
+    /// <param type="System.Nullable{System.Boolean}, System" name="excludeGroup" example="true">Specifies whether or not the user should be a member of the group with the specified ID</param>
     /// <returns type="ASC.Web.Api.Models.EmployeeDto, ASC.Api.Core">List of users</returns>
     /// <path>api/2.0/people/simple/filter</path>
     /// <httpMethod>GET</httpMethod>
@@ -1174,7 +1174,7 @@ public class UserController(
     /// Set an activation status to the users
     /// </short>
     /// <category>User status</category>
-    /// <param type="ASC.Core.Users.EmployeeActivationStatus, ASC.Core.Common" method="url" name="activationstatus">Activation status</param>
+    /// <param type="ASC.Core.Users.EmployeeActivationStatus, ASC.Core.Common" method="url" name="activationstatus" example="NotActivated">Activation status</param>
     /// <param type="ASC.People.ApiModels.RequestDto.UpdateMembersRequestDto, ASC.People" name="inDto">Request parameters for updating user information</param>
     /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">List of users with the detailed information</returns>
     /// <path>api/2.0/people/activationstatus/{activationstatus}</path>
@@ -1224,7 +1224,7 @@ public class UserController(
     /// Update user language
     /// </short>
     /// <category>Profiles</category>
-    /// <param type="System.String, System" method="url" name="userid">User ID</param>
+    /// <param type="System.String, System" method="url" name="userid" example="some text">User ID</param>
     /// <param type="ASC.People.ApiModels.RequestDto.UpdateMemberRequestDto, ASC.People" name="inDto">Request parameters for updating user information</param>
     /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">Detailed user information</returns>
     /// <path>api/2.0/people/{userid}/culture</path>
@@ -1254,7 +1254,7 @@ public class UserController(
     /// Update a user
     /// </short>
     /// <category>Profiles</category>
-    /// <param type="System.String, System" method="url" name="userid">User ID</param>
+    /// <param type="System.String, System" method="url" name="userid" example="some text">User ID</param>
     /// <param type="ASC.People.ApiModels.RequestDto.UpdateMemberRequestDto, ASC.People" name="inDto">Member request parameters</param>
     /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">Updated user with the detailed information</returns>
     /// <path>api/2.0/people/{userid}</path>
@@ -1412,7 +1412,7 @@ public class UserController(
     /// Change a user status
     /// </short>
     /// <category>User status</category>
-    /// <param type="ASC.Core.Users.EmployeeStatus, ASC.Core.Common" method="url" name="status">New user status</param>
+    /// <param type="ASC.Core.Users.EmployeeStatus, ASC.Core.Common" method="url" name="status" example="Active">New user status</param>
     /// <param type="ASC.People.ApiModels.RequestDto.UpdateMembersRequestDto, ASC.People" name="inDto">Request parameters for updating user information</param>
     /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">List of users with the detailed information</returns>
     /// <path>api/2.0/people/status/{status}</path>
@@ -1496,7 +1496,7 @@ public class UserController(
     /// Change a user type
     /// </short>
     /// <category>User type</category>
-    /// <param type="ASC.Core.Users.EmployeeType, ASC.Core.Common" method="url" name="type">New user type</param>
+    /// <param type="ASC.Core.Users.EmployeeType, ASC.Core.Common" method="url" name="type" example="All">New user type</param>
     /// <param type="ASC.People.ApiModels.RequestDto.UpdateMembersRequestDto, ASC.People" name="inDto">Request parameters for updating user information</param>
     /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">List of users with the detailed information</returns>
     /// <path>api/2.0/people/type/{type}</path>

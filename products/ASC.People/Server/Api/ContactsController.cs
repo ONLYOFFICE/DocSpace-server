@@ -42,7 +42,7 @@ public class ContactsController(UserManager userManager,
     /// Delete user contacts
     /// </short>
     /// <category>Contacts</category>
-    /// <param type="System.String, System" method="url" name="userid">User ID</param>
+    /// <param type="System.String, System" method="url" name="userid" example="some text">User ID</param>
     /// <param type="ASC.People.ApiModels.RequestDto.UpdateMemberRequestDto, ASC.People" name="inDto">Request parameters for updating user contacts</param>
     /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Web.Api">Deleted user profile with the detailed information</returns>
     /// <path>api/2.0/people/{userid}/contacts</path>
@@ -71,7 +71,7 @@ public class ContactsController(UserManager userManager,
     /// Set user contacts
     /// </short>
     /// <category>Contacts</category>
-    /// <param type="System.String, System" method="url" name="userid">User ID</param>
+    /// <param type="System.String, System" method="url" name="userid" example="some text">User ID</param>
     /// <param type="ASC.People.ApiModels.RequestDto.UpdateMemberRequestDto, ASC.People" name="inDto">Request parameters for updating user contacts</param>
     /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Web.Api">Updated user profile with the detailed information</returns>
     /// <path>api/2.0/people/{userid}/contacts</path>
@@ -101,7 +101,7 @@ public class ContactsController(UserManager userManager,
     /// Update user contacts
     /// </short>
     /// <category>Contacts</category>
-    /// <param type="System.String, System" method="url" name="userid">User ID</param>
+    /// <param type="System.String, System" method="url" name="userid" example="some text">User ID</param>
     /// <param type="ASC.People.ApiModels.RequestDto.UpdateMemberRequestDto, ASC.People" name="inDto">Request parameters for updating user contacts</param>
     /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Web.Api">Updated user profile with the detailed information</returns>
     /// <path>api/2.0/people/{userid}/contacts</path>

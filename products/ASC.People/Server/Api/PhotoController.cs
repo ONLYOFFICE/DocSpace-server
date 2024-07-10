@@ -51,7 +51,7 @@ public class PhotoController(
     /// Create photo thumbnails
     /// </short>
     /// <category>Photos</category>
-    /// <param type="System.String, System" method="url" name="userid">User ID</param>
+    /// <param type="System.String, System" method="url" name="userid" example="some text">User ID</param>
     /// <param type="ASC.People.ApiModels.RequestDto.ThumbnailsRequestDto, ASC.People" name="inDto">Thumbnail request parameters</param>
     /// <path>api/2.0/people/{userid}/photo/thumbnails</path>
     /// <httpMethod>POST</httpMethod>
@@ -109,7 +109,7 @@ public class PhotoController(
     /// Delete a user photo
     /// </short>
     /// <category>Photos</category>
-    /// <param type="System.String, System" method="url" name="userid">User ID</param>
+    /// <param type="System.String, System" method="url" name="userid" example="some text">User ID</param>
     /// <returns type="ASC.People.ApiModels.ResponseDto.ThumbnailsDataDto, ASC.People">Thumbnail parameters: original photo, retina, maximum size photo, big, medium, small</returns>
     /// <path>api/2.0/people/{userid}/photo</path>
     /// <httpMethod>DELETE</httpMethod>
@@ -146,7 +146,7 @@ public class PhotoController(
     /// Get a user photo
     /// </short>
     /// <category>Photos</category>
-    /// <param type="System.String, System" method="url" name="userid">User ID</param>
+    /// <param type="System.String, System" method="url" name="userid" example="some text">User ID</param>
     /// <returns type="ASC.People.ApiModels.ResponseDto.ThumbnailsDataDto, ASC.People">Thumbnail parameters: original photo, retina, maximum size photo, big, medium, small</returns>
     /// <path>api/2.0/people/{userid}/photo</path>
     /// <httpMethod>GET</httpMethod>
@@ -171,7 +171,7 @@ public class PhotoController(
     /// Update a user photo
     /// </short>
     /// <category>Photos</category>
-    /// <param type="System.String, System" method="url" name="userid">User ID</param>
+    /// <param type="System.String, System" method="url" name="userid" example="some text">User ID</param>
     /// <param type="ASC.People.ApiModels.RequestDto.UpdateMemberRequestDto, ASC.People" name="inDto">Request parameters for updating user photo</param>
     /// <returns type="ASC.People.ApiModels.ResponseDto.ThumbnailsDataDto, ASC.People">Updated thumbnail parameters: original photo, retina, maximum size photo, big, medium, small</returns>
     /// <path>api/2.0/people/{userid}/photo</path>
@@ -211,7 +211,7 @@ public class PhotoController(
     /// Upload a user photo
     /// </short>
     /// <category>Photos</category>
-    /// <param type="System.String, System" method="url" name="userid">User ID</param>
+    /// <param type="System.String, System" method="url" name="userid" example="some text">User ID</param>
     /// <param type="Microsoft.AspNetCore.Http.IFormCollection, Microsoft.AspNetCore.Http" name="formCollection">Image data</param>
     /// <path>api/2.0/people/{userid}/photo</path>
     /// <httpMethod>POST</httpMethod>

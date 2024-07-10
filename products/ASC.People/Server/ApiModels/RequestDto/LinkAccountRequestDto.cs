@@ -26,44 +26,32 @@
 
 namespace ASC.People.ApiModels.RequestDto;
 
-/// <summary>
-/// </summary>
 public class LinkAccountRequestDto
 {
-    /// <summary>Third-party profile in the serialized format</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Third-party profile in the serialized format")]
     public string SerializedProfile { get; set; }
 }
 
-/// <summary>
-/// </summary>
 public class SignupAccountRequestDto : LinkAccountRequestDto
 {
-    /// <summary>Employee type (All, RoomAdmin, User, DocSpaceAdmin, Collaborator)</summary>
-    /// <type>System.Nullable{ASC.Core.Users.EmployeeType}, System</type>
+    [SwaggerSchemaCustom(Example = "All", Description = "Employee type (All, RoomAdmin, User, DocSpaceAdmin, Collaborator)")]
     public EmployeeType? EmployeeType { get; set; }
 
-    /// <summary>First name</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "First name")]
     public string FirstName { get; set; }
 
-    /// <summary>Last name</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Last name")]
     public string LastName { get; set; }
 
-    /// <summary>Email address</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Email address")]
     public string Email { get; set; }
 
-    /// <summary>Password hash</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Password hash")]
     public string PasswordHash { get; set; }
-    
-    /// <summary>Link key</summary>
-    /// <type>System.String, System</type>
+
+    [SwaggerSchemaCustom(Example = "some text", Description = "Link key")]
     public string Key { get; set; }
-    
-    /// <summary>Culture</summary>
-    /// <type>System.String, System</type>
+
+    [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "Culture")]
     public string Culture { get; set; }
 }

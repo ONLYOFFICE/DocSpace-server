@@ -26,27 +26,20 @@
 
 namespace ASC.People.ApiModels.RequestDto;
 
-/// <summary>
-/// </summary>
 public class ThumbnailsRequestDto
 {
-    /// <summary>Path to the temporary file</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Path to the temporary file")]
     public string TmpFile { get; set; }
 
-    /// <summary>Horizontal coordinate</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustom(Example = "1234", Description = "Horizontal coordinate", Format  = "int32")]
     public int X { get; set; }
 
-    /// <summary>Vertical coordinate</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustom(Example = "1234", Description = "Vertical coordinate", Format = "int32")]
     public int Y { get; set; }
 
-    /// <summary>Thumbnail width</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustom(Example = "1234", Description = "Thumbnail width", Format = "int32")]
     public int Width { get; set; }
 
-    /// <summary>Thumbnail height</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustom(Example = "1234", Description = "Thumbnail height", Format = "int32")]
     public int Height { get; set; }
 }

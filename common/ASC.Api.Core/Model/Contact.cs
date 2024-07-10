@@ -24,20 +24,16 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using SwaggerCustomFilter;
+
 namespace ASC.Web.Api.Models;
 
-/// <summary>
-/// </summary>
 public class Contact
 {
-    /// <summary>Contact type</summary>
-    /// <type>System.String, System</type>
-    /// <example>GTalk</example>
+    [SwaggerSchemaCustom(Example = "GTalk", Description = "Contact type")]
     public string Type { get; set; }
 
-    /// <summary>Contact value</summary>
-    /// <type>System.String, System</type>
-    /// <example>my@gmail.com</example>
+    [SwaggerSchemaCustom(Example = "my@gmail.com", Description = "Contact value")]
     public string Value { get; set; }
 
     //For binder

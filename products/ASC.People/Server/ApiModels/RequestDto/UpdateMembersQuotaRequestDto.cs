@@ -30,11 +30,9 @@ namespace ASC.People.ApiModels.RequestDto;
 /// </summary>
 public class UpdateMembersQuotaRequestDto
 {
-    /// <summary>List of user IDs</summary>
-    /// <type>System.Collections.Generic.IEnumerable{System.Guid}, System.Collections.Generic</type>
+    [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "List of user IDs")]
     public IEnumerable<Guid> UserIds { get; set; }
 
-    /// <summary>User quota</summary>
-    /// <type>System.Int64, System</type>
+    [SwaggerSchemaCustom(Example = "User quota", Description = "List of user IDs", Format = "int64")]
     public JsonElement Quota { get; set; }
 }

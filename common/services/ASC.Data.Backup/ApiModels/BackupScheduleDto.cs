@@ -26,49 +26,32 @@
 
 namespace ASC.Data.Backup.ApiModels;
 
-/// <summary>
-/// </summary>
 public class BackupScheduleDto
 {
-    /// <summary>Storage type</summary>
-    /// <type>System.String, System</type>
-    /// <example>Documents</example>
+    [SwaggerSchemaCustom(Example= "some text", Description = "Storage type")]
     public string StorageType { get; set; }
 
-    /// <summary>Storage parameters</summary>
-    /// <type>System.Collections.Generic.IEnumerable{ASC.Api.Collections.ItemKeyValuePair{System.Object, System.Object}}, System.Collections.Generic</type>
+    [SwaggerSchemaCustom(Description = "Storage parameters")]
     public IEnumerable<ItemKeyValuePair<object, object>> StorageParams { get; set; }
 
-    /// <summary>Maximum number of the stored backup copies</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Maximum number of the stored backup copies")]
     public string BackupsStored { get; set; }
 
-    /// <summary>Cron parameters</summary>
-    /// <type>ASC.Data.Backup.ApiModels.Cron, ASC.Data.Backup</type>
+    [SwaggerSchemaCustom(Description = "Cron parameters")]
     public Cron CronParams { get; set; }
 
-    /// <summary>Specifies if a dump will be created or not</summary>
-    /// <type>System.Boolean, System</type>
-    /// <example>true</example>
+    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if a dump will be created or not")]
     public bool Dump { get; set; }
 }
 
-/// <summary>
-/// </summary>
 public class Cron
 {
-    /// <summary>Period</summary>
-    /// <type>System.String, System</type>
-    /// <example>0</example>
+    [SwaggerSchemaCustom(Example = "0", Description = "Period")]
     public string Period { get; set; }
 
-    /// <summary>Hour</summary>
-    /// <type>System.String, System</type>
-    /// <example>0</example>
+    [SwaggerSchemaCustom(Example = "0", Description = "Hour")]
     public string Hour { get; set; }
 
-    /// <summary>Day</summary>
-    /// <type>System.String, System</type>
-    /// <example>0</example>
+    [SwaggerSchemaCustom(Example = "0", Description = "Day")]
     public string Day { get; set; }
 }

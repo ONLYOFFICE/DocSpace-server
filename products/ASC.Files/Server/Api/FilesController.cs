@@ -55,7 +55,7 @@ public class FilesControllerInternal(
     /// Get file history
     /// </short>
     /// <category>Files</category>
-    /// <param type="System.Int32, System" name="fileId">File ID</param>
+    /// <param type="System.Int32, System" name="fileId" example="1234">File ID</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.HistoryDto, ASC.Files.Core">List of actions performed on the file</returns>
     /// <path>api/2.0/files/file/{fileId}/log</path>
     /// <httpMethod>GET</httpMethod>
@@ -100,7 +100,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// Changes the version history of a file with the ID specified in the request.
     /// </summary>
     /// <short>Change version history</short>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
+    /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.ChangeHistoryRequestDto, ASC.Files.Core" name="inDto">Request parameters for changing version history</param>
     /// <category>Files</category>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileDto, ASC.Files.Core">Updated information about file versions</returns>
@@ -119,7 +119,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// </summary>
     /// <short>Get conversion status</short>
     /// <category>Operations</category>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
+    /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
     /// <param type="System.Boolean, System" name="start">Specifies if a conversion operation is started or not</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.ConversationResultDto, ASC.Files.Core">Conversion result</returns>
     /// <path>api/2.0/files/file/{fileId}/checkconversion</path>
@@ -144,7 +144,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// </summary>
     /// <short>Get file download link</short>
     /// <category>Files</category>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
+    /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
     /// <returns type="System.String, System">File download link</returns>
     /// <path>api/2.0/files/file/{fileId}/presigneduri</path>
     /// <httpMethod>GET</httpMethod>
@@ -159,6 +159,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// Checks if the PDF file is form or not.
     /// </summary>
     /// <short>Check the PDF file</short>
+    /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
     /// <returns type="System.Boolean, System">Boolean value: true - the PDF file is form, false - the PDF file is not a form.</returns>
     /// <path>api/2.0/files/file/{fileId}/isformpdf</path>
     /// <httpMethod>GET</httpMethod>
@@ -174,7 +175,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// </summary>
     /// <short>Copy a file</short>
     /// <category>Files</category>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
+    /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.CopyAsRequestDto{System.Text.Json.JsonElement}, ASC.Files.Core" name="inDto">Request parameters for copying a file</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileEntryDto, ASC.Files.Core">Copied file entry information</returns>
     /// <path>api/2.0/files/file/{fileId}/copyas</path>
@@ -201,7 +202,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// </summary>
     /// <short>Create a file</short>
     /// <category>Files</category>
-    /// <param type="System.Int32, System" method="url" name="folderId">Folder ID</param>
+    /// <param type="System.Int32, System" method="url" name="folderId" example="1234">Folder ID</param>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.CreateFileRequestDto{System.Text.Json.JsonElement}, ASC.Files.Core" name="inDto">Request parameters for creating a file</param>
     /// <remarks>If a file extension is different from DOCX/XLSX/PPTX and refers to one of the known text, spreadsheet, or presentation formats, it will be changed to DOCX/XLSX/PPTX accordingly. If the file extension is not specified or is unknown, the DOCX extension will be added to the file title.</remarks>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileDto, ASC.Files.Core">New file information</returns>
@@ -219,7 +220,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// </summary>
     /// <short>Create an HTML file</short>
     /// <category>Files</category>
-    /// <param type="System.Int32, System" method="url" name="folderId">Folder ID</param>
+    /// <param type="System.Int32, System" method="url" name="folderId" example="1234">Folder ID</param>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.CreateTextOrHtmlFileRequestDto, ASC.Files.Core" name="inDto">Request parameters for creating an HTML file</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileDto, ASC.Files.Core">New file information</returns>
     /// <path>api/2.0/files/{folderId}/html</path>
@@ -236,7 +237,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// </summary>
     /// <short>Create a txt file</short>
     /// <category>Files</category>
-    /// <param type="System.Int32, System" method="url" name="folderId">Folder ID</param>
+    /// <param type="System.Int32, System" method="url" name="folderId" example="1234">Folder ID</param>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.CreateTextOrHtmlFileRequestDto, ASC.Files.Core" name="inDto">Request parameters for creating a text file</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileDto, ASC.Files.Core">New file information</returns>
     /// <path>api/2.0/files/{folderId}/text</path>
@@ -253,7 +254,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// </summary>
     /// <short>Delete a file</short>
     /// <category>Files</category>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
+    /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.DeleteRequestDto, ASC.Files.Core" name="inDto">Request parameters for deleting a file</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileOperationDto, ASC.Files.Core">List of file operations</returns>
     /// <path>api/2.0/files/file/{fileId}</path>
@@ -276,7 +277,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// </summary>
     /// <short>Get changes URL</short>
     /// <category>Files</category>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
+    /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
     /// <param type="System.Int32, System" name="version">File version</param>
     /// <returns type="ASC.Files.Core.EditHistoryDataDto, ASC.Files.Core">File version history data</returns>
     /// <path>api/2.0/files/file/{fileId}/edit/diff</path>
@@ -295,7 +296,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// </summary>
     /// <short>Get version history</short>
     /// <category>Files</category>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
+    /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.EditHistoryDto, ASC.Files.Core">Version history data</returns>
     /// <path>api/2.0/files/file/{fileId}/edit/history</path>
     /// <httpMethod>GET</httpMethod>
@@ -313,7 +314,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// Returns the detailed information about a file with the ID specified in the request.
     /// </summary>
     /// <short>Get file information</short>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
+    /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
     /// <param type="System.Int32, System" name="version">File version</param>
     /// <category>Files</category>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileDto, ASC.Files.Core">File information</returns>
@@ -334,7 +335,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// </summary>
     /// <short>Get file versions</short>
     /// <category>Files</category>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
+    /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileDto, ASC.Files.Core">Information about file versions: folder ID, version, version group, content length, pure content length, file status, URL to view a file, web URL, file type, file extension, comment, encrypted or not, thumbnail URL, thumbnail status, locked or not, user ID who locked a file, denies file downloading or not, denies file sharing or not, file accessibility</returns>
     /// <path>api/2.0/files/file/{fileId}/history</path>
     /// <httpMethod>GET</httpMethod>
@@ -353,7 +354,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// </summary>
     /// <short>Lock a file</short>
     /// <category>Files</category>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
+    /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.LockFileRequestDto, ASC.Files.Core" name="inDto">Request parameters for locking a file</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileDto, ASC.Files.Core">Locked file information</returns>
     /// <path>api/2.0/files/file/{fileId}/lock</path>
@@ -370,7 +371,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// </summary>
     /// <short>Restore a file version</short>
     /// <category>Files</category>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
+    /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
     /// <param type="System.Int32, System" name="version">File version</param>
     /// <param type="System.String, System" name="url">File version URL</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.EditHistoryDto, ASC.Files.Core">Version history data: file ID, key, file version, version group, a user who updated a file, creation time, history changes in the string format, list of history changes, server version</returns>
@@ -391,7 +392,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// </summary>
     /// <short>Start file conversion</short>
     /// <category>Operations</category>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
+    /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.CheckConversionRequestDto, ASC.Files.Core" name="inDto">Request parameters for starting file conversion</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.ConversationResultDto, ASC.Files.Core">Conversion result</returns>
     /// <path>api/2.0/files/file/{fileId}/checkconversion</path>
@@ -412,7 +413,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// </summary>
     /// <short>Update a comment</short>
     /// <category>Operations</category>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
+    /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.UpdateCommentRequestDto, ASC.Files.Core" name="inDto">Request parameters for updating a comment</param>
     /// <returns type="System.Object, System">Updated comment</returns>
     /// <path>api/2.0/files/file/{fileId}/comment</path>
@@ -429,7 +430,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// </summary>
     /// <short>Update a file</short>
     /// <category>Files</category>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
+    /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.UpdateFileRequestDto, ASC.Files.Core" name="inDto">Request parameters for updating a file</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileDto, ASC.Files.Core">Updated file information</returns>
     /// <path>api/2.0/files/file/{fileId}</path>
@@ -448,7 +449,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// </summary>
     /// <short>Update file contents</short>
     /// <category>Files</category>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
+    /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.FileStreamRequestDto, ASC.Files.Core" name="inDto">Request parameters for updating file contents</param>
     /// <path>api/2.0/files/{fileId}/update</path>
     /// <httpMethod>PUT</httpMethod>
@@ -466,7 +467,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// </summary>
     /// <short>Get primary external link</short>
     /// <category>Files</category>
-    /// <param type="System.Int32, System" method="url" name="id">File ID</param>
+    /// <param type="System.Int32, System" method="url" name="id" example="1234">File ID</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">File security information</returns>
     /// <path>api/2.0/files/file/{id}/link</path>
     /// <httpMethod>GET</httpMethod>
@@ -491,7 +492,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// </summary>
     /// <short>Get file external links</short>
     /// <category>Files</category>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
+    /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">File security information</returns>
     /// <path>api/2.0/files/file/{fileId}/links</path>
     /// <httpMethod>GET</httpMethod>
@@ -518,7 +519,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// </summary>
     /// <short>Set an external link</short>
     /// <category>Files</category>
-    /// <param type="System.Int32, System" method="url" name="id">File ID</param>
+    /// <param type="System.Int32, System" method="url" name="id" example="1234">File ID</param>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.FileLinkRequestDto, ASC.Files.Core" name="inDto">External link request parameters</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">File security information</returns>
     /// <path>api/2.0/files/file/{id}/links</path>
@@ -538,7 +539,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// </summary>
     /// <short>Save as pdf</short>
     /// <category>Files</category>
-    /// <param type="System.Int32, System" method="url" name="id">File ID</param>
+    /// <param type="System.Int32, System" method="url" name="id" example="1234">File ID</param>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.SaveAsPdfRequestDto, ASC.Files.Core" name="inDto">Request parameters</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileDto, ASC.Files.Core">New file information</returns>
     /// <path>api/2.0/files/file/{id}/saveaspdf</path>

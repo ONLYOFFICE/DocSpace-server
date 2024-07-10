@@ -26,18 +26,11 @@
 
 namespace ASC.People.ApiModels.RequestDto;
 
-/// <summary>
-/// </summary>
 public class UpdateMembersRequestDto
 {
-    /// <summary>List of user IDs</summary>
-    /// <type>System.Collections.Generic.IEnumerable{System.Guid}, System.Collections.Generic</type>
-    /// <example>9924256A-739C-462b-AF15-E652A3B1B6EB</example>
-	/// <collection>list</collection>
+    [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "List of user IDs")]
     public IEnumerable<Guid> UserIds { get; set; }
 
-    /// <summary>Specifies whether to resend invitation letters to all the users or not</summary>
-    /// <type>System.Boolean, System</type>
-    /// <example>true</example>
+    [SwaggerSchemaCustom(Example = "true", Description = "Specifies whether to resend invitation letters to all the users or not")]
     public bool ResendAll { get; set; }
 }

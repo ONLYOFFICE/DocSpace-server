@@ -231,7 +231,7 @@ public class BackupController(
     /// Deletes the backup with the ID specified in the request.
     /// </summary>
     /// <short>Delete the backup</short>
-    /// <param type="System.Guid, System" method="url" name="id">Backup ID</param>
+    /// <param type="System.Guid, System" method="url" name="id" example="9924256A-739C-462b-AF15-E652A3B1B6EB">Backup ID</param>
     /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
     /// <httpMethod>DELETE</httpMethod>
     /// <path>api/2.0/backup/deletebackup/{id}</path>

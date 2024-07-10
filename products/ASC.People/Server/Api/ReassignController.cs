@@ -41,7 +41,7 @@ public class ReassignController(
     /// Returns the progress of the started data reassignment for the user with the ID specified in the request.
     /// </summary>
     /// <short>Get the reassignment progress</short>
-    /// <param type="System.Guid, System" name="userId">User ID whose data is reassigned</param>
+    /// <param type="System.Guid, System" name="userId" example="9924256A-739C-462b-AF15-E652A3B1B6EB">User ID whose data is reassigned</param>
     /// <category>User data</category>
     /// <returns type="ASC.People.ApiModels.ResponseDto.TaskProgressResponseDto, ASC.People">Reassignment progress</returns>
     /// <path>api/2.0/people/reassign/progress/{userid}</path>

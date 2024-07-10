@@ -42,7 +42,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     /// Returns the progress of the started data deletion for the user with the ID specified in the request.
     /// </summary>
     /// <short>Get the deletion progress</short>
-    /// <param type="System.Guid, System" name="userId">User ID</param>
+    /// <param type="System.Guid, System" name="userId" example="9924256A-739C-462b-AF15-E652A3B1B6EB">User ID</param>
     /// <category>User data</category>
     /// <returns type="ASC.People.ApiModels.ResponseDto.TaskProgressResponseDto, ASC.People">Deletion progress</returns>
     /// <path>api/2.0/people/remove/progress/{userid}</path>

@@ -28,6 +28,6 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class StartEditRequestDto
 {
-    [SwaggerSchemaCustom(Example = "true", Type = "boolean", Description = "Specifies whether to share a file with other users for editing or not")]
+    [SwaggerSchemaCustom(Example = "true", Description = "Specifies whether to share a file with other users for editing or not")]
     public bool EditingAlone { get; set; }
 }

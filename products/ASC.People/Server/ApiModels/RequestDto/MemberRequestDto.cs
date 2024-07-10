@@ -26,100 +26,74 @@
 
 namespace ASC.People.ApiModels.RequestDto;
 
-/// <summary>
-/// </summary>
 public class MemberRequestDto
 {
-    /// <summary>Employee type (All, RoomAdmin, User, DocSpaceAdmin, Collaborator)</summary>
-    /// <type>ASC.Core.Users.EmployeeType, ASC.Core.Common</type>
+    [SwaggerSchemaCustom(Example = "All", Description = "Employee type (All, RoomAdmin, User, DocSpaceAdmin, Collaborator)")]
     public EmployeeType Type { get; set; }
 
-    /// <summary>Specifies if this is a guest or a user</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if this is a guest or a user", Nullable = true)]
     public bool? IsUser { get; set; }
 
-    /// <summary>Email</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Email")]
     public string Email { get; set; }
 
-    /// <summary>First name</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "First name")]
     public string Firstname { get; set; }
 
-    /// <summary>Last name</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Last name")]
     public string Lastname { get; set; }
 
-    /// <summary>List of user departments</summary>
-    /// <type>System.Guid[], System</type>
+    [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "List of user departments")]
     public Guid[] Department { get; set; }
 
-    /// <summary>Title</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Title")]
     public string Title { get; set; }
 
-    /// <summary>Location</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Location")]
     public string Location { get; set; }
 
-    /// <summary>Sex (male or female)</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Sex (male or female)")]
     public string Sex { get; set; }
 
-    /// <summary>Birthday</summary>
-    /// <type>ASC.Api.Core.ApiDateTime, ASC.Api.Core</type>
+    [SwaggerSchemaCustom(Example = "2008-04-10T06-30-00.000Z", Description = "Birthday")]
     public ApiDateTime Birthday { get; set; }
 
-    /// <summary>Registration date (if it is not specified, then the current date will be set)</summary>
-    /// <type>ASC.Api.Core.ApiDateTime, ASC.Api.Core</type>
+    [SwaggerSchemaCustom(Example = "2008-04-10T06-30-00.000Z", Description = "Registration date (if it is not specified, then the current date will be set)")]
     public ApiDateTime Worksfrom { get; set; }
 
-    /// <summary>Comment</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Comment")]
     public string Comment { get; set; }
 
-    /// <summary>List of user contacts</summary>
-    /// <type>System.Collections.Generic.IEnumerable{ASC.Web.Api.Models.Contact}, System.Collections.Generic</type>
+    [SwaggerSchemaCustom(Description = "List of user contacts")]
     public IEnumerable<Contact> Contacts { get; set; }
 
-    /// <summary>Avatar photo URL</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Avatar photo URL", Format ="uri")]
     public string Files { get; set; }
 
-    /// <summary>Password</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Password")]
     public string Password { get; set; }
 
-    /// <summary>Password hash</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Password hash")]
     public string PasswordHash { get; set; }
 
-    /// <summary>Specifies if the user is added via the invitation link or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the user is added via the invitation link or not")]
     public bool FromInviteLink { get; set; }
 
-    /// <summary>Key</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Key")]
     public string Key { get; set; }
 
-    /// <summary>Language</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Language")]
     public string CultureName { get; set; }
 
-    /// <summary>Target</summary>
-    /// <type>System.Guid, System</type>
+    [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "Target")]
     public Guid Target { get; set; }
 }
 
-/// <summary>
-/// </summary>
 public class UpdateMemberRequestDto : MemberRequestDto
 {
-    /// <summary>User ID</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "User ID")]
     public string UserId { get; set; }
 
-    /// <summary>Specifies whether to disable a user or not</summary>
-    /// <type>System.Nullable{System.Boolean}, System</type>
+    [SwaggerSchemaCustom(Example = "true", Description = "Specifies whether to disable a user or not", Nullable = true)]
     public bool? Disable { get; set; }
 }
