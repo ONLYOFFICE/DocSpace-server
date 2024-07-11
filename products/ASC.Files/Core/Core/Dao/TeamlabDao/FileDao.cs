@@ -2241,7 +2241,7 @@ internal class FileDao(
         {
             query = initQuery .Join(filesDbContext.Security, r => r.tag.Name, s => s.Subject.ToString(), 
                     (fileWithTag, security) => new { fileWithTag, security, 
-                        expirationDate = (DateTime)(object)DbFunctionsExtension.JsonValue(nameof(security.Options), "ExpirationDate").Trim('"')})
+                        expirationDate = (DateTime)(object)DbFunctionsExtension.JsonExtract(nameof(security.Options), "ExpirationDate").Trim('"')})
                 .Where(r => r.security.Share != FileShare.Restrict && (r.expirationDate == DateTime.MinValue || r.expirationDate > DateTime.UtcNow))
                 .Select(r => new FileByTagQuery { Entry = r.fileWithTag.file, Tag = r.fileWithTag.tag, TagLink = r.fileWithTag.tagLink, Security = r.security}); 
         }
