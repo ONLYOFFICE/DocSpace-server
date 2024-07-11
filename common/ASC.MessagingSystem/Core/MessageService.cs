@@ -300,4 +300,5 @@ public class EventDescription<T>
     public List<Guid> UserIds { get; set; }
     public T ParentId { get; set; }
     public string ParentTitle { get; set; }
+    public Guid? CreateBy { get; set; }
 }
