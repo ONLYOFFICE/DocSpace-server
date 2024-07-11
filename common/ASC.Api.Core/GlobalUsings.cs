@@ -53,6 +53,7 @@ global using ASC.Api.Core.Log;
 global using ASC.Api.Core.Middleware;
 global using ASC.Api.Core.Routing;
 global using ASC.Api.Core.Security;
+global using ASC.Common.Security.Authorizing;
 global using ASC.AuditTrail.Repositories;
 global using ASC.AuditTrail.Types;
 global using ASC.Common;

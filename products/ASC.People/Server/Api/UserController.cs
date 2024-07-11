@@ -74,7 +74,19 @@ public class UserController(
     FilesMessageService filesMessageService)
     : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
 {
-    
+
+    [HttpGet("tokendiagnostics")]
+    public object GetClaims()
+    {
+        var result = new
+        {
+            Name = User.Identity?.Name ?? "Unknown Name",
+            Claims = (from c in User.Claims select c.Type + ":" + c.Value).ToList()
+        };
+
+        return result;
+    }
+
 
     /// <summary>
     /// Adds an activated portal user with the first name, last name, email address, and several optional parameters specified in the request.

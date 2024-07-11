@@ -65,7 +65,8 @@ public class CapabilitiesController(CoreBaseSettings coreBaseSettings,
             OauthEnabled = coreBaseSettings.Standalone || quota.Oauth,
             Providers = new List<string>(0),
             SsoLabel = string.Empty,
-            SsoUrl = string.Empty
+            SsoUrl = string.Empty,
+            IdentityServerEnabled = false
         };
 
         try
@@ -125,6 +126,11 @@ public class CapabilitiesController(CoreBaseSettings coreBaseSettings,
         catch (Exception ex)
         {
             _log.ErrorWithException(ex);
+        }
+
+        if (SetupInfo.IsVisibleSettings(ManagementType.IdentityServer.ToString()))
+        {
+            result.IdentityServerEnabled = true;
         }
 
         return result;

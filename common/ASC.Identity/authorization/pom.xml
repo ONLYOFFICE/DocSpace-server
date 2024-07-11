@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.asc</groupId>
+        <artifactId>identity</artifactId>
+        <version>1.0.0</version>
+    </parent>
+
+    <artifactId>authorization</artifactId>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>authorization-application</module>
+        <module>authorization-container</module>
+        <module>authorization-data</module>
+        <module>authorization-messaging</module>
+    </modules>
+</project>

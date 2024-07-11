@@ -168,7 +168,7 @@ public class SetupInfo
         SsoSamlLoginUrl = GetAppSettings("web:sso:saml:login:url", "");
         SsoSamlLogoutUrl = GetAppSettings("web:sso:saml:logout:url", "");
 
-        _hideSettings = GetAppSettings("web.hide-settings", string.Empty).Split(new[] { ',', ';', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+        _hideSettings = GetAppSettings("web:hide-settings", string.Empty).Split(new[] { ',', ';', ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
         SmsTrial = GetAppSettings("core.sms.trial", false);
 
