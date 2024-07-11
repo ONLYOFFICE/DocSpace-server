@@ -26,7 +26,7 @@
 
 namespace ASC.Web.Files.Utils;
 [Transient]
-public class FileСhecker(
+public class FileChecker(
     IDaoFactory daoFactory,
     IConfiguration configuration)
 {

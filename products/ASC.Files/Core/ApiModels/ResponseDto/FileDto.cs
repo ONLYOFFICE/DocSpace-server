@@ -178,7 +178,7 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         FileDateTime fileDateTime,
         ExternalShare externalShare,
         FileSharing fileSharing,
-        File—hecker file—hecker)
+        FileChecker fileChecker)
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime) 
 {
     private readonly ApiDateTimeHelper _apiDateTimeHelper = apiDateTimeHelper;
@@ -245,7 +245,7 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
             }
             if (!file.IsForm && (FilterType)file.Category == FilterType.None)
             {
-                result.IsForm = await file—hecker.CheckExtendedPDF(file);
+                result.IsForm = await fileChecker.CheckExtendedPDF(file);
             }
             else
             {

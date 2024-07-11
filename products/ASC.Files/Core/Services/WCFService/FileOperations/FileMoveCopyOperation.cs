@@ -745,7 +745,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         var socketManager = scope.ServiceProvider.GetService<SocketManager>();
         var globalStorage = scope.ServiceProvider.GetService<GlobalStore>();
         var fileStorageService = scope.ServiceProvider.GetService<FileStorageService>();
-        var file—hecker = scope.ServiceProvider.GetService<File—hecker>();
+        var fileChecker = scope.ServiceProvider.GetService<FileChecker>();
         var securityContext = scope.ServiceProvider.GetService<SecurityContext>();
 
         var toFolderId = toFolder.Id;
@@ -805,7 +805,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                         {
                             var extension = FileUtility.GetFileExtension(file.Title);
                             var fileType = FileUtility.GetFileTypeByExtention(extension);
-                            if (fileType != FileType.Pdf || (fileType == FileType.Pdf && !await file—hecker.CheckExtendedPDF(file)))
+                            if (fileType != FileType.Pdf || (fileType == FileType.Pdf && !await fileChecker.CheckExtendedPDF(file)))
                             {
                                 this[Err] = _copy ? FilesCommonResource.ErrorMessage_UploadToFormRoom : FilesCommonResource.ErrorMessage_MoveToFormRoom;
                                 continue;

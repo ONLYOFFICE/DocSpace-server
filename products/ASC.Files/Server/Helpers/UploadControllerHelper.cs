@@ -41,14 +41,14 @@ public class UploadControllerHelper(
     SecurityContext securityContext,
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
-    FileСhecker fileСhecker)
+    FileChecker fileChecker)
     : FilesHelperBase(
         filesSettingsHelper,
         fileUploader,
         socketManager,
         fileDtoHelper,
         fileStorageService,
-        fileСhecker,
+        fileChecker,
         httpContextAccessor)
     {
     public async Task<object> CreateEditSessionAsync<T>(T fileId, long fileSize)

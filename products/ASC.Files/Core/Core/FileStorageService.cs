@@ -88,8 +88,7 @@ public class FileStorageService //: IFileStorageService
     TempStream tempStream,
     MentionWrapperCreator mentionWrapperCreator,
     SecurityContext securityContext,
-    IConfiguration configuration,
-    File—hecker fileChecker)
+    FileChecker fileChecker)
 {
     private readonly ILogger _logger = optionMonitor.CreateLogger("ASC.Files");
 

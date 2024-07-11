@@ -46,7 +46,7 @@ public class FileUploader(
     ChunkedUploadSessionHolder chunkedUploadSessionHolder,
     FileTrackerHelper fileTracker,
     SocketManager socketManager,
-    File—hecker file—hecker)
+    FileChecker fileChecker)
 {
     public async Task<File<T>> ExecAsync<T>(T folderId, string title, long contentLength, Stream data, bool createNewIfExist, bool deleteConvertStatus = true)
     {
@@ -305,7 +305,7 @@ public class FileUploader(
                 await stream.CopyToAsync(memoryStream);
                 var cloneStreamForCheck = CloneMemoryStream(memoryStream, 300);
                 var cloneStreamForSave = CloneMemoryStream(memoryStream);
-                var isForm = await file—hecker.CheckExtendedPDFstream(cloneStreamForCheck);
+                var isForm = await fileChecker.CheckExtendedPDFstream(cloneStreamForCheck);
                 uploadSession.File.IsForm = isForm;
 
                 if (int.TryParse(roomId?.ToString(), out var curRoomId) && curRoomId != -1)
