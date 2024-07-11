@@ -3204,7 +3204,7 @@ public class FileStorageService //: IFileStorageService
             await using (await distributedLockProvider.TryAcquireFairLockAsync($"pin_{authContext.CurrentAccount.ID}"))
             {
                 var count = await tagDao.GetTagsAsync(authContext.CurrentAccount.ID, TagType.Pin).CountAsync();
-                if (count > fileUtilityConfiguration.MaxPinnedRooms)
+                if (count >= fileUtilityConfiguration.MaxPinnedRooms)
                 {
                     throw new InvalidOperationException(FilesCommonResource.ErrorrMessage_PinRoom);
                 }
