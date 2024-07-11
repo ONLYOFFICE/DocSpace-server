@@ -447,7 +447,8 @@ internal class FolderDao(
                     HasLogo = folder.SettingsHasLogo,
                     Color = folder.SettingsColor,
                     Indexing = folder.SettingsIndexing,
-                    Quota = folder.SettingsQuota
+                    Quota = folder.SettingsQuota,
+                    Stealth = folder.SettingsStealth
                 };
             }
 
