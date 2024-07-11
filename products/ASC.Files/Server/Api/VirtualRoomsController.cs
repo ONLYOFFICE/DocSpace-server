@@ -68,7 +68,7 @@ public class VirtualRoomsInternalController(GlobalFolderHelper globalFolderHelpe
     [HttpPost("")]
     public async Task<FolderDto<int>> CreateRoomAsync(CreateRoomRequestDto inDto)
     {
-        var room = await _fileStorageService.CreateRoomAsync(inDto.Title, inDto.RoomType, inDto.Private, inDto.Indexing, inDto.Share, inDto.Quota);
+        var room = await _fileStorageService.CreateRoomAsync(inDto.Title, inDto.RoomType, inDto.Private, inDto.Indexing, inDto.Share, inDto.Quota, inDto.Lifetime?.Serialize());
 
         return await _folderDtoHelper.GetAsync(room);
     }
@@ -610,7 +610,15 @@ public abstract class VirtualRoomsController<T>(
 
         return await _folderDtoHelper.GetAsync(room);
     }
-    
+
+    [HttpPut("{id}/lifetime")]
+    public async Task<FolderDto<T>> UpdateLifetimeSettingsAsync(T id, RoomDataLifetimeDto inDto = null)
+    {
+        var room = await _fileStorageService.SetRoomLifetimeSettingsAsync(id, inDto?.Serialize());
+
+        return await _folderDtoHelper.GetAsync(room);
+    }
+
     [HttpPut("{id}/reorder")]
     public async Task<FolderDto<T>> ReorderAsync(T id)
     {
@@ -674,6 +682,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
             RoomType.CustomRoom => FilterType.CustomRooms,
             RoomType.PublicRoom => FilterType.PublicRooms,
             RoomType.FormRoom => FilterType.FormRooms,
+            RoomType.VirtualDataRoom => FilterType.VirtualDataRooms,
             _ => FilterType.None
         };
 

@@ -36,6 +36,7 @@ public class DbRoomSettings
     public bool Indexing { get; set; }
     public long Quota { get; set; }
     public string Watermark { get; set; }
+    public string Lifetime { get; set; }
     public DbTenant Tenant { get; set; }
     public DbFolder Room { get; set; }
 }
@@ -87,6 +88,12 @@ public static class DbRoomSettingsExtension
             entity.Property(e => e.Quota)
                 .HasColumnName("quota")
                 .HasDefaultValueSql("'-2'");
+
+            entity.Property(e => e.Lifetime)
+                .HasColumnName("lifetime")
+                .HasColumnType("varchar(100)")
+                .HasCharSet("utf8")
+                .UseCollation("utf8_general_ci");
         });
     }
 

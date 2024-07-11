@@ -78,6 +78,7 @@ public class FolderDto<T> : FileEntryDto<T>
     /// <type>System.Boolean, System</type>
     public bool Private { get; set; }
     public bool Indexing { get; set; }
+    public RoomDataLifetimeDto Lifetime { get; set; }
 
     /// <summary>Folder type</summary>
     /// <type>ASC.Files.Core.FolderType, ASC.Files.Core</type>
@@ -218,6 +219,8 @@ public class FolderDtoHelper(
         {
             result.Type = folder.FolderType;
         }
+
+        result.Lifetime = RoomDataLifetimeDto.Deserialize(folder.SettingsLifetime);
 
         return result;
     }

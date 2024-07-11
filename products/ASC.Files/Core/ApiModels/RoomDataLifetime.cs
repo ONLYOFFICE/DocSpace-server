@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2010-2023
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,55 +24,56 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core.ApiModels.RequestDto;
+using System.ComponentModel.DataAnnotations;
+
+namespace ASC.Files.Core.ApiModels;
 
 /// <summary>
 /// </summary>
-public enum RoomType
+public class RoomDataLifetimeDto
 {
-    FillingFormsRoom = 1,
-    EditingRoom = 2,
-    ReviewRoom = 3,
-    ReadOnlyRoom = 4,
-    CustomRoom = 5,
-    PublicRoom = 6,
-    FormRoom = 7,
-    VirtualDataRoom = 8
+    /// <summary>Specifies action</summary>
+    /// <type>System.Boolean, System</type>
+    public bool DeletePermanently { get; set; }
+
+    /// <summary>Specifies time period type</summary>
+    /// <type>ASC.Files.Core.ApiModels.RoomDataLifetimePeriod, ASC.Files.Core</type>
+    public RoomDataLifetimePeriod Period { get; set; }
+
+    /// <summary>Specifies time period value</summary>
+    /// <type>System.Int32, System</type>
+    [Range(1, 9999)]
+    public int Value { get; set; }
+
+    public DateTime GetExpirationUtc()
+    {
+        var expiration = DateTime.UtcNow;
+
+        expiration = Period switch
+        {
+            RoomDataLifetimePeriod.Day => expiration.AddDays(-Value),
+            RoomDataLifetimePeriod.Month => expiration.AddMonths(-Value),
+            RoomDataLifetimePeriod.Year => expiration.AddYears(-Value),
+            _ => throw new Exception("Unknown lifetime period"),
+        };
+
+        return expiration;
+    }
+
+    public string Serialize()
+    {
+        return JsonSerializer.Serialize(this);
+    }
+
+    public static RoomDataLifetimeDto Deserialize(string json)
+    {
+        return string.IsNullOrEmpty(json) ? null : JsonSerializer.Deserialize<RoomDataLifetimeDto>(json);
+    }
 }
 
-/// <summary>
-/// </summary>
-public class CreateRoomRequestDto
+public enum RoomDataLifetimePeriod
 {
-    /// <summary>Room name</summary>
-    /// <type>System.String, System</type>
-    public string Title { get; set; }
-
-    /// <summary>Room type</summary>
-    /// <type>ASC.Files.Core.ApiModels.RequestDto.RoomType, ASC.Files.Core</type>
-    public RoomType RoomType { get; set; }
-
-    /// <summary>Private room or not</summary>
-    /// <type>System.Boolean, System</type>
-    public bool Private { get; set; }
-
-    /// <summary>Collection of sharing parameters</summary>
-    /// <type>System.Collections.Generic.IEnumerable{ASC.Files.Core.ApiModels.FileShareParams}, System.Collections.Generic</type>
-    public IEnumerable<FileShareParams> Share { get; set; }
-
-    /// <summary>Notifies users about the shared room or not</summary>
-    /// <type>System.Boolean, System</type>
-    public bool Notify { get; set; }
-
-    /// <summary>Message to send when notifying about the shared room</summary>
-    /// <type>System.String, System</type>
-    public string SharingMessage { get; set; }
-
-    /// <summary>Room quota</summary>
-    /// <type>System.Int64, System</type>
-    public long Quota { get; set; }
-
-    public bool Indexing { get; set; }
-
-    public RoomDataLifetimeDto Lifetime { get; set; }
+    Day = 0,
+    Month = 1,
+    Year = 2
 }

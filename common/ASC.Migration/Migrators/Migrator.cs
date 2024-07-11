@@ -345,7 +345,7 @@ public abstract class Migrator : IDisposable
 
         var newFolder = storage.Type == FolderType.USER
             ? await FileStorageService.CreateFolderAsync(await GlobalFolderHelper.FolderMyAsync, $"ASC migration files {DateTime.Now:dd.MM.yyyy}")
-                : await FileStorageService.CreateRoomAsync($"ASC migration {(storage.Type == FolderType.BUNCH ? "project" : "common")} files {DateTime.Now:dd.MM.yyyy}", RoomType.PublicRoom, false, false, new List<FileShareParams>(), 0);
+                : await FileStorageService.CreateRoomAsync($"ASC migration {(storage.Type == FolderType.BUNCH ? "project" : "common")} files {DateTime.Now:dd.MM.yyyy}", RoomType.PublicRoom, false, false, new List<FileShareParams>(), 0, null);
         Log(MigrationResource.СreateRootFolder);
 
         var _matchingFilesIds = new Dictionary<string, FileEntry<int>> { { $"{_folderKey}-{storage.RootKey}", newFolder } };
@@ -479,7 +479,7 @@ public abstract class Migrator : IDisposable
                             await SecurityContext.AuthenticateMeAsync(user.Info.Id);
                         }
                         var room = await FileStorageService.CreateRoomAsync($"{_matchingFilesIds[key].Title}",
-                            RoomType.EditingRoom, false, false, new List<FileShareParams>(), 0);
+                            RoomType.EditingRoom, false, false, new List<FileShareParams>(), 0, null);
 
                         orderedFolders = storage.Folders.Where(f => f.ParentId == security.EntryId).OrderBy(f => f.Level);
                         matchingRoomIds.Add(security.EntryId, room);
