@@ -35,14 +35,14 @@ public class LdapOperationJob(
     LdapUserManager ldapUserManager,
     NovellLdapHelper novellLdapHelper,
     LdapChangeCollection ldapChanges,
-    UserFormatter userFormatter,
-    UserPhotoManager userPhotoManager,
-    WebItemSecurity webItemSecurity,
-    UserManager userManager,
-    DisplayUserSettingsHelper displayUserSettingsHelper,
-    NovellLdapSettingsChecker novellLdapSettingsChecker,
-    ILogger<LdapOperationJob> logger,
-    IServiceScopeFactory serviceScopeFactory)
+        UserFormatter userFormatter,
+        UserPhotoManager userPhotoManager,
+        WebItemSecurity webItemSecurity,
+        UserManager userManager,
+        DisplayUserSettingsHelper displayUserSettingsHelper,
+        NovellLdapSettingsChecker novellLdapSettingsChecker,
+        ILogger<LdapOperationJob> logger,
+        IServiceScopeFactory serviceScopeFactory)
     : DistributedTaskProgress
 {
     private string _culture;

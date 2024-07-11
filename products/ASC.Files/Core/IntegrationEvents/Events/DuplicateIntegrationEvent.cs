@@ -24,36 +24,24 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Profile = AutoMapper.Profile;
-using Status = ASC.Files.Core.Security.Status;
+namespace ASC.Files.Core.IntegrationEvents.Events;
 
-namespace ASC.Files.Core.ApiModels.ResponseDto;
-
-/// <summary>
-/// </summary>
-public class ExternalShareDto : IMapFrom<ValidationInfo>
+[ProtoContract]
+public record DuplicateIntegrationEvent : IntegrationEvent
 {
-    /// <summary>External data status</summary>
-    /// <type>ASC.Files.Core.Security.Status, ASC.Files.Core</type>
-    public Status Status { get; set; }
+    private DuplicateIntegrationEvent() : base() { }
 
-    /// <summary>External data ID</summary>
-    /// <type>System.String, System</type>
-    public string Id { get; set; }
+    public DuplicateIntegrationEvent(Guid createBy, int tenantId) : base(createBy, tenantId)
+    {
 
-    /// <summary>External data title</summary>
-    /// <type>System.String, System</type>
-    public string Title { get; set; }
-
-    /// <summary>Tenant ID</summary>
-    /// <type>System.Int32, System</type>
-    public int TenantId { get; set; }
-
-    /// <summary>Specifies whether to share the external data or not</summary>
-    /// <type>System.Boolean, System</type>
-    public bool Shared { get; set; }
+    }
     
-    /// <summary>Link ID</summary>
-    /// <type>System.Guid, System</type>
-    public Guid LinkId { get; set; }
+    [ProtoMember(1)]
+    public string TaskId { get; set;}
+    
+    [ProtoMember(2)]
+    public FileOperationData<int> Data { get; set; }
+    
+    [ProtoMember(3)]
+    public FileOperationData<string> ThirdPartyData { get; set; }
 }

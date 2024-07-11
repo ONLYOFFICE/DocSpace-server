@@ -296,6 +296,13 @@ public enum MessageAction
 
     PortalRenamed = 6039,
 
+    QuotaPerRoomChanged = 6040,
+    QuotaPerRoomDisabled = 6041,
+    QuotaPerUserChanged = 6042,
+    QuotaPerUserDisabled = 6043,
+    QuotaPerPortalChanged = 6044,
+    QuotaPerPortalDisabled = 6045,
+    
     DocumentServiceLocationSetting = 5037,
     AuthorizationKeysSetting = 5038,
     FullTextSearchSetting = 5039,

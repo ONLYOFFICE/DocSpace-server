@@ -768,6 +768,13 @@ internal class FolderDao(
             folder.FolderType == FolderType.FormFillingFolderInProgress) ? FolderType.DEFAULT : folder.FolderType;
 
         copy = await GetFolderAsync(await SaveFolderAsync(copy));
+        var tagDao = daoFactory.GetTagDao<int>();
+        var tags = await tagDao.GetTagsAsync(folder.Id, FileEntryType.Folder, TagType.Custom).ToListAsync();
+        foreach (var t in tags)
+        {
+            t.EntryId = copy.Id;
+        }
+        await tagDao.SaveTagsAsync(tags);
 
         //FactoryIndexer.IndexAsync(FoldersWrapper.GetFolderWrapper(ServiceProvider, copy));
         return copy;
@@ -982,6 +989,15 @@ internal class FolderDao(
     }
 
     #region Only for TMFolderDao
+
+
+
+    public async Task<bool> IsExistAsync(string title, int folderId)
+    {
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        return await filesDbContext.DbFoldersAnyAsync(tenantId, title, folderId);
+    }
 
     public async Task ReassignFoldersAsync(Guid oldOwnerId, Guid newOwnerId, IEnumerable<int> exceptFolderIds)
     {

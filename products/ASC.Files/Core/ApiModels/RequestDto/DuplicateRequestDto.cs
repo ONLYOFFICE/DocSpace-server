@@ -24,36 +24,15 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Profile = AutoMapper.Profile;
-using Status = ASC.Files.Core.Security.Status;
+namespace ASC.Files.Core.ApiModels.RequestDto;
 
-namespace ASC.Files.Core.ApiModels.ResponseDto;
-
-/// <summary>
-/// </summary>
-public class ExternalShareDto : IMapFrom<ValidationInfo>
+public class DuplicateRequestDto
 {
-    /// <summary>External data status</summary>
-    /// <type>ASC.Files.Core.Security.Status, ASC.Files.Core</type>
-    public Status Status { get; set; }
+    /// <summary>List of folder IDs</summary>
+    /// <type>System.Collections.Generic.IEnumerable{System.Text.Json.JsonElement}, System.Collections.Generic</type>
+    public IEnumerable<JsonElement> FolderIds { get; set; } = new List<JsonElement>();
 
-    /// <summary>External data ID</summary>
-    /// <type>System.String, System</type>
-    public string Id { get; set; }
-
-    /// <summary>External data title</summary>
-    /// <type>System.String, System</type>
-    public string Title { get; set; }
-
-    /// <summary>Tenant ID</summary>
-    /// <type>System.Int32, System</type>
-    public int TenantId { get; set; }
-
-    /// <summary>Specifies whether to share the external data or not</summary>
-    /// <type>System.Boolean, System</type>
-    public bool Shared { get; set; }
-    
-    /// <summary>Link ID</summary>
-    /// <type>System.Guid, System</type>
-    public Guid LinkId { get; set; }
+    /// <summary>List of file IDs</summary>
+    /// <type>System.Collections.Generic.IEnumerable{System.Text.Json.JsonElement}, System.Collections.Generic</type>
+    public IEnumerable<JsonElement> FileIds { get; set; } = new List<JsonElement>();
 }

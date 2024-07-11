@@ -58,7 +58,7 @@ public class UserController(
     IHttpClientFactory httpClientFactory,
     IHttpContextAccessor httpContextAccessor,
     SettingsManager settingsManager,
-    InvitationLinkService invitationLinkService,
+    InvitationService invitationService,
     FileSecurity fileSecurity,
     UsersQuotaSyncOperation usersQuotaSyncOperation,
     CountPaidUserChecker countPaidUserChecker,
@@ -179,7 +179,7 @@ public class UserController(
     {
         await _apiContext.AuthByClaimAsync();
 
-        var linkData = inDto.FromInviteLink ? await invitationLinkService.GetProcessedLinkDataAsync(inDto.Key, inDto.Email, inDto.Type) : null;
+        var linkData = inDto.FromInviteLink ? await invitationService.GetInvitationDataAsync(inDto.Key, inDto.Email, inDto.Type) : null;
         if (linkData is { IsCorrect: false })
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_InvintationLink);
@@ -266,7 +266,7 @@ public class UserController(
             await UpdatePhotoUrlAsync(inDto.Files, user);
         }
 
-        if (linkData is { LinkType: InvitationLinkType.CommonWithRoom })
+        if (linkData is { LinkType: InvitationLinkType.CommonToRoom })
         {
             var success = int.TryParse(linkData.RoomId, out var id);
             var tenantId = await tenantManager.GetCurrentTenantIdAsync();

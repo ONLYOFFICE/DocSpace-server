@@ -35,9 +35,7 @@ public class ExternalShare(Global global,
     FilesLinkUtility filesLinkUtility,
     FileUtility fileUtility)
 {
-    private Guid _linkId;
-    private Guid _sessionId;
-    private string _passwordKey;
+    private ExternalSessionSnapshot _snapshot;
     private string _dbKey;
     private const string RoomLinkPattern = "rooms/share?key={0}";
 
@@ -99,7 +97,12 @@ public class ExternalShare(Global global,
             return Status.Expired;
         }
 
-        if ((record.Options.Internal && !isAuthenticated) || entry is { RootFolderType: FolderType.Archive or FolderType.TRASH })
+        if (record.Options.Internal && !isAuthenticated)
+        {
+            return Status.ExternalAccessDenied;
+        }
+
+        if (entry is { RootFolderType: FolderType.Archive or FolderType.TRASH })
         {
             return Status.Invalid;
         }
@@ -108,13 +111,14 @@ public class ExternalShare(Global global,
         {
             return Status.Ok;
         }
-        
-        if (string.IsNullOrEmpty(_passwordKey))
-        {
-            _passwordKey = cookiesManager.GetCookies(CookiesType.ShareLink, record.Subject.ToString(), true);
-        }
 
-        if (_passwordKey == record.Options.Password)
+        var passwordKey = _snapshot?.PasswordKey;
+        if (string.IsNullOrEmpty(passwordKey))
+        {
+            passwordKey = cookiesManager.GetCookies(CookiesType.ShareLink, record.Subject.ToString(), true);
+        }
+        
+        if (passwordKey == record.Options.Password)
         {
             return Status.Ok;
         }
@@ -167,9 +171,9 @@ public class ExternalShare(Global global,
 
     public async Task<Guid> GetLinkIdAsync()
     {
-        if (_linkId != Guid.Empty)
+        if (_snapshot != null && _snapshot.LinkId != Guid.Empty)
         {
-            return _linkId;
+            return _snapshot.LinkId;
         }
         
         var key = GetKey();
@@ -179,12 +183,7 @@ public class ExternalShare(Global global,
         }
         
         var linkId = await ParseShareKeyAsync(key);
-        if (linkId == Guid.Empty)
-        {
-            return Guid.Empty;
-        }
-
-        return _linkId = linkId;
+        return linkId == Guid.Empty ? Guid.Empty : linkId;
     }
 
     public Guid GetSessionId()
@@ -194,14 +193,14 @@ public class ExternalShare(Global global,
     
     public async Task<Guid> GetSessionIdAsync()
     {
-        if (_sessionId != Guid.Empty)
+        if (_snapshot != null && _snapshot.SessionId != Guid.Empty)
         {
-            return _sessionId;
+            return _snapshot.SessionId;
         }
 
         if (CustomSynchronizationContext.CurrentContext?.CurrentPrincipal?.Identity is AnonymousSession anonymous)
         {
-            return _sessionId = anonymous.SessionId;
+            return anonymous.SessionId;
         }
         
         var sessionKey = cookiesManager.GetCookies(CookiesType.AnonymousSessionKey);
@@ -211,12 +210,7 @@ public class ExternalShare(Global global,
         }
         
         var id = Signature.Read<Guid>(sessionKey, await GetDbKeyAsync());
-        if (id == Guid.Empty)
-        {
-            return Guid.Empty;
-        }
-
-        return _sessionId = id;
+        return id == Guid.Empty ? Guid.Empty : id;
     }
 
     public async Task<string> CreateDownloadSessionKeyAsync()
@@ -266,23 +260,14 @@ public class ExternalShare(Global global,
     {
         var linkId = await GetLinkIdAsync();
         var sessionId = await GetSessionIdAsync();
-        var passwordKey = string.IsNullOrEmpty(_passwordKey) 
-            ? cookiesManager.GetCookies(CookiesType.ShareLink, _linkId.ToString(), true) 
-            : _passwordKey;
+        var passwordKey = cookiesManager.GetCookies(CookiesType.ShareLink, linkId.ToString(), true);
 
         return new ExternalSessionSnapshot(linkId, sessionId, passwordKey);
     }
     
     public void Initialize(ExternalSessionSnapshot snapshot)
     {
-        if (snapshot == null)
-        {
-            return;
-        }
-        
-        _linkId = snapshot.LinkId;
-        _sessionId = snapshot.SessionId;
-        _passwordKey = snapshot.PasswordKey;
+        _snapshot = snapshot;
     }
     
     public async Task<string> CreateShareKeyAsync(Guid linkId)
@@ -321,15 +306,7 @@ public class ValidationInfo
     /// <summary>Sharing rights</summary>
     /// <type>ASC.Files.Core.Security.FileShare, ASC.Files.Core</type>
     public FileShare Access { get; set; }
-
-    /// <summary>Type of a folder where the external data is located</summary>
-    /// <type>ASC.Files.Core.FolderType, ASC.Files.Core</type>
-    public FolderType FolderType { get; set; }
-
-    /// <summary>Room logo</summary>
-    /// <type>ASC.Files.Core.VirtualRooms.Logo, ASC.Files.Core</type>
-    public Logo Logo { get; set; }
-
+    
     /// <summary>Tenant ID</summary>
     /// <type>System.Int32, System</type>
     public int TenantId { get; set; }
@@ -357,11 +334,11 @@ public class ExternalSessionSnapshot
         
     }
     
-    public ExternalSessionSnapshot(Guid LinkId, Guid SessionId, string PasswordKey)
+    public ExternalSessionSnapshot(Guid linkId, Guid sessionId, string passwordKey)
     {
-        this.LinkId = LinkId;
-        this.SessionId = SessionId;
-        this.PasswordKey = PasswordKey;
+        this.LinkId = linkId;
+        this.SessionId = sessionId;
+        this.PasswordKey = passwordKey;
     }
 
     [ProtoMember(1)]
@@ -380,5 +357,6 @@ public enum Status
     Invalid,
     Expired,
     RequiredPassword,
-    InvalidPassword
+    InvalidPassword,
+    ExternalAccessDenied
 }

@@ -379,59 +379,70 @@ internal abstract class SecurityBaseDao<T>(
                         q1 = q1.Where(r => r.User.ActivationStatus == status.Value);
                     }
 
-                    q = q1.OrderBy(r => r.User.ActivationStatus).ThenBy(predicate)
+                    q = q1.OrderBy(r => r.User.ActivationStatus)
+                        .ThenBy(predicate)
+                        .ThenBy(r => r.User.FirstName)
                         .Select(r => r.Security);
                     break;
                 }
             case ShareFilterType.Group:
                 {
+                    var q1 = q.Join(filesDbContext.Groups, s => s.Subject, g => g.Id,
+                        (security, group) => new SecurityOrderRecord
+                        {
+                            Security = security,
+                            Order = 0,
+                            Name = group.Name
+                        });
+                    
                     if (searchByText)
                     {
-                        q = q.Join(filesDbContext.Groups, s => s.Subject, g => g.Id,
-                                (security, group) => new { security, group })
-                            .Where(r => r.group.Name.ToLower().Contains(text))
-                            .Select(r => r.security);
+                        q1 = q1.Where(r => r.Name.ToLower().Contains(text));
                     }
 
-                    var predicate = ShareCompareHelper.GetCompareExpression<DbFilesSecurity>(s => s.Share, entry.RootFolderType);
-                    q = q.OrderBy(predicate);
+                    var predicate = ShareCompareHelper.GetCompareExpression<SecurityOrderRecord>(s => s.Security.Share, entry.RootFolderType);
+                    
+                    q = q1.OrderBy(predicate)
+                        .ThenBy(r => r.Name)
+                        .Select(r => r.Security);
                     break;
                 }
             case ShareFilterType.UserOrGroup:
                 {
                     var predicate = ShareCompareHelper.GetCompareExpression<SecurityOrderRecord>(r => r.Security.Share, entry.RootFolderType);
 
+                    var userQuery = q.Join(filesDbContext.Users, s => s.Subject, u => u.Id,
+                        (security, user) => new { security, user });
+
+                    var groupQuery = q.Join(filesDbContext.Groups, s => s.Subject, g => g.Id,
+                        (security, group) => new { security, group });
+
                     if (searchByText)
                     {
-                        var userQuery = q.Join(filesDbContext.Users, s => s.Subject, u => u.Id,
-                                (security, user) => new { security, user })
-                            .Where(r => !r.user.Removed && (r.user.FirstName.ToLower().Contains(text) || r.user.LastName.ToLower().Contains(text) || r.user.Email.ToLower().Contains(text)))
-                            .Select(r => new SecurityOrderRecord
-                            {
-                                Security = r.security, 
-                                Order = r.user.ActivationStatus == EmployeeActivationStatus.Pending ? 3 : r.security.Share == FileShare.RoomAdmin ? 0 : 2
-                            });
-
-                        var groupQuery = q.Join(filesDbContext.Groups, s => s.Subject, g => g.Id,
-                                (security, group) => new { security, group })
-                            .Where(r => r.group.Name.ToLower().Contains(text))
-                            .Select(r => new SecurityOrderRecord { Security = r.security, Order = 1 });
-
-                        q = userQuery.Concat(groupQuery).OrderBy(r => r.Order).ThenBy(predicate).Select(r => r.Security);
+                        userQuery = userQuery.Where(r =>
+                            !r.user.Removed && (r.user.FirstName.ToLower().Contains(text) || r.user.LastName.ToLower().Contains(text) || r.user.Email.ToLower().Contains(text)));
+                        groupQuery = groupQuery.Where(r => r.group.Name.ToLower().Contains(text));
                     }
-                    else
+                    
+                    var userQuery1 = userQuery.Select(r => new SecurityOrderRecord
                     {
-                        var q1 = q.GroupJoin(filesDbContext.Users, s => s.Subject, u => u.Id,
-                                (security, users) => new { security, users })
-                            .SelectMany(r => r.users.Where(u => u == null || !u.Removed).DefaultIfEmpty(), 
-                                (r, u) => new SecurityOrderRecord 
-                                {
-                                    Security = r.security,
-                                    Order = u == null ? 1 : u.ActivationStatus == EmployeeActivationStatus.Pending ? 3 : r.security.Share == FileShare.RoomAdmin ? 0 : 2
-                                });
+                        Security = r.security, 
+                        Order = r.user.ActivationStatus == EmployeeActivationStatus.Pending ? 3 : r.security.Share == FileShare.RoomAdmin ? 0 : 2,
+                        Name = r.user.ActivationStatus == EmployeeActivationStatus.Pending ? r.user.Email : r.user.FirstName
+                    });
+                    
+                    var groupQuery1 = groupQuery.Select(r => new SecurityOrderRecord
+                    {
+                        Security = r.security, 
+                        Order = 1,
+                        Name = r.group.Name
+                    });
 
-                        q = q1.OrderBy(r => r.Order).ThenBy(predicate).Select(r => r.Security);
-                    }
+                    q = userQuery1.Concat(groupQuery1)
+                        .OrderBy(r => r.Order)
+                        .ThenBy(predicate)
+                        .ThenBy(r => r.Name)
+                        .Select(r => r.Security);
 
                     break;
                 }
@@ -1054,6 +1065,7 @@ public class SecurityOrderRecord
 {
     public DbFilesSecurity Security { get; init; }
     public int Order { get; init; }
+    public string Name { get; init; }
 }
 
 public class UserInfoWithShared

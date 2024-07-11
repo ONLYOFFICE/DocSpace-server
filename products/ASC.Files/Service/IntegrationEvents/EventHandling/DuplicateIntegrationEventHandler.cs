@@ -24,36 +24,28 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Profile = AutoMapper.Profile;
-using Status = ASC.Files.Core.Security.Status;
+using ASC.Web.Files.Services.WCFService.FileOperations;
 
-namespace ASC.Files.Core.ApiModels.ResponseDto;
+namespace ASC.Files.Service.IntegrationEvents.EventHandling;
 
-/// <summary>
-/// </summary>
-public class ExternalShareDto : IMapFrom<ValidationInfo>
+[Scope]
+public class DuplicateIntegrationEventHandler(
+    ILogger<DuplicateIntegrationEventHandler> logger,
+    FileOperationsManager fileOperationsManager,
+    TenantManager tenantManager,
+    SecurityContext securityContext)
+    : IIntegrationEventHandler<DuplicateIntegrationEvent>
 {
-    /// <summary>External data status</summary>
-    /// <type>ASC.Files.Core.Security.Status, ASC.Files.Core</type>
-    public Status Status { get; set; }
-
-    /// <summary>External data ID</summary>
-    /// <type>System.String, System</type>
-    public string Id { get; set; }
-
-    /// <summary>External data title</summary>
-    /// <type>System.String, System</type>
-    public string Title { get; set; }
-
-    /// <summary>Tenant ID</summary>
-    /// <type>System.Int32, System</type>
-    public int TenantId { get; set; }
-
-    /// <summary>Specifies whether to share the external data or not</summary>
-    /// <type>System.Boolean, System</type>
-    public bool Shared { get; set; }
-    
-    /// <summary>Link ID</summary>
-    /// <type>System.Guid, System</type>
-    public Guid LinkId { get; set; }
+    public async Task Handle(DuplicateIntegrationEvent @event)
+    {
+        CustomSynchronizationContext.CreateContext();
+        using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
+        {
+            logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
+            await tenantManager.SetCurrentTenantAsync(@event.TenantId);
+            await securityContext.AuthenticateMeWithoutCookieAsync(@event.TenantId, @event.CreateBy);
+            await fileOperationsManager.Enqueue<FileDuplicateOperation, FileOperationData<string>, FileOperationData<int>>(@event.TaskId, @event.ThirdPartyData, @event.Data);
+        }
+    }
 }
+

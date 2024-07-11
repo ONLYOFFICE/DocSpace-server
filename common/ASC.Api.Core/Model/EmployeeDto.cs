@@ -171,7 +171,7 @@ public class EmployeeDtoHelper(
 
         if (result.Id != Guid.Empty)
         {
-            var profileUrl = await commonLinkUtility.GetUserProfileAsync(userInfo.Id, false);
+            var profileUrl = await commonLinkUtility.GetUserProfileAsync(userInfo.Id);
             result.ProfileUrl = commonLinkUtility.GetFullAbsolutePath(profileUrl);
         }
 

@@ -170,8 +170,6 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
         var extension = FileUtility.GetFileExtension(file.Title);
         var fileType = FileUtility.GetFileTypeByExtention(extension);
 
-        (File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom) docParams;
-        Configuration<T> configuration;
         bool canEdit;
         bool canFill;
         var canStartFilling = true;
@@ -220,28 +218,34 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                     }
                     else
                     {
-                        if (properties != null && properties.FormFilling.StartFilling)
+                        if (file.RootFolderType == FolderType.Archive)
                         {
-                            var linkedId = await linkDao.GetLinkedAsync(file.Id);
-                            var formDraft = !Equals(linkedId, default(T)) ?
-                                await fileDao.GetFileAsync((T)Convert.ChangeType(linkedId, typeof(T))) :
-                                (await entryManager.GetFillFormDraftAsync(file, rootFolder.Id)).file;
-
-
                             canEdit = false;
-                            canFill = true;
-                            editorType = EditorType.Embedded;
-
-                            await fileMarker.MarkAsNewAsync(formDraft);
-                            await socketManager.CreateFileAsync(formDraft);
-                            await socketManager.UpdateFileAsync(file);
-
-                            file = formDraft;
+                            canFill = false;
                         }
                         else
                         {
-                            canEdit = true;
-                            canFill = false;
+                            if (properties != null && properties.FormFilling.StartFilling)
+                            {
+                                var linkedId = await linkDao.GetLinkedAsync(file.Id);
+                                var formDraft = !Equals(linkedId, default(T)) ? await fileDao.GetFileAsync(linkedId) : (await entryManager.GetFillFormDraftAsync(file, rootFolder.Id)).file;
+
+
+                                canEdit = false;
+                                canFill = true;
+                                editorType = EditorType.Embedded;
+
+                                await fileMarker.MarkAsNewAsync(formDraft);
+                                await socketManager.CreateFileAsync(formDraft);
+                                await socketManager.UpdateFileAsync(file);
+
+                                file = formDraft;
+                            }
+                            else
+                            {
+                                canEdit = true;
+                                canFill = false;
+                            }
                         }
                     }
 
@@ -270,8 +274,8 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
             canFill = true;
         }
 
-        docParams = await documentServiceHelper.GetParamsAsync(file, lastVersion, canEdit, !view, true, canFill, editorType, isSubmitOnly);
-        configuration = docParams.Configuration;
+        var docParams = await documentServiceHelper.GetParamsAsync(file, lastVersion, canEdit, !view, true, canFill, editorType, isSubmitOnly);
+        var configuration = docParams.Configuration;
         file = docParams.File;
 
         if (file.RootFolderType == FolderType.Privacy && await PrivacyRoomSettings.GetEnabledAsync(settingsManager) || docParams.LocatedInPrivateRoom)
@@ -303,8 +307,12 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                 await entryManager.MarkAsRecent(file);
             }
         }
-        if (fileType == FileType.Pdf) result.StartFilling = canStartFilling;
         
+        if (fileType == FileType.Pdf)
+        {
+            result.StartFilling = canStartFilling;
+        }
+
         return result;
     }
 
@@ -366,9 +374,9 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <path>api/2.0/files/file/referencedata</path>
     /// <httpMethod>POST</httpMethod>
     [HttpPost("referencedata")]
-    public async Task<FileReference<T>> GetReferenceDataAsync(GetReferenceDataDto<T> inDto)
+    public async Task<FileReference> GetReferenceDataAsync(GetReferenceDataDto<T> inDto)
     {
-        return await fileStorageService.GetReferenceDataAsync(inDto.FileKey, inDto.InstanceId, inDto.SourceFileId, inDto.Path);
+        return await fileStorageService.GetReferenceDataAsync(inDto.FileKey, inDto.InstanceId, inDto.SourceFileId, inDto.Path, inDto.Link);
     }
 
     /// <summary>

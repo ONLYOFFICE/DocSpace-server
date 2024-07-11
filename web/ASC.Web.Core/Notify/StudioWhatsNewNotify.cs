@@ -156,11 +156,13 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
 
                 _log.Debug($"SendMsgWhatsNew userActivities count : {userActivities.Count}");//temp
 
+                var action = whatsNewType == WhatsNewType.RoomsActivity ? Actions.RoomsActivity : Actions.SendWhatsNew;
+
                 if (userActivities.Any())
                 {
                     _log.InformationSendWhatsNewTo(user.Email);
                     await client.SendNoticeAsync(
-                        Actions.SendWhatsNew, null, user,
+                        action, null, user,
                         new TagValue(Tags.Activities, userActivities),
                         new TagValue(Tags.Date, DateToString(scheduleDate, whatsNewType, culture)),
                         new TagValue(CommonTags.Priority, 1)

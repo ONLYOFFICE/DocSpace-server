@@ -40,7 +40,9 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         IServiceProvider serviceProvider,
         ExternalShare externalShare,
         AuthContext authContext,
-        SecurityContext securityContext)
+        SecurityContext securityContext,
+        ILogger<DocumentServiceHelper> logger,
+        CookiesManager cookiesManager)
     {
 
     public async Task<(File<T> File, bool LastVersion)> GetCurFileInfoAsync<T>(T fileId, int version)
@@ -140,6 +142,15 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             if (file.ShareRecord is { IsLink: true, Share: not FileShare.Restrict, Options.Internal: true } && !authContext.IsAuthenticated)
             {
                 throw new LinkScopeException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
+            }
+
+            if (file.ShareRecord is { IsLink: true } && !string.IsNullOrEmpty(file.ShareRecord.Options.Password))
+            {
+                var passwordKey = cookiesManager.GetCookies(CookiesType.ShareLink, file.ShareRecord.Subject.ToString(), true);
+                if (string.IsNullOrEmpty(passwordKey))
+                {
+                    logger.Debug($"Password key not found for file {file.Id} and subject {file.ShareRecord.Subject}");
+                }
             }
             
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);

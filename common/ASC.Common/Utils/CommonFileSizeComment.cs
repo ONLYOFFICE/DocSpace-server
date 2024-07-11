@@ -24,18 +24,28 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Data.Backup.Core.Log;
-internal static partial class DeletePortalTaskLogging
+namespace ASC.Common.Utils;
+
+public class CommonFileSizeComment
 {
-    [LoggerMessage(Level = LogLevel.Debug, Message = "begin delete {tenantId}")]
-    public static partial void DebugBeginDelete(this ILogger<DeletePortalTask> logger, int tenantId);
+    /// <summary>
+    /// Generates a string the file size
+    /// </summary>
+    /// <param name="size">Size in bytes</param>
+    /// <returns>10 b, 100 Kb, 25 Mb, 1 Gb</returns>
+    public static string FilesSizeToString(string fileSizePostfix, long size)
+    {
+        var sizeNames = !string.IsNullOrEmpty(fileSizePostfix) ? 
+            fileSizePostfix.Split(',', '،') : ["bytes", "KB", "MB", "GB", "TB"];
+        var power = 0;
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "end delete {tenantId}")]
-    public static partial void DebugEndDelete(this ILogger<DeletePortalTask> logger, int tenantId);
-
-    [LoggerMessage(Level = LogLevel.Debug, Message = "begin delete data for module ({name})")]
-    public static partial void DebugBeginDeleteDataForModule(this ILogger<DeletePortalTask> logger, ModuleName name);
-
-    [LoggerMessage(Level = LogLevel.Debug, Message = "end delete data for module ({name})")]
-    public static partial void DebugEndDeleteDataForModule(this ILogger<DeletePortalTask> logger, ModuleName name);
+        double resultSize = size;
+        if (1024 <= resultSize)
+        {
+            power = (int)Math.Log(resultSize, 1024);
+            power = power < sizeNames.Length ? power : sizeNames.Length - 1;
+            resultSize /= Math.Pow(1024d, power);
+        }
+        return $"{resultSize:#,0.##} {sizeNames[power]}";
+    }
 }

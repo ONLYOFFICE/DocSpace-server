@@ -88,7 +88,7 @@ public abstract class Migrator : IAsyncDisposable
         UserManagerWrapper = userManagerWrapper;
     }
     
-    public abstract void Init(string path, CancellationToken cancellationToken, OperationType operation);
+    public abstract Task InitAsync(string path, CancellationToken cancellationToken, OperationType operation);
     public abstract Task<MigrationApiInfo> ParseAsync(bool reportProgress = true);
 
     protected async Task ReportProgressAsync(double value, string status)
@@ -525,7 +525,7 @@ public abstract class Migrator : IAsyncDisposable
                             {
                                 new AceWrapper
                                 {
-                                    Access = Files.Core.Security.FileShare.Collaborator,
+                                    Access = Files.Core.Security.FileShare.PowerUser,
                                     Id = user.Info.Id
                                 }
                             };

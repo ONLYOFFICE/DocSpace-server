@@ -42,7 +42,8 @@ module.exports = function (app, config) {
   const UserModel = require("./model/user");
   const LogoutModel = require("./model/logout");
   const fs = require('fs');
-  
+  const crypto = require('crypto');
+
   let uploadDir = "";
   const selfSignedDomain = "myselfsigned.crt";
   const machineKey = config["core"].machinekey ? config["core"].machinekey : config.app.machinekey;
@@ -199,10 +200,37 @@ module.exports = function (app, config) {
         key: key
     };
   }
+
+    function getCert(publicKey) {
+        try {
+            return new crypto.X509Certificate(publicKey);
+        } catch (error) {
+            logger.error(error.message);
+            return null;
+        }
+    }
+
+    function isPrivateKeyValid(privateKey) {
+        try {
+            const pk = crypto.createPrivateKey(privateKey);
+            return pk.asymmetricKeyType != null;
+        } catch (error) {
+            logger.error(error.message);
+            return false;
+        }
+    }
+    function getField(cnString, paramName) {
+        const cnPattern = new RegExp(`${paramName}=(.+)`);
+        const match = cnString.match(cnPattern);
+
+        if (match && match[1]) {
+            return match[1];
+        } else {
+            return null;
+        }
+    }
   function validateCertificate(certs){
     const result = [];
-    const pki = forge.pki;
-
     certs.forEach(function (data) {
         if (!data.crt)
             throw "Empty public certificate";
@@ -210,32 +238,40 @@ module.exports = function (app, config) {
         if (data.crt[0] !== "-")
             data.crt = "-----BEGIN CERTIFICATE-----\n" + data.crt + "\n-----END CERTIFICATE-----";
 
-        const cert = pki.certificateFromPem(data.crt);
-
-        const publicKey = cert.publicKey;
-        if (!publicKey)
+        const cert = getCert(data.crt);
+        if (cert == null) 
             throw "Invalid public cert";
 
+
         if (data.key) {
-            const privateKey = pki.privateKeyFromPem(data.key);
-            if (!privateKey)
+            if (!isPrivateKeyValid(data.key)) {
                 throw "Invalid private key";
+            }
+            const privateKey = data.key;
 
-            const md = forge.md.sha1.create();
-            md.update('sign this', 'utf8');
-            const signature = privateKey.sign(md);
+            const signData = 'sign this';
+            const sign = crypto.createSign('SHA256');
+            sign.update(signData);
+            sign.end();
+            const signature = sign.sign(privateKey, 'hex');
 
-            // verify data with a public key
-            // (defaults to RSASSA PKCS#1 v1.5)
-            const verified = publicKey.verify(md.digest().bytes(), signature);
-
-            if (!verified)
+            const verify = crypto.createVerify('SHA256');
+            verify.update(signData);
+            verify.end();
+            try {
+                verify.verify(data.crt, signature, 'hex');
+            }
+            catch (error) {
+                logger.error(error.message);
                 throw "Invalid key-pair (unverified signed data test)";
+            }
         }
+        const validFrom = new Date(cert.validFrom);
+        const validTo = new Date(cert.validTo);
+        const domainName = getField(cert.subject, "CN") || getField(cert.issuer, "CN");
+        const startDate = validFrom.toISOString().split(".")[0] + "Z";
+        const expiredDate = validTo.toISOString().split(".")[0] + "Z";
 
-        const domainName = cert.subject.getField("CN").value || cert.issuer.getField("CN").value;
-        const startDate = cert.validity.notBefore.toISOString().split(".")[0] + "Z";
-        const expiredDate = cert.validity.notAfter.toISOString().split(".")[0] + "Z";
 
         result.push({
             selfSigned: domainName === selfSignedDomain,

@@ -1218,7 +1218,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
         context.Response.Redirect(
             (context.Request.Query["openfolder"].FirstOrDefault() ?? "").Equals("true")
                     ? await pathProvider.GetFolderUrlByIdAsync(file.ParentId)
-                    : (filesLinkUtility.GetFileWebEditorUrl(file.Id) + "#message/" + HttpUtility.UrlEncode(string.Format(FilesCommonResource.MessageFileCreated, folder.Title))));
+                    : (filesLinkUtility.GetFileWebEditorUrl(file.Id) + "&message=" + HttpUtility.UrlEncode(string.Format(FilesCommonResource.MessageFileCreated, folder.Title))));
     }
 
     private async Task WriteError(HttpContext context, Exception ex, bool responseMessage)
@@ -1230,7 +1230,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             await context.Response.WriteAsync("error: " + ex.Message);
             return;
         }
-        context.Response.Redirect(PathProvider.StartURL + "#error/" + HttpUtility.UrlEncode(ex.Message), true);
+        context.Response.Redirect($"{filesLinkUtility.GetFileWebEditorUrl("")}&error={HttpUtility.UrlEncode(ex.Message)}", true);
     }
 
     private async Task WriteOk<T>(HttpContext context, Folder<T> folder, File<T> file)

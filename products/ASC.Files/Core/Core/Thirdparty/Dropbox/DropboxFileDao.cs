@@ -29,16 +29,18 @@ using File = System.IO.File;
 namespace ASC.Files.Core.Core.Thirdparty.Dropbox;
 
 [Scope(typeof(ThirdPartyFileDao<FileMetadata, FolderMetadata, Metadata>))]
-internal class DropboxFileDao(UserManager userManager,
-        IDbContextFactory<FilesDbContext> dbContextFactory,
-        IDaoSelector<FileMetadata, FolderMetadata, Metadata> daoSelector,
-        CrossDao crossDao,
-        IFileDao<int> fileDao,
-        IDaoBase<FileMetadata, FolderMetadata, Metadata> dao,
-        TempPath tempPath,
-        SetupInfo setupInfo,
-        TenantManager tenantManager)
-    : ThirdPartyFileDao<FileMetadata, FolderMetadata, Metadata>(userManager, dbContextFactory, daoSelector, crossDao, fileDao, dao, tenantManager)
+internal class DropboxFileDao(
+    UserManager userManager,
+    IDbContextFactory<FilesDbContext> dbContextFactory,
+    IDaoSelector<FileMetadata, FolderMetadata, Metadata> daoSelector,
+    CrossDao crossDao,
+    IFileDao<int> fileDao,
+    IDaoBase<FileMetadata, FolderMetadata, Metadata> dao,
+    TempPath tempPath,
+    SetupInfo setupInfo,
+    TenantManager tenantManager,
+    Global global)
+    : ThirdPartyFileDao<FileMetadata, FolderMetadata, Metadata>(userManager, dbContextFactory, daoSelector, crossDao, fileDao, dao, tenantManager, global)
 {
     protected override string UploadSessionKey => "DropboxSession";
 
@@ -85,7 +87,7 @@ internal class DropboxFileDao(UserManager userManager,
             else
             {
                 var folderPath = Dao.MakeThirdId(file.ParentId);
-                var title = await Dao.GetAvailableTitleAsync(file.Title, folderPath, IsExistAsync);
+                var title = await _global.GetAvailableTitleAsync(file.Title, folderPath, IsExistAsync);
                 dropboxFile = await storage.FinishRenewableSessionAsync(dropboxSession, folderPath, title);
             }
 

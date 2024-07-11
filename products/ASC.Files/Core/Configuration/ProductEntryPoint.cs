@@ -378,7 +378,7 @@ public class ProductEntryPoint : Product
             case FileShare.FillForms:
             case FileShare.RoomAdmin:
             case FileShare.Editing:
-            case FileShare.Collaborator:
+            case FileShare.PowerUser:
                 return FilesCommonResource.ResourceManager.GetString("RoleEnum_" + userRoomRole.ToStringFast());
             default:
                 return string.Empty;

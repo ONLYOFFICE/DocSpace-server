@@ -259,6 +259,17 @@ public class CommonMethods(
         return true;
     }
 
+    public string GetRequestScheme()
+    {
+        var request = httpContextAccessor.HttpContext?.Request;
+        if (request == null)
+        {
+            return Uri.UriSchemeHttp;
+        }
+        var header = request.Headers["X-Forwarded-Proto"].FirstOrDefault();
+        return string.IsNullOrEmpty(header) ? request.Scheme : header;
+    }
+
     public string GetClientIp()
     {
         return httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString();

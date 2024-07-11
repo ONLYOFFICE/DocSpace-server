@@ -857,7 +857,7 @@ $TrulyYours</comment>
 [$__AuthorName]($__AuthorUrl) has changed his/her profile details at the [${__VirtualRootPath}](${__VirtualRootPath}) portal.</value>
   </data>
   <data name="pattern_send_whats_new" xml:space="preserve">
-    <value>h1.Here is what’s new in your DocSpace on $Date
+    <value>h1.Here is what’s new in your DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" on $Date
 
 #foreach($activity in $Activities)
 $activity
@@ -1046,7 +1046,7 @@ The link is only valid for 7 days.</value>
     <value>${__VirtualRootPath} portal profile change notification</value>
   </data>
   <data name="subject_send_whats_new" xml:space="preserve">
-    <value>What's new on your portal for $Date</value>
+    <value>What's new on your portal "${__VirtualRootPath}":"${__VirtualRootPath}" for $Date</value>
   </data>
   <data name="subject_smtp_test" xml:space="preserve">
     <value>SMTP test message</value>
@@ -2351,5 +2351,16 @@ $TrulyYours</comment>
   </data>
   <data name="subject_saas_admin_integrations_v1" xml:space="preserve">
     <value>Explore useful integrations for ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="pattern_rooms_activity" xml:space="preserve">
+    <value>h1.Here is what’s new in your DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" in the last hour
+
+#foreach($activity in $Activities)
+$activity
+
+#end</value>
+  </data>
+  <data name="subject_rooms_activity" xml:space="preserve">
+    <value>What's new on your portal "${__VirtualRootPath}":"${__VirtualRootPath}" for the last hour</value>
   </data>
 </root>
