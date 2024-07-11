@@ -226,8 +226,6 @@ internal class FileDao(
 
         switch (filterType)
         {
-            case FilterType.OFormOnly:
-            case FilterType.OFormTemplateOnly:
             case FilterType.DocumentsOnly:
             case FilterType.ImagesOnly:
             case FilterType.PresentationsOnly:
@@ -1454,8 +1452,6 @@ internal class FileDao(
 
         switch (filterType)
         {
-            case FilterType.OFormOnly:
-            case FilterType.OFormTemplateOnly:
             case FilterType.DocumentsOnly:
             case FilterType.ImagesOnly:
             case FilterType.PresentationsOnly:
@@ -1463,6 +1459,10 @@ internal class FileDao(
             case FilterType.ArchiveOnly:
             case FilterType.MediaOnly:
                 q = q.Where(r => r.Category == (int)filterType);
+                break;
+            case FilterType.Pdf:
+            case FilterType.PdfForm:
+                q = q.Where(r => r.Category == (int)filterType || r.Title.ToLower().EndsWith(".pdf"));
                 break;
             case FilterType.ByExtension:
                 if (!string.IsNullOrEmpty(searchText))
@@ -1813,8 +1813,7 @@ internal class FileDao(
 
             switch (filterType)
             {
-                case FilterType.OFormOnly:
-                case FilterType.OFormTemplateOnly:
+
                 case FilterType.DocumentsOnly:
                 case FilterType.ImagesOnly:
                 case FilterType.PresentationsOnly:
@@ -2065,8 +2064,7 @@ internal class FileDao(
 
         switch (filterType)
         {
-            case FilterType.OFormOnly:
-            case FilterType.OFormTemplateOnly:
+
             case FilterType.DocumentsOnly:
             case FilterType.ImagesOnly:
             case FilterType.PresentationsOnly:
@@ -2074,6 +2072,10 @@ internal class FileDao(
             case FilterType.ArchiveOnly:
             case FilterType.MediaOnly:
                 q = q.Where(r => r.Category == (int)filterType);
+                break;
+            case FilterType.Pdf:
+            case FilterType.PdfForm:
+                q = q.Where(r => r.Category == (int)filterType || r.Title.ToLower().EndsWith(".pdf"));
                 break;
             case FilterType.ByExtension:
                 if (!string.IsNullOrEmpty(searchText))
@@ -2171,8 +2173,7 @@ internal class FileDao(
 
         switch (filterType)
         {
-            case FilterType.OFormOnly:
-            case FilterType.OFormTemplateOnly:
+
             case FilterType.DocumentsOnly:
             case FilterType.ImagesOnly:
             case FilterType.PresentationsOnly:
@@ -2180,6 +2181,10 @@ internal class FileDao(
             case FilterType.ArchiveOnly:
             case FilterType.MediaOnly:
                 q = q.Where(r => r.Entry.Category == (int)filterType);
+                break;
+            case FilterType.Pdf:
+            case FilterType.PdfForm:
+                q = q.Where(r => r.Entry.Category == (int)filterType || r.Entry.Title.ToLower().EndsWith(".pdf"));
                 break;
             case FilterType.ByExtension:
                 if (!string.IsNullOrEmpty(searchText))

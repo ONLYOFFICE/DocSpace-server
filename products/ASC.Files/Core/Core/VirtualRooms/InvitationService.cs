@@ -224,7 +224,7 @@ public class InvitationService(
             return data;
         }
 
-        var securityDao = daoFactory.GetSecurityDao<int>();
+        var securityDao = daoFactory.GetSecurityDao<string>();
         var record = await securityDao.GetSharesAsync(new[] { result.LinkId })
             .FirstOrDefaultAsync(s => s.SubjectType == SubjectType.InvitationLink);
         
@@ -239,7 +239,7 @@ public class InvitationService(
             : EmailValidationKeyProvider.ValidationResult.Expired;
 
         data.Share = record.Share;
-        data.RoomId = record.EntryId.ToString();
+        data.RoomId = record.EntryId;
         data.EmployeeType = FileSecurity.GetTypeByShare(record.Share);
 
         return data;
