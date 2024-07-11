@@ -1182,7 +1182,7 @@ public class EntryManager(IDaoFactory daoFactory,
                     {
                         linkedFile.ParentId = (T)Convert.ChangeType(properties.FormFilling.ToFolderId, typeof(T));
                     }
-
+                    linkedFile.IsForm = true;
                 }
                 else
                 {

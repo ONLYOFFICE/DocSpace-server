@@ -1098,6 +1098,7 @@ internal class FileDao(
             copy.ConvertedType = file.ConvertedType;
             copy.Comment = FilesCommonResource.CommentCopy;
             copy.Encrypted = file.Encrypted;
+            copy.IsForm = file.IsForm;
             copy.ThumbnailStatus = file.ThumbnailStatus == Thumbnail.Created ? Thumbnail.Creating : Thumbnail.Waiting;
 
             await using (var stream = await GetFileStreamAsync(file))
@@ -1335,6 +1336,7 @@ internal class FileDao(
                 file.VersionGroup++;
             }
             file.ContentLength = uploadSession.BytesTotal;
+            file.IsForm = uploadSession.File.IsForm;
             file.ConvertedType = null;
             file.Comment = FilesCommonResource.CommentUpload;
             file.Encrypted = uploadSession.Encrypted;
@@ -1350,6 +1352,7 @@ internal class FileDao(
         result.Comment = FilesCommonResource.CommentUpload;
         result.Encrypted = uploadSession.Encrypted;
         result.CreateOn = uploadSession.File.CreateOn;
+        result.IsForm = uploadSession.File.IsForm;
 
         return result;
     }

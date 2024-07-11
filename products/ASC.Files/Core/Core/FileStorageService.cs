@@ -88,7 +88,8 @@ public class FileStorageService //: IFileStorageService
     TempStream tempStream,
     MentionWrapperCreator mentionWrapperCreator,
     SecurityContext securityContext,
-    IConfiguration configuration)
+    IConfiguration configuration,
+    File—hecker fileChecker)
 {
     private readonly ILogger _logger = optionMonitor.CreateLogger("ASC.Files");
 
@@ -896,75 +897,6 @@ public class FileStorageService //: IFileStorageService
 
         return file;
     }
-    public async Task<bool> CheckExtendedPDF<T>(File<T> file)
-    {
-        const int limit = 300;
-        var fileDao = daoFactory.GetFileDao<T>();
-        var stream = await fileDao.GetFileStreamAsync(file, 0, limit);
-
-        using var memStream = new MemoryStream();
-        await stream.CopyToAsync(memStream);
-        memStream.Seek(0, SeekOrigin.Begin);
-
-        return await CheckExtendedPDFstream(memStream);
-    }
-    public async Task<bool> CheckExtendedPDFstream(Stream stream)
-    {
-        using var reader = new StreamReader(stream, Encoding.GetEncoding("iso-8859-1"));
-        var message = await reader.ReadToEndAsync();
-
-        var config = configuration.GetSection("files:oform").Get<OFormSettings>();
-
-        return IsExtendedPDFFile(message, config.Signature);
-    }
-    private static bool IsExtendedPDFFile(string text, string signature)
-    {
-        if (string.IsNullOrEmpty(text))
-        {
-            return false;
-        }
-
-        var indexFirst = text.IndexOf("%\xCD\xCA\xD2\xA9\x0D");
-
-        if (indexFirst == -1)
-        {
-            return false;
-        }
-
-        var pFirst = text.Substring(indexFirst + 6);
-
-        if (!pFirst.StartsWith("1 0 obj\x0A<<\x0A"))
-        {
-            return false;
-        }
-
-        pFirst = pFirst.Substring(11);
-
-        var indexStream = pFirst.IndexOf("stream\x0D\x0A");
-        var indexMeta = pFirst.IndexOf(signature);
-
-        if (indexStream == -1 || indexMeta == -1 || indexStream < indexMeta)
-        {
-            return false;
-        }
-
-        var pMeta = pFirst.Substring(indexMeta + signature.Length + 3);
-
-        var indexMetaLast = pMeta.IndexOf(' ');
-        if (indexMetaLast == -1)
-        {
-            return false;
-        }
-
-        pMeta = pMeta.Substring(indexMetaLast + 1);
-        indexMetaLast = pMeta.IndexOf(' ');
-        if (indexMetaLast == -1)
-        {
-            return false;
-        }
-
-        return true;
-    }
 
     public async ValueTask<File<T>> CreateNewFileAsync<T, TTemplate>(FileModel<T, TTemplate> fileWrapper, bool enableExternalExt = false)
     {
@@ -1019,7 +951,7 @@ public class FileStorageService //: IFileStorageService
         {
             file.Title = FileUtility.ReplaceFileExtension(title, fileExt);
         }
-
+        file.IsForm = FileUtility.GetFileTypeByExtention(fileExt) == FileType.Pdf;
         if (fileWrapper.FormId != 0)
         {
             await using var stream = await oFormRequestManager.Get(fileWrapper.FormId);
@@ -2135,7 +2067,7 @@ public class FileStorageService //: IFileStorageService
                 var extension = FileUtility.GetFileExtension(file.Title);
                 var fileType = FileUtility.GetFileTypeByExtention(extension);
 
-                if (fileType == FileType.Pdf && await CheckExtendedPDF(file))
+                if (fileType == FileType.Pdf && await fileChecker.CheckExtendedPDF(file))
                 {
                     checkedFiles.Add(id);
                 }

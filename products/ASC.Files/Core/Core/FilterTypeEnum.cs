@@ -48,5 +48,7 @@ public enum FilterType
     [EnumMember] OFormTemplateOnly = 18,
     [EnumMember] OFormOnly = 19,
     [EnumMember] PublicRooms = 20,
-    [EnumMember] FormRooms = 21
+    [EnumMember] FormRooms = 21,
+    [EnumMember] PdfForm = 22
+
 }

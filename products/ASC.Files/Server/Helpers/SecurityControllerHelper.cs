@@ -35,13 +35,15 @@ public class SecurityControllerHelper(
     FileStorageService fileStorageService,
     IHttpContextAccessor httpContextAccessor,
     FileShareDtoHelper fileShareDtoHelper,
-    FileShareParamsHelper fileShareParamsHelper)
+    FileShareParamsHelper fileShareParamsHelper,
+    FileСhecker fileСhecker)
     : FilesHelperBase(
         filesSettingsHelper,
         fileUploader,
         socketManager,
         fileDtoHelper,
         fileStorageService,
+        fileСhecker,
         httpContextAccessor)
 {
     public IAsyncEnumerable<FileShareDto> GetFileSecurityInfoAsync<T>(T fileId)

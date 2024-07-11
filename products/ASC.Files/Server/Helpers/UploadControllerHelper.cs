@@ -40,13 +40,15 @@ public class UploadControllerHelper(
     IHttpClientFactory httpClientFactory,
     SecurityContext securityContext,
     IDaoFactory daoFactory,
-    FileSecurity fileSecurity)
+    FileSecurity fileSecurity,
+    FileСhecker fileСhecker)
     : FilesHelperBase(
         filesSettingsHelper,
         fileUploader,
         socketManager,
         fileDtoHelper,
         fileStorageService,
+        fileСhecker,
         httpContextAccessor)
     {
     public async Task<object> CreateEditSessionAsync<T>(T fileId, long fileSize)

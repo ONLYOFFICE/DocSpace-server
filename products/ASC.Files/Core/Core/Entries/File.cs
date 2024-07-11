@@ -100,6 +100,16 @@ public class File<T> : FileEntry<T>
                 case FileType.Audio:
                 case FileType.Video:
                     return FilterType.MediaOnly;
+                case FileType.Pdf:
+                    if (this.IsForm)
+                    {
+                        return FilterType.PdfForm;
+                    }
+                    else
+                    {
+                        return FilterType.DocumentsOnly;
+                    }
+                   
             }
 
             return FilterType.None;
@@ -124,6 +134,9 @@ public class File<T> : FileEntry<T>
     public string DownloadUrl => FileHelper.GetDownloadUrl(this);
 
     public bool Locked { get; set; }
+    public bool IsForm { get; set; }
+
+    public int Category { get; set; }
     public string LockedBy { get; set; }
 
     [JsonIgnore]

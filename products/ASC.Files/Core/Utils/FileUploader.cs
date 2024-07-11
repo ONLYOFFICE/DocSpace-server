@@ -46,7 +46,7 @@ public class FileUploader(
     ChunkedUploadSessionHolder chunkedUploadSessionHolder,
     FileTrackerHelper fileTracker,
     SocketManager socketManager,
-    FileStorageService fileStorageService)
+    File—hecker file—hecker)
 {
     public async Task<File<T>> ExecAsync<T>(T folderId, string title, long contentLength, Stream data, bool createNewIfExist, bool deleteConvertStatus = true)
     {
@@ -301,28 +301,23 @@ public class FileUploader(
                 var currentFolder = await folderDao.GetFolderAsync(uploadSession.File.FolderIdDisplay);
                 var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(currentFolder);
 
+                var memoryStream = new MemoryStream();
+                await stream.CopyToAsync(memoryStream);
+                var cloneStreamForCheck = CloneMemoryStream(memoryStream, 300);
+                var cloneStreamForSave = CloneMemoryStream(memoryStream);
+                var isForm = await file—hecker.CheckExtendedPDFstream(cloneStreamForCheck);
+                uploadSession.File.IsForm = isForm;
+
                 if (int.TryParse(roomId?.ToString(), out var curRoomId) && curRoomId != -1)
                 {
                     var currentRoom = await folderDao.GetFolderAsync(roomId);
-                    if (currentRoom.FolderType == FolderType.FillingFormsRoom)
+                    if (currentRoom.FolderType == FolderType.FillingFormsRoom && !isForm)
                     {
-                        var memoryStream = new MemoryStream();
-                        await stream.CopyToAsync(memoryStream);
-                        var cloneStreamForCheck = CloneMemoryStream(memoryStream, 300);
-                        var cloneStreamForSave = CloneMemoryStream(memoryStream);
-
-                        if (!await fileStorageService.CheckExtendedPDFstream(cloneStreamForCheck))
-                        {
-                            throw new Exception(FilesCommonResource.ErrorMessage_UploadToFormRoom);
-                        }
-                        else
-                        {
-                            await dao.UploadChunkAsync(uploadSession, cloneStreamForSave, chunkLength, chunkNumber);
-                            return uploadSession;
-                        }
-
+                        throw new Exception(FilesCommonResource.ErrorMessage_UploadToFormRoom);
                     }
                 }
+                await dao.UploadChunkAsync(uploadSession, cloneStreamForSave, chunkLength, chunkNumber);
+                return uploadSession;
             }
         }
 

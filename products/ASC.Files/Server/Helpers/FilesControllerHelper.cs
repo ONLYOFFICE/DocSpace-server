@@ -39,12 +39,14 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         UserManager userManager,
         DisplayUserSettingsHelper displayUserSettingsHelper,
         FileConverter fileConverter,
-        PathProvider pathProvider)
+        PathProvider pathProvider,
+        FileСhecker fileСhecker)
     : FilesHelperBase(filesSettingsHelper,
             fileUploader,
             socketManager,
             fileDtoHelper,
             fileStorageService,
+            fileСhecker,
             httpContextAccessor)
     {
     private readonly ILogger _logger = logger;
@@ -68,7 +70,7 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
 
         if (fileType == FileType.Pdf)
         {
-            return await _fileStorageService.CheckExtendedPDF(file);
+            return await _fileСhecker.CheckExtendedPDF(file);
         }
         return false;
     }
