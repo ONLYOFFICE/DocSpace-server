@@ -24,7 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Constants = ASC.Common.Security.Authorizing.Constants;
+using AuthConstants = ASC.Common.Security.Authorizing.AuthConstants;
 
 namespace ASC.Core.Security.Authorizing;
 
@@ -51,9 +51,9 @@ class RoleProvider(IServiceProvider serviceProvider) : IRoleProvider
             }
         }
         
-        if (roles.Any(r => r.ID == Constants.Collaborator.ID || r.ID == Constants.User.ID))
+        if (roles.Any(r => r.ID == AuthConstants.Collaborator.ID || r.ID == AuthConstants.User.ID))
         {
-            roles = roles.Where(r => r.ID != Constants.RoomAdmin.ID).ToList();
+            roles = roles.Where(r => r.ID != AuthConstants.RoomAdmin.ID).ToList();
         }
 
         return roles;

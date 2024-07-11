@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.asc</groupId>
+        <artifactId>infrastructure</artifactId>
+        <version>1.0.0</version>
+    </parent>
+
+    <artifactId>infrastructure-migration-runner</artifactId>
+
+    <dependencies>
+        <!-- MySQL Connector -->
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+            <version>${mysql.connector.version}</version>
+        </dependency>
+
+        <!-- Flyway Core -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
+
+        <!-- Flyway MySQL -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-mysql</artifactId>
+        </dependency>
+
+        <!-- Spring Boot Starter Data JPA -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+
+        <!-- Systemd Notification Dependency -->
+        <dependency>
+            <groupId>com.github.jpmsilva.jsystemd</groupId>
+            <artifactId>jsystemd-spring-boot-starter</artifactId>
+            <version>${jsystemd.version}</version>
+        </dependency>
+
+        <!-- Logging Dependencies -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>de.siegmar</groupId>
+            <artifactId>logback-gelf</artifactId>
+            <version>${logback.gelf.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.logstash.logback</groupId>
+            <artifactId>logstash-logback-encoder</artifactId>
+            <version>${logback.logstash.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.janino</groupId>
+            <artifactId>janino</artifactId>
+        </dependency>
+    </dependencies>
+
+    <profiles>
+        <profile>
+            <id>win</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.github.nikolaybespalov</groupId>
+                        <artifactId>winsw-maven-plugin</artifactId>
+                        <version>${winsw.maven.plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>process-winsw</id>
+                                <phase>prepare-package</phase>
+                                <goals>
+                                    <goal>winsw</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${project.build.directory}</outputDirectory>
+                                    <winswRepo>jar</winswRepo>
+                                    <winswVersion>2.9.0</winswVersion>
+                                    <executableFileName>${project.build.finalName}.exe</executableFileName>
+                                    <configurationFileName>${project.build.finalName}.xml</configurationFileName>
+                                    <configurationFile>
+                                        <id>identity-migration-service</id>
+                                        <name>Identity Migration Service</name>
+                                        <description>Run Identity Migration as a Service</description>
+                                        <executable>java</executable>
+                                        <arguments>-jar ${project.build.finalName}.jar</arguments>
+                                    </configurationFile>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <imageName>onlyoffice-identity-migration:${project.version}</imageName>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>build-image</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
