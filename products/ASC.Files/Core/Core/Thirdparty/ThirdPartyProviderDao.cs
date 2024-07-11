@@ -496,13 +496,12 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(
             FilterType.FilesOnly or
             FilterType.ByExtension or
             FilterType.DocumentsOnly or
-            FilterType.OFormOnly or
-            FilterType.OFormTemplateOnly or
             FilterType.ImagesOnly or
             FilterType.PresentationsOnly or
             FilterType.SpreadsheetsOnly or
             FilterType.ArchiveOnly or
-            FilterType.MediaOnly;
+            FilterType.MediaOnly or
+            FilterType.Pdf;
     }
 
     public async Task UpdateIdAsync(string oldValue, string newValue)

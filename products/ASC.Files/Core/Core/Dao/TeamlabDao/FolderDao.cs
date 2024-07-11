@@ -1628,13 +1628,12 @@ internal class FolderDao(
             FilterType.FilesOnly or
             FilterType.ByExtension or
             FilterType.DocumentsOnly or
-            FilterType.OFormOnly or
-            FilterType.OFormTemplateOnly or
             FilterType.ImagesOnly or
             FilterType.PresentationsOnly or
             FilterType.SpreadsheetsOnly or
             FilterType.ArchiveOnly or
-            FilterType.MediaOnly;
+            FilterType.MediaOnly or
+            FilterType.Pdf;
     }
 
     private FolderType GetRoomTypeFilter(FilterType filterType)

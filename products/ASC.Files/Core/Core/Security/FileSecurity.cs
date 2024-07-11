@@ -853,12 +853,7 @@ public class FileSecurity(IDaoFactory daoFactory,
         {
             return false;
         }
-
-        if (action == FilesSecurityActions.SubmitToFormGallery &&
-            file is not { FilterType: FilterType.OFormTemplateOnly })
-        {
-            return false;
-        }
+        
 
         if (e.ProviderEntry && folder is { ProviderMapped: false } && e.CreateBy == userId)
         {
@@ -1477,11 +1472,6 @@ public class FileSecurity(IDaoFactory daoFactory,
                     case FolderType.USER:
                         return false;
                     default:
-                        if (e.Access is FileShare.RoomAdmin or FileShare.PowerUser &&
-                            file is { FilterType: FilterType.OFormTemplateOnly })
-                        {
-                            return true;
-                        }
                         break;
                 }
                 break;
@@ -2183,7 +2173,7 @@ public class FileSecurity(IDaoFactory daoFactory,
             switch (s)
             {
                 case FileShare.Editing when canEdit:
-                case FileShare.FillForms when fileType is FileType.OForm or FileType.Pdf:
+                case FileShare.FillForms when fileType is FileType.Pdf:
                 case FileShare.CustomFilter when canCustomFiltering:
                 case FileShare.Comment when canComment:
                 case FileShare.Review when canReview:

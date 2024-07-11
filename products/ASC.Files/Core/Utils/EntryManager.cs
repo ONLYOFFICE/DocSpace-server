@@ -837,11 +837,10 @@ public class EntryManager(IDaoFactory daoFactory,
             case FilterType.PresentationsOnly:
             case FilterType.ImagesOnly:
             case FilterType.DocumentsOnly:
-            case FilterType.OFormOnly:
-            case FilterType.OFormTemplateOnly:
             case FilterType.ArchiveOnly:
             case FilterType.FilesOnly:
             case FilterType.MediaOnly:
+            case FilterType.Pdf:
                 where = f => f.FileEntryType == FileEntryType.File && (((File<T>)f).FilterType == filter || filter == FilterType.FilesOnly);
                 break;
             case FilterType.FoldersOnly:
