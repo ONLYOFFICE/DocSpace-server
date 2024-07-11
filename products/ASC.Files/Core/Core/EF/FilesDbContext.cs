@@ -50,6 +50,7 @@ public partial class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOp
     public DbSet<DbGroup> Groups { get; set; }
     public DbSet<UserGroup> UserGroup { get; set; }
     public DbSet<DbFilesAuditReference> FilesAuditReference { get; set; }
+    public DbSet<DbAuditEvent> AuditEvents { get; set; }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -75,6 +76,7 @@ public partial class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOp
             .AddDbGroup()
             .AddUserGroup()
             .AddFilesAuditReference()
+            .AddAuditEvent()
             .AddDbFunctions();
     }
 }

@@ -38,7 +38,7 @@ public class FilesControllerInternal(
     FileDtoHelper fileDtoHelper,
     ApiContext apiContext,
     FileShareDtoHelper fileShareDtoHelper,
-    HistoryApiHelper historyApiHelper)
+    HistoryService historyService)
     : FilesController<int>(filesControllerHelper,
         fileStorageService,
         fileOperationsManager,
@@ -63,7 +63,7 @@ public class FilesControllerInternal(
     [HttpGet("file/{fileId:int}/log")]
     public IAsyncEnumerable<HistoryDto> GetHistoryAsync(int fileId)
     {
-        return historyApiHelper.GetFileHistoryAsync(fileId);
+        return historyService.GetFileHistoryAsync(fileId);
     }
 }
 

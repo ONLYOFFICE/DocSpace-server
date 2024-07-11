@@ -84,8 +84,7 @@ public class AuditInterpreter(IServiceProvider serviceProvider)
     
     public ValueTask<HistoryEntry> ToHistoryAsync(DbAuditEvent @event)
     {
-        return !_interpreters.TryGetValue(@event.Action ?? -1, out var interpreter) 
-            ? ValueTask.FromResult<HistoryEntry>(null) 
-            : interpreter.InterpretAsync(@event, serviceProvider);
+        var interpreter = _interpreters.Get(@event.Action ?? -1);
+        return interpreter.InterpretAsync(@event, serviceProvider);
     }
 }

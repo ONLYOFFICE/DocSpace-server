@@ -24,60 +24,33 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.MessagingSystem.EF.Context;
-
 namespace ASC.Files.Core.Core.History;
 
 [Scope]
 public class HistoryService(
-    IDbContextFactory<MessagesContext> dbContextFactory, 
-    TenantManager tenantManager, 
-    IDaoFactory daoFactory, 
-    FileSecurity fileSecurity, 
-    AuditInterpreter interpreter)
+    HistoryStore historyStore,
+    HistoryDtoHelper historyDtoHelper,
+    ApiContext apiContext,
+    IDaoFactory daoFactory,
+    FileSecurity fileSecurity,
+    UserManager userManager,
+    AuthContext authContext)
 {
-    public static HashSet<MessageAction> TrackedActions => [
-        MessageAction.FileCreated, 
-        MessageAction.FileUploaded,
-        MessageAction.FileUploadedWithOverwriting,
-        MessageAction.UserFileUpdated, 
-        MessageAction.FileRenamed, 
-        MessageAction.FileMoved, 
-        MessageAction.FileMovedWithOverwriting, 
-        MessageAction.FileMovedToTrash, 
-        MessageAction.FileCopied, 
-        MessageAction.FileCopiedWithOverwriting, 
-        MessageAction.FileDeleted, 
-        MessageAction.FileConverted, 
-        MessageAction.FileRestoreVersion, 
-        MessageAction.FolderCreated,
-        MessageAction.FolderRenamed,
-        MessageAction.FolderMoved,
-        MessageAction.FolderMovedWithOverwriting,
-        MessageAction.FolderCopied,
-        MessageAction.FolderCopiedWithOverwriting,
-        MessageAction.FolderMovedToTrash,
-        MessageAction.FolderDeleted,
-        MessageAction.RoomCreateUser,
-        MessageAction.RoomUpdateAccessForUser,
-        MessageAction.RoomRemoveUser,
-        MessageAction.RoomGroupAdded,
-        MessageAction.RoomUpdateAccessForGroup,
-        MessageAction.RoomGroupRemove,
-        MessageAction.RoomCreated,
-        MessageAction.RoomRenamed,
-        MessageAction.AddedRoomTags,
-        MessageAction.DeletedRoomTags,
-        MessageAction.RoomLogoCreated,
-        MessageAction.RoomLogoDeleted,
-        MessageAction.RoomExternalLinkCreated,
-        MessageAction.RoomExternalLinkRenamed,
-        MessageAction.RoomExternalLinkDeleted,
-        MessageAction.RoomExternalLinkRevoked
-    ];
-    
-    public async IAsyncEnumerable<HistoryEntry> GetHistoryAsync(int entryId, FileEntryType entryType, int offset, int count)
+    public IAsyncEnumerable<HistoryDto> GetFileHistoryAsync(int fileId)
+    { 
+        return GetEntryHistoryAsync(fileId, FileEntryType.File);
+    }
+
+    public IAsyncEnumerable<HistoryDto> GetFolderHistoryAsync(int folderId)
     {
+        return GetEntryHistoryAsync(folderId, FileEntryType.Folder);
+    }
+    
+    private async IAsyncEnumerable<HistoryDto> GetEntryHistoryAsync(int entryId, FileEntryType entryType)
+    {
+        var offset = Convert.ToInt32(apiContext.StartIndex);
+        var count = Convert.ToInt32(apiContext.Count);
+        
         FileEntry<int> entry = entryType switch
         {
             FileEntryType.File => await daoFactory.GetFileDao<int>().GetFileAsync(entryId),
@@ -90,33 +63,47 @@ public class HistoryService(
             throw new ItemNotFoundException(entryType == FileEntryType.File 
                 ? FilesCommonResource.ErrorMessage_FileNotFound 
                 : FilesCommonResource.ErrorMessage_FolderNotFound
-                );
+            );
         }
-
+        
+        var roomTask = daoFactory.GetFolderDao<int>().GetFirstParentFromFileEntryAsync(entry);
+        
         if (!await fileSecurity.CanReadAsync(entry))
         {
             throw new SecurityException(entryType == FileEntryType.File 
                 ? FilesCommonResource.ErrorMessage_SecurityException_ReadFile 
                 : FilesCommonResource.ErrorMessage_SecurityException_ReadFolder
-                );
+            );
         }
         
-        var messageDbContext = await dbContextFactory.CreateDbContextAsync();
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var room = await roomTask;
+        var userId = authContext.CurrentAccount.ID;
+        
+        var excludeOtherUsersFilesEvents = 
+            room is { SettingsStealth: true } && 
+            entry.FileEntryType == FileEntryType.Folder && 
+            room.CreateBy != userId && 
+            !await userManager.IsDocSpaceAdminAsync(userId);
 
-        var events = messageDbContext.GetAuditEventsByReferences(tenantId, entryId, (byte)entryType, offset, count);
+        var totalCountTask = historyStore.GetHistoryTotalCountAsync(entry, excludeOtherUsersFilesEvents, userId); 
 
-        await foreach (var hEntry in events.SelectAwait(interpreter.ToHistoryAsync).Where(x => x != null))
+        var histories = historyStore.GetHistoryAsync(entry,excludeOtherUsersFilesEvents, userId, offset, count)
+            .GroupByAwait(x => ValueTask.FromResult(x.GetGroupId()),
+                async (_, group) =>
+                {
+                    var first = await historyDtoHelper.GetAsync(await group.FirstAsync());
+                    first.Related = await group.Skip(1).SelectAwait(async x => await historyDtoHelper.GetAsync(x)).ToListAsync();
+                    return first;
+                })
+            .OrderByDescending(x => x.Date);
+
+        var totalCount = await totalCountTask;
+        
+        apiContext.SetCount(Math.Min(Math.Max(totalCount - offset, 0), count)).SetTotalCount(totalCount);
+        
+        await foreach (var history in histories)
         {
-            yield return hEntry;
+            yield return history;
         }
-    }
-
-    public async Task<int> GetHistoryCountAsync(int entryId, FileEntryType entryType)
-    {
-        var messageDbContext = await dbContextFactory.CreateDbContextAsync();
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
-
-        return await messageDbContext.GetAuditEventsByReferencesTotalCount(tenantId, entryId, (byte)entryType);
     }
 }
