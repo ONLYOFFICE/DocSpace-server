@@ -405,13 +405,13 @@ public interface IFolderDao<T>
     /// <param name="entry"></param>
     /// <returns></returns>
     Task<(T RoomId, string RoomTitle)> GetParentRoomInfoFromFileEntryAsync(FileEntry<T> entry);
-    Task<FolderType> GetFirstParentTypeFromFileEntryAsync(FileEntry<T> entry);
+    Task<Folder<T>> GetFirstParentTypeFromFileEntryAsync(FileEntry<T> entry);
     Task<int> GetFoldersCountAsync(T parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool withSubfolders = false, bool excludeSubject = false,
         T roomId = default);
     Task<FilesStatisticsResultDto> GetFilesUsedSpace();
     Task SetCustomOrder(T folderId, T parentFolderId, int order);
 
-    Task InitCustomOrder(IEnumerable<T> folderIds, T parentFolderId);
+    Task InitCustomOrder(Dictionary<T, int> folderIds, T parentFolderId);
     Task<T> SetWatermarkSettings(WatermarkSettings waterMarks, Folder<T> folder);
     Task<WatermarkSettings> GetWatermarkSettings(Folder<T> room);
     Task<Folder<T>> DeleteWatermarkSettings(Folder<T> room);

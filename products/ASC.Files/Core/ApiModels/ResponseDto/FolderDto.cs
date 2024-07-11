@@ -144,6 +144,7 @@ public class FolderDtoHelper(
     {
         var result = await GetFolderWrapperAsync(folder);
 
+        result.FileEntryType = FileEntryType.Folder;
         result.ParentId = folder.ParentId;
 
         if (DocSpaceHelper.IsRoom(folder.FolderType))

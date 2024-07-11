@@ -1687,7 +1687,7 @@ internal class FileDao(
         await SetCustomOrder(filesDbContext, fileId, parentFolderId, order);
     }
     
-    public async Task InitCustomOrder(IEnumerable<int> fileIds, int parentFolderId)
+    public async Task InitCustomOrder(Dictionary<int, int> fileIds, int parentFolderId)
     {
         await InitCustomOrder(fileIds, parentFolderId, FileEntryType.File);
     }

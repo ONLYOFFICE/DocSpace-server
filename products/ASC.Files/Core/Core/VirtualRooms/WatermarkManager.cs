@@ -91,7 +91,14 @@ public class WatermarkManager
 
         if (!string.IsNullOrEmpty(watermarkRequestDto.ImageUrl))
         {
-            imageUrl = await _roomLogoManager.CreateWatermarkImageAsync(room, watermarkRequestDto.ImageUrl);
+            if(Uri.IsWellFormedUriString(watermarkRequestDto.ImageUrl, UriKind.Absolute))
+            {
+                imageUrl = watermarkRequestDto.ImageUrl;
+            }
+            else
+            {
+                imageUrl = await _roomLogoManager.CreateWatermarkImageAsync(room, watermarkRequestDto.ImageUrl);
+            }
         }
         else if (!Equals(watermarkRequestDto.ImageId, default(T)))
         {

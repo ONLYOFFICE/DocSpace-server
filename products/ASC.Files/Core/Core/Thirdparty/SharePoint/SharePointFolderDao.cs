@@ -447,7 +447,7 @@ internal class SharePointFolderDao(IServiceProvider serviceProvider,
             : (ProviderInfo.FolderId, ProviderInfo.CustomerTitle));
     }
 
-    public Task<FolderType> GetFirstParentTypeFromFileEntryAsync(FileEntry<string> entry)
+    public Task<Folder<string>> GetFirstParentTypeFromFileEntryAsync(FileEntry<string> entry)
     {
         throw new NotImplementedException();
     }
@@ -457,7 +457,7 @@ internal class SharePointFolderDao(IServiceProvider serviceProvider,
         return Task.CompletedTask;
     }
 
-    public Task InitCustomOrder(IEnumerable<string> folderIds, string parentFolderId)
+    public Task InitCustomOrder(Dictionary<string, int> folderIds, string parentFolderId)
     {
         return Task.CompletedTask;
     }

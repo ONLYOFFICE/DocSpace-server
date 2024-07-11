@@ -1626,20 +1626,15 @@ internal class FolderDao(
     {
         return AsyncEnumerable.Empty<Folder<int>>();
     }
-    public async Task<FolderType> GetFirstParentTypeFromFileEntryAsync(FileEntry<int> entry)
+    public async Task<Folder<int>> GetFirstParentTypeFromFileEntryAsync(FileEntry<int> entry)
     {
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var folderId = Convert.ToInt32(entry.ParentId);
 
-        var parentFolders = await Queries.ParentIdTypePairAsync(filesDbContext, folderId).ToListAsync();
-
-        if (parentFolders.Count > 1)
-    {
-            return parentFolders[1].FolderType;
-        }
-
-        return parentFolders[0].FolderType;
+        var parentFolder = await Queries.ParentIdTypePairAsync(filesDbContext, folderId);
+        
+        return mapper.Map<DbFolderQuery, Folder<int>>(parentFolder);
     }
 
     public Task<(int RoomId, string RoomTitle)> GetParentRoomInfoFromFileEntryAsync(FileEntry<int> entry)
@@ -1689,7 +1684,7 @@ internal class FolderDao(
         await SetCustomOrder(filesDbContext, folderId, parentFolderId, order);
     }
 
-    public async Task InitCustomOrder(IEnumerable<int> folderIds, int parentFolderId)
+    public async Task InitCustomOrder(Dictionary<int, int> folderIds, int parentFolderId)
     {
         await InitCustomOrder(folderIds, parentFolderId, FileEntryType.Folder);
     }
@@ -2509,14 +2504,23 @@ static file class Queries
                     .OrderByDescending(r => r.Tree.Level)
                     .Select(r => new ParentIdTitlePair { ParentId = r.Tree.ParentId, Title = r.Folders.Title }));
 
-    public static readonly Func<FilesDbContext, int, IAsyncEnumerable<ParentIdFolderTypePair>> ParentIdTypePairAsync =
+    public static readonly Func<FilesDbContext, int, Task<DbFolderQuery>> ParentIdTypePairAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int folderId) =>
                 ctx.Tree
                     .Join(ctx.Folders, r => r.ParentId, s => s.Id, (t, f) => new { Tree = t, Folders = f })
                     .Where(r => r.Tree.FolderId == folderId)
                     .OrderByDescending(r => r.Tree.Level)
-                    .Select(r => new ParentIdFolderTypePair { ParentId = r.Tree.ParentId, FolderType = r.Folders.FolderType }));
+                    .Select(r => new DbFolderQuery
+                    {
+                        Folder = r.Folders,
+                        Settings = (from f in ctx.RoomSettings
+                            where f.TenantId == r.Folders.TenantId && f.RoomId == r.Folders.Id
+                            select f)
+                            .FirstOrDefault()
+                    })
+                    .Skip(1)
+                    .FirstOrDefault());
 
     public static readonly Func<FilesDbContext, int, IEnumerable<FolderType>, IAsyncEnumerable<FolderTypeUsedSpacePair>> FolderTypeUsedSpaceAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

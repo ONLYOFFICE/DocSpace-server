@@ -637,7 +637,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
     {
         throw new NotImplementedException();
     }
-    public Task<FolderType> GetFirstParentTypeFromFileEntryAsync(FileEntry<string> entry)
+    public Task<Folder<string>> GetFirstParentTypeFromFileEntryAsync(FileEntry<string> entry)
     {
         throw new NotImplementedException();
     }
@@ -666,7 +666,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         return Task.CompletedTask;
     }
 
-    public Task InitCustomOrder(IEnumerable<string> folderIds, string parentFolderId)
+    public Task InitCustomOrder(Dictionary<string, int> folderIds, string parentFolderId)
     {
         return Task.CompletedTask;
     }

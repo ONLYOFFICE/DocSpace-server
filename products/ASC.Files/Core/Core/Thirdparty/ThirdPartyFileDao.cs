@@ -755,7 +755,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         return Task.CompletedTask;
     }
 
-    public Task InitCustomOrder(IEnumerable<string> fileIds, string parentFolderId)
+    public Task InitCustomOrder(Dictionary<string, int> fileIds, string parentFolderId)
     {
         return Task.CompletedTask;
     }
