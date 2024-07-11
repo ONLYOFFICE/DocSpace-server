@@ -739,4 +739,7 @@
   <data name="FileOpenedForChange" xml:space="preserve">
     <value>Файл, отворен за промяна: {0}</value>
   </data>
+  <data name="FileSizePostfix" xml:space="preserve">
+    <value>байта, KB, MB, GB, TB</value>
+  </data>
 </root>

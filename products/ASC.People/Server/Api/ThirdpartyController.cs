@@ -46,7 +46,7 @@ public class ThirdpartyController(
     UserManager userManager,
     StudioNotifyService studioNotifyService,
     TenantManager tenantManager,
-    InvitationLinkService invitationLinkService,
+    InvitationService invitationService,
     FileSecurity fileSecurity,
     UsersInRoomChecker usersInRoomChecker, 
     IDistributedLockProvider distributedLockProvider,
@@ -187,7 +187,7 @@ public class ThirdpartyController(
             throw new Exception(Resource.ErrorNotCorrectEmail);
         }
 
-        var linkData = await invitationLinkService.GetProcessedLinkDataAsync(inDto.Key, inDto.Email, inDto.EmployeeType ?? EmployeeType.RoomAdmin);
+        var linkData = await invitationService.GetInvitationDataAsync(inDto.Key, inDto.Email, inDto.EmployeeType ?? EmployeeType.RoomAdmin);
 
         if (!linkData.IsCorrect)
         {
@@ -203,9 +203,18 @@ public class ThirdpartyController(
 
             var invitedByEmail = linkData.LinkType == InvitationLinkType.Individual;
 
-            var newUser = await CreateNewUser(GetFirstName(inDto, thirdPartyProfile), GetLastName(inDto, thirdPartyProfile), GetEmailAddress(inDto, thirdPartyProfile), passwordHash, employeeType, true, invitedByEmail);
+            var newUser = await CreateNewUser(
+                GetFirstName(inDto, thirdPartyProfile), 
+                GetLastName(inDto, thirdPartyProfile), 
+                GetEmailAddress(inDto, thirdPartyProfile), 
+                passwordHash, 
+                employeeType, 
+                true, 
+                invitedByEmail,
+                inDto.Culture);
+            
             var messageAction = employeeType == EmployeeType.RoomAdmin ? MessageAction.UserCreatedViaInvite : MessageAction.GuestCreatedViaInvite;
-            await messageService.SendAsync(MessageInitiator.System, messageAction, MessageTarget.Create(newUser.Id), newUser.DisplayUserName(false, displayUserSettingsHelper));
+            await messageService.SendAsync(MessageInitiator.System, messageAction, MessageTarget.Create(newUser.Id), description: newUser.DisplayUserName(false, displayUserSettingsHelper));
             userId = newUser.Id;
             if (!string.IsNullOrEmpty(thirdPartyProfile.Avatar))
             {
@@ -232,7 +241,7 @@ public class ThirdpartyController(
 
         await userHelpTourHelper.SetIsNewUser(true);
 
-        if (linkData is { LinkType: InvitationLinkType.CommonWithRoom })
+        if (linkData is { LinkType: InvitationLinkType.CommonToRoom })
         {
             var success = int.TryParse(linkData.RoomId, out var id);
             var tenantId = await tenantManager.GetCurrentTenantIdAsync();
@@ -272,7 +281,7 @@ public class ThirdpartyController(
         await messageService.SendAsync(MessageAction.UserUnlinkedSocialAccount, GetMeaningfulProviderName(provider));
     }
 
-    private async Task<UserInfo> CreateNewUser(string firstName, string lastName, string email, string passwordHash, EmployeeType employeeType, bool fromInviteLink, bool inviteByEmail)
+    private async Task<UserInfo> CreateNewUser(string firstName, string lastName, string email, string passwordHash, EmployeeType employeeType, bool fromInviteLink, bool inviteByEmail, string cultureName)
     {
         if (SetupInfo.IsSecretEmail(email))
         {
@@ -294,7 +303,12 @@ public class ThirdpartyController(
         user.FirstName = string.IsNullOrEmpty(firstName) ? UserControlsCommonResource.UnknownFirstName : firstName;
         user.LastName = string.IsNullOrEmpty(lastName) ? UserControlsCommonResource.UnknownLastName : lastName;
         user.Email = email;
-
+        
+        if (coreBaseSettings.EnabledCultures.Find(c => string.Equals(c.Name, cultureName, StringComparison.InvariantCultureIgnoreCase)) != null)
+        {
+            user.CultureName = cultureName;
+        }
+        
         return await userManagerWrapper.AddUserAsync(user, passwordHash, true, true, employeeType, fromInviteLink, updateExising: inviteByEmail);
     }
 

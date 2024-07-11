@@ -29,15 +29,15 @@ using Role = ASC.Common.Security.Authorizing.Role;
 
 namespace ASC.Api.Core.Auth;
 
-[Scope]
-public class AuthHandler(IOptionsMonitor<AuthenticationSchemeOptions> options,
-        ILoggerFactory logger,
-        UrlEncoder encoder,
-        IConfiguration configuration,
-        ILogger<AuthHandler> log,
-        ApiSystemHelper apiSystemHelper,
-        MachinePseudoKeys machinePseudoKeys,
-        IHttpContextAccessor httpContextAccessor)
+public class AuthHandler(
+    IOptionsMonitor<AuthenticationSchemeOptions> options,
+    ILoggerFactory logger,
+    UrlEncoder encoder,
+    IConfiguration configuration,
+    ILogger<AuthHandler> log,
+    ApiSystemHelper apiSystemHelper,
+    MachinePseudoKeys machinePseudoKeys,
+    IHttpContextAccessor httpContextAccessor)
     : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
 {
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()

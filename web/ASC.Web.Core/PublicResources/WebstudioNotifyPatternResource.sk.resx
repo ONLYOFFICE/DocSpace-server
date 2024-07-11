@@ -1139,13 +1139,10 @@ $TrulyYours</value>
   <data name="ButtonAccept" xml:space="preserve">
     <value>Prijať</value>
   </data>
-  <data name="AcceptDocSpace" xml:space="preserve">
-    <value>AKCEPTOVAŤ</value>
-  </data>
-  <data name="ButtonCollaborateDocSpace" xml:space="preserve">
+  <data name="ButtonCollaborate" xml:space="preserve">
     <value>Spolupracujte v DocSpace</value>
   </data>
-  <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
+  <data name="ButtonConfirmInvite" xml:space="preserve">
     <value>Potvrdiť pozvánku do DocSpace</value>
   </data>
   <data name="ButtonConfirm" xml:space="preserve">
@@ -1328,7 +1325,7 @@ Viac informácií o postupe zálohovania nájdete v našej [Data backup](${__Hel
 Ak máte akékoľvek otázky alebo potrebujete pomoc, neváhajte nás kontaktovať na adrese [${__SupportLink}](${__SupportLink})
 
 S pozdravom,
-Tím podpory ONLYOFFICE™
+Tím podpory ONLYOFFICE
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
@@ -1422,6 +1419,7 @@ h1."$PortalUrl":"$PortalUrl"
 Váš portál bol prenesený na novú doménu. Prosím, zadajte heslo, ktoré sa bude používať na prihlásenie, aby ste obnovili svoj prístup k portálu.
 
 Prosím, prejdite na tento odkaz, aby ste nastavili svoje heslo pre účet:
+
 $OrangeButton
 
 *Poznámka*: tento odkaz je platný len 7 dní. Prosíme, aby ste v tomto termíne dokončili proces obnovenia prístupu.
@@ -1459,7 +1457,7 @@ Svoj portál môžete kedykoľvek opätovne aktivovať kliknutím na nasledujúc
 Ak máte akékoľvek otázky alebo potrebujete pomoc, neváhajte nás kontaktovať na adrese [${__SalesEmail}](mailto:${__SalesEmail})
 
 S pozdravom,
-Tím podpory ONLYOFFICE™
+Tím podpory ONLYOFFICE
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete_tg" xml:space="preserve">
@@ -1484,7 +1482,7 @@ _Upozornenie_: tento odkaz je platný len 7 dní. Prosím, dokončite dovtedy pr
 Ak máte akékoľvek otázky alebo potrebujete pomoc, neváhajte nás kontaktovať na adrese [${__SalesEmail}](mailto:${__SalesEmail})
 
 S pozdravom,
-Tím podpory ONLYOFFICE™
+Tím podpory ONLYOFFICE
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">

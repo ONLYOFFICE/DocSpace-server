@@ -26,7 +26,7 @@
 
 namespace ASC.Web.Files;
 
-[Singleton(Additional = typeof(UsersQuotaOperationExtension))]
+[Singleton]
 public class UsersQuotaSyncOperation(IServiceProvider serviceProvider, IDistributedTaskQueueFactory queueFactory)
 {
     public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "userQuotaOperation";
@@ -70,18 +70,11 @@ public class UsersQuotaSyncOperation(IServiceProvider serviceProvider, IDistribu
         }
 
         return progress;
-    }
 
-
-    public static class UsersQuotaOperationExtension
-    {
-        public static void Register(DIHelper services)
-        {
-            services.TryAdd<UsersQuotaSyncJob>();
-        }
     }
 }
 
+[Transient]
 public class UsersQuotaSyncJob(IServiceScopeFactory serviceScopeFactory, FilesSpaceUsageStatManager filesSpaceUsageStatManager) : DistributedTaskProgress
 {
     private int? _tenantId;

@@ -28,7 +28,6 @@ using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Migration.Core.Migrators;
 
-[Transient]
 public abstract class Migrator : IAsyncDisposable
 {
     protected SecurityContext SecurityContext { get; }
@@ -89,7 +88,7 @@ public abstract class Migrator : IAsyncDisposable
         UserManagerWrapper = userManagerWrapper;
     }
     
-    public abstract void Init(string path, CancellationToken cancellationToken, OperationType operation);
+    public abstract Task InitAsync(string path, CancellationToken cancellationToken, OperationType operation);
     public abstract Task<MigrationApiInfo> ParseAsync(bool reportProgress = true);
 
     protected async Task ReportProgressAsync(double value, string status)
@@ -184,14 +183,14 @@ public abstract class Migrator : IAsyncDisposable
         }
 
         MigrationInfo.FailedUsers = _failedUsers.Count;
-        MigrationInfo.SuccessedUsers = _usersForImport.Count() - MigrationInfo.FailedUsers;
+        MigrationInfo.SuccessedUsers = _usersForImport.Count - MigrationInfo.FailedUsers;
         await ReportProgressAsync(100, MigrationResource.MigrationCompleted);
     }
 
     private async Task MigrateUsersAsync()
     {
         var i = 1;
-        var progressStep = _usersForImport.Count() == 0 ? 30 : 30 / _usersForImport.Count();
+        var progressStep = !_usersForImport.Any() ? 30 : 30 / _usersForImport.Count;
         foreach (var kv in MigrationInfo.Users)
         {
             var key = kv.Key;
@@ -264,14 +263,8 @@ public abstract class Migrator : IAsyncDisposable
 
     private void DataСhange(MigrationUser user)
     {
-        if (user.Info.UserName == null)
-        {
-            user.Info.UserName = user.Info.Email.Split('@').First();
-        }
-        if (user.Info.LastName == null)
-        {
-            user.Info.LastName = user.Info.FirstName;
-        }
+        user.Info.UserName ??= user.Info.Email.Split('@').First();
+        user.Info.LastName ??= user.Info.FirstName;
     }
 
     private async Task MigrateGroupAsync()
@@ -329,7 +322,7 @@ public abstract class Migrator : IAsyncDisposable
 
     private async Task MigrateStorageAsync(MigrationStorage storage, MigrationUser user = null)
     {
-        if (!storage.ShouldImport || storage.Files.Count() == 0)
+        if (!storage.ShouldImport || storage.Files.Count == 0)
         {
             return;
         }
@@ -482,8 +475,8 @@ public abstract class Migrator : IAsyncDisposable
                         else
                         {
                             var users = UserManager.GetUsers(false, EmployeeStatus.Active,
-                                new List<List<Guid>> { new List<Guid> { MigrationInfo.Groups[security.Subject].Info.ID } },
-                                new List<Guid>(), new List<Tuple<List<List<Guid>>, List<Guid>>>(), null, null, null, "", false, "firstname",
+                                [[MigrationInfo.Groups[security.Subject].Info.ID]],
+                                [], [], null, null, null, "", false, "firstname",
                                 true, 100000, 0).Where(u => u.Id != user.Info.Id);
                             await foreach (var u in users)
                             {
@@ -532,7 +525,7 @@ public abstract class Migrator : IAsyncDisposable
                             {
                                 new AceWrapper
                                 {
-                                    Access = Files.Core.Security.FileShare.Collaborator,
+                                    Access = Files.Core.Security.FileShare.PowerUser,
                                     Id = user.Info.Id
                                 }
                             };

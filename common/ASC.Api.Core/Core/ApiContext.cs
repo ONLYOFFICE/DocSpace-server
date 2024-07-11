@@ -38,7 +38,7 @@ public class ApiContext : ICloneable
     {
         set
         {
-            _httpContextAccessor.HttpContext.Items[nameof(TotalCount)] = value;
+            _httpContextAccessor.HttpContext?.Items.TryAdd(nameof(TotalCount),  value);
         }
     }
 
@@ -187,7 +187,7 @@ public class ApiContext : ICloneable
 
     public ApiContext SetCount(int count)
     {
-        _httpContextAccessor.HttpContext.Items[nameof(Count)] = count;
+        _httpContextAccessor.HttpContext?.Items.TryAdd(nameof(Count), count);
 
         return this;
     }

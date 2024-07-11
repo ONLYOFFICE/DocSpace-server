@@ -26,7 +26,6 @@
 
 namespace ASC.Core;
 
-[Scope(typeof(CachedUserService))]
 public interface IUserService
 {
     Task<IEnumerable<UserInfo>> GetUsersAsync(int tenant);
@@ -64,13 +63,11 @@ public interface IUserService
     Task<Group> GetGroupAsync(int tenant, Guid id);
     Task<Group> SaveGroupAsync(int tenant, Group group);
     Task<IDictionary<string, UserGroupRef>> GetUserGroupRefsAsync(int tenant);
-    IDictionary<string, UserGroupRef> GetUserGroupRefs(int tenant);
     Task<IEnumerable<Group>> GetGroupsAsync(int tenant);
     IAsyncEnumerable<Group> GetGroupsAsync(int tenant, string text, Guid userId, bool manager, GroupSortType sortBy, bool sortOrderAsc, int offset = 0, int count = -1);
     Task<int> GetGroupsCountAsync(int tenant, string text, Guid userId, bool manager);
     Task<IEnumerable<UserInfo>> GetUsersAllTenantsAsync(IEnumerable<Guid> userIds);
     Task<UserGroupRef> GetUserGroupRefAsync(int tenant, Guid groupId, UserGroupRefType refType);
-    UserGroupRef GetUserGroupRef(int tenant, Guid groupId, UserGroupRefType refType);
     Task<UserGroupRef> SaveUserGroupRefAsync(int tenant, UserGroupRef r);
     Task<UserInfo> GetUserAsync(int tenant, Guid id);
     UserInfo GetUser(int tenant, Guid id);
@@ -79,7 +76,6 @@ public interface IUserService
     Task<UserInfo> GetUserByPasswordHashAsync(int tenant, string login, string passwordHash);
     Task<UserInfo> GetUserByUserName(int tenant, string userName);
     Task<UserInfo> SaveUserAsync(int tenant, UserInfo user);
-    Task<IEnumerable<int>> GetTenantsWithFeedsAsync(DateTime from);
     Task RemoveGroupAsync(int tenant, Guid id);
     Task RemoveUserAsync(int tenant, Guid id, bool immediate = false);
     Task<IEnumerable<string>> GetDavUserEmailsAsync(int tenant);

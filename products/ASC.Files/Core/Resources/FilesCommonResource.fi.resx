@@ -257,7 +257,7 @@
     <value>Asiakirjat</value>
   </data>
   <data name="ProductUserOpportunities" xml:space="preserve">
-    <value>Luo ja muokkaa omia ja yhteisiä asiakirjoja sopivilla käyttöoikeuksilla|Myönnä muille käyttäjille asiakirjojen ja kansioiden luku- ja muokkausoikeuksia|Yhdistä Dropbox, Box ja muita pilvipalveluita/tilejä 'Omat Asiakirjat'  -osiossa</value>
+    <value>Luo ja muokkaa omia ja yhteisiä asiakirjoja sopivilla käyttöoikeuksilla|Myönnä muille käyttäjille asiakirjojen ja kansioiden luku- ja muokkausoikeuksia|Yhdistä Dropbox, Box ja muita pilvipalveluita/tilejä 'Asiakirjat'  -osiossa</value>
   </data>
   <data name="UnknownFirstName" xml:space="preserve">
     <value>Etunimi</value>

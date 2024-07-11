@@ -30,8 +30,7 @@ namespace ASC.Files;
 
 public class Startup : BaseStartup
 {
-    public Startup(IConfiguration configuration, IHostEnvironment hostEnvironment)
-        : base(configuration, hostEnvironment)
+    public Startup(IConfiguration configuration) : base(configuration)
     {
         WebhooksEnabled = true;
 
@@ -49,28 +48,13 @@ public class Startup : BaseStartup
 
         await base.ConfigureServices(services);
 
-        services.RegisterQueue();
-
-        DIHelper.TryAdd<FileHandlerService>();
-        DIHelper.TryAdd<ChunkedUploaderHandlerService>();
-        DIHelper.TryAdd<DocuSignHandlerService>();
-        DIHelper.TryAdd<DistributedTaskProgress>();
-        DIHelper.TryAdd<DocumentBuilderTask<int>>();
-
-        NotifyConfigurationExtension.Register(DIHelper);
-
+        services.Configure<DistributedTaskQueueFactoryOptions>(FileOperationsManagerHolder.CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME, x =>
+        {
+            x.MaxThreadsCount = 10;
+        });
+        
         services.AddBaseDbContextPool<FilesDbContext>();
-
-        services.AddScoped<ITenantQuotaFeatureChecker, CountRoomChecker>();
-        services.AddScoped<CountRoomChecker>();
-
-        services.AddScoped<ITenantQuotaFeatureStat<CountRoomFeature, int>, CountRoomCheckerStatistic>();
-        services.AddScoped<CountRoomCheckerStatistic>();
-
-        services.AddScoped<UsersInRoomChecker>();
-
-        services.AddScoped<ITenantQuotaFeatureStat<UsersInRoomFeature, int>, UsersInRoomStatistic>();
-        services.AddScoped<UsersInRoomStatistic>();
+        services.RegisterQuotaFeature();
         services.AddScoped<IWebItem, ProductEntryPoint>();
         services.AddDocumentServiceHttpClient();
     }

@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using DriveFile = Google.Apis.Drive.v3.Data.File;
-
 namespace ASC.Files.Core.Core.Thirdparty;
 
 internal abstract class AbstractProviderInfo<TFile, TFolder, TItem, TProvider>(DisposableWrapper wrapper,
@@ -289,7 +287,7 @@ public class ProviderInfoHelper
     }
 }
 
-[Transient(Additional = typeof(DisposableWrapperExtension))]
+[Transient]
 public class DisposableWrapper(IServiceProvider serviceProvider, OAuth20TokenHelper oAuth20TokenHelper)
     : IDisposable
 {
@@ -364,17 +362,5 @@ public class DisposableWrapper(IServiceProvider serviceProvider, OAuth20TokenHel
         _storages.TryAdd(id, storage);
 
         return storage;
-    }
-}
-
-public static class DisposableWrapperExtension
-{
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<IThirdPartyStorage<BoxFile, BoxFolder, BoxItem>, BoxStorage>();
-        services.TryAdd<IThirdPartyStorage<FileMetadata, FolderMetadata, Metadata>, DropboxStorage>();
-        services.TryAdd<IThirdPartyStorage<DriveFile, DriveFile, DriveFile>, GoogleDriveStorage>();
-        services.TryAdd<IThirdPartyStorage<Item, Item, Item>, OneDriveStorage>();
-        services.TryAdd<IThirdPartyStorage<WebDavEntry, WebDavEntry, WebDavEntry>, WebDavStorage>();
     }
 }

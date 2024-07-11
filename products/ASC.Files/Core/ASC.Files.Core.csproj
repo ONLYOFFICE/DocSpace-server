@@ -15,9 +15,9 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Box.V2.Core" Version="5.7.0" />
-    <PackageReference Include="DocuSign.eSign.dll" Version="6.8.0" />
-    <PackageReference Include="Dropbox.Api" Version="6.37.0" />
-    <PackageReference Include="Google.Apis.Drive.v3" Version="1.67.0.3373" />
+    <PackageReference Include="DocuSign.eSign.dll" Version="6.9.0" />
+    <PackageReference Include="Dropbox.Api" Version="7.0.0" />
+    <PackageReference Include="Google.Apis.Drive.v3" Version="1.68.0.3428" />
     <PackageReference Include="Joonasw.AspNetCore.SecurityHeaders" Version="5.0.0" />
     <PackageReference Include="Microsoft.OneDriveSDK" Version="2.1.0" />
     <PackageReference Include="Microsoft.SharePoint.Client" Version="14.0.4762.1000" />
@@ -113,6 +113,9 @@
       <DependentUpon>FilesPatternResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="Services\NotifyService\FilesPatternResource.sl.resx">
+      <DependentUpon>FilesPatternResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Services\NotifyService\FilesPatternResource.sr-Cyrl-RS.resx">
       <DependentUpon>FilesPatternResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="Services\NotifyService\FilesPatternResource.sr-Latn-RS.resx">
@@ -231,6 +234,9 @@
     <EmbeddedResource Update="Resources\FilesCommonResource.sl.resx">
       <DependentUpon>FilesCommonResource.resx</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Update="Resources\FilesCommonResource.sr-Cyrl-RS.resx">
+      <DependentUpon>FilesCommonResource.resx</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Update="Resources\FilesCommonResource.sr-Latn-RS.resx">
       <DependentUpon>FilesCommonResource.resx</DependentUpon>
     </EmbeddedResource>
@@ -314,6 +320,9 @@
       <DependentUpon>FilesJSResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\FilesJSResource.sl.resx">
+      <DependentUpon>FilesJSResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\FilesJSResource.sr-Cyrl-RS.resx">
       <DependentUpon>FilesJSResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\FilesJSResource.sr-Latn-RS.resx">
@@ -402,6 +411,9 @@
       <DependentUpon>FilesUCResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\FilesUCResource.sl.resx">
+      <DependentUpon>FilesUCResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\FilesUCResource.sr-Cyrl-RS.resx">
       <DependentUpon>FilesUCResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\FilesUCResource.sr-Latn-RS.resx">

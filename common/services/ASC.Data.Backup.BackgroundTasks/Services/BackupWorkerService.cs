@@ -27,16 +27,17 @@
 namespace ASC.Data.Backup.BackgroundTasks;
 
 [Singleton]
-internal sealed class BackupWorkerService(BackupWorker backupWorker,
-        ConfigurationExtension configuration,
-        NotifyConfiguration notifyConfiguration)
+internal sealed class BackupWorkerService(
+    BackupWorker backupWorker,
+    IConfiguration configuration,
+    NotifyConfiguration notifyConfiguration)
     : IHostedService
-    {
+{
     public Task StartAsync(CancellationToken cancellationToken)
     {
         notifyConfiguration.Configure();
 
-        var settings = configuration.GetSetting<BackupSettings>("backup");
+        var settings = configuration.GetSection("backup").Get<BackupSettings>();
 
         backupWorker.Start(settings);
 

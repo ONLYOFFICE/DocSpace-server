@@ -155,7 +155,7 @@ public class MessageSettingsController(MessageService messageService,
 
         CheckCache("sendadmmail");
 
-        await studioNotifyService.SendMsgToAdminFromNotAuthUserAsync(inDto.Email, message);
+        await studioNotifyService.SendMsgToAdminFromNotAuthUserAsync(inDto.Email, message, inDto.Culture);
         await messageService.SendAsync(MessageAction.ContactAdminMailSent);
 
         return Resource.AdminMessageSent;
@@ -226,7 +226,7 @@ public class MessageSettingsController(MessageService messageService,
                         var address = new MailAddress(email);
                         if (tenant.TrustedDomains.Any(d => address.Address.EndsWith("@" + d.Replace("*", ""), StringComparison.InvariantCultureIgnoreCase)))
                         {
-                            await studioNotifyService.SendJoinMsgAsync(email, emplType);
+                            await studioNotifyService.SendJoinMsgAsync(email, emplType, inDto.Culture);
                             await messageService.SendAsync(MessageInitiator.System, MessageAction.SentInviteInstructions, email);
                             return Resource.FinishInviteJoinEmailMessage;
                         }
@@ -235,7 +235,7 @@ public class MessageSettingsController(MessageService messageService,
                     }
                 case TenantTrustedDomainsType.All:
                     {
-                        await studioNotifyService.SendJoinMsgAsync(email, emplType);
+                        await studioNotifyService.SendJoinMsgAsync(email, emplType, inDto.Culture);
                         await messageService.SendAsync(MessageInitiator.System, MessageAction.SentInviteInstructions, email);
                         return Resource.FinishInviteJoinEmailMessage;
                     }

@@ -136,7 +136,7 @@ public class FolderDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime)
     {
 
-    public async Task<FolderDto<T>> GetAsync<T>(Folder<T> folder, List<FileShareRecord> currentUserRecords = null, string order = null)
+    public async Task<FolderDto<T>> GetAsync<T>(Folder<T> folder, List<FileShareRecord<string>> currentUserRecords = null, string order = null)
     {
         var result = await GetFolderWrapperAsync(folder);
 
@@ -179,10 +179,10 @@ public class FolderDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
             }
             else
             {
-                currentUserRecords ??= await _fileSecurity.GetUserRecordsAsync<T>().ToListAsync();
+                currentUserRecords ??= await _fileSecurity.GetUserRecordsAsync().ToListAsync();
 
-                result.InRoom = currentUserRecords.Exists(c => c.EntryId.Equals(folder.Id) && c.SubjectType == SubjectType.User)
-                    && !currentUserRecords.Exists(c => c.EntryId.Equals(folder.Id) && c.SubjectType == SubjectType.Group);
+                result.InRoom = currentUserRecords.Exists(c => c.EntryId.Equals(folder.Id.ToString()) && c.SubjectType == SubjectType.User) && 
+                                !currentUserRecords.Exists(c => c.EntryId.Equals(folder.Id.ToString()) && c.SubjectType == SubjectType.Group);
             }
 
             if ((coreBaseSettings.Standalone || (await tenantManager.GetCurrentTenantQuotaAsync()).Statistic) && 
@@ -205,7 +205,7 @@ public class FolderDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
             result.Order = !string.IsNullOrEmpty(order) ? string.Join('.', order, folder.Order) : folder.Order.ToString();
         }
 
-        if (folder.FolderType is FolderType.InProcessFormFolder or FolderType.ReadyFormFolder or FolderType.FormFillingFolderDone or FolderType.FormFillingFolderInProgress)
+        if (DocSpaceHelper.IsFormsFillingSystemFolder(folder.FolderType))
         {
             result.Type = folder.FolderType;
         }

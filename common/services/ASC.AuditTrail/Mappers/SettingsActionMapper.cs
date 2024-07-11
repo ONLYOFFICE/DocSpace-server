@@ -45,7 +45,7 @@ internal class GeneralActionMapper : IModuleActionMapper
     public GeneralActionMapper()
     {
         Module = ModuleType.General;
-        var productType = ProductType.Settings;
+        const ProductType productType = ProductType.Settings;
         Actions = new MessageMapsDictionary(productType, Module)
         {
             {
@@ -72,9 +72,9 @@ internal class ProductsActionMapper : IModuleActionMapper
     public ProductsActionMapper()
     {
         Module = ModuleType.Products;
-        var productType = ProductType.Projects;
+        const ProductType productType = ProductType.Settings;
 
-        Actions = new MessageMapsDictionary(ProductType.Projects, Module)
+        Actions = new MessageMapsDictionary(ProductType.Settings, Module)
         {
             {
                 ActionType.Update, new[]
@@ -88,7 +88,8 @@ internal class ProductsActionMapper : IModuleActionMapper
                     MessageAction.StartBackupSetting,MessageAction.LicenseKeyUploaded, MessageAction.StartStorageEncryption,
                     MessageAction.StartStorageDecryption, MessageAction.CookieSettingsUpdated,  MessageAction.MailServiceSettingsUpdated,
                     MessageAction.CustomNavigationSettingsUpdated,MessageAction.AuditSettingsUpdated,MessageAction.PrivacyRoomEnable,
-                    MessageAction.PrivacyRoomDisable
+                    MessageAction.PrivacyRoomDisable, 
+                    MessageAction.QuotaPerRoomChanged, MessageAction.QuotaPerRoomDisabled, MessageAction.QuotaPerUserChanged, MessageAction.QuotaPerUserDisabled, MessageAction.QuotaPerPortalChanged, MessageAction.QuotaPerPortalDisabled
                 }
             },
             {

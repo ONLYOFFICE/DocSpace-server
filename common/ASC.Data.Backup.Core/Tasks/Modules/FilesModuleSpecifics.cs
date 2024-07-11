@@ -121,6 +121,13 @@ public class FilesModuleSpecifics(ILogger<ModuleProvider> logger, Helpers helper
 
     public override void PrepareData(DataTable data)
     {
+        if(data.TableName == "files_file")
+        {
+            for (var i = 0; i < data.Rows.Count; i++)
+            {
+                data.Rows[i]["thumb"] = "0";
+            }
+        }
         if (data.TableName == "files_thirdparty_account")
         {
             var providerColumn = data.Columns.Cast<DataColumn>().Single(c => c.ColumnName == "provider");
@@ -181,7 +188,7 @@ public class FilesModuleSpecifics(ILogger<ModuleProvider> logger, Helpers helper
                 return (false, null);
             }
 
-            var hashBytes = MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(sboxId));
+            var hashBytes = MD5.HashData(Encoding.UTF8.GetBytes(sboxId));
             var hashedId = BitConverter.ToString(hashBytes).Replace("-", "").ToLower();
 
             preparedRow.Add("hash_id", hashedId);

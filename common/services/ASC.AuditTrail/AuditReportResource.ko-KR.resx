@@ -798,4 +798,7 @@
   <data name="PortalRenamed" xml:space="preserve">
     <value>포털 이름이 변경되었습니다</value>
   </data>
+  <data name="FileSizePostfix" xml:space="preserve">
+    <value>bytes,KB,MB,GB</value>
+  </data>
 </root>

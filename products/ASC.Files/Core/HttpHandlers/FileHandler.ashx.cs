@@ -162,7 +162,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
         }
         else
         {
-            filename = instanceCrypto.Decrypt(Uri.UnescapeDataString(filename));
+            filename = await instanceCrypto.DecryptAsync(Uri.UnescapeDataString(filename));
         }
 
         string path;
@@ -519,8 +519,8 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
         var flushed = false;
         while (toRead > 0)
         {
-            var length = await fileStream.ReadAsync(buffer, 0, bufferSize);
-            await context.Response.Body.WriteAsync(buffer, 0, length, context.RequestAborted);
+            var length = await fileStream.ReadAsync(buffer.AsMemory(0, bufferSize));
+            await context.Response.Body.WriteAsync(buffer.AsMemory(0, length), context.RequestAborted);
             await context.Response.Body.FlushAsync();
             flushed = true;
             toRead -= length;
@@ -657,9 +657,11 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             
             long offset = 0;
             var length = ProcessRangeHeader(context, fullLength, ref offset);
-            var stream = await fileDao.GetFileStreamAsync(file, offset, length);
-            
-            await SendStreamByChunksAsync(context, length, offset, fullLength, file.Title, stream);
+
+            await using (var stream = await fileDao.GetFileStreamAsync(file, offset, length))
+            {
+                await SendStreamByChunksAsync(context, length, offset, fullLength, file.Title, stream);
+            }
         }
         catch (Exception ex)
         {
@@ -1216,7 +1218,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
         context.Response.Redirect(
             (context.Request.Query["openfolder"].FirstOrDefault() ?? "").Equals("true")
                     ? await pathProvider.GetFolderUrlByIdAsync(file.ParentId)
-                    : (filesLinkUtility.GetFileWebEditorUrl(file.Id) + "#message/" + HttpUtility.UrlEncode(string.Format(FilesCommonResource.MessageFileCreated, folder.Title))));
+                    : (filesLinkUtility.GetFileWebEditorUrl(file.Id) + "&message=" + HttpUtility.UrlEncode(string.Format(FilesCommonResource.MessageFileCreated, folder.Title))));
     }
 
     private async Task WriteError(HttpContext context, Exception ex, bool responseMessage)
@@ -1228,7 +1230,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             await context.Response.WriteAsync("error: " + ex.Message);
             return;
         }
-        context.Response.Redirect(PathProvider.StartURL + "#error/" + HttpUtility.UrlEncode(ex.Message), true);
+        context.Response.Redirect($"{filesLinkUtility.GetFileWebEditorUrl("")}&error={HttpUtility.UrlEncode(ex.Message)}", true);
     }
 
     private async Task WriteOk<T>(HttpContext context, Folder<T> folder, File<T> file)
@@ -1317,10 +1319,19 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             return await fileDao.SaveFileAsync(file, fileStream);
         }
 
-        await using var buffered = await tempStream.GetBufferedAsync(fileStream);
-        file.ContentLength = buffered.Length;
-        return await fileDao.SaveFileAsync(file, buffered);
-
+        var (buffered, isNew) = await tempStream.TryGetBufferedAsync(fileStream);
+        try
+        {
+            file.ContentLength = buffered.Length;
+            return await fileDao.SaveFileAsync(file, buffered);
+        }
+        finally
+        {
+            if (isNew)
+            {
+                await buffered.DisposeAsync();
+            }
+        }
 
     }
 

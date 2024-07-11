@@ -817,9 +817,6 @@ $TrulyYours</value>
   <data name="subject_enterprise_admin_activation_v1" xml:space="preserve">
     <value>Καλώς ήλθατε στο ONLYOFFICE DocSpace!</value>
   </data>
-  <data name="AcceptDocSpace" xml:space="preserve">
-    <value>ΑΠΟΔΟΧΉ</value>
-  </data>
   <data name="ButtonConfirmEmail" xml:space="preserve">
     <value>ΕΠΙΒΕΒΑΊΩΣΗ</value>
   </data>
@@ -1027,13 +1024,13 @@ $TrulyYours</value>
   <data name="ButtonChangeTfa" xml:space="preserve">
     <value>Διαμορφώστε την εφαρμογή αυθεντικοποίησης</value>
   </data>
-  <data name="ButtonCollaborateDocSpace" xml:space="preserve">
+  <data name="ButtonCollaborate" xml:space="preserve">
     <value>Συνεργαστείτε στο DocSpace</value>
   </data>
   <data name="ButtonConfigureRightNow" xml:space="preserve">
     <value>Κάντε διαμόρφωση τώρα</value>
   </data>
-  <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
+  <data name="ButtonConfirmInvite" xml:space="preserve">
     <value>Επιβεβαίωση πρόσκλησης στο DocSpace</value>
   </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
@@ -1100,7 +1097,7 @@ $TrulyYours</value>
 Εάν έχετε οποιεσδήποτε ερωτήσεις ή χρειάζεστε βοήθεια, μη διστάσετε να επικοινωνήσετε μαζί μας στο [${__SupportLink}](${__SupportLink})
 
 Με εκτίμηση,
-Η ομάδα υποστήριξης του ONLYOFFICE™
+Η ομάδα υποστήριξης του ONLYOFFICE
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
@@ -1271,6 +1268,7 @@ h1."$PortalUrl":"$PortalUrl"
 Η πύλη σας έχει μεταφερθεί σε νέο τομέα. Επαναφέρετε την πρόσβασή σας στην πύλη καθορίζοντας τον κωδικό πρόσβασης που θα χρησιμοποιηθεί για την είσοδο.
 
 Ακολουθήστε τον παρακάτω σύνδεσμο για να ορίσετε τον κωδικό πρόσβασης για τον λογαριασμό σας:
+
 $OrangeButton
 
 *Σημείωση*: αυτός ο σύνδεσμος ισχύει μόνο για 7 ημέρες. Παρακαλείστε να ολοκληρώσετε τη διαδικασία επαναφοράς της πρόσβασης εντός αυτής της περιόδου.
@@ -1326,7 +1324,7 @@ _Σημείωση_: αυτός ο σύνδεσμος ισχύει μόνο γι�
 Εάν έχετε οποιεσδήποτε ερωτήσεις ή χρειάζεστε βοήθεια, μπορείτε να επικοινωνήσετε μαζί μας στο [${__SalesEmail}](mailto:${__SalesEmail})
 
 Με εκτίμηση,
-Η ομάδα υποστήριξης του ONLYOFFICE™
+Η ομάδα υποστήριξης του ONLYOFFICE
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
@@ -1374,7 +1372,7 @@ _Σημείωση_: αυτός ο σύνδεσμος ισχύει μόνο γι�
 Εάν έχετε οποιεσδήποτε ερωτήσεις ή χρειάζεστε βοήθεια, μη διστάσετε να επικοινωνήσετε μαζί μας στο [${__SalesEmail}](mailto:${__SalesEmail})
 
 Με εκτίμηση,
-Η ομάδα υποστήριξης του ONLYOFFICE™
+Η ομάδα υποστήριξης του ONLYOFFICE
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_rename" xml:space="preserve">

@@ -41,7 +41,8 @@ public class OwnerController(
     WebItemManager webItemManager,
     DisplayUserSettingsHelper displayUserSettingsHelper,
     IMemoryCache memoryCache,
-    IHttpContextAccessor httpContextAccessor)
+    IHttpContextAccessor httpContextAccessor,
+    IUrlShortener urlShortener)
     : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
@@ -75,7 +76,7 @@ public class OwnerController(
         }
 
         var confirmLink = await commonLinkUtility.GetConfirmationEmailUrlAsync(owner.Email, ConfirmType.PortalOwnerChange, newOwner.Id, newOwner.Id);
-        await studioNotifyService.SendMsgConfirmChangeOwnerAsync(owner, newOwner, confirmLink);
+        await studioNotifyService.SendMsgConfirmChangeOwnerAsync(owner, newOwner, await urlShortener.GetShortenLinkAsync(confirmLink));
 
         await messageService.SendAsync(MessageAction.OwnerSentChangeOwnerInstructions, MessageTarget.Create(owner.Id), owner.DisplayUserName(false, displayUserSettingsHelper));
 

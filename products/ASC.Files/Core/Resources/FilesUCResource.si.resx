@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="MyFiles" xml:space="preserve">
-    <value>මාගේ ලේඛන</value>
+    <value>ලේඛන</value>
   </data>
   <data name="SharedForMe" xml:space="preserve">
     <value>මා සමඟ බෙදාගත්</value>

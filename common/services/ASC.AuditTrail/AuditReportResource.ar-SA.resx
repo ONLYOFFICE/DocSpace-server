@@ -798,4 +798,7 @@
   <data name="PortalRenamed" xml:space="preserve">
     <value>تمت إعادة تسمية البوابة</value>
   </data>
+  <data name="FileSizePostfix" xml:space="preserve">
+    <value>بايت، كيلوبايت، ميجابايت، جيجابايت، تيرابايت</value>
+  </data>
 </root>

@@ -24,26 +24,25 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using File = Microsoft.SharePoint.Client.File;
 using Folder = Microsoft.SharePoint.Client.Folder;
 
 namespace ASC.Files.Thirdparty.SharePoint;
 
 [Scope]
-internal class SharePointFileDao(IServiceProvider serviceProvider,
-        UserManager userManager,
-        TenantManager tenantManager,
-        TenantUtil tenantUtil,
-        IDbContextFactory<FilesDbContext> dbContextManager,
-        SetupInfo setupInfo,
-        FileUtility fileUtility,
-        CrossDao crossDao,
-        SharePointDaoSelector sharePointDaoSelector,
-        IFileDao<int> fileDao,
-        TempPath tempPath,
-        RegexDaoSelectorBase<File, Folder, ClientObject> regexDaoSelectorBase)
-    : SharePointDaoBase(serviceProvider, userManager, tenantManager, tenantUtil, dbContextManager, setupInfo,
-        fileUtility, tempPath, regexDaoSelectorBase), IFileDao<string>
+internal class SharePointFileDao(
+    IDaoFactory daoFactory,
+    IServiceProvider serviceProvider,
+    UserManager userManager,
+    TenantManager tenantManager,
+    TenantUtil tenantUtil,
+    IDbContextFactory<FilesDbContext> dbContextManager,
+    FileUtility fileUtility,
+    CrossDao crossDao,
+    SharePointDaoSelector sharePointDaoSelector,
+    IFileDao<int> fileDao,
+    SharePointDaoSelector regexDaoSelectorBase,
+    Global global)
+    : SharePointDaoBase(daoFactory, serviceProvider, userManager, tenantManager, tenantUtil, dbContextManager, fileUtility, regexDaoSelectorBase), IFileDao<string>
 {
     private const string BytesTransferredKey = "BytesTransferred";
     
@@ -308,6 +307,11 @@ internal class SharePointFileDao(IServiceProvider serviceProvider,
         return Task.FromResult(false);
     }
 
+    public async Task<File<string>> SaveFileAsync(File<string> file, Stream fileStream, bool checkFolder)
+    {
+        return await SaveFileAsync(file, fileStream);
+    }
+
     public async Task<File<string>> SaveFileAsync(File<string> file, Stream fileStream)
     {
         ArgumentNullException.ThrowIfNull(fileStream);
@@ -320,7 +324,7 @@ internal class SharePointFileDao(IServiceProvider serviceProvider,
             if (!sharePointFile.Name.Equals(file.Title))
             {
                 var folder = await SharePointProviderInfo.GetFolderByIdAsync(file.ParentId);
-                file.Title = await GetAvailableTitleAsync(file.Title, folder, IsExistAsync);
+                file.Title = await global.GetAvailableTitleAsync(file.Title, folder.ServerRelativeUrl, IsExistAsync);
 
                 var id = await SharePointProviderInfo.RenameFileAsync(DaoSelector.ConvertId(resultFile.Id), file.Title);
 
@@ -333,7 +337,7 @@ internal class SharePointFileDao(IServiceProvider serviceProvider,
         if (file.ParentId != null)
         {
             var folder = await SharePointProviderInfo.GetFolderByIdAsync(file.ParentId);
-            file.Title = await GetAvailableTitleAsync(file.Title, folder, IsExistAsync);
+            file.Title = await global.GetAvailableTitleAsync(file.Title, folder.ServerRelativeUrl, IsExistAsync);
 
             return SharePointProviderInfo.ToFile(await SharePointProviderInfo.CreateFileAsync(folder.ServerRelativeUrl + "/" + file.Title, fileStream));
 
@@ -355,19 +359,13 @@ internal class SharePointFileDao(IServiceProvider serviceProvider,
         await SharePointProviderInfo.DeleteFileAsync(fileId);
     }
 
-    public async Task<bool> IsExistAsync(string title, object folderId)
+    public async Task<bool> IsExistAsync(string title, string folderId)
     {
         var files = await SharePointProviderInfo.GetFolderFilesAsync(folderId);
 
         return files.Any(item => item.Name.Equals(title, StringComparison.InvariantCultureIgnoreCase));
     }
-
-    public async Task<bool> IsExistAsync(string title, Folder folder)
-    {
-        var files = await SharePointProviderInfo.GetFolderFilesAsync(folder.ServerRelativeUrl);
-
-        return files.Any(item => item.Name.Equals(title, StringComparison.InvariantCultureIgnoreCase));
-    }
+    
 
     public async Task<TTo> MoveFileAsync<TTo>(string fileId, TTo toFolderId, bool deleteLinks = false)
     {

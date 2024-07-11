@@ -121,6 +121,18 @@ public class ConnectionsController(
             if (loginEvent != null)
             {
                 listLoginEvents.Remove(loginEvent);
+
+                if (httpContextAccessor.HttpContext != null)
+                {
+                    var baseEvent = await GetBaseEvent();
+
+                    loginEvent.Platform = baseEvent.Platform;
+                    loginEvent.Browser = baseEvent.Browser;
+                    loginEvent.IP = baseEvent.IP;
+                    loginEvent.City = baseEvent.City;
+                    loginEvent.Country = baseEvent.Country;
+                }
+
                 listLoginEvents.Insert(0, loginEvent);
             }
         }
@@ -128,23 +140,9 @@ public class ConnectionsController(
         {
             if (listLoginEvents.Count == 0 && httpContextAccessor.HttpContext != null)
             {
-                var request = httpContextAccessor.HttpContext.Request;
-                var uaHeader = MessageSettings.GetUAHeader(request);
-                var clientInfo = MessageSettings.GetClientInfo(uaHeader);
-                var platformAndDevice = MessageSettings.GetPlatformAndDevice(clientInfo);
-                var browser = MessageSettings.GetBrowser(clientInfo);
-                var ip = MessageSettings.GetIP(request);
+                var baseEvent = await GetBaseEvent();
 
-                var baseEvent = new BaseEvent
-                {
-                    Id = 0,
-                    Platform = platformAndDevice,
-                    Browser = browser,
-                    Date = DateTime.Now,
-                    IP = ip
-                };
-
-                listLoginEvents.Add(await geolocationHelper.AddGeolocationAsync(baseEvent));
+                listLoginEvents.Add(baseEvent);
             }
         }
 
@@ -167,6 +165,26 @@ public class ConnectionsController(
 
             }).ToList()
         };
+
+        async Task<BaseEvent> GetBaseEvent()
+        {
+            var request = httpContextAccessor.HttpContext.Request;
+            var uaHeader = MessageSettings.GetUAHeader(request);
+            var clientInfo = MessageSettings.GetClientInfo(uaHeader);
+            var platformAndDevice = MessageSettings.GetPlatformAndDevice(clientInfo);
+            var browser = MessageSettings.GetBrowser(clientInfo);
+            var ip = MessageSettings.GetIP(request);
+
+            var baseEvent = new BaseEvent
+            {
+                Platform = platformAndDevice,
+                Browser = browser,
+                Date = DateTime.Now,
+                IP = ip
+            };
+
+            return await geolocationHelper.AddGeolocationAsync(baseEvent);
+        }
     }
 
     /// <summary>

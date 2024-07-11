@@ -549,9 +549,6 @@ $TrulyYours</value>
   <data name="ActionUserUpdated" xml:space="preserve">
     <value>Người dùng DocSpace đã được cập nhật: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
-  <data name="AcceptDocSpace" xml:space="preserve">
-    <value>CHẤP NHẬN</value>
-  </data>
   <data name="ButtonAccept" xml:space="preserve">
     <value>Chấp nhận</value>
   </data>
@@ -561,10 +558,10 @@ $TrulyYours</value>
   <data name="ButtonConfirm" xml:space="preserve">
     <value>Xác nhận</value>
   </data>
-  <data name="ButtonCollaborateDocSpace" xml:space="preserve">
+  <data name="ButtonCollaborate" xml:space="preserve">
     <value>Cộng tác trong DocSpace</value>
   </data>
-  <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
+  <data name="ButtonConfirmInvite" xml:space="preserve">
     <value>Xác nhận Lời mời DocSpace</value>
   </data>
   <data name="ButtonConfirmRoomInvite" xml:space="preserve">
@@ -1357,6 +1354,7 @@ h1."$PortalUrl":"$PortalUrl"
 Cổng thông tin của bạn đã được di chuyển đến một miền mới. Xin vui lòng khôi phục quyền truy cập của bạn vào cổng thông tin bằng cách đặt mật khẩu sẽ được sử dụng để đăng nhập.
 
 Vui lòng làm theo các liên kết dưới đây để thiết lập mật khẩu của bạn cho tài khoản:
+
 $OrangeButton
 
 *Lưu ý*: liên kết này chỉ có giá trị trong 7 ngày. Vui lòng hoàn tất quá trình khôi phục quyền truy cập trong khoảng thời gian đó.
@@ -1394,7 +1392,7 @@ Bạn có thể kích hoạt lại cổng thông tin của mình bất cứ lúc
 Nếu bạn có bất kỳ câu hỏi gì hoặc cần trợ giúp, xin vui lòng liên hệ với chúng tôi tại [${__SalesEmail}](mailto:${__SalesEmail})
 
 Trân trọng,
-Nhóm hỗ trợ ONLYOFFICE™
+Nhóm hỗ trợ ONLYOFFICE
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete_tg" xml:space="preserve">
@@ -1419,7 +1417,7 @@ _Lưu ý_: liên kết này chỉ có giá trị trong 7 ngày. Vui lòng hoàn 
 Nếu bạn có bất kỳ câu hỏi gì hoặc cần trợ giúp, xin vui lòng liên hệ với chúng tôi tại [${__SalesEmail}](mailto:${__SalesEmail})
 
 Trân trọng,
-Nhóm hỗ trợ ONLYOFFICE™
+Nhóm hỗ trợ ONLYOFFICE
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
@@ -1647,7 +1645,7 @@ Tập tin sao lưu chứa dữ liệu từ cổng thông tin [${__VirtualRootPat
 Nếu bạn có bất kỳ câu hỏi gì hoặc cần trợ giúp, xin vui lòng liên hệ với chúng tôi tại [${__SupportLink}](${__SupportLink})
 
 Trân trọng,
-Nhóm hỗ trợ ONLYOFFICE™
+Nhóm hỗ trợ ONLYOFFICE
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="ButtonChangeTfa" xml:space="preserve">

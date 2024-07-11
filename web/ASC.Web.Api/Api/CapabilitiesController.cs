@@ -65,7 +65,8 @@ public class CapabilitiesController(CoreBaseSettings coreBaseSettings,
             OauthEnabled = coreBaseSettings.Standalone || quota.Oauth,
             Providers = new List<string>(0),
             SsoLabel = string.Empty,
-            SsoUrl = string.Empty
+            SsoUrl = string.Empty,
+            IdentityServerEnabled = false
         };
 
         try
@@ -74,10 +75,10 @@ public class CapabilitiesController(CoreBaseSettings coreBaseSettings,
                     || SetupInfo.IsVisibleSettings(ManagementType.LdapSettings.ToString())
                         && quota.Ldap)
             {
-                //var settings = SettingsManager.Load<LdapSettings>();
-
-                //result.LdapEnabled = settings.EnableLdapAuthentication;
-                result.LdapEnabled = false;
+                var settings = await settingsManager.LoadAsync<LdapSettings>();
+                var currentDomainSettings = await settingsManager.LoadAsync<LdapCurrentDomain>();
+                result.LdapEnabled = settings.EnableLdapAuthentication;
+                result.LdapDomain = currentDomainSettings.CurrentDomain;
             }
         }
         catch (Exception ex)
@@ -125,6 +126,11 @@ public class CapabilitiesController(CoreBaseSettings coreBaseSettings,
         catch (Exception ex)
         {
             _log.ErrorWithException(ex);
+        }
+
+        if (SetupInfo.IsVisibleSettings(ManagementType.IdentityServer.ToString()))
+        {
+            result.IdentityServerEnabled = true;
         }
 
         return result;

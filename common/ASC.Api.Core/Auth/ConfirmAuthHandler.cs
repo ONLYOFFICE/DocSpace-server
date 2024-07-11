@@ -29,7 +29,6 @@ using SecurityContext = ASC.Core.SecurityContext;
 
 namespace ASC.Api.Core.Auth;
 
-[Transient]
 public class ConfirmAuthHandler(
     IOptionsMonitor<AuthenticationSchemeOptions> options,
     ILoggerFactory logger,
@@ -62,9 +61,9 @@ public class ConfirmAuthHandler(
 
         var claims = new List<Claim>
         {
-                new(ClaimTypes.Role, emailValidationKeyModel.Type.ToString())
+            new(ClaimTypes.Role, emailValidationKeyModel.Type.ToString()),AuthConstants.Claim_ScopeRootWrite
         };
-
+        
         if (checkKeyResult == EmailValidationKeyProvider.ValidationResult.Ok)
         {
             Guid userId;

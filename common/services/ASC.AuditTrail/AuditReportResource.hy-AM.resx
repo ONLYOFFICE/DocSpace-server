@@ -798,4 +798,7 @@
   <data name="PortalRenamed" xml:space="preserve">
     <value>Պորտալը վերանվանվել է</value>
   </data>
+  <data name="FileSizePostfix" xml:space="preserve">
+    <value>բայթ, ԿԲ, ՄԲ, ԳԲ, ՏԲ</value>
+  </data>
 </root>

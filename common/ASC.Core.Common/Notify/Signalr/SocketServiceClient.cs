@@ -48,8 +48,8 @@ public class SocketServiceClient(
     };
     
     protected virtual string Hub { get => "default"; }
-
-    public async Task MakeRequest(string method, object data)
+    
+    public async Task MakeRequest(string method, object data, int? tenantId = null)
     {
         if (string.IsNullOrEmpty(Url))
         {
@@ -58,8 +58,10 @@ public class SocketServiceClient(
 
         var request = GenerateRequest(method, data);
         if (await channelWriter.WaitToWriteAsync())
-        {            
-            var tariff = await tariffService.GetTariffAsync(await _tenantManager.GetCurrentTenantIdAsync());
+        {
+            var tenant = tenantId ?? await _tenantManager.GetCurrentTenantIdAsync();
+            
+            var tariff = await tariffService.GetTariffAsync(tenant);
             await channelWriter.WriteAsync(new SocketData(request, tariff.State));
         }
     }
@@ -123,6 +125,7 @@ public class SocketService(
                 {        
                     try
                     {
+
                         var httpClient = clientFactory.CreateClient();
                         await httpClient.SendAsync(socketData.RequestMessage, HttpCompletionOption.ResponseHeadersRead, stoppingToken);
                     }

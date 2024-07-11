@@ -1,0 +1,18 @@
+spring:
+  datasource:
+    driver-class-name: ${JDBC_DRIVER:com.mysql.cj.jdbc.Driver}
+    password: ${JDBC_PASSWORD:dev}
+    url: jdbc:mysql://${JDBC_URL:localhost}/${JDBC_DATABASE:docspace}?${JDBC_PARAMETERS:}
+    username: ${JDBC_USER_NAME:dev}
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        generate_statistics: ${JPA_HIBERNATE_GENERATE_STATS:false}
+        jdbc:
+          batch_size: ${JDBC_BATCH_SIZE:100}
+          time_zone: ${JDBC_TIME_ZONE:UTC}
+        order_inserts: ${JPA_HIBERNATE_ORDER_INSERTS:true}
+    show-sql: ${JPA_SHOW_SQL:false}
+  lifecycle:
+    timeout-per-shutdown-phase: ${SPRING_LIFECYCLE_TIMEOUT:1m}

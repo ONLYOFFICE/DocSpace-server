@@ -58,37 +58,14 @@ public class ConfigurationExtension
     public ConfigurationExtension(IConfiguration configuration)
     {
         _configuration = configuration;
-        _connectionStringSettings = new Lazy<ConnectionStringCollection>(new ConnectionStringCollection(GetSettings<ConnectionStringSettings>($"{RegionSettings.Current}ConnectionStrings")));
+        _connectionStringSettings = new Lazy<ConnectionStringCollection>(new ConnectionStringCollection(_configuration.GetSection($"ConnectionStrings").Get<IEnumerable<ConnectionStringSettings>>()));
     }
-
-    public IEnumerable<T> GetSettings<T>(string section) where T : new()
-    {
-        var result = new List<T>();
-
-        var sectionSettings = _configuration.GetSection(section);
-
-        foreach (var ch in sectionSettings.GetChildren())
-        {
-            var cs = new T();
-            ch.Bind(cs);
-            result.Add(cs);
-        }
-
-        return result;
-    }
-
-    public T GetSetting<T>(string section) where T : new()
-    {
-        return GetSetting(section, new T());
-    }
-
-    public T GetSetting<T>(string section, T instance)
+    
+    public void GetSetting<T>(string section, T instance)
     {
         var sectionSettings = _configuration.GetSection(section);
 
         sectionSettings.Bind(instance);
-
-        return instance;
     }
 
     public ConnectionStringCollection GetConnectionStrings()
@@ -103,7 +80,7 @@ public class ConfigurationExtension
             return GetConnectionStrings()[key];
         }
 
-        var connectionStrings = new ConnectionStringCollection(GetSettings<ConnectionStringSettings>($"regions:{region}:ConnectionStrings"));
+        var connectionStrings = new ConnectionStringCollection(_configuration.GetSection($"regions:{region}:ConnectionStrings").Get<IEnumerable<ConnectionStringSettings>>());
         return connectionStrings[key];
     }
 }

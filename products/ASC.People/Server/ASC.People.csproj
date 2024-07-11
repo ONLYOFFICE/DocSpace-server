@@ -102,6 +102,9 @@
     <EmbeddedResource Update="Resources\PeopleResource.sl.resx">
       <DependentUpon>PeopleResource.resx</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Update="Resources\PeopleResource.sr-Cyrl-RS.resx">
+      <DependentUpon>PeopleResource.resx</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Update="Resources\PeopleResource.sr-Latn-RS.resx">
       <DependentUpon>PeopleResource.resx</DependentUpon>
     </EmbeddedResource>

@@ -26,31 +26,28 @@
 
 namespace ASC.Files.Helpers;
 
-public class UploadControllerHelper(FilesSettingsHelper filesSettingsHelper,
-        FileUploader fileUploader,
-        SocketManager socketManager,
-        FileDtoHelper fileDtoHelper,
-        ApiContext apiContext,
-        FileStorageService fileStorageService,
-        FolderContentDtoHelper folderContentDtoHelper,
-        IHttpContextAccessor httpContextAccessor,
-        FolderDtoHelper folderDtoHelper,
-        FilesLinkUtility filesLinkUtility,
-        ChunkedUploadSessionHelper chunkedUploadSessionHelper,
-        TenantManager tenantManager,
-        IHttpClientFactory httpClientFactory,
-        SecurityContext securityContext,
-        IDaoFactory daoFactory,
-        FileSecurity fileSecurity)
-    : FilesHelperBase(filesSettingsHelper,
-            fileUploader,
-            socketManager,
-            fileDtoHelper,
-            apiContext,
-            fileStorageService,
-            folderContentDtoHelper,
-            httpContextAccessor,
-            folderDtoHelper)
+[Scope]
+public class UploadControllerHelper(
+    FilesSettingsHelper filesSettingsHelper,
+    FileUploader fileUploader,
+    SocketManager socketManager,
+    FileDtoHelper fileDtoHelper,
+    FileStorageService fileStorageService,
+    IHttpContextAccessor httpContextAccessor,
+    FilesLinkUtility filesLinkUtility,
+    ChunkedUploadSessionHelper chunkedUploadSessionHelper,
+    TenantManager tenantManager,
+    IHttpClientFactory httpClientFactory,
+    SecurityContext securityContext,
+    IDaoFactory daoFactory,
+    FileSecurity fileSecurity)
+    : FilesHelperBase(
+        filesSettingsHelper,
+        fileUploader,
+        socketManager,
+        fileDtoHelper,
+        fileStorageService,
+        httpContextAccessor)
     {
     public async Task<object> CreateEditSessionAsync<T>(T fileId, long fileSize)
     {
@@ -93,7 +90,7 @@ public class UploadControllerHelper(FilesSettingsHelper filesSettingsHelper,
         return await CreateUploadSessionAsync(file, encrypted, createOn, keepVersion);
     }
 
-    public async Task<object> CreateUploadSessionAsync<T>(File<T> file, bool encrypted, ApiDateTime createOn, bool keepVersion = false)
+    private async Task<object> CreateUploadSessionAsync<T>(File<T> file, bool encrypted, ApiDateTime createOn, bool keepVersion = false)
     {
         if (filesLinkUtility.IsLocalFileUploader)
         {
@@ -108,7 +105,7 @@ public class UploadControllerHelper(FilesSettingsHelper filesSettingsHelper,
             };
         }
 
-        var createSessionUrl = filesLinkUtility.GetInitiateUploadSessionUrl(await tenantManager.GetCurrentTenantIdAsync(), file.ParentId, file.Id, file.Title, file.ContentLength, encrypted, securityContext);
+        var createSessionUrl = await filesLinkUtility.GetInitiateUploadSessionUrlAsync(await tenantManager.GetCurrentTenantIdAsync(), file.ParentId, file.Id, file.Title, file.ContentLength, encrypted, securityContext);
 
         var httpClient = httpClientFactory.CreateClient();
 

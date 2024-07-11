@@ -26,7 +26,6 @@
 
 namespace ASC.Common.Security;
 
-[Scope(typeof(PermissionProvider))]
 public interface IPermissionProvider
 {
     Task<IEnumerable<Ace>> GetAclAsync(ISubject subject, IAction action, ISecurityObjectId objectId, ISecurityObjectProvider secObjProvider);

@@ -54,17 +54,18 @@ public class BaseIndexerFile(Client client,
 }
 
 
-[Scope(Additional = typeof(FactoryIndexerFileExtension))]
-public class FactoryIndexerFile(ILoggerProvider options,
-        TenantManager tenantManager,
-        SearchSettingsHelper searchSettingsHelper,
-        FactoryIndexer factoryIndexer,
-        BaseIndexerFile baseIndexer,
-        IServiceProvider serviceProvider,
-        IDbContextFactory<FilesDbContext> dbContextFactory,
-        ICache cache,
-        Settings settings,
-        FileUtility fileUtility)
+[Scope(typeof(IFactoryIndexer))]
+public class FactoryIndexerFile(
+    ILoggerProvider options,
+    TenantManager tenantManager,
+    SearchSettingsHelper searchSettingsHelper,
+    FactoryIndexer factoryIndexer,
+    BaseIndexerFile baseIndexer,
+    IServiceProvider serviceProvider,
+    IDbContextFactory<FilesDbContext> dbContextFactory,
+    ICache cache,
+    Settings settings,
+    FileUtility fileUtility)
     : FactoryIndexer<DbFile>(options, tenantManager, searchSettingsHelper, factoryIndexer, baseIndexer, serviceProvider, cache)
 {
     public override async Task IndexAllAsync()
@@ -173,14 +174,6 @@ public class FileTenant
 {
     public DbTenant DbTenant { get; init; }
     public DbFile DbFile { get; init; }
-}
-
-public static class FactoryIndexerFileExtension
-{
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<DbFile>();
-    }
 }
 
 sealed file class FilesFoldersPair

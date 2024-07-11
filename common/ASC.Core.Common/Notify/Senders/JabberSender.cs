@@ -26,7 +26,7 @@
 
 namespace ASC.Core.Notify.Senders;
 
-[Singleton(Additional = typeof(JabberSenderExtension))]
+[Singleton]
 public class JabberSender(IServiceProvider serviceProvider, ILogger<JabberSender> logger)
     : INotifySender
 {
@@ -54,13 +54,5 @@ public class JabberSender(IServiceProvider serviceProvider, ILogger<JabberSender
         }
 
         return Task.FromResult(NoticeSendResult.OK);
-    }
-}
-
-public static class JabberSenderExtension
-{
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<JabberServiceClient>();
     }
 }

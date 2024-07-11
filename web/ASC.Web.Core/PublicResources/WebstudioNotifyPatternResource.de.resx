@@ -113,7 +113,7 @@
     <value>Kommentare hinterlassen</value>
   </data>
   <data name="ButtonRemoveProfile" xml:space="preserve">
-    <value>Profil entfernen</value>
+    <value>Konto deaktivieren</value>
   </data>
   <data name="ButtonRenewNow" xml:space="preserve">
     <value>Jetzt erneuern</value>
@@ -166,7 +166,7 @@ Schauen Sie in unser Benutzerhandbuch [Daten-Backup](${__HelpLink}/tipstricks/da
 Sollten Sie noch Fragen haben oder Hilfe benötigen, kontaktieren Sie  uns unter [${__SupportLink}](${__SupportLink})
 
 Mit freundlichen Grüßen,
-ONLYOFFICE™ Support Team
+ONLYOFFICE Support Team
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
@@ -392,6 +392,7 @@ h1."$PortalUrl":"$PortalUrl"
 Ihr Portal wurde auf eine neue Domain übertragen. Bitte stellen Sie den Zugriff auf das Portal wieder her, indem Sie Passwort für die Anmeldung eingeben.
 
 Folgen Sie dem unten stehenden Link, um neues Passwort einzugeben:
+
 $OrangeButton
 
 *Erinnerung*: Dieser Link ist nur 7 Tage gültig. Stellen Sie den Zugang innerhalb von diesem Zeitraum wieder her.
@@ -469,7 +470,7 @@ Mit folgendem Link können Sie Ihr Portal jederzeit wieder aktivieren:
 Haben Sie Fragen oder benötigen Sie Hilfe, können Sie uns unter [${__SalesEmail}](mailto:${__SalesEmail})
 
 Mit freundlichen Grüßen,
-ONLYOFFICE™ Support Team
+ONLYOFFICE Support Team
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
@@ -517,7 +518,7 @@ _Hinweis_: dieser Link ist nur für 7 Tage gültig. Bitte schließen Sie das Lö
 Haben Sie Fragen oder benötigen Sie Hilfe, können Sie uns unter [${__SalesEmail}](mailto:${__SalesEmail}) kontaktieren.
 
 Mit freundlichen Grüßen,
-ONLYOFFICE™ Support Team
+ONLYOFFICE Support Team
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_rename" xml:space="preserve">
@@ -530,15 +531,15 @@ Ihre Portal-Adresse $PortalUrl wurde auf die neue Adresse "${__VirtualRootPath}"
 *Hinweis*: DNS-Einstellungen und Single-Sign-On Optionen funktionieren nicht, bis Sie diese ändern.</value>
   </data>
   <data name="pattern_profile_delete" xml:space="preserve">
-    <value>h1.Löschen des Profils von "${__VirtualRootPath}":"${__VirtualRootPath}" Portal
+    <value>h1.Deaktivierung des Kontos auf "${__VirtualRootPath}":"${__VirtualRootPath}"
 
-Sie haben angefragt, Ihr Profil von "${__VirtualRootPath}":"${__VirtualRootPath}" Portal zu löschen. 
+Sie haben beantragt, Ihr DocSpace-Konto "${__VirtualRootPath}":"${__VirtualRootPath}" zu deaktivieren.
 
-Wenn Sie Ihr Profil trotzdem löschen möchten, folgen Sie bitte dem untenstehenden Link, um den Vorgang zu bestätigen:
+Wenn Sie Ihr Konto dennoch deaktivieren möchten, folgen Sie bitte dem unten stehenden Link, um den Vorgang zu bestätigen:
 
 $OrangeButton
 
-*Hinweis*: Dieser Link ist nur 7 Tage gültig. Bitte schließen Sie die Aktivierung Ihrer E-Mail-Adresse in dieser Zeitperiode ab.</value>
+*Hinweis*: Dieser Link ist nur für 7 Tage gültig. Bitte schließen Sie die Deaktivierung des Kontos innerhalb dieses Zeitraums ab.</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
     <value>Benutzer/in "$FromUserName":"$FromUserLink" hat sein/ihr Profil gelöscht und dieses Profil ist jetzt blockiert. Alle Benutzerdateien sind ihm/ihr weiterhin zugewiesen und belegen Speicherplatz.
@@ -869,7 +870,7 @@ Dieser Link ist nur 7 Tage gültig.</value>
     <value>${LetterLogoText}. Änderung der Postadresse</value>
   </data>
   <data name="subject_profile_delete" xml:space="preserve">
-    <value>Löschen Ihres Profils auf dem Portal ${__VirtualRootPath}</value>
+    <value>Deaktivierung des Kontos auf ${__VirtualRootPath}</value>
   </data>
   <data name="subject_profile_has_deleted_itself" xml:space="preserve">
     <value>Der/die Benutzer/in hat sein/ihr Profil gelöscht</value>
@@ -1588,17 +1589,14 @@ $TrulyYours</value>
   <data name="ButtonConfirmRoomInvite" xml:space="preserve">
     <value>Bestätigen Sie die Einladung zum Raum</value>
   </data>
-  <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
+  <data name="ButtonConfirmInvite" xml:space="preserve">
     <value>DocSpace-Einladung bestätigen</value>
   </data>
   <data name="ButtonConfirmEmail" xml:space="preserve">
     <value>BESTÄTIGEN</value>
   </data>
-  <data name="ButtonCollaborateDocSpace" xml:space="preserve">
+  <data name="ButtonCollaborate" xml:space="preserve">
     <value>In DocSpace zusammenarbeiten</value>
-  </data>
-  <data name="AcceptDocSpace" xml:space="preserve">
-    <value>ANNEHMEN</value>
   </data>
   <data name="subject_change_password" xml:space="preserve">
     <value>${LetterLogoText} Passwort-Hilfe</value>
@@ -1701,5 +1699,14 @@ $TrulyYours</value>
   </data>
   <data name="subject_zoom_welcome" xml:space="preserve">
     <value>Willkommen im ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="pattern_saas_room_invite_existing_user" xml:space="preserve">
+    <value>Hallo!
+
+$__AuthorName hat Sie eingeladen, dem Raum "$Message":"$InviteLink" auf "${__VirtualRootPath}":"${__VirtualRootPath}" beizutreten
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
 </root>

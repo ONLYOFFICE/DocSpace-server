@@ -27,6 +27,8 @@
 namespace ASC.Common.Caching;
 public class RabbitMQSettings
 {
+    public const ushort DefaultChannelMax = ushort.MaxValue;
+    
     public string HostName { get; set; }
     public string UserName { get; set; }
     public string Password { get; set; }
@@ -37,13 +39,15 @@ public class RabbitMQSettings
     public string SslServerName { get; set; }
     public string SslCertPath { get; set; }
     public string ClientProvidedName { get; set; }
+    public ushort RequestedChannelMax { get; set; } = DefaultChannelMax;
 
     public ConnectionFactory GetConnectionFactory()
     {
         var factory = new ConnectionFactory
         {
             DispatchConsumersAsync = true,
-            ClientProvidedName = ClientProvidedName
+            ClientProvidedName = ClientProvidedName,
+            RequestedChannelMax = RequestedChannelMax
         };
 
         if (!string.IsNullOrEmpty(Uri))

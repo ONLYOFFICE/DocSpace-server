@@ -44,7 +44,6 @@ public class SetupInfo
     public string UserVoiceURL { get; private set; }
     public string MainLogoURL { get; private set; }
     public string MainLogoMailTmplURL { get; private set; }
-    public List<CultureInfo> EnabledCultures { get; private set; }
     public long MaxImageUploadSize { get; private set; }
 
     /// <summary>
@@ -105,6 +104,9 @@ public class SetupInfo
     public string RecaptchaPublicKey { get; private set; }
     public string RecaptchaPrivateKey { get; private set; }
     public string RecaptchaVerifyUrl { get; private set; }
+    public string HcaptchaPublicKey { get; private set; }
+    public string HcaptchaPrivateKey { get; private set; }
+    public string HcaptchaVerifyUrl { get; private set; }
     public string AmiMetaUrl { get; private set; }
     public int InvitationLimit { get; private set; }
 
@@ -128,13 +130,7 @@ public class SetupInfo
         DownloadForIosDocuments = GetAppSettings("web.download.for.ios.doc", "https://itunes.apple.com/app/onlyoffice-documents/id944896972");
         DownloadForIosProjects = GetAppSettings("web.download.for.ios.proj", "https://itunes.apple.com/app/onlyoffice-projects/id1353395928?mt=8");
         DownloadForAndroidDocuments = GetAppSettings("web.download.for.android.doc", "https://play.google.com/store/apps/details?id=com.onlyoffice.documents");
-
-        EnabledCultures = GetAppSettings("web:cultures", "en-US")
-            .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
-            .Distinct()
-            .Select(l => CultureInfo.GetCultureInfo(l.Trim()))
-            .ToList();
-
+        
         MaxImageUploadSize = GetAppSettings<long>("web:max-upload-size", 1024 * 1024);
         AvailableFileSize = GetAppSettings("web:available-file-size", 100L * 1024L * 1024L);
 
@@ -159,6 +155,10 @@ public class SetupInfo
         RecaptchaPrivateKey = GetAppSettings("web:recaptcha:private-key", null);
         RecaptchaVerifyUrl = GetAppSettings("web:recaptcha:verify-url", "https://www.recaptcha.net/recaptcha/api/siteverify");
 
+        HcaptchaPublicKey = GetAppSettings("web:hcaptcha:public-key", null);
+        HcaptchaPrivateKey = GetAppSettings("web:hcaptcha:private-key", null);
+        HcaptchaVerifyUrl = GetAppSettings("web:hcaptcha:verify-url", "https://api.hcaptcha.com/siteverify");
+
         _webDisplayMobappsBanner = (configuration["web.display.mobapps.banner"] ?? "").Trim().Split(new[] { ',', ';', ' ' }, StringSplitOptions.RemoveEmptyEntries);
         ShareTwitterUrl = GetAppSettings("web.share.twitter", "https://twitter.com/intent/tweet?text={0}");
         ShareFacebookUrl = GetAppSettings("web.share.facebook", "");
@@ -168,7 +168,7 @@ public class SetupInfo
         SsoSamlLoginUrl = GetAppSettings("web:sso:saml:login:url", "");
         SsoSamlLogoutUrl = GetAppSettings("web:sso:saml:logout:url", "");
 
-        _hideSettings = GetAppSettings("web.hide-settings", string.Empty).Split(new[] { ',', ';', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+        _hideSettings = GetAppSettings("web:hide-settings", string.Empty).Split(new[] { ',', ';', ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
         SmsTrial = GetAppSettings("core.sms.trial", false);
 
@@ -205,15 +205,6 @@ public class SetupInfo
             return Math.Min(freeSize, diskQuota.MaxFileSize);
         }
         return ChunkUploadSize;
-    }
-
-    public string GetRightCultureName(CultureInfo cultureInfo)
-    {
-        return EnabledCultures.Contains(cultureInfo)
-            ? cultureInfo.Name
-            : EnabledCultures.Contains(cultureInfo.Parent)
-                ? cultureInfo.Parent.Name
-                : "en-US";
     }
 
     private string GetAppSettings(string key, string defaultValue)

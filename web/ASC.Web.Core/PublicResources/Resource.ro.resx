@@ -1104,4 +1104,7 @@
   <data name="TariffsFeature_total_size" xml:space="preserve">
     <value>{0} per adminastrator/utilizator avansat și posibilitatea de a adăuga mai mult spațiu de stocare la cerere</value>
   </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>Utilizatorul este dezactivat</value>
+  </data>
 </root>

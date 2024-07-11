@@ -319,7 +319,7 @@ public class NotifyEngine(Context context,
                 CultureInfo.CurrentCulture = culture;
                 CultureInfo.CurrentUICulture = culture;
                 //We need to run through styler before templating
-                StyleMessage(serviceScope, noticeMessage);
+                await StyleMessageAsync(serviceScope, noticeMessage);
             }
         }
         catch (Exception exc)
@@ -330,7 +330,7 @@ public class NotifyEngine(Context context,
         return (null, noticeMessage);
     }
 
-    private void StyleMessage(IServiceScope scope, NoticeMessage message)
+    private async Task StyleMessageAsync(IServiceScope scope, NoticeMessage message)
     {
         try
         {
@@ -341,7 +341,8 @@ public class NotifyEngine(Context context,
                     _stylers.Add(message.Pattern.Styler, styler);
                 }
             }
-            _stylers[message.Pattern.Styler].ApplyFormating(message);
+            
+            await _stylers[message.Pattern.Styler].ApplyFormatingAsync(message);
         }
         catch (Exception exc)
         {

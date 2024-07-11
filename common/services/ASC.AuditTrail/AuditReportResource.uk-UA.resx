@@ -739,4 +739,7 @@
   <data name="PortalRenamed" xml:space="preserve">
     <value>Портал перейменовано</value>
   </data>
+  <data name="FileSizePostfix" xml:space="preserve">
+    <value>байт,Кб,Мб,Гб,Тб</value>
+  </data>
 </root>

@@ -1,6 +1,6 @@
 ﻿{
   "app": {
-    "name": "Onlyoffice Single Sign-On handler",
+    "name": "ONLYOFFICE Single Sign-On handler",
     "port": 9834,
     "appsettings": "../../../config",
     "environment": "Development",

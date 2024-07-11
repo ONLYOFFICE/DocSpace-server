@@ -316,16 +316,13 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="AcceptDocSpace" xml:space="preserve">
-    <value>HYVÄKSY</value>
-  </data>
   <data name="ButtonAccept" xml:space="preserve">
     <value>Hyväksy</value>
   </data>
-  <data name="ButtonCollaborateDocSpace" xml:space="preserve">
+  <data name="ButtonCollaborate" xml:space="preserve">
     <value>Tee yhteistyötä DocSpacessa</value>
   </data>
-  <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
+  <data name="ButtonConfirmInvite" xml:space="preserve">
     <value>Vahvista DocSpace-kutsusi</value>
   </data>
   <data name="ButtonConfirm" xml:space="preserve">
@@ -768,7 +765,7 @@ $TrulyYours</value>
 
 Hei, $UserName!
 
-Säädä ONLYOFFICE DocSPacesi turvallisuusasetuksia tehdäksesi siitä vielä turvallisemman:
+Säädä ONLYOFFICE DocSpacesi turvallisuusasetuksia tehdäksesi siitä vielä turvallisemman:
 
 &lt;table cellspacing="0" cellpadding="0" background="" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Aseta salasanan vahvuus&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Ota käyttöön kaksivaiheinen todennus ja kertakirjautuminen&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Määritä luotetut sähköpostinimet ja istunnon kesto&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Rajoita pääsyä tietyistä IP-osoitteista&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Salli tai rajoita pääkäyttäjäviestejä&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Hallitse pääkäyttäjän pääsyoikeuksia&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;Tee tietojen varmuuskopiointia&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
 
@@ -1113,7 +1110,7 @@ Lisätietoa varmuuskopioinnista löytyy [Tietojen varmuuskopiointi](${__HelpLink
 Jos sinulla on kysyttävää tai tarvitset apua ole hyvä ja ota meihin yhteyttä [${__SupportLink}](${__SupportLink})
 
 Ystävällisin terveisin,
-ONLYOFFICE™-tukitiimi
+ONLYOFFICE-tukitiimi
 [www.onlyoffice.com](http://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
@@ -1271,6 +1268,7 @@ h1."$PortalUrl":"$PortalUrl"
 Portaalisi on siirretty uudelle verkkotunnukselle. Ole hyvä ja palauta pääsysi portaaliin antamalla salasanasi, jota käytetään jatkossa sisäänkirjautumiseen.
 
 Ole hyvä ja seuraa alla olevaa linkkiä asettaaksesi tilisi salasanan:
+
 $OrangeButton
 
 *Huom*: tämä linkki on voimassa vain 7 päivää. Ole hyvä ja viimeistele pääsyn palautustoiminto siinä ajassa.
@@ -1326,7 +1324,7 @@ Voit aktivoida portaalin uudelleen milloin tahansa klikkaamalla linkkiä:
 Jos sinulla on kysyttävää tai tarvitset apua, ole hyvä ja ota meihin yhteyttä [${__SalesEmail}](mailto:${__SalesEmail})
 
 Ystävällisin terveisin;
-ONLYOFFICE™ Support Team
+ONLYOFFICE Support Team
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
@@ -1374,7 +1372,7 @@ _Huom_: tämä linkki on voimassa vain 7 päivää. Ole hyvä ja viimeistele por
 Jos sinulla on kysyttävää tai tarvitset apua, ole hyvä ja ota meihin yhteyttä osoitteessa [${__SalesEmail}](mailto:${__SalesEmail})
 
 Ystävällisin terveisin,
-ONLYOFFICE™ -tukitiimi
+ONLYOFFICE -tukitiimi
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_self_profile_updated" xml:space="preserve">
