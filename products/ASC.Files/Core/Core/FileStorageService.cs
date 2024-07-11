@@ -128,9 +128,18 @@ public class FileStorageService //: IFileStorageService
 
         try
         {
-            (entries, _) = await entryManager.GetEntriesAsync(
-                await folderDao.GetFolderAsync(parentId), 0, -1, FilterType.FoldersOnly,
-                false, Guid.Empty, string.Empty, [], false, false, new OrderBy(SortedByType.AZ, true));
+            var parent = await folderDao.GetFolderAsync(parentId);
+
+            Folder<T> parentRoom = null;
+
+            if (parent.RootFolderType == FolderType.VirtualRooms)
+            {
+                parentRoom = !DocSpaceHelper.IsRoom(parent.FolderType) && parent.FolderType != FolderType.VirtualRooms ? 
+                    await folderDao.GetFirstParentTypeFromFileEntryAsync(parent) : 
+                    parent;
+            }
+
+            (entries, _) = await entryManager.GetEntriesAsync(parent, parentRoom, 0, -1, FilterType.FoldersOnly, false, Guid.Empty, string.Empty, [], false, false, new OrderBy(SortedByType.AZ, true));
         }
         catch (Exception e)
         {
@@ -167,6 +176,8 @@ public class FileStorageService //: IFileStorageService
         var folderDao = daoFactory.GetFolderDao<T>();
 
         Folder<T> parent = null;
+        Folder<T> parentRoom = null;
+        
         try
         {
             parent = await folderDao.GetFolderAsync(parentId);
@@ -174,10 +185,21 @@ public class FileStorageService //: IFileStorageService
             {
                 throw new Exception(parent.Error);
             }
-            if (parent.RootFolderType == FolderType.VirtualRooms && !DocSpaceHelper.IsRoom(parent.FolderType) && parent.FolderType != FolderType.VirtualRooms)
+            
+            if (parent == null)
             {
-                parent.ParentRoomType = await folderDao.GetFirstParentTypeFromFileEntryAsync(parent);
-        }
+                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FolderNotFound);
+            }
+            
+            if (parent.RootFolderType == FolderType.VirtualRooms)
+            {
+                parentRoom = !DocSpaceHelper.IsRoom(parent.FolderType) && parent.FolderType != FolderType.VirtualRooms ? 
+                    await folderDao.GetFirstParentTypeFromFileEntryAsync(parent) : 
+                    parent;
+                
+                parent.ParentRoomType = parentRoom.FolderType;
+            }
+            
         }
         catch (Exception e)
         {
@@ -188,12 +210,7 @@ public class FileStorageService //: IFileStorageService
 
             throw GenerateException(e);
         }
-
-        if (parent == null)
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FolderNotFound);
-        }
-
+        
         if (!await fileSecurity.CanReadAsync(parent))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ViewFolder);
@@ -236,8 +253,7 @@ public class FileStorageService //: IFileStorageService
         IEnumerable<FileEntry> entries;
         try
         {
-            (entries, total) = await entryManager.GetEntriesAsync(parent, from, count, filterType, subjectGroup, subjectId, searchText, extension, searchInContent, withSubfolders, orderBy, roomId, searchArea,
-                withoutTags, tagNames, excludeSubject, provider, subjectFilter, applyFilterOption, quotaFilter);
+            (entries, total) = await entryManager.GetEntriesAsync(parent, parentRoom, from, count, filterType, subjectGroup, subjectId, searchText, extension, searchInContent, withSubfolders, orderBy, roomId, searchArea, withoutTags, tagNames, excludeSubject, provider, subjectFilter, applyFilterOption, quotaFilter);
         }
         catch (Exception e)
         {
@@ -258,14 +274,14 @@ public class FileStorageService //: IFileStorageService
         var prevVisible = breadCrumbs.ElementAtOrDefault(breadCrumbs.Count - 2);
         if (prevVisible != null && !DocSpaceHelper.IsRoom(parent.FolderType) && prevVisible.FileEntryType == FileEntryType.Folder)
         {
-                if (prevVisible is Folder<string> f1)
-                {
-                    parent.ParentId = (T)Convert.ChangeType(f1.Id, typeof(T));
-                }
-                else if (prevVisible is Folder<int> f2)
-                {
-                    parent.ParentId = (T)Convert.ChangeType(f2.Id, typeof(T));
-                }
+            if (prevVisible is Folder<string> f1)
+            {
+                parent.ParentId = (T)Convert.ChangeType(f1.Id, typeof(T));
+            }
+            else if (prevVisible is Folder<int> f2)
+            {
+                parent.ParentId = (T)Convert.ChangeType(f2.Id, typeof(T));
+            }
         }
 
         parent.Shareable =
@@ -313,7 +329,8 @@ public class FileStorageService //: IFileStorageService
                 })
             ],
             FolderInfo = parent,
-            New = await newTask
+            New = await newTask,
+            ParentRoom = parentRoom
         };
 
         return result;
@@ -2935,7 +2952,7 @@ public class FileStorageService //: IFileStorageService
             {
                 if (indexing)
                 {
-                    await ReOrder(room.Id, true);
+                    await ReOrderAsync(room.Id, true);
                 }
                 
                 room.SettingsIndexing = indexing;
@@ -2947,7 +2964,7 @@ public class FileStorageService //: IFileStorageService
     }
     
     
-    public async Task<Folder<T>> ReOrder<T>(T folderId, bool subfolders = false)
+    public async Task<Folder<T>> ReOrderAsync<T>(T folderId, bool subfolders = false)
     {        
         var folderDao = daoFactory.GetFolderDao<T>();
         var fileDao = daoFactory.GetFileDao<T>();
@@ -2963,18 +2980,48 @@ public class FileStorageService //: IFileStorageService
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
         }
-
-        var folders = await folderDao.GetFoldersAsync(folderId, new OrderBy(SortedByType.AZ, true), FilterType.None, false, Guid.Empty, null).Select(r => r.Id).ToListAsync();
-        await folderDao.InitCustomOrder(folders, folderId);
         
-        var files = await fileDao.GetFilesAsync(folderId, new OrderBy(SortedByType.AZ, true), FilterType.None, false, Guid.Empty, null, null, false).Select(r=> r.Id).ToListAsync();
-        await fileDao.InitCustomOrder(files, folderId);
+        
+        var folders = folderDao.GetFoldersAsync(folderId, new OrderBy(SortedByType.CustomOrder, true), FilterType.None, false, Guid.Empty, null);
+        var files = fileDao.GetFilesAsync(folderId, new OrderBy(SortedByType.CustomOrder, true), FilterType.None, false, Guid.Empty, null, null, false);
+        
+        var entries = await files.Concat(folders.Cast<FileEntry>())
+            .OrderBy(r => r.Order)
+            .ToListAsync();
 
+        Dictionary<T, int> fileIds = new();
+        Dictionary<T, int> folderIds = new();
+        
+        for (var i = 1; i <= entries.Count; i++)
+        {
+            var entry = entries[i-1];
+            if (entry.Order != i)
+            {
+                if (entry is File<T> file)
+                {
+                    fileIds.Add(file.Id, i);
+                } else if (entry is Folder<T> folder)
+                {                    
+                    folderIds.Add(folder.Id, i);
+                }
+            }
+        }
+
+        if (fileIds.Count != 0)
+        {
+            await fileDao.InitCustomOrder(fileIds, folderId);
+        }
+
+        if (folderIds.Count != 0)
+        {
+            await folderDao.InitCustomOrder(folderIds, folderId);
+        }
+        
         if (subfolders)
         {
-            foreach (var t in folders)
+            foreach (var t in folderIds)
             {
-                await ReOrder(t, true);
+                await ReOrderAsync(t.Key, true);
             }
         }
 
