@@ -854,7 +854,12 @@ public class FileSecurity(IDaoFactory daoFactory,
             return false;
         }
         
+        if (action == FilesSecurityActions.SubmitToFormGallery) //temp
+        {
+            return false;
+        }
 
+        
         if (e.ProviderEntry && folder is { ProviderMapped: false } && e.CreateBy == userId)
         {
             return true;
