@@ -188,16 +188,6 @@ public class FileUtility(
             return FileType.Document;
         }
 
-        if (ExtsFormTemplate.Contains(extension))
-        {
-            return FileType.OFormTemplate;
-        }
-
-        if (ExtsOForm.Contains(extension))
-        {
-            return FileType.OForm;
-        }
-
         if (ExtsSpreadsheet.Contains(extension))
         {
             return FileType.Spreadsheet;
@@ -586,16 +576,6 @@ public class FileUtility(
                 ".gdoc",
                 ".drawio",
                 ".md", ".markdown"
-            }.ToImmutableList();
-
-    public static readonly ImmutableList<string> ExtsFormTemplate = new List<string>
-    {
-                ".docxf"
-            }.ToImmutableList();
-
-    public static readonly ImmutableList<string> ExtsOForm = new List<string>
-    {
-                ".oform"
             }.ToImmutableList();
 
     public static readonly ImmutableList<string> ExtsPdf = new List<string>

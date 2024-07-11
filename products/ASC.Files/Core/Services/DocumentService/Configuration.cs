@@ -282,8 +282,6 @@ public class EditorConfiguration<T>(
         switch (fileType)
         {
             case FileType.Document:
-            case FileType.OForm:
-            case FileType.OFormTemplate:
                 title = FilesJSResource.TitleNewFileText;
                 break;
 
