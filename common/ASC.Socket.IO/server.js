@@ -118,6 +118,28 @@ io.use(sharedsession(session, secretCookieParser, { autoSave: true }))
   })
   .use((socket, next) => {
     auth(socket, next);
+  })
+  .use((socket, next) =>{
+    const session = socket.handshake.session;
+
+    if (!session) {
+      next(new Error("empty session"));
+      return;
+    }
+
+    if(!session.system)
+    {
+      if (!session.user && !session.anonymous) {
+        next(new Error("invalid session: unknown user"));
+        return;
+      }
+  
+      if (!session.portal) {
+        next(new Error("invalid session: unknown portal"));
+        return;
+      }
+    }
+    next();
   });
 
 if (redisClient != null) 

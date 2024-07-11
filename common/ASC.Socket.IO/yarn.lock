@@ -1315,6 +1315,7 @@ __metadata:
     nodemon: "npm:^2.0.15"
     redis: "npm:^4.6.14"
     socket.io: "npm:^4.7.5"
+    ua-parser-js: "npm:^1.0.37"
     winston: "npm:^3.8.2"
     winston-cloudwatch: "npm:^6.1.1"
     winston-daily-rotate-file: "npm:^4.5.5"
@@ -3344,6 +3345,13 @@ __metadata:
     media-typer: "npm:0.3.0"
     mime-types: "npm:~2.1.24"
   checksum: 10/0bd9eeae5efd27d98fd63519f999908c009e148039d8e7179a074f105362d4fcc214c38b24f6cda79c87e563cbd12083a4691381ed28559220d4a10c2047bed4
+  languageName: node
+  linkType: hard
+
+"ua-parser-js@npm:^1.0.37":
+  version: 1.0.38
+  resolution: "ua-parser-js@npm:1.0.38"
+  checksum: 10/f2345e9bd0f9c5f85bcaa434535fae88f4bb891538e568106f0225b2c2937fbfbeb5782bd22320d07b6b3d68b350b8861574c1d7af072ff9b2362fb72d326fd9
   languageName: node
   linkType: hard
 
