@@ -87,10 +87,6 @@ public class File<T> : FileEntry<T>
                     return FilterType.ImagesOnly;
                 case FileType.Document:
                     return FilterType.DocumentsOnly;
-                case FileType.OForm:
-                    return FilterType.OFormOnly;
-                case FileType.OFormTemplate:
-                    return FilterType.OFormTemplateOnly;
                 case FileType.Presentation:
                     return FilterType.PresentationsOnly;
                 case FileType.Spreadsheet:
@@ -100,6 +96,8 @@ public class File<T> : FileEntry<T>
                 case FileType.Audio:
                 case FileType.Video:
                     return FilterType.MediaOnly;
+                case FileType.Pdf:
+                    return FilterType.Pdf;
             }
 
             return FilterType.None;

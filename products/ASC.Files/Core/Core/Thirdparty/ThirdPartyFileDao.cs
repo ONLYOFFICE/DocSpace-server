@@ -132,11 +132,8 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
             case FilterType.DocumentsOnly:
                 files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Document);
                 break;
-            case FilterType.OFormOnly:
-                files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.OForm);
-                break;
-            case FilterType.OFormTemplateOnly:
-                files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.OFormTemplate);
+            case FilterType.Pdf:
+                files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Pdf);
                 break;
             case FilterType.PresentationsOnly:
                 files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Presentation);
@@ -216,11 +213,8 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
             case FilterType.DocumentsOnly:
                 files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Document);
                 break;
-            case FilterType.OFormOnly:
-                files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.OForm);
-                break;
-            case FilterType.OFormTemplateOnly:
-                files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.OFormTemplate);
+            case FilterType.Pdf:
+                files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Pdf);
                 break;
             case FilterType.PresentationsOnly:
                 files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Presentation);

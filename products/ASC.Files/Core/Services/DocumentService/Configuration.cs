@@ -327,8 +327,7 @@ public class EditorConfiguration<T>(
         var filter = fileType switch
         {
             FileType.Document => FilterType.DocumentsOnly,
-            FileType.OForm => FilterType.OFormOnly,
-            FileType.OFormTemplate => FilterType.OFormTemplateOnly,
+            FileType.Pdf => FilterType.Pdf,
             FileType.Spreadsheet => FilterType.SpreadsheetsOnly,
             FileType.Presentation => FilterType.PresentationsOnly,
             _ => FilterType.FilesOnly
@@ -370,8 +369,7 @@ public class EditorConfiguration<T>(
             var filter = fileType switch
             {
                 FileType.Document => FilterType.DocumentsOnly,
-                FileType.OForm => FilterType.OFormOnly,
-                FileType.OFormTemplate => FilterType.OFormTemplateOnly,
+                FileType.Pdf => FilterType.Pdf,
                 FileType.Spreadsheet => FilterType.SpreadsheetsOnly,
                 FileType.Presentation => FilterType.PresentationsOnly,
                 _ => FilterType.FilesOnly
