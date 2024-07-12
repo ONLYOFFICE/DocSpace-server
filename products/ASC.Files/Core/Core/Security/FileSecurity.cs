@@ -1176,6 +1176,7 @@ public class FileSecurity(IDaoFactory daoFactory,
             case FilesSecurityActions.Read:
             case FilesSecurityActions.Pin:
             case FilesSecurityActions.Mute:
+            case FilesSecurityActions.CopyLink:
                 return e.Access != FileShare.Restrict;
             case FilesSecurityActions.Comment:
                 switch (e.RootFolderType)
