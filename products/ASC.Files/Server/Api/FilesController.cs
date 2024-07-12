@@ -120,7 +120,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <short>Get conversion status</short>
     /// <category>Operations</category>
     /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
-    /// <param type="System.Boolean, System" name="start">Specifies if a conversion operation is started or not</param>
+    /// <param type="System.Boolean, System" name="start" example="true">Specifies if a conversion operation is started or not</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.ConversationResultDto, ASC.Files.Core">Conversion result</returns>
     /// <path>api/2.0/files/file/{fileId}/checkconversion</path>
     /// <httpMethod>GET</httpMethod>
@@ -278,7 +278,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <short>Get changes URL</short>
     /// <category>Files</category>
     /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
-    /// <param type="System.Int32, System" name="version">File version</param>
+    /// <param type="System.Int32, System" name="version" example="1234">File version</param>
     /// <returns type="ASC.Files.Core.EditHistoryDataDto, ASC.Files.Core">File version history data</returns>
     /// <path>api/2.0/files/file/{fileId}/edit/diff</path>
     /// <httpMethod>GET</httpMethod>
@@ -372,8 +372,8 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <short>Restore a file version</short>
     /// <category>Files</category>
     /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
-    /// <param type="System.Int32, System" name="version">File version</param>
-    /// <param type="System.String, System" name="url">File version URL</param>
+    /// <param type="System.Int32, System" name="version" example="1234">File version</param>
+    /// <param type="System.String, System" name="url" example="some text">File version URL</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.EditHistoryDto, ASC.Files.Core">Version history data: file ID, key, file version, version group, a user who updated a file, creation time, history changes in the string format, list of history changes, server version</returns>
     /// <path>api/2.0/files/file/{fileId}/restoreversion</path>
     /// <httpMethod>GET</httpMethod>

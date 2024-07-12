@@ -26,41 +26,26 @@
 
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
-/// <summary>
-/// </summary>
 public class TfaRequestsDto
 {
-    /// <summary>TFA type (None, Sms, or App)</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "None", Description = "TFA type (None, Sms, or App)")]
     public string Type { get; set; }
 
-    /// <summary>User ID</summary>
-    /// <type>System.Nullable{System.Guid}, System</type>
-    /// <example>9924256A-739C-462b-AF15-E652A3B1B6EB</example>
+    [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "User ID", Nullable = true)]
     public Guid? Id { get; set; }
 
-    /// <summary>List of trusted IP addresses</summary>
-    /// <type>System.Collections.Generic.List{System.String}, System.Collections.Generic</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "List of trusted IP addresses")]
     public List<string> TrustedIps { get; set; }
 
-    /// <summary>List of users who must use the TFA verification</summary>
-    /// <type>System.Collections.Generic.List{System.Guid}, System.Collections.Generic</type>
-    /// <example>9924256A-739C-462b-AF15-E652A3B1B6EB</example>
-	/// <collection>list</collection>
+    [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "List of users who must use the TFA verification")]
     public List<Guid> MandatoryUsers { get; set; }
 
-    /// <summary>List of groups who must use the TFA verification</summary>
-    /// <type>System.Collections.Generic.List{System.Guid}, System.Collections.Generic</type>
-    /// <example>9924256A-739C-462b-AF15-E652A3B1B6EB</example>
-	/// <collection>list</collection>
+    [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "List of groups who must use the TFA verification")]
     public List<Guid> MandatoryGroups { get; set; }
 }
 
-/// <summary>
-/// </summary>
 public class TfaValidateRequestsDto
 {
-    /// <summary>TFA code</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "TFA code")]
     public string Code { get; set; }
 }

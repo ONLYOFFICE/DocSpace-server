@@ -44,6 +44,11 @@ public class MigrationController(
         return migrationCore.GetAvailableMigrations();
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="migratorName" example="some text"></param>
+    /// <returns></returns>
     [Tags("Migration")]
     [HttpPost("init/{migratorName}")]
     public async Task UploadAndInitAsync(string migratorName)

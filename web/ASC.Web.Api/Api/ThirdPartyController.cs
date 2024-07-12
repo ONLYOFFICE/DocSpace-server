@@ -85,9 +85,9 @@ public class ThirdPartyController(OAuth20TokenHelper oAuth20TokenHelper) : Contr
     /// Returns the confirmation code for requesting an OAuth token.
     /// </summary>
     /// <short>Get the confirmation code</short>
-    /// <param type="System.String, System" name="redirect">URL where the user will be redirected to after they have granted the application access</param>
-    /// <param type="System.String, System" method="url" name="code">Confirmation code that can be exchanged for an OAuth token</param>
-    /// <param type="System.String, System" name="error">Error</param>
+    /// <param type="System.String, System" name="redirect" example="some text">URL where the user will be redirected to after they have granted the application access</param>
+    /// <param type="System.String, System" method="url" name="code" example="some text">Confirmation code that can be exchanged for an OAuth token</param>
+    /// <param type="System.String, System" name="error" example="some text">Error</param>
     /// <returns type="System.Object, System">Confirmation code</returns>
     /// <path>api/2.0/thirdparty/{provider}/code</path>
     /// <httpMethod>GET</httpMethod>

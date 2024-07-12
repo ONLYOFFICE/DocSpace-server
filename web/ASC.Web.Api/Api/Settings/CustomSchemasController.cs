@@ -164,7 +164,7 @@ public class CustomSchemasController(MessageService messageService,
     /// </summary>
     /// <short>Get a team template by ID</short>
     /// <category>Team templates</category>
-    /// <param type="System.String, System" method="url" name="id">Team template ID</param>
+    /// <param type="System.String, System" method="url" name="id" example="some text">Team template ID</param>
     /// <returns type="ASC.Web.Api.ApiModel.RequestsDto.SchemaRequestsDto, ASC.Web.Api">Team template with the following parameters</returns>
     /// <path>api/2.0/settings/customschemas/{id}</path>
     /// <httpMethod>GET</httpMethod>

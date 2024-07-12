@@ -26,12 +26,11 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
-/// <summary>
-/// </summary>
 public class UserInvitationRequestDto
 {
-    /// <summary>List of user IDs</summary>
-    /// <type>System.Collections.Generic.IEnumerable{System.Guid}, System.Collections.Generic</type>
+    [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "List of user IDs")]
     public IEnumerable<Guid> UsersIds { get; set; }
+
+    [SwaggerSchemaCustom(Example = "true", Description = "Resend all")]
     public bool ResendAll { get; set; }
 }

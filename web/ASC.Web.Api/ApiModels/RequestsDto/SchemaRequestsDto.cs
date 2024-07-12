@@ -26,51 +26,38 @@
 
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
-/// <summary>
-/// </summary>
 public class SchemaRequestsDto
 {
-    /// <summary>Team template ID</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Team template ID")]
     public string Id { get; init; }
 
-    /// <summary>Team template name</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Team template name")]
     public string Name { get; set; }
 
-    /// <summary>User caption</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "User caption")]
     public string UserCaption { get; init; }
 
-    /// <summary>Users caption</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Users caption")]
     public string UsersCaption { get; init; }
 
-    /// <summary>Group caption</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Group caption")]
     public string GroupCaption { get; init; }
 
-    /// <summary>Groups caption</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Groups caption")]
     public string GroupsCaption { get; init; }
 
-    /// <summary>User status caption</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "User status caption")]
     public string UserPostCaption { get; init; }
 
-    /// <summary>Registration date caption</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Registration date caption")]
     public string RegDateCaption { get; init; }
 
-    /// <summary>Group lead caption</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Group lead caption")]
     public string GroupHeadCaption { get; init; }
 
-    /// <summary>Guest caption</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Guest caption")]
     public string GuestCaption { get; init; }
 
-    /// <summary>Guests caption</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Guests caption")]
     public string GuestsCaption { get; init; }
 }

@@ -26,15 +26,11 @@
 
 namespace ASC.Web.Api.Models;
 
-/// <summary>
-/// </summary>
 public class DnsSettingsRequestsDto
 {
-    /// <summary>DNS</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "DNS")]
     public string DnsName { get; set; }
 
-    /// <summary>Enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom(Example = "true", Description = "Enabled or not")]
     public bool Enable { get; set; }
 }

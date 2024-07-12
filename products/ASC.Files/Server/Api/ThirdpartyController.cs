@@ -102,7 +102,7 @@ public class ThirdpartyController(
     /// <summary>
     /// Removes the third-party storage service account with the ID specified in the request.
     /// </summary>
-    /// <param type="System.Int32, System" method="url" name="providerId">Provider ID. It is a part of the folder ID. Example: folder ID is "sbox-123", then provider ID is "123"</param>
+    /// <param type="System.Int32, System" method="url" name="providerId" example="1234">Provider ID. It is a part of the folder ID. Example: folder ID is "sbox-123", then provider ID is "123"</param>
     /// <short>Remove a third-party account</short>
     /// <category>Third-party integration</category>
     /// <returns type="System.Object, System">Third-party folder ID</returns>

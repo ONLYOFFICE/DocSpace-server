@@ -26,31 +26,25 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
-/// <summary>
-/// </summary>
 public class InsertFileRequestDto : IModelWithFile, IDisposable
 {
-    /// <summary>File</summary>
-    /// <type>Microsoft.AspNetCore.Http.IFormFile, Microsoft.AspNetCore.Http</type>
+    [SwaggerSchemaCustom(Description = "File", Format = "file")]
     public IFormFile File { get; set; }
 
-    /// <summary>File name</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "File name")]
     public string Title { get; set; }
 
-    /// <summary>Specifies whether to create a new file if it already exists or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom(Example = "true", Description = "Specifies whether to create a new file if it already exists or not")]
     public bool CreateNewIfExist { get; set; }
 
-    /// <summary>Specifies whether to keep the file converting status or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom(Example = "true", Description = "Specifies whether to keep the file converting status or not")]
     public bool KeepConvertStatus { get; set; }
+
 
     private Stream _stream;
     private bool _disposedValue;
 
-    /// <summary>Request input stream</summary>
-    /// <type>System.IO.Stream, System.IO</type>
+    [SwaggerSchemaCustom(Example = "N/A", Description = "Request input stream")]
     public Stream Stream
     {
         get => File?.OpenReadStream() ?? _stream;

@@ -119,7 +119,7 @@ public class WebhooksController(ApiContext context,
     /// Remove a webhook
     /// </short>
     /// <category>Webhooks</category>
-    /// <param type="System.Int32, System" method="url" name="id">Webhook ID</param>
+    /// <param type="System.Int32, System" method="url" name="id" example="1234">Webhook ID</param>
     /// <path>api/2.0/settings/webhook</path>
     /// <httpMethod>DELETE</httpMethod>
     /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.WebhooksConfigDto, ASC.Web.Api">Tenant webhook with its config parameters</returns>
@@ -141,13 +141,13 @@ public class WebhooksController(ApiContext context,
     /// Get webhook logs
     /// </short>
     /// <category>Webhooks</category>
-    /// <param type="System.Nullable{System.DateTime}, System" name="deliveryFrom">Delivey start time</param>
-    /// <param type="System.Nullable{System.DateTime}, System" name="deliveryTo">Delivey end time</param>
-    /// <param type="System.String, System" name="hookUri">Hook URI</param>
-    /// <param type="System.Nullable{System.Int32}, System" name="webhookId">Webhook ID</param>
-    /// <param type="System.Nullable{System.Int32}, System" name="configId">Config ID</param>
-    /// <param type="System.Nullable{System.Int32}, System" name="eventId">Event ID</param>
-    /// <param type="System.Nullable{ASC.Webhooks.Core.WebhookGroupStatus}, System" name="groupStatus">Webhook group status</param>
+    /// <param type="System.Nullable{System.DateTime}, System" name="deliveryFrom" example="2008-04-10T06-30-00.000Z">Delivey start time</param>
+    /// <param type="System.Nullable{System.DateTime}, System" name="deliveryTo" example="2008-04-10T06-30-00.000Z">Delivey end time</param>
+    /// <param type="System.String, System" name="hookUri" example="some text">Hook URI</param>
+    /// <param type="System.Nullable{System.Int32}, System" name="webhookId" example="1234">Webhook ID</param>
+    /// <param type="System.Nullable{System.Int32}, System" name="configId" example="1234">Config ID</param>
+    /// <param type="System.Nullable{System.Int32}, System" name="eventId" example="1234">Event ID</param>
+    /// <param type="System.Nullable{ASC.Webhooks.Core.WebhookGroupStatus}, System" name="groupStatus" example="None">Webhook group status</param>
     /// <path>api/2.0/settings/webhooks/log</path>
     /// <httpMethod>GET</httpMethod>
     /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.WebhooksLogDto, ASC.Web.Api">Logs of the webhook activities</returns>
@@ -177,7 +177,7 @@ public class WebhooksController(ApiContext context,
     /// Retry a webhook
     /// </short>
     /// <category>Webhooks</category>
-    /// <param type="System.Int32, System" method="url" name="id">Webhook ID</param>
+    /// <param type="System.Int32, System" method="url" name="id" example="1234">Webhook ID</param>
     /// <path>api/2.0/settings/webhook/{id}/retry</path>
     /// <httpMethod>PUT</httpMethod>
     /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.WebhooksLogDto, ASC.Web.Api">Logs of the webhook activities</returns>
@@ -268,7 +268,7 @@ public class WebhooksController(ApiContext context,
     /// Disable a webhook
     /// </short>
     /// <category>Webhooks</category>
-    /// <param type="System.Int32, System" method="url" name="id">Webhook ID</param>
+    /// <param type="System.Int32, System" method="url" name="id" example="1234">Webhook ID</param>
     /// <path>api/2.0/settings/webhook/{id}</path>
     /// <httpMethod>PUT</httpMethod>
     /// <returns type="ASC.Webhooks.Core.Webhook, ASC.Webhooks.Core">Webhook settings</returns>

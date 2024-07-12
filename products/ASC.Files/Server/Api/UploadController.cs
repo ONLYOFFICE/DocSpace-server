@@ -49,7 +49,7 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     /// </summary>
     /// <short>Chunked upload</short>
     /// <category>Operations</category>
-    /// <param type="System.Int32, System" name="folderId">Folder ID</param>
+    /// <param type="System.Int32, System" name="folderId" example="1234">Folder ID</param>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.SessionRequestDto, ASC.Files.Core" name="inDto">Session request parameters</param>
     /// <remarks>
     /// <![CDATA[
@@ -87,8 +87,8 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     /// </summary>
     /// <short>Create the editing session</short>
     /// <category>Files</category>
-    /// <param type="System.Int32, System" name="fileId">File ID</param>
-    /// <param type="System.Int64, System" name="fileSize">File size in bytes</param>
+    /// <param type="System.Int32, System" name="fileId" example="1234">File ID</param>
+    /// <param type="System.Int64, System" name="fileSize" example="1234">File size in bytes</param>
     /// <returns type="System.Object, System">
     /// <![CDATA[
     /// Information about created session which includes:
@@ -111,6 +111,12 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
         return await filesControllerHelper.CreateEditSessionAsync(fileId, fileSize);
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param type="System.Int32, System" name="folderId" example="1234"></param>
+    /// <param type="ASC.Files.Core.ApiModels.RequestDto.CheckUploadRequestDto, ASC.Files.Core"  name="model"></param>
+    /// <returns></returns>
     [Tags("Files / Folders")]
     [HttpPost("{folderId}/upload/check")]
     public Task<List<string>> CheckUploadAsync(T folderId, CheckUploadRequestDto model)
@@ -122,7 +128,7 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     /// Inserts a file specified in the request to the selected folder by single file uploading.
     /// </summary>
     /// <short>Insert a file</short>
-    /// <param type="System.Int32, System" name="folderId">Folder ID</param>
+    /// <param type="System.Int32, System" name="folderId" example="1234">Folder ID</param>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.InsertFileRequestDto, ASC.Files.Core" name="inDto">Request parameters for inserting a file</param>
     /// <category>Folders</category>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileDto, ASC.Files.Core">Inserted file informationy</returns>

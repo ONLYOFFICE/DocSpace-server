@@ -39,35 +39,30 @@ public enum RoomType
     FormRoom = 7
 }
 
-/// <summary>
-/// </summary>
+
 public class CreateRoomRequestDto
 {
-    /// <summary>Room name</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Room name")]
     public string Title { get; set; }
 
-    /// <summary>Room type</summary>
-    /// <type>ASC.Files.Core.ApiModels.RequestDto.RoomType, ASC.Files.Core</type>
+    [SwaggerSchemaCustom(Example = "CustomRoom", Description = "Room type")]
     public RoomType RoomType { get; set; }
 
+    [SwaggerSchemaCustom(Example = "true", Description = "Private")]
     public bool Private { get; set; }
 
-    /// <summary>Collection of sharing parameters</summary>
-    /// <type>System.Collections.Generic.IEnumerable{ASC.Files.Core.ApiModels.FileShareParams}, System.Collections.Generic</type>
+    [SwaggerSchemaCustom(Description = "Collection of sharing parameters")]
     public IEnumerable<FileShareParams> Share { get; set; }
 
-    /// <summary>Notifies users about the shared room or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom(Example = "true", Description = "Notifies users about the shared room or not")]
     public bool Notify { get; set; }
 
-    /// <summary>Message to send when notifying about the shared room</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Message to send when notifying about the shared room")]
     public string SharingMessage { get; set; }
 
-    /// <summary>Room quota</summary>
-    /// <type>System.Int64, System</type>
+    [SwaggerSchemaCustom(Example = "1234", Description = "Room quota", Format = "int64")]
     public long Quota { get; set; }
-    
+
+    [SwaggerSchemaCustom(Example = "true", Description = "Indexing")]
     public bool Indexing { get; set; }
 }

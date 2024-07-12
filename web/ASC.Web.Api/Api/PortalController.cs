@@ -99,7 +99,7 @@ public class PortalController(
     /// Get a user by ID
     /// </short>
     /// <category>Users</category>
-    /// <param type="System.Guid, System" method="url" name="userID">User ID</param>
+    /// <param type="System.Guid, System" method="url" name="userID" example="9924256A-739C-462b-AF15-E652A3B1B6EB">User ID</param>
     /// <returns type="ASC.Core.Users.UserInfo, ASC.Core.Common">User information</returns>
     /// <path>api/2.0/portal/users/{userID}</path>
     /// <httpMethod>GET</httpMethod>
@@ -116,7 +116,7 @@ public class PortalController(
     /// <short>
     /// Get an invitation link
     /// </short>
-    /// <param type="ASC.Core.Users.EmployeeType, ASC.Core.Common" method="url" name="employeeType">Employee type (All, RoomAdmin, User, DocSpaceAdmin)</param>
+    /// <param type="ASC.Core.Users.EmployeeType, ASC.Core.Common" method="url" name="employeeType" example="All">Employee type (All, RoomAdmin, User, DocSpaceAdmin)</param>
     /// <category>Users</category>
     /// <returns type="System.Object, System">Invitation link</returns>
     /// <path>api/2.0/portal/users/invite/{employeeType}</path>
@@ -170,7 +170,7 @@ public class PortalController(
     /// Get an extra tenant license
     /// </short>
     /// <category>Quota</category>
-    /// <param type="System.Boolean, System" name="refresh">Specifies whether the tariff will be refreshed</param>
+    /// <param type="System.Boolean, System" name="refresh" example="true">Specifies whether the tariff will be refreshed</param>
     /// <returns type="ASC.Web.Api.ApiModels.ResponseDto, ASC.Web.Api">Extra tenant license information</returns>
     /// <path>api/2.0/portal/tenantextra</path>
     /// <httpMethod>GET</httpMethod>
@@ -252,7 +252,7 @@ public class PortalController(
     /// Get a portal tariff
     /// </short>
     /// <category>Quota</category>
-    /// <param type="System.Boolean, System" name="refresh">Specifies whether the tariff will be refreshed</param>
+    /// <param type="System.Boolean, System" name="refresh" example="true">Specifies whether the tariff will be refreshed</param>
     /// <returns type="ASC.Core.Billing.Tariff, ASC.Core.Common">Current portal tariff</returns>
     /// <path>api/2.0/portal/tariff</path>
     /// <httpMethod>GET</httpMethod>
@@ -315,7 +315,7 @@ public class PortalController(
     /// Get a path to the portal
     /// </short>
     /// <category>Settings</category>
-    /// <param type="System.String, System" name="virtualPath">Portal virtual path</param>
+    /// <param type="System.String, System" name="virtualPath" example="some text">Portal virtual path</param>
     /// <returns type="System.Object, System">Portal path</returns>
     /// <path>api/2.0/portal/path</path>
     /// <httpMethod>GET</httpMethod>
@@ -333,7 +333,7 @@ public class PortalController(
     /// Get a bookmark thumbnail
     /// </short>
     /// <category>Settings</category>
-    /// <param type="System.String, System" name="url">Bookmark URL</param>
+    /// <param type="System.String, System" name="url" example="some text">Bookmark URL</param>
     /// <returns type="Microsoft.AspNetCore.Mvc.FileResult, Microsoft.AspNetCore.Mvc">Thumbnail</returns>
     /// <path>api/2.0/portal/thumb</path>
     /// <httpMethod>GET</httpMethod>

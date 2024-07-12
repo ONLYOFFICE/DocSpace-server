@@ -26,15 +26,11 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
-/// <summary>
-/// </summary>
 public class UpdateRoomRequestDto
 {
-    /// <summary>Room name</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Room name")]
     public string Title { get; set; }
 
-    /// <summary>Room quota</summary>
-    /// <type>System.Nullable{System.Int64}, System</type>
+    [SwaggerSchemaCustom(Example = "1234", Description = "Room quota", Format = "int64")]
     public long? Quota { get; set; }
 }

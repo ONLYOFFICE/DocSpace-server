@@ -26,32 +26,24 @@
 
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
-/// <summary>
-/// </summary>
 public class AuthServiceRequestsDto
 {
-    /// <summary>Name</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Name")]
     public string Name { get; set; }
 
-    /// <summary>Title</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Title")]
     public string Title { get; set; }
 
-    /// <summary>Description</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Description")]
     public string Description { get; set; }
 
-    /// <summary>Instruction</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Instruction")]
     public string Instruction { get; set; }
 
-    /// <summary>Specifies if the authentication service can be set or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Specifies if the authentication service can be set or not")]
     public bool CanSet { get; set; }
 
-    /// <summary>List of authorization keys</summary>
-    /// <type>System.Collections.Generic.List{ASC.Web.Core.CookiesType.AuthKey}, System.Collections.Generic</type>
+    [SwaggerSchemaCustom(Description = "List of authorization keys")]
     public List<AuthKey> Props { get; set; }
 
     public static async Task<AuthServiceRequestsDto> From(Consumer consumer)

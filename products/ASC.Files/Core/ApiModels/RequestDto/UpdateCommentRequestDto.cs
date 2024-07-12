@@ -26,15 +26,11 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
-/// <summary>
-/// </summary>
 public class UpdateCommentRequestDto
 {
-    /// <summary>File version</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustom(Example = "1234", Description = "File version", Format = "int32")]
     public int Version { get; set; }
 
-    /// <summary>Comment text</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Comment text")]
     public string Comment { get; set; }
 }

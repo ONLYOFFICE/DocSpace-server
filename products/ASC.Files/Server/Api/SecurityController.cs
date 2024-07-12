@@ -62,7 +62,7 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// </summary>
     /// <short>Get the shared file information</short>
     /// <category>Sharing</category>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
+    /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">List of shared file information</returns>
     /// <path>api/2.0/files/file/{fileId}/share</path>
     /// <httpMethod>GET</httpMethod>
@@ -82,7 +82,7 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// Returns the detailed information about the shared folder with the ID specified in the request.
     /// </summary>
     /// <short>Get the shared folder information</short>
-    /// <param type="System.Int32, System" method="url" name="folderId">Folder ID</param>
+    /// <param type="System.Int32, System" method="url" name="folderId" example="1234">Folder ID</param>
     /// <category>Sharing</category>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">List of shared folder information</returns>
     /// <path>api/2.0/files/folder/{folderId}/share</path>
@@ -102,7 +102,7 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// <summary>
     /// Sets the sharing settings to a file with the ID specified in the request.
     /// </summary>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
+    /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.SecurityInfoRequestDto, ASC.Files.Core" name="inDto">Security information request parameters</param>
     /// <short>Share a file</short>
     /// <category>Sharing</category>
@@ -124,7 +124,7 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// <summary>
     /// Sets the sharing settings to a folder with the ID specified in the request.
     /// </summary>
-    /// <param type="System.Int32, System" method="url" name="folderId">Folder ID</param>
+    /// <param type="System.Int32, System" method="url" name="folderId" example="1234">Folder ID</param>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.SecurityInfoRequestDto, ASC.Files.Core" name="inDto">Security information request parameters</param>
     /// <short>Share a folder</short>
     /// <category>Sharing</category>
@@ -147,7 +147,7 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// Returns the encryption keys to access a file with the ID specified in the request.
     /// </summary>
     /// <short>Get file encryption keys</short>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
+    /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
     /// <category>Sharing</category>
     /// <returns type="ASC.Web.Files.Core.Entries.EncryptionKeyPairDto, ASC.Files.Core">List of encryption key pairs: encrypted private key, public key, user ID</returns>
     /// <path>api/2.0/files/file/{fileId}/publickeys</path>
@@ -164,7 +164,7 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// <summary>
     /// Sends a message to the users who are mentioned in the file with the ID specified in the request.
     /// </summary>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
+    /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
     /// <param type="ASC.Web.Files.Services.WCFService.MentionMessageWrapper, ASC.Files.Core" name="mentionMessage">Mention message request parameters</param>
     /// <short>Send the mention message</short>
     /// <category>Sharing</category>
@@ -329,7 +329,7 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// </summary>
     /// <short>Get the external data</short>
     /// <category>Sharing</category>
-    /// <param type="System.String, System" name="key" method="url">The unique document identifier</param>
+    /// <param type="System.String, System" name="key" method="url" example="some text">The unique document identifier</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.ExternalShareDto, ASC.Files.Core">External data</returns>
     /// <path>api/2.0/files/share/{key}</path>
     /// <httpMethod>GET</httpMethod>
@@ -350,7 +350,7 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// </summary>
     /// <short>Apply external data password</short>
     /// <category>Sharing</category>
-    /// <param type="System.String, System" name="key" method="url">The unique document identifier</param>
+    /// <param type="System.String, System" name="key" method="url" example="some text">The unique document identifier</param>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.ExternalShareRequestDto, ASC.Files.Core" name="inDto">External data request parameters</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.ExternalShareDto, ASC.Files.Core">External data</returns>
     /// <path>api/2.0/files/share/{key}/password</path>

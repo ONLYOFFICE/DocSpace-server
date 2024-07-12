@@ -26,15 +26,11 @@
 
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
-/// <summary>
-/// </summary>
 public class QuotaSettingsRequestsDto
 {
-    /// <summary>Specifies if the quota settings are enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the quota settings are enabled or not")]
     public bool EnableQuota { get; set; }
 
-    /// <summary>Default quota value</summary>
-    /// <type>System.Int64, System</type>
+    [SwaggerSchemaCustom(Example = "1234", Description = "Default quota value", Format = "int64")]
     public JsonElement DefaultQuota { get; set; }
 }

@@ -99,10 +99,10 @@ public class SecurityController(PermissionContext permissionContext,
     /// Get filtered login events
     /// </short>
     /// <category>Login history</category>
-    /// <param type="System.Guid, System" name="userId">User ID</param>
-    /// <param type="ASC.MessagingSystem.Core.MessageAction, ASC.MessagingSystem.Core" name="action">Action</param>
-    /// <param type="ASC.Api.Core.ApiDateTime, ASC.Api.Core" name="from">Start date</param>
-    /// <param type="ASC.Api.Core.ApiDateTime, ASC.Api.Core" name="to">End date</param>
+    /// <param type="System.Guid, System" name="userId" example="9924256A-739C-462b-AF15-E652A3B1B6EB">User ID</param>
+    /// <param type="ASC.MessagingSystem.Core.MessageAction, ASC.MessagingSystem.Core" name="action" example="null">Action</param>
+    /// <param type="ASC.Api.Core.ApiDateTime, ASC.Api.Core" name="from" example="2008-04-10T06-30-00.000Z">Start date</param>
+    /// <param type="ASC.Api.Core.ApiDateTime, ASC.Api.Core" name="to" example="2008-04-10T06-30-00.000Z">End date</param>
     /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.LoginEventDto, ASC.Web.Api">List of filtered login events</returns>
     /// <path>api/2.0/security/audit/login/filter</path>
     /// <httpMethod>GET</httpMethod>
@@ -139,15 +139,15 @@ public class SecurityController(PermissionContext permissionContext,
     /// Get filtered audit trail data
     /// </short>
     /// <category>Audit trail data</category>
-    /// <param type="System.Guid, System" name="userId">User ID</param>
-    /// <param type="ASC.AuditTrail.Types.ProductType, ASC.AuditTrail.Types" name="productType">Product</param>
-    /// <param type="ASC.AuditTrail.Types.ModuleType, ASC.AuditTrail.Types" name="moduleType">Module</param>
-    /// <param type="ASC.AuditTrail.Types.ActionType, ASC.AuditTrail.Types" name="actionType">Action type</param>
-    /// <param type="ASC.MessagingSystem.Core.MessageAction, ASC.MessagingSystem.Core" name="action">Action</param>
-    /// <param type="ASC.AuditTrail.Types.EntryType, ASC.AuditTrail.Types" name="entryType">Entry</param>
-    /// <param type="System.String, System" name="target">Target</param>
-    /// <param type="ASC.Api.Core.ApiDateTime, ASC.Api.Core" name="from">Start date</param>
-    /// <param type="ASC.Api.Core.ApiDateTime, ASC.Api.Core" name="to">End date</param>
+    /// <param type="System.Guid, System" name="userId" example="9924256A-739C-462b-AF15-E652A3B1B6EB">User ID</param>
+    /// <param type="ASC.AuditTrail.Types.ProductType, ASC.AuditTrail.Types" name="productType" example="None">Product</param>
+    /// <param type="ASC.AuditTrail.Types.ModuleType, ASC.AuditTrail.Types" name="moduleType" example="None">Module</param>
+    /// <param type="ASC.AuditTrail.Types.ActionType, ASC.AuditTrail.Types" name="actionType" example="None">Action type</param>
+    /// <param type="ASC.MessagingSystem.Core.MessageAction, ASC.MessagingSystem.Core" name="action" example="null">Action</param>
+    /// <param type="ASC.AuditTrail.Types.EntryType, ASC.AuditTrail.Types" name="entryType" example="None">Entry</param>
+    /// <param type="System.String, System" name="target" example="some text">Target</param>
+    /// <param type="ASC.Api.Core.ApiDateTime, ASC.Api.Core" name="from" example="2008-04-10T06-30-00.000Z">Start date</param>
+    /// <param type="ASC.Api.Core.ApiDateTime, ASC.Api.Core" name="to" example="2008-04-10T06-30-00.000Z">End date</param>
     /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.AuditEventDto, ASC.Web.Api">List of filtered audit trail data</returns>
     /// <path>api/2.0/security/audit/events/filter</path>
     /// <httpMethod>GET</httpMethod>
@@ -215,8 +215,8 @@ public class SecurityController(PermissionContext permissionContext,
     /// Get audit trail mappers
     /// </short>
     /// <category>Audit trail data</category>
-    /// <param type="System.Nullable{ASC.AuditTrail.Types.ProductType}, System" name="productType">Product</param>
-    /// <param type="System.Nullable{ASC.AuditTrail.Types.ModuleType}, System" name="moduleType">Module</param>
+    /// <param type="System.Nullable{ASC.AuditTrail.Types.ProductType}, System" name="productType" example="None">Product</param>
+    /// <param type="System.Nullable{ASC.AuditTrail.Types.ModuleType}, System" name="moduleType" example="None">Module</param>
     /// <returns type="System.Object, System">Audit trail mappers</returns>
     /// <path>api/2.0/security/audit/mappers</path>
     /// <httpMethod>GET</httpMethod>

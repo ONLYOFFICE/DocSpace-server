@@ -26,15 +26,11 @@
 
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
-/// <summary>
-/// </summary>
 public class SendCongratulationsDto
 {
-    /// <summary>Uer ID</summary>
-    /// <type>System.Guid, System</type>
+    [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "User ID")]
     public Guid Userid { get; set; }
 
-    /// <summary>Email key</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Email key")]
     public string Key { get; set; }
 }

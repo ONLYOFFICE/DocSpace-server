@@ -73,7 +73,7 @@ public class CustomNavigationController(MessageService messageService,
     /// </summary>
     /// <short>Get a custom navigation item by ID</short>
     /// <category>Custom navigation</category>
-    /// <param type="System.Guid, System" method="url" name="id">Custom navigation item ID</param>
+    /// <param type="System.Guid, System" method="url" name="id" example="9924256A-739C-462b-AF15-E652A3B1B6EB">Custom navigation item ID</param>
     /// <returns type="ASC.Web.Studio.Core.CustomNavigationItem, ASC.Web.Core">Custom navigation item</returns>
     /// <path>api/2.0/settings/customnavigation/get/{id}</path>
     /// <httpMethod>GET</httpMethod>

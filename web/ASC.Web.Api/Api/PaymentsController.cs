@@ -122,7 +122,7 @@ public class PaymentController(UserManager userManager,
     /// Get the payment account
     /// </short>
     /// <category>Payment</category>
-    /// <param type="System.String, System" name="backUrl">Back URL</param>
+    /// <param type="System.String, System" name="backUrl" example="some text">Back URL</param>
     /// <returns type="System.Object, System">The URL to the payment account</returns>
     /// <path>api/2.0/portal/payment/account</path>
     /// <httpMethod>GET</httpMethod>
@@ -221,6 +221,7 @@ public class PaymentController(UserManager userManager,
     /// Get quota payment information
     /// </short>
     /// <category>Payment</category>
+    /// <param type="System.Boolean, System" name="refresh" example="true"></param>
     /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.QuotaDto, ASC.Web.Api">Payment information about the current portal quota</returns>
     /// <path>api/2.0/portal/payment/quota</path>
     /// <httpMethod>GET</httpMethod>

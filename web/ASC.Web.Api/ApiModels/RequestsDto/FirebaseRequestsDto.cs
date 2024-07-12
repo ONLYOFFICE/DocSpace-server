@@ -26,15 +26,11 @@
 
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
-/// <summary>
-/// </summary>
 public class FirebaseRequestsDto
 {
-    /// <summary>Firebase device token</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Firebase device token")]
     public string FirebaseDeviceToken { get; set; }
 
-    /// <summary>Specifies if the user is subscribed to the push notification or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the user is subscribed to the push notification or not")]
     public bool IsSubscribed { get; set; }
 }

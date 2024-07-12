@@ -26,35 +26,26 @@
 
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
-/// <summary>
-/// </summary>
 public class SettingsRequestsDto
 {
-    /// <summary>Default product ID</summary>
-    /// <type>System.Guid, System</type>
+    [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "Default product ID")]
     public Guid DefaultProductID { get; set; }
 
-    /// <summary>Language</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Language")]
     public string Lng { get; set; }
 
-    /// <summary>Time zone ID</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Time zone ID")]
     public string TimeZoneID { get; set; }
 
-    /// <summary>Theme</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Theme")]
     public string Theme { get; set; }
 
-    /// <summary>Specifies whether to show tips for the user or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom(Example = "true", Description = "Specifies whether to show tips for the user or not")]
     public bool Show { get; set; } //tips
 
-    /// <summary>Version ID</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustom(Example = "1234", Description = "Version ID", Format = "int32")]
     public int VersionId { get; set; }
 
-    /// <summary>Owner ID</summary>
-    /// <type>System.Guid, System</type>
+    [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "Owner ID")]
     public Guid OwnerId { get; set; }
 }

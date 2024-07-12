@@ -48,7 +48,7 @@ public abstract class TagsController<T>(FileStorageService fileStorageService,
     /// <summary>
     /// Adds a file with the ID specified in the request to the "Recent" section.
     /// </summary>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
+    /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
     /// <short>Add a file to the "Recent" section</short>
     /// <category>Files</category>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileDto, ASC.Files.Core">New file information</returns>
@@ -69,8 +69,8 @@ public abstract class TagsController<T>(FileStorageService fileStorageService,
     /// <summary>
     /// Changes the favorite status of the file with the ID specified in the request.
     /// </summary>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
-    /// <param type="System.Boolean, System" name="favorite">Specifies if this file is marked as favorite or not</param>
+    /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
+    /// <param type="System.Boolean, System" name="favorite" example="true">Specifies if this file is marked as favorite or not</param>
     /// <short>Change the file favorite status</short>
     /// <category>Files</category>
     /// <returns type="System.Boolean, System">Boolean value: true - the file is favorite, false - the file is not favorite</returns>
@@ -171,7 +171,7 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     /// </summary>
     /// <short>Delete template files</short>
     /// <category>Files</category>
-    /// <param type="System.Collections.Generic.IEnumerable{System.Int32}, System.Collections.Generic" name="fileIds">List of file IDs</param>
+    /// <param type="System.Collections.Generic.IEnumerable{System.Int32}, System.Collections.Generic" name="fileIds" example="1234">List of file IDs</param>
     /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
     /// <path>api/2.0/files/templates</path>
     /// <httpMethod>DELETE</httpMethod>

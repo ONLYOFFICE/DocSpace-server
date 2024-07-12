@@ -188,7 +188,7 @@ public class ConnectionsController(
     /// Log out for the user by ID
     /// </short>
     /// <category>Active connections</category>
-    /// <param type="System.Guid, System" method="url" name="userId">User ID</param>
+    /// <param type="System.Guid, System" method="url" name="userId" example="9924256A-739C-462b-AF15-E652A3B1B6EB">User ID</param>
     /// <path>api/2.0/security/activeconnections/logoutall/{userId}</path>
     /// <httpMethod>PUT</httpMethod>
     /// <returns></returns>
@@ -246,7 +246,7 @@ public class ConnectionsController(
     /// Log out from the connection
     /// </short>
     /// <category>Active connections</category>
-    /// <param type="System.Int32, System" method="url" name="loginEventId">Login event ID</param>
+    /// <param type="System.Int32, System" method="url" name="loginEventId" example="1234">Login event ID</param>
     /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
     /// <path>api/2.0/security/activeconnections/logout/{loginEventId}</path>
     /// <httpMethod>PUT</httpMethod>

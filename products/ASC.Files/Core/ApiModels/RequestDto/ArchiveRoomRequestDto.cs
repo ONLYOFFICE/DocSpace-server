@@ -26,11 +26,8 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
-/// <summary>
-/// </summary>
 public class ArchiveRoomRequestDto
 {
-    /// <summary>Specifies whether to archive a room after the editing session is finished or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom(Example = "true", Description = "Specifies whether to archive a room after the editing session is finished or not")]
     public bool DeleteAfter { get; set; }
 }

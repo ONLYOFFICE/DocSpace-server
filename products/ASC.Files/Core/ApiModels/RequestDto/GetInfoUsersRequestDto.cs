@@ -27,7 +27,6 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 public class GetInfoUsersRequestDto
 {
-    /// <summary>List of user ids</summary>
-    /// <type>System.Collections.Generic.List{System.Guid}, System.Collections.Generic</type>
+    [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "List of user ids")]
     public List<Guid> UserIds { get; set; }
 }

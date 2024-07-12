@@ -57,19 +57,14 @@ public class MentionWrapper
     public string Name { get; internal set; }
 }
 
-/// <summary>
-/// </summary>
 public class MentionMessageWrapper
 {
-    /// <summary>The config parameter which contains the information about the comment in the document that will be scrolled to</summary>
-    /// <type>ASC.Web.Files.Services.DocumentService.ActionLinkConfig, ASC.Files.Core</type>
+    [SwaggerSchemaCustom(Description = "The config parameter which contains the information about the comment in the document that will be scrolled to")]
     public ActionLinkConfig ActionLink { get; set; }
 
-    /// <summary>A list of emails which will receive the mention message</summary>
-    /// <type>System.Collections.Generic.List{System.String}, System.Collections.Generic</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "A list of emails which will receive the mention message")]
     public List<string> Emails { get; set; }
 
-    /// <summary>The comment message</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "The comment message")]
     public string Message { get; set; }
 }

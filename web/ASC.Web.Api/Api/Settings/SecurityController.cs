@@ -57,7 +57,7 @@ public class SecurityController(
     /// Get the security settings
     /// </short>
     /// <category>Security</category>
-    /// <param type="System.Collections.Generic.IEnumerable{System.String}, System.Collections.Generic" name="ids">List of module IDs</param>
+    /// <param type="System.Collections.Generic.IEnumerable{System.String}, System.Collections.Generic" name="ids" example="some text">List of module IDs</param>
     /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.SecurityDto, ASC.Web.Api">Security settings</returns>
     /// <path>api/2.0/settings/security</path>
     /// <httpMethod>GET</httpMethod>
@@ -107,7 +107,7 @@ public class SecurityController(
     /// Get the module availability
     /// </short>
     /// <category>Security</category>
-    /// <param type="System.Guid, System" method="url" name="id">Module ID</param>
+    /// <param type="System.Guid, System" method="url" name="id" example="9924256A-739C-462b-AF15-E652A3B1B6EB">Module ID</param>
     /// <returns type="System.Boolean, System">Boolean value: true - module is enabled, false - module is disabled</returns>
     /// <path>api/2.0/settings/security/{id}</path>
     /// <httpMethod>GET</httpMethod>
@@ -316,7 +316,7 @@ public class SecurityController(
     /// Get the product administrators
     /// </short>
     /// <category>Security</category>
-    /// <param type="System.Guid, System" method="url" name="productid">Product ID</param>
+    /// <param type="System.Guid, System" method="url" name="productid" example="9924256A-739C-462b-AF15-E652A3B1B6EB">Product ID</param>
     /// <returns type="ASC.Web.Api.Models.EmployeeDto, ASC.Api.Core">List of product administrators with the following parameters</returns>
     /// <path>api/2.0/settings/security/administrator/{productid}</path>
     /// <httpMethod>GET</httpMethod>
@@ -340,8 +340,8 @@ public class SecurityController(
     /// Check a product administrator
     /// </short>
     /// <category>Security</category>
-    /// <param type="System.Guid, System" name="productid">Product ID</param>
-    /// <param type="System.Guid, System" name="userid">User ID</param>
+    /// <param type="System.Guid, System" name="productid" example="9924256A-739C-462b-AF15-E652A3B1B6EB">Product ID</param>
+    /// <param type="System.Guid, System" name="userid" example="9924256A-739C-462b-AF15-E652A3B1B6EB">User ID</param>
     /// <returns type="System.Object, System">Object with the user security information: product ID, user ID, administrator or not</returns>
     /// <path>api/2.0/settings/security/administrator</path>
     /// <httpMethod>GET</httpMethod>

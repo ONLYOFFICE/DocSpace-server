@@ -26,31 +26,23 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
-/// <summary>
-/// </summary>
 public class ThirdPartyBackupRequestDto
 {
-    /// <summary>Connection URL for the sharepoint</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Connection URL for the sharepoint", Format = "uri")]
     public string Url { get; set; }
 
-    /// <summary>Login</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Login")]
     public string Login { get; set; }
 
-    /// <summary>Password</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Password")]
     public string Password { get; set; }
 
-    /// <summary>Authentication token</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Authentication token")]
     public string Token { get; set; }
 
-    /// <summary>Customer title</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Customer title")]
     public string CustomerTitle { get; set; }
 
-    /// <summary>Provider key</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Provider key")]
     public string ProviderKey { get; set; }
 }

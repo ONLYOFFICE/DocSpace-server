@@ -101,7 +101,7 @@ public class VirtualRoomsThirdPartyController(GlobalFolderHelper globalFolderHel
     /// </summary>
     /// <short>Create a third-party room</short>
     /// <category>Rooms</category>
-    /// <param type="System.String, System" method="url" name="id">ID of the folder in the third-party storage in which the contents of the room will be stored</param>
+    /// <param type="System.String, System" method="url" name="id" example="1234">ID of the folder in the third-party storage in which the contents of the room will be stored</param>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.CreateRoomRequestDto, ASC.Files.Core" name="inDto">Request parameters for creating a room</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FolderDto, ASC.Files.Core">Room information</returns>
     /// <path>api/2.0/files/rooms/thirdparty/{id}</path>
@@ -139,7 +139,7 @@ public abstract class VirtualRoomsController<T>(
     /// </summary>
     /// <short>Get room information</short>
     /// <category>Rooms</category>
-    /// <param type="System.Int32, System" method="url" name="id">Room ID</param>
+    /// <param type="System.Int32, System" method="url" name="id" example="1234">Room ID</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FolderDto, ASC.Files.Core">Room information</returns>
     /// <path>api/2.0/files/rooms/{id}</path>
     /// <httpMethod>GET</httpMethod>
@@ -159,7 +159,7 @@ public abstract class VirtualRoomsController<T>(
     /// </summary>
     /// <short>Rename a room</short>
     /// <category>Rooms</category>
-    /// <param type="System.Int32, System" method="url" name="id">Room ID</param>
+    /// <param type="System.Int32, System" method="url" name="id" example="1234">Room ID</param>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.UpdateRoomRequestDto, ASC.Files.Core" name="inDto">Request parameters for updating a room</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FolderDto, ASC.Files.Core">Updated room information</returns>
     /// <path>api/2.0/files/rooms/{id}</path>
@@ -231,7 +231,7 @@ public abstract class VirtualRoomsController<T>(
     /// </summary>
     /// <short>Remove a room</short>
     /// <category>Rooms</category>
-    /// <param type="System.Int32, System" method="url" name="id">Room ID</param>
+    /// <param type="System.Int32, System" method="url" name="id" example="1234">Room ID</param>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.DeleteRoomRequestDto, ASC.Files.Core" name="inDto">Request parameters for deleting a room</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileOperationDto, ASC.Files.Core">File operation</returns>
     /// <path>api/2.0/files/rooms/{id}</path>
@@ -250,7 +250,7 @@ public abstract class VirtualRoomsController<T>(
     /// </summary>
     /// <short>Archive a room</short>
     /// <category>Rooms</category>
-    /// <param type="System.Int32, System" method="url" name="id">Room ID</param>
+    /// <param type="System.Int32, System" method="url" name="id" example="1234">Room ID</param>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.ArchiveRoomRequestDto, ASC.Files.Core" name="inDto">Request parameters for archiving a room</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileOperationDto, ASC.Files.Core">File operation</returns>
     /// <path>api/2.0/files/rooms/{id}/archive</path>
@@ -272,7 +272,7 @@ public abstract class VirtualRoomsController<T>(
     /// </summary>
     /// <short>Unarchive a room</short>
     /// <category>Rooms</category>
-    /// <param type="System.Int32, System" method="url" name="id">Room ID</param>
+    /// <param type="System.Int32, System" method="url" name="id" example="1234">Room ID</param>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.ArchiveRoomRequestDto, ASC.Files.Core" name="inDto">Request parameters for unarchiving a room</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileOperationDto, ASC.Files.Core">File operation</returns>
     /// <path>api/2.0/files/rooms/{id}/unarchive</path>
@@ -293,7 +293,7 @@ public abstract class VirtualRoomsController<T>(
     /// </summary>
     /// <short>Set room access rights</short>
     /// <category>Rooms</category>
-    /// <param type="System.Int32, System" method="url" name="id">Room ID</param>
+    /// <param type="System.Int32, System" method="url" name="id" example="1234">Room ID</param>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.RoomInvitationRequestDto, ASC.Files.Core" name="inDto">Request parameters for inviting users to a room</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.RoomSecurityDto, ASC.Files.Core">Room security information</returns>
     /// <path>api/2.0/files/rooms/{id}/share</path>
@@ -335,8 +335,8 @@ public abstract class VirtualRoomsController<T>(
     /// </summary>
     /// <short>Get room access rights</short>
     /// <category>Rooms</category>
-    /// <param type="System.Int32, System" method="url" name="id">Room ID</param>
-    /// <param type="ASC.Files.Core.Security.ShareFilterType, ASC.Files.Core" name="filterType">Share type filter</param>
+    /// <param type="System.Int32, System" method="url" name="id" example="1234">Room ID</param>
+    /// <param type="ASC.Files.Core.Security.ShareFilterType, ASC.Files.Core" name="filterType" example="UserOrGroup">Share type filter</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">Security information of room files</returns>
     /// <path>api/2.0/files/rooms/{id}/share</path>
     /// <httpMethod>GET</httpMethod>
@@ -363,7 +363,7 @@ public abstract class VirtualRoomsController<T>(
     /// </summary>
     /// <short>Set an external or invitation link</short>
     /// <category>Rooms</category>
-    /// <param type="System.Int32, System" method="url" name="id">Room ID</param>
+    /// <param type="System.Int32, System" method="url" name="id" example="1234">Room ID</param>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.LinkRequestDto, ASC.Files.Core" name="inDto">Link request parameters</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">Room security information</returns>
     /// <path>api/2.0/files/rooms/{id}/links</path>
@@ -388,8 +388,8 @@ public abstract class VirtualRoomsController<T>(
     /// </summary>
     /// <short>Get room links</short>
     /// <category>Rooms</category>
-    /// <param type="System.Int32, System" method="url" name="id">Room ID</param>
-    /// <param type="System.Nullable{ASC.Files.Core.ApiModels.ResponseDto.LinkType}, System" name="type">Link type</param>
+    /// <param type="System.Int32, System" method="url" name="id" example="1234">Room ID</param>
+    /// <param type="System.Nullable{ASC.Files.Core.ApiModels.ResponseDto.LinkType}, System" name="type" example="Invitation">Link type</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">Room security information</returns>
     /// <path>api/2.0/files/rooms/{id}/links</path>
     /// <httpMethod>GET</httpMethod>
@@ -423,7 +423,7 @@ public abstract class VirtualRoomsController<T>(
     /// </summary>
     /// <short>Get primary external link</short>
     /// <category>Rooms</category>
-    /// <param type="System.Int32, System" method="url" name="id">Room ID</param>
+    /// <param type="System.Int32, System" method="url" name="id" example="1234">Room ID</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">Room security information</returns>
     /// <path>api/2.0/files/rooms/{id}/link</path>
     /// <httpMethod>GET</httpMethod>
@@ -441,7 +441,7 @@ public abstract class VirtualRoomsController<T>(
     /// </summary>
     /// <short>Add room tags</short>
     /// <category>Rooms</category>
-    /// <param type="System.Int32, System" method="url" name="id">Room ID</param>
+    /// <param type="System.Int32, System" method="url" name="id" example="1234">Room ID</param>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.BatchTagsRequestDto, ASC.Files.Core" name="inDto">Request parameters for adding tags</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FolderDto, ASC.Files.Core">Room information</returns>
     /// <path>api/2.0/files/rooms/{id}/tags</path>
@@ -460,7 +460,7 @@ public abstract class VirtualRoomsController<T>(
     /// </summary>
     /// <short>Remove room tags</short>
     /// <category>Rooms</category>
-    /// <param type="System.Int32, System" method="url" name="id">Room ID</param>
+    /// <param type="System.Int32, System" method="url" name="id" example="1234">Room ID</param>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.BatchTagsRequestDto, ASC.Files.Core" name="inDto">Request parameters for removing tags</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FolderDto, ASC.Files.Core">Room information</returns>
     /// <path>api/2.0/files/rooms/{id}/tags</path>
@@ -479,7 +479,7 @@ public abstract class VirtualRoomsController<T>(
     /// </summary>
     /// <short>Create a room logo</short>
     /// <category>Rooms</category>
-    /// <param type="System.Int32, System" method="url" name="id">Room ID</param>
+    /// <param type="System.Int32, System" method="url" name="id" example="1234">Room ID</param>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.LogoRequestDto, ASC.Files.Core" name="inDto">Logo request parameters</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FolderDto, ASC.Files.Core">Room information</returns>
     /// <path>api/2.0/files/rooms/{id}/logo</path>
@@ -500,7 +500,7 @@ public abstract class VirtualRoomsController<T>(
     /// </summary>
     /// <short>Remove a room logo</short>
     /// <category>Rooms</category>
-    /// <param type="System.Int32, System" method="url" name="id">Room ID</param>
+    /// <param type="System.Int32, System" method="url" name="id" example="1234">Room ID</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FolderDto, ASC.Files.Core">Room information</returns>
     /// <path>api/2.0/files/rooms/{id}/logo</path>
     /// <httpMethod>DELETE</httpMethod>
@@ -520,7 +520,7 @@ public abstract class VirtualRoomsController<T>(
     /// </summary>
     /// <short>Pin a room</short>
     /// <category>Rooms</category>
-    /// <param type="System.Int32, System" method="url" name="id">Room ID</param>
+    /// <param type="System.Int32, System" method="url" name="id" example="1234">Room ID</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FolderDto, ASC.Files.Core">Room information</returns>
     /// <path>api/2.0/files/rooms/{id}/pin</path>
     /// <httpMethod>PUT</httpMethod>
@@ -538,7 +538,7 @@ public abstract class VirtualRoomsController<T>(
     /// </summary>
     /// <short>Unpin a room</short>
     /// <category>Rooms</category>
-    /// <param type="System.Int32, System" method="url" name="id">Room ID</param>
+    /// <param type="System.Int32, System" method="url" name="id" example="1234">Room ID</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FolderDto, ASC.Files.Core">Room information</returns>
     /// <path>api/2.0/files/rooms/{id}/unpin</path>
     /// <httpMethod>PUT</httpMethod>
@@ -556,7 +556,7 @@ public abstract class VirtualRoomsController<T>(
     /// </summary>
     /// <short>Resend room invitations</short>
     /// <category>Rooms</category>
-    /// <param type="System.Int32, System" method="url" name="id">Room ID</param>
+    /// <param type="System.Int32, System" method="url" name="id" example="1234">Room ID</param>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.UserInvintationRequestDto, ASC.Files.Core" name="inDto">User invitation request parameters</param>
     /// <returns></returns>
     /// <path>api/2.0/files/rooms/{id}/resend</path>
@@ -568,6 +568,12 @@ public abstract class VirtualRoomsController<T>(
         await _fileStorageService.ResendEmailInvitationsAsync(id, inDto.UsersIds, inDto.ResendAll);
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param type="System.Int32, System" name="id" example="1234"></param>
+    /// <param name="inDto"></param>
+    /// <returns></returns>
     [Tags("Files / Rooms")]
     [HttpPut("{id}/settings")]
     public async Task<FolderDto<T>> UpdateSettingsAsync(T id, SettingsRoomRequestDto inDto)
@@ -577,6 +583,11 @@ public abstract class VirtualRoomsController<T>(
         return await _folderDtoHelper.GetAsync(room);
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param type="System.Int32, System" name="id" example="1234"></param>
+    /// <returns></returns>
     [Tags("Files / Rooms")]
     [HttpPut("{id}/reorder")]
     public async Task<FolderDto<T>> ReorderAsync(T id)
@@ -611,18 +622,18 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     /// </summary>
     /// <short>Get rooms</short>
     /// <category>Rooms</category>
-    /// <param type="System.Nullable{ASC.Files.Core.ApiModels.RequestDto.RoomType}, System" name="type">Filter by room type</param>
-    /// <param type="System.String, System" name="subjectId">Filter by user ID</param>
-    /// <param type="System.Nullable{System.Boolean}, System" name="searchInContent">Specifies whether to search within the section contents or not</param>
-    /// <param type="System.Nullable{System.Boolean}, System" name="withSubfolders">Specifies whether to return sections with or without subfolders</param>
-    /// <param type="System.Nullable{ASC.Files.Core.VirtualRooms.SearchArea}, System" name="searchArea">Room search area (Active, Archive, Any)</param>
-    /// <param type="System.Nullable{System.Boolean}, System" name="withoutTags">Specifies whether to search by tags or not</param>
-    /// <param type="System.String, System" name="tags">Tags in the serialized format</param>
-    /// <param type="System.Nullable{System.Boolean}, System" name="excludeSubject">Specifies whether to exclude a subject or not</param>
-    /// <param type="System.Nullable{ASC.Files.Core.ProviderFilter}, System" name="provider">Filter by provider name (None, Box, DropBox, GoogleDrive, kDrive, OneDrive, WebDav)</param>
-    /// <param type="System.Nullable{ASC.Files.Core.Core.SubjectFilter}, System" name="subjectFilter">Filter by subject (Owner - 1, Member - 1)</param>
-    /// <param type="System.Nullable{ASC.Core.QuotaFilter}, System" name="quotaFilter">Filter by quota (Default - 1, Custom - 2)</param>
-    /// <param type="System.Nullable{ASC.Core.StorageFilter}, ASC.Files.Core" name="storageFilter">Filter by storage (Internal - 1, ThirdParty - 2)</param>
+    /// <param type="System.Nullable{ASC.Files.Core.ApiModels.RequestDto.RoomType}, System" name="type" example="CustomRoom">Filter by room type</param>
+    /// <param type="System.String, System" name="subjectId" example="some text">Filter by user ID</param>
+    /// <param type="System.Nullable{System.Boolean}, System" name="searchInContent" example="true">Specifies whether to search within the section contents or not</param>
+    /// <param type="System.Nullable{System.Boolean}, System" name="withSubfolders" example="true">Specifies whether to return sections with or without subfolders</param>
+    /// <param type="System.Nullable{ASC.Files.Core.VirtualRooms.SearchArea}, System" name="searchArea" example="Active">Room search area (Active, Archive, Any)</param>
+    /// <param type="System.Nullable{System.Boolean}, System" name="withoutTags" example="true">Specifies whether to search by tags or not</param>
+    /// <param type="System.String, System" name="tags" example="some text">Tags in the serialized format</param>
+    /// <param type="System.Nullable{System.Boolean}, System" name="excludeSubject" example="true">Specifies whether to exclude a subject or not</param>
+    /// <param type="System.Nullable{ASC.Files.Core.ProviderFilter}, System" name="provider" example="None">Filter by provider name (None, Box, DropBox, GoogleDrive, kDrive, OneDrive, WebDav)</param>
+    /// <param type="System.Nullable{ASC.Files.Core.Core.SubjectFilter}, System" name="subjectFilter" example="Owner">Filter by subject (Owner - 1, Member - 1)</param>
+    /// <param type="System.Nullable{ASC.Core.QuotaFilter}, System" name="quotaFilter" example="All">Filter by quota (Default - 1, Custom - 2)</param>
+    /// <param type="System.Nullable{ASC.Core.StorageFilter}, ASC.Files.Core" name="storageFilter" example="None">Filter by storage (Internal - 1, ThirdParty - 2)</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FolderContentDto, ASC.Files.Core">Rooms contents</returns>
     /// <path>api/2.0/files/rooms</path>
     /// <httpMethod>GET</httpMethod>
@@ -855,6 +866,12 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="id" example="1234"></param>
+    /// <returns></returns>
+    /// <exception cref="NotSupportedException"></exception>
     [Tags("Files / Rooms")]
     [HttpPost("rooms/{id:int}/indexexport")]
     public async Task<DocumentBuilderTaskDto> StartRoomIndexExportAsync(int id)

@@ -26,19 +26,14 @@
 
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
-/// <summary>
-/// </summary>
 public class SecurityRequestsDto
 {
-    /// <summary>Product ID</summary>
-    /// <type>System.Guid, System</type>
+    [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "Product ID")]
     public Guid ProductId { get; set; }
 
-    /// <summary>User ID</summary>
-    /// <type>System.Guid, System</type>
+    [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "User ID")]
     public Guid UserId { get; set; }
 
-    /// <summary>Administrator or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom(Example = "true", Description = "Administrator or not")]
     public bool Administrator { get; set; }
 }

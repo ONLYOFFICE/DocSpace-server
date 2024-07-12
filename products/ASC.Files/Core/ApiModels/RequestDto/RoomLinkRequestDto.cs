@@ -28,24 +28,18 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
-/// <summary>
-/// </summary>
 public class RoomLinkRequestDto : LinkRequestDtoBase
 {
-    /// <summary>Link name</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Link name")]
     [StringLength(255)]
     public string Title { get; set; }
 
-    /// <summary>Link type (Invitation or External)</summary>
-    /// <type>ASC.Files.Core.ApiModels.ResponseDto.LinkType, ASC.Files.Core</type>
+    [SwaggerSchemaCustom(Example = "Invitation", Description = "Link type (Invitation or External)")]
     public LinkType LinkType { get; set; }
 
-    /// <summary>Link password</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Link password")]
     public string Password { get; set; }
-    
-    /// <summary>Specifies whether downloading a file from a link is disabled or not</summary>
-    /// <type>System.Boolean, System</type>
+
+    [SwaggerSchemaCustom(Example = "true", Description = "Specifies whether downloading a file from a link is disabled or not")]
     public bool DenyDownload { get; set; }
 }

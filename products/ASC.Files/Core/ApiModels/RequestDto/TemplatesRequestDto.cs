@@ -26,11 +26,8 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
-/// <summary>
-/// </summary>
 public class TemplatesRequestDto
 {
-    /// <summary>List of file IDs</summary>
-    /// <type>System.Collections.Generic.IEnumerable{System.Int32}, System.Collections.Generic</type>
+    [SwaggerSchemaCustom(Example = "1234", Description = "List of file IDs", Format = "int64")]
     public IEnumerable<int> FileIds { get; set; }
 }

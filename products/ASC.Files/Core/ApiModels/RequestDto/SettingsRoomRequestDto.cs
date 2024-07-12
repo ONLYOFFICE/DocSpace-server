@@ -28,5 +28,6 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class SettingsRoomRequestDto
 {
+    [SwaggerSchemaCustom(Example = "true", Description = "Indexing")]
     public bool Indexing { get; set; }
 }

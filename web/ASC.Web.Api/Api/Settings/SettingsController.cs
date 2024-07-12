@@ -78,7 +78,7 @@ public partial class SettingsController(MessageService messageService,
     /// Get the portal settings
     /// </short>
     /// <category>Common settings</category>
-    /// <param type="System.Boolean, System" name="withpassword">Specifies if the password hasher settings will be returned or not</param>
+    /// <param type="System.Boolean, System" name="withpassword" example="true">Specifies if the password hasher settings will be returned or not</param>
     /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.SettingsDto, ASC.Web.Api">Settings</returns>
     /// <path>api/2.0/settings</path>
     /// <httpMethod>GET</httpMethod>
@@ -734,7 +734,7 @@ public partial class SettingsController(MessageService messageService,
     /// </summary>
     /// <short>Delete a color theme</short>
     /// <category>Common settings</category>
-    /// <param ype="System.Int32, System" name="id">Portal theme ID</param>
+    /// <param ype="System.Int32, System" name="id" example="1234">Portal theme ID</param>
     /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.CustomColorThemesSettingsDto, ASC.Web.Api">Portal theme settings: custom color theme settings, selected or not, limit</returns>
     /// <path>api/2.0/settings/colortheme</path>
     /// <httpMethod>DELETE</httpMethod>
@@ -882,7 +882,7 @@ public partial class SettingsController(MessageService messageService,
     /// </summary>
     /// <category>Statistics</category>
     /// <short>Get the space usage statistics</short>
-    /// <param ype="System.Guid, System" method="url" name="id">Module ID</param>
+    /// <param ype="System.Guid, System" method="url" name="id" example="9924256A-739C-462b-AF15-E652A3B1B6EB">Module ID</param>
     /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.UsageSpaceStatItemDto, ASC.Web.Api">Module space usage statistics</returns>
     /// <path>api/2.0/settings/statistics/spaceusage/{id}</path>
     /// <httpMethod>GET</httpMethod>
@@ -921,8 +921,8 @@ public partial class SettingsController(MessageService messageService,
     /// </summary>
     /// <category>Statistics</category>
     /// <short>Get the visit statistics</short>
-    /// <param type="ASC.Api.Core.ApiDateTime, ASC.Api.Core" name="fromDate">Start period date</param>
-    /// <param type="ASC.Api.Core.ApiDateTime, ASC.Api.Core" name="toDate">End period date</param>
+    /// <param type="ASC.Api.Core.ApiDateTime, ASC.Api.Core" name="fromDate" example="2008-04-10T06-30-00.000Z">Start period date</param>
+    /// <param type="ASC.Api.Core.ApiDateTime, ASC.Api.Core" name="toDate" example="2008-04-10T06-30-00.000Z">End period date</param>
     /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.ChartPointDto, ASC.Web.Api">List of point charts</returns>
     /// <path>api/2.0/settings/statistics/visit</path>
     /// <httpMethod>GET</httpMethod>

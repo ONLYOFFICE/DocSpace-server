@@ -24,101 +24,78 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Amqp.Types;
+
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
-/// <summary>
-/// </summary>
 public class LdapRequestsDto : IMapFrom<LdapSettings>
 {
-    /// <summary>Specifies if the LDAP authentication is enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the LDAP authentication is enabled or not")]
     public bool EnableLdapAuthentication { get; set; }
 
-    /// <summary>Specifies if the StartTLS is enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the StartTLS is enabled or not")]
     public bool StartTls { get; set; }
 
-    /// <summary>Specifies if the SSL is enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the SSL is enabled or not")]
     public bool Ssl { get; set; }
 
-    /// <summary>Specifies if the welcome email is sent or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the welcome email is sent or not")]
     public bool SendWelcomeEmail { get; set; }
 
-    /// <summary>LDAP server URL address</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "LDAP server URL address")]
     public string Server { get; set; }
 
-    /// <summary>Absolute path to the top level directory containing users for the import</summary>
-    /// <type>System.String, System</type>
-    // ReSharper disable once InconsistentNaming
+    [SwaggerSchemaCustom(Example = "some text", Description = "Absolute path to the top level directory containing users for the import")]
     public string UserDN { get; set; }
 
-    /// <summary>Port number</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustom(Example = "1234", Description = "Port number", Format  = "int32")]
     public int PortNumber { get; set; }
 
-    /// <summary>User filter value to import the users who correspond to the specified search criteria. The default filter value (uid=*) allows importing all users</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "User filter value to import the users who correspond to the specified search criteria. The default filter value (uid=*) allows importing all users")]
     public string UserFilter { get; set; }
 
-    /// <summary>Attribute in a user record that corresponds to the login that LDAP server users will use to log in to ONLYOFFICE</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Attribute in a user record that corresponds to the login that LDAP server users will use to log in to ONLYOFFICE")]
     public string LoginAttribute { get; set; }
 
-    /// <summary>Correspondence between the user data fields on the portal and the attributes in the LDAP server user record</summary>
-    /// <type>System.Collections.Generic.Dictionary{ASC.ActiveDirectory.Base.Settings.MappingFields, System.String}, System.Collections.Generic</type>
+    [SwaggerSchemaCustom(Description = "Correspondence between the user data fields on the portal and the attributes in the LDAP server user record")]
     public Dictionary<MappingFields, string> LdapMapping { get; set; }
 
-    /// <summary>Group access rights</summary>
-    /// <type>System.Collections.Generic.Dictionary{ASC.ActiveDirectory.Base.Settings.AccessRight, System.String}, System.Collections.Generic</type>
+    [SwaggerSchemaCustom(Description = "Group access rights")]
     //ToDo: use SId instead of group name
     public Dictionary<AccessRight, string> AccessRights { get; set; }
 
-    /// <summary>Specifies if the groups from the LDAP server are added to the portal or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the groups from the LDAP server are added to the portal or not")]
     public bool GroupMembership { get; set; }
 
-    /// <summary>The absolute path to the top level directory containing groups for the import</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "The absolute path to the top level directory containing groups for the import")]
     // ReSharper disable once InconsistentNaming
     public string GroupDN { get; set; }
 
-    /// <summary>Attribute that determines whether this user is a member of the groups</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Attribute that determines whether this user is a member of the groups")]
     public string UserAttribute { get; set; }
 
-    /// <summary>Group filter value to import the groups who correspond to the specified search criteria. The default filter value (objectClass=posixGroup) allows importing all users</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Group filter value to import the groups who correspond to the specified search criteria. The default filter value (objectClass=posixGroup) allows importing all users")]
     public string GroupFilter { get; set; }
 
-    /// <summary>Attribute that specifies the users that the group includes</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Attribute that specifies the users that the group includes")]
     public string GroupAttribute { get; set; }
 
-    /// <summary>Attribute that corresponds to a name of the group where the user is included</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Attribute that corresponds to a name of the group where the user is included")]
     public string GroupNameAttribute { get; set; }
 
-    /// <summary>Specifies if the user has rights to read data from LDAP server or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the user has rights to read data from LDAP server or not")]
     public bool Authentication { get; set; }
 
-    /// <summary>Login</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Login")]
     public string Login { get; set; }
 
-    /// <summary>Password</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Password")]
     public string Password { get; set; }
 
-    /// <summary>Specifies if the certificate is accepted or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the certificate is accepted or not")]
     public bool AcceptCertificate { get; set; }
 
-    /// <summary>Users type (All, RoomAdmin, User, DocSpaceAdmin, Collaborator)</summary>
-    /// <type>ASC.Core.Users.EmployeeType, ASC.Core.Common</type>
+    [SwaggerSchemaCustom(Example = "All", Description = "Users type (All, RoomAdmin, User, DocSpaceAdmin, Collaborator)")]
     public EmployeeType UsersType { get; set; }
 
     public void Mapping(Profile profile)

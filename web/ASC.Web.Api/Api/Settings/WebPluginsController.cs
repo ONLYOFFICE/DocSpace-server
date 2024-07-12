@@ -38,6 +38,12 @@ public class WebPluginsController(ApiContext apiContext,
         IMapper mapper)
     : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
 {
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param type="System.Boolean, System" name="system" example="true"></param>
+    /// <returns></returns>
+    /// <exception cref="CustomHttpException"></exception>
     [Tags("Settings / Webplugins")]
     [HttpPost("")]
     public async Task<WebPluginDto> AddWebPluginFromFile(bool system)
@@ -67,6 +73,11 @@ public class WebPluginsController(ApiContext apiContext,
         return outDto;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param type="System.Boolean, System" name="enabled" example="true"></param>
+    /// <returns></returns>
     [Tags("Settings / Webplugins")]
     [HttpGet("")]
     public async Task<IEnumerable<WebPluginDto>> GetWebPluginsAsync(bool? enabled = null)
@@ -85,6 +96,11 @@ public class WebPluginsController(ApiContext apiContext,
         return outDto;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param type="System.String, System" name="name" example="some text"></param>
+    /// <returns></returns>
     [Tags("Settings / Webplugins")]
     [HttpGet("{name}")]
     public async Task<WebPluginDto> GetWebPluginAsync(string name)
@@ -98,6 +114,12 @@ public class WebPluginsController(ApiContext apiContext,
         return outDto;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param type="System.String, System" name="name" example="some text"></param>
+    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.WebPluginRequestsDto, ASC.Web.Api" name="inDto"></param>
+    /// <returns></returns>
     [Tags("Settings / Webplugins")]
     [HttpPut("{name}")]
     public async Task UpdateWebPluginAsync(string name, WebPluginRequestsDto inDto)
@@ -111,6 +133,11 @@ public class WebPluginsController(ApiContext apiContext,
         await ChangeCspSettings(webPlugin, inDto.Enabled);
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param type="System.String, System" name="name" example="some text"></param>
+    /// <returns></returns>
     [Tags("Settings / Webplugins")]
     [HttpDelete("{name}")]
     public async Task DeleteWebPluginAsync(string name)
