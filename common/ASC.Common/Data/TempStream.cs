@@ -45,7 +45,7 @@ public class TempStream(TempPath tempPath)
         return (srcStream, false);
     }
 
-    public MemoryStream CloneMemoryStream(MemoryStream originalStream, int limit = -1)
+    public async Task<MemoryStream> CloneMemoryStream(MemoryStream originalStream, int limit = -1)
     {
         var cloneStream = new MemoryStream();
 
@@ -55,11 +55,11 @@ public class TempStream(TempPath tempPath)
 
         if (limit > 0)
         {
-            originalStream.CopyTo(cloneStream, limit);
+           await originalStream.CopyToAsync(cloneStream, limit);
         }
         else
         {
-            originalStream.CopyTo(cloneStream);
+           await originalStream.CopyToAsync(cloneStream);
         }
 
 

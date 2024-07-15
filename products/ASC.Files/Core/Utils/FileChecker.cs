@@ -36,11 +36,7 @@ public class FileChecker(
         var fileDao = daoFactory.GetFileDao<T>();
         await using var stream = await fileDao.GetFileStreamAsync(file, 0, limit);
 
-        using var memStream = new MemoryStream();
-        await stream.CopyToAsync(memStream);
-        memStream.Seek(0, SeekOrigin.Begin);
-
-        return await CheckExtendedPDFstream(memStream);
+        return await CheckExtendedPDFstream(stream);
     }
     public async Task<bool> CheckExtendedPDFstream(Stream stream)
     {

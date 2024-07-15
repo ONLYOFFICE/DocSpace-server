@@ -31,17 +31,15 @@ public class CheckPdfStartupTask(IServiceProvider provider) : IStartupTask
     public async Task ExecuteAsync(CancellationToken cancellationToken = default)
     {
         var tenantService = provider.GetService<ITenantService>();
-        var dbContextFactory = provider.GetService<IDbContextFactory<FilesDbContext>>();
-        var daoFactory = provider.GetService<IDaoFactory>();
-        var fileChecker = provider.GetService<FileChecker>();
-        var logger = provider.GetService<ILogger<FileDao>>();
-        var tenantManager = provider.GetService<TenantManager>();
         var checkPdfExecutor = provider.GetService<CheckPdfExecutor>();
 
         var tenants = await tenantService.GetTenantsAsync((DateTime)default);
         var t = Task.Run(async () =>
         {
+            await using var scope = provider.CreateAsyncScope();
+            var checkPdfExecutor = scope.ServiceProvider.GetService<CheckPdfExecutor>();
             await checkPdfExecutor.CheckPdf(tenants);
+
         }, cancellationToken);
         _ = t.ConfigureAwait(false);
     }

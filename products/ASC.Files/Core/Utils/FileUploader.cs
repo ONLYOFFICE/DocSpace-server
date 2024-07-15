@@ -304,9 +304,18 @@ public class FileUploader(
 
                 var memoryStream = new MemoryStream();
                 await stream.CopyToAsync(memoryStream);
-                var cloneStreamForCheck = tempStream.CloneMemoryStream(memoryStream, 300);
-                var cloneStreamForSave = tempStream.CloneMemoryStream(memoryStream);
-                var isForm = await fileChecker.CheckExtendedPDFstream(cloneStreamForCheck);
+
+                var isForm = false;
+                var cloneStreamForCheck = await tempStream.CloneMemoryStream(memoryStream, 300);
+                try
+                {
+                    isForm = await fileChecker.CheckExtendedPDFstream(cloneStreamForCheck);
+                }
+                finally
+                {
+                    cloneStreamForCheck.Dispose();
+                }
+
                 uploadSession.File.Category = isForm ? (int)FilterType.PdfForm : (int)FilterType.Pdf;
 
                 if (int.TryParse(roomId?.ToString(), out var curRoomId) && curRoomId != -1)
@@ -317,7 +326,18 @@ public class FileUploader(
                         throw new Exception(FilesCommonResource.ErrorMessage_UploadToFormRoom);
                     }
                 }
-                await dao.UploadChunkAsync(uploadSession, cloneStreamForSave, chunkLength, chunkNumber);
+
+                var cloneStreamForSave = await tempStream.CloneMemoryStream(memoryStream);
+                try
+                {
+                    await dao.UploadChunkAsync(uploadSession, cloneStreamForSave, chunkLength, chunkNumber);
+                }
+                finally
+                {
+                    memoryStream.Dispose();
+                    cloneStreamForSave.Dispose();
+                }
+
                 return uploadSession;
             }
         }
