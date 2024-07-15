@@ -301,4 +301,5 @@ public class EventDescription<T>
     public T ParentId { get; set; }
     public string ParentTitle { get; set; }
     public Guid? CreateBy { get; set; }
+    public int ParentType { get; set; }
 }

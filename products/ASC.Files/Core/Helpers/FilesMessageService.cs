@@ -113,7 +113,11 @@ public class FilesMessageService(
             return;
         }
 
-        var additionalParams = await GetAdditionalEntryDataAsync(entry1, action);
+        FolderType? parentType = entry2 is Folder<T2> folder 
+            ? folder.FolderType 
+            : null;
+
+        var additionalParams = await GetAdditionalEntryDataAsync(entry1, action, parentType: parentType);
         description = Append(description, additionalParams.DescriptionPart);
 
         if (headers == null)//todo check need if
@@ -177,18 +181,18 @@ public class FilesMessageService(
     }
 
     private async Task<FileEntryData> GetAdditionalEntryDataAsync<T>(FileEntry<T> entry, MessageAction action, string oldTitle = null, Guid userid = default,
-        FileShare userRole = FileShare.None)
+        FileShare userRole = FileShare.None, FolderType? parentType = null)
     { 
         return entry switch
         {
-            FileEntry<int> entryInt => await GetAdditionalEntryDataAsync(entryInt, action, oldTitle, userid, userRole),
+            FileEntry<int> entryInt => await GetAdditionalEntryDataAsync(entryInt, action, oldTitle, userid, userRole, parentType),
             FileEntry<string> entryString => await GetAdditionalEntryDataAsync(entryString, action, oldTitle, userid, userRole),
             _ => throw new NotSupportedException()
         };
     }
 
     private async Task<FileEntryData> GetAdditionalEntryDataAsync(FileEntry<int> entry, MessageAction action, string oldTitle = null, Guid userid = default, 
-        FileShare userRole = FileShare.None)
+        FileShare userRole = FileShare.None, FolderType? parentType = null)
     {
         var folderDao = daoFactory.GetFolderDao<int>();
 
@@ -229,12 +233,17 @@ public class FilesMessageService(
 
         desc.ParentId = parent.Id;
         desc.ParentTitle = parent.Title;
+        
         desc.RootFolderTitle = entry.RootFolderType switch
         {
             FolderType.USER => FilesUCResource.MyFiles,
             FolderType.TRASH => FilesUCResource.Trash,
             _ => null
         };
+        
+        desc.ParentType = parentType.HasValue 
+            ? (int)parentType.Value 
+            : (int)parent.FolderType;
 
         return new FileEntryData(JsonSerializer.Serialize(desc, _serializerOptions), references);
     }

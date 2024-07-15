@@ -1464,6 +1464,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Room copied: {0}.
+        /// </summary>
+        public static string RoomCopied {
+            get {
+                return ResourceManager.GetString("RoomCopied", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Room created.
         /// </summary>
         public static string RoomCreated {
