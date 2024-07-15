@@ -30,36 +30,42 @@ public class CheckPdfStartupTask(IServiceProvider provider) : IStartupTask
 {
     public async Task ExecuteAsync(CancellationToken cancellationToken = default)
     {
-        await using var scope = provider.CreateAsyncScope();
-
         var tenantService = provider.GetService<ITenantService>();
         var dbContextFactory = provider.GetService<IDbContextFactory<FilesDbContext>>();
         var daoFactory = provider.GetService<IDaoFactory>();
         var fileChecker = provider.GetService<FileChecker>();
         var logger = provider.GetService<ILogger<FileDao>>();
         var tenantManager = provider.GetService<TenantManager>();
+        var checkPdfExecutor = provider.GetService<CheckPdfExecutor>();
 
         var tenants = await tenantService.GetTenantsAsync((DateTime)default);
         var t = Task.Run(async () =>
         {
-            await CheckPdf(tenants, dbContextFactory, fileChecker, daoFactory, logger, tenantManager);
+            await checkPdfExecutor.CheckPdf(tenants);
         }, cancellationToken);
         _ = t.ConfigureAwait(false);
     }
 
+}
 
-    private async Task CheckPdf(IEnumerable<Tenant> tenants, IDbContextFactory<FilesDbContext> dbContextFactory, FileChecker fileChecker, IDaoFactory daoFactory, ILogger<FileDao> logger, TenantManager tenantManager)
+[Scope]
+public class CheckPdfExecutor(IDbContextFactory<FilesDbContext> dbContextFactory, FileChecker fileChecker, IDaoFactory daoFactory, ILogger<CheckPdfExecutor> logger, TenantManager tenantManager)
+{
+    public async Task CheckPdf(IEnumerable<Tenant> tenants)
     {
-        await using var context = await dbContextFactory.CreateDbContextAsync();
         var fileDao = daoFactory.GetFileDao<int>();
-
 
         foreach (var t in tenants)
         {
             await tenantManager.SetCurrentTenantAsync(t.Id);
-            var dbFileIds = context.PdfTenantFileIdsAsync(t.Id);
-           
-            await foreach (var dbFileId in dbFileIds)
+            IEnumerable<int> dbFileIds;
+            await using (var context = await dbContextFactory.CreateDbContextAsync())
+            {
+
+                dbFileIds = await context.PdfTenantFileIdsAsync(t.Id).ToListAsync();
+            }
+
+            foreach (var dbFileId in dbFileIds)
             {
                 try
                 {
@@ -78,7 +84,8 @@ public class CheckPdfStartupTask(IServiceProvider provider) : IStartupTask
                     filesDbContext.Update(toUpdate);
                     await filesDbContext.SaveChangesAsync();
                 }
-                catch(Exception ex) {
+                catch (Exception ex)
+                {
                     logger.Error(ex.Message);
                 }
             }
