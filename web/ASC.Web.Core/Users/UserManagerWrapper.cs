@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.FederatedLogin;
+
 using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Web.Core.Users;
@@ -50,7 +52,10 @@ public sealed class UserManagerWrapper(
     QuotaSocketManager quotaSocketManager,
     TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper, 
     IDistributedLockProvider distributedLockProvider,
-    PasswordSettingsManager passwordSettingsManager)
+    PasswordSettingsManager passwordSettingsManager,
+    AccountLinker accountLinker,
+    ProviderManager providerManager,
+    DisplayUserSettingsHelper displayUserSettingsHelper)
 {
     private async Task<bool> TestUniqueUserNameAsync(string uniqueName)
     {
@@ -88,10 +93,20 @@ public sealed class UserManagerWrapper(
     public async Task<UserInfo> AddInvitedUserAsync(string email, EmployeeType type, string culture)
     {
         var mail = new MailAddress(email);
+        var emailLinkedCheckTask = IsEmailLinkedAsync(mail.Address);
 
         if ((await userManager.GetUserByEmailAsync(mail.Address)).Id != Constants.LostUser.Id)
         {
             throw new Exception(await customNamingPeople.Substitute<Resource>("ErrorEmailAlreadyExists"));
+        }
+        
+        var result = await emailLinkedCheckTask;
+        if (result.Linked)
+        {
+            var linkedUser = await userManager.GetUsersAsync(result.UserId);
+            var pattern = await customNamingPeople.Substitute<Resource>("ErrorEmailLinked");
+            
+            throw new Exception(string.Format(pattern, linkedUser.DisplayUserName(displayUserSettingsHelper)));
         }
 
         var user = new UserInfo
@@ -389,6 +404,28 @@ public sealed class UserManagerWrapper(
             sb.Append(noise[RandomNumberGenerator.GetInt32(noise.Length - 1)]);
         }
         return sb.ToString();
+    }
+    
+    private async Task<(bool Linked, Guid UserId)> IsEmailLinkedAsync(string email)
+    {
+        var profiles = await accountLinker.GetLinkedProfilesAsync();
+        
+        var profile = profiles.FirstOrDefault(x => x.EMail.Equals(email, StringComparison.OrdinalIgnoreCase));
+        if (profile == null)
+        {
+            return (false, Guid.Empty);
+        }
+        
+        var providerType = ProviderManager.AuthProviders.FirstOrDefault(x => x.Equals(profile.Provider, StringComparison.OrdinalIgnoreCase));
+        var provider = providerManager.GetLoginProvider(providerType);
+
+        if (provider is { IsEnabled: true })
+        {
+            return Guid.TryParse(profile.LinkId, out var userId) ? (true, userId) : (true, Guid.Empty);
+        }
+
+        await accountLinker.RemoveProviderAsync(profile.LinkId, profile.Provider, profile.HashId);
+        return (false, Guid.Empty);
     }
 
     private static string GetPasswordHelpMessage(PasswordSettings passwordSettings)
