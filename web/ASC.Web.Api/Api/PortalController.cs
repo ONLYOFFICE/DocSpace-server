@@ -667,26 +667,11 @@ public class PortalController(
 
         redirectLink += HttpUtility.UrlEncode(parameters);
 
-        var authed = false;
-        try
-        {
-            if (!securityContext.IsAuthenticated)
-            {
-                await securityContext.AuthenticateMeAsync(ASC.Core.Configuration.Constants.CoreSystem);
-                authed = true;
-            }
-        }
-        finally
-        {
-            if (authed)
-            {
-                securityContext.Logout();
-            }
-        }
+        await studioNotifyService.SendMsgPortalDeletionSuccessAsync(owner, redirectLink);
+
+        await messageService.SendAsync(MessageAction.PortalDeleted);
 
         eventBus.Publish(new RemovePortalIntegrationEvent(securityContext.CurrentAccount.ID, tenant.Id));
-
-        await studioNotifyService.SendMsgPortalDeletionSuccessAsync(owner, redirectLink);
 
         return redirectLink;
     }
