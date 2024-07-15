@@ -34,7 +34,7 @@ public class FileChecker(
     {
         const int limit = 300;
         var fileDao = daoFactory.GetFileDao<T>();
-        var stream = await fileDao.GetFileStreamAsync(file, 0, limit);
+        await using var stream = await fileDao.GetFileStreamAsync(file, 0, limit);
 
         using var memStream = new MemoryStream();
         await stream.CopyToAsync(memStream);

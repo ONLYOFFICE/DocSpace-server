@@ -64,14 +64,6 @@ public class DbFile : BaseEntity, IDbFile, IDbSearch, ISearchItemDocument
 
     public DbTenant Tenant { get; set; }
 
-    public bool IsForm
-    {
-        get
-        {
-            return (FilterType)Category == FilterType.PdfForm;
-        }
-    }
-
     [Nested]
     public List<DbFolderTree> Folders { get; set; }
 

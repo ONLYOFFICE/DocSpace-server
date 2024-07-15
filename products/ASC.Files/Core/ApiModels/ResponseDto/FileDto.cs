@@ -252,7 +252,7 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
                 result.IsForm = file.IsForm;
             }
             
-            result.HasDraft = file.IsForm ? !Equals(linkedId, default(T)) : null;
+            result.HasDraft = result.IsForm == true ? !Equals(linkedId, default(T)) : null;
 
             var formFilling = properties?.FormFilling;
             if (formFilling != null)
