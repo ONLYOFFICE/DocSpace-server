@@ -88,6 +88,7 @@ public class FileStorageService //: IFileStorageService
     TempStream tempStream,
     MentionWrapperCreator mentionWrapperCreator,
     SecurityContext securityContext,
+    FileUtilityConfiguration fileUtilityConfiguration,
     FileChecker fileChecker)
 {
     private readonly ILogger _logger = optionMonitor.CreateLogger("ASC.Files");
@@ -3131,7 +3132,16 @@ public class FileStorageService //: IFileStorageService
 
         if (pin)
         {
+            await using (await distributedLockProvider.TryAcquireFairLockAsync($"pin_{authContext.CurrentAccount.ID}"))
+            {
+                var count = await tagDao.GetTagsAsync(authContext.CurrentAccount.ID, TagType.Pin).CountAsync();
+                if (count >= fileUtilityConfiguration.MaxPinnedRooms)
+                {
+                    throw new InvalidOperationException(FilesCommonResource.ErrorrMessage_PinRoom);
+                }
+                
             await tagDao.SaveTagsAsync(tag);
+        }
         }
         else
         {

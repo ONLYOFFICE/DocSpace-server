@@ -1046,7 +1046,7 @@ The link is only valid for 7 days.</value>
     <value>${__VirtualRootPath} portal profile change notification</value>
   </data>
   <data name="subject_send_whats_new" xml:space="preserve">
-    <value>What's new on your portal "${__VirtualRootPath}":"${__VirtualRootPath}" for $Date</value>
+    <value>What's new on your portal ${__VirtualRootPath} for $Date</value>
   </data>
   <data name="subject_smtp_test" xml:space="preserve">
     <value>SMTP test message</value>
@@ -2361,6 +2361,6 @@ $activity
 #end</value>
   </data>
   <data name="subject_rooms_activity" xml:space="preserve">
-    <value>What's new on your portal "${__VirtualRootPath}":"${__VirtualRootPath}" for the last hour</value>
+    <value>What's new on your portal ${__VirtualRootPath} for the last hour</value>
   </data>
 </root>

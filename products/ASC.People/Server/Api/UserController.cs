@@ -1483,7 +1483,7 @@ public class UserController(
             .ToAsyncEnumerable()
             .Where(userId => !_userManager.IsSystemUser(userId))
             .SelectAwait(async userId => await _userManager.GetUsersAsync(userId))
-            .Where(r => r.Status == EmployeeStatus.Active)
+            .Where(r => r.Status != EmployeeStatus.Terminated)
             .ToListAsync();
 
         foreach (var user in users)

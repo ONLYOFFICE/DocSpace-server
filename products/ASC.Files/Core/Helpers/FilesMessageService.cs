@@ -198,7 +198,7 @@ public class FilesMessageService(
             ? folder 
             : parents.FirstOrDefault(x => DocSpaceHelper.IsRoom(x.FolderType));
 
-        var desc = GetEventDescription(action, oldTitle, userid, userRole, room?.Id ?? -1, room?.Title);
+        var desc = GetEventDescription(action, oldTitle, userid, userRole, room?.Id ?? -1, room?.Title, entry.CreateBy);
 
         if (!HistoryService.TrackedActions.Contains(action))
         {
@@ -252,12 +252,13 @@ public class FilesMessageService(
         return new FileEntryData(json, null);
     }
 
-    private static EventDescription<T> GetEventDescription<T>(MessageAction action, string oldTitle, Guid userid, FileShare userRole, T roomId, string roomTitle)
+    private static EventDescription<T> GetEventDescription<T>(MessageAction action, string oldTitle, Guid userid, FileShare userRole, T roomId, string roomTitle, Guid? createBy = null)
     {
         var desc = new EventDescription<T>
         {
             RoomId = roomId,
-            RoomTitle = roomTitle
+            RoomTitle = roomTitle,
+            CreateBy = createBy
         };
 
         switch (action)

@@ -2406,7 +2406,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to What&apos;s new on your portal &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; for the last hour.
+        ///   Looks up a localized string similar to What&apos;s new on your portal ${__VirtualRootPath} for the last hour.
         /// </summary>
         public static string subject_rooms_activity {
             get {
@@ -2604,7 +2604,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to What&apos;s new on your portal &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; for $Date.
+        ///   Looks up a localized string similar to What&apos;s new on your portal ${__VirtualRootPath} for $Date.
         /// </summary>
         public static string subject_send_whats_new {
             get {

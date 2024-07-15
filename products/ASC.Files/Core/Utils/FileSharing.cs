@@ -824,12 +824,14 @@ public class FileSharing(
             return false;
         }
 
-        if (filterType is ShareFilterType.User or ShareFilterType.Group or ShareFilterType.UserOrGroup)
+        switch (filterType)
         {
-            return true;
+            case ShareFilterType.User or ShareFilterType.Group or ShareFilterType.UserOrGroup:
+            case ShareFilterType.PrimaryExternalLink when entry.RootFolderType is FolderType.VirtualRooms:
+                return true;
+            default:
+                return await fileSecurity.CanReadLinksAsync(entry);
         }
-
-        return await fileSecurity.CanReadLinksAsync(entry);
     }
 
     private async IAsyncEnumerable<AceWrapper> GetDefaultAcesAsync<T>(FileEntry<T> entry, ShareFilterType filterType, EmployeeActivationStatus? status, string text)

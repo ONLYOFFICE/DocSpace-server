@@ -47,6 +47,7 @@ public class FileUtilityConfiguration(IConfiguration configuration)
     private readonly string _signatureSecret = configuration["files:docservice:secret:value"];
     private readonly string _signatureHeader = configuration["files:docservice:secret:header"];
     private readonly string _forceSave = configuration["files:docservice:forcesave"];
+    public readonly int MaxPinnedRooms = int.Parse(configuration["files:pin"] ?? "10");
     public readonly Dictionary<FileType, string> InternalExtension = new()
         {
                 { FileType.Document, configuration["files:docservice:internal-doc"] ?? ".docx" },
