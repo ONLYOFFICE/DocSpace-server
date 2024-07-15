@@ -497,7 +497,18 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                     var primaryExternalLink = (await FilesSecurity.GetSharesAsync(folder)).FirstOrDefault(r => r.SubjectType == SubjectType.PrimaryExternalLink);
                                     if (primaryExternalLink != null)
                                     {
-                                        await fileSecurity.ShareAsync(newFolder.Id, newFolder.FileEntryType, Guid.NewGuid(), primaryExternalLink.Share, primaryExternalLink.SubjectType, primaryExternalLink.Options);
+                                        FileShareOptions options = null;
+                                        if (primaryExternalLink.Options != null)
+                                        {
+                                            options = new FileShareOptions
+                                            {
+                                                Title = primaryExternalLink.Options.Title, 
+                                                ExpirationDate = primaryExternalLink.Options.ExpirationDate, 
+                                                Internal = primaryExternalLink.Options.Internal
+                                            };
+                                        }
+
+                                        await fileSecurity.ShareAsync(newFolder.Id, newFolder.FileEntryType, Guid.NewGuid(), primaryExternalLink.Share, primaryExternalLink.SubjectType, options);
                                     }
                                 }
                             }
