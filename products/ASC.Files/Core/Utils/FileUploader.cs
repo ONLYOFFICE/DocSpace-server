@@ -46,7 +46,8 @@ public class FileUploader(
     ChunkedUploadSessionHolder chunkedUploadSessionHolder,
     FileTrackerHelper fileTracker,
     SocketManager socketManager,
-    FileChecker fileChecker)
+    FileChecker fileChecker,
+    TempStream tempStream )
 {
     public async Task<File<T>> ExecAsync<T>(T folderId, string title, long contentLength, Stream data, bool createNewIfExist, bool deleteConvertStatus = true)
     {
@@ -303,8 +304,8 @@ public class FileUploader(
 
                 var memoryStream = new MemoryStream();
                 await stream.CopyToAsync(memoryStream);
-                var cloneStreamForCheck = CloneMemoryStream(memoryStream, 300);
-                var cloneStreamForSave = CloneMemoryStream(memoryStream);
+                var cloneStreamForCheck = tempStream.CloneMemoryStream(memoryStream, 300);
+                var cloneStreamForSave = tempStream.CloneMemoryStream(memoryStream);
                 var isForm = await fileChecker.CheckExtendedPDFstream(cloneStreamForCheck);
                 uploadSession.File.IsForm = isForm;
 
@@ -369,29 +370,5 @@ public class FileUploader(
         return await folderDao.GetMaxUploadSizeAsync(folderId, chunkedUpload);
     }
 
-    private MemoryStream CloneMemoryStream(MemoryStream originalStream, int limit = -1)
-    {
-        var cloneStream = new MemoryStream();
-
-        var originalPosition = originalStream.Position;
-
-        originalStream.Position = 0;
-
-        if (limit > 0)
-        {
-            originalStream.CopyTo(cloneStream, limit);
-        }
-        else
-        {
-            originalStream.CopyTo(cloneStream);
-        }
-
-
-        originalStream.Position = originalPosition;
-
-        cloneStream.Position = 0;
-
-        return cloneStream;
-    }
     #endregion
 }

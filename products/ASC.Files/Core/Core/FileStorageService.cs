@@ -951,12 +951,22 @@ public class FileStorageService //: IFileStorageService
         {
             file.Title = FileUtility.ReplaceFileExtension(title, fileExt);
         }
-        file.IsForm = FileUtility.GetFileTypeByExtention(fileExt) == FileType.Pdf;
+       
         if (fileWrapper.FormId != 0)
         {
             await using var stream = await oFormRequestManager.Get(fileWrapper.FormId);
             file.ContentLength = stream.Length;
-            file = await fileDao.SaveFileAsync(file, stream);
+
+            if (FileUtility.GetFileTypeByExtention(fileExt) == FileType.Pdf)
+            {
+                (var cloneStreamForCheck, var cloneStreamForSave) = await GetCloneMemoryStreams(stream);
+                file.IsForm = await fileChecker.CheckExtendedPDFstream(cloneStreamForCheck);
+                file = await fileDao.SaveFileAsync(file, cloneStreamForSave);
+            }
+            else
+            {
+                file = await fileDao.SaveFileAsync(file, stream);
+            }
         }
         else if (EqualityComparer<TTemplate>.Default.Equals(fileWrapper.TemplateId, default))
         {
@@ -978,7 +988,18 @@ public class FileStorageService //: IFileStorageService
                     var pathNew = path + "new" + fileExt;
                     await using var stream = await storeTemplate.GetReadStreamAsync("", pathNew, 0);
                     file.ContentLength = stream.CanSeek ? stream.Length : await storeTemplate.GetFileSizeAsync(pathNew);
-                    file = await fileDao.SaveFileAsync(file, stream);
+
+                    if (FileUtility.GetFileTypeByExtention(fileExt) == FileType.Pdf)
+                    {
+                        (var cloneStreamForCheck, var cloneStreamForSave) = await GetCloneMemoryStreams(stream);
+                        file.IsForm = await fileChecker.CheckExtendedPDFstream(cloneStreamForCheck);
+                        file = await fileDao.SaveFileAsync(file, cloneStreamForSave);
+                    }
+                    else
+                    {
+                        file = await fileDao.SaveFileAsync(file, stream);
+                    }
+
                 }
                 else
                 {
@@ -1044,7 +1065,18 @@ public class FileStorageService //: IFileStorageService
                 await using (var stream = await fileTemlateDao.GetFileStreamAsync(template))
                 {
                     file.ContentLength = template.ContentLength;
-                    file = await fileDao.SaveFileAsync(file, stream);
+
+                    if(FileUtility.GetFileTypeByExtention(fileExt) == FileType.Pdf)
+                    {
+                        (var cloneStreamForCheck, var cloneStreamForSave) = await GetCloneMemoryStreams(stream);
+                        file.IsForm = await fileChecker.CheckExtendedPDFstream(cloneStreamForCheck);
+                        file = await fileDao.SaveFileAsync(file, cloneStreamForSave);
+                    }
+                    else
+                    {
+                        file = await fileDao.SaveFileAsync(file, stream);
+                    }
+                   
                 }
 
                 if (template.ThumbnailStatus == Thumbnail.Created)
@@ -1673,6 +1705,13 @@ public class FileStorageService //: IFileStorageService
         return InternalGetThirdPartyAsync(providerDao);
     }
 
+    private async Task<(MemoryStream, MemoryStream)> GetCloneMemoryStreams(Stream stream)
+    {
+        var memoryStream = new MemoryStream();
+        await stream.CopyToAsync(memoryStream);
+
+        return (tempStream.CloneMemoryStream(memoryStream, 300), tempStream.CloneMemoryStream(memoryStream));
+    }
     private async IAsyncEnumerable<ThirdPartyParams> InternalGetThirdPartyAsync(IProviderDao providerDao)
     {
         await foreach (var r in providerDao.GetProvidersInfoAsync())

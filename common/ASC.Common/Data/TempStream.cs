@@ -45,6 +45,31 @@ public class TempStream(TempPath tempPath)
         return (srcStream, false);
     }
 
+    public MemoryStream CloneMemoryStream(MemoryStream originalStream, int limit = -1)
+    {
+        var cloneStream = new MemoryStream();
+
+        var originalPosition = originalStream.Position;
+
+        originalStream.Position = 0;
+
+        if (limit > 0)
+        {
+            originalStream.CopyTo(cloneStream, limit);
+        }
+        else
+        {
+            originalStream.CopyTo(cloneStream);
+        }
+
+
+        originalStream.Position = originalPosition;
+
+        cloneStream.Position = 0;
+
+        return cloneStream;
+    }
+
     public Stream Create()
     {
         var path = tempPath.GetTempFileName();
