@@ -473,7 +473,7 @@ public class EntryManager(IDaoFactory daoFactory,
             {
                 for (var i = files.Count - 1; i >= 0; i--)
                 {
-                    if (!await fileChecker.CheckExtendedPDF(files[i]))
+                    if (files[i].Category == (int)FilterType.None && !await fileChecker.CheckExtendedPDF(files[i]))
                     {
                         files.Remove(files[i]);
                     }
