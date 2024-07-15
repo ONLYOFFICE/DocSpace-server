@@ -52,7 +52,7 @@ public class MessagesRepository(
             return await ForceSave(message);
         }
 
-        eventBus.Publish(new EventDataIntegrationEvent(message.UserId, message.TenantId)
+        await eventBus.PublishAsync(new EventDataIntegrationEvent(message.UserId, message.TenantId)
         {
              RequestMessage = message
         });

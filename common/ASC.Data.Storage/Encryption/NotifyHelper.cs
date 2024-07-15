@@ -80,7 +80,7 @@ public class NotifyHelper(ILogger<NotifyHelper> logger, NotifyServiceClient noti
 
         try
         {
-            notifyServiceClient.InvokeSendMethod(notifyInvoke);
+            notifyServiceClient.InvokeSendMethodAsync(notifyInvoke).GetAwaiter().GetResult();
         }
         catch (Exception error)
         {

@@ -44,14 +44,14 @@ public class DefaultRabbitMQPersistentConnection(IConnectionFactory connectionFa
         }
     }
 
-    public IModel CreateModel()
+    public async Task<IChannel> CreateModelAsync()
     {
         if (!IsConnected)
         {
             throw new InvalidOperationException("No RabbitMQ connections are available to perform this action");
         }
 
-        return _connection.CreateModel();
+        return await _connection.CreateChannelAsync();
     }
 
     public void Dispose()
@@ -65,9 +65,10 @@ public class DefaultRabbitMQPersistentConnection(IConnectionFactory connectionFa
 
         try
         {
-            _connection.ConnectionShutdown -= OnConnectionShutdown;
-            _connection.CallbackException -= OnCallbackException;
-            _connection.ConnectionBlocked -= OnConnectionBlocked;
+//            _connection.ConnectionShutdown -= OnConnectionShutdown;
+//            _connection.CallbackException -= OnCallbackException;
+//            _connection.ConnectionBlocked -= OnConnectionBlocked;
+
             _connection.Dispose();
         }
         catch (IOException ex)
@@ -76,56 +77,54 @@ public class DefaultRabbitMQPersistentConnection(IConnectionFactory connectionFa
         }
     }
 
-    public bool TryConnect()
+    public async Task<bool> TryConnectAsync()
     {
         _logger.InformationRabbitMQTryingConnect();
 
-        lock (_sync_root)
+        if (_connection != null)
         {
-            if (_connection != null)
+            while (!IsConnected) // waiting automatic recovery connection
             {
-                while (!IsConnected) // waiting automatic recovery connection
-                {
-                    Thread.Sleep(1000);
-                }
-
-                _logger.InformationRabbitMQAcquiredPersistentConnection(_connection.Endpoint.HostName);
-
-                return true;
+                Thread.Sleep(1000);
             }
 
-            var policy = Policy.Handle<SocketException>()
-                .Or<BrokerUnreachableException>()
-                .WaitAndRetry(retryCount, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (ex, time) =>
-                {
-                    _logger.WarningRabbitMQCouldNotConnect(time.TotalSeconds, ex);
-                }
-            );
+            _logger.InformationRabbitMQAcquiredPersistentConnection(_connection.Endpoint.HostName);
 
-            policy.Execute(() =>
-            {
-                _connection = _connectionFactory
-                        .CreateConnection();
-            });
-
-            if (IsConnected)
-            {
-                _connection.ConnectionShutdown += OnConnectionShutdown;
-                _connection.CallbackException += OnCallbackException;
-                _connection.ConnectionBlocked += OnConnectionBlocked;
-
-                _logger.InformationRabbitMQAcquiredPersistentConnection(_connection.Endpoint.HostName);
-
-                return true;
-            }
-
-            _logger.CriticalRabbitMQCouldNotBeCreated();
-
-            return false;
+            return true;
         }
+
+        var policy = Policy.Handle<SocketException>()
+            .Or<BrokerUnreachableException>()
+            .WaitAndRetry(retryCount, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (ex, time) =>
+            {
+                _logger.WarningRabbitMQCouldNotConnect(time.TotalSeconds, ex);
+            }
+        );
+
+        await policy.Execute(async () =>
+        {
+            _connection = await _connectionFactory
+                    .CreateConnectionAsync();
+        });
+
+        if (IsConnected)
+        {
+            _connection.ConnectionShutdown += async (s,e) => { await OnConnectionShutdownAsync(s, e); };
+            _connection.CallbackException += async (s, e) => { await OnCallbackExceptionAsync(s, e); };
+            _connection.ConnectionBlocked += async (s, e) => { await OnConnectionBlockedAsync(s, e); };
+
+            _logger.InformationRabbitMQAcquiredPersistentConnection(_connection.Endpoint.HostName);
+
+            return true;
+        }
+
+        _logger.CriticalRabbitMQCouldNotBeCreated();
+
+        return false;
+
     }
 
-    private void OnConnectionBlocked(object sender, ConnectionBlockedEventArgs e)
+    private async Task OnConnectionBlockedAsync(object sender, ConnectionBlockedEventArgs e)
     {
         if (_disposed)
         {
@@ -134,10 +133,11 @@ public class DefaultRabbitMQPersistentConnection(IConnectionFactory connectionFa
 
         _logger.WarningRabbitMQConnectionShutdown();
 
-        TryConnect();
+        await TryConnectAsync();
     }
 
-    void OnCallbackException(object sender, CallbackExceptionEventArgs e)
+
+    private async Task OnCallbackExceptionAsync(object sender, CallbackExceptionEventArgs e)
     {
         if (_disposed)
         {
@@ -146,10 +146,9 @@ public class DefaultRabbitMQPersistentConnection(IConnectionFactory connectionFa
 
         _logger.WarningRabbitMQConnectionThrowException();
 
-        TryConnect();
+        await TryConnectAsync();
     }
-
-    void OnConnectionShutdown(object sender, ShutdownEventArgs reason)
+    private async Task OnConnectionShutdownAsync(object sender, ShutdownEventArgs reason)
     {
         if (_disposed)
         {
@@ -158,6 +157,6 @@ public class DefaultRabbitMQPersistentConnection(IConnectionFactory connectionFa
 
         _logger.WarningRabbitMQConnectionIsOnShutDown();
 
-        TryConnect();
+        await TryConnectAsync();
     }
 }

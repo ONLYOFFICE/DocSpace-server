@@ -791,7 +791,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
 
         var evt = new RoomIndexExportIntegrationEvent(userId, tenantId, id, baseUri);
 
-        eventBus.Publish(evt);
+        await eventBus.PublishAsync(evt);
 
         return DocumentBuilderTaskDto.Get(taskProgress);
     }
@@ -815,6 +815,6 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
 
         var evt = new RoomIndexExportIntegrationEvent(userId, tenantId, 0, null, true);
 
-        eventBus.Publish(evt);
+        await eventBus.PublishAsync(evt);
     }
 }

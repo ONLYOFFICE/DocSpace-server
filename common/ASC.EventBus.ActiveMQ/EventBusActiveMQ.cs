@@ -93,7 +93,7 @@ public class EventBusActiveMQ : IEventBus, IDisposable
         }
     }
 
-    public void Publish(IntegrationEvent @event)
+    public async Task PublishAsync(IntegrationEvent @event)
     {
         if (!_persistentConnection.IsConnected)
         {
@@ -122,9 +122,11 @@ public class EventBusActiveMQ : IEventBus, IDisposable
         request.WriteBytes(body);
 
         producer.Send(request);
+
+        await Task.CompletedTask;
     }
 
-    public void Subscribe<T, TH>()
+    public async Task SubscribeAsync<T, TH>()
     where T : IntegrationEvent
     where TH : IIntegrationEventHandler<T>
     {
@@ -135,15 +137,19 @@ public class EventBusActiveMQ : IEventBus, IDisposable
         _subsManager.AddSubscription<T, TH>();
 
         StartBasicConsume(eventName);
+
+        await Task.CompletedTask;
     }
 
-    public void SubscribeDynamic<TH>(string eventName) where TH : IDynamicIntegrationEventHandler
+    public async Task SubscribeDynamicAsync<TH>(string eventName) where TH : IDynamicIntegrationEventHandler
     {
         _logger.InformationSubscribingDynamic(eventName, typeof(TH).GetGenericTypeName());
 
         _subsManager.AddDynamicSubscription<TH>(eventName);
 
         StartBasicConsume(eventName);
+
+        await Task.CompletedTask;
     }
 
     private ISession CreateConsumerSession()
