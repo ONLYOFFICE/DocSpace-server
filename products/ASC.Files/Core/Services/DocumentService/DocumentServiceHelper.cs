@@ -42,7 +42,8 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         AuthContext authContext,
         SecurityContext securityContext,
         ILogger<DocumentServiceHelper> logger,
-        CookiesManager cookiesManager)
+        CookiesManager cookiesManager,
+        IHttpContextAccessor httpContextAccessor)
     {
 
     public async Task<(File<T> File, bool LastVersion)> GetCurFileInfoAsync<T>(T fileId, int version)
@@ -150,6 +151,12 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
                 if (string.IsNullOrEmpty(passwordKey))
                 {
                     logger.Debug($"Password key not found for file {file.Id} and subject {file.ShareRecord.Subject}");
+                }
+
+                var requestToken = httpContextAccessor.HttpContext?.Request.Headers[HttpRequestExtensions.RequestTokenHeader].FirstOrDefault();
+                if (string.IsNullOrEmpty(requestToken))
+                {
+                    logger.Debug($"Request token not found for file {file.Id} and subject {file.ShareRecord.Subject}");
                 }
             }
             
