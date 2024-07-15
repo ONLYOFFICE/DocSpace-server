@@ -875,9 +875,22 @@ public class FileSecurity(IDaoFactory daoFactory,
             return e.RootFolderType == FolderType.USER && e.RootCreateBy == userId && !isCollaborator && (folder is { FolderType: FolderType.DEFAULT } || file != null);
         }
 
-        if (action == FilesSecurityActions.Embed && !((isRoom && folder.Shared) || file is { Shared: true, RootFolderType: FolderType.VirtualRooms }))
+        if (action == FilesSecurityActions.Embed)
         {
-            return false;
+            if (e.RootFolderType != FolderType.VirtualRooms)
+            {
+                return false;
+            }
+
+            if (folder != null && !(isRoom && folder.Shared))
+            {
+                return false;
+            }
+
+            if (file != null && !(file.Shared && fileUtility.CanWebView(file.Title)))
+            {
+                return false;
+            }
         }
 
         if (e.FileEntryType == FileEntryType.Folder)
