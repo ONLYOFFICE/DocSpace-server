@@ -106,6 +106,11 @@ public class CustomTagsService(
 
         var tagsInfos = await tagDao.GetTagsInfoAsync(names).ToListAsync();
 
+        if (tagsInfos.Count == 0)
+        {
+            return folder;
+        }
+
         var tags = tagsInfos.Select(tagInfo => Tag.Custom(Guid.Empty, folder, tagInfo.Name));
 
         await tagDao.SaveTagsAsync(tags);
