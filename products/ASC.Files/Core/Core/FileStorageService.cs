@@ -3749,9 +3749,16 @@ public class FileStorageService //: IFileStorageService
                     previousRecord.Options?.Title);
             }
         }
-        
-        await filesMessageService.SendAsync(actions[SubjectType.ExternalLink][eventType], entry, ace.FileShareOptions?.Title,
-            FileShareExtensions.GetAccessString(ace.Access, isRoom), ace.Id.ToString());
+
+        if (eventType != EventType.Remove)
+        {
+            await filesMessageService.SendAsync(actions[SubjectType.ExternalLink][eventType], entry, ace.FileShareOptions?.Title,
+                FileShareExtensions.GetAccessString(ace.Access, isRoom), ace.Id.ToString());
+        }
+        else
+        {
+            await filesMessageService.SendAsync(actions[SubjectType.ExternalLink][eventType], entry, ace.FileShareOptions?.Title);
+        }
 
         return (await fileSharing.GetPureSharesAsync(entry, new[] { linkId }).FirstOrDefaultAsync());
     }
