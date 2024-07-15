@@ -50,14 +50,15 @@ public class CheckPdfStartupTask(IServiceProvider provider) : IStartupTask
 
     private async Task CheckPdf(IEnumerable<Tenant> tenants, IDbContextFactory<FilesDbContext> dbContextFactory, FileChecker fileChecker, IDaoFactory daoFactory, ILogger<FileDao> logger, TenantManager tenantManager)
     {
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+        var fileDao = daoFactory.GetFileDao<int>();
+
+
         foreach (var t in tenants)
         {
-            await using var context = await dbContextFactory.CreateDbContextAsync();
-
             await tenantManager.SetCurrentTenantAsync(t.Id);
             var dbFileIds = context.PdfTenantFileIdsAsync(t.Id);
-            var fileDao = daoFactory.GetFileDao<int>();
-
+           
             await foreach (var dbFileId in dbFileIds)
             {
                 try
