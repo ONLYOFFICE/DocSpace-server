@@ -307,7 +307,7 @@ public class FileUploader(
                 var cloneStreamForCheck = tempStream.CloneMemoryStream(memoryStream, 300);
                 var cloneStreamForSave = tempStream.CloneMemoryStream(memoryStream);
                 var isForm = await fileChecker.CheckExtendedPDFstream(cloneStreamForCheck);
-                uploadSession.File.IsForm = isForm;
+                uploadSession.File.Category = isForm ? (int)FilterType.PdfForm : (int)FilterType.Pdf;
 
                 if (int.TryParse(roomId?.ToString(), out var curRoomId) && curRoomId != -1)
                 {

@@ -479,7 +479,7 @@ public class EntryManager(IDaoFactory daoFactory,
                     }
                     else
                     {
-                        files[i].IsForm = true;
+                        files[i].Category = (int)FilterType.PdfForm;
                     }
                 }
             }
@@ -1198,7 +1198,7 @@ public class EntryManager(IDaoFactory daoFactory,
                     {
                         linkedFile.ParentId = (T)Convert.ChangeType(properties.FormFilling.ToFolderId, typeof(T));
                     }
-                    linkedFile.IsForm = true;
+                    linkedFile.Category = (int)FilterType.PdfForm;
                 }
                 else
                 {

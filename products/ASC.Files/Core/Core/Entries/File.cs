@@ -130,7 +130,12 @@ public class File<T> : FileEntry<T>
     public string DownloadUrl => FileHelper.GetDownloadUrl(this);
 
     public bool Locked { get; set; }
-    public bool IsForm { get; set; }
+    public bool IsForm {
+        get
+        {
+            return (FilterType)Category == FilterType.PdfForm;
+        }
+    }
 
     public int Category { get; set; }
     public string LockedBy { get; set; }

@@ -735,8 +735,11 @@ public class GlobalFolder(
             newFile.Comment = FilesCommonResource.CommentCreate;
 
             var fileExt = FileUtility.GetFileExtension(fileName);
-            newFile.IsForm = FileUtility.GetFileTypeByExtention(fileExt) == FileType.Pdf;
-
+            if (FileUtility.GetFileTypeByExtention(fileExt) == FileType.Pdf)
+            {
+                newFile.Category = (int)FilterType.PdfForm;
+            }
+           
             await using (var stream = await storeTemplate.GetReadStreamAsync("", filePath))
             {
                 newFile.ContentLength = stream.CanSeek ? stream.Length : await storeTemplate.GetFileSizeAsync("", filePath);
