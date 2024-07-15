@@ -250,7 +250,8 @@ public class EntryManager(IDaoFactory daoFactory,
     FileSharing fileSharing,
     IQuotaService quotaService,
     TenantManager tenantManager,
-    ExternalShare externalShare)
+    ExternalShare externalShare,
+    FileChecker fileChecker)
 {
     private const string UpdateList = "filesUpdateList";
 
@@ -464,6 +465,21 @@ public class EntryManager(IDaoFactory daoFactory,
                     if (folders[i].FolderType == FolderType.ReadyFormFolder || folders[i].FolderType == FolderType.InProcessFormFolder)
                     {
                         folders.Remove(folders[i]);
+                    }
+                }
+            }
+
+            if (filterType == FilterType.PdfForm)
+            {
+                for (var i = files.Count - 1; i >= 0; i--)
+                {
+                    if (!await fileChecker.CheckExtendedPDF(files[i]))
+                    {
+                        files.Remove(files[i]);
+                    }
+                    else
+                    {
+                        files[i].IsForm = true;
                     }
                 }
             }

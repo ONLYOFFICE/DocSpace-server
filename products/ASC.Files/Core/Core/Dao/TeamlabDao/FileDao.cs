@@ -1458,8 +1458,10 @@ internal class FileDao(
             case FilterType.SpreadsheetsOnly:
             case FilterType.ArchiveOnly:
             case FilterType.MediaOnly:
-            case FilterType.PdfForm:
                 q = q.Where(r => r.Category == (int)filterType);
+                break;
+            case FilterType.PdfForm:
+                q = q.Where(r => (r.Category == (int)filterType || r.Category == (int)FilterType.None) && r.Title.ToLower().EndsWith(".pdf"));
                 break;
             case FilterType.Pdf:
                 q = q.Where(r => r.Category == (int)filterType || r.Title.ToLower().EndsWith(".pdf"));
@@ -2071,8 +2073,10 @@ internal class FileDao(
             case FilterType.SpreadsheetsOnly:
             case FilterType.ArchiveOnly:
             case FilterType.MediaOnly:
-            case FilterType.PdfForm:
                 q = q.Where(r => r.Category == (int)filterType);
+                break;
+            case FilterType.PdfForm:
+                q = q.Where(r => (r.Category == (int)filterType || r.Category == (int)FilterType.None) && r.Title.ToLower().EndsWith(".pdf"));
                 break;
             case FilterType.Pdf:
                 q = q.Where(r => r.Category == (int)filterType || r.Title.ToLower().EndsWith(".pdf"));
@@ -2180,8 +2184,10 @@ internal class FileDao(
             case FilterType.SpreadsheetsOnly:
             case FilterType.ArchiveOnly:
             case FilterType.MediaOnly:
-            case FilterType.PdfForm:
                 q = q.Where(r => r.Entry.Category == (int)filterType);
+                break;
+            case FilterType.PdfForm:
+                q = q.Where(r => (r.Entry.Category == (int)filterType || r.Entry.Category == (int)FilterType.None) && r.Entry.Title.ToLower().EndsWith(".pdf"));
                 break;
             case FilterType.Pdf:
                 q = q.Where(r => r.Entry.Category == (int)filterType || r.Entry.Title.ToLower().EndsWith(".pdf"));
