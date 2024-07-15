@@ -290,14 +290,16 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
 
         try
         {
-            if (file.ShareRecord is { SubjectType: SubjectType.PrimaryExternalLink or SubjectType.ExternalLink })
+            var externalMediaAccess = file.ShareRecord is { SubjectType: SubjectType.PrimaryExternalLink or SubjectType.ExternalLink };
+            
+            if (externalMediaAccess)
             {
                 result.RequestToken = await externalShare.CreateShareKeyAsync(file.ShareRecord.Subject);
             }
             
             result.ViewUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(file.DownloadUrl), result.RequestToken);
 
-            result.WebUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id, file.Version)),
+            result.WebUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id, file.Version, externalMediaAccess)),
                 result.RequestToken);
 
             result.ThumbnailStatus = file.ThumbnailStatus;
