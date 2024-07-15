@@ -119,7 +119,7 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
 
                             await WriteSuccess(context, await ToResponseObject(resumedSession.File), (int)HttpStatusCode.Created);
 
-                            _ = filesMessageService.SendAsync(resumedSession.File.Version > 1 
+                            await filesMessageService.SendAsync(resumedSession.File.Version > 1 
                                 ? MessageAction.FileUploadedWithOverwriting 
                                 : MessageAction.FileUploaded, resumedSession.File, resumedSession.File.Title);
 
@@ -163,7 +163,7 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
 
                     await WriteSuccess(context, await ToResponseObject(session.File), (int)HttpStatusCode.Created);
                     
-                    _ = filesMessageService.SendAsync(session.File.Version > 1 
+                    await filesMessageService.SendAsync(session.File.Version > 1 
                         ? MessageAction.FileUploadedWithOverwriting 
                         : MessageAction.FileUploaded, session.File, session.File.Title);
 
