@@ -492,10 +492,13 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                     await folderDao.SaveFolderAsync(newFolder);
                                 }
 
-                                var primaryExternalLink = (await FilesSecurity.GetSharesAsync(folder)).FirstOrDefault(r => r.SubjectType == SubjectType.PrimaryExternalLink);
-                                if (primaryExternalLink != null)
+                                if (newFolder.FolderType != FolderType.CustomRoom)
                                 {
-                                    await fileSecurity.ShareAsync(newFolder.Id, newFolder.FileEntryType, Guid.NewGuid(), primaryExternalLink.Share, primaryExternalLink.SubjectType, primaryExternalLink.Options);
+                                    var primaryExternalLink = (await FilesSecurity.GetSharesAsync(folder)).FirstOrDefault(r => r.SubjectType == SubjectType.PrimaryExternalLink);
+                                    if (primaryExternalLink != null)
+                                    {
+                                        await fileSecurity.ShareAsync(newFolder.Id, newFolder.FileEntryType, Guid.NewGuid(), primaryExternalLink.Share, primaryExternalLink.SubjectType, primaryExternalLink.Options);
+                                    }
                                 }
                             }
 
