@@ -250,7 +250,8 @@ public class EntryManager(IDaoFactory daoFactory,
     FileSharing fileSharing,
     IQuotaService quotaService,
     TenantManager tenantManager,
-    ExternalShare externalShare)
+    ExternalShare externalShare,
+    FileChecker fileChecker)
 {
     private const string UpdateList = "filesUpdateList";
 
@@ -464,6 +465,21 @@ public class EntryManager(IDaoFactory daoFactory,
                     if (folders[i].FolderType == FolderType.ReadyFormFolder || folders[i].FolderType == FolderType.InProcessFormFolder)
                     {
                         folders.Remove(folders[i]);
+                    }
+                }
+            }
+
+            if (filterType == FilterType.PdfForm)
+            {
+                for (var i = files.Count - 1; i >= 0; i--)
+                {
+                    if (files[i].Category == (int)FilterType.None && !await fileChecker.CheckExtendedPDF(files[i]))
+                    {
+                        files.Remove(files[i]);
+                    }
+                    else
+                    {
+                        files[i].Category = (int)FilterType.PdfForm;
                     }
                 }
             }
@@ -841,6 +857,7 @@ public class EntryManager(IDaoFactory daoFactory,
             case FilterType.FilesOnly:
             case FilterType.MediaOnly:
             case FilterType.Pdf:
+            case FilterType.PdfForm:
                 where = f => f.FileEntryType == FileEntryType.File && (((File<T>)f).FilterType == filter || filter == FilterType.FilesOnly);
                 break;
             case FilterType.FoldersOnly:
@@ -1181,7 +1198,7 @@ public class EntryManager(IDaoFactory daoFactory,
                     {
                         linkedFile.ParentId = (T)Convert.ChangeType(properties.FormFilling.ToFolderId, typeof(T));
                     }
-
+                    linkedFile.Category = (int)FilterType.PdfForm;
                 }
                 else
                 {

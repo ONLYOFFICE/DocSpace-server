@@ -1096,6 +1096,7 @@ internal class FileDao(
             copy.ConvertedType = file.ConvertedType;
             copy.Comment = FilesCommonResource.CommentCopy;
             copy.Encrypted = file.Encrypted;
+            copy.Category = file.Category;
             copy.ThumbnailStatus = file.ThumbnailStatus == Thumbnail.Created ? Thumbnail.Creating : Thumbnail.Waiting;
 
             await using (var stream = await GetFileStreamAsync(file))
@@ -1333,6 +1334,7 @@ internal class FileDao(
                 file.VersionGroup++;
             }
             file.ContentLength = uploadSession.BytesTotal;
+            file.Category = uploadSession.File.Category;
             file.ConvertedType = null;
             file.Comment = FilesCommonResource.CommentUpload;
             file.Encrypted = uploadSession.Encrypted;
@@ -1348,6 +1350,7 @@ internal class FileDao(
         result.Comment = FilesCommonResource.CommentUpload;
         result.Encrypted = uploadSession.Encrypted;
         result.CreateOn = uploadSession.File.CreateOn;
+        result.Category = uploadSession.File.Category;
 
         return result;
     }
@@ -1456,6 +1459,9 @@ internal class FileDao(
             case FilterType.ArchiveOnly:
             case FilterType.MediaOnly:
                 q = q.Where(r => r.Category == (int)filterType);
+                break;
+            case FilterType.PdfForm:
+                q = q.Where(r => (r.Category == (int)filterType || r.Category == (int)FilterType.None) && r.Title.ToLower().EndsWith(".pdf"));
                 break;
             case FilterType.Pdf:
                 q = q.Where(r => r.Category == (int)filterType || r.Title.ToLower().EndsWith(".pdf"));
@@ -2069,6 +2075,9 @@ internal class FileDao(
             case FilterType.MediaOnly:
                 q = q.Where(r => r.Category == (int)filterType);
                 break;
+            case FilterType.PdfForm:
+                q = q.Where(r => (r.Category == (int)filterType || r.Category == (int)FilterType.None) && r.Title.ToLower().EndsWith(".pdf"));
+                break;
             case FilterType.Pdf:
                 q = q.Where(r => r.Category == (int)filterType || r.Title.ToLower().EndsWith(".pdf"));
                 break;
@@ -2176,6 +2185,9 @@ internal class FileDao(
             case FilterType.ArchiveOnly:
             case FilterType.MediaOnly:
                 q = q.Where(r => r.Entry.Category == (int)filterType);
+                break;
+            case FilterType.PdfForm:
+                q = q.Where(r => (r.Entry.Category == (int)filterType || r.Entry.Category == (int)FilterType.None) && r.Entry.Title.ToLower().EndsWith(".pdf"));
                 break;
             case FilterType.Pdf:
                 q = q.Where(r => r.Entry.Category == (int)filterType || r.Entry.Title.ToLower().EndsWith(".pdf"));

@@ -133,6 +133,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
                 files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Document);
                 break;
             case FilterType.Pdf:
+            case FilterType.PdfForm:
                 files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Pdf);
                 break;
             case FilterType.PresentationsOnly:
@@ -214,6 +215,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
                 files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Document);
                 break;
             case FilterType.Pdf:
+            case FilterType.PdfForm:
                 files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Pdf);
                 break;
             case FilterType.PresentationsOnly:

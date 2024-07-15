@@ -46,7 +46,8 @@ public class FileUploader(
     ChunkedUploadSessionHolder chunkedUploadSessionHolder,
     FileTrackerHelper fileTracker,
     SocketManager socketManager,
-    FileStorageService fileStorageService)
+    FileChecker fileChecker,
+    TempStream tempStream )
 {
     public async Task<File<T>> ExecAsync<T>(T folderId, string title, long contentLength, Stream data, bool createNewIfExist, bool deleteConvertStatus = true)
     {
@@ -301,28 +302,43 @@ public class FileUploader(
                 var currentFolder = await folderDao.GetFolderAsync(uploadSession.File.FolderIdDisplay);
                 var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(currentFolder);
 
+                var memoryStream = new MemoryStream();
+                await stream.CopyToAsync(memoryStream);
+
+                var isForm = false;
+                var cloneStreamForCheck = await tempStream.CloneMemoryStream(memoryStream, 300);
+                try
+                {
+                    isForm = await fileChecker.CheckExtendedPDFstream(cloneStreamForCheck);
+                }
+                finally
+                {
+                    cloneStreamForCheck.Dispose();
+                }
+
+                uploadSession.File.Category = isForm ? (int)FilterType.PdfForm : (int)FilterType.Pdf;
+
                 if (int.TryParse(roomId?.ToString(), out var curRoomId) && curRoomId != -1)
                 {
                     var currentRoom = await folderDao.GetFolderAsync(roomId);
-                    if (currentRoom.FolderType == FolderType.FillingFormsRoom)
+                    if (currentRoom.FolderType == FolderType.FillingFormsRoom && !isForm)
                     {
-                        var memoryStream = new MemoryStream();
-                        await stream.CopyToAsync(memoryStream);
-                        var cloneStreamForCheck = CloneMemoryStream(memoryStream, 300);
-                        var cloneStreamForSave = CloneMemoryStream(memoryStream);
-
-                        if (!await fileStorageService.CheckExtendedPDFstream(cloneStreamForCheck))
-                        {
-                            throw new Exception(FilesCommonResource.ErrorMessage_UploadToFormRoom);
-                        }
-                        else
-                        {
-                            await dao.UploadChunkAsync(uploadSession, cloneStreamForSave, chunkLength, chunkNumber);
-                            return uploadSession;
-                        }
-
+                        throw new Exception(FilesCommonResource.ErrorMessage_UploadToFormRoom);
                     }
                 }
+
+                var cloneStreamForSave = await tempStream.CloneMemoryStream(memoryStream);
+                try
+                {
+                    await dao.UploadChunkAsync(uploadSession, cloneStreamForSave, chunkLength, chunkNumber);
+                }
+                finally
+                {
+                    memoryStream.Dispose();
+                    cloneStreamForSave.Dispose();
+                }
+
+                return uploadSession;
             }
         }
 
@@ -374,29 +390,5 @@ public class FileUploader(
         return await folderDao.GetMaxUploadSizeAsync(folderId, chunkedUpload);
     }
 
-    private MemoryStream CloneMemoryStream(MemoryStream originalStream, int limit = -1)
-    {
-        var cloneStream = new MemoryStream();
-
-        var originalPosition = originalStream.Position;
-
-        originalStream.Position = 0;
-
-        if (limit > 0)
-        {
-            originalStream.CopyTo(cloneStream, limit);
-        }
-        else
-        {
-            originalStream.CopyTo(cloneStream);
-        }
-
-
-        originalStream.Position = originalPosition;
-
-        cloneStream.Position = 0;
-
-        return cloneStream;
-    }
     #endregion
 }

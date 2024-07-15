@@ -501,7 +501,8 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(
             FilterType.SpreadsheetsOnly or
             FilterType.ArchiveOnly or
             FilterType.MediaOnly or
-            FilterType.Pdf;
+            FilterType.Pdf or
+            FilterType.PdfForm;
     }
 
     public async Task UpdateIdAsync(string oldValue, string newValue)

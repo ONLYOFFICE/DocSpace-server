@@ -47,5 +47,6 @@ public enum FilterType
     [EnumMember] CustomRooms = 17,
     [EnumMember] PublicRooms = 20,
     [EnumMember] FormRooms = 21,
-    [EnumMember] Pdf = 22
+    [EnumMember] Pdf = 22,
+    [EnumMember] PdfForm = 23
 }

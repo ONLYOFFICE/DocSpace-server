@@ -116,6 +116,7 @@ internal class SharePointFileDao(
                 files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Document);
                 break;
             case FilterType.Pdf:
+            case FilterType.PdfForm:
                 files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Pdf);
                 break;
             case FilterType.PresentationsOnly:
@@ -197,6 +198,7 @@ internal class SharePointFileDao(
                 files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Document);
                 break;
             case FilterType.Pdf:
+            case FilterType.PdfForm:
                 files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Pdf);
                 break;
             case FilterType.PresentationsOnly:

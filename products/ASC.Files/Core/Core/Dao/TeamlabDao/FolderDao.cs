@@ -1633,7 +1633,8 @@ internal class FolderDao(
             FilterType.SpreadsheetsOnly or
             FilterType.ArchiveOnly or
             FilterType.MediaOnly or
-            FilterType.Pdf;
+            FilterType.Pdf or
+            FilterType.PdfForm;
     }
 
     private FolderType GetRoomTypeFilter(FilterType filterType)

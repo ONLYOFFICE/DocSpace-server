@@ -106,6 +106,10 @@ public class FileDto<T> : FileEntryDto<T>
     /// <type>System.Boolean, System</type>
     public bool? HasDraft { get; set; }
 
+    /// <summary>Is there a form or not</summary>
+    /// <type>System.Boolean, System</type>
+    public bool? IsForm { get; set; }
+
     /// <summary>Specifies if the filling has started or not</summary>
     /// <type>System.Boolean, System</type>
     public bool? StartFilling { get; set; }
@@ -173,7 +177,8 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         FilesSettingsHelper filesSettingsHelper,
         FileDateTime fileDateTime,
         ExternalShare externalShare,
-        FileSharing fileSharing)
+        FileSharing fileSharing,
+        FileChecker fileChecker)
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime) 
 {
     private readonly ApiDateTimeHelper _apiDateTimeHelper = apiDateTimeHelper;
@@ -238,8 +243,16 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
             {
                 result.Security[FileSecurity.FilesSecurityActions.EditForm] = false;
             }
-
-            result.HasDraft = !Equals(linkedId, default(T));
+            if (!file.IsForm && (FilterType)file.Category == FilterType.None)
+            {
+                result.IsForm = await fileChecker.CheckExtendedPDF(file);
+            }
+            else
+            {
+                result.IsForm = file.IsForm;
+            }
+            
+            result.HasDraft = result.IsForm == true ? !Equals(linkedId, default(T)) : null;
 
             var formFilling = properties?.FormFilling;
             if (formFilling != null)
