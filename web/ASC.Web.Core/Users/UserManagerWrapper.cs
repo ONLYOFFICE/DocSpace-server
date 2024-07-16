@@ -410,13 +410,13 @@ public sealed class UserManagerWrapper(
     {
         var profiles = await accountLinker.GetLinkedProfilesAsync();
         
-        var profile = profiles.FirstOrDefault(x => x.EMail.Equals(email, StringComparison.OrdinalIgnoreCase));
+        var profile = profiles.FirstOrDefault(x => x.EMail.Equals(email));
         if (profile == null)
         {
             return (false, Guid.Empty);
         }
         
-        var providerType = ProviderManager.AuthProviders.FirstOrDefault(x => x.Equals(profile.Provider, StringComparison.OrdinalIgnoreCase));
+        var providerType = ProviderManager.AuthProviders.FirstOrDefault(x => x.Equals(profile.Provider));
         var provider = providerManager.GetLoginProvider(providerType);
 
         if (provider is { IsEnabled: true })
