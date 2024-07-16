@@ -3727,12 +3727,19 @@ public class FileStorageService //: IFileStorageService
 
         linkId = ace.Id;
 
-        if (eventType == EventType.Remove && ace.SubjectType == SubjectType.PrimaryExternalLink && (entry is Folder<T> { FolderType: FolderType.PublicRoom } or Folder<T> { FolderType: FolderType.FillingFormsRoom }))
+        if (eventType == EventType.Remove && ace.SubjectType == SubjectType.PrimaryExternalLink && 
+            (entry is Folder<T> { FolderType: FolderType.PublicRoom or FolderType.FillingFormsRoom } room))
         {
             linkId = Guid.NewGuid();
 
-            result = await SetAceLinkAsync(entry, SubjectType.PrimaryExternalLink, linkId, FileShare.Read, 
-                new FileShareOptions { Title = FilesCommonResource.DefaultExternalLinkTitle });
+            var (defaultTitle, defaultAccess) = room.FolderType switch
+            {
+                FolderType.PublicRoom => (FilesCommonResource.DefaultExternalLinkTitle, FileShare.Read),
+                FolderType.FillingFormsRoom => (FilesCommonResource.FillOutExternalLinkTitle, FileShare.FillForms),
+                _ => throw new InvalidOperationException()
+            };
+
+            result = await SetAceLinkAsync(entry, SubjectType.PrimaryExternalLink, linkId, defaultAccess, new FileShareOptions { Title = defaultTitle });
             
             await filesMessageService.SendAsync(MessageAction.RoomExternalLinkRevoked, entry, linkId.ToString(), ace.FileShareOptions?.Title, 
                 result.Ace.FileShareOptions?.Title);
