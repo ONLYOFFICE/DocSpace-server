@@ -63,21 +63,21 @@ public class FileSecurity(IDaoFactory daoFactory,
 
     public static readonly FrozenDictionary<FolderType, FrozenDictionary<SubjectType, HashSet<FileShare>>> AvailableFileAccesses =
         new Dictionary<FolderType, FrozenDictionary<SubjectType, HashSet<FileShare>>>
-    {
         {
+            {
                 FolderType.USER,
                 new Dictionary<SubjectType, HashSet<FileShare>>
-            {
                 {
+                    {
                         SubjectType.ExternalLink,
                         [FileShare.Editing, FileShare.CustomFilter, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.Restrict, FileShare.None]
-                },
-                {
+                    },
+                    {
                         SubjectType.PrimaryExternalLink,
                         [FileShare.Editing, FileShare.CustomFilter, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.Restrict, FileShare.None]
                     }
                 }.ToFrozenDictionary()
-        }
+            }
         }.ToFrozenDictionary();
 
     public static readonly FrozenDictionary<FolderType, FrozenDictionary<SubjectType, HashSet<FileShare>>> AvailableRoomAccesses =
@@ -91,18 +91,18 @@ public class FileSecurity(IDaoFactory daoFactory,
                             FileShare.RoomAdmin, FileShare.PowerUser, FileShare.Editing, FileShare.Review,
                             FileShare.Comment, FileShare.FillForms, FileShare.Read, FileShare.None
                         ]
-                },
-                {
+                    },
+                    {
                         SubjectType.Group, [
                             FileShare.Editing, FileShare.Review, FileShare.Comment, FileShare.FillForms, FileShare.Read, FileShare.None
                         ]
-                },
-                {
+                    },
+                    {
                         SubjectType.InvitationLink, [
                             FileShare.RoomAdmin, FileShare.PowerUser, FileShare.Editing, FileShare.Review,
                             FileShare.Comment, FileShare.FillForms, FileShare.Read, FileShare.None
                         ]
-                },
+                    },
                     { SubjectType.ExternalLink, [FileShare.Read, FileShare.None] },
                     { SubjectType.PrimaryExternalLink, [FileShare.Read, FileShare.None] }
                 }.ToFrozenDictionary()
@@ -122,7 +122,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 new Dictionary<SubjectType, HashSet<FileShare>>
                 {
                     { SubjectType.User, [FileShare.RoomAdmin, FileShare.PowerUser, FileShare.FillForms, FileShare.None] },
-                    { SubjectType.Group , [FileShare.FillForms, FileShare.None] },
+                    { SubjectType.Group, [FileShare.FillForms, FileShare.None] },
                     { SubjectType.InvitationLink, [FileShare.RoomAdmin, FileShare.PowerUser, FileShare.FillForms, FileShare.None] },
                     { SubjectType.ExternalLink, [FileShare.FillForms, FileShare.Read, FileShare.None] },
                     { SubjectType.PrimaryExternalLink, [FileShare.FillForms, FileShare.Read, FileShare.None] }
@@ -133,7 +133,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 new Dictionary<SubjectType, HashSet<FileShare>>
                 {
                     { SubjectType.User, [FileShare.RoomAdmin, FileShare.PowerUser, FileShare.Editing, FileShare.Read, FileShare.None] },
-                    { SubjectType.Group , [FileShare.Editing, FileShare.Read, FileShare.None] },
+                    { SubjectType.Group, [FileShare.Editing, FileShare.Read, FileShare.None] },
                     { SubjectType.InvitationLink, [FileShare.RoomAdmin, FileShare.PowerUser, FileShare.Editing, FileShare.Read, FileShare.None] }
                 }.ToFrozenDictionary()
             },
@@ -149,7 +149,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                     {
                         SubjectType.Group, [
                             FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.None
-                        ]  
+                        ]
                     },
                     {
                         SubjectType.InvitationLink, [
@@ -171,7 +171,7 @@ public class FileSecurity(IDaoFactory daoFactory,
             {
                 FolderType.FormRoom,
                 new Dictionary<SubjectType, HashSet<FileShare>>
-                    {
+                {
                     { SubjectType.User, [FileShare.RoomAdmin, FileShare.PowerUser, FileShare.Editing, FileShare.FillForms, FileShare.Read, FileShare.None] },
                     { SubjectType.Group, [FileShare.Editing, FileShare.FillForms, FileShare.Read, FileShare.None] },
                     { SubjectType.InvitationLink, [FileShare.RoomAdmin, FileShare.PowerUser, FileShare.Editing, FileShare.Read, FileShare.None] }
@@ -199,7 +199,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 FileShare.Editing, FileShare.Review, FileShare.Comment, FileShare.FillForms, FileShare.Read,
                 FileShare.None
             ]
-            }
+        }
     }.ToFrozenDictionary();
 
     private static readonly FrozenDictionary<FileEntryType, IEnumerable<FilesSecurityActions>> _securityEntries =
