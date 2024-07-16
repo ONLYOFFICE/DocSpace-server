@@ -153,10 +153,10 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
                     logger.Debug($"Password key not found for file {file.Id} and subject {file.ShareRecord.Subject}");
                 }
 
-                var headersNames = httpContextAccessor.HttpContext?.Request?.Headers.Keys?.ToList();
+                var headersNames = httpContextAccessor.HttpContext?.Request.Headers.Where(x => x.Key != "Authorization").ToList();
                 if (headersNames != null)
                 {
-                    logger.Debug($"OpenEdit Headers: {string.Join(", ", headersNames)}");
+                    logger.Debug($"OpenEdit Headers: {string.Join("| ", headersNames.Select(x => $"{x.Key}: {x.Value}"))}");
                 }
             }
             
