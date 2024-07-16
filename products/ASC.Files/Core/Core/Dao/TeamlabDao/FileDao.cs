@@ -550,10 +550,7 @@ internal class FileDao(
                         using var originalCopyStream = new MemoryStream();
                         if (currentRoom.FolderType == FolderType.FillingFormsRoom)
                         {
-                            var extension = FileUtility.GetFileExtension(file.Title);
-                            var fileType = FileUtility.GetFileTypeByExtention(extension);
-
-                            if (fileType == FileType.Pdf)
+                            if (file.IsForm)
                             {
                                 await SaveFileStreamAsync(file, fileStream, currentFolder);
 
