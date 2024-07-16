@@ -320,7 +320,7 @@ internal class SharePointFileDao(
             if (!sharePointFile.Name.Equals(file.Title))
             {
                 var folder = await SharePointProviderInfo.GetFolderByIdAsync(file.ParentId);
-                file.Title = await global.GetAvailableTitleAsync(file.Title, folder.ServerRelativeUrl, IsExistAsync);
+                file.Title = await global.GetAvailableTitleAsync(file.Title, folder.ServerRelativeUrl, IsExistAsync, FileEntryType.File);
 
                 var id = await SharePointProviderInfo.RenameFileAsync(DaoSelector.ConvertId(resultFile.Id), file.Title);
 
@@ -333,7 +333,7 @@ internal class SharePointFileDao(
         if (file.ParentId != null)
         {
             var folder = await SharePointProviderInfo.GetFolderByIdAsync(file.ParentId);
-            file.Title = await global.GetAvailableTitleAsync(file.Title, folder.ServerRelativeUrl, IsExistAsync);
+            file.Title = await global.GetAvailableTitleAsync(file.Title, folder.ServerRelativeUrl, IsExistAsync, FileEntryType.File);
 
             return SharePointProviderInfo.ToFile(await SharePointProviderInfo.CreateFileAsync(folder.ServerRelativeUrl + "/" + file.Title, fileStream));
 
