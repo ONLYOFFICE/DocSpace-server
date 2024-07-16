@@ -140,7 +140,7 @@ public class CookiesManager(
 
         var cookieName = GetFullCookiesName(type, itemId);
 
-        if (httpContextAccessor.HttpContext.Request.Cookies.TryGetValue(cookieName, out var cookie))
+        if (httpContextAccessor.HttpContext.Request.Cookies.TryGetValue(cookieName, out var cookie) && !string.IsNullOrEmpty(cookie))
         {
             return cookie;
         }
