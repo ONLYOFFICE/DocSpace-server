@@ -464,4 +464,16 @@ Visaugstākā saderība ar docx, xlsx, pptx.</value>
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>Tips</value>
   </data>
+  <data name="Date" xml:space="preserve">
+    <value>Datums</value>
+  </data>
+  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
+    <value>Prasmīgs lietotājs</value>
+  </data>
+  <data name="RoleEnum_PowerUser" xml:space="preserve">
+    <value>Prasmīgs lietotājs</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>Lietotājs</value>
+  </data>
 </root>

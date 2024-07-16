@@ -529,4 +529,10 @@ Najviša kompatibilnost sa docx, xlsx, pptx.</value>
   <data name="User" xml:space="preserve">
     <value>Korisnik</value>
   </data>
+  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
+    <value>Napredni korisnik</value>
+  </data>
+  <data name="RoleEnum_PowerUser" xml:space="preserve">
+    <value>Napredni korisnik</value>
+  </data>
 </root>

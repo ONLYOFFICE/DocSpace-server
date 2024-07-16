@@ -1449,7 +1449,7 @@ Thông báo ngoại lệ: $Message</value>
 
 Quá trình xóa dữ liệu của người dùng "$FromUserName":"$FromUserLink" đã được hoàn thành.
 
-Việc xóa dữ liệu cá nhân được phép cho $DocsSpace miễn phí:</value>
+Việc xóa dữ liệu cá nhân được phép cho $DocsSpace miễn phí</value>
   </data>
   <data name="pattern_remove_user_data_failed" xml:space="preserve">
     <value>Kính gửi $UserName,

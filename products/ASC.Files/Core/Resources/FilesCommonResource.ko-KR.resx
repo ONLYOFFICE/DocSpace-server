@@ -464,4 +464,16 @@ docx, xlsx, pptx와 최고의 호환성이 보장됩니다.</value>
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>타입</value>
   </data>
+  <data name="Date" xml:space="preserve">
+    <value>날짜</value>
+  </data>
+  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
+    <value>고급 사용자</value>
+  </data>
+  <data name="RoleEnum_PowerUser" xml:space="preserve">
+    <value>고급 사용자</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>사용자</value>
+  </data>
 </root>

@@ -464,4 +464,16 @@ Paras yhteensopivuus docx:n, xlsx:n, pptx:n kanssa.</value>
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>Tyyppi</value>
   </data>
+  <data name="Date" xml:space="preserve">
+    <value>Päivämäärä</value>
+  </data>
+  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
+    <value>Tehokäyttäjä</value>
+  </data>
+  <data name="RoleEnum_PowerUser" xml:space="preserve">
+    <value>Tehokäyttäjä</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>Käyttäjä</value>
+  </data>
 </root>

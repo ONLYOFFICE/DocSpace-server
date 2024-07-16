@@ -464,4 +464,16 @@
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>Tipo</value>
   </data>
+  <data name="Date" xml:space="preserve">
+    <value>Fecha</value>
+  </data>
+  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
+    <value>Usuario avanzado</value>
+  </data>
+  <data name="RoleEnum_PowerUser" xml:space="preserve">
+    <value>Usuario avanzado</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>Usuario</value>
+  </data>
 </root>

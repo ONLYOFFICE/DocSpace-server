@@ -464,4 +464,16 @@ Je garantována 100% kompatibilita s MS Office formáty.</value>
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>Typ</value>
   </data>
+  <data name="Date" xml:space="preserve">
+    <value>Datum</value>
+  </data>
+  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
+    <value>Mocný uživatel</value>
+  </data>
+  <data name="RoleEnum_PowerUser" xml:space="preserve">
+    <value>Mocný uživatel</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>Uživatel</value>
+  </data>
 </root>

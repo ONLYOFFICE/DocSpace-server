@@ -1045,7 +1045,7 @@
   <data name="TariffsFeature_total_size" xml:space="preserve">
     <value>{0} por administrador/usuário avançado e capacidade de adicionar espaço mediante solicitação</value>
   </data>
-  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+  <data name="ErrorUserDisabled" xml:space="preserve">
     <value>Usuário desativado</value>
   </data>
 </root>

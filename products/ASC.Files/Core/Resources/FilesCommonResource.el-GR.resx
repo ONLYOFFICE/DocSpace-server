@@ -464,4 +464,16 @@
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>Τύπος</value>
   </data>
+  <data name="Date" xml:space="preserve">
+    <value>Ημερομηνία</value>
+  </data>
+  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
+    <value>Χρήστης ισχύος</value>
+  </data>
+  <data name="RoleEnum_PowerUser" xml:space="preserve">
+    <value>Χρήστης ισχύος</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>Χρήστης</value>
+  </data>
 </root>
