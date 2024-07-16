@@ -325,7 +325,7 @@ internal class FileDao(
 
         if (!_authContext.IsAuthenticated)
         {
-            headers.Add(SecureHelper.GenerateSecureKeyHeader(path, emailValidationKeyProvider));
+            headers.Add(await SecureHelper.GenerateSecureKeyHeaderAsync(path, emailValidationKeyProvider));
         }
 
         var url = (await storage.GetPreSignedUriAsync(string.Empty, path, expires, headers)).ToString();

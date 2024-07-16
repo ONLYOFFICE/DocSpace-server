@@ -303,7 +303,7 @@ public class RoomLogoManager(
     private async ValueTask<string> GetLogoPathAsync<T>(T id, SizeName size, int hash, bool secure = false)
     {
         var fileName = GetFileName(id, size);
-        var headers = secure ? new[] { SecureHelper.GenerateSecureKeyHeader(fileName, emailValidationKeyProvider) } : null;
+        var headers = secure ? new[] { await SecureHelper.GenerateSecureKeyHeaderAsync(fileName, emailValidationKeyProvider) } : null;
 
         var store = await GetDataStoreAsync();
 
