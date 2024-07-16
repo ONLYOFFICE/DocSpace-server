@@ -930,6 +930,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 {
                     return false;
                 }
+                
                 if (action is FilesSecurityActions.Pin or FilesSecurityActions.EditAccess or FilesSecurityActions.Mute &&
                     !isRoom)
                 {
@@ -937,6 +938,11 @@ public class FileSecurity(IDaoFactory daoFactory,
                 }
 
                 if (action == FilesSecurityActions.Mute && isRoom && await IsAllGeneralNotificationSettingsOffAsync())
+                {
+                    return false;
+                }
+
+                if (action == FilesSecurityActions.Mute && e.ProviderEntry)
                 {
                     return false;
                 }
