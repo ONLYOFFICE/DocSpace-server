@@ -285,6 +285,12 @@ public class FileStorageService //: IFileStorageService
 
             return x is File<int> f2 && !await fileConverter.IsConverting(f2);
         }).ToEnumerable();
+
+        if (parent.FolderType == FolderType.Recent && searchArea == SearchArea.RecentByLinks)
+        {
+            parent.Title = FilesUCResource.MyFiles;
+        }
+        
         var result = new DataWrapper<T>
         {
             Total = total,
@@ -302,7 +308,11 @@ public class FileStorageService //: IFileStorageService
 
                         if (f is Folder<int> f2)
                         {
-                            return new { f2.Id, f2.Title, RoomType = DocSpaceHelper.MapToRoomType(f2.FolderType) };
+                            var title = f2.FolderType is FolderType.Recent && searchArea == SearchArea.RecentByLinks
+                                ? FilesUCResource.MyFiles
+                                : f2.Title;
+                            
+                            return new { f2.Id, title, RoomType = DocSpaceHelper.MapToRoomType(f2.FolderType) };
                         }
                     }
 
