@@ -550,11 +550,14 @@ internal class FileDao(
                         using var originalCopyStream = new MemoryStream();
                         if (currentRoom.FolderType == FolderType.FillingFormsRoom)
                         {
-                            if (file.IsForm)
+                            var fileProp = await fileDao.GetProperties(file.Id);
+                            var extension = FileUtility.GetFileExtension(file.Title);
+
+                            if (file.IsForm || (extension == ".csv" && fileProp?.FormFilling.ResultsFolderId == file.ParentId.ToString()))
                             {
                                 await SaveFileStreamAsync(file, fileStream, currentFolder);
 
-                                var properties = await fileDao.GetProperties(file.Id) ?? new EntryProperties() { FormFilling = new FormFillingProperties() };
+                                var properties = fileProp ?? new EntryProperties() { FormFilling = new FormFillingProperties() };
                                 if (!properties.FormFilling.CollectFillForm)
                                 {
                                     properties.FormFilling.StartFilling = true;
