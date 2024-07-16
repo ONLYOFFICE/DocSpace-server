@@ -979,12 +979,17 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
 
                                 if (file.ThumbnailStatus == Thumbnail.Created && !file.ProviderEntry)
                                 {
+                                    var store = await globalStorage.GetStoreAsync();
+                                    
                                     foreach (var size in thumbnailSettings.Sizes)
                                     {
-                                        await (await globalStorage.GetStoreAsync()).CopyAsync(String.Empty,
-                                                                                FileDao.GetUniqThumbnailPath(file, size.Width, size.Height),
-                                                                                String.Empty,
-                                                                                fileDao.GetUniqThumbnailPath(newFile, size.Width, size.Height));
+                                        var path = FileDao.GetUniqThumbnailPath(file, size.Width, size.Height);
+                                        var newPath = fileDao.GetUniqThumbnailPath(newFile, size.Width, size.Height);
+                                        
+                                        if (await store.IsFileAsync(path))
+                                        {
+                                            await store.CopyAsync(string.Empty, path, string.Empty, newPath);
+                                        }
                                     }
 
                                     await fileDao.SetThumbnailStatusAsync(newFile, Thumbnail.Created);
