@@ -980,6 +980,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                 if (file.ThumbnailStatus == Thumbnail.Created && !file.ProviderEntry)
                                 {
                                     var store = await globalStorage.GetStoreAsync();
+                                    var thumbnailStatus = Thumbnail.Created;
                                     
                                     foreach (var size in thumbnailSettings.Sizes)
                                     {
@@ -990,11 +991,16 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                         {
                                             await store.CopyAsync(string.Empty, path, string.Empty, newPath);
                                         }
+                                        else
+                                        {
+                                            thumbnailStatus = Thumbnail.Waiting;
+                                            break;
+                                        }
                                     }
+                                    
+                                    await fileDao.SetThumbnailStatusAsync(newFile, thumbnailStatus);
 
-                                    await fileDao.SetThumbnailStatusAsync(newFile, Thumbnail.Created);
-
-                                    newFile.ThumbnailStatus = Thumbnail.Created;
+                                    newFile.ThumbnailStatus = thumbnailStatus;
                                 }
 
                                 await linkDao.DeleteAllLinkAsync(newFile.Id);
