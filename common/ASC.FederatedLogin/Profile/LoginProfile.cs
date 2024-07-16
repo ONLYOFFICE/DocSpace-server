@@ -31,20 +31,16 @@ namespace ASC.FederatedLogin.Profile;
 [DebuggerDisplay("{DisplayName} ({Id})")]
 public class LoginProfile
 {
-    public const string QueryParamName = "up";
-    public const string QuerySessionParamName = "sup";
-    public const string QueryCacheParamName = "cup";
+    public string LinkId { get; init; }
+    
+    public LoginProfile() { }
 
-    public LoginProfile()
-    {
-        
-    }
-
-    public LoginProfile([NotNull]string serialized)
+    public LoginProfile([NotNull]string serialized, string linkId = null)
     {
         ArgumentNullException.ThrowIfNull(serialized);
 
         _fields = serialized.Split(PairSeparator).ToDictionary(x => x.Split(KeyValueSeparator)[0], y => y.Split(KeyValueSeparator)[1]);
+        LinkId = linkId;
     }
     
     public LoginProfile(Exception e)

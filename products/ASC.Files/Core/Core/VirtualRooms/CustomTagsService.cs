@@ -47,7 +47,7 @@ public class CustomTagsService(
         var tagDao = daoFactory.GetTagDao<int>();
         var tags = await tagDao.GetTagsInfoAsync(name, TagType.Custom, true).ToListAsync();
 
-        if (tags.Any())
+        if (tags.Count != 0)
         {
             throw new InvalidOperationException();
         }
