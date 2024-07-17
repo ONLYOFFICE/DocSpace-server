@@ -116,6 +116,8 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                             {
                                 resumedSession = await fileUploader.FinalizeUploadSessionAsync<T>(request.UploadId);
                             }
+                            
+                            await fileUploader.DeleteLinkAndMarkAsync(resumedSession.File);
 
                             await WriteSuccess(context, await ToResponseObject(resumedSession.File), (int)HttpStatusCode.Created);
 
@@ -160,6 +162,8 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                     {
                         session = await fileUploader.FinalizeUploadSessionAsync<T>(request.UploadId);
                     }
+
+                    await fileUploader.DeleteLinkAndMarkAsync(session.File);
 
                     await WriteSuccess(context, await ToResponseObject(session.File), (int)HttpStatusCode.Created);
                     

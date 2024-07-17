@@ -354,14 +354,20 @@ public class FileUploader(
         var dao = daoFactory.GetFileDao<T>();
 
         uploadSession.File = await dao.FinalizeUploadSessionAsync(uploadSession);
-
-        var linkDao = daoFactory.GetLinkDao<T>();
-        await linkDao.DeleteAllLinkAsync(uploadSession.File.Id);
-
-        await fileMarker.MarkAsNewAsync(uploadSession.File);
+        
         await chunkedUploadSessionHolder.RemoveSessionAsync(uploadSession);
 
         return uploadSession;
+    }
+
+    public async Task DeleteLinkAndMarkAsync<T>(File<T> file)
+    {
+        var linkDao = daoFactory.GetLinkDao<T>();
+        
+        var t1 = linkDao.DeleteAllLinkAsync(file.Id);
+        var t2 = fileMarker.MarkAsNewAsync(file).AsTask();
+
+        await Task.WhenAll(t1, t2);
     }
 
     public async Task AbortUploadAsync<T>(string uploadId)
