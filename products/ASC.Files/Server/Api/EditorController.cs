@@ -174,6 +174,8 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
         bool canFill;
         var canStartFilling = true;
         var isSubmitOnly = false;
+
+        var fillingSessionId = "";
         if (fileType == FileType.Pdf)
         {
             var folderDao = daoFactory.GetFolderDao<T>();
@@ -240,6 +242,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                                 await socketManager.UpdateFileAsync(file);
 
                                 file = formDraft;
+                                fillingSessionId = Guid.NewGuid().ToString("N");
                             }
                             else
                             {
@@ -255,6 +258,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                     canEdit = false;
                     canFill = true;
                     editorType = EditorType.Embedded;
+                    fillingSessionId = Guid.NewGuid().ToString("N");
                     break;
 
                 case FolderType.FormFillingFolderDone:
@@ -312,6 +316,8 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
         {
             result.StartFilling = canStartFilling;
         }
+
+        result.FillingSessionId = !string.IsNullOrEmpty(fillingSessionId) ? fillingSessionId : null;
 
         return result;
     }
