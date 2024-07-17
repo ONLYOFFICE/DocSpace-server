@@ -59,7 +59,9 @@ internal class FileDao(
     IDistributedLockProvider distributedLockProvider,
     FileStorageService fileStorageService,
     SocketManager socketManager,
-    SecurityContext securityContext)
+    SecurityContext securityContext,
+    TempStream tempStream,
+    FileChecker fileChecker)
     : AbstractDao(dbContextManager,
               userManager,
               tenantManager,
@@ -481,6 +483,31 @@ internal class FileDao(
                             await filesDbContext.DisableCurrentVersionAsync(tenantId, file.Id);
                         }
 
+
+                        var extension = FileUtility.GetFileExtension(file.Title);
+                        var fileType = FileUtility.GetFileTypeByExtention(extension);
+
+                        if (fileType == FileType.Pdf && file.Category == (int)FilterType.None)
+                        {
+                            using var originalCopyStream = new MemoryStream();
+                            await fileStream.CopyToAsync(originalCopyStream);
+
+                            var cloneStreamForCheck = await tempStream.CloneMemoryStream(originalCopyStream, 300);
+
+                            try
+                            {
+                                if (await fileChecker.CheckExtendedPDFstream(cloneStreamForCheck))
+                                {
+                                    file.Category = (int)FilterType.PdfForm;
+                                }
+                            }
+                            finally
+                            {
+                                originalCopyStream.Dispose();
+                                cloneStreamForCheck.Dispose();
+                            }
+                        }
+
                         toInsert = new DbFile
                         {
                             Id = file.Id,
@@ -490,7 +517,7 @@ internal class FileDao(
                             ParentId = file.ParentId,
                             Title = file.Title,
                             ContentLength = file.ContentLength,
-                            Category = (int)file.FilterType,
+                            Category = file.Category != (int)FilterType.None ? file.Category : (int)file.FilterType,
                             CreateBy = file.CreateBy,
                             CreateOn = _tenantUtil.DateTimeToUtc(file.CreateOn),
                             ModifiedBy = file.ModifiedBy,
@@ -547,7 +574,6 @@ internal class FileDao(
                     if (roomId != -1 && checkFolder)
                     {
                         var currentRoom = await folderDao.GetFolderAsync(roomId);
-                        using var originalCopyStream = new MemoryStream();
                         if (currentRoom.FolderType == FolderType.FillingFormsRoom)
                         {
                             var fileProp = await fileDao.GetProperties(file.Id);

@@ -41,7 +41,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
     private string _region;
     private string _upgradesPath;
     private string _serverBaseUri;
-
+    
     public RestoreProgressItem(
         IConfiguration configuration,
         ILogger<RestoreProgressItem> logger,
@@ -70,6 +70,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
     {
         Init();
         TenantId = request.TenantId;
+        NewTenantId = request.TenantId;
         Notify = request.NotifyAfterCompletion;
         StoragePath = request.FilePathOrId;
         StorageType = request.StorageType;
@@ -118,7 +119,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
                     record = await _backupRepository.GetBackupRecordAsync(md5Hash, TenantId);
                     if (record == null)
                     {
-                        throw new Exception(BackupResource.BackupNotFound);
+                       // throw new Exception(BackupResource.BackupNotFound);
                     }
                 }
             }
@@ -136,7 +137,9 @@ public class RestoreProgressItem : BaseBackupProgressItem
                 Percentage = Percentage = 10d + 0.65 * args.Progress;
                 await PublishChanges();
             };
-            await restoreTask.RunJob();
+            await restoreTask.RunJob(); 
+            NewTenantId = columnMapper.GetTenantMapping();
+            await PublishChanges();
 
             if (restoreTask.Dump)
             {

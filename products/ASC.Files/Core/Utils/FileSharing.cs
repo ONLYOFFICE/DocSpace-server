@@ -412,6 +412,15 @@ public class FileSharingHelper(
             return false;
         }
 
+        if (entry is File<T>)
+        {
+            var file = entry as File<T>;
+            if (file.IsForm)
+            {
+                return false;
+            }
+        }
+
         if (entry.RootFolderType == FolderType.COMMON && await global.IsDocSpaceAdministratorAsync)
         {
             return true;

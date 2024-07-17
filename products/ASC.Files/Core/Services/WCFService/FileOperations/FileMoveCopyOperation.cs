@@ -984,14 +984,14 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                     
                                     foreach (var size in thumbnailSettings.Sizes)
                                     {
-                                        var path = FileDao.GetUniqThumbnailPath(file, size.Width, size.Height);
-                                        var newPath = fileDao.GetUniqThumbnailPath(newFile, size.Width, size.Height);
-                                        
-                                        if (await store.IsFileAsync(path))
+                                        try
                                         {
+                                            var path = FileDao.GetUniqThumbnailPath(file, size.Width, size.Height);
+                                            var newPath = fileDao.GetUniqThumbnailPath(newFile, size.Width, size.Height);
+                                            
                                             await store.CopyAsync(string.Empty, path, string.Empty, newPath);
                                         }
-                                        else
+                                        catch (Exception)
                                         {
                                             thumbnailStatus = Thumbnail.Waiting;
                                             break;

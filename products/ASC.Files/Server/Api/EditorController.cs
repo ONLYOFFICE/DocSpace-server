@@ -312,7 +312,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
             }
         }
         
-        if (fileType == FileType.Pdf)
+        if (fileType == FileType.Pdf && file.IsForm)
         {
             result.StartFilling = canStartFilling;
         }

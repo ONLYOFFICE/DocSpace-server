@@ -221,28 +221,33 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
 
             var linkedId = await linkedIdTask;
             var properties = await propertiesTask;
-            var room = await currentFolderTask;
+            var currentFolder = await currentFolderTask;
 
-            if (!DocSpaceHelper.IsRoom(room.FolderType))
+            Folder<T> currentRoom = null;
+            if (!DocSpaceHelper.IsRoom(currentFolder.FolderType))
             {
-                var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(room);
+                var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(currentFolder);
                 if (int.TryParse(roomId?.ToString(), out var curRoomId) && curRoomId != -1)
                 {
-                    room = await folderDao.GetFolderAsync(roomId);
+                    currentRoom = await folderDao.GetFolderAsync(roomId);
+                }
+                else
+                {
+                    currentRoom = currentFolder;
                 }
             }
-            if (properties != null)
+            else
             {
-                if (room.FolderType == FolderType.FillingFormsRoom && properties.FormFilling.StartFilling)
+                currentRoom = currentFolder;
+            }
+            if (currentRoom != null && properties != null)
+            {
+                if (currentRoom.FolderType == FolderType.FillingFormsRoom && properties.FormFilling.StartFilling)
                     result.Security[FileSecurity.FilesSecurityActions.Lock] = false;
             }
 
-            var ace = await fileSharing.GetPureSharesAsync(room, new List<Guid> { authContext.CurrentAccount.ID }).FirstOrDefaultAsync();
+            var ace = await fileSharing.GetPureSharesAsync(currentRoom, new List<Guid> { authContext.CurrentAccount.ID }).FirstOrDefaultAsync();
 
-            if (ace is { Access: FileShare.FillForms })
-            {
-                result.Security[FileSecurity.FilesSecurityActions.EditForm] = false;
-            }
             if (!file.IsForm && (FilterType)file.Category == FilterType.None)
             {
                 result.IsForm = await fileChecker.CheckExtendedPDF(file);
@@ -251,7 +256,14 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
             {
                 result.IsForm = file.IsForm;
             }
-            
+
+            if (ace is { Access: FileShare.FillForms } || 
+                result.IsForm == null || result.IsForm == false || 
+                currentFolder.FolderType == FolderType.FormFillingFolderInProgress)
+            {
+                result.Security[FileSecurity.FilesSecurityActions.EditForm] = false;
+            }
+
             result.HasDraft = result.IsForm == true ? !Equals(linkedId, default(T)) : null;
 
             var formFilling = properties?.FormFilling;
