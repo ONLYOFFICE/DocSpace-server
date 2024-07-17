@@ -42,14 +42,16 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         DisplayUserSettingsHelper displayUserSettingsHelper,
         FileConverter fileConverter,
         PathProvider pathProvider,
-        FileChecker fileChecker)
+        FileChecker fileChecker,
+        IDistributedCache distributedCache)
     : FilesHelperBase(filesSettingsHelper,
             fileUploader,
             socketManager,
             fileDtoHelper,
             fileStorageService,
             fileChecker,
-            httpContextAccessor)
+            httpContextAccessor,
+            distributedCache)
     {
     private readonly ILogger _logger = logger;
 
@@ -177,6 +179,11 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
     public async Task<EditHistoryDataDto> GetEditDiffUrlAsync<T>(T fileId, int version = 0)
     {
         return await _fileStorageService.GetEditDiffUrlAsync(fileId, version);
+    }
+
+    public async Task<string> GetFillResultAsync(string fillingSessionId)
+    {
+        return await _distributedCache.GetStringAsync(fillingSessionId);
     }
 
     public async IAsyncEnumerable<EditHistoryDto> GetEditHistoryAsync<T>(T fileId)

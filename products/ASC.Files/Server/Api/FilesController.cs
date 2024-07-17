@@ -261,6 +261,13 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
         }
     }
 
+
+    [AllowAnonymous]
+    [HttpGet("file/fillresult")]
+    public async Task<string> GetFillResultAsync(string fillingSessionId)
+    {
+        return await filesControllerHelper.GetFillResultAsync(fillingSessionId);
+    }
     /// <summary>
     /// Returns a URL to the changes of a file version specified in the request.
     /// </summary>

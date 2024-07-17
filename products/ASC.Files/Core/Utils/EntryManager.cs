@@ -251,7 +251,8 @@ public class EntryManager(IDaoFactory daoFactory,
     IQuotaService quotaService,
     TenantManager tenantManager,
     ExternalShare externalShare,
-    FileChecker fileChecker)
+    FileChecker fileChecker,
+    IDistributedCache distributedCache)
 {
     private const string UpdateList = "filesUpdateList";
 
@@ -1488,6 +1489,7 @@ public class EntryManager(IDaoFactory daoFactory,
                                 }
                             }
                         }
+                        await distributedCache.SetStringAsync("testkey", result.Id.ToString());
 
                         try
                         {
