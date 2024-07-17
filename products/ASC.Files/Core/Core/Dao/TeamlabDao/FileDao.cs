@@ -327,7 +327,7 @@ internal class FileDao(
 
         if (!_authContext.IsAuthenticated)
         {
-            headers.Add(SecureHelper.GenerateSecureKeyHeader(path, emailValidationKeyProvider));
+            headers.Add(await SecureHelper.GenerateSecureKeyHeaderAsync(path, emailValidationKeyProvider));
         }
 
         var url = (await storage.GetPreSignedUriAsync(string.Empty, path, expires, headers)).ToString();
@@ -576,14 +576,14 @@ internal class FileDao(
                         var currentRoom = await folderDao.GetFolderAsync(roomId);
                         if (currentRoom.FolderType == FolderType.FillingFormsRoom)
                         {
+                            var fileProp = await fileDao.GetProperties(file.Id);
                             var extension = FileUtility.GetFileExtension(file.Title);
-                            var fileType = FileUtility.GetFileTypeByExtention(extension);
 
-                            if (fileType == FileType.Pdf)
+                            if (file.IsForm || (extension == ".csv" && fileProp?.FormFilling.ResultsFolderId == file.ParentId.ToString()))
                             {
                                 await SaveFileStreamAsync(file, fileStream, currentFolder);
 
-                                var properties = await fileDao.GetProperties(file.Id) ?? new EntryProperties() { FormFilling = new FormFillingProperties() };
+                                var properties = fileProp ?? new EntryProperties() { FormFilling = new FormFillingProperties() };
                                 if (!properties.FormFilling.CollectFillForm)
                                 {
                                     properties.FormFilling.StartFilling = true;

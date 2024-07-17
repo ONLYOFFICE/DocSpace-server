@@ -89,7 +89,10 @@ public class FileStorageService //: IFileStorageService
     MentionWrapperCreator mentionWrapperCreator,
     SecurityContext securityContext,
     FileUtilityConfiguration fileUtilityConfiguration,
-    FileChecker fileChecker)
+    FileChecker fileChecker,
+    CommonLinkUtility commonLinkUtility,
+    ShortUrl shortUrl,
+    IDbContextFactory<UrlShortenerDbContext> dbContextFactory)
 {
     private readonly ILogger _logger = optionMonitor.CreateLogger("ASC.Files");
 
@@ -285,6 +288,12 @@ public class FileStorageService //: IFileStorageService
 
             return x is File<int> f2 && !await fileConverter.IsConverting(f2);
         }).ToEnumerable();
+
+        if (parent.FolderType == FolderType.Recent && searchArea == SearchArea.RecentByLinks)
+        {
+            parent.Title = FilesUCResource.MyFiles;
+        }
+        
         var result = new DataWrapper<T>
         {
             Total = total,
@@ -302,7 +311,11 @@ public class FileStorageService //: IFileStorageService
 
                         if (f is Folder<int> f2)
                         {
-                            return new { f2.Id, f2.Title, RoomType = DocSpaceHelper.MapToRoomType(f2.FolderType) };
+                            var title = f2.FolderType is FolderType.Recent && searchArea == SearchArea.RecentByLinks
+                                ? FilesUCResource.MyFiles
+                                : f2.Title;
+                            
+                            return new { f2.Id, title, RoomType = DocSpaceHelper.MapToRoomType(f2.FolderType) };
                         }
                     }
 
@@ -3095,6 +3108,20 @@ public class FileStorageService //: IFileStorageService
                     && !string.IsNullOrEmpty(link)
                     && link.StartsWith(baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath)))
         {
+            var start = commonLinkUtility.ServerRootPath + "/s/";
+            if (link.StartsWith(start))
+            {
+                await using (var context = await dbContextFactory.CreateDbContextAsync())
+                {
+                    var decode = shortUrl.Decode(link[start.Length..]);
+                    var sl = await context.ShortLinks.FindAsync(decode);
+                    if (sl != null)
+                    {
+                        link = sl.Link;
+                    }
+                }
+            }
+
             var url = new UriBuilder(link);
             var id = HttpUtility.ParseQueryString(url.Query)[FilesLinkUtility.FileId];
             if (!string.IsNullOrEmpty(id))
@@ -3717,12 +3744,19 @@ public class FileStorageService //: IFileStorageService
 
         linkId = ace.Id;
 
-        if (eventType == EventType.Remove && ace.SubjectType == SubjectType.PrimaryExternalLink && (entry is Folder<T> { FolderType: FolderType.PublicRoom } or Folder<T> { FolderType: FolderType.FillingFormsRoom }))
+        if (eventType == EventType.Remove && ace.SubjectType == SubjectType.PrimaryExternalLink && 
+            (entry is Folder<T> { FolderType: FolderType.PublicRoom or FolderType.FillingFormsRoom } room))
         {
             linkId = Guid.NewGuid();
 
-            result = await SetAceLinkAsync(entry, SubjectType.PrimaryExternalLink, linkId, FileShare.Read, 
-                new FileShareOptions { Title = FilesCommonResource.DefaultExternalLinkTitle });
+            var (defaultTitle, defaultAccess) = room.FolderType switch
+            {
+                FolderType.PublicRoom => (FilesCommonResource.DefaultExternalLinkTitle, FileShare.Read),
+                FolderType.FillingFormsRoom => (FilesCommonResource.FillOutExternalLinkTitle, FileShare.FillForms),
+                _ => throw new InvalidOperationException()
+            };
+
+            result = await SetAceLinkAsync(entry, SubjectType.PrimaryExternalLink, linkId, defaultAccess, new FileShareOptions { Title = defaultTitle });
             
             await filesMessageService.SendAsync(MessageAction.RoomExternalLinkRevoked, entry, linkId.ToString(), ace.FileShareOptions?.Title, 
                 result.Ace.FileShareOptions?.Title);

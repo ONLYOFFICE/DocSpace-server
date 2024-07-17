@@ -364,7 +364,7 @@ public abstract class VirtualRoomsController<T>(
         {
             LinkType.Invitation => await _fileStorageService.SetInvitationLinkAsync(id, inDto.LinkId, inDto.Title, inDto.Access),
             LinkType.External => await _fileStorageService.SetExternalLinkAsync(id, FileEntryType.Folder, inDto.LinkId, inDto.Title,
-                inDto.Access is not (FileShare.Read or FileShare.None) ? FileShare.Read : inDto.Access, inDto.ExpirationDate, inDto.Password?.Trim(), inDto.DenyDownload),
+                inDto.Access, inDto.ExpirationDate, inDto.Password?.Trim(), inDto.DenyDownload),
             _ => throw new InvalidOperationException()
         };
 

@@ -84,6 +84,22 @@ public class AccountLinker(
         return await accountLinkerStorage.GetFromCacheAsync(obj, GetLinkedProfilesFromDBAsync);
     }
 
+    public async Task<IEnumerable<LoginProfile>> GetLinkedProfilesAsync()
+    {
+        var tenant = await tenantManager.GetCurrentTenantIdAsync();
+        var cacheKey = CacheKey(tenant);
+        
+        var profiles = await accountLinkerStorage.GetFromCacheAsync(cacheKey, async _ =>
+        {
+            await using var accountLinkContext = await accountLinkContextManager.CreateDbContextAsync();
+            return await Queries.AccountLinksByTenantAsync(accountLinkContext, tenant)
+                .Select(x => new LoginProfile(x.Profile, x.Id))
+                .ToListAsync();
+        });
+        
+        return profiles;
+    }
+
     public async Task AddLinkAsync(Guid obj, LoginProfile profile)
     {
         var accountLink = new AccountLinks
@@ -106,6 +122,7 @@ public class AccountLinker(
         await accountLinkContext.SaveChangesAsync();
 
         await accountLinkerStorage.RemoveFromCacheAsync(obj.ToString());
+        await accountLinkerStorage.RemoveFromCacheAsync(CacheKey(tenant));
     }
 
     public async Task AddLinkAsync(Guid obj, string id, string provider)
@@ -116,6 +133,7 @@ public class AccountLinker(
     public async Task RemoveProviderAsync(string obj, string provider = null, string hashId = null)
     {
         await using var accountLinkContext = await accountLinkContextManager.CreateDbContextAsync();
+        var tenant = await tenantManager.GetCurrentTenantIdAsync();
 
         var accountLink = await Queries.AccountLinkAsync(accountLinkContext, obj, provider, hashId);
 
@@ -123,6 +141,7 @@ public class AccountLinker(
         await accountLinkContext.SaveChangesAsync();
 
         await accountLinkerStorage.RemoveFromCacheAsync(obj);
+        await accountLinkerStorage.RemoveFromCacheAsync(CacheKey(tenant));
     }
 
     private async Task<List<LoginProfile>> GetLinkedProfilesFromDBAsync(string obj)
@@ -141,6 +160,8 @@ public class AccountLinker(
             .Select(r => new { r.Id, r.Profile })
             .ToDictionaryAsync(k => k.Id, v =>  new LoginProfile(v.Profile));
     }
+    
+    private static string CacheKey(int tenantId) => $"tenant_profiles_{tenantId}";
 }
 
 static file class Queries
@@ -174,4 +195,12 @@ static file class Queries
                 ctx.AccountLinks.Join(ctx.Users, a => a.Id, u => u.Id.ToString(),
                         (accountLink, user) => new { accountLink, user })
                         .Any(q => q.accountLink.UId == hashId && q.user.TenantId == tenant));
+    
+    public static readonly Func<AccountLinkContext, int, IAsyncEnumerable<AccountLinks>> AccountLinksByTenantAsync =
+        EF.CompileAsyncQuery(
+            (AccountLinkContext ctx, int tenant) =>
+                ctx.AccountLinks.Join(ctx.Users, a => a.Id, u => u.Id.ToString(), 
+                        (accountLink, user) => new { accountLink, user })
+                        .Where(x => x.user.TenantId == tenant)
+                        .Select(x => x.accountLink));
 }
