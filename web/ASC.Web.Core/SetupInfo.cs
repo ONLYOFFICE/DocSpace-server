@@ -65,8 +65,6 @@ public class SetupInfo
     public string TipsAddress { get; private set; }
     public string SupportFeedback { get; private set; }
     public string WebApiBaseUrl { get { return VirtualPathUtility.ToAbsolute(GetAppSettings("api.url", "~/api/2.0/")); } }
-    public TimeSpan ValidEmailKeyInterval { get; private set; }
-    public TimeSpan ValidAuthKeyInterval { get; private set; }
     public string SalesEmail { get; private set; }
     public static bool IsSecretEmail(string email)
     {
@@ -144,9 +142,6 @@ public class SetupInfo
         NotifyAddress = GetAppSettings("web.promo-url", string.Empty);
         TipsAddress = GetAppSettings("web.promo-tips-url", string.Empty);
         SupportFeedback = GetAppSettings("web.support-feedback", string.Empty);
-
-        ValidEmailKeyInterval = GetAppSettings("email.validinterval", TimeSpan.FromDays(7));
-        ValidAuthKeyInterval = GetAppSettings("auth.validinterval", TimeSpan.FromHours(1));
 
         SalesEmail = GetAppSettings("web.payment.email", "sales@onlyoffice.com");
         _webAutotestSecretEmail = (configuration["web:autotest:secret-email"] ?? "").Trim();
