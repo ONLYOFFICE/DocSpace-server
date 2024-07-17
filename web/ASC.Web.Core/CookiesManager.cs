@@ -323,17 +323,6 @@ public class CookiesManager(
             _ => string.Empty
         };
 
-        var request = httpContextAccessor.HttpContext?.Request;
-        if (request == null || !FromCors(request) || !request.Headers.TryGetValue(HeaderNames.Origin, out var origin))
-        {
-            return result;
-        }
-
-        var originUri = new Uri(origin);
-        var host = originUri.Host;
-        var alias = host[..(host.Length - coreBaseSettings.Basedomain.Length - 1)];
-        result = $"{result}_{alias}";
-
         return result;
     }
 
