@@ -26,19 +26,14 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
-/// <summary>
-/// </summary>
 public class UploadResultDto
 {
-    /// <summary>Specifies if the operation is successful or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the operation is successful or not")]
     public bool Success { get; set; }
 
-    /// <summary>Data</summary>
-    /// <type>System.Object, System</type>
+    [SwaggerSchemaCustom(Description = "Data")]
     public object Data { get; set; }
 
-    /// <summary>Message</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Message")]
     public string Message { get; set; }
 }

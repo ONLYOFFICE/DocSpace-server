@@ -26,40 +26,30 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
-/// <summary>
-/// </summary>
 public class FolderContentDto<T>
 {
-    /// <summary>List of files</summary>
-    /// <type>System.Collections.Generic.List{ASC.Files.Core.ApiModels.ResponseDto.FileEntryDto}, System.Collections.Generic</type>
+    [SwaggerSchemaCustom(Description = "List of files")]
     public List<FileEntryDto> Files { get; set; }
 
-    /// <summary>List of folders</summary>
-    /// <type>System.Collections.Generic.List{ASC.Files.Core.ApiModels.ResponseDto.FileEntryDto}, System.Collections.Generic</type>
+    [SwaggerSchemaCustom(Description = "List of folders")]
     public List<FileEntryDto> Folders { get; set; }
 
-    /// <summary>Current folder information</summary>
-    /// <type>ASC.Files.Core.ApiModels.ResponseDto.FolderDto, ASC.Files.Core</type>
+    [SwaggerSchemaCustom(Description = "Current folder information")]
     public FolderDto<T> Current { get; set; }
 
-    /// <summary>Folder path</summary>
-    /// <type>System.Object, System</type>
+    [SwaggerSchemaCustom(Description = "Folder path")]
     public object PathParts { get; set; }
 
-    /// <summary>Folder start index</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustom(Example = "1234", Description = "Folder start index", Format = "int32")]
     public int StartIndex { get; set; }
 
-    /// <summary>Number of folder elements</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustom(Example = "1234", Description = "Number of folder elements", Format = "int32")]
     public int Count { get; set; }
 
-    /// <summary>Total number of elements in the folder</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustom(Example = "1234", Description = "Total number of elements in the folder", Format = "int32")]
     public int Total { get; set; }
 
-    /// <summary>New element index</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustom(Example = "1234", Description = "New element index", Format = "int32")]
     public int New { get; set; }
 
     public static FolderContentDto<int> GetSample()

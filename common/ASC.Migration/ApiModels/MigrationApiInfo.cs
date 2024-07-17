@@ -29,50 +29,71 @@ namespace ASC.Migration.Core.Models.Api;
 [ProtoContract]
 public class MigrationApiInfo
 {
+    [SwaggerSchemaCustom(Example = "some text", Description = "Migrator name")]
     [ProtoMember(1)]
     public string MigratorName { get; set; }
 
+    [SwaggerSchemaCustom(Example = "some text", Description = "")]
     [ProtoMember(2)]
     public string Operation { get; set; }
 
+    [SwaggerSchemaCustom(Example = "some text", Description = "")]
     [ProtoMember(3)]
     public List<string> FailedArchives { get; set; } = new List<string>();
 
+    [SwaggerSchemaCustom(Description = "")]
     [ProtoMember(4)]
     public List<MigratingApiUser> Users { get; set; } = new List<MigratingApiUser>();
 
+    [SwaggerSchemaCustom(Description = "")]
     [ProtoMember(5)]
     public List<MigratingApiUser> WithoutEmailUsers { get; set; } = new List<MigratingApiUser>();
 
+    [SwaggerSchemaCustom(Description = "")]
     [ProtoMember(6)]
     public List<MigratingApiUser> ExistUsers { get; set; } = new List<MigratingApiUser>();
-    
+
+    [SwaggerSchemaCustom(Description = "")]
     [ProtoMember(7)]
     public List<MigratingApiGroup> Groups { get; set; } = new List<MigratingApiGroup>();
 
+    [SwaggerSchemaCustom(Example = "true", Description = "")]
     [ProtoMember(8)]
-    public bool ImportPersonalFiles { get; set; } 
+    public bool ImportPersonalFiles { get; set; }
+
+    [SwaggerSchemaCustom(Example = "true", Description = "")]
     [ProtoMember(9)]
     public bool ImportSharedFiles { get; set; }
-    
+
+    [SwaggerSchemaCustom(Example = "true", Description = "")]
     [ProtoMember(10)]
-    public bool ImportSharedFolders { get; set; } 
-    
+    public bool ImportSharedFolders { get; set; }
+
+    [SwaggerSchemaCustom(Example = "true", Description = "")]
     [ProtoMember(11)]
     public bool ImportCommonFiles { get; set; }
-    
+
+    [SwaggerSchemaCustom(Example = "true", Description = "")]
     [ProtoMember(12)]
-    public bool ImportProjectFiles { get; set; } 
-    
+    public bool ImportProjectFiles { get; set; }
+
+    [SwaggerSchemaCustom(Example = "true", Description = "")]
     [ProtoMember(13)]
     public bool ImportGroups { get; set; }
-    
+
+    [SwaggerSchemaCustom(Example = "1234", Description = "", Format = "int32")]
     [ProtoMember(14)]
     public int SuccessedUsers { get; set; }
+
+    [SwaggerSchemaCustom(Example = "1234", Description = "", Format = "int32")]
     [ProtoMember(15)]
     public int FailedUsers { get; set; }
+
+    [SwaggerSchemaCustom(Example = "some text", Description = "")]
     [ProtoMember(16)]
     public List<string> Files { get; set; }
+
+    [SwaggerSchemaCustom(Example = "some text", Description = "")]
     [ProtoMember(17)]
     public List<string> Errors { get; set; }
 }

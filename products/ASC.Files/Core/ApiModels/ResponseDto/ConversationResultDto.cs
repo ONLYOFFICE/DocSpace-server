@@ -31,47 +31,26 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 /// </summary>
 public class ConversationResultDto
 {
-    /// <summary>
-    /// Operation ID
-    /// </summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Operation ID")]
     public string Id { get; set; }
 
-    /// <summary>
-    /// Operation type
-    /// </summary>
-    /// <type>ASC.Web.Files.Services.WCFService.FileOperations.FileOperationType, ASC.Files.Core</type>
+    [SwaggerSchemaCustom(Example = "Move", Description = "Operation type")]
     [JsonPropertyName("Operation")]
     public FileOperationType OperationType { get; set; }
 
-    /// <summary>
-    /// Operation progress
-    /// </summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustom(Example = "1234", Description = "Operation progress", Format = "int32")]
     public int Progress { get; set; }
 
-    /// <summary>
-    /// Source file
-    /// </summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Source file")]
     public string Source { get; set; }
 
-    /// <summary>
-    /// Resulting file
-    /// </summary>
-    /// <type>System.Object, System</type>
+    [SwaggerSchemaCustom(Description = "Resulting file")]
     [JsonPropertyName("result")]
     public object File { get; set; }
 
-    /// <summary>
-    /// Error
-    /// </summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Error")]
     public string Error { get; set; }
 
-    /// <summary>
-    /// Specifies if the operation is processed or not
-    /// </summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Specifies if the operation is processed or not")]
     public string Processed { get; set; }
 }

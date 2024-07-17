@@ -26,38 +26,33 @@
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
-/// <summary>
-/// </summary>
 public class WebhooksConfigDto : IMapFrom<WebhooksConfig>
 {
-    /// <summary>ID</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustom(Example = "1234", Description = "ID", Format = "int32")]
     public int Id { get; set; }
 
-    /// <summary>Name</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Name")]
     public string Name { get; set; }
 
-    /// <summary>URI</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "URI")]
     public string Uri { get; set; }
 
-    /// <summary>Secret key</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Secret key")]
     public string SecretKey { get; set; }
 
-    /// <summary>Specifies if the webhooks are enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the webhooks are enabled or not")]
     public bool Enabled { get; set; }
 
-    /// <summary>SSL</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom(Example = "true", Description = "SSL")]
     public bool SSL { get; set; }
 }
 
 public class WebhooksConfigWithStatusDto : IMapFrom<WebhooksConfigWithStatus>
 {
+    [SwaggerSchemaCustom(Description = "Configs")]
     public WebhooksConfigDto Configs { get; set; }
+
+    [SwaggerSchemaCustom(Example = "1234", Description = "Status", Format = "int32")]
     public int Status { get; set; }
 
     public void Mapping(Profile profile)

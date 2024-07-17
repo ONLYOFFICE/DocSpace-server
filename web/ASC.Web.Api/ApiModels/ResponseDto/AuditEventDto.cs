@@ -26,80 +26,60 @@
 
 namespace ASC.Web.Api.ApiModel.ResponseDto;
 
-/// <summary>
-/// </summary>
 public class AuditEventDto
 {
-    /// <summary>ID</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustom(Example = "1234", Description = "ID", Format = "int32")]
     public int Id { get; set; }
 
-    /// <summary>Date</summary>
-    /// <type>ASC.Api.Core.ApiDateTime, ASC.Api.Core</type>
+    [SwaggerSchemaCustom(Example = "2008-04-10T06-30-00.000Z", Description = "Date")]
     public ApiDateTime Date { get; set; }
 
-    /// <summary>User</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "User")]
     public string User { get; set; }
 
-    /// <summary>User ID</summary>
-    /// <type>System.Guid, System</type>
+    [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "User ID")]
     public Guid UserId { get; set; }
 
-    /// <summary>Action</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Action")]
     public string Action { get; set; }
 
-    /// <summary>Action ID</summary>
-    /// <type>ASC.MessagingSystem.Core.MessageAction, ASC.Core.Common</type>
+    [SwaggerSchemaCustom(Example = "None", Description = "Action ID")]
     public MessageAction ActionId { get; set; }
 
-    /// <summary>IP</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "IP")]
     public string IP { get; set; }
 
-    /// <summary>Country</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Country")]
     public string Country { get; set; }
 
-    /// <summary>City</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "City")]
     public string City { get; set; }
 
-    /// <summary>Browser</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Browser")]
     public string Browser { get; set; }
 
-    /// <summary>Platform</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Platform")]
     public string Platform { get; set; }
 
-    /// <summary>Page</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Page")]
     public string Page { get; set; }
 
-    /// <summary>Action type</summary>
-    /// <type>ASC.AuditTrail.Types.ActionType, ASC.AuditTrail</type>
+    [SwaggerSchemaCustom(Example = "None", Description = "Action type")]
     public ActionType ActionType { get; set; }
 
-    /// <summary>Product type</summary>
-    /// <type>ASC.AuditTrail.Types.ProductType, ASC.AuditTrail</type>
+    [SwaggerSchemaCustom(Example = "None", Description = "Product type")]
     public ProductType Product { get; set; }
 
-    /// <summary>Module type</summary>
-    /// <type>ASC.AuditTrail.Types.ModuleType, ASC.AuditTrail</type>
+    [SwaggerSchemaCustom(Example = "None", Description = "Module type")]
     public ModuleType Module { get; set; }
 
-    /// <summary>List of targets</summary>
-    /// <type>System.Collections.Generic.IEnumerable{System.String}, System.Collections.Generic</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "List of targets")]
     public IEnumerable<string> Target { get; set; }
 
-    /// <summary>List of entry types</summary>
-    /// <type>System.Collections.Generic.IEnumerable{ASC.AuditTrail.Types.EntryType}, System.Collections.Generic</type>
+    [SwaggerSchemaCustom(Example = "None", Description = "List of entry types")]
     public IEnumerable<EntryType> Entries { get; set; }
 
-    /// <summary>Context</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Context")]
     public string Context { get; set; }
 
     public AuditEventDto(AuditEvent auditEvent, AuditActionMapper auditActionMapper)

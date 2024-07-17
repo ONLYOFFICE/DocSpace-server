@@ -26,44 +26,33 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
-/// <summary>
-/// </summary>
 public class EditHistoryDto
 {
-    /// <summary>File ID</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustom(Example = "1234", Description = "File ID", Format = "int32")]
     public int ID { get; set; }
 
-    /// <summary>Key</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Key")]
     public string Key { get; set; }
 
-    /// <summary>File version</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustom(Example = "1234", Description = "File version", Format = "int32")]
     public int Version { get; set; }
 
-    /// <summary>Version group</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustom(Example = "1234", Description = "Version group", Format = "int32")]
     public int VersionGroup { get; set; }
 
-    /// <summary>A user who updated a file</summary>
-    /// <type>ASC.Files.Core.EditHistoryAuthor, ASC.Files.Core</type>
+    [SwaggerSchemaCustom(Description = "A user who updated a file")]
     public EditHistoryAuthor User { get; set; }
 
-    /// <summary>Creation time</summary>
-    /// <type>ASC.Api.Core.ApiDateTime, ASC.Api.Core</type>
+    [SwaggerSchemaCustom(Example = "2008-04-10T06-30-00.000Z", Description = "Creation time")]
     public ApiDateTime Created { get; set; }
 
-    /// <summary>History changes in the string format</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "History changes in the string format")]
     public string ChangesHistory { get; set; }
 
-    /// <summary>List of history changes</summary>
-    /// <type>System.Collections.Generic.List{ASC.Files.Core.ApiModels.ResponseDto.EditHistoryChangesWrapper}, System.Collections.Generic</type>
+    [SwaggerSchemaCustom(Description = "List of history changes")]
     public List<EditHistoryChangesWrapper> Changes { get; set; }
 
-    /// <summary>Server version</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Server version")]
     public string ServerVersion { get; set; }
 
     public EditHistoryDto(EditHistory editHistory, ApiDateTimeHelper apiDateTimeHelper, UserManager userManager, DisplayUserSettingsHelper displayUserSettingsHelper)
@@ -82,6 +71,9 @@ public class EditHistoryDto
 
 public class EditHistoryChangesWrapper(EditHistoryChanges historyChanges, ApiDateTimeHelper apiDateTimeHelper)
 {
+    [SwaggerSchemaCustom(Description = "")]
     public EditHistoryAuthor User { get; set; } = historyChanges.Author;
+
+    [SwaggerSchemaCustom(Example = "2008-04-10T06-30-00.000Z", Description = "")]
     public ApiDateTime Created { get; set; } = apiDateTimeHelper.Get(historyChanges.Date);
 }

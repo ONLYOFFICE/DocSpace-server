@@ -26,44 +26,33 @@
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
-/// <summary>
-/// </summary>
 public class LdapStatusDto : IMapFrom<LdapOperationStatus>
 {
-    /// <summary>Specifies if the LDAP operation is completed or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the LDAP operation is completed or not")]
     public bool Completed { get; set; }
 
-    /// <summary>ID</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "ID")]
     public string Id { get; set; }
 
-    /// <summary>Status</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Status")]
     public string Status { get; set; }
 
-    /// <summary>Error</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Error")]
     public string Error { get; set; }
 
-    /// <summary>Warning</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Warning")]
     public string Warning { get; set; }
 
-    /// <summary>Percentage of completion</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustom(Example = "1234", Description = "Percentage of completion", Format = "int32")]
     public int Percents { get; set; }
 
-    /// <summary>Certificate confirmation request</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Certificate confirmation request")]
     public string CertificateConfirmRequest { get; set; }
 
-    /// <summary>Source</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Source")]
     public string Source { get; set; }
 
-    /// <summary>Operation type</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Operation type")]
     public string OperationType { get; set; }
 
     public void Mapping(Profile profile)

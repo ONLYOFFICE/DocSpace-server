@@ -63,9 +63,13 @@ public class ActionLinkConfig
 
 public class CoEditingConfig
 {
+    [SwaggerSchemaCustom(Example = "true", Description = "Change")]
     public bool Change { get; set; }
+
+    [SwaggerSchemaCustom(Example = "true", Description = "Fast")]
     public bool Fast { get; init; }
 
+    [SwaggerSchemaCustom(Example = "fast", Description = "Mode")]
     public string Mode
     {
         get { return Fast ? "fast" : "strict"; }
@@ -473,17 +477,40 @@ public class InfoConfig<T>(
 
 public class PermissionsConfig
 {
+    [SwaggerSchemaCustom(Example = "true", Description = "Change history")]
     public bool ChangeHistory { get; set; }
+
+    [SwaggerSchemaCustom(Example = "true", Description = "Comment")]
     public bool Comment { get; set; } = true;
+
+    [SwaggerSchemaCustom(Example = "true", Description = "Chat")]
     public bool Chat { get; set; } = true;
+
+    [SwaggerSchemaCustom(Example = "true", Description = "Download")]
     public bool Download { get; set; } = true;
+
+    [SwaggerSchemaCustom(Example = "true", Description = "Edit")]
     public bool Edit { get; set; } = true;
+
+    [SwaggerSchemaCustom(Example = "true", Description = "FillForms")]
     public bool FillForms { get; set; } = true;
+
+    [SwaggerSchemaCustom(Example = "true", Description = "ModifyFilter")]
     public bool ModifyFilter { get; set; } = true;
+
+    [SwaggerSchemaCustom(Example = "true", Description = "Protect")]
     public bool Protect { get; set; } = true;
+
+    [SwaggerSchemaCustom(Example = "true", Description = "Print")]
     public bool Print { get; set; } = true;
+
+    [SwaggerSchemaCustom(Example = "true", Description = "Rename")]
     public bool Rename { get; set; }
+
+    [SwaggerSchemaCustom(Example = "true", Description = "Review")]
     public bool Review { get; set; } = true;
+
+    [SwaggerSchemaCustom(Example = "true", Description = "Copy")]
     public bool Copy { get; set; } = true;
 }
 
@@ -524,16 +551,12 @@ public class FileReference<T>
     public string Token { get; set; }
 }
 
-/// <summary>
-/// </summary>
 public class FileReferenceData<T>
 {
-    /// <summary>File key</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustom(Example = "1234", Description = "File key", Format = "int32")]
     public T FileKey { get; set; }
 
-    /// <summary>Instance ID</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Instance ID")]
     public string InstanceId { get; set; }
 }
 
@@ -712,12 +735,16 @@ public class EncryptionKeysConfig
 
 public class FeedbackConfig
 {
+    [SwaggerSchemaCustom(Example = "some text", Description = "Url", Format = "uri")]
     public string Url { get; set; }
+
+    [SwaggerSchemaCustom(Example = "true", Description = "Visible")]
     public bool Visible { get => true; }
 }
 
 public class GobackConfig
 {
+    [SwaggerSchemaCustom(Example = "some text", Description = "Url", Format = "uri")]
     public string Url { get; set; }
 }
 
@@ -803,21 +830,36 @@ public class PluginsConfig
 
 public class RecentConfig
 {
+    [SwaggerSchemaCustom(Example = "some text", Description = "Folder")]
     public string Folder { get; set; }
+
+    [SwaggerSchemaCustom(Example = "some text", Description = "Title")]
     public string Title { get; set; }
+
+    [SwaggerSchemaCustom(Example = "some text", Description = "Url", Format = "uri")]
     public string Url { get; set; }
 }
 
 public class TemplatesConfig
 {
+    [SwaggerSchemaCustom(Example = "some text", Description = "Image")]
     public string Image { get; set; }
+
+    [SwaggerSchemaCustom(Example = "some text", Description = "Title")]
     public string Title { get; set; }
+
+    [SwaggerSchemaCustom(Example = "some text", Description = "Url", Format = "uri")]
     public string Url { get; set; }
 }
 
 public class UserConfig
 {
+    [SwaggerSchemaCustom(Example = "some text", Description = "Id")]
     public string Id { get; set; }
+
+    [SwaggerSchemaCustom(Example = "some text", Description = "Name")]
     public string Name { get; set; }
+
+    [SwaggerSchemaCustom(Example = "some text", Description = "Image")]
     public string Image { get; set; }
 }

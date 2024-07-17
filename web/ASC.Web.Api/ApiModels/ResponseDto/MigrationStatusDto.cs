@@ -26,24 +26,17 @@
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
-/// <summary>
-/// 
-/// </summary>
 public class MigrationStatusDto
 {
-    /// <summary>Migration progress</summary>
-    /// <type>System.Double, System</type>
+    [SwaggerSchemaCustom(Example = "1.0", Description = "Migration progress")]
     public double Progress { get; set; }
 
-    /// <summary>Migration error</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Migration error")]
     public string Error { get; set; }
 
-    /// <summary>Migration API information</summary>
-    /// <type>ASC.Migration.Core.Models.Api.MigrationApiInfo, ASC.Migration</type>
+    [SwaggerSchemaCustom(Description = "Migration API information")]
     public MigrationApiInfo ParseResult { get; set; }
 
-    /// <summary>Specifies whether the migration is completed</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom(Example = "true", Description = "Specifies whether the migration is completed")]
     public bool IsCompleted { get; set; }
 }

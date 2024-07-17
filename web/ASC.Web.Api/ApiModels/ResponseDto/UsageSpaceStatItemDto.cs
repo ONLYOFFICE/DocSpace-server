@@ -26,28 +26,21 @@
 
 namespace ASC.Web.Api.ApiModel.ResponseDto;
 
-/// <summary>
-/// </summary>
 public class UsageSpaceStatItemDto
 {
-    /// <summary>Name</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "Item name", Description = "Name")]
     public string Name { get; set; }
 
-    /// <summary>Icon</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "Item icon path", Description = "Icon")]
     public string Icon { get; set; }
 
-    /// <summary>Specifies if the module space is disabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom(Example = "false", Description = "Specifies if the module space is disabled or not")]
     public bool Disabled { get; set; }
 
-    /// <summary>Size</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "0 Byte", Description = "Size")]
     public string Size { get; set; }
 
-    /// <summary>URL</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "Item url", Description = "URL", Format = "uri")]
     public string Url { get; set; }
 
     public static UsageSpaceStatItemDto GetSample()
@@ -63,24 +56,18 @@ public class UsageSpaceStatItemDto
     }
 }
 
-/// <summary>
-/// </summary>
 public class ChartPointDto
 {
-    /// <summary>Display date</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Display date")]
     public string DisplayDate { get; set; }
 
-    /// <summary>Date</summary>
-    /// <type>System.DateTime, System</type>
+    [SwaggerSchemaCustom(Example = "2008-04-10T06-30-00.000Z", Description = "Date")]
     public DateTime Date { get; init; }
 
-    /// <summary>Hosts</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustom(Example = "0", Description = "Hosts", Format = "int32")]
     public int Hosts { get; set; }
 
-    /// <summary>Hits</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustom(Example = "0", Description = "Hits", Format = "int32")]
     public int Hits { get; set; }
 
     public static ChartPointDto GetSample()

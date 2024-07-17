@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using SwaggerCustomFilter;
+
 namespace ASC.Data.Backup.Contracts;
 
 
@@ -48,28 +50,21 @@ public class StartBackupRequest
     public bool Dump { get; init; }
 }
 
-/// <summary>
-/// </summary>
 public class BackupHistoryRecord
 {
-    /// <summary>Backup ID</summary>
-    /// <type>System.Guid, System</type>
+    [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "Backup ID")]
     public Guid Id { get; set; }
 
-    /// <summary>File name</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "File name")]
     public string FileName { get; set; }
 
-    /// <summary>Storage type</summary>
-    /// <type>ASC.Data.Backup.Contracts.BackupStorageType, ASC.Data.Backup.Core</type>
+    [SwaggerSchemaCustom(Example = "Documents", Description = "Storage type")]
     public BackupStorageType StorageType { get; set; }
 
-    /// <summary>Creation date</summary>
-    /// <type>System.DateTime, System</type>
+    [SwaggerSchemaCustom(Example = "2008-04-10T06-30-00.000Z", Description = "Creation date")]
     public DateTime CreatedOn { get; set; }
 
-    /// <summary>Expiration date</summary>
-    /// <type>System.DateTime, System</type>
+    [SwaggerSchemaCustom(Example = "2008-04-10T06-30-00.000Z", Description = "Expiration date")]
     public DateTime ExpiresOn { get; set; }
 }
 

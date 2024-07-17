@@ -26,19 +26,14 @@
 
 namespace ASC.Web.Api.ApiModel.ResponseDto;
 
-/// <summary>
-/// </summary>
 public class PluginsDto
 {
-    /// <summary>Specifies if the plugins are enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the plugins are enabled or not")]
     public bool Enabled { get; set; }
 
-    /// <summary>Specifies if the plugins can be uploaded or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the plugins can be uploaded or not")]
     public bool Upload { get; set; }
 
-    /// <summary>Specifies if the plugins can be deleted or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the plugins can be deleted or not")]
     public bool Delete { get; set; }
 }

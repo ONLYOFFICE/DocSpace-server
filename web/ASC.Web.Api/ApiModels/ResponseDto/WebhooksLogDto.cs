@@ -26,51 +26,38 @@
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
-/// <summary>
-/// </summary>
 public class WebhooksLogDto : IMapFrom<WebhooksLog>
 {
-    /// <summary>ID</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustom(Example = "1234", Description = "ID", Format = "int32")]
     public int Id { get; set; }
 
-    /// <summary>Config name</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Config name")]
     public string ConfigName { get; set; }
 
-    /// <summary>Creation time</summary>
-    /// <type>System.DateTime, System</type>
+    [SwaggerSchemaCustom(Example = "2008-04-10T06-30-00.000Z", Description = "Creation time")]
     public DateTime CreationTime { get; set; }
 
-    /// <summary>Method</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Method")]
     public string Method { get; set; }
 
-    /// <summary>Route</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Route")]
     public string Route { get; set; }
 
-    /// <summary>Request headers</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Request headers")]
     public string RequestHeaders { get; set; }
 
-    /// <summary>Request payload</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Request payload")]
     public string RequestPayload { get; set; }
 
-    /// <summary>Response headers</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Response headers")]
     public string ResponseHeaders { get; set; }
 
-    /// <summary>Response payload</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Response payload")]
     public string ResponsePayload { get; set; }
 
-    /// <summary>Status</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustom(Example = "1234", Description = "Status", Format = "int32")]
     public int Status { get; set; }
 
-    /// <summary>Delivery time</summary>
-    /// <type>System.Nullable{System.DateTime}, System</type>
+    [SwaggerSchemaCustom(Example = "2008-04-10T06-30-00.000Z", Description = "Delivery time", Nullable = true)]
     public DateTime? Delivery { get; set; }
 }

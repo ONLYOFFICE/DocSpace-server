@@ -36,72 +36,58 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 public partial class FileEntryDtoContext : JsonSerializerContext;
 
 
-/// <summary>
-/// </summary>
 [JsonDerivedType(typeof(FileDto<int>))]
 [JsonDerivedType(typeof(FileDto<string>))]
 [JsonDerivedType(typeof(FolderDto<int>))]
 [JsonDerivedType(typeof(FolderDto<string>))]
 public abstract class FileEntryDto
 {
-    /// <summary>Title</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Title")]
     public string Title { get; set; }
 
-    /// <summary>Access rights</summary>
-    /// <type>ASC.Files.Core.Security.FileShare, ASC.Files.Core</type>
+    [SwaggerSchemaCustom(Example = "None", Description = "Access rights")]
     public FileShare Access { get; set; }
 
-    /// <summary>Specifies if the file is shared or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the file is shared or not")]
     public bool Shared { get; set; }
 
-    /// <summary>Creation time</summary>
-    /// <type>ASC.Api.Core.ApiDateTime, ASC.Api.Core</type>
+    [SwaggerSchemaCustom(Example = "2008-04-10T06-30-00.000Z", Description = "Creation time")]
     public ApiDateTime Created { get; set; }
 
-    /// <summary>Author</summary>
-    /// <type>ASC.Web.Api.Models.EmployeeDto, ASC.Api.Core</type>
+    [SwaggerSchemaCustom(Description = "Author")]
     public EmployeeDto CreatedBy { get; set; }
 
     private ApiDateTime _updated;
 
-    /// <summary>Time of the last file update</summary>
-    /// <type>ASC.Api.Core.ApiDateTime, ASC.Api.Core</type>
+    [SwaggerSchemaCustom(Example = "2008-04-10T06-30-00.000Z", Description = "Time of the last file update")]
     public ApiDateTime Updated
     {
         get => _updated < Created ? Created : _updated;
         set => _updated = value;
     }
 
-    /// <summary>Time when the file will be automatically deleted</summary>
-    /// <type>ASC.Api.Core.ApiDateTime, ASC.Api.Core</type>
+    [SwaggerSchemaCustom(Example = "2008-04-10T06-30-00.000Z", Description = "Time when the file will be automatically deleted")]
     public ApiDateTime AutoDelete { get; set; }
 
-    /// <summary>Root folder type</summary>
-    /// <type>ASC.Files.Core.FolderType, ASC.Files.Core</type>
+    [SwaggerSchemaCustom(Example = "DEFAULT", Description = "Root folder type")]
     public FolderType RootFolderType { get; set; }
 
-    /// <summary>First parent folder type</summary>
-    /// <type>ASC.Files.Core.FolderType, ASC.Files.Core</type>
+    [SwaggerSchemaCustom(Example = "DEFAULT", Description = "First parent folder type", Nullable = true)]
     public FolderType? ParentRoomType { get; set; }
 
-    /// <summary>A user who updated a file</summary>
-    /// <type>ASC.Web.Api.Models.EmployeeDto, ASC.Api.Core</type>
+    [SwaggerSchemaCustom(Description = "A user who updated a file")]
     public EmployeeDto UpdatedBy { get; set; }
 
-    /// <summary>Provider is specified or not</summary>
-    /// <type>System.Nullable{System.Boolean}, System</type>
+    [SwaggerSchemaCustom(Example = "true", Description = "Provider is specified or not", Nullable = true)]
     public bool? ProviderItem { get; set; }
 
-    /// <summary>Provider key</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Provider key")]
     public string ProviderKey { get; set; }
 
-    /// <summary>Provider ID</summary>
-    /// <type>System.Nullable{System.Int32}, System</type>
+    [SwaggerSchemaCustom(Example = "1234", Description = "Provider ID", Format = "int32", Nullable = true)]
     public int? ProviderId { get; set; }
 
+    [SwaggerSchemaCustom(Example = "some text", Description = "Order")]
     public string Order { get; set; }
 
     protected FileEntryDto(FileEntry entry)
@@ -121,17 +107,30 @@ public abstract class FileEntryDto
 
 public abstract class FileEntryDto<T> : FileEntryDto
 {
+    [SwaggerSchemaCustom(Example = "1234", Description = "Id", Format = "int32")]
     public T Id { get; set; }
+
+    [SwaggerSchemaCustom(Example = "1234", Description = "Root folder id", Format = "int32")]
     public T RootFolderId { get; set; }
 
+    [SwaggerSchemaCustom(Example = "1234", Description = "Origin id", Format = "int32")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public T OriginId { get; set; }
 
+    [SwaggerSchemaCustom(Example = "1234", Description = "Origin room id", Format = "int32")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public T OriginRoomId { get; set; }
+
+    [SwaggerSchemaCustom(Example = "some text", Description = "Origin title")]
     public string OriginTitle { get; set; }
+
+    [SwaggerSchemaCustom(Example = "some text", Description = "Origin room title")]
     public string OriginRoomTitle { get; set; }
+
+    [SwaggerSchemaCustom(Example = "true", Description = "Can share")]
     public bool CanShare { get; set; }
+
+    [SwaggerSchemaCustom(Description = "Security")]
     public IDictionary<FilesSecurityActions, bool> Security { get; set; }
 
     protected FileEntryDto(FileEntry<T> entry)

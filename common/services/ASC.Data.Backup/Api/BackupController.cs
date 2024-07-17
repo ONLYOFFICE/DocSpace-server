@@ -68,7 +68,7 @@ public class BackupController(
     /// </summary>
     /// <short>Create the backup schedule</short>
     /// <param type="ASC.Data.Backup.ApiModels.BackupScheduleDto, ASC.Data.Backup" name="inDto">Backup schedule parameters</param>
-    /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
+    /// <returns type="System.Boolean, System" example="true">Boolean value: true if the operation is successful</returns>
     /// <httpMethod>POST</httpMethod>
     /// <path>api/2.0/backup/createbackupschedule</path>
     [Tags("Backup")]
@@ -114,7 +114,7 @@ public class BackupController(
     /// Deletes the backup schedule of the current portal.
     /// </summary>
     /// <short>Delete the backup schedule</short>
-    /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
+    /// <returns type="System.Boolean, System" example="true">Boolean value: true if the operation is successful</returns>
     /// <httpMethod>DELETE</httpMethod>
     /// <path>api/2.0/backup/deletebackupschedule</path>
     [Tags("Backup")]
@@ -232,7 +232,7 @@ public class BackupController(
     /// </summary>
     /// <short>Delete the backup</short>
     /// <param type="System.Guid, System" method="url" name="id" example="9924256A-739C-462b-AF15-E652A3B1B6EB">Backup ID</param>
-    /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
+    /// <returns type="System.Boolean, System" example="true">Boolean value: true if the operation is successful</returns>
     /// <httpMethod>DELETE</httpMethod>
     /// <path>api/2.0/backup/deletebackup/{id}</path>
     [Tags("Backup")]
@@ -247,7 +247,7 @@ public class BackupController(
     /// Deletes the backup history of the current portal.
     /// </summary>
     /// <short>Delete the backup history</short>
-    /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
+    /// <returns type="System.Boolean, System" example="true">Boolean value: true if the operation is successful</returns>
     /// <httpMethod>DELETE</httpMethod>
     /// <path>api/2.0/backup/deletebackuphistory</path>
     [Tags("Backup")]

@@ -26,29 +26,24 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
-/// <summary>
-/// </summary>
 public class FileShareDto
 {
-    /// <summary>Sharing rights</summary>
-    /// <type>ASC.Files.Core.Security.FileShare, ASC.Files.Core</type>
+    [SwaggerSchemaCustom(Example = "None", Description = "Sharing rights")]
     public FileShare Access { get; set; }
 
-    /// <summary>A user who has the access to the specified file</summary>
-    /// <type>System.Object, System</type>
+    [SwaggerSchemaCustom(Description = "A user who has the access to the specified file")]
     public object SharedTo { get; set; }
 
-    /// <summary>Specifies if the file is locked by this user or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom(Example = "false", Description = "Specifies if the file is locked by this user or not")]
     public bool IsLocked { get; set; }
 
-    /// <summary>Specifies if this user is an owner of the specified file or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if this user is an owner of the specified file or not")]
     public bool IsOwner { get; set; }
 
-    /// <summary>Spceifies if this user can edit the access to the specified file or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom(Example = "true", Description = "Spceifies if this user can edit the access to the specified file or not")]
     public bool CanEditAccess { get; set; }
+
+    [SwaggerSchemaCustom(Example = "User", Description = "Subject type")]
     public SubjectType SubjectType { get; set; }
 
     public static FileShareDto GetSample()

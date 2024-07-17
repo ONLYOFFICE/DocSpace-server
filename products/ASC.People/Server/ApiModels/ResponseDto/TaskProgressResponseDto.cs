@@ -28,10 +28,19 @@ namespace ASC.People.ApiModels.ResponseDto;
 
 public class TaskProgressResponseDto
 {
+    [SwaggerSchemaCustom(Example = "some text", Description = "ID")]
     public string Id { get; set; }
+
+    [SwaggerSchemaCustom(Example = "some text", Description = "Error")]
     public string Error { get; set; }
+
+    [SwaggerSchemaCustom(Example = "1234", Description = "Percentage", Format = "int32")]
     public int Percentage { get; set; }
+
+    [SwaggerSchemaCustom(Example = "true", Description = "IsCompleted")]
     public bool IsCompleted { get; set; }
+
+    [SwaggerSchemaCustom(Example = "Completed", Description = "Status")]
     public DistributedTaskStatus Status { get; set; }
 
     public static TaskProgressResponseDto Get(DistributedTaskProgress progressItem)

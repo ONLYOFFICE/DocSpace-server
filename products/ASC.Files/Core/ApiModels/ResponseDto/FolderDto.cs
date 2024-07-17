@@ -26,74 +26,57 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
-/// <summary>
-/// </summary>
 public class FolderDto<T> : FileEntryDto<T>
 {
-    /// <summary>Parent folder ID</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustom(Example = "10", Description = "Parent folder ID", Format = "int32")]
     public T ParentId { get; set; }
 
-    /// <summary>Number of files</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustom(Example = "5", Description = "Number of files", Format = "int32")]
     public int FilesCount { get; set; }
 
-    /// <summary>Number of folders</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustom(Example = "7", Description = "Number of folders", Format = "int32")]
     public int FoldersCount { get; set; }
 
-    /// <summary>Specifies if a folder is shareable or not</summary>
-    /// <type>System.Nullable{System.Boolean}, System</type>
+    [SwaggerSchemaCustom(Example = "null", Description = "Specifies if a folder is shareable or not", Nullable = true)]
     public bool? IsShareable { get; set; }
 
-    /// <summary>Specifies if a folder is favorite or not</summary>
-    /// <type>System.Nullable{System.Boolean}, System</type>
+    [SwaggerSchemaCustom(Example = "null", Description = "Specifies if a folder is favorite or not", Nullable = true)]
     public bool? IsFavorite { get; set; }
 
-    /// <summary>Number for a new folder</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustom(Example = "1234", Description = "Number for a new folder", Format = "int32")]
     public int New { get; set; }
 
-    /// <summary>Specifies if a folder is muted or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if a folder is muted or not")]
     public bool Mute { get; set; }
 
-    /// <summary>List of tags</summary>
-    /// <type>System.Collections.Generic.IEnumerable{System.String}, System.Collections.Generic</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "List of tags")]
     public IEnumerable<string> Tags { get; set; }
 
-    /// <summary>Logo</summary>
-    /// <type>ASC.Files.Core.VirtualRooms.Logo, ASC.Files.Core</type>
+    [SwaggerSchemaCustom(Description = "Logo")]
     public Logo Logo { get; set; }
 
-    /// <summary>Specifies if a folder is pinned or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if a folder is pinned or not")]
     public bool Pinned { get; set; }
 
-    /// <summary>Room type</summary>
-    /// <type>System.Nullable{ASC.Files.Core.ApiModels.RequestDto.RoomType}, System</type>
+    [SwaggerSchemaCustom(Example = "PublicRoom", Description = "Room type", Nullable = true)]
     public RoomType? RoomType { get; set; }
 
-    /// <summary>Specifies if a folder is private or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if a folder is private or not")]
     public bool Private { get; set; }
 
-    /// <summary>Folder type</summary>
-    /// <type>System.Nullable{ASC.Files.Core.FolderType}, System</type>
+    [SwaggerSchemaCustom(Example = "DEFAULT", Description = "Folder type", Nullable = true)]
     public FolderType? Type { get; set; }
 
+    [SwaggerSchemaCustom(Example = "true", Description = "InRoom", Nullable = true)]
     public bool? InRoom { get; set; }
 
-    /// <summary>Quota</summary>
-    /// <type>System.Nullable{System.Int64}, System</type>
+    [SwaggerSchemaCustom(Example = "1234", Description = "Quota", Nullable = true, Format = "int64")]
     public long? QuotaLimit { get; set; }
 
-    /// <summary>Specifies if the room has a custom quota or not</summary>
-    /// <type>System.Nullable{System.Boolean}, System</type>
+    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the room has a custom quota or not", Nullable = true)]
     public bool? IsCustomQuota { get; set; }
 
-    /// <summary>Counter</summary>
-    /// <type>System.Nullable{System.Int64}, System</type>
+    [SwaggerSchemaCustom(Example = "1234", Description = "Counter", Nullable = true, Format = "int64")]
     public long? UsedSpace { get; set; }
     public static FolderDto<int> GetSample()
     {

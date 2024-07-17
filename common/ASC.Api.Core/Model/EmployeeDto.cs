@@ -28,52 +28,39 @@ using System.Collections.Concurrent;
 
 namespace ASC.Web.Api.Models;
 
-/// <summary>
-/// </summary>
 public class EmployeeDto
 {
-    /// <summary>ID</summary>
-    /// <type>System.Guid, System</type>
+    [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "ID")]
     public Guid Id { get; set; }
 
-    /// <summary>Display name</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Display name")]
     public string DisplayName { get; set; }
 
-    /// <summary>Title</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Title")]
     public string Title { get; set; }
-    
-    /// <summary>Avatar</summary>
-    /// <type>System.String, System</type>
+
+    [SwaggerSchemaCustom(Example = "some text", Description = "Avatar")]
     public string Avatar { get; set; }
-    
-    /// <summary>Original size avatar</summary>
-    /// <type>System.String, System</type>
+
+    [SwaggerSchemaCustom(Example = "some text", Description = "Original size avatar")]
     public string AvatarOriginal { get; set; }
 
-    /// <summary>Maximum size avatar</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Maximum size avatar")]
     public string AvatarMax { get; set; }
 
-    /// <summary>Medium size avatar</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Medium size avatar")]
     public string AvatarMedium { get; set; }
 
-    /// <summary>Small avatar</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Small avatar")]
     public string AvatarSmall { get; set; }
 
-    /// <summary>Profile URL</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Profile URL")]
     public string ProfileUrl { get; set; }
 
-    /// <summary>Specifies if the user has an avatar or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the user has an avatar or not")]
     public bool HasAvatar { get; set; }
 
-    /// <summary>Specifies if the user is an anonim or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the user is an anonim or not")]
     public bool IsAnonim { get; set; }
 
     public static EmployeeDto GetSample()

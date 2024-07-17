@@ -28,21 +28,45 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class ActiveConnectionsDto
 {
+    [SwaggerSchemaCustom(Example = "1234", Description = "Login event", Format = "int32")]
     public int LoginEvent { get; set; }
+
+    [SwaggerSchemaCustom(Description = "Items")]
     public List<ActiveConnectionsItemDto> Items { get; set; }
 }
 
 public class ActiveConnectionsItemDto
 {
+    [SwaggerSchemaCustom(Example = "1234", Description = "Id", Format = "int32")]
     public int Id { get; set; }
+
+    [SwaggerSchemaCustom(Example = "1234", Description = "Tenant id", Format = "int32")]
     public int TenantId { get; set; }
+
+    [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "User id")]
     public Guid UserId { get; set; }
+
+    [SwaggerSchemaCustom(Example = "true", Description = "Mobile")]
     public bool Mobile {  get; set; }
+
+    [SwaggerSchemaCustom(Example = "some text", Description = "Ip")]
     public string Ip { get; set; }
+
+    [SwaggerSchemaCustom(Example = "some text", Description = "Country")]
     public string Country { get; set; }
+
+    [SwaggerSchemaCustom(Example = "some text", Description = "City")]
     public string City { get; set; }
+
+    [SwaggerSchemaCustom(Example = "some text", Description = "Browser")]
     public string Browser { get; set; }
+
+    [SwaggerSchemaCustom(Example = "some text", Description = "Platform")]
     public string Platform { get; set; }
+
+    [SwaggerSchemaCustom(Example = "2008-04-10T06-30-00.000Z", Description = "Date")]
     public ApiDateTime Date { get; set; }
+
+    [SwaggerSchemaCustom(Example = "some text", Description = "Page")]
     public string Page { get; set; }
 }

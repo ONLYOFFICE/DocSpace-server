@@ -40,16 +40,12 @@ public enum DateToAutoCleanUp
     ThreeMonths
 }
 
-/// <summary>
-/// </summary>
 public class AutoCleanUpData
 {
-    /// <summary>Specifies if the auto-clearing setting is enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the auto-clearing setting is enabled or not")]
     public bool IsAutoCleanUp { get; init; }
 
-    /// <summary>The period when the trash bin will be cleared</summary>
-    /// <type>ASC.Files.Core.DateToAutoCleanUp, ASC.Files.Core</type>
+    [SwaggerSchemaCustom(Example = "OneWeek", Description = "The period when the trash bin will be cleared")]
     public DateToAutoCleanUp Gap { get; init; }
 
     public static AutoCleanUpData GetDefault()

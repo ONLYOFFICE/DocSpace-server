@@ -26,39 +26,33 @@
 
 namespace ASC.People.ApiModels.ResponseDto;
 
-/// <summary>
-/// </summary>
 public class GroupDto
 {
-    /// <summary>Name</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Name")]
     public string Name { get; set; }
 
-    /// <summary>Parent</summary>
-    /// <type>System.Nullable{System.Guid}, System</type>
+    [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "Parent", Nullable = true)]
     public Guid? Parent { get; set; }
 
-    /// <summary>Category</summary>
-    /// <type>System.Guid, System</type>
+    [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "Category")]
     public Guid Category { get; set; }
 
-    /// <summary>ID</summary>
-    /// <type>System.Guid, System</type>
+    [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "ID")]
     public Guid Id { get; set; }
 
-    /// <summary>Specifies if the LDAP settings are enabled for the group or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the LDAP settings are enabled for the group or not")]
     public bool IsLDAP { get; set; }
 
-    /// <summary>Manager</summary>
-    /// <type>ASC.Web.Api.Models.EmployeeDto, ASC.Api.Core</type>
+    [SwaggerSchemaCustom(Description = "Manager")]
     public EmployeeFullDto Manager { get; set; }
 
-    /// <summary>List of members</summary>
-    /// <type>System.Collections.Generic.List{ASC.Web.Api.Models.EmployeeDto,}, System.Collections.Generic</type>
+    [SwaggerSchemaCustom(Description = "List of members")]
     public List<EmployeeFullDto> Members { get; set; }
-    
+
+    [SwaggerSchemaCustom(Example = "true", Description = "Shared", Nullable = true)]
     public bool? Shared { get; set; }
+
+    [SwaggerSchemaCustom(Example = "1234", Description = "Members count", Format = "int32")]
     public int MembersCount { get; set; }
 }
 

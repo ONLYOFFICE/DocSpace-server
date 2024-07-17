@@ -26,39 +26,29 @@
 
 namespace ASC.Web.Api.ApiModel.ResponseDto;
 
-/// <summary>
-/// </summary>
 public class FirebaseDto
 {
-    /// <summary>API key</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "API key")]
     public string ApiKey { get; set; }
 
-    /// <summary>Authentication domain</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Authentication domain")]
     public string AuthDomain { get; set; }
 
-    /// <summary>Project ID</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Project ID")]
     public string ProjectId { get; set; }
 
-    /// <summary>Storage bucket</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Storage bucket")]
     public string StorageBucket { get; set; }
 
-    /// <summary>Message sender ID</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Message sender ID")]
     public string MessagingSenderId { get; set; }
 
-    /// <summary>Application ID</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Application ID")]
     public string AppId { get; set; }
 
-    /// <summary>Measurement ID</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Measurement ID")]
     public string MeasurementId { get; set; }
 
-    /// <summary>Database URL</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Database URL", Format = "uri")]
     public string DatabaseURL { get; set; }
 }

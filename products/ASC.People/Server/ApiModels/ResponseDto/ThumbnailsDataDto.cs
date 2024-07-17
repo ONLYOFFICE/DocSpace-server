@@ -26,8 +26,6 @@
 
 namespace ASC.People.ApiModels.ResponseDto;
 
-/// <summary>
-/// </summary>
 public class ThumbnailsDataDto
 {
     private ThumbnailsDataDto() { }
@@ -47,28 +45,22 @@ public class ThumbnailsDataDto
         };
     }
 
-    /// <summary>Original photo</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Original photo")]
     public string Original { get; set; }
 
-    /// <summary>Retina</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Retina")]
     public string Retina { get; set; }
 
-    /// <summary>Maximum size</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Maximum size")]
     public string Max { get; set; }
 
-    /// <summary>Big</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Big")]
     public string Big { get; set; }
 
-    /// <summary>Medium</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Medium")]
     public string Medium { get; set; }
 
-    /// <summary>Small</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Small")]
     public string Small { get; set; }
 
     public static ThumbnailsDataDto GetSample()

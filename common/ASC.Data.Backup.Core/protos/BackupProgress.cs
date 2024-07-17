@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using SwaggerCustomFilter;
+
 namespace ASC.Data.Backup.Contracts;
 
 public enum BackupProgressEnum
@@ -36,24 +38,31 @@ public enum BackupProgressEnum
 [ProtoContract]
 public record BackupProgress
 {
+    [SwaggerSchemaCustom(Example = "true", Description = "Completed or not")]
     [ProtoMember(1)]
     public bool IsCompleted { get; set; }
 
+    [SwaggerSchemaCustom(Example = "1234", Description = "Progress", Format = "int32")]
     [ProtoMember(2)]
     public int Progress { get; set; }
 
+    [SwaggerSchemaCustom(Example = "some text", Description = "Error")]
     [ProtoMember(3)]
     public string Error { get; set; }
 
+    [SwaggerSchemaCustom(Example = "some text", Description = "Link", Format = "uri")]
     [ProtoMember(4)]
     public string Link { get; set; }
 
+    [SwaggerSchemaCustom(Example = "1234", Description = "Tenant id")]
     [ProtoMember(5)]
     public int TenantId { get; set; }
 
+    [SwaggerSchemaCustom(Example = "Backup", Description = "Backup progress item (Backup, Restore, Transfer)")]
     [ProtoMember(6)]
     public BackupProgressEnum BackupProgressEnum { get; set;}
-    
+
+    [SwaggerSchemaCustom(Example = "some text", Description = "Task id")]
     [ProtoMember(7)]
     public string TaskId { get; set; }
 }

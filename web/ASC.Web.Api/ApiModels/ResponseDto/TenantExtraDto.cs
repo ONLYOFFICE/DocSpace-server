@@ -26,47 +26,35 @@
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
-/// <summary>
-/// </summary>
 public class TenantExtraDto
 {
-    /// <summary>Specifies if the extra tenant license is customizable or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the extra tenant license is customizable or not")]
     public bool CustomMode { get; set; }
 
-    /// <summary>Specifies if the extra tenant license is Opensource or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the extra tenant license is Opensource or not")]
     public bool Opensource { get; set; }
 
-    /// <summary>Specifies if the extra tenant license is Enterprise or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the extra tenant license is Enterprise or not")]
     public bool Enterprise { get; set; }
 
-    /// <summary>License tariff</summary>
-    /// <type>ASC.Core.Billing.Tariff, ASC.Core.Common</type>
+    [SwaggerSchemaCustom(Description = "License tariff")]
     public Tariff Tariff { get; set; }
 
-    /// <summary>License quota</summary>
-    /// <type>ASC.Web.Api.ApiModels.ResponseDto.QuotaDto, ASC.Web.Api</type>
+    [SwaggerSchemaCustom(Description = "License quota")]
     public QuotaDto Quota { get; set; }
 
-    /// <summary>Specifies if the license is paid or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the license is paid or not")]
     public bool NotPaid { get; set; }
 
-    /// <summary>The time when the license was accepted</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "The time when the license was accepted")]
     public string LicenseAccept { get; set; }
 
-    /// <summary>Specifies if the tariff page is enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the tariff page is enabled or not")]
     public bool EnableTariffPage { get; set; }
 
-    /// <summary>Document server user quotas</summary>
-    /// <type>System.Collections.Generic.Dictionary{System.String, System.DateTime}, System.Collections.Generic</type>
+    [SwaggerSchemaCustom(Description = "Document server user quotas")]
     public Dictionary<string, DateTime> DocServerUserQuota { get; set; }
 
-    /// <summary>Document server license</summary>
-    /// <type>ASC.Core.Billing.License, ASC.Core.Common</type>
+    [SwaggerSchemaCustom(Description = "Document server license")]
     public License DocServerLicense { get; set; }
 }

@@ -28,20 +28,15 @@ using GroupInfo = ASC.Core.Users.GroupInfo;
 
 namespace ASC.Web.Api.Models;
 
-/// <summary>
-/// </summary>
 public class GroupSummaryDto
 {
-    /// <summary>ID</summary>
-    /// <type>System.Guid, System</type>
+    [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "ID")]
     public Guid Id { get; set; }
 
-    /// <summary>Name</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Name")]
     public string Name { get; init; }
 
-    /// <summary>Manager</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Manager")]
     public string Manager { get; set; }
 
     public static GroupSummaryDto GetSample()

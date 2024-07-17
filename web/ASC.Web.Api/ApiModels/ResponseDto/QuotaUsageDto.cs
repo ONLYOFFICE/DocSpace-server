@@ -61,84 +61,65 @@ public class QuotaUsageManager(
     }
 }
 
-/// <summary>
-/// </summary>
 public class QuotaUsageDto
 {
-    /// <summary>Storage size</summary>
-    /// <type>System.UInt64, System</type>
+    [SwaggerSchemaCustom(Example = "1234", Description = "Storage size", Format = "uint64")]
     public ulong StorageSize { get; init; }
 
-    /// <summary>Maximum file size</summary>
-    /// <type>System.UInt64, System</type>
+    [SwaggerSchemaCustom(Example = "1234", Description = "Maximum file size", Format = "uint64")]
     public ulong MaxFileSize { get; set; }
 
-    /// <summary>Used size</summary>
-    /// <type>System.UInt64, System</type>
+    [SwaggerSchemaCustom(Example = "1234", Description = "Used size", Format = "uint64")]
     public ulong UsedSize { get; init; }
 
-    /// <summary>maximum number of room administrators</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustom(Example = "1234", Description = "maximum number of room administrators", Format = "int32")]
     public int MaxRoomAdminsCount { get; init; }
 
-    /// <summary>Number of room administrators</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustom(Example = "1234", Description = "Number of room administrators", Format = "int32")]
     public int RoomAdminCount { get; init; }
 
-    /// <summary>Available size</summary>
-    /// <type>System.UInt64, System</type>
+    [SwaggerSchemaCustom(Example = "1234", Description = "Available size", Format = "uint64")]
     public ulong AvailableSize
     {
         get { return Math.Max(0, StorageSize > UsedSize ? StorageSize - UsedSize : 0); }
         set { throw new NotImplementedException(); }
     }
 
-    /// <summary>Available number of users</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustom(Example = "1234", Description = "Available number of users", Format = "int32")]
     public int AvailableUsersCount
     {
         get { return Math.Max(0, MaxRoomAdminsCount - RoomAdminCount); }
         set { throw new NotImplementedException(); }
     }
 
-    /// <summary>Storage usage</summary>
-    /// <type>System.Collections.Generic.IList{ASC.Web.Api.ApiModel.ResponseDto.QuotaUsage}, System.Collections.Generic</type>
+    [SwaggerSchemaCustom(Description = "Storage usage")]
     public IList<QuotaUsage> StorageUsage { get; set; }
 
-    /// <summary>User storage size</summary>
-    /// <type>System.Int64, System</type>
+    [SwaggerSchemaCustom(Example = "1234", Description = "User storage size", Format = "int64")]
     public long UserStorageSize { get; set; }
 
-    /// <summary>User used size</summary>
-    /// <type>System.Int64, System</type>
+    [SwaggerSchemaCustom(Example = "1234", Description = "User used size", Format = "int64")]
     public long UserUsedSize { get; set; }
 
-    /// <summary>User available size</summary>
-    /// <type>System.Int64, System</type>
+    [SwaggerSchemaCustom(Example = "1234", Description = "User available size", Format = "int64")]
     public long UserAvailableSize
     {
         get { return Math.Max(0, UserStorageSize - UserUsedSize); }
         set { throw new NotImplementedException(); }
     }
 
-    /// <summary>Maximum number of users</summary>
-    /// <type>System.Int64, System</type>
+    [SwaggerSchemaCustom(Example = "1234", Description = "Maximum number of users", Format = "int64")]
     public long MaxUsers { get; set; }
 
-    /// <summary>Number of users</summary>
-    /// <type>System.Int64, System</type>
+    [SwaggerSchemaCustom(Example = "1234", Description = "Number of users", Format = "int64")]
     public long UsersCount { get; set; }
 }
 
-/// <summary>
-/// </summary>
 public class QuotaUsage
 {
-    /// <summary>Path to the storage</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom(Example = "some text", Description = "Path to the storage")]
     public string Path { get; set; }
 
-    /// <summary>Storage size</summary>
-    /// <type>System.Int64, System</type>
+    [SwaggerSchemaCustom(Example = "1234", Description = "Storage size", Format = "int64")]
     public long Size { get; set; }
 }
