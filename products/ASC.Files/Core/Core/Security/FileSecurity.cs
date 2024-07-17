@@ -849,6 +849,14 @@ public class FileSecurity(IDaoFactory daoFactory,
             return false;
         }
 
+        if (file != null &&
+            (action == FilesSecurityActions.EditForm ||
+            action == FilesSecurityActions.FillForms) &&
+            !file.IsForm)
+        {
+            return false;
+        }
+
         if (action is FilesSecurityActions.ReadHistory or FilesSecurityActions.EditHistory && e.ProviderEntry)
         {
             return false;
