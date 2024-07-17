@@ -96,7 +96,7 @@ public enum DocThumbnailExtension
 }
 
 [Scope]
-public class Global(
+public partial class Global(
     IConfiguration configuration,
     AuthContext authContext,
     UserManager userManager,
@@ -244,20 +244,20 @@ public class Global(
         return userInfo.DisplayUserName(false, displayUserSettingsHelper);
     }
     
-    public async Task<string> GetAvailableTitleAsync<T>(string requestTitle, T parentFolderId, Func<string, T, Task<bool>> isExist)
+    public async Task<string> GetAvailableTitleAsync<T>(string requestTitle, T parentFolderId, Func<string, T, Task<bool>> isExist, FileEntryType fileEntryType)
     {
         if (!await isExist(requestTitle, parentFolderId))
         {
             return requestTitle;
         }
 
-        var re = new Regex(@"( \(((?<index>[0-9])+)\)(\.[^\.]*)?)$");
+        var re = MyRegex();
         var match = re.Match(requestTitle);
 
         if (!match.Success)
         {
             var insertIndex = requestTitle.Length;
-            if (requestTitle.LastIndexOf('.') != -1)
+            if (fileEntryType == FileEntryType.File && requestTitle.LastIndexOf('.') != -1)
             {
                 insertIndex = requestTitle.LastIndexOf('.');
             }
@@ -280,6 +280,9 @@ public class Global(
 
         return $" ({index + 1}){staticText}";
     }
+
+    [GeneratedRegex(@"( \(((?<index>[0-9])+)\)(\.[^\.]*)?)$")]
+    private static partial Regex MyRegex();
 }
 
 [Scope]

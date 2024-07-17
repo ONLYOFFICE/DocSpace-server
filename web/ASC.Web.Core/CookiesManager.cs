@@ -139,15 +139,15 @@ public class CookiesManager(
         }
 
         var cookieName = GetFullCookiesName(type, itemId);
-
-        if (httpContextAccessor.HttpContext.Request.Cookies.TryGetValue(cookieName, out var cookie))
-        {
-            return cookie;
-        }
-
+        
         if (allowHeader && httpContextAccessor.HttpContext.Request.Headers.TryGetValue(cookieName, out var cookieHeader))
         {
             return cookieHeader;
+        }
+
+        if (httpContextAccessor.HttpContext.Request.Cookies.TryGetValue(cookieName, out var cookie) && !string.IsNullOrEmpty(cookie))
+        {
+            return cookie;
         }
         
         return string.Empty;

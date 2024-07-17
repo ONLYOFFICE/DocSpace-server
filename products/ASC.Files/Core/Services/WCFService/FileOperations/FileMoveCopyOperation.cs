@@ -463,7 +463,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                             if (!conflictFolder.ProviderEntry)
                             {
                                 conflictFolder.Id = default;
-                                conflictFolder.Title = await global.GetAvailableTitleAsync(conflictFolder.Title, conflictFolder.ParentId, folderDao.IsExistAsync);
+                                conflictFolder.Title = await global.GetAvailableTitleAsync(conflictFolder.Title, conflictFolder.ParentId, folderDao.IsExistAsync, FileEntryType.Folder);
                                 conflictFolder.Id = await folderDao.SaveFolderAsync(conflictFolder);
                             }
                             
@@ -478,7 +478,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                         }
                         else
                         {
-                            var title = await global.GetAvailableTitleAsync(folder.Title, toFolderId, folderDao.IsExistAsync);
+                            var title = await global.GetAvailableTitleAsync(folder.Title, toFolderId, folderDao.IsExistAsync, FileEntryType.Folder);
                             newFolder = await FolderDao.CopyFolderAsync(folder.Id, toFolderId, CancellationToken);
                             newFolder.Title = title;
                             newFolder.Id = await folderDao.SaveFolderAsync(newFolder);
@@ -861,7 +861,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                         {
                             try
                             {
-                                var title = await global.GetAvailableTitleAsync(file.Title, toFolderId, fileDao.IsExistAsync);
+                                var title = await global.GetAvailableTitleAsync(file.Title, toFolderId, fileDao.IsExistAsync, FileEntryType.File);
                                 newFile = await FileDao.CopyFileAsync(file.Id, toFolderId); //Stream copy will occur inside dao
                                 newFile.Title = title;
                                 await fileDao.SaveFileAsync(newFile, null);
@@ -979,17 +979,28 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
 
                                 if (file.ThumbnailStatus == Thumbnail.Created && !file.ProviderEntry)
                                 {
+                                    var store = await globalStorage.GetStoreAsync();
+                                    var thumbnailStatus = Thumbnail.Created;
+                                    
                                     foreach (var size in thumbnailSettings.Sizes)
                                     {
-                                        await (await globalStorage.GetStoreAsync()).CopyAsync(String.Empty,
-                                                                                FileDao.GetUniqThumbnailPath(file, size.Width, size.Height),
-                                                                                String.Empty,
-                                                                                fileDao.GetUniqThumbnailPath(newFile, size.Width, size.Height));
+                                        var path = FileDao.GetUniqThumbnailPath(file, size.Width, size.Height);
+                                        var newPath = fileDao.GetUniqThumbnailPath(newFile, size.Width, size.Height);
+                                        
+                                        if (await store.IsFileAsync(path))
+                                        {
+                                            await store.CopyAsync(string.Empty, path, string.Empty, newPath);
+                                        }
+                                        else
+                                        {
+                                            thumbnailStatus = Thumbnail.Waiting;
+                                            break;
+                                        }
                                     }
+                                    
+                                    await fileDao.SetThumbnailStatusAsync(newFile, thumbnailStatus);
 
-                                    await fileDao.SetThumbnailStatusAsync(newFile, Thumbnail.Created);
-
-                                    newFile.ThumbnailStatus = Thumbnail.Created;
+                                    newFile.ThumbnailStatus = thumbnailStatus;
                                 }
 
                                 await linkDao.DeleteAllLinkAsync(newFile.Id);

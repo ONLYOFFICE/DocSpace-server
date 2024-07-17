@@ -42,11 +42,11 @@ public static class SecureHelper
         }
     }
 
-    public static string GenerateSecureKeyHeader(string path, EmailValidationKeyProvider keyProvider)
+    public static async Task<string> GenerateSecureKeyHeaderAsync(string path, EmailValidationKeyProvider keyProvider)
     {
         var ticks = DateTime.UtcNow.Ticks;
         var data = path.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar) + '.' + ticks;
-        var key = keyProvider.GetEmailKey(data);
+        var key = await keyProvider.GetEmailKeyAsync(data);
 
         return Constants.SecureKeyHeader + ':' + ticks + '-' + key;
     }

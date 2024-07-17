@@ -2076,6 +2076,10 @@ public class EntryManager(IDaoFactory daoFactory,
             csvFile.CreateBy = createBy;
 
             var file = await fileDao.SaveFileAsync(csvFile, textStream, false);
+            var csvProp = new EntryProperties() { FormFilling = new FormFillingProperties() };
+            csvProp.FormFilling.ResultsFolderId = resultsFolderId.ToString();
+            await fileDao.SaveProperties(file.Id, csvProp);
+
             properties.FormFilling.ResultsFileID = file.Id.ToString();
         }
         await fileDao.SaveProperties(sourceFileId, properties);

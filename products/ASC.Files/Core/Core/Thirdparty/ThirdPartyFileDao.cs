@@ -355,14 +355,14 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
             if (!Dao.GetName(newFile).Equals(file.Title))
             {
                 var folderId = Dao.GetParentFolderId(await Dao.GetFileAsync(fileId));
-                file.Title = await _global.GetAvailableTitleAsync(file.Title, folderId, IsExistAsync);
+                file.Title = await _global.GetAvailableTitleAsync(file.Title, folderId, IsExistAsync, FileEntryType.File);
                 newFile = await storage.RenameFileAsync(fileId, file.Title);
             }
         }
         else if (file.ParentId != null)
         {
             var folderId = Dao.MakeThirdId(file.ParentId);
-            file.Title = await _global.GetAvailableTitleAsync(file.Title, folderId, IsExistAsync);
+            file.Title = await _global.GetAvailableTitleAsync(file.Title, folderId, IsExistAsync, FileEntryType.File);
             newFile = await storage.CreateFileAsync(fileStream, file.Title, folderId);
         }
 
@@ -470,7 +470,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
             throw new Exception(errorFolder.Error);
         }
 
-        var newTitle = await _global.GetAvailableTitleAsync(Dao.GetName(file), Dao.GetId(toFolder), IsExistAsync);
+        var newTitle = await _global.GetAvailableTitleAsync(Dao.GetName(file), Dao.GetId(toFolder), IsExistAsync, FileEntryType.File);
         var storage = await ProviderInfo.StorageAsync;
         var movedFile = await storage.MoveFileAsync(Dao.GetId(file), newTitle, Dao.GetId(toFolder));
 
@@ -517,7 +517,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
             throw new Exception(errorFolder.Error);
         }
 
-        var newTitle = await _global.GetAvailableTitleAsync(Dao.GetName(file), Dao.GetId(toFolder), IsExistAsync);
+        var newTitle = await _global.GetAvailableTitleAsync(Dao.GetName(file), Dao.GetId(toFolder), IsExistAsync, FileEntryType.File);
         var storage = await ProviderInfo.StorageAsync;
         var newFile = await storage.CopyFileAsync(Dao.GetId(file), newTitle, Dao.GetId(toFolder));
 
@@ -540,7 +540,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
     public async Task<string> FileRenameAsync(File<string> file, string newTitle)
     {
         var thirdFile = await Dao.GetFileAsync(file.Id);
-        newTitle = await _global.GetAvailableTitleAsync(newTitle, Dao.GetParentFolderId(thirdFile), IsExistAsync);
+        newTitle = await _global.GetAvailableTitleAsync(newTitle, Dao.GetParentFolderId(thirdFile), IsExistAsync, FileEntryType.File);
 
         var storage = await ProviderInfo.StorageAsync;
         var renamedThirdFile = await storage.RenameFileAsync(Dao.GetId(thirdFile), newTitle);
