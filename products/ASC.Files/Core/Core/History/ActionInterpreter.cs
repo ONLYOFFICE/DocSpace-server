@@ -115,15 +115,15 @@ public record EntryOperationData : HistoryData
     public string Title { get; }
     public int ToFolderId { get; }
     public string ToFolderTitle { get; }
-    public int ToFolderType { get; }
+    public int ToParentType { get; }
     
-    public EntryOperationData(string id, string title, string toFolderId, string toFolderTitle, int toFolderType)
+    public EntryOperationData(string id, string title, string toFolderId, string toFolderTitle, int toParentType)
     {
         Id = int.Parse(id);
         Title = title;
         ToFolderId = int.Parse(toFolderId);
         ToFolderTitle = toFolderTitle;
-        ToFolderType = toFolderType;
+        ToParentType = toParentType;
     }
     
     public override int GetId() => ToFolderId;
