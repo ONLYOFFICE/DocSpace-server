@@ -37,7 +37,7 @@ public class FillingFormResultDto<T>
 
     /// <summary>Completed form</summary>
     /// <type>ASC.Files.Core.ApiModels.ResponseDto.FileEntryDto, ASC.Files.Core</type>
-    public FileDto<T> ÑompletedForm { get; set; }
+    public FileDto<T> CompletedForm { get; set; }
 
     /// <summary>Original form</summary>
     /// <type>ASC.Files.Core.ApiModels.ResponseDto.FileEntryDto, ASC.Files.Core</type>
@@ -83,7 +83,7 @@ public class FillingFormResultDtoHelper(
 
                 var result = new FillingFormResultDto<T>()
                 {
-                    ÑompletedForm = await fileDtoHelper.GetAsync(file),
+                    CompletedForm = await fileDtoHelper.GetAsync(file),
                     OriginalForm = await fileDtoHelper.GetAsync(originalForm),
                     FormNumber = properties.FormFilling.ResultFormNumber,
                     Manager = await employeeFullDtoHelper.GetSimpleWithEmail(manager),
