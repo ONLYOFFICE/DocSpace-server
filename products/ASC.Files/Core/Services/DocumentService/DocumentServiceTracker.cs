@@ -179,7 +179,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
         return await documentServiceConnector.CommandAsync(CommandMethod.Info, docKeyForTrack, fileId, callbackUrl);
     }
 
-    public async Task<TrackResponse> ProcessDataAsync<T>(T fileId, TrackerData fileData)
+    public async Task<TrackResponse> ProcessDataAsync<T>(T fileId, TrackerData fileData, string fillingSessionId)
     {
         switch (fileData.Status)
         {
@@ -224,7 +224,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
             case TrackerStatus.Corrupted:
             case TrackerStatus.ForceSave:
             case TrackerStatus.CorruptedForceSave:
-                return await ProcessSaveAsync(fileId, fileData);
+                return await ProcessSaveAsync(fileId, fileData, fillingSessionId);
 
             case TrackerStatus.MailMerge:
                 return await ProcessMailMergeAsync(fileId, fileData);
@@ -302,7 +302,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
         }
     }
 
-    private async Task<TrackResponse> ProcessSaveAsync<T>(T fileId, TrackerData fileData)
+    private async Task<TrackResponse> ProcessSaveAsync<T>(T fileId, TrackerData fileData, string fillingSessionId = null)
     {
         var comments = new List<string>();
         if (fileData.Status is TrackerStatus.Corrupted or TrackerStatus.CorruptedForceSave)
@@ -406,7 +406,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
 
             try
             {
-                file = await entryManager.SaveEditingAsync(fileId, fileData.Filetype, documentServiceConnector.ReplaceDocumentAddress(fileData.Url), null, string.Join("; ", comments), false, fileData.Encrypted, forceSaveType, true, fileData.FormsDataUrl);
+                file = await entryManager.SaveEditingAsync(fileId, fileData.Filetype, documentServiceConnector.ReplaceDocumentAddress(fileData.Url), null, string.Join("; ", comments), false, fileData.Encrypted, forceSaveType, true, fileData.FormsDataUrl, fillingSessionId);
                 saveMessage = fileData.Status is TrackerStatus.MustSave or TrackerStatus.ForceSave ? null : "Status " + fileData.Status;
             }
             catch (Exception ex)

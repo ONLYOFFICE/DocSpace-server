@@ -43,7 +43,8 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         FileConverter fileConverter,
         PathProvider pathProvider,
         FileChecker fileChecker,
-        IDistributedCache distributedCache)
+        IDistributedCache distributedCache,
+        FillingFormResultDtoHelper fillingFormResultDtoHelper)
     : FilesHelperBase(filesSettingsHelper,
             fileUploader,
             socketManager,
@@ -181,9 +182,13 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         return await _fileStorageService.GetEditDiffUrlAsync(fileId, version);
     }
 
-    public async Task<string> GetFillResultAsync(string fillingSessionId)
+    public async Task<FillingFormResultDto<T>> GetFillResultAsync<T>(T formId)
     {
-        return await _distributedCache.GetStringAsync(fillingSessionId);
+        if (formId != null)
+        {
+            return await fillingFormResultDtoHelper.GetAsync(formId);
+        }
+        return null;
     }
 
     public async IAsyncEnumerable<EditHistoryDto> GetEditHistoryAsync<T>(T fileId)

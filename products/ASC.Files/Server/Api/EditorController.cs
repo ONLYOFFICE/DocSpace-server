@@ -207,6 +207,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                         canFill = true;
                         isSubmitOnly = true;
                         editorType = EditorType.Embedded;
+                        fillingSessionId = Guid.NewGuid().ToString("N");
                         break;
                     }
 
@@ -317,8 +318,12 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
             result.StartFilling = canStartFilling;
         }
 
-        result.FillingSessionId = !string.IsNullOrEmpty(fillingSessionId) ? fillingSessionId : null;
-
+        if (!string.IsNullOrEmpty(fillingSessionId))
+        {
+            result.FillingSessionId = fillingSessionId;
+            result.EditorConfig.CallbackUrl = QueryHelpers.AddQueryString(result.EditorConfig.CallbackUrl, FilesLinkUtility.FillingSessionId, fillingSessionId);
+        }
+       
         return result;
     }
 

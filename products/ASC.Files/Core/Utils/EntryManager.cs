@@ -1192,7 +1192,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
                     if (properties.FormFilling.ResultsFileID == null)
                     {
-                        var initFormFillingProperties = await InitFormFillingProperties(sourceTitle, sourceFile.Id, inProcessFormFolderId, readyFormFolderId, folderIfNew.CreateBy, properties, fileDao, folderDao);
+                        var initFormFillingProperties = await InitFormFillingProperties(folderIfNew.Id, sourceTitle, sourceFile.Id, inProcessFormFolderId, readyFormFolderId, folderIfNew.CreateBy, properties, fileDao, folderDao);
                         linkedFile.ParentId = (T)Convert.ChangeType(initFormFillingProperties.FormFilling.ToFolderId, typeof(T));
                     }
                     else
@@ -1295,7 +1295,7 @@ public class EntryManager(IDaoFactory daoFactory,
     }
 
     public async Task<File<T>> SaveEditingAsync<T>(T fileId, string fileExtension, string downloadUri, Stream stream, string comment = null, bool checkRight = true, 
-        bool encrypted = false, ForcesaveType? forceSave = null, bool keepLink = false, string formsDataUrl = null)
+        bool encrypted = false, ForcesaveType? forceSave = null, bool keepLink = false, string formsDataUrl = null, string fillingSessionId = null)
     {
         var newExtension = string.IsNullOrEmpty(fileExtension)
                           ? FileUtility.GetFileExtension(downloadUri)
@@ -1490,17 +1490,18 @@ public class EntryManager(IDaoFactory daoFactory,
                                 }
                             }
                         }
-                        await distributedCache.SetStringAsync("testkey", result.Id.ToString());
+                        if (fillingSessionId != null)
+                        {
+                            await distributedCache.SetStringAsync(fillingSessionId, result.Id.ToString());
+                        }
 
                         try
                         {
                             var linkDao = daoFactory.GetLinkDao<T>();
-                            if (!securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))
-                            {
-                                var resProp = properties;
-                                resProp.FormFilling.ResultFormNumber++;
-                                await fileDao.SaveProperties(result.Id, resProp);
-                            }
+
+                            var resProp = properties;
+                            resProp.FormFilling.ResultFormNumber++;
+                            await fileDao.SaveProperties(result.Id, resProp);
 
                             await fileMarker.MarkAsNewAsync(result);
                             await socketManager.CreateFileAsync(result);
@@ -2021,7 +2022,7 @@ public class EntryManager(IDaoFactory daoFactory,
             await filesMessageService.SendAsync(MessageAction.FolderCreated, formFolder, formFolder.Title);
         }
 
-        await InitFormFillingProperties(Path.GetFileNameWithoutExtension(file.Title), file.Id, inProcessFormFolderId, readyFormFolderId, folder.CreateBy, properties, fileDao, folderDao);
+        await InitFormFillingProperties(folder.Id, Path.GetFileNameWithoutExtension(file.Title), file.Id, inProcessFormFolderId, readyFormFolderId, folder.CreateBy, properties, fileDao, folderDao);
     }
     private async Task<(T readyFormFolderId, T inProcessFolderId)> InitSystemFormFillingFolders<T>(T formFillingRoomId, IFolderDao<T> folderDao)
     {
@@ -2042,7 +2043,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
         return (await readyFormFolderTask, await inProcessFolderTask);
     }
-    private async Task<EntryProperties> InitFormFillingProperties<T>(string sourceTitle, T sourceFileId, T inProcessFormFolderId, T readyFormFolderId, Guid createBy, EntryProperties properties, IFileDao<T> fileDao, IFolderDao<T> folderDao)
+    private async Task<EntryProperties> InitFormFillingProperties<T>(T roomId, string sourceTitle, T sourceFileId, T inProcessFormFolderId, T readyFormFolderId, Guid createBy, EntryProperties properties, IFileDao<T> fileDao, IFolderDao<T> folderDao)
     {
         var templatesFolder = serviceProvider.GetService<Folder<T>>();
         templatesFolder.Title = sourceTitle;
@@ -2065,6 +2066,7 @@ public class EntryManager(IDaoFactory daoFactory,
         var resultsFolderId = await resultsFolderTask;
 
         properties.FormFilling.Title = sourceTitle;
+        properties.FormFilling.RoomId = roomId.ToString();
         properties.FormFilling.OriginalFormId = sourceFileId.ToString();
         properties.FormFilling.ToFolderId = templatesFolderId.ToString();
         properties.FormFilling.ResultsFolderId = resultsFolderId.ToString();

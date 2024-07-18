@@ -38,7 +38,8 @@ public class FilesControllerInternal(
     FileDtoHelper fileDtoHelper,
     ApiContext apiContext,
     FileShareDtoHelper fileShareDtoHelper,
-    HistoryApiHelper historyApiHelper)
+    HistoryApiHelper historyApiHelper,
+    IDistributedCache distributedCache)
     : FilesController<int>(filesControllerHelper,
         fileStorageService,
         fileOperationsManager,
@@ -46,7 +47,8 @@ public class FilesControllerInternal(
         folderDtoHelper,
         fileDtoHelper,
         apiContext,
-        fileShareDtoHelper)
+        fileShareDtoHelper,
+        distributedCache)
 {
     /// <summary>
     /// Get the list of actions performed on the file with the specified identifier
@@ -75,7 +77,8 @@ public class FilesControllerThirdparty(
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
     ApiContext apiContext,
-    FileShareDtoHelper fileShareDtoHelper)
+    FileShareDtoHelper fileShareDtoHelper,
+    IDistributedCache distributedCache)
     : FilesController<string>(filesControllerHelper,
         fileStorageService,
         fileOperationsManager,
@@ -83,7 +86,8 @@ public class FilesControllerThirdparty(
         folderDtoHelper,
         fileDtoHelper,
         apiContext,
-        fileShareDtoHelper);
+        fileShareDtoHelper,
+        distributedCache);
 
 public abstract class FilesController<T>(FilesControllerHelper filesControllerHelper,
         FileStorageService fileStorageService,
@@ -92,7 +96,8 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
         ApiContext apiContext,
-        FileShareDtoHelper fileShareDtoHelper)
+        FileShareDtoHelper fileShareDtoHelper,
+        IDistributedCache distributedCache)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -264,10 +269,13 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
 
     [AllowAnonymous]
     [HttpGet("file/fillresult")]
-    public async Task<string> GetFillResultAsync(string fillingSessionId)
+    public async Task<FillingFormResultDto<T>> GetFillResultAsync(string fillingSessionId)
     {
-        return await filesControllerHelper.GetFillResultAsync(fillingSessionId);
+        var completedFormId = await distributedCache.GetStringAsync(fillingSessionId);
+
+        return await filesControllerHelper.GetFillResultAsync((T)Convert.ChangeType(completedFormId, typeof(T)));
     }
+
     /// <summary>
     /// Returns a URL to the changes of a file version specified in the request.
     /// </summary>
