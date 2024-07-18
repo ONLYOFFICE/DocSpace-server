@@ -1490,6 +1490,10 @@ public class EntryManager(IDaoFactory daoFactory,
                                 }
                             }
                         }
+
+                        logger.LogError("=======================");
+                        logger.LogError("fillingSessionId = " + fillingSessionId);
+                        logger.LogError("=======================");
                         if (fillingSessionId != null)
                         {
                             await distributedCache.SetStringAsync(fillingSessionId, result.Id.ToString());
