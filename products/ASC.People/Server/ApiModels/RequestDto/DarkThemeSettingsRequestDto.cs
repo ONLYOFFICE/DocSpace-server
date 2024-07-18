@@ -26,8 +26,6 @@
 
 namespace ASC.People.ApiModels.RequestDto;
 
-/// <summary>
-/// </summary>
 public class DarkThemeSettingsRequestDto
 {
     [SwaggerSchemaCustom(Example = "Dark", Description = "Portal theme (Base, System, or Dark)")]

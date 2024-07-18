@@ -47,7 +47,7 @@ public class NotificationController(UserManager userManager,
     /// <httpMethod>POST</httpMethod>
     [Tags("People / Profiles")]
     [HttpPost("phone")]
-    public async Task<object> SendNotificationToChangeAsync(UpdateMemberRequestDto inDto)
+    public async Task<object> SendNotificationToChangeAsync(UpdateMemberSimpleRequestDto inDto)
     {
         var user = await userManager.GetUsersAsync(string.IsNullOrEmpty(inDto.UserId)
             ? securityContext.CurrentAccount.ID : new Guid(inDto.UserId));

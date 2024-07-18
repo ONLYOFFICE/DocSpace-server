@@ -34,9 +34,12 @@ public class PrivacyRoomRequestDto
     [SwaggerSchemaCustom(Example = "some text", Description = "Private key")]
     public string PrivateKeyEnc { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies whether to enable the Private Room settings or not")]
-    public bool Enable { get; set; }
-
     [SwaggerSchemaCustom(Example = "true", Description = "Encryption keys need to be updated or not")]
     public bool Update { get; set; }
+}
+
+public class PrivacyRoomEnableRequestDto
+{
+    [SwaggerSchemaCustom(Example = "true", Description = "Specifies whether to enable the Private Room settings or not")]
+    public bool Enable { get; set; }
 }

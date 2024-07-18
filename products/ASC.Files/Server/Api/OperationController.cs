@@ -197,7 +197,7 @@ public class OperationController(
 
     [Tags("Files / Operations")]
     [HttpGet("checkdestfolder")]
-    public async Task<CheckDestFolderDto> MoveOrCopyDestFolderCheckAsync([ModelBinder(BinderType = typeof(BatchModelBinder))] BatchRequestDto inDto)
+    public async Task<CheckDestFolderDto> MoveOrCopyDestFolderCheckAsync([ModelBinder(BinderType = typeof(BatchModelBinder))] BatchSimpleRequestDto inDto)
     {
         List<object> checkedFiles;
 
@@ -244,7 +244,7 @@ public class OperationController(
     /// <collection>list</collection>
     [Tags("Files / Operations")]
     [HttpGet("move")]
-    public async IAsyncEnumerable<FileEntryDto> MoveOrCopyBatchCheckAsync([ModelBinder(BinderType = typeof(BatchModelBinder))] BatchRequestDto inDto)
+    public async IAsyncEnumerable<FileEntryDto> MoveOrCopyBatchCheckAsync([ModelBinder(BinderType = typeof(BatchModelBinder))] BatchSimpleRequestDto inDto)
     {
         List<object> checkedFiles;
 

@@ -49,7 +49,7 @@ public class ContactsController(UserManager userManager,
     /// <httpMethod>DELETE</httpMethod>
     [Tags("People / Contacts")]
     [HttpDelete("{userid}/contacts")]
-    public async Task<EmployeeFullDto> DeleteMemberContacts(string userid, UpdateMemberRequestDto inDto)
+    public async Task<EmployeeFullDto> DeleteMemberContacts(string userid, ContactsRequestDto inDto)
     {
         var user = await GetUserInfoAsync(userid);
 
@@ -78,7 +78,7 @@ public class ContactsController(UserManager userManager,
     /// <httpMethod>POST</httpMethod>
     [Tags("People / Contacts")]
     [HttpPost("{userid}/contacts")]
-    public async Task<EmployeeFullDto> SetMemberContacts(string userid, UpdateMemberRequestDto inDto)
+    public async Task<EmployeeFullDto> SetMemberContacts(string userid, ContactsRequestDto inDto)
     {
         var user = await GetUserInfoAsync(userid);
 
@@ -108,7 +108,7 @@ public class ContactsController(UserManager userManager,
     /// <httpMethod>PUT</httpMethod>
     [Tags("People / Contacts")]
     [HttpPut("{userid}/contacts")]
-    public async Task<EmployeeFullDto> UpdateMemberContacts(string userid, UpdateMemberRequestDto inDto)
+    public async Task<EmployeeFullDto> UpdateMemberContacts(string userid, ContactsRequestDto inDto)
     {
         var user = await GetUserInfoAsync(userid);
 

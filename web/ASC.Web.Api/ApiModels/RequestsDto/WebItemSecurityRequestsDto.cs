@@ -36,7 +36,10 @@ public class WebItemSecurityRequestsDto
 
     [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "List of user/group IDs with the access to the module")]
     public IEnumerable<Guid> Subjects { get; set; }
+}
 
+public class WebItemsSecurityRequestsDto
+{
     [SwaggerSchemaCustom(Description = "Products with security information")]
     public IEnumerable<ItemKeyValuePair<string, bool>> Items { get; set; }
 }

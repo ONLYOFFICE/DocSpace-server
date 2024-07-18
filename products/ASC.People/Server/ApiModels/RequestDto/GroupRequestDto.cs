@@ -31,3 +31,9 @@ public class GroupRequestDto : GroupRequestDtoBase
     [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "List of group member IDs")]
     public IEnumerable<Guid> Members { get; init; }
 }
+
+public class MembersRequestDto
+{
+    [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "List of group member IDs")]
+    public IEnumerable<Guid> Members { get; init; }
+}

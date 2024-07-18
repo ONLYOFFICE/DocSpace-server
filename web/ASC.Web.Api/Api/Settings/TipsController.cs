@@ -53,7 +53,7 @@ public class TipsController(ILoggerProvider option,
     /// <httpMethod>PUT</httpMethod>
     [Tags("Settings / Tips")]
     [HttpPut("")]
-    public async Task<TipsSettings> UpdateTipsSettingsAsync(SettingsRequestsDto inDto)
+    public async Task<TipsSettings> UpdateTipsSettingsAsync(TipsRequestDto inDto)
     {
         var settings = new TipsSettings { Show = inDto.Show };
         await settingsManager.SaveForCurrentUserAsync(settings);

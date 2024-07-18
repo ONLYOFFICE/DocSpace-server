@@ -67,7 +67,7 @@ public class IpRestrictionsController(ApiContext apiContext,
     /// <collection>list</collection>
     [Tags("Settings / IP restrictions")]
     [HttpPut("")]
-    public async Task<IEnumerable<IpRestrictionBase>> SaveIpRestrictionsAsync(IpRestrictionsRequestsDto inDto)
+    public async Task<IEnumerable<IpRestrictionBase>> SaveIpRestrictionsAsync(IpRestrictionsBaseRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         

@@ -264,7 +264,7 @@ public class SecurityController(
     /// <collection>list</collection>
     [Tags("Settings / Security")]
     [HttpPut("access")]
-    public async Task<IEnumerable<SecurityDto>> SetAccessToWebItems(WebItemSecurityRequestsDto inDto)
+    public async Task<IEnumerable<SecurityDto>> SetAccessToWebItems(WebItemsSecurityRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 

@@ -26,26 +26,33 @@
 
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
+public class OwnerIdSettingsRequestDto
+{
+    [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "Owner ID")]
+    public Guid OwnerId { get; set; }
+}
 public class SettingsRequestsDto
+{
+    [SwaggerSchemaCustom(Example = "1234", Description = "Version ID", Format = "int32")]
+    public int VersionId { get; set; }
+}
+
+public class TipsRequestDto
+{
+    [SwaggerSchemaCustom(Example = "true", Description = "Specifies whether to show tips for the user or not")]
+    public bool Show { get; set; } //tips
+}
+public  class DefaultProductRequestDto
 {
     [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "Default product ID")]
     public Guid DefaultProductID { get; set; }
+}
 
+public class TimeZoneRequestDto
+{
     [SwaggerSchemaCustom(Example = "some text", Description = "Language")]
     public string Lng { get; set; }
 
     [SwaggerSchemaCustom(Example = "some text", Description = "Time zone ID")]
     public string TimeZoneID { get; set; }
-
-    [SwaggerSchemaCustom(Example = "some text", Description = "Theme")]
-    public string Theme { get; set; }
-
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies whether to show tips for the user or not")]
-    public bool Show { get; set; } //tips
-
-    [SwaggerSchemaCustom(Example = "1234", Description = "Version ID", Format = "int32")]
-    public int VersionId { get; set; }
-
-    [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "Owner ID")]
-    public Guid OwnerId { get; set; }
 }

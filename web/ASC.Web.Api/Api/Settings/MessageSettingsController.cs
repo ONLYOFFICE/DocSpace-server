@@ -57,7 +57,7 @@ public class MessageSettingsController(MessageService messageService,
     /// <httpMethod>POST</httpMethod>
     [Tags("Settings / Messages")]
     [HttpPost("messagesettings")]
-    public async Task<object> EnableAdminMessageSettingsAsync(AdminMessageSettingsRequestsDto inDto)
+    public async Task<object> EnableAdminMessageSettingsAsync(TurnOnAdminMessageSettingsRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -180,7 +180,7 @@ public class MessageSettingsController(MessageService messageService,
     [Tags("Settings / Messages")]
     [AllowAnonymous]
     [HttpPost("sendjoininvite")]
-    public async Task<object> SendJoinInviteMail(AdminMessageSettingsRequestsDto inDto)
+    public async Task<object> SendJoinInviteMail(AdminMessageBaseSettingsRequestsDto inDto)
     {
         try
         {

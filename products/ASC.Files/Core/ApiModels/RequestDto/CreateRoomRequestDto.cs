@@ -54,12 +54,6 @@ public class CreateRoomRequestDto
     [SwaggerSchemaCustom(Description = "Collection of sharing parameters")]
     public IEnumerable<FileShareParams> Share { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Notifies users about the shared room or not")]
-    public bool Notify { get; set; }
-
-    [SwaggerSchemaCustom(Example = "some text", Description = "Message to send when notifying about the shared room")]
-    public string SharingMessage { get; set; }
-
     [SwaggerSchemaCustom(Example = "1234", Description = "Room quota", Format = "int64")]
     public long Quota { get; set; }
 

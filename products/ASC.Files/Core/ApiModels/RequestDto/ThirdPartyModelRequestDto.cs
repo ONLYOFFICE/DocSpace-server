@@ -40,12 +40,6 @@ public class ThirdPartyRequestDto
     [SwaggerSchemaCustom(Example = "some text", Description = "Authentication token")]
     public string Token { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if this is a corporate account or not")]
-    public bool IsCorporate { get; set; }
-
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if this is a room storage or not")]
-    public bool IsRoomsStorage { get; set; }
-
     [SwaggerSchemaCustom(Example = "some text", Description = "Customer title")]
     public string CustomerTitle { get; set; }
 

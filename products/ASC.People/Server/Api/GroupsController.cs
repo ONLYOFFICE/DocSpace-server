@@ -283,9 +283,9 @@ public class GroupController(
     /// <httpMethod>POST</httpMethod>
     [Tags("Group")]
     [HttpPost("{id:guid}/members")]
-    public async Task<GroupDto> SetMembersToAsync(Guid id, GroupRequestDto inDto)
+    public async Task<GroupDto> SetMembersToAsync(Guid id, MembersRequestDto inDto)
     {
-        await RemoveMembersFromAsync(id, new GroupRequestDto { Members = (await userManager.GetUsersByGroupAsync(id)).Select(x => x.Id) });
+        await RemoveMembersFromAsync(id, new MembersRequestDto { Members = (await userManager.GetUsersByGroupAsync(id)).Select(x => x.Id) });
         await AddMembersToAsync(id, inDto);
         
         return await GetGroupAsync(id);
@@ -304,7 +304,7 @@ public class GroupController(
     /// <httpMethod>PUT</httpMethod>
     [Tags("Group")]
     [HttpPut("{id:guid}/members")]
-    public async Task<GroupDto> AddMembersToAsync(Guid id, GroupRequestDto inDto)
+    public async Task<GroupDto> AddMembersToAsync(Guid id, MembersRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_EditGroups, Constants.Action_AddRemoveUser);
 
@@ -360,7 +360,7 @@ public class GroupController(
     /// <httpMethod>DELETE</httpMethod>
     [Tags("Group")]
     [HttpDelete("{id:guid}/members")]
-    public async Task<GroupDto> RemoveMembersFromAsync(Guid id, GroupRequestDto inDto)
+    public async Task<GroupDto> RemoveMembersFromAsync(Guid id, MembersRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_EditGroups, Constants.Action_AddRemoveUser);
 

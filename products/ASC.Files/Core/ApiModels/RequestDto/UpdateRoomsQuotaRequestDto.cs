@@ -26,12 +26,15 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
-public class UpdateRoomsQuotaRequestDto<T>
+public class UpdateRoomsQuotaRequestDto<T> : UpdateRoomsRoomIdsRequestDto<T>
 {
-    [SwaggerSchemaCustom(Description = "List of room IDs", Format ="json")]
-    public IEnumerable<JsonElement> RoomIds { get; set; } = new List<JsonElement>();
-
     [SwaggerSchemaCustom(Example = "1234", Description = "Room quota", Format = "int64")]
     public long Quota { get; set; }
 
+}
+
+public class UpdateRoomsRoomIdsRequestDto<T>
+{
+    [SwaggerSchemaCustom(Description = "List of room IDs", Format = "json")]
+    public IEnumerable<JsonElement> RoomIds { get; set; } = new List<JsonElement>();
 }

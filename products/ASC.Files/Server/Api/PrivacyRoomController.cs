@@ -175,7 +175,7 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Private room")]
     [HttpPut("")]
-    public async Task<bool> SetPrivacyRoomAsync(PrivacyRoomRequestDto inDto)
+    public async Task<bool> SetPrivacyRoomAsync(PrivacyRoomEnableRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 

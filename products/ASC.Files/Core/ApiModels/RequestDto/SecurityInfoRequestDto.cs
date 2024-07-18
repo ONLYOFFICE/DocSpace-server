@@ -37,3 +37,15 @@ public class SecurityInfoRequestDto : BaseBatchRequestDto
     [SwaggerSchemaCustom(Example = "some text", Description = "Message to send when notifying about the shared file")]
     public string SharingMessage { get; set; }
 }
+
+public class SecurityInfoSimpeRequestDto
+{
+    [SwaggerSchemaCustom(Description = "Collection of sharing parameters")]
+    public IEnumerable<FileShareParams> Share { get; set; }
+
+    [SwaggerSchemaCustom(Example = "true", Description = "Notifies users about the shared file or not")]
+    public bool Notify { get; set; }
+
+    [SwaggerSchemaCustom(Example = "some text", Description = "Message to send when notifying about the shared file")]
+    public string SharingMessage { get; set; }
+}

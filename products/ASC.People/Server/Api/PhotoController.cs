@@ -178,7 +178,7 @@ public class PhotoController(
     /// <httpMethod>PUT</httpMethod>
     [Tags("People / Photos")]
     [HttpPut("{userid}/photo")]
-    public async Task<ThumbnailsDataDto> UpdateMemberPhoto(string userid, UpdateMemberRequestDto inDto)
+    public async Task<ThumbnailsDataDto> UpdateMemberPhoto(string userid, UpdatePhotoMemberRequestDto inDto)
     {
         var user = await GetUserInfoAsync(userid);
 

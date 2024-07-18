@@ -85,7 +85,7 @@ public class CustomSchemasController(MessageService messageService,
     /// <httpMethod>POST</httpMethod>
     [Tags("Settings / Team templates")]
     [HttpPost("")]
-    public async Task<SchemaRequestsDto> SaveNamingSettingsAsync(SchemaRequestsDto inDto)
+    public async Task<SchemaRequestsDto> SaveNamingSettingsAsync(SchemaBaseRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 

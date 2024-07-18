@@ -26,6 +26,11 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+public class FileBaseBatchRequestDto
+{
+    [SwaggerSchemaCustom(Example = "some text", Description = "List of file IDs")]
+    public IEnumerable<JsonElement> FileIds { get; set; } = new List<JsonElement>();
+}
 public class BaseBatchRequestDto
 {
     [SwaggerSchemaCustom(Example = "some text", Description = "List of folder IDs")]
@@ -72,4 +77,10 @@ public class BatchRequestDto : BaseBatchRequestDto
 
     [SwaggerSchemaCustom(Example = "true", Description = "Content")]
     public bool Content { get; set; }
+}
+
+public class BatchSimpleRequestDto : BaseBatchRequestDto
+{
+    [SwaggerSchemaCustom(Example = "some text", Description = "Destination folder ID", Format = "json")]
+    public JsonElement DestFolderId { get; set; }
 }

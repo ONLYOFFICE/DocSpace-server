@@ -26,8 +26,20 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
-public class CreateThirdPartyRoomRequestDto : CreateRoomRequestDto
+public class CreateThirdPartyRoomRequestDto
 {
     [SwaggerSchemaCustom(Example = "true", Description = "Create as new folder")]
     public bool CreateAsNewFolder { get; set; }
+
+    [SwaggerSchemaCustom(Example = "some text", Description = "Room name")]
+    public string Title { get; set; }
+
+    [SwaggerSchemaCustom(Example = "CustomRoom", Description = "Room type")]
+    public RoomType RoomType { get; set; }
+
+    [SwaggerSchemaCustom(Example = "true", Description = "Private")]
+    public bool Private { get; set; }
+
+    [SwaggerSchemaCustom(Example = "true", Description = "Indexing")]
+    public bool Indexing { get; set; }
 }

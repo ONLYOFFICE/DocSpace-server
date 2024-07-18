@@ -214,7 +214,7 @@ public abstract class VirtualRoomsController<T>(
     /// <collection>list</collection>
     [Tags("Files / Quota")]
     [HttpPut("resetquota")]
-    public async IAsyncEnumerable<FolderDto<int>> ResetRoomQuotaAsync(UpdateRoomsQuotaRequestDto<T> inDto)
+    public async IAsyncEnumerable<FolderDto<int>> ResetRoomQuotaAsync(UpdateRoomsRoomIdsRequestDto<T> inDto)
     {
         var (folderIntIds, _) = FileOperationsManager.GetIds(inDto.RoomIds);
         foreach (var roomId in folderIntIds)

@@ -38,17 +38,22 @@ public class MailDomainSettingsRequestsDto
     public bool InviteUsersAsVisitors { get; set; }
 }
 
-public class AdminMessageSettingsRequestsDto
+public class AdminMessageBaseSettingsRequestsDto
 {
     [SwaggerSchemaCustom(Example = "some text", Description = "Email")]
     public string Email { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Message")]
-    public string Message { get; set; }
-
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the administrator messages are enabled or not")]
-    public bool TurnOn { get; set; }
-
     [SwaggerSchemaCustom(Example = "some text", Description = "Culture")]
     public string Culture { get; set; }
+}
+public class AdminMessageSettingsRequestsDto : AdminMessageBaseSettingsRequestsDto
+{
+    [SwaggerSchemaCustom(Example = "some text", Description = "Message")]
+    public string Message { get; set; }
+}
+
+public class TurnOnAdminMessageSettingsRequestDto
+{
+    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the administrator messages are enabled or not")]
+    public bool TurnOn { get; set; }
 }

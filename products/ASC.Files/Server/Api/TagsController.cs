@@ -195,7 +195,7 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     /// <httpMethod>DELETE</httpMethod>
     [Tags("Files / Files")]
     [HttpDelete("recent")]
-    public async Task<NoContentResult> DeleteRecentAsync(BaseBatchRequestDto inDto)
+    public async Task<NoContentResult> DeleteRecentAsync(FileBaseBatchRequestDto inDto)
     {
         var (fileIntIds, _) = FileOperationsManager.GetIds(inDto.FileIds);
         

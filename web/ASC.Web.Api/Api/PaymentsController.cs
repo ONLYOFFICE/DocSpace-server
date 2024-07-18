@@ -100,7 +100,7 @@ public class PaymentController(UserManager userManager,
     /// <httpMethod>PUT</httpMethod>
     [Tags("Portal / Payment")]
     [HttpPut("update")]
-    public async Task<bool> PaymentUpdateAsync(PaymentUrlRequestsDto inDto)
+    public async Task<bool> PaymentUpdateAsync(QuantityRequestDto inDto)
     {
         var tenant = await tenantManager.GetCurrentTenantAsync();
         var payerId = (await tariffService.GetTariffAsync(tenant.Id)).CustomerId;

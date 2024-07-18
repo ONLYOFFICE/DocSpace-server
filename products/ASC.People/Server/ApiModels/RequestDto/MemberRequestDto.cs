@@ -26,16 +26,26 @@
 
 namespace ASC.People.ApiModels.RequestDto;
 
-public class MemberRequestDto
+public class EmailMemberRequestDto
+{
+    [SwaggerSchemaCustom(Example = "some text", Description = "Email")]
+    public string Email { get; set; }
+}
+public class MemberBaseRequestDto : EmailMemberRequestDto
+{
+    [SwaggerSchemaCustom(Example = "some text", Description = "Password")]
+    public string Password { get; set; }
+
+    [SwaggerSchemaCustom(Example = "some text", Description = "Password hash")]
+    public string PasswordHash { get; set; }
+}
+public class MemberRequestDto : MemberBaseRequestDto
 {
     [SwaggerSchemaCustom(Example = "All", Description = "Employee type (All, RoomAdmin, User, DocSpaceAdmin, Collaborator)")]
     public EmployeeType Type { get; set; }
 
     [SwaggerSchemaCustom(Example = "true", Description = "Specifies if this is a guest or a user", Nullable = true)]
     public bool? IsUser { get; set; }
-
-    [SwaggerSchemaCustom(Example = "some text", Description = "Email")]
-    public string Email { get; set; }
 
     [SwaggerSchemaCustom(Example = "some text", Description = "First name")]
     public string Firstname { get; set; }
@@ -70,12 +80,6 @@ public class MemberRequestDto
     [SwaggerSchemaCustom(Example = "some text", Description = "Avatar photo URL", Format ="uri")]
     public string Files { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Password")]
-    public string Password { get; set; }
-
-    [SwaggerSchemaCustom(Example = "some text", Description = "Password hash")]
-    public string PasswordHash { get; set; }
-
     [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the user is added via the invitation link or not")]
     public bool FromInviteLink { get; set; }
 
@@ -96,4 +100,21 @@ public class UpdateMemberRequestDto : MemberRequestDto
 
     [SwaggerSchemaCustom(Example = "true", Description = "Specifies whether to disable a user or not", Nullable = true)]
     public bool? Disable { get; set; }
+}
+
+public class UpdatePhotoMemberRequestDto
+{
+    [SwaggerSchemaCustom(Example = "some text", Description = "Avatar photo URL", Format = "uri")]
+    public string Files { get; set; }
+}
+public class UpdateMemberSimpleRequestDto
+{
+    [SwaggerSchemaCustom(Example = "some text", Description = "User ID")]
+    public string UserId { get; set; }
+}
+
+public class ContactsRequestDto
+{
+    [SwaggerSchemaCustom(Description = "List of user contacts")]
+    public IEnumerable<Contact> Contacts { get; set; }
 }

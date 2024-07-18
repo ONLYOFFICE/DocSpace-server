@@ -798,7 +798,7 @@ public partial class SettingsController(MessageService messageService,
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Common settings")]
     [HttpPut("timeandlanguage")]
-    public async Task<object> TimaAndLanguageAsync(SettingsRequestsDto inDto)
+    public async Task<object> TimaAndLanguageAsync(TimeZoneRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -849,7 +849,7 @@ public partial class SettingsController(MessageService messageService,
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Common settings")]
     [HttpPut("defaultpage")]
-    public async Task<object> SaveDefaultPageSettingAsync(SettingsRequestsDto inDto)
+    public async Task<object> SaveDefaultPageSettingAsync(DefaultProductRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 

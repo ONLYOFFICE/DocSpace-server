@@ -58,7 +58,7 @@ public class OwnerController(
     /// <httpMethod>POST</httpMethod>
     [Tags("Settings / Owner")]
     [HttpPost("")]
-    public async Task<object> SendOwnerChangeInstructionsAsync(SettingsRequestsDto inDto)
+    public async Task<object> SendOwnerChangeInstructionsAsync(OwnerIdSettingsRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -99,7 +99,7 @@ public class OwnerController(
     [Tags("Settings / Owner")]
     [HttpPut("")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PortalOwnerChange")]
-    public async Task OwnerAsync(SettingsRequestsDto inDto)
+    public async Task OwnerAsync(OwnerIdSettingsRequestDto inDto)
     {
         var newOwner = Constants.LostUser;
         try
