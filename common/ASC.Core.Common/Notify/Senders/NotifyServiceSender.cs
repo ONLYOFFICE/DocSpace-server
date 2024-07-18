@@ -35,6 +35,6 @@ public class NotifyServiceSender(NotifyServiceClient notifyServiceClient) : INot
     {
         await notifyServiceClient.SendNotifyMessageAsync(m);
 
-        return await Task.FromResult(NoticeSendResult.OK);
+        return NoticeSendResult.OK;
     }
 }

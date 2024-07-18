@@ -34,8 +34,7 @@ public class DefaultRabbitMQPersistentConnection(IConnectionFactory connectionFa
     private readonly ILogger<DefaultRabbitMQPersistentConnection> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     private IConnection _connection;
     private bool _disposed;
-    readonly object _sync_root = new();
-
+   
     public bool IsConnected
     {
         get
@@ -85,7 +84,7 @@ public class DefaultRabbitMQPersistentConnection(IConnectionFactory connectionFa
         {
             while (!IsConnected) // waiting automatic recovery connection
             {
-                Thread.Sleep(1000);
+                await Task.Delay(1000);
             }
 
             _logger.InformationRabbitMQAcquiredPersistentConnection(_connection.Endpoint.HostName);
