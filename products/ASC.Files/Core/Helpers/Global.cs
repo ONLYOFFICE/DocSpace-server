@@ -252,18 +252,14 @@ public partial class Global(
         }
 
         var re = MyRegex();
-        var match = re.Match(requestTitle);
-
-        if (!match.Success)
+        
+        var insertIndex = requestTitle.Length;
+        if (fileEntryType == FileEntryType.File && requestTitle.LastIndexOf('.') != -1)
         {
-            var insertIndex = requestTitle.Length;
-            if (fileEntryType == FileEntryType.File && requestTitle.LastIndexOf('.') != -1)
-            {
-                insertIndex = requestTitle.LastIndexOf('.');
-            }
-
-            requestTitle = requestTitle.Insert(insertIndex, " (1)");
+            insertIndex = requestTitle.LastIndexOf('.');
         }
+
+        requestTitle = requestTitle.Insert(insertIndex, " (1)");
 
         while (await isExist(requestTitle, parentFolderId))
         {
