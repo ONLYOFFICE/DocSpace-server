@@ -1427,6 +1427,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
         var fillingSessionId = context.Request.Query[FilesLinkUtility.FillingSessionId];
         logger.Error("======================");
         logger.Error("FilesLinkUtility.FillingSessionId = "+ context.Request.Query[FilesLinkUtility.FillingSessionId]);
+        logger.Error("context.Request = " + context.Request.QueryString);
         logger.Error("======================");
         TrackerData fileData;
         try
