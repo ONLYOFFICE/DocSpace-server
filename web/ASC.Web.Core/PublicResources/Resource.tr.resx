@@ -380,7 +380,7 @@
     <value>Yönetici sayısı {0} değerini geçmemelidir</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Yönetici sayısı</value>
+    <value>Yönetici/uzman kullanıcı sayısı</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Otomatik yedekleme ve kurtarma</value>
@@ -423,9 +423,6 @@
   </data>
   <data name="TariffsFeature_whitelabel" xml:space="preserve">
     <value>Markalaşma ve özelleştirme</value>
-  </data>
-  <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Yönetici/uzman kullanıcı sayısı:</value>
   </data>
   <data name="ConsumersBitly" xml:space="preserve">
     <value>Bitly</value>

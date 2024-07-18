@@ -383,7 +383,7 @@
     <value>Počet administrátorov by nemal presahovať {0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Počet administrátorov</value>
+    <value>Počet administrátorov/pokročilých používateľov</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Automatické zálohovanie a obnovenie</value>
@@ -426,9 +426,6 @@
   </data>
   <data name="TariffsFeature_whitelabel" xml:space="preserve">
     <value>Branding a personalizácia</value>
-  </data>
-  <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Počet administrátorov/pokročilých používateľov:</value>
   </data>
   <data name="ConsumersBitly" xml:space="preserve">
     <value>Bitly</value>

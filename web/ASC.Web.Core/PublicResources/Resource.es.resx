@@ -815,7 +815,7 @@
     <value>El número de administradores no debe superar {0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Número de administradores</value>
+    <value>El número de administradores/usuarios avanzados</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Copias de seguridad y recuperación automáticas</value>
@@ -855,9 +855,6 @@
   </data>
   <data name="TariffsFeature_usersInRoom_exception" xml:space="preserve">
     <value>El número de usuarios en la sala no debe superar {0}</value>
-  </data>
-  <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>El número de administradores/usuarios avanzados:</value>
   </data>
   <data name="ConsumersAppleId" xml:space="preserve">
     <value>ID de Apple</value>

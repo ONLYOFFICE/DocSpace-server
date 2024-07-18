@@ -380,7 +380,7 @@
     <value>Administratoru skaits nedrīkst pārsniegt {0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Administratoru skaits</value>
+    <value>Administratoru/prasmīgo lietotāju skaits</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Automātiska dublēšana un atkopšana</value>
@@ -972,9 +972,6 @@
   </data>
   <data name="TariffsFeature_thirdparty" xml:space="preserve">
     <value>Trešo pušu integrācija</value>
-  </data>
-  <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Administratoru/prasmīgo lietotāju skaits:</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>Nepareizs kods</value>

@@ -419,7 +419,7 @@
     <value>管理员的数量不应超过{0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>管理员的数量</value>
+    <value>管理员/高级用户数量</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>自动备份与恢复</value>
@@ -465,9 +465,6 @@
   </data>
   <data name="TariffsFeature_whitelabel" xml:space="preserve">
     <value>品牌化&amp;个性定制</value>
-  </data>
-  <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>管理员/高级用户数量:</value>
   </data>
   <data name="ConsumersBitly" xml:space="preserve">
     <value>比特利</value>

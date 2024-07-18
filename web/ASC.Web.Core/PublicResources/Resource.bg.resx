@@ -437,7 +437,7 @@
     <value>Броят администратори не трябва да надвишава {0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Брой администратори</value>
+    <value>Брой администратори/опитни потребители</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Автоматичен бекъп и възстановяване</value>
@@ -480,9 +480,6 @@
   </data>
   <data name="TariffsFeature_whitelabel" xml:space="preserve">
     <value>Брандинг и персонализиране</value>
-  </data>
-  <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Брой администратори/опитни потребители:</value>
   </data>
   <data name="ConsumersBitly" xml:space="preserve">
     <value>Bitly</value>

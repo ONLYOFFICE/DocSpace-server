@@ -281,7 +281,7 @@
     <value>Število skrbnikov ne sme presegati {0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Število skrbnikov</value>
+    <value>Število skrbnikov/naprednih uporabnikov</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Samodejno varnostno kopiranje &amp; obnovitev</value>
@@ -324,9 +324,6 @@
   </data>
   <data name="TariffsFeature_whitelabel" xml:space="preserve">
     <value>Blagovna znamka &amp; prilagoditve</value>
-  </data>
-  <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Število skrbnikov/naprednih uporabnikov:</value>
   </data>
   <data name="ConsumersBox" xml:space="preserve">
     <value>Box</value>

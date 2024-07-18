@@ -848,7 +848,7 @@
     <value>Die Anzahl der Admins sollte {0} nicht überschreiten</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Anzahl der Administratoren</value>
+    <value>Die Anzahl der Admins/Power-User</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Automatische Sicherung &amp; Wiederherstellung</value>
@@ -888,9 +888,6 @@
   </data>
   <data name="TariffsFeature_usersInRoom_exception" xml:space="preserve">
     <value>Die Anzahl der Benutzer im Raum sollte {0} nicht überschreiten</value>
-  </data>
-  <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Die Anzahl der Admins/Power-User:</value>
   </data>
   <data name="ConsumersAppleId" xml:space="preserve">
     <value>Apple ID</value>

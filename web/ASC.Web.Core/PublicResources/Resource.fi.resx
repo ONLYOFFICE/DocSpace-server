@@ -296,7 +296,7 @@
     <value>Ylläpitäjien määrä ei saisi ylittää {0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Ylläpitäjien määrä</value>
+    <value>Järjestelmänvalvojien/tehokäyttäjien määrä</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Automaattinen varmuuskopiointi &amp; palautus</value>
@@ -501,9 +501,6 @@
   </data>
   <data name="ConsumersMailruClientId" xml:space="preserve">
     <value>ID</value>
-  </data>
-  <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Järjestelmänvalvojien/tehokäyttäjien määrä:</value>
   </data>
   <data name="LdapSettingsTenantQuotaSettled" xml:space="preserve">
     <value>Nykyisen hinnoitteluohjelman käyttäjäraja on saavutettu</value>
