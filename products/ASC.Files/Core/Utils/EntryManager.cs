@@ -1463,7 +1463,11 @@ public class EntryManager(IDaoFactory daoFactory,
                             await InitFormFillingFolders(file, room, properties, folderDao, fileDao);
                         }
                         var pdfFile = serviceProvider.GetService<File<T>>();
-                        pdfFile.Title = $"{properties.FormFilling.ResultFormNumber + 1} - {file.Title}";
+
+                        var ext = FileUtility.GetFileExtension(file.Title);
+                        var sourceTitle = Path.GetFileNameWithoutExtension(file.Title);
+
+                        pdfFile.Title = $"{properties.FormFilling.ResultFormNumber + 1} - {sourceTitle} ({$"{tenantUtil.DateTimeNow().ToString("dd-MM-yyyy H-mm")}"}){ext}";
                         pdfFile.ParentId = (T)Convert.ChangeType(properties.FormFilling.ResultsFolderId, typeof(T));
                         pdfFile.Comment = string.IsNullOrEmpty(comment) ? null : comment;
                         pdfFile.Category = (int)FilterType.Pdf;
