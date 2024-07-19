@@ -179,12 +179,12 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     {
         if (inDto.DestFolderId.ValueKind == JsonValueKind.Number)
         {
-            return await filesControllerHelper.CopyFileAsAsync(fileId, inDto.DestFolderId.GetInt32(), inDto.DestTitle, inDto.Password);
+            return await filesControllerHelper.CopyFileAsAsync(fileId, inDto.DestFolderId.GetInt32(), inDto.DestTitle, inDto.Password, inDto.ToForm);
         }
 
         if (inDto.DestFolderId.ValueKind == JsonValueKind.String)
         {
-            return await filesControllerHelper.CopyFileAsAsync(fileId, inDto.DestFolderId.GetString(), inDto.DestTitle, inDto.Password);
+            return await filesControllerHelper.CopyFileAsAsync(fileId, inDto.DestFolderId.GetString(), inDto.DestTitle, inDto.Password, inDto.ToForm);
         }
 
         return null;

@@ -333,7 +333,7 @@ public class FileConverter(
         return ExecAsync(file, fileUtility.GetInternalExtension(file.Title));
     }
 
-    public async Task<Stream> ExecAsync<T>(File<T> file, string toExtension, string password = null)
+    public async Task<Stream> ExecAsync<T>(File<T> file, string toExtension, string password = null, bool toForm = false)
     {
         if (!await EnableConvertAsync(file, toExtension))
         {
@@ -346,7 +346,7 @@ public class FileConverter(
         fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(fileUri);
 
         var uriTuple = await documentServiceConnector.GetConvertedUriAsync(fileUri, file.ConvertedExtension, toExtension, docKey, password, 
-            CultureInfo.CurrentUICulture.Name, null, null, false);
+            CultureInfo.CurrentUICulture.Name, null, null, false, toForm);
         var convertUri = uriTuple.ConvertedDocumentUri;
         var request = new HttpRequestMessage
         {
@@ -377,7 +377,7 @@ public class FileConverter(
         fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(fileUri);
 
         var (_, convertUri, convertType) = await documentServiceConnector.GetConvertedUriAsync(fileUri, fileExtension, toExtension, docKey, 
-            null, CultureInfo.CurrentUICulture.Name, null, null, false);
+            null, CultureInfo.CurrentUICulture.Name, null, null, false, false);
 
         var operationResult = new FileConverterOperationResult
         {

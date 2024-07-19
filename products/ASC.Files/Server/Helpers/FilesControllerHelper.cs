@@ -269,7 +269,7 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         }
     }
 
-    public async Task<FileDto<TTemplate>> CopyFileAsAsync<T, TTemplate>(T fileId, TTemplate destFolderId, string destTitle, string password = null)
+    public async Task<FileDto<TTemplate>> CopyFileAsAsync<T, TTemplate>(T fileId, TTemplate destFolderId, string destTitle, string password = null, bool toForm = false)
     {
         var service = serviceProvider.GetService<FileStorageService>();
         var file = await _fileStorageService.GetFileAsync(fileId, -1);
@@ -283,7 +283,7 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
             return await _fileDtoHelper.GetAsync(newFile);
         }
 
-        await using var fileStream = await fileConverter.ExecAsync(file, destExt, password);
+        await using var fileStream = await fileConverter.ExecAsync(file, destExt, password, toForm);
         var controller = serviceProvider.GetService<FilesControllerHelper>();
         return await controller.InsertFileAsync(destFolderId, fileStream, destTitle, true);
     }
