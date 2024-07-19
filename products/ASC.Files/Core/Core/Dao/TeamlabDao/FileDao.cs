@@ -437,7 +437,8 @@ internal class FileDao(
 
             var isNew = false;
             DbFile toInsert = null;
-
+            var cloneStreamForSave = new MemoryStream();
+            var streamChange = false;
             await using (var filesDbContext = await _dbContextFactory.CreateDbContextAsync())
             {
                 var parentFolders = await filesDbContext.DbFolderTreesAsync(file.ParentId).ToListAsync();
@@ -493,7 +494,8 @@ internal class FileDao(
                             await fileStream.CopyToAsync(originalCopyStream);
 
                             var cloneStreamForCheck = await tempStream.CloneMemoryStream(originalCopyStream, 300);
-
+                            cloneStreamForSave = await tempStream.CloneMemoryStream(originalCopyStream);
+                            streamChange = true;
                             try
                             {
                                 if (await fileChecker.CheckExtendedPDFstream(cloneStreamForCheck))
@@ -581,7 +583,7 @@ internal class FileDao(
 
                             if (file.IsForm || (extension == ".csv" && fileProp?.FormFilling.ResultsFolderId == file.ParentId.ToString()))
                             {
-                                await SaveFileStreamAsync(file, fileStream, currentFolder);
+                                await SaveFileStreamAsync(file, streamChange ? cloneStreamForSave : fileStream, currentFolder);
 
                                 var properties = fileProp ?? new EntryProperties() { FormFilling = new FormFillingProperties() };
                                 if (!properties.FormFilling.CollectFillForm)
@@ -600,12 +602,12 @@ internal class FileDao(
                         }
                         else
                         {
-                            await SaveFileStreamAsync(file, fileStream, currentFolder);
+                            await SaveFileStreamAsync(file, streamChange ? cloneStreamForSave : fileStream, currentFolder);
                         }
                     }
                     else
                     {
-                        await SaveFileStreamAsync(file, fileStream, currentFolder);
+                        await SaveFileStreamAsync(file, streamChange ? cloneStreamForSave : fileStream, currentFolder);
                     }
                 }
                 catch (Exception saveException)
@@ -627,6 +629,10 @@ internal class FileDao(
                         throw new Exception(saveException.Message, deleteException);
                     }
                     throw;
+                }
+                finally
+                {
+                    cloneStreamForSave.Dispose();
                 }
             }
             else
