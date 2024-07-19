@@ -296,7 +296,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
             }
         }
 
-        var result = await configurationConverter.Convert(configuration, file);
+        var result = await configurationConverter.Convert(configuration, file, fillingSessionId);
         
         if (authContext.IsAuthenticated && !file.Encrypted && !file.ProviderEntry 
             && result.File.Security.TryGetValue(FileSecurity.FilesSecurityActions.Read, out var canRead) && canRead)
@@ -321,7 +321,6 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
         if (!string.IsNullOrEmpty(fillingSessionId))
         {
             result.FillingSessionId = fillingSessionId;
-            result.EditorConfig.CallbackUrl = QueryHelpers.AddQueryString(result.EditorConfig.CallbackUrl, FilesLinkUtility.FillingSessionId, fillingSessionId);
         }
        
         return result;

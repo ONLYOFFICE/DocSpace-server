@@ -1425,10 +1425,6 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             throw new HttpException((int)HttpStatusCode.Forbidden, FilesCommonResource.ErrorMessage_SecurityException);
         }
         var fillingSessionId = context.Request.Query[FilesLinkUtility.FillingSessionId];
-        logger.Error("======================");
-        logger.Error("FilesLinkUtility.FillingSessionId = "+ context.Request.Query[FilesLinkUtility.FillingSessionId]);
-        logger.Error("context.Request = " + context.Request.QueryString);
-        logger.Error("======================");
         TrackerData fileData;
         try
         {
