@@ -314,7 +314,9 @@ public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
 }
 
 [Scope]
-public class TenantWhiteLabelSettingsHelper(WebImageSupplier webImageSupplier,
+public class TenantWhiteLabelSettingsHelper(
+    IHttpContextAccessor httpContextAccessor,
+    WebImageSupplier webImageSupplier,
     UserPhotoManager userPhotoManager,
     StorageFactory storageFactory,
     WhiteLabelHelper whiteLabelHelper,
@@ -618,10 +620,12 @@ public class TenantWhiteLabelSettingsHelper(WebImageSupplier webImageSupplier,
             _ => "svg"
         };
 
+        var regionalPath = await GetCustomRegionalPath();
+
         var path = type switch
         {
             WhiteLabelLogoType.Notification => "notifications/",
-            _ => "logo/"
+            _ => $"logo/{regionalPath}"
         };
 
         var fileName = BuildLogoFileName(type, ext, dark);
@@ -652,6 +656,27 @@ public class TenantWhiteLabelSettingsHelper(WebImageSupplier webImageSupplier,
         var logoPath = BuildLogoFileName(type, partnerSettings.GetExt(type, dark), dark);
 
         return (await partnerStorage.IsFileAsync(logoPath)) ? (await partnerStorage.GetUrlWithHashAsync(string.Empty, logoPath)) : null;
+    }
+
+    private async Task<string> GetCustomRegionalPath()
+    {
+        var customCultures = (configuration["web:logo:custom-cultures"] ?? "").Split(',', ';', ' ');
+
+        if (customCultures.Length == 0)
+        {
+            return string.Empty;
+        }
+
+        var language = string.Empty;
+
+        _ = httpContextAccessor?.HttpContext?.Request?.Cookies.TryGetValue("asc_language", out language);
+
+        if (string.IsNullOrEmpty(language))
+        {
+            language = (await tenantManager.GetCurrentTenantAsync()).Language;
+        }
+
+        return customCultures.Contains(language, StringComparer.InvariantCultureIgnoreCase) ? $"{language.ToLower()}/" : string.Empty;
     }
 
     #endregion
