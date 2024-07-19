@@ -2997,7 +2997,7 @@ public class FileStorageService //: IFileStorageService
 
             fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(fileUri);
 
-            var (_, convertedDocumentUri, _) = await documentServiceConnector.GetConvertedUriAsync(fileUri, fileExtension, "pdf", docKey, null, CultureInfo.CurrentUICulture.Name, null, null, false);
+            var (_, convertedDocumentUri, _) = await documentServiceConnector.GetConvertedUriAsync(fileUri, fileExtension, "pdf", docKey, null, CultureInfo.CurrentUICulture.Name, null, null, false, false);
 
             var pdfFile = serviceProvider.GetService<File<T>>();
             pdfFile.Title = !string.IsNullOrEmpty(title) ? $"{title}.pdf" : FileUtility.ReplaceFileExtension(file.Title, "pdf");

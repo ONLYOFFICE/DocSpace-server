@@ -51,7 +51,8 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
                                       string region,
                                       ThumbnailData thumbnail,
                                       SpreadsheetLayout spreadsheetLayout,
-                                      bool isAsync)
+                                      bool isAsync,
+                                      bool toForm)
     {
         logger.DebugDocServiceConvert(fromExtension, toExtension, documentUri, filesLinkUtility.DocServiceConverterUrl);
         try
@@ -69,7 +70,8 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
                 spreadsheetLayout,
                 isAsync,
                 fileUtility.SignatureSecret,
-                clientFactory);
+                clientFactory,
+                toForm);
         }
         catch (Exception ex)
         {
@@ -249,7 +251,7 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
                 var fileUri = await ReplaceCommunityAddressAsync(url);
 
                 var key = GenerateRevisionId(Guid.NewGuid().ToString());
-                var uriTuple = await ASC.Files.Core.Helpers.DocumentService.GetConvertedUriAsync(fileUtility, filesLinkUtility.DocServiceConverterUrl, fileUri, fileExtension, toExtension, key, null, null, null, null, false, fileUtility.SignatureSecret, clientFactory);
+                var uriTuple = await ASC.Files.Core.Helpers.DocumentService.GetConvertedUriAsync(fileUtility, filesLinkUtility.DocServiceConverterUrl, fileUri, fileExtension, toExtension, key, null, null, null, null, false, fileUtility.SignatureSecret, clientFactory, false);
                 convertedFileUri = uriTuple.ConvertedDocumentUri;
             }
             catch (Exception ex)
