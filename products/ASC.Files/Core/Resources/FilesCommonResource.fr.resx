@@ -476,4 +476,22 @@ Compatibilité maximale avec docx, xlsx, pptx.</value>
   <data name="User" xml:space="preserve">
     <value>Utilisateur</value>
   </data>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>Il n'est pas possible de déplacer plusieurs fichiers vers la salle de remplissage des formulaires. Déplacez un seul formulaire PDF ONLYOFFICE à la fois.</value>
+  </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>Le déplacement de dossiers vers la salle de remplissage des formulaires n'est pas possible. Déplacez un seul formulaire PDF ONLYOFFICE à la fois.</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>Le fichier ne peut pas être déplacé dans cette salle. Veuillez essayer de déplacer le formulaire PDF ONLYOFFICE.</value>
+  </data>
+  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
+    <value>Le fichier ne peut pas être téléchargé dans cette salle. Veuillez essayer de télécharger le formulaire PDF ONLYOFFICE.</value>
+  </data>
+  <data name="FillOutExternalLinkTitle" xml:space="preserve">
+    <value>Lien pour remplir</value>
+  </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>Lien vers le formulaire</value>
+  </data>
 </root>

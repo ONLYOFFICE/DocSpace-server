@@ -1036,4 +1036,7 @@
   <data name="UserFreeSpaceException" xml:space="preserve">
     <value>Квотата за потребителс пространство е надвишена</value>
   </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>Добавени са Администратори/Опитни потребители:</value>
+  </data>
 </root>

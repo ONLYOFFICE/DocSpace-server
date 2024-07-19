@@ -1036,4 +1036,7 @@
   <data name="ErrorWebPluginToManyInputFiles" xml:space="preserve">
     <value>Para muitos arquivos de entrada</value>
   </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>Dodani skrbniki/Super uporabniki:</value>
+  </data>
 </root>

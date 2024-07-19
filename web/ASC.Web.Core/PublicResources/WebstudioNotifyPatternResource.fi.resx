@@ -1701,4 +1701,38 @@ Tämänhetkinen tilauksesi on STARTUP. Se on täysin ilmainen ja sisältää:
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_migration_personal_to_docspace" xml:space="preserve">
+    <value>Hei!
+
+Tietojen siirto ONLYOFFICE Personalista uuteen ONLYOFFICE DocSpaceen on onnistuneesti suoritettu. Klikkaa alla olevaa painiketta päästäksesi päivitettyyn DocSpaceen: $OrangeButton
+
+Nykyinen DocSpace-tilauksesi on STARTUP. Se on täysin ilmainen. 
+
+=== Tarvittaessa voit muuttaa uuden DocSpacesi nimen. Klikkaa Asetukset -&gt; Mukauttaminen -&gt; DocSpacen nimeäminen uudelleen ==
+
+Nauti uudesta tavasta tehdä yhteistyötä asiakirjoin!
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_rooms_activity" xml:space="preserve">
+    <value>h1.Uutta DocSpacessa "${__VirtualRootPath}":"${__VirtualRootPath}" viimeisen tunnin aikana
+
+#foreach($activity in $Activities)
+$activity
+
+#end</value>
+  </data>
+  <data name="pattern_saas_docspace_registration" xml:space="preserve">
+    <value>h1.ONLYOFFICE DocSpace: viimeistele rekisteröinti
+
+
+Hei,
+
+Sinut on kutsuttu viimeistelemään rekisteröinti ONLYOFFICE DocSpaceen "${__VirtualRootPath}":"${__VirtualRootPath}".
+Syötä nimesi ja aseta salasana klikkaamalla linkkiä:
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
 </root>

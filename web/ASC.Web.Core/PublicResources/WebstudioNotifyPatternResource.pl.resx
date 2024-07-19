@@ -1700,4 +1700,41 @@ Twój bieżący plan cenowy to STARTUP. Jest absolutnie darmowy i obejmuje:
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_migration_personal_to_docspace" xml:space="preserve">
+    <value>Witaj!
+
+Proces migracji danych z ONLYOFFICE Personal do nowego obszaru roboczego ONLYOFFICE DocSpace został pomyślnie zakończony.
+
+Aby uzyskać dostęp do obszaru z zaimportowanymi danymi, wystarczy kliknąć poniższy przycisk:
+
+$OrangeButton
+
+Twój bieżący plan DocSpace to STARTUP. Jest absolutnie darmowy.
+
+==W razie potrzeby możesz zmienić nazwę nowego DocSpace. Wystarczy przejść do sekcji Ustawienia -&gt; Dostosowywanie -&gt; Zmiana nazwy DocSpace.==
+
+Ciesz się nowym sposobem współpracy nad dokumentami!
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_rooms_activity" xml:space="preserve">
+    <value>h1.Oto co nowego w Twoim DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}"w ciągu ostatniej godziny
+
+#foreach($activity in $Activities)
+$activity
+
+#end</value>
+  </data>
+  <data name="pattern_saas_docspace_registration" xml:space="preserve">
+    <value>h1. ONLYOFFICE DocSpace: zakończ rejestrację
+
+
+Witaj!
+
+Zapraszamy Cię do ukończenia rejestracji w ONLYOFFICE DocSpace pod adresem "${__VirtualRootPath}":"${__VirtualRootPath}". Wpisz swoje imię i ustaw hasło, klikając link:
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
 </root>

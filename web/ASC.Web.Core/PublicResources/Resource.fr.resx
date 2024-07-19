@@ -1048,4 +1048,10 @@
   <data name="ErrorUserDisabled" xml:space="preserve">
     <value>Utilisateur désactivé</value>
   </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>La limite d'invitation est dépassée</value>
+  </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>L'instruction de changement de mot de passe a été envoyée à l'adresse e-mail {0}.</value>
+  </data>
 </root>

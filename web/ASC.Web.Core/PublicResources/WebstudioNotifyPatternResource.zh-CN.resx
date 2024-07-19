@@ -110,19 +110,6 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_change_password" xml:space="preserve">
-    <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" 门户密码变更请求
-
-有一个变更您进入 "${__VirtualRootPath}":"${__VirtualRootPath}" 门户所使用密码的请求。
-
-请使用下面的链接，以变更密码:
-
-$OrangeButton
-
-*注意*：此链接仅7天有效。请在此期限内完成密码变更过程。
-
-如果您不想更改密码或错误收到此电子邮件，请忽略它或与您 "${__VirtualRootPath}":"${__VirtualRootPath}" 的门户管理员联系，以了解详情。</value>
-  </data>
   <data name="pattern_change_phone" xml:space="preserve">
     <value>h1.手机号码修改请求
 
@@ -1718,6 +1705,44 @@ $TrulyYours</value>
     <value>你好！
 
 $__AuthorName 邀请您加入"${__VirtualRootPath}":"${__VirtualRootPath}"的"$Message":"$InviteLink"房间。
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_migration_personal_to_docspace" xml:space="preserve">
+    <value>您好！
+
+从 ONLYOFFICE 个人版到您的新 ONLYOFFICE 协作空间的数据迁移过程已成功完成。
+
+要使用导入的数据访问您的协作空间，只需单击下面的按钮：
+
+$OrangeButton
+
+您当前的协作空间计划是初创版。它完全免费。
+
+==如有必要，您可以更改新协作空间的名称。只需切换到设置 -&gt; 自定义 -&gt; 协作空间重命名。==
+
+享受一种新的文档协作方式！
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_rooms_activity" xml:space="preserve">
+    <value>h1.以下是过去一小时内协作空间"${__VirtualRootPath}":"${__VirtualRootPath}" 中的新内容
+
+#foreach($activity in $Activities)
+$activity
+
+#end</value>
+  </data>
+  <data name="pattern_saas_docspace_registration" xml:space="preserve">
+    <value>h1. ONLYOFFICE 协作空间：完成注册
+
+
+您好！
+
+邀请您在“${__VirtualRootPath}”完成 ONLYOFFICE 协作空间的注册：“${__VirtualRootPath}”。点击链接输入您的姓名并设置密码：
+
 
 $OrangeButton
 

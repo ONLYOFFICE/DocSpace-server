@@ -1768,4 +1768,39 @@ Seu plano tarifário atual é STARTUP. É totalmente gratuito e inclui:
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_migration_personal_to_docspace" xml:space="preserve">
+    <value>Olá!
+
+O processo de migração de dados do ONLYOFFICE Personal para o seu novo ONLYOFFICE DocSpace foi concluído com êxito.
+
+Para acessar seu DocSpace com os dados importados, basta clicar no botão abaixo:
+
+$OrangeButton
+
+Seu plano DocSpace atual é STARTUP. É totalmente gratuito.
+
+==Se necessário, você pode alterar o nome do seu novo DocSpace. Basta mudar para Configurações -&gt; Personalização -&gt; Renomeação do DocSpace.== Desfrute de uma nova forma de colaboração de documentos!
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_rooms_activity" xml:space="preserve">
+    <value>h1.Aqui estão as novidades em seu DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" na última hora
+
+#foreach($activity em $Activities)
+$activity
+
+#end</value>
+  </data>
+  <data name="pattern_saas_docspace_registration" xml:space="preserve">
+    <value>h1. ONLYOFFICE DocSpace: registro completo
+
+
+Olá!
+
+Você está convidado a concluir o registro no ONLYOFFICE DocSpace em "${__VirtualRootPath}":"${__VirtualRootPath}". Digite seu nome e defina uma senha clicando no link:
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
 </root>

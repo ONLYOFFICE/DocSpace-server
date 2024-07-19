@@ -1036,4 +1036,7 @@
   <data name="UserFreeSpaceException" xml:space="preserve">
     <value>Cota de espaço do usuário excedida</value>
   </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>Administradores/usuários avançados adicionados:</value>
+  </data>
 </root>

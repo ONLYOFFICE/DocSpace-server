@@ -1095,4 +1095,7 @@
   <data name="WhatsNewSubscriptionName" xml:space="preserve">
     <value>Šta je novo</value>
   </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>Administratori/Napredni korisnici dodati:</value>
+  </data>
 </root>

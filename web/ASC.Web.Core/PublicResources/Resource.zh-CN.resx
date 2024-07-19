@@ -343,9 +343,6 @@
   <data name="Owner" xml:space="preserve">
     <value>创建者</value>
   </data>
-  <data name="PersonalFreeSpaceException" xml:space="preserve">
-    <value>超过磁盘空间配额</value>
-  </data>
   <data name="PortalSecurity" xml:space="preserve">
     <value>门户访问</value>
   </data>
@@ -1047,5 +1044,8 @@
   </data>
   <data name="ErrorUserDisabled" xml:space="preserve">
     <value>禁用用户</value>
+  </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>管理员/高级用户已添加：</value>
   </data>
 </root>

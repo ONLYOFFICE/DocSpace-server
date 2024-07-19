@@ -1036,4 +1036,7 @@
   <data name="UserFreeSpaceException" xml:space="preserve">
     <value>Przekroczono limit pamięci użytkownika</value>
   </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>Dodani administratorzy/użytkownicy z większą liczbą uprawnień:</value>
+  </data>
 </root>

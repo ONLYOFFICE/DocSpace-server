@@ -1036,4 +1036,7 @@
   <data name="UserFreeSpaceException" xml:space="preserve">
     <value>Käyttäjätilakiintiö ylitetty</value>
   </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>Pääkäyttäjät/Tehokäyttäjät lisätty:</value>
+  </data>
 </root>

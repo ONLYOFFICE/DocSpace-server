@@ -1768,4 +1768,61 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_migration_personal_to_docspace" xml:space="preserve">
+    <value>Ողջու՜ն
+
+Տվյալների տեղափոխման գործընթացը ONLYOFFICE Personal-ից դեպի ձեր նոր ONLYOFFICE DocSpace բարեհաջող ավարտված է:
+
+Ներմուծված տվյալների հետ ձեր DocSpace մուտք գործելու համար պարզապես սեղմեք ստորև նշված կոճակը.
+
+$OrangeButton
+
+Ձեր ընթացիկ DocSpace պլանը STARTUP-ն է: Այն բացարձակապես անվճար է:
+
+== Անհրաժեշտության դեպքում կարող եք փոխել ձեր նոր DocSpace-ի անունը: Պարզապես անցեք Կարգավորումներ -&gt; Հարմարեցում -&gt; DocSpace-ի վերանվանում:==
+
+Վայելեք փաստաթղթերի համագործակցության նոր եղանակը:
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_rooms_activity" xml:space="preserve">
+    <value>h1.Ահա թե ինչ նորություն կա ձեր DocSpace-ում "${__VirtualRootPath}":"${__VirtualRootPath}" վերջին մեկ ժամվա ընթացքում 
+
+#foreach($activity in $Activities)
+$activity
+
+#end</value>
+  </data>
+  <data name="pattern_saas_admin_integrations_v1" xml:space="preserve">
+    <value>Ուսումնասիրեք օգտակար ինտեգրումները ONLYOFFICE DocSpace-ի համար
+
+Բարեւ Ձեզ։ Մենք ձեզ համար պատրաստել ենք DocSpace-ի պատրաստի ինտեգրումները այս տեղեկագրում: Փորձեք հիմա և բարձրացրեք ձեր արտադրողականությունը:
+
+Համագործակցեք ցանկացած բովանդակության վրա Zoom Meetings ընթացքում այլ մասնակիցների հետ: Արդյունավետ կառավարեք ձեր փաստաթղթերը հանդիպումների միջև։ Իմանալ ավելին՝ 
+$OrangeButton1
+
+Ավտոմատացրեք ձեր աշխատանքային հոսքը՝ օգտագործելով zaps DocSpace-ի և տարբեր հավելվածների համար, ինչպիսիք են Asana, Slack, HubSpot, Discord, Linear և այլն: Իմանալ ավելին`
+$OrangeButton2
+
+Տեղադրեք փաստաթղթերը և սենյակները ձեր կայքում՝ թույլ տալով այցելուներին դիտել ֆայլերը առանց ներբեռնելու: Կառավարեք գրասենյակային փաստաթղթերը DocSpace-ի միջոցով: Իմանալ ավելին՝
+$OrangeButton3
+
+Գրասենյակային փաստաթղթերը հեշտությամբ հասանելի դարձրեք ձեր կայքի այցելուներին և կառավարեք ֆայլերը DocSpace-ի միջոցով:
+Իմանալ ավելին՝
+$OrangeButton4
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_docspace_registration" xml:space="preserve">
+    <value>h1. ONLYOFFICE DocSpace՝ ամբողջական գրանցում
+
+
+Ողջու՜յն
+
+Դուք հրավիրված եք լրացնել գրանցումը ONLYOFFICE DocSpace-ում"${__VirtualRootPath}":"${__VirtualRootPath}". Մուտքագրեք ձեր անունը և գաղտնաբառ սահմանեք, սեղմելով հղման վրա՝
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
 </root>

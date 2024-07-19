@@ -1045,4 +1045,13 @@
   <data name="ErrorUserDisabled" xml:space="preserve">
     <value>Benutzer deaktiviert</value>
   </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>Administratoren/Power-User hinzugefügt:</value>
+  </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>Einladungsgrenze ist überschritten</value>
+  </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>Die Anweisung zur Passwortänderung wurde an die E-Mail-Adresse {0} gesendet.</value>
+  </data>
 </root>

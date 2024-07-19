@@ -1701,4 +1701,41 @@ Uw huidige tariefplan is STARTUP. Het is helemaal gratis en bestaat uit:
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_migration_personal_to_docspace" xml:space="preserve">
+    <value>Hallo!
+
+De gegevensmigratie van ONLYOFFICE Personal naar uw nieuwe ONLYOFFICE DocSpace is succesvol afgerond.
+
+Klik op de knop hieronder om toegang te krijgen tot uw DocSpace met de geïmporteerde gegevens:
+
+$OrangeButton
+
+Uw huidige DocSpace abonnement is STARTUP. Het is helemaal gratis.
+
+==Als het nodig is, kunt u de naam van uw nieuwe DocSpace wijzigen. Ga naar Instellingen -&gt; Aanpassing -&gt; DocSpace Hernoemen.==
+
+Beleef een nieuwe manier van samenwerken aan documenten!
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_rooms_activity" xml:space="preserve">
+    <value>h1.Dit is wat er nieuw is in uw DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" in het laatste uur
+
+#foreach($activity in $Activities)
+$activity
+
+#end</value>
+  </data>
+  <data name="pattern_saas_docspace_registration" xml:space="preserve">
+    <value>h1. ONLYOFFICE DocSpace: registratie voltooien
+
+
+Hallo!
+
+U bent uitgenodigd om de registratie voor ONLYOFFICE DocSpace te voltooien op "${__VirtualRootPath}":"${__VirtualRootPath}". Voer uw naam in en stel een wachtwoord in door op de link te klikken:
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
 </root>

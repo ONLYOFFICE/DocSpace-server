@@ -1036,4 +1036,7 @@
   <data name="UserFreeSpaceException" xml:space="preserve">
     <value>Gebruikersruimte quota overschreden</value>
   </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>Beheerders/Power users toegevoegd:</value>
+  </data>
 </root>

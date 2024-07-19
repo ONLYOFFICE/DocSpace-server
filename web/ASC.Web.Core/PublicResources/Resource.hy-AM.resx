@@ -1104,4 +1104,7 @@
   <data name="ErrorUserDisabled" xml:space="preserve">
     <value>Օգտատերն անջատված է</value>
   </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>Ադմիններ/Հզոր օգտվողներ ավելացվել են՝</value>
+  </data>
 </root>

@@ -1700,4 +1700,41 @@ $TrulyYours</value>
   <data name="subject_zoom_welcome" xml:space="preserve">
     <value>Vítejte v ONLYOFFICE DocSpace!</value>
   </data>
+  <data name="pattern_migration_personal_to_docspace" xml:space="preserve">
+    <value>Dobrý den!
+
+Proces migrace dat z osobního prosotru ONLYOFFICE Personal do vašeho nového prostoru ONLYOFFICE DocSpace byl úspěšně dokončen.
+
+Chcete-li získat přístup do svého prostoru DocSpace s importovanými daty, stačí kliknout na tlačítko níže:
+
+$OrangeButton
+
+Aktuálně využíváte plán DocSpace STARTUP. Je zcela zdarma.
+
+== V případě potřeby můžete změnit název nového prostoru DocSpace. Stačí přepnout do Nastavení -&gt; Přizpůsobení -&gt; Přejmenování prostoru DocSpace.==
+
+Užijte si nový způsob spolupráce na dokumentech!
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_rooms_activity" xml:space="preserve">
+    <value>h1.Zde jsou novinky ve vašem DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" za poslední hodinu.
+
+#foreach($activity in $Activities)
+$activity
+
+#end</value>
+  </data>
+  <data name="pattern_saas_docspace_registration" xml:space="preserve">
+    <value>h1. ONLYOFFICE DocSpace: dokončená registrace
+
+
+Dobrý den!
+
+Vyzýváme vás k dokončení registrace pro ONLYOFFICE DocSpace na adrese "${__VirtualRootPath}":"${__VirtualRootPath}". Kliknutím na odkaz zadejte své jméno a nastavte heslo:
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
 </root>

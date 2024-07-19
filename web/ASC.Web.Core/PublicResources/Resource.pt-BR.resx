@@ -1045,4 +1045,13 @@
   <data name="ErrorUserDisabled" xml:space="preserve">
     <value>Usuário desativado</value>
   </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>Administradores/usuários avançados adicionados:</value>
+  </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>O limite de convites foi excedido</value>
+  </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>A instrução de alteração de senha foi enviada para o endereço de e-mail {0}.</value>
+  </data>
 </root>
