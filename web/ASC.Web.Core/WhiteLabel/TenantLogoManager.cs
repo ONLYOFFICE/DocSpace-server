@@ -205,7 +205,7 @@ public class TenantLogoManager(
     {
         var customCultures = GetLogoCustomCultures();
 
-        foreach(var customCulture in customCultures)
+        foreach (var customCulture in customCultures)
         {
             await distributedCache.RemoveAsync(await GetCacheKey(customCulture));
         }
@@ -264,9 +264,9 @@ public class TenantLogoManager(
         return null;
     }
 
-    private IEnumerable<string> GetLogoCustomCultures()
+    private string[] GetLogoCustomCultures()
     {
-        return (configuration["web:logo:custom-cultures"] ?? "").Split(',', ';', ' ');
+        return configuration.GetSection("web:logo:custom-cultures").Get<string[]>() ?? [];
     }
 
     private string GetLogoRegionalPath(string culture)

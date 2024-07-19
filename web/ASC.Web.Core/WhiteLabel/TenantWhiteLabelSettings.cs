@@ -661,7 +661,7 @@ public class TenantWhiteLabelSettingsHelper(
 
     private async Task<string> GetCustomRegionalPath()
     {
-        var customCultures = (configuration["web:logo:custom-cultures"] ?? "").Split(',', ';', ' ');
+        var customCultures = configuration.GetSection("web:logo:custom-cultures").Get<string[]>() ?? [];
 
         if (customCultures.Length == 0)
         {
