@@ -45,4 +45,8 @@ public class CopyAsRequestDto<T>
     /// <summary>Password</summary>
     /// <type>System.String, System</type>
     public string Password { get; set; }
+
+    /// <summary>Convert to form</summary>
+    /// <type>System.Boolean, System</type>
+    public bool ToForm { get; set; }
 }

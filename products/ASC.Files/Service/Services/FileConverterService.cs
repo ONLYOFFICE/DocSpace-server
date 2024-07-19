@@ -110,7 +110,7 @@ internal class FileConverterService<T>(
                     var docKey = await documentServiceHelper.GetDocKeyAsync(file);
 
                     fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(fileUri);
-                    (operationResultProgress, convertedFileUrl, convertedFileType) = await documentServiceConnector.GetConvertedUriAsync(fileUri, fileExtension, toExtension, docKey, password, CultureInfo.CurrentUICulture.Name, null, null, true);
+                    (operationResultProgress, convertedFileUrl, convertedFileType) = await documentServiceConnector.GetConvertedUriAsync(fileUri, fileExtension, toExtension, docKey, password, CultureInfo.CurrentUICulture.Name, null, null, true, false);
                 }
                 catch (Exception exception)
                 {
