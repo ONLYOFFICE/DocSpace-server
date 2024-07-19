@@ -263,7 +263,8 @@ public class NotifyTransferRequest(TenantManager tenantManager,
 
         try
         {
-            var attachment = await tenantLogoManager.GetMailLogoAsAttachmentAsync();
+            var culture = await request.GetCulture(tenantManager, userManager);
+            var attachment = await tenantLogoManager.GetMailLogoAsAttachmentAsync(culture);
 
             if (attachment != null)
             {
