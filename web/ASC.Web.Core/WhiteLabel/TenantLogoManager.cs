@@ -169,18 +169,20 @@ public class TenantLogoManager(
         /***/
     }
 
-    public async Task<NotifyMessageAttachment> GetMailLogoAsAttachmentAsync()
+    public async Task<NotifyMessageAttachment> GetMailLogoAsAttachmentAsync(CultureInfo cultureInfo)
     {
-        var logoData = await GetMailLogoDataFromCacheAsync();
+        var culture = cultureInfo.Name;
+
+        var logoData = await GetMailLogoDataFromCacheAsync(culture);
 
         if (logoData == null)
         {
             var logoStream = await GetWhitelabelMailLogoAsync();
-            logoData = await ReadStreamToByteArrayAsync(logoStream) ?? await GetDefaultMailLogoAsync();
+            logoData = await ReadStreamToByteArrayAsync(logoStream) ?? await GetDefaultMailLogoAsync(culture);
 
             if (logoData != null)
             {
-                await InsertMailLogoDataToCacheAsync(logoData);
+                await InsertMailLogoDataToCacheAsync(logoData, culture);
             }
         }
 
@@ -201,29 +203,37 @@ public class TenantLogoManager(
 
     public async Task RemoveMailLogoDataFromCacheAsync()
     {
-        await distributedCache.RemoveAsync(await GetCacheKey());
+        var customCultures = GetLogoCustomCultures();
+
+        foreach (var customCulture in customCultures)
+        {
+            await distributedCache.RemoveAsync(await GetCacheKey(customCulture));
+        }
+
+        await distributedCache.RemoveAsync(await GetCacheKey(string.Empty));
     }
 
 
-    private async Task<byte[]> GetMailLogoDataFromCacheAsync()
+    private async Task<byte[]> GetMailLogoDataFromCacheAsync(string culture)
     {
-        return await distributedCache.GetAsync(await GetCacheKey());
+        return await distributedCache.GetAsync(await GetCacheKey(culture));
     }
 
-    private async Task InsertMailLogoDataToCacheAsync(byte[] data)
+    private async Task InsertMailLogoDataToCacheAsync(byte[] data, string culture)
     {
-        await distributedCache.SetAsync(await GetCacheKey(), data, new DistributedCacheEntryOptions
+        await distributedCache.SetAsync(await GetCacheKey(culture), data, new DistributedCacheEntryOptions
         {
             AbsoluteExpiration = DateTime.UtcNow.Add(TimeSpan.FromDays(1))
         });
     }
 
-    private async Task<string> GetCacheKey()
+    private async Task<string> GetCacheKey(string culture)
     {
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
-        return $"letterlogodata{tenantId}";
+        var regionalPath = GetLogoRegionalPath(culture);
+        return $"letterlogodata{tenantId}{regionalPath}";
     }
-    
+
     private static async Task<byte[]> ReadStreamToByteArrayAsync(Stream inputStream)
     {
         if (inputStream == null)
@@ -239,10 +249,11 @@ public class TenantLogoManager(
         }
     }
 
-    private static async Task<byte[]> GetDefaultMailLogoAsync()
+    private async Task<byte[]> GetDefaultMailLogoAsync(string culture)
     {
+        var regionalPath = GetLogoRegionalPath(culture);
         var myAssembly = Assembly.GetExecutingAssembly();
-        await using var stream = myAssembly.GetManifestResourceStream("ASC.Web.Core.PublicResources.logo.png");
+        await using var stream = myAssembly.GetManifestResourceStream($"ASC.Web.Core.PublicResources.logo{regionalPath}.png");
         if (stream != null)
         {
             using var memoryStream = new MemoryStream();
@@ -251,5 +262,19 @@ public class TenantLogoManager(
         }
 
         return null;
+    }
+
+    private string[] GetLogoCustomCultures()
+    {
+        return configuration.GetSection("web:logo:custom-cultures").Get<string[]>() ?? [];
+    }
+
+    private string GetLogoRegionalPath(string culture)
+    {
+        var customCultures = GetLogoCustomCultures();
+
+        return customCultures.Contains(culture, StringComparer.InvariantCultureIgnoreCase)
+            ? culture.ToLower()
+            : string.Empty;
     }
 }
