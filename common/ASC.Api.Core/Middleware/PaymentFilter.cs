@@ -34,7 +34,6 @@ public class PaymentFilter(ILogger<PaymentFilter> logger, TenantExtra tenantExtr
         if (context.ActionDescriptor is ControllerActionDescriptor controllerActionDescriptor
             && controllerActionDescriptor.EndpointMetadata.OfType<AllowNotPaymentAttribute>().Any())
         {
-            logger.DebugPaymentIsNotRequired();
             await next();
             return;
         }

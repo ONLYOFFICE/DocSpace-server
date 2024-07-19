@@ -29,7 +29,7 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 public class ConfigurationDto<T>
 {
     [SwaggerSchemaCustom(Description = "Document config")]
-    public DocumentConfigDto<T> Document { get; set; }
+    public DocumentConfigDto Document { get; set; }
 
     [SwaggerSchemaCustom(Example = "some text", Description = "Document type")]
     public string DocumentType { get; set; }
@@ -175,7 +175,7 @@ public class CustomerConfigDto
     public string Www  { get; set; }
 }
 
-public class DocumentConfigDto<T>
+public class DocumentConfigDto
 {
     [SwaggerSchemaCustom(Example = "some text", Description = "File type")]
     public string FileType  { get; set; }
@@ -199,7 +199,7 @@ public class DocumentConfigDto<T>
     public string SharedLinkKey { get; set; }
 
     [SwaggerSchemaCustom(Description = "Reference data")]
-    public FileReferenceData<T> ReferenceData { get; set; }
+    public FileReferenceData ReferenceData { get; set; }
 
     [SwaggerSchemaCustom(Example = "some text", Description = "Title")]
     public string Title { get; set; }
@@ -407,14 +407,14 @@ public class CustomerConfigConverter
 [Scope(GenericArguments = [typeof(string)])]
 public class DocumentConfigConverter<T>(InfoConfigConverter<T> configConverter)
 {
-    public async Task<DocumentConfigDto<T>> Convert(DocumentConfig<T> source, File<T> file)
+    public async Task<DocumentConfigDto> Convert(DocumentConfig<T> source, File<T> file)
     {        
         if (source == null)
         {
             return null;
         }
         
-        var result = new DocumentConfigDto<T>
+        var result = new DocumentConfigDto
         {
             FileType = source.GetFileType(file),
             Info = await configConverter.Convert(source.Info, file),

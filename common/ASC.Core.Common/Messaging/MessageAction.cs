@@ -146,7 +146,7 @@ public enum MessageAction
 
     FileUploaded = 5011,
     FileImported = 5012,
-    FileUploadedWithOverwriting = 5099, // last
+    FileUploadedWithOverwriting = 5099,
 
     FileCopied = 5013,
     FileCopiedWithOverwriting = 5014,
@@ -203,6 +203,7 @@ public enum MessageAction
     RoomArchived = 5072,
     RoomUnarchived = 5073,
     RoomDeleted = 5074,
+    RoomCopied = 5100, // last
     
     RoomUpdateAccessForUser = 5075,
     RoomRemoveUser = 5084,
@@ -296,6 +297,13 @@ public enum MessageAction
 
     PortalRenamed = 6039,
 
+    QuotaPerRoomChanged = 6040,
+    QuotaPerRoomDisabled = 6041,
+    QuotaPerUserChanged = 6042,
+    QuotaPerUserDisabled = 6043,
+    QuotaPerPortalChanged = 6044,
+    QuotaPerPortalDisabled = 6045,
+    
     DocumentServiceLocationSetting = 5037,
     AuthorizationKeysSetting = 5038,
     FullTextSearchSetting = 5039,

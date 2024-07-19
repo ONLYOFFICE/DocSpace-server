@@ -259,6 +259,38 @@ public class FileOperationsManager(
         }
     }
 
+    public async Task DuplicateAsync(
+        IEnumerable<JsonElement> folderIds,
+        IEnumerable<JsonElement> fileIds)
+    {        
+        
+        if ((folderIds == null || !folderIds.Any()) && (fileIds == null || !fileIds.Any()))
+        {
+            return;
+        }
+        
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var sessionSnapshot = await externalShare.TakeSessionSnapshotAsync();
+        
+        var (folderIntIds, folderStringIds) = GetIds(folderIds);
+        var (fileIntIds, fileStringIds) = GetIds(fileIds);
+        
+        
+        var op = fileOperationsManagerHolder.GetService<FileDuplicateOperation>();
+        op.Init(true);
+        var taskId = await fileOperationsManagerHolder.Publish(op);
+        
+        var data = new FileOperationData<int>(folderIntIds, fileIntIds, tenantId, GetHttpHeaders(), sessionSnapshot); 
+        var thirdPartyData = new FileOperationData<string>(folderStringIds, fileStringIds, tenantId, GetHttpHeaders(), sessionSnapshot);
+        
+        eventBus.Publish(new DuplicateIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
+        {
+            TaskId = taskId,
+            Data = data,
+            ThirdPartyData = thirdPartyData
+        });
+    }
+
     public Task PublishDelete<T>(
         IEnumerable<T> folders, 
         IEnumerable<T> files, 
@@ -346,21 +378,25 @@ public class FileOperationsManager(
 
         foreach (var item in items)
         {
-            if (item.ValueKind == JsonValueKind.Number)
+            switch (item.ValueKind)
             {
-                resultInt.Add(item.GetInt32());
-            }
-            else if (item.ValueKind == JsonValueKind.String)
-            {
-                var val = item.GetString();
-                if (int.TryParse(val, out var i))
-                {
-                    resultInt.Add(i);
-                }
-                else
-                {
-                    resultString.Add(val);
-                }
+                case JsonValueKind.Number:
+                    resultInt.Add(item.GetInt32());
+                    break;
+                case JsonValueKind.String:
+                    {
+                        var val = item.GetString();
+                        if (int.TryParse(val, out var i))
+                        {
+                            resultInt.Add(i);
+                        }
+                        else
+                        {
+                            resultString.Add(val);
+                        }
+
+                        break;
+                    }
             }
         }
 

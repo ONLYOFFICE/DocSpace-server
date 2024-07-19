@@ -199,7 +199,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
 
         if (store.IsSupportedPreSignedUri)
         {
-            var headers = securityContext.IsAuthenticated ? null : new[] { SecureHelper.GenerateSecureKeyHeader(path, emailValidationKeyProvider) };
+            var headers = securityContext.IsAuthenticated ? null : new[] { await SecureHelper.GenerateSecureKeyHeaderAsync(path, emailValidationKeyProvider) };
 
             var tmp = await store.GetPreSignedUriAsync(FileConstant.StorageDomainTmp, path, TimeSpan.FromHours(1), headers);
             var url = tmp.ToString();
@@ -280,15 +280,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                 return;
             }
             
-            if (authContext.IsAuthenticated && file.RootFolderType == FolderType.USER && !file.ProviderEntry && file.CreateBy != authContext.CurrentAccount.ID
-                && (fileUtility.CanImageView(file.Title) || fileUtility.CanMediaView(file.Title) || !fileUtility.CanWebView(file.Title)))
-            {
-                var linkId = await externalShare.GetLinkIdAsync();
-                if (linkId != Guid.Empty)
-                {
-                    await entryManager.MarkAsRecentByLink(file, linkId);
-                }
-            }
+            await TryMarkAsRecentByLink(file);
 
             await fileMarker.RemoveMarkAsNewAsync(file);
 
@@ -451,6 +443,19 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             {
                 context.Response.StatusCode = 400;
                 await context.Response.WriteAsync(HttpUtility.HtmlEncode(ex.Message));
+            }
+        }
+    }
+
+    private async Task TryMarkAsRecentByLink<T>(File<T> file)
+    {
+        if (authContext.IsAuthenticated && file.RootFolderType == FolderType.USER && !file.ProviderEntry && file.CreateBy != authContext.CurrentAccount.ID
+            && (fileUtility.CanImageView(file.Title) || fileUtility.CanMediaView(file.Title) || !fileUtility.CanWebView(file.Title)))
+        {
+            var linkId = await externalShare.GetLinkIdAsync();
+            if (linkId != Guid.Empty)
+            {
+                await entryManager.MarkAsRecentByLink(file, linkId);
             }
         }
     }
@@ -1016,6 +1021,8 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                 return;
             }
 
+            await TryMarkAsRecentByLink(file);
+
             if (force)
             {
                 context.Response.ContentType = MimeMapping.GetMimeMapping(".jpeg");
@@ -1218,7 +1225,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
         context.Response.Redirect(
             (context.Request.Query["openfolder"].FirstOrDefault() ?? "").Equals("true")
                     ? await pathProvider.GetFolderUrlByIdAsync(file.ParentId)
-                    : (filesLinkUtility.GetFileWebEditorUrl(file.Id) + "#message/" + HttpUtility.UrlEncode(string.Format(FilesCommonResource.MessageFileCreated, folder.Title))));
+                    : (filesLinkUtility.GetFileWebEditorUrl(file.Id) + "&message=" + HttpUtility.UrlEncode(string.Format(FilesCommonResource.MessageFileCreated, folder.Title))));
     }
 
     private async Task WriteError(HttpContext context, Exception ex, bool responseMessage)
@@ -1230,7 +1237,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             await context.Response.WriteAsync("error: " + ex.Message);
             return;
         }
-        context.Response.Redirect(PathProvider.StartURL + "#error/" + HttpUtility.UrlEncode(ex.Message), true);
+        context.Response.Redirect($"{filesLinkUtility.GetFileWebEditorUrl("")}&error={HttpUtility.UrlEncode(ex.Message)}", true);
     }
 
     private async Task WriteOk<T>(HttpContext context, Folder<T> folder, File<T> file)

@@ -139,15 +139,15 @@ public class CookiesManager(
         }
 
         var cookieName = GetFullCookiesName(type, itemId);
-
-        if (httpContextAccessor.HttpContext.Request.Cookies.TryGetValue(cookieName, out var cookie))
-        {
-            return cookie;
-        }
-
+        
         if (allowHeader && httpContextAccessor.HttpContext.Request.Headers.TryGetValue(cookieName, out var cookieHeader))
         {
             return cookieHeader;
+        }
+
+        if (httpContextAccessor.HttpContext.Request.Cookies.TryGetValue(cookieName, out var cookie) && !string.IsNullOrEmpty(cookie))
+        {
+            return cookie;
         }
         
         return string.Empty;
@@ -322,17 +322,6 @@ public class CookiesManager(
             CookiesType.ConfirmKey => ConfirmCookiesName,
             _ => string.Empty
         };
-
-        var request = httpContextAccessor.HttpContext?.Request;
-        if (request == null || !FromCors(request) || !request.Headers.TryGetValue(HeaderNames.Origin, out var origin))
-        {
-            return result;
-        }
-
-        var originUri = new Uri(origin);
-        var host = originUri.Host;
-        var alias = host[..(host.Length - coreBaseSettings.Basedomain.Length - 1)];
-        result = $"{result}_{alias}";
 
         return result;
     }

@@ -113,7 +113,11 @@ public class FilesMessageService(
             return;
         }
 
-        var additionalParams = await GetAdditionalEntryDataAsync(entry1, action);
+        FolderType? parentType = entry2 is Folder<T2> folder 
+            ? folder.FolderType 
+            : null;
+
+        var additionalParams = await GetAdditionalEntryDataAsync(entry1, action, parentType: parentType);
         description = Append(description, additionalParams.DescriptionPart);
 
         if (headers == null)//todo check need if
@@ -177,18 +181,18 @@ public class FilesMessageService(
     }
 
     private async Task<FileEntryData> GetAdditionalEntryDataAsync<T>(FileEntry<T> entry, MessageAction action, string oldTitle = null, Guid userid = default,
-        FileShare userRole = FileShare.None)
+        FileShare userRole = FileShare.None, FolderType? parentType = null)
     { 
         return entry switch
         {
-            FileEntry<int> entryInt => await GetAdditionalEntryDataAsync(entryInt, action, oldTitle, userid, userRole),
+            FileEntry<int> entryInt => await GetAdditionalEntryDataAsync(entryInt, action, oldTitle, userid, userRole, parentType),
             FileEntry<string> entryString => await GetAdditionalEntryDataAsync(entryString, action, oldTitle, userid, userRole),
             _ => throw new NotSupportedException()
         };
     }
 
     private async Task<FileEntryData> GetAdditionalEntryDataAsync(FileEntry<int> entry, MessageAction action, string oldTitle = null, Guid userid = default, 
-        FileShare userRole = FileShare.None)
+        FileShare userRole = FileShare.None, FolderType? parentType = null)
     {
         var folderDao = daoFactory.GetFolderDao<int>();
 
@@ -198,7 +202,7 @@ public class FilesMessageService(
             ? folder 
             : parents.FirstOrDefault(x => DocSpaceHelper.IsRoom(x.FolderType));
 
-        var desc = GetEventDescription(action, oldTitle, userid, userRole, room?.Id ?? -1, room?.Title);
+        var desc = GetEventDescription(action, oldTitle, userid, userRole, room?.Id ?? -1, room?.Title, entry.CreateBy);
 
         if (!HistoryService.TrackedActions.Contains(action))
         {
@@ -229,12 +233,17 @@ public class FilesMessageService(
 
         desc.ParentId = parent.Id;
         desc.ParentTitle = parent.Title;
+        
         desc.RootFolderTitle = entry.RootFolderType switch
         {
             FolderType.USER => FilesUCResource.MyFiles,
             FolderType.TRASH => FilesUCResource.Trash,
             _ => null
         };
+        
+        desc.ParentType = parentType.HasValue 
+            ? (int)parentType.Value 
+            : (int)parent.FolderType;
 
         return new FileEntryData(JsonSerializer.Serialize(desc, _serializerOptions), references);
     }
@@ -252,12 +261,13 @@ public class FilesMessageService(
         return new FileEntryData(json, null);
     }
 
-    private static EventDescription<T> GetEventDescription<T>(MessageAction action, string oldTitle, Guid userid, FileShare userRole, T roomId, string roomTitle)
+    private static EventDescription<T> GetEventDescription<T>(MessageAction action, string oldTitle, Guid userid, FileShare userRole, T roomId, string roomTitle, Guid? createBy = null)
     {
         var desc = new EventDescription<T>
         {
             RoomId = roomId,
-            RoomTitle = roomTitle
+            RoomTitle = roomTitle,
+            CreateBy = createBy
         };
 
         switch (action)

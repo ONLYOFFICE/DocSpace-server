@@ -102,9 +102,9 @@ public class MessageService(
         }
     }
 
-    public async Task SendAsync(MessageAction action, MessageTarget target, string d1, string d2, IEnumerable<FilesAuditReference> references = null)
+    public async Task SendAsync(MessageAction action, MessageTarget target, string d1, string d2, IEnumerable<FilesAuditReference> references = null, DateTime? dateTime = null)
     {
-        await SendRequestMessageAsync(action, target, description: [d1, d2], references: references);
+        await SendRequestMessageAsync(action, target, description: [d1, d2], references: references, dateTime: dateTime);
     }
     
     public async Task SendAsync(MessageAction action, MessageTarget target, string[] description, IEnumerable<FilesAuditReference> references = null)
@@ -300,4 +300,6 @@ public class EventDescription<T>
     public List<Guid> UserIds { get; set; }
     public T ParentId { get; set; }
     public string ParentTitle { get; set; }
+    public Guid? CreateBy { get; set; }
+    public int ParentType { get; set; }
 }

@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Web.Files.Utils;
+
 namespace ASC.Files.Helpers;
 
 [Scope]
@@ -39,12 +41,14 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         UserManager userManager,
         DisplayUserSettingsHelper displayUserSettingsHelper,
         FileConverter fileConverter,
-        PathProvider pathProvider)
+        PathProvider pathProvider,
+        FileChecker fileChecker)
     : FilesHelperBase(filesSettingsHelper,
             fileUploader,
             socketManager,
             fileDtoHelper,
             fileStorageService,
+            fileChecker,
             httpContextAccessor)
     {
     private readonly ILogger _logger = logger;
@@ -68,7 +72,7 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
 
         if (fileType == FileType.Pdf)
         {
-            return await _fileStorageService.CheckExtendedPDF(file);
+            return await _fileChecker.CheckExtendedPDF(file);
         }
         return false;
     }
@@ -265,7 +269,7 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         }
     }
 
-    public async Task<FileDto<TTemplate>> CopyFileAsAsync<T, TTemplate>(T fileId, TTemplate destFolderId, string destTitle, string password = null)
+    public async Task<FileDto<TTemplate>> CopyFileAsAsync<T, TTemplate>(T fileId, TTemplate destFolderId, string destTitle, string password = null, bool toForm = false)
     {
         var service = serviceProvider.GetService<FileStorageService>();
         var file = await _fileStorageService.GetFileAsync(fileId, -1);
@@ -279,7 +283,7 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
             return await _fileDtoHelper.GetAsync(newFile);
         }
 
-        await using var fileStream = await fileConverter.ExecAsync(file, destExt, password);
+        await using var fileStream = await fileConverter.ExecAsync(file, destExt, password, toForm);
         var controller = serviceProvider.GetService<FilesControllerHelper>();
         return await controller.InsertFileAsync(destFolderId, fileStream, destTitle, true);
     }

@@ -573,6 +573,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to bytes,KB,MB,GB,TB.
+        /// </summary>
+        public static string FileSizePostfix {
+            get {
+                return ResourceManager.GetString("FileSizePostfix", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Files.
         /// </summary>
         public static string FilesModule {
@@ -1383,6 +1392,60 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Set default storage quota: {0}.
+        /// </summary>
+        public static string QuotaPerPortalChanged {
+            get {
+                return ResourceManager.GetString("QuotaPerPortalChanged", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Disabled default storage quota.
+        /// </summary>
+        public static string QuotaPerPortalDisabled {
+            get {
+                return ResourceManager.GetString("QuotaPerPortalDisabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Set default storage quota for rooms: {0}.
+        /// </summary>
+        public static string QuotaPerRoomChanged {
+            get {
+                return ResourceManager.GetString("QuotaPerRoomChanged", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Disabled default storage quota for rooms.
+        /// </summary>
+        public static string QuotaPerRoomDisabled {
+            get {
+                return ResourceManager.GetString("QuotaPerRoomDisabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Set default storage quota for users: {0}.
+        /// </summary>
+        public static string QuotaPerUserChanged {
+            get {
+                return ResourceManager.GetString("QuotaPerUserChanged", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Disabled default storage quota for users.
+        /// </summary>
+        public static string QuotaPerUserDisabled {
+            get {
+                return ResourceManager.GetString("QuotaPerUserDisabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Reassigns.
         /// </summary>
         public static string ReassignsActionType {
@@ -1397,6 +1460,15 @@ namespace ASC.AuditTrail {
         public static string RoomArchived {
             get {
                 return ResourceManager.GetString("RoomArchived", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Room copied: {0}.
+        /// </summary>
+        public static string RoomCopied {
+            get {
+                return ResourceManager.GetString("RoomCopied", resourceCulture);
             }
         }
         

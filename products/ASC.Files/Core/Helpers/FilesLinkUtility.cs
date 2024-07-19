@@ -304,11 +304,6 @@ public class FilesLinkUtility
                + (string.IsNullOrEmpty(convertToExtension) ? string.Empty : "&" + OutType + "=" + convertToExtension);
     }
 
-    public string GetFileWebMediaViewUrl(object fileId)
-    {
-        return FilesBaseAbsolutePath + "#preview/" + HttpUtility.UrlEncode(fileId.ToString());
-    }
-
     public string FileWebViewerUrlString
     {
         get { return $"{FileWebEditorUrlString}&{Action}=view"; }
@@ -330,37 +325,16 @@ public class FilesLinkUtility
             + (fileVersion > 0 ? "&" + Version + "=" + fileVersion : string.Empty);
     }
 
-    public string GetFileWebEditorTryUrl(FileType fileType)
-    {
-        return FilesBaseAbsolutePath + EditorPage + "?" + TryParam + "=" + fileType;
-    }
-
     public string FileWebEditorExternalUrlString
     {
         get { return FileHandlerPath + "?" + Action + "=create&" + FileUri + "={0}&" + FileTitle + "={1}"; }
     }
 
-    public string GetFileWebEditorExternalUrl(string fileUri, string fileTitle)
-    {
-        return GetFileWebEditorExternalUrl(fileUri, fileTitle, false);
-    }
-
-    public string GetFileWebEditorExternalUrl(string fileUri, string fileTitle, bool openFolder)
-    {
-        var url = string.Format(FileWebEditorExternalUrlString, HttpUtility.UrlEncode(fileUri), HttpUtility.UrlEncode(fileTitle));
-        if (openFolder)
-        {
-            url += "&openfolder=true";
-        }
-
-        return url;
-    }
-
-    public string GetFileWebPreviewUrl(FileUtility fileUtility, string fileTitle, object fileId, int fileVersion = 0)
+    public string GetFileWebPreviewUrl(FileUtility fileUtility, string fileTitle, object fileId, int fileVersion = 0, bool external = false)
     {
         if (fileUtility.CanImageView(fileTitle) || fileUtility.CanMediaView(fileTitle))
         {
-            return GetFileWebMediaViewUrl(fileId);
+            return GetFileWebMediaViewUrl(fileId, external);
         }
 
         if (fileUtility.CanWebView(fileTitle))
@@ -379,11 +353,6 @@ public class FilesLinkUtility
     public string FileRedirectPreviewUrlString
     {
         get { return FileHandlerPath + "?" + Action + "=redirect"; }
-    }
-
-    public string GetFileRedirectPreviewUrl(object enrtyId, bool isFile)
-    {
-        return FileRedirectPreviewUrlString + "&" + (isFile ? FileId : FolderId) + "=" + HttpUtility.UrlEncode(enrtyId.ToString());
     }
 
     public string FileThumbnailUrlString
@@ -497,5 +466,17 @@ public class FilesLinkUtility
     private string GetSettingsKey(string key)
     {
         return "DocKey_" + key;
+    }
+    
+    private string GetFileWebMediaViewUrl(object fileId, bool external = false)
+    {
+        var id = HttpUtility.UrlEncode(fileId.ToString());
+        
+        if (external)
+        {
+            return FilesBaseAbsolutePath + $"share/preview/{id}";
+        }
+        
+        return FilesBaseAbsolutePath + $"#preview/{id}";
     }
 }

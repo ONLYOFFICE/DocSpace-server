@@ -55,7 +55,7 @@ public class NextcloudWorkspaceMigrator : Migrator
         MigrationInfo = new MigrationInfo { Name = "Nextcloud" };
     }
 
-    public override void Init(string path, CancellationToken cancellationToken, OperationType operation)
+    public override async Task InitAsync(string path, CancellationToken cancellationToken, OperationType operation)
     {
         MigrationLogger.Init();
         _cancellationToken = cancellationToken;
@@ -78,6 +78,7 @@ public class NextcloudWorkspaceMigrator : Migrator
         }
         MigrationInfo.Files = [Path.GetFileName(_takeout)];
         TmpFolder = path;
+        await ReportProgressAsync(1, "start");
     }
 
     public override async Task<MigrationApiInfo> ParseAsync(bool reportProgress = true)

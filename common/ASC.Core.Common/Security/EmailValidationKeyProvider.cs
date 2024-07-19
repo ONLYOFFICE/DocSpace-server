@@ -34,7 +34,10 @@ public class EmailValidationKeyProvider
         Ok,
         Invalid,
         Expired,
-        TariffLimit
+        TariffLimit,
+        UserExisted,
+        UserExcluded,
+        QuotaFailed
     }
 
     public TimeSpan ValidEmailKeyInterval { get; }
@@ -74,11 +77,6 @@ public class EmailValidationKeyProvider
         return GetEmailKey(await _tenantManager.GetCurrentTenantIdAsync(), email);
     }
 
-    public string GetEmailKey(string email)
-    {
-        return GetEmailKey(_tenantManager.GetCurrentTenant().Id, email);
-    }
-
     public string GetEmailKey(int tenantId, string email)
     {
         ArgumentException.ThrowIfNullOrEmpty(email);
@@ -86,9 +84,9 @@ public class EmailValidationKeyProvider
         email = FormatEmail(tenantId, email);
 
         var ms = (long)(DateTime.UtcNow - _from).TotalMilliseconds;
-        var hash = GetMashineHashedData(BitConverter.GetBytes(ms), Encoding.ASCII.GetBytes(email));
+        var hash = GetMachineHashedData(BitConverter.GetBytes(ms), Encoding.ASCII.GetBytes(email));
 
-        return string.Format("{0}.{1}", ms, DoStringFromBytes(hash));
+        return $"{ms}.{DoStringFromBytes(hash)}";
     }
 
     private string FormatEmail(int tenantId, string email)
@@ -97,7 +95,7 @@ public class EmailValidationKeyProvider
 
         try
         {
-            return string.Format("{0}|{1}|{2}", email.ToLowerInvariant(), tenantId, Encoding.UTF8.GetString(_machinePseudoKeys.GetMachineConstant()));
+            return $"{email.ToLowerInvariant()}|{tenantId}|{Encoding.UTF8.GetString(_machinePseudoKeys.GetMachineConstant())}";
         }
         catch (Exception e)
         {
@@ -114,18 +112,18 @@ public class EmailValidationKeyProvider
 
     public async Task<ValidationResult> ValidateEmailKeyAsync(string email, string key, TimeSpan validInterval)
     {
-        var result = await ValidateEmailKeyInternalAsync(email, key, validInterval);
-        _logger.DebugValidationResult(result, email, key, validInterval, await _tenantManager.GetCurrentTenantIdAsync());
-
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var result = ValidateEmailKey(email, key, validInterval, tenantId);
+        _logger.DebugValidationResult(result, email, key, validInterval, tenantId);
         return result;
     }
 
-    private async Task<ValidationResult> ValidateEmailKeyInternalAsync(string email, string key, TimeSpan validInterval)
+    private ValidationResult ValidateEmailKey(string email, string key, TimeSpan validInterval, int tenantId)
     {
         ArgumentException.ThrowIfNullOrEmpty(email);
         ArgumentNullException.ThrowIfNull(key);
 
-        email = FormatEmail(await _tenantManager.GetCurrentTenantIdAsync(), email);
+        email = FormatEmail(tenantId, email);
         var parts = key.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
         if (parts.Length != 2)
         {
@@ -137,7 +135,7 @@ public class EmailValidationKeyProvider
             return ValidationResult.Invalid;
         }
 
-        var hash = GetMashineHashedData(BitConverter.GetBytes(ms), Encoding.ASCII.GetBytes(email));
+        var hash = GetMachineHashedData(BitConverter.GetBytes(ms), Encoding.ASCII.GetBytes(email));
         var key2 = DoStringFromBytes(hash);
         var key2_good = string.Equals(parts[1], key2, StringComparison.OrdinalIgnoreCase);
         if (!key2_good)
@@ -150,7 +148,7 @@ public class EmailValidationKeyProvider
         return validInterval >= TimeSpan.FromMilliseconds(ms_current - ms) ? ValidationResult.Ok : ValidationResult.Expired;
     }
 
-    internal static string DoStringFromBytes(byte[] data)
+    private static string DoStringFromBytes(byte[] data)
     {
         var str = Convert.ToBase64String(data);
         str = str.Replace("=", "").Replace("+", "").Replace("/", "").Replace("\\", "");
@@ -158,13 +156,13 @@ public class EmailValidationKeyProvider
         return str.ToUpperInvariant();
     }
 
-    internal static byte[] GetMashineHashedData(byte[] salt, byte[] data)
+    private static byte[] GetMachineHashedData(byte[] salt, byte[] data)
     {
-        var alldata = new byte[salt.Length + data.Length];
-        Array.Copy(data, alldata, data.Length);
-        Array.Copy(salt, 0, alldata, data.Length, salt.Length);
+        var allData = new byte[salt.Length + data.Length];
+        Array.Copy(data, allData, data.Length);
+        Array.Copy(salt, 0, allData, data.Length, salt.Length);
 
-        return Hasher.Hash(alldata, HashAlg.SHA256);
+        return Hasher.Hash(allData, HashAlg.SHA256);
     }
 }
 

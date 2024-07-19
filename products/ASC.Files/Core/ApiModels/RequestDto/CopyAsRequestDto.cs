@@ -39,4 +39,8 @@ public class CopyAsRequestDto<T>
 
     [SwaggerSchemaCustom(Example = "some text", Description = "Password")]
     public string Password { get; set; }
+
+    /// <summary>Convert to form</summary>
+    /// <type>System.Boolean, System</type>
+    public bool ToForm { get; set; }
 }

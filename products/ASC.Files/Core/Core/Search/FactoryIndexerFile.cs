@@ -54,17 +54,18 @@ public class BaseIndexerFile(Client client,
 }
 
 
-[Scope]
-public class FactoryIndexerFile(ILoggerProvider options,
-        TenantManager tenantManager,
-        SearchSettingsHelper searchSettingsHelper,
-        FactoryIndexer factoryIndexer,
-        BaseIndexerFile baseIndexer,
-        IServiceProvider serviceProvider,
-        IDbContextFactory<FilesDbContext> dbContextFactory,
-        ICache cache,
-        Settings settings,
-        FileUtility fileUtility)
+[Scope(typeof(IFactoryIndexer))]
+public class FactoryIndexerFile(
+    ILoggerProvider options,
+    TenantManager tenantManager,
+    SearchSettingsHelper searchSettingsHelper,
+    FactoryIndexer factoryIndexer,
+    BaseIndexerFile baseIndexer,
+    IServiceProvider serviceProvider,
+    IDbContextFactory<FilesDbContext> dbContextFactory,
+    ICache cache,
+    Settings settings,
+    FileUtility fileUtility)
     : FactoryIndexer<DbFile>(options, tenantManager, searchSettingsHelper, factoryIndexer, baseIndexer, serviceProvider, cache)
 {
     public override async Task IndexAllAsync()

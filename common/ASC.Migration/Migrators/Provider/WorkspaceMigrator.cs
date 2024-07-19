@@ -52,7 +52,7 @@ public class WorkspaceMigrator : Migrator
         MigrationInfo = new MigrationInfo { Name = "Workspace" };
     }
 
-    public override void Init(string path, CancellationToken cancellationToken, OperationType operation)
+    public override async Task InitAsync(string path, CancellationToken cancellationToken, OperationType operation)
     {
         MigrationLogger.Init();
         _cancellationToken = cancellationToken;
@@ -69,6 +69,7 @@ public class WorkspaceMigrator : Migrator
 
         _backup = files.First(f => f.EndsWith(".gz") || f.EndsWith(".tar"));
         MigrationInfo.Files = [Path.GetFileName(_backup)];
+        await ReportProgressAsync(1, "start");
     }
 
     public override async Task<MigrationApiInfo> ParseAsync(bool reportProgress = true)
@@ -405,9 +406,19 @@ public class WorkspaceMigrator : Migrator
 
         foreach(var row in dataGroup.Rows.Cast<DataRow>())
         {
-            if(int.Parse(row["removed"].ToString()) == 1)
+            if(int.TryParse(row["removed"].ToString(), out var result))
             {
-                continue;
+                if (result == 1)
+                {
+                    continue;
+                }
+            }
+            else
+            {
+                if (row["removed"].ToString() == "True")
+                {
+                    continue;
+                }
             }
             var group = new MigrationGroup
             {

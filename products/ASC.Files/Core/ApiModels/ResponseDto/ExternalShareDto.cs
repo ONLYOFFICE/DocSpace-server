@@ -40,25 +40,12 @@ public class ExternalShareDto : IMapFrom<ValidationInfo>
     [SwaggerSchemaCustom(Example = "some text", Description = "External data title")]
     public string Title { get; set; }
 
-    [SwaggerSchemaCustom(Example = "PublicRoom", Description = "Type of a room where the external data is located", Nullable = true)]
-    public RoomType? RoomType { get; set; }
-
     [SwaggerSchemaCustom(Example = "1234", Description = "Tenant ID", Format = "int32")]
     public int TenantId { get; set; }
-
-    [SwaggerSchemaCustom(Description = "Room logo")]
-    public Logo Logo { get; set; }
 
     [SwaggerSchemaCustom(Example = "true", Description = "Specifies whether to share the external data or not")]
     public bool Shared { get; set; }
 
     [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "Link ID")]
     public Guid LinkId { get; set; }
-
-    public void Mapping(Profile profile)
-    {
-        profile.CreateMap<ValidationInfo, ExternalShareDto>()
-            .ForMember(dest => dest.RoomType, opt =>
-                opt.MapFrom(source => DocSpaceHelper.MapToRoomType(source.FolderType)));
-    }
 }

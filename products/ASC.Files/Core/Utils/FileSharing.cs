@@ -39,7 +39,7 @@ public class FileSharingAceHelper(
     PathProvider pathProvider,
     FileSharingHelper fileSharingHelper,
     FileTrackerHelper fileTracker,
-    InvitationLinkService invitationLinkService,
+    InvitationService invitationService,
     StudioNotifyService studioNotifyService,
     UserManagerWrapper userManagerWrapper,
     IUrlShortener urlShortener,
@@ -271,7 +271,7 @@ public class FileSharingAceHelper(
 
             if (emailInvite)
             {
-                var link = await invitationLinkService.GetInvitationLinkAsync(w.Email, share, authContext.CurrentAccount.ID, entry.Id.ToString(), culture);
+                var link = await invitationService.GetInvitationLinkAsync(w.Email, share, authContext.CurrentAccount.ID, entry.Id.ToString(), culture);
                 var shortenLink = await urlShortener.GetShortenLinkAsync(link);
 
                 await studioNotifyService.SendEmailRoomInviteAsync(w.Email, entry.Title, shortenLink, culture, true);
@@ -412,6 +412,15 @@ public class FileSharingHelper(
             return false;
         }
 
+        if (entry is File<T>)
+        {
+            var file = entry as File<T>;
+            if (file.IsForm)
+            {
+                return false;
+            }
+        }
+
         if (entry.RootFolderType == FolderType.COMMON && await global.IsDocSpaceAdministratorAsync)
         {
             return true;
@@ -454,7 +463,7 @@ public class FileSharing(
     DisplayUserSettingsHelper displayUserSettingsHelper,
     IDaoFactory daoFactory,
     FileSharingHelper fileSharingHelper,
-    InvitationLinkService invitationLinkService,
+    InvitationService invitationService,
     ExternalShare externalShare,
     IUrlShortener urlShortener)
 {
@@ -824,12 +833,14 @@ public class FileSharing(
             return false;
         }
 
-        if (filterType is ShareFilterType.User or ShareFilterType.Group or ShareFilterType.UserOrGroup)
+        switch (filterType)
         {
-            return true;
+            case ShareFilterType.User or ShareFilterType.Group or ShareFilterType.UserOrGroup:
+            case ShareFilterType.PrimaryExternalLink when entry.RootFolderType is FolderType.VirtualRooms:
+                return true;
+            default:
+                return await fileSecurity.CanReadLinksAsync(entry);
         }
-
-        return await fileSecurity.CanReadLinksAsync(entry);
     }
 
     private async IAsyncEnumerable<AceWrapper> GetDefaultAcesAsync<T>(FileEntry<T> entry, ShareFilterType filterType, EmployeeActivationStatus? status, string text)
@@ -915,7 +926,7 @@ public class FileSharing(
 
         if (record.SubjectType == SubjectType.InvitationLink)
         {
-            link = invitationLinkService.GetInvitationLink(record.Subject, authContext.CurrentAccount.ID);
+            link = invitationService.GetInvitationLink(record.Subject, authContext.CurrentAccount.ID);
         }
         else
         {

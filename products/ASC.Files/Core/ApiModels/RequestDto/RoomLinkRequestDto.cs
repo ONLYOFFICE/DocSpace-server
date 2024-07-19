@@ -38,6 +38,7 @@ public class RoomLinkRequestDto : LinkRequestDtoBase
     public LinkType LinkType { get; set; }
 
     [SwaggerSchemaCustom(Example = "some text", Description = "Link password")]
+    [StringLength(255)]
     public string Password { get; set; }
 
     [SwaggerSchemaCustom(Example = "true", Description = "Specifies whether downloading a file from a link is disabled or not")]

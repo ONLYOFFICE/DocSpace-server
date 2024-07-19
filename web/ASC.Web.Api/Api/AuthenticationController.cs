@@ -69,9 +69,8 @@ public class AuthenticationController(
     DbLoginEventsManager dbLoginEventsManager,
     BruteForceLoginManager bruteForceLoginManager,
     TfaAppAuthSettingsHelper tfaAppAuthSettingsHelper,
-    EmailValidationKeyProvider emailValidationKeyProvider,
     ILogger<AuthenticationController> logger,
-    InvitationLinkService invitationLinkService,
+    InvitationService invitationService,
     LoginProfileTransport loginProfileTransport,
     IMapper mapper)
     : ControllerBase
@@ -357,7 +356,7 @@ public class AuthenticationController(
             return new ConfirmDto { Result = await emailValidationKeyModelHelper.ValidateAsync(inDto)};
         }
 
-        var result = await invitationLinkService.ValidateAsync(inDto.Key, inDto.Email, inDto.EmplType ?? default, inDto.RoomId);
+        var result = await invitationService.ConfirmAsync(inDto.Key, inDto.Email, inDto.EmplType ?? default, inDto.RoomId);
 
         return mapper.Map<Validation, ConfirmDto>(result);
     }
@@ -434,8 +433,8 @@ public class AuthenticationController(
             if (inDto.ConfirmData != null)
             {
                 var email = inDto.ConfirmData.Email;
-
-                var checkKeyResult = await emailValidationKeyProvider.ValidateEmailKeyAsync(email + ConfirmType.Auth + inDto.ConfirmData.First, inDto.ConfirmData.Key, setupInfo.ValidAuthKeyInterval);
+                    
+                var checkKeyResult = await emailValidationKeyModelHelper.ValidateAsync(new EmailValidationKeyModel { Key = inDto.ConfirmData.Key, Email = email, Type = ConfirmType.Auth, First = inDto.ConfirmData.First.ToString() });
 
                 if (checkKeyResult == ValidationResult.Ok)
                 {

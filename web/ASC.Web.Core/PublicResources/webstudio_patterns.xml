@@ -73,6 +73,12 @@
     <body styler="ASC.Notify.Textile.JabberStyler,ASC.Core.Common" resource="|pattern_join|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
 
+  <!-- rooms_activity -->
+  <pattern id="rooms_activity" sender="email.sender">
+    <subject resource="|subject_rooms_activity|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_rooms_activity|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+  </pattern>
+
   <!-- send_whats_new -->
   <pattern id="send_whats_new" sender="email.sender">
     <subject resource="|subject_send_whats_new|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />

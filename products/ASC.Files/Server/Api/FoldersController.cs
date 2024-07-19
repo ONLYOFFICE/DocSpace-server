@@ -324,6 +324,7 @@ public abstract class FoldersController<T>(
     /// <path>api/2.0/files/folder/{id}/link</path>
     /// <httpMethod>GET</httpMethod>
     [Tags("Files / Folders")]
+    [AllowAnonymous]
     [HttpGet("folder/{id}/link")]
     public async Task<FileShareDto> GetPrimaryExternalLinkAsync(T id)
     {

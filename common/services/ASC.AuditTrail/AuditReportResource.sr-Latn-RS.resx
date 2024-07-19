@@ -798,4 +798,7 @@
   <data name="UserUpdatedPassword" xml:space="preserve">
     <value>Lozinka ažurirana</value>
   </data>
+  <data name="FileSizePostfix" xml:space="preserve">
+    <value>bajtovi,KB,MB,GB,TB</value>
+  </data>
 </root>

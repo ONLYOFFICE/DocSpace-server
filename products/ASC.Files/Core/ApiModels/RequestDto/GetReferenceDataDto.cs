@@ -39,4 +39,7 @@ public class GetReferenceDataDto<T>
 
     [SwaggerSchemaCustom(Example = "some text", Description = "The file name or relative path for the formula editor", Nullable = true)]
     public string Path { get; set; }
+
+    [SwaggerSchemaCustom(Example = "some text", Description = "Link to file", Format = "uri")]
+    public string Link { get; set; }
 }

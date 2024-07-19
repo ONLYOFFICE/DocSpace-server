@@ -798,4 +798,7 @@
   <data name="PortalRenamed" xml:space="preserve">
     <value>Portalul a fost redenumit</value>
   </data>
+  <data name="FileSizePostfix" xml:space="preserve">
+    <value>octeți, KO, MO, GO, TO</value>
+  </data>
 </root>

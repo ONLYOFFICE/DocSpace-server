@@ -81,8 +81,9 @@ public class FormFillingProperties
     /// <type>System.String, System</type>
     public string Title { get; set; }
     public string ToFolderId { get; set; }
+    public string OriginalFormId { get; set; }
     public string ResultsFolderId { get; set; }
     public string ResultsFileID { get; set; }
-    public int GuestFormId { get; set; }
+    public int ResultFormNumber { get; set; }
 
 }

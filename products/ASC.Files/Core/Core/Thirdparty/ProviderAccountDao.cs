@@ -65,8 +65,9 @@ internal class ProviderAccountDao(
             var id = Selectors.Pattern.Match(entryId).Groups["id"].Value;
             return await GetProviderInfoAsync(int.Parse(id));
         }
-        catch
+        catch(Exception exception)
         {
+            logger.ErrorWithException(exception);
             return null;
         }
     }

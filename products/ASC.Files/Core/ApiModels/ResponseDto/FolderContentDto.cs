@@ -149,8 +149,7 @@ public class FolderContentDtoHelper(
 
         async IAsyncEnumerable<FileEntryDto> GetFoldersDto(IEnumerable<FileEntry> folderEntries, string entriesOrder)
         {
-            List<FileShareRecord<int>> currentUsersRecords = null;
-            List<FileShareRecord<string>> currentUsersRecords1 = null;
+            List<FileShareRecord<string>> currentUsersRecords = null;
 
             foreach (var r in folderEntries)
             {
@@ -161,26 +160,23 @@ public class FolderContentDtoHelper(
                             DocSpaceHelper.IsRoom(fol1.FolderType) && 
                             await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID))
                         {
-                            currentUsersRecords = await fileSecurity.GetUserRecordsAsync<int>().ToListAsync();
+                            currentUsersRecords = await fileSecurity.GetUserRecordsAsync().ToListAsync();
                         }
                 
                         yield return await folderWrapperHelper.GetAsync(fol1, currentUsersRecords, entriesOrder);
                         break;
                     case Folder<string> fol2:
-                        if (currentUsersRecords1 == null && 
+                        if (currentUsersRecords == null && 
                             DocSpaceHelper.IsRoom(fol2.FolderType) && 
                             await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID))
                         {
-                            currentUsersRecords1 = await fileSecurity.GetUserRecordsAsync<string>().ToListAsync();
+                            currentUsersRecords = await fileSecurity.GetUserRecordsAsync().ToListAsync();
                         }
                 
-                        yield return await folderWrapperHelper.GetAsync(fol2, currentUsersRecords1, entriesOrder);
+                        yield return await folderWrapperHelper.GetAsync(fol2, currentUsersRecords, entriesOrder);
                         break;
                 }
             }
-
-            yield break;
-            
         }
     }
     

@@ -523,7 +523,7 @@ $OrangeButton
 $TrulyYours</value>
   </data>
   <data name="pattern_opensource_user_activation_v1" xml:space="preserve">
-    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt;DocSpaceに参加しましょう
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpaceに参加しましょう
 
 
 こんにちは！
@@ -700,7 +700,7 @@ ONLYOFFICE DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" に半年以�
 $TrulyYours</value>
   </data>
   <data name="pattern_saas_docspace_invite" xml:space="preserve">
-    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt;DocSpaceに参加しましょう
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpaceに参加しましょう
 
 
 こんにちは！
@@ -1107,7 +1107,7 @@ $OrangeButton
 間違ってこのメールを受け取った場合は、無視するか、"$PortalUrl":"$PortalUrl "ポータル管理者に連絡して詳細をご確認ください。</value>
   </data>
   <data name="pattern_opensource_guest_activation_v11" xml:space="preserve">
-    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt;DocSpaceに参加しましょう
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpaceに参加しましょう
 
 
 こんにちは！
@@ -1417,7 +1417,7 @@ $TrulyYours
 ^通知の種類を変更するには、"購読設定":"$RecipientSubscriptionConfigURL"を管理してください。^</value>
   </data>
   <data name="pattern_saas_guest_activation_v115" xml:space="preserve">
-    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt;DocSpaceに参加しましょう
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpaceに参加しましょう
 
 
 こんにちは！

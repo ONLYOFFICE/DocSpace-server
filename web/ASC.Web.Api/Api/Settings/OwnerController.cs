@@ -71,7 +71,9 @@ public class OwnerController(
             throw new SecurityException("Collaborator can not be an owner");
         }
 
-        if (!owner.Id.Equals(authContext.CurrentAccount.ID) || Guid.Empty.Equals(newOwner.Id))
+        if (!owner.Id.Equals(authContext.CurrentAccount.ID) || 
+            Guid.Empty.Equals(newOwner.Id) || 
+            newOwner.Status != EmployeeStatus.Active)
         {
             return new { Status = 0, Message = Resource.ErrorAccessDenied };
         }
@@ -117,6 +119,11 @@ public class OwnerController(
         if (await userManager.IsUserInGroupAsync(newOwner.Id, Constants.GroupUser.ID))
         {
             throw new Exception(Resource.ErrorUserNotFound);
+        }
+
+        if (newOwner.Status != EmployeeStatus.Active)
+        {
+            throw new Exception(Resource.ErrorAccessDenied);
         }
 
         var curTenant = await tenantManager.GetCurrentTenantAsync();
