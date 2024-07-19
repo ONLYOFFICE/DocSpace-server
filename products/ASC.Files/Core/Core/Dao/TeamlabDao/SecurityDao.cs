@@ -618,7 +618,8 @@ internal abstract class SecurityBaseDao<T>(
         {
             text = GetSearchText(text);
             
-            q = q.Where(u => u.FirstName.ToLower().Contains(text) || u.LastName.ToLower().Contains(text) || u.Email.ToLower().Contains(text));
+            var splittedText = text.Split(" ");
+            q = splittedText.Aggregate(q, (current, t) => current.Where(u => u.FirstName.ToLower().Contains(t) || u.LastName.ToLower().Contains(t) || u.Email.ToLower().Contains(t)));
         }
 
         var q1 = excludeShared

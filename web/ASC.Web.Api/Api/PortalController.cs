@@ -448,6 +448,7 @@ public class PortalController(
         var oldAlias = tenant.Alias;
         var oldVirtualRootPath = commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/');
 
+        var massageDate = DateTime.UtcNow;
         if (!string.Equals(newAlias, oldAlias, StringComparison.InvariantCultureIgnoreCase))
         {
             if (!string.IsNullOrEmpty(apiSystemHelper.ApiSystemUrl))
@@ -463,8 +464,8 @@ public class PortalController(
             tenant.Alias = alias;
             tenant = await tenantManager.SaveTenantAsync(tenant);
             tenantManager.SetCurrentTenant(tenant);
-
-            await messageService.SendAsync(MessageAction.PortalRenamed, MessageTarget.Create(tenant.Id), oldAlias, newAlias);
+            
+            await messageService.SendAsync(MessageAction.PortalRenamed, MessageTarget.Create(tenant.Id), oldAlias, newAlias, dateTime: massageDate);
             await cspSettingsHelper.RenameDomain(oldDomain, tenant.GetTenantDomain(coreSettings));
 
             if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
@@ -488,7 +489,7 @@ public class PortalController(
                                 Uri.SchemeDelimiter,
                                 tenant.GetTenantDomain(coreSettings),
                                 rewriter != null && !rewriter.IsDefaultPort ? $":{rewriter.Port}" : "",
-                                commonLinkUtility.GetConfirmationUrlRelative(tenant.Id, user.Email, ConfirmType.Auth)
+                                commonLinkUtility.GetConfirmationUrlRelative(tenant.Id, user.Email, ConfirmType.Auth, massageDate.ToString(CultureInfo.InvariantCulture))
                );
 
         cookiesManager.ClearCookies(CookiesType.AuthKey);

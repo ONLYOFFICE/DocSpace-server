@@ -41,6 +41,7 @@ public class EmailValidationKeyModelHelper(
     AuthManager authentication,
     InvitationValidator invitationValidator,
     AuditEventsRepository auditEventsRepository,
+    LoginEventsRepository loginEventsRepository,
     TenantUtil tenantUtil,
     CookiesManager cookiesManager,
     SecurityContext securityContext,
@@ -89,7 +90,8 @@ public class EmailValidationKeyModelHelper(
         var (key, emplType, email, uiD, type, first) = inDto;
 
         ValidationResult checkKeyResult;
-
+        UserInfo userInfo;
+        
         switch (type)
         {
             case ConfirmType.EmpInvite:
@@ -150,7 +152,7 @@ public class EmailValidationKeyModelHelper(
                 checkKeyResult = await provider.ValidateEmailKeyAsync(email + type + postfix, key, provider.ValidEmailKeyInterval);
                 break;
             case ConfirmType.PasswordChange:
-                var userInfo = await userManager.GetUserByEmailAsync(email);
+                userInfo = await userManager.GetUserByEmailAsync(email);
                 if(Equals(userInfo, Constants.LostUser) || userInfo.Id != uiD || userInfo.Status == EmployeeStatus.Terminated)
                 {
                     checkKeyResult = ValidationResult.Invalid;
@@ -189,8 +191,8 @@ public class EmailValidationKeyModelHelper(
 
             case ConfirmType.ProfileRemove:
                 // validate UiD
-                var user = await userManager.GetUsersAsync(uiD.GetValueOrDefault());
-                if (user == null || Equals(user, Constants.LostUser) || user.Status == EmployeeStatus.Terminated || authContext.IsAuthenticated && authContext.CurrentAccount.ID != uiD)
+                userInfo = await userManager.GetUsersAsync(uiD.GetValueOrDefault());
+                if (userInfo == null || Equals(userInfo, Constants.LostUser) || userInfo.Status == EmployeeStatus.Terminated || authContext.IsAuthenticated && authContext.CurrentAccount.ID != uiD)
                 {
                     return ValidationResult.Invalid;
                 }
@@ -206,8 +208,28 @@ public class EmailValidationKeyModelHelper(
             case ConfirmType.PhoneAuth:
             case ConfirmType.TfaActivation:
             case ConfirmType.TfaAuth:
+                checkKeyResult = await provider.ValidateEmailKeyAsync(email + type + first, key, provider.ValidAuthKeyInterval);
+                break;
             case ConfirmType.Auth:
                 checkKeyResult = await provider.ValidateEmailKeyAsync(email + type + first, key, provider.ValidAuthKeyInterval);
+                if (checkKeyResult == ValidationResult.Invalid)
+                {
+                    userInfo = await userManager.GetUserByEmailAsync(email);
+                    var portalRenameEvent = (await auditEventsRepository.GetByFilterAsync(action: MessageAction.PortalRenamed, target: MessageTarget.Create(await tenantManager.GetCurrentTenantIdAsync()).ToString(), limit: 1)).FirstOrDefault();
+                    var validInterval = DateTime.UtcNow.Add(-provider.ValidAuthKeyInterval);
+                    if (portalRenameEvent != null)
+                    {                    
+                        var portalRenameEventDate = tenantUtil.DateTimeToUtc(portalRenameEvent.Date);
+                        if (portalRenameEventDate >= validInterval)
+                        {
+                            var loginEvent = (await loginEventsRepository.GetByFilterAsync(userInfo.Id, MessageAction.LoginSuccessViaApi, limit: 1, fromDate: portalRenameEventDate)).FirstOrDefault();
+                            if (loginEvent == null)
+                            {
+                                checkKeyResult = await provider.ValidateEmailKeyAsync(email + type + portalRenameEventDate.ToString(CultureInfo.InvariantCulture), key, provider.ValidAuthKeyInterval);
+                            }
+                        }
+                    }
+                }
                 break;
 
             case ConfirmType.PortalContinue:
