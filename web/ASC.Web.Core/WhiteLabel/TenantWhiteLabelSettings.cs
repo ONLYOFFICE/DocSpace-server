@@ -315,12 +315,13 @@ public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
 
 [Scope]
 public class TenantWhiteLabelSettingsHelper(
-    IHttpContextAccessor httpContextAccessor,
     WebImageSupplier webImageSupplier,
     UserPhotoManager userPhotoManager,
     StorageFactory storageFactory,
     WhiteLabelHelper whiteLabelHelper,
     TenantManager tenantManager,
+    AuthContext authContext,
+    UserManager userManager,
     SettingsManager settingsManager,
     IConfiguration configuration,
     ILogger<TenantWhiteLabelSettingsHelper> logger)
@@ -669,7 +670,10 @@ public class TenantWhiteLabelSettingsHelper(
 
         var language = string.Empty;
 
-        _ = httpContextAccessor?.HttpContext?.Request?.Cookies.TryGetValue("asc_language", out language);
+        if (authContext.IsAuthenticated)
+        {
+            language = (await userManager.GetUsersAsync(authContext.CurrentAccount.ID)).CultureName;
+        }
 
         if (string.IsNullOrEmpty(language))
         {
