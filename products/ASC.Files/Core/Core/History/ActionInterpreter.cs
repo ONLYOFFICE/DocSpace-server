@@ -113,18 +113,35 @@ public record EntryOperationData : HistoryData
 {
     public int Id { get; }
     public string Title { get; }
-    public int ToFolderId { get; }
-    public string ToFolderTitle { get; }
-    public int ToParentType { get; }
+    public string ToFolderId { get; }
+    public string ParentTitle { get; }
+    public int? ParentType { get; }
+    public string FromParentTitle { get; }
+    public int? FromParentType { get; }
+    public int? FromFolderId { get; }
     
-    public EntryOperationData(string id, string title, string toFolderId, string toFolderTitle, int toParentType)
+    public EntryOperationData(
+        string id,
+        string title,
+        string toFolderId,
+        string parentTitle,
+        int? parentType,
+        string fromParentTitle,
+        int? fromParentType,
+        int? fromFolderId)
     {
         Id = int.Parse(id);
         Title = title;
-        ToFolderId = int.Parse(toFolderId);
-        ToFolderTitle = toFolderTitle;
-        ToParentType = toParentType;
+        ToFolderId = toFolderId;
+        ParentTitle = parentTitle;
+        ParentType = parentType;
+        FromParentTitle = fromParentTitle;
+        FromParentType = fromParentType;
+        FromFolderId = fromFolderId;
     }
-    
-    public override int GetId() => ToFolderId;
+
+    public override int GetId()
+    {
+        return FromFolderId.HasValue ? HashCode.Combine(ToFolderId, FromFolderId) : ToFolderId.GetHashCode();
+    }
 }

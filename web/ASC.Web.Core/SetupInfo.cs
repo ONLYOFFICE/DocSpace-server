@@ -56,6 +56,7 @@ public class SetupInfo
 
     public long AvailableFileSize { get; }
     public string TeamlabSiteRedirect { get; private set; }
+    public int MaxUploadThreadCount { get; set; }
     public long ChunkUploadSize { get; set; }
     public long ProviderMaxUploadSize { get; private set; }
     public bool ThirdPartyAuthEnabled { get; private set; }
@@ -65,8 +66,6 @@ public class SetupInfo
     public string TipsAddress { get; private set; }
     public string SupportFeedback { get; private set; }
     public string WebApiBaseUrl { get { return VirtualPathUtility.ToAbsolute(GetAppSettings("api.url", "~/api/2.0/")); } }
-    public TimeSpan ValidEmailKeyInterval { get; private set; }
-    public TimeSpan ValidAuthKeyInterval { get; private set; }
     public string SalesEmail { get; private set; }
     public static bool IsSecretEmail(string email)
     {
@@ -135,6 +134,7 @@ public class SetupInfo
         AvailableFileSize = GetAppSettings("web:available-file-size", 100L * 1024L * 1024L);
 
         TeamlabSiteRedirect = GetAppSettings("web:teamlab-site", string.Empty);
+        MaxUploadThreadCount = GetAppSettings("core:hosting:rateLimiterOptions:defaultConcurrencyWriteRequests", 15);
         ChunkUploadSize = GetAppSettings("files:uploader:chunk-size", 10 * 1024 * 1024);
         ProviderMaxUploadSize = GetAppSettings("files:provider:max-upload-size", 1024L * 1024L * 1024L);
         ThirdPartyAuthEnabled = string.Equals(GetAppSettings("web:thirdparty-auth", "true"), "true");
@@ -144,9 +144,6 @@ public class SetupInfo
         NotifyAddress = GetAppSettings("web.promo-url", string.Empty);
         TipsAddress = GetAppSettings("web.promo-tips-url", string.Empty);
         SupportFeedback = GetAppSettings("web.support-feedback", string.Empty);
-
-        ValidEmailKeyInterval = GetAppSettings("email.validinterval", TimeSpan.FromDays(7));
-        ValidAuthKeyInterval = GetAppSettings("auth.validinterval", TimeSpan.FromHours(1));
 
         SalesEmail = GetAppSettings("web.payment.email", "sales@onlyoffice.com");
         _webAutotestSecretEmail = (configuration["web:autotest:secret-email"] ?? "").Trim();

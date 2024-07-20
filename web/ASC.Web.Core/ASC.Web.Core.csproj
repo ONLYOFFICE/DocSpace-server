@@ -19,10 +19,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Remove="PublicResources\logo.png" />
+    <None Remove="PublicResources\logozh-cn.png" />
     <None Remove="PublicResources\webstudio_patterns.xml" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="PublicResources\logo.png" />
+    <EmbeddedResource Include="PublicResources\logozh-cn.png" />
     <EmbeddedResource Include="PublicResources\webstudio_patterns.xml" />
   </ItemGroup>
   <ItemGroup>
