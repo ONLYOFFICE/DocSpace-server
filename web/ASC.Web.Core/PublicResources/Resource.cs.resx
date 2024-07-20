@@ -1039,4 +1039,7 @@
   <data name="TariffsFeature_used_manager" xml:space="preserve">
     <value>Přidání administrátorů/správců:</value>
   </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>Limit pozvánek je překročen</value>
+  </data>
 </root>

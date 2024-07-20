@@ -1039,4 +1039,13 @@
   <data name="TariffsFeature_used_manager" xml:space="preserve">
     <value>Добавени са Администратори/Опитни потребители:</value>
   </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>Лимитът за покани е надвишен</value>
+  </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>Потребителят е деактивиран</value>
+  </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>Инструкцията за промяна на паролата е изпратена до имейл адреса на {0}.</value>
+  </data>
 </root>

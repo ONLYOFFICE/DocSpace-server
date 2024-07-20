@@ -1048,4 +1048,10 @@
   <data name="TariffsFeature_used_manager" xml:space="preserve">
     <value>管理员/高级用户已添加：</value>
   </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>邀请人数已超过上限</value>
+  </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>密码更改说明已发送至 {0} 电子邮件地址。</value>
+  </data>
 </root>

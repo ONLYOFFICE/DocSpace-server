@@ -1107,4 +1107,10 @@
   <data name="TariffsFeature_used_manager" xml:space="preserve">
     <value>Ադմիններ/Հզոր օգտվողներ ավելացվել են՝</value>
   </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>Հրավերների սահմանաչափը գերազանցված է</value>
+  </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>Գաղտնաբառի փոփոխման հրահանգն ուղարկվել է {0} էլ.փոստի հասցեին:</value>
+  </data>
 </root>

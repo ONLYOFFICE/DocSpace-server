@@ -162,9 +162,6 @@
   <data name="MigrationProjectFiles" xml:space="preserve">
     <value>Миграция документов из проектов</value>
   </data>
-  <data name="MigrationUploadException" xml:space="preserve">
-    <value>Миграция уже выполняется</value>
-  </data>
   <data name="CanNotAddUserInGroup" xml:space="preserve">
     <value>Не удалось добавить пользователя {0} в группу {1}</value>
   </data>

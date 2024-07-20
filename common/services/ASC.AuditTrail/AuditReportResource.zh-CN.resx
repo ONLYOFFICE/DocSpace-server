@@ -739,4 +739,40 @@
   <data name="PortalRenamed" xml:space="preserve">
     <value>门户已被重命名</value>
   </data>
+  <data name="FileSizePostfix" xml:space="preserve">
+    <value>字节、KB、MB、GB、TB</value>
+  </data>
+  <data name="FileUploadedWithOverwriting" xml:space="preserve">
+    <value>上传文件并覆盖：{0}</value>
+  </data>
+  <data name="QuotaPerPortalChanged" xml:space="preserve">
+    <value>设置默认存储配额：{0}</value>
+  </data>
+  <data name="QuotaPerPortalDisabled" xml:space="preserve">
+    <value>禁用默认存储配额</value>
+  </data>
+  <data name="QuotaPerRoomChanged" xml:space="preserve">
+    <value>设置房间默认存储配额：{0}</value>
+  </data>
+  <data name="QuotaPerRoomDisabled" xml:space="preserve">
+    <value>禁用房间默认存储配额</value>
+  </data>
+  <data name="QuotaPerUserChanged" xml:space="preserve">
+    <value>设置用户默认存储配额：{0}</value>
+  </data>
+  <data name="QuotaPerUserDisabled" xml:space="preserve">
+    <value>禁用用户默认存储配额</value>
+  </data>
+  <data name="RoomGroupAdded" xml:space="preserve">
+    <value>添加群组：{0}。角色：{1}</value>
+  </data>
+  <data name="RoomCopied" xml:space="preserve">
+    <value>房间复制： {0}</value>
+  </data>
+  <data name="RoomGroupRemove" xml:space="preserve">
+    <value>删除群组：{0}</value>
+  </data>
+  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
+    <value>{0}已指定：{1}</value>
+  </data>
 </root>

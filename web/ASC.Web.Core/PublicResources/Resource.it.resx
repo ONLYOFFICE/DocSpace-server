@@ -1045,4 +1045,13 @@
   <data name="TariffsFeature_used_manager" xml:space="preserve">
     <value>Amministratori/utenti esperti aggiunti:</value>
   </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>Il limite degli inviti è stato superato</value>
+  </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>Utente disabilitato</value>
+  </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>Le istruzioni per la modifica della password sono state inviate all'indirizzo email {0}.</value>
+  </data>
 </root>

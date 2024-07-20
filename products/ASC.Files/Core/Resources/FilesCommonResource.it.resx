@@ -476,4 +476,22 @@ Massima compatibilità con docx, xlsx, pptx.</value>
   <data name="User" xml:space="preserve">
     <value>Utente</value>
   </data>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>Lo spostamento di più file nella sttanza per la Compilazione dei moduli non è supportato. Sposta un modulo PDF di ONLYOFFICE alla volta.</value>
+  </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>Lo spostamento delle cartelle nella sttanza per la Compilazione dei moduli non è supportato. Sposta un modulo PDF di ONLYOFFICE alla volta.</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>Il file non può essere spostato in questa stanza. Prova a spostare il modulo PDF di ONLYOFFICE.</value>
+  </data>
+  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
+    <value>Impossibile caricare il file in questa stanza. Prova a caricare il modulo PDF di ONLYOFFICE.</value>
+  </data>
+  <data name="FillOutExternalLinkTitle" xml:space="preserve">
+    <value>Link per la compilazione</value>
+  </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>Link al modulo</value>
+  </data>
 </root>

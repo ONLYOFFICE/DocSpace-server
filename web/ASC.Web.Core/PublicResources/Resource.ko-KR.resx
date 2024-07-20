@@ -1036,4 +1036,7 @@
   <data name="UserFreeSpaceException" xml:space="preserve">
     <value>사용자 공간 할당량을 초과했습니다</value>
   </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>추가된 관리자/파워 사용자:</value>
+  </data>
 </root>

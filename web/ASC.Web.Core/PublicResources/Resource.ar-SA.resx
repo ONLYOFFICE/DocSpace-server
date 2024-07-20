@@ -1095,4 +1095,7 @@
   <data name="UserFreeSpaceException" xml:space="preserve">
     <value>تم تجاوز حصة مساحة المستخدم</value>
   </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>تمت إضافة المشرفين/المستخدمين المتميزين:</value>
+  </data>
 </root>

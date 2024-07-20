@@ -1592,9 +1592,6 @@ $TrulyYours</value>
   <data name="ButtonConfirmInvite" xml:space="preserve">
     <value>DocSpace-Einladung bestätigen</value>
   </data>
-  <data name="ButtonConfirmEmail" xml:space="preserve">
-    <value>BESTÄTIGEN</value>
-  </data>
   <data name="ButtonCollaborate" xml:space="preserve">
     <value>In DocSpace zusammenarbeiten</value>
   </data>

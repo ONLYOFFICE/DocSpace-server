@@ -476,4 +476,22 @@
   <data name="User" xml:space="preserve">
     <value>普通用户</value>
   </data>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>不支持将多个文件移动到表单填写房间。一次移动一个 ONLYOFFICE PDF 表单。</value>
+  </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>不支持将文件夹移动到表单填写房间。一次移动一个 ONLYOFFICE PDF 表单。</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>无法将文件移动到此房间。请尝试移动 ONLYOFFICE PDF 表单。</value>
+  </data>
+  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
+    <value>无法将文件上传到此房间。请尝试上传 ONLYOFFICE PDF 表单。</value>
+  </data>
+  <data name="FillOutExternalLinkTitle" xml:space="preserve">
+    <value>填写链接</value>
+  </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>表单链接</value>
+  </data>
 </root>

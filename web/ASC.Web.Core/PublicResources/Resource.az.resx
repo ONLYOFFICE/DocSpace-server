@@ -1036,4 +1036,7 @@
   <data name="UserFreeSpaceException" xml:space="preserve">
     <value>İstifadəçi məkanı kvota limitini keçib</value>
   </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>Administratorlar/Güclü istifadəçilər əlavə edildi:</value>
+  </data>
 </root>
