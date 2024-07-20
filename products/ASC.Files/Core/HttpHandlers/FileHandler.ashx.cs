@@ -1424,7 +1424,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             logger.ErrorDocServiceTrackAuth(validateResult, FilesLinkUtility.AuthKey, auth);
             throw new HttpException((int)HttpStatusCode.Forbidden, FilesCommonResource.ErrorMessage_SecurityException);
         }
-
+        var fillingSessionId = context.Request.Query[FilesLinkUtility.FillingSessionId];
         TrackerData fileData;
         try
         {
@@ -1512,7 +1512,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
         TrackResponse result;
         try
         {
-            result = await documentServiceTrackerHelper.ProcessDataAsync(fileId, fileData);
+            result = await documentServiceTrackerHelper.ProcessDataAsync(fileId, fileData, fillingSessionId);
         }
         catch (Exception e)
         {

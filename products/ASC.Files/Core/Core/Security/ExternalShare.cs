@@ -39,7 +39,7 @@ public class ExternalShare(Global global,
     private string _dbKey;
     private const string RoomLinkPattern = "rooms/share?key={0}";
 
-    public async Task<LinkData> GetLinkDataAsync<T>(FileEntry<T> entry, Guid linkId)
+    public async Task<LinkData> GetLinkDataAsync<T>(FileEntry<T> entry, Guid linkId, bool isFile = false)
     {
         var key = await CreateShareKeyAsync(linkId);
         string url = null;
@@ -59,7 +59,7 @@ public class ExternalShare(Global global,
                 {
                     url = file.DownloadUrl;
                 }
-                
+
                 url = QueryHelpers.AddQueryString(url, FilesLinkUtility.ShareKey, key);
                 break;
             case Folder<T> folder when DocSpaceHelper.IsRoom(folder.FolderType):
@@ -69,7 +69,12 @@ public class ExternalShare(Global global,
                 url = QueryHelpers.AddQueryString(string.Format(RoomLinkPattern, key), "folder", HttpUtility.UrlEncode(folder.Id.ToString()!));
                 break;
         }
-        
+
+        if (isFile)
+        {
+            url = QueryHelpers.AddQueryString(url, FilesLinkUtility.IsFile, "true");
+        }
+
         return new LinkData
         {
             Url = commonLinkUtility.GetFullAbsolutePath(url),

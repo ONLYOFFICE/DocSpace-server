@@ -77,6 +77,8 @@ public class FilesLinkUtility
     public const string AuthKey = "stream_auth";
     public const string Anchor = "anchor";
     public const string ShareKey = "share";
+    public const string FillingSessionId = "filling_session_id";
+    public const string IsFile = "is_file";
 
     public string FileHandlerPath
     {
