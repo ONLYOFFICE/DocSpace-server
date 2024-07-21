@@ -815,7 +815,7 @@
     <value>Настройки успешно обновлены</value>
   </data>
   <data name="SuccessfullySentNotificationDeleteUserInfoMessage" xml:space="preserve">
-    <value>Инструкции по удалению профиля были отправлены на адрес {0}</value>
+    <value>Инструкции по отключению профиля были отправлены на адрес {0}</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>Неправильный код</value>

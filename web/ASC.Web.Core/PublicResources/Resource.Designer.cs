@@ -2769,7 +2769,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Instructions to delete your profile has been sent to {0} email address.
+        ///   Looks up a localized string similar to Instructions to disable your profile has been sent to {0} email address.
         /// </summary>
         public static string SuccessfullySentNotificationDeleteUserInfoMessage {
             get {
