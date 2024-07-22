@@ -178,7 +178,6 @@ public class GoogleWorkspaceMigrator : Migrator
                 Log(MigrationResource.CanNotParseArchives, ex);
                 if (MigrationInfo.FailedArchives.Count == _takeouts.Length)
                 {
-                    await ReportProgressAsync(_lastProgressUpdate, MigrationResource.CanNotParseArchives);
                     throw new Exception(MigrationResource.CanNotParseArchives);
                 }
             }

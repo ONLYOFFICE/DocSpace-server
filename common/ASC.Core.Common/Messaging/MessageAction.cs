@@ -146,7 +146,7 @@ public enum MessageAction
 
     FileUploaded = 5011,
     FileImported = 5012,
-    FileUploadedWithOverwriting = 5099, // last
+    FileUploadedWithOverwriting = 5099,
 
     FileCopied = 5013,
     FileCopiedWithOverwriting = 5014,
@@ -203,6 +203,7 @@ public enum MessageAction
     RoomArchived = 5072,
     RoomUnarchived = 5073,
     RoomDeleted = 5074,
+    RoomCopied = 5100, // last
     
     RoomUpdateAccessForUser = 5075,
     RoomRemoveUser = 5084,

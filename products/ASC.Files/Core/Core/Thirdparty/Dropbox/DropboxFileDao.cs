@@ -87,7 +87,7 @@ internal class DropboxFileDao(
             else
             {
                 var folderPath = Dao.MakeThirdId(file.ParentId);
-                var title = await _global.GetAvailableTitleAsync(file.Title, folderPath, IsExistAsync);
+                var title = await _global.GetAvailableTitleAsync(file.Title, folderPath, IsExistAsync, FileEntryType.File);
                 dropboxFile = await storage.FinishRenewableSessionAsync(dropboxSession, folderPath, title);
             }
 

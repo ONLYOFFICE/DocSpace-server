@@ -38,7 +38,8 @@ public class FilesControllerInternal(
     FileDtoHelper fileDtoHelper,
     ApiContext apiContext,
     FileShareDtoHelper fileShareDtoHelper,
-    HistoryApiHelper historyApiHelper)
+    HistoryApiHelper historyApiHelper,
+    IDistributedCache distributedCache)
     : FilesController<int>(filesControllerHelper,
         fileStorageService,
         fileOperationsManager,
@@ -46,7 +47,8 @@ public class FilesControllerInternal(
         folderDtoHelper,
         fileDtoHelper,
         apiContext,
-        fileShareDtoHelper)
+        fileShareDtoHelper,
+        distributedCache)
 {
     /// <summary>
     /// Get the list of actions performed on the file with the specified identifier
@@ -75,7 +77,8 @@ public class FilesControllerThirdparty(
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
     ApiContext apiContext,
-    FileShareDtoHelper fileShareDtoHelper)
+    FileShareDtoHelper fileShareDtoHelper,
+    IDistributedCache distributedCache)
     : FilesController<string>(filesControllerHelper,
         fileStorageService,
         fileOperationsManager,
@@ -83,7 +86,8 @@ public class FilesControllerThirdparty(
         folderDtoHelper,
         fileDtoHelper,
         apiContext,
-        fileShareDtoHelper);
+        fileShareDtoHelper,
+        distributedCache);
 
 public abstract class FilesController<T>(FilesControllerHelper filesControllerHelper,
         FileStorageService fileStorageService,
@@ -92,7 +96,8 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
         ApiContext apiContext,
-        FileShareDtoHelper fileShareDtoHelper)
+        FileShareDtoHelper fileShareDtoHelper,
+        IDistributedCache distributedCache)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -179,12 +184,12 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     {
         if (inDto.DestFolderId.ValueKind == JsonValueKind.Number)
         {
-            return await filesControllerHelper.CopyFileAsAsync(fileId, inDto.DestFolderId.GetInt32(), inDto.DestTitle, inDto.Password);
+            return await filesControllerHelper.CopyFileAsAsync(fileId, inDto.DestFolderId.GetInt32(), inDto.DestTitle, inDto.Password, inDto.ToForm);
         }
 
         if (inDto.DestFolderId.ValueKind == JsonValueKind.String)
         {
-            return await filesControllerHelper.CopyFileAsAsync(fileId, inDto.DestFolderId.GetString(), inDto.DestTitle, inDto.Password);
+            return await filesControllerHelper.CopyFileAsAsync(fileId, inDto.DestFolderId.GetString(), inDto.DestTitle, inDto.Password, inDto.ToForm);
         }
 
         return null;
@@ -259,6 +264,16 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
+    }
+
+
+    [AllowAnonymous]
+    [HttpGet("file/fillresult")]
+    public async Task<FillingFormResultDto<T>> GetFillResultAsync(string fillingSessionId)
+    {
+        var completedFormId = await distributedCache.GetStringAsync(fillingSessionId);
+
+        return await filesControllerHelper.GetFillResultAsync((T)Convert.ChangeType(completedFormId, typeof(T)));
     }
 
     /// <summary>
@@ -450,6 +465,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">File security information</returns>
     /// <path>api/2.0/files/file/{id}/link</path>
     /// <httpMethod>GET</httpMethod>
+    [AllowAnonymous]
     [HttpGet("file/{id}/link")]
     public async Task<FileShareDto> GetPrimaryExternalLinkAsync(T id)
     {

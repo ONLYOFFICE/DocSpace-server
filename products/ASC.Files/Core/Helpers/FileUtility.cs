@@ -47,6 +47,7 @@ public class FileUtilityConfiguration(IConfiguration configuration)
     private readonly string _signatureSecret = configuration["files:docservice:secret:value"];
     private readonly string _signatureHeader = configuration["files:docservice:secret:header"];
     private readonly string _forceSave = configuration["files:docservice:forcesave"];
+    public readonly int MaxPinnedRooms = int.Parse(configuration["files:pin"] ?? "10");
     public readonly Dictionary<FileType, string> InternalExtension = new()
         {
                 { FileType.Document, configuration["files:docservice:internal-doc"] ?? ".docx" },
@@ -188,16 +189,6 @@ public class FileUtility(
             return FileType.Document;
         }
 
-        if (ExtsFormTemplate.Contains(extension))
-        {
-            return FileType.OFormTemplate;
-        }
-
-        if (ExtsOForm.Contains(extension))
-        {
-            return FileType.OForm;
-        }
-
         if (ExtsSpreadsheet.Contains(extension))
         {
             return FileType.Spreadsheet;
@@ -276,7 +267,7 @@ public class FileUtility(
     private bool GetWebViewAccessibility(string fileName)
     {
         var ext = GetFileExtension(fileName).ToLower();
-        return ExtsWebPreviewed.Contains(ext);
+        return !ext.Equals(".pdf") && ExtsWebPreviewed.Contains(ext);
     }
     
     public bool CanWebView(string fileName)
@@ -586,16 +577,6 @@ public class FileUtility(
                 ".gdoc",
                 ".drawio",
                 ".md", ".markdown"
-            }.ToImmutableList();
-
-    public static readonly ImmutableList<string> ExtsFormTemplate = new List<string>
-    {
-                ".docxf"
-            }.ToImmutableList();
-
-    public static readonly ImmutableList<string> ExtsOForm = new List<string>
-    {
-                ".oform"
             }.ToImmutableList();
 
     public static readonly ImmutableList<string> ExtsPdf = new List<string>

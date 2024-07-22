@@ -782,7 +782,7 @@
     <value>Ajustes se han actualizado con éxito</value>
   </data>
   <data name="SuccessfullySentNotificationDeleteUserInfoMessage" xml:space="preserve">
-    <value>Las instrucciones para borrar su perfil se han enviado al correo electrónico {0}</value>
+    <value>Las instrucciones para desactivar su perfil se han enviado al correo electrónico {0}</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>Código incorrecto</value>

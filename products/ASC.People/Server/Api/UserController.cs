@@ -24,6 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.AuditTrail.Repositories;
+using ASC.AuditTrail.Types;
+
 namespace ASC.People.Api;
 
 public class UserController(
@@ -71,7 +74,8 @@ public class UserController(
     IQuotaService quotaService,
     CustomQuota customQuota,
     IDaoFactory daoFactory,
-    FilesMessageService filesMessageService)
+    FilesMessageService filesMessageService,
+    AuditEventsRepository auditEventsRepository)
     : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
 {
 
@@ -1441,7 +1445,18 @@ public class UserController(
                                 await activeUsersChecker.CheckAppend();
                             }
 
+
+                            if (user.Status == EmployeeStatus.Terminated && string.IsNullOrEmpty(user.FirstName) && string.IsNullOrEmpty(user.LastName))
+                            {
+                                var emailChangeEvent = (await auditEventsRepository.GetByFilterAsync(action: MessageAction.SendJoinInvite, entry: EntryType.User, target: MessageTarget.Create(user.Id).ToString(), limit: 1)).FirstOrDefault() ?? 
+                                                       (await auditEventsRepository.GetByFilterAsync(action: MessageAction.RoomInviteLinkUsed, entry: EntryType.User, target: MessageTarget.Create(user.Id).ToString(), limit: 1)).FirstOrDefault();
+
+                                user.Status = emailChangeEvent != null ? EmployeeStatus.Pending : EmployeeStatus.Active;
+                            }
+                            else
+                            {
                             user.Status = EmployeeStatus.Active;
+                            }
 
                             await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
                         }
@@ -1495,7 +1510,7 @@ public class UserController(
             .ToAsyncEnumerable()
             .Where(userId => !_userManager.IsSystemUser(userId))
             .SelectAwait(async userId => await _userManager.GetUsersAsync(userId))
-            .Where(r => r.Status == EmployeeStatus.Active)
+            .Where(r => r.Status != EmployeeStatus.Terminated)
             .ToListAsync();
 
         foreach (var user in users)

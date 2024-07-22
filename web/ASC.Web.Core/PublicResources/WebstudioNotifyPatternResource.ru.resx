@@ -1532,7 +1532,7 @@ $OrangeButton
 $TrulyYours</value>
   </data>
   <data name="subject_send_whats_new" xml:space="preserve">
-    <value>Новости Вашего портала "${__VirtualRootPath}":"${__VirtualRootPath}" за $Date</value>
+    <value>Новости Вашего портала ${__VirtualRootPath} за $Date</value>
   </data>
   <data name="subject_change_password_v115" xml:space="preserve">
     <value>Подтвердите изменение пароля</value>
@@ -1749,6 +1749,6 @@ $activity
 #end</value>
   </data>
   <data name="subject_rooms_activity" xml:space="preserve">
-    <value>Новости Вашего портала "${__VirtualRootPath}":"${__VirtualRootPath}" за последний час</value>
+    <value>Новости Вашего портала ${__VirtualRootPath} за последний час</value>
   </data>
 </root>

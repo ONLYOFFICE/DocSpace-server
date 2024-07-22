@@ -27,7 +27,7 @@
 namespace ASC.Common.Caching;
 public class RabbitMQSettings
 {
-    public const ushort DefaultChannelMax = ushort.MaxValue;
+    private const ushort DefaultChannelMax = ConnectionFactory.DefaultChannelMax * 8;
     
     public string HostName { get; set; }
     public string UserName { get; set; }

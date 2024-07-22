@@ -64,7 +64,6 @@ public class DbFile : BaseEntity, IDbFile, IDbSearch, ISearchItemDocument
 
     public DbTenant Tenant { get; set; }
 
-
     [Nested]
     public List<DbFolderTree> Folders { get; set; }
 

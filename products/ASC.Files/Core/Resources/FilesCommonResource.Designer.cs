@@ -996,6 +996,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Form number.
+        /// </summary>
+        public static string FormNumber {
+            get {
+                return ResourceManager.GetString("FormNumber", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Anonymous.
         /// </summary>
         public static string Guest {

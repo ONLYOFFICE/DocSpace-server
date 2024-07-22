@@ -773,7 +773,7 @@
     <value>Le impostazioni sono state aggiornate con successo</value>
   </data>
   <data name="SuccessfullySentNotificationDeleteUserInfoMessage" xml:space="preserve">
-    <value>Le istruzioni di eliminazione del tuo profilo sono state inviate al {0} indirizzo email</value>
+    <value>Le istruzioni per disattivare il tuo profilo sono state inviate all'indirizzo email {0}</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>Codice non corretto</value>

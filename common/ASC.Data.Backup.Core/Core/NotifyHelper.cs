@@ -145,7 +145,7 @@ public class NotifyHelper(UserManager userManager,
 
         if (users.Any())
         {
-            var args = await CreateArgsAsync(region, url);
+            var args = CreateArgsAsync(region, url);
             if (action.Equals(Actions.MigrationPortalSuccessV115))
             {
                 foreach (var user in users)
@@ -162,6 +162,9 @@ public class NotifyHelper(UserManager userManager,
 
                     var bestReagardsTxt = WebstudioNotifyPatternResource.ResourceManager.GetString("BestRegardsText", culture);
                     currentArgs.Add(TagValues.TrulyYours(studioNotifyHelper, bestReagardsTxt));
+
+                    var logoArgs = await CreateLogoArgsAsync(culture);
+                    currentArgs.AddRange(logoArgs);
 
                     await client.SendNoticeToAsync(
                         action,
@@ -181,7 +184,7 @@ public class NotifyHelper(UserManager userManager,
         }
     }
 
-    private async Task<List<ITagValue>> CreateArgsAsync(string region, string url)
+    private List<ITagValue> CreateArgsAsync(string region, string url)
     {
         var args = new List<ITagValue>
         {
@@ -193,14 +196,21 @@ public class NotifyHelper(UserManager userManager,
         {
             args.Add(new TagValue(CommonTags.VirtualRootPath, url));
             args.Add(new TagValue(CommonTags.ProfileUrl, url + commonLinkUtility.GetMyStaff()));
+        }
 
-            var attachment = await tenantLogoManager.GetMailLogoAsAttachmentAsync();
+        return args;
+    }
 
-            if (attachment != null)
-            {
-                args.Add(new TagValue(CommonTags.LetterLogo, "cid:" + attachment.ContentId));
-                args.Add(new TagValue(CommonTags.EmbeddedAttachments, new[] { attachment }));
-            }
+    private async Task<List<ITagValue>> CreateLogoArgsAsync(CultureInfo cultureInfo)
+    {
+        var args = new List<ITagValue>();
+
+        var attachment = await tenantLogoManager.GetMailLogoAsAttachmentAsync(cultureInfo);
+
+        if (attachment != null)
+        {
+            args.Add(new TagValue(CommonTags.LetterLogo, "cid:" + attachment.ContentId));
+            args.Add(new TagValue(CommonTags.EmbeddedAttachments, new[] { attachment }));
         }
 
         return args;

@@ -115,11 +115,9 @@ internal class SharePointFileDao(
             case FilterType.DocumentsOnly:
                 files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Document);
                 break;
-            case FilterType.OFormOnly:
-                files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.OForm);
-                break;
-            case FilterType.OFormTemplateOnly:
-                files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.OFormTemplate);
+            case FilterType.Pdf:
+            case FilterType.PdfForm:
+                files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Pdf);
                 break;
             case FilterType.PresentationsOnly:
                 files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Presentation);
@@ -199,11 +197,9 @@ internal class SharePointFileDao(
             case FilterType.DocumentsOnly:
                 files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Document);
                 break;
-            case FilterType.OFormOnly:
-                files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.OForm);
-                break;
-            case FilterType.OFormTemplateOnly:
-                files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.OFormTemplate);
+            case FilterType.Pdf:
+            case FilterType.PdfForm:
+                files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Pdf);
                 break;
             case FilterType.PresentationsOnly:
                 files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Presentation);
@@ -324,7 +320,7 @@ internal class SharePointFileDao(
             if (!sharePointFile.Name.Equals(file.Title))
             {
                 var folder = await SharePointProviderInfo.GetFolderByIdAsync(file.ParentId);
-                file.Title = await global.GetAvailableTitleAsync(file.Title, folder.ServerRelativeUrl, IsExistAsync);
+                file.Title = await global.GetAvailableTitleAsync(file.Title, folder.ServerRelativeUrl, IsExistAsync, FileEntryType.File);
 
                 var id = await SharePointProviderInfo.RenameFileAsync(DaoSelector.ConvertId(resultFile.Id), file.Title);
 
@@ -337,7 +333,7 @@ internal class SharePointFileDao(
         if (file.ParentId != null)
         {
             var folder = await SharePointProviderInfo.GetFolderByIdAsync(file.ParentId);
-            file.Title = await global.GetAvailableTitleAsync(file.Title, folder.ServerRelativeUrl, IsExistAsync);
+            file.Title = await global.GetAvailableTitleAsync(file.Title, folder.ServerRelativeUrl, IsExistAsync, FileEntryType.File);
 
             return SharePointProviderInfo.ToFile(await SharePointProviderInfo.CreateFileAsync(folder.ServerRelativeUrl + "/" + file.Title, fileStream));
 

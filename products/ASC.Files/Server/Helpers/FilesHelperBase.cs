@@ -32,12 +32,17 @@ public abstract class FilesHelperBase(
     SocketManager socketManager,
     FileDtoHelper fileDtoHelper,
     FileStorageService fileStorageService,
-    IHttpContextAccessor httpContextAccessor)
+    FileChecker fileChecker,
+    IHttpContextAccessor httpContextAccessor,
+    IDistributedCache distributedCache)
     {
     protected readonly FilesSettingsHelper _filesSettingsHelper = filesSettingsHelper;
     protected readonly FileUploader _fileUploader = fileUploader;
     protected readonly FileDtoHelper _fileDtoHelper = fileDtoHelper;
     protected readonly FileStorageService _fileStorageService = fileStorageService;
+    protected readonly IDistributedCache _distributedCache = distributedCache;
+
+    protected readonly FileChecker _fileChecker = fileChecker;
     protected readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
     public async Task<FileDto<T>> InsertFileAsync<T>(T folderId, Stream file, string title, bool createNewIfExist, bool keepConvertStatus = false)

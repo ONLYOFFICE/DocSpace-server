@@ -834,4 +834,7 @@
   <data name="FileSizePostfix" xml:space="preserve">
     <value>bytes,KB,MB,GB,TB</value>
   </data>
+  <data name="RoomCopied" xml:space="preserve">
+    <value>Room copied: {0}</value>
+  </data>
 </root>

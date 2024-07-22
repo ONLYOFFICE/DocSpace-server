@@ -144,6 +144,7 @@ internal class RoomsActionMapper : IModuleActionMapper
                 EntryType.Room, new Dictionary<ActionType, MessageAction[]>
                 {
                     { ActionType.Create, [MessageAction.RoomCreated] },
+                    { ActionType.Copy, [MessageAction.RoomCopied] },
                     {
                         ActionType.Update, [
                             MessageAction.RoomArchived,

@@ -174,6 +174,8 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
         bool canFill;
         var canStartFilling = true;
         var isSubmitOnly = false;
+
+        var fillingSessionId = "";
         if (fileType == FileType.Pdf)
         {
             var folderDao = daoFactory.GetFolderDao<T>();
@@ -205,6 +207,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                         canFill = true;
                         isSubmitOnly = true;
                         editorType = EditorType.Embedded;
+                        fillingSessionId = Guid.NewGuid().ToString("N");
                         break;
                     }
 
@@ -240,6 +243,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                                 await socketManager.UpdateFileAsync(file);
 
                                 file = formDraft;
+                                fillingSessionId = Guid.NewGuid().ToString("N");
                             }
                             else
                             {
@@ -255,9 +259,11 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                     canEdit = false;
                     canFill = true;
                     editorType = EditorType.Embedded;
+                    fillingSessionId = Guid.NewGuid().ToString("N");
                     break;
 
                 case FolderType.FormFillingFolderDone:
+                    editorType = EditorType.Embedded;
                     canEdit = false;
                     canFill = false;
                     break;
@@ -291,7 +297,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
             }
         }
 
-        var result = await configurationConverter.Convert(configuration, file);
+        var result = await configurationConverter.Convert(configuration, file, fillingSessionId);
         
         if (authContext.IsAuthenticated && !file.Encrypted && !file.ProviderEntry 
             && result.File.Security.TryGetValue(FileSecurity.FilesSecurityActions.Read, out var canRead) && canRead)
@@ -308,11 +314,16 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
             }
         }
         
-        if (fileType == FileType.Pdf)
+        if (fileType == FileType.Pdf && file.IsForm)
         {
             result.StartFilling = canStartFilling;
         }
 
+        if (!string.IsNullOrEmpty(fillingSessionId))
+        {
+            result.FillingSessionId = fillingSessionId;
+        }
+       
         return result;
     }
 
