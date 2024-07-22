@@ -1498,7 +1498,7 @@ public class EntryManager(IDaoFactory daoFactory,
                         }
 
                         var originalForm = await fileDao.GetFileAsync(properties.FormFilling.OriginalFormId);
-                        await notifyClient.SendFormSubmittedAsync(room, securityContext.CurrentAccount.ID, originalForm.CreateBy, pdfFile, dateTimeNow, properties.FormFilling.ResultFormNumber + 1);
+                        await notifyClient.SendFormSubmittedAsync(room, originalForm, pdfFile);
 
                         if (fillingSessionId != null)
                         {

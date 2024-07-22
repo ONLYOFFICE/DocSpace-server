@@ -156,4 +156,31 @@ $__AuthorName deleted the room: $RoomTitle</value>
   <data name="subject_RoomRemoved" xml:space="preserve">
     <value>DocSpace notification. Room deleted</value>
   </data>
+  <data name="button_CheckReadyForms" xml:space="preserve">
+    <value>Check ready forms</value>
+  </data>
+  <data name="pattern_FormReceived" xml:space="preserve">
+    <value>h1. Form $Message was filled out
+
+A new form "$DocumentTitle":"$DocumentURL" was filled out in the room "$RoomTitle":"$RoomURL"
+
+Executor: "$FromUserName":"$FromUserLink"
+
+$OrangeButton</value>
+  </data>
+  <data name="pattern_FormSubmitted" xml:space="preserve">
+    <value>h1. You have filled out the form $Message
+
+In the room "$RoomTitle":"$RoomURL" you filled out the form "$DocumentTitle":"$DocumentURL"
+
+Filling organizer: "$ToUserName":"$ToUserLink"
+
+$OrangeButton</value>
+  </data>
+  <data name="subject_FormReceived" xml:space="preserve">
+    <value>DocSpace notification. The form was filled out</value>
+  </data>
+  <data name="subject_FormSubmitted" xml:space="preserve">
+    <value>DocSpace notification. The form was filled out</value>
+  </data>
 </root>
