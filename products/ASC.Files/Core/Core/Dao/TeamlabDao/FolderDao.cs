@@ -809,11 +809,15 @@ internal class FolderDao(
         }
 
     public async Task<IDictionary<int, string>> CanMoveOrCopyAsync(IEnumerable<int> folderIds, int to)
-    {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-
+    {        
         var result = new Dictionary<int, string>();
-
+        if (!folderIds.Any())
+        {
+            return result;
+        }
+        
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         foreach (var folderId in folderIds)
         {
@@ -828,19 +832,7 @@ internal class FolderDao(
 
             if (conflict != 0)
             {
-                var files = filesDbContext.DbFilesAsync(tenantId, folderId, conflict);
-
-                await foreach (var file in files)
-                {
-                    result[file.Id] = file.Title;
-                }
-
-                var children = await filesDbContext.ArrayAsync(tenantId, folderId).ToListAsync();
-
-                foreach (var pair in await CanMoveOrCopyAsync(children, conflict))
-                {
-                    result.Add(pair.Key, pair.Value);
-                }
+                result[conflict] = "";
             }
         }
 

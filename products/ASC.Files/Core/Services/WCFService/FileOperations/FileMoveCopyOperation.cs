@@ -460,21 +460,32 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                     {
                         if (conflictFolder != null)
                         {
-                            if (!conflictFolder.ProviderEntry)
+                            if (_resolveType != FileConflictResolveType.Skip)
+                            {                            
+                                if (ProcessedFolder(folderId))
+                                {
+                                    sb.Append($"folder_{folderId}{SplitChar}");
+                                }
+                                
+                                continue;
+                            }
+
+                            if (!conflictFolder.ProviderEntry && _resolveType == FileConflictResolveType.Duplicate)
                             {
                                 conflictFolder.Id = default;
                                 conflictFolder.Title = await global.GetAvailableTitleAsync(conflictFolder.Title, conflictFolder.ParentId, folderDao.IsExistAsync, FileEntryType.Folder);
                                 conflictFolder.Id = await folderDao.SaveFolderAsync(conflictFolder);
                             }
-                            
+
                             newFolder = conflictFolder;
-                            
+
                             await filesMessageService.SendAsync(MessageAction.FolderCopied, newFolder, toFolder, _headers, newFolder.Title, toFolder.Title, toFolder.Id.ToString());
-                            
+
                             if (isToFolder)
                             {
                                 needToMark.Add(conflictFolder);
                             }
+                            
                         }
                         else
                         {
@@ -565,7 +576,17 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                         else
                         {
                             if (conflictFolder != null)
-                            {
+                            {                            
+                                if (_resolveType != FileConflictResolveType.Skip)
+                                {                            
+                                    if (ProcessedFolder(folderId))
+                                    {
+                                        sb.Append($"folder_{folderId}{SplitChar}");
+                                    }
+                                
+                                    continue;
+                                }
+                                
                                 TTo newFolderId;
                                 if (copy)
                                 {
