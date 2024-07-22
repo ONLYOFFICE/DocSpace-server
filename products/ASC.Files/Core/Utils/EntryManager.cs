@@ -252,7 +252,8 @@ public class EntryManager(IDaoFactory daoFactory,
     TenantManager tenantManager,
     ExternalShare externalShare,
     FileChecker fileChecker,
-    IDistributedCache distributedCache)
+    IDistributedCache distributedCache,
+    NotifyClient notifyClient)
 {
     private const string UpdateList = "filesUpdateList";
 
@@ -1467,7 +1468,8 @@ public class EntryManager(IDaoFactory daoFactory,
                         var ext = FileUtility.GetFileExtension(file.Title);
                         var sourceTitle = Path.GetFileNameWithoutExtension(file.Title);
 
-                        pdfFile.Title = $"{properties.FormFilling.ResultFormNumber + 1} - {sourceTitle} ({$"{tenantUtil.DateTimeNow().ToString("dd-MM-yyyy H-mm")}"}){ext}";
+                        var dateTimeNow = tenantUtil.DateTimeNow();
+                        pdfFile.Title = $"{properties.FormFilling.ResultFormNumber + 1} - {sourceTitle} ({$"{dateTimeNow.ToString("dd-MM-yyyy H-mm")}"}){ext}";
                         pdfFile.ParentId = properties.FormFilling.ResultsFolderId;
                         pdfFile.Comment = string.IsNullOrEmpty(comment) ? null : comment;
                         pdfFile.Category = (int)FilterType.Pdf;
@@ -1494,6 +1496,9 @@ public class EntryManager(IDaoFactory daoFactory,
                                 }
                             }
                         }
+
+                        var originalForm = await fileDao.GetFileAsync(properties.FormFilling.OriginalFormId);
+                        await notifyClient.SendFormSubmittedAsync(room, securityContext.CurrentAccount.ID, originalForm.CreateBy, pdfFile, dateTimeNow, properties.FormFilling.ResultFormNumber + 1);
 
                         if (fillingSessionId != null)
                         {

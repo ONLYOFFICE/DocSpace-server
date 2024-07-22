@@ -245,7 +245,10 @@ public class NotifyClient(WorkContext notifyContext,
                 );
         }
     }
+    public async Task SendFormSubmittedAsync<T>(Folder<T> room, Guid userId, Guid manager, FileEntry<T> form, DateTime date, int formNumber)
+    {
 
+    }
     public async Task SendRoomRemovedAsync<T>(FileEntry<T> folder, List<AceWrapper> aces, Guid userId)
     {
         if (folder == null || folder.FileEntryType != FileEntryType.Folder || aces.Count == 0)
