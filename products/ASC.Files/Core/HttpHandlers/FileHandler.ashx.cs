@@ -504,6 +504,8 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
 
         if (toRead == fullLength)
         {
+            context.Response.Headers.Append("Accept-Ranges", "bytes");
+            context.Response.Headers.Append("Content-Range", $" bytes 0-{fullLength - 1}/{fullLength}");
             await fileStream.CopyToAsync(context.Response.Body);
             return true;
         }
