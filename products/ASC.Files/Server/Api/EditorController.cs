@@ -263,6 +263,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                     break;
 
                 case FolderType.FormFillingFolderDone:
+                    editorType = EditorType.Embedded;
                     canEdit = false;
                     canFill = false;
                     break;
