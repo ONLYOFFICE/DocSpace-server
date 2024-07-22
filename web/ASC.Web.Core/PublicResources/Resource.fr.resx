@@ -815,7 +815,7 @@
     <value>Les paramètres ont été actualisés avec succès</value>
   </data>
   <data name="SuccessfullySentNotificationDeleteUserInfoMessage" xml:space="preserve">
-    <value>Instructions sur la suppression de votre profil ont été envoyées à l'adresse e-mail {0}</value>
+    <value>Les instructions pour désactiver votre profil ont été envoyées à l'adresse e-mail {0}</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>Code incorrect</value>
