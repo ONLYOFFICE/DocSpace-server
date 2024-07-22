@@ -955,7 +955,7 @@
     <value>Settings have been successfully updated</value>
   </data>
   <data name="SuccessfullySentNotificationDeleteUserInfoMessage" xml:space="preserve">
-    <value>Instructions to delete your profile has been sent to {0} email address</value>
+    <value>Instructions to disable your profile has been sent to {0} email address</value>
   </data>
   <data name="Tariffs_admin" xml:space="preserve">
     <value>Business</value>

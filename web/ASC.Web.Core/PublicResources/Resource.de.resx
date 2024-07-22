@@ -815,7 +815,7 @@
     <value>Die Einstellungen wurden erfolgreich aktualisiert</value>
   </data>
   <data name="SuccessfullySentNotificationDeleteUserInfoMessage" xml:space="preserve">
-    <value>Die Hinweise zum Löschen Ihres Profils wurden an Ihre E-Mail-Adresse {0} verschickt</value>
+    <value>Die Hinweise zum Deaktivieren Ihres Profils wurden an Ihre E-Mail-Adresse {0} verschickt</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>Falscher Code</value>
