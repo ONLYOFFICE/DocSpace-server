@@ -93,12 +93,12 @@ internal abstract class ThirdPartyProviderDao
         return Task.FromResult<Stream>(null);
     }
 
-    public Task<EntryProperties> GetProperties(string fileId)
+    public Task<EntryProperties<string>> GetProperties(string fileId)
     {
-        return Task.FromResult<EntryProperties>(null);
+        return Task.FromResult<EntryProperties<string>>(null);
     }
 
-    public Task SaveProperties(string fileId, EntryProperties entryProperties)
+    public Task SaveProperties(string fileId, EntryProperties<string> entryProperties)
     {
         return Task.CompletedTask;
     }

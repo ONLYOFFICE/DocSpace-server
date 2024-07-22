@@ -715,12 +715,12 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         return GetThumbnailAsync(file.Id, width, height);
     }
 
-    public Task<EntryProperties> GetProperties(string fileId)
+    public Task<EntryProperties<string>> GetProperties(string fileId)
     {
-        return Task.FromResult<EntryProperties>(null);
+        return Task.FromResult<EntryProperties<string>>(null);
     }
 
-    public Task SaveProperties(string fileId, EntryProperties entryProperties)
+    public Task SaveProperties(string fileId, EntryProperties<string> entryProperties)
     {
         return Task.CompletedTask;
     }

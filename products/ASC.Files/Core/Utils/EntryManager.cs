@@ -1190,14 +1190,14 @@ public class EntryManager(IDaoFactory daoFactory,
                     var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
                     title = $"{user.FirstName} {user.LastName} - {sourceFile.Title}";
 
-                    if (properties.FormFilling.ResultsFileID == null)
+                    if (Equals(properties.FormFilling.ResultsFileID, default(T)))
                     {
                         var initFormFillingProperties = await InitFormFillingProperties(folderIfNew.Id, sourceTitle, sourceFile.Id, inProcessFormFolderId, readyFormFolderId, folderIfNew.CreateBy, properties, fileDao, folderDao);
-                        linkedFile.ParentId = (T)Convert.ChangeType(initFormFillingProperties.FormFilling.ToFolderId, typeof(T));
+                        linkedFile.ParentId = initFormFillingProperties.FormFilling.ToFolderId;
                     }
                     else
                     {
-                        linkedFile.ParentId = (T)Convert.ChangeType(properties.FormFilling.ToFolderId, typeof(T));
+                        linkedFile.ParentId = properties.FormFilling.ToFolderId;
                     }
                     linkedFile.Category = (int)FilterType.PdfForm;
                 }
@@ -1458,7 +1458,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
                     if (properties != null)
                     {
-                        if (securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID) && properties.FormFilling.ResultsFileID == null)
+                        if (securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID) && (properties.FormFilling.ResultsFileID == null || Equals(properties.FormFilling.ResultsFileID, default(T))))
                         {
                             await InitFormFillingFolders(file, room, properties, folderDao, fileDao);
                         }
@@ -1468,7 +1468,7 @@ public class EntryManager(IDaoFactory daoFactory,
                         var sourceTitle = Path.GetFileNameWithoutExtension(file.Title);
 
                         pdfFile.Title = $"{properties.FormFilling.ResultFormNumber + 1} - {sourceTitle} ({$"{tenantUtil.DateTimeNow().ToString("dd-MM-yyyy H-mm")}"}){ext}";
-                        pdfFile.ParentId = (T)Convert.ChangeType(properties.FormFilling.ResultsFolderId, typeof(T));
+                        pdfFile.ParentId = properties.FormFilling.ResultsFolderId;
                         pdfFile.Comment = string.IsNullOrEmpty(comment) ? null : comment;
                         pdfFile.Category = (int)FilterType.Pdf;
                         File<T> result;
@@ -1512,23 +1512,19 @@ public class EntryManager(IDaoFactory daoFactory,
                             await socketManager.CreateFileAsync(result);
 
                             var resultUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, result.Title, result.Id, result.Version)));
-                            await formFillingReportCreator.UpdateFormFillingReport((T)Convert.ChangeType(properties.FormFilling.ResultsFileID, typeof(T)), formsDataUrl, resultUrl);
+                            await formFillingReportCreator.UpdateFormFillingReport(properties.FormFilling.ResultsFileID, formsDataUrl, resultUrl);
 
-                            if (!string.Equals(properties.FormFilling.OriginalFormId, file.Id.ToString()))
+                            if (!Equals(properties.FormFilling.OriginalFormId, file.Id))
                             {
-                                var origProperties = await daoFactory.GetFileDao<T>().GetProperties((T)Convert.ChangeType(properties.FormFilling.OriginalFormId, typeof(T)));
+                                var origProperties = await daoFactory.GetFileDao<T>().GetProperties(properties.FormFilling.OriginalFormId);
                                 origProperties.FormFilling.ResultFormNumber++;
-                                await fileDao.SaveProperties((T)Convert.ChangeType(properties.FormFilling.OriginalFormId, typeof(T)), origProperties);
-                            }
-                            else
-                            {
-                                properties.FormFilling.ResultFormNumber++;
+                                await fileDao.SaveProperties(properties.FormFilling.OriginalFormId, origProperties);
                             }
 
                             if (!securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))
                             {
                                 var sourceId = await linkDao.GetSourceAsync(file.Id);
-                                var sourceFile = await fileDao.GetFileAsync((T)Convert.ChangeType(sourceId, typeof(T)));
+                                var sourceFile = await fileDao.GetFileAsync(sourceId);
 
                                 await linkDao.DeleteLinkAsync(sourceId);
                                 await socketManager.UpdateFileAsync(sourceFile);
@@ -1999,7 +1995,7 @@ public class EntryManager(IDaoFactory daoFactory,
         await tagDao.SaveTagsAsync(tag);
     }
 
-    private async Task InitFormFillingFolders<T>(File<T> file, Folder<T> folder, EntryProperties properties, IFolderDao<T> folderDao, IFileDao<T> fileDao) {
+    private async Task InitFormFillingFolders<T>(File<T> file, Folder<T> folder, EntryProperties<T> properties, IFolderDao<T> folderDao, IFileDao<T> fileDao) {
         T inProcessFormFolderId;
         T readyFormFolderId;
 
@@ -2048,7 +2044,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
         return (await readyFormFolderTask, await inProcessFolderTask);
     }
-    private async Task<EntryProperties> InitFormFillingProperties<T>(T roomId, string sourceTitle, T sourceFileId, T inProcessFormFolderId, T readyFormFolderId, Guid createBy, EntryProperties properties, IFileDao<T> fileDao, IFolderDao<T> folderDao)
+    private async Task<EntryProperties<T>> InitFormFillingProperties<T>(T roomId, string sourceTitle, T sourceFileId, T inProcessFormFolderId, T readyFormFolderId, Guid createBy, EntryProperties<T> properties, IFileDao<T> fileDao, IFolderDao<T> folderDao)
     {
         var templatesFolder = serviceProvider.GetService<Folder<T>>();
         templatesFolder.Title = sourceTitle;
@@ -2071,10 +2067,10 @@ public class EntryManager(IDaoFactory daoFactory,
         var resultsFolderId = await resultsFolderTask;
 
         properties.FormFilling.Title = sourceTitle;
-        properties.FormFilling.RoomId = roomId.ToString();
-        properties.FormFilling.OriginalFormId = sourceFileId.ToString();
-        properties.FormFilling.ToFolderId = templatesFolderId.ToString();
-        properties.FormFilling.ResultsFolderId = resultsFolderId.ToString();
+        properties.FormFilling.RoomId = roomId;
+        properties.FormFilling.OriginalFormId = sourceFileId;
+        properties.FormFilling.ToFolderId = templatesFolderId;
+        properties.FormFilling.ResultsFolderId = resultsFolderId;
         properties.FormFilling.CollectFillForm = true;
 
         using (var textStream = new MemoryStream(Encoding.UTF8.GetBytes(""))) {
@@ -2085,11 +2081,11 @@ public class EntryManager(IDaoFactory daoFactory,
             csvFile.CreateBy = createBy;
 
             var file = await fileDao.SaveFileAsync(csvFile, textStream, false);
-            var csvProp = new EntryProperties() { FormFilling = new FormFillingProperties() };
-            csvProp.FormFilling.ResultsFolderId = resultsFolderId.ToString();
+            var csvProp = new EntryProperties<T>() { FormFilling = new FormFillingProperties<T>() };
+            csvProp.FormFilling.ResultsFolderId = resultsFolderId;
             await fileDao.SaveProperties(file.Id, csvProp);
 
-            properties.FormFilling.ResultsFileID = file.Id.ToString();
+            properties.FormFilling.ResultsFileID = file.Id;
         }
         await fileDao.SaveProperties(sourceFileId, properties);
 

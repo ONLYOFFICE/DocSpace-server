@@ -78,7 +78,7 @@ public class FillingFormResultDtoHelper(
             if (properties != null && properties.FormFilling != null)
             {
 
-                var originalForm = await fileStorageService.GetFileAsync((T)Convert.ChangeType(properties.FormFilling.OriginalFormId, typeof(T)), -1);
+                var originalForm = await fileStorageService.GetFileAsync(properties.FormFilling.OriginalFormId, -1);
                 var manager = await userManager.GetUsersAsync(originalForm.CreateBy);
 
                 var result = new FillingFormResultDto<T>()
@@ -87,7 +87,7 @@ public class FillingFormResultDtoHelper(
                     OriginalForm = await fileDtoHelper.GetAsync(originalForm),
                     FormNumber = properties.FormFilling.ResultFormNumber,
                     Manager = await employeeFullDtoHelper.GetSimpleWithEmail(manager),
-                    RoomId = record == null || record.EntryType == FileEntryType.Folder ? (T)Convert.ChangeType(properties.FormFilling.RoomId, typeof(T)): default(T)
+                    RoomId = record == null || record.EntryType == FileEntryType.Folder ? properties.FormFilling.RoomId : default(T)
                 };
                 return result;
             }
