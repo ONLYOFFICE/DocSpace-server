@@ -1039,4 +1039,10 @@
   <data name="TariffsFeature_used_manager" xml:space="preserve">
     <value>Pääkäyttäjät/Tehokäyttäjät lisätty:</value>
   </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>Kutsujen raja on ylitetty</value>
+  </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>Käyttäjä poistettu käytöstä</value>
+  </data>
 </root>
