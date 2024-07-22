@@ -136,6 +136,8 @@ public class FileDto<T> : FileEntryDto<T>
     public IDictionary<string, bool> AvailableExternalRights { get; set; }
     public string RequestToken { get; set; }
     public ApiDateTime LastOpened { get; set; }
+    
+    public override FileEntryType FileEntryType { get => FileEntryType.File; }
 
     public static FileDto<int> GetSample()
     {
