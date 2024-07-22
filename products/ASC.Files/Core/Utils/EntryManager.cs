@@ -1512,7 +1512,7 @@ public class EntryManager(IDaoFactory daoFactory,
                             await socketManager.CreateFileAsync(result);
 
                             var resultUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, result.Title, result.Id, result.Version)));
-                            await formFillingReportCreator.UpdateFormFillingReport(properties.FormFilling.ResultsFileID, formsDataUrl, resultUrl);
+                            await formFillingReportCreator.UpdateFormFillingReport(properties.FormFilling.ResultsFileID, resProp.FormFilling.ResultFormNumber, formsDataUrl, resultUrl);
 
                             if (!Equals(properties.FormFilling.OriginalFormId, file.Id))
                             {
