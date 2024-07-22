@@ -792,8 +792,8 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
 
         if (!string.IsNullOrEmpty(text))
         {
-            var splittedText = text.Split(" ");
-            q = splittedText.Aggregate(q, (current, t) => current.Where(u => u.FirstName.Contains(t) || u.LastName.Contains(t) || u.Title.Contains(t) || u.Location.Contains(t) || u.Email.Contains(t)));
+            var splittedText = text.Trim().ToLower().Split(" ");
+            q = splittedText.Aggregate(q, (current, t) => current.Where(u => u.FirstName.ToLower().Contains(t) || u.LastName.ToLower().Contains(t) || u.Title.ToLower().Contains(t) || u.Location.ToLower().Contains(t) || u.Email.ToLower().Contains(t)));
         }
 
         q = accountLoginType switch

@@ -412,8 +412,8 @@ public abstract class Migrator : IAsyncDisposable
             }
             catch (Exception ex)
             {
-                Log(string.Format(MigrationResource.CanNotCreateFile, file.Title), ex);
-                MigrationInfo.Errors.Add(string.Format(MigrationResource.CanNotCreateFile, file.Title));
+                Log(string.Format(MigrationResource.CanNotCreateFile, Path.GetFileName(file.Title)), ex);
+                MigrationInfo.Errors.Add(string.Format(MigrationResource.CanNotCreateFile, Path.GetFileName(file.Title)));
             }
         }
 
@@ -576,8 +576,8 @@ public abstract class Migrator : IAsyncDisposable
                             }
                             catch(Exception ex)
                             {
-                                Log(string.Format(MigrationResource.CanNotCreateFile, file.Title), ex);
-                                MigrationInfo.Errors.Add(string.Format(MigrationResource.CanNotCreateFile, file.Title));
+                                Log(string.Format(MigrationResource.CanNotCreateFile, Path.GetFileName(file.Title)), ex);
+                                MigrationInfo.Errors.Add(string.Format(MigrationResource.CanNotCreateFile, Path.GetFileName(file.Title)));
                             }
                         }
                     }
