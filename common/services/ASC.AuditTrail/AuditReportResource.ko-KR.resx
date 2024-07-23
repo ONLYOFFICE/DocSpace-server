@@ -556,7 +556,7 @@
     <value>게스트가 활성화되었습니다: {0}</value>
   </data>
   <data name="GuestAccount" xml:space="preserve">
-    <value>게스트 계정</value>
+    <value>게스트</value>
   </data>
   <data name="GroupsModule" xml:space="preserve">
     <value>그룹</value>

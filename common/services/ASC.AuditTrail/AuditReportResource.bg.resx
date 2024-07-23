@@ -284,7 +284,7 @@
     <value>Групата се актуализира: {0}</value>
   </data>
   <data name="GuestAccount" xml:space="preserve">
-    <value>Акаунт за гости</value>
+    <value>Анонимен</value>
   </data>
   <data name="GuestActivated" xml:space="preserve">
     <value>Активирано гост: {0}</value>

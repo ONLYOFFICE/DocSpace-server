@@ -290,7 +290,7 @@
     <value>Qrup Yeniləndi: {0}</value>
   </data>
   <data name="GuestAccount" xml:space="preserve">
-    <value>Qonaq Hesabı</value>
+    <value>Qonaq</value>
   </data>
   <data name="GuestActivated" xml:space="preserve">
     <value>Qonaq Aktivləşdirildi: {0}</value>

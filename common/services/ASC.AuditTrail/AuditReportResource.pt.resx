@@ -406,7 +406,7 @@
     <value>Grupo Atualizado: {0}</value>
   </data>
   <data name="GuestAccount" xml:space="preserve">
-    <value>Conta de Convidado</value>
+    <value>Convidado</value>
   </data>
   <data name="GuestActivated" xml:space="preserve">
     <value>Convidado Ativado: {0}</value>
