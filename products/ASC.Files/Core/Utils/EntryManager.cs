@@ -1458,7 +1458,9 @@ public class EntryManager(IDaoFactory daoFactory,
 
                     if (properties != null)
                     {
-                        if (securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID) && (properties.FormFilling.ResultsFileID == null || Equals(properties.FormFilling.ResultsFileID, default(T))))
+                        var userId = securityContext.CurrentAccount.ID;
+                        var user = await userManager.GetUsersAsync(userId);
+                        if (userId.Equals(ASC.Core.Configuration.Constants.Guest.ID) && (properties.FormFilling.ResultsFileID == null || Equals(properties.FormFilling.ResultsFileID, default(T))))
                         {
                             await InitFormFillingFolders(file, room, properties, folderDao, fileDao);
                         }
@@ -1472,6 +1474,12 @@ public class EntryManager(IDaoFactory daoFactory,
                         pdfFile.Comment = string.IsNullOrEmpty(comment) ? null : comment;
                         pdfFile.Category = (int)FilterType.Pdf;
                         File<T> result;
+
+                        await filesMessageService.SendAsync(
+                            MessageAction.FormSubmit, 
+                            file, MessageInitiator.DocsService,
+                            user.Id.Equals(ASC.Core.Configuration.Constants.Guest.ID) ? FilesCommonResource.Guest : user.DisplayUserName(false, displayUserSettingsHelper),
+                            file.Title);
 
                         if (tmpStream.CanSeek)
                         {

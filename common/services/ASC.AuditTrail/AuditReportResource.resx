@@ -837,4 +837,10 @@
   <data name="RoomCopied" xml:space="preserve">
     <value>Room copied: {0}</value>
   </data>
+  <data name="FormSubmit" xml:space="preserve">
+    <value>Users [{0}]. Form submitted: {1}</value>
+  </data>
+  <data name="FormOpenedForFilling" xml:space="preserve">
+    <value>File Opened For Filling: {0}</value>
+  </data>
 </root>

@@ -170,6 +170,9 @@ public enum MessageAction
 
     FolderDownloaded = 5057,
 
+    FormSubmit = 6046,
+    FormOpenedForFilling = 6047,
+
     ThirdPartyCreated = 5028,
     ThirdPartyUpdated = 5029,
     ThirdPartyDeleted = 5030,

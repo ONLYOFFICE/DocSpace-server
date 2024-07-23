@@ -190,7 +190,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
                 break;
 
             case TrackerStatus.Editing:
-                await ProcessEditAsync(fileId, fileData);
+                await ProcessEditAsync(fileId, fileData, !string.IsNullOrEmpty(fillingSessionId) );
                 break;
 
             case TrackerStatus.MustSave:
@@ -232,7 +232,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
         return null;
     }
 
-    private async Task ProcessEditAsync<T>(T fileId, TrackerData fileData)
+    private async Task ProcessEditAsync<T>(T fileId, TrackerData fileData, bool isFillingSession)
     {
         var users = await fileTracker.GetEditingByAsync(fileId);
         var usersDrop = new List<string>();
@@ -297,7 +297,8 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
                 await securityContext.AuthenticateMeWithoutCookieAsync(userId); //hack
             }
 
-            await filesMessageService.SendAsync(MessageAction.FileOpenedForChange, file, file.Title);
+            await filesMessageService.SendAsync(isFillingSession ? MessageAction.FormOpenedForFilling : MessageAction.FileOpenedForChange, file, file.Title);
+
             securityContext.Logout();
         }
     }
