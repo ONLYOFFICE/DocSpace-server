@@ -48,6 +48,7 @@ public class FillingFormResultDto<T>
     public EmployeeFullDto Manager { get; set; }
 
     public T RoomId { get; set; }
+    public bool isRoomMember { get; set; }
 
 }
 
@@ -58,7 +59,9 @@ public class FillingFormResultDtoHelper(
     FileDtoHelper fileDtoHelper,
     FileStorageService fileStorageService,
     EmployeeFullDtoHelper employeeFullDtoHelper,
-    ExternalShare externalShare)
+    ExternalShare externalShare,
+    FileSharing fileSharing,
+    AuthContext authContext)
 {
     public async Task<FillingFormResultDto<T>> GetAsync<T>(T completedFormId)
     {
@@ -81,13 +84,19 @@ public class FillingFormResultDtoHelper(
                 var originalForm = await fileStorageService.GetFileAsync(properties.FormFilling.OriginalFormId, -1);
                 var manager = await userManager.GetUsersAsync(originalForm.CreateBy);
 
+                var folderDao = daoFactory.GetFolderDao<T>();
+
+                var currentRoom = await folderDao.GetFolderAsync(properties.FormFilling.RoomId);
+                var aces = await fileSharing.GetSharedInfoAsync(currentRoom);
+
                 var result = new FillingFormResultDto<T>()
                 {
                     CompletedForm = await fileDtoHelper.GetAsync(file),
                     OriginalForm = await fileDtoHelper.GetAsync(originalForm),
                     FormNumber = properties.FormFilling.ResultFormNumber,
                     Manager = await employeeFullDtoHelper.GetSimpleWithEmail(manager),
-                    RoomId = record == null || record.EntryType == FileEntryType.Folder ? properties.FormFilling.RoomId : default(T)
+                    RoomId = record == null || record.EntryType == FileEntryType.Folder ? properties.FormFilling.RoomId : default(T),
+                    isRoomMember = aces.Exists(u => u.Id == authContext.CurrentAccount.ID)
                 };
                 return result;
             }
