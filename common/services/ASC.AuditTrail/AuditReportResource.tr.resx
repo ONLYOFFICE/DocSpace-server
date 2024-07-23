@@ -775,4 +775,7 @@
   <data name="SendJoinInvite" xml:space="preserve">
     <value>Kullanıcı {0}, {1} kullanıcısına bu DocSpace'e katılması için bir davet gönderdi</value>
   </data>
+  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
+    <value>{0} atandı: {1}</value>
+  </data>
 </root>

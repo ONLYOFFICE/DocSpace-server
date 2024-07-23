@@ -1039,4 +1039,10 @@
   <data name="TariffsFeature_used_manager" xml:space="preserve">
     <value>Додані адміністратори/досвідчені користувачі:</value>
   </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>Ліміт запрошень перевищено</value>
+  </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>Користувача вимкнено</value>
+  </data>
 </root>
