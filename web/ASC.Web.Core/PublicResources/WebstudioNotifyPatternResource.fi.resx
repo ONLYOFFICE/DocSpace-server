@@ -1780,7 +1780,7 @@ $TrulyYours</value>
   <data name="pattern_saas_room_invite_existing_user" xml:space="preserve">
     <value>Hei!
 
-c$__AuthorName kutsui sinut liittymään huoneeseen "$Message":"$InviteLink" "${__VirtualRootPath}":"${__VirtualRootPath}".
+$__AuthorName kutsui sinut liittymään huoneeseen "$Message":"$InviteLink" "${__VirtualRootPath}":"${__VirtualRootPath}".
 
 $OrangeButton
 

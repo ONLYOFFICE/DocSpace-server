@@ -1036,4 +1036,7 @@
   <data name="UserFreeSpaceException" xml:space="preserve">
     <value>Đã vượt quá hạn mức không gian người dùng</value>
   </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>Quản trị viên/Người dùng cấp cao đã thêm:</value>
+  </data>
 </root>

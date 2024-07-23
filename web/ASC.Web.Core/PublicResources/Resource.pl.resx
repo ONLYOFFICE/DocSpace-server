@@ -1039,4 +1039,13 @@
   <data name="TariffsFeature_used_manager" xml:space="preserve">
     <value>Dodani administratorzy/użytkownicy z większą liczbą uprawnień:</value>
   </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>Przekroczono limit zaproszeń</value>
+  </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>Użytkownik nieaktywny</value>
+  </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>Instrukcje dotyczące zmiany hasła zostały wysłane na adres e-mail {0}.</value>
+  </data>
 </root>

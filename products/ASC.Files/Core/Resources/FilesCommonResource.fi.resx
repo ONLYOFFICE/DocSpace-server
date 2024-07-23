@@ -476,4 +476,25 @@ Paras yhteensopivuus docx:n, xlsx:n, pptx:n kanssa.</value>
   <data name="User" xml:space="preserve">
     <value>Käyttäjä</value>
   </data>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>Useiden tiedostojen siirtämistä Lomakkeen täyttöhuoneeseen ei tueta. Siirrä yksi ONLYOFFICE PDF-lomake kerrallaan.</value>
+  </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>Kansioiden siirtämistä Lomakkeen täyttöhuoneeseen ei tueta. Siirrä yksi ONLYOFFICE PDF-lomake kerrallaan.</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>Tiedostoa ei voi siirtää tähän huoneeseen. Kokeile siirtää ONLYOFFICE PDF-lomake.</value>
+  </data>
+  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
+    <value>Tiedostoa ei voi ladata tähän huoneeseen. Kokeile ladata ONLYOFFICE PDF-lomake.</value>
+  </data>
+  <data name="FillOutExternalLinkTitle" xml:space="preserve">
+    <value>Linkki täyttämiseen</value>
+  </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>Linkki lomakkeeseen</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Avaa lomake</value>
+  </data>
 </root>

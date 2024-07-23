@@ -1036,4 +1036,16 @@
   <data name="UserFreeSpaceException" xml:space="preserve">
     <value>Υπέρβαση της ποσόστωσης χώρου χρήστη</value>
   </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>Το όριο προσκλήσεων έχει ξεπεραστεί</value>
+  </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>Απενεργοποίηση χρήστη</value>
+  </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>Η εντολή αλλαγής κωδικού πρόσβασης έχει αποσταλεί στη διεύθυνση email {0}.</value>
+  </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>Οι Διαχειριστές/Εξουσιοδοτημένοι χρήστες προστέθηκαν:</value>
+  </data>
 </root>

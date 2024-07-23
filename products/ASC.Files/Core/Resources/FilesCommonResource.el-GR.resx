@@ -476,4 +476,25 @@
   <data name="User" xml:space="preserve">
     <value>Χρήστης</value>
   </data>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>Η μετακίνηση πολλών αρχείων στο δωμάτιο Συμπλήρωσης Φορμών δεν υποστηρίζεται. Μετακινήστε μία φόρμα PDF του ONLYOFFICE κάθε φορά.</value>
+  </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>Η μετακίνηση φακέλων στο δωμάτιο Συμπλήρωσης Φορμών δεν υποστηρίζεται. Μετακινήστε μία φόρμα PDF του ONLYOFFICE κάθε φορά.</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>Το αρχείο δεν μπορεί να μετακινηθεί σε αυτό το δωμάτιο. Προσπαθήστε να μετακινήσετε τη φόρμα PDF του ONLYOFFICE.</value>
+  </data>
+  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
+    <value>Το αρχείο δεν μπορεί να μεταφορτωθεί σε αυτό το δωμάτιο. Προσπαθήστε να μεταφορτώσετε τη φόρμα PDF του ONLYOFFICE.</value>
+  </data>
+  <data name="FillOutExternalLinkTitle" xml:space="preserve">
+    <value>Σύνδεσμος για συμπλήρωση</value>
+  </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>Σύνδεσμος προς τη φόρμα</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Άνοιγμα φόρμας</value>
+  </data>
 </root>

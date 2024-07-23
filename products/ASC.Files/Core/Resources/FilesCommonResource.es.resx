@@ -476,4 +476,25 @@
   <data name="User" xml:space="preserve">
     <value>Usuario</value>
   </data>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>No se admite mover varios archivos a la sala para rellenar formularios. Mueva un formulario PDF de ONLYOFFICE a la vez.</value>
+  </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>No se admite mover carpetas a la sala para rellenar formularios. Mueva un formulario PDF de ONLYOFFICE a la vez.</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>El archivo no se puede mover a esta sala. Intente mover el formulario PDF de ONLYOFFICE.</value>
+  </data>
+  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
+    <value>El archivo no se puede cargar en esta sala. Intente cargar el formulario PDF de ONLYOFFICE.</value>
+  </data>
+  <data name="FillOutExternalLinkTitle" xml:space="preserve">
+    <value>Enlace para rellenar</value>
+  </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>Enlace al formulario</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Abrir formulario</value>
+  </data>
 </root>

@@ -775,4 +775,7 @@
   <data name="RoomUpdateAccessForGroup" xml:space="preserve">
     <value>{0} nimitetty: {1}</value>
   </data>
+  <data name="SendJoinInvite" xml:space="preserve">
+    <value>Käyttäjä {0} lähetti {1}:lle liittymiskutsun tähän DocSpaceen</value>
+  </data>
 </root>

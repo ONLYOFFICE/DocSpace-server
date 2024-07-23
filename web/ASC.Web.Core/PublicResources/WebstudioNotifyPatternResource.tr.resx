@@ -1136,9 +1136,6 @@ $TrulyYours</value>
   <data name="ButtonCollaborate" xml:space="preserve">
     <value>DocSpace'te iş birliği yapın</value>
   </data>
-  <data name="ButtonConfirmEmail" xml:space="preserve">
-    <value>ONAYLA</value>
-  </data>
   <data name="ButtonConfirmInvite" xml:space="preserve">
     <value>DocSpace Davetini Onaylayın</value>
   </data>

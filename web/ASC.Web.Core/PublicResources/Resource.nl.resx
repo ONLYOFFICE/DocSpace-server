@@ -1039,4 +1039,13 @@
   <data name="TariffsFeature_used_manager" xml:space="preserve">
     <value>Beheerders/Power users toegevoegd:</value>
   </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>Uitnodigingslimiet is overschreden</value>
+  </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>Gebruiker uitgeschakeld</value>
+  </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>De instructies voor het wijzigen van het wachtwoord zijn naar {0} e-mailadres verzonden.</value>
+  </data>
 </root>

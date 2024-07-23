@@ -1036,4 +1036,16 @@
   <data name="UserFreeSpaceException" xml:space="preserve">
     <value>Kullanıcı alanı kotası aşıldı</value>
   </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>Yöneticiler/Uzman kullanıcılar eklendi:</value>
+  </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>Şifre değiştirme talimatı {0} e-posta adresine gönderildi.</value>
+  </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>Davet sınırı aşıldı</value>
+  </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>Kullanıcı devre dışı</value>
+  </data>
 </root>

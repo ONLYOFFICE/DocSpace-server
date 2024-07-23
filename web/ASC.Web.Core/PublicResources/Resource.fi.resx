@@ -1045,4 +1045,7 @@
   <data name="ErrorUserDisabled" xml:space="preserve">
     <value>Käyttäjä poistettu käytöstä</value>
   </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>Salasanan muuttamisen ohje on lähetetty {0} sähköpostiosoitteeseen.</value>
+  </data>
 </root>

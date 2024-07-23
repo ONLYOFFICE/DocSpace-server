@@ -1039,4 +1039,13 @@
   <data name="TariffsFeature_used_manager" xml:space="preserve">
     <value>추가된 관리자/파워 사용자:</value>
   </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>초대 한도를 초과했습니다</value>
+  </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>사용자가 비활성화되었습니다</value>
+  </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>비밀번호 변경 지침이 {0} 이메일 주소로 전송되었습니다.</value>
+  </data>
 </root>

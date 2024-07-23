@@ -552,9 +552,6 @@ $TrulyYours</value>
   <data name="ButtonAccept" xml:space="preserve">
     <value>Chấp nhận</value>
   </data>
-  <data name="ButtonConfirmEmail" xml:space="preserve">
-    <value>XÁC NHẬN</value>
-  </data>
   <data name="ButtonConfirm" xml:space="preserve">
     <value>Xác nhận</value>
   </data>
