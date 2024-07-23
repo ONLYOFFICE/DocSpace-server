@@ -278,7 +278,7 @@
     <value>Đã cập nhật Nhóm: {0}</value>
   </data>
   <data name="GuestAccount" xml:space="preserve">
-    <value>Tài khoản khách</value>
+    <value>Nặc danh</value>
   </data>
   <data name="GuestActivated" xml:space="preserve">
     <value>Đã kích hoạt khách: {0}</value>

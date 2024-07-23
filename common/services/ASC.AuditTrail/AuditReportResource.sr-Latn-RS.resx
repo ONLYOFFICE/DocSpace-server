@@ -364,7 +364,7 @@
     <value>Grupe ažurirane: {0}</value>
   </data>
   <data name="GuestAccount" xml:space="preserve">
-    <value>Gost nalog</value>
+    <value>Anonimno</value>
   </data>
   <data name="GuestActivated" xml:space="preserve">
     <value>Gost aktiviran: {0}</value>

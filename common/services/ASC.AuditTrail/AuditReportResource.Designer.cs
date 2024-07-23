@@ -834,7 +834,7 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Guest Account.
+        ///   Looks up a localized string similar to Anonymous.
         /// </summary>
         public static string GuestAccount {
             get {

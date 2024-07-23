@@ -290,7 +290,7 @@
     <value>Grupo atualizado: {0}</value>
   </data>
   <data name="GuestAccount" xml:space="preserve">
-    <value>Conta de visitante</value>
+    <value>Anônimo</value>
   </data>
   <data name="GuestActivated" xml:space="preserve">
     <value>Visitante ativado: {0}</value>

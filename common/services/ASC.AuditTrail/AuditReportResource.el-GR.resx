@@ -203,7 +203,7 @@
     <value>Ομάδα Που Ενημερώθηκε: {0}</value>
   </data>
   <data name="GuestAccount" xml:space="preserve">
-    <value>Λογαριασμός Επισκέπτη</value>
+    <value>Ανώνυμος</value>
   </data>
   <data name="GuestCreated" xml:space="preserve">
     <value>Επισκέπτης Που Δημιουργήθηκε: {0}</value>

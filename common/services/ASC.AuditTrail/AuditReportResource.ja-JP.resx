@@ -287,7 +287,7 @@
     <value>グループは更新されました：{0}</value>
   </data>
   <data name="GuestAccount" xml:space="preserve">
-    <value>お客様アカウント</value>
+    <value>匿名の</value>
   </data>
   <data name="GuestActivated" xml:space="preserve">
     <value>お客様は有効されました：{0}</value>

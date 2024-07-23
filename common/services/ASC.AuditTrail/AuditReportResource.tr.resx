@@ -275,7 +275,7 @@
     <value>Grup Güncellendi: {0}</value>
   </data>
   <data name="GuestAccount" xml:space="preserve">
-    <value>Misafir Hesabı</value>
+    <value>Anonim</value>
   </data>
   <data name="GuestActivated" xml:space="preserve">
     <value>Misafir Aktive Edildi: {0}</value>

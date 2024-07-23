@@ -275,7 +275,7 @@
     <value>Groep Geüpdatet: {0}</value>
   </data>
   <data name="GuestAccount" xml:space="preserve">
-    <value>Gast account</value>
+    <value>Anoniem</value>
   </data>
   <data name="GuestActivated" xml:space="preserve">
     <value>Gast Geactiveerd: {0}</value>
