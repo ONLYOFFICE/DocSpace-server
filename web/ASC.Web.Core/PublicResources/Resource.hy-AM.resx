@@ -670,7 +670,7 @@
     <value>Կարգավորումները հաջողությամբ թարմացվել են</value>
   </data>
   <data name="SuccessfullySentNotificationDeleteUserInfoMessage" xml:space="preserve">
-    <value>Ձեր պրոֆիլը ջնջելու ցուցումները ուղարկվել են {0} էլփոստի հասցեին</value>
+    <value>Ձեր պրոֆիլը անջատելու ցուցումները ուղարկվել են {0} էլ․փոստի հասցեին</value>
   </data>
   <data name="ActivateMobilePhoneEmptyCode" xml:space="preserve">
     <value>Վավերացման կոդի դաշտը չի կարող դատարկ լինել</value>
