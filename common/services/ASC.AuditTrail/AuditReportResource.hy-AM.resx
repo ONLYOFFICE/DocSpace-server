@@ -349,7 +349,7 @@
     <value>Խումբը թարմացվել է: {0}</value>
   </data>
   <data name="GuestAccount" xml:space="preserve">
-    <value>Հյուրի հաշիվ</value>
+    <value>Անանուն</value>
   </data>
   <data name="GuestActivated" xml:space="preserve">
     <value>Հյուրն ակտիվացված է: {0}</value>

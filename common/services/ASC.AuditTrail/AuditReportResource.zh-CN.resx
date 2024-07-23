@@ -281,7 +281,7 @@
     <value>小组已更新：{0}</value>
   </data>
   <data name="GuestAccount" xml:space="preserve">
-    <value>宾客账户</value>
+    <value>访客</value>
   </data>
   <data name="GuestActivated" xml:space="preserve">
     <value>访客已激活：{0}</value>

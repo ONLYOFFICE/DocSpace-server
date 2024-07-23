@@ -425,7 +425,7 @@
     <value>As configurações foram atualizadas com sucesso</value>
   </data>
   <data name="SuccessfullySentNotificationDeleteUserInfoMessage" xml:space="preserve">
-    <value>Instruções sobre como excluir seu perfil foram enviadas para seu endereço de e-mail {0}</value>
+    <value>As instruções para desativar seu perfil foram enviadas para o endereço de e-mail {0}</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>Código incorreto</value>

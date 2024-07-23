@@ -104,11 +104,11 @@ namespace ASC.Files.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to h1. Form $Message was filled out
+        ///   Looks up a localized string similar to h1. Form $Message is filled out
         ///
-        ///A new form &quot;$DocumentTitle&quot;:&quot;$DocumentURL&quot; was filled out in the room &quot;$RoomTitle&quot;:&quot;$RoomURL&quot;
+        ///A new form &quot;$DocumentTitle&quot;:&quot;$DocumentURL&quot; is filled out in the room &quot;$RoomTitle&quot;:&quot;$RoomURL&quot;
         ///
-        ///Executor: &quot;$FromUserName&quot;:&quot;$FromUserLink&quot;
+        ///Form submitter: &quot;$FromUserName&quot;:&quot;$FromUserLink&quot;
         ///
         ///$OrangeButton.
         /// </summary>
@@ -119,11 +119,11 @@ namespace ASC.Files.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to h1. You have filled out the form $Message
+        ///   Looks up a localized string similar to h1. You filled out the form $Message
         ///
-        ///In the room &quot;$RoomTitle&quot;:&quot;$RoomURL&quot; you filled out the form &quot;$DocumentTitle&quot;:&quot;$DocumentURL&quot;
+        ///You filled out the form &quot;$DocumentTitle&quot;:&quot;$DocumentURL&quot; in the room &quot;$RoomTitle&quot;:&quot;$RoomURL&quot;
         ///
-        ///Filling organizer: &quot;$ToUserName&quot;:&quot;$ToUserLink&quot;
+        ///Manager: &quot;$ToUserName&quot;:&quot;$ToUserLink&quot;
         ///
         ///$OrangeButton.
         /// </summary>
@@ -263,7 +263,7 @@ namespace ASC.Files.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to DocSpace notification. The form was filled out.
+        ///   Looks up a localized string similar to DocSpace notification. The form is filled out.
         /// </summary>
         public static string subject_FormReceived {
             get {
@@ -272,7 +272,7 @@ namespace ASC.Files.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to DocSpace notification. The form was filled out.
+        ///   Looks up a localized string similar to DocSpace notification. The form is filled out.
         /// </summary>
         public static string subject_FormSubmitted {
             get {

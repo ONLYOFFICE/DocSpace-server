@@ -278,7 +278,7 @@
     <value>Skupina aktualizována: {0}</value>
   </data>
   <data name="GuestAccount" xml:space="preserve">
-    <value>Účet návštěvníka</value>
+    <value>Anonymní</value>
   </data>
   <data name="GuestActivated" xml:space="preserve">
     <value>Návštěvník aktivován: {0}</value>

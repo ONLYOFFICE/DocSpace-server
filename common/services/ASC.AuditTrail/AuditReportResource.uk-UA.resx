@@ -275,7 +275,7 @@
     <value>Група оновлена: {0}</value>
   </data>
   <data name="GuestAccount" xml:space="preserve">
-    <value>Аккаунт гостя</value>
+    <value>Гість</value>
   </data>
   <data name="GuestActivated" xml:space="preserve">
     <value>Гість активований: {0}</value>

@@ -349,7 +349,7 @@
     <value>Group Updated: {0}</value>
   </data>
   <data name="GuestAccount" xml:space="preserve">
-    <value>Guest Account</value>
+    <value>Anonymous</value>
   </data>
   <data name="GuestActivated" xml:space="preserve">
     <value>Guest Activated: {0}</value>

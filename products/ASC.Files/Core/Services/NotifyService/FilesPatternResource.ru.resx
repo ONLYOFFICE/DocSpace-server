@@ -156,7 +156,7 @@ $__AuthorName удалил(а) комнату: $RoomTitle</value>
     <value>Проверить готовые формы</value>
   </data>
   <data name="pattern_FormReceived" xml:space="preserve">
-    <value>h1. Форма $Message была заполнена
+    <value>h1. Форма $Message заполнена
 
 В комнате "$RoomTitle":"$RoomURL" заполнена новая форма "$DocumentTitle":"$DocumentURL"
 
@@ -167,16 +167,16 @@ $OrangeButton</value>
   <data name="pattern_FormSubmitted" xml:space="preserve">
     <value>h1. Вы заполнили форму $Message
 
-В комнате "$RoomTitle":"$RoomURL" вами была заполнена форма "$DocumentTitle":"$DocumentURL"
+Вы заполнили форму "$DocumentTitle":"$DocumentURL" в комнате "$RoomTitle":"$RoomURL" 
 
 Организатор заполнения: "$ToUserName":"$ToUserLink"
 
 $OrangeButton</value>
   </data>
   <data name="subject_FormReceived" xml:space="preserve">
-    <value>Уведомление DocSpace. Форма была заполнена</value>
+    <value>Уведомление DocSpace. Форма заполнена</value>
   </data>
   <data name="subject_FormSubmitted" xml:space="preserve">
-    <value>Уведомление DocSpace. Форма была заполнена</value>
+    <value>Уведомление DocSpace. Форма заполнена</value>
   </data>
 </root>
