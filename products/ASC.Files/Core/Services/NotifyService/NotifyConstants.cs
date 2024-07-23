@@ -38,6 +38,8 @@ public static class NotifyConstants
     public static readonly INotifyAction EventShareFolder = new NotifyAction("ShareFolder", "share folder");
     public static readonly INotifyAction EventEditorMentions = new NotifyAction("EditorMentions", "editor mentions");
     public static readonly INotifyAction EventRoomRemoved = new NotifyAction("RoomRemoved", "room removed");
+    public static readonly INotifyAction EventFormSubmitted = new NotifyAction("FormSubmitted", "form submitted");
+    public static readonly INotifyAction EventFormReceived = new NotifyAction("FormReceived", "form received");
 
     #endregion
 
