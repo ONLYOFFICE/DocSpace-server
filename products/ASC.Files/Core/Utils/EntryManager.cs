@@ -1517,6 +1517,7 @@ public class EntryManager(IDaoFactory daoFactory,
                         {
                             var linkDao = daoFactory.GetLinkDao<T>();
 
+                            properties.FormFilling.ResultFormNumber++;
                             var resProp = new EntryProperties<T>()
                             {
                                 FormFilling = new FormFillingProperties<T>()
@@ -1529,7 +1530,7 @@ public class EntryManager(IDaoFactory daoFactory,
                                     OriginalFormId = properties.FormFilling.OriginalFormId,
                                     ResultsFolderId = properties.FormFilling.ResultsFolderId,
                                     ResultsFileID = properties.FormFilling.ResultsFileID,
-                                    ResultFormNumber = properties.FormFilling.ResultFormNumber++
+                                    ResultFormNumber = properties.FormFilling.ResultFormNumber
                                 }
                             };
 
