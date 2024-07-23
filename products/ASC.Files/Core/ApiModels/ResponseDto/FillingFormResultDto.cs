@@ -89,6 +89,8 @@ public class FillingFormResultDtoHelper(
                 var currentRoom = await folderDao.GetFolderAsync(properties.FormFilling.RoomId);
                 var aces = await fileSharing.GetSharedInfoAsync(currentRoom);
 
+                var currentType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
+
                 var result = new FillingFormResultDto<T>()
                 {
                     CompletedForm = await fileDtoHelper.GetAsync(file),
@@ -96,7 +98,7 @@ public class FillingFormResultDtoHelper(
                     FormNumber = properties.FormFilling.ResultFormNumber,
                     Manager = await employeeFullDtoHelper.GetSimpleWithEmail(manager),
                     RoomId = record == null || record.EntryType == FileEntryType.Folder ? properties.FormFilling.RoomId : default(T),
-                    isRoomMember = aces.Exists(u => u.Id == authContext.CurrentAccount.ID)
+                    isRoomMember = currentType == EmployeeType.DocSpaceAdmin || aces.Exists(u => u.Id == authContext.CurrentAccount.ID)
                 };
                 return result;
             }
