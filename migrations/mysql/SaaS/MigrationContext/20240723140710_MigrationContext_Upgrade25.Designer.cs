@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     [DbContext(typeof(MigrationContext))]
-    [Migration("20240624132552_MigrationContext_Upgrade24")]
-    partial class MigrationContext_Upgrade24
+    [Migration("20240723140710_MigrationContext_Upgrade25")]
+    partial class MigrationContext_Upgrade25
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -2061,11 +2061,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         {
                             Input = ".docx",
                             Output = ".docm"
-                        },
-                        new
-                        {
-                            Input = ".docx",
-                            Output = ".docxf"
                         },
                         new
                         {
