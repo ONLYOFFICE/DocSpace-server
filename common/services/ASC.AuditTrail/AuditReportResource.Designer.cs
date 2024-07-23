@@ -753,6 +753,24 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to File Opened For Filling: {0}.
+        /// </summary>
+        public static string FormOpenedForFilling {
+            get {
+                return ResourceManager.GetString("FormOpenedForFilling", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Users [{0}]. Form submitted: {1}.
+        /// </summary>
+        public static string FormSubmit {
+            get {
+                return ResourceManager.GetString("FormSubmit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Sphinx settings updated.
         /// </summary>
         public static string FullTextSearchSetting {
