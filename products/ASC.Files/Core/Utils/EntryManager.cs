@@ -1519,6 +1519,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
                             var resProp = properties;
                             resProp.FormFilling.ResultFormNumber++;
+                            resProp.FormFilling.StartFilling = false;
                             await fileDao.SaveProperties(result.Id, resProp);
 
                             await fileMarker.MarkAsNewAsync(result);
