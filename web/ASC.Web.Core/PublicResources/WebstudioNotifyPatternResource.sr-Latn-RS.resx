@@ -1766,19 +1766,19 @@ Dobićete više saveta o tome kako da koristite svoju veb kancelariju. Možete 
     <value>Započnite</value>
   </data>
   <data name="pattern_migration_personal_to_docspace" xml:space="preserve">
-    <value>Zdravo!
+    <value>Здраво!
 
-Proces migracije podataka sa ONLYOFFICE Personal na vaš novi ONLYOFFICE DocSpace je uspešno završen.
- 
-Da biste pristupili vašem DocSpace-u sa uvezenim podacima, samo kliknite na dugme ispod:
+Процес миграције података са ONLYOFFICE Personal на ваш нови ONLYOFFICE DocSpace је успешно завршен.
+
+Да бисте приступили вашем DocSpace-у са увезеним подацима, само кликните на дугме испод:
 
 $OrangeButton
 
-Vaš trenutni DocSpace plan je STARTUP. Potpuno je besplatan.
+Ваш тренутни DocSpace план је STARTUP. Потпуно је бесплатан.
 
-==Ako je potrebno, možete promeniti ime vašeg novog DocSpace-a. Samo se prebacite na Podešavanja -&gt; Prilagođavanje -&gt; DocSpace Preimenovanje.==
+==Ако је потребно, можете променити име вашег новог DocSpace -а. Само се пребаците на Подешавања -&gt; Прилагођавање -&gt; DocSpace Преименовање.==
 
-Uživajte u novom načinu saradnje na dokumentima!
+Уживајте у новом начину сарадње на документима!
 
 $TrulyYours</value>
   </data>

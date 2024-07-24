@@ -1701,11 +1701,15 @@ $TrulyYours</value>
   <data name="pattern_migration_personal_to_docspace" xml:space="preserve">
     <value>Hei!
 
-Tietojen siirto ONLYOFFICE Personalista uuteen ONLYOFFICE DocSpaceen on onnistuneesti suoritettu. Klikkaa alla olevaa painiketta päästäksesi päivitettyyn DocSpaceen: $OrangeButton
+Tietojen siirto ONLYOFFICE Personalista uuteen ONLYOFFICE DocSpaceen on onnistuneesti suoritettu.
+
+Klikkaa alla olevaa painiketta päästäksesi päivitettyyn DocSpaceen:
+
+$OrangeButton
 
 Nykyinen DocSpace-tilauksesi on STARTUP. Se on täysin ilmainen. 
 
-=== Tarvittaessa voit muuttaa uuden DocSpacesi nimen. Klikkaa Asetukset -&gt; Mukauttaminen -&gt; DocSpacen nimeäminen uudelleen ==
+==Tarvittaessa voit muuttaa uuden DocSpacesi nimen. Klikkaa Asetukset -&gt; Mukauttaminen -&gt; DocSpacen nimeäminen uudelleen.==
 
 Nauti uudesta tavasta tehdä yhteistyötä asiakirjoin!
 

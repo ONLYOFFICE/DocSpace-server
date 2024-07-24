@@ -1708,19 +1708,19 @@ $TrulyYours</value>
   </data>
   <data name="pattern_migration_personal_to_docspace" xml:space="preserve">
     <value>Bonjour !
- 
+
 Le processus de migration des données d'ONLYOFFICE Personal vers votre nouvel ONLYOFFICE DocSpace est terminé avec succès.
- 
+
 Pour accéder à votre DocSpace avec les données importées, cliquez sur le bouton ci-dessous :
- 
+
 $OrangeButton
- 
+
 Votre plan DocSpace actuel est STARTUP. Il est totalement gratuit.
- 
-==Si nécessaire, vous pouvez changer le nom de votre nouvel DocSpace. Il vous suffit de passer à Paramètres -&gt; Personnalisation -&gt; Renommer DocSpace.===
- 
+
+==Si nécessaire, vous pouvez changer le nom de votre nouvel DocSpace. Il vous suffit de passer à Paramètres -&gt; Personnalisation -&gt; Renommer DocSpace.==
+
 Profitez d'un nouveau mode de collaboration documentaire !
- 
+
 $TrulyYours</value>
   </data>
   <data name="pattern_rooms_activity" xml:space="preserve">

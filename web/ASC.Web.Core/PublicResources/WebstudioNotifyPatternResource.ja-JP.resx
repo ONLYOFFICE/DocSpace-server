@@ -1728,7 +1728,6 @@ $TrulyYours</value>
 
 从 ONLYOFFICE 个人版到您的新 ONLYOFFICE 协作空间的数据迁移过程已成功完成。
 
-
 要使用导入的数据访问您的协作空间，只需单击下面的按钮：
 
 $OrangeButton
@@ -1770,7 +1769,7 @@ $TrulyYours</value>
 
 您好！
 
-邀请您在“${__VirtualRootPath}”完成 ONLYOFFICE 协作空间的注册：“${__VirtualRootPath}”。点击链接输入您的姓名并设置密码：
+邀请您在 "${__VirtualRootPath}":"${__VirtualRootPath}" 完成 ONLYOFFICE 协作空间的注册。点击链接输入您的姓名并设置密码：
 
 
 $OrangeButton

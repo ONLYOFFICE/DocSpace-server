@@ -1770,12 +1770,23 @@ $activity
 $TrulyYours</value>
   </data>
   <data name="pattern_saas_room_invite_existing_user" xml:space="preserve">
+    <value>Merhaba!
+
+$__AuthorName sizi "${__VirtualRootPath}":"${__VirtualRootPath}" üzerindeki "$Message":"$InviteLink" odasına katılmaya davet etti.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_docspace_registration" xml:space="preserve">
     <value>h1. ONLYOFFICE DocSpace: kaydı tamamlayın
 
 
 Merhaba!
 
-ONLYOFFICE DocSpace için “${__VirtualRootPath}”:“${__VirtualRootPath}” adresinden kayıt işlemini tamamlamaya davet edildiniz. Bağlantıya tıklayarak adınızı girin ve bir şifre belirleyin:$OrangeButton
+ONLYOFFICE DocSpace için "${__VirtualRootPath}":"${__VirtualRootPath}" adresinden kayıt işlemini tamamlamaya davet edildiniz. Bağlantıya tıklayarak adınızı girin ve bir şifre belirleyin:
+
+$OrangeButton
 
 $TrulyYours</value>
   </data>
