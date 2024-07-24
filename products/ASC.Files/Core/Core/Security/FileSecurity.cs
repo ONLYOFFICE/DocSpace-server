@@ -955,11 +955,6 @@ public class FileSecurity(IDaoFactory daoFactory,
                     return false;
                 }
 
-                if (action == FilesSecurityActions.Mute && e.ProviderEntry)
-                {
-                    return false;
-                }
-
                 if (action == FilesSecurityActions.CopySharedLink && folder.FolderType is not (FolderType.CustomRoom or FolderType.PublicRoom or FolderType.FillingFormsRoom))
                 {
                     return false;

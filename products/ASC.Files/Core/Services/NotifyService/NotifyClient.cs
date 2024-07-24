@@ -227,9 +227,7 @@ public class NotifyClient(WorkContext notifyContext,
 
             var recipient = await recipientsProvider.GetRecipientAsync(recipientId.ToString());
 
-            var disabledRooms = await roomsNotificationSettingsHelper.GetDisabledRoomsForUserAsync(recipientId);
-
-            if (disabledRooms.Contains(roomId))
+            if (await roomsNotificationSettingsHelper.CheckMuteForRoomAsync(roomId, recipientId))
             {
                 continue;
             }
@@ -338,9 +336,7 @@ public class NotifyClient(WorkContext notifyContext,
                 continue;
             }
 
-            var disabledRooms = (await roomsNotificationSettingsHelper.GetDisabledRoomsForUserAsync(userId)).Select(d => d.ToString());
-
-            if (disabledRooms.Contains(folderId))
+            if (await roomsNotificationSettingsHelper.CheckMuteForRoomAsync(folderId, userId))
             {
                 continue;
             }
