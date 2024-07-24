@@ -637,7 +637,7 @@ public static class DocumentService
 
         public static void ProcessResponseError(string errorCode)
         {
-            if (!ErrorCodeExtensions.TryParse(errorCode, true, out var code))
+            if (!ErrorCodeExtensions.TryParse(errorCode, true, out var code) && CultureInfo.CurrentCulture.Name == "ar-SA" && !Enum.TryParse(errorCode, out code))
             {
                 code = ErrorCode.Unknown;
             }
