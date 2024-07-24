@@ -483,10 +483,8 @@ internal class FileDao(
                         {
                             await filesDbContext.DisableCurrentVersionAsync(tenantId, file.Id);
                         }
-
-
-                        var extension = FileUtility.GetFileExtension(file.Title);
-                        var fileType = FileUtility.GetFileTypeByExtention(extension);
+                        
+                        var fileType = FileUtility.GetFileTypeByFileName(file.Title);
 
                         if (fileType == FileType.Pdf && file.Category == (int)FilterType.None)
                         {

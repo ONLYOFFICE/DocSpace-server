@@ -274,8 +274,7 @@ public class FileUploader(
             throw FileSizeComment.GetFileSizeException(await setupInfo.MaxUploadSize(tenantManager, maxTotalSizeStatistic));
         }
 
-        var extension = FileUtility.GetFileExtension(uploadSession.File.Title);
-        var fileType = FileUtility.GetFileTypeByExtention(extension);
+        var fileType = FileUtility.GetFileTypeByFileName(uploadSession.File.Title);
         var dao = daoFactory.GetFileDao<T>();
 
         if (fileType == FileType.Pdf)

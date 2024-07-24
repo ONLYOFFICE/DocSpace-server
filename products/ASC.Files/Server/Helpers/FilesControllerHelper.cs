@@ -70,8 +70,7 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
     public async Task<bool> isFormPDF<T>(T fileId)
     {
         var file = await _fileStorageService.GetFileAsync(fileId, -1);
-        var extension = FileUtility.GetFileExtension(file.Title);
-        var fileType = FileUtility.GetFileTypeByExtention(extension);
+        var fileType = FileUtility.GetFileTypeByFileName(file.Title);
 
         if (fileType == FileType.Pdf)
         {

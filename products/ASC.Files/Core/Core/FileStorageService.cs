@@ -887,8 +887,8 @@ public class FileStorageService //: IFileStorageService
             }
         }
 
-        var fileExt = FileUtility.GetFileExtension(file.Title);
-        var fileType = FileUtility.GetFileTypeByExtention(fileExt);
+        var fileType = FileUtility.GetFileTypeByFileName(file.Title);
+        
         if (fileType == FileType.Pdf)
         {
             var folderDao = daoFactory.GetFolderDao<T>();
@@ -2140,9 +2140,7 @@ public class FileStorageService //: IFileStorageService
             foreach (var id in filesId)
             {
                 var file = await fileDao.GetFileAsync(id);
-
-                var extension = FileUtility.GetFileExtension(file.Title);
-                var fileType = FileUtility.GetFileTypeByExtention(extension);
+                var fileType = FileUtility.GetFileTypeByFileName(file.Title);
 
                 if (fileType == FileType.Pdf && await fileChecker.CheckExtendedPDF(file))
                 {

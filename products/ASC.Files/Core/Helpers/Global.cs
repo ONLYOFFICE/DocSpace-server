@@ -733,8 +733,8 @@ public class GlobalFolder(
             newFile.ParentId = folderId;
             newFile.Comment = FilesCommonResource.CommentCreate;
 
-            var fileExt = FileUtility.GetFileExtension(fileName);
-            if (FileUtility.GetFileTypeByExtention(fileExt) == FileType.Pdf)
+            var fileType = FileUtility.GetFileTypeByFileName(fileName);
+            if (fileType == FileType.Pdf)
             {
                 newFile.Category = (int)FilterType.PdfForm;
             }

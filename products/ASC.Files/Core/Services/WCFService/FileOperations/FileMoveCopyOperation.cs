@@ -831,8 +831,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                         var room = await folderDao.GetFolderAsync((TTo)Convert.ChangeType(roomId, typeof(TTo)));
                         if (room.FolderType == FolderType.FillingFormsRoom)
                         {
-                            var extension = FileUtility.GetFileExtension(file.Title);
-                            var fileType = FileUtility.GetFileTypeByExtention(extension);
+                            var fileType = FileUtility.GetFileTypeByFileName(file.Title);
                             if (fileType != FileType.Pdf || (fileType == FileType.Pdf && !await fileChecker.CheckExtendedPDF(file)))
                             {
                                 this[Err] = _copy ? FilesCommonResource.ErrorMessage_UploadToFormRoom : FilesCommonResource.ErrorMessage_MoveToFormRoom;
