@@ -843,4 +843,22 @@
   <data name="FormOpenedForFilling" xml:space="preserve">
     <value>File Opened For Filling: {0}</value>
   </data>
+  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
+    <value>Rooms [{0}]. Set custom storage quota for rooms: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
+    <value>Rooms [{0}]. Set default storage quota for rooms: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
+    <value>Rooms [{0}]. Disabled storage quota for rooms</value>
+  </data>
+  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
+    <value>Users [{0}]. Set custom storage quota for users: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
+    <value>Users [{0}]. Set default storage quota for users: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
+    <value>Users [{0}]. Disabled storage quota for users</value>
+  </data>
 </root>

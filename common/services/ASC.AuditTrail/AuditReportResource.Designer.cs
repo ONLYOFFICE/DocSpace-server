@@ -249,6 +249,60 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Rooms [{0}]. Set custom storage quota for rooms: {1}.
+        /// </summary>
+        public static string CustomQuotaPerRoomChanged {
+            get {
+                return ResourceManager.GetString("CustomQuotaPerRoomChanged", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Rooms [{0}]. Set default storage quota for rooms: {1}.
+        /// </summary>
+        public static string CustomQuotaPerRoomDefault {
+            get {
+                return ResourceManager.GetString("CustomQuotaPerRoomDefault", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Rooms [{0}]. Disabled storage quota for rooms.
+        /// </summary>
+        public static string CustomQuotaPerRoomDisabled {
+            get {
+                return ResourceManager.GetString("CustomQuotaPerRoomDisabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Users [{0}]. Set custom storage quota for users: {1}.
+        /// </summary>
+        public static string CustomQuotaPerUserChanged {
+            get {
+                return ResourceManager.GetString("CustomQuotaPerUserChanged", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Users [{0}]. Set default storage quota for users: {1}.
+        /// </summary>
+        public static string CustomQuotaPerUserDefault {
+            get {
+                return ResourceManager.GetString("CustomQuotaPerUserDefault", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Users [{0}]. Disabled storage quota for users.
+        /// </summary>
+        public static string CustomQuotaPerUserDisabled {
+            get {
+                return ResourceManager.GetString("CustomQuotaPerUserDisabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Date.
         /// </summary>
         public static string DateCol {

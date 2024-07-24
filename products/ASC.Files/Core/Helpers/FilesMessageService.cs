@@ -61,6 +61,11 @@ public class FilesMessageService(
         await SendAsync(action, entry, null, Guid.Empty, FileShare.None, description);
     }
 
+    public async Task SendAsync(MessageAction action, string d1, IEnumerable<string> d2)
+    {
+        await SendAsync(action, description: [d1, string.Join(", ", d2)]);
+    }
+
     public async Task SendAsync<T>(MessageAction action, string oldTitle, FileEntry<T> entry, params string[] description)
     {
         await SendAsync(action, entry, oldTitle, description: description);
