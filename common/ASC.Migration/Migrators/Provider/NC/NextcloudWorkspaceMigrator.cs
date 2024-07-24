@@ -129,7 +129,8 @@ public class NextcloudWorkspaceMigrator : Migrator
                 await ReportProgressAsync(50, MigrationResource.UnzippingFinished);
             }
 
-            var dbFile = Directory.GetFiles(Directory.GetDirectories(TmpFolder)[0]).Where(f=> f.EndsWith(".bak") || f.EndsWith(".sql")).First();
+            var dbFile = Directory.GetFiles(Directory.GetDirectories(TmpFolder)[0]).Where(f=> f.EndsWith(".bak") || f.EndsWith(".sql")).FirstOrDefault();
+            dbFile = dbFile ?? Directory.GetFiles(TmpFolder).Where(f => f.EndsWith(".bak") || f.EndsWith(".sql")).FirstOrDefault();
             if (dbFile == null)
             {
                 throw new Exception("*.bak file not found");
