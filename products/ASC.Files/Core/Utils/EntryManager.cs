@@ -1517,8 +1517,23 @@ public class EntryManager(IDaoFactory daoFactory,
                         {
                             var linkDao = daoFactory.GetLinkDao<T>();
 
-                            var resProp = properties;
-                            resProp.FormFilling.ResultFormNumber++;
+                            properties.FormFilling.ResultFormNumber++;
+                            var resProp = new EntryProperties<T>()
+                            {
+                                FormFilling = new FormFillingProperties<T>()
+                                {
+                                    CollectFillForm = properties.FormFilling.CollectFillForm,
+                                    StartFilling = false,
+                                    Title = properties.FormFilling.Title,
+                                    RoomId = properties.FormFilling.RoomId,
+                                    ToFolderId = properties.FormFilling.ToFolderId,
+                                    OriginalFormId = properties.FormFilling.OriginalFormId,
+                                    ResultsFolderId = properties.FormFilling.ResultsFolderId,
+                                    ResultsFileID = properties.FormFilling.ResultsFileID,
+                                    ResultFormNumber = properties.FormFilling.ResultFormNumber
+                                }
+                            };
+
                             await fileDao.SaveProperties(result.Id, resProp);
 
                             await fileMarker.MarkAsNewAsync(result);

@@ -488,7 +488,7 @@ internal class FileDao(
 
                         if (fileType == FileType.Pdf && file.Category == (int)FilterType.None)
                         {
-                            using var originalCopyStream = new MemoryStream();
+                            var originalCopyStream = new MemoryStream();
                             await fileStream.CopyToAsync(originalCopyStream);
 
                             var cloneStreamForCheck = await tempStream.CloneMemoryStream(originalCopyStream, 300);
@@ -503,8 +503,8 @@ internal class FileDao(
                             }
                             finally
                             {
-                                originalCopyStream.Dispose();
-                                cloneStreamForCheck.Dispose();
+                                await originalCopyStream.DisposeAsync();
+                                await cloneStreamForCheck.DisposeAsync();
                             }
                         }
 
@@ -633,7 +633,7 @@ internal class FileDao(
                 }
                 finally
                 {
-                    cloneStreamForSave.Dispose();
+                    await cloneStreamForSave.DisposeAsync();
                 }
             }
             else
