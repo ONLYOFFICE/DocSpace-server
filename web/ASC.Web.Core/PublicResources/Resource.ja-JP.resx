@@ -1051,4 +1051,7 @@
   <data name="MessagePasswordSendedToEmail" xml:space="preserve">
     <value>パスワード変更指示が{0}メールアドレスに送信されました。</value>
   </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>管理者/パワーユーザーが追加されました：</value>
+  </data>
 </root>

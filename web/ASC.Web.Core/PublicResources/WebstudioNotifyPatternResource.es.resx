@@ -1620,7 +1620,7 @@ $TrulyYours</value>
     <value>El período de gracia para su ONLYOFFICE DocSpace expira mañana</value>
   </data>
   <data name="subject_send_whats_new" xml:space="preserve">
-    <value>Novedades en su portal el $Date</value>
+    <value>Novedades en su portal ${__VirtualRootPath} para $Date</value>
   </data>
   <data name="subject_for_sales_notify" xml:space="preserve">
     <value>Solicitud al departamento de ventas</value>
@@ -1775,5 +1775,20 @@ Le invitamos a completar su registro para ONLYOFFICE DocSpace en "${__VirtualRoo
 $OrangeButton
 
 $TrulyYours</value>
+  </data>
+  <data name="subject_migration_personal_to_docspace" xml:space="preserve">
+    <value>La migración de datos a ONLYOFFICE DocSpace se ha completado correctamente</value>
+  </data>
+  <data name="subject_rooms_activity" xml:space="preserve">
+    <value>Novedades de su portal ${__VirtualRootPath} durante la última hora</value>
+  </data>
+  <data name="subject_saas_admin_integrations_v1" xml:space="preserve">
+    <value>Explore integraciones útiles para ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="subject_saas_docspace_registration" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace: complete su registro</value>
+  </data>
+  <data name="subject_saas_room_invite_existing_user" xml:space="preserve">
+    <value>Le invitan a la sala de ONLYOFFICE DocSpace</value>
   </data>
 </root>

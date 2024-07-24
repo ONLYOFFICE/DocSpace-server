@@ -775,4 +775,7 @@
   <data name="RoomUpdateAccessForGroup" xml:space="preserve">
     <value>{0} toegewezen: {1}</value>
   </data>
+  <data name="SendJoinInvite" xml:space="preserve">
+    <value>Gebruiker {0} stuurde een uitnodiging naar {1} om lid te worden van deze DocSpace</value>
+  </data>
 </root>

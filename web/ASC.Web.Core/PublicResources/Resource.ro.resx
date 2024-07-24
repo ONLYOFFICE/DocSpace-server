@@ -1107,4 +1107,10 @@
   <data name="TariffsFeature_used_manager" xml:space="preserve">
     <value>Administratori/Utilizatori avansați adăugați:</value>
   </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>Instrucțiuni de schimbare a parolei au fost trimise la adresa de e-mail {0}.</value>
+  </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>S-a atins limita de invitații </value>
+  </data>
 </root>

@@ -435,7 +435,7 @@ $TrulyYours
 ^Ak nechcete dostávať notifikácie o aktualizáciách profilov, prosím skontrolujte si Vaše "nastavenia odberu":"$RecipientSubscriptionConfigURL".^</value>
   </data>
   <data name="pattern_send_whats_new" xml:space="preserve">
-    <value>h1.Tu nájdete novinky vo vašom priestore DocSpace za $Date
+    <value>h1.Tu nájdete novinky vo vašom priestore DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" za $Date
 
 #foreach($activity in $Activities)
 $activity

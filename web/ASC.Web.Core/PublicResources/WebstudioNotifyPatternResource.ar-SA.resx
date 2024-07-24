@@ -198,9 +198,6 @@
   <data name="ButtonConfirmInvite" xml:space="preserve">
     <value>تأكيد دعوة DocSpace</value>
   </data>
-  <data name="ButtonConfirmEmail" xml:space="preserve">
-    <value>تأكيد</value>
-  </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
     <value>تأكيد تحديث مالك البوابة</value>
   </data>

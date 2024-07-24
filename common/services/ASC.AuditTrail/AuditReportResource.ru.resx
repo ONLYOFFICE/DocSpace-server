@@ -749,7 +749,7 @@
     <value>Загружен файл с перезаписью: {0}</value>
   </data>
   <data name="QuotaPerPortalChanged" xml:space="preserve">
-    <value>Установить квоту хранилища по умолчанию: {0}</value>
+    <value>Установлена квота хранилища по умолчанию: {0}</value>
   </data>
   <data name="QuotaPerPortalDisabled" xml:space="preserve">
     <value>Квота хранилища по умолчанию отключена</value>
@@ -777,5 +777,29 @@
   </data>
   <data name="SendJoinInvite" xml:space="preserve">
     <value>Пользователь {0} отправил приглашение {1} в этот DocSpace</value>
+  </data>
+  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
+    <value>Комнаты [{0}]. Установлена пользовательская квота хранилища для комнат: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
+    <value>Комнаты [{0}]. Установлена квота хранилища по умолчанию для комнат: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
+    <value>Комнаты [{0}]. Отключена квота хранилища для комнат</value>
+  </data>
+  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
+    <value>Пользователи [{0}]. Установлена пользовательская квота хранилища для пользователей: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
+    <value>Пользователи [{0}]. Установлена квота хранилища по умолчанию для пользователей: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
+    <value>Пользователи [{0}]. Установлена квота хранилища по умолчанию для пользователей</value>
+  </data>
+  <data name="FormOpenedForFilling" xml:space="preserve">
+    <value>Файл открыт для заполнения: {0}</value>
+  </data>
+  <data name="FormSubmit" xml:space="preserve">
+    <value>Пользователи [{0}]. Форма отправлена: {1}</value>
   </data>
 </root>
