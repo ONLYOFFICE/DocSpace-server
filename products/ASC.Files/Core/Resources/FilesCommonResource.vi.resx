@@ -476,4 +476,22 @@ Khả năng tương thích cao nhất với docx, xlsx, pptx.</value>
   <data name="User" xml:space="preserve">
     <value>Người dùng</value>
   </data>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>Không hỗ trợ di chuyển một số tập tin vào phòng Điền Biểu mẫu. Hãy di chuyển từng biểu mẫu ONLYOFFICE một.</value>
+  </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>Không hỗ trợ di chuyển các thư mục đến phòng Điền Biểu mẫu. Hãy di chuyển từng biểu mẫu ONLYOFFICE PDF một.</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>Không thể di chuyển tập tin đến phòng này. Xin hãy thử di chuyển biểu mẫu ONLYOFFICE PDF.</value>
+  </data>
+  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
+    <value>Không thể tải tập tin lên phòng này. Xin hãy thử tải lên biểu mẫu ONLYOFFICE PDF.</value>
+  </data>
+  <data name="FillOutExternalLinkTitle" xml:space="preserve">
+    <value>Liên kết để điền</value>
+  </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>Liên kết đến biểu mẫu</value>
+  </data>
 </root>

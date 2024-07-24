@@ -80,7 +80,7 @@
     <value>Επιβεβαίωση τερματισμού λογαριασμού</value>
   </data>
   <data name="ButtonRemoveProfile" xml:space="preserve">
-    <value>Αφαίρεση προφίλ</value>
+    <value>Απενεργοποίηση λογαριασμού</value>
   </data>
   <data name="ButtonRenewNow" xml:space="preserve">
     <value>Ανανέωση τώρα</value>
@@ -944,7 +944,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Αλλαγή της διεύθυνσης πύλης</value>
   </data>
   <data name="subject_profile_delete" xml:space="preserve">
-    <value>Διαγραφή του προφίλ σας από την πύλη ${__VirtualRootPath}</value>
+    <value>Απενεργοποίηση λογαριασμού στο ${__VirtualRootPath}</value>
   </data>
   <data name="subject_profile_has_deleted_itself" xml:space="preserve">
     <value>Ο χρήστης διέγραψε το προφίλ του</value>

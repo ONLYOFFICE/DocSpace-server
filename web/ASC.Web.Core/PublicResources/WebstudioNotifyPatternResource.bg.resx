@@ -110,7 +110,7 @@
     <value>Оставете отзиви</value>
   </data>
   <data name="ButtonRemoveProfile" xml:space="preserve">
-    <value>Премахване на потребителския профил</value>
+    <value>Деактивирай профил</value>
   </data>
   <data name="ButtonRequestCallButton" xml:space="preserve">
     <value>Заявка за повикване</value>
@@ -635,7 +635,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Промяна на адреса на портала</value>
   </data>
   <data name="subject_profile_delete" xml:space="preserve">
-    <value>Деактивиране профил на "${__VirtualRootPath}":"${__VirtualRootPath}"</value>
+    <value>Деактивиране профил на ${__VirtualRootPath}</value>
   </data>
   <data name="subject_profile_updated" xml:space="preserve">
     <value>Потребителският ви профил в ${__VirtualRootPath} е променен</value>

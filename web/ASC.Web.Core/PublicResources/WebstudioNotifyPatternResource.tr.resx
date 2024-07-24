@@ -357,15 +357,15 @@ $PortalUrl portal adresiniz "${__VirtualRootPath}":"${__VirtualRootPath}" olarak
 *Not*: Paylaşılan tüm belgeler artık erişilemezdir, ayrıca DNS ayarları ve tek giriş seçenekleri değiştirilene kadar durdurulmuştur. Üçüncü parti iCal linkleri siz yeniden yükleyene dek takviminize eklenmiş olup güncellenmeyecektir.</value>
   </data>
   <data name="pattern_profile_delete" xml:space="preserve">
-    <value>h1.Profilin "${__VirtualRootPath}":"${__VirtualRootPath}" portalından kaldırılması
+    <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" üzerindeki hesap devre dışı bırakılıyor
 
-Profilinizi kalıcı olarak "${__VirtualRootPath}":"${__VirtualRootPath}" portalından silme talebinde bulundunuz.
+DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" hesabınızın devre dışı bırakılmasını talep ettiniz.
 
-Profilinizi silmek istiyorsanız aşağıdaki linki takip edin:
+Hesabınızı yine de devre dışı bırakmak istiyorsanız işlemi onaylamak için lütfen aşağıdaki bağlantıyı izleyin:
 
 $OrangeButton
 
-*Not*: bu link 7 gün boyunca geçerli olacaktır. Lütfen bu süre zarfında profil silme işlemini tamamlayın.</value>
+*Not*: Bu bağlantı sadece 7 gün geçerlidir. Lütfen bu süre içinde hesap devre dışı bırakma işlemini tamamlayın.</value>
   </data>
   <data name="pattern_profile_updated" xml:space="preserve">
     <value>h1."$__VirtualRootPath":"$__VirtualRootPath" portalındaki profiliniz değiştirildi
@@ -515,7 +515,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Portal adres değişikliği</value>
   </data>
   <data name="subject_profile_delete" xml:space="preserve">
-    <value>${__VirtualRootPath} portalından profilinizin silinmesi</value>
+    <value>${__VirtualRootPath} üzerindeki hesap devre dışı bırakılıyor</value>
   </data>
   <data name="subject_profile_updated" xml:space="preserve">
     <value>${__VirtualRootPath} profiliniz değiştirildi</value>
@@ -1149,7 +1149,7 @@ $TrulyYours</value>
     <value>Geribildirim Bırak</value>
   </data>
   <data name="ButtonRemoveProfile" xml:space="preserve">
-    <value>Profili kaldır</value>
+    <value>Hesabı devre dışı bırak</value>
   </data>
   <data name="ButtonRenewNow" xml:space="preserve">
     <value>Şimdi yenile</value>

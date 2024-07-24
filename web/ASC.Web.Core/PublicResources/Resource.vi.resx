@@ -1039,4 +1039,13 @@
   <data name="TariffsFeature_used_manager" xml:space="preserve">
     <value>Quản trị viên/Người dùng cấp cao đã thêm:</value>
   </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>Đã vượt quá giới hạn lời mời</value>
+  </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>Người dùng đã bị vô hiệu</value>
+  </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>Hướng dẫn thay đổi mật khẩu đã được gửi đến địa chỉ email {0}.</value>
+  </data>
 </root>

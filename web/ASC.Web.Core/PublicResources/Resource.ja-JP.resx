@@ -1043,6 +1043,12 @@
     <value>ストレージ容量制限と統計</value>
   </data>
   <data name="ErrorUserDisabled" xml:space="preserve">
-    <value>無効なユーザー</value>
+    <value>ユーザーが無効化されました</value>
+  </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>招待上限を超えています</value>
+  </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>パスワード変更指示が{0}メールアドレスに送信されました。</value>
   </data>
 </root>

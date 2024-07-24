@@ -476,7 +476,7 @@ Użytkownik "$__AuthorName":"$__AuthorUrl" dołączył do portalu "${__VirtualRo
     <value>${LetterLogoText}. Zmiana adresu portalu</value>
   </data>
   <data name="subject_profile_delete" xml:space="preserve">
-    <value>Usunięcie profilu na portalu ${__VirtualRootPath}</value>
+    <value>Wyłączanie konta na ${__VirtualRootPath}</value>
   </data>
   <data name="subject_profile_updated" xml:space="preserve">
     <value>Twój profil na portalu ${__VirtualRootPath} został zmieniony</value>
@@ -1206,7 +1206,7 @@ $TrulyYours</value>
     <value>Zostaw opinię</value>
   </data>
   <data name="ButtonRemoveProfile" xml:space="preserve">
-    <value>Usuń profil</value>
+    <value>Wyłącz konto</value>
   </data>
   <data name="ButtonRenewNow" xml:space="preserve">
     <value>Odnów teraz</value>

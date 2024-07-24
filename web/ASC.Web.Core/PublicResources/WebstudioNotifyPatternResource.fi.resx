@@ -132,7 +132,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Portaalin osoitteen muutos</value>
   </data>
   <data name="subject_profile_delete" xml:space="preserve">
-    <value>${__VirtualRootPath} portaalista profiilisi poisto</value>
+    <value>Poistetaan tili käytöstä ${__VirtualRootPath}</value>
   </data>
   <data name="subject_profile_updated" xml:space="preserve">
     <value>Profiilisi: ${__VirtualRootPath} on muutettu</value>
@@ -994,7 +994,7 @@ $TrulyYours</value>
     <value>Jätä palautetta</value>
   </data>
   <data name="ButtonRemoveProfile" xml:space="preserve">
-    <value>Poista profiili</value>
+    <value>Poista tili käytöstä</value>
   </data>
   <data name="ButtonRenewNow" xml:space="preserve">
     <value>Uudista nyt</value>

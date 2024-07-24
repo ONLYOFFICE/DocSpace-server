@@ -326,15 +326,15 @@ $TrulyYours</value>
 *Примітка*: настройки DNS та варіанти єдиного входу не працюють, поки ви їх не зміните.</value>
   </data>
   <data name="pattern_profile_delete" xml:space="preserve">
-    <value>h1.Видалення профілю з порталу "${__VirtualRootPath}":"${__VirtualRootPath}"
+    <value>h1.Вимкнення облікового запису на "${__VirtualRootPath}":"${__VirtualRootPath}"
 
-Ви просили назавжди видалити свій профіль із порталу "${__VirtualRootPath}":"${__VirtualRootPath}".
+Ви зробили запит на вимкнення вашого облікового запису в DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}".
 
-Якщо ви все-таки хочете видалити свій профіль, перейдіть за посиланням нижче, щоб підтвердити операцію:
+Якщо ви все ще хочете вимкнути ваш обліковий запис, перейдіть за посиланням нижче, щоб підтвердити операцію.
 
 $OrangeButton
 
-*Примітка*: це посилання дійсно лише 7 днів. Пройдіть процес видалення профілю протягом цього періоду.</value>
+*Примітка*. Посилання дійсне протягом 7 днів. Завершіть процес вимкнення облікового запису протягом цього періоду.</value>
   </data>
   <data name="pattern_profile_updated" xml:space="preserve">
     <value>Ваш профіль на сторінці "$__VirtualRootPath":"$__VirtualRootPath" було змінено
@@ -476,7 +476,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Зміна адреси порталу</value>
   </data>
   <data name="subject_profile_delete" xml:space="preserve">
-    <value>Видалення вашого профілю з порталу ${__VirtualRootPath}</value>
+    <value>Вимкнення облікового запису на "${__VirtualRootPath}":"${__VirtualRootPath}"</value>
   </data>
   <data name="subject_profile_updated" xml:space="preserve">
     <value>Ваш профіль у ${__VirtualRootPath} змінено</value>
@@ -1140,7 +1140,7 @@ $TrulyYours</value>
     <value>Залишити відгук</value>
   </data>
   <data name="ButtonRemoveProfile" xml:space="preserve">
-    <value>Видалити профіль</value>
+    <value>Вимкнути обліковий запис</value>
   </data>
   <data name="ButtonRenewNow" xml:space="preserve">
     <value>Поновити зараз</value>

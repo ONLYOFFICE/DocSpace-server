@@ -113,7 +113,7 @@
     <value>Esprimi una valutazione</value>
   </data>
   <data name="ButtonRemoveProfile" xml:space="preserve">
-    <value>Elimina Profilo</value>
+    <value>Disabilita l’account</value>
   </data>
   <data name="ButtonRenewNow" xml:space="preserve">
     <value>Rinnova adesso</value>
@@ -487,15 +487,15 @@ Il tuo indirizzo del portale $PortalUrl è stato cambiato con il nuovo indirizzo
 *Nota*: le impostazioni DNS e le opzioni Single Sign-On smettono di funzionare finché non le modifichi.</value>
   </data>
   <data name="pattern_profile_delete" xml:space="preserve">
-    <value>h1.Rimozione del profilo dal portale "${__VirtualRootPath}":"${__VirtualRootPath}"
+    <value>h1.Disattivazione dell'account su "${__VirtualRootPath}":"${__VirtualRootPath}"
 
-Hai richiesto la rimozione definitiva del tuo profilo dal portale "${__VirtualRootPath}":"${__VirtualRootPath}"
+Hai richiesto di disabilitare il tuo account in DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}".
 
-Se vuoi ancora rimuovere il tuo profilo vai al link seguente per completare l'operazione:
+Se desideri comunque disattivare il tuo account, segui il link sottostante per confermare l'operazione:
 
 $OrangeButton
 
-* Nota *: questo collegamento è valido solo per 7 giorni. Completa il processo di cambio di indirizzo del portale entro tale periodo.</value>
+*Nota*: questo link è valido soltanto per 7 giorni. Completa il processo di disattivazione dell'account entro tale periodo.</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
     <value>L'utente "$FromUserName":"$FromUserLink" ha eliminato il suo profilo e questo profilo è ora bloccato. Tutti i file dell'utente vengono comunque assegnati a lui / lei e occupano spazio su disco.
@@ -729,7 +729,7 @@ Questo link è valido 7 giorni dalla ricezione di questo messaggio.</value>
     <value>${LetterLogoText}. Cambio dell'indirizzo del portale</value>
   </data>
   <data name="subject_profile_delete" xml:space="preserve">
-    <value>Eliminazione del profilo dal ${__VirtualRootPath} portale</value>
+    <value>Disabilitazione dell'account su ${__VirtualRootPath}</value>
   </data>
   <data name="subject_profile_has_deleted_itself" xml:space="preserve">
     <value>L'utente ha rimosso il suo profilo</value>

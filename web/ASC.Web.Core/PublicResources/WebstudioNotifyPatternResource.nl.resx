@@ -472,7 +472,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Verandering van Portaal adres</value>
   </data>
   <data name="subject_profile_delete" xml:space="preserve">
-    <value>Verwijdering van uw profiel van het ${__VirtualRootPath} portaal</value>
+    <value>Account deactiveren op ${__VirtualRootPath}</value>
   </data>
   <data name="subject_profile_updated" xml:space="preserve">
     <value>Uw profiel op ${__VirtualRootPath} is gewijzigd</value>
@@ -1234,7 +1234,7 @@ $TrulyYours</value>
     <value>Laat feedback achter</value>
   </data>
   <data name="ButtonRemoveProfile" xml:space="preserve">
-    <value>Verwijder profiel</value>
+    <value>Account deactiveren</value>
   </data>
   <data name="ButtonRenewNow" xml:space="preserve">
     <value>Verleng nu</value>

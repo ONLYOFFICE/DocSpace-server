@@ -476,7 +476,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Změna adresy portálu</value>
   </data>
   <data name="subject_profile_delete" xml:space="preserve">
-    <value>Vymazání Vašeho profilu z ${__VirtualRootPath} portálu</value>
+    <value>Zakázání účtu na ${__VirtualRootPath}</value>
   </data>
   <data name="subject_profile_updated" xml:space="preserve">
     <value>Váš profil na ${__VirtualRootPath} byl změněn</value>
@@ -1136,7 +1136,7 @@ $TrulyYours</value>
     <value>Zanechat zpětnou vazbu</value>
   </data>
   <data name="ButtonRemoveProfile" xml:space="preserve">
-    <value>Odstranění profilu</value>
+    <value>Zakázat účet</value>
   </data>
   <data name="ButtonRenewNow" xml:space="preserve">
     <value>Obnovit nyní</value>

@@ -497,7 +497,7 @@
     <value>Impostazioni</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
-    <value>Accesso singolo (SSO) disattivato</value>
+    <value>Accesso singolo (SSO) disabilitato</value>
   </data>
   <data name="SSOEnabled" xml:space="preserve">
     <value>Accesso singolo (SSO) attivato</value>

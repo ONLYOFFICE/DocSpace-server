@@ -476,4 +476,25 @@ Visaugstākā saderība ar docx, xlsx, pptx.</value>
   <data name="User" xml:space="preserve">
     <value>Lietotājs</value>
   </data>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>Vairāku failu pārvietošana uz veidlapu aizpildīšanas telpu netiek atbalstīta. Pārvietojiet pa vienai ONLYOFFICE PDF veidlapai.</value>
+  </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>Mapju pārvietošana uz veidlapu aizpildīšanas telpu netiek atbalstīta. Pārvietojiet pa vienai ONLYOFFICE PDF veidlapai.</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>Failu nevar pārvietot uz šo telpu. Mēģiniet pārvietot ONLYOFFICE PDF veidlapu.</value>
+  </data>
+  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
+    <value>Failu nevar augšupielādēt šajā telpā. Mēģiniet augšupielādēt ONLYOFFICE PDF veidlapu.</value>
+  </data>
+  <data name="FillOutExternalLinkTitle" xml:space="preserve">
+    <value>Aizpildāmā saite</value>
+  </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>Saite uz veidlapu</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Atvērt formu</value>
+  </data>
 </root>

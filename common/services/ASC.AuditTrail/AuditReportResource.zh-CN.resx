@@ -775,4 +775,7 @@
   <data name="RoomUpdateAccessForGroup" xml:space="preserve">
     <value>{0}已指定：{1}</value>
   </data>
+  <data name="SendJoinInvite" xml:space="preserve">
+    <value>用户 {0} 向 {1} 发送邀请加入此协作空间</value>
+  </data>
 </root>

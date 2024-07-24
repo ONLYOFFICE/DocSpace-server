@@ -1036,4 +1036,16 @@
   <data name="UserFreeSpaceException" xml:space="preserve">
     <value>Pārsniegta lietotāja vietas kvota</value>
   </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>Uzaicinājumu ierobežojums ir pārsniegts</value>
+  </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>Lietotājs ir atspējots</value>
+  </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>Paroles maiņas instrukcija ir nosūtīta uz {0} e-pasta adresi.</value>
+  </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>Pievienoti administratori/prasmīgi lietotāji:</value>
+  </data>
 </root>
