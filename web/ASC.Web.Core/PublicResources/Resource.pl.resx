@@ -380,7 +380,7 @@
     <value>Liczba administratorów nie powinna być większa niż {0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Liczba administratorów</value>
+    <value>Liczba administratorów/użytkowników z większą liczbą uprawnień</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Automatyczne tworzenie kopii zapasowych i przywracanie</value>
@@ -973,9 +973,6 @@
   <data name="TariffsFeature_thirdparty" xml:space="preserve">
     <value>Integracje podmiotów trzecich</value>
   </data>
-  <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Liczba administratorów/użytkowników z większą liczbą uprawnień:</value>
-  </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>Błędny kod</value>
   </data>
@@ -1038,5 +1035,17 @@
   </data>
   <data name="UserFreeSpaceException" xml:space="preserve">
     <value>Przekroczono limit pamięci użytkownika</value>
+  </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>Dodani administratorzy/użytkownicy z większą liczbą uprawnień:</value>
+  </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>Przekroczono limit zaproszeń</value>
+  </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>Użytkownik nieaktywny</value>
+  </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>Instrukcje dotyczące zmiany hasła zostały wysłane na adres e-mail {0}.</value>
   </data>
 </root>

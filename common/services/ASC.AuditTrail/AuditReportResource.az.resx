@@ -742,4 +742,40 @@
   <data name="FileSizePostfix" xml:space="preserve">
     <value>bayt, kilobayt, meqabayt, giqabayt</value>
   </data>
+  <data name="FileUploadedWithOverwriting" xml:space="preserve">
+    <value>Üzərinə yazılmaqla yüklənmiş fayl: {0}</value>
+  </data>
+  <data name="QuotaPerPortalChanged" xml:space="preserve">
+    <value>Defolt yaddaş kvotası təyin edin: {0}</value>
+  </data>
+  <data name="QuotaPerPortalDisabled" xml:space="preserve">
+    <value>Defolt yaddaş kvotası deaktiv edilib</value>
+  </data>
+  <data name="QuotaPerRoomChanged" xml:space="preserve">
+    <value>Otaqlar üçün defolt yaddaş kvotası təyin edin: {0}</value>
+  </data>
+  <data name="QuotaPerRoomDisabled" xml:space="preserve">
+    <value>Otaqlar üçün defolt yaddaş kvotası deaktiv edildi</value>
+  </data>
+  <data name="QuotaPerUserChanged" xml:space="preserve">
+    <value>İstifadəçilər üçün defolt yaddaş kvotası təyin edin: {0}</value>
+  </data>
+  <data name="QuotaPerUserDisabled" xml:space="preserve">
+    <value>Defolt yaddaş kvotası istifadəçilər üçün deaktiv edilib</value>
+  </data>
+  <data name="RoomGroupAdded" xml:space="preserve">
+    <value>Əlavə edilmiş qrup: {0}. Rol: {1}</value>
+  </data>
+  <data name="RoomGroupRemove" xml:space="preserve">
+    <value>Silinmiş qrup: {0}</value>
+  </data>
+  <data name="RoomCopied" xml:space="preserve">
+    <value>Otaq kopyalandı: {0}</value>
+  </data>
+  <data name="SendJoinInvite" xml:space="preserve">
+    <value>İstifadəçi {0} bu DocSpace-ə qoşulmaq üçün {1} ünvanına dəvət göndərdi</value>
+  </data>
+  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
+    <value>{0} təyin edildi: {1}</value>
+  </data>
 </root>

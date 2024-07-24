@@ -133,7 +133,7 @@
     <value>Ադմինիստրատորների թիվը չպետք է գերազանցի {0}-ը</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Ադմինների թիվը</value>
+    <value>Ադմինիստրատորների/հզոր օգտագործողների թիվը</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Հետևել օգտվողների մուտքերին &amp; գործողություն</value>
@@ -155,9 +155,6 @@
   </data>
   <data name="TariffsFeature_total_size_price_count" xml:space="preserve">
     <value>Պահեստային տարածք</value>
-  </data>
-  <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Ադմինիստրատորների/հզոր օգտագործողների թիվը:</value>
   </data>
   <data name="TariffsFeature_used_room" xml:space="preserve">
     <value>Սենյակներ:</value>
@@ -1106,5 +1103,14 @@
   </data>
   <data name="ErrorUserDisabled" xml:space="preserve">
     <value>Օգտատերն անջատված է</value>
+  </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>Ադմիններ/Հզոր օգտվողներ ավելացվել են՝</value>
+  </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>Հրավերների սահմանաչափը գերազանցված է</value>
+  </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>Գաղտնաբառի փոփոխման հրահանգն ուղարկվել է {0} էլ.փոստի հասցեին:</value>
   </data>
 </root>

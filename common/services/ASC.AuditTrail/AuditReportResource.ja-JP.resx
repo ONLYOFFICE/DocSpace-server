@@ -742,4 +742,40 @@
   <data name="FileSizePostfix" xml:space="preserve">
     <value>bytes,KB,MB,GB</value>
   </data>
+  <data name="FileUploadedWithOverwriting" xml:space="preserve">
+    <value>上書きでファイルがアップロードされました：{0}</value>
+  </data>
+  <data name="QuotaPerPortalChanged" xml:space="preserve">
+    <value>デフォルトのストレージ容量制限が設定されました：{0}</value>
+  </data>
+  <data name="QuotaPerPortalDisabled" xml:space="preserve">
+    <value>デフォルトストレージ容量制限の無効化</value>
+  </data>
+  <data name="QuotaPerRoomChanged" xml:space="preserve">
+    <value>ルームのデフォルトストレージ容量制限を設定：{0}</value>
+  </data>
+  <data name="QuotaPerRoomDisabled" xml:space="preserve">
+    <value>ルームのデフォルトストレージ容量制限を無効化</value>
+  </data>
+  <data name="QuotaPerUserChanged" xml:space="preserve">
+    <value>ユーザーのストレージ容量制限が設定されました：{0}</value>
+  </data>
+  <data name="QuotaPerUserDisabled" xml:space="preserve">
+    <value>ユーザーのデフォルトストレージ容量制限が無効化されました</value>
+  </data>
+  <data name="RoomCopied" xml:space="preserve">
+    <value>部屋をコピーしました: {0}</value>
+  </data>
+  <data name="RoomGroupAdded" xml:space="preserve">
+    <value>グループが追加されました：{0}。役割：{1}</value>
+  </data>
+  <data name="RoomGroupRemove" xml:space="preserve">
+    <value>グループが削除されました：{0}</value>
+  </data>
+  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
+    <value>{0}が任命されました: {1}</value>
+  </data>
+  <data name="SendJoinInvite" xml:space="preserve">
+    <value>ユーザー{0}は{1}にこのDocSpaceへの招待を送信しました</value>
+  </data>
 </root>

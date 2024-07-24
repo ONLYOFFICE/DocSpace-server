@@ -176,7 +176,7 @@
     <value>O número de administradores não deve exceder {0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Número de administradores</value>
+    <value>O número de administradores/utilizadores com poder</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Cópia de Segurança automática e recuperação</value>
@@ -219,9 +219,6 @@
   </data>
   <data name="TariffsFeature_whitelabel" xml:space="preserve">
     <value>Imagem de Marca e personalização</value>
-  </data>
-  <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>O número de administradores/utilizadores com poder:</value>
   </data>
   <data name="ConsumersBox" xml:space="preserve">
     <value>Box</value>
@@ -1038,5 +1035,14 @@
   </data>
   <data name="UserFreeSpaceException" xml:space="preserve">
     <value>Cota de espaço do usuário excedida</value>
+  </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>Administradores/usuários avançados adicionados:</value>
+  </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>O limite de convites foi excedido</value>
+  </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>Usuário desativado</value>
   </data>
 </root>

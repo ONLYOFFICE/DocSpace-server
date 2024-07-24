@@ -218,7 +218,7 @@
     <value>Ο αριθμός των διαχειριστών πρέπει να είναι ίσος ή μικρότερος από {0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Αριθμός των διαχειριστών</value>
+    <value>Ο αριθμός των διαχειριστών/χρηστών ισχύο</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Αυτόματη δημιουργία αντιγράφων ασφαλείας και ανάκτηση</value>
@@ -261,9 +261,6 @@
   </data>
   <data name="TariffsFeature_whitelabel" xml:space="preserve">
     <value>Επωνυμία και προσαρμογή</value>
-  </data>
-  <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Ο αριθμός των διαχειριστών/χρηστών ισχύο:</value>
   </data>
   <data name="ConsumersauthUser" xml:space="preserve">
     <value>Selectel authUser</value>
@@ -1038,5 +1035,17 @@
   </data>
   <data name="UserFreeSpaceException" xml:space="preserve">
     <value>Υπέρβαση της ποσόστωσης χώρου χρήστη</value>
+  </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>Το όριο προσκλήσεων έχει ξεπεραστεί</value>
+  </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>Απενεργοποίηση χρήστη</value>
+  </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>Η εντολή αλλαγής κωδικού πρόσβασης έχει αποσταλεί στη διεύθυνση email {0}.</value>
+  </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>Οι Διαχειριστές/Εξουσιοδοτημένοι χρήστες προστέθηκαν:</value>
   </data>
 </root>
