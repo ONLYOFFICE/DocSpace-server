@@ -132,6 +132,10 @@ public class MigrationOperation(
                 await migrator.MigrateAsync(copyInfo);
             }
         }
+        catch (DirectoryNotFoundException)
+        {
+            Exception = new Exception(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
         catch (Exception e)
         {
             Exception = e;
