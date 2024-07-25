@@ -1054,4 +1054,7 @@
   <data name="ErrorUserDisabled" xml:space="preserve">
     <value>Пользователь отключен</value>
   </data>
+  <data name="ErrorEmailLinked" xml:space="preserve">
+    <value>Этот адрес электронной почты прикреплен к пользователю {0} в качестве стороннего провайдера</value>
+  </data>
 </root>

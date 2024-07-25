@@ -494,4 +494,7 @@ docx, xlsx, pptx ilə ən yüksək uyğunluq.</value>
   <data name="LinkToForm" xml:space="preserve">
     <value>Forma üçün link</value>
   </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Formanı açın</value>
+  </data>
 </root>

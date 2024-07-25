@@ -494,4 +494,7 @@ docx、xlsx、pptxとの100％の互換性が保証されています。</value>
   <data name="LinkToForm" xml:space="preserve">
     <value>フォームへのリンク</value>
   </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>フォームを開く</value>
+  </data>
 </root>

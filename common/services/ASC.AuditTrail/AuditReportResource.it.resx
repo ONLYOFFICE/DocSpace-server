@@ -778,4 +778,28 @@
   <data name="RoomUpdateAccessForGroup" xml:space="preserve">
     <value>{0} nominato: {1}</value>
   </data>
+  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
+    <value>Stanze [{0}]. Imposta una quota di spazio di archiviazione personalizzata per le stanze: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
+    <value>Stanze [{0}]. Imposta la quota di archiviazione predefinita per le stanze: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
+    <value>Stanze [{0}]. Quota di archiviazione disabilitata per le stanze</value>
+  </data>
+  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
+    <value>Utenti [{0}]. Imposta una quota di spazio di archiviazione personalizzata per gli utenti: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
+    <value>Utenti [{0}]. Imposta la quota di spazio di archiviazione predefinita per gli utenti: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
+    <value>Utenti [{0}]. Quota di spazio di archiviazione disattivata per gli utenti</value>
+  </data>
+  <data name="FormOpenedForFilling" xml:space="preserve">
+    <value>File aperti per la compilazione: {0}</value>
+  </data>
+  <data name="FormSubmit" xml:space="preserve">
+    <value>Utenti [{0}]. Moduli inviati: {1}</value>
+  </data>
 </root>

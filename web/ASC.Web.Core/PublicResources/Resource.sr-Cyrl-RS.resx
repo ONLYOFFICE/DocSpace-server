@@ -1098,4 +1098,19 @@
   <data name="TariffsFeature_used_manager" xml:space="preserve">
     <value>Администратори /Напредни корисници додати:</value>
   </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>Лимит за позивницу је прекорачен</value>
+  </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>Корисник онемогућен</value>
+  </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>Инструкција за промену лозинке је послата на {0} емаил адресу.</value>
+  </data>
+  <data name="TariffsFeature_statistic" xml:space="preserve">
+    <value>Квоте за складиштење и статистика</value>
+  </data>
+  <data name="TariffsFeature_total_size" xml:space="preserve">
+    <value>{0} по администратору/напредни кориснику и могућност додавања простора на захтев</value>
+  </data>
 </root>

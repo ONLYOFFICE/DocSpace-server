@@ -535,4 +535,25 @@
   <data name="User" xml:space="preserve">
     <value>مستخدم</value>
   </data>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>نقل عدة ملفات إلى غرفة تعبئة النماذج غير مدعوم. قم بنقل نموذجONLYOFFICE PDF  واحد في كل مرة.</value>
+  </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>نقل المجلدات إلى غرفة تعبئة النموذج غير مدعوم. قم بنقل نموذج ONLYOFFICE PDF  واحد في كل مرة.</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>لا يمكن نقل الملف إلى هذه الغرفة. يرجى محاولة نقل نموذج ONLYOFFICE PDF.</value>
+  </data>
+  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
+    <value>لا يمكن تحميل الملف إلى هذه الغرفة. يرجى محاولة تحميل نموذج ONLYOFFICE PDF.</value>
+  </data>
+  <data name="FillOutExternalLinkTitle" xml:space="preserve">
+    <value>رابط تعبئة النموذج</value>
+  </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>رابط النموذج</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>فتح النموذج</value>
+  </data>
 </root>

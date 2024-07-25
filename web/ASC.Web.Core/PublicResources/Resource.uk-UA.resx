@@ -1045,4 +1045,7 @@
   <data name="ErrorUserDisabled" xml:space="preserve">
     <value>Користувача вимкнено</value>
   </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>Інструкцію зі зміни пароля надіслано на адресу {0}.</value>
+  </data>
 </root>
