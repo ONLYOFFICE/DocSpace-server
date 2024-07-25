@@ -1045,4 +1045,7 @@
   <data name="ErrorUserDisabled" xml:space="preserve">
     <value>Uživatel zakázán</value>
   </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>Pokyn ke změně hesla byl odeslán na e-mailovou adresu {0}.</value>
+  </data>
 </root>

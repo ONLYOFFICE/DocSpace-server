@@ -1054,4 +1054,7 @@
   <data name="MessagePasswordSendedToEmail" xml:space="preserve">
     <value>A instrução de alteração de senha foi enviada para o endereço de e-mail {0}.</value>
   </data>
+  <data name="ErrorEmailLinked" xml:space="preserve">
+    <value>Este e-mail está anexado ao usuário {0} como um provedor terceirizado</value>
+  </data>
 </root>

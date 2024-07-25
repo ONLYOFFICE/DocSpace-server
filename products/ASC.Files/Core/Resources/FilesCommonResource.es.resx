@@ -497,4 +497,7 @@
   <data name="OpenForm" xml:space="preserve">
     <value>Abrir formulario</value>
   </data>
+  <data name="FormNumber" xml:space="preserve">
+    <value>Número de formulario</value>
+  </data>
 </root>

@@ -494,4 +494,10 @@ Massima compatibilità con docx, xlsx, pptx.</value>
   <data name="LinkToForm" xml:space="preserve">
     <value>Link al modulo</value>
   </data>
+  <data name="FormNumber" xml:space="preserve">
+    <value>Numero del modulo</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Apri il modulo</value>
+  </data>
 </root>

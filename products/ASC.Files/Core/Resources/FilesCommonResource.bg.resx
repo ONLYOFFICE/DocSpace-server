@@ -476,4 +476,25 @@
   <data name="User" xml:space="preserve">
     <value>Потребител</value>
   </data>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>Преместването на няколко файла в стаята за попълване на формуляри не се поддържа. Премествайте по един ONLYOFFICE PDF формуляр.</value>
+  </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>Преместването на папки в стаята за попълване на формуляри не се поддържа. Премествайте по един ONLYOFFICE PDF формуляр.</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>Файлът не може да бъде преместен в тази стая. Моля, опитайте да преместите ONLYOFFICE PDF формуляра.</value>
+  </data>
+  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
+    <value>Файлът не може да бъде качен в тази стая. Моля, опитайте да качите ONLYOFFICE PDF формуляра.</value>
+  </data>
+  <data name="FillOutExternalLinkTitle" xml:space="preserve">
+    <value>Линк за попълване</value>
+  </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>Линк към формуляра</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Отворен формуляр</value>
+  </data>
 </root>

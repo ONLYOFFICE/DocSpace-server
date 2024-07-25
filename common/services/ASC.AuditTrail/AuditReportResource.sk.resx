@@ -742,4 +742,40 @@
   <data name="FileSizePostfix" xml:space="preserve">
     <value>bytes,KB,MB,GB,TB</value>
   </data>
+  <data name="FileUploadedWithOverwriting" xml:space="preserve">
+    <value>Súbor nahraný s prepísaním: {0}</value>
+  </data>
+  <data name="QuotaPerPortalChanged" xml:space="preserve">
+    <value>Nastavená predvolená kvóta úložiska: {0}</value>
+  </data>
+  <data name="QuotaPerPortalDisabled" xml:space="preserve">
+    <value>Deaktivovaná predvolená kvóta úložiska</value>
+  </data>
+  <data name="QuotaPerRoomChanged" xml:space="preserve">
+    <value>Nastavená predvolená kvóta úložiska pre miestnosti: {0}</value>
+  </data>
+  <data name="QuotaPerRoomDisabled" xml:space="preserve">
+    <value>Deaktivovaná predvolená kvóta úložiska pre miestnosti</value>
+  </data>
+  <data name="QuotaPerUserChanged" xml:space="preserve">
+    <value>Nastavená predvolená kvóta úložiska pre používateľov: {0}</value>
+  </data>
+  <data name="QuotaPerUserDisabled" xml:space="preserve">
+    <value>Deaktivovaná predvolená kvóta úložiska pre používateľov</value>
+  </data>
+  <data name="RoomCopied" xml:space="preserve">
+    <value>Skopírovaná miestnosť: {0}</value>
+  </data>
+  <data name="RoomGroupAdded" xml:space="preserve">
+    <value>Pridaná skupina: {0}. Rola: {1}</value>
+  </data>
+  <data name="RoomGroupRemove" xml:space="preserve">
+    <value>Odstránená skupina: {0}</value>
+  </data>
+  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
+    <value>{0} priradene: {1}</value>
+  </data>
+  <data name="SendJoinInvite" xml:space="preserve">
+    <value>Používateľ {0} poslal pozvánku {1}, aby sa pripojil k tomuto priestoru DocSpace</value>
+  </data>
 </root>

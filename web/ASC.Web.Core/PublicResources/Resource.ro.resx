@@ -1111,6 +1111,9 @@
     <value>Instrucțiuni de schimbare a parolei au fost trimise la adresa de e-mail {0}.</value>
   </data>
   <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
-    <value>S-a atins limita de invitații </value>
+    <value>S-a atins limita de invitații</value>
+  </data>
+  <data name="ErrorEmailLinked" xml:space="preserve">
+    <value>Această adresă de email este înregistrată de utilizatorul {0} ca furnizor terță parte</value>
   </data>
 </root>

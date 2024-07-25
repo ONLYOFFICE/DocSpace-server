@@ -497,4 +497,7 @@
   <data name="OpenForm" xml:space="preserve">
     <value>Открыть форму</value>
   </data>
+  <data name="FormNumber" xml:space="preserve">
+    <value>Номер формы</value>
+  </data>
 </root>

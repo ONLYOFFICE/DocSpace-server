@@ -801,4 +801,40 @@
   <data name="FileSizePostfix" xml:space="preserve">
     <value>bajtovi,KB,MB,GB,TB</value>
   </data>
+  <data name="FileUploadedWithOverwriting" xml:space="preserve">
+    <value>Datoteka otpremljena sa prepisivanjem: {0}</value>
+  </data>
+  <data name="RoomCopied" xml:space="preserve">
+    <value>Soba je kopirana: {0}</value>
+  </data>
+  <data name="RoomGroupAdded" xml:space="preserve">
+    <value>Dodata grupa: {0}. Uloga: {1}</value>
+  </data>
+  <data name="RoomGroupRemove" xml:space="preserve">
+    <value>Obrisana grupa: {0}</value>
+  </data>
+  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
+    <value>{0} imenovan: {1}</value>
+  </data>
+  <data name="SendJoinInvite" xml:space="preserve">
+    <value>Korisnik {0} je poslao pozivnicu {1} da se pridruži ovom DocSpace-u</value>
+  </data>
+  <data name="QuotaPerPortalChanged" xml:space="preserve">
+    <value>Postavi podrazumevanu skladišnu kvotu: {0}</value>
+  </data>
+  <data name="QuotaPerPortalDisabled" xml:space="preserve">
+    <value>Onemogućena podrazumevana skladišna kvota</value>
+  </data>
+  <data name="QuotaPerRoomChanged" xml:space="preserve">
+    <value>Postavi podrazumevanu skladišnu kvotu za prostorije: {0}</value>
+  </data>
+  <data name="QuotaPerRoomDisabled" xml:space="preserve">
+    <value>Onemogućena podrazumevana skladišna kvota za prostorije</value>
+  </data>
+  <data name="QuotaPerUserChanged" xml:space="preserve">
+    <value>Postavi podrazumevanu skladišnu kvotu za korisnike: {0}</value>
+  </data>
+  <data name="QuotaPerUserDisabled" xml:space="preserve">
+    <value>Onemogućena podrazumevana skladišna kvota za korisnike</value>
+  </data>
 </root>

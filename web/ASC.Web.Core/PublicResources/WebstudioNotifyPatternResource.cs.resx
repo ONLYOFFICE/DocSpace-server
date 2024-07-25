@@ -1767,4 +1767,25 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
+  <data name="subject_saas_docspace_registration" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace: kompletní registrace</value>
+  </data>
+  <data name="subject_saas_admin_integrations_v1" xml:space="preserve">
+    <value>Prozkoumejte užitečné integrace pro ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="subject_rooms_activity" xml:space="preserve">
+    <value>Co je nového na vašem portálu ${__VirtualRootPath} za poslední hodinu</value>
+  </data>
+  <data name="subject_migration_personal_to_docspace" xml:space="preserve">
+    <value>Migrace dat do ONLYOFFICE DocSpace úspěšně dokončena</value>
+  </data>
+  <data name="pattern_saas_room_invite_existing_user" xml:space="preserve">
+    <value>Dobrý den!
+
+$__AuthorName vás pozval do místnosti "$Message":"$InviteLink" na "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
 </root>

@@ -778,4 +778,28 @@
   <data name="RoomUpdateAccessForGroup" xml:space="preserve">
     <value>{0} nomeado: {1}</value>
   </data>
+  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
+    <value>Salas [{0}]. Cota de armazenamento desativada para salas</value>
+  </data>
+  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
+    <value>Usuários [{0}]. Cota de armazenamento desativada para usuários</value>
+  </data>
+  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
+    <value>Salas [{0}]. Defina cota de armazenamento personalizada para salas: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
+    <value>Salas [{0}]. Defina a cota de armazenamento padrão para salas: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
+    <value>Usuários [{0}]. Defina cota de armazenamento personalizada para usuários: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
+    <value>Usuários [{0}]. Defina a cota de armazenamento padrão para usuários: {1}</value>
+  </data>
+  <data name="FormOpenedForFilling" xml:space="preserve">
+    <value>Arquivo aberto para preenchimento: {0}</value>
+  </data>
+  <data name="FormSubmit" xml:space="preserve">
+    <value>Usuários [{0}]. Formulário enviado: {1}</value>
+  </data>
 </root>

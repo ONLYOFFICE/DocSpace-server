@@ -837,4 +837,28 @@
   <data name="SendJoinInvite" xml:space="preserve">
     <value>{0} օգտատերը հրավեր է ուղարկել {1}-ին միանալու այս DocSpace-ին</value>
   </data>
+  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
+    <value>Սենյակներ [{0}]: Սահմանել հարմարեցված պահեստային քվոտա սենյակների համար՝ {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
+    <value>Սենյակներ [{0}]: Սահմանել լռելյայն պահեստի քվոտան սենյակների համար՝ {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
+    <value>Սենյակներ [{0}]: Անջատված պահեստային քվոտա սենյակների համար</value>
+  </data>
+  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
+    <value>Օգտատերեր[{0}]: Օգտատերերի համար սահմանել հատուկ պահեստային քվոտա՝ {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
+    <value>Օգտատերեր[{0}]: Սահմանել օգտատերերի համար լռելյայն պահեստի քվոտան՝ {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
+    <value>Օգտատերեր[{0}]: Անջատված է օգտատերերի պահեստային քվոտան</value>
+  </data>
+  <data name="FormOpenedForFilling" xml:space="preserve">
+    <value>Լրացման համար բացված ֆայլ՝ {0}</value>
+  </data>
+  <data name="FormSubmit" xml:space="preserve">
+    <value>Օգտատերեր[{0}]: Ներկայացված ձևը՝ {1}</value>
+  </data>
 </root>

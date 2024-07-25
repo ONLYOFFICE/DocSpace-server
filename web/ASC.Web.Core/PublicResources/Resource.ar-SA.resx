@@ -1098,4 +1098,13 @@
   <data name="TariffsFeature_used_manager" xml:space="preserve">
     <value>تمت إضافة المشرفين/المستخدمين المتميزين:</value>
   </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>لقد تجاوزت حد الدعوات المسموح به</value>
+  </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>تعطيل المستخدم</value>
+  </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>تم إرسال تعليمات تغيير كلمة المرور إلى عنوان البريد الإلكتروني {0}.</value>
+  </data>
 </root>

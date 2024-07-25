@@ -743,7 +743,7 @@
     <value>байт,Кб,Мб,Гб,Тб</value>
   </data>
   <data name="RoomUpdateAccessForGroup" xml:space="preserve">
-    <value>{0} назначена: {1}</value>
+    <value>{0} назначен: {1}</value>
   </data>
   <data name="FileUploadedWithOverwriting" xml:space="preserve">
     <value>Загружен файл с перезаписью: {0}</value>
@@ -752,19 +752,19 @@
     <value>Установлена квота хранилища по умолчанию: {0}</value>
   </data>
   <data name="QuotaPerPortalDisabled" xml:space="preserve">
-    <value>Квота хранилища по умолчанию отключена</value>
+    <value>Отключена квота хранилища по умолчанию</value>
   </data>
   <data name="QuotaPerRoomChanged" xml:space="preserve">
-    <value>Установить квоту хранилища по умолчанию для комнат: {0}</value>
+    <value>Установлена квота хранилища по умолчанию для комнат: {0}</value>
   </data>
   <data name="QuotaPerRoomDisabled" xml:space="preserve">
-    <value>Квота хранилища по умолчанию отключена для комнат</value>
+    <value>Отключена квота хранилища по умолчанию для комнат</value>
   </data>
   <data name="QuotaPerUserChanged" xml:space="preserve">
-    <value>Установить квоту хранилища по умолчанию для пользователей: {0}</value>
+    <value>Установлена квота хранилища по умолчанию для пользователей: {0}</value>
   </data>
   <data name="QuotaPerUserDisabled" xml:space="preserve">
-    <value>Квота хранилища по умолчанию отключена для пользователей</value>
+    <value>Отключена квота хранилища по умолчанию для пользователей</value>
   </data>
   <data name="RoomCopied" xml:space="preserve">
     <value>Скопирована комната: {0}</value>
@@ -794,12 +794,12 @@
     <value>Пользователи [{0}]. Установлена квота хранилища по умолчанию для пользователей: {1}</value>
   </data>
   <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
-    <value>Пользователи [{0}]. Установлена квота хранилища по умолчанию для пользователей</value>
+    <value>Пользователи [{0}]. Отключена квота хранилища для пользователей</value>
   </data>
   <data name="FormOpenedForFilling" xml:space="preserve">
-    <value>Файл открыт для заполнения: {0}</value>
+    <value>Открыт файл для заполнения: {0}</value>
   </data>
   <data name="FormSubmit" xml:space="preserve">
-    <value>Пользователи [{0}]. Форма отправлена: {1}</value>
+    <value>Пользователи [{0}]. Отправлена форма: {1}</value>
   </data>
 </root>
