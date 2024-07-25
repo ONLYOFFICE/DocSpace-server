@@ -39,29 +39,30 @@ public class RoomLogosModuleSpecifics(Helpers helpers) : ModuleSpecificsBase(hel
         {
             var split = filePath.Split('_');
             var roomId = columnMapper.GetMapping("files_folder", "id", split[0]);
-
             if (roomId != null) 
             {
                 filePath = roomId + "_" + split[1];
                 return true;
             }
-            split = filePath.Split('-');
-            roomId = columnMapper.GetMapping("files_thirdparty_account", "id", split[1]);
-            if (roomId != null)
-            {
-                filePath = split[0] + "-" + roomId + "-" + split[2];
-                return true;
-            }
-            else
-            {
-                if (!dump)
-                {
-                    return false;
-                }
 
-                roomId = split[0];
-                return true;
+            split = filePath.Split('-');
+            if (split.Length > 1) 
+            {
+                roomId = columnMapper.GetMapping("files_thirdparty_account", "id", split[1]);
+                if (roomId != null)
+                {
+                    filePath = split[0] + "-" + roomId + "-" + split[2];
+                    return true;
+                }
             }
+
+            if (!dump)
+            {
+                return false;
+            }
+
+            roomId = split[0];
+            return true;
         }
         catch
         {
