@@ -223,10 +223,8 @@ public class FilesMessageService(
 
         if (!crossEvent)
         {
-            var references = fromParents.Count > toParents.Count
-                ? GetReferences(fromParents)
-                : GetReferences(toParents);
-            
+            var references = GetReferences(fromParents);
+            references.AddRange(GetReferences(toParents));
             references.Add(new FilesAuditReference { EntryId = target.Id, EntryType = (byte)target.FileEntryType });
             
             var json = JsonSerializer.Serialize(eventDescriptionTo, _serializerOptions);
