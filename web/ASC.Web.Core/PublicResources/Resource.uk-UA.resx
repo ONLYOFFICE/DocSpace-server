@@ -263,7 +263,7 @@
     <value>Кількість адміністраторів не повинна перевищувати {0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Кількість адміністраторів</value>
+    <value>Кількість адміністраторів / досвідчених користувачів</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Автоматичне резервне копіювання та відновлення</value>
@@ -306,9 +306,6 @@
   </data>
   <data name="TariffsFeature_whitelabel" xml:space="preserve">
     <value>Брендинг та налаштування</value>
-  </data>
-  <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Кількість адміністраторів / досвідчених користувачів:</value>
   </data>
   <data name="ConsumersBitly" xml:space="preserve">
     <value>Bitly</value>
@@ -1038,5 +1035,14 @@
   </data>
   <data name="UserFreeSpaceException" xml:space="preserve">
     <value>Перевищено квоту простору кімнати</value>
+  </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>Додані адміністратори/досвідчені користувачі:</value>
+  </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>Ліміт запрошень перевищено</value>
+  </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>Користувача вимкнено</value>
   </data>
 </root>

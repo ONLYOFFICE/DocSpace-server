@@ -742,4 +742,40 @@
   <data name="FileSizePostfix" xml:space="preserve">
     <value>Byte,KB,MB,GB,TB</value>
   </data>
+  <data name="FileUploadedWithOverwriting" xml:space="preserve">
+    <value>Datei hochgeladen mit Überschreiben: {0}</value>
+  </data>
+  <data name="QuotaPerPortalChanged" xml:space="preserve">
+    <value>Standard-Speicherquote festlegen: {0}</value>
+  </data>
+  <data name="QuotaPerPortalDisabled" xml:space="preserve">
+    <value>Standard-Speicherquote deaktiviert</value>
+  </data>
+  <data name="QuotaPerRoomChanged" xml:space="preserve">
+    <value>Standard-Speicherquote für Räume festlegen: {0}</value>
+  </data>
+  <data name="QuotaPerRoomDisabled" xml:space="preserve">
+    <value>Standard-Speicherquote für Räume deaktiviert</value>
+  </data>
+  <data name="QuotaPerUserChanged" xml:space="preserve">
+    <value>Standard-Speicherquote für Benutzer festlegen: {0}</value>
+  </data>
+  <data name="QuotaPerUserDisabled" xml:space="preserve">
+    <value>Standard-Speicherquote für Benutzer deaktiviert</value>
+  </data>
+  <data name="RoomCopied" xml:space="preserve">
+    <value>Raum kopiert: {0}</value>
+  </data>
+  <data name="RoomGroupAdded" xml:space="preserve">
+    <value>Gruppe hinzugefügt: {0}. Rolle: {1}</value>
+  </data>
+  <data name="RoomGroupRemove" xml:space="preserve">
+    <value>Gruppe gelöscht: {0}</value>
+  </data>
+  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
+    <value>{0} ernannt: {1}</value>
+  </data>
+  <data name="SendJoinInvite" xml:space="preserve">
+    <value>Benutzer {0} hat eine Einladung an {1} geschickt, diesem DocSpace beizutreten</value>
+  </data>
 </root>

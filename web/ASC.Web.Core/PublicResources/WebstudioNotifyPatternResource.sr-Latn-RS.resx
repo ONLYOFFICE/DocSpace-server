@@ -1765,4 +1765,41 @@ Dobićete više saveta o tome kako da koristite svoju veb kancelariju. Možete 
   <data name="ButtonGetStarted" xml:space="preserve">
     <value>Započnite</value>
   </data>
+  <data name="pattern_migration_personal_to_docspace" xml:space="preserve">
+    <value>Здраво!
+
+Процес миграције података са ONLYOFFICE Personal на ваш нови ONLYOFFICE DocSpace је успешно завршен.
+
+Да бисте приступили вашем DocSpace-у са увезеним подацима, само кликните на дугме испод:
+
+$OrangeButton
+
+Ваш тренутни DocSpace план је STARTUP. Потпуно је бесплатан.
+
+==Ако је потребно, можете променити име вашег новог DocSpace -а. Само се пребаците на Подешавања -&gt; Прилагођавање -&gt; DocSpace Преименовање.==
+
+Уживајте у новом начину сарадње на документима!
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_rooms_activity" xml:space="preserve">
+    <value>h1.Evo šta je novo na vašem DocSpace-u "${__VirtualRootPath}":"${__VirtualRootPath}" u poslednjih sat vremena
+ 
+#foreach ($activity u $Activities)
+$activity
+ 
+#end</value>
+  </data>
+  <data name="pattern_saas_docspace_registration" xml:space="preserve">
+    <value>h1. ONLYOFFICE DocSpace: završite registraciju
+ 
+ 
+Zdravo!
+ 
+Pozvani ste da završite registraciju za ONLYOFFICE DocSpace na "${__VirtualRootPath}":"${__VirtualRootPath}". Unesite svoje ime i postavite lozinku klikom na link:
+ 
+$OrangeButton
+ 
+$TrulyYours</value>
+  </data>
 </root>

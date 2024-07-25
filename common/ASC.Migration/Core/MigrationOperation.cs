@@ -166,11 +166,4 @@ public class MigrationOperation(
             await PublishChanges();
         }
     }
-
-    public async Task CopyLogsAsync(Stream stream)
-    {
-        await using var logger = serviceProvider.GetService<MigrationLogger>();
-        logger.Init(LogName);
-        await (await logger.GetStreamAsync()).CopyToAsync(stream);
-    }
 }

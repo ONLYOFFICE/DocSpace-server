@@ -742,4 +742,40 @@
   <data name="FileSizePostfix" xml:space="preserve">
     <value>bytes,KB,MB,GB,TB</value>
   </data>
+  <data name="FileUploadedWithOverwriting" xml:space="preserve">
+    <value>Tập tin được tải lên với ghi đè: {0}</value>
+  </data>
+  <data name="QuotaPerPortalChanged" xml:space="preserve">
+    <value>Đặt hạn mức lưu trữ mặc định: {0}</value>
+  </data>
+  <data name="QuotaPerPortalDisabled" xml:space="preserve">
+    <value>Đã tăt hạn mức lưu trữ mặc định</value>
+  </data>
+  <data name="QuotaPerRoomChanged" xml:space="preserve">
+    <value>Đặt hạn mức lưu trữ mặc định cho các phòng: {0}</value>
+  </data>
+  <data name="QuotaPerRoomDisabled" xml:space="preserve">
+    <value>Đã tắt hạn mức lưu trữ mặc định cho các phòng</value>
+  </data>
+  <data name="QuotaPerUserChanged" xml:space="preserve">
+    <value>Đặt hạn mức lưu trữ mặc định cho người dùng: {0}</value>
+  </data>
+  <data name="QuotaPerUserDisabled" xml:space="preserve">
+    <value>Đã tắt hạn mức lưu trữ mặc định cho người dùng</value>
+  </data>
+  <data name="RoomCopied" xml:space="preserve">
+    <value>Phòng đã sao chép: {0}</value>
+  </data>
+  <data name="RoomGroupAdded" xml:space="preserve">
+    <value>Đã thêm nhóm: {0}. Vai trò: {1}</value>
+  </data>
+  <data name="RoomGroupRemove" xml:space="preserve">
+    <value>Đã xóa nhóm: {0}</value>
+  </data>
+  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
+    <value>{0} được chỉ định: {1}</value>
+  </data>
+  <data name="SendJoinInvite" xml:space="preserve">
+    <value>Người dùng {0} đã gửi lời mời đến {1} để tham gia DocSpace này</value>
+  </data>
 </root>

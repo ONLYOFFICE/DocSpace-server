@@ -655,10 +655,7 @@
     <value>Mențiune: dimensiunea fișierului nu poate depăși {1}{0}{2}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Numărul de administratori</value>
-  </data>
-  <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Numărul de administratori/utilizatori avansați:</value>
+    <value>Numărul de administratori/utilizatori avansați</value>
   </data>
   <data name="ConsumersSkyDrive" xml:space="preserve">
     <value>OneDrive</value>
@@ -1106,5 +1103,8 @@
   </data>
   <data name="ErrorUserDisabled" xml:space="preserve">
     <value>Utilizatorul este dezactivat</value>
+  </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>Administratori/Utilizatori avansați adăugați:</value>
   </data>
 </root>

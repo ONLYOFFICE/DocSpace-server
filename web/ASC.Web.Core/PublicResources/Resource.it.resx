@@ -806,7 +806,7 @@
     <value>Il numero di amministratori non deve superare {0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Numero di amministratori</value>
+    <value>Numero di amministratori/utenti esperti</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Backup e ripristino automatici</value>
@@ -846,9 +846,6 @@
   </data>
   <data name="TariffsFeature_usersInRoom_exception" xml:space="preserve">
     <value>Il numero di utenti in stanza non deve superare {0}</value>
-  </data>
-  <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Il numero di amministratori/utenti esperti:</value>
   </data>
   <data name="ConsumersappleIdKeyId" xml:space="preserve">
     <value>Chiave identificativa di 10 caratteri generata per la chiave privata per l'accesso con Apple</value>
@@ -1044,5 +1041,17 @@
   </data>
   <data name="TariffsFeature_total_size" xml:space="preserve">
     <value>{0} per amministratore/utente esperto e possibilità di aggiungere spazio su richiesta</value>
+  </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>Amministratori/utenti esperti aggiunti:</value>
+  </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>Il limite degli inviti è stato superato</value>
+  </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>Utente disabilitato</value>
+  </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>Le istruzioni per la modifica della password sono state inviate all'indirizzo email {0}.</value>
   </data>
 </root>

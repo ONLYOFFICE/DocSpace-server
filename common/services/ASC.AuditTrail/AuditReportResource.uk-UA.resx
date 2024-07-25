@@ -742,4 +742,40 @@
   <data name="FileSizePostfix" xml:space="preserve">
     <value>байт,Кб,Мб,Гб,Тб</value>
   </data>
+  <data name="FileUploadedWithOverwriting" xml:space="preserve">
+    <value>Файл, переданий із перезаписом: {0}</value>
+  </data>
+  <data name="QuotaPerPortalChanged" xml:space="preserve">
+    <value>Установлена квота пам'яті за замовчуванням: {0}</value>
+  </data>
+  <data name="QuotaPerPortalDisabled" xml:space="preserve">
+    <value>Вимкнута квота пам'яті за замовчуванням</value>
+  </data>
+  <data name="QuotaPerRoomChanged" xml:space="preserve">
+    <value>Установлена квота пам'яті за замовчуванням для кімнат: {0}</value>
+  </data>
+  <data name="QuotaPerRoomDisabled" xml:space="preserve">
+    <value>Вимкнута квота пам'яті за замовчуванням для кімнат</value>
+  </data>
+  <data name="QuotaPerUserChanged" xml:space="preserve">
+    <value>Установлена квота пам'яті за замовчуванням для користувачів: {0}</value>
+  </data>
+  <data name="QuotaPerUserDisabled" xml:space="preserve">
+    <value>Вимкнута квота пам'яті за замовчуванням для користувачів</value>
+  </data>
+  <data name="RoomCopied" xml:space="preserve">
+    <value>Кімната скопійовано: {0}</value>
+  </data>
+  <data name="RoomGroupAdded" xml:space="preserve">
+    <value>Додана група: {0}. Роль: {1}</value>
+  </data>
+  <data name="RoomGroupRemove" xml:space="preserve">
+    <value>Видалена група: {0}</value>
+  </data>
+  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
+    <value>{0} призначені: {1}</value>
+  </data>
+  <data name="SendJoinInvite" xml:space="preserve">
+    <value>Користувач {0} надіслав {1} запрошення приєднатися до цього простору DocSpace</value>
+  </data>
 </root>

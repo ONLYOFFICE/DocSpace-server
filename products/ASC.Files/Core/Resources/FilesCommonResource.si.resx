@@ -117,49 +117,19 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="DataProcessingCompleted" xml:space="preserve">
-    <value>데이터 처리가 완료되었습니다</value>
+  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
+    <value>බලවත් පරිශ්‍රීලකයා</value>
   </data>
-  <data name="DataProcessing" xml:space="preserve">
-    <value>데이터 처리 중...</value>
+  <data name="RoleEnum_PowerUser" xml:space="preserve">
+    <value>බලවත් පරිශ්‍රීලකයා</value>
   </data>
-  <data name="DumpParse" xml:space="preserve">
-    <value>데이터베이스 파싱 중</value>
+  <data name="User" xml:space="preserve">
+    <value>පරිශ්‍රීලකයා</value>
   </data>
-  <data name="GroupMigration" xml:space="preserve">
-    <value>그룹 마이그레이션 {0} ({1}/{2})</value>
+  <data name="RoleEnum_User" xml:space="preserve">
+    <value>පරිශ්‍රීලකයා</value>
   </data>
-  <data name="MigratingUserFiles" xml:space="preserve">
-    <value>사용자 파일 마이그레이션 중 {0} ({1}/{2})</value>
-  </data>
-  <data name="MigrationCompleted" xml:space="preserve">
-    <value>마이그레이션이 완료되었습니다</value>
-  </data>
-  <data name="PreparingForMigration" xml:space="preserve">
-    <value>마이그레이션 준비 중</value>
-  </data>
-  <data name="StartOfDataProcessing" xml:space="preserve">
-    <value>데이터 처리 시작 중...</value>
-  </data>
-  <data name="UnzippingFinished" xml:space="preserve">
-    <value>압축 해제가 완료되었습니다...</value>
-  </data>
-  <data name="Unzipping" xml:space="preserve">
-    <value>압축 해제 중...</value>
-  </data>
-  <data name="UserMigration" xml:space="preserve">
-    <value>사용자 마이그레이션 {0} ({1}/{2})</value>
-  </data>
-  <data name="MigrationCommonFiles" xml:space="preserve">
-    <value>마이그레이션 공통 파일</value>
-  </data>
-  <data name="MigrationNotFoundException" xml:space="preserve">
-    <value>해당 마이그레이션 제공자가 존재하지 않습니다</value>
-  </data>
-  <data name="MigrationProgressException" xml:space="preserve">
-    <value>진행 중인 마이그레이션이 없습니다</value>
-  </data>
-  <data name="MigrationProjectFiles" xml:space="preserve">
-    <value>마이그레이션 프로젝트 파일</value>
+  <data name="Date" xml:space="preserve">
+    <value>දිනය</value>
   </data>
 </root>

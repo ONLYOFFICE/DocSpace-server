@@ -671,7 +671,7 @@
     <value>Papelera vaciada</value>
   </data>
   <data name="RoomUpdateAccessForUser" xml:space="preserve">
-    <value>{0} appointed: {1} {0} designado: {1}</value>
+    <value>{0} designado: {1}</value>
   </data>
   <data name="AddedRoomTags" xml:space="preserve">
     <value>Etiquetas añadidas: [{1}]</value>
@@ -741,5 +741,38 @@
   </data>
   <data name="FileSizePostfix" xml:space="preserve">
     <value>bytes,KB,MB,GB,TB</value>
+  </data>
+  <data name="FileUploadedWithOverwriting" xml:space="preserve">
+    <value>Archivo cargado con sobreescritura: {0}</value>
+  </data>
+  <data name="QuotaPerPortalChanged" xml:space="preserve">
+    <value>Establecer cuota de almacenamiento predeterminada: {0}</value>
+  </data>
+  <data name="QuotaPerPortalDisabled" xml:space="preserve">
+    <value>La cuota de almacenamiento predeterminada está desactivada</value>
+  </data>
+  <data name="QuotaPerRoomChanged" xml:space="preserve">
+    <value>Establecer cuota de almacenamiento predeterminada para salas: {0}</value>
+  </data>
+  <data name="QuotaPerRoomDisabled" xml:space="preserve">
+    <value>La cuota de almacenamiento predeterminada para salas está desactivada</value>
+  </data>
+  <data name="QuotaPerUserChanged" xml:space="preserve">
+    <value>Establecer cuota de almacenamiento por defecto para usuarios: {0}</value>
+  </data>
+  <data name="QuotaPerUserDisabled" xml:space="preserve">
+    <value>Desactivada la cuota de almacenamiento predeterminada para usuarios</value>
+  </data>
+  <data name="RoomCopied" xml:space="preserve">
+    <value>Habitación copiada: {0}</value>
+  </data>
+  <data name="RoomGroupAdded" xml:space="preserve">
+    <value>Grupo añadido: {0}. Rol: {1}</value>
+  </data>
+  <data name="RoomGroupRemove" xml:space="preserve">
+    <value>Grupo eliminado: {0}</value>
+  </data>
+  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
+    <value>{0} designado: {1}</value>
   </data>
 </root>

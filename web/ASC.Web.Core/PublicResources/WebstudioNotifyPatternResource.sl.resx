@@ -1762,4 +1762,41 @@ Vaš trenutni tarifni načrt je STARTUP. Je popolnoma brezplačen in vključuje:
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_migration_personal_to_docspace" xml:space="preserve">
+    <value>Pozdravljeni!
+
+Postopek selitve podatkov iz ONLYOFFICE Personal v vaš novi ONLYOFFICE DocSpace je uspešno zaključen.
+
+Za dostop do prostora DocSpace z uvoženimi podatki preprosto kliknite spodnji gumb:
+
+$OrangeButton
+
+Vaš trenutni paket DocSpace je STARTUP. Ta je popolnoma brezplačen.
+
+==Po potrebi lahko spremenite ime svojega novega prostora DocSpace. Preklopite na Nastavitve -&gt; Prilagajanje -&gt; Preimenovanje DocSpace.==
+
+Uživajte v novem načinu sodelovanja pri dokumentih!
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_rooms_activity" xml:space="preserve">
+    <value>h1.Tukaj je nekaj novosti iz vašega DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" v the zadnji uri
+
+#foreach($activity v $Activities)
+$activity
+
+#end</value>
+  </data>
+  <data name="pattern_saas_docspace_registration" xml:space="preserve">
+    <value>h1. ONLYOFFICE DocSpace: dokončajte registracijo
+
+
+Pozdravljeni!
+
+Vabimo vas, da dokončate registracijo za ONLYOFFICE DocSpace na "${__VirtualRootPath}":"${__VirtualRootPath}". Vnesite svoje ime in nastavite geslo s klikom na povezavo:
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
 </root>
