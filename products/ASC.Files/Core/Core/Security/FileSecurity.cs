@@ -862,7 +862,7 @@ public class FileSecurity(IDaoFactory daoFactory,
             return false;
         }
         
-        if (action == FilesSecurityActions.SubmitToFormGallery) //temp
+        if (file != null && action == FilesSecurityActions.SubmitToFormGallery && !file.IsForm)
         {
             return false;
         }
