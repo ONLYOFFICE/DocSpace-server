@@ -1457,6 +1457,19 @@ public class EntryManager(IDaoFactory daoFactory,
                 {
                     var properties = await daoFactory.GetFileDao<T>().GetProperties(file.Id);
 
+                    if (!Equals(properties.FormFilling.OriginalFormId, file.Id))
+                    {
+                        var origProperties = await daoFactory.GetFileDao<T>().GetProperties(properties.FormFilling.OriginalFormId);
+                        origProperties.FormFilling.ResultFormNumber++;
+                        await fileDao.SaveProperties(properties.FormFilling.OriginalFormId, origProperties);
+
+                        properties.FormFilling.ResultFormNumber = origProperties.FormFilling.ResultFormNumber;
+                    }
+                    else
+                    {
+                        properties.FormFilling.ResultFormNumber++;
+                    }
+
                     if (properties != null)
                     {
                         var userId = securityContext.CurrentAccount.ID;
@@ -1471,7 +1484,7 @@ public class EntryManager(IDaoFactory daoFactory,
                         var sourceTitle = Path.GetFileNameWithoutExtension(file.Title);
 
                         var dateTimeNow = tenantUtil.DateTimeNow();
-                        pdfFile.Title = $"{properties.FormFilling.ResultFormNumber + 1} - {sourceTitle} ({$"{dateTimeNow.ToString("dd-MM-yyyy H-mm")}"}){ext}";
+                        pdfFile.Title = $"{properties.FormFilling.ResultFormNumber} - {sourceTitle} ({$"{dateTimeNow.ToString("dd-MM-yyyy H-mm")}"}){ext}";
                         pdfFile.ParentId = properties.FormFilling.ResultsFolderId;
                         pdfFile.Comment = string.IsNullOrEmpty(comment) ? null : comment;
                         pdfFile.Category = (int)FilterType.Pdf;
@@ -1517,7 +1530,6 @@ public class EntryManager(IDaoFactory daoFactory,
                         {
                             var linkDao = daoFactory.GetLinkDao<T>();
 
-                            properties.FormFilling.ResultFormNumber++;
                             var resProp = new EntryProperties<T>()
                             {
                                 FormFilling = new FormFillingProperties<T>()
@@ -1541,13 +1553,6 @@ public class EntryManager(IDaoFactory daoFactory,
 
                             var resultUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, result.Title, result.Id, result.Version)));
                             await formFillingReportCreator.UpdateFormFillingReport(properties.FormFilling.ResultsFileID, resProp.FormFilling.ResultFormNumber, formsDataUrl, resultUrl);
-
-                            if (!Equals(properties.FormFilling.OriginalFormId, file.Id))
-                            {
-                                var origProperties = await daoFactory.GetFileDao<T>().GetProperties(properties.FormFilling.OriginalFormId);
-                                origProperties.FormFilling.ResultFormNumber++;
-                                await fileDao.SaveProperties(properties.FormFilling.OriginalFormId, origProperties);
-                            }
 
                             if (!securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))
                             {
