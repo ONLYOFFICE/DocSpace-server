@@ -142,7 +142,6 @@ public abstract class VirtualRoomsController<T>(
 {
     protected readonly FileStorageService _fileStorageService = fileStorageService;
     protected readonly FilesMessageService _filesMessageService = filesMessageService;
-    protected readonly SettingsManager _settingsManager = settingsManager;
 
     /// <summary>
     /// Returns the room information.

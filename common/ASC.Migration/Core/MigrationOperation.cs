@@ -34,7 +34,6 @@ public class MigrationOperation(
     MigrationCore migrationCore,
     TenantManager tenantManager,
     SecurityContext securityContext,
-    IServiceProvider serviceProvider,
     IDistributedCache cache)
     : DistributedTaskProgress
 {
@@ -131,6 +130,10 @@ public class MigrationOperation(
             {
                 await migrator.MigrateAsync(copyInfo);
             }
+        }
+        catch (DirectoryNotFoundException)
+        {
+            Exception = new Exception(FilesCommonResource.ErrorMessage_FileNotFound);
         }
         catch (Exception e)
         {
