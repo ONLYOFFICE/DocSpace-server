@@ -31,7 +31,7 @@ public class MessageSettings
     private const string UserAgentHeader = "User-Agent";
     private const string RefererHeader = "Referer";
     private const string EditorsUAHeader = "AscDesktopEditor";
-    private const string XRemoteIpAddress = "X-Remote-Ip-Address";
+    private const string XRemoteIpAddress = "X-Remote-Ip-Address"; // Custom (fake) header for storage client remote ip address
     private const string EditorsName = "Desktop Editors";
     private const string ZoomAppsUAHeader = "ZoomApps";
     private const string ZoomBrowserUAHeader = "ZoomWebKit";
