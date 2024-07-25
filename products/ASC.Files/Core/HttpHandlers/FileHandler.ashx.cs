@@ -496,8 +496,8 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
     }
 
     private async Task<bool> SendStreamByChunksAsync(HttpContext context, long toRead, long offset, long fullLength, string title, Stream fileStream)
-    {
-        context.Response.Headers.Append("Connection", "Keep-Alive");
+    {       
+        context.Response.Headers.Append("Accept-Ranges", "bytes");
         context.Response.ContentLength = toRead;
         context.Response.Headers.Append("Content-Disposition", ContentDispositionUtil.GetHeaderValue(title));
         context.Response.ContentType = MimeMapping.GetMimeMapping(title);
@@ -508,9 +508,8 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             return true;
         }
         
-
+        context.Response.Headers.Append("Connection", "Keep-Alive");
         context.Response.StatusCode = (int)HttpStatusCode.PartialContent;
-        context.Response.Headers.Append("Accept-Ranges", "bytes");
         context.Response.Headers.Append("Content-Range", $" bytes {offset}-{offset + toRead - 1}/{fullLength}");
 
         if (fileStream.Length == toRead)
