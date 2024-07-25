@@ -847,18 +847,18 @@
     <value>Սենյակներ [{0}]: Անջատված պահեստային քվոտա սենյակների համար</value>
   </data>
   <data name="CustomQuotaPerUserChanged" xml:space="preserve">
-    <value>Օգտատերեր[{0}]: Օգտատերերի համար սահմանել հատուկ պահեստային քվոտա՝ {1}</value>
+    <value>Օգտատերեր [{0}]: Օգտատերերի համար սահմանել հատուկ պահեստային քվոտա՝ {1}</value>
   </data>
   <data name="CustomQuotaPerUserDefault" xml:space="preserve">
-    <value>Օգտատերեր[{0}]: Սահմանել օգտատերերի համար լռելյայն պահեստի քվոտան՝ {1}</value>
+    <value>Օգտատերեր [{0}]: Սահմանել օգտատերերի համար լռելյայն պահեստի քվոտան՝ {1}</value>
   </data>
   <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
-    <value>Օգտատերեր[{0}]: Անջատված է օգտատերերի պահեստային քվոտան</value>
+    <value>Օգտատերեր [{0}]: Անջատված է օգտատերերի պահեստային քվոտան</value>
   </data>
   <data name="FormOpenedForFilling" xml:space="preserve">
     <value>Լրացման համար բացված ֆայլ՝ {0}</value>
   </data>
   <data name="FormSubmit" xml:space="preserve">
-    <value>Օգտատերեր[{0}]: Ներկայացված ձևը՝ {1}</value>
+    <value>Օգտատերեր [{0}]: Ներկայացված ձևը՝ {1}</value>
   </data>
 </root>

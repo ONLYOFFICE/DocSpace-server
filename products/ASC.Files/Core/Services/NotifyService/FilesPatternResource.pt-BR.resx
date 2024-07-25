@@ -156,7 +156,7 @@ $__AuthorName deletando a sala:$RoomTitle</value>
     <value>Verifique os formulários prontos</value>
   </data>
   <data name="pattern_FormReceived" xml:space="preserve">
-    <value>h1. O formulário $Mensagem está preenchido
+    <value>h1. O formulário $Message está preenchido
 
 Um novo formulário "$DocumentTitle":"$DocumentURL" é preenchido na sala "$RoomTitle":"$RoomURL"
 

@@ -217,7 +217,7 @@ $Message</value>
   <data name="pattern_FormReceived" xml:space="preserve">
     <value>h1. $Message ձևը լրացված է
 
-Սենյակում լրացվում է նոր ձև՝ "$DocumentTitle":"$DocumentURL": "$RoomTitle":"$RoomURL"
+Սենյակում լրացվում է նոր ձև՝ "$DocumentTitle":"$DocumentURL" "$RoomTitle":"$RoomURL"
 
 Ձևաթուղթ ներկայացնող՝ "$FromUserName":"$FromUserLink"
 
