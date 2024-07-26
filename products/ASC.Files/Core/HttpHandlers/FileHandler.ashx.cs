@@ -1274,7 +1274,8 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                     },
                     new JsonSerializerOptions
                     {
-                        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+                        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
                     }
                 )
             );
