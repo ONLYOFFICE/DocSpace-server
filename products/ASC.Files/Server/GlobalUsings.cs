@@ -99,3 +99,4 @@ global using Newtonsoft.Json.Linq;
 
 global using SecurityContext = ASC.Core.SecurityContext;
 global using FileShare = ASC.Files.Core.Security.FileShare;
+global using Swashbuckle.AspNetCore.Annotations;

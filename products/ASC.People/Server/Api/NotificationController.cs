@@ -46,6 +46,7 @@ public class NotificationController(UserManager userManager,
     /// <path>api/2.0/people/phone</path>
     /// <httpMethod>POST</httpMethod>
     [Tags("People / Profiles")]
+    [SwaggerResponse(200, "Notification", typeof(object))]
     [HttpPost("phone")]
     public async Task<object> SendNotificationToChangeAsync(UpdateMemberSimpleRequestDto inDto)
     {

@@ -47,6 +47,7 @@ public class ThirdPartyController(OAuth20TokenHelper oAuth20TokenHelper) : Contr
     /// <path>api/2.0/thirdparty/{provider}</path>
     /// <httpMethod>GET</httpMethod>
     [Tags("ThirdParty")]
+    [SwaggerResponse(200, "Code request", typeof(object))]
     [HttpGet("{provider}")]
     public object Get(LoginProvider provider)
     {
@@ -92,6 +93,7 @@ public class ThirdPartyController(OAuth20TokenHelper oAuth20TokenHelper) : Contr
     /// <path>api/2.0/thirdparty/{provider}/code</path>
     /// <httpMethod>GET</httpMethod>
     [Tags("ThirdParty")]
+    [SwaggerResponse(200, "Confirmation code", typeof(object))]
     [HttpGet("{provider}/code")]
     public object GetCode(string redirect, string code, string error)
     {

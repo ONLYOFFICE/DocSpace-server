@@ -50,6 +50,7 @@ public class WebhooksController(ApiContext context,
     /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.WebhooksConfigDto, ASC.Web.Api">List of tenant webhooks with their config parameters</returns>
     /// <collection>list</collection>
     [Tags("Settings / Webhooks")]
+    [SwaggerResponse(200, "List of tenant webhooks with their config parameters", typeof(WebhooksConfigWithStatusDto))]
     [HttpGet("webhook")]
     public async IAsyncEnumerable<WebhooksConfigWithStatusDto> GetTenantWebhooks()
     {
@@ -73,6 +74,7 @@ public class WebhooksController(ApiContext context,
     /// <httpMethod>POST</httpMethod>
     /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.WebhooksConfigDto, ASC.Web.Api">Tenant webhook with its config parameters</returns>
     [Tags("Settings / Webhooks")]
+    [SwaggerResponse(200, "Tenant webhook with its config parameters", typeof(WebhooksConfigDto))]
     [HttpPost("webhook")]
     public async Task<WebhooksConfigDto> CreateWebhook(WebhooksConfigRequestsDto inDto)
     {
@@ -99,6 +101,7 @@ public class WebhooksController(ApiContext context,
     /// <httpMethod>PUT</httpMethod>
     /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.WebhooksConfigDto, ASC.Web.Api">Updated tenant webhook with its config parameters</returns>
     [Tags("Settings / Webhooks")]
+    [SwaggerResponse(200, "Updated tenant webhook with its config parameters", typeof(WebhooksConfigDto))]
     [HttpPut("webhook")]
     public async Task<WebhooksConfigDto> UpdateWebhook(WebhooksConfigRequestsDto inDto)
     {
@@ -124,6 +127,7 @@ public class WebhooksController(ApiContext context,
     /// <httpMethod>DELETE</httpMethod>
     /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.WebhooksConfigDto, ASC.Web.Api">Tenant webhook with its config parameters</returns>
     [Tags("Settings / Webhooks")]
+    [SwaggerResponse(200, "Tenant webhook with its config parameters", typeof(WebhooksConfigDto))]
     [HttpDelete("webhook/{id:int}")]
     public async Task<WebhooksConfigDto> RemoveWebhook(int id)
     {
@@ -153,6 +157,7 @@ public class WebhooksController(ApiContext context,
     /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.WebhooksLogDto, ASC.Web.Api">Logs of the webhook activities</returns>
     /// <collection>list</collection>
     [Tags("Settings / Webhooks")]
+    [SwaggerResponse(200, "Logs of the webhook activities", typeof(WebhooksLogDto))]
     [HttpGet("webhooks/log")]
     public async IAsyncEnumerable<WebhooksLogDto> GetJournal(DateTime? deliveryFrom, DateTime? deliveryTo, string hookUri, int? webhookId, int? configId, int? eventId, WebhookGroupStatus? groupStatus)
     {
@@ -182,6 +187,7 @@ public class WebhooksController(ApiContext context,
     /// <httpMethod>PUT</httpMethod>
     /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.WebhooksLogDto, ASC.Web.Api">Logs of the webhook activities</returns>
     [Tags("Settings / Webhooks")]
+    [SwaggerResponse(200, "Logs of the webhook activities", typeof(WebhooksLogDto))]
     [HttpPut("webhook/{id:int}/retry")]
     public async Task<WebhooksLogDto> RetryWebhook(int id)
     {
@@ -217,6 +223,7 @@ public class WebhooksController(ApiContext context,
     /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.WebhooksLogDto, ASC.Web.Api">Logs of the webhook activities</returns>
     /// <collection>list</collection>
     [Tags("Settings / Webhooks")]
+    [SwaggerResponse(200, "Logs of the webhook activities", typeof(WebhooksLogDto))]
     [HttpPut("webhook/retry")]
     public async IAsyncEnumerable<WebhooksLogDto> RetryWebhooks(WebhookRetryRequestsDto inDto)
     {
@@ -249,6 +256,7 @@ public class WebhooksController(ApiContext context,
     /// <returns type="ASC.Webhooks.Core.Webhook, ASC.Webhooks.Core">List of webhook settings</returns>
     /// <collection>list</collection>
     [Tags("Settings / Webhooks")]
+    [SwaggerResponse(200, "List of webhook settings", typeof(Webhook))]
     [HttpGet("webhooks")]
     public async IAsyncEnumerable<Webhook> Settings()
     {
@@ -273,6 +281,7 @@ public class WebhooksController(ApiContext context,
     /// <httpMethod>PUT</httpMethod>
     /// <returns type="ASC.Webhooks.Core.Webhook, ASC.Webhooks.Core">Webhook settings</returns>
     [Tags("Settings / Webhooks")]
+    [SwaggerResponse(200, "Webhook settings", typeof(Webhook))]
     [HttpPut("webhook/{id:int}")]
     public async Task<Webhook> DisableWebHook(int id)
     {

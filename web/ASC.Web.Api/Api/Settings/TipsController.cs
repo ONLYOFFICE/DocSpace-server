@@ -52,6 +52,7 @@ public class TipsController(ILoggerProvider option,
     /// <path>api/2.0/settings/tips</path>
     /// <httpMethod>PUT</httpMethod>
     [Tags("Settings / Tips")]
+    [SwaggerResponse(200, "Updated tip settings", typeof(TipsSettings))]
     [HttpPut("")]
     public async Task<TipsSettings> UpdateTipsSettingsAsync(TipsRequestDto inDto)
     {
@@ -98,6 +99,7 @@ public class TipsController(ILoggerProvider option,
     /// <path>api/2.0/settings/tips/change/subscription</path>
     /// <httpMethod>PUT</httpMethod>
     [Tags("Settings / Tips")]
+    [SwaggerResponse(200, "Boolean value: true if the user is subscribed to the tips", typeof(bool))]
     [HttpPut("change/subscription")]
     public async Task<bool> UpdateTipsSubscriptionAsync()
     {
@@ -113,6 +115,7 @@ public class TipsController(ILoggerProvider option,
     /// <path>api/2.0/settings/tips/subscription</path>
     /// <httpMethod>GET</httpMethod>
     [Tags("Settings / Tips")]
+    [SwaggerResponse(200, "Boolean value: true if the user is subscribed to the tips", typeof(bool))]
     [HttpGet("subscription")]
     public async Task<bool> GetTipsSubscriptionAsync()
     {

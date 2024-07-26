@@ -55,6 +55,7 @@ public class LdapController(
     /// <httpMethod>GET</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / LDAP")]
+    [SwaggerResponse(200, "LDAP settings", typeof(LdapSettingsDto))]
     [HttpGet("")]
     public async Task<LdapSettingsDto> GetLdapSettingsAsync()
     {
@@ -100,6 +101,7 @@ public class LdapController(
     /// <httpMethod>GET</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / LDAP")]
+    [SwaggerResponse(200, "LDAP cron settings", typeof(LdapCronSettingsDto))]
     [HttpGet("cron")]
     public async Task<LdapCronSettingsDto> GetLdapCronSettingsAsync()
     {
@@ -174,6 +176,7 @@ public class LdapController(
     /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.LdapStatusDto, ASC.Web.Api">LDAP operation status</returns>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / LDAP")]
+    [SwaggerResponse(200, "LDAP operation status", typeof(LdapStatusDto))]
     [HttpGet("sync")]
     public async Task<LdapStatusDto> SyncLdapAsync()
     {
@@ -202,6 +205,7 @@ public class LdapController(
     /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.LdapStatusDto, ASC.Web.Api">LDAP operation status</returns>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / LDAP")]
+    [SwaggerResponse(200, "LDAP operation status", typeof(LdapStatusDto))]
     [HttpGet("sync/test")]
     public async Task<LdapStatusDto> TestLdapSync()
     {
@@ -229,6 +233,7 @@ public class LdapController(
     /// <httpMethod>POST</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / LDAP")]
+    [SwaggerResponse(200, "LDAP operation status", typeof(LdapStatusDto))]
     [HttpPost("")]
     public async Task<LdapStatusDto> SaveLdapSettingsAsync(LdapRequestsDto inDto)
     {
@@ -263,6 +268,7 @@ public class LdapController(
     /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.LdapStatusDto, ASC.Web.Api">LDAP operation status</returns>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / LDAP")]
+    [SwaggerResponse(200, "LDAP operation status", typeof(LdapStatusDto))]
     [HttpPost("save/test")]
     public async Task<LdapStatusDto> TestLdapSaveAsync(LdapSettings inDto)
     {
@@ -289,6 +295,7 @@ public class LdapController(
     /// <httpMethod>GET</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / LDAP")]
+    [SwaggerResponse(200, "LDAP operation status", typeof(LdapStatusDto))]
     [HttpGet("status")]
     public async Task<LdapStatusDto> GetLdapOperationStatusAsync()
     {
@@ -313,6 +320,7 @@ public class LdapController(
     /// <httpMethod>GET</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / LDAP")]
+    [SwaggerResponse(200, "LDAP default settings: enable LDAP authentication or not, start TLS or not, enable SSL or not, send welcome email or not, server name, user name, port number, user filter, login attribute, LDAP settings mapping, access rights, user is a group member or not, group name, user attribute, group filter, group attribute, group name attribute, authentication is enabled or not, login, password, accept certificate or not", typeof(LdapSettingsDto))]
     [HttpGet("default")]
     public async Task<LdapSettingsDto> GetDefaultLdapSettingsAsync()
     {

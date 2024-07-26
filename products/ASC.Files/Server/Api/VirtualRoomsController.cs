@@ -62,6 +62,7 @@ public class VirtualRoomsInternalController(GlobalFolderHelper globalFolderHelpe
     /// <path>api/2.0/files/rooms</path>
     /// <httpMethod>POST</httpMethod>
     [Tags("Files / Rooms")]
+    [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
     [HttpPost("")]
     public async Task<FolderDto<int>> CreateRoomAsync(CreateRoomRequestDto inDto)
     {
@@ -107,6 +108,7 @@ public class VirtualRoomsThirdPartyController(GlobalFolderHelper globalFolderHel
     /// <path>api/2.0/files/rooms/thirdparty/{id}</path>
     /// <httpMethod>POST</httpMethod>
     [Tags("Files / Rooms")]
+    [SwaggerResponse(200, "Room information", typeof(FolderDto<string>))]
     [HttpPost("thirdparty/{id}")]
     public async Task<FolderDto<string>> CreateRoomAsync(string id, CreateThirdPartyRoomRequestDto inDto)
     {
@@ -145,6 +147,7 @@ public abstract class VirtualRoomsController<T>(
     /// <httpMethod>GET</httpMethod>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Rooms")]
+    [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
     [AllowAnonymous]
     [HttpGet("{id}")]
     public async Task<FolderDto<T>> GetRoomInfoAsync(T id)
@@ -165,6 +168,7 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}</path>
     /// <httpMethod>PUT</httpMethod>
     [Tags("Files / Rooms")]
+    [SwaggerResponse(200, "Updated room information", typeof(FolderDto<int>))]
     [HttpPut("{id}")]
     public async Task<FolderDto<T>> UpdateRoomAsync(T id, UpdateRoomRequestDto inDto)
     {
@@ -186,6 +190,7 @@ public abstract class VirtualRoomsController<T>(
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
     [Tags("Files / Quota")]
+    [SwaggerResponse(200, "List of rooms with the detailed information", typeof(FolderDto<int>))]
     [HttpPut("roomquota")]
     public async IAsyncEnumerable<FolderDto<int>> UpdateRoomsQuotaAsync(UpdateRoomsQuotaRequestDto<T> inDto)
     {
@@ -213,6 +218,7 @@ public abstract class VirtualRoomsController<T>(
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
     [Tags("Files / Quota")]
+    [SwaggerResponse(200, "List of rooms with the detailed information", typeof(FolderDto<int>))]
     [HttpPut("resetquota")]
     public async IAsyncEnumerable<FolderDto<int>> ResetRoomQuotaAsync(UpdateRoomsRoomIdsRequestDto<T> inDto)
     {
@@ -237,6 +243,7 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}</path>
     /// <httpMethod>DELETE</httpMethod>
     [Tags("Files / Rooms")]
+    [SwaggerResponse(200, "File operation", typeof(FileOperationDto))]
     [HttpDelete("{id}")]
     public async Task<FileOperationDto> DeleteRoomAsync(T id, DeleteRoomRequestDto inDto)
     {
@@ -256,6 +263,7 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/archive</path>
     /// <httpMethod>PUT</httpMethod>
     [Tags("Files / Rooms")]
+    [SwaggerResponse(200, "File operation", typeof(FileOperationDto))]
     [HttpPut("{id}/archive")]
     public async Task<FileOperationDto> ArchiveRoomAsync(T id, ArchiveRoomRequestDto inDto)
     {
@@ -278,6 +286,7 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/unarchive</path>
     /// <httpMethod>PUT</httpMethod>
     [Tags("Files / Rooms")]
+    [SwaggerResponse(200, "File operation", typeof(FileOperationDto))]
     [HttpPut("{id}/unarchive")]
     public async Task<FileOperationDto> UnarchiveRoomAsync(T id, ArchiveRoomRequestDto inDto)
     {
@@ -299,6 +308,7 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/share</path>
     /// <httpMethod>PUT</httpMethod>
     [Tags("Files / Rooms")]
+    [SwaggerResponse(200, "Room security information", typeof(RoomSecurityDto))]
     [HttpPut("{id}/share")]
     [EnableRateLimiting(RateLimiterPolicy.EmailInvitationApi)]
     public async Task<RoomSecurityDto> SetRoomSecurityAsync(T id, RoomInvitationRequestDto inDto)
@@ -342,6 +352,7 @@ public abstract class VirtualRoomsController<T>(
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [Tags("Files / Rooms")]
+    [SwaggerResponse(200, "Security information of room files", typeof(FileShareDto))]
     [HttpGet("{id}/share")]
     public async IAsyncEnumerable<FileShareDto> GetRoomSecurityInfoAsync(T id, ShareFilterType filterType = ShareFilterType.UserOrGroup)
     {
@@ -369,6 +380,7 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/links</path>
     /// <httpMethod>PUT</httpMethod>
     [Tags("Files / Rooms")]
+    [SwaggerResponse(200, "Room security information", typeof(FileShareDto))]
     [HttpPut("{id}/links")]
     public async Task<FileShareDto> SetLinkAsync(T id, RoomLinkRequestDto inDto)
     {
@@ -395,6 +407,7 @@ public abstract class VirtualRoomsController<T>(
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [Tags("Files / Rooms")]
+    [SwaggerResponse(200, "Room security information", typeof(FileShareDto))]
     [HttpGet("{id}/links")]
     public async IAsyncEnumerable<FileShareDto> GetLinksAsync(T id, LinkType? type)
     {
@@ -428,6 +441,7 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/link</path>
     /// <httpMethod>GET</httpMethod>
     [Tags("Files / Rooms")]
+    [SwaggerResponse(200, "Room security information", typeof(FileShareDto))]
     [HttpGet("{id}/link")]
     public async Task<FileShareDto> GetPrimaryExternalLinkAsync(T id)
     {
@@ -447,6 +461,7 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/tags</path>
     /// <httpMethod>PUT</httpMethod>
     [Tags("Files / Rooms")]
+    [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
     [HttpPut("{id}/tags")]
     public async Task<FolderDto<T>> AddTagsAsync(T id, BatchTagsRequestDto inDto)
     {
@@ -466,6 +481,7 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/tags</path>
     /// <httpMethod>DELETE</httpMethod>
     [Tags("Files / Rooms")]
+    [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
     [HttpDelete("{id}/tags")]
     public async Task<FolderDto<T>> DeleteTagsAsync(T id, BatchTagsRequestDto inDto)
     {
@@ -485,6 +501,7 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/logo</path>
     /// <httpMethod>POST</httpMethod>
     [Tags("Files / Rooms")]
+    [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
     [HttpPost("{id}/logo")]
     public async Task<FolderDto<T>> CreateRoomLogoAsync(T id, LogoRequestDto inDto)
     {
@@ -505,6 +522,7 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/logo</path>
     /// <httpMethod>DELETE</httpMethod>
     [Tags("Files / Rooms")]
+    [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
     [HttpDelete("{id}/logo")]
     public async Task<FolderDto<T>> DeleteRoomLogoAsync(T id)
     {
@@ -525,6 +543,7 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/pin</path>
     /// <httpMethod>PUT</httpMethod>
     [Tags("Files / Rooms")]
+    [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
     [HttpPut("{id}/pin")]
     public async Task<FolderDto<T>> PinRoomAsync(T id)
     {
@@ -543,6 +562,7 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/unpin</path>
     /// <httpMethod>PUT</httpMethod>
     [Tags("Files / Rooms")]
+    [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
     [HttpPut("{id}/unpin")]
     public async Task<FolderDto<T>> UnpinRoomAsync(T id)
     {
@@ -575,6 +595,7 @@ public abstract class VirtualRoomsController<T>(
     /// <param name="inDto"></param>
     /// <returns></returns>
     [Tags("Files / Rooms")]
+    [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
     [HttpPut("{id}/settings")]
     public async Task<FolderDto<T>> UpdateSettingsAsync(T id, SettingsRoomRequestDto inDto)
     {
@@ -589,6 +610,7 @@ public abstract class VirtualRoomsController<T>(
     /// <param type="System.Int32, System" name="id" example="1234"></param>
     /// <returns></returns>
     [Tags("Files / Rooms")]
+    [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
     [HttpPut("{id}/reorder")]
     public async Task<FolderDto<T>> ReorderAsync(T id)
     {
@@ -701,6 +723,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     /// <path>api/2.0/files/tags</path>
     /// <httpMethod>POST</httpMethod>
     [Tags("Files / Rooms")]
+    [SwaggerResponse(200, "New tag name", typeof(object))]
     [HttpPost("tags")]
     public async Task<object> CreateTagAsync(CreateTagRequestDto inDto)
     {
@@ -717,6 +740,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [Tags("Files / Rooms")]
+    [SwaggerResponse(200, "List of tag names", typeof(object))]
     [HttpGet("tags")]
     public async IAsyncEnumerable<object> GetTagsInfoAsync()
     {
@@ -755,6 +779,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     /// <path>api/2.0/files/logos</path>
     /// <httpMethod>POST</httpMethod>
     [Tags("Files / Rooms")]
+    [SwaggerResponse(200, "Upload result", typeof(UploadResultDto))]
     [HttpPost("logos")]
     public async Task<UploadResultDto> UploadRoomLogo(IFormCollection formCollection)
     {
@@ -812,6 +837,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     /// <returns></returns>
     /// <exception cref="NotSupportedException"></exception>
     [Tags("Files / Rooms")]
+    [SwaggerResponse(200, "Ok", typeof(DocumentBuilderTaskDto))]
     [HttpPost("rooms/{id:int}/indexexport")]
     public async Task<DocumentBuilderTaskDto> StartRoomIndexExportAsync(int id)
     {
@@ -843,6 +869,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     }
 
     [Tags("Files / Rooms")]
+    [SwaggerResponse(200, "Ok", typeof(DocumentBuilderTaskDto))]
     [HttpGet("rooms/indexexport")]
     public async Task<DocumentBuilderTaskDto> GetRoomIndexExport()
     {

@@ -45,6 +45,7 @@ public class WebPluginsController(ApiContext apiContext,
     /// <returns></returns>
     /// <exception cref="CustomHttpException"></exception>
     [Tags("Settings / Webplugins")]
+    [SwaggerResponse(200, "Web plugin", typeof(WebPluginDto))]
     [HttpPost("")]
     public async Task<WebPluginDto> AddWebPluginFromFile(bool system)
     {
@@ -79,6 +80,7 @@ public class WebPluginsController(ApiContext apiContext,
     /// <param type="System.Boolean, System" name="enabled" example="true"></param>
     /// <returns></returns>
     [Tags("Settings / Webplugins")]
+    [SwaggerResponse(200, "Web plugin", typeof(WebPluginDto))]
     [HttpGet("")]
     public async Task<IEnumerable<WebPluginDto>> GetWebPluginsAsync(bool? enabled = null)
     {
@@ -102,6 +104,7 @@ public class WebPluginsController(ApiContext apiContext,
     /// <param type="System.String, System" name="name" example="some text"></param>
     /// <returns></returns>
     [Tags("Settings / Webplugins")]
+    [SwaggerResponse(200, "Web plugin", typeof(WebPluginDto))]
     [HttpGet("{name}")]
     public async Task<WebPluginDto> GetWebPluginAsync(string name)
     {

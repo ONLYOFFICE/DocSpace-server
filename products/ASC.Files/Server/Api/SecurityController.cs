@@ -69,6 +69,7 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
+    [SwaggerResponse(200, "List of shared file information", typeof(FileShareDto))]
     [HttpGet("file/{fileId}/share")]
     public async IAsyncEnumerable<FileShareDto> GetFileSecurityInfoAsync(T fileId)
     {
@@ -90,6 +91,7 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
+    [SwaggerResponse(200, "List of shared file information", typeof(FileShareDto))]
     [HttpGet("folder/{folderId}/share")]
     public async IAsyncEnumerable<FileShareDto> GetFolderSecurityInfoAsync(T folderId)
     {
@@ -112,6 +114,7 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
+    [SwaggerResponse(200, "List of shared file information: sharing rights, a user who has the access to the specified file, the file is locked by this user or not, this user is an owner of the specified file or not, this user can edit the access to the specified file or not", typeof(FileShareDto))]
     [HttpPut("file/{fileId}/share")]
     public async IAsyncEnumerable<FileShareDto> SetFileSecurityInfoAsync(T fileId, SecurityInfoSimpeRequestDto inDto)
     {
@@ -134,6 +137,7 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
+    [SwaggerResponse(200, "List of shared folder information: sharing rights, a user who has the access to the specified folder, the folder is locked by this user or not, this user is an owner of the specified folder or not, this user can edit the access to the specified folder or not", typeof(FileShareDto))]
     [HttpPut("folder/{folderId}/share")]
     public async IAsyncEnumerable<FileShareDto> SetFolderSecurityInfoAsync(T folderId, SecurityInfoSimpeRequestDto inDto)
     {
@@ -155,6 +159,7 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
+    [SwaggerResponse(200, "List of encryption key pairs: encrypted private key, public key, user ID", typeof(List<EncryptionKeyPairDto>))]
     [HttpGet("file/{fileId}/publickeys")]
     public async Task<List<EncryptionKeyPairDto>> GetEncryptionAccess(T fileId)
     {
@@ -174,6 +179,7 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
+    [SwaggerResponse(200, "List of access rights information", typeof(List<AceShortWrapper>))]
     [HttpPost("file/{fileId}/sendeditornotify")]
     public async Task<List<AceShortWrapper>> SendEditorNotify(T fileId, MentionMessageWrapper mentionMessage)
     {
@@ -230,6 +236,7 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
+    [SwaggerResponse(200, "File entry information", typeof(FileEntryDto))]
     [HttpPost("owner")]
     public async IAsyncEnumerable<FileEntryDto> ChangeOwnerAsync(ChangeOwnerRequestDto inDto)
     {
@@ -258,6 +265,7 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
+    [SwaggerResponse(200, "List of shared files and folders information", typeof(FileShareDto))]
     [HttpPost("share")]
     public async IAsyncEnumerable<FileShareDto> GetSecurityInfoAsync(BaseBatchRequestDto inDto)
     {
@@ -284,6 +292,7 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// <httpMethod>DELETE</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpDelete("share")]
     public async Task<bool> RemoveSecurityInfoAsync(BaseBatchRequestDto inDto)
     {
@@ -309,6 +318,7 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
+    [SwaggerResponse(200, "List of shared files and folders information: sharing rights, a user who has the access to the specified folder, the folder is locked by this user or not, this user is an owner of the specified folder or not, this user can edit the access to the specified folder or not", typeof(FileShareDto))]
     [HttpPut("share")]
     public async IAsyncEnumerable<FileShareDto> SetSecurityInfoAsync(SecurityInfoRequestDto inDto)
     {
@@ -336,6 +346,7 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// <requiresAuthorization>false</requiresAuthorization>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
+    [SwaggerResponse(200, "External data", typeof(ExternalShareDto))]
     [AllowAnonymous]
     [HttpGet("share/{key}")]
     public async Task<ExternalShareDto> GetExternalShareDataAsync(string key)
@@ -358,6 +369,7 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// <requiresAuthorization>false</requiresAuthorization>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
+    [SwaggerResponse(200, "External data", typeof(ExternalShareDto))]
     [AllowAnonymous]
     [HttpPost("share/{key}/password")]
     public async Task<ExternalShareDto> ApplyExternalSharePasswordAsync(string key, ExternalShareRequestDto inDto)

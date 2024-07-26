@@ -47,6 +47,7 @@ public class GreetingSettingsController(TenantInfoSettingsHelper tenantInfoSetti
     /// <path>api/2.0/settings/greetingsettings</path>
     /// <httpMethod>GET</httpMethod>
     [Tags("Settings / Greeting settings")]
+    [SwaggerResponse(200, "Greeting settings: tenant name", typeof(object))]
     [HttpGet("")]
     public async Task<object> GetGreetingSettings()
     {
@@ -63,6 +64,7 @@ public class GreetingSettingsController(TenantInfoSettingsHelper tenantInfoSetti
     /// <path>api/2.0/settings/greetingsettings/isdefault</path>
     /// <httpMethod>GET</httpMethod>
     [Tags("Settings / Greeting settings")]
+    [SwaggerResponse(200, "Boolean value: true if the greeting settings of the current portal are set to default", typeof(bool))]
     [HttpGet("isdefault")]
     public async Task<bool> IsDefault()
     {
@@ -80,6 +82,7 @@ public class GreetingSettingsController(TenantInfoSettingsHelper tenantInfoSetti
     /// <path>api/2.0/settings/greetingsettings</path>
     /// <httpMethod>POST</httpMethod>
     [Tags("Settings / Greeting settings")]
+    [SwaggerResponse(200, "Message about saving greeting settings successfully", typeof(object))]
     [HttpPost("")]
     public async Task<object> SaveGreetingSettingsAsync(GreetingSettingsRequestsDto inDto)
     {
@@ -113,6 +116,7 @@ public class GreetingSettingsController(TenantInfoSettingsHelper tenantInfoSetti
     /// <path>api/2.0/settings/greetingsettings/restore</path>
     /// <httpMethod>POST</httpMethod>
     [Tags("Settings / Greeting settings")]
+    [SwaggerResponse(200, "Greeting settings: tenant name", typeof(object))]
     [HttpPost("restore")]
     public async Task<object> RestoreGreetingSettingsAsync()
     {

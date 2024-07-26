@@ -48,6 +48,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     /// <path>api/2.0/people/remove/progress/{userid}</path>
     /// <httpMethod>GET</httpMethod>
     [Tags("People / User data")]
+    [SwaggerResponse(200, "Deletion progress", typeof(TaskProgressResponseDto))]
     [HttpGet("remove/progress/{userid:guid}")]
     public async Task<TaskProgressResponseDto> GetRemoveProgressAsync(Guid userId)
     {
@@ -70,6 +71,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     /// <path>api/2.0/people/self/delete</path>
     /// <httpMethod>PUT</httpMethod>
     [Tags("People / User data")]
+    [SwaggerResponse(200, "Information message", typeof(object))]
     [HttpPut("self/delete")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task<object> SendInstructionsToDeleteAsync()
@@ -98,6 +100,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     /// <path>api/2.0/people/remove/start</path>
     /// <httpMethod>POST</httpMethod>
     [Tags("People / User data")]
+    [SwaggerResponse(200, "Deletion progress", typeof(TaskProgressResponseDto))]
     [HttpPost("remove/start")]
     public async Task<TaskProgressResponseDto> StartRemoveAsync(TerminateRequestDto inDto)
     {

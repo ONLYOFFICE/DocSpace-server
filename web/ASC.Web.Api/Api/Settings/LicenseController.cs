@@ -55,6 +55,7 @@ public class LicenseController(ILoggerProvider option,
     /// <path>api/2.0/settings/license/refresh</path>
     /// <httpMethod>GET</httpMethod>
     [Tags("Settings / License")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpGet("refresh")]
     [AllowNotPayment]
     public async Task<bool> RefreshLicenseAsync()
@@ -79,6 +80,7 @@ public class LicenseController(ILoggerProvider option,
     /// <path>api/2.0/settings/license/accept</path>
     /// <httpMethod>POST</httpMethod>
     [Tags("Settings / License")]
+    [SwaggerResponse(200, "Message about the result of activating license", typeof(object))]
     [AllowNotPayment]
     [HttpPost("accept")]
     public async Task<object> AcceptLicenseAsync()
@@ -127,6 +129,7 @@ public class LicenseController(ILoggerProvider option,
     /// <httpMethod>POST</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / License")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpPost("trial")]
     public async Task<bool> ActivateTrialAsync()
     {
@@ -196,6 +199,7 @@ public class LicenseController(ILoggerProvider option,
     /// <httpMethod>GET</httpMethod>
     /// <requiresAuthorization>false</requiresAuthorization>\
     [Tags("Settings / License")]
+    [SwaggerResponse(200, "Boolean value: true if the license is required", typeof(bool))]
     [AllowAnonymous]
     [AllowNotPayment]
     [HttpGet("required")]
@@ -217,6 +221,7 @@ public class LicenseController(ILoggerProvider option,
     /// <path>api/2.0/settings/license</path>
     /// <httpMethod>POST</httpMethod>
     [Tags("Settings / License")]
+    [SwaggerResponse(200, "License", typeof(object))]
     [AllowNotPayment]
     [HttpPost("")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Wizard, Administrators")]

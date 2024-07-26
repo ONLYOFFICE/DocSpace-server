@@ -56,6 +56,7 @@ public class MessageSettingsController(MessageService messageService,
     /// <path>api/2.0/settings/messagesettings</path>
     /// <httpMethod>POST</httpMethod>
     [Tags("Settings / Messages")]
+    [SwaggerResponse(200, "Message about the result of saving new settings", typeof(object))]
     [HttpPost("messagesettings")]
     public async Task<object> EnableAdminMessageSettingsAsync(TurnOnAdminMessageSettingsRequestDto inDto)
     {
@@ -79,6 +80,7 @@ public class MessageSettingsController(MessageService messageService,
     /// <path>api/2.0/settings/cookiesettings</path>
     /// <httpMethod>GET</httpMethod>
     [Tags("Settings / Cookies")]
+    [SwaggerResponse(200, "Lifetime value in minutes", typeof(CookieSettingsDto))]
     [HttpGet("cookiesettings")]
     public async Task<CookieSettingsDto> GetCookieSettings()
     {        
@@ -103,6 +105,7 @@ public class MessageSettingsController(MessageService messageService,
     /// <path>api/2.0/settings/cookiesettings</path>
     /// <httpMethod>PUT</httpMethod>
     [Tags("Settings / Cookies")]
+    [SwaggerResponse(200, "Message about the result of saving new settings", typeof(object))]
     [HttpPut("cookiesettings")]
     public async Task<object> UpdateCookieSettings(CookieSettingsRequestsDto inDto)
     {
@@ -133,6 +136,7 @@ public class MessageSettingsController(MessageService messageService,
     /// <httpMethod>POST</httpMethod>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Settings / Messages")]
+    [SwaggerResponse(200, "Message about the result of sending a message", typeof(object))]
     [AllowAnonymous, AllowNotPayment]
     [HttpPost("sendadmmail")]
     public async Task<object> SendAdmMailAsync(AdminMessageSettingsRequestsDto inDto)
@@ -178,6 +182,7 @@ public class MessageSettingsController(MessageService messageService,
     /// <httpMethod>POST</httpMethod>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Settings / Messages")]
+    [SwaggerResponse(200, "Message about sending a link to confirm joining the DocSpace", typeof(object))]
     [AllowAnonymous]
     [HttpPost("sendjoininvite")]
     public async Task<object> SendJoinInviteMail(AdminMessageBaseSettingsRequestsDto inDto)

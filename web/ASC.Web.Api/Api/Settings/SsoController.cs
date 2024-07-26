@@ -52,6 +52,7 @@ public class SsoController(TenantManager tenantManager,
     /// <httpMethod>GET</httpMethod>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Settings / SSO")]
+    [SwaggerResponse(200, "SSO settings", typeof(SsoSettingsV2))]
     [HttpGet("")]
     [AllowAnonymous, AllowNotPayment]
     public async Task<SsoSettingsV2> GetSsoSettingsV2()
@@ -98,6 +99,7 @@ public class SsoController(TenantManager tenantManager,
     /// <path>api/2.0/settings/ssov2/default</path>
     /// <httpMethod>GET</httpMethod>
     [Tags("Settings / SSO")]
+    [SwaggerResponse(200, "Default SSO settings", typeof(SsoSettingsV2))]
     [HttpGet("default")]
     public async Task<SsoSettingsV2> GetDefaultSsoSettingsV2Async()
     {
@@ -116,6 +118,7 @@ public class SsoController(TenantManager tenantManager,
     /// <path>api/2.0/settings/ssov2/constants</path>
     /// <httpMethod>GET</httpMethod>
     [Tags("Settings / SSO")]
+    [SwaggerResponse(200, "The SSO settings constants: SSO name ID format type, SSO binding type, SSO signing algorithm type, SSO SP certificate action type, SSO IDP certificate action type", typeof(object))]
     [HttpGet("constants")]
     public object GetSsoSettingsV2Constants()
     {
@@ -142,6 +145,7 @@ public class SsoController(TenantManager tenantManager,
     /// <path>api/2.0/settings/ssov2</path>
     /// <httpMethod>POST</httpMethod>
     [Tags("Settings / SSO")]
+    [SwaggerResponse(200, "SSO settings", typeof(SsoSettingsV2))]
     [HttpPost("")]
     public async Task<SsoSettingsV2> SaveSsoSettingsV2Async(SsoSettingsRequestsDto inDto)
     {
@@ -227,6 +231,7 @@ public class SsoController(TenantManager tenantManager,
     /// <path>api/2.0/settings/ssov2</path>
     /// <httpMethod>DELETE</httpMethod>
     [Tags("Settings / SSO")]
+    [SwaggerResponse(200, "Default SSO settings", typeof(SsoSettingsV2))]
     [HttpDelete("")]
     public async Task<SsoSettingsV2> ResetSsoSettingsV2Async()
     {

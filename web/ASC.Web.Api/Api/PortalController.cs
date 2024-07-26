@@ -84,6 +84,7 @@ public class PortalController(
     /// <path>api/2.0/portal</path>
     /// <httpMethod>GET</httpMethod>
     [Tags("Portal / Settings")]
+    [SwaggerResponse(200, "Current portal information", typeof(TenantDto))]
     [AllowNotPayment]
     [HttpGet("")]
     public async Task<TenantDto> Get()
@@ -104,6 +105,7 @@ public class PortalController(
     /// <path>api/2.0/portal/users/{userID}</path>
     /// <httpMethod>GET</httpMethod>
     [Tags("Portal / Users")]
+    [SwaggerResponse(200, "User information", typeof(UserInfo))]
     [HttpGet("users/{userID:guid}")]
     public async Task<UserInfo> GetUserAsync(Guid userID)
     {
@@ -122,6 +124,7 @@ public class PortalController(
     /// <path>api/2.0/portal/users/invite/{employeeType}</path>
     /// <httpMethod>GET</httpMethod>
     [Tags("Portal / Users")]
+    [SwaggerResponse(200, "Invitation link", typeof(object))]
     [HttpGet("users/invite/{employeeType}")]
     public async Task<object> GeInviteLinkAsync(EmployeeType employeeType)
     {
@@ -149,6 +152,7 @@ public class PortalController(
     /// <path>api/2.0/portal/getshortenlink</path>
     /// <httpMethod>PUT</httpMethod>
     [Tags("Portal / Settings")]
+    [SwaggerResponse(200, "Shortened link", typeof(object))]
     [HttpPut("getshortenlink")]
     public async Task<object> GetShortenLinkAsync(ShortenLinkRequestsDto inDto)
     {
@@ -176,6 +180,7 @@ public class PortalController(
     /// <httpMethod>GET</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Portal / Quota")]
+    [SwaggerResponse(200, "Extra tenant license information", typeof(TenantExtraDto))]
     [AllowNotPayment]
     [HttpGet("tenantextra")]
     public async Task<TenantExtraDto> GetTenantExtra(bool refresh)
@@ -216,6 +221,7 @@ public class PortalController(
     /// <path>api/2.0/portal/usedspace</path>
     /// <httpMethod>GET</httpMethod>
     [Tags("Portal / Quota")]
+    [SwaggerResponse(200, "Used portal space", typeof(double))]
     [HttpGet("usedspace")]
     public async Task<double> GetUsedSpaceAsync()
     {
@@ -239,6 +245,7 @@ public class PortalController(
     /// <path>api/2.0/portal/userscount</path>
     /// <httpMethod>GET</httpMethod>
     [Tags("Portal / Users")]
+    [SwaggerResponse(200, "Number of portal users", typeof(long))]
     [HttpGet("userscount")]
     public async Task<long> GetUsersCountAsync()
     {
@@ -257,6 +264,7 @@ public class PortalController(
     /// <path>api/2.0/portal/tariff</path>
     /// <httpMethod>GET</httpMethod>
     [Tags("Portal / Quota")]
+    [SwaggerResponse(200, "Current portal tariff", typeof(Tariff))]
     [AllowNotPayment]
     [HttpGet("tariff")]
     public async Task<Tariff> GetTariffAsync(bool refresh)
@@ -276,6 +284,7 @@ public class PortalController(
     /// <path>api/2.0/portal/quota</path>
     /// <httpMethod>GET</httpMethod>
     [Tags("Portal / Quota")]
+    [SwaggerResponse(200, "Current portal quota", typeof(TenantQuota))]
     [AllowNotPayment]
     [HttpGet("quota")]
     public async Task<TenantQuota> GetQuotaAsync()
@@ -295,6 +304,7 @@ public class PortalController(
     /// <path>api/2.0/portal/quota/right</path>
     /// <httpMethod>GET</httpMethod>
     [Tags("Portal / Quota")]
+    [SwaggerResponse(200, "Recommended portal quota", typeof(TenantQuota))]
     [HttpGet("quota/right")]
     public async Task<TenantQuota> GetRightQuotaAsync()
     {
@@ -320,6 +330,7 @@ public class PortalController(
     /// <path>api/2.0/portal/path</path>
     /// <httpMethod>GET</httpMethod>
     [Tags("Portal / Settings")]
+    [SwaggerResponse(200, "Portal path", typeof(object))]
     [HttpGet("path")]
     public object GetFullAbsolutePath(string virtualPath)
     {
@@ -339,6 +350,7 @@ public class PortalController(
     /// <httpMethod>GET</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Portal / Settings")]
+    [SwaggerResponse(200, "Thumbnail", typeof(FileResult))]
     [HttpGet("thumb")]
     public async Task<FileResult> GetThumb(string url)
     {
@@ -440,6 +452,7 @@ public class PortalController(
     /// <httpMethod>PUT</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Portal / Settings")]
+    [SwaggerResponse(200, "Confirmation email about authentication to the portal with a new name", typeof(object))]
     [HttpPut("portalrename")]
     public async Task<object> UpdatePortalName(PortalRenameRequestsDto inDto)
     {
@@ -666,6 +679,7 @@ public class PortalController(
     /// <path>api/2.0/portal/delete</path>
     /// <httpMethod>DELETE</httpMethod>
     [Tags("Portal / Settings")]
+    [SwaggerResponse(200, "URL to the feedback form about removing a portal", typeof(object))]
     [AllowNotPayment]
     [HttpDelete("delete")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PortalRemove")]

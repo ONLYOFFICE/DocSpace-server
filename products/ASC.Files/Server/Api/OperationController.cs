@@ -48,6 +48,7 @@ public class OperationController(
     /// <collection>list</collection>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Operations")]
+    [SwaggerResponse(200, "List of file operations", typeof(FileOperationDto))]
     [AllowAnonymous]
     [HttpPut("bulkdownload")]
     public async IAsyncEnumerable<FileOperationDto> BulkDownload(DownloadRequestDto inDto)
@@ -74,6 +75,7 @@ public class OperationController(
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
     [Tags("Files / Operations")]
+    [SwaggerResponse(200, "List of file operations", typeof(FileOperationDto))]
     [HttpPut("copy")]
     public async IAsyncEnumerable<FileOperationDto> CopyBatchItems(BatchRequestDto inDto)
     {
@@ -96,6 +98,7 @@ public class OperationController(
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
     [Tags("Files / Operations")]
+    [SwaggerResponse(200, "List of file operations", typeof(FileOperationDto))]
     [HttpPut("delete")]
     public async IAsyncEnumerable<FileOperationDto> DeleteBatchItems(DeleteBatchRequestDto inDto)
     {
@@ -117,6 +120,7 @@ public class OperationController(
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
     [Tags("Files / Operations")]
+    [SwaggerResponse(200, "List of file operations", typeof(FileOperationDto))]
     [HttpPut("emptytrash")]
     public async IAsyncEnumerable<FileOperationDto> EmptyTrashAsync()
     {
@@ -141,6 +145,7 @@ public class OperationController(
     /// <collection>list</collection>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Operations")]
+    [SwaggerResponse(200, "List of file operations", typeof(FileOperationDto))]
     [AllowAnonymous]
     [HttpGet("")]
     public async IAsyncEnumerable<FileOperationDto> GetOperationStatuses()
@@ -162,6 +167,7 @@ public class OperationController(
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
     [Tags("Files / Operations")]
+    [SwaggerResponse(200, "List of file operations", typeof(FileOperationDto))]
     [HttpPut("markasread")]
     public async IAsyncEnumerable<FileOperationDto> MarkAsRead(BaseBatchRequestDto inDto)
     {
@@ -184,6 +190,7 @@ public class OperationController(
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
     [Tags("Files / Operations")]
+    [SwaggerResponse(200, "List of file operations", typeof(FileOperationDto))]
     [HttpPut("move")]
     public async IAsyncEnumerable<FileOperationDto> MoveBatchItems(BatchRequestDto inDto)
     {
@@ -195,7 +202,8 @@ public class OperationController(
         }
     }
 
-        [Tags("Files / Operations")]
+    [Tags("Files / Operations")]
+    [SwaggerResponse(200, "List of file operations", typeof(FileOperationDto))]
     [HttpPut("duplicate")]
     public async IAsyncEnumerable<FileOperationDto> DuplicateBatchItems(DuplicateRequestDto inDto)
     {
@@ -208,6 +216,7 @@ public class OperationController(
     }
     
     [Tags("Files / Operations")]
+    [SwaggerResponse(200, "Result", typeof(CheckDestFolderDto))]
     [HttpGet("checkdestfolder")]
     public async Task<CheckDestFolderDto> MoveOrCopyDestFolderCheckAsync([ModelBinder(BinderType = typeof(BatchModelBinder))] BatchSimpleRequestDto inDto)
     {
@@ -255,6 +264,7 @@ public class OperationController(
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [Tags("Files / Operations")]
+    [SwaggerResponse(200, "List of file entry information", typeof(FileEntryDto))]
     [HttpGet("move")]
     public async IAsyncEnumerable<FileEntryDto> MoveOrCopyBatchCheckAsync([ModelBinder(BinderType = typeof(BatchModelBinder))] BatchSimpleRequestDto inDto)
     {
@@ -290,6 +300,7 @@ public class OperationController(
     /// <collection>list</collection>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Operations")]
+    [SwaggerResponse(200, "List of file operations", typeof(FileOperationDto))]
     [AllowAnonymous]
     [HttpPut("terminate/{id?}")]
     public async IAsyncEnumerable<FileOperationDto> TerminateTasks(string id = null)

@@ -47,6 +47,7 @@ public class CustomSchemasController(MessageService messageService,
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [Tags("Settings / Team templates")]
+    [SwaggerResponse(200, "List of team templates with the following parameters", typeof(SchemaRequestsDto))]
     [HttpGet("")]
     public async Task<List<SchemaRequestsDto>> PeopleSchemasAsync()
     {
@@ -84,6 +85,7 @@ public class CustomSchemasController(MessageService messageService,
     /// <path>api/2.0/settings/customschemas</path>
     /// <httpMethod>POST</httpMethod>
     [Tags("Settings / Team templates")]
+    [SwaggerResponse(200, "Team template with the following parameters", typeof(SchemaRequestsDto))]
     [HttpPost("")]
     public async Task<SchemaRequestsDto> SaveNamingSettingsAsync(SchemaBaseRequestsDto inDto)
     {
@@ -108,6 +110,7 @@ public class CustomSchemasController(MessageService messageService,
     /// <path>api/2.0/settings/customschemas</path>
     /// <httpMethod>PUT</httpMethod>
     [Tags("Settings / Team templates")]
+    [SwaggerResponse(200, "Custom team template with the following parameters", typeof(SchemaRequestsDto))]
     [HttpPut("")]
     public async Task<SchemaRequestsDto> SaveCustomNamingSettingsAsync(SchemaRequestsDto inDto)
     {
@@ -169,6 +172,7 @@ public class CustomSchemasController(MessageService messageService,
     /// <path>api/2.0/settings/customschemas/{id}</path>
     /// <httpMethod>GET</httpMethod>
     [Tags("Settings / Team templates")]
+    [SwaggerResponse(200, "Team template with the following parameters", typeof(SchemaRequestsDto))]
     [HttpGet("{id}")]
     public async Task<SchemaRequestsDto> PeopleSchemaAsync(string id)
     {

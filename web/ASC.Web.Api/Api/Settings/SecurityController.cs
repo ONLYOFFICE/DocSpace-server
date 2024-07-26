@@ -63,6 +63,7 @@ public class SecurityController(
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [Tags("Settings / Security")]
+    [SwaggerResponse(200, "Security settings", typeof(SecurityDto))]
     [HttpGet("")]
     public async IAsyncEnumerable<SecurityDto> GetWebItemSecurityInfo([FromQuery] IEnumerable<string> ids)
     {
@@ -112,6 +113,7 @@ public class SecurityController(
     /// <path>api/2.0/settings/security/{id}</path>
     /// <httpMethod>GET</httpMethod>
     [Tags("Settings / Security")]
+    [SwaggerResponse(200, "Boolean value: true - module is enabled, false - module is disabled", typeof(bool))]
     [HttpGet("{id:guid}")]
     public async Task<bool> GetWebItemSecurityInfoAsync(Guid id)
     {
@@ -131,6 +133,7 @@ public class SecurityController(
     /// <path>api/2.0/settings/security/modules</path>
     /// <httpMethod>GET</httpMethod>
     [Tags("Settings / Security")]
+    [SwaggerResponse(200, "List of enabled modules", typeof(object))]
     [HttpGet("modules")]
     public object GetEnabledModules()
     {
@@ -152,6 +155,7 @@ public class SecurityController(
     /// <path>api/2.0/settings/security/password</path>
     /// <httpMethod>GET</httpMethod>
     [Tags("Settings / Security")]
+    [SwaggerResponse(200, "Password settings", typeof(PasswordSettingsDto))]
     [HttpGet("password")]
     [AllowNotPayment]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Everyone")]
@@ -173,6 +177,7 @@ public class SecurityController(
     /// <path>api/2.0/settings/security/password</path>
     /// <httpMethod>PUT</httpMethod>
     [Tags("Settings / Security")]
+    [SwaggerResponse(200, "Password settings", typeof(PasswordSettingsDto))]
     [HttpPut("password")]
     public async Task<PasswordSettingsDto> UpdatePasswordSettingsAsync(PasswordSettingsRequestsDto inDto)
     {
@@ -210,6 +215,7 @@ public class SecurityController(
     /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.SecurityDto, ASC.Web.Api">Security settings</returns>
     /// <collection>list</collection>
     [Tags("Settings / Security")]
+    [SwaggerResponse(200, "Security settings", typeof(SecurityDto))]
     [HttpPut("")]
     public async Task<IEnumerable<SecurityDto>> SetWebItemSecurity(WebItemSecurityRequestsDto inDto)
     {
@@ -263,6 +269,7 @@ public class SecurityController(
     /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.SecurityDto, ASC.Web.Api">Security settings</returns>
     /// <collection>list</collection>
     [Tags("Settings / Security")]
+    [SwaggerResponse(200, "Security settings", typeof(SecurityDto))]
     [HttpPut("access")]
     public async Task<IEnumerable<SecurityDto>> SetAccessToWebItems(WebItemsSecurityRequestsDto inDto)
     {
@@ -322,6 +329,7 @@ public class SecurityController(
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [Tags("Settings / Security")]
+    [SwaggerResponse(200, "List of product administrators with the following parameters", typeof(EmployeeDto))]
     [HttpGet("administrator/{productid:guid}")]
     public async IAsyncEnumerable<EmployeeDto> GetProductAdministrators(Guid productid)
     {
@@ -346,6 +354,7 @@ public class SecurityController(
     /// <path>api/2.0/settings/security/administrator</path>
     /// <httpMethod>GET</httpMethod>
     [Tags("Settings / Security")]
+    [SwaggerResponse(200, "Object with the user security information: product ID, user ID, administrator or not", typeof(object))]
     [HttpGet("administrator")]
     public async Task<object> IsProductAdministratorAsync(Guid productid, Guid userid)
     {
@@ -365,6 +374,7 @@ public class SecurityController(
     /// <path>api/2.0/settings/security/administrator</path>
     /// <httpMethod>PUT</httpMethod>
     [Tags("Settings / Security")]
+    [SwaggerResponse(200, "Object with the user security information: product ID, user ID, administrator or not", typeof(object))]
     [HttpPut("administrator")]
     public async Task<object> SetProductAdministrator(SecurityRequestsDto inDto)
     {
@@ -413,6 +423,7 @@ public class SecurityController(
     /// <path>api/2.0/settings/security/loginsettings</path>
     /// <httpMethod>PUT</httpMethod>
     [Tags("Settings / Login settings")]
+    [SwaggerResponse(200, "Updated login settings", typeof(LoginSettingsDto))]
     [HttpPut("loginSettings")]
     public async Task<LoginSettingsDto> UpdateLoginSettingsAsync(LoginSettingsRequestDto inDto)
     {
@@ -441,6 +452,7 @@ public class SecurityController(
     /// <path>api/2.0/settings/security/loginsettings</path>
     /// <httpMethod>GET</httpMethod>
     [Tags("Settings / Login settings")]
+    [SwaggerResponse(200, "Login settings", typeof(LoginSettingsDto))]
     [HttpGet("loginSettings")]
     public async Task<LoginSettingsDto> GetLoginSettingsAsync()
     {

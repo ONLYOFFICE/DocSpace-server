@@ -46,6 +46,7 @@ public class PushController(ApiContext apiContext,
     /// <path>api/2.0/settings/push/docregisterdevice</path>
     /// <httpMethod>POST</httpMethod>
     [Tags("Security / Firebase")]
+    [SwaggerResponse(200, "FireBase user", typeof(FireBaseUser))]
     [HttpPost("docregisterdevice")]
     public async Task<FireBaseUser> DocRegisterPusnNotificationDeviceAsync(FirebaseRequestsDto inDto)
     {
@@ -62,6 +63,7 @@ public class PushController(ApiContext apiContext,
     /// <path>api/2.0/settings/push/docsubscribe</path>
     /// <httpMethod>PUT</httpMethod>
     [Tags("Security / Firebase")]
+    [SwaggerResponse(200, "FireBase user", typeof(FireBaseUser))]
     [HttpPut("docsubscribe")]
     public async Task<FireBaseUser> SubscribeDocumentsPushNotificationAsync(FirebaseRequestsDto inDto)
     {

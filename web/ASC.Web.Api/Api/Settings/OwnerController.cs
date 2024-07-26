@@ -57,6 +57,7 @@ public class OwnerController(
     /// <path>api/2.0/settings/owner</path>
     /// <httpMethod>POST</httpMethod>
     [Tags("Settings / Owner")]
+    [SwaggerResponse(200, "Message about changing the portal owner", typeof(object))]
     [HttpPost("")]
     public async Task<object> SendOwnerChangeInstructionsAsync(OwnerIdSettingsRequestDto inDto)
     {

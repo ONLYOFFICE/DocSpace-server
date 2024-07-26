@@ -48,6 +48,7 @@ public class ModulesController(WebItemManagerSecurity webItemManagerSecurity) : 
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [Tags("Modules")]
+    [SwaggerResponse(200, "List of modules", typeof(string))]
     [HttpGet]
     public IEnumerable<string> GetAll()
     {
@@ -72,6 +73,7 @@ public class ModulesController(WebItemManagerSecurity webItemManagerSecurity) : 
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [Tags("Modules")]
+    [SwaggerResponse(200, "List of modules with their information", typeof(Module))]
     [HttpGet("info")]
     public IEnumerable<Module> GetAllWithInfo()
     {

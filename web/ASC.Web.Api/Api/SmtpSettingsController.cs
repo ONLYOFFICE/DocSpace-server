@@ -54,6 +54,7 @@ public class SmtpSettingsController(
     /// <path>api/2.0/smtpsettings/smtp</path>
     /// <httpMethod>GET</httpMethod>
     [Tags("Security / SMTP settings")]
+    [SwaggerResponse(200, "SMTP settings", typeof(SmtpSettingsDto))]
     [HttpGet("")]
     public async Task<SmtpSettingsDto> GetSmtpSettingsAsync()
     {
@@ -84,6 +85,7 @@ public class SmtpSettingsController(
     /// <path>api/2.0/smtpsettings/smtp</path>
     /// <httpMethod>POST</httpMethod>
     [Tags("Security / SMTP settings")]
+    [SwaggerResponse(200, "SMTP settings", typeof(SmtpSettingsDto))]
     [HttpPost("")]
     public async Task<SmtpSettingsDto> SaveSmtpSettingsAsync(SmtpSettingsDto inDto)
     {
@@ -136,6 +138,7 @@ public class SmtpSettingsController(
     /// <path>api/2.0/smtpsettings/smtp</path>
     /// <httpMethod>DELETE</httpMethod>
     [Tags("Security / SMTP settings")]
+    [SwaggerResponse(200, "Default SMTP settings", typeof(SmtpSettingsDto))]
     [HttpDelete("")]
     public async Task<SmtpSettingsDto> ResetSmtpSettingsAsync()
     {
@@ -159,17 +162,18 @@ public class SmtpSettingsController(
         return settings;
     }
 
-    // <summary>
-    // Tests the SMTP settings for the current portal (sends test message to the user email).
-    // </summary>
-    // <short>
-    // Test the SMTP settings
-    // </short>
-    // <category>SMTP settings</category>
-    // <returns type="ASC.Api.Settings.Smtp.SmtpOperationStatusRequestsDto, ASC.Web.Api">SMTP operation status</returns>
-    // <path>api/2.0/smtpsettings/smtp/test</path>
-    // <httpMethod>GET</httpMethod>
+    /// <summary>
+    /// Tests the SMTP settings for the current portal (sends test message to the user email).
+    /// </summary>
+    /// <short>
+    /// Test the SMTP settings
+    /// </short>
+    /// <category>SMTP settings</category>
+    /// <returns type="ASC.Api.Settings.Smtp.SmtpOperationStatusRequestsDto, ASC.Web.Api">SMTP operation status</returns>
+    /// <path>api/2.0/smtpsettings/smtp/test</path>
+    /// <httpMethod>GET</httpMethod>
     [Tags("Security / SMTP settings")]
+    [SwaggerResponse(200, "SMTP operation status", typeof(SmtpOperationStatusRequestsDto))]
     [HttpGet("test")]
     public async Task<SmtpOperationStatusRequestsDto> TestSmtpSettings()
     {
@@ -184,17 +188,18 @@ public class SmtpSettingsController(
         return await smtpOperation.GetStatus(tenant);
     }
 
-    // <summary>
-    // Returns the SMTP test process status.
-    // </summary>
-    // <short>
-    // Get the SMTP test process status
-    // </short>
-    // <category>SMTP settings</category>
-    // <returns type="ASC.Api.Settings.Smtp.SmtpOperationStatusRequestsDto, ASC.Web.Api">SMTP operation status</returns>
-    // <path>api/2.0/smtpsettings/smtp/test/status</path>
-    // <httpMethod>GET</httpMethod>
+    /// <summary>
+    /// Returns the SMTP test process status.
+    /// </summary>
+    /// <short>
+    /// Get the SMTP test process status
+    /// </short>
+    /// <category>SMTP settings</category>
+    /// <returns type="ASC.Api.Settings.Smtp.SmtpOperationStatusRequestsDto, ASC.Web.Api">SMTP operation status</returns>
+    /// <path>api/2.0/smtpsettings/smtp/test/status</path>
+    /// <httpMethod>GET</httpMethod>
     [Tags("Security / SMTP settings")]
+    [SwaggerResponse(200, "SMTP operation status", typeof(SmtpOperationStatusRequestsDto))]
     [HttpGet("test/status")]
     public async Task<SmtpOperationStatusRequestsDto> GetSmtpOperationStatus()
     {

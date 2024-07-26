@@ -84,6 +84,7 @@ public partial class SettingsController(MessageService messageService,
     /// <httpMethod>GET</httpMethod>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Settings / Common settings")]
+    [SwaggerResponse(200, "Settings", typeof(SettingsDto))]
     [HttpGet("")]
     [AllowNotPayment, AllowSuspended, AllowAnonymous]
     public async Task<SettingsDto> GetSettingsAsync(bool? withpassword)
@@ -229,6 +230,7 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/maildomainsettings</path>
     /// <httpMethod>POST</httpMethod>
     [Tags("Settings / Common settings")]
+    [SwaggerResponse(200, "Message about the result of saving the mail domain settings", typeof(object))]
     [HttpPost("maildomainsettings")]
     public async Task<object> SaveMailDomainSettingsAsync(MailDomainSettingsRequestsDto inDto)
     {
@@ -279,6 +281,7 @@ public partial class SettingsController(MessageService messageService,
     /// <httpMethod>GET</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Quota")]
+    [SwaggerResponse(200, "Space usage and limits for upload", typeof(QuotaUsageDto))]
     [HttpGet("quota")]
     public async Task<QuotaUsageDto> GetQuotaUsed()
     {
@@ -298,6 +301,7 @@ public partial class SettingsController(MessageService messageService,
     /// <httpMethod>POST</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Quota")]
+    [SwaggerResponse(200, "Message about the result of saving the user quota settings", typeof(TenantUserQuotaSettings))]
     [HttpPost("userquotasettings")]
     public async Task<TenantUserQuotaSettings> SaveUserQuotaSettingsAsync(QuotaSettingsRequestsDto inDto)
     {
@@ -347,6 +351,7 @@ public partial class SettingsController(MessageService messageService,
     }
 
     [Tags("Settings / Quota")]
+    [SwaggerResponse(200, "Ok", typeof(object))]
     [HttpGet("userquotasettings")]
     public async Task<object> GetUserQuotaSettings()
     {
@@ -367,6 +372,7 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/roomquotasettings</path>
     /// <httpMethod>POST</httpMethod>
     [Tags("Settings / Quota")]
+    [SwaggerResponse(200, "Tenant room quota settings", typeof(TenantRoomQuotaSettings))]
     [HttpPost("roomquotasettings")]
     public async Task<TenantRoomQuotaSettings> SaveRoomQuotaSettingsAsync(QuotaSettingsRequestsDto inDto)
     {
@@ -427,6 +433,7 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/tenantquotasettings</path>
     /// <httpMethod>PUT</httpMethod>
     [Tags("Settings / Quota")]
+    [SwaggerResponse(200, "Tenant quota settings", typeof(TenantQuotaSettings))]
     [HttpPut("tenantquotasettings")]
     public async Task<TenantQuotaSettings> SetTenantQuotaSettingsAsync(TenantQuotaSettingsRequestsDto inDto)
     {
@@ -480,6 +487,7 @@ public partial class SettingsController(MessageService messageService,
     /// <requiresAuthorization>false</requiresAuthorization>
     /// <collection>list</collection>
     [Tags("Settings / Common settings")]
+    [SwaggerResponse(200, "List of all the available portal languages", typeof(string))]
     [AllowAnonymous]
     [AllowNotPayment]
     [HttpGet("cultures")]
@@ -498,6 +506,7 @@ public partial class SettingsController(MessageService messageService,
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [Tags("Settings / Common settings")]
+    [SwaggerResponse(200, "List of all the available time zones with their IDs and display names", typeof(TimezonesRequestsDto))]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Wizard,Administrators")]
     [HttpGet("timezones")]
     [AllowNotPayment]
@@ -534,6 +543,7 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/machine</path>
     /// <httpMethod>GET</httpMethod>
     [Tags("Settings / Common settings")]
+    [SwaggerResponse(200, "Portal hostname", typeof(object))]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Wizard")]
     [HttpGet("machine")]
     [AllowNotPayment]
@@ -552,6 +562,7 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/dns</path>
     /// <httpMethod>PUT</httpMethod>
     [Tags("Settings / Common settings")]
+    [SwaggerResponse(200, "Message about changing DNS", typeof(object))]
     [HttpPut("dns")]
     public async Task<object> SaveDnsSettingsAsync(DnsSettingsRequestsDto inDto)
     {
@@ -590,6 +601,7 @@ public partial class SettingsController(MessageService messageService,
     /// <httpMethod>GET</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Quota")]
+    [SwaggerResponse(200, "Boolean value: true - quota recalculation process is enabled, false - quota recalculation process is disabled", typeof(bool))]
     [HttpGet("checkrecalculatequota")]
     public async Task<bool> CheckRecalculateQuotaAsync()
     {
@@ -610,6 +622,7 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/logo</path>
     /// <httpMethod>GET</httpMethod>
     [Tags("Settings / Common settings")]
+    [SwaggerResponse(200, "Portal logo image URL", typeof(object))]
     [HttpGet("logo")]
     public async Task<object> GetLogoAsync()
     {
@@ -626,6 +639,7 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/wizard/complete</path>
     /// <httpMethod>PUT</httpMethod>
     [Tags("Settings / Common settings")]
+    [SwaggerResponse(200, "Wizard settings", typeof(WizardSettings))]
     [AllowNotPayment]
     [HttpPut("wizard/complete")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Wizard")]
@@ -674,6 +688,7 @@ public partial class SettingsController(MessageService messageService,
     /// <httpMethod>GET</httpMethod>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Settings / Common settings")]
+    [SwaggerResponse(200, "Settings of the portal themes", typeof(CustomColorThemesSettingsDto))]
     [AllowAnonymous, AllowNotPayment, AllowSuspended]
     [HttpGet("colortheme")]
     public async Task<CustomColorThemesSettingsDto> GetColorThemeAsync()
@@ -691,6 +706,7 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/colortheme</path>
     /// <httpMethod>PUT</httpMethod>
     [Tags("Settings / Common settings")]
+    [SwaggerResponse(200, "Portal theme settings", typeof(CustomColorThemesSettingsDto))]
     [HttpPut("colortheme")]
     public async Task<CustomColorThemesSettingsDto> SaveColorThemeAsync(CustomColorThemesSettingsRequestsDto inDto)
     {
@@ -766,6 +782,7 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/colortheme</path>
     /// <httpMethod>DELETE</httpMethod>
     [Tags("Settings / Common settings")]
+    [SwaggerResponse(200, "Portal theme settings: custom color theme settings, selected or not, limit", typeof(CustomColorThemesSettingsDto))]
     [HttpDelete("colortheme")]
     public async Task<CustomColorThemesSettingsDto> DeleteColorThemeAsync(int id)
     {
@@ -824,6 +841,7 @@ public partial class SettingsController(MessageService messageService,
     /// <httpMethod>PUT</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Common settings")]
+    [SwaggerResponse(200, "Message about saving settings successfully", typeof(object))]
     [HttpPut("timeandlanguage")]
     public async Task<object> TimaAndLanguageAsync(TimeZoneRequestDto inDto)
     {
@@ -875,6 +893,7 @@ public partial class SettingsController(MessageService messageService,
     /// <httpMethod>PUT</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Common settings")]
+    [SwaggerResponse(200, "Message about saving settings successfully", typeof(object))]
     [HttpPut("defaultpage")]
     public async Task<object> SaveDefaultPageSettingAsync(DefaultProductRequestDto inDto)
     {
@@ -897,6 +916,7 @@ public partial class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/emailactivation</path>
     /// <httpMethod>PUT</httpMethod>
     [Tags("Settings / Common settings")]
+    [SwaggerResponse(200, "Updated email activation settings", typeof(EmailActivationSettings))]
     [HttpPut("emailactivation")]
     public async Task<EmailActivationSettings> UpdateEmailActivationSettingsAsync(EmailActivationSettings inDto)
     {
@@ -915,6 +935,7 @@ public partial class SettingsController(MessageService messageService,
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [Tags("Settings / Statistics")]
+    [SwaggerResponse(200, "Module space usage statistics", typeof(UsageSpaceStatItemDto))]
     [HttpGet("statistics/spaceusage/{id:guid}")]
     public async Task<List<UsageSpaceStatItemDto>> GetSpaceUsageStatistics(Guid id)
     {
@@ -955,6 +976,7 @@ public partial class SettingsController(MessageService messageService,
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [Tags("Settings / Statistics")]
+    [SwaggerResponse(200, "List of point charts", typeof(ChartPointDto))]
     [HttpGet("statistics/visit")]
     public async Task<List<ChartPointDto>> GetVisitStatisticsAsync(ApiDateTime fromDate, ApiDateTime toDate)
     {
@@ -1019,6 +1041,7 @@ public partial class SettingsController(MessageService messageService,
     /// <httpMethod>GET</httpMethod>
     /// <returns type="System.Object, System">Socket settings: hub URL</returns>
     [Tags("Settings / Common settings")]
+    [SwaggerResponse(200, "Socket settings: hub URL", typeof(object))]
     [HttpGet("socket")]
     public object GetSocketSettings()
     {
@@ -1059,6 +1082,7 @@ public partial class SettingsController(MessageService messageService,
     /// <returns type="ASC.Web.Api.ApiModel.RequestsDto.AuthServiceRequestsDto, ASC.Web.Api">Authorization services</returns>
     /// <collection>list</collection>
     [Tags("Settings / Authorization")]
+    [SwaggerResponse(200, "Authorization services", typeof(AuthServiceRequestsDto))]
     [HttpGet("authservice")]
     public async Task<IEnumerable<AuthServiceRequestsDto>> GetAuthServices()
     {
@@ -1082,6 +1106,7 @@ public partial class SettingsController(MessageService messageService,
     /// <httpMethod>POST</httpMethod>
     /// <returns type="System.Boolean, System">Boolean value: true if the authorization keys are changed</returns>
     [Tags("Settings / Authorization")]
+    [SwaggerResponse(200, "Boolean value: true if the authorization keys are changed", typeof(bool))]
     [HttpPost("authservice")]
     public async Task<bool> SaveAuthKeys(AuthServiceRequestsDto inDto)
     {
@@ -1144,6 +1169,7 @@ public partial class SettingsController(MessageService messageService,
     /// <httpMethod>GET</httpMethod>
     /// <returns type="System.Object, System">Payment settings: sales email, feedback and support URL, link to pay for a portal, Standalone or not, current license, maximum quota quantity</returns>
     [Tags("Settings / Common settings")]
+    [SwaggerResponse(200, "Payment settings: sales email, feedback and support URL, link to pay for a portal, Standalone or not, current license, maximum quota quantity", typeof(object))]
     [AllowNotPayment]
     [HttpGet("payment")]
     public async Task<object> PaymentSettingsAsync()
@@ -1183,6 +1209,7 @@ public partial class SettingsController(MessageService messageService,
     /// <returns type="System.Object, System">Telegram link</returns>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Telegram")]
+    [SwaggerResponse(200, "Telegram link", typeof(object))]
     [HttpGet("telegramlink")]
     public async Task<object> TelegramLink()
     {
@@ -1208,6 +1235,7 @@ public partial class SettingsController(MessageService messageService,
     /// <returns type="System.Object, System">Operation result: 0 - not connected, 1 - connected, 2 - awaiting confirmation</returns>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Telegram")]
+    [SwaggerResponse(200, "Operation result: 0 - not connected, 1 - connected, 2 - awaiting confirmation", typeof(object))]
     [HttpGet("telegramisconnected")]
     public async Task<object> TelegramIsConnectedAsync()
     {

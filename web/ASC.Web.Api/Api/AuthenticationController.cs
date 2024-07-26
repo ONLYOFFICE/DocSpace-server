@@ -84,6 +84,7 @@ public class AuthenticationController(
     /// <returns type="System.Boolean, System">Boolean value: true if the current user is authenticated</returns>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]
+    [SwaggerResponse(200, "Boolean value: true if the current user is authenticated", typeof(bool))]
     [AllowNotPayment]
     [HttpGet]
     public bool GetIsAuthentificated()
@@ -103,6 +104,7 @@ public class AuthenticationController(
     /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.AuthenticationTokenDto, ASC.Web.Api">Authentication data</returns>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]
+    [SwaggerResponse(200, "Authentication data", typeof(AuthenticationTokenDto))]
     [AllowNotPayment]
     [HttpPost("{code}", Order = 1)]
     public async Task<AuthenticationTokenDto> AuthenticateMeFromBodyWithCode(AuthRequestsDto inDto)
@@ -178,6 +180,7 @@ public class AuthenticationController(
     /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.AuthenticationTokenDto, ASC.Web.Api">Authentication data</returns>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]
+    [SwaggerResponse(200, "Authentication data", typeof(AuthenticationTokenDto))]
     [AllowNotPayment]
     [HttpPost]
     public async Task<AuthenticationTokenDto> AuthenticateMeAsync(AuthRequestsDto inDto)
@@ -291,6 +294,7 @@ public class AuthenticationController(
     /// <returns></returns>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]
+    [SwaggerResponse(200, "Ok", typeof(object))]
     [AllowNotPayment]
     [HttpPost("logout")]
     [HttpGet("logout")]// temp fix
@@ -342,6 +346,7 @@ public class AuthenticationController(
     /// <returns type="ASC.Security.Cryptography.EmailValidationKeyProvider.ValidationResult, ASC.Security.Cryptography">Validation result: Ok, Invalid, or Expired</returns>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]
+    [SwaggerResponse(200, "Validation result: Ok, Invalid, or Expired", typeof(ValidationResult))]
     [AllowNotPayment, AllowSuspended]
     [HttpPost("confirm")]
     public async Task<ConfirmDto> CheckConfirm(EmailValidationKeyModel inDto)
@@ -373,6 +378,7 @@ public class AuthenticationController(
     /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.AuthenticationTokenDto, ASC.Web.Api">Authentication data</returns>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]
+    [SwaggerResponse(200, "Authentication data", typeof(AuthenticationTokenDto))]
     [AllowNotPayment]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PhoneActivation")]
     [HttpPost("setphone")]
@@ -403,6 +409,7 @@ public class AuthenticationController(
     /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.AuthenticationTokenDto, ASC.Web.Api">Authentication data</returns>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]
+    [SwaggerResponse(200, "Authentication data", typeof(AuthenticationTokenDto))]
     [AllowNotPayment]
     [HttpPost("sendsms")]
     public async Task<AuthenticationTokenDto> SendSmsCodeAsync(AuthRequestsDto inDto)

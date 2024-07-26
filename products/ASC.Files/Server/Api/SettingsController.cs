@@ -47,6 +47,7 @@ public class SettingsController(
     /// <path>api/2.0/files/thirdparty</path>
     /// <httpMethod>PUT</httpMethod>
     [Tags("Files / Settings")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpPut("thirdparty")]
     public async Task<bool> ChangeAccessToThirdpartyAsync(SettingsRequestDto inDto)
     {        
@@ -65,6 +66,7 @@ public class SettingsController(
     /// <path>api/2.0/files/changedeleteconfim</path>
     /// <httpMethod>PUT</httpMethod>
     [Tags("Files / Settings")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpPut("changedeleteconfrim")]
     public async Task<bool> ChangeDeleteConfirm(SettingsRequestDto inDto)
     {
@@ -82,6 +84,7 @@ public class SettingsController(
     /// <path>api/2.0/files/settings/downloadtargz</path>
     /// <httpMethod>PUT</httpMethod>
     [Tags("Files / Settings")]
+    [SwaggerResponse(200, "Archive", typeof(ICompress))]
     [HttpPut("settings/downloadtargz")]
     public async Task<ICompress> ChangeDownloadZipFromBody([FromBody] DisplayRequestDto inDto)
     {        
@@ -100,6 +103,7 @@ public class SettingsController(
     /// <httpMethod>PUT</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Settings")]
+    [SwaggerResponse(200, "Archive", typeof(ICompress))]
     [HttpPut("settings/downloadtargz")]
     public async Task<ICompress> ChangeDownloadZipFromForm([FromForm] DisplayRequestDto inDto)
     {
@@ -118,6 +122,7 @@ public class SettingsController(
     /// <httpMethod>PUT</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Settings")]
+    [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
     [HttpPut("settings/favorites")]
     public async Task<bool> DisplayFavorite(DisplayRequestDto inDto)
     {
@@ -136,6 +141,7 @@ public class SettingsController(
     /// <httpMethod>PUT</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Settings")]
+    [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
     [HttpPut("displayRecent")]
     public async Task<bool> DisplayRecent(DisplayRequestDto inDto)
     {
@@ -154,6 +160,7 @@ public class SettingsController(
     /// <httpMethod>PUT</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Settings")]
+    [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
     [HttpPut("settings/templates")]
     public async Task<bool> DisplayTemplates(DisplayRequestDto inDto)
     {        
@@ -171,6 +178,7 @@ public class SettingsController(
     /// <path>api/2.0/files/settings/external</path>
     /// <httpMethod>PUT</httpMethod>
     [Tags("Files / Settings")]
+    [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
     [HttpPut("settings/external")]
     public async Task<bool> ExternalShareAsync(DisplayRequestDto inDto)
     {
@@ -187,6 +195,7 @@ public class SettingsController(
     /// <path>api/2.0/files/settings/externalsocialmedia</path>
     /// <httpMethod>PUT</httpMethod>
     [Tags("Files / Settings")]
+    [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
     [HttpPut("settings/externalsocialmedia")]
     public async Task<bool> ExternalShareSocialMediaAsync(DisplayRequestDto inDto)
     {
@@ -202,6 +211,7 @@ public class SettingsController(
     /// <path>api/2.0/files/forcesave</path>
     /// <httpMethod>PUT</httpMethod>
     [Tags("Files / Settings")]
+    [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
     [HttpPut("forcesave")]
     public bool Forcesave()
     {
@@ -219,6 +229,7 @@ public class SettingsController(
     /// <httpMethod>GET</httpMethod>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Settings")]
+    [SwaggerResponse(200, "File settings", typeof(FilesSettingsDto))]
     [AllowAnonymous]
     [HttpGet("settings")]
     public async Task<FilesSettingsDto> GetFilesSettings()
@@ -235,6 +246,7 @@ public class SettingsController(
     /// <path>api/2.0/files/info</path>
     /// <httpMethod>GET</httpMethod>
     [Tags("Files / Settings")]
+    [SwaggerResponse(200, "Module information: ID, product class name, title, description, icon URL, large icon URL, start URL, primary or nor, help URL", typeof(Module))]
     [HttpGet("info")]
     public Module GetModule()
     {
@@ -253,6 +265,7 @@ public class SettingsController(
     /// <httpMethod>PUT</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Settings")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(Module))]
     [HttpPut("hideconfirmconvert")]
     public async Task<bool> HideConfirmConvert(HideConfirmConvertRequestDto inDto)
     {
@@ -268,6 +281,7 @@ public class SettingsController(
     /// <path>api/2.0/files/@privacy/available</path>
     /// <httpMethod>GET</httpMethod>
     [Tags("Files / Settings")]
+    [SwaggerResponse(200, "Boolean value: true if the Private Room settings are available", typeof(bool))]
     [HttpGet("@privacy/available")]
     public bool IsAvailablePrivacyRoomSettings()
     {
@@ -283,6 +297,7 @@ public class SettingsController(
     /// <path>api/2.0/files/storeforcesave</path>
     /// <httpMethod>PUT</httpMethod>
     [Tags("Files / Settings")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpPut("storeforcesave")]
     public bool StoreForcesave()
     {
@@ -300,6 +315,7 @@ public class SettingsController(
     /// <path>api/2.0/files/storeoriginal</path>
     /// <httpMethod>PUT</httpMethod>
     [Tags("Files / Settings")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpPut("storeoriginal")]
     public async Task<bool> StoreOriginalAsync(SettingsRequestDto inDto)
     {
@@ -317,6 +333,7 @@ public class SettingsController(
     /// <path>api/2.0/files/keepnewfilename</path>
     /// <httpMethod>PUT</httpMethod>
     [Tags("Files / Settings")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpPut("keepnewfilename")]
     public async Task<bool> KeepNewFileNameAsync(SettingsRequestDto inDto)
     {
@@ -333,6 +350,7 @@ public class SettingsController(
     /// <path>api/2.0/files/updateifexist</path>
     /// <httpMethod>PUT</httpMethod>
     [Tags("Files / Settings")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpPut("updateifexist")]
     public Task<bool> UpdateIfExistAsync(SettingsRequestDto inDto)
     {
@@ -348,6 +366,7 @@ public class SettingsController(
     /// <path>api/2.0/files/settings/autocleanup</path>
     /// <httpMethod>GET</httpMethod>
     [Tags("Files / Settings")]
+    [SwaggerResponse(200, "The auto-clearing setting properties: auto-clearing or not, a time interval when the auto-clearing will be performed", typeof(AutoCleanUpData))]
     [HttpGet("settings/autocleanup")]
     public async Task<AutoCleanUpData> GetAutomaticallyCleanUp()
     {
@@ -364,6 +383,7 @@ public class SettingsController(
     /// <path>api/2.0/files/settings/autocleanup</path>
     /// <httpMethod>PUT</httpMethod>
     [Tags("Files / Settings")]
+    [SwaggerResponse(200, "The auto-clearing setting properties: auto-clearing or not, a time interval when the auto-clearing will be performed", typeof(AutoCleanUpData))]
     [HttpPut("settings/autocleanup")]
     public async Task<AutoCleanUpData> ChangeAutomaticallyCleanUp(AutoCleanupRequestDto inDto)
     {
@@ -382,6 +402,7 @@ public class SettingsController(
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
     [Tags("Files / Settings")]
+    [SwaggerResponse(200, "Updated sharing rights (None, ReadWrite, Read, Restrict, Varies, Review, Comment, FillForms, CustomFilter, RoomAdmin, Editing, Collaborator)", typeof(List<FileShare>))]
     [HttpPut("settings/dafaultaccessrights")]
     public async Task<List<FileShare>> ChangeDefaultAccessRights(List<FileShare> value)
     {        
@@ -399,6 +420,7 @@ public class SettingsController(
     /// <path>api/2.0/files/settings/openeditorinsametab</path>
     /// <httpMethod>PUT</httpMethod>
     [Tags("Files / Settings")]
+    [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
     [HttpPut("settings/openeditorinsametab")]
     public async Task<bool> SetOpenEditorInSameTabAsync(SettingsRequestDto inDto)
     {

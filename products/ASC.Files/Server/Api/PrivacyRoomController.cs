@@ -59,6 +59,7 @@ public abstract class PrivacyRoomController<T>(SettingsManager settingsManager,
     /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Private room")]
+    [SwaggerResponse(200, "List of encryption key pairs", typeof(EncryptionKeyPairDto))]
     [HttpGet("access/{fileId}")]
     public async Task<IEnumerable<EncryptionKeyPairDto>> GetPublicKeysWithAccess(T fileId)
     {
@@ -94,6 +95,7 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
     /// <httpMethod>GET</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Private room")]
+    [SwaggerResponse(200, "Encryption key pair: private key, public key, user ID", typeof(EncryptionKeyPairDto))]
     [HttpGet("keys")]
     public async Task<EncryptionKeyPairDto> GetKeysAsync()
     {
@@ -117,6 +119,7 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
     /// <httpMethod>GET</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Private room")]
+    [SwaggerResponse(200, "Boolean value: true - the Private Room settings are enabled, false - the Private Room settings are disabled", typeof(bool))]
     [HttpGet("")]
     public async Task<bool> PrivacyRoomAsync()
     {
@@ -135,6 +138,7 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
     /// <httpMethod>PUT</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Private room")]
+    [SwaggerResponse(200, "Boolean value: true - the key pair is set", typeof(object))]
     [HttpPut("keys")]
     public async Task<object> SetKeysAsync(PrivacyRoomRequestDto inDto)
     {
@@ -174,6 +178,7 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
     /// <httpMethod>PUT</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Private room")]
+    [SwaggerResponse(200, "Boolean value: true - the Private Room settings are enabled, false - the Private Room settings are disabled", typeof(bool))]
     [HttpPut("")]
     public async Task<bool> SetPrivacyRoomAsync(PrivacyRoomEnableRequestDto inDto)
     {

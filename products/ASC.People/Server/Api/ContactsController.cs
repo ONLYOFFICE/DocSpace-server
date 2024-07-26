@@ -48,6 +48,7 @@ public class ContactsController(UserManager userManager,
     /// <path>api/2.0/people/{userid}/contacts</path>
     /// <httpMethod>DELETE</httpMethod>
     [Tags("People / Contacts")]
+    [SwaggerResponse(200, "Deleted user profile with the detailed information", typeof(EmployeeFullDto))]
     [HttpDelete("{userid}/contacts")]
     public async Task<EmployeeFullDto> DeleteMemberContacts(string userid, ContactsRequestDto inDto)
     {
@@ -77,6 +78,7 @@ public class ContactsController(UserManager userManager,
     /// <path>api/2.0/people/{userid}/contacts</path>
     /// <httpMethod>POST</httpMethod>
     [Tags("People / Contacts")]
+    [SwaggerResponse(200, "Updated user profile with the detailed information", typeof(EmployeeFullDto))]
     [HttpPost("{userid}/contacts")]
     public async Task<EmployeeFullDto> SetMemberContacts(string userid, ContactsRequestDto inDto)
     {
@@ -107,6 +109,7 @@ public class ContactsController(UserManager userManager,
     /// <path>api/2.0/people/{userid}/contacts</path>
     /// <httpMethod>PUT</httpMethod>
     [Tags("People / Contacts")]
+    [SwaggerResponse(200, "Updated user profile with the detailed information", typeof(EmployeeFullDto))]
     [HttpPut("{userid}/contacts")]
     public async Task<EmployeeFullDto> UpdateMemberContacts(string userid, ContactsRequestDto inDto)
     {

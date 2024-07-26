@@ -52,6 +52,7 @@ public class ThirdpartyController(
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [Tags("Files / Third-party integration")]
+    [SwaggerResponse(200, "List of provider keys", typeof(List<List<string>>))]
     [HttpGet("thirdparty/capabilities")]
     public async Task<List<List<string>>> CapabilitiesAsync()
     {
@@ -74,6 +75,7 @@ public class ThirdpartyController(
     /// <httpMethod>POST</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / WordPress")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpPost("wordpress")]
     public async Task<bool> CreateWordpressPostAsync(CreateWordpressPostRequestDto inDto)
     {
@@ -110,6 +112,7 @@ public class ThirdpartyController(
     /// <httpMethod>DELETE</httpMethod>
     /// <exception cref="ArgumentException"></exception>
     [Tags("Files / Third-party integration")]
+    [SwaggerResponse(200, "Third-party folder ID", typeof(object))]
     [HttpDelete("thirdparty/{providerId:int}")]
     public async Task<object> DeleteThirdPartyAsync(int providerId)
     {
@@ -126,6 +129,7 @@ public class ThirdpartyController(
     /// <httpMethod>GET</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / WordPress")]
+    [SwaggerResponse(200, "Object with the \"success\" field: true if the operation is successful", typeof(object))]
     [HttpGet("wordpress-delete")]
     public async Task<object> DeleteWordpressInfoAsync()
     {
@@ -154,6 +158,7 @@ public class ThirdpartyController(
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [Tags("Files / Third-party integration")]
+    [SwaggerResponse(200, "List of common third-party folderst", typeof(FolderDto<string>))]
     [HttpGet("thirdparty/common")]
     public async IAsyncEnumerable<FolderDto<string>> GetCommonThirdPartyFoldersAsync([FromServices] EntryManager entryManager)
     {
@@ -176,6 +181,7 @@ public class ThirdpartyController(
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [Tags("Files / Third-party integration")]
+    [SwaggerResponse(200, "List of connected providers information", typeof(ThirdPartyParams))]
     [HttpGet("thirdparty")]
     public IAsyncEnumerable<ThirdPartyParams> GetThirdPartyAccountsAsync()
     {
@@ -191,6 +197,7 @@ public class ThirdpartyController(
     /// <path>api/2.0/files/thirdparty/backup</path>
     /// <httpMethod>GET</httpMethod>
     [Tags("Files / Third-party integration")]
+    [SwaggerResponse(200, "Folder for the third-party account backup", typeof(FolderDto<string>))]
     [HttpGet("thirdparty/backup")]
     public async Task<FolderDto<string>> GetBackupThirdPartyAccountAsync()
     {
@@ -214,6 +221,7 @@ public class ThirdpartyController(
     /// <httpMethod>GET</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / WordPress")]
+    [SwaggerResponse(200, "Object with the following parameters: \"success\" - specifies if the operation is successful or not, \"data\" - blog information", typeof(object))]
     [HttpGet("wordpress-info")]
     public async Task<object> GetWordpressInfoAsync()
     {
@@ -253,6 +261,7 @@ public class ThirdpartyController(
     /// <httpMethod>POST</httpMethod>
     /// <exception cref="ArgumentException"></exception>
     [Tags("Files / Third-party integration")]
+    [SwaggerResponse(200, "Connected provider folder", typeof(FolderDto<string>))]
     [HttpPost("thirdparty")]
     public async Task<FolderDto<string>> SaveThirdPartyAsync(ThirdPartyRequestDto inDto)
     {
@@ -282,6 +291,7 @@ public class ThirdpartyController(
     /// <httpMethod>POST</httpMethod>
     /// <exception cref="ArgumentException"></exception>
     [Tags("Files / Third-party integration")]
+    [SwaggerResponse(200, "Folder for the third-party account backup", typeof(FolderDto<string>))]
     [HttpPost("thirdparty/backup")]
     public async Task<FolderDto<string>> SaveThirdPartyBackupAsync(ThirdPartyBackupRequestDto inDto)
     {
@@ -313,6 +323,7 @@ public class ThirdpartyController(
     /// <httpMethod>POST</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / WordPress")]
+    [SwaggerResponse(200, "Object with the following parameters: \"success\" - specifies if the operation is successful or not, \"data\" - blog information", typeof(object))]
     [HttpPost("wordpress-save")]
     public async Task<object> WordpressSaveAsync(WordpressSaveRequestDto inDto)
     {
@@ -362,6 +373,7 @@ public class ThirdpartyController(
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [Tags("Files / Third-party integration")]
+    [SwaggerResponse(200, "List of provider", typeof(List<ProviderDto>))]
     [HttpGet("thirdparty/providers")]
     public async Task<List<ProviderDto>> GetAllProvidersAsync()
     {

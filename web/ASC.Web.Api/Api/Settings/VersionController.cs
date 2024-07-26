@@ -48,6 +48,7 @@ public class VersionController(PermissionContext permissionContext,
     /// <returns type="ASC.Api.Settings.BuildVersion, ASC.Web.Api">Current product versions</returns>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Versions")]
+    [SwaggerResponse(200, "Current product versions", typeof(BuildVersion))]
     [AllowAnonymous]
     [AllowNotPayment]
     [HttpGet("build")]
@@ -68,6 +69,7 @@ public class VersionController(PermissionContext permissionContext,
     /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.TenantVersionDto, ASC.Web.Api">List of availibe portal versions including the current version</returns>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Versions")]
+    [SwaggerResponse(200, "List of availibe portal versions including the current version", typeof(TenantVersionDto))]
     [HttpGet("")]
     public async Task<TenantVersionDto> GetVersionsAsync()
     {
@@ -88,6 +90,7 @@ public class VersionController(PermissionContext permissionContext,
     /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.TenantVersionDto, ASC.Web.Api">List of availibe portal versions including the current version</returns>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Versions")]
+    [SwaggerResponse(200, "List of availibe portal versions including the current version", typeof(TenantVersionDto))]
     [HttpPut("")]
     public async Task<TenantVersionDto> SetVersionAsync(SettingsRequestsDto inDto)
     {

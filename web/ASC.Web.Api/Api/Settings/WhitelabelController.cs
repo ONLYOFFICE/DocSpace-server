@@ -57,6 +57,7 @@ public class WhitelabelController(ApiContext apiContext,
     /// <path>api/2.0/settings/whitelabel/save</path>
     /// <httpMethod>POST</httpMethod>
     [Tags("Settings / Rebranding")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is sucessful", typeof(bool))]
     [HttpPost("whitelabel/save")]
     public async Task<bool> SaveWhiteLabelSettingsAsync(WhiteLabelRequestsDto inDto, [FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
     {
@@ -129,6 +130,7 @@ public class WhitelabelController(ApiContext apiContext,
     /// <path>api/2.0/settings/whitelabel/savefromfiles</path>
     /// <httpMethod>POST</httpMethod>
     [Tags("Settings / Rebranding")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is sucessful", typeof(bool))]
     [HttpPost("whitelabel/savefromfiles")]
     public async Task<bool> SaveWhiteLabelSettingsFromFilesAsync([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
     {
@@ -215,6 +217,7 @@ public class WhitelabelController(ApiContext apiContext,
     /// <requiresAuthorization>false</requiresAuthorization>
     /// <collection>list</collection>
     [Tags("Settings / Rebranding")]
+    [SwaggerResponse(200, "White label logos", typeof(WhiteLabelItemDto))]
     [AllowNotPayment, AllowAnonymous, AllowSuspended]
     [HttpGet("whitelabel/logos")]
     public async IAsyncEnumerable<WhiteLabelItemDto> GetWhiteLabelLogosAsync([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
@@ -295,6 +298,7 @@ public class WhitelabelController(ApiContext apiContext,
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [Tags("Settings / Rebranding")]
+    [SwaggerResponse(200, "Request properties of white label logos", typeof(IsDefaultWhiteLabelLogosDto))]
     [HttpGet("whitelabel/logos/isdefault")]
     public async IAsyncEnumerable<IsDefaultWhiteLabelLogosDto> GetIsDefaultWhiteLabelLogos([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
     {
@@ -333,6 +337,7 @@ public class WhitelabelController(ApiContext apiContext,
     /// <path>api/2.0/settings/whitelabel/logotext</path>
     /// <httpMethod>GET</httpMethod>
     [Tags("Settings / Rebranding")]
+    [SwaggerResponse(200, "Logo text", typeof(object))]
     [AllowNotPayment]
     [HttpGet("whitelabel/logotext")]
     public async Task<object> GetWhiteLabelLogoTextAsync([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
@@ -359,6 +364,7 @@ public class WhitelabelController(ApiContext apiContext,
     /// <path>api/2.0/settings/whitelabel/restore</path>
     /// <httpMethod>PUT</httpMethod>
     [Tags("Settings / Rebranding")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpPut("whitelabel/restore")]
     public async Task<bool> RestoreWhiteLabelOptionsAsync([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
     {
@@ -416,6 +422,7 @@ public class WhitelabelController(ApiContext apiContext,
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [Tags("Settings / Rebranding")]
+    [SwaggerResponse(200, "List of company white label settings", typeof(CompanyWhiteLabelSettings))]
     [HttpGet("companywhitelabel")]
     public async Task<List<CompanyWhiteLabelSettings>> GetLicensorDataAsync()
     {
@@ -443,6 +450,7 @@ public class WhitelabelController(ApiContext apiContext,
     /// <path>api/2.0/settings/rebranding/company</path>
     /// <httpMethod>POST</httpMethod>
     [Tags("Settings / Rebranding")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpPost("rebranding/company")]
     public async Task<bool> SaveCompanyWhiteLabelSettingsAsync(CompanyWhiteLabelSettingsWrapper companyWhiteLabelSettingsWrapper)
     {
@@ -471,6 +479,7 @@ public class WhitelabelController(ApiContext apiContext,
     /// <path>api/2.0/settings/rebranding/company</path>
     /// <httpMethod>GET</httpMethod>
     [Tags("Settings / Rebranding")]
+    [SwaggerResponse(200, "Company white label settings", typeof(CompanyWhiteLabelSettingsDto))]
     [AllowNotPayment]
     [HttpGet("rebranding/company")]
     public async Task<CompanyWhiteLabelSettingsDto> GetCompanyWhiteLabelSettingsAsync()
@@ -489,6 +498,7 @@ public class WhitelabelController(ApiContext apiContext,
     /// <path>api/2.0/settings/rebranding/company</path>
     /// <httpMethod>DELETE</httpMethod>
     [Tags("Settings / Rebranding")]
+    [SwaggerResponse(200, "Default company white label settings", typeof(CompanyWhiteLabelSettings))]
     [HttpDelete("rebranding/company")]
     public async Task<CompanyWhiteLabelSettings> DeleteCompanyWhiteLabelSettingsAsync()
     {
@@ -513,6 +523,7 @@ public class WhitelabelController(ApiContext apiContext,
     /// <path>api/2.0/settings/rebranding/additional</path>
     /// <httpMethod>POST</httpMethod>
     [Tags("Settings / Rebranding")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpPost("rebranding/additional")]
     public async Task<bool> SaveAdditionalWhiteLabelSettingsAsync(AdditionalWhiteLabelSettingsWrapper wrapper)
     {
@@ -539,6 +550,7 @@ public class WhitelabelController(ApiContext apiContext,
     /// <path>api/2.0/settings/rebranding/additional</path>
     /// <httpMethod>GET</httpMethod>
     [Tags("Settings / Rebranding")]
+    [SwaggerResponse(200, "Additional white label settings", typeof(AdditionalWhiteLabelSettingsDto))]
     [AllowNotPayment]
     [HttpGet("rebranding/additional")]
     public async Task<AdditionalWhiteLabelSettingsDto> GetAdditionalWhiteLabelSettingsAsync()
@@ -557,6 +569,7 @@ public class WhitelabelController(ApiContext apiContext,
     /// <path>api/2.0/settings/rebranding/additional</path>
     /// <httpMethod>DELETE</httpMethod>
     [Tags("Settings / Rebranding")]
+    [SwaggerResponse(200, "Default additional white label settings", typeof(AdditionalWhiteLabelSettingsDto))]
     [HttpDelete("rebranding/additional")]
     public async Task<AdditionalWhiteLabelSettings> DeleteAdditionalWhiteLabelSettingsAsync()
     {
@@ -581,6 +594,7 @@ public class WhitelabelController(ApiContext apiContext,
     /// <path>api/2.0/settings/rebranding/mail</path>
     /// <httpMethod>POST</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [Tags("Settings / Rebranding")]
     [HttpPost("rebranding/mail")]
     public async Task<bool> SaveMailWhiteLabelSettingsAsync(MailWhiteLabelSettings settings)
@@ -607,6 +621,7 @@ public class WhitelabelController(ApiContext apiContext,
     /// <httpMethod>PUT</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Rebranding")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpPut("rebranding/mail")]
     public async Task<bool> UpdateMailWhiteLabelSettings(MailWhiteLabelSettingsRequestsDto inDto)
     {
@@ -633,6 +648,7 @@ public class WhitelabelController(ApiContext apiContext,
     /// <httpMethod>GET</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Rebranding")]
+    [SwaggerResponse(200, "Mail white label settings", typeof(MailWhiteLabelSettings))]
     [HttpGet("rebranding/mail")]
     public async Task<MailWhiteLabelSettings> GetMailWhiteLabelSettingsAsync()
     {
@@ -649,6 +665,7 @@ public class WhitelabelController(ApiContext apiContext,
     /// <httpMethod>DELETE</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Rebranding")]
+    [SwaggerResponse(200, "Default mail white label settings", typeof(MailWhiteLabelSettings))]
     [HttpDelete("rebranding/mail")]
     public async Task<MailWhiteLabelSettings> DeleteMailWhiteLabelSettingsAsync()
     {
@@ -672,6 +689,7 @@ public class WhitelabelController(ApiContext apiContext,
     /// <path>api/2.0/settings/enableWhitelabel</path>
     /// <httpMethod>GET</httpMethod>
     [Tags("Settings / Rebranding")]
+    [SwaggerResponse(200, "Boolean value: true if the white label is enabled", typeof(bool))]
     [HttpGet("enableWhitelabel")]
     public async Task<bool> GetEnableWhitelabelAsync()
     {

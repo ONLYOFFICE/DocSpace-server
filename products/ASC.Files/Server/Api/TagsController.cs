@@ -56,6 +56,7 @@ public abstract class TagsController<T>(FileStorageService fileStorageService,
     /// <httpMethod>POST</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Files")]
+    [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
     [HttpPost("file/{fileId}/recent")]
     public async Task<FileDto<T>> AddToRecentAsync(T fileId)
     {
@@ -78,6 +79,7 @@ public abstract class TagsController<T>(FileStorageService fileStorageService,
     /// <httpMethod>GET</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Files")]
+    [SwaggerResponse(200, "Boolean value: true - the file is favorite, false - the file is not favorite", typeof(bool))]
     [HttpGet("favorites/{fileId}")]
     public async Task<bool> ToggleFileFavoriteAsync(T fileId, bool favorite)
     {
@@ -101,6 +103,7 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     /// <httpMethod>POST</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Operations")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpPost("favorites")]
     public async Task<bool> AddFavoritesAsync(BaseBatchRequestDto inDto)
     {
@@ -123,6 +126,7 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     /// <path>api/2.0/files/templates</path>
     /// <httpMethod>POST</httpMethod>
     [Tags("Files / Files")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpPost("templates")]
     public async Task<bool> AddTemplatesAsync(TemplatesRequestDto inDto)
     {
@@ -142,6 +146,7 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     /// <httpMethod>DELETE</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Operations")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpDelete("favorites")]
     [Consumes("application/json")]
     public async Task<bool> DeleteFavoritesFromBodyAsync([FromBody] BaseBatchRequestDto inDto)
@@ -160,6 +165,7 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     /// <httpMethod>DELETE</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Operations")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpDelete("favorites")]
     public async Task<bool> DeleteFavoritesFromQueryAsync([FromQuery][ModelBinder(BinderType = typeof(BaseBatchModelBinder))] BaseBatchRequestDto inDto)
     {
@@ -176,6 +182,7 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     /// <path>api/2.0/files/templates</path>
     /// <httpMethod>DELETE</httpMethod>
     [Tags("Files / Files")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpDelete("templates")]
     public async Task<bool> DeleteTemplatesAsync(IEnumerable<int> fileIds)
     {
@@ -194,6 +201,7 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     /// <path>api/2.0/files/recent</path>
     /// <httpMethod>DELETE</httpMethod>
     [Tags("Files / Files")]
+    [SwaggerResponse(200, "No content", typeof(NoContentResult))]
     [HttpDelete("recent")]
     public async Task<NoContentResult> DeleteRecentAsync(FileBaseBatchRequestDto inDto)
     {

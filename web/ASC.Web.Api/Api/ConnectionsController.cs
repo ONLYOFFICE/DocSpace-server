@@ -61,6 +61,7 @@ public class ConnectionsController(
     /// <path>api/2.0/security/activeconnections</path>
     /// <httpMethod>GET</httpMethod>
     [Tags("Security / Active connections")]
+    [SwaggerResponse(200, "Active portal connections", typeof(ActiveConnectionsDto))]
     [HttpGet("")]
     public async Task<ActiveConnectionsDto> GetAllActiveConnections()
     {
@@ -152,6 +153,7 @@ public class ConnectionsController(
     /// <path>api/2.0/security/activeconnections/logoutallchangepassword</path>
     /// <httpMethod>PUT</httpMethod>
     [Tags("Security / Active connections")]
+    [SwaggerResponse(200, "URL to the confirmation message for changing a password", typeof(object))]
     [HttpPut("logoutallchangepassword")]
     public async Task<object> LogOutAllActiveConnectionsChangePassword()
     {
@@ -218,6 +220,7 @@ public class ConnectionsController(
     /// <path>api/2.0/security/activeconnections/logoutallexceptthis</path>
     /// <httpMethod>PUT</httpMethod>
     [Tags("Security / Active connections")]
+    [SwaggerResponse(200, "Current user name", typeof(object))]
     [HttpPut("logoutallexceptthis")]
     public async Task<object> LogOutAllExceptThisConnection()
     {
@@ -251,6 +254,7 @@ public class ConnectionsController(
     /// <path>api/2.0/security/activeconnections/logout/{loginEventId}</path>
     /// <httpMethod>PUT</httpMethod>
     [Tags("Security / Active connections")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpPut("logout/{loginEventId:int}")]
     public async Task<bool> LogOutActiveConnection(int loginEventId)
     {

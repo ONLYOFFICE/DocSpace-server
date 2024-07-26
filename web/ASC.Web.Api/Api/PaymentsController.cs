@@ -63,6 +63,7 @@ public class PaymentController(UserManager userManager,
     /// <path>api/2.0/portal/payment/url</path>
     /// <httpMethod>PUT</httpMethod>
     [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The URL to the payment page", typeof(Uri))]
     [HttpPut("url")]
     public async Task<Uri> GetPaymentUrlAsync(PaymentUrlRequestsDto inDto)
     {
@@ -99,6 +100,7 @@ public class PaymentController(UserManager userManager,
     /// <path>api/2.0/portal/payment/update</path>
     /// <httpMethod>PUT</httpMethod>
     [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpPut("update")]
     public async Task<bool> PaymentUpdateAsync(QuantityRequestDto inDto)
     {
@@ -127,6 +129,7 @@ public class PaymentController(UserManager userManager,
     /// <path>api/2.0/portal/payment/account</path>
     /// <httpMethod>GET</httpMethod>
     [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The URL to the payment account", typeof(object))]
     [HttpGet("account")]
     public async Task<object> GetPaymentAccountAsync(string backUrl)
     {
@@ -160,6 +163,7 @@ public class PaymentController(UserManager userManager,
     /// <path>api/2.0/portal/payment/prices</path>
     /// <httpMethod>GET</httpMethod>
     [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "List of available portal prices", typeof(object))]
     [HttpGet("prices")]
     public async Task<object> GetPricesAsync()
     {
@@ -182,6 +186,7 @@ public class PaymentController(UserManager userManager,
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "List of available portal currencies", typeof(CurrenciesDto))]
     [HttpGet("currencies")]
     public async IAsyncEnumerable<CurrenciesDto> GetCurrenciesAsync()
     {
@@ -208,6 +213,7 @@ public class PaymentController(UserManager userManager,
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "List of available portal quotas", typeof(QuotaDto))]
     [HttpGet("quotas")]
     public async Task<IEnumerable<QuotaDto>> GetQuotasAsync()
     {
@@ -226,6 +232,7 @@ public class PaymentController(UserManager userManager,
     /// <path>api/2.0/portal/payment/quota</path>
     /// <httpMethod>GET</httpMethod>
     [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "Payment information about the current portal quota", typeof(QuotaDto))]
     [HttpGet("quota")]
     public async Task<QuotaDto> GetQuotaAsync(bool refresh)
     {

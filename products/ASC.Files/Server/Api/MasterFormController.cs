@@ -54,6 +54,7 @@ public abstract class MasterFormController<T>(FileStorageService fileStorageServ
     /// <httpMethod>POST</httpMethod>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
+    [SwaggerResponse(200, "Link to the form", typeof(object))]
     [AllowAnonymous]
     [HttpPost("masterform/{fileId}/checkfillformdraft")]
     public async Task<object> CheckFillFormDraftAsync(T fileId, CheckFillFormDraftRequestDto inDto)

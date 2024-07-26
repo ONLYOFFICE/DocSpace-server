@@ -133,6 +133,10 @@ public static class OpenApiExtension
                 .Union(context.MethodInfo.GetCustomAttributes(true))
                 .OfType<AllowAnonymousAttribute>();
 
+            var authorizeAttribute = context.MethodInfo.DeclaringType.GetCustomAttributes(true)
+                .Union (context.MethodInfo.GetCustomAttributes(true)) .OfType<AuthorizeAttribute>();
+
+
             if (allowAnonymous.Any())
             {
                 operation.Security.Clear();
@@ -152,6 +156,32 @@ public static class OpenApiExtension
 
                 operation.Responses.Add("401", new OpenApiResponse { Description = "Unauthorized" });
                 operation.Responses.Add("403", new OpenApiResponse { Description = "Forbidden" });
+            }
+
+            if(authorizeAttribute.Any())
+            {
+                var authorizationDescription = new StringBuilder(" (Auth:");
+                var policySelector = authorizeAttribute.Where(a => !string.IsNullOrEmpty(a.Policy)).Select(a => a.Policy);
+                var schemaSelector = authorizeAttribute.Where(a => !string.IsNullOrEmpty(a.AuthenticationSchemes)).Select(a => a.AuthenticationSchemes);
+                var rolesSelector = authorizeAttribute.Where(a => !string.IsNullOrEmpty(a.Roles)).Select(a => a.Roles);
+                ApplyAuthorizeAttribute(authorizationDescription, policySelector, schemaSelector, rolesSelector);
+                operation.Summary += authorizationDescription.ToString().TrimEnd(';') + ")";
+            }
+        }
+
+        private void ApplyAuthorizeAttribute(StringBuilder authorizationDescription, IEnumerable<string> policySelector, IEnumerable<string> schemaSelector, IEnumerable<string> rolesSelector)
+        {
+            if(policySelector.Any())
+            {
+                authorizationDescription.Append($" Policy: {string.Join(", ", policySelector)};");
+            }
+            if(schemaSelector.Any())
+            {
+                authorizationDescription.Append($" Schema: {string.Join(", ", schemaSelector)};");
+            }
+            if(rolesSelector.Any())
+            {
+                authorizationDescription.Append($" Roles: {string.Join(", ", rolesSelector)};");
             }
         }
     }

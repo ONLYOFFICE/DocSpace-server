@@ -47,6 +47,7 @@ public class ReassignController(
     /// <path>api/2.0/people/reassign/progress/{userid}</path>
     /// <httpMethod>GET</httpMethod>
     [Tags("People / User data")]
+    [SwaggerResponse(200, "Reassignment progress", typeof(TaskProgressResponseDto))]
     [HttpGet("progress/{userid:guid}")]
     public async Task<TaskProgressResponseDto> GetReassignProgressAsync(Guid userId)
     {
@@ -68,6 +69,7 @@ public class ReassignController(
     /// <path>api/2.0/people/reassign/start</path>
     /// <httpMethod>POST</httpMethod>
     [Tags("People / User data")]
+    [SwaggerResponse(200, "Reassignment progress", typeof(TaskProgressResponseDto))]
     [HttpPost("start")]
     public async Task<TaskProgressResponseDto> StartReassignAsync(StartReassignRequestDto inDto)
     {
@@ -110,6 +112,7 @@ public class ReassignController(
     /// <httpMethod>PUT</httpMethod>
     /// <returns></returns>
     [Tags("People / User data")]
+    [SwaggerResponse(200, "Reassignment progress", typeof(TaskProgressResponseDto))]
     [HttpPut("terminate")]
     public async Task<TaskProgressResponseDto> TerminateReassignAsync(TerminateRequestDto inDto)
     {

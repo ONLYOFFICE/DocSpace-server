@@ -47,6 +47,7 @@ public class CustomNavigationController(MessageService messageService,
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [Tags("Settings / Custom Navigation")]
+    [SwaggerResponse(200, "List of the custom navigation items", typeof(CustomNavigationItem))]
     [HttpGet("getall")]
     public async Task<List<CustomNavigationItem>> GetCustomNavigationItemsAsync()
     {
@@ -62,6 +63,7 @@ public class CustomNavigationController(MessageService messageService,
     /// <path>api/2.0/settings/customnavigation/getsample</path>
     /// <httpMethod>GET</httpMethod>
     [Tags("Settings / Custom Navigation")]
+    [SwaggerResponse(200, "Custom navigation item", typeof(CustomNavigationItem))]
     [HttpGet("getsample")]
     public CustomNavigationItem GetCustomNavigationItemSample()
     {
@@ -78,6 +80,7 @@ public class CustomNavigationController(MessageService messageService,
     /// <path>api/2.0/settings/customnavigation/get/{id}</path>
     /// <httpMethod>GET</httpMethod>
     [Tags("Settings / Custom Navigation")]
+    [SwaggerResponse(200, "Custom navigation item", typeof(CustomNavigationItem))]
     [HttpGet("get/{id:guid}")]
     public async Task<CustomNavigationItem> GetCustomNavigationItemAsync(Guid id)
     {
@@ -94,6 +97,7 @@ public class CustomNavigationController(MessageService messageService,
     /// <path>api/2.0/settings/customnavigation/create</path>
     /// <httpMethod>POST</httpMethod>
     [Tags("Settings / Custom Navigation")]
+    [SwaggerResponse(200, "Custom navigation item", typeof(CustomNavigationItem))]
     [HttpPost("create")]
     public async Task<CustomNavigationItem> CreateCustomNavigationItem(CustomNavigationItem inDto)
     {

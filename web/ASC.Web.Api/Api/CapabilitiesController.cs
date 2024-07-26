@@ -56,6 +56,7 @@ public class CapabilitiesController(CoreBaseSettings coreBaseSettings,
     ///<httpMethod>GET</httpMethod>
     ///<requiresAuthorization>false</requiresAuthorization>
     [Tags("Capabilities")]
+    [SwaggerResponse(200, "Portal capabilities", typeof(CapabilitiesDto))]
     [HttpGet] //NOTE: this method doesn't requires auth!!!  //NOTE: this method doesn't check payment!!!
     [AllowNotPayment]
     public async Task<CapabilitiesDto> GetPortalCapabilitiesAsync()

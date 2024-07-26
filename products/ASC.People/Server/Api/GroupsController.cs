@@ -60,6 +60,7 @@ public class GroupController(
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [Tags("Group")]
+    [SwaggerResponse(200, "List of groups", typeof(GroupDto))]
     [HttpGet]
     public async IAsyncEnumerable<GroupDto> GetGroupsAsync(Guid? userId, bool? manager)
     {
@@ -101,6 +102,7 @@ public class GroupController(
     /// <path>api/2.0/groups/{id}</path>
     /// <httpMethod>GET</httpMethod>
     [Tags("Group")]
+    [SwaggerResponse(200, "Group with the detailed information", typeof(GroupDto))]
     [HttpGet("{id:guid}")]
     public async Task<GroupDto> GetGroupAsync(Guid id)
     {
@@ -121,6 +123,7 @@ public class GroupController(
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [Tags("Group")]
+    [SwaggerResponse(200, "List of groups", typeof(GroupSummaryDto))]
     [HttpGet("user/{userid:guid}")]
     public async Task<IEnumerable<GroupSummaryDto>> GetByUserIdAsync(Guid userid)
     {
@@ -147,6 +150,7 @@ public class GroupController(
     /// <path>api/2.0/groups</path>
     /// <httpMethod>POST</httpMethod>
     [Tags("Group")]
+    [SwaggerResponse(200, "Newly created group with the detailed information", typeof(GroupDto))]
     [HttpPost]
     public async Task<GroupDto> AddGroupAsync(GroupRequestDto inDto)
     {
@@ -181,6 +185,7 @@ public class GroupController(
     /// <path>api/2.0/groups/{id}</path>
     /// <httpMethod>PUT</httpMethod>
     [Tags("Group")]
+    [SwaggerResponse(200, "Updated group with the detailed information", typeof(GroupDto))]
     [HttpPut("{id:guid}")]
     public async Task<GroupDto> UpdateGroupAsync(Guid id, UpdateGroupRequestDto inDto)
     {
@@ -225,6 +230,7 @@ public class GroupController(
     /// <path>api/2.0/groups/{id}</path>
     /// <httpMethod>DELETE</httpMethod>
     [Tags("Group")]
+    [SwaggerResponse(200, "No content", typeof(NoContentResult))]
     [HttpDelete("{id:guid}")]
     public async Task<NoContentResult> DeleteGroupAsync(Guid id)
     { 
@@ -252,6 +258,7 @@ public class GroupController(
     /// <path>api/2.0/groups/{fromId}/members/{toId}</path>
     /// <httpMethod>PUT</httpMethod>
     [Tags("Group")]
+    [SwaggerResponse(200, "Group with the detailed information", typeof(GroupDto))]
     [HttpPut("{fromId:guid}/members/{toId:guid}")]
     public async Task<GroupDto> TransferMembersToAsync(Guid fromId, Guid toId)
     {
@@ -282,6 +289,7 @@ public class GroupController(
     /// <path>api/2.0/groups/{id}/members</path>
     /// <httpMethod>POST</httpMethod>
     [Tags("Group")]
+    [SwaggerResponse(200, "Group with the detailed information", typeof(GroupDto))]
     [HttpPost("{id:guid}/members")]
     public async Task<GroupDto> SetMembersToAsync(Guid id, MembersRequestDto inDto)
     {
@@ -303,6 +311,7 @@ public class GroupController(
     /// <path>api/2.0/groups/{id}/members</path>
     /// <httpMethod>PUT</httpMethod>
     [Tags("Group")]
+    [SwaggerResponse(200, "Group with the detailed information", typeof(GroupDto))]
     [HttpPut("{id:guid}/members")]
     public async Task<GroupDto> AddMembersToAsync(Guid id, MembersRequestDto inDto)
     {
@@ -330,6 +339,7 @@ public class GroupController(
     /// <path>api/2.0/groups/{id}/manager</path>
     /// <httpMethod>PUT</httpMethod>
     [Tags("Group")]
+    [SwaggerResponse(200, "Group with the detailed information", typeof(GroupDto))]
     [HttpPut("{id:guid}/manager")]
     public async Task<GroupDto> SetManagerAsync(Guid id, SetManagerRequestDto inDto)
     {
@@ -359,6 +369,7 @@ public class GroupController(
     /// <path>api/2.0/groups/{id}/members</path>
     /// <httpMethod>DELETE</httpMethod>
     [Tags("Group")]
+    [SwaggerResponse(200, "Group with the detailed information", typeof(GroupDto))]
     [HttpDelete("{id:guid}/members")]
     public async Task<GroupDto> RemoveMembersFromAsync(Guid id, MembersRequestDto inDto)
     {

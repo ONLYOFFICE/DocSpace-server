@@ -57,6 +57,7 @@ public class PhotoController(
     /// <httpMethod>POST</httpMethod>
     /// <returns type="ASC.People.ApiModels.ResponseDto.ThumbnailsDataDto, ASC.People">Thumbnail parameters</returns>
     [Tags("People / Photos")]
+    [SwaggerResponse(200, "Thumbnail parameters", typeof(ThumbnailsDataDto))]
     [HttpPost("{userid}/photo/thumbnails")]
     public async Task<ThumbnailsDataDto> CreateMemberPhotoThumbnails(string userid, ThumbnailsRequestDto inDto)
     {
@@ -114,6 +115,7 @@ public class PhotoController(
     /// <path>api/2.0/people/{userid}/photo</path>
     /// <httpMethod>DELETE</httpMethod>
     [Tags("People / Photos")]
+    [SwaggerResponse(200, "Thumbnail parameters: original photo, retina, maximum size photo, big, medium, small", typeof(ThumbnailsDataDto))]
     [HttpDelete("{userid}/photo")]
     public async Task<ThumbnailsDataDto> DeleteMemberPhotoAsync(string userid)
     {
@@ -151,6 +153,7 @@ public class PhotoController(
     /// <path>api/2.0/people/{userid}/photo</path>
     /// <httpMethod>GET</httpMethod>
     [Tags("People / Photos")]
+    [SwaggerResponse(200, "Thumbnail parameters: original photo, retina, maximum size photo, big, medium, small", typeof(ThumbnailsDataDto))]
     [HttpGet("{userid}/photo")]
     public async Task<ThumbnailsDataDto> GetMemberPhoto(string userid)
     {
@@ -177,6 +180,7 @@ public class PhotoController(
     /// <path>api/2.0/people/{userid}/photo</path>
     /// <httpMethod>PUT</httpMethod>
     [Tags("People / Photos")]
+    [SwaggerResponse(200, "Updated thumbnail parameters: original photo, retina, maximum size photo, big, medium, small", typeof(ThumbnailsDataDto))]
     [HttpPut("{userid}/photo")]
     public async Task<ThumbnailsDataDto> UpdateMemberPhoto(string userid, UpdatePhotoMemberRequestDto inDto)
     {
@@ -217,6 +221,7 @@ public class PhotoController(
     /// <httpMethod>POST</httpMethod>
     /// <returns type="ASC.People.ApiModels.ResponseDto.FileUploadResultDto, ASC.People">Result of file uploading</returns>
     [Tags("People / Photos")]
+    [SwaggerResponse(200, "Result of file uploading", typeof(FileUploadResultDto))]
     [HttpPost("{userid}/photo")]
     public async Task<FileUploadResultDto> UploadMemberPhoto(string userid, IFormCollection formCollection)
     {

@@ -59,6 +59,7 @@ public class MigrationController(
     }
 
     [Tags("Migration")]
+    [SwaggerResponse(200, "Ok", typeof(MigrationStatusDto))]
     [HttpGet("status")]
     public async Task<MigrationStatusDto> Status()
     {

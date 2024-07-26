@@ -76,6 +76,7 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     /// <path>api/2.0/files/{folderId}/upload/create_session</path>
     /// <httpMethod>POST</httpMethod>
     [Tags("Files / Operations")]
+    [SwaggerResponse(200, "Information about created session", typeof(object))]
     [HttpPost("{folderId}/upload/create_session")]
     public async Task<object> CreateUploadSessionAsync(T folderId, SessionRequestDto inDto)
     {
@@ -105,6 +106,7 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     /// <path>api/2.0/files/file/{fileId}/edit_session</path>
     /// <httpMethod>POST</httpMethod>
     [Tags("Files / Files")]
+    [SwaggerResponse(200, "Information about created session", typeof(object))]
     [HttpPost("file/{fileId}/edit_session")]
     public async Task<object> CreateEditSession(T fileId, long fileSize)
     {
@@ -118,6 +120,7 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.CheckUploadRequestDto, ASC.Files.Core"  name="model"></param>
     /// <returns></returns>
     [Tags("Files / Folders")]
+    [SwaggerResponse(200, "Inserted file", typeof(List<string>))]
     [HttpPost("{folderId}/upload/check")]
     public Task<List<string>> CheckUploadAsync(T folderId, CheckUploadRequestDto model)
     {
@@ -135,6 +138,7 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     /// <path>api/2.0/files/{folderId}/insert</path>
     /// <httpMethod>POST</httpMethod>
     [Tags("Files / Folders")]
+    [SwaggerResponse(200, "Inserted file", typeof(FileDto<int>))]
     [HttpPost("{folderId}/insert", Order = 1)]
     public async Task<FileDto<T>> InsertFileAsync(T folderId, [FromForm][ModelBinder(BinderType = typeof(InsertFileModelBinder))] InsertFileRequestDto inDto)
     {
@@ -161,6 +165,7 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     /// <path>api/2.0/files/{folderId}/upload</path>
     /// <httpMethod>POST</httpMethod>
     [Tags("Files / Folders")]
+    [SwaggerResponse(200, "Inserted file", typeof(FileDto<int>))]
     [HttpPost("{folderId}/upload", Order = 1)]
     public async Task<object> UploadFileAsync(T folderId, [ModelBinder(BinderType = typeof(UploadModelBinder))] UploadRequestDto inDto)
     {
@@ -185,6 +190,7 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
     /// <httpMethod>POST</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Folders")]
+    [SwaggerResponse(200, "Inserted file", typeof(FileDto<int>))]
     [HttpPost("@common/insert")]
     public async Task<FileDto<int>> InsertFileToCommonFromBodyAsync([FromForm][ModelBinder(BinderType = typeof(InsertFileModelBinder))] InsertFileRequestDto inDto)
     {
@@ -201,6 +207,7 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
     /// <path>api/2.0/files/@my/insert</path>
     /// <httpMethod>POST</httpMethod>
     [Tags("Files / Folders")]
+    [SwaggerResponse(200, "Inserted file", typeof(FileDto<int>))]
     [HttpPost("@my/insert")]
     public async Task<FileDto<int>> InsertFileToMyFromBodyAsync([FromForm][ModelBinder(BinderType = typeof(InsertFileModelBinder))] InsertFileRequestDto inDto)
     {
@@ -226,6 +233,7 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
     /// <httpMethod>POST</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Folders")]
+    [SwaggerResponse(200, "Uploaded file(s)", typeof(object))]
     [HttpPost("@common/upload")]
     public async Task<object> UploadFileToCommonAsync([ModelBinder(BinderType = typeof(UploadModelBinder))] UploadRequestDto inDto)
     {
@@ -252,6 +260,7 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
     /// <path>api/2.0/files/@my/upload</path>
     /// <httpMethod>POST</httpMethod>
     [Tags("Files / Folders")]
+    [SwaggerResponse(200, "Uploaded file(s)", typeof(object))]
     [HttpPost("@my/upload")]
     public async Task<object> UploadFileToMyAsync([ModelBinder(BinderType = typeof(UploadModelBinder))] UploadRequestDto inDto)
     {
