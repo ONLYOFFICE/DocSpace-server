@@ -75,7 +75,8 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
     ExternalLinkHelper externalLinkHelper,
     ExternalShare externalShare,
     EntryManager entryManager,
-    IPSecurity.IPSecurity ipSecurity)
+    IPSecurity.IPSecurity ipSecurity,
+    FileDtoHelper fileDtoHelper)
 {
     public async Task InvokeAsync(HttpContext context)
     {
@@ -1270,8 +1271,8 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             JsonSerializer.Serialize(new CreatedFormData<T>()
                     {
                         Message = string.Format(FilesCommonResource.MessageFileCreatedForm, folder.Title),
-                        Form = file
-                    },
+                        Form = await fileDtoHelper.GetAsync(file)
+            },
                     new JsonSerializerOptions
                     {
                         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
@@ -1566,5 +1567,5 @@ public static class FileHandlerExtensions
 public class CreatedFormData<T>
 {
     public string Message { get; set; }
-    public File<T> Form { get; set; }
+    public FileDto<T> Form { get; set; }
 }
