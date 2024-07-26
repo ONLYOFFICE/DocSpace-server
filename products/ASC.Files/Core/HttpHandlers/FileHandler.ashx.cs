@@ -118,6 +118,9 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                 case "create":
                     await CreateFile(context);
                     break;
+                case "createform":
+                    await CreateFile(context, true);
+                    break;
                 case "redirect":
                     await RedirectAsync(context);
                     break;
@@ -1141,7 +1144,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
         return file.Id + ":" + file.Version + ":" + file.Title.GetHashCode() + ":" + file.ContentLength;
     }
 
-    private async ValueTask CreateFile(HttpContext context)
+    private async ValueTask CreateFile(HttpContext context, bool isForm = false)
     {
         if (!securityContext.IsAuthenticated)
         {
@@ -1156,22 +1159,22 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
         var folderId = context.Request.Query[FilesLinkUtility.FolderId].FirstOrDefault();
         if (string.IsNullOrEmpty(folderId))
         {
-            await CreateFile(context, await globalFolderHelper.FolderMyAsync);
+            await CreateFile(context, await globalFolderHelper.FolderMyAsync, isForm);
         }
         else
         {
             if (int.TryParse(folderId, out var id))
             {
-                await CreateFile(context, id);
+                await CreateFile(context, id, isForm);
             }
             else
             {
-                await CreateFile(context, folderId);
+                await CreateFile(context, folderId, isForm);
             }
         }
     }
 
-    private async Task CreateFile<T>(HttpContext context, T folderId)
+    private async Task CreateFile<T>(HttpContext context, T folderId, bool isForm)
     {
         var responseMessage = context.Request.Query["response"] == "message";
 
@@ -1215,10 +1218,21 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
 
         await fileMarker.MarkAsNewAsync(file);
 
-        if (responseMessage)
+        if (isForm && file.IsForm)
         {
-            await WriteOk(context, folder, file);
-            return;
+            if (responseMessage)
+            {
+                await FormWriteOk(context, folder, file);
+                return;
+            }
+        }
+        else
+        {
+            if (responseMessage)
+            {
+                await WriteOk(context, folder, file);
+                return;
+            }
         }
 
         context.Response.Redirect(
@@ -1248,6 +1262,22 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
         }
 
         await context.Response.WriteAsync("ok: " + message);
+    }
+
+    private async Task FormWriteOk<T>(HttpContext context, Folder<T> folder, File<T> file)
+    {
+        await context.Response.WriteAsync(
+            JsonSerializer.Serialize(new CreatedFormData<T>()
+                    {
+                        Message = string.Format(FilesCommonResource.MessageFileCreatedForm, folder.Title),
+                        Form = file
+                    },
+                    new JsonSerializerOptions
+                    {
+                        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+                    }
+                )
+            );
     }
 
     private async Task<File<T>> CreateFileFromTemplateAsync<T>(Folder<T> folder, string fileTitle, string docType)
@@ -1530,4 +1560,10 @@ public static class FileHandlerExtensions
     {
         return builder.UseMiddleware<FileHandler>();
     }
+}
+
+public class CreatedFormData<T>
+{
+    public string Message { get; set; }
+    public File<T> Form { get; set; }
 }
