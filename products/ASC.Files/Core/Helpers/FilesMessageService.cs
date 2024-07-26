@@ -223,9 +223,11 @@ public class FilesMessageService(
 
         if (!crossEvent)
         {
-            var references = fromParents.Count > toParents.Count
-                ? GetReferences(fromParents)
-                : GetReferences(toParents);
+            var references = GetReferences(fromParents);
+            foreach (var toRef in GetReferences(toParents).Where(toRef => !references.Any(r => r.EntryId == toRef.EntryId && r.EntryType == toRef.EntryType)))
+            {
+                references.Add(toRef);
+            }
             
             references.Add(new FilesAuditReference { EntryId = target.Id, EntryType = (byte)target.FileEntryType });
             
