@@ -612,6 +612,8 @@ public class PortalController(
         var tenant = await tenantManager.GetCurrentTenantAsync();
         tenant.SetStatus(TenantStatus.Active);
         await tenantManager.SaveTenantAsync(tenant);
+
+        await cspSettingsHelper.UpdateBaseDomain();
     }
 
     /// <summary>
@@ -633,6 +635,8 @@ public class PortalController(
         tenant.SetStatus(TenantStatus.Suspended);
         await tenantManager.SaveTenantAsync(tenant);
         await messageService.SendAsync(MessageAction.PortalDeactivated);
+
+        await cspSettingsHelper.UpdateBaseDomain();
     }
 
     /// <summary>
@@ -671,6 +675,8 @@ public class PortalController(
         await studioNotifyService.SendMsgPortalDeletionSuccessAsync(owner, redirectLink);
 
         await messageService.SendAsync(MessageAction.PortalDeleted);
+
+        await cspSettingsHelper.UpdateBaseDomain();
 
         eventBus.Publish(new RemovePortalIntegrationEvent(securityContext.CurrentAccount.ID, tenant.Id));
 
