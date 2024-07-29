@@ -43,7 +43,6 @@ namespace ASC.Plugins.Api;
 [ApiController]
 public class PluginsController(PermissionContext permissionContext,
     PluginManager pluginManager,
-    TenantManager tenantManager,
     IEnumerable<EndpointDataSource> endpointSources) : ControllerBase
 {
 
@@ -79,7 +78,7 @@ public class PluginsController(PermissionContext permissionContext,
     }
 
     [HttpPost("")]
-    public async Task<string> AddPluginFromFile()
+    public async Task<PluginConfig> AddPluginFromFile()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -97,21 +96,16 @@ public class PluginsController(PermissionContext permissionContext,
 
         var plugin = await pluginManager.AddPluginFromFileAsync(file);
 
-       // var outDto = mapper.Map<PluginConfig, PluginDto>(webPlugin);
-
-        return "ok";
+        return plugin;
     }
 
     [HttpDelete("{name}")]
-    public async Task<string> DeletePlugin(string name)
+    public async Task<PluginConfig> DeletePlugin(string name)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var plugin = await pluginManager.DeletePluginAsync(name);
-
-        // var outDto = mapper.Map<PluginConfig, PluginDto>(webPlugin);
-
-        return "ok";
+        return plugin;
     }
 
     [HttpPost("enable/{name}")]
