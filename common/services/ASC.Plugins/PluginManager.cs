@@ -160,6 +160,10 @@ public class PluginManager(PluginConfigSettings pluginConfigSettings,
 
         foreach (ZipEntry zipEntry in zipFile)
         {
+            if (zipEntry.Name == ConfigFileName)
+            {
+                continue;
+            }
             await using var stream = zipFile.GetInputStream(zipEntry);
             await storage.SaveAsync(Path.Combine(config.Name, zipEntry.Name), stream);
         }
