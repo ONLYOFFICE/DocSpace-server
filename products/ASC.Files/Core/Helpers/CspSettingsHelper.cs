@@ -50,7 +50,7 @@ public class CspSettingsHelper(
             var tenantWithoutAlias = await tenantManager.GetTenantAsync(baseDomain);
             if (tenant.Id == tenantWithoutAlias.Id)
             {
-                _ = headerKeys.Add(GetKey(coreSettings.BaseDomain));
+                _ = headerKeys.Add(GetKey(baseDomain));
             }
         }
 
@@ -129,6 +129,28 @@ public class CspSettingsHelper(
             await distributedCache.RemoveAsync(oldKey);
             await distributedCache.SetStringAsync(GetKey(newDomain), val);
         }
+    }
+
+    public async Task UpdateBaseDomain()
+    {
+        if (!coreBaseSettings.Standalone)
+        {
+            return;
+        }
+
+        var baseDomain = await coreSettings.GetSettingAsync("BaseDomain");
+        if (string.IsNullOrEmpty(baseDomain))
+        {
+            return;
+        }
+
+        var tenantWithoutAlias = await tenantManager.GetTenantAsync(baseDomain);
+
+        var domain = tenantWithoutAlias.GetTenantDomain(coreSettings);
+
+        var val = await distributedCache.GetStringAsync(GetKey(domain));
+
+        await distributedCache.SetStringAsync(GetKey(baseDomain), val);
     }
 
     public async Task<string> CreateHeaderAsync(IEnumerable<string> domains, bool currentTenant = true)
