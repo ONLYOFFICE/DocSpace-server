@@ -44,6 +44,16 @@ public class CspSettingsHelper(
         var domain = tenant.GetTenantDomain(coreSettings);
         HashSet<string> headerKeys = [GetKey(domain)];
 
+        var baseDomain = await coreSettings.GetSettingAsync("BaseDomain");
+        if (coreBaseSettings.Standalone && !string.IsNullOrEmpty(baseDomain))
+        {
+            var tenantWithoutAlias = await tenantManager.GetTenantAsync(baseDomain);
+            if (tenant.Id == tenantWithoutAlias.Id)
+            {
+                _ = headerKeys.Add(GetKey(coreSettings.BaseDomain));
+            }
+        }
+
         if (domain == Tenant.LocalHost && tenant.Alias == Tenant.LocalHost)
         {
             var domainsKey = $"{GetKey(domain)}:keys";
