@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Diagnostics;
+
 using ASC.Common.Mapping;
 using ASC.Core.Notify.Socket;
 using ASC.MessagingSystem;
@@ -502,6 +504,25 @@ public abstract class BaseStartup
         app.UseForwardedHeaders();
         app.UseExceptionHandler();
         app.UseRouting();
+
+        app.Use(next => async context =>
+        {
+            var stopWatch = new Stopwatch();
+            stopWatch.Start();
+
+            context.Response.OnStarting(() =>
+            {
+                stopWatch.Stop();
+
+                var headerValue = $"aspnetcore-request-time;dur={stopWatch.ElapsedMilliseconds}ms";
+
+                context.Response.Headers.Append("Server-Timing", headerValue);
+
+                return Task.CompletedTask;
+            });
+
+            await next(context);
+        });
 
         if (!string.IsNullOrEmpty(_corsOrigin))
         {
