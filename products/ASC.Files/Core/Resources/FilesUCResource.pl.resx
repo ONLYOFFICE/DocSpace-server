@@ -100,4 +100,7 @@
   <data name="InProcessFormFolder" xml:space="preserve">
     <value>W toku</value>
   </data>
+  <data name="ReadyFormFolder" xml:space="preserve">
+    <value>Gotowe</value>
+  </data>
 </root>

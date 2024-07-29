@@ -65,8 +65,12 @@ public class BasicAuthHandler(
             var userInfo = await userManager.GetUserByEmailAsync(authUsername);
             var passwordHash = passwordHasher.GetClientPassword(authPassword);
 
-            await securityContext.AuthenticateMeAsync(userInfo.Email, passwordHash);
+            var claims = new List<Claim>()
+            {
+                AuthConstants.Claim_ScopeRootWrite
+            };
 
+            await securityContext.AuthenticateMeAsync(userInfo.Email, passwordHash, null, claims);
         }
         catch (Exception)
         {

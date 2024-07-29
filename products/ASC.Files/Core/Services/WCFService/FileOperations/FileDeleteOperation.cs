@@ -322,6 +322,9 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
             else
             {
                 await fileMarker.RemoveMarkAsNewForAllAsync(file);
+                await LinkDao.DeleteAllLinkAsync(file.Id);
+                await FileDao.SaveProperties(file.Id, null);
+
                 if (!_immediately && FileDao.UseTrashForRemove(file))
                 {
                     try
@@ -382,9 +385,6 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                         this[Err] = ex.Message;
                         Logger.ErrorWithException(ex);
                     }
-
-                    await LinkDao.DeleteAllLinkAsync(file.Id);
-                    await FileDao.SaveProperties(file.Id, null);
                 }
 
                 ProcessedFile(fileId);

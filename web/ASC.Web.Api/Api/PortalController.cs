@@ -533,7 +533,7 @@ public class PortalController(
         }
         finally
         {
-            eventBus.Publish(new RemovePortalIntegrationEvent(securityContext.CurrentAccount.ID, tenant.Id));
+            await eventBus.PublishAsync(new RemovePortalIntegrationEvent(securityContext.CurrentAccount.ID, tenant.Id));
             securityContext.Logout();
         }
     }
@@ -672,7 +672,7 @@ public class PortalController(
 
         await messageService.SendAsync(MessageAction.PortalDeleted);
 
-        eventBus.Publish(new RemovePortalIntegrationEvent(securityContext.CurrentAccount.ID, tenant.Id));
+        await eventBus.PublishAsync(new RemovePortalIntegrationEvent(securityContext.CurrentAccount.ID, tenant.Id));
 
         return redirectLink;
     }

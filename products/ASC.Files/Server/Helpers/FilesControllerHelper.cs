@@ -42,14 +42,17 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         DisplayUserSettingsHelper displayUserSettingsHelper,
         FileConverter fileConverter,
         PathProvider pathProvider,
-        FileChecker fileChecker)
+        FileChecker fileChecker,
+        IDistributedCache distributedCache,
+        FillingFormResultDtoHelper fillingFormResultDtoHelper)
     : FilesHelperBase(filesSettingsHelper,
             fileUploader,
             socketManager,
             fileDtoHelper,
             fileStorageService,
             fileChecker,
-            httpContextAccessor)
+            httpContextAccessor,
+            distributedCache)
     {
     private readonly ILogger _logger = logger;
 
@@ -67,8 +70,7 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
     public async Task<bool> isFormPDF<T>(T fileId)
     {
         var file = await _fileStorageService.GetFileAsync(fileId, -1);
-        var extension = FileUtility.GetFileExtension(file.Title);
-        var fileType = FileUtility.GetFileTypeByExtention(extension);
+        var fileType = FileUtility.GetFileTypeByFileName(file.Title);
 
         if (fileType == FileType.Pdf)
         {
@@ -177,6 +179,15 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
     public async Task<EditHistoryDataDto> GetEditDiffUrlAsync<T>(T fileId, int version = 0)
     {
         return await _fileStorageService.GetEditDiffUrlAsync(fileId, version);
+    }
+
+    public async Task<FillingFormResultDto<T>> GetFillResultAsync<T>(T formId)
+    {
+        if (formId != null)
+        {
+            return await fillingFormResultDtoHelper.GetAsync(formId);
+        }
+        return null;
     }
 
     public async IAsyncEnumerable<EditHistoryDto> GetEditHistoryAsync<T>(T fileId)

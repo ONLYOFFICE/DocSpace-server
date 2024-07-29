@@ -303,11 +303,11 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         return JsonWebToken.Encode(payload, fileUtility.SignatureSecret);
     }
 
-    public async Task<File<T>> CheckNeedDeletion<T>(IFileDao<T> fileDao, T fileId, FormFillingProperties formFillingProperties)
+    public async Task<File<T>> CheckNeedDeletion<T>(IFileDao<T> fileDao, T fileId, FormFillingProperties<T> formFillingProperties)
     {
         var file = await fileDao.GetFileAsync(fileId);
 
-        if (formFillingProperties.ToFolderId == file.ParentId.ToString())
+        if (Equals(formFillingProperties.ToFolderId, file.ParentId))
         {
             await securityContext.AuthenticateMeAsync(file.CreateBy);
 

@@ -29,7 +29,7 @@ namespace ASC.EventBus.ActiveMQ;
 public interface IActiveMQPersistentConnection
 {
     bool IsConnected { get; }
-    bool TryConnect();
-    ISession CreateSession(AcknowledgementMode acknowledgementMode);
-    ISession CreateSession();
+    Task<bool> TryConnectAsync();
+    Task<ISession> CreateSessionAsync(AcknowledgementMode acknowledgementMode);
+    Task<ISession> CreateSessionAsync();
 }

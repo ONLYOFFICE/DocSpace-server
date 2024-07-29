@@ -32,7 +32,25 @@ public static class HttpRequestExtensions
 
     public static Uri Url(this HttpRequest request)
     {
-        return request != null ? new Uri(request.GetDisplayUrl()) : null;
+        var url = request != null ? new Uri(request.GetDisplayUrl()) : null;
+
+        if (!string.IsNullOrEmpty(url?.Query))
+        {
+            var queryParams = HttpUtility.ParseQueryString(url.Query);
+            var origin = queryParams[HeaderNames.Origin.ToLower()];
+            if (Uri.TryCreate(origin, UriKind.Absolute, out var urlOrigin))
+            {
+                var result = new UriBuilder(url)
+                {
+                    Scheme = urlOrigin.Scheme,
+                    Host = urlOrigin.Host,
+                    Port = urlOrigin.Port
+                };
+                return result.Uri;
+            }
+        }
+
+        return url;
     }
 
     public static Uri PushRewritenUri(this HttpContext context)

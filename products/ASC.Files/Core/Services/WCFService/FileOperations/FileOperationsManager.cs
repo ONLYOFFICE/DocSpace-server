@@ -157,7 +157,7 @@ public class FileOperationsManager(
         var data = new FileMarkAsReadOperationData<int>(folderIntIds, fileIntIds, tenantId, GetHttpHeaders(), sessionSnapshot);
         var thirdPartyData = new FileMarkAsReadOperationData<string>(folderStringIds, fileStringIds, tenantId, GetHttpHeaders(), sessionSnapshot);
         
-        eventBus.Publish(new MarkAsReadIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
+        await eventBus.PublishAsync(new MarkAsReadIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
         {
             TaskId = taskId,
             Data = data,
@@ -186,7 +186,7 @@ public class FileOperationsManager(
         var data = new FileDownloadOperationData<int>(folderIntIds, fileIntIds, tenantId, GetHttpHeaders(), sessionSnapshot, baseUri);
         var thirdPartyData = new FileDownloadOperationData<string>(folderStringIds, fileStringIds, tenantId, GetHttpHeaders(), sessionSnapshot, baseUri);
         
-        eventBus.Publish(new BulkDownloadIntegrationEvent(await GetUserIdAsync(), tenantId)
+        await eventBus.PublishAsync(new BulkDownloadIntegrationEvent(await GetUserIdAsync(), tenantId)
         {
             TaskId = taskId,
             Data = data,
@@ -232,7 +232,7 @@ public class FileOperationsManager(
         var data = new FileMoveCopyOperationData<int>(folderIntIds, fileIntIds, tenantId, destFolderId, copy, resolveType, holdResult, GetHttpHeaders(), sessionSnapshot); 
         var thirdPartyData = new FileMoveCopyOperationData<string>(folderStringIds, fileStringIds, tenantId, destFolderId, copy, resolveType, holdResult, GetHttpHeaders(), sessionSnapshot);
         
-        eventBus.Publish(new MoveOrCopyIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
+        await eventBus.PublishAsync(new MoveOrCopyIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
         {
             TaskId = taskId,
             Data = data,
@@ -283,7 +283,7 @@ public class FileOperationsManager(
         var data = new FileOperationData<int>(folderIntIds, fileIntIds, tenantId, GetHttpHeaders(), sessionSnapshot); 
         var thirdPartyData = new FileOperationData<string>(folderStringIds, fileStringIds, tenantId, GetHttpHeaders(), sessionSnapshot);
         
-        eventBus.Publish(new DuplicateIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
+        await eventBus.PublishAsync(new DuplicateIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
         {
             TaskId = taskId,
             Data = data,
@@ -369,7 +369,7 @@ public class FileOperationsManager(
             };
         }
         
-        eventBus.Publish(toPublish);
+        await eventBus.PublishAsync(toPublish);
     }
 
     public static (List<int>, List<string>) GetIds(IEnumerable<JsonElement> items)

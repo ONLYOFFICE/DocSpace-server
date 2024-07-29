@@ -152,4 +152,31 @@ $__AuthorName deletando a sala:$RoomTitle</value>
   <data name="subject_RoomRemoved" xml:space="preserve">
     <value>Notificação do DocSpace. Sala deletada</value>
   </data>
+  <data name="button_CheckReadyForms" xml:space="preserve">
+    <value>Verifique os formulários prontos</value>
+  </data>
+  <data name="pattern_FormReceived" xml:space="preserve">
+    <value>h1. O formulário $Message está preenchido
+
+Um novo formulário "$DocumentTitle":"$DocumentURL" é preenchido na sala "$RoomTitle":"$RoomURL"
+
+Remetente do formulário: "$FromUserName":"$FromUserLink"
+
+$OrangeButton</value>
+  </data>
+  <data name="pattern_FormSubmitted" xml:space="preserve">
+    <value>h1. Você preencheu o formulário $Message
+
+Você preencheu o formulário "$DocumentTitle":"$DocumentURL" na sala "$RoomTitle":"$RoomURL"
+
+Administrador: "$ToUserName":"$ToUserLink"
+
+$OrangeButton</value>
+  </data>
+  <data name="subject_FormReceived" xml:space="preserve">
+    <value>Notificação do DocSpace. O formulário é preenchido</value>
+  </data>
+  <data name="subject_FormSubmitted" xml:space="preserve">
+    <value>Notificação do DocSpace. O formulário é preenchido</value>
+  </data>
 </root>

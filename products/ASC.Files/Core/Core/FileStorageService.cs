@@ -887,8 +887,8 @@ public class FileStorageService //: IFileStorageService
             }
         }
 
-        var fileExt = FileUtility.GetFileExtension(file.Title);
-        var fileType = FileUtility.GetFileTypeByExtention(fileExt);
+        var fileType = FileUtility.GetFileTypeByFileName(file.Title);
+        
         if (fileType == FileType.Pdf)
         {
             var folderDao = daoFactory.GetFolderDao<T>();
@@ -1256,7 +1256,7 @@ public class FileStorageService //: IFileStorageService
                 throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
             }
 
-            var properties = await fileDao.GetProperties(fileId) ?? new EntryProperties() { FormFilling = new FormFillingProperties() };
+            var properties = await fileDao.GetProperties(fileId) ?? new EntryProperties<T>() { FormFilling = new FormFillingProperties<T>() };
             properties.FormFilling.StartFilling = true;
             properties.FormFilling.CollectFillForm = true;
 
@@ -2140,9 +2140,7 @@ public class FileStorageService //: IFileStorageService
             foreach (var id in filesId)
             {
                 var file = await fileDao.GetFileAsync(id);
-
-                var extension = FileUtility.GetFileExtension(file.Title);
-                var fileType = FileUtility.GetFileTypeByExtention(extension);
+                var fileType = FileUtility.GetFileTypeByFileName(file.Title);
 
                 if (fileType == FileType.Pdf && await fileChecker.CheckExtendedPDF(file))
                 {
@@ -2779,7 +2777,7 @@ public class FileStorageService //: IFileStorageService
                 throw new ItemNotFoundException();
             }
 
-            var data = await externalShare.GetLinkDataAsync(entry, parentLink.Id);
+            var data = await externalShare.GetLinkDataAsync(entry, parentLink.Id, entryType == FileEntryType.File);
             parentLink.Link = await urlShortener.GetShortenLinkAsync(data.Url);
 
             return parentLink;
@@ -3567,7 +3565,7 @@ public class FileStorageService //: IFileStorageService
         {
             var (fileIntIds, _) = FileOperationsManager.GetIds(fileIds);
 
-            eventBus.Publish(new ThumbnailRequestedIntegrationEvent(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantIdAsync()) { BaseUrl = baseCommonLinkUtility.GetFullAbsolutePath(""), FileIds = fileIntIds });
+            await eventBus.PublishAsync(new ThumbnailRequestedIntegrationEvent(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantIdAsync()) { BaseUrl = baseCommonLinkUtility.GetFullAbsolutePath(""), FileIds = fileIntIds });
         }
         catch (Exception e)
         {

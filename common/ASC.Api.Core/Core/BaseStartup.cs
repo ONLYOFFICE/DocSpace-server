@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Api.Core.Cors.Middlewares;
+using ASC.Api.Core.Cors;
 using ASC.Common.Mapping;
 using ASC.Core.Notify.Socket;
 using ASC.MessagingSystem;
@@ -32,12 +34,12 @@ using ASC.MessagingSystem.Data;
 using Flurl.Util;
 
 using IPNetwork = Microsoft.AspNetCore.HttpOverrides.IPNetwork;
+using ASC.Api.Core.Cors.Enums;
 
 namespace ASC.Api.Core;
 
 public abstract class BaseStartup
 {
-    private const string CustomCorsPolicyName = "Basic";
     private const string BasicAuthScheme = "Basic";
     private const string MultiAuthSchemes = "MultiAuthSchemes";
 
@@ -187,7 +189,13 @@ public abstract class BaseStartup
                     }
                     else
                     {
-                        permitLimit = 15;
+                        permitLimit = _configuration.GetSection("core:hosting:rateLimiterOptions:defaultConcurrencyWriteRequests").Get<int>();
+
+                        if (permitLimit == default(int))
+                        {
+                            permitLimit = 15;
+                        }
+
                         partitionKey = $"cr_write_{userId}";
                     }
 
@@ -331,24 +339,33 @@ public abstract class BaseStartup
         services.AddSingleton(jsonOptions);
         
         DIHelper.Scan();
-        
+
         if (!string.IsNullOrEmpty(_corsOrigin))
         {
-            services.AddCors(options =>
+            services.AddDynamicCors<DynamicCorsPolicyResolver>(options =>
             {
-                options.AddPolicy(name: CustomCorsPolicyName,
-                    policy =>
-                    {
-                        policy.WithOrigins(_corsOrigin)
-                            .SetIsOriginAllowedToAllowWildcardSubdomains()
-                            .AllowAnyHeader()
-                            .AllowAnyMethod();
+                options.AddPolicy(name: CorsPoliciesEnums.DynamicCorsPolicyName,
+                                  policy =>
+                                  {
+                                      policy.WithOrigins(_corsOrigin)
+                                            .SetIsOriginAllowedToAllowWildcardSubdomains()
+                                            .AllowAnyHeader()
+                                            .AllowAnyMethod();
 
-                        if (_corsOrigin != "*")
-                        {
-                            policy.AllowCredentials();
-                        }
-                    });
+                                      if (_corsOrigin != "*")
+                                      {
+                                          policy.AllowCredentials();
+                                      }
+                                  });
+
+                options.AddPolicy(name: CorsPoliciesEnums.AllowAllCorsPolicyName,
+                                  policy =>
+                                  {
+                                      policy.WithOrigins("*")
+                                            .SetIsOriginAllowedToAllowWildcardSubdomains()
+                                            .AllowAnyHeader()
+                                            .AllowAnyMethod();
+                                  });
             });
         }
 
@@ -396,34 +413,6 @@ public abstract class BaseStartup
             .AddScheme<AuthenticationSchemeOptions, CookieAuthHandler>(CookieAuthenticationDefaults.AuthenticationScheme, _ => { })
             .AddScheme<AuthenticationSchemeOptions, BasicAuthHandler>(BasicAuthScheme, _ => { })
             .AddScheme<AuthenticationSchemeOptions, ConfirmAuthHandler>("confirm", _ => { })
-            .AddJwtBearer("Bearer", options =>
-            {
-                options.Authority = _configuration["core:oidc:authority"];
-                options.IncludeErrorDetails = true;
-
-                options.TokenValidationParameters = new TokenValidationParameters { ValidateAudience = false };
-
-              options.Events = new JwtBearerEvents
-              {
-                  OnTokenValidated = async ctx =>
-                  {
-                      using var scope = ctx.HttpContext.RequestServices.CreateScope();
-
-                      var securityContext = scope.ServiceProvider.GetService<ASC.Core.SecurityContext>();
-
-                      var claimUserId = ctx.Principal.FindFirstValue("userId");
-
-                      if (string.IsNullOrEmpty(claimUserId))
-                      {
-                          throw new Exception("Claim 'UserId' is not present in claim list");
-                      }
-
-                      var userId = new Guid(claimUserId);
-
-                      await securityContext.AuthenticateMeWithoutCookieAsync(userId, ctx.Principal.Claims.ToList());
-                  }
-              };
-            })
             .AddPolicyScheme(MultiAuthSchemes, JwtBearerDefaults.AuthenticationScheme, options =>
             {
                 options.ForwardDefaultSelector = context =>
@@ -447,17 +436,15 @@ public abstract class BaseStartup
 
                         if (jwtHandler.CanReadToken(token))
                         {
-                            var issuer = jwtHandler.ReadJwtToken(token).Issuer;
-                            if (!string.IsNullOrEmpty(issuer) && issuer.Equals(_configuration["core:oidc:authority"]))
-                            {
-                                return JwtBearerDefaults.AuthenticationScheme;
-                            }
+                            return JwtBearerDefaults.AuthenticationScheme;
                         }
                     }
 
                     return CookieAuthenticationDefaults.AuthenticationScheme;
                 };
             });
+
+        services.AddJwtBearerAuthentication();
 
         services.AddAutoMapper(GetAutoMapperProfileAssemblies());
 
@@ -499,7 +486,7 @@ public abstract class BaseStartup
 
         if (!string.IsNullOrEmpty(_corsOrigin))
         {
-            app.UseCors(CustomCorsPolicyName);
+            app.UseDynamicCorsMiddleware(CorsPoliciesEnums.DynamicCorsPolicyName);
         }
 
         if (AddAndUseSession)

@@ -290,7 +290,7 @@
     <value>Gruppo aggiornato: {0}</value>
   </data>
   <data name="GuestAccount" xml:space="preserve">
-    <value>Account di ospite</value>
+    <value>Anonimo</value>
   </data>
   <data name="GuestActivated" xml:space="preserve">
     <value>Ospite attivato: {0}</value>
@@ -497,7 +497,7 @@
     <value>Impostazioni</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
-    <value>Accesso singolo (SSO) disattivato</value>
+    <value>Accesso singolo (SSO) disabilitato</value>
   </data>
   <data name="SSOEnabled" xml:space="preserve">
     <value>Accesso singolo (SSO) attivato</value>
@@ -741,5 +741,65 @@
   </data>
   <data name="FileSizePostfix" xml:space="preserve">
     <value>byte,KB,MB,GB,TB</value>
+  </data>
+  <data name="FileUploadedWithOverwriting" xml:space="preserve">
+    <value>File caricato con sovrascrittura: {0}</value>
+  </data>
+  <data name="QuotaPerPortalChanged" xml:space="preserve">
+    <value>Imposta la quota di archiviazione predefinita: {0}</value>
+  </data>
+  <data name="QuotaPerPortalDisabled" xml:space="preserve">
+    <value>Quota di spazio di archiviazione predefinita disattivata</value>
+  </data>
+  <data name="QuotaPerRoomChanged" xml:space="preserve">
+    <value>Imposta la quota di spazio di archiviazione predefinita per le stanze: {0}</value>
+  </data>
+  <data name="QuotaPerRoomDisabled" xml:space="preserve">
+    <value>Quota di spazio di archiviazione predefinita disabilitata per le stanze</value>
+  </data>
+  <data name="QuotaPerUserChanged" xml:space="preserve">
+    <value>Imposta la quota di spazio di archiviazione predefinita per gli utenti: {0}</value>
+  </data>
+  <data name="QuotaPerUserDisabled" xml:space="preserve">
+    <value>Quota di spazio di archiviazione predefinita disattivata per gli utenti</value>
+  </data>
+  <data name="RoomGroupAdded" xml:space="preserve">
+    <value>Gruppo aggiunto: {0}. Ruolo: {1}</value>
+  </data>
+  <data name="RoomCopied" xml:space="preserve">
+    <value>Stanza copiata: {0}</value>
+  </data>
+  <data name="RoomGroupRemove" xml:space="preserve">
+    <value>Gruppo eliminato: {0}</value>
+  </data>
+  <data name="SendJoinInvite" xml:space="preserve">
+    <value>L'utente {0} ha inviato un invito a {1} per unirsi a questo DocSpace</value>
+  </data>
+  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
+    <value>{0} nominato: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
+    <value>Stanze [{0}]. Imposta una quota di spazio di archiviazione personalizzata per le stanze: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
+    <value>Stanze [{0}]. Imposta la quota di archiviazione predefinita per le stanze: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
+    <value>Stanze [{0}]. Quota di archiviazione disabilitata per le stanze</value>
+  </data>
+  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
+    <value>Utenti [{0}]. Imposta una quota di spazio di archiviazione personalizzata per gli utenti: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
+    <value>Utenti [{0}]. Imposta la quota di spazio di archiviazione predefinita per gli utenti: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
+    <value>Utenti [{0}]. Quota di spazio di archiviazione disattivata per gli utenti</value>
+  </data>
+  <data name="FormOpenedForFilling" xml:space="preserve">
+    <value>File aperti per la compilazione: {0}</value>
+  </data>
+  <data name="FormSubmit" xml:space="preserve">
+    <value>Utenti [{0}]. Moduli inviati: {1}</value>
   </data>
 </root>

@@ -955,7 +955,7 @@
     <value>Settings have been successfully updated</value>
   </data>
   <data name="SuccessfullySentNotificationDeleteUserInfoMessage" xml:space="preserve">
-    <value>Instructions to delete your profile has been sent to {0} email address</value>
+    <value>Instructions to disable your profile has been sent to {0} email address</value>
   </data>
   <data name="Tariffs_admin" xml:space="preserve">
     <value>Business</value>
@@ -976,7 +976,7 @@
     <value>The number of admins should not exceed {0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Number of admins</value>
+    <value>Number of admins/power users</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Automatic backup &amp; recovery</value>
@@ -1000,7 +1000,7 @@
     <value>Storage space</value>
   </data>
   <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Number of admins/power users:</value>
+    <value>Admins/Power users added:</value>
   </data>
   <data name="TariffsFeature_used_room" xml:space="preserve">
     <value>Rooms:</value>

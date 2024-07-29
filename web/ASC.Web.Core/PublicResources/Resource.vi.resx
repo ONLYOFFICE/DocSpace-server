@@ -380,7 +380,7 @@
     <value>Số lượng quản trị viên không được vượt quá {0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Số lượng quản trị viên</value>
+    <value>Số lượng quản trị viên/người dùng cấp cao</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Tự động sao lưu &amp; khôi phục</value>
@@ -423,9 +423,6 @@
   </data>
   <data name="TariffsFeature_whitelabel" xml:space="preserve">
     <value>Xây dựng thương hiệu &amp; tùy chỉnh</value>
-  </data>
-  <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Số lượng quản trị viên/người dùng cấp cao:</value>
   </data>
   <data name="ConsumersBitly" xml:space="preserve">
     <value>Bitly</value>
@@ -1038,5 +1035,17 @@
   </data>
   <data name="UserFreeSpaceException" xml:space="preserve">
     <value>Đã vượt quá hạn mức không gian người dùng</value>
+  </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>Quản trị viên/Người dùng cấp cao đã thêm:</value>
+  </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>Đã vượt quá giới hạn lời mời</value>
+  </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>Người dùng đã bị vô hiệu</value>
+  </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>Hướng dẫn thay đổi mật khẩu đã được gửi đến địa chỉ email {0}.</value>
   </data>
 </root>

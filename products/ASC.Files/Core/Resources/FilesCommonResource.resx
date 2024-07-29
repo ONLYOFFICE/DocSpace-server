@@ -556,4 +556,7 @@ Highest compatibility with docx, xlsx, pptx.</value>
   <data name="RoleEnum_PowerUser" xml:space="preserve">
     <value>Power User</value>
   </data>
+  <data name="FormNumber" xml:space="preserve">
+    <value>Form number</value>
+  </data>
 </root>
