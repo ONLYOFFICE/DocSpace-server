@@ -1402,7 +1402,8 @@ public class EntryManager(IDaoFactory daoFactory,
 
         if (file.ProviderEntry && !newExtension.Equals(currentExt))
         {
-            if ((await fileUtility.GetExtsConvertibleAsync()).ContainsKey(newExtension) && (await fileUtility.GetExtsConvertibleAsync())[newExtension].Contains(currentExt))
+            var extsConvertibleAsync = await fileUtility.GetExtsConvertibleAsync();
+            if (extsConvertibleAsync.TryGetValue(newExtension, out var value) && value.Contains(currentExt))
             {
                 if (stream != null)
                 {

@@ -71,6 +71,7 @@ internal class FileConverterService<T>(
 
                 int operationResultProgress;
                 var password = converter.Password;
+                var outputType = converter.OutputType;
 
                 var commonLinkUtility = serviceScope.ServiceProvider.GetService<CommonLinkUtility>();
                 commonLinkUtility.ServerUri = converter.ServerRootPath;
@@ -106,6 +107,12 @@ internal class FileConverterService<T>(
                     fileUri = await pathProvider.GetFileStreamUrlAsync(file);
 
                     var toExtension = fileUtility.GetInternalConvertExtension(file.Title);
+                    
+                    if (!string.IsNullOrEmpty(outputType) && await fileConverter.EnableConvertAsync(file, outputType))
+                    {
+                        toExtension = outputType;
+                    }
+                    
                     var fileExtension = file.ConvertedExtension;
                     var docKey = await documentServiceHelper.GetDocKeyAsync(file);
 

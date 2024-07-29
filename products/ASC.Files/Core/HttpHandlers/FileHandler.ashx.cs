@@ -335,8 +335,8 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                         var ext = FileUtility.GetFileExtension(file.Title);
 
                         var outType = (context.Request.Query[FilesLinkUtility.OutType].FirstOrDefault() ?? "").Trim();
-                        if (!string.IsNullOrEmpty(outType)
-                            && (await fileUtility.GetExtsConvertibleAsync()).ContainsKey(ext) && (await fileUtility.GetExtsConvertibleAsync())[ext].Contains(outType))
+                        var extsConvertibleAsync = await fileUtility.GetExtsConvertibleAsync();
+                        if (!string.IsNullOrEmpty(outType) && extsConvertibleAsync.TryGetValue(ext, out var value) && value.Contains(outType))
                         {
                             ext = outType;
                         }
