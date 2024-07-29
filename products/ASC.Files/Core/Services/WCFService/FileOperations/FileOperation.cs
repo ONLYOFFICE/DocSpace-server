@@ -323,7 +323,7 @@ public abstract class FileOperation<T, TId> : FileOperation where T : FileOperat
             try
             {
                 this[Finish] = true;
-                await PublishTaskInfo();
+                await PublishChanges();
             }
             catch
             {
@@ -358,7 +358,7 @@ public abstract class FileOperation<T, TId> : FileOperation where T : FileOperat
             || !Equals(fileId, default(TId)) && Files.Contains(fileId))
         {
             IncrementProgress();
-            await PublishTaskInfo();
+            await PublishChanges();
         }
     }
 
@@ -386,11 +386,6 @@ public abstract class FileOperation<T, TId> : FileOperation where T : FileOperat
         }
 
         return false;
-    }
-
-    protected async Task PublishTaskInfo()
-    {
-        await PublishChanges();
     }
 }
 

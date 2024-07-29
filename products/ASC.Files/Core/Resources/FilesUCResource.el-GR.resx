@@ -100,4 +100,7 @@
   <data name="InProcessFormFolder" xml:space="preserve">
     <value>Σε εξέλιξη</value>
   </data>
+  <data name="ReadyFormFolder" xml:space="preserve">
+    <value>Συμπλήρωση</value>
+  </data>
 </root>

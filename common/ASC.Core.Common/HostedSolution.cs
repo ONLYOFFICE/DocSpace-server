@@ -47,7 +47,7 @@ public class HostedSolution(ITenantService tenantService,
 
     public async Task<List<Tenant>> FindTenantsAsync(string login, string passwordHash = null)
     {
-        if (!string.IsNullOrEmpty(passwordHash) && userService.GetUserByPasswordHashAsync(Tenant.DefaultTenant, login, passwordHash) == null)
+        if (!string.IsNullOrEmpty(passwordHash) && await userService.GetUserByPasswordHashAsync(Tenant.DefaultTenant, login, passwordHash) == null)
         {
             throw new SecurityException("Invalid login or password.");
         }

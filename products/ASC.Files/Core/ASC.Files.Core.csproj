@@ -14,10 +14,10 @@
     <None Remove="Services\DocumentBuilderService\ScriptTemplates\RoomIndexExport.docbuilder" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Box.V2.Core" Version="5.7.0" />
-    <PackageReference Include="DocuSign.eSign.dll" Version="6.8.0" />
+    <PackageReference Include="Box.V2.Core" Version="5.8.0" />
+    <PackageReference Include="DocuSign.eSign.dll" Version="7.0.0" />
     <PackageReference Include="Dropbox.Api" Version="7.0.0" />
-    <PackageReference Include="Google.Apis.Drive.v3" Version="1.68.0.3428" />
+    <PackageReference Include="Google.Apis.Drive.v3" Version="1.68.0.3466" />
     <PackageReference Include="Joonasw.AspNetCore.SecurityHeaders" Version="5.0.0" />
     <PackageReference Include="Microsoft.OneDriveSDK" Version="2.1.0" />
     <PackageReference Include="Microsoft.SharePoint.Client" Version="14.0.4762.1000" />

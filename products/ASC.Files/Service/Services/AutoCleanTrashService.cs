@@ -93,6 +93,10 @@ public class AutoCleanTrashService(
             var now = DateTime.UtcNow;
 
             var trashId = await folderDao.GetFolderIDTrashAsync(false, tenantUser.UserId);
+            if(trashId == 0)
+            {
+                return;
+            }
 
             var foldersList = await folderDao.GetFoldersAsync(trashId)
                 .Where(x => fileDateTime.GetModifiedOnWithAutoCleanUp(x.ModifiedOn, tenantUser.Setting, true) < now)

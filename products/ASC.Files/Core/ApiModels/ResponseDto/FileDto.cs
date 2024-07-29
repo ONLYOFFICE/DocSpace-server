@@ -106,6 +106,10 @@ public class FileDto<T> : FileEntryDto<T>
     /// <type>System.Boolean, System</type>
     public bool? HasDraft { get; set; }
 
+    /// <summary>Is there a form or not</summary>
+    /// <type>System.Boolean, System</type>
+    public bool? IsForm { get; set; }
+
     /// <summary>Specifies if the filling has started or not</summary>
     /// <type>System.Boolean, System</type>
     public bool? StartFilling { get; set; }
@@ -173,7 +177,8 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         FilesSettingsHelper filesSettingsHelper,
         FileDateTime fileDateTime,
         ExternalShare externalShare,
-        FileSharing fileSharing)
+        FileSharing fileSharing,
+        FileChecker fileChecker)
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime) 
 {
     private readonly ApiDateTimeHelper _apiDateTimeHelper = apiDateTimeHelper;
@@ -216,30 +221,50 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
 
             var linkedId = await linkedIdTask;
             var properties = await propertiesTask;
-            var room = await currentFolderTask;
+            var currentFolder = await currentFolderTask;
 
-            if (!DocSpaceHelper.IsRoom(room.FolderType))
+            Folder<T> currentRoom = null;
+            if (!DocSpaceHelper.IsRoom(currentFolder.FolderType))
             {
-                var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(room);
+                var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(currentFolder);
                 if (int.TryParse(roomId?.ToString(), out var curRoomId) && curRoomId != -1)
                 {
-                    room = await folderDao.GetFolderAsync(roomId);
+                    currentRoom = await folderDao.GetFolderAsync(roomId);
+                }
+                else
+                {
+                    currentRoom = currentFolder;
                 }
             }
-            if (properties != null)
+            else
             {
-                if (room.FolderType == FolderType.FillingFormsRoom && properties.FormFilling.StartFilling)
+                currentRoom = currentFolder;
+            }
+            if (currentRoom != null && properties != null)
+            {
+                if (currentRoom.FolderType == FolderType.FillingFormsRoom && properties.FormFilling.StartFilling)
                     result.Security[FileSecurity.FilesSecurityActions.Lock] = false;
             }
 
-            var ace = await fileSharing.GetPureSharesAsync(room, new List<Guid> { authContext.CurrentAccount.ID }).FirstOrDefaultAsync();
+            var ace = await fileSharing.GetPureSharesAsync(currentRoom, new List<Guid> { authContext.CurrentAccount.ID }).FirstOrDefaultAsync();
 
-            if (ace is { Access: FileShare.FillForms })
+            if (!file.IsForm && (FilterType)file.Category == FilterType.None)
+            {
+                result.IsForm = await fileChecker.CheckExtendedPDF(file);
+            }
+            else
+            {
+                result.IsForm = file.IsForm;
+            }
+
+            if (ace is { Access: FileShare.FillForms } || 
+                result.IsForm == null || result.IsForm == false || 
+                currentFolder.FolderType == FolderType.FormFillingFolderInProgress)
             {
                 result.Security[FileSecurity.FilesSecurityActions.EditForm] = false;
             }
 
-            result.HasDraft = !Equals(linkedId, default(T));
+            result.HasDraft = result.IsForm == true ? !Equals(linkedId, default(T)) : null;
 
             var formFilling = properties?.FormFilling;
             if (formFilling != null)
@@ -249,7 +274,7 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
                 {
                     var draftLocation = new DraftLocation<T>()
                     {
-                        FolderId = (T)Convert.ChangeType(formFilling.ToFolderId, typeof(T)),
+                        FolderId = formFilling.ToFolderId,
                         FolderTitle = formFilling.Title,
                         FileId = (T)Convert.ChangeType(linkedId, typeof(T))
                     };
@@ -290,14 +315,16 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
 
         try
         {
-            if (file.ShareRecord is { SubjectType: SubjectType.PrimaryExternalLink or SubjectType.ExternalLink })
+            var externalMediaAccess = file.ShareRecord is { SubjectType: SubjectType.PrimaryExternalLink or SubjectType.ExternalLink };
+            
+            if (externalMediaAccess)
             {
                 result.RequestToken = await externalShare.CreateShareKeyAsync(file.ShareRecord.Subject);
             }
             
             result.ViewUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(file.DownloadUrl), result.RequestToken);
 
-            result.WebUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id, file.Version)),
+            result.WebUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id, file.Version, externalMediaAccess)),
                 result.RequestToken);
 
             result.ThumbnailStatus = file.ThumbnailStatus;

@@ -100,10 +100,11 @@ public class EmployeeDtoHelper(
 {
     private readonly ConcurrentDictionary<Guid, EmployeeDto> _dictionary = new();
     protected readonly ApiContext _httpContext = httpContext;
-    protected  readonly UserPhotoManager _userPhotoManager = userPhotoManager;
-    protected  readonly UserManager _userManager = userManager;
-    protected  readonly AuthContext _authContext = authContext;
-    
+    protected readonly UserPhotoManager _userPhotoManager = userPhotoManager;
+    protected readonly UserManager _userManager = userManager;
+    protected readonly AuthContext _authContext = authContext;
+    protected readonly DisplayUserSettingsHelper _displayUserSettingsHelper = displayUserSettingsHelper;
+
     public async Task<EmployeeDto> GetAsync(UserInfo userInfo)
     {
         if (!_dictionary.TryGetValue(userInfo.Id, out var employee))
@@ -133,7 +134,7 @@ public class EmployeeDtoHelper(
     protected async Task<EmployeeDto> InitAsync(EmployeeDto result, UserInfo userInfo)
     {
         result.Id = userInfo.Id;
-        result.DisplayName = displayUserSettingsHelper.GetFullUserName(userInfo);
+        result.DisplayName = _displayUserSettingsHelper.GetFullUserName(userInfo);
         result.HasAvatar = await _userPhotoManager.UserHasAvatar(userInfo.Id);
         result.IsAnonim = userInfo.Id.Equals(ASC.Core.Configuration.Constants.Guest.ID);
 
@@ -171,7 +172,7 @@ public class EmployeeDtoHelper(
 
         if (result.Id != Guid.Empty)
         {
-            var profileUrl = await commonLinkUtility.GetUserProfileAsync(userInfo.Id, false);
+            var profileUrl = await commonLinkUtility.GetUserProfileAsync(userInfo.Id);
             result.ProfileUrl = commonLinkUtility.GetFullAbsolutePath(profileUrl);
         }
 

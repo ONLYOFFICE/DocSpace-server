@@ -153,9 +153,6 @@
   <data name="MigrationCommonFiles" xml:space="preserve">
     <value>Migrācijas kopīgie faili</value>
   </data>
-  <data name="MigrationInitException" xml:space="preserve">
-    <value>Inicializējot {0} migrētāju, radās kļūda</value>
-  </data>
   <data name="MigrationNotFoundException" xml:space="preserve">
     <value>Nav šāda migrācijas nodrošinātāja</value>
   </data>
@@ -164,11 +161,5 @@
   </data>
   <data name="MigrationProjectFiles" xml:space="preserve">
     <value>Migrācijas projektu faili</value>
-  </data>
-  <data name="MigrationStartException" xml:space="preserve">
-    <value>Parsēšana joprojām notiek</value>
-  </data>
-  <data name="MigrationUploadException" xml:space="preserve">
-    <value>Migrācija jau notiek</value>
   </data>
 </root>

@@ -29,22 +29,17 @@ using Profile = AutoMapper.Profile;
 namespace ASC.Files.Core.ApiModels.RequestDto;
 /// <summary>
 /// </summary>
-public class EntryPropertiesRequestDto : IMapFrom<EntryProperties>
+public class EntryPropertiesRequestDto<T>
 {
     /// <summary>Form filling request parameters</summary>
     /// <type>ASC.Files.Core.ApiModels.RequestDto.FormFillingPropertiesRequestDto, ASC.Files.Core</type>
-    public FormFillingPropertiesRequestDto FormFilling { get; set; }
+    public FormFillingPropertiesRequestDto<T> FormFilling { get; set; }
 
-    public void Mapping(Profile profile)
-    {
-        profile.CreateMap(typeof(EntryProperties), GetType());
-        profile.CreateMap(GetType(), typeof(EntryProperties));
-    }
 }
 
 /// <summary>
 /// </summary>
-public class FormFillingPropertiesRequestDto : IMapFrom<FormFillingProperties>
+public class FormFillingPropertiesRequestDto<T>
 {
     /// <summary>Specifies if the data will be collected from the filled forms or not</summary>
     /// <type>System.Boolean, System</type>
@@ -66,16 +61,11 @@ public class FormFillingPropertiesRequestDto : IMapFrom<FormFillingProperties>
     /// <type>System.String, System</type>
     public string CreateFileMask { get; set; }
 
-    public void Mapping(Profile profile)
-    {
-        profile.CreateMap(typeof(FormFillingProperties), GetType());
-        profile.CreateMap(GetType(), typeof(FormFillingProperties));
-    }
 }
 
 /// <summary>
 /// </summary>
-public class BatchEntryPropertiesRequestDto
+public class BatchEntryPropertiesRequestDto<T>
 {
     /// <summary>List of file IDs</summary>
     /// <type>System.Text.Json.JsonElement[], System.Text.Json</type>
@@ -87,5 +77,5 @@ public class BatchEntryPropertiesRequestDto
 
     /// <summary>File properties that are represented as the EntryPropertiesRequestDto object</summary>
     /// <type>ASC.Files.Core.ApiModels.RequestDto.EntryPropertiesRequestDto, ASC.Files.Core</type>
-    public EntryPropertiesRequestDto FileProperties { get; set; }
+    public EntryPropertiesRequestDto<T> FileProperties { get; set; }
 }

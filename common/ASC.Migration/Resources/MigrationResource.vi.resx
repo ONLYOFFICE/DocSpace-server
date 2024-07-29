@@ -153,9 +153,6 @@
   <data name="MigrationCommonFiles" xml:space="preserve">
     <value>Di chuyển các tập tin phổ biến</value>
   </data>
-  <data name="MigrationInitException" xml:space="preserve">
-    <value>Đã xảy ra lỗi khi khởi tạo {0} trình di chuyển</value>
-  </data>
   <data name="MigrationNotFoundException" xml:space="preserve">
     <value>Không có nhà cung cấp dịch vụ di chuyển</value>
   </data>
@@ -164,11 +161,5 @@
   </data>
   <data name="MigrationProjectFiles" xml:space="preserve">
     <value>Di chuyển tập tin dự án</value>
-  </data>
-  <data name="MigrationStartException" xml:space="preserve">
-    <value>Việc phân tích cú pháp (parsing) vẫn đang được tiến hành</value>
-  </data>
-  <data name="MigrationUploadException" xml:space="preserve">
-    <value>Quá trình di chuyển đã được tiến hành</value>
   </data>
 </root>

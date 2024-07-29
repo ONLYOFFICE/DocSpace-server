@@ -24,6 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.AuditTrail.Repositories;
+using ASC.AuditTrail.Types;
+
 namespace ASC.People.Api;
 
 public class UserController(
@@ -58,7 +61,7 @@ public class UserController(
     IHttpClientFactory httpClientFactory,
     IHttpContextAccessor httpContextAccessor,
     SettingsManager settingsManager,
-    InvitationLinkService invitationLinkService,
+    InvitationService invitationService,
     FileSecurity fileSecurity,
     UsersQuotaSyncOperation usersQuotaSyncOperation,
     CountPaidUserChecker countPaidUserChecker,
@@ -71,7 +74,8 @@ public class UserController(
     IQuotaService quotaService,
     CustomQuota customQuota,
     IDaoFactory daoFactory,
-    FilesMessageService filesMessageService)
+    FilesMessageService filesMessageService,
+    AuditEventsRepository auditEventsRepository)
     : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
 {
 
@@ -179,7 +183,7 @@ public class UserController(
     {
         await _apiContext.AuthByClaimAsync();
 
-        var linkData = inDto.FromInviteLink ? await invitationLinkService.GetProcessedLinkDataAsync(inDto.Key, inDto.Email, inDto.Type) : null;
+        var linkData = inDto.FromInviteLink ? await invitationService.GetInvitationDataAsync(inDto.Key, inDto.Email, inDto.Type) : null;
         if (linkData is { IsCorrect: false })
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_InvintationLink);
@@ -266,7 +270,7 @@ public class UserController(
             await UpdatePhotoUrlAsync(inDto.Files, user);
         }
 
-        if (linkData is { LinkType: InvitationLinkType.CommonWithRoom })
+        if (linkData is { LinkType: InvitationLinkType.CommonToRoom })
         {
             var success = int.TryParse(linkData.RoomId, out var id);
             var tenantId = await tenantManager.GetCurrentTenantIdAsync();
@@ -1441,7 +1445,18 @@ public class UserController(
                                 await activeUsersChecker.CheckAppend();
                             }
 
+
+                            if (user.Status == EmployeeStatus.Terminated && string.IsNullOrEmpty(user.FirstName) && string.IsNullOrEmpty(user.LastName))
+                            {
+                                var emailChangeEvent = (await auditEventsRepository.GetByFilterAsync(action: MessageAction.SendJoinInvite, entry: EntryType.User, target: MessageTarget.Create(user.Id).ToString(), limit: 1)).FirstOrDefault() ?? 
+                                                       (await auditEventsRepository.GetByFilterAsync(action: MessageAction.RoomInviteLinkUsed, entry: EntryType.User, target: MessageTarget.Create(user.Id).ToString(), limit: 1)).FirstOrDefault();
+
+                                user.Status = emailChangeEvent != null ? EmployeeStatus.Pending : EmployeeStatus.Active;
+                            }
+                            else
+                            {
                             user.Status = EmployeeStatus.Active;
+                            }
 
                             await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
                         }
@@ -1495,7 +1510,7 @@ public class UserController(
             .ToAsyncEnumerable()
             .Where(userId => !_userManager.IsSystemUser(userId))
             .SelectAwait(async userId => await _userManager.GetUsersAsync(userId))
-            .Where(r => r.Status == EmployeeStatus.Active)
+            .Where(r => r.Status != EmployeeStatus.Terminated)
             .ToListAsync();
 
         foreach (var user in users)
@@ -1605,6 +1620,18 @@ public class UserController(
 
             yield return await employeeFullDtoHelper.GetFullAsync(user);
         }
+
+        if(quota >= 0)
+        {
+            await messageService.SendAsync(MessageAction.CustomQuotaPerUserChanged, quota.ToString(),
+                        users.Select(x => HttpUtility.HtmlDecode(displayUserSettingsHelper.GetFullUserName(x))));
+    }
+        else
+        {
+            await messageService.SendAsync(MessageAction.CustomQuotaPerUserDisabled, MessageTarget.Create(users.Select(x => x.Id)), users.Select(x => HttpUtility.HtmlDecode(displayUserSettingsHelper.GetFullUserName(x))));
+        }
+
+
     }
 
     /// <summary>
@@ -1635,6 +1662,8 @@ public class UserController(
             .ToListAsync();
 
         var tenant = await tenantManager.GetCurrentTenantAsync();
+
+        var quotaUserSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
         foreach (var user in users)
         {
             if (_userManager.IsSystemUser(user.Id))
@@ -1645,13 +1674,15 @@ public class UserController(
             await settingsManager.SaveAsync(defaultSettings, user);
             var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenant.Id, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
             var userQuotaData = await settingsManager.LoadAsync<UserQuotaSettings>(user);
-            var quotaUserSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
             var userQuotaLimit = userQuotaData.UserQuota == userQuotaData.GetDefault().UserQuota ? quotaUserSettings.DefaultQuota : userQuotaData.UserQuota;
             _ = quotaSocketManager.ChangeCustomQuotaUsedValueAsync(tenant.Id, customQuota.GetFeature<UserCustomQuotaFeature>().Name, quotaUserSettings.EnableQuota, userUsedSpace, userQuotaLimit, [user.Id]);
 
             yield return await employeeFullDtoHelper.GetFullAsync(user);
         }
 
+        await messageService.SendAsync(MessageAction.CustomQuotaPerUserDefault, quotaUserSettings.DefaultQuota.ToString(),
+                        users.Select(x => HttpUtility.HtmlDecode(displayUserSettingsHelper.GetFullUserName(x))));
+        
     }
 
     private async Task UpdateDepartmentsAsync(IEnumerable<Guid> department, UserInfo user)

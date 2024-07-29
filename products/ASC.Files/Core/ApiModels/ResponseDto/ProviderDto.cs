@@ -26,7 +26,7 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
-public record ProviderDto(string Name, string Key, bool Connected, bool Oauth = false, string RedirectUrl = null)
+public record ProviderDto(string Name, string Key, bool Connected, bool Oauth = false, string RedirectUrl = null, bool RequiredConnectionUrl = false)
 {
     /// <summary>Provider name</summary>
     /// <type>System.String, System</type>
@@ -47,4 +47,8 @@ public record ProviderDto(string Name, string Key, bool Connected, bool Oauth = 
     /// <summary>Redirect url</summary>
     // <type>System.String, System</type>
     public string RedirectUrl { get; init; } = RedirectUrl;
+
+    /// <summary>Required connection url flag</summary>
+    /// <type>System.Boolean, System</type>
+    public bool RequiredConnectionUrl { get; init; } = RequiredConnectionUrl;
 }

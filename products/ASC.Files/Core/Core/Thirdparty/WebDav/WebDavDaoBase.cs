@@ -258,35 +258,6 @@ internal class WebDavDaoBase(
             ? items.Where(x => x.IsCollection).ToList() 
             : items.Where(x => !x.IsCollection).ToList();
     }
-
-    public async Task<string> GetAvailableTitleAsync(string requestTitle, string parentFolderId, Func<string, string, Task<bool>> isExist)
-    {
-        if (!await isExist(requestTitle, parentFolderId))
-        {
-            return requestTitle;
-        }
-
-        var re = new Regex(@"( \(((?<index>[0-9])+)\)(\.[^\.]*)?)$");
-        var match = re.Match(requestTitle);
-
-        if (!match.Success)
-        {
-            var insertIndex = requestTitle.Length;
-            if (requestTitle.LastIndexOf('.') != -1)
-            {
-                insertIndex = requestTitle.LastIndexOf('.');
-            }
-
-            requestTitle = requestTitle.Insert(insertIndex, " (1)");
-        }
-
-        while (await isExist(requestTitle, parentFolderId))
-        {
-            requestTitle = re.Replace(requestTitle, MatchEvaluator);
-        }
-
-        return requestTitle;
-    }
     
     private File<string> ToErrorFile(ErrorWebDavEntry errorEntry)
     {
@@ -312,14 +283,6 @@ internal class WebDavDaoBase(
         folder.Title = MakeFolderTitle(errorEntry);
 
         return folder;
-    }
-
-    private static string MatchEvaluator(Match match)
-    {
-        var index = Convert.ToInt32(match.Groups[2].Value);
-        var staticText = match.Value[$" ({index})".Length..];
-
-        return $" ({index + 1}){staticText}";
     }
 
     private class ErrorWebDavEntry(string errorMessage, string id) : WebDavEntry, IErrorItem

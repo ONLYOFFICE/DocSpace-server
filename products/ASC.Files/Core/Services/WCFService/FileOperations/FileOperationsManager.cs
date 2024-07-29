@@ -157,7 +157,7 @@ public class FileOperationsManager(
         var data = new FileMarkAsReadOperationData<int>(folderIntIds, fileIntIds, tenantId, GetHttpHeaders(), sessionSnapshot);
         var thirdPartyData = new FileMarkAsReadOperationData<string>(folderStringIds, fileStringIds, tenantId, GetHttpHeaders(), sessionSnapshot);
         
-        eventBus.Publish(new MarkAsReadIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
+        await eventBus.PublishAsync(new MarkAsReadIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
         {
             TaskId = taskId,
             Data = data,
@@ -186,7 +186,7 @@ public class FileOperationsManager(
         var data = new FileDownloadOperationData<int>(folderIntIds, fileIntIds, tenantId, GetHttpHeaders(), sessionSnapshot, baseUri);
         var thirdPartyData = new FileDownloadOperationData<string>(folderStringIds, fileStringIds, tenantId, GetHttpHeaders(), sessionSnapshot, baseUri);
         
-        eventBus.Publish(new BulkDownloadIntegrationEvent(await GetUserIdAsync(), tenantId)
+        await eventBus.PublishAsync(new BulkDownloadIntegrationEvent(await GetUserIdAsync(), tenantId)
         {
             TaskId = taskId,
             Data = data,
@@ -232,7 +232,7 @@ public class FileOperationsManager(
         var data = new FileMoveCopyOperationData<int>(folderIntIds, fileIntIds, tenantId, destFolderId, copy, resolveType, holdResult, GetHttpHeaders(), sessionSnapshot); 
         var thirdPartyData = new FileMoveCopyOperationData<string>(folderStringIds, fileStringIds, tenantId, destFolderId, copy, resolveType, holdResult, GetHttpHeaders(), sessionSnapshot);
         
-        eventBus.Publish(new MoveOrCopyIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
+        await eventBus.PublishAsync(new MoveOrCopyIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
         {
             TaskId = taskId,
             Data = data,
@@ -257,6 +257,38 @@ public class FileOperationsManager(
                 fileForContentIds.AddRange(await fileDao.GetFilesAsync(folderId).ToListAsync());
             }
         }
+    }
+
+    public async Task DuplicateAsync(
+        IEnumerable<JsonElement> folderIds,
+        IEnumerable<JsonElement> fileIds)
+    {        
+        
+        if ((folderIds == null || !folderIds.Any()) && (fileIds == null || !fileIds.Any()))
+        {
+            return;
+        }
+        
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var sessionSnapshot = await externalShare.TakeSessionSnapshotAsync();
+        
+        var (folderIntIds, folderStringIds) = GetIds(folderIds);
+        var (fileIntIds, fileStringIds) = GetIds(fileIds);
+        
+        
+        var op = fileOperationsManagerHolder.GetService<FileDuplicateOperation>();
+        op.Init(true);
+        var taskId = await fileOperationsManagerHolder.Publish(op);
+        
+        var data = new FileOperationData<int>(folderIntIds, fileIntIds, tenantId, GetHttpHeaders(), sessionSnapshot); 
+        var thirdPartyData = new FileOperationData<string>(folderStringIds, fileStringIds, tenantId, GetHttpHeaders(), sessionSnapshot);
+        
+        await eventBus.PublishAsync(new DuplicateIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
+        {
+            TaskId = taskId,
+            Data = data,
+            ThirdPartyData = thirdPartyData
+        });
     }
 
     public Task PublishDelete<T>(
@@ -337,7 +369,7 @@ public class FileOperationsManager(
             };
         }
         
-        eventBus.Publish(toPublish);
+        await eventBus.PublishAsync(toPublish);
     }
 
     public static (List<int>, List<string>) GetIds(IEnumerable<JsonElement> items)
@@ -346,21 +378,25 @@ public class FileOperationsManager(
 
         foreach (var item in items)
         {
-            if (item.ValueKind == JsonValueKind.Number)
+            switch (item.ValueKind)
             {
-                resultInt.Add(item.GetInt32());
-            }
-            else if (item.ValueKind == JsonValueKind.String)
-            {
-                var val = item.GetString();
-                if (int.TryParse(val, out var i))
-                {
-                    resultInt.Add(i);
-                }
-                else
-                {
-                    resultString.Add(val);
-                }
+                case JsonValueKind.Number:
+                    resultInt.Add(item.GetInt32());
+                    break;
+                case JsonValueKind.String:
+                    {
+                        var val = item.GetString();
+                        if (int.TryParse(val, out var i))
+                        {
+                            resultInt.Add(i);
+                        }
+                        else
+                        {
+                            resultString.Add(val);
+                        }
+
+                        break;
+                    }
             }
         }
 

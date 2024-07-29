@@ -47,7 +47,7 @@ public class CustomTagsService(
         var tagDao = daoFactory.GetTagDao<int>();
         var tags = await tagDao.GetTagsInfoAsync(name, TagType.Custom, true).ToListAsync();
 
-        if (tags.Any())
+        if (tags.Count != 0)
         {
             throw new InvalidOperationException();
         }
@@ -105,6 +105,11 @@ public class CustomTagsService(
         var tagDao = daoFactory.GetTagDao<T>();
 
         var tagsInfos = await tagDao.GetTagsInfoAsync(names).ToListAsync();
+
+        if (tagsInfos.Count == 0)
+        {
+            return folder;
+        }
 
         var tags = tagsInfos.Select(tagInfo => Tag.Custom(Guid.Empty, folder, tagInfo.Name));
 

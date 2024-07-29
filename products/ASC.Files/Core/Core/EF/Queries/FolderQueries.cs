@@ -279,7 +279,13 @@ public partial class FilesDbContext
     {
         return FolderQueries.UpdateFoldersAsync(this, tenantId, folderId, parentId, modifiedBy);
     }
-        
+    
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultInt])]
+    public  Task<bool> DbFoldersAnyAsync(int tenantId, string title, int folderId)
+    {
+        return FolderQueries.DbFoldersAnyAsync(this, tenantId, title, folderId);
+    }
+    
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultGuid])]
     public Task<int> ReassignFoldersAsync(int tenantId, Guid oldOwnerId, Guid newOwnerId)
     {
@@ -580,6 +586,14 @@ static file class FolderQueries
                         .SetProperty(p => p.ModifiedOn, DateTime.UtcNow)
                         .SetProperty(p => p.ModifiedBy, modifiedBy)
                     ));
+    
+    public static readonly Func<FilesDbContext, int, string, int, Task<bool>> DbFoldersAnyAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, string title, int folderId) =>
+                ctx.Folders
+                    .Any(r => r.Title == title &&
+                              r.ParentId == folderId &&
+                              r.TenantId == tenantId));
 
     public static readonly Func<FilesDbContext, int, IAsyncEnumerable<DbFolderTree>> SubfolderAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

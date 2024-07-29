@@ -62,7 +62,7 @@ public class GoogleWorkspaceMigrator : Migrator
         MigrationInfo = new MigrationInfo { Name = "GoogleWorkspace" };
     }
 
-    public override void Init(string path, CancellationToken cancellationToken, OperationType operation)
+    public override async Task InitAsync(string path, CancellationToken cancellationToken, OperationType operation)
     {
         MigrationLogger.Init();
         _cancellationToken = cancellationToken;
@@ -79,6 +79,7 @@ public class GoogleWorkspaceMigrator : Migrator
 
         _takeouts = files.Where(item => item.EndsWith(".zip")).ToArray();
         MigrationInfo.Files = _takeouts.Select(Path.GetFileName).ToList();
+        await ReportProgressAsync(1, "start");
     }
 
     public override async Task<MigrationApiInfo> ParseAsync(bool reportProgress = true)
@@ -177,7 +178,6 @@ public class GoogleWorkspaceMigrator : Migrator
                 Log(MigrationResource.CanNotParseArchives, ex);
                 if (MigrationInfo.FailedArchives.Count == _takeouts.Length)
                 {
-                    await ReportProgressAsync(_lastProgressUpdate, MigrationResource.CanNotParseArchives);
                     throw new Exception(MigrationResource.CanNotParseArchives);
                 }
             }

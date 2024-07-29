@@ -54,7 +54,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         {
                 file = await fileDao.GetFileAsync(fileId, version);
                 lastVersion = false;
-            }
+        }
 
         if (file == null)
         {
@@ -62,9 +62,11 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         }
 
         return (file, lastVersion);
-            }
-    public async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(File<T> file, bool lastVersion, bool editPossible, bool tryEdit, bool tryCoauth, bool fillFormsPossible, EditorType editorType, bool isSubmitOnly = false)
-            {
+    }
+
+    public async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(File<T> file, bool lastVersion, bool editPossible, bool tryEdit,
+        bool tryCoauth, bool fillFormsPossible, EditorType editorType, bool isSubmitOnly = false)
+    {
         var docParams = await GetParamsAsync(file, lastVersion, true, editPossible, editPossible, tryEdit, tryCoauth, fillFormsPossible);
         docParams.Configuration.EditorType = editorType;
 
@@ -74,7 +76,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         }
 
         return docParams;
-            }
+    }
 
     public async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(T fileId, int version, bool editPossible, bool tryEdit,
         bool tryCoAuthoring, bool fillFormsPossible)
@@ -301,11 +303,11 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         return JsonWebToken.Encode(payload, fileUtility.SignatureSecret);
     }
 
-    public async Task<File<T>> CheckNeedDeletion<T>(IFileDao<T> fileDao, T fileId, FormFillingProperties formFillingProperties)
+    public async Task<File<T>> CheckNeedDeletion<T>(IFileDao<T> fileDao, T fileId, FormFillingProperties<T> formFillingProperties)
     {
         var file = await fileDao.GetFileAsync(fileId);
 
-        if (formFillingProperties.ToFolderId == file.ParentId.ToString())
+        if (Equals(formFillingProperties.ToFolderId, file.ParentId))
         {
             await securityContext.AuthenticateMeAsync(file.CreateBy);
 

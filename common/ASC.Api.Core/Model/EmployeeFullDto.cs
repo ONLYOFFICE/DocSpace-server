@@ -261,6 +261,14 @@ public class EmployeeFullDtoHelper(
         return result;
     }
 
+    public async Task<EmployeeFullDto> GetSimpleWithEmail(UserInfo userInfo)
+    {
+        var result = await GetSimple(userInfo);
+        result.DisplayName = _displayUserSettingsHelper.GetFullUserName(userInfo);
+        result.Email = userInfo.Email;
+        return result;
+    }
+
     public async Task<EmployeeFullDto> GetFullAsync(UserInfo userInfo, bool? shared = null)
     {
         var currentType = await _userManager.GetUserTypeAsync(userInfo.Id);

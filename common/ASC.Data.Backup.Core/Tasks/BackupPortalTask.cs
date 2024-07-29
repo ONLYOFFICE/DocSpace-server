@@ -510,6 +510,7 @@ public class BackupPortalTask(
         var exclude = await Queries.BackupRecordsAsync(backupRecordContext, tenantId).ToListAsync();
 
         files = files.Where(f => !exclude.Exists(e => f.Path.Replace('\\', '/').Contains($"/file_{e.StoragePath}/")));
+        files = files.Where(f => !f.Path.Contains("/thumb."));
 
         await foreach (var file in files)
         {

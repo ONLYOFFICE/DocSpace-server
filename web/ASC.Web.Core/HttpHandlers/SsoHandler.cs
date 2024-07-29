@@ -197,7 +197,7 @@ public class SsoHandlerService
                 {
                     _log.WarningWithException("Failed to save user", ex);
                 }
-
+               
                 var authKey = await _cookiesManager.AuthenticateMeAndSetCookiesAsync(userInfo.Id, MessageAction.LoginSuccessViaSSO);
 
                 context.Response.Redirect(_commonLinkUtility.GetDefault() + "?token=" + HttpUtility.UrlEncode(authKey), false);
@@ -285,19 +285,16 @@ public class SsoHandlerService
                 var type = EmployeeType.RoomAdmin;
                 var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
-                await using (await _distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenantId)))
+                try
                 {
-                    try
-                    {
-                        await _countPaidUserChecker.CheckAppend();
-                    }
-                    catch (Exception)
-                    {
-                        type = EmployeeType.User;
-                    }
-
-                    newUserInfo = await _userManagerWrapper.AddUserAsync(newUserInfo, UserManagerWrapper.GeneratePassword(), true, false, type);
+                    await _countPaidUserChecker.CheckAppend();
                 }
+                catch (Exception)
+                {
+                    type = EmployeeType.User;
+                }
+
+                newUserInfo = await _userManagerWrapper.AddUserAsync(newUserInfo, UserManagerWrapper.GeneratePassword(), true, false, type);
             }
             else
             {

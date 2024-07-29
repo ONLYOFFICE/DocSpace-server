@@ -141,7 +141,12 @@ public partial class FilesDbContext
     {
         return FileQueries.DbFilesAsync(this, tenantId, fileId);
     }
-    
+    [PreCompileQuery([PreCompileQuery.DefaultInt])]
+    public IAsyncEnumerable<int> PdfTenantFileIdsAsync(int tenantId)
+    {
+        return FileQueries.PdfTenantFileIdsAsync(this, tenantId);
+    }
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public Task<int> DeleteSecurityAsync(int tenantId, string fileId)
     {
@@ -540,6 +545,15 @@ static file class FileQueries
                 ctx.Files
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.Id == fileId));
+
+    public static readonly Func<FilesDbContext, int, IAsyncEnumerable<int>> PdfTenantFileIdsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId) =>
+                ctx.Files
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => r.Category == (int)FilterType.None)
+                    .Where(r => r.Title.EndsWith(".pdf"))
+                    .Select(r => r.Id));
 
     public static readonly Func<FilesDbContext, int, string, Task<int>> DeleteSecurityAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

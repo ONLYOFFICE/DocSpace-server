@@ -406,7 +406,7 @@
     <value>Grupo Atualizado: {0}</value>
   </data>
   <data name="GuestAccount" xml:space="preserve">
-    <value>Conta de Convidado</value>
+    <value>Convidado</value>
   </data>
   <data name="GuestActivated" xml:space="preserve">
     <value>Convidado Ativado: {0}</value>
@@ -797,5 +797,44 @@
   </data>
   <data name="PortalRenamed" xml:space="preserve">
     <value>Portal renomeado</value>
+  </data>
+  <data name="FileSizePostfix" xml:space="preserve">
+    <value>bytes,KB,MB,GB</value>
+  </data>
+  <data name="FileUploadedWithOverwriting" xml:space="preserve">
+    <value>Arquivo enviado com substituição: {0}</value>
+  </data>
+  <data name="QuotaPerPortalChanged" xml:space="preserve">
+    <value>Definir cota de armazenamento padrão: {0}</value>
+  </data>
+  <data name="QuotaPerPortalDisabled" xml:space="preserve">
+    <value>Cota de armazenamento padrão desativada</value>
+  </data>
+  <data name="QuotaPerRoomChanged" xml:space="preserve">
+    <value>Defina a cota de armazenamento padrão para salas: {0}</value>
+  </data>
+  <data name="QuotaPerRoomDisabled" xml:space="preserve">
+    <value>Cota de armazenamento padrão desativada para salas</value>
+  </data>
+  <data name="QuotaPerUserChanged" xml:space="preserve">
+    <value>Defina a cota de armazenamento padrão para usuários: {0}</value>
+  </data>
+  <data name="QuotaPerUserDisabled" xml:space="preserve">
+    <value>Cota de armazenamento padrão desativada para usuários</value>
+  </data>
+  <data name="RoomCopied" xml:space="preserve">
+    <value>Sala copiada: {0}</value>
+  </data>
+  <data name="RoomGroupAdded" xml:space="preserve">
+    <value>Grupo adicionado: {0}. Função: {1}</value>
+  </data>
+  <data name="RoomGroupRemove" xml:space="preserve">
+    <value>Grupo excluído: {0}</value>
+  </data>
+  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
+    <value>{0} atribuído: {1}</value>
+  </data>
+  <data name="SendJoinInvite" xml:space="preserve">
+    <value>O usuário {0} enviou um convite para {1} para ingressar neste DocSpace</value>
   </data>
 </root>
