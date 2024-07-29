@@ -401,7 +401,7 @@ $TrulyYours
 ^Pokud nechcete dostávat oznámení o aktualizacích profilu, prosím upravte Vaše "nastavení odběru":"$RecipientSubscriptionConfigURL".^</value>
   </data>
   <data name="pattern_send_whats_new" xml:space="preserve">
-    <value>h1.Zde je to, co je nového ve vašem DocSpace ke dni $Date
+    <value>h1.Zde je to, co je nového ve vašem DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" ke dni $Date
 
 #foreach($activity in $Activities)
 $activity
@@ -476,7 +476,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Změna adresy portálu</value>
   </data>
   <data name="subject_profile_delete" xml:space="preserve">
-    <value>Vymazání Vašeho profilu z ${__VirtualRootPath} portálu</value>
+    <value>Zakázání účtu na ${__VirtualRootPath}</value>
   </data>
   <data name="subject_profile_updated" xml:space="preserve">
     <value>Váš profil na ${__VirtualRootPath} byl změněn</value>
@@ -1090,9 +1090,6 @@ $TrulyYours</value>
   <data name="ButtonAccept" xml:space="preserve">
     <value>Přijmout</value>
   </data>
-  <data name="AcceptDocSpace" xml:space="preserve">
-    <value>PŘIJMOUT</value>
-  </data>
   <data name="ButtonActivateEmail" xml:space="preserve">
     <value>Kliknutím zde aktivujete svou e-mailovou adresu</value>
   </data>
@@ -1108,17 +1105,14 @@ $TrulyYours</value>
   <data name="ButtonChangeTfa" xml:space="preserve">
     <value>Konfigurace aplikace ověřovatele</value>
   </data>
-  <data name="ButtonCollaborateDocSpace" xml:space="preserve">
+  <data name="ButtonCollaborate" xml:space="preserve">
     <value>Spolupráce v DocSpace</value>
   </data>
   <data name="ButtonConfirm" xml:space="preserve">
     <value>Potvrdit</value>
   </data>
-  <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
+  <data name="ButtonConfirmInvite" xml:space="preserve">
     <value>Potvrzení pozvánky DocSpace</value>
-  </data>
-  <data name="ButtonConfirmEmail" xml:space="preserve">
-    <value>POTVRDIT</value>
   </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
     <value>Potvrzení aktualizace vlastníka portálu</value>
@@ -1142,7 +1136,7 @@ $TrulyYours</value>
     <value>Zanechat zpětnou vazbu</value>
   </data>
   <data name="ButtonRemoveProfile" xml:space="preserve">
-    <value>Odstranění profilu</value>
+    <value>Zakázat účet</value>
   </data>
   <data name="ButtonRenewNow" xml:space="preserve">
     <value>Obnovit nyní</value>
@@ -1168,7 +1162,7 @@ Další informace o postupu zálohování naleznete v naší uživatelské pří
 Pokud máte jakékoli dotazy nebo potřebujete pomoc, neváhejte nás kontaktovat na adrese [${__SupportLink}](${__SupportLink}).
 
 S pozdravem,
-tým podpory ONLYOFFICE™
+tým podpory ONLYOFFICE
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
@@ -1271,6 +1265,7 @@ h1."$PortalUrl":"$PortalUrl"
 Váš portál byl přesunut na novou doménu. Obnovte prosím svůj přístup k portálu zadáním hesla, které bude použito pro přihlášení.
 
 Heslo k účtu nastavíte pomocí níže uvedeného odkazu:
+
 $OrangeButton
 
 *Poznámka*: tento odkaz je platný pouze 7 dní. Během této doby dokončete proces obnovení přístupu.
@@ -1308,7 +1303,7 @@ Svůj portál můžete kdykoli znovu aktivovat kliknutím na následující odka
 V případě jakýchkoli dotazů nebo potřeby pomoci nás neváhejte kontaktovat na adrese [${__SalesEmail}](mailto:${__SalesEmail}).
 
 S pozdravem,
-tým podpory ONLYOFFICE™
+tým podpory ONLYOFFICE
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete_tg" xml:space="preserve">
@@ -1333,7 +1328,7 @@ _Poznámka_: tento odkaz je platný pouze 7 dní. V této lhůtě dokončete pro
 V případě jakýchkoli dotazů nebo potřeby pomoci nás neváhejte kontaktovat na adrese [${__SalesEmail}](mailto:${__SalesEmail})
 
 S pozdravem,
-tým podpory ONLYOFFICE™
+tým podpory ONLYOFFICE
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
@@ -1583,7 +1578,7 @@ Odkaz je platný pouze 7 dní.</value>
     <value>Připojte se k ONLYOFFICE DocSpace</value>
   </data>
   <data name="subject_send_whats_new" xml:space="preserve">
-    <value>Co je nového na vašem portálu pro $Date</value>
+    <value>Co je nového na vašem portálu ${__VirtualRootPath} pro $Date</value>
   </data>
   <data name="subject_storage_decryption_error" xml:space="preserve">
     <value>${LetterLogoText}. Proces dešifrování se nezdařil</value>
@@ -1701,5 +1696,96 @@ $TrulyYours</value>
   </data>
   <data name="subject_zoom_welcome" xml:space="preserve">
     <value>Vítejte v ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="pattern_migration_personal_to_docspace" xml:space="preserve">
+    <value>Dobrý den!
+
+Proces migrace dat z osobního prosotru ONLYOFFICE Personal do vašeho nového prostoru ONLYOFFICE DocSpace byl úspěšně dokončen.
+
+Chcete-li získat přístup do svého prostoru DocSpace s importovanými daty, stačí kliknout na tlačítko níže:
+
+$OrangeButton
+
+Aktuálně využíváte plán DocSpace STARTUP. Je zcela zdarma.
+
+==V případě potřeby můžete změnit název nového prostoru DocSpace. Stačí přepnout do Nastavení -&gt; Přizpůsobení -&gt; Přejmenování prostoru DocSpace.==
+
+Užijte si nový způsob spolupráce na dokumentech!
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_rooms_activity" xml:space="preserve">
+    <value>h1.Zde jsou novinky ve vašem DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" za poslední hodinu.
+
+#foreach($activity in $Activities)
+$activity
+
+#end</value>
+  </data>
+  <data name="pattern_saas_docspace_registration" xml:space="preserve">
+    <value>h1. ONLYOFFICE DocSpace: dokončená registrace
+
+
+Dobrý den!
+
+Vyzýváme vás k dokončení registrace pro ONLYOFFICE DocSpace na adrese "${__VirtualRootPath}":"${__VirtualRootPath}". Kliknutím na odkaz zadejte své jméno a nastavte heslo:
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="ButtonGetFreeApp" xml:space="preserve">
+    <value>Získejte bezplatnou aplikaci</value>
+  </data>
+  <data name="ButtonGetStarted" xml:space="preserve">
+    <value>Začněte</value>
+  </data>
+  <data name="ButtonJoinRoom" xml:space="preserve">
+    <value>Připojte se k místnosti</value>
+  </data>
+  <data name="ButtonRegister" xml:space="preserve">
+    <value>Registrace</value>
+  </data>
+  <data name="ButtonUpgrade" xml:space="preserve">
+    <value>Upgrade</value>
+  </data>
+  <data name="subject_saas_room_invite_existing_user" xml:space="preserve">
+    <value>Jste zváni do místnosti ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="pattern_saas_admin_integrations_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 24px 40px 32px; text-align: center;"&gt;ONLYOFFICE DocSpace: Prozkoumejte užitečné &lt;span style="color: #FF6F3D;"&gt;integrace&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Dobrý den! V tomto newsletteru jsme pro vás shromáždili integrace DocSpace připravené k použití. Vyzkoušejte je nyní a zvyšte svou produktivitu!&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="Margin: 0; padding-bottom: 24px; padding-top: 32px; padding-left: 40px; padding-right: 40px; text-align: left;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 64px; Margin:0; padding-left: 148px; padding-right: 32px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG1" alt="ONLYOFFICE" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 32px; Margin:0; padding-left: 0px; padding-right: 0px; padding-top: 16px; padding-bottom: 16px; vertical-align: top; width: 32px;"&gt;&lt;img width="32" src="$IMG2" alt="connecting to" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 64px; Margin:0; padding-left: 32px; padding-right: 148px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG3" alt="Zoom" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0px 40px 24px; text-align: center;"&gt;ONLYOFFICE DocSpace &amp; Zoom&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 16px; text-align: center;"&gt;Spolupracujte na jakémkoli obsahu během schůzek Zoom s ostatními účastníky. Efektivně spravujte dokumenty mezi schůzkami.&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 24px; text-align: center;"&gt;&lt;a href="https://www.onlyoffice.com/office-for-zoom.aspx" style="color: #FF6F3D; text-decoration: underline;" target="_blank"&gt;Zjistěte více&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton1&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="Margin: 0; padding-bottom: 24px; padding-top: 32px; padding-left: 40px; padding-right: 40px; text-align: left;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 64px; Margin:0; padding-left: 148px; padding-right: 32px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG1" alt="ONLYOFFICE" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 32px; Margin:0; padding-left: 0px; padding-right: 0px; padding-top: 16px; padding-bottom: 16px; vertical-align: top; width: 32px;"&gt;&lt;img width="32" src="$IMG2" alt="connecting to" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 64px; Margin:0; padding-left: 32px; padding-right: 148px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG4" alt="Zapier" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0px 40px 24px; text-align: center;"&gt;ONLYOFFICE DocSpace &amp; Zapier&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 16px; text-align: center;"&gt;Automatizujte své pracovní postupy pomocí zaps pro DocSpace a různé aplikace, jako je Asana, Slack, HubSpot, Discord, Linear atd.&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 24px; text-align: center;"&gt;&lt;a href="https://helpcenter.onlyoffice.com/integration/gettingstarted-zapier.aspx" style="color: #FF6F3D; text-decoration: underline;" target="_blank"&gt;Zjistěte více&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton2&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="Margin: 0; padding-bottom: 24px; padding-top: 32px; padding-left: 40px; padding-right: 40px; text-align: left;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 64px; Margin:0; padding-left: 148px; padding-right: 32px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG1" alt="ONLYOFFICE" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 32px; Margin:0; padding-left: 0px; padding-right: 0px; padding-top: 16px; padding-bottom: 16px; vertical-align: top; width: 32px;"&gt;&lt;img width="32" src="$IMG2" alt="connecting to" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 64px; Margin:0; padding-left: 32px; padding-right: 148px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG5" alt="Wordpress" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0px 40px 24px; text-align: center;"&gt;ONLYOFFICE DocSpace &amp; Wordpress&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 16px; text-align: center;"&gt;Vkládání dokumentů a místností do webových stránek, které návštěvníkům umožní prohlížet soubory bez stahování. Spravujte kancelářské dokumenty prostřednictvím DocSpace.&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 24px; text-align: center;"&gt;&lt;a href="https://www.onlyoffice.com/office-for-wordpress.aspx" style="color: #FF6F3D; text-decoration: underline;" target="_blank"&gt;Zjistěte více&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton3&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="Margin: 0; padding-bottom: 24px; padding-top: 32px; padding-left: 40px; padding-right: 40px; text-align: left;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 64px; Margin:0; padding-left: 148px; padding-right: 32px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG1" alt="ONLYOFFICE" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 32px; Margin:0; padding-left: 0px; padding-right: 0px; padding-top: 16px; padding-bottom: 16px; vertical-align: top; width: 32px;"&gt;&lt;img width="32" src="$IMG2" alt="connecting to" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 64px; Margin:0; padding-left: 32px; padding-right: 148px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG6" alt="Drupal" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0px 40px 24px; text-align: center;"&gt;ONLYOFFICE DocSpace &amp; Drupal&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 16px; text-align: center;"&gt;Umožněte návštěvníkům webu snadný přístup ke kancelářským dokumentům a spravujte soubory prostřednictvím služby DocSpace.&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 24px; text-align: center;"&gt;&lt;a href="https://www.onlyoffice.com/office-for-drupal.aspx" style="color: #FF6F3D; text-decoration: underline;" target="_blank"&gt;Zjistěte více&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 64px; padding-top: 0; text-align: center;"&gt;$OrangeButton4&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_saas_docspace_registration" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace: kompletní registrace</value>
+  </data>
+  <data name="subject_saas_admin_integrations_v1" xml:space="preserve">
+    <value>Prozkoumejte užitečné integrace pro ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="subject_rooms_activity" xml:space="preserve">
+    <value>Co je nového na vašem portálu ${__VirtualRootPath} za poslední hodinu</value>
+  </data>
+  <data name="subject_migration_personal_to_docspace" xml:space="preserve">
+    <value>Migrace dat do ONLYOFFICE DocSpace úspěšně dokončena</value>
+  </data>
+  <data name="pattern_saas_room_invite_existing_user" xml:space="preserve">
+    <value>Dobrý den!
+
+$__AuthorName vás pozval do místnosti "$Message":"$InviteLink" na "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
 </root>

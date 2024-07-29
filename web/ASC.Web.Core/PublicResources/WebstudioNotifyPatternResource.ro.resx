@@ -786,7 +786,7 @@ Pentru a afla mai multe despre procedura de creare a copiei de rezervă, consult
 Dacă aveți întrebări sau aveți nevoie de asistență, nu ezitați să ne contactați la [${__SupportLink}](${__SupportLink})
 
 Cu stimă,
-Echipă de Asistență ONLYOFFICE™
+Echipă de Asistență ONLYOFFICE
 [www.onlyoffice.com](http://onlyoffice.com/)</value>
   </data>
   <data name="pattern_self_profile_updated_tg" xml:space="preserve">
@@ -808,9 +808,6 @@ Echipă de Asistență ONLYOFFICE™
   </data>
   <data name="ButtonAccept" xml:space="preserve">
     <value>Acceptare</value>
-  </data>
-  <data name="AcceptDocSpace" xml:space="preserve">
-    <value>ACCEPTARE</value>
   </data>
   <data name="ButtonAccessControlPanel" xml:space="preserve">
     <value>Accesare Panou de Control</value>
@@ -839,7 +836,7 @@ Echipă de Asistență ONLYOFFICE™
   <data name="ButtonJoin" xml:space="preserve">
     <value>Faceți clic aici pentru a vă asocia la portalul</value>
   </data>
-  <data name="ButtonCollaborateDocSpace" xml:space="preserve">
+  <data name="ButtonCollaborate" xml:space="preserve">
     <value>Colaborare în spațiul DocSpace</value>
   </data>
   <data name="ButtonConfigureRightNow" xml:space="preserve">
@@ -854,9 +851,6 @@ Echipă de Asistență ONLYOFFICE™
   <data name="ButtonConfirm" xml:space="preserve">
     <value>Confirmare</value>
   </data>
-  <data name="ButtonConfirmEmail" xml:space="preserve">
-    <value>CONFIRMARE</value>
-  </data>
   <data name="ButtonConfirmTermination" xml:space="preserve">
     <value>Confirmare închidere cont</value>
   </data>
@@ -866,7 +860,7 @@ Echipă de Asistență ONLYOFFICE™
   <data name="subject_change_password_v115" xml:space="preserve">
     <value>Confirmare schimbare parolă</value>
   </data>
-  <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
+  <data name="ButtonConfirmInvite" xml:space="preserve">
     <value>Confirmare invitație la DocSpace</value>
   </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
@@ -882,7 +876,7 @@ Echipă de Asistență ONLYOFFICE™
     <value>Dezactivarea portalului ${__VirtualRootPath}</value>
   </data>
   <data name="subject_profile_delete" xml:space="preserve">
-    <value>Ștergerea profilului din portalul ${__VirtualRootPath}</value>
+    <value>Dezactivarea contului ${__VirtualRootPath}</value>
   </data>
   <data name="subject_opensource_admin_welcome_v1" xml:space="preserve">
     <value>Descoperiți abonamentul ONLYOFFICE DocSpace business</value>
@@ -973,7 +967,7 @@ Echipă de Asistență ONLYOFFICE™
     <value>Spațiul ONLYOFFICE DocSpace a fost activat</value>
   </data>
   <data name="ButtonRemoveProfile" xml:space="preserve">
-    <value>Eliminare profil</value>
+    <value>Dezactivare cont</value>
   </data>
   <data name="ButtonRenewNow" xml:space="preserve">
     <value>Reînnoiește acum</value>
@@ -1051,7 +1045,7 @@ Echipă de Asistență ONLYOFFICE™
     <value>Bun venit în spaţiul ONLYOFFICE DocSpace!</value>
   </data>
   <data name="subject_send_whats_new" xml:space="preserve">
-    <value>Ce este nou pe portalul dvs. în data de $Date</value>
+    <value>Ce este nou pe portalul dvs. ${__VirtualRootPath} for $Date</value>
   </data>
   <data name="subject_user_ldap_activation" xml:space="preserve">
     <value>Sunteţi invitat să vă asociaţi ${__VirtualRootPath}</value>
@@ -1289,6 +1283,7 @@ h1."$PortalUrl":"$PortalUrl"
 Portalul dvs. a fost migrat pe un nou domeniu. Restabiliți accesul la portalul prin introducerea parolei care va fi utilizată pentru autentificare.
 
 Urmați linkul de mai jos pentru a seta parola pentru contul dvs:
+
 $OrangeButton
 
 * Menţiune*: Acest link este valabil doar timp de 7 zile. Finalizați procedura de restabilire a accesului în perioada dată.
@@ -1344,7 +1339,7 @@ Puteți oricând să reactivați portalul dvs apăsând pe link-ul următor:
 Dacă aveți întrebări sau aveți nevoie de asistență, nu ezitați să ne contactați la [${__SalesEmail}](mailto:${__SalesEmail})
 
 Best regards,
-ONLYOFFICE™ Support Team
+ONLYOFFICE Support Team
 [www.onlyoffice.com](http://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
@@ -1392,7 +1387,7 @@ _Menţiune_: Acest link este valabil doar timp de 7 zile. Finalizați procedura 
 Dacă aveți întrebări sau aveți nevoie de asistență, nu ezitați să ne contactați la [${__SalesEmail}](mailto:${__SalesEmail})
 
 Cu stimă,
-Echipă de Asistență ONLYOFFICE™
+Echipă de Asistență ONLYOFFICE
 [www.onlyoffice.com](http://onlyoffice.com/)</value>
   </data>
   <data name="pattern_user_ldap_activation" xml:space="preserve">
@@ -1504,15 +1499,15 @@ Adresa de portal $PortalUrl a fost schimbată cu una nouă "${__VirtualRootPath}
 *Mențiune*: Setările DNS și opțiuni de autentificare unică nu vor funcționa până nu le schimbați.</value>
   </data>
   <data name="pattern_profile_delete" xml:space="preserve">
-    <value>h1.Ștergerea profilului pe portalul "${__VirtualRootPath}":"${__VirtualRootPath}"
+    <value>h1.Dezactivarea contului "${__VirtualRootPath}":"${__VirtualRootPath}"
 
-licitat ștergerea definitivă profilului dvs din portalul "${__VirtualRootPath}":"${__VirtualRootPath}".
+Ați solicitat dezactivarea contului dvs DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}".
 
-Dacă doriți totuși să ștergeți portalul, urmăriți linkul de mai jos pentru a confirma acțiunea:
+Dacă doriți totuși să dezactivați contul dvs, urmăriți linkul de mai jos pentru a confirma acțiunea:
 
 $OrangeButton
 
-*Menţiune*: Acest link este valabil doar timp de 7 zile. Finalizați procedura de ștergere a profilului în perioada dată.</value>
+*Mențiune*: Acest link este valabil doar timp de 7 zile. Finalizați procedura de dezactivare a contului în perioada dată.</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
     <value>Utilizatorul "$FromUserName":"$FromUserLink" și-a șters profilul, așadar acest profil este acum blocat. Toate fișierele sunt încă atribuite acestui utilizator și ocupă spațiu de stocare.
@@ -1671,7 +1666,7 @@ $TrulyYours</value>
 ^Dacă nu doriți să primiți notificări despre actualizări de profil, gestionați setările de abonament:"$RecipientSubscriptionConfigURL".^</value>
   </data>
   <data name="pattern_send_whats_new" xml:space="preserve">
-    <value>h1.Ce este nou în spațiul dvs DocSpace în data de $Date
+    <value>h1.Ce este nou în spațiul dvs DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" în data de $Date
 
 #foreach($activity in $Activities)
 $activity
@@ -1761,5 +1756,96 @@ Planul dvs tarifar actual est STARTUP. Acest abonament este absolut gratuit și 
 *Descoperiți un nou mod de colaborare asupra documentelor!*
  
 $TrulyYours</value>
+  </data>
+  <data name="pattern_saas_room_invite_existing_user" xml:space="preserve">
+    <value>Bună!
+
+$__AuthorName v-a invitat să participați la sala "$Message":"$InviteLink" la "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_migration_personal_to_docspace" xml:space="preserve">
+    <value>Bună!
+ 
+Procesului de migrare a datelor din ONLYOFFICE Personal în spațiul dvs nou ONLYOFFICE DocSpace s-a terminat cu succes.
+ 
+Pentru accesarea datelor importate în DocSpace, faceți clic pe butonul de mai jos:
+ 
+$OrangeButton
+ 
+Planul dvs actual DocSpace est STARTUP. Acest abonament este absolut gratuit.
+ 
+==Dacă este necesar, puteți schimba numele spațiului dvs DocSpace. Treceți la Setare -&gt; Particularizare -&gt; Redenumire DocSpace.==
+ 
+Descoperiți un nou mod de colaborare asupra documentelor!
+ 
+$TrulyYours</value>
+  </data>
+  <data name="pattern_rooms_activity" xml:space="preserve">
+    <value>h1.Ce este nou în spațiul dvs DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" de ultima oră
+ 
+#foreach($activity in $Activities)
+$activity
+ 
+#end</value>
+  </data>
+  <data name="pattern_saas_docspace_registration" xml:space="preserve">
+    <value>h1. ONLYOFFICE DocSpace: Finalizați inregistrarea
+
+
+Bună!
+
+Sunteţi invitat să finalizați înregistrarea în spaţiul ONLYOFFICE DocSpace  "${__VirtualRootPath}":"${__VirtualRootPath}". Introduceți numele dvs și setați o parolă apăsând pe linkul:
+ 
+$OrangeButton
+ 
+$TrulyYours</value>
+  </data>
+  <data name="ButtonGetFreeApp" xml:space="preserve">
+    <value>Obțineți aplicația gratuit</value>
+  </data>
+  <data name="ButtonGetStarted" xml:space="preserve">
+    <value>Începeți lucrul</value>
+  </data>
+  <data name="ButtonJoinRoom" xml:space="preserve">
+    <value>Participare la sala</value>
+  </data>
+  <data name="ButtonRegister" xml:space="preserve">
+    <value>Înregistrare</value>
+  </data>
+  <data name="ButtonUpgrade" xml:space="preserve">
+    <value>Face upgrade</value>
+  </data>
+  <data name="pattern_saas_admin_integrations_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 24px 40px 32px; text-align: center;"&gt;ONLYOFFICE DocSpace: Explorați soluții de &lt;span style="color: #FF6F3D;"&gt;integrare utile&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Bună! Acest buletin informativ conține toate soluții de integrare gata de utilizare adunate într-un loc. Încercați acum și creșteți productivitatea &lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="Margin: 0; padding-bottom: 24px; padding-top: 32px; padding-left: 40px; padding-right: 40px; text-align: left;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 64px; Margin:0; padding-left: 148px; padding-right: 32px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG1" alt="ONLYOFFICE" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 32px; Margin:0; padding-left: 0px; padding-right: 0px; padding-top: 16px; padding-bottom: 16px; vertical-align: top; width: 32px;"&gt;&lt;img width="32" src="$IMG2" alt="connecting to" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 64px; Margin:0; padding-left: 32px; padding-right: 148px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG3" alt="Zoom" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0px 40px 24px; text-align: center;"&gt;ONLYOFFICE DocSpace &amp; Zoom&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 16px; text-align: center;"&gt;Colaborați la orice conținut cu alți participanți în timpul ședințelor pe Zoom. Gestionați în mod eficient documentele între ședințe&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 24px; text-align: center;"&gt;&lt;a href="https://www.onlyoffice.com/office-for-zoom.aspx" style="color: #FF6F3D; text-decoration: underline;" target="_blank"&gt;Aflați mai multe&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton1&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="Margin: 0; padding-bottom: 24px; padding-top: 32px; padding-left: 40px; padding-right: 40px; text-align: left;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 64px; Margin:0; padding-left: 148px; padding-right: 32px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG1" alt="ONLYOFFICE" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 32px; Margin:0; padding-left: 0px; padding-right: 0px; padding-top: 16px; padding-bottom: 16px; vertical-align: top; width: 32px;"&gt;&lt;img width="32" src="$IMG2" alt="connecting to" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 64px; Margin:0; padding-left: 32px; padding-right: 148px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG4" alt="Zapier" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0px 40px 24px; text-align: center;"&gt;ONLYOFFICE DocSpace &amp; Zapier&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 16px; text-align: center;"&gt;Automatizați-vă fluxul de lucru prin crearea de zap-uri pentru DocSpace și diferite aplicații precum Asana, Slack, HubSpot, Discord, Linear, etc&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 24px; text-align: center;"&gt;&lt;a href="https://helpcenter.onlyoffice.com/integration/gettingstarted-zapier.aspx" style="color: #FF6F3D; text-decoration: underline;" target="_blank"&gt;Aflați mai multe&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton2&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="Margin: 0; padding-bottom: 24px; padding-top: 32px; padding-left: 40px; padding-right: 40px; text-align: left;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 64px; Margin:0; padding-left: 148px; padding-right: 32px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG1" alt="ONLYOFFICE" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 32px; Margin:0; padding-left: 0px; padding-right: 0px; padding-top: 16px; padding-bottom: 16px; vertical-align: top; width: 32px;"&gt;&lt;img width="32" src="$IMG2" alt="connecting to" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 64px; Margin:0; padding-left: 32px; padding-right: 148px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG5" alt="Wordpress" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0px 40px 24px; text-align: center;"&gt;ONLYOFFICE DocSpace &amp; Wordpress&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 16px; text-align: center;"&gt;Încorporați documente și săli în pagina dvs web pentru a permite vizitătorilor afișarea fișierelor fără descărcare. Gestionați docmente de oficiu prin intermediul DocSpace&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 24px; text-align: center;"&gt;&lt;a href="https://www.onlyoffice.com/office-for-wordpress.aspx" style="color: #FF6F3D; text-decoration: underline;" target="_blank"&gt;Aflați mai multe&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton3&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="Margin: 0; padding-bottom: 24px; padding-top: 32px; padding-left: 40px; padding-right: 40px; text-align: left;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 64px; Margin:0; padding-left: 148px; padding-right: 32px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG1" alt="ONLYOFFICE" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 32px; Margin:0; padding-left: 0px; padding-right: 0px; padding-top: 16px; padding-bottom: 16px; vertical-align: top; width: 32px;"&gt;&lt;img width="32" src="$IMG2" alt="connecting to" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 64px; Margin:0; padding-left: 32px; padding-right: 148px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG6" alt="Drupal" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0px 40px 24px; text-align: center;"&gt;ONLYOFFICE DocSpace &amp; Drupal&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 16px; text-align: center;"&gt;Faceți documentele de birou ușor accesibile pentru vizitătorii paginii dvs. web și gestionați fișierele prin intermediul DocSpace.&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 24px; text-align: center;"&gt;&lt;a href="https://www.onlyoffice.com/office-for-drupal.aspx" style="color: #FF6F3D; text-decoration: underline;" target="_blank"&gt;Aflați mai multe&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 64px; padding-top: 0; text-align: center;"&gt;$OrangeButton4&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_migration_personal_to_docspace" xml:space="preserve">
+    <value>Migrarea datelor în ONLYOFFICE DocSpace s-a terminat cu succes</value>
+  </data>
+  <data name="subject_rooms_activity" xml:space="preserve">
+    <value>Ce este nou pe portalul dvs. ${__VirtualRootPath} de ultima oră</value>
+  </data>
+  <data name="subject_saas_admin_integrations_v1" xml:space="preserve">
+    <value>Explorați soluții de integrare utile pentru spațiu ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="subject_saas_docspace_registration" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace: Finalizați inregistrarea</value>
+  </data>
+  <data name="subject_saas_room_invite_existing_user" xml:space="preserve">
+    <value>Sunteți invitat la sala ONLYOFFICE DocSpace</value>
   </data>
 </root>

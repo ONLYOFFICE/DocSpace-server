@@ -29,7 +29,7 @@ namespace ASC.Common;
 [Singleton]
 public class TempStream(TempPath tempPath)
 {
-    public async Task<Stream> GetBufferedAsync(Stream srcStream)
+    public async Task<(Stream, bool)> TryGetBufferedAsync(Stream srcStream)
     {
         ArgumentNullException.ThrowIfNull(srcStream);
         if (!srcStream.CanSeek || srcStream.CanTimeout)
@@ -39,10 +39,35 @@ public class TempStream(TempPath tempPath)
             await srcStream.CopyToAsync(memStream);
             memStream.Position = 0;
 
-            return memStream;
+            return (memStream, true);
         }
 
-        return srcStream;
+        return (srcStream, false);
+    }
+
+    public async Task<MemoryStream> CloneMemoryStream(MemoryStream originalStream, int limit = -1)
+    {
+        var cloneStream = new MemoryStream();
+
+        var originalPosition = originalStream.Position;
+
+        originalStream.Position = 0;
+
+        if (limit > 0)
+        {
+           await originalStream.CopyToAsync(cloneStream, limit);
+        }
+        else
+        {
+           await originalStream.CopyToAsync(cloneStream);
+        }
+
+
+        originalStream.Position = originalPosition;
+
+        cloneStream.Position = 0;
+
+        return cloneStream;
     }
 
     public Stream Create()

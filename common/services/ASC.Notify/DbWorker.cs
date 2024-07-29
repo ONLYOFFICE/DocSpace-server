@@ -27,7 +27,7 @@
 namespace ASC.Notify;
 
 [Singleton]
-public class DbWorker(IServiceScopeFactory serviceScopeFactory, IOptions<NotifyServiceCfg> notifyServiceCfg, IDistributedLockProvider distributedLockProvider)
+public class DbWorker(IServiceScopeFactory serviceScopeFactory, ConfigureNotifyServiceCfg notifyServiceCfg, IDistributedLockProvider distributedLockProvider)
 {
     private readonly NotifyServiceCfg _notifyServiceCfg = notifyServiceCfg.Value;
 

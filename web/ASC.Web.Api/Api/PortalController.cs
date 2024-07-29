@@ -444,10 +444,11 @@ public class PortalController(
 
         var localhost = coreSettings.BaseDomain == "localhost" || tenant.Alias == "localhost";
 
-        var newAlias = alias.Trim().ToLowerInvariant();
+        var newAlias = string.Concat(alias.Where(c => !Char.IsWhiteSpace(c))).ToLowerInvariant();
         var oldAlias = tenant.Alias;
         var oldVirtualRootPath = commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/');
 
+        var massageDate = DateTime.UtcNow;
         if (!string.Equals(newAlias, oldAlias, StringComparison.InvariantCultureIgnoreCase))
         {
             if (!string.IsNullOrEmpty(apiSystemHelper.ApiSystemUrl))
@@ -463,8 +464,8 @@ public class PortalController(
             tenant.Alias = alias;
             tenant = await tenantManager.SaveTenantAsync(tenant);
             tenantManager.SetCurrentTenant(tenant);
-
-            await messageService.SendAsync(MessageAction.PortalRenamed, MessageTarget.Create(tenant.Id), oldAlias, newAlias);
+            
+            await messageService.SendAsync(MessageAction.PortalRenamed, MessageTarget.Create(tenant.Id), oldAlias, newAlias, dateTime: massageDate);
             await cspSettingsHelper.RenameDomain(oldDomain, tenant.GetTenantDomain(coreSettings));
 
             if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
@@ -488,7 +489,7 @@ public class PortalController(
                                 Uri.SchemeDelimiter,
                                 tenant.GetTenantDomain(coreSettings),
                                 rewriter != null && !rewriter.IsDefaultPort ? $":{rewriter.Port}" : "",
-                                commonLinkUtility.GetConfirmationUrlRelative(tenant.Id, user.Email, ConfirmType.Auth)
+                                commonLinkUtility.GetConfirmationUrlRelative(tenant.Id, user.Email, ConfirmType.Auth, massageDate.ToString(CultureInfo.InvariantCulture))
                );
 
         cookiesManager.ClearCookies(CookiesType.AuthKey);
@@ -532,6 +533,7 @@ public class PortalController(
         }
         finally
         {
+            eventBus.Publish(new RemovePortalIntegrationEvent(securityContext.CurrentAccount.ID, tenant.Id));
             securityContext.Logout();
         }
     }
@@ -559,7 +561,7 @@ public class PortalController(
         var suspendUrl = await commonLinkUtility.GetConfirmationEmailUrlAsync(owner.Email, ConfirmType.PortalSuspend);
         var continueUrl = await commonLinkUtility.GetConfirmationEmailUrlAsync(owner.Email, ConfirmType.PortalContinue);
 
-        await studioNotifyService.SendMsgPortalDeactivationAsync(tenant, suspendUrl, continueUrl);
+        await studioNotifyService.SendMsgPortalDeactivationAsync(tenant, await urlShortener.GetShortenLinkAsync(suspendUrl), await urlShortener.GetShortenLinkAsync(continueUrl));
 
         await messageService.SendAsync(MessageAction.OwnerSentPortalDeactivationInstructions, MessageTarget.Create(owner.Id), owner.DisplayUserName(false, displayUserSettingsHelper));
     }
@@ -589,7 +591,9 @@ public class PortalController(
                         (await tariffService.GetPaymentsAsync(tenant.Id)).Any() &&
                         !(await tenantManager.GetCurrentTenantQuotaAsync()).Trial;
 
-        await studioNotifyService.SendMsgPortalDeletionAsync(tenant, await commonLinkUtility.GetConfirmationEmailUrlAsync(owner.Email, ConfirmType.PortalRemove), showAutoRenewText);
+        var confirmLink = await commonLinkUtility.GetConfirmationEmailUrlAsync(owner.Email, ConfirmType.PortalRemove);
+            
+        await studioNotifyService.SendMsgPortalDeletionAsync(tenant, await urlShortener.GetShortenLinkAsync(confirmLink), showAutoRenewText);
     }
 
     /// <summary>
@@ -608,6 +612,8 @@ public class PortalController(
         var tenant = await tenantManager.GetCurrentTenantAsync();
         tenant.SetStatus(TenantStatus.Active);
         await tenantManager.SaveTenantAsync(tenant);
+
+        await cspSettingsHelper.UpdateBaseDomain();
     }
 
     /// <summary>
@@ -629,6 +635,8 @@ public class PortalController(
         tenant.SetStatus(TenantStatus.Suspended);
         await tenantManager.SaveTenantAsync(tenant);
         await messageService.SendAsync(MessageAction.PortalDeactivated);
+
+        await cspSettingsHelper.UpdateBaseDomain();
     }
 
     /// <summary>
@@ -664,26 +672,13 @@ public class PortalController(
 
         redirectLink += HttpUtility.UrlEncode(parameters);
 
-        var authed = false;
-        try
-        {
-            if (!securityContext.IsAuthenticated)
-            {
-                await securityContext.AuthenticateMeAsync(ASC.Core.Configuration.Constants.CoreSystem);
-                authed = true;
-            }
-        }
-        finally
-        {
-            if (authed)
-            {
-                securityContext.Logout();
-            }
-        }
+        await studioNotifyService.SendMsgPortalDeletionSuccessAsync(owner, redirectLink);
+
+        await messageService.SendAsync(MessageAction.PortalDeleted);
+
+        await cspSettingsHelper.UpdateBaseDomain();
 
         eventBus.Publish(new RemovePortalIntegrationEvent(securityContext.CurrentAccount.ID, tenant.Id));
-
-        await studioNotifyService.SendMsgPortalDeletionSuccessAsync(owner, redirectLink);
 
         return redirectLink;
     }

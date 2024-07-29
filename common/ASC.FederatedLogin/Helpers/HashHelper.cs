@@ -63,8 +63,7 @@ public static class HashHelper
 
     public static byte[] MD5(byte[] data)
     {
-        using var md5 = System.Security.Cryptography.MD5.Create();
 
-        return md5.ComputeHash(data);
+        return System.Security.Cryptography.MD5.HashData(data);
     }
 }

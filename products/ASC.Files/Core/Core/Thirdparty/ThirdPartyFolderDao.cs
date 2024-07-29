@@ -24,20 +24,27 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using DriveFile = Google.Apis.Drive.v3.Data.File;
+
 namespace ASC.Files.Core.Core.Thirdparty;
 
 /// <inheritdoc />
-[Scope]
+[Scope(GenericArguments = [typeof(BoxFile), typeof(BoxFolder), typeof(BoxItem)])]
+[Scope(GenericArguments = [typeof(FileMetadata), typeof(FolderMetadata), typeof(Metadata)])]
+[Scope(GenericArguments = [typeof(DriveFile), typeof(DriveFile), typeof(DriveFile)])]
+[Scope(GenericArguments = [typeof(Item), typeof(Item), typeof(Item)])]
+[Scope(GenericArguments = [typeof(WebDavEntry), typeof(WebDavEntry), typeof(WebDavEntry)])]
 internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
+    IDaoSelector<TFile, TFolder, TItem> daoSelector,
+    IDaoBase<TFile, TFolder, TItem> dao,
     IDbContextFactory<FilesDbContext> dbContextFactory,
     UserManager userManager,
     CrossDao crossDao,
-    IDaoSelector<TFile, TFolder, TItem> daoSelector,
     IFileDao<int> fileDao,
     IFolderDao<int> folderDao,
     SetupInfo setupInfo,
-    IDaoBase<TFile, TFolder, TItem> dao,
-    TenantManager tenantManager)
+    TenantManager tenantManager,
+    Global global)
     : BaseFolderDao, IFolderDao<string>
     where TFile : class, TItem
     where TFolder : class, TItem
@@ -54,6 +61,17 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
     public async Task<Folder<string>> GetFolderAsync(string folderId)
     {
         var folder = dao.ToFolder(await dao.GetFolderAsync(folderId));
+        if (folder == null)
+        {
+            if (dao.IsRoom(folderId))
+            {
+                folder = dao.GetErrorRoom();
+            }
+            else
+            {
+                return null;
+            }
+        }
 
         if (folder.FolderType is not (FolderType.CustomRoom or FolderType.PublicRoom))
         {
@@ -119,7 +137,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
     }
 
     public IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, 
-        bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default)
+        bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default, bool containingMyFiles = false)
     {
         if (dao.CheckInvalidFilter(filterType))
         {
@@ -130,8 +148,8 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
 
         if (subjectID != Guid.Empty)
         {
-            folders = folders.Where(x => subjectGroup
-                                             ? userManager.IsUserInGroup(x.CreateBy, subjectID)
+            folders = folders.WhereAwait(async x => subjectGroup
+                                             ? await userManager.IsUserInGroupAsync(x.CreateBy, subjectID)
                                              : x.CreateBy == subjectID);
         }
 
@@ -166,8 +184,8 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
 
         if (subjectID.HasValue && subjectID != Guid.Empty)
         {
-            folders = folders.Where(x => subjectGroup
-                                             ? userManager.IsUserInGroup(x.CreateBy, subjectID.Value)
+            folders = folders.WhereAwait(async x => subjectGroup
+                                             ? await userManager.IsUserInGroupAsync(x.CreateBy, subjectID.Value)
                                              : x.CreateBy == subjectID);
         }
 
@@ -187,7 +205,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         {
             var folder = await dao.GetFolderAsync(folderId);
 
-            if (folder is IErrorItem)
+            if (folder is null or IErrorItem)
             {
                 folderId = null;
             }
@@ -220,7 +238,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
             return null;
         }
 
-        folder.Title = await dao.GetAvailableTitleAsync(folder.Title, dao.MakeThirdId(folder.ParentId), IsExistAsync);
+        folder.Title = await global.GetAvailableTitleAsync(folder.Title, dao.MakeThirdId(folder.ParentId), IsExistAsync, FileEntryType.Folder);
         
         var thirdFolder = await dao.CreateFolderAsync(folder.Title, folder.ParentId);
             
@@ -284,7 +302,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
 
         var fromFolderId = dao.GetParentFolderId(folder);
 
-        var newTitle = await dao.GetAvailableTitleAsync(dao.GetName(folder), dao.GetId(toFolder), IsExistAsync);
+        var newTitle = await global.GetAvailableTitleAsync(dao.GetName(folder), dao.GetId(toFolder), IsExistAsync, FileEntryType.Folder);
         var storage = await _providerInfo.StorageAsync;
         var movedFolder = await storage.MoveFolderAsync(dao.GetId(folder), newTitle, dao.GetId(toFolder));
 
@@ -356,7 +374,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
             throw new Exception(errorFolder1.Error);
         }
 
-        var newTitle = await dao.GetAvailableTitleAsync(dao.GetName(folder), dao.GetId(toFolder), IsExistAsync);
+        var newTitle = await global.GetAvailableTitleAsync(dao.GetName(folder), dao.GetId(toFolder), IsExistAsync, FileEntryType.Folder);
         var storage = await _providerInfo.StorageAsync;
         var newFolder = await storage.CopyFolderAsync(dao.GetId(folder), newTitle, dao.GetId(toFolder));
 
@@ -414,7 +432,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         }
         else
         {
-            newTitle = await dao.GetAvailableTitleAsync(newTitle, parentFolderId, IsExistAsync);
+            newTitle = await global.GetAvailableTitleAsync(newTitle, parentFolderId, IsExistAsync, FileEntryType.Folder);
 
             //rename folder
             var storage = await _providerInfo.StorageAsync;
@@ -575,36 +593,6 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         return Task.FromResult<string>(null);
     }
 
-    public Task<Dictionary<string, string>> GetBunchObjectIDsAsync(List<string> folderIDs)
-    {
-        return Task.FromResult<Dictionary<string, string>>(null);
-    }
-
-    public IAsyncEnumerable<FolderWithShare> GetFeedsForRoomsAsync(int tenant, DateTime from, DateTime to)
-    {
-        throw new NotImplementedException();
-    }
-
-    public IAsyncEnumerable<FolderWithShare> GetFeedsForFoldersAsync(int tenant, DateTime from, DateTime to)
-    {
-        throw new NotImplementedException();
-    }
-
-    public IAsyncEnumerable<ParentRoomPair> GetParentRoomsAsync(IEnumerable<int> foldersIds)
-    {
-        throw new NotImplementedException();
-    }
-
-    public IAsyncEnumerable<int> GetTenantsWithFoldersFeedsAsync(DateTime fromTime)
-    {
-        throw new NotImplementedException();
-    }
-
-    public IAsyncEnumerable<int> GetTenantsWithRoomsFeedsAsync(DateTime fromTime)
-    {
-        throw new NotImplementedException();
-    }
-
     public IAsyncEnumerable<OriginData> GetOriginsDataAsync(IEnumerable<string> entriesId)
     {
         throw new NotImplementedException();
@@ -637,20 +625,24 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
     {
         throw new NotImplementedException();
     }
+    
     public Task<FolderType> GetFirstParentTypeFromFileEntryAsync(FileEntry<string> entry)
     {
         throw new NotImplementedException();
     }
+    
     public Task<(string RoomId, string RoomTitle)> GetParentRoomInfoFromFileEntryAsync(FileEntry<string> entry)
     {
         return Task.FromResult(entry.RootFolderType is not (FolderType.VirtualRooms or FolderType.Archive) 
             ? (string.Empty, string.Empty) 
             : (_providerInfo.FolderId, _providerInfo.CustomerTitle));
     }
+    
     public Task<FilesStatisticsResultDto> GetFilesUsedSpace()
     {
         throw new NotImplementedException();
     }
+    
     public Task<int> GetFoldersCountAsync(string parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool withSubfolders = false, bool excludeSubject = false, string roomId = default)
     {
         throw new NotImplementedException();
@@ -670,16 +662,18 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
     {
         return Task.CompletedTask;
     }
+    
     public Task<string> ChangeTreeFolderSizeAsync(string folderId, long size)
     {
         throw new NotImplementedException();
     }
+    
     public Task<string> ChangeFolderQuotaAsync(Folder<string> folder, long quota)
     {
         throw new NotImplementedException();
     }
     
-    private async Task<bool> IsExistAsync(string title, string folderId)
+    public async Task<bool> IsExistAsync(string title, string folderId)
     {
         var items = await dao.GetItemsAsync(folderId, true);
 

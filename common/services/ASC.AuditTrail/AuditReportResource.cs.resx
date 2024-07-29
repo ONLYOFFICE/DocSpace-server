@@ -278,7 +278,7 @@
     <value>Skupina aktualizována: {0}</value>
   </data>
   <data name="GuestAccount" xml:space="preserve">
-    <value>Účet návštěvníka</value>
+    <value>Anonymní</value>
   </data>
   <data name="GuestActivated" xml:space="preserve">
     <value>Návštěvník aktivován: {0}</value>
@@ -738,5 +738,44 @@
   </data>
   <data name="PortalRenamed" xml:space="preserve">
     <value>Přejmenování portálu</value>
+  </data>
+  <data name="FileSizePostfix" xml:space="preserve">
+    <value>byty,KB,MB,GB,TB</value>
+  </data>
+  <data name="FileUploadedWithOverwriting" xml:space="preserve">
+    <value>Nahraný soubor s přepsáním: {0}</value>
+  </data>
+  <data name="QuotaPerPortalChanged" xml:space="preserve">
+    <value>Nastavení výchozí kvóty úložiště: {0}</value>
+  </data>
+  <data name="QuotaPerPortalDisabled" xml:space="preserve">
+    <value>Vypnutá výchozí kvóta úložiště</value>
+  </data>
+  <data name="QuotaPerRoomChanged" xml:space="preserve">
+    <value>Nastavení výchozí kvóty úložiště pro místnosti: {0}</value>
+  </data>
+  <data name="QuotaPerRoomDisabled" xml:space="preserve">
+    <value>Zakázání výchozí kvóty úložiště pro místnosti</value>
+  </data>
+  <data name="QuotaPerUserChanged" xml:space="preserve">
+    <value>Nastavení výchozí kvóty úložiště pro uživatele: {0}</value>
+  </data>
+  <data name="QuotaPerUserDisabled" xml:space="preserve">
+    <value>Zakázání výchozí kvóty úložiště pro uživatele</value>
+  </data>
+  <data name="RoomGroupAdded" xml:space="preserve">
+    <value>Přidaná skupina: {0}. Role: {1}</value>
+  </data>
+  <data name="RoomCopied" xml:space="preserve">
+    <value>Místnost zkopírována: {0}</value>
+  </data>
+  <data name="RoomGroupRemove" xml:space="preserve">
+    <value>Odstraněná skupina: {0}</value>
+  </data>
+  <data name="SendJoinInvite" xml:space="preserve">
+    <value>Uživatel {0} poslal pozvánku {1}, aby se připojil k tomuto prostoru DocSpace</value>
+  </data>
+  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
+    <value>{0} jmenován: {1}</value>
   </data>
 </root>

@@ -26,17 +26,17 @@
 
 namespace ASC.Files.Core.Core.Thirdparty.WebDav;
 
-[Scope]
-internal class WebDavDaoBase(IServiceProvider serviceProvider,
+[Scope(typeof(IDaoBase<WebDavEntry, WebDavEntry, WebDavEntry>))]
+internal class WebDavDaoBase(
+    IDaoFactory daoFactory,
+    IServiceProvider serviceProvider,
     UserManager userManager,
     TenantManager tenantManager,
     TenantUtil tenantUtil,
     IDbContextFactory<FilesDbContext> dbContextFactory,
-    SetupInfo setupInfo,
     FileUtility fileUtility,
-    TempPath tempPath,
     RegexDaoSelectorBase<WebDavEntry, WebDavEntry, WebDavEntry> regexDaoSelectorBase) 
-    : ThirdPartyProviderDao<WebDavEntry, WebDavEntry, WebDavEntry>(serviceProvider, userManager, tenantManager, tenantUtil, dbContextFactory, setupInfo, fileUtility, tempPath, regexDaoSelectorBase),
+    : ThirdPartyProviderDao<WebDavEntry, WebDavEntry, WebDavEntry>(daoFactory, serviceProvider, userManager, tenantManager, tenantUtil, dbContextFactory, fileUtility, regexDaoSelectorBase),
         IDaoBase<WebDavEntry, WebDavEntry, WebDavEntry>
 {
 
@@ -181,6 +181,7 @@ internal class WebDavDaoBase(IServiceProvider serviceProvider,
         file.Title = MakeFileTitle(webDavFile);
         file.ThumbnailStatus = Thumbnail.Created;
         file.Encrypted = ProviderInfo.Private;
+        file.Shared = ProviderInfo.FolderType is FolderType.PublicRoom;
         SetDateTime(webDavFile, file);
 
         return file;
@@ -257,35 +258,6 @@ internal class WebDavDaoBase(IServiceProvider serviceProvider,
             ? items.Where(x => x.IsCollection).ToList() 
             : items.Where(x => !x.IsCollection).ToList();
     }
-
-    public async Task<string> GetAvailableTitleAsync(string requestTitle, string parentFolderId, Func<string, string, Task<bool>> isExist)
-    {
-        if (!await isExist(requestTitle, parentFolderId))
-        {
-            return requestTitle;
-        }
-
-        var re = new Regex(@"( \(((?<index>[0-9])+)\)(\.[^\.]*)?)$");
-        var match = re.Match(requestTitle);
-
-        if (!match.Success)
-        {
-            var insertIndex = requestTitle.Length;
-            if (requestTitle.LastIndexOf('.') != -1)
-            {
-                insertIndex = requestTitle.LastIndexOf('.');
-            }
-
-            requestTitle = requestTitle.Insert(insertIndex, " (1)");
-        }
-
-        while (await isExist(requestTitle, parentFolderId))
-        {
-            requestTitle = re.Replace(requestTitle, MatchEvaluator);
-        }
-
-        return requestTitle;
-    }
     
     private File<string> ToErrorFile(ErrorWebDavEntry errorEntry)
     {
@@ -311,14 +283,6 @@ internal class WebDavDaoBase(IServiceProvider serviceProvider,
         folder.Title = MakeFolderTitle(errorEntry);
 
         return folder;
-    }
-
-    private static string MatchEvaluator(Match match)
-    {
-        var index = Convert.ToInt32(match.Groups[2].Value);
-        var staticText = match.Value[$" ({index})".Length..];
-
-        return $" ({index + 1}){staticText}";
     }
 
     private class ErrorWebDavEntry(string errorMessage, string id) : WebDavEntry, IErrorItem

@@ -40,7 +40,7 @@ public class AscCacheNotify
         _cacheNotify.Subscribe(_ => { OnClearCache(); }, CacheNotifyAction.Any);
     }
 
-    public void ClearCache() => _cacheNotify.Publish(new AscCacheItem { Id = Guid.NewGuid().ToString() }, CacheNotifyAction.Any);
+    public async Task ClearCacheAsync() => await _cacheNotify.PublishAsync(new AscCacheItem { Id = Guid.NewGuid().ToString() }, CacheNotifyAction.Any);
 
     public void OnClearCache()
     {
@@ -48,7 +48,7 @@ public class AscCacheNotify
     }
 }
 
-[Singleton]
+[Singleton(typeof(ICache))]
 public sealed class AscCache(IMemoryCache memoryCache) : ICache, IDisposable
 {
     private CancellationTokenSource _resetCacheToken = new();

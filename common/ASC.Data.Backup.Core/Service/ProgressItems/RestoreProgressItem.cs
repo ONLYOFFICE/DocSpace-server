@@ -26,7 +26,7 @@
 
 namespace ASC.Data.Backup.Services;
 
-[Transient(Additional = typeof(RestoreProgressItemExtention))]
+[Transient]
 public class RestoreProgressItem : BaseBackupProgressItem
 {
     private readonly IConfiguration _configuration;
@@ -41,7 +41,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
     private string _region;
     private string _upgradesPath;
     private string _serverBaseUri;
-
+    
     public RestoreProgressItem(
         IConfiguration configuration,
         ILogger<RestoreProgressItem> logger,
@@ -49,7 +49,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
         IServiceScopeFactory serviceScopeFactory,
         NotifyHelper notifyHelper,
         CoreBaseSettings coreBaseSettings)
-        : base(logger, serviceScopeFactory)
+        : base(serviceScopeFactory)
     {
         _configuration = configuration;
         _logger = logger;
@@ -68,7 +68,9 @@ public class RestoreProgressItem : BaseBackupProgressItem
 
     public void Init(StartRestoreRequest request, string tempFolder, string upgradesPath, string region = "current")
     {
+        Init();
         TenantId = request.TenantId;
+        NewTenantId = request.TenantId;
         Notify = request.NotifyAfterCompletion;
         StoragePath = request.FilePathOrId;
         StorageType = request.StorageType;
@@ -113,11 +115,11 @@ public class RestoreProgressItem : BaseBackupProgressItem
 
                 if (record == null)
                 {
-                    var md5Hash = BackupWorker.GetBackupHashMD5(tempFile, S3Storage.ChunkSize);
+                    var md5Hash = await BackupWorker.GetBackupHashMD5Async(tempFile, S3Storage.ChunkSize);
                     record = await _backupRepository.GetBackupRecordAsync(md5Hash, TenantId);
                     if (record == null)
                     {
-                        throw new Exception(BackupResource.BackupNotFound);
+                       // throw new Exception(BackupResource.BackupNotFound);
                     }
                 }
             }
@@ -135,7 +137,9 @@ public class RestoreProgressItem : BaseBackupProgressItem
                 Percentage = Percentage = 10d + 0.65 * args.Progress;
                 await PublishChanges();
             };
-            await restoreTask.RunJob();
+            await restoreTask.RunJob(); 
+            NewTenantId = columnMapper.GetTenantMapping();
+            await PublishChanges();
 
             if (restoreTask.Dump)
             {
@@ -210,13 +214,5 @@ public class RestoreProgressItem : BaseBackupProgressItem
     public override object Clone()
     {
         return MemberwiseClone();
-    }
-}
-
-public static class RestoreProgressItemExtention
-{
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<RestorePortalTask>();
     }
 }

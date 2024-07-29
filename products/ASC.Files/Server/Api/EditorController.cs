@@ -38,8 +38,12 @@ public class EditorControllerInternal(FileStorageService fileStorageService,
         FileDtoHelper fileDtoHelper,
         ExternalShare externalShare,
         AuthContext authContext,
-        ConfigurationConverter<int> configurationConverter)
-        : EditorController<int>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter);
+        ConfigurationConverter<int> configurationConverter,
+        IDaoFactory daoFactory,
+        FileMarker fileMarker,
+        SocketManager socketManager,
+        SecurityContext securityContext)
+        : EditorController<int>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, daoFactory, fileMarker, socketManager, securityContext);
 
 [DefaultRoute("file")]
 public class EditorControllerThirdparty(FileStorageService fileStorageService,
@@ -52,8 +56,12 @@ public class EditorControllerThirdparty(FileStorageService fileStorageService,
         FileDtoHelper fileDtoHelper,
         ExternalShare externalShare,
         AuthContext authContext,
-        ConfigurationConverter<string> configurationConverter)
-        : EditorController<string>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter);
+        ConfigurationConverter<string> configurationConverter,
+        IDaoFactory daoFactory,
+        FileMarker fileMarker,
+        SocketManager socketManager,
+        SecurityContext securityContext)
+        : EditorController<string>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, daoFactory, fileMarker, socketManager, securityContext);
 
 public abstract class EditorController<T>(FileStorageService fileStorageService,
         DocumentServiceHelper documentServiceHelper,
@@ -65,13 +73,13 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
         FileDtoHelper fileDtoHelper,
         ExternalShare externalShare,
         AuthContext authContext,
-        ConfigurationConverter<T> configurationConverter)
+        ConfigurationConverter<T> configurationConverter,
+        IDaoFactory daoFactory,
+        FileMarker fileMarker,
+        SocketManager socketManager,
+        SecurityContext securityContext)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
-    protected readonly DocumentServiceHelper _documentServiceHelper = documentServiceHelper;
-    protected readonly EncryptionKeyPairDtoHelper _encryptionKeyPairDtoHelper = encryptionKeyPairDtoHelper;
-    protected readonly SettingsManager _settingsManager = settingsManager;
-    protected readonly EntryManager _entryManager = entryManager;
 
     /// <summary>
     /// Saves edits to a file with the ID specified in the request.
@@ -108,6 +116,20 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     }
 
     /// <summary>
+    /// Starts filling a file with the ID specified in the request.
+    /// </summary>
+    /// <short>Starts filling</short>
+    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
+    /// <category>Files</category>
+    /// <path>api/2.0/files/file/{fileId}/startfilling</path>
+    /// <httpMethod>PUT</httpMethod>
+    [HttpPut("{fileId}/startfilling")]
+    public async Task StartFillingAsync(T fileId)
+    {
+        await fileStorageService.StartFillingAsync(fileId);
+    }
+
+    /// <summary>
     /// Tracks file changes when editing.
     /// </summary>
     /// <short>Track file editing</short>
@@ -133,6 +155,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <param type="System.Int32, System" name="version">File version</param>
     /// <param type="System.Boolean, System" name="view">Specifies if a document will be opened for viewing only or not</param>
     /// <param type="ASC.Web.Files.Services.DocumentService.EditorType, ASC.Files.Core" name="editorType">Editor type (Desktop, Mobile, Embedded)</param>
+    /// <param type="System.Boolean, System" name="edit"></param>
     /// <category>Files</category>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.ConfigurationDto, ASC.Files.Core">Configuration parameters</returns>
     /// <path>api/2.0/files/file/{fileId}/openedit</path>
@@ -141,16 +164,125 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     [AllowAnonymous]
     [AllowNotPayment]
     [HttpGet("{fileId}/openedit")]
-    public async Task<ConfigurationDto<T>> OpenEditAsync(T fileId, int version, bool view, EditorType editorType)
+    public async Task<ConfigurationDto<T>> OpenEditAsync(T fileId, int version, bool view, EditorType editorType, bool edit)
     {
-        var docParams = await _documentServiceHelper.GetParamsAsync(fileId, version, true, !view, true);
-        var configuration = docParams.Configuration;
-        var file = docParams.File;
-        configuration.EditorType = editorType;
+        var (file, lastVersion) = await documentServiceHelper.GetCurFileInfoAsync(fileId, version);
+        var extension = FileUtility.GetFileExtension(file.Title);
+        var fileType = FileUtility.GetFileTypeByExtention(extension);
 
-        if (file.RootFolderType == FolderType.Privacy && await PrivacyRoomSettings.GetEnabledAsync(_settingsManager) || docParams.LocatedInPrivateRoom)
+        bool canEdit;
+        bool canFill;
+        var canStartFilling = true;
+        var isSubmitOnly = false;
+
+        var fillingSessionId = "";
+        if (fileType == FileType.Pdf)
         {
-            var keyPair = await _encryptionKeyPairDtoHelper.GetKeyPairAsync();
+            var folderDao = daoFactory.GetFolderDao<T>();
+            var rootFolder = await folderDao.GetFolderAsync(file.ParentId);
+            if (!DocSpaceHelper.IsRoom(rootFolder.FolderType) && rootFolder.FolderType != FolderType.FormFillingFolderInProgress && rootFolder.FolderType != FolderType.FormFillingFolderDone)
+            {
+                var (rId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(rootFolder);
+                if (int.TryParse(rId.ToString(), out var roomId) && roomId != -1)
+                {
+                    var room = await folderDao.GetFolderAsync((T)Convert.ChangeType(roomId, typeof(T)));
+                    if (room.FolderType == FolderType.FillingFormsRoom)
+                    {
+                        rootFolder = room;
+                    }
+                }
+            }
+
+            switch (rootFolder.FolderType)
+            {
+                case FolderType.FillingFormsRoom:
+                    var properties = await daoFactory.GetFileDao<T>().GetProperties(file.Id);
+                    var linkDao = daoFactory.GetLinkDao<T>();
+                    var fileDao = daoFactory.GetFileDao<T>();
+                    canStartFilling = false;
+
+                    if (securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))
+                    {
+                        canEdit = false;
+                        canFill = true;
+                        isSubmitOnly = true;
+                        editorType = EditorType.Embedded;
+                        fillingSessionId = Guid.NewGuid().ToString("N");
+                        break;
+                    }
+
+                   
+                    if (edit)
+                    {
+                        await linkDao.DeleteAllLinkAsync(file.Id);
+                        await fileDao.SaveProperties(file.Id, null);
+                        canEdit = true;
+                        canFill = false;
+                    }
+                    else
+                    {
+                        if (file.RootFolderType == FolderType.Archive)
+                        {
+                            canEdit = false;
+                            canFill = false;
+                        }
+                        else
+                        {
+                            if (properties != null && properties.FormFilling.StartFilling)
+                            {
+                                var linkedId = await linkDao.GetLinkedAsync(file.Id);
+                                var formDraft = !Equals(linkedId, default(T)) ? await fileDao.GetFileAsync(linkedId) : (await entryManager.GetFillFormDraftAsync(file, rootFolder.Id)).file;
+
+
+                                canEdit = false;
+                                canFill = true;
+                                editorType = EditorType.Embedded;
+
+                                file = formDraft;
+                                fillingSessionId = Guid.NewGuid().ToString("N");
+                            }
+                            else
+                            {
+                                canEdit = true;
+                                canFill = false;
+                            }
+                        }
+                    }
+
+                    break;
+
+                case FolderType.FormFillingFolderInProgress:
+                    canEdit = false;
+                    canFill = true;
+                    editorType = EditorType.Embedded;
+                    fillingSessionId = Guid.NewGuid().ToString("N");
+                    break;
+
+                case FolderType.FormFillingFolderDone:
+                    editorType = EditorType.Embedded;
+                    canEdit = false;
+                    canFill = false;
+                    break;
+
+                default:
+                    canEdit = edit;
+                    canFill = !edit;
+                    break;
+            }
+        }
+        else
+        {
+            canEdit = true;
+            canFill = true;
+        }
+
+        var docParams = await documentServiceHelper.GetParamsAsync(file, lastVersion, canEdit, !view, true, canFill, editorType, isSubmitOnly);
+        var configuration = docParams.Configuration;
+        file = docParams.File;
+
+        if (file.RootFolderType == FolderType.Privacy && await PrivacyRoomSettings.GetEnabledAsync(settingsManager) || docParams.LocatedInPrivateRoom)
+        {
+            var keyPair = await encryptionKeyPairDtoHelper.GetKeyPairAsync();
             if (keyPair != null)
             {
                 configuration.EditorConfig.EncryptionKeys = new EncryptionKeysConfig
@@ -161,7 +293,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
             }
         }
 
-        var result = await configurationConverter.Convert(configuration, file);
+        var result = await configurationConverter.Convert(configuration, file, fillingSessionId);
         
         if (authContext.IsAuthenticated && !file.Encrypted && !file.ProviderEntry 
             && result.File.Security.TryGetValue(FileSecurity.FilesSecurityActions.Read, out var canRead) && canRead)
@@ -170,14 +302,24 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
 
             if (linkId != default && file.RootFolderType == FolderType.USER && file.CreateBy != authContext.CurrentAccount.ID)
             {
-                await _entryManager.MarkAsRecentByLink(file, linkId);
+                await entryManager.MarkAsRecentByLink(file, linkId);
             }
             else
             {
-                await _entryManager.MarkAsRecent(file);
+                await entryManager.MarkAsRecent(file);
             }
         }
         
+        if (fileType == FileType.Pdf && file.IsForm)
+        {
+            result.StartFilling = canStartFilling;
+        }
+
+        if (!string.IsNullOrEmpty(fillingSessionId))
+        {
+            result.FillingSessionId = fillingSessionId;
+        }
+       
         return result;
     }
 
@@ -239,9 +381,9 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <path>api/2.0/files/file/referencedata</path>
     /// <httpMethod>POST</httpMethod>
     [HttpPost("referencedata")]
-    public async Task<FileReference<T>> GetReferenceDataAsync(GetReferenceDataDto<T> inDto)
+    public async Task<FileReference> GetReferenceDataAsync(GetReferenceDataDto<T> inDto)
     {
-        return await fileStorageService.GetReferenceDataAsync(inDto.FileKey, inDto.InstanceId, inDto.SourceFileId, inDto.Path);
+        return await fileStorageService.GetReferenceDataAsync(inDto.FileKey, inDto.InstanceId, inDto.SourceFileId, inDto.Path, inDto.Link);
     }
 
     /// <summary>
@@ -285,9 +427,9 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         
-        var currentDocServiceUrl = filesLinkUtility.DocServiceUrl;
-        var currentDocServiceUrlInternal = filesLinkUtility.DocServiceUrlInternal;
-        var currentDocServicePortalUrl = filesLinkUtility.DocServicePortalUrl;
+        var currentDocServiceUrl = filesLinkUtility.GetDocServiceUrl();
+        var currentDocServiceUrlInternal = filesLinkUtility.GetDocServiceUrlInternal();
+        var currentDocServicePortalUrl = filesLinkUtility.GetDocServicePortalUrl();
 
         if (!ValidateUrl(inDto.DocServiceUrl) ||
             !ValidateUrl(inDto.DocServiceUrlInternal) ||
@@ -296,13 +438,13 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
             throw new Exception("Invalid input urls");
         }
 
-        filesLinkUtility.DocServiceUrl = inDto.DocServiceUrl;
-        filesLinkUtility.DocServiceUrlInternal = inDto.DocServiceUrlInternal;
-        filesLinkUtility.DocServicePortalUrl = inDto.DocServiceUrlPortal;
+        await filesLinkUtility.SetDocServiceUrlAsync(inDto.DocServiceUrl);
+        await filesLinkUtility.SetDocServiceUrlInternalAsync(inDto.DocServiceUrlInternal);
+        await filesLinkUtility.SetDocServicePortalUrlAsync(inDto.DocServiceUrlPortal);
 
         var https = new Regex(@"^https://", RegexOptions.IgnoreCase);
         var http = new Regex(@"^http://", RegexOptions.IgnoreCase);
-        if (https.IsMatch(commonLinkUtility.GetFullAbsolutePath("")) && http.IsMatch(filesLinkUtility.DocServiceUrl))
+        if (https.IsMatch(commonLinkUtility.GetFullAbsolutePath("")) && http.IsMatch(filesLinkUtility.GetDocServiceUrl()))
         {
             throw new Exception("Mixed Active Content is not allowed. HTTPS address for Document Server is required.");
         }
@@ -315,9 +457,9 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
         }
         catch (Exception)
         {        
-            filesLinkUtility.DocServiceUrl = currentDocServiceUrl;
-            filesLinkUtility.DocServiceUrlInternal = currentDocServiceUrlInternal;
-            filesLinkUtility.DocServicePortalUrl = currentDocServicePortalUrl;
+            await filesLinkUtility.SetDocServiceUrlAsync(currentDocServiceUrl);
+            await filesLinkUtility.SetDocServiceUrlInternalAsync(currentDocServiceUrlInternal);
+            await filesLinkUtility.SetDocServicePortalUrlAsync(currentDocServicePortalUrl);
           
             throw new Exception("Unable to establish a connection with the Document Server.");
         }
@@ -370,9 +512,9 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
         {
             Version = dsVersion,
             DocServiceUrlApi = url,
-            DocServiceUrl = filesLinkUtility.DocServiceUrl,
-            DocServiceUrlInternal =filesLinkUtility.DocServiceUrlInternal,
-            DocServicePortalUrl = filesLinkUtility.DocServicePortalUrl,
+            DocServiceUrl = filesLinkUtility.GetDocServiceUrl(),
+            DocServiceUrlInternal =filesLinkUtility.GetDocServiceUrlInternal(),
+            DocServicePortalUrl = filesLinkUtility.GetDocServicePortalUrl(),
             IsDefault = filesLinkUtility.IsDefault
         };
     }

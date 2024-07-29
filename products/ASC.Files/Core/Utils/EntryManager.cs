@@ -69,7 +69,7 @@ public class BreadCrumbsManager(
     {
         if (folderId == null)
         {
-            return new List<FileEntry>();
+            return [];
         }
 
         var breadCrumbs = await fileSecurity.FilterReadAsync(folderDao.GetParentFoldersAsync(folderId)).Cast<FileEntry>().ToListAsync();
@@ -80,7 +80,7 @@ public class BreadCrumbsManager(
         {
             rootId = await globalFolderHelper.FolderShareAsync;
         }
-        else if (firstVisible.ProviderEntry && firstVisible.ProviderMapped && (firstVisible.RootFolderType is FolderType.VirtualRooms or FolderType.Archive))
+        else if (firstVisible.ProviderMapped && (firstVisible.RootFolderType is FolderType.VirtualRooms or FolderType.Archive))
         {
             if (authContext.IsAuthenticated && firstVisible.ShareRecord is not { IsLink: true })
             {
@@ -90,6 +90,14 @@ public class BreadCrumbsManager(
             }
                 
             breadCrumbs = breadCrumbs.SkipWhile(f => f is Folder<T> folder && !DocSpaceHelper.IsRoom(folder.FolderType)).ToList();
+        }
+        else if (!firstVisible.ProviderEntry && firstVisible.RootFolderType is FolderType.VirtualRooms or FolderType.Archive && authContext.IsAuthenticated)
+        {
+            var room = breadCrumbs.FirstOrDefault(e => e is Folder<T> folder && DocSpaceHelper.IsRoom(folder.FolderType));
+            if (room is Folder<int> { ShareRecord.IsLink: true })
+            {
+                breadCrumbs = breadCrumbs.SkipWhile(f => f is Folder<T> folder && !DocSpaceHelper.IsRoom(folder.FolderType)).ToList();
+            }
         }
         else
         {
@@ -233,16 +241,44 @@ public class EntryManager(IDaoFactory daoFactory,
     SocketManager socketManager,
     FilesMessageService filesMessageService,
     BaseCommonLinkUtility commonLinkUtility,
+    FilesLinkUtility filesLinkUtility,
     SecurityContext securityContext,
     FormFillingReportCreator formFillingReportCreator,
     TenantUtil tenantUtil,
-    IDistributedLockProvider distributedLockProvider)
+    IDistributedLockProvider distributedLockProvider,
+    TempStream tempStream,
+    FileSharing fileSharing,
+    IQuotaService quotaService,
+    TenantManager tenantManager,
+    ExternalShare externalShare,
+    FileChecker fileChecker,
+    IDistributedCache distributedCache,
+    NotifyClient notifyClient)
 {
     private const string UpdateList = "filesUpdateList";
 
-    public async Task<(IEnumerable<FileEntry> Entries, int Total)> GetEntriesAsync<T>(Folder<T> parent, int from, int count, FilterType filterType, bool subjectGroup, Guid subjectId,
-        string searchText, string[] extension, bool searchInContent, bool withSubfolders, OrderBy orderBy, T roomId = default, SearchArea searchArea = SearchArea.Active, bool withoutTags = false, IEnumerable<string> tagNames = null,
-        bool excludeSubject = false, ProviderFilter provider = ProviderFilter.None, SubjectFilter subjectFilter = SubjectFilter.Owner, ApplyFilterOption applyFilterOption = ApplyFilterOption.All, QuotaFilter quotaFilter = QuotaFilter.All)
+    public async Task<(IEnumerable<FileEntry> Entries, int Total)> GetEntriesAsync<T>(
+        Folder<T> parent,
+        int from,
+        int count,
+        FilterType filterType,
+        bool subjectGroup,
+        Guid subjectId,
+        string searchText,
+        string[] extension,
+        bool searchInContent,
+        bool withSubfolders,
+        OrderBy orderBy,
+        T roomId = default,
+        SearchArea searchArea = SearchArea.Active,
+        bool withoutTags = false,
+        IEnumerable<string> tagNames = null,
+        bool excludeSubject = false,
+        ProviderFilter provider = ProviderFilter.None,
+        SubjectFilter subjectFilter = SubjectFilter.Owner,
+        ApplyFilterOption applyFilterOption = ApplyFilterOption.All,
+        QuotaFilter quotaFilter = QuotaFilter.All,
+        StorageFilter storageFilter = StorageFilter.None)
     {
         int total;
         var withShared = false;
@@ -271,10 +307,14 @@ public class EntryManager(IDaoFactory daoFactory,
             withSubfolders = false;
         }
 
-        if (parent.RootFolderType == FolderType.USER)
+        if (parent.RootFolderType is FolderType.USER)
         {
             withShared = true;
         }
+        
+        var sharedTask = parent.RootFolderType is FolderType.VirtualRooms && !parent.ProviderEntry 
+            ? daoFactory.GetSecurityDao<T>().IsSharedAsync(parent, [SubjectType.PrimaryExternalLink, SubjectType.ExternalLink]) 
+            : Task.FromResult(false);
 
         var (foldersFilterType, foldersSearchText) = applyFilterOption != ApplyFilterOption.Files ? (filterType, searchText) : (FilterType.None, string.Empty);
 
@@ -285,7 +325,7 @@ public class EntryManager(IDaoFactory daoFactory,
             if (applyFilterOption == ApplyFilterOption.All)
             {
                 filterType = foldersFilterType = FilterType.FilesOnly;
-        }
+            }
         }
         
         var (filesFilterType, filesSearchText, fileExtension) = applyFilterOption != ApplyFilterOption.Folders ? (filterType, searchText, extension) : (FilterType.None, string.Empty, new string[] {});
@@ -367,7 +407,8 @@ public class EntryManager(IDaoFactory daoFactory,
         }
         else if (parent.FolderType is FolderType.VirtualRooms or FolderType.Archive && !parent.ProviderEntry)
         {
-            entries = await fileSecurity.GetVirtualRoomsAsync(filterType, subjectId, searchText, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject, provider, subjectFilter, quotaFilter);
+            entries = await fileSecurity.GetVirtualRoomsAsync(filterType, subjectId, searchText, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject, 
+                provider, subjectFilter, quotaFilter, storageFilter);
 
             CalculateTotal();
         }
@@ -379,14 +420,71 @@ public class EntryManager(IDaoFactory daoFactory,
             var allFoldersCountTask = folderDao.GetFoldersCountAsync(parent.Id, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders, excludeSubject, roomId);
             var allFilesCountTask = fileDao.GetFilesCountAsync(parent.Id, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders, excludeSubject, roomId);
 
-            var folders = await folderDao.GetFoldersAsync(parent.Id, orderBy, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders, excludeSubject, from, count, roomId)
+            var containingMyFiles = false;
+            if (parent.FolderType is FolderType.ReadyFormFolder or FolderType.InProcessFormFolder)
+            {
+                var (currentRoomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(parent);
+                var room = await folderDao.GetFolderAsync((T)Convert.ChangeType(currentRoomId, typeof(T))).NotFoundIfNull();
+                var ace = await fileSharing.GetPureSharesAsync(room, new List<Guid> { authContext.CurrentAccount.ID }).FirstOrDefaultAsync();
+
+                if (ace is { Access: FileShare.FillForms })
+                {
+                    containingMyFiles = true;
+                }
+            }
+            
+            var folders = await folderDao.GetFoldersAsync(parent.Id, orderBy, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders, excludeSubject, from, count, roomId, containingMyFiles)
                 .ToListAsync();
+
+            if (containingMyFiles)
+            {
+                folders = folders.GroupBy(folder => folder.Id).Select(f => f.First()).ToList();
+            }
 
             var filesCount = count - folders.Count;
             var filesOffset = Math.Max(folders.Count > 0 ? 0 : from - await allFoldersCountTask, 0);
 
-            var files = await fileDao.GetFilesAsync(parent.Id, orderBy, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders, excludeSubject, filesOffset, filesCount, roomId, withShared)
-                .ToListAsync();
+            var filesTask = fileDao.GetFilesAsync(parent.Id, orderBy, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders,
+                excludeSubject, filesOffset, filesCount, roomId, withShared);
+
+            var shared = await sharedTask;
+
+            if (shared)
+            {
+                filesTask = filesTask.Select(x =>
+                {
+                    x.Shared = true;
+                    return x;
+                });
+            }
+
+            var files = await filesTask.ToListAsync();
+
+            if (parent.FolderType == FolderType.FillingFormsRoom && securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))
+            {
+                for (var i = folders.Count - 1; i >= 0; i--)
+                {
+                    if (folders[i].FolderType == FolderType.ReadyFormFolder || folders[i].FolderType == FolderType.InProcessFormFolder)
+                    {
+                        folders.Remove(folders[i]);
+                    }
+                }
+            }
+
+            if (filterType == FilterType.PdfForm)
+            {
+                for (var i = files.Count - 1; i >= 0; i--)
+                {
+                    if (files[i].Category == (int)FilterType.None && !await fileChecker.CheckExtendedPDF(files[i]))
+                    {
+                        files.Remove(files[i]);
+                    }
+                    else
+                    {
+                        files[i].Category = (int)FilterType.PdfForm;
+                    }
+                }
+            }
 
             entries = new List<FileEntry>(folders.Count + files.Count);
             entries.AddRange(folders);
@@ -737,7 +835,7 @@ public class EntryManager(IDaoFactory daoFactory,
     {
         if (entries == null)
         {
-            return entries;
+            return null;
         }
 
         if (subjectId != Guid.Empty)
@@ -757,11 +855,11 @@ public class EntryManager(IDaoFactory daoFactory,
             case FilterType.PresentationsOnly:
             case FilterType.ImagesOnly:
             case FilterType.DocumentsOnly:
-            case FilterType.OFormOnly:
-            case FilterType.OFormTemplateOnly:
             case FilterType.ArchiveOnly:
             case FilterType.FilesOnly:
             case FilterType.MediaOnly:
+            case FilterType.Pdf:
+            case FilterType.PdfForm:
                 where = f => f.FileEntryType == FileEntryType.File && (((File<T>)f).FilterType == filter || filter == FilterType.FilesOnly);
                 break;
             case FilterType.FoldersOnly:
@@ -1014,7 +1112,7 @@ public class EntryManager(IDaoFactory daoFactory,
         }
     }
     
-    public async Task<(File<T> file, Folder<T> folderIfNew)> GetFillFormDraftAsync<T>(File<T> sourceFile)
+    public async Task<(File<T> file, Folder<T> folderIfNew)> GetFillFormDraftAsync<T>(File<T> sourceFile, T folderId)
     {
         if (sourceFile == null)
         {
@@ -1025,28 +1123,27 @@ public class EntryManager(IDaoFactory daoFactory,
         File<T> linkedFile = null;
         var fileDao = daoFactory.GetFileDao<T>();
         var sourceFileDao = daoFactory.GetFileDao<T>();
-        var linkDao = daoFactory.GetLinkDao();
+        var linkDao = daoFactory.GetLinkDao<T>();
 
         await using (await distributedLockProvider.TryAcquireFairLockAsync(sourceFile.Id + "_draft"))
         {
-            var linkedId = await linkDao.GetLinkedAsync(sourceFile.Id.ToString());
+            var linkedId = await linkDao.GetLinkedAsync(sourceFile.Id);
 
-            if (linkedId != null)
+            if (!Equals(linkedId, default(T)))
             {
-                linkedFile = await fileDao.GetFileAsync((T)Convert.ChangeType(linkedId, typeof(T)));
+                linkedFile = await fileDao.GetFileAsync(linkedId);
                 if (linkedFile == null
                     || !await fileSecurity.CanFillFormsAsync(linkedFile)
                     || await lockerManager.FileLockedForMeAsync(linkedFile.Id)
                     || linkedFile.RootFolderType == FolderType.TRASH)
                 {
-                    await linkDao.DeleteLinkAsync(sourceFile.Id.ToString());
+                    await linkDao.DeleteLinkAsync(sourceFile.Id);
                     linkedFile = null;
                 }
             }
 
             if (linkedFile == null)
             {
-                var folderId = sourceFile.ParentId;
                 var folderDao = daoFactory.GetFolderDao<T>();
                 folderIfNew = await folderDao.GetFolderAsync(folderId);
                 if (folderIfNew == null)
@@ -1069,8 +1166,8 @@ public class EntryManager(IDaoFactory daoFactory,
                     T inProcessFormFolderId;
                     T readyFormFolderId;
 
-                    var inProcessFormFolder = (await folderDao.GetFoldersAsync(folderId, FolderType.InProcessFormFolder).ToListAsync()).FirstOrDefault();
-                    var readyFormFolder = (await folderDao.GetFoldersAsync(folderId, FolderType.ReadyFormFolder).ToListAsync()).FirstOrDefault();
+                    var inProcessFormFolder = await folderDao.GetFoldersAsync(folderId, FolderType.InProcessFormFolder).FirstOrDefaultAsync();
+                    var readyFormFolder = await folderDao.GetFoldersAsync(folderId, FolderType.ReadyFormFolder).FirstOrDefaultAsync();
                     if (inProcessFormFolder == null && readyFormFolder == null)
                     {
                         (readyFormFolderId, inProcessFormFolderId) = await InitSystemFormFillingFolders(folderId, folderDao);
@@ -1094,16 +1191,16 @@ public class EntryManager(IDaoFactory daoFactory,
                     var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
                     title = $"{user.FirstName} {user.LastName} - {sourceFile.Title}";
 
-                    if (properties == null)
+                    if (Equals(properties.FormFilling.ResultsFileID, default(T)))
                     {
-                        var initFormFillingProperties = await InitFormFillingProperties(sourceTitle, sourceFile.Id, inProcessFormFolderId, readyFormFolderId, folderIfNew.CreateBy, fileDao, folderDao);
-                        linkedFile.ParentId = (T)Convert.ChangeType(initFormFillingProperties.FormFilling.ToFolderId, typeof(T));
+                        var initFormFillingProperties = await InitFormFillingProperties(folderIfNew.Id, sourceTitle, sourceFile.Id, inProcessFormFolderId, readyFormFolderId, folderIfNew.CreateBy, properties, fileDao, folderDao);
+                        linkedFile.ParentId = initFormFillingProperties.FormFilling.ToFolderId;
                     }
                     else
                     {
-                        linkedFile.ParentId = (T)Convert.ChangeType(properties.FormFilling.ToFolderId, typeof(T));
+                        linkedFile.ParentId = properties.FormFilling.ToFolderId;
                     }
-
+                    linkedFile.Category = (int)FilterType.PdfForm;
                 }
                 else
                 {
@@ -1122,7 +1219,7 @@ public class EntryManager(IDaoFactory daoFactory,
                 }
 
                 linkedFile.Title = Global.ReplaceInvalidCharsAndTruncate(title);
-                    linkedFile.SetFileStatus(await sourceFile.GetFileStatus());
+                linkedFile.SetFileStatus(await sourceFile.GetFileStatus());
                 linkedFile.ConvertedType = sourceFile.ConvertedType;
                 linkedFile.Comment = FilesCommonResource.CommentCreateFillFormDraft;
                 linkedFile.Encrypted = sourceFile.Encrypted;
@@ -1136,14 +1233,20 @@ public class EntryManager(IDaoFactory daoFactory,
                 if (folderIfNew.FolderType == FolderType.FillingFormsRoom)
                 {
                     var prop = await fileDao.GetProperties(sourceFile.Id);
+                    prop.FormFilling.StartFilling = false;
                     await fileDao.SaveProperties(linkedFile.Id, prop);
                 }
 
-                await fileMarker.MarkAsNewAsync(linkedFile);
+                var aces = await fileSharing.GetSharedInfoAsync(folderIfNew);
+                var users = aces.Where(ace => ace is not { Access: FileShare.FillForms }).Select(ace => ace.Id).ToList();
 
-                await socketManager.CreateFileAsync(linkedFile);
+                await fileMarker.MarkAsNewAsync(linkedFile, users);
+                await socketManager.CreateFileAsync(linkedFile, users);
 
-                await linkDao.AddLinkAsync(sourceFile.Id.ToString(), linkedFile.Id.ToString());
+                if (!securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))
+                {
+                    await linkDao.AddLinkAsync(sourceFile.Id, linkedFile.Id);
+                }
 
                 await socketManager.UpdateFileAsync(sourceFile);
             }
@@ -1159,10 +1262,10 @@ public class EntryManager(IDaoFactory daoFactory,
             return false;
         }
 
-        var linkDao = daoFactory.GetLinkDao();
-        var sourceId = await linkDao.GetSourceAsync(file.Id.ToString());
+        var linkDao = daoFactory.GetLinkDao<T>();
+        var sourceId = await linkDao.GetSourceAsync(file.Id);
 
-        return !string.IsNullOrEmpty(sourceId);
+        return !Equals(sourceId, default(T));
     }
 
     public async Task<bool> CheckFillFormDraftAsync<T>(File<T> linkedFile)
@@ -1172,39 +1275,30 @@ public class EntryManager(IDaoFactory daoFactory,
             return false;
         }
 
-        var linkDao = daoFactory.GetLinkDao();
-        var sourceId = await linkDao.GetSourceAsync(linkedFile.Id.ToString());
-        if (sourceId == null)
+        var linkDao = daoFactory.GetLinkDao<T>();
+        var sourceId = await linkDao.GetSourceAsync(linkedFile.Id);
+        if (Equals(sourceId, default(T)))
         {
             return false;
         }
-
-        if (int.TryParse(sourceId, out var sId))
+        
+        var fileDao = daoFactory.GetFileDao<T>();
+        var sourceFile = await fileDao.GetFileAsync(sourceId);
+        if (sourceFile == null
+            || !await fileSecurity.CanFillFormsAsync(sourceFile)
+            || sourceFile.Access != FileShare.FillForms)
         {
-            return await CheckAsync(sId);
+            await linkDao.DeleteLinkAsync(sourceId);
+
+            return false;
         }
 
-        return await CheckAsync(sourceId);
-
-        async Task<bool> CheckAsync<T1>(T1 id)
-        {
-            var fileDao = daoFactory.GetFileDao<T1>();
-            var sourceFile = await fileDao.GetFileAsync(id);
-            if (sourceFile == null
-                || !await fileSecurity.CanFillFormsAsync(sourceFile)
-                || sourceFile.Access != FileShare.FillForms)
-            {
-                await linkDao.DeleteLinkAsync(id.ToString());
-
-                return false;
-            }
-
-            return true;
-        }
+        return true;
+        
     }
 
     public async Task<File<T>> SaveEditingAsync<T>(T fileId, string fileExtension, string downloadUri, Stream stream, string comment = null, bool checkRight = true, 
-        bool encrypted = false, ForcesaveType? forceSave = null, bool keepLink = false, string formsDataUrl = null)
+        bool encrypted = false, ForcesaveType? forceSave = null, bool keepLink = false, string formsDataUrl = null, string fillingSessionId = null)
     {
         var newExtension = string.IsNullOrEmpty(fileExtension)
                           ? FileUtility.GetFileExtension(downloadUri)
@@ -1223,7 +1317,7 @@ public class EntryManager(IDaoFactory daoFactory,
             throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
-        if (checkRight && (!await fileSecurity.CanFillFormsAsync(file) || !await fileSecurity.CanEditAsync(file)))
+        if (checkRight && !await fileSecurity.CanEditAsync(file))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
         }
@@ -1233,7 +1327,7 @@ public class EntryManager(IDaoFactory daoFactory,
             throw new Exception(FilesCommonResource.ErrorMessage_LockedFile);
         }
 
-        if (checkRight && forceSave is null or ForcesaveType.None && fileTracker.IsEditing(file.Id))
+        if (checkRight && forceSave is null or ForcesaveType.None && await fileTracker.IsEditingAsync(file.Id))
         {
             throw new Exception(FilesCommonResource.ErrorMessage_SecurityException_UpdateEditingFile);
         }
@@ -1320,7 +1414,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
                 var key = DocumentServiceConnector.GenerateRevisionId(downloadUri);
 
-                var resultTuple = await documentServiceConnector.GetConvertedUriAsync(downloadUri, newExtension, currentExt, key, null, CultureInfo.CurrentUICulture.Name, null, null, false);
+                var resultTuple = await documentServiceConnector.GetConvertedUriAsync(downloadUri, newExtension, currentExt, key, null, CultureInfo.CurrentUICulture.Name, null, null, false, false);
                 downloadUri = resultTuple.ConvertedDocumentUri;
 
                 stream = null;
@@ -1334,23 +1428,6 @@ public class EntryManager(IDaoFactory daoFactory,
             file.ConvertedType = null;
         }
 
-        if (file.Forcesave == ForcesaveType.UserSubmit)
-        {
-            var folderDao = daoFactory.GetFolderDao<T>();
-            var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(file);
-
-            var room = await folderDao.GetFolderAsync((T)Convert.ChangeType(roomId, typeof(T))).NotFoundIfNull();
-            if (room.FolderType == FolderType.FillingFormsRoom)
-            {
-                var properties = await formFillingReportCreator.UpdateFormFillingReport(file, formsDataUrl);
-
-                if (properties != null)
-                {
-                    await fileMarker.RemoveMarkAsNewForAllAsync(file);
-                    file.ParentId = (T)Convert.ChangeType(properties.FormFilling.ResultsFolderId, typeof(T));
-                }
-            }
-        }
 
         using (var tmpStream = new MemoryStream())
         {
@@ -1366,13 +1443,151 @@ public class EntryManager(IDaoFactory daoFactory,
                     RequestUri = new Uri(downloadUri)
                 };
 
-                var httpClient = clientFactory.CreateClient();
+                var httpClient = clientFactory.CreateClient(nameof(DocumentService));
                 using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
                 await using var editedFileStream = await response.Content.ReadAsStreamAsync();
                 await editedFileStream.CopyToAsync(tmpStream);
             }
             tmpStream.Position = 0;
+            if (file.Forcesave == ForcesaveType.UserSubmit)
+            {
+                var folderDao = daoFactory.GetFolderDao<T>();
+                var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(file);
 
+                var room = await folderDao.GetFolderAsync((T)Convert.ChangeType(roomId, typeof(T))).NotFoundIfNull();
+                if (room.FolderType == FolderType.FillingFormsRoom)
+                {
+                    var properties = await daoFactory.GetFileDao<T>().GetProperties(file.Id);
+
+                    if (!Equals(properties.FormFilling.OriginalFormId, file.Id) && !Equals(properties.FormFilling.OriginalFormId, default(T)))
+                    {
+                        var origProperties = await daoFactory.GetFileDao<T>().GetProperties(properties.FormFilling.OriginalFormId);
+                        origProperties.FormFilling.ResultFormNumber++;
+                        await fileDao.SaveProperties(properties.FormFilling.OriginalFormId, origProperties);
+
+                        properties.FormFilling.ResultFormNumber = origProperties.FormFilling.ResultFormNumber;
+                    }
+                    else
+                    {
+                        properties.FormFilling.ResultFormNumber++;
+                    }
+
+                    if (properties != null)
+                    {
+                        var userId = securityContext.CurrentAccount.ID;
+                        var user = await userManager.GetUsersAsync(userId);
+                        if (userId.Equals(ASC.Core.Configuration.Constants.Guest.ID) && (properties.FormFilling.ResultsFileID == null || Equals(properties.FormFilling.ResultsFileID, default(T))))
+                        {
+                            await InitFormFillingFolders(file, room, properties, folderDao, fileDao);
+                        }
+                        var pdfFile = serviceProvider.GetService<File<T>>();
+
+                        var ext = FileUtility.GetFileExtension(file.Title);
+                        var sourceTitle = Path.GetFileNameWithoutExtension(file.Title);
+
+                        var dateTimeNow = tenantUtil.DateTimeNow();
+                        pdfFile.Title = $"{properties.FormFilling.ResultFormNumber} - {sourceTitle} ({$"{dateTimeNow.ToString("dd-MM-yyyy H-mm")}"}){ext}";
+                        pdfFile.ParentId = properties.FormFilling.ResultsFolderId;
+                        pdfFile.Comment = string.IsNullOrEmpty(comment) ? null : comment;
+                        pdfFile.Category = (int)FilterType.Pdf;
+                        File<T> result;
+
+                        await filesMessageService.SendAsync(
+                            MessageAction.FormSubmit, 
+                            file, MessageInitiator.DocsService,
+                            user.Id.Equals(ASC.Core.Configuration.Constants.Guest.ID) ? FilesCommonResource.Guest : user.DisplayUserName(false, displayUserSettingsHelper),
+                            file.Title);
+
+                        if (tmpStream.CanSeek)
+                        {
+                            pdfFile.ContentLength = tmpStream.Length;
+                            result = await fileDao.SaveFileAsync(pdfFile, tmpStream, false);
+                        }
+                        else
+                        {
+                            var (buffered, isNew) = await tempStream.TryGetBufferedAsync(tmpStream);
+                            try
+                            {
+                                pdfFile.ContentLength = buffered.Length;
+                                result = await fileDao.SaveFileAsync(pdfFile, buffered, false);
+                            }
+                            finally
+                            {
+                                if (isNew)
+                                {
+                                    await buffered.DisposeAsync();
+                                }
+                            }
+                        }
+
+                        var originalForm = await fileDao.GetFileAsync(properties.FormFilling.OriginalFormId);
+                        await notifyClient.SendFormSubmittedAsync(room, originalForm, pdfFile);
+
+                        if (fillingSessionId != null)
+                        {
+                            await distributedCache.SetStringAsync(fillingSessionId, result.Id.ToString());
+                        }
+
+                        try
+                        {
+                            var linkDao = daoFactory.GetLinkDao<T>();
+
+                            var resProp = new EntryProperties<T>()
+                            {
+                                FormFilling = new FormFillingProperties<T>()
+                                {
+                                    CollectFillForm = properties.FormFilling.CollectFillForm,
+                                    StartFilling = false,
+                                    Title = properties.FormFilling.Title,
+                                    RoomId = properties.FormFilling.RoomId,
+                                    ToFolderId = properties.FormFilling.ToFolderId,
+                                    OriginalFormId = properties.FormFilling.OriginalFormId,
+                                    ResultsFolderId = properties.FormFilling.ResultsFolderId,
+                                    ResultsFileID = properties.FormFilling.ResultsFileID,
+                                    ResultFormNumber = properties.FormFilling.ResultFormNumber
+                                }
+                            };
+
+                            await fileDao.SaveProperties(result.Id, resProp);
+
+                            var aces = await fileSharing.GetSharedInfoAsync(room);
+                            var users = aces.Where(ace => ace is not { Access: FileShare.FillForms }).Select(ace => ace.Id).ToList();
+
+                            await fileMarker.MarkAsNewAsync(result, users);
+                            await socketManager.CreateFileAsync(result, users);
+
+                            var resultUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, result.Title, result.Id, result.Version)));
+                            await formFillingReportCreator.UpdateFormFillingReport(properties.FormFilling.ResultsFileID, resProp.FormFilling.ResultFormNumber, formsDataUrl, resultUrl);
+
+                            if (!securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))
+                            {
+                                var sourceId = await linkDao.GetSourceAsync(file.Id);
+                                var sourceFile = await fileDao.GetFileAsync(sourceId);
+
+                                await linkDao.DeleteLinkAsync(sourceId);
+                                await socketManager.UpdateFileAsync(sourceFile);
+
+                                await fileDao.SaveProperties(file.Id, properties);
+                                await fileMarker.RemoveMarkAsNewForAllAsync(file);
+
+                                await linkDao.DeleteAllLinkAsync(file.Id);
+                            }
+                            else
+                            {
+                                await fileDao.SaveProperties(file.Id, properties);
+                            }
+                           
+
+                        }
+                        catch(Exception ex)
+                        {
+                            logger.LogError(ex, "Form submission error");
+                        }
+
+                        return result;
+                    }
+                }
+            }
             file.ContentLength = tmpStream.Length;
             file.Comment = string.IsNullOrEmpty(comment) ? null : comment;
             if (replaceVersion)
@@ -1387,8 +1602,8 @@ public class EntryManager(IDaoFactory daoFactory,
                || (!file.ProviderEntry && file.CreateBy != authContext.CurrentAccount.ID)
                || !await LinkedForMeAsync(file))
             {
-                var linkDao = daoFactory.GetLinkDao();
-                await linkDao.DeleteAllLinkAsync(file.Id.ToString());
+                var linkDao = daoFactory.GetLinkDao<T>();
+                await linkDao.DeleteAllLinkAsync(file.Id);
             }
         }
 
@@ -1401,9 +1616,9 @@ public class EntryManager(IDaoFactory daoFactory,
     public async Task<File<T>> TrackEditingAsync<T>(T fileId, Guid tabId, Guid userId, int tenantId, bool editingAlone = false)
     {
         bool checkRight;
-        if (fileTracker.GetEditingBy(fileId).Contains(userId))
+        if ((await fileTracker.GetEditingByAsync(fileId)).Contains(userId))
         {
-            checkRight = fileTracker.ProlongEditing(fileId, tabId, userId, tenantId, commonLinkUtility.ServerRootPath, editingAlone);
+            checkRight = await fileTracker.ProlongEditingAsync(fileId, tabId, userId, tenantId, commonLinkUtility.ServerRootPath, editingAlone);
             if (!checkRight)
             {
                 return null;
@@ -1431,10 +1646,10 @@ public class EntryManager(IDaoFactory daoFactory,
             throw new Exception(FilesCommonResource.ErrorMessage_ViewTrashItem);
         }
 
-        checkRight = fileTracker.ProlongEditing(fileId, tabId, userId, tenantId, commonLinkUtility.ServerRootPath, editingAlone);
+        checkRight = await fileTracker.ProlongEditingAsync(fileId, tabId, userId, tenantId, commonLinkUtility.ServerRootPath, editingAlone);
         if (checkRight)
         {
-            fileTracker.ChangeRight(fileId, userId, false);
+            await fileTracker.ChangeRight(fileId, userId, false);
         }
 
         return file;
@@ -1491,7 +1706,7 @@ public class EntryManager(IDaoFactory daoFactory,
             throw new Exception(FilesCommonResource.ErrorMessage_LockedFile);
         }
 
-        if (checkRight && fileTracker.IsEditing(file.Id))
+        if (checkRight && await fileTracker.IsEditingAsync(file.Id))
         {
             throw new Exception(FilesCommonResource.ErrorMessage_SecurityException_UpdateEditingFile);
         }
@@ -1516,6 +1731,54 @@ public class EntryManager(IDaoFactory daoFactory,
         {
             throw new Exception(FilesCommonResource.ErrorMessage_UpdateEditingFile);
         }
+
+        var folderDao = daoFactory.GetFolderDao<T>();
+        var currentFolder = await folderDao.GetFolderAsync(file.FolderIdDisplay);
+        var (folderId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(currentFolder);
+
+        if (int.TryParse(folderId.ToString(), out var roomId))
+        {
+            if (roomId != -1)
+            {
+                var currentRoom = await folderDao.GetFolderAsync((T)Convert.ChangeType(roomId, typeof(T)));
+                var quotaRoomSettings = await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
+                if (quotaRoomSettings.EnableQuota)
+                {
+                    var roomQuotaLimit = currentRoom.SettingsQuota == TenantEntityQuotaSettings.DefaultQuotaValue ? quotaRoomSettings.DefaultQuota : currentRoom.SettingsQuota;
+                    if (roomQuotaLimit != TenantEntityQuotaSettings.NoQuota)
+                    {
+                        if (roomQuotaLimit - currentRoom.Counter < file.ContentLength)
+                        {
+                            throw FileSizeComment.GetRoomFreeSpaceException(roomQuotaLimit);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+                var quotaUserSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
+                if (quotaUserSettings.EnableQuota)
+                {
+                    var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+                    var userQuotaData = await settingsManager.LoadAsync<UserQuotaSettings>(user);
+
+                    var userQuotaLimit = userQuotaData.UserQuota == userQuotaData.GetDefault().UserQuota ? quotaUserSettings.DefaultQuota : userQuotaData.UserQuota;
+
+                    if (userQuotaLimit != UserQuotaSettings.NoQuota)
+                    {
+                        var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenantId, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
+
+                        if (userQuotaLimit - userUsedSpace < file.ContentLength)
+                        {
+                            throw FileSizeComment.GetUserFreeSpaceException(userQuotaLimit);
+                        }
+                    }
+                }
+            }
+        }
+
+
 
         cache.Insert(UpdateList + fileId, fileId.ToString(), TimeSpan.FromMinutes(2));
 
@@ -1568,8 +1831,8 @@ public class EntryManager(IDaoFactory daoFactory,
             }
 
 
-            var linkDao = daoFactory.GetLinkDao();
-            await linkDao.DeleteAllLinkAsync(newFile.Id.ToString());
+            var linkDao = daoFactory.GetLinkDao<T>();
+            await linkDao.DeleteAllLinkAsync(newFile.Id);
 
             await fileMarker.MarkAsNewAsync(newFile);
 
@@ -1645,7 +1908,7 @@ public class EntryManager(IDaoFactory daoFactory,
         }
         else
         {
-            if (!fileTracker.IsEditing(lastVersionFile.Id) && fileVersion.Version == lastVersionFile.Version)
+            if (!await fileTracker.IsEditingAsync(lastVersionFile.Id) && fileVersion.Version == lastVersionFile.Version)
             {
                     lastVersionFile = await UpdateToVersionFileAsync(fileVersion.Id, fileVersion.Version, checkRight, true);
                 //await fileDao.CompleteVersionAsync(fileVersion.Id, fileVersion.Version);
@@ -1681,7 +1944,7 @@ public class EntryManager(IDaoFactory daoFactory,
             throw new Exception(FilesCommonResource.ErrorMessage_LockedFile);
         }
 
-        if (file.ProviderEntry && fileTracker.IsEditing(file.Id))
+        if (file.ProviderEntry && await fileTracker.IsEditingAsync(file.Id))
         {
             throw new Exception(FilesCommonResource.ErrorMessage_UpdateEditingFile);
         }
@@ -1769,6 +2032,37 @@ public class EntryManager(IDaoFactory daoFactory,
 
         await tagDao.SaveTagsAsync(tag);
     }
+
+    private async Task InitFormFillingFolders<T>(File<T> file, Folder<T> folder, EntryProperties<T> properties, IFolderDao<T> folderDao, IFileDao<T> fileDao) {
+        T inProcessFormFolderId;
+        T readyFormFolderId;
+
+        var inProcessFormFolder = await folderDao.GetFoldersAsync(folder.Id, FolderType.InProcessFormFolder).FirstOrDefaultAsync();
+        var readyFormFolder = await folderDao.GetFoldersAsync(folder.Id, FolderType.ReadyFormFolder).FirstOrDefaultAsync();
+
+        if (inProcessFormFolder == null && readyFormFolder == null)
+        {
+            (readyFormFolderId, inProcessFormFolderId) = await InitSystemFormFillingFolders(folder.Id, folderDao);
+        }
+        else
+        {
+            inProcessFormFolderId = inProcessFormFolder.Id;
+            readyFormFolderId = readyFormFolder.Id;
+        }
+
+        var systemFormFillingFolders = new List<Folder<T>>()
+        {
+            await folderDao.GetFolderAsync(readyFormFolderId),
+            await folderDao.GetFolderAsync(inProcessFormFolderId)
+        };
+        foreach (var formFolder in systemFormFillingFolders)
+        {
+            await socketManager.CreateFolderAsync(formFolder);
+            await filesMessageService.SendAsync(MessageAction.FolderCreated, formFolder, formFolder.Title);
+        }
+
+        await InitFormFillingProperties(folder.Id, Path.GetFileNameWithoutExtension(file.Title), file.Id, inProcessFormFolderId, readyFormFolderId, folder.CreateBy, properties, fileDao, folderDao);
+    }
     private async Task<(T readyFormFolderId, T inProcessFolderId)> InitSystemFormFillingFolders<T>(T formFillingRoomId, IFolderDao<T> folderDao)
     {
         var readyFormFolder = serviceProvider.GetService<Folder<T>>();
@@ -1788,7 +2082,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
         return (await readyFormFolderTask, await inProcessFolderTask);
     }
-    private async Task<EntryProperties> InitFormFillingProperties<T>(string sourceTitle, T sourceFileId, T inProcessFormFolderId, T readyFormFolderId, Guid createBy, IFileDao<T> fileDao, IFolderDao<T> folderDao)
+    private async Task<EntryProperties<T>> InitFormFillingProperties<T>(T roomId, string sourceTitle, T sourceFileId, T inProcessFormFolderId, T readyFormFolderId, Guid createBy, EntryProperties<T> properties, IFileDao<T> fileDao, IFolderDao<T> folderDao)
     {
         var templatesFolder = serviceProvider.GetService<Folder<T>>();
         templatesFolder.Title = sourceTitle;
@@ -1810,24 +2104,30 @@ public class EntryManager(IDaoFactory daoFactory,
         var templatesFolderId = await templatesFolderTask;
         var resultsFolderId = await resultsFolderTask;
 
-        var currentProperties = new EntryProperties { FormFilling = serviceProvider.GetService<FormFillingProperties>() };
-        currentProperties.FormFilling.Title = sourceTitle;
-        currentProperties.FormFilling.ToFolderId = templatesFolderId.ToString();
-        currentProperties.FormFilling.ResultsFolderId = resultsFolderId.ToString();
-        currentProperties.FormFilling.CollectFillForm = true;
+        properties.FormFilling.Title = sourceTitle;
+        properties.FormFilling.RoomId = roomId;
+        properties.FormFilling.OriginalFormId = sourceFileId;
+        properties.FormFilling.ToFolderId = templatesFolderId;
+        properties.FormFilling.ResultsFolderId = resultsFolderId;
+        properties.FormFilling.CollectFillForm = true;
 
         using (var textStream = new MemoryStream(Encoding.UTF8.GetBytes(""))) {
 
             var csvFile = serviceProvider.GetService<File<T>>();
             csvFile.ParentId = resultsFolderId;
             csvFile.Title = Global.ReplaceInvalidCharsAndTruncate(sourceTitle + ".csv");
+            csvFile.CreateBy = createBy;
 
-            var file = await fileDao.SaveFileAsync(csvFile, textStream);
-            currentProperties.FormFilling.ResultsFileID = file.Id.ToString();
+            var file = await fileDao.SaveFileAsync(csvFile, textStream, false);
+            var csvProp = new EntryProperties<T>() { FormFilling = new FormFillingProperties<T>() };
+            csvProp.FormFilling.ResultsFolderId = resultsFolderId;
+            await fileDao.SaveProperties(file.Id, csvProp);
+
+            properties.FormFilling.ResultsFileID = file.Id;
         }
-        await fileDao.SaveProperties(sourceFileId, currentProperties);
+        await fileDao.SaveProperties(sourceFileId, properties);
 
-        return currentProperties;
+        return properties;
     }
     private async Task SetOriginsAsync(IFolder parent, IEnumerable<FileEntry> entries)
     {

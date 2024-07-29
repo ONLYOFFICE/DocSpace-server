@@ -29,17 +29,19 @@ using File = System.IO.File;
 
 namespace ASC.Files.Core.Core.Thirdparty.GoogleDrive;
 
-[Scope]
-internal class GoogleDriveFileDao(UserManager userManager,
-        IDbContextFactory<FilesDbContext> dbContextFactory,
-        RegexDaoSelectorBase<DriveFile, DriveFile, DriveFile> daoSelector,
-        CrossDao crossDao,
-        IFileDao<int> fileDao,
-        IDaoBase<DriveFile, DriveFile, DriveFile> dao,
-        TempPath tempPath,
-        SetupInfo setupInfo,
-        TenantManager tenantManager)
-    : ThirdPartyFileDao<DriveFile, DriveFile, DriveFile>(userManager, dbContextFactory, daoSelector, crossDao, fileDao, dao, tenantManager)
+[Scope(typeof(ThirdPartyFileDao<DriveFile, DriveFile, DriveFile>))]
+internal class GoogleDriveFileDao(
+    UserManager userManager,
+    IDbContextFactory<FilesDbContext> dbContextFactory,
+    RegexDaoSelectorBase<DriveFile, DriveFile, DriveFile> daoSelector,
+    CrossDao crossDao,
+    IFileDao<int> fileDao,
+    IDaoBase<DriveFile, DriveFile, DriveFile> dao,
+    TempPath tempPath,
+    SetupInfo setupInfo,
+    TenantManager tenantManager,
+    Global global)
+    : ThirdPartyFileDao<DriveFile, DriveFile, DriveFile>(userManager, dbContextFactory, daoSelector, crossDao, fileDao, dao, tenantManager, global)
 {
     protected override string UploadSessionKey => "GoogleDriveSession";
 

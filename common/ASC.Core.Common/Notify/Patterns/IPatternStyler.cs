@@ -28,5 +28,5 @@ namespace ASC.Common.Notify.Patterns;
 
 public interface IPatternStyler
 {
-    void ApplyFormating(NoticeMessage message);
+    Task ApplyFormatingAsync(NoticeMessage message);
 }

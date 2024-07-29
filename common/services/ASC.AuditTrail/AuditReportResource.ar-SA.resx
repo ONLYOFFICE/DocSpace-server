@@ -355,7 +355,7 @@
     <value>تم تحديث المجموعات: {0}</value>
   </data>
   <data name="GuestAccount" xml:space="preserve">
-    <value>حساب ضيف</value>
+    <value>مجهول</value>
   </data>
   <data name="GuestActivated" xml:space="preserve">
     <value>تم تفعيل حساب الضيف: {0}</value>
@@ -797,5 +797,44 @@
   </data>
   <data name="PortalRenamed" xml:space="preserve">
     <value>تمت إعادة تسمية البوابة</value>
+  </data>
+  <data name="FileSizePostfix" xml:space="preserve">
+    <value>بايت، كيلوبايت، ميجابايت، جيجابايت، تيرابايت</value>
+  </data>
+  <data name="FileUploadedWithOverwriting" xml:space="preserve">
+    <value>تم تحميل ملف مع الكتابة فوقه: {0}</value>
+  </data>
+  <data name="RoomCopied" xml:space="preserve">
+    <value>تم نسخ الغرفة: {0}</value>
+  </data>
+  <data name="RoomGroupAdded" xml:space="preserve">
+    <value>مجموعة مضافة: {0}. المهام: {1}</value>
+  </data>
+  <data name="RoomGroupRemove" xml:space="preserve">
+    <value>المجموعة المحذوفة: {0}</value>
+  </data>
+  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
+    <value>{0} قام بتعيين: {1}</value>
+  </data>
+  <data name="SendJoinInvite" xml:space="preserve">
+    <value>أرسل المستخدم {0} دعوة إلى {1} للانضمام إلى DocSpace</value>
+  </data>
+  <data name="QuotaPerPortalChanged" xml:space="preserve">
+    <value>ضبط حصة التخزين الافتراضية: {0}</value>
+  </data>
+  <data name="QuotaPerPortalDisabled" xml:space="preserve">
+    <value>تعطيل حصة التخزين الافتراضية</value>
+  </data>
+  <data name="QuotaPerRoomChanged" xml:space="preserve">
+    <value>ضبط حصة التخزين الافتراضية للغرف: {0}</value>
+  </data>
+  <data name="QuotaPerRoomDisabled" xml:space="preserve">
+    <value>تعطيل حصة التخزين الافتراضية للغرف</value>
+  </data>
+  <data name="QuotaPerUserChanged" xml:space="preserve">
+    <value>ضبط حصة التخزين الافتراضية للمستخدمين: {0}</value>
+  </data>
+  <data name="QuotaPerUserDisabled" xml:space="preserve">
+    <value>تعطيل حصة التخزين الافتراضية للمستخدمين</value>
   </data>
 </root>

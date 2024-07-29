@@ -31,21 +31,15 @@ public static class QuotaExtension
     {
         services.AddScoped<ITenantQuotaFeatureChecker, CountPaidUserChecker>();
         services.AddScoped<TenantQuotaFeatureCheckerCount<CountPaidUserFeature>, CountPaidUserChecker>();
-        services.AddScoped<CountPaidUserChecker>();    
         services.AddScoped<ITenantQuotaFeatureStat<CountPaidUserFeature, int>, CountPaidUserStatistic>();
-        services.AddScoped<CountPaidUserStatistic>();
 
         services.AddScoped<ITenantQuotaFeatureChecker, CountUserChecker>();
         services.AddScoped<TenantQuotaFeatureCheckerCount<CountUserFeature>, CountUserChecker>();
-        services.AddScoped<CountUserChecker>();
         services.AddScoped<ITenantQuotaFeatureStat<CountUserFeature, int>, CountUserStatistic>();
-        services.AddScoped<CountUserStatistic>();
 
         services.AddScoped<ITenantQuotaFeatureChecker, MaxTotalSizeChecker>();
         services.AddScoped<TenantQuotaFeatureChecker<MaxTotalSizeFeature, long>, MaxTotalSizeChecker>();
-        services.AddScoped<MaxTotalSizeChecker>();
         services.AddScoped<ITenantQuotaFeatureStat<MaxTotalSizeFeature, long>, MaxTotalSizeStatistic>();
-        services.AddScoped<MaxTotalSizeStatistic>();
 
         services.AddScoped<TenantQuotaFeatureChecker<MaxFileSizeFeature, long>, MaxFileSizeChecker>();
         services.AddScoped<ITenantQuotaFeatureStat<MaxFileSizeFeature, long>, MaxFileSizeStatistic>();

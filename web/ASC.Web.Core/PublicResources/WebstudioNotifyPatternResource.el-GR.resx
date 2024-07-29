@@ -80,7 +80,7 @@
     <value>Επιβεβαίωση τερματισμού λογαριασμού</value>
   </data>
   <data name="ButtonRemoveProfile" xml:space="preserve">
-    <value>Αφαίρεση προφίλ</value>
+    <value>Απενεργοποίηση λογαριασμού</value>
   </data>
   <data name="ButtonRenewNow" xml:space="preserve">
     <value>Ανανέωση τώρα</value>
@@ -176,7 +176,7 @@
     <value>Ο χρήστης του DocSpace ενημερώθηκε: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="pattern_send_whats_new" xml:space="preserve">
-    <value>h1.Ακολουθούν τα νέα στο DocSpace σας στις $Date
+    <value>h1.Να τι νέο υπάρχει στο DocSpace σας "${__VirtualRootPath}":"${__VirtualRootPath}" την τελευταία ώρα
 
 #foreach($activity in $Activities)
 $activity
@@ -817,12 +817,6 @@ $TrulyYours</value>
   <data name="subject_enterprise_admin_activation_v1" xml:space="preserve">
     <value>Καλώς ήλθατε στο ONLYOFFICE DocSpace!</value>
   </data>
-  <data name="AcceptDocSpace" xml:space="preserve">
-    <value>ΑΠΟΔΟΧΉ</value>
-  </data>
-  <data name="ButtonConfirmEmail" xml:space="preserve">
-    <value>ΕΠΙΒΕΒΑΊΩΣΗ</value>
-  </data>
   <data name="subject_backup_created" xml:space="preserve">
     <value>${LetterLogoText}. ${__VirtualRootPath} δημιουργία αντιγράφου ασφαλείας πύλης</value>
   </data>
@@ -950,7 +944,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Αλλαγή της διεύθυνσης πύλης</value>
   </data>
   <data name="subject_profile_delete" xml:space="preserve">
-    <value>Διαγραφή του προφίλ σας από την πύλη ${__VirtualRootPath}</value>
+    <value>Απενεργοποίηση λογαριασμού στο ${__VirtualRootPath}</value>
   </data>
   <data name="subject_profile_has_deleted_itself" xml:space="preserve">
     <value>Ο χρήστης διέγραψε το προφίλ του</value>
@@ -989,7 +983,7 @@ $TrulyYours</value>
     <value>Ειδοποίησης αλλαγής προφίλ πύλης ${__VirtualRootPath}</value>
   </data>
   <data name="subject_send_whats_new" xml:space="preserve">
-    <value>Τι νέο υπάρχει στην πύλη σας για τις $Date</value>
+    <value>Τι νέο υπάρχει στην πύλη σας ${__VirtualRootPath} για τις $Date</value>
   </data>
   <data name="subject_smtp_test" xml:space="preserve">
     <value>Δοκιμαστικό μήνυμα SMTP</value>
@@ -1027,13 +1021,13 @@ $TrulyYours</value>
   <data name="ButtonChangeTfa" xml:space="preserve">
     <value>Διαμορφώστε την εφαρμογή αυθεντικοποίησης</value>
   </data>
-  <data name="ButtonCollaborateDocSpace" xml:space="preserve">
+  <data name="ButtonCollaborate" xml:space="preserve">
     <value>Συνεργαστείτε στο DocSpace</value>
   </data>
   <data name="ButtonConfigureRightNow" xml:space="preserve">
     <value>Κάντε διαμόρφωση τώρα</value>
   </data>
-  <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
+  <data name="ButtonConfirmInvite" xml:space="preserve">
     <value>Επιβεβαίωση πρόσκλησης στο DocSpace</value>
   </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
@@ -1100,7 +1094,7 @@ $TrulyYours</value>
 Εάν έχετε οποιεσδήποτε ερωτήσεις ή χρειάζεστε βοήθεια, μη διστάσετε να επικοινωνήσετε μαζί μας στο [${__SupportLink}](${__SupportLink})
 
 Με εκτίμηση,
-Η ομάδα υποστήριξης του ONLYOFFICE™
+Η ομάδα υποστήριξης του ONLYOFFICE
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
@@ -1271,6 +1265,7 @@ h1."$PortalUrl":"$PortalUrl"
 Η πύλη σας έχει μεταφερθεί σε νέο τομέα. Επαναφέρετε την πρόσβασή σας στην πύλη καθορίζοντας τον κωδικό πρόσβασης που θα χρησιμοποιηθεί για την είσοδο.
 
 Ακολουθήστε τον παρακάτω σύνδεσμο για να ορίσετε τον κωδικό πρόσβασης για τον λογαριασμό σας:
+
 $OrangeButton
 
 *Σημείωση*: αυτός ο σύνδεσμος ισχύει μόνο για 7 ημέρες. Παρακαλείστε να ολοκληρώσετε τη διαδικασία επαναφοράς της πρόσβασης εντός αυτής της περιόδου.
@@ -1326,7 +1321,7 @@ _Σημείωση_: αυτός ο σύνδεσμος ισχύει μόνο γι�
 Εάν έχετε οποιεσδήποτε ερωτήσεις ή χρειάζεστε βοήθεια, μπορείτε να επικοινωνήσετε μαζί μας στο [${__SalesEmail}](mailto:${__SalesEmail})
 
 Με εκτίμηση,
-Η ομάδα υποστήριξης του ONLYOFFICE™
+Η ομάδα υποστήριξης του ONLYOFFICE
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
@@ -1374,7 +1369,7 @@ _Σημείωση_: αυτός ο σύνδεσμος ισχύει μόνο γι�
 Εάν έχετε οποιεσδήποτε ερωτήσεις ή χρειάζεστε βοήθεια, μη διστάσετε να επικοινωνήσετε μαζί μας στο [${__SalesEmail}](mailto:${__SalesEmail})
 
 Με εκτίμηση,
-Η ομάδα υποστήριξης του ONLYOFFICE™
+Η ομάδα υποστήριξης του ONLYOFFICE
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_rename" xml:space="preserve">
@@ -1702,5 +1697,96 @@ $TrulyYours</value>
 *Απολαύστε έναν νέο τρόπο συνεργασίας στα έγγραφα!*
 
 $TrulyYours</value>
+  </data>
+  <data name="ButtonGetFreeApp" xml:space="preserve">
+    <value>Λήψη δωρεάν εφαρμογής</value>
+  </data>
+  <data name="ButtonGetStarted" xml:space="preserve">
+    <value>Ξεκινήστε</value>
+  </data>
+  <data name="ButtonJoinRoom" xml:space="preserve">
+    <value>Συμμετοχή στο δωμάτιο</value>
+  </data>
+  <data name="ButtonRegister" xml:space="preserve">
+    <value>Εγγραφή</value>
+  </data>
+  <data name="ButtonUpgrade" xml:space="preserve">
+    <value>Αναβάθμιση</value>
+  </data>
+  <data name="pattern_migration_personal_to_docspace" xml:space="preserve">
+    <value>Γεια σας!
+
+Η διαδικασία μεταφοράς δεδομένων από το Προσωπικό ONLYOFFICE στο νέο σας DocSpace του ONLYOFFICE ολοκληρώθηκε με επιτυχία.
+
+Για να αποκτήσετε πρόσβαση στο DocSpace σας με τα εισαγόμενα δεδομένα, απλά κάντε κλικ στο παρακάτω κουμπί:
+
+$OrangeButton
+
+Το τρέχον πρόγραμμα DocSpace σας είναι το ΑΡΧΙΚΟ. Είναι απολύτως δωρεάν.
+
+==Εάν είναι απαραίτητο, μπορείτε να αλλάξετε το όνομα του νέου σας DocSpace. Απλά μεταβείτε στις Ρυθμίσεις -&gt; Προσαρμογή -&gt; Μετονομασία DocSpace.==
+
+Απολαύστε έναν νέο τρόπο συνεργασίας στα έγγραφα!
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_rooms_activity" xml:space="preserve">
+    <value>h1.Να τι νέο υπάρχει στο DocSpace σας "${__VirtualRootPath}":"${__VirtualRootPath}" την τελευταία ώρα
+
+#foreach($activity in $Activities)
+$activity
+
+#end</value>
+  </data>
+  <data name="pattern_saas_admin_integrations_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 24px 40px 32px; text-align: center;"&gt;ONLYOFFICE DocSpace: Εξερευνήστε χρήσιμες &lt;span style="color: #FF6F3D;"&gt;ενσωματώσεις&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Γεια σας! Συγκεντρώσαμε τις έτοιμες προς χρήση ενσωματώσεις DocSpace σε αυτό το ενημερωτικό δελτίο για εσάς. Δοκιμάστε τες τώρα και βελτιώστε την παραγωγικότητά σας!&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="Margin: 0; padding-bottom: 24px; padding-top: 32px; padding-left: 40px; padding-right: 40px; text-align: left;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 64px; Margin:0; padding-left: 148px; padding-right: 32px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG1" alt="ONLYOFFICE" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 32px; Margin:0; padding-left: 0px; padding-right: 0px; padding-top: 16px; padding-bottom: 16px; vertical-align: top; width: 32px;"&gt;&lt;img width="32" src="$IMG2" alt="connecting to" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 64px; Margin:0; padding-left: 32px; padding-right: 148px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG3" alt="Zoom" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0px 40px 24px; text-align: center;"&gt;ONLYOFFICE DocSpace &amp; Zoom&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 16px; text-align: center;"&gt;Συνεργάζεστε σε οποιοδήποτε περιεχόμενο κατά τη διάρκεια συσκέψεων Zoom με άλλους συμμετέχοντες. Διαχειριστείτε αποτελεσματικά τα έγγραφά σας μεταξύ των συναντήσεων.&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 24px; text-align: center;"&gt;&lt;a href="https://www.onlyoffice.com/office-for-zoom.aspx" style="color: #FF6F3D; text-decoration: underline;" target="_blank"&gt;Μάθετε περισσότερα&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton1&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="Margin: 0; padding-bottom: 24px; padding-top: 32px; padding-left: 40px; padding-right: 40px; text-align: left;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 64px; Margin:0; padding-left: 148px; padding-right: 32px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG1" alt="ONLYOFFICE" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 32px; Margin:0; padding-left: 0px; padding-right: 0px; padding-top: 16px; padding-bottom: 16px; vertical-align: top; width: 32px;"&gt;&lt;img width="32" src="$IMG2" alt="connecting to" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 64px; Margin:0; padding-left: 32px; padding-right: 148px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG4" alt="Zapier" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0px 40px 24px; text-align: center;"&gt;ONLYOFFICE DocSpace &amp; Zapier&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 16px; text-align: center;"&gt;Αυτοματοποιήστε τη ροή εργασίας σας χρησιμοποιώντας εφαρμογές για το DocSpace και διάφορες εφαρμογές όπως Asana, Slack, HubSpot, Discord, Linear κ.λπ.&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 24px; text-align: center;"&gt;&lt;a href="https://helpcenter.onlyoffice.com/integration/gettingstarted-zapier.aspx" style="color: #FF6F3D; text-decoration: underline;" target="_blank"&gt;Μάθετε περισσότερα&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton2&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="Margin: 0; padding-bottom: 24px; padding-top: 32px; padding-left: 40px; padding-right: 40px; text-align: left;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 64px; Margin:0; padding-left: 148px; padding-right: 32px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG1" alt="ONLYOFFICE" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 32px; Margin:0; padding-left: 0px; padding-right: 0px; padding-top: 16px; padding-bottom: 16px; vertical-align: top; width: 32px;"&gt;&lt;img width="32" src="$IMG2" alt="connecting to" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 64px; Margin:0; padding-left: 32px; padding-right: 148px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG5" alt="Wordpress" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0px 40px 24px; text-align: center;"&gt;ONLYOFFICE DocSpace &amp; Wordpress&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 16px; text-align: center;"&gt;Ενσωματώστε έγγραφα και δωμάτια στον ιστότοπό σας, επιτρέποντας στους επισκέπτες να προβάλλουν αρχεία χωρίς λήψη. Διαχειριστείτε τα έγγραφα του γραφείου μέσω του DocSpace.&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 24px; text-align: center;"&gt;&lt;a href="https://www.onlyoffice.com/office-for-wordpress.aspx" style="color: #FF6F3D; text-decoration: underline;" target="_blank"&gt;Μάθετε περισσότερα&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton3&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="Margin: 0; padding-bottom: 24px; padding-top: 32px; padding-left: 40px; padding-right: 40px; text-align: left;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 64px; Margin:0; padding-left: 148px; padding-right: 32px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG1" alt="ONLYOFFICE" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 32px; Margin:0; padding-left: 0px; padding-right: 0px; padding-top: 16px; padding-bottom: 16px; vertical-align: top; width: 32px;"&gt;&lt;img width="32" src="$IMG2" alt="connecting to" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 64px; Margin:0; padding-left: 32px; padding-right: 148px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG6" alt="Drupal" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0px 40px 24px; text-align: center;"&gt;ONLYOFFICE DocSpace &amp; Drupal&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 16px; text-align: center;"&gt;Κάντε τα έγγραφα γραφείου εύκολα προσβάσιμα στους επισκέπτες του ιστότοπού σας και διαχειριστείτε τα αρχεία μέσω του DocSpace.&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 24px; text-align: center;"&gt;&lt;a href="https://www.onlyoffice.com/office-for-drupal.aspx" style="color: #FF6F3D; text-decoration: underline;" target="_blank"&gt;Μάθετε περισσότερα&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 64px; padding-top: 0; text-align: center;"&gt;$OrangeButton4&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_docspace_registration" xml:space="preserve">
+    <value>h1. DocSpace του ONLYOFFICE: ολοκλήρωση εγγραφής
+
+
+Γεια σας!
+
+Καλείστε να ολοκληρώσετε την εγγραφή σας στο DocSpace του ONLYOFFICE εδώ: "${__VirtualRootPath}":"${__VirtualRootPath}". Εισαγάγετε το όνομά σας και ορίστε έναν κωδικό πρόσβασης κάνοντας κλικ στον σύνδεσμο:
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_room_invite_existing_user" xml:space="preserve">
+    <value>Γεια σας!
+
+Ο $__AuthorName σάς προσκάλεσε να συμμετάσχετε στο δωμάτιο "$Message":"$InviteLink" στο "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_migration_personal_to_docspace" xml:space="preserve">
+    <value>Η μεταφορά δεδομένων στο DocSpace του ONLYOFFICE ολοκληρώθηκε με επιτυχία</value>
+  </data>
+  <data name="subject_rooms_activity" xml:space="preserve">
+    <value>Τι νέο υπάρχει στην πύλη σας ${__VirtualRootPath} την τελευταία ώρα</value>
+  </data>
+  <data name="subject_saas_admin_integrations_v1" xml:space="preserve">
+    <value>Εξερευνήστε χρήσιμες ενσωματώσεις για το DocSpace του ONLYOFFICE</value>
+  </data>
+  <data name="subject_saas_docspace_registration" xml:space="preserve">
+    <value>DocSpace του ONLYOFFICE: ολοκληρώστε την εγγραφή</value>
+  </data>
+  <data name="subject_saas_room_invite_existing_user" xml:space="preserve">
+    <value>Είστε προσκεκλημένοι στην δωμάτιο DocSpace του ONLYOFFICE</value>
   </data>
 </root>

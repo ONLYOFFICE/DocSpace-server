@@ -145,16 +145,3 @@ public abstract class BaseLoginProvider<T> : Consumer, ILoginProvider where T : 
         return _oAuth20TokenHelper.GetAccessToken<T>(codeOAuth);
     }
 }
-
-public static class BaseLoginProviderExtension
-{
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<BoxLoginProvider>();
-        services.TryAdd<DropboxLoginProvider>();
-        services.TryAdd<OneDriveLoginProvider>();
-        services.TryAdd<DocuSignLoginProvider>();
-        services.TryAdd<GoogleLoginProvider>();
-        services.TryAdd<WordpressLoginProvider>();
-    }
-}

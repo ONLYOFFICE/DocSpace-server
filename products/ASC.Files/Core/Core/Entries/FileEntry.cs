@@ -88,7 +88,6 @@ public abstract class FileEntry : ICloneable
     public IEnumerable<Tag> Tags { get; set; }
     public string OriginTitle { get; set; }
     public string OriginRoomTitle { get; set; }
-    public FileShareRecord ShareRecord { get; set; }
     public int Order { get; set; }
 
     private string _modifiedByString;
@@ -112,7 +111,7 @@ public abstract class FileEntry<T> : FileEntry, IEquatable<FileEntry<T>>
     public T OriginId { get; set; }
     public T OriginRoomId { get; set; }
     public bool MutableId { get; set; }
-
+    public FileShareRecord<T> ShareRecord { get; set; }
     public IDictionary<FilesSecurityActions, bool> Security { get; set; }
 
     private T _folderIdDisplay;

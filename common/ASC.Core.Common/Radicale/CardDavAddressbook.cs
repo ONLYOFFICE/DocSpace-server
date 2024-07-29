@@ -133,7 +133,7 @@ public class CardDavAddressbook(ILogger<CardDavAddressbook> logger,
 
     public async Task Delete(string uri, Guid userID, string email, int tenantId = 0)
     {
-        var authorization = GetSystemAuthorization();
+        var authorization = await GetSystemAuthorizationAsync();
         var deleteUrlBook = GetRadicaleUrl(uri, email.ToLower(), true, true);
         var davRequest = new DavRequest
         {
@@ -153,7 +153,7 @@ public class CardDavAddressbook(ILogger<CardDavAddressbook> logger,
 
     public async Task UpdateItemForAllAddBooks(List<string> emailList, string uri, CardDavItem user, int tenantId = 0, string changedEmail = null)
     {
-        var authorization = GetSystemAuthorization();
+        var authorization = await GetSystemAuthorizationAsync();
         if (changedEmail != null)
         {
             var deleteUrlBook = GetRadicaleUrl(uri, changedEmail.ToLower(), true, true);

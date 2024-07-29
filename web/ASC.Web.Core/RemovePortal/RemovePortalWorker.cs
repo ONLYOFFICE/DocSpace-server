@@ -26,7 +26,7 @@
 
 namespace ASC.Web.Core.RemovePortal;
 
-[Singleton(Additional = typeof(RemovePortalWorkerExtension))]
+[Singleton]
 public class RemovePortalWorker(
     IDistributedTaskQueueFactory queueFactory,
     IServiceProvider serviceProvider,
@@ -68,13 +68,5 @@ public class RemovePortalWorker(
         {
             await _queue.DequeueTask(t.Id);
         }
-    }
-}
-
-public static class RemovePortalWorkerExtension
-{
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<RemovePortalOperation>();
     }
 }

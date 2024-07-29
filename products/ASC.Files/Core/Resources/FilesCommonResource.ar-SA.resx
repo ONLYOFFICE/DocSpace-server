@@ -431,7 +431,7 @@
     <value>المستندات</value>
   </data>
   <data name="ProductUserOpportunities" xml:space="preserve">
-    <value>أنشئ المستندات الخاصة بك وقم بالتعديل عليها ، كما يمكنك القيام بذلك على المستندات المشتركة مع حقوق الوصول المناسبة قم بمنح أذونات القراءة أو التعديل إلى المستخدمين الآخرين على المستندات والمجلدات Link Dropbox و Box والحسابات الأخرى في قسم 'مستنداتي'</value>
+    <value>أنشئ المستندات الخاصة بك وقم بالتعديل عليها ، كما يمكنك القيام بذلك على المستندات المشتركة مع حقوق الوصول المناسبة قم بمنح أذونات القراءة أو التعديل إلى المستخدمين الآخرين على المستندات والمجلدات Link Dropbox و Box والحسابات الأخرى في قسم ' المستندات'</value>
   </data>
   <data name="RoleEnum_Collaborator" xml:space="preserve">
     <value>متعاون</value>
@@ -522,5 +522,38 @@
   </data>
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>النوع</value>
+  </data>
+  <data name="Date" xml:space="preserve">
+    <value>التاريخ</value>
+  </data>
+  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
+    <value>قوة المستخدم</value>
+  </data>
+  <data name="RoleEnum_PowerUser" xml:space="preserve">
+    <value>قوة المستخدم</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>مستخدم</value>
+  </data>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>نقل عدة ملفات إلى غرفة تعبئة النماذج غير مدعوم. قم بنقل نموذجONLYOFFICE PDF  واحد في كل مرة.</value>
+  </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>نقل المجلدات إلى غرفة تعبئة النموذج غير مدعوم. قم بنقل نموذج ONLYOFFICE PDF  واحد في كل مرة.</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>لا يمكن نقل الملف إلى هذه الغرفة. يرجى محاولة نقل نموذج ONLYOFFICE PDF.</value>
+  </data>
+  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
+    <value>لا يمكن تحميل الملف إلى هذه الغرفة. يرجى محاولة تحميل نموذج ONLYOFFICE PDF.</value>
+  </data>
+  <data name="FillOutExternalLinkTitle" xml:space="preserve">
+    <value>رابط تعبئة النموذج</value>
+  </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>رابط النموذج</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>فتح النموذج</value>
   </data>
 </root>

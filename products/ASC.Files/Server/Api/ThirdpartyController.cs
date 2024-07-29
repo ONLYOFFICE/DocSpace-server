@@ -27,7 +27,6 @@
 namespace ASC.Files.Api;
 
 public class ThirdpartyController(
-    EntryManager entryManager,
         FilesSettingsHelper filesSettingsHelper,
         FileStorageService fileStorageService,
         GlobalFolderHelper globalFolderHelper,
@@ -55,11 +54,9 @@ public class ThirdpartyController(
     [HttpGet("thirdparty/capabilities")]
     public async Task<List<List<string>>> CapabilitiesAsync()
     {
-        var result = new List<List<string>>();
-
-        if (await userManager.IsUserAsync(securityContext.CurrentAccount.ID) || !await filesSettingsHelper.GetEnableThirdParty())
+        if (!await CheckAccessAsync())
         {
-            return result;
+            return [];
         }
 
         return thirdPartyConfiguration.GetProviders();
@@ -153,7 +150,7 @@ public class ThirdpartyController(
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [HttpGet("thirdparty/common")]
-    public async IAsyncEnumerable<FolderDto<string>> GetCommonThirdPartyFoldersAsync()
+    public async IAsyncEnumerable<FolderDto<string>> GetCommonThirdPartyFoldersAsync([FromServices] EntryManager entryManager)
     {
         var parent = await fileStorageService.GetFolderAsync(await globalFolderHelper.FolderCommonAsync);
         var thirdpartyFolders = entryManager.GetThirdPartyFoldersAsync(parent);
@@ -341,5 +338,31 @@ public class ThirdpartyController(
                 success = false
             };
         }
+    }
+    
+    /// <summary>
+    /// Returns a list of the all providers.
+    /// </summary>
+    /// <short>Get all providers</short>
+    /// <category>Third-party integration</category>
+    /// <returns type="System.Collections.Generic.List{ASC.Files.Core.ApiModels.ResponseDto.ProviderDto}, System.Collections.Generic">List of provider</returns>
+    /// <remarks>Available provider keys: Dropbox, Box, WebDav, OneDrive, GoogleDrive, kDrive, ownCloud, Nextcloud</remarks>
+    /// <path>api/2.0/files/thirdparty/providers</path>
+    /// <httpMethod>GET</httpMethod>
+    /// <collection>list</collection>
+    [HttpGet("thirdparty/providers")]
+    public async Task<List<ProviderDto>> GetAllProvidersAsync()
+    {
+        if (!await CheckAccessAsync())
+        {
+            return [];
+        }
+        
+        return thirdPartyConfiguration.GetAllProviders();
+    }
+    
+    private async Task<bool> CheckAccessAsync()
+    {
+        return !await userManager.IsUserAsync(securityContext.CurrentAccount.ID) && await filesSettingsHelper.GetEnableThirdParty();
     }
 }

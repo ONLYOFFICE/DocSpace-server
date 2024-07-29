@@ -136,7 +136,7 @@
     <value>U procesu</value>
   </data>
   <data name="MyFiles" xml:space="preserve">
-    <value>Moji dokumenti</value>
+    <value>Dokumenti</value>
   </data>
   <data name="Personal" xml:space="preserve">
     <value>Lično</value>
@@ -146,9 +146,6 @@
   </data>
   <data name="ProjectFiles" xml:space="preserve">
     <value>U projektima</value>
-  </data>
-  <data name="ReadyFormFolder" xml:space="preserve">
-    <value>Spremno</value>
   </data>
   <data name="Recent" xml:space="preserve">
     <value>Skorašnje</value>
@@ -161,5 +158,8 @@
   </data>
   <data name="VirtualRooms" xml:space="preserve">
     <value>Sobe</value>
+  </data>
+  <data name="ReadyFormFolder" xml:space="preserve">
+    <value>Spremno</value>
   </data>
 </root>

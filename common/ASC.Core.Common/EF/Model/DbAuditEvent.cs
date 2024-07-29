@@ -34,6 +34,7 @@ public class DbAuditEvent : MessageEvent, IMapFrom<EventMessage>
     public string Target { get; set; }
 
     public DbTenant Tenant { get; set; }
+    public List<DbFilesAuditReference> FilesReferences { get; set; }
 
     public void Mapping(Profile profile)
     {
@@ -48,6 +49,7 @@ public static class AuditEventExtension
     public static ModelBuilderWrapper AddAuditEvent(this ModelBuilderWrapper modelBuilder)
     {
         modelBuilder.Entity<DbAuditEvent>().Navigation(e => e.Tenant).AutoInclude(false);
+        modelBuilder.Entity<DbAuditEvent>().Navigation(e => e.FilesReferences).AutoInclude(false);
 
         modelBuilder
             .Add(MySqlAddAuditEvent, Provider.MySql)

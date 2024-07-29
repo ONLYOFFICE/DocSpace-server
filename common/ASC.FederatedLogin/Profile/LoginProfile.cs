@@ -31,20 +31,16 @@ namespace ASC.FederatedLogin.Profile;
 [DebuggerDisplay("{DisplayName} ({Id})")]
 public class LoginProfile
 {
-    public const string QueryParamName = "up";
-    public const string QuerySessionParamName = "sup";
-    public const string QueryCacheParamName = "cup";
+    public string LinkId { get; init; }
+    
+    public LoginProfile() { }
 
-    public LoginProfile()
-    {
-        
-    }
-
-    public LoginProfile([NotNull]string serialized)
+    public LoginProfile([NotNull]string serialized, string linkId = null)
     {
         ArgumentNullException.ThrowIfNull(serialized);
 
         _fields = serialized.Split(PairSeparator).ToDictionary(x => x.Split(KeyValueSeparator)[0], y => y.Split(KeyValueSeparator)[1]);
+        LinkId = linkId;
     }
     
     public LoginProfile(Exception e)
@@ -198,12 +194,14 @@ public class LoginProfileTransport(InstanceCrypto instanceCrypto, TenantManager 
 {
     public async Task<string> ToString(LoginProfile profile)
     {
-        return WebEncoders.Base64UrlEncode(instanceCrypto.Encrypt(Encoding.UTF8.GetBytes(profile.ToString() + await tenantManager.GetCurrentTenantIdAsync())));
+        var tenantId =  await tenantManager.GetCurrentTenantIdAsync();
+        var input =  await instanceCrypto.EncryptAsync(Encoding.UTF8.GetBytes(profile.ToString() + tenantId));
+        return WebEncoders.Base64UrlEncode(input);
     }
 
     public async Task<LoginProfile> FromTransport(string transportString)
     {
-        var serialized = instanceCrypto.Decrypt(WebEncoders.Base64UrlDecode(transportString));
+        var serialized = await instanceCrypto.DecryptAsync(WebEncoders.Base64UrlDecode(transportString));
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         return new LoginProfile(serialized.Substring(0, serialized.LastIndexOf(tenantId.ToString(), StringComparison.Ordinal)));
     }

@@ -26,7 +26,6 @@
 
 namespace ASC.Files.Core;
 
-[Scope]
 public interface IFolderDao<T>
 {
     /// <summary>
@@ -96,9 +95,10 @@ public interface IFolderDao<T>
     /// <param name="offset"></param>
     /// <param name="count"></param>
     /// <param name="roomId"></param>
+    /// <param name="containingMyFiles"></param>
     /// <returns></returns>
     IAsyncEnumerable<Folder<T>> GetFoldersAsync(T parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
-        bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, T roomId = default);
+        bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, T roomId = default, bool containingMyFiles = false);
 
     /// <summary>
     /// Gets the folder (s) by ID (s)
@@ -236,7 +236,9 @@ public interface IFolderDao<T>
     
 
     Task<string> GetBackupExtensionAsync(T folderId);
-
+    
+    Task<bool> IsExistAsync(string title, T folderId);
+    
     #region Only for TMFolderDao
 
     /// <summary>
@@ -383,19 +385,6 @@ public interface IFolderDao<T>
     /// <returns></returns>
     Task<string> GetBunchObjectIDAsync(T folderID);
 
-    /// <summary>
-    /// Return ids of related objects
-    /// Only in TMFolderDao
-    /// </summary>
-    /// <param name="folderIDs"></param>
-    /// <returns></returns>
-    Task<Dictionary<string, string>> GetBunchObjectIDsAsync(List<T> folderIDs);
-    IAsyncEnumerable<FolderWithShare> GetFeedsForRoomsAsync(int tenant, DateTime from, DateTime to);
-    IAsyncEnumerable<FolderWithShare> GetFeedsForFoldersAsync(int tenant, DateTime from, DateTime to);
-    IAsyncEnumerable<ParentRoomPair> GetParentRoomsAsync(IEnumerable<int> foldersIds);
-
-    IAsyncEnumerable<int> GetTenantsWithFoldersFeedsAsync(DateTime fromTime);
-    IAsyncEnumerable<int> GetTenantsWithRoomsFeedsAsync(DateTime fromTime);
     IAsyncEnumerable<OriginData> GetOriginsDataAsync(IEnumerable<T> entriesIds);
 
     /// <summary>

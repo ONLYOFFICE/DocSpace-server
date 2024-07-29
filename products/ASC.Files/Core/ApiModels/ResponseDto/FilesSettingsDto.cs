@@ -79,7 +79,9 @@ public class FilesSettingsDto
     public AutoCleanUpData AutomaticallyCleanUp { get; set; }
     public bool CanSearchByContent { get; set; }
     public List<FileShare> DefaultSharingAccessRights { get; set; }
+    public int MaxUploadThreadCount { get; set; }
     public long ChunkUploadSize { get; set; }
+    public bool OpenEditorInSameTab { get; set; }
 }
 
 
@@ -146,7 +148,9 @@ public class FilesSettingsDtoConverter(
             AutomaticallyCleanUp = await filesSettingsHelper.GetAutomaticallyCleanUp(),
             CanSearchByContent = await searchSettingsHelper.CanSearchByContentAsync<DbFile>(),
             DefaultSharingAccessRights = await filesSettingsHelper.GetDefaultSharingAccessRights(),
-            ChunkUploadSize = setupInfo.ChunkUploadSize
+            MaxUploadThreadCount = setupInfo.MaxUploadThreadCount,
+            ChunkUploadSize = setupInfo.ChunkUploadSize,
+            OpenEditorInSameTab = await filesSettingsHelper.GetOpenEditorInSameTabAsync()
         };
     }
 }

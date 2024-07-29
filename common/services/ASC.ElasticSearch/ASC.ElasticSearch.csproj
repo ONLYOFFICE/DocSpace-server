@@ -26,8 +26,8 @@
     <None Remove="Properties\**" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="OpenSearch.Client" Version="1.7.0" />
-    <PackageReference Include="OpenSearch.Net" Version="1.7.0" />
+    <PackageReference Include="OpenSearch.Client" Version="1.7.1" />
+    <PackageReference Include="OpenSearch.Net" Version="1.7.1" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\ASC.Common\ASC.Common.csproj" />

@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Microsoft.Net.Http.Headers;
+
 namespace ASC.Web.Files.Services.DocumentService;
 
 [Scope]
@@ -51,7 +53,8 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
                                       string region,
                                       ThumbnailData thumbnail,
                                       SpreadsheetLayout spreadsheetLayout,
-                                      bool isAsync)
+                                      bool isAsync,
+                                      bool toForm)
     {
         logger.DebugDocServiceConvert(fromExtension, toExtension, documentUri, filesLinkUtility.DocServiceConverterUrl);
         try
@@ -69,7 +72,8 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
                 spreadsheetLayout,
                 isAsync,
                 fileUtility.SignatureSecret,
-                clientFactory);
+                clientFactory,
+                toForm);
         }
         catch (Exception ex)
         {
@@ -190,6 +194,36 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
 
     public async Task CheckDocServiceUrlAsync()
     {
+        if (!string.IsNullOrEmpty(filesLinkUtility.DocServiceApiUrl))
+        {
+            try
+            {
+                var requestUri = Uri.IsWellFormedUriString(filesLinkUtility.DocServiceApiUrl, UriKind.Absolute)
+                    ? filesLinkUtility.DocServiceApiUrl
+                    : baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.DocServiceApiUrl);
+
+                var request = new HttpRequestMessage
+                {
+                    RequestUri = new Uri(requestUri),
+                    Method = HttpMethod.Head
+                };
+
+                using var httpClient = clientFactory.CreateClient();
+                using var response = await httpClient.SendAsync(request);
+
+                if (response.StatusCode != HttpStatusCode.OK)
+                {
+                    throw new Exception("Api url is not available");
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.ErrorDocumentDocServiceCheckError(ex);
+
+                throw new Exception("Api url: " + ex.Message);
+            }
+        }
+
         if (!string.IsNullOrEmpty(filesLinkUtility.DocServiceHealthcheckUrl))
         {
             try
@@ -219,7 +253,7 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
                 var fileUri = await ReplaceCommunityAddressAsync(url);
 
                 var key = GenerateRevisionId(Guid.NewGuid().ToString());
-                var uriTuple = await ASC.Files.Core.Helpers.DocumentService.GetConvertedUriAsync(fileUtility, filesLinkUtility.DocServiceConverterUrl, fileUri, fileExtension, toExtension, key, null, null, null, null, false, fileUtility.SignatureSecret, clientFactory);
+                var uriTuple = await ASC.Files.Core.Helpers.DocumentService.GetConvertedUriAsync(fileUtility, filesLinkUtility.DocServiceConverterUrl, fileUri, fileExtension, toExtension, key, null, null, null, null, false, fileUtility.SignatureSecret, clientFactory, false);
                 convertedFileUri = uriTuple.ConvertedDocumentUri;
             }
             catch (Exception ex)
@@ -289,7 +323,7 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
 
     public async Task<string> ReplaceCommunityAddressAsync(string url)
     {
-        var docServicePortalUrl = filesLinkUtility.DocServicePortalUrl;
+        var docServicePortalUrl = filesLinkUtility.GetDocServicePortalUrl();
 
         if (string.IsNullOrEmpty(url))
         {
@@ -316,7 +350,7 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
         }
 
         var query = HttpUtility.ParseQueryString(uri.Query);
-        //query[HttpRequestExtensions.UrlRewriterHeader] = urlRewriterQuery;
+        query[HeaderNames.Origin.ToLower()] = uri.Scheme + Uri.SchemeDelimiter + uri.Host + ":" + uri.Port;
         uri.Query = query.ToString();
 
         var communityUrl = new UriBuilder(docServicePortalUrl);
@@ -335,14 +369,14 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
         }
 
         var uri = new UriBuilder(url).ToString();
-        var externalUri = new UriBuilder(baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.DocServiceUrl)).ToString();
-        var internalUri = new UriBuilder(baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.DocServiceUrlInternal)).ToString();
+        var externalUri = new UriBuilder(baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetDocServiceUrl())).ToString();
+        var internalUri = new UriBuilder(baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetDocServiceUrlInternal())).ToString();
         if (uri.StartsWith(internalUri, true, CultureInfo.InvariantCulture) || !uri.StartsWith(externalUri, true, CultureInfo.InvariantCulture))
         {
             return url;
         }
 
-        uri = uri.Replace(externalUri, filesLinkUtility.DocServiceUrlInternal);
+        uri = uri.Replace(externalUri, filesLinkUtility.GetDocServiceUrlInternal());
 
         return uri;
     }

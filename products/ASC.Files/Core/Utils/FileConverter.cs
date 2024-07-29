@@ -254,7 +254,7 @@ public class FileJsonSerializerData<T>
     public string FileJson { get; set; }
 }
 
-[Scope(Additional = typeof(FileConverterExtension))]
+[Scope]
 public class FileConverter(
     FileUtility fileUtility,
     FilesLinkUtility filesLinkUtility,
@@ -333,7 +333,7 @@ public class FileConverter(
         return ExecAsync(file, fileUtility.GetInternalExtension(file.Title));
     }
 
-    public async Task<Stream> ExecAsync<T>(File<T> file, string toExtension, string password = null)
+    public async Task<Stream> ExecAsync<T>(File<T> file, string toExtension, string password = null, bool toForm = false)
     {
         if (!await EnableConvertAsync(file, toExtension))
         {
@@ -346,14 +346,14 @@ public class FileConverter(
         fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(fileUri);
 
         var uriTuple = await documentServiceConnector.GetConvertedUriAsync(fileUri, file.ConvertedExtension, toExtension, docKey, password, 
-            CultureInfo.CurrentUICulture.Name, null, null, false);
+            CultureInfo.CurrentUICulture.Name, null, null, false, toForm);
         var convertUri = uriTuple.ConvertedDocumentUri;
         var request = new HttpRequestMessage
         {
             RequestUri = new Uri(convertUri)
         };
 
-        var httpClient = clientFactory.CreateClient();
+        var httpClient = clientFactory.CreateClient(nameof(DocumentService));
         var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
 
         return await ResponseStream.FromMessageAsync(response);
@@ -377,7 +377,7 @@ public class FileConverter(
         fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(fileUri);
 
         var (_, convertUri, convertType) = await documentServiceConnector.GetConvertedUriAsync(fileUri, fileExtension, toExtension, docKey, 
-            null, CultureInfo.CurrentUICulture.Name, null, null, false);
+            null, CultureInfo.CurrentUICulture.Name, null, null, false, false);
 
         var operationResult = new FileConverterOperationResult
         {
@@ -502,7 +502,7 @@ public class FileConverter(
             if (updateIfExist && (parent != null && !folderId.Equals(parent.Id) || !file.ProviderEntry))
             {
                 newFile = await fileDao.GetFileAsync(folderId, newFileTitle);
-                if (newFile != null && await fileSecurity.CanEditAsync(newFile) && !await lockerManager.FileLockedForMeAsync(newFile.Id) && !fileTracker.IsEditing(newFile.Id))
+                if (newFile != null && await fileSecurity.CanEditAsync(newFile) && !await lockerManager.FileLockedForMeAsync(newFile.Id) && !await fileTracker.IsEditingAsync(newFile.Id))
                 {
                     newFile.Version++;
                     newFile.VersionGroup++;
@@ -531,7 +531,7 @@ public class FileConverter(
             RequestUri = new Uri(convertedFileUrl)
         };
 
-        var httpClient = clientFactory.CreateClient();
+        var httpClient = clientFactory.CreateClient(nameof(DocumentService));
 
         try
         {
@@ -563,8 +563,8 @@ public class FileConverter(
 
         await filesMessageService.SendAsync(MessageAction.FileConverted, newFile, MessageInitiator.DocsService, newFile.Title);
 
-        var linkDao = daoFactory.GetLinkDao();
-        await linkDao.DeleteAllLinkAsync(file.Id.ToString());
+        var linkDao = daoFactory.GetLinkDao<T>();
+        await linkDao.DeleteAllLinkAsync(file.Id);
 
         await fileMarker.MarkAsNewAsync(newFile);
 
@@ -585,10 +585,3 @@ public class FileConverter(
     }
     }
 
-public static class FileConverterExtension
-{
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<FileConverterQueue>();
-    }
-}

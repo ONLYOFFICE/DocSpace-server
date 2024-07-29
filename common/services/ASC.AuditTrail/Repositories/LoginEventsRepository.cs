@@ -26,7 +26,7 @@
 
 namespace ASC.AuditTrail.Repositories;
 
-[Scope(Additional = typeof(LoginEventsRepositoryExtensions))]
+[Scope]
 public class LoginEventsRepository(TenantManager tenantManager,
     IDbContextFactory<MessagesContext> dbContextFactory,
     IMapper mapper,
@@ -99,13 +99,5 @@ public class LoginEventsRepository(TenantManager tenantManager,
             await geolocationHelper.AddGeolocationAsync(e);
         }
         return events;
-    }
-}
-
-public static class LoginEventsRepositoryExtensions
-{
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<EventTypeConverter>();
     }
 }

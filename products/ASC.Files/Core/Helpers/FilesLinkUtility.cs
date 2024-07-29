@@ -32,6 +32,7 @@ public class FilesLinkUtility
     public const string FilesBaseVirtualPath = "~/";
     public const string EditorPage = "doceditor";
     public TimeSpan DefaultLinkLifeTime { get; }
+    public const int MaxLinkLifeTimeInYears = 10;
     
     private readonly string _filesUploaderUrl;
     private readonly CommonLinkUtility _commonLinkUtility;
@@ -76,6 +77,8 @@ public class FilesLinkUtility
     public const string AuthKey = "stream_auth";
     public const string Anchor = "anchor";
     public const string ShareKey = "share";
+    public const string FillingSessionId = "filling_session_id";
+    public const string IsFile = "is_file";
 
     public string FileHandlerPath
     {
@@ -83,72 +86,72 @@ public class FilesLinkUtility
     }
 
     private const string PublicUrlKey = "public";
-    public string DocServiceUrl
+
+    public string GetDocServiceUrl()
     {
-        get
+        var url = GetUrlSetting(PublicUrlKey, out _);
+        if (!string.IsNullOrEmpty(url) && url != "/")
         {
-            var url = GetUrlSetting(PublicUrlKey, out _);
-            if (!string.IsNullOrEmpty(url) && url != "/")
-            {
-                url = url.TrimEnd('/') + "/";
-            }
-            return url;
+            url = url.TrimEnd('/') + "/";
         }
-        set
+
+        return url;
+    }
+
+    public async Task SetDocServiceUrlAsync(string value)
+    {
+        await SetUrlSettingAsync(ApiUrlKey, null);
+
+        value = (value ?? "").Trim().ToLowerInvariant();
+        if (!string.IsNullOrEmpty(value))
         {
-            SetUrlSetting(ApiUrlKey, null);
-
-            value = (value ?? "").Trim().ToLowerInvariant();
-            if (!string.IsNullOrEmpty(value))
+            value = value.TrimEnd('/') + "/";
+            if (!new Regex(@"(^https?:\/\/)|^\/", RegexOptions.CultureInvariant).IsMatch(value))
             {
-                value = value.TrimEnd('/') + "/";
-                if (!new Regex(@"(^https?:\/\/)|^\/", RegexOptions.CultureInvariant).IsMatch(value))
-                {
-                    value = "http://" + value;
-                }
+                value = "http://" + value;
             }
-
-            SetUrlSetting(PublicUrlKey, value);
         }
+
+        await SetUrlSettingAsync(PublicUrlKey, value);
     }
 
     private const string InternalUrlKey = "internal";
-    public string DocServiceUrlInternal
+
+    public string GetDocServiceUrlInternal()
     {
-        get
+        var url = GetUrlSetting(InternalUrlKey, out _);
+        if (string.IsNullOrEmpty(url))
         {
-            var url = GetUrlSetting(InternalUrlKey, out _);
-            if (string.IsNullOrEmpty(url))
-            {
-                url = DocServiceUrl;
-            }
-            else
-            {
-                url = url.TrimEnd('/') + "/";
-            }
-            return url;
+            url = GetDocServiceUrl();
         }
-        set
+        else
         {
-            SetUrlSetting("converter", null);
-            SetUrlSetting("storage", null);
-            SetUrlSetting("command", null);
-            SetUrlSetting("docbuilder", null);
+            url = url.TrimEnd('/') + "/";
+        }
 
-            value = (value ?? "").Trim().ToLowerInvariant();
-            if (!string.IsNullOrEmpty(value))
-            {
-                value = value.TrimEnd('/') + "/";
-                if (!new Regex(@"(^https?:\/\/)", RegexOptions.CultureInvariant).IsMatch(value))
-                {
-                    value = "http://" + value;
-                }
-            }
+        return url;
+    }
 
-            if (DocServiceUrlInternal != value)
+    public async Task SetDocServiceUrlInternalAsync(string value)
+    {
+        await SetUrlSettingAsync("converter", null);
+        await SetUrlSettingAsync("storage", null);
+        await SetUrlSettingAsync("command", null);
+        await SetUrlSettingAsync("docbuilder", null);
+
+        value = (value ?? "").Trim().ToLowerInvariant();
+        if (!string.IsNullOrEmpty(value))
+        {
+            value = value.TrimEnd('/') + "/";
+            if (!new Regex(@"(^https?:\/\/)", RegexOptions.CultureInvariant).IsMatch(value))
             {
-                SetUrlSetting(InternalUrlKey, value);
+                value = "http://" + value;
             }
+        }
+
+        if (GetDocServiceUrlInternal() != value)
+        {
+            await SetUrlSettingAsync(InternalUrlKey, value);
         }
     }
 
@@ -160,7 +163,7 @@ public class FilesLinkUtility
             var url = GetUrlSetting(ApiUrlKey, out _);
             if (string.IsNullOrEmpty(url))
             {
-                url = DocServiceUrl;
+                url = GetDocServiceUrl();
                 if (!string.IsNullOrEmpty(url))
                 {
                     url += "web-apps/apps/api/documents/api.js";
@@ -177,7 +180,7 @@ public class FilesLinkUtility
             var url = GetUrlSetting("converter", out _);
             if (string.IsNullOrEmpty(url))
             {
-                url = DocServiceUrlInternal;
+                url = GetDocServiceUrlInternal();
                 if (!string.IsNullOrEmpty(url))
                 {
                     url += "ConvertService.ashx";
@@ -194,7 +197,7 @@ public class FilesLinkUtility
             var url = GetUrlSetting("command", out _);
             if (string.IsNullOrEmpty(url))
             {
-                url = DocServiceUrlInternal;
+                url = GetDocServiceUrlInternal();
                 if (!string.IsNullOrEmpty(url))
                 {
                     url += "coauthoring/CommandService.ashx";
@@ -211,7 +214,7 @@ public class FilesLinkUtility
             var url = GetUrlSetting("docbuilder", out _);
             if (string.IsNullOrEmpty(url))
             {
-                url = DocServiceUrlInternal;
+                url = GetDocServiceUrlInternal();
                 if (!string.IsNullOrEmpty(url))
                 {
                     url += "docbuilder";
@@ -228,7 +231,7 @@ public class FilesLinkUtility
             var url = GetUrlSetting("healthcheck", out _);
             if (string.IsNullOrEmpty(url))
             {
-                url = DocServiceUrlInternal;
+                url = GetDocServiceUrlInternal();
                 if (!string.IsNullOrEmpty(url))
                 {
                     url += "healthcheck";
@@ -239,23 +242,25 @@ public class FilesLinkUtility
     }
 
     private const string PortalUrlKey = "portal";
-    public string DocServicePortalUrl
-    {
-        get { return GetUrlSetting(PortalUrlKey, out _); }
-        set
-        {
-            value = (value ?? "").Trim().ToLowerInvariant();
-            if (!string.IsNullOrEmpty(value))
-            {
-                value = value.TrimEnd('/') + "/";
-                if (!new Regex(@"(^https?:\/\/)", RegexOptions.CultureInvariant).IsMatch(value))
-                {
-                    value = "http://" + value;
-                }
-            }
 
-            SetUrlSetting(PortalUrlKey, value);
+    public string GetDocServicePortalUrl()
+    {
+        return GetUrlSetting(PortalUrlKey, out _);
+    }
+
+    public async Task SetDocServicePortalUrlAsync(string value)
+    {
+        value = (value ?? "").Trim().ToLowerInvariant();
+        if (!string.IsNullOrEmpty(value))
+        {
+            value = value.TrimEnd('/') + "/";
+            if (!new Regex(@"(^https?:\/\/)", RegexOptions.CultureInvariant).IsMatch(value))
+            {
+                value = "http://" + value;
+            }
         }
+
+        await SetUrlSettingAsync(PortalUrlKey, value);
     }
 
     public bool IsDefault
@@ -301,11 +306,6 @@ public class FilesLinkUtility
                + (string.IsNullOrEmpty(convertToExtension) ? string.Empty : "&" + OutType + "=" + convertToExtension);
     }
 
-    public string GetFileWebMediaViewUrl(object fileId)
-    {
-        return FilesBaseAbsolutePath + "#preview/" + HttpUtility.UrlEncode(fileId.ToString());
-    }
-
     public string FileWebViewerUrlString
     {
         get { return $"{FileWebEditorUrlString}&{Action}=view"; }
@@ -327,37 +327,16 @@ public class FilesLinkUtility
             + (fileVersion > 0 ? "&" + Version + "=" + fileVersion : string.Empty);
     }
 
-    public string GetFileWebEditorTryUrl(FileType fileType)
-    {
-        return FilesBaseAbsolutePath + EditorPage + "?" + TryParam + "=" + fileType;
-    }
-
     public string FileWebEditorExternalUrlString
     {
         get { return FileHandlerPath + "?" + Action + "=create&" + FileUri + "={0}&" + FileTitle + "={1}"; }
     }
 
-    public string GetFileWebEditorExternalUrl(string fileUri, string fileTitle)
-    {
-        return GetFileWebEditorExternalUrl(fileUri, fileTitle, false);
-    }
-
-    public string GetFileWebEditorExternalUrl(string fileUri, string fileTitle, bool openFolder)
-    {
-        var url = string.Format(FileWebEditorExternalUrlString, HttpUtility.UrlEncode(fileUri), HttpUtility.UrlEncode(fileTitle));
-        if (openFolder)
-        {
-            url += "&openfolder=true";
-        }
-
-        return url;
-    }
-
-    public string GetFileWebPreviewUrl(FileUtility fileUtility, string fileTitle, object fileId, int fileVersion = 0)
+    public string GetFileWebPreviewUrl(FileUtility fileUtility, string fileTitle, object fileId, int fileVersion = 0, bool external = false)
     {
         if (fileUtility.CanImageView(fileTitle) || fileUtility.CanMediaView(fileTitle))
         {
-            return GetFileWebMediaViewUrl(fileId);
+            return GetFileWebMediaViewUrl(fileId, external);
         }
 
         if (fileUtility.CanWebView(fileTitle))
@@ -378,11 +357,6 @@ public class FilesLinkUtility
         get { return FileHandlerPath + "?" + Action + "=redirect"; }
     }
 
-    public string GetFileRedirectPreviewUrl(object enrtyId, bool isFile)
-    {
-        return FileRedirectPreviewUrlString + "&" + (isFile ? FileId : FolderId) + "=" + HttpUtility.UrlEncode(enrtyId.ToString());
-    }
-
     public string FileThumbnailUrlString
     {
         get { return FileHandlerPath + "?" + Action + "=thumb&" + FileId + "={0}"; }
@@ -395,14 +369,14 @@ public class FilesLinkUtility
     }
 
 
-    public string GetInitiateUploadSessionUrl(int tenantId, object folderId, object fileId, string fileName, long contentLength, bool encrypted, SecurityContext securityContext)
+    public async Task<string> GetInitiateUploadSessionUrlAsync(int tenantId, object folderId, object fileId, string fileName, long contentLength, bool encrypted, SecurityContext securityContext)
     {
         var queryString = string.Format("?initiate=true&{0}={1}&fileSize={2}&tid={3}&userid={4}&culture={5}&encrypted={6}",
                                         FileTitle,
                                         HttpUtility.UrlEncode(fileName),
                                         contentLength,
                                         tenantId,
-                                        HttpUtility.UrlEncode(_instanceCrypto.Encrypt(securityContext.CurrentAccount.ID.ToString())),
+                                        HttpUtility.UrlEncode(await _instanceCrypto.EncryptAsync(securityContext.CurrentAccount.ID.ToString())),
                                         CultureInfo.CurrentUICulture.Name,
                                         encrypted.ToString().ToLower());
 
@@ -464,7 +438,7 @@ public class FilesLinkUtility
         return value;
     }
 
-    private void SetUrlSetting(string key, string value)
+    private async Task SetUrlSettingAsync(string key, string value)
     {
         if (!_coreBaseSettings.Standalone)
         {
@@ -487,12 +461,24 @@ public class FilesLinkUtility
 
         if (GetUrlSetting(key, out _) != value)
         {
-            _coreSettings.SaveSetting(GetSettingsKey(key), value);
+            await _coreSettings.SaveSettingAsync(GetSettingsKey(key), value);
         }
     }
 
     private string GetSettingsKey(string key)
     {
         return "DocKey_" + key;
+    }
+    
+    private string GetFileWebMediaViewUrl(object fileId, bool external = false)
+    {
+        var id = HttpUtility.UrlEncode(fileId.ToString());
+        
+        if (external)
+        {
+            return FilesBaseAbsolutePath + $"share/preview/{id}";
+        }
+        
+        return FilesBaseAbsolutePath + $"#preview/{id}";
     }
 }

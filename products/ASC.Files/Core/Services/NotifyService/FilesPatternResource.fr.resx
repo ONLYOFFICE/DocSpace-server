@@ -90,28 +90,28 @@ $__DateTime "$__AuthorName":"$__AuthorUrl" vous a accordé l'accès au dossier "
 $Message</value>
   </data>
   <data name="subject_DocuSignComplete" xml:space="preserve">
-    <value>[OnlyOffice - Documents] Tous les signataires ont signé $DocumentTitle</value>
+    <value>Documents. Tous les signataires ont signé $DocumentTitle</value>
   </data>
   <data name="subject_DocuSignComplete_tg" xml:space="preserve">
-    <value>[OnlyOffice - Documents] Tous les signataires ont complété le document [$DocumentTitle]($DocumentURL)</value>
+    <value>Documents. Tous les signataires ont complété le document [$DocumentTitle]($DocumentURL)</value>
   </data>
   <data name="subject_DocuSignStatus" xml:space="preserve">
-    <value>[OnlyOffice - Documents] Le statut de la signature modifié</value>
+    <value>Documents. Le statut de la signature modifié</value>
   </data>
   <data name="subject_MailMergeEnd" xml:space="preserve">
-    <value>[OnlyOffice - Documents] Diffusion est terminée.</value>
+    <value>Documents. Diffusion est terminée.</value>
   </data>
   <data name="subject_ShareDocument" xml:space="preserve">
-    <value>[OnlyOffice - Documents] Accès accordé au document $DocumentTitle</value>
+    <value>Documents. Accès accordé au document $DocumentTitle</value>
   </data>
   <data name="subject_ShareDocument_tg" xml:space="preserve">
-    <value>[OnlyOffice - Documents] Accès accordé au document [$DocumentTitle]($DocumentURL)</value>
+    <value>Documents. Accès accordé au document [$DocumentTitle]($DocumentURL)</value>
   </data>
   <data name="subject_ShareFolder" xml:space="preserve">
-    <value>[OnlyOffice - Documents] Accès accordé au dossier $DocumentTitle</value>
+    <value>Documents. Accès accordé au dossier $DocumentTitle</value>
   </data>
   <data name="subject_ShareFolder_tg" xml:space="preserve">
-    <value>[OnlyOffice - Documents] Accès accordé au dossier [$DocumentTitle]($DocumentURL)</value>
+    <value>Documents. Accès accordé au dossier [$DocumentTitle]($DocumentURL)</value>
   </data>
   <data name="pattern_EditorMentions" xml:space="preserve">
     <value>h1. $__AuthorName vous a mentionné dans le commentaire du document
@@ -151,5 +151,32 @@ $__AuthorName a supprimé la salle : $RoomTitle</value>
   </data>
   <data name="subject_ShareFolder_push" xml:space="preserve">
     <value>Accès autorisé au dossier : $DocumentTitle</value>
+  </data>
+  <data name="button_CheckReadyForms" xml:space="preserve">
+    <value>Formulaires prêts à vérifier</value>
+  </data>
+  <data name="pattern_FormReceived" xml:space="preserve">
+    <value>h1. Le formulaire $Message est rempli
+ 
+Un nouveau formulaire "$DocumentTitle":"$DocumentURL" est rempli dans la salle "$RoomTitle":"$RoomURL".
+ 
+L'expéditeur du formulaire : "$FromUserName":"$FromUserLink"
+ 
+$OrangeButton</value>
+  </data>
+  <data name="pattern_FormSubmitted" xml:space="preserve">
+    <value>h1. Vous avez rempli le formulaire $Message
+ 
+Vous avez rempli le formulaire "$DocumentTitle":"$DocumentURL" dans la salle "$RoomTitle":"$RoomURL".
+ 
+Responsable : "$ToUserName":"$ToUserLink"
+ 
+$OrangeButton</value>
+  </data>
+  <data name="subject_FormReceived" xml:space="preserve">
+    <value>Notification DocSpace. Le formulaire est rempli</value>
+  </data>
+  <data name="subject_FormSubmitted" xml:space="preserve">
+    <value>Notification DocSpace. Le formulaire est rempli</value>
   </data>
 </root>

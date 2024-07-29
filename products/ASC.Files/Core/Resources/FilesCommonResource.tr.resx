@@ -315,7 +315,7 @@ docx, xlsx, pptx ile en yüksek uyumluluk.</value>
     <value>Belgeler</value>
   </data>
   <data name="ProductUserOpportunities" xml:space="preserve">
-    <value>Uygun erişim haklarıyla ortak dökümanları yaratıp düzenlediğiniz gibi kendi dosyalarınızı yaratın ve düzenleyin|Dökümanlara ve klasörlere diğer kullanıcılara okuma/düzenleme hakkı verin|Dropbox, Box ve diğer hesapların bağlantılarını "Belgelerim" bölümünden yapın</value>
+    <value>Uygun erişim haklarıyla ortak dökümanları yaratıp düzenlediğiniz gibi kendi dosyalarınızı yaratın ve düzenleyin|Dökümanlara ve klasörlere diğer kullanıcılara okuma/düzenleme hakkı verin|Dropbox, Box ve diğer hesapların bağlantılarını "Belgeler" bölümünden yapın</value>
   </data>
   <data name="UnknownFirstName" xml:space="preserve">
     <value>Ad</value>
@@ -463,5 +463,38 @@ docx, xlsx, pptx ile en yüksek uyumluluk.</value>
   </data>
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>Tip</value>
+  </data>
+  <data name="Date" xml:space="preserve">
+    <value>Tarih</value>
+  </data>
+  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
+    <value>Uzman kullanıcı</value>
+  </data>
+  <data name="RoleEnum_PowerUser" xml:space="preserve">
+    <value>Uzman kullanıcı</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>Kullanıcı</value>
+  </data>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>Birden fazla dosyanın Form Doldurma odasına taşınması desteklenmemektedir. Bir seferde bir ONLYOFFICE PDF formu taşıyın.</value>
+  </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>Klasörlerin Form Doldurma odasına taşınması desteklenmemektedir. Bir seferde bir ONLYOFFICE PDF formu taşıyın.</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>Dosya bu odaya taşınamıyor. Lütfen ONLYOFFICE PDF formunu taşımayı deneyin.</value>
+  </data>
+  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
+    <value>Dosya bu odaya yüklenemiyor. Lütfen ONLYOFFICE PDF formunu yüklemeyi deneyin.</value>
+  </data>
+  <data name="FillOutExternalLinkTitle" xml:space="preserve">
+    <value>Doldurulacak bağlantı</value>
+  </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>Form bağlantısı</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Açık form</value>
   </data>
 </root>

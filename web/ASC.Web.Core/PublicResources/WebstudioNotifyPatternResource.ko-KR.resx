@@ -699,9 +699,6 @@ $TrulyYours</value>
   <data name="ActionUserUpdated" xml:space="preserve">
     <value>DocSpace 사용자가 업데이트되었습니다: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
-  <data name="AcceptDocSpace" xml:space="preserve">
-    <value>수락</value>
-  </data>
   <data name="subject_saas_user_welcome_v1" xml:space="preserve">
     <value>ONLYOFFICE DocSpace에 오신 것을 환영합니다!</value>
   </data>
@@ -739,7 +736,7 @@ $TrulyYours</value>
     <value>ONLYOFFICE DocSpace에 오신 것을 환영합니다!</value>
   </data>
   <data name="subject_send_whats_new" xml:space="preserve">
-    <value>$Date, 포털 새 소식</value>
+    <value>$Date, 포털 새 소식 ${__VirtualRootPath}</value>
   </data>
   <data name="subject_user_ldap_activation" xml:space="preserve">
     <value>${__VirtualRootPath}에 초대받으셨</value>
@@ -852,7 +849,7 @@ $TrulyYours</value>
   <data name="ButtonChangeTfa" xml:space="preserve">
     <value>인증 앱 구성</value>
   </data>
-  <data name="ButtonCollaborateDocSpace" xml:space="preserve">
+  <data name="ButtonCollaborate" xml:space="preserve">
     <value>DocSpace에서 공동 작업</value>
   </data>
   <data name="ButtonConfigureRightNow" xml:space="preserve">
@@ -861,10 +858,7 @@ $TrulyYours</value>
   <data name="ButtonConfirm" xml:space="preserve">
     <value>확인</value>
   </data>
-  <data name="ButtonConfirmEmail" xml:space="preserve">
-    <value>확인</value>
-  </data>
-  <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
+  <data name="ButtonConfirmInvite" xml:space="preserve">
     <value>DocSpace 초대 확인</value>
   </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
@@ -1102,7 +1096,7 @@ $OwnerName님,
 문의 사항이 있거나 도움이 필요한 경우 언제든지 연락주세요: [${__SupportLink}](${__SupportLink})
 
 감사합니다,
-ONLYOFFICE™ 지원팀
+ONLYOFFICE 지원팀
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
@@ -1328,6 +1322,7 @@ h1."$PortalUrl":"$PortalUrl"
 포털이 새 도메인으로 마이그레이션되었습니다. 로그인에 사용할 비밀번호를 지정하여 포털에 대한 액세스를 복원하세요.
 
 아래 링크에서 계정의 비밀번호를 설정하세요:
+
 $OrangeButton
 
 *알림*: 이 링크는 7일 동안만 유효합니다. 기간 내에 액세스 복원 프로세스를 완료하세요.
@@ -1405,7 +1400,7 @@ _알림_: 이 링크는 7일 동안만 유효합니다. 기간 내에 포털 비
 문의 사항이 있거나 도움이 필요한 경우 언제든지 연락주세요: [${__SalesEmail}](mailto:${__SalesEmail})
 
 감사합니다,
-ONLYOFFICE™ 지원팀
+ONLYOFFICE 지원팀
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
@@ -1453,7 +1448,7 @@ _알림_: 이 링크는 7일 동안만 유효합니다. 기간 내에 포털 삭
 문의 사항이 있거나 도움이 필요한 경우 언제든지 연락주세요: [${__SalesEmail}](mailto:${__SalesEmail})
 
 감사합니다,
-ONLYOFFICE™ 지원팀
+ONLYOFFICE 지원팀
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_rename" xml:space="preserve">
@@ -1631,7 +1626,7 @@ $TrulyYours
 [$__AuthorName]($__AuthorUrl)님이 [${__VirtualRootPath}](${__VirtualRootPath}) 포털의 자신의 프로필 정보를 변경했습니다.</value>
   </data>
   <data name="pattern_send_whats_new" xml:space="preserve">
-    <value>h1.$Date, 고객님의 DocSpace의 새 소식입니다
+    <value>h1.$Date, 고객님의 DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" 의 새 소식입니다
 
 #foreach($Activities 내 $activity)
 $activity
@@ -1761,5 +1756,96 @@ $TrulyYours</value>
 *새로운 문서 공동작업 방식을 즐기시기 바랍니다!*
 
 $TrulyYours</value>
+  </data>
+  <data name="ButtonGetFreeApp" xml:space="preserve">
+    <value>무료 앱 다운로드</value>
+  </data>
+  <data name="ButtonGetStarted" xml:space="preserve">
+    <value>시작하기</value>
+  </data>
+  <data name="ButtonJoinRoom" xml:space="preserve">
+    <value>룸에 참여하기</value>
+  </data>
+  <data name="ButtonRegister" xml:space="preserve">
+    <value>등록</value>
+  </data>
+  <data name="ButtonUpgrade" xml:space="preserve">
+    <value>업그레이드</value>
+  </data>
+  <data name="pattern_migration_personal_to_docspace" xml:space="preserve">
+    <value>안녕하세요!
+
+ONLYOFFICE Personal에서 새 ONLYOFFICE DocSpace로의 데이터 마이그레이션 프로세스가 완료되었습니다.
+
+가져오기한 데이터로 DocSpace에 액세스하려면 아래 버튼을 클릭하세요:
+
+$OrangeButton
+
+현재 DocSpace 요금제는 STARTUP이며, 이 요금제는 완전 무료입니다.
+
+==필요한 경우 새 DocSpace의 이름을 변경할 수 있습니다. 설정 -&gt; 사용자 지정 -&gt; DocSpace 이름 변경으로 전환하기만 하면 됩니다.==
+
+새로운 방식의 문서 협업을 즐기세요!
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_admin_integrations_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 24px 40px 32px; text-align: center;"&gt;ONLYOFFICE DocSpace: &lt;span style="color: #FF6F3D;"&gt;에 대한 유용한 통합 정보를 확인하세요&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;안녕하세요! 이 뉴스레터에서 즉시 사용 가능한 DocSpace 통합을 확인하세요. 바로 사용하여 생산성을 높이세요&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="Margin: 0; padding-bottom: 24px; padding-top: 32px; padding-left: 40px; padding-right: 40px; text-align: left;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 64px; Margin:0; padding-left: 148px; padding-right: 32px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG1" alt="ONLYOFFICE" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 32px; Margin:0; padding-left: 0px; padding-right: 0px; padding-top: 16px; padding-bottom: 16px; vertical-align: top; width: 32px;"&gt;&lt;img width="32" src="$IMG2" alt="connecting to" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 64px; Margin:0; padding-left: 32px; padding-right: 148px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG3" alt="Zoom" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0px 40px 24px; text-align: center;"&gt;ONLYOFFICE DocSpace &amp; Zoom&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 16px; text-align: center;"&gt;Zoom 회의 도중 다른 참가자와 함께 콘텐츠 협업을 하세요. 회의 사이에 문서를 효율적으로 관리하세요.&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 24px; text-align: center;"&gt;&lt;a href="https://www.onlyoffice.com/office-for-zoom.aspx" style="color: #FF6F3D; text-decoration: underline;" target="_blank"&gt;자세히 알아보기&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton1&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="Margin: 0; padding-bottom: 24px; padding-top: 32px; padding-left: 40px; padding-right: 40px; text-align: left;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 64px; Margin:0; padding-left: 148px; padding-right: 32px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG1" alt="ONLYOFFICE" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 32px; Margin:0; padding-left: 0px; padding-right: 0px; padding-top: 16px; padding-bottom: 16px; vertical-align: top; width: 32px;"&gt;&lt;img width="32" src="$IMG2" alt="connecting to" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 64px; Margin:0; padding-left: 32px; padding-right: 148px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG4" alt="Zapier" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0px 40px 24px; text-align: center;"&gt;ONLYOFFICE DocSpace &amp; Zapier&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 16px; text-align: center;"&gt; DocSpace용 zaps과 다양한 앱(Asana, Slack, HubSpot, Discord, Linear 등)을 사용하여 워크플로우를 자동화하세요.&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 24px; text-align: center;"&gt;&lt;a href="https://helpcenter.onlyoffice.com/integration/gettingstarted-zapier.aspx" style="color: #FF6F3D; text-decoration: underline;" target="_blank"&gt;자세히 알아보기&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton2&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="Margin: 0; padding-bottom: 24px; padding-top: 32px; padding-left: 40px; padding-right: 40px; text-align: left;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 64px; Margin:0; padding-left: 148px; padding-right: 32px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG1" alt="ONLYOFFICE" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 32px; Margin:0; padding-left: 0px; padding-right: 0px; padding-top: 16px; padding-bottom: 16px; vertical-align: top; width: 32px;"&gt;&lt;img width="32" src="$IMG2" alt="connecting to" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 64px; Margin:0; padding-left: 32px; padding-right: 148px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG5" alt="Wordpress" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0px 40px 24px; text-align: center;"&gt;ONLYOFFICE DocSpace &amp; Wordpress&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 16px; text-align: center;"&gt;웹사이트에 문서 및 룸을 임베드하여 방문자가 다운로드하지 않고도 파일을 확인할 수 있도록 하세요. DocSpace를 통해 오피스 문서를 관리하세요.&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 24px; text-align: center;"&gt;&lt;a href="https://www.onlyoffice.com/office-for-wordpress.aspx" style="color: #FF6F3D; text-decoration: underline;" target="_blank"&gt;자세히 알아보기&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton3&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="Margin: 0; padding-bottom: 24px; padding-top: 32px; padding-left: 40px; padding-right: 40px; text-align: left;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 64px; Margin:0; padding-left: 148px; padding-right: 32px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG1" alt="ONLYOFFICE" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 32px; Margin:0; padding-left: 0px; padding-right: 0px; padding-top: 16px; padding-bottom: 16px; vertical-align: top; width: 32px;"&gt;&lt;img width="32" src="$IMG2" alt="connecting to" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 64px; Margin:0; padding-left: 32px; padding-right: 148px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG6" alt="Drupal" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0px 40px 24px; text-align: center;"&gt;ONLYOFFICE DocSpace &amp; Drupal&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 16px; text-align: center;"&gt;DocSpace를 통해 웹사이트 방문자가 오피스 문서에 쉽게 접근할 수 있도록 만들고 파일을 관리하세요.&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 24px; text-align: center;"&gt;&lt;a href="https://www.onlyoffice.com/office-for-drupal.aspx" style="color: #FF6F3D; text-decoration: underline;" target="_blank"&gt;자세히 알아보기&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 64px; padding-top: 0; text-align: center;"&gt;$OrangeButton4&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_rooms_activity" xml:space="preserve">
+    <value>h1.지난 1시간 동안 DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" 에 새로 추가된 내용입니다 $Date
+
+#foreach($activity in $Activities)
+$activity
+
+#end</value>
+  </data>
+  <data name="pattern_saas_docspace_registration" xml:space="preserve">
+    <value>h1. ONLYOFFICE DocSpace: 등록 완료
+
+
+안녕하세요!
+ 
+"${__VirtualRootPath}":"${__VirtualRootPath}"에서 ONLYOFFICE DocSpace에 대한 등록을 완료해 주시기 바랍니다. 링크를 클릭하여 이름을 입력하고 비밀번호를 설정하세요:
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_room_invite_existing_user" xml:space="preserve">
+    <value>안녕하세요!
+
+$__AuthorName님이 "${__VirtualRootPath}":"${__VirtualRootPath}"에서 "$Message":"$InviteLink" 룸에 참여하도록 초대했습니다.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_migration_personal_to_docspace" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace로의 데이터 마이그레이션이 완료되었습니다</value>
+  </data>
+  <data name="subject_rooms_activity" xml:space="preserve">
+    <value>지난 1시간 동안 ${__VirtualRootPath} 포털에 새로 추가된 내용입니다</value>
+  </data>
+  <data name="subject_saas_admin_integrations_v1" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace에 대한 유용한 통합 정보를 확인하세요</value>
+  </data>
+  <data name="subject_saas_docspace_registration" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace: 등록 완료</value>
+  </data>
+  <data name="subject_saas_room_invite_existing_user" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace 룸에 초대받으셨습니다</value>
   </data>
 </root>

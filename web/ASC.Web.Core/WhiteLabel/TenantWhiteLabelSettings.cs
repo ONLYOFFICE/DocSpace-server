@@ -314,11 +314,14 @@ public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
 }
 
 [Scope]
-public class TenantWhiteLabelSettingsHelper(WebImageSupplier webImageSupplier,
+public class TenantWhiteLabelSettingsHelper(
+    WebImageSupplier webImageSupplier,
     UserPhotoManager userPhotoManager,
     StorageFactory storageFactory,
     WhiteLabelHelper whiteLabelHelper,
     TenantManager tenantManager,
+    AuthContext authContext,
+    UserManager userManager,
     SettingsManager settingsManager,
     IConfiguration configuration,
     ILogger<TenantWhiteLabelSettingsHelper> logger)
@@ -464,12 +467,11 @@ public class TenantWhiteLabelSettingsHelper(WebImageSupplier webImageSupplier,
                 }
         };
 
-        string ext = null;
-
         if (!string.IsNullOrEmpty(logo))
         {
             byte[] data;
             var format = supportedFormats.FirstOrDefault(r => logo.StartsWith($"data:{r.mime};base64,"));
+            string ext;
             if (format == null)
             {
                 var fileName = Path.GetFileName(logo);
@@ -494,7 +496,7 @@ public class TenantWhiteLabelSettingsHelper(WebImageSupplier webImageSupplier,
             return (data, ext);
         }
 
-        return (null, ext);
+        return (null, null);
     }
 
     private (byte[], string) GetNotificationLogoData(byte[] logoData, string extLogo, TenantWhiteLabelSettings tenantWhiteLabelSettings)
@@ -619,10 +621,12 @@ public class TenantWhiteLabelSettingsHelper(WebImageSupplier webImageSupplier,
             _ => "svg"
         };
 
+        var regionalPath = await GetCustomRegionalPath();
+
         var path = type switch
         {
             WhiteLabelLogoType.Notification => "notifications/",
-            _ => "logo/"
+            _ => $"logo/{regionalPath}"
         };
 
         var fileName = BuildLogoFileName(type, ext, dark);
@@ -653,6 +657,30 @@ public class TenantWhiteLabelSettingsHelper(WebImageSupplier webImageSupplier,
         var logoPath = BuildLogoFileName(type, partnerSettings.GetExt(type, dark), dark);
 
         return (await partnerStorage.IsFileAsync(logoPath)) ? (await partnerStorage.GetUrlWithHashAsync(string.Empty, logoPath)) : null;
+    }
+
+    private async Task<string> GetCustomRegionalPath()
+    {
+        var customCultures = configuration.GetSection("web:logo:custom-cultures").Get<string[]>() ?? [];
+
+        if (customCultures.Length == 0)
+        {
+            return string.Empty;
+        }
+
+        var language = string.Empty;
+
+        if (authContext.IsAuthenticated)
+        {
+            language = (await userManager.GetUsersAsync(authContext.CurrentAccount.ID)).CultureName;
+        }
+
+        if (string.IsNullOrEmpty(language))
+        {
+            language = (await tenantManager.GetCurrentTenantAsync()).Language;
+        }
+
+        return customCultures.Contains(language, StringComparer.InvariantCultureIgnoreCase) ? $"{language.ToLower()}/" : string.Empty;
     }
 
     #endregion

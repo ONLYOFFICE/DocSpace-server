@@ -349,7 +349,7 @@
     <value>Group Updated: {0}</value>
   </data>
   <data name="GuestAccount" xml:space="preserve">
-    <value>Guest Account</value>
+    <value>Anonymous</value>
   </data>
   <data name="GuestActivated" xml:space="preserve">
     <value>Guest Activated: {0}</value>
@@ -797,5 +797,68 @@
   </data>
   <data name="PortalRenamed" xml:space="preserve">
     <value>Portal Renamed</value>
+  </data>
+  <data name="SendJoinInvite" xml:space="preserve">
+    <value>User {0} sent an invitation to {1} to join this DocSpace</value>
+  </data>
+  <data name="RoomGroupAdded" xml:space="preserve">
+    <value>Added group: {0}. Role: {1}</value>
+  </data>
+  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
+    <value>{0} appointed: {1}</value>
+  </data>
+  <data name="RoomGroupRemove" xml:space="preserve">
+    <value>Deleted group: {0}</value>
+  </data>
+  <data name="FileUploadedWithOverwriting" xml:space="preserve">
+    <value>File uploaded with overwriting: {0}</value>
+  </data>
+  <data name="QuotaPerRoomChanged" xml:space="preserve">
+    <value>Set default storage quota for rooms: {0}</value>
+  </data>
+  <data name="QuotaPerRoomDisabled" xml:space="preserve">
+    <value>Disabled default storage quota for rooms</value>
+  </data>
+  <data name="QuotaPerUserChanged" xml:space="preserve">
+    <value>Set default storage quota for users: {0}</value>
+  </data>
+  <data name="QuotaPerUserDisabled" xml:space="preserve">
+    <value>Disabled default storage quota for users</value>
+  </data>
+  <data name="QuotaPerPortalChanged" xml:space="preserve">
+    <value>Set default storage quota: {0}</value>
+  </data>
+  <data name="QuotaPerPortalDisabled" xml:space="preserve">
+    <value>Disabled default storage quota</value>
+  </data>
+  <data name="FileSizePostfix" xml:space="preserve">
+    <value>bytes,KB,MB,GB,TB</value>
+  </data>
+  <data name="RoomCopied" xml:space="preserve">
+    <value>Room copied: {0}</value>
+  </data>
+  <data name="FormSubmit" xml:space="preserve">
+    <value>Users [{0}]. Form submitted: {1}</value>
+  </data>
+  <data name="FormOpenedForFilling" xml:space="preserve">
+    <value>File Opened For Filling: {0}</value>
+  </data>
+  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
+    <value>Rooms [{0}]. Set custom storage quota for rooms: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
+    <value>Rooms [{0}]. Set default storage quota for rooms: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
+    <value>Rooms [{0}]. Disabled storage quota for rooms</value>
+  </data>
+  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
+    <value>Users [{0}]. Set custom storage quota for users: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
+    <value>Users [{0}]. Set default storage quota for users: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
+    <value>Users [{0}]. Disabled storage quota for users</value>
   </data>
 </root>

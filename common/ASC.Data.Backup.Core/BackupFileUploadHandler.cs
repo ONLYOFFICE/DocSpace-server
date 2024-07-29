@@ -46,6 +46,7 @@ public class BackupFileUploadHandler
         BackupFileUploadResult result;
         try
         {
+            await backupAjaxHandler.DemandPermissionsRestoreAsync();
             if (!await permissionContext.CheckPermissionsAsync(SecurityConstants.EditPortalSettings))
             {
                 throw new ArgumentException("Access denied.");

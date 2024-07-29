@@ -29,7 +29,7 @@ using Folder = Microsoft.SharePoint.Client.Folder;
 
 namespace ASC.Files.Thirdparty.SharePoint;
 
-[Transient]
+[Transient(typeof(IProviderInfo<File, Folder, ClientObject>))]
 public class SharePointProviderInfo(ILogger<SharePointProviderInfo> logger,
         IServiceProvider serviceProvider,
         TenantUtil tenantUtil,
@@ -409,7 +409,7 @@ public class SharePointProviderInfo(ILogger<SharePointProviderInfo> logger,
         return await GetFolderByIdAsync(GetParentFolderId(serverRelativeUrl));
     }
 
-    public async Task<IEnumerable<File>> GetFolderFilesAsync(object id)
+    public async Task<IEnumerable<File>> GetFolderFilesAsync(string id)
     {
         var folder = await GetFolderByIdAsync(id);
         if (folder is SharePointFolderErrorEntry)

@@ -34,6 +34,7 @@ namespace ASC.People.Api;
 [DefaultRoute]
 [ApiController]
 public class GroupController(
+    GroupSummaryDtoHelper groupSummaryDtoHelper,
     UserManager userManager,
     ApiContext apiContext,
     GroupFullDtoHelper groupFullDtoHelper,
@@ -91,6 +92,7 @@ public class GroupController(
     /// Get a group
     /// </short>
     /// <param type="System.Guid, System" method="url" name="id">Group ID</param>
+    /// <param type="System.Boolean, System" name="includeMembers">Include members</param>
     /// <returns type="ASC.People.ApiModels.ResponseDto.GroupDto, ASC.People">Group with the detailed information</returns>
     /// <remarks>
     /// This method returns full group information.
@@ -98,11 +100,11 @@ public class GroupController(
     /// <path>api/2.0/groups/{id}</path>
     /// <httpMethod>GET</httpMethod>
     [HttpGet("{id:guid}")]
-    public async Task<GroupDto> GetGroupAsync(Guid id)
+    public async Task<GroupDto> GetGroupAsync(Guid id, bool includeMembers = true)
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_ReadGroups);
         
-        return await groupFullDtoHelper.Get(await GetGroupInfoAsync(id), true);
+        return await groupFullDtoHelper.Get(await GetGroupInfoAsync(id), includeMembers);
     }
 
     /// <summary>
@@ -120,8 +122,15 @@ public class GroupController(
     public async Task<IEnumerable<GroupSummaryDto>> GetByUserIdAsync(Guid userid)
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_ReadGroups);
+        var groups = await userManager.GetUserGroupsAsync(userid);
+        List<GroupSummaryDto> result = new(groups.Count);
         
-        return (await userManager.GetUserGroupsAsync(userid)).Select(x => new GroupSummaryDto(x, userManager));
+        foreach (var g in groups)
+        {
+            result.Add(await groupSummaryDtoHelper.GetAsync(g));
+        }
+
+        return result;
     }
 
     /// <summary>
@@ -176,7 +185,7 @@ public class GroupController(
 
         group.Name = inDto.GroupName ?? group.Name;
         await userManager.SaveGroupInfoAsync(group);
-
+        
         await TransferUserToDepartmentAsync(inDto.GroupManager, group, true);
 
         if (inDto.MembersToAdd != null)
@@ -367,7 +376,8 @@ public class GroupController(
 
     private async Task TransferUserToDepartmentAsync(Guid userId, GroupInfo group, bool setAsManager)
     {
-        if (userId == Guid.Empty || !await userManager.UserExistsAsync(userId))
+        var user = await userManager.GetUsersAsync(userId);
+        if (userId == Guid.Empty || !userManager.UserExists(user) || user.Status != EmployeeStatus.Active)
         {
             return;
         }

@@ -121,10 +121,10 @@
     <value>Akcija</value>
   </data>
   <data name="ActionIdCol" xml:space="preserve">
-    <value>ID Akcije</value>
+    <value>ID akcije</value>
   </data>
   <data name="ActionTypeCol" xml:space="preserve">
-    <value>Tip Akcije</value>
+    <value>Tip akcije</value>
   </data>
   <data name="AdministratorAdded" xml:space="preserve">
     <value>Administrator dodat: {0}</value>
@@ -232,13 +232,13 @@
     <value>Postavi vlasnika od [{0}] na [{1}]</value>
   </data>
   <data name="FileConverted" xml:space="preserve">
-    <value>Datoteka konvertovana na Interni format: {0}</value>
+    <value>Datoteka konvertovana na interni format: {0}</value>
   </data>
   <data name="FileCopied" xml:space="preserve">
     <value>Datoteke [{0}]. Kopirane sa foldera "{1}" na folder: "{2}"</value>
   </data>
   <data name="FileCopiedWithOverwriting" xml:space="preserve">
-    <value>Datoteke [{0}]. Kopirane s prepisivanjem iz foldera "{1}" U folder: "{2}"</value>
+    <value>Datoteke [{0}]. Kopirane s prepisivanjem iz foldera "{1}" u folder: "{2}"</value>
   </data>
   <data name="FileCreated" xml:space="preserve">
     <value>Datoteka kreirana: {0}</value>
@@ -364,7 +364,7 @@
     <value>Grupe ažurirane: {0}</value>
   </data>
   <data name="GuestAccount" xml:space="preserve">
-    <value>Gost nalog</value>
+    <value>Anonimno</value>
   </data>
   <data name="GuestActivated" xml:space="preserve">
     <value>Gost aktiviran: {0}</value>
@@ -421,7 +421,7 @@
     <value>Neuspešna prijava putem API i SMS koda</value>
   </data>
   <data name="LoginFailViaApiSocialAccount" xml:space="preserve">
-    <value>Prijava putem API i Društvenih medija nije uspela</value>
+    <value>Prijava putem API i društvenih medija nije uspela</value>
   </data>
   <data name="LoginFailViaApiTfa" xml:space="preserve">
     <value>Neuspešna prijava putem API i autentifikator aplikacija</value>
@@ -463,7 +463,7 @@
     <value>Prijava putem SMS-a uspešna</value>
   </data>
   <data name="LoginSuccessViaSocialAccount" xml:space="preserve">
-    <value>Prijava putem API i Društvenih medija uspešna</value>
+    <value>Prijava putem API i društvenih medija uspešna</value>
   </data>
   <data name="LoginSuccessViaSSO" xml:space="preserve">
     <value>Uspešna prijava putem SSO</value>
@@ -520,13 +520,13 @@
     <value>Portal obrisan</value>
   </data>
   <data name="PrivacyRoomDisable" xml:space="preserve">
-    <value>Privatna Soba je onemogućena</value>
+    <value>Privatna soba je onemogućena</value>
   </data>
   <data name="PortalRenamed" xml:space="preserve">
-    <value>Portal Preimenovan</value>
+    <value>Portal preimenovan</value>
   </data>
   <data name="PrivacyRoomEnable" xml:space="preserve">
-    <value>Privatna Soba je omogućena</value>
+    <value>Privatna soba je omogućena</value>
   </data>
   <data name="ProductAccessOpened" xml:space="preserve">
     <value>Proizvodi [{0}]. Pristup otvoren</value>
@@ -797,5 +797,44 @@
   </data>
   <data name="UserUpdatedPassword" xml:space="preserve">
     <value>Lozinka ažurirana</value>
+  </data>
+  <data name="FileSizePostfix" xml:space="preserve">
+    <value>bajtovi,KB,MB,GB,TB</value>
+  </data>
+  <data name="FileUploadedWithOverwriting" xml:space="preserve">
+    <value>Datoteka otpremljena sa prepisivanjem: {0}</value>
+  </data>
+  <data name="RoomCopied" xml:space="preserve">
+    <value>Soba je kopirana: {0}</value>
+  </data>
+  <data name="RoomGroupAdded" xml:space="preserve">
+    <value>Dodata grupa: {0}. Uloga: {1}</value>
+  </data>
+  <data name="RoomGroupRemove" xml:space="preserve">
+    <value>Obrisana grupa: {0}</value>
+  </data>
+  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
+    <value>{0} imenovan: {1}</value>
+  </data>
+  <data name="SendJoinInvite" xml:space="preserve">
+    <value>Korisnik {0} je poslao pozivnicu {1} da se pridruži ovom DocSpace-u</value>
+  </data>
+  <data name="QuotaPerPortalChanged" xml:space="preserve">
+    <value>Postavi podrazumevanu skladišnu kvotu: {0}</value>
+  </data>
+  <data name="QuotaPerPortalDisabled" xml:space="preserve">
+    <value>Onemogućena podrazumevana skladišna kvota</value>
+  </data>
+  <data name="QuotaPerRoomChanged" xml:space="preserve">
+    <value>Postavi podrazumevanu skladišnu kvotu za prostorije: {0}</value>
+  </data>
+  <data name="QuotaPerRoomDisabled" xml:space="preserve">
+    <value>Onemogućena podrazumevana skladišna kvota za prostorije</value>
+  </data>
+  <data name="QuotaPerUserChanged" xml:space="preserve">
+    <value>Postavi podrazumevanu skladišnu kvotu za korisnike: {0}</value>
+  </data>
+  <data name="QuotaPerUserDisabled" xml:space="preserve">
+    <value>Onemogućena podrazumevana skladišna kvota za korisnike</value>
   </data>
 </root>

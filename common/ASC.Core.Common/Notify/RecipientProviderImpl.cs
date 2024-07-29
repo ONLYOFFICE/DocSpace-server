@@ -28,6 +28,7 @@ using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Core.Notify;
 
+[Scope(typeof(IRecipientProvider))]
 public class RecipientProviderImpl(UserManager userManager) : IRecipientProvider
 {
     public virtual async Task<IRecipient> GetRecipientAsync(string id)

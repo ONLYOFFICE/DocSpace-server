@@ -115,7 +115,7 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to My documents.
+        ///   Looks up a localized string similar to Documents.
         /// </summary>
         public static string MyFiles {
             get {
@@ -151,7 +151,7 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Ready.
+        ///   Looks up a localized string similar to Complete.
         /// </summary>
         public static string ReadyFormFolder {
             get {

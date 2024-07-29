@@ -30,17 +30,15 @@ using Folder = Microsoft.SharePoint.Client.Folder;
 namespace ASC.Files.Thirdparty.SharePoint;
 
 internal class SharePointDaoBase(
+    IDaoFactory daoFactory,
     IServiceProvider serviceProvider,
     UserManager userManager,
     TenantManager tenantManager,
     TenantUtil tenantUtil,
     IDbContextFactory<FilesDbContext> dbContextFactory,
-    SetupInfo setupInfo,
     FileUtility fileUtility,
-    TempPath tempPath,
-    RegexDaoSelectorBase<File, Folder, ClientObject> regexDaoSelectorBase)
-    : ThirdPartyProviderDao<File, Folder, ClientObject>(serviceProvider, userManager, tenantManager, tenantUtil,
-        dbContextFactory, setupInfo, fileUtility, tempPath, regexDaoSelectorBase)
+    SharePointDaoSelector regexDaoSelectorBase)
+    : ThirdPartyProviderDao<File, Folder, ClientObject>(daoFactory, serviceProvider, userManager, tenantManager, tenantUtil, dbContextFactory, fileUtility, regexDaoSelectorBase)
 {
     private readonly TenantManager _tenantManager = tenantManager;
     internal SharePointProviderInfo SharePointProviderInfo { get; private set; }
@@ -50,72 +48,6 @@ internal class SharePointDaoBase(
         PathPrefix = pathPrefix;
         ProviderInfo = providerInfo;
         SharePointProviderInfo = providerInfo as SharePointProviderInfo;
-    }
-
-    protected string GetAvailableTitle(string requestTitle, Folder parentFolderId, Func<string, Folder, bool> isExist)
-    {
-        if (!isExist(requestTitle, parentFolderId))
-        {
-            return requestTitle;
-        }
-
-        var re = new Regex(@"( \(((?<index>[0-9])+)\)(\.[^\.]*)?)$");
-        var match = re.Match(requestTitle);
-
-        if (!match.Success)
-        {
-            var insertIndex = requestTitle.Length;
-            if (requestTitle.LastIndexOf('.') != -1)
-            {
-                insertIndex = requestTitle.LastIndexOf('.');
-            }
-
-            requestTitle = requestTitle.Insert(insertIndex, " (1)");
-        }
-
-        while (isExist(requestTitle, parentFolderId))
-        {
-            requestTitle = re.Replace(requestTitle, MatchEvaluator);
-        }
-
-        return requestTitle;
-    }
-
-    protected async Task<string> GetAvailableTitleAsync(string requestTitle, Folder parentFolderID, Func<string, Folder, Task<bool>> isExist)
-    {
-        if (!await isExist(requestTitle, parentFolderID))
-        {
-            return requestTitle;
-        }
-
-        var re = new Regex(@"( \(((?<index>[0-9])+)\)(\.[^\.]*)?)$");
-        var match = re.Match(requestTitle);
-
-        if (!match.Success)
-        {
-            var insertIndex = requestTitle.Length;
-            if (requestTitle.LastIndexOf(".", StringComparison.Ordinal) != -1)
-            {
-                insertIndex = requestTitle.LastIndexOf(".", StringComparison.Ordinal);
-            }
-
-            requestTitle = requestTitle.Insert(insertIndex, " (1)");
-        }
-
-        while (await isExist(requestTitle, parentFolderID))
-        {
-            requestTitle = re.Replace(requestTitle, MatchEvaluator);
-        }
-
-        return requestTitle;
-    }
-
-    private string MatchEvaluator(Match match)
-    {
-        var index = Convert.ToInt32(match.Groups[2].Value);
-        var staticText = match.Value[string.Format(" ({0})", index).Length..];
-
-        return string.Format(" ({0}){1}", index + 1, staticText);
     }
 
     protected async ValueTask UpdatePathInDBAsync(string oldValue, string newValue)
@@ -131,6 +63,7 @@ internal class SharePointDaoBase(
 
         await strategy.ExecuteAsync(async () =>
         {
+            var mapping = _daoFactory.GetMapping<string>();
             await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
             await using var tx = await dbContext.Database.BeginTransactionAsync();
 
@@ -138,9 +71,9 @@ internal class SharePointDaoBase(
 
             await foreach (var oldId in oldIds)
             {
-                var oldHashId = await MappingIDAsync(oldId);
+                var oldHashId = await mapping.MappingIdAsync(oldId);
                 var newId = oldId.Replace(oldValue, newValue);
-                var newHashId = await MappingIDAsync(newId);
+                var newHashId = await mapping.MappingIdAsync(newId);
 
                 var mappingForDelete = await Queries.ThirdpartyIdMappingsAsync(dbContext, tenantId, oldHashId).ToListAsync();
                 var mappingForInsert = mappingForDelete.Select(m => new DbFilesThirdpartyIdMapping

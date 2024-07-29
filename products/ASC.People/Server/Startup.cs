@@ -28,7 +28,7 @@ namespace ASC.People;
 
 public class Startup : BaseStartup
 {
-    public Startup(IConfiguration configuration, IHostEnvironment hostEnvironment) : base(configuration, hostEnvironment)
+    public Startup(IConfiguration configuration) : base(configuration)
     {
         WebhooksEnabled = true;
 
@@ -43,10 +43,6 @@ public class Startup : BaseStartup
         await base.ConfigureServices(services);
 
         services.AddBaseDbContextPool<FilesDbContext>();
-
         services.RegisterQuotaFeature();
-
-        DIHelper.TryAdd<ReassignProgressItem>();
-        DIHelper.TryAdd<RemoveProgressItem>();
     }
 }

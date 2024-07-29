@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Telegram.Bot.Requests;
+
 namespace ASC.Files.Core;
 
 /// <summary>
@@ -49,6 +51,14 @@ public class AutoCleanUpData
     /// <summary>The period when the trash bin will be cleared</summary>
     /// <type>ASC.Files.Core.DateToAutoCleanUp, ASC.Files.Core</type>
     public DateToAutoCleanUp Gap { get; init; }
+
+    public static AutoCleanUpData GetDefault()
+    {
+        return new AutoCleanUpData {
+             Gap = DateToAutoCleanUp.ThirtyDays,
+             IsAutoCleanUp = true
+       };
+    }
 }
 
 [Scope]

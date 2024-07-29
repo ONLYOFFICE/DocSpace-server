@@ -1681,6 +1681,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to This email is attached to the user {0} as a third-party provider.
+        /// </summary>
+        public static string ErrorEmailLinked {
+            get {
+                return ResourceManager.GetString("ErrorEmailLinked", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The current email and the new email are the same.
         /// </summary>
         public static string ErrorEmailsAreTheSame {
@@ -1749,6 +1758,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string ErrorIncorrectUserName {
             get {
                 return ResourceManager.GetString("ErrorIncorrectUserName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invitation limit is exceeded.
+        /// </summary>
+        public static string ErrorInvitationLimitExceeded {
+            get {
+                return ResourceManager.GetString("ErrorInvitationLimitExceeded", resourceCulture);
             }
         }
         
@@ -1893,6 +1911,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string ErrorTooManyLoginAttempts {
             get {
                 return ResourceManager.GetString("ErrorTooManyLoginAttempts", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User disabled.
+        /// </summary>
+        public static string ErrorUserDisabled {
+            get {
+                return ResourceManager.GetString("ErrorUserDisabled", resourceCulture);
             }
         }
         
@@ -2743,7 +2770,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Instructions to delete your profile has been sent to {0} email address.
+        ///   Looks up a localized string similar to Instructions to disable your profile has been sent to {0} email address.
         /// </summary>
         public static string SuccessfullySentNotificationDeleteUserInfoMessage {
             get {
@@ -2806,7 +2833,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Number of admins.
+        ///   Looks up a localized string similar to Number of admins/power users.
         /// </summary>
         public static string TariffsFeature_manager_price_count {
             get {
@@ -2896,7 +2923,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Number of admins/power users:.
+        ///   Looks up a localized string similar to Admins/Power users added:.
         /// </summary>
         public static string TariffsFeature_used_manager {
             get {

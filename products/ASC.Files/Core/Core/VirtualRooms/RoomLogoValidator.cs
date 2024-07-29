@@ -45,8 +45,8 @@ public class RoomLogoValidator(IDaoFactory daoFactory, FileSecurity fileSecurity
             return false;
         }
 
-        var id = data[0];
-
+        var id = path.Substring(0, path.LastIndexOf(RoomLogoManager.LogosPathSplitter, StringComparison.Ordinal));
+        
         if (int.TryParse(id, out var internalId))
         {
             return await CheckRoomAccess(internalId);

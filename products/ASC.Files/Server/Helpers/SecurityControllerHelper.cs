@@ -26,26 +26,27 @@
 
 namespace ASC.Files.Helpers;
 
-public class SecurityControllerHelper(FilesSettingsHelper filesSettingsHelper,
-        FileUploader fileUploader,
-        SocketManager socketManager,
-        FileDtoHelper fileDtoHelper,
-        ApiContext apiContext,
-        FileStorageService fileStorageService,
-        FolderContentDtoHelper folderContentDtoHelper,
-        IHttpContextAccessor httpContextAccessor,
-        FolderDtoHelper folderDtoHelper,
-        FileShareDtoHelper fileShareDtoHelper,
-        FileShareParamsHelper fileShareParamsHelper)
-    : FilesHelperBase(filesSettingsHelper,
-    fileUploader,
-    socketManager,
-    fileDtoHelper,
-    apiContext,
-    fileStorageService,
-    folderContentDtoHelper,
-    httpContextAccessor,
-    folderDtoHelper)
+[Scope]
+public class SecurityControllerHelper(
+    FilesSettingsHelper filesSettingsHelper,
+    FileUploader fileUploader,
+    SocketManager socketManager,
+    FileDtoHelper fileDtoHelper,
+    FileStorageService fileStorageService,
+    IHttpContextAccessor httpContextAccessor,
+    FileShareDtoHelper fileShareDtoHelper,
+    FileShareParamsHelper fileShareParamsHelper,
+    FileChecker fileChecker,
+    IDistributedCache distributedCache)
+    : FilesHelperBase(
+        filesSettingsHelper,
+        fileUploader,
+        socketManager,
+        fileDtoHelper,
+        fileStorageService,
+        fileChecker,
+        httpContextAccessor,
+        distributedCache)
 {
     public IAsyncEnumerable<FileShareDto> GetFileSecurityInfoAsync<T>(T fileId)
     {

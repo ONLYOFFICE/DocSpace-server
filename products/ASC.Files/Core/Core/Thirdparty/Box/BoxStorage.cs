@@ -28,7 +28,7 @@ using Box.V2.Exceptions;
 
 namespace ASC.Files.Thirdparty.Box;
 
-[Transient]
+[Transient(typeof(IThirdPartyStorage<BoxFile, BoxFolder, BoxItem>))]
 internal class BoxStorage(TempStream tempStream) : IThirdPartyStorage<BoxFile, BoxFolder, BoxItem>
 {
     private BoxClient _boxClient;
@@ -67,9 +67,9 @@ internal class BoxStorage(TempStream tempStream) : IThirdPartyStorage<BoxFile, B
         {
             return await _boxClient.FoldersManager.GetInformationAsync(folderId, _boxFields);
         }
-        catch (Exception ex)
+        catch (BoxAPIException ex)
         {
-            if (ex.InnerException is BoxAPIException boxException && boxException.Error.Status == ((int)HttpStatusCode.NotFound).ToString())
+            if (ex.Error.Status == ((int)HttpStatusCode.NotFound).ToString())
             {
                 return null;
             }
@@ -109,9 +109,20 @@ internal class BoxStorage(TempStream tempStream) : IThirdPartyStorage<BoxFile, B
 
     public async Task<List<BoxItem>> GetItemsAsync(string folderId)
     {
-        var folderItems = await _boxClient.FoldersManager.GetFolderItemsAsync(folderId, 500, 0, _boxFields);
+        try
+        {
+            var folderItems = await _boxClient.FoldersManager.GetFolderItemsAsync(folderId, 500, 0, _boxFields);
+            return folderItems.Entries;
+        }
+        catch (BoxAPIException ex)
+        {
+            if (ex.Error.Status == ((int)HttpStatusCode.NotFound).ToString())
+            {
+                return [];
+            }
 
-        return folderItems.Entries;
+            throw;
+        }
     }
 
     public async Task<Stream> DownloadStreamAsync(BoxFile file, int offset = 0)

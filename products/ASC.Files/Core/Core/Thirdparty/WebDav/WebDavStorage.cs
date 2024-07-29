@@ -26,7 +26,7 @@
 
 namespace ASC.Files.Core.Core.Thirdparty.WebDav;
 
-[Transient]
+[Transient(typeof(IThirdPartyStorage<WebDavEntry, WebDavEntry, WebDavEntry>))]
 public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientFactory, SetupInfo setupInfo) 
     : IThirdPartyStorage<WebDavEntry, WebDavEntry, WebDavEntry>, IDisposable
 {
@@ -257,7 +257,7 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
         });
 
         return !response.IsSuccessful
-            ? null
+            ? []
             : response.Resources.Skip(1).Select(ToEntry).ToList(); // Skip the folder itself
     }
     
