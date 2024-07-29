@@ -238,10 +238,6 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                                 canFill = true;
                                 editorType = EditorType.Embedded;
 
-                                await fileMarker.MarkAsNewAsync(formDraft);
-                                await socketManager.CreateFileAsync(formDraft);
-                                await socketManager.UpdateFileAsync(file);
-
                                 file = formDraft;
                                 fillingSessionId = Guid.NewGuid().ToString("N");
                             }
