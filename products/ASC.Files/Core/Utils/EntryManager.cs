@@ -1457,7 +1457,7 @@ public class EntryManager(IDaoFactory daoFactory,
                 {
                     var properties = await daoFactory.GetFileDao<T>().GetProperties(file.Id);
 
-                    if (!Equals(properties.FormFilling.OriginalFormId, file.Id))
+                    if (!Equals(properties.FormFilling.OriginalFormId, file.Id) && !Equals(properties.FormFilling.OriginalFormId, default(T)))
                     {
                         var origProperties = await daoFactory.GetFileDao<T>().GetProperties(properties.FormFilling.OriginalFormId);
                         origProperties.FormFilling.ResultFormNumber++;
