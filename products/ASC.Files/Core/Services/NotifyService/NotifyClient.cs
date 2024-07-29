@@ -248,6 +248,11 @@ public class NotifyClient(WorkContext notifyContext,
 
     public async Task SendFormSubmittedAsync<T>(Folder<T> room, FileEntry<T> originalForm, FileEntry<T> filledForm)
     {
+        if (filledForm.CreateBy.Equals(originalForm.CreateBy))
+        {
+            return;
+        }
+
         var client = notifyContext.RegisterClient(serviceProvider, notifySource);
 
         var tenant = await tenantManager.GetCurrentTenantAsync();
