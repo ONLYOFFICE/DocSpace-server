@@ -296,22 +296,13 @@ public class PluginManager(PluginConfigSettings pluginConfigSettings,
     private async Task<PluginConfig> UpdatePluginAsync(PluginConfig plugin, bool enabled)
     {
         var pluginSettings = await settingsManager.LoadAsync<PluginSettings>();
-
         var enabledPlugins = pluginSettings?.EnabledPlugins ?? new Dictionary<string, PluginState>();
 
-        if (enabled)
-        {
-            var pluginState = new PluginState(enabled);
+        var pluginState = new PluginState(enabled);
 
-            enabledPlugins[plugin.Name] = pluginState;
-        }
-        else
-        {
-            enabledPlugins.Remove(plugin.Name);
-        }
+        enabledPlugins[plugin.Name] = pluginState;
 
         pluginSettings.EnabledPlugins = enabledPlugins.Any() ? enabledPlugins : null;
-
         await settingsManager.SaveAsync(pluginSettings);
 
         plugin.Enabled = enabled;

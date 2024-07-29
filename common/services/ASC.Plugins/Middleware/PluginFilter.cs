@@ -44,7 +44,7 @@ public class PluginFilter(SettingsManager settingsManager)
         var pluginSettings = await settingsManager.LoadAsync<PluginSettings>();
         var route = context.ActionDescriptor.AttributeRouteInfo.Template;
         var pluginName = route.Split('/')[1];
-        if (route.StartsWith("plugin") && (pluginSettings.EnabledPlugins == null || !pluginSettings.EnabledPlugins.ContainsKey(pluginName)))
+        if (route.StartsWith("plugin") && (pluginSettings.EnabledPlugins == null || !pluginSettings.EnabledPlugins.ContainsKey(pluginName) || !pluginSettings.EnabledPlugins[pluginName].Enabled))
         {
             context.Result = new ObjectResult("Plugin is not enable")
             {
