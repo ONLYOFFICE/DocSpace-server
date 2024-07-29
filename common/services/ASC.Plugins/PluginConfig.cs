@@ -48,37 +48,3 @@ public class PluginConfig
     }
 }
 
-[Singleton]
-public class PluginCache
-{
-    private readonly ICache _cache;
-    private readonly ICacheNotify<PluginCacheItem> _notify;
-    private readonly TimeSpan _cacheExpiration = TimeSpan.FromDays(1);
-
-    public PluginCache(ICacheNotify<PluginCacheItem> notify, ICache cache)
-    {
-        _cache = cache;
-        _notify = notify;
-
-        _notify.Subscribe(i => _cache.Remove(i.Key), CacheNotifyAction.Remove);
-    }
-
-    public List<PluginConfig> Get(string key)
-    {
-        return _cache.Get<List<PluginConfig>>(key);
-    }
-
-    public void Insert(string key, object value)
-    {
-        _notify.Publish(new PluginCacheItem { Key = key }, CacheNotifyAction.Remove);
-
-        _cache.Insert(key, value, _cacheExpiration);
-    }
-
-    public void Remove(string key)
-    {
-        _notify.Publish(new PluginCacheItem { Key = key }, CacheNotifyAction.Remove);
-
-        _cache.Remove(key);
-    }
-}

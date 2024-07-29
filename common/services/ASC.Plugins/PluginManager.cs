@@ -53,7 +53,6 @@ public class PluginManager(PluginConfigSettings pluginConfigSettings,
     StorageFactory storageFactory,
     CoreBaseSettings coreBaseSettings,
     AuthContext authContext,
-    PluginCache pluginCache,
     ILogger<PluginManager> log,
     SettingsManager settingsManager,
     InstanceCrypto instanceCrypto,
@@ -320,8 +319,6 @@ public class PluginManager(PluginConfigSettings pluginConfigSettings,
         plugin.Settings = settings;
 
         var key = StorageModuleName;
-
-        pluginCache.Remove(key);
 
         return plugin;
     }
