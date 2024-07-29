@@ -1317,7 +1317,7 @@ public class EntryManager(IDaoFactory daoFactory,
             throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
-        if (checkRight && (!await fileSecurity.CanFillFormsAsync(file) || !await fileSecurity.CanEditAsync(file)))
+        if (checkRight && !await fileSecurity.CanEditAsync(file))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
         }
@@ -1459,7 +1459,7 @@ public class EntryManager(IDaoFactory daoFactory,
                 {
                     var properties = await daoFactory.GetFileDao<T>().GetProperties(file.Id);
 
-                    if (!Equals(properties.FormFilling.OriginalFormId, file.Id))
+                    if (!Equals(properties.FormFilling.OriginalFormId, file.Id) && !Equals(properties.FormFilling.OriginalFormId, default(T)))
                     {
                         var origProperties = await daoFactory.GetFileDao<T>().GetProperties(properties.FormFilling.OriginalFormId);
                         origProperties.FormFilling.ResultFormNumber++;
