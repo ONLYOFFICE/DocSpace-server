@@ -270,7 +270,6 @@ public class PluginManager(PluginConfigSettings pluginConfigSettings,
                 if (enabledPlugins.TryGetValue(plugin.Name, out var pluginState))
                 {
                     plugin.Enabled = pluginState.Enabled;
-                    plugin.Settings = string.IsNullOrEmpty(pluginState.Settings) ? null : instanceCrypto.Decrypt(pluginState.Settings);
                 }
             }
         }
@@ -287,31 +286,27 @@ public class PluginManager(PluginConfigSettings pluginConfigSettings,
         return plugin;
     }
 
-    public async Task<PluginConfig> UpdatePluginAsync(string name, bool enabled, string settings)
+    public async Task<PluginConfig> UpdatePluginAsync(string name, bool enabled)
     {
         var plugin = await GetPluginByNameAsync(name);
 
-        return await UpdatePluginAsync(plugin, enabled, settings);
+        return await UpdatePluginAsync(plugin, enabled);
     }
 
-    private async Task<PluginConfig> UpdatePluginAsync(PluginConfig plugin, bool enabled, string settings)
+    private async Task<PluginConfig> UpdatePluginAsync(PluginConfig plugin, bool enabled)
     {
         var pluginSettings = await settingsManager.LoadAsync<PluginSettings>();
 
         var enabledPlugins = pluginSettings?.EnabledPlugins ?? new Dictionary<string, PluginState>();
 
-        var encryptedSettings = string.IsNullOrEmpty(settings) ? null : instanceCrypto.Encrypt(settings);
-
-        if (enabled || encryptedSettings != null)
+        if (enabled)
         {
-            var pluginState = new PluginState(enabled, encryptedSettings);
+            var pluginState = new PluginState(enabled);
 
             enabledPlugins[plugin.Name] = pluginState;
         }
         else
         {
-            settings = null;
-
             enabledPlugins.Remove(plugin.Name);
         }
 
@@ -320,9 +315,6 @@ public class PluginManager(PluginConfigSettings pluginConfigSettings,
         await settingsManager.SaveAsync(pluginSettings);
 
         plugin.Enabled = enabled;
-        plugin.Settings = settings;
-
-        var key = StorageModuleName;
 
         return plugin;
     }

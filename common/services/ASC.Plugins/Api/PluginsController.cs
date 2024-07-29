@@ -94,9 +94,7 @@ public class PluginsController(PermissionContext permissionContext,
 
         var file = HttpContext.Request.Form.Files[0] ?? throw new CustomHttpException(HttpStatusCode.BadRequest, Resource.ErrorWebPluginNoInputFile);
 
-        var plugin = await pluginManager.AddPluginFromFileAsync(file);
-
-        return plugin;
+        return await pluginManager.AddPluginFromFileAsync(file);
     }
 
     [HttpDelete("{name}")]
@@ -104,23 +102,20 @@ public class PluginsController(PermissionContext permissionContext,
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var plugin = await pluginManager.DeletePluginAsync(name);
-        return plugin;
+        return await pluginManager.DeletePluginAsync(name);
     }
 
     [HttpPost("enable/{name}")]
-    public async Task<string> EnablePlugin(string name)
+    public async Task<PluginConfig> EnablePlugin(string name)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var plugin = await pluginManager.UpdatePluginAsync(name, true, string.Empty);
-        return "ok";
+        return await pluginManager.UpdatePluginAsync(name, true);
     }
 
     [HttpPost("disenable/{name}")]
-    public async Task<string> DisenablePlugin(string name)
+    public async Task DisenablePlugin(string name)
     {
-        var plugin = await pluginManager.UpdatePluginAsync(name, false, string.Empty);
-        return "ok";
+         await pluginManager.UpdatePluginAsync(name, false);
     }
 }

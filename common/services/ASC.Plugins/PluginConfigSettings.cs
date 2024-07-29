@@ -76,8 +76,7 @@ public class PluginSettings : ISettings<PluginSettings>
     }
 }
 
-public class PluginState(bool enabled, string settings)
+public class PluginState(bool enabled)
 {
     public bool Enabled { get; set; } = enabled;
-    public string Settings { get; set; } = settings;
 }
