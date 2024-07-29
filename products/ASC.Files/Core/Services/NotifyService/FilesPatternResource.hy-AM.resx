@@ -211,4 +211,31 @@ $Message</value>
   <data name="subject_ShareFolder_tg" xml:space="preserve">
     <value>Փաստաթղթեր. Մատչումը տրված է թղթապանակին: [$DocumentTitle]($DocumentURL)</value>
   </data>
+  <data name="button_CheckReadyForms" xml:space="preserve">
+    <value>Ստուգել պատրաստի ձևերը</value>
+  </data>
+  <data name="pattern_FormReceived" xml:space="preserve">
+    <value>h1. $Message ձևը լրացված է
+
+Սենյակում լրացվում է նոր ձև՝ "$DocumentTitle":"$DocumentURL" "$RoomTitle":"$RoomURL"
+
+Ձևաթուղթ ներկայացնող՝ "$FromUserName":"$FromUserLink"
+
+$OrangeButton</value>
+  </data>
+  <data name="pattern_FormSubmitted" xml:space="preserve">
+    <value>h1. Դուք լրացրել եք ձևը $Message
+
+Դուք լրացրել եք ձևաթուղթը "$DocumentTitle":"$DocumentURL" սենյակում "$RoomTitle":"$RoomURL"
+
+Մենեջեր: "$ToUserName":"$ToUserLink"
+
+$OrangeButton</value>
+  </data>
+  <data name="subject_FormReceived" xml:space="preserve">
+    <value>DocSpace ծանուցում՝ Ձևաթուղթը լրացված է</value>
+  </data>
+  <data name="subject_FormSubmitted" xml:space="preserve">
+    <value>DocSpace ծանուցում՝ Ձևաթուղթը լրացված է</value>
+  </data>
 </root>

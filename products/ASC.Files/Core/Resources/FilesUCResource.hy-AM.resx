@@ -159,4 +159,7 @@
   <data name="InProcessFormFolder" xml:space="preserve">
     <value>Ընթացքի մեջ</value>
   </data>
+  <data name="ReadyFormFolder" xml:space="preserve">
+    <value>Ամբողջական</value>
+  </data>
 </root>

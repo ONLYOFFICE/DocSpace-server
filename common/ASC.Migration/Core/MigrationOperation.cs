@@ -34,11 +34,9 @@ public class MigrationOperation(
     MigrationCore migrationCore,
     TenantManager tenantManager,
     SecurityContext securityContext,
-    IServiceProvider serviceProvider,
     IDistributedCache cache)
-    : DistributedTaskProgress, IDisposable
+    : DistributedTaskProgress
 {
-    private readonly SemaphoreSlim _semaphore = new(1);
     private string _migratorName;
     private Guid _userId;
 
@@ -133,6 +131,10 @@ public class MigrationOperation(
                 await migrator.MigrateAsync(copyInfo);
             }
         }
+        catch (DirectoryNotFoundException)
+        {
+            Exception = new Exception(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
         catch (Exception e)
         {
             Exception = e;
@@ -166,25 +168,5 @@ public class MigrationOperation(
             }
             await PublishChanges();
         }
-    }
-
-    public async Task CopyLogsAsync(Stream stream)
-    {
-        try
-        {
-            await _semaphore.WaitAsync();
-            await using var logger = serviceProvider.GetService<MigrationLogger>();
-            logger.Init(LogName);
-            await (await logger.GetStreamAsync()).CopyToAsync(stream);
-        }
-        finally
-        {
-            _semaphore.Release();
-        }
-    }
-
-    public void Dispose()
-    {
-        _semaphore.Dispose();
     }
 }

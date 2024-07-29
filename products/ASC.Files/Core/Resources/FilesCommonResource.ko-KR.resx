@@ -464,4 +464,37 @@ docx, xlsx, pptx와 최고의 호환성이 보장됩니다.</value>
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>타입</value>
   </data>
+  <data name="Date" xml:space="preserve">
+    <value>날짜</value>
+  </data>
+  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
+    <value>고급 사용자</value>
+  </data>
+  <data name="RoleEnum_PowerUser" xml:space="preserve">
+    <value>고급 사용자</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>사용자</value>
+  </data>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>여러 파일을 양식 작성 룸으로 이동하는 것은 지원되지 않습니다. 한 번에 하나의 ONLYOFFICE PDF 양식을 이동하세요.</value>
+  </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>폴더를 양식 작성 룸으로 이동하는 것은 지원되지 않습니다. 한 번에 하나의 ONLYOFFICE PDF 양식을 이동하세요.</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>파일을 이 룸으로 이동할 수 없습니다. ONLYOFFICE PDF 양식을 이동해 보세요.</value>
+  </data>
+  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
+    <value>파일을 이 룸으로 업로드할 수 없습니다. ONLYOFFICE PDF 양식을 업로드해 보세요.</value>
+  </data>
+  <data name="FillOutExternalLinkTitle" xml:space="preserve">
+    <value>작성 링크</value>
+  </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>양식 링크</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>양식 열기</value>
+  </data>
 </root>

@@ -275,7 +275,7 @@
     <value>Grup Güncellendi: {0}</value>
   </data>
   <data name="GuestAccount" xml:space="preserve">
-    <value>Misafir Hesabı</value>
+    <value>Anonim</value>
   </data>
   <data name="GuestActivated" xml:space="preserve">
     <value>Misafir Aktive Edildi: {0}</value>
@@ -741,5 +741,41 @@
   </data>
   <data name="FileSizePostfix" xml:space="preserve">
     <value>b,KB,MB,GB</value>
+  </data>
+  <data name="FileUploadedWithOverwriting" xml:space="preserve">
+    <value>Dosya üzerine yazılarak yüklendi: {0}</value>
+  </data>
+  <data name="QuotaPerPortalChanged" xml:space="preserve">
+    <value>Varsayılan depolama kotasını ayarlayın: {0}</value>
+  </data>
+  <data name="QuotaPerPortalDisabled" xml:space="preserve">
+    <value>Varsayılan depolama kotası devre dışı bırakıldı</value>
+  </data>
+  <data name="QuotaPerRoomChanged" xml:space="preserve">
+    <value>Odalar için varsayılan depolama kotasını ayarlayın: {0}</value>
+  </data>
+  <data name="QuotaPerRoomDisabled" xml:space="preserve">
+    <value>Odalar için varsayılan depolama kotası devre dışı bırakıldı</value>
+  </data>
+  <data name="QuotaPerUserChanged" xml:space="preserve">
+    <value>Kullanıcılar için varsayılan depolama alanı kotasını ayarlayın: {0}</value>
+  </data>
+  <data name="QuotaPerUserDisabled" xml:space="preserve">
+    <value>Kullanıcılar için varsayılan depolama kotası devre dışı bırakıldı</value>
+  </data>
+  <data name="RoomCopied" xml:space="preserve">
+    <value>Oda kopyalandı: {0}</value>
+  </data>
+  <data name="RoomGroupAdded" xml:space="preserve">
+    <value>Grup eklendi: {0}. Rol: {1}</value>
+  </data>
+  <data name="RoomGroupRemove" xml:space="preserve">
+    <value>Silinen grup: {0}</value>
+  </data>
+  <data name="SendJoinInvite" xml:space="preserve">
+    <value>Kullanıcı {0}, {1} kullanıcısına bu DocSpace'e katılması için bir davet gönderdi</value>
+  </data>
+  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
+    <value>{0} atandı: {1}</value>
   </data>
 </root>

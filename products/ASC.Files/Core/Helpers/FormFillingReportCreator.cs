@@ -86,7 +86,7 @@ public class FormFillingReportCreator(
         var date = new FormsItemData()
         {
             Key = FilesCommonResource.Date,
-            Value = $"{tenantUtil.DateTimeNow().ToString("dd.MM.yyyy H:mm:ss")}"
+            Value = $"{tenantUtil.DateTimeNow().ToString("MM/dd/yyyy H:mm:ss")}"
         };
         var result = JsonSerializer.Deserialize<SubmitFormsData>(data, _options);
 

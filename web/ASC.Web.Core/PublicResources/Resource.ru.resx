@@ -848,7 +848,7 @@
     <value>Количество администраторов не должно превышать {0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Количество администраторов</value>
+    <value>Количество администраторов/опытных пользователей</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Автоматическое резервное копирование и восстановление данных</value>
@@ -890,7 +890,7 @@
     <value>Количество пользователей в комнате не должно превышать {0}</value>
   </data>
   <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Количество администраторов/опытных пользователей:</value>
+    <value>Добавлено администраторов/опытных пользователей:</value>
   </data>
   <data name="ConsumersappleIdClientId" xml:space="preserve">
     <value>ID клиента приложения</value>
@@ -1053,5 +1053,8 @@
   </data>
   <data name="ErrorUserDisabled" xml:space="preserve">
     <value>Пользователь отключен</value>
+  </data>
+  <data name="ErrorEmailLinked" xml:space="preserve">
+    <value>Этот адрес электронной почты прикреплен к пользователю {0} в качестве стороннего провайдера</value>
   </data>
 </root>

@@ -779,6 +779,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         var toFolderId = toFolder.Id;
         var sb = new StringBuilder();
         var isPdfForm = false;
+        var isInSameRoom = false;
         var numberRoomMembers = 0;
         foreach (var fileId in fileIds)
         {
@@ -842,6 +843,10 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                 isPdfForm = true;
                                 numberRoomMembers = await fileStorageService.GetPureSharesCountAsync(toFolder.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "");
                             }
+
+                            var fromFolder = await FolderDao.GetFolderAsync(file.ParentId);
+                            var (fromRId, _) = await FolderDao.GetParentRoomInfoFromFileEntryAsync(fromFolder);
+                            isInSameRoom = int.TryParse(fromRId.ToString(), out var fromRoomId) && fromRoomId != -1 && fromRoomId == roomId;
                         }
                     }
                 }
@@ -922,7 +927,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                     needToMark.Add(newFile);
                                 }
 
-                                if (fileType == FileType.Pdf)
+                                if (fileType == FileType.Pdf && !isInSameRoom)
                                 {
                                     await LinkDao.DeleteAllLinkAsync(file.Id);
                                     await FileDao.SaveProperties(file.Id, null);

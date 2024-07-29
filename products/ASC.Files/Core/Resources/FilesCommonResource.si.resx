@@ -117,49 +117,19 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="DataProcessingCompleted" xml:space="preserve">
-    <value>Spracovanie údajov dokončené</value>
+  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
+    <value>බලවත් පරිශ්‍රීලකයා</value>
   </data>
-  <data name="DataProcessing" xml:space="preserve">
-    <value>Spracovanie údajov...</value>
+  <data name="RoleEnum_PowerUser" xml:space="preserve">
+    <value>බලවත් පරිශ්‍රීලකයා</value>
   </data>
-  <data name="DumpParse" xml:space="preserve">
-    <value>Spracovanie databázy</value>
+  <data name="User" xml:space="preserve">
+    <value>පරිශ්‍රීලකයා</value>
   </data>
-  <data name="GroupMigration" xml:space="preserve">
-    <value>Presun skupín {0} ({1}/{2})</value>
+  <data name="RoleEnum_User" xml:space="preserve">
+    <value>පරිශ්‍රීලකයා</value>
   </data>
-  <data name="MigratingUserFiles" xml:space="preserve">
-    <value>Presun používateľských súborov {0} ({1}/{2})</value>
-  </data>
-  <data name="MigrationCompleted" xml:space="preserve">
-    <value>Presun dokončený</value>
-  </data>
-  <data name="PreparingForMigration" xml:space="preserve">
-    <value>Príprava na presun</value>
-  </data>
-  <data name="StartOfDataProcessing" xml:space="preserve">
-    <value>Spustenie spracovania údajov...</value>
-  </data>
-  <data name="UnzippingFinished" xml:space="preserve">
-    <value>Rozbaľovanie dokončené...</value>
-  </data>
-  <data name="Unzipping" xml:space="preserve">
-    <value>Rozbaľovanie...</value>
-  </data>
-  <data name="UserMigration" xml:space="preserve">
-    <value>Presun používateľov {0} ({1}/{2})</value>
-  </data>
-  <data name="MigrationCommonFiles" xml:space="preserve">
-    <value>Migrácia spoločných súborov</value>
-  </data>
-  <data name="MigrationNotFoundException" xml:space="preserve">
-    <value>Žiadny takýto poskytovateľ migrácie</value>
-  </data>
-  <data name="MigrationProgressException" xml:space="preserve">
-    <value>Neprebieha žiadna migrácia</value>
-  </data>
-  <data name="MigrationProjectFiles" xml:space="preserve">
-    <value>Súbory projektu migrácie</value>
+  <data name="Date" xml:space="preserve">
+    <value>දිනය</value>
   </data>
 </root>

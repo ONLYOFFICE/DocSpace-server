@@ -153,9 +153,6 @@
   <data name="MigrationCommonFiles" xml:space="preserve">
     <value>Ümumi faylların köçürülməsi</value>
   </data>
-  <data name="MigrationInitException" xml:space="preserve">
-    <value>{0} köçürülməni işə salarkən xəta baş verdi</value>
-  </data>
   <data name="MigrationNotFoundException" xml:space="preserve">
     <value>Belə bir köçürülmə provayderi yoxdur</value>
   </data>
@@ -164,11 +161,5 @@
   </data>
   <data name="MigrationProjectFiles" xml:space="preserve">
     <value>Köçürülmə layihəsi faylları</value>
-  </data>
-  <data name="MigrationStartException" xml:space="preserve">
-    <value>Analiz hələ də davam edir</value>
-  </data>
-  <data name="MigrationUploadException" xml:space="preserve">
-    <value>Köçürülmə artıq davam edir</value>
   </data>
 </root>

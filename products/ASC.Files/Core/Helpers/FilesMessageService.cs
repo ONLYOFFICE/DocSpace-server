@@ -61,6 +61,11 @@ public class FilesMessageService(
         await SendAsync(action, entry, null, Guid.Empty, FileShare.None, description);
     }
 
+    public async Task SendAsync(MessageAction action, string d1, IEnumerable<string> d2)
+    {
+        await SendAsync(action, description: [d1, string.Join(", ", d2)]);
+    }
+
     public async Task SendAsync<T>(MessageAction action, string oldTitle, FileEntry<T> entry, params string[] description)
     {
         await SendAsync(action, entry, oldTitle, description: description);
@@ -218,9 +223,11 @@ public class FilesMessageService(
 
         if (!crossEvent)
         {
-            var references = fromParents.Count > toParents.Count
-                ? GetReferences(fromParents)
-                : GetReferences(toParents);
+            var references = GetReferences(fromParents);
+            foreach (var toRef in GetReferences(toParents).Where(toRef => !references.Any(r => r.EntryId == toRef.EntryId && r.EntryType == toRef.EntryType)))
+            {
+                references.Add(toRef);
+            }
             
             references.Add(new FilesAuditReference { EntryId = target.Id, EntryType = (byte)target.FileEntryType });
             

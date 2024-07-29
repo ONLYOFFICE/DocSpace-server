@@ -1620,6 +1620,18 @@ public class UserController(
 
             yield return await employeeFullDtoHelper.GetFullAsync(user);
         }
+
+        if(quota >= 0)
+        {
+            await messageService.SendAsync(MessageAction.CustomQuotaPerUserChanged, quota.ToString(),
+                        users.Select(x => HttpUtility.HtmlDecode(displayUserSettingsHelper.GetFullUserName(x))));
+    }
+        else
+        {
+            await messageService.SendAsync(MessageAction.CustomQuotaPerUserDisabled, MessageTarget.Create(users.Select(x => x.Id)), users.Select(x => HttpUtility.HtmlDecode(displayUserSettingsHelper.GetFullUserName(x))));
+        }
+
+
     }
 
     /// <summary>
@@ -1650,6 +1662,8 @@ public class UserController(
             .ToListAsync();
 
         var tenant = await tenantManager.GetCurrentTenantAsync();
+
+        var quotaUserSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
         foreach (var user in users)
         {
             if (_userManager.IsSystemUser(user.Id))
@@ -1660,13 +1674,15 @@ public class UserController(
             await settingsManager.SaveAsync(defaultSettings, user);
             var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenant.Id, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
             var userQuotaData = await settingsManager.LoadAsync<UserQuotaSettings>(user);
-            var quotaUserSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
             var userQuotaLimit = userQuotaData.UserQuota == userQuotaData.GetDefault().UserQuota ? quotaUserSettings.DefaultQuota : userQuotaData.UserQuota;
             _ = quotaSocketManager.ChangeCustomQuotaUsedValueAsync(tenant.Id, customQuota.GetFeature<UserCustomQuotaFeature>().Name, quotaUserSettings.EnableQuota, userUsedSpace, userQuotaLimit, [user.Id]);
 
             yield return await employeeFullDtoHelper.GetFullAsync(user);
         }
 
+        await messageService.SendAsync(MessageAction.CustomQuotaPerUserDefault, quotaUserSettings.DefaultQuota.ToString(),
+                        users.Select(x => HttpUtility.HtmlDecode(displayUserSettingsHelper.GetFullUserName(x))));
+        
     }
 
     private async Task UpdateDepartmentsAsync(IEnumerable<Guid> department, UserInfo user)
