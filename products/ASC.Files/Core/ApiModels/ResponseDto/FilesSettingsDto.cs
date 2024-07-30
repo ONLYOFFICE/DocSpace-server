@@ -181,8 +181,10 @@ public class FilesSettingsDto
     [SwaggerSchemaCustom(Example = "None", Description = "Default sharing access rights")]
     public List<FileShare> DefaultSharingAccessRights { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "Chunk upload size", Format = "int64")]
-    public long ChunkUploadSize { get; set; }
+
+    [SwaggerSchemaCustom(Example = "1234", Description = "Max upload thread count", Format = "int32")]    public int MaxUploadThreadCount { get; set; }
+
+    [SwaggerSchemaCustom(Example = "1234", Description = "Chunk upload size", Format = "int64")]    public long ChunkUploadSize { get; set; }
 
     [SwaggerSchemaCustom(Example = "true", Description = "Open editor in same tab")]
     public bool OpenEditorInSameTab { get; set; }
@@ -252,6 +254,7 @@ public class FilesSettingsDtoConverter(
             AutomaticallyCleanUp = await filesSettingsHelper.GetAutomaticallyCleanUp(),
             CanSearchByContent = await searchSettingsHelper.CanSearchByContentAsync<DbFile>(),
             DefaultSharingAccessRights = await filesSettingsHelper.GetDefaultSharingAccessRights(),
+            MaxUploadThreadCount = setupInfo.MaxUploadThreadCount,
             ChunkUploadSize = setupInfo.ChunkUploadSize,
             OpenEditorInSameTab = await filesSettingsHelper.GetOpenEditorInSameTabAsync()
         };

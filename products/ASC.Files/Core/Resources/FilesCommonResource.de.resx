@@ -464,4 +464,37 @@ Sicherheit durch garantierte 100%ige Kompatibilität mit docx, xslx und pptx For
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>Typ</value>
   </data>
+  <data name="Date" xml:space="preserve">
+    <value>Datum</value>
+  </data>
+  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
+    <value>Power-Benutzer</value>
+  </data>
+  <data name="RoleEnum_PowerUser" xml:space="preserve">
+    <value>Power-Benutzer</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>Benutzer</value>
+  </data>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>Das Verschieben mehrerer Dateien in den Raum zum Ausfüllen von Formularen wird nicht unterstützt. Verschieben Sie immer nur ein ONLYOFFICE PDF-Formular auf einmal.</value>
+  </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>Das Verschieben von Ordnern in den Raum zum Ausfüllen von Formularen wird nicht unterstützt. Verschieben Sie immer nur ein ONLYOFFICE PDF-Formular auf einmal.</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>Die Datei kann nicht in diesen Raum verschoben werden. Bitte versuchen Sie, das ONLYOFFICE PDF-Formular zu verschieben.</value>
+  </data>
+  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
+    <value>Die Datei kann nicht in diesen Raum hochgeladen werden. Bitte versuchen Sie, das ONLYOFFICE PDF-Formular hochzuladen.</value>
+  </data>
+  <data name="FillOutExternalLinkTitle" xml:space="preserve">
+    <value>Link zum Ausfüllen</value>
+  </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>Link zum Formular</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Formular öffnen</value>
+  </data>
 </root>

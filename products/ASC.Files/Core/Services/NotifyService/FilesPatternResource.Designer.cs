@@ -60,6 +60,15 @@ namespace ASC.Files.Core.Services.NotifyService {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Check ready forms.
+        /// </summary>
+        public static string button_CheckReadyForms {
+            get {
+                return ResourceManager.GetString("button_CheckReadyForms", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to h1. All signers completed $DocumentTitle
         ///
         ///This is an email notification to inform you that all signers completed &quot;$DocumentTitle&quot;:&quot;$DocumentURL&quot;..
@@ -91,6 +100,36 @@ namespace ASC.Files.Core.Services.NotifyService {
         public static string pattern_EditorMentions {
             get {
                 return ResourceManager.GetString("pattern_EditorMentions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to h1. Form $Message is filled out
+        ///
+        ///A new form &quot;$DocumentTitle&quot;:&quot;$DocumentURL&quot; is filled out in the room &quot;$RoomTitle&quot;:&quot;$RoomURL&quot;
+        ///
+        ///Form submitter: &quot;$FromUserName&quot;:&quot;$FromUserLink&quot;
+        ///
+        ///$OrangeButton.
+        /// </summary>
+        public static string pattern_FormReceived {
+            get {
+                return ResourceManager.GetString("pattern_FormReceived", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to h1. You filled out the form $Message
+        ///
+        ///You filled out the form &quot;$DocumentTitle&quot;:&quot;$DocumentURL&quot; in the room &quot;$RoomTitle&quot;:&quot;$RoomURL&quot;
+        ///
+        ///Manager: &quot;$ToUserName&quot;:&quot;$ToUserLink&quot;
+        ///
+        ///$OrangeButton.
+        /// </summary>
+        public static string pattern_FormSubmitted {
+            get {
+                return ResourceManager.GetString("pattern_FormSubmitted", resourceCulture);
             }
         }
         
@@ -161,15 +200,6 @@ namespace ASC.Files.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Power User.
-        /// </summary>
-        public static string RoleEnum_PowerUser {
-            get {
-                return ResourceManager.GetString("RoleEnum_PowerUser", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Documents. All signers completed $DocumentTitle.
         /// </summary>
         public static string subject_DocuSignComplete {
@@ -229,6 +259,24 @@ namespace ASC.Files.Core.Services.NotifyService {
         public static string subject_EditorMentions_push {
             get {
                 return ResourceManager.GetString("subject_EditorMentions_push", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to DocSpace notification. The form is filled out.
+        /// </summary>
+        public static string subject_FormReceived {
+            get {
+                return ResourceManager.GetString("subject_FormReceived", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to DocSpace notification. The form is filled out.
+        /// </summary>
+        public static string subject_FormSubmitted {
+            get {
+                return ResourceManager.GetString("subject_FormSubmitted", resourceCulture);
             }
         }
         

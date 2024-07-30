@@ -170,6 +170,9 @@ public enum MessageAction
 
     FolderDownloaded = 5057,
 
+    FormSubmit = 6046,
+    FormOpenedForFilling = 6047,
+
     ThirdPartyCreated = 5028,
     ThirdPartyUpdated = 5029,
     ThirdPartyDeleted = 5030,
@@ -303,7 +306,14 @@ public enum MessageAction
     QuotaPerUserDisabled = 6043,
     QuotaPerPortalChanged = 6044,
     QuotaPerPortalDisabled = 6045,
-    
+
+    CustomQuotaPerRoomDefault = 6048,
+    CustomQuotaPerRoomChanged = 6049,
+    CustomQuotaPerRoomDisabled = 6050,
+    CustomQuotaPerUserDefault = 6051,
+    CustomQuotaPerUserChanged = 6052,
+    CustomQuotaPerUserDisabled = 6053,
+
     DocumentServiceLocationSetting = 5037,
     AuthorizationKeysSetting = 5038,
     FullTextSearchSetting = 5039,

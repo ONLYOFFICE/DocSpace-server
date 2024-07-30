@@ -355,7 +355,7 @@
     <value>تم تحديث المجموعات: {0}</value>
   </data>
   <data name="GuestAccount" xml:space="preserve">
-    <value>حساب ضيف</value>
+    <value>مجهول</value>
   </data>
   <data name="GuestActivated" xml:space="preserve">
     <value>تم تفعيل حساب الضيف: {0}</value>

@@ -57,6 +57,10 @@ public class ConfigurationDto<T>
 
     [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the filling has started or not", Nullable = true)]
     public bool? StartFilling { get; set; }
+
+    /// <summary>Filling session Id</summary>
+    /// <type>System.String, System</type>
+    public string FillingSessionId { get; set; }
 }
 
 public class EditorConfigurationDto<T>
@@ -239,7 +243,7 @@ public class ConfigurationConverter<T>(
     DocumentConfigConverter<T> documentConfigConverter,
     DocumentServiceHelper documentServiceHelper)
 {
-    public async Task<ConfigurationDto<T>> Convert(Configuration<T> source, File<T> file)
+    public async Task<ConfigurationDto<T>> Convert(Configuration<T> source, File<T> file, string fillingSessionId = "")
     {   
         if (source == null)
         {
@@ -250,7 +254,7 @@ public class ConfigurationConverter<T>(
         {
             Document = await documentConfigConverter.Convert(source.Document, file),
             DocumentType = source.GetDocumentType(file),
-            EditorConfig = await editorConfigurationConverter.Convert(source, file),
+            EditorConfig = await editorConfigurationConverter.Convert(source, file, fillingSessionId),
             EditorType = source.EditorType,
             EditorUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.DocServiceApiUrl),
             ErrorMessage = source.Error
@@ -267,7 +271,7 @@ public class ConfigurationConverter<T>(
 [Scope(GenericArguments = [typeof(string)])]
 public class EditorConfigurationConverter<T>(CustomizationConfigConverter<T> configConverter)
 {
-    public async Task<EditorConfigurationDto<T>> Convert(Configuration<T> configuration, File<T> file)
+    public async Task<EditorConfigurationDto<T>> Convert(Configuration<T> configuration, File<T> file, string fillingSessionId)
     {
         var source = configuration.EditorConfig;
         
@@ -279,7 +283,7 @@ public class EditorConfigurationConverter<T>(CustomizationConfigConverter<T> con
         var fileType = configuration.GetFileType(file);
         var result = new EditorConfigurationDto<T>
         {
-            CallbackUrl = await source.GetCallbackUrl(file.Id.ToString()),
+            CallbackUrl = await source.GetCallbackUrl(file.Id.ToString(), fillingSessionId),
             CoEditing = await source.GetCoEditingAsync(),
             CreateUrl = await source.GetCreateUrl(configuration.EditorType, fileType),
             Customization = await configConverter.Convert(configuration, file),

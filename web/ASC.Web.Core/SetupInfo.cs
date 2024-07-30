@@ -56,6 +56,7 @@ public class SetupInfo
 
     public long AvailableFileSize { get; }
     public string TeamlabSiteRedirect { get; private set; }
+    public int MaxUploadThreadCount { get; set; }
     public long ChunkUploadSize { get; set; }
     public long ProviderMaxUploadSize { get; private set; }
     public bool ThirdPartyAuthEnabled { get; private set; }
@@ -133,6 +134,7 @@ public class SetupInfo
         AvailableFileSize = GetAppSettings("web:available-file-size", 100L * 1024L * 1024L);
 
         TeamlabSiteRedirect = GetAppSettings("web:teamlab-site", string.Empty);
+        MaxUploadThreadCount = GetAppSettings("core:hosting:rateLimiterOptions:defaultConcurrencyWriteRequests", 15);
         ChunkUploadSize = GetAppSettings("files:uploader:chunk-size", 10 * 1024 * 1024);
         ProviderMaxUploadSize = GetAppSettings("files:provider:max-upload-size", 1024L * 1024L * 1024L);
         ThirdPartyAuthEnabled = string.Equals(GetAppSettings("web:thirdparty-auth", "true"), "true");

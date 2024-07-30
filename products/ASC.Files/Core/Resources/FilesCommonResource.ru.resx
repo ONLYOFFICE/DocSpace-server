@@ -470,4 +470,31 @@
   <data name="User" xml:space="preserve">
     <value>Пользователь</value>
   </data>
+  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
+    <value>Опытный пользователь</value>
+  </data>
+  <data name="RoleEnum_PowerUser" xml:space="preserve">
+    <value>Опытный пользователь</value>
+  </data>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>Перемещение нескольких файлов в комнату «Заполнение форм» не поддерживается. Перемещайте по одной PDF-форме ONLYOFFICE.</value>
+  </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>Перемещение папок в комнату «Заполнение форм» не поддерживается. Перемещайте по одной PDF-форме ONLYOFFICE.</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>Файл не может быть перемещен в эту комнату. Попробуйте переместить PDF-форму ONLYOFFICE.</value>
+  </data>
+  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
+    <value>Файл не может быть загружен в эту комнату. Попробуйте загрузить PDF-форму ONLYOFFICE.</value>
+  </data>
+  <data name="FillOutExternalLinkTitle" xml:space="preserve">
+    <value>Ссылка для заполнения</value>
+  </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>Ссылка на форму</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Открыть форму</value>
+  </data>
 </root>

@@ -290,7 +290,7 @@
     <value>Обновлена группа: {0}</value>
   </data>
   <data name="GuestAccount" xml:space="preserve">
-    <value>Учетная запись гостя</value>
+    <value>Анонимный пользователь</value>
   </data>
   <data name="GuestActivated" xml:space="preserve">
     <value>Активирован гость: {0}</value>
@@ -741,5 +741,41 @@
   </data>
   <data name="FileSizePostfix" xml:space="preserve">
     <value>байт,Кб,Мб,Гб,Тб</value>
+  </data>
+  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
+    <value>{0} назначена: {1}</value>
+  </data>
+  <data name="FileUploadedWithOverwriting" xml:space="preserve">
+    <value>Загружен файл с перезаписью: {0}</value>
+  </data>
+  <data name="QuotaPerPortalChanged" xml:space="preserve">
+    <value>Установить квоту хранилища по умолчанию: {0}</value>
+  </data>
+  <data name="QuotaPerPortalDisabled" xml:space="preserve">
+    <value>Квота хранилища по умолчанию отключена</value>
+  </data>
+  <data name="QuotaPerRoomChanged" xml:space="preserve">
+    <value>Установить квоту хранилища по умолчанию для комнат: {0}</value>
+  </data>
+  <data name="QuotaPerRoomDisabled" xml:space="preserve">
+    <value>Квота хранилища по умолчанию отключена для комнат</value>
+  </data>
+  <data name="QuotaPerUserChanged" xml:space="preserve">
+    <value>Установить квоту хранилища по умолчанию для пользователей: {0}</value>
+  </data>
+  <data name="QuotaPerUserDisabled" xml:space="preserve">
+    <value>Квота хранилища по умолчанию отключена для пользователей</value>
+  </data>
+  <data name="RoomCopied" xml:space="preserve">
+    <value>Скопирована комната: {0}</value>
+  </data>
+  <data name="RoomGroupAdded" xml:space="preserve">
+    <value>Добавлена группа: {0}. Роль: {1}</value>
+  </data>
+  <data name="RoomGroupRemove" xml:space="preserve">
+    <value>Удалена группа: {0}</value>
+  </data>
+  <data name="SendJoinInvite" xml:space="preserve">
+    <value>Пользователь {0} отправил приглашение {1} в этот DocSpace</value>
   </data>
 </root>

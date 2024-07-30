@@ -187,7 +187,13 @@ public abstract class BaseStartup
                     }
                     else
                     {
-                        permitLimit = 15;
+                        permitLimit = _configuration.GetSection("core:hosting:rateLimiterOptions:defaultConcurrencyWriteRequests").Get<int>();
+
+                        if (permitLimit == default(int))
+                        {
+                            permitLimit = 15;
+                        }
+
                         partitionKey = $"cr_write_{userId}";
                     }
 

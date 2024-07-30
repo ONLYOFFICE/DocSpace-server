@@ -349,7 +349,7 @@
     <value>Խումբը թարմացվել է: {0}</value>
   </data>
   <data name="GuestAccount" xml:space="preserve">
-    <value>Հյուրի հաշիվ</value>
+    <value>Անանուն</value>
   </data>
   <data name="GuestActivated" xml:space="preserve">
     <value>Հյուրն ակտիվացված է: {0}</value>
@@ -745,7 +745,7 @@
     <value>Սենյակը ջնջված է</value>
   </data>
   <data name="RoomCreateUser" xml:space="preserve">
-    <value>Ավելացված օգտվող: {0}. Դեր: {1}</value>
+    <value>Ավելացված օգտվող՝ {0}: Դեր՝ {1}</value>
   </data>
   <data name="RoomInvitationLinkCreated" xml:space="preserve">
     <value>Հղումը ստեղծվել է: Դեր: {1}</value>
@@ -800,5 +800,41 @@
   </data>
   <data name="FileSizePostfix" xml:space="preserve">
     <value>բայթ, ԿԲ, ՄԲ, ԳԲ, ՏԲ</value>
+  </data>
+  <data name="FileUploadedWithOverwriting" xml:space="preserve">
+    <value>Ֆայլը վերբեռնվել է վերագրանցմամբ՝ {0}</value>
+  </data>
+  <data name="QuotaPerPortalChanged" xml:space="preserve">
+    <value>Սահմանեք լռելյայն պահեստի քվոտան՝ {0}</value>
+  </data>
+  <data name="QuotaPerPortalDisabled" xml:space="preserve">
+    <value>Անջատված լռելյայն պահեստի քվոտա</value>
+  </data>
+  <data name="QuotaPerRoomChanged" xml:space="preserve">
+    <value>Սահմանել լռելյայն պահեստի քվոտան սենյակների համար՝ {0}</value>
+  </data>
+  <data name="QuotaPerRoomDisabled" xml:space="preserve">
+    <value>Սենյակների համար լռելյայն պահեստի քվոտան անջատված է</value>
+  </data>
+  <data name="QuotaPerUserChanged" xml:space="preserve">
+    <value>Սահմանեք օգտատերերի համար լռելյայն պահեստի քվոտան՝ {0}</value>
+  </data>
+  <data name="QuotaPerUserDisabled" xml:space="preserve">
+    <value>Անջատված է օգտատերերի լռելյայն պահեստի քվոտան</value>
+  </data>
+  <data name="RoomGroupAdded" xml:space="preserve">
+    <value>Ավելացվեց խումբ՝ {0}: Դերը՝ {1}</value>
+  </data>
+  <data name="RoomCopied" xml:space="preserve">
+    <value>Սենյակը պատճենված է՝ {0}</value>
+  </data>
+  <data name="RoomGroupRemove" xml:space="preserve">
+    <value>Ջնջված խումբ՝ {0}</value>
+  </data>
+  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
+    <value>{0} նշանակված: {1}</value>
+  </data>
+  <data name="SendJoinInvite" xml:space="preserve">
+    <value>{0} օգտատերը հրավեր է ուղարկել {1}-ին միանալու այս DocSpace-ին</value>
   </data>
 </root>

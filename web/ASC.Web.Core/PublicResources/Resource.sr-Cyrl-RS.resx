@@ -1030,7 +1030,7 @@
     <value>Број админа не би требало да прекорачи {0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Број админа</value>
+    <value>Број админа/напредних корисника</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Аутоматска резервна копија и опоравак</value>
@@ -1052,9 +1052,6 @@
   </data>
   <data name="TariffsFeature_total_size_price_count" xml:space="preserve">
     <value>Складишни простор</value>
-  </data>
-  <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Број админа/напредних корисника:</value>
   </data>
   <data name="TariffsFeature_used_room" xml:space="preserve">
     <value>Собе:</value>
@@ -1097,5 +1094,8 @@
   </data>
   <data name="WhatsNewSubscriptionName" xml:space="preserve">
     <value>Шта је ново</value>
+  </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>Администратори /Напредни корисници додати:</value>
   </data>
 </root>

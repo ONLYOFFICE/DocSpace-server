@@ -38,7 +38,9 @@ public class VirtualRoomsInternalController(GlobalFolderHelper globalFolderHelpe
         FileShareDtoHelper fileShareDtoHelper,
         IMapper mapper,
         SocketManager socketManager,
-        ApiContext apiContext)
+        ApiContext apiContext,
+        FilesMessageService filesMessageService,
+        SettingsManager settingsManager)
     : VirtualRoomsController<int>(globalFolderHelper,
     fileOperationDtoHelper,
     customTagsService,
@@ -50,7 +52,9 @@ public class VirtualRoomsInternalController(GlobalFolderHelper globalFolderHelpe
     fileShareDtoHelper,
     mapper,
     socketManager,
-    apiContext)
+    apiContext,
+    filesMessageService,
+    settingsManager)
 {
     /// <summary>
     /// Creates a room in the "Rooms" section.
@@ -83,7 +87,9 @@ public class VirtualRoomsThirdPartyController(GlobalFolderHelper globalFolderHel
         FileShareDtoHelper fileShareDtoHelper,
         IMapper mapper,
         SocketManager socketManager,
-        ApiContext apiContext)
+        ApiContext apiContext,
+        FilesMessageService filesMessageService,
+        SettingsManager settingsManager)
     : VirtualRoomsController<string>(globalFolderHelper,
     fileOperationDtoHelper,
     customTagsService,
@@ -95,7 +101,9 @@ public class VirtualRoomsThirdPartyController(GlobalFolderHelper globalFolderHel
     fileShareDtoHelper,
     mapper,
     socketManager,
-    apiContext)
+    apiContext,
+    filesMessageService,
+    settingsManager)
 {
     /// <summary>
     /// Creates a room in the "Rooms" section stored in a third-party storage.
@@ -131,10 +139,13 @@ public abstract class VirtualRoomsController<T>(
     FileShareDtoHelper fileShareDtoHelper,
     IMapper mapper,
     SocketManager socketManager,
-    ApiContext apiContext)
+    ApiContext apiContext,
+    FilesMessageService filesMessageService,
+    SettingsManager settingsManager)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     protected readonly FileStorageService _fileStorageService = fileStorageService;
+    protected readonly FilesMessageService _filesMessageService = filesMessageService;
 
     /// <summary>
     /// Returns the room information.
@@ -196,12 +207,24 @@ public abstract class VirtualRoomsController<T>(
     {
         var (folderIntIds, _) = FileOperationsManager.GetIds(inDto.RoomIds);
 
+        var folderTitles = new List<string>();
+
         foreach (var roomId in folderIntIds)
         {
             var room = await _fileStorageService.FolderQuotaChangeAsync(roomId, inDto.Quota);
-
+            folderTitles.Add(room.Title);
             yield return await _folderDtoHelper.GetAsync(room);
         }
+
+        if (inDto.Quota >= 0)
+        {
+            await _filesMessageService.SendAsync(MessageAction.CustomQuotaPerRoomChanged, inDto.Quota.ToString(), folderTitles.ToArray());
+        }
+        else
+        {
+            await _filesMessageService.SendAsync(MessageAction.CustomQuotaPerRoomDisabled, string.Join(", ", folderTitles.ToArray()));
+        }
+
 
     }
 
@@ -223,12 +246,18 @@ public abstract class VirtualRoomsController<T>(
     public async IAsyncEnumerable<FolderDto<int>> ResetRoomQuotaAsync(UpdateRoomsRoomIdsRequestDto<T> inDto)
     {
         var (folderIntIds, _) = FileOperationsManager.GetIds(inDto.RoomIds);
+        var folderTitles = new List<string>();
+        var quotaRoomSettings = await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
+
         foreach (var roomId in folderIntIds)
         {
             var room = await _fileStorageService.FolderQuotaChangeAsync(roomId, -2);
+            folderTitles.Add(room.Title);
 
             yield return await _folderDtoHelper.GetAsync(room);
         }
+
+        await _filesMessageService.SendAsync(MessageAction.CustomQuotaPerRoomDefault, quotaRoomSettings.DefaultQuota.ToString(), folderTitles.ToArray());
     }
 
 

@@ -284,7 +284,7 @@
     <value>Групата се актуализира: {0}</value>
   </data>
   <data name="GuestAccount" xml:space="preserve">
-    <value>Акаунт за гости</value>
+    <value>Анонимен</value>
   </data>
   <data name="GuestActivated" xml:space="preserve">
     <value>Активирано гост: {0}</value>
@@ -741,5 +741,41 @@
   </data>
   <data name="FileSizePostfix" xml:space="preserve">
     <value>байта, KB, MB, GB, TB</value>
+  </data>
+  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
+    <value>{0} назначи: {1}</value>
+  </data>
+  <data name="RoomGroupAdded" xml:space="preserve">
+    <value>Добавена група: {0}. Роля: {1}</value>
+  </data>
+  <data name="RoomGroupRemove" xml:space="preserve">
+    <value>Изтрита група: {0}</value>
+  </data>
+  <data name="QuotaPerPortalDisabled" xml:space="preserve">
+    <value>Деактивирана квота за съхранение по подразбиране</value>
+  </data>
+  <data name="QuotaPerRoomDisabled" xml:space="preserve">
+    <value>Деактивирана квота за съхранение по подразбиране за стаи</value>
+  </data>
+  <data name="QuotaPerUserDisabled" xml:space="preserve">
+    <value>Деактивирана квота за съхранение по подразбиране за потребители</value>
+  </data>
+  <data name="FileUploadedWithOverwriting" xml:space="preserve">
+    <value>Файлът е качен с презаписване: {0}</value>
+  </data>
+  <data name="RoomCopied" xml:space="preserve">
+    <value>Стаята е копирана: {0}</value>
+  </data>
+  <data name="QuotaPerRoomChanged" xml:space="preserve">
+    <value>Задайте квота за съхранение по подразбиране за стаи: {0}</value>
+  </data>
+  <data name="QuotaPerUserChanged" xml:space="preserve">
+    <value>Задайте квота за съхранение по подразбиране за потребители: {0}</value>
+  </data>
+  <data name="QuotaPerPortalChanged" xml:space="preserve">
+    <value>Задайте квота за съхранение по подразбиране: {0}</value>
+  </data>
+  <data name="SendJoinInvite" xml:space="preserve">
+    <value>Потребител {0} изпрати покана до {1} да се присъедини към този DocSpace</value>
   </data>
 </root>

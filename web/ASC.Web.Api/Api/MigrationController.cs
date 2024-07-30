@@ -34,7 +34,8 @@ public class MigrationController(
     AuthContext authContext,
     StudioNotifyService studioNotifyService,
     IHttpContextAccessor httpContextAccessor,
-    MigrationCore migrationCore) : ControllerBase
+    MigrationCore migrationCore,
+    MigrationLogger migrationLogger) : ControllerBase
 {
     [Tags("Migration")]
     [HttpGet("list")]
@@ -127,7 +128,9 @@ public class MigrationController(
 
         httpContextAccessor.HttpContext.Response.Headers.Append("Content-Disposition", ContentDispositionUtil.GetHeaderValue("migration.log"));
         httpContextAccessor.HttpContext.Response.ContentType = "text/plain; charset=UTF-8";
-        await status.CopyLogsAsync(httpContextAccessor.HttpContext.Response.Body);
+
+        migrationLogger.Init(status.LogName);
+        await (await migrationLogger.GetStreamAsync()).CopyToAsync(httpContextAccessor.HttpContext.Response.Body);
     }
 
     [Tags("Migration")]

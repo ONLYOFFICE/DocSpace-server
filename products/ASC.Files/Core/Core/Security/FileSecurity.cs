@@ -862,7 +862,12 @@ public class FileSecurity(IDaoFactory daoFactory,
             return false;
         }
         
-        if (action == FilesSecurityActions.SubmitToFormGallery) //temp
+        if (file != null && action == FilesSecurityActions.SubmitToFormGallery && !file.IsForm)
+        {
+            return false;
+        }
+        
+        if (action == FilesSecurityActions.Duplicate && folder is { FolderType: FolderType.FillingFormsRoom})
         {
             return false;
         }
@@ -946,11 +951,6 @@ public class FileSecurity(IDaoFactory daoFactory,
                 }
 
                 if (action == FilesSecurityActions.Mute && isRoom && await IsAllGeneralNotificationSettingsOffAsync())
-                {
-                    return false;
-                }
-
-                if (action == FilesSecurityActions.Mute && e.ProviderEntry)
                 {
                     return false;
                 }
@@ -1062,8 +1062,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                         }
                     }
                 }
-                if((action == FilesSecurityActions.Delete ||
-                    action == FilesSecurityActions.Rename ||
+                if((action == FilesSecurityActions.Rename ||
                     action == FilesSecurityActions.Lock ||
                     action == FilesSecurityActions.Move ||
                     action == FilesSecurityActions.Duplicate ||
@@ -1078,6 +1077,18 @@ public class FileSecurity(IDaoFactory daoFactory,
                             return false;
                         }
                     }  
+                }
+                if (action == FilesSecurityActions.Delete && file != null)
+                {
+                    var parentFolders = await GetFileParentFolders(file.ParentId);
+                    if (parentFolders != null)
+                    {
+                        var fileFolder = parentFolders.LastOrDefault();
+                        if (fileFolder.FolderType == FolderType.FormFillingFolderDone && FileUtility.GetFileTypeByFileName(file.Title) is not FileType.Pdf)
+                        {
+                            return false;
+                        }
+                    }
                 }
                 if (action == FilesSecurityActions.CopyLink && file != null)
                 {

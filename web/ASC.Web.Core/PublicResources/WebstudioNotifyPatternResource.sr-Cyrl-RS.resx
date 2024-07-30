@@ -1754,4 +1754,41 @@ $OrangeButton
 Да бисте видели свој профил, следите линк испод:
 [$UserName]($MyStaffLink)</value>
   </data>
+  <data name="pattern_migration_personal_to_docspace" xml:space="preserve">
+    <value>Здраво!
+
+Процес миграције података са ONLYOFFICE Personal на ваш нови ONLYOFFICE DocSpace је успешно завршен.
+
+Да бисте приступили вашем DocSpace-у са увезеним подацима, само кликните на дугме испод:
+
+$OrangeButton
+
+Ваш тренутни DocSpace план је STARTUP. Потпуно је бесплатан.
+
+==Ако је потребно, можете променити име вашег новог DocSpace -а. Само се пребаците на Подешавања -&gt; Прилагођавање -&gt; DocSpace Преименовање.= =
+
+Уживајте у новом начину сарадње на документима!
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_rooms_activity" xml:space="preserve">
+    <value>DocSpace-у "${__VirtualRootPath}":"${__VirtualRootPath}" у последњих сат времена
+
+#foreach ($activity у $Activities)
+$activity
+
+#end</value>
+  </data>
+  <data name="pattern_saas_docspace_registration" xml:space="preserve">
+    <value>h1. ONLYOFFICE DocSpace: завршите регистрацију
+
+
+Здраво!
+
+Позвани сте да завршите регистрацију за ONLYOFFICE DocSpace на "${__VirtualRootPath}":"${__VirtualRootPath}". Унесите своје име и поставите лозинку кликом на линк:
+
+$OrangeButton
+ 
+$TrulyYours</value>
+  </data>
 </root>

@@ -252,8 +252,15 @@ public class WorkspaceMigrator : Migrator
             {
                 if (row["right_node"].ToString().StartsWith("projects/project/"))
                 {
-                    var split = row["right_node"].ToString().Split('/');
-                    projectTitle.Add(row["left_node"].ToString(), projectProjects[split.Last()]);
+                    try
+                    {
+                        var split = row["right_node"].ToString().Split('/');
+                        projectTitle.Add(row["left_node"].ToString(), projectProjects[split.Last()]);
+                    }
+                    catch
+                    {
+
+                    }
                 }
             }
         }

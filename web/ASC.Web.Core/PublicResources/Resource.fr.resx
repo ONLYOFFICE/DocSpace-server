@@ -815,7 +815,7 @@
     <value>Les paramètres ont été actualisés avec succès</value>
   </data>
   <data name="SuccessfullySentNotificationDeleteUserInfoMessage" xml:space="preserve">
-    <value>Instructions sur la suppression de votre profil ont été envoyées à l'adresse e-mail {0}</value>
+    <value>Les instructions pour désactiver votre profil ont été envoyées à l'adresse e-mail {0}</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>Code incorrect</value>
@@ -848,7 +848,7 @@
     <value>Le nombre d'administrateurs ne peut pas dépasser {0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Nombre d'administrateurs</value>
+    <value>Nombre d'administrateurs/utilisateurs avancés</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Sauvegarde automatique &amp; récupération</value>
@@ -890,7 +890,7 @@
     <value>Le nombre d'utilisateurs dans la salle ne peut pas dépasser {0}</value>
   </data>
   <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Nombre d'administrateurs/utilisateurs avancés :</value>
+    <value>Administrateurs/utilisateurs avancés ajoutés :</value>
   </data>
   <data name="ConsumersAppleId" xml:space="preserve">
     <value>Apple ID</value>
@@ -1047,5 +1047,11 @@
   </data>
   <data name="ErrorUserDisabled" xml:space="preserve">
     <value>Utilisateur désactivé</value>
+  </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>La limite d'invitation est dépassée</value>
+  </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>L'instruction de changement de mot de passe a été envoyée à l'adresse e-mail {0}.</value>
   </data>
 </root>

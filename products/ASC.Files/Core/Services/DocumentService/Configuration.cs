@@ -248,7 +248,7 @@ public class EditorConfiguration<T>(
         return _user;
     }
 
-    public async Task<string> GetCallbackUrl(string fileId)
+    public async Task<string> GetCallbackUrl(string fileId, string fillingSessionId)
     {
         if (!ModeWrite)
         {
@@ -256,6 +256,8 @@ public class EditorConfiguration<T>(
         }
 
         var callbackUrl = await documentServiceTrackerHelper.GetCallbackUrlAsync(fileId);
+
+        callbackUrl = !string.IsNullOrEmpty(fillingSessionId) ? QueryHelpers.AddQueryString(callbackUrl, FilesLinkUtility.FillingSessionId, fillingSessionId) : callbackUrl;
 
         return externalShare.GetUrlWithShare(callbackUrl);
     }
@@ -702,7 +704,7 @@ public class CustomizationConfig<T>(
 
         var properties = await daoFactory.GetFileDao<T>().GetProperties(file.Id);
 
-        return properties is { FormFilling.CollectFillForm: true };
+        return properties is { FormFilling.CollectFillForm: true } && file.RootFolderType != FolderType.Archive;
     }
 
     private FileSharing FileSharing { get; } = fileSharing;
