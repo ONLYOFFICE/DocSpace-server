@@ -84,7 +84,7 @@ public class NotificationController(
     /// <path>api/2.0/settings/notification/rooms</path>
     /// <httpMethod>GET</httpMethod>
     [Tags("Settings / Notifications")]
-    [SwaggerResponse(200, "Room notification settings", typeof(RoomsNotificayionSettingsDto))]
+    [SwaggerResponse(200, "Room notification settings", typeof(RoomsNotificationSettingsDto))]
     [HttpGet("rooms")]
     public async Task<RoomsNotificationSettingsDto> GetRoomsNotificationSettings()
     {
@@ -102,7 +102,7 @@ public class NotificationController(
     /// <path>api/2.0/settings/notification/rooms</path>
     /// <httpMethod>POST</httpMethod>
     [Tags("Settings / Notifications")]
-    [SwaggerResponse(200, "Room notification settings", typeof(RoomsNotificayionSettingsDto))]
+    [SwaggerResponse(200, "Room notification settings", typeof(RoomsNotificationSettingsDto))]
     [HttpPost("rooms")]
     public async Task<RoomsNotificationSettingsDto> SetRoomsNotificationStatus(RoomsNotificationsSettingsRequestDto inDto)
     {
