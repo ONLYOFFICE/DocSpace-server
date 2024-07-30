@@ -832,7 +832,7 @@ internal class FolderDao(
 
             if (conflict != 0)
             {
-                result[conflict] = "";
+                result[folderId] = "";
             }
         }
 
