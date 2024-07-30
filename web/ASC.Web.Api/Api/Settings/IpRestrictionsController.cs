@@ -67,7 +67,7 @@ public class IpRestrictionsController(ApiContext apiContext,
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
     [Tags("Settings / IP restrictions")]
-    [SwaggerResponse(200, "List of IP restrictions parameters", typeof(IPRestriction))]
+    [SwaggerResponse(200, "List of IP restrictions parameters", typeof(IpRestrictionBase))]
     [HttpPut("")]
     public async Task<IEnumerable<IpRestrictionBase>> SaveIpRestrictionsAsync(IpRestrictionsBaseRequestsDto inDto)
     {
@@ -91,7 +91,7 @@ public class IpRestrictionsController(ApiContext apiContext,
     /// <path>api/2.0/settings/iprestrictions/settings</path>
     /// <httpMethod>GET</httpMethod>
     [Tags("Settings / IP restrictions")]
-    [SwaggerResponse(200, "IP restriction settings", typeof(IPRestriction))]
+    [SwaggerResponse(200, "IP restriction settings", typeof(IPRestrictionsSettings))]
     [HttpGet("settings")]
     public async Task<IPRestrictionsSettings> ReadIpRestrictionsSettingsAsync()
     {
@@ -110,7 +110,7 @@ public class IpRestrictionsController(ApiContext apiContext,
     /// <path>api/2.0/settings/iprestrictions/settings</path>
     /// <httpMethod>PUT</httpMethod>
     [Tags("Settings / IP restrictions")]
-    [SwaggerResponse(200, "Updated IP restriction settings", typeof(IPRestriction))]
+    [SwaggerResponse(200, "Updated IP restriction settings", typeof(IPRestrictionsSettings))]
     [HttpPut("settings")]
     public async Task<IPRestrictionsSettings> UpdateIpRestrictionsSettingsAsync(IpRestrictionsRequestsDto inDto)
     {

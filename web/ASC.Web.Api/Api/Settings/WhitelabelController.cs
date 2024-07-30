@@ -569,7 +569,7 @@ public class WhitelabelController(ApiContext apiContext,
     /// <path>api/2.0/settings/rebranding/additional</path>
     /// <httpMethod>DELETE</httpMethod>
     [Tags("Settings / Rebranding")]
-    [SwaggerResponse(200, "Default additional white label settings", typeof(AdditionalWhiteLabelSettingsDto))]
+    [SwaggerResponse(200, "Default additional white label settings", typeof(AdditionalWhiteLabelSettings))]
     [HttpDelete("rebranding/additional")]
     public async Task<AdditionalWhiteLabelSettings> DeleteAdditionalWhiteLabelSettingsAsync()
     {

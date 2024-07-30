@@ -346,7 +346,7 @@ public class AuthenticationController(
     /// <returns type="ASC.Security.Cryptography.EmailValidationKeyProvider.ValidationResult, ASC.Security.Cryptography">Validation result: Ok, Invalid, or Expired</returns>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]
-    [SwaggerResponse(200, "Validation result: Ok, Invalid, or Expired", typeof(ValidationResult))]
+    [SwaggerResponse(200, "Validation result: Ok, Invalid, or Expired", typeof(ConfirmDto))]
     [AllowNotPayment, AllowSuspended]
     [HttpPost("confirm")]
     public async Task<ConfirmDto> CheckConfirm(EmailValidationKeyModel inDto)
