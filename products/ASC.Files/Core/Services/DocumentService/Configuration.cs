@@ -244,7 +244,7 @@ public class EditorConfiguration<T>(
         return _user;
     }
 
-    public async Task<string> GetCallbackUrl(string fileId)
+    public async Task<string> GetCallbackUrl(string fileId, string fillingSessionId)
     {
         if (!ModeWrite)
         {
@@ -252,6 +252,8 @@ public class EditorConfiguration<T>(
         }
 
         var callbackUrl = await documentServiceTrackerHelper.GetCallbackUrlAsync(fileId);
+
+        callbackUrl = !string.IsNullOrEmpty(fillingSessionId) ? QueryHelpers.AddQueryString(callbackUrl, FilesLinkUtility.FillingSessionId, fillingSessionId) : callbackUrl;
 
         return externalShare.GetUrlWithShare(callbackUrl);
     }
@@ -282,8 +284,6 @@ public class EditorConfiguration<T>(
         switch (fileType)
         {
             case FileType.Document:
-            case FileType.OForm:
-            case FileType.OFormTemplate:
                 title = FilesJSResource.TitleNewFileText;
                 break;
 
@@ -327,8 +327,7 @@ public class EditorConfiguration<T>(
         var filter = fileType switch
         {
             FileType.Document => FilterType.DocumentsOnly,
-            FileType.OForm => FilterType.OFormOnly,
-            FileType.OFormTemplate => FilterType.OFormTemplateOnly,
+            FileType.Pdf => FilterType.Pdf,
             FileType.Spreadsheet => FilterType.SpreadsheetsOnly,
             FileType.Presentation => FilterType.PresentationsOnly,
             _ => FilterType.FilesOnly
@@ -370,8 +369,7 @@ public class EditorConfiguration<T>(
             var filter = fileType switch
             {
                 FileType.Document => FilterType.DocumentsOnly,
-                FileType.OForm => FilterType.OFormOnly,
-                FileType.OFormTemplate => FilterType.OFormTemplateOnly,
+                FileType.Pdf => FilterType.Pdf,
                 FileType.Spreadsheet => FilterType.SpreadsheetsOnly,
                 FileType.Presentation => FilterType.PresentationsOnly,
                 _ => FilterType.FilesOnly
@@ -683,7 +681,7 @@ public class CustomizationConfig<T>(
 
         var properties = await daoFactory.GetFileDao<T>().GetProperties(file.Id);
 
-        return properties is { FormFilling.CollectFillForm: true };
+        return properties is { FormFilling.CollectFillForm: true } && file.RootFolderType != FolderType.Archive;
     }
 
     private FileSharing FileSharing { get; } = fileSharing;

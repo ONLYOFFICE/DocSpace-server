@@ -153,9 +153,6 @@
   <data name="MigrationCommonFiles" xml:space="preserve">
     <value>Общи файлове за миграция</value>
   </data>
-  <data name="MigrationInitException" xml:space="preserve">
-    <value>Грешка при инициализиране мигратора на {0}</value>
-  </data>
   <data name="MigrationNotFoundException" xml:space="preserve">
     <value>Няма такъв доставчик на миграция</value>
   </data>
@@ -164,11 +161,5 @@
   </data>
   <data name="MigrationProjectFiles" xml:space="preserve">
     <value>Проектни файлове за миграция</value>
-  </data>
-  <data name="MigrationStartException" xml:space="preserve">
-    <value>Анализът все още се изпълнява</value>
-  </data>
-  <data name="MigrationUploadException" xml:space="preserve">
-    <value>Миграцията вече се изпълнява</value>
   </data>
 </root>

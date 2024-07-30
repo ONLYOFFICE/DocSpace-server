@@ -29,7 +29,7 @@ using Status = ASC.Files.Core.Security.Status;
 namespace ASC.Files.Core.Helpers;
 
 [Scope]
-public class ExternalLinkHelper(ExternalShare externalShare, SecurityContext securityContext, IDaoFactory daoFactory)
+public class ExternalLinkHelper(ExternalShare externalShare, SecurityContext securityContext, IDaoFactory daoFactory, UserManager userManager, FileSecurity fileSecurity)
 {
     public async Task<ValidationInfo> ValidateAsync(string key, string password = null)
     {
@@ -79,16 +79,20 @@ public class ExternalLinkHelper(ExternalShare externalShare, SecurityContext sec
 
         if (securityContext.IsAuthenticated)
         {
-            if (entry.CreateBy.Equals(securityContext.CurrentAccount.ID))
+            var userId = securityContext.CurrentAccount.ID;
+            
+            if (entry.CreateBy.Equals(userId) || await userManager.IsDocSpaceAdminAsync(userId))
             {
                 result.Shared = true;
             }
             else
             {
-                var existedRecord = await securityDao.GetSharesAsync(new[] { securityContext.CurrentAccount.ID })
-                    .FirstOrDefaultAsync(r => r.EntryId.ToString() == entryId);
-
-                result.Shared = existedRecord != null;
+                result.Shared = (entry switch
+                {
+                    FileEntry<int> entryInt => await fileSecurity.CanReadAsync(entryInt) && !entryInt.ShareRecord.IsLink,
+                    FileEntry<string> entryString => await fileSecurity.CanReadAsync(entryString) && !entryString.ShareRecord.IsLink,
+                    _ => false
+                });
             }
         }
 

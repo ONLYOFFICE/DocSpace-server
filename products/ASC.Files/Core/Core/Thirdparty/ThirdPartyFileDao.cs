@@ -132,11 +132,9 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
             case FilterType.DocumentsOnly:
                 files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Document);
                 break;
-            case FilterType.OFormOnly:
-                files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.OForm);
-                break;
-            case FilterType.OFormTemplateOnly:
-                files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.OFormTemplate);
+            case FilterType.Pdf:
+            case FilterType.PdfForm:
+                files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Pdf);
                 break;
             case FilterType.PresentationsOnly:
                 files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Presentation);
@@ -216,11 +214,9 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
             case FilterType.DocumentsOnly:
                 files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Document);
                 break;
-            case FilterType.OFormOnly:
-                files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.OForm);
-                break;
-            case FilterType.OFormTemplateOnly:
-                files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.OFormTemplate);
+            case FilterType.Pdf:
+            case FilterType.PdfForm:
+                files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Pdf);
                 break;
             case FilterType.PresentationsOnly:
                 files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Presentation);
@@ -359,14 +355,14 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
             if (!Dao.GetName(newFile).Equals(file.Title))
             {
                 var folderId = Dao.GetParentFolderId(await Dao.GetFileAsync(fileId));
-                file.Title = await _global.GetAvailableTitleAsync(file.Title, folderId, IsExistAsync);
+                file.Title = await _global.GetAvailableTitleAsync(file.Title, folderId, IsExistAsync, FileEntryType.File);
                 newFile = await storage.RenameFileAsync(fileId, file.Title);
             }
         }
         else if (file.ParentId != null)
         {
             var folderId = Dao.MakeThirdId(file.ParentId);
-            file.Title = await _global.GetAvailableTitleAsync(file.Title, folderId, IsExistAsync);
+            file.Title = await _global.GetAvailableTitleAsync(file.Title, folderId, IsExistAsync, FileEntryType.File);
             newFile = await storage.CreateFileAsync(fileStream, file.Title, folderId);
         }
 
@@ -474,7 +470,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
             throw new Exception(errorFolder.Error);
         }
 
-        var newTitle = await _global.GetAvailableTitleAsync(Dao.GetName(file), Dao.GetId(toFolder), IsExistAsync);
+        var newTitle = await _global.GetAvailableTitleAsync(Dao.GetName(file), Dao.GetId(toFolder), IsExistAsync, FileEntryType.File);
         var storage = await ProviderInfo.StorageAsync;
         var movedFile = await storage.MoveFileAsync(Dao.GetId(file), newTitle, Dao.GetId(toFolder));
 
@@ -521,7 +517,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
             throw new Exception(errorFolder.Error);
         }
 
-        var newTitle = await _global.GetAvailableTitleAsync(Dao.GetName(file), Dao.GetId(toFolder), IsExistAsync);
+        var newTitle = await _global.GetAvailableTitleAsync(Dao.GetName(file), Dao.GetId(toFolder), IsExistAsync, FileEntryType.File);
         var storage = await ProviderInfo.StorageAsync;
         var newFile = await storage.CopyFileAsync(Dao.GetId(file), newTitle, Dao.GetId(toFolder));
 
@@ -544,7 +540,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
     public async Task<string> FileRenameAsync(File<string> file, string newTitle)
     {
         var thirdFile = await Dao.GetFileAsync(file.Id);
-        newTitle = await _global.GetAvailableTitleAsync(newTitle, Dao.GetParentFolderId(thirdFile), IsExistAsync);
+        newTitle = await _global.GetAvailableTitleAsync(newTitle, Dao.GetParentFolderId(thirdFile), IsExistAsync, FileEntryType.File);
 
         var storage = await ProviderInfo.StorageAsync;
         var renamedThirdFile = await storage.RenameFileAsync(Dao.GetId(thirdFile), newTitle);
@@ -719,12 +715,12 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         return GetThumbnailAsync(file.Id, width, height);
     }
 
-    public Task<EntryProperties> GetProperties(string fileId)
+    public Task<EntryProperties<string>> GetProperties(string fileId)
     {
-        return Task.FromResult<EntryProperties>(null);
+        return Task.FromResult<EntryProperties<string>>(null);
     }
 
-    public Task SaveProperties(string fileId, EntryProperties entryProperties)
+    public Task SaveProperties(string fileId, EntryProperties<string> entryProperties)
     {
         return Task.CompletedTask;
     }

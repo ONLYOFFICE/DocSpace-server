@@ -152,4 +152,31 @@ $__AuthorName удалил(а) комнату: $RoomTitle</value>
   <data name="subject_ShareDocument_push" xml:space="preserve">
     <value>Предоставлен доступ к документу: $DocumentTitle</value>
   </data>
+  <data name="button_CheckReadyForms" xml:space="preserve">
+    <value>Проверить готовые формы</value>
+  </data>
+  <data name="pattern_FormReceived" xml:space="preserve">
+    <value>h1. Форма $Message заполнена
+
+В комнате "$RoomTitle":"$RoomURL" заполнена новая форма "$DocumentTitle":"$DocumentURL"
+
+Исполнитель: "$FromUserName":"$FromUserLink"
+
+$OrangeButton</value>
+  </data>
+  <data name="pattern_FormSubmitted" xml:space="preserve">
+    <value>h1. Вы заполнили форму $Message
+
+Вы заполнили форму "$DocumentTitle":"$DocumentURL" в комнате "$RoomTitle":"$RoomURL" 
+
+Организатор заполнения: "$ToUserName":"$ToUserLink"
+
+$OrangeButton</value>
+  </data>
+  <data name="subject_FormReceived" xml:space="preserve">
+    <value>Уведомление DocSpace. Форма заполнена</value>
+  </data>
+  <data name="subject_FormSubmitted" xml:space="preserve">
+    <value>Уведомление DocSpace. Форма заполнена</value>
+  </data>
 </root>

@@ -35,15 +35,17 @@ public class FileConverterQueue(IDistributedCache distributedCache, IDistributed
 {
     private const string Cache_key_prefix = "asc_file_converter_queue_";
 
-    public async Task AddAsync<T>(File<T> file,
-                        string password,
-                        int tenantId,
-                        IAccount account,
-                        bool deleteAfter,
-                        string url,
-                        string serverRootPath,
-                        bool updateIfExist,
-                        IDictionary<string, string> headers)
+    public async Task AddAsync<T>(
+        File<T> file,
+        string password,
+        string outputType,
+        int tenantId,
+        IAccount account,
+        bool deleteAfter,
+        string url,
+        string serverRootPath,
+        bool updateIfExist,
+        IDictionary<string, string> headers)
     {
         var cacheKey = GetCacheKey<T>();
 
@@ -77,7 +79,8 @@ public class FileConverterQueue(IDistributedCache distributedCache, IDistributed
                 Url = url,
                 Password = password,
                 ServerRootPath = serverRootPath,
-                Headers = headers
+                Headers = headers,
+                OutputType = outputType
             };
 
             await EnqueueAsync(queueResult, cacheKey);
@@ -325,7 +328,8 @@ public class FileConverter(
             return true;
         }
 
-        return (await fileUtility.GetExtsConvertibleAsync()).ContainsKey(fileExtension) && (await fileUtility.GetExtsConvertibleAsync())[fileExtension].Contains(toExtension);
+        var extsConvertibleAsync = await fileUtility.GetExtsConvertibleAsync();
+        return extsConvertibleAsync.ContainsKey(fileExtension) && extsConvertibleAsync[fileExtension].Contains(toExtension);
     }
 
     public Task<Stream> ExecAsync<T>(File<T> file)
@@ -333,7 +337,7 @@ public class FileConverter(
         return ExecAsync(file, fileUtility.GetInternalExtension(file.Title));
     }
 
-    public async Task<Stream> ExecAsync<T>(File<T> file, string toExtension, string password = null)
+    public async Task<Stream> ExecAsync<T>(File<T> file, string toExtension, string password = null, bool toForm = false)
     {
         if (!await EnableConvertAsync(file, toExtension))
         {
@@ -345,8 +349,7 @@ public class FileConverter(
         var docKey = await documentServiceHelper.GetDocKeyAsync(file);
         fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(fileUri);
 
-        var uriTuple = await documentServiceConnector.GetConvertedUriAsync(fileUri, file.ConvertedExtension, toExtension, docKey, password, 
-            CultureInfo.CurrentUICulture.Name, null, null, false);
+        var uriTuple = await documentServiceConnector.GetConvertedUriAsync(fileUri, file.ConvertedExtension, toExtension, docKey, password, CultureInfo.CurrentUICulture.Name, null, null, false, toForm);
         var convertUri = uriTuple.ConvertedDocumentUri;
         var request = new HttpRequestMessage
         {
@@ -359,7 +362,7 @@ public class FileConverter(
         return await ResponseStream.FromMessageAsync(response);
     }
 
-    public async Task<FileOperationResult> ExecSynchronouslyAsync<T>(File<T> file, bool updateIfExist)
+    public async Task<FileOperationResult> ExecSynchronouslyAsync<T>(File<T> file, bool updateIfExist, string outputType)
     {
         if (!await fileSecurity.CanReadAsync(file))
         {
@@ -371,13 +374,17 @@ public class FileConverter(
 
         var fileUri = await pathProvider.GetFileStreamUrlAsync(file);
         var fileExtension = file.ConvertedExtension;
-        var toExtension = fileUtility.GetInternalExtension(file.Title);
+        var toExtension =  fileUtility.GetInternalExtension(file.Title);
+        if (!string.IsNullOrEmpty(outputType)  && await EnableConvertAsync(file, outputType))
+        {
+            toExtension = outputType;
+        }
+        
         var docKey = await documentServiceHelper.GetDocKeyAsync(file);
 
         fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(fileUri);
 
-        var (_, convertUri, convertType) = await documentServiceConnector.GetConvertedUriAsync(fileUri, fileExtension, toExtension, docKey, 
-            null, CultureInfo.CurrentUICulture.Name, null, null, false);
+        var (_, convertUri, convertType) = await documentServiceConnector.GetConvertedUriAsync(fileUri, fileExtension, toExtension, docKey, null, CultureInfo.CurrentUICulture.Name, null, null, false, false);
 
         var operationResult = new FileConverterOperationResult
         {
@@ -422,7 +429,7 @@ public class FileConverter(
         return operationResult;
     }
 
-    public async Task ExecAsynchronouslyAsync<T>(File<T> file, bool deleteAfter, bool updateIfExist, string password = null)
+    public async Task ExecAsynchronouslyAsync<T>(File<T> file, bool deleteAfter, bool updateIfExist, string password = null, string outputType = null)
     {
         if (!MustConvert(file))
         {
@@ -435,7 +442,11 @@ public class FileConverter(
 
         await fileMarker.RemoveMarkAsNewAsync(file);
 
-        await fileConverterQueue.AddAsync(file, password, (await tenantManager.GetCurrentTenantAsync()).Id, 
+        await fileConverterQueue.AddAsync(
+            file, 
+            password, 
+            outputType,
+            (await tenantManager.GetCurrentTenantAsync()).Id, 
             authContext.CurrentAccount, 
             deleteAfter, 
             httpContextAccessor?.HttpContext?.Request.GetDisplayUrl(),

@@ -90,6 +90,7 @@ public static class DocumentService
     /// <param name="isAsync">Perform conversions asynchronously</param>
     /// <param name="signatureSecret">Secret key to generate the token</param>
     /// <param name="clientFactory"></param>
+    /// <param name="toForm"></param>
     /// <returns>The percentage of completion of conversion</returns>
     /// <example>
     /// string convertedDocumentUri;
@@ -111,7 +112,8 @@ public static class DocumentService
         SpreadsheetLayout spreadsheetLayout,
         bool isAsync,
         string signatureSecret,
-       IHttpClientFactory clientFactory)
+       IHttpClientFactory clientFactory,
+       bool toForm)
     {
         fromExtension = string.IsNullOrEmpty(fromExtension) ? Path.GetExtension(documentUri) : fromExtension;
         if (string.IsNullOrEmpty(fromExtension))
@@ -124,7 +126,7 @@ public static class DocumentService
             throw new ArgumentNullException(nameof(toExtension), "Extension for conversion is not known");
         }
 
-        return InternalGetConvertedUriAsync(fileUtility, documentConverterUrl, documentUri, fromExtension, toExtension, documentRevisionId, password, region, thumbnail, spreadsheetLayout, isAsync, signatureSecret, clientFactory);
+        return InternalGetConvertedUriAsync(fileUtility, documentConverterUrl, documentUri, fromExtension, toExtension, documentRevisionId, password, region, thumbnail, spreadsheetLayout, isAsync, signatureSecret, clientFactory, toForm);
     }
 
     private static async Task<(int ResultPercent, string ConvertedDocumentUri, string convertedFileType)> InternalGetConvertedUriAsync(
@@ -140,7 +142,8 @@ public static class DocumentService
        SpreadsheetLayout spreadsheetLayout,
        bool isAsync,
        string signatureSecret,
-       IHttpClientFactory clientFactory)
+       IHttpClientFactory clientFactory,
+       bool toForm)
     {
         var title = Path.GetFileName(documentUri ?? "");
         title = string.IsNullOrEmpty(title) || title.Contains('?') ? Guid.NewGuid().ToString() : title;
@@ -169,9 +172,12 @@ public static class DocumentService
             Thumbnail = thumbnail,
             SpreadsheetLayout = spreadsheetLayout,
             Url = documentUri,
-            Region = region,
-            Pdf = toExtension == ".pdf" ? new PdfData() { Form = true} : null
+            Region = region
         };
+        if (toForm)
+        {
+            body.Pdf = new PdfData { Form = true };
+        }
 
         if (!string.IsNullOrEmpty(password))
         {
@@ -631,7 +637,7 @@ public static class DocumentService
 
         public static void ProcessResponseError(string errorCode)
         {
-            if (!ErrorCodeExtensions.TryParse(errorCode, true, out var code))
+            if (!ErrorCodeExtensions.TryParse(errorCode, true, out var code) && CultureInfo.CurrentCulture.Name == "ar-SA" && !Enum.TryParse(errorCode, out code))
             {
                 code = ErrorCode.Unknown;
             }

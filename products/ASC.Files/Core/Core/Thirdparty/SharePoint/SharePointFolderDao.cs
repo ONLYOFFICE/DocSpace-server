@@ -216,7 +216,7 @@ internal class SharePointFolderDao(
         {
             var parentFolder = await SharePointProviderInfo.GetFolderByIdAsync(folder.ParentId);
 
-            folder.Title = await global.GetAvailableTitleAsync(folder.Title, parentFolder.ServerRelativeUrl, IsExistAsync);
+            folder.Title = await global.GetAvailableTitleAsync(folder.Title, parentFolder.ServerRelativeUrl, IsExistAsync, FileEntryType.Folder);
 
             var newFolder = await SharePointProviderInfo.CreateFolderAsync(parentFolder.ServerRelativeUrl + "/" + folder.Title);
 

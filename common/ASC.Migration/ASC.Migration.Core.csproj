@@ -18,7 +18,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FolkerKinzel.VCards" Version="7.1.2" />
+    <PackageReference Include="FolkerKinzel.VCards" Version="7.2.0" />
     <PackageReference Include="HtmlAgilityPack" Version="1.11.61" />
     <PackageReference Include="Ical.Net" Version="4.2.0" />
   </ItemGroup>

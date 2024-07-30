@@ -106,6 +106,7 @@ global using ASC.IPSecurity;
 global using ASC.MessagingSystem;
 global using ASC.MessagingSystem.Core;
 global using ASC.MessagingSystem.EF.Model;
+global using ASC.Migration.Core;
 global using ASC.Migration.Core.Core;
 global using ASC.Migration.Core.Models.Api;
 global using ASC.Migration.Core.Resources;

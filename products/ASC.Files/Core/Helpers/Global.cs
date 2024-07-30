@@ -96,7 +96,7 @@ public enum DocThumbnailExtension
 }
 
 [Scope]
-public class Global(
+public partial class Global(
     IConfiguration configuration,
     AuthContext authContext,
     UserManager userManager,
@@ -244,26 +244,22 @@ public class Global(
         return userInfo.DisplayUserName(false, displayUserSettingsHelper);
     }
     
-    public async Task<string> GetAvailableTitleAsync<T>(string requestTitle, T parentFolderId, Func<string, T, Task<bool>> isExist)
+    public async Task<string> GetAvailableTitleAsync<T>(string requestTitle, T parentFolderId, Func<string, T, Task<bool>> isExist, FileEntryType fileEntryType)
     {
         if (!await isExist(requestTitle, parentFolderId))
         {
             return requestTitle;
         }
 
-        var re = new Regex(@"( \(((?<index>[0-9])+)\)(\.[^\.]*)?)$");
-        var match = re.Match(requestTitle);
-
-        if (!match.Success)
+        var re = MyRegex();
+        
+        var insertIndex = requestTitle.Length;
+        if (fileEntryType == FileEntryType.File && requestTitle.LastIndexOf('.') != -1)
         {
-            var insertIndex = requestTitle.Length;
-            if (requestTitle.LastIndexOf('.') != -1)
-            {
-                insertIndex = requestTitle.LastIndexOf('.');
-            }
-
-            requestTitle = requestTitle.Insert(insertIndex, " (1)");
+            insertIndex = requestTitle.LastIndexOf('.');
         }
+
+        requestTitle = requestTitle.Insert(insertIndex, " (1)");
 
         while (await isExist(requestTitle, parentFolderId))
         {
@@ -280,6 +276,9 @@ public class Global(
 
         return $" ({index + 1}){staticText}";
     }
+
+    [GeneratedRegex(@"( \(((?<index>[0-9])+)\)(\.[^\.]*)?)$")]
+    private static partial Regex MyRegex();
 }
 
 [Scope]
@@ -734,6 +733,12 @@ public class GlobalFolder(
             newFile.ParentId = folderId;
             newFile.Comment = FilesCommonResource.CommentCreate;
 
+            var fileType = FileUtility.GetFileTypeByFileName(fileName);
+            if (fileType == FileType.Pdf)
+            {
+                newFile.Category = (int)FilterType.PdfForm;
+            }
+           
             await using (var stream = await storeTemplate.GetReadStreamAsync("", filePath))
             {
                 newFile.ContentLength = stream.CanSeek ? stream.Length : await storeTemplate.GetFileSizeAsync("", filePath);

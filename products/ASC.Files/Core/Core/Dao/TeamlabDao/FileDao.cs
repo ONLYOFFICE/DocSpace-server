@@ -59,7 +59,9 @@ internal class FileDao(
     IDistributedLockProvider distributedLockProvider,
     FileStorageService fileStorageService,
     SocketManager socketManager,
-    SecurityContext securityContext)
+    SecurityContext securityContext,
+    TempStream tempStream,
+    FileChecker fileChecker)
     : AbstractDao(dbContextManager,
               userManager,
               tenantManager,
@@ -226,8 +228,6 @@ internal class FileDao(
 
         switch (filterType)
         {
-            case FilterType.OFormOnly:
-            case FilterType.OFormTemplateOnly:
             case FilterType.DocumentsOnly:
             case FilterType.ImagesOnly:
             case FilterType.PresentationsOnly:
@@ -327,7 +327,7 @@ internal class FileDao(
 
         if (!_authContext.IsAuthenticated)
         {
-            headers.Add(SecureHelper.GenerateSecureKeyHeader(path, emailValidationKeyProvider));
+            headers.Add(await SecureHelper.GenerateSecureKeyHeaderAsync(path, emailValidationKeyProvider));
         }
 
         var url = (await storage.GetPreSignedUriAsync(string.Empty, path, expires, headers)).ToString();
@@ -437,7 +437,8 @@ internal class FileDao(
 
             var isNew = false;
             DbFile toInsert = null;
-
+            var cloneStreamForSave = new MemoryStream();
+            var streamChange = false;
             await using (var filesDbContext = await _dbContextFactory.CreateDbContextAsync())
             {
                 var parentFolders = await filesDbContext.DbFolderTreesAsync(file.ParentId).ToListAsync();
@@ -464,10 +465,8 @@ internal class FileDao(
                         file.Title = FileUtility.ReplaceFileExtension(file.Title, FileUtility.GetFileExtension(file.Title));
 
                         file.ModifiedBy = _authContext.CurrentAccount.ID;
-                        if (file.ModifiedOn == default)
-                        {
-                            file.ModifiedOn = _tenantUtil.DateTimeNow();
-                        }
+                        file.ModifiedOn = _tenantUtil.DateTimeNow();
+                        
                         if (file.CreateBy == default)
                         {
                             file.CreateBy = _authContext.CurrentAccount.ID;
@@ -482,6 +481,30 @@ internal class FileDao(
                         {
                             await filesDbContext.DisableCurrentVersionAsync(tenantId, file.Id);
                         }
+                        
+                        var fileType = FileUtility.GetFileTypeByFileName(file.Title);
+
+                        if (fileType == FileType.Pdf && file.Category == (int)FilterType.None)
+                        {
+                            var originalCopyStream = new MemoryStream();
+                            await fileStream.CopyToAsync(originalCopyStream);
+
+                            var cloneStreamForCheck = await tempStream.CloneMemoryStream(originalCopyStream, 300);
+                            cloneStreamForSave = await tempStream.CloneMemoryStream(originalCopyStream);
+                            streamChange = true;
+                            try
+                            {
+                                if (await fileChecker.CheckExtendedPDFstream(cloneStreamForCheck))
+                                {
+                                    file.Category = (int)FilterType.PdfForm;
+                                }
+                            }
+                            finally
+                            {
+                                await originalCopyStream.DisposeAsync();
+                                await cloneStreamForCheck.DisposeAsync();
+                            }
+                        }
 
                         toInsert = new DbFile
                         {
@@ -492,7 +515,7 @@ internal class FileDao(
                             ParentId = file.ParentId,
                             Title = file.Title,
                             ContentLength = file.ContentLength,
-                            Category = (int)file.FilterType,
+                            Category = file.Category != (int)FilterType.None ? file.Category : (int)file.FilterType,
                             CreateBy = file.CreateBy,
                             CreateOn = _tenantUtil.DateTimeToUtc(file.CreateOn),
                             ModifiedBy = file.ModifiedBy,
@@ -549,24 +572,26 @@ internal class FileDao(
                     if (roomId != -1 && checkFolder)
                     {
                         var currentRoom = await folderDao.GetFolderAsync(roomId);
-                        using var originalCopyStream = new MemoryStream();
                         if (currentRoom.FolderType == FolderType.FillingFormsRoom)
                         {
+                            var fileProp = await fileDao.GetProperties(file.Id);
                             var extension = FileUtility.GetFileExtension(file.Title);
-                            var fileType = FileUtility.GetFileTypeByExtention(extension);
 
-                            if (fileType == FileType.Pdf)
+                            if (file.IsForm || (extension == ".csv" && fileProp != null && Equals(fileProp.FormFilling.ResultsFolderId, file.ParentId)))
                             {
-                                await SaveFileStreamAsync(file, fileStream, currentFolder);
+                                await SaveFileStreamAsync(file, streamChange ? cloneStreamForSave : fileStream, currentFolder);
 
-                                var properties = await fileDao.GetProperties(file.Id) ?? new EntryProperties() { FormFilling = new FormFillingProperties() };
+                                var properties = fileProp ?? new EntryProperties<int>() { FormFilling = new FormFillingProperties<int>() };
                                 if (!properties.FormFilling.CollectFillForm)
                                 {
                                     properties.FormFilling.StartFilling = true;
                                     properties.FormFilling.CollectFillForm = true;
                                     await fileDao.SaveProperties(file.Id, properties);
                                     var count = await fileStorageService.GetPureSharesCountAsync(currentRoom.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "");
-                                    await socketManager.CreateFormAsync(file, securityContext.CurrentAccount.ID, count <= 1);
+                                    if (file.IsForm)
+                                    {
+                                        await socketManager.CreateFormAsync(file, securityContext.CurrentAccount.ID, count <= 1);
+                                    }
                                 }
                             }
                             else
@@ -576,12 +601,12 @@ internal class FileDao(
                         }
                         else
                         {
-                            await SaveFileStreamAsync(file, fileStream, currentFolder);
+                            await SaveFileStreamAsync(file, streamChange ? cloneStreamForSave : fileStream, currentFolder);
                         }
                     }
                     else
                     {
-                        await SaveFileStreamAsync(file, fileStream, currentFolder);
+                        await SaveFileStreamAsync(file, streamChange ? cloneStreamForSave : fileStream, currentFolder);
                     }
                 }
                 catch (Exception saveException)
@@ -603,6 +628,10 @@ internal class FileDao(
                         throw new Exception(saveException.Message, deleteException);
                     }
                     throw;
+                }
+                finally
+                {
+                    await cloneStreamForSave.DisposeAsync();
                 }
             }
             else
@@ -1098,6 +1127,7 @@ internal class FileDao(
             copy.ConvertedType = file.ConvertedType;
             copy.Comment = FilesCommonResource.CommentCopy;
             copy.Encrypted = file.Encrypted;
+            copy.Category = file.Category;
             copy.ThumbnailStatus = file.ThumbnailStatus == Thumbnail.Created ? Thumbnail.Creating : Thumbnail.Waiting;
 
             await using (var stream = await GetFileStreamAsync(file))
@@ -1335,6 +1365,7 @@ internal class FileDao(
                 file.VersionGroup++;
             }
             file.ContentLength = uploadSession.BytesTotal;
+            file.Category = uploadSession.File.Category;
             file.ConvertedType = null;
             file.Comment = FilesCommonResource.CommentUpload;
             file.Encrypted = uploadSession.Encrypted;
@@ -1350,6 +1381,7 @@ internal class FileDao(
         result.Comment = FilesCommonResource.CommentUpload;
         result.Encrypted = uploadSession.Encrypted;
         result.CreateOn = uploadSession.File.CreateOn;
+        result.Category = uploadSession.File.Category;
 
         return result;
     }
@@ -1451,8 +1483,6 @@ internal class FileDao(
 
         switch (filterType)
         {
-            case FilterType.OFormOnly:
-            case FilterType.OFormTemplateOnly:
             case FilterType.DocumentsOnly:
             case FilterType.ImagesOnly:
             case FilterType.PresentationsOnly:
@@ -1460,6 +1490,12 @@ internal class FileDao(
             case FilterType.ArchiveOnly:
             case FilterType.MediaOnly:
                 q = q.Where(r => r.Category == (int)filterType);
+                break;
+            case FilterType.PdfForm:
+                q = q.Where(r => (r.Category == (int)filterType || r.Category == (int)FilterType.None) && r.Title.ToLower().EndsWith(".pdf"));
+                break;
+            case FilterType.Pdf:
+                q = q.Where(r => r.Category == (int)filterType || r.Title.ToLower().EndsWith(".pdf"));
                 break;
             case FilterType.ByExtension:
                 if (!string.IsNullOrEmpty(searchText))
@@ -1683,18 +1719,18 @@ internal class FileDao(
         return $"{ThumbnailTitle}.{width}x{height}.{global.ThumbnailExtension}";
     }
 
-    public async Task<EntryProperties> GetProperties(int fileId)
+    public async Task<EntryProperties<int>> GetProperties(int fileId)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         if(await filesDbContext.DataAsync(tenantId, fileId.ToString()) != null)
         {
-            return EntryProperties.Deserialize(await filesDbContext.DataAsync(tenantId, fileId.ToString()), logger);
+            return EntryProperties<int>.Deserialize(await filesDbContext.DataAsync(tenantId, fileId.ToString()), logger);
         }
         return null;
     }
 
-    public async Task SaveProperties(int fileId, EntryProperties entryProperties)
+    public async Task SaveProperties(int fileId, EntryProperties<int> entryProperties)
     {
         string data;
 
@@ -1702,7 +1738,7 @@ internal class FileDao(
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        if (entryProperties == null || string.IsNullOrEmpty(data = EntryProperties.Serialize(entryProperties, logger)))
+        if (entryProperties == null || string.IsNullOrEmpty(data = EntryProperties<int>.Serialize(entryProperties, logger)))
         {
             await filesDbContext.DeleteFilesPropertiesAsync(tenantId, fileId.ToString());
             return;
@@ -1810,8 +1846,7 @@ internal class FileDao(
 
             switch (filterType)
             {
-                case FilterType.OFormOnly:
-                case FilterType.OFormTemplateOnly:
+
                 case FilterType.DocumentsOnly:
                 case FilterType.ImagesOnly:
                 case FilterType.PresentationsOnly:
@@ -2062,8 +2097,7 @@ internal class FileDao(
 
         switch (filterType)
         {
-            case FilterType.OFormOnly:
-            case FilterType.OFormTemplateOnly:
+
             case FilterType.DocumentsOnly:
             case FilterType.ImagesOnly:
             case FilterType.PresentationsOnly:
@@ -2071,6 +2105,12 @@ internal class FileDao(
             case FilterType.ArchiveOnly:
             case FilterType.MediaOnly:
                 q = q.Where(r => r.Category == (int)filterType);
+                break;
+            case FilterType.PdfForm:
+                q = q.Where(r => (r.Category == (int)filterType || r.Category == (int)FilterType.None) && r.Title.ToLower().EndsWith(".pdf"));
+                break;
+            case FilterType.Pdf:
+                q = q.Where(r => r.Category == (int)filterType || r.Title.ToLower().EndsWith(".pdf"));
                 break;
             case FilterType.ByExtension:
                 if (!string.IsNullOrEmpty(searchText))
@@ -2168,8 +2208,7 @@ internal class FileDao(
 
         switch (filterType)
         {
-            case FilterType.OFormOnly:
-            case FilterType.OFormTemplateOnly:
+
             case FilterType.DocumentsOnly:
             case FilterType.ImagesOnly:
             case FilterType.PresentationsOnly:
@@ -2177,6 +2216,12 @@ internal class FileDao(
             case FilterType.ArchiveOnly:
             case FilterType.MediaOnly:
                 q = q.Where(r => r.Entry.Category == (int)filterType);
+                break;
+            case FilterType.PdfForm:
+                q = q.Where(r => (r.Entry.Category == (int)filterType || r.Entry.Category == (int)FilterType.None) && r.Entry.Title.ToLower().EndsWith(".pdf"));
+                break;
+            case FilterType.Pdf:
+                q = q.Where(r => r.Entry.Category == (int)filterType || r.Entry.Title.ToLower().EndsWith(".pdf"));
                 break;
             case FilterType.ByExtension:
                 if (!string.IsNullOrEmpty(searchText))

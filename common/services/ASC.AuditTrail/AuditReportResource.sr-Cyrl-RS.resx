@@ -364,7 +364,7 @@
     <value>Групе ажуриране: {0}</value>
   </data>
   <data name="GuestAccount" xml:space="preserve">
-    <value>Гост налог</value>
+    <value>Анонимно</value>
   </data>
   <data name="GuestActivated" xml:space="preserve">
     <value>Гост активиран: {0}</value>
@@ -800,5 +800,41 @@
   </data>
   <data name="FileSizePostfix" xml:space="preserve">
     <value>бајтови,КБ,МБ,ГБ,ТБ</value>
+  </data>
+  <data name="FileUploadedWithOverwriting" xml:space="preserve">
+    <value>Датотека отпремљена са преписивањем: {0}</value>
+  </data>
+  <data name="QuotaPerPortalChanged" xml:space="preserve">
+    <value>Постави подразумевану складишну квоту: {0}</value>
+  </data>
+  <data name="QuotaPerPortalDisabled" xml:space="preserve">
+    <value>Онемогућена подразумевана складишна квота</value>
+  </data>
+  <data name="QuotaPerRoomChanged" xml:space="preserve">
+    <value>Постави подразумевану складишну квоту за просторије: {0}</value>
+  </data>
+  <data name="QuotaPerRoomDisabled" xml:space="preserve">
+    <value>Онемогућена подразумевана складишна квота за просторије</value>
+  </data>
+  <data name="QuotaPerUserChanged" xml:space="preserve">
+    <value>Постави подразумевану складишну квоту за кориснике: {0}</value>
+  </data>
+  <data name="QuotaPerUserDisabled" xml:space="preserve">
+    <value>Онемогућена подразумевана складишна квота за кориснике</value>
+  </data>
+  <data name="RoomCopied" xml:space="preserve">
+    <value>Соба је копирана: {0}</value>
+  </data>
+  <data name="RoomGroupAdded" xml:space="preserve">
+    <value>Додата група: {0}. Улога: {1}</value>
+  </data>
+  <data name="RoomGroupRemove" xml:space="preserve">
+    <value>Обрисана група: {0}</value>
+  </data>
+  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
+    <value>{0} именован: {1}</value>
+  </data>
+  <data name="SendJoinInvite" xml:space="preserve">
+    <value>Корисник {0} је послао позивницу {1} да се придружи овом DocSpace-у</value>
   </data>
 </root>

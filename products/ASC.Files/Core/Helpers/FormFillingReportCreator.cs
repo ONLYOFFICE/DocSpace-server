@@ -39,13 +39,13 @@ public class FormFillingReportCreator(
         PropertyNameCaseInsensitive = true
     };
 
-    public async Task UpdateFormFillingReport<T>(T resultsFileId, string formsDataUrl, string resultUrl)
+    public async Task UpdateFormFillingReport<T>(T resultsFileId, int resultFormNumber, string formsDataUrl, string resultUrl)
     {
 
         if (formsDataUrl != null)
         {
             var fileDao = daoFactory.GetFileDao<T>();
-            var submitFormsData = await GetSubmitFormsData(formsDataUrl, resultUrl);
+            var submitFormsData = await GetSubmitFormsData(resultFormNumber, formsDataUrl, resultUrl);
 
             if (resultsFileId != null)
             {
@@ -58,7 +58,7 @@ public class FormFillingReportCreator(
         }
     }
 
-    private async Task<SubmitFormsData> GetSubmitFormsData(string url, string resultUrl)
+    private async Task<SubmitFormsData> GetSubmitFormsData(int resultFormNumber, string url, string resultUrl)
     {
         var request = new HttpRequestMessage
         {
@@ -69,6 +69,15 @@ public class FormFillingReportCreator(
         using var response = await httpClient.SendAsync(request);
         var data = await response.Content.ReadAsStringAsync();
 
+        var formNumber = new List<FormsItemData>()
+        {
+            new FormsItemData()
+            {
+                Key = FilesCommonResource.FormNumber,
+                Value = resultFormNumber
+            },
+        };
+
         var formLink = new FormsItemData()
         {
             Key = FilesCommonResource.LinkToForm,
@@ -77,9 +86,11 @@ public class FormFillingReportCreator(
         var date = new FormsItemData()
         {
             Key = FilesCommonResource.Date,
-            Value = $"{tenantUtil.DateTimeNow().ToString("dd.MM.yyyy H:mm:ss")}"
+            Value = $"{tenantUtil.DateTimeNow().ToString("MM/dd/yyyy H:mm:ss")}"
         };
         var result = JsonSerializer.Deserialize<SubmitFormsData>(data, _options);
+
+        result.FormsData = formNumber.Concat(result.FormsData);
         result.FormsData = result.FormsData.Append(date);
         result.FormsData = result.FormsData.Append(formLink);
 

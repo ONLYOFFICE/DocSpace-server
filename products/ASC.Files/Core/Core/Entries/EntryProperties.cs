@@ -29,17 +29,21 @@ namespace ASC.Files.Core;
 /// <summary>
 /// </summary>
 [DebuggerDisplay("")]
-public class EntryProperties
+public class EntryProperties<T>
 {
     /// <summary>Form filling properties</summary>
     /// <type>ASC.Files.Core.FormFillingProperties, ASC.Files.Core</type>
-    public FormFillingProperties FormFilling { get; set; }
+    public FormFillingProperties<T> FormFilling { get; set; }
 
-    public static EntryProperties Deserialize(string data, ILogger logger)
+    public static EntryProperties<T> Deserialize(string data, ILogger logger)
     {
+        var options = new JsonSerializerOptions()
+        {
+            NumberHandling = JsonNumberHandling.AllowReadingFromString
+        };
         try
         {
-            return JsonSerializer.Deserialize<EntryProperties>(data);
+            return JsonSerializer.Deserialize<EntryProperties<T>>(data, options);
         }
         catch (Exception e)
         {
@@ -48,7 +52,7 @@ public class EntryProperties
         }
     }
 
-    public static string Serialize(EntryProperties entryProperties, ILogger logger)
+    public static string Serialize(EntryProperties<T> entryProperties, ILogger logger)
     {
         try
         {
@@ -65,24 +69,16 @@ public class EntryProperties
 /// <summary>
 /// </summary>
 [Transient]
-public class FormFillingProperties
+public class FormFillingProperties<T>
 {
-    public static readonly string DefaultTitleMask = "{0} - {1} ({2})";
-
-    /// <summary>Specifies whether to collect the data from the filled forms or not</summary>
-    /// <type>System.Boolean, System</type>
     public bool CollectFillForm { get; set; }
-
-    /// <summary>Specifies if the filling has started or not</summary>
-    /// <type>System.Boolean, System</type>
     public bool StartFilling { get; set; }
-
-    /// <summary>Folder ID where a file will be saved</summary>
-    /// <type>System.String, System</type>
     public string Title { get; set; }
-    public string ToFolderId { get; set; }
-    public string ResultsFolderId { get; set; }
-    public string ResultsFileID { get; set; }
-    public int GuestFormId { get; set; }
+    public T RoomId { get; set; }
+    public T ToFolderId { get; set; }
+    public T OriginalFormId { get; set; }
+    public T ResultsFolderId { get; set; }
+    public T ResultsFileID { get; set; }
+    public int ResultFormNumber { get; set; }
 
 }

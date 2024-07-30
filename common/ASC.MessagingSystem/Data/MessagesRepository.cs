@@ -40,8 +40,15 @@ public class MessagesRepository(
     IMapper mapper,
     IEventBus eventBus)
 {
-    private static readonly HashSet<MessageAction> _forceSaveAuditActions = [MessageAction.RoomInviteLinkUsed, MessageAction.UserSentEmailChangeInstructions, 
-        MessageAction.UserSentPasswordChangeInstructions, MessageAction.SendJoinInvite, MessageAction.RoomRemoveUser];
+    private static readonly HashSet<MessageAction> _forceSaveAuditActions = 
+    [
+        MessageAction.RoomInviteLinkUsed, 
+        MessageAction.UserSentEmailChangeInstructions, 
+        MessageAction.UserSentPasswordChangeInstructions, 
+        MessageAction.SendJoinInvite, 
+        MessageAction.RoomRemoveUser,
+        MessageAction.PortalRenamed
+    ];
 
     public async Task<int> AddAsync(EventMessage message)
     {
@@ -52,7 +59,7 @@ public class MessagesRepository(
             return await ForceSave(message);
         }
 
-        eventBus.Publish(new EventDataIntegrationEvent(message.UserId, message.TenantId)
+        await eventBus.PublishAsync(new EventDataIntegrationEvent(message.UserId, message.TenantId)
         {
              RequestMessage = message
         });

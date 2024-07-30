@@ -238,7 +238,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
             return null;
         }
 
-        folder.Title = await global.GetAvailableTitleAsync(folder.Title, dao.MakeThirdId(folder.ParentId), IsExistAsync);
+        folder.Title = await global.GetAvailableTitleAsync(folder.Title, dao.MakeThirdId(folder.ParentId), IsExistAsync, FileEntryType.Folder);
         
         var thirdFolder = await dao.CreateFolderAsync(folder.Title, folder.ParentId);
             
@@ -302,7 +302,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
 
         var fromFolderId = dao.GetParentFolderId(folder);
 
-        var newTitle = await global.GetAvailableTitleAsync(dao.GetName(folder), dao.GetId(toFolder), IsExistAsync);
+        var newTitle = await global.GetAvailableTitleAsync(dao.GetName(folder), dao.GetId(toFolder), IsExistAsync, FileEntryType.Folder);
         var storage = await _providerInfo.StorageAsync;
         var movedFolder = await storage.MoveFolderAsync(dao.GetId(folder), newTitle, dao.GetId(toFolder));
 
@@ -374,7 +374,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
             throw new Exception(errorFolder1.Error);
         }
 
-        var newTitle = await global.GetAvailableTitleAsync(dao.GetName(folder), dao.GetId(toFolder), IsExistAsync);
+        var newTitle = await global.GetAvailableTitleAsync(dao.GetName(folder), dao.GetId(toFolder), IsExistAsync, FileEntryType.Folder);
         var storage = await _providerInfo.StorageAsync;
         var newFolder = await storage.CopyFolderAsync(dao.GetId(folder), newTitle, dao.GetId(toFolder));
 
@@ -432,7 +432,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         }
         else
         {
-            newTitle = await global.GetAvailableTitleAsync(newTitle, parentFolderId, IsExistAsync);
+            newTitle = await global.GetAvailableTitleAsync(newTitle, parentFolderId, IsExistAsync, FileEntryType.Folder);
 
             //rename folder
             var storage = await _providerInfo.StorageAsync;

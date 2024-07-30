@@ -30,9 +30,9 @@ public class FolderCreatedInterpreter : ActionInterpreter
 {
     protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
     {
-        var additionalDescription = GetAdditionalDescription(description);
+        var desc = GetAdditionalDescription(description);
 
-        return new ValueTask<HistoryData>(new EntryData(target, description[0], additionalDescription.ParentId, additionalDescription.ParentTitle));
+        return new ValueTask<HistoryData>(new EntryData(target, description[0], desc.ParentId, desc.ParentTitle, desc.ParentType));
     }
 }
 
@@ -41,8 +41,18 @@ public class FolderMovedInterpreter : ActionInterpreter
     protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
     {
         var splitTarget = target.Split(',');
+        var desc = GetAdditionalDescription(description);
 
-        return new ValueTask<HistoryData>(new EntryOperationData(splitTarget[0], description[0], splitTarget[1], description[2]));
+        return new ValueTask<HistoryData>(
+            new EntryOperationData(
+                splitTarget[0],
+                description[0],
+                splitTarget[1],
+                desc.ParentTitle,
+                desc.ParentType,
+                desc.FromParentTitle,
+                desc.FromParentType,
+                desc.FromFolderId));
     }
 }
 
@@ -50,10 +60,10 @@ public class FolderRenamedInterpreter : ActionInterpreter
 {
     protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
     {
-        var additionalDescription = GetAdditionalDescription(description);
+        var desc = GetAdditionalDescription(description);
         
-        return new ValueTask<HistoryData>(new RenameEntryData(target, description[1], description[0], additionalDescription.ParentId, 
-            additionalDescription.ParentTitle));
+        return new ValueTask<HistoryData>(new RenameEntryData(target, description[1], description[0], desc.ParentId, 
+            desc.ParentTitle, desc.ParentType));
     }
 }
 
@@ -62,8 +72,18 @@ public class FolderCopiedInterpreter : ActionInterpreter
     protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
     {
         var splitTarget = target.Split(',');
+        var desc = GetAdditionalDescription(description);
 
-        return new ValueTask<HistoryData>(new EntryOperationData(splitTarget[0], description[0], splitTarget[1], description[2]));
+        return new ValueTask<HistoryData>(
+            new EntryOperationData(
+                splitTarget[0], 
+                description[0], 
+                splitTarget[1], 
+                desc.ParentTitle, 
+                desc.ParentType,
+                desc.FromParentTitle,
+                desc.FromParentType,
+                desc.FromFolderId));
     }
 }
 

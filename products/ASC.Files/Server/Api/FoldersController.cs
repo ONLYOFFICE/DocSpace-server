@@ -306,6 +306,7 @@ public abstract class FoldersController<T>(
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">Folder security information</returns>
     /// <path>api/2.0/files/folder/{id}/link</path>
     /// <httpMethod>GET</httpMethod>
+    [AllowAnonymous]
     [HttpGet("folder/{id}/link")]
     public async Task<FileShareDto> GetPrimaryExternalLinkAsync(T id)
     {

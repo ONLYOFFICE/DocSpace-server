@@ -40,9 +40,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         IServiceProvider serviceProvider,
         ExternalShare externalShare,
         AuthContext authContext,
-        SecurityContext securityContext,
-        ILogger<DocumentServiceHelper> logger,
-        CookiesManager cookiesManager)
+        SecurityContext securityContext)
     {
 
     public async Task<(File<T> File, bool LastVersion)> GetCurFileInfoAsync<T>(T fileId, int version)
@@ -56,7 +54,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         {
                 file = await fileDao.GetFileAsync(fileId, version);
                 lastVersion = false;
-            }
+        }
 
         if (file == null)
         {
@@ -64,9 +62,11 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         }
 
         return (file, lastVersion);
-            }
-    public async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(File<T> file, bool lastVersion, bool editPossible, bool tryEdit, bool tryCoauth, bool fillFormsPossible, EditorType editorType, bool isSubmitOnly = false)
-            {
+    }
+
+    public async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(File<T> file, bool lastVersion, bool editPossible, bool tryEdit,
+        bool tryCoauth, bool fillFormsPossible, EditorType editorType, bool isSubmitOnly = false)
+    {
         var docParams = await GetParamsAsync(file, lastVersion, true, editPossible, editPossible, tryEdit, tryCoauth, fillFormsPossible);
         docParams.Configuration.EditorType = editorType;
 
@@ -76,7 +76,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         }
 
         return docParams;
-            }
+    }
 
     public async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(T fileId, int version, bool editPossible, bool tryEdit,
         bool tryCoAuthoring, bool fillFormsPossible)
@@ -142,15 +142,6 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             if (file.ShareRecord is { IsLink: true, Share: not FileShare.Restrict, Options.Internal: true } && !authContext.IsAuthenticated)
             {
                 throw new LinkScopeException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
-            }
-
-            if (file.ShareRecord is { IsLink: true } && !string.IsNullOrEmpty(file.ShareRecord.Options.Password))
-            {
-                var passwordKey = cookiesManager.GetCookies(CookiesType.ShareLink, file.ShareRecord.Subject.ToString(), true);
-                if (string.IsNullOrEmpty(passwordKey))
-                {
-                    logger.Debug($"Password key not found for file {file.Id} and subject {file.ShareRecord.Subject}");
-                }
             }
             
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
@@ -312,11 +303,11 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         return JsonWebToken.Encode(payload, fileUtility.SignatureSecret);
     }
 
-    public async Task<File<T>> CheckNeedDeletion<T>(IFileDao<T> fileDao, T fileId, FormFillingProperties formFillingProperties)
+    public async Task<File<T>> CheckNeedDeletion<T>(IFileDao<T> fileDao, T fileId, FormFillingProperties<T> formFillingProperties)
     {
         var file = await fileDao.GetFileAsync(fileId);
 
-        if (formFillingProperties.ToFolderId == file.ParentId.ToString())
+        if (Equals(formFillingProperties.ToFolderId, file.ParentId))
         {
             await securityContext.AuthenticateMeAsync(file.CreateBy);
 
