@@ -103,6 +103,11 @@ public class FileSharingAceHelper(
             {
                 var group = await userManager.GetGroupInfoAsync(w.Id);
 
+                if (group.Removed)
+                {
+                    continue;
+                }
+
                 if (group.ID != Constants.LostGroupInfo.ID)
                 {
                     w.SubjectType = SubjectType.Group;
