@@ -211,11 +211,11 @@
   <data name="TextForFooterUnsubsribe" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
     &lt;td class="fol" style="color: #666666; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; margin: 0; padding: 40px 0 8px; vertical-align: top;"&gt;
-        W razie jakichkolwiek pytań związanych z zakupem, skontaktuj się z nami drogą mailową pod adresem &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="mailto:sales@onlyoffice.com"&gt;sales@onlyoffice.com&lt;/a&gt;.
+        W razie jakichkolwiek pytań związanych z zakupem, skontaktuj się z nami drogą mailową pod adresem &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="mailto:%SALESEMAIL%"&gt;%SALESEMAIL%&lt;/a&gt;.
     &lt;/td&gt;
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
     &lt;td class="fol" style="color: #666666; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; margin: 0; padding: 0; vertical-align: top;"&gt;
-        Jeśli napotkasz problemy techniczne, napisz do naszego &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://www.onlyoffice.com/support-contact-form.aspx"&gt;działu wsparcia&lt;/a&gt;.
+        Jeśli napotkasz problemy techniczne, napisz do naszego &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="%SUPPORTURL%"&gt;działu wsparcia&lt;/a&gt;.
     &lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
