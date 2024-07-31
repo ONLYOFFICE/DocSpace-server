@@ -507,6 +507,7 @@ public class PortalController(
     /// <returns></returns>
     /// <path>api/2.0/portal/deleteportalimmediately</path>
     /// <httpMethod>DELETE</httpMethod>
+    /// <visible>false</visible>
     [HttpDelete("deleteportalimmediately")]
     public async Task DeletePortalImmediatelyAsync()
     {
