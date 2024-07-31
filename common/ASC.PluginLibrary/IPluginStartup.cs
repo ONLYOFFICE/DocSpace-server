@@ -24,29 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.PluginLibrary;
-
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.DependencyInjection;
-
-using PluginLibrary;
-
-namespace HelloPlugin.Controllers;
-
-[ApiController]
-[PluginRoute("HelloPlugin")]
-public class HelloController : ControllerBase
+namespace ASC.PluginLibrary;
+public interface IPluginStartup
 {
-    private readonly Helper _helper;
-    public HelloController(PluginServiceProvider serviceProvider)
-    {
-        var service = serviceProvider.GetServiceProvider();
-        _helper = service.GetRequiredService<Helper>();
-    }
-
-    [HttpGet("test")]
-    public object Test()    
-    {
-        return _helper.GetWork();
-    }
+    public void Configure(PluginServiceProvider pluginServiceProvider);
 }

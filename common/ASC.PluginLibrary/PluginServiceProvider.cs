@@ -24,29 +24,67 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.PluginLibrary;
+using ASC.Common;
 
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 
-using PluginLibrary;
+namespace ASC.PluginLibrary;
 
-namespace HelloPlugin.Controllers;
-
-[ApiController]
-[PluginRoute("HelloPlugin")]
-public class HelloController : ControllerBase
+[Singleton]
+public class PluginServiceProvider
 {
-    private readonly Helper _helper;
-    public HelloController(PluginServiceProvider serviceProvider)
+    private readonly DIHelper _dIHelper;
+    private readonly IServiceCollection _collection;
+    private bool _needRebild;
+    private IServiceProvider _serviceProvider;
+    private readonly object _locker = new object();
+
+    public PluginServiceProvider()
     {
-        var service = serviceProvider.GetServiceProvider();
-        _helper = service.GetRequiredService<Helper>();
+        _collection = new ServiceCollection();
+        _dIHelper = new DIHelper(_collection);
+        _serviceProvider = _collection.BuildServiceProvider();
     }
 
-    [HttpGet("test")]
-    public object Test()    
+    public bool TryAdd(Type service)
     {
-        return _helper.GetWork();
+        _needRebild = true;
+        return _dIHelper.TryAdd(service);
+    }
+
+    public bool TryAdd(Type service, Type implementation)
+    {
+        _needRebild = true;
+        return _dIHelper.TryAdd(service, implementation);
+    }
+
+    public bool TryAdd<TService>() where TService : class
+    {
+        _needRebild = true;
+        return _dIHelper.TryAdd(typeof(TService));
+    }
+
+    public bool TryAdd<TService, TImplementation>() where TService : class
+    {
+        _needRebild = true;
+        return _dIHelper.TryAdd(typeof(TService), typeof(TImplementation));
+    }
+
+    public IServiceProvider GetServiceProvider()
+    {
+        if (_needRebild)
+        {
+            lock (_locker)
+            {
+                if (_needRebild) 
+                {
+                    _serviceProvider = _collection.BuildServiceProvider();
+                    _needRebild = false;
+                }
+                return _serviceProvider;
+            }
+        }
+
+        return _serviceProvider;
     }
 }

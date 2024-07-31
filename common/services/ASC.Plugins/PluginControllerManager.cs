@@ -25,8 +25,10 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using System.Reflection;
+using System.Windows.Input;
 
 using ASC.Common;
+using ASC.PluginLibrary;
 
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -35,7 +37,7 @@ using Microsoft.Extensions.Primitives;
 namespace ASC.Plugins;
 
 [Transient]
-public class PluginControllerManager(ApplicationPartManager applicationPartManager)
+public class PluginControllerManager(ApplicationPartManager applicationPartManager, PluginServiceProvider pluginService)
 {
 
     public void AddControllers(Assembly assembly)
@@ -43,6 +45,17 @@ public class PluginControllerManager(ApplicationPartManager applicationPartManag
         var assemblyPart = new AssemblyPart(assembly);
         applicationPartManager.ApplicationParts.Add(assemblyPart);
 
+        foreach (var type in assembly.GetTypes())
+        {
+            if (typeof(IPluginStartup).IsAssignableFrom(type))
+            {
+                var startup = Activator.CreateInstance(type) as IPluginStartup;
+                if (startup != null)
+                {
+                    startup.Configure(pluginService);
+                }
+            }
+        }
         ResetControllActions();
     }
 
