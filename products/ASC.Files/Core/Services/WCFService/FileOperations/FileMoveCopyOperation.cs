@@ -165,19 +165,35 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
             return;
         }
 
-        if (!_copy && (toFolder.FolderType == FolderType.FillingFormsRoom || parentFolders.Exists(parent => parent.FolderType == FolderType.FillingFormsRoom)))
+        if (!_copy && parentFolders.Exists(parent => parent.FolderType == FolderType.FillingFormsRoom))
         {
-            if (Folders.Count > 0)
-            {
-                this[Err] = FilesCommonResource.ErrorMessage_FolderMoveFormFillingError;
 
-                return;
+            var fromRoomId = default(T);
+            var toRoom = parentFolders.Where(parent => parent.FolderType == FolderType.FillingFormsRoom).FirstOrDefault();
+
+            FileEntry<T> fileEntry = Folders.Count > 0 ? await FolderDao.GetFolderAsync(Folders.FirstOrDefault()) : 
+                                  Files.Count > 1 ? await FileDao.GetFileAsync(Files.FirstOrDefault()) : null;
+
+            if (fileEntry != null)
+            {
+                (fromRoomId, _) = await FolderDao.GetParentRoomInfoFromFileEntryAsync(fileEntry);
             }
-            if (Files.Count > 1)
+            if (int.TryParse(fromRoomId?.ToString(), out var frId) &&
+                int.TryParse(toRoom.Id.ToString(), out var trId) &&
+                trId != frId)
             {
-                this[Err] = FilesCommonResource.ErrorMessage_FilesMoveFormFillingError;
+                if (Folders.Count > 0)
+                {
+                    this[Err] = FilesCommonResource.ErrorMessage_FolderMoveFormFillingError;
 
-                return;
+                    return;
+                }
+                if (Files.Count > 1)
+                {
+                    this[Err] = FilesCommonResource.ErrorMessage_FilesMoveFormFillingError;
+
+                    return;
+                }
             }
         }
 
