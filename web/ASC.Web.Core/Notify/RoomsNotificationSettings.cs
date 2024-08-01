@@ -29,7 +29,7 @@ using AutoMapper.Internal;
 namespace ASC.Web.Core.Notify;
 public class RoomsNotificationSettings : ISettings<RoomsNotificationSettings>
 {
-    public List<int> DisabledRooms { get; init; }
+    public List<object> DisabledRooms { get; init; }
 
     [JsonIgnore]
     public Guid ID
@@ -47,20 +47,12 @@ public class RoomsNotificationSettings : ISettings<RoomsNotificationSettings>
 }
 
 [Scope]
-public class RoomsNotificationSettingsHelper(SettingsManager settingsManager)
+public class RoomsNotificationSettingsHelper(SettingsManager settingsManager, AuthContext authContext)
 {
-    public async Task<List<int>> GetDisabledRoomsForUserAsync(Guid userId)
-    {
-        var settings = await settingsManager.LoadAsync<RoomsNotificationSettings>(userId);
-        var disabledRooms = settings.DisabledRooms;
-        return disabledRooms;
-    }
-
     public async Task<IEnumerable<string>> GetDisabledRoomsForCurrentUserAsync()
     {
         var settings = await settingsManager.LoadForCurrentUserAsync<RoomsNotificationSettings>();
-        var disabledRooms = settings.DisabledRooms;
-        return disabledRooms.Select(r => r.ToString());
+        return settings.DisabledRooms.Select(r => r.ToString());
     }
 
     public async Task<RoomsNotificationSettings> GetSettingsForCurrentUserAsync()
@@ -68,36 +60,41 @@ public class RoomsNotificationSettingsHelper(SettingsManager settingsManager)
         return await settingsManager.LoadForCurrentUserAsync<RoomsNotificationSettings>();
     }
 
-    public async Task<bool> CheckMuteForRoomAsync(string roomsId)
+    public Task<bool> CheckMuteForRoomAsync(object roomsId)
     {
-        var settings = await settingsManager.LoadForCurrentUserAsync<RoomsNotificationSettings>();
-        var disabledRooms = settings.DisabledRooms.Select(r => r.ToString());
-
-        return disabledRooms.Contains(roomsId);
+        return CheckMuteForRoomAsync(roomsId, authContext.CurrentAccount.ID);
+    }
+    
+    public async Task<bool> CheckMuteForRoomAsync(object roomsId, Guid userId)
+    {        
+        var settings = await settingsManager.LoadAsync<RoomsNotificationSettings>(userId);
+        return settings.DisabledRooms.Select(r => r.ToString()).Contains(roomsId.ToString());
     }
 
-    public async Task<RoomsNotificationSettings> SetForCurrentUserAsync(int roomsId, bool mute)
+    public async Task<RoomsNotificationSettings> SetForCurrentUserAsync(object roomsId, bool mute)
     {
-        var settings = await settingsManager.LoadForCurrentUserAsync<RoomsNotificationSettings>();
-        var disabledRooms = settings.DisabledRooms;
-
-        if (disabledRooms.Contains(roomsId))
+        var disabledRooms = (await GetDisabledRoomsForCurrentUserAsync()).ToList();
+        var id = roomsId.ToString();
+        
+        if (disabledRooms.Contains(id))
         {
             if (!mute)
             {
-                disabledRooms.Remove(roomsId);
+                disabledRooms.Remove(id);
             }
         }
         else
         {
             if (mute)
             {
-                disabledRooms.TryAdd(roomsId);
+                disabledRooms.TryAdd(id);
             }
         }
 
-        await settingsManager.SaveForCurrentUserAsync(settings);
+        var newSettings = new RoomsNotificationSettings { DisabledRooms = disabledRooms.Select(r => (object)r).ToList() };
+        
+        await settingsManager.SaveForCurrentUserAsync(newSettings);
 
-        return settings;
+        return newSettings;
     }
 }

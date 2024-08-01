@@ -1256,7 +1256,7 @@ public class FileStorageService //: IFileStorageService
                 throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
             }
 
-            var properties = await fileDao.GetProperties(fileId) ?? new EntryProperties() { FormFilling = new FormFillingProperties() };
+            var properties = await fileDao.GetProperties(fileId) ?? new EntryProperties<T>() { FormFilling = new FormFillingProperties<T>() };
             properties.FormFilling.StartFilling = true;
             properties.FormFilling.CollectFillForm = true;
 
@@ -2779,7 +2779,7 @@ public class FileStorageService //: IFileStorageService
                 throw new ItemNotFoundException();
             }
 
-            var data = await externalShare.GetLinkDataAsync(entry, parentLink.Id);
+            var data = await externalShare.GetLinkDataAsync(entry, parentLink.Id, entryType == FileEntryType.File);
             parentLink.Link = await urlShortener.GetShortenLinkAsync(data.Url);
 
             return parentLink;

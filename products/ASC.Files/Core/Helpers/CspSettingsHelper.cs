@@ -44,6 +44,16 @@ public class CspSettingsHelper(
         var domain = tenant.GetTenantDomain(coreSettings);
         HashSet<string> headerKeys = [GetKey(domain)];
 
+        var baseDomain = await coreSettings.GetSettingAsync("BaseDomain");
+        if (coreBaseSettings.Standalone && !string.IsNullOrEmpty(baseDomain))
+        {
+            var tenantWithoutAlias = await tenantManager.GetTenantAsync(baseDomain);
+            if (tenant.Id == tenantWithoutAlias.Id)
+            {
+                _ = headerKeys.Add(GetKey(baseDomain));
+            }
+        }
+
         if (domain == Tenant.LocalHost && tenant.Alias == Tenant.LocalHost)
         {
             var domainsKey = $"{GetKey(domain)}:keys";
@@ -119,6 +129,28 @@ public class CspSettingsHelper(
             await distributedCache.RemoveAsync(oldKey);
             await distributedCache.SetStringAsync(GetKey(newDomain), val);
         }
+    }
+
+    public async Task UpdateBaseDomain()
+    {
+        if (!coreBaseSettings.Standalone)
+        {
+            return;
+        }
+
+        var baseDomain = await coreSettings.GetSettingAsync("BaseDomain");
+        if (string.IsNullOrEmpty(baseDomain))
+        {
+            return;
+        }
+
+        var tenantWithoutAlias = await tenantManager.GetTenantAsync(baseDomain);
+
+        var domain = tenantWithoutAlias.GetTenantDomain(coreSettings);
+
+        var val = await distributedCache.GetStringAsync(GetKey(domain));
+
+        await distributedCache.SetStringAsync(GetKey(baseDomain), val);
     }
 
     public async Task<string> CreateHeaderAsync(IEnumerable<string> domains, bool currentTenant = true)

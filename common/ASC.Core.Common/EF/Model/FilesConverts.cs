@@ -87,7 +87,6 @@ public static class FilesConvertsExtension
            new FilesConverts { Input = ".docx", Output = ".fb2" },
            new FilesConverts { Input = ".docx", Output = ".ott" },
            new FilesConverts { Input = ".docx", Output = ".docm" },
-           new FilesConverts { Input = ".docx", Output = ".docxf" },
 
            new FilesConverts { Input = ".docxf", Output = ".docm" },
            new FilesConverts { Input = ".docxf", Output = ".docx" },

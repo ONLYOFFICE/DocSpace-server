@@ -203,7 +203,7 @@
     <value>Ομάδα Που Ενημερώθηκε: {0}</value>
   </data>
   <data name="GuestAccount" xml:space="preserve">
-    <value>Λογαριασμός Επισκέπτη</value>
+    <value>Ανώνυμος</value>
   </data>
   <data name="GuestCreated" xml:space="preserve">
     <value>Επισκέπτης Που Δημιουργήθηκε: {0}</value>
@@ -741,5 +741,41 @@
   </data>
   <data name="FileSizePostfix" xml:space="preserve">
     <value>b, KB, MB, GB</value>
+  </data>
+  <data name="FileUploadedWithOverwriting" xml:space="preserve">
+    <value>Μεταφόρτωση αρχείου με αντικατάσταση: {0}</value>
+  </data>
+  <data name="QuotaPerPortalChanged" xml:space="preserve">
+    <value>Ορισμός προεπιλεγμένης ποσόστωσης αποθήκευσης: {0}</value>
+  </data>
+  <data name="QuotaPerPortalDisabled" xml:space="preserve">
+    <value>Απενεργοποιημένη προεπιλεγμένη ποσόστωση αποθήκευσης</value>
+  </data>
+  <data name="QuotaPerRoomChanged" xml:space="preserve">
+    <value>Ορισμός προεπιλεγμένης ποσόστωσης αποθήκευσης για δωμάτια: {0}</value>
+  </data>
+  <data name="QuotaPerRoomDisabled" xml:space="preserve">
+    <value>Απενεργοποιημένη προεπιλεγμένη ποσόστωση αποθήκευσης για δωμάτια</value>
+  </data>
+  <data name="QuotaPerUserChanged" xml:space="preserve">
+    <value>Ορισμός προεπιλεγμένης ποσόστωσης αποθήκευσης για χρήστες: {0}</value>
+  </data>
+  <data name="QuotaPerUserDisabled" xml:space="preserve">
+    <value>Απενεργοποιημένη προεπιλεγμένη ποσόστωση αποθήκευσης για χρήστες</value>
+  </data>
+  <data name="RoomCopied" xml:space="preserve">
+    <value>Το δωμάτιο αντιγράφηκε: {0}</value>
+  </data>
+  <data name="RoomGroupAdded" xml:space="preserve">
+    <value>Η ομάδα προστέθηκε: {0}. Ρόλος: {1}</value>
+  </data>
+  <data name="RoomGroupRemove" xml:space="preserve">
+    <value>Η ομάδα διαγράφηκε: {0}</value>
+  </data>
+  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
+    <value>Ορίστηκε {0}: {1}</value>
+  </data>
+  <data name="SendJoinInvite" xml:space="preserve">
+    <value>Ο χρήστης {0} έστειλε πρόσκληση στον {1} να συμμετάσχει σε αυτό το DocSpace</value>
   </data>
 </root>

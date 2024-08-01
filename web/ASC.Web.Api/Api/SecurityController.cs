@@ -404,7 +404,7 @@ public class SecurityController(PermissionContext permissionContext,
         var settings = await cspSettingsHelper.LoadAsync();
         return new CspDto
         {
-            Domains = settings.Domains,
+            Domains = settings.Domains ?? [],
             Header = await cspSettingsHelper.CreateHeaderAsync(settings.Domains)
         };
     }

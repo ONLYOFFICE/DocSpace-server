@@ -153,9 +153,6 @@
   <data name="MigrationCommonFiles" xml:space="preserve">
     <value>Yleisten tiedostojen siirto</value>
   </data>
-  <data name="MigrationInitException" xml:space="preserve">
-    <value>Virhe aloittaessa {0} siirtoa</value>
-  </data>
   <data name="MigrationNotFoundException" xml:space="preserve">
     <value>Annettua siirtopalveluntarjoajaa ei löydy</value>
   </data>
@@ -164,11 +161,5 @@
   </data>
   <data name="MigrationProjectFiles" xml:space="preserve">
     <value>Siirtoprojektitiedostot</value>
-  </data>
-  <data name="MigrationStartException" xml:space="preserve">
-    <value>Jäsentäminen on vielä käynnissä</value>
-  </data>
-  <data name="MigrationUploadException" xml:space="preserve">
-    <value>Siirto on jo käynnissä</value>
   </data>
 </root>

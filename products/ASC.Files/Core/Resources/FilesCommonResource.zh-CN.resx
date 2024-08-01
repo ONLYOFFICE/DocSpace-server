@@ -464,4 +464,40 @@
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>类型</value>
   </data>
+  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
+    <value>高级用户</value>
+  </data>
+  <data name="Date" xml:space="preserve">
+    <value>日期</value>
+  </data>
+  <data name="RoleEnum_PowerUser" xml:space="preserve">
+    <value>高级用户</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>普通用户</value>
+  </data>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>不支持将多个文件移动到表单填写房间。一次移动一个 ONLYOFFICE PDF 表单。</value>
+  </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>不支持将文件夹移动到表单填写房间。一次移动一个 ONLYOFFICE PDF 表单。</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>无法将文件移动到此房间。请尝试移动 ONLYOFFICE PDF 表单。</value>
+  </data>
+  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
+    <value>无法将文件上传到此房间。请尝试上传 ONLYOFFICE PDF 表单。</value>
+  </data>
+  <data name="FillOutExternalLinkTitle" xml:space="preserve">
+    <value>填写链接</value>
+  </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>表单链接</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>打开表单</value>
+  </data>
+  <data name="FormNumber" xml:space="preserve">
+    <value>表单编号</value>
+  </data>
 </root>

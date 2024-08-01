@@ -43,7 +43,16 @@ public class FolderMovedInterpreter : ActionInterpreter
         var splitTarget = target.Split(',');
         var desc = GetAdditionalDescription(description);
 
-        return new ValueTask<HistoryData>(new EntryOperationData(splitTarget[0], description[0], splitTarget[1], description[2], desc.ParentType));
+        return new ValueTask<HistoryData>(
+            new EntryOperationData(
+                splitTarget[0],
+                description[0],
+                splitTarget[1],
+                desc.ParentTitle,
+                desc.ParentType,
+                desc.FromParentTitle,
+                desc.FromParentType,
+                desc.FromFolderId));
     }
 }
 
@@ -65,7 +74,16 @@ public class FolderCopiedInterpreter : ActionInterpreter
         var splitTarget = target.Split(',');
         var desc = GetAdditionalDescription(description);
 
-        return new ValueTask<HistoryData>(new EntryOperationData(splitTarget[0], description[0], splitTarget[1], description[1], desc.ParentType));
+        return new ValueTask<HistoryData>(
+            new EntryOperationData(
+                splitTarget[0], 
+                description[0], 
+                splitTarget[1], 
+                desc.ParentTitle, 
+                desc.ParentType,
+                desc.FromParentTitle,
+                desc.FromParentType,
+                desc.FromFolderId));
     }
 }
 

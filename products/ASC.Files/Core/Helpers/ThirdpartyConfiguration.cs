@@ -98,9 +98,9 @@ public class ThirdpartyConfiguration(ThirdpartyConfigurationData configuration, 
             new("GoogleDrive", ProviderTypes.GoogleDrive.ToStringFast(), GoogleLoginProvider.IsEnabled, true, GoogleLoginProvider.RedirectUri),
             new("OneDrive", ProviderTypes.OneDrive.ToStringFast(), OneDriveLoginProvider.IsEnabled, true, OneDriveLoginProvider.RedirectUri),
             new("kDrive", webDavKey, true),
-            new("WebDav", webDavKey, true),
-            new("Nextcloud", webDavKey, true),
-            new("ownCloud", webDavKey, true)
+            new("WebDav", webDavKey, true, RequiredConnectionUrl: true),
+            new("Nextcloud", webDavKey, true, RequiredConnectionUrl: true),
+            new("ownCloud", webDavKey, true, RequiredConnectionUrl: true)
         };
 
         return providers;

@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Microsoft.Net.Http.Headers;
+
 namespace ASC.Web.Files.Services.DocumentService;
 
 [Scope]
@@ -348,7 +350,7 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
         }
 
         var query = HttpUtility.ParseQueryString(uri.Query);
-        //query[HttpRequestExtensions.UrlRewriterHeader] = urlRewriterQuery;
+        query[HeaderNames.Origin.ToLower()] = uri.Scheme + Uri.SchemeDelimiter + uri.Host + ":" + uri.Port;
         uri.Query = query.ToString();
 
         var communityUrl = new UriBuilder(docServicePortalUrl);

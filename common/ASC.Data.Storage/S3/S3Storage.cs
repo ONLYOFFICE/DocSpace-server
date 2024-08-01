@@ -258,14 +258,13 @@ public class S3Storage(TempStream tempStream,
         try
         {
             using var client = GetClient();
-
             return new ResponseStreamWrapper(await client.GetObjectAsync(request));
         }
         catch (AmazonS3Exception ex)
         {
             if (ex.ErrorCode == "NoSuchKey")
             {
-                throw new FileNotFoundException("File not found", path);
+                throw new FileNotFoundException("File not found", request.Key);
             }
 
             throw;

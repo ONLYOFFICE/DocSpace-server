@@ -73,8 +73,11 @@ public class ReassignController(
 
         var toUser = await userManager.GetUsersAsync(inDto.ToUserId);
 
+        var toUserType = await userManager.GetUserTypeAsync(toUser);
+        var toUserIsAdmin = toUserType is EmployeeType.DocSpaceAdmin || toUserType is EmployeeType.RoomAdmin;
+
         if (userManager.IsSystemUser(toUser.Id) ||
-            await userManager.IsUserAsync(toUser) || 
+            !toUserIsAdmin ||
             toUser.Status == EmployeeStatus.Terminated)
         {
             throw new ArgumentException("Can not reassign data to user with id = " + toUser.Id);

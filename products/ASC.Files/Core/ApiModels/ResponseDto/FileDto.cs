@@ -276,7 +276,7 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
                 {
                     var draftLocation = new DraftLocation<T>()
                     {
-                        FolderId = (T)Convert.ChangeType(formFilling.ToFolderId, typeof(T)),
+                        FolderId = formFilling.ToFolderId,
                         FolderTitle = formFilling.Title,
                         FileId = (T)Convert.ChangeType(linkedId, typeof(T))
                     };

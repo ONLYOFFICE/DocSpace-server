@@ -131,9 +131,21 @@ internal class EventTypeConverter(
         var map = actionMapper.GetMessageMaps(result.Action);
         if (map != null)
         {
-            if (result.Action is (int)MessageAction.QuotaPerPortalChanged or (int)MessageAction.QuotaPerRoomChanged or (int)MessageAction.QuotaPerUserChanged && long.TryParse(result.Description.FirstOrDefault(), out var size))
+            if (result.Action is 
+                (int)MessageAction.QuotaPerPortalChanged or 
+                (int)MessageAction.QuotaPerRoomChanged or 
+                (int)MessageAction.QuotaPerUserChanged
+                && long.TryParse(result.Description.FirstOrDefault(), out var size))
             { 
                 result.ActionText = string.Format(map.GetActionText(), CommonFileSizeComment.FilesSizeToString(AuditReportResource.FileSizePostfix, size));
+            }
+            else if (result.Action is (int)MessageAction.CustomQuotaPerRoomDefault or
+                (int)MessageAction.CustomQuotaPerRoomChanged or
+                (int)MessageAction.CustomQuotaPerUserDefault or
+                (int)MessageAction.CustomQuotaPerUserChanged
+                && long.TryParse(result.Description.FirstOrDefault(), out var customSize))
+            {
+                result.ActionText = string.Format(map.GetActionText(), result.Description.LastOrDefault(), CommonFileSizeComment.FilesSizeToString(AuditReportResource.FileSizePostfix, customSize));
             }
             else
             {
