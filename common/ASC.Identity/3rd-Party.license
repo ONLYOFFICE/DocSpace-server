@@ -8,6 +8,10 @@ bucket4j-redis      - Java rate limiting library based on token-bucket algorithm
 License:              Apache License 2.0
 License File:         bucket4j.license
 
+caffeine            - A high performance caching library for Java. (https://github.com/ben-manes/caffeine)
+License:              Apache License 2.0
+License File:         caffeine.license
+
 guava               - Google core libraries for Java. (https://github.com/google/guava)
 License:              Apache License 2.0
 License File:         guava.license
