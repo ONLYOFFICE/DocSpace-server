@@ -460,16 +460,6 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                     {
                         if (conflictFolder != null)
                         {
-                            if (_resolveType != FileConflictResolveType.Skip)
-                            {                            
-                                if (ProcessedFolder(folderId))
-                                {
-                                    sb.Append($"folder_{folderId}{SplitChar}");
-                                }
-                                
-                                continue;
-                            }
-
                             if (!conflictFolder.ProviderEntry && _resolveType == FileConflictResolveType.Duplicate)
                             {
                                 conflictFolder.Id = default;
@@ -485,7 +475,6 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                             {
                                 needToMark.Add(conflictFolder);
                             }
-                            
                         }
                         else
                         {
@@ -577,7 +566,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                         {
                             if (conflictFolder != null)
                             {                            
-                                if (_resolveType != FileConflictResolveType.Skip)
+                                if (_resolveType == FileConflictResolveType.Overwrite)
                                 {                            
                                     if (ProcessedFolder(folderId))
                                     {
