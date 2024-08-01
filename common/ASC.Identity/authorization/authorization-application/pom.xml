@@ -97,11 +97,10 @@
             <version>${lettuce.version}</version>
         </dependency>
 
-        <!-- Guava -->
         <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>${guava.version}</version>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+            <version>${caffeine.caching.version}</version>
         </dependency>
     </dependencies>
 </project>

@@ -27,28 +27,37 @@
 
 package com.asc.authorization.application.security.jwks;
 
+import com.asc.authorization.application.configuration.security.AscOAuth2RegisteredClientConfiguration;
 import com.asc.authorization.application.mapper.KeyPairMapper;
 import com.asc.authorization.application.security.oauth.authorities.TenantAuthority;
+import com.asc.authorization.application.security.oauth.services.AscKeyPairService;
 import com.asc.authorization.data.key.entity.KeyPair;
-import com.asc.authorization.data.key.repository.JpaKeyPairRepository;
 import com.asc.common.core.domain.value.KeyPairType;
-import com.asc.common.utilities.crypto.EncryptionService;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.Expiry;
 import com.nimbusds.jose.KeySourceException;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSelector;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import jakarta.annotation.PostConstruct;
-import java.util.ArrayList;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+import java.time.Duration;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
-import java.util.stream.StreamSupport;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
@@ -60,115 +69,93 @@ import org.springframework.stereotype.Component;
 @AllArgsConstructor
 public class KeyPairRepositoryJWKSource
     implements JWKSource<SecurityContext>, OAuth2TokenCustomizer<JwtEncodingContext> {
+  private final AscOAuth2RegisteredClientConfiguration registeredClientConfiguration;
+
   @Autowired
   @Qualifier("rsa")
-  private JwksKeyPairGenerator keyPairGenerator;
+  private final JwksKeyPairGenerator keyPairGenerator;
 
-  private final EncryptionService encryptionService;
-  private final JpaKeyPairRepository jpaKeyPairRepository;
   private final KeyPairMapper keyPairMapper;
+  private final AscKeyPairService keyPairService;
 
-  private List<KeyPair> keyPairs = new ArrayList<>();
+  private static Duration rotationPeriod;
+  private static Duration deprecationPeriod;
+  private static final Cache<String, KeyPair> keyPairsCache =
+      Caffeine.newBuilder().expireAfter(new CreationDateExpiry()).build();
 
   /**
-   * Initializes the key pairs from the repository, generating a new one if none are found.
+   * Initializes the key rotation and deprecation periods and performs initial key rotation and
+   * deprecation.
    *
-   * @throws Exception If an error occurs during initialization.
+   * @throws NoSuchAlgorithmException if a required algorithm is not available.
    */
+  @SneakyThrows
   @PostConstruct
-  public void init() throws Exception {
-    keyPairs.addAll(
-        StreamSupport.stream(jpaKeyPairRepository.findAll().spliterator(), false)
-            .filter(p -> p.getPairType().equals(keyPairGenerator.type()))
-            .map(
-                pair -> {
-                  // Decrypt the private key for internal use
-                  pair.setPrivateKey(encryptionService.decrypt(pair.getPrivateKey()));
-                  return pair;
-                })
-            .filter(
-                p -> {
-                  try {
-                    keyPairGenerator.buildKey(p.getId(), p.getPublicKey(), p.getPrivateKey());
-                    return true;
-                  } catch (Exception e) {
-                    log.error("Invalid key pair in repository: {}", p.getId(), e);
-                    return false;
-                  }
-                })
-            .toList());
+  public void init() {
+    rotationPeriod =
+        Duration.ofMinutes(registeredClientConfiguration.getAccessTokenMinutesTTL() * 4L);
+    deprecationPeriod =
+        Duration.ofMinutes(registeredClientConfiguration.getAccessTokenMinutesTTL());
+    invalidateKeys();
+    rotateKeysIfNeeded();
+    refreshKeyPairs();
+  }
 
-    if (keyPairs.isEmpty()) {
-      MDC.put("type", keyPairGenerator.type().name());
-      log.debug("Found no certificates of this type. Generating a new one");
-      MDC.clear();
-      var pair = keyPairGenerator.generateKeyPair();
-      var keyPair =
-          KeyPair.builder()
-              .publicKey(keyPairMapper.toString(pair.getPublic()))
-              .privateKey(encryptionService.encrypt(keyPairMapper.toString(pair.getPrivate())))
-              .pairType(keyPairGenerator.type())
-              .build();
-      // Save the encrypted private key to the repository
-      jpaKeyPairRepository.save(keyPair);
-      // Add the key pair with the decrypted private key for internal use
-      keyPairs.add(
-          KeyPair.builder()
-              .id(keyPair.getId())
-              .publicKey(keyPairMapper.toString(pair.getPublic()))
-              .privateKey(keyPairMapper.toString(pair.getPrivate()))
-              .pairType(keyPairGenerator.type())
-              .build());
+  /** Scheduled task for key rotation and cleanup, running every minute. */
+  @Scheduled(fixedRate = 60000)
+  public void scheduledKeyRotationAndCleanup() {
+    try {
+      invalidateKeys();
+      rotateKeysIfNeeded();
+      refreshKeyPairs();
+    } catch (Exception e) {
+      log.error("Error during scheduled key rotation and cleanup", e);
     }
   }
 
   /**
-   * Retrieves a list of JWKs that match the given JWK selector and security context.
+   * Retrieves JSON Web Keys (JWK) based on the provided JWK selector and security context.
    *
-   * @param jwkSelector The JWK selector to filter the keys.
-   * @param securityContext The security context.
-   * @return A list of JWKs matching the selector.
-   * @throws KeySourceException If an error occurs while retrieving the keys.
+   * @param jwkSelector the JWK selector.
+   * @param securityContext the security context.
+   * @return a list of JWKs matching the selector.
+   * @throws KeySourceException if an error occurs while retrieving the keys.
    */
   @SneakyThrows
   public List<JWK> get(JWKSelector jwkSelector, SecurityContext securityContext)
       throws KeySourceException {
     log.debug("Trying to get JWK");
-    List<JWK> result = new ArrayList<>();
-    for (var keyPair : keyPairs) {
-      MDC.put("id", keyPair.getId());
-      MDC.put("type", keyPair.getPairType().name());
-      log.debug("Validating a key pair");
-      if (!keyPair.getPairType().equals(keyPairGenerator.type())) {
-        log.debug("Key pair is not supported");
-        MDC.clear();
-        continue;
-      }
-      log.debug("Key pair is supported");
-      MDC.clear();
-      var key =
-          keyPairGenerator.buildKey(
-              keyPair.getId(), keyPair.getPublicKey(), keyPair.getPrivateKey());
-      if (jwkSelector.getMatcher().matches(key)) result.add(key);
-    }
+    List<JWK> result =
+        keyPairsCache.asMap().values().stream()
+            .filter(
+                keyPair -> {
+                  MDC.put("id", keyPair.getId());
+                  MDC.put("type", keyPair.getPairType().name());
+                  boolean matches =
+                      keyPair.getPairType().equals(keyPairGenerator.type())
+                          && jwkSelector.getMatcher().matches(buildJwk(keyPair));
+                  MDC.clear();
+                  return matches;
+                })
+            .map(this::buildJwk)
+            .collect(Collectors.toList());
+
+    if (result.isEmpty()) refreshKeyPairs();
 
     return result;
   }
 
   /**
-   * Customizes the JWT encoding context with the appropriate key and claims.
+   * Customizes the JWT encoding context with additional claims and headers.
    *
-   * @param context The JWT encoding context.
+   * @param context the JWT encoding context.
    */
   public void customize(JwtEncodingContext context) {
-    var keyPair =
-        keyPairs.stream()
-            .filter(p -> p.getPairType().equals(keyPairGenerator.type()))
-            .findFirst()
-            .orElseThrow(
-                () -> new UnsupportedOperationException("Could not find any suitable keypair"));
+    var activeKeyPair = getLatestActiveKeyPair();
+    if (activeKeyPair == null)
+      throw new UnsupportedOperationException("Could not find any suitable keypair");
 
-    log.debug("Using key pair with ID: {}", keyPair.getId());
+    log.debug("Using key pair with ID: {}", activeKeyPair.getId());
 
     var principal = context.getPrincipal();
     var authority = principal.getAuthorities().stream().findFirst().orElse(null);
@@ -186,10 +173,117 @@ public class KeyPairRepositoryJWKSource
 
     context
         .getJwsHeader()
-        .keyId(keyPair.getId())
+        .keyId(activeKeyPair.getId())
         .algorithm(
-            keyPair.getPairType().equals(KeyPairType.EC)
+            activeKeyPair.getPairType().equals(KeyPairType.EC)
                 ? SignatureAlgorithm.ES256
                 : SignatureAlgorithm.RS256);
+  }
+
+  /**
+   * Rotates keys if needed based on the rotation period.
+   *
+   * @throws NoSuchAlgorithmException if a required algorithm is not available.
+   */
+  protected void rotateKeysIfNeeded() throws NoSuchAlgorithmException {
+    if (shouldRotateKeys()) {
+      generateAndStoreNewKeyPair();
+      refreshKeyPairs();
+    }
+  }
+
+  /** Deprecates old keys that are beyond the deprecation period. */
+  protected void invalidateKeys() {
+    var cutoffTime =
+        ZonedDateTime.now(ZoneOffset.UTC).minus(rotationPeriod).minus(deprecationPeriod);
+    keyPairService.invalidateKeyPairs(cutoffTime);
+  }
+
+  /**
+   * Determines if keys should be rotated based on the latest active key pair's age.
+   *
+   * @return true if keys should be rotated, false otherwise.
+   */
+  private boolean shouldRotateKeys() {
+    var latestKeyPair = getLatestActiveKeyPair();
+    return latestKeyPair == null
+        || Duration.between(latestKeyPair.getCreatedAt(), ZonedDateTime.now(ZoneOffset.UTC))
+                .compareTo(rotationPeriod)
+            > 0;
+  }
+
+  /**
+   * Retrieves the latest active key pair.
+   *
+   * @return the latest active key pair, or null if none exists.
+   */
+  private KeyPair getLatestActiveKeyPair() {
+    return keyPairsCache.asMap().values().stream()
+        .max(Comparator.comparing(KeyPair::getCreatedAt))
+        .orElse(null);
+  }
+
+  /** Refreshes the key pairs cache by retrieving active key pairs from the service. */
+  private void refreshKeyPairs() {
+    var cutoffTime =
+        ZonedDateTime.now(ZoneOffset.UTC).minus(rotationPeriod).minus(deprecationPeriod);
+    var keyPairs = keyPairService.findActiveKeyPairs(cutoffTime);
+    keyPairs.forEach(keyPair -> keyPairsCache.put(keyPair.getId(), keyPair));
+  }
+
+  /**
+   * Generates and stores a new key pair.
+   *
+   * @throws NoSuchAlgorithmException if a required algorithm is not available.
+   */
+  private void generateAndStoreNewKeyPair() throws NoSuchAlgorithmException {
+    var pair = keyPairGenerator.generateKeyPair();
+    var keyPair =
+        KeyPair.builder()
+            .publicKey(keyPairMapper.toString(pair.getPublic()))
+            .privateKey(keyPairMapper.toString(pair.getPrivate()))
+            .pairType(keyPairGenerator.type())
+            .createdAt(ZonedDateTime.now(ZoneOffset.UTC))
+            .build();
+    var saved = keyPairService.saveKeyPair(keyPair);
+    keyPairsCache.put(saved.getId(), saved);
+  }
+
+  /**
+   * Builds a JSON Web Key (JWK) from the provided key pair.
+   *
+   * @param keyPair the key pair.
+   * @return the JWK.
+   */
+  private JWK buildJwk(KeyPair keyPair) {
+    try {
+      return keyPairGenerator.buildKey(
+          keyPair.getId(), keyPair.getPublicKey(), keyPair.getPrivateKey());
+    } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+      log.error("Error building JWK from KeyPair", e);
+      return null;
+    }
+  }
+
+  /** Custom expiry policy for key pairs based on their creation date. */
+  private static class CreationDateExpiry implements Expiry<String, KeyPair> {
+    public long expireAfterCreate(String key, KeyPair keyPair, long currentTime) {
+      long durationSinceCreation =
+          Duration.between(keyPair.getCreatedAt(), ZonedDateTime.now(ZoneOffset.UTC)).toNanos();
+      return rotationPeriod
+          .plus(deprecationPeriod)
+          .minus(Duration.ofNanos(durationSinceCreation))
+          .toNanos();
+    }
+
+    public long expireAfterUpdate(
+        String key, KeyPair keyPair, long currentTime, long currentDuration) {
+      return currentDuration;
+    }
+
+    public long expireAfterRead(
+        String key, KeyPair keyPair, long currentTime, long currentDuration) {
+      return currentDuration;
+    }
   }
 }
