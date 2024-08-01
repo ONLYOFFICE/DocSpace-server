@@ -54,10 +54,7 @@ public class SecurityController(PermissionContext permissionContext,
     /// <short>
     /// Get login history
     /// </short>
-    /// <category>Login history</category>
-    /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.LoginEventDto, ASC.Web.Api">List of login events</returns>
     /// <path>api/2.0/security/audit/login/last</path>
-    /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [Tags("Security / Login history")]
     [SwaggerResponse(200, "List of login events", typeof(LoginEventDto))]
@@ -77,10 +74,7 @@ public class SecurityController(PermissionContext permissionContext,
     /// <short>
     /// Get audit trail data
     /// </short>
-    /// <category>Audit trail data</category>
-    /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.AuditEventDto, ASC.Web.Api">List of audit trail data</returns>
     /// <path>api/2.0/security/audit/events/last</path>
-    /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [Tags("Security / Audit trail data")]
     [SwaggerResponse(200, "List of audit trail data", typeof(AuditEventDto))]
@@ -100,14 +94,11 @@ public class SecurityController(PermissionContext permissionContext,
     /// <short>
     /// Get filtered login events
     /// </short>
-    /// <category>Login history</category>
     /// <param type="System.Guid, System" name="userId" example="9924256A-739C-462b-AF15-E652A3B1B6EB">User ID</param>
     /// <param type="ASC.MessagingSystem.Core.MessageAction, ASC.MessagingSystem.Core" name="action" example="null">Action</param>
     /// <param type="ASC.Api.Core.ApiDateTime, ASC.Api.Core" name="from" example="2008-04-10T06-30-00.000Z">Start date</param>
     /// <param type="ASC.Api.Core.ApiDateTime, ASC.Api.Core" name="to" example="2008-04-10T06-30-00.000Z">End date</param>
-    /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.LoginEventDto, ASC.Web.Api">List of filtered login events</returns>
     /// <path>api/2.0/security/audit/login/filter</path>
-    /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [Tags("Security / Login history")]
     [SwaggerResponse(200, "List of filtered login events", typeof(LoginEventDto))]
@@ -141,7 +132,6 @@ public class SecurityController(PermissionContext permissionContext,
     /// <short>
     /// Get filtered audit trail data
     /// </short>
-    /// <category>Audit trail data</category>
     /// <param type="System.Guid, System" name="userId" example="9924256A-739C-462b-AF15-E652A3B1B6EB">User ID</param>
     /// <param type="ASC.AuditTrail.Types.ProductType, ASC.AuditTrail.Types" name="productType" example="None">Product</param>
     /// <param type="ASC.AuditTrail.Types.ModuleType, ASC.AuditTrail.Types" name="moduleType" example="None">Module</param>
@@ -151,9 +141,7 @@ public class SecurityController(PermissionContext permissionContext,
     /// <param type="System.String, System" name="target" example="some text">Target</param>
     /// <param type="ASC.Api.Core.ApiDateTime, ASC.Api.Core" name="from" example="2008-04-10T06-30-00.000Z">Start date</param>
     /// <param type="ASC.Api.Core.ApiDateTime, ASC.Api.Core" name="to" example="2008-04-10T06-30-00.000Z">End date</param>
-    /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.AuditEventDto, ASC.Web.Api">List of filtered audit trail data</returns>
     /// <path>api/2.0/security/audit/events/filter</path>
-    /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [Tags("Security / Audit trail data")]
     [SwaggerResponse(200, "List of filtered audit trail data", typeof(AuditEventDto))]
@@ -192,10 +180,7 @@ public class SecurityController(PermissionContext permissionContext,
     /// <short>
     /// Get audit trail types
     /// </short>
-    /// <category>Audit trail data</category>
-    /// <returns type="System.Object, System">Audit trail types</returns>
     /// <path>api/2.0/security/audit/types</path>
-    /// <httpMethod>GET</httpMethod>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Security / Audit trail data")]
     [SwaggerResponse(200, "Audit trail types", typeof(object))]
@@ -219,12 +204,9 @@ public class SecurityController(PermissionContext permissionContext,
     /// <short>
     /// Get audit trail mappers
     /// </short>
-    /// <category>Audit trail data</category>
     /// <param type="System.Nullable{ASC.AuditTrail.Types.ProductType}, System" name="productType" example="None">Product</param>
     /// <param type="System.Nullable{ASC.AuditTrail.Types.ModuleType}, System" name="moduleType" example="None">Module</param>
-    /// <returns type="System.Object, System">Audit trail mappers</returns>
     /// <path>api/2.0/security/audit/mappers</path>
-    /// <httpMethod>GET</httpMethod>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Security / Audit trail data")]
     [SwaggerResponse(200, "Audit trail mappers", typeof(object))]
@@ -258,10 +240,7 @@ public class SecurityController(PermissionContext permissionContext,
     /// <short>
     /// Generate the login history report
     /// </short>
-    /// <category>Login history</category>
-    /// <returns type="System.Object, System">URL to the xlsx report file</returns>
     /// <path>api/2.0/security/audit/login/report</path>
-    /// <httpMethod>POST</httpMethod>
     [Tags("Security / Login history")]
     [SwaggerResponse(200, "URL to the xlsx report file", typeof(object))]
     [HttpPost("audit/login/report")]
@@ -292,10 +271,7 @@ public class SecurityController(PermissionContext permissionContext,
     /// <short>
     /// Generate the audit trail report
     /// </short>
-    /// <category>Audit trail data</category>
-    /// <returns type="System.Object, System">URL to the xlsx report file</returns>
     /// <path>api/2.0/security/audit/events/report</path>
-    /// <httpMethod>POST</httpMethod>
     [Tags("Security / Audit trail data")]
     [SwaggerResponse(200, "URL to the xlsx report file", typeof(object))]
     [HttpPost("audit/events/report")]
@@ -329,10 +305,7 @@ public class SecurityController(PermissionContext permissionContext,
     /// <short>
     /// Get the audit trail settings
     /// </short>
-    /// <category>Audit trail data</category>
-    /// <returns type="ASC.Core.Tenants.TenantAuditSettings, ASC.Core.Common">Audit settings</returns>
     /// <path>api/2.0/security/audit/settings/lifetime</path>
-    /// <httpMethod>GET</httpMethod>
     [Tags("Security / Audit trail data")]
     [SwaggerResponse(200, "Audit settings", typeof(TenantAuditSettings))]
     [HttpGet("audit/settings/lifetime")]
@@ -351,11 +324,8 @@ public class SecurityController(PermissionContext permissionContext,
     /// <short>
     /// Set the audit trail settings
     /// </short>
-    /// <category>Audit trail data</category>
     /// <param type="ASC.Core.Tenants.TenantAuditSettingsWrapper, ASC.Core.Common" name="inDto">Audit trail settings</param>
-    /// <returns type="ASC.Core.Tenants.TenantAuditSettings, ASC.Core.Common">Audit trail settings</returns>
     /// <path>api/2.0/security/audit/settings/lifetime</path>
-    /// <httpMethod>POST</httpMethod>
     [Tags("Security / Audit trail data")]
     [SwaggerResponse(200, "Audit trail settings", typeof(TenantAuditSettings))]
     [HttpPost("audit/settings/lifetime")]

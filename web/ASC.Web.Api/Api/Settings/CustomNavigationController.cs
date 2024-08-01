@@ -41,10 +41,7 @@ public class CustomNavigationController(MessageService messageService,
     /// Returns a list of the custom navigation items.
     /// </summary>
     /// <short>Get the custom navigation items</short>
-    /// <category>Custom navigation</category>
-    /// <returns type="ASC.Web.Studio.Core.CustomNavigationItem, ASC.Web.Core">List of the custom navigation items</returns>
     /// <path>api/2.0/settings/customnavigation/getall</path>
-    /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [Tags("Settings / Custom Navigation")]
     [SwaggerResponse(200, "List of the custom navigation items", typeof(CustomNavigationItem))]
@@ -58,10 +55,7 @@ public class CustomNavigationController(MessageService messageService,
     /// Returns a custom navigation item sample.
     /// </summary>
     /// <short>Get a custom navigation item sample</short>
-    /// <category>Custom navigation</category>
-    /// <returns type="ASC.Web.Studio.Core.CustomNavigationItem, ASC.Web.Core">Custom navigation item</returns>
     /// <path>api/2.0/settings/customnavigation/getsample</path>
-    /// <httpMethod>GET</httpMethod>
     [Tags("Settings / Custom Navigation")]
     [SwaggerResponse(200, "Custom navigation item", typeof(CustomNavigationItem))]
     [HttpGet("getsample")]
@@ -74,11 +68,8 @@ public class CustomNavigationController(MessageService messageService,
     /// Returns a custom navigation item by the ID specified in the request.
     /// </summary>
     /// <short>Get a custom navigation item by ID</short>
-    /// <category>Custom navigation</category>
     /// <param type="System.Guid, System" method="url" name="id" example="9924256A-739C-462b-AF15-E652A3B1B6EB">Custom navigation item ID</param>
-    /// <returns type="ASC.Web.Studio.Core.CustomNavigationItem, ASC.Web.Core">Custom navigation item</returns>
     /// <path>api/2.0/settings/customnavigation/get/{id}</path>
-    /// <httpMethod>GET</httpMethod>
     [Tags("Settings / Custom Navigation")]
     [SwaggerResponse(200, "Custom navigation item", typeof(CustomNavigationItem))]
     [HttpGet("get/{id:guid}")]
@@ -91,11 +82,8 @@ public class CustomNavigationController(MessageService messageService,
     /// Adds a custom navigation item with the parameters specified in the request.
     /// </summary>
     /// <short>Add a custom navigation item</short>
-    /// <category>Custom navigation</category>
     /// <param type="ASC.Web.Studio.Core.CustomNavigationItem, ASC.Web.Core" name="inDto">Custom navigation parameters</param>
-    /// <returns type="ASC.Web.Studio.Core.CustomNavigationItem, ASC.Web.Core">Custom navigation item</returns>
     /// <path>api/2.0/settings/customnavigation/create</path>
-    /// <httpMethod>POST</httpMethod>
     [Tags("Settings / Custom Navigation")]
     [SwaggerResponse(200, "Custom navigation item", typeof(CustomNavigationItem))]
     [HttpPost("create")]
@@ -155,11 +143,8 @@ public class CustomNavigationController(MessageService messageService,
     /// Deletes a custom navigation item with the ID specified in the request.
     /// </summary>
     /// <short>Delete a custom navigation item</short>
-    /// <category>Custom navigation</category>
     /// <param type="System.Guid, System" method="url" name="id">Custom navigation item ID</param>
     /// <path>api/2.0/settings/customnavigation/delete/{id}</path>
-    /// <httpMethod>DELETE</httpMethod>
-    /// <returns></returns>
     [Tags("Settings / Custom Navigation")]
     [HttpDelete("delete/{id:guid}")]
     public async Task DeleteCustomNavigationItem(Guid id)

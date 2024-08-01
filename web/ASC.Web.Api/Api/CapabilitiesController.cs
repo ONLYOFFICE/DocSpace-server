@@ -51,9 +51,7 @@ public class CapabilitiesController(CoreBaseSettings coreBaseSettings,
     ///<short>
     ///Get portal capabilities
     ///</short>
-    ///<returns type="ASC.Web.Api.ApiModel.ResponseDto.CapabilitiesDto, ASC.Web.Api">Portal capabilities</returns>
     ///<path>api/2.0/capabilities</path>
-    ///<httpMethod>GET</httpMethod>
     ///<requiresAuthorization>false</requiresAuthorization>
     [Tags("Capabilities")]
     [SwaggerResponse(200, "Portal capabilities", typeof(CapabilitiesDto))]

@@ -53,9 +53,7 @@ public abstract class PrivacyRoomController<T>(SettingsManager settingsManager,
     /// </summary>
     /// <short>Get file key pairs</short>
     /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
-    /// <returns type="ASC.Web.Files.Core.Entries.EncryptionKeyPairDto, ASC.Files.Core">List of encryption key pairs</returns>
     /// <path>api/2.0/privacyroom/access/{fileId}</path>
-    /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Private room")]
@@ -90,9 +88,7 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
     /// Returns a key pair for the current user.
     /// </summary>
     /// <short>Get encryption keys</short>
-    /// <returns type="ASC.Web.Files.Core.Entries.EncryptionKeyPairDto, ASC.Files.Core">Encryption key pair: private key, public key, user ID</returns>
     /// <path>api/2.0/privacyroom/keys</path>
-    /// <httpMethod>GET</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Private room")]
     [SwaggerResponse(200, "Encryption key pair: private key, public key, user ID", typeof(EncryptionKeyPairDto))]
@@ -114,9 +110,7 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
     /// Checks if the Private Room settings are enabled or not.
     /// </summary>
     /// <short>Check the Private Room settings</short>
-    /// <returns type="System.Boolean, System">Boolean value: true - the Private Room settings are enabled, false - the Private Room settings are disabled</returns>
     /// <path>api/2.0/privacyroom</path>
-    /// <httpMethod>GET</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Private room")]
     [SwaggerResponse(200, "Boolean value: true - the Private Room settings are enabled, false - the Private Room settings are disabled", typeof(bool))]
@@ -133,9 +127,7 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
     /// </summary>
     /// <short>Set encryption keys</short>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.PrivacyRoomRequestDto, ASC.Files.Core" name="inDto">Request parameters for setting encryption keys</param>
-    /// <returns type="System.Object, System">Boolean value: true - the key pair is set</returns>
     /// <path>api/2.0/privacyroom/keys</path>
-    /// <httpMethod>PUT</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Private room")]
     [SwaggerResponse(200, "Boolean value: true - the key pair is set", typeof(object))]
@@ -173,9 +165,7 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
     /// </summary>
     /// <short>Enable the Private Room settings</short>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.PrivacyRoomRequestDto, ASC.Files.Core" name="inDto">Request parameters for setting encryption keys</param>
-    /// <returns type="System.Boolean, System">Boolean value: true - the Private Room settings are enabled, false - the Private Room settings are disabled</returns>
     /// <path>api/2.0/privacyroom</path>
-    /// <httpMethod>PUT</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Private room")]
     [SwaggerResponse(200, "Boolean value: true - the Private Room settings are enabled, false - the Private Room settings are disabled", typeof(bool))]

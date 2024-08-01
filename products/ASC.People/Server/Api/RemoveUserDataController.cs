@@ -43,10 +43,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     /// </summary>
     /// <short>Get the deletion progress</short>
     /// <param type="System.Guid, System" name="userId" example="9924256A-739C-462b-AF15-E652A3B1B6EB">User ID</param>
-    /// <category>User data</category>
-    /// <returns type="ASC.People.ApiModels.ResponseDto.TaskProgressResponseDto, ASC.People">Deletion progress</returns>
     /// <path>api/2.0/people/remove/progress/{userid}</path>
-    /// <httpMethod>GET</httpMethod>
     [Tags("People / User data")]
     [SwaggerResponse(200, "Deletion progress", typeof(TaskProgressResponseDto))]
     [HttpGet("remove/progress/{userid:guid}")]
@@ -66,10 +63,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     /// <short>
     /// Send the deletion instructions
     /// </short>
-    /// <category>Profiles</category>
-    /// <returns type="System.Object, System">Information message</returns>
     /// <path>api/2.0/people/self/delete</path>
-    /// <httpMethod>PUT</httpMethod>
     [Tags("People / User data")]
     [SwaggerResponse(200, "Information message", typeof(object))]
     [HttpPut("self/delete")]
@@ -95,10 +89,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     /// </summary>
     /// <short>Start the data deletion</short>
     /// <param type="ASC.People.ApiModels.RequestDto.TerminateRequestDto, ASC.People" name="inDto">Request parameters for starting the deletion process</param>
-    /// <category>User data</category>
-    /// <returns type="ASC.People.ApiModels.ResponseDto.TaskProgressResponseDto, ASC.People">Deletion progress</returns>
     /// <path>api/2.0/people/remove/start</path>
-    /// <httpMethod>POST</httpMethod>
     [Tags("People / User data")]
     [SwaggerResponse(200, "Deletion progress", typeof(TaskProgressResponseDto))]
     [HttpPost("remove/start")]
@@ -129,10 +120,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     /// </summary>
     /// <short>Terminate the data deletion</short>
     /// <param type="ASC.People.ApiModels.RequestDto.TerminateRequestDto, ASC.People" name="inDto">Request parameters for terminating the deletion process</param>
-    /// <category>User data</category>
     /// <path>api/2.0/people/remove/terminate</path>
-    /// <httpMethod>PUT</httpMethod>
-    /// <returns></returns>
     [Tags("People / User data")]
     [HttpPut("remove/terminate")]
     public async Task TerminateRemoveAsync(TerminateRequestDto inDto)

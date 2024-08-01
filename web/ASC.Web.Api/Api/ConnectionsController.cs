@@ -56,10 +56,7 @@ public class ConnectionsController(
     /// <short>
     /// Get active connections
     /// </short>
-    /// <category>Active connections</category>
-    /// <returns type="System.Object, System">Active portal connections</returns>
     /// <path>api/2.0/security/activeconnections</path>
-    /// <httpMethod>GET</httpMethod>
     [Tags("Security / Active connections")]
     [SwaggerResponse(200, "Active portal connections", typeof(ActiveConnectionsDto))]
     [HttpGet("")]
@@ -148,10 +145,7 @@ public class ConnectionsController(
     /// <short>
     /// Log out and change password
     /// </short>
-    /// <category>Active connections</category>
-    /// <returns type="System.Object, System">URL to the confirmation message for changing a password</returns>
     /// <path>api/2.0/security/activeconnections/logoutallchangepassword</path>
-    /// <httpMethod>PUT</httpMethod>
     [Tags("Security / Active connections")]
     [SwaggerResponse(200, "URL to the confirmation message for changing a password", typeof(object))]
     [HttpPut("logoutallchangepassword")]
@@ -189,11 +183,8 @@ public class ConnectionsController(
     /// <short>
     /// Log out for the user by ID
     /// </short>
-    /// <category>Active connections</category>
     /// <param type="System.Guid, System" method="url" name="userId" example="9924256A-739C-462b-AF15-E652A3B1B6EB">User ID</param>
     /// <path>api/2.0/security/activeconnections/logoutall/{userId}</path>
-    /// <httpMethod>PUT</httpMethod>
-    /// <returns></returns>
     [Tags("Security / Active connections")]
     [HttpPut("logoutall/{userId:guid}")]
     public async Task LogOutAllActiveConnectionsForUserAsync(Guid userId)
@@ -215,10 +206,7 @@ public class ConnectionsController(
     /// <short>
     /// Log out from all connections
     /// </short>
-    /// <category>Active connections</category>
-    /// <returns type="System.Object, System">Current user name</returns>
     /// <path>api/2.0/security/activeconnections/logoutallexceptthis</path>
-    /// <httpMethod>PUT</httpMethod>
     [Tags("Security / Active connections")]
     [SwaggerResponse(200, "Current user name", typeof(object))]
     [HttpPut("logoutallexceptthis")]
@@ -248,11 +236,8 @@ public class ConnectionsController(
     /// <short>
     /// Log out from the connection
     /// </short>
-    /// <category>Active connections</category>
     /// <param type="System.Int32, System" method="url" name="loginEventId" example="1234">Login event ID</param>
-    /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
     /// <path>api/2.0/security/activeconnections/logout/{loginEventId}</path>
-    /// <httpMethod>PUT</httpMethod>
     [Tags("Security / Active connections")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpPut("logout/{loginEventId:int}")]

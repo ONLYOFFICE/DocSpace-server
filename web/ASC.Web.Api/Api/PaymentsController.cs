@@ -57,11 +57,8 @@ public class PaymentController(UserManager userManager,
     /// <short>
     /// Get the payment page URL
     /// </short>
-    /// <category>Payment</category>
     /// <param type="ASC.Web.Api.Models.PaymentUrlRequestsDto, ASC.Web.Api" name="inDto">Payment URL request parameters</param>
-    /// <returns type="System.Uri, System">The URL to the payment page</returns>
     /// <path>api/2.0/portal/payment/url</path>
-    /// <httpMethod>PUT</httpMethod>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The URL to the payment page", typeof(Uri))]
     [HttpPut("url")]
@@ -94,11 +91,8 @@ public class PaymentController(UserManager userManager,
     /// <short>
     /// Update the payment quantity
     /// </short>
-    /// <category>Payment</category>
     /// <param type="ASC.Web.Api.Models.PaymentUrlRequestsDto, ASC.Web.Api" name="inDto">Payment URL request parameters</param>
-    /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
     /// <path>api/2.0/portal/payment/update</path>
-    /// <httpMethod>PUT</httpMethod>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpPut("update")]
@@ -123,11 +117,8 @@ public class PaymentController(UserManager userManager,
     /// <short>
     /// Get the payment account
     /// </short>
-    /// <category>Payment</category>
     /// <param type="System.String, System" name="backUrl" example="some text">Back URL</param>
-    /// <returns type="System.Object, System">The URL to the payment account</returns>
     /// <path>api/2.0/portal/payment/account</path>
-    /// <httpMethod>GET</httpMethod>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The URL to the payment account", typeof(object))]
     [HttpGet("account")]
@@ -158,10 +149,7 @@ public class PaymentController(UserManager userManager,
     /// <short>
     /// Get prices
     /// </short>
-    /// <category>Payment</category>
-    /// <returns type="System.Object, System">List of available portal prices</returns>
     /// <path>api/2.0/portal/payment/prices</path>
-    /// <httpMethod>GET</httpMethod>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "List of available portal prices", typeof(object))]
     [HttpGet("prices")]
@@ -180,10 +168,7 @@ public class PaymentController(UserManager userManager,
     /// <short>
     /// Get currencies
     /// </short>
-    /// <category>Payment</category>
-    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.CurrenciesDto, ASC.Web.Api">List of available portal currencies</returns>
     /// <path>api/2.0/portal/payment/currencies</path>
-    /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "List of available portal currencies", typeof(CurrenciesDto))]
@@ -207,10 +192,7 @@ public class PaymentController(UserManager userManager,
     /// <short>
     /// Get quotas
     /// </short>
-    /// <category>Quota</category>
-    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.QuotaDto, ASC.Web.Api">List of available portal quotas</returns>
     /// <path>api/2.0/portal/payment/quotas</path>
-    /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "List of available portal quotas", typeof(QuotaDto))]
@@ -226,11 +208,8 @@ public class PaymentController(UserManager userManager,
     /// <short>
     /// Get quota payment information
     /// </short>
-    /// <category>Payment</category>
     /// <param type="System.Boolean, System" name="refresh" example="true"></param>
-    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.QuotaDto, ASC.Web.Api">Payment information about the current portal quota</returns>
     /// <path>api/2.0/portal/payment/quota</path>
-    /// <httpMethod>GET</httpMethod>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "Payment information about the current portal quota", typeof(QuotaDto))]
     [HttpGet("quota")]
@@ -245,11 +224,8 @@ public class PaymentController(UserManager userManager,
     /// <short>
     /// Send a payment request
     /// </short>
-    /// <category>Payment</category>
     /// <param type="ASC.Web.Api.ApiModels.RequestsDto.SalesRequestsDto, ASC.Web.Api" name="inDto">Portal payment request parameters</param>
-    /// <returns></returns>
     /// <path>api/2.0/portal/payment/request</path>
-    /// <httpMethod>POST</httpMethod>
     [Tags("Portal / Payment")]
     [HttpPost("request")]
     public async Task SendSalesRequestAsync(SalesRequestsDto inDto)

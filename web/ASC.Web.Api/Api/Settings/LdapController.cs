@@ -49,10 +49,7 @@ public class LdapController(
     /// <short>
     /// Get the LDAP settings
     /// </short>
-    /// <category>LDAP</category>
-    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.LdapSettingsDto, ASC.Web.Api">LDAP settings</returns>
     /// <path>api/2.0/settings/ldap</path>
-    /// <httpMethod>GET</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / LDAP")]
     [SwaggerResponse(200, "LDAP settings", typeof(LdapSettingsDto))]
@@ -95,10 +92,7 @@ public class LdapController(
     /// <short>
     /// Get the LDAP cron expression
     /// </short>
-    /// <category>LDAP</category>
-    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.LdapCronSettingsDto, ASC.Web.Api">LDAP cron settings</returns>
     /// <path>api/2.0/settings/ldap/cron</path>
-    /// <httpMethod>GET</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / LDAP")]
     [SwaggerResponse(200, "LDAP cron settings", typeof(LdapCronSettingsDto))]
@@ -123,11 +117,8 @@ public class LdapController(
     /// <short>
     /// Set the LDAP cron expression
     /// </short>
-    /// <category>LDAP</category>
     /// <path>api/2.0/settings/ldap/cron</path>
     /// <param type="ASC.Web.Api.ApiModels.RequestsDto.LdapCronRequestDto, ASC.Web.Api" name="inDto">LDAP cron request parameters</param>
-    /// <httpMethod>POST</httpMethod>
-    /// <returns></returns>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / LDAP")]
     [HttpPost("cron")]
@@ -170,10 +161,7 @@ public class LdapController(
     /// <short>
     /// Synchronize with LDAP server
     /// </short>
-    /// <category>LDAP</category>
     /// <path>api/2.0/settings/ldap/sync</path>
-    /// <httpMethod>GET</httpMethod>
-    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.LdapStatusDto, ASC.Web.Api">LDAP operation status</returns>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / LDAP")]
     [SwaggerResponse(200, "LDAP operation status", typeof(LdapStatusDto))]
@@ -199,10 +187,7 @@ public class LdapController(
     /// <short>
     /// Test the LDAP synchronization
     /// </short>
-    /// <category>LDAP</category>
     /// <path>api/2.0/settings/ldap/sync/test</path>
-    /// <httpMethod>GET</httpMethod>
-    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.LdapStatusDto, ASC.Web.Api">LDAP operation status</returns>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / LDAP")]
     [SwaggerResponse(200, "LDAP operation status", typeof(LdapStatusDto))]
@@ -226,11 +211,8 @@ public class LdapController(
     /// <short>
     /// Save the LDAP settings
     /// </short>
-    /// <category>LDAP</category>
     /// <param type="ASC.Web.Api.ApiModels.RequestsDto.LdapRequestsDto, ASC.Web.Api" name="inDto">LDAP settings</param>
-    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.LdapStatusDto, ASC.Web.Api">LDAP operation status</returns>
     /// <path>api/2.0/settings/ldap</path>
-    /// <httpMethod>POST</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / LDAP")]
     [SwaggerResponse(200, "LDAP operation status", typeof(LdapStatusDto))]
@@ -261,11 +243,8 @@ public class LdapController(
     /// <short>
     /// Test the LDAP saving process
     /// </short>
-    /// <category>LDAP</category>
     /// <param type="ASC.ActiveDirectory.Base.Settings.LdapSettings, ASC.ActiveDirectory.Base.Settings" name="inDto">LDAP settings</param>
     /// <path>api/2.0/settings/ldap/save/test</path>
-    /// <httpMethod>POST</httpMethod>
-    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.LdapStatusDto, ASC.Web.Api">LDAP operation status</returns>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / LDAP")]
     [SwaggerResponse(200, "LDAP operation status", typeof(LdapStatusDto))]
@@ -289,10 +268,7 @@ public class LdapController(
     /// <short>
     /// Get the LDAP synchronization process status
     /// </short>
-    /// <category>LDAP</category>
-    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.LdapStatusDto, ASC.Web.Api">LDAP operation status</returns>
     /// <path>api/2.0/settings/ldap/status</path>
-    /// <httpMethod>GET</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / LDAP")]
     [SwaggerResponse(200, "LDAP operation status", typeof(LdapStatusDto))]
@@ -314,10 +290,7 @@ public class LdapController(
     /// <short>
     /// Get the LDAP default settings
     /// </short>
-    /// <category>LDAP</category>
-    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.LdapSettingsDto, ASC.Web.Api">LDAP default settings: enable LDAP authentication or not, start TLS or not, enable SSL or not, send welcome email or not, server name, user name, port number, user filter, login attribute, LDAP settings mapping, access rights, user is a group member or not, group name, user attribute, group filter, group attribute, group name attribute, authentication is enabled or not, login, password, accept certificate or not</returns>
     /// <path>api/2.0/settings/ldap/default</path>
-    /// <httpMethod>GET</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / LDAP")]
     [SwaggerResponse(200, "LDAP default settings: enable LDAP authentication or not, start TLS or not, enable SSL or not, send welcome email or not, server name, user name, port number, user filter, login attribute, LDAP settings mapping, access rights, user is a group member or not, group name, user attribute, group filter, group attribute, group name attribute, authentication is enabled or not, login, password, accept certificate or not", typeof(LdapSettingsDto))]

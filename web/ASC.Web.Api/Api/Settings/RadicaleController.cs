@@ -48,10 +48,7 @@ public class RadicaleController(RadicaleClient radicaleClient,
     /// <short>
     /// Get a link to the CardDav address book
     /// </short>
-    /// <category>CardDav address book</category>
-    /// <returns type="ASC.Common.Radicale.DavResponse, ASC.Common.Radicale">CardDav response</returns>
     /// <path>api/2.0/settings/carddavurl</path>
-    /// <httpMethod>GET</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / CardDav address book")]
     [SwaggerResponse(200, "CardDav response", typeof(DavResponse))]
@@ -122,10 +119,7 @@ public class RadicaleController(RadicaleClient radicaleClient,
     /// <short>
     /// Delete a CardDav address book
     /// </short>
-    /// <category>CardDav address book</category>
-    /// <returns type="ASC.Common.Radicale.DavResponse, ASC.Common.Radicale">CardDav response</returns>
     /// <path>api/2.0/settings/deletebook</path>
-    /// <httpMethod>DELETE</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / CardDav address book")]
     [SwaggerResponse(200, "CardDav response", typeof(DavResponse))]

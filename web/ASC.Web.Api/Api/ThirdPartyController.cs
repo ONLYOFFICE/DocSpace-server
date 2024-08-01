@@ -42,10 +42,8 @@ public class ThirdPartyController(OAuth20TokenHelper oAuth20TokenHelper) : Contr
     /// </summary>
     /// <short>Get the code request</short>
     /// <param type="ASC.FederatedLogin.LoginProviders.LoginProvider, ASC.FederatedLogin.LoginProviders" method="url" name="provider">Provider</param>
-    /// <returns type="System.Object, System">Code request</returns>
     /// <remarks>List of providers: Google, Dropbox, Docusign, Box, OneDrive, Wordpress.</remarks>
     /// <path>api/2.0/thirdparty/{provider}</path>
-    /// <httpMethod>GET</httpMethod>
     [Tags("ThirdParty")]
     [SwaggerResponse(200, "Code request", typeof(object))]
     [HttpGet("{provider}")]
@@ -89,9 +87,7 @@ public class ThirdPartyController(OAuth20TokenHelper oAuth20TokenHelper) : Contr
     /// <param type="System.String, System" name="redirect" example="some text">URL where the user will be redirected to after they have granted the application access</param>
     /// <param type="System.String, System" method="url" name="code" example="some text">Confirmation code that can be exchanged for an OAuth token</param>
     /// <param type="System.String, System" name="error" example="some text">Error</param>
-    /// <returns type="System.Object, System">Confirmation code</returns>
     /// <path>api/2.0/thirdparty/{provider}/code</path>
-    /// <httpMethod>GET</httpMethod>
     [Tags("ThirdParty")]
     [SwaggerResponse(200, "Confirmation code", typeof(object))]
     [HttpGet("{provider}/code")]

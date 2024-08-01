@@ -46,11 +46,8 @@ public class TipsController(ILoggerProvider option,
     /// Updates the tip settings with a parameter specified in the request.
     /// </summary>
     /// <short>Update the tip settings</short>
-    /// <category>Tips</category>
     /// <param type="ASC.Web.Api.ApiModel.RequestsDto.SettingsRequestsDto, ASC.Web.Api" name="inDto">Settings request parameters</param>
-    /// <returns type="ASC.Web.Studio.Core.TipsSettings, ASC.Web.Core">Updated tip settings</returns>
     /// <path>api/2.0/settings/tips</path>
-    /// <httpMethod>PUT</httpMethod>
     [Tags("Settings / Tips")]
     [SwaggerResponse(200, "Updated tip settings", typeof(TipsSettings))]
     [HttpPut("")]
@@ -94,10 +91,7 @@ public class TipsController(ILoggerProvider option,
     /// Updates the tip subscription.
     /// </summary>
     /// <short>Update the tip subscription</short>
-    /// <category>Tips</category>
-    /// <returns type="System.Boolean, System">Boolean value: true if the user is subscribed to the tips</returns>
     /// <path>api/2.0/settings/tips/change/subscription</path>
-    /// <httpMethod>PUT</httpMethod>
     [Tags("Settings / Tips")]
     [SwaggerResponse(200, "Boolean value: true if the user is subscribed to the tips", typeof(bool))]
     [HttpPut("change/subscription")]
@@ -110,10 +104,7 @@ public class TipsController(ILoggerProvider option,
     /// Checks if the current user is subscribed to the tips or not.
     /// </summary>
     /// <short>Check the tip subscription</short>
-    /// <category>Tips</category>
-    /// <returns type="System.Boolean, System">Boolean value: true if the user is subscribed to the tips</returns>
     /// <path>api/2.0/settings/tips/subscription</path>
-    /// <httpMethod>GET</httpMethod>
     [Tags("Settings / Tips")]
     [SwaggerResponse(200, "Boolean value: true if the user is subscribed to the tips", typeof(bool))]
     [HttpGet("subscription")]

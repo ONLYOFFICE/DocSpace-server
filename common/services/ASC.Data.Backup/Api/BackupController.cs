@@ -55,8 +55,6 @@ public class BackupController(
     /// Returns the backup schedule of the current portal.
     /// </summary>
     /// <short>Get the backup schedule</short>
-    /// <returns type="ASC.Data.Backup.BackupAjaxHandler.Schedule, ASC.Data.Backup">Backup schedule</returns>
-    /// <httpMethod>GET</httpMethod>
     /// <path>api/2.0/backup/getbackupschedule</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "Backup schedule", typeof(BackupAjaxHandler.Schedule))]
@@ -71,8 +69,6 @@ public class BackupController(
     /// </summary>
     /// <short>Create the backup schedule</short>
     /// <param type="ASC.Data.Backup.ApiModels.BackupScheduleDto, ASC.Data.Backup" name="inDto">Backup schedule parameters</param>
-    /// <returns type="System.Boolean, System" example="true">Boolean value: true if the operation is successful</returns>
-    /// <httpMethod>POST</httpMethod>
     /// <path>api/2.0/backup/createbackupschedule</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
@@ -118,8 +114,6 @@ public class BackupController(
     /// Deletes the backup schedule of the current portal.
     /// </summary>
     /// <short>Delete the backup schedule</short>
-    /// <returns type="System.Boolean, System" example="true">Boolean value: true if the operation is successful</returns>
-    /// <httpMethod>DELETE</httpMethod>
     /// <path>api/2.0/backup/deletebackupschedule</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
@@ -136,8 +130,6 @@ public class BackupController(
     /// </summary>
     /// <short>Start the backup</short>
     /// <param type="ASC.Data.Backup.ApiModels.BackupDto, ASC.Data.Backup" name="inDto">Backup parameters</param>
-    /// <returns type="System.Object, System">Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link</returns>
-    /// <httpMethod>POST</httpMethod>
     /// <path>api/2.0/backup/startbackup</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link", typeof(BackupProgress))]
@@ -207,8 +199,6 @@ public class BackupController(
     /// Returns the progress of the started backup.
     /// </summary>
     /// <short>Get the backup progress</short>
-    /// <returns type="System.Object, System">Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link</returns>
-    /// <httpMethod>GET</httpMethod>
     /// <path>api/2.0/backup/getbackupprogress</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link", typeof(BackupProgress))]
@@ -223,8 +213,6 @@ public class BackupController(
     /// Returns the history of the started backup.
     /// </summary>
     /// <short>Get the backup history</short>
-    /// <returns type="ASC.Data.Backup.Contracts.BackupHistoryRecord, ASC.Data.Backup.Core">List of backup history records</returns>
-    /// <httpMethod>GET</httpMethod>
     /// <path>api/2.0/backup/getbackuphistory</path>
     /// <collection>list</collection>
     [Tags("Backup")]
@@ -240,8 +228,6 @@ public class BackupController(
     /// </summary>
     /// <short>Delete the backup</short>
     /// <param type="System.Guid, System" method="url" name="id" example="9924256A-739C-462b-AF15-E652A3B1B6EB">Backup ID</param>
-    /// <returns type="System.Boolean, System" example="true">Boolean value: true if the operation is successful</returns>
-    /// <httpMethod>DELETE</httpMethod>
     /// <path>api/2.0/backup/deletebackup/{id}</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
@@ -256,8 +242,6 @@ public class BackupController(
     /// Deletes the backup history of the current portal.
     /// </summary>
     /// <short>Delete the backup history</short>
-    /// <returns type="System.Boolean, System" example="true">Boolean value: true if the operation is successful</returns>
-    /// <httpMethod>DELETE</httpMethod>
     /// <path>api/2.0/backup/deletebackuphistory</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful")]
@@ -273,8 +257,6 @@ public class BackupController(
     /// </summary>
     /// <short>Start the restoring process</short>
     /// <param type="ASC.Data.Backup.ApiModels.BackupRestoreDto, ASC.Data.Backup" name="inDto">Restoring parameters</param>
-    /// <returns type="System.Object, System">Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link</returns>
-    /// <httpMethod>POST</httpMethod>
     /// <path>api/2.0/backup/startrestore</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link", typeof(BackupProgress))]
@@ -322,8 +304,6 @@ public class BackupController(
     /// Returns the progress of the started restoring process.
     /// </summary>
     /// <short>Get the restoring progress</short>
-    /// <returns type="System.Object, System">Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link</returns>
-    /// <httpMethod>GET</httpMethod>
     /// <path>api/2.0/backup/getrestoreprogress</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Backup")]
@@ -340,8 +320,6 @@ public class BackupController(
     /// Returns a path to the temporary folder with the stored backup.
     /// </summary>
     /// <short>Get the temporary backup folder</short>
-    /// <returns type="System.Object, System">Path to the temporary folder with the stored backup</returns>
-    /// <httpMethod>GET</httpMethod>
     /// <path>api/2.0/backup/backuptmp</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Backup")]

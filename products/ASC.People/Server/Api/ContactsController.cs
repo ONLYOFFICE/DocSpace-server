@@ -41,12 +41,9 @@ public class ContactsController(UserManager userManager,
     /// <short>
     /// Delete user contacts
     /// </short>
-    /// <category>Contacts</category>
     /// <param type="System.String, System" method="url" name="userid" example="some text">User ID</param>
     /// <param type="ASC.People.ApiModels.RequestDto.UpdateMemberRequestDto, ASC.People" name="inDto">Request parameters for updating user contacts</param>
-    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Web.Api">Deleted user profile with the detailed information</returns>
     /// <path>api/2.0/people/{userid}/contacts</path>
-    /// <httpMethod>DELETE</httpMethod>
     [Tags("People / Contacts")]
     [SwaggerResponse(200, "Deleted user profile with the detailed information", typeof(EmployeeFullDto))]
     [HttpDelete("{userid}/contacts")]
@@ -71,12 +68,9 @@ public class ContactsController(UserManager userManager,
     /// <short>
     /// Set user contacts
     /// </short>
-    /// <category>Contacts</category>
     /// <param type="System.String, System" method="url" name="userid" example="some text">User ID</param>
     /// <param type="ASC.People.ApiModels.RequestDto.UpdateMemberRequestDto, ASC.People" name="inDto">Request parameters for updating user contacts</param>
-    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Web.Api">Updated user profile with the detailed information</returns>
     /// <path>api/2.0/people/{userid}/contacts</path>
-    /// <httpMethod>POST</httpMethod>
     [Tags("People / Contacts")]
     [SwaggerResponse(200, "Updated user profile with the detailed information", typeof(EmployeeFullDto))]
     [HttpPost("{userid}/contacts")]
@@ -102,12 +96,9 @@ public class ContactsController(UserManager userManager,
     /// <short>
     /// Update user contacts
     /// </short>
-    /// <category>Contacts</category>
     /// <param type="System.String, System" method="url" name="userid" example="some text">User ID</param>
     /// <param type="ASC.People.ApiModels.RequestDto.UpdateMemberRequestDto, ASC.People" name="inDto">Request parameters for updating user contacts</param>
-    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Web.Api">Updated user profile with the detailed information</returns>
     /// <path>api/2.0/people/{userid}/contacts</path>
-    /// <httpMethod>PUT</httpMethod>
     [Tags("People / Contacts")]
     [SwaggerResponse(200, "Updated user profile with the detailed information", typeof(EmployeeFullDto))]
     [HttpPut("{userid}/contacts")]

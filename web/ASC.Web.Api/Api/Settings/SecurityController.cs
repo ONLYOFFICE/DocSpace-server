@@ -56,11 +56,8 @@ public class SecurityController(
     /// <short>
     /// Get the security settings
     /// </short>
-    /// <category>Security</category>
     /// <param type="System.Collections.Generic.IEnumerable{System.String}, System.Collections.Generic" name="ids" example="some text">List of module IDs</param>
-    /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.SecurityDto, ASC.Web.Api">Security settings</returns>
     /// <path>api/2.0/settings/security</path>
-    /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [Tags("Settings / Security")]
     [SwaggerResponse(200, "Security settings", typeof(SecurityDto))]
@@ -107,11 +104,8 @@ public class SecurityController(
     /// <short>
     /// Get the module availability
     /// </short>
-    /// <category>Security</category>
     /// <param type="System.Guid, System" method="url" name="id" example="9924256A-739C-462b-AF15-E652A3B1B6EB">Module ID</param>
-    /// <returns type="System.Boolean, System">Boolean value: true - module is enabled, false - module is disabled</returns>
     /// <path>api/2.0/settings/security/{id}</path>
-    /// <httpMethod>GET</httpMethod>
     [Tags("Settings / Security")]
     [SwaggerResponse(200, "Boolean value: true - module is enabled, false - module is disabled", typeof(bool))]
     [HttpGet("{id:guid}")]
@@ -128,10 +122,7 @@ public class SecurityController(
     /// <short>
     /// Get the enabled modules
     /// </short>
-    /// <category>Security</category>
-    /// <returns type="System.Object, System">List of enabled modules</returns>
     /// <path>api/2.0/settings/security/modules</path>
-    /// <httpMethod>GET</httpMethod>
     [Tags("Settings / Security")]
     [SwaggerResponse(200, "List of enabled modules", typeof(object))]
     [HttpGet("modules")]
@@ -150,10 +141,7 @@ public class SecurityController(
     /// <short>
     /// Get the password settings
     /// </short>
-    /// <category>Security</category>
-    /// <returns type="ASC.Web.Core.Utility.PasswordSettings, ASC.Web.Core">Password settings</returns>
     /// <path>api/2.0/settings/security/password</path>
-    /// <httpMethod>GET</httpMethod>
     [Tags("Settings / Security")]
     [SwaggerResponse(200, "Password settings", typeof(PasswordSettingsDto))]
     [HttpGet("password")]
@@ -171,11 +159,8 @@ public class SecurityController(
     /// <short>
     /// Set the password settings
     /// </short>
-    /// <category>Security</category>
     /// <param type="ASC.Web.Api.Models.PasswordSettingsRequestsDto, ASC.Web.Api" name="inDto">Password settings</param>
-    /// <returns type="ASC.Web.Core.Utility.PasswordSettings, ASC.Web.Core">Password settings</returns>
     /// <path>api/2.0/settings/security/password</path>
-    /// <httpMethod>PUT</httpMethod>
     [Tags("Settings / Security")]
     [SwaggerResponse(200, "Password settings", typeof(PasswordSettingsDto))]
     [HttpPut("password")]
@@ -208,11 +193,8 @@ public class SecurityController(
     /// <short>
     /// Set the module security settings
     /// </short>
-    /// <category>Security</category>
     /// <param type="ASC.Web.Api.ApiModel.RequestsDto.WebItemSecurityRequestsDto, ASC.Web.Api" name="inDto">Module request parameters</param>
     /// <path>api/2.0/settings/security</path>
-    /// <httpMethod>PUT</httpMethod>
-    /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.SecurityDto, ASC.Web.Api">Security settings</returns>
     /// <collection>list</collection>
     [Tags("Settings / Security")]
     [SwaggerResponse(200, "Security settings", typeof(SecurityDto))]
@@ -262,11 +244,8 @@ public class SecurityController(
     /// <short>
     /// Set the access settings to products
     /// </short>
-    /// <category>Security</category>
     /// <param type="ASC.Web.Api.ApiModel.RequestsDto.WebItemSecurityRequestsDto, ASC.Web.Api" name="inDto">Module request parameters</param>
     /// <path>api/2.0/settings/security/access</path>
-    /// <httpMethod>PUT</httpMethod>
-    /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.SecurityDto, ASC.Web.Api">Security settings</returns>
     /// <collection>list</collection>
     [Tags("Settings / Security")]
     [SwaggerResponse(200, "Security settings", typeof(SecurityDto))]
@@ -322,11 +301,8 @@ public class SecurityController(
     /// <short>
     /// Get the product administrators
     /// </short>
-    /// <category>Security</category>
     /// <param type="System.Guid, System" method="url" name="productid" example="9924256A-739C-462b-AF15-E652A3B1B6EB">Product ID</param>
-    /// <returns type="ASC.Web.Api.Models.EmployeeDto, ASC.Api.Core">List of product administrators with the following parameters</returns>
     /// <path>api/2.0/settings/security/administrator/{productid}</path>
-    /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [Tags("Settings / Security")]
     [SwaggerResponse(200, "List of product administrators with the following parameters", typeof(EmployeeDto))]
@@ -347,12 +323,9 @@ public class SecurityController(
     /// <short>
     /// Check a product administrator
     /// </short>
-    /// <category>Security</category>
     /// <param type="System.Guid, System" name="productid" example="9924256A-739C-462b-AF15-E652A3B1B6EB">Product ID</param>
     /// <param type="System.Guid, System" name="userid" example="9924256A-739C-462b-AF15-E652A3B1B6EB">User ID</param>
-    /// <returns type="System.Object, System">Object with the user security information: product ID, user ID, administrator or not</returns>
     /// <path>api/2.0/settings/security/administrator</path>
-    /// <httpMethod>GET</httpMethod>
     [Tags("Settings / Security")]
     [SwaggerResponse(200, "Object with the user security information: product ID, user ID, administrator or not", typeof(object))]
     [HttpGet("administrator")]
@@ -368,11 +341,8 @@ public class SecurityController(
     /// <short>
     /// Set a product administrator
     /// </short>
-    /// <category>Security</category>
     /// <param type="ASC.Web.Api.ApiModel.RequestsDto.SecurityRequestsDto, ASC.Web.Api" name="inDto">Security request parameters</param>
-    /// <returns type="System.Object, System">Object with the user security information: product ID, user ID, administrator or not</returns>
     /// <path>api/2.0/settings/security/administrator</path>
-    /// <httpMethod>PUT</httpMethod>
     [Tags("Settings / Security")]
     [SwaggerResponse(200, "Object with the user security information: product ID, user ID, administrator or not", typeof(object))]
     [HttpPut("administrator")]
@@ -417,11 +387,8 @@ public class SecurityController(
     /// <short>
     /// Update login settings
     /// </short>
-    /// <category>Login settings</category>
     /// <param type="ASC.Web.Api.ApiModels.RequestsDto.LoginSettingsRequestDto, ASC.Web.Api" name="inDto">Login settings request parameters</param>
-    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.LoginSettingsDto, ASC.Web.Api">Updated login settings</returns>
     /// <path>api/2.0/settings/security/loginsettings</path>
-    /// <httpMethod>PUT</httpMethod>
     [Tags("Settings / Login settings")]
     [SwaggerResponse(200, "Updated login settings", typeof(LoginSettingsDto))]
     [HttpPut("loginSettings")]
@@ -447,10 +414,7 @@ public class SecurityController(
     /// <short>
     /// Get login settings
     /// </short>
-    /// <category>Login settings</category>
-    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.LoginSettingsDto, ASC.Web.Api">Login settings</returns>
     /// <path>api/2.0/settings/security/loginsettings</path>
-    /// <httpMethod>GET</httpMethod>
     [Tags("Settings / Login settings")]
     [SwaggerResponse(200, "Login settings", typeof(LoginSettingsDto))]
     [HttpGet("loginSettings")]

@@ -39,10 +39,8 @@ public class WebPluginsController(ApiContext apiContext,
     : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
-    /// 
     /// </summary>
     /// <param type="System.Boolean, System" name="system" example="true"></param>
-    /// <returns></returns>
     /// <exception cref="CustomHttpException"></exception>
     [Tags("Settings / Webplugins")]
     [SwaggerResponse(200, "Web plugin", typeof(WebPluginDto))]
@@ -75,10 +73,8 @@ public class WebPluginsController(ApiContext apiContext,
     }
 
     /// <summary>
-    /// 
     /// </summary>
     /// <param type="System.Boolean, System" name="enabled" example="true"></param>
-    /// <returns></returns>
     [Tags("Settings / Webplugins")]
     [SwaggerResponse(200, "Web plugin", typeof(WebPluginDto))]
     [HttpGet("")]
@@ -99,10 +95,8 @@ public class WebPluginsController(ApiContext apiContext,
     }
 
     /// <summary>
-    /// 
     /// </summary>
     /// <param type="System.String, System" name="name" example="some text"></param>
-    /// <returns></returns>
     [Tags("Settings / Webplugins")]
     [SwaggerResponse(200, "Web plugin", typeof(WebPluginDto))]
     [HttpGet("{name}")]
@@ -118,11 +112,9 @@ public class WebPluginsController(ApiContext apiContext,
     }
 
     /// <summary>
-    /// 
     /// </summary>
     /// <param type="System.String, System" name="name" example="some text"></param>
     /// <param type="ASC.Web.Api.ApiModel.RequestsDto.WebPluginRequestsDto, ASC.Web.Api" name="inDto"></param>
-    /// <returns></returns>
     [Tags("Settings / Webplugins")]
     [HttpPut("{name}")]
     public async Task UpdateWebPluginAsync(string name, WebPluginRequestsDto inDto)
@@ -137,10 +129,8 @@ public class WebPluginsController(ApiContext apiContext,
     }
 
     /// <summary>
-    /// 
     /// </summary>
     /// <param type="System.String, System" name="name" example="some text"></param>
-    /// <returns></returns>
     [Tags("Settings / Webplugins")]
     [HttpDelete("{name}")]
     public async Task DeleteWebPluginAsync(string name)

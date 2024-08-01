@@ -49,10 +49,7 @@ public class SmtpSettingsController(
     /// <short>
     /// Get the SMTP settings
     /// </short>
-    /// <category>SMTP settings</category>
-    /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.SmtpSettingsDto, ASC.Web.Api">SMTP settings</returns>
     /// <path>api/2.0/smtpsettings/smtp</path>
-    /// <httpMethod>GET</httpMethod>
     [Tags("Security / SMTP settings")]
     [SwaggerResponse(200, "SMTP settings", typeof(SmtpSettingsDto))]
     [HttpGet("")]
@@ -79,11 +76,8 @@ public class SmtpSettingsController(
     /// <short>
     /// Save the SMTP settings
     /// </short>
-    /// <category>SMTP settings</category>
     /// <param type="ASC.Web.Api.ApiModel.ResponseDto.SmtpSettingsDto, ASC.Web.Api" name="inDto">SMTP settings</param>
-    /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.SmtpSettingsDto, ASC.Web.Api">SMTP settings</returns>
     /// <path>api/2.0/smtpsettings/smtp</path>
-    /// <httpMethod>POST</httpMethod>
     [Tags("Security / SMTP settings")]
     [SwaggerResponse(200, "SMTP settings", typeof(SmtpSettingsDto))]
     [HttpPost("")]
@@ -133,10 +127,7 @@ public class SmtpSettingsController(
     /// <short>
     /// Reset the SMTP settings
     /// </short>
-    /// <category>SMTP settings</category>
-    /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.SmtpSettingsDto, ASC.Web.Api">Default SMTP settings</returns>
     /// <path>api/2.0/smtpsettings/smtp</path>
-    /// <httpMethod>DELETE</httpMethod>
     [Tags("Security / SMTP settings")]
     [SwaggerResponse(200, "Default SMTP settings", typeof(SmtpSettingsDto))]
     [HttpDelete("")]
@@ -168,10 +159,7 @@ public class SmtpSettingsController(
     /// <short>
     /// Test the SMTP settings
     /// </short>
-    /// <category>SMTP settings</category>
-    /// <returns type="ASC.Api.Settings.Smtp.SmtpOperationStatusRequestsDto, ASC.Web.Api">SMTP operation status</returns>
     /// <path>api/2.0/smtpsettings/smtp/test</path>
-    /// <httpMethod>GET</httpMethod>
     [Tags("Security / SMTP settings")]
     [SwaggerResponse(200, "SMTP operation status", typeof(SmtpOperationStatusRequestsDto))]
     [HttpGet("test")]
@@ -194,10 +182,7 @@ public class SmtpSettingsController(
     /// <short>
     /// Get the SMTP test process status
     /// </short>
-    /// <category>SMTP settings</category>
-    /// <returns type="ASC.Api.Settings.Smtp.SmtpOperationStatusRequestsDto, ASC.Web.Api">SMTP operation status</returns>
     /// <path>api/2.0/smtpsettings/smtp/test/status</path>
-    /// <httpMethod>GET</httpMethod>
     [Tags("Security / SMTP settings")]
     [SwaggerResponse(200, "SMTP operation status", typeof(SmtpOperationStatusRequestsDto))]
     [HttpGet("test/status")]

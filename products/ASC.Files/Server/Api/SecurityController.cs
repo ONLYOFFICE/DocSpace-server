@@ -61,11 +61,8 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// Returns the detailed information about the shared file with the ID specified in the request.
     /// </summary>
     /// <short>Get the shared file information</short>
-    /// <category>Sharing</category>
     /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">List of shared file information</returns>
     /// <path>api/2.0/files/file/{fileId}/share</path>
-    /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
@@ -84,10 +81,7 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// </summary>
     /// <short>Get the shared folder information</short>
     /// <param type="System.Int32, System" method="url" name="folderId" example="1234">Folder ID</param>
-    /// <category>Sharing</category>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">List of shared folder information</returns>
     /// <path>api/2.0/files/folder/{folderId}/share</path>
-    /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
@@ -107,10 +101,7 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.SecurityInfoRequestDto, ASC.Files.Core" name="inDto">Security information request parameters</param>
     /// <short>Share a file</short>
-    /// <category>Sharing</category>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">List of shared file information: sharing rights, a user who has the access to the specified file, the file is locked by this user or not, this user is an owner of the specified file or not, this user can edit the access to the specified file or not</returns>
     /// <path>api/2.0/files/file/{fileId}/share</path>
-    /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
@@ -130,10 +121,7 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// <param type="System.Int32, System" method="url" name="folderId" example="1234">Folder ID</param>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.SecurityInfoRequestDto, ASC.Files.Core" name="inDto">Security information request parameters</param>
     /// <short>Share a folder</short>
-    /// <category>Sharing</category>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto}, ASC.Files.Core">List of shared folder information: sharing rights, a user who has the access to the specified folder, the folder is locked by this user or not, this user is an owner of the specified folder or not, this user can edit the access to the specified folder or not</returns>
     /// <path>api/2.0/files/folder/{folderId}/share</path>
-    /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
@@ -152,10 +140,7 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// </summary>
     /// <short>Get file encryption keys</short>
     /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
-    /// <category>Sharing</category>
-    /// <returns type="ASC.Web.Files.Core.Entries.EncryptionKeyPairDto, ASC.Files.Core">List of encryption key pairs: encrypted private key, public key, user ID</returns>
     /// <path>api/2.0/files/file/{fileId}/publickeys</path>
-    /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
@@ -172,10 +157,7 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
     /// <param type="ASC.Web.Files.Services.WCFService.MentionMessageWrapper, ASC.Files.Core" name="mentionMessage">Mention message request parameters</param>
     /// <short>Send the mention message</short>
-    /// <category>Sharing</category>
-    /// <returns type="ASC.Web.Files.Services.WCFService.AceShortWrapper, ASC.Files.Core">List of access rights information</returns>
     /// <path>api/2.0/files/file/{fileId}/sendeditornotify</path>
-    /// <httpMethod>POST</httpMethod>
     /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
@@ -229,10 +211,7 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// </summary>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.ChangeOwnerRequestDto, ASC.Files.Core" name="inDto">Request parameters for changing the file owner</param>
     /// <short>Change the file owner</short>
-    /// <category>Sharing</category>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileEntryDto, ASC.Files.Core">File entry information</returns>
     /// <path>api/2.0/files/owner</path>
-    /// <httpMethod>POST</httpMethod>
     /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
@@ -257,11 +236,8 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// Returns the sharing rights for all the files and folders specified in the request.
     /// </summary>
     /// <short>Get the sharing rights</short>
-    /// <category>Sharing</category>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.BaseBatchRequestDto, ASC.Files.Core" name="inDto">Base batch request parameters</param>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">List of shared files and folders information</returns>
     /// <path>api/2.0/files/share</path>
-    /// <httpMethod>POST</httpMethod>
     /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
@@ -285,11 +261,8 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// Removes the sharing rights from all the files and folders specified in the request.
     /// </summary>
     /// <short>Remove the sharing rights</short>
-    /// <category>Sharing</category>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.BaseBatchRequestDto, ASC.Files.Core" name="inDto">Base batch request parameters</param>
-    /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
     /// <path>api/2.0/files/share</path>
-    /// <httpMethod>DELETE</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
@@ -310,11 +283,8 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// Sets the sharing rights to all the files and folders specified in the request.
     /// </summary>
     /// <short>Set the sharing rights</short>
-    /// <category>Sharing</category>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.SecurityInfoRequestDto, ASC.Files.Core" name="inDto">Security information request parameters</param>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">List of shared files and folders information: sharing rights, a user who has the access to the specified folder, the folder is locked by this user or not, this user is an owner of the specified folder or not, this user can edit the access to the specified folder or not</returns>
     /// <path>api/2.0/files/share</path>
-    /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
@@ -338,11 +308,8 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// Returns the external data by the key specified in the request.
     /// </summary>
     /// <short>Get the external data</short>
-    /// <category>Sharing</category>
     /// <param type="System.String, System" name="key" method="url" example="some text">The unique document identifier</param>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.ExternalShareDto, ASC.Files.Core">External data</returns>
     /// <path>api/2.0/files/share/{key}</path>
-    /// <httpMethod>GET</httpMethod>
     /// <requiresAuthorization>false</requiresAuthorization>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
@@ -360,12 +327,9 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// Applies a password specified in the request to get the external data.
     /// </summary>
     /// <short>Apply external data password</short>
-    /// <category>Sharing</category>
     /// <param type="System.String, System" name="key" method="url" example="some text">The unique document identifier</param>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.ExternalShareRequestDto, ASC.Files.Core" name="inDto">External data request parameters</param>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.ExternalShareDto, ASC.Files.Core">External data</returns>
     /// <path>api/2.0/files/share/{key}/password</path>
-    /// <httpMethod>POST</httpMethod>
     /// <requiresAuthorization>false</requiresAuthorization>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]

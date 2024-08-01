@@ -41,11 +41,8 @@ public class SettingsController(
     /// Changes the access to the third-party settings.
     /// </summary>
     /// <short>Change the third-party settings access</short>
-    /// <category>Settings</category>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.SettingsRequestDto, ASC.Files.Core" name="inDto">Settings request parameters</param>
-    /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
     /// <path>api/2.0/files/thirdparty</path>
-    /// <httpMethod>PUT</httpMethod>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpPut("thirdparty")]
@@ -60,11 +57,8 @@ public class SettingsController(
     /// Specifies whether to confirm the file deletion or not.
     /// </summary>
     /// <short>Confirm the file deletion</short>
-    /// <category>Settings</category>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.SettingsRequestDto, ASC.Files.Core" name="inDto">Settings request parameters</param>
-    /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
     /// <path>api/2.0/files/changedeleteconfim</path>
-    /// <httpMethod>PUT</httpMethod>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpPut("changedeleteconfrim")]
@@ -79,10 +73,7 @@ public class SettingsController(
     /// </summary>
     /// <short>Change the archive format (using body parameters)</short>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.DisplayRequestDto, ASC.Files.Core" name="inDto">Settings request parameters</param>
-    /// <category>Settings</category>
-    /// <returns type="ASC.Web.Files.Core.Compress.ICompress, ASC.Files.Core">Archive</returns>
     /// <path>api/2.0/files/settings/downloadtargz</path>
-    /// <httpMethod>PUT</httpMethod>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Archive", typeof(ICompress))]
     [HttpPut("settings/downloadtargz")]
@@ -97,10 +88,7 @@ public class SettingsController(
     /// </summary>
     /// <short>Change the archive format (using form parameters)</short>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.DisplayRequestDto, ASC.Files.Core" name="inDto">Settings request parameters</param>
-    /// <category>Settings</category>
-    /// <returns type="ASC.Web.Files.Core.Compress.ICompress, ASC.Files.Core">Archive</returns>
     /// <path>api/2.0/files/settings/downloadtargz</path>
-    /// <httpMethod>PUT</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Archive", typeof(ICompress))]
@@ -116,10 +104,7 @@ public class SettingsController(
     /// </summary>
     /// <short>Display the "Favorites" folder</short>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.DisplayRequestDto, ASC.Files.Core" name="inDto">Settings request parameters</param>
-    /// <category>Settings</category>
-    /// <returns type="System.Boolean, System">Boolean value: true if the parameter is enabled</returns>
     /// <path>api/2.0/files/settings/favorites</path>
-    /// <httpMethod>PUT</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
@@ -135,10 +120,7 @@ public class SettingsController(
     /// </summary>
     /// <short>Display the "Recent" folder</short>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.DisplayRequestDto, ASC.Files.Core" name="inDto">Settings request parameters</param>
-    /// <category>Settings</category>
-    /// <returns type="System.Boolean, System">Boolean value: true if the parameter is enabled</returns>
     /// <path>api/2.0/files/displayRecent</path>
-    /// <httpMethod>PUT</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
@@ -154,10 +136,7 @@ public class SettingsController(
     /// </summary>
     /// <short>Display the "Templates" folder</short>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.DisplayRequestDto, ASC.Files.Core" name="inDto">Settings request parameters</param>
-    /// <category>Settings</category>
-    /// <returns type="System.Boolean, System">Boolean value: true if the parameter is enabled</returns>
     /// <path>api/2.0/files/settings/templates</path>
-    /// <httpMethod>PUT</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
@@ -173,10 +152,7 @@ public class SettingsController(
     /// </summary>
     /// <short>Change the external sharing ability</short>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.DisplayRequestDto, ASC.Files.Core" name="inDto">Settings request parameters</param>
-    /// <category>Settings</category>
-    /// <returns type="System.Boolean, System">Boolean value: true if the parameter is enabled</returns>
     /// <path>api/2.0/files/settings/external</path>
-    /// <httpMethod>PUT</httpMethod>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
     [HttpPut("settings/external")]
@@ -190,10 +166,7 @@ public class SettingsController(
     /// </summary>
     /// <short>Change the external sharing ability on social networks</short>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.DisplayRequestDto, ASC.Files.Core" name="inDto">Settings request parameters</param>
-    /// <category>Settings</category>
-    /// <returns type="System.Boolean, System">Boolean value: true if the parameter is enabled</returns>
     /// <path>api/2.0/files/settings/externalsocialmedia</path>
-    /// <httpMethod>PUT</httpMethod>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
     [HttpPut("settings/externalsocialmedia")]
@@ -206,10 +179,7 @@ public class SettingsController(
     /// Changes the ability to force save a file.
     /// </summary>
     /// <short>Change the forcasaving ability</short>
-    /// <category>Settings</category>
-    /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
     /// <path>api/2.0/files/forcesave</path>
-    /// <httpMethod>PUT</httpMethod>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
     [HttpPut("forcesave")]
@@ -223,10 +193,7 @@ public class SettingsController(
     /// Returns all the file settings.
     /// </summary>
     /// <short>Get file settings</short>
-    /// <category>Settings</category>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FilesSettingsDto, ASC.Files.Core">File settings</returns>
     /// <path>api/2.0/files/settings</path>
-    /// <httpMethod>GET</httpMethod>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "File settings", typeof(FilesSettingsDto))]
@@ -241,10 +208,7 @@ public class SettingsController(
     /// Returns the information about the Documents module.
     /// </summary>
     /// <short>Get the Documents information</short>
-    /// <category>Settings</category>
-    /// <returns type="ASC.Api.Core.Module, ASC.Api.Core">Module information: ID, product class name, title, description, icon URL, large icon URL, start URL, primary or nor, help URL</returns>
     /// <path>api/2.0/files/info</path>
-    /// <httpMethod>GET</httpMethod>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Module information: ID, product class name, title, description, icon URL, large icon URL, start URL, primary or nor, help URL", typeof(Module))]
     [HttpGet("info")]
@@ -259,10 +223,7 @@ public class SettingsController(
     /// </summary>
     /// <short>Hide the confirmation dialog when converting</short>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.HideConfirmConvertRequestDto, ASC.Files.Core" name="inDto">Request parameters for hiding the confirmation dialog</param>
-    /// <category>Settings</category>
-    /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
     /// <path>api/2.0/files/hideconfirmconvert</path>
-    /// <httpMethod>PUT</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(Module))]
@@ -276,10 +237,7 @@ public class SettingsController(
     /// Checks if the Private Room settings are available or not.
     /// </summary>
     /// <short>Check the Private Room availability</short>
-    /// <category>Settings</category>
-    /// <returns type="System.Boolean, System">Boolean value: true if the Private Room settings are available</returns>
     /// <path>api/2.0/files/@privacy/available</path>
-    /// <httpMethod>GET</httpMethod>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the Private Room settings are available", typeof(bool))]
     [HttpGet("@privacy/available")]
@@ -292,10 +250,7 @@ public class SettingsController(
     /// Changes the ability to store the forcesaved file versions.
     /// </summary>
     /// <short>Change the ability to store the forcesaved files</short>
-    /// <category>Settings</category>
-    /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
     /// <path>api/2.0/files/storeforcesave</path>
-    /// <httpMethod>PUT</httpMethod>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpPut("storeforcesave")]
@@ -309,11 +264,8 @@ public class SettingsController(
     /// Changes the ability to upload documents in the original formats as well.
     /// </summary>
     /// <short>Change the ability to upload original formats</short>
-    /// <category>Settings</category>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.SettingsRequestDto, ASC.Files.Core" name="inDto">Settings request parameters</param>
-    /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
     /// <path>api/2.0/files/storeoriginal</path>
-    /// <httpMethod>PUT</httpMethod>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpPut("storeoriginal")]
@@ -328,10 +280,7 @@ public class SettingsController(
     /// </summary>
     /// <short>Ask a new file name</short>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.SettingsRequestDto, ASC.Files.Core" name="inDto">Settings request parameters</param>
-    /// <category>Settings</category>
-    /// <returns type="System.Boolean, System">Boolean value: true if the parameter is enabled</returns>
     /// <path>api/2.0/files/keepnewfilename</path>
-    /// <httpMethod>PUT</httpMethod>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpPut("keepnewfilename")]
@@ -345,10 +294,7 @@ public class SettingsController(
     /// </summary>
     /// <short>Update a file version if it exists</short>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.SettingsRequestDto, ASC.Files.Core" name="inDto">Settings request parameters</param>
-    /// <category>Settings</category>
-    /// <returns type="System.Boolean, System">Boolean value: true if the parameter is enabled</returns>
     /// <path>api/2.0/files/updateifexist</path>
-    /// <httpMethod>PUT</httpMethod>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpPut("updateifexist")]
@@ -361,10 +307,7 @@ public class SettingsController(
     /// Returns the trash bin auto-clearing setting.
     /// </summary>
     /// <short>Get the trash bin auto-clearing setting</short>
-    /// <category>Settings</category>
-    /// <returns type="ASC.Files.Core.AutoCleanUpData, ASC.Files.Core">The auto-clearing setting properties: auto-clearing or not, a time interval when the auto-clearing will be performed</returns>
     /// <path>api/2.0/files/settings/autocleanup</path>
-    /// <httpMethod>GET</httpMethod>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "The auto-clearing setting properties: auto-clearing or not, a time interval when the auto-clearing will be performed", typeof(AutoCleanUpData))]
     [HttpGet("settings/autocleanup")]
@@ -378,10 +321,7 @@ public class SettingsController(
     /// </summary>
     /// <short>Update the trash bin auto-clearing setting</short>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.AutoCleanupRequestDto, ASC.Files.Core" name="inDto">Auto-clearing request parameters</param>
-    /// <category>Settings</category>
-    /// <returns type="ASC.Files.Core.AutoCleanUpData, ASC.Files.Core">The auto-clearing setting properties: auto-clearing or not, a time interval when the auto-clearing will be performed</returns>
     /// <path>api/2.0/files/settings/autocleanup</path>
-    /// <httpMethod>PUT</httpMethod>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "The auto-clearing setting properties: auto-clearing or not, a time interval when the auto-clearing will be performed", typeof(AutoCleanUpData))]
     [HttpPut("settings/autocleanup")]
@@ -396,10 +336,7 @@ public class SettingsController(
     /// </summary>
     /// <short>Change the default access rights</short>
     /// <param type="System.Collections.Generic.List{ASC.Files.Core.Security.FileShare}, System.Collections.Generic" name="value" example="None">Sharing rights (None, ReadWrite, Read, Restrict, Varies, Review, Comment, FillForms, CustomFilter, RoomAdmin, Editing, Collaborator)</param>
-    /// <category>Settings</category>
-    /// <returns type="ASC.Files.Core.Security.FileShare, ASC.Files.Core">Updated sharing rights (None, ReadWrite, Read, Restrict, Varies, Review, Comment, FillForms, CustomFilter, RoomAdmin, Editing, Collaborator)</returns>
     /// <path>api/2.0/files/settings/dafaultaccessrights</path>
-    /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Updated sharing rights (None, ReadWrite, Read, Restrict, Varies, Review, Comment, FillForms, CustomFilter, RoomAdmin, Editing, Collaborator)", typeof(List<FileShare>))]
@@ -415,10 +352,7 @@ public class SettingsController(
     /// </summary>
     /// <short>Open document in same browser tab</short>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.SettingsRequestDto, ASC.Files.Core" name="inDto">Settings request parameters</param>
-    /// <category>Settings</category>
-    /// <returns type="System.Boolean, System">Boolean value: true if the parameter is enabled</returns>
     /// <path>api/2.0/files/settings/openeditorinsametab</path>
-    /// <httpMethod>PUT</httpMethod>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
     [HttpPut("settings/openeditorinsametab")]

@@ -43,9 +43,7 @@ public class ModulesController(WebItemManagerSecurity webItemManagerSecurity) : 
     /// <short>
     /// Get modules
     /// </short>
-    /// <returns type="System.String, System">List of modules</returns>
     /// <path>api/2.0/modules</path>
-    /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [Tags("Modules")]
     [SwaggerResponse(200, "List of modules", typeof(string))]
@@ -68,9 +66,7 @@ public class ModulesController(WebItemManagerSecurity webItemManagerSecurity) : 
     /// <short>
     /// Get modules information
     /// </short>
-    /// <returns type="ASC.Api.Core.Module, ASC.Api.Core">List of modules with their information</returns>
     /// <path>api/2.0/modules/info</path>
-    /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [Tags("Modules")]
     [SwaggerResponse(200, "List of modules with their information", typeof(Module))]

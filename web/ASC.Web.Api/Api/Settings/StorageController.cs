@@ -61,11 +61,8 @@ public class StorageController(ILoggerProvider option,
     /// <summary>
     /// Returns a list of all the portal storages.
     /// </summary>
-    /// <category>Storage</category>
     /// <short>Get storages</short>
-    /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.StorageDto, ASC.Web.Api">List of storages with the following parameters</returns>
     /// <path>api/2.0/settings/storage</path>
-    /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [Tags("Settings / Storage")]
     [SwaggerResponse(200, "List of storages with the following parameters", typeof(StorageDto))]
@@ -89,11 +86,8 @@ public class StorageController(ILoggerProvider option,
     /// <summary>
     /// Returns the storage progress.
     /// </summary>
-    /// <category>Storage</category>
     /// <short>Get the storage progress</short>
-    /// <returns type="System.Double, System">Storage progress</returns>
     /// <path>api/2.0/settings/storage/progress</path>
-    /// <httpMethod>GET</httpMethod>
     [Tags("Settings / Storage")]
     [SwaggerResponse(200, "Storage progress", typeof(double))]
     [AllowNotPayment]
@@ -115,11 +109,8 @@ public class StorageController(ILoggerProvider option,
     /// Starts the storage encryption process.
     /// </summary>
     /// <short>Start the storage encryption process</short>
-    /// <category>Encryption</category>
     /// <param type="ASC.Web.Api.ApiModel.RequestsDto.StorageEncryptionRequestsDto, ASC.Web.Api" name="inDto">Storage encryption request parameters</param>
-    /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
     /// <path>api/2.0/settings/encryption/start</path>
-    /// <httpMethod>POST</httpMethod>
     [Tags("Settings / Encryption")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpPost("encryption/start")]
@@ -248,10 +239,7 @@ public class StorageController(ILoggerProvider option,
     /// Returns the storage encryption settings.
     /// </summary>
     /// <short>Get the storage encryption settings</short>
-    /// <category>Encryption</category>
-    /// <returns type="ASC.Core.Encryption.EncryptionSettings, ASC.Core.Encryption">Storage encryption settings</returns>
     /// <path>api/2.0/settings/encryption/settings</path>
-    /// <httpMethod>GET</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Encryption")]
     [SwaggerResponse(200, "Storage encryption settings", typeof(EncryptionSettings))]
@@ -291,10 +279,7 @@ public class StorageController(ILoggerProvider option,
     /// Returns the storage encryption progress.
     /// </summary>
     /// <short>Get the storage encryption progress</short>
-    /// <category>Encryption</category>
-    /// <returns type="System.Nullable{System.Double}, System">Storage encryption progress</returns>
     /// <path>api/2.0/settings/encryption/progress</path>
-    /// <httpMethod>GET</httpMethod>
     [Tags("Settings / Encryption")]
     [SwaggerResponse(200, "Storage encryption progress", typeof(double?))]
     [HttpGet("encryption/progress")]
@@ -321,12 +306,9 @@ public class StorageController(ILoggerProvider option,
     /// <summary>
     /// Updates a storage with the parameters specified in the request.
     /// </summary>
-    /// <category>Storage</category>
     /// <short>Update a storage</short>
     /// <param type="ASC.Web.Api.ApiModel.RequestsDto.StorageRequestsDto, ASC.Web.Api" name="inDto">Storage settings request parameters</param>
-    /// <returns type="ASC.Data.Storage.Configuration.StorageSettings, ASC.Data.Storage">Updated storage settings</returns>
     /// <path>api/2.0/settings/storage</path>
-    /// <httpMethod>PUT</httpMethod>
     [Tags("Settings / Storage")]
     [SwaggerResponse(200, "Updated storage settings", typeof(StorageSettings))]
     [HttpPut("storage")]
@@ -366,11 +348,8 @@ public class StorageController(ILoggerProvider option,
     /// <summary>
     /// Resets the storage settings to the default parameters.
     /// </summary>
-    /// <category>Storage</category>
     /// <short>Reset the storage settings</short>
     /// <path>api/2.0/settings/storage</path>
-    /// <httpMethod>DELETE</httpMethod>
-    /// <returns></returns>
     [Tags("Settings / Storage")]
     [HttpDelete("storage")]
     public async Task ResetStorageToDefaultAsync()
@@ -399,11 +378,8 @@ public class StorageController(ILoggerProvider option,
     /// <summary>
     /// Returns a list of all the CDN storages.
     /// </summary>
-    /// <category>Storage</category>
     /// <short>Get the CDN storages</short>
-    /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.StorageDto, ASC.Web.Api">List of the CDN storages with the following parameters</returns>
     /// <path>api/2.0/settings/storage/cdn</path>
-    /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [Tags("Settings / Storage")]
     [SwaggerResponse(200, "List of the CDN storages with the following parameters", typeof(StorageDto))]
@@ -427,12 +403,9 @@ public class StorageController(ILoggerProvider option,
     /// <summary>
     /// Updates the CDN storage with the parameters specified in the request.
     /// </summary>
-    /// <category>Storage</category>
     /// <short>Update the CDN storage</short>
-    /// <returns type="ASC.Data.Storage.Configuration.CdnStorageSettings, ASC.Data.Storage">Updated CDN storage</returns>
     /// <param type="ASC.Web.Api.ApiModel.RequestsDto.StorageRequestsDto, ASC.Web.Api" name="inDto">CDN storage settings request parameters</param>
     /// <path>api/2.0/settings/storage/cdn</path>
-    /// <httpMethod>PUT</httpMethod>
     [Tags("Settings / Storage")]
     [SwaggerResponse(200, "Updated CDN storage", typeof(CdnStorageSettings))]
     [HttpPut("storage/cdn")]
@@ -474,11 +447,8 @@ public class StorageController(ILoggerProvider option,
     /// <summary>
     /// Resets the CDN storage settings to the default parameters.
     /// </summary>
-    /// <category>Storage</category>
     /// <short>Reset the CDN storage settings</short>
     /// <path>api/2.0/settings/storage/cdn</path>
-    /// <httpMethod>DELETE</httpMethod>
-    /// <returns></returns>
     [Tags("Settings / Storage")]
     [HttpDelete("storage/cdn")]
     public async Task ResetCdnToDefaultAsync()
@@ -493,11 +463,8 @@ public class StorageController(ILoggerProvider option,
     /// <summary>
     /// Returns a list of all the backup storages.
     /// </summary>
-    /// <category>Storage</category>
     /// <short>Get the backup storages</short>
-    /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.StorageDto, ASC.Web.Api">List of the backup storages with the following parameters</returns>
     /// <path>api/2.0/settings/storage/backup</path>
-    /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [Tags("Settings / Storage")]
     [SwaggerResponse(200, "List of the backup storages with the following parameters", typeof(StorageDto))]
@@ -539,11 +506,8 @@ public class StorageController(ILoggerProvider option,
     /// <summary>
     /// Returns a list of all Amazon regions.
     /// </summary>
-    /// <category>Storage</category>
     /// <short>Get Amazon regions</short>
-    /// <returns type="System.Object, System">List of the Amazon regions</returns>
     /// <path>api/2.0/settings/storage/s3/regions</path>
-    /// <httpMethod>GET</httpMethod>
     [Tags("Settings / Storage")]
     [SwaggerResponse(200, "List of the Amazon regions", typeof(object))]
     [HttpGet("storage/s3/regions")]

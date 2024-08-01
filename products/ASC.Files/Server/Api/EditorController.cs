@@ -87,10 +87,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <short>Save file edits</short>
     /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.SaveEditingRequestDto, ASC.Files.Core" name="inDto">Request parameters for saving file edits</param>
-    /// <category>Files</category>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileDto, ASC.Files.Core">Saved file parameters</returns>
     /// <path>api/2.0/files/file/{fileId}/saveediting</path>
-    /// <httpMethod>PUT</httpMethod>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Saved file parameters", typeof(FileDto<int>))]
     [HttpPut("{fileId}/saveediting")]
@@ -107,10 +104,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <short>Start file editing</short>
     /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.StartEditRequestDto, ASC.Files.Core" name="inDto">Request parameters for starting file editing</param>
-    /// <category>Files</category>
-    /// <returns type="System.Object, System">File key for Document Service</returns>
     /// <path>api/2.0/files/file/{fileId}/startedit</path>
-    /// <httpMethod>POST</httpMethod>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "File key for Document Service", typeof(object))]
     [HttpPost("{fileId}/startedit")]
@@ -124,9 +118,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// </summary>
     /// <short>Starts filling</short>
     /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
-    /// <category>Files</category>
     /// <path>api/2.0/files/file/{fileId}/startfilling</path>
-    /// <httpMethod>PUT</httpMethod>
     [Tags("Files / Files")]
     [HttpPut("{fileId}/startfilling")]
     public async Task StartFillingAsync(T fileId)
@@ -142,10 +134,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <param type="System.Guid, System" name="tabId" example="9924256A-739C-462b-AF15-E652A3B1B6EB">Tab ID</param>
     /// <param type="System.String, System" name="docKeyForTrack" example="some text">Document key for tracking</param>
     /// <param type="System.Boolean, System" name="isFinish" example="true">Specifies whether to finish file tracking or not</param>
-    /// <category>Files</category>
-    /// <returns type="System.Collections.Generic.KeyValuePair{System.Boolean, System.String}, System.Collections.Generic">File changes</returns>
     /// <path>api/2.0/files/file/{fileId}/trackeditfile</path>
-    /// <httpMethod>GET</httpMethod>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "File changes", typeof(KeyValuePair<bool, string>))]
     [HttpGet("{fileId}/trackeditfile")]
@@ -163,11 +152,8 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <param type="System.Boolean, System" name="view" example="true">Specifies if a document will be opened for viewing only or not</param>
     /// <param type="ASC.Web.Files.Services.DocumentService.EditorType, ASC.Files.Core" name="editorType">Editor type (Desktop, Mobile, Embedded)</param>
     /// <param type="System.Boolean, System" name="edit" example="true"></param>
-    /// <category>Files</category>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.ConfigurationDto, ASC.Files.Core">Configuration parameters</returns>
     /// <path>api/2.0/files/file/{fileId}/openedit</path>
     /// <requiresAuthorization>false</requiresAuthorization>
-    /// <httpMethod>GET</httpMethod>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Configuration parameters", typeof(ConfigurationDto<int>))]
     [AllowAnonymous]
@@ -340,11 +326,8 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// Returns a link to download a file with the ID specified in the request asynchronously.
     /// </summary>
     /// <short>Get file download link asynchronously</short>
-    /// <category>Files</category>
     /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
-    /// <returns type="ASC.Files.Core.Helpers.DocumentService.FileLink, ASC.Files.Core">File download link</returns>
     /// <path>api/2.0/files/file/{fileId}/presigned</path>
-    /// <httpMethod>GET</httpMethod>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "File download link", typeof(DocumentService.FileLink))]
     [HttpGet("{fileId}/presigned")]
@@ -357,11 +340,8 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// Returns a list of users with their access rights to the file with the ID specified in the request.
     /// </summary>
     /// <short>Get shared users</short>
-    /// <category>Sharing</category>
     /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
-    /// <returns type="ASC.Web.Files.Services.WCFService.MentionWrapper, ASC.Files.Core">List of users with their access rights to the file</returns>
     /// <path>api/2.0/files/file/{fileId}/sharedusers</path>
-    /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
@@ -376,11 +356,8 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// Return list of users with their access rights to the file
     /// </summary>
     /// <short>Return list of users with their access rights to the file</short>
-    /// <category>Files</category>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.GetInfoUsersRequestDto, ASC.Files.Core" name="inDto">Base batch request parameters</param>
-    /// <returns type="ASC.Web.Files.Services.WCFService.MentionWrapper, ASC.Files.Core">List of users with their access rights to the file</returns>
     /// <path>api/2.0/files/infousers</path>
-    /// <httpMethod>POST</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "List of users with their access rights to the file", typeof(List<MentionWrapper>))]
@@ -394,11 +371,8 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// Returns the reference data to uniquely identify a file in its system and check the availability of insering data into the destination spreadsheet by the external link.
     /// </summary>
     /// <short>Get reference data</short>
-    /// <category>Files</category>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.GetReferenceDataDto, ASC.Files.Core" name="inDto">Request parameters for getting reference data</param>
-    /// <returns type="ASC.Web.Files.Services.DocumentService.FileReference, ASC.Files.Core">File reference data</returns>
     /// <path>api/2.0/files/file/referencedata</path>
-    /// <httpMethod>POST</httpMethod>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "File reference data", typeof(FileReference))]
     [HttpPost("referencedata")]
@@ -411,11 +385,8 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// Returns a list of users with their access rights to the protected file with the ID specified in the request.
     /// </summary>
     /// <short>Get users with the access to the protected file</short>
-    /// <category>Files</category>
     /// <param type="System.Int32, System" name="fileId" example="1234">File ID</param>
-    /// <returns type="ASC.Web.Files.Services.WCFService.MentionWrapper, ASC.Files.Core">List of users with their access rights to the protected file</returns>
     /// <path>api/2.0/files/file/{fileId}/protectusers</path>
-    /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "List of users with their access rights to the protected file", typeof(List<MentionWrapper>))]
@@ -440,10 +411,7 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
     /// </summary>
     /// <short>Check the document service URL</short>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.CheckDocServiceUrlRequestDto, ASC.Files.Core" name="inDto">Request parameters for checking the document service location</param>
-    /// <category>Settings</category>
-    /// <returns type="System.String, System">Document service information: the Document Server address, the Document Server address in the local private network, the Community Server address</returns>
     /// <path>api/2.0/files/docservice</path>
-    /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Document service information: the Document Server address, the Document Server address in the local private network, the Community Server address", typeof(DocServiceUrlDto))]
@@ -513,11 +481,8 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
     /// Returns the address of the connected editors.
     /// </summary>
     /// <short>Get the document service URL</short>
-    /// <category>Settings</category>
     /// <param type="System.Boolean, System" name="version" example="true">Specifies the editor version or not</param>
-    /// <returns type="System.Object, System">The document service URL with the editor version specified</returns>
     /// <path>api/2.0/files/docservice</path>
-    /// <httpMethod>GET</httpMethod>
     /// <requiresAuthorization>false</requiresAuthorization>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Settings")]

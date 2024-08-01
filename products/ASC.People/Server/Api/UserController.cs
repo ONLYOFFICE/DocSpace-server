@@ -86,11 +86,8 @@ public class UserController(
     /// <short>
     /// Add an activated user
     /// </short>
-    /// <category>Profiles</category>
     /// <param type="ASC.People.ApiModels.RequestDto.MemberRequestDto, ASC.People" name="inDto">Member request parameters</param>
-    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">Newly added user with the detailed information</returns>
     /// <path>api/2.0/people/active</path>
-    /// <httpMethod>POST</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "Newly added user with the detailed information", typeof(EmployeeFullDto))]
@@ -162,11 +159,8 @@ public class UserController(
     /// <short>
     /// Add a user
     /// </short>
-    /// <category>Profiles</category>
     /// <param type="ASC.People.ApiModels.RequestDto.MemberRequestDto, ASC.People" name="inDto">Member request parameters</param>
-    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">Newly added user with the detailed information</returns>
     /// <path>api/2.0/people</path>
-    /// <httpMethod>POST</httpMethod>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "Newly added user with the detailed information", typeof(EmployeeFullDto))]
     [HttpPost]
@@ -311,11 +305,8 @@ public class UserController(
     /// <short>
     /// Invite users
     /// </short>
-    /// <category>Profiles</category>
     /// <param type="ASC.People.ApiModels.RequestDto.InviteUsersRequestDto, ASC.People" name="inDto">Request parameters for inviting users</param>
-    /// <returns type="ASC.Web.Api.Models.EmployeeDto, ASC.Api.Core">List of users</returns>
     /// <path>api/2.0/people/invite</path>
-    /// <httpMethod>POST</httpMethod>
     /// <collection>list</collection>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "List of users", typeof(EmployeeDto))]
@@ -362,12 +353,9 @@ public class UserController(
     /// Sets a new password to the user with the ID specified in the request.
     /// </summary>
     /// <short>Change a user password</short>
-    /// <category>Password</category>
     /// <param type="System.Guid, System" method="url" name="userid" example="9924256A-739C-462b-AF15-E652A3B1B6EB">User ID</param>
     /// <param type="ASC.People.ApiModels.RequestDto.MemberRequestDto, ASC.People" name="inDto">Request parameters for setting new password</param>
-    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">Detailed user information</returns>
     /// <path>api/2.0/people/{userid}/password</path>
-    /// <httpMethod>PUT</httpMethod>
     [Tags("People / Password")]
     [SwaggerResponse(200, "Detailed user information", typeof(EmployeeFullDto))]
     [HttpPut("{userid:guid}/password")]
@@ -432,11 +420,8 @@ public class UserController(
     /// <short>
     /// Delete a user
     /// </short>
-    /// <category>Profiles</category>
     /// <param type="System.String, System" method="url" name="userid" example="some text">User ID</param>
-    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">Deleted user detailed information</returns>
     /// <path>api/2.0/people/{userid}</path>
-    /// <httpMethod>DELETE</httpMethod>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "Deleted user detailed information", typeof(EmployeeFullDto))]
     [HttpDelete("{userid}")]
@@ -483,10 +468,7 @@ public class UserController(
     /// <short>
     /// Delete my profile
     /// </short>
-    /// <category>Profiles</category>
-    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">Detailed information about my profile</returns>
     /// <path>api/2.0/people/@self</path>
-    /// <httpMethod>DELETE</httpMethod>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "Detailed information about my profile", typeof(EmployeeFullDto))]
     [HttpDelete("@self")]
@@ -534,12 +516,9 @@ public class UserController(
     /// <short>
     /// Search users by status filter
     /// </short>
-    /// <category>Search</category>
     /// <param type="ASC.Core.Users.EmployeeStatus, ASC.Core.Common" method="url" name="status" example="Active">User status</param>
     /// <param type="System.String, System" name="query" example="some text">Search query</param>
-    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">List of users with the detailed information</returns>
     /// <path>api/2.0/people/status/{status}/search</path>
-    /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [Tags("People / Search")]
     [SwaggerResponse(200, "List of users with the detailed information", typeof(EmployeeFullDto))]
@@ -571,10 +550,7 @@ public class UserController(
     /// <short>
     /// Get profiles
     /// </short>
-    /// <category>Profiles</category>
-    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">List of users with the detailed information</returns>
     /// <path>api/2.0/people</path>
-    /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "List of users with the detailed information", typeof(EmployeeFullDto))]
@@ -590,11 +566,8 @@ public class UserController(
     /// <short>
     /// Get a profile by user email
     /// </short>
-    /// <category>Profiles</category>
     /// <param type="System.String, System" method="url" name="email" example="some text">User email address</param>
-    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">Detailed profile information</returns>
     /// <path>api/2.0/people/email</path>
-    /// <httpMethod>GET</httpMethod>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "Detailed profile information", typeof(EmployeeFullDto))]
     [AllowNotPayment]
@@ -617,11 +590,8 @@ public class UserController(
     /// <short>
     /// Get a profile by user name
     /// </short>
-    /// <category>Profiles</category>
     /// <param type="System.String, System" method="url" name="username" example="some text">User name</param>
-    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">Detailed profile information</returns>
     /// <path>api/2.0/people/{username}</path>
-    /// <httpMethod>GET</httpMethod>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "Detailed profile information", typeof(EmployeeFullDto))]
     [AllowNotPayment]
@@ -666,12 +636,8 @@ public class UserController(
     /// <short>
     /// Get profiles by status
     /// </short>
-    /// <category>User status</category>
     /// <param type="ASC.Core.Users.EmployeeStatus, ASC.Core.Common" method="url" name="status" example="Active">User status</param>
-    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">List of users with the detailed information</returns>
-    /// <category>User status</category>
     /// <path>api/2.0/people/status/{status}</path>
-    /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [Tags("People / User status")]
     [SwaggerResponse(200, "List of users with the detailed information", typeof(EmployeeFullDto))]
@@ -694,7 +660,6 @@ public class UserController(
     /// <short>
     /// Search users and their information by extended filter
     /// </short>
-    /// <category>Search</category>
     /// <param type="System.Nullable{ASC.Core.Users.EmployeeStatus}, System" name="employeeStatus" example="Active">User status</param>
     /// <param type="System.Nullable{System.Guid}, System" name="groupId" example="9924256A-739C-462b-AF15-E652A3B1B6EB">Group ID</param>
     /// <param type="System.Nullable{ASC.Core.Users.EmployeeActivationStatus}, System" name="activationStatus" example="NotActivated">Activation status</param>
@@ -706,9 +671,7 @@ public class UserController(
     /// <param type="System.Nullable{ASC.Core.QuotaFilter}, System" name="quotaFilter" example="All">Filter by quota (Default - 1, Custom - 2)</param>
     /// <param type="System.Nullable{System.Boolean}, System" name="withoutGroup" example="true">Specifies whether the user should be a member of a group or not</param>
     /// <param type="System.Nullable{System.Boolean}, System" name="excludeGroup" example="true">Specifies whether or not the user should be a member of the group with the specified ID</param>
-    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">List of users with the detailed information</returns>
     /// <path>api/2.0/people/filter</path>
-    /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [Tags("People / Search")]
     [SwaggerResponse(200, "List of users with the detailed information", typeof(EmployeeFullDto))]
@@ -737,10 +700,7 @@ public class UserController(
     /// Returns the information about the People module.
     /// </summary>
     /// <short>Get the People information</short>
-    /// <category>Module</category>
-    /// <returns type="ASC.Api.Core.Module, ASC.Api.Core">Module information</returns>
     /// <path>api/2.0/people/info</path>
-    /// <httpMethod>GET</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("People / Module")]
     [SwaggerResponse(200, "Module information", typeof(Module))]
@@ -757,11 +717,8 @@ public class UserController(
     /// Returns a list of users matching the search query. This method uses the query parameters.
     /// </summary>
     /// <short>Search users (using query parameters)</short>
-    /// <category>Search</category>
     /// <param type="System.String, System" name="query" example="some text">Search query</param>
-    /// <returns type="ASC.Web.Api.Models.EmployeeDto, ASC.Api.Core">List of users</returns>
     /// <path>api/2.0/people/search</path>
-    /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [Tags("People / Search")]
     [SwaggerResponse(200, "List of users", typeof(EmployeeDto))]
@@ -775,11 +732,8 @@ public class UserController(
     /// Returns a list of users matching the search query.
     /// </summary>
     /// <short>Search users</short>
-    /// <category>Search</category>
     /// <param type="System.String, System" method="url" name="query" example="some text">Search query</param>
-    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">List of users with the detailed information</returns>
     /// <path>api/2.0/people/@search/{query}</path>
-    /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [Tags("People / Search")]
     [SwaggerResponse(200, "List of users with the detailed information", typeof(EmployeeFullDto))]
@@ -806,7 +760,6 @@ public class UserController(
     /// <short>
     /// Search users by extended filter
     /// </short>
-    /// <category>Search</category>
     /// <param type="System.Nullable{ASC.Core.Users.EmployeeStatus}, System" name="employeeStatus" example="Active">User status</param>
     /// <param type="System.Nullable{System.Guid}, System" name="groupId" example="9924256A-739C-462b-AF15-E652A3B1B6EB">Group ID</param>
     /// <param type="System.Nullable{ASC.Core.Users.EmployeeActivationStatus}, System" name="activationStatus" example="NotActivated">Activation status</param>
@@ -818,9 +771,7 @@ public class UserController(
     /// <param type="System.Nullable{ASC.Core.QuotaFilter}, System" name="quotaFilter" example="All">Filter by quota (Default - 1, Custom - 2)</param>
     /// <param type="System.Nullable{System.Boolean}, System" name="withoutGroup" example="true">Specifies whether the user should be a member of a group or not</param>
     /// <param type="System.Nullable{System.Boolean}, System" name="excludeGroup" example="true">Specifies whether or not the user should be a member of the group with the specified ID</param>
-    /// <returns type="ASC.Web.Api.Models.EmployeeDto, ASC.Api.Core">List of users</returns>
     /// <path>api/2.0/people/simple/filter</path>
-    /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [Tags("People / Search")]
     [SwaggerResponse(200, "List of users", typeof(EmployeeDto))]
@@ -851,11 +802,8 @@ public class UserController(
     /// <short>
     /// Delete users
     /// </short>
-    /// <category>Profiles</category>
     /// <param type="ASC.People.ApiModels.RequestDto.UpdateMembersRequestDto, ASC.People" name="inDto">Request parameters for updating portal users</param>
-    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">List of users with the detailed information</returns>
     /// <path>api/2.0/people/delete</path>
-    /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "List of users with the detailed information", typeof(EmployeeFullDto))]
@@ -899,11 +847,8 @@ public class UserController(
     /// <short>
     /// Resend activation emails
     /// </short>
-    /// <category>Profiles</category>
     /// <param type="ASC.People.ApiModels.RequestDto.UpdateMembersRequestDto, ASC.People" name="inDto">Request parameters for updating portal users</param>
-    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">List of users with the detailed information</returns>
     /// <path>api/2.0/people/invite</path>
-    /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "List of users with the detailed information", typeof(EmployeeFullDto))]
@@ -1001,10 +946,7 @@ public class UserController(
     /// <short>
     /// Get portal theme
     /// </short>
-    /// <category>Theme</category>
-    /// <returns type="ASC.Web.Core.Users.DarkThemeSettings, ASC.Web.Core">Theme</returns>
     /// <path>api/2.0/people/theme</path>
-    /// <httpMethod>GET</httpMethod>
     [Tags("People / Theme")]
     [SwaggerResponse(200, "Theme", typeof(DarkThemeSettings))]
     [HttpGet("theme")]
@@ -1019,11 +961,8 @@ public class UserController(
     /// <short>
     /// Change portal theme
     /// </short>
-    /// <category>Theme</category>
     /// <param type="ASC.People.ApiModels.RequestDto.DarkThemeSettingsRequestDto, ASC.People" name="inDto">Theme settings request parameters</param>
-    /// <returns type="ASC.Web.Core.Users.DarkThemeSettings, ASC.Web.Core">Theme</returns>
     /// <path>api/2.0/people/theme</path>
-    /// <httpMethod>PUT</httpMethod>
     [Tags("People / Theme")]
     [SwaggerResponse(200, "Theme", typeof(DarkThemeSettings))]
     [HttpPut("theme")]
@@ -1045,10 +984,7 @@ public class UserController(
     /// <short>
     /// Get my profile
     /// </short>
-    /// <category>Profiles</category>
-    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">Detailed information about my profile</returns>
     /// <path>api/2.0/people/@self</path>
-    /// <httpMethod>GET</httpMethod>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "Detailed information about my profile", typeof(EmployeeFullDto))]
     [AllowNotPayment]
@@ -1070,11 +1006,8 @@ public class UserController(
     /// <short>
     /// Send instructions to change email
     /// </short>
-    /// <category>Profiles</category>
     /// <param type="ASC.People.ApiModels.RequestDto.UpdateMemberRequestDto, ASC.People" name="inDto">Request parameters for updating user information</param>
-    /// <returns type="System.Object, System">Message text</returns>
     /// <path>api/2.0/people/email</path>
-    /// <httpMethod>POST</httpMethod>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "Message text", typeof(object))]
     [AllowNotPayment]
@@ -1161,11 +1094,8 @@ public class UserController(
     /// <short>
     /// Remind a user password
     /// </short>
-    /// <category>Password</category>
     /// <param type="ASC.People.ApiModels.RequestDto.MemberRequestDto, ASC.People" name="inDto">Member request parameters</param>
-    /// <returns type="System.Object, System">Email with the password</returns>
     /// <path>api/2.0/people/password</path>
-    /// <httpMethod>POST</httpMethod>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("People / Password")]
     [SwaggerResponse(200, "Email with the password", typeof(object))]
@@ -1200,12 +1130,9 @@ public class UserController(
     /// <short>
     /// Set an activation status to the users
     /// </short>
-    /// <category>User status</category>
     /// <param type="ASC.Core.Users.EmployeeActivationStatus, ASC.Core.Common" method="url" name="activationstatus" example="NotActivated">Activation status</param>
     /// <param type="ASC.People.ApiModels.RequestDto.UpdateMembersRequestDto, ASC.People" name="inDto">Request parameters for updating user information</param>
-    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">List of users with the detailed information</returns>
     /// <path>api/2.0/people/activationstatus/{activationstatus}</path>
-    /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
     [Tags("People / User status")]
     [SwaggerResponse(200, "List of users with the detailed information", typeof(EmployeeFullDto))]
@@ -1251,12 +1178,9 @@ public class UserController(
     /// <short>
     /// Update user language
     /// </short>
-    /// <category>Profiles</category>
     /// <param type="System.String, System" method="url" name="userid" example="some text">User ID</param>
     /// <param type="ASC.People.ApiModels.RequestDto.UpdateMemberRequestDto, ASC.People" name="inDto">Request parameters for updating user information</param>
-    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">Detailed user information</returns>
     /// <path>api/2.0/people/{userid}/culture</path>
-    /// <httpMethod>PUT</httpMethod>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "Detailed user information", typeof(EmployeeFullDto))]
     [HttpPut("{userid}/culture")]
@@ -1282,12 +1206,9 @@ public class UserController(
     /// <short>
     /// Update a user
     /// </short>
-    /// <category>Profiles</category>
     /// <param type="System.String, System" method="url" name="userid" example="some text">User ID</param>
     /// <param type="ASC.People.ApiModels.RequestDto.UpdateMemberRequestDto, ASC.People" name="inDto">Member request parameters</param>
-    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">Updated user with the detailed information</returns>
     /// <path>api/2.0/people/{userid}</path>
-    /// <httpMethod>PUT</httpMethod>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "Updated user with the detailed information", typeof(EmployeeFullDto))]
     [HttpPut("{userid}", Order = 1)]
@@ -1441,12 +1362,9 @@ public class UserController(
     /// <short>
     /// Change a user status
     /// </short>
-    /// <category>User status</category>
     /// <param type="ASC.Core.Users.EmployeeStatus, ASC.Core.Common" method="url" name="status" example="Active">New user status</param>
     /// <param type="ASC.People.ApiModels.RequestDto.UpdateMembersRequestDto, ASC.People" name="inDto">Request parameters for updating user information</param>
-    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">List of users with the detailed information</returns>
     /// <path>api/2.0/people/status/{status}</path>
-    /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
     [Tags("People / User status")]
     [SwaggerResponse(200, "List of users with the detailed information", typeof(EmployeeFullDto))]
@@ -1537,12 +1455,9 @@ public class UserController(
     /// <short>
     /// Change a user type
     /// </short>
-    /// <category>User type</category>
     /// <param type="ASC.Core.Users.EmployeeType, ASC.Core.Common" method="url" name="type" example="All">New user type</param>
     /// <param type="ASC.People.ApiModels.RequestDto.UpdateMembersRequestDto, ASC.People" name="inDto">Request parameters for updating user information</param>
-    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">List of users with the detailed information</returns>
     /// <path>api/2.0/people/type/{type}</path>
-    /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
     [Tags("People / User type")]
     [SwaggerResponse(200, "List of users with the detailed information", typeof(EmployeeFullDto))]
@@ -1578,10 +1493,7 @@ public class UserController(
     /// <short>
     /// Recalculate quota 
     /// </short>
-    /// <category>Quota</category>
     /// <path>api/2.0/people/recalculatequota</path>
-    /// <httpMethod>GET</httpMethod>
-    /// <returns></returns>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("People / Quota")]
     [HttpGet("recalculatequota")]
@@ -1597,10 +1509,7 @@ public class UserController(
     /// <short>
     /// Check quota recalculation
     /// </short>
-    /// <category>Quota</category>
-    /// <returns type="ASC.Api.Core.Model.TaskProgressDto, ASC.Api.Core.Model">Task progress</returns>
     /// <path>api/2.0/people/checkrecalculatequota</path>
-    /// <httpMethod>GET</httpMethod>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("People / Quota")]
     [SwaggerResponse(200, "Task progress", typeof(TaskProgressDto))]
@@ -1617,11 +1526,8 @@ public class UserController(
     /// <short>
     /// Change a user quota limit
     /// </short>
-    /// <category>Quota</category>
     /// <param type="ASC.People.ApiModels.RequestDto.UpdateMembersRequestDto, ASC.People" name="inDto">Request parameters for updating user information</param>
-    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">List of users with the detailed information</returns>
     /// <path>api/2.0/people/userquota</path>
-    /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
     [Tags("People / Quota")]
     [SwaggerResponse(200, "List of users with the detailed information", typeof(EmployeeFullDto))]
@@ -1690,11 +1596,8 @@ public class UserController(
     /// <short>
     /// Reset a user quota limit
     /// </short>
-    /// <category>Quota</category>
     /// <param type="ASC.People.ApiModels.RequestDto.UpdateMembersQuotaRequestDto, ASC.People" name="inDto">Request parameters for updating user information</param>
-    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">User detailed information</returns>
     /// <path>api/2.0/people/resetquota</path>
-    /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
     [Tags("People / Quota")]
     [SwaggerResponse(200, "User detailed information", typeof(EmployeeFullDto))]
@@ -1912,12 +1815,9 @@ public class UserController(
     ///// <short>
     ///// Import users
     ///// </short>
-    ///// <category>Profiles</category>
     ///// <param type="System.String, System" name="userList">List of users</param>
     ///// <param type="System.Boolean, System" name="importUsersAsCollaborators" optional="true">Specifies whether to import users as guests or not</param>
-    ///// <returns></returns>
     ///// <path>api/2.0/people/import/save</path>
-    ///// <httpMethod>POST</httpMethod>
     //[HttpPost("import/save")]
     //public void SaveUsers(string userList, bool importUsersAsCollaborators)
     //{

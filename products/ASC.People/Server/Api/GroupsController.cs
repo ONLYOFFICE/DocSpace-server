@@ -52,12 +52,10 @@ public class GroupController(
     /// </short>
     /// <param type="System.Nullable{System.Guid}, System" name="userId" example="9924256A-739C-462b-AF15-E652A3B1B6EB">User ID</param>
     /// <param type="System.Nullable{System.Boolean}, System" name="manager" example="true">Specifies if the user is a manager or not</param>
-    /// <returns type="ASC.People.ApiModels.ResponseDto.GroupDto, ASC.People">List of groups</returns>
     /// <remarks>
     /// This method returns partial group information.
     /// </remarks>
     /// <path>api/2.0/groups</path>
-    /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [Tags("Group")]
     [SwaggerResponse(200, "List of groups", typeof(GroupDto))]
@@ -95,12 +93,10 @@ public class GroupController(
     /// Get a group
     /// </short>
     /// <param type="System.Guid, System" method="url" name="id" example="9924256A-739C-462b-AF15-E652A3B1B6EB">Group ID</param>
-    /// <returns type="ASC.People.ApiModels.ResponseDto.GroupDto, ASC.People">Group with the detailed information</returns>
     /// <remarks>
     /// This method returns full group information.
     /// </remarks>
     /// <path>api/2.0/groups/{id}</path>
-    /// <httpMethod>GET</httpMethod>
     [Tags("Group")]
     [SwaggerResponse(200, "Group with the detailed information", typeof(GroupDto))]
     [HttpGet("{id:guid}")]
@@ -118,9 +114,7 @@ public class GroupController(
     /// Get user groups
     /// </short>
     /// <param type="System.Guid, System" method="url" name="userid" example="9924256A-739C-462b-AF15-E652A3B1B6EB">User ID</param>
-    /// <returns type="ASC.Web.Api.Models.GroupSummaryDto, ASC.Api.Core">List of groups</returns>
     /// <path>api/2.0/groups/user/{userid}</path>
-    /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [Tags("Group")]
     [SwaggerResponse(200, "List of groups", typeof(GroupSummaryDto))]
@@ -146,9 +140,7 @@ public class GroupController(
     /// Add a new group
     /// </short>
     /// <param type="ASC.People.ApiModels.RequestDto.GroupRequestDto, ASC.People" name="inDto">Group request parameters</param>
-    /// <returns type="ASC.People.ApiModels.ResponseDto.GroupDto, ASC.People">Newly created group with the detailed information</returns>
     /// <path>api/2.0/groups</path>
-    /// <httpMethod>POST</httpMethod>
     [Tags("Group")]
     [SwaggerResponse(200, "Newly created group with the detailed information", typeof(GroupDto))]
     [HttpPost]
@@ -181,9 +173,7 @@ public class GroupController(
     /// </short>
     /// <param type="System.Guid, System" method="url" name="id" example="9924256A-739C-462b-AF15-E652A3B1B6EB">Group ID</param>
     /// <param type="ASC.People.ApiModels.RequestDto.UpdateGroupRequestDto, ASC.People" name="inDto">Group request parameters</param>
-    /// <returns type="ASC.People.ApiModels.ResponseDto.GroupDto, ASC.People">Updated group with the detailed information</returns>
     /// <path>api/2.0/groups/{id}</path>
-    /// <httpMethod>PUT</httpMethod>
     [Tags("Group")]
     [SwaggerResponse(200, "Updated group with the detailed information", typeof(GroupDto))]
     [HttpPut("{id:guid}")]
@@ -226,9 +216,7 @@ public class GroupController(
     /// Delete a group
     /// </short>
     /// <param type="System.Guid, System" method="url" name="id" example="9924256A-739C-462b-AF15-E652A3B1B6EB">Group ID</param>
-    /// <returns type="Microsoft.AspNetCore.Mvc.NoContentResult, Microsoft.AspNetCore.Mvc">No content</returns>
     /// <path>api/2.0/groups/{id}</path>
-    /// <httpMethod>DELETE</httpMethod>
     [Tags("Group")]
     [SwaggerResponse(200, "No content", typeof(NoContentResult))]
     [HttpDelete("{id:guid}")]
@@ -254,9 +242,7 @@ public class GroupController(
     /// </short>
     /// <param type="System.Guid, System" method="url" name="fromId" example="9924256A-739C-462b-AF15-E652A3B1B6EB">Group ID to move from</param>
     /// <param type="System.Guid, System" method="url" name="toId" example="9924256A-739C-462b-AF15-E652A3B1B6EB">Group ID to move to</param>
-    /// <returns type="ASC.People.ApiModels.ResponseDto.GroupDto, ASC.People">Group with the detailed information</returns>
     /// <path>api/2.0/groups/{fromId}/members/{toId}</path>
-    /// <httpMethod>PUT</httpMethod>
     [Tags("Group")]
     [SwaggerResponse(200, "Group with the detailed information", typeof(GroupDto))]
     [HttpPut("{fromId:guid}/members/{toId:guid}")]
@@ -285,9 +271,7 @@ public class GroupController(
     /// </short>
     /// <param type="System.Guid, System" method="url" name="id" example="9924256A-739C-462b-AF15-E652A3B1B6EB">Group ID</param>
     /// <param type="ASC.People.ApiModels.RequestDto.GroupRequestDto, ASC.People" name="inDto">Group request parameters</param>
-    /// <returns type="ASC.People.ApiModels.ResponseDto.GroupDto, ASC.People">Group with the detailed information</returns>
     /// <path>api/2.0/groups/{id}/members</path>
-    /// <httpMethod>POST</httpMethod>
     [Tags("Group")]
     [SwaggerResponse(200, "Group with the detailed information", typeof(GroupDto))]
     [HttpPost("{id:guid}/members")]
@@ -307,9 +291,7 @@ public class GroupController(
     /// </short>
     /// <param type="System.Guid, System" method="url" name="id" example="9924256A-739C-462b-AF15-E652A3B1B6EB">Group ID</param>
     /// <param type="ASC.People.ApiModels.RequestDto.GroupRequestDto, ASC.People" name="inDto">Group request parameters</param>
-    /// <returns type="ASC.People.ApiModels.ResponseDto.GroupDto, ASC.People">Group with the detailed information</returns>
     /// <path>api/2.0/groups/{id}/members</path>
-    /// <httpMethod>PUT</httpMethod>
     [Tags("Group")]
     [SwaggerResponse(200, "Group with the detailed information", typeof(GroupDto))]
     [HttpPut("{id:guid}/members")]
@@ -335,9 +317,7 @@ public class GroupController(
     /// </short>
     /// <param type="System.Guid, System" method="url" name="id" example="9924256A-739C-462b-AF15-E652A3B1B6EB">Group ID</param>
     /// <param type="ASC.People.ApiModels.RequestDto.SetManagerRequestDto, ASC.People" name="inDto">Request parameters for setting a group manager</param>
-    /// <returns type="ASC.People.ApiModels.ResponseDto.GroupDto, ASC.People">Group with the detailed information</returns>
     /// <path>api/2.0/groups/{id}/manager</path>
-    /// <httpMethod>PUT</httpMethod>
     [Tags("Group")]
     [SwaggerResponse(200, "Group with the detailed information", typeof(GroupDto))]
     [HttpPut("{id:guid}/manager")]
@@ -365,9 +345,7 @@ public class GroupController(
     /// </short>
     /// <param type="System.Guid, System" method="url" name="id" example="9924256A-739C-462b-AF15-E652A3B1B6EB">Group ID</param>
     /// <param type="ASC.People.ApiModels.RequestDto.GroupRequestDto, ASC.People" name="inDto">Group request parameters</param>
-    /// <returns type="ASC.People.ApiModels.ResponseDto.GroupDto, ASC.People">Group with the detailed information</returns>
     /// <path>api/2.0/groups/{id}/members</path>
-    /// <httpMethod>DELETE</httpMethod>
     [Tags("Group")]
     [SwaggerResponse(200, "Group with the detailed information", typeof(GroupDto))]
     [HttpDelete("{id:guid}/members")]
