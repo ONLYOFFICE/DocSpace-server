@@ -662,13 +662,10 @@ $TrulyYours</value>
   <data name="ButtonAccept" xml:space="preserve">
     <value>Sprejmi</value>
   </data>
-  <data name="AcceptDocSpace" xml:space="preserve">
-    <value>SPREJMI</value>
-  </data>
-  <data name="ButtonCollaborateDocSpace" xml:space="preserve">
+  <data name="ButtonCollaborate" xml:space="preserve">
     <value>Sodelujte v DocSpace</value>
   </data>
-  <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
+  <data name="ButtonConfirmInvite" xml:space="preserve">
     <value>Potrdite povabilo DocSpace</value>
   </data>
   <data name="ButtonConfirmEmail" xml:space="preserve">
@@ -1068,7 +1065,7 @@ Datoteka varnostne kopije, ki vsebuje podatke iz vašega [${__VirtualRootPath}](
 Če imate kakršna koli vprašanja ali potrebujete pomoč, nas kontaktirajte na [${__SupportLink}](${__SupportLink})
 
 Lep pozdrav,
-ONLYOFFICE™ Ekipa za podporo
+ONLYOFFICE Ekipa za podporo
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
@@ -1294,6 +1291,7 @@ h1."$PortalUrl":"$PortalUrl"
 Vaš portal je bil preseljen na novo domeno. Obnovite dostop do portala tako, da navedete geslo, ki se bo uporabljalo za prijavo.
 
 Za nastavitev gesla za račun sledite spodnji povezavi:
+
 $OrangeButton
 
 *Opomba*: ta povezava velja samo 7 dni. V tem obdobju dokončajte postopek obnovitve dostopa.
@@ -1371,7 +1369,7 @@ Svoj portal lahko kadar koli znova aktivirate s klikom na naslednjo povezavo:
 Če imate kakršna koli vprašanja ali potrebujete pomoč, nas kontaktirajte na [${__SalesEmail}](mailto:${__SalesEmail})
 
 Z najlepšimi pozdravi,
-Podporna ekipa ONLYOFFICE™
+Podporna ekipa ONLYOFFICE
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
@@ -1419,7 +1417,7 @@ _Opomba_: ta povezava velja samo 7 dni. Prosimo, dokončajte postopek izbrisa po
 Če imate kakršna koli vprašanja ali potrebujete pomoč, nas kontaktirajte na [${__SalesEmail}](mailto:${__SalesEmail})
 
 Z najlepšimi pozdravi,
-Podporna ekipa ONLYOFFICE™
+Podporna ekipa ONLYOFFICE
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_rename" xml:space="preserve">
@@ -1761,6 +1759,43 @@ Vaš trenutni tarifni načrt je STARTUP. Je popolnoma brezplačen in vključuje:
 &lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt; 100 skrbnikov/izkušenih uporabnikov&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt; Do 100 sob&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt; 100 GB prostora na disku&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
 
 *Uživajte v novem načinu sodelovanja pri dokumentih!*
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_migration_personal_to_docspace" xml:space="preserve">
+    <value>Pozdravljeni!
+
+Postopek selitve podatkov iz ONLYOFFICE Personal v vaš novi ONLYOFFICE DocSpace je uspešno zaključen.
+
+Za dostop do prostora DocSpace z uvoženimi podatki preprosto kliknite spodnji gumb:
+
+$OrangeButton
+
+Vaš trenutni paket DocSpace je STARTUP. Ta je popolnoma brezplačen.
+
+==Po potrebi lahko spremenite ime svojega novega prostora DocSpace. Preklopite na Nastavitve -&gt; Prilagajanje -&gt; Preimenovanje DocSpace.==
+
+Uživajte v novem načinu sodelovanja pri dokumentih!
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_rooms_activity" xml:space="preserve">
+    <value>h1.Tukaj je nekaj novosti iz vašega DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" v the zadnji uri
+
+#foreach($activity v $Activities)
+$activity
+
+#end</value>
+  </data>
+  <data name="pattern_saas_docspace_registration" xml:space="preserve">
+    <value>h1. ONLYOFFICE DocSpace: dokončajte registracijo
+
+
+Pozdravljeni!
+
+Vabimo vas, da dokončate registracijo za ONLYOFFICE DocSpace na "${__VirtualRootPath}":"${__VirtualRootPath}". Vnesite svoje ime in nastavite geslo s klikom na povezavo:
+
+$OrangeButton
 
 $TrulyYours</value>
   </data>

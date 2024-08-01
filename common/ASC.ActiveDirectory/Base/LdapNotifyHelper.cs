@@ -26,7 +26,7 @@
 
 namespace ASC.ActiveDirectory.Base;
 
-[Singleton(Additional = typeof(LdapNotifyHelperExtension))]
+[Singleton]
 public class LdapNotifyService(IServiceScopeFactory serviceScopeFactory,
         WorkContext workContext,
         NotifyConfiguration notifyConfiguration,
@@ -103,14 +103,5 @@ public class LdapNotifyService(IServiceScopeFactory serviceScopeFactory,
         }
 
         await ldapSaveSyncOperation.RunJobAsync(ldapSettings, tenant, LdapOperationType.Sync);
-    }
-}
-
-public static class LdapNotifyHelperExtension
-{
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<DbHelper>();
-        services.TryAdd<LdapNotifySource>();
     }
 }

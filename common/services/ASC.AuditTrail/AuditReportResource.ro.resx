@@ -349,7 +349,7 @@
     <value>Grupul a fost actualizat: {0}</value>
   </data>
   <data name="GuestAccount" xml:space="preserve">
-    <value>Cont de invitat</value>
+    <value>Anonim</value>
   </data>
   <data name="GuestActivated" xml:space="preserve">
     <value>Invitatul activat: {0}</value>
@@ -797,5 +797,8 @@
   </data>
   <data name="PortalRenamed" xml:space="preserve">
     <value>Portalul a fost redenumit</value>
+  </data>
+  <data name="FileSizePostfix" xml:space="preserve">
+    <value>octeți, KO, MO, GO, TO</value>
   </data>
 </root>

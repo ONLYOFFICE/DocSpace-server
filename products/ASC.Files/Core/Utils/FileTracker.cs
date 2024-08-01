@@ -52,11 +52,11 @@ public class FileTrackerHelper
         _callbackAction = EvictionCallback();
     }
 
-    public bool ProlongEditing<T>(T fileId, Guid tabId, Guid userId, int tenantId, string baseUri, bool editingAlone = false)
+    public async Task<bool> ProlongEditingAsync<T>(T fileId, Guid tabId, Guid userId, int tenantId, string baseUri, bool editingAlone = false)
     {
         var checkRight = true;
         var tracker = GetTracker(fileId);
-        if (tracker != null && IsEditing(fileId))
+        if (tracker != null && await IsEditingAsync(fileId))
         {
             if (tracker.EditingBy.TryGetValue(tabId, out var trackInfo))
             {
@@ -81,12 +81,12 @@ public class FileTrackerHelper
             tracker = new FileTracker(tabId, userId, tabId == userId, editingAlone, tenantId, baseUri);
         }
 
-        SetTracker(fileId, tracker);
+        await SetTrackerAsync(fileId, tracker);
 
         return checkRight;
     }
 
-    public void Remove<T>(T fileId, Guid tabId = default, Guid userId = default)
+    public async Task RemoveAsync<T>(T fileId, Guid tabId = default, Guid userId = default)
     {
         var tracker = GetTracker(fileId);
         if (tracker != null)
@@ -94,7 +94,7 @@ public class FileTrackerHelper
             if (tabId != Guid.Empty)
             {
                 tracker.EditingBy.Remove(tabId);
-                SetTracker(fileId, tracker);
+                await SetTrackerAsync(fileId, tracker);
 
                 return;
             }
@@ -108,16 +108,16 @@ public class FileTrackerHelper
                     tracker.EditingBy.Remove(editTab.Key);
                 }
 
-                SetTracker(fileId, tracker);
+                await SetTrackerAsync(fileId, tracker);
 
                 return;
             }
         }
 
-        RemoveTracker(fileId);
+        await RemoveTrackerAsync(fileId);
     }
 
-    public bool IsEditing<T>(T fileId)
+    public async Task<bool> IsEditingAsync<T>(T fileId)
     {
         var tracker = GetTracker(fileId);
         if (tracker != null)
@@ -133,17 +133,17 @@ public class FileTrackerHelper
 
             if (tracker.EditingBy.Count == 0)
             {
-                RemoveTracker(fileId);
+                await RemoveTrackerAsync(fileId);
 
                 return false;
             }
 
-            SetTracker(fileId, tracker);
+            await SetTrackerAsync(fileId, tracker);
 
             return true;
         }
 
-        RemoveTracker(fileId);
+        await RemoveTrackerAsync(fileId);
 
         return false;
     }
@@ -155,7 +155,7 @@ public class FileTrackerHelper
         return tracker != null && tracker.EditingBy.Count == 1 && tracker.EditingBy.FirstOrDefault().Value.EditingAlone;
     }
 
-    public void ChangeRight<T>(T fileId, Guid userId, bool check)
+    public async Task ChangeRight<T>(T fileId, Guid userId, bool check)
     {
         var tracker = GetTracker(fileId);
         if (tracker != null)
@@ -165,15 +165,15 @@ public class FileTrackerHelper
                 value.CheckRightTime = check ? DateTime.MinValue : DateTime.UtcNow;
             }
 
-            SetTracker(fileId, tracker);
+            await SetTrackerAsync(fileId, tracker);
         }
     }
 
-    public List<Guid> GetEditingBy<T>(T fileId)
+    public async Task<List<Guid>> GetEditingByAsync<T>(T fileId)
     {
         var tracker = GetTracker(fileId);
 
-        return tracker != null && IsEditing(fileId)
+        return tracker != null && await IsEditingAsync(fileId)
             ? tracker.EditingBy.Values.Select(i => i.UserId).Distinct().ToList()
             : [];
     }
@@ -188,20 +188,20 @@ public class FileTrackerHelper
         return _cache.Get<FileTracker>(GetCacheKey(fileId));
     }
 
-    private void SetTracker<T>(T fileId, FileTracker tracker)
+    private async Task SetTrackerAsync<T>(T fileId, FileTracker tracker)
     {
         if (!EqualityComparer<T>.Default.Equals(fileId, default) && tracker != null)
         {
             _cache.Insert(GetCacheKey(fileId), tracker with { }, _cacheTimeout, _callbackAction);
-            _cacheNotify.Publish(new FileTrackerNotify { FileId = fileId.ToString(), FileTracker = tracker }, CacheNotifyAction.Insert);
+            await _cacheNotify.PublishAsync(new FileTrackerNotify { FileId = fileId.ToString(), FileTracker = tracker }, CacheNotifyAction.Insert);
         }
     }
     
-    private void RemoveTracker<T>(T fileId)
+    private async Task RemoveTrackerAsync<T>(T fileId)
     {
         if (!EqualityComparer<T>.Default.Equals(fileId, default))
         {
-            _cacheNotify.Publish(new FileTrackerNotify { FileId = fileId.ToString(), FileTracker = new FileTracker() }, CacheNotifyAction.Remove);
+            await _cacheNotify.PublishAsync(new FileTrackerNotify { FileId = fileId.ToString(), FileTracker = new FileTracker() }, CacheNotifyAction.Remove);
         }
     }
 
@@ -250,7 +250,7 @@ public class FileTrackerHelper
                 {
                     if (await tracker.StartTrackAsync(fileId.ToString(), docKey))
                     {
-                        SetTracker(fileId, fileTracker);
+                        await SetTrackerAsync(fileId, fileTracker);
                     }
                 }
             }

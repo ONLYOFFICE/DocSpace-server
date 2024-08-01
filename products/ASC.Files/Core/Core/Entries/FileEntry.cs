@@ -81,13 +81,13 @@ public abstract class FileEntry : ICloneable
     public DateTime CreateOn { get; set; }
     public DateTime ModifiedOn { get; set; }
     public FolderType RootFolderType { get; set; }
+    public FolderType? ParentRoomType { get; set; }
     public Guid RootCreateBy { get; set; }
     public abstract bool IsNew { get; set; }
     public FileEntryType FileEntryType { get; set; }
     public IEnumerable<Tag> Tags { get; set; }
     public string OriginTitle { get; set; }
     public string OriginRoomTitle { get; set; }
-    public FileShareRecord ShareRecord { get; set; }
     public int Order { get; set; }
 
     private string _modifiedByString;
@@ -111,7 +111,7 @@ public abstract class FileEntry<T> : FileEntry, IEquatable<FileEntry<T>>
     public T OriginId { get; set; }
     public T OriginRoomId { get; set; }
     public bool MutableId { get; set; }
-
+    public FileShareRecord<T> ShareRecord { get; set; }
     public IDictionary<FilesSecurityActions, bool> Security { get; set; }
 
     private T _folderIdDisplay;

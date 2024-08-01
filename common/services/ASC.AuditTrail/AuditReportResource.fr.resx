@@ -290,7 +290,7 @@
     <value>Groupe mis à jour : {0}</value>
   </data>
   <data name="GuestAccount" xml:space="preserve">
-    <value>Compte Invité</value>
+    <value>Anonyme</value>
   </data>
   <data name="GuestActivated" xml:space="preserve">
     <value>Invité activé : {0}</value>
@@ -738,5 +738,44 @@
   </data>
   <data name="PortalRenamed" xml:space="preserve">
     <value>Portail est renommé</value>
+  </data>
+  <data name="FileSizePostfix" xml:space="preserve">
+    <value>octets,ko,Mo,Go,To</value>
+  </data>
+  <data name="FileUploadedWithOverwriting" xml:space="preserve">
+    <value>Fichier téléchargé avec écrasement : {0}</value>
+  </data>
+  <data name="QuotaPerPortalChanged" xml:space="preserve">
+    <value>Définir le quota de stockage par défaut : {0}</value>
+  </data>
+  <data name="QuotaPerPortalDisabled" xml:space="preserve">
+    <value>Quota de stockage par défaut désactivé</value>
+  </data>
+  <data name="QuotaPerRoomChanged" xml:space="preserve">
+    <value>Définir le quota de stockage par défaut pour les salles : {0}</value>
+  </data>
+  <data name="QuotaPerRoomDisabled" xml:space="preserve">
+    <value>Quota de stockage par défaut désactivé pour les salles</value>
+  </data>
+  <data name="QuotaPerUserChanged" xml:space="preserve">
+    <value>Définir le quota de stockage par défaut pour les utilisateurs : {0}</value>
+  </data>
+  <data name="QuotaPerUserDisabled" xml:space="preserve">
+    <value>Quota de stockage par défaut désactivé pour les utilisateurs</value>
+  </data>
+  <data name="RoomCopied" xml:space="preserve">
+    <value>Salle copiée : {0}</value>
+  </data>
+  <data name="RoomGroupAdded" xml:space="preserve">
+    <value>Groupe ajouté : {0}. Rôle : {1}</value>
+  </data>
+  <data name="RoomGroupRemove" xml:space="preserve">
+    <value>Groupe supprimé : {0}</value>
+  </data>
+  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
+    <value>{0} nommé : {1}</value>
+  </data>
+  <data name="SendJoinInvite" xml:space="preserve">
+    <value>L'utilisateur {0} a envoyé une invitation à {1} pour qu'il rejoigne ce DocSpace</value>
   </data>
 </root>

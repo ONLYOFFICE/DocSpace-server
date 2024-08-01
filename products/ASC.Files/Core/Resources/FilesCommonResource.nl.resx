@@ -300,7 +300,7 @@ Het beste geschikt voor docx, xlsx, pptx.</value>
     <value>Documenten</value>
   </data>
   <data name="ProductUserOpportunities" xml:space="preserve">
-    <value>Maak en wijzig eigen documenten evenals gedeelde documenten met de juiste machtigingen|Geef lees/schrijf machtiging voor documenten en folders aan andere gebruikers|Koppel Dropbox, Box en andere accounts in de 'Mijn documenten'-sectie</value>
+    <value>Maak en wijzig eigen documenten evenals gedeelde documenten met de juiste machtigingen|Geef lees/schrijf machtiging voor documenten en folders aan andere gebruikers|Koppel Dropbox, Box en andere accounts in de 'Documenten'-sectie</value>
   </data>
   <data name="UnknownFirstName" xml:space="preserve">
     <value>Voornaam</value>
@@ -463,5 +463,38 @@ Het beste geschikt voor docx, xlsx, pptx.</value>
   </data>
   <data name="RoomIndex_Author" xml:space="preserve">
     <value>Auteur</value>
+  </data>
+  <data name="Date" xml:space="preserve">
+    <value>Datum</value>
+  </data>
+  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
+    <value>Power user</value>
+  </data>
+  <data name="RoleEnum_PowerUser" xml:space="preserve">
+    <value>Power user</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>Gebruiker</value>
+  </data>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>Het verplaatsen van meerdere bestanden naar de kamer voor het invullen van formulieren wordt niet ondersteund. Verplaats één ONLYOFFICE PDF formulier tegelijk.</value>
+  </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>Het verplaatsen van mappen naar de kamer voor het invullen van formulieren wordt niet ondersteund. Verplaats één ONLYOFFICE PDF formulier tegelijk.</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>Het bestand kan niet naar deze kamer worden verplaatst. Probeer het ONLYOFFICE PDF formulier te verplaatsen.</value>
+  </data>
+  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
+    <value>Het bestand kan niet worden geüpload naar deze kamer. Probeer het ONLYOFFICE PDF formulier te uploaden.</value>
+  </data>
+  <data name="FillOutExternalLinkTitle" xml:space="preserve">
+    <value>Link om in te vullen</value>
+  </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>Link naar formulier</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Open formulier</value>
   </data>
 </root>

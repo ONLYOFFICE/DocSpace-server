@@ -26,12 +26,23 @@
 
 namespace ASC.Web.Files.Core.Search;
 
-[Scope(Additional = typeof(FactoryIndexerFolderExtension))]
+[Scope]
+public class BaseIndexerFolder(
+    Client client,
+    ILogger<BaseIndexerFolder> log,
+    IDbContextFactory<WebstudioDbContext> dbContextManager,
+    TenantManager tenantManager,
+    BaseIndexerHelper baseIndexerHelper,
+    Settings settings,
+    IServiceProvider serviceProvider)
+    : BaseIndexer<DbFolder>(client, log, dbContextManager, tenantManager, baseIndexerHelper, settings, serviceProvider);
+
+[Scope(typeof(IFactoryIndexer))]
 public class FactoryIndexerFolder(ILoggerProvider options,
         TenantManager tenantManager,
         SearchSettingsHelper searchSettingsHelper,
         FactoryIndexer factoryIndexer,
-        BaseIndexer<DbFolder> baseIndexer,
+        BaseIndexerFolder baseIndexer,
         IServiceProvider serviceProvider,
         IDbContextFactory<FilesDbContext> dbContextFactory,
         ICache cache,
@@ -112,31 +123,23 @@ public class FactoryIndexerFolder(ILoggerProvider options,
 
         (int, int, int) GetCount(DateTime lastIndexed)
             {
-            using var filesDbContext = dbContextFactory.CreateDbContext();
+                using var filesDbContext = dbContextFactory.CreateDbContext();
 
-            var minId = Queries.FolderMinId(filesDbContext, lastIndexed);
+                var minId = Queries.FolderMinId(filesDbContext, lastIndexed);
 
-            var maxId = Queries.FolderMaxId(filesDbContext, lastIndexed);
+                var maxId = Queries.FolderMaxId(filesDbContext, lastIndexed);
 
-            var count = Queries.FoldersCount(filesDbContext, lastIndexed);
+                var count = Queries.FoldersCount(filesDbContext, lastIndexed);
 
-            return new(count, maxId, minId);
+                return new(count, maxId, minId);
             }
         }
-        }
+}
 
 class FolderTenant
 {
     public DbTenant DbTenant { get; init; }
     public DbFolder DbFolder { get; init; }
-}
-
-public static class FactoryIndexerFolderExtension
-{
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<DbFolder>();
-    }
 }
 
 static file class Queries

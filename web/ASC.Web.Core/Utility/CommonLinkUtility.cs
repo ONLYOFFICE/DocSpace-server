@@ -54,30 +54,22 @@ public enum ManagementType
 }
 
 [Scope]
-public class CommonLinkUtility(IHttpContextAccessor httpContextAccessor,
+public class CommonLinkUtility(
+    IHttpContextAccessor httpContextAccessor,
         CoreBaseSettings coreBaseSettings,
         CoreSettings coreSettings,
         TenantManager tenantManager,
         UserManager userManager,
         EmailValidationKeyProvider emailValidationKeyProvider,
-        ILoggerProvider options)
+        MailWhiteLabelSettingsHelper mailWhiteLabelSettingsHelper,
+        ILoggerProvider options,
+        AdditionalWhiteLabelSettingsHelperInit additionalWhiteLabelSettingsHelper)
     : BaseCommonLinkUtility(httpContextAccessor, coreBaseSettings, coreSettings, tenantManager, options)
 {
     public const string ParamName_UserUserID = "uid";
     public const string AbsoluteAccountsPath = "/accounts/";
     public const string VirtualAccountsPath = "~/accounts/";
-
-    public CommonLinkUtility(
-        CoreBaseSettings coreBaseSettings,
-        CoreSettings coreSettings,
-        TenantManager tenantManager,
-        UserManager userManager,
-        EmailValidationKeyProvider emailValidationKeyProvider,
-        ILoggerProvider options) :
-        this(null, coreBaseSettings, coreSettings, tenantManager, userManager, emailValidationKeyProvider, options)
-    {
-    }
-
+    
     public string Logout
     {
         get { return ToAbsolute("~/auth.aspx") + "?t=logout"; }
@@ -100,51 +92,34 @@ public class CommonLinkUtility(IHttpContextAccessor httpContextAccessor,
 
     public string GetEmployees(EmployeeStatus empStatus = EmployeeStatus.Active)
     {
-        return ToAbsolute("~/products/people/") +
-               (empStatus == EmployeeStatus.Terminated ? "#type=disabled" : string.Empty);
+        return ToAbsolute("~/accounts/people/filter") +
+               (empStatus == EmployeeStatus.Terminated ? $"?employeestatus={(int)EmployeeStatus.Terminated}" : string.Empty);
     }
 
     public string GetDepartment(Guid depId)
     {
-        return depId != Guid.Empty ? ToAbsolute("~/products/people/#group=") + depId : GetEmployees();
+        return depId != Guid.Empty ? ToAbsolute($"~/accounts/groups/{depId}/filter") : GetEmployees();
     }
 
     #region user profile link
 
-    public async Task<string> GetUserProfileAsync(Guid userId, bool absolute = true)
+    public async Task<string> GetUserProfileAsync(Guid userId)
     {
-        if (!await userManager.UserExistsAsync(userId))
+        var path = GetEmployees();
+
+        if (!userManager.IsSystemUser(userId))
         {
-            return GetEmployees();
+            var user = await userManager.GetUsersAsync(userId);
+
+            path += $"?search={HttpUtility.UrlEncode(user.Email?.ToLowerInvariant())}";
         }
-        
-        var queryParams = userId != Guid.Empty ? await GetUserParamsPairAsync(userId) : HttpUtility.UrlEncode(userId.ToString().ToLowerInvariant());
 
-        var url = absolute ? ToAbsolute(VirtualAccountsPath) : AbsoluteAccountsPath;
-        url += "view/";
-        url += queryParams;
-
-        return url;
+        return path;
     }
 
     #endregion
 
-    private async Task<string> GetUserParamsPairAsync(Guid userID)
-    {
-        return GetUserParamsPair(await userManager.GetUsersAsync(userID));
-    }
-
-    public string GetUserParamsPair(UserInfo user)
-    {
-        if (user == null || string.IsNullOrEmpty(user.UserName) || !userManager.UserExists(user))
-        {
-            return "";
-        }
-
-        return HttpUtility.UrlEncode(user.UserName.ToLowerInvariant());
-    }
-
-    public async Task<string> GetUserForumLinkAsync(SettingsManager settingsManager, AdditionalWhiteLabelSettingsHelperInit additionalWhiteLabelSettingsHelper, bool inCurrentCulture = true)
+    public async Task<string> GetUserForumLinkAsync(SettingsManager settingsManager, bool inCurrentCulture = true)
     {
         if (!(await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>()).UserForumEnabled)
         {
@@ -163,7 +138,7 @@ public class CommonLinkUtility(IHttpContextAccessor httpContextAccessor,
     
     #region Help Centr
 
-    public async Task<string> GetHelpLinkAsync(SettingsManager settingsManager, AdditionalWhiteLabelSettingsHelperInit additionalWhiteLabelSettingsHelper, bool inCurrentCulture = true)
+    public async Task<string> GetHelpLinkAsync(SettingsManager settingsManager, bool inCurrentCulture = true)
     {
         if (!(await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>()).HelpCenterEnabled)
         {
@@ -180,7 +155,7 @@ public class CommonLinkUtility(IHttpContextAccessor httpContextAccessor,
         return GetRegionalUrl(url, inCurrentCulture ? CultureInfo.CurrentCulture.TwoLetterISOLanguageName : null);
     }
 
-    public async Task<string> GetSupportLinkAsync(SettingsManager settingsManager, AdditionalWhiteLabelSettingsHelperInit additionalWhiteLabelSettingsHelper, bool inCurrentCulture = true)
+    public async Task<string> GetSupportLinkAsync(SettingsManager settingsManager, bool inCurrentCulture = true)
     {
         if (!(await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>()).FeedbackAndSupportEnabled)
         {
@@ -197,21 +172,21 @@ public class CommonLinkUtility(IHttpContextAccessor httpContextAccessor,
         return GetRegionalUrl(url, inCurrentCulture ? CultureInfo.CurrentCulture.TwoLetterISOLanguageName : null);
     }
 
-    public string GetSiteLink(MailWhiteLabelSettingsHelper mailWhiteLabelSettingsHelper)
+    public string GetSiteLink()
     {
         var url = mailWhiteLabelSettingsHelper.DefaultMailSiteUrl;
 
         return string.IsNullOrEmpty(url) ? string.Empty : url;
     }
 
-    public string GetSupportEmail(MailWhiteLabelSettingsHelper mailWhiteLabelSettingsHelper)
+    public string GetSupportEmail()
     {
         var url = mailWhiteLabelSettingsHelper.DefaultMailSupportEmail;
 
         return string.IsNullOrEmpty(url) ? string.Empty : url;
     }
 
-    public string GetSalesEmail(AdditionalWhiteLabelSettingsHelperInit additionalWhiteLabelSettingsHelper)
+    public string GetSalesEmail()
     {
         var mail = additionalWhiteLabelSettingsHelper.DefaultMailSalesEmail;
 
@@ -231,6 +206,19 @@ public class CommonLinkUtility(IHttpContextAccessor httpContextAccessor,
 
     #region confirm links
 
+    public async Task<string> GetInvitationLinkAsync(string email, EmployeeType employeeType, Guid createdBy, string culture = null)
+    {
+        var link = await GetConfirmationEmailUrlAsync(email, ConfirmType.LinkInvite, employeeType, createdBy)
+                   + $"&emplType={employeeType:d}";
+        
+        if (!string.IsNullOrEmpty(culture))
+        {
+            link += $"&culture={culture}";
+        }
+        
+        return link;
+    }
+    
     public async Task<(string, string)> GetConfirmationUrlAndKeyAsync(string email, ConfirmType confirmType, object postfix = null, Guid userId = default)
     {
         var url = GetFullAbsolutePath($"confirm/{confirmType}?{GetTokenWithoutKey(email, confirmType, userId)}");
@@ -244,7 +232,7 @@ public class CommonLinkUtility(IHttpContextAccessor httpContextAccessor,
     {
         return GetFullAbsolutePath(await GetConfirmationUrlRelativeAsync(email, confirmType, postfix, userId));
     }
-
+    
     public string GetConfirmationUrl(string key, ConfirmType confirmType, Guid userId = default)
     {
         return GetFullAbsolutePath(GetConfirmationUrlRelative(key, confirmType, userId));
@@ -265,7 +253,7 @@ public class CommonLinkUtility(IHttpContextAccessor httpContextAccessor,
         return $"confirm/{confirmType}?type={confirmType}&key={key}&uid={userId}";
     }
 
-    public string GetTokenWithoutKey(string email, ConfirmType confirmType, Guid userId = default)
+    private string GetTokenWithoutKey(string email, ConfirmType confirmType, Guid userId = default)
     {
         var link = $"type={confirmType}";
 

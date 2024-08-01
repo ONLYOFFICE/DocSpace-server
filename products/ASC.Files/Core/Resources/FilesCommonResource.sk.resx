@@ -273,7 +273,7 @@
     <value>Dokumenty</value>
   </data>
   <data name="ProductUserOpportunities" xml:space="preserve">
-    <value>Vytvárajte a upravujte vlastné dokumenty, rovnako ako zdieľané dokumenty s príslušnými prístupovými právami|Udeľte práva na čítanie/úpravu ostatným používateľom na dokumenty a priečinky|Prepojte Dropbox, Box a iné kontá v sekcii 'Moje dokumenty'</value>
+    <value>Vytvárajte a upravujte vlastné dokumenty, rovnako ako zdieľané dokumenty s príslušnými prístupovými právami|Udeľte práva na čítanie/úpravu ostatným používateľom na dokumenty a priečinky|Prepojte Dropbox, Box a iné kontá v sekcii 'Dokumenty'</value>
   </data>
   <data name="UnknownFirstName" xml:space="preserve">
     <value>Krstné meno</value>
@@ -463,5 +463,17 @@
   </data>
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>Typ</value>
+  </data>
+  <data name="Date" xml:space="preserve">
+    <value>Dátum</value>
+  </data>
+  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
+    <value>Pokročilý používateľ</value>
+  </data>
+  <data name="RoleEnum_PowerUser" xml:space="preserve">
+    <value>Pokročilý používateľ</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>Používateľ</value>
   </data>
 </root>

@@ -32,7 +32,7 @@ public class ConfigurationDto<T>
 {
     /// <summary>Document config</summary>
     /// <type>ASC.Web.Files.Services.DocumentService.DocumentConfig, ASC.Files.Core</type>
-    public DocumentConfigDto<T> Document { get; set; }
+    public DocumentConfigDto Document { get; set; }
 
     /// <summary>Document type</summary>
     /// <type>System.String, System</type>
@@ -65,6 +65,14 @@ public class ConfigurationDto<T>
     /// <summary>Error message</summary>
     /// <type>System.String, System</type>
     public string ErrorMessage { get; set; }
+
+    /// <summary>Specifies if the filling has started or not</summary>
+    /// <type>System.Boolean, System</type>
+    public bool? StartFilling { get; set; }
+
+    /// <summary>Filling session Id</summary>
+    /// <type>System.String, System</type>
+    public string FillingSessionId { get; set; }
 }
 
 public class EditorConfigurationDto<T>
@@ -100,6 +108,7 @@ public class CustomizationConfigDto<T>
     public bool About { get; set; }
 
     public CustomerConfigDto Customer { get; set; }
+    public AnonymousConfigDto Anonymous { get; set; }
 
     public FeedbackConfig Feedback  { get; set; }
 
@@ -125,6 +134,12 @@ public class LogoConfigDto
     public string ImageEmbedded { get; set; }
 
     public string Url { get; set; }
+    public bool Visible { get; set; }
+}
+
+public class AnonymousConfigDto
+{
+    public bool Request { get; set; }
 }
 
 public class CustomerConfigDto
@@ -140,7 +155,7 @@ public class CustomerConfigDto
     public string Www  { get; set; }
 }
 
-public class DocumentConfigDto<T>
+public class DocumentConfigDto
 {
     public string FileType  { get; set; }
     
@@ -156,7 +171,7 @@ public class DocumentConfigDto<T>
     
     public string SharedLinkKey { get; set; }
     
-    public FileReferenceData<T> ReferenceData { get; set; }
+    public FileReferenceData ReferenceData { get; set; }
 
     public string Title { get; set; }
 
@@ -178,7 +193,8 @@ public class InfoConfigDto
     public string Uploaded { get; set; }
 }
 
-[Scope]
+[Scope(GenericArguments = [typeof(int)])]
+[Scope(GenericArguments = [typeof(string)])]
 public class ConfigurationConverter<T>(
     CommonLinkUtility commonLinkUtility, 
     FilesLinkUtility filesLinkUtility, 
@@ -187,7 +203,7 @@ public class ConfigurationConverter<T>(
     DocumentConfigConverter<T> documentConfigConverter,
     DocumentServiceHelper documentServiceHelper)
 {
-    public async Task<ConfigurationDto<T>> Convert(Configuration<T> source, File<T> file)
+    public async Task<ConfigurationDto<T>> Convert(Configuration<T> source, File<T> file, string fillingSessionId = "")
     {   
         if (source == null)
         {
@@ -198,7 +214,7 @@ public class ConfigurationConverter<T>(
         {
             Document = await documentConfigConverter.Convert(source.Document, file),
             DocumentType = source.GetDocumentType(file),
-            EditorConfig = await editorConfigurationConverter.Convert(source, file),
+            EditorConfig = await editorConfigurationConverter.Convert(source, file, fillingSessionId),
             EditorType = source.EditorType,
             EditorUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.DocServiceApiUrl),
             ErrorMessage = source.Error
@@ -211,10 +227,11 @@ public class ConfigurationConverter<T>(
     }
 }
 
-[Scope]
+[Scope(GenericArguments = [typeof(int)])]
+[Scope(GenericArguments = [typeof(string)])]
 public class EditorConfigurationConverter<T>(CustomizationConfigConverter<T> configConverter)
 {
-    public async Task<EditorConfigurationDto<T>> Convert(Configuration<T> configuration, File<T> file)
+    public async Task<EditorConfigurationDto<T>> Convert(Configuration<T> configuration, File<T> file, string fillingSessionId)
     {
         var source = configuration.EditorConfig;
         
@@ -226,8 +243,8 @@ public class EditorConfigurationConverter<T>(CustomizationConfigConverter<T> con
         var fileType = configuration.GetFileType(file);
         var result = new EditorConfigurationDto<T>
         {
-            CallbackUrl = await source.GetCallbackUrl(file.Id.ToString()),
-            CoEditing = source.CoEditing,
+            CallbackUrl = await source.GetCallbackUrl(file.Id.ToString(), fillingSessionId),
+            CoEditing = await source.GetCoEditingAsync(),
             CreateUrl = await source.GetCreateUrl(configuration.EditorType, fileType),
             Customization = await configConverter.Convert(configuration, file),
             Embedded = source.GetEmbedded(configuration.EditorType),
@@ -237,18 +254,20 @@ public class EditorConfigurationConverter<T>(CustomizationConfigConverter<T> con
             ModeWrite = source.ModeWrite,
             Plugins = source.Plugins,
             Templates = await source.GetTemplates(fileType, configuration.Document.Title),
-            User = source.User
+            User = await source.GetUserAsync()
         };
 
         return result;
     }
 }
 
-[Scope]
+[Scope(GenericArguments = [typeof(int)])]
+[Scope(GenericArguments = [typeof(string)])]
 public class CustomizationConfigConverter<T>(
     LogoConfigConverter<T> configConverter, 
     CustomerConfigConverter customerConfigConverter,
-    CoreBaseSettings coreBaseSettings)
+    CoreBaseSettings coreBaseSettings,
+    AnonymousConfigConverter<T> anonymousConfigConverter)
 {
     public async Task<CustomizationConfigDto<T>> Convert(Configuration<T> configuration, File<T> file)
     {    
@@ -269,14 +288,16 @@ public class CustomizationConfigConverter<T>(
             Logo = await configConverter.Convert(configuration),
             MentionShare = await source.GetMentionShare(file),
             ReviewDisplay = source.GetReviewDisplay(configuration.EditorConfig.ModeWrite),
-            SubmitForm = await source.GetSubmitForm(file, configuration.EditorConfig.ModeWrite)
+            SubmitForm = await source.GetSubmitForm(file, configuration.EditorConfig.ModeWrite),
+            Anonymous = anonymousConfigConverter.Convert(configuration)
         };
 
         return result;
     }
 }
 
-[Scope]
+[Scope(GenericArguments = [typeof(int)])]
+[Scope(GenericArguments = [typeof(string)])]
 public class LogoConfigConverter<T>
 {
     public async Task<LogoConfigDto> Convert(Configuration<T> configuration)
@@ -293,7 +314,30 @@ public class LogoConfigConverter<T>
             Image = await source.GetImage(configuration.EditorType),
             ImageDark = await source.GetImageDark(),
             ImageEmbedded = await source.GetImageEmbedded(configuration.EditorType),
-            Url = source.Url
+            Url = source.Url,
+            Visible = source.GetVisible(configuration.EditorType)
+        };
+
+        return result;
+    }
+}
+
+[Scope(GenericArguments = [typeof(int)])]
+[Scope(GenericArguments = [typeof(string)])]
+public class AnonymousConfigConverter<T>
+{
+    public AnonymousConfigDto Convert(Configuration<T> configuration)
+    {
+        var source = configuration.EditorConfig?.Customization?.Logo;
+
+        if (source == null)
+        {
+            return null;
+        }
+
+        var result = new AnonymousConfigDto
+        {
+            Request = configuration.Document.Permissions.Chat
         };
 
         return result;
@@ -323,17 +367,18 @@ public class CustomerConfigConverter
     }
 }
 
-[Scope]
+[Scope(GenericArguments = [typeof(int)])]
+[Scope(GenericArguments = [typeof(string)])]
 public class DocumentConfigConverter<T>(InfoConfigConverter<T> configConverter)
 {
-    public async Task<DocumentConfigDto<T>> Convert(DocumentConfig<T> source, File<T> file)
+    public async Task<DocumentConfigDto> Convert(DocumentConfig<T> source, File<T> file)
     {        
         if (source == null)
         {
             return null;
         }
         
-        var result = new DocumentConfigDto<T>
+        var result = new DocumentConfigDto
         {
             FileType = source.GetFileType(file),
             Info = await configConverter.Convert(source.Info, file),
@@ -351,7 +396,8 @@ public class DocumentConfigConverter<T>(InfoConfigConverter<T> configConverter)
     }
 }
 
-[Scope]
+[Scope(GenericArguments = [typeof(int)])]
+[Scope(GenericArguments = [typeof(string)])]
 public class InfoConfigConverter<T>
 {
     public async Task<InfoConfigDto> Convert(InfoConfig<T> source, File<T> file)

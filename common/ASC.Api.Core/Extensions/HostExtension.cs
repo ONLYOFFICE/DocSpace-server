@@ -26,23 +26,23 @@
 
 namespace ASC.Api.Core.Extensions;
 
-public interface IStartupTask
-{
-    Task ExecuteAsync(CancellationToken cancellationToken = default);
-}
-
 public static class HostExtension
 {
     public static async Task RunWithTasksAsync(this WebApplication webHost, CancellationToken cancellationToken = default)
     {
         CustomSynchronizationContext.CreateContext();
+        
         // Load all tasks from DI
         var startupTasks = webHost.Services.GetServices<IStartupTask>();
 
         // Execute all the tasks
         foreach (var startupTask in startupTasks)
-        {
-            await startupTask.ExecuteAsync(cancellationToken);
+        {        
+            var t = startupTask.ExecuteAsync(cancellationToken);
+            if (startupTask is not IStartupTaskNotAwaitable)
+            {
+                await t.ConfigureAwait(false);
+            }
         }
 
         // Start the tasks as normal

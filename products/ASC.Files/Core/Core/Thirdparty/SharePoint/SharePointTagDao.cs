@@ -24,28 +24,25 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using File = Microsoft.SharePoint.Client.File;
-using Folder = Microsoft.SharePoint.Client.Folder;
-
 namespace ASC.Files.Thirdparty.SharePoint;
 
 [Scope]
-internal class SharePointTagDao(IServiceProvider serviceProvider,
-        UserManager userManager,
-        TenantManager tenantManager,
-        TenantUtil tenantUtil,
-        IDbContextFactory<FilesDbContext> dbContextFactory,
-        SetupInfo setupInfo,
-        FileUtility fileUtility,
-        TempPath tempPath,
-        RegexDaoSelectorBase<File, Folder, ClientObject> regexDaoSelectorBase)
-    : SharePointDaoBase(serviceProvider, userManager, tenantManager, tenantUtil, dbContextFactory, setupInfo,
-        fileUtility, tempPath, regexDaoSelectorBase), IThirdPartyTagDao
+internal class SharePointTagDao(
+    IDaoFactory daoFactory,
+    IServiceProvider serviceProvider,
+    UserManager userManager,
+    TenantManager tenantManager,
+    TenantUtil tenantUtil,
+    IDbContextFactory<FilesDbContext> dbContextFactory,
+    FileUtility fileUtility,
+    SharePointDaoSelector regexDaoSelectorBase)
+    : SharePointDaoBase(daoFactory, serviceProvider, userManager, tenantManager, tenantUtil, dbContextFactory, fileUtility, regexDaoSelectorBase), IThirdPartyTagDao
 {
     private readonly TenantManager _tenantManager = tenantManager;
 
     public async IAsyncEnumerable<Tag> GetNewTagsAsync(Guid subject, Folder<string> parentFolder, bool deepSearch)
     {
+        var mapping = _daoFactory.GetMapping<string>();
         var folderId = DaoSelector.ConvertId(parentFolder.Id);
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
@@ -67,13 +64,12 @@ internal class SharePointTagDao(IServiceProvider serviceProvider,
                 Name = r.Tag.Name,
                 Type = r.Tag.Type,
                 Owner = r.Tag.Owner,
-                EntryId = await MappingIDAsync(r.TagLink.EntryId),
+                EntryId = await mapping.MappingIdAsync(r.TagLink.EntryId),
                 EntryType = r.TagLink.EntryType,
                 Count = r.TagLink.Count,
                 Id = r.Tag.Id
             });
         }
-
 
         if (deepSearch)
         {

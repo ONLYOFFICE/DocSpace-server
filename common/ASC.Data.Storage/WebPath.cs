@@ -31,8 +31,9 @@ public class WebPathSettings
 {
     private readonly IEnumerable<Appender> _appenders;
 
-    public WebPathSettings(Configuration.Storage storage)
+    public WebPathSettings(StorageConfigExtension storageConfigExtension)
     {
+        var storage = storageConfigExtension.Storage;
         if (storage != null)
         {
             _appenders = storage.Appender;
@@ -124,33 +125,16 @@ public class WebPathSettings
     }
 }
 
-[Scope(Additional = typeof(StaticUploaderExtension))]
+[Scope]
 public class WebPath(
     WebPathSettings webPathSettings,
     IServiceProvider serviceProvider,
     SettingsManager settingsManager,
     StorageSettingsHelper storageSettingsHelper,
+    IHttpContextAccessor httpContextAccessor,
     CoreBaseSettings coreBaseSettings,
     ILoggerProvider options)
 {
-    private static readonly ConcurrentDictionary<string, bool> _existing = new();
-    private readonly IHttpContextAccessor _httpContextAccessor;
-
-    public WebPath(
-        WebPathSettings webPathSettings,
-        IServiceProvider serviceProvider,
-        SettingsManager settingsManager,
-        StorageSettingsHelper storageSettingsHelper,
-        IHttpContextAccessor httpContextAccessor,
-        IHostEnvironment hostEnvironment,
-        CoreBaseSettings coreBaseSettings,
-        ILoggerProvider options,
-        IHttpClientFactory clientFactory)
-            : this(webPathSettings, serviceProvider, settingsManager, storageSettingsHelper, coreBaseSettings, options)
-    {
-        _httpContextAccessor = httpContextAccessor;
-    }
-
     public async Task<string> GetPathAsync(string relativePath)
     {
         if (!string.IsNullOrEmpty(relativePath) && relativePath.IndexOf('~') == 0)
@@ -175,14 +159,6 @@ public class WebPath(
             }
         }
 
-        return webPathSettings.GetPath(_httpContextAccessor?.HttpContext, options, relativePath);
-    }
-}
-
-public class StaticUploaderExtension
-{
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<StaticUploader>();
+        return webPathSettings.GetPath(httpContextAccessor?.HttpContext, options, relativePath);
     }
 }

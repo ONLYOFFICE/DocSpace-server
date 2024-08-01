@@ -24,18 +24,20 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Common.Utils;
+
 using Constants = ASC.Core.Configuration.Constants;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace ASC.AuditTrail.Models.Mappings;
 
 [Scope]
-internal class EventTypeConverter(UserFormatter userFormatter,
-        AuditActionMapper actionMapper,
-        MessageTarget messageTarget,
-        TenantUtil tenantUtil)
+internal class EventTypeConverter(
+    UserFormatter userFormatter,
+    AuditActionMapper actionMapper,
+    TenantUtil tenantUtil)
     : ITypeConverter<LoginEventQuery, LoginEvent>,
-        ITypeConverter<AuditEventQuery, AuditEvent>
+      ITypeConverter<AuditEventQuery, AuditEvent>
 {
     public LoginEvent Convert(LoginEventQuery source, LoginEvent destination, ResolutionContext context)
     {
@@ -89,7 +91,7 @@ internal class EventTypeConverter(UserFormatter userFormatter,
         source.Event.Target = null;
         var result = context.Mapper.Map<AuditEvent>(source.Event);
 
-        result.Target = messageTarget.Parse(target);
+        result.Target = MessageTarget.Parse(target);
 
         if (source.Event.DescriptionRaw != null)
         {
@@ -109,17 +111,17 @@ internal class EventTypeConverter(UserFormatter userFormatter,
         {
             result.UserName = AuditReportResource.GuestAccount;
         }
-        else if (!(string.IsNullOrEmpty(source.FirstName) || string.IsNullOrEmpty(source.LastName)))
+        else if (!(string.IsNullOrEmpty(source.UserData?.FirstName) || string.IsNullOrEmpty(source.UserData?.LastName)))
         {
-            result.UserName = userFormatter.GetUserName(source.FirstName, source.LastName);
+            result.UserName = userFormatter.GetUserName(source.UserData?.FirstName, source.UserData?.LastName);
         }
-        else if (!string.IsNullOrEmpty(source.FirstName))
+        else if (!string.IsNullOrEmpty(source.UserData?.FirstName))
         {
-            result.UserName = source.FirstName;
+            result.UserName = source.UserData.FirstName;
         }
-        else if (!string.IsNullOrEmpty(source.LastName))
+        else if (!string.IsNullOrEmpty(source.UserData?.LastName))
         {
-            result.UserName = source.LastName;
+            result.UserName = source.UserData.LastName;
         }
         else
         {
@@ -129,13 +131,32 @@ internal class EventTypeConverter(UserFormatter userFormatter,
         var map = actionMapper.GetMessageMaps(result.Action);
         if (map != null)
         {
-            result.ActionText = actionMapper.GetActionText(map, result);
+            if (result.Action is 
+                (int)MessageAction.QuotaPerPortalChanged or 
+                (int)MessageAction.QuotaPerRoomChanged or 
+                (int)MessageAction.QuotaPerUserChanged
+                && long.TryParse(result.Description.FirstOrDefault(), out var size))
+            { 
+                result.ActionText = string.Format(map.GetActionText(), CommonFileSizeComment.FilesSizeToString(AuditReportResource.FileSizePostfix, size));
+            }
+            else if (result.Action is (int)MessageAction.CustomQuotaPerRoomDefault or
+                (int)MessageAction.CustomQuotaPerRoomChanged or
+                (int)MessageAction.CustomQuotaPerUserDefault or
+                (int)MessageAction.CustomQuotaPerUserChanged
+                && long.TryParse(result.Description.FirstOrDefault(), out var customSize))
+            {
+                result.ActionText = string.Format(map.GetActionText(), result.Description.LastOrDefault(), CommonFileSizeComment.FilesSizeToString(AuditReportResource.FileSizePostfix, customSize));
+            }
+            else
+            {
+                result.ActionText = actionMapper.GetActionText(map, result);
+            }
+
             result.ActionTypeText = actionMapper.GetActionTypeText(map);
             result.Product = actionMapper.GetProductText(map);
             result.Module = actionMapper.GetModuleText(map);
         }
-
-
+        
         result.Date = tenantUtil.DateTimeFromUtc(result.Date);
         if (!string.IsNullOrEmpty(result.IP))
         {
@@ -152,7 +173,7 @@ internal class EventTypeConverter(UserFormatter userFormatter,
 
             if (!string.IsNullOrEmpty(rawNotificationInfo) && rawNotificationInfo.StartsWith('{') && rawNotificationInfo.EndsWith('}'))
             {
-                var notificationInfo = JsonSerializer.Deserialize<AdditionalNotificationInfo<JsonElement>>(rawNotificationInfo);
+                var notificationInfo = JsonSerializer.Deserialize<EventDescription<JsonElement>>(rawNotificationInfo);
 
                 result.Context = result.Action == (int)MessageAction.RoomRenamed ? notificationInfo.RoomOldTitle :
                     !string.IsNullOrEmpty(notificationInfo.RoomTitle) ? notificationInfo.RoomTitle : notificationInfo.RootFolderTitle;

@@ -325,15 +325,15 @@ Jūsu $PortalUrl portāla adrese tika nomainīta uz jauno "${__VirtualRootPath}"
 *Piezīme*: DNS uzstādījumi un vienreizējās pierakstīšanās iespējas nedarbosies līdz to maiņai.</value>
   </data>
   <data name="pattern_profile_delete" xml:space="preserve">
-    <value>h1.Profila dzēšana no portāla "${__VirtualRootPath}":"${__VirtualRootPath}"
+    <value>Konta atspējošana "${__VirtualRootPath}":"${__VirtualRootPath}"
 
-Jūs esat pieprasījuši neatgriezeniski dzēst savu profilu no "${__VirtualRootPath}":"${__VirtualRootPath}" portāla.
+Jūs pieprasījāt atspējot savu kontu DocSpace ${__VirtualRootPath}:${__VirtualRootPath}.
 
-Ja vēlaties dzēst savu profilu, lūdzu, sekojiet zemāk esošajai saitei, lai apstiprinātu darbību:
+Ja joprojām vēlies atspējot kontu, izmanto tālāk norādīto saiti, lai apstiprinātu darbību:
 
 $OrangeButton
 
-*Piezīme*: šī saite ir derīga tikai 7 dienas. Lūdzu, šajā laikā pabeidziet profila dzēšanu.</value>
+*Piezīme*: šī saite ir derīga tikai septiņas dienas. Pabeidziet konta atspējošanas procesu šajā periodā.</value>
   </data>
   <data name="pattern_profile_updated" xml:space="preserve">
     <value>h1.Jūsu"$__VirtualRootPath":"$__VirtualRootPath" profils ir mainīts
@@ -426,10 +426,10 @@ $TrulyYours
 ^Jūs saņemat šo e-pastu, jo esat reģistrējies portālā "${__VirtualRootPath}":"${__VirtualRootPath}". Ja nevēlaties saņemt paziņojumus par profila atjauninājumiem, lūdzu, labojiet savus "abonēšanas uzstādījumus":"$RecipientSubscriptionConfigURL".^</value>
   </data>
   <data name="pattern_send_whats_new" xml:space="preserve">
-    <value>h1.Lūk, kas jauns jūsu DocSpace šajā datumā: $Date
+    <value>h1.Lūk, kas jauns jūsu DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" $Date
 
-#foreach($activity in $Activities)
-$activity
+#foreach($activity šeit: $Activities)
+$aktivitāte
 
 #end</value>
   </data>
@@ -489,7 +489,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Portāla adreses maiņa</value>
   </data>
   <data name="subject_profile_delete" xml:space="preserve">
-    <value>Jūsu profila dzēšana no ${__VirtualRootPath} portāla</value>
+    <value>Konta atspējošana šajā datumā: ${__VirtualRootPath}</value>
   </data>
   <data name="subject_profile_updated" xml:space="preserve">
     <value>Tika mainīts jūsu profils portālā ${__VirtualRootPath}</value>
@@ -1148,9 +1148,6 @@ $TrulyYours</value>
   <data name="ButtonAccept" xml:space="preserve">
     <value>Piekrist</value>
   </data>
-  <data name="AcceptDocSpace" xml:space="preserve">
-    <value>PIEKRIST</value>
-  </data>
   <data name="ButtonActivateEmail" xml:space="preserve">
     <value>Noklikšķiniet šeit, lai aktivizētu savu e-pasta adresi</value>
   </data>
@@ -1166,16 +1163,13 @@ $TrulyYours</value>
   <data name="ButtonChangeTfa" xml:space="preserve">
     <value>Konfigurējiet autentificētāja lietotni</value>
   </data>
-  <data name="ButtonCollaborateDocSpace" xml:space="preserve">
+  <data name="ButtonCollaborate" xml:space="preserve">
     <value>Sadarboties DocSpace</value>
   </data>
   <data name="ButtonConfirm" xml:space="preserve">
     <value>Apstiprināt</value>
   </data>
-  <data name="ButtonConfirmEmail" xml:space="preserve">
-    <value>APSTIPRINĀT</value>
-  </data>
-  <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
+  <data name="ButtonConfirmInvite" xml:space="preserve">
     <value>Apstiprināt DocSpace uzaicinājumu</value>
   </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
@@ -1200,7 +1194,7 @@ $TrulyYours</value>
     <value>Atstāt atsauksmi</value>
   </data>
   <data name="ButtonRemoveProfile" xml:space="preserve">
-    <value>Izņemt profilu</value>
+    <value>Atspējot kontu</value>
   </data>
   <data name="ButtonRenewNow" xml:space="preserve">
     <value>Atjaunot tūlīt</value>
@@ -1314,7 +1308,7 @@ $TrulyYours</value>
     <value>Pagarinājuma periods jūsu ONLYOFFICE DocSpace beidzas rīt</value>
   </data>
   <data name="subject_send_whats_new" xml:space="preserve">
-    <value>Jaunumi jūsu portālā par $Date</value>
+    <value>Jaunumi jūsu portālā ${__VirtualRootPath} par šo datumu: $Date</value>
   </data>
   <data name="subject_storage_decryption_error" xml:space="preserve">
     <value>${LetterLogoText}. Atšifrēšanas process neizdevās</value>
@@ -1349,7 +1343,7 @@ Lai uzzinātu vairāk par dublēšanas procedūru, skatiet mūsu [Data backup]($
 Ja tev ir kādi jautājumi vai nepieciešama palīdzība, sazinies ar mums tīmekļa vietnē [${__SupportLink}](${__SupportLink})
 
 Ar cieņu
-ONLYOFFICE™ atbalsta komanda
+ONLYOFFICE atbalsta komanda
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
@@ -1452,6 +1446,7 @@ h1."$PortalUrl":"$PortalUrl"
 Jūsu portāls ir migrēts uz jaunu domēnu. Atjaunojiet piekļuvi portālam, norādot paroli, kas tiks izmantota pierakstoties.
 
 Lūdzu, izmantojiet tālāk norādīto saiti, lai iestatītu konta paroli:
+
 $OrangeButton
 
 *Piezīme*: šī saite ir derīga tikai septiņas dienas. Pabeidziet piekļuves atjaunošanas procesu šajā periodā.
@@ -1489,7 +1484,7 @@ Jūs varat atkārtoti aktivizēt savu portālu jebkurā laikā, noklikšķinot u
 Ja jums ir kādi jautājumi vai nepieciešama palīdzība, sazinies ar mums tīmekļa vietnē [${__SalesEmail}](mailto:${__SalesEmail})
 
 Ar cieņu
-ONLYOFFICE™ atbalsta komanda
+ONLYOFFICE atbalsta komanda
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete_tg" xml:space="preserve">
@@ -1514,7 +1509,7 @@ _Note_: šī saite ir derīga tikai septiņas dienas. Pabeidziet portāla dzēš
 Ja jums ir kādi jautājumi vai nepieciešama palīdzība, sazinies ar mums tīmekļa vietnē [${__SalesEmail}](mailto:${__SalesEmail})
 
 Ar cieņu
-ONLYOFFICE™ atbalsta komanda
+ONLYOFFICE atbalsta komanda
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
@@ -1702,5 +1697,96 @@ Jūsu pašreizējais tarifu plāns ir STARTUP (JAUNUZŅĒMUMS). Tas ir pilnīgi 
 *Izbaudiet jaunu dokumentu sadarbības veidu!*
 
 $TrulyYours</value>
+  </data>
+  <data name="ButtonGetFreeApp" xml:space="preserve">
+    <value>Saņemt bezmaksas lietojumprogrammu</value>
+  </data>
+  <data name="ButtonGetStarted" xml:space="preserve">
+    <value>Darba sākšana</value>
+  </data>
+  <data name="ButtonJoinRoom" xml:space="preserve">
+    <value>Pievienoties telpai</value>
+  </data>
+  <data name="ButtonRegister" xml:space="preserve">
+    <value>Reģistrēties</value>
+  </data>
+  <data name="ButtonUpgrade" xml:space="preserve">
+    <value>Atjaunināt</value>
+  </data>
+  <data name="pattern_migration_personal_to_docspace" xml:space="preserve">
+    <value>Sveiki!
+
+Datu migrācijas process no ONLYOFFICE Personal uz jūsu jauno ONLYOFFICE DocSpace ir veiksmīgi pabeigts.
+
+Lai piekļūtu savam DocSpace ar importētajiem datiem, vienkārši noklikšķiniet uz tālāk redzamās pogas:
+
+$OrangeButton
+
+Jūsu pašreizējais DocSpace plāns ir STARTUP (JAUNUZŅĒMUMS). Tas ir pilnīgi bez maksas.
+
+==Ja nepieciešams, varat mainīt jaunā DocSpace nosaukumu. Vienkārši pārslēdzieties uz Iestatījumi -&gt; Pielāgošana -&gt; DocSpace pārdēvēšana.==
+
+Izbaudiet jaunu dokumentu sadarbības veidu!
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_rooms_activity" xml:space="preserve">
+    <value>h1.Kas jauns jūsu DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" pēdējās stundas laikā
+
+#foreach($activity šeit: $Activities)
+$activity
+
+#end</value>
+  </data>
+  <data name="pattern_saas_admin_integrations_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 24px 40px 32px; text-align: center;"&gt;ONLYOFFICE DocSpace: Izpētiet noderīgas &lt;span style="color: #FF6F3D;"&gt;integrācijas&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Sveiki! Šajā informatīvajā izdevumā apkopojām lietošanai gatavās DocSpace integrācijas. Izmēģiniet tagad un uzlabojiet savu produktivitāti!&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="Margin: 0; padding-bottom: 24px; padding-top: 32px; padding-left: 40px; padding-right: 40px; text-align: left;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 64px; Margin:0; padding-left: 148px; padding-right: 32px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG1" alt="ONLYOFFICE" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 32px; Margin:0; padding-left: 0px; padding-right: 0px; padding-top: 16px; padding-bottom: 16px; vertical-align: top; width: 32px;"&gt;&lt;img width="32" src="$IMG2" alt="connecting to" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 64px; Margin:0; padding-left: 32px; padding-right: 148px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG3" alt="Zoom" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0px 40px 24px; text-align: center;"&gt;ONLYOFFICE DocSpace &amp; Zoom&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 16px; text-align: center;"&gt;Sadarbojieties ar jebkuru saturu Zoom sapulču laikā ar citiem dalībniekiem. Efektīvi pārvaldiet dokumentus sanāksmju starplaikos.&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 24px; text-align: center;"&gt;&lt;a href="https://www.onlyoffice.com/office-for-zoom.aspx" style="color: #FF6F3D; text-decoration: underline;" target="_blank"&gt;Uzziniet vairāk&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton1&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="Margin: 0; padding-bottom: 24px; padding-top: 32px; padding-left: 40px; padding-right: 40px; text-align: left;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 64px; Margin:0; padding-left: 148px; padding-right: 32px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG1" alt="ONLYOFFICE" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 32px; Margin:0; padding-left: 0px; padding-right: 0px; padding-top: 16px; padding-bottom: 16px; vertical-align: top; width: 32px;"&gt;&lt;img width="32" src="$IMG2" alt="connecting to" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 64px; Margin:0; padding-left: 32px; padding-right: 148px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG4" alt="Zapier" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0px 40px 24px; text-align: center;"&gt;ONLYOFFICE DocSpace &amp; Zapier&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 16px; text-align: center;"&gt;Automatizējiet savu darbplūsmu, izmantojot zaps DocSpace un dažādām lietojumprogrammām, piemēram, Asana, Slack, HubSpot, Discord, Linear utt.&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 24px; text-align: center;"&gt;&lt;a href="https://helpcenter.onlyoffice.com/integration/gettingstarted-zapier.aspx" style="color: #FF6F3D; text-decoration: underline;" target="_blank"&gt;Uzziniet vairāk&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton2&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="Margin: 0; padding-bottom: 24px; padding-top: 32px; padding-left: 40px; padding-right: 40px; text-align: left;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 64px; Margin:0; padding-left: 148px; padding-right: 32px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG1" alt="ONLYOFFICE" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 32px; Margin:0; padding-left: 0px; padding-right: 0px; padding-top: 16px; padding-bottom: 16px; vertical-align: top; width: 32px;"&gt;&lt;img width="32" src="$IMG2" alt="connecting to" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 64px; Margin:0; padding-left: 32px; padding-right: 148px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG5" alt="Wordpress" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0px 40px 24px; text-align: center;"&gt;ONLYOFFICE DocSpace &amp; Wordpress&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 16px; text-align: center;"&gt;Ieguliet dokumentus un telpas savā tīmekļa vietnē, ļaujot apmeklētājiem skatīt failus bez lejupielādes. Pārvaldiet biroja dokumentus, izmantojot DocSpace.&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 24px; text-align: center;"&gt;&lt;a href="https://www.onlyoffice.com/office-for-wordpress.aspx" style="color: #FF6F3D; text-decoration: underline;" target="_blank"&gt;Uzziniet vairāk&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton3&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="Margin: 0; padding-bottom: 24px; padding-top: 32px; padding-left: 40px; padding-right: 40px; text-align: left;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 64px; Margin:0; padding-left: 148px; padding-right: 32px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG1" alt="ONLYOFFICE" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 32px; Margin:0; padding-left: 0px; padding-right: 0px; padding-top: 16px; padding-bottom: 16px; vertical-align: top; width: 32px;"&gt;&lt;img width="32" src="$IMG2" alt="connecting to" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 64px; Margin:0; padding-left: 32px; padding-right: 148px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG6" alt="Drupal" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0px 40px 24px; text-align: center;"&gt;ONLYOFFICE DocSpace &amp; Drupal&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 16px; text-align: center;"&gt;Padariet biroja dokumentus viegli pieejamus jūsu tīmekļa vietnes apmeklētājiem un pārvaldiet failus, izmantojot DocSpace.&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 24px; text-align: center;"&gt;&lt;a href="https://www.onlyoffice.com/office-for-drupal.aspx" style="color: #FF6F3D; text-decoration: underline;" target="_blank"&gt;Uzziniet vairāk&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 64px; padding-top: 0; text-align: center;"&gt;$OrangeButton4&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_docspace_registration" xml:space="preserve">
+    <value>h1. ONLYOFFICE DocSpace: pabeidziet reģistrāciju
+
+
+Sveiki!
+
+Jūs esat aicināts pabeigt reģistrāciju ONLYOFFICE DocSpace tīmekļa vietnē "${__VirtualRootPath}":"${__VirtualRootPath}". Ievadiet savu vārdu un iestatiet paroli, noklikšķinot uz saites:
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_room_invite_existing_user" xml:space="preserve">
+    <value>Sveiki!
+
+$__AuthorName uzaicināja jūs pievienoties telpai "$Message":"$InviteLink" vietnē "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_migration_personal_to_docspace" xml:space="preserve">
+    <value>Datu migrācija uz ONLYOFFICE DocSpace ir veiksmīgi pabeigta</value>
+  </data>
+  <data name="subject_rooms_activity" xml:space="preserve">
+    <value>Jaunumi jūsu portālā pēdējās ${__VirtualRootPath} stundas laikā</value>
+  </data>
+  <data name="subject_saas_admin_integrations_v1" xml:space="preserve">
+    <value>Izpētiet noderīgas ONLYOFFICE DocSpace integrācijas</value>
+  </data>
+  <data name="subject_saas_docspace_registration" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace: pabeidziet reģistrāciju</value>
+  </data>
+  <data name="subject_saas_room_invite_existing_user" xml:space="preserve">
+    <value>Laipni aicināti pievienoties ONLYOFFICE DocSpace telpai</value>
   </data>
 </root>

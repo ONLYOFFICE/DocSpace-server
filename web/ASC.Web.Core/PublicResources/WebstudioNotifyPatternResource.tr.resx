@@ -357,15 +357,15 @@ $PortalUrl portal adresiniz "${__VirtualRootPath}":"${__VirtualRootPath}" olarak
 *Not*: Paylaşılan tüm belgeler artık erişilemezdir, ayrıca DNS ayarları ve tek giriş seçenekleri değiştirilene kadar durdurulmuştur. Üçüncü parti iCal linkleri siz yeniden yükleyene dek takviminize eklenmiş olup güncellenmeyecektir.</value>
   </data>
   <data name="pattern_profile_delete" xml:space="preserve">
-    <value>h1.Profilin "${__VirtualRootPath}":"${__VirtualRootPath}" portalından kaldırılması
+    <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" üzerindeki hesap devre dışı bırakılıyor
 
-Profilinizi kalıcı olarak "${__VirtualRootPath}":"${__VirtualRootPath}" portalından silme talebinde bulundunuz.
+DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" hesabınızın devre dışı bırakılmasını talep ettiniz.
 
-Profilinizi silmek istiyorsanız aşağıdaki linki takip edin:
+Hesabınızı yine de devre dışı bırakmak istiyorsanız işlemi onaylamak için lütfen aşağıdaki bağlantıyı izleyin:
 
 $OrangeButton
 
-*Not*: bu link 7 gün boyunca geçerli olacaktır. Lütfen bu süre zarfında profil silme işlemini tamamlayın.</value>
+*Not*: Bu bağlantı sadece 7 gün geçerlidir. Lütfen bu süre içinde hesap devre dışı bırakma işlemini tamamlayın.</value>
   </data>
   <data name="pattern_profile_updated" xml:space="preserve">
     <value>h1."$__VirtualRootPath":"$__VirtualRootPath" portalındaki profiliniz değiştirildi
@@ -437,7 +437,7 @@ $TrulyYours
 ^Profil güncellemeleri hakkında bildirim almak istemiyorsanız, lütfen "abonelik ayarlarınızı":"$RecipientSubscriptionConfigURL" değiştirin.^</value>
   </data>
   <data name="pattern_send_whats_new" xml:space="preserve">
-    <value>h1.$Date tarihinde DocSpace'inizdeki yenilikler burada
+    <value>h1.$Date tarihinde "${__VirtualRootPath}":"${__VirtualRootPath}" DocSpace'inizdeki yenilikler burada
 
 #foreach($activity in $Activities)
 $activity
@@ -515,7 +515,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Portal adres değişikliği</value>
   </data>
   <data name="subject_profile_delete" xml:space="preserve">
-    <value>${__VirtualRootPath} portalından profilinizin silinmesi</value>
+    <value>${__VirtualRootPath} üzerindeki hesap devre dışı bırakılıyor</value>
   </data>
   <data name="subject_profile_updated" xml:space="preserve">
     <value>${__VirtualRootPath} profiliniz değiştirildi</value>
@@ -1128,21 +1128,15 @@ Davet bağlantısına tıkladıktan sonra lütfen hesabınız için yeni bir şi
 $TrulyYours</value>
   </data>
   <data name="subject_send_whats_new" xml:space="preserve">
-    <value>$Date gününde portalda neler var?</value>
+    <value>${__VirtualRootPath} için $Date tarihinde portalınızda ne yenilikler var?</value>
   </data>
   <data name="subject_change_password_v115" xml:space="preserve">
     <value>Parolanızı değiştirmeyi onaylayın</value>
   </data>
-  <data name="AcceptDocSpace" xml:space="preserve">
-    <value>KABUL ET</value>
-  </data>
-  <data name="ButtonCollaborateDocSpace" xml:space="preserve">
+  <data name="ButtonCollaborate" xml:space="preserve">
     <value>DocSpace'te iş birliği yapın</value>
   </data>
-  <data name="ButtonConfirmEmail" xml:space="preserve">
-    <value>ONAYLA</value>
-  </data>
-  <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
+  <data name="ButtonConfirmInvite" xml:space="preserve">
     <value>DocSpace Davetini Onaylayın</value>
   </data>
   <data name="ButtonConfirmRoomInvite" xml:space="preserve">
@@ -1155,7 +1149,7 @@ $TrulyYours</value>
     <value>Geribildirim Bırak</value>
   </data>
   <data name="ButtonRemoveProfile" xml:space="preserve">
-    <value>Profili kaldır</value>
+    <value>Hesabı devre dışı bırak</value>
   </data>
   <data name="ButtonRenewNow" xml:space="preserve">
     <value>Şimdi yenile</value>
@@ -1178,7 +1172,7 @@ Yedekleme prosedürü hakkında daha fazla bilgi almak için lütfen [Veri Yede�
 Herhangi bir sorunuz veya yardıma ihtiyacınız olması halinde lütfen [${__SupportLink}](${__SupportLink}) adresinden bizimle iletişime geçin.
 
 Saygılarımızla,
-ONLYOFFICE™ Destek Ekibi
+ONLYOFFICE Destek Ekibi
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
@@ -1281,6 +1275,7 @@ h1."$PortalUrl":"$PortalUrl"
 Portalınız yeni bir alana taşındı. Lütfen oturum açmak için kullanılacak şifreyi belirleyerek portala erişiminizi yeniden etkin hale getirin.
 
 Hesap şifrenizi belirlemek üzere lütfen aşağıdaki bağlantıyı takip edin:
+
 $OrangeButton
 
 *Not*: Bu bağlantı yalnızca 7 gün boyunca geçerlidir. Lütfen erişimi yeniden etkin hale getirme işlemini bu süre zarfında tamamlayın.
@@ -1318,7 +1313,7 @@ Aşağıdaki bağlantıya tıklayarak portalınızı istediğiniz zaman yeniden 
 Herhangi bir sorunuz veya yardıma ihtiyacınız olması halinde lütfen [${__SalesEmail}](mailto:${__SalesEmail}) adresinden bizimle iletişime geçin.
 
 Saygılarımızla,
-ONLYOFFICE™ Destek Ekibi
+ONLYOFFICE Destek Ekibi
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete_tg" xml:space="preserve">
@@ -1343,7 +1338,7 @@ $OrangeButton
 Herhangi bir sorunuz veya yardıma ihtiyacınız olması halinde lütfen [${__SalesEmail}](mailto:${__SalesEmail}) adresinden bizimle iletişime geçin.
 
 Saygılarımızla,
-ONLYOFFICE™ Destek Ekibi
+ONLYOFFICE Destek Ekibi
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
@@ -1701,6 +1696,97 @@ Mevcut tarife planınız STARTUP'tır. Tamamen ücretsizdir ve şunları içerme
 &lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;100 yönetici/uzman kullanıcı&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;100 odaya kadar&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;100 GB disk alanı&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
 
 *Yeni bir belge iş birliği yönteminin keyfini çıkarın!*
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_rooms_activity" xml:space="preserve">
+    <value>Son bir saat içinde ${__VirtualRootPath} portalınızdaki yenilikler</value>
+  </data>
+  <data name="subject_saas_admin_integrations_v1" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace için faydalı entegrasyonları keşfedin</value>
+  </data>
+  <data name="subject_saas_docspace_registration" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace: kaydı tamamlayın</value>
+  </data>
+  <data name="subject_saas_room_invite_existing_user" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace odasına davetlisiniz</value>
+  </data>
+  <data name="subject_migration_personal_to_docspace" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace'e veri geçişi başarıyla tamamlandı</value>
+  </data>
+  <data name="ButtonGetFreeApp" xml:space="preserve">
+    <value>Ücretsiz uygulamayı edinin</value>
+  </data>
+  <data name="ButtonGetStarted" xml:space="preserve">
+    <value>Başlayın</value>
+  </data>
+  <data name="ButtonJoinRoom" xml:space="preserve">
+    <value>Odaya katıl</value>
+  </data>
+  <data name="ButtonRegister" xml:space="preserve">
+    <value>Kaydol</value>
+  </data>
+  <data name="ButtonUpgrade" xml:space="preserve">
+    <value>Yükseltme</value>
+  </data>
+  <data name="pattern_migration_personal_to_docspace" xml:space="preserve">
+    <value>Merhaba!
+
+ONLYOFFICE Personal'dan yeni ONLYOFFICE DocSpace'inize veri taşıma işlemi başarıyla tamamlandı.
+
+DocSpace'inize içe aktarılan verilerle erişmek için aşağıdaki düğmeyi tıklamanız yeterlidir:
+
+$OrangeButton
+
+Mevcut DocSpace planınız STARTUP'tır. Tamamen ücretsizdir.
+
+==Gerekirse, yeni DocSpace'inizin adını değiştirebilirsiniz. Sadece Ayarlar -&gt; Özelleştirme -&gt; DocSpace Yeniden Adlandırma adımlarını takip edin.==
+
+Yeni bir belge iş birliği yönteminin keyfini çıkarın!
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_rooms_activity" xml:space="preserve">
+    <value>h1.İşte son bir saat içinde DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" dosyanızdaki yenilikler
+
+#foreach($activity in $Activities)
+$activity
+
+#end</value>
+  </data>
+  <data name="pattern_saas_admin_integrations_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 24px 40px 32px; text-align: center;"&gt;ONLYOFFICE DocSpace: için faydalı&lt;span style="color: #FF6F3D;"&gt;entegrasyonları keşfedin&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Merhaba! Kullanıma hazır DocSpace entegrasyonlarını sizler için bu bültende topladık. Hemen deneyin ve üretkenliğinizi artırın!&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="Margin: 0; padding-bottom: 24px; padding-top: 32px; padding-left: 40px; padding-right: 40px; text-align: left;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 64px; Margin:0; padding-left: 148px; padding-right: 32px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG1" alt="ONLYOFFICE" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 32px; Margin:0; padding-left: 0px; padding-right: 0px; padding-top: 16px; padding-bottom: 16px; vertical-align: top; width: 32px;"&gt;&lt;img width="32" src="$IMG2" alt="connecting to" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 64px; Margin:0; padding-left: 32px; padding-right: 148px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG3" alt="Zoom" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0px 40px 24px; text-align: center;"&gt;ONLYOFFICE DocSpace &amp; Zoom&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 16px; text-align: center;"&gt;Toplantıları sırasında diğer katılımcılarla herhangi bir içerik üzerinde iş birliği yapın. Toplantılar arasında belgelerinizi verimli bir şekilde yönetin.&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 24px; text-align: center;"&gt;&lt;a href="https://www.onlyoffice.com/office-for-zoom.aspx" style="color: #FF6F3D; text-decoration: underline;" target="_blank"&gt;Daha fazlasını öğrenmek için&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton1&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="Margin: 0; padding-bottom: 24px; padding-top: 32px; padding-left: 40px; padding-right: 40px; text-align: left;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 64px; Margin:0; padding-left: 148px; padding-right: 32px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG1" alt="ONLYOFFICE" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 32px; Margin:0; padding-left: 0px; padding-right: 0px; padding-top: 16px; padding-bottom: 16px; vertical-align: top; width: 32px;"&gt;&lt;img width="32" src="$IMG2" alt="connecting to" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 64px; Margin:0; padding-left: 32px; padding-right: 148px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG4" alt="Zapier" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0px 40px 24px; text-align: center;"&gt;ONLYOFFICE DocSpace &amp; Zapier&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 16px; text-align: center;"&gt;DocSpace ve Asana, Slack, HubSpot, Discord, Linear gibi çeşitli uygulamalar için zap&amp;apos;leri kullanarak iş akışınızı otomatikleştirin.&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 24px; text-align: center;"&gt;&lt;a href="https://helpcenter.onlyoffice.com/integration/gettingstarted-zapier.aspx" style="color: #FF6F3D; text-decoration: underline;" target="_blank"&gt;Daha fazlasını öğrenmek için&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton2&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="Margin: 0; padding-bottom: 24px; padding-top: 32px; padding-left: 40px; padding-right: 40px; text-align: left;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 64px; Margin:0; padding-left: 148px; padding-right: 32px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG1" alt="ONLYOFFICE" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 32px; Margin:0; padding-left: 0px; padding-right: 0px; padding-top: 16px; padding-bottom: 16px; vertical-align: top; width: 32px;"&gt;&lt;img width="32" src="$IMG2" alt="connecting to" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 64px; Margin:0; padding-left: 32px; padding-right: 148px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG5" alt="Wordpress" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0px 40px 24px; text-align: center;"&gt;ONLYOFFICE DocSpace &amp; Wordpress&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 16px; text-align: center;"&gt;Dokümanları ve odaları web sitenize yerleştirerek ziyaretçilerin dosyaları indirmeden görüntülemesini sağlayın. DocSpace aracılığıyla ofis dokümanlarını yönetin.&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 24px; text-align: center;"&gt;&lt;a href="https://www.onlyoffice.com/office-for-wordpress.aspx" style="color: #FF6F3D; text-decoration: underline;" target="_blank"&gt;Daha fazlasını öğrenmek için&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton3&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="Margin: 0; padding-bottom: 24px; padding-top: 32px; padding-left: 40px; padding-right: 40px; text-align: left;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 64px; Margin:0; padding-left: 148px; padding-right: 32px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG1" alt="ONLYOFFICE" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 32px; Margin:0; padding-left: 0px; padding-right: 0px; padding-top: 16px; padding-bottom: 16px; vertical-align: top; width: 32px;"&gt;&lt;img width="32" src="$IMG2" alt="connecting to" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 64px; Margin:0; padding-left: 32px; padding-right: 148px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG6" alt="Drupal" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0px 40px 24px; text-align: center;"&gt;ONLYOFFICE DocSpace &amp; Drupal&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 16px; text-align: center;"&gt;Ofis belgelerini web sitenizin ziyaretçileri için kolayca erişilebilir hale getirin ve DocSpace aracılığıyla dosyaları yönetin.&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 24px; text-align: center;"&gt;&lt;a href="https://www.onlyoffice.com/office-for-drupal.aspx" style="color: #FF6F3D; text-decoration: underline;" target="_blank"&gt;Daha fazlasını öğrenmek için&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 64px; padding-top: 0; text-align: center;"&gt;$OrangeButton4&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_room_invite_existing_user" xml:space="preserve">
+    <value>Merhaba!
+
+$__AuthorName sizi "${__VirtualRootPath}":"${__VirtualRootPath}" üzerindeki "$Message":"$InviteLink" odasına katılmaya davet etti.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_docspace_registration" xml:space="preserve">
+    <value>h1. ONLYOFFICE DocSpace: kaydı tamamlayın
+
+
+Merhaba!
+
+ONLYOFFICE DocSpace için "${__VirtualRootPath}":"${__VirtualRootPath}" adresinden kayıt işlemini tamamlamaya davet edildiniz. Bağlantıya tıklayarak adınızı girin ve bir şifre belirleyin:
+
+$OrangeButton
 
 $TrulyYours</value>
   </data>

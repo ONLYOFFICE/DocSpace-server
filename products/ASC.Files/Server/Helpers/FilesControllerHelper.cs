@@ -24,33 +24,35 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Web.Files.Utils;
+
 namespace ASC.Files.Helpers;
 
+[Scope]
 public class FilesControllerHelper(IServiceProvider serviceProvider,
         FilesSettingsHelper filesSettingsHelper,
         FileUploader fileUploader,
         SocketManager socketManager,
         FileDtoHelper fileDtoHelper,
-        ApiContext apiContext,
         FileStorageService fileStorageService,
-        FolderContentDtoHelper folderContentDtoHelper,
         IHttpContextAccessor httpContextAccessor,
-        FolderDtoHelper folderDtoHelper,
         ILogger<FilesControllerHelper> logger,
         ApiDateTimeHelper apiDateTimeHelper,
         UserManager userManager,
         DisplayUserSettingsHelper displayUserSettingsHelper,
         FileConverter fileConverter,
-        PathProvider pathProvider)
+        PathProvider pathProvider,
+        FileChecker fileChecker,
+        IDistributedCache distributedCache,
+        FillingFormResultDtoHelper fillingFormResultDtoHelper)
     : FilesHelperBase(filesSettingsHelper,
             fileUploader,
             socketManager,
             fileDtoHelper,
-            apiContext,
             fileStorageService,
-            folderContentDtoHelper,
+            fileChecker,
             httpContextAccessor,
-            folderDtoHelper)
+            distributedCache)
     {
     private readonly ILogger _logger = logger;
 
@@ -63,6 +65,19 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         {
             yield return await _fileDtoHelper.GetAsync(e);
         }
+    }
+
+    public async Task<bool> isFormPDF<T>(T fileId)
+    {
+        var file = await _fileStorageService.GetFileAsync(fileId, -1);
+        var extension = FileUtility.GetFileExtension(file.Title);
+        var fileType = FileUtility.GetFileTypeByExtention(extension);
+
+        if (fileType == FileType.Pdf)
+        {
+            return await _fileChecker.CheckExtendedPDF(file);
+        }
+        return false;
     }
 
     public async Task<string> GetPresignedUri<T>(T fileId)
@@ -162,14 +177,23 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         return await _fileDtoHelper.GetAsync(file);
     }
 
-    public async Task<EditHistoryDataDto> GetEditDiffUrlAsync<T>(T fileId, int version = 0, string doc = null)
+    public async Task<EditHistoryDataDto> GetEditDiffUrlAsync<T>(T fileId, int version = 0)
     {
-        return await _fileStorageService.GetEditDiffUrlAsync(fileId, version, doc);
+        return await _fileStorageService.GetEditDiffUrlAsync(fileId, version);
     }
 
-    public async IAsyncEnumerable<EditHistoryDto> GetEditHistoryAsync<T>(T fileId, string doc = null)
+    public async Task<FillingFormResultDto<T>> GetFillResultAsync<T>(T formId)
     {
-        await foreach (var f in _fileStorageService.GetEditHistoryAsync(fileId, doc))
+        if (formId != null)
+        {
+            return await fillingFormResultDtoHelper.GetAsync(formId);
+        }
+        return null;
+    }
+
+    public async IAsyncEnumerable<EditHistoryDto> GetEditHistoryAsync<T>(T fileId)
+    {
+        await foreach (var f in _fileStorageService.GetEditHistoryAsync(fileId))
         {
             yield return new EditHistoryDto(f, apiDateTimeHelper, userManager, displayUserSettingsHelper);
         }
@@ -190,9 +214,9 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         return await _fileDtoHelper.GetAsync(result);
     }
 
-    public async IAsyncEnumerable<EditHistoryDto> RestoreVersionAsync<T>(T fileId, int version = 0, string url = null, string doc = null)
+    public async IAsyncEnumerable<EditHistoryDto> RestoreVersionAsync<T>(T fileId, int version = 0, string url = null)
     {
-        await foreach (var e in _fileStorageService.RestoreVersionAsync(fileId, version, url, doc))
+        await foreach (var e in _fileStorageService.RestoreVersionAsync(fileId, version, url))
         {
             yield return new EditHistoryDto(e, apiDateTimeHelper, userManager, displayUserSettingsHelper);
         }
@@ -230,6 +254,19 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         return await GetFileInfoAsync(file.Id);
     }
 
+    public async Task<FileDto<T>> SaveAsPdf<T>(T fileId, T folderId, string title)
+    {
+        try
+        {
+            var resultFile = await _fileStorageService.SaveAsPdf(fileId, folderId, title);
+            return await _fileDtoHelper.GetAsync(resultFile);
+        }
+        catch (FileNotFoundException e)
+        {
+            throw new ItemNotFoundException("File not found", e);
+        }
+    }
+
     public async Task<FileDto<T>> UpdateFileStreamAsync<T>(Stream file, T fileId, string fileExtension, bool encrypted = false, bool forcesave = false)
     {
         try
@@ -244,7 +281,7 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         }
     }
 
-    public async Task<FileDto<TTemplate>> CopyFileAsAsync<T, TTemplate>(T fileId, TTemplate destFolderId, string destTitle, string password = null)
+    public async Task<FileDto<TTemplate>> CopyFileAsAsync<T, TTemplate>(T fileId, TTemplate destFolderId, string destTitle, string password = null, bool toForm = false)
     {
         var service = serviceProvider.GetService<FileStorageService>();
         var file = await _fileStorageService.GetFileAsync(fileId, -1);
@@ -258,8 +295,8 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
             return await _fileDtoHelper.GetAsync(newFile);
         }
 
-        await using var fileStream = await fileConverter.ExecAsync(file, destExt, password);
+        await using var fileStream = await fileConverter.ExecAsync(file, destExt, password, toForm);
         var controller = serviceProvider.GetService<FilesControllerHelper>();
-            return await controller.InsertFileAsync(destFolderId, fileStream, destTitle, true);
-        }
+        return await controller.InsertFileAsync(destFolderId, fileStream, destTitle, true);
     }
+}

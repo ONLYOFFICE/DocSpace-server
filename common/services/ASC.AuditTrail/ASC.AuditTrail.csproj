@@ -16,7 +16,7 @@
     <None Remove="Attributes\**" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="CsvHelper" Version="31.0.2" />
+    <PackageReference Include="CsvHelper" Version="33.0.1" />
     <PackageReference Include="EtaEmre.NetEscapades.EnumGenerators" Version="1.0.0-beta07" />
   </ItemGroup>
 
@@ -83,6 +83,9 @@
       <DependentUpon>AuditReportResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="AuditReportResource.sl.resx">
+      <DependentUpon>AuditReportResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="AuditReportResource.sr-Cyrl-RS.resx">
       <DependentUpon>AuditReportResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="AuditReportResource.sr-Latn-RS.resx">

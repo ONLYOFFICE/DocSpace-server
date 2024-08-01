@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Web.Core.Utility;
+
 using Constants = ASC.Core.Users.Constants;
 using Mapping = ASC.ActiveDirectory.Base.Settings.LdapSettings.MappingFields;
 using SecurityContext = ASC.Core.SecurityContext;
@@ -40,7 +42,10 @@ public class LdapUserManager(ILogger<LdapUserManager> logger,
     SettingsManager settingsManager,
     DisplayUserSettingsHelper displayUserSettingsHelper,
     UserFormatter userFormatter,
-    NovellLdapUserImporter novellLdapUserImporter)
+    NovellLdapUserImporter novellLdapUserImporter,
+    IServiceScopeFactory serviceScopeFactory,
+    TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
+    QuotaSocketManager quotaSocketManager)
 {
     private LdapLocalization _resource;
 
@@ -111,7 +116,27 @@ public class LdapUserManager(ILogger<LdapUserManager> logger,
 
             logger.DebugSaveUserInfo(ldapUserInfo.GetUserInfoString());
 
-            portalUserInfo = await userManager.SaveUserInfo(ldapUserInfo);
+            var settings = await settingsManager.LoadAsync<LdapSettings>();
+
+            portalUserInfo = await userManager.SaveUserInfo(ldapUserInfo, EmployeeType.Collaborator);
+
+            var groupId = settings.UsersType switch
+            {
+                EmployeeType.User => Constants.GroupUser.ID,
+                EmployeeType.DocSpaceAdmin => Constants.GroupAdmin.ID,
+                EmployeeType.Collaborator => Constants.GroupCollaborator.ID,
+                _ => Guid.Empty
+            };
+
+            if (groupId != Guid.Empty)
+            {
+                await userManager.AddUserIntoGroupAsync(portalUserInfo.Id, groupId, true);
+            }
+            else if (settings.UsersType == EmployeeType.RoomAdmin)
+            {
+                var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountPaidUserFeature, int>();
+                _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
+            }
 
             var quotaSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
             if (quotaSettings.EnableQuota)
@@ -251,9 +276,10 @@ public class LdapUserManager(ILogger<LdapUserManager> logger,
                     source.Init(await tenantManager.GetCurrentTenantAsync());
                     var workContext = scope.ServiceProvider.GetRequiredService<WorkContext>();
                     var client = workContext.RegisterClient(scope.ServiceProvider, source);
+                    var urlShortener = scope.ServiceProvider.GetRequiredService<IUrlShortener>();
 
                     var confirmLink = await commonLinkUtility.GetConfirmationEmailUrlAsync(ldapUserInfo.Email, ConfirmType.EmailActivation);
-
+                   
                     await client.SendNoticeToAsync(
                         NotifyConstants.ActionLdapActivation,
                         [new DirectRecipient(ldapUserInfo.Email, null, [ldapUserInfo.Email], false)],
@@ -262,7 +288,7 @@ public class LdapUserManager(ILogger<LdapUserManager> logger,
                         new TagValue(NotifyConstants.TagUserName, ldapUserInfo.DisplayUserName(displayUserSettingsHelper)),
                         new TagValue(NotifyConstants.TagUserEmail, ldapUserInfo.Email),
                         new TagValue(NotifyConstants.TagMyStaffLink, commonLinkUtility.GetFullAbsolutePath(commonLinkUtility.GetMyStaff())),
-                        NotifyConstants.TagOrangeButton(_resource.NotifyButtonJoin, confirmLink),
+                        NotifyConstants.TagOrangeButton(_resource.NotifyButtonJoin,  await urlShortener.GetShortenLinkAsync(confirmLink)),
                         new TagValue(NotifyCommonTags.WithoutUnsubscribe, true));
                 }
 
@@ -614,7 +640,7 @@ public class LdapUserManager(ILogger<LdapUserManager> logger,
 
                 var tenant = await tenantManager.GetCurrentTenantAsync();
 
-                Action().Start();
+                _ = Task.Run(Action);
 
                 if (ldapUserInfo.Item2.IsDisabled)
                 {
@@ -626,10 +652,9 @@ public class LdapUserManager(ILogger<LdapUserManager> logger,
 
                 async Task Action()
                 {
-                    using var scope = serviceProvider.CreateScope();
+                    await using var scope = serviceScopeFactory.CreateAsyncScope();
                     var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
                     var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
-                    var novellLdapUserImporter = scope.ServiceProvider.GetRequiredService<NovellLdapUserImporter>();
                     var userManager = scope.ServiceProvider.GetRequiredService<UserManager>();
                     var cookiesManager = scope.ServiceProvider.GetRequiredService<CookiesManager>();
                     var log = scope.ServiceProvider.GetRequiredService<ILogger<LdapUserManager>>();

@@ -110,13 +110,12 @@ public class ProtobufSerializer : IIntegrationEventSerializer
 
         if (baseType.GetSubtypes().All(s => s.DerivedType != itemType))
         {
-            var md5Hasher = MD5.Create();
-            var hashed = md5Hasher.ComputeHash(Encoding.UTF8.GetBytes(protoType.FullName));
+            var hashed = MD5.HashData(Encoding.UTF8.GetBytes(protoType.FullName));
             var hashedAsInt32 = BitConverter.ToInt32(hashed, 0);
 
             // restriction: https://developers.google.com/protocol-buffers/docs/proto3
-            var fieldNumber = (int)Math.Abs((hashedAsInt32 % (Math.Pow(2,29) - 1)));
-                    
+            var fieldNumber = (int)Math.Abs((hashedAsInt32 % (Math.Pow(2, 29) - 1)));
+
             baseType.AddSubType(fieldNumber, protoType);
 
             _processedProtoTypes.Add(protoType.FullName);

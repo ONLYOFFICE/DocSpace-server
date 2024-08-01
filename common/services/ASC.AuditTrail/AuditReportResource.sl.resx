@@ -248,7 +248,7 @@
     <value>Skupina posodobljena: {0}</value>
   </data>
   <data name="GuestAccount" xml:space="preserve">
-    <value>Račun gosta</value>
+    <value>Gost</value>
   </data>
   <data name="GuestActivated" xml:space="preserve">
     <value>Gost aktiviran: {0}</value>
@@ -738,5 +738,8 @@
   </data>
   <data name="PortalRenamed" xml:space="preserve">
     <value>Portal preimenovan</value>
+  </data>
+  <data name="FileSizePostfix" xml:space="preserve">
+    <value>bajtov,KB,MB,GB,TB</value>
   </data>
 </root>

@@ -27,24 +27,15 @@
 namespace ASC.Web.Studio.IntegrationEvents;
 
 [Scope]
-public class RemovePortalIntegrationEventHandler : IIntegrationEventHandler<RemovePortalIntegrationEvent>
+public class RemovePortalIntegrationEventHandler(RemovePortalWorker worker, ILogger<RemovePortalIntegrationEventHandler> logger) : IIntegrationEventHandler<RemovePortalIntegrationEvent>
 {
-    private readonly RemovePortalWorker _worker;
-    private readonly ILogger _logger;
-
-    public RemovePortalIntegrationEventHandler(RemovePortalWorker worker, ILogger<RemovePortalIntegrationEventHandler> logger)
-    {
-        _worker = worker;
-        _logger = logger;
-    }
-
     public async Task Handle(RemovePortalIntegrationEvent @event)
     {
-        using (_logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
+        using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
         {
-            _logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
+            logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
 
-            await _worker.StartAsync(@event.TenantId);
+            await worker.StartAsync(@event.TenantId);
         }
     }
 }

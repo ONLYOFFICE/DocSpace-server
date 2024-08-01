@@ -32,7 +32,8 @@ public class PathProvider(WebImageSupplier webImageSupplier,
     CommonLinkUtility commonLinkUtility,
     FilesLinkUtility filesLinkUtility,
     EmailValidationKeyProvider emailValidationKeyProvider,
-    GlobalStore globalStore)
+    GlobalStore globalStore,
+    ExternalShare externalShare)
 {
     public static readonly string ProjectVirtualPath = "~/Products/Projects/TMDocs.aspx";
     public static readonly string StartURL = FilesLinkUtility.FilesBaseVirtualPath;
@@ -96,7 +97,7 @@ public class PathProvider(WebImageSupplier webImageSupplier,
         return await GetFolderUrlAsync(folder);
     }
 
-    public async Task<string> GetFileStreamUrlAsync<T>(File<T> file, string doc = null, bool lastVersion = false)
+    public async Task<string> GetFileStreamUrlAsync<T>(File<T> file, bool lastVersion = false)
     {
         if (file == null)
         {
@@ -116,41 +117,13 @@ public class PathProvider(WebImageSupplier webImageSupplier,
         }
 
         query += FilesLinkUtility.AuthKey + "=" + await emailValidationKeyProvider.GetEmailKeyAsync(file.Id.ToString() + version);
-        if (!string.IsNullOrEmpty(doc))
-        {
-            query += "&" + FilesLinkUtility.DocShareKey + "=" + HttpUtility.UrlEncode(doc);
-        }
+        
+        query = AddKey(query);
 
         return uriBuilder.Uri + "?" + query;
     }
-
-    public string GetFileStreamUrl<T>(File<T> file, string key = null, string keyName = null, bool lastVersion = false)
-    {
-        if (file == null)
-        {
-            throw new ArgumentNullException(nameof(file), FilesCommonResource.ErrorMessage_FileNotFound);
-        }
-
-        //NOTE: Always build path to handler!
-        var uriBuilder = new UriBuilder(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FileHandlerPath));
-        var query = uriBuilder.Query;
-        query += FilesLinkUtility.Action + "=stream&";
-        query += FilesLinkUtility.FileId + "=" + HttpUtility.UrlEncode(file.Id.ToString()) + "&";
-        var version = 0;
-        if (!lastVersion)
-        {
-            version = file.Version;
-            query += FilesLinkUtility.Version + "=" + file.Version + "&";
-        }
-
-        query += FilesLinkUtility.AuthKey + "=" + emailValidationKeyProvider.GetEmailKey(file.Id.ToString() + version);
-
-        query += GetExternalShareKey(keyName, key);
-
-        return uriBuilder.Uri + "?" + query;
-    }
-
-    public async Task<string> GetFileChangesUrlAsync<T>(File<T> file, string key = null, string keyName = null)
+    
+    public async Task<string> GetFileChangesUrlAsync<T>(File<T> file)
     {
         if (file == null)
         {
@@ -163,8 +136,8 @@ public class PathProvider(WebImageSupplier webImageSupplier,
         query += $"{FilesLinkUtility.FileId}={HttpUtility.UrlEncode(file.Id.ToString())}&";
         query += $"{FilesLinkUtility.Version}={file.Version}&";
         query += $"{FilesLinkUtility.AuthKey}={await emailValidationKeyProvider.GetEmailKeyAsync(file.Id + file.Version.ToString(CultureInfo.InvariantCulture))}";
-        
-        query += GetExternalShareKey(keyName, key);
+
+        query = AddKey(query);
 
         return $"{uriBuilder.Uri}?{query}";
     }
@@ -207,19 +180,15 @@ public class PathProvider(WebImageSupplier webImageSupplier,
 
         return $"{uriBuilder.Uri}?{query}";
     }
-    
-    private static string GetExternalShareKey(string keyName, string keyValue)
+
+    private string AddKey(string query)
     {
-        if (string.IsNullOrEmpty(keyValue))
+        var key = externalShare.GetKey();
+        if (!string.IsNullOrEmpty(key))
         {
-            return null;
+            query += $"&{FilesLinkUtility.ShareKey}={HttpUtility.UrlEncode(key)}";
         }
 
-        if (!string.IsNullOrEmpty(keyName))
-        {
-            return "&" + keyName + '=' + HttpUtility.UrlEncode(keyValue);
-        }
-
-        return "&" + FilesLinkUtility.DocShareKey + '=' + HttpUtility.UrlEncode(keyValue);
+        return query;
     }
 }

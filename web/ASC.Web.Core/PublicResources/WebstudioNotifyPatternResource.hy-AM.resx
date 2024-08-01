@@ -117,9 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AcceptDocSpace" xml:space="preserve">
-    <value>ԸՆԴՈՒՆԵԼ</value>
-  </data>
   <data name="ActionFileCreated" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; ստեղծել է նոր փաստաթուղթ՝ &lt;a href={1}&gt;{2}&lt;/a&gt; սենյակում՝ &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
@@ -189,7 +186,7 @@
   <data name="ButtonChangeTfa" xml:space="preserve">
     <value>Փոխել բջջային հեռախոսահամարը</value>
   </data>
-  <data name="ButtonCollaborateDocSpace" xml:space="preserve">
+  <data name="ButtonCollaborate" xml:space="preserve">
     <value>Համագործակցեք DocSpace-ում</value>
   </data>
   <data name="ButtonConfigureRightNow" xml:space="preserve">
@@ -198,11 +195,8 @@
   <data name="ButtonConfirm" xml:space="preserve">
     <value>Հաստատել</value>
   </data>
-  <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
+  <data name="ButtonConfirmInvite" xml:space="preserve">
     <value>Հաստատեք DocSpace Հրավերը</value>
-  </data>
-  <data name="ButtonConfirmEmail" xml:space="preserve">
-    <value>ՀԱՍՏԱՏԵԼ</value>
   </data>
   <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
     <value>Հաստատեք պորտալի սեփականատիրոջ թարմացում</value>
@@ -227,9 +221,6 @@
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>Թողնել կարծիք</value>
-  </data>
-  <data name="ButtonRemoveProfile" xml:space="preserve">
-    <value>Հեռացնել պրոֆիլը</value>
   </data>
   <data name="ButtonRenewNow" xml:space="preserve">
     <value>Թարմացրեք հիմա</value>
@@ -400,7 +391,7 @@
     <value>${LetterLogoText}: Պորտալի հասցեի փոփոխություն</value>
   </data>
   <data name="subject_profile_delete" xml:space="preserve">
-    <value>Ձեր պրոֆիլի ջնջում ${__VirtualRootPath} պորտալից</value>
+    <value>Հաշվի անջատումը միացված է ${__VirtualRootPath}</value>
   </data>
   <data name="subject_profile_has_deleted_itself" xml:space="preserve">
     <value>Օգտատերը ջնջել է իր պրոֆիլը</value>
@@ -523,7 +514,7 @@ $TrulyYours</value>
 Եթե ունեք հարցեր կամ օգնության կարիք ունեք, խնդրում ենք կապվել մեզ հետ [${__SupportLink}](${__SupportLink}) հասցեով:
 
 Հարգանքներով՝
-ONLYOFFICE™ աջակցման թիմ
+ONLYOFFICE աջակցման թիմ
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
@@ -948,6 +939,7 @@ h1."$PortalUrl":"$PortalUrl"
 Ձեր պորտալը տեղափոխվել է նոր տիրույթ: Խնդրում ենք վերականգնել ձեր մուտքը դեպի պորտալ՝ նշելով գաղտնաբառը, որը կօգտագործվի մուտք գործելու համար:
 
 Խնդրում ենք հետևել ստորև բերված հղմանը` ձեր հաշվի գաղտնաբառը սահմանելու համար.
+
 $OrangeButton
 
 *Նշում*. այս հղումը գործում է միայն 7 օր: Խնդրում ենք ավարտել մուտքի վերականգնման գործընթացը այդ ժամանակահատվածում:
@@ -1143,7 +1135,7 @@ _Նշում_. այս հղումը գործում է միայն 7 օր: Խնդր�
 Եթե ունեք հարցեր կամ օգնության կարիք ունեք, խնդրում ենք կապվել մեզ հետ [${__SalesEmail}](mailto:${__SalesEmail}) հասցեով
 
 Հարգանքներով՝
-ONLYOFFICE™ աջակցման թիմ
+ONLYOFFICE աջակցման թիմ
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
@@ -1195,7 +1187,7 @@ $TrulyYours</value>
 [$__AuthorName]($__AuthorUrl) փոխել է իր պրոֆիլի տվյալները [${__VirtualRootPath}](${__VirtualRootPath}) պորտալում.</value>
   </data>
   <data name="pattern_send_whats_new" xml:space="preserve">
-    <value>h1.Ահա, թե ինչ նորություն կա ձեր DocSpace-ում $Date-ին
+    <value>h1.Ահա, թե ինչ նորություն կա ձեր DocSpace-ում "${__VirtualRootPath}":"${__VirtualRootPath}" $Date-ին
 
 #foreach ($activity $Activities-ում)
 $activity
@@ -1360,7 +1352,7 @@ _Նշում_. այս հղումը գործում է միայն 7 օր: Խնդր�
 Եթե ունեք հարցեր կամ օգնության կարիք ունեք, խնդրում ենք կապվել մեզ հետ [${__SalesEmail}](mailto:${__SalesEmail}) հասցեով
 
 Հարգանքներով՝
-ONLYOFFICE™ աջակցման թիմ
+ONLYOFFICE աջակցման թիմ
 [www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_rename" xml:space="preserve">
@@ -1373,15 +1365,15 @@ ONLYOFFICE™ աջակցման թիմ
 *Նշում*. DNS-ի կարգավորումները և մեկ մուտքի ընտրանքները դադարում են աշխատել, քանի դեռ չեք փոխել դրանք.</value>
   </data>
   <data name="pattern_profile_delete" xml:space="preserve">
-    <value>h1.Պրոֆիլի հեռացում "${__VirtualRootPath}":"${__VirtualRootPath}" պորտալից
+    <value>h1.Հաշվի անջատումը միացված է"${__VirtualRootPath}":"${__VirtualRootPath}"
 
-Դուք խնդրել եք ընդմիշտ ջնջել ձեր պրոֆիլը "${__VirtualRootPath}":"${__VirtualRootPath}" պորտալից:
+Դուք դիմել եք  DocSpace-ում ձեր հաշիվը անջատելու համար"${__VirtualRootPath}":"${__VirtualRootPath}".
 
-Եթե դուք դեռ ցանկանում եք ջնջել ձեր պրոֆիլը, ապա հետևեք ստորև նշված հղմանը, որպեսզի հաստատեք գործողությունը.
+Եթե դուք դեռ ցանկանում եք անջատել ձեր հաշիվը, խնդրում ենք հետևել ստորև նշված հղմանը, որպեսզի հաստատեք գործողությունը՝
 
 $OrangeButton
 
-*Նշում*. այս հղումը գործում է միայն 7 օր: Խնդրում ենք ավարտել պրոֆիլի ջնջման գործընթացը այդ ժամանակահատվածում.</value>
+*Նշում*՝ այս հղումը գործում է միայն 7 օր։ Խնդրում ենք ավարտել հաշվի անջատման գործընթացը այդ ժամանակահատվածում:</value>
   </data>
   <data name="pattern_profile_updated" xml:space="preserve">
     <value>h1.Ձեր պրոֆիլը "$__VirtualRootPath":"$__VirtualRootPath"-ում փոխվել է
@@ -1760,5 +1752,99 @@ $TrulyYours</value>
   </data>
   <data name="subject_zoom_welcome" xml:space="preserve">
     <value>Բարի գալուստ ONLYOFFICE DocSpace:</value>
+  </data>
+  <data name="ButtonRemoveProfile" xml:space="preserve">
+    <value>Անջատել հաշիվը</value>
+  </data>
+  <data name="pattern_saas_room_invite_existing_user" xml:space="preserve">
+    <value>Բարեւ Ձեզ!
+
+$__AuthorName-ը ձեզ հրավիրել է միանալու սենյակ "$Message":"$InviteLink"՝ "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_migration_personal_to_docspace" xml:space="preserve">
+    <value>Ողջու՜ն
+
+Տվյալների տեղափոխման գործընթացը ONLYOFFICE Personal-ից դեպի ձեր նոր ONLYOFFICE DocSpace բարեհաջող ավարտված է:
+
+Ներմուծված տվյալների հետ ձեր DocSpace մուտք գործելու համար պարզապես սեղմեք ստորև նշված կոճակը.
+
+$OrangeButton
+
+Ձեր ընթացիկ DocSpace պլանը STARTUP-ն է: Այն բացարձակապես անվճար է:
+
+==Անհրաժեշտության դեպքում կարող եք փոխել ձեր նոր DocSpace-ի անունը: Պարզապես անցեք Կարգավորումներ -&gt; Հարմարեցում -&gt; DocSpace-ի վերանվանում:==
+
+Վայելեք փաստաթղթերի համագործակցության նոր եղանակը:
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_rooms_activity" xml:space="preserve">
+    <value>h1.Ահա թե ինչ նորություն կա ձեր DocSpace-ում "${__VirtualRootPath}":"${__VirtualRootPath}" վերջին մեկ ժամվա ընթացքում 
+
+#foreach($activity in $Activities)
+$activity
+
+#end</value>
+  </data>
+  <data name="pattern_saas_admin_integrations_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 24px 40px 32px; text-align: center;"&gt;ONLYOFFICE DocSpace. Ուսումնասիրեք օգտակար &lt;span style="color: #FF6F3D;"&gt;ինտեգրումները&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Բարեւ Ձեզ։ Մենք ձեզ համար պատրաստել ենք DocSpace-ի պատրաստի ինտեգրումները այս տեղեկագրում: Փորձեք հիմա և բարձրացրեք ձեր արտադրողականությունը:&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="Margin: 0; padding-bottom: 24px; padding-top: 32px; padding-left: 40px; padding-right: 40px; text-align: left;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 64px; Margin:0; padding-left: 148px; padding-right: 32px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG1" alt="ONLYOFFICE" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 32px; Margin:0; padding-left: 0px; padding-right: 0px; padding-top: 16px; padding-bottom: 16px; vertical-align: top; width: 32px;"&gt;&lt;img width="32" src="$IMG2" alt="connecting to" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 64px; Margin:0; padding-left: 32px; padding-right: 148px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG3" alt="Zoom" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0px 40px 24px; text-align: center;"&gt;ONLYOFFICE DocSpace &amp; Zoom&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 16px; text-align: center;"&gt;Համագործակցեք ցանկացած բովանդակության վրա Zoom Meetings ընթացքում այլ մասնակիցների հետ: Արդյունավետ կառավարեք ձեր փաստաթղթերը հանդիպումների միջև։.&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 24px; text-align: center;"&gt;&lt;a href="https://www.onlyoffice.com/office-for-zoom.aspx" style="color: #FF6F3D; text-decoration: underline;" target="_blank"&gt;Իմանալ ավելին՝&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton1&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="Margin: 0; padding-bottom: 24px; padding-top: 32px; padding-left: 40px; padding-right: 40px; text-align: left;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 64px; Margin:0; padding-left: 148px; padding-right: 32px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG1" alt="ONLYOFFICE" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 32px; Margin:0; padding-left: 0px; padding-right: 0px; padding-top: 16px; padding-bottom: 16px; vertical-align: top; width: 32px;"&gt;&lt;img width="32" src="$IMG2" alt="connecting to" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 64px; Margin:0; padding-left: 32px; padding-right: 148px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG4" alt="Zapier" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0px 40px 24px; text-align: center;"&gt;ONLYOFFICE DocSpace &amp; Zapier&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 16px; text-align: center;"&gt;Ավտոմատացրեք ձեր աշխատանքային հոսքը՝ օգտագործելով zaps DocSpace-ի և տարբեր հավելվածների համար, ինչպիսիք են Asana, Slack, HubSpot, Discord, Linear և այլն:&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 24px; text-align: center;"&gt;&lt;a href="https://helpcenter.onlyoffice.com/integration/gettingstarted-zapier.aspx" style="color: #FF6F3D; text-decoration: underline;" target="_blank"&gt;Իմանալ ավելին`&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton2&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="Margin: 0; padding-bottom: 24px; padding-top: 32px; padding-left: 40px; padding-right: 40px; text-align: left;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 64px; Margin:0; padding-left: 148px; padding-right: 32px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG1" alt="ONLYOFFICE" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 32px; Margin:0; padding-left: 0px; padding-right: 0px; padding-top: 16px; padding-bottom: 16px; vertical-align: top; width: 32px;"&gt;&lt;img width="32" src="$IMG2" alt="connecting to" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 64px; Margin:0; padding-left: 32px; padding-right: 148px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG5" alt="Wordpress" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0px 40px 24px; text-align: center;"&gt;ONLYOFFICE DocSpace &amp; Wordpress&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 16px; text-align: center;"&gt;Տեղադրեք փաստաթղթերը և սենյակները ձեր կայքում՝ թույլ տալով այցելուներին դիտել ֆայլերը առանց ներբեռնելու: Կառավարեք գրասենյակային փաստաթղթերը DocSpace-ի միջոցով:&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 24px; text-align: center;"&gt;&lt;a href="https://www.onlyoffice.com/office-for-wordpress.aspx" style="color: #FF6F3D; text-decoration: underline;" target="_blank"&gt;Իմանալ ավելին՝&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton3&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="Margin: 0; padding-bottom: 24px; padding-top: 32px; padding-left: 40px; padding-right: 40px; text-align: left;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 64px; Margin:0; padding-left: 148px; padding-right: 32px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG1" alt="ONLYOFFICE" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 32px; Margin:0; padding-left: 0px; padding-right: 0px; padding-top: 16px; padding-bottom: 16px; vertical-align: top; width: 32px;"&gt;&lt;img width="32" src="$IMG2" alt="connecting to" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 64px; Margin:0; padding-left: 32px; padding-right: 148px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG6" alt="Drupal" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0px 40px 24px; text-align: center;"&gt;ONLYOFFICE DocSpace &amp; Drupal&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 16px; text-align: center;"&gt;Գրասենյակային փաստաթղթերը հեշտությամբ հասանելի դարձրեք ձեր կայքի այցելուներին և կառավարեք ֆայլերը DocSpace-ի միջոցով:&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 24px; text-align: center;"&gt;&lt;a href="https://www.onlyoffice.com/office-for-drupal.aspx" style="color: #FF6F3D; text-decoration: underline;" target="_blank"&gt;Իմանալ ավելին՝&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 64px; padding-top: 0; text-align: center;"&gt;$OrangeButton4&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_docspace_registration" xml:space="preserve">
+    <value>h1. ONLYOFFICE DocSpace՝ ամբողջական գրանցում
+
+
+Ողջու՜յն
+
+Դուք հրավիրված եք լրացնել գրանցումը ONLYOFFICE DocSpace-ում"${__VirtualRootPath}":"${__VirtualRootPath}". Մուտքագրեք ձեր անունը և գաղտնաբառ սահմանեք, սեղմելով հղման վրա՝
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="ButtonGetFreeApp" xml:space="preserve">
+    <value>Ձեռք բերել անվճար հավելվածը</value>
+  </data>
+  <data name="ButtonGetStarted" xml:space="preserve">
+    <value>Սկսել</value>
+  </data>
+  <data name="ButtonJoinRoom" xml:space="preserve">
+    <value>Միանալ սենյակին</value>
+  </data>
+  <data name="ButtonRegister" xml:space="preserve">
+    <value>Գրանցվել</value>
+  </data>
+  <data name="ButtonUpgrade" xml:space="preserve">
+    <value>Թարմացնել</value>
+  </data>
+  <data name="subject_migration_personal_to_docspace" xml:space="preserve">
+    <value>Տվյալների տեղափոխումը ONLYOFFICE DocSpace հաջողությամբ ավարտվեց</value>
+  </data>
+  <data name="subject_rooms_activity" xml:space="preserve">
+    <value>Ինչ նորություն կա ձեր ${__VirtualRootPath} պորտալում վերջին մեկ ժամվա ընթացքում</value>
+  </data>
+  <data name="subject_saas_admin_integrations_v1" xml:space="preserve">
+    <value>Ուսումնասիրեք օգտակար ինտեգրումները ONLYOFFICE DocSpace-ի համար</value>
+  </data>
+  <data name="subject_saas_docspace_registration" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace՝ ամբողջական գրանցում</value>
+  </data>
+  <data name="subject_saas_room_invite_existing_user" xml:space="preserve">
+    <value>Դուք հրավիրված եք ONLYOFFICE DocSpace սենյակ</value>
   </data>
 </root>

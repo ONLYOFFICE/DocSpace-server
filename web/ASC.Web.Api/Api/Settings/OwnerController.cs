@@ -29,19 +29,20 @@ using Constants = ASC.Core.Users.Constants;
 namespace ASC.Web.Api.Controllers.Settings;
 
 [DefaultRoute("owner")]
-public class OwnerController(MessageService messageService,
-        CommonLinkUtility commonLinkUtility,
-        StudioNotifyService studioNotifyService,
-        ApiContext apiContext,
-        UserManager userManager,
-        TenantManager tenantManager,
-        AuthContext authContext,
-        PermissionContext permissionContext,
-        WebItemManager webItemManager,
-        DisplayUserSettingsHelper displayUserSettingsHelper,
-        MessageTarget messageTarget,
-        IMemoryCache memoryCache,
-        IHttpContextAccessor httpContextAccessor)
+public class OwnerController(
+    MessageService messageService,
+    CommonLinkUtility commonLinkUtility,
+    StudioNotifyService studioNotifyService,
+    ApiContext apiContext,
+    UserManager userManager,
+    TenantManager tenantManager,
+    AuthContext authContext,
+    PermissionContext permissionContext,
+    WebItemManager webItemManager,
+    DisplayUserSettingsHelper displayUserSettingsHelper,
+    IMemoryCache memoryCache,
+    IHttpContextAccessor httpContextAccessor,
+    IUrlShortener urlShortener)
     : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
@@ -69,15 +70,17 @@ public class OwnerController(MessageService messageService,
             throw new SecurityException("Collaborator can not be an owner");
         }
 
-        if (!owner.Id.Equals(authContext.CurrentAccount.ID) || Guid.Empty.Equals(newOwner.Id))
+        if (!owner.Id.Equals(authContext.CurrentAccount.ID) || 
+            Guid.Empty.Equals(newOwner.Id) || 
+            newOwner.Status != EmployeeStatus.Active)
         {
             return new { Status = 0, Message = Resource.ErrorAccessDenied };
         }
 
         var confirmLink = await commonLinkUtility.GetConfirmationEmailUrlAsync(owner.Email, ConfirmType.PortalOwnerChange, newOwner.Id, newOwner.Id);
-        await studioNotifyService.SendMsgConfirmChangeOwnerAsync(owner, newOwner, confirmLink);
+        await studioNotifyService.SendMsgConfirmChangeOwnerAsync(owner, newOwner, await urlShortener.GetShortenLinkAsync(confirmLink));
 
-        await messageService.SendAsync(MessageAction.OwnerSentChangeOwnerInstructions, messageTarget.Create(owner.Id), owner.DisplayUserName(false, displayUserSettingsHelper));
+        await messageService.SendAsync(MessageAction.OwnerSentChangeOwnerInstructions, MessageTarget.Create(owner.Id), owner.DisplayUserName(false, displayUserSettingsHelper));
 
         var emailLink = $"<a href=\"mailto:{owner.Email}\">{owner.Email}</a>";
         return new { Status = 1, Message = Resource.ChangePortalOwnerMsg.Replace(":email", emailLink) };
@@ -114,6 +117,11 @@ public class OwnerController(MessageService messageService,
         if (await userManager.IsUserInGroupAsync(newOwner.Id, Constants.GroupUser.ID))
         {
             throw new Exception(Resource.ErrorUserNotFound);
+        }
+
+        if (newOwner.Status != EmployeeStatus.Active)
+        {
+            throw new Exception(Resource.ErrorAccessDenied);
         }
 
         var curTenant = await tenantManager.GetCurrentTenantAsync();

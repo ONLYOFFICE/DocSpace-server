@@ -318,7 +318,7 @@ Compatibilité maximale avec docx, xlsx, pptx.</value>
     <value>Documents</value>
   </data>
   <data name="ProductUserOpportunities" xml:space="preserve">
-    <value>Créer et modifier les documents personnels aussi que les documents partagés ayant les droits d'accès appropriés|Donner l'accès de lecture/modification des documents et des dossier à d'autres utilisateurs|Lier Dropbox, Box et d'autres comptes dans la section 'Mes documents'</value>
+    <value>Créer et modifier les documents personnels aussi que les documents partagés ayant les droits d'accès appropriés|Donner l'accès de lecture/modification des documents et des dossier à d'autres utilisateurs|Lier Dropbox, Box et d'autres comptes dans la section 'Documents'</value>
   </data>
   <data name="UnknownFirstName" xml:space="preserve">
     <value>Prénom</value>
@@ -463,5 +463,35 @@ Compatibilité maximale avec docx, xlsx, pptx.</value>
   </data>
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>Type</value>
+  </data>
+  <data name="Date" xml:space="preserve">
+    <value>Date</value>
+  </data>
+  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
+    <value>Utilisateur avancé</value>
+  </data>
+  <data name="RoleEnum_PowerUser" xml:space="preserve">
+    <value>Utilisateur avancé</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>Utilisateur</value>
+  </data>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>Il n'est pas possible de déplacer plusieurs fichiers vers la salle de remplissage des formulaires. Déplacez un seul formulaire PDF ONLYOFFICE à la fois.</value>
+  </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>Le déplacement de dossiers vers la salle de remplissage des formulaires n'est pas possible. Déplacez un seul formulaire PDF ONLYOFFICE à la fois.</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>Le fichier ne peut pas être déplacé dans cette salle. Veuillez essayer de déplacer le formulaire PDF ONLYOFFICE.</value>
+  </data>
+  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
+    <value>Le fichier ne peut pas être téléchargé dans cette salle. Veuillez essayer de télécharger le formulaire PDF ONLYOFFICE.</value>
+  </data>
+  <data name="FillOutExternalLinkTitle" xml:space="preserve">
+    <value>Lien pour remplir</value>
+  </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>Lien vers le formulaire</value>
   </data>
 </root>

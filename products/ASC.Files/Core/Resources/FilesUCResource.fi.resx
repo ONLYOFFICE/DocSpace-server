@@ -65,7 +65,7 @@
     <value>Yhteiset tiedostot</value>
   </data>
   <data name="MyFiles" xml:space="preserve">
-    <value>Omat Asiakirjat</value>
+    <value>Asiakirjat</value>
   </data>
   <data name="ProjectFiles" xml:space="preserve">
     <value>Projektin asiakirjat</value>

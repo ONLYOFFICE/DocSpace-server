@@ -117,6 +117,10 @@ public class LdapSettingsDto : IMapFrom<LdapSettings>
     /// <type>System.Boolean, System</type>
     public bool AcceptCertificate { get; set; }
 
+    /// <summary>Specifies if the default LDAP settings are used or not</summary>
+    /// <type>System.Boolean, System</type>
+    public bool IsDefault { get; set; }
+
     public void Mapping(Profile profile)
     {
         profile.CreateMap<LdapSettings, LdapSettingsDto>();

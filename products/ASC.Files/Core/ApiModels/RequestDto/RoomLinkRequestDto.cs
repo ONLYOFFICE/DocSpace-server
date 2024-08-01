@@ -43,6 +43,7 @@ public class RoomLinkRequestDto : LinkRequestDtoBase
 
     /// <summary>Link password</summary>
     /// <type>System.String, System</type>
+    [StringLength(255)]
     public string Password { get; set; }
     
     /// <summary>Specifies whether downloading a file from a link is disabled or not</summary>

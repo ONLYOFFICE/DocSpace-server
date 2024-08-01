@@ -28,24 +28,26 @@ namespace ASC.Web.Files.Utils;
 
 [Scope]
 public class FileUploader(
-        FileUtility fileUtility,
-        UserManager userManager,
-        TenantManager tenantManager,
-        AuthContext authContext,
-        SetupInfo setupInfo,
-        MaxTotalSizeStatistic maxTotalSizeStatistic,
-        FileMarker fileMarker,
-        FileConverter fileConverter,
-        IDaoFactory daoFactory,
-        Global global,
-        FilesLinkUtility filesLinkUtility,
-        FilesMessageService filesMessageService,
-        FileSecurity fileSecurity,
-        EntryManager entryManager,
-        IServiceProvider serviceProvider,
-        ChunkedUploadSessionHolder chunkedUploadSessionHolder,
-        FileTrackerHelper fileTracker,
-        SocketManager socketManager)
+    FileUtility fileUtility,
+    UserManager userManager,
+    TenantManager tenantManager,
+    AuthContext authContext,
+    SetupInfo setupInfo,
+    MaxTotalSizeStatistic maxTotalSizeStatistic,
+    FileMarker fileMarker,
+    FileConverter fileConverter,
+    IDaoFactory daoFactory,
+    Global global,
+    FilesLinkUtility filesLinkUtility,
+    FilesMessageService filesMessageService,
+    FileSecurity fileSecurity,
+    LockerManager lockerManager,
+    IServiceProvider serviceProvider,
+    ChunkedUploadSessionHolder chunkedUploadSessionHolder,
+    FileTrackerHelper fileTracker,
+    SocketManager socketManager,
+    FileChecker fileChecker,
+    TempStream tempStream )
 {
     public async Task<File<T>> ExecAsync<T>(T folderId, string title, long contentLength, Stream data, bool createNewIfExist, bool deleteConvertStatus = true)
     {
@@ -59,8 +61,8 @@ public class FileUploader(
         var dao = daoFactory.GetFileDao<T>();
         file = await dao.SaveFileAsync(file, data);
 
-        var linkDao = daoFactory.GetLinkDao();
-        await linkDao.DeleteAllLinkAsync(file.Id.ToString());
+        var linkDao = daoFactory.GetLinkDao<T>();
+        await linkDao.DeleteAllLinkAsync(file.Id);
 
         await fileMarker.MarkAsNewAsync(file);
 
@@ -131,8 +133,8 @@ public class FileUploader(
         return file != null
                && await fileSecurity.CanEditAsync(file)
                && !await userManager.IsUserAsync(authContext.CurrentAccount.ID)
-               && !await entryManager.FileLockedForMeAsync(file.Id)
-               && !fileTracker.IsEditing(file.Id)
+               && !await lockerManager.FileLockedForMeAsync(file.Id)
+               && !await fileTracker.IsEditingAsync(file.Id)
                && file.RootFolderType != FolderType.TRASH
                && !file.Encrypted;
     }
@@ -272,7 +274,75 @@ public class FileUploader(
             throw FileSizeComment.GetFileSizeException(await setupInfo.MaxUploadSize(tenantManager, maxTotalSizeStatistic));
         }
 
+        var extension = FileUtility.GetFileExtension(uploadSession.File.Title);
+        var fileType = FileUtility.GetFileTypeByExtention(extension);
         var dao = daoFactory.GetFileDao<T>();
+
+        if (fileType == FileType.Pdf)
+        {
+            var isFirstChunk = false;
+            if (!chunkNumber.HasValue)
+            {
+                int.TryParse(uploadSession.GetItemOrDefault<string>("ChunkNumber"), out var number);
+                if (number == 0)
+                {
+                    isFirstChunk = true;
+                }
+                number++;
+                uploadSession.Items["ChunkNumber"] = number.ToString();
+            }
+            else if (chunkNumber == 1)
+            {
+                isFirstChunk = true;
+            }
+
+            if (isFirstChunk)
+            {
+                var folderDao = daoFactory.GetFolderDao<T>();
+                var currentFolder = await folderDao.GetFolderAsync(uploadSession.File.FolderIdDisplay);
+                var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(currentFolder);
+
+                var memoryStream = new MemoryStream();
+                await stream.CopyToAsync(memoryStream);
+
+                var isForm = false;
+                var cloneStreamForCheck = await tempStream.CloneMemoryStream(memoryStream, 300);
+                try
+                {
+                    isForm = await fileChecker.CheckExtendedPDFstream(cloneStreamForCheck);
+                }
+                finally
+                {
+                    cloneStreamForCheck.Dispose();
+                }
+
+                uploadSession.File.Category = isForm ? (int)FilterType.PdfForm : (int)FilterType.Pdf;
+
+                if (int.TryParse(roomId?.ToString(), out var curRoomId) && curRoomId != -1)
+                {
+                    var currentRoom = await folderDao.GetFolderAsync(roomId);
+                    if (currentRoom.FolderType == FolderType.FillingFormsRoom && !isForm)
+                    {
+                        throw new Exception(FilesCommonResource.ErrorMessage_UploadToFormRoom);
+                    }
+                }
+
+                var cloneStreamForSave = await tempStream.CloneMemoryStream(memoryStream);
+                try
+                {
+                    await dao.UploadChunkAsync(uploadSession, cloneStreamForSave, chunkLength, chunkNumber);
+                }
+                finally
+                {
+                    memoryStream.Dispose();
+                    cloneStreamForSave.Dispose();
+                }
+
+                return uploadSession;
+            }
+        }
+
+
         await dao.UploadChunkAsync(uploadSession, stream, chunkLength, chunkNumber);
 
         return uploadSession;
@@ -284,14 +354,20 @@ public class FileUploader(
         var dao = daoFactory.GetFileDao<T>();
 
         uploadSession.File = await dao.FinalizeUploadSessionAsync(uploadSession);
-
-        var linkDao = daoFactory.GetLinkDao();
-        await linkDao.DeleteAllLinkAsync(uploadSession.File.Id.ToString());
-
-        await fileMarker.MarkAsNewAsync(uploadSession.File);
+        
         await chunkedUploadSessionHolder.RemoveSessionAsync(uploadSession);
 
         return uploadSession;
+    }
+
+    public async Task DeleteLinkAndMarkAsync<T>(File<T> file)
+    {
+        var linkDao = daoFactory.GetLinkDao<T>();
+        
+        var t1 = linkDao.DeleteAllLinkAsync(file.Id);
+        var t2 = fileMarker.MarkAsNewAsync(file).AsTask();
+
+        await Task.WhenAll(t1, t2);
     }
 
     public async Task AbortUploadAsync<T>(string uploadId)

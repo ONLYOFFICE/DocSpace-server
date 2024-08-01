@@ -26,7 +26,6 @@
 
 namespace ASC.Notify.Recipients;
 
-[Scope(typeof(RecipientProviderImpl))]
 public interface IRecipientProvider
 {
     Task<IDirectRecipient> FilterRecipientAddressesAsync(IDirectRecipient recipient);

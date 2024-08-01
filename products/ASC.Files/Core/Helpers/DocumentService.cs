@@ -65,10 +65,9 @@ public static class DocumentService
     {
         expectedKey ??= "";
         const int maxLength = 128;
-        using var sha256 = SHA256.Create();
         if (expectedKey.Length > maxLength)
         {
-            expectedKey = Convert.ToBase64String(sha256.ComputeHash(Encoding.UTF8.GetBytes(expectedKey)));
+            expectedKey = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(expectedKey)));
         }
 
         var key = Regex.Replace(expectedKey, "[^0-9a-zA-Z_]", "_");
@@ -91,6 +90,7 @@ public static class DocumentService
     /// <param name="isAsync">Perform conversions asynchronously</param>
     /// <param name="signatureSecret">Secret key to generate the token</param>
     /// <param name="clientFactory"></param>
+    /// <param name="toForm"></param>
     /// <returns>The percentage of completion of conversion</returns>
     /// <example>
     /// string convertedDocumentUri;
@@ -112,7 +112,8 @@ public static class DocumentService
         SpreadsheetLayout spreadsheetLayout,
         bool isAsync,
         string signatureSecret,
-       IHttpClientFactory clientFactory)
+       IHttpClientFactory clientFactory,
+       bool toForm)
     {
         fromExtension = string.IsNullOrEmpty(fromExtension) ? Path.GetExtension(documentUri) : fromExtension;
         if (string.IsNullOrEmpty(fromExtension))
@@ -125,7 +126,7 @@ public static class DocumentService
             throw new ArgumentNullException(nameof(toExtension), "Extension for conversion is not known");
         }
 
-        return InternalGetConvertedUriAsync(fileUtility, documentConverterUrl, documentUri, fromExtension, toExtension, documentRevisionId, password, region, thumbnail, spreadsheetLayout, isAsync, signatureSecret, clientFactory);
+        return InternalGetConvertedUriAsync(fileUtility, documentConverterUrl, documentUri, fromExtension, toExtension, documentRevisionId, password, region, thumbnail, spreadsheetLayout, isAsync, signatureSecret, clientFactory, toForm);
     }
 
     private static async Task<(int ResultPercent, string ConvertedDocumentUri, string convertedFileType)> InternalGetConvertedUriAsync(
@@ -141,7 +142,8 @@ public static class DocumentService
        SpreadsheetLayout spreadsheetLayout,
        bool isAsync,
        string signatureSecret,
-       IHttpClientFactory clientFactory)
+       IHttpClientFactory clientFactory,
+       bool toForm)
     {
         var title = Path.GetFileName(documentUri ?? "");
         title = string.IsNullOrEmpty(title) || title.Contains('?') ? Guid.NewGuid().ToString() : title;
@@ -172,6 +174,10 @@ public static class DocumentService
             Url = documentUri,
             Region = region
         };
+        if (toForm)
+        {
+            body.Pdf = new PdfData { Form = true };
+        }
 
         if (!string.IsNullOrEmpty(password))
         {
@@ -535,6 +541,11 @@ public static class DocumentService
         public string UserData { get; set; }
     }
 
+    public class PdfData
+    {
+        public bool Form { get; set; }
+    }
+
     [DebuggerDisplay("{Title}")]
     public class MetaData
     {
@@ -598,6 +609,8 @@ public static class DocumentService
         public required string Url { get; set; }
         public required string Region { get; set; }
         public string Token { get; set; }
+        public PdfData Pdf { get; set; }
+
     }
 
     [DebuggerDisplay("{Key}")]
@@ -624,12 +637,13 @@ public static class DocumentService
 
         public static void ProcessResponseError(string errorCode)
         {
-            if (!ErrorCodeExtensions.TryParse(errorCode, true, out var code))
+            if (!ErrorCodeExtensions.TryParse(errorCode, true, out var code) && CultureInfo.CurrentCulture.Name == "ar-SA" && !Enum.TryParse(errorCode, out code))
             {
                 code = ErrorCode.Unknown;
             }
             var errorMessage = code switch
             {
+                ErrorCode.SizeLimit => "size limit exceeded",
                 ErrorCode.OutputType => "output format not defined",
                 ErrorCode.Vkey => "document signature",
                 ErrorCode.TaskQueue => "database",
@@ -646,6 +660,7 @@ public static class DocumentService
         [EnumExtensions]
         public enum ErrorCode
         {
+            SizeLimit = -10,
             OutputType = -9,
             Vkey = -8,
             TaskQueue = -6,
@@ -714,6 +729,12 @@ public static class DocumentServiceHttpClientExtension
             .AddPolicyHandler((_, _) => 
                 HttpPolicyExtensions
                 .HandleTransientHttpError()
+                .OrResult(response =>
+                {
+                    return response.IsSuccessStatusCode
+                        ? false
+                        : throw new HttpRequestException($"Response status code: {response.StatusCode}", null, response.StatusCode);
+                })
                 .WaitAndRetryAsync(MaxTry, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))));
     }
 }

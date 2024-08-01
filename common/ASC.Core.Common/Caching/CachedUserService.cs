@@ -140,7 +140,7 @@ public class UserServiceCache
     }
 }
 
-[Scope]
+[Scope(typeof(IUserService))]
 public class CachedUserService : IUserService, ICachedService
 {
     private readonly EFUserService _service;
@@ -270,12 +270,7 @@ public class CachedUserService : IUserService, ICachedService
 
         return user;
     }
-
-    public async Task<IEnumerable<int>> GetTenantsWithFeedsAsync(DateTime from)
-    {
-        return await _service.GetTenantsWithFeedsAsync(from);
-    }
-
+    
     public async Task RemoveUserAsync(int tenant, Guid id, bool immediate = false)
     {
         await _service.RemoveUserAsync(tenant, id, immediate);
@@ -356,18 +351,6 @@ public class CachedUserService : IUserService, ICachedService
         return refs;
     }
 
-    public IDictionary<string, UserGroupRef> GetUserGroupRefs(int tenant)
-    {
-        var key = UserServiceCache.GetRefCacheKey(tenant);
-        if (_cache.Get<UserGroupRefStore>(key) is not IDictionary<string, UserGroupRef> refs)
-        {
-            refs = _service.GetUserGroupRefs(tenant);
-            _cache.Insert(key, new UserGroupRefStore(refs), _cacheExpiration);
-        }
-
-        return refs;
-    }
-
     public async Task<UserGroupRef> GetUserGroupRefAsync(int tenant, Guid groupId, UserGroupRefType refType)
     {
         var key = UserServiceCache.GetRefCacheKey(tenant, groupId, refType);
@@ -376,24 +359,6 @@ public class CachedUserService : IUserService, ICachedService
         if (groupRef == null)
         {
             groupRef = await _service.GetUserGroupRefAsync(tenant, groupId, refType);
-
-            if (groupRef != null)
-            {
-                _cache.Insert(key, groupRef, _cacheExpiration);
-            }
-        }
-
-        return groupRef;
-    }
-
-    public UserGroupRef GetUserGroupRef(int tenant, Guid groupId, UserGroupRefType refType)
-    {
-        var key = UserServiceCache.GetRefCacheKey(tenant, groupId, refType);
-        var groupRef = _cache.Get<UserGroupRef>(key);
-
-        if (groupRef == null)
-        {
-            groupRef = _service.GetUserGroupRef(tenant, groupId, refType);
 
             if (groupRef != null)
             {

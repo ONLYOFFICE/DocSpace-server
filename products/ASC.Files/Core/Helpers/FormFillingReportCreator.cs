@@ -27,72 +27,74 @@
 namespace ASC.Files.Core.Helpers;
 
 [Scope]
-public class FormFillingReportCreator
+public class FormFillingReportCreator(
+    ExportToCSV exportToCSV,
+    IDaoFactory daoFactory,
+    IHttpClientFactory clientFactory,
+    TenantUtil tenantUtil)
 {
-    private readonly ExportToCSV _exportToCSV;
-    private readonly SocketManager _socketManager;
-    private readonly IDaoFactory _daoFactory;
-    private readonly IHttpClientFactory _clientFactory;
 
     private static readonly JsonSerializerOptions _options = new() {
         AllowTrailingCommas = true,
         PropertyNameCaseInsensitive = true
     };
 
-    public FormFillingReportCreator(
-        ExportToCSV exportToCSV,
-        SocketManager socketManager,
-        IDaoFactory daoFactory,
-        IHttpClientFactory clientFactory)
+    public async Task UpdateFormFillingReport<T>(T resultsFileId, int resultFormNumber, string formsDataUrl, string resultUrl)
     {
-        _exportToCSV = exportToCSV;
-        _socketManager = socketManager;
-        _daoFactory = daoFactory;
-        _clientFactory = clientFactory;
-    }
 
-    public async Task<EntryProperties> UpdateFormFillingReport<T>(File<T> form, string formsDataUrl)
-    {
-        var linkDao = _daoFactory.GetLinkDao();
-        var sourceId = await linkDao.GetSourceAsync(form.Id.ToString());
-
-        if (sourceId != null && formsDataUrl != null)
+        if (formsDataUrl != null)
         {
-            var properties = await _daoFactory.GetFileDao<T>().GetProperties(form.Id);
-            var fileDao = _daoFactory.GetFileDao<T>();
-            var submitFormsData = await GetSubmitFormsData(formsDataUrl);
+            var fileDao = daoFactory.GetFileDao<T>();
+            var submitFormsData = await GetSubmitFormsData(resultFormNumber, formsDataUrl, resultUrl);
 
-            if (properties.FormFilling.ResultsFileID != null)
+            if (resultsFileId != null)
             {
-                var resultsFile = await fileDao.GetFileAsync((T)Convert.ChangeType(properties.FormFilling.ResultsFileID, typeof(T)));
-                var sourceFile = await fileDao.GetFileAsync((T)Convert.ChangeType(sourceId, typeof(T)));
+                var resultsFile = await fileDao.GetFileAsync(resultsFileId);
 
-                var updateDt = _exportToCSV.CreateDataTable(submitFormsData.FormsData);
-                await _exportToCSV.UpdateCsvReport(resultsFile, updateDt);
+                var updateDt = exportToCSV.CreateDataTable(submitFormsData.FormsData);
+                await exportToCSV.UpdateCsvReport(resultsFile, updateDt);
 
-                await _socketManager.DeleteFileAsync(form);
-                await _socketManager.UpdateFileAsync(sourceFile);
-                await linkDao.DeleteLinkAsync(sourceId);
-
-                return properties;
             }
         }
-
-        return null;
     }
 
-    private async Task<SubmitFormsData> GetSubmitFormsData(string url)
+    private async Task<SubmitFormsData> GetSubmitFormsData(int resultFormNumber, string url, string resultUrl)
     {
         var request = new HttpRequestMessage
         {
             RequestUri = new Uri(url),
             Method = HttpMethod.Get
         };
-        var httpClient = _clientFactory.CreateClient();
+        var httpClient = clientFactory.CreateClient();
         using var response = await httpClient.SendAsync(request);
         var data = await response.Content.ReadAsStringAsync();
 
-        return JsonSerializer.Deserialize<SubmitFormsData>(data, _options);
+        var formNumber = new List<FormsItemData>()
+        {
+            new FormsItemData()
+            {
+                Key = FilesCommonResource.FormNumber,
+                Value = resultFormNumber
+            },
+        };
+
+        var formLink = new FormsItemData()
+        {
+            Key = FilesCommonResource.LinkToForm,
+            Value = $"=HYPERLINK(\"{resultUrl}\";\"{FilesCommonResource.OpenForm}\")"
+        };
+        var date = new FormsItemData()
+        {
+            Key = FilesCommonResource.Date,
+            Value = $"{tenantUtil.DateTimeNow().ToString("MM/dd/yyyy H:mm:ss")}"
+        };
+        var result = JsonSerializer.Deserialize<SubmitFormsData>(data, _options);
+
+        result.FormsData = formNumber.Concat(result.FormsData);
+        result.FormsData = result.FormsData.Append(date);
+        result.FormsData = result.FormsData.Append(formLink);
+
+        return result;
     }
 
 }

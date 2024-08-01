@@ -81,7 +81,6 @@ global using Microsoft.Extensions.Caching.Distributed;
 global using Microsoft.Extensions.Caching.Memory;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
-global using Microsoft.Extensions.DependencyInjection.Extensions;
 global using Microsoft.Extensions.Hosting;
 global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.Options;
@@ -102,6 +101,7 @@ global using RabbitMQ.Client;
 global using RabbitMQ.Client.Events;
 
 global using StackExchange.Redis;
+global using StackExchange.Redis.Extensions.Core;
 global using StackExchange.Redis.Extensions.Core.Abstractions;
 
 global using ILogger = Microsoft.Extensions.Logging.ILogger;

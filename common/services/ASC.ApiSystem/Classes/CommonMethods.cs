@@ -187,6 +187,18 @@ public class CommonMethods(
         return tenants;
     }
 
+    public async Task<List<Tenant>> GetTenantsAsync(string email, string passwordHash)
+    {
+        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(passwordHash))
+        {
+            throw new Exception("Invalid login or password.");
+        }
+
+        var tenants = await hostedSolution.FindTenantsAsync(email, passwordHash);
+
+        return tenants;
+    }
+
     public bool IsTestEmail(string email)
     {
         //the point is not needed in gmail.com
@@ -247,6 +259,17 @@ public class CommonMethods(
         return true;
     }
 
+    public string GetRequestScheme()
+    {
+        var request = httpContextAccessor.HttpContext?.Request;
+        if (request == null)
+        {
+            return Uri.UriSchemeHttp;
+        }
+        var header = request.Headers["X-Forwarded-Proto"].FirstOrDefault();
+        return string.IsNullOrEmpty(header) ? request.Scheme : header;
+    }
+
     public string GetClientIp()
     {
         return httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
@@ -274,7 +297,7 @@ public class CommonMethods(
         return hostEntry.AddressList.Select(ip => ip.ToString());
     }
 
-    public async Task<bool> ValidateRecaptcha(string response, RecaptchaType recaptchaType, string ip)
+    public async Task<bool> ValidateRecaptcha(RecaptchaType recaptchaType, string response, string ip)
     {
         try
         {
@@ -282,11 +305,15 @@ public class CommonMethods(
             {
                 RecaptchaType.AndroidV2 => configuration["recaptcha:private-key:android"],
                 RecaptchaType.iOSV2 => configuration["recaptcha:private-key:ios"],
+                RecaptchaType.hCaptcha => configuration["hcaptcha:private-key"],
                 _ => configuration["recaptcha:private-key:default"]
             };
 
             var data = $"secret={privateKey}&remoteip={ip}&response={response}";
-            var url = configuration["recaptcha:verify-url"] ?? "https://www.recaptcha.net/recaptcha/api/siteverify";
+
+            var url = recaptchaType is RecaptchaType.hCaptcha
+                ? configuration["hcaptcha:verify-url"] ?? "https://api.hcaptcha.com/siteverify"
+                : configuration["recaptcha:verify-url"] ?? "https://www.recaptcha.net/recaptcha/api/siteverify";
 
             var request = new HttpRequestMessage
             {

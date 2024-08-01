@@ -83,7 +83,7 @@
     <value>Fișiere vor fi comprimate în format de fișier {0}.zip{1}</value>
   </data>
   <data name="MyFiles" xml:space="preserve">
-    <value>Documentele mele</value>
+    <value>Documentele</value>
   </data>
   <data name="PrivacyRoom" xml:space="preserve">
     <value>Sala privată</value>
@@ -99,8 +99,5 @@
   </data>
   <data name="InProcessFormFolder" xml:space="preserve">
     <value>În curs de realizare</value>
-  </data>
-  <data name="ReadyFormFolder" xml:space="preserve">
-    <value>Gata</value>
   </data>
 </root>

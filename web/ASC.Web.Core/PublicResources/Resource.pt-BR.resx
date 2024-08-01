@@ -425,7 +425,7 @@
     <value>As configurações foram atualizadas com sucesso</value>
   </data>
   <data name="SuccessfullySentNotificationDeleteUserInfoMessage" xml:space="preserve">
-    <value>Instruções sobre como excluir seu perfil foram enviadas para seu endereço de e-mail {0}</value>
+    <value>As instruções para desativar seu perfil foram enviadas para o endereço de e-mail {0}</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>Código incorreto</value>
@@ -458,7 +458,7 @@
     <value>O número de administradores não deve exceder {0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Número de administradores</value>
+    <value>Número de administradores/usuários avançados</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Backup e recuperação automática</value>
@@ -498,9 +498,6 @@
   </data>
   <data name="TariffsFeature_usersInRoom_exception" xml:space="preserve">
     <value>O número de usuários na sala não deve exceder {0}</value>
-  </data>
-  <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Número de administradores/usuários avançados:</value>
   </data>
   <data name="ConsumersAppleId" xml:space="preserve">
     <value>Apple ID</value>
@@ -1044,5 +1041,17 @@
   </data>
   <data name="TariffsFeature_total_size" xml:space="preserve">
     <value>{0} por administrador/usuário avançado e capacidade de adicionar espaço mediante solicitação</value>
+  </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>Usuário desativado</value>
+  </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>Administradores/usuários avançados adicionados:</value>
+  </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>O limite de convites foi excedido</value>
+  </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>A instrução de alteração de senha foi enviada para o endereço de e-mail {0}.</value>
   </data>
 </root>

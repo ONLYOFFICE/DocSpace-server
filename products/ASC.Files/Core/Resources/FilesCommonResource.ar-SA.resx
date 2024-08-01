@@ -431,7 +431,7 @@
     <value>المستندات</value>
   </data>
   <data name="ProductUserOpportunities" xml:space="preserve">
-    <value>أنشئ المستندات الخاصة بك وقم بالتعديل عليها ، كما يمكنك القيام بذلك على المستندات المشتركة مع حقوق الوصول المناسبة قم بمنح أذونات القراءة أو التعديل إلى المستخدمين الآخرين على المستندات والمجلدات Link Dropbox و Box والحسابات الأخرى في قسم 'مستنداتي'</value>
+    <value>أنشئ المستندات الخاصة بك وقم بالتعديل عليها ، كما يمكنك القيام بذلك على المستندات المشتركة مع حقوق الوصول المناسبة قم بمنح أذونات القراءة أو التعديل إلى المستخدمين الآخرين على المستندات والمجلدات Link Dropbox و Box والحسابات الأخرى في قسم ' المستندات'</value>
   </data>
   <data name="RoleEnum_Collaborator" xml:space="preserve">
     <value>متعاون</value>
@@ -522,5 +522,17 @@
   </data>
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>النوع</value>
+  </data>
+  <data name="Date" xml:space="preserve">
+    <value>التاريخ</value>
+  </data>
+  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
+    <value>قوة المستخدم</value>
+  </data>
+  <data name="RoleEnum_PowerUser" xml:space="preserve">
+    <value>قوة المستخدم</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>مستخدم</value>
   </data>
 </root>

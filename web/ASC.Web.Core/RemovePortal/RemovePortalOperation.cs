@@ -24,14 +24,18 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.ElasticSearch;
+
 namespace ASC.Web.Core.RemovePortal;
 
 [Transient]
-public class RemovePortalOperation(StorageFactory storageFactory,
-        StorageFactoryConfig storageFactoryConfig,
-        ITenantService tenantService,
-        TenantManager tenantManager,
-        ILogger<RemovePortalOperation> logger)
+public class RemovePortalOperation(
+    StorageFactory storageFactory,
+    StorageFactoryConfig storageFactoryConfig,
+    ITenantService tenantService,
+    TenantManager tenantManager,
+    IEnumerable<IFactoryIndexer> factoryIndexers,
+    ILogger<RemovePortalOperation> logger)
     : DistributedTaskProgress
 {
     public int TenantId { get; set; }
@@ -70,6 +74,11 @@ public class RemovePortalOperation(StorageFactory storageFactory,
             logger.DebugRemoveTenantFromDb();
             await tenantService.PermanentlyRemoveTenantAsync(TenantId);
 
+            foreach (var indexer in factoryIndexers)
+            {
+                await indexer.DeleteAsync(tenant.Id);
+            }
+            
             logger.DebugEndRemoveTenant(TenantId);
             Percentage = 100;
         }

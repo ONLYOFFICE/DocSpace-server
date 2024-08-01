@@ -38,14 +38,9 @@ public static class XmlExtensions
         return attr?.Value;
     }
 
-    public static void WriteTo(this XElement el, Stream stream)
+    public static async Task WriteToAsync(this XElement el, Stream stream)
     {
-        WriteTo(el, stream, Encoding.UTF8);
-    }
-
-    public static void WriteTo(this XElement el, Stream stream, Encoding encoding)
-    {
-        var data = encoding.GetBytes(el.ToString(SaveOptions.None));
-        stream.Write(data, 0, data.Length);
+        var data = Encoding.UTF8.GetBytes(el.ToString(SaveOptions.None));
+        await stream.WriteAsync(data);
     }
 }

@@ -133,7 +133,7 @@
     <value>الملفات سيتم ضغطها في {0}.zip ملف{1}</value>
   </data>
   <data name="MyFiles" xml:space="preserve">
-    <value>ملفاتي</value>
+    <value>المستندات</value>
   </data>
   <data name="Personal" xml:space="preserve">
     <value>شخصي</value>
@@ -158,8 +158,5 @@
   </data>
   <data name="InProcessFormFolder" xml:space="preserve">
     <value>قيد التنفيذ</value>
-  </data>
-  <data name="ReadyFormFolder" xml:space="preserve">
-    <value>جاهز</value>
   </data>
 </root>

@@ -26,7 +26,6 @@
 
 namespace ASC.Files.Core.Security;
 
-[Scope(typeof(FileSecurity))]
 public interface IFileSecurity
 {
     Task<bool> CanReadAsync<T>(FileEntry<T> entry, Guid userId);

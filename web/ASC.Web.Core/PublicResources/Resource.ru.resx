@@ -815,7 +815,7 @@
     <value>Настройки успешно обновлены</value>
   </data>
   <data name="SuccessfullySentNotificationDeleteUserInfoMessage" xml:space="preserve">
-    <value>Инструкции по удалению профиля были отправлены на адрес {0}</value>
+    <value>Инструкции по отключению профиля были отправлены на адрес {0}</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>Неправильный код</value>
@@ -848,7 +848,7 @@
     <value>Количество администраторов не должно превышать {0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Количество администраторов</value>
+    <value>Количество администраторов/опытных пользователей</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Автоматическое резервное копирование и восстановление данных</value>
@@ -890,7 +890,7 @@
     <value>Количество пользователей в комнате не должно превышать {0}</value>
   </data>
   <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Количество администраторов/опытных пользователей:</value>
+    <value>Добавлено администраторов/опытных пользователей:</value>
   </data>
   <data name="ConsumersappleIdClientId" xml:space="preserve">
     <value>ID клиента приложения</value>
@@ -1044,5 +1044,14 @@
   </data>
   <data name="TariffsFeature_statistic" xml:space="preserve">
     <value>Квота хранилища и статистика</value>
+  </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>Превышен лимит приглашений</value>
+  </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>Инструкция по смене пароля была отправлена ​​на адрес электронной почты {0}.</value>
+  </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>Пользователь отключен</value>
   </data>
 </root>

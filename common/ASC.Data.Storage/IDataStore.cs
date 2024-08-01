@@ -195,6 +195,8 @@ public interface IDataStore
 
     bool IsSupportedPreSignedUri { get; }
 
+    bool ContentAsAttachment { get; }
+
     ///<summary>
     /// Deletes file
     ///</summary>
@@ -365,4 +367,6 @@ public interface IDataStore
     Task<string> GetFileEtagAsync(string domain, string path);
 
     Task<string> GetUrlWithHashAsync(string domain, string path);
+
+    string GetRootDirectory(string domain);
 }

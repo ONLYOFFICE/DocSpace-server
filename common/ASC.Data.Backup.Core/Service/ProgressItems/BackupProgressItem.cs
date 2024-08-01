@@ -31,7 +31,7 @@ public class BackupProgressItem(ILogger<BackupProgressItem> logger,
         IServiceScopeFactory serviceProvider,
         CoreBaseSettings coreBaseSettings,
         NotifyHelper notifyHelper)
-    : BaseBackupProgressItem(logger, serviceProvider)
+    : BaseBackupProgressItem(serviceProvider)
 {
     private Dictionary<string, string> _storageParams;
     private string _tempFolder;
@@ -46,6 +46,7 @@ public class BackupProgressItem(ILogger<BackupProgressItem> logger,
 
     public void Init(BackupSchedule schedule, bool isScheduled, string tempFolder, int limit)
     {
+        Init();
         _userId = Guid.Empty;
         TenantId = schedule.TenantId;
         _storageType = schedule.StorageType;
@@ -59,6 +60,7 @@ public class BackupProgressItem(ILogger<BackupProgressItem> logger,
 
     public void Init(StartBackupRequest request, bool isScheduled, string tempFolder, int limit)
     {
+        Init();
         _userId = request.UserId;
         TenantId = request.TenantId;
         _storageType = request.StorageType;

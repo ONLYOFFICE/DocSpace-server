@@ -30,14 +30,14 @@ namespace ASC.Data.Storage.Migration;
 public interface IService
 {
     [OperationContract]
-    void Migrate(int tenant, StorageSettings storageSettings);
+    Task MigrateAsync(int tenant, StorageSettings storageSettings);
 
     [OperationContract]
     double GetProgress(int tenant);
 
     [OperationContract]
-    void StopMigrate();
+    Task StopMigrateAsync();
 
     [OperationContract]
-    void UploadCdn(int tenant, string relativePath, string mappedPath, CdnStorageSettings cdnStorageSettings = null);
+    Task UploadCdnAsync(int tenant, string relativePath, string mappedPath, CdnStorageSettings cdnStorageSettings = null);
 }

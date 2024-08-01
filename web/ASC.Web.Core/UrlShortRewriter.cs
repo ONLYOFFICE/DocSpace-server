@@ -33,12 +33,12 @@ public class UrlShortRewriter
 
     public const string BasePath = "/s/";
 
-    public async Task InvokeAsync(HttpContext httpContext, IDbContextFactory<UrlShortenerDbContext> dbContextFactory)
+    public async Task InvokeAsync(HttpContext httpContext, IDbContextFactory<UrlShortenerDbContext> dbContextFactory, ShortUrl shortUrl)
     {
         var path = httpContext.Request.Path.ToString();
         path = path[BasePath.Length..];
 
-        var id = ShortUrl.Decode(path);
+        var id = shortUrl.Decode(path);
 
         ShortLink link;
 

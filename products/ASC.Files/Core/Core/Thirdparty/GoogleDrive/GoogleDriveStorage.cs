@@ -29,7 +29,7 @@ using IHttpClientFactory = System.Net.Http.IHttpClientFactory;
 
 namespace ASC.Files.Thirdparty.GoogleDrive;
 
-[Transient]
+[Transient(typeof(IThirdPartyStorage<DriveFile, DriveFile, DriveFile>))]
 internal class GoogleDriveStorage(
         FileUtility fileUtility,
         ILoggerProvider monitor,
@@ -330,6 +330,7 @@ internal class GoogleDriveStorage(
             RequestUri = new Uri(GoogleLoginProvider.GoogleUrlFileUpload + fileId + "?uploadType=resumable"),
             Method = new HttpMethod(method)
         };
+        
         request.Headers.Add("X-Upload-Content-Type", MimeMapping.GetMimeMapping(driveFile.Name));
         request.Headers.Add("X-Upload-Content-Length", contentLength.ToString(CultureInfo.InvariantCulture));
         request.Headers.Add("Authorization", "Bearer " + AccessToken);
@@ -337,6 +338,11 @@ internal class GoogleDriveStorage(
 
         var httpClient = clientFactory.CreateClient();
         using var response = await httpClient.SendAsync(request);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new InvalidOperationException(response.ReasonPhrase);
+        }
 
         var uploadSession = new RenewableUploadSession(driveFile.Id, folderId, contentLength)
         {

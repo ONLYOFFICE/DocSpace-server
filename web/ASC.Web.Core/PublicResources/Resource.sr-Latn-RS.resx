@@ -151,7 +151,7 @@
     <value>Apple ID</value>
   </data>
   <data name="ConsumersappleIdClientId" xml:space="preserve">
-    <value>ID Aplikacije</value>
+    <value>ID aplikacije</value>
   </data>
   <data name="ConsumersAppleIdDescription" xml:space="preserve">
     <value>Omogućite aplikaciji da se prijavi na portal koristeći Apple ID nalog.</value>
@@ -160,7 +160,7 @@
     <value>Omogućite ovoj aplikaciji da omogući korisnicima da se prijave na ONLYOFFICE koristeći Apple ID. {0}Idite na Apple Developers Portal i kreirajte novu aplikaciju za ONLYOFFICE integraciju. Unesite podatke koje ste dobili ispod:</value>
   </data>
   <data name="ConsumersappleIdKeyId" xml:space="preserve">
-    <value>Identifikator ključa od 10 znakova generisan za Sign in with Apple privatni ključ</value>
+    <value>Identifikator ključa od 10 znakova generisan za prijavu sa Apple privatni ključ</value>
   </data>
   <data name="ConsumersappleIdPrivateKey" xml:space="preserve">
     <value>Privatni ključ preuzet sa Apple Developer</value>
@@ -253,7 +253,7 @@
     <value>EasyBib</value>
   </data>
   <data name="ConsumerseasyBibappkey" xml:space="preserve">
-    <value>Ključ Aplikacije</value>
+    <value>Ključ aplikacije</value>
   </data>
   <data name="ConsumersEasyBibDescription" xml:space="preserve">
     <value>Omogućite ovoj aplikaciji da kreira bibliografske liste u dokumentima sa EasyBib-om.</value>
@@ -265,7 +265,7 @@
     <value>Facebook</value>
   </data>
   <data name="ConsumersfacebookAccessToken_Default" xml:space="preserve">
-    <value>Aplikacijski Token</value>
+    <value>Aplikacijski token</value>
   </data>
   <data name="ConsumersfacebookClientId" xml:space="preserve">
     <value>Facebook ID</value>
@@ -289,10 +289,10 @@
     <value>Server key</value>
   </data>
   <data name="Consumersfirebase_messagingSenderId" xml:space="preserve">
-    <value>ID Pošiljaoca</value>
+    <value>ID pošiljaoca</value>
   </data>
   <data name="Consumersfirebase_projectId" xml:space="preserve">
-    <value>ID Projekta</value>
+    <value>ID projekta</value>
   </data>
   <data name="ConsumersFirebaseDescription" xml:space="preserve">
     <value>Omogućite ovu aplikaciju da prima obaveštenja o porukama koje su vam poslate pomoću Firebase Cloud Messaging.</value>
@@ -307,7 +307,7 @@
     <value>Google ID</value>
   </data>
   <data name="ConsumersgoogleClientSecret" xml:space="preserve">
-    <value>Google Ključ</value>
+    <value>Google ključ</value>
   </data>
   <data name="ConsumersGoogleCloud" xml:space="preserve">
     <value>Google Cloud Storage</value>
@@ -322,7 +322,7 @@
     <value>Povežite uslugu Google Cloud Storage za pravljenje rezervnih kopija i skladištenje podataka sa vašeg portala.</value>
   </data>
   <data name="ConsumersGoogleCloudInstruction" xml:space="preserve">
-    <value>Povežite uslugu Google Cloud Storage za pravljenje rezervnih kopija i skladištenje podataka sa vašeg portala. {0}Idite na Google Cloud Platform Cinsole i napravite novi nalog usluge za ONLYOFFICE. Nalepite podatke koje ste dobili u nastavku:</value>
+    <value>Povežite uslugu Google Cloud Storage za pravljenje rezervnih kopija i skladištenje podataka sa vašeg portala. {0}Idite na konzolu Google Cloud Platform i napravite novi nalog usluge za ONLYOFFICE. Nalepite podatke koje ste dobili u nastavku:</value>
   </data>
   <data name="ConsumersGoogleCloudjson" xml:space="preserve">
     <value>GoogleCloud json</value>
@@ -376,7 +376,7 @@
     <value>Omogućite aplikaciji da se prijavi na portal pomoću Microsoft naloga.</value>
   </data>
   <data name="ConsumersMicrosoftInstruction" xml:space="preserve">
-    <value>Omogućite ovu aplikaciju da biste svojim korisnicima omogućili da se prijave na ONLIOFFICE koristeći Microsoft. {0}Idite na Microsoft Azure i napravite novu integraciju aplikacije ONLIOFFICE. Unesite podatke koje ste dobili ispod:</value>
+    <value>Omogućite ovu aplikaciju da biste svojim korisnicima omogućili da se prijave na ONLYOFFICE koristeći Microsoft. {0}Idite na Microsoft Azure i napravite novu integraciju aplikacije ONLYOFFICE. Unesite podatke koje ste dobili ispod:</value>
   </data>
   <data name="ConsumersRackspace" xml:space="preserve">
     <value>Rackspace Cloud Storage</value>
@@ -385,7 +385,7 @@
     <value>Povežite uslugu Rackspace Cloud Storage da biste napravili rezervnu kopiju i čuvali podatke sa vašeg portala.</value>
   </data>
   <data name="ConsumersRackspaceInstruction" xml:space="preserve">
-    <value>Povežite uslugu Rackspace Cloud Storage da biste napravili rezervnu kopiju i čuvali podatke sa vašeg portala. {0}U bezbednosnim postavkama Rackspace Cloud Kontrolne Table kliknite na link Prikaži pored Rackspace API ključa. Nalepite podatke koje ste dobili u nastavku:</value>
+    <value>Povežite uslugu Rackspace Cloud Storage da biste napravili rezervnu kopiju i čuvali podatke sa vašeg portala. {0}U bezbednosnim postavkama Rackspace Cloud kontrolne table kliknite na link Prikaži pored Rackspace API ključa. Nalepite podatke koje ste dobili u nastavku:</value>
   </data>
   <data name="ConsumersRackspaceprivate_container" xml:space="preserve">
     <value>Privatni kontejner</value>
@@ -418,7 +418,7 @@
     <value>Povežite Amazon AVS S3 za pravljenje rezervnih kopija i skladištenje podataka sa vašeg portala.</value>
   </data>
   <data name="ConsumersS3Instruction" xml:space="preserve">
-    <value>Povežite Amazon AVS S3 za pravljenje rezervnih kopija i skladištenje podataka sa vašeg portala. {0}Idite na AVS upravljačku konzolu i napravite pristupne ključeve za ONLIOFFICE. Nalepite podatke koje ste dobili u nastavku:</value>
+    <value>Povežite Amazon AVS S3 za pravljenje rezervnih kopija i skladištenje podataka sa vašeg portala. {0}Idite na AVS upravljačku konzolu i napravite pristupne ključeve za ONLYOFFICE. Nalepite podatke koje ste dobili u nastavku:</value>
   </data>
   <data name="ConsumersS3region" xml:space="preserve">
     <value>Region</value>
@@ -460,7 +460,7 @@
     <value>OneDrive</value>
   </data>
   <data name="Consumersskydriveappkey" xml:space="preserve">
-    <value>ID Aplikacije</value>
+    <value>ID aplikacije</value>
   </data>
   <data name="Consumersskydriveappsecret" xml:space="preserve">
     <value>Tajna klijenta</value>
@@ -472,7 +472,7 @@
     <value>Omogućite ovu aplikaciju da povežete svoj OneDrive nalog sa modulom Dokumenti. Moći ćete da upravljate, menjate i delite datoteke sa OneDrive-a sa ONLYOFFICE korisnicima. {0}Prijavite se na svoj Microsoft Azure nalog i napravite novu aplikaciju za ONLYOFFICE integraciju. Unesite podatke koje ste dobili ispod:</value>
   </data>
   <data name="ConsumersSmsc" xml:space="preserve">
-    <value>SMS Centar</value>
+    <value>SMS centar</value>
   </data>
   <data name="ConsumersSmscDescription" xml:space="preserve">
     <value>Omogućite aplikaciju za dvofaktorsku autentifikaciju preko SMS Centra.</value>
@@ -499,7 +499,7 @@
     <value>Povežite Telegram nalog da biste primali obaveštenja portala putem Telegrama.</value>
   </data>
   <data name="ConsumersTelegramInstruction" xml:space="preserve">
-    <value>Da biste dobijali obaveštenja portala preko Telegrama, omogućite Telegram bot. Možete kreirati novog bota koristeći BotFather u Telegram Desktopu. Da bi koristili ovog bota, korisnici portala treba da omoguće Telegram obaveštenja na svojoj stranici profila. {0}Nalepite korisničko ime bota i token koji ste primili u polja u nastavku.</value>
+    <value>Da biste dobijali obaveštenja portala preko Telegrama, omogućite Telegram bot. Možete kreirati novog bota koristeći BotFather u Telegram Desktop. Da bi koristili ovog bota, korisnici portala treba da omoguće Telegram obaveštenja na svojoj stranici profila. {0}Nalepite korisničko ime bota i token koji ste primili u polja u nastavku.</value>
   </data>
   <data name="ConsumersTwilio" xml:space="preserve">
     <value>Twilio</value>
@@ -514,7 +514,7 @@
     <value>Omogućite ovu aplikaciju da poziva CRM kontakte sa Twilio.</value>
   </data>
   <data name="ConsumersTwilioInstruction" xml:space="preserve">
-    <value>Omogućite ovu aplikaciju da dozvolite vašim korisnicima da pozivaju njihove kontakte sa CRM modula koristeći Twilio. {0}Idite na Twilio Konzolu i nalepite sledeće podatke ispod:</value>
+    <value>Omogućite ovu aplikaciju da dozvolite vašim korisnicima da pozivaju njihove kontakte sa CRM modula koristeći Twilio. {0}Idite na konzolu Twilio i nalepite sledeće podatke ispod:</value>
   </data>
   <data name="Consumerstwiliosender" xml:space="preserve">
     <value>Broj telefona sa Twilio (potrebno za SMS autorizaciju)</value>
@@ -532,7 +532,7 @@
     <value>Omogućite aplikaciju da biste se prijavili na portal koristeći Twitter nalog.</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>Omogućite ovu aplikaciju da biste svojim korisnicima omogućili da se prijave na ONLYOFFICE koristeći svoj Twitter i povežu Twitter naloge svojih klijenata sa CRM modulom. {0}Idite na Tvitter Developers Portal i napravite novu integraciju aplikacije ONLYOFFICE. Unesite podatke koje ste primili ispod:</value>
+    <value>Omogućite ovu aplikaciju da biste svojim korisnicima omogućili da se prijave na ONLYOFFICE koristeći svoj Twitter i povežu Twitter naloge svojih klijenata sa CRM modulom. {0}Idite na Twitter Developers portal i napravite novu integraciju aplikacije ONLYOFFICE. Unesite podatke koje ste primili ispod:</value>
   </data>
   <data name="ConsumersTwitterKey" xml:space="preserve">
     <value>API ključ</value>
@@ -547,7 +547,7 @@
     <value>VK</value>
   </data>
   <data name="ConsumersVkClientId" xml:space="preserve">
-    <value>ID Aplikacije</value>
+    <value>ID aplikacije</value>
   </data>
   <data name="ConsumersVkClientSecret" xml:space="preserve">
     <value>Sigurni ključ</value>
@@ -586,7 +586,7 @@
     <value>Omogućite aplikaciji uvoz korisnika sa Yahoo servisa.</value>
   </data>
   <data name="ConsumersYahooInstruction" xml:space="preserve">
-    <value>Omogućite ovu aplikaciju da biste dodali nove korisnike portala sa svoje Yahoo liste kontakata. {0}Idite na stranicu Kreiraj Aplikaciju u Yahoo Developer Network-u i napravite novu aplikaciju za ONLIOFFICE integraciju. Unesite podatke koje ste dobili ispod:</value>
+    <value>Omogućite ovu aplikaciju da biste dodali nove korisnike portala sa svoje Yahoo liste kontakata. {0}Idite na stranicu Kreiraj Aplikaciju u Yahoo Developer Network-u i napravite novu aplikaciju za ONLYOFFICE integraciju. Unesite podatke koje ste dobili ispod:</value>
   </data>
   <data name="ConsumersYandex" xml:space="preserve">
     <value>Yandex</value>
@@ -628,7 +628,7 @@
     <value>Netačan ID Instance.</value>
   </data>
   <data name="CustomNamingPeopleSchema" xml:space="preserve">
-    <value>Prilagođeno</value>
+    <value>Prilagođeni</value>
   </data>
   <data name="EmailAndPasswordIncorrectEmail" xml:space="preserve">
     <value>Netačna email adresa</value>
@@ -805,7 +805,7 @@
     <value>Nema pronađenih grupa.</value>
   </data>
   <data name="LdapSettingsErrorIncorrectLdapFilter" xml:space="preserve">
-    <value>Nevažeća vrednost Korisničkog Filtera.</value>
+    <value>Nevažeća vrednost Korisničkog filtera.</value>
   </data>
   <data name="LdapSettingsErrorLostRights" xml:space="preserve">
     <value>Pokušali ste sebi da oduzmete administratorska prava. Vaša administratorska prava nisu promenjena.</value>
@@ -820,22 +820,22 @@
     <value>Nije pronađen nijedan korisnik.</value>
   </data>
   <data name="LdapSettingsErrorWrongGroupAttribute" xml:space="preserve">
-    <value>Nije moguće dobiti Atribut Grupe za jednu ili više grupa.</value>
+    <value>Nije moguće dobiti Atribut grupe za jednu ili više grupa.</value>
   </data>
   <data name="LdapSettingsErrorWrongGroupFilter" xml:space="preserve">
-    <value>Netačan Filter Grupe.</value>
+    <value>Netačan Filter grupe.</value>
   </data>
   <data name="LdapSettingsErrorWrongGroupNameAttribute" xml:space="preserve">
-    <value>Nije moguće dobiti Atribut Imena Grupe za jednu ili više grupa.</value>
+    <value>Nije moguće dobiti Atribut imena grupe za jednu ili više grupa.</value>
   </data>
   <data name="LdapSettingsErrorWrongLoginAttribute" xml:space="preserve">
-    <value>Nije moguće dobiti Atribut za Prijavu za jednog ili više korisnika.</value>
+    <value>Nije moguće dobiti Atribut za prijavu za jednog ili više korisnika.</value>
   </data>
   <data name="LdapSettingsErrorWrongServerOrPort" xml:space="preserve">
     <value>Nije moguće povezati se sa LDAP serverom. Proverite da li su adresa servera i broj porta tačni.</value>
   </data>
   <data name="LdapSettingsErrorWrongUserAttribute" xml:space="preserve">
-    <value>Nije moguće dobiti Atribut Korisnika za jednog ili više korisnika.</value>
+    <value>Nije moguće dobiti Atribut korisnika za jednog ili više korisnika.</value>
   </data>
   <data name="LdapSettingsInternalServerError" xml:space="preserve">
     <value>Interna greška servera.</value>
@@ -913,7 +913,7 @@
     <value>Previše LDAP operacija.</value>
   </data>
   <data name="LdapSettingsWrongSidAttribute" xml:space="preserve">
-    <value>Nije moguće dobiti jedinstveni ID za objekte korisnika/grupe. Podrazumevano, sistem će pokušati da uskladi jedan od sledećih identifikatora: entriUUID, nsuniqueid, GUID, objectSid. Ako nijedan od atributa ne odgovara vašem LDAP serveru, navedite potreban atribut u postavci ldap.unikue.id datoteke veb.appsettings.config.</value>
+    <value>Nije moguće dobiti jedinstveni ID za objekte korisnika/grupe. Podrazumevano, sistem će pokušati da uskladi jedan od sledećih identifikatora: entryUUID, nsuniqueid, GUID, objectSid. Ako nijedan od atributa ne odgovara vašem LDAP serveru, navedite potreban atribut u postavci ldap.unique.id datoteke web.appsettings.config.</value>
   </data>
   <data name="LicenseError" xml:space="preserve">
     <value>Licenca nije ispravna</value>
@@ -1003,7 +1003,7 @@
     <value>Nevažeće mapiranje polja</value>
   </data>
   <data name="SuccessfullySaveGreetingSettingsMessage" xml:space="preserve">
-    <value>Podešavanja Dobrodošli Stranice su uspešno sačuvana</value>
+    <value>Podešavanja Dobrodošli stranice su uspešno sačuvana</value>
   </data>
   <data name="SuccessfullySaveSettingsMessage" xml:space="preserve">
     <value>Podešavanja su uspešno ažurirana</value>
@@ -1012,7 +1012,7 @@
     <value>Instrukcije za brisanje vašeg profila su poslate na {0} email adresu</value>
   </data>
   <data name="Tariffs_admin" xml:space="preserve">
-    <value>Posao</value>
+    <value>Business</value>
   </data>
   <data name="Tariffs_startup" xml:space="preserve">
     <value>Startup</value>
@@ -1030,7 +1030,7 @@
     <value>Broj admina ne bi trebalo da prekorači {0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Broj admina</value>
+    <value>Broj admina/naprednih korisnika</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Automatska rezervna kopija i oporavak</value>
@@ -1052,9 +1052,6 @@
   </data>
   <data name="TariffsFeature_total_size_price_count" xml:space="preserve">
     <value>Skladišni prostor</value>
-  </data>
-  <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Broj admina/naprednih korisnika:</value>
   </data>
   <data name="TariffsFeature_used_room" xml:space="preserve">
     <value>Sobe:</value>
@@ -1097,5 +1094,8 @@
   </data>
   <data name="WhatsNewSubscriptionName" xml:space="preserve">
     <value>Šta je novo</value>
+  </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>Administratori/Napredni korisnici dodati:</value>
   </data>
 </root>

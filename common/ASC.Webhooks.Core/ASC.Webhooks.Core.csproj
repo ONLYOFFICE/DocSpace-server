@@ -104,6 +104,9 @@
     <EmbeddedResource Update="Resources\WebHookResource.sl.resx">
       <DependentUpon>WebHookResource.resx</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Update="Resources\WebHookResource.sr-Cyrl-RS.resx">
+      <DependentUpon>WebHookResource.resx</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Update="Resources\WebHookResource.sr-Latn-RS.resx">
       <DependentUpon>WebHookResource.resx</DependentUpon>
     </EmbeddedResource>

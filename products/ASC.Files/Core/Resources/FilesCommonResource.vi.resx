@@ -270,7 +270,7 @@ Khả năng tương thích cao nhất với docx, xlsx, pptx.</value>
     <value>Tài liệu</value>
   </data>
   <data name="ProductUserOpportunities" xml:space="preserve">
-    <value>Tạo và chỉnh sửa tài liệu riêng cũng như tài liệu được chia sẻ với quyền truy cập thích hợp|Trao cho người dùng khác quyền đọc/chỉnh sửa tài liệu và thư mục|Liên kết Dropbox, Box và tài khoản tài khác trong mục 'Tài liệu của tôi'</value>
+    <value>Tạo và chỉnh sửa tài liệu riêng cũng như tài liệu được chia sẻ với quyền truy cập thích hợp|Trao cho người dùng khác quyền đọc/chỉnh sửa tài liệu và thư mục|Liên kết Dropbox, Box và tài khoản tài khác trong mục 'Tài liệu'</value>
   </data>
   <data name="UnknownFirstName" xml:space="preserve">
     <value>Tên</value>
@@ -463,5 +463,35 @@ Khả năng tương thích cao nhất với docx, xlsx, pptx.</value>
   </data>
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>Loại</value>
+  </data>
+  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
+    <value>Người dùng cấp cao</value>
+  </data>
+  <data name="Date" xml:space="preserve">
+    <value>Ngày</value>
+  </data>
+  <data name="RoleEnum_PowerUser" xml:space="preserve">
+    <value>Người dùng cấp cao</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>Người dùng</value>
+  </data>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>Không hỗ trợ di chuyển một số tập tin vào phòng Điền Biểu mẫu. Hãy di chuyển từng biểu mẫu ONLYOFFICE một.</value>
+  </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>Không hỗ trợ di chuyển các thư mục đến phòng Điền Biểu mẫu. Hãy di chuyển từng biểu mẫu ONLYOFFICE PDF một.</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>Không thể di chuyển tập tin đến phòng này. Xin hãy thử di chuyển biểu mẫu ONLYOFFICE PDF.</value>
+  </data>
+  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
+    <value>Không thể tải tập tin lên phòng này. Xin hãy thử tải lên biểu mẫu ONLYOFFICE PDF.</value>
+  </data>
+  <data name="FillOutExternalLinkTitle" xml:space="preserve">
+    <value>Liên kết để điền</value>
+  </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>Liên kết đến biểu mẫu</value>
   </data>
 </root>

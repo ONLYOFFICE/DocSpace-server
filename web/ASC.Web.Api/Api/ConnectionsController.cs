@@ -34,20 +34,20 @@ namespace ASC.Web.Api;
 [DefaultRoute("activeconnections")]
 [ApiController]
 [ControllerName("security")]
-public class ConnectionsController(UserManager userManager,
-        SecurityContext securityContext,
-        DbLoginEventsManager dbLoginEventsManager,
-        IHttpContextAccessor httpContextAccessor,
-        DisplayUserSettingsHelper displayUserSettingsHelper,
-        CommonLinkUtility commonLinkUtility,
-        ILogger<ConnectionsController> logger,
-        WebItemSecurity webItemSecurity,
-        MessageService messageService,
-        MessageTarget messageTarget,
-        CookiesManager cookiesManager,
-        CookieStorage cookieStorage,
-        GeolocationHelper geolocationHelper,
-        ApiDateTimeHelper apiDateTimeHelper)
+public class ConnectionsController(
+    UserManager userManager,
+    SecurityContext securityContext,
+    DbLoginEventsManager dbLoginEventsManager,
+    IHttpContextAccessor httpContextAccessor,
+    DisplayUserSettingsHelper displayUserSettingsHelper,
+    CommonLinkUtility commonLinkUtility,
+    ILogger<ConnectionsController> logger,
+    WebItemSecurity webItemSecurity,
+    MessageService messageService,
+    CookiesManager cookiesManager,
+    CookieStorage cookieStorage,
+    GeolocationHelper geolocationHelper,
+    ApiDateTimeHelper apiDateTimeHelper)
     : ControllerBase
 {
     /// <summary>
@@ -74,6 +74,18 @@ public class ConnectionsController(UserManager userManager,
             if (loginEvent != null)
             {
                 listLoginEvents.Remove(loginEvent);
+
+                if (httpContextAccessor.HttpContext != null)
+                {
+                    var baseEvent = await GetBaseEvent();
+
+                    loginEvent.Platform = baseEvent.Platform;
+                    loginEvent.Browser = baseEvent.Browser;
+                    loginEvent.IP = baseEvent.IP;
+                    loginEvent.City = baseEvent.City;
+                    loginEvent.Country = baseEvent.Country;
+                }
+
                 listLoginEvents.Insert(0, loginEvent);
             }
         }
@@ -81,23 +93,9 @@ public class ConnectionsController(UserManager userManager,
         {
             if (listLoginEvents.Count == 0 && httpContextAccessor.HttpContext != null)
             {
-                var request = httpContextAccessor.HttpContext.Request;
-                var uaHeader = MessageSettings.GetUAHeader(request);
-                var clientInfo = MessageSettings.GetClientInfo(uaHeader);
-                var platformAndDevice = MessageSettings.GetPlatformAndDevice(clientInfo);
-                var browser = MessageSettings.GetBrowser(clientInfo);
-                var ip = MessageSettings.GetIP(request);
+                var baseEvent = await GetBaseEvent();
 
-                var baseEvent = new BaseEvent
-                {
-                    Id = 0,
-                    Platform = platformAndDevice,
-                    Browser = browser,
-                    Date = DateTime.Now,
-                    IP = ip
-                };
-
-                listLoginEvents.Add(await geolocationHelper.AddGeolocationAsync(baseEvent));
+                listLoginEvents.Add(baseEvent);
             }
         }
 
@@ -120,6 +118,26 @@ public class ConnectionsController(UserManager userManager,
 
             }).ToList()
         };
+
+        async Task<BaseEvent> GetBaseEvent()
+        {
+            var request = httpContextAccessor.HttpContext.Request;
+            var uaHeader = MessageSettings.GetUAHeader(request);
+            var clientInfo = MessageSettings.GetClientInfo(uaHeader);
+            var platformAndDevice = MessageSettings.GetPlatformAndDevice(clientInfo);
+            var browser = MessageSettings.GetBrowser(clientInfo);
+            var ip = MessageSettings.GetIP(request);
+
+            var baseEvent = new BaseEvent
+            {
+                Platform = platformAndDevice,
+                Browser = browser,
+                Date = DateTime.Now,
+                IP = ip
+            };
+
+            return await geolocationHelper.AddGeolocationAsync(baseEvent);
+        }
     }
 
     /// <summary>
@@ -150,7 +168,7 @@ public class ConnectionsController(UserManager userManager,
             var hash = auditEventDate.ToString("s", CultureInfo.InvariantCulture);
             var confirmationUrl = await commonLinkUtility.GetConfirmationEmailUrlAsync(user.Email, ConfirmType.PasswordChange, hash, user.Id);
 
-            await messageService.SendAsync(MessageAction.UserSentPasswordChangeInstructions, messageTarget.Create(user.Id), auditEventDate, userName);
+            await messageService.SendAsync(MessageAction.UserSentPasswordChangeInstructions, MessageTarget.Create(user.Id), auditEventDate, userName);
 
             return confirmationUrl;
         }
@@ -269,7 +287,7 @@ public class ConnectionsController(UserManager userManager,
         var userName = user.DisplayUserName(false, displayUserSettingsHelper);
         var auditEventDate = DateTime.UtcNow;
 
-        await messageService.SendAsync(currentUserId.Equals(user.Id) ? MessageAction.UserLogoutActiveConnections : MessageAction.UserLogoutActiveConnectionsForUser, messageTarget.Create(user.Id), auditEventDate, userName);
+        await messageService.SendAsync(currentUserId.Equals(user.Id) ? MessageAction.UserLogoutActiveConnections : MessageAction.UserLogoutActiveConnectionsForUser, MessageTarget.Create(user.Id), auditEventDate, userName);
         await cookiesManager.ResetUserCookieAsync(user.Id);
     }
 

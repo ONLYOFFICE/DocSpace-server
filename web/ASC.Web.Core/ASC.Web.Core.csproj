@@ -19,21 +19,22 @@
   </ItemGroup>
   <ItemGroup>
     <None Remove="PublicResources\logo.png" />
+    <None Remove="PublicResources\logozh-cn.png" />
     <None Remove="PublicResources\webstudio_patterns.xml" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="PublicResources\logo.png" />
+    <EmbeddedResource Include="PublicResources\logozh-cn.png" />
     <EmbeddedResource Include="PublicResources\webstudio_patterns.xml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\common\ASC.Core.Common\ASC.Core.Common.csproj" />
     <ProjectReference Include="..\..\common\ASC.Data.Encryption\ASC.Data.Encryption.csproj" />
     <ProjectReference Include="..\..\common\ASC.FederatedLogin\ASC.FederatedLogin.csproj" />
-    <ProjectReference Include="..\..\common\ASC.Feed\ASC.Feed.csproj" />
     <ProjectReference Include="..\..\common\ASC.IPSecurity\ASC.IPSecurity.csproj" />
     <ProjectReference Include="..\..\common\ASC.MessagingSystem\ASC.MessagingSystem.csproj" />
-    <ProjectReference Include="..\..\common\ASC.Notify.Textile\ASC.Notify.Textile.csproj" />
     <ProjectReference Include="..\..\common\services\ASC.AuditTrail\ASC.AuditTrail.csproj" />
+    <ProjectReference Include="..\..\common\services\ASC.ElasticSearch\ASC.ElasticSearch.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="PublicResources\WebPatternResource.Designer.cs">
@@ -112,6 +113,9 @@
       <DependentUpon>NamingPeopleResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="PublicResources\NamingPeopleResource.sl.resx">
+      <DependentUpon>NamingPeopleResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="PublicResources\NamingPeopleResource.sr-Cyrl-RS.resx">
       <DependentUpon>NamingPeopleResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="PublicResources\NamingPeopleResource.sr-Latn-RS.resx">
@@ -208,6 +212,9 @@
     <EmbeddedResource Update="PublicResources\Resource.sl.resx">
       <DependentUpon>Resource.resx</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Update="PublicResources\Resource.sr-Cyrl-RS.resx">
+      <DependentUpon>Resource.resx</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Update="PublicResources\Resource.sr-Latn-RS.resx">
       <DependentUpon>Resource.resx</DependentUpon>
     </EmbeddedResource>
@@ -302,6 +309,9 @@
     <EmbeddedResource Update="PublicResources\UserControlsCommonResource.sl.resx">
       <DependentUpon>UserControlsCommonResource.resx</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Update="PublicResources\UserControlsCommonResource.sr-Cyrl-RS.resx">
+      <DependentUpon>UserControlsCommonResource.resx</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Update="PublicResources\UserControlsCommonResource.sr-Latn-RS.resx">
       <DependentUpon>UserControlsCommonResource.resx</DependentUpon>
     </EmbeddedResource>
@@ -385,6 +395,9 @@
       <DependentUpon>WebstudioNotifyPatternResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="PublicResources\WebstudioNotifyPatternResource.sk.resx">
+      <DependentUpon>WebstudioNotifyPatternResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="PublicResources\WebstudioNotifyPatternResource.sr-Cyrl-RS.resx">
       <DependentUpon>WebstudioNotifyPatternResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="PublicResources\WebstudioNotifyPatternResource.sr-Latn-RS.resx">
@@ -505,6 +518,9 @@
     <EmbeddedResource Update="PublicResources\CustomModeResource.sl.resx">
       <DependentUpon>CustomModeResource.resx</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Update="PublicResources\CustomModeResource.sr-Cyrl-RS.resx">
+      <DependentUpon>CustomModeResource.resx</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Update="PublicResources\CustomModeResource.sr-Latn-RS.resx">
       <DependentUpon>CustomModeResource.resx</DependentUpon>
     </EmbeddedResource>
@@ -519,13 +535,13 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.301.17" />
+    <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.303.26" />
     <PackageReference Include="GoogleAuthenticator" Version="3.2.0" />
-    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.4" />
-    <PackageReference Include="SkiaSharp" Version="2.88.7" />
-    <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="2.88.7" />
-    <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="2.88.7" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.5" />
+    <PackageReference Include="SkiaSharp" Version="2.88.8" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="2.88.8" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="2.88.8" />
     <PackageReference Include="SkiaSharp.Svg" Version="1.60.0" />
-    <PackageReference Include="Twilio" Version="7.0.0" />
+    <PackageReference Include="Twilio" Version="7.2.0" />
   </ItemGroup>
 </Project>

@@ -278,7 +278,7 @@
     <value>Skupina aktualizovaná: {0}</value>
   </data>
   <data name="GuestAccount" xml:space="preserve">
-    <value>Účet návštevníka</value>
+    <value>Anonymný</value>
   </data>
   <data name="GuestActivated" xml:space="preserve">
     <value>Hosť bol aktivovaný: {0}</value>
@@ -738,5 +738,8 @@
   </data>
   <data name="PortalRenamed" xml:space="preserve">
     <value>Portál bol premenovaný</value>
+  </data>
+  <data name="FileSizePostfix" xml:space="preserve">
+    <value>bytes,KB,MB,GB,TB</value>
   </data>
 </root>

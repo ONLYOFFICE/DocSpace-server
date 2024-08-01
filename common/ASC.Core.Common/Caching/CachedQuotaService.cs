@@ -54,7 +54,8 @@ class QuotaServiceCache
     }
 }
 
-[Scope]
+
+[Scope(typeof(IQuotaService))]
 class CachedQuotaService() : IQuotaService
 {
     private readonly DbQuotaService _service;

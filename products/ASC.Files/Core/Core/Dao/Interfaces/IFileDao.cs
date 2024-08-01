@@ -26,7 +26,6 @@
 
 namespace ASC.Files.Core;
 
-[Scope]
 public interface IFileDao<T>
 {
     /// <summary>
@@ -174,6 +173,24 @@ public interface IFileDao<T>
     /// Save in all other cases
     /// </remarks>
     Task<File<T>> SaveFileAsync(File<T> file, Stream fileStream);
+
+    /// <summary>
+    ///  Saves / updates the version of the file
+    ///  and save stream of file
+    /// </summary>
+    /// <param name="file"></param>
+    /// <param name="fileStream"> </param>
+    /// <param name="checkFolder"> </param>
+    /// <returns></returns>
+    /// <remarks>
+    /// Updates the file if:
+    /// - The file comes with the given id
+    /// - The file with that name in the folder / container exists
+    ///
+    /// Save in all other cases
+    /// </remarks>
+    Task<File<T>> SaveFileAsync(File<T> file, Stream fileStream, bool checkFolder);
+
     /// <summary>
     /// 
     /// </summary>
@@ -198,7 +215,7 @@ public interface IFileDao<T>
     /// <param name="title">file name</param>
     /// <param name="folderId">folder id</param>
     /// <returns>Returns true if the file exists, otherwise false</returns>
-    Task<bool> IsExistAsync(string title, object folderId);
+    Task<bool> IsExistAsync(string title, T folderId);
 
     /// <summary>
     ///   Moves a file or set of files in a folder
@@ -320,13 +337,9 @@ public interface IFileDao<T>
 
     Task<Stream> GetThumbnailAsync(T fileId, int width, int height);
 
-    IAsyncEnumerable<FileWithShare> GetFeedsAsync(int tenant, DateTime from, DateTime to);
+    Task<EntryProperties<T>> GetProperties(T fileId);
 
-    IAsyncEnumerable<int> GetTenantsWithFeedsAsync(DateTime fromTime, bool includeSecurity);
-
-    Task<EntryProperties> GetProperties(T fileId);
-
-    Task SaveProperties(T fileId, EntryProperties entryProperties);
+    Task SaveProperties(T fileId, EntryProperties<T> entryProperties);
 
     Task<int> GetFilesCountAsync(T parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent, 
         bool withSubfolders = false, bool excludeSubject = false, T roomId = default);

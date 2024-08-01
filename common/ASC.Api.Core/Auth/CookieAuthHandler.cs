@@ -28,7 +28,6 @@ using SecurityContext = ASC.Core.SecurityContext;
 
 namespace ASC.Api.Core.Auth;
 
-[Scope]
 public class CookieAuthHandler(
     IOptionsMonitor<AuthenticationSchemeOptions> options,
     ILoggerFactory logger,
@@ -56,7 +55,7 @@ public class CookieAuthHandler(
                 authorization = authorization["Bearer ".Length..];
             }
 
-            if (!(await securityContext.AuthenticateMe(authorization)))
+            if (!(await securityContext.AuthenticateMeAsync(authorization)))
             {
                 throw new AuthenticationException(nameof(HttpStatusCode.Unauthorized));
             }

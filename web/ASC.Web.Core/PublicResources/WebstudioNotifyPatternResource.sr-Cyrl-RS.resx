@@ -1,0 +1,1794 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ActionFileCreated" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; је направио нови документ: &lt;a href={1}&gt;{2}&lt;/а&gt; у соби: &lt;a href={3}&gt;{4}&lt;/а&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionFileEdited" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; је изменио/ла документ: &lt;a href={1}&gt;{2}&lt;/а&gt; у соби: &lt;a href={3}&gt;{4}&lt;/а&gt;</value>
+  </data>
+  <data name="ActionFileUploaded" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; је отпремио нови документ: &lt;a href={1}&gt;{2}&lt;/а&gt; у соби: &lt;a href={3}&gt;{4}&lt;/а&gt;</value>
+  </data>
+  <data name="ActionNewComment" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; је додао нови коментар у верзију документа: &lt;a href={1}&gt;{2}&lt;/а&gt; у соби: &lt;a href={3}&gt;{4}&lt;/а&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionRoomArchived" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; је преместио/ла собу: &lt;a href={1}&gt;{2}&lt;/а&gt; у архиву - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionRoomCreated" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; је направио/ла нову собу: &lt;a href={1}&gt;{2}&lt;/а&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionRoomRemoved" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; је избрисао/ла собу: &lt;b&gt;{1}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionRoomRenamed" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; је преименовао собу: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href={2}&gt;{3}&lt;/а&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionRoomUpdateAccessForUser" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; је додељена улога &lt;b&gt;{1}&lt;/b&gt; у соби: &lt;a href={2}&gt;{3}&lt;/а&gt;</value>
+  </data>
+  <data name="ActionUserAddedToRoom" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; је додат у собу: &lt;a href={1}&gt;{2}&lt;/а&gt;</value>
+  </data>
+  <data name="ActionUserCreated" xml:space="preserve">
+    <value>Додат је нови DocSpace корисник: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionUserRemovedFromRoom" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; је уклоњен из собе: &lt;a href={1}&gt;{2}&lt;/а&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionUsersUpdatedType" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; је променио ниво приступа корисника &lt;b&gt;{1}&lt;/b&gt; у &lt;b&gt;{2}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionUserUpdated" xml:space="preserve">
+    <value>Корисник DocSpace -а је ажуриран: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
+  </data>
+  <data name="BestRegardsText" xml:space="preserve">
+    <value>Срдачан поздрав, ONLYOFFICE тим за подршку</value>
+  </data>
+  <data name="ButtonAccept" xml:space="preserve">
+    <value>Прихвати</value>
+  </data>
+  <data name="ButtonAccessControlPanel" xml:space="preserve">
+    <value>Приступи Control Panel-у</value>
+  </data>
+  <data name="ButtonAccessYourPortal" xml:space="preserve">
+    <value>Приступи свом порталу</value>
+  </data>
+  <data name="ButtonAccessYouWebOffice" xml:space="preserve">
+    <value>Приступи свом Web-Office</value>
+  </data>
+  <data name="ButtonActivateEmail" xml:space="preserve">
+    <value>Кликни овде да активираш своју емаил адресу</value>
+  </data>
+  <data name="ButtonChangeEmail" xml:space="preserve">
+    <value>Промени емаил адресу</value>
+  </data>
+  <data name="ButtonChangePassword" xml:space="preserve">
+    <value>Промени лозинку</value>
+  </data>
+  <data name="ButtonChangePhone" xml:space="preserve">
+    <value>Промени број мобилног телефона</value>
+  </data>
+  <data name="ButtonChangeTfa" xml:space="preserve">
+    <value>Конфигуриши аутентификатор апликацију</value>
+  </data>
+  <data name="ButtonCollaborate" xml:space="preserve">
+    <value>Сарађујте у DocSpace-у</value>
+  </data>
+  <data name="ButtonConfigureRightNow" xml:space="preserve">
+    <value>Конфигуриши сада</value>
+  </data>
+  <data name="ButtonConfirm" xml:space="preserve">
+    <value>Потврди</value>
+  </data>
+  <data name="ButtonConfirmEmail" xml:space="preserve">
+    <value>ПОТВРДИ</value>
+  </data>
+  <data name="ButtonConfirmInvite" xml:space="preserve">
+    <value>Потврдите позив за DocSpace</value>
+  </data>
+  <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
+    <value>Потврди ажурирање портал власника</value>
+  </data>
+  <data name="ButtonConfirmRoomInvite" xml:space="preserve">
+    <value>Потврдите позивницу за собу</value>
+  </data>
+  <data name="ButtonConfirmTermination" xml:space="preserve">
+    <value>Потврди терминацију налога</value>
+  </data>
+  <data name="ButtonDeactivatePortal" xml:space="preserve">
+    <value>Деактивирај портал</value>
+  </data>
+  <data name="ButtonDeletePortal" xml:space="preserve">
+    <value>Обриши портал</value>
+  </data>
+  <data name="ButtonGetStarted" xml:space="preserve">
+    <value>Започните</value>
+  </data>
+  <data name="ButtonInviteRightNow" xml:space="preserve">
+    <value>Позови сада</value>
+  </data>
+  <data name="ButtonLeaveFeedback" xml:space="preserve">
+    <value>Остави повратне информације</value>
+  </data>
+  <data name="ButtonRemoveProfile" xml:space="preserve">
+    <value>Уклони профиле</value>
+  </data>
+  <data name="ButtonRenewNow" xml:space="preserve">
+    <value>Обнови сада</value>
+  </data>
+  <data name="ButtonRequestCallButton" xml:space="preserve">
+    <value>Затражи позив</value>
+  </data>
+  <data name="ButtonSelectPricingPlans" xml:space="preserve">
+    <value>Одабери тарифни план сада</value>
+  </data>
+  <data name="ButtonStartFreeTrial" xml:space="preserve">
+    <value>Започни бесплатни пробни период</value>
+  </data>
+  <data name="ButtonUseDiscount" xml:space="preserve">
+    <value>Користи попуст</value>
+  </data>
+  <data name="ButtonVisitPaymentsSection" xml:space="preserve">
+    <value>Посетите одељак за Плац́ања</value>
+  </data>
+  <data name="ButtonWatchFullPlaylist" xml:space="preserve">
+    <value>ПОГЛЕДАЈТЕ КОМПЛЕТНУ PLAYLIST-У</value>
+  </data>
+  <data name="subject_activate_email" xml:space="preserve">
+    <value>${LetterLogoText}. Молимо активирајте своју емаил адресу</value>
+  </data>
+  <data name="subject_backup_created" xml:space="preserve">
+    <value>${LetterLogoText}. ${__VirtualRootPath} портал резервна копија направљена</value>
+  </data>
+  <data name="subject_change_email_v115" xml:space="preserve">
+    <value>Потврдите промену вашег емаил-а</value>
+  </data>
+  <data name="subject_change_password" xml:space="preserve">
+    <value>${LetterLogoText} помоћ око лозинке</value>
+  </data>
+  <data name="subject_change_password_v115" xml:space="preserve">
+    <value>Потврдите промену лозинке</value>
+  </data>
+  <data name="subject_change_phone" xml:space="preserve">
+    <value>${LetterLogoText}. Захтев за промену мобилног телефона</value>
+  </data>
+  <data name="subject_change_tfa" xml:space="preserve">
+    <value>${LetterLogoText}. Безбедносно обавештење</value>
+  </data>
+  <data name="subject_confirm_owner_change" xml:space="preserve">
+    <value>${LetterLogoText}. Промена власника портала</value>
+  </data>
+  <data name="subject_enterprise_admin_activation_v1" xml:space="preserve">
+    <value>Добродошли у ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
+    <value>Преузмите бесплатне ONLYOFFICE апликације</value>
+  </data>
+  <data name="subject_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
+    <value>5 савета за ефикасан рад на вашим документима</value>
+  </data>
+  <data name="subject_enterprise_admin_welcome_v1" xml:space="preserve">
+    <value>Откријте пословну претплату на ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="subject_enterprise_guest_activation_v10" xml:space="preserve">
+    <value>Придружите се ${__VirtualRootPath}</value>
+  </data>
+  <data name="subject_enterprise_guest_welcome_v1" xml:space="preserve">
+    <value>Добродошли у ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_enterprise_user_welcome_v1" xml:space="preserve">
+    <value>Добродошли у ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
+    <value>Добродошли у ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_enterprise_whitelabel_guest_welcome_v1" xml:space="preserve">
+    <value>Добродошли у ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_enterprise_whitelabel_user_welcome_v1" xml:space="preserve">
+    <value>Добродошли у ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_opensource_admin_activation_v1" xml:space="preserve">
+    <value>Добродошли у ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_opensource_guest_welcome_v1" xml:space="preserve">
+    <value>Добродошли у ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_opensource_user_welcome_v1" xml:space="preserve">
+    <value>Добродошли у ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_saas_admin_activation_v1" xml:space="preserve">
+    <value>Добродошли у ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_saas_guest_welcome_v1" xml:space="preserve">
+    <value>Добродошли у ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_saas_user_welcome_v1" xml:space="preserve">
+    <value>Добродошли у ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_zoom_welcome" xml:space="preserve">
+    <value>Добродошли у ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_saas_admin_user_apps_tips_v1" xml:space="preserve">
+    <value>Преузмите бесплатне ONLYOFFICE апликације</value>
+  </data>
+  <data name="subject_opensource_admin_docs_tips_v1" xml:space="preserve">
+    <value>5 савета за ефикасан рад на вашим документима</value>
+  </data>
+  <data name="subject_opensource_user_docs_tips_v1" xml:space="preserve">
+    <value>5 савета за ефикасан рад на вашим документима</value>
+  </data>
+  <data name="subject_saas_admin_user_docs_tips_v1" xml:space="preserve">
+    <value>5 савета за ефикасан рад на вашим документима</value>
+  </data>
+  <data name="TrulyYoursText" xml:space="preserve">
+    <value>Заиста Ваш, ONLYOFFICE Тим</value>
+  </data>
+  <data name="subject_enterprise_user_activation_v1" xml:space="preserve">
+    <value>Придружите се ONLYOFFICE DocSpace-у</value>
+  </data>
+  <data name="subject_enterprise_whitelabel_user_activation_v1" xml:space="preserve">
+    <value>Придружите се ONLYOFFICE DocSpace-у</value>
+  </data>
+  <data name="subject_opensource_user_activation_v1" xml:space="preserve">
+    <value>Придружите се ONLYOFFICE DocSpace-у</value>
+  </data>
+  <data name="subject_saas_docspace_invite" xml:space="preserve">
+    <value>Придружите се ONLYOFFICE DocSpace-у</value>
+  </data>
+  <data name="subject_saas_room_invite" xml:space="preserve">
+    <value>Придружите се ONLYOFFICE DocSpace-у</value>
+  </data>
+  <data name="subject_saas_user_activation_v1" xml:space="preserve">
+    <value>Придружите се ONLYOFFICE DocSpace-у</value>
+  </data>
+  <data name="subject_saas_admin_modules_v1" xml:space="preserve">
+    <value>Конфигуришите свој ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="subject_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
+    <value>Ваш ONLYOFFICE DocSpace ц́е бити избрисан</value>
+  </data>
+  <data name="subject_saas_admin_welcome_v1" xml:space="preserve">
+    <value>Откријте пословну претплату на ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="subject_opensource_admin_welcome_v1" xml:space="preserve">
+    <value>Откријте пословну претплату на ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="subject_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
+    <value>Откријте пословну претплату на ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="subject_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
+    <value>Придружите се ${__VirtualRootPath}</value>
+  </data>
+  <data name="subject_for_admin_notify" xml:space="preserve">
+    <value>Порука корисника администраторима</value>
+  </data>
+  <data name="subject_for_sales_notify" xml:space="preserve">
+    <value>Захтев одељења продаје</value>
+  </data>
+  <data name="subject_join" xml:space="preserve">
+    <value>Позив за придруживање ${__VirtualRootPath} порталу</value>
+  </data>
+  <data name="subject_mailbox_created" xml:space="preserve">
+    <value>${LetterLogoText}. Креирање поштанског сандучета</value>
+  </data>
+  <data name="subject_mailbox_password_changed" xml:space="preserve">
+    <value>${LetterLogoText}. Промена лозинке за поштанско сандуче</value>
+  </data>
+  <data name="subject_migration_error" xml:space="preserve">
+    <value>${LetterLogoText}. Још једна грешка при миграцији регионалног портала</value>
+  </data>
+  <data name="subject_migration_start" xml:space="preserve">
+    <value>${LetterLogoText}. Почела је још једна миграција регионалног портала</value>
+  </data>
+  <data name="subject_migration_success" xml:space="preserve">
+    <value>${LetterLogoText}. Још једна миграција регионалног портала је успешно завршена</value>
+  </data>
+  <data name="subject_opensource_guest_activation_v11" xml:space="preserve">
+    <value>Придружите се ${__VirtualRootPath}</value>
+  </data>
+  <data name="subject_saas_guest_activation_v115" xml:space="preserve">
+    <value>Придружите се ${__VirtualRootPath}</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Грејс период за ваш ONLYOFFICE DocSpace активиран</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Ваша ONLYOFFICE DocSpace претплата ускоро истиче</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
+    <value>Грејс период за ваш ONLYOFFICE DocSpace је истекао</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
+    <value>Грејс период за ваш ONLYOFFICE DocSpace истиче сутра</value>
+  </data>
+  <data name="subject_saas_video_guides_v1" xml:space="preserve">
+    <value>Savladajte ONLYOFFICE DocSpace sa video vodičima</value>
+  </data>
+  <data name="subject_self_profile_updated" xml:space="preserve">
+    <value>Обавештење о промени профила портала ${__VirtualRootPath}</value>
+  </data>
+  <data name="subject_send_whats_new" xml:space="preserve">
+    <value>Шта је ново на вашем порталу за $Date</value>
+  </data>
+  <data name="subject_smtp_test" xml:space="preserve">
+    <value>SMTP тест порука</value>
+  </data>
+  <data name="subject_storage_decryption_error" xml:space="preserve">
+    <value>${LetterLogoText}. Процес дешифровања није успео</value>
+  </data>
+  <data name="subject_storage_decryption_start" xml:space="preserve">
+    <value>${LetterLogoText}. Процес дешифровања је започео</value>
+  </data>
+  <data name="subject_storage_decryption_success" xml:space="preserve">
+    <value>${LetterLogoText}. Процес дешифровања је завршен</value>
+  </data>
+  <data name="subject_storage_encryption_error" xml:space="preserve">
+    <value>${LetterLogoText}. Процес шифровања није успео</value>
+  </data>
+  <data name="subject_storage_encryption_start" xml:space="preserve">
+    <value>${LetterLogoText}. Процес шифровања је започео</value>
+  </data>
+  <data name="subject_storage_encryption_success" xml:space="preserve">
+    <value>${LetterLogoText}. Процес шифровања је завршен</value>
+  </data>
+  <data name="subject_user_has_join" xml:space="preserve">
+    <value>Нови корисник је додат на портал ${LetterLogoText}</value>
+  </data>
+  <data name="subject_user_ldap_activation" xml:space="preserve">
+    <value>Позвани сте да се придружите ${__VirtualRootPath}</value>
+  </data>
+  <data name="subject_portal_deactivate" xml:space="preserve">
+    <value>Деактивација портала ${__VirtualRootPath}</value>
+  </data>
+  <data name="subject_portal_delete" xml:space="preserve">
+    <value>Брисање портала ${__VirtualRootPath}</value>
+  </data>
+  <data name="subject_portal_delete_success_v1" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace је деактивиран</value>
+  </data>
+  <data name="subject_portal_rename" xml:space="preserve">
+    <value>${LetterLogoText}. Промена адресе портала</value>
+  </data>
+  <data name="subject_profile_delete" xml:space="preserve">
+    <value>Брисање вашег профила са портала ${__VirtualRootPath}</value>
+  </data>
+  <data name="subject_profile_has_deleted_itself" xml:space="preserve">
+    <value>Корисник је избрисао свој профил</value>
+  </data>
+  <data name="subject_profile_updated" xml:space="preserve">
+    <value>Ваш профил на адреси ${__VirtualRootPath} је промењен</value>
+  </data>
+  <data name="subject_reassigns_completed" xml:space="preserve">
+    <value>${LetterLogoText}. Додела корисничких података је завршена</value>
+  </data>
+  <data name="subject_reassigns_failed" xml:space="preserve">
+    <value>${LetterLogoText}. Додељивање корисничких података није успело</value>
+  </data>
+  <data name="subject_remove_user_data_completed" xml:space="preserve">
+    <value>${LetterLogoText}. Уклањање корисничких података је завршено</value>
+  </data>
+  <data name="subject_remove_user_data_failed" xml:space="preserve">
+    <value>${LetterLogoText}. Уклањање корисничких података није успело</value>
+  </data>
+  <data name="subject_request_license" xml:space="preserve">
+    <value>Захтев за лиценцу предузец́а</value>
+  </data>
+  <data name="subject_request_tariff" xml:space="preserve">
+    <value>Захтев за SaaS план цена</value>
+  </data>
+  <data name="subject_restore_completed" xml:space="preserve">
+    <value>${LetterLogoText}. Врац́ање је завршено</value>
+  </data>
+  <data name="subject_restore_started" xml:space="preserve">
+    <value>${LetterLogoText}. Врац́ање је почело</value>
+  </data>
+  <data name="pattern_activate_email" xml:space="preserve">
+    <value>h1.Активирај свој емаил за "${__VirtualRootPath}":"$InviteLink" портал.
+
+Здраво!
+
+Да бисте почели да учествујете у животу портала "${__VirtualRootPath}":"$InviteLink", потребно је да активирате своју адресу емаил-а. Ово се ради из безбедносних разлога.
+
+$OrangeButton
+
+Овај линк је валидан само 7 дана. Молим завршите вашу емаил активацију у току тог периода.</value>
+  </data>
+  <data name="pattern_backup_created" xml:space="preserve">
+    <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" резервна копија портала креирана
+
+Драги $OwnerName,
+
+Направљена је резервна датотека која садржи податке са вашег "${__VirtualRootPath}":"${__VirtualRootPath}" портала.
+
+Да бисте сазнали више о процедури прављења резервних копија, погледајте наш кориснички водич "Резервна копија података":"${__HelpLink}/administration/docspace-settings.aspx#CreatingBackup_block.
+
+Ако имате било каквих питања или вам је потребна помоц́, слободно нас контактирајте на "${__SupportLink}":"${__SupportLink}"
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_backup_created_tg" xml:space="preserve">
+    <value>[${__VirtualRootPath}](${__VirtualRootPath}) резервна копија портала креирана
+
+Драги $OwnerName,
+
+Резервна датотека која садржи податке са вашег [${__VirtualRootPath}](${__VirtualRootPath}) портала је креирана.
+
+Да бисте научили више о процедури резервне копије молимо погледајте наше [Резервна копија података](${__HelpLink}/tipstricks/data-backup-restore.aspx) упутство за употребу.
+
+Ако имате било која питања или вам треба помоћ молимо контактирајте нас на [${__SupportLink}](${__SupportLink})
+
+Срдачан поздрав,
+ONLYOFFICE™ Тим за подршку
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
+  </data>
+  <data name="pattern_change_email_v115" xml:space="preserve">
+    <value>Желите да промените емаил на свом ${LetterLogoText} налогу?
+
+Кликните на дугме испод и пријавите* се на ваш облак.
+
+$OrangeButton
+
+Линк важи 7 дана.
+
+*Ако нисте пријављени на ${LetterLogoText} у овом прегледачу, морац́ете да користите свој стари емаил за потврду. Ако се не сец́ате, обратите се администратору портала.
+
+Не желите да промените своју емаил? Само игноришите ову поруку.</value>
+  </data>
+  <data name="pattern_change_password_v115" xml:space="preserve">
+    <value>Желите да промените лозинку на свом ONLYOFFICE налогу? Кликните на дугме испод да потврдите.
+
+$OrangeButton
+
+Линк важи 7 дана.
+
+Не желите да промените лозинку? Само игноришите ову поруку</value>
+  </data>
+  <data name="pattern_change_phone" xml:space="preserve">
+    <value>h1.Захтев за промену мобилног телефона
+
+Захтевали сте да промените свој мобилни телефон који се користи за улазак на портал ${LetterLogoText}.
+
+Пратите линк испод да бисте променили свој мобилни телефон:
+
+$OrangeButton
+
+Ако не желите да промените свој мобилни телефон или сте грешком примили овај емаил, занемарите га или контактирајте администратора портала да бисте сазнали детаље.</value>
+  </data>
+  <data name="pattern_change_tfa" xml:space="preserve">
+    <value>h1.Безбедносно обавештење
+
+Конфигурација апликације за аутентификацију коју користите за улазак на портал ${LetterLogoText} је ресетована.
+
+Кликните на дугме испод да бисте отишли на страницу за пријаву на портал и конфигурисали апликацију за аутентификацију:
+
+$OrangeButton</value>
+  </data>
+  <data name="pattern_confirm_owner_change" xml:space="preserve">
+    <value>h1.Промена "${__VirtualRootPath}":"${__VirtualRootPath}" власника портала
+
+Поштовани $OwnerName,
+
+Појавио се захтев за промену власника портала "${__VirtualRootPath}":"${__VirtualRootPath}" у $UserName.
+
+Молимо вас да пратите доњу везу да потврдите операцију:
+
+$OrangeButton
+
+*Напомена*: овај линк важи само 7 дана. Молимо довршите процес промене власника портала у том периоду.</value>
+  </data>
+  <data name="pattern_enterprise_guest_activation_v10" xml:space="preserve">
+    <value>h1. Придружите се &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Здраво, $UserName!
+
+Позвани сте да се придружите "${__VirtualRootPath}":"${__VirtualRootPath}" као гост корисник. Прихватите позив кликом на линк:
+
+$OrangeButton
+
+Линк важи само 7 дана.
+
+Добиц́ете више савета о томе како да користите своју веб канцеларију. Можете да откажете претплате на вашој страници рофила у било ком тренутку, као и да их поново омогуц́ите.</value>
+  </data>
+  <data name="pattern_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
+    <value>h1. Придружи &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+Здраво, $UserName!
+
+$__AuthorName вас је позвао као гост корисника на "${__VirtualRootPath}":"${__VirtualRootPath}". Прихвати позивницу кликом на линк:
+
+$OrangeButton
+
+Линк је валидан само за 7 дана.
+
+Добиц́ете више савета о томе како да користите своју веб канцеларију. Можете да откажете претплате на страници профила у било ком тренутку, као и да их поново омогуц́ите.</value>
+  </data>
+  <data name="pattern_for_admin_notify" xml:space="preserve">
+    <value>h1.Порука са "${__VirtualRootPath}":"${__VirtualRootPath}" портала
+
+Емаил: $UserEmail
+
+$Body</value>
+  </data>
+  <data name="pattern_for_admin_notify_tg" xml:space="preserve">
+    <value>Порука са [${__VirtualRootPath}](${__VirtualRootPath}) портала
+
+Емаил: $UserEmail
+
+$Body</value>
+  </data>
+  <data name="pattern_for_sales_notify" xml:space="preserve">
+    <value>h1.Порука са портала "${__VirtualRootPath}":"${__VirtualRootPath}"
+
+Име: $UserName
+
+Емаил: $UserEmail
+
+$Body</value>
+  </data>
+  <data name="pattern_join" xml:space="preserve">
+    <value>h1.Позивница да се придружите
+"${__VirtualRootPath}":"$InviteLink" портал
+
+Здраво,
+
+Затражили сте да се придружите "${__VirtualRootPath}":"$InviteLink" порталу на ${LetterLogoText} - платформи за управљање документима и пројектима. Придружите се порталу и одмах почните да сарађујете са својим колегама или пријатељима.
+
+Да бисте прихватили позив, унесите своје име и лозинку пратећи овај линк:
+
+$OrangeButton
+
+*Напомена*: овај линк важи само 48 сати. Завршите операцију у том року.</value>
+  </data>
+  <data name="pattern_mailbox_created" xml:space="preserve">
+    <value>Поштовани $UserName,
+
+Администратор је направио ново &lt;b&gt;$Address&lt;/b&gt; поштанско сандуче за вас на порталу "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+     Користите следец́а подешавања за друге клијенте емаил-а:
+      Пријава: &lt;b&gt;$Login&lt;/b&gt;
+      Лозинка: "&lt;b&gt; постави лозинку &lt;/b&gt;":"$MyStaffLink"
+
+Долазна пошта (IMAP):
+      Сервер: &lt;b&gt;$Server&lt;/b&gt;
+      Порт: &lt;b&gt;$ImapPort&lt;/b&gt;
+      SSL/TLS: &lt;b&gt;$Encryption&lt;/b&gt;
+
+Одлазна пошта (SMTP):
+      Сервер: &lt;b&gt;$Server&lt;/b&gt;
+      Порт: &lt;b&gt;$SmtpPort&lt;/b&gt;
+      SSL/TLS: &lt;b&gt;$Encryption&lt;/b&gt;
+      Захтева Аутентификацију: &lt;b&gt;Да&lt;/b&gt;
+
+Ако сте грешком примили овај емаил, занемарите га или контактирајте администратора портала да бисте сазнали детаље.</value>
+  </data>
+  <data name="pattern_mailbox_password_changed" xml:space="preserve">
+    <value>Поштовани $UserName,
+
+      Лозинка за &lt;b&gt;$Address&lt;/b&gt; поштанско сандуче је промењена.
+
+      Ако сте грешком примили овај емаил, занемарите га или контактирајте администратора портала да бисте сазнали детаље.</value>
+  </data>
+  <data name="pattern_mailbox_without_settings_created" xml:space="preserve">
+    <value>Поштовани, $UserName,
+
+      Администратор је направио ново &lt;b&gt;$Address&lt;/b&gt; поштанско сандуче за вас на порталу "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+      Ако сте грешком примили овај емаил, занемарите га или контактирајте администратора портала да бисте сазнали детаље.</value>
+  </data>
+  <data name="pattern_migration_error" xml:space="preserve">
+    <value>h1.Још једна грешка при миграцији портала региона
+
+Дошло је до грешке при миграцији на регион $RegionName. Молим вас, покушајте поново касније.
+Ваш портал је сада доступан на старој адреси "$PortalUrl":"$PortalUrl"
+
+Ако имате било каквих питања или вам је потребна помоц́, слободно нас контактирајте на "${__SalesEmail}":"mailto:${__SalesEmail}"
+
+$TrulyYours
+
+^Да бисте променили тип обавештења, управљајте својим "подешавањима претплате":"$RecipientSubscriptionConfigURL".^</value>
+  </data>
+  <data name="pattern_migration_server_failure" xml:space="preserve">
+    <value>h1.Још једна грешка при миграцији портала региона
+
+Дошло је до грешке приликом миграције у други регион. Молим вас, покушајте поново касније.
+Ваш портал је сада доступан на старој адреси "$PortalUrl":"$PortalUrl"
+
+Ако имате било каквих питања или вам је потребна помоц́, слободно нас контактирајте на "${__SalesEmail}":"mailto:${__SalesEmail}"
+
+$TrulyYours
+
+^Да бисте променили тип обавештења, управљајте својим "подешавањима претплате":"$RecipientSubscriptionConfigURL".^</value>
+  </data>
+  <data name="pattern_zoom_welcome" xml:space="preserve">
+    <value>h1. у &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Здраво, $UserName!
+
+Управо сте креирали ONLYOFFICE DocSpace, центар за документе где можете да побољшате сарадњу са својим тимом, клијентима, партнерима и још много тога. Његова адреса је "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+Ваш тренутни тарифни план је STARTUP. Потпуно је бесплатан и укључује:
+
+&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;100 администратора/напредних корисника&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;До 100 соба&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;100 ГБ простора на диску&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+
+*Уживајте у новом начину сарадње са документима!*
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_user_ldap_activation" xml:space="preserve">
+    <value>Поштовани $UserName,
+
+Позвани сте да се придружите сигурној и безбедној веб канцеларији ваше компаније која би унапредила вашу сарадњу. Адреса је "${__VirtualRootPath}":"${__VirtualRootPath}". Додавање овог линка у обележиваче је добра идеја, вероватно ц́ете га често користити.
+
+Прихватите позив тако што ц́ете пратити доњи линк и користити своје корисничко име и лозинку са корпоративног налога за пријаву.
+
+$OrangeButton
+
+Линк важи само 7 дана.</value>
+  </data>
+  <data name="pattern_user_has_join_tg" xml:space="preserve">
+    <value>Нови корисник је додат на портал [${__VirtualRootPath}](${__VirtualRootPath})
+[$__AuthorName]($__AuthorUrl) се придружио вашем порталу на [${__VirtualRootPath}](${__VirtualRootPath}).</value>
+  </data>
+  <data name="pattern_user_has_join" xml:space="preserve">
+    <value>h1.Нови корисник је додат на "${__VirtualRootPath}":"${__VirtualRootPath}" портал
+
+"$__AuthorName":"$__AuthorUrl" се придружио вашем порталу на "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+^Ако не желите да примате обавештења о новим корисницима, управљајте својим "подешавањима претплате":"$RecipientSubscriptionConfigURL".^</value>
+  </data>
+  <data name="pattern_enterprise_admin_activation_v1" xml:space="preserve">
+    <value>h1. у &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Здраво, $UserName!
+
+Управо сте креирали ONLYOFFICE DocSpace, центар за документе где можете да побољшате сарадњу са својим тимом, клијентима, партнерима и још много тога. Његова адреса је "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+Молимо потврдите свој емаил (линк важи 7 дана):
+
+$OrangeButton
+
+*Уживајте у новом начину сарадње са документима!*
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
+    <value>h1. у &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Здраво, $UserName!
+
+Управо сте креирали ONLYOFFICE DocSpace, центар за документе где можете да побољшате сарадњу са својим тимом, клијентима, партнерима и још много тога. Његова адреса је "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+Молимо потврдите свој емаил (линк важи 7 дана):
+
+$OrangeButton
+
+*Уживајте у новом начину сарадње са документима!*
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_opensource_admin_activation_v1" xml:space="preserve">
+    <value>h1. у &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Здраво, $UserName!
+
+Управо сте креирали ONLYOFFICE DocSpace, центар за документе где можете да побољшате сарадњу са својим тимом, клијентима, партнерима и још много тога. Његова адреса је "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+Молимо потврдите свој емаил (линк важи 7 дана):
+
+$OrangeButton
+
+*Уживајте у новом начину сарадње са документима!*
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_admin_activation_v1" xml:space="preserve">
+    <value>h1. у &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Здраво, $UserName!
+
+Управо сте креирали ONLYOFFICE DocSpace, центар за документе где можете да побољшате сарадњу са својим тимом, клијентима, партнерима и још много тога. Његова адреса је "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+Молимо потврдите свој емаил (линк важи 7 дана):
+$OrangeButton
+
+Ваш тренутни тарифни план је STARTUP. Потпуно је бесплатан и укључује:
+
+&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;1 администратора, 2 напредна корисника&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;До 12 соба&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Неограничен број корисника у свакој соби&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;2 ГБ простора на диску&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+
+*Уживајте у новом начину сарадње са документима!*
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
+    <value>h1. Преузмите &lt;span style="color:#FF6F3D;"&gt;бесплатне&lt;/span&gt; ONLYOFFICE апликације
+
+
+Здраво, $UserName!
+
+Набавите бесплатне ONLYOFFICE апликације за рад на документима са било ког уређаја.
+
+&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Да бисте радили на документима ван мреже, набавите ONLYOFFICE Desktop Editor за&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 155px; padding-right: 155px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG1" alt="Windows" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="macOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG3" alt="Linux" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Да бисте уређивали документе на мобилним уређајима, преузмите апликацију ONLYOFFICE Documents за&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 190px; padding-right: 190px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 29px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="29" height="32" src="$IMG4" alt="Android" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="iOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
+    <value>h1. Преузмите &lt;span style="color:#FF6F3D;"&gt;бесплатне&lt;/span&gt; ONLYOFFICE апликације
+
+
+Здраво, $UserName!
+
+Набавите бесплатне ONLYOFFICE апликације за рад на документима са било ког уређаја.
+
+&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Да бисте радили на документима ван мреже, набавите ONLYOFFICE Desktop Editor за&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 155px; padding-right: 155px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG1" alt="Windows" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="macOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG3" alt="Linux" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Да бисте уређивали документе на мобилним уређајима, преузмите апликацију ONLYOFFICE Documents за&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 190px; padding-right: 190px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 29px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="29" height="32" src="$IMG4" alt="Android" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="iOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_guest_welcome_v1" xml:space="preserve">
+    <value>h1. у &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Здраво, $UserName!
+
+Добродошли у ONLYOFFICE DocSpace! Ваш кориснички профил је успешно додат у "${__VirtualRootPath}":"${__VirtualRootPath}". Сада можете:
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt; Радите са другим корисницима у просторији у коју сте позвани: &lt;b&gt;собе за сарадњу за коауторство у реалном времену или прилагођене собе са флексибилним подешавањима за било коју сврху&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Work with files of different formats&lt;/b&gt;: text documents, spreadsheets, presentations, digital forms, PDFs, e-books, multimedia.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Сарађујте на документима&lt;/b&gt; са два начина заједничког уређивања: у реалном времену или са закључавањем пасуса. Пратите промене, комуницирајте у реалном времену помоц́у уграђеног ц́аскања или упуц́ивања аудио и видео позива.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Искористите додатак AI помоц́ника:&lt;/b&gt; сумирајте и преводите текстове, генеришите слике и кључне речи, анализирајте речи итд.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$OrangeButton
+
+Ако вам је потребна помоц́, прегледајте наш "Центар за помоц́":"${__HelpLink}" или питајте наш "тим за подршку":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_user_welcome_v1" xml:space="preserve">
+    <value>h1. у &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Здраво, $UserName!
+
+Добродошли у ONLYOFFICE DocSpace! Ваш кориснички профил је успешно додат у "${__VirtualRootPath}":"${__VirtualRootPath}". Сада можете:
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt; Радите са другим корисницима у просторији у коју сте позвани: &lt;b&gt;собе за сарадњу за коауторство у реалном времену или прилагођене собе са флексибилним подешавањима за било коју сврху&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Work with files of different formats&lt;/b&gt;: text documents, spreadsheets, presentations, digital forms, PDFs, e-books, multimedia.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Сарађујте на документима&lt;/b&gt; са два начина заједничког уређивања: у реалном времену или са закључавањем пасуса. Пратите промене, комуницирајте у реалном времену помоц́у уграђеног ц́аскања или упуц́ивања аудио и видео позива.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Искористите додатак AI помоц́ника:&lt;/b&gt; сумирајте и преводите текстове, генеришите слике и кључне речи, анализирајте речи итд.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$OrangeButton
+
+Ако вам је потребна помоц́, прегледајте наш "Центар за помоц́":"${__HelpLink}" или питајте наш "тим за подршку":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_whitelabel_guest_welcome_v1" xml:space="preserve">
+    <value>h1. у &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Здраво, $UserName!
+
+Добродошли у ONLYOFFICE DocSpace! Ваш кориснички профил је успешно додат у "${__VirtualRootPath}":"${__VirtualRootPath}". Сада можете:
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt; Радите са другим корисницима у просторији у коју сте позвани: &lt;b&gt;собе за сарадњу за коауторство у реалном времену или прилагођене собе са флексибилним подешавањима за било коју сврху&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Work with files of different formats&lt;/b&gt;: text documents, spreadsheets, presentations, digital forms, PDFs, e-books, multimedia.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Сарађујте на документима&lt;/b&gt; са два начина заједничког уређивања: у реалном времену или са закључавањем пасуса. Пратите промене, комуницирајте у реалном времену помоц́у уграђеног ц́аскања или упуц́ивања аудио и видео позива.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Искористите додатак AI помоц́ника:&lt;/b&gt; сумирајте и преводите текстове, генеришите слике и кључне речи, анализирајте речи итд.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$OrangeButton
+
+Ако вам је потребна помоц́, прегледајте наш "Центар за помоц́":"${__HelpLink}" или питајте наш "тим за подршку":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_whitelabel_user_welcome_v1" xml:space="preserve">
+    <value>h1. у &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Здраво, $UserName!
+
+Добродошли у ONLYOFFICE DocSpace! Ваш кориснички профил је успешно додат у "${__VirtualRootPath}":"${__VirtualRootPath}". Сада можете:
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt; Радите са другим корисницима у просторији у коју сте позвани: &lt;b&gt;собе за сарадњу за коауторство у реалном времену или прилагођене собе са флексибилним подешавањима за било коју сврху&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Work with files of different formats&lt;/b&gt;: text documents, spreadsheets, presentations, digital forms, PDFs, e-books, multimedia.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Сарађујте на документима&lt;/b&gt; са два начина заједничког уређивања: у реалном времену или са закључавањем пасуса. Пратите промене, комуницирајте у реалном времену помоц́у уграђеног ц́аскања или упуц́ивања аудио и видео позива.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Искористите додатак AI помоц́ника:&lt;/b&gt; сумирајте и преводите текстове, генеришите слике и кључне речи, анализирајте речи итд.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$OrangeButton
+
+Ако вам је потребна помоц́, прегледајте наш "Центар за помоц́":"${__HelpLink}" или питајте наш "тим за подршку":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_opensource_guest_welcome_v1" xml:space="preserve">
+    <value>h1. у &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Здраво, $UserName!
+
+Добродошли у ONLYOFFICE DocSpace! Ваш кориснички профил је успешно додат у "${__VirtualRootPath}":"${__VirtualRootPath}". Сада можете:
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt; Радите са другим корисницима у просторији у коју сте позвани: &lt;b&gt;собе за сарадњу за коауторство у реалном времену или прилагођене собе са флексибилним подешавањима за било коју сврху&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Work with files of different formats&lt;/b&gt;: text documents, spreadsheets, presentations, digital forms, PDFs, e-books, multimedia.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Сарађујте на документима&lt;/b&gt; са два начина заједничког уређивања: у реалном времену или са закључавањем пасуса. Пратите промене, комуницирајте у реалном времену помоц́у уграђеног ц́аскања или упуц́ивања аудио и видео позива.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Искористите додатак AI помоц́ника:&lt;/b&gt; сумирајте и преводите текстове, генеришите слике и кључне речи, анализирајте речи итд.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$OrangeButton
+
+Ако вам је потребна помоц́, прегледајте наш "Центар за помоц́":"${__HelpLink}" или питајте наш "тим за подршку":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_opensource_user_welcome_v1" xml:space="preserve">
+    <value>h1. у &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Здраво, $UserName!
+
+Добродошли у ONLYOFFICE DocSpace! Ваш кориснички профил је успешно додат у "${__VirtualRootPath}":"${__VirtualRootPath}". Сада можете:
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt; Радите са другим корисницима у просторији у коју сте позвани: &lt;b&gt;собе за сарадњу за коауторство у реалном времену или прилагођене собе са флексибилним подешавањима за било коју сврху&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Work with files of different formats&lt;/b&gt;: text documents, spreadsheets, presentations, digital forms, PDFs, e-books, multimedia.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Сарађујте на документима&lt;/b&gt; са два начина заједничког уређивања: у реалном времену или са закључавањем пасуса. Пратите промене, комуницирајте у реалном времену помоц́у уграђеног ц́аскања или упуц́ивања аудио и видео позива.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Искористите додатак AI помоц́ника:&lt;/b&gt; сумирајте и преводите текстове, генеришите слике и кључне речи, анализирајте речи итд.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$OrangeButton
+
+Ако вам је потребна помоц́, прегледајте наш "Центар за помоц́":"${__HelpLink}" или питајте наш "тим за подршку":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_guest_welcome_v1" xml:space="preserve">
+    <value>h1. у &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Здраво, $UserName!
+
+Добродошли у ONLYOFFICE DocSpace! Ваш кориснички профил је успешно додат у "${__VirtualRootPath}":"${__VirtualRootPath}". Сада можете:
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt; Радите са другим корисницима у просторији у коју сте позвани: &lt;b&gt;собе за сарадњу за коауторство у реалном времену или прилагођене собе са флексибилним подешавањима за било коју сврху&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Work with files of different formats&lt;/b&gt;: text documents, spreadsheets, presentations, digital forms, PDFs, e-books, multimedia.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Сарађујте на документима&lt;/b&gt; са два начина заједничког уређивања: у реалном времену или са закључавањем пасуса. Пратите промене, комуницирајте у реалном времену помоц́у уграђеног ц́аскања или упуц́ивања аудио и видео позива.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Искористите додатак AI помоц́ника:&lt;/b&gt; сумирајте и преводите текстове, генеришите слике и кључне речи, анализирајте речи итд.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$OrangeButton
+
+Ако вам је потребна помоц́, прегледајте наш "Центар за помоц́":"${__HelpLink}" или питајте наш "тим за подршку":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_user_welcome_v1" xml:space="preserve">
+    <value>h1. у &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Здраво, $UserName!
+
+Добродошли у ONLYOFFICE DocSpace! Ваш кориснички профил је успешно додат у "${__VirtualRootPath}":"${__VirtualRootPath}". Сада можете:
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt; Радите са другим корисницима у просторији у коју сте позвани: &lt;b&gt;собе за сарадњу за коауторство у реалном времену или прилагођене собе са флексибилним подешавањима за било коју сврху&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Work with files of different formats&lt;/b&gt;: text documents, spreadsheets, presentations, digital forms, PDFs, e-books, multimedia.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Сарађујте на документима&lt;/b&gt; са два начина заједничког уређивања: у реалном времену или са закључавањем пасуса. Пратите промене, комуницирајте у реалном времену помоц́у уграђеног ц́аскања или упуц́ивања аудио и видео позива.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Искористите додатак AI помоц́ника:&lt;/b&gt; сумирајте и преводите текстове, генеришите слике и кључне речи, анализирајте речи итд.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$OrangeButton
+
+Ако вам је потребна помоц́, прегледајте наш "Центар за помоц́":"${__HelpLink}" или питајте наш "тим за подршку":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_user_activation_v1" xml:space="preserve">
+    <value>h1. Придружите &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Здраво!
+
+Позвани сте да се придружите ONLYOFFICE DocSpace-у на "${__VirtualRootPath}":"${__VirtualRootPath}". Прихватите позив кликом на линк:
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_whitelabel_user_activation_v1" xml:space="preserve">
+    <value>h1. Придружите &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Здраво!
+
+Позвани сте да се придружите ONLYOFFICE DocSpace-у на "${__VirtualRootPath}":"${__VirtualRootPath}". Прихватите позив кликом на линк:
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_opensource_user_activation_v1" xml:space="preserve">
+    <value>h1. Придружите &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Здраво!
+
+Позвани сте да се придружите ONLYOFFICE DocSpace-у на "${__VirtualRootPath}":"${__VirtualRootPath}". Прихватите позив кликом на линк:
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_docspace_invite" xml:space="preserve">
+    <value>h1. Придружите &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Здраво!
+
+Позвани сте да се придружите ONLYOFFICE DocSpace-у на "${__VirtualRootPath}":"${__VirtualRootPath}". Прихватите позив кликом на линк:
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_user_activation_v1" xml:space="preserve">
+    <value>h1. Придружите &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Здраво!
+
+Позвани сте да се придружите ONLYOFFICE DocSpace-у на "${__VirtualRootPath}":"${__VirtualRootPath}". Прихватите позив кликом на линк:
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt; 5 савета&lt;/span&gt; за ефикасан рад на вашим документима
+
+
+Здраво, $UserName!
+
+Надамо се да ц́ете уживати у коришц́ењу свог ONLYOFFICE DocSpace-а. Ево неколико савета како да рад на документима учините ефикаснијим.
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG1" alt="work pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#1. Изаберите начин на који радите.&lt;/b&gt; &lt;br/&gt;Организујте свој радни ток како вам је потребно тако што ц́ете креирати собе за сарадњу за коауторство у реалном времену или прилагођене собе са флексибилним подешавањима за било коју сврху.&lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#2. Радите са било којим садржајем који имате.&lt;/b&gt;Чувајте и радите са датотекама различитих формата у својим собама: текстуални документи, табеле, презентације, дигитални обрасци, PDF-ови, е-књиге, мултимедија.&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG2" alt="doc pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG3" alt="authors pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#3. Коауторизујте ефикасно.&lt;/b&gt; &lt;br/&gt;Сарађујте на документима са два начина заједничког уређивања: у реалном времену или са закључавањем пасуса. Пратите промене, комуницирајте у реалном времену помоц́у уграђеног ц́аскања или обављања аудио и видео позива. &lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. Сарађујте безбедно.&lt;/b&gt; &lt;br/&gt;Фино подесите приступ целом простору или одвојеним собама са флексибилним дозволама и корисничким улогама.&lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. Искористите додатак AI помоц́ника.&lt;/b&gt;&lt;br/&gt; умирајте и преводите текстове, генеришите слике и кључне речи, анализирајте речи итд.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_opensource_admin_docs_tips_v1" xml:space="preserve">
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt; 5 савета&lt;/span&gt; за ефикасан рад на вашим документима
+
+
+Здраво, $UserName!
+
+Надамо се да ц́ете уживати у коришц́ењу свог ONLYOFFICE DocSpace-а. Ево неколико савета како да рад на документима учините ефикаснијим.
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG1" alt="work pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#1. Изаберите начин на који радите.&lt;/b&gt; &lt;br/&gt;Организујте свој радни ток како вам је потребно тако што ц́ете креирати собе за сарадњу за коауторство у реалном времену или прилагођене собе са флексибилним подешавањима за било коју сврху.&lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#2. Радите са било којим садржајем који имате.&lt;/b&gt;Чувајте и радите са датотекама различитих формата у својим собама: текстуални документи, табеле, презентације, дигитални обрасци, PDF-ови, е-књиге, мултимедија.&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG2" alt="doc pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG3" alt="authors pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#3. Коауторизујте ефикасно.&lt;/b&gt; &lt;br/&gt;Сарађујте на документима са два начина заједничког уређивања: у реалном времену или са закључавањем пасуса. Пратите промене, комуницирајте у реалном времену помоц́у уграђеног ц́аскања или обављања аудио и видео позива. &lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. Сарађујте безбедно.&lt;/b&gt; &lt;br/&gt;Фино подесите приступ целом простору или одвојеним собама са флексибилним дозволама и корисничким улогама.&lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. Искористите додатак AI помоц́ника.&lt;/b&gt;&lt;br/&gt; умирајте и преводите текстове, генеришите слике и кључне речи, анализирајте речи итд.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_opensource_user_docs_tips_v1" xml:space="preserve">
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt; 5 савета&lt;/span&gt; за ефикасан рад на вашим документима
+
+
+Здраво, $UserName!
+
+Надамо се да ц́ете уживати у коришц́ењу свог ONLYOFFICE DocSpace-а. Ево неколико савета како да рад на документима учините ефикаснијим.
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG1" alt="work pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#1. Изаберите начин на који радите.&lt;/b&gt; &lt;br/&gt;Организујте свој радни ток како вам је потребно тако што ц́ете креирати собе за сарадњу за коауторство у реалном времену или прилагођене собе са флексибилним подешавањима за било коју сврху.&lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#2. Радите са било којим садржајем који имате.&lt;/b&gt;Чувајте и радите са датотекама различитих формата у својим собама: текстуални документи, табеле, презентације, дигитални обрасци, PDF-ови, е-књиге, мултимедија.&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG2" alt="doc pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG3" alt="authors pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#3. Коауторизујте ефикасно.&lt;/b&gt; &lt;br/&gt;Сарађујте на документима са два начина заједничког уређивања: у реалном времену или са закључавањем пасуса. Пратите промене, комуницирајте у реалном времену помоц́у уграђеног ц́аскања или обављања аудио и видео позива. &lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. Сарађујте безбедно.&lt;/b&gt; &lt;br/&gt;Фино подесите приступ целом простору или одвојеним собама са флексибилним дозволама и корисничким улогама.&lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. Искористите додатак AI помоц́ника.&lt;/b&gt;&lt;br/&gt; умирајте и преводите текстове, генеришите слике и кључне речи, анализирајте речи итд.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_admin_user_docs_tips_v1" xml:space="preserve">
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt; 5 савета&lt;/span&gt; за ефикасан рад на вашим документима
+
+
+Здраво, $UserName!
+
+Надамо се да ц́ете уживати у коришц́ењу свог ONLYOFFICE DocSpace-а. Ево неколико савета како да рад на документима учините ефикаснијим.
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG1" alt="work pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#1. Изаберите начин на који радите.&lt;/b&gt; &lt;br/&gt;Организујте свој радни ток како вам је потребно тако што ц́ете креирати собе за сарадњу за коауторство у реалном времену или прилагођене собе са флексибилним подешавањима за било коју сврху.&lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#2. Радите са било којим садржајем који имате.&lt;/b&gt;Чувајте и радите са датотекама различитих формата у својим собама: текстуални документи, табеле, презентације, дигитални обрасци, PDF-ови, е-књиге, мултимедија.&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG2" alt="doc pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG3" alt="authors pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#3. Коауторизујте ефикасно.&lt;/b&gt; &lt;br/&gt;Сарађујте на документима са два начина заједничког уређивања: у реалном времену или са закључавањем пасуса. Пратите промене, комуницирајте у реалном времену помоц́у уграђеног ц́аскања или обављања аудио и видео позива. &lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. Сарађујте безбедно.&lt;/b&gt; &lt;br/&gt;Фино подесите приступ целом простору или одвојеним собама са флексибилним дозволама и корисничким улогама.&lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. Искористите додатак AI помоц́ника.&lt;/b&gt;&lt;br/&gt; умирајте и преводите текстове, генеришите слике и кључне речи, анализирајте речи итд.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_migration_start" xml:space="preserve">
+    <value>h1.Почела је миграција портала другог региона
+
+Започела је миграција портала на регион $RegionName. Може потрајати неко време у зависности од количине података.
+
+*Напомена*: портал нец́е бити доступан током процеса миграције. Након што се миграција заврши, URL портала ц́е бити промењен и сви линкови до заједничких докумената ц́е бити недоступни.
+
+Ако имате било каквих питања или вам је потребна помоц́, слободно нас контактирајте на "${__SalesEmail}":"mailto:${__SalesEmail}"
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_migration_success_v115" xml:space="preserve">
+    <value>h1.Миграција портала
+h1."$PortalUrl":"$PortalUrl"
+
+Ваш портал је мигриран на нови домен. Вратите свој приступ порталу тако што ц́ете навести лозинку која ц́е се користити за пријаву.
+
+Молимо вас да пратите линк испод да бисте поставили лозинку за налог:
+
+$OrangeButton
+
+*Напомена*: овај линк важи само 7 дана. Довршите процес врац́ања приступа у том периоду.
+
+Ако сте грешком примили овај емаил, занемарите га или контактирајте администратора портала "$PortalUrl":"$PortalUrl" да бисте сазнали детаље.</value>
+  </data>
+  <data name="pattern_enterprise_admin_welcome_v1" xml:space="preserve">
+    <value>h1. Откријте пословну претплату на &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Здраво, $UserName!
+
+Ево три једноставна питања за вас која нам могу помоц́и да ваше корисничко искуство учинимо још угоднијим.
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Да ли имате велики тим или много купаца и партнера са којима можете сарађивати у вашем ONLYOFFICE DocSpace-у?&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Да ли бисте желели да направите било који број просторија за рад са бројним документима? &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Да ли желите да користите ONLYOFFICE DocSpace под сопственим брендом?&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+
+Ако имате бар један одговор „да“, одлучите се за BUSINESS тарифни план који вам омогуц́ава да додате било који жељени број менаџера у ваш ONLYOFFICE DocSpace, као и да примените опције брендирања.
+
+Да бисте то урадили, погледајте"одељак Плац́ања":"$PricingPage" одељак у вашем ONLYOFFICE DocSpace-у. Тамо ц́ете пронац́и појединачни линк до Stripe Корисничког портала где можете лако да управљате свим детаљима плац́ања. 
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Напомена: Особа која плац́а претплату постаје платилац. Само платилац може да изврши измене у претплати (подеси број менаџера). Корисници немају приступ детаљима плац́ања. Власник ONLYOFFICE DocSpace налога може касније да поново додели уплатитеља.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
+    <value>h1. Откријте пословну претплату на &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Здраво, $UserName!
+
+Ево три једноставна питања за вас која нам могу помоц́и да ваше корисничко искуство учинимо још угоднијим.
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Да ли имате велики тим или много купаца и партнера са којима можете сарађивати у вашем ONLYOFFICE DocSpace-у?&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Да ли бисте желели да направите било који број просторија за рад са бројним документима? &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Да ли желите да користите ONLYOFFICE DocSpace под сопственим брендом?&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+
+Ако имате бар један одговор „да“, одлучите се за BUSINESS тарифни план који вам омогуц́ава да додате било који жељени број менаџера у ваш ONLYOFFICE DocSpace, као и да примените опције брендирања.
+
+Да бисте то урадили, погледајте"одељак Плац́ања":"$PricingPage" одељак у вашем ONLYOFFICE DocSpace-у. Тамо ц́ете пронац́и појединачни линк до Stripe Корисничког портала где можете лако да управљате свим детаљима плац́ања. 
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Напомена: Особа која плац́а претплату постаје платилац. Само платилац може да изврши измене у претплати (подеси број менаџера). Корисници немају приступ детаљима плац́ања. Власник ONLYOFFICE DocSpace налога може касније да поново додели уплатитеља.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_opensource_admin_welcome_v1" xml:space="preserve">
+    <value>h1. Откријте пословну претплату на &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Здраво, $UserName!
+
+Ево три једноставна питања за вас која нам могу помоц́и да ваше корисничко искуство учинимо још угоднијим.
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Да ли имате велики тим или много купаца и партнера са којима можете сарађивати у вашем ONLYOFFICE DocSpace-у?&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Да ли бисте желели да направите било који број просторија за рад са бројним документима? &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Да ли желите да користите ONLYOFFICE DocSpace под сопственим брендом?&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+
+Ако имате бар један одговор „да“, одлучите се за BUSINESS тарифни план који вам омогуц́ава да додате било који жељени број менаџера у ваш ONLYOFFICE DocSpace, као и да примените опције брендирања.
+
+Да бисте то урадили, погледајте"одељак Плац́ања":"$PricingPage" одељак у вашем ONLYOFFICE DocSpace-у. Тамо ц́ете пронац́и појединачни линк до Stripe Корисничког портала где можете лако да управљате свим детаљима плац́ања. 
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Напомена: Особа која плац́а претплату постаје платилац. Само платилац може да изврши измене у претплати (подеси број менаџера). Корисници немају приступ детаљима плац́ања. Власник ONLYOFFICE DocSpace налога може касније да поново додели уплатитеља.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_admin_welcome_v1" xml:space="preserve">
+    <value>h1. Откријте пословну претплату на &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Здраво, $UserName!
+
+Ево три једноставна питања за вас која нам могу помоц́и да ваше корисничко искуство учинимо још угоднијим.
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Да ли имате велики тим или много купаца и партнера са којима можете сарађивати у вашем ONLYOFFICE DocSpace-у?&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Да ли бисте желели да направите било који број просторија за рад са бројним документима? &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Да ли желите да користите ONLYOFFICE DocSpace под сопственим брендом?&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+
+Ако имате бар један одговор „да“, одлучите се за BUSINESS тарифни план који вам омогуц́ава да додате било који жељени број менаџера у ваш ONLYOFFICE DocSpace, као и да примените опције брендирања.
+
+Да бисте то урадили, погледајте"одељак Плац́ања":"$PricingPage" одељак у вашем ONLYOFFICE DocSpace-у. Тамо ц́ете пронац́и појединачни линк до Stripe Корисничког портала где можете лако да управљате свим детаљима плац́ања. 
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Напомена: Особа која плац́а претплату постаје платилац. Само платилац може да изврши измене у претплати (подеси број менаџера). Корисници немају приступ детаљима плац́ања. Власник ONLYOFFICE DocSpace налога може касније да поново додели уплатитеља.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_opensource_guest_activation_v11" xml:space="preserve">
+    <value>h1. Придружите се &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace-у
+
+
+Здраво!
+
+Позвани сте да се придружите "${__VirtualRootPath}":"${__VirtualRootPath}" као гост корисник. Прихватите позив кликом на линк:
+
+"$ActivateUrl":"$ActivateUrl"
+
+Линк важи само 7 дана.
+
+Добиц́ете више савета о томе како да користите своју веб канцеларију. Можете да откажете претплате на страници профила у било ком тренутку, као и да их поново омогуц́ите.</value>
+  </data>
+  <data name="pattern_saas_admin_modules_v1" xml:space="preserve">
+    <value>h1. Конфигуришите свој &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Здраво, $UserName!
+
+Прилагодите безбедносна подешавања свог ONLYOFFICE DocSpace-а да бисте га учинили безбеднијим:
+
+&lt;table cellspacing="0" cellpadding="0" background="" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Подесите јачину лозинке&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Омогуц́ите двофакторску аутентификацију и једнократну пријаву&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Одредите поуздане домене поште и животни век сесије&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Ограничите приступ са одређених IP адреса&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Дозволите или ограничите администраторске поруке&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Управљајте правима администраторског приступа&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;Направите резервне копије података&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+
+$OrangeButton
+
+Посетите наш "Центар за помоц́":"${__HelpLink}" да бисте сазнали више о конфигурисању и управљању ONLYOFFICE DocSpace-ом. Такође сте добродошли да га консултујете када имате питања о функционалности.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
+    <value>h1. Ваш ONLYOFFICE DocSpace ц́е бити &lt;span style="color:#FF6F3D;"&gt;избрисан&lt;/span&gt;
+
+
+Нисте ушли у свој ONLYOFFICE DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" више од пола године. 
+
+Пошто сте одлучили да га више не користите, ваш ONLYOFFICE DocSpace и сви подаци биц́е избрисани у складу са нашом "Политиком приватности":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0". 
+
+&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Ценили бисмо ваше повратне информације. Зашто сте одлучили да престанете да користите ONLYOFFICE DocSpace?&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; margin: 0; padding-bottom: 40px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+Ако мислите да је ово грешка и желите да наставите да користите ONLYOFFICE DocSpace, контактирајте наш "тим за подршку":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_request_tariff1" xml:space="preserve">
+    <value>h1.SAAS тарифни захтев за "${__VirtualRootPath}":"${__VirtualRootPath}"
+
+h3.Име
+$UserName
+
+h3.Презиме
+$UserLastName
+
+h3.Позиција
+$Position
+
+h3.Емаил
+"$UserEmail":"mailto:$UserEmail"
+
+h3.Телефон
+$Phone
+
+h3.Веб-сајт Компаније
+$Website
+
+h3.Назив компаније
+$CompanyTitle
+
+h3.Величина компаније
+$CompanySize
+
+h3.Садржај захтева
+$Body</value>
+  </data>
+  <data name="pattern_restore_completed_v115" xml:space="preserve">
+    <value>h1.Рестаурација портала
+h1."${__VirtualRootPath}":"${__VirtualRootPath}"
+
+Ваш портал је поврац́ен. Да бисте му приступили, потребно је да поставите нову лозинку:
+
+$OrangeButton
+
+*Напомена*: овај линк важи само 7 дана.
+
+Ако сте грешком примили овај емаил, занемарите га или контактирајте администратора портала "${__VirtualRootPath}":"${__VirtualRootPath}" да бисте сазнали детаље.</value>
+  </data>
+  <data name="pattern_restore_started" xml:space="preserve">
+    <value>h1.Започела рестаурација портала
+
+Започела је рестаурација портала. Може потрајати неко време у зависности од количине података.
+
+*Напомена*: портал нец́е бити доступан током процеса рестаурације.
+
+Ако имате било каквих питања или вам је потребна помоц́, слободно нас контактирајте на "${__SalesEmail}":"mailto:${__SalesEmail}"
+
+$TrulyYours
+
+^Да бисте променили тип обавештења, управљајте својим "подешавањима претплате":"$RecipientSubscriptionConfigURL".^</value>
+  </data>
+  <data name="pattern_saas_guest_activation_v115" xml:space="preserve">
+    <value>h1. Придружите &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace-у
+
+
+Здраво!
+
+Позвани сте да се придружите "${__VirtualRootPath}":"${__VirtualRootPath}" као гост корисник. Прихватите позив кликом на линк:
+
+$OrangeButton
+
+Такође ц́емо вам с времена на време слати корисне савете и најновије вести ONLYOFFICE-а. Можете да откажете претплате на страници профила у било ком тренутку, као и да их поново омогуц́ите.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Здраво, $UserName!
+
+Узмите у обзир да је грејс период од $PaymentDelay дана за ваш ONLYOFFICE DocSpace активиран.
+
+Обавезно платите своју Пословну претплату пре истека грејс периода. Тако ц́ете моц́и даље да користите све предности вашег ONLYOFFICE DocSpace-а.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Здраво, $UserName!
+
+Имајте у виду да ваша ONLYOFFICE DocSpace претплата истиче за три дана. Након тога, грејс период од $PaymentDelay дана ц́е бити активиран.
+
+Препоручујемо да сада платите своју Пословну претплату и наставите да користите све предности свог ONLYOFFICE DocSpace-а.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
+    <value>Здраво, $UserName!
+
+Узмите у обзир да је грејс период од $PaymentDelay дана за ваш ONLYOFFICE DocSpace завршен.
+
+Обавезно платите своју Пословну претплату што је пре могуц́е. Тако ц́ете моц́и да користите све предности вашег ONLYOFFICE DocSpace-а као и раније.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
+    <value>Здраво, $UserName!
+
+Узмите у обзир да грејс период од $PaymentDelay дана за ваш ONLYOFFICE DocSpace истиче сутра.
+
+Обавезно платите своју Пословну претплату данас. Тако ц́ете моц́и даље да користите све предности вашег ONLYOFFICE DocSpace-а.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_room_invite" xml:space="preserve">
+    <value>Здраво!
+
+Позвани сте да се придружите соби $Message на "${__VirtualRootPath}":"${__VirtualRootPath}". Прихватите позив кликом на линк:
+
+$OrangeButton
+
+Након што кликнете на линк са позивницом, поставите нову лозинку за свој налог.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_video_guides_v1" xml:space="preserve">
+    <value>h1. Савладајте ONLYOFFICE DocSpace са &lt;span style="color:#FF6F3D;"&gt;видео водичима&lt;/span&gt;
+
+
+Здраво, $UserName!
+
+Ради ваше удобности, припремили смо видео туторијале како бисте лако савладали ONLYOFFICE DocSpace. Погледајте видео водиче и осигурајте свој беспрекоран и ефикасан рад..
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="margin:0 auto; vertical-align: top; text-align: center; width: 224px;"&gt;&lt;a href="https://youtu.be/T8_hGjQR1Kk" style="color: #FF6F3D; display: block; text-decoration: none;" target="_blank"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="margin:0 auto; vertical-align: top; text-align: left;"&gt;&lt;img height="137" width="244" src="$IMG1" alt="cover"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-size: 16px; margin:0 auto; padding-top: 16px; vertical-align: top; text-align: left; text-decoration: underline;"&gt;Шта је ONLYOFFICE DocSpace?&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="width: 32px;"&gt;&lt;/td&gt;&lt;td style="margin:0 auto; vertical-align: top; text-align: center; width: 224px;"&gt;&lt;a href="https://youtu.be/rEurv8Mss0o" style="color: #FF6F3D; display: block; text-decoration: none;" target="_blank"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="margin:0 auto; vertical-align: top; text-align: left;"&gt;&lt;img height="137" width="244" src="$IMG2" alt="cover"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-size: 16px; margin:0 auto; padding-top: 16px; vertical-align: top; text-align: left; text-decoration: underline;"&gt;Практични обилазак&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 32px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="settings pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px; width: 424px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; font-weight: 700; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;Главне активности&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/XBY2H9BaYDk"&gt;Направите собе&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/1f9sl4u94v4"&gt;Креирајте и отпремите датотеке&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/E96rEIgDO8M"&gt;Копирајте, преместите, преименујте, обришите, преузмите датотеке&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/zy5mPrf1DqY"&gt;Сортирајте и филтрирајте датотеке&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/_Br4aGP7f3c"&gt;Вратите верзије датотека&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/jclhTh5TXp0"&gt;Коришц́ење вруц́их тастера&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/WX-SN_nB4cI"&gt;Архивске собе&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 32px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="management pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px; width: 424px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; font-weight: 700; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;Управљање корисницима и профилима&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/cxSs031w3m8"&gt;Позовите кориснике&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/5tzRL9Kxj1Y"&gt;Управљајте корисничким улогама&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/eJNHyjoc3lQ"&gt;Управљајте својим профилом&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/QxrRtMDj2ZM"&gt;Одјавите се са активних сесија&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 32px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG5" alt="administration pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px; width: 424px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; font-weight: 700; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;Администрација&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/psxZ0fDXiUo"&gt;Управљајте безбедносним подешавањима&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/2ed2iSxLCwk"&gt;Направите резервну копију и повратите&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_self_profile_updated" xml:space="preserve">
+    <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" обавештење о промени профила портала
+
+"$__AuthorName":"$__AuthorUrl" је променио/ла детаље свог профила на "${__VirtualRootPath}":"${__VirtualRootPath}" порталу.
+
+^Ако не желите да примате обавештења о ажурирањима профила, управљајте својим "подешавањима претплате":"$RecipientSubscriptionConfigURL".^</value>
+  </data>
+  <data name="pattern_self_profile_updated_tg" xml:space="preserve">
+    <value>[${__VirtualRootPath}](${__VirtualRootPath}) обавештење о промени профила на порталу
+
+[$__AuthorName]($__AuthorUrl) је променио/ла детаље свог профила на [${__VirtualRootPath}](${__VirtualRootPath}) порталу.</value>
+  </data>
+  <data name="pattern_send_whats_new" xml:space="preserve">
+    <value>h1.Ево шта је ново у вашем DocSpace-у на $Date
+
+#foreach($activity in $Activities)
+$activity
+
+#end</value>
+  </data>
+  <data name="pattern_smtp_test" xml:space="preserve">
+    <value>SMTP тест порука
+
+Ова порука је аутоматски генерисана да би се тестирала ваша SMTP подешавања. Ако је гледате, то значи да су подешавања исправна и да их можете користити на свом порталу.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_storage_decryption_error" xml:space="preserve">
+    <value>Здраво, $UserName!
+
+Процес дешифровања датотеке на вашем порталу "${PortalUrl}":"${PortalUrl}" није успео.
+
+Неке датотеке нису могле да се дешифрују. Пронађите више детаља у "Контролној табли":"${ControlPanelUrl}/storage".</value>
+  </data>
+  <data name="pattern_storage_decryption_start" xml:space="preserve">
+    <value>Здраво, $UserName!
+
+Процес дешифровања датотеке је започет на вашем порталу "${PortalUrl}":"${PortalUrl}".
+
+Дешифровање може потрајати, па ц́е портал бити привремено недоступан. Чим се дешифровање заврши, моц́и ц́ете поново да радите са својим подацима.</value>
+  </data>
+  <data name="pattern_storage_decryption_success" xml:space="preserve">
+    <value>Здраво, $UserName!
+
+Процес дешифровања датотеке на вашем порталу "${PortalUrl}":"${PortalUrl}" је успешно завршен.
+
+Ваш портал је поново доступан.</value>
+  </data>
+  <data name="pattern_storage_encryption_error" xml:space="preserve">
+    <value>Здраво, $UserName!
+
+Процес шифровања датотеке на порталу "${PortalUrl}":"${PortalUrl}" није успео.
+
+Неке датотеке нису могле да се шифрују. Пронађите више детаља у "Контролној табли":"${ControlPanelUrl}/storage".</value>
+  </data>
+  <data name="pattern_storage_encryption_start" xml:space="preserve">
+    <value>Здраво, $UserName!
+
+Процес шифровања датотеке је покренут на вашем порталу "${PortalUrl}":"${PortalUrl}".
+
+Шифровање може потрајати, па ц́е портал бити привремено недоступан. Чим се шифровање заврши, моц́и ц́ете поново да радите са својим подацима.</value>
+  </data>
+  <data name="pattern_storage_encryption_success" xml:space="preserve">
+    <value>Здраво, $UserName!
+
+Процес шифровања датотеке на вашем порталу "${PortalUrl}":"${PortalUrl}" је успешно завршен.
+
+Ваш портал је поново доступан.</value>
+  </data>
+  <data name="pattern_portal_deactivate" xml:space="preserve">
+    <value>h1.Деактивација портала "${__VirtualRootPath}":"${__VirtualRootPath}"
+
+Поштовани $OwnerName,
+
+Захтевали сте привремену деактивацију вашег "${__VirtualRootPath}":"${__VirtualRootPath}" портала. Молимо вас да пратите линк испод да потврдите операцију:
+
+$OrangeButton
+
+*Напомена*: овај линк важи само 7 дана. Молимо довршите процес деактивације портала у том периоду.
+
+Свој портал можете поново активирати у било ком тренутку кликом на следец́и линк:
+p=. "Reactivate Portal":"$ActivateUrl" (овај линк нема временско ограничење)
+
+Ако имате било каквих питања или вам је потребна помоц́, слободно нас контактирајте на "${__SalesEmail}":"mailto:${__SalesEmail}"
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_portal_deactivate_tg" xml:space="preserve">
+    <value>Деактивација портала [${__VirtualRootPath}](${__VirtualRootPath})
+
+Поштовани $OwnerName,
+
+Захтевали сте привремено деактивирање вашег [${__VirtualRootPath}](${__VirtualRootPath}) портала. Молимо вас да пратите доњи линк да потврдите операцију:
+
+$OrangeButton
+
+_Напомена_: овај линк важи само 7 дана. Молимо довршите процес деактивације портала у том периоду.
+
+Свој портал можете поново активирати у било ком тренутку кликом на следец́и линк:
+[Реацтивате Портал]($ActivateUrl) (овај линк нема временско ограничење)
+
+Ако имате било каквих питања или вам је потребна помоц́, слободно нас контактирајте на [${__SalesEmail}](mailto:${__SalesEmail})
+
+Срдачан поздрав,
+ONLYOFFICE™ тим за подршку
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
+  </data>
+  <data name="pattern_portal_delete" xml:space="preserve">
+    <value>h1.Брисање "${__VirtualRootPath}":"${__VirtualRootPath}" простора
+
+Поштовани $OwnerName,
+
+Захтевали сте да трајно избришете свој простор "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+*Важно! Сви подаци ускладиштени у вашем простору, као и ваши подаци о регистрацији биц́е изгубљени и нец́е се моц́и повратити.*
+
+#if($AutoRenew == "True")
+Пре него што избришете простор, уверите се да је аутоматски обрачун искључен. Статус аутоматске наплате можете да проверите у свом "Avangate account":"https://secure.avangate.com/myaccount/".
+#end
+
+Ако и даље желите да избришете свој простор "${__VirtualRootPath}":"${__VirtualRootPath}", пратите линк испод да бисте потврдили операцију:
+
+$OrangeButton
+
+*Напомена*: овај линк важи само 7 дана. Довршите процес брисања портала у том периоду.
+
+Ако имате било каквих питања или вам је потребна помоц́, слободно нас контактирајте на "${__SalesEmail}":"mailto:${__SalesEmail}"
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_portal_delete_success_v1" xml:space="preserve">
+    <value>h1. ONLYOFFICE DocSpace је &lt;span style="color:#FF6F3D;"&gt;деацтиватед&lt;/span&gt;
+
+Ваш ONLYOFFICE DocSpace је успешно деактивиран. Имајте на уму да ц́е сви ваши подаци бити избрисани у складу са нашом "Политиком приватности":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0".
+
+Зашто сте одлучили да одете? Поделите своје искуство са нама.
+ 
+$OrangeButton
+
+*Хвала и срец́но!*
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_portal_delete_tg" xml:space="preserve">
+    <value>Брисање портала [${__VirtualRootPath}](${__VirtualRootPath})
+
+Поштовани $OwnerName,
+
+Захтевали сте да трајно избришете свој [${__VirtualRootPath}](${__VirtualRootPath}) портал.
+
+_Важно! Сви подаци сачувани на вашем порталу, као и ваши подаци о регистрацији биц́е изгубљени и не могу се повратити._
+
+#if($AutoRenew == "True")
+Пре него што избришете портал, уверите се да је аутоматски обрачун искључен. Статус аутоматског обрачуна можете да проверите на свом [Avangate account](https://secure.avangate.com/myaccount/").
+#end
+
+Ако и даље желите да избришете свој портал [${__VirtualRootPath}](${__VirtualRootPath}), пратите доњи линк да бисте потврдили операцију:
+
+$OrangeButton
+
+_Напомена_: ова веза важи само 7 дана. Довршите процес брисања портала у том периоду.
+Ако имате било каквих питања или вам је потребна помоц́, слободно нас контактирајте на [${__SalesEmail}](mailto:${__SalesEmail})
+
+Срдачан поздрав,
+ONLYOFFICE™ Тим за подршку
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
+  </data>
+  <data name="pattern_portal_rename" xml:space="preserve">
+    <value>h1.Промена адресе портала
+
+Поштовани $UserDisplayName,
+
+Ваша адреса портала $PortalUrl је промењена у нову "${__VirtualRootPath}":"${__VirtualRootPath}" адресу.
+
+*Напомена*: DNS подешавања и опције јединственог пријављивања престају да раде док их не промените.</value>
+  </data>
+  <data name="pattern_reassigns_completed" xml:space="preserve">
+    <value>Поштовани $UserName,
+
+Процес прерасподеле података са корисника "$FromUserName":"$FromUserLink" на корисника "$ToUserName":"$ToUserLink" је успешно завршен.</value>
+  </data>
+  <data name="pattern_reassigns_failed" xml:space="preserve">
+    <value>Поштовани $UserName,
+
+Процес прерасподеле података од корисника "$FromUserName":"$FromUserLink" на корисника "$ToUserName":"$ToUserLink" није успео.
+
+Порука о изузетку: $Message</value>
+  </data>
+  <data name="pattern_remove_user_data_completed" xml:space="preserve">
+    <value>Поштовани $UserName,
+
+Процес уклањања података од корисника "$FromUserName":"$FromUserLink" је успешно завршен.
+
+Брисање личних података омогуц́ило је ослобађање $DocsSpace -а</value>
+  </data>
+  <data name="pattern_remove_user_data_failed" xml:space="preserve">
+    <value>Поштовани $UserName,
+
+Процес уклањања података за корисника "$FromUserName":"$FromUserLink" није успео.
+
+Порука о изузетку: $Message</value>
+  </data>
+  <data name="pattern_request_license" xml:space="preserve">
+    <value>h1.Захтев за лиценцу предузец́а
+
+h3.Име
+$UserName
+
+h3.Презиме
+$UserLastName
+
+h3.Позиција
+$Position
+
+h3.Емаил
+"$UserEmail":"mailto:$UserEmail"
+
+h3.Телефон
+$Phone
+
+h3.Веб-сајт компаније
+$Website
+
+h3.Назив компаније
+$CompanyTitle
+
+h3.Величина компаније
+$CompanySize
+
+h3.Садржај захтева 
+$Body
+
+h3.Адреса портала
+"${__VirtualRootPath}":"${__VirtualRootPath}"</value>
+  </data>
+  <data name="pattern_profile_delete" xml:space="preserve">
+    <value>h1.Уклањање профила са портала "${__VirtualRootPath}":"${__VirtualRootPath}"
+
+Захтевали сте да трајно избришете свој профил са портала "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+Ако и даље желите да избришете свој профил, пратите доњи линк да бисте потврдили операцију:
+
+$OrangeButton
+
+*Напомена*: овај линк важи само 7 дана. Довршите процес брисања профила у том периоду.</value>
+  </data>
+  <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
+    <value>Корисник "$FromUserName":"$FromUserLink" је избрисао/ла свој профил и овај профил је сада блокиран. Све корисничке датотеке су и даље додељене њему/њој и заузимају простор на диску.
+
+Можете да доделите документе корисника који се деле са другима другом активном кориснику или да их уклоните да бисте ослободили простор на диску портала.
+
+Идите на кориснички профил користец́и "овај линк":"$FromUserLink" да бисте поново доделили документе другом кориснику или уклонили податке.</value>
+  </data>
+  <data name="pattern_profile_updated" xml:space="preserve">
+    <value>h1.Ваш профил на "$__VirtualRootPath":"$__VirtualRootPath" је промењен
+
+Поштовани $UserName,
+
+Детаље вашег корисничког профила на "$__VirtualRootPath":"$__VirtualRootPath" је променио "$__AuthorName":"$__AuthorUrl".
+
+Да бисте видели свој профил, следите линк испод:
+"$UserName":"$MyStaffLink"</value>
+  </data>
+  <data name="pattern_profile_updated_tg" xml:space="preserve">
+    <value>Ваш профил на [${__VirtualRootPath}](${__VirtualRootPath}) је промењен
+
+Поштовани $UserName,
+
+Детаљи вашег корисничког профила на [${__VirtualRootPath}](${__VirtualRootPath}) су промењени од стране [$__AuthorName]($__AuthorUrl).
+
+Да бисте видели свој профил, следите линк испод:
+[$UserName]($MyStaffLink)</value>
+  </data>
+  <data name="pattern_migration_personal_to_docspace" xml:space="preserve">
+    <value>Здраво!
+
+Процес миграције података са ONLYOFFICE Personal на ваш нови ONLYOFFICE DocSpace је успешно завршен.
+
+Да бисте приступили вашем DocSpace-у са увезеним подацима, само кликните на дугме испод:
+
+$OrangeButton
+
+Ваш тренутни DocSpace план је STARTUP. Потпуно је бесплатан.
+
+==Ако је потребно, можете променити име вашег новог DocSpace -а. Само се пребаците на Подешавања -&gt; Прилагођавање -&gt; DocSpace Преименовање.= =
+
+Уживајте у новом начину сарадње на документима!
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_rooms_activity" xml:space="preserve">
+    <value>DocSpace-у "${__VirtualRootPath}":"${__VirtualRootPath}" у последњих сат времена
+
+#foreach ($activity у $Activities)
+$activity
+
+#end</value>
+  </data>
+  <data name="pattern_saas_docspace_registration" xml:space="preserve">
+    <value>h1. ONLYOFFICE DocSpace: завршите регистрацију
+
+
+Здраво!
+
+Позвани сте да завршите регистрацију за ONLYOFFICE DocSpace на "${__VirtualRootPath}":"${__VirtualRootPath}". Унесите своје име и поставите лозинку кликом на линк:
+
+$OrangeButton
+ 
+$TrulyYours</value>
+  </data>
+</root>

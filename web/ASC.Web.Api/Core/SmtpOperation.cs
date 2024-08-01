@@ -26,7 +26,7 @@
 
 namespace ASC.Web.Api.Core;
 
-[Singleton(Additional = typeof(SmtpOperationExtension))]
+[Singleton]
 public class SmtpOperation(IServiceProvider serviceProvider, IDistributedTaskQueueFactory queueFactory)
 {
     public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "smtp";
@@ -76,13 +76,5 @@ public class SmtpOperation(IServiceProvider serviceProvider, IDistributedTaskQue
         };
 
         return result;
-    }
-}
-
-public static class SmtpOperationExtension
-{
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<SmtpJob>();
     }
 }

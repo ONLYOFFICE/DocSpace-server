@@ -782,7 +782,7 @@
     <value>Ajustes se han actualizado con éxito</value>
   </data>
   <data name="SuccessfullySentNotificationDeleteUserInfoMessage" xml:space="preserve">
-    <value>Las instrucciones para borrar su perfil se han enviado al correo electrónico {0}</value>
+    <value>Las instrucciones para desactivar su perfil se han enviado al correo electrónico {0}</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>Código incorrecto</value>
@@ -815,7 +815,7 @@
     <value>El número de administradores no debe superar {0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Número de administradores</value>
+    <value>El número de administradores/usuarios avanzados</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Copias de seguridad y recuperación automáticas</value>
@@ -855,9 +855,6 @@
   </data>
   <data name="TariffsFeature_usersInRoom_exception" xml:space="preserve">
     <value>El número de usuarios en la sala no debe superar {0}</value>
-  </data>
-  <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>El número de administradores/usuarios avanzados:</value>
   </data>
   <data name="ConsumersAppleId" xml:space="preserve">
     <value>ID de Apple</value>
@@ -1044,5 +1041,17 @@
   </data>
   <data name="TariffsFeature_statistic" xml:space="preserve">
     <value>Cuotas de almacenamiento y estadísticas</value>
+  </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>Utente disabilitato</value>
+  </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>Il limite degli inviti è stato superato</value>
+  </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>Le istruzioni per la modifica della password sono state inviate all'indirizzo email {0}.</value>
+  </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>Amministratori/utenti esperti aggiunti:</value>
   </data>
 </root>

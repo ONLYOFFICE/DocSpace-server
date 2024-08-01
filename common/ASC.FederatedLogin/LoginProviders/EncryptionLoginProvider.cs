@@ -29,7 +29,7 @@ namespace ASC.Web.Studio.Core;
 [Scope]
 public class EncryptionLoginProvider(
     ILogger<EncryptionLoginProvider> logger,
-    SecurityContext securityContext,
+    AuthContext authContext,
     InstanceCrypto instanceCrypto,
     AccountLinker accountLinker)
 {
@@ -43,7 +43,7 @@ public class EncryptionLoginProvider(
         var loginProfile = new LoginProfile
         {
             Provider = ProviderConstants.Encryption,
-            Name = instanceCrypto.Encrypt(keys)
+            Name = await instanceCrypto.EncryptAsync(keys)
         };
 
         await accountLinker.AddLinkAsync(userId, loginProfile);
@@ -51,7 +51,7 @@ public class EncryptionLoginProvider(
 
     public async Task<string> GetKeysAsync()
     {
-        return await GetKeysAsync(securityContext.CurrentAccount.ID);
+        return await GetKeysAsync(authContext.CurrentAccount.ID);
     }
 
     public async Task<string> GetKeysAsync(Guid userId)
@@ -64,7 +64,7 @@ public class EncryptionLoginProvider(
 
         try
         {
-            return instanceCrypto.Decrypt(profile.Name);
+            return await instanceCrypto.DecryptAsync(profile.Name);
         }
         catch (Exception ex)
         {
@@ -85,7 +85,7 @@ public class EncryptionLoginProvider(
 
             try
             {
-                var key = instanceCrypto.Decrypt(profilePair.Value.Name);
+                var key = await instanceCrypto.DecryptAsync(profilePair.Value.Name);
                 keys.Add(new Guid(profilePair.Key), key);
             }
             catch (Exception ex)

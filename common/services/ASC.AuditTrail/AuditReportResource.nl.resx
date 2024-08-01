@@ -275,7 +275,7 @@
     <value>Groep Geüpdatet: {0}</value>
   </data>
   <data name="GuestAccount" xml:space="preserve">
-    <value>Gast account</value>
+    <value>Anoniem</value>
   </data>
   <data name="GuestActivated" xml:space="preserve">
     <value>Gast Geactiveerd: {0}</value>
@@ -738,5 +738,41 @@
   </data>
   <data name="PortalRenamed" xml:space="preserve">
     <value>Portaal hernoemd</value>
+  </data>
+  <data name="FileSizePostfix" xml:space="preserve">
+    <value>bytes,KB,MB,GB,TB</value>
+  </data>
+  <data name="FileUploadedWithOverwriting" xml:space="preserve">
+    <value>Bestand geüpload met overschrijven: {0}</value>
+  </data>
+  <data name="QuotaPerPortalChanged" xml:space="preserve">
+    <value>Standaard opslagquota instellen: {0}</value>
+  </data>
+  <data name="QuotaPerPortalDisabled" xml:space="preserve">
+    <value>Standaard opslagquota uitgeschakeld</value>
+  </data>
+  <data name="QuotaPerRoomChanged" xml:space="preserve">
+    <value>Standaard opslagquota instellen voor kamers: {0}</value>
+  </data>
+  <data name="QuotaPerRoomDisabled" xml:space="preserve">
+    <value>Standaard opslagquota voor kamers uitgeschakeld</value>
+  </data>
+  <data name="QuotaPerUserChanged" xml:space="preserve">
+    <value>Standaard opslagquota instellen voor gebruikers: {0}</value>
+  </data>
+  <data name="QuotaPerUserDisabled" xml:space="preserve">
+    <value>Standaard opslagquota voor gebruikers uitgeschakeld</value>
+  </data>
+  <data name="RoomGroupAdded" xml:space="preserve">
+    <value>Toegevoegde groep: {0}. Rol: {1}</value>
+  </data>
+  <data name="RoomGroupRemove" xml:space="preserve">
+    <value>Verwijderde groep: {0}</value>
+  </data>
+  <data name="RoomCopied" xml:space="preserve">
+    <value>Kamer gekopieerd: {0}</value>
+  </data>
+  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
+    <value>{0} toegewezen: {1}</value>
   </data>
 </root>

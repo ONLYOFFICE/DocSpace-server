@@ -39,8 +39,7 @@ public class EventTypeConverter : ITypeConverter<EventMessage, DbLoginEvent>, IT
 
         if (source.Description is { Count: > 0 })
         {
-            loginEvent.DescriptionRaw =
-                JsonConvert.SerializeObject(source.Description, new JsonSerializerSettings
+            loginEvent.DescriptionRaw = JsonConvert.SerializeObject(source.Description, new JsonSerializerSettings
                 {
                     DateTimeZoneHandling = DateTimeZoneHandling.Utc
                 });
@@ -56,6 +55,12 @@ public class EventTypeConverter : ITypeConverter<EventMessage, DbLoginEvent>, IT
 
         auditEvent.Initiator = source.Initiator;
         auditEvent.Target = source.Target?.ToString();
+        
+        auditEvent.FilesReferences = source.References?.Select(x => new DbFilesAuditReference
+        {
+            EntryId = x.EntryId,
+            EntryType = x.EntryType
+        }).ToList();
 
         if (source.Description is { Count: > 0 })
         {
@@ -69,7 +74,7 @@ public class EventTypeConverter : ITypeConverter<EventMessage, DbLoginEvent>, IT
         return auditEvent;
     }
 
-    private static IList<string> GetSafeDescription(IEnumerable<string> description)
+    private static List<string> GetSafeDescription(IEnumerable<string> description)
     {
         const int maxLength = 15000;
 

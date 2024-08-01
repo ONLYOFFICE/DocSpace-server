@@ -303,7 +303,7 @@ docx、xlsx、pptxとの100％の互換性が保証されています。</value>
     <value>文書</value>
   </data>
   <data name="ProductUserOpportunities" xml:space="preserve">
-    <value>独自の文書だけでなく、適切なアクセス権を持つ共有ドキュメントを作成および編集|読書/文書やフォルダに他のユーザーへのアクセス権を編集を進呈|"マイドキュメント"セクションのリンクDropboxは、Boxと他のアカウント</value>
+    <value>独自の文書だけでなく、適切なアクセス権を持つ共有ドキュメントを作成および編集|読書/文書やフォルダに他のユーザーへのアクセス権を編集を進呈|"文書"セクションのリンクDropboxは、Boxと他のアカウント</value>
   </data>
   <data name="UnknownFirstName" xml:space="preserve">
     <value>名</value>
@@ -463,5 +463,35 @@ docx、xlsx、pptxとの100％の互換性が保証されています。</value>
   </data>
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>タイプ</value>
+  </data>
+  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
+    <value>パワーユーザー</value>
+  </data>
+  <data name="Date" xml:space="preserve">
+    <value>日付</value>
+  </data>
+  <data name="RoleEnum_PowerUser" xml:space="preserve">
+    <value>パワーユーザー</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>ユーザー</value>
+  </data>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>フォーム記入ルームに複数のファイルを移動することはサポートされていません。ONLYOFFICE PDFフォームを一度に 1 つずつ移動してください。</value>
+  </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>フォーム記入ルームへのフォルダの移動はサポートされていません。ONLYOFFICE PDFフォームを1つずつ移動します。</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>このルームへのファイルの移動はできません。ONLYOFFICE PDFフォームの移動をお試しください。</value>
+  </data>
+  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
+    <value>このルームにはファイルをアップロードできません。ONLYOFFICE PDFフォームのアップロードをお試しください。</value>
+  </data>
+  <data name="FillOutExternalLinkTitle" xml:space="preserve">
+    <value>フォーム記入用のリンク</value>
+  </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>フォームへのリンク</value>
   </data>
 </root>

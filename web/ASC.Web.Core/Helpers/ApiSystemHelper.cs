@@ -54,19 +54,18 @@ public class ApiSystemHelper
     private readonly string _regionTableName;
 
     public ApiSystemHelper(
-        ConfigurationExtension configuration,
+        IConfiguration configuration,
         CoreBaseSettings coreBaseSettings,
         CommonLinkUtility commonLinkUtility,
         MachinePseudoKeys machinePseudoKeys,
-        IHttpClientFactory clientFactory,
-        TenantDomainValidator tenantDomainValidator)
+        IHttpClientFactory clientFactory)
     {
         ApiSystemUrl = configuration["web:api-system"];
         _commonLinkUtility = commonLinkUtility;
         _skey = machinePseudoKeys.GetMachineConstant();
         _clientFactory = clientFactory;
         _coreBaseSettings = coreBaseSettings;
-        _dynamoDbSettings = configuration.GetSetting<DynamoDbSettings>("aws:dynamoDB");
+        _dynamoDbSettings =  configuration.GetSection("aws:dynamoDB").Get<DynamoDbSettings>();
         _regionTableName = !string.IsNullOrEmpty(_dynamoDbSettings.TableName) ? _dynamoDbSettings.TableName: "docspace-tenants_region";
         }
 

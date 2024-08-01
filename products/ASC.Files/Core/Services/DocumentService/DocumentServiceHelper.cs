@@ -26,9 +26,8 @@
 
 namespace ASC.Web.Files.Services.DocumentService;
 
-[Scope(Additional = typeof(ConfigurationFilesExtension))]
+[Scope]
 public class DocumentServiceHelper(IDaoFactory daoFactory,
-        FileShareLink fileShareLink,
         UserManager userManager,
         FileSecurity fileSecurity,
         FileUtility fileUtility,
@@ -40,38 +39,57 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         EntryStatusManager entryStatusManager,
         IServiceProvider serviceProvider,
         ExternalShare externalShare,
-        AuthContext authContext)
+        AuthContext authContext,
+        SecurityContext securityContext)
     {
-    public async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(T fileId, int version, string doc, bool editPossible, bool tryEdit, bool tryCoauth)
+
+    public async Task<(File<T> File, bool LastVersion)> GetCurFileInfoAsync<T>(T fileId, int version)
     {
         var lastVersion = true;
 
         var fileDao = daoFactory.GetFileDao<T>();
 
-        var fileOptions = await fileShareLink.CheckAsync(doc, fileDao);
-        var file = fileOptions.File;
-        var linkRight = fileOptions.FileShare;
+        var file = await fileDao.GetFileAsync(fileId);
+        if (file != null && 0 < version && version < file.Version)
+        {
+                file = await fileDao.GetFileAsync(fileId, version);
+                lastVersion = false;
+        }
 
         if (file == null)
         {
-            var curFile = await fileDao.GetFileAsync(fileId);
-
-            if (curFile != null && 0 < version && version < curFile.Version)
-            {
-                file = await fileDao.GetFileAsync(fileId, version);
-                lastVersion = false;
-            }
-            else
-            {
-                file = curFile;
-            }
+            throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
-        return await GetParamsAsync(file, lastVersion, linkRight, true, true, editPossible, tryEdit, tryCoauth);
+        return (file, lastVersion);
     }
 
-    public async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(File<T> file, bool lastVersion, FileShare linkRight, bool rightToRename, bool rightToEdit, bool editPossible, bool tryEdit, bool tryCoauth)
+    public async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(File<T> file, bool lastVersion, bool editPossible, bool tryEdit,
+        bool tryCoauth, bool fillFormsPossible, EditorType editorType, bool isSubmitOnly = false)
     {
+        var docParams = await GetParamsAsync(file, lastVersion, true, editPossible, editPossible, tryEdit, tryCoauth, fillFormsPossible);
+        docParams.Configuration.EditorType = editorType;
+
+        if (isSubmitOnly)
+        {
+            docParams.Configuration.Document.Key = GetDocSubmitKeyAsync(docParams.Configuration.Document.Key);
+        }
+
+        return docParams;
+    }
+
+    public async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(T fileId, int version, bool editPossible, bool tryEdit,
+        bool tryCoAuthoring, bool fillFormsPossible)
+    {
+        var (file, lastVersion) = await GetCurFileInfoAsync(fileId, version);
+
+        return await GetParamsAsync(file, lastVersion, true, true, editPossible, tryEdit, tryCoAuthoring, fillFormsPossible);
+    }
+
+    private async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(File<T> file, bool lastVersion, bool rightToRename,
+        bool rightToEdit, bool editPossible, bool tryEdit, bool tryCoAuthoring, bool fillFormsPossible)
+    {
+
         if (file == null)
         {
             throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
@@ -85,55 +103,41 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         var rightToReview = rightToEdit;
         var reviewPossible = editPossible;
 
-        var rightToFillForms = rightToEdit;
-        var fillFormsPossible = editPossible;
+        var rightToFillForms = fillFormsPossible;
 
         var rightToComment = rightToEdit;
         var commentPossible = editPossible;
 
         var rightModifyFilter = rightToEdit;
 
-        rightToEdit = rightToEdit
-                      && (linkRight == FileShare.ReadWrite || linkRight == FileShare.CustomFilter
-                          || await fileSecurity.CanEditAsync(file) || await fileSecurity.CanCustomFilterEditAsync(file));
+        rightToEdit = rightToEdit && (await fileSecurity.CanEditAsync(file) || await fileSecurity.CanCustomFilterEditAsync(file));
         if (editPossible && !rightToEdit)
         {
             editPossible = false;
         }
 
-        rightModifyFilter = rightModifyFilter
-            && (linkRight == FileShare.ReadWrite
-                || await fileSecurity.CanEditAsync(file));
-
+        rightModifyFilter = rightModifyFilter && await fileSecurity.CanEditAsync(file);
         rightToRename = rightToRename && rightToEdit && await fileSecurity.CanRenameAsync(file);
 
-        rightToReview = rightToReview
-                        && (linkRight == FileShare.Review || linkRight == FileShare.ReadWrite
-                            || await fileSecurity.CanReviewAsync(file));
+        rightToReview = rightToReview && await fileSecurity.CanReviewAsync(file);
         if (reviewPossible && !rightToReview)
         {
             reviewPossible = false;
         }
 
-        rightToFillForms = rightToFillForms
-                           && (linkRight == FileShare.FillForms || linkRight == FileShare.Review || linkRight == FileShare.ReadWrite
-                               || await fileSecurity.CanFillFormsAsync(file));
+        rightToFillForms = rightToFillForms && await fileSecurity.CanFillFormsAsync(file);
         if (fillFormsPossible && !rightToFillForms)
         {
             fillFormsPossible = false;
         }
 
-        rightToComment = rightToComment
-                         && (linkRight == FileShare.Comment || linkRight == FileShare.Review || linkRight == FileShare.ReadWrite
-                             || await fileSecurity.CanCommentAsync(file));
+        rightToComment = rightToComment && await fileSecurity.CanCommentAsync(file);
         if (commentPossible && !rightToComment)
         {
             commentPossible = false;
         }
 
-        if (linkRight == FileShare.Restrict
-            && !(editPossible || reviewPossible || fillFormsPossible || commentPossible)
-            && !await fileSecurity.CanReadAsync(file))
+        if (!(editPossible || reviewPossible || fillFormsPossible || commentPossible) && !await fileSecurity.CanReadAsync(file))
         {
             if (file.ShareRecord is { IsLink: true, Share: not FileShare.Restrict, Options.Internal: true } && !authContext.IsAuthenticated)
             {
@@ -149,8 +153,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         }
 
         string strError = null;
-        if ((editPossible || reviewPossible || fillFormsPossible || commentPossible)
-            && await lockerManager.FileLockedForMeAsync(file.Id))
+        if ((editPossible || reviewPossible || fillFormsPossible || commentPossible) && await lockerManager.FileLockedForMeAsync(file.Id))
         {
             if (tryEdit)
             {
@@ -164,8 +167,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             rightToComment = commentPossible = false;
         }
 
-        if (editPossible
-            && !fileUtility.CanWebEdit(file.Title))
+        if (editPossible && !fileUtility.CanWebEdit(file.Title))
         {
             rightToEdit = editPossible = false;
         }
@@ -175,12 +177,10 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         if (file.RootFolderType == FolderType.VirtualRooms)
         {
             var folderDao = daoFactory.GetFolderDao<T>();
-
             locatedInPrivateRoom = await DocSpaceHelper.LocatedInPrivateRoomAsync(file, folderDao);
         }
 
-        if (file.Encrypted
-            && file.RootFolderType != FolderType.Privacy && !locatedInPrivateRoom)
+        if (file.Encrypted && file.RootFolderType != FolderType.Privacy && !locatedInPrivateRoom)
         {
             rightToEdit = editPossible = false;
             rightToReview = reviewPossible = false;
@@ -188,49 +188,46 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             rightToComment = commentPossible = false;
         }
 
-
         if (!editPossible && !fileUtility.CanWebView(file.Title))
         {
             throw new NotSupportedException($"{FilesCommonResource.ErrorMessage_NotSupportedFormat} ({FileUtility.GetFileExtension(file.Title)})");
         }
 
-        if (reviewPossible &&
-            !fileUtility.CanWebReview(file.Title))
+        if (reviewPossible && !fileUtility.CanWebReview(file.Title))
         {
             rightToReview = reviewPossible = false;
         }
 
-        if (fillFormsPossible &&
-            !fileUtility.CanWebRestrictedEditing(file.Title))
+        if (fillFormsPossible && !fileUtility.CanWebRestrictedEditing(file.Title))
         {
             rightToFillForms = fillFormsPossible = false;
         }
 
-        if (commentPossible &&
-            !fileUtility.CanWebComment(file.Title))
+        if (commentPossible && !fileUtility.CanWebComment(file.Title))
         {
             rightToComment = commentPossible = false;
         }
 
         var rightChangeHistory = rightToEdit && !file.Encrypted;
 
-        if (fileTracker.IsEditing(file.Id))
+        if (await fileTracker.IsEditingAsync(file.Id))
         {
             rightChangeHistory = false;
 
-            bool coauth;
+            bool canCoAuthoring;
             if ((editPossible || reviewPossible || fillFormsPossible || commentPossible)
-                && tryCoauth
-                && (!(coauth = fileUtility.CanCoAuthoring(file.Title)) || fileTracker.IsEditingAlone(file.Id)))
+                && tryCoAuthoring
+                && (!(canCoAuthoring = fileUtility.CanCoAuthoring(file.Title)) || fileTracker.IsEditingAlone(file.Id)))
             {
                 if (tryEdit)
                 {
-                    var editingBy = fileTracker.GetEditingBy(file.Id).FirstOrDefault();
-                    strError = string.Format(!coauth
+                    var editingBy = (await fileTracker.GetEditingByAsync(file.Id)).FirstOrDefault();
+                    strError = string.Format(!canCoAuthoring 
                                                  ? FilesCommonResource.ErrorMessage_EditingCoauth
                                                  : FilesCommonResource.ErrorMessage_EditingMobile,
                                              await global.GetUserNameAsync(editingBy, true));
                 }
+                
                 rightToEdit = editPossible = reviewPossible = fillFormsPossible = commentPossible = false;
             }
         }
@@ -250,7 +247,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             await entryStatusManager.SetFileStatusAsync(file);
         }
 
-        var rightToDownload = await CanDownloadAsync(file, linkRight);
+        var rightToDownload = await fileSecurity.CanDownloadAsync(file);
 
         var configuration = serviceProvider.GetService<Configuration<T>>();
         configuration.Document.Key = docKey;
@@ -265,7 +262,9 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             ModifyFilter = rightModifyFilter,
             Print = rightToDownload,
             Download = rightToDownload,
-            Copy = rightToDownload
+            Copy = rightToDownload,
+            Protect = authContext.IsAuthenticated,
+            Chat = file.Access != FileShare.Read
         };
 
         configuration.EditorConfig.ModeWrite = modeWrite;
@@ -278,9 +277,9 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
         if (fileUtility.CanWebRestrictedEditing(file.Title))
         {
-            var linkDao = daoFactory.GetLinkDao();
-            var sourceId = await linkDao.GetSourceAsync(file.Id.ToString());
-            configuration.Document.IsLinkedForMe = !string.IsNullOrEmpty(sourceId);
+            var linkDao = daoFactory.GetLinkDao<T>();
+            var sourceId = await linkDao.GetSourceAsync(file.Id);
+            configuration.Document.IsLinkedForMe = Equals(sourceId, default(T));
         }
 
         if (await externalShare.GetLinkIdAsync() == Guid.Empty)
@@ -294,26 +293,6 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         return (file, configuration, locatedInPrivateRoom);
     }
 
-    private async Task<bool> CanDownloadAsync<T>(File<T> file, FileShare linkRight)
-    {
-        var canDownload = linkRight != FileShare.Restrict && linkRight != FileShare.Read && linkRight != FileShare.Comment;
-
-        if (canDownload)
-        {
-            return true;
-        }
-
-        if (linkRight is FileShare.Read or FileShare.Comment)
-        {
-            var fileDao = daoFactory.GetFileDao<T>();
-            file = await fileDao.GetFileAsync(file.Id); // reset Access prop
-        }
-
-        canDownload = await fileSecurity.CanDownloadAsync(file);
-
-        return canDownload;
-    }
-
     public string GetSignature(object payload)
     {
         if (string.IsNullOrEmpty(fileUtility.SignatureSecret))
@@ -324,6 +303,23 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         return JsonWebToken.Encode(payload, fileUtility.SignatureSecret);
     }
 
+    public async Task<File<T>> CheckNeedDeletion<T>(IFileDao<T> fileDao, T fileId, FormFillingProperties<T> formFillingProperties)
+    {
+        var file = await fileDao.GetFileAsync(fileId);
+
+        if (Equals(formFillingProperties.ToFolderId, file.ParentId))
+        {
+            await securityContext.AuthenticateMeAsync(file.CreateBy);
+
+            var linkDao = daoFactory.GetLinkDao<T>();
+            var sourceId = await linkDao.GetSourceAsync(file.Id);
+            if (Equals(sourceId, default(T)))
+            {
+                return file;
+            }
+        }
+        return null;
+    }
 
     public async Task<string> GetDocKeyAsync<T>(File<T> file)
     {
@@ -342,11 +338,45 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         return DocumentServiceConnector.GenerateRevisionId(Hasher.Base64Hash(keyDoc, HashAlg.SHA256));
     }
 
+    public string GetDocSubmitKeyAsync(string key)
+    {
+        var rnd = Guid.NewGuid();
+        return Convert.ToBase64String(Encoding.UTF8.GetBytes($"submit_{rnd}_{key}"));
+    }
+
+    public bool IsDocSubmitKey(string docKey, string key)
+    {
+        var submitKey = Encoding.UTF8.GetString(Convert.FromBase64String(ReplaceLastUnderscoresWithEquals(key)));
+
+        var keySplit = submitKey.Split(Convert.ToChar("_"), 3);
+
+        if (keySplit.Length == 3 && keySplit[0] == "submit" && docKey.Equals(keySplit[2]))
+        {
+            return true;
+        }
+        return false;
+    }
+    private string ReplaceLastUnderscoresWithEquals(string inputString)
+    {
+        var charToReplace = '_';
+        var replaceWith = '=';
+
+        var lastCharIndex = inputString.LastIndexOf(charToReplace);
+
+        while (lastCharIndex != -1)
+        {
+            inputString = inputString.Substring(0, lastCharIndex) + replaceWith + inputString.Substring(lastCharIndex + 1);
+            lastCharIndex = inputString.LastIndexOf(charToReplace);
+        }
+
+        return inputString;
+    }
+
     public async Task CheckUsersForDropAsync<T>(File<T> file)
     {
         var usersDrop = new List<string>();
 
-        foreach (var uid in fileTracker.GetEditingBy(file.Id))
+        foreach (var uid in await fileTracker.GetEditingByAsync(file.Id))
         {
             if (!await userManager.UserExistsAsync(uid))
             {

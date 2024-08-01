@@ -28,7 +28,7 @@ using ASCShare = ASC.Files.Core.Security.FileShare;
 
 namespace ASC.Migration.Core.Migrators.Provider.Google;
 
-[Transient]
+[Transient(typeof(Migrator))]
 public class GoogleWorkspaceMigrator : Migrator
 {
 
@@ -62,7 +62,7 @@ public class GoogleWorkspaceMigrator : Migrator
         MigrationInfo = new MigrationInfo { Name = "GoogleWorkspace" };
     }
 
-    public override void Init(string path, CancellationToken cancellationToken, OperationType operation)
+    public override async Task InitAsync(string path, CancellationToken cancellationToken, OperationType operation)
     {
         MigrationLogger.Init();
         _cancellationToken = cancellationToken;
@@ -79,6 +79,7 @@ public class GoogleWorkspaceMigrator : Migrator
 
         _takeouts = files.Where(item => item.EndsWith(".zip")).ToArray();
         MigrationInfo.Files = _takeouts.Select(Path.GetFileName).ToList();
+        await ReportProgressAsync(1, "start");
     }
 
     public override async Task<MigrationApiInfo> ParseAsync(bool reportProgress = true)
@@ -177,7 +178,6 @@ public class GoogleWorkspaceMigrator : Migrator
                 Log(MigrationResource.CanNotParseArchives, ex);
                 if (MigrationInfo.FailedArchives.Count == _takeouts.Length)
                 {
-                    await ReportProgressAsync(_lastProgressUpdate, MigrationResource.CanNotParseArchives);
                     throw new Exception(MigrationResource.CanNotParseArchives);
                 }
             }
@@ -295,14 +295,14 @@ public class GoogleWorkspaceMigrator : Migrator
                 var substring = entry.Substring(drivePath.Length + 1);
                 var split = substring.Split('\\');
                 var path = Path.GetDirectoryName(substring);
-                if (split.Count() != 1)
+                if (split.Length != 1)
                 {
                     ParseFolders(path, foldersdictionary, i);
                 }
                 var file = new MigrationFile
                 {
                     Id = i++,
-                    Folder = split.Count() == 1 ? 0 : foldersdictionary[path].Id,
+                    Folder = split.Length == 1 ? 0 : foldersdictionary[path].Id,
                     Title = split.Last(),
                     Path = entry
                 };
@@ -484,7 +484,7 @@ public class GoogleWorkspaceMigrator : Migrator
     private void ParseRootHtml(string tmpFolder, MigrationUser user)
     {
         var htmlFiles = Directory.GetFiles(tmpFolder, "*.html");
-        if (htmlFiles.Count() != 1)
+        if (htmlFiles.Length != 1)
         {
             throw new Exception("Incorrect Takeout format.");
         }
@@ -561,7 +561,7 @@ public class GoogleWorkspaceMigrator : Migrator
         }
 
         var htmlFiles = Directory.GetFiles(accountPath, "*.SubscriberInfo.html");
-        if (htmlFiles.Count() != 1)
+        if (htmlFiles.Length != 1)
         {
             return;
         }

@@ -27,33 +27,19 @@
 namespace ASC.Common.Caching;
 
 [Singleton]
-public class RedisCacheNotify<T>(IRedisClient redisCacheClient) : ICacheNotify<T>
-    where T : new()
+public class RedisCacheNotify<T>(IRedisClient redisCacheClient) : ICacheNotify<T> where T : new()
 {
     private readonly IRedisDatabase _redis = redisCacheClient.GetDefaultDatabase();
-    private readonly ConcurrentDictionary<CacheNotifyAction, ConcurrentBag<Action<T>>> _invoctionList = new();
+    private readonly ConcurrentDictionary<CacheNotifyAction, ConcurrentBag<Action<T>>> _invocationList = new();
     private readonly Guid _instanceId = Guid.NewGuid();
-
-
-    public void Publish(T obj, CacheNotifyAction action)
-    {
-        Task.Run(async () => await _redis.PublishAsync(GetChannelName(), new RedisCachePubSubItem<T> { Id = _instanceId, Object = obj, Action = action }))
-            .GetAwaiter()
-            .GetResult();
-
-        foreach (var hanlder in GetInvoctionList(action))
-        {
-            hanlder(obj);
-        }
-    }
 
     public async Task PublishAsync(T obj, CacheNotifyAction action)
     {
-        await Task.Run(async () => await _redis.PublishAsync(GetChannelName(), new RedisCachePubSubItem<T> { Id = _instanceId, Object = obj, Action = action }));
+        await _redis.PublishAsync(GetChannelName(), new RedisCachePubSubItem<T> { Id = _instanceId, Object = obj, Action = action });
 
-        foreach (var hanlder in GetInvoctionList(action))
+        foreach (var handler in GetInvocationList(action))
         {
-            hanlder(obj);
+            handler(obj);
         }
     }
 
@@ -70,7 +56,7 @@ public class RedisCacheNotify<T>(IRedisClient redisCacheClient) : ICacheNotify<T
         })).GetAwaiter()
           .GetResult();
 
-        AddToInInvoctionList(onChange, action);
+        AddToInInvocationList(onChange, action);
     }
 
     public void Unsubscribe(CacheNotifyAction action)
@@ -78,10 +64,10 @@ public class RedisCacheNotify<T>(IRedisClient redisCacheClient) : ICacheNotify<T
         Task.Run(async () => await _redis.UnsubscribeAsync<RedisCachePubSubItem<T>>(GetChannelName(), _ => Task.FromResult(true))).GetAwaiter()
           .GetResult();
 
-        _invoctionList.TryRemove(action, out _);
+        _invocationList.TryRemove(action, out _);
     }
 
-    private RedisChannel GetChannelName()
+    private static RedisChannel GetChannelName()
     {
         var pattern = $"asc:channel:{typeof(T).FullName}".ToLower(CultureInfo.InvariantCulture);
 
@@ -90,7 +76,7 @@ public class RedisCacheNotify<T>(IRedisClient redisCacheClient) : ICacheNotify<T
         return redisChannel; 
     }
 
-    private List<Action<T>> GetInvoctionList(CacheNotifyAction action)
+    private List<Action<T>> GetInvocationList(CacheNotifyAction action)
     {
         var result = new List<Action<T>>();
 
@@ -101,7 +87,7 @@ public class RedisCacheNotify<T>(IRedisClient redisCacheClient) : ICacheNotify<T
                 continue;
             }
 
-            if (_invoctionList.TryGetValue(val, out var handlers))
+            if (_invocationList.TryGetValue(val, out var handlers))
             {
                 result.AddRange(handlers);
             }
@@ -111,11 +97,11 @@ public class RedisCacheNotify<T>(IRedisClient redisCacheClient) : ICacheNotify<T
         return result;
     }
 
-    private void AddToInInvoctionList(Action<T> onChange, CacheNotifyAction action)
+    private void AddToInInvocationList(Action<T> onChange, CacheNotifyAction action)
     {
         if (onChange != null)
         {
-            _invoctionList.AddOrUpdate(action,
+            _invocationList.AddOrUpdate(action,
                 [onChange],
                 (_, bag) =>
                 {
@@ -125,17 +111,21 @@ public class RedisCacheNotify<T>(IRedisClient redisCacheClient) : ICacheNotify<T
         }
         else
         {
-            _invoctionList.TryRemove(action, out _);
+            _invocationList.TryRemove(action, out _);
         }
     }
 
 
-    class RedisCachePubSubItem<T0>
+    [ProtoContract]
+    public record RedisCachePubSubItem<TObject>
     {
+        [ProtoMember(1)]
         public Guid Id { get; set; }
 
-        public T0 Object { get; set; }
+        [ProtoMember(2)]
+        public TObject Object { get; set; }
 
+        [ProtoMember(3)]
         public CacheNotifyAction Action { get; set; }
     }
 }

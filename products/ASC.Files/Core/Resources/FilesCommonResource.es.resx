@@ -318,7 +318,7 @@
     <value>Documentos</value>
   </data>
   <data name="ProductUserOpportunities" xml:space="preserve">
-    <value>Crear y editar sus propios documentos y documentos compartidos con los derechos de acceso propios|Dar derechos de acceso a otros usuarios para leer/editar los documentos y carpetas|Enlazar Dropbox, Box y otras cuentas en la sección de 'Mis documentos'</value>
+    <value>Crear y editar sus propios documentos y documentos compartidos con los derechos de acceso propios|Dar derechos de acceso a otros usuarios para leer/editar los documentos y carpetas|Enlazar Dropbox, Box y otras cuentas en la sección de 'Documentos'</value>
   </data>
   <data name="UnknownFirstName" xml:space="preserve">
     <value>Nombre</value>
@@ -463,5 +463,38 @@
   </data>
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>Tipo</value>
+  </data>
+  <data name="Date" xml:space="preserve">
+    <value>Fecha</value>
+  </data>
+  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
+    <value>Usuario avanzado</value>
+  </data>
+  <data name="RoleEnum_PowerUser" xml:space="preserve">
+    <value>Usuario avanzado</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>Usuario</value>
+  </data>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>No se admite mover varios archivos a la sala para rellenar formularios. Mueva un formulario PDF de ONLYOFFICE a la vez.</value>
+  </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>No se admite mover carpetas a la sala para rellenar formularios. Mueva un formulario PDF de ONLYOFFICE a la vez.</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>El archivo no se puede mover a esta sala. Intente mover el formulario PDF de ONLYOFFICE.</value>
+  </data>
+  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
+    <value>El archivo no se puede cargar en esta sala. Intente cargar el formulario PDF de ONLYOFFICE.</value>
+  </data>
+  <data name="FillOutExternalLinkTitle" xml:space="preserve">
+    <value>Enlace para rellenar</value>
+  </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>Enlace al formulario</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Abrir formulario</value>
   </data>
 </root>

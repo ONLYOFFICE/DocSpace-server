@@ -28,8 +28,9 @@ using ThumbnailSize = Dropbox.Api.Files.ThumbnailSize;
 
 namespace ASC.Files.Thirdparty.Dropbox;
 
-[Transient]
-internal class DropboxStorage(TempStream tempStream, IHttpClientFactory httpClientFactory) : IThirdPartyStorage<FileMetadata, FolderMetadata, Metadata>,
+[Transient(typeof(IThirdPartyStorage<FileMetadata, FolderMetadata, Metadata>))]
+internal class DropboxStorage(TempStream tempStream, IHttpClientFactory httpClientFactory) : 
+    IThirdPartyStorage<FileMetadata, FolderMetadata, Metadata>,
     IDisposable
 {
     public bool IsOpened { get; private set; }

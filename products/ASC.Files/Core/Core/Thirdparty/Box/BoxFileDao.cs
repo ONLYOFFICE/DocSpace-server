@@ -28,7 +28,7 @@ using File = System.IO.File;
 
 namespace ASC.Files.Core.Core.Thirdparty.Box;
 
-[Scope]
+[Scope(typeof(ThirdPartyFileDao<BoxFile, BoxFolder, BoxItem>))]
 internal class BoxFileDao(UserManager userManager,
         IDbContextFactory<FilesDbContext> dbContextFactory,
         IDaoSelector<BoxFile, BoxFolder, BoxItem> daoSelector,
@@ -37,8 +37,9 @@ internal class BoxFileDao(UserManager userManager,
         IDaoBase<BoxFile, BoxFolder, BoxItem> dao,
         TempPath tempPath,
         SetupInfo setupInfo,
-        TenantManager tenantManager)
-    : ThirdPartyFileDao<BoxFile, BoxFolder, BoxItem>(userManager, dbContextFactory, daoSelector, crossDao, fileDao, dao, tenantManager)
+        TenantManager tenantManager,
+        Global global)
+    : ThirdPartyFileDao<BoxFile, BoxFolder, BoxItem>(userManager, dbContextFactory, daoSelector, crossDao, fileDao, dao, tenantManager, global)
 {
     protected override string UploadSessionKey => "BoxSession";
     

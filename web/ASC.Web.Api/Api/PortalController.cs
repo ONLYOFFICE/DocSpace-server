@@ -37,39 +37,39 @@ namespace ASC.Web.Api.Controllers;
 [Scope]
 [DefaultRoute]
 [ApiController]
-public class PortalController(ILogger<PortalController> logger,
-        UserManager userManager,
-        TenantManager tenantManager,
-        ITariffService tariffService,
-        CommonLinkUtility commonLinkUtility,
-        IUrlShortener urlShortener,
-        AuthContext authContext,
+public class PortalController(
+    ILogger<PortalController> logger,
+    UserManager userManager,
+    TenantManager tenantManager,
+    ITariffService tariffService,
+    CommonLinkUtility commonLinkUtility,
+    IUrlShortener urlShortener,
+    AuthContext authContext,
         CookiesManager cookiesManager,
-        SecurityContext securityContext,
-        SettingsManager settingsManager,
-        IMobileAppInstallRegistrator mobileAppInstallRegistrator,
-        TenantExtra tenantExtra,
-        IConfiguration configuration,
-        CoreBaseSettings coreBaseSettings,
-        LicenseReader licenseReader,
-        SetupInfo setupInfo,
-        DocumentServiceLicense documentServiceLicense,
-        IHttpClientFactory clientFactory,
-        ApiSystemHelper apiSystemHelper,
-        CoreSettings coreSettings,
-        PermissionContext permissionContext,
-        StudioNotifyService studioNotifyService,
-        MessageService messageService,
-        MessageTarget messageTarget,
-        DisplayUserSettingsHelper displayUserSettingsHelper,
-        EmailValidationKeyProvider emailValidationKeyProvider,
-        StudioSmsNotificationSettingsHelper studioSmsNotificationSettingsHelper,
-        TfaAppAuthSettingsHelper tfaAppAuthSettingsHelper,
-        IMapper mapper,
-        IHttpContextAccessor httpContextAccessor,
-        QuotaHelper quotaHelper,
-        IEventBus eventBus,
-        CspSettingsHelper cspSettingsHelper)
+    SecurityContext securityContext,
+    SettingsManager settingsManager,
+    IMobileAppInstallRegistrator mobileAppInstallRegistrator,
+    TenantExtra tenantExtra,
+    IConfiguration configuration,
+    CoreBaseSettings coreBaseSettings,
+    LicenseReader licenseReader,
+    SetupInfo setupInfo,
+    DocumentServiceLicense documentServiceLicense,
+    IHttpClientFactory clientFactory,
+    ApiSystemHelper apiSystemHelper,
+    CoreSettings coreSettings,
+    PermissionContext permissionContext,
+    StudioNotifyService studioNotifyService,
+    MessageService messageService,
+    DisplayUserSettingsHelper displayUserSettingsHelper,
+    EmailValidationKeyProvider emailValidationKeyProvider,
+    StudioSmsNotificationSettingsHelper studioSmsNotificationSettingsHelper,
+    TfaAppAuthSettingsHelper tfaAppAuthSettingsHelper,
+    IMapper mapper,
+    IHttpContextAccessor httpContextAccessor,
+    QuotaHelper quotaHelper,
+    IEventBus eventBus,
+    CspSettingsHelper cspSettingsHelper)
     : ControllerBase
 {
     /// <summary>
@@ -448,6 +448,7 @@ public class PortalController(ILogger<PortalController> logger,
         var oldAlias = tenant.Alias;
         var oldVirtualRootPath = commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/');
 
+        var massageDate = DateTime.UtcNow;
         if (!string.Equals(newAlias, oldAlias, StringComparison.InvariantCultureIgnoreCase))
         {
             if (!string.IsNullOrEmpty(apiSystemHelper.ApiSystemUrl))
@@ -463,8 +464,8 @@ public class PortalController(ILogger<PortalController> logger,
             tenant.Alias = alias;
             tenant = await tenantManager.SaveTenantAsync(tenant);
             tenantManager.SetCurrentTenant(tenant);
-
-            await messageService.SendAsync(MessageAction.PortalRenamed, messageTarget.Create(tenant.Id), oldAlias, newAlias);
+            
+            await messageService.SendAsync(MessageAction.PortalRenamed, MessageTarget.Create(tenant.Id), oldAlias, newAlias, dateTime: massageDate);
             await cspSettingsHelper.RenameDomain(oldDomain, tenant.GetTenantDomain(coreSettings));
 
             if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
@@ -488,8 +489,8 @@ public class PortalController(ILogger<PortalController> logger,
                                 Uri.SchemeDelimiter,
                                 tenant.GetTenantDomain(coreSettings),
                                 rewriter != null && !rewriter.IsDefaultPort ? $":{rewriter.Port}" : "",
-                                commonLinkUtility.GetConfirmationUrlRelative(tenant.Id, user.Email, ConfirmType.Auth)
-        );
+                                commonLinkUtility.GetConfirmationUrlRelative(tenant.Id, user.Email, ConfirmType.Auth, massageDate.ToString(CultureInfo.InvariantCulture))
+               );
 
         cookiesManager.ClearCookies(CookiesType.AuthKey);
         cookiesManager.ClearCookies(CookiesType.SocketIO);
@@ -532,6 +533,7 @@ public class PortalController(ILogger<PortalController> logger,
         }
         finally
         {
+            eventBus.Publish(new RemovePortalIntegrationEvent(securityContext.CurrentAccount.ID, tenant.Id));
             securityContext.Logout();
         }
     }
@@ -559,9 +561,9 @@ public class PortalController(ILogger<PortalController> logger,
         var suspendUrl = await commonLinkUtility.GetConfirmationEmailUrlAsync(owner.Email, ConfirmType.PortalSuspend);
         var continueUrl = await commonLinkUtility.GetConfirmationEmailUrlAsync(owner.Email, ConfirmType.PortalContinue);
 
-        await studioNotifyService.SendMsgPortalDeactivationAsync(tenant, suspendUrl, continueUrl);
+        await studioNotifyService.SendMsgPortalDeactivationAsync(tenant, await urlShortener.GetShortenLinkAsync(suspendUrl), await urlShortener.GetShortenLinkAsync(continueUrl));
 
-        await messageService.SendAsync(MessageAction.OwnerSentPortalDeactivationInstructions, messageTarget.Create(owner.Id), owner.DisplayUserName(false, displayUserSettingsHelper));
+        await messageService.SendAsync(MessageAction.OwnerSentPortalDeactivationInstructions, MessageTarget.Create(owner.Id), owner.DisplayUserName(false, displayUserSettingsHelper));
     }
 
     /// <summary>
@@ -589,7 +591,9 @@ public class PortalController(ILogger<PortalController> logger,
                         (await tariffService.GetPaymentsAsync(tenant.Id)).Any() &&
                         !(await tenantManager.GetCurrentTenantQuotaAsync()).Trial;
 
-        await studioNotifyService.SendMsgPortalDeletionAsync(tenant, await commonLinkUtility.GetConfirmationEmailUrlAsync(owner.Email, ConfirmType.PortalRemove), showAutoRenewText);
+        var confirmLink = await commonLinkUtility.GetConfirmationEmailUrlAsync(owner.Email, ConfirmType.PortalRemove);
+            
+        await studioNotifyService.SendMsgPortalDeletionAsync(tenant, await urlShortener.GetShortenLinkAsync(confirmLink), showAutoRenewText);
     }
 
     /// <summary>
@@ -664,26 +668,11 @@ public class PortalController(ILogger<PortalController> logger,
 
         redirectLink += HttpUtility.UrlEncode(parameters);
 
-        var authed = false;
-        try
-        {
-            if (!securityContext.IsAuthenticated)
-            {
-                await securityContext.AuthenticateMeAsync(ASC.Core.Configuration.Constants.CoreSystem);
-                authed = true;
-            }
-        }
-        finally
-        {
-            if (authed)
-            {
-                securityContext.Logout();
-            }
-        }
+        await studioNotifyService.SendMsgPortalDeletionSuccessAsync(owner, redirectLink);
+
+        await messageService.SendAsync(MessageAction.PortalDeleted);
 
         eventBus.Publish(new RemovePortalIntegrationEvent(securityContext.CurrentAccount.ID, tenant.Id));
-
-        await studioNotifyService.SendMsgPortalDeletionSuccessAsync(owner, redirectLink);
 
         return redirectLink;
     }

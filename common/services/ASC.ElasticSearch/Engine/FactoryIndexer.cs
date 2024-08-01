@@ -51,10 +51,10 @@ public interface IFactoryIndexer
     string SettingsTitle { get; }
     Task IndexAllAsync();
     Task ReIndexAsync();
+    Task DeleteAsync(int tenantId, bool immediately = true);
 }
 
-[Scope]
-public class FactoryIndexer<T>(ILoggerProvider options,
+public abstract class FactoryIndexer<T>(ILoggerProvider options,
         TenantManager tenantManager,
         SearchSettingsHelper searchSettingsHelper,
         FactoryIndexer factoryIndexer,
@@ -64,15 +64,13 @@ public class FactoryIndexer<T>(ILoggerProvider options,
     : IFactoryIndexer
     where T : class, ISearchItem
 {
-    public ILogger Logger { get; } = options.CreateLogger("ASC.Indexer");
+    protected ILogger Logger { get; } = options.CreateLogger("ASC.Indexer");
     public string IndexName { get => _indexer.IndexName; }
     public virtual string SettingsTitle => string.Empty;
 
-    protected readonly TenantManager _tenantManager = tenantManager;
     protected readonly BaseIndexer<T> _indexer = baseIndexer;
 
-    private static readonly TaskScheduler _scheduler
-        = new ConcurrentExclusiveSchedulerPair(TaskScheduler.Default, 10).ConcurrentScheduler;
+    private static readonly TaskScheduler _scheduler = new ConcurrentExclusiveSchedulerPair(TaskScheduler.Default, 10).ConcurrentScheduler;
 
     public async Task<(bool, IReadOnlyCollection<T>)> TrySelectAsync(Expression<Func<Selector<T>, Selector<T>>> expression)
     {
@@ -320,7 +318,7 @@ public class FactoryIndexer<T>(ILoggerProvider options,
 
         try
         {
-            var tenant = await _tenantManager.GetCurrentTenantIdAsync();
+            var tenant = await tenantManager.GetCurrentTenantIdAsync();
             _indexer.Update(data, expression, tenant, immediately, fields);
         }
         catch (Exception e)
@@ -339,7 +337,7 @@ public class FactoryIndexer<T>(ILoggerProvider options,
 
         try
         {
-            var tenant = await _tenantManager.GetCurrentTenantIdAsync();
+            var tenant = await tenantManager.GetCurrentTenantIdAsync();
             _indexer.Update(data, expression, tenant, action, fields, immediately);
         }
         catch (Exception e)
@@ -404,9 +402,20 @@ public class FactoryIndexer<T>(ILoggerProvider options,
             return false;
         }
 
-        var tenant = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenant = await tenantManager.GetCurrentTenantIdAsync();
 
         return await QueueAsync(() => _indexer.Delete(expression, tenant, immediately));
+    }
+
+    public async Task DeleteAsync(int tenantId, bool immediately = true)
+    {
+        var t = serviceProvider.GetService<T>();
+        if (!await SupportAsync(t))
+        {
+            return;
+        }
+        
+        await QueueAsync(() => _indexer.Delete(r => r, tenantId, immediately));
     }
 
     public void Flush()

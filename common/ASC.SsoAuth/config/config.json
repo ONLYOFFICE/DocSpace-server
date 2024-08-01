@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "Onlyoffice Single Sign-On handler",
+    "name": "ONLYOFFICE Single Sign-On handler",
     "port": 9834,
     "appsettings": "../../../../buildtools/config",
     "machinekey": "1123askdasjklasbnd",
@@ -13,7 +13,7 @@
     },
     "organization": {
       "name": "Ascensio System SIA",
-      "displayName": "Onlyoffice",
+      "displayName": "ONLYOFFICE",
       "url": "http://www.onlyoffice.com",
       "lang": "en-US"
     },

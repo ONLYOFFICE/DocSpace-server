@@ -38,42 +38,40 @@ namespace ASC.Web.Api.Controllers;
 [ApiController]
 [AllowAnonymous]
 [WebhookDisable]
-public class AuthenticationController(UserManager userManager,
-        TenantManager tenantManager,
-        SecurityContext securityContext,
-        TenantCookieSettingsHelper tenantCookieSettingsHelper,
-        CookiesManager cookiesManager,
-        PasswordHasher passwordHasher,
-        EmailValidationKeyModelHelper emailValidationKeyModelHelper,
-        SetupInfo setupInfo,
-        MessageService messageService,
-        ProviderManager providerManager,
-        AccountLinker accountLinker,
-        CoreBaseSettings coreBaseSettings,
-        StudioNotifyService studioNotifyService,
-        UserManagerWrapper userManagerWrapper,
-        UserHelpTourHelper userHelpTourHelper,
-        Signature signature,
-        DisplayUserSettingsHelper displayUserSettingsHelper,
-        MessageTarget messageTarget,
-        StudioSmsNotificationSettingsHelper studioSmsNotificationSettingsHelper,
-        SettingsManager settingsManager,
-        SmsManager smsManager,
-        TfaManager tfaManager,
-        TimeZoneConverter timeZoneConverter,
-        SmsKeyStorage smsKeyStorage,
-        CommonLinkUtility commonLinkUtility,
-        ApiContext apiContext,
-        AuthContext authContext,
-        CookieStorage cookieStorage,
-        DbLoginEventsManager dbLoginEventsManager,
-        BruteForceLoginManager bruteForceLoginManager,
-        TfaAppAuthSettingsHelper tfaAppAuthSettingsHelper,
-        EmailValidationKeyProvider emailValidationKeyProvider,
-        ILogger<AuthenticationController> logger,
-        InvitationLinkService invitationLinkService,
-        LoginProfileTransport loginProfileTransport,
-        IMapper mapper)
+public class AuthenticationController(
+    UserManager userManager,
+    LdapUserManager ldapUserManager,
+    TenantManager tenantManager,
+    SecurityContext securityContext,
+    TenantCookieSettingsHelper tenantCookieSettingsHelper,
+    CookiesManager cookiesManager,
+    PasswordHasher passwordHasher,
+    EmailValidationKeyModelHelper emailValidationKeyModelHelper,
+    SetupInfo setupInfo,
+    MessageService messageService,
+    ProviderManager providerManager,
+    AccountLinker accountLinker,
+    CoreBaseSettings coreBaseSettings,
+    UserManagerWrapper userManagerWrapper,
+    Signature signature,
+    DisplayUserSettingsHelper displayUserSettingsHelper,
+    StudioSmsNotificationSettingsHelper studioSmsNotificationSettingsHelper,
+    SettingsManager settingsManager,
+    SmsManager smsManager,
+    TfaManager tfaManager,
+    TimeZoneConverter timeZoneConverter,
+    SmsKeyStorage smsKeyStorage,
+    CommonLinkUtility commonLinkUtility,
+    ApiContext apiContext,
+    AuthContext authContext,
+    CookieStorage cookieStorage,
+    DbLoginEventsManager dbLoginEventsManager,
+    BruteForceLoginManager bruteForceLoginManager,
+    TfaAppAuthSettingsHelper tfaAppAuthSettingsHelper,
+    ILogger<AuthenticationController> logger,
+    InvitationService invitationService,
+    LoginProfileTransport loginProfileTransport,
+    IMapper mapper)
     : ControllerBase
 {
     /// <summary>
@@ -121,7 +119,7 @@ public class AuthenticationController(UserManager userManager,
             {
                 if (await tfaManager.ValidateAuthCodeAsync(user, inDto.Code, true, true))
                 {
-                    await messageService.SendAsync(MessageAction.UserConnectedTfaApp, messageTarget.Create(user.Id));
+                    await messageService.SendAsync(MessageAction.UserConnectedTfaApp, MessageTarget.Create(user.Id));
                 }
             }
             else
@@ -155,7 +153,7 @@ public class AuthenticationController(UserManager userManager,
             await messageService.SendAsync(user.DisplayUserName(false, displayUserSettingsHelper), sms
                                                                           ? MessageAction.LoginFailViaApiSms
                                                                           : MessageAction.LoginFailViaApiTfa,
-                                messageTarget.Create(user.Id));
+                                MessageTarget.Create(user.Id));
             logger.ErrorWithException(ex);
             throw new AuthenticationException("User authentication failed");
         }
@@ -185,9 +183,14 @@ public class AuthenticationController(UserManager userManager,
         var user = wrapper.UserInfo;
         var session = inDto.Session;
 
-        if (user == null || Equals(user, Constants.LostUser) || user.Status != EmployeeStatus.Active)
+        if (user == null || Equals(user, Constants.LostUser))
         {
             throw new Exception(Resource.ErrorUserNotFound);
+        }
+
+        if (user.Status != EmployeeStatus.Active)
+        {
+            throw new Exception(Resource.ErrorUserDisabled);
         }
 
         if (await studioSmsNotificationSettingsHelper.IsVisibleAndAvailableSettingsAsync() && await studioSmsNotificationSettingsHelper.TfaEnabledForUserAsync(user.Id))
@@ -239,6 +242,12 @@ public class AuthenticationController(UserManager userManager,
         {
             var action = viaEmail ? MessageAction.LoginSuccessViaApi : MessageAction.LoginSuccessViaApiSocialAccount;
             var token = await cookiesManager.AuthenticateMeAndSetCookiesAsync(user.Id, action, session);
+
+            if (!string.IsNullOrEmpty(inDto.Culture))
+            {
+                await userManager.ChangeUserCulture(user, inDto.Culture);
+                await messageService.SendAsync(MessageAction.UserUpdatedLanguage, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
+            }
 
             var outDto = new AuthenticationTokenDto
             {
@@ -341,7 +350,7 @@ public class AuthenticationController(UserManager userManager,
             return new ConfirmDto { Result = await emailValidationKeyModelHelper.ValidateAsync(inDto)};
         }
 
-        var result = await invitationLinkService.ValidateAsync(inDto.Key, inDto.Email, inDto.EmplType ?? default, inDto.RoomId);
+        var result = await invitationService.ConfirmAsync(inDto.Key, inDto.Email, inDto.EmplType ?? default, inDto.RoomId);
 
         return mapper.Map<Validation, ConfirmDto>(result);
     }
@@ -365,7 +374,7 @@ public class AuthenticationController(UserManager userManager,
         await apiContext.AuthByClaimAsync();
         var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
         inDto.MobilePhone = await smsManager.SaveMobilePhoneAsync(user, inDto.MobilePhone);
-        await messageService.SendAsync(MessageAction.UserUpdatedMobileNumber, messageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper), inDto.MobilePhone);
+        await messageService.SendAsync(MessageAction.UserUpdatedMobileNumber, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper), inDto.MobilePhone);
 
         return new AuthenticationTokenDto
         {
@@ -416,8 +425,8 @@ public class AuthenticationController(UserManager userManager,
             if (inDto.ConfirmData != null)
             {
                 var email = inDto.ConfirmData.Email;
-
-                var checkKeyResult = await emailValidationKeyProvider.ValidateEmailKeyAsync(email + ConfirmType.Auth + inDto.ConfirmData.First, inDto.ConfirmData.Key, setupInfo.ValidAuthKeyInterval);
+                    
+                var checkKeyResult = await emailValidationKeyModelHelper.ValidateAsync(new EmailValidationKeyModel { Key = inDto.ConfirmData.Key, Email = email, Type = ConfirmType.Auth, First = inDto.ConfirmData.First.ToString() });
 
                 if (checkKeyResult == ValidationResult.Ok)
                 {
@@ -456,12 +465,22 @@ public class AuthenticationController(UserManager userManager,
                         inDto.PasswordHash = passwordHasher.GetClientPassword(inDto.Password);
                     }
                 }
+                var ldapSettings = await settingsManager.LoadAsync<LdapSettings>();
 
-                user = await bruteForceLoginManager.AttemptAsync(inDto.UserName, inDto.RecaptchaResponse, async () => 
-                    await userManager.GetUsersByPasswordHashAsync(
-                    await tenantManager.GetCurrentTenantIdAsync(),
-                    inDto.UserName,
-                    inDto.PasswordHash));
+                user = await bruteForceLoginManager.AttemptAsync(inDto.UserName, inDto.RecaptchaType, inDto.RecaptchaResponse, async () =>
+                {
+                    if (ldapSettings.EnableLdapAuthentication && !string.IsNullOrEmpty(inDto.Password))
+                    {
+                        return await ldapUserManager.TryGetAndSyncLdapUserInfo(inDto.UserName, inDto.Password);
+                    }
+                    else
+                    {
+                        return await userManager.GetUsersByPasswordHashAsync(
+                         await tenantManager.GetCurrentTenantIdAsync(),
+                         inDto.UserName,
+                         inDto.PasswordHash);
+                    }
+                });
             }
             else
             {
@@ -477,7 +496,7 @@ public class AuthenticationController(UserManager userManager,
 
                 inDto.UserName = thirdPartyProfile.EMail;
                 
-                user = await bruteForceLoginManager.AttemptAsync(inDto.UserName, inDto.RecaptchaResponse, async () => await GetUserByThirdParty(thirdPartyProfile));
+                user = await bruteForceLoginManager.AttemptAsync(inDto.UserName, inDto.RecaptchaType, inDto.RecaptchaResponse, async () => await GetUserByThirdParty(thirdPartyProfile));
             }
         }
         catch (BruteForceCredentialException)
@@ -522,35 +541,35 @@ public class AuthenticationController(UserManager userManager,
                 userInfo = await userManager.GetUsersAsync(userId);
             }
 
-            var isNew = false;
-
-            if (isNew)
-            {
-                //TODO:
-                //var spam = HttpContext.Current.Request["spam"];
-                //if (spam != "on")
-                //{
-                //    try
-                //    {
-                //        const string _databaseID = "com";
-                //        using (var db = DbManager.FromHttpContext(_databaseID))
-                //        {
-                //            db.ExecuteNonQuery(new SqlInsert("template_unsubscribe", false)
-                //                                   .InColumnValue("email", userInfo.Email.ToLowerInvariant())
-                //                                   .InColumnValue("reason", "personal")
-                //                );
-                //            Log.Debug(string.Format("Write to template_unsubscribe {0}", userInfo.Email.ToLowerInvariant()));
-                //        }
-                //    }
-                //    catch (Exception ex)
-                //    {
-                //        Log.Debug(string.Format("ERROR write to template_unsubscribe {0}, email:{1}", ex.Message, userInfo.Email.ToLowerInvariant()));
-                //    }
-                //}
-
-                await studioNotifyService.UserHasJoinAsync();
-                await userHelpTourHelper.SetIsNewUser(true); 
-            }
+            // var isNew = false;
+            //
+            // if (isNew)
+            // {
+            //     //TODO:
+            //     //var spam = HttpContext.Current.Request["spam"];
+            //     //if (spam != "on")
+            //     //{
+            //     //    try
+            //     //    {
+            //     //        const string _databaseID = "com";
+            //     //        using (var db = DbManager.FromHttpContext(_databaseID))
+            //     //        {
+            //     //            db.ExecuteNonQuery(new SqlInsert("template_unsubscribe", false)
+            //     //                                   .InColumnValue("email", userInfo.Email.ToLowerInvariant())
+            //     //                                   .InColumnValue("reason", "personal")
+            //     //                );
+            //     //            Log.Debug(string.Format("Write to template_unsubscribe {0}", userInfo.Email.ToLowerInvariant()));
+            //     //        }
+            //     //    }
+            //     //    catch (Exception ex)
+            //     //    {
+            //     //        Log.Debug(string.Format("ERROR write to template_unsubscribe {0}, email:{1}", ex.Message, userInfo.Email.ToLowerInvariant()));
+            //     //    }
+            //     //}
+            //
+            //     await studioNotifyService.UserHasJoinAsync();
+            //     await userHelpTourHelper.SetIsNewUser(true); 
+            // }
 
             return userInfo;
         }
@@ -632,10 +651,14 @@ public class AuthenticationController(UserManager userManager,
         }
 
         var linkedProfiles = await accountLinker.GetLinkedObjectsByHashIdAsync(hashId);
-        var tmp = Guid.Empty;
-        if (linkedProfiles.Any(profileId => Guid.TryParse(profileId, out tmp) && userManager.UserExists(tmp)))
+        
+        foreach (var profileId in linkedProfiles)
         {
-            userId = tmp;
+            if (Guid.TryParse(profileId, out var tmp) && await userManager.UserExistsAsync(tmp))
+            {
+                userId = tmp;
+                break;
+            }
         }
 
         return (true, userId);

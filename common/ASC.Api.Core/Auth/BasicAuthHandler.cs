@@ -28,29 +28,15 @@ using SecurityContext = ASC.Core.SecurityContext;
 
 namespace ASC.Api.Core.Auth;
 
-[Scope]
-public class BasicAuthHandler(IOptionsMonitor<AuthenticationSchemeOptions> options,
-        ILoggerFactory logger,
-        UrlEncoder encoder)
+public class BasicAuthHandler(
+    IOptionsMonitor<AuthenticationSchemeOptions> options,
+    ILoggerFactory logger,
+    UrlEncoder encoder,
+    UserManager userManager,
+    SecurityContext securityContext,
+    PasswordHasher passwordHasher)
     : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
 {
-    private readonly UserManager _userManager;
-    private readonly SecurityContext _securityContext;
-    private readonly PasswordHasher _passwordHasher;
-
-    public BasicAuthHandler(
-      IOptionsMonitor<AuthenticationSchemeOptions> options,
-      ILoggerFactory logger,
-      UrlEncoder encoder,
-      UserManager userManager,
-      SecurityContext securityContext,
-      PasswordHasher passwordHasher) : this(options, logger, encoder)
-    {
-        _userManager = userManager;
-        _securityContext = securityContext;
-        _passwordHasher = passwordHasher;
-    }
-
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
         Response.Headers.Append("WWW-Authenticate", "Basic");
@@ -76,10 +62,10 @@ public class BasicAuthHandler(IOptionsMonitor<AuthenticationSchemeOptions> optio
 
         try
         {
-            var userInfo = await _userManager.GetUserByEmailAsync(authUsername);
-            var passwordHash = _passwordHasher.GetClientPassword(authPassword);
+            var userInfo = await userManager.GetUserByEmailAsync(authUsername);
+            var passwordHash = passwordHasher.GetClientPassword(authPassword);
 
-            await _securityContext.AuthenticateMeAsync(userInfo.Email, passwordHash);
+            await securityContext.AuthenticateMeAsync(userInfo.Email, passwordHash);
 
         }
         catch (Exception)

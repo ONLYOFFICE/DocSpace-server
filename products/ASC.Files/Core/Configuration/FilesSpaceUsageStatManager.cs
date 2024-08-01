@@ -26,7 +26,7 @@
 
 namespace ASC.Web.Files;
 
-[Scope(Additional = typeof(FilesSpaceUsageStatExtension))]
+[Scope]
 public class FilesSpaceUsageStatManager(IDbContextFactory<FilesDbContext> dbContextFactory,
         TenantManager tenantManager,
         UserManager userManager,
@@ -164,14 +164,6 @@ public class FilesSpaceUsageStatManager(IDbContextFactory<FilesDbContext> dbCont
     }
 }
 
-public static class FilesSpaceUsageStatExtension
-{
-    public static void Register(DIHelper services)
-    {
-        services.ServiceCollection.AddBaseDbContextPool<FilesDbContext>();
-    }
-}
-
 static file class Queries
 {
     public static readonly Func<FilesDbContext, int, Task<long>> SumPortalContentLengthAsync =
@@ -189,7 +181,7 @@ static file class Queries
                     .Join(ctx.BunchObjects, a => a.tree.ParentId.ToString(), b => b.LeftNode, (fileTree, bunch) => new { fileTree.file, fileTree.tree, bunch })
                     .Where(r => r.file.TenantId == r.bunch.TenantId)
                     .Where(r => r.file.TenantId == tenantId)
-                    .Where(r => r.bunch.RightNode.StartsWith("files/my/" + userId.ToString()) || r.bunch.RightNode.StartsWith("files/trash/" + userId.ToString()))
+                    .Where(r => r.bunch.RightNode.StartsWith("files/my/" + userId) || r.bunch.RightNode.StartsWith("files/trash/" + userId))
                     .Sum(r => r.file.ContentLength));
 
     public static readonly Func<FilesDbContext, int, Guid, Task<long>>

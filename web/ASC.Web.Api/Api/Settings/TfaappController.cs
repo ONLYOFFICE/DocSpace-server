@@ -28,28 +28,28 @@ using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Web.Api.Controllers.Settings;
 
-public class TfaappController(MessageService messageService,
-        StudioNotifyService studioNotifyService,
-        ApiContext apiContext,
-        UserManager userManager,
-        AuthContext authContext,
-        CookiesManager cookiesManager,
-        PermissionContext permissionContext,
-        SettingsManager settingsManager,
-        TfaManager tfaManager,
-        WebItemManager webItemManager,
-        CommonLinkUtility commonLinkUtility,
-        DisplayUserSettingsHelper displayUserSettingsHelper,
-        MessageTarget messageTarget,
-        StudioSmsNotificationSettingsHelper studioSmsNotificationSettingsHelper,
-        TfaAppAuthSettingsHelper tfaAppAuthSettingsHelper,
-        SmsProviderManager smsProviderManager,
-        IMemoryCache memoryCache,
-        InstanceCrypto instanceCrypto,
-        Signature signature,
-        SecurityContext securityContext,
-        IHttpContextAccessor httpContextAccessor,
-        TenantManager tenantManager)
+public class TfaappController(
+    MessageService messageService,
+    StudioNotifyService studioNotifyService,
+    ApiContext apiContext,
+    UserManager userManager,
+    AuthContext authContext,
+    CookiesManager cookiesManager,
+    PermissionContext permissionContext,
+    SettingsManager settingsManager,
+    TfaManager tfaManager,
+    WebItemManager webItemManager,
+    CommonLinkUtility commonLinkUtility,
+    DisplayUserSettingsHelper displayUserSettingsHelper,
+    StudioSmsNotificationSettingsHelper studioSmsNotificationSettingsHelper,
+    TfaAppAuthSettingsHelper tfaAppAuthSettingsHelper,
+    SmsProviderManager smsProviderManager,
+    IMemoryCache memoryCache,
+    InstanceCrypto instanceCrypto,
+    Signature signature,
+    SecurityContext securityContext,
+    IHttpContextAccessor httpContextAccessor,
+    TenantManager tenantManager)
     : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
@@ -371,7 +371,7 @@ public class TfaappController(MessageService messageService,
         }
 
         var codes = (await tfaManager.GenerateBackupCodesAsync()).Select(r => new { r.IsUsed, Code = r.GetEncryptedCode(instanceCrypto, signature) }).ToList();
-        await messageService.SendAsync(MessageAction.UserConnectedTfaApp, messageTarget.Create(currentUser.Id), currentUser.DisplayUserName(false, displayUserSettingsHelper));
+        await messageService.SendAsync(MessageAction.UserConnectedTfaApp, MessageTarget.Create(currentUser.Id), currentUser.DisplayUserName(false, displayUserSettingsHelper));
         return codes;
     }
 
@@ -414,7 +414,7 @@ public class TfaappController(MessageService messageService,
         }
 
         await TfaAppUserSettings.DisableForUserAsync(settingsManager, user.Id);
-        await messageService.SendAsync(MessageAction.UserDisconnectedTfaApp, messageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
+        await messageService.SendAsync(MessageAction.UserDisconnectedTfaApp, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
 
         await cookiesManager.ResetUserCookieAsync(user.Id);
         if (isMe)

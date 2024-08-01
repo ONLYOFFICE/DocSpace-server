@@ -185,7 +185,7 @@
     <value>Dokumenti</value>
   </data>
   <data name="ProductUserOpportunities" xml:space="preserve">
-    <value>Svoje dokumente ustvarjajte in urejajte ter deljene dokumente s ustreznimi pravicami dostopa|Drugim uporabnikom dajte pravice branja/urejanja za dokumente in mape|Povežite Dropbox, Box in druge račune v oddelku 'Moji Dokumenti'</value>
+    <value>Svoje dokumente ustvarjajte in urejajte ter deljene dokumente s ustreznimi pravicami dostopa|Drugim uporabnikom dajte pravice branja/urejanja za dokumente in mape|Povežite Dropbox, Box in druge račune v oddelku 'Dokumenti'</value>
   </data>
   <data name="UnknownFirstName" xml:space="preserve">
     <value>Ime</value>
@@ -463,5 +463,17 @@ Najvišja združljivost z docx, xlsx, pptx.</value>
   </data>
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>Tip</value>
+  </data>
+  <data name="Date" xml:space="preserve">
+    <value>Datum</value>
+  </data>
+  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
+    <value>Napredni uporabnik</value>
+  </data>
+  <data name="RoleEnum_PowerUser" xml:space="preserve">
+    <value>Napredni uporabnik</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>Uporabnik</value>
   </data>
 </root>

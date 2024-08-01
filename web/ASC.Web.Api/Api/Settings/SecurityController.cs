@@ -27,26 +27,27 @@
 namespace ASC.Web.Api.Controllers.Settings;
 
 [DefaultRoute("security")]
-public class SecurityController(TenantManager tenantManager,
-        TenantExtra tenantExtra,
-        CoreBaseSettings coreBaseSettings,
-        MessageService messageService,
-        ApiContext apiContext,
-        UserManager userManager,
-        AuthContext authContext,
-        WebItemSecurity webItemSecurity,
-        PermissionContext permissionContext,
-        SettingsManager settingsManager,
-        WebItemManager webItemManager,
-        WebItemManagerSecurity webItemManagerSecurity,
-        DisplayUserSettingsHelper displayUserSettingsHelper,
-        EmployeeDtoHelper employeeWrapperHelper,
-        MessageTarget messageTarget,
-        IMemoryCache memoryCache,
-        IMapper mapper,
-        IHttpContextAccessor httpContextAccessor,
-        PasswordSettingsConverter passwordSettingsConverter,
-        PasswordSettingsManager passwordSettingsManager)
+public class SecurityController(
+    GroupSummaryDtoHelper groupSummaryDtoHelper,
+    TenantManager tenantManager,
+    TenantExtra tenantExtra,
+    CoreBaseSettings coreBaseSettings,
+    MessageService messageService,
+    ApiContext apiContext,
+    UserManager userManager,
+    AuthContext authContext,
+    WebItemSecurity webItemSecurity,
+    PermissionContext permissionContext,
+    SettingsManager settingsManager,
+    WebItemManager webItemManager,
+    WebItemManagerSecurity webItemManagerSecurity,
+    DisplayUserSettingsHelper displayUserSettingsHelper,
+    EmployeeDtoHelper employeeWrapperHelper,
+    IMemoryCache memoryCache,
+    IMapper mapper,
+    IHttpContextAccessor httpContextAccessor,
+    PasswordSettingsConverter passwordSettingsConverter,
+    PasswordSettingsManager passwordSettingsManager)
     : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
@@ -79,12 +80,16 @@ public class SecurityController(TenantManager tenantManager,
             {
                 WebItemId = i.WebItemId,
                 Enabled = i.Enabled,
-                Groups = i.Groups.Select(g => new GroupSummaryDto(g, userManager)),
-                IsSubItem = subItemList.Contains(i.WebItemId)
+                Groups = [],
+                IsSubItem = subItemList.Contains(i.WebItemId),
+                Users = []
             };
 
-            s.Users = new List<EmployeeDto>();
-
+            foreach (var e in i.Groups)
+            {
+                s.Groups.Add(await groupSummaryDtoHelper.GetAsync(e));
+            }
+            
             foreach (var e in i.Users)
             {
                 s.Users.Add(await employeeWrapperHelper.GetAsync(e));
@@ -371,7 +376,7 @@ public class SecurityController(TenantManager tenantManager,
             var messageAction = inDto.Administrator
                 ? MessageAction.AdministratorOpenedFullAccess
                 : MessageAction.AdministratorDeleted;
-            await messageService.SendAsync(messageAction, messageTarget.Create(admin.Id),
+            await messageService.SendAsync(messageAction, MessageTarget.Create(admin.Id),
                 admin.DisplayUserName(false, displayUserSettingsHelper));
         }
         else
@@ -379,7 +384,7 @@ public class SecurityController(TenantManager tenantManager,
             var messageAction = inDto.Administrator
                 ? MessageAction.ProductAddedAdministrator
                 : MessageAction.ProductDeletedAdministrator;
-            await messageService.SendAsync(messageAction, messageTarget.Create(admin.Id),
+            await messageService.SendAsync(messageAction, MessageTarget.Create(admin.Id),
                 GetProductName(inDto.ProductId), admin.DisplayUserName(false, displayUserSettingsHelper));
         }
 

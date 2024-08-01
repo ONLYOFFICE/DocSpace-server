@@ -33,7 +33,6 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
     StudioNotifyHelper studioNotifyHelper,
     UserManager userManager,
     SecurityContext securityContext,
-    AuthManager authManager,
     CoreSettings coreSettings,
     IConfiguration configuration,
     WorkContext workContext,
@@ -90,11 +89,9 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
     {
         return whatsNewType switch
         {
-            WhatsNewType.DailyFeed => await auditEventsRepository.GetTenantsAsync(date.Date.AddDays(-1),
-                date.Date.AddSeconds(-1)),
-            WhatsNewType.RoomsActivity => await auditEventsRepository.GetTenantsAsync(date.AddHours(-1),
-                date.AddSeconds(-1)),
-            _ => Enumerable.Empty<int>()
+            WhatsNewType.DailyFeed => await auditEventsRepository.GetTenantsAsync(date.Date.AddDays(-1), date.Date.AddSeconds(-1)),
+            WhatsNewType.RoomsActivity => await auditEventsRepository.GetTenantsAsync(date.AddHours(-1), date.AddSeconds(-1)),
+            _ => []
         };
     }
 
@@ -131,7 +128,7 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
 
                 _log.Debug($"SendMsgWhatsNew checking subscription complete: {user.Email}");//temp
 
-                await securityContext.AuthenticateMeWithoutCookieAsync(await authManager.GetAccountByIDAsync(tenant.Id, user.Id));
+                await securityContext.AuthenticateMeWithoutCookieAsync(tenant.Id, user.Id);
 
                 var culture = string.IsNullOrEmpty(user.CultureName) ? tenant.GetCulture() : user.GetCulture();
 
@@ -159,11 +156,13 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
 
                 _log.Debug($"SendMsgWhatsNew userActivities count : {userActivities.Count}");//temp
 
+                var action = whatsNewType == WhatsNewType.RoomsActivity ? Actions.RoomsActivity : Actions.SendWhatsNew;
+
                 if (userActivities.Any())
                 {
                     _log.InformationSendWhatsNewTo(user.Email);
                     await client.SendNoticeAsync(
-                        Actions.SendWhatsNew, null, user,
+                        action, null, user,
                         new TagValue(Tags.Activities, userActivities),
                         new TagValue(Tags.Date, DateToString(scheduleDate, whatsNewType, culture)),
                         new TagValue(CommonTags.Priority, 1)
