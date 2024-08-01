@@ -366,7 +366,7 @@ public class GroupController(
     private async Task<GroupInfo> GetGroupInfoAsync(Guid id)
     {
         var group = await userManager.GetGroupInfoAsync(id);
-        if (group == null || group.ID == Constants.LostGroupInfo.ID)
+        if (group == null || group.Removed || group.ID == Constants.LostGroupInfo.ID)
         {
             throw new ItemNotFoundException("group not found");
         }
