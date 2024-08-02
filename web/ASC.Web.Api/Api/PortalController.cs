@@ -129,7 +129,7 @@ public class PortalController(
             return string.Empty;
         }
 
-        var link = await commonLinkUtility.GetConfirmationEmailUrlAsync(string.Empty, ConfirmType.LinkInvite, (int)employeeType, authContext.CurrentAccount.ID)
+        var link = await commonLinkUtility.GetConfirmationEmailUrlAsync(string.Empty, ConfirmType.LinkInvite, (int)employeeType + authContext.CurrentAccount.ID.ToString(), authContext.CurrentAccount.ID)
                 + $"&emplType={employeeType:d}";
 
         return await urlShortener.GetShortenLinkAsync(link);

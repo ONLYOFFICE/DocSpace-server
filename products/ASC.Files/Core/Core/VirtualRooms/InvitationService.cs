@@ -47,7 +47,7 @@ public class InvitationService(
 {
     public string GetInvitationLink(Guid linkId, Guid createdBy)
     {
-        var key = invitationValidator.MakeIndividualLinkKey(linkId);
+        var key = invitationValidator.MakeIndividualLinkKey(linkId, createdBy);
         return commonLinkUtility.GetConfirmationUrl(key, ConfirmType.LinkInvite, createdBy);
     }
 
@@ -58,14 +58,14 @@ public class InvitationService(
         return link;
     }
     
-    public async Task<Validation> ConfirmAsync(string key, string email, EmployeeType employeeType, string roomId = null)
+    public async Task<Validation> ConfirmAsync(string key, string email, EmployeeType employeeType, string roomId = null, Guid? userId = default)
     {
         if (!await iPSecurity.VerifyAsync())
         {
             throw new SecurityException();
         }
 
-        var data = await GetLinkDataAsync(key, email, employeeType);
+        var data = await GetLinkDataAsync(key, email, employeeType, userId);
         var validation = new Validation { Result = data.Result };
         
         if (data.Result is EmailValidationKeyProvider.ValidationResult.Invalid or EmailValidationKeyProvider.ValidationResult.Expired)
@@ -207,9 +207,9 @@ public class InvitationService(
         return data;
     }
 
-    private async Task<InvitationLinkData> GetLinkDataAsync(string key, string email, EmployeeType employeeType = EmployeeType.All)
+    private async Task<InvitationLinkData> GetLinkDataAsync(string key, string email, EmployeeType employeeType = EmployeeType.All, Guid? userId = default)
     {
-        var result = await invitationValidator.ValidateAsync(key, email, employeeType);
+        var result = await invitationValidator.ValidateAsync(key, email, employeeType, userId);
         var data = new InvitationLinkData
         {
             Result = result.Status, 
