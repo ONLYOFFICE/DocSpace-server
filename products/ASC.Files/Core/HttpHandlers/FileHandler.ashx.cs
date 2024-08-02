@@ -266,9 +266,12 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             }
 
             if (!await fileSecurity.CanDownloadAsync(file))
-            {
-                context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
-                return;
+            {                
+                if (!(fileUtility.CanImageView(file.Title) || fileUtility.CanMediaView(file.Title)))
+                {
+                    context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+                    return;
+                }
             }
 
             if (!string.IsNullOrEmpty(file.Error))
@@ -970,7 +973,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
     }
 
     private async Task ThumbnailFile(HttpContext context, int id, bool force)
-    {
+    {                
         IFileDao<int> fileDao = null;
         File<int> file = null;
         try

@@ -848,7 +848,8 @@ public class UserManager(
             ID = group.Id,
             CategoryID = group.CategoryId,
             Name = group.Name,
-            Sid = group.Sid
+            Sid = group.Sid,
+            Removed = group.Removed
         };
     }
 
@@ -992,7 +993,8 @@ public class UserManager(
             Name = g.Name,
             ParentId = g.Parent?.ID ?? Guid.Empty,
             CategoryId = g.CategoryID,
-            Sid = g.Sid
+            Sid = g.Sid,
+            Removed = g.Removed
         };
     }
 
