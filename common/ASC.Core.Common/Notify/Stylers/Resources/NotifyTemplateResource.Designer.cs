@@ -114,10 +114,10 @@ namespace ASC.Core.Common.Notify.Stylers.Resources {
         /// <summary>
         ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;
         ///    &lt;td class=&quot;fol&quot; style=&quot;color: #666666; font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; margin: 0; padding: 40px 0 8px; vertical-align: top;&quot;&gt;
-        ///        For any purchase questions, email us at &lt;a style=&quot;color: #FF6F3D; text-decoration: underline;&quot; target=&quot;_blank&quot; href=&quot;mailto:sales@onlyoffice.com&quot;&gt;sales@onlyoffice.com&lt;/a&gt;.
+        ///        For any purchase questions, email us at &lt;a style=&quot;color: #FF6F3D; text-decoration: underline;&quot; target=&quot;_blank&quot; href=&quot;mailto:%SALESEMAIL%&quot;&gt;%SALESEMAIL%&lt;/a&gt;.
         ///    &lt;/td&gt;
         ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;
-        ///    &lt;td class=&quot;fol&quot; sty [rest of string was truncated]&quot;;.
+        ///    &lt;td class=&quot;fol&quot; style=&quot;color: #6666 [rest of string was truncated]&quot;;.
         /// </summary>
         public static string TextForFooterUnsubsribe {
             get {

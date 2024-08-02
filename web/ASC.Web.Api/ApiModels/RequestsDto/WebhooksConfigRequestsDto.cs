@@ -38,6 +38,7 @@ public class WebhooksConfigRequestsDto
 
     /// <summary>Name</summary>
     /// <type>System.String, System</type>
+    [StringLength(50)]
     public string Name { get; set; }
 
     /// <summary>URI</summary>

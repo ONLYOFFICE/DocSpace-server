@@ -84,7 +84,12 @@ public class FileSharingAceHelper(
             }
 
             var emailInvite = !string.IsNullOrEmpty(w.Email);
-            var currentUserType = await userManager.GetUserTypeAsync(w.Id);
+            var currentUser = await userManager.GetUsersAsync(w.Id);
+            if (currentUser.Status == EmployeeStatus.Terminated && w.Access != FileShare.None)
+            {
+                continue;
+            }
+            var currentUserType = await userManager.GetUserTypeAsync(currentUser);
             var userType = EmployeeType.User;
             var existedShare = shares.Get(w.Id);
             var eventType = existedShare != null ? w.Access == FileShare.None ? EventType.Remove : EventType.Update : EventType.Create;
@@ -97,6 +102,11 @@ public class FileSharingAceHelper(
             if (existedShare == null && w.SubjectType == default)
             {
                 var group = await userManager.GetGroupInfoAsync(w.Id);
+
+                if (group.Removed)
+                {
+                    continue;
+                }
 
                 if (group.ID != Constants.LostGroupInfo.ID)
                 {
