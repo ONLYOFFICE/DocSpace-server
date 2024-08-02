@@ -40,10 +40,8 @@ public class EditorControllerInternal(FileStorageService fileStorageService,
         AuthContext authContext,
         ConfigurationConverter<int> configurationConverter,
         IDaoFactory daoFactory,
-        FileMarker fileMarker,
-        SocketManager socketManager,
         SecurityContext securityContext)
-        : EditorController<int>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, daoFactory, fileMarker, socketManager, securityContext);
+        : EditorController<int>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, daoFactory, securityContext);
 
 [DefaultRoute("file")]
 public class EditorControllerThirdparty(FileStorageService fileStorageService,
@@ -58,10 +56,8 @@ public class EditorControllerThirdparty(FileStorageService fileStorageService,
         AuthContext authContext,
         ConfigurationConverter<string> configurationConverter,
         IDaoFactory daoFactory,
-        FileMarker fileMarker,
-        SocketManager socketManager,
         SecurityContext securityContext)
-        : EditorController<string>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, daoFactory, fileMarker, socketManager, securityContext);
+        : EditorController<string>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, daoFactory, securityContext);
 
 public abstract class EditorController<T>(FileStorageService fileStorageService,
         DocumentServiceHelper documentServiceHelper,
@@ -75,8 +71,6 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
         AuthContext authContext,
         ConfigurationConverter<T> configurationConverter,
         IDaoFactory daoFactory,
-        FileMarker fileMarker,
-        SocketManager socketManager,
         SecurityContext securityContext)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
@@ -236,10 +230,6 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                                 canEdit = false;
                                 canFill = true;
                                 editorType = EditorType.Embedded;
-
-                                await fileMarker.MarkAsNewAsync(formDraft);
-                                await socketManager.CreateFileAsync(formDraft);
-                                await socketManager.UpdateFileAsync(file);
 
                                 file = formDraft;
                                 fillingSessionId = Guid.NewGuid().ToString("N");

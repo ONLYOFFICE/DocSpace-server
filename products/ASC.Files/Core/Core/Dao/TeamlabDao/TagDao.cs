@@ -612,7 +612,7 @@ internal abstract class BaseTagDao<T>(
     }
     private string GetCacheKey(Tag tag, int tenantId)
     {
-        return string.Join("/", tenantId.ToString(), tag.Owner.ToString(), tag.Name, ((int)tag.Type).ToString(CultureInfo.InvariantCulture));
+        return string.Join("/", tenantId.ToString(), tag.Owner.ToString(), tag.Name, ((int)tag.Type).ToString(CultureInfo.InvariantCulture), tag.EntryId, tag.EntryType);
     }
 
     private static string GetLockKey(int tenantId)

@@ -1237,9 +1237,11 @@ public class EntryManager(IDaoFactory daoFactory,
                     await fileDao.SaveProperties(linkedFile.Id, prop);
                 }
 
-                await fileMarker.MarkAsNewAsync(linkedFile);
+                var aces = await fileSharing.GetSharedInfoAsync(folderIfNew);
+                var users = aces.Where(ace => ace is not { Access: FileShare.FillForms }).Select(ace => ace.Id).ToList();
 
-                await socketManager.CreateFileAsync(linkedFile);
+                await fileMarker.MarkAsNewAsync(linkedFile, users);
+                await socketManager.CreateFileAsync(linkedFile, users);
 
                 if (!securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))
                 {
@@ -1402,7 +1404,8 @@ public class EntryManager(IDaoFactory daoFactory,
 
         if (file.ProviderEntry && !newExtension.Equals(currentExt))
         {
-            if ((await fileUtility.GetExtsConvertibleAsync()).ContainsKey(newExtension) && (await fileUtility.GetExtsConvertibleAsync())[newExtension].Contains(currentExt))
+            var extsConvertibleAsync = await fileUtility.GetExtsConvertibleAsync();
+            if (extsConvertibleAsync.TryGetValue(newExtension, out var value) && value.Contains(currentExt))
             {
                 if (stream != null)
                 {
@@ -1548,8 +1551,11 @@ public class EntryManager(IDaoFactory daoFactory,
 
                             await fileDao.SaveProperties(result.Id, resProp);
 
-                            await fileMarker.MarkAsNewAsync(result);
-                            await socketManager.CreateFileAsync(result);
+                            var aces = await fileSharing.GetSharedInfoAsync(room);
+                            var users = aces.Where(ace => ace is not { Access: FileShare.FillForms }).Select(ace => ace.Id).ToList();
+
+                            await fileMarker.MarkAsNewAsync(result, users);
+                            await socketManager.CreateFileAsync(result, users);
 
                             var resultUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, result.Title, result.Id, result.Version)));
                             await formFillingReportCreator.UpdateFormFillingReport(properties.FormFilling.ResultsFileID, resProp.FormFilling.ResultFormNumber, formsDataUrl, resultUrl);

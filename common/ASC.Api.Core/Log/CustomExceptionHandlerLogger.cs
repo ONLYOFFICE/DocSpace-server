@@ -24,39 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Web.Files.Utils;
+namespace ASC.Api.Core.Log;
 
-[ProtoContract]
-public class FileConverterOperationResult : FileOperationResult
+internal static partial class CustomExceptionHandlerLogger
 {
-    [ProtoMember(1)]
-    public DateTime StartDateTime { get; set; }
-
-    [ProtoMember(2)]
-    public DateTime StopDateTime { get; set; }
-
-    [ProtoMember(3)]
-    public int TenantId { get; set; }
-
-    [ProtoMember(4)]
-    public Guid Account { get; set; }
-
-    [ProtoMember(5)]
-    public bool Delete { get; set; }
-
-    [ProtoMember(6)]
-    public string Url { get; set; }
-
-    [ProtoMember(7)]
-    public string Password { get; set; }
-
-    [ProtoMember(8)]
-    //hack for download
-    public string ServerRootPath { get; set; }
-    
-    [ProtoMember(9)]
-    public IDictionary<string, string> Headers { get; set; }
-    
-    [ProtoMember(10)]
-    public string OutputType { get; set; }
+    [LoggerMessage(LogLevel.Critical, "error during executing {RequestMethod}: {PathValue}")]
+    public static partial void CriticalError(this ILogger<CustomExceptionHandler> logger, string RequestMethod, string PathValue, Exception exception);
 }

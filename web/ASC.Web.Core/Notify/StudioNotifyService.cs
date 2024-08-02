@@ -950,7 +950,7 @@ public class StudioNotifyService(
 
     #region Zoom
 
-    public async Task SendZoomWelcomeAsync(UserInfo u)
+    public async Task SendZoomWelcomeAsync(UserInfo u, string portalUrl = null)
     {
         try
         {
@@ -961,6 +961,7 @@ public class StudioNotifyService(
                 Actions.ZoomWelcome,
                 await studioNotifyHelper.RecipientFromEmailAsync(u.Email, false),
                 [EMailSenderName],
+                portalUrl ??= commonLinkUtility.GetFullAbsolutePath(""),
                 new TagValue(CommonTags.Culture, culture.Name),
                 new TagValue(Tags.UserName, u.FirstName.HtmlEncode()),
                 new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("welcome.gif")),
