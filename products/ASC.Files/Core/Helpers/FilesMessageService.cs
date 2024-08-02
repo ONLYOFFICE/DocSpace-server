@@ -142,7 +142,7 @@ public class FilesMessageService(
         }
     }
     
-    public async Task SendMoveMessageAsync<T1, T2>(FileEntry<T1> target, Folder<T1> from, Folder<T2> to, List<Folder<T2>> toParents, bool overwrite,
+    public async Task SendMoveMessageAsync<T1, T2>(FileEntry<T2> target, Folder<T1> from, Folder<T2> to, List<Folder<T2>> toParents, bool overwrite,
         IDictionary<string, StringValues> headers, string[] description)
     {
         var action = target switch
