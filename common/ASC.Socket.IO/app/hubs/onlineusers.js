@@ -1,12 +1,16 @@
 var uap = require('ua-parser-js');
 const { json } = require("express/lib/response");
+const config = require("../../config");
+const redis = require("redis");
 
 module.exports = async (io) => {
     const logger = require("../log.js");
     const onlineIO = io;
     const portalUsers =[];
     const roomUsers =[];
-    const mapperIds = [];
+    const redisOptions = config.get("Redis");
+    var redisClient = redis.createClient(redisOptions);
+    await redisClient.connect();
 
     onlineIO.on("connection", async (socket) => {
       if (socket.handshake.session.system) {
@@ -40,13 +44,23 @@ module.exports = async (io) => {
             status: "online"
           });
         id = 1;
+
+        var offSess = await redisClient.get(userId);
+        if(offSess && offSess != '{}')
+        {
+            var result = new Map(JSON.parse(offSess).map(i => [i[0], i[1]]));
+        }
+        else
+        {
+          offSess = new Map();
+        }
         user = {
           id: userId,
           displayName: userName,
           page: session?.user?.profileUrl,
           sessions: sessions,
           status: "online",
-          offlineSessions: new Map()
+          offlineSessions: offSess
         };
       }
       else
@@ -68,6 +82,13 @@ module.exports = async (io) => {
       }
       
       user.offlineSessions.delete(sessionId);
+      if(user.offlineSessions.size != 0)
+      {
+        await redisClient.set(userId, JSON.stringify(Array.from(user.offlineSessions)));
+      }
+      else{
+        await redisClient.del(userId);
+      }
       if(user.sessions.size == 1)
       {
         var stringUser = serialize(user);
@@ -100,7 +121,9 @@ module.exports = async (io) => {
                 status: "offline",
                 date: new Date().toString()
             });
-
+            
+            await redisClient.set(userId, JSON.stringify(Array.from(user.offlineSessions)));
+            
             var date = new Date().toString();
             if(user.sessions.size <= 0)
             {
@@ -322,7 +345,7 @@ module.exports = async (io) => {
       }
     });
 
-    function leaveSessionInPortal({id, userId, tenantId} = {}) {
+    async function leaveSessionInPortal({id, userId, tenantId} = {}) {
 
       var user = getUser(portalUsers, userId, tenantId);
         if (user) 
@@ -338,6 +361,13 @@ module.exports = async (io) => {
           });
 
           user.offlineSessions.delete(id);
+          if(user.offlineSessions.size != 0)
+          {
+            await redisClient.set(userId, JSON.stringify(Array.from(user.offlineSessions)));
+          }
+          else{
+            await redisClient.del(userId);
+          }
           var date = new Date().toString();
           if(user.sessions.size <= 0)
           {
@@ -373,7 +403,7 @@ module.exports = async (io) => {
         }
     }
 
-    function leaveExceptThisInPortal({id, userId, tenantId} = {}) {
+    async function leaveExceptThisInPortal({id, userId, tenantId} = {}) {
 
       var user = getUser(portalUsers, userId, tenantId);
         if (user) 
@@ -396,6 +426,13 @@ module.exports = async (io) => {
           Object.values(array.filter(e=> e.id != id)).forEach(function(entry) {
             user.offlineSessions.delete(entry.id);
           });
+          if(user.offlineSessions.size != 0)
+          {
+            await redisClient.set(userId, JSON.stringify(Array.from(user.offlineSessions)));
+          }
+          else{
+            await redisClient.del(userId);
+          }
           var date = new Date().toString();
           if(user.sessions.size <= 0)
           {
@@ -429,7 +466,7 @@ module.exports = async (io) => {
       }
       list[id][userId] = user;
     }
-
+    
     return {
       leaveSessionInPortal,
       leaveInPortal,
