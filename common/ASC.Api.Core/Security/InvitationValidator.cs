@@ -141,10 +141,13 @@ public class InvitationValidator(
         if (linkId == default && userId.HasValue)
         {
             var combined = signature.Read<string>(key);
-            var split = combined.Split('.');
-            if (split.Length == 2 && Guid.TryParse(split[0], out linkId) && Guid.TryParse(split[1], out var uId) && !Equals(uId, userId.Value))
+            if (!string.IsNullOrEmpty(combined))
             {
-                linkId = default;
+                var split = combined.Split('.');
+                if (split.Length == 2 && Guid.TryParse(split[0], out linkId) && Guid.TryParse(split[1], out var uId) && !Equals(uId, userId.Value))
+                {
+                    linkId = default;
+                }
             }
         }
         
