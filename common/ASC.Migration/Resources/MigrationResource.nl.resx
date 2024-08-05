@@ -153,9 +153,6 @@
   <data name="MigrationCommonFiles" xml:space="preserve">
     <value>Algemene bestanden voor migratie</value>
   </data>
-  <data name="MigrationInitException" xml:space="preserve">
-    <value>Fout bij het initialiseren van {0} migrator</value>
-  </data>
   <data name="MigrationNotFoundException" xml:space="preserve">
     <value>Geen dergelijke migratieprovider</value>
   </data>
@@ -164,11 +161,5 @@
   </data>
   <data name="MigrationProjectFiles" xml:space="preserve">
     <value>Migratie projectbestanden</value>
-  </data>
-  <data name="MigrationStartException" xml:space="preserve">
-    <value>Parsing is nog bezig</value>
-  </data>
-  <data name="MigrationUploadException" xml:space="preserve">
-    <value>Migratie is al bezig</value>
   </data>
 </root>

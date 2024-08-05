@@ -55,7 +55,7 @@ public class NextcloudWorkspaceMigrator : Migrator
         MigrationInfo = new MigrationInfo { Name = "Nextcloud" };
     }
 
-    public override void Init(string path, CancellationToken cancellationToken, OperationType operation)
+    public override async Task InitAsync(string path, CancellationToken cancellationToken, OperationType operation)
     {
         MigrationLogger.Init();
         _cancellationToken = cancellationToken;
@@ -78,6 +78,7 @@ public class NextcloudWorkspaceMigrator : Migrator
         }
         MigrationInfo.Files = [Path.GetFileName(_takeout)];
         TmpFolder = path;
+        await ReportProgressAsync(1, "start");
     }
 
     public override async Task<MigrationApiInfo> ParseAsync(bool reportProgress = true)
@@ -128,7 +129,8 @@ public class NextcloudWorkspaceMigrator : Migrator
                 await ReportProgressAsync(50, MigrationResource.UnzippingFinished);
             }
 
-            var dbFile = Directory.GetFiles(Directory.GetDirectories(TmpFolder)[0], "*.bak")[0];
+            var dbFile = Directory.GetFiles(Directory.GetDirectories(TmpFolder)[0]).Where(f=> f.EndsWith(".bak") || f.EndsWith(".sql")).FirstOrDefault();
+            dbFile = dbFile ?? Directory.GetFiles(TmpFolder).Where(f => f.EndsWith(".bak") || f.EndsWith(".sql")).FirstOrDefault();
             if (dbFile == null)
             {
                 throw new Exception("*.bak file not found");

@@ -256,7 +256,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         {
                             await apiSystemHelper.RemoveTenantFromCacheAsync(tenant.GetTenantDomain(coreSettings));
                         }
-                        eventBus.Publish(new RemovePortalIntegrationEvent(Guid.Empty, tenant.Id));
+                        await eventBus.PublishAsync(new RemovePortalIntegrationEvent(Guid.Empty, tenant.Id));
                     }
 
                     #endregion
@@ -348,7 +348,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         {
                             await apiSystemHelper.RemoveTenantFromCacheAsync(tenant.GetTenantDomain(coreSettings));
                         }
-                        eventBus.Publish(new RemovePortalIntegrationEvent(Guid.Empty, tenant.Id));
+                        await eventBus.PublishAsync(new RemovePortalIntegrationEvent(Guid.Empty, tenant.Id));
                     }
 
                     #endregion

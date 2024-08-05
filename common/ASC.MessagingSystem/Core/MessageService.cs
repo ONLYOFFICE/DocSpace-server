@@ -102,9 +102,9 @@ public class MessageService(
         }
     }
 
-    public async Task SendAsync(MessageAction action, MessageTarget target, string d1, string d2, IEnumerable<FilesAuditReference> references = null)
+    public async Task SendAsync(MessageAction action, MessageTarget target, string d1, string d2, IEnumerable<FilesAuditReference> references = null, DateTime? dateTime = null)
     {
-        await SendRequestMessageAsync(action, target, description: [d1, d2], references: references);
+        await SendRequestMessageAsync(action, target, description: [d1, d2], references: references, dateTime: dateTime);
     }
     
     public async Task SendAsync(MessageAction action, MessageTarget target, string[] description, IEnumerable<FilesAuditReference> references = null)
@@ -298,7 +298,15 @@ public class EventDescription<T>
     public string RootFolderTitle { get; set; }
     public int UserRole { get; set; }
     public List<Guid> UserIds { get; set; }
+    public Guid? CreateBy { get; set; }
     public T ParentId { get; set; }
     public string ParentTitle { get; set; }
-    public Guid? CreateBy { get; set; }
+    public int? ParentType { get; set; }
+    public string ToParentTitle { get; set; }
+    public int? ToParentType { get; set; }
+    public string FromParentTitle { get; set; }
+    public int? FromParentType { get; set; }
+    public int? FromFolderId { get; set; }
+    
+    public EventDescription() { }
 }

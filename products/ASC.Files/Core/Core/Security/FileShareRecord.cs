@@ -45,7 +45,7 @@ public class FileShareRecord<T>
         [
             (int)FileShare.None,
             (int)FileShare.RoomAdmin,
-            (int)FileShare.Collaborator,
+            (int)FileShare.PowerUser,
             (int)FileShare.Editing,
             (int)FileShare.FillForms,
             (int)FileShare.Review,
@@ -74,7 +74,7 @@ public class FileShareRecord<T>
             // Not used
             (int)FileShare.ReadWrite,
             (int)FileShare.RoomAdmin,
-            (int)FileShare.Collaborator,
+            (int)FileShare.PowerUser,
             (int)FileShare.Varies
         ];
         

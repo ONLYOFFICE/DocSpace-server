@@ -34,6 +34,17 @@ public class FilesMessageService(
     IDaoFactory daoFactory)
 {
     private static readonly JsonSerializerOptions _serializerOptions = new() { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault };
+    private static readonly HashSet<MessageAction> _moveCopyActions =
+    [
+        MessageAction.FolderMoved,
+        MessageAction.FolderMovedWithOverwriting,
+        MessageAction.FolderCopied,
+        MessageAction.FolderCopiedWithOverwriting,
+        MessageAction.FileMoved,
+        MessageAction.FileMovedWithOverwriting,
+        MessageAction.FileCopied,
+        MessageAction.FileCopiedWithOverwriting
+    ];
 
     public async Task SendAsync(MessageAction action, params string[] description)
     {
@@ -48,6 +59,11 @@ public class FilesMessageService(
     public async Task SendAsync<T>(MessageAction action, FileEntry<T> entry, params string[] description)
     {
         await SendAsync(action, entry, null, Guid.Empty, FileShare.None, description);
+    }
+
+    public async Task SendAsync(MessageAction action, string d1, IEnumerable<string> d2)
+    {
+        await SendAsync(action, description: [d1, string.Join(", ", d2)]);
     }
 
     public async Task SendAsync<T>(MessageAction action, string oldTitle, FileEntry<T> entry, params string[] description)
@@ -106,6 +122,148 @@ public class FilesMessageService(
         await messageService.SendHeadersMessageAsync(action, MessageTarget.Create(entry.Id), null, description, additionalParam.References);
     }
 
+    public async Task SendCopyMessageAsync<T1, T2>(FileEntry<T2> target, Folder<T1> from, Folder<T2> to, List<Folder<T2>> toParents, bool overwrite,
+        IDictionary<string, StringValues> headers, string[] description)
+    {
+        var action = target switch
+        {
+            Folder<int> => overwrite ? MessageAction.FolderCopiedWithOverwriting : MessageAction.FolderCopied,
+            File<int> => overwrite ? MessageAction.FileCopiedWithOverwriting : MessageAction.FileCopied,
+            _ => MessageAction.None
+        };
+        
+        if (target is FileEntry<int> targetInt && from is Folder<int> fromInt && to is Folder<int> toInt && toParents is List<Folder<int>> toParentsInt)
+        {
+            await SendMoveOrCopyMessageAsync(action, targetInt, fromInt, toInt, toParentsInt, headers, description);
+        }
+        else
+        {
+            await SendAsync(action, target, to, headers, description);
+        }
+    }
+    
+    public async Task SendMoveMessageAsync<T1, T2>(FileEntry<T1> target, Folder<T1> from, Folder<T2> to, List<Folder<T2>> toParents, bool overwrite,
+        IDictionary<string, StringValues> headers, string[] description)
+    {
+        var action = target switch
+        {
+            Folder<int> => overwrite ? MessageAction.FolderMovedWithOverwriting : MessageAction.FolderMoved,
+            File<int> => overwrite ? MessageAction.FileMovedWithOverwriting : MessageAction.FileMoved,
+            _ => MessageAction.None
+        };
+        
+        if (target is FileEntry<int> targetInt && from is Folder<int> fromInt && to is Folder<int> toInt && toParents is List<Folder<int>> toParentsInt)
+        {
+            await SendMoveOrCopyMessageAsync(action, targetInt, fromInt, toInt, toParentsInt, headers, description);
+        }
+        else
+        {
+            await SendAsync(action, target, to, headers, description);
+        }
+    }
+
+    private async Task SendMoveOrCopyMessageAsync(MessageAction action, FileEntry<int> target, Folder<int> from, Folder<int> to, List<Folder<int>> toParents,
+        IDictionary<string, StringValues> headers, string[] description)
+    {
+        if (!_moveCopyActions.Contains(action))
+        {
+            throw new ArgumentException(null, nameof(action));
+        }
+        
+        var folderDao = daoFactory.GetFolderDao<int>();
+        var fromParents = await folderDao.GetParentFoldersAsync(from.Id).ToListAsync();
+        
+        var rootFolderTitle = GetRootFolderTitle(target.RootFolderType);
+        
+        var eventDescriptionTo = new EventDescription<int>
+        {
+            ParentId = to.Id,
+            ParentTitle = to.Title,
+            ParentType = (int)to.FolderType,
+            CreateBy = target.CreateBy,
+            RootFolderTitle = rootFolderTitle
+        };
+        
+        var eventDescriptionFrom = new EventDescription<int>
+        {
+            ParentId = to.Id,
+            ParentTitle = to.Title,
+            ParentType = (int)to.FolderType,
+            CreateBy = target.CreateBy,
+            RootFolderTitle = rootFolderTitle
+        };
+        
+        var crossEvent = true;
+
+        if (from.RootFolderType == FolderType.VirtualRooms && to.RootFolderType == FolderType.VirtualRooms)
+        {
+            var toRoom = FindRoom(to, toParents);
+            var fromRoom = FindRoom(from, fromParents);
+            
+            eventDescriptionTo.RoomId = toRoom.Id;
+            eventDescriptionTo.RoomTitle = toRoom.Title;
+            eventDescriptionFrom.RoomId = fromRoom.Id;
+            eventDescriptionFrom.RoomTitle = fromRoom.Title;
+            
+            if (fromRoom.Id == toRoom.Id)
+            {
+                eventDescriptionTo.FromParentTitle = from.Title;
+                eventDescriptionTo.FromParentType = (int)from.FolderType;
+                eventDescriptionTo.FromFolderId = from.Id;
+                crossEvent = false;
+            }
+        }
+        else if (from.RootFolderType == FolderType.USER && to.RootFolderType == FolderType.USER && to.CreateBy == from.CreateBy)
+        {
+            eventDescriptionTo.FromParentTitle = from.Title;
+            eventDescriptionTo.FromParentType = (int)from.FolderType;
+            eventDescriptionTo.FromFolderId = from.Id;
+            crossEvent = false;
+        }
+
+        if (!crossEvent)
+        {
+            var references = GetReferences(fromParents);
+            foreach (var toRef in GetReferences(toParents).Where(toRef => !references.Any(r => r.EntryId == toRef.EntryId && r.EntryType == toRef.EntryType)))
+            {
+                references.Add(toRef);
+            }
+            
+            references.Add(new FilesAuditReference { EntryId = target.Id, EntryType = (byte)target.FileEntryType });
+            
+            var json = JsonSerializer.Serialize(eventDescriptionTo, _serializerOptions);
+            await messageService.SendHeadersMessageAsync(action, MessageTarget.Create([target.Id, to.Id]), headers, Append(description, json), references);
+            
+            return;
+        }
+
+        eventDescriptionFrom.ParentTitle = null;
+        eventDescriptionFrom.ParentType = 0;
+
+        var toReferences = GetReferences(toParents);
+        var fromReferences = GetReferences(fromParents);
+        
+        toReferences.Add(new FilesAuditReference { EntryId = target.Id, EntryType = (byte)target.FileEntryType });
+        
+        var jsonTo = JsonSerializer.Serialize(eventDescriptionTo, _serializerOptions);
+        var t1= messageService.SendHeadersMessageAsync(action, MessageTarget.Create([target.Id, to.Id]), headers, Append(description, jsonTo), toReferences);
+        
+        var jsonFrom = JsonSerializer.Serialize(eventDescriptionFrom, _serializerOptions);
+        var t2= messageService.SendHeadersMessageAsync(action, MessageTarget.Create([target.Id, to.Id]), headers, Append(description, jsonFrom), fromReferences);
+        
+        await Task.WhenAll(t1, t2);
+    }
+
+    private static List<FilesAuditReference> GetReferences(List<Folder<int>> parents)
+    {
+        return parents.Where(x => !x.IsRoot).Select(x => 
+            new FilesAuditReference 
+            { 
+                EntryId = x.Id, 
+                EntryType = (byte)x.FileEntryType 
+            }).ToList();
+    }
+
     public async Task SendAsync<T1, T2>(MessageAction action, FileEntry<T1> entry1, FileEntry<T2> entry2, IDictionary<string, StringValues> headers, params string[] description)
     {
         if (entry1 == null || entry2 == null)
@@ -113,7 +271,11 @@ public class FilesMessageService(
             return;
         }
 
-        var additionalParams = await GetAdditionalEntryDataAsync(entry1, action);
+        FolderType? parentType = entry2 is Folder<T2> folder 
+            ? folder.FolderType 
+            : null;
+
+        var additionalParams = await GetAdditionalEntryDataAsync(entry1, action, parentType: parentType);
         description = Append(description, additionalParams.DescriptionPart);
 
         if (headers == null)//todo check need if
@@ -177,18 +339,18 @@ public class FilesMessageService(
     }
 
     private async Task<FileEntryData> GetAdditionalEntryDataAsync<T>(FileEntry<T> entry, MessageAction action, string oldTitle = null, Guid userid = default,
-        FileShare userRole = FileShare.None)
+        FileShare userRole = FileShare.None, FolderType? parentType = null)
     { 
         return entry switch
         {
-            FileEntry<int> entryInt => await GetAdditionalEntryDataAsync(entryInt, action, oldTitle, userid, userRole),
+            FileEntry<int> entryInt => await GetAdditionalEntryDataAsync(entryInt, action, oldTitle, userid, userRole, parentType),
             FileEntry<string> entryString => await GetAdditionalEntryDataAsync(entryString, action, oldTitle, userid, userRole),
             _ => throw new NotSupportedException()
         };
     }
 
     private async Task<FileEntryData> GetAdditionalEntryDataAsync(FileEntry<int> entry, MessageAction action, string oldTitle = null, Guid userid = default, 
-        FileShare userRole = FileShare.None)
+        FileShare userRole = FileShare.None, FolderType? parentType = null)
     {
         var folderDao = daoFactory.GetFolderDao<int>();
 
@@ -228,13 +390,22 @@ public class FilesMessageService(
         }
 
         desc.ParentId = parent.Id;
-        desc.ParentTitle = parent.Title;
+
+        if (!_moveCopyActions.Contains(action))
+        {
+            desc.ParentTitle = parent.Title;
+        }
+        
         desc.RootFolderTitle = entry.RootFolderType switch
         {
             FolderType.USER => FilesUCResource.MyFiles,
             FolderType.TRASH => FilesUCResource.Trash,
             _ => null
         };
+        
+        desc.ParentType = parentType.HasValue 
+            ? (int)parentType.Value 
+            : (int)parent.FolderType;
 
         return new FileEntryData(JsonSerializer.Serialize(desc, _serializerOptions), references);
     }
@@ -285,6 +456,23 @@ public class FilesMessageService(
         newArray[^1] = value;
         
         return newArray;
+    }
+
+    private static string GetRootFolderTitle(FolderType folderType)
+    {
+        return folderType switch
+        {
+            FolderType.USER => FilesUCResource.MyFiles,
+            FolderType.TRASH => FilesUCResource.Trash,
+            _ => null
+        };
+    }
+    
+    private static Folder<T> FindRoom<T>(Folder<T> folder, List<Folder<T>> parents)
+    {
+        return DocSpaceHelper.IsRoom(folder.FolderType) 
+            ? folder 
+            : parents.First(x => DocSpaceHelper.IsRoom(x.FolderType));
     }
     
     private record FileEntryData(string DescriptionPart, IEnumerable<FilesAuditReference> References);

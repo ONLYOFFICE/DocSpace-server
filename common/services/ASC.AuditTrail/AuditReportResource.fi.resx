@@ -272,7 +272,7 @@
     <value>Ryhmät. Päivitetty: {0}</value>
   </data>
   <data name="GuestAccount" xml:space="preserve">
-    <value>Vierailijatili</value>
+    <value>Vierailija</value>
   </data>
   <data name="GuestActivated" xml:space="preserve">
     <value>Vierailijat. Aktivoitu: {0}</value>
@@ -738,5 +738,44 @@
   </data>
   <data name="PortalRenamed" xml:space="preserve">
     <value>Portaali nimetty uudelleen</value>
+  </data>
+  <data name="FileSizePostfix" xml:space="preserve">
+    <value>tavua, kt, Mt, Gt, Tt</value>
+  </data>
+  <data name="FileUploadedWithOverwriting" xml:space="preserve">
+    <value>Tiedosto ladattu uusilla tiedoilla: {0}</value>
+  </data>
+  <data name="QuotaPerPortalChanged" xml:space="preserve">
+    <value>Aseta oletustallennuskiintiö: {0}</value>
+  </data>
+  <data name="QuotaPerPortalDisabled" xml:space="preserve">
+    <value>Oletustallennuskiintiö on poistettu käytöstä</value>
+  </data>
+  <data name="QuotaPerRoomChanged" xml:space="preserve">
+    <value>Aseta oletustallennuskiintiö huoneille: {0}</value>
+  </data>
+  <data name="QuotaPerRoomDisabled" xml:space="preserve">
+    <value>Huoneiden oletustallennuskiintiö poistettu käytöstä</value>
+  </data>
+  <data name="QuotaPerUserChanged" xml:space="preserve">
+    <value>Aseta oletustallennuskiintiö käyttäjille: {0}</value>
+  </data>
+  <data name="QuotaPerUserDisabled" xml:space="preserve">
+    <value>Käyttäjien oletustallennuskiintiö on poistettu käytöstä</value>
+  </data>
+  <data name="RoomGroupAdded" xml:space="preserve">
+    <value>Ryhmä lisätty: {0}. Rooli: {1}</value>
+  </data>
+  <data name="RoomGroupRemove" xml:space="preserve">
+    <value>Ryhmä poistettu: {0}</value>
+  </data>
+  <data name="RoomCopied" xml:space="preserve">
+    <value>Huone kopioitu: {0}</value>
+  </data>
+  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
+    <value>{0} nimitetty: {1}</value>
+  </data>
+  <data name="SendJoinInvite" xml:space="preserve">
+    <value>Käyttäjä {0} lähetti {1}:lle liittymiskutsun tähän DocSpaceen</value>
   </data>
 </root>

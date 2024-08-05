@@ -87,10 +87,6 @@ public class File<T> : FileEntry<T>
                     return FilterType.ImagesOnly;
                 case FileType.Document:
                     return FilterType.DocumentsOnly;
-                case FileType.OForm:
-                    return FilterType.OFormOnly;
-                case FileType.OFormTemplate:
-                    return FilterType.OFormTemplateOnly;
                 case FileType.Presentation:
                     return FilterType.PresentationsOnly;
                 case FileType.Spreadsheet:
@@ -100,6 +96,16 @@ public class File<T> : FileEntry<T>
                 case FileType.Audio:
                 case FileType.Video:
                     return FilterType.MediaOnly;
+                case FileType.Pdf:
+                    if (this.IsForm)
+                    {
+                        return FilterType.PdfForm;
+                    }
+                    else
+                    {
+                        return FilterType.Pdf;
+                    }
+                   
             }
 
             return FilterType.None;
@@ -124,6 +130,14 @@ public class File<T> : FileEntry<T>
     public string DownloadUrl => FileHelper.GetDownloadUrl(this);
 
     public bool Locked { get; set; }
+    public bool IsForm {
+        get
+        {
+            return (FilterType)Category == FilterType.PdfForm;
+        }
+    }
+
+    public int Category { get; set; }
     public string LockedBy { get; set; }
 
     [JsonIgnore]

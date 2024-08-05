@@ -100,4 +100,7 @@
   <data name="InProcessFormFolder" xml:space="preserve">
     <value>Prosesdədir</value>
   </data>
+  <data name="ReadyFormFolder" xml:space="preserve">
+    <value>Tamamlayın</value>
+  </data>
 </root>

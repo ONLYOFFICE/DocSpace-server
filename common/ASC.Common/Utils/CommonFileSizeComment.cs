@@ -24,13 +24,28 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Web.Api.ApiModels.ResponseDto;
+namespace ASC.Common.Utils;
 
-/// <summary>
-/// </summary>
-public class RoomsNotificayionSettingsDto : IMapFrom<RoomsNotificationSettings>
+public class CommonFileSizeComment
 {
-    /// <summary>List of rooms with the disabled notifications</summary>
-    /// <type>System.Collections.Generic.List{System.Int32}, System.Collections.Generic</type>
-    public List<int> DisabledRooms { get; set; }
+    /// <summary>
+    /// Generates a string the file size
+    /// </summary>
+    /// <param name="size">Size in bytes</param>
+    /// <returns>10 b, 100 Kb, 25 Mb, 1 Gb</returns>
+    public static string FilesSizeToString(string fileSizePostfix, long size)
+    {
+        var sizeNames = !string.IsNullOrEmpty(fileSizePostfix) ? 
+            fileSizePostfix.Split(',', '،') : ["bytes", "KB", "MB", "GB", "TB"];
+        var power = 0;
+
+        double resultSize = size;
+        if (1024 <= resultSize)
+        {
+            power = (int)Math.Log(resultSize, 1024);
+            power = power < sizeNames.Length ? power : sizeNames.Length - 1;
+            resultSize /= Math.Pow(1024d, power);
+        }
+        return $"{resultSize:#,0.##} {sizeNames[power]}";
+    }
 }

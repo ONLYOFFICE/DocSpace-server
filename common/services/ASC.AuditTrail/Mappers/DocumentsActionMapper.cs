@@ -58,7 +58,7 @@ internal class FilesActionMapper : IModuleActionMapper
                         ActionType.Update, [
                             MessageAction.FileRenamed, MessageAction.FileUpdated, MessageAction.UserFileUpdated, MessageAction.FileUpdatedRevisionComment,
                             MessageAction.FileLocked, MessageAction.FileUnlocked, MessageAction.FileOpenedForChange, MessageAction.FileMarkedAsFavorite,
-                            MessageAction.FileRemovedFromFavorite, MessageAction.FileMarkedAsRead, MessageAction.FileReaded
+                            MessageAction.FileRemovedFromFavorite, MessageAction.FileMarkedAsRead, MessageAction.FileReaded, MessageAction.FormSubmit, MessageAction.FormOpenedForFilling
                         ]
                     },
                     { ActionType.Delete, [MessageAction.FileDeletedVersion, MessageAction.FileDeleted, MessageAction.TrashEmptied
@@ -144,6 +144,7 @@ internal class RoomsActionMapper : IModuleActionMapper
                 EntryType.Room, new Dictionary<ActionType, MessageAction[]>
                 {
                     { ActionType.Create, [MessageAction.RoomCreated] },
+                    { ActionType.Copy, [MessageAction.RoomCopied] },
                     {
                         ActionType.Update, [
                             MessageAction.RoomArchived,

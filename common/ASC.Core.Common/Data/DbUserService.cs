@@ -330,7 +330,8 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
                         u.Group.UserGroupId == Constants.GroupAdmin.ID ? 1 :
                         u.Group.UserGroupId == Constants.GroupCollaborator.ID ? 3 : 4;
 
-                    q = (sortOrderAsc ? q1.OrderBy(orderByUserType) : q1.OrderByDescending(orderByUserType)).Select(r => r.User);
+                    q = (sortOrderAsc ? q1.OrderBy(orderByUserType).ThenBy(x => x.User.FirstName) 
+                        : q1.OrderByDescending(orderByUserType)).ThenBy(x => x.User.FirstName).Select(r => r.User);
                     break;
                 }
             case UserSortType.UsedSpace:
@@ -791,12 +792,8 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
 
         if (!string.IsNullOrEmpty(text))
         {
-            q = q.Where(
-                u => u.FirstName.Contains(text) ||
-                u.LastName.Contains(text) ||
-                u.Title.Contains(text) ||
-                u.Location.Contains(text) ||
-                u.Email.Contains(text));
+            var splittedText = text.Trim().ToLower().Split(" ");
+            q = splittedText.Aggregate(q, (current, t) => current.Where(u => u.FirstName.ToLower().Contains(t) || u.LastName.ToLower().Contains(t) || u.Title.ToLower().Contains(t) || u.Location.ToLower().Contains(t) || u.Email.ToLower().Contains(t)));
         }
 
         q = accountLoginType switch

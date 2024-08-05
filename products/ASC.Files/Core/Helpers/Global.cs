@@ -96,7 +96,7 @@ public enum DocThumbnailExtension
 }
 
 [Scope]
-public class Global(
+public partial class Global(
     IConfiguration configuration,
     AuthContext authContext,
     UserManager userManager,
@@ -243,6 +243,42 @@ public class Global(
 
         return userInfo.DisplayUserName(false, displayUserSettingsHelper);
     }
+    
+    public async Task<string> GetAvailableTitleAsync<T>(string requestTitle, T parentFolderId, Func<string, T, Task<bool>> isExist, FileEntryType fileEntryType)
+    {
+        if (!await isExist(requestTitle, parentFolderId))
+        {
+            return requestTitle;
+        }
+
+        var re = MyRegex();
+        
+        var insertIndex = requestTitle.Length;
+        if (fileEntryType == FileEntryType.File && requestTitle.LastIndexOf('.') != -1)
+        {
+            insertIndex = requestTitle.LastIndexOf('.');
+        }
+
+        requestTitle = requestTitle.Insert(insertIndex, " (1)");
+
+        while (await isExist(requestTitle, parentFolderId))
+        {
+            requestTitle = re.Replace(requestTitle, MatchEvaluator);
+        }
+
+        return requestTitle;
+    }
+    
+    private static string MatchEvaluator(Match match)
+    {
+        var index = Convert.ToInt32(match.Groups[2].Value);
+        var staticText = match.Value[$" ({index})".Length..];
+
+        return $" ({index + 1}){staticText}";
+    }
+
+    [GeneratedRegex(@"( \(((?<index>[0-9])+)\)(\.[^\.]*)?)$")]
+    private static partial Regex MyRegex();
 }
 
 [Scope]
@@ -697,6 +733,12 @@ public class GlobalFolder(
             newFile.ParentId = folderId;
             newFile.Comment = FilesCommonResource.CommentCreate;
 
+            var fileType = FileUtility.GetFileTypeByFileName(fileName);
+            if (fileType == FileType.Pdf)
+            {
+                newFile.Category = (int)FilterType.PdfForm;
+            }
+           
             await using (var stream = await storeTemplate.GetReadStreamAsync("", filePath))
             {
                 newFile.ContentLength = stream.CanSeek ? stream.Length : await storeTemplate.GetFileSizeAsync("", filePath);

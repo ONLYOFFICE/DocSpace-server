@@ -115,6 +115,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Power User.
+        /// </summary>
+        public static string AceStatusEnum_PowerUser {
+            get {
+                return ResourceManager.GetString("AceStatusEnum_PowerUser", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Read Only.
         /// </summary>
         public static string AceStatusEnum_Read {
@@ -988,6 +997,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Form number.
+        /// </summary>
+        public static string FormNumber {
+            get {
+                return ResourceManager.GetString("FormNumber", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Anonymous.
         /// </summary>
         public static string Guest {
@@ -1156,6 +1174,15 @@ namespace ASC.Files.Core.Resources {
         public static string RoleEnum_FillForms {
             get {
                 return ResourceManager.GetString("RoleEnum_FillForms", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Power User.
+        /// </summary>
+        public static string RoleEnum_PowerUser {
+            get {
+                return ResourceManager.GetString("RoleEnum_PowerUser", resourceCulture);
             }
         }
         

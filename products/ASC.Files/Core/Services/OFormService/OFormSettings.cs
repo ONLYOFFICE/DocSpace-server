@@ -32,6 +32,7 @@ public class OFormSettings
     public string Path { get; set; }
     public string Dashboard { get; set; }
     public string Ext { get; set; }
+    public string Signature { get; set; }
 
     public OFormSettings Upload { get; set; }
 }

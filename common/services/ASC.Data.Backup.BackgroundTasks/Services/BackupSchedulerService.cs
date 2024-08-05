@@ -81,7 +81,7 @@ public sealed class BackupSchedulerService(
 
                         logger.DebugStartScheduledBackup(schedule.TenantId, schedule.StorageType, schedule.StorageBasePath);
 
-                        _eventBus.Publish(new BackupRequestIntegrationEvent(
+                        await _eventBus.PublishAsync(new BackupRequestIntegrationEvent(
                                                  tenantId: schedule.TenantId,
                                                  storageBasePath: schedule.StorageBasePath,
                                                  storageParams: JsonConvert.DeserializeObject<Dictionary<string, string>>(schedule.StorageParams),

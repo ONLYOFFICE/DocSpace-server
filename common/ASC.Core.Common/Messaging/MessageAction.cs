@@ -146,7 +146,7 @@ public enum MessageAction
 
     FileUploaded = 5011,
     FileImported = 5012,
-    FileUploadedWithOverwriting = 5099, // last
+    FileUploadedWithOverwriting = 5099,
 
     FileCopied = 5013,
     FileCopiedWithOverwriting = 5014,
@@ -169,6 +169,9 @@ public enum MessageAction
     FolderRemovedFromList = 5059,
 
     FolderDownloaded = 5057,
+
+    FormSubmit = 6046,
+    FormOpenedForFilling = 6047,
 
     ThirdPartyCreated = 5028,
     ThirdPartyUpdated = 5029,
@@ -203,6 +206,7 @@ public enum MessageAction
     RoomArchived = 5072,
     RoomUnarchived = 5073,
     RoomDeleted = 5074,
+    RoomCopied = 5100, // last
     
     RoomUpdateAccessForUser = 5075,
     RoomRemoveUser = 5084,
@@ -295,6 +299,20 @@ public enum MessageAction
     TwoFactorAuthenticationEnabledByTfaApp = 6038,
 
     PortalRenamed = 6039,
+
+    QuotaPerRoomChanged = 6040,
+    QuotaPerRoomDisabled = 6041,
+    QuotaPerUserChanged = 6042,
+    QuotaPerUserDisabled = 6043,
+    QuotaPerPortalChanged = 6044,
+    QuotaPerPortalDisabled = 6045,
+
+    CustomQuotaPerRoomDefault = 6048,
+    CustomQuotaPerRoomChanged = 6049,
+    CustomQuotaPerRoomDisabled = 6050,
+    CustomQuotaPerUserDefault = 6051,
+    CustomQuotaPerUserChanged = 6052,
+    CustomQuotaPerUserDisabled = 6053,
 
     DocumentServiceLocationSetting = 5037,
     AuthorizationKeysSetting = 5038,

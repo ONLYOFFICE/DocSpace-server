@@ -73,13 +73,15 @@ public record EntryData : HistoryData
     public string Title { get; }
     public string ParentTitle { get; }
     public int? ParentId { get; }
+    public int? ParentType { get; }
     
-    public EntryData(string id, string title, int? parentId = null, string parentTitle = null)
+    public EntryData(string id, string title, int? parentId = null, string parentTitle = null, int? parentType = null)
     {
         Id = int.Parse(id);
         Title = title;
         ParentId = parentId;
         ParentTitle = parentTitle;
+        ParentType = parentType;
     }
     
     public override int GetId() => ParentId ?? 0;
@@ -92,14 +94,16 @@ public record RenameEntryData : HistoryData
     public string NewTitle { get; }
     public int? ParentId { get; }
     public string ParentTitle { get; }
+    public int? ParentType { get; }
     
-    public RenameEntryData(string id, string oldTitle, string newTitle, int? parentId = null, string parentTitle = null)
+    public RenameEntryData(string id, string oldTitle, string newTitle, int? parentId = null, string parentTitle = null, int? parentType = null)
     {
         Id = string.IsNullOrEmpty(id) ? null : int.Parse(id);
         OldTitle = oldTitle;
         NewTitle = newTitle;
         ParentId = parentId;
         ParentTitle = parentTitle;
+        ParentType = parentType;
     }
 }
 
@@ -109,16 +113,35 @@ public record EntryOperationData : HistoryData
 {
     public int Id { get; }
     public string Title { get; }
-    public int ToFolderId { get; }
-    public string ToFolderTitle { get; }
+    public string ToFolderId { get; }
+    public string ParentTitle { get; }
+    public int? ParentType { get; }
+    public string FromParentTitle { get; }
+    public int? FromParentType { get; }
+    public int? FromFolderId { get; }
     
-    public EntryOperationData(string id, string title, string toFolderId, string toFolderTitle)
+    public EntryOperationData(
+        string id,
+        string title,
+        string toFolderId,
+        string parentTitle,
+        int? parentType,
+        string fromParentTitle,
+        int? fromParentType,
+        int? fromFolderId)
     {
         Id = int.Parse(id);
         Title = title;
-        ToFolderId = int.Parse(toFolderId);
-        ToFolderTitle = toFolderTitle;
+        ToFolderId = toFolderId;
+        ParentTitle = parentTitle;
+        ParentType = parentType;
+        FromParentTitle = fromParentTitle;
+        FromParentType = fromParentType;
+        FromFolderId = fromFolderId;
     }
-    
-    public override int GetId() => ToFolderId;
+
+    public override int GetId()
+    {
+        return FromFolderId.HasValue ? HashCode.Combine(ToFolderId, FromFolderId) : ToFolderId.GetHashCode();
+    }
 }

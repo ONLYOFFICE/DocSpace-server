@@ -32,6 +32,18 @@ public abstract class BaseBackupProgressItem(IServiceScopeFactory serviceScopeFa
     private int? _tenantId;
     private BackupProgressItemType? _backupProgressItemEnum;
     private string _link;
+    private int? _newTenantId;
+
+    public int NewTenantId
+    {
+        get => _newTenantId ?? this[nameof(_newTenantId)];
+        set
+        {
+            _newTenantId = value;
+            this[nameof(_newTenantId)] = value;
+        }
+    }
+
 
     public int TenantId
     {
@@ -73,6 +85,7 @@ public abstract class BaseBackupProgressItem(IServiceScopeFactory serviceScopeFa
     protected void Init()
     {
         this[nameof(_tenantId)] = 0;
+        this[nameof(_newTenantId)] = 0;
         this[nameof(_link)] = "";
         this[nameof(_backupProgressItemEnum)] = 0;
     }

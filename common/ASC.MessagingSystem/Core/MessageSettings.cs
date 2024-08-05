@@ -30,8 +30,8 @@ public class MessageSettings
 {
     private const string UserAgentHeader = "User-Agent";
     private const string RefererHeader = "Referer";
-    private const string XRealIPHeader = "X-Real-IP";
     private const string EditorsUAHeader = "AscDesktopEditor";
+    private const string XRemoteIpAddress = "X-Remote-Ip-Address"; // Custom (fake) header for storage client remote ip address
     private const string EditorsName = "Desktop Editors";
     private const string ZoomAppsUAHeader = "ZoomApps";
     private const string ZoomBrowserUAHeader = "ZoomWebKit";
@@ -57,13 +57,13 @@ public class MessageSettings
 
         var headers = request.Headers.ToDictionary(k => k.Key, v => v.Value);
 
-        if (!headers.TryGetValue(XRealIPHeader, out _))
+        if (!headers.TryGetValue(XRemoteIpAddress, out _))
         {
             var remoteIpAddress = GetIP(request);
 
             if (!string.IsNullOrEmpty(remoteIpAddress))
             {
-                headers.Add(XRealIPHeader, remoteIpAddress);
+                headers.Add(XRemoteIpAddress, remoteIpAddress);
             }
         }
 
@@ -111,7 +111,7 @@ public class MessageSettings
 
     public static string GetIP(IDictionary<string, StringValues> headers)
     {
-        return headers.TryGetValue(XRealIPHeader, out var header) ? header.FirstOrDefault() : null;
+        return headers.TryGetValue(XRemoteIpAddress, out var header) ? header.FirstOrDefault() : null;
     }
 
     public static void AddInfoMessage(EventMessage message, Dictionary<string, ClientInfo> dict = null)

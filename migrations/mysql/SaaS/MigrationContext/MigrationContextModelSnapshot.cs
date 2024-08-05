@@ -2061,11 +2061,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         },
                         new
                         {
-                            Input = ".docx",
-                            Output = ".docxf"
-                        },
-                        new
-                        {
                             Input = ".docxf",
                             Output = ".docm"
                         },

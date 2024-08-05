@@ -90,6 +90,8 @@ public class Startup : BaseStartup
         services.AddSingleton(Channel.CreateUnbounded<EventData>());
         services.AddSingleton(svc => svc.GetRequiredService<Channel<EventData>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<EventData>>().Writer);
+        services.AddScoped<EventDataIntegrationEventHandler>();
+        services.AddSingleton<MessageSenderService>();
         services.AddHostedService<MessageSenderService>();
         
         var lifeTime = TimeSpan.FromMinutes(5);

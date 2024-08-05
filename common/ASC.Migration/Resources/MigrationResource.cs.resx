@@ -153,9 +153,6 @@
   <data name="MigrationCommonFiles" xml:space="preserve">
     <value>Migrace společných souborů</value>
   </data>
-  <data name="MigrationInitException" xml:space="preserve">
-    <value>Chyba při inicializaci migrátoru {0}</value>
-  </data>
   <data name="MigrationNotFoundException" xml:space="preserve">
     <value>Žádný takový poskytovatel migrace</value>
   </data>
@@ -164,11 +161,5 @@
   </data>
   <data name="MigrationProjectFiles" xml:space="preserve">
     <value>Soubory projektu migrace</value>
-  </data>
-  <data name="MigrationStartException" xml:space="preserve">
-    <value>Rozbor stále probíhá</value>
-  </data>
-  <data name="MigrationUploadException" xml:space="preserve">
-    <value>Migrace již probíhá</value>
   </data>
 </root>

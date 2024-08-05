@@ -93,49 +93,32 @@ public class CommonLinkUtility(
 
     public string GetEmployees(EmployeeStatus empStatus = EmployeeStatus.Active)
     {
-        return ToAbsolute("~/products/people/") +
-               (empStatus == EmployeeStatus.Terminated ? "#type=disabled" : string.Empty);
+        return ToAbsolute("~/accounts/people/filter") +
+               (empStatus == EmployeeStatus.Terminated ? $"?employeestatus={(int)EmployeeStatus.Terminated}" : string.Empty);
     }
 
     public string GetDepartment(Guid depId)
     {
-        return depId != Guid.Empty ? ToAbsolute("~/products/people/#group=") + depId : GetEmployees();
+        return depId != Guid.Empty ? ToAbsolute($"~/accounts/groups/{depId}/filter") : GetEmployees();
     }
 
     #region user profile link
 
-    public async Task<string> GetUserProfileAsync(Guid userId, bool absolute = true)
+    public async Task<string> GetUserProfileAsync(Guid userId)
     {
-        if (!await userManager.UserExistsAsync(userId))
+        var path = GetEmployees();
+
+        if (!userManager.IsSystemUser(userId))
         {
-            return GetEmployees();
+            var user = await userManager.GetUsersAsync(userId);
+
+            path += $"?search={HttpUtility.UrlEncode(user.Email?.ToLowerInvariant())}";
         }
-        
-        var queryParams = userId != Guid.Empty ? await GetUserParamsPairAsync(userId) : HttpUtility.UrlEncode(userId.ToString().ToLowerInvariant());
 
-        var url = absolute ? ToAbsolute(VirtualAccountsPath) : AbsoluteAccountsPath;
-        url += "view/";
-        url += queryParams;
-
-        return url;
+        return path;
     }
 
     #endregion
-
-    private async Task<string> GetUserParamsPairAsync(Guid userID)
-    {
-        return GetUserParamsPair(await userManager.GetUsersAsync(userID));
-    }
-
-    public string GetUserParamsPair(UserInfo user)
-    {
-        if (user == null || string.IsNullOrEmpty(user.UserName) || !userManager.UserExists(user))
-        {
-            return "";
-        }
-
-        return HttpUtility.UrlEncode(user.UserName.ToLowerInvariant());
-    }
 
     public async Task<string> GetUserForumLinkAsync(SettingsManager settingsManager, bool inCurrentCulture = true)
     {
@@ -271,7 +254,7 @@ public class CommonLinkUtility(
         return $"confirm/{confirmType}?type={confirmType}&key={key}&uid={userId}";
     }
 
-    public string GetTokenWithoutKey(string email, ConfirmType confirmType, Guid userId = default)
+    private string GetTokenWithoutKey(string email, ConfirmType confirmType, Guid userId = default)
     {
         var link = $"type={confirmType}";
 

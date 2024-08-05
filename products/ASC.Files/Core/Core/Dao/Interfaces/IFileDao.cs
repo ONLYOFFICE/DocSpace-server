@@ -215,7 +215,7 @@ public interface IFileDao<T>
     /// <param name="title">file name</param>
     /// <param name="folderId">folder id</param>
     /// <returns>Returns true if the file exists, otherwise false</returns>
-    Task<bool> IsExistAsync(string title, object folderId);
+    Task<bool> IsExistAsync(string title, T folderId);
 
     /// <summary>
     ///   Moves a file or set of files in a folder
@@ -337,9 +337,9 @@ public interface IFileDao<T>
 
     Task<Stream> GetThumbnailAsync(T fileId, int width, int height);
 
-    Task<EntryProperties> GetProperties(T fileId);
+    Task<EntryProperties<T>> GetProperties(T fileId);
 
-    Task SaveProperties(T fileId, EntryProperties entryProperties);
+    Task SaveProperties(T fileId, EntryProperties<T> entryProperties);
 
     Task<int> GetFilesCountAsync(T parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent, 
         bool withSubfolders = false, bool excludeSubject = false, T roomId = default);

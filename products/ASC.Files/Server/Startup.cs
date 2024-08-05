@@ -57,6 +57,9 @@ public class Startup : BaseStartup
         services.RegisterQuotaFeature();
         services.AddScoped<IWebItem, ProductEntryPoint>();
         services.AddDocumentServiceHttpClient();
+
+        services.AddStartupTask<CheckPdfStartupTask>()
+           .TryAddSingleton(services);
     }
 
     public override void Configure(IApplicationBuilder app, IWebHostEnvironment env)
