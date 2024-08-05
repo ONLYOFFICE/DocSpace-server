@@ -87,7 +87,14 @@ public class PortalController(
     public async Task<TenantDto> Get()
     {
         var tenant = await tenantManager.GetCurrentTenantAsync();   
-        return mapper.Map<TenantDto>(tenant);
+        var result = mapper.Map<TenantDto>(tenant);
+        
+        if (!await permissionContext.CheckPermissionsAsync(SecurityConstants.EditPortalSettings))
+        {
+            result.PaymentId = null;
+        }
+        
+        return result;
     }
 
     /// <summary>
@@ -250,10 +257,25 @@ public class PortalController(
     /// <httpMethod>GET</httpMethod>
     [AllowNotPayment]
     [HttpGet("tariff")]
-    public async Task<Tariff> GetTariffAsync(bool refresh)
+    public async Task<TariffDto> GetTariffAsync(bool refresh)
     {
         var tenant = await tenantManager.GetCurrentTenantAsync();
-        return await tariffService.GetTariffAsync(tenant.Id, refresh: refresh);
+        var source = await tariffService.GetTariffAsync(tenant.Id, refresh: refresh);
+
+        var result = new TariffDto
+        {
+            Id = source.Id,
+            State = source.State,
+            DueDate = source.DueDate,
+            DelayDueDate = source.DelayDueDate,
+            LicenseDate = source.LicenseDate,
+            CustomerId = source.CustomerId,
+            Quotas = source.Quotas,
+            OpenSource = tenantExtra.Opensource,
+            Enterprise = tenantExtra.Enterprise
+        };
+        
+        return result;
     }
 
     /// <summary>
