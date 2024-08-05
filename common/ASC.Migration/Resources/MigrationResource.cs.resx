@@ -199,12 +199,15 @@
     <value>Vytvořit složku {0}</value>
   </data>
   <data name="CreateShareRoom" xml:space="preserve">
-    <value>Vytvořit sdílenou místnost {0}</value>
+    <value>vytvořit sdílenou místnost {0}</value>
   </data>
   <data name="СanNotImportCommonFiles" xml:space="preserve">
     <value>Nelze importovat společné soubory</value>
   </data>
   <data name="СanNotImportProjectFiles" xml:space="preserve">
     <value>Nelze importovat soubory projektu</value>
+  </data>
+  <data name="СreateRootFolder" xml:space="preserve">
+    <value>Vytvořit kořenovou složku</value>
   </data>
 </root>
