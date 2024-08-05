@@ -1580,7 +1580,7 @@ public class EntryManager(IDaoFactory daoFactory,
                             await fileMarker.MarkAsNewAsync(result, users);
                             await socketManager.CreateFileAsync(result, users);
 
-                            var resultUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, result.Title, result.Id, result.Version)));
+                            var resultUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, result.Title, result.Id, result.Version));
                             await formFillingReportCreator.UpdateFormFillingReport(properties.FormFilling.ResultsFileID, resProp.FormFilling.ResultFormNumber, formsDataUrl, resultUrl);
 
                             if (!securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))
