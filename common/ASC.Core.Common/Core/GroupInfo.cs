@@ -33,6 +33,7 @@ public class GroupInfo : IRole, IRecipientsGroup, IMapFrom<DbGroup>
     public Guid CategoryID { get; init; }
     public GroupInfo Parent { get; internal set; }
     public string Sid { get; set; }
+    public bool Removed { get; set; }
 
     public GroupInfo() { }
 

@@ -95,6 +95,9 @@ public class FolderDto<T> : FileEntryDto<T>
     /// <summary>Counter</summary>
     /// <type>System.Nullable{System.Int64}, System</type>
     public long? UsedSpace { get; set; }
+
+    public override FileEntryType FileEntryType { get => FileEntryType.Folder; }
+
     public static FolderDto<int> GetSample()
     {
         return new FolderDto<int>

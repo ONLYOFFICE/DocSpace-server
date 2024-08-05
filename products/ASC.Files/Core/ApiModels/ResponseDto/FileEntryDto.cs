@@ -103,6 +103,8 @@ public abstract class FileEntryDto
     public int? ProviderId { get; set; }
 
     public string Order { get; set; }
+    
+    public abstract FileEntryType FileEntryType { get; }
 
     protected FileEntryDto(FileEntry entry)
     {
