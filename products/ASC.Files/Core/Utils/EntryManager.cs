@@ -250,7 +250,6 @@ public class EntryManager(IDaoFactory daoFactory,
     FileSharing fileSharing,
     IQuotaService quotaService,
     TenantManager tenantManager,
-    ExternalShare externalShare,
     FileChecker fileChecker,
     IDistributedCache distributedCache,
     NotifyClient notifyClient)
