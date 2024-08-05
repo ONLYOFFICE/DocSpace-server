@@ -97,6 +97,7 @@ public enum MessageAction
 
     UserUpdatedEmail = 5047,
     UserUpdatedPassword = 4017,
+    UserResetPassword = 4038,
     UserDeleted = 4018,
 
     UsersUpdatedType = 4019,

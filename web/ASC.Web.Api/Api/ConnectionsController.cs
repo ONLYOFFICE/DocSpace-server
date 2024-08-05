@@ -51,7 +51,8 @@ public class ConnectionsController(
     TenantManager tenantManager,
     UserPhotoManager userPhotoManager,
     DisplayUserSettingsHelper displayUserSettings,
-    ConnectionSocket socketManager)
+    ConnectionSocket socketManager,
+    StudioNotifyService studioNotifyService)
     : ControllerBase
 {
     /// <summary>
@@ -234,11 +235,12 @@ public class ConnectionsController(
     /// </short>
     /// <category>Active connections</category>
     /// <param type="System.Guid, System" method="url" name="userId">User ID</param>
+    /// <param name="dto"></param>
     /// <path>api/2.0/security/activeconnections/logoutall/{userId}</path>
     /// <httpMethod>PUT</httpMethod>
     /// <returns></returns>
     [HttpPut("logoutall/{userId:guid}")]
-    public async Task LogOutAllActiveConnectionsForUserAsync(Guid userId)
+    public async Task LogOutAllActiveConnectionsForUserAsync(Guid userId, LogoutUserDto dto)
     {
         var currentUserId = securityContext.CurrentAccount.ID;
         var currentUser = await userManager.GetUsersAsync(currentUserId);
@@ -249,7 +251,7 @@ public class ConnectionsController(
             throw new SecurityException("Method not available");
         }
 
-        await LogOutAllActiveConnections(userId);
+        await LogOutAllActiveConnections(userId, dto.ChangePassword);
     }
 
     [HttpPut("logoutall")]
@@ -266,7 +268,7 @@ public class ConnectionsController(
                 throw new SecurityException("Method not available");
             }
 
-            await LogOutAllActiveConnections(userId);
+            await LogOutAllActiveConnections(userId, dto.ChangePassword);
         }
     }
 
@@ -386,7 +388,7 @@ public class ConnectionsController(
         }
     }
 
-    private async Task LogOutAllActiveConnections(Guid? userId = null)
+    private async Task LogOutAllActiveConnections(Guid? userId = null, bool changePassword = false)
     {
         var currentUserId = securityContext.CurrentAccount.ID;
         var user = await userManager.GetUsersAsync(userId ?? currentUserId);
@@ -396,6 +398,13 @@ public class ConnectionsController(
         await messageService.SendAsync(currentUserId.Equals(user.Id) ? MessageAction.UserLogoutActiveConnections : MessageAction.UserLogoutActiveConnectionsForUser, MessageTarget.Create(user.Id), auditEventDate, userName);
         await cookiesManager.ResetUserCookieAsync(user.Id, false);
         await socketManager.LogoutUserAsync(user.Id);
+        if (changePassword)
+        {
+            await messageService.SendAsync(MessageAction.UserResetPassword, MessageTarget.Create(user.Id));
+            var password = UserManagerWrapper.GeneratePassword();
+            await securityContext.SetUserPasswordHashAsync(user.Id, password);
+            await studioNotifyService.UserPasswordChangeAsync(user);
+        }
     }
 
     private int GetLoginEventIdFromCookie()

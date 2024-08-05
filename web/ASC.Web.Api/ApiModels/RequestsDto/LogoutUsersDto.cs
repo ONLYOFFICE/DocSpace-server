@@ -29,4 +29,10 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 public class LogoutUsersDto
 {
     public List<Guid> UserIds { get; set; }
+    public bool ChangePassword { get; set; }
+}
+
+public class LogoutUserDto
+{
+    public bool ChangePassword { get; set; }
 }
