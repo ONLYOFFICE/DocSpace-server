@@ -48,7 +48,7 @@ module.exports = async (io) => {
         var offSess = await redisClient.get(userId);
         if(offSess && offSess != '{}')
         {
-          offSess = new Map(JSON.parse(offSess).map(i => [i[0], i[1]]));
+            var result = new Map(JSON.parse(offSess).map(i => [i[0], i[1]]));
         }
         else
         {
