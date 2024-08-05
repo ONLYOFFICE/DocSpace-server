@@ -50,7 +50,8 @@ public class ThirdpartyController(
     FileSecurity fileSecurity,
     UsersInRoomChecker usersInRoomChecker, 
     IDistributedLockProvider distributedLockProvider,
-    LoginProfileTransport loginProfileTransport)
+    LoginProfileTransport loginProfileTransport,
+    EmailValidationKeyModelHelper emailValidationKeyModelHelper)
     : ApiControllerBase
     {
     
@@ -186,8 +187,9 @@ public class ThirdpartyController(
         {
             throw new Exception(Resource.ErrorNotCorrectEmail);
         }
-
-        var linkData = await invitationService.GetInvitationDataAsync(inDto.Key, inDto.Email, inDto.EmployeeType ?? EmployeeType.RoomAdmin);
+        
+        var model = emailValidationKeyModelHelper.GetModel();
+        var linkData = await invitationService.GetInvitationDataAsync(inDto.Key, inDto.Email, inDto.EmployeeType ?? EmployeeType.RoomAdmin, model?.UiD);
 
         if (!linkData.IsCorrect)
         {
