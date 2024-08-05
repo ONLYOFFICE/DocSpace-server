@@ -338,8 +338,9 @@ module.exports = (io) => {
   }
 
   function logoutSession({ userId, loginEventId } = {}) {
+    const room = getRoom(userId);
     logger.info(`logout user ${userId} session ${loginEventId}`);
-    filesIO.to(userId).emit("s:logout-session", loginEventId);
+    filesIO.to(room).emit("s:logout-session", loginEventId);
   }
 
   return {
