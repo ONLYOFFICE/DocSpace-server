@@ -156,7 +156,11 @@ public class KeyPairRepositoryJWKSource
     var principal = context.getPrincipal();
     var authority = principal.getAuthorities().stream().findFirst().orElse(null);
 
-    if (context.getAuthorization().getRegisteredClientId() != null)
+    if (context.getRegisteredClient() != null
+        && context.getRegisteredClient().getClientId() != null)
+      context.getClaims().claim("cid", context.getRegisteredClient().getClientId());
+    if (context.getAuthorization() != null
+        && context.getAuthorization().getRegisteredClientId() != null)
       context.getClaims().claim("cid", context.getAuthorization().getRegisteredClientId());
     if (principal.getPrincipal() != null)
       context.getClaims().subject(principal.getPrincipal().toString());
