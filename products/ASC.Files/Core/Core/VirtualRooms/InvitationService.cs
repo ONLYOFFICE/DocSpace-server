@@ -198,9 +198,9 @@ public class InvitationService(
         return validation;
     }
     
-    public async Task<InvitationLinkData> GetInvitationDataAsync(string key, string email, EmployeeType employeeType = EmployeeType.All)
+    public async Task<InvitationLinkData> GetInvitationDataAsync(string key, string email, EmployeeType employeeType = EmployeeType.All, Guid? userId = default)
     {
-        var data = await GetLinkDataAsync(key, email, employeeType);
+        var data = await GetLinkDataAsync(key, email, employeeType, userId);
 
         data.Result = await GetQuotaBasedResultAsync(data);
 

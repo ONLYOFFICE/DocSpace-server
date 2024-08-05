@@ -75,7 +75,8 @@ public class UserController(
     CustomQuota customQuota,
     IDaoFactory daoFactory,
     FilesMessageService filesMessageService,
-    AuditEventsRepository auditEventsRepository)
+    AuditEventsRepository auditEventsRepository,
+    EmailValidationKeyModelHelper emailValidationKeyModelHelper)
     : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
 {
     
@@ -170,8 +171,8 @@ public class UserController(
     public async Task<EmployeeFullDto> AddMember(MemberRequestDto inDto)
     {
         await _apiContext.AuthByClaimAsync();
-
-        var linkData = inDto.FromInviteLink ? await invitationService.GetInvitationDataAsync(inDto.Key, inDto.Email, inDto.Type) : null;
+        var model = emailValidationKeyModelHelper.GetModel();
+        var linkData = inDto.FromInviteLink ? await invitationService.GetInvitationDataAsync(inDto.Key, inDto.Email, inDto.Type, model?.UiD) : null;
         if (linkData is { IsCorrect: false })
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_InvintationLink);
