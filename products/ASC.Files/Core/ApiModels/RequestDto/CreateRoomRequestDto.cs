@@ -70,4 +70,8 @@ public class CreateRoomRequestDto
     public long Quota { get; set; }
     
     public bool Indexing { get; set; }
+    
+    /// <summary>Stealth mode</summary>
+    /// <type>System.Boolean, System</type>
+    public bool Stealth { get; set; }
 }
