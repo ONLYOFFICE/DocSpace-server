@@ -376,6 +376,10 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
     {
         return await RenameFolderAsync(folder, newTitle);
     }
+    public Task<string> ChangeFolderTypeAsync(Folder<string> folder, FolderType folderType)
+    {
+        return Task.FromResult<string>(null);
+    }
     public async Task<string> RenameFolderAsync(Folder<string> folder, string newTitle)
     {
         var folderId = folder.Id;
