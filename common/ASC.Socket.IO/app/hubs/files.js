@@ -337,9 +337,9 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:update-history", { id, type });
   }
 
-  function logoutSession({ tenantId, userId, loginEventId } = {}) {
-    logger.info(`logout user ${userId} session ${loginEventId} tenant ${tenantId}`);
-    filesIO.to(`${tenantId}-${userId}`).emit("s:logout-session", loginEventId);
+  function logoutSession({ room, loginEventId } = {}) {
+    logger.info(`logout user ${room} session ${loginEventId}`);
+    filesIO.to(room).emit("s:logout-session", loginEventId);
   }
 
   return {
