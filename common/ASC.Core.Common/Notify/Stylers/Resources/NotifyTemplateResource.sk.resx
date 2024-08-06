@@ -211,11 +211,11 @@
   <data name="TextForFooterUnsubsribe" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
     &lt;td class="fol" style="color: #666666; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; margin: 0; padding: 40px 0 8px; vertical-align: top;"&gt;
-        V prípade akýchkoľvek otázok o kúpe nám pošlite e-mail na adresu &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="mailto:sales@onlyoffice.com"&gt;sales@onlyoffice.com&lt;/a&gt;.
+        V prípade akýchkoľvek otázok o kúpe nám pošlite e-mail na adresu &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="%SALESEMAIL%"&gt;%SALESEMAIL%&lt;/a&gt;.
     &lt;/td&gt;
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
     &lt;td class="fol" style="color: #666666; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; margin: 0; padding: 0; vertical-align: top;"&gt;
-        V prípade technických problémov kontaktujte náš &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://www.onlyoffice.com/support-contact-form.aspx"&gt;tím podpory&lt;/a&gt;.
+        V prípade technických problémov kontaktujte náš &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="%SUPPORTURL%"&gt;tím podpory&lt;/a&gt;.
     &lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;

@@ -614,7 +614,7 @@ internal class FolderDao(
             var folder = await GetFolderAsync(folderId);
             var oldParentId = folder.ParentId;
 
-            if (folder.FolderType != FolderType.DEFAULT && !DocSpaceHelper.IsRoom(folder.FolderType))
+            if ((folder.FolderType is not (FolderType.DEFAULT or FolderType.FormFillingFolderInProgress or FolderType.FormFillingFolderDone)) && !DocSpaceHelper.IsRoom(folder.FolderType))
             {
                 throw new ArgumentException("It is forbidden to move the System folder.", nameof(folderId));
             }
@@ -809,11 +809,15 @@ internal class FolderDao(
         }
 
     public async Task<IDictionary<int, string>> CanMoveOrCopyAsync(IEnumerable<int> folderIds, int to)
-    {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-
+    {        
         var result = new Dictionary<int, string>();
-
+        if (!folderIds.Any())
+        {
+            return result;
+        }
+        
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         foreach (var folderId in folderIds)
         {
@@ -828,19 +832,7 @@ internal class FolderDao(
 
             if (conflict != 0)
             {
-                var files = filesDbContext.DbFilesAsync(tenantId, folderId, conflict);
-
-                await foreach (var file in files)
-                {
-                    result[file.Id] = file.Title;
-                }
-
-                var children = await filesDbContext.ArrayAsync(tenantId, folderId).ToListAsync();
-
-                foreach (var pair in await CanMoveOrCopyAsync(children, conflict))
-                {
-                    result.Add(pair.Key, pair.Value);
-                }
+                result[folderId] = "";
             }
         }
 
@@ -912,6 +904,25 @@ internal class FolderDao(
         var toUpdate = await filesDbContext.FolderAsync(tenantId, folder.Id);
 
         toUpdate.Title = Global.ReplaceInvalidCharsAndTruncate(newTitle);
+        toUpdate.ModifiedOn = DateTime.UtcNow;
+        toUpdate.ModifiedBy = _authContext.CurrentAccount.ID;
+        filesDbContext.Update(toUpdate);
+
+        await filesDbContext.SaveChangesAsync();
+
+        _ = factoryIndexer.IndexAsync(toUpdate);
+
+        return folder.Id;
+    }
+
+    public async Task<int> ChangeFolderTypeAsync(Folder<int> folder, FolderType folderType)
+    {
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        var toUpdate = await filesDbContext.FolderAsync(tenantId, folder.Id);
+
+        toUpdate.FolderType = folderType;
         toUpdate.ModifiedOn = DateTime.UtcNow;
         toUpdate.ModifiedBy = _authContext.CurrentAccount.ID;
         filesDbContext.Update(toUpdate);

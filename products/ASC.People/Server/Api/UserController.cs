@@ -77,7 +77,8 @@ public class UserController(
     CustomQuota customQuota,
     IDaoFactory daoFactory,
     FilesMessageService filesMessageService,
-    AuditEventsRepository auditEventsRepository)
+    AuditEventsRepository auditEventsRepository,
+    EmailValidationKeyModelHelper emailValidationKeyModelHelper)
     : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
 {
     
@@ -172,8 +173,8 @@ public class UserController(
     public async Task<EmployeeFullDto> AddMember(MemberRequestDto inDto)
     {
         await _apiContext.AuthByClaimAsync();
-
-        var linkData = inDto.FromInviteLink ? await invitationService.GetInvitationDataAsync(inDto.Key, inDto.Email, inDto.Type) : null;
+        var model = emailValidationKeyModelHelper.GetModel();
+        var linkData = inDto.FromInviteLink ? await invitationService.GetInvitationDataAsync(inDto.Key, inDto.Email, inDto.Type, model?.UiD) : null;
         if (linkData is { IsCorrect: false })
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_InvintationLink);
@@ -587,11 +588,15 @@ public class UserController(
     public async Task<EmployeeFullDto> GetByEmailAsync([FromQuery] string email)
     {
         var user = await _userManager.GetUserByEmailAsync(email);
-        if (user.Id == Constants.LostUser.Id)
+        
+        var isInvite = _httpContextAccessor.HttpContext!.User.Claims
+            .Any(role => role.Type == ClaimTypes.Role && ConfirmTypeExtensions.TryParse(role.Value, out var confirmType) && confirmType == ConfirmType.LinkInvite);
+        if (user.Id == Constants.LostUser.Id || (isInvite && user.Id != authContext.CurrentAccount.ID))
         {
             throw new ItemNotFoundException("User not found");
         }
-
+        
+        
         return await employeeFullDtoHelper.GetFullAsync(user);
     }
 
