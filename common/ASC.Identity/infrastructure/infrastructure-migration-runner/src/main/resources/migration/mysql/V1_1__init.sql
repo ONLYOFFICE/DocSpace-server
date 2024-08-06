@@ -66,9 +66,10 @@ CREATE TABLE identity_authorizations (
     refresh_token_expires_at datetime(6),
     is_invalidated tinyint(1) default false,
     modified_at datetime(6),
-    primary key (principal_id, registered_client_id),
+    primary key (principal_id, registered_client_id, authorization_grant_type),
     index idx_identity_authorizations_registered_client_id (registered_client_id),
     index idx_identity_authorizations_principal_id (principal_id),
+    index idx_identity_authorizations_grant_type (authorization_grant_type),
     index idx_identity_authorizations_is_invalidated (is_invalidated)
 ) engine=InnoDB;
 

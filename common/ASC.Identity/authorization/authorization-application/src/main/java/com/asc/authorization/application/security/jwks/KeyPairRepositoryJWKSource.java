@@ -49,12 +49,14 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.AllArgsConstructor;
-import lombok.SneakyThrows;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext;
@@ -67,14 +69,14 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class KeyPairRepositoryJWKSource
     implements JWKSource<SecurityContext>, OAuth2TokenCustomizer<JwtEncodingContext> {
 
   private final AscOAuth2RegisteredClientConfiguration registeredClientConfiguration;
 
   @Autowired
-  @Qualifier("rsa")
+  @Qualifier("ec")
   private final JwksKeyPairGenerator keyPairGenerator;
 
   private final KeyPairMapper keyPairMapper;
@@ -84,40 +86,37 @@ public class KeyPairRepositoryJWKSource
   private static Duration deprecationPeriod;
 
   /**
-   * Initializes the key rotation and deprecation periods based on the configuration. Also
-   * invalidates and rotates keys if needed.
+   * Initializes the rotation and deprecation periods based on the registered client configuration.
    */
-  @SneakyThrows
   @PostConstruct
   public void init() {
     rotationPeriod =
-        Duration.ofMinutes(registeredClientConfiguration.getAccessTokenMinutesTTL() * 4L);
+        Duration.ofSeconds(registeredClientConfiguration.getAccessTokenMinutesTTL() * 4L);
     deprecationPeriod =
-        Duration.ofMinutes(registeredClientConfiguration.getAccessTokenMinutesTTL());
-    rotateKeysIfNeeded();
-    invalidateKeys();
+        Duration.ofSeconds(registeredClientConfiguration.getAccessTokenMinutesTTL());
   }
 
-  /** Scheduled task to periodically invalidate and rotate keys. Runs every 60 seconds. */
-  @Scheduled(fixedRate = 60000)
+  /** Scheduled task for rotating keys and cleaning up old keys. Runs every 30 minutes. */
+  @EventListener(ApplicationReadyEvent.class)
+  @Scheduled(fixedDelayString = "PT30M")
+  @SchedulerLock(name = "key_rotation_task")
   public void scheduledKeyRotationAndCleanup() {
     try {
       rotateKeysIfNeeded();
       invalidateKeys();
     } catch (Exception e) {
-      log.error("Error during scheduled key rotation and cleanup", e);
+      log.error("Critical error during key rotation and cleanup", e);
     }
   }
 
   /**
-   * Retrieves a list of JWKs that match the specified selector and security context.
+   * Retrieves a list of JWKs that match the given selector and security context.
    *
-   * @param jwkSelector The JWK selector used to filter keys.
-   * @param securityContext The security context.
-   * @return A list of matching JWKs.
-   * @throws KeySourceException if an error occurs while fetching JWKs.
+   * @param jwkSelector the JWK selector
+   * @param securityContext the security context
+   * @return a list of matching JWKs
+   * @throws KeySourceException if an error occurs while retrieving the keys
    */
-  @SneakyThrows
   public List<JWK> get(JWKSelector jwkSelector, SecurityContext securityContext)
       throws KeySourceException {
     log.debug("Trying to get JWK");
@@ -142,9 +141,9 @@ public class KeyPairRepositoryJWKSource
   }
 
   /**
-   * Customizes the JWT encoding context with specific claims and headers.
+   * Customizes the JWT encoding context with additional claims and header information.
    *
-   * @param context The JWT encoding context.
+   * @param context the JWT encoding context
    */
   public void customize(JwtEncodingContext context) {
     var activeKeyPair = getLatestActiveKeyPair();
@@ -181,9 +180,9 @@ public class KeyPairRepositoryJWKSource
   }
 
   /**
-   * Rotates keys if needed based on the rotation period.
+   * Rotates the keys if needed based on the rotation period.
    *
-   * @throws NoSuchAlgorithmException if an error occurs while generating a new key pair.
+   * @throws NoSuchAlgorithmException if an error occurs while generating the new key pair
    */
   protected void rotateKeysIfNeeded() throws NoSuchAlgorithmException {
     var latestKeyPair = getLatestActiveKeyPair();
@@ -195,7 +194,7 @@ public class KeyPairRepositoryJWKSource
     }
   }
 
-  /** Invalidates keys that have surpassed the rotation and deprecation periods. */
+  /** Invalidates old keys based on the rotation and deprecation periods. */
   protected void invalidateKeys() {
     var cutoffTime =
         ZonedDateTime.now(ZoneOffset.UTC).minus(rotationPeriod).minus(deprecationPeriod);
@@ -205,7 +204,7 @@ public class KeyPairRepositoryJWKSource
   /**
    * Retrieves the latest active key pair.
    *
-   * @return The latest active key pair or null if none found.
+   * @return the latest active key pair, or null if none are found
    */
   private KeyPair getLatestActiveKeyPair() {
     var cutoffTime =
@@ -218,7 +217,7 @@ public class KeyPairRepositoryJWKSource
   /**
    * Retrieves the set of active key pairs.
    *
-   * @return A set of active key pairs.
+   * @return a set of active key pairs
    */
   private Set<KeyPair> getActiveKeyPairs() {
     var cutoffTime =
@@ -227,9 +226,9 @@ public class KeyPairRepositoryJWKSource
   }
 
   /**
-   * Generates and stores a new key pair.
+   * Generates a new key pair and stores it in the key pair service.
    *
-   * @throws NoSuchAlgorithmException if an error occurs while generating the key pair.
+   * @throws NoSuchAlgorithmException if an error occurs while generating the key pair
    */
   private void generateAndStoreNewKeyPair() throws NoSuchAlgorithmException {
     var pair = keyPairGenerator.generateKeyPair();
@@ -246,8 +245,8 @@ public class KeyPairRepositoryJWKSource
   /**
    * Builds a JWK from the given key pair.
    *
-   * @param keyPair The key pair to build the JWK from.
-   * @return The resulting JWK or null if an error occurs.
+   * @param keyPair the key pair
+   * @return the JWK, or null if an error occurs
    */
   private JWK buildJwk(KeyPair keyPair) {
     try {
