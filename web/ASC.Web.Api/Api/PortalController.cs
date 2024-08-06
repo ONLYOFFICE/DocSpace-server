@@ -86,15 +86,9 @@ public class PortalController(
     [HttpGet("")]
     public async Task<TenantDto> Get()
     {
-        var tenant = await tenantManager.GetCurrentTenantAsync();   
-        var result = mapper.Map<TenantDto>(tenant);
-        
-        if (!await permissionContext.CheckPermissionsAsync(SecurityConstants.EditPortalSettings))
-        {
-            result.PaymentId = null;
-        }
-        
-        return result;
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        return  mapper.Map<TenantDto>(tenant);
     }
 
     /// <summary>
@@ -181,7 +175,7 @@ public class PortalController(
     [HttpGet("tenantextra")]
     public async Task<TenantExtraDto> GetTenantExtra(bool refresh)
     {
-        //await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         var quota = await quotaHelper.GetCurrentQuotaAsync(refresh);
         var docServiceQuota = await documentServiceLicense.GetLicenseQuotaAsync();
         
@@ -240,7 +234,8 @@ public class PortalController(
     /// <httpMethod>GET</httpMethod>
     [HttpGet("userscount")]
     public async Task<long> GetUsersCountAsync()
-    {
+    {        
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         return (await userManager.GetUserNamesAsync(EmployeeStatus.Active)).Length;
     }
 
@@ -258,7 +253,8 @@ public class PortalController(
     [AllowNotPayment]
     [HttpGet("tariff")]
     public async Task<TariffDto> GetTariffAsync(bool refresh)
-    {
+    {        
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         var tenant = await tenantManager.GetCurrentTenantAsync();
         var source = await tariffService.GetTariffAsync(tenant.Id, refresh: refresh);
 

@@ -45,7 +45,8 @@ public class PaymentController(UserManager userManager,
         IMemoryCache memoryCache,
         IHttpContextAccessor httpContextAccessor,
         MessageService messageService,
-        StudioNotifyService studioNotifyService)
+        StudioNotifyService studioNotifyService,
+        PermissionContext permissionContext)
     : ControllerBase
 {
     private readonly int _maxCount = 10;
@@ -220,7 +221,8 @@ public class PaymentController(UserManager userManager,
     /// <httpMethod>GET</httpMethod>
     [HttpGet("quota")]
     public async Task<QuotaDto> GetQuotaAsync(bool refresh)
-    {
+    {        
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         return await tariffHelper.GetCurrentQuotaAsync(refresh);
     }
 
