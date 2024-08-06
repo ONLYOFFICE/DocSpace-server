@@ -331,12 +331,17 @@ module.exports = (io) => {
     logger.info(`changed user invitation limit in room ${room}, value ${value}`);
     filesIO.to(room).emit("s:change-invitation-limit-value", value);
   }
-  
+
   function updateHistory({ room, id, type } = {}) {
     logger.info(`update ${type} history ${id} in room ${room}`);
     filesIO.to(room).emit("s:update-history", { id, type });
   }
-  
+
+  function logoutSession({ room, loginEventId } = {}) {
+    logger.info(`logout user ${room} session ${loginEventId}`);
+    filesIO.to(room).emit("s:logout-session", loginEventId);
+  }
+
   return {
     startEdit,
     stopEdit,
@@ -354,5 +359,6 @@ module.exports = (io) => {
     markAsNewFolders,
     changeInvitationLimitValue,
     updateHistory,
+    logoutSession
   };
 };
