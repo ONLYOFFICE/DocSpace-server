@@ -653,12 +653,9 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         var filter = type switch
         {
             RoomType.FillingFormsRoom => FilterType.FillingFormsRooms,
-            RoomType.ReadOnlyRoom => FilterType.ReadOnlyRooms,
             RoomType.EditingRoom => FilterType.EditingRooms,
-            RoomType.ReviewRoom => FilterType.ReviewRooms,
             RoomType.CustomRoom => FilterType.CustomRooms,
             RoomType.PublicRoom => FilterType.PublicRooms,
-            RoomType.FormRoom => FilterType.FormRooms,
             _ => FilterType.None
         };
 

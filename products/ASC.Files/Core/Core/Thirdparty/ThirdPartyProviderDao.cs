@@ -370,17 +370,7 @@ internal abstract class ThirdPartyProviderDao
     
     internal static FolderType GetRoomFolderType(FilterType filterType)
     {
-        var typeFilter = filterType switch
-        {
-            FilterType.FillingFormsRooms => FolderType.FillingFormsRoom,
-            FilterType.EditingRooms => FolderType.EditingRoom,
-            FilterType.ReviewRooms => FolderType.ReviewRoom,
-            FilterType.ReadOnlyRooms => FolderType.ReadOnlyRoom,
-            FilterType.CustomRooms => FolderType.CustomRoom,
-            FilterType.PublicRooms => FolderType.PublicRoom,
-            _ => FolderType.DEFAULT
-        };
-        return typeFilter;
+        return DocSpaceHelper.MapToFolderType(filterType) ?? FolderType.DEFAULT;
     }
 
     #endregion

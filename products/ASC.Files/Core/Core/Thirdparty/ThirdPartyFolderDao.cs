@@ -714,17 +714,7 @@ internal abstract class BaseFolderDao
             return rooms;
         }
 
-        var typeFilter = filterType switch
-        {
-            FilterType.FillingFormsRooms => FolderType.FillingFormsRoom,
-            FilterType.EditingRooms => FolderType.EditingRoom,
-            FilterType.ReviewRooms => FolderType.ReviewRoom,
-            FilterType.ReadOnlyRooms => FolderType.ReadOnlyRoom,
-            FilterType.CustomRooms => FolderType.CustomRoom,
-            FilterType.PublicRooms => FolderType.PublicRoom,
-            FilterType.FormRooms => FolderType.FormRoom,
-            _ => FolderType.DEFAULT
-        };
+        var typeFilter = DocSpaceHelper.MapToFolderType(filterType) ?? FolderType.DEFAULT;
 
         return rooms.Where(f => f.FolderType == typeFilter);
     }

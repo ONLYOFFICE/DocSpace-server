@@ -1639,17 +1639,7 @@ internal class FolderDao(
 
     private FolderType GetRoomTypeFilter(FilterType filterType)
     {
-        return filterType switch
-        {
-            FilterType.FillingFormsRooms => FolderType.FillingFormsRoom,
-            FilterType.EditingRooms => FolderType.EditingRoom,
-            FilterType.ReviewRooms => FolderType.ReviewRoom,
-            FilterType.ReadOnlyRooms => FolderType.ReadOnlyRoom,
-            FilterType.CustomRooms => FolderType.CustomRoom,
-            FilterType.PublicRooms => FolderType.PublicRoom,
-            FilterType.FormRooms => FolderType.FormRoom,
-            _ => FolderType.CustomRoom
-        };
+        return DocSpaceHelper.MapToFolderType(filterType) ?? FolderType.CustomRoom;
     }
 
     public async Task<IDataWriteOperator> CreateDataWriteOperatorAsync(
