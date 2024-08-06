@@ -47,9 +47,6 @@ public class ThirdpartyController(
     StudioNotifyService studioNotifyService,
     TenantManager tenantManager,
     InvitationService invitationService,
-    FileSecurity fileSecurity,
-    UsersInRoomChecker usersInRoomChecker, 
-    IDistributedLockProvider distributedLockProvider,
     LoginProfileTransport loginProfileTransport,
     EmailValidationKeyModelHelper emailValidationKeyModelHelper)
     : ApiControllerBase
@@ -189,7 +186,7 @@ public class ThirdpartyController(
         }
         
         var model = emailValidationKeyModelHelper.GetModel();
-        var linkData = await invitationService.GetInvitationDataAsync(inDto.Key, inDto.Email, inDto.EmployeeType ?? EmployeeType.RoomAdmin, model?.UiD);
+        var linkData = await invitationService.GetLinkDataAsync(inDto.Key, inDto.Email, inDto.EmployeeType ?? EmployeeType.RoomAdmin, model?.UiD);
 
         if (!linkData.IsCorrect)
         {
@@ -197,6 +194,7 @@ public class ThirdpartyController(
         }
 
         var employeeType = linkData.EmployeeType;
+        bool quotaLimit;
 
         Guid userId;
         try
@@ -205,7 +203,7 @@ public class ThirdpartyController(
 
             var invitedByEmail = linkData.LinkType == InvitationLinkType.Individual;
 
-            var newUser = await CreateNewUser(
+            (var newUser, quotaLimit) = await CreateNewUser(
                 GetFirstName(inDto, thirdPartyProfile), 
                 GetLastName(inDto, thirdPartyProfile), 
                 GetEmailAddress(inDto, thirdPartyProfile), 
@@ -245,22 +243,7 @@ public class ThirdpartyController(
 
         if (linkData is { LinkType: InvitationLinkType.CommonToRoom })
         {
-            var success = int.TryParse(linkData.RoomId, out var id);
-            var tenantId = await tenantManager.GetCurrentTenantIdAsync();
-
-            await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetUsersInRoomCountCheckKey(tenantId)))
-            {
-                if (success)
-                {
-                    await usersInRoomChecker.CheckAppend();
-                    await fileSecurity.ShareAsync(id, FileEntryType.Folder, user.Id, linkData.Share);
-                }
-                else
-                {
-                    await usersInRoomChecker.CheckAppend();
-                    await fileSecurity.ShareAsync(linkData.RoomId, FileEntryType.Folder, user.Id, linkData.Share);
-                }
-            }
+            await invitationService.AddUserToRoomByInviteAsync(linkData, user, quotaLimit);
         }
     }
 
@@ -283,7 +266,7 @@ public class ThirdpartyController(
         await messageService.SendAsync(MessageAction.UserUnlinkedSocialAccount, GetMeaningfulProviderName(provider));
     }
 
-    private async Task<UserInfo> CreateNewUser(string firstName, string lastName, string email, string passwordHash, EmployeeType employeeType, bool fromInviteLink, bool inviteByEmail, string cultureName)
+    private async Task<(UserInfo, bool)> CreateNewUser(string firstName, string lastName, string email, string passwordHash, EmployeeType employeeType, bool fromInviteLink, bool inviteByEmail, string cultureName)
     {
         if (SetupInfo.IsSecretEmail(email))
         {
@@ -310,8 +293,20 @@ public class ThirdpartyController(
         {
             user.CultureName = cultureName;
         }
-        
-        return await userManagerWrapper.AddUserAsync(user, passwordHash, true, true, employeeType, fromInviteLink, updateExising: inviteByEmail);
+
+        var quotaLimit = false;
+
+        try
+        {
+            user = await userManagerWrapper.AddUserAsync(user, passwordHash, true, true, employeeType, fromInviteLink, updateExising: inviteByEmail);
+        }
+        catch (TenantQuotaException)
+        {
+            quotaLimit = true;
+            user = await userManagerWrapper.AddUserAsync(user, passwordHash, true, true, EmployeeType.User, fromInviteLink, updateExising: inviteByEmail);
+        }
+
+        return (user, quotaLimit);
     }
 
     private async Task SaveContactImage(Guid userID, string url)
