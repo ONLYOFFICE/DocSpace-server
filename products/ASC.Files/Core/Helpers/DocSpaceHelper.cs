@@ -33,11 +33,8 @@ public static class DocSpaceHelper
         return folderType is 
             FolderType.CustomRoom or 
             FolderType.EditingRoom or 
-            FolderType.ReviewRoom or 
-            FolderType.ReadOnlyRoom or 
             FolderType.FillingFormsRoom or
-            FolderType.PublicRoom or
-            FolderType.FormRoom;
+            FolderType.PublicRoom;
     }
 
     public static bool IsFormsFillingSystemFolder(FolderType folderType)
