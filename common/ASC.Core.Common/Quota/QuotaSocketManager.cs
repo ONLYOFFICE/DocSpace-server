@@ -67,7 +67,9 @@ public class QuotaSocketManager(
 
     public async Task LogoutSession(Guid userId, int loginEventId = 0)
     {
-        await MakeRequest("logout-session", new { userId, loginEventId });
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+
+        await MakeRequest("logout-session", new { tenantId, userId, loginEventId });
     }
 
     private async Task<string> GetQuotaRoom()
