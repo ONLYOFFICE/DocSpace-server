@@ -1072,6 +1072,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                     action == FilesSecurityActions.Move ||
                     action == FilesSecurityActions.Duplicate ||
                     action == FilesSecurityActions.EditHistory ||
+                    action == FilesSecurityActions.SubmitToFormGallery ||
                     action == FilesSecurityActions.Embed) && file != null )
                 {
                     var parentFolders = await GetFileParentFolders(file.ParentId);
