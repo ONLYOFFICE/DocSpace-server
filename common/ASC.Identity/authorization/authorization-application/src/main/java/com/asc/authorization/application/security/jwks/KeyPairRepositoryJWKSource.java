@@ -91,9 +91,9 @@ public class KeyPairRepositoryJWKSource
   @PostConstruct
   public void init() {
     rotationPeriod =
-        Duration.ofSeconds(registeredClientConfiguration.getAccessTokenMinutesTTL() * 4L);
+        Duration.ofMinutes(registeredClientConfiguration.getAccessTokenMinutesTTL() * 4L);
     deprecationPeriod =
-        Duration.ofSeconds(registeredClientConfiguration.getAccessTokenMinutesTTL());
+        Duration.ofMinutes(registeredClientConfiguration.getAccessTokenMinutesTTL());
   }
 
   /** Scheduled task for rotating keys and cleaning up old keys. Runs every 30 minutes. */

@@ -64,6 +64,10 @@ resilience4j-spring-boot3 - Resilience4j is a fault tolerance library designed f
 License:              Apache 2.0
 License File:         resilience4j.license
 
+shedlock            - Distributed lock for your scheduled tasks. (https://github.com/lukas-krecan/ShedLock)
+License:              Apache 2.0
+License File:         shedlock.license
+
 spring-boot-starter-amqp - AMQP Spring Boot Starter. (https://github.com/spring-projects/spring-boot/tree/main/spring-boot-project/spring-boot-starters)
 License:              Apache 2.0
 License File:         spring-boot-starter.license
