@@ -155,6 +155,8 @@ public final class PersonalAccessTokenAuthenticationConverter implements Authent
           clientPrincipal,
           requestedScopes,
           me.getResponse().getId(),
+          me.getResponse().getUserName(),
+          me.getResponse().getEmail(),
           tenantResponse.getTenantId(),
           hostAddress,
           additionalParameters);

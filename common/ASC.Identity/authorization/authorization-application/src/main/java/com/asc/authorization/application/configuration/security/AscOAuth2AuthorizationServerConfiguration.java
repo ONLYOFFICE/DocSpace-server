@@ -33,6 +33,7 @@ import com.asc.authorization.application.security.oauth.converters.PersonalAcces
 import com.asc.authorization.application.security.oauth.providers.AscAuthenticationProvider;
 import com.asc.authorization.application.security.oauth.providers.AscPersonalAccessTokenAuthenticationProvider;
 import com.asc.common.application.client.AscApiClient;
+import com.asc.common.service.ports.output.message.publisher.AuditMessagePublisher;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import jakarta.servlet.RequestDispatcher;
@@ -72,6 +73,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 public class AscOAuth2AuthorizationServerConfiguration {
   private final AscOAuth2AuthorizationFormConfiguration formConfiguration;
   private final AscApiClient ascApiClient;
+  private final AuditMessagePublisher auditMessagePublisher;
   private final OAuth2AuthorizationService authorizationService;
   private final OAuth2TokenCustomizer<JwtEncodingContext> jwtCustomizer;
   private final JWKSource<SecurityContext> jwkSource;
@@ -110,7 +112,9 @@ public class AscOAuth2AuthorizationServerConfiguration {
                                     new OAuth2AuthorizationCodeAuthenticationProvider(
                                         authorizationService, tokenGenerator()),
                                     new AscPersonalAccessTokenAuthenticationProvider(
-                                        authorizationService, tokenGenerator())))))
+                                        auditMessagePublisher,
+                                        authorizationService,
+                                        tokenGenerator())))))
         .authorizationEndpoint(
             e -> {
               e.consentPage(formConfiguration.getConsent());

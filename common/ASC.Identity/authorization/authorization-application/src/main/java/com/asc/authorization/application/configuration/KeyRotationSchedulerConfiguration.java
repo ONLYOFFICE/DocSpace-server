@@ -9,8 +9,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
- * Configuration class for setting up ShedLock for scheduling key rotation tasks.
- * Enables scheduler locking with default lock times.
+ * Configuration class for setting up ShedLock for scheduling key rotation tasks. Enables scheduler
+ * locking with default lock times.
  */
 @Configuration
 @EnableSchedulerLock(defaultLockAtLeastFor = "PT10s", defaultLockAtMostFor = "PT20S")
@@ -25,10 +25,10 @@ public class KeyRotationSchedulerConfiguration {
   @Bean
   public LockProvider lockProvider(DataSource dataSource) {
     return new JdbcTemplateLockProvider(
-            JdbcTemplateLockProvider.Configuration.builder()
-                    .withJdbcTemplate(new JdbcTemplate(dataSource))
-                    .withTableName("identity_shedlock")
-                    .usingDbTime()
-                    .build());
+        JdbcTemplateLockProvider.Configuration.builder()
+            .withJdbcTemplate(new JdbcTemplate(dataSource))
+            .withTableName("identity_shedlock")
+            .usingDbTime()
+            .build());
   }
 }

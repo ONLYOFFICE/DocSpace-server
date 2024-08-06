@@ -32,10 +32,16 @@ import com.asc.authorization.application.security.oauth.AscAuthorizationGrantTyp
 import com.asc.authorization.application.security.oauth.authentications.PersonalAccessTokenAuthenticationToken;
 import com.asc.authorization.application.security.oauth.authorities.TenantAuthority;
 import com.asc.authorization.application.security.oauth.errors.AuthenticationError;
+import com.asc.common.core.domain.value.enums.AuditCode;
+import com.asc.common.service.ports.output.message.publisher.AuditMessagePublisher;
+import com.asc.common.service.transfer.message.AuditMessage;
+import com.asc.common.utilities.HttpUtils;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -50,6 +56,8 @@ import org.springframework.security.oauth2.server.authorization.settings.OAuth2T
 import org.springframework.security.oauth2.server.authorization.token.DefaultOAuth2TokenContext;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenContext;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenGenerator;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 /** This class provides authentication for personal access tokens. */
 @Slf4j
@@ -58,6 +66,10 @@ public class AscPersonalAccessTokenAuthenticationProvider implements Authenticat
   private static final String ERROR_URI =
       "https://datatracker.ietf.org/doc/html/rfc6749#section-5.2";
 
+  @Value("${spring.application.name}")
+  private String serviceName;
+
+  private final AuditMessagePublisher auditMessagePublisher;
   private final OAuth2AuthorizationService authorizationService;
   private final OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator;
 
@@ -71,6 +83,11 @@ public class AscPersonalAccessTokenAuthenticationProvider implements Authenticat
   public Authentication authenticate(Authentication authentication) throws AuthenticationException {
     log.debug("Authenticating with token: {}", authentication);
     if (authentication instanceof PersonalAccessTokenAuthenticationToken patAuthentication) {
+      var ctx = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+      if (ctx == null)
+        throw new BadCredentialsException("Authentication failed due to missing request context");
+      var request = ctx.getRequest();
+
       var clientPrincipal = getAuthenticatedClientElseThrowInvalidClient(patAuthentication);
       var registeredClient = clientPrincipal.getRegisteredClient();
       if (registeredClient == null
@@ -119,6 +136,26 @@ public class AscPersonalAccessTokenAuthenticationProvider implements Authenticat
       authorizationService.save(authorizationBuilder.build());
 
       log.debug("Authentication successful for user: {}", patAuthentication.getUserId());
+
+      auditMessagePublisher.publish(
+          AuditMessage.builder()
+              .ip(
+                  HttpUtils.getRequestClientAddress(request)
+                      .map(HttpUtils::extractHostFromUrl)
+                      .orElseGet(
+                          () -> HttpUtils.extractHostFromUrl(HttpUtils.getFirstRequestIP(request))))
+              .initiator(serviceName)
+              .target(registeredClient.getClientId())
+              .browser(HttpUtils.getClientBrowser(request))
+              .platform(HttpUtils.getClientOS(request))
+              .tenantId(patAuthentication.getTenantId())
+              .userId(patAuthentication.getUserId())
+              .userEmail(patAuthentication.getUserEmail())
+              .userName(patAuthentication.getUserName())
+              .page(HttpUtils.getFullURL(request))
+              .action(AuditCode.GENERATE_PERSONAL_ACCESS_TOKEN.getCode())
+              .build());
+
       return new OAuth2AccessTokenAuthenticationToken(
           registeredClient, clientPrincipal, accessToken, null);
     }

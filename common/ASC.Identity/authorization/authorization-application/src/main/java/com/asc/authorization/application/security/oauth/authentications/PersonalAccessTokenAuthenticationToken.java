@@ -42,6 +42,8 @@ import org.springframework.security.oauth2.server.authorization.authentication.O
 public class PersonalAccessTokenAuthenticationToken
     extends OAuth2AuthorizationGrantAuthenticationToken {
   private final String userId;
+  private final String userName;
+  private final String userEmail;
   private final int tenantId;
   private final String tenantUrl;
   private final Set<String> scopes;
@@ -52,6 +54,8 @@ public class PersonalAccessTokenAuthenticationToken
    * @param clientPrincipal the authenticated client principal
    * @param scopes the requested scopes
    * @param userId the user ID associated with the personal access token
+   * @param userName the username associated with the personal access token
+   * @param userEmail the user email associated with the personal access token
    * @param tenantId the tenant ID associated with the personal access token
    * @param tenantUrl the tenant URL associated with the personal access token
    * @param additionalParameters additional parameters for the authorization request
@@ -60,6 +64,8 @@ public class PersonalAccessTokenAuthenticationToken
       Authentication clientPrincipal,
       @Nullable Set<String> scopes,
       String userId,
+      String userName,
+      String userEmail,
       int tenantId,
       String tenantUrl,
       @Nullable Map<String, Object> additionalParameters) {
@@ -68,6 +74,8 @@ public class PersonalAccessTokenAuthenticationToken
         Collections.unmodifiableSet(
             scopes != null ? new HashSet<>(scopes) : Collections.emptySet());
     this.userId = userId;
+    this.userName = userName;
+    this.userEmail = userEmail;
     this.tenantId = tenantId;
     this.tenantUrl = tenantUrl;
   }

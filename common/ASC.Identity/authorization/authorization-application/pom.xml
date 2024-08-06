@@ -28,6 +28,10 @@
         </dependency>
         <dependency>
             <groupId>com.asc</groupId>
+            <artifactId>common-messaging</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.asc</groupId>
             <artifactId>common-service</artifactId>
         </dependency>
         <dependency>

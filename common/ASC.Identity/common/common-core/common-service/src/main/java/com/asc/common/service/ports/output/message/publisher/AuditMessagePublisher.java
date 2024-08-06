@@ -25,15 +25,15 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-package com.asc.registration.service.ports.output.message.publisher;
+package com.asc.common.service.ports.output.message.publisher;
 
 import com.asc.common.service.transfer.message.AuditMessage;
 
 /**
- * ClientAuditMessagePublisher defines the contract for publishing audit messages. This interface
- * handles the publishing of audit messages related to client operations.
+ * AuditMessagePublisher defines the contract for publishing audit messages. This interface handles
+ * the publishing of audit messages.
  */
-public interface ClientAuditMessagePublisher {
+public interface AuditMessagePublisher {
   /**
    * Publishes an audit message.
    *

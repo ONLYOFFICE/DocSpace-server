@@ -35,6 +35,9 @@ import com.asc.common.application.client.AscApiClient;
 import com.asc.common.application.transfer.response.AscPersonResponse;
 import com.asc.common.application.transfer.response.AscSettingsResponse;
 import com.asc.common.application.transfer.response.AscTenantResponse;
+import com.asc.common.core.domain.value.enums.AuditCode;
+import com.asc.common.service.ports.output.message.publisher.AuditMessagePublisher;
+import com.asc.common.service.transfer.message.AuditMessage;
 import com.asc.common.utilities.HttpUtils;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import jakarta.servlet.http.HttpServletRequest;
@@ -46,6 +49,7 @@ import java.util.concurrent.ExecutionException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -63,7 +67,11 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 public class AscAuthenticationProvider implements AuthenticationProvider {
   private static final String ASC_AUTH_COOKIE = "asc_auth_key";
 
+  @Value("${spring.application.name}")
+  private String serviceName;
+
   private final AscApiClient apiClient;
+  private final AuditMessagePublisher auditMessagePublisher;
   private final CacheableRegisteredClientQueryService cacheableRegisteredClientQueryService;
 
   /**
@@ -163,6 +171,26 @@ public class AscAuthenticationProvider implements AuthenticationProvider {
               null,
               List.of(new TenantAuthority(tenant.getResponse().getTenantId(), hostAddress)));
       authenticationToken.setDetails(client.getClientId());
+
+      auditMessagePublisher.publish(
+          AuditMessage.builder()
+              .ip(
+                  HttpUtils.getRequestClientAddress(request)
+                      .map(HttpUtils::extractHostFromUrl)
+                      .orElseGet(
+                          () -> HttpUtils.extractHostFromUrl(HttpUtils.getFirstRequestIP(request))))
+              .initiator(serviceName)
+              .target(clientId)
+              .browser(HttpUtils.getClientBrowser(request))
+              .platform(HttpUtils.getClientOS(request))
+              .tenantId(tenant.getResponse().getTenantId())
+              .userId(me.getResponse().getId())
+              .userEmail(me.getResponse().getEmail())
+              .userName(me.getResponse().getUserName())
+              .page(HttpUtils.getFullURL(request))
+              .action(AuditCode.GENERATE_AUTHORIZATION_CODE_TOKEN.getCode())
+              .build());
+
       return authenticationToken;
     } catch (InterruptedException | ExecutionException e) {
       throw new AuthenticationProcessingException(
