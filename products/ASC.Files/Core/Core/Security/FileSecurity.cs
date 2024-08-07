@@ -2236,6 +2236,13 @@ public class FileSecurity(IDaoFactory daoFactory,
 
         return result;
     }
+
+    public static bool IsAvailableAccess(FileShare share, SubjectType subjectType, FolderType roomType)
+    {
+        return AvailableRoomAccesses.TryGetValue(roomType, out var availableRoles) &&
+            availableRoles.TryGetValue(subjectType, out var availableRolesBySubject) &&
+            availableRolesBySubject.Contains(share);
+    }
     
     private async Task<List<Guid>> GetUserSubjectsAsync<T>(Guid userId, FileEntry<T> entry)
     {
