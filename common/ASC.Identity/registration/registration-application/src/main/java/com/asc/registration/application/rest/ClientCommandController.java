@@ -49,6 +49,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -108,6 +109,7 @@ public class ClientCommandController {
   @Operation(
       summary = "Creates a new client",
       tags = {"ClientCommandController"},
+      security = @SecurityRequirement(name = "ascAuthAdmin"),
       responses = {
         @ApiResponse(responseCode = "201", description = "Successfully created"),
         @ApiResponse(
@@ -174,6 +176,7 @@ public class ClientCommandController {
   @Operation(
       summary = "Updated an existing client",
       tags = {"ClientCommandController"},
+      security = @SecurityRequirement(name = "ascAuthAdmin"),
       responses = {
         @ApiResponse(
             responseCode = "200",
@@ -231,6 +234,7 @@ public class ClientCommandController {
   @Operation(
       summary = "Regenerates the secret for a specific client",
       tags = {"ClientCommandController"},
+      security = @SecurityRequirement(name = "ascAuthAdmin"),
       responses = {
         @ApiResponse(responseCode = "200", description = "Successfully regenerated"),
         @ApiResponse(
@@ -282,6 +286,7 @@ public class ClientCommandController {
   @Operation(
       summary = "Revokes the consent for a specific client",
       tags = {"ClientCommandController"},
+      security = @SecurityRequirement(name = "ascAuthAdmin"),
       responses = {
         @ApiResponse(
             responseCode = "200",
@@ -332,6 +337,7 @@ public class ClientCommandController {
   @Operation(
       summary = "Deletes a specific client",
       tags = {"ClientCommandController"},
+      security = @SecurityRequirement(name = "ascAuthAdmin"),
       responses = {
         @ApiResponse(
             responseCode = "200",
@@ -383,6 +389,7 @@ public class ClientCommandController {
   @Operation(
       summary = "Changes the activation status of a specific client",
       tags = {"ClientCommandController"},
+      security = @SecurityRequirement(name = "ascAuthAdmin"),
       responses = {
         @ApiResponse(
             responseCode = "200",
