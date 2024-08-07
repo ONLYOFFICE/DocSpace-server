@@ -467,20 +467,17 @@ public class AuthenticationController(
                 }
                 var ldapSettings = await settingsManager.LoadAsync<LdapSettings>();
 
-                user = await bruteForceLoginManager.AttemptAsync(inDto.UserName, inDto.RecaptchaType, inDto.RecaptchaResponse, async () =>
+                if (ldapSettings.EnableLdapAuthentication)
                 {
-                    if (ldapSettings.EnableLdapAuthentication && !string.IsNullOrEmpty(inDto.Password))
-                    {
-                        return await ldapUserManager.TryGetAndSyncLdapUserInfo(inDto.UserName, inDto.Password);
-                    }
-                    else
-                    {
-                        return await userManager.GetUsersByPasswordHashAsync(
-                         await tenantManager.GetCurrentTenantIdAsync(),
-                         inDto.UserName,
-                         inDto.PasswordHash);
-                    }
-                });
+                    user = await ldapUserManager.TryGetAndSyncLdapUserInfo(inDto.UserName, inDto.Password);  
+                }
+
+                if(user == null || Equals(user, Constants.LostUser))
+                {
+                    user = await userManager.GetUsersByPasswordHashAsync(await tenantManager.GetCurrentTenantIdAsync(), inDto.UserName, inDto.PasswordHash);
+                }
+
+                user = await bruteForceLoginManager.AttemptAsync(inDto.UserName, inDto.RecaptchaType, inDto.RecaptchaResponse, user);
             }
             else
             {
@@ -496,7 +493,7 @@ public class AuthenticationController(
 
                 inDto.UserName = thirdPartyProfile.EMail;
                 
-                user = await bruteForceLoginManager.AttemptAsync(inDto.UserName, inDto.RecaptchaType, inDto.RecaptchaResponse, async () => await GetUserByThirdParty(thirdPartyProfile));
+                user = await bruteForceLoginManager.AttemptAsync(inDto.UserName, inDto.RecaptchaType, inDto.RecaptchaResponse, await GetUserByThirdParty(thirdPartyProfile));
             }
         }
         catch (BruteForceCredentialException)
