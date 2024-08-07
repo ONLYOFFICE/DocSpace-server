@@ -723,6 +723,7 @@ public class UserManager(
             return;
         }
 
+        var managerIdTask = GetDepartmentManagerAsync(groupId);
         var user = await GetUsersAsync(userId);
         var isUserBefore = await this.IsUserAsync(user);
         var isPaidUserBefore = await IsPaidUserAsync(user);
@@ -731,6 +732,12 @@ public class UserManager(
             Constants.Action_EditGroups);
 
         await userService.RemoveUserGroupRefAsync(Tenant.Id, userId, groupId, UserGroupRefType.Contains);
+        
+        var managerId = await managerIdTask;
+        if (managerId == userId)
+        {
+            await userService.RemoveUserGroupRefAsync(Tenant.Id, userId, groupId, UserGroupRefType.Manager);
+        }
 
         ResetGroupCache(userId);
 

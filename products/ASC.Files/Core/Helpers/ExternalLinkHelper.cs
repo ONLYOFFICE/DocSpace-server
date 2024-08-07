@@ -31,7 +31,7 @@ namespace ASC.Files.Core.Helpers;
 [Scope]
 public class ExternalLinkHelper(ExternalShare externalShare, SecurityContext securityContext, IDaoFactory daoFactory, UserManager userManager, FileSecurity fileSecurity)
 {
-    public async Task<ValidationInfo> ValidateAsync(string key, string password = null)
+    public async Task<ValidationInfo> ValidateAsync(string key, string password = null, string fileId = null)
     {
         var result = new ValidationInfo
         {
@@ -61,6 +61,18 @@ public class ExternalLinkHelper(ExternalShare externalShare, SecurityContext sec
         var entry = int.TryParse(entryId, out var id)
             ? await GetEntryAndProcessAsync(id, record.EntryType, result)
             : await GetEntryAndProcessAsync(entryId, record.EntryType, result);
+
+        if (!string.IsNullOrEmpty(fileId))
+        {
+            if (int.TryParse(fileId, out var entityId))
+            {
+                await GetSubEntryAndProcessAsync(entityId, entryId, result);
+            }
+            else
+            {
+                await GetSubEntryAndProcessAsync(fileId, entryId, result);
+            }
+        }
 
         if (entry == null || entry.RootFolderType is FolderType.TRASH or FolderType.Archive)
         {
@@ -132,5 +144,23 @@ public class ExternalLinkHelper(ExternalShare externalShare, SecurityContext sec
         info.Title = file.Title;
 
         return file;
+    }
+    
+    private async Task GetSubEntryAndProcessAsync<T>(T id, string rootId, ValidationInfo info)
+    {
+        var file = await daoFactory.GetFileDao<T>().GetFileAsync(id);
+        if (file == null)
+        {
+            return;
+        }
+        var (currentRoomId, _) = await daoFactory.GetFolderDao<T>().GetParentRoomInfoFromFileEntryAsync(file);
+        
+        if (Equals(currentRoomId, default) || !string.Equals(currentRoomId.ToString(), rootId))
+        {
+            return;
+        }
+        
+        info.EntityId = file.Id.ToString();
+        info.EntryTitle = file.Title;
     }
 }

@@ -44,7 +44,15 @@ public class ExternalShareDto : IMapFrom<ValidationInfo>
     /// <summary>External data title</summary>
     /// <type>System.String, System</type>
     public string Title { get; set; }
-
+    
+    /// <summary>Entity ID</summary>
+    /// <type>System.String, System</type>
+    public string EntityId { get; set; }
+   
+    /// <summary>Entity title</summary>
+    /// <type>System.String, System</type>
+    public string EntryTitle { get; set; }
+    
     /// <summary>Tenant ID</summary>
     /// <type>System.Int32, System</type>
     public int TenantId { get; set; }
