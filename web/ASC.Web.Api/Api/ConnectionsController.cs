@@ -403,7 +403,7 @@ public class ConnectionsController(
             await messageService.SendAsync(MessageAction.UserResetPassword, MessageTarget.Create(user.Id));
             var password = UserManagerWrapper.GeneratePassword();
             await securityContext.SetUserPasswordHashAsync(user.Id, password);
-            await studioNotifyService.UserPasswordChangeAsync(user);
+            await studioNotifyService.UserPasswordResetAsync(user);
         }
     }
 

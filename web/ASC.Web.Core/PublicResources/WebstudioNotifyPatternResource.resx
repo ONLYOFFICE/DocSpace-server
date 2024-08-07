@@ -138,6 +138,9 @@
   <data name="ButtonChangePassword" xml:space="preserve">
     <value>Change password</value>
   </data>
+  <data name="ButtonSetPassword" xml:space="preserve">
+    <value>Set password</value>
+  </data>
   <data name="ButtonChangePhone" xml:space="preserve">
     <value>Change mobile phone number</value>
   </data>
@@ -1086,6 +1089,19 @@ Don’t want to change your password? Just ignore this message</value>
   </data>
   <data name="subject_change_password_v115" xml:space="preserve">
     <value>Confirm changing your password</value>
+  </data>
+	
+    <data name="pattern_reset_password" xml:space="preserve">
+        <value>The DocSpace administrator noticed suspicious activity from your account and disabled all active sessions. Your password was reset. 
+
+Please click the button below to set a new password for your DocSpace account.
+
+$OrangeButton
+
+The link is valid for 7 days.</value>
+  </data>
+	<data name="subject_reset_password" xml:space="preserve">
+    <value>Reset your password</value>
   </data>
   <data name="ButtonConfirmRoomInvite" xml:space="preserve">
     <value>Confirm Room Invite</value>
