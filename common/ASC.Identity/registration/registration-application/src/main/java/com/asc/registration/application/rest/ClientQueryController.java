@@ -34,6 +34,7 @@ import com.asc.common.application.transfer.response.AscTenantResponse;
 import com.asc.common.service.transfer.response.ClientResponse;
 import com.asc.common.utilities.HttpUtils;
 import com.asc.registration.application.security.authentications.AscAuthenticationTokenPrincipal;
+import com.asc.registration.application.transfer.ErrorResponse;
 import com.asc.registration.core.domain.exception.ClientDomainException;
 import com.asc.registration.service.ports.input.service.ClientApplicationService;
 import com.asc.registration.service.transfer.request.fetch.*;
@@ -41,6 +42,11 @@ import com.asc.registration.service.transfer.response.ClientInfoResponse;
 import com.asc.registration.service.transfer.response.ConsentResponse;
 import com.asc.registration.service.transfer.response.PageableResponse;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -94,6 +100,25 @@ public class ClientQueryController {
    */
   @RateLimiter(name = "globalRateLimiter")
   @GetMapping("/{clientId}")
+  @Operation(
+      summary = "Retrieves the details of a specific client",
+      tags = {"ClientQueryController"},
+      security = @SecurityRequirement(name = "ascAuthAdmin"),
+      responses = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved the client"),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Bad request",
+            content = {@Content}),
+        @ApiResponse(
+            responseCode = "429",
+            description = "Too many requests",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "500",
+            description = "Internal server error",
+            content = @Content)
+      })
   public ResponseEntity<ClientResponse> getClient(
       @PathVariable @NotBlank String clientId,
       @AuthenticationPrincipal AscAuthenticationTokenPrincipal principal) {
@@ -127,6 +152,25 @@ public class ClientQueryController {
    */
   @RateLimiter(name = "globalRateLimiter")
   @GetMapping
+  @Operation(
+      summary = "Retrieves a pageable list of clients",
+      tags = {"ClientQueryController"},
+      security = @SecurityRequirement(name = "ascAuthAdmin"),
+      responses = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved clients"),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Bad request",
+            content = {@Content}),
+        @ApiResponse(
+            responseCode = "429",
+            description = "Too many requests",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "500",
+            description = "Internal server error",
+            content = @Content)
+      })
   public ResponseEntity<PageableResponse<ClientResponse>> getClients(
       HttpServletRequest request,
       @AuthenticationPrincipal AscAuthenticationTokenPrincipal principal,
@@ -194,6 +238,25 @@ public class ClientQueryController {
    */
   @RateLimiter(name = "globalRateLimiter")
   @GetMapping("/{clientId}/info")
+  @Operation(
+      summary = "Retrieves detailed information for a specific client",
+      tags = {"ClientQueryController"},
+      security = @SecurityRequirement(name = "ascAuth"),
+      responses = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved client info"),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Bad request",
+            content = {@Content}),
+        @ApiResponse(
+            responseCode = "429",
+            description = "Too many requests",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "500",
+            description = "Internal server error",
+            content = @Content)
+      })
   public ResponseEntity<ClientInfoResponse> getClientInfo(
       @AuthenticationPrincipal AscAuthenticationTokenPrincipal principal,
       @PathVariable @NotBlank String clientId) {
@@ -221,6 +284,26 @@ public class ClientQueryController {
    */
   @RateLimiter(name = "publicRateLimiter")
   @GetMapping("/{clientId}/public/info")
+  @Operation(
+      summary = "Handles the GET request for public client information",
+      tags = {"ClientQueryController"},
+      responses = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Successfully retrieved public client info"),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Bad request",
+            content = {@Content}),
+        @ApiResponse(
+            responseCode = "429",
+            description = "Too many requests",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "500",
+            description = "Internal server error",
+            content = @Content)
+      })
   public ResponseEntity<ClientInfoResponse> getPublicClientInfo(
       @PathVariable @NotBlank String clientId) {
     try {
@@ -241,6 +324,25 @@ public class ClientQueryController {
    */
   @RateLimiter(name = "globalRateLimiter")
   @GetMapping("/info")
+  @Operation(
+      summary = "Retrieves a pageable list of client information",
+      tags = {"ClientQueryController"},
+      security = @SecurityRequirement(name = "ascAuth"),
+      responses = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved clients info"),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Bad request",
+            content = {@Content}),
+        @ApiResponse(
+            responseCode = "429",
+            description = "Too many requests",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "500",
+            description = "Internal server error",
+            content = @Content)
+      })
   public ResponseEntity<PageableResponse<ClientInfoResponse>> getClientsInfo(
       HttpServletRequest request,
       @AuthenticationPrincipal AscAuthenticationTokenPrincipal principal,
@@ -279,6 +381,25 @@ public class ClientQueryController {
    */
   @RateLimiter(name = "globalRateLimiter")
   @GetMapping("/consents")
+  @Operation(
+      summary = "Retrieves a pageable list of consents",
+      tags = {"ClientQueryController"},
+      security = @SecurityRequirement(name = "ascAuth"),
+      responses = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved user consents"),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Bad request",
+            content = {@Content}),
+        @ApiResponse(
+            responseCode = "429",
+            description = "Too many requests",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "500",
+            description = "Internal server error",
+            content = @Content)
+      })
   public ResponseEntity<PageableResponse<ConsentResponse>> getConsents(
       @AuthenticationPrincipal AscAuthenticationTokenPrincipal principal,
       @RequestParam(value = "page") @Min(value = 0) int page,

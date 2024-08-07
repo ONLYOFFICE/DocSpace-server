@@ -28,9 +28,15 @@
 package com.asc.registration.application.rest;
 
 import com.asc.registration.application.security.authentications.AscAuthenticationTokenPrincipal;
+import com.asc.registration.application.transfer.ErrorResponse;
 import com.asc.registration.service.ports.input.service.ScopeApplicationService;
 import com.asc.registration.service.transfer.response.ScopeResponse;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -60,6 +66,25 @@ public class ScopeQueryController {
    */
   @GetMapping
   @RateLimiter(name = "globalRateLimiter")
+  @Operation(
+      summary = "Retrieves a list of scopes for the specified tenant",
+      tags = {"ScopeQueryController"},
+      security = @SecurityRequirement(name = "ascAuth"),
+      responses = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved scopes"),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Bad request",
+            content = {@Content}),
+        @ApiResponse(
+            responseCode = "429",
+            description = "Too many requests",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "500",
+            description = "Internal server error",
+            content = @Content)
+      })
   public ResponseEntity<Iterable<ScopeResponse>> getScopes(
       @AuthenticationPrincipal AscAuthenticationTokenPrincipal principal) {
     MDC.put("tenant_id", String.valueOf(principal.tenant().getTenantId()));
