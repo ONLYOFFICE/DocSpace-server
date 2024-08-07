@@ -44,7 +44,6 @@ public partial class SettingsController(MessageService messageService,
         IConfiguration configuration,
         SetupInfo setupInfo,
         GeolocationHelper geolocationHelper,
-        StatisticManager statisticManager,
         ConsumerFactory consumerFactory,
         TimeZoneConverter timeZoneConverter,
         CustomNamingPeople customNamingPeople,
@@ -917,72 +916,6 @@ public partial class SettingsController(MessageService messageService,
             Size = FileSizeComment.FilesSizeToString(it.SpaceUsage),
             Url = it.Url
         });
-    }
-
-    /// <summary>
-    /// Returns the user visit statistics for the period specified in the request.
-    /// </summary>
-    /// <category>Statistics</category>
-    /// <short>Get the visit statistics</short>
-    /// <param type="ASC.Api.Core.ApiDateTime, ASC.Api.Core" name="fromDate">Start period date</param>
-    /// <param type="ASC.Api.Core.ApiDateTime, ASC.Api.Core" name="toDate">End period date</param>
-    /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.ChartPointDto, ASC.Web.Api">List of point charts</returns>
-    /// <path>api/2.0/settings/statistics/visit</path>
-    /// <httpMethod>GET</httpMethod>
-    /// <collection>list</collection>
-    [HttpGet("statistics/visit")]
-    public async Task<List<ChartPointDto>> GetVisitStatisticsAsync(ApiDateTime fromDate, ApiDateTime toDate)
-    {
-        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-
-        var from = tenantUtil.DateTimeFromUtc(fromDate);
-        var to = tenantUtil.DateTimeFromUtc(toDate);
-
-        var points = new List<ChartPointDto>();
-
-        if (from.CompareTo(to) >= 0)
-        {
-            return points;
-        }
-
-        for (var d = new DateTime(from.Ticks); d.Date.CompareTo(to.Date) <= 0; d = d.AddDays(1))
-        {
-            points.Add(new ChartPointDto
-            {
-                DisplayDate = d.Date.ToShortDateString(),
-                Date = d.Date,
-                Hosts = 0,
-                Hits = 0
-            });
-        }
-
-        var tenant = await tenantManager.GetCurrentTenantAsync();
-        var hits = await statisticManager.GetHitsByPeriodAsync(tenant.Id, from, to);
-        var hosts = await statisticManager.GetHostsByPeriodAsync(tenant.Id, from, to);
-
-        if (hits.Count == 0 || hosts.Count == 0)
-        {
-            return points;
-        }
-
-        hits.Sort((x, y) => x.VisitDate.CompareTo(y.VisitDate));
-        hosts.Sort((x, y) => x.VisitDate.CompareTo(y.VisitDate));
-
-        for (int i = 0, n = points.Count, hitsNum = 0, hostsNum = 0; i < n; i++)
-        {
-            while (hitsNum < hits.Count && points[i].Date.CompareTo(hits[hitsNum].VisitDate.Date) == 0)
-            {
-                points[i].Hits += hits[hitsNum].VisitCount;
-                hitsNum++;
-            }
-            while (hostsNum < hosts.Count && points[i].Date.CompareTo(hosts[hostsNum].VisitDate.Date) == 0)
-            {
-                points[i].Hosts++;
-                hostsNum++;
-            }
-        }
-
-        return points;
     }
 
     /// <summary>
