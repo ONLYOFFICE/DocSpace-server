@@ -1240,6 +1240,7 @@ public class EntryManager(IDaoFactory daoFactory,
                 if (folderIfNew.FolderType == FolderType.FillingFormsRoom)
                 {
                     var prop = await fileDao.GetProperties(sourceFile.Id);
+                    prop.FormFilling.StartFilling = false;
                     await fileDao.SaveProperties(linkedFile.Id, prop);
                 }
 
