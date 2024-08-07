@@ -108,9 +108,9 @@ spring-context      - Spring Framework. (https://github.com/spring-projects/spri
 License:              Apache 2.0
 License File:         spring-framework.license
 
-springdoc-openapi-starter-webmvc-ui - Library for OpenAPI 3 with spring-boot. (https://github.com/springdoc/springdoc-openapi)
+springdoc-openapi-starter-webmvc-api - Library for OpenAPI 3 with spring-boot. (https://github.com/springdoc/springdoc-openapi)
 License:              Apache 2.0
-License File:         springdoc-openapi-starter-webmvc-ui.license
+License File:         springdoc-openapi-starter-webmvc-api.license
 
 spring-security-crypto - Spring Security Crypto. (https://github.com/spring-projects/spring-security)
 License:              Apache 2.0

@@ -43,6 +43,8 @@ management:
       enabled: true
     refresh:
       enabled: false
+  server:
+    port: ${SERVER_MANAGEMENT_PORT:0}
 
 server:
   servlet:
@@ -54,7 +56,8 @@ server:
 
 springdoc:
   api-docs:
-    path: ${web.api}/oauth/info
+    path: /docs
+  use-management-port: true
 
 feign:
   client:

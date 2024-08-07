@@ -25,13 +25,17 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-package com.asc.registration.application.security;
+package com.asc.registration.application.security.filters;
 
 import com.asc.common.application.client.AscApiClient;
+import com.asc.common.application.transfer.response.AscPersonResponse;
+import com.asc.common.application.transfer.response.AscSettingsResponse;
+import com.asc.common.application.transfer.response.AscTenantResponse;
 import com.asc.common.utilities.HttpUtils;
+import com.asc.registration.application.security.authentications.AscAuthenticationTokenPrincipal;
 import jakarta.servlet.http.HttpServletRequest;
 import java.net.URI;
-import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicReference;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -46,31 +50,21 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class AscCookieAuthenticationProcessor {
-  private final String AUTH_COOKIE_NAME = "asc_auth_key";
-
   private final AscApiClient apiClient;
 
   /**
    * Process ASC cookies and authenticate the request.
    *
    * @param request the HTTP request
+   * @param ascCookieName the name of the ASC cookie
+   * @param ascCookieValue the value of the ASC cookie
+   * @return the principal containing user, tenant, and settings information
    * @throws BadCredentialsException if authentication fails
    */
-  public void processAscCookies(HttpServletRequest request) throws BadCredentialsException {
-    log.debug("Trying to authenticate an incoming request");
-
-    var cookies = request.getCookies();
-    if (cookies == null || cookies.length < 1)
-      throw new BadCredentialsException("Could not find any authentication cookie");
-
-    var authCookie =
-        Arrays.stream(cookies)
-            .filter(c -> c.getName().equalsIgnoreCase(AUTH_COOKIE_NAME))
-            .findFirst();
-
-    if (authCookie.isEmpty()) throw new BadCredentialsException("Could not find ASC auth cookie");
-
-    var ascCookie = String.format("%s=%s", authCookie.get().getName(), authCookie.get().getValue());
+  public AscAuthenticationTokenPrincipal processAscCookies(
+      HttpServletRequest request, String ascCookieName, String ascCookieValue)
+      throws BadCredentialsException {
+    var cookie = String.format("%s=%s", ascCookieName, ascCookieValue);
 
     var address =
         HttpUtils.getRequestHostAddress(request)
@@ -78,28 +72,24 @@ public class AscCookieAuthenticationProcessor {
 
     try {
       var uri = URI.create(address);
+      AtomicReference<AscPersonResponse> me = new AtomicReference<>();
+      AtomicReference<AscTenantResponse> tenant = new AtomicReference<>();
+      AtomicReference<AscSettingsResponse> settings = new AtomicReference<>();
+
       var userThread =
-          Thread.ofVirtual()
-              .start(
-                  () ->
-                      request.setAttribute(
-                          "person", apiClient.getMe(uri, ascCookie).getResponse()));
+          Thread.ofVirtual().start(() -> me.set(apiClient.getMe(uri, cookie).getResponse()));
       var tenantThread =
           Thread.ofVirtual()
-              .start(
-                  () ->
-                      request.setAttribute(
-                          "tenant", apiClient.getTenant(uri, ascCookie).getResponse()));
+              .start(() -> tenant.set(apiClient.getTenant(uri, cookie).getResponse()));
       var settingsThread =
           Thread.ofVirtual()
-              .start(
-                  () ->
-                      request.setAttribute(
-                          "settings", apiClient.getSettings(uri, ascCookie).getResponse()));
+              .start(() -> settings.set(apiClient.getSettings(uri, cookie).getResponse()));
 
       userThread.join();
       tenantThread.join();
       settingsThread.join();
+
+      return new AscAuthenticationTokenPrincipal(me.get(), tenant.get(), settings.get());
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
       throw new BadCredentialsException("Something went wrong while fetching data", e);
