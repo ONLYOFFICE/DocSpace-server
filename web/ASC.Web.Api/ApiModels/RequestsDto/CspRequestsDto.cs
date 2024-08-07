@@ -28,6 +28,6 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 public class CspRequestsDto
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "Domains")]
+    [SwaggerSchemaCustomString("Domains")]
     public IEnumerable<string> Domains { get; set; }
 }

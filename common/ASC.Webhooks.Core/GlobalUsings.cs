@@ -40,3 +40,4 @@ global using ASC.Webhooks.Core.IntegrationEvents.Events;
 global using ASC.Webhooks.Core.Resources;
 
 global using Microsoft.EntityFrameworkCore;
+global using ASC.Api.Core.Extensions;

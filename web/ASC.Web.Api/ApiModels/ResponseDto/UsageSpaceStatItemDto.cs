@@ -28,19 +28,19 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 
 public class UsageSpaceStatItemDto
 {
-    [SwaggerSchemaCustom(Example = "Item name", Description = "Name")]
+    [SwaggerSchemaCustomString("Name", Example = "Item name")]
     public string Name { get; set; }
 
-    [SwaggerSchemaCustom(Example = "Item icon path", Description = "Icon")]
+    [SwaggerSchemaCustomString("Icon", Example = "Item icon path")]
     public string Icon { get; set; }
 
-    [SwaggerSchemaCustom(Example = "false", Description = "Specifies if the module space is disabled or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if the module space is disabled or not", Example = false)]
     public bool Disabled { get; set; }
 
-    [SwaggerSchemaCustom(Example = "0 Byte", Description = "Size")]
+    [SwaggerSchemaCustomString("Size", Example = "0 Byte")]
     public string Size { get; set; }
 
-    [SwaggerSchemaCustom(Example = "Item url", Description = "URL", Format = "uri")]
+    [SwaggerSchemaCustomString("URL", Example = "Item url", Format = "uri")]
     public string Url { get; set; }
 
     public static UsageSpaceStatItemDto GetSample()
@@ -58,16 +58,16 @@ public class UsageSpaceStatItemDto
 
 public class ChartPointDto
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "Display date")]
+    [SwaggerSchemaCustomString("Display date")]
     public string DisplayDate { get; set; }
 
-    [SwaggerSchemaCustom(Example = "2008-04-10T06-30-00.000Z", Description = "Date")]
+    [SwaggerSchemaCustomDateTime("Date")]
     public DateTime Date { get; init; }
 
-    [SwaggerSchemaCustom(Example = "0", Description = "Hosts", Format = "int32")]
+    [SwaggerSchemaCustomInt("Hosts", Example = 0, Format = "int32")]
     public int Hosts { get; set; }
 
-    [SwaggerSchemaCustom(Example = "0", Description = "Hits", Format = "int32")]
+    [SwaggerSchemaCustomInt("Hits", Example = 0, Format = "int32")]
     public int Hits { get; set; }
 
     public static ChartPointDto GetSample()

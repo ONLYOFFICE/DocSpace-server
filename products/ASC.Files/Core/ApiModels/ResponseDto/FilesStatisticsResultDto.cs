@@ -28,24 +28,24 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public class FilesStatisticsResultDto
 {
-    [SwaggerSchemaCustom(Description = "Used space of files in the \"My Documents\" section")]
+    [SwaggerSchemaCustom<FilesStatisticsFolder>("Used space of files in the \"My Documents\" section")]
     public FilesStatisticsFolder MyDocumentsUsedSpace { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Used space of files in the \"Trash\" section")]
+    [SwaggerSchemaCustom<FilesStatisticsFolder>("Used space of files in the \"Trash\" section")]
     public FilesStatisticsFolder TrashUsedSpace { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Used space of files in the \"Archive\" section")]
+    [SwaggerSchemaCustom<FilesStatisticsFolder>("Used space of files in the \"Archive\" section")]
     public FilesStatisticsFolder ArchiveUsedSpace { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Used space of files in the \"Rooms\" section")]
+    [SwaggerSchemaCustom<FilesStatisticsFolder>("Used space of files in the \"Rooms\" section")]
     public FilesStatisticsFolder RoomsUsedSpace { get; set; }
 }
 
 public class FilesStatisticsFolder
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "Folder title")]
+    [SwaggerSchemaCustomString("Folder title")]
     public string Title { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "Used space", Format = "int64")]
+    [SwaggerSchemaCustomLong("Used space", Format = "int64")]
     public long UsedSpace { get; set; }
 }

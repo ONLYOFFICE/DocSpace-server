@@ -28,12 +28,12 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public class UploadResultDto
 {
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the operation is successful or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if the operation is successful or not")]
     public bool Success { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Data")]
+    [SwaggerSchemaCustom<object>("Data")]
     public object Data { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Message")]
+    [SwaggerSchemaCustomString("Message")]
     public string Message { get; set; }
 }

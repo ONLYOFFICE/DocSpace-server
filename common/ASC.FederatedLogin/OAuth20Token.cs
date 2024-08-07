@@ -29,31 +29,40 @@ namespace ASC.FederatedLogin;
 [DebuggerDisplay("{AccessToken} (expired: {IsExpired})")]
 public class OAuth20Token
 {
+    [SwaggerSchemaCustomString("Access token")]
     [JsonPropertyName("access_token")]
     public string AccessToken { get; set; }
 
+    [SwaggerSchemaCustomString("Refresh token")]
     [JsonPropertyName("refresh_token")]
     public string RefreshToken { get; set; }
 
+    [SwaggerSchemaCustomLong("Expires in")]
     [JsonPropertyName("expires_in")]
     [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
     public long ExpiresIn { get; set; }
 
+    [SwaggerSchemaCustomString("Client id")]
     [JsonPropertyName("client_id")]
     public string ClientID { get; set; }
 
+    [SwaggerSchemaCustomString("Client secret")]
     [JsonPropertyName("client_secret")]
     public string ClientSecret { get; set; }
 
+    [SwaggerSchemaCustomString("Redirect uri", Format = "uri")]
     [JsonPropertyName("redirect_uri")]
     public string RedirectUri { get; set; }
 
+    [SwaggerSchemaCustomDateTime("Timestamp")]
     [JsonPropertyName("timestamp")]
     public DateTime Timestamp { get; set; }
 
+    [SwaggerSchemaCustomString("Origin json")]
     [System.Text.Json.Serialization.JsonIgnore]
     public string OriginJson { get; set; }
 
+    [SwaggerSchemaCustomBoolean("Is expired")]
     public bool IsExpired
     {
         get

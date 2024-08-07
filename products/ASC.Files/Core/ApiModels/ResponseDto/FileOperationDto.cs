@@ -28,32 +28,32 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public class FileOperationDto
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "Operation ID")]
+    [SwaggerSchemaCustomString("Operation ID")]
     public string Id { get; set; }
 
-    [SwaggerSchemaCustom(Example = "Move", Description = "Operation type")]
+    [SwaggerSchemaCustomString("Operation type", Example = "Move")]
     [JsonPropertyName("Operation")]
     public FileOperationType OperationType { get; init; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "Operation progress", Format = "int32")]
+    [SwaggerSchemaCustomInt("Operation progress", Format = "int32")]
     public int Progress { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Error")]
+    [SwaggerSchemaCustomString("Error")]
     public string Error { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1", Description = "Processing status")]
+    [SwaggerSchemaCustomString("Processing status", Example = "1")]
     public string Processed { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the operation is finished or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if the operation is finished or not")]
     public bool Finished { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "URL", Format = "uri")]
+    [SwaggerSchemaCustomString("URL", Format = "uri")]
     public string Url { get; set; }
 
-    [SwaggerSchemaCustom(Description = "List of files")]
+    [SwaggerSchemaCustom<List<FileEntryDto>>("List of files")]
     public List<FileEntryDto> Files { get; set; }
 
-    [SwaggerSchemaCustom(Description = "List of folders")]
+    [SwaggerSchemaCustom<List<FileEntryDto>>("List of folders")]
     public List<FileEntryDto> Folders { get; set; }
 
     public static FileOperationDto GetSample()

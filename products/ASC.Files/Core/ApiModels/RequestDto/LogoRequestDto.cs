@@ -28,18 +28,18 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class LogoRequestDto
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "The path to the temporary image file")]
+    [SwaggerSchemaCustomString("The path to the temporary image file")]
     public string TmpFile { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "The X coordinate of the rectangle starting point", Format = "int32")]
+    [SwaggerSchemaCustomInt("The X coordinate of the rectangle starting point", Format = "int32")]
     public int X { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "The Y coordinate of the rectangle starting point", Format = "int32")]
+    [SwaggerSchemaCustomInt("The Y coordinate of the rectangle starting point", Format = "int32")]
     public int Y { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "The rectangle width", Format = "int32")]
+    [SwaggerSchemaCustomInt("The rectangle width", Format = "int32")]
     public int Width { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "The rectangle height", Format = "int32")]
+    [SwaggerSchemaCustomInt("The rectangle height", Format = "int32")]
     public int Height { get; set; }
 }

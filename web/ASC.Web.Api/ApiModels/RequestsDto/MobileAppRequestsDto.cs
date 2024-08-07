@@ -28,6 +28,6 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 public class MobileAppRequestsDto
 {
-    [SwaggerSchemaCustom(Example = "None", Description = "Mobile app type")]
+    [SwaggerSchemaCustomString("Mobile app type", Example = "None")]
     public MobileAppType Type { get; set; }
 }

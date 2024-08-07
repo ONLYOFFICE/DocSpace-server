@@ -28,165 +28,167 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public class FilesSettingsDto
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "Exts image previewed")]
+    [SwaggerSchemaCustomString("Exts image previewed")]
     public List<string> ExtsImagePreviewed { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Exts media previewed")]
+    [SwaggerSchemaCustomString("Exts media previewed")]
     public List<string> ExtsMediaPreviewed { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Exts web previewed")]
+    [SwaggerSchemaCustomString("Exts web previewed")]
     public List<string> ExtsWebPreviewed { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Exts web edited")]
+    [SwaggerSchemaCustomString("Exts web edited")]
     public List<string> ExtsWebEdited { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Exts web encrypt")]
+    [SwaggerSchemaCustomString("Exts web encrypt")]
     public List<string> ExtsWebEncrypt { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Exts web reviewed")]
+    [SwaggerSchemaCustomString("Exts web reviewed")]
     public List<string> ExtsWebReviewed { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Exts web custom filter editing")]
+    [SwaggerSchemaCustomString("Exts web custom filter editing")]
     public List<string> ExtsWebCustomFilterEditing { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Exts web restricted editing")]
+    [SwaggerSchemaCustomString("Exts web restricted editing")]
     public List<string> ExtsWebRestrictedEditing { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Exts web commented")]
+    [SwaggerSchemaCustomString("Exts web commented")]
     public List<string> ExtsWebCommented { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Exts web template")]
+    [SwaggerSchemaCustomString("Exts web template")]
     public List<string> ExtsWebTemplate { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Exts co authoring")]
+    [SwaggerSchemaCustomString("Exts co authoring")]
     public List<string> ExtsCoAuthoring { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Exts must convert")]
+    [SwaggerSchemaCustomString("Exts must convert")]
     public List<string> ExtsMustConvert { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Exts convertible")]
+    [SwaggerSchemaCustom<IDictionary<string, List<string>>>("Exts convertible")]
     public IDictionary<string, List<string>> ExtsConvertible { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Exts uploadable")]
+    [SwaggerSchemaCustomString("Exts uploadable")]
     public List<string> ExtsUploadable { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Exts archive")]
+    [SwaggerSchemaCustomString("Exts archive")]
     public ImmutableList<string> ExtsArchive { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Exts video")]
+    [SwaggerSchemaCustomString("Exts video")]
     public ImmutableList<string> ExtsVideo { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Exts audio")]
+    [SwaggerSchemaCustomString("Exts audio")]
     public ImmutableList<string> ExtsAudio { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Exts image")]
+    [SwaggerSchemaCustomString("Exts image")]
     public ImmutableList<string> ExtsImage { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Exts spreadsheet")]
+    [SwaggerSchemaCustomString("Exts spreadsheet")]
     public ImmutableList<string> ExtsSpreadsheet { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Exts presentation")]
+    [SwaggerSchemaCustomString("Exts presentation")]
     public ImmutableList<string> ExtsPresentation { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Exts document")]
+    [SwaggerSchemaCustomString("Exts document")]
     public ImmutableList<string> ExtsDocument { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Internal formats")]
+    [SwaggerSchemaCustom<Dictionary<FileType, string>>("Internal formats")]
     public Dictionary<FileType, string> InternalFormats { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Master form extension")]
+    [SwaggerSchemaCustomString("Master form extension")]
     public string MasterFormExtension { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Param version")]
+    [SwaggerSchemaCustomString("Param version")]
     public string ParamVersion { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Param out type")]
+    [SwaggerSchemaCustomString("Param out type")]
     public string ParamOutType { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "File download url string", Format = "uri")]
+    [SwaggerSchemaCustomString("File download url string", Format = "uri")]
     public string FileDownloadUrlString { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "File web viewer url string", Format = "uri")]
+    [SwaggerSchemaCustomString("File web viewer url string", Format = "uri")]
     public string FileWebViewerUrlString { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "File web viewer external url string", Format = "uri")]
+    [SwaggerSchemaCustomString("File web viewer external url string", Format = "uri")]
     public string FileWebViewerExternalUrlString { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "File web editor url string", Format = "uri")]
+    [SwaggerSchemaCustomString("File web editor url string", Format = "uri")]
     public string FileWebEditorUrlString { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "File web editor external url string", Format = "uri")]
+    [SwaggerSchemaCustomString("File web editor external url string", Format = "uri")]
     public string FileWebEditorExternalUrlString { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "File redirect preview url string", Format = "uri")]
+    [SwaggerSchemaCustomString("File redirect preview url string", Format = "uri")]
     public string FileRedirectPreviewUrlString { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "File thumbnail url string", Format = "uri")]
+    [SwaggerSchemaCustomString("File thumbnail url string", Format = "uri")]
     public string FileThumbnailUrlString { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Confirm delete")]
+    [SwaggerSchemaCustomBoolean("Confirm delete")]
     public bool ConfirmDelete { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "EnableT third party")]
+    [SwaggerSchemaCustomBoolean("EnableT third party")]
     public bool EnableThirdParty { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "External share")]
+    [SwaggerSchemaCustomBoolean("External share")]
     public bool ExternalShare { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "External share social media")]
+    [SwaggerSchemaCustomBoolean("External share social media")]
     public bool ExternalShareSocialMedia { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Store original files")]
+    [SwaggerSchemaCustomBoolean("Store original files")]
     public bool StoreOriginalFiles { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Keep new file name")]
+    [SwaggerSchemaCustomBoolean("Keep new file name")]
     public bool KeepNewFileName { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Convert notify")]
+    [SwaggerSchemaCustomBoolean("Convert notify")]
     public bool ConvertNotify { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "HideC confirm convert save")]
+    [SwaggerSchemaCustomBoolean("HideC confirm convert save")]
     public bool HideConfirmConvertSave { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Hide confirm convert open")]
+    [SwaggerSchemaCustomBoolean("Hide confirm convert open")]
     public bool HideConfirmConvertOpen { get; set; }
 
-    [SwaggerSchemaCustom(Description = "DefaultO order")]
+    [SwaggerSchemaCustom<OrderBy>("DefaultO order")]
     public OrderBy DefaultOrder { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Forcesave")]
+    [SwaggerSchemaCustomBoolean("Forcesave")]
     public bool Forcesave { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Store forcesave")]
+    [SwaggerSchemaCustomBoolean("Store forcesave")]
     public bool StoreForcesave { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Recent section")]
+    [SwaggerSchemaCustomBoolean("Recent section")]
     public bool RecentSection { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Favorites section")]
+    [SwaggerSchemaCustomBoolean("Favorites section")]
     public bool FavoritesSection { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Templates section")]
+    [SwaggerSchemaCustomBoolean("Templates section")]
     public bool TemplatesSection { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Download tar gz")]
+    [SwaggerSchemaCustomBoolean("Download tar gz")]
     public bool DownloadTarGz { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Automatically clean up")]
+    [SwaggerSchemaCustom<AutoCleanUpData>("Automatically clean up")]
     public AutoCleanUpData AutomaticallyCleanUp { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Can search by content")]
+    [SwaggerSchemaCustomBoolean("Can search by content")]
     public bool CanSearchByContent { get; set; }
 
-    [SwaggerSchemaCustom(Example = "None", Description = "Default sharing access rights")]
+    [SwaggerSchemaCustomString("Default sharing access rights", Example = "None")]
     public List<FileShare> DefaultSharingAccessRights { get; set; }
 
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "Max upload thread count", Format = "int32")]    public int MaxUploadThreadCount { get; set; }
+    [SwaggerSchemaCustomInt("Max upload thread count", Format = "int32")]    
+    public int MaxUploadThreadCount { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "Chunk upload size", Format = "int64")]    public long ChunkUploadSize { get; set; }
+    [SwaggerSchemaCustomLong("Chunk upload size", Format = "int64")]    
+    public long ChunkUploadSize { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Open editor in same tab")]
+    [SwaggerSchemaCustomBoolean("Open editor in same tab")]
     public bool OpenEditorInSameTab { get; set; }
 }
 

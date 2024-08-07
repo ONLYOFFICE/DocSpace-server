@@ -28,16 +28,16 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class RoomInvitationRequestDto
 {
-    [SwaggerSchemaCustom(Description = "Collection of invitation parameters")]
+    [SwaggerSchemaCustom<IEnumerable<RoomInvitation>>("Collection of invitation parameters")]
     [MaxEmailInvitations]
     public IEnumerable<RoomInvitation> Invitations { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Notifies users about the shared room or not")]
+    [SwaggerSchemaCustomBoolean("Notifies users about the shared room or not")]
     public bool Notify { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Message to send when notifying about the shared room")]
+    [SwaggerSchemaCustomString("Message to send when notifying about the shared room")]
     public string Message { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Culture")]
+    [SwaggerSchemaCustomString("Culture")]
     public string Culture { get; set; }
 }

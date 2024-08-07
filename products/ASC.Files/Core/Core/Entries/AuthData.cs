@@ -29,12 +29,22 @@ namespace ASC.Files.Core;
 [DebuggerDisplay("{Login} {Password} {RawToken} {Url}")]
 public class AuthData(string url = null, string login = null, string password = null, string token = null, string provider = null)
 {
+    [SwaggerSchemaCustomString("Login")]
     public string Login { get; init; } = login ?? string.Empty;
+
+    [SwaggerSchemaCustomString("Password")]
     public string Password { get; init; } = password ?? string.Empty;
+
+    [SwaggerSchemaCustomString("Raw token")]
     public string RawToken { get; init; } = token ?? string.Empty;
+
+    [SwaggerSchemaCustomString("Url", Format = "uri")]
     public string Url { get; set; } = url ?? string.Empty;
+
+    [SwaggerSchemaCustomString("Provider")]
     public string Provider { get; init; } = provider ?? string.Empty;
 
+    [SwaggerSchemaCustom<OAuth20Token>("Token")]
     public OAuth20Token Token
     {
         get

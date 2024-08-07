@@ -28,6 +28,6 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 public class WebhookRetryRequestsDto
 {
-    [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "List of webhook IDs")]
+    [SwaggerSchemaCustomGuid("List of webhook IDs")]
     public List<int> Ids { get; set; }
 }

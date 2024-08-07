@@ -24,35 +24,37 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.ComponentModel;
+
 namespace ASC.People.ApiModels.ResponseDto;
 
 public class GroupDto
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "Name")]
+    [SwaggerSchemaCustomString("Name")]
     public string Name { get; set; }
 
-    [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "Parent", Nullable = true)]
+    [SwaggerSchemaCustomGuid("Parent", Nullable = true)]
     public Guid? Parent { get; set; }
 
-    [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "Category")]
+    [SwaggerSchemaCustomGuid("Category")]
     public Guid Category { get; set; }
 
-    [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "ID")]
+    [SwaggerSchemaCustomGuid("ID")]
     public Guid Id { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the LDAP settings are enabled for the group or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if the LDAP settings are enabled for the group or not")]
     public bool IsLDAP { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Manager")]
+    [SwaggerSchemaCustom<EmployeeFullDto>("Manager")]
     public EmployeeFullDto Manager { get; set; }
 
-    [SwaggerSchemaCustom(Description = "List of members")]
+    [SwaggerSchemaCustom<List<EmployeeFullDto>>(Description = "List of members")]
     public List<EmployeeFullDto> Members { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Shared", Nullable = true)]
+    [SwaggerSchemaCustomBoolean("Shared", Nullable = true)]
     public bool? Shared { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "Members count", Format = "int32")]
+    [SwaggerSchemaCustomInt("Members count", Format = "int32")]
     public int MembersCount { get; set; }
 }
 

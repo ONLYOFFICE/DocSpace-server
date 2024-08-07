@@ -28,6 +28,6 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 public class StorageEncryptionRequestsDto
 {
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the users will be notified about the encryption process or note")]
+    [SwaggerSchemaCustomBoolean("Specifies if the users will be notified about the encryption process or note")]
     public bool NotifyUsers { get; set; }
 }

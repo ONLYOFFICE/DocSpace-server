@@ -25,14 +25,11 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using System.Xml.XPath;
-
 using Microsoft.OpenApi;
 using Microsoft.OpenApi.Extensions;
 using Microsoft.OpenApi.Interfaces;
 using Microsoft.OpenApi.Models;
 using Microsoft.OpenApi.Writers;
-
-using SwaggerCustomFilter;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace ASC.Api.Core.Extensions;
@@ -50,6 +47,7 @@ public static class OpenApiExtension
 
             c.SwaggerDoc("common", new OpenApiInfo { Title = assemblyName, Version = "v2" });
             c.SchemaFilter<SwaggerSchemaCustomFilter>();
+            c.SchemaFilter<SwaggerEnumFilter>();
             c.EnableAnnotations();
             
             // ToDo: add security definitions

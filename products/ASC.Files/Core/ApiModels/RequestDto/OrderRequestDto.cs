@@ -27,6 +27,6 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 public class OrderRequestDto
 {
-    [SwaggerSchemaCustom(Example = "1234", Description = "Order", Format = "int32")]
+    [SwaggerSchemaCustomInt("Order", Format = "int32")]
     public int Order { get; set; }
 }

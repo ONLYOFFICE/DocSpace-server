@@ -28,6 +28,6 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class HideConfirmConvertRequestDto
 {
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies whether to set the specified settings or not")]
+    [SwaggerSchemaCustomBoolean("Specifies whether to set the specified settings or not")]
     public bool Save { get; set; }
 }

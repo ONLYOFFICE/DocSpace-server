@@ -30,12 +30,15 @@ namespace ASC.Migration.Core.Models.Api;
 [ProtoContract]
 public class MigratingApiGroup : ImportableApiEntity
 {
+    [SwaggerSchemaCustomString("Group name")]
     [ProtoMember(2)]
     public string GroupName { get; set; }
 
+    [SwaggerSchemaCustomString("Module name")]
     [ProtoMember(3)]
     public string ModuleName { get; set; }
 
+    [SwaggerSchemaCustomString("List of user uid")]
     [ProtoMember(4)]
     public List<string> UserUidList { get; set; }
 }

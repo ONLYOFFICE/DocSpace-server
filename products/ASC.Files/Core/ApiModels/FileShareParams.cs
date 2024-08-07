@@ -28,13 +28,13 @@ namespace ASC.Files.Core.ApiModels;
 
 public class FileShareParams
 {
-    [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "ID of the user with whom we want to share a file")]
+    [SwaggerSchemaCustomGuid("ID of the user with whom we want to share a file")]
     public Guid ShareTo { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "User email address")]
+    [SwaggerSchemaCustomString("User email address")]
     public string Email { get; set; }
 
-    [SwaggerSchemaCustom(Example = "None", Description = "Sharing rights")]
+    [SwaggerSchemaCustomString("Sharing rights", Example = "None")]
     public FileShare Access { get; set; }
 }
 

@@ -249,5 +249,3 @@ global using JsonSerializer = System.Text.Json.JsonSerializer;
 global using JsonTokenType = System.Text.Json.JsonTokenType;
 global using JsonConverterAttribute = System.Text.Json.Serialization.JsonConverterAttribute;
 global using JsonIgnoreAttribute = System.Text.Json.Serialization.JsonIgnoreAttribute;
-
-global using SwaggerCustomFilter;

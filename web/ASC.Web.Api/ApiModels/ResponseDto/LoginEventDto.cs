@@ -28,43 +28,43 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 
 public class LoginEventDto
 {
-    [SwaggerSchemaCustom(Example = "1234", Description = "ID", Format = "int32")]
+    [SwaggerSchemaCustomInt("ID", Format = "int32")]
     public int Id { get; set; }
 
-    [SwaggerSchemaCustom(Example = "2008-04-10T06-30-00.000Z", Description = "Date")]
+    [SwaggerSchemaCustom<ApiDateTime>("Date")]
     public ApiDateTime Date { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "User")]
+    [SwaggerSchemaCustomString("User")]
     public string User { get; set; }
 
-    [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "User ID")]
+    [SwaggerSchemaCustomGuid("User ID")]
     public Guid UserId { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Login")]
+    [SwaggerSchemaCustomString("Login")]
     public string Login { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Action")]
+    [SwaggerSchemaCustomString("Action")]
     public string Action { get; set; }
 
-    [SwaggerSchemaCustom(Example = "None", Description = "Action ID")]
+    [SwaggerSchemaCustomString("Action ID", Example = "None")]
     public MessageAction ActionId { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "IP")]
+    [SwaggerSchemaCustomString("IP")]
     public string IP { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Country")]
+    [SwaggerSchemaCustomString("Country")]
     public string Country { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "City")]
+    [SwaggerSchemaCustomString("City")]
     public string City { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Browser")]
+    [SwaggerSchemaCustomString("Browser")]
     public string Browser { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Platform")]
+    [SwaggerSchemaCustomString("Platform")]
     public string Platform { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Page")]
+    [SwaggerSchemaCustomString("Page")]
     public string Page { get; set; }
 
     public LoginEventDto(LoginEvent loginEvent)

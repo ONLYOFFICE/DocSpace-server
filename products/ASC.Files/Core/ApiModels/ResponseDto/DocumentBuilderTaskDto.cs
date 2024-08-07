@@ -28,28 +28,28 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public class DocumentBuilderTaskDto
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "Id")]
+    [SwaggerSchemaCustomString("Id")]
     public string Id { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Error")]
+    [SwaggerSchemaCustomString("Error")]
     public string Error { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "Percentage", Format ="int32")]
+    [SwaggerSchemaCustomInt("Percentage", Format ="int32")]
     public int Percentage { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Is completed")]
+    [SwaggerSchemaCustomBoolean("Is completed")]
     public bool IsCompleted { get; set; }
 
-    [SwaggerSchemaCustom(Example = "Created", Description = "Status")]
+    [SwaggerSchemaCustomString("Status", Example = "Created")]
     public DistributedTaskStatus Status { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Result file id")]
+    [SwaggerSchemaCustom<object>("Result file id")]
     public object ResultFileId { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Result file name")]
+    [SwaggerSchemaCustomString("Result file name")]
     public string ResultFileName { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Result file url", Format = "uri")]
+    [SwaggerSchemaCustomString("Result file url", Format = "uri")]
     public string ResultFileUrl { get; set; }
 
     public static DocumentBuilderTaskDto Get(DistributedTaskProgress task)

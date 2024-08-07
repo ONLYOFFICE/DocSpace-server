@@ -28,91 +28,91 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public class FileDto<T> : FileEntryDto<T>
 {
-    [SwaggerSchemaCustom(Example = "12334", Description = "Folder ID")]
+    [SwaggerSchemaCustomInt("Folder ID", Example = 12334, Format = "int32")]
     public T FolderId { get; set; }
 
-    [SwaggerSchemaCustom(Example = "3", Description = "Version", Format = "int32")]
+    [SwaggerSchemaCustomInt("Version", Example = 3, Format = "int32")]
     public int Version { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1", Description = "Version group", Format = "int32")]
+    [SwaggerSchemaCustomInt("Version group", Example = 1, Format = "int32")]
     public int VersionGroup { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "Content length")]
+    [SwaggerSchemaCustomInt("Content length")]
     public string ContentLength { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "Pure content length", Format = "int64", Nullable = true)]
+    [SwaggerSchemaCustomLong("Pure content length", Format = "int64", Nullable = true)]
     public long? PureContentLength { get; set; }
 
-    [SwaggerSchemaCustom(Example = "None", Description = "File status")]
+    [SwaggerSchemaCustomString("File status", Example = "None")]
     public FileStatus FileStatus { get; set; }
 
-    [SwaggerSchemaCustom(Example = "false", Description = "Muted or not")]
+    [SwaggerSchemaCustomBoolean("Muted or not", Example = false)]
     public bool Mute { get; set; }
 
-    [SwaggerSchemaCustom(Example = "https://www.onlyoffice.com/viewfile?fileid=2221", Description = "URL to view a file", Format = "uri")]
+    [SwaggerSchemaCustomString("URL to view a file", Example = "https://www.onlyoffice.com/viewfile?fileid=2221", Format = "uri")]
     public string ViewUrl { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Web URL", Format = "uri")]
+    [SwaggerSchemaCustomString("Web URL", Format = "uri")]
     public string WebUrl { get; set; }
 
-    [SwaggerSchemaCustom(Example = "Document", Description = "File type")]
+    [SwaggerSchemaCustomString("File type", Example = "Document")]
     public FileType FileType { get; set; }
 
-    [SwaggerSchemaCustom(Example = ".txt", Description = "File extension")]
+    [SwaggerSchemaCustomString("File extension", Example = ".txt")]
     public string FileExst { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Comment")]
+    [SwaggerSchemaCustomString("Comment")]
     public string Comment { get; set; }
 
-    [SwaggerSchemaCustom(Example = "false", Description = "Encrypted or not", Nullable = true)]
+    [SwaggerSchemaCustomBoolean("Encrypted or not", Example = false, Nullable = true)]
     public bool? Encrypted { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Thumbnail URL", Format = "uri")]
+    [SwaggerSchemaCustomString("Thumbnail URL", Format = "uri")]
     public string ThumbnailUrl { get; set; }
 
-    [SwaggerSchemaCustom(Example = "Created", Description = "Thumbnail status")]
+    [SwaggerSchemaCustomString("Thumbnail status", Example = "Created")]
     public Thumbnail ThumbnailStatus { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Locked or not", Nullable = true)]
+    [SwaggerSchemaCustomBoolean("Locked or not", Nullable = true)]
     public bool? Locked { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "User ID who locked a file")]
+    [SwaggerSchemaCustomString("User ID who locked a file")]
     public string LockedBy { get; set; }
 
-    [SwaggerSchemaCustom(Example = "false", Description = "Denies file downloading or not")]
+    [SwaggerSchemaCustomBoolean("Denies file downloading or not", Example = false)]
     public bool DenyDownload { get; set; }
 
-    [SwaggerSchemaCustom(Example = "false", Description = "Is there a draft or not", Nullable = true)]
+    [SwaggerSchemaCustomBoolean("Is there a draft or not", Example = false, Nullable = true)]
     public bool? HasDraft { get; set; }
 
-    [SwaggerSchemaCustom(Example = "false", Description = "Is there a form or not", Nullable = true)]
+    [SwaggerSchemaCustomBoolean("Is there a form or not", Example = false, Nullable = true)]
     public bool? IsForm { get; set; }
 
-    [SwaggerSchemaCustom(Example = "false", Description = "Specifies if the filling has started or not", Nullable = true)]
+    [SwaggerSchemaCustomBoolean("Specifies if the filling has started or not", Example = false, Nullable = true)]
     public bool? StartFilling { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "InProcess folder ID", Format = "int32", Nullable = true)]
+    [SwaggerSchemaCustomInt("InProcess folder ID", Format = "int32", Nullable = true)]
     public int? InProcessFolderId { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "InProcess folder title")]
+    [SwaggerSchemaCustomString("InProcess folder title")]
     public string InProcessFolderTitle { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Draft info")]
+    [SwaggerSchemaCustom<DraftLocation<int>>("Draft info")]
     public DraftLocation<T> DraftLocation { get; set; }
 
-    [SwaggerSchemaCustom(Example = "false", Description = "Denies file sharing or not")]
+    [SwaggerSchemaCustomBoolean("Denies file sharing or not", Example = false)]
     public bool DenySharing { get; set; }
 
-    [SwaggerSchemaCustom(Description = "File accessibility")]
+    [SwaggerSchemaCustom<IDictionary<Accessibility, bool>>("File accessibility")]
     public IDictionary<Accessibility, bool> ViewAccessibility { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Available external rights")]
+    [SwaggerSchemaCustom<IDictionary<string, bool>>("Available external rights")]
     public IDictionary<string, bool> AvailableExternalRights { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Request token")]
+    [SwaggerSchemaCustomString("Request token")]
     public string RequestToken { get; set; }
 
-    [SwaggerSchemaCustom(Example = "2008-04-10T06-30-00.000Z", Description = "Last opened")]
+    [SwaggerSchemaCustom<ApiDateTime>(Description = "Last opened")]
     public ApiDateTime LastOpened { get; set; }
 
 
@@ -328,15 +328,15 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
 
 public class DraftLocation<T>
 {
-    [SwaggerSchemaCustom(Example = "1234", Description = "InProcess folder ID", Format = "int32")]
+    [SwaggerSchemaCustomInt("InProcess folder ID", Format = "int32")]
     public T FolderId { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "InProcess folder title")]
+    [SwaggerSchemaCustomString("InProcess folder title")]
     public string FolderTitle { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "Draft ID", Format = "int32")]
+    [SwaggerSchemaCustomInt("Draft ID", Format = "int32")]
     public T FileId { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Draft title")]
+    [SwaggerSchemaCustomString("Draft title")]
     public string FileTitle { get; set; }
 }

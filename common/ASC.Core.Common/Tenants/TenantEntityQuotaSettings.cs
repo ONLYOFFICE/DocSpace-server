@@ -26,24 +26,18 @@
 
 namespace ASC.Core.Tenants;
 
-/// <summary>
-/// 
-/// </summary>
 public abstract class TenantEntityQuotaSettings
 {
     public const int NoQuota = -1;
     public const int DefaultQuotaValue = -2;
 
-    /// <summary>Specifies if the quota is enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustomBoolean("Specifies if the quota is enabled or not")]
     public bool EnableQuota { get; set; }
 
-    /// <summary>Default quota</summary>
-    /// <type>System.Int64, System</type>
+    [SwaggerSchemaCustomLong("Default quota")]
     public long DefaultQuota { get; set; } = DefaultQuotaValue;
 
-    /// <summary>Date of the last quota recalculation</summary>
-    /// <type>System.Nullable{System.DateTime}, System</type>
+    [SwaggerSchemaCustomDateTime("Date of the last quota recalculation", Nullable = true)]
     public DateTime? LastRecalculateDate { get; set; }
 
 }

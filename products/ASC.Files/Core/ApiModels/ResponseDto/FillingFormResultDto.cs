@@ -27,27 +27,24 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
-/// <summary>
-/// </summary>
 public class FillingFormResultDto<T>
 {
-    /// <summary>Form number</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustomInt("Form number", Format = "int32")]
     public int FormNumber { get; set; }
 
-    /// <summary>Completed form</summary>
-    /// <type>ASC.Files.Core.ApiModels.ResponseDto.FileEntryDto, ASC.Files.Core</type>
+    [SwaggerSchemaCustom<FileDto<int>>("Completed form")]
     public FileDto<T> CompletedForm { get; set; }
 
-    /// <summary>Original form</summary>
-    /// <type>ASC.Files.Core.ApiModels.ResponseDto.FileEntryDto, ASC.Files.Core</type>
+    [SwaggerSchemaCustom<FileDto<int>>("Original form")]
     public FileDto<T> OriginalForm { get; set; }
 
-    /// <summary>Manager</summary>
-    /// <type>ASC.Web.Api.Models.EmployeeDto, ASC.Api.Core</type>
+    [SwaggerSchemaCustom<EmployeeFullDto>("Manager")]
     public EmployeeFullDto Manager { get; set; }
 
+    [SwaggerSchemaCustomInt("Room Id", Format = "int32")]
     public T RoomId { get; set; }
+
+    [SwaggerSchemaCustomBoolean("Is room member")]
     public bool isRoomMember { get; set; }
 
 }

@@ -30,22 +30,22 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 public class WebhooksConfigRequestsDto
 {
-    [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "ID")]
+    [SwaggerSchemaCustomInt(Description = "ID")]
     public int Id { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Name")]
+    [SwaggerSchemaCustomString("Name")]
     public string Name { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "URI", Format = "uri")]
+    [SwaggerSchemaCustomString("URI", Format = "uri")]
     [Url]
     public string Uri { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Secret key")]
+    [SwaggerSchemaCustomString("Secret key")]
     public string SecretKey { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Enabled or not", Nullable = true)]
+    [SwaggerSchemaCustomBoolean("Enabled or not", Nullable = true)]
     public bool? Enabled { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "SSL", Nullable = true)]
+    [SwaggerSchemaCustomBoolean("SSL", Nullable = true)]
     public bool? SSL { get; set;}
 }

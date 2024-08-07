@@ -28,33 +28,33 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class TenantExtraDto
 {
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the extra tenant license is customizable or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if the extra tenant license is customizable or not")]
     public bool CustomMode { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the extra tenant license is Opensource or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if the extra tenant license is Opensource or not")]
     public bool Opensource { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the extra tenant license is Enterprise or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if the extra tenant license is Enterprise or not")]
     public bool Enterprise { get; set; }
 
-    [SwaggerSchemaCustom(Description = "License tariff")]
+    [SwaggerSchemaCustom<Tariff>("License tariff")]
     public Tariff Tariff { get; set; }
 
-    [SwaggerSchemaCustom(Description = "License quota")]
+    [SwaggerSchemaCustom<QuotaDto>("License quota")]
     public QuotaDto Quota { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the license is paid or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if the license is paid or not")]
     public bool NotPaid { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "The time when the license was accepted")]
+    [SwaggerSchemaCustomString("The time when the license was accepted")]
     public string LicenseAccept { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the tariff page is enabled or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if the tariff page is enabled or not")]
     public bool EnableTariffPage { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Document server user quotas")]
+    [SwaggerSchemaCustom<Dictionary<string, DateTime>>("Document server user quotas")]
     public Dictionary<string, DateTime> DocServerUserQuota { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Document server license")]
+    [SwaggerSchemaCustom<License>("Document server license")]
     public License DocServerLicense { get; set; }
 }

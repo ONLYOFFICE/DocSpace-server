@@ -172,5 +172,4 @@ global using static ASC.ActiveDirectory.Base.Settings.LdapSettings;
 global using static ASC.Security.Cryptography.EmailValidationKeyProvider;
 
 global using SecurityContext = ASC.Core.SecurityContext;
-global using SwaggerCustomFilter;
 global using Swashbuckle.AspNetCore.Annotations;

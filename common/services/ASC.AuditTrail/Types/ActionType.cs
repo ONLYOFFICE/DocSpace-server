@@ -23,32 +23,68 @@
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
-
 namespace ASC.AuditTrail.Types;
 
-/// <summary>
-/// </summary>
 [EnumExtensions]
 public enum ActionType
 {
+    [SwaggerEnum("None")]
     None,
+
+    [SwaggerEnum("Create")]
     Create,
+
+    [SwaggerEnum("Update")]
     Update,
+
+    [SwaggerEnum("Delete")]
     Delete,
+
+    [SwaggerEnum("Link")]
     Link,
+
+    [SwaggerEnum("Unlink")]
     Unlink,
+
+    [SwaggerEnum("Attach")]
     Attach,
+
+    [SwaggerEnum("Detach")]
     Detach,
+
+    [SwaggerEnum("Send")]
     Send,
+
+    [SwaggerEnum("Import")]
     Import,
+
+    [SwaggerEnum("Export")]
     Export,
+
+    [SwaggerEnum("Update access")]
     UpdateAccess,
+
+    [SwaggerEnum("Download")]
     Download,
+
+    [SwaggerEnum("Upload")]
     Upload,
+
+    [SwaggerEnum("Copy")]
     Copy,
+
+    [SwaggerEnum("Move")]
     Move,
+
+    [SwaggerEnum("Reassigns")]
     Reassigns,
+
+    [SwaggerEnum("Follow")]
     Follow,
+
+    [SwaggerEnum("Unfollow")]
     Unfollow,
+
+    [SwaggerEnum("Logout")]
     Logout
 }

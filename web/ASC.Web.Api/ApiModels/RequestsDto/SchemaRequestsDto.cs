@@ -28,38 +28,38 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 public class SchemaBaseRequestsDto
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "Team template ID")]
+    [SwaggerSchemaCustomString("Team template ID")]
     public string Id { get; init; }
 }
 public class SchemaRequestsDto : SchemaBaseRequestsDto
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "Team template name")]
+    [SwaggerSchemaCustomString("Team template name")]
     public string Name { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "User caption")]
+    [SwaggerSchemaCustomString("User caption")]
     public string UserCaption { get; init; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Users caption")]
+    [SwaggerSchemaCustomString("Users caption")]
     public string UsersCaption { get; init; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Group caption")]
+    [SwaggerSchemaCustomString("Group caption")]
     public string GroupCaption { get; init; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Groups caption")]
+    [SwaggerSchemaCustomString("Groups caption")]
     public string GroupsCaption { get; init; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "User status caption")]
+    [SwaggerSchemaCustomString("User status caption")]
     public string UserPostCaption { get; init; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Registration date caption")]
+    [SwaggerSchemaCustomString("Registration date caption")]
     public string RegDateCaption { get; init; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Group lead caption")]
+    [SwaggerSchemaCustomString("Group lead caption")]
     public string GroupHeadCaption { get; init; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Guest caption")]
+    [SwaggerSchemaCustomString("Guest caption")]
     public string GuestCaption { get; init; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Guests caption")]
+    [SwaggerSchemaCustomString("Guests caption")]
     public string GuestsCaption { get; init; }
 }

@@ -28,58 +28,58 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 
 public class AuditEventDto
 {
-    [SwaggerSchemaCustom(Example = "1234", Description = "ID", Format = "int32")]
+    [SwaggerSchemaCustomInt("ID", Format = "int32")]
     public int Id { get; set; }
 
-    [SwaggerSchemaCustom(Example = "2008-04-10T06-30-00.000Z", Description = "Date")]
+    [SwaggerSchemaCustom<ApiDateTime>("Date")]
     public ApiDateTime Date { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "User")]
+    [SwaggerSchemaCustomString("User")]
     public string User { get; set; }
 
-    [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "User ID")]
+    [SwaggerSchemaCustomGuid("User ID")]
     public Guid UserId { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Action")]
+    [SwaggerSchemaCustomString("Action")]
     public string Action { get; set; }
 
-    [SwaggerSchemaCustom(Example = "None", Description = "Action ID")]
+    [SwaggerSchemaCustomString("Action ID", Example = "None")]
     public MessageAction ActionId { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "IP")]
+    [SwaggerSchemaCustomString("IP")]
     public string IP { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Country")]
+    [SwaggerSchemaCustomString("Country")]
     public string Country { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "City")]
+    [SwaggerSchemaCustomString("City")]
     public string City { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Browser")]
+    [SwaggerSchemaCustomString("Browser")]
     public string Browser { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Platform")]
+    [SwaggerSchemaCustomString("Platform")]
     public string Platform { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Page")]
+    [SwaggerSchemaCustomString("Page")]
     public string Page { get; set; }
 
-    [SwaggerSchemaCustom(Example = "None", Description = "Action type")]
+    [SwaggerSchemaCustomString("Action type", Example = "None")]
     public ActionType ActionType { get; set; }
 
-    [SwaggerSchemaCustom(Example = "None", Description = "Product type")]
+    [SwaggerSchemaCustomString("Product type", Example = "None")]
     public ProductType Product { get; set; }
 
-    [SwaggerSchemaCustom(Example = "None", Description = "Module type")]
+    [SwaggerSchemaCustomString("Module type", Example = "None")]
     public ModuleType Module { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "List of targets")]
+    [SwaggerSchemaCustomString("List of targets")]
     public IEnumerable<string> Target { get; set; }
 
-    [SwaggerSchemaCustom(Example = "None", Description = "List of entry types")]
+    [SwaggerSchemaCustomString("List of entry types", Example = "None")]
     public IEnumerable<EntryType> Entries { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Context")]
+    [SwaggerSchemaCustomString("Context")]
     public string Context { get; set; }
 
     public AuditEventDto(AuditEvent auditEvent, AuditActionMapper auditActionMapper)

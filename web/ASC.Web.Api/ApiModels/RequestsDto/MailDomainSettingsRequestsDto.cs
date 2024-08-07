@@ -28,32 +28,32 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 public class MailDomainSettingsRequestsDto
 {
-    [SwaggerSchemaCustom(Example = "None", Description = "Trusted domain type")]
+    [SwaggerSchemaCustomString("Trusted domain type", Example = "None")]
     public TenantTrustedDomainsType Type { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "List of trusted domains")]
+    [SwaggerSchemaCustomString("List of trusted domains")]
     public List<string> Domains { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Invites as a user or not")]
+    [SwaggerSchemaCustomBoolean("Invites as a user or not")]
     public bool InviteUsersAsVisitors { get; set; }
 }
 
 public class AdminMessageBaseSettingsRequestsDto
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "Email")]
+    [SwaggerSchemaCustomString("Email")]
     public string Email { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Culture")]
+    [SwaggerSchemaCustomString("Culture")]
     public string Culture { get; set; }
 }
 public class AdminMessageSettingsRequestsDto : AdminMessageBaseSettingsRequestsDto
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "Message")]
+    [SwaggerSchemaCustomString("Message")]
     public string Message { get; set; }
 }
 
 public class TurnOnAdminMessageSettingsRequestDto
 {
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the administrator messages are enabled or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if the administrator messages are enabled or not")]
     public bool TurnOn { get; set; }
 }

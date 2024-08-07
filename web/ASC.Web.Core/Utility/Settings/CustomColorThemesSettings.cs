@@ -55,24 +55,18 @@ public class CustomColorThemesSettings : ISettings<CustomColorThemesSettings>
     }
 }
 
-/// <summary>
-/// </summary>
 public class CustomColorThemesSettingsItem
 {
-    /// <summary>Theme ID</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustomInt("Theme ID", Example = 1)]
     public int Id { get; set; }
 
-    /// <summary>Theme name</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustomString("Theme name", Example = "blue")]
     public string Name { get; set; }
 
-    /// <summary>Main colors</summary>
-    /// <type>ASC.Web.Core.Utility.Settings.CustomColorThemesSettingsColorItem, ASC.Web.Core</type>
+    [SwaggerSchemaCustom<CustomColorThemesSettingsColorItem>("Main colors")]
     public CustomColorThemesSettingsColorItem Main { get; set; }
 
-    /// <summary>Text colors</summary>
-    /// <type>ASC.Web.Core.Utility.Settings.CustomColorThemesSettingsColorItem, ASC.Web.Core</type>
+    [SwaggerSchemaCustom<CustomColorThemesSettingsColorItem>("Text colors")]
     public CustomColorThemesSettingsColorItem Text { get; set; }
 
     public static List<CustomColorThemesSettingsItem> Default =>
@@ -127,15 +121,11 @@ public class CustomColorThemesSettingsItem
     ];
 }
 
-/// <summary>
-/// </summary>
 public class CustomColorThemesSettingsColorItem
 {
-    /// <summary>Accent color</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustomString("Accent color", Example = "#4781D1")]
     public string Accent { get; init; }
-
-    /// <summary>Button color</summary>
-    /// <type>System.String, System</type>
+    
+    [SwaggerSchemaCustomString("Button color", Example = "#5299E0")]
     public string Buttons { get; init; }
 }

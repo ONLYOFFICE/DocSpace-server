@@ -28,60 +28,60 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 public class AuthRequestsDto
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "Username / email")]
+    [SwaggerSchemaCustomString("Username / email")]
     public string UserName { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Password")]
+    [SwaggerSchemaCustomString("Password")]
     public string Password { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Password hash")]
+    [SwaggerSchemaCustomString("Password hash")]
     public string PasswordHash { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Provider type")]
+    [SwaggerSchemaCustomString("Provider type")]
     public string Provider { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Provider access token")]
+    [SwaggerSchemaCustomString("Provider access token")]
     public string AccessToken { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Serialized user profile")]
+    [SwaggerSchemaCustomString("Serialized user profile")]
     public string SerializedProfile { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Two-factor authentication code")]
+    [SwaggerSchemaCustomString("Two-factor authentication code")]
     public string Code { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Code for getting a token")]
+    [SwaggerSchemaCustomString("Code for getting a token")]
     public string CodeOAuth { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Session based authentication or not")]
+    [SwaggerSchemaCustomBoolean("Session based authentication or not")]
     public bool Session { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Confirmation data")]
+    [SwaggerSchemaCustom<ConfirmData>("Confirmation data")]
     public ConfirmData ConfirmData { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Type of captcha")]
+    [SwaggerSchemaCustomString("Type of captcha", Example = "Default")]
     public RecaptchaType RecaptchaType { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "reCAPTCHA response")]
+    [SwaggerSchemaCustomString("reCAPTCHA response")]
     public string RecaptchaResponse { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Culture")]
+    [SwaggerSchemaCustomString("Culture")]
     public string Culture { get; set; }
 }
 
 public class MobileRequestsDto
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "Mobile phone")]
+    [SwaggerSchemaCustomString("Mobile phone")]
     public string MobilePhone { get; set; }
 }
 
 public class ConfirmData
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "Email address")]
+    [SwaggerSchemaCustomString("Email address")]
     public string Email { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Access an account for the first time or not", Nullable = true)]
+    [SwaggerSchemaCustomBoolean("Access an account for the first time or not", Nullable = true)]
     public bool? First { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Key")]
+    [SwaggerSchemaCustomString("Key")]
     public string Key { get; set; }
 }

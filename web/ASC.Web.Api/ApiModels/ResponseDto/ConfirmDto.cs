@@ -28,12 +28,12 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class ConfirmDto : IMapFrom<Validation>
 {
-    [SwaggerSchemaCustom(Example = "Ok", Description = "Result")]
+    [SwaggerSchemaCustomString("Result", Example = "Ok")]
     public ValidationResult Result { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Room id")]
+    [SwaggerSchemaCustomString("Room id")]
     public string RoomId { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Title")]
+    [SwaggerSchemaCustomString("Title")]
     public string Title { get; set; }
 }

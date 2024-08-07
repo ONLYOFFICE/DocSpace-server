@@ -28,93 +28,93 @@ namespace ASC.People.ApiModels.RequestDto;
 
 public class EmailMemberRequestDto
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "Email")]
+    [SwaggerSchemaCustomString("Email")]
     public string Email { get; set; }
 }
 public class MemberBaseRequestDto : EmailMemberRequestDto
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "Password")]
+    [SwaggerSchemaCustomString("Password")]
     public string Password { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Password hash")]
+    [SwaggerSchemaCustomString("Password hash")]
     public string PasswordHash { get; set; }
 }
 public class MemberRequestDto : MemberBaseRequestDto
 {
-    [SwaggerSchemaCustom(Example = "All", Description = "Employee type (All, RoomAdmin, User, DocSpaceAdmin, Collaborator)")]
+    [SwaggerSchemaCustomString("Employee type (All, RoomAdmin, User, DocSpaceAdmin, Collaborator)", Example = "All")]
     public EmployeeType Type { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if this is a guest or a user", Nullable = true)]
+    [SwaggerSchemaCustomBoolean("Specifies if this is a guest or a user", Nullable = true)]
     public bool? IsUser { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "First name")]
+    [SwaggerSchemaCustomString("First name")]
     public string Firstname { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Last name")]
+    [SwaggerSchemaCustomString("Last name")]
     public string Lastname { get; set; }
 
-    [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "List of user departments")]
+    [SwaggerSchemaCustomGuid("List of user departments")]
     public Guid[] Department { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Title")]
+    [SwaggerSchemaCustomString("Title")]
     public string Title { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Location")]
+    [SwaggerSchemaCustomString("Location")]
     public string Location { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Sex (male or female)")]
+    [SwaggerSchemaCustomString("Sex (male or female)")]
     public string Sex { get; set; }
 
-    [SwaggerSchemaCustom(Example = "2008-04-10T06-30-00.000Z", Description = "Birthday")]
+    [SwaggerSchemaCustom<ApiDateTime>("Birthday")]
     public ApiDateTime Birthday { get; set; }
 
-    [SwaggerSchemaCustom(Example = "2008-04-10T06-30-00.000Z", Description = "Registration date (if it is not specified, then the current date will be set)")]
+    [SwaggerSchemaCustom<ApiDateTime>("Registration date (if it is not specified, then the current date will be set)")]
     public ApiDateTime Worksfrom { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Comment")]
+    [SwaggerSchemaCustomString("Comment")]
     public string Comment { get; set; }
 
-    [SwaggerSchemaCustom(Description = "List of user contacts")]
+    [SwaggerSchemaCustom<IEnumerable<Contact>>("List of user contacts")]
     public IEnumerable<Contact> Contacts { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Avatar photo URL", Format ="uri")]
+    [SwaggerSchemaCustomString("Avatar photo URL", Format ="uri")]
     public string Files { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the user is added via the invitation link or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if the user is added via the invitation link or not")]
     public bool FromInviteLink { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Key")]
+    [SwaggerSchemaCustomString("Key")]
     public string Key { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Language")]
+    [SwaggerSchemaCustomString("Language")]
     public string CultureName { get; set; }
 
-    [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "Target")]
+    [SwaggerSchemaCustomGuid("Target")]
     public Guid Target { get; set; }
 }
 
 public class UpdateMemberRequestDto : MemberRequestDto
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "User ID")]
+    [SwaggerSchemaCustomString("User ID")]
     public string UserId { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies whether to disable a user or not", Nullable = true)]
+    [SwaggerSchemaCustomBoolean("Specifies whether to disable a user or not", Nullable = true)]
     public bool? Disable { get; set; }
 }
 
 public class UpdatePhotoMemberRequestDto
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "Avatar photo URL", Format = "uri")]
+    [SwaggerSchemaCustomString("Avatar photo URL", Format = "uri")]
     public string Files { get; set; }
 }
 public class UpdateMemberSimpleRequestDto
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "User ID")]
+    [SwaggerSchemaCustomString("User ID")]
     public string UserId { get; set; }
 }
 
 public class ContactsRequestDto
 {
-    [SwaggerSchemaCustom(Description = "List of user contacts")]
+    [SwaggerSchemaCustom<IEnumerable<Contact>>("List of user contacts")]
     public IEnumerable<Contact> Contacts { get; set; }
 }

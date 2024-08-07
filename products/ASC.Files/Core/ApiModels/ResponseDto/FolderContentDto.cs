@@ -28,28 +28,28 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public class FolderContentDto<T>
 {
-    [SwaggerSchemaCustom(Description = "List of files")]
+    [SwaggerSchemaCustom<List<FileEntryDto>>("List of files")]
     public List<FileEntryDto> Files { get; set; }
 
-    [SwaggerSchemaCustom(Description = "List of folders")]
+    [SwaggerSchemaCustom<List<FileEntryDto>>("List of folders")]
     public List<FileEntryDto> Folders { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Current folder information")]
+    [SwaggerSchemaCustom<FolderDto<int>>("Current folder information")]
     public FolderDto<T> Current { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Folder path")]
+    [SwaggerSchemaCustom<object>("Folder path")]
     public object PathParts { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "Folder start index", Format = "int32")]
+    [SwaggerSchemaCustomInt("Folder start index", Format = "int32")]
     public int StartIndex { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "Number of folder elements", Format = "int32")]
+    [SwaggerSchemaCustomInt("Number of folder elements", Format = "int32")]
     public int Count { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "Total number of elements in the folder", Format = "int32")]
+    [SwaggerSchemaCustomInt("Total number of elements in the folder", Format = "int32")]
     public int Total { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "New element index", Format = "int32")]
+    [SwaggerSchemaCustomInt("New element index", Format = "int32")]
     public int New { get; set; }
 
     public static FolderContentDto<int> GetSample()

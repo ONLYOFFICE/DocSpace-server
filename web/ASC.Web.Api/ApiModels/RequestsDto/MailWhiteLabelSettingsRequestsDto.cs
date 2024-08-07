@@ -28,6 +28,6 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 public class MailWhiteLabelSettingsRequestsDto
 {
-    [SwaggerSchemaCustom(Example = "None", Description = "Specifies if the mail footer will be enabled or note")]
+    [SwaggerSchemaCustomBoolean("Specifies if the mail footer will be enabled or note")]
     public bool FooterEnabled { get; set; }
 }

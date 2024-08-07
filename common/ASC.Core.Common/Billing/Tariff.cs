@@ -26,37 +26,28 @@
 
 namespace ASC.Core.Billing;
 
-/// <summary>
-/// </summary>
 [DebuggerDisplay("{State} before {DueDate}")]
 public class Tariff
 {
-    /// <summary>ID</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustomInt("ID")]
     public int Id { get; set; }
 
-    /// <summary>Tariff state</summary>
-    /// <type>ASC.Core.Billing.TariffState, ASC.Core.Common</type>
+    [SwaggerSchemaCustomString("Tariff state", Example = "Trial")]
     public TariffState State { get; set; }
 
-    /// <summary>Due date</summary>
-    /// <type>System.DateTime, System</type>
+    [SwaggerSchemaCustomDateTime("Due date")]
     public DateTime DueDate { get; set; }
 
-    /// <summary>Delay due date</summary>
-    /// <type>System.DateTime, System</type>
+    [SwaggerSchemaCustomDateTime("Delay due date")]
     public DateTime DelayDueDate { get; set; }
 
-    /// <summary>License date</summary>
-    /// <type>System.DateTime, System</type>
+    [SwaggerSchemaCustomDateTime("License date")]
     public DateTime LicenseDate { get; set; }
 
-    /// <summary>Customer ID</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustomString("Customer ID")]
     public string CustomerId { get; set; }
 
-    /// <summary>List of quotas</summary>
-    /// <type>System.Collections.Generic.List{ASC.Core.Billing.Quota}, System.Collections.Generic</type>
+    [SwaggerSchemaCustom<List<Quota>>("List of quotas")]
     public List<Quota> Quotas { get; set; }
 
     public override int GetHashCode()
@@ -79,16 +70,12 @@ public class Tariff
     }
 }
 
-/// <summary>
-/// </summary>
 public class Quota(int id, int quantity) : IEquatable<Quota>
 {
-    /// <summary>ID</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustomInt("ID")]
     public int Id { get; set; } = id;
 
-    /// <summary>Quantity</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustomInt("Quantity")]
     public int Quantity { get; set; } = quantity;
 
     public bool Equals(Quota other)

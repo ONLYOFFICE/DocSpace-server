@@ -28,97 +28,97 @@ namespace ASC.Web.Api.Models;
 
 public class EmployeeFullDto : EmployeeDto
 {
-    [SwaggerSchemaCustom (Example = "some text", Description = "First name")]
+    [SwaggerSchemaCustomString("First name")]
     public string FirstName { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Last name")]
+    [SwaggerSchemaCustomString("Last name")]
     public string LastName { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Username")]
+    [SwaggerSchemaCustomString("Username")]
     public string UserName { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Email")]
+    [SwaggerSchemaCustomString("Email")]
     public string Email { get; set; }
 
-    [SwaggerSchemaCustom(Description = "List of contacts")]
+    [SwaggerSchemaCustom<List<Contact>>("List of contacts")]
     public List<Contact> Contacts { get; set; }
 
-    [SwaggerSchemaCustom(Example = "2008-04-10T06-30-00.000Z", Description = "Birthday")]
+    [SwaggerSchemaCustom<ApiDateTime>("Birthday")]
     public ApiDateTime Birthday { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Sex")]
+    [SwaggerSchemaCustomString("Sex")]
     public string Sex { get; set; }
 
-    [SwaggerSchemaCustom(Example = "Active", Description = "Employee status")]
+    [SwaggerSchemaCustomString("Employee status", Example = "Active")]
     public EmployeeStatus Status { get; set; }
 
-    [SwaggerSchemaCustom(Example = "Activated", Description = "Employee activation status")]
+    [SwaggerSchemaCustomString("Employee activation status", Example = "Activated")]
     public EmployeeActivationStatus ActivationStatus { get; set; }
 
-    [SwaggerSchemaCustom(Example = "2008-04-10T06-30-00.000Z", Description = "The date when the user account was terminated")]
+    [SwaggerSchemaCustom<ApiDateTime>("The date when the user account was terminated")]
     public ApiDateTime Terminated { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Department")]
+    [SwaggerSchemaCustomString("Department")]
     public string Department { get; set; }
 
-    [SwaggerSchemaCustom(Example = "2008-04-10T06-30-00.000Z", Description = "Registration date")]
+    [SwaggerSchemaCustom<ApiDateTime>("Registration date")]
     public ApiDateTime WorkFrom { get; set; }
 
-    [SwaggerSchemaCustom(Description = "List of groups")]
+    [SwaggerSchemaCustom<List<GroupSummaryDto>>("List of groups")]
     public List<GroupSummaryDto> Groups { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Location")]
+    [SwaggerSchemaCustomString("Location")]
     public string Location { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Notes")]
+    [SwaggerSchemaCustomString("Notes")]
     public string Notes { get; set; }
 
-    [SwaggerSchemaCustom(Example = "false", Description = "Specifies if the user is an administrator or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if the user is an administrator or not", Example = false)]
     public bool IsAdmin { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the user is a room administrator or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if the user is a room administrator or not")]
     public bool IsRoomAdmin { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the LDAP settings are enabled for the user or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if the LDAP settings are enabled for the user or not")]
     public bool IsLDAP { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "List of administrator modules")]
+    [SwaggerSchemaCustomString("List of administrator modules")]
     public List<string> ListAdminModules { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the user is a portal owner or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if the user is a portal owner or not")]
     public bool IsOwner { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the user is a portal visitor or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if the user is a portal visitor or not")]
     public bool IsVisitor { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the user is a portal collaborator or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if the user is a portal collaborator or not")]
     public bool IsCollaborator { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Language")]
+    [SwaggerSchemaCustomString("Language")]
     public string CultureName { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Mobile phone number")]
+    [SwaggerSchemaCustomString("Mobile phone number")]
     public string MobilePhone { get; set; }
 
-    [SwaggerSchemaCustom(Example = "NotActivated", Description = "ile phone activation status")]
+    [SwaggerSchemaCustomString("Mobile phone activation status", Example = "NotActivated")]
     public MobilePhoneActivationStatus MobilePhoneActivationStatus { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the SSO settings are enabled for the user or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if the SSO settings are enabled for the user or not")]
     public bool IsSSO { get; set; }
 
-    [SwaggerSchemaCustom(Example = "Base", Description = "Theme", Nullable = true)]
+    [SwaggerSchemaCustomString("Theme", Example = "Base", Nullable = true)]
     public DarkThemeSettingsType? Theme { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "Quota limit", Nullable = true, Format = "int64")]
+    [SwaggerSchemaCustomLong("Quota limit", Nullable = true, Format = "int64")]
     public long? QuotaLimit { get; set; }
 
-    [SwaggerSchemaCustom(Example = "12345", Description = "Portal used space", Nullable = true)]
+    [SwaggerSchemaCustomDouble("Portal used space", Example = 12345, Nullable = true)]
     public double? UsedSpace { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Shared", Nullable = true)]
+    [SwaggerSchemaCustomBoolean("Shared", Nullable = true)]
     public bool? Shared { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the user has a custom quota or not", Nullable = true)]
+    [SwaggerSchemaCustomBoolean("Specifies if the user has a custom quota or not", Nullable = true)]
     public bool? IsCustomQuota { get; set; }
 
     public static new EmployeeFullDto GetSample()

@@ -30,38 +30,79 @@ namespace ASC.Core.Common.EF.Model;
 
 public class DbTenant : IMapFrom<Tenant>
 {
+    [SwaggerSchemaCustomInt("Id")]
     public int Id { get; set; }
+
+    [SwaggerSchemaCustomString("Name")]
     public string Name { get; set; }
+
+    [SwaggerSchemaCustomString("Alias")]
     public string Alias { get; set; }
+
+    [SwaggerSchemaCustomString("Mapped domain")]
     public string MappedDomain { get; set; }
+
+    [SwaggerSchemaCustomInt("Version")]
     public int Version { get; set; }
+
+    [SwaggerSchemaCustomDateTime("Version_changed", Nullable = true)]
     public DateTime? Version_Changed { get; set; }
+
+    [SwaggerSchemaCustomDateTime("Version changed")]
     public DateTime VersionChanged
     {
         get => Version_Changed ?? DateTime.MinValue;
         set => Version_Changed = value;
     }
+
+    [SwaggerSchemaCustomString("Language")]
     public string Language { get; set; }
+
+    [SwaggerSchemaCustomString("Time zone")]
     public string TimeZone { get; set; }
+
+    [SwaggerSchemaCustomString("Trusted domains raw")]
     public string TrustedDomainsRaw { get; set; }
+
+    [SwaggerSchemaCustomString("Trusted domains enabled", Example = "None")]
     public TenantTrustedDomainsType TrustedDomainsEnabled { get; set; }
+
+    [SwaggerSchemaCustomString("Status", Example = "Active")]
     public TenantStatus Status { get; set; }
+
+    [SwaggerSchemaCustomDateTime("Status changed", Nullable = true)]
     public DateTime? StatusChanged { get; set; }
     //hack for DateTime?
 
+    [SwaggerSchemaCustomDateTime("Status changed hack")]
     public DateTime StatusChangedHack
     {
         get => StatusChanged ?? DateTime.MinValue;
         set { StatusChanged = value; }
     }
+
+    [SwaggerSchemaCustomDateTime("Creation date time")]
     public DateTime CreationDateTime { get; set; }
+
+    [SwaggerSchemaCustomGuid("Owner id", Nullable = true)]
     public Guid? OwnerId { get; set; }
+
+    [SwaggerSchemaCustomString("Payment id")]
     public string PaymentId { get; set; }
+
+    [SwaggerSchemaCustomString("Industry", Example = "Other")]
     public TenantIndustry Industry { get; set; }
+
+    [SwaggerSchemaCustomDateTime("Last modified")]
     public DateTime LastModified { get; set; }
+
+    [SwaggerSchemaCustomBoolean("Spam")]
     public bool Spam { get; set; }
+
+    [SwaggerSchemaCustomBoolean("Calls")]
     public bool Calls { get; set; }
 
+    [SwaggerSchemaCustom<DbTenantPartner>("Partner")]
     public DbTenantPartner Partner { get; set; }
 
     public void Mapping(Profile profile)

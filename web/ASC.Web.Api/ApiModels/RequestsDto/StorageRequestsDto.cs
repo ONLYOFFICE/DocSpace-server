@@ -28,9 +28,9 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 public class StorageRequestsDto
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "Storage name")]
+    [SwaggerSchemaCustomString("Storage name")]
     public string Module { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Storage properties")]
+    [SwaggerSchemaCustom<IEnumerable<ItemKeyValuePair<string, string>>>("Storage properties")]
     public IEnumerable<ItemKeyValuePair<string, string>> Props { get; set; }
 }

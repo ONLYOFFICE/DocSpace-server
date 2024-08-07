@@ -67,3 +67,4 @@ global using Newtonsoft.Json;
 global using Newtonsoft.Json.Linq;
 
 global using JsonSerializer = System.Text.Json.JsonSerializer;
+global using ASC.Api.Core.Extensions;

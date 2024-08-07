@@ -28,9 +28,9 @@ namespace ASC.People.ApiModels.RequestDto;
 
 public class UpdateGroupRequestDto : GroupRequestDtoBase
 {
-    [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "List of user IDs to add to the group")]
+    [SwaggerSchemaCustomGuid("List of user IDs to add to the group")]
     public IEnumerable<Guid> MembersToAdd { get; set; }
 
-    [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "List of user IDs to remove from the group")]
+    [SwaggerSchemaCustomGuid("List of user IDs to remove from the group")]
     public IEnumerable<Guid> MembersToRemove { get; set; }
 }

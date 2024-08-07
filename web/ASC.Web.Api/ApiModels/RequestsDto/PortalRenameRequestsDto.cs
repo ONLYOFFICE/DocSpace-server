@@ -28,6 +28,6 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 public class PortalRenameRequestsDto
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "Portal name")]
+    [SwaggerSchemaCustomString("Portal name")]
     public string Alias { get; set; }
 }

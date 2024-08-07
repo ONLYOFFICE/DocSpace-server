@@ -28,9 +28,9 @@ namespace ASC.Web.Api.Models;
 
 public class DnsSettingsRequestsDto
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "DNS")]
+    [SwaggerSchemaCustomString("DNS")]
     public string DnsName { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Enabled or not")]
+    [SwaggerSchemaCustomBoolean("Enabled or not")]
     public bool Enable { get; set; }
 }

@@ -28,23 +28,23 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class InsertFileRequestDto : IModelWithFile, IDisposable
 {
-    [SwaggerSchemaCustom(Description = "File", Format = "file")]
+    [SwaggerSchemaCustomString("File", Format = "file", Example = null)]
     public IFormFile File { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "File name")]
+    [SwaggerSchemaCustomString("File name")]
     public string Title { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies whether to create a new file if it already exists or not")]
+    [SwaggerSchemaCustomBoolean("Specifies whether to create a new file if it already exists or not")]
     public bool CreateNewIfExist { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies whether to keep the file converting status or not")]
+    [SwaggerSchemaCustomBoolean("Specifies whether to keep the file converting status or not")]
     public bool KeepConvertStatus { get; set; }
 
 
     private Stream _stream;
     private bool _disposedValue;
 
-    [SwaggerSchemaCustom(Example = "N/A", Description = "Request input stream")]
+    [SwaggerSchemaCustomString("Request input stream", Example = "N/A")]
     public Stream Stream
     {
         get => File?.OpenReadStream() ?? _stream;

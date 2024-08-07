@@ -105,3 +105,5 @@ global using StackExchange.Redis.Extensions.Core;
 global using StackExchange.Redis.Extensions.Core.Abstractions;
 
 global using ILogger = Microsoft.Extensions.Logging.ILogger;
+
+global using ASC.Api.Core.Extensions;

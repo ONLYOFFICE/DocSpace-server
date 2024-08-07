@@ -28,55 +28,55 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public class FolderDto<T> : FileEntryDto<T>
 {
-    [SwaggerSchemaCustom(Example = "10", Description = "Parent folder ID", Format = "int32")]
+    [SwaggerSchemaCustomInt("Parent folder ID", Example = 10, Format = "int32")]
     public T ParentId { get; set; }
 
-    [SwaggerSchemaCustom(Example = "5", Description = "Number of files", Format = "int32")]
+    [SwaggerSchemaCustomInt("Number of files", Example = 5, Format = "int32")]
     public int FilesCount { get; set; }
 
-    [SwaggerSchemaCustom(Example = "7", Description = "Number of folders", Format = "int32")]
+    [SwaggerSchemaCustomInt("Number of folders", Example = 7, Format = "int32")]
     public int FoldersCount { get; set; }
 
-    [SwaggerSchemaCustom(Example = "null", Description = "Specifies if a folder is shareable or not", Nullable = true)]
+    [SwaggerSchemaCustomBoolean("Specifies if a folder is shareable or not", Example = false, Nullable = true)]
     public bool? IsShareable { get; set; }
 
-    [SwaggerSchemaCustom(Example = "null", Description = "Specifies if a folder is favorite or not", Nullable = true)]
+    [SwaggerSchemaCustomBoolean("Specifies if a folder is favorite or not", Example = false, Nullable = true)]
     public bool? IsFavorite { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "Number for a new folder", Format = "int32")]
+    [SwaggerSchemaCustomInt("Number for a new folder", Format = "int32")]
     public int New { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if a folder is muted or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if a folder is muted or not")]
     public bool Mute { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "List of tags")]
+    [SwaggerSchemaCustomString("List of tags")]
     public IEnumerable<string> Tags { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Logo")]
+    [SwaggerSchemaCustom<Logo>("Logo")]
     public Logo Logo { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if a folder is pinned or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if a folder is pinned or not")]
     public bool Pinned { get; set; }
 
-    [SwaggerSchemaCustom(Example = "PublicRoom", Description = "Room type", Nullable = true)]
+    [SwaggerSchemaCustomString("Room type", Example = "PublicRoom", Nullable = true)]
     public RoomType? RoomType { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if a folder is private or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if a folder is private or not")]
     public bool Private { get; set; }
 
-    [SwaggerSchemaCustom(Example = "DEFAULT", Description = "Folder type", Nullable = true)]
+    [SwaggerSchemaCustomString("Folder type", Example = "DEFAULT", Nullable = true)]
     public FolderType? Type { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "InRoom", Nullable = true)]
+    [SwaggerSchemaCustomBoolean("InRoom", Nullable = true)]
     public bool? InRoom { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "Quota", Nullable = true, Format = "int64")]
+    [SwaggerSchemaCustomLong("Quota", Nullable = true, Format = "int64")]
     public long? QuotaLimit { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the room has a custom quota or not", Nullable = true)]
+    [SwaggerSchemaCustomBoolean("Specifies if the room has a custom quota or not", Nullable = true)]
     public bool? IsCustomQuota { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "Counter", Nullable = true, Format = "int64")]
+    [SwaggerSchemaCustomLong("Counter", Nullable = true, Format = "int64")]
     public long? UsedSpace { get; set; }
     public static FolderDto<int> GetSample()
     {

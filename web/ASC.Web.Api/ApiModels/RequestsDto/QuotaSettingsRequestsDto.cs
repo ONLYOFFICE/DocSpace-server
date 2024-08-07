@@ -28,9 +28,9 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 public class QuotaSettingsRequestsDto
 {
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the quota settings are enabled or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if the quota settings are enabled or not")]
     public bool EnableQuota { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "Default quota value", Format = "int64")]
+    [SwaggerSchemaCustomInt("Default quota value", Format = "int64")]
     public JsonElement DefaultQuota { get; set; }
 }

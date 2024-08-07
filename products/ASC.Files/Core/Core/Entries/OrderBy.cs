@@ -29,29 +29,54 @@ namespace ASC.Files.Core;
 [EnumExtensions]
 public enum SortedByType
 {
+    [SwaggerEnum("Date and time")]
     DateAndTime,
+
+    [SwaggerEnum("AZ")]
     AZ,
+
+    [SwaggerEnum("Size")]
     Size,
+
+    [SwaggerEnum("Author")]
     Author,
+
+    [SwaggerEnum("Type")]
     Type,
+
+    [SwaggerEnum("New")]
     New,
+
+    [SwaggerEnum("Date and time creation")]
     DateAndTimeCreation,
+
+    [SwaggerEnum("Room type")]
     RoomType,
+
+    [SwaggerEnum("Tags")]
     Tags,
+
+    [SwaggerEnum("Room")]
     Room,
+
+    [SwaggerEnum("Custom order")]
     CustomOrder,
+
+    [SwaggerEnum("Last opened")]
     LastOpened,
+
+    [SwaggerEnum("Used space")]
     UsedSpace
 }
 
 [DebuggerDisplay("{SortedBy} {IsAsc}")]
 public class OrderBy(SortedByType sortedByType, bool isAsc)
 {
-    [SwaggerSchemaCustom(Example = "true", Description = "Is asc")]
+    [SwaggerSchemaCustomBoolean("Is asc")]
     [JsonPropertyName("is_asc")]
     public bool IsAsc { get; init; } = isAsc;
 
-    [SwaggerSchemaCustom(Example = "DateAndTime", Description = "Sorted by")]
+    [SwaggerSchemaCustomString("Sorted by", Example = "DateAndTime")]
     [JsonPropertyName("property")]
     public SortedByType SortedBy { get; set; } = sortedByType;
 }

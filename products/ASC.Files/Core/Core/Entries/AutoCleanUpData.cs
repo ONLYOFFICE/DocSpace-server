@@ -28,24 +28,33 @@ using Telegram.Bot.Requests;
 
 namespace ASC.Files.Core;
 
-/// <summary>
-/// </summary>
 public enum DateToAutoCleanUp
 {
+    [SwaggerEnum(Description = "One week")]
     OneWeek = 1,
+
+    [SwaggerEnum(Description = "Two weeks")]
     TwoWeeks,
+
+    [SwaggerEnum(Description = "One month")]
     OneMonth,
+
+    [SwaggerEnum(Description = "Thirty days")]
     ThirtyDays,
+
+    [SwaggerEnum(Description = "Two months")]
     TwoMonths,
+
+    [SwaggerEnum(Description = "Three months")]
     ThreeMonths
 }
 
 public class AutoCleanUpData
 {
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the auto-clearing setting is enabled or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if the auto-clearing setting is enabled or not")]
     public bool IsAutoCleanUp { get; init; }
 
-    [SwaggerSchemaCustom(Example = "OneWeek", Description = "The period when the trash bin will be cleared")]
+    [SwaggerSchemaCustomString("The period when the trash bin will be cleared", Example = "OneWeek")]
     public DateToAutoCleanUp Gap { get; init; }
 
     public static AutoCleanUpData GetDefault()

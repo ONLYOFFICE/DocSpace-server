@@ -28,16 +28,21 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public class CheckDestFolderDto
 {
-    [SwaggerSchemaCustom(Example = "AllAllowed", Description = "Result")]
+    [SwaggerSchemaCustomString("Result", Example = "AllAllowed")]
     public CheckDestFolderResult Result { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Files")]
+    [SwaggerSchemaCustom<List<FileEntryDto>>("Files")]
     public List<FileEntryDto> Files { get; set; }
 }
 
 public enum CheckDestFolderResult
 {
+    [SwaggerEnum(Description = "All allowed")]
     AllAllowed,
+
+    [SwaggerEnum(Description = "Part allowed")]
     PartAllowed,
+
+    [SwaggerEnum(Description = "None allowed")]
     NoneAllowed
 }

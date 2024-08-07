@@ -28,25 +28,25 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 
 public class AuthenticationTokenDto
 {
-    [SwaggerSchemaCustom(Example = "abcde12345", Description = "Authentication token")]
+    [SwaggerSchemaCustomString("Authentication token", Example = "abcde12345")]
     public string Token { get; set; }
 
-    [SwaggerSchemaCustom(Example = "2008-04-10T06-30-00.000Z", Description = "Token expiration time")]
+    [SwaggerSchemaCustomDateTime("Token expiration time")]
     public DateTime Expires { get; set; }
 
-    [SwaggerSchemaCustom(Example = "false", Description = "Specifies if the authentication code is sent by SMS or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if the authentication code is sent by SMS or not", Example = false)]
     public bool Sms { get; set; }
 
-    [SwaggerSchemaCustom(Example = "null", Description = "Phone number")]
+    [SwaggerSchemaCustomString("Phone number", Example = "null")]
     public string PhoneNoise { get; set; }
 
-    [SwaggerSchemaCustom(Example = "false", Description = "Specifies if the two-factor application is used or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if the two-factor application is used or not", Example = false)]
     public bool Tfa { get; set; }
 
-    [SwaggerSchemaCustom(Example = "null", Description = "Two-factor authentication key")]
+    [SwaggerSchemaCustomString("Two-factor authentication key", Example = "null")]
     public string TfaKey { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Confirmation email URL", Format = "uri")]
+    [SwaggerSchemaCustomString("Confirmation email URL", Format = "uri")]
     public string ConfirmUrl { get; set; }
 
     public static AuthenticationTokenDto GetSample()

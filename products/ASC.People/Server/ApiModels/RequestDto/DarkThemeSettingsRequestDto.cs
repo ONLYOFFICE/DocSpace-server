@@ -28,6 +28,6 @@ namespace ASC.People.ApiModels.RequestDto;
 
 public class DarkThemeSettingsRequestDto
 {
-    [SwaggerSchemaCustom(Example = "Dark", Description = "Portal theme (Base, System, or Dark)")]
+    [SwaggerSchemaCustomString("Portal theme (Base, System, or Dark)", Example = "Dark")]
     public DarkThemeSettingsType Theme { get; set; }
 }

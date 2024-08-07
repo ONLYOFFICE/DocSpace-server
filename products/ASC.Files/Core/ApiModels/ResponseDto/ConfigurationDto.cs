@@ -28,208 +28,207 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public class ConfigurationDto<T>
 {
-    [SwaggerSchemaCustom(Description = "Document config")]
+    [SwaggerSchemaCustom<DocumentConfigDto>("Document config")]
     public DocumentConfigDto Document { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Document type")]
+    [SwaggerSchemaCustomString("Document type")]
     public string DocumentType { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Editor config")]
+    [SwaggerSchemaCustom<EditorConfigurationDto<int>>("Editor config")]
     public EditorConfigurationDto<T> EditorConfig { get; set; }
 
-    [SwaggerSchemaCustom(Example = "Desktop", Description = "Editor type")]
+    [SwaggerSchemaCustomString("Editor type", Example = "Desktop")]
     public EditorType EditorType { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Editor URL", Format = "uri")]
+    [SwaggerSchemaCustomString("Editor URL", Format = "uri")]
     public string EditorUrl { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Token")]
+    [SwaggerSchemaCustomString("Token")]
     public string Token { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Platform type")]
+    [SwaggerSchemaCustomString("Platform type")]
     public string Type { get; set; }
 
-    [SwaggerSchemaCustom(Description = "File parameters")]
+    [SwaggerSchemaCustom<FileDto<int>>("File parameters")]
     public FileDto<T> File { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Error message")]
+    [SwaggerSchemaCustomString("Error message")]
     public string ErrorMessage { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the filling has started or not", Nullable = true)]
+    [SwaggerSchemaCustomBoolean("Specifies if the filling has started or not", Nullable = true)]
     public bool? StartFilling { get; set; }
 
-    /// <summary>Filling session Id</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustomString("Filling session Id")]
     public string FillingSessionId { get; set; }
 }
 
 public class EditorConfigurationDto<T>
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "Callback url", Format = "uri")]
+    [SwaggerSchemaCustomString("Callback url", Format = "uri")]
     public string CallbackUrl { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Co editing")]
+    [SwaggerSchemaCustom<CoEditingConfig>("Co editing")]
     public CoEditingConfig CoEditing { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Create url", Format = "uri")]
+    [SwaggerSchemaCustomString("Create url", Format = "uri")]
     public string CreateUrl { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Customization")]
+    [SwaggerSchemaCustom<CustomizationConfigDto<int>>("Customization")]
     public CustomizationConfigDto<T> Customization { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Embedded")]
+    [SwaggerSchemaCustom<EmbeddedConfig>("Embedded")]
     public EmbeddedConfig Embedded { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Encryption keys")]
+    [SwaggerSchemaCustom<EncryptionKeysConfig>("Encryption keys")]
     public EncryptionKeysConfig EncryptionKeys { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Lang")]
+    [SwaggerSchemaCustomString("Lang")]
     public string Lang { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Mode")]
+    [SwaggerSchemaCustomString("Mode")]
     public string Mode { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Mode write")]
+    [SwaggerSchemaCustomBoolean("Mode write")]
     public bool ModeWrite { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Plugins")]
+    [SwaggerSchemaCustom<PluginsConfig>("Plugins")]
     public PluginsConfig Plugins { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Recent")]
+    [SwaggerSchemaCustom<List<RecentConfig>>("Recent")]
     public List<RecentConfig> Recent { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Templates")]
+    [SwaggerSchemaCustom<List<TemplatesConfig>>("Templates")]
     public List<TemplatesConfig> Templates { get; set; }
 
-    [SwaggerSchemaCustom(Description = "User")]
+    [SwaggerSchemaCustom<UserConfig>("User")]
     public UserConfig User { get; set; }
 }
 public class CustomizationConfigDto<T>
 {
-    [SwaggerSchemaCustom(Example = "true", Description = "About")]
+    [SwaggerSchemaCustomBoolean("About")]
     public bool About { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Customer")]
+    [SwaggerSchemaCustom<CustomerConfigDto>("Customer")]
     public CustomerConfigDto Customer { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Anonymous")]
+    [SwaggerSchemaCustom<AnonymousConfigDto>("Anonymous")]
     public AnonymousConfigDto Anonymous { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Feedback")]
+    [SwaggerSchemaCustom<FeedbackConfig>("Feedback")]
     public FeedbackConfig Feedback  { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Forcesave", Nullable = true)]
+    [SwaggerSchemaCustomBoolean("Forcesave", Nullable = true)]
     public bool? Forcesave { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Go back")]
+    [SwaggerSchemaCustom<GobackConfig>("Go back")]
     public GobackConfig Goback { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Logo")]
+    [SwaggerSchemaCustom<LogoConfigDto>("Logo")]
     public LogoConfigDto Logo { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "MentionShare")]
+    [SwaggerSchemaCustomBoolean("MentionShare")]
     public bool MentionShare { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Review display")]
+    [SwaggerSchemaCustomString("Review display")]
     public string ReviewDisplay { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Submit form")]
+    [SwaggerSchemaCustomBoolean("Submit form")]
     public bool SubmitForm { get; set; }
 }
 
 public class LogoConfigDto
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "Image")]
+    [SwaggerSchemaCustomString("Image")]
     public string Image { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Image dark")]
+    [SwaggerSchemaCustomString("Image dark")]
     public string ImageDark { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Image embedded")]
+    [SwaggerSchemaCustomString("Image embedded")]
     public string ImageEmbedded { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Url", Format = "uri")]
+    [SwaggerSchemaCustomString("Url", Format = "uri")]
     public string Url { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Visible")]
+    [SwaggerSchemaCustomBoolean("Visible")]
     public bool Visible { get; set; }
 }
 
 public class AnonymousConfigDto
 {
-    [SwaggerSchemaCustom(Example = "true", Description = "Request")]
+    [SwaggerSchemaCustomBoolean("Request")]
     public bool Request { get; set; }
 }
 
 public class CustomerConfigDto
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "Address")]
+    [SwaggerSchemaCustomString("Address")]
     public string Address { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Logo")]
+    [SwaggerSchemaCustomString("Logo")]
     public string Logo { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Mail")]
+    [SwaggerSchemaCustomString("Mail")]
     public string Mail { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Name")]
+    [SwaggerSchemaCustomString("Name")]
     public string Name  { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Www")]
+    [SwaggerSchemaCustomString("Www")]
     public string Www  { get; set; }
 }
 
 public class DocumentConfigDto
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "File type")]
+    [SwaggerSchemaCustomString("File type")]
     public string FileType  { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Info")]
+    [SwaggerSchemaCustom<InfoConfigDto>("Info")]
     public InfoConfigDto Info { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Is linked for me")]
+    [SwaggerSchemaCustomBoolean("Is linked for me")]
     public bool IsLinkedForMe { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Key")]
+    [SwaggerSchemaCustomString("Key")]
     public string Key { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Permissions")]
+    [SwaggerSchemaCustom<PermissionsConfig>("Permissions")]
     public PermissionsConfig Permissions { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Shared link param")]
+    [SwaggerSchemaCustomString("Shared link param")]
     public string SharedLinkParam { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Shared link key")]
+    [SwaggerSchemaCustomString("Shared link key")]
     public string SharedLinkKey { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Reference data")]
+    [SwaggerSchemaCustom<FileReferenceData>("Reference data")]
     public FileReferenceData ReferenceData { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Title")]
+    [SwaggerSchemaCustomString("Title")]
     public string Title { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Url", Format = "uri")]
+    [SwaggerSchemaCustomString("Url", Format = "uri")]
     public string Url { get; set; }
 }
 
 public class InfoConfigDto
 {
-    [SwaggerSchemaCustom(Example = "true", Description = "Favorite", Nullable = true)]
+    [SwaggerSchemaCustomBoolean("Favorite", Nullable = true)]
     public bool? Favorite { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Folder")]
+    [SwaggerSchemaCustomString("Folder")]
     public string Folder { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Owner")]
+    [SwaggerSchemaCustomString("Owner")]
     public string Owner { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Sharing settings")]
+    [SwaggerSchemaCustom<List<AceShortWrapper>>("Sharing settings")]
     public List<AceShortWrapper> SharingSettings{ get; set; }
 
-    [SwaggerSchemaCustom(Example = "Desktop", Description = "Type")]
+    [SwaggerSchemaCustomString("Type", Example = "Desktop")]
     public EditorType Type { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Uploaded")]
+    [SwaggerSchemaCustomString("Uploaded")]
     public string Uploaded { get; set; }
 }
 

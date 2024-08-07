@@ -26,45 +26,38 @@
 
 namespace ASC.Web.Files.Services.WCFService;
 
-/// <summary>
-/// </summary>
 public class MentionWrapper
 {
     internal MentionWrapper() { }
 
-    /// <summary>User information</summary>
-    /// <type>ASC.Core.Users.UserInfo, ASC.Core.Common</type>
+    [SwaggerSchemaCustom<UserInfo>("User information")]
     public UserInfo User { get; internal set; }
 
-    /// <summary>User email</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustomString("User email")]
     public string Email { get; internal set; }
 
-    /// <summary>User ID</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustomString("User ID")]
     public string Id { get; internal set; }
 
-    /// <summary>User image</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustomString("User image")]
     public string Image { get; internal set; }
 
-    /// <summary>Specifies if the user has the access to the file or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustomBoolean("Specifies if the user has the access to the file or not")]
     public bool HasAccess { get; internal set; }
 
-    /// <summary>User display name</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustomString("User display name")]
     public string Name { get; internal set; }
 }
 
+
 public class MentionMessageWrapper
 {
-    [SwaggerSchemaCustom(Description = "The config parameter which contains the information about the comment in the document that will be scrolled to")]
+    [SwaggerSchemaCustom<ActionLinkConfig>("The config parameter which contains the information about the comment in the document that will be scrolled to")]
     public ActionLinkConfig ActionLink { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "A list of emails which will receive the mention message")]
+    [SwaggerSchemaCustomString("A list of emails which will receive the mention message")]
     public List<string> Emails { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "The comment message")]
+    [SwaggerSchemaCustomString("The comment message")]
     public string Message { get; set; }
 }

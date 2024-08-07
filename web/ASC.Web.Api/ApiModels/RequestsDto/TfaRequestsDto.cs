@@ -28,24 +28,24 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 public class TfaRequestsDto
 {
-    [SwaggerSchemaCustom(Example = "None", Description = "TFA type (None, Sms, or App)")]
+    [SwaggerSchemaCustomString("TFA type (None, Sms, or App)", Example = "None")]
     public string Type { get; set; }
 
-    [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "User ID", Nullable = true)]
+    [SwaggerSchemaCustomGuid("User ID", Nullable = true)]
     public Guid? Id { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "List of trusted IP addresses")]
+    [SwaggerSchemaCustomString("List of trusted IP addresses")]
     public List<string> TrustedIps { get; set; }
 
-    [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "List of users who must use the TFA verification")]
+    [SwaggerSchemaCustomGuid("List of users who must use the TFA verification")]
     public List<Guid> MandatoryUsers { get; set; }
 
-    [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "List of groups who must use the TFA verification")]
+    [SwaggerSchemaCustomGuid("List of groups who must use the TFA verification")]
     public List<Guid> MandatoryGroups { get; set; }
 }
 
 public class TfaValidateRequestsDto
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "TFA code")]
+    [SwaggerSchemaCustomString("TFA code")]
     public string Code { get; set; }
 }

@@ -28,21 +28,21 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class SessionRequestDto
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "File name")]
+    [SwaggerSchemaCustomString("File name")]
     public string FileName { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "File length in bytes", Format = "int64")]
+    [SwaggerSchemaCustomLong("File length in bytes", Format = "int64")]
     public long FileSize { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Relative path to the folder")]
+    [SwaggerSchemaCustomString("Relative path to the folder")]
     public string RelativePath { get; set; }
 
-    [SwaggerSchemaCustom(Example = "2008-04-10T06-30-00.000Z", Description = "Creation time")]
+    [SwaggerSchemaCustom<ApiDateTime>("Creation time")]
     public ApiDateTime CreateOn { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies whether to encrypt a file or not")]
+    [SwaggerSchemaCustomBoolean("Specifies whether to encrypt a file or not")]
     public bool Encrypted { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Create new if exists")]
+    [SwaggerSchemaCustomBoolean("Create new if exists")]
     public bool CreateNewIfExist { get; set; }
 }

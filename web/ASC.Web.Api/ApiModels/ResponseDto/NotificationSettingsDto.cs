@@ -28,9 +28,9 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class NotificationSettingsDto : IMapFrom<NotificationSettingsRequestsDto>
 {
-    [SwaggerSchemaCustom(Example = "DailyFeed", Description = "Notification type")]
+    [SwaggerSchemaCustomString("Notification type", Example = "DailyFeed")]
     public NotificationType Type { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the notification type is enabled or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if the notification type is enabled or not")]
     public bool IsEnabled { get; set; }
 }

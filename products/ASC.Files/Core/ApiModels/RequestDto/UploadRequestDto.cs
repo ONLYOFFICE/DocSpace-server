@@ -28,31 +28,31 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class UploadRequestDto : IModelWithFile, IDisposable
 {
-    [SwaggerSchemaCustom(Description = "File", Format = "file")]
+    [SwaggerSchemaCustom<IFormFile>("File", Format = "file")]
     public IFormFile File { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Content-Type header")]
+    [SwaggerSchemaCustom<ContentType>("Content-Type header")]
     public ContentType ContentType { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Content-Disposition header")]
+    [SwaggerSchemaCustom<ContentDisposition>("Content-Disposition header")]
     public ContentDisposition ContentDisposition { get; set; }
 
-    [SwaggerSchemaCustom(Description = "List of files when specified as multipart/form-data", Format = "file")]
+    [SwaggerSchemaCustom<IEnumerable<IFormFile>>("List of files when specified as multipart/form-data", Format = "file")]
     public IEnumerable<IFormFile> Files { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies whether to create a new file if it already exists or not")]
+    [SwaggerSchemaCustomBoolean("Specifies whether to create a new file if it already exists or not")]
     public bool CreateNewIfExist { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies whether to upload documents in the original formats as well or not", Nullable = true)]
+    [SwaggerSchemaCustomBoolean("Specifies whether to upload documents in the original formats as well or not", Nullable = true)]
     public bool? StoreOriginalFileFlag { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies whether to keep the file converting status or not")]
+    [SwaggerSchemaCustomBoolean("Specifies whether to keep the file converting status or not")]
     public bool KeepConvertStatus { get; set; }
 
     private Stream _stream;
     private bool _disposedValue;
 
-    [SwaggerSchemaCustom(Example = "N/A", Description = "Request input stream")]
+    [SwaggerSchemaCustom<Stream>("Request input stream")]
     public Stream Stream
     {
         get => File?.OpenReadStream() ?? _stream;

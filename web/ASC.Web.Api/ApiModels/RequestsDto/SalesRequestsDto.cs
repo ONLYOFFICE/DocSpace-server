@@ -28,12 +28,12 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 public class SalesRequestsDto
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "User name")]
+    [SwaggerSchemaCustomString("User name")]
     public string UserName { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Email address")]
+    [SwaggerSchemaCustomString("Email address")]
     public string Email { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Message")]
+    [SwaggerSchemaCustomString("Message")]
     public string Message { get; set; }
 }

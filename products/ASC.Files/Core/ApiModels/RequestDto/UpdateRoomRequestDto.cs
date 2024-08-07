@@ -28,9 +28,9 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class UpdateRoomRequestDto
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "Room name")]
+    [SwaggerSchemaCustomString("Room name")]
     public string Title { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "Room quota", Format = "int64")]
+    [SwaggerSchemaCustomLong("Room quota", Format = "int64")]
     public long? Quota { get; set; }
 }

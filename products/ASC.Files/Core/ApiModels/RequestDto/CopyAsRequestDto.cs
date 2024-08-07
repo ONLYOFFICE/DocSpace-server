@@ -28,16 +28,16 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class CopyAsRequestDto<T>
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "Destination file title")]
+    [SwaggerSchemaCustomString("Destination file title")]
     public string DestTitle { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "Destination folder ID", Format = "int32")]
+    [SwaggerSchemaCustomInt("Destination folder ID", Format = "int32")]
     public T DestFolderId { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies whether to allow the creation of external extension files or not")]
+    [SwaggerSchemaCustomBoolean("Specifies whether to allow the creation of external extension files or not")]
     public bool EnableExternalExt { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Password")]
+    [SwaggerSchemaCustomString("Password")]
     public string Password { get; set; }
 
     /// <summary>Convert to form</summary>

@@ -26,8 +26,6 @@
 
 using System.ComponentModel.DataAnnotations;
 
-using SwaggerCustomFilter;
-
 namespace ASC.Web.Api.Models;
 
 public class EmailInvitationsDto
@@ -37,7 +35,7 @@ public class EmailInvitationsDto
 
 public class EmailInvitationDto
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "Email address")]
+    [SwaggerSchemaCustomString("Email address")]
     public string Email { get; set; }
 }
 

@@ -24,36 +24,85 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.ComponentModel;
+
 namespace ASC.Files.Core;
 
-/// <summary>
-/// </summary>
 public enum FolderType
 {
+    [SwaggerEnum(Description = "Default")]
     DEFAULT = 0,
+
+    [SwaggerEnum(Description = "Coomon")]
     COMMON = 1,
+
+    [SwaggerEnum(Description = "Bunch")]
     BUNCH = 2,
+
+    [SwaggerEnum(Description = "Trash")]
     TRASH = 3,
+
+    [SwaggerEnum(Description = "User")]
     USER = 5,
+
+    [SwaggerEnum(Description = "Share")]
     SHARE = 6,
+
+    [SwaggerEnum(Description = "Projects")]
     Projects = 8,
+
+    [SwaggerEnum(Description = "Favourites")]
     Favorites = 10,
+
+    [SwaggerEnum(Description = "Recent")]
     Recent = 11,
+
+    [SwaggerEnum(Description = "Templates")]
     Templates = 12,
+
+    [SwaggerEnum(Description = "Privacy")]
     Privacy = 13,
+
+    [SwaggerEnum(Description = "Virtual rooms")]
     VirtualRooms = 14,
+
+    [SwaggerEnum(Description = "Filling forms room")]
     FillingFormsRoom = 15,
+
+    [SwaggerEnum(Description = "Editing room")]
     EditingRoom = 16,
+
+    [SwaggerEnum(Description = "Review room")]
     ReviewRoom = 17,
+
+    [SwaggerEnum(Description = "Read only room")]
     ReadOnlyRoom = 18,
+
+    [SwaggerEnum(Description = "Custom room")]
     CustomRoom = 19,
+
+    [SwaggerEnum(Description = "Archive")]
     Archive = 20,
+
+    [SwaggerEnum(Description = "Thirdparty backup")]
     ThirdpartyBackup = 21,
+
+    [SwaggerEnum(Description = "Public room")]
     PublicRoom = 22,
+
+    [SwaggerEnum(Description = "Form room")]
     FormRoom = 24,
+
+    [SwaggerEnum(Description = "Ready form folder")]
     ReadyFormFolder = 25,
+
+    [SwaggerEnum(Description = "In process form folder")]
     InProcessFormFolder = 26,
+
+    [SwaggerEnum(Description = "Form filling folder done")]
     FormFillingFolderDone = 27,
+
+    [SwaggerEnum(Description = "Form filling folder in progress")]
     FormFillingFolderInProgress = 28
 }
 

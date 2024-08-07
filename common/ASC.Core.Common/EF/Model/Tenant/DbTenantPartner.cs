@@ -28,11 +28,19 @@ namespace ASC.Core.Common.EF.Model;
 
 public class DbTenantPartner : BaseEntity
 {
+    [SwaggerSchemaCustomInt("Tenant id")]
     public int TenantId { get; set; }
+
+    [SwaggerSchemaCustomString("Partner id")]
     public string PartnerId { get; set; }
+
+    [SwaggerSchemaCustomString("Affiliate id")]
     public string AffiliateId { get; set; }
+
+    [SwaggerSchemaCustomString("Campaign")]
     public string Campaign { get; set; }
 
+    [SwaggerSchemaCustom<DbTenant>("Tenant")]
     public DbTenant Tenant { get; set; }
 
     public override object[] GetKeys()

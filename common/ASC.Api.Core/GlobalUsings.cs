@@ -161,4 +161,3 @@ global using StackExchange.Redis.Extensions.Core.Abstractions;
 global using StackExchange.Redis.Extensions.Core.Configuration;
 
 global using LogLevel = Microsoft.Extensions.Logging.LogLevel;
-global using SwaggerCustomFilter;

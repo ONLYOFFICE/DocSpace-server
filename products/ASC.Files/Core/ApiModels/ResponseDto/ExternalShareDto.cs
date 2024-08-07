@@ -31,21 +31,21 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public class ExternalShareDto : IMapFrom<ValidationInfo>
 {
-    [SwaggerSchemaCustom(Example = "Ok", Description = "External data status")]
+    [SwaggerSchemaCustomString("External data status", Example = "Ok")]
     public Status Status { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "External data ID")]
+    [SwaggerSchemaCustomString("External data ID")]
     public string Id { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "External data title")]
+    [SwaggerSchemaCustomString("External data title")]
     public string Title { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "Tenant ID", Format = "int32")]
+    [SwaggerSchemaCustomInt("Tenant ID", Format = "int32")]
     public int TenantId { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies whether to share the external data or not")]
+    [SwaggerSchemaCustomBoolean("Specifies whether to share the external data or not")]
     public bool Shared { get; set; }
 
-    [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "Link ID")]
+    [SwaggerSchemaCustomGuid("Link ID")]
     public Guid LinkId { get; set; }
 }

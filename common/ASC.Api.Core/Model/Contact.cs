@@ -24,16 +24,14 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using SwaggerCustomFilter;
-
 namespace ASC.Web.Api.Models;
 
 public class Contact
 {
-    [SwaggerSchemaCustom(Example = "GTalk", Description = "Contact type")]
+    [SwaggerSchemaCustomString("Contact type", Example = "GTalk")]
     public string Type { get; set; }
 
-    [SwaggerSchemaCustom(Example = "my@gmail.com", Description = "Contact value")]
+    [SwaggerSchemaCustomString("Contact value", Example = "my@gmail.com")]
     public string Value { get; set; }
 
     //For binder

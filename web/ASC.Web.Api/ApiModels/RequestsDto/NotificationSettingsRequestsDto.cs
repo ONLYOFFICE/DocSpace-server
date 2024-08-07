@@ -28,10 +28,10 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 public class NotificationSettingsRequestsDto
 {
-    [SwaggerSchemaCustom(Example = "Badges", Description = "Notification type (Badges, RoomsActivity, DailyFeed, UsefullTips)")]
+    [SwaggerSchemaCustomString("Notification type (Badges, RoomsActivity, DailyFeed, UsefullTips)", Example = "Badges")]
     public NotificationType Type { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the notification type is enabled or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if the notification type is enabled or not")]
     public bool IsEnabled { get; set; }
 }
 

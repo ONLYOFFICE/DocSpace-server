@@ -28,9 +28,9 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 public class FirebaseRequestsDto
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "Firebase device token")]
+    [SwaggerSchemaCustomString("Firebase device token")]
     public string FirebaseDeviceToken { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the user is subscribed to the push notification or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if the user is subscribed to the push notification or not")]
     public bool IsSubscribed { get; set; }
 }

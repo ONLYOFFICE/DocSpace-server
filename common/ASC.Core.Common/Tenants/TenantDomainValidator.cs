@@ -32,8 +32,13 @@ public class TenantDomainValidator
     private readonly Regex _validDomain;
     private readonly Regex _validName;
 
+    [SwaggerSchemaCustomString("Regex")]
     public string Regex { get; }
+
+    [SwaggerSchemaCustomInt("Min length")]
     public int MinLength { get; }
+
+    [SwaggerSchemaCustomInt("Max length", Example = 63)]
     public int MaxLength { get; }
 
     public TenantDomainValidator(IConfiguration configuration, CoreBaseSettings coreBaseSettings)

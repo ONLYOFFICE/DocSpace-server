@@ -28,15 +28,15 @@ namespace ASC.People.ApiModels.ResponseDto;
 
 public class AccountInfoDto
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "Provider")]
+    [SwaggerSchemaCustomString("Provider")]
     public string Provider { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "URL", Format = "uri")]
+    [SwaggerSchemaCustomString("URL", Format = "uri")]
     public string Url { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if an account is linked or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if an account is linked or not")]
     public bool Linked { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Class")]
+    [SwaggerSchemaCustomString("Class")]
     public string Class { get; set; }
 }

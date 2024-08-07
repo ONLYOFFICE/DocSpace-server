@@ -28,7 +28,7 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class LdapCronSettingsDto : IMapFrom<LdapCronSettings>
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "Cron expression")]
+    [SwaggerSchemaCustomString("Cron expression")]
     public string Cron { get; set; }
     public void Mapping(Profile profile)
     {

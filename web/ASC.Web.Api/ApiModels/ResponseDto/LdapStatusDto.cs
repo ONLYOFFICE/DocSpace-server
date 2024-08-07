@@ -28,31 +28,31 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class LdapStatusDto : IMapFrom<LdapOperationStatus>
 {
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the LDAP operation is completed or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if the LDAP operation is completed or not")]
     public bool Completed { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "ID")]
+    [SwaggerSchemaCustomString("ID")]
     public string Id { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Status")]
+    [SwaggerSchemaCustomString("Status")]
     public string Status { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Error")]
+    [SwaggerSchemaCustomString("Error")]
     public string Error { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Warning")]
+    [SwaggerSchemaCustomString("Warning")]
     public string Warning { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "Percentage of completion", Format = "int32")]
+    [SwaggerSchemaCustomInt("Percentage of completion", Format = "int32")]
     public int Percents { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Certificate confirmation request")]
+    [SwaggerSchemaCustomString("Certificate confirmation request")]
     public string CertificateConfirmRequest { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Source")]
+    [SwaggerSchemaCustomString("Source")]
     public string Source { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Operation type")]
+    [SwaggerSchemaCustomString("Operation type")]
     public string OperationType { get; set; }
 
     public void Mapping(Profile profile)

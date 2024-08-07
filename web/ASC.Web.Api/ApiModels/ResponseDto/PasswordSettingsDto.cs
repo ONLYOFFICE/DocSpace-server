@@ -28,28 +28,28 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class PasswordSettingsDto
 {
-    [SwaggerSchemaCustom(Example = "1234", Description = "Min length", Format = "int32")]
+    [SwaggerSchemaCustomInt("Min length", Format = "int32")]
     public int MinLength { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Upper case")]
+    [SwaggerSchemaCustomBoolean("Upper case")]
     public bool UpperCase { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Digits")]
+    [SwaggerSchemaCustomBoolean("Digits")]
     public bool Digits { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Spec symbols")]
+    [SwaggerSchemaCustomBoolean("Spec symbols")]
     public bool SpecSymbols { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Allowed characters regex str")]
+    [SwaggerSchemaCustomString("Allowed characters regex str")]
     public string AllowedCharactersRegexStr { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Digits regex str")]
+    [SwaggerSchemaCustomString("Digits regex str")]
     public string DigitsRegexStr { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Upper case regex str")]
+    [SwaggerSchemaCustomString("Upper case regex str")]
     public string UpperCaseRegexStr { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Spec symbols regex str")]
+    [SwaggerSchemaCustomString("Spec symbols regex str")]
     public string SpecSymbolsRegexStr { get; set; }
 }
 

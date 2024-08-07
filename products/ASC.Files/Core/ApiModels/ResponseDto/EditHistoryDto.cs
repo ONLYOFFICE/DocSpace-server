@@ -28,31 +28,31 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public class EditHistoryDto
 {
-    [SwaggerSchemaCustom(Example = "1234", Description = "File ID", Format = "int32")]
+    [SwaggerSchemaCustomInt("File ID", Format = "int32")]
     public int ID { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Key")]
+    [SwaggerSchemaCustomString("Key")]
     public string Key { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "File version", Format = "int32")]
+    [SwaggerSchemaCustomInt("File version", Format = "int32")]
     public int Version { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "Version group", Format = "int32")]
+    [SwaggerSchemaCustomInt("Version group", Format = "int32")]
     public int VersionGroup { get; set; }
 
-    [SwaggerSchemaCustom(Description = "A user who updated a file")]
+    [SwaggerSchemaCustom<EditHistoryAuthor>("A user who updated a file")]
     public EditHistoryAuthor User { get; set; }
 
-    [SwaggerSchemaCustom(Example = "2008-04-10T06-30-00.000Z", Description = "Creation time")]
+    [SwaggerSchemaCustom<ApiDateTime>("Creation time")]
     public ApiDateTime Created { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "History changes in the string format")]
+    [SwaggerSchemaCustomString("History changes in the string format")]
     public string ChangesHistory { get; set; }
 
-    [SwaggerSchemaCustom(Description = "List of history changes")]
+    [SwaggerSchemaCustom<List<EditHistoryChangesWrapper>>("List of history changes")]
     public List<EditHistoryChangesWrapper> Changes { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Server version")]
+    [SwaggerSchemaCustomString("Server version")]
     public string ServerVersion { get; set; }
 
     public EditHistoryDto(EditHistory editHistory, ApiDateTimeHelper apiDateTimeHelper, UserManager userManager, DisplayUserSettingsHelper displayUserSettingsHelper)
@@ -71,9 +71,9 @@ public class EditHistoryDto
 
 public class EditHistoryChangesWrapper(EditHistoryChanges historyChanges, ApiDateTimeHelper apiDateTimeHelper)
 {
-    [SwaggerSchemaCustom(Description = "")]
+    [SwaggerSchemaCustom<EditHistoryAuthor>("User")]
     public EditHistoryAuthor User { get; set; } = historyChanges.Author;
 
-    [SwaggerSchemaCustom(Example = "2008-04-10T06-30-00.000Z", Description = "")]
+    [SwaggerSchemaCustom<ApiDateTime>("Created")]
     public ApiDateTime Created { get; set; } = apiDateTimeHelper.Get(historyChanges.Date);
 }

@@ -28,19 +28,19 @@ namespace ASC.Files.Core.VirtualRooms;
 
 public class Logo
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "Original")]
+    [SwaggerSchemaCustomString("Original")]
     public string Original { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Large")]
+    [SwaggerSchemaCustomString("Large")]
     public string Large { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Medium")]
+    [SwaggerSchemaCustomString("Medium")]
     public string Medium { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Small")]
+    [SwaggerSchemaCustomString("Small")]
     public string Small { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Color")]
+    [SwaggerSchemaCustomString("Color")]
     public string Color { get; set; }
 
     public bool IsDefault()

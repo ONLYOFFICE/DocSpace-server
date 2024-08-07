@@ -24,18 +24,27 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using SwaggerCustomFilter;
-
 namespace ASC.Data.Backup.Contracts;
 
 
 public enum BackupStorageType
 {
+    [SwaggerEnum(Description = "Documents")]
     Documents = 0,
+
+    [SwaggerEnum(Description = "Thridparty documents")]
     ThridpartyDocuments = 1,
+
+    [SwaggerEnum(Description = "Custom cloud")]
     CustomCloud = 2,
+
+    [SwaggerEnum(Description = "Local")]
     Local = 3,
+
+    [SwaggerEnum(Description = "Data store")]
     DataStore = 4,
+
+    [SwaggerEnum(Description = "Thirdparty consumer")]
     ThirdPartyConsumer = 5
 }
 
@@ -52,19 +61,19 @@ public class StartBackupRequest
 
 public class BackupHistoryRecord
 {
-    [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "Backup ID")]
+    [SwaggerSchemaCustomGuid("Backup ID")]
     public Guid Id { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "File name")]
+    [SwaggerSchemaCustomString("File name")]
     public string FileName { get; set; }
 
-    [SwaggerSchemaCustom(Example = "Documents", Description = "Storage type")]
+    [SwaggerSchemaCustomString("Storage type", Example = "Documents")]
     public BackupStorageType StorageType { get; set; }
 
-    [SwaggerSchemaCustom(Example = "2008-04-10T06-30-00.000Z", Description = "Creation date")]
+    [SwaggerSchemaCustomDateTime("Creation date")]
     public DateTime CreatedOn { get; set; }
 
-    [SwaggerSchemaCustom(Example = "2008-04-10T06-30-00.000Z", Description = "Expiration date")]
+    [SwaggerSchemaCustomDateTime("Expiration date")]
     public DateTime ExpiresOn { get; set; }
 }
 

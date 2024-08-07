@@ -28,9 +28,9 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public class RoomSecurityDto
 {
-    [SwaggerSchemaCustom(Description = "List of room members")]
+    [SwaggerSchemaCustom<IEnumerable<FileShareDto>>("List of room members")]
     public IEnumerable<FileShareDto> Members { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Warning")]
+    [SwaggerSchemaCustomString("Warning")]
     public string Warning { get; set; }
 }

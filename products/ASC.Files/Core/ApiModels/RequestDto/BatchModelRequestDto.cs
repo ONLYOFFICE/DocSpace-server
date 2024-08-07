@@ -28,59 +28,59 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class FileBaseBatchRequestDto
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "List of file IDs")]
+    [SwaggerSchemaCustomString("List of file IDs")]
     public IEnumerable<JsonElement> FileIds { get; set; } = new List<JsonElement>();
 }
 public class BaseBatchRequestDto
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "List of folder IDs")]
+    [SwaggerSchemaCustomString("List of folder IDs")]
     public IEnumerable<JsonElement> FolderIds { get; set; } = new List<JsonElement>();
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "List of file IDs")]
+    [SwaggerSchemaCustomString("List of file IDs")]
     public IEnumerable<JsonElement> FileIds { get; set; } = new List<JsonElement>();
 }
 
 public class DownloadRequestDto : BaseBatchRequestDto
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "List of file IDs which will be converted")]
+    [SwaggerSchemaCustomString("List of file IDs which will be converted")]
     public IEnumerable<ItemKeyValuePair<JsonElement, string>> FileConvertIds { get; set; } = new List<ItemKeyValuePair<JsonElement, string>>();
 }
 
 public class DeleteBatchRequestDto : BaseBatchRequestDto
 {
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies whether to delete a file after the editing session is finished or not")]
+    [SwaggerSchemaCustomBoolean("Specifies whether to delete a file after the editing session is finished or not")]
     public bool DeleteAfter { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies whether to move a file to the \"Trash\" folder or delete it immediately")]
+    [SwaggerSchemaCustomBoolean("Specifies whether to move a file to the \"Trash\" folder or delete it immediately")]
     public bool Immediately { get; set; }
 }
 
 public class DeleteRequestDto
 {
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies whether to delete a file after the editing session is finished or not")]
+    [SwaggerSchemaCustomBoolean("Specifies whether to delete a file after the editing session is finished or not")]
     public bool DeleteAfter { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies whether to move a file to the \"Trash\" folder or delete it immediately")]
+    [SwaggerSchemaCustomBoolean("Specifies whether to move a file to the \"Trash\" folder or delete it immediately")]
     public bool Immediately { get; set; }
 }
 
 public class BatchRequestDto : BaseBatchRequestDto
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "Destination folder ID", Format = "json")]
+    [SwaggerSchemaCustomString("Destination folder ID", Format = "json")]
     public JsonElement DestFolderId { get; set; }
 
-    [SwaggerSchemaCustom(Example = "Skip", Description = "Overwriting behavior")]
+    [SwaggerSchemaCustomString("Overwriting behavior", Example = "Skip")]
     public FileConflictResolveType ConflictResolveType { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies whether to delete a folder after the editing session is finished or not")]
+    [SwaggerSchemaCustomBoolean("Specifies whether to delete a folder after the editing session is finished or not")]
     public bool DeleteAfter { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Content")]
+    [SwaggerSchemaCustomBoolean("Content")]
     public bool Content { get; set; }
 }
 
 public class BatchSimpleRequestDto : BaseBatchRequestDto
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "Destination folder ID", Format = "json")]
+    [SwaggerSchemaCustomString("Destination folder ID", Format = "json")]
     public JsonElement DestFolderId { get; set; }
 }

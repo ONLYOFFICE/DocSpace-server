@@ -28,73 +28,73 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class LdapSettingsDto : IMapFrom<LdapSettings>
 {
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the LDAP authentication is enabled or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if the LDAP authentication is enabled or not")]
     public bool EnableLdapAuthentication { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the StartTLS is enabled or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if the StartTLS is enabled or not")]
     public bool StartTls { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the SSL is enabled or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if the SSL is enabled or not")]
     public bool Ssl { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the welcome email is sent or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if the welcome email is sent or not")]
     public bool SendWelcomeEmail { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "LDAP server URL address")]
+    [SwaggerSchemaCustomString("LDAP server URL address")]
     public string Server { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Absolute path to the top level directory containing users for the import")]
+    [SwaggerSchemaCustomString("Absolute path to the top level directory containing users for the import")]
     // ReSharper disable once InconsistentNaming
     public string UserDN { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "Port number", Format = "int32")]
+    [SwaggerSchemaCustomInt("Port number", Format = "int32")]
     public int PortNumber { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "User filter value to import the users who correspond to the specified search criteria. The default filter value (uid=*) allows importing all users")]
+    [SwaggerSchemaCustomString("User filter value to import the users who correspond to the specified search criteria. The default filter value (uid=*) allows importing all users")]
     public string UserFilter { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Attribute in a user record that corresponds to the login that LDAP server users will use to log in to ONLYOFFICE")]
+    [SwaggerSchemaCustomString("Attribute in a user record that corresponds to the login that LDAP server users will use to log in to ONLYOFFICE")]
     public string LoginAttribute { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Correspondence between the user data fields on the portal and the attributes in the LDAP server user record")]
+    [SwaggerSchemaCustom<Dictionary<MappingFields, string>>("Correspondence between the user data fields on the portal and the attributes in the LDAP server user record")]
     public Dictionary<MappingFields, string> LdapMapping { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Group access rights")]
+    [SwaggerSchemaCustom<Dictionary<AccessRight, string>>("Group access rights")]
     //ToDo: use SId instead of group name
     public Dictionary<AccessRight, string> AccessRights { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the groups from the LDAP server are added to the portal or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if the groups from the LDAP server are added to the portal or not")]
     public bool GroupMembership { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "The absolute path to the top level directory containing groups for the import")]
+    [SwaggerSchemaCustomString("The absolute path to the top level directory containing groups for the import")]
     // ReSharper disable once InconsistentNaming
     public string GroupDN { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Attribute that determines whether this user is a member of the groups")]
+    [SwaggerSchemaCustomString("Attribute that determines whether this user is a member of the groups")]
     public string UserAttribute { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Group filter value to import the groups who correspond to the specified search criteria. The default filter value (objectClass=posixGroup) allows importing all users")]
+    [SwaggerSchemaCustomString("Group filter value to import the groups who correspond to the specified search criteria. The default filter value (objectClass=posixGroup) allows importing all users")]
     public string GroupFilter { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Attribute that specifies the users that the group includes")]
+    [SwaggerSchemaCustomString("Attribute that specifies the users that the group includes")]
     public string GroupAttribute { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Attribute that corresponds to a name of the group where the user is included")]
+    [SwaggerSchemaCustomString("Attribute that corresponds to a name of the group where the user is included")]
     public string GroupNameAttribute { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the user has rights to read data from LDAP server or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if the user has rights to read data from LDAP server or not")]
     public bool Authentication { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Login")]
+    [SwaggerSchemaCustomString("Login")]
     public string Login { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Password")]
+    [SwaggerSchemaCustomString("Password")]
     public string Password { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the certificate is accepted or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if the certificate is accepted or not")]
     public bool AcceptCertificate { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the default LDAP settings are used or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if the default LDAP settings are used or not")]
     public bool IsDefault { get; set; }
 
     public void Mapping(Profile profile)

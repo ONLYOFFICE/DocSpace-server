@@ -23,46 +23,48 @@
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
-
-using SwaggerCustomFilter;
-
 namespace ASC.Data.Backup.Contracts;
 
 public enum BackupProgressEnum
 {
+    [SwaggerEnum(Description = "Backup")]
     Backup,
+
+    [SwaggerEnum(Description = "Restore")]
     Restore,
+
+    [SwaggerEnum(Description = "Transfer")]
     Transfer
 }
 
 [ProtoContract]
 public record BackupProgress
 {
-    [SwaggerSchemaCustom(Example = "true", Description = "Completed or not")]
+    [SwaggerSchemaCustomBoolean("Completed or not")]
     [ProtoMember(1)]
     public bool IsCompleted { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "Progress", Format = "int32")]
+    [SwaggerSchemaCustomInt("Progress", Format = "int32")]
     [ProtoMember(2)]
     public int Progress { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Error")]
+    [SwaggerSchemaCustomString("Error")]
     [ProtoMember(3)]
     public string Error { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Link", Format = "uri")]
+    [SwaggerSchemaCustomString("Link", Format = "uri")]
     [ProtoMember(4)]
     public string Link { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "Tenant id")]
+    [SwaggerSchemaCustomInt("Tenant id")]
     [ProtoMember(5)]
     public int TenantId { get; set; }
 
-    [SwaggerSchemaCustom(Example = "Backup", Description = "Backup progress item (Backup, Restore, Transfer)")]
+    [SwaggerSchemaCustomString("Backup progress item (Backup, Restore, Transfer)", Example = "Backup")]
     [ProtoMember(6)]
     public BackupProgressEnum BackupProgressEnum { get; set;}
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Task id")]
+    [SwaggerSchemaCustomString("Task id")]
     [ProtoMember(7)]
     public string TaskId { get; set; }
 }

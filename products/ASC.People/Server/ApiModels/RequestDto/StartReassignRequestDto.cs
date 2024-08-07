@@ -28,12 +28,12 @@ namespace ASC.People.ApiModels.RequestDto;
 
 public class StartReassignRequestDto
 {
-    [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "User ID whose data will be reassigned to another user")]
+    [SwaggerSchemaCustomGuid("User ID whose data will be reassigned to another user")]
     public Guid FromUserId { get; set; }
 
-    [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "User ID to whom all the data will be reassigned")]
+    [SwaggerSchemaCustomGuid("User ID to whom all the data will be reassigned")]
     public Guid ToUserId { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies whether to delete a profile when the data reassignment will be finished or not")]
+    [SwaggerSchemaCustomBoolean("Specifies whether to delete a profile when the data reassignment will be finished or not")]
     public bool DeleteProfile { get; set; }
 }

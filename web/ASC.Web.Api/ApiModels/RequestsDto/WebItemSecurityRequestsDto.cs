@@ -28,18 +28,18 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 public class WebItemSecurityRequestsDto
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "Module ID")]
+    [SwaggerSchemaCustomString("Module ID")]
     public string Id { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the module security settings are enabled or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if the module security settings are enabled or not")]
     public bool Enabled { get; set; }
 
-    [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "List of user/group IDs with the access to the module")]
+    [SwaggerSchemaCustomGuid("List of user/group IDs with the access to the module")]
     public IEnumerable<Guid> Subjects { get; set; }
 }
 
 public class WebItemsSecurityRequestsDto
 {
-    [SwaggerSchemaCustom(Description = "Products with security information")]
+    [SwaggerSchemaCustom<IEnumerable<ItemKeyValuePair<string, bool>>>("Products with security information")]
     public IEnumerable<ItemKeyValuePair<string, bool>> Items { get; set; }
 }

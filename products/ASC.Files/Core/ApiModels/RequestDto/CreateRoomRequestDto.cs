@@ -24,39 +24,53 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.ComponentModel;
+
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
-/// <summary>
-/// </summary>
+
 public enum RoomType
 {
+    [SwaggerEnum(Description = "Form filling room")]
     FillingFormsRoom = 1,
+
+    [SwaggerEnum(Description = "Collaboration room")]
     EditingRoom = 2,
+
+    [SwaggerEnum(Ignore = true)]
     ReviewRoom = 3,
+
+    [SwaggerEnum(Ignore = true)]
     ReadOnlyRoom = 4,
+
+    [SwaggerEnum(Description = "Custom room")]
     CustomRoom = 5,
+
+    [SwaggerEnum(Description = "Public room")]
     PublicRoom = 6,
+
+    [SwaggerEnum(Ignore = true)]
     FormRoom = 7
 }
 
 
 public class CreateRoomRequestDto
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "Room name")]
+    [SwaggerSchemaCustomString("Room name")]
     public string Title { get; set; }
 
-    [SwaggerSchemaCustom(Example = "CustomRoom", Description = "Room type")]
+    [SwaggerSchemaCustomString("Room type", Example = "CustomRoom")]
     public RoomType RoomType { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Private")]
+    [SwaggerSchemaCustomBoolean("Private")]
     public bool Private { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Collection of sharing parameters")]
+    [SwaggerSchemaCustom<IEnumerable<FileShareParams>>("Collection of sharing parameters")]
     public IEnumerable<FileShareParams> Share { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "Room quota", Format = "int64")]
+    [SwaggerSchemaCustomLong("Room quota", Format = "int64")]
     public long Quota { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Indexing")]
+    [SwaggerSchemaCustomBoolean("Indexing")]
     public bool Indexing { get; set; }
 }

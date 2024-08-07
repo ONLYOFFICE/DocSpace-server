@@ -28,6 +28,6 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class RoomsNotificationSettingsDto : IMapFrom<RoomsNotificationSettings>
 {
-    [SwaggerSchemaCustom(Description = "List of rooms with the disabled notifications")]
+    [SwaggerSchemaCustom<List<object>>("List of rooms with the disabled notifications")]
     public List<object> DisabledRooms { get; set; }
 }

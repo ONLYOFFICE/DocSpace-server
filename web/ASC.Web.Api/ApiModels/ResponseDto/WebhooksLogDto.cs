@@ -28,36 +28,36 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class WebhooksLogDto : IMapFrom<WebhooksLog>
 {
-    [SwaggerSchemaCustom(Example = "1234", Description = "ID", Format = "int32")]
+    [SwaggerSchemaCustomInt("ID", Format = "int32")]
     public int Id { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Config name")]
+    [SwaggerSchemaCustomString("Config name")]
     public string ConfigName { get; set; }
 
-    [SwaggerSchemaCustom(Example = "2008-04-10T06-30-00.000Z", Description = "Creation time")]
+    [SwaggerSchemaCustomDateTime("Creation time")]
     public DateTime CreationTime { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Method")]
+    [SwaggerSchemaCustomString("Method")]
     public string Method { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Route")]
+    [SwaggerSchemaCustomString("Route")]
     public string Route { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Request headers")]
+    [SwaggerSchemaCustomString("Request headers")]
     public string RequestHeaders { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Request payload")]
+    [SwaggerSchemaCustomString("Request payload")]
     public string RequestPayload { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Response headers")]
+    [SwaggerSchemaCustomString("Response headers")]
     public string ResponseHeaders { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Response payload")]
+    [SwaggerSchemaCustomString("Response payload")]
     public string ResponsePayload { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "Status", Format = "int32")]
+    [SwaggerSchemaCustomInt("Status", Format = "int32")]
     public int Status { get; set; }
 
-    [SwaggerSchemaCustom(Example = "2008-04-10T06-30-00.000Z", Description = "Delivery time", Nullable = true)]
+    [SwaggerSchemaCustomDateTime("Delivery time", Nullable = true)]
     public DateTime? Delivery { get; set; }
 }

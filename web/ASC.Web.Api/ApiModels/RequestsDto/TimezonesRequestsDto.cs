@@ -28,9 +28,9 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 public class TimezonesRequestsDto
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "Time zone ID")]
+    [SwaggerSchemaCustomString("Time zone ID")]
     public string Id { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Time zone display name")]
+    [SwaggerSchemaCustomString("Time zone display name")]
     public string DisplayName { get; set; }
 }

@@ -28,27 +28,27 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 
 public class FirebaseDto
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "API key")]
+    [SwaggerSchemaCustomString("API key")]
     public string ApiKey { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Authentication domain")]
+    [SwaggerSchemaCustomString("Authentication domain")]
     public string AuthDomain { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Project ID")]
+    [SwaggerSchemaCustomString("Project ID")]
     public string ProjectId { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Storage bucket")]
+    [SwaggerSchemaCustomString("Storage bucket")]
     public string StorageBucket { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Message sender ID")]
+    [SwaggerSchemaCustomString("Message sender ID")]
     public string MessagingSenderId { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Application ID")]
+    [SwaggerSchemaCustomString("Application ID")]
     public string AppId { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Measurement ID")]
+    [SwaggerSchemaCustomString("Measurement ID")]
     public string MeasurementId { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Database URL", Format = "uri")]
+    [SwaggerSchemaCustomString("Database URL", Format = "uri")]
     public string DatabaseURL { get; set; }
 }

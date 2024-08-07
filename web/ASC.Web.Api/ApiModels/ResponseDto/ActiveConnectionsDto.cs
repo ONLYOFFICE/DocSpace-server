@@ -28,45 +28,45 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class ActiveConnectionsDto
 {
-    [SwaggerSchemaCustom(Example = "1234", Description = "Login event", Format = "int32")]
+    [SwaggerSchemaCustomInt("Login event", Format = "int32")]
     public int LoginEvent { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Items")]
+    [SwaggerSchemaCustom<List<ActiveConnectionsItemDto>>("Items")]
     public List<ActiveConnectionsItemDto> Items { get; set; }
 }
 
 public class ActiveConnectionsItemDto
 {
-    [SwaggerSchemaCustom(Example = "1234", Description = "Id", Format = "int32")]
+    [SwaggerSchemaCustomInt("Id", Format = "int32")]
     public int Id { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "Tenant id", Format = "int32")]
+    [SwaggerSchemaCustomInt("Tenant id", Format = "int32")]
     public int TenantId { get; set; }
 
-    [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "User id")]
+    [SwaggerSchemaCustomGuid("User id")]
     public Guid UserId { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Mobile")]
+    [SwaggerSchemaCustomBoolean("Mobile")]
     public bool Mobile {  get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Ip")]
+    [SwaggerSchemaCustomString("Ip")]
     public string Ip { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Country")]
+    [SwaggerSchemaCustomString("Country")]
     public string Country { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "City")]
+    [SwaggerSchemaCustomString("City")]
     public string City { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Browser")]
+    [SwaggerSchemaCustomString("Browser")]
     public string Browser { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Platform")]
+    [SwaggerSchemaCustomString("Platform")]
     public string Platform { get; set; }
 
-    [SwaggerSchemaCustom(Example = "2008-04-10T06-30-00.000Z", Description = "Date")]
+    [SwaggerSchemaCustom<ApiDateTime>("Date")]
     public ApiDateTime Date { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Page")]
+    [SwaggerSchemaCustomString("Page")]
     public string Page { get; set; }
 }

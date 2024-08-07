@@ -28,58 +28,58 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class QuotaDto
 {
-    [SwaggerSchemaCustom(Example = "1234", Description = "ID", Format = "int32")]
+    [SwaggerSchemaCustomInt("ID", Format = "int32")]
     public int Id { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Title")]
+    [SwaggerSchemaCustomString("Title")]
     public string Title { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Price")]
+    [SwaggerSchemaCustom<PriceDto>("Price")]
     public PriceDto Price { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the quota is nonprofit or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if the quota is nonprofit or not")]
     public bool NonProfit { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the quota is free or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if the quota is free or not")]
     public bool Free { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the quota is trial or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if the quota is trial or not")]
     public bool Trial { get; set; }
 
-    [SwaggerSchemaCustom(Description = "List of quota features")]
+    [SwaggerSchemaCustom<IEnumerable<TenantQuotaFeatureDto>>("List of quota features")]
     public IEnumerable<TenantQuotaFeatureDto> Features { get; set; }
 
-    [SwaggerSchemaCustom(Description = "User quota")]
+    [SwaggerSchemaCustom<TenantEntityQuotaSettings>("User quota")]
     public TenantEntityQuotaSettings UsersQuota {  get; set; }
 
-    [SwaggerSchemaCustom(Description = "Room quota")]
+    [SwaggerSchemaCustom<TenantEntityQuotaSettings>("Room quota")]
     public TenantEntityQuotaSettings RoomsQuota {  get; set; }
 
-    [SwaggerSchemaCustom(Description = "Tenant custom quota")]
+    [SwaggerSchemaCustom<TenantQuotaSettings>("Tenant custom quota")]
     public TenantQuotaSettings TenantCustomQuota { get; set; }
 }
 
 public class TenantQuotaFeatureDto : IEquatable<TenantQuotaFeatureDto>
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "ID")]
+    [SwaggerSchemaCustomString("ID")]
     public string Id { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Title")]
+    [SwaggerSchemaCustomString("Title")]
     public string Title { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Image URL")]
+    [SwaggerSchemaCustomString("Image URL")]
     public string Image { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Value")]
+    [SwaggerSchemaCustom<object>("Value")]
     public object Value { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Type")]
+    [SwaggerSchemaCustomString("Type")]
     public string Type { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Used feature parameters")]
+    [SwaggerSchemaCustom<FeatureUsedDto>("Used feature parameters")]
     public FeatureUsedDto Used { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Price title")]
+    [SwaggerSchemaCustomString("Price title")]
     public string PriceTitle { get; set; }
 
     public bool Equals(TenantQuotaFeatureDto other)
@@ -98,18 +98,18 @@ public class TenantQuotaFeatureDto : IEquatable<TenantQuotaFeatureDto>
 
 public class PriceDto
 {
-    [SwaggerSchemaCustom(Description = "Value", Nullable = true)]
+    [SwaggerSchemaCustomString("Value", Nullable = true, Example = "10.0")]
     public decimal? Value { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Currency symbol")]
+    [SwaggerSchemaCustomString("Currency symbol")]
     public string CurrencySymbol { get; set; }
 }
 
 public class FeatureUsedDto
 {
-    [SwaggerSchemaCustom(Description = "Value")]
+    [SwaggerSchemaCustom<object>("Value")]
     public object Value { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Title")]
+    [SwaggerSchemaCustomString("Title")]
     public string Title { get; set; }
 }

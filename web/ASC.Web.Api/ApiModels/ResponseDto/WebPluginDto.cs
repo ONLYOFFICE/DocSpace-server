@@ -28,49 +28,49 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class WebPluginDto: IMapFrom<WebPlugin>
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "Name")]
+    [SwaggerSchemaCustomString("Name")]
     public string Name { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Version")]
+    [SwaggerSchemaCustomString("Version")]
     public string Version { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Description")]
+    [SwaggerSchemaCustomString("Description")]
     public string Description { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "License")]
+    [SwaggerSchemaCustomString("License")]
     public string License { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Author")]
+    [SwaggerSchemaCustomString("Author")]
     public string Author { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Home page")]
+    [SwaggerSchemaCustomString("Home page")]
     public string HomePage { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "PluginName")]
+    [SwaggerSchemaCustomString("PluginName")]
     public string PluginName { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Scopes")]
+    [SwaggerSchemaCustomString("Scopes")]
     public string Scopes { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Image")]
+    [SwaggerSchemaCustomString("Image")]
     public string Image { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Create by")]
+    [SwaggerSchemaCustom<EmployeeDto>("Create by")]
     public EmployeeDto CreateBy { get; set; }
 
-    [SwaggerSchemaCustom(Example = "2008-04-10T06-30-00.000Z", Description = "Create on")]
+    [SwaggerSchemaCustomDateTime("Create on")]
     public DateTime CreateOn { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Enabled")]
+    [SwaggerSchemaCustomBoolean("Enabled")]
     public bool Enabled { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "System")]
+    [SwaggerSchemaCustomBoolean("System")]
     public bool System { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Url", Format = "uri")]
+    [SwaggerSchemaCustomString("Url", Format = "uri")]
     public string Url { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Settings")]
+    [SwaggerSchemaCustomString("Settings")]
     public string Settings { get; set; }
 
     public void Mapping(Profile profile)

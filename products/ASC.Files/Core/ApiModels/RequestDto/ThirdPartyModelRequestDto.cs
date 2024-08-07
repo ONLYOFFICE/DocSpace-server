@@ -28,24 +28,24 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class ThirdPartyRequestDto
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "Connection URL for the sharepoint", Format = "uri")]
+    [SwaggerSchemaCustomString("Connection URL for the sharepoint", Format = "uri")]
     public string Url { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Login")]
+    [SwaggerSchemaCustomString("Login")]
     public string Login { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Password")]
+    [SwaggerSchemaCustomString("Password")]
     public string Password { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Authentication token")]
+    [SwaggerSchemaCustomString("Authentication token")]
     public string Token { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Customer title")]
+    [SwaggerSchemaCustomString("Customer title")]
     public string CustomerTitle { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Provider key")]
+    [SwaggerSchemaCustomString("Provider key")]
     public string ProviderKey { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "Provider ID", Format = "int32", Nullable = true)]
+    [SwaggerSchemaCustomInt("Provider ID", Format = "int32", Nullable = true)]
     public int? ProviderId { get; set; }
 }

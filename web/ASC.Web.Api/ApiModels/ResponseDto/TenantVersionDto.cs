@@ -28,10 +28,10 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 
 public class TenantVersionDto
 {
-    [SwaggerSchemaCustom(Example = "1234", Description = "Current portal version", Format = "int32")]
+    [SwaggerSchemaCustomInt("Current portal version", Format = "int32")]
     public int Current { get; set; }
 
-    [SwaggerSchemaCustom(Description = "List of available portal versions")]
+    [SwaggerSchemaCustom<IEnumerable<TenantVersion>>("List of available portal versions")]
     public IEnumerable<TenantVersion> Versions { get; set; }
 
     public TenantVersionDto(int version, IEnumerable<TenantVersion> tenantVersions)

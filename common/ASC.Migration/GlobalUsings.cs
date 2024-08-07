@@ -72,4 +72,4 @@ global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.Caching.Distributed;
 
 global using ProtoBuf;
-global using SwaggerCustomFilter;
+global using ASC.Api.Core.Extensions;

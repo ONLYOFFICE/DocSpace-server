@@ -30,37 +30,37 @@ namespace ASC.Web.Api.Models;
 
 public class EmployeeDto
 {
-    [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "ID")]
+    [SwaggerSchemaCustomGuid("ID")]
     public Guid Id { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Display name")]
+    [SwaggerSchemaCustomString("Display name")]
     public string DisplayName { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Title")]
+    [SwaggerSchemaCustomString("Title")]
     public string Title { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Avatar")]
+    [SwaggerSchemaCustomString("Avatar")]
     public string Avatar { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Original size avatar")]
+    [SwaggerSchemaCustomString("Original size avatar")]
     public string AvatarOriginal { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Maximum size avatar")]
+    [SwaggerSchemaCustomString("Maximum size avatar")]
     public string AvatarMax { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Medium size avatar")]
+    [SwaggerSchemaCustomString("Medium size avatar")]
     public string AvatarMedium { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Small avatar")]
+    [SwaggerSchemaCustomString("Small avatar")]
     public string AvatarSmall { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Profile URL")]
+    [SwaggerSchemaCustomString("Profile URL")]
     public string ProfileUrl { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the user has an avatar or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if the user has an avatar or not")]
     public bool HasAvatar { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the user is an anonim or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if the user is an anonim or not")]
     public bool IsAnonim { get; set; }
 
     public static EmployeeDto GetSample()

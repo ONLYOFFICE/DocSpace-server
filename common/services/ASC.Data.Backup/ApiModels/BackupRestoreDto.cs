@@ -28,15 +28,15 @@ namespace ASC.Data.Backup.ApiModels;
 
 public class BackupRestoreDto
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "Backup ID")]
+    [SwaggerSchemaCustomString("Backup ID")]
     public string BackupId { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Storage type")]
+    [SwaggerSchemaCustomString("Storage type")]
     public object StorageType { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Storage parameters")]
+    [SwaggerSchemaCustom<IEnumerable<ItemKeyValuePair<object, object>>>("Storage parameters")]
     public IEnumerable<ItemKeyValuePair<object, object>> StorageParams { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Notifies users about portal restoring process or not")]
+    [SwaggerSchemaCustomBoolean("Notifies users about portal restoring process or not")]
     public bool Notify { get; set; }
 }

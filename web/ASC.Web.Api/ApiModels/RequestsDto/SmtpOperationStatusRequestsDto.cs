@@ -28,19 +28,19 @@ namespace ASC.Api.Settings.Smtp;
 
 public class SmtpOperationStatusRequestsDto
 {
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the SMTP operation is completed or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if the SMTP operation is completed or not")]
     public bool Completed { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "SMTP operation ID")]
+    [SwaggerSchemaCustomString("SMTP operation ID")]
     public string Id { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "SMTP operation error")]
+    [SwaggerSchemaCustomString("SMTP operation error")]
     public string Error { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "SMTP operation status")]
+    [SwaggerSchemaCustomString("SMTP operation status")]
     public string Status { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "Percentage of SMTP operation completion", Format = "int32")]
+    [SwaggerSchemaCustomInt("Percentage of SMTP operation completion", Format = "int32")]
     public int Percents { get; set; }
 
     public static SmtpOperationStatusRequestsDto GetSample()

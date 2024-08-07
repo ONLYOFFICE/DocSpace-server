@@ -30,21 +30,21 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class WhiteLabelItemDto
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "File name")]
+    [SwaggerSchemaCustomString("File name")]
     public string Name { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Size")]
+    [SwaggerSchemaCustom<Size>("Size")]
     public Size Size { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Path")]
+    [SwaggerSchemaCustom<WhiteLabelItemPathDto>("Path")]
     public WhiteLabelItemPathDto Path { get; set; }
 }
 
 public class WhiteLabelItemPathDto
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "Path to the light theme logo")]
+    [SwaggerSchemaCustomString("Path to the light theme logo")]
     public string Light { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Path to the dark theme logo")]
+    [SwaggerSchemaCustomString("Path to the dark theme logo")]
     public string Dark { get; set; }
 }

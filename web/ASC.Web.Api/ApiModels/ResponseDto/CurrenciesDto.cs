@@ -28,13 +28,13 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class CurrenciesDto
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "ISO country code")]
+    [SwaggerSchemaCustomString("ISO country code")]
     public string ISOCountryCode { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "ISO currency symbol")]
+    [SwaggerSchemaCustomString("ISO currency symbol")]
     public string ISOCurrencySymbol { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Currency native name")]
+    [SwaggerSchemaCustomString("Currency native name")]
     public string CurrencyNativeName { get; set; }
 
     public CurrenciesDto()

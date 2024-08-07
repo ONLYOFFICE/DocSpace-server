@@ -28,15 +28,15 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class CreateFileRequestDto<T>
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "File title")]
+    [SwaggerSchemaCustomString("File title")]
     public string Title { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "Template file ID", Format = "int32")]
+    [SwaggerSchemaCustomInt("Template file ID", Format = "int32")]
     public T TemplateId { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies whether to allow the creation of external extension files or not")]
+    [SwaggerSchemaCustomBoolean("Specifies whether to allow the creation of external extension files or not")]
     public bool EnableExternalExt { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "Form ID", Format = "int32")]
+    [SwaggerSchemaCustomInt("Form ID", Format = "int32")]
     public int FormId { get; set; }
 }

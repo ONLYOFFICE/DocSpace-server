@@ -63,63 +63,63 @@ public class QuotaUsageManager(
 
 public class QuotaUsageDto
 {
-    [SwaggerSchemaCustom(Example = "1234", Description = "Storage size", Format = "uint64")]
+    [SwaggerSchemaCustomInt("Storage size", Format = "uint64")]
     public ulong StorageSize { get; init; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "Maximum file size", Format = "uint64")]
+    [SwaggerSchemaCustomInt("Maximum file size", Format = "uint64")]
     public ulong MaxFileSize { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "Used size", Format = "uint64")]
+    [SwaggerSchemaCustomInt("Used size", Format = "uint64")]
     public ulong UsedSize { get; init; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "maximum number of room administrators", Format = "int32")]
+    [SwaggerSchemaCustomInt("maximum number of room administrators", Format = "int32")]
     public int MaxRoomAdminsCount { get; init; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "Number of room administrators", Format = "int32")]
+    [SwaggerSchemaCustomInt("Number of room administrators", Format = "int32")]
     public int RoomAdminCount { get; init; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "Available size", Format = "uint64")]
+    [SwaggerSchemaCustomInt("Available size", Format = "uint64")]
     public ulong AvailableSize
     {
         get { return Math.Max(0, StorageSize > UsedSize ? StorageSize - UsedSize : 0); }
         set { throw new NotImplementedException(); }
     }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "Available number of users", Format = "int32")]
+    [SwaggerSchemaCustomInt("Available number of users", Format = "int32")]
     public int AvailableUsersCount
     {
         get { return Math.Max(0, MaxRoomAdminsCount - RoomAdminCount); }
         set { throw new NotImplementedException(); }
     }
 
-    [SwaggerSchemaCustom(Description = "Storage usage")]
+    [SwaggerSchemaCustom<IList<QuotaUsage>>("Storage usage")]
     public IList<QuotaUsage> StorageUsage { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "User storage size", Format = "int64")]
+    [SwaggerSchemaCustomLong("User storage size", Format = "int64")]
     public long UserStorageSize { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "User used size", Format = "int64")]
+    [SwaggerSchemaCustomLong("User used size", Format = "int64")]
     public long UserUsedSize { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "User available size", Format = "int64")]
+    [SwaggerSchemaCustomLong("User available size", Format = "int64")]
     public long UserAvailableSize
     {
         get { return Math.Max(0, UserStorageSize - UserUsedSize); }
         set { throw new NotImplementedException(); }
     }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "Maximum number of users", Format = "int64")]
+    [SwaggerSchemaCustomLong("Maximum number of users", Format = "int64")]
     public long MaxUsers { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "Number of users", Format = "int64")]
+    [SwaggerSchemaCustomLong("Number of users", Format = "int64")]
     public long UsersCount { get; set; }
 }
 
 public class QuotaUsage
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "Path to the storage")]
+    [SwaggerSchemaCustomString("Path to the storage")]
     public string Path { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "Storage size", Format = "int64")]
+    [SwaggerSchemaCustomLong("Storage size", Format = "int64")]
     public long Size { get; set; }
 }

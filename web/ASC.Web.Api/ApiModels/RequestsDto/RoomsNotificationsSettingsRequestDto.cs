@@ -28,9 +28,9 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 public class RoomsNotificationsSettingsRequestDto
 {
-    [SwaggerSchemaCustom(Example = "1234", Description = "Room ID")]
+    [SwaggerSchemaCustomInt("Room ID")]
     public object RoomsId { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the room notifications are disabled or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if the room notifications are disabled or not")]
     public bool Mute { get; set; }
 }

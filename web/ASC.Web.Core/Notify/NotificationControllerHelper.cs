@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Api.Core.Extensions;
+
 namespace ASC.Web.Core.Notify;
 [Scope]
 public class NotificationControllerHelper(
@@ -75,12 +77,17 @@ public class NotificationControllerHelper(
     }
 }
 
-/// <summary>
-/// </summary>
 public enum NotificationType
 {
+    [SwaggerEnum("Badges")]
     Badges = 0,
+
+    [SwaggerEnum("Rooms activity")]
     RoomsActivity = 1,
+
+    [SwaggerEnum("Daily feed")]
     DailyFeed = 2,
+
+    [SwaggerEnum("Usefull tips")]
     UsefullTips = 3
 }

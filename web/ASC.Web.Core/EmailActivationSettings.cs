@@ -26,12 +26,9 @@
 
 namespace ASC.Web.Studio.Core;
 
-/// <summary>
-/// </summary>
 public class EmailActivationSettings : ISettings<EmailActivationSettings>
 {
-    /// <summary>Shown or hidden</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustomBoolean("Shown or hidden")]
     public bool Show { get; set; }
 
     [JsonIgnore]

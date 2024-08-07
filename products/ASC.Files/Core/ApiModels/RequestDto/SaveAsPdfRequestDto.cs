@@ -28,9 +28,9 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class SaveAsPdfRequestDto<T>
 {
-    [SwaggerSchemaCustom(Example = "1234", Description = "Folder ID", Format = "int32")]
+    [SwaggerSchemaCustomInt("Folder ID", Format = "int32")]
     public T FolderId { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "File title")]
+    [SwaggerSchemaCustomString("File title")]
     public string Title { get; set; }
 }

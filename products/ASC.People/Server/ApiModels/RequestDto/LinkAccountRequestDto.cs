@@ -28,30 +28,30 @@ namespace ASC.People.ApiModels.RequestDto;
 
 public class LinkAccountRequestDto
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "Third-party profile in the serialized format")]
+    [SwaggerSchemaCustomString("Third-party profile in the serialized format")]
     public string SerializedProfile { get; set; }
 }
 
 public class SignupAccountRequestDto : LinkAccountRequestDto
 {
-    [SwaggerSchemaCustom(Example = "All", Description = "Employee type (All, RoomAdmin, User, DocSpaceAdmin, Collaborator)")]
+    [SwaggerSchemaCustomString("Employee type (All, RoomAdmin, User, DocSpaceAdmin, Collaborator)", Example = "All")]
     public EmployeeType? EmployeeType { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "First name")]
+    [SwaggerSchemaCustomString("First name")]
     public string FirstName { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Last name")]
+    [SwaggerSchemaCustomString("Last name")]
     public string LastName { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Email address")]
+    [SwaggerSchemaCustomString("Email address")]
     public string Email { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Password hash")]
+    [SwaggerSchemaCustomString("Password hash")]
     public string PasswordHash { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Link key")]
+    [SwaggerSchemaCustomString("Link key")]
     public string Key { get; set; }
 
-    [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "Culture")]
+    [SwaggerSchemaCustomGuid("Culture")]
     public string Culture { get; set; }
 }

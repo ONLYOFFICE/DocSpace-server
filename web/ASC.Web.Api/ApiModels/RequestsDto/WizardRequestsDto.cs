@@ -28,22 +28,22 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 public class WizardRequestsDto
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "Email")]
+    [SwaggerSchemaCustomString("Email")]
     public string Email { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Password hash")]
+    [SwaggerSchemaCustomString("Password hash")]
     public string PasswordHash { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Language")]
+    [SwaggerSchemaCustomString("Language")]
     public string Lng { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Time zone")]
+    [SwaggerSchemaCustomString("Time zone")]
     public string TimeZone { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "AMI ID")]
+    [SwaggerSchemaCustomString("AMI ID")]
     public string AmiId { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Subscribed from the site or not")]
+    [SwaggerSchemaCustomBoolean("Subscribed from the site or not")]
     public bool SubscribeFromSite { get; set; }
 
     public void Deconstruct(out string email, out string passwordHash, out string lng, out string timeZone, out string amiid, out bool subscribeFromSite)

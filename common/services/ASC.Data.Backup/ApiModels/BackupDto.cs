@@ -28,12 +28,12 @@ namespace ASC.Data.Backup.ApiModels;
 
 public class BackupDto
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "Storage type")]
+    [SwaggerSchemaCustomString("Storage type")]
     public string StorageType { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Storage parameters")]
+    [SwaggerSchemaCustom<IEnumerable<ItemKeyValuePair<object, object>>>("Storage parameters")]
     public IEnumerable<ItemKeyValuePair<object, object>> StorageParams { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if a dump will be created or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if a dump will be created or not")]
     public bool Dump { get; set; }
 }

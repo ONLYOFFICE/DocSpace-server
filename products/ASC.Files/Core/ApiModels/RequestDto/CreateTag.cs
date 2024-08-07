@@ -28,6 +28,6 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class CreateTagRequestDto
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "Tag name")]
+    [SwaggerSchemaCustomString("Tag name")]
     public string Name { get; set; }
 }

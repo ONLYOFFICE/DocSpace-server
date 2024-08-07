@@ -368,15 +368,24 @@ public class DbWebhooks
     public WebhooksConfig Config { get; init; }
 }
 
-/// <summary>
-/// </summary>
 [Flags]
 public enum WebhookGroupStatus
 {
+    [SwaggerEnum("None")]
     None = 0,
+
+    [SwaggerEnum("Not sent")]
     NotSent = 1,
+
+    [SwaggerEnum("Status2xx")]
     Status2xx = 2,
+
+    [SwaggerEnum("Status3xx")]
     Status3xx = 4,
+
+    [SwaggerEnum("Status4xx")]
     Status4xx = 8,
+
+    [SwaggerEnum("Status5xx")]
     Status5xx = 16
 }

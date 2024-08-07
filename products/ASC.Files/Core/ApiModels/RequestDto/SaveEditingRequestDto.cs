@@ -28,15 +28,15 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class SaveEditingRequestDto : IModelWithFile
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "File extension")]
+    [SwaggerSchemaCustomString("File extension")]
     public string FileExtension { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "URI to download a file", Format = "uri")]
+    [SwaggerSchemaCustomString("URI to download a file", Format = "uri")]
     public string DownloadUri { get; set; }
 
-    [SwaggerSchemaCustom(Type = "file", Description = "Request file stream", Format = "binary")]
+    [SwaggerSchemaCustom<IFormFile>("Request file stream", Format = "binary")]
     public IFormFile File { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies whether to force save a file or not")]
+    [SwaggerSchemaCustomBoolean("Specifies whether to force save a file or not")]
     public bool Forcesave { get; set; }
 }

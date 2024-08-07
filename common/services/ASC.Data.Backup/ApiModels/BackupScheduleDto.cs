@@ -28,30 +28,30 @@ namespace ASC.Data.Backup.ApiModels;
 
 public class BackupScheduleDto
 {
-    [SwaggerSchemaCustom(Example= "some text", Description = "Storage type")]
+    [SwaggerSchemaCustomString("Storage type")]
     public string StorageType { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Storage parameters")]
+    [SwaggerSchemaCustom<IEnumerable<ItemKeyValuePair<object, object>>>("Storage parameters")]
     public IEnumerable<ItemKeyValuePair<object, object>> StorageParams { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Maximum number of the stored backup copies")]
+    [SwaggerSchemaCustomString("Maximum number of the stored backup copies")]
     public string BackupsStored { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Cron parameters")]
+    [SwaggerSchemaCustom<Cron>("Cron parameters")]
     public Cron CronParams { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if a dump will be created or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if a dump will be created or not")]
     public bool Dump { get; set; }
 }
 
 public class Cron
 {
-    [SwaggerSchemaCustom(Example = "0", Description = "Period")]
+    [SwaggerSchemaCustomString("Period", Example = "0")]
     public string Period { get; set; }
 
-    [SwaggerSchemaCustom(Example = "0", Description = "Hour")]
+    [SwaggerSchemaCustomString("Hour", Example = "0")]
     public string Hour { get; set; }
 
-    [SwaggerSchemaCustom(Example = "0", Description = "Day")]
+    [SwaggerSchemaCustomString("Day", Example = "0")]
     public string Day { get; set; }
 }

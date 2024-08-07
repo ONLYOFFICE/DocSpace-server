@@ -28,130 +28,130 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 
 public class SettingsDto
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "Time zone")]
+    [SwaggerSchemaCustomString("Time zone")]
     public string Timezone { get; set; }
 
-    [SwaggerSchemaCustom(Example = "mydomain.com", Description = "List of trusted domains")]
+    [SwaggerSchemaCustomString("List of trusted domains", Example = "mydomain.com")]
     public List<string> TrustedDomains { get; set; }
 
-    [SwaggerSchemaCustom(Example = "None", Description = "Trusted domains type")]
+    [SwaggerSchemaCustomString("Trusted domains type", Example = "None")]
     public TenantTrustedDomainsType TrustedDomainsType { get; set; }
 
-    [SwaggerSchemaCustom(Example = "en-US", Description = "Language")]
+    [SwaggerSchemaCustomString("Language", Example = "en-US")]
     public string Culture { get; set; }
 
-    [SwaggerSchemaCustom(Description = "UTC offset")]
+    [SwaggerSchemaCustom<TimeSpan>("UTC offset")]
     public TimeSpan UtcOffset { get; set; }
 
-    [SwaggerSchemaCustom(Example = "-8.5", Description = "UTC hours offset")]
+    [SwaggerSchemaCustomDouble("UTC hours offset")]
     public double UtcHoursOffset { get; set; }
 
-    [SwaggerSchemaCustom(Example = "Web Office Applications", Description = "Greeting settings")]
+    [SwaggerSchemaCustomString("Greeting settings", Example = "Web Office Applications")]
     public string GreetingSettings { get; set; }
 
-    [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "Owner ID")]
+    [SwaggerSchemaCustomGuid("Owner ID")]
     public Guid OwnerId { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Team template ID")]
+    [SwaggerSchemaCustomString("Team template ID")]
     public string NameSchemaId { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if a user can join to the portal or not", Nullable = true)]
+    [SwaggerSchemaCustomBoolean("Specifies if a user can join to the portal or not", Nullable = true)]
     public bool? EnabledJoin { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if a user can send a message to the administrator or not", Nullable = true)]
+    [SwaggerSchemaCustomBoolean("Specifies if a user can send a message to the administrator or not", Nullable = true)]
     public bool? EnableAdmMess { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if a user can connect third-party providers or not", Nullable = true)]
+    [SwaggerSchemaCustomBoolean("Specifies if a user can connect third-party providers or not", Nullable = true)]
     public bool? ThirdpartyEnable { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if this is a DocSpace portal or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if this is a DocSpace portal or not")]
     public bool DocSpace { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if this is a standalone portal or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if this is a standalone portal or not")]
     public bool Standalone { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Base domain")]
+    [SwaggerSchemaCustomString("Base domain")]
     public string BaseDomain { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Wizard token")]
+    [SwaggerSchemaCustomString("Wizard token")]
     public string WizardToken { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Password hash")]
+    [SwaggerSchemaCustom<PasswordHasher>("Password hash")]
     public PasswordHasher PasswordHash { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Firebase parameters")]
+    [SwaggerSchemaCustom<FirebaseDto>("Firebase parameters")]
     public FirebaseDto Firebase { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Version")]
+    [SwaggerSchemaCustomString("Version")]
     public string Version { get; set; }
 
-    [SwaggerSchemaCustom(Example = "Default", Description = "Type of captcha")]
+    [SwaggerSchemaCustomString("Type of captcha", Example = "Default")]
     public RecaptchaType RecaptchaType { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "ReCAPTCHA public key")]
+    [SwaggerSchemaCustomString("ReCAPTCHA public key")]
     public string RecaptchaPublicKey { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the debug information will be sent or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if the debug information will be sent or not")]
     public bool DebugInfo { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Socket URL")]
+    [SwaggerSchemaCustomString("Socket URL")]
     public string SocketUrl { get; set; }
 
-    [SwaggerSchemaCustom(Example = "Active", Description = "Tenant status")]
+    [SwaggerSchemaCustomString("Tenant status", Example = "Active")]
     public TenantStatus TenantStatus { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Tenant alias")]
+    [SwaggerSchemaCustomString("Tenant alias")]
     public string TenantAlias { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Link to the help")]
+    [SwaggerSchemaCustomString("Link to the help")]
     public string HelpLink { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Link to the forum")]
+    [SwaggerSchemaCustomString("Link to the forum")]
     public string ForumLink { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "API documentation link")]
+    [SwaggerSchemaCustomString("API documentation link")]
     public string ApiDocsLink { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Domain validator")]
+    [SwaggerSchemaCustom<TenantDomainValidator>("Domain validator")]
     public TenantDomainValidator DomainValidator { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Zendesk key")]
+    [SwaggerSchemaCustomString("Zendesk key")]
     public string ZendeskKey { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Tag manager ID")]
+    [SwaggerSchemaCustomString("Tag manager ID")]
     public string TagManagerId { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Email for training booking")]
+    [SwaggerSchemaCustomString("Email for training booking")]
     public string BookTrainingEmail { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Documentation email")]
+    [SwaggerSchemaCustomString("Documentation email")]
     public string DocumentationEmail { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Legal terms")]
+    [SwaggerSchemaCustomString("Legal terms")]
     public string LegalTerms { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies whether the cookie settings are enabled")]
+    [SwaggerSchemaCustomBoolean("Specifies whether the cookie settings are enabled")]
     public bool CookieSettingsEnabled { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Limited access space")]
+    [SwaggerSchemaCustomBoolean("Limited access space")]
     public bool LimitedAccessSpace { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "User name validation regex")]
+    [SwaggerSchemaCustomString("User name validation regex")]
     public string UserNameRegex { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "Invitation limit", Format = "int32", Nullable = true)]
+    [SwaggerSchemaCustomInt("Invitation limit", Format = "int32", Nullable = true)]
     public int? InvitationLimit { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Plugins")]
+    [SwaggerSchemaCustom<PluginsDto>("Plugins")]
     public PluginsDto Plugins { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Deep link")]
+    [SwaggerSchemaCustom<DeepLinkDto>("Deep link")]
     public DeepLinkDto DeepLink { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Form gallery")]
+    [SwaggerSchemaCustom<FormGalleryDto>("Form gallery")]
     public FormGalleryDto FormGallery { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "Max image upload size", Format = "int64")]
+    [SwaggerSchemaCustomLong("Max image upload size", Format = "int64")]
     public long MaxImageUploadSize { get; set; }
 
     public static SettingsDto GetSample()

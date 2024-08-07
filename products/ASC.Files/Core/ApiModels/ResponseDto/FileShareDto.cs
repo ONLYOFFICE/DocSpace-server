@@ -28,22 +28,22 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public class FileShareDto
 {
-    [SwaggerSchemaCustom(Example = "None", Description = "Sharing rights")]
+    [SwaggerSchemaCustomString("Sharing rights", Example = "None")]
     public FileShare Access { get; set; }
 
-    [SwaggerSchemaCustom(Description = "A user who has the access to the specified file")]
+    [SwaggerSchemaCustom<object>("A user who has the access to the specified file")]
     public object SharedTo { get; set; }
 
-    [SwaggerSchemaCustom(Example = "false", Description = "Specifies if the file is locked by this user or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if the file is locked by this user or not", Example = false)]
     public bool IsLocked { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if this user is an owner of the specified file or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if this user is an owner of the specified file or not")]
     public bool IsOwner { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Spceifies if this user can edit the access to the specified file or not")]
+    [SwaggerSchemaCustomBoolean("Spceifies if this user can edit the access to the specified file or not")]
     public bool CanEditAccess { get; set; }
 
-    [SwaggerSchemaCustom(Example = "User", Description = "Subject type")]
+    [SwaggerSchemaCustomString("Subject type", Example = "User")]
     public SubjectType SubjectType { get; set; }
 
     public static FileShareDto GetSample()
@@ -60,10 +60,19 @@ public class FileShareDto
 
 public class FileShareLink
 {
+    [SwaggerSchemaCustomGuid("Id")]
     public Guid Id { get; set; }
+
+    [SwaggerSchemaCustomString("Title")]
     public string Title { get; set; }
+
+    [SwaggerSchemaCustomString("Share link")]
     public string ShareLink { get; set; }
+
+    [SwaggerSchemaCustom<ApiDateTime>("Expiration date")]
     public ApiDateTime ExpirationDate { get; set; }
+
+    [SwaggerSchemaCustomString("link type", Example = "Invitation")]
     public LinkType LinkType { get; set; }
     public string Password { get; set; }
     public bool? DenyDownload { get; set; }
@@ -73,11 +82,12 @@ public class FileShareLink
     public string RequestToken { get; set; }
 }
 
-/// <summary>
-/// </summary>
 public enum LinkType
 {
+    [SwaggerEnum(Description = "Invitation")]
     Invitation,
+
+    [SwaggerEnum(Description = "External")]
     External
 }
 

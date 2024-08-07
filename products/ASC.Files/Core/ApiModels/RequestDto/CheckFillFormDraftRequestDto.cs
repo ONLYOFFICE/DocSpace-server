@@ -28,15 +28,15 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class CheckFillFormDraftRequestDto
 {
-    [SwaggerSchemaCustom(Example = "1234", Description = "File version", Format = "int32")]
+    [SwaggerSchemaCustomInt("File version", Format = "int32")]
     public int Version { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Action with a form")]
+    [SwaggerSchemaCustomString("Action with a form")]
     public string Action { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies whether to request a form for viewing or not")]
+    [SwaggerSchemaCustomBoolean("Specifies whether to request a form for viewing or not")]
     public bool RequestView => (Action ?? "").Equals("view", StringComparison.InvariantCultureIgnoreCase);
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies whether to request an embedded form or not")]
+    [SwaggerSchemaCustomBoolean("Specifies whether to request an embedded form or not")]
     public bool RequestEmbedded => (Action ?? "").Equals("embedded", StringComparison.InvariantCultureIgnoreCase);
 }

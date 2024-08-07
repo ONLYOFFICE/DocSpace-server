@@ -28,43 +28,43 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class AdditionalWhiteLabelSettingsDto: IMapFrom<AdditionalWhiteLabelSettings>
 {
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the start document is enabled or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if the start document is enabled or not")]
     public bool StartDocsEnabled { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the help center is enabled or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if the help center is enabled or not")]
     public bool HelpCenterEnabled { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if feedback and support are available or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if feedback and support are available or not")]
     public bool FeedbackAndSupportEnabled { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Feedback and support URL")]
+    [SwaggerSchemaCustomString("Feedback and support URL")]
     public string FeedbackAndSupportUrl { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the user forum is enabled or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if the user forum is enabled or not")]
     public bool UserForumEnabled { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "User forum URL", Format = "uri")]
+    [SwaggerSchemaCustomString("User forum URL", Format = "uri")]
     public string UserForumUrl { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the video guides are enabled or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if the video guides are enabled or not")]
     public bool VideoGuidesEnabled { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Video guides URL", Format = "uri")]
+    [SwaggerSchemaCustomString("Video guides URL", Format = "uri")]
     public string VideoGuidesUrl { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Sales email")]
+    [SwaggerSchemaCustomString("Sales email")]
     public string SalesEmail { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "URL to pay for the portal", Format = "uri")]
+    [SwaggerSchemaCustomString("URL to pay for the portal", Format = "uri")]
     public string BuyUrl { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the license agreements are enabled or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if the license agreements are enabled or not")]
     public bool LicenseAgreementsEnabled { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if these settings are default or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if these settings are default or not")]
     public bool IsDefault { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "License agreements URL")]
+    [SwaggerSchemaCustomString("License agreements URL")]
     public string LicenseAgreementsUrl { get; set; }
 
     public void Mapping(Profile profile)

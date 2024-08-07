@@ -42,52 +42,52 @@ public partial class FileEntryDtoContext : JsonSerializerContext;
 [JsonDerivedType(typeof(FolderDto<string>))]
 public abstract class FileEntryDto
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "Title")]
+    [SwaggerSchemaCustomString("Title")]
     public string Title { get; set; }
 
-    [SwaggerSchemaCustom(Example = "None", Description = "Access rights")]
+    [SwaggerSchemaCustomString("Access rights", Example = "None")]
     public FileShare Access { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the file is shared or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if the file is shared or not")]
     public bool Shared { get; set; }
 
-    [SwaggerSchemaCustom(Example = "2008-04-10T06-30-00.000Z", Description = "Creation time")]
+    [SwaggerSchemaCustom<ApiDateTime>("Creation time")]
     public ApiDateTime Created { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Author")]
+    [SwaggerSchemaCustom<EmployeeDto>("Author")]
     public EmployeeDto CreatedBy { get; set; }
 
     private ApiDateTime _updated;
 
-    [SwaggerSchemaCustom(Example = "2008-04-10T06-30-00.000Z", Description = "Time of the last file update")]
+    [SwaggerSchemaCustom<ApiDateTime>("Time of the last file update")]
     public ApiDateTime Updated
     {
         get => _updated < Created ? Created : _updated;
         set => _updated = value;
     }
 
-    [SwaggerSchemaCustom(Example = "2008-04-10T06-30-00.000Z", Description = "Time when the file will be automatically deleted")]
+    [SwaggerSchemaCustom<ApiDateTime>("Time when the file will be automatically deleted")]
     public ApiDateTime AutoDelete { get; set; }
 
-    [SwaggerSchemaCustom(Example = "DEFAULT", Description = "Root folder type")]
+    [SwaggerSchemaCustomString("Root folder type", Example = "DEFAULT")]
     public FolderType RootFolderType { get; set; }
 
-    [SwaggerSchemaCustom(Example = "DEFAULT", Description = "First parent folder type", Nullable = true)]
+    [SwaggerSchemaCustomString("First parent folder type", Example = "DEFAULT", Nullable = true)]
     public FolderType? ParentRoomType { get; set; }
 
-    [SwaggerSchemaCustom(Description = "A user who updated a file")]
+    [SwaggerSchemaCustom<EmployeeDto>("A user who updated a file")]
     public EmployeeDto UpdatedBy { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Provider is specified or not", Nullable = true)]
+    [SwaggerSchemaCustomBoolean("Provider is specified or not", Nullable = true)]
     public bool? ProviderItem { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Provider key")]
+    [SwaggerSchemaCustomString("Provider key")]
     public string ProviderKey { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "Provider ID", Format = "int32", Nullable = true)]
+    [SwaggerSchemaCustomInt("Provider ID", Format = "int32", Nullable = true)]
     public int? ProviderId { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Order")]
+    [SwaggerSchemaCustomString("Order")]
     public string Order { get; set; }
 
     protected FileEntryDto(FileEntry entry)
@@ -107,30 +107,30 @@ public abstract class FileEntryDto
 
 public abstract class FileEntryDto<T> : FileEntryDto
 {
-    [SwaggerSchemaCustom(Example = "1234", Description = "Id", Format = "int32")]
+    [SwaggerSchemaCustomInt("Id", Format = "int32")]
     public T Id { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "Root folder id", Format = "int32")]
+    [SwaggerSchemaCustomInt("Root folder id", Format = "int32")]
     public T RootFolderId { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "Origin id", Format = "int32")]
+    [SwaggerSchemaCustomInt("Origin id", Format = "int32")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public T OriginId { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "Origin room id", Format = "int32")]
+    [SwaggerSchemaCustomInt("Origin room id", Format = "int32")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public T OriginRoomId { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Origin title")]
+    [SwaggerSchemaCustomString("Origin title")]
     public string OriginTitle { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Origin room title")]
+    [SwaggerSchemaCustomString("Origin room title")]
     public string OriginRoomTitle { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Can share")]
+    [SwaggerSchemaCustomBoolean("Can share")]
     public bool CanShare { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Security")]
+    [SwaggerSchemaCustom<IDictionary<FilesSecurityActions, bool>>("Security")]
     public IDictionary<FilesSecurityActions, bool> Security { get; set; }
 
     protected FileEntryDto(FileEntry<T> entry)

@@ -28,73 +28,73 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class TenantDto : IMapFrom<Tenant>
 {
-    [SwaggerSchemaCustom(Example = "some text", Description = "Affiliate ID")]
+    [SwaggerSchemaCustomString("Affiliate ID")]
     public string AffiliateId { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Tenant alias")]
+    [SwaggerSchemaCustomString("Tenant alias")]
     public string TenantAlias { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the calls are available for this tenant or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if the calls are available for this tenant or not")]
     public bool Calls { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Campaign")]
+    [SwaggerSchemaCustomString("Campaign")]
     public string Campaign { get; set; }
 
-    [SwaggerSchemaCustom(Example = "2008-04-10T06-30-00.000Z", Description = "Creation date and time")]
+    [SwaggerSchemaCustomDateTime("Creation date and time")]
     public DateTime CreationDateTime { get; internal set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Hosted region")]
+    [SwaggerSchemaCustomString("Hosted region")]
     public string HostedRegion { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "Tenant ID", Format = "int32")]
+    [SwaggerSchemaCustomInt("Tenant ID", Format = "int32")]
     public int TenantId { get; internal set; }
 
-    [SwaggerSchemaCustom(Example = "Other", Description = "Tenant industry")]
+    [SwaggerSchemaCustomString("Tenant industry", Example = "Other")]
     public TenantIndustry Industry { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Language")]
+    [SwaggerSchemaCustomString("Language")]
     public string Language { get; set; }
 
-    [SwaggerSchemaCustom(Example = "2008-04-10T06-30-00.000Z", Description = "Last modified date")]
+    [SwaggerSchemaCustomDateTime("Last modified date")]
     public DateTime LastModified { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Mapped domain")]
+    [SwaggerSchemaCustomString("Mapped domain")]
     public string MappedDomain { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Name")]
+    [SwaggerSchemaCustomString("Name")]
     public string Name { get; set; }
 
-    [SwaggerSchemaCustom(Example = "9924256A-739C-462b-AF15-E652A3B1B6EB", Description = "Owner ID")]
+    [SwaggerSchemaCustomGuid("Owner ID")]
     public Guid OwnerId { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Payment ID")]
+    [SwaggerSchemaCustomString("Payment ID")]
     public string PaymentId { get; set; }
 
-    [SwaggerSchemaCustom(Example = "true", Description = "Specifies if the ONLYOFFICE newsletter is allowed or not")]
+    [SwaggerSchemaCustomBoolean("Specifies if the ONLYOFFICE newsletter is allowed or not")]
     public bool Spam { get; set; }
 
-    [SwaggerSchemaCustom(Example = "Active", Description = "Tenant status")]
+    [SwaggerSchemaCustomString("Tenant status", Example = "Active")]
     public TenantStatus Status { get; internal set; }
 
-    [SwaggerSchemaCustom(Example = "2008-04-10T06-30-00.000Z", Description = "The date and time when the tenant status was changed")]
+    [SwaggerSchemaCustomDateTime("The date and time when the tenant status was changed")]
     public DateTime StatusChangeDate { get; internal set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Time zone")]
+    [SwaggerSchemaCustomString("Time zone")]
     public string TimeZone { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "List of trusted domains")]
+    [SwaggerSchemaCustomString("List of trusted domains")]
     public List<string> TrustedDomains { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Trusted domains in the string format")]
+    [SwaggerSchemaCustomString("Trusted domains in the string format")]
     public string TrustedDomainsRaw { get; set; }
 
-    [SwaggerSchemaCustom(Example = "None", Description = "Trusted domains type")]
+    [SwaggerSchemaCustomString("Trusted domains type", Example = "None")]
     public TenantTrustedDomainsType TrustedDomainsType { get; set; }
 
-    [SwaggerSchemaCustom(Example = "1234", Description = "Version", Format = "int32")]
+    [SwaggerSchemaCustomInt("Version", Format = "int32")]
     public int Version { get; set; }
 
-    [SwaggerSchemaCustom(Example = "2008-04-10T06-30-00.000Z", Description = "The date and time when the tenant version was changed")]
+    [SwaggerSchemaCustomDateTime("The date and time when the tenant version was changed")]
     public DateTime VersionChanged { get; set; }
 
     public void Mapping(Profile profile)

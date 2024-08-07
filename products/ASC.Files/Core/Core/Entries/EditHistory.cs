@@ -126,9 +126,12 @@ class ChangesUserData
 public class EditHistoryAuthor(UserManager userManager,
     DisplayUserSettingsHelper displayUserSettingsHelper)
 {
+    [SwaggerSchemaCustomString("Id")]
     public string Id { get; init; }
 
     private string _name;
+
+    [SwaggerSchemaCustomString("Name")]
     public string Name
     {
         get
@@ -159,44 +162,40 @@ public class EditHistoryChanges
     public DateTime Date { get; set; }
 }
 
-/// <summary>
-/// </summary>
 [DebuggerDisplay("{Version}")]
 public class EditHistoryDataDto
 {
-    /// <summary>URL to the file changes</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustomString("URL to the file changes", Format = "uri")]
     public string ChangesUrl { get; set; }
 
-    /// <summary>Key</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustomString("Key")]
     public string Key { get; set; }
 
-    /// <summary>Previous version</summary>
-    /// <type>ASC.Files.Core.EditHistoryUrl, ASC.Files.Core</type>
+    [SwaggerSchemaCustom<EditHistoryUrl>("Previous version")]
     public EditHistoryUrl Previous { get; set; }
 
-    /// <summary>Token</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustomString("Token")]
     public string Token { get; set; }
 
-    /// <summary>File URL</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustomString("File URL", Format = "uri")]
     public string Url { get; set; }
 
-    /// <summary>File version</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustomInt("File version")]
     public int Version { get; init; }
 
-    /// <summary>File type</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustomString("File type")]
     public string FileType { get; set; }
 }
 
 [DebuggerDisplay("{Key} - {Url}")]
 public class EditHistoryUrl
 {
+    [SwaggerSchemaCustomString("Key")]
     public string Key { get; init; }
+
+    [SwaggerSchemaCustomString("Url", Format = "uri")]
     public string Url { get; init; }
+
+    [SwaggerSchemaCustomString("File type")]
     public string FileType { get; set; }
 }

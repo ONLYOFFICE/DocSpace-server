@@ -45,22 +45,22 @@ public class ThumbnailsDataDto
         };
     }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Original photo")]
+    [SwaggerSchemaCustomString("Original photo")]
     public string Original { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Retina")]
+    [SwaggerSchemaCustomString("Retina")]
     public string Retina { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Maximum size")]
+    [SwaggerSchemaCustomString("Maximum size")]
     public string Max { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Big")]
+    [SwaggerSchemaCustomString("Big")]
     public string Big { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Medium")]
+    [SwaggerSchemaCustomString("Medium")]
     public string Medium { get; set; }
 
-    [SwaggerSchemaCustom(Example = "some text", Description = "Small")]
+    [SwaggerSchemaCustomString("Small")]
     public string Small { get; set; }
 
     public static ThumbnailsDataDto GetSample()
