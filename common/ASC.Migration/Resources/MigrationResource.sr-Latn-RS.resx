@@ -162,4 +162,52 @@
   <data name="UnzippingFinished" xml:space="preserve">
     <value>Razrešavanje (dekompresovanje) završeno...</value>
   </data>
+  <data name="CanNotAddUserInGroup" xml:space="preserve">
+    <value>Nije moguće dodati korisnika {0} u grupu {1}</value>
+  </data>
+  <data name="CanNotCreateFile" xml:space="preserve">
+    <value>Nije moguće kreirati datoteku {0}</value>
+  </data>
+  <data name="CanNotImportUser" xml:space="preserve">
+    <value>Nije moguće uvesti korisnika</value>
+  </data>
+  <data name="CanNotImportUserFiles" xml:space="preserve">
+    <value>Nije moguće uvesti korisničke datoteke</value>
+  </data>
+  <data name="CanNotParseArchive" xml:space="preserve">
+    <value>Nije moguće obraditi {0} arhivu</value>
+  </data>
+  <data name="CanNotParseArchives" xml:space="preserve">
+    <value>Nije moguće obraditi arhive</value>
+  </data>
+  <data name="CanNotParseUser" xml:space="preserve">
+    <value>Nije moguće obraditi korisnika {0}</value>
+  </data>
+  <data name="CanNotReadInfoFile" xml:space="preserve">
+    <value>Nije moguće čitati informativnu datoteku sa {0}</value>
+  </data>
+  <data name="CanNotShare" xml:space="preserve">
+    <value>Nije moguće podeliti unos {0} na {1}</value>
+  </data>
+  <data name="CanNotToUnzip" xml:space="preserve">
+    <value>Nije moguće raspakovati {0}</value>
+  </data>
+  <data name="CreateFile" xml:space="preserve">
+    <value>Kreiraj datoteku {0}</value>
+  </data>
+  <data name="CreateFolder" xml:space="preserve">
+    <value>Kreiraj folder {0}</value>
+  </data>
+  <data name="CreateShareRoom" xml:space="preserve">
+    <value>kreiraj zajedničku prostoriju {0}</value>
+  </data>
+  <data name="СanNotImportCommonFiles" xml:space="preserve">
+    <value>Nije moguće uvesti zajedničke datoteke</value>
+  </data>
+  <data name="СanNotImportProjectFiles" xml:space="preserve">
+    <value>Nije moguće uvesti datoteke projekta</value>
+  </data>
+  <data name="СreateRootFolder" xml:space="preserve">
+    <value>Kreiraj root folder</value>
+  </data>
 </root>

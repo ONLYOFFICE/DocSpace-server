@@ -152,4 +152,31 @@ $__AuthorName şu odayı sildi: $RoomTitle</value>
   <data name="subject_DocuSignComplete_push" xml:space="preserve">
     <value>Tüm imza sahipleri $DocumentTitle dosyasını tamamladı</value>
   </data>
+  <data name="button_CheckReadyForms" xml:space="preserve">
+    <value>Hazır formları kontrol et</value>
+  </data>
+  <data name="pattern_FormReceived" xml:space="preserve">
+    <value>h1. Form $Message dolduruldu
+
+"$RoomTitle":"$RoomURL" odasında yeni bir "$DocumentTitle":"$DocumentURL" formu dolduruldu
+
+Form gönderen: "$FromUserName":"$FromUserLink"
+
+$OrangeButton</value>
+  </data>
+  <data name="pattern_FormSubmitted" xml:space="preserve">
+    <value>h1. Formu doldurdunuz $Message
+
+"$RoomTitle":"$RoomURL" odasında "$DocumentTitle":"$DocumentURL" formunu doldurdunuz
+
+Yönetici: "$ToUserName":"$ToUserLink"
+
+$OrangeButton</value>
+  </data>
+  <data name="subject_FormReceived" xml:space="preserve">
+    <value>DocSpace bildirimi. Form dolduruldu</value>
+  </data>
+  <data name="subject_FormSubmitted" xml:space="preserve">
+    <value>DocSpace bildirimi. Form dolduruldu</value>
+  </data>
 </root>

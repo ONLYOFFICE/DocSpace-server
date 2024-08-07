@@ -778,4 +778,28 @@
   <data name="SendJoinInvite" xml:space="preserve">
     <value>Gebruiker {0} stuurde een uitnodiging naar {1} om lid te worden van deze DocSpace</value>
   </data>
+  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
+    <value>Kamers [{0}]. Aangepaste opslagquota instellen voor kamers: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
+    <value>Kamers [{0}]. Standaard opslagquota instellen voor kamers: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
+    <value>Kamers [{0}]. Opslagquota voor kamers uitgeschakeld</value>
+  </data>
+  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
+    <value>Gebruikers [{0}]. Aangepaste opslagquota instellen voor gebruikers: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
+    <value>Gebruikers [{0}]. Standaard opslagquota instellen voor gebruikers: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
+    <value>Gebruikers [{0}]. Opslagquota voor gebruikers uitgeschakeld</value>
+  </data>
+  <data name="FormOpenedForFilling" xml:space="preserve">
+    <value>Bestand Geopend Om In Te Vullen: {0}</value>
+  </data>
+  <data name="FormSubmit" xml:space="preserve">
+    <value>Gebruikers [{0}]. Formulier ingediend: {1}</value>
+  </data>
 </root>

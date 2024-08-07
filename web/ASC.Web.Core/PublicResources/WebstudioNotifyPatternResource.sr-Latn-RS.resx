@@ -1850,4 +1850,7 @@ $TrulyYours</value>
   <data name="subject_saas_room_invite_existing_user" xml:space="preserve">
     <value>Pozvani ste u ONLYOFFICE DocSpace prostoriju</value>
   </data>
+  <data name="ButtonJoin" xml:space="preserve">
+    <value>Klikni ovde da se pridružiš portalu</value>
+  </data>
 </root>

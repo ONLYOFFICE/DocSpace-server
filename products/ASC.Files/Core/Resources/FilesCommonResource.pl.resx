@@ -497,4 +497,7 @@ Najwyższy poziom kompatybilności z docx, xlsx, pptx.</value>
   <data name="OpenForm" xml:space="preserve">
     <value>Otwórz formularz</value>
   </data>
+  <data name="FormNumber" xml:space="preserve">
+    <value>Numer formularza</value>
+  </data>
 </root>

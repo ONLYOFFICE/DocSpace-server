@@ -152,4 +152,31 @@ $__AuthorName izdzēsa telpu: $RoomTitle</value>
   <data name="subject_ShareDocument_tg" xml:space="preserve">
     <value>Dokumenti. Dokumentam ir piešķirta piekļuve: [$DocumentTitle]($DocumentURL)</value>
   </data>
+  <data name="button_CheckReadyForms" xml:space="preserve">
+    <value>Pārbaudīt gatavās veidlapas</value>
+  </data>
+  <data name="pattern_FormReceived" xml:space="preserve">
+    <value>h1. Veidlapa $Message ir aizpildīta
+
+Telpā "$RoomTitle":"$RoomURL" ir aizpildīta jauna veidlapa "$DocumentTitle":"$DocumentURL"
+
+Veidlapas iesniedzējs: "$FromUserName":"$FromUserLink"
+
+$OrangeButton</value>
+  </data>
+  <data name="pattern_FormSubmitted" xml:space="preserve">
+    <value>h1. Jūs aizpildījāt veidlapu $Message
+
+Jūs aizpildījāt veidlapu "$DocumentTitle":"$DocumentURL" telpā "$RoomTitle":"$RoomURL"
+
+Pārvaldnieks: "$ToUserName":"$ToUserLink"
+
+$OrangeButton</value>
+  </data>
+  <data name="subject_FormReceived" xml:space="preserve">
+    <value>DocSpace paziņojums. Veidlapa ir aizpildīta</value>
+  </data>
+  <data name="subject_FormSubmitted" xml:space="preserve">
+    <value>DocSpace paziņojums. Veidlapa ir aizpildīta</value>
+  </data>
 </root>

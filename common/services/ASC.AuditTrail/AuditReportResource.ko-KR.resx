@@ -837,4 +837,28 @@
   <data name="SendJoinInvite" xml:space="preserve">
     <value>사용자 {0}님이 {1}님에게 이 DocSpace에 참여하라는 초대장을 보냈습니다</value>
   </data>
+  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
+    <value>[{0}] 룸. 룸에 대한 커스텀 스토리지 할당량 설정: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
+    <value>[{0}] 룸. 룸에 대한 기본 스토리지 할당량 설정: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
+    <value>[{0}] 룸. 룸에 대한 스토리지 할당량 비활성화</value>
+  </data>
+  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
+    <value>[{0}] 사용자. 사용자에 대한 커스텀 스토리지 할당량 설정: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
+    <value>[{0}] 사용자. 사용자에 대한 기본 스토리지 할당량 설정: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
+    <value>[{0}] 사용자. 사용자에 대한 스토리지 할당량 비활성화</value>
+  </data>
+  <data name="FormOpenedForFilling" xml:space="preserve">
+    <value>작성을 위해 열린 파일: {0}</value>
+  </data>
+  <data name="FormSubmit" xml:space="preserve">
+    <value>[{0}] 사용자. 제출된 양식: {1}</value>
+  </data>
 </root>

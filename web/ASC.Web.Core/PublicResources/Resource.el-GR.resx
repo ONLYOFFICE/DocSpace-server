@@ -1048,4 +1048,13 @@
   <data name="TariffsFeature_used_manager" xml:space="preserve">
     <value>Οι Διαχειριστές/Εξουσιοδοτημένοι χρήστες προστέθηκαν:</value>
   </data>
+  <data name="ErrorEmailLinked" xml:space="preserve">
+    <value>Αυτό το email επισυνάπτεται στον χρήστη {0} ως πάροχος τρίτου μέρους</value>
+  </data>
+  <data name="TariffsFeature_statistic" xml:space="preserve">
+    <value>Ποσοστώσεις αποθήκευσης και στατιστικά στοιχεία</value>
+  </data>
+  <data name="TariffsFeature_total_size" xml:space="preserve">
+    <value>{0} ανά διαχειριστή/ενεργό χρήστη και δυνατότητα προσθήκης χώρου κατόπιν αιτήματος</value>
+  </data>
 </root>

@@ -1839,4 +1839,7 @@ $TrulyYours</value>
   <data name="subject_saas_docspace_registration" xml:space="preserve">
     <value>ONLYOFFICE DocSpace: заврши регистрацију</value>
   </data>
+  <data name="ButtonJoin" xml:space="preserve">
+    <value>Кликни овде да се придружиш порталу</value>
+  </data>
 </root>

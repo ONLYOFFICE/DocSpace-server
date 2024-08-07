@@ -162,4 +162,43 @@
   <data name="MigrationProjectFiles" xml:space="preserve">
     <value>Migracija projektnih datotek</value>
   </data>
+  <data name="CanNotToUnzip" xml:space="preserve">
+    <value>{0} ni bilo mogoče razpakirati</value>
+  </data>
+  <data name="CanNotImportUser" xml:space="preserve">
+    <value>Ni bilo mogoče uvoziti uporabnika</value>
+  </data>
+  <data name="СreateRootFolder" xml:space="preserve">
+    <value>Ustvari korensko mapo</value>
+  </data>
+  <data name="CanNotAddUserInGroup" xml:space="preserve">
+    <value>Uporabnika {0} ni bilo mogoče dodati v skupino {1}</value>
+  </data>
+  <data name="CreateFile" xml:space="preserve">
+    <value>Ustvari datoteko {0}</value>
+  </data>
+  <data name="СanNotImportCommonFiles" xml:space="preserve">
+    <value>Ni bilo mogoče uvoziti skupnih datotek</value>
+  </data>
+  <data name="CanNotParseUser" xml:space="preserve">
+    <value>Ni bilo mogoče razčleniti uporabnika {0}</value>
+  </data>
+  <data name="CanNotShare" xml:space="preserve">
+    <value>Vnosa {0} ni bilo mogoče dati v skupno rabo z {1}</value>
+  </data>
+  <data name="CanNotImportUserFiles" xml:space="preserve">
+    <value>Ni bilo mogoče uvoziti uporabnikovih datotek</value>
+  </data>
+  <data name="CanNotCreateFile" xml:space="preserve">
+    <value>Ni bilo mogoče ustvariti datoteke {0}</value>
+  </data>
+  <data name="CanNotParseArchives" xml:space="preserve">
+    <value>Ni bilo mogoče razčleniti arhivov</value>
+  </data>
+  <data name="CreateShareRoom" xml:space="preserve">
+    <value>ustvari deljeno sobo {0}</value>
+  </data>
+  <data name="CanNotReadInfoFile" xml:space="preserve">
+    <value>Ni bilo mogoče prebrati informacijske datoteke od {0}</value>
+  </data>
 </root>

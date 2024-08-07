@@ -1048,4 +1048,13 @@
   <data name="MessagePasswordSendedToEmail" xml:space="preserve">
     <value>Інструкцію зі зміни пароля надіслано на адресу {0}.</value>
   </data>
+  <data name="ErrorEmailLinked" xml:space="preserve">
+    <value>Ця адреса електронної пошти закріплена за користувачем {0} як стороннім провайдером</value>
+  </data>
+  <data name="TariffsFeature_statistic" xml:space="preserve">
+    <value>Квота пам'яті й статистика</value>
+  </data>
+  <data name="TariffsFeature_total_size" xml:space="preserve">
+    <value>{0} на адміністратора/досвідченого користувача та можливість додавати простір за запитом</value>
+  </data>
 </root>

@@ -162,4 +162,52 @@
   <data name="MigrationProjectFiles" xml:space="preserve">
     <value>마이그레이션 프로젝트 파일</value>
   </data>
+  <data name="CanNotAddUserInGroup" xml:space="preserve">
+    <value>{0} 사용자를 {1} 그룹에 추가할 수 없습니다</value>
+  </data>
+  <data name="CanNotCreateFile" xml:space="preserve">
+    <value>{0} 파일을 생성할 수 없습니다</value>
+  </data>
+  <data name="CanNotImportUser" xml:space="preserve">
+    <value>사용자를 가져오기할 수 없습니다</value>
+  </data>
+  <data name="CanNotImportUserFiles" xml:space="preserve">
+    <value>사용자 파일을 가져오기할 수 없습니다</value>
+  </data>
+  <data name="CanNotParseArchive" xml:space="preserve">
+    <value>{0} 아카이브를 파싱할 수 없습니다</value>
+  </data>
+  <data name="CanNotParseArchives" xml:space="preserve">
+    <value>아카이브를 파싱할 수 없습니다</value>
+  </data>
+  <data name="CanNotParseUser" xml:space="preserve">
+    <value>{0} 사용자를 파싱할 수 없습니다</value>
+  </data>
+  <data name="CanNotReadInfoFile" xml:space="preserve">
+    <value>{0}에서 정보 파일을 읽을 수 없습니다</value>
+  </data>
+  <data name="CanNotShare" xml:space="preserve">
+    <value>{0} 항목을 {1}에 공유할 수 없습니다</value>
+  </data>
+  <data name="CanNotToUnzip" xml:space="preserve">
+    <value>{0}의 압축을 풀 수 없습니다</value>
+  </data>
+  <data name="CreateFile" xml:space="preserve">
+    <value>{0} 파일을 생성할 수 없습니다</value>
+  </data>
+  <data name="CreateFolder" xml:space="preserve">
+    <value>{0} 폴더를 생성할 수 없습니다</value>
+  </data>
+  <data name="CreateShareRoom" xml:space="preserve">
+    <value>{0} 공유 룸을 생성할 수 없습니다</value>
+  </data>
+  <data name="СanNotImportCommonFiles" xml:space="preserve">
+    <value>공통 파일을 가져오기할 수 없습니다</value>
+  </data>
+  <data name="СanNotImportProjectFiles" xml:space="preserve">
+    <value>프로젝트 파일을 가져오기할 수 없습니다</value>
+  </data>
+  <data name="СreateRootFolder" xml:space="preserve">
+    <value>루트 폴더 생성</value>
+  </data>
 </root>

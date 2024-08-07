@@ -152,4 +152,31 @@ $__AuthorName vymazal(a) miestnosť: $RoomTitle</value>
   <data name="subject_MailMergeEnd_push" xml:space="preserve">
     <value>Odosielanie je ukončené.</value>
   </data>
+  <data name="button_CheckReadyForms" xml:space="preserve">
+    <value>Skontrolovať hotové formuláre</value>
+  </data>
+  <data name="pattern_FormReceived" xml:space="preserve">
+    <value>h1. Formulár $Message je vyplnený
+
+Nový formulár "$DocumentTitle":"$DocumentURL" bol vyplnený v miestnosti "$RoomTitle":"$RoomURL"
+
+Formulár vyplnil: "$FromUserName":"$FromUserLink"
+
+$OrangeButton</value>
+  </data>
+  <data name="pattern_FormSubmitted" xml:space="preserve">
+    <value>h1. Vyplnili ste formulár $Message
+
+Vyplnili ste formulár "$DocumentTitle":"$DocumentURL" v miestnosti "$RoomTitle":"$RoomURL"
+
+Manažér: "$ToUserName":"$ToUserLink"
+
+$OrangeButton</value>
+  </data>
+  <data name="subject_FormReceived" xml:space="preserve">
+    <value>Oznámenie DocSpace. Formulár je vyplnený</value>
+  </data>
+  <data name="subject_FormSubmitted" xml:space="preserve">
+    <value>Oznámenie DocSpace. Formulár je vyplnený</value>
+  </data>
 </root>

@@ -152,4 +152,7 @@ $__AuthorName さんが次のルームを削除しました：$RoomTitle</value>
   <data name="subject_ShareFolder_push" xml:space="preserve">
     <value>フォルダへのアクセスが許可されました: $DocumentTitle</value>
   </data>
+  <data name="button_CheckReadyForms" xml:space="preserve">
+    <value>完成させたフォームを見る</value>
+  </data>
 </root>
