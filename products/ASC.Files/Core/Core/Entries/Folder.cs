@@ -72,10 +72,10 @@ public enum FolderType
     [SwaggerEnum(Description = "Editing room")]
     EditingRoom = 16,
 
-    [SwaggerEnum(Description = "Review room")]
+    [SwaggerEnum(Description = "Review room", Ignore = true)]
     ReviewRoom = 17,
 
-    [SwaggerEnum(Description = "Read only room")]
+    [SwaggerEnum(Description = "Read only room", Ignore = true)]
     ReadOnlyRoom = 18,
 
     [SwaggerEnum(Description = "Custom room")]
@@ -90,7 +90,7 @@ public enum FolderType
     [SwaggerEnum(Description = "Public room")]
     PublicRoom = 22,
 
-    [SwaggerEnum(Description = "Form room")]
+    [SwaggerEnum(Description = "Form room", Ignore = true)]
     FormRoom = 24,
 
     [SwaggerEnum(Description = "Ready form folder")]
