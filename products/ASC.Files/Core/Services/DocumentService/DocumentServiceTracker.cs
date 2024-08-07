@@ -179,7 +179,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
         return await documentServiceConnector.CommandAsync(CommandMethod.Info, docKeyForTrack, fileId, callbackUrl);
     }
 
-    public async Task<TrackResponse> ProcessDataAsync<T>(T fileId, TrackerData fileData)
+    public async Task<TrackResponse> ProcessDataAsync<T>(T fileId, TrackerData fileData, string fillingSessionId)
     {
         switch (fileData.Status)
         {
@@ -190,7 +190,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
                 break;
 
             case TrackerStatus.Editing:
-                await ProcessEditAsync(fileId, fileData);
+                await ProcessEditAsync(fileId, fileData, !string.IsNullOrEmpty(fillingSessionId) );
                 break;
 
             case TrackerStatus.MustSave:
@@ -224,7 +224,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
             case TrackerStatus.Corrupted:
             case TrackerStatus.ForceSave:
             case TrackerStatus.CorruptedForceSave:
-                return await ProcessSaveAsync(fileId, fileData);
+                return await ProcessSaveAsync(fileId, fileData, fillingSessionId);
 
             case TrackerStatus.MailMerge:
                 return await ProcessMailMergeAsync(fileId, fileData);
@@ -232,7 +232,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
         return null;
     }
 
-    private async Task ProcessEditAsync<T>(T fileId, TrackerData fileData)
+    private async Task ProcessEditAsync<T>(T fileId, TrackerData fileData, bool isFillingSession)
     {
         var users = await fileTracker.GetEditingByAsync(fileId);
         var usersDrop = new List<string>();
@@ -297,12 +297,13 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
                 await securityContext.AuthenticateMeWithoutCookieAsync(userId); //hack
             }
 
-            await filesMessageService.SendAsync(MessageAction.FileOpenedForChange, file, file.Title);
+            await filesMessageService.SendAsync(isFillingSession ? MessageAction.FormOpenedForFilling : MessageAction.FileOpenedForChange, file, file.Title);
+
             securityContext.Logout();
         }
     }
 
-    private async Task<TrackResponse> ProcessSaveAsync<T>(T fileId, TrackerData fileData)
+    private async Task<TrackResponse> ProcessSaveAsync<T>(T fileId, TrackerData fileData, string fillingSessionId = null)
     {
         var comments = new List<string>();
         if (fileData.Status is TrackerStatus.Corrupted or TrackerStatus.CorruptedForceSave)
@@ -406,7 +407,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
 
             try
             {
-                file = await entryManager.SaveEditingAsync(fileId, fileData.Filetype, documentServiceConnector.ReplaceDocumentAddress(fileData.Url), null, string.Join("; ", comments), false, fileData.Encrypted, forceSaveType, true, fileData.FormsDataUrl);
+                file = await entryManager.SaveEditingAsync(fileId, fileData.Filetype, documentServiceConnector.ReplaceDocumentAddress(fileData.Url), null, string.Join("; ", comments), false, fileData.Encrypted, forceSaveType, true, fileData.FormsDataUrl, fillingSessionId);
                 saveMessage = fileData.Status is TrackerStatus.MustSave or TrackerStatus.ForceSave ? null : "Status " + fileData.Status;
             }
             catch (Exception ex)
@@ -424,18 +425,17 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
             await socketManager.StopEditAsync(fileId);
         }
 
-        if (file != null)
+        if (file == null)
         {
-            if (user != null)
-            {
-                await filesMessageService.SendAsync(MessageAction.UserFileUpdated, file, MessageInitiator.DocsService, user.DisplayUserName(false, displayUserSettingsHelper), file.Title);
-            }
+            return new TrackResponse { Message = saveMessage };
+        }
 
-            if (!forceSave)
-            {
-                await SaveHistoryAsync(file, (fileData.History ?? "").ToString(), documentServiceConnector.ReplaceDocumentAddress(fileData.ChangesUrl));
-            }
+        var userName = user?.DisplayUserName(false, displayUserSettingsHelper) ?? AuditReportResource.GuestAccount;
+        await filesMessageService.SendAsync(MessageAction.UserFileUpdated, file, MessageInitiator.DocsService, userName, file.Title);
 
+        if (!forceSave)
+        {
+            await SaveHistoryAsync(file, (fileData.History ?? "").ToString(), documentServiceConnector.ReplaceDocumentAddress(fileData.ChangesUrl));
         }
 
         return new TrackResponse { Message = saveMessage };

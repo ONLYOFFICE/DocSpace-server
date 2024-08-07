@@ -93,12 +93,12 @@ internal abstract class ThirdPartyProviderDao
         return Task.FromResult<Stream>(null);
     }
 
-    public Task<EntryProperties> GetProperties(string fileId)
+    public Task<EntryProperties<string>> GetProperties(string fileId)
     {
-        return Task.FromResult<EntryProperties>(null);
+        return Task.FromResult<EntryProperties<string>>(null);
     }
 
-    public Task SaveProperties(string fileId, EntryProperties entryProperties)
+    public Task SaveProperties(string fileId, EntryProperties<string> entryProperties)
     {
         return Task.CompletedTask;
     }
@@ -370,17 +370,7 @@ internal abstract class ThirdPartyProviderDao
     
     internal static FolderType GetRoomFolderType(FilterType filterType)
     {
-        var typeFilter = filterType switch
-        {
-            FilterType.FillingFormsRooms => FolderType.FillingFormsRoom,
-            FilterType.EditingRooms => FolderType.EditingRoom,
-            FilterType.ReviewRooms => FolderType.ReviewRoom,
-            FilterType.ReadOnlyRooms => FolderType.ReadOnlyRoom,
-            FilterType.CustomRooms => FolderType.CustomRoom,
-            FilterType.PublicRooms => FolderType.PublicRoom,
-            _ => FolderType.DEFAULT
-        };
-        return typeFilter;
+        return DocSpaceHelper.MapToFolderType(filterType) ?? FolderType.DEFAULT;
     }
 
     #endregion
@@ -496,13 +486,13 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(
             FilterType.FilesOnly or
             FilterType.ByExtension or
             FilterType.DocumentsOnly or
-            FilterType.OFormOnly or
-            FilterType.OFormTemplateOnly or
             FilterType.ImagesOnly or
             FilterType.PresentationsOnly or
             FilterType.SpreadsheetsOnly or
             FilterType.ArchiveOnly or
-            FilterType.MediaOnly;
+            FilterType.MediaOnly or
+            FilterType.Pdf or
+            FilterType.PdfForm;
     }
 
     public async Task UpdateIdAsync(string oldValue, string newValue)

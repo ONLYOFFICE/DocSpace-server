@@ -768,6 +768,13 @@ internal class FolderDao(
             folder.FolderType == FolderType.FormFillingFolderInProgress) ? FolderType.DEFAULT : folder.FolderType;
 
         copy = await GetFolderAsync(await SaveFolderAsync(copy));
+        var tagDao = daoFactory.GetTagDao<int>();
+        var tags = await tagDao.GetTagsAsync(folder.Id, FileEntryType.Folder, TagType.Custom).ToListAsync();
+        foreach (var t in tags)
+        {
+            t.EntryId = copy.Id;
+        }
+        await tagDao.SaveTagsAsync(tags);
 
         //FactoryIndexer.IndexAsync(FoldersWrapper.GetFolderWrapper(ServiceProvider, copy));
         return copy;
@@ -982,6 +989,15 @@ internal class FolderDao(
     }
 
     #region Only for TMFolderDao
+
+
+
+    public async Task<bool> IsExistAsync(string title, int folderId)
+    {
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        return await filesDbContext.DbFoldersAnyAsync(tenantId, title, folderId);
+    }
 
     public async Task ReassignFoldersAsync(Guid oldOwnerId, Guid newOwnerId, IEnumerable<int> exceptFolderIds)
     {
@@ -1612,28 +1628,18 @@ internal class FolderDao(
             FilterType.FilesOnly or
             FilterType.ByExtension or
             FilterType.DocumentsOnly or
-            FilterType.OFormOnly or
-            FilterType.OFormTemplateOnly or
             FilterType.ImagesOnly or
             FilterType.PresentationsOnly or
             FilterType.SpreadsheetsOnly or
             FilterType.ArchiveOnly or
-            FilterType.MediaOnly;
+            FilterType.MediaOnly or
+            FilterType.Pdf or
+            FilterType.PdfForm;
     }
 
     private FolderType GetRoomTypeFilter(FilterType filterType)
     {
-        return filterType switch
-        {
-            FilterType.FillingFormsRooms => FolderType.FillingFormsRoom,
-            FilterType.EditingRooms => FolderType.EditingRoom,
-            FilterType.ReviewRooms => FolderType.ReviewRoom,
-            FilterType.ReadOnlyRooms => FolderType.ReadOnlyRoom,
-            FilterType.CustomRooms => FolderType.CustomRoom,
-            FilterType.PublicRooms => FolderType.PublicRoom,
-            FilterType.FormRooms => FolderType.FormRoom,
-            _ => FolderType.CustomRoom
-        };
+        return DocSpaceHelper.MapToFolderType(filterType) ?? FolderType.CustomRoom;
     }
 
     public async Task<IDataWriteOperator> CreateDataWriteOperatorAsync(

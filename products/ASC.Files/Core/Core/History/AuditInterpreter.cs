@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Files.Core.Core.History.Interpreters;
-
 namespace ASC.Files.Core.Core.History;
 
 [Scope]
@@ -71,6 +69,7 @@ public class AuditInterpreter(IServiceProvider serviceProvider)
         { (int)MessageAction.RoomUpdateAccessForGroup, new RoomGroupAccessUpdatedInterpreter() },
         { (int)MessageAction.RoomGroupRemove, new RoomRemovedGroupInterpreter() },
         { (int)MessageAction.RoomCreated, new RoomCreateInterpreter() },
+        { (int)MessageAction.RoomCopied, new RoomCopiedInterpreter() },
         { (int)MessageAction.RoomRenamed, new RoomRenamedInterpreter() },
         { (int)MessageAction.AddedRoomTags, _roomTagsInterpreter },
         { (int)MessageAction.DeletedRoomTags, _roomTagsInterpreter },

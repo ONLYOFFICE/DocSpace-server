@@ -187,6 +187,18 @@ public class OperationController(
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
     }
+    
+    [HttpPut("duplicate")]
+    public async IAsyncEnumerable<FileOperationDto> DuplicateBatchItems(DuplicateRequestDto inDto)
+    {
+        await fileOperationsManager.DuplicateAsync(inDto.FolderIds, inDto.FileIds);
+        
+        foreach (var e in await fileOperationsManager.GetOperationResults())
+        {
+            yield return await fileOperationDtoHelper.GetAsync(e);
+        }
+    }
+    
     [HttpGet("checkdestfolder")]
     public async Task<CheckDestFolderDto> MoveOrCopyDestFolderCheckAsync([ModelBinder(BinderType = typeof(BatchModelBinder))] BatchRequestDto inDto)
     {

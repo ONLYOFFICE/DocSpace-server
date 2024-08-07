@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Diagnostics;
+
 using ASC.Api.Core.Cors.Middlewares;
 using ASC.Api.Core.Cors;
 using ASC.Common.Mapping;
@@ -189,7 +191,13 @@ public abstract class BaseStartup
                     }
                     else
                     {
-                        permitLimit = 15;
+                        permitLimit = _configuration.GetSection("core:hosting:rateLimiterOptions:defaultConcurrencyWriteRequests").Get<int>();
+
+                        if (permitLimit == default(int))
+                        {
+                            permitLimit = 15;
+                        }
+
                         partitionKey = $"cr_write_{userId}";
                     }
 
@@ -477,6 +485,25 @@ public abstract class BaseStartup
         app.UseForwardedHeaders();
         app.UseExceptionHandler();
         app.UseRouting();
+
+        app.Use(next => async context =>
+        {
+            var stopWatch = new Stopwatch();
+            stopWatch.Start();
+
+            context.Response.OnStarting(() =>
+            {
+                stopWatch.Stop();
+
+                var headerValue = $"aspnetcore-request-time;dur={stopWatch.ElapsedMilliseconds}ms";
+
+                context.Response.Headers.Append("Server-Timing", headerValue);
+
+                return Task.CompletedTask;
+            });
+
+            await next(context);
+        });
 
         if (!string.IsNullOrEmpty(_corsOrigin))
         {

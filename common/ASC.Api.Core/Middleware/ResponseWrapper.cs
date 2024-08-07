@@ -82,7 +82,7 @@ public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IE
                 break;
         }
 
-        logger.LogCritical(exception, "error during executing {RequestMethod}: {PathValue}", context.Request.Method, context.Request.Path.Value);
+        logger.CriticalError(context.Request.Method, context.Request.Path.Value, exception);
 
         var result = new ErrorApiResponse(status, exception, message, withStackTrace);
 

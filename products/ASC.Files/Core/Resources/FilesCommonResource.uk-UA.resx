@@ -464,4 +464,37 @@
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>Тип</value>
   </data>
+  <data name="Date" xml:space="preserve">
+    <value>Дата</value>
+  </data>
+  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
+    <value>Досвідчений користувач</value>
+  </data>
+  <data name="RoleEnum_PowerUser" xml:space="preserve">
+    <value>Досвідчений користувач</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>Користувач</value>
+  </data>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>Переміщення кількох файлів до кімнати заповнення форм не підтримується. Переміщуйте одну PDF-форму ONLYOFFICE за раз.</value>
+  </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>Переміщення папок до кімнати заповнення форм не підтримується. Переміщуйте одну PDF-форму ONLYOFFICE за раз.</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>Не можна перемістити файл до цієї кімнати. Спробуйте перемістити PDF-форму ONLYOFFICE.</value>
+  </data>
+  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
+    <value>Не можна передати файл до цієї кімнати. Спробуйте передати PDF-форму ONLYOFFICE.</value>
+  </data>
+  <data name="FillOutExternalLinkTitle" xml:space="preserve">
+    <value>Посилання для заповнення</value>
+  </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>Посилання на форму</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Відкрити форму</value>
+  </data>
 </root>

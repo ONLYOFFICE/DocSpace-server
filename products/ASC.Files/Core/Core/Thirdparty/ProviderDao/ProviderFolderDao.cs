@@ -481,6 +481,13 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         var folderDao = selector.GetFolderDao(folderId);
         return await folderDao.GetBackupExtensionAsync(folderId);
     }
+    
+    public Task<bool> IsExistAsync(string title, string folderId)
+    {
+        var selector = _selectorFactory.GetSelector(folderId);
+        var folderDao = selector.GetFolderDao(folderId);
+        return folderDao.IsExistAsync(title, folderId);
+    }
 
     private static IAsyncEnumerable<Folder<string>> FilterByProvider(IAsyncEnumerable<Folder<string>> folders, ProviderFilter provider)
     {

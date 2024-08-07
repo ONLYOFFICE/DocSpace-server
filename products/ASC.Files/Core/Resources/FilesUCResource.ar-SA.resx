@@ -159,4 +159,7 @@
   <data name="InProcessFormFolder" xml:space="preserve">
     <value>قيد التنفيذ</value>
   </data>
+  <data name="ReadyFormFolder" xml:space="preserve">
+    <value>أكمل</value>
+  </data>
 </root>

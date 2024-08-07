@@ -76,8 +76,8 @@ public static class UserPhotoThumbnailManager
     {
         var x = thumbnailSettings.Point.X > 0 ? thumbnailSettings.Point.X : 0;
         var y = thumbnailSettings.Point.Y > 0 ? thumbnailSettings.Point.Y : 0;
-        var width = x + thumbnailSettings.Size.Width > mainImg.Width ? mainImg.Width : thumbnailSettings.Size.Width;
-        var height = y + thumbnailSettings.Size.Height > mainImg.Height ? mainImg.Height : thumbnailSettings.Size.Height;
+        var width = x + thumbnailSettings.Size.Width >= mainImg.Width ? mainImg.Width - x : thumbnailSettings.Size.Width ;
+        var height = y + thumbnailSettings.Size.Height >= mainImg.Height ? mainImg.Height - y : thumbnailSettings.Size.Height;
 
         var rect = new Rectangle(x,
                                  y,

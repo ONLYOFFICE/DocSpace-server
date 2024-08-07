@@ -100,4 +100,7 @@
   <data name="InProcessFormFolder" xml:space="preserve">
     <value>V procesu</value>
   </data>
+  <data name="ReadyFormFolder" xml:space="preserve">
+    <value>Vyplněné</value>
+  </data>
 </root>

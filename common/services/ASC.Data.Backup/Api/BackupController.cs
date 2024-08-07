@@ -177,7 +177,7 @@ public class BackupController(
         var taskId = await backupAjaxHandler.StartBackupAsync(storageType, storageParams, serverBaseUri, inDto.Dump, false);
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         
-        eventBus.Publish(new BackupRequestIntegrationEvent(
+        await eventBus.PublishAsync(new BackupRequestIntegrationEvent(
              tenantId: tenantId,
              storageParams: storageParams,
              storageType: storageType,
@@ -281,7 +281,7 @@ public class BackupController(
             }
         }
         
-        eventBus.Publish(new BackupRestoreRequestIntegrationEvent(
+        await eventBus.PublishAsync(new BackupRestoreRequestIntegrationEvent(
                              tenantId: tenantId,
                              createBy: CurrentUserId,
                              storageParams: storageParams,

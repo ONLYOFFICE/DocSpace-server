@@ -248,7 +248,7 @@
     <value>Skupina posodobljena: {0}</value>
   </data>
   <data name="GuestAccount" xml:space="preserve">
-    <value>Račun gosta</value>
+    <value>Gost</value>
   </data>
   <data name="GuestActivated" xml:space="preserve">
     <value>Gost aktiviran: {0}</value>
@@ -738,5 +738,44 @@
   </data>
   <data name="PortalRenamed" xml:space="preserve">
     <value>Portal preimenovan</value>
+  </data>
+  <data name="FileSizePostfix" xml:space="preserve">
+    <value>bajtov,KB,MB,GB,TB</value>
+  </data>
+  <data name="FileUploadedWithOverwriting" xml:space="preserve">
+    <value>Datoteka, naložena s prepisom: {0}</value>
+  </data>
+  <data name="QuotaPerPortalChanged" xml:space="preserve">
+    <value>Nastavitev privzete kvote prostora za shranjevanje: {0}</value>
+  </data>
+  <data name="QuotaPerPortalDisabled" xml:space="preserve">
+    <value>Onemogočena privzeta kvota prostora za shranjevanje</value>
+  </data>
+  <data name="QuotaPerRoomChanged" xml:space="preserve">
+    <value>Nastavitev privzete kvote prostora za shranjevanje: {0}</value>
+  </data>
+  <data name="QuotaPerRoomDisabled" xml:space="preserve">
+    <value>Onemogočena privzeta kvota prostora za shranjevanje</value>
+  </data>
+  <data name="QuotaPerUserChanged" xml:space="preserve">
+    <value>Nastavitev privzete kvote prostora za shranjevanje za uporabnike: {0}</value>
+  </data>
+  <data name="QuotaPerUserDisabled" xml:space="preserve">
+    <value>Onemogočena privzeta kvota prostora za shranjevanje za uporabnike</value>
+  </data>
+  <data name="RoomCopied" xml:space="preserve">
+    <value>Soba kopirana: {0}</value>
+  </data>
+  <data name="RoomGroupAdded" xml:space="preserve">
+    <value>Dodanih skupin: {0}. Vloga: {1}</value>
+  </data>
+  <data name="RoomGroupRemove" xml:space="preserve">
+    <value>Izbrisanih skupin: {0}</value>
+  </data>
+  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
+    <value>{0} dodeljen: {1}</value>
+  </data>
+  <data name="SendJoinInvite" xml:space="preserve">
+    <value>Uporabnik {0} je poslal povabilo na {1} za pridružitev temu prostoru DocSpace</value>
   </data>
 </root>

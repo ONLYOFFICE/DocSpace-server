@@ -1030,7 +1030,7 @@
     <value>Broj admina ne bi trebalo da prekorači {0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Broj admina</value>
+    <value>Broj admina/naprednih korisnika</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Automatska rezervna kopija i oporavak</value>
@@ -1052,9 +1052,6 @@
   </data>
   <data name="TariffsFeature_total_size_price_count" xml:space="preserve">
     <value>Skladišni prostor</value>
-  </data>
-  <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Broj admina/naprednih korisnika:</value>
   </data>
   <data name="TariffsFeature_used_room" xml:space="preserve">
     <value>Sobe:</value>
@@ -1097,5 +1094,23 @@
   </data>
   <data name="WhatsNewSubscriptionName" xml:space="preserve">
     <value>Šta je novo</value>
+  </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>Administratori/Napredni korisnici dodati:</value>
+  </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>Limit za pozivnicu je prekoračen</value>
+  </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>Korisnik onemogućen</value>
+  </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>Instrukcija za promenu lozinke je poslata na {0} email adresu.</value>
+  </data>
+  <data name="TariffsFeature_statistic" xml:space="preserve">
+    <value>Kvote za skladištenje i statistika</value>
+  </data>
+  <data name="TariffsFeature_total_size" xml:space="preserve">
+    <value>{0} po administratoru/napredni korisniku i mogućnost dodavanja prostora na zahtev</value>
   </data>
 </root>

@@ -76,14 +76,14 @@ public class NotificationController(
     /// </summary>
     /// <category>Notifications</category>
     /// <short>Get room notification settings</short>
-    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.RoomsNotificayionSettingsDto, ASC.Web.Api">Room notification settings</returns>
+    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.RoomsNotificationSettingsDto, ASC.Web.Api">Room notification settings</returns>
     /// <path>api/2.0/settings/notification/rooms</path>
     /// <httpMethod>GET</httpMethod>
     [HttpGet("rooms")]
-    public async Task<RoomsNotificayionSettingsDto> GetRoomsNotificationSettings()
+    public async Task<RoomsNotificationSettingsDto> GetRoomsNotificationSettings()
     {
         var  settings = await roomsNotificationSettingsHelper.GetSettingsForCurrentUserAsync();
-        return mapper.Map<RoomsNotificayionSettingsDto>(settings);
+        return mapper.Map<RoomsNotificationSettingsDto>(settings);
     }
 
     /// <summary>
@@ -92,13 +92,13 @@ public class NotificationController(
     /// <category>Notifications</category>
     /// <short>Set room notification status</short>
     /// <param type="ASC.Web.Api.ApiModels.RequestsDto.RoomsNotificationsSettingsRequestDto, ASC.Web.Api" name="inDto">Request parameters for the room notification settings</param>
-    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.RoomsNotificayionSettingsDto, ASC.Web.Api">Room notification settings</returns>
+    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.RoomsNotificationSettingsDto, ASC.Web.Api">Room notification settings</returns>
     /// <path>api/2.0/settings/notification/rooms</path>
     /// <httpMethod>POST</httpMethod>
     [HttpPost("rooms")]
-    public async Task<RoomsNotificayionSettingsDto> SetRoomsNotificationStatus(RoomsNotificationsSettingsRequestDto inDto)
+    public async Task<RoomsNotificationSettingsDto> SetRoomsNotificationStatus(RoomsNotificationsSettingsRequestDto inDto)
     {
         var settings = await roomsNotificationSettingsHelper.SetForCurrentUserAsync(inDto.RoomsId, inDto.Mute);
-        return mapper.Map<RoomsNotificayionSettingsDto>(settings);
+        return mapper.Map<RoomsNotificationSettingsDto>(settings);
     }
 }

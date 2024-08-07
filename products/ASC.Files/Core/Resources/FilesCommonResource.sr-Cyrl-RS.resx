@@ -529,4 +529,31 @@
   <data name="UnlockComment" xml:space="preserve">
     <value>Датотека је откључана</value>
   </data>
+  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
+    <value>Напредни корисник</value>
+  </data>
+  <data name="RoleEnum_PowerUser" xml:space="preserve">
+    <value>Напредни корисник</value>
+  </data>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>Померање неколико датотека у просторију за Попуњавање Формулара није подржано. Померајте један по један ONLYOFFICE PDF.</value>
+  </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>Померање фолдера у просторију за Попуњавање Формулара није подржано. Померајте један по један ONLYOFFICE PDF.</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>Датотека не може бити померена у ову просторију. Молимо покушајте да померите ONLYOFFICE PDF формулар.</value>
+  </data>
+  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
+    <value>Датотека не може бити померена у ову просторију. Молимо покушајте да померите ONLYOFFICE PDF формулар.</value>
+  </data>
+  <data name="FillOutExternalLinkTitle" xml:space="preserve">
+    <value>Линк за попуњавање</value>
+  </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>Линк ка формулару</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Отвори формулар</value>
+  </data>
 </root>

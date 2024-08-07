@@ -40,7 +40,7 @@ public class WorkerService(
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        eventBus.Subscribe<WebhookRequestIntegrationEvent, WebhookRequestIntegrationEventHandler>();
+        await eventBus.SubscribeAsync<WebhookRequestIntegrationEvent, WebhookRequestIntegrationEventHandler>();
 
         stoppingToken.Register(eventBus.Unsubscribe<WebhookRequestIntegrationEvent, WebhookRequestIntegrationEventHandler>);
 

@@ -36,12 +36,14 @@ public class NotifyClient(WorkContext notifyContext,
     FilesLinkUtility filesLinkUtility,
     FileUtility fileUtility,
     BaseCommonLinkUtility baseCommonLinkUtility,
+    CommonLinkUtility commonLinkUtility,
     IDaoFactory daoFactory,
     PathProvider pathProvider,
     UserManager userManager,
     TenantManager tenantManager,
     StudioNotifyHelper studioNotifyHelper,
     RoomsNotificationSettingsHelper roomsNotificationSettingsHelper,
+    DisplayUserSettingsHelper displayUserSettingsHelper,
     FileSecurity fileSecurity,
     IServiceProvider serviceProvider)
 {
@@ -225,9 +227,7 @@ public class NotifyClient(WorkContext notifyContext,
 
             var recipient = await recipientsProvider.GetRecipientAsync(recipientId.ToString());
 
-            var disabledRooms = await roomsNotificationSettingsHelper.GetDisabledRoomsForUserAsync(recipientId);
-
-            if (disabledRooms.Contains(roomId))
+            if (await roomsNotificationSettingsHelper.CheckMuteForRoomAsync(roomId, recipientId))
             {
                 continue;
             }
@@ -244,6 +244,72 @@ public class NotifyClient(WorkContext notifyContext,
                 new AdditionalSenderTag("push.sender")
                 );
         }
+    }
+
+    public async Task SendFormSubmittedAsync<T>(Folder<T> room, FileEntry<T> originalForm, FileEntry<T> filledForm)
+    {
+        if (filledForm.CreateBy.Equals(originalForm.CreateBy))
+        {
+            return;
+        }
+
+        var client = notifyContext.RegisterClient(serviceProvider, notifySource);
+
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+
+        var user = await userManager.GetUsersAsync(filledForm.CreateBy);
+
+        var userCulture = CultureInfo.GetCultureInfo(user.CultureName ?? tenant.Language);
+
+        var userUrl = baseCommonLinkUtility.GetFullAbsolutePath(await commonLinkUtility.GetUserProfileAsync(filledForm.CreateBy));
+
+        var manager = await userManager.GetUsersAsync(originalForm.CreateBy);
+
+        var managerCulture = CultureInfo.GetCultureInfo(manager.CultureName ?? tenant.Language);
+
+        var managerUrl = baseCommonLinkUtility.GetFullAbsolutePath(await commonLinkUtility.GetUserProfileAsync(originalForm.CreateBy));
+
+        var roomUrl = pathProvider.GetRoomsUrl(room.Id.ToString());
+
+        var documentParentUrl = pathProvider.GetRoomsUrl(filledForm.ParentId.ToString());
+
+        var documentUrl = baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, filledForm.Title, filledForm.Id));
+
+        var userButtonText = FilesPatternResource.ResourceManager.GetString("button_CheckReadyForms", userCulture);
+
+        var managerButtonText = FilesPatternResource.ResourceManager.GetString("button_CheckReadyForms", managerCulture);
+
+        await client.SendNoticeAsync(
+            NotifyConstants.EventFormSubmitted,
+            filledForm.UniqID,
+            user,
+            ConfigurationConstants.NotifyEMailSenderSysName,
+            new TagValue(NotifyConstants.TagMessage, originalForm.Title),
+            new TagValue(NotifyConstants.TagDocumentTitle, filledForm.Title),
+            new TagValue(NotifyConstants.TagDocumentUrl, documentUrl),
+            new TagValue(NotifyConstants.RoomTitle, room.Title),
+            new TagValue(NotifyConstants.RoomUrl, roomUrl),
+            new TagValue(Tags.ToUserName, manager.DisplayUserName(displayUserSettingsHelper)),
+            new TagValue(Tags.ToUserLink, managerUrl),
+            new TagValue(CommonTags.Culture, userCulture.Name),
+            TagValues.OrangeButton(userButtonText, documentParentUrl)
+            );
+
+        await client.SendNoticeAsync(
+            NotifyConstants.EventFormReceived,
+            filledForm.UniqID,
+            manager,
+            ConfigurationConstants.NotifyEMailSenderSysName,
+            new TagValue(NotifyConstants.TagMessage, originalForm.Title),
+            new TagValue(NotifyConstants.TagDocumentTitle, filledForm.Title),
+            new TagValue(NotifyConstants.TagDocumentUrl, documentUrl),
+            new TagValue(NotifyConstants.RoomTitle, room.Title),
+            new TagValue(NotifyConstants.RoomUrl, roomUrl),
+            new TagValue(Tags.FromUserName, user.DisplayUserName(displayUserSettingsHelper)),
+            new TagValue(Tags.FromUserLink, userUrl),
+            new TagValue(CommonTags.Culture, managerCulture.Name),
+            TagValues.OrangeButton(managerButtonText, documentParentUrl)
+            );
     }
 
     public async Task SendRoomRemovedAsync<T>(FileEntry<T> folder, List<AceWrapper> aces, Guid userId)
@@ -275,9 +341,7 @@ public class NotifyClient(WorkContext notifyContext,
                 continue;
             }
 
-            var disabledRooms = (await roomsNotificationSettingsHelper.GetDisabledRoomsForUserAsync(userId)).Select(d => d.ToString());
-
-            if (disabledRooms.Contains(folderId))
+            if (await roomsNotificationSettingsHelper.CheckMuteForRoomAsync(folderId, userId))
             {
                 continue;
             }

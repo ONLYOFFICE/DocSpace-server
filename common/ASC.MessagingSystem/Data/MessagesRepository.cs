@@ -40,7 +40,15 @@ public class MessagesRepository(
     IMapper mapper,
     IEventBus eventBus)
 {
-    private static readonly HashSet<MessageAction> _forceSaveAuditActions = [MessageAction.RoomInviteLinkUsed, MessageAction.UserSentEmailChangeInstructions, MessageAction.UserSentPasswordChangeInstructions, MessageAction.SendJoinInvite];
+    private static readonly HashSet<MessageAction> _forceSaveAuditActions = 
+    [
+        MessageAction.RoomInviteLinkUsed, 
+        MessageAction.UserSentEmailChangeInstructions, 
+        MessageAction.UserSentPasswordChangeInstructions, 
+        MessageAction.SendJoinInvite, 
+        MessageAction.RoomRemoveUser,
+        MessageAction.PortalRenamed
+    ];
 
     public async Task<int> AddAsync(EventMessage message)
     {
@@ -51,7 +59,7 @@ public class MessagesRepository(
             return await ForceSave(message);
         }
 
-        eventBus.Publish(new EventDataIntegrationEvent(message.UserId, message.TenantId)
+        await eventBus.PublishAsync(new EventDataIntegrationEvent(message.UserId, message.TenantId)
         {
              RequestMessage = message
         });
@@ -124,7 +132,6 @@ public class MessagesRepository(
     }
 }
 
-[Scope]
 public class EventDataIntegrationEventHandler : IIntegrationEventHandler<EventDataIntegrationEvent>
 {
     private readonly ILogger _logger;
@@ -167,7 +174,6 @@ public class EventDataIntegrationEventHandler : IIntegrationEventHandler<EventDa
     }
 }
 
-[Singleton]
 public class MessageSenderService(
     IServiceScopeFactory serviceScopeFactory, 
     ILogger<MessagesRepository> logger, 

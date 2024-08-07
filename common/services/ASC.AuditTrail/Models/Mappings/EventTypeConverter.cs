@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Common.Utils;
+
 using Constants = ASC.Core.Configuration.Constants;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
@@ -129,12 +131,32 @@ internal class EventTypeConverter(
         var map = actionMapper.GetMessageMaps(result.Action);
         if (map != null)
         {
-            result.ActionText = actionMapper.GetActionText(map, result);
+            if (result.Action is 
+                (int)MessageAction.QuotaPerPortalChanged or 
+                (int)MessageAction.QuotaPerRoomChanged or 
+                (int)MessageAction.QuotaPerUserChanged
+                && long.TryParse(result.Description.FirstOrDefault(), out var size))
+            { 
+                result.ActionText = string.Format(map.GetActionText(), CommonFileSizeComment.FilesSizeToString(AuditReportResource.FileSizePostfix, size));
+            }
+            else if (result.Action is (int)MessageAction.CustomQuotaPerRoomDefault or
+                (int)MessageAction.CustomQuotaPerRoomChanged or
+                (int)MessageAction.CustomQuotaPerUserDefault or
+                (int)MessageAction.CustomQuotaPerUserChanged
+                && long.TryParse(result.Description.FirstOrDefault(), out var customSize))
+            {
+                result.ActionText = string.Format(map.GetActionText(), result.Description.LastOrDefault(), CommonFileSizeComment.FilesSizeToString(AuditReportResource.FileSizePostfix, customSize));
+            }
+            else
+            {
+                result.ActionText = actionMapper.GetActionText(map, result);
+            }
+
             result.ActionTypeText = actionMapper.GetActionTypeText(map);
             result.Product = actionMapper.GetProductText(map);
             result.Module = actionMapper.GetModuleText(map);
         }
-
+        
         result.Date = tenantUtil.DateTimeFromUtc(result.Date);
         if (!string.IsNullOrEmpty(result.IP))
         {

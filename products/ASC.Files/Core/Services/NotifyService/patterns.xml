@@ -129,9 +129,19 @@ $Message
 $DocumentURL
     </body>
   </pattern>
-	
+
   <pattern id="RoomRemoved" sender="email.sender">
-	<subject resource="|subject_RoomRemoved|ASC.Files.Core.Services.NotifyService.FilesPatternResource,ASC.Files.Core" />
+    <subject resource="|subject_RoomRemoved|ASC.Files.Core.Services.NotifyService.FilesPatternResource,ASC.Files.Core" />
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_RoomRemoved|ASC.Files.Core.Services.NotifyService.FilesPatternResource,ASC.Files.Core" />
-  </pattern>  
+  </pattern>
+
+  <pattern id="FormSubmitted" sender="email.sender">
+    <subject resource="|subject_FormSubmitted|ASC.Files.Core.Services.NotifyService.FilesPatternResource,ASC.Files.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_FormSubmitted|ASC.Files.Core.Services.NotifyService.FilesPatternResource,ASC.Files.Core" />
+  </pattern>
+
+  <pattern id="FormReceived" sender="email.sender">
+    <subject resource="|subject_FormReceived|ASC.Files.Core.Services.NotifyService.FilesPatternResource,ASC.Files.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_FormReceived|ASC.Files.Core.Services.NotifyService.FilesPatternResource,ASC.Files.Core" />
+  </pattern>
 </patterns>

@@ -45,4 +45,8 @@ public class GetReferenceDataDto<T>
     /// <summary>The file name or relative path for the formula editor</summary>
     /// <type>System.String, System</type>
     public string Path { get; set; }
+
+    /// <summary>Link to file</summary>
+    /// <type>System.String, System</type>
+    public string Link { get; set; }
 }

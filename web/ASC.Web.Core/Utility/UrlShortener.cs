@@ -70,6 +70,10 @@ public class OnlyoShortener(IDbContextFactory<UrlShortenerDbContext> contextFact
 {
     public async Task<string> GetShortenLinkAsync(string shareLink)
     {
+        if (!shareLink.StartsWith(commonLinkUtility.ServerRootPath))
+        {
+            throw new ArgumentException("the link should be to this portal");
+        }
         if (Uri.IsWellFormedUriString(shareLink, UriKind.Absolute))
         {
             var tenantId = await tenantManager.GetCurrentTenantIdAsync();

@@ -152,4 +152,31 @@ $Message</value>
   <data name="subject_ShareFolder_tg" xml:space="preserve">
     <value>Documente. S-au acordat permisiuni de acces la folderul: [$DocumentTitle]($DocumentURL)</value>
   </data>
+  <data name="button_CheckReadyForms" xml:space="preserve">
+    <value>Verificați formulare completate</value>
+  </data>
+  <data name="pattern_FormReceived" xml:space="preserve">
+    <value>h1. Formularul $Message este completat
+ 
+Un formular nou "$DocumentTitle":"$DocumentURL" este completat în sala "$RoomTitle":"$RoomURL"
+ 
+Expeditorul formularului: "$FromUserName":"$FromUserLink"
+ 
+$OrangeButton</value>
+  </data>
+  <data name="pattern_FormSubmitted" xml:space="preserve">
+    <value>h1. Dumneavoastră ați completat formularul $Message
+ 
+Dumneavoastră ați completat formularul "$DocumentTitle":"$DocumentURL" în sala "$RoomTitle":"$RoomURL"
+ 
+Manager: "$ToUserName":"$ToUserLink"
+ 
+$OrangeButton</value>
+  </data>
+  <data name="subject_FormReceived" xml:space="preserve">
+    <value>Notificare DocSpace. Formularul este completat</value>
+  </data>
+  <data name="subject_FormSubmitted" xml:space="preserve">
+    <value>Notificare DocSpace. Formularul este completat</value>
+  </data>
 </root>

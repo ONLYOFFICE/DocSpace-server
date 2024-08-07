@@ -152,4 +152,31 @@ $__AuthorName ha eliminato una stanza: $RoomTitle</value>
   <data name="subject_ShareFolder_push" xml:space="preserve">
     <value>Accesso autorizzato alla cartella: $DocumentTitle</value>
   </data>
+  <data name="button_CheckReadyForms" xml:space="preserve">
+    <value>Controlla i moduli pronti</value>
+  </data>
+  <data name="pattern_FormReceived" xml:space="preserve">
+    <value>h1. Il modulo $Message è compilato
+
+Un nuovo modulo "$DocumentTitle":"$DocumentURL" è stato compilato nella stanza "$RoomTitle":"$RoomURL"
+
+Mittente del modulo: "$FromUserName":"$FromUserLink"
+
+$OrangeButton</value>
+  </data>
+  <data name="pattern_FormSubmitted" xml:space="preserve">
+    <value>h1. Hai compilato il modulo $Message
+
+Hai compilato il modulo "$DocumentTitle":"$DocumentURL" nella stanza "$RoomTitle":"$RoomURL"
+
+Responsabile: "$ToUserName":"$ToUserLink"
+
+$OrangeButton</value>
+  </data>
+  <data name="subject_FormReceived" xml:space="preserve">
+    <value>Notifica di DocSpace. Il modulo è compilato</value>
+  </data>
+  <data name="subject_FormSubmitted" xml:space="preserve">
+    <value>Notifica di DocSpace. Il modulo è compilato</value>
+  </data>
 </root>

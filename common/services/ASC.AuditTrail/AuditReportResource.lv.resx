@@ -281,7 +281,7 @@
     <value>Atjaunināta grupa: {0}</value>
   </data>
   <data name="GuestAccount" xml:space="preserve">
-    <value>Viesa konts</value>
+    <value>Anonīms lietotājs</value>
   </data>
   <data name="GuestActivated" xml:space="preserve">
     <value>Aktivizēts viesis: {0}</value>
@@ -314,7 +314,7 @@
     <value>Neizdevusies ieeja</value>
   </data>
   <data name="LoginFailDisabledProfile" xml:space="preserve">
-    <value>Ieeja neizdevās. Profils ir bloķēts</value>
+    <value>Ieeja neizdevās. Profils ir atspējots</value>
   </data>
   <data name="LoginFailInvalidCombination" xml:space="preserve">
     <value>Neizdevās ieiet. Nederīgs lietotājvārds un/vai parole</value>
@@ -738,5 +738,44 @@
   </data>
   <data name="PortalRenamed" xml:space="preserve">
     <value>Portāls pārdēvēts</value>
+  </data>
+  <data name="FileSizePostfix" xml:space="preserve">
+    <value>bytes,KB,MB,GB, TB</value>
+  </data>
+  <data name="FileUploadedWithOverwriting" xml:space="preserve">
+    <value>Fails augšupielādēts ar pārrakstīšanu: {0}</value>
+  </data>
+  <data name="QuotaPerPortalChanged" xml:space="preserve">
+    <value>Iestatīt noklusējuma krātuves kvotu: {0}</value>
+  </data>
+  <data name="QuotaPerPortalDisabled" xml:space="preserve">
+    <value>Atspējota noklusējuma krātuves kvota</value>
+  </data>
+  <data name="QuotaPerRoomChanged" xml:space="preserve">
+    <value>Iestatiet noklusējuma krātuves kvotu telpām: {0}</value>
+  </data>
+  <data name="QuotaPerRoomDisabled" xml:space="preserve">
+    <value>Atspējota noklusējuma krātuves kvota telpām</value>
+  </data>
+  <data name="QuotaPerUserChanged" xml:space="preserve">
+    <value>Iestatiet noklusējuma krātuves kvotu lietotājiem: {0}</value>
+  </data>
+  <data name="QuotaPerUserDisabled" xml:space="preserve">
+    <value>Atspējota noklusējuma krātuves kvota lietotājiem</value>
+  </data>
+  <data name="RoomCopied" xml:space="preserve">
+    <value>Telpa kopēta: {0}</value>
+  </data>
+  <data name="RoomGroupAdded" xml:space="preserve">
+    <value>Pievienotā grupa: {0}. Loma: {1}</value>
+  </data>
+  <data name="RoomGroupRemove" xml:space="preserve">
+    <value>Dzēsta grupa: {0}</value>
+  </data>
+  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
+    <value>{0} iecelts: {1}</value>
+  </data>
+  <data name="SendJoinInvite" xml:space="preserve">
+    <value>Lietotājs (-a) {0} nosūtīja uzaicinājumu {1} pievienoties šim DocSpace</value>
   </data>
 </root>

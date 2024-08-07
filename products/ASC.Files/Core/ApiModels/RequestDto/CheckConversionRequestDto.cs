@@ -49,5 +49,7 @@ public class CheckConversionRequestDto<T>
     /// <summary>Password</summary>
     /// <type>System.String, System</type>
     public string Password { get; set; }
+    
+    public string OutputType { get; set; }
     public bool CreateNewIfExist { get; set; }
 }

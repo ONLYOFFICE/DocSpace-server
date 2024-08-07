@@ -550,4 +550,13 @@ Highest compatibility with docx, xlsx, pptx.</value>
   <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
     <value>The file cannot be moved to this room. Please try to move the ONLYOFFICE PDF form.</value>
   </data>
+  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
+    <value>Power User</value>
+  </data>
+  <data name="RoleEnum_PowerUser" xml:space="preserve">
+    <value>Power User</value>
+  </data>
+  <data name="FormNumber" xml:space="preserve">
+    <value>Form number</value>
+  </data>
 </root>
