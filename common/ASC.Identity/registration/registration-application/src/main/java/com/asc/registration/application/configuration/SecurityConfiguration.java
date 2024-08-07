@@ -71,7 +71,7 @@ public class SecurityConfiguration {
                 authorizeRequests
                     .requestMatchers(checkManagementPort())
                     .permitAll()
-                    .requestMatchers(String.format("%s/clients/*/public/info", webApi))
+                    .requestMatchers(String.format("%s/clients/*/public/info", webApi), "/docs")
                     .permitAll()
                     .requestMatchers(
                         String.format("%s/scopes", webApi),

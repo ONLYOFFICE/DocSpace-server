@@ -36,6 +36,7 @@ import com.asc.common.utilities.HttpUtils;
 import com.asc.registration.application.security.authentications.AscAuthenticationTokenPrincipal;
 import com.asc.registration.application.transfer.ChangeTenantClientActivationCommandRequest;
 import com.asc.registration.application.transfer.CreateTenantClientCommandRequest;
+import com.asc.registration.application.transfer.ErrorResponse;
 import com.asc.registration.application.transfer.UpdateTenantClientCommandRequest;
 import com.asc.registration.service.ports.input.service.ClientApplicationService;
 import com.asc.registration.service.ports.input.service.ScopeApplicationService;
@@ -44,6 +45,10 @@ import com.asc.registration.service.transfer.request.update.*;
 import com.asc.registration.service.transfer.response.ClientSecretResponse;
 import com.asc.registration.service.transfer.response.ScopeResponse;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -100,6 +105,24 @@ public class ClientCommandController {
    */
   @RateLimiter(name = "globalRateLimiter")
   @PostMapping
+  @Operation(
+      summary = "Creates a new client",
+      tags = {"ClientCommandController"},
+      responses = {
+        @ApiResponse(responseCode = "201", description = "Successfully created"),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Bad request",
+            content = {@Content}),
+        @ApiResponse(
+            responseCode = "429",
+            description = "Too many requests",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "500",
+            description = "Internal server error",
+            content = @Content)
+      })
   public ResponseEntity<ClientResponse> createClient(
       HttpServletRequest request,
       @AuthenticationPrincipal AscAuthenticationTokenPrincipal principal,
@@ -148,6 +171,27 @@ public class ClientCommandController {
    */
   @RateLimiter(name = "globalRateLimiter")
   @PutMapping("/{clientId}")
+  @Operation(
+      summary = "Updated an existing client",
+      tags = {"ClientCommandController"},
+      responses = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Successfully updated",
+            content = @Content),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Bad request",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "429",
+            description = "Too many requests",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "500",
+            description = "Internal server error",
+            content = @Content)
+      })
   public ResponseEntity<?> updateClient(
       HttpServletRequest request,
       @AuthenticationPrincipal AscAuthenticationTokenPrincipal principal,
@@ -184,6 +228,24 @@ public class ClientCommandController {
    */
   @RateLimiter(name = "globalRateLimiter")
   @PatchMapping("/{clientId}/regenerate")
+  @Operation(
+      summary = "Regenerates the secret for a specific client",
+      tags = {"ClientCommandController"},
+      responses = {
+        @ApiResponse(responseCode = "200", description = "Successfully regenerated"),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Bad request",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "429",
+            description = "Too many requests",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "500",
+            description = "Internal server error",
+            content = @Content)
+      })
   public ResponseEntity<ClientSecretResponse> regenerateSecret(
       HttpServletRequest request,
       @AuthenticationPrincipal AscAuthenticationTokenPrincipal principal,
@@ -217,6 +279,27 @@ public class ClientCommandController {
    */
   @RateLimiter(name = "globalRateLimiter")
   @DeleteMapping("/{clientId}/revoke")
+  @Operation(
+      summary = "Revokes the consent for a specific client",
+      tags = {"ClientCommandController"},
+      responses = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Successfully revoked",
+            content = @Content),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Bad request",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "429",
+            description = "Too many requests",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "500",
+            description = "Internal server error",
+            content = @Content)
+      })
   public ResponseEntity<?> revokeUserClient(
       HttpServletRequest request,
       @AuthenticationPrincipal AscAuthenticationTokenPrincipal principal,
@@ -246,6 +329,27 @@ public class ClientCommandController {
    */
   @RateLimiter(name = "globalRateLimiter")
   @DeleteMapping("/{clientId}")
+  @Operation(
+      summary = "Deletes a specific client",
+      tags = {"ClientCommandController"},
+      responses = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Successfully deleted",
+            content = @Content),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Bad request",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "429",
+            description = "Too many requests",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "500",
+            description = "Internal server error",
+            content = @Content)
+      })
   public ResponseEntity<?> deleteClient(
       HttpServletRequest request,
       @AuthenticationPrincipal AscAuthenticationTokenPrincipal principal,
@@ -276,6 +380,27 @@ public class ClientCommandController {
    */
   @RateLimiter(name = "globalRateLimiter")
   @PatchMapping("/{clientId}/activation")
+  @Operation(
+      summary = "Changes the activation status of a specific client",
+      tags = {"ClientCommandController"},
+      responses = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Successfully changed activation",
+            content = @Content),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Bad request",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "429",
+            description = "Too many requests",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "500",
+            description = "Internal server error",
+            content = @Content)
+      })
   public ResponseEntity<?> changeActivation(
       HttpServletRequest request,
       @AuthenticationPrincipal AscAuthenticationTokenPrincipal principal,

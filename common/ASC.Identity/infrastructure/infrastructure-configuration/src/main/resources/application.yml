@@ -57,7 +57,7 @@ server:
 springdoc:
   api-docs:
     path: /docs
-  use-management-port: true
+  use-management-port: false
 
 feign:
   client:
