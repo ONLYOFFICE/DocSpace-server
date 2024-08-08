@@ -1048,4 +1048,13 @@
   <data name="MessagePasswordSendedToEmail" xml:space="preserve">
     <value>A instrução de alteração de senha foi enviada para o endereço de e-mail {0}.</value>
   </data>
+  <data name="ErrorEmailLinked" xml:space="preserve">
+    <value>Este e-mail é anexado ao usuário {0} como um provedor terceirizado</value>
+  </data>
+  <data name="TariffsFeature_statistic" xml:space="preserve">
+    <value>Cotas de armazenamento e estatística</value>
+  </data>
+  <data name="TariffsFeature_total_size" xml:space="preserve">
+    <value>{0} por administrador/usuário avançado e capacidade de adicionar espaço mediante solicitação</value>
+  </data>
 </root>

@@ -556,4 +556,7 @@
   <data name="OpenForm" xml:space="preserve">
     <value>فتح النموذج</value>
   </data>
+  <data name="FormNumber" xml:space="preserve">
+    <value>رقم النموذج</value>
+  </data>
 </root>

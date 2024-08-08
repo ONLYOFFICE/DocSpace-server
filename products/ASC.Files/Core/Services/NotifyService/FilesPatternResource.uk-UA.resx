@@ -152,4 +152,31 @@ $__AuthorName видалив(ла) кімнату $RoomTitle</value>
   <data name="subject_ShareDocument_tg" xml:space="preserve">
     <value>Документи. Надано доступ до документа [$DocumentTitle]($DocumentURL)</value>
   </data>
+  <data name="button_CheckReadyForms" xml:space="preserve">
+    <value>Перевірити готові форми</value>
+  </data>
+  <data name="pattern_FormReceived" xml:space="preserve">
+    <value>h1. Форму $Message заповнено
+
+Нову форму "$DocumentTitle":"$DocumentURL" заповнено в кімнаті "$RoomTitle":"$RoomURL"
+
+Відправник форми: "$FromUserName":"$FromUserLink"
+
+$OrangeButton</value>
+  </data>
+  <data name="pattern_FormSubmitted" xml:space="preserve">
+    <value>h1. Ви заповнили форму $Message
+
+Ви заповнили форму "$DocumentTitle":"$DocumentURL" в кімнаті "$RoomTitle":"$RoomURL"
+
+Менеджер: "$ToUserName":"$ToUserLink"
+
+$OrangeButton</value>
+  </data>
+  <data name="subject_FormReceived" xml:space="preserve">
+    <value>Сповіщення DocSpace. Форму заповнено</value>
+  </data>
+  <data name="subject_FormSubmitted" xml:space="preserve">
+    <value>Сповіщення DocSpace. Форму заповнено</value>
+  </data>
 </root>

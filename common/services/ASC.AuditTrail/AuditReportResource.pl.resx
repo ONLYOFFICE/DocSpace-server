@@ -778,4 +778,28 @@
   <data name="SendJoinInvite" xml:space="preserve">
     <value>Użytkownik {0} zaprosił użytkownika {1}, aby dołączył do tego DocSpace</value>
   </data>
+  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
+    <value>Pokoje [{0}]. Ustaw niestandardowy limit pamięci dla pokoi: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
+    <value>Pokoje [{0}]. Ustaw domyślny limit pamięci dla pokoi: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
+    <value>Pokoje [{0}]. Wyłączono niestandardowy limit pamięci dla pokoi</value>
+  </data>
+  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
+    <value>Użytkownicy [{0}]. Ustaw niestandardowy limit pamięci dla użytkowników: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
+    <value>Użytkownicy [{0}]. Ustaw domyślny limit pamięci dla użytkowników: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
+    <value>Użytkownicy [{0}]. Wyłączono limit pamięci dla użytkowników</value>
+  </data>
+  <data name="FormOpenedForFilling" xml:space="preserve">
+    <value>Plik otworzony do wypełnienia: {0}</value>
+  </data>
+  <data name="FormSubmit" xml:space="preserve">
+    <value>Użytkownicy [{0}]. Przesłany formularz: {1}</value>
+  </data>
 </root>

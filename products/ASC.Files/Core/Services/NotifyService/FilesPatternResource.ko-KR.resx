@@ -152,4 +152,31 @@ $__AuthorName님이 방을 삭제했습니다: $RoomTitle</value>
 
 자세한 내용을 확인하려면 DocuSign 계정에 로그인하세요.</value>
   </data>
+  <data name="button_CheckReadyForms" xml:space="preserve">
+    <value>준비된 양식 확인</value>
+  </data>
+  <data name="pattern_FormReceived" xml:space="preserve">
+    <value>h1. $Message 양식이 작성되었습니다
+
+"$RoomTitle":"$RoomURL" 룸에서 새로운 "$DocumentTitle":"$DocumentURL" 양식이 작성되었습니다
+
+양식 제출자: "$FromUserName":"$FromUserLink"
+
+$OrangeButton</value>
+  </data>
+  <data name="pattern_FormSubmitted" xml:space="preserve">
+    <value>h1. $Message 양식을 작성하셨습니다
+
+"$RoomTitle":"$RoomURL" 룸에서 "$DocumentTitle":"$DocumentURL" 양식을 작성하셨습니다
+
+관리자: "$ToUserName":"$ToUserLink"
+
+$OrangeButton</value>
+  </data>
+  <data name="subject_FormReceived" xml:space="preserve">
+    <value>DocSpace 알림. 양식이 작성되었습니다</value>
+  </data>
+  <data name="subject_FormSubmitted" xml:space="preserve">
+    <value>DocSpace 알림. 양식이 작성되었습니다</value>
+  </data>
 </root>
