@@ -155,4 +155,28 @@ $__AuthorName さんが次のルームを削除しました：$RoomTitle</value>
   <data name="button_CheckReadyForms" xml:space="preserve">
     <value>完成させたフォームを見る</value>
   </data>
+  <data name="pattern_FormReceived" xml:space="preserve">
+    <value>h1. 「$Message」フォームが記入されました
+ 
+新しいフォーム "$DocumentTitle":"$DocumentURL" がルーム "$RoomTitle":"$RoomURL" で記入されました。
+ 
+フォーム記入者： "$FromUserName":"$FromUserLink"
+ 
+$OrangeButton</value>
+  </data>
+  <data name="pattern_FormSubmitted" xml:space="preserve">
+    <value>h1. 「$Message」フォームが記入されました 
+ 
+あなたは"$RoomTitle":"$RoomURL "ルームで"$DocumentTitle":"$DocumentURL "フォームを記入しました。
+ 
+マネージャー："$ToUserName":"$ToUserLink"
+ 
+$OrangeButton</value>
+  </data>
+  <data name="subject_FormReceived" xml:space="preserve">
+    <value>DocSpaceからの通知。フォームが記入されました</value>
+  </data>
+  <data name="subject_FormSubmitted" xml:space="preserve">
+    <value>DocSpaceからの通知。フォームが記入されました</value>
+  </data>
 </root>
