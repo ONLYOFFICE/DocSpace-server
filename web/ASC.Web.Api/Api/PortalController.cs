@@ -254,7 +254,6 @@ public class PortalController(
     [HttpGet("tariff")]
     public async Task<TariffDto> GetTariffAsync(bool refresh)
     {        
-        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         var tenant = await tenantManager.GetCurrentTenantAsync();
         var source = await tariffService.GetTariffAsync(tenant.Id, refresh: refresh);
 
@@ -267,9 +266,13 @@ public class PortalController(
             LicenseDate = source.LicenseDate,
             CustomerId = source.CustomerId,
             Quotas = source.Quotas,
-            OpenSource = tenantExtra.Opensource,
-            Enterprise = tenantExtra.Enterprise
         };
+
+        if (await permissionContext.CheckPermissionsAsync(SecurityConstants.EditPortalSettings))
+        {
+            result.OpenSource = tenantExtra.Opensource;
+            result.Enterprise = tenantExtra.Enterprise;
+        }
         
         return result;
     }
