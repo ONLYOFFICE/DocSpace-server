@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Web.Api.Core;
+
 namespace ASC.Files.Api;
 
 [ConstraintRoute("int")]
@@ -403,6 +405,7 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
         CommonLinkUtility commonLinkUtility,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
+        CspSettingsHelper cspSettingsHelper,
         PermissionContext permissionContext)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
@@ -444,17 +447,23 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
         }
 
         try
-        {        
+        {
             await documentServiceConnector.CheckDocServiceUrlAsync();
 
             await messageService.SendAsync(MessageAction.DocumentServiceLocationSetting);
+
+            var settings = await cspSettingsHelper.LoadAsync();
+
+            var currentDomains = settings.Domains?.ToList() ?? [];
+
+            _ = await cspSettingsHelper.SaveAsync(currentDomains);
         }
         catch (Exception)
-        {        
+        {
             await filesLinkUtility.SetDocServiceUrlAsync(currentDocServiceUrl);
             await filesLinkUtility.SetDocServiceUrlInternalAsync(currentDocServiceUrlInternal);
             await filesLinkUtility.SetDocServicePortalUrlAsync(currentDocServicePortalUrl);
-          
+
             throw new Exception("Unable to establish a connection with the Document Server.");
         }
 
