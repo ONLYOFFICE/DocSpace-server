@@ -454,9 +454,7 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
 
             var settings = await cspSettingsHelper.LoadAsync();
 
-            var currentDomains = settings.Domains?.ToList() ?? [];
-
-            _ = await cspSettingsHelper.SaveAsync(currentDomains);
+            _ = await cspSettingsHelper.SaveAsync(settings.Domains ?? []);
         }
         catch (Exception)
         {
