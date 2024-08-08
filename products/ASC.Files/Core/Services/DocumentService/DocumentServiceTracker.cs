@@ -425,18 +425,17 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
             await socketManager.StopEditAsync(fileId);
         }
 
-        if (file != null)
+        if (file == null)
         {
-            if (user != null)
-            {
-                await filesMessageService.SendAsync(MessageAction.UserFileUpdated, file, MessageInitiator.DocsService, user.DisplayUserName(false, displayUserSettingsHelper), file.Title);
-            }
+            return new TrackResponse { Message = saveMessage };
+        }
 
-            if (!forceSave)
-            {
-                await SaveHistoryAsync(file, (fileData.History ?? "").ToString(), documentServiceConnector.ReplaceDocumentAddress(fileData.ChangesUrl));
-            }
+        var userName = user?.DisplayUserName(false, displayUserSettingsHelper) ?? AuditReportResource.GuestAccount;
+        await filesMessageService.SendAsync(MessageAction.UserFileUpdated, file, MessageInitiator.DocsService, userName, file.Title);
 
+        if (!forceSave)
+        {
+            await SaveHistoryAsync(file, (fileData.History ?? "").ToString(), documentServiceConnector.ReplaceDocumentAddress(fileData.ChangesUrl));
         }
 
         return new TrackResponse { Message = saveMessage };

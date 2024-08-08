@@ -500,18 +500,6 @@ public class FileStorageService //: IFileStorageService
             case FolderType.FillingFormsRoom:
                 await SetExternalLinkAsync(folder, Guid.NewGuid(), FileShare.FillForms, FilesCommonResource.FillOutExternalLinkTitle, primary: true);
                 break;
-            case FolderType.FormRoom:
-                var task1 = InternalCreateFolderAsync(folder.Id, FilesUCResource.ReadyFormFolder, FolderType.ReadyFormFolder);
-                var task2 = InternalCreateFolderAsync(folder.Id, FilesUCResource.InProcessFormFolder, FolderType.InProcessFormFolder);
-
-                var folders = await Task.WhenAll(task1, task2);
-                foreach (var f in folders)
-                {
-                    await socketManager.CreateFolderAsync(f);
-                    await filesMessageService.SendAsync(MessageAction.FolderCreated, f, f.Title);
-                }
-
-                break;
         }
 
         if (privacy)
@@ -3181,10 +3169,7 @@ public class FileStorageService //: IFileStorageService
 
         var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(file);
 
-        var access = await fileSharing.GetSharedInfoAsync([], new[] { roomId });
-        var usersIdWithAccess = access.Where(aceWrapper => !aceWrapper.SubjectGroup
-                                                           && aceWrapper.Access != FileShare.Restrict)
-            .Select(aceWrapper => aceWrapper.Id);
+        var usersIdWithAccess = await WhoCanRead(await folderDao.GetFolderAsync(roomId));
 
         var users = usersIdWithAccess
             .Where(id => !id.Equals(authContext.CurrentAccount.ID))
@@ -3199,7 +3184,22 @@ public class FileStorageService //: IFileStorageService
 
         return result;
     }
+    private async Task<List<Guid>> WhoCanRead<T>(FileEntry<T> entry)
+    {
+        var whoCanReadTask = (await fileSecurity.WhoCanReadAsync(entry, true)).ToList();
+        whoCanReadTask.AddRange(await userManager.GetUsers(true, EmployeeStatus.Active, null, null, null, null, null, null, null, false, null, true, 0, 0)
+            .Select(r=> r.Id)
+            .ToListAsync());
+        
+        whoCanReadTask.Add((await tenantManager.GetCurrentTenantAsync()).OwnerId);
+        
+        var userIds = whoCanReadTask
+            .Concat(new []{ entry.CreateBy })
+            .Distinct()
+            .ToList();
 
+        return userIds;
+    }
     public async Task<Folder<T>> SetPinnedStatusAsync<T>(T folderId, bool pin)
     {
         var folderDao = daoFactory.GetFolderDao<T>();

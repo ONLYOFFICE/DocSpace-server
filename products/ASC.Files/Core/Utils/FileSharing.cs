@@ -956,7 +956,7 @@ public class FileSharing(
     }
 }
 
-public record AceProcessingResult<T>(bool Changed, string Warning, IReadOnlyList<ProcessedItem<T>> ProcessedItems);
+public record AceProcessingResult<T>(bool Changed, string Warning, List<ProcessedItem<T>> ProcessedItems);
 public record ProcessedItem<T>(EventType EventType, FileShareRecord<T> PastRecord, AceWrapper Ace);
 
 public enum EventType

@@ -209,7 +209,7 @@ public abstract class VirtualRoomsController<T>(
         if (inDto.Quota >= 0)
         {
             await _filesMessageService.SendAsync(MessageAction.CustomQuotaPerRoomChanged, inDto.Quota.ToString(), folderTitles.ToArray());
-        }
+    }
         else
         {
             await _filesMessageService.SendAsync(MessageAction.CustomQuotaPerRoomDisabled, string.Join(", ", folderTitles.ToArray()));
@@ -392,8 +392,8 @@ public abstract class VirtualRoomsController<T>(
         var linkAce = inDto.LinkType switch
         {
             LinkType.Invitation => await _fileStorageService.SetInvitationLinkAsync(id, inDto.LinkId, inDto.Title, inDto.Access),
-            LinkType.External => await _fileStorageService.SetExternalLinkAsync(id, FileEntryType.Folder, inDto.LinkId, inDto.Title,
-                inDto.Access, inDto.ExpirationDate, inDto.Password?.Trim(), inDto.DenyDownload),
+            LinkType.External => await _fileStorageService.SetExternalLinkAsync(id, FileEntryType.Folder, inDto.LinkId, inDto.Title, inDto.Access , inDto.ExpirationDate, 
+                inDto.Password?.Trim(), inDto.DenyDownload),
             _ => throw new InvalidOperationException()
         };
 
@@ -653,12 +653,9 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         var filter = type switch
         {
             RoomType.FillingFormsRoom => FilterType.FillingFormsRooms,
-            RoomType.ReadOnlyRoom => FilterType.ReadOnlyRooms,
             RoomType.EditingRoom => FilterType.EditingRooms,
-            RoomType.ReviewRoom => FilterType.ReviewRooms,
             RoomType.CustomRoom => FilterType.CustomRooms,
             RoomType.PublicRoom => FilterType.PublicRooms,
-            RoomType.FormRoom => FilterType.FormRooms,
             _ => FilterType.None
         };
 

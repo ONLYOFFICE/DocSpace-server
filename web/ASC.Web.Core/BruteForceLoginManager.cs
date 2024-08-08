@@ -105,10 +105,8 @@ public class BruteForceLoginManager(
         }
     }
 
-    public async Task<UserInfo> AttemptAsync(string login, RecaptchaType recaptchaType, string recaptchaResponse,  Func<Task<UserInfo>> getUser)
+    public async Task<UserInfo> AttemptAsync(string login, RecaptchaType recaptchaType, string recaptchaResponse, UserInfo user)
     {
-        UserInfo user;
-
         var requestIp = MessageSettings.GetIP(httpContextAccessor.HttpContext?.Request);
         var secretEmail = SetupInfo.IsSecretEmail(login);
 
@@ -153,8 +151,6 @@ public class BruteForceLoginManager(
 
                 await SetToCache(historyCacheKey, history, now.Add(settings.CheckPeriod));
             }
-
-            user = await getUser();
 
             if (user == null || !userManager.UserExists(user))
             {

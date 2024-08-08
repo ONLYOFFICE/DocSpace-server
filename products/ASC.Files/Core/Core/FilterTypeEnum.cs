@@ -42,11 +42,8 @@ public enum FilterType
     [EnumMember] MediaOnly = 12,
     [EnumMember] FillingFormsRooms = 13,
     [EnumMember] EditingRooms = 14,
-    [EnumMember] ReviewRooms = 15,
-    [EnumMember] ReadOnlyRooms = 16,
     [EnumMember] CustomRooms = 17,
     [EnumMember] PublicRooms = 20,
-    [EnumMember] FormRooms = 21,
     [EnumMember] Pdf = 22,
     [EnumMember] PdfForm = 23
 }

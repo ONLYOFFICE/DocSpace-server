@@ -33,11 +33,8 @@ public static class DocSpaceHelper
         return folderType is 
             FolderType.CustomRoom or 
             FolderType.EditingRoom or 
-            FolderType.ReviewRoom or 
-            FolderType.ReadOnlyRoom or 
             FolderType.FillingFormsRoom or
-            FolderType.PublicRoom or
-            FolderType.FormRoom;
+            FolderType.PublicRoom;
     }
 
     public static bool IsFormsFillingSystemFolder(FolderType folderType)
@@ -55,11 +52,8 @@ public static class DocSpaceHelper
         {
             FolderType.FillingFormsRoom => RoomType.FillingFormsRoom,
             FolderType.EditingRoom => RoomType.EditingRoom,
-            FolderType.ReviewRoom => RoomType.ReviewRoom,
-            FolderType.ReadOnlyRoom => RoomType.ReadOnlyRoom,
             FolderType.CustomRoom => RoomType.CustomRoom,
             FolderType.PublicRoom => RoomType.PublicRoom,
-            FolderType.FormRoom => RoomType.FormRoom,
             _ => null
         };
     }
@@ -70,12 +64,21 @@ public static class DocSpaceHelper
         {
             RoomType.FillingFormsRoom => FolderType.FillingFormsRoom,
             RoomType.EditingRoom => FolderType.EditingRoom,
-            RoomType.ReviewRoom => FolderType.ReviewRoom,
-            RoomType.ReadOnlyRoom => FolderType.ReadOnlyRoom,
             RoomType.CustomRoom => FolderType.CustomRoom,
             RoomType.PublicRoom => FolderType.PublicRoom,
-            RoomType.FormRoom => FolderType.FormRoom,
             _ => throw new ArgumentOutOfRangeException(nameof(roomType), roomType, null)
+        };
+    }
+    
+    public static FolderType? MapToFolderType(FilterType filterType)
+    {
+        return filterType switch
+        {
+            FilterType.FillingFormsRooms => FolderType.FillingFormsRoom,
+            FilterType.EditingRooms => FolderType.EditingRoom,
+            FilterType.CustomRooms => FolderType.CustomRoom,
+            FilterType.PublicRooms => FolderType.PublicRoom,
+            _ => null
         };
     }
 

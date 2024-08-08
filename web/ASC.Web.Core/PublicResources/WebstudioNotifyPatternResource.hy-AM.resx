@@ -448,7 +448,7 @@
     <value>${__VirtualRootPath} պորտալի պրոֆիլի փոփոխության ծանուցում</value>
   </data>
   <data name="subject_send_whats_new" xml:space="preserve">
-    <value>Ինչ նորություններ կան ձեր պորտալում $Date-ի համար</value>
+    <value>Ինչ նորություններ կան ձեր ${__VirtualRootPath} պորտալում $Date-ի համար</value>
   </data>
   <data name="subject_smtp_test" xml:space="preserve">
     <value>SMTP թեստային հաղորդագրություն</value>

@@ -148,6 +148,8 @@ public class CustomerConfigDto
 
     public string Logo { get; set; }
 
+    public string LogoDark { get; set; }
+
     public string Mail { get; set; }
 
     public string Name  { get; set; }
@@ -358,6 +360,7 @@ public class CustomerConfigConverter
         {
             Address = await source.GetAddress(),
             Logo = await source.GetLogo(),
+            LogoDark = await source.GetLogoDark(),
             Mail = await source.GetMail(),
             Name = await source.GetName(),
             Www = await source.GetWww()

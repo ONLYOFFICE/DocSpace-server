@@ -64,7 +64,6 @@ public class MigrationContext : DbContext
     public DbSet<UserDav> UsersDav { get; set; }
 
     public DbSet<DbWebstudioSettings> WebstudioSettings { get; set; }
-    public DbSet<DbWebstudioUserVisit> WebstudioUserVisit { get; set; }
     public DbSet<DbWebstudioIndex> WebstudioIndex { get; set; }
 
     public DbSet<InstanceRegistration> InstanceRegistrations { get; set; }
@@ -131,7 +130,6 @@ public class MigrationContext : DbContext
             .AddSubscription()
             .AddUserDav()
             .AddWebstudioSettings()
-            .AddWebstudioUserVisit()
             .AddDbWebstudioIndex()
             .AddDbFiles()
             .AddDbFolder()
