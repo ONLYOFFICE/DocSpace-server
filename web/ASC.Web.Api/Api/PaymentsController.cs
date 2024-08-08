@@ -227,7 +227,6 @@ public class PaymentController(UserManager userManager,
             throw new SecurityException();
         }
         
-        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         return await tariffHelper.GetCurrentQuotaAsync(refresh);
     }
 
