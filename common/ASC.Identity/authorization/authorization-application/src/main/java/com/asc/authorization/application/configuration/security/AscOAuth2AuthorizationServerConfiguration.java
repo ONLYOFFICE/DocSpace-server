@@ -30,8 +30,9 @@ package com.asc.authorization.application.configuration.security;
 import com.asc.authorization.application.security.filters.AnonymousReplacerAuthenticationFilter;
 import com.asc.authorization.application.security.filters.RateLimiterFilter;
 import com.asc.authorization.application.security.oauth.converters.PersonalAccessTokenAuthenticationConverter;
-import com.asc.authorization.application.security.oauth.providers.AscAuthenticationProvider;
+import com.asc.authorization.application.security.oauth.providers.AscCodeAuthenticationProvider;
 import com.asc.authorization.application.security.oauth.providers.AscPersonalAccessTokenAuthenticationProvider;
+import com.asc.authorization.application.security.oauth.providers.AscTokenIntrospectionAuthenticationProvider;
 import com.asc.common.application.client.AscApiClient;
 import com.asc.common.service.ports.output.message.publisher.AuditMessagePublisher;
 import com.nimbusds.jose.jwk.source.JWKSource;
@@ -72,14 +73,22 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @RequiredArgsConstructor
 public class AscOAuth2AuthorizationServerConfiguration {
   private final AscOAuth2AuthorizationFormConfiguration formConfiguration;
+
   private final AscApiClient ascApiClient;
   private final AuditMessagePublisher auditMessagePublisher;
-  private final OAuth2AuthorizationService authorizationService;
+
   private final OAuth2TokenCustomizer<JwtEncodingContext> jwtCustomizer;
   private final JWKSource<SecurityContext> jwkSource;
-  private final AscAuthenticationProvider authenticationProvider;
+
+  private final OAuth2AuthorizationService authorizationService;
+
+  private final AscCodeAuthenticationProvider codeAuthenticationProvider;
+  private final AscTokenIntrospectionAuthenticationProvider
+      tokenIntrospectionAuthenticationProvider;
+
   private final AuthenticationSuccessHandler authenticationSuccessHandler;
   private final AuthenticationFailureHandler authenticationFailureHandler;
+
   private final RateLimiterFilter rateLimiterFilter;
   private final AnonymousReplacerAuthenticationFilter authenticationFilter;
 
@@ -93,7 +102,17 @@ public class AscOAuth2AuthorizationServerConfiguration {
   @Order(Ordered.HIGHEST_PRECEDENCE)
   @SneakyThrows
   public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) {
-    OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
+    var authorizationServerConfigurer = new OAuth2AuthorizationServerConfigurer();
+    var endpointsMatcher = authorizationServerConfigurer.getEndpointsMatcher();
+
+    http.securityMatcher(endpointsMatcher)
+        .authorizeHttpRequests(
+            authorize -> {
+              authorize.requestMatchers("oauth2/introspect").permitAll();
+              authorize.anyRequest().authenticated();
+            })
+        .csrf(csrf -> csrf.ignoringRequestMatchers(endpointsMatcher))
+        .apply(authorizationServerConfigurer);
 
     http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
         .oidc(Customizer.withDefaults())
@@ -118,10 +137,12 @@ public class AscOAuth2AuthorizationServerConfiguration {
         .authorizationEndpoint(
             e -> {
               e.consentPage(formConfiguration.getConsent());
-              e.authenticationProvider(authenticationProvider);
+              e.authenticationProvider(codeAuthenticationProvider);
               e.authorizationResponseHandler(authenticationSuccessHandler);
               e.errorResponseHandler(authenticationFailureHandler);
-            });
+            })
+        .tokenIntrospectionEndpoint(
+            i -> i.authenticationProvider(tokenIntrospectionAuthenticationProvider));
 
     http.exceptionHandling(
         e ->

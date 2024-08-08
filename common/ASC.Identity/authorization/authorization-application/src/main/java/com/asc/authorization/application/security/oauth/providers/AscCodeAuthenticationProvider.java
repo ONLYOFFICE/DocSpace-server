@@ -64,7 +64,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class AscAuthenticationProvider implements AuthenticationProvider {
+public class AscCodeAuthenticationProvider implements AuthenticationProvider {
   private static final String ASC_AUTH_COOKIE = "asc_auth_key";
 
   @Value("${spring.application.name}")
