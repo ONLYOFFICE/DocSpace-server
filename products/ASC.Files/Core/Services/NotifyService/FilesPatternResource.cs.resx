@@ -175,7 +175,7 @@ $OrangeButton</value>
  
 Vyplnili jste formulář "$DocumentTitle":"$DocumentURL" v místnosti "$RoomTitle":"$RoomURL"
  
-Manažer: $ToUserName":"$ToUserLink"
+Manažer: "$ToUserName":"$ToUserLink"
  
 $OrangeButton</value>
   </data>

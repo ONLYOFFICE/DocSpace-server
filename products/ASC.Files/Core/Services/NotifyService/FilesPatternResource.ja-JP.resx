@@ -165,9 +165,9 @@ $__AuthorName さんが次のルームを削除しました：$RoomTitle</value>
 $OrangeButton</value>
   </data>
   <data name="pattern_FormSubmitted" xml:space="preserve">
-    <value>h1. 「$Message」フォームが記入されました 
+    <value>h1. 「$Message」フォームが記入されました
  
-あなたは"$RoomTitle":"$RoomURL "ルームで"$DocumentTitle":"$DocumentURL "フォームを記入しました。
+あなたは"$RoomTitle":"$RoomURL"ルームで"$DocumentTitle":"$DocumentURL"フォームを記入しました。
  
 マネージャー："$ToUserName":"$ToUserLink"
  

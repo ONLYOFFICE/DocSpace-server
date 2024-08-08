@@ -167,9 +167,9 @@ $OrangeButton</value>
   <data name="pattern_FormSubmitted" xml:space="preserve">
     <value>h1. Wypełniono formularz $Message
 
-Formularz "$DocumentTitle":"$DocumentURL” w pokoju "$RoomTitle":"$RoomURL” został wypełniony
+Formularz "$DocumentTitle":"$DocumentURL" w pokoju "$RoomTitle":"$RoomURL" został wypełniony
 
-Menedżer: "$ToUserName":"$ToUserLink”
+Menedżer: "$ToUserName":"$ToUserLink"
 
 $OrangeButton</value>
   </data>
