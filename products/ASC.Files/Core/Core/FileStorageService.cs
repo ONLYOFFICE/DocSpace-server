@@ -712,19 +712,19 @@ public class FileStorageService //: IFileStorageService
 
         var folderAccess = folder.Access;
 
-        if (!string.Equals(folder.Title, updateData.Title, StringComparison.OrdinalIgnoreCase) || (folder.SettingsQuota != updateData.Quota && updateData.Quota != null))
+        if (!string.Equals(folder.Title, updateData.Title, StringComparison.Ordinal) || (folder.SettingsQuota != updateData.Quota && updateData.Quota != null))
         {
             var oldTitle = folder.Title;
             
             var newFolderId = await folderDao.UpdateFolderAsync(
                  folder,
-                 !string.Equals(folder.Title, updateData.Title, StringComparison.OrdinalIgnoreCase) && updateData.Title != null ? updateData.Title : folder.Title,
+                 !string.Equals(folder.Title, updateData.Title, StringComparison.Ordinal) && updateData.Title != null ? updateData.Title : folder.Title,
                  folder.SettingsQuota != updateData.Quota && updateData.Quota != null ? (long)updateData.Quota : folder.SettingsQuota);
 
             folder = await folderDao.GetFolderAsync(newFolderId);
             folder.Access = folderAccess;
             
-            if (!string.Equals(oldTitle, updateData.Title, StringComparison.OrdinalIgnoreCase))
+            if (!string.Equals(oldTitle, updateData.Title, StringComparison.Ordinal))
             {
                 if (DocSpaceHelper.IsRoom(folder.FolderType))
                 {
@@ -794,7 +794,7 @@ public class FileStorageService //: IFileStorageService
         var folderAccess = folder.Access;
         var renamedFolder = folder;
 
-        if (!string.Equals(folder.Title, title, StringComparison.OrdinalIgnoreCase))
+        if (!string.Equals(folder.Title, title, StringComparison.Ordinal))
         {
             var oldTitle = folder.Title;
             T newFolderId = default;
