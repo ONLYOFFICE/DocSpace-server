@@ -1048,4 +1048,13 @@
   <data name="MessagePasswordSendedToEmail" xml:space="preserve">
     <value>Hướng dẫn thay đổi mật khẩu đã được gửi đến địa chỉ email {0}.</value>
   </data>
+  <data name="ErrorEmailLinked" xml:space="preserve">
+    <value>Email này được gắn với người dùng {0} như là nhà cung cấp bên thứ ba</value>
+  </data>
+  <data name="TariffsFeature_statistic" xml:space="preserve">
+    <value>Hạn mức lưu trữ &amp; thống kê</value>
+  </data>
+  <data name="TariffsFeature_total_size" xml:space="preserve">
+    <value>{0} mỗi quản trị viên/người dùng cấp cao và khả năng thêm không gian theo yêu cầu</value>
+  </data>
 </root>

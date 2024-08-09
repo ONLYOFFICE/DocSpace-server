@@ -778,4 +778,28 @@
   <data name="SendJoinInvite" xml:space="preserve">
     <value>Käyttäjä {0} lähetti {1}:lle liittymiskutsun tähän DocSpaceen</value>
   </data>
+  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
+    <value>Huoneet [{0}]. Aseta huoneille mukautettu tallennuskiintiö {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
+    <value>Huoneet [{0}]. Aseta huoneille oletustallennuskiintiö {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
+    <value>Huoneet [{0}]. Huoneiden tallennuskiintiö poistettu käytöstä</value>
+  </data>
+  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
+    <value>Käyttäjät [{0}]. Aseta käyttäjille mukautettu tallennuskiintiö: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
+    <value>Käyttäjät [{0}]. Aseta käyttäjille oletustallennuskiintiö: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
+    <value>Käyttäjät [{0}]. Käyttäjien tallennuskiintiö poistettu käytöstä</value>
+  </data>
+  <data name="FormOpenedForFilling" xml:space="preserve">
+    <value>Tiedosto avattu täytettäväksi: {0}</value>
+  </data>
+  <data name="FormSubmit" xml:space="preserve">
+    <value>Käyttäjät [{0}]. Lomake lähetetty: {1}</value>
+  </data>
 </root>

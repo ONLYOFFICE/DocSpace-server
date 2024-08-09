@@ -86,8 +86,9 @@ public class PortalController(
     [HttpGet("")]
     public async Task<TenantDto> Get()
     {
-        var tenant = await tenantManager.GetCurrentTenantAsync();   
-        return mapper.Map<TenantDto>(tenant);
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        return  mapper.Map<TenantDto>(tenant);
     }
 
     /// <summary>
@@ -174,7 +175,7 @@ public class PortalController(
     [HttpGet("tenantextra")]
     public async Task<TenantExtraDto> GetTenantExtra(bool refresh)
     {
-        //await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         var quota = await quotaHelper.GetCurrentQuotaAsync(refresh);
         var docServiceQuota = await documentServiceLicense.GetLicenseQuotaAsync();
         
@@ -233,7 +234,8 @@ public class PortalController(
     /// <httpMethod>GET</httpMethod>
     [HttpGet("userscount")]
     public async Task<long> GetUsersCountAsync()
-    {
+    {        
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         return (await userManager.GetUserNamesAsync(EmployeeStatus.Active)).Length;
     }
 
@@ -250,10 +252,29 @@ public class PortalController(
     /// <httpMethod>GET</httpMethod>
     [AllowNotPayment]
     [HttpGet("tariff")]
-    public async Task<Tariff> GetTariffAsync(bool refresh)
-    {
+    public async Task<TariffDto> GetTariffAsync(bool refresh)
+    {        
         var tenant = await tenantManager.GetCurrentTenantAsync();
-        return await tariffService.GetTariffAsync(tenant.Id, refresh: refresh);
+        var source = await tariffService.GetTariffAsync(tenant.Id, refresh: refresh);
+
+        var result = new TariffDto
+        {
+            Id = source.Id,
+            State = source.State,
+            DueDate = source.DueDate,
+            DelayDueDate = source.DelayDueDate,
+            LicenseDate = source.LicenseDate,
+            CustomerId = source.CustomerId,
+            Quotas = source.Quotas,
+        };
+
+        if (await permissionContext.CheckPermissionsAsync(SecurityConstants.EditPortalSettings))
+        {
+            result.OpenSource = tenantExtra.Opensource;
+            result.Enterprise = tenantExtra.Enterprise;
+        }
+        
+        return result;
     }
 
     /// <summary>

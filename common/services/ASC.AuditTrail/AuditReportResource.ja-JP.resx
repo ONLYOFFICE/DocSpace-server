@@ -778,4 +778,28 @@
   <data name="SendJoinInvite" xml:space="preserve">
     <value>ユーザー{0}は{1}にこのDocSpaceへの招待を送信しました</value>
   </data>
+  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
+    <value>ルーム [{0}]。ルームにカスタムなストレージ容量を設定する：{1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
+    <value>ルーム [{0}]。ルームにデフォルトのストレージ容量を設定する：{1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
+    <value>ルーム [{0}]。ルームのストレージ容量を無効</value>
+  </data>
+  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
+    <value>ユーザー [{0}]。ユーザーにカスタムなストレージ容量を設定する：{1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
+    <value>ユーザー [{0}]。ユーザーにデフォルトのストレージ容量を設定する：{1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
+    <value>ユーザー [{0}]。ユーザーのストレージ容量を無効</value>
+  </data>
+  <data name="FormOpenedForFilling" xml:space="preserve">
+    <value>記入するために開かれたファイル：{0}</value>
+  </data>
+  <data name="FormSubmit" xml:space="preserve">
+    <value>ユーザー [{0}]。フォームが送信された：{1}</value>
+  </data>
 </root>

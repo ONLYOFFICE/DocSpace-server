@@ -778,4 +778,28 @@
   <data name="RoomUpdateAccessForGroup" xml:space="preserve">
     <value>{0} jmenován: {1}</value>
   </data>
+  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
+    <value>Místnosti [{0}]. Nastavení vlastní kvóty pro ukládání dat v místnostech: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
+    <value>Místnosti [{0}]. Nastavení výchozí kvóty úložiště pro místnosti: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
+    <value>Místnosti [{0}]. Vypnutá kvóta úložiště pro místnosti</value>
+  </data>
+  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
+    <value>Uživatelé [{0}]. Nastavení vlastní kvóty úložiště pro uživatele: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
+    <value>Uživatelé [{0}]. Nastavení výchozí kvóty úložiště pro uživatele: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
+    <value>Uživatelé [{0}]. Zakázat kvótu úložiště pro uživatele</value>
+  </data>
+  <data name="FormOpenedForFilling" xml:space="preserve">
+    <value>Soubor otevřený k vyplnění: {0}</value>
+  </data>
+  <data name="FormSubmit" xml:space="preserve">
+    <value>Uživatelé [{0}]. Formulář odeslán: {1}</value>
+  </data>
 </root>

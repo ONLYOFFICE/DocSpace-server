@@ -1048,4 +1048,13 @@
   <data name="MessagePasswordSendedToEmail" xml:space="preserve">
     <value>비밀번호 변경 지침이 {0} 이메일 주소로 전송되었습니다.</value>
   </data>
+  <data name="ErrorEmailLinked" xml:space="preserve">
+    <value>이 이메일은 제3자 공급자로서 {0} 사용자에게 첨부되었습니다</value>
+  </data>
+  <data name="TariffsFeature_statistic" xml:space="preserve">
+    <value>스토리지 할당량 &amp; 통계</value>
+  </data>
+  <data name="TariffsFeature_total_size" xml:space="preserve">
+    <value>관리자/파워 유저당 {0} 및 요청 시 공간 추가 가능</value>
+  </data>
 </root>

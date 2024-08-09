@@ -778,4 +778,28 @@
   <data name="SendJoinInvite" xml:space="preserve">
     <value>Người dùng {0} đã gửi lời mời đến {1} để tham gia DocSpace này</value>
   </data>
+  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
+    <value>Phòng [{0}]. Đã đặt hạn mức lưu trữ tùy chỉnh cho các phòng: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
+    <value>Phòng [{0}]. Đã đặt hạn mức lưu trữ mặc định cho các phòng: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
+    <value>Phòng [{0}]. Đã tắt hạn mức lưu trữ cho các phòng</value>
+  </data>
+  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
+    <value>Người dùng [{0}]. Đã đặt hạn mức lưu trữ tùy chỉnh cho người dùng: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
+    <value>Người dùng [{0}]. Đã đặt hạn mức lưu trữ mặc định cho người dùng: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
+    <value>Người dùng [{0}]. Đã tắt hạn mức lưu trữ cho người dùng</value>
+  </data>
+  <data name="FormOpenedForFilling" xml:space="preserve">
+    <value>Tập tin được mở để điền: {0}</value>
+  </data>
+  <data name="FormSubmit" xml:space="preserve">
+    <value>Người dùng [{0}]. Đã gửi biểu mẫu: {1}</value>
+  </data>
 </root>

@@ -152,4 +152,31 @@ $__AuthorName poisti huoneen: $RoomTitle</value>
   <data name="subject_ShareFolder_tg" xml:space="preserve">
     <value>Asiakirjoja. Pääsy kansioon myönnetty: [$DocumentTitle]($DocumentURL)</value>
   </data>
+  <data name="button_CheckReadyForms" xml:space="preserve">
+    <value>Katso valmiit lomakkeet</value>
+  </data>
+  <data name="pattern_FormReceived" xml:space="preserve">
+    <value>h1. Lomake $Message on täytetty
+
+Uusi lomake "$DocumentTitle":"$DocumentURL" on täytetty huoneessa "$RoomTitle":"$RoomURL"
+
+Lomakkeen lähettäjä: "$FromUserName":"$FromUserLink"
+
+$OrangeButton</value>
+  </data>
+  <data name="pattern_FormSubmitted" xml:space="preserve">
+    <value>h1. Olet täyttänyt lomakkeen $Message
+
+Olet täyttänyt lomakkeen "$DocumentTitle":"$DocumentURL" huoneessa "$RoomTitle":"$RoomURL"
+
+Johto: "$ToUserName":"$ToUserLink"
+
+$OrangeButton</value>
+  </data>
+  <data name="subject_FormReceived" xml:space="preserve">
+    <value>DocSpace-ilmoitus. Lomake on täytetty</value>
+  </data>
+  <data name="subject_FormSubmitted" xml:space="preserve">
+    <value>DocSpace-ilmoitus. Lomake on täytetty</value>
+  </data>
 </root>

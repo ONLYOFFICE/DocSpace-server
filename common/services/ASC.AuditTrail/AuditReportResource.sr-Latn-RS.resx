@@ -837,4 +837,28 @@
   <data name="QuotaPerUserDisabled" xml:space="preserve">
     <value>Onemogućena podrazumevana skladišna kvota za korisnike</value>
   </data>
+  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
+    <value>Prostorije [{0}]. Postavi prilagođenu skladišnu kvotu za prostorije: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
+    <value>Prostorije [{0}]. Postavi podrazumevanu skladišnu kvotu za prostorije: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
+    <value>Prostorije [{0}]. Onemogućena skladišna kvota za prostorije</value>
+  </data>
+  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
+    <value>Korisnici [{0}]. Postavi prilagođenu skladišnu kvotu za korisnike: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
+    <value>Korisnici [{0}]. Postavi podrazumevanu skladišnu kvotu za korisnike: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
+    <value>Korisnici [{0}]. Onemogućena skladišna kvota za korisnike</value>
+  </data>
+  <data name="FormOpenedForFilling" xml:space="preserve">
+    <value>Datoteka otvorena za popunjavanje: {0}</value>
+  </data>
+  <data name="FormSubmit" xml:space="preserve">
+    <value>Korisnici [{0}]. Formular dostavljen: {1}</value>
+  </data>
 </root>
