@@ -57,16 +57,18 @@ public class LogoHandler
             throw new ArgumentException("dark");
         }
 
+        var culture = context.Request.Query["culture"].FirstOrDefault();
+
         string path;
 
         if (isDefault)
         {
-            path = await tenantWhiteLabelSettingsHelper.GetAbsoluteDefaultLogoPathAsync(logoType, dark);
+            path = await tenantWhiteLabelSettingsHelper.GetAbsoluteDefaultLogoPathAsync(logoType, dark, culture);
         }
         else
         {
             var tenantWhiteLabelSettings = await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
-            path = await tenantWhiteLabelSettingsHelper.GetAbsoluteLogoPathAsync(tenantWhiteLabelSettings, logoType, dark);
+            path = await tenantWhiteLabelSettingsHelper.GetAbsoluteLogoPathAsync(tenantWhiteLabelSettings, logoType, dark, culture);
         }
 
         context.Response.Redirect(commonLinkUtility.GetFullAbsolutePath(path));
