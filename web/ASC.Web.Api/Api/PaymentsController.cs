@@ -45,8 +45,7 @@ public class PaymentController(UserManager userManager,
         IMemoryCache memoryCache,
         IHttpContextAccessor httpContextAccessor,
         MessageService messageService,
-        StudioNotifyService studioNotifyService,
-        PermissionContext permissionContext)
+        StudioNotifyService studioNotifyService)
     : ControllerBase
 {
     private readonly int _maxCount = 10;
