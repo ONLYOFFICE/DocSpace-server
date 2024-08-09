@@ -565,7 +565,7 @@
     <value>Utilizator șters: {0}</value>
   </data>
   <data name="RoomUpdateAccessForUser" xml:space="preserve">
-    <value>&gt;{0} desemnat(ți): {1}</value>
+    <value>{0} desemnat(ți): {1}</value>
   </data>
   <data name="SendActionType" xml:space="preserve">
     <value>Trimitere</value>
@@ -800,5 +800,65 @@
   </data>
   <data name="FileSizePostfix" xml:space="preserve">
     <value>octeți, KO, MO, GO, TO</value>
+  </data>
+  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
+    <value>Săli [{0}]. Stabilire cotă de stocare particularizată pentru săli: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
+    <value>Săli [{0}]. Stabilire cotă de stocare implicită pentru săli: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
+    <value>Săli [{0}]. Cotă de stocare pentru săli este dezactivată</value>
+  </data>
+  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
+    <value>Utilizatori [{0}]. Stabilire cotă de stocare particularizată pentru utilizatori: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
+    <value>Utilizatori [{0}]. Stabilire cotă de stocare implicită pentru utilizatori: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
+    <value>Utilizatori [{0}]. Cotă de stocare pentru utilizatori este dezactivată</value>
+  </data>
+  <data name="FileUploadedWithOverwriting" xml:space="preserve">
+    <value>Fișierul a fost încărcat cu suprascriere: {0}</value>
+  </data>
+  <data name="FormOpenedForFilling" xml:space="preserve">
+    <value>Fișierul este deschis pentru completare: {0}</value>
+  </data>
+  <data name="FormSubmit" xml:space="preserve">
+    <value>Utilizatori [{0}]. Formular a fost trimis: {1}</value>
+  </data>
+  <data name="QuotaPerPortalChanged" xml:space="preserve">
+    <value>Stabilirea cotei de stocare implicită: {0}</value>
+  </data>
+  <data name="QuotaPerPortalDisabled" xml:space="preserve">
+    <value>Cotă de stocare implicită este dezactivată</value>
+  </data>
+  <data name="QuotaPerRoomChanged" xml:space="preserve">
+    <value>Stabilirea cotei de stocare implicită pentru săli: {0}</value>
+  </data>
+  <data name="QuotaPerRoomDisabled" xml:space="preserve">
+    <value>Cotă de stocare implicită pentru săli este dezactivată</value>
+  </data>
+  <data name="QuotaPerUserChanged" xml:space="preserve">
+    <value>Stabilirea cotei de stocare implicită pentru utilizatori: {0}</value>
+  </data>
+  <data name="QuotaPerUserDisabled" xml:space="preserve">
+    <value>Cotă de stocare implicită pentru utilizatori este dezactivată</value>
+  </data>
+  <data name="RoomCopied" xml:space="preserve">
+    <value>Sala copiată: {0}</value>
+  </data>
+  <data name="RoomGroupAdded" xml:space="preserve">
+    <value>Grup adăugat: {0}. Rol: {1}</value>
+  </data>
+  <data name="RoomGroupRemove" xml:space="preserve">
+    <value>Grup șters: {0}</value>
+  </data>
+  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
+    <value>{0} desemnat(ți): {1}</value>
+  </data>
+  <data name="SendJoinInvite" xml:space="preserve">
+    <value>Utilizatorul {0} a trimis invitația de asociere la DocSpace către {1}</value>
   </data>
 </root>

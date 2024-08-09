@@ -476,4 +476,28 @@
   <data name="User" xml:space="preserve">
     <value>Používateľ</value>
   </data>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>Presun viacerých súborov do miestnosti na vyplnenie formulárov nie je podporovaný. Presúvajte vždy len jeden ONLYOFFICE PDF formulár.</value>
+  </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>Presun priečinkov do miestnosti na vyplnenie formulárov nie je podporovaný. Presúvajte vždy jeden ONLYOFFICE PDF formulár.</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>Súbor nie je možné presunúť do tejto miestnosti. Pokúste sa presunúť ONLYOFFICE PDF formulár.</value>
+  </data>
+  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
+    <value>Súbor nie je možné nahrať do tejto miestnosti. Pokúste sa nahrať ONLYOFFICE PDF formulár.</value>
+  </data>
+  <data name="FillOutExternalLinkTitle" xml:space="preserve">
+    <value>Odkaz na vyplnenie</value>
+  </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>Odkaz na formulár</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Otvoriť formulár</value>
+  </data>
+  <data name="FormNumber" xml:space="preserve">
+    <value>Číslo formulára</value>
+  </data>
 </root>

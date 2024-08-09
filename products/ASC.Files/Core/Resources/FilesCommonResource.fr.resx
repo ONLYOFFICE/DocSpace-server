@@ -494,4 +494,10 @@ Compatibilité maximale avec docx, xlsx, pptx.</value>
   <data name="LinkToForm" xml:space="preserve">
     <value>Lien vers le formulaire</value>
   </data>
+  <data name="FormNumber" xml:space="preserve">
+    <value>Numéro de formulaire</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Ouvrir le formulaire</value>
+  </data>
 </root>

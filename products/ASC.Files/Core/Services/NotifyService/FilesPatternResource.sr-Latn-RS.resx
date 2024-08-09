@@ -211,4 +211,31 @@ $Message</value>
 
 $__AuthorName je izbrisao sobu: $RoomTitle</value>
   </data>
+  <data name="button_CheckReadyForms" xml:space="preserve">
+    <value>Proveri spremne formulare</value>
+  </data>
+  <data name="pattern_FormReceived" xml:space="preserve">
+    <value>h1. Formular $Message je popunjen
+ 
+Novi formular "$DocumentTitle":"$DocumentURL" je popunjen u prostoriji "$RoomTitle":"$RoomURL"
+ 
+Podnosilac formulara: "$FromUserName":"$FromUserLink"
+ 
+$OrangeButton</value>
+  </data>
+  <data name="pattern_FormSubmitted" xml:space="preserve">
+    <value>h1. Popunili ste formular $Message
+ 
+Popunili ste formular "$DocumentTitle":"$DocumentURL" u prostoriji "$RoomTitle":"$RoomURL"
+ 
+Menadžer: "$ToUserName":"$ToUserLink"
+ 
+$OrangeButton</value>
+  </data>
+  <data name="subject_FormReceived" xml:space="preserve">
+    <value>DocSpace notifikacija. Formular je popunjen</value>
+  </data>
+  <data name="subject_FormSubmitted" xml:space="preserve">
+    <value>DocSpace notifikacija. Formular je popunjen</value>
+  </data>
 </root>

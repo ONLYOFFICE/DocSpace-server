@@ -168,6 +168,8 @@ public class CustomerConfigDto
     [SwaggerSchemaCustomString("Logo")]
     public string Logo { get; set; }
 
+    public string LogoDark { get; set; }
+
     [SwaggerSchemaCustomString("Mail")]
     public string Mail { get; set; }
 
@@ -397,6 +399,7 @@ public class CustomerConfigConverter
         {
             Address = await source.GetAddress(),
             Logo = await source.GetLogo(),
+            LogoDark = await source.GetLogoDark(),
             Mail = await source.GetMail(),
             Name = await source.GetName(),
             Www = await source.GetWww()

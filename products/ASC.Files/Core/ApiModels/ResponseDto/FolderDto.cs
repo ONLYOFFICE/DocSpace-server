@@ -78,6 +78,9 @@ public class FolderDto<T> : FileEntryDto<T>
 
     [SwaggerSchemaCustomLong("Counter", Nullable = true, Format = "int64")]
     public long? UsedSpace { get; set; }
+
+    public override FileEntryType FileEntryType { get => FileEntryType.Folder; }
+
     public static FolderDto<int> GetSample()
     {
         return new FolderDto<int>

@@ -152,4 +152,31 @@ $Message</value>
   <data name="subject_ShareFolder_push" xml:space="preserve">
     <value>Acceso concedido a la carpeta: $DocumentTitle</value>
   </data>
+  <data name="button_CheckReadyForms" xml:space="preserve">
+    <value>Comprobar formularios listos</value>
+  </data>
+  <data name="pattern_FormReceived" xml:space="preserve">
+    <value>h1. El formulario $Message está rellenado
+ 
+El nuevo formulario "$DocumentTitle":"$DocumentURL" está rellenado en la sala "$RoomTitle":"$RoomURL"
+ 
+Remitente del formulario: "$FromUserName":"$FromUserLink"
+
+$OrangeButton</value>
+  </data>
+  <data name="pattern_FormSubmitted" xml:space="preserve">
+    <value>h1. Ha rellenado el formulario $Message
+ 
+Ha rellenado el formulario "$DocumentTitle":"$DocumentURL" en la sala "$RoomTitle":"$RoomURL"
+ 
+Responsable: "$ToUserName":"$ToUserLink"
+ 
+$OrangeButton</value>
+  </data>
+  <data name="subject_FormReceived" xml:space="preserve">
+    <value>Notificación de DocSpace. El formulario está rellenado</value>
+  </data>
+  <data name="subject_FormSubmitted" xml:space="preserve">
+    <value>Notificación de DocSpace. El formulario está rellenado</value>
+  </data>
 </root>

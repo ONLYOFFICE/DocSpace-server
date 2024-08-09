@@ -497,4 +497,7 @@ Visaugstākā saderība ar docx, xlsx, pptx.</value>
   <data name="OpenForm" xml:space="preserve">
     <value>Atvērt formu</value>
   </data>
+  <data name="FormNumber" xml:space="preserve">
+    <value>Veidlapas numurs</value>
+  </data>
 </root>

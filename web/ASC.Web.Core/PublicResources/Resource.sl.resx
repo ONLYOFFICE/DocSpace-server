@@ -1039,4 +1039,19 @@
   <data name="TariffsFeature_used_manager" xml:space="preserve">
     <value>Dodani skrbniki/Super uporabniki:</value>
   </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>Kvota povabil je presežena</value>
+  </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>Uporabnik onemogočen</value>
+  </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>Navodilo za spremembo gesla je bilo poslano na e-poštni naslov {0}.</value>
+  </data>
+  <data name="ErrorEmailLinked" xml:space="preserve">
+    <value>To e-mail sporočilo je priloženo uporabniku {0} kot tretjemu ponudniku</value>
+  </data>
+  <data name="TariffsFeature_statistic" xml:space="preserve">
+    <value>Kvote za shranjevanje in statistika</value>
+  </data>
 </root>

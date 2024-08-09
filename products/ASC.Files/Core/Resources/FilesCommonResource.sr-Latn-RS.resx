@@ -535,4 +535,28 @@ Najviša kompatibilnost sa docx, xlsx, pptx.</value>
   <data name="RoleEnum_PowerUser" xml:space="preserve">
     <value>Napredni korisnik</value>
   </data>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>Pomeranje nekoliko datoteka u prostoriju za Popunjavanje Formulara nije podržano. Pomerajte jedan po jedan ONLYOFFICE PDF.</value>
+  </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>Pomeranje foldera u prostoriju za Popunjavanje Formulara nije podržano. Pomerajte jedan po jedan ONLYOFFICE PDF.</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>Datoteka ne može biti pomerena u ovu prostoriju. Molimo pokušajte da pomerite ONLYOFFICE PDF formular.</value>
+  </data>
+  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
+    <value>Datoteka ne može biti otpremljena u ovu prostoriju. Molimo pokušajte da otpremite ONLYOFFICE PDF formular.</value>
+  </data>
+  <data name="FillOutExternalLinkTitle" xml:space="preserve">
+    <value>Link za popunjavanje</value>
+  </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>Link ka formularu</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Otvori formular</value>
+  </data>
+  <data name="FormNumber" xml:space="preserve">
+    <value>Broj formulara</value>
+  </data>
 </root>

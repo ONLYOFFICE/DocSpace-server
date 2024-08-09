@@ -114,6 +114,8 @@ public class FileDto<T> : FileEntryDto<T>
 
     [SwaggerSchemaCustom<ApiDateTime>(Description = "Last opened")]
     public ApiDateTime LastOpened { get; set; }
+    
+    public override FileEntryType FileEntryType { get => FileEntryType.File; }
 
 
     public static FileDto<int> GetSample()

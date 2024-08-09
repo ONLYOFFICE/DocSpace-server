@@ -159,7 +159,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
             }
             else if (folder.FolderType != FolderType.DEFAULT && folder.FolderType != FolderType.BUNCH
                 && !DocSpaceHelper.IsRoom(folder.FolderType)
-                && ((folder.FolderType == FolderType.FormFillingFolderDone || folder.FolderType == FolderType.FormFillingFolderInProgress) && folder.RootFolderType != FolderType.Archive))
+                && ((folder.FolderType == FolderType.InProcessFormFolder || folder.FolderType == FolderType.ReadyFormFolder) && folder.RootFolderType != FolderType.Archive))
             {
                 this[Err] = FilesCommonResource.ErrorMessage_SecurityException_DeleteFolder;
             }
@@ -248,6 +248,16 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                         var files = await FileDao.GetFilesAsync(folder.Id, new OrderBy(SortedByType.AZ, true), FilterType.FilesOnly, false, Guid.Empty, string.Empty, null, false, withSubfolders: true).ToListAsync();
                         var (isError, message) = await WithErrorAsync(scope, files, true, checkPermissions);
                         
+                        if (folder.FolderType == FolderType.FormFillingFolderInProgress || folder.FolderType == FolderType.FormFillingFolderDone)
+                        {
+                            await FolderDao.ChangeFolderTypeAsync(folder, FolderType.DEFAULT);
+                            foreach (var file in files)
+                            {
+                                await LinkDao.DeleteAllLinkAsync(file.Id);
+                                await FileDao.SaveProperties(file.Id, null);
+                            }
+                        }
+
                         if (!_ignoreException && isError)
                         {
                             this[Err] = message;

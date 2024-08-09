@@ -1048,4 +1048,13 @@
   <data name="MessagePasswordSendedToEmail" xml:space="preserve">
     <value>De instructies voor het wijzigen van het wachtwoord zijn naar {0} e-mailadres verzonden.</value>
   </data>
+  <data name="ErrorEmailLinked" xml:space="preserve">
+    <value>Deze e-mail is gekoppeld aan de gebruiker {0} als een externe provider</value>
+  </data>
+  <data name="TariffsFeature_statistic" xml:space="preserve">
+    <value>Opslagquota &amp; statistieken</value>
+  </data>
+  <data name="TariffsFeature_total_size" xml:space="preserve">
+    <value>{0} per beheerder/power user en mogelijkheid om ruimte op verzoek toe te voegen</value>
+  </data>
 </root>

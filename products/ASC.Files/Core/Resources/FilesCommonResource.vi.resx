@@ -494,4 +494,10 @@ Khả năng tương thích cao nhất với docx, xlsx, pptx.</value>
   <data name="LinkToForm" xml:space="preserve">
     <value>Liên kết đến biểu mẫu</value>
   </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Mở biểu mẫu</value>
+  </data>
+  <data name="FormNumber" xml:space="preserve">
+    <value>Số của biểu mẫu</value>
+  </data>
 </root>

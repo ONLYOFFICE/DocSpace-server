@@ -24,32 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Profile = AutoMapper.Profile;
-using Status = ASC.Files.Core.Security.Status;
+namespace ASC.Web.Api.ApiModels.ResponseDto;
 
-namespace ASC.Files.Core.ApiModels.ResponseDto;
-
-public class ExternalShareDto : IMapFrom<ValidationInfo>
+public class TariffDto : Tariff
 {
-    [SwaggerSchemaCustomString("External data status", Example = "Ok")]
-    public Status Status { get; set; }
-
-    [SwaggerSchemaCustomString("External data ID")]
-    public string Id { get; set; }
-
-    [SwaggerSchemaCustomString("External data title")]
-    public string Title { get; set; }
-
-    [SwaggerSchemaCustomInt("Tenant ID", Format = "int32")]
-    public int TenantId { get; set; }
-
-    public string EntityId { get; set; }
-   
-    public string EntryTitle { get; set; }
-
-    [SwaggerSchemaCustomBoolean("Specifies whether to share the external data or not")]
-    public bool Shared { get; set; }
-
-    [SwaggerSchemaCustomGuid("Link ID")]
-    public Guid LinkId { get; set; }
+    public bool? OpenSource { get; set; }
+    public bool? Enterprise { get; set; }
 }

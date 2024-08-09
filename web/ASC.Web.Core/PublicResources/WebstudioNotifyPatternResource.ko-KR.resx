@@ -1626,7 +1626,7 @@ $TrulyYours
 [$__AuthorName]($__AuthorUrl)님이 [${__VirtualRootPath}](${__VirtualRootPath}) 포털의 자신의 프로필 정보를 변경했습니다.</value>
   </data>
   <data name="pattern_send_whats_new" xml:space="preserve">
-    <value>h1.$Date, 고객님의 DocSpace의 새 소식입니다
+    <value>h1.$Date, 고객님의 DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" 의 새 소식입니다
 
 #foreach($Activities 내 $activity)
 $activity

@@ -152,4 +152,31 @@ To je email obvestilo, ki vas obvešča, da je na podlagi vašega zahtevka za po
 
 Uspešno poslana email sporočila najdete v mapi "Poslano":"$__VirtualRootPath/addons/mail/#sent" v email modulu.</value>
   </data>
+  <data name="pattern_FormSubmitted" xml:space="preserve">
+    <value>h1. Izpolnili ste obrazec $Message
+
+Izpolnili ste obrazec "$DocumentTitle":"$DocumentURL" v sobi "$RoomTitle":"$RoomURL"
+
+Upravnik: "$ToUserName":"$ToUserLink"
+
+$OrangeButton</value>
+  </data>
+  <data name="button_CheckReadyForms" xml:space="preserve">
+    <value>Preveri pripravljene obrazce</value>
+  </data>
+  <data name="subject_FormReceived" xml:space="preserve">
+    <value>DocSpace obvestilo. Obrazec je izpolnjen</value>
+  </data>
+  <data name="pattern_FormReceived" xml:space="preserve">
+    <value>h1. Obrazec $Message je izpolnjen
+
+Nov obrazec "$DocumentTitle":"$DocumentURL" je izpolnjen v sobi "$RoomTitle":"$RoomURL"
+
+Pošiljatelj obrazca: "$FromUserName":"$FromUserLink"
+
+$OrangeButton</value>
+  </data>
+  <data name="subject_FormSubmitted" xml:space="preserve">
+    <value>DocSpace obvestilo. Obrazec je izpolnjen</value>
+  </data>
 </root>

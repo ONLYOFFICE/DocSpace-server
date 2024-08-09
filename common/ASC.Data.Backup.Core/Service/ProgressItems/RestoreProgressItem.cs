@@ -119,7 +119,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
                     record = await _backupRepository.GetBackupRecordAsync(md5Hash, TenantId);
                     if (record == null)
                     {
-                       // throw new Exception(BackupResource.BackupNotFound);
+                        throw new Exception(BackupResource.BackupNotFound);
                     }
                 }
             }

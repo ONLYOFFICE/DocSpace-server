@@ -34,6 +34,7 @@ public class WebhooksConfigRequestsDto
     public int Id { get; set; }
 
     [SwaggerSchemaCustomString("Name")]
+    [StringLength(50)]
     public string Name { get; set; }
 
     [SwaggerSchemaCustomString("URI", Format = "uri")]

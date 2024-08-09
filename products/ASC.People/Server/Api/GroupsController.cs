@@ -93,6 +93,7 @@ public class GroupController(
     /// Get a group
     /// </short>
     /// <param type="System.Guid, System" method="url" name="id" example="9924256A-739C-462b-AF15-E652A3B1B6EB">Group ID</param>
+    /// <param type="System.Boolean, System" name="includeMembers">Include members</param>
     /// <remarks>
     /// This method returns full group information.
     /// </remarks>
@@ -100,11 +101,11 @@ public class GroupController(
     [Tags("Group")]
     [SwaggerResponse(200, "Group with the detailed information", typeof(GroupDto))]
     [HttpGet("{id:guid}")]
-    public async Task<GroupDto> GetGroupAsync(Guid id)
+    public async Task<GroupDto> GetGroupAsync(Guid id, bool includeMembers = true)
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_ReadGroups);
         
-        return await groupFullDtoHelper.Get(await GetGroupInfoAsync(id), true);
+        return await groupFullDtoHelper.Get(await GetGroupInfoAsync(id), includeMembers);
     }
 
     /// <summary>
@@ -366,7 +367,7 @@ public class GroupController(
     private async Task<GroupInfo> GetGroupInfoAsync(Guid id)
     {
         var group = await userManager.GetGroupInfoAsync(id);
-        if (group == null || group.ID == Constants.LostGroupInfo.ID)
+        if (group == null || group.Removed || group.ID == Constants.LostGroupInfo.ID)
         {
             throw new ItemNotFoundException("group not found");
         }

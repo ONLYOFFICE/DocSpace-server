@@ -712,19 +712,19 @@ public class FileStorageService //: IFileStorageService
 
         var folderAccess = folder.Access;
 
-        if (!string.Equals(folder.Title, updateData.Title, StringComparison.OrdinalIgnoreCase) || (folder.SettingsQuota != updateData.Quota && updateData.Quota != null))
+        if (!string.Equals(folder.Title, updateData.Title, StringComparison.Ordinal) || (folder.SettingsQuota != updateData.Quota && updateData.Quota != null))
         {
             var oldTitle = folder.Title;
             
             var newFolderId = await folderDao.UpdateFolderAsync(
                  folder,
-                 !string.Equals(folder.Title, updateData.Title, StringComparison.OrdinalIgnoreCase) && updateData.Title != null ? updateData.Title : folder.Title,
+                 !string.Equals(folder.Title, updateData.Title, StringComparison.Ordinal) && updateData.Title != null ? updateData.Title : folder.Title,
                  folder.SettingsQuota != updateData.Quota && updateData.Quota != null ? (long)updateData.Quota : folder.SettingsQuota);
 
             folder = await folderDao.GetFolderAsync(newFolderId);
             folder.Access = folderAccess;
             
-            if (!string.Equals(oldTitle, updateData.Title, StringComparison.OrdinalIgnoreCase))
+            if (!string.Equals(oldTitle, updateData.Title, StringComparison.Ordinal))
             {
                 if (DocSpaceHelper.IsRoom(folder.FolderType))
                 {
@@ -794,7 +794,7 @@ public class FileStorageService //: IFileStorageService
         var folderAccess = folder.Access;
         var renamedFolder = folder;
 
-        if (!string.Equals(folder.Title, title, StringComparison.OrdinalIgnoreCase))
+        if (!string.Equals(folder.Title, title, StringComparison.Ordinal))
         {
             var oldTitle = folder.Title;
             T newFolderId = default;
@@ -3183,10 +3183,7 @@ public class FileStorageService //: IFileStorageService
 
         var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(file);
 
-        var access = await fileSharing.GetSharedInfoAsync([], new[] { roomId });
-        var usersIdWithAccess = access.Where(aceWrapper => !aceWrapper.SubjectGroup
-                                                           && aceWrapper.Access != FileShare.Restrict)
-            .Select(aceWrapper => aceWrapper.Id);
+        var usersIdWithAccess = await WhoCanRead(await folderDao.GetFolderAsync(roomId));
 
         var users = usersIdWithAccess
             .Where(id => !id.Equals(authContext.CurrentAccount.ID))
@@ -3201,7 +3198,22 @@ public class FileStorageService //: IFileStorageService
 
         return result;
     }
+    private async Task<List<Guid>> WhoCanRead<T>(FileEntry<T> entry)
+    {
+        var whoCanReadTask = (await fileSecurity.WhoCanReadAsync(entry, true)).ToList();
+        whoCanReadTask.AddRange(await userManager.GetUsers(true, EmployeeStatus.Active, null, null, null, null, null, null, null, false, null, true, 0, 0)
+            .Select(r=> r.Id)
+            .ToListAsync());
+        
+        whoCanReadTask.Add((await tenantManager.GetCurrentTenantAsync()).OwnerId);
+        
+        var userIds = whoCanReadTask
+            .Concat(new []{ entry.CreateBy })
+            .Distinct()
+            .ToList();
 
+        return userIds;
+    }
     public async Task<Folder<T>> SetPinnedStatusAsync<T>(T folderId, bool pin)
     {
         var folderDao = daoFactory.GetFolderDao<T>();

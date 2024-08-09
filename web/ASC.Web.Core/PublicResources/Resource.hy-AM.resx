@@ -1113,4 +1113,7 @@
   <data name="MessagePasswordSendedToEmail" xml:space="preserve">
     <value>Գաղտնաբառի փոփոխման հրահանգն ուղարկվել է {0} էլ.փոստի հասցեին:</value>
   </data>
+  <data name="ErrorEmailLinked" xml:space="preserve">
+    <value>Այս նամակը կցված է {0} օգտատիրոջը՝ որպես երրորդ կողմի պրովայդեր</value>
+  </data>
 </root>

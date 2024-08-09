@@ -152,4 +152,31 @@ $__AuthorName đã xóa phòng: $RoomTitle</value>
   <data name="subject_ShareDocument_tg" xml:space="preserve">
     <value>Tài liệu. Đã cấp quyền truy cập vào tài liệu: [$DocumentTitle]($DocumentURL)</value>
   </data>
+  <data name="button_CheckReadyForms" xml:space="preserve">
+    <value>Kiểm tra các biểu mẫu đã sẵn sàng</value>
+  </data>
+  <data name="pattern_FormReceived" xml:space="preserve">
+    <value>h1. Biểu mẫu $Message đã được điền
+
+Một biểu mẫu mới "$DocumentTitle":"$DocumentURL" đã được điền trong phòng "$RoomTitle":"$RoomURL"
+
+Người gửi biểu mẫu: "$FromUserName":"$FromUserLink"
+
+$OrangeButton</value>
+  </data>
+  <data name="pattern_FormSubmitted" xml:space="preserve">
+    <value>h1. Bạn đã điền vào biểu mẫu $Message
+
+Bạn đã điền vào biểu mẫu "$DocumentTitle":"$DocumentURL" trong phòng "$RoomTitle":"$RoomURL"
+
+Người quản lý: "$ToUserName":"$ToUserLink"
+
+$OrangeButton</value>
+  </data>
+  <data name="subject_FormReceived" xml:space="preserve">
+    <value>Thông báo DocSpace. Biểu mẫu đã được điền</value>
+  </data>
+  <data name="subject_FormSubmitted" xml:space="preserve">
+    <value>Thông báo DocSpace. Biểu mẫu đã được điền</value>
+  </data>
 </root>

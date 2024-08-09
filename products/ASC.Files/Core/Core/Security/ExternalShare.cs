@@ -308,6 +308,14 @@ public class ValidationInfo
     /// <type>System.String, System</type>
     public string Title { get; set; }
 
+    /// <summary>Entity ID</summary>
+    /// <type>System.String, System</type>
+    public string EntityId { get; set; }
+   
+    /// <summary>Entity title</summary>
+    /// <type>System.String, System</type>
+    public string EntryTitle { get; set; }
+    
     /// <summary>Sharing rights</summary>
     /// <type>ASC.Files.Core.Security.FileShare, ASC.Files.Core</type>
     public FileShare Access { get; set; }

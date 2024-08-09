@@ -89,6 +89,8 @@ public abstract class FileEntryDto
 
     [SwaggerSchemaCustomString("Order")]
     public string Order { get; set; }
+    
+    public abstract FileEntryType FileEntryType { get; }
 
     protected FileEntryDto(FileEntry entry)
     {

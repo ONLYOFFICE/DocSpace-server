@@ -778,4 +778,28 @@
   <data name="RoomUpdateAccessForGroup" xml:space="preserve">
     <value>{0} təyin edildi: {1}</value>
   </data>
+  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
+    <value>Otaqlar [{0}]. Otaqlar üçün fərdi yaddaş kvotası təyin edin: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
+    <value>Otaqlar [{0}]. Otaqlar üçün defolt yaddaş kvotası təyin edin: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
+    <value>Otaqlar [{0}]. Otaqlar üçün deaktiv edilmiş yaddaş kvotası</value>
+  </data>
+  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
+    <value>İstifadəçilər [{0}]. İstifadəçilər üçün fərdi yaddaş kvotası təyin edin: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
+    <value>İstifadəçilər [{0}]. İstifadəçilər üçün defolt yaddaş kvotası təyin edin: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
+    <value>İstifadəçilər [{0}]. İstifadəçilər üçün deaktiv edilmiş yaddaş kvotası</value>
+  </data>
+  <data name="FormOpenedForFilling" xml:space="preserve">
+    <value>Fayl Doldurulmaq üçün Açıldı: {0}</value>
+  </data>
+  <data name="FormSubmit" xml:space="preserve">
+    <value>İstifadəçilər [{0}]. Forma əlavə edildi: {1}</value>
+  </data>
 </root>

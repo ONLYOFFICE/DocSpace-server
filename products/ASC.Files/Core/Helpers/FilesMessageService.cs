@@ -142,7 +142,7 @@ public class FilesMessageService(
         }
     }
     
-    public async Task SendMoveMessageAsync<T1, T2>(FileEntry<T1> target, Folder<T1> from, Folder<T2> to, List<Folder<T2>> toParents, bool overwrite,
+    public async Task SendMoveMessageAsync<T1, T2>(FileEntry<T2> target, Folder<T1> from, Folder<T2> to, List<Folder<T2>> toParents, bool overwrite,
         IDictionary<string, StringValues> headers, string[] description)
     {
         var action = target switch
@@ -223,9 +223,11 @@ public class FilesMessageService(
 
         if (!crossEvent)
         {
-            var references = fromParents.Count > toParents.Count
-                ? GetReferences(fromParents)
-                : GetReferences(toParents);
+            var references = GetReferences(fromParents);
+            foreach (var toRef in GetReferences(toParents).Where(toRef => !references.Any(r => r.EntryId == toRef.EntryId && r.EntryType == toRef.EntryType)))
+            {
+                references.Add(toRef);
+            }
             
             references.Add(new FilesAuditReference { EntryId = target.Id, EntryType = (byte)target.FileEntryType });
             

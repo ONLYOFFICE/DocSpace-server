@@ -211,4 +211,31 @@ $Message</value>
   <data name="subject_ShareFolder_tg" xml:space="preserve">
     <value>المستندات. تم منح الوصول للمجلد: [$DocumentTitle]($DocumentURL)</value>
   </data>
+  <data name="button_CheckReadyForms" xml:space="preserve">
+    <value>فحص النماذج الجاهزة</value>
+  </data>
+  <data name="pattern_FormReceived" xml:space="preserve">
+    <value>1h. النموذج $Message تم ملؤه
+
+تم ملء نموذج جديد "$DocumentTitle":"$DocumentURL" في الغرفة "$RoomTitle":"$RoomURL"
+
+مقدم النموذج: "$FromUserName":"$FromUserLink"
+
+OrangeButton$</value>
+  </data>
+  <data name="pattern_FormSubmitted" xml:space="preserve">
+    <value>1h. لقد ملأت النموذج $Message
+
+لقد ملأت النموذج "$DocumentTitle":"$DocumentURL" في الغرفة "$RoomTitle":"$RoomURL"
+
+المدير: "$ToUserName":"$ToUserLink"
+
+$OrangeButton</value>
+  </data>
+  <data name="subject_FormReceived" xml:space="preserve">
+    <value>إشعار DocSpace. تم تعبئة النموذج</value>
+  </data>
+  <data name="subject_FormSubmitted" xml:space="preserve">
+    <value>إشعار DocSpace. تم تعبئة النموذج</value>
+  </data>
 </root>

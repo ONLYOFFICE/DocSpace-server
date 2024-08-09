@@ -778,4 +778,28 @@
   <data name="SendJoinInvite" xml:space="preserve">
     <value>L'utilisateur {0} a envoyé une invitation à {1} pour qu'il rejoigne ce DocSpace</value>
   </data>
+  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
+    <value>Salles [{0}]. Définir un quota de stockage personnalisé pour les salles : {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
+    <value>Salles [{0}]. Définir le quota de stockage par défaut pour les salles : {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
+    <value>Salles [{0}]. Quota de stockage désactivé pour les salles</value>
+  </data>
+  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
+    <value>Utilisateurs [{0}]. Définir un quota de stockage personnalisé pour les utilisateurs : {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
+    <value>Utilisateurs [{0}]. Définir le quota de stockage par défaut pour les utilisateurs : {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
+    <value>Utilisateurs [{0}]. Quota de stockage désactivé pour les utilisateurs</value>
+  </data>
+  <data name="FormOpenedForFilling" xml:space="preserve">
+    <value>Fichier ouvert pour remplissage : {0}</value>
+  </data>
+  <data name="FormSubmit" xml:space="preserve">
+    <value>Utilisateurs [{0}]. Formulaire soumis : {1}</value>
+  </data>
 </root>

@@ -66,6 +66,7 @@ public class AuthenticationController(
     ApiContext apiContext,
     AuthContext authContext,
     CookieStorage cookieStorage,
+    QuotaSocketManager quotaSocketManager,
     DbLoginEventsManager dbLoginEventsManager,
     BruteForceLoginManager bruteForceLoginManager,
     TfaAppAuthSettingsHelper tfaAppAuthSettingsHelper,
@@ -296,6 +297,7 @@ public class AuthenticationController(
         var loginEventId = cookieStorage.GetLoginEventIdFromCookie(cookie);
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         await dbLoginEventsManager.LogOutEventAsync(tenantId, loginEventId);
+        await quotaSocketManager.LogoutSession(securityContext.CurrentAccount.ID, loginEventId);
 
         var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
         var loginName = user.DisplayUserName(false, displayUserSettingsHelper);
@@ -351,7 +353,7 @@ public class AuthenticationController(
             return new ConfirmDto { Result = await emailValidationKeyModelHelper.ValidateAsync(inDto)};
         }
 
-        var result = await invitationService.ConfirmAsync(inDto.Key, inDto.Email, inDto.EmplType ?? default, inDto.RoomId);
+        var result = await invitationService.ConfirmAsync(inDto.Key, inDto.Email, inDto.EmplType ?? default, inDto.RoomId, inDto.UiD);
 
         return mapper.Map<Validation, ConfirmDto>(result);
     }
@@ -468,20 +470,17 @@ public class AuthenticationController(
                 }
                 var ldapSettings = await settingsManager.LoadAsync<LdapSettings>();
 
-                user = await bruteForceLoginManager.AttemptAsync(inDto.UserName, inDto.RecaptchaType, inDto.RecaptchaResponse, async () =>
+                if (ldapSettings.EnableLdapAuthentication)
                 {
-                    if (ldapSettings.EnableLdapAuthentication && !string.IsNullOrEmpty(inDto.Password))
-                    {
-                        return await ldapUserManager.TryGetAndSyncLdapUserInfo(inDto.UserName, inDto.Password);
-                    }
-                    else
-                    {
-                        return await userManager.GetUsersByPasswordHashAsync(
-                         await tenantManager.GetCurrentTenantIdAsync(),
-                         inDto.UserName,
-                         inDto.PasswordHash);
-                    }
-                });
+                    user = await ldapUserManager.TryGetAndSyncLdapUserInfo(inDto.UserName, inDto.Password);  
+                }
+
+                if(user == null || Equals(user, Constants.LostUser))
+                {
+                    user = await userManager.GetUsersByPasswordHashAsync(await tenantManager.GetCurrentTenantIdAsync(), inDto.UserName, inDto.PasswordHash);
+                }
+
+                user = await bruteForceLoginManager.AttemptAsync(inDto.UserName, inDto.RecaptchaType, inDto.RecaptchaResponse, user);
             }
             else
             {
@@ -497,7 +496,7 @@ public class AuthenticationController(
 
                 inDto.UserName = thirdPartyProfile.EMail;
                 
-                user = await bruteForceLoginManager.AttemptAsync(inDto.UserName, inDto.RecaptchaType, inDto.RecaptchaResponse, async () => await GetUserByThirdParty(thirdPartyProfile));
+                user = await bruteForceLoginManager.AttemptAsync(inDto.UserName, inDto.RecaptchaType, inDto.RecaptchaResponse, await GetUserByThirdParty(thirdPartyProfile));
             }
         }
         catch (BruteForceCredentialException)

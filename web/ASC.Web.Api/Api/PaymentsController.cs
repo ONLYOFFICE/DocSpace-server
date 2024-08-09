@@ -215,6 +215,11 @@ public class PaymentController(UserManager userManager,
     [HttpGet("quota")]
     public async Task<QuotaDto> GetQuotaAsync(bool refresh)
     {
+        if (await userManager.IsUserAsync(securityContext.CurrentAccount.ID))
+        {
+            throw new SecurityException();
+        }
+        
         return await tariffHelper.GetCurrentQuotaAsync(refresh);
     }
 

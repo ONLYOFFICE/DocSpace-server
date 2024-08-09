@@ -51,10 +51,11 @@ public static class OpenApiExtension
             c.EnableAnnotations();
             
             // ToDo: add security definitions
-            c.AddSecurityDefinition("asc_auth_key", new OpenApiSecurityScheme
+            c.AddSecurityDefinition(CookiesManager.AuthCookiesName, new OpenApiSecurityScheme
             {
                 Type = SecuritySchemeType.ApiKey,
-                In = ParameterLocation.Cookie
+                In = ParameterLocation.Cookie,
+                Name = CookiesManager.AuthCookiesName
             });
 
             var xmlPath = Path.Combine(AppContext.BaseDirectory, $"{assemblyName}.xml");
