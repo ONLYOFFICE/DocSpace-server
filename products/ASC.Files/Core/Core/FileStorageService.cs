@@ -1695,7 +1695,7 @@ public class FileStorageService //: IFileStorageService
         await folderDao.SetCustomOrder(folderId, folder.ParentId, order);
     }
 
-    public async Task<SortedDictionary<DateTime, SortedDictionary<FileEntry, SortedSet<FileEntry>>>> GetNewRoomFilesAsync()
+    public async Task<IEnumerable<KeyValuePair<DateTime, IEnumerable<KeyValuePair<FileEntry, IEnumerable<FileEntry>>>>>> GetNewRoomFilesAsync()
     {
         try
         {
@@ -1704,8 +1704,15 @@ public class FileStorageService //: IFileStorageService
             {
                 await fileOperationsManager.PublishMarkAsRead([JsonSerializer.SerializeToElement(await globalFolderHelper.FolderVirtualRoomsAsync)], []);
             }
-            
-            return newFiles;
+
+            return newFiles
+                .OrderByDescending(x => x.Key)
+                .Select(x => 
+                    new KeyValuePair<DateTime, IEnumerable<KeyValuePair<FileEntry, IEnumerable<FileEntry>>>>(x.Key, 
+                        x.Value.OrderByDescending(y => y.Key.ModifiedOn)
+                            .Select(y => 
+                                new KeyValuePair<FileEntry, IEnumerable<FileEntry>>(y.Key, 
+                                    y.Value.OrderByDescending(y1 => y1.ModifiedOn)))));
         }
         catch (Exception e)
         {

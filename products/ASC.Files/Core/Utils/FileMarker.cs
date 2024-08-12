@@ -686,7 +686,7 @@ public class FileMarker(
         return 0;
     }
 
-    public async Task<SortedDictionary<DateTime, SortedDictionary<FileEntry, SortedSet<FileEntry>>>> GetRoomGroupedNewFilesAsync()
+    public async Task<Dictionary<DateTime, Dictionary<FileEntry, List<FileEntry>>>> GetRoomGroupedNewFilesAsync()
     {
         var roomsId = await globalFolder.GetFolderVirtualRoomsAsync(daoFactory, false);
         var roomsRoot = await daoFactory.GetFolderDao<int>().GetFolderAsync(roomsId);
@@ -694,13 +694,13 @@ public class FileMarker(
         var (entryTagsProvider, entryTagsInternal) = await GetMarkedEntriesAsync(roomsRoot);
         if (entryTagsProvider.Count == 0 && entryTagsInternal.Count == 0)
         {
-            return new SortedDictionary<DateTime, SortedDictionary<FileEntry, SortedSet<FileEntry>>>();
+            return new Dictionary<DateTime, Dictionary<FileEntry, List<FileEntry>>>();
         }
         
         var treeInternal = MakeTree(entryTagsInternal);
         var treeProvider = MakeTree(entryTagsProvider);
         
-        var groupedEntries = new SortedDictionary<DateTime, SortedDictionary<FileEntry, SortedSet<FileEntry>>>(_dateDescComparer);
+        var groupedEntries = new Dictionary<DateTime, Dictionary<FileEntry, List<FileEntry>>>();
         
         var t1 = RemoveErrorEntriesAsync(treeInternal);
         var t2 = RemoveErrorEntriesAsync(treeProvider);
@@ -748,13 +748,13 @@ public class FileMarker(
                 
                 if (!groupedEntries.TryGetValue(entry.ModifiedOn.Date, out var roomEntries))
                 {
-                    roomEntries = new SortedDictionary<FileEntry, SortedSet<FileEntry>>(_entryDateDescComparer);
+                    roomEntries = new Dictionary<FileEntry, List<FileEntry>>();
                     groupedEntries[entry.ModifiedOn.Date] = roomEntries;
                 }
                 
                 if (!roomEntries.TryGetValue(room, out var entries))
                 {
-                    entries = new SortedSet<FileEntry>(_entryDateDescComparer);
+                    entries = [];
                     roomEntries[room] = entries;
                 }
                 
