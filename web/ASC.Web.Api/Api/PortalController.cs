@@ -290,9 +290,21 @@ public class PortalController(
     [AllowNotPayment]
     [HttpGet("quota")]
     public async Task<TenantQuota> GetQuotaAsync()
-    {
+    {        
+        if (await userManager.IsUserAsync(securityContext.CurrentAccount.ID))
+        {
+            throw new SecurityException();
+        }
+        
         var tenant = await tenantManager.GetCurrentTenantAsync();
-        return await tenantManager.GetTenantQuotaAsync(tenant.Id);
+        var result = await tenantManager.GetTenantQuotaAsync(tenant.Id);
+
+        if (await userManager.IsCollaboratorAsync(authContext.CurrentAccount.ID))
+        {
+            result.MaxTotalSize = 0;
+        }
+        
+        return result;
     }
 
     /// <summary>
