@@ -26,6 +26,7 @@
 
 using ASC.AuditTrail.Repositories;
 using ASC.AuditTrail.Types;
+using ASC.Core.Security.Authentication;
 
 namespace ASC.People.Api;
 
@@ -34,6 +35,7 @@ public class UserController(
     ICache cache,
     TenantManager tenantManager,
     CookiesManager cookiesManager,
+    CookieStorage cookieStorage,
     CustomNamingPeople customNamingPeople,
     EmployeeDtoHelper employeeDtoHelper,
     EmployeeFullDtoHelper employeeFullDtoHelper,
@@ -66,16 +68,14 @@ public class UserController(
     UsersQuotaSyncOperation usersQuotaSyncOperation,
     CountPaidUserChecker countPaidUserChecker,
     CountUserChecker activeUsersChecker,
-    UsersInRoomChecker usersInRoomChecker,
     IUrlShortener urlShortener,
     FileSecurityCommon fileSecurityCommon, 
     IDistributedLockProvider distributedLockProvider,
     QuotaSocketManager quotaSocketManager,
     IQuotaService quotaService,
     CustomQuota customQuota,
-    IDaoFactory daoFactory,
-    FilesMessageService filesMessageService,
-    AuditEventsRepository auditEventsRepository)
+    AuditEventsRepository auditEventsRepository,
+    EmailValidationKeyModelHelper emailValidationKeyModelHelper)
     : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
 {
 
@@ -182,8 +182,8 @@ public class UserController(
     public async Task<EmployeeFullDto> AddMember(MemberRequestDto inDto)
     {
         await _apiContext.AuthByClaimAsync();
-
-        var linkData = inDto.FromInviteLink ? await invitationService.GetInvitationDataAsync(inDto.Key, inDto.Email, inDto.Type) : null;
+        var model = emailValidationKeyModelHelper.GetModel();
+        var linkData = inDto.FromInviteLink ? await invitationService.GetLinkDataAsync(inDto.Key, inDto.Email, inDto.Type, model?.UiD) : null;
         if (linkData is { IsCorrect: false })
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_InvintationLink);
@@ -260,8 +260,19 @@ public class UserController(
 
         cache.Insert("REWRITE_URL" + await tenantManager.GetCurrentTenantIdAsync(), HttpContext.Request.GetDisplayUrl(), TimeSpan.FromMinutes(5));
 
+        var quotaLimit = false;
+        
+        try
+        {
         user = await userManagerWrapper.AddUserAsync(user, inDto.PasswordHash, inDto.FromInviteLink, true, inDto.Type,
             inDto.FromInviteLink && linkData is { IsCorrect: true, ConfirmType: not ConfirmType.EmpInvite }, true, true, byEmail);
+        }
+        catch (TenantQuotaException)
+        {
+            quotaLimit = true;
+            user = await userManagerWrapper.AddUserAsync(user, inDto.PasswordHash, inDto.FromInviteLink, true, EmployeeType.User,
+                inDto.FromInviteLink && linkData is { IsCorrect: true, ConfirmType: not ConfirmType.EmpInvite }, true, true, byEmail);
+        }
 
         await UpdateDepartmentsAsync(inDto.Department, user);
 
@@ -272,21 +283,8 @@ public class UserController(
 
         if (linkData is { LinkType: InvitationLinkType.CommonToRoom })
         {
-            var success = int.TryParse(linkData.RoomId, out var id);
-            var tenantId = await tenantManager.GetCurrentTenantIdAsync();
-
-            await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetUsersInRoomCountCheckKey(tenantId)))
-            {
-                if (success)
-                {
-                    await AddUserToRoomAsync(id);
+            await invitationService.AddUserToRoomByInviteAsync(linkData, user, quotaLimit);
                 }
-                else
-                {
-                    await AddUserToRoomAsync(linkData.RoomId);
-                }
-            }
-        }
 
         if (inDto.IsUser.GetValueOrDefault(false))
         {
@@ -298,20 +296,7 @@ public class UserController(
         }
 
         return await employeeFullDtoHelper.GetFullAsync(user);
-        
-        async Task AddUserToRoomAsync<T>(T roomId)
-        {
-            await usersInRoomChecker.CheckAppend();
-            var roomTask = daoFactory.GetFolderDao<T>().GetFolderAsync(roomId);
-
-            await fileSecurity.ShareAsync(roomId, FileEntryType.Folder, user.Id, linkData.Share);
-
-            var room = await roomTask;
-
-            await filesMessageService.SendAsync(MessageAction.RoomCreateUser, room, user.Id, linkData.Share, null, true, 
-                user.DisplayUserName(false, displayUserSettingsHelper));
         }
-    }
 
     /// <summary>
     /// Invites users specified in the request to the current portal.
@@ -1033,6 +1018,8 @@ public class UserController(
         var result = await employeeFullDtoHelper.GetFullAsync(user);
 
         result.Theme = (await settingsManager.LoadForCurrentUserAsync<DarkThemeSettings>()).Theme;
+
+        result.LoginEventId = cookieStorage.GetLoginEventIdFromCookie(cookiesManager.GetCookies(CookiesType.AuthKey));
 
         return result;
     }

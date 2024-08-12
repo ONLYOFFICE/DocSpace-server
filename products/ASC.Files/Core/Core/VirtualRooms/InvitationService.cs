@@ -24,7 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Core.Billing;
 using ASC.MessagingSystem.EF.Context;
 
 namespace ASC.Files.Core.VirtualRooms;
@@ -34,20 +33,20 @@ public class InvitationService(
     CommonLinkUtility commonLinkUtility, 
     IDaoFactory daoFactory, 
     InvitationValidator invitationValidator, 
-    ITariffService tariffService, 
     TenantManager tenantManager, 
-    CountPaidUserChecker countPaidUserChecker, 
     FileSecurity fileSecurity, 
     UserManager userManager,
     IPSecurity.IPSecurity iPSecurity,
     AuthContext authContext,
     IDbContextFactory<MessagesContext> dbContextFactory,
     FilesMessageService filesMessageService,
-    DisplayUserSettingsHelper displayUserSettingsHelper)
+    DisplayUserSettingsHelper displayUserSettingsHelper,
+    IDistributedLockProvider distributedLockProvider,
+    UsersInRoomChecker usersInRoomChecker)
 {
     public string GetInvitationLink(Guid linkId, Guid createdBy)
     {
-        var key = invitationValidator.MakeIndividualLinkKey(linkId);
+        var key = invitationValidator.MakeIndividualLinkKey(linkId, createdBy);
         return commonLinkUtility.GetConfirmationUrl(key, ConfirmType.LinkInvite, createdBy);
     }
 
@@ -58,14 +57,14 @@ public class InvitationService(
         return link;
     }
     
-    public async Task<Validation> ConfirmAsync(string key, string email, EmployeeType employeeType, string roomId = null)
+    public async Task<Validation> ConfirmAsync(string key, string email, EmployeeType employeeType, string roomId = null, Guid? userId = default)
     {
         if (!await iPSecurity.VerifyAsync())
         {
             throw new SecurityException();
         }
 
-        var data = await GetLinkDataAsync(key, email, employeeType);
+        var data = await GetLinkDataAsync(key, email, employeeType, userId);
         var validation = new Validation { Result = data.Result };
         
         if (data.Result is EmailValidationKeyProvider.ValidationResult.Invalid or EmailValidationKeyProvider.ValidationResult.Expired)
@@ -123,14 +122,14 @@ public class InvitationService(
                         query = query.Where(x => x.Target == data.RoomId);
                     }
 
-                    var userId = authContext.CurrentAccount.ID;
+                    var currentUserId = authContext.CurrentAccount.ID;
                 
                     await foreach(var auditEvent in query.ToAsyncEnumerable())
                     {
                         var description = JsonSerializer.Deserialize<List<string>>(auditEvent.DescriptionRaw);
                         var info = JsonSerializer.Deserialize<EventDescription<JsonElement>>(description.Last());
 
-                        if (!info.UserIds.Contains(userId) || auditEvent.UserId == userId)
+                        if (!info.UserIds.Contains(currentUserId) || auditEvent.UserId == currentUserId)
                         {
                             continue;
                         }
@@ -139,32 +138,29 @@ public class InvitationService(
                         return false;
                     }
                     
-                    if (FileSecurity.PaidShares.Contains(data.Share) && await userManager.GetUserTypeAsync(userId) is EmployeeType.User)
+                    if (FileSecurity.PaidShares.Contains(data.Share) && await userManager.GetUserTypeAsync(currentUserId) is EmployeeType.User)
                     {
                         data.Share = FileSecurity.GetHighFreeRole(folder.FolderType);
 
-                        if (data.Share == FileShare.None || 
-                            !FileSecurity.AvailableRoomAccesses.TryGetValue(folder.FolderType, out var availableRoles) || 
-                            !availableRoles.TryGetValue(SubjectType.InvitationLink, out var availableRolesBySubject) || 
-                            !availableRolesBySubject.Contains(data.Share))
+                        if (data.Share == FileShare.None || !FileSecurity.IsAvailableAccess(data.Share, SubjectType.InvitationLink, folder.FolderType))
                         {
                             validation.Result = EmailValidationKeyProvider.ValidationResult.QuotaFailed;
                             return false;
                         }
                     }
 
-                    var user = await userManager.GetUsersAsync(userId);
+                    var user = await userManager.GetUsersAsync(currentUserId);
                     
-                    await fileSecurity.ShareAsync(folder.Id, FileEntryType.Folder, userId, data.Share);
+                    await fileSecurity.ShareAsync(folder.Id, FileEntryType.Folder, currentUserId, data.Share);
 
                     switch (entry)
                     {
                         case FileEntry<int> entryInt:
-                            await filesMessageService.SendAsync(MessageAction.RoomCreateUser, entryInt, userId, data.Share, null, true, 
+                            await filesMessageService.SendAsync(MessageAction.RoomCreateUser, entryInt, currentUserId, data.Share, null, true, 
                                 user.DisplayUserName(false, displayUserSettingsHelper));
                             break;
                         case FileEntry<string> entryString:
-                            await filesMessageService.SendAsync(MessageAction.RoomCreateUser, entryString, userId, data.Share, null, true, 
+                            await filesMessageService.SendAsync(MessageAction.RoomCreateUser, entryString, currentUserId, data.Share, null, true, 
                                 user.DisplayUserName(false, displayUserSettingsHelper));
                             break;
                     }
@@ -184,8 +180,6 @@ public class InvitationService(
 
             return validation;
         }
-        
-        validation.Result = await GetQuotaBasedResultAsync(data);
 
         if (validation.Result is EmailValidationKeyProvider.ValidationResult.Ok)
         {
@@ -197,19 +191,10 @@ public class InvitationService(
 
         return validation;
     }
-    
-    public async Task<InvitationLinkData> GetInvitationDataAsync(string key, string email, EmployeeType employeeType = EmployeeType.All)
+
+    public async Task<InvitationLinkData> GetLinkDataAsync(string key, string email, EmployeeType employeeType = EmployeeType.All, Guid? userId = default)
     {
-        var data = await GetLinkDataAsync(key, email, employeeType);
-
-        data.Result = await GetQuotaBasedResultAsync(data);
-
-        return data;
-    }
-
-    private async Task<InvitationLinkData> GetLinkDataAsync(string key, string email, EmployeeType employeeType = EmployeeType.All)
-    {
-        var result = await invitationValidator.ValidateAsync(key, email, employeeType);
+        var result = await invitationValidator.ValidateAsync(key, email, employeeType, userId);
         var data = new InvitationLinkData
         {
             Result = result.Status, 
@@ -244,32 +229,50 @@ public class InvitationService(
 
         return data;
     }
-
-    private async Task<EmailValidationKeyProvider.ValidationResult> GetQuotaBasedResultAsync(InvitationLinkData data)
+    
+    public async Task AddUserToRoomByInviteAsync(InvitationLinkData data, UserInfo user, bool quotaLimit = false)
     {
-        var tenant = await tenantManager.GetCurrentTenantAsync();
-        
-        // preferential rate does not allow invite users
-        if ((await tariffService.GetTariffAsync(tenant.Id)).State > TariffState.Paid)
+        if (data is not { LinkType: InvitationLinkType.CommonToRoom })
         {
-            return EmailValidationKeyProvider.ValidationResult.Invalid;
+            return;
         }
 
-        if (data.LinkType is InvitationLinkType.Individual || data.EmployeeType is EmployeeType.User)
+        var success = int.TryParse(data.RoomId, out var id);
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+
+        await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetUsersInRoomCountCheckKey(tenantId)))
         {
-            return data.Result;
-        }
-        
-        try
-        {
-            await countPaidUserChecker.CheckAppend();
-        }
-        catch (TenantQuotaException)
-        {
-            return EmailValidationKeyProvider.ValidationResult.TariffLimit;
+            if (success)
+            {
+                await AddToRoomAsync(id);
+            }
+            else
+            {
+                await AddToRoomAsync(data.RoomId);
+            }
         }
 
-        return data.Result;
+        return;
+
+        async Task AddToRoomAsync<T>(T roomId)
+        {
+            await usersInRoomChecker.CheckAppend();
+            var room = await daoFactory.GetFolderDao<T>().GetFolderAsync(roomId);
+
+            if (quotaLimit && FileSecurity.PaidShares.Contains(data.Share))
+            {
+                data.Share = FileSecurity.GetHighFreeRole(room.FolderType);
+                if (data.Share == FileShare.None || !FileSecurity.IsAvailableAccess(data.Share, SubjectType.InvitationLink, room.FolderType))
+                {
+                    return;
+                }
+            }
+
+            await fileSecurity.ShareAsync(roomId, FileEntryType.Folder, user.Id, data.Share);
+
+            await filesMessageService.SendAsync(MessageAction.RoomCreateUser, room, user.Id, data.Share, null, true, 
+                user.DisplayUserName(false, displayUserSettingsHelper));
+        }
     }
 
     private async Task<(string, string)> GetRoomDataAsync(string roomId, Func<FileEntry, Task<bool>> accessResolver = null)

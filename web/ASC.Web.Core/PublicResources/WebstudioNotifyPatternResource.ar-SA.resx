@@ -1838,7 +1838,7 @@ $TrulyYours</value>
 
 مرحبا $UserName!
 
-لقد قمت للتو بإنشاء ONLYOFFICE DocSpace، وهو مركز مستندات حيث يمكنك تعزيز التعاون مع فريقك وعملائك وشركائك والمزيد. عنوانها هو "${VirtualRootPath}":"${VirtualRootPath}".
+لقد قمت للتو بإنشاء ONLYOFFICE DocSpace، وهو مركز مستندات حيث يمكنك تعزيز التعاون مع فريقك وعملائك وشركائك والمزيد. عنوانها هو "${__VirtualRootPath}":"${__VirtualRootPath}".
 
 الخطة التعريفة الحالية الخاصة بك هي STARTUP. إنه مجاني تماما ويشمل:
 

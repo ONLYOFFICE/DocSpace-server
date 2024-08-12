@@ -497,4 +497,7 @@ docx, xlsx, pptx ilə ən yüksək uyğunluq.</value>
   <data name="OpenForm" xml:space="preserve">
     <value>Formanı açın</value>
   </data>
+  <data name="FormNumber" xml:space="preserve">
+    <value>Forma nömrəsi</value>
+  </data>
 </root>

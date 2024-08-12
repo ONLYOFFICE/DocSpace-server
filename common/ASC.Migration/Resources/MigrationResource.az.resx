@@ -162,4 +162,52 @@
   <data name="MigrationProjectFiles" xml:space="preserve">
     <value>Köçürülmə layihəsi faylları</value>
   </data>
+  <data name="CanNotAddUserInGroup" xml:space="preserve">
+    <value>{0} istifadəçisini {1} qrupuna əlavə etmək mümkün olmadı</value>
+  </data>
+  <data name="CanNotCreateFile" xml:space="preserve">
+    <value>{0} faylı yaratmaq mümkün olmadı</value>
+  </data>
+  <data name="CanNotImportUser" xml:space="preserve">
+    <value>İstifadəçini idxal etmək mümkün olmadı</value>
+  </data>
+  <data name="CanNotImportUserFiles" xml:space="preserve">
+    <value>İstifadəçi fayllarını idxal etmək mümkün olmadı</value>
+  </data>
+  <data name="CanNotParseArchive" xml:space="preserve">
+    <value>{0} arxivini təhlil etmək mümkün olmadı</value>
+  </data>
+  <data name="CanNotParseArchives" xml:space="preserve">
+    <value>Arxivləri təhlil etmək mümkün olmadı</value>
+  </data>
+  <data name="CanNotParseUser" xml:space="preserve">
+    <value>{0} istifadəçisini təhlil etmək mümkün olmadı</value>
+  </data>
+  <data name="CanNotReadInfoFile" xml:space="preserve">
+    <value>{0} məlumat faylını oxumaq mümkün olmadı</value>
+  </data>
+  <data name="CanNotShare" xml:space="preserve">
+    <value>{0} girişini {1} ilə paylaşmaq mümkün olmadı</value>
+  </data>
+  <data name="CanNotToUnzip" xml:space="preserve">
+    <value>{0} faylını açmaq mümkün olmadı</value>
+  </data>
+  <data name="CreateFile" xml:space="preserve">
+    <value>{0} faylı yaradın</value>
+  </data>
+  <data name="CreateFolder" xml:space="preserve">
+    <value>{0} qovluğu yaradın</value>
+  </data>
+  <data name="CreateShareRoom" xml:space="preserve">
+    <value>ortaq otaq yaradın {0}</value>
+  </data>
+  <data name="СanNotImportCommonFiles" xml:space="preserve">
+    <value>Ümumi faylları idxal etmək mümkün olmadı</value>
+  </data>
+  <data name="СanNotImportProjectFiles" xml:space="preserve">
+    <value>Layihə fayllarını idxal etmək mümkün olmadı</value>
+  </data>
+  <data name="СreateRootFolder" xml:space="preserve">
+    <value>Kök qovluğu yaradın</value>
+  </data>
 </root>

@@ -556,4 +556,7 @@ Najviša kompatibilnost sa docx, xlsx, pptx.</value>
   <data name="OpenForm" xml:space="preserve">
     <value>Otvori formular</value>
   </data>
+  <data name="FormNumber" xml:space="preserve">
+    <value>Broj formulara</value>
+  </data>
 </root>

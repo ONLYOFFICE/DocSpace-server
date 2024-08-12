@@ -126,7 +126,7 @@ public class EmailValidationKeyModelHelper(
                 break;
 
             case ConfirmType.LinkInvite:
-                checkKeyResult = (await invitationValidator.ValidateAsync(key, email, emplType ?? default)).Status;
+                checkKeyResult = (await invitationValidator.ValidateAsync(key, email, emplType ?? default, uiD)).Status;
                 break;
 
             case ConfirmType.PortalOwnerChange:                

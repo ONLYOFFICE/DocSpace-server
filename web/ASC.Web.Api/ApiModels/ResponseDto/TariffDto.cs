@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,41 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Web.Api.ApiModel.ResponseDto;
+namespace ASC.Web.Api.ApiModels.ResponseDto;
 
-/// <summary>
-/// </summary>
-public class UsageSpaceStatItemDto
+public class TariffDto : Tariff
 {
-    /// <summary>Name</summary>
-    /// <type>System.String, System</type>
-    public string Name { get; set; }
-
-    /// <summary>Icon</summary>
-    /// <type>System.String, System</type>
-    public string Icon { get; set; }
-
-    /// <summary>Specifies if the module space is disabled or not</summary>
-    /// <type>System.Boolean, System</type>
-    public bool Disabled { get; set; }
-
-    /// <summary>Size</summary>
-    /// <type>System.String, System</type>
-    public string Size { get; set; }
-
-    /// <summary>URL</summary>
-    /// <type>System.String, System</type>
-    public string Url { get; set; }
-
-    public static UsageSpaceStatItemDto GetSample()
-    {
-        return new UsageSpaceStatItemDto
-        {
-            Name = "Item name",
-            Icon = "Item icon path",
-            Disabled = false,
-            Size = "0 Byte",
-            Url = "Item url"
-        };
-    }
+    public bool? OpenSource { get; set; }
+    public bool? Enterprise { get; set; }
 }
