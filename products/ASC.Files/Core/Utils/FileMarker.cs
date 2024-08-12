@@ -858,10 +858,12 @@ public class FileMarker(
             .Where(r => (r.EntryType == FileEntryType.Folder && !Equals(r.EntryId, folder.Id)) || r.EntryType == FileEntryType.File)
             .Distinct()
             .ToList();
-
-        //TODO: refactoring
-        var entryTagsProvider = await GetEntryTagsAsync<string>(tags.Where(r => r.EntryId is string).ToAsyncEnumerable());
-        var entryTagsInternal = await GetEntryTagsAsync<int>(tags.Where(r => r.EntryId is int).ToAsyncEnumerable());
+        
+        var entryTagsProvider = await filesSettingsHelper.GetEnableThirdParty() 
+            ? await GetEntryTagsAsync<string>(tags.Where(r => r.EntryId is string)) 
+            : [];
+        
+        var entryTagsInternal = await GetEntryTagsAsync<int>(tags.Where(r => r.EntryId is int));
 
         foreach (var entryTag in entryTagsInternal)
         {
@@ -924,22 +926,32 @@ public class FileMarker(
 
         return tree;
     }
-
-    // TODO: Need optimize
-    private async Task<Dictionary<FileEntry<T>, Tag>> GetEntryTagsAsync<T>(IAsyncEnumerable<Tag> tags)
+    
+    private async Task<Dictionary<FileEntry<T>, Tag>> GetEntryTagsAsync<T>(IEnumerable<Tag> tags)
     {
         var fileDao = daoFactory.GetFileDao<T>();
         var folderDao = daoFactory.GetFolderDao<T>();
         var entryTags = new Dictionary<FileEntry<T>, Tag>();
 
-        await foreach (var tag in tags)
+        var filesTags = tags.Where(t => t.EntryType == FileEntryType.File).ToDictionary(t => (T)t.EntryId);
+        var foldersTags = tags.Where(t => t.EntryType == FileEntryType.Folder).ToDictionary(t => (T)t.EntryId);
+
+        var files = fileDao.GetFilesAsync(filesTags.Keys);
+        var folders = folderDao.GetFoldersAsync(foldersTags.Keys);
+
+        await foreach (var file in files)
         {
-            var entry = tag.EntryType == FileEntryType.File
-                            ? await fileDao.GetFileAsync((T)tag.EntryId)
-                            : (FileEntry<T>)await folderDao.GetFolderAsync((T)tag.EntryId);
-            if (entry != null && (!entry.ProviderEntry || await filesSettingsHelper.GetEnableThirdParty()))
+            if (filesTags.TryGetValue(file.Id, out var tag))
             {
-                entryTags.Add(entry, tag);
+                entryTags[file] = tag;
+            }
+        }
+        
+        await foreach (var folder in folders)
+        {
+            if (foldersTags.TryGetValue(folder.Id, out var tag))
+            {
+                entryTags[folder] = tag;
             }
         }
 
