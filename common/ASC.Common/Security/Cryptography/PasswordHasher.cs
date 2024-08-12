@@ -29,10 +29,10 @@ namespace ASC.Security.Cryptography;
 [Singleton]
 public class PasswordHasher
 {
-    [SwaggerSchemaCustomInt("Size")]
+    [SwaggerSchemaCustom("Size")]
     public int Size { get; private set; }
 
-    [SwaggerSchemaCustomInt("Iterations")]
+    [SwaggerSchemaCustom("Iterations")]
     public int Iterations { get; private set; }
 
     [SwaggerSchemaCustomString("Salt")]

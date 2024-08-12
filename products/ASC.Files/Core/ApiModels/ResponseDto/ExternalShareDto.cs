@@ -40,16 +40,16 @@ public class ExternalShareDto : IMapFrom<ValidationInfo>
     [SwaggerSchemaCustomString("External data title")]
     public string Title { get; set; }
 
-    [SwaggerSchemaCustomInt("Tenant ID", Format = "int32")]
+    [SwaggerSchemaCustom("Tenant ID")]
     public int TenantId { get; set; }
 
     public string EntityId { get; set; }
    
     public string EntryTitle { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies whether to share the external data or not")]
+    [SwaggerSchemaCustom("Specifies whether to share the external data or not")]
     public bool Shared { get; set; }
 
-    [SwaggerSchemaCustomGuid("Link ID")]
+    [SwaggerSchemaCustom("Link ID")]
     public Guid LinkId { get; set; }
 }

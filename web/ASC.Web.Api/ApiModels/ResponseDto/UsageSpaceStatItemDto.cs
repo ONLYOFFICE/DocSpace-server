@@ -61,13 +61,13 @@ public class ChartPointDto
     [SwaggerSchemaCustomString("Display date")]
     public string DisplayDate { get; set; }
 
-    [SwaggerSchemaCustomDateTime("Date")]
+    [SwaggerSchemaCustom("Date")]
     public DateTime Date { get; init; }
 
-    [SwaggerSchemaCustomInt("Hosts", Example = 0, Format = "int32")]
+    [SwaggerSchemaCustomInt("Hosts", Example = 0)]
     public int Hosts { get; set; }
 
-    [SwaggerSchemaCustomInt("Hits", Example = 0, Format = "int32")]
+    [SwaggerSchemaCustomInt("Hits", Example = 0)]
     public int Hits { get; set; }
 
     public static ChartPointDto GetSample()

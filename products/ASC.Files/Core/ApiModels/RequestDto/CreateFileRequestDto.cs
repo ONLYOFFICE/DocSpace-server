@@ -31,12 +31,12 @@ public class CreateFileRequestDto<T>
     [SwaggerSchemaCustomString("File title")]
     public string Title { get; set; }
 
-    [SwaggerSchemaCustomInt("Template file ID", Format = "int32")]
+    [SwaggerSchemaCustomInt("Template file ID")]
     public T TemplateId { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies whether to allow the creation of external extension files or not")]
+    [SwaggerSchemaCustom("Specifies whether to allow the creation of external extension files or not")]
     public bool EnableExternalExt { get; set; }
 
-    [SwaggerSchemaCustomInt("Form ID", Format = "int32")]
+    [SwaggerSchemaCustom("Form ID")]
     public int FormId { get; set; }
 }

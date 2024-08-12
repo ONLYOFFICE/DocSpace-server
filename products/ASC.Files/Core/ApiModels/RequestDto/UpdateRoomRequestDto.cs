@@ -31,6 +31,6 @@ public class UpdateRoomRequestDto
     [SwaggerSchemaCustomString("Room name")]
     public string Title { get; set; }
 
-    [SwaggerSchemaCustomLong("Room quota", Format = "int64")]
+    [SwaggerSchemaCustom("Room quota")]
     public long? Quota { get; set; }
 }

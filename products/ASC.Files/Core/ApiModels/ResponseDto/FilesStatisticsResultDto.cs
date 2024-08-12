@@ -46,6 +46,6 @@ public class FilesStatisticsFolder
     [SwaggerSchemaCustomString("Folder title")]
     public string Title { get; set; }
 
-    [SwaggerSchemaCustomLong("Used space", Format = "int64")]
+    [SwaggerSchemaCustom("Used space")]
     public long UsedSpace { get; set; }
 }

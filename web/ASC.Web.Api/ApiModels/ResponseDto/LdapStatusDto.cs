@@ -28,7 +28,7 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class LdapStatusDto : IMapFrom<LdapOperationStatus>
 {
-    [SwaggerSchemaCustomBoolean("Specifies if the LDAP operation is completed or not")]
+    [SwaggerSchemaCustom("Specifies if the LDAP operation is completed or not")]
     public bool Completed { get; set; }
 
     [SwaggerSchemaCustomString("ID")]
@@ -43,7 +43,7 @@ public class LdapStatusDto : IMapFrom<LdapOperationStatus>
     [SwaggerSchemaCustomString("Warning")]
     public string Warning { get; set; }
 
-    [SwaggerSchemaCustomInt("Percentage of completion", Format = "int32")]
+    [SwaggerSchemaCustom("Percentage of completion")]
     public int Percents { get; set; }
 
     [SwaggerSchemaCustomString("Certificate confirmation request")]

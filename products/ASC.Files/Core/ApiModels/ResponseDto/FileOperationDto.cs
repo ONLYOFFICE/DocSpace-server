@@ -35,7 +35,7 @@ public class FileOperationDto
     [JsonPropertyName("Operation")]
     public FileOperationType OperationType { get; init; }
 
-    [SwaggerSchemaCustomInt("Operation progress", Format = "int32")]
+    [SwaggerSchemaCustom("Operation progress")]
     public int Progress { get; set; }
 
     [SwaggerSchemaCustomString("Error")]
@@ -44,7 +44,7 @@ public class FileOperationDto
     [SwaggerSchemaCustomString("Processing status", Example = "1")]
     public string Processed { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the operation is finished or not")]
+    [SwaggerSchemaCustom("Specifies if the operation is finished or not")]
     public bool Finished { get; set; }
 
     [SwaggerSchemaCustomString("URL", Format = "uri")]

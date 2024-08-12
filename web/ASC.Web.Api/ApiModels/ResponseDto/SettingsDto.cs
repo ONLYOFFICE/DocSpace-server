@@ -43,31 +43,31 @@ public class SettingsDto
     [SwaggerSchemaCustom<TimeSpan>("UTC offset")]
     public TimeSpan UtcOffset { get; set; }
 
-    [SwaggerSchemaCustomDouble("UTC hours offset")]
+    [SwaggerSchemaCustom("UTC hours offset")]
     public double UtcHoursOffset { get; set; }
 
     [SwaggerSchemaCustomString("Greeting settings", Example = "Web Office Applications")]
     public string GreetingSettings { get; set; }
 
-    [SwaggerSchemaCustomGuid("Owner ID")]
+    [SwaggerSchemaCustom("Owner ID")]
     public Guid OwnerId { get; set; }
 
     [SwaggerSchemaCustomString("Team template ID")]
     public string NameSchemaId { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if a user can join to the portal or not", Nullable = true)]
+    [SwaggerSchemaCustom("Specifies if a user can join to the portal or not", Nullable = true)]
     public bool? EnabledJoin { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if a user can send a message to the administrator or not", Nullable = true)]
+    [SwaggerSchemaCustom("Specifies if a user can send a message to the administrator or not", Nullable = true)]
     public bool? EnableAdmMess { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if a user can connect third-party providers or not", Nullable = true)]
+    [SwaggerSchemaCustom("Specifies if a user can connect third-party providers or not", Nullable = true)]
     public bool? ThirdpartyEnable { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if this is a DocSpace portal or not")]
+    [SwaggerSchemaCustom("Specifies if this is a DocSpace portal or not")]
     public bool DocSpace { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if this is a standalone portal or not")]
+    [SwaggerSchemaCustom("Specifies if this is a standalone portal or not")]
     public bool Standalone { get; set; }
 
     [SwaggerSchemaCustomString("Base domain")]
@@ -91,7 +91,7 @@ public class SettingsDto
     [SwaggerSchemaCustomString("ReCAPTCHA public key")]
     public string RecaptchaPublicKey { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the debug information will be sent or not")]
+    [SwaggerSchemaCustom("Specifies if the debug information will be sent or not")]
     public bool DebugInfo { get; set; }
 
     [SwaggerSchemaCustomString("Socket URL")]
@@ -130,16 +130,16 @@ public class SettingsDto
     [SwaggerSchemaCustomString("Legal terms")]
     public string LegalTerms { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies whether the cookie settings are enabled")]
+    [SwaggerSchemaCustom("Specifies whether the cookie settings are enabled")]
     public bool CookieSettingsEnabled { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Limited access space")]
+    [SwaggerSchemaCustom("Limited access space")]
     public bool LimitedAccessSpace { get; set; }
 
     [SwaggerSchemaCustomString("User name validation regex")]
     public string UserNameRegex { get; set; }
 
-    [SwaggerSchemaCustomInt("Invitation limit", Format = "int32", Nullable = true)]
+    [SwaggerSchemaCustom("Invitation limit")]
     public int? InvitationLimit { get; set; }
 
     [SwaggerSchemaCustom<PluginsDto>("Plugins")]
@@ -151,7 +151,7 @@ public class SettingsDto
     [SwaggerSchemaCustom<FormGalleryDto>("Form gallery")]
     public FormGalleryDto FormGallery { get; set; }
 
-    [SwaggerSchemaCustomLong("Max image upload size", Format = "int64")]
+    [SwaggerSchemaCustom("Max image upload size")]
     public long MaxImageUploadSize { get; set; }
 
     public static SettingsDto GetSample()

@@ -28,13 +28,13 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public class FolderDto<T> : FileEntryDto<T>
 {
-    [SwaggerSchemaCustomInt("Parent folder ID", Example = 10, Format = "int32")]
+    [SwaggerSchemaCustomInt("Parent folder ID", Example = 10)]
     public T ParentId { get; set; }
 
-    [SwaggerSchemaCustomInt("Number of files", Example = 5, Format = "int32")]
+    [SwaggerSchemaCustomInt("Number of files", Example = 5)]
     public int FilesCount { get; set; }
 
-    [SwaggerSchemaCustomInt("Number of folders", Example = 7, Format = "int32")]
+    [SwaggerSchemaCustomInt("Number of folders", Example = 7)]
     public int FoldersCount { get; set; }
 
     [SwaggerSchemaCustomBoolean("Specifies if a folder is shareable or not", Example = false, Nullable = true)]
@@ -43,10 +43,10 @@ public class FolderDto<T> : FileEntryDto<T>
     [SwaggerSchemaCustomBoolean("Specifies if a folder is favorite or not", Example = false, Nullable = true)]
     public bool? IsFavorite { get; set; }
 
-    [SwaggerSchemaCustomInt("Number for a new folder", Format = "int32")]
+    [SwaggerSchemaCustom("Number for a new folder")]
     public int New { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if a folder is muted or not")]
+    [SwaggerSchemaCustom("Specifies if a folder is muted or not")]
     public bool Mute { get; set; }
 
     [SwaggerSchemaCustomString("List of tags")]
@@ -55,28 +55,28 @@ public class FolderDto<T> : FileEntryDto<T>
     [SwaggerSchemaCustom<Logo>("Logo")]
     public Logo Logo { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if a folder is pinned or not")]
+    [SwaggerSchemaCustom("Specifies if a folder is pinned or not")]
     public bool Pinned { get; set; }
 
     [SwaggerSchemaCustomString("Room type", Example = "PublicRoom", Nullable = true)]
     public RoomType? RoomType { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if a folder is private or not")]
+    [SwaggerSchemaCustom("Specifies if a folder is private or not")]
     public bool Private { get; set; }
 
     [SwaggerSchemaCustomString("Folder type", Example = "DEFAULT", Nullable = true)]
     public FolderType? Type { get; set; }
 
-    [SwaggerSchemaCustomBoolean("InRoom", Nullable = true)]
+    [SwaggerSchemaCustom("InRoom", Nullable = true)]
     public bool? InRoom { get; set; }
 
-    [SwaggerSchemaCustomLong("Quota", Nullable = true, Format = "int64")]
+    [SwaggerSchemaCustom("Quota")]
     public long? QuotaLimit { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the room has a custom quota or not", Nullable = true)]
+    [SwaggerSchemaCustom("Specifies if the room has a custom quota or not", Nullable = true)]
     public bool? IsCustomQuota { get; set; }
 
-    [SwaggerSchemaCustomLong("Counter", Nullable = true, Format = "int64")]
+    [SwaggerSchemaCustom("Counter")]
     public long? UsedSpace { get; set; }
 
     public override FileEntryType FileEntryType { get => FileEntryType.Folder; }

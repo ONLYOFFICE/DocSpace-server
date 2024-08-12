@@ -76,22 +76,22 @@ public class EmployeeFullDto : EmployeeDto
     [SwaggerSchemaCustomBoolean("Specifies if the user is an administrator or not", Example = false)]
     public bool IsAdmin { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the user is a room administrator or not")]
+    [SwaggerSchemaCustom("Specifies if the user is a room administrator or not")]
     public bool IsRoomAdmin { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the LDAP settings are enabled for the user or not")]
+    [SwaggerSchemaCustom("Specifies if the LDAP settings are enabled for the user or not")]
     public bool IsLDAP { get; set; }
 
     [SwaggerSchemaCustomString("List of administrator modules")]
     public List<string> ListAdminModules { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the user is a portal owner or not")]
+    [SwaggerSchemaCustom("Specifies if the user is a portal owner or not")]
     public bool IsOwner { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the user is a portal visitor or not")]
+    [SwaggerSchemaCustom("Specifies if the user is a portal visitor or not")]
     public bool IsVisitor { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the user is a portal collaborator or not")]
+    [SwaggerSchemaCustom("Specifies if the user is a portal collaborator or not")]
     public bool IsCollaborator { get; set; }
 
     [SwaggerSchemaCustomString("Language")]
@@ -103,22 +103,22 @@ public class EmployeeFullDto : EmployeeDto
     [SwaggerSchemaCustomString("Mobile phone activation status", Example = "NotActivated")]
     public MobilePhoneActivationStatus MobilePhoneActivationStatus { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the SSO settings are enabled for the user or not")]
+    [SwaggerSchemaCustom("Specifies if the SSO settings are enabled for the user or not")]
     public bool IsSSO { get; set; }
 
     [SwaggerSchemaCustomString("Theme", Example = "Base", Nullable = true)]
     public DarkThemeSettingsType? Theme { get; set; }
 
-    [SwaggerSchemaCustomLong("Quota limit", Nullable = true, Format = "int64")]
+    [SwaggerSchemaCustom("Quota limit")]
     public long? QuotaLimit { get; set; }
 
     [SwaggerSchemaCustomDouble("Portal used space", Example = 12345, Nullable = true)]
     public double? UsedSpace { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Shared", Nullable = true)]
+    [SwaggerSchemaCustom("Shared")]
     public bool? Shared { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the user has a custom quota or not", Nullable = true)]
+    [SwaggerSchemaCustom("Specifies if the user has a custom quota or not")]
     public bool? IsCustomQuota { get; set; }
 
     /// <summary>Current login event ID</summary>

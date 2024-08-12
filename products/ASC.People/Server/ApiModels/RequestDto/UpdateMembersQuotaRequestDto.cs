@@ -28,7 +28,7 @@ namespace ASC.People.ApiModels.RequestDto;
 
 public class UpdateMembersQuotaRequestDto
 {
-    [SwaggerSchemaCustomGuid("List of user IDs")]
+    [SwaggerSchemaCustom("List of user IDs")]
     public IEnumerable<Guid> UserIds { get; set; }
 
     [SwaggerSchemaCustomString("List of user IDs", Example = "User quota", Format = "int64")]

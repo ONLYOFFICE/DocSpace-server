@@ -28,7 +28,7 @@ namespace ASC.Webhooks.Core;
 
 public class Webhook : IMapFrom<DbWebhook>
 {
-    [SwaggerSchemaCustomInt("ID")]
+    [SwaggerSchemaCustom("ID")]
     public int Id { get; set; }
 
     [SwaggerSchemaCustomString("Route")]
@@ -37,7 +37,7 @@ public class Webhook : IMapFrom<DbWebhook>
     [SwaggerSchemaCustomString("Method")]
     public string Method { get; init; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if a webhook is disabled or not")]
+    [SwaggerSchemaCustom("Specifies if a webhook is disabled or not")]
     public bool Disable { get; set; }
 
     [SwaggerSchemaCustomString("Name")]

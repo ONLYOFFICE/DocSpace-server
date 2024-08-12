@@ -36,25 +36,25 @@ public class AdditionalWhiteLabelSettings : ISettings<AdditionalWhiteLabelSettin
 {
     public AdditionalWhiteLabelSettingsHelperInit AdditionalWhiteLabelSettingsHelper;
 
-    [SwaggerSchemaCustomBoolean("Specifies if the start document is enabled or not")]
+    [SwaggerSchemaCustom("Specifies if the start document is enabled or not")]
     public bool StartDocsEnabled { get; init; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the help center is enabled or not")]
+    [SwaggerSchemaCustom("Specifies if the help center is enabled or not")]
     public bool HelpCenterEnabled { get; init; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if feedback and support are available or not")]
+    [SwaggerSchemaCustom("Specifies if feedback and support are available or not")]
     public bool FeedbackAndSupportEnabled { get; init; }
 
     [SwaggerSchemaCustomString("Feedback and support URL")]
     public string FeedbackAndSupportUrl { get; init; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the user forum is enabled or not")]
+    [SwaggerSchemaCustom("Specifies if the user forum is enabled or not")]
     public bool UserForumEnabled { get; init; }
 
     [SwaggerSchemaCustomString("User forum URL")]
     public string UserForumUrl { get; init; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the video guides are enabled or not")]
+    [SwaggerSchemaCustom("Specifies if the video guides are enabled or not")]
     public bool VideoGuidesEnabled { get; init; }
 
     [SwaggerSchemaCustomString("Video guides URL")]
@@ -66,7 +66,7 @@ public class AdditionalWhiteLabelSettings : ISettings<AdditionalWhiteLabelSettin
     [SwaggerSchemaCustomString("URL to pay for the portal")]
     public string BuyUrl { get; init; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the license agreements are enabled or not")]
+    [SwaggerSchemaCustom("Specifies if the license agreements are enabled or not")]
     public bool LicenseAgreementsEnabled { get; init; }
 
     [SwaggerSchemaCustomString("License agreements URL")]

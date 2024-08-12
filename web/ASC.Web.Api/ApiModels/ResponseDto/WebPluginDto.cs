@@ -58,13 +58,13 @@ public class WebPluginDto: IMapFrom<WebPlugin>
     [SwaggerSchemaCustom<EmployeeDto>("Create by")]
     public EmployeeDto CreateBy { get; set; }
 
-    [SwaggerSchemaCustomDateTime("Create on")]
+    [SwaggerSchemaCustom("Create on")]
     public DateTime CreateOn { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Enabled")]
+    [SwaggerSchemaCustom("Enabled")]
     public bool Enabled { get; set; }
 
-    [SwaggerSchemaCustomBoolean("System")]
+    [SwaggerSchemaCustom("System")]
     public bool System { get; set; }
 
     [SwaggerSchemaCustomString("Url", Format = "uri")]

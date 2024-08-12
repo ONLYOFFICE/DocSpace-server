@@ -35,13 +35,13 @@ public class TenantQuotaSettings : ISettings<TenantQuotaSettings>
         get { return new Guid("{62609D95-35D3-4F14-A6BA-2118979E04EA}"); }
     }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the quota is enabled or not")]
+    [SwaggerSchemaCustom("Specifies if the quota is enabled or not")]
     public bool EnableQuota { get; set; }
 
-    [SwaggerSchemaCustomLong("Quota")]
+    [SwaggerSchemaCustom("Quota")]
     public long Quota { get; set; }
 
-    [SwaggerSchemaCustomDateTime("Date of the last quota recalculation", Nullable = true)]
+    [SwaggerSchemaCustom("Date of the last quota recalculation", Nullable = true)]
     public DateTime? LastRecalculateDate { get; set; }
 
     public TenantQuotaSettings GetDefault()

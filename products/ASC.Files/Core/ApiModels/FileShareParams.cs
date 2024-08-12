@@ -28,7 +28,7 @@ namespace ASC.Files.Core.ApiModels;
 
 public class FileShareParams
 {
-    [SwaggerSchemaCustomGuid("ID of the user with whom we want to share a file")]
+    [SwaggerSchemaCustom("ID of the user with whom we want to share a file")]
     public Guid ShareTo { get; set; }
 
     [SwaggerSchemaCustomString("User email address")]

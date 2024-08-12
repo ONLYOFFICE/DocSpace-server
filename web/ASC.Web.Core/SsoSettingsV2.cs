@@ -89,7 +89,7 @@ public class SsoSettingsV2 : ISettings<SsoSettingsV2>
         };
     }
 
-    [SwaggerSchemaCustomBoolean("Specifies if SSO is enabled or not", Nullable = true)]
+    [SwaggerSchemaCustom("Specifies if SSO is enabled or not", Nullable = true)]
     public bool? EnableSso { get; set; }
 
     [SwaggerSchemaCustom<SsoIdpSettings>("IDP settings")]
@@ -113,7 +113,7 @@ public class SsoSettingsV2 : ISettings<SsoSettingsV2>
     [SwaggerSchemaCustom<SsoFieldMapping>("Field mapping")]
     public SsoFieldMapping FieldMapping { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the authentication page will be hidden or not")]
+    [SwaggerSchemaCustom("Specifies if the authentication page will be hidden or not")]
     public bool HideAuthPage { get; set; }
 }
 
@@ -174,7 +174,7 @@ public class SsoFieldMapping
 
 public class SsoCertificate
 {
-    [SwaggerSchemaCustomBoolean("Specifies if a certificate is self-signed or not")]
+    [SwaggerSchemaCustom("Specifies if a certificate is self-signed or not")]
     public bool SelfSigned { get; set; }
 
     [SwaggerSchemaCustomString("Certificate")]
@@ -189,10 +189,10 @@ public class SsoCertificate
     [SwaggerSchemaCustomString("Domain name")]
     public string DomainName { get; set; }
 
-    [SwaggerSchemaCustomDateTime("Start date")]
+    [SwaggerSchemaCustom("Start date")]
     public DateTime StartDate { get; set; }
 
-    [SwaggerSchemaCustomDateTime("Expiration date")]
+    [SwaggerSchemaCustom("Expiration date")]
     public DateTime ExpiredDate { get; set; }
 }
 
@@ -201,19 +201,19 @@ public class SsoIdpCertificateAdvanced
     [SwaggerSchemaCustomString("Verification algorithm")]
     public string VerifyAlgorithm { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the signatures of the SAML authentication responses sent to SP will be verified or not")]
+    [SwaggerSchemaCustom("Specifies if the signatures of the SAML authentication responses sent to SP will be verified or not")]
     public bool VerifyAuthResponsesSign { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the signatures of the SAML logout requests sent to SP will be verified or not")]
+    [SwaggerSchemaCustom("Specifies if the signatures of the SAML logout requests sent to SP will be verified or not")]
     public bool VerifyLogoutRequestsSign { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the signatures of the SAML logout responses sent to SP will be verified or not")]
+    [SwaggerSchemaCustom("Specifies if the signatures of the SAML logout responses sent to SP will be verified or not")]
     public bool VerifyLogoutResponsesSign { get; set; }
 
     [SwaggerSchemaCustomString("Decryption algorithm")]
     public string DecryptAlgorithm { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the assertions will be decrypted or not")]
+    [SwaggerSchemaCustom("Specifies if the assertions will be decrypted or not")]
     public bool DecryptAssertions { get; set; }
 }
 
@@ -222,13 +222,13 @@ public class SsoSpCertificateAdvanced
     [SwaggerSchemaCustomString("Signing algorithm")]
     public string SigningAlgorithm { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if SP will sign the SAML authentication requests sent to IdP or not")]
+    [SwaggerSchemaCustom("Specifies if SP will sign the SAML authentication requests sent to IdP or not")]
     public bool SignAuthRequests { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if SP will sign the SAML logout requests sent to IdP or not")]
+    [SwaggerSchemaCustom("Specifies if SP will sign the SAML logout requests sent to IdP or not")]
     public bool SignLogoutRequests { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if sign the SAML logout responses sent to IdP or not")]
+    [SwaggerSchemaCustom("Specifies if sign the SAML logout responses sent to IdP or not")]
     public bool SignLogoutResponses { get; set; }
 
     [SwaggerSchemaCustomString("Encryption algorithm")]
@@ -237,7 +237,7 @@ public class SsoSpCertificateAdvanced
     [SwaggerSchemaCustomString("Decryption algorithm")]
     public string DecryptAlgorithm { get; set; }
    
-    [SwaggerSchemaCustomBoolean("Specifies if the assertions will be encrypted or not")]
+    [SwaggerSchemaCustom("Specifies if the assertions will be encrypted or not")]
     public bool EncryptAssertions { get; set; }
 }
 

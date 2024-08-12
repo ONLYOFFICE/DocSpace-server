@@ -28,25 +28,25 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class AdditionalWhiteLabelSettingsDto: IMapFrom<AdditionalWhiteLabelSettings>
 {
-    [SwaggerSchemaCustomBoolean("Specifies if the start document is enabled or not")]
+    [SwaggerSchemaCustom("Specifies if the start document is enabled or not")]
     public bool StartDocsEnabled { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the help center is enabled or not")]
+    [SwaggerSchemaCustom("Specifies if the help center is enabled or not")]
     public bool HelpCenterEnabled { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if feedback and support are available or not")]
+    [SwaggerSchemaCustom("Specifies if feedback and support are available or not")]
     public bool FeedbackAndSupportEnabled { get; set; }
 
     [SwaggerSchemaCustomString("Feedback and support URL")]
     public string FeedbackAndSupportUrl { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the user forum is enabled or not")]
+    [SwaggerSchemaCustom("Specifies if the user forum is enabled or not")]
     public bool UserForumEnabled { get; set; }
 
     [SwaggerSchemaCustomString("User forum URL", Format = "uri")]
     public string UserForumUrl { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the video guides are enabled or not")]
+    [SwaggerSchemaCustom("Specifies if the video guides are enabled or not")]
     public bool VideoGuidesEnabled { get; set; }
 
     [SwaggerSchemaCustomString("Video guides URL", Format = "uri")]
@@ -58,10 +58,10 @@ public class AdditionalWhiteLabelSettingsDto: IMapFrom<AdditionalWhiteLabelSetti
     [SwaggerSchemaCustomString("URL to pay for the portal", Format = "uri")]
     public string BuyUrl { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the license agreements are enabled or not")]
+    [SwaggerSchemaCustom("Specifies if the license agreements are enabled or not")]
     public bool LicenseAgreementsEnabled { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if these settings are default or not")]
+    [SwaggerSchemaCustom("Specifies if these settings are default or not")]
     public bool IsDefault { get; set; }
 
     [SwaggerSchemaCustomString("License agreements URL")]

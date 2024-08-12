@@ -28,7 +28,7 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public abstract class LinkRequestDtoBase
 {
-    [SwaggerSchemaCustomGuid("Link ID")]
+    [SwaggerSchemaCustom("Link ID")]
     public Guid LinkId { get; set; }
 
     [SwaggerSchemaCustomString("Sharing rights", Example = "None")]

@@ -31,10 +31,10 @@ public class WebItemSecurityRequestsDto
     [SwaggerSchemaCustomString("Module ID")]
     public string Id { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the module security settings are enabled or not")]
+    [SwaggerSchemaCustom("Specifies if the module security settings are enabled or not")]
     public bool Enabled { get; set; }
 
-    [SwaggerSchemaCustomGuid("List of user/group IDs with the access to the module")]
+    [SwaggerSchemaCustom("List of user/group IDs with the access to the module")]
     public IEnumerable<Guid> Subjects { get; set; }
 }
 

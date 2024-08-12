@@ -34,7 +34,7 @@ public class AccountInfoDto
     [SwaggerSchemaCustomString("URL", Format = "uri")]
     public string Url { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if an account is linked or not")]
+    [SwaggerSchemaCustom("Specifies if an account is linked or not")]
     public bool Linked { get; set; }
 
     [SwaggerSchemaCustomString("Class")]

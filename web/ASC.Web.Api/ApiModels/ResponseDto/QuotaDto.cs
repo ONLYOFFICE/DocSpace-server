@@ -28,7 +28,7 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class QuotaDto
 {
-    [SwaggerSchemaCustomInt("ID", Format = "int32")]
+    [SwaggerSchemaCustom("ID")]
     public int Id { get; set; }
 
     [SwaggerSchemaCustomString("Title")]
@@ -37,13 +37,13 @@ public class QuotaDto
     [SwaggerSchemaCustom<PriceDto>("Price")]
     public PriceDto Price { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the quota is nonprofit or not")]
+    [SwaggerSchemaCustom("Specifies if the quota is nonprofit or not")]
     public bool NonProfit { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the quota is free or not")]
+    [SwaggerSchemaCustom("Specifies if the quota is free or not")]
     public bool Free { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the quota is trial or not")]
+    [SwaggerSchemaCustom("Specifies if the quota is trial or not")]
     public bool Trial { get; set; }
 
     [SwaggerSchemaCustom<IEnumerable<TenantQuotaFeatureDto>>("List of quota features")]

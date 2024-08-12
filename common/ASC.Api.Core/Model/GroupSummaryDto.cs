@@ -30,7 +30,7 @@ namespace ASC.Web.Api.Models;
 
 public class GroupSummaryDto
 {
-    [SwaggerSchemaCustomGuid("ID")]
+    [SwaggerSchemaCustom("ID")]
     public Guid Id { get; set; }
 
     [SwaggerSchemaCustomString("Name")]

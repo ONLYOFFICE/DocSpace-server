@@ -37,10 +37,10 @@ public class FileShareDto
     [SwaggerSchemaCustomBoolean("Specifies if the file is locked by this user or not", Example = false)]
     public bool IsLocked { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if this user is an owner of the specified file or not")]
+    [SwaggerSchemaCustom("Specifies if this user is an owner of the specified file or not")]
     public bool IsOwner { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Spceifies if this user can edit the access to the specified file or not")]
+    [SwaggerSchemaCustom("Spceifies if this user can edit the access to the specified file or not")]
     public bool CanEditAccess { get; set; }
 
     [SwaggerSchemaCustomString("Subject type", Example = "User")]
@@ -60,7 +60,7 @@ public class FileShareDto
 
 public class FileShareLink
 {
-    [SwaggerSchemaCustomGuid("Id")]
+    [SwaggerSchemaCustom("Id")]
     public Guid Id { get; set; }
 
     [SwaggerSchemaCustomString("Title")]

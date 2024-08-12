@@ -28,7 +28,7 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class CreateThirdPartyRoomRequestDto
 {
-    [SwaggerSchemaCustomBoolean("Create as new folder")]
+    [SwaggerSchemaCustom("Create as new folder")]
     public bool CreateAsNewFolder { get; set; }
 
     [SwaggerSchemaCustomString("Room name")]
@@ -37,9 +37,9 @@ public class CreateThirdPartyRoomRequestDto
     [SwaggerSchemaCustomString("Room type", Example = "CustomRoom")]
     public RoomType RoomType { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Private")]
+    [SwaggerSchemaCustom("Private")]
     public bool Private { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Indexing")]
+    [SwaggerSchemaCustom("Indexing")]
     public bool Indexing { get; set; }
 }

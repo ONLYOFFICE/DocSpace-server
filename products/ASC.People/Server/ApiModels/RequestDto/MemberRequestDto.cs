@@ -44,7 +44,7 @@ public class MemberRequestDto : MemberBaseRequestDto
     [SwaggerSchemaCustomString("Employee type (All, RoomAdmin, User, DocSpaceAdmin, Collaborator)", Example = "All")]
     public EmployeeType Type { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if this is a guest or a user", Nullable = true)]
+    [SwaggerSchemaCustom("Specifies if this is a guest or a user", Nullable = true)]
     public bool? IsUser { get; set; }
 
     [SwaggerSchemaCustomString("First name")]
@@ -53,7 +53,7 @@ public class MemberRequestDto : MemberBaseRequestDto
     [SwaggerSchemaCustomString("Last name")]
     public string Lastname { get; set; }
 
-    [SwaggerSchemaCustomGuid("List of user departments")]
+    [SwaggerSchemaCustom("List of user departments")]
     public Guid[] Department { get; set; }
 
     [SwaggerSchemaCustomString("Title")]
@@ -80,7 +80,7 @@ public class MemberRequestDto : MemberBaseRequestDto
     [SwaggerSchemaCustomString("Avatar photo URL", Format ="uri")]
     public string Files { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the user is added via the invitation link or not")]
+    [SwaggerSchemaCustom("Specifies if the user is added via the invitation link or not")]
     public bool FromInviteLink { get; set; }
 
     [SwaggerSchemaCustomString("Key")]
@@ -89,7 +89,7 @@ public class MemberRequestDto : MemberBaseRequestDto
     [SwaggerSchemaCustomString("Language")]
     public string CultureName { get; set; }
 
-    [SwaggerSchemaCustomGuid("Target")]
+    [SwaggerSchemaCustom("Target")]
     public Guid Target { get; set; }
 }
 
@@ -98,7 +98,7 @@ public class UpdateMemberRequestDto : MemberRequestDto
     [SwaggerSchemaCustomString("User ID")]
     public string UserId { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies whether to disable a user or not", Nullable = true)]
+    [SwaggerSchemaCustom("Specifies whether to disable a user or not", Nullable = true)]
     public bool? Disable { get; set; }
 }
 

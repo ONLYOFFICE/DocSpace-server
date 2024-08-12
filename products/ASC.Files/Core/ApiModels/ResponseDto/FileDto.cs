@@ -28,19 +28,19 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public class FileDto<T> : FileEntryDto<T>
 {
-    [SwaggerSchemaCustomInt("Folder ID", Example = 12334, Format = "int32")]
+    [SwaggerSchemaCustomInt("Folder ID", Example = 12334)]
     public T FolderId { get; set; }
 
-    [SwaggerSchemaCustomInt("Version", Example = 3, Format = "int32")]
+    [SwaggerSchemaCustomInt("Version", Example = 3)]
     public int Version { get; set; }
 
-    [SwaggerSchemaCustomInt("Version group", Example = 1, Format = "int32")]
+    [SwaggerSchemaCustomInt("Version group", Example = 1)]
     public int VersionGroup { get; set; }
 
     [SwaggerSchemaCustomInt("Content length")]
     public string ContentLength { get; set; }
 
-    [SwaggerSchemaCustomLong("Pure content length", Format = "int64", Nullable = true)]
+    [SwaggerSchemaCustom("Pure content length")]
     public long? PureContentLength { get; set; }
 
     [SwaggerSchemaCustomString("File status", Example = "None")]
@@ -73,7 +73,7 @@ public class FileDto<T> : FileEntryDto<T>
     [SwaggerSchemaCustomString("Thumbnail status", Example = "Created")]
     public Thumbnail ThumbnailStatus { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Locked or not", Nullable = true)]
+    [SwaggerSchemaCustom("Locked or not", Nullable = true)]
     public bool? Locked { get; set; }
 
     [SwaggerSchemaCustomString("User ID who locked a file")]
@@ -91,7 +91,7 @@ public class FileDto<T> : FileEntryDto<T>
     [SwaggerSchemaCustomBoolean("Specifies if the filling has started or not", Example = false, Nullable = true)]
     public bool? StartFilling { get; set; }
 
-    [SwaggerSchemaCustomInt("InProcess folder ID", Format = "int32", Nullable = true)]
+    [SwaggerSchemaCustom("InProcess folder ID")]
     public int? InProcessFolderId { get; set; }
 
     [SwaggerSchemaCustomString("InProcess folder title")]
@@ -330,13 +330,13 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
 
 public class DraftLocation<T>
 {
-    [SwaggerSchemaCustomInt("InProcess folder ID", Format = "int32")]
+    [SwaggerSchemaCustomInt("InProcess folder ID")]
     public T FolderId { get; set; }
 
     [SwaggerSchemaCustomString("InProcess folder title")]
     public string FolderTitle { get; set; }
 
-    [SwaggerSchemaCustomInt("Draft ID", Format = "int32")]
+    [SwaggerSchemaCustomInt("Draft ID")]
     public T FileId { get; set; }
 
     [SwaggerSchemaCustomString("Draft title")]

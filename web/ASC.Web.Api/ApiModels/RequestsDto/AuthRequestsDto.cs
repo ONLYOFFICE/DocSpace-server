@@ -52,7 +52,7 @@ public class AuthRequestsDto
     [SwaggerSchemaCustomString("Code for getting a token")]
     public string CodeOAuth { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Session based authentication or not")]
+    [SwaggerSchemaCustom("Session based authentication or not")]
     public bool Session { get; set; }
 
     [SwaggerSchemaCustom<ConfirmData>("Confirmation data")]
@@ -79,7 +79,7 @@ public class ConfirmData
     [SwaggerSchemaCustomString("Email address")]
     public string Email { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Access an account for the first time or not", Nullable = true)]
+    [SwaggerSchemaCustom("Access an account for the first time or not", Nullable = true)]
     public bool? First { get; set; }
 
     [SwaggerSchemaCustomString("Key")]

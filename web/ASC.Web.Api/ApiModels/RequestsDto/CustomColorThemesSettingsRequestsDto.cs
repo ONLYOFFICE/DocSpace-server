@@ -31,6 +31,6 @@ public class CustomColorThemesSettingsRequestsDto
     [SwaggerSchemaCustom<CustomColorThemesSettingsItem>("Custom color theme settings")]
     public CustomColorThemesSettingsItem Theme { get; set; }
 
-    [SwaggerSchemaCustomInt("Selected or not", Nullable = true, Format = "int32")]
+    [SwaggerSchemaCustom("Selected or not")]
     public int? Selected { get; set; }
 }

@@ -30,10 +30,10 @@ public class TenantAuditSettings : ISettings<TenantAuditSettings>
 {
     public const int MaxLifeTime = 180;
 
-    [SwaggerSchemaCustomInt("Login history lifetime")]
+    [SwaggerSchemaCustom("Login history lifetime")]
     public int LoginHistoryLifeTime { get; init; }
 
-    [SwaggerSchemaCustomInt("Audit trail lifetime")]
+    [SwaggerSchemaCustom("Audit trail lifetime")]
     public int AuditTrailLifeTime { get; init; }
 
     public static readonly Guid Guid = new("{8337D0FB-AD67-4552-8297-802312E7F503}");

@@ -34,10 +34,10 @@ public class InsertFileRequestDto : IModelWithFile, IDisposable
     [SwaggerSchemaCustomString("File name")]
     public string Title { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies whether to create a new file if it already exists or not")]
+    [SwaggerSchemaCustom("Specifies whether to create a new file if it already exists or not")]
     public bool CreateNewIfExist { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies whether to keep the file converting status or not")]
+    [SwaggerSchemaCustom("Specifies whether to keep the file converting status or not")]
     public bool KeepConvertStatus { get; set; }
 
 

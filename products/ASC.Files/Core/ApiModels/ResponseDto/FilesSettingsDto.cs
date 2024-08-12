@@ -124,71 +124,71 @@ public class FilesSettingsDto
     [SwaggerSchemaCustomString("File thumbnail url string", Format = "uri")]
     public string FileThumbnailUrlString { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Confirm delete")]
+    [SwaggerSchemaCustom("Confirm delete")]
     public bool ConfirmDelete { get; set; }
 
-    [SwaggerSchemaCustomBoolean("EnableT third party")]
+    [SwaggerSchemaCustom("EnableT third party")]
     public bool EnableThirdParty { get; set; }
 
-    [SwaggerSchemaCustomBoolean("External share")]
+    [SwaggerSchemaCustom("External share")]
     public bool ExternalShare { get; set; }
 
-    [SwaggerSchemaCustomBoolean("External share social media")]
+    [SwaggerSchemaCustom("External share social media")]
     public bool ExternalShareSocialMedia { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Store original files")]
+    [SwaggerSchemaCustom("Store original files")]
     public bool StoreOriginalFiles { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Keep new file name")]
+    [SwaggerSchemaCustom("Keep new file name")]
     public bool KeepNewFileName { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Convert notify")]
+    [SwaggerSchemaCustom("Convert notify")]
     public bool ConvertNotify { get; set; }
 
-    [SwaggerSchemaCustomBoolean("HideC confirm convert save")]
+    [SwaggerSchemaCustom("HideC confirm convert save")]
     public bool HideConfirmConvertSave { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Hide confirm convert open")]
+    [SwaggerSchemaCustom("Hide confirm convert open")]
     public bool HideConfirmConvertOpen { get; set; }
 
     [SwaggerSchemaCustom<OrderBy>("DefaultO order")]
     public OrderBy DefaultOrder { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Forcesave")]
+    [SwaggerSchemaCustom("Forcesave")]
     public bool Forcesave { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Store forcesave")]
+    [SwaggerSchemaCustom("Store forcesave")]
     public bool StoreForcesave { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Recent section")]
+    [SwaggerSchemaCustom("Recent section")]
     public bool RecentSection { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Favorites section")]
+    [SwaggerSchemaCustom("Favorites section")]
     public bool FavoritesSection { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Templates section")]
+    [SwaggerSchemaCustom("Templates section")]
     public bool TemplatesSection { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Download tar gz")]
+    [SwaggerSchemaCustom("Download tar gz")]
     public bool DownloadTarGz { get; set; }
 
     [SwaggerSchemaCustom<AutoCleanUpData>("Automatically clean up")]
     public AutoCleanUpData AutomaticallyCleanUp { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Can search by content")]
+    [SwaggerSchemaCustom("Can search by content")]
     public bool CanSearchByContent { get; set; }
 
     [SwaggerSchemaCustomString("Default sharing access rights", Example = "None")]
     public List<FileShare> DefaultSharingAccessRights { get; set; }
 
 
-    [SwaggerSchemaCustomInt("Max upload thread count", Format = "int32")]    
+    [SwaggerSchemaCustom("Max upload thread count")]    
     public int MaxUploadThreadCount { get; set; }
 
-    [SwaggerSchemaCustomLong("Chunk upload size", Format = "int64")]    
+    [SwaggerSchemaCustom("Chunk upload size")]    
     public long ChunkUploadSize { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Open editor in same tab")]
+    [SwaggerSchemaCustom("Open editor in same tab")]
     public bool OpenEditorInSameTab { get; set; }
 }
 

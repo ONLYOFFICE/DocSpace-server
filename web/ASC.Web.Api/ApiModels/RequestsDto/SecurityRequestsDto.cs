@@ -28,12 +28,12 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 public class SecurityRequestsDto
 {
-    [SwaggerSchemaCustomGuid("Product ID")]
+    [SwaggerSchemaCustom("Product ID")]
     public Guid ProductId { get; set; }
 
-    [SwaggerSchemaCustomGuid("User ID")]
+    [SwaggerSchemaCustom("User ID")]
     public Guid UserId { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Administrator or not")]
+    [SwaggerSchemaCustom("Administrator or not")]
     public bool Administrator { get; set; }
 }

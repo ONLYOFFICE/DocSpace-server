@@ -34,18 +34,18 @@ public class TfaSettingsDto
     [SwaggerSchemaCustomString("Title")]
     public string Title { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the TFA settings are enabled or not")]
+    [SwaggerSchemaCustom("Specifies if the TFA settings are enabled or not")]
     public bool Enabled { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the TFA settings are available or not")]
+    [SwaggerSchemaCustom("Specifies if the TFA settings are available or not")]
     public bool Avaliable { get; set; }
 
     [SwaggerSchemaCustomString("List of trusted IP addresses")]
     public List<string> TrustedIps { get; set; }
 
-    [SwaggerSchemaCustomGuid("List of users who must use the TFA verification")]
+    [SwaggerSchemaCustom("List of users who must use the TFA verification")]
     public List<Guid> MandatoryUsers { get; set; }
 
-    [SwaggerSchemaCustomGuid("List of groups who must use the TFA verification")]
+    [SwaggerSchemaCustom("List of groups who must use the TFA verification")]
     public List<Guid> MandatoryGroups { get; set; }
 }

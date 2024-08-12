@@ -31,6 +31,6 @@ public class UpdateFileRequestDto
     [SwaggerSchemaCustomString("File title")]
     public string Title { get; set; }
 
-    [SwaggerSchemaCustomInt("Number of the latest file version", Format = "int32")]
+    [SwaggerSchemaCustom("Number of the latest file version")]
     public int LastVersion { get; set; }
 }

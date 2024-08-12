@@ -31,6 +31,6 @@ public class RoomsNotificationsSettingsRequestDto
     [SwaggerSchemaCustomInt("Room ID")]
     public object RoomsId { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the room notifications are disabled or not")]
+    [SwaggerSchemaCustom("Specifies if the room notifications are disabled or not")]
     public bool Mute { get; set; }
 }

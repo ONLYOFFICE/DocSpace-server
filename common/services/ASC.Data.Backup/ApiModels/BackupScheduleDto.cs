@@ -40,7 +40,7 @@ public class BackupScheduleDto
     [SwaggerSchemaCustom<Cron>("Cron parameters")]
     public Cron CronParams { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if a dump will be created or not")]
+    [SwaggerSchemaCustom("Specifies if a dump will be created or not")]
     public bool Dump { get; set; }
 }
 

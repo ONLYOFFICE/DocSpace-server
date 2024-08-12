@@ -40,16 +40,16 @@ public class FolderContentDto<T>
     [SwaggerSchemaCustom<object>("Folder path")]
     public object PathParts { get; set; }
 
-    [SwaggerSchemaCustomInt("Folder start index", Format = "int32")]
+    [SwaggerSchemaCustom("Folder start index")]
     public int StartIndex { get; set; }
 
-    [SwaggerSchemaCustomInt("Number of folder elements", Format = "int32")]
+    [SwaggerSchemaCustom("Number of folder elements")]
     public int Count { get; set; }
 
-    [SwaggerSchemaCustomInt("Total number of elements in the folder", Format = "int32")]
+    [SwaggerSchemaCustom("Total number of elements in the folder")]
     public int Total { get; set; }
 
-    [SwaggerSchemaCustomInt("New element index", Format = "int32")]
+    [SwaggerSchemaCustom("New element index")]
     public int New { get; set; }
 
     public static FolderContentDto<int> GetSample()

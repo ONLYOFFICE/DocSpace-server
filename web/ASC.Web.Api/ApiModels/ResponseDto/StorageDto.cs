@@ -37,10 +37,10 @@ public class StorageDto
     [SwaggerSchemaCustom<List<AuthKey>>("List of authentication keys")]
     public List<AuthKey> Properties { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if this is the current storage or not")]
+    [SwaggerSchemaCustom("Specifies if this is the current storage or not")]
     public bool Current { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if this storage can be set or not")]
+    [SwaggerSchemaCustom("Specifies if this storage can be set or not")]
     public bool IsSet { get; set; }
 
     public static async Task<StorageDto> StorageWrapperInit<T>(DataStoreConsumer consumer, BaseStorageSettings<T> current) where T : class, ISettings<T>, new()

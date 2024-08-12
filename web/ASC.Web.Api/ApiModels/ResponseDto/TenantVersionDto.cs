@@ -28,7 +28,7 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 
 public class TenantVersionDto
 {
-    [SwaggerSchemaCustomInt("Current portal version", Format = "int32")]
+    [SwaggerSchemaCustom("Current portal version")]
     public int Current { get; set; }
 
     [SwaggerSchemaCustom<IEnumerable<TenantVersion>>("List of available portal versions")]

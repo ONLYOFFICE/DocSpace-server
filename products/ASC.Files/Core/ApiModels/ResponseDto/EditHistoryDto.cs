@@ -28,16 +28,16 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public class EditHistoryDto
 {
-    [SwaggerSchemaCustomInt("File ID", Format = "int32")]
+    [SwaggerSchemaCustom("File ID")]
     public int ID { get; set; }
 
     [SwaggerSchemaCustomString("Key")]
     public string Key { get; set; }
 
-    [SwaggerSchemaCustomInt("File version", Format = "int32")]
+    [SwaggerSchemaCustom("File version")]
     public int Version { get; set; }
 
-    [SwaggerSchemaCustomInt("Version group", Format = "int32")]
+    [SwaggerSchemaCustom("Version group")]
     public int VersionGroup { get; set; }
 
     [SwaggerSchemaCustom<EditHistoryAuthor>("A user who updated a file")]

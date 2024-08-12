@@ -33,16 +33,16 @@ public class GroupDto
     [SwaggerSchemaCustomString("Name")]
     public string Name { get; set; }
 
-    [SwaggerSchemaCustomGuid("Parent", Nullable = true)]
+    [SwaggerSchemaCustom("Parent", Nullable = true)]
     public Guid? Parent { get; set; }
 
-    [SwaggerSchemaCustomGuid("Category")]
+    [SwaggerSchemaCustom("Category")]
     public Guid Category { get; set; }
 
-    [SwaggerSchemaCustomGuid("ID")]
+    [SwaggerSchemaCustom("ID")]
     public Guid Id { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the LDAP settings are enabled for the group or not")]
+    [SwaggerSchemaCustom("Specifies if the LDAP settings are enabled for the group or not")]
     public bool IsLDAP { get; set; }
 
     [SwaggerSchemaCustom<EmployeeFullDto>("Manager")]
@@ -51,10 +51,10 @@ public class GroupDto
     [SwaggerSchemaCustom<List<EmployeeFullDto>>(Description = "List of members")]
     public List<EmployeeFullDto> Members { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Shared", Nullable = true)]
+    [SwaggerSchemaCustom("Shared", Nullable = true)]
     public bool? Shared { get; set; }
 
-    [SwaggerSchemaCustomInt("Members count", Format = "int32")]
+    [SwaggerSchemaCustom("Members count")]
     public int MembersCount { get; set; }
 }
 

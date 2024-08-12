@@ -28,23 +28,23 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 public class OwnerIdSettingsRequestDto
 {
-    [SwaggerSchemaCustomGuid("Owner ID")]
+    [SwaggerSchemaCustom("Owner ID")]
     public Guid OwnerId { get; set; }
 }
 public class SettingsRequestsDto
 {
-    [SwaggerSchemaCustomInt("Version ID", Format = "int32")]
+    [SwaggerSchemaCustom("Version ID")]
     public int VersionId { get; set; }
 }
 
 public class TipsRequestDto
 {
-    [SwaggerSchemaCustomBoolean("Specifies whether to show tips for the user or not")]
+    [SwaggerSchemaCustom("Specifies whether to show tips for the user or not")]
     public bool Show { get; set; } //tips
 }
 public  class DefaultProductRequestDto
 {
-    [SwaggerSchemaCustomGuid("Default product ID")]
+    [SwaggerSchemaCustom("Default product ID")]
     public Guid DefaultProductID { get; set; }
 }
 

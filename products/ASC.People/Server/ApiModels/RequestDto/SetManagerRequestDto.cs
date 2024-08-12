@@ -28,6 +28,6 @@ namespace ASC.People.ApiModels.RequestDto;
 
 public class SetManagerRequestDto
 {
-    [SwaggerSchemaCustomGuid("User ID")]
+    [SwaggerSchemaCustom("User ID")]
     public Guid UserId { get; set; }
 }

@@ -31,10 +31,10 @@ public class CustomColorThemesSettingsDto
     [SwaggerSchemaCustom<IEnumerable<CustomColorThemesSettingsItem>>("Themes")]
     public IEnumerable<CustomColorThemesSettingsItem> Themes { get; set; }
 
-    [SwaggerSchemaCustomInt("Selected", Format = "int32")]
+    [SwaggerSchemaCustom("Selected")]
     public int Selected { get; set; }
 
-    [SwaggerSchemaCustomInt("Limit", Format = "int32")]
+    [SwaggerSchemaCustom("Limit")]
     public int Limit { get; set; }
 
     public CustomColorThemesSettingsDto(CustomColorThemesSettings customColorThemesSettings, int limit)

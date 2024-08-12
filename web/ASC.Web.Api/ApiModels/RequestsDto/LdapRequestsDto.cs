@@ -30,16 +30,16 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 public class LdapRequestsDto : IMapFrom<LdapSettings>
 {
-    [SwaggerSchemaCustomBoolean("Specifies if the LDAP authentication is enabled or not")]
+    [SwaggerSchemaCustom("Specifies if the LDAP authentication is enabled or not")]
     public bool EnableLdapAuthentication { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the StartTLS is enabled or not")]
+    [SwaggerSchemaCustom("Specifies if the StartTLS is enabled or not")]
     public bool StartTls { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the SSL is enabled or not")]
+    [SwaggerSchemaCustom("Specifies if the SSL is enabled or not")]
     public bool Ssl { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the welcome email is sent or not")]
+    [SwaggerSchemaCustom("Specifies if the welcome email is sent or not")]
     public bool SendWelcomeEmail { get; set; }
 
     [SwaggerSchemaCustomString("LDAP server URL address")]
@@ -48,7 +48,7 @@ public class LdapRequestsDto : IMapFrom<LdapSettings>
     [SwaggerSchemaCustomString("Absolute path to the top level directory containing users for the import")]
     public string UserDN { get; set; }
 
-    [SwaggerSchemaCustomInt("Port number", Format  = "int32")]
+    [SwaggerSchemaCustom("Port number")]
     public int PortNumber { get; set; }
 
     [SwaggerSchemaCustomString("User filter value to import the users who correspond to the specified search criteria. The default filter value (uid=*) allows importing all users")]
@@ -64,7 +64,7 @@ public class LdapRequestsDto : IMapFrom<LdapSettings>
     //ToDo: use SId instead of group name
     public Dictionary<AccessRight, string> AccessRights { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the groups from the LDAP server are added to the portal or not")]
+    [SwaggerSchemaCustom("Specifies if the groups from the LDAP server are added to the portal or not")]
     public bool GroupMembership { get; set; }
 
     [SwaggerSchemaCustomString("The absolute path to the top level directory containing groups for the import")]
@@ -83,7 +83,7 @@ public class LdapRequestsDto : IMapFrom<LdapSettings>
     [SwaggerSchemaCustomString("Attribute that corresponds to a name of the group where the user is included")]
     public string GroupNameAttribute { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the user has rights to read data from LDAP server or not")]
+    [SwaggerSchemaCustom("Specifies if the user has rights to read data from LDAP server or not")]
     public bool Authentication { get; set; }
 
     [SwaggerSchemaCustomString("Login")]
@@ -92,7 +92,7 @@ public class LdapRequestsDto : IMapFrom<LdapSettings>
     [SwaggerSchemaCustomString("Password")]
     public string Password { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the certificate is accepted or not")]
+    [SwaggerSchemaCustom("Specifies if the certificate is accepted or not")]
     public bool AcceptCertificate { get; set; }
 
     [SwaggerSchemaCustomString("Users type (All, RoomAdmin, User, DocSpaceAdmin, Collaborator)", Example = "All")]

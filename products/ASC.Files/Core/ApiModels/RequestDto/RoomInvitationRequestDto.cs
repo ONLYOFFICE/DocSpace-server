@@ -32,7 +32,7 @@ public class RoomInvitationRequestDto
     [MaxEmailInvitations]
     public IEnumerable<RoomInvitation> Invitations { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Notifies users about the shared room or not")]
+    [SwaggerSchemaCustom("Notifies users about the shared room or not")]
     public bool Notify { get; set; }
 
     [SwaggerSchemaCustomString("Message to send when notifying about the shared room")]

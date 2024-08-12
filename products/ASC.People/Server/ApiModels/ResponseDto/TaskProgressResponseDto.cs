@@ -34,10 +34,10 @@ public class TaskProgressResponseDto
     [SwaggerSchemaCustomString("Error")]
     public string Error { get; set; }
 
-    [SwaggerSchemaCustomInt("Percentage", Format = "int32")]
+    [SwaggerSchemaCustom("Percentage")]
     public int Percentage { get; set; }
 
-    [SwaggerSchemaCustomBoolean("IsCompleted")]
+    [SwaggerSchemaCustom("IsCompleted")]
     public bool IsCompleted { get; set; }
 
     [SwaggerSchemaCustomString("Status", Example = "Completed")]

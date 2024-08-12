@@ -37,10 +37,10 @@ public class SecurityDto
     [SwaggerSchemaCustom<List<GroupSummaryDto>>("List of groups with the access to the module")]
     public List<GroupSummaryDto> Groups { get; init; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the security settings are enabled or not")]
+    [SwaggerSchemaCustom("Specifies if the security settings are enabled or not")]
     public bool Enabled { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if this module is a subitem or not")]
+    [SwaggerSchemaCustom("Specifies if this module is a subitem or not")]
     public bool IsSubItem { get; set; }
 
     public static SecurityDto GetSample()

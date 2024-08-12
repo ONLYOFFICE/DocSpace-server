@@ -57,35 +57,35 @@ public class MigrationApiInfo
     [ProtoMember(7)]
     public List<MigratingApiGroup> Groups { get; set; } = new List<MigratingApiGroup>();
 
-    [SwaggerSchemaCustomBoolean("Import personal files")]
+    [SwaggerSchemaCustom("Import personal files")]
     [ProtoMember(8)]
     public bool ImportPersonalFiles { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Import shared files")]
+    [SwaggerSchemaCustom("Import shared files")]
     [ProtoMember(9)]
     public bool ImportSharedFiles { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Import shared folders")]
+    [SwaggerSchemaCustom("Import shared folders")]
     [ProtoMember(10)]
     public bool ImportSharedFolders { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Import common files")]
+    [SwaggerSchemaCustom("Import common files")]
     [ProtoMember(11)]
     public bool ImportCommonFiles { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Import project files")]
+    [SwaggerSchemaCustom("Import project files")]
     [ProtoMember(12)]
     public bool ImportProjectFiles { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Import groups")]
+    [SwaggerSchemaCustom("Import groups")]
     [ProtoMember(13)]
     public bool ImportGroups { get; set; }
 
-    [SwaggerSchemaCustomInt("Successed users", Format = "int32")]
+    [SwaggerSchemaCustom("Successed users")]
     [ProtoMember(14)]
     public int SuccessedUsers { get; set; }
 
-    [SwaggerSchemaCustomInt("Failed users", Format = "int32")]
+    [SwaggerSchemaCustom("Failed users")]
     [ProtoMember(15)]
     public int FailedUsers { get; set; }
 

@@ -34,12 +34,12 @@ public class PrivacyRoomRequestDto
     [SwaggerSchemaCustomString("Private key")]
     public string PrivateKeyEnc { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Encryption keys need to be updated or not")]
+    [SwaggerSchemaCustom("Encryption keys need to be updated or not")]
     public bool Update { get; set; }
 }
 
 public class PrivacyRoomEnableRequestDto
 {
-    [SwaggerSchemaCustomBoolean("Specifies whether to enable the Private Room settings or not")]
+    [SwaggerSchemaCustom("Specifies whether to enable the Private Room settings or not")]
     public bool Enable { get; set; }
 }

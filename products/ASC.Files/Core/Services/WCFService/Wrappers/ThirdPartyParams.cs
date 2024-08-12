@@ -32,17 +32,17 @@ public class ThirdPartyParams
     [JsonPropertyName("auth_data")]
     public AuthData AuthData { get; init; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if this is a corporate account or not")]
+    [SwaggerSchemaCustom("Specifies if this is a corporate account or not")]
     public bool Corporate { get; init; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if this is a room storage or not")]
+    [SwaggerSchemaCustom("Specifies if this is a room storage or not")]
     public bool RoomsStorage { get; init; }
 
     [SwaggerSchemaCustomString("Customer title")]
     [JsonPropertyName("customer_title")]
     public string CustomerTitle { get; set; }
 
-    [SwaggerSchemaCustomInt("Provider ID", Nullable = true)]
+    [SwaggerSchemaCustom("Provider ID")]
     [JsonPropertyName("provider_id")]
     public int? ProviderId { get; init; }
 

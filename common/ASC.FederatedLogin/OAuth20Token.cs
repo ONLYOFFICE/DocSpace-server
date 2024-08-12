@@ -37,7 +37,7 @@ public class OAuth20Token
     [JsonPropertyName("refresh_token")]
     public string RefreshToken { get; set; }
 
-    [SwaggerSchemaCustomLong("Expires in")]
+    [SwaggerSchemaCustom("Expires in")]
     [JsonPropertyName("expires_in")]
     [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
     public long ExpiresIn { get; set; }
@@ -54,7 +54,7 @@ public class OAuth20Token
     [JsonPropertyName("redirect_uri")]
     public string RedirectUri { get; set; }
 
-    [SwaggerSchemaCustomDateTime("Timestamp")]
+    [SwaggerSchemaCustom("Timestamp")]
     [JsonPropertyName("timestamp")]
     public DateTime Timestamp { get; set; }
 
@@ -62,7 +62,7 @@ public class OAuth20Token
     [System.Text.Json.Serialization.JsonIgnore]
     public string OriginJson { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Is expired")]
+    [SwaggerSchemaCustom("Is expired")]
     public bool IsExpired
     {
         get

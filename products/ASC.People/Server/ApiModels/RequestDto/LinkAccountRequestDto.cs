@@ -52,6 +52,6 @@ public class SignupAccountRequestDto : LinkAccountRequestDto
     [SwaggerSchemaCustomString("Link key")]
     public string Key { get; set; }
 
-    [SwaggerSchemaCustomGuid("Culture")]
+    [SwaggerSchemaCustom("Culture")]
     public string Culture { get; set; }
 }

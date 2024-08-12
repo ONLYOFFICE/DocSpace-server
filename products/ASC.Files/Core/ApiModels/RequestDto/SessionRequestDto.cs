@@ -31,7 +31,7 @@ public class SessionRequestDto
     [SwaggerSchemaCustomString("File name")]
     public string FileName { get; set; }
 
-    [SwaggerSchemaCustomLong("File length in bytes", Format = "int64")]
+    [SwaggerSchemaCustomLong("File length in bytes")]
     public long FileSize { get; set; }
 
     [SwaggerSchemaCustomString("Relative path to the folder")]
@@ -40,9 +40,9 @@ public class SessionRequestDto
     [SwaggerSchemaCustom<ApiDateTime>("Creation time")]
     public ApiDateTime CreateOn { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies whether to encrypt a file or not")]
+    [SwaggerSchemaCustom("Specifies whether to encrypt a file or not")]
     public bool Encrypted { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Create new if exists")]
+    [SwaggerSchemaCustom("Create new if exists")]
     public bool CreateNewIfExist { get; set; }
 }

@@ -43,10 +43,10 @@ public class CompanyWhiteLabelSettingsDto: IMapFrom<CompanyWhiteLabelSettings>
     [SwaggerSchemaCustomString("Phone number")]
     public string Phone { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if a company is a licensor or not")]
+    [SwaggerSchemaCustom("Specifies if a company is a licensor or not")]
     public bool IsLicensor { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if these settings are default or not")]
+    [SwaggerSchemaCustom("Specifies if these settings are default or not")]
     public bool IsDefault { get; set; }
 
     public void Mapping(Profile profile)

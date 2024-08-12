@@ -28,7 +28,7 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 
 public class AuditEventDto
 {
-    [SwaggerSchemaCustomInt("ID", Format = "int32")]
+    [SwaggerSchemaCustom("ID")]
     public int Id { get; set; }
 
     [SwaggerSchemaCustom<ApiDateTime>("Date")]
@@ -37,7 +37,7 @@ public class AuditEventDto
     [SwaggerSchemaCustomString("User")]
     public string User { get; set; }
 
-    [SwaggerSchemaCustomGuid("User ID")]
+    [SwaggerSchemaCustom("User ID")]
     public Guid UserId { get; set; }
 
     [SwaggerSchemaCustomString("Action")]

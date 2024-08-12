@@ -433,10 +433,10 @@ public class BackupAjaxHandler(
         [SwaggerSchemaCustom<CronParams>("Cron parameters")]
         public CronParams CronParams { get; init; }
 
-        [SwaggerSchemaCustomInt("Maximum number of the stored backup copies", Format = "int32", Nullable = true)]
+        [SwaggerSchemaCustom("Maximum number of the stored backup copies")]
         public int? BackupsStored { get; init; }
 
-        [SwaggerSchemaCustomDateTime("Last backup creation time")]
+        [SwaggerSchemaCustom("Last backup creation time")]
         public DateTime LastBackupTime { get; set; }
 
         [SwaggerSchemaCustomBoolean("Dump", Example = false)]
@@ -448,10 +448,10 @@ public class BackupAjaxHandler(
         [SwaggerSchemaCustomString("Period", Example = "EveryWeek")]
         public BackupPeriod Period { get; init; }
 
-        [SwaggerSchemaCustomInt("Hour", Format = "int32")]
+        [SwaggerSchemaCustom("Hour")]
         public int Hour { get; init; }
 
-        [SwaggerSchemaCustomInt("Day", Format = "int32")]
+        [SwaggerSchemaCustom("Day")]
         public int Day { get; init; }
 
         public CronParams() { }

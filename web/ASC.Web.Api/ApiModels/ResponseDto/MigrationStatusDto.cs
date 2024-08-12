@@ -39,6 +39,6 @@ public class MigrationStatusDto
     [SwaggerSchemaCustom<InfoConfigDto>("Migration API information")]
     public MigrationApiInfo ParseResult { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies whether the migration is completed")]
+    [SwaggerSchemaCustom("Specifies whether the migration is completed")]
     public bool IsCompleted { get; set; }
 }

@@ -42,7 +42,7 @@ public class MentionWrapper
     [SwaggerSchemaCustomString("User image")]
     public string Image { get; internal set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the user has the access to the file or not")]
+    [SwaggerSchemaCustom("Specifies if the user has the access to the file or not")]
     public bool HasAccess { get; internal set; }
 
     [SwaggerSchemaCustomString("User display name")]

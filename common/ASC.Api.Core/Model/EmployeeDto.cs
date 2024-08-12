@@ -30,7 +30,7 @@ namespace ASC.Web.Api.Models;
 
 public class EmployeeDto
 {
-    [SwaggerSchemaCustomGuid("ID")]
+    [SwaggerSchemaCustom("ID")]
     public Guid Id { get; set; }
 
     [SwaggerSchemaCustomString("Display name")]
@@ -57,10 +57,10 @@ public class EmployeeDto
     [SwaggerSchemaCustomString("Profile URL")]
     public string ProfileUrl { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the user has an avatar or not")]
+    [SwaggerSchemaCustom("Specifies if the user has an avatar or not")]
     public bool HasAvatar { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the user is an anonim or not")]
+    [SwaggerSchemaCustom("Specifies if the user is an anonim or not")]
     public bool IsAnonim { get; set; }
 
     public static EmployeeDto GetSample()

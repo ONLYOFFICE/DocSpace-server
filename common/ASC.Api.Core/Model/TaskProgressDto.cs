@@ -27,10 +27,10 @@
 namespace ASC.Api.Core.Model;
 public class TaskProgressDto
 {
-    [SwaggerSchemaCustomBoolean("Specifies if the operation is completed or not")]
+    [SwaggerSchemaCustom("Specifies if the operation is completed or not")]
     public bool IsCompleted { get; set; }
 
-    [SwaggerSchemaCustomInt("Progress percentage", Example = 0, Format = "int32")]
+    [SwaggerSchemaCustomInt("Progress percentage", Example = 0)]
     public int Progress { get; set; }
 
     public static TaskProgressDto GetSample()

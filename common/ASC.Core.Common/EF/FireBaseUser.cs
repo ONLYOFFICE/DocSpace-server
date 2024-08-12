@@ -28,13 +28,13 @@ namespace ASC.Core.Common.EF;
 
 public class FireBaseUser : BaseEntity
 {
-    [SwaggerSchemaCustomInt("ID")]
+    [SwaggerSchemaCustom("ID")]
     public int Id { get; set; }
 
-    [SwaggerSchemaCustomGuid("User ID")]
+    [SwaggerSchemaCustom("User ID")]
     public Guid UserId { get; set; }
 
-    [SwaggerSchemaCustomInt("Tenant ID")]
+    [SwaggerSchemaCustom("Tenant ID")]
     public int TenantId { get; set; }
 
     [SwaggerSchemaCustomString("Firebase device token")]
@@ -43,7 +43,7 @@ public class FireBaseUser : BaseEntity
     [SwaggerSchemaCustomString("Application")]
     public string Application { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the user is subscribed to the push notifications or not", Nullable = true)]
+    [SwaggerSchemaCustom("Specifies if the user is subscribed to the push notifications or not", Nullable = true)]
     public bool? IsSubscribed { get; set; }
 
     [SwaggerSchemaCustom<DbTenant>("Tenant")]

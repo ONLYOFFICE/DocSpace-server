@@ -28,7 +28,7 @@ namespace ASC.People.ApiModels.RequestDto;
 
 public abstract class GroupRequestDtoBase
 {
-    [SwaggerSchemaCustomGuid("Group manager ID")]
+    [SwaggerSchemaCustom("Group manager ID")]
     public Guid GroupManager { get; set; }
 
     [SwaggerSchemaCustomString("Group name")]

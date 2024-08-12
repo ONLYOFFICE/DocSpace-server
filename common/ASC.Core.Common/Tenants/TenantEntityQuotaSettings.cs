@@ -31,13 +31,13 @@ public abstract class TenantEntityQuotaSettings
     public const int NoQuota = -1;
     public const int DefaultQuotaValue = -2;
 
-    [SwaggerSchemaCustomBoolean("Specifies if the quota is enabled or not")]
+    [SwaggerSchemaCustom("Specifies if the quota is enabled or not")]
     public bool EnableQuota { get; set; }
 
-    [SwaggerSchemaCustomLong("Default quota")]
+    [SwaggerSchemaCustom("Default quota")]
     public long DefaultQuota { get; set; } = DefaultQuotaValue;
 
-    [SwaggerSchemaCustomDateTime("Date of the last quota recalculation", Nullable = true)]
+    [SwaggerSchemaCustom("Date of the last quota recalculation", Nullable = true)]
     public DateTime? LastRecalculateDate { get; set; }
 
 }

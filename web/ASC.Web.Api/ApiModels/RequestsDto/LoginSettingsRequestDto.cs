@@ -30,15 +30,15 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 public class LoginSettingsRequestDto
 {
-    [SwaggerSchemaCustomInt("Maximum number of the user attempts to log in", Format = "int32")]
+    [SwaggerSchemaCustom("Maximum number of the user attempts to log in")]
     [Range(1, 9999)]
     public int AttemptCount { get; set; }
 
-    [SwaggerSchemaCustomInt("The duration of the account suspension for unsuccessful login attempts", Format = "int32")]
+    [SwaggerSchemaCustom("The duration of the account suspension for unsuccessful login attempts")]
     [Range(1, 9999)]
     public int BlockTime { get; set; }
 
-    [SwaggerSchemaCustomInt("Expected server response time", Format = "int32")]
+    [SwaggerSchemaCustom("Expected server response time")]
     [Range(1, 9999)]
     public int CheckPeriod { get; set; }
 }

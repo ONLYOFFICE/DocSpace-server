@@ -34,6 +34,6 @@ public class CreateTextOrHtmlFileRequestDto
     [SwaggerSchemaCustomString("File contents")]
     public string Content { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Create new if exist")]
+    [SwaggerSchemaCustom("Create new if exist")]
     public bool CreateNewIfExist { get; set; }
 }

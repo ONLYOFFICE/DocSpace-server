@@ -29,6 +29,7 @@ public class SwaggerSchemaCustomAttribute<T> : SwaggerSchemaAttribute
 
 public class SwaggerSchemaCustomStringAttribute : SwaggerSchemaCustomAttribute<string>
 {
+    internal static readonly string DefaultExample = "some text";
     public SwaggerSchemaCustomStringAttribute(string description = null)
     {
         Description = description;
@@ -38,6 +39,7 @@ public class SwaggerSchemaCustomStringAttribute : SwaggerSchemaCustomAttribute<s
 
 public class SwaggerSchemaCustomBooleanAttribute : SwaggerSchemaCustomAttribute<bool>
 {
+    internal static readonly bool DefaultExample = true;
     public SwaggerSchemaCustomBooleanAttribute(string description = null)
     {
         Description = description;
@@ -47,6 +49,7 @@ public class SwaggerSchemaCustomBooleanAttribute : SwaggerSchemaCustomAttribute<
 
 public class SwaggerSchemaCustomIntAttribute : SwaggerSchemaCustomAttribute<int>
 {
+    internal static readonly int DefaultExample = 1234;
     public SwaggerSchemaCustomIntAttribute(string description = null)
     {
         Description = description;
@@ -56,6 +59,7 @@ public class SwaggerSchemaCustomIntAttribute : SwaggerSchemaCustomAttribute<int>
 
 public class SwaggerSchemaCustomLongAttribute : SwaggerSchemaCustomAttribute<long>
 {
+    internal static readonly long DefaultExample = 1234;
     public SwaggerSchemaCustomLongAttribute(string description = null)
     {
         Description = description;
@@ -65,6 +69,7 @@ public class SwaggerSchemaCustomLongAttribute : SwaggerSchemaCustomAttribute<lon
 
 public class SwaggerSchemaCustomDoubleAttribute : SwaggerSchemaCustomAttribute<double>
 {
+    internal static readonly double DefaultExample = -8.5;
     public SwaggerSchemaCustomDoubleAttribute(string description = null)
     {
         Description = description;
@@ -73,20 +78,22 @@ public class SwaggerSchemaCustomDoubleAttribute : SwaggerSchemaCustomAttribute<d
 }
 
 public class SwaggerSchemaCustomGuidAttribute : SwaggerSchemaCustomAttribute<string>
-{
+{    
+    internal static Guid DefaultExample = new("{75A5F745-F697-4418-B38D-0FE0D277E258}");
     public SwaggerSchemaCustomGuidAttribute(string description = null)
     {
         Description = description;
-        Example = new Guid("{75A5F745-F697-4418-B38D-0FE0D277E258}").ToString();
+        Example = DefaultExample.ToString();
     }
 }
 
 public class SwaggerSchemaCustomDateTimeAttribute : SwaggerSchemaCustomAttribute<DateTime>
 {
+    internal static DateTime DefaultExample = new(2008, 4, 10, 06, 30, 00);
     public SwaggerSchemaCustomDateTimeAttribute(string description = null)
     {
         Description = description;
-        Example = new DateTime(2008, 4, 10, 06, 30, 00);
+        Example = DefaultExample;
     }
 }
 
@@ -103,30 +110,14 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
 
         if (swaggerSchemaCustomAttribute != null)
         {
-            if (propertyInfo.PropertyType == typeof(int))
+            var (example, nullable, format) = GetExample(propertyInfo.PropertyType);
+            schema.Example = example;
+            schema.Nullable = nullable;
+            if (!string.IsNullOrEmpty(format))
             {
-                schema.Example = new OpenApiInteger(1234);
-            } 
-            else if (propertyInfo.PropertyType == typeof(long))
-            {
-                schema.Example = new OpenApiLong(1234);
+                schema.Format = format;
             }
-            else if (propertyInfo.PropertyType == typeof(string))
-            {
-                schema.Example = new OpenApiString("some text");
-            }
-            else if (propertyInfo.PropertyType == typeof(bool))
-            {
-                schema.Example = new OpenApiBoolean(true);
-            }
-            else if (propertyInfo.PropertyType == typeof(double))
-            {
-                schema.Example = new OpenApiDouble(-8.5);
-            }
-            else if (propertyInfo.PropertyType == typeof(DateTime))
-            {
-                schema.Example = new OpenApiDateTime(new DateTime(2008, 4, 10, 06, 30, 00));
-            }
+            
             return;
         }
             
@@ -161,6 +152,73 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
         return exampleProperty == null ? null : exampleProperty.GetValue(attribute);
     }
 
+    private (IOpenApiAny, bool, string) GetExample(Type checkType)
+    {
+        IOpenApiAny example = null;
+        var nullable = false;
+        string format = null;
+        
+        var nullableType = Nullable.GetUnderlyingType(checkType);
+        if (nullableType != null)
+        {
+            nullable = true;
+            checkType = nullableType;
+        }
+            
+        if (checkType == typeof(int))
+        {
+            example = new OpenApiInteger(SwaggerSchemaCustomIntAttribute.DefaultExample);
+            format = "int32";
+        } 
+        else if (checkType == typeof(long) || checkType == typeof(ulong))
+        {
+            example = new OpenApiLong(SwaggerSchemaCustomLongAttribute.DefaultExample);
+            format = "int64";
+        }
+        else if (checkType == typeof(string))
+        {
+            example = new OpenApiString(SwaggerSchemaCustomStringAttribute.DefaultExample);
+        }
+        else if (checkType == typeof(bool))
+        {
+            example = new OpenApiBoolean(SwaggerSchemaCustomBooleanAttribute.DefaultExample);
+        }
+        else if (checkType == typeof(double))
+        {
+            example = new OpenApiDouble(SwaggerSchemaCustomDoubleAttribute.DefaultExample);
+            format = "double";
+        }
+        else if (checkType == typeof(DateTime))
+        {
+            example = new OpenApiDateTime(SwaggerSchemaCustomDateTimeAttribute.DefaultExample);
+        }
+        else if (checkType == typeof(Guid))
+        {
+            example = new OpenApiString(SwaggerSchemaCustomGuidAttribute.DefaultExample.ToString());
+        }
+        else if(typeof(IEnumerable).IsAssignableFrom(checkType))
+        {
+            var array = new OpenApiArray();
+            if (checkType.IsGenericType)
+            {
+                checkType = checkType.GenericTypeArguments.FirstOrDefault();
+            }
+            else if(checkType.IsArray)
+            {
+                checkType = checkType.GetElementType();
+            }
+            
+            var (arrayExample, _, _) = GetExample(checkType);
+            array.Add(arrayExample);
+            example = array;
+        }
+        else
+        {
+            var a = 0;
+        }
+
+        return (example, nullable, format);
+    } 
     private void ApplySchemaAttribute(OpenApiSchema schema, object exampleValue)
     {
         schema.Example = exampleValue switch

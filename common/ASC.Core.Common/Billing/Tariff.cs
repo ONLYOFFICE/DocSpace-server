@@ -29,19 +29,19 @@ namespace ASC.Core.Billing;
 [DebuggerDisplay("{State} before {DueDate}")]
 public class Tariff
 {
-    [SwaggerSchemaCustomInt("ID")]
+    [SwaggerSchemaCustom("ID")]
     public int Id { get; set; }
 
     [SwaggerSchemaCustomString("Tariff state", Example = "Trial")]
     public TariffState State { get; set; }
 
-    [SwaggerSchemaCustomDateTime("Due date")]
+    [SwaggerSchemaCustom("Due date")]
     public DateTime DueDate { get; set; }
 
-    [SwaggerSchemaCustomDateTime("Delay due date")]
+    [SwaggerSchemaCustom("Delay due date")]
     public DateTime DelayDueDate { get; set; }
 
-    [SwaggerSchemaCustomDateTime("License date")]
+    [SwaggerSchemaCustom("License date")]
     public DateTime LicenseDate { get; set; }
 
     [SwaggerSchemaCustomString("Customer ID")]
@@ -72,10 +72,10 @@ public class Tariff
 
 public class Quota(int id, int quantity) : IEquatable<Quota>
 {
-    [SwaggerSchemaCustomInt("ID")]
+    [SwaggerSchemaCustom("ID")]
     public int Id { get; set; } = id;
 
-    [SwaggerSchemaCustomInt("Quantity")]
+    [SwaggerSchemaCustom("Quantity")]
     public int Quantity { get; set; } = quantity;
 
     public bool Equals(Quota other)

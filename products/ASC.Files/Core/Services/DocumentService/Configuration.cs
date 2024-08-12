@@ -64,10 +64,10 @@ public class ActionLinkConfig
 
 public class CoEditingConfig
 {
-    [SwaggerSchemaCustomBoolean("Change")]
+    [SwaggerSchemaCustom("Change")]
     public bool Change { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Fast")]
+    [SwaggerSchemaCustom("Fast")]
     public bool Fast { get; init; }
 
     [SwaggerSchemaCustomString("Mode", Example = "fast")]
@@ -476,40 +476,40 @@ public class InfoConfig<T>(
 
 public class PermissionsConfig
 {
-    [SwaggerSchemaCustomBoolean("Change history")]
+    [SwaggerSchemaCustom("Change history")]
     public bool ChangeHistory { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Comment")]
+    [SwaggerSchemaCustom("Comment")]
     public bool Comment { get; set; } = true;
 
-    [SwaggerSchemaCustomBoolean("Chat")]
+    [SwaggerSchemaCustom("Chat")]
     public bool Chat { get; set; } = true;
 
-    [SwaggerSchemaCustomBoolean("Download")]
+    [SwaggerSchemaCustom("Download")]
     public bool Download { get; set; } = true;
 
-    [SwaggerSchemaCustomBoolean("Edit")]
+    [SwaggerSchemaCustom("Edit")]
     public bool Edit { get; set; } = true;
 
-    [SwaggerSchemaCustomBoolean("FillForms")]
+    [SwaggerSchemaCustom("FillForms")]
     public bool FillForms { get; set; } = true;
 
-    [SwaggerSchemaCustomBoolean("ModifyFilter")]
+    [SwaggerSchemaCustom("ModifyFilter")]
     public bool ModifyFilter { get; set; } = true;
 
-    [SwaggerSchemaCustomBoolean("Protect")]
+    [SwaggerSchemaCustom("Protect")]
     public bool Protect { get; set; } = true;
 
-    [SwaggerSchemaCustomBoolean("Print")]
+    [SwaggerSchemaCustom("Print")]
     public bool Print { get; set; } = true;
 
-    [SwaggerSchemaCustomBoolean("Rename")]
+    [SwaggerSchemaCustom("Rename")]
     public bool Rename { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Review")]
+    [SwaggerSchemaCustom("Review")]
     public bool Review { get; set; } = true;
 
-    [SwaggerSchemaCustomBoolean("Copy")]
+    [SwaggerSchemaCustom("Copy")]
     public bool Copy { get; set; } = true;
 }
 
@@ -739,7 +739,7 @@ public class FeedbackConfig
     [SwaggerSchemaCustomString("Url", Format = "uri")]
     public string Url { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Visible")]
+    [SwaggerSchemaCustom("Visible")]
     public bool Visible { get => true; }
 }
 

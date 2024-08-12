@@ -55,7 +55,7 @@ public class ConfigurationDto<T>
     [SwaggerSchemaCustomString("Error message")]
     public string ErrorMessage { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the filling has started or not", Nullable = true)]
+    [SwaggerSchemaCustom("Specifies if the filling has started or not", Nullable = true)]
     public bool? StartFilling { get; set; }
 
     [SwaggerSchemaCustomString("Filling session Id")]
@@ -88,7 +88,7 @@ public class EditorConfigurationDto<T>
     [SwaggerSchemaCustomString("Mode")]
     public string Mode { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Mode write")]
+    [SwaggerSchemaCustom("Mode write")]
     public bool ModeWrite { get; set; }
 
     [SwaggerSchemaCustom<PluginsConfig>("Plugins")]
@@ -105,7 +105,7 @@ public class EditorConfigurationDto<T>
 }
 public class CustomizationConfigDto<T>
 {
-    [SwaggerSchemaCustomBoolean("About")]
+    [SwaggerSchemaCustom("About")]
     public bool About { get; set; }
 
     [SwaggerSchemaCustom<CustomerConfigDto>("Customer")]
@@ -117,7 +117,7 @@ public class CustomizationConfigDto<T>
     [SwaggerSchemaCustom<FeedbackConfig>("Feedback")]
     public FeedbackConfig Feedback  { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Forcesave", Nullable = true)]
+    [SwaggerSchemaCustom("Forcesave", Nullable = true)]
     public bool? Forcesave { get; set; }
 
     [SwaggerSchemaCustom<GobackConfig>("Go back")]
@@ -126,13 +126,13 @@ public class CustomizationConfigDto<T>
     [SwaggerSchemaCustom<LogoConfigDto>("Logo")]
     public LogoConfigDto Logo { get; set; }
 
-    [SwaggerSchemaCustomBoolean("MentionShare")]
+    [SwaggerSchemaCustom("MentionShare")]
     public bool MentionShare { get; set; }
 
     [SwaggerSchemaCustomString("Review display")]
     public string ReviewDisplay { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Submit form")]
+    [SwaggerSchemaCustom("Submit form")]
     public bool SubmitForm { get; set; }
 }
 
@@ -150,13 +150,13 @@ public class LogoConfigDto
     [SwaggerSchemaCustomString("Url", Format = "uri")]
     public string Url { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Visible")]
+    [SwaggerSchemaCustom("Visible")]
     public bool Visible { get; set; }
 }
 
 public class AnonymousConfigDto
 {
-    [SwaggerSchemaCustomBoolean("Request")]
+    [SwaggerSchemaCustom("Request")]
     public bool Request { get; set; }
 }
 
@@ -188,7 +188,7 @@ public class DocumentConfigDto
     [SwaggerSchemaCustom<InfoConfigDto>("Info")]
     public InfoConfigDto Info { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Is linked for me")]
+    [SwaggerSchemaCustom("Is linked for me")]
     public bool IsLinkedForMe { get; set; }
 
     [SwaggerSchemaCustomString("Key")]
@@ -215,7 +215,7 @@ public class DocumentConfigDto
 
 public class InfoConfigDto
 {
-    [SwaggerSchemaCustomBoolean("Favorite", Nullable = true)]
+    [SwaggerSchemaCustom("Favorite", Nullable = true)]
     public bool? Favorite { get; set; }
 
     [SwaggerSchemaCustomString("Folder")]

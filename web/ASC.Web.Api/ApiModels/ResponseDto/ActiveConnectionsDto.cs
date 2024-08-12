@@ -28,7 +28,7 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class ActiveConnectionsDto
 {
-    [SwaggerSchemaCustomInt("Login event", Format = "int32")]
+    [SwaggerSchemaCustom("Login event")]
     public int LoginEvent { get; set; }
 
     [SwaggerSchemaCustom<List<ActiveConnectionsItemDto>>("Items")]
@@ -37,16 +37,16 @@ public class ActiveConnectionsDto
 
 public class ActiveConnectionsItemDto
 {
-    [SwaggerSchemaCustomInt("Id", Format = "int32")]
+    [SwaggerSchemaCustom("Id")]
     public int Id { get; set; }
 
-    [SwaggerSchemaCustomInt("Tenant id", Format = "int32")]
+    [SwaggerSchemaCustom("Tenant id")]
     public int TenantId { get; set; }
 
-    [SwaggerSchemaCustomGuid("User id")]
+    [SwaggerSchemaCustom("User id")]
     public Guid UserId { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Mobile")]
+    [SwaggerSchemaCustom("Mobile")]
     public bool Mobile {  get; set; }
 
     [SwaggerSchemaCustomString("Ip")]

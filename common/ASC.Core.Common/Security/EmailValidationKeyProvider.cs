@@ -190,7 +190,7 @@ public class EmailValidationKeyModel
     [SwaggerSchemaCustomString("Email")]
     public string Email { get; init; }
 
-    [SwaggerSchemaCustomGuid("User ID", Nullable = true)]
+    [SwaggerSchemaCustom("User ID", Nullable = true)]
     public Guid? UiD { get; init; }
 
     [SwaggerSchemaCustomString("Confirmation email type", Example = "LinkInvite", Nullable = true)]

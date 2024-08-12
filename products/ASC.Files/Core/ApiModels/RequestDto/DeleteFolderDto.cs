@@ -28,9 +28,9 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class DeleteFolderDto
 {
-    [SwaggerSchemaCustomBoolean("Specifies whether to delete a folder after the editing session is finished or not")]
+    [SwaggerSchemaCustom("Specifies whether to delete a folder after the editing session is finished or not")]
     public bool DeleteAfter { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies whether to move a folder to the \"Trash\" folder or delete it immediately")]
+    [SwaggerSchemaCustom("Specifies whether to move a folder to the \"Trash\" folder or delete it immediately")]
     public bool Immediately { get; set; }
 }

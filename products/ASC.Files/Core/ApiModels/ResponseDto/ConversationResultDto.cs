@@ -38,7 +38,7 @@ public class ConversationResultDto
     [JsonPropertyName("Operation")]
     public FileOperationType OperationType { get; set; }
 
-    [SwaggerSchemaCustomInt("Operation progress", Format = "int32")]
+    [SwaggerSchemaCustom("Operation progress")]
     public int Progress { get; set; }
 
     [SwaggerSchemaCustomString("Source file")]

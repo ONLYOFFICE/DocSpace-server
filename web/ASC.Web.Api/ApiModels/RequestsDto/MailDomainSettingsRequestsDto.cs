@@ -34,7 +34,7 @@ public class MailDomainSettingsRequestsDto
     [SwaggerSchemaCustomString("List of trusted domains")]
     public List<string> Domains { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Invites as a user or not")]
+    [SwaggerSchemaCustom("Invites as a user or not")]
     public bool InviteUsersAsVisitors { get; set; }
 }
 
@@ -54,6 +54,6 @@ public class AdminMessageSettingsRequestsDto : AdminMessageBaseSettingsRequestsD
 
 public class TurnOnAdminMessageSettingsRequestDto
 {
-    [SwaggerSchemaCustomBoolean("Specifies if the administrator messages are enabled or not")]
+    [SwaggerSchemaCustom("Specifies if the administrator messages are enabled or not")]
     public bool TurnOn { get; set; }
 }

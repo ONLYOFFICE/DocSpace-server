@@ -31,6 +31,6 @@ public class DnsSettingsRequestsDto
     [SwaggerSchemaCustomString("DNS")]
     public string DnsName { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Enabled or not")]
+    [SwaggerSchemaCustom("Enabled or not")]
     public bool Enable { get; set; }
 }

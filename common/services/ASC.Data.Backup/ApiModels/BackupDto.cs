@@ -34,6 +34,6 @@ public class BackupDto
     [SwaggerSchemaCustom<IEnumerable<ItemKeyValuePair<object, object>>>("Storage parameters")]
     public IEnumerable<ItemKeyValuePair<object, object>> StorageParams { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if a dump will be created or not")]
+    [SwaggerSchemaCustom("Specifies if a dump will be created or not")]
     public bool Dump { get; set; }
 }

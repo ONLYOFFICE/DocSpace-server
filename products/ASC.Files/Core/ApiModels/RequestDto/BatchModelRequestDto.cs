@@ -48,19 +48,19 @@ public class DownloadRequestDto : BaseBatchRequestDto
 
 public class DeleteBatchRequestDto : BaseBatchRequestDto
 {
-    [SwaggerSchemaCustomBoolean("Specifies whether to delete a file after the editing session is finished or not")]
+    [SwaggerSchemaCustom("Specifies whether to delete a file after the editing session is finished or not")]
     public bool DeleteAfter { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies whether to move a file to the \"Trash\" folder or delete it immediately")]
+    [SwaggerSchemaCustom("Specifies whether to move a file to the \"Trash\" folder or delete it immediately")]
     public bool Immediately { get; set; }
 }
 
 public class DeleteRequestDto
 {
-    [SwaggerSchemaCustomBoolean("Specifies whether to delete a file after the editing session is finished or not")]
+    [SwaggerSchemaCustom("Specifies whether to delete a file after the editing session is finished or not")]
     public bool DeleteAfter { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies whether to move a file to the \"Trash\" folder or delete it immediately")]
+    [SwaggerSchemaCustom("Specifies whether to move a file to the \"Trash\" folder or delete it immediately")]
     public bool Immediately { get; set; }
 }
 
@@ -72,10 +72,10 @@ public class BatchRequestDto : BaseBatchRequestDto
     [SwaggerSchemaCustomString("Overwriting behavior", Example = "Skip")]
     public FileConflictResolveType ConflictResolveType { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies whether to delete a folder after the editing session is finished or not")]
+    [SwaggerSchemaCustom("Specifies whether to delete a folder after the editing session is finished or not")]
     public bool DeleteAfter { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Content")]
+    [SwaggerSchemaCustom("Content")]
     public bool Content { get; set; }
 }
 

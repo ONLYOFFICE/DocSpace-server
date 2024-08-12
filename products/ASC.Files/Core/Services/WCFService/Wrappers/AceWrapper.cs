@@ -75,7 +75,7 @@ public class AceShortWrapper(string subjectName, string permission, bool isLink)
     [SwaggerSchemaCustomString("User access rights to the file")]
     public string Permissions { get; init; } = permission;
 
-    [SwaggerSchemaCustomBoolean("Is link")]
+    [SwaggerSchemaCustom("Is link")]
     public bool isLink { get; init; } = isLink;
 }
 

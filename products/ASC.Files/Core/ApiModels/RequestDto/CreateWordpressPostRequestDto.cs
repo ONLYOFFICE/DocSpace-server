@@ -34,6 +34,6 @@ public class CreateWordpressPostRequestDto
     [SwaggerSchemaCustomString("Post contents")]
     public string Content { get; set; }
 
-    [SwaggerSchemaCustomInt("Operation status", Format = "int32")]
+    [SwaggerSchemaCustom("Operation status")]
     public int Status { get; set; }
 }

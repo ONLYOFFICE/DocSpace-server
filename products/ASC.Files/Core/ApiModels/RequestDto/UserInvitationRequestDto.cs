@@ -28,9 +28,9 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class UserInvitationRequestDto
 {
-    [SwaggerSchemaCustomGuid("List of user IDs")]
+    [SwaggerSchemaCustom("List of user IDs")]
     public IEnumerable<Guid> UsersIds { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Resend all")]
+    [SwaggerSchemaCustom("Resend all")]
     public bool ResendAll { get; set; }
 }

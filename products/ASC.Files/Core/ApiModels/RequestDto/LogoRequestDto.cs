@@ -31,15 +31,15 @@ public class LogoRequestDto
     [SwaggerSchemaCustomString("The path to the temporary image file")]
     public string TmpFile { get; set; }
 
-    [SwaggerSchemaCustomInt("The X coordinate of the rectangle starting point", Format = "int32")]
+    [SwaggerSchemaCustom("The X coordinate of the rectangle starting point")]
     public int X { get; set; }
 
-    [SwaggerSchemaCustomInt("The Y coordinate of the rectangle starting point", Format = "int32")]
+    [SwaggerSchemaCustom("The Y coordinate of the rectangle starting point")]
     public int Y { get; set; }
 
-    [SwaggerSchemaCustomInt("The rectangle width", Format = "int32")]
+    [SwaggerSchemaCustom("The rectangle width")]
     public int Width { get; set; }
 
-    [SwaggerSchemaCustomInt("The rectangle height", Format = "int32")]
+    [SwaggerSchemaCustom("The rectangle height")]
     public int Height { get; set; }
 }

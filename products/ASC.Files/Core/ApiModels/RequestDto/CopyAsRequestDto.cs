@@ -31,10 +31,10 @@ public class CopyAsRequestDto<T>
     [SwaggerSchemaCustomString("Destination file title")]
     public string DestTitle { get; set; }
 
-    [SwaggerSchemaCustomInt("Destination folder ID", Format = "int32")]
+    [SwaggerSchemaCustomInt("Destination folder ID")]
     public T DestFolderId { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies whether to allow the creation of external extension files or not")]
+    [SwaggerSchemaCustom("Specifies whether to allow the creation of external extension files or not")]
     public bool EnableExternalExt { get; set; }
 
     [SwaggerSchemaCustomString("Password")]

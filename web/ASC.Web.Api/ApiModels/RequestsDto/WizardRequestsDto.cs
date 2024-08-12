@@ -43,7 +43,7 @@ public class WizardRequestsDto
     [SwaggerSchemaCustomString("AMI ID")]
     public string AmiId { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Subscribed from the site or not")]
+    [SwaggerSchemaCustom("Subscribed from the site or not")]
     public bool SubscribeFromSite { get; set; }
 
     public void Deconstruct(out string email, out string passwordHash, out string lng, out string timeZone, out string amiid, out bool subscribeFromSite)

@@ -34,19 +34,19 @@ public class TenantDto : IMapFrom<Tenant>
     [SwaggerSchemaCustomString("Tenant alias")]
     public string TenantAlias { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the calls are available for this tenant or not")]
+    [SwaggerSchemaCustom("Specifies if the calls are available for this tenant or not")]
     public bool Calls { get; set; }
 
     [SwaggerSchemaCustomString("Campaign")]
     public string Campaign { get; set; }
 
-    [SwaggerSchemaCustomDateTime("Creation date and time")]
+    [SwaggerSchemaCustom("Creation date and time")]
     public DateTime CreationDateTime { get; internal set; }
 
     [SwaggerSchemaCustomString("Hosted region")]
     public string HostedRegion { get; set; }
 
-    [SwaggerSchemaCustomInt("Tenant ID", Format = "int32")]
+    [SwaggerSchemaCustom("Tenant ID")]
     public int TenantId { get; internal set; }
 
     [SwaggerSchemaCustomString("Tenant industry", Example = "Other")]
@@ -55,7 +55,7 @@ public class TenantDto : IMapFrom<Tenant>
     [SwaggerSchemaCustomString("Language")]
     public string Language { get; set; }
 
-    [SwaggerSchemaCustomDateTime("Last modified date")]
+    [SwaggerSchemaCustom("Last modified date")]
     public DateTime LastModified { get; set; }
 
     [SwaggerSchemaCustomString("Mapped domain")]
@@ -64,19 +64,19 @@ public class TenantDto : IMapFrom<Tenant>
     [SwaggerSchemaCustomString("Name")]
     public string Name { get; set; }
 
-    [SwaggerSchemaCustomGuid("Owner ID")]
+    [SwaggerSchemaCustom("Owner ID")]
     public Guid OwnerId { get; set; }
 
     [SwaggerSchemaCustomString("Payment ID")]
     public string PaymentId { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the ONLYOFFICE newsletter is allowed or not")]
+    [SwaggerSchemaCustom("Specifies if the ONLYOFFICE newsletter is allowed or not")]
     public bool Spam { get; set; }
 
     [SwaggerSchemaCustomString("Tenant status", Example = "Active")]
     public TenantStatus Status { get; internal set; }
 
-    [SwaggerSchemaCustomDateTime("The date and time when the tenant status was changed")]
+    [SwaggerSchemaCustom("The date and time when the tenant status was changed")]
     public DateTime StatusChangeDate { get; internal set; }
 
     [SwaggerSchemaCustomString("Time zone")]
@@ -91,10 +91,10 @@ public class TenantDto : IMapFrom<Tenant>
     [SwaggerSchemaCustomString("Trusted domains type", Example = "None")]
     public TenantTrustedDomainsType TrustedDomainsType { get; set; }
 
-    [SwaggerSchemaCustomInt("Version", Format = "int32")]
+    [SwaggerSchemaCustom("Version")]
     public int Version { get; set; }
 
-    [SwaggerSchemaCustomDateTime("The date and time when the tenant version was changed")]
+    [SwaggerSchemaCustom("The date and time when the tenant version was changed")]
     public DateTime VersionChanged { get; set; }
 
     public void Mapping(Profile profile)

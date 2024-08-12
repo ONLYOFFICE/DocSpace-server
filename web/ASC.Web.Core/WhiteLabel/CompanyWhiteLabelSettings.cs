@@ -56,7 +56,7 @@ public class CompanyWhiteLabelSettings : ISettings<CompanyWhiteLabelSettings>
     [Phone]
     public string Phone { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if a company is a licensor or not")]
+    [SwaggerSchemaCustom("Specifies if a company is a licensor or not")]
     [JsonPropertyName("IsLicensor")]
     public bool IsLicensor { get; set; }
 

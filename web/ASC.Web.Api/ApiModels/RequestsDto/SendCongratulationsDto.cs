@@ -28,7 +28,7 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 public class SendCongratulationsDto
 {
-    [SwaggerSchemaCustomGuid("User ID")]
+    [SwaggerSchemaCustom("User ID")]
     public Guid Userid { get; set; }
 
     [SwaggerSchemaCustomString("Email key")]

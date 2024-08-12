@@ -35,7 +35,7 @@ public class TenantDomainValidator
     [SwaggerSchemaCustomString("Regex")]
     public string Regex { get; }
 
-    [SwaggerSchemaCustomInt("Min length")]
+    [SwaggerSchemaCustom("Min length")]
     public int MinLength { get; }
 
     [SwaggerSchemaCustomInt("Max length", Example = 63)]

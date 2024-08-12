@@ -180,7 +180,7 @@ public class EditHistoryDataDto
     [SwaggerSchemaCustomString("File URL", Format = "uri")]
     public string Url { get; set; }
 
-    [SwaggerSchemaCustomInt("File version")]
+    [SwaggerSchemaCustom("File version")]
     public int Version { get; init; }
 
     [SwaggerSchemaCustomString("File type")]

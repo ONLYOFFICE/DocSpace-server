@@ -30,7 +30,7 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 public class WebhooksConfigRequestsDto
 {
-    [SwaggerSchemaCustomInt(Description = "ID")]
+    [SwaggerSchemaCustom("ID")]
     public int Id { get; set; }
 
     [SwaggerSchemaCustomString("Name")]
@@ -44,9 +44,9 @@ public class WebhooksConfigRequestsDto
     [SwaggerSchemaCustomString("Secret key")]
     public string SecretKey { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Enabled or not", Nullable = true)]
+    [SwaggerSchemaCustom("Enabled or not", Nullable = true)]
     public bool? Enabled { get; set; }
 
-    [SwaggerSchemaCustomBoolean("SSL", Nullable = true)]
+    [SwaggerSchemaCustom("SSL", Nullable = true)]
     public bool? SSL { get; set;}
 }

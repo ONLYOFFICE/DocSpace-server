@@ -37,6 +37,6 @@ public class SaveEditingRequestDto : IModelWithFile
     [SwaggerSchemaCustom<IFormFile>("Request file stream", Format = "binary")]
     public IFormFile File { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies whether to force save a file or not")]
+    [SwaggerSchemaCustom("Specifies whether to force save a file or not")]
     public bool Forcesave { get; set; }
 }

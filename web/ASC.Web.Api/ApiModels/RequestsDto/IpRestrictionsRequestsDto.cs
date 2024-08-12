@@ -33,6 +33,6 @@ public class IpRestrictionsBaseRequestsDto
 }
 public class IpRestrictionsRequestsDto
 {
-    [SwaggerSchemaCustomBoolean("Enables IP restrictions or not")]
+    [SwaggerSchemaCustom("Enables IP restrictions or not")]
     public bool Enable { get; set; }
 }

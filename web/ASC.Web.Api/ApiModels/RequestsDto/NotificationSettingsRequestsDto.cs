@@ -31,7 +31,7 @@ public class NotificationSettingsRequestsDto
     [SwaggerSchemaCustomString("Notification type (Badges, RoomsActivity, DailyFeed, UsefullTips)", Example = "Badges")]
     public NotificationType Type { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the notification type is enabled or not")]
+    [SwaggerSchemaCustom("Specifies if the notification type is enabled or not")]
     public bool IsEnabled { get; set; }
 }
 

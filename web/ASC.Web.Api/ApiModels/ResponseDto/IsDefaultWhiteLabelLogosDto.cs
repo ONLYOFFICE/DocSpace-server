@@ -31,6 +31,6 @@ public class IsDefaultWhiteLabelLogosDto
     [SwaggerSchemaCustomString("White label logo name")]
     public string Name { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the white label logo is default or not")]
+    [SwaggerSchemaCustom("Specifies if the white label logo is default or not")]
     public bool Default { get; set; }
 }

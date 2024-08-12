@@ -28,9 +28,9 @@ namespace ASC.People.ApiModels.RequestDto;
 
 public class UpdateMembersRequestDto
 {
-    [SwaggerSchemaCustomGuid("List of user IDs")]
+    [SwaggerSchemaCustom("List of user IDs")]
     public IEnumerable<Guid> UserIds { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies whether to resend invitation letters to all the users or not")]
+    [SwaggerSchemaCustom("Specifies whether to resend invitation letters to all the users or not")]
     public bool ResendAll { get; set; }
 }

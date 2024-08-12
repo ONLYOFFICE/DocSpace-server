@@ -28,7 +28,7 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class UpdateCommentRequestDto
 {
-    [SwaggerSchemaCustomInt("File version", Format = "int32")]
+    [SwaggerSchemaCustom("File version")]
     public int Version { get; set; }
 
     [SwaggerSchemaCustomString("Comment text")]

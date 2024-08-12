@@ -28,13 +28,13 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class WebhooksLogDto : IMapFrom<WebhooksLog>
 {
-    [SwaggerSchemaCustomInt("ID", Format = "int32")]
+    [SwaggerSchemaCustom("ID")]
     public int Id { get; set; }
 
     [SwaggerSchemaCustomString("Config name")]
     public string ConfigName { get; set; }
 
-    [SwaggerSchemaCustomDateTime("Creation time")]
+    [SwaggerSchemaCustom("Creation time")]
     public DateTime CreationTime { get; set; }
 
     [SwaggerSchemaCustomString("Method")]
@@ -55,9 +55,9 @@ public class WebhooksLogDto : IMapFrom<WebhooksLog>
     [SwaggerSchemaCustomString("Response payload")]
     public string ResponsePayload { get; set; }
 
-    [SwaggerSchemaCustomInt("Status", Format = "int32")]
+    [SwaggerSchemaCustom("Status")]
     public int Status { get; set; }
 
-    [SwaggerSchemaCustomDateTime("Delivery time", Nullable = true)]
+    [SwaggerSchemaCustom("Delivery time", Nullable = true)]
     public DateTime? Delivery { get; set; }
 }

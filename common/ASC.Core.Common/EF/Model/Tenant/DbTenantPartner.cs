@@ -28,7 +28,7 @@ namespace ASC.Core.Common.EF.Model;
 
 public class DbTenantPartner : BaseEntity
 {
-    [SwaggerSchemaCustomInt("Tenant id")]
+    [SwaggerSchemaCustom("Tenant id")]
     public int TenantId { get; set; }
 
     [SwaggerSchemaCustomString("Partner id")]

@@ -31,7 +31,7 @@ public class SecurityInfoRequestDto : BaseBatchRequestDto
     [SwaggerSchemaCustom<IEnumerable<FileShareParams>>("Collection of sharing parameters")]
     public IEnumerable<FileShareParams> Share { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Notifies users about the shared file or not")]
+    [SwaggerSchemaCustom("Notifies users about the shared file or not")]
     public bool Notify { get; set; }
 
     [SwaggerSchemaCustomString("Message to send when notifying about the shared file")]
@@ -43,7 +43,7 @@ public class SecurityInfoSimpeRequestDto
     [SwaggerSchemaCustom<IEnumerable<FileShareParams>>("Collection of sharing parameters")]
     public IEnumerable<FileShareParams> Share { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Notifies users about the shared file or not")]
+    [SwaggerSchemaCustom("Notifies users about the shared file or not")]
     public bool Notify { get; set; }
 
     [SwaggerSchemaCustomString("Message to send when notifying about the shared file")]

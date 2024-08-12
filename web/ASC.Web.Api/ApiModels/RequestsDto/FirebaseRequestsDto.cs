@@ -31,6 +31,6 @@ public class FirebaseRequestsDto
     [SwaggerSchemaCustomString("Firebase device token")]
     public string FirebaseDeviceToken { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the user is subscribed to the push notification or not")]
+    [SwaggerSchemaCustom("Specifies if the user is subscribed to the push notification or not")]
     public bool IsSubscribed { get; set; }
 }

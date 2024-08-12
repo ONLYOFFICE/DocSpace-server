@@ -37,12 +37,12 @@ public class GroupMemberSecurityDto
     [SwaggerSchemaCustomString("User access", Example = "None", Nullable = true)]
     public FileShare? UserAccess { get; init; }
 
-    [SwaggerSchemaCustomBoolean("Overridden")]
+    [SwaggerSchemaCustom("Overridden")]
     public bool Overridden { get; init; }
 
-    [SwaggerSchemaCustomBoolean("Can edit access")]
+    [SwaggerSchemaCustom("Can edit access")]
     public bool CanEditAccess { get; init; }
 
-    [SwaggerSchemaCustomBoolean("Owner")]
+    [SwaggerSchemaCustom("Owner")]
     public bool Owner { get; init; }
 }

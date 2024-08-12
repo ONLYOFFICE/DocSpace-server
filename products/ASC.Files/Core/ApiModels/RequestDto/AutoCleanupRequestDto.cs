@@ -28,7 +28,7 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class AutoCleanupRequestDto
 {
-    [SwaggerSchemaCustomBoolean("Enables the auto-clearing or not")]
+    [SwaggerSchemaCustom("Enables the auto-clearing or not")]
     public bool Set { get; set; }
 
     [SwaggerSchemaCustomString("A time interval when the auto-clearing will be performed", Example = "OneWeek")]

@@ -37,6 +37,6 @@ public class BackupRestoreDto
     [SwaggerSchemaCustom<IEnumerable<ItemKeyValuePair<object, object>>>("Storage parameters")]
     public IEnumerable<ItemKeyValuePair<object, object>> StorageParams { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Notifies users about portal restoring process or not")]
+    [SwaggerSchemaCustom("Notifies users about portal restoring process or not")]
     public bool Notify { get; set; }
 }

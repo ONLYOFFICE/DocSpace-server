@@ -31,7 +31,7 @@ public class SmtpSettingsDto : IMapFrom<SmtpSettings>
     [SwaggerSchemaCustomString("Host", Example = "mail.example.com")]
     public string Host { get; set; }
 
-    [SwaggerSchemaCustomInt("Port", Example = 25, Format = "int32", Nullable = true)]
+    [SwaggerSchemaCustomInt("Port", Example = 25, Nullable = true)]
     public int? Port { get; set; }
 
     [SwaggerSchemaCustomString("Sender address", Example = "notify@example.com")]
@@ -46,7 +46,7 @@ public class SmtpSettingsDto : IMapFrom<SmtpSettings>
     [SwaggerSchemaCustomString("Credentials user password", Example = "{password}")]
     public string CredentialsUserPassword { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Enables SSL or not")]
+    [SwaggerSchemaCustom("Enables SSL or not")]
     public bool EnableSSL { get; set; }
 
     [SwaggerSchemaCustomBoolean("Enables authentication or not", Example = false)]

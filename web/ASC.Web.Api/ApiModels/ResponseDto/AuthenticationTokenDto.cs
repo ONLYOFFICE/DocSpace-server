@@ -31,7 +31,7 @@ public class AuthenticationTokenDto
     [SwaggerSchemaCustomString("Authentication token", Example = "abcde12345")]
     public string Token { get; set; }
 
-    [SwaggerSchemaCustomDateTime("Token expiration time")]
+    [SwaggerSchemaCustom("Token expiration time")]
     public DateTime Expires { get; set; }
 
     [SwaggerSchemaCustomBoolean("Specifies if the authentication code is sent by SMS or not", Example = false)]

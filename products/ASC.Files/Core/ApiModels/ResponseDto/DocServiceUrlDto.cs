@@ -43,6 +43,6 @@ public class DocServiceUrlDto
     [SwaggerSchemaCustomString("Doc service portal url")]
     public required string DocServicePortalUrl { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Is default")]
+    [SwaggerSchemaCustom("Is default")]
     public required bool IsDefault { get; set; }
 }

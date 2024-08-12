@@ -28,12 +28,12 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 
 public class PluginsDto
 {
-    [SwaggerSchemaCustomBoolean("Specifies if the plugins are enabled or not")]
+    [SwaggerSchemaCustom("Specifies if the plugins are enabled or not")]
     public bool Enabled { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the plugins can be uploaded or not")]
+    [SwaggerSchemaCustom("Specifies if the plugins can be uploaded or not")]
     public bool Upload { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the plugins can be deleted or not")]
+    [SwaggerSchemaCustom("Specifies if the plugins can be deleted or not")]
     public bool Delete { get; set; }
 }

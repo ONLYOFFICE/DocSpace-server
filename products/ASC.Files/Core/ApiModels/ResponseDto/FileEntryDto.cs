@@ -48,7 +48,7 @@ public abstract class FileEntryDto
     [SwaggerSchemaCustomString("Access rights", Example = "None")]
     public FileShare Access { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the file is shared or not")]
+    [SwaggerSchemaCustom("Specifies if the file is shared or not")]
     public bool Shared { get; set; }
 
     [SwaggerSchemaCustom<ApiDateTime>("Creation time")]
@@ -78,13 +78,13 @@ public abstract class FileEntryDto
     [SwaggerSchemaCustom<EmployeeDto>("A user who updated a file")]
     public EmployeeDto UpdatedBy { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Provider is specified or not", Nullable = true)]
+    [SwaggerSchemaCustom("Provider is specified or not")]
     public bool? ProviderItem { get; set; }
 
     [SwaggerSchemaCustomString("Provider key")]
     public string ProviderKey { get; set; }
 
-    [SwaggerSchemaCustomInt("Provider ID", Format = "int32", Nullable = true)]
+    [SwaggerSchemaCustom("Provider ID")]
     public int? ProviderId { get; set; }
 
     [SwaggerSchemaCustomString("Order")]
@@ -109,17 +109,17 @@ public abstract class FileEntryDto
 
 public abstract class FileEntryDto<T> : FileEntryDto
 {
-    [SwaggerSchemaCustomInt("Id", Format = "int32")]
+    [SwaggerSchemaCustomInt("Id")]
     public T Id { get; set; }
 
-    [SwaggerSchemaCustomInt("Root folder id", Format = "int32")]
+    [SwaggerSchemaCustomInt("Root folder id")]
     public T RootFolderId { get; set; }
 
-    [SwaggerSchemaCustomInt("Origin id", Format = "int32")]
+    [SwaggerSchemaCustomInt("Origin id")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public T OriginId { get; set; }
 
-    [SwaggerSchemaCustomInt("Origin room id", Format = "int32")]
+    [SwaggerSchemaCustomInt("Origin room id")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public T OriginRoomId { get; set; }
 
@@ -129,7 +129,7 @@ public abstract class FileEntryDto<T> : FileEntryDto
     [SwaggerSchemaCustomString("Origin room title")]
     public string OriginRoomTitle { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Can share")]
+    [SwaggerSchemaCustom("Can share")]
     public bool CanShare { get; set; }
 
     [SwaggerSchemaCustom<IDictionary<FilesSecurityActions, bool>>("Security")]

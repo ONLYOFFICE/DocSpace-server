@@ -28,7 +28,7 @@ namespace ASC.Api.Core;
 
 public class Module(Product product)
 {
-    [SwaggerSchemaCustomGuid("ID")]
+    [SwaggerSchemaCustom("ID")]
     public Guid Id { get; set; } = product.ProductID;
 
     [SwaggerSchemaCustomString("Product class name")]
@@ -52,6 +52,6 @@ public class Module(Product product)
     [SwaggerSchemaCustomString("Description")]
     public string Description { get; set; } = product.Description;
 
-    [SwaggerSchemaCustomBoolean("Specifies if the module is primary or not")]
+    [SwaggerSchemaCustom("Specifies if the module is primary or not")]
     public bool IsPrimary { get; set; } = product.IsPrimary;
 }

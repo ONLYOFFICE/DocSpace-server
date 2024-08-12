@@ -41,6 +41,6 @@ public class RoomLinkRequestDto : LinkRequestDtoBase
     [StringLength(255)]
     public string Password { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies whether downloading a file from a link is disabled or not")]
+    [SwaggerSchemaCustom("Specifies whether downloading a file from a link is disabled or not")]
     public bool DenyDownload { get; set; }
 }

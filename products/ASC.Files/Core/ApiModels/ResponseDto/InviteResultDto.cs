@@ -31,7 +31,7 @@ public class InviteResultDto
     [SwaggerSchemaCustomString("Email")]
     public string Email { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Success")]
+    [SwaggerSchemaCustom("Success")]
     public bool Success { get; set; }
 
     [SwaggerSchemaCustomString("Message")]

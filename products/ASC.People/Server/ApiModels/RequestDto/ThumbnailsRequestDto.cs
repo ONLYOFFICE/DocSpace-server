@@ -31,15 +31,15 @@ public class ThumbnailsRequestDto
     [SwaggerSchemaCustomString("Path to the temporary file")]
     public string TmpFile { get; set; }
 
-    [SwaggerSchemaCustomInt("Horizontal coordinate", Format  = "int32")]
+    [SwaggerSchemaCustom("Horizontal coordinate")]
     public int X { get; set; }
 
-    [SwaggerSchemaCustomInt("Vertical coordinate", Format = "int32")]
+    [SwaggerSchemaCustom("Vertical coordinate")]
     public int Y { get; set; }
 
-    [SwaggerSchemaCustomInt("Thumbnail width", Format = "int32")]
+    [SwaggerSchemaCustom("Thumbnail width")]
     public int Width { get; set; }
 
-    [SwaggerSchemaCustomInt("Thumbnail height", Format = "int32")]
+    [SwaggerSchemaCustom("Thumbnail height")]
     public int Height { get; set; }
 }

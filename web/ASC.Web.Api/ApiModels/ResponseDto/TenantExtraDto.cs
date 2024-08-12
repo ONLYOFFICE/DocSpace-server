@@ -28,13 +28,13 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class TenantExtraDto
 {
-    [SwaggerSchemaCustomBoolean("Specifies if the extra tenant license is customizable or not")]
+    [SwaggerSchemaCustom("Specifies if the extra tenant license is customizable or not")]
     public bool CustomMode { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the extra tenant license is Opensource or not")]
+    [SwaggerSchemaCustom("Specifies if the extra tenant license is Opensource or not")]
     public bool Opensource { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the extra tenant license is Enterprise or not")]
+    [SwaggerSchemaCustom("Specifies if the extra tenant license is Enterprise or not")]
     public bool Enterprise { get; set; }
 
     [SwaggerSchemaCustom<Tariff>("License tariff")]
@@ -43,13 +43,13 @@ public class TenantExtraDto
     [SwaggerSchemaCustom<QuotaDto>("License quota")]
     public QuotaDto Quota { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the license is paid or not")]
+    [SwaggerSchemaCustom("Specifies if the license is paid or not")]
     public bool NotPaid { get; set; }
 
     [SwaggerSchemaCustomString("The time when the license was accepted")]
     public string LicenseAccept { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the tariff page is enabled or not")]
+    [SwaggerSchemaCustom("Specifies if the tariff page is enabled or not")]
     public bool EnableTariffPage { get; set; }
 
     [SwaggerSchemaCustom<Dictionary<string, DateTime>>("Document server user quotas")]

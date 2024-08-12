@@ -46,6 +46,6 @@ public class ThirdPartyRequestDto
     [SwaggerSchemaCustomString("Provider key")]
     public string ProviderKey { get; set; }
 
-    [SwaggerSchemaCustomInt("Provider ID", Format = "int32", Nullable = true)]
+    [SwaggerSchemaCustom("Provider ID")]
     public int? ProviderId { get; set; }
 }

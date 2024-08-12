@@ -28,15 +28,15 @@ namespace ASC.Web.Api.Models;
 
 public class PasswordSettingsRequestsDto
 {
-    [SwaggerSchemaCustomInt("Minimum password length", Format = "int32")]
+    [SwaggerSchemaCustom("Minimum password length")]
     public int MinLength { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the password must include the uppercase letters or not")]
+    [SwaggerSchemaCustom("Specifies if the password must include the uppercase letters or not")]
     public bool UpperCase { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the password must include the digits or not")]
+    [SwaggerSchemaCustom("Specifies if the password must include the digits or not")]
     public bool Digits { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the password must include the special symbols or not")]
+    [SwaggerSchemaCustom("Specifies if the password must include the special symbols or not")]
     public bool SpecSymbols { get; set; }
 }

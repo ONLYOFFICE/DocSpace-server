@@ -34,10 +34,10 @@ public class DocumentBuilderTaskDto
     [SwaggerSchemaCustomString("Error")]
     public string Error { get; set; }
 
-    [SwaggerSchemaCustomInt("Percentage", Format ="int32")]
+    [SwaggerSchemaCustom("Percentage")]
     public int Percentage { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Is completed")]
+    [SwaggerSchemaCustom("Is completed")]
     public bool IsCompleted { get; set; }
 
     [SwaggerSchemaCustomString("Status", Example = "Created")]

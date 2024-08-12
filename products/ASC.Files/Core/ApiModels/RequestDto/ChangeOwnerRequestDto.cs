@@ -28,6 +28,6 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class ChangeOwnerRequestDto : BaseBatchRequestDto
 {
-    [SwaggerSchemaCustomGuid("New file owner ID")]
+    [SwaggerSchemaCustom("New file owner ID")]
     public Guid UserId { get; set; }
 }

@@ -28,6 +28,6 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class LockFileRequestDto
 {
-    [SwaggerSchemaCustomBoolean("Specifies whether to lock a file or not")]
+    [SwaggerSchemaCustom("Specifies whether to lock a file or not")]
     public bool LockFile { get; set; }
 }

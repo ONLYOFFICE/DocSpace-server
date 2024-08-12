@@ -62,15 +62,15 @@ public class CreateRoomRequestDto
     [SwaggerSchemaCustomString("Room type", Example = "CustomRoom")]
     public RoomType RoomType { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Private")]
+    [SwaggerSchemaCustom("Private")]
     public bool Private { get; set; }
 
     [SwaggerSchemaCustom<IEnumerable<FileShareParams>>("Collection of sharing parameters")]
     public IEnumerable<FileShareParams> Share { get; set; }
 
-    [SwaggerSchemaCustomLong("Room quota", Format = "int64")]
+    [SwaggerSchemaCustom("Room quota")]
     public long Quota { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Indexing")]
+    [SwaggerSchemaCustom("Indexing")]
     public bool Indexing { get; set; }
 }

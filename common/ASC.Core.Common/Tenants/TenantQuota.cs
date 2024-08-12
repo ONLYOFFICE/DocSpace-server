@@ -41,7 +41,7 @@ public class TenantQuota : IMapFrom<DbQuota>
         CountRoom = int.MaxValue
     };
 
-    [SwaggerSchemaCustomInt("Tenant ID")]
+    [SwaggerSchemaCustom("Tenant ID")]
     public int TenantId { get; set; }
 
     [SwaggerSchemaCustomString("Name", Example = "Default")]
@@ -56,7 +56,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     [SwaggerSchemaCustomString("Product ID")]
     public string ProductId { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the tenant quota is visible or not")]
+    [SwaggerSchemaCustom("Specifies if the tenant quota is visible or not")]
     public bool Visible { get; set; }
 
     [JsonIgnore]
@@ -97,7 +97,7 @@ public class TenantQuota : IMapFrom<DbQuota>
 
     private readonly CountUserFeature _countUserFeature;
 
-    [SwaggerSchemaCustomInt("Number of portal users")]
+    [SwaggerSchemaCustom("Number of portal users")]
     public int CountUser
     {
         get => _countUserFeature.Value;
@@ -106,7 +106,7 @@ public class TenantQuota : IMapFrom<DbQuota>
 
     private readonly CountPaidUserFeature _countPaidUserFeature;
 
-    [SwaggerSchemaCustomInt("Number of portal room administrators")]
+    [SwaggerSchemaCustom("Number of portal room administrators")]
     public int CountRoomAdmin
     {
         get => _countPaidUserFeature.Value;
@@ -115,7 +115,7 @@ public class TenantQuota : IMapFrom<DbQuota>
 
     private readonly UsersInRoomFeature _usersInRoomFeature;
 
-    [SwaggerSchemaCustomInt("Number of room users")]
+    [SwaggerSchemaCustom("Number of room users")]
     public int UsersInRoom
     {
         get => _usersInRoomFeature.Value;
@@ -124,7 +124,7 @@ public class TenantQuota : IMapFrom<DbQuota>
 
     private readonly CountRoomFeature _countRoomFeature;
 
-    [SwaggerSchemaCustomInt("Number of rooms")]
+    [SwaggerSchemaCustom("Number of rooms")]
     public int CountRoom
     {
         get => _countRoomFeature.Value;
@@ -133,7 +133,7 @@ public class TenantQuota : IMapFrom<DbQuota>
 
     private readonly TenantQuotaFeatureFlag _nonProfitFeature;
 
-    [SwaggerSchemaCustomBoolean("Specifies if the tenant quota is nonprofit or not")]
+    [SwaggerSchemaCustom("Specifies if the tenant quota is nonprofit or not")]
     public bool NonProfit
     {
         get => _nonProfitFeature.Value;
@@ -142,7 +142,7 @@ public class TenantQuota : IMapFrom<DbQuota>
 
     private readonly TenantQuotaFeatureFlag _trialFeature;
 
-    [SwaggerSchemaCustomBoolean("Specifies if the tenant quota is trial or not")]
+    [SwaggerSchemaCustom("Specifies if the tenant quota is trial or not")]
     public bool Trial
     {
         get => _trialFeature.Value;
@@ -151,7 +151,7 @@ public class TenantQuota : IMapFrom<DbQuota>
 
     private readonly TenantQuotaFeatureFlag _freeFeature;
 
-    [SwaggerSchemaCustomBoolean("Specifies if the tenant quota is free or not")]
+    [SwaggerSchemaCustom("Specifies if the tenant quota is free or not")]
     public bool Free
     {
         get => _freeFeature.Value;
@@ -160,7 +160,7 @@ public class TenantQuota : IMapFrom<DbQuota>
 
     private readonly TenantQuotaFeatureFlag _updateFeature;
 
-    [SwaggerSchemaCustomBoolean("Specifies if the tenant quota is updated or not")]
+    [SwaggerSchemaCustom("Specifies if the tenant quota is updated or not")]
     public bool Update
     {
         get => _updateFeature.Value;
@@ -169,7 +169,7 @@ public class TenantQuota : IMapFrom<DbQuota>
 
     private readonly TenantQuotaFeatureFlag _auditFeature;
 
-    [SwaggerSchemaCustomBoolean("Specifies if the audit trail is available or not")]
+    [SwaggerSchemaCustom("Specifies if the audit trail is available or not")]
     public bool Audit
     {
         get => _auditFeature.Value;
@@ -178,7 +178,7 @@ public class TenantQuota : IMapFrom<DbQuota>
 
     private readonly TenantQuotaFeatureFlag _docsEditionFeature;
 
-    [SwaggerSchemaCustomBoolean("Specifies if this tenant quota is Docs edition or not")]
+    [SwaggerSchemaCustom("Specifies if this tenant quota is Docs edition or not")]
     public bool DocsEdition
     {
         get => _docsEditionFeature.Value;
@@ -187,7 +187,7 @@ public class TenantQuota : IMapFrom<DbQuota>
 
     private readonly TenantQuotaFeatureFlag _ldapFeature;
 
-    [SwaggerSchemaCustomBoolean("Specifies if the LDAP settings are available or not")]
+    [SwaggerSchemaCustom("Specifies if the LDAP settings are available or not")]
     public bool Ldap
     {
         get => _ldapFeature.Value;
@@ -196,7 +196,7 @@ public class TenantQuota : IMapFrom<DbQuota>
 
     private readonly TenantQuotaFeatureFlag _ssoFeature;
 
-    [SwaggerSchemaCustomBoolean("Specifies if the SSO settings are available or not")]
+    [SwaggerSchemaCustom("Specifies if the SSO settings are available or not")]
     public bool Sso
     {
         get => _ssoFeature.Value;
@@ -205,7 +205,7 @@ public class TenantQuota : IMapFrom<DbQuota>
 
     private readonly TenantQuotaFeatureFlag _statisticFeature;
 
-    [SwaggerSchemaCustomBoolean("Specifies if the statistic settings are available or not")]
+    [SwaggerSchemaCustom("Specifies if the statistic settings are available or not")]
     public bool Statistic
     {
         get => _statisticFeature.Value;
@@ -214,7 +214,7 @@ public class TenantQuota : IMapFrom<DbQuota>
 
     private readonly TenantQuotaFeatureFlag _whiteLabelFeature;
 
-    [SwaggerSchemaCustomBoolean("Specifies if the white label settings are available or not")]
+    [SwaggerSchemaCustom("Specifies if the white label settings are available or not")]
     public bool WhiteLabel
     {
         get => _whiteLabelFeature.Value;
@@ -223,7 +223,7 @@ public class TenantQuota : IMapFrom<DbQuota>
 
     private readonly TenantQuotaFeatureFlag _customizationFeature;
 
-    [SwaggerSchemaCustomBoolean("Specifies if the customization settings are available or not")]
+    [SwaggerSchemaCustom("Specifies if the customization settings are available or not")]
     public bool Customization
     {
         get => _customizationFeature.Value;
@@ -232,7 +232,7 @@ public class TenantQuota : IMapFrom<DbQuota>
 
     private readonly TenantQuotaFeatureFlag _customFeature;
 
-    [SwaggerSchemaCustomBoolean("Specifies if the custom domain URL is available or not")]
+    [SwaggerSchemaCustom("Specifies if the custom domain URL is available or not")]
     public bool Custom
     {
         get => _customFeature.Value;
@@ -241,7 +241,7 @@ public class TenantQuota : IMapFrom<DbQuota>
 
     private readonly TenantQuotaFeatureFlag _autoBackupRestoreFeature;
 
-    [SwaggerSchemaCustomBoolean("Specifies if the automatic Backup&amp;Restore feature is available or not")]
+    [SwaggerSchemaCustom("Specifies if the automatic Backup&amp;Restore feature is available or not")]
     public bool AutoBackupRestore
     {
         get => _autoBackupRestoreFeature.Value;
@@ -250,7 +250,7 @@ public class TenantQuota : IMapFrom<DbQuota>
 
     private readonly TenantQuotaFeatureFlag _oauthFeature;
 
-    [SwaggerSchemaCustomBoolean("Specifies if Oauth is available or not")]
+    [SwaggerSchemaCustom("Specifies if Oauth is available or not")]
     public bool Oauth
     {
         get => _oauthFeature.Value;
@@ -259,7 +259,7 @@ public class TenantQuota : IMapFrom<DbQuota>
 
     private readonly TenantQuotaFeatureFlag _contentSearchFeature;
 
-    [SwaggerSchemaCustomBoolean("Specifies if the content search is available or not")]
+    [SwaggerSchemaCustom("Specifies if the content search is available or not")]
     public bool ContentSearch
     {
         get => _contentSearchFeature.Value;
@@ -268,7 +268,7 @@ public class TenantQuota : IMapFrom<DbQuota>
 
     private readonly TenantQuotaFeatureFlag _thirdPartyFeature;
 
-    [SwaggerSchemaCustomBoolean("Specifies if the third-party accounts linking is available or not")]
+    [SwaggerSchemaCustom("Specifies if the third-party accounts linking is available or not")]
     public bool ThirdParty
     {
         get => _thirdPartyFeature.Value;

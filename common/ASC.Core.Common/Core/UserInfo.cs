@@ -28,7 +28,7 @@ namespace ASC.Core.Users;
 
 public sealed class UserInfo : IDirectRecipient, ICloneable, IMapFrom<User>
 {
-    [SwaggerSchemaCustomGuid("ID")]
+    [SwaggerSchemaCustom("ID")]
     public Guid Id { get; set; }
 
     [SwaggerSchemaCustomString("First name")]
@@ -40,10 +40,10 @@ public sealed class UserInfo : IDirectRecipient, ICloneable, IMapFrom<User>
     [SwaggerSchemaCustomString("Username")]
     public string UserName { get; set; }
 
-    [SwaggerSchemaCustomDateTime("Birthday", Nullable = true)]
+    [SwaggerSchemaCustom("Birthday")]
     public DateTime? BirthDate { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Sex (male or female)")]
+    [SwaggerSchemaCustom("Sex (male or female)")]
     public bool? Sex { get; set; }
 
     [SwaggerSchemaCustomString("Status", Example = "Active")]
@@ -52,13 +52,13 @@ public sealed class UserInfo : IDirectRecipient, ICloneable, IMapFrom<User>
     [SwaggerSchemaCustomString("Activation status", Example = "Activated")]
     public EmployeeActivationStatus ActivationStatus { get; set; } = EmployeeActivationStatus.NotActivated;
 
-    [SwaggerSchemaCustomDateTime("The date and time when the user account was terminated", Nullable = true)]
+    [SwaggerSchemaCustom("The date and time when the user account was terminated")]
     public DateTime? TerminatedDate { get; set; }
 
     [SwaggerSchemaCustomString("Title")]
     public string Title { get; set; }
 
-    [SwaggerSchemaCustomDateTime("Registration date", Nullable = true)]
+    [SwaggerSchemaCustom("Registration date", Nullable = true)]
     public DateTime? WorkFromDate { get; set; }
 
     [SwaggerSchemaCustomString("Email")]
@@ -86,16 +86,16 @@ public sealed class UserInfo : IDirectRecipient, ICloneable, IMapFrom<User>
     [SwaggerSchemaCustomString("Notes")]
     public string Notes { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the user account was removed or not")]
+    [SwaggerSchemaCustom("Specifies if the user account was removed or not")]
     public bool Removed { get; set; }
 
-    [SwaggerSchemaCustomDateTime("Last modified date")]
+    [SwaggerSchemaCustom("Last modified date")]
     public DateTime LastModified { get; set; } = DateTime.UtcNow;
 
-    [SwaggerSchemaCustomInt("Tenant ID")]
+    [SwaggerSchemaCustom("Tenant ID")]
     public int TenantId { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Spceifies if the user is active or not")]
+    [SwaggerSchemaCustom("Spceifies if the user is active or not")]
     public bool IsActive => ActivationStatus.HasFlag(EmployeeActivationStatus.Activated);
 
     [SwaggerSchemaCustomString("Language")]
@@ -110,7 +110,7 @@ public sealed class UserInfo : IDirectRecipient, ICloneable, IMapFrom<User>
     [SwaggerSchemaCustomString("LDAP user identificator")]
     public string Sid { get; set; } // LDAP user identificator
 
-    [SwaggerSchemaCustomLong("LDAP user quota attribute")]
+    [SwaggerSchemaCustom("LDAP user quota attribute")]
     public long LdapQouta { get; init; } // LDAP user quota attribute
 
     [SwaggerSchemaCustomString("SSO SAML user identificator")]
@@ -119,7 +119,7 @@ public sealed class UserInfo : IDirectRecipient, ICloneable, IMapFrom<User>
     [SwaggerSchemaCustomString("SSO SAML user session identificator")]
     public string SsoSessionId { get; set; } // SSO SAML user session identificator
 
-    [SwaggerSchemaCustomDateTime("Creation date")]
+    [SwaggerSchemaCustom("Creation date")]
     public DateTime CreateDate { get; set; }
 
     public override string ToString()
