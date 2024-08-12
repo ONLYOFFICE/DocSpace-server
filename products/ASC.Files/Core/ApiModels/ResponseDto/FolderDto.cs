@@ -212,6 +212,22 @@ public class FolderDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
 
         return result;
     }
+    
+    public async Task<FolderDto<T>> GetShortAsync<T>(Folder<T> folder)
+    {
+        var result = await GetFolderWrapperAsync(folder);
+        result.ParentId = folder.ParentId;
+
+        if (!DocSpaceHelper.IsRoom(folder.FolderType))
+        {
+            return result;
+        }
+
+        result.RoomType = DocSpaceHelper.MapToRoomType(folder.FolderType);
+        result.Logo = await roomLogoManager.GetLogoAsync(folder);
+
+        return result;
+    }
 
     private async Task<FolderDto<T>> GetFolderWrapperAsync<T>(Folder<T> folder)
     {

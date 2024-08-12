@@ -608,7 +608,9 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         TenantManager tenantManager,
         IEventBus eventBus,
         UserManager userManager,
-        IServiceProvider serviceProvider)
+        IServiceProvider serviceProvider,
+        ApiDateTimeHelper apiDateTimeHelper,
+        RoomNewItemsDtoHelper roomNewItemsDtoHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -842,5 +844,22 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         var evt = new RoomIndexExportIntegrationEvent(userId, tenantId, 0, null, true);
 
         await eventBus.PublishAsync(evt);
+    }
+
+    [HttpGet("rooms/news")]
+    public async IAsyncEnumerable<NewItemsDto<RoomNewItemsDto>> GetRoomsNewItems()
+    {
+        var newItems = await fileStorageService.GetNewRoomFilesAsync();
+
+        foreach (var item in newItems)
+        {
+            yield return new NewItemsDto<RoomNewItemsDto>
+            {
+                Date = apiDateTimeHelper.Get(item.Key), 
+                Items = await Task.WhenAll(item.Value
+                    .Select(s => 
+                        roomNewItemsDtoHelper.GetAsync(s.Key, s.Value.AsEnumerable())))
+            };
+        }
     }
 }

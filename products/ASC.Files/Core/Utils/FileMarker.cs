@@ -109,6 +109,9 @@ public class FileMarker(
 {
     private const string CacheKeyFormat = "MarkedAsNew/{0}/folder_{1}";
     private const string LockKey = "file_marker";
+    
+    private static readonly IComparer<FileEntry> _entryDateDescComparer = Comparer<FileEntry>.Create((x, y) => y.ModifiedOn.CompareTo(x.ModifiedOn));
+    private static readonly IComparer<DateTime> _dateDescComparer = Comparer<DateTime>.Create((x, y) => y.CompareTo(x));
 
     internal async Task ExecMarkFileAsNewAsync<T>(AsyncTaskData<T> obj, SocketManager socketManager)
     {
@@ -683,106 +686,89 @@ public class FileMarker(
         return 0;
     }
 
-    public IAsyncEnumerable<FileEntry> MarkedItemsAsync<T>(Folder<T> folder)
+    public async Task<SortedDictionary<DateTime, SortedDictionary<FileEntry, SortedSet<FileEntry>>>> GetRoomGroupedNewFilesAsync()
     {
-        if (folder == null)
+        var roomsId = await globalFolder.GetFolderVirtualRoomsAsync(daoFactory, false);
+        var roomsRoot = await daoFactory.GetFolderDao<int>().GetFolderAsync(roomsId);
+        
+        var (entryTagsProvider, entryTagsInternal) = await GetMarkedEntriesAsync(roomsRoot);
+        if (entryTagsProvider.Count == 0 && entryTagsInternal.Count == 0)
         {
-            throw new ArgumentNullException(nameof(folder), FilesCommonResource.ErrorMessage_FolderNotFound);
+            return new SortedDictionary<DateTime, SortedDictionary<FileEntry, SortedSet<FileEntry>>>();
+        }
+        
+        var treeInternal = MakeTree(entryTagsInternal);
+        var treeProvider = MakeTree(entryTagsProvider);
+        
+        var groupedEntries = new SortedDictionary<DateTime, SortedDictionary<FileEntry, SortedSet<FileEntry>>>(_dateDescComparer);
+        
+        var t1 = RemoveErrorEntriesAsync(treeInternal);
+        var t2 = RemoveErrorEntriesAsync(treeProvider);
+        
+        await Task.WhenAll(t1, t2);
+        
+        GroupAndFilterEntries(treeInternal);
+        GroupAndFilterEntries(treeProvider);
+        
+        return groupedEntries;
+        
+        async Task RemoveErrorEntriesAsync<TId>(Dictionary<string, FileEntry<TId>> entryTags)
+        {
+            foreach (var (path, entry) in entryTags)
+            {
+                if (string.IsNullOrEmpty(entry.Error))
+                {
+                    continue;
+                }
+
+                await RemoveMarkAsNewAsync(entry);
+                entryTags.Remove(path);
+            }
         }
 
-        return InternalMarkedItemsAsync(folder);
+        void GroupAndFilterEntries<TId>(Dictionary<string, FileEntry<TId>> entriesTree)
+        {
+            var rooms = entriesTree
+                .Where(x => x.Value is IFolder f && DocSpaceHelper.IsRoom(f.FolderType))
+                .ToDictionary(x => x.Key, x => x.Value);
+
+            foreach (var (path, entry) in entriesTree)
+            {
+                if (entry is IFolder)
+                {
+                    continue;
+                }
+
+                var roomPath = path.Split('/').FirstOrDefault();
+                
+                if (string.IsNullOrEmpty(roomPath) || !rooms.TryGetValue(roomPath, out var room))
+                {
+                    continue;
+                }
+                
+                if (!groupedEntries.TryGetValue(entry.ModifiedOn.Date, out var roomEntries))
+                {
+                    roomEntries = new SortedDictionary<FileEntry, SortedSet<FileEntry>>(_entryDateDescComparer);
+                    groupedEntries[entry.ModifiedOn.Date] = roomEntries;
+                }
+                
+                if (!roomEntries.TryGetValue(room, out var entries))
+                {
+                    entries = new SortedSet<FileEntry>(_entryDateDescComparer);
+                    roomEntries[room] = entries;
+                }
+                
+                entries.Add(entry);
+            }
+        }
     }
 
-    private async IAsyncEnumerable<FileEntry> InternalMarkedItemsAsync<T>(Folder<T> folder)
+    public async IAsyncEnumerable<FileEntry> MarkedItemsAsync<T>(Folder<T> folder)
     {
-        if (!await fileSecurity.CanReadAsync(folder))
-        {
-            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ViewFolder);
-        }
-
-        if (folder.RootFolderType == FolderType.TRASH && !Equals(folder.Id, await globalFolder.GetFolderTrashAsync(daoFactory)))
-        {
-            throw new SecurityException(FilesCommonResource.ErrorMessage_ViewTrashItem);
-        }
-
-        var tagDao = daoFactory.GetTagDao<T>();
-        var providerFolderDao = daoFactory.GetFolderDao<string>();
-        var providerTagDao = daoFactory.GetTagDao<string>();
-        var tags = await (tagDao.GetNewTagsAsync(authContext.CurrentAccount.ID, folder, true) ?? AsyncEnumerable.Empty<Tag>()).ToListAsync();
-
-        if (tags.Count == 0)
+        var (entryTagsProvider, entryTagsInternal) = await GetMarkedEntriesAsync(folder);
+        if (entryTagsProvider.Count == 0 && entryTagsInternal.Count == 0)
         {
             yield break;
-        }
-
-        if (Equals(folder.Id, await globalFolder.GetFolderMyAsync(daoFactory)) ||
-            Equals(folder.Id, await globalFolder.GetFolderCommonAsync(daoFactory)) ||
-            Equals(folder.Id, await globalFolder.GetFolderShareAsync(daoFactory)) ||
-            Equals(folder.Id, await globalFolder.GetFolderVirtualRoomsAsync(daoFactory)))
-        {
-            var folderTags = tags.Where(tag => tag.EntryType == FileEntryType.Folder && tag.EntryId is string);
-
-            var providerFolderTags = new List<KeyValuePair<Tag, Folder<string>>>();
-
-            foreach (var tag in folderTags)
-            {
-                var pair = new KeyValuePair<Tag, Folder<string>>(tag, await providerFolderDao.GetFolderAsync(tag.EntryId.ToString()));
-                if (pair.Value is { ProviderEntry: true })
-                {
-                    providerFolderTags.Add(pair);
-                }
-            }
-
-            providerFolderTags.Reverse();
-
-            foreach (var providerFolderTag in providerFolderTags)
-            {
-                tags.AddRange(await providerTagDao.GetNewTagsAsync(authContext.CurrentAccount.ID, providerFolderTag.Value, true).ToListAsync());
-            }
-        }
-
-        tags = tags
-            .Where(r => (r.EntryType == FileEntryType.Folder && !Equals(r.EntryId, folder.Id)) || r.EntryType == FileEntryType.File)
-                .Distinct()
-                .ToList();
-
-        //TODO: refactoring
-        var entryTagsProvider = await GetEntryTagsAsync<string>(tags.Where(r => r.EntryId is string).ToAsyncEnumerable());
-        var entryTagsInternal = await GetEntryTagsAsync<int>(tags.Where(r => r.EntryId is int).ToAsyncEnumerable());
-
-        foreach (var entryTag in entryTagsInternal)
-        {
-            var parentEntry = entryTagsInternal.Keys
-                .FirstOrDefault(entryCountTag => entryCountTag.FileEntryType == FileEntryType.Folder && Equals(entryCountTag.Id, entryTag.Key.ParentId));
-
-            if (parentEntry != null)
-            {
-                entryTagsInternal[parentEntry].Count -= entryTag.Value.Count;
-            }
-        }
-
-        foreach (var entryTag in entryTagsProvider)
-        {
-            if (int.TryParse(entryTag.Key.ParentId, out var fId))
-            {
-                var parentEntryInt = entryTagsInternal.Keys
-                        .FirstOrDefault(entryCountTag => entryCountTag.FileEntryType == FileEntryType.Folder && Equals(entryCountTag.Id, fId));
-
-                if (parentEntryInt != null)
-                {
-                    entryTagsInternal[parentEntryInt].Count -= entryTag.Value.Count;
-                }
-
-                continue;
-            }
-
-            var parentEntry = entryTagsProvider.Keys
-                .FirstOrDefault(entryCountTag => entryCountTag.FileEntryType == FileEntryType.Folder && Equals(entryCountTag.Id, entryTag.Key.ParentId));
-
-            if (parentEntry != null)
-            {
-                entryTagsProvider[parentEntry].Count -= entryTag.Value.Count;
-            }
         }
 
         await foreach (var r in GetResultAsync(entryTagsInternal))
@@ -815,6 +801,131 @@ public class FileMarker(
         }
     }
 
+    private async Task<(Dictionary<FileEntry<string>, Tag> entryTagsProvider, Dictionary<FileEntry<int>, Tag> entryTagsInternal)> GetMarkedEntriesAsync<T>(Folder<T> folder)
+    {
+        if (folder == null)
+        {
+            throw new ArgumentNullException(nameof(folder), FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
+        
+        if (!await fileSecurity.CanReadAsync(folder))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ViewFolder);
+        }
+
+        if (folder.RootFolderType == FolderType.TRASH && !Equals(folder.Id, await globalFolder.GetFolderTrashAsync(daoFactory)))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_ViewTrashItem);
+        }
+
+        var tagDao = daoFactory.GetTagDao<T>();
+        var providerFolderDao = daoFactory.GetFolderDao<string>();
+        var providerTagDao = daoFactory.GetTagDao<string>();
+        var tags = await (tagDao.GetNewTagsAsync(authContext.CurrentAccount.ID, folder, true) ?? AsyncEnumerable.Empty<Tag>()).ToListAsync();
+
+        if (tags.Count == 0)
+        {
+            return ([], []);
+        }
+
+        if (Equals(folder.Id, await globalFolder.GetFolderMyAsync(daoFactory)) ||
+            Equals(folder.Id, await globalFolder.GetFolderCommonAsync(daoFactory)) ||
+            Equals(folder.Id, await globalFolder.GetFolderShareAsync(daoFactory)) ||
+            Equals(folder.Id, await globalFolder.GetFolderVirtualRoomsAsync(daoFactory)))
+        {
+            var folderTags = tags.Where(tag => tag.EntryType == FileEntryType.Folder && tag.EntryId is string);
+
+            var providerFolderTags = new List<KeyValuePair<Tag, Folder<string>>>();
+
+            foreach (var tag in folderTags)
+            {
+                var pair = new KeyValuePair<Tag, Folder<string>>(tag, await providerFolderDao.GetFolderAsync(tag.EntryId.ToString()));
+                if (pair.Value is { ProviderEntry: true })
+                {
+                    providerFolderTags.Add(pair);
+                }
+            }
+
+            providerFolderTags.Reverse();
+
+            foreach (var providerFolderTag in providerFolderTags)
+            {
+                tags.AddRange(await providerTagDao.GetNewTagsAsync(authContext.CurrentAccount.ID, providerFolderTag.Value, true).ToListAsync());
+            }
+        }
+
+        tags = tags
+            .Where(r => (r.EntryType == FileEntryType.Folder && !Equals(r.EntryId, folder.Id)) || r.EntryType == FileEntryType.File)
+            .Distinct()
+            .ToList();
+
+        //TODO: refactoring
+        var entryTagsProvider = await GetEntryTagsAsync<string>(tags.Where(r => r.EntryId is string).ToAsyncEnumerable());
+        var entryTagsInternal = await GetEntryTagsAsync<int>(tags.Where(r => r.EntryId is int).ToAsyncEnumerable());
+
+        foreach (var entryTag in entryTagsInternal)
+        {
+            var parentEntry = entryTagsInternal.Keys
+                .FirstOrDefault(entryCountTag => entryCountTag.FileEntryType == FileEntryType.Folder && Equals(entryCountTag.Id, entryTag.Key.ParentId));
+
+            if (parentEntry != null)
+            {
+                entryTagsInternal[parentEntry].Count -= entryTag.Value.Count;
+            }
+        }
+
+        foreach (var entryTag in entryTagsProvider)
+        {
+            if (int.TryParse(entryTag.Key.ParentId, out var fId))
+            {
+                var parentEntryInt = entryTagsInternal.Keys
+                    .FirstOrDefault(entryCountTag => entryCountTag.FileEntryType == FileEntryType.Folder && Equals(entryCountTag.Id, fId));
+
+                if (parentEntryInt != null)
+                {
+                    entryTagsInternal[parentEntryInt].Count -= entryTag.Value.Count;
+                }
+
+                continue;
+            }
+
+            var parentEntry = entryTagsProvider.Keys
+                .FirstOrDefault(entryCountTag => entryCountTag.FileEntryType == FileEntryType.Folder && Equals(entryCountTag.Id, entryTag.Key.ParentId));
+
+            if (parentEntry != null)
+            {
+                entryTagsProvider[parentEntry].Count -= entryTag.Value.Count;
+            }
+        }
+
+        return (entryTagsProvider, entryTagsInternal);
+    }
+    
+    private static Dictionary<string, FileEntry<TEntry>> MakeTree<TEntry>(Dictionary<FileEntry<TEntry>, Tag> entryTags)
+    {
+        var tree = new Dictionary<string, FileEntry<TEntry>>();
+        var parentMap = entryTags.Keys
+            .Where(e => e.FileEntryType == FileEntryType.Folder)
+            .ToDictionary(e => e.Id, e => e.ParentId);
+
+        foreach (var (entry, _) in entryTags)
+        {
+            var key = entry.Id.ToString()!;
+            var parentId = entry.ParentId;
+
+            while (parentId != null && parentMap.TryGetValue(parentId, out var grandParentId))
+            {
+                key = $"{parentId}/{key}";
+                parentId = grandParentId;
+            }
+
+            tree[key] = entry;
+        }
+
+        return tree;
+    }
+
+    // TODO: Need optimize
     private async Task<Dictionary<FileEntry<T>, Tag>> GetEntryTagsAsync<T>(IAsyncEnumerable<Tag> tags)
     {
         var fileDao = daoFactory.GetFileDao<T>();
@@ -830,7 +941,6 @@ public class FileMarker(
             {
                 entryTags.Add(entry, tag);
             }
-                //todo: RemoveMarkAsNew(tag);
         }
 
         return entryTags;

@@ -1695,23 +1695,17 @@ public class FileStorageService //: IFileStorageService
         await folderDao.SetCustomOrder(folderId, folder.ParentId, order);
     }
 
-    public async Task<List<FileEntry>> GetNewItemsAsync<T>(T folderId)
+    public async Task<SortedDictionary<DateTime, SortedDictionary<FileEntry, SortedSet<FileEntry>>>> GetNewRoomFilesAsync()
     {
         try
         {
-            var folderDao = daoFactory.GetFolderDao<T>();
-            var folder = await folderDao.GetFolderAsync(folderId);
-
-            var result = await fileMarker.MarkedItemsAsync(folder).Where(e => e.FileEntryType == FileEntryType.File).ToListAsync();
-
-            result = [.. await entryManager.SortEntries<T>(result, new OrderBy(SortedByType.DateAndTime, false))];
-
-            if (result.Count == 0)
+            var newFiles = await fileMarker.GetRoomGroupedNewFilesAsync();
+            if (newFiles.Count == 0)
             {
-                await fileOperationsManager.PublishMarkAsRead([JsonSerializer.SerializeToElement(folderId)], []);
+                await fileOperationsManager.PublishMarkAsRead([JsonSerializer.SerializeToElement(await globalFolderHelper.FolderVirtualRoomsAsync)], []);
             }
-
-            return result;
+            
+            return newFiles;
         }
         catch (Exception e)
         {
@@ -1719,6 +1713,31 @@ public class FileStorageService //: IFileStorageService
         }
     }
 
+    public async Task<IEnumerable<KeyValuePair<DateTime, IEnumerable<FileEntry>>>> GetNewFilesAsync<T>(T folderId)
+    {
+        try
+        {
+            var folderDao = daoFactory.GetFolderDao<T>();
+            var folder = await folderDao.GetFolderAsync(folderId);
+
+            var newFiles = await fileMarker.MarkedItemsAsync(folder).Where(e => e.FileEntryType == FileEntryType.File).ToListAsync();
+            if (newFiles.Count == 0)
+            {
+                await fileOperationsManager.PublishMarkAsRead([JsonSerializer.SerializeToElement(folderId)], []);
+            }
+
+            return newFiles
+                .GroupBy(x => x.ModifiedOn.Date)
+                .OrderByDescending(x => x.Key)
+                .Select(x => 
+                    new KeyValuePair<DateTime, IEnumerable<FileEntry>>(
+                        x.Key, x.OrderByDescending(y => y.ModifiedOn)));
+        }
+        catch (Exception e)
+        {
+            throw GenerateException(e);
+        }
+    }
 
     public IAsyncEnumerable<ThirdPartyParams> GetThirdPartyAsync()
     {
@@ -1738,6 +1757,7 @@ public class FileStorageService //: IFileStorageService
 
         return (await tempStream.CloneMemoryStream(memoryStream, 300), await tempStream.CloneMemoryStream(memoryStream));
     }
+    
     private async IAsyncEnumerable<ThirdPartyParams> InternalGetThirdPartyAsync(IProviderDao providerDao)
     {
         await foreach (var r in providerDao.GetProvidersInfoAsync())
