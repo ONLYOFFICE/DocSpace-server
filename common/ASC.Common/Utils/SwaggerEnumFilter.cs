@@ -6,7 +6,7 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace ASC.Api.Core.Extensions;
 
-[AttributeUsage(AttributeTargets.All, AllowMultiple = false)]
+[AttributeUsage(AttributeTargets.All)]
 public class SwaggerEnumAttribute : Attribute
 {
     public SwaggerEnumAttribute(string description = null)

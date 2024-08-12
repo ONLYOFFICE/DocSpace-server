@@ -1,17 +1,29 @@
 ﻿using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
+
 using Swashbuckle.AspNetCore.Annotations;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace ASC.Api.Core.Extensions;
 
-[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Parameter | AttributeTargets.Property | AttributeTargets.Enum, AllowMultiple = false)]
+[AttributeUsage(AttributeTargets.Property)]
+public class SwaggerSchemaCustomAttribute : SwaggerSchemaAttribute
+{
+    public SwaggerSchemaCustomAttribute(string description = null)
+    {
+        Description = description;
+    }
+}
+
+
+[AttributeUsage(AttributeTargets.Property)]
 public class SwaggerSchemaCustomAttribute<T> : SwaggerSchemaAttribute
 {
     public SwaggerSchemaCustomAttribute(string description = null)
     {
         Description = description;
     }
+
     public T Example { get; set; }
 }
 
@@ -23,6 +35,7 @@ public class SwaggerSchemaCustomStringAttribute : SwaggerSchemaCustomAttribute<s
         Example = "some text";
     }
 }
+
 public class SwaggerSchemaCustomBooleanAttribute : SwaggerSchemaCustomAttribute<bool>
 {
     public SwaggerSchemaCustomBooleanAttribute(string description = null)
@@ -81,18 +94,63 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
 {
     public void Apply(OpenApiSchema schema, SchemaFilterContext context)
     {
-        if (context.MemberInfo != null)
+        if (context.MemberInfo is not PropertyInfo propertyInfo)
         {
-            var attribute = context.MemberInfo.GetCustomAttributes(true).FirstOrDefault(attr => attr.GetType().BaseType != null && attr.GetType().BaseType.IsGenericType && attr.GetType().BaseType.GetGenericTypeDefinition() == typeof(SwaggerSchemaCustomAttribute<>));
-            if (attribute != null)
-            {
-                var exampleValue = GetExampleValue(attribute);
+            return;
+        }
 
-                if (exampleValue != null)
-                {
-                    ApplySchemaAttribute(schema, exampleValue);
-                }
+        var swaggerSchemaCustomAttribute = propertyInfo.GetCustomAttributes(true).OfType<SwaggerSchemaCustomAttribute>().FirstOrDefault();
+
+        if (swaggerSchemaCustomAttribute != null)
+        {
+            if (propertyInfo.PropertyType == typeof(int))
+            {
+                schema.Example = new OpenApiInteger(1234);
+            } 
+            else if (propertyInfo.PropertyType == typeof(long))
+            {
+                schema.Example = new OpenApiLong(1234);
             }
+            else if (propertyInfo.PropertyType == typeof(string))
+            {
+                schema.Example = new OpenApiString("some text");
+            }
+            else if (propertyInfo.PropertyType == typeof(bool))
+            {
+                schema.Example = new OpenApiBoolean(true);
+            }
+            else if (propertyInfo.PropertyType == typeof(double))
+            {
+                schema.Example = new OpenApiDouble(-8.5);
+            }
+            else if (propertyInfo.PropertyType == typeof(DateTime))
+            {
+                schema.Example = new OpenApiDateTime(new DateTime(2008, 4, 10, 06, 30, 00));
+            }
+            return;
+        }
+            
+        var attribute = context.MemberInfo.GetCustomAttributes(true).FirstOrDefault(attr =>
+        {
+            var baseType = attr.GetType().BaseType;
+            if (baseType == null)
+            {
+                return false;
+            }
+
+            return baseType.IsGenericType && baseType.GetGenericTypeDefinition() == typeof(SwaggerSchemaCustomAttribute<>);
+        });
+
+        if (attribute == null)
+        {
+            return;
+        }
+
+        var exampleValue = GetExampleValue(attribute);
+
+        if (exampleValue != null)
+        {
+            ApplySchemaAttribute(schema, exampleValue);
         }
     }
 
@@ -115,6 +173,5 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
             DateTime _dateTime => new OpenApiDateTime(_dateTime),
             _ => null
         };
-        
     }
 }
