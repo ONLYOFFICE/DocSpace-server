@@ -686,7 +686,7 @@ public class FileMarker(
         return 0;
     }
 
-    public async Task<Dictionary<DateTime, Dictionary<FileEntry, List<FileEntry>>>> GetRoomGroupedNewFilesAsync()
+    public async Task<Dictionary<DateTime, Dictionary<FileEntry, List<FileEntry>>>> GetRoomGroupedNewItemsAsync()
     {
         var roomsId = await globalFolder.GetFolderVirtualRoomsAsync(daoFactory, false);
         var roomsRoot = await daoFactory.GetFolderDao<int>().GetFolderAsync(roomsId);
@@ -707,8 +707,8 @@ public class FileMarker(
         
         await Task.WhenAll(t1, t2);
         
-        GroupAndFilterEntries(treeInternal);
-        GroupAndFilterEntries(treeProvider);
+        GroupEntries(treeInternal);
+        GroupEntries(treeProvider);
         
         return groupedEntries;
         
@@ -726,7 +726,7 @@ public class FileMarker(
             }
         }
 
-        void GroupAndFilterEntries<TId>(Dictionary<string, FileEntry<TId>> entriesTree)
+        void GroupEntries<TId>(Dictionary<string, FileEntry<TId>> entriesTree)
         {
             var rooms = entriesTree
                 .Where(x => x.Value is IFolder f && DocSpaceHelper.IsRoom(f.FolderType))
@@ -734,7 +734,7 @@ public class FileMarker(
 
             foreach (var (path, entry) in entriesTree)
             {
-                if (entry is IFolder)
+                if (entry is IFolder folder && DocSpaceHelper.IsRoom(folder.FolderType))
                 {
                     continue;
                 }

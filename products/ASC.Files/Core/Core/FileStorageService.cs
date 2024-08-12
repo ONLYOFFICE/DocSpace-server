@@ -1699,7 +1699,7 @@ public class FileStorageService //: IFileStorageService
     {
         try
         {
-            var newFiles = await fileMarker.GetRoomGroupedNewFilesAsync();
+            var newFiles = await fileMarker.GetRoomGroupedNewItemsAsync();
             if (newFiles.Count == 0)
             {
                 await fileOperationsManager.PublishMarkAsRead([JsonSerializer.SerializeToElement(await globalFolderHelper.FolderVirtualRoomsAsync)], []);
@@ -1708,11 +1708,12 @@ public class FileStorageService //: IFileStorageService
             return newFiles
                 .OrderByDescending(x => x.Key)
                 .Select(x => 
-                    new KeyValuePair<DateTime, IEnumerable<KeyValuePair<FileEntry, IEnumerable<FileEntry>>>>(x.Key, 
-                        x.Value.OrderByDescending(y => y.Key.ModifiedOn)
-                            .Select(y => 
-                                new KeyValuePair<FileEntry, IEnumerable<FileEntry>>(y.Key, 
-                                    y.Value.OrderByDescending(y1 => y1.ModifiedOn)))));
+                    new KeyValuePair<DateTime, IEnumerable<KeyValuePair<FileEntry, IEnumerable<FileEntry>>>>(x.Key, x.Value
+                        .OrderByDescending(y => y.Key.ModifiedOn)
+                        .Select(y => 
+                            new KeyValuePair<FileEntry, IEnumerable<FileEntry>>(y.Key, y.Value
+                                .Where(y1 => y1.FileEntryType == FileEntryType.File)
+                                .OrderByDescending(y1 => y1.ModifiedOn)))));
         }
         catch (Exception e)
         {
