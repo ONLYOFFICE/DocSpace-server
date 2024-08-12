@@ -33,7 +33,7 @@ public class GroupDto
     [SwaggerSchemaCustomString("Name")]
     public string Name { get; set; }
 
-    [SwaggerSchemaCustom("Parent", Nullable = true)]
+    [SwaggerSchemaCustom("Parent")]
     public Guid? Parent { get; set; }
 
     [SwaggerSchemaCustom("Category")]
@@ -51,7 +51,7 @@ public class GroupDto
     [SwaggerSchemaCustom<List<EmployeeFullDto>>(Description = "List of members")]
     public List<EmployeeFullDto> Members { get; set; }
 
-    [SwaggerSchemaCustom("Shared", Nullable = true)]
+    [SwaggerSchemaCustom("Shared")]
     public bool? Shared { get; set; }
 
     [SwaggerSchemaCustom("Members count")]

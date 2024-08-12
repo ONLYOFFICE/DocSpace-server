@@ -38,7 +38,7 @@ public class ThirdPartyParams
     [SwaggerSchemaCustom("Specifies if this is a room storage or not")]
     public bool RoomsStorage { get; init; }
 
-    [SwaggerSchemaCustomString("Customer title")]
+    [SwaggerSchemaCustom("Customer title")]
     [JsonPropertyName("customer_title")]
     public string CustomerTitle { get; set; }
 
@@ -46,7 +46,7 @@ public class ThirdPartyParams
     [JsonPropertyName("provider_id")]
     public int? ProviderId { get; init; }
 
-    [SwaggerSchemaCustomString("Provider key")]
+    [SwaggerSchemaCustom("Provider key")]
     [JsonPropertyName("provider_key")]
     public string ProviderKey { get; init; }
 }

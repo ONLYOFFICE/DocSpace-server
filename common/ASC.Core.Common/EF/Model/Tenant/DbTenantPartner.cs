@@ -31,13 +31,13 @@ public class DbTenantPartner : BaseEntity
     [SwaggerSchemaCustom("Tenant id")]
     public int TenantId { get; set; }
 
-    [SwaggerSchemaCustomString("Partner id")]
+    [SwaggerSchemaCustom("Partner id")]
     public string PartnerId { get; set; }
 
-    [SwaggerSchemaCustomString("Affiliate id")]
+    [SwaggerSchemaCustom("Affiliate id")]
     public string AffiliateId { get; set; }
 
-    [SwaggerSchemaCustomString("Campaign")]
+    [SwaggerSchemaCustom("Campaign")]
     public string Campaign { get; set; }
 
     [SwaggerSchemaCustom<DbTenant>("Tenant")]

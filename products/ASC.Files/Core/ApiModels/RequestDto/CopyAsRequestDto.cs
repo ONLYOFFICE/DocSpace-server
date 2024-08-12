@@ -28,7 +28,7 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class CopyAsRequestDto<T>
 {
-    [SwaggerSchemaCustomString("Destination file title")]
+    [SwaggerSchemaCustom("Destination file title")]
     public string DestTitle { get; set; }
 
     [SwaggerSchemaCustomInt("Destination folder ID")]
@@ -37,7 +37,7 @@ public class CopyAsRequestDto<T>
     [SwaggerSchemaCustom("Specifies whether to allow the creation of external extension files or not")]
     public bool EnableExternalExt { get; set; }
 
-    [SwaggerSchemaCustomString("Password")]
+    [SwaggerSchemaCustom("Password")]
     public string Password { get; set; }
 
     /// <summary>Convert to form</summary>

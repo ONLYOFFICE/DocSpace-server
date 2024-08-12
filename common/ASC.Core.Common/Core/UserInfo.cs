@@ -31,13 +31,13 @@ public sealed class UserInfo : IDirectRecipient, ICloneable, IMapFrom<User>
     [SwaggerSchemaCustom("ID")]
     public Guid Id { get; set; }
 
-    [SwaggerSchemaCustomString("First name")]
+    [SwaggerSchemaCustom("First name")]
     public string FirstName { get; set; }
 
-    [SwaggerSchemaCustomString("Last name")]
+    [SwaggerSchemaCustom("Last name")]
     public string LastName { get; set; }
 
-    [SwaggerSchemaCustomString("Username")]
+    [SwaggerSchemaCustom("Username")]
     public string UserName { get; set; }
 
     [SwaggerSchemaCustom("Birthday")]
@@ -55,18 +55,18 @@ public sealed class UserInfo : IDirectRecipient, ICloneable, IMapFrom<User>
     [SwaggerSchemaCustom("The date and time when the user account was terminated")]
     public DateTime? TerminatedDate { get; set; }
 
-    [SwaggerSchemaCustomString("Title")]
+    [SwaggerSchemaCustom("Title")]
     public string Title { get; set; }
 
-    [SwaggerSchemaCustom("Registration date", Nullable = true)]
+    [SwaggerSchemaCustom("Registration date")]
     public DateTime? WorkFromDate { get; set; }
 
-    [SwaggerSchemaCustomString("Email")]
+    [SwaggerSchemaCustom("Email")]
     public string Email { get; set; }
 
     private string _contacts;
 
-    [SwaggerSchemaCustomString("List of contacts in the string format")]
+    [SwaggerSchemaCustom("List of contacts in the string format")]
     public string Contacts
     {
         get => _contacts;
@@ -80,10 +80,10 @@ public sealed class UserInfo : IDirectRecipient, ICloneable, IMapFrom<User>
     [SwaggerSchemaCustomString("List of contacts")]
     public List<string> ContactsList { get; set; }
 
-    [SwaggerSchemaCustomString("Location")]
+    [SwaggerSchemaCustom("Location")]
     public string Location { get; set; }
 
-    [SwaggerSchemaCustomString("Notes")]
+    [SwaggerSchemaCustom("Notes")]
     public string Notes { get; set; }
 
     [SwaggerSchemaCustom("Specifies if the user account was removed or not")]
@@ -98,25 +98,25 @@ public sealed class UserInfo : IDirectRecipient, ICloneable, IMapFrom<User>
     [SwaggerSchemaCustom("Spceifies if the user is active or not")]
     public bool IsActive => ActivationStatus.HasFlag(EmployeeActivationStatus.Activated);
 
-    [SwaggerSchemaCustomString("Language")]
+    [SwaggerSchemaCustom("Language")]
     public string CultureName { get; set; }
 
-    [SwaggerSchemaCustomString("Mobile phone")]
+    [SwaggerSchemaCustom("Mobile phone")]
     public string MobilePhone { get; set; }
 
     [SwaggerSchemaCustomString("Mobile phone activation status", Example = "NotActivated")]
     public MobilePhoneActivationStatus MobilePhoneActivationStatus { get; set; }
 
-    [SwaggerSchemaCustomString("LDAP user identificator")]
+    [SwaggerSchemaCustom("LDAP user identificator")]
     public string Sid { get; set; } // LDAP user identificator
 
     [SwaggerSchemaCustom("LDAP user quota attribute")]
     public long LdapQouta { get; init; } // LDAP user quota attribute
 
-    [SwaggerSchemaCustomString("SSO SAML user identificator")]
+    [SwaggerSchemaCustom("SSO SAML user identificator")]
     public string SsoNameId { get; set; } // SSO SAML user identificator
 
-    [SwaggerSchemaCustomString("SSO SAML user session identificator")]
+    [SwaggerSchemaCustom("SSO SAML user session identificator")]
     public string SsoSessionId { get; set; } // SSO SAML user session identificator
 
     [SwaggerSchemaCustom("Creation date")]

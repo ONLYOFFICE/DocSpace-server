@@ -28,7 +28,7 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 
 public class SettingsDto
 {
-    [SwaggerSchemaCustomString("Time zone")]
+    [SwaggerSchemaCustom("Time zone")]
     public string Timezone { get; set; }
 
     [SwaggerSchemaCustomString("List of trusted domains", Example = "mydomain.com")]
@@ -37,7 +37,7 @@ public class SettingsDto
     [SwaggerSchemaCustomString("Trusted domains type", Example = "None")]
     public TenantTrustedDomainsType TrustedDomainsType { get; set; }
 
-    [SwaggerSchemaCustomString("Language", Example = "en-US")]
+    [SwaggerSchemaCustom("Language", Example = "en-US")]
     public string Culture { get; set; }
 
     [SwaggerSchemaCustom<TimeSpan>("UTC offset")]
@@ -46,22 +46,22 @@ public class SettingsDto
     [SwaggerSchemaCustom("UTC hours offset")]
     public double UtcHoursOffset { get; set; }
 
-    [SwaggerSchemaCustomString("Greeting settings", Example = "Web Office Applications")]
+    [SwaggerSchemaCustom("Greeting settings", Example = "Web Office Applications")]
     public string GreetingSettings { get; set; }
 
     [SwaggerSchemaCustom("Owner ID")]
     public Guid OwnerId { get; set; }
 
-    [SwaggerSchemaCustomString("Team template ID")]
+    [SwaggerSchemaCustom("Team template ID")]
     public string NameSchemaId { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if a user can join to the portal or not", Nullable = true)]
+    [SwaggerSchemaCustom("Specifies if a user can join to the portal or not")]
     public bool? EnabledJoin { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if a user can send a message to the administrator or not", Nullable = true)]
+    [SwaggerSchemaCustom("Specifies if a user can send a message to the administrator or not")]
     public bool? EnableAdmMess { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if a user can connect third-party providers or not", Nullable = true)]
+    [SwaggerSchemaCustom("Specifies if a user can connect third-party providers or not")]
     public bool? ThirdpartyEnable { get; set; }
 
     [SwaggerSchemaCustom("Specifies if this is a DocSpace portal or not")]
@@ -70,10 +70,10 @@ public class SettingsDto
     [SwaggerSchemaCustom("Specifies if this is a standalone portal or not")]
     public bool Standalone { get; set; }
 
-    [SwaggerSchemaCustomString("Base domain")]
+    [SwaggerSchemaCustom("Base domain")]
     public string BaseDomain { get; set; }
 
-    [SwaggerSchemaCustomString("Wizard token")]
+    [SwaggerSchemaCustom("Wizard token")]
     public string WizardToken { get; set; }
 
     [SwaggerSchemaCustom<PasswordHasher>("Password hash")]
@@ -82,52 +82,52 @@ public class SettingsDto
     [SwaggerSchemaCustom<FirebaseDto>("Firebase parameters")]
     public FirebaseDto Firebase { get; set; }
 
-    [SwaggerSchemaCustomString("Version")]
+    [SwaggerSchemaCustom("Version")]
     public string Version { get; set; }
 
     [SwaggerSchemaCustomString("Type of captcha", Example = "Default")]
     public RecaptchaType RecaptchaType { get; set; }
 
-    [SwaggerSchemaCustomString("ReCAPTCHA public key")]
+    [SwaggerSchemaCustom("ReCAPTCHA public key")]
     public string RecaptchaPublicKey { get; set; }
 
     [SwaggerSchemaCustom("Specifies if the debug information will be sent or not")]
     public bool DebugInfo { get; set; }
 
-    [SwaggerSchemaCustomString("Socket URL")]
+    [SwaggerSchemaCustom("Socket URL")]
     public string SocketUrl { get; set; }
 
     [SwaggerSchemaCustomString("Tenant status", Example = "Active")]
     public TenantStatus TenantStatus { get; set; }
 
-    [SwaggerSchemaCustomString("Tenant alias")]
+    [SwaggerSchemaCustom("Tenant alias")]
     public string TenantAlias { get; set; }
 
-    [SwaggerSchemaCustomString("Link to the help")]
+    [SwaggerSchemaCustom("Link to the help")]
     public string HelpLink { get; set; }
 
-    [SwaggerSchemaCustomString("Link to the forum")]
+    [SwaggerSchemaCustom("Link to the forum")]
     public string ForumLink { get; set; }
 
-    [SwaggerSchemaCustomString("API documentation link")]
+    [SwaggerSchemaCustom("API documentation link")]
     public string ApiDocsLink { get; set; }
 
     [SwaggerSchemaCustom<TenantDomainValidator>("Domain validator")]
     public TenantDomainValidator DomainValidator { get; set; }
 
-    [SwaggerSchemaCustomString("Zendesk key")]
+    [SwaggerSchemaCustom("Zendesk key")]
     public string ZendeskKey { get; set; }
 
-    [SwaggerSchemaCustomString("Tag manager ID")]
+    [SwaggerSchemaCustom("Tag manager ID")]
     public string TagManagerId { get; set; }
 
-    [SwaggerSchemaCustomString("Email for training booking")]
+    [SwaggerSchemaCustom("Email for training booking")]
     public string BookTrainingEmail { get; set; }
 
-    [SwaggerSchemaCustomString("Documentation email")]
+    [SwaggerSchemaCustom("Documentation email")]
     public string DocumentationEmail { get; set; }
 
-    [SwaggerSchemaCustomString("Legal terms")]
+    [SwaggerSchemaCustom("Legal terms")]
     public string LegalTerms { get; set; }
 
     [SwaggerSchemaCustom("Specifies whether the cookie settings are enabled")]
@@ -136,7 +136,7 @@ public class SettingsDto
     [SwaggerSchemaCustom("Limited access space")]
     public bool LimitedAccessSpace { get; set; }
 
-    [SwaggerSchemaCustomString("User name validation regex")]
+    [SwaggerSchemaCustom("User name validation regex")]
     public string UserNameRegex { get; set; }
 
     [SwaggerSchemaCustom("Invitation limit")]

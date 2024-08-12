@@ -28,25 +28,25 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 
 public class AuthenticationTokenDto
 {
-    [SwaggerSchemaCustomString("Authentication token", Example = "abcde12345")]
+    [SwaggerSchemaCustom("Authentication token", Example = "abcde12345")]
     public string Token { get; set; }
 
     [SwaggerSchemaCustom("Token expiration time")]
     public DateTime Expires { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the authentication code is sent by SMS or not", Example = false)]
+    [SwaggerSchemaCustom("Specifies if the authentication code is sent by SMS or not", Example = false)]
     public bool Sms { get; set; }
 
-    [SwaggerSchemaCustomString("Phone number", Example = "null")]
+    [SwaggerSchemaCustom("Phone number", Example = "null")]
     public string PhoneNoise { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the two-factor application is used or not", Example = false)]
+    [SwaggerSchemaCustom("Specifies if the two-factor application is used or not", Example = false)]
     public bool Tfa { get; set; }
 
-    [SwaggerSchemaCustomString("Two-factor authentication key", Example = "null")]
+    [SwaggerSchemaCustom("Two-factor authentication key", Example = "null")]
     public string TfaKey { get; set; }
 
-    [SwaggerSchemaCustomString("Confirmation email URL", Format = "uri")]
+    [SwaggerSchemaCustom("Confirmation email URL", Format = "uri")]
     public string ConfirmUrl { get; set; }
 
     public static AuthenticationTokenDto GetSample()

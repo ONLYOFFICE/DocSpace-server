@@ -28,6 +28,6 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class ExternalShareRequestDto
 {
-    [SwaggerSchemaCustomString("Password")]
+    [SwaggerSchemaCustom("Password")]
     public string Password { get; set; }
 }

@@ -37,10 +37,10 @@ public class FolderDto<T> : FileEntryDto<T>
     [SwaggerSchemaCustomInt("Number of folders", Example = 7)]
     public int FoldersCount { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if a folder is shareable or not", Example = false, Nullable = true)]
+    [SwaggerSchemaCustom("Specifies if a folder is shareable or not", Example = false)]
     public bool? IsShareable { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if a folder is favorite or not", Example = false, Nullable = true)]
+    [SwaggerSchemaCustom("Specifies if a folder is favorite or not", Example = false)]
     public bool? IsFavorite { get; set; }
 
     [SwaggerSchemaCustom("Number for a new folder")]
@@ -49,7 +49,7 @@ public class FolderDto<T> : FileEntryDto<T>
     [SwaggerSchemaCustom("Specifies if a folder is muted or not")]
     public bool Mute { get; set; }
 
-    [SwaggerSchemaCustomString("List of tags")]
+    [SwaggerSchemaCustom("List of tags")]
     public IEnumerable<string> Tags { get; set; }
 
     [SwaggerSchemaCustom<Logo>("Logo")]
@@ -67,13 +67,13 @@ public class FolderDto<T> : FileEntryDto<T>
     [SwaggerSchemaCustomString("Folder type", Example = "DEFAULT", Nullable = true)]
     public FolderType? Type { get; set; }
 
-    [SwaggerSchemaCustom("InRoom", Nullable = true)]
+    [SwaggerSchemaCustom("InRoom")]
     public bool? InRoom { get; set; }
 
     [SwaggerSchemaCustom("Quota")]
     public long? QuotaLimit { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the room has a custom quota or not", Nullable = true)]
+    [SwaggerSchemaCustom("Specifies if the room has a custom quota or not")]
     public bool? IsCustomQuota { get; set; }
 
     [SwaggerSchemaCustom("Counter")]

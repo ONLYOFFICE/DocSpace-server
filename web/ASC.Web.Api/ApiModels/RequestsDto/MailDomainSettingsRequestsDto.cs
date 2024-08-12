@@ -31,7 +31,7 @@ public class MailDomainSettingsRequestsDto
     [SwaggerSchemaCustomString("Trusted domain type", Example = "None")]
     public TenantTrustedDomainsType Type { get; set; }
 
-    [SwaggerSchemaCustomString("List of trusted domains")]
+    [SwaggerSchemaCustom("List of trusted domains")]
     public List<string> Domains { get; set; }
 
     [SwaggerSchemaCustom("Invites as a user or not")]
@@ -40,15 +40,15 @@ public class MailDomainSettingsRequestsDto
 
 public class AdminMessageBaseSettingsRequestsDto
 {
-    [SwaggerSchemaCustomString("Email")]
+    [SwaggerSchemaCustom("Email")]
     public string Email { get; set; }
 
-    [SwaggerSchemaCustomString("Culture")]
+    [SwaggerSchemaCustom("Culture")]
     public string Culture { get; set; }
 }
 public class AdminMessageSettingsRequestsDto : AdminMessageBaseSettingsRequestsDto
 {
-    [SwaggerSchemaCustomString("Message")]
+    [SwaggerSchemaCustom("Message")]
     public string Message { get; set; }
 }
 

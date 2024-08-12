@@ -31,28 +31,28 @@ public class LdapStatusDto : IMapFrom<LdapOperationStatus>
     [SwaggerSchemaCustom("Specifies if the LDAP operation is completed or not")]
     public bool Completed { get; set; }
 
-    [SwaggerSchemaCustomString("ID")]
+    [SwaggerSchemaCustom("ID")]
     public string Id { get; set; }
 
-    [SwaggerSchemaCustomString("Status")]
+    [SwaggerSchemaCustom("Status")]
     public string Status { get; set; }
 
-    [SwaggerSchemaCustomString("Error")]
+    [SwaggerSchemaCustom("Error")]
     public string Error { get; set; }
 
-    [SwaggerSchemaCustomString("Warning")]
+    [SwaggerSchemaCustom("Warning")]
     public string Warning { get; set; }
 
     [SwaggerSchemaCustom("Percentage of completion")]
     public int Percents { get; set; }
 
-    [SwaggerSchemaCustomString("Certificate confirmation request")]
+    [SwaggerSchemaCustom("Certificate confirmation request")]
     public string CertificateConfirmRequest { get; set; }
 
-    [SwaggerSchemaCustomString("Source")]
+    [SwaggerSchemaCustom("Source")]
     public string Source { get; set; }
 
-    [SwaggerSchemaCustomString("Operation type")]
+    [SwaggerSchemaCustom("Operation type")]
     public string OperationType { get; set; }
 
     public void Mapping(Profile profile)

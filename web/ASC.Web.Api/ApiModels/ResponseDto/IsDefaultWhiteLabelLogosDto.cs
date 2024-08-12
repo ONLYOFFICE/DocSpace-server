@@ -28,7 +28,7 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class IsDefaultWhiteLabelLogosDto
 {
-    [SwaggerSchemaCustomString("White label logo name")]
+    [SwaggerSchemaCustom("White label logo name")]
     public string Name { get; set; }
 
     [SwaggerSchemaCustom("Specifies if the white label logo is default or not")]

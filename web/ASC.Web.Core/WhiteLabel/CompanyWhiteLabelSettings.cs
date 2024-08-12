@@ -38,21 +38,21 @@ public class CompanyWhiteLabelSettings : ISettings<CompanyWhiteLabelSettings>
 {
     public CoreSettings CoreSettings;
 
-    [SwaggerSchemaCustomString("Company name")]
+    [SwaggerSchemaCustom("Company name")]
     public string CompanyName { get; set; }
 
-    [SwaggerSchemaCustomString("Site", Format = "uri")]
+    [SwaggerSchemaCustom("Site", Format = "uri")]
     [Url]
     public string Site { get; set; }
 
-    [SwaggerSchemaCustomString("Email address")]
+    [SwaggerSchemaCustom("Email address")]
     [EmailAddress]
     public string Email { get; set; }
 
-    [SwaggerSchemaCustomString("Address")]
+    [SwaggerSchemaCustom("Address")]
     public string Address { get; set; }
 
-    [SwaggerSchemaCustomString("Phone")]
+    [SwaggerSchemaCustom("Phone")]
     [Phone]
     public string Phone { get; set; }
 

@@ -35,7 +35,7 @@ public class PasswordHasher
     [SwaggerSchemaCustom("Iterations")]
     public int Iterations { get; private set; }
 
-    [SwaggerSchemaCustomString("Salt")]
+    [SwaggerSchemaCustom("Salt")]
     public string Salt { get; private set; }
 
     public PasswordHasher(IConfiguration configuration, MachinePseudoKeys machinePseudoKeys)

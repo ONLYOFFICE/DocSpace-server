@@ -34,7 +34,7 @@ public class SecurityInfoRequestDto : BaseBatchRequestDto
     [SwaggerSchemaCustom("Notifies users about the shared file or not")]
     public bool Notify { get; set; }
 
-    [SwaggerSchemaCustomString("Message to send when notifying about the shared file")]
+    [SwaggerSchemaCustom("Message to send when notifying about the shared file")]
     public string SharingMessage { get; set; }
 }
 
@@ -46,6 +46,6 @@ public class SecurityInfoSimpeRequestDto
     [SwaggerSchemaCustom("Notifies users about the shared file or not")]
     public bool Notify { get; set; }
 
-    [SwaggerSchemaCustomString("Message to send when notifying about the shared file")]
+    [SwaggerSchemaCustom("Message to send when notifying about the shared file")]
     public string SharingMessage { get; set; }
 }

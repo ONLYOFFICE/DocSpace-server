@@ -28,16 +28,16 @@ namespace ASC.Web.Api.Models;
 
 public class EmployeeFullDto : EmployeeDto
 {
-    [SwaggerSchemaCustomString("First name")]
+    [SwaggerSchemaCustom("First name")]
     public string FirstName { get; set; }
 
-    [SwaggerSchemaCustomString("Last name")]
+    [SwaggerSchemaCustom("Last name")]
     public string LastName { get; set; }
 
-    [SwaggerSchemaCustomString("Username")]
+    [SwaggerSchemaCustom("Username")]
     public string UserName { get; set; }
 
-    [SwaggerSchemaCustomString("Email")]
+    [SwaggerSchemaCustom("Email")]
     public string Email { get; set; }
 
     [SwaggerSchemaCustom<List<Contact>>("List of contacts")]
@@ -46,7 +46,7 @@ public class EmployeeFullDto : EmployeeDto
     [SwaggerSchemaCustom<ApiDateTime>("Birthday")]
     public ApiDateTime Birthday { get; set; }
 
-    [SwaggerSchemaCustomString("Sex")]
+    [SwaggerSchemaCustom("Sex")]
     public string Sex { get; set; }
 
     [SwaggerSchemaCustomString("Employee status", Example = "Active")]
@@ -58,7 +58,7 @@ public class EmployeeFullDto : EmployeeDto
     [SwaggerSchemaCustom<ApiDateTime>("The date when the user account was terminated")]
     public ApiDateTime Terminated { get; set; }
 
-    [SwaggerSchemaCustomString("Department")]
+    [SwaggerSchemaCustom("Department")]
     public string Department { get; set; }
 
     [SwaggerSchemaCustom<ApiDateTime>("Registration date")]
@@ -67,13 +67,13 @@ public class EmployeeFullDto : EmployeeDto
     [SwaggerSchemaCustom<List<GroupSummaryDto>>("List of groups")]
     public List<GroupSummaryDto> Groups { get; set; }
 
-    [SwaggerSchemaCustomString("Location")]
+    [SwaggerSchemaCustom("Location")]
     public string Location { get; set; }
 
-    [SwaggerSchemaCustomString("Notes")]
+    [SwaggerSchemaCustom("Notes")]
     public string Notes { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the user is an administrator or not", Example = false)]
+    [SwaggerSchemaCustom("Specifies if the user is an administrator or not", Example = false)]
     public bool IsAdmin { get; set; }
 
     [SwaggerSchemaCustom("Specifies if the user is a room administrator or not")]
@@ -82,7 +82,7 @@ public class EmployeeFullDto : EmployeeDto
     [SwaggerSchemaCustom("Specifies if the LDAP settings are enabled for the user or not")]
     public bool IsLDAP { get; set; }
 
-    [SwaggerSchemaCustomString("List of administrator modules")]
+    [SwaggerSchemaCustom("List of administrator modules")]
     public List<string> ListAdminModules { get; set; }
 
     [SwaggerSchemaCustom("Specifies if the user is a portal owner or not")]
@@ -94,10 +94,10 @@ public class EmployeeFullDto : EmployeeDto
     [SwaggerSchemaCustom("Specifies if the user is a portal collaborator or not")]
     public bool IsCollaborator { get; set; }
 
-    [SwaggerSchemaCustomString("Language")]
+    [SwaggerSchemaCustom("Language")]
     public string CultureName { get; set; }
 
-    [SwaggerSchemaCustomString("Mobile phone number")]
+    [SwaggerSchemaCustom("Mobile phone number")]
     public string MobilePhone { get; set; }
 
     [SwaggerSchemaCustomString("Mobile phone activation status", Example = "NotActivated")]
@@ -112,7 +112,7 @@ public class EmployeeFullDto : EmployeeDto
     [SwaggerSchemaCustom("Quota limit")]
     public long? QuotaLimit { get; set; }
 
-    [SwaggerSchemaCustomDouble("Portal used space", Example = 12345, Nullable = true)]
+    [SwaggerSchemaCustom("Portal used space", Example = 12345)]
     public double? UsedSpace { get; set; }
 
     [SwaggerSchemaCustom("Shared")]

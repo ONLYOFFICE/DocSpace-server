@@ -28,19 +28,19 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 public class AuthServiceRequestsDto
 {
-    [SwaggerSchemaCustomString("Name")]
+    [SwaggerSchemaCustom("Name")]
     public string Name { get; set; }
 
-    [SwaggerSchemaCustomString("Title")]
+    [SwaggerSchemaCustom("Title")]
     public string Title { get; set; }
 
-    [SwaggerSchemaCustomString("Description")]
+    [SwaggerSchemaCustom("Description")]
     public string Description { get; set; }
 
-    [SwaggerSchemaCustomString("Instruction")]
+    [SwaggerSchemaCustom("Instruction")]
     public string Instruction { get; set; }
 
-    [SwaggerSchemaCustomString("Specifies if the authentication service can be set or not")]
+    [SwaggerSchemaCustom("Specifies if the authentication service can be set or not")]
     public bool CanSet { get; set; }
 
     [SwaggerSchemaCustom<List<AuthKey>>("List of authorization keys")]

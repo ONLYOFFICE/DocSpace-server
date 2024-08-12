@@ -31,6 +31,6 @@ public class UpdateCommentRequestDto
     [SwaggerSchemaCustom("File version")]
     public int Version { get; set; }
 
-    [SwaggerSchemaCustomString("Comment text")]
+    [SwaggerSchemaCustom("Comment text")]
     public string Comment { get; set; }
 }

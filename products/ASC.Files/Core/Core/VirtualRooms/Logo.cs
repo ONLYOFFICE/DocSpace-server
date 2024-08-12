@@ -28,7 +28,7 @@ namespace ASC.Files.Core.VirtualRooms;
 
 public class Logo
 {
-    [SwaggerSchemaCustomString("Original")]
+    [SwaggerSchemaCustom("Original")]
     public string Original { get; set; }
 
     [SwaggerSchemaCustomString("Large")]

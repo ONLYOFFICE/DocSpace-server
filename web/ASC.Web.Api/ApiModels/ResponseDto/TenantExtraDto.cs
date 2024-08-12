@@ -46,7 +46,7 @@ public class TenantExtraDto
     [SwaggerSchemaCustom("Specifies if the license is paid or not")]
     public bool NotPaid { get; set; }
 
-    [SwaggerSchemaCustomString("The time when the license was accepted")]
+    [SwaggerSchemaCustom("The time when the license was accepted")]
     public string LicenseAccept { get; set; }
 
     [SwaggerSchemaCustom("Specifies if the tariff page is enabled or not")]

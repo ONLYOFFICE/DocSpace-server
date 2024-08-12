@@ -13,6 +13,8 @@ public class SwaggerSchemaCustomAttribute : SwaggerSchemaAttribute
     {
         Description = description;
     }
+    
+    public object Example { get; set; }
 }
 
 
@@ -37,16 +39,6 @@ public class SwaggerSchemaCustomStringAttribute : SwaggerSchemaCustomAttribute<s
     }
 }
 
-public class SwaggerSchemaCustomBooleanAttribute : SwaggerSchemaCustomAttribute<bool>
-{
-    internal static readonly bool DefaultExample = true;
-    public SwaggerSchemaCustomBooleanAttribute(string description = null)
-    {
-        Description = description;
-        Example = true;
-    }
-}
-
 public class SwaggerSchemaCustomIntAttribute : SwaggerSchemaCustomAttribute<int>
 {
     internal static readonly int DefaultExample = 1234;
@@ -54,46 +46,6 @@ public class SwaggerSchemaCustomIntAttribute : SwaggerSchemaCustomAttribute<int>
     {
         Description = description;
         Example = 1234;
-    }
-}
-
-public class SwaggerSchemaCustomLongAttribute : SwaggerSchemaCustomAttribute<long>
-{
-    internal static readonly long DefaultExample = 1234;
-    public SwaggerSchemaCustomLongAttribute(string description = null)
-    {
-        Description = description;
-        Example = 1234;
-    }
-}
-
-public class SwaggerSchemaCustomDoubleAttribute : SwaggerSchemaCustomAttribute<double>
-{
-    internal static readonly double DefaultExample = -8.5;
-    public SwaggerSchemaCustomDoubleAttribute(string description = null)
-    {
-        Description = description;
-        Example = -8.5;
-    }
-}
-
-public class SwaggerSchemaCustomGuidAttribute : SwaggerSchemaCustomAttribute<string>
-{    
-    internal static Guid DefaultExample = new("{75A5F745-F697-4418-B38D-0FE0D277E258}");
-    public SwaggerSchemaCustomGuidAttribute(string description = null)
-    {
-        Description = description;
-        Example = DefaultExample.ToString();
-    }
-}
-
-public class SwaggerSchemaCustomDateTimeAttribute : SwaggerSchemaCustomAttribute<DateTime>
-{
-    internal static DateTime DefaultExample = new(2008, 4, 10, 06, 30, 00);
-    public SwaggerSchemaCustomDateTimeAttribute(string description = null)
-    {
-        Description = description;
-        Example = DefaultExample;
     }
 }
 
@@ -110,8 +62,16 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
 
         if (swaggerSchemaCustomAttribute != null)
         {
-            var (example, nullable, format) = GetExample(propertyInfo.PropertyType);
-            schema.Example = example;
+            var (defaultExample, nullable, format) = GetExample(propertyInfo.PropertyType);
+            if (swaggerSchemaCustomAttribute.Example != null)
+            {
+                schema.Example = GetExample(swaggerSchemaCustomAttribute.Example) ?? defaultExample;
+            }
+            else
+            {
+                schema.Example = defaultExample;
+            }
+
             schema.Nullable = nullable;
             if (!string.IsNullOrEmpty(format))
             {
@@ -141,7 +101,7 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
 
         if (exampleValue != null)
         {
-            ApplySchemaAttribute(schema, exampleValue);
+            schema.Example = GetExample(exampleValue);
         }
     }
 
@@ -172,7 +132,7 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
         } 
         else if (checkType == typeof(long) || checkType == typeof(ulong))
         {
-            example = new OpenApiLong(SwaggerSchemaCustomLongAttribute.DefaultExample);
+            example = new OpenApiLong(1234);
             format = "int64";
         }
         else if (checkType == typeof(string))
@@ -181,20 +141,20 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
         }
         else if (checkType == typeof(bool))
         {
-            example = new OpenApiBoolean(SwaggerSchemaCustomBooleanAttribute.DefaultExample);
+            example = new OpenApiBoolean(true);
         }
         else if (checkType == typeof(double))
         {
-            example = new OpenApiDouble(SwaggerSchemaCustomDoubleAttribute.DefaultExample);
+            example = new OpenApiDouble(-8.5);
             format = "double";
         }
         else if (checkType == typeof(DateTime))
         {
-            example = new OpenApiDateTime(SwaggerSchemaCustomDateTimeAttribute.DefaultExample);
+            example = new OpenApiDateTime(new DateTime(2008, 4, 10, 06, 30, 00));
         }
         else if (checkType == typeof(Guid))
         {
-            example = new OpenApiString(SwaggerSchemaCustomGuidAttribute.DefaultExample.ToString());
+            example = new OpenApiString(new Guid("{75A5F745-F697-4418-B38D-0FE0D277E258}").ToString());
         }
         else if(typeof(IEnumerable).IsAssignableFrom(checkType))
         {
@@ -212,16 +172,13 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
             array.Add(arrayExample);
             example = array;
         }
-        else
-        {
-            var a = 0;
-        }
 
         return (example, nullable, format);
-    } 
-    private void ApplySchemaAttribute(OpenApiSchema schema, object exampleValue)
+    }
+    
+    private IOpenApiAny GetExample(object exampleValue)
     {
-        schema.Example = exampleValue switch
+        return exampleValue switch
         {
             string _str => new OpenApiString(_str),
             int _int => new OpenApiInteger(_int),

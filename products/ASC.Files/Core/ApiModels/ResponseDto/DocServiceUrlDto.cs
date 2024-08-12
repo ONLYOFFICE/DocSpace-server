@@ -28,19 +28,19 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public class DocServiceUrlDto
 {
-    [SwaggerSchemaCustomString("Version")]
+    [SwaggerSchemaCustom("Version")]
     public required string Version { get; set; }
 
-    [SwaggerSchemaCustomString("Doc service url api")]
+    [SwaggerSchemaCustom("Doc service url api")]
     public required string DocServiceUrlApi { get; set; }
 
-    [SwaggerSchemaCustomString("Doc service url")]
+    [SwaggerSchemaCustom("Doc service url")]
     public required string DocServiceUrl { get; set; }
 
-    [SwaggerSchemaCustomString("Doc service url internal")]
+    [SwaggerSchemaCustom("Doc service url internal")]
     public required string DocServiceUrlInternal { get; set; }
 
-    [SwaggerSchemaCustomString("Doc service portal url")]
+    [SwaggerSchemaCustom("Doc service portal url")]
     public required string DocServicePortalUrl { get; set; }
 
     [SwaggerSchemaCustom("Is default")]

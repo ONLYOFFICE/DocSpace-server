@@ -28,6 +28,6 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class WordpressSaveRequestDto
 {
-    [SwaggerSchemaCustomString("Authorization code")]
+    [SwaggerSchemaCustom("Authorization code")]
     public string Code { get; set; }
 }

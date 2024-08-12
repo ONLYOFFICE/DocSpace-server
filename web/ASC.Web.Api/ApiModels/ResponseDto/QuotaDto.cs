@@ -31,7 +31,7 @@ public class QuotaDto
     [SwaggerSchemaCustom("ID")]
     public int Id { get; set; }
 
-    [SwaggerSchemaCustomString("Title")]
+    [SwaggerSchemaCustom("Title")]
     public string Title { get; set; }
 
     [SwaggerSchemaCustom<PriceDto>("Price")]
@@ -61,25 +61,25 @@ public class QuotaDto
 
 public class TenantQuotaFeatureDto : IEquatable<TenantQuotaFeatureDto>
 {
-    [SwaggerSchemaCustomString("ID")]
+    [SwaggerSchemaCustom("ID")]
     public string Id { get; set; }
 
-    [SwaggerSchemaCustomString("Title")]
+    [SwaggerSchemaCustom("Title")]
     public string Title { get; set; }
 
-    [SwaggerSchemaCustomString("Image URL")]
+    [SwaggerSchemaCustom("Image URL")]
     public string Image { get; set; }
 
     [SwaggerSchemaCustom<object>("Value")]
     public object Value { get; set; }
 
-    [SwaggerSchemaCustomString("Type")]
+    [SwaggerSchemaCustom("Type")]
     public string Type { get; set; }
 
     [SwaggerSchemaCustom<FeatureUsedDto>("Used feature parameters")]
     public FeatureUsedDto Used { get; set; }
 
-    [SwaggerSchemaCustomString("Price title")]
+    [SwaggerSchemaCustom("Price title")]
     public string PriceTitle { get; set; }
 
     public bool Equals(TenantQuotaFeatureDto other)
@@ -98,10 +98,10 @@ public class TenantQuotaFeatureDto : IEquatable<TenantQuotaFeatureDto>
 
 public class PriceDto
 {
-    [SwaggerSchemaCustomString("Value", Nullable = true, Example = "10.0")]
+    [SwaggerSchemaCustom("Value", Example = 10.0)]
     public decimal? Value { get; set; }
 
-    [SwaggerSchemaCustomString("Currency symbol")]
+    [SwaggerSchemaCustom("Currency symbol")]
     public string CurrencySymbol { get; set; }
 }
 
@@ -110,6 +110,6 @@ public class FeatureUsedDto
     [SwaggerSchemaCustom<object>("Value")]
     public object Value { get; set; }
 
-    [SwaggerSchemaCustomString("Title")]
+    [SwaggerSchemaCustom("Title")]
     public string Title { get; set; }
 }

@@ -28,13 +28,13 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class SessionRequestDto
 {
-    [SwaggerSchemaCustomString("File name")]
+    [SwaggerSchemaCustom("File name")]
     public string FileName { get; set; }
 
-    [SwaggerSchemaCustomLong("File length in bytes")]
+    [SwaggerSchemaCustom("File length in bytes")]
     public long FileSize { get; set; }
 
-    [SwaggerSchemaCustomString("Relative path to the folder")]
+    [SwaggerSchemaCustom("Relative path to the folder")]
     public string RelativePath { get; set; }
 
     [SwaggerSchemaCustom<ApiDateTime>("Creation time")]

@@ -28,7 +28,7 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public class FileOperationDto
 {
-    [SwaggerSchemaCustomString("Operation ID")]
+    [SwaggerSchemaCustom("Operation ID")]
     public string Id { get; set; }
 
     [SwaggerSchemaCustomString("Operation type", Example = "Move")]

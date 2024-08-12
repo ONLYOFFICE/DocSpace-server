@@ -31,13 +31,13 @@ public class SmtpOperationStatusRequestsDto
     [SwaggerSchemaCustom("Specifies if the SMTP operation is completed or not")]
     public bool Completed { get; set; }
 
-    [SwaggerSchemaCustomString("SMTP operation ID")]
+    [SwaggerSchemaCustom("SMTP operation ID")]
     public string Id { get; set; }
 
-    [SwaggerSchemaCustomString("SMTP operation error")]
+    [SwaggerSchemaCustom("SMTP operation error")]
     public string Error { get; set; }
 
-    [SwaggerSchemaCustomString("SMTP operation status")]
+    [SwaggerSchemaCustom("SMTP operation status")]
     public string Status { get; set; }
 
     [SwaggerSchemaCustom("Percentage of SMTP operation completion")]

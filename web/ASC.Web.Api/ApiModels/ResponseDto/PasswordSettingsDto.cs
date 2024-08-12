@@ -40,16 +40,16 @@ public class PasswordSettingsDto
     [SwaggerSchemaCustom("Spec symbols")]
     public bool SpecSymbols { get; set; }
 
-    [SwaggerSchemaCustomString("Allowed characters regex str")]
+    [SwaggerSchemaCustom("Allowed characters regex str")]
     public string AllowedCharactersRegexStr { get; set; }
 
-    [SwaggerSchemaCustomString("Digits regex str")]
+    [SwaggerSchemaCustom("Digits regex str")]
     public string DigitsRegexStr { get; set; }
 
-    [SwaggerSchemaCustomString("Upper case regex str")]
+    [SwaggerSchemaCustom("Upper case regex str")]
     public string UpperCaseRegexStr { get; set; }
 
-    [SwaggerSchemaCustomString("Spec symbols regex str")]
+    [SwaggerSchemaCustom("Spec symbols regex str")]
     public string SpecSymbolsRegexStr { get; set; }
 }
 

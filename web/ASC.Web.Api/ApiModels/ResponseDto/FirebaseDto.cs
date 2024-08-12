@@ -28,27 +28,27 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 
 public class FirebaseDto
 {
-    [SwaggerSchemaCustomString("API key")]
+    [SwaggerSchemaCustom("API key")]
     public string ApiKey { get; set; }
 
-    [SwaggerSchemaCustomString("Authentication domain")]
+    [SwaggerSchemaCustom("Authentication domain")]
     public string AuthDomain { get; set; }
 
-    [SwaggerSchemaCustomString("Project ID")]
+    [SwaggerSchemaCustom("Project ID")]
     public string ProjectId { get; set; }
 
-    [SwaggerSchemaCustomString("Storage bucket")]
+    [SwaggerSchemaCustom("Storage bucket")]
     public string StorageBucket { get; set; }
 
-    [SwaggerSchemaCustomString("Message sender ID")]
+    [SwaggerSchemaCustom("Message sender ID")]
     public string MessagingSenderId { get; set; }
 
-    [SwaggerSchemaCustomString("Application ID")]
+    [SwaggerSchemaCustom("Application ID")]
     public string AppId { get; set; }
 
-    [SwaggerSchemaCustomString("Measurement ID")]
+    [SwaggerSchemaCustom("Measurement ID")]
     public string MeasurementId { get; set; }
 
-    [SwaggerSchemaCustomString("Database URL", Format = "uri")]
+    [SwaggerSchemaCustom("Database URL", Format = "uri")]
     public string DatabaseURL { get; set; }
 }

@@ -28,38 +28,38 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 public class SchemaBaseRequestsDto
 {
-    [SwaggerSchemaCustomString("Team template ID")]
+    [SwaggerSchemaCustom("Team template ID")]
     public string Id { get; init; }
 }
 public class SchemaRequestsDto : SchemaBaseRequestsDto
 {
-    [SwaggerSchemaCustomString("Team template name")]
+    [SwaggerSchemaCustom("Team template name")]
     public string Name { get; set; }
 
-    [SwaggerSchemaCustomString("User caption")]
+    [SwaggerSchemaCustom("User caption")]
     public string UserCaption { get; init; }
 
-    [SwaggerSchemaCustomString("Users caption")]
+    [SwaggerSchemaCustom("Users caption")]
     public string UsersCaption { get; init; }
 
-    [SwaggerSchemaCustomString("Group caption")]
+    [SwaggerSchemaCustom("Group caption")]
     public string GroupCaption { get; init; }
 
-    [SwaggerSchemaCustomString("Groups caption")]
+    [SwaggerSchemaCustom("Groups caption")]
     public string GroupsCaption { get; init; }
 
-    [SwaggerSchemaCustomString("User status caption")]
+    [SwaggerSchemaCustom("User status caption")]
     public string UserPostCaption { get; init; }
 
-    [SwaggerSchemaCustomString("Registration date caption")]
+    [SwaggerSchemaCustom("Registration date caption")]
     public string RegDateCaption { get; init; }
 
-    [SwaggerSchemaCustomString("Group lead caption")]
+    [SwaggerSchemaCustom("Group lead caption")]
     public string GroupHeadCaption { get; init; }
 
-    [SwaggerSchemaCustomString("Guest caption")]
+    [SwaggerSchemaCustom("Guest caption")]
     public string GuestCaption { get; init; }
 
-    [SwaggerSchemaCustomString("Guests caption")]
+    [SwaggerSchemaCustom("Guests caption")]
     public string GuestsCaption { get; init; }
 }

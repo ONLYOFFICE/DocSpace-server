@@ -34,6 +34,6 @@ public class UploadResultDto
     [SwaggerSchemaCustom<object>("Data")]
     public object Data { get; set; }
 
-    [SwaggerSchemaCustomString("Message")]
+    [SwaggerSchemaCustom("Message")]
     public string Message { get; set; }
 }

@@ -40,7 +40,7 @@ public class CheckConversionRequestDto<T>
     [SwaggerSchemaCustom("File version")]
     public int Version { get; set; }
 
-    [SwaggerSchemaCustomString("Password")]
+    [SwaggerSchemaCustom("Password")]
     public string Password { get; set; }
 
     [SwaggerSchemaCustom("Create new if exists")]

@@ -31,6 +31,6 @@ public class TenantQuotaSettingsRequestsDto
     [SwaggerSchemaCustom("Tenant ID")]
     public int TenantId { get; set; }
 
-    [SwaggerSchemaCustomLong("Quota")]
+    [SwaggerSchemaCustom("Quota")]
     public long Quota { get; set; }
 }

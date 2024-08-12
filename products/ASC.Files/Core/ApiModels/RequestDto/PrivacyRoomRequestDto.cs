@@ -28,10 +28,10 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class PrivacyRoomRequestDto
 {
-    [SwaggerSchemaCustomString("Public key")]
+    [SwaggerSchemaCustom("Public key")]
     public string PublicKey { get; set; }
 
-    [SwaggerSchemaCustomString("Private key")]
+    [SwaggerSchemaCustom("Private key")]
     public string PrivateKeyEnc { get; set; }
 
     [SwaggerSchemaCustom("Encryption keys need to be updated or not")]

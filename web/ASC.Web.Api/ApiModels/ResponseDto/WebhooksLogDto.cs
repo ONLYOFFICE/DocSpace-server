@@ -31,33 +31,33 @@ public class WebhooksLogDto : IMapFrom<WebhooksLog>
     [SwaggerSchemaCustom("ID")]
     public int Id { get; set; }
 
-    [SwaggerSchemaCustomString("Config name")]
+    [SwaggerSchemaCustom("Config name")]
     public string ConfigName { get; set; }
 
     [SwaggerSchemaCustom("Creation time")]
     public DateTime CreationTime { get; set; }
 
-    [SwaggerSchemaCustomString("Method")]
+    [SwaggerSchemaCustom("Method")]
     public string Method { get; set; }
 
-    [SwaggerSchemaCustomString("Route")]
+    [SwaggerSchemaCustom("Route")]
     public string Route { get; set; }
 
-    [SwaggerSchemaCustomString("Request headers")]
+    [SwaggerSchemaCustom("Request headers")]
     public string RequestHeaders { get; set; }
 
-    [SwaggerSchemaCustomString("Request payload")]
+    [SwaggerSchemaCustom("Request payload")]
     public string RequestPayload { get; set; }
 
-    [SwaggerSchemaCustomString("Response headers")]
+    [SwaggerSchemaCustom("Response headers")]
     public string ResponseHeaders { get; set; }
 
-    [SwaggerSchemaCustomString("Response payload")]
+    [SwaggerSchemaCustom("Response payload")]
     public string ResponsePayload { get; set; }
 
     [SwaggerSchemaCustom("Status")]
     public int Status { get; set; }
 
-    [SwaggerSchemaCustom("Delivery time", Nullable = true)]
+    [SwaggerSchemaCustom("Delivery time")]
     public DateTime? Delivery { get; set; }
 }

@@ -28,34 +28,34 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 
 public class SmtpSettingsDto : IMapFrom<SmtpSettings>
 {
-    [SwaggerSchemaCustomString("Host", Example = "mail.example.com")]
+    [SwaggerSchemaCustom("Host", Example = "mail.example.com")]
     public string Host { get; set; }
 
-    [SwaggerSchemaCustomInt("Port", Example = 25, Nullable = true)]
+    [SwaggerSchemaCustom("Port", Example = 25)]
     public int? Port { get; set; }
 
-    [SwaggerSchemaCustomString("Sender address", Example = "notify@example.com")]
+    [SwaggerSchemaCustom("Sender address", Example = "notify@example.com")]
     public string SenderAddress { get; set; }
 
-    [SwaggerSchemaCustomString("Sender display name", Example = "Postman")]
+    [SwaggerSchemaCustom("Sender display name", Example = "Postman")]
     public string SenderDisplayName { get; set; }
 
-    [SwaggerSchemaCustomString("Credentials username", Example = "notify@example.com")]
+    [SwaggerSchemaCustom("Credentials username", Example = "notify@example.com")]
     public string CredentialsUserName { get; set; }
 
-    [SwaggerSchemaCustomString("Credentials user password", Example = "{password}")]
+    [SwaggerSchemaCustom("Credentials user password", Example = "{password}")]
     public string CredentialsUserPassword { get; set; }
 
     [SwaggerSchemaCustom("Enables SSL or not")]
     public bool EnableSSL { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Enables authentication or not", Example = false)]
+    [SwaggerSchemaCustom("Enables authentication or not", Example = false)]
     public bool EnableAuth { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies whether to use NTLM or not", Example = false)]
+    [SwaggerSchemaCustom("Specifies whether to use NTLM or not", Example = false)]
     public bool UseNtlm { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the current settings are default or not", Example = false)]
+    [SwaggerSchemaCustom("Specifies if the current settings are default or not", Example = false)]
     public bool IsDefaultSettings { get; set; }
 
     public static SmtpSettingsDto GetSample()

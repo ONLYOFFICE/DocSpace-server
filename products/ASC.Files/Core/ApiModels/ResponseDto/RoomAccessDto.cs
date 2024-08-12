@@ -31,6 +31,6 @@ public class RoomSecurityDto
     [SwaggerSchemaCustom<IEnumerable<FileShareDto>>("List of room members")]
     public IEnumerable<FileShareDto> Members { get; set; }
 
-    [SwaggerSchemaCustomString("Warning")]
+    [SwaggerSchemaCustom("Warning")]
     public string Warning { get; set; }
 }

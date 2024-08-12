@@ -31,25 +31,25 @@ public class Module(Product product)
     [SwaggerSchemaCustom("ID")]
     public Guid Id { get; set; } = product.ProductID;
 
-    [SwaggerSchemaCustomString("Product class name")]
+    [SwaggerSchemaCustom("Product class name")]
     public string AppName { get; set; } = product.ProductClassName;
 
-    [SwaggerSchemaCustomString("Title")]
+    [SwaggerSchemaCustom("Title")]
     public string Title { get; set; } = product.Name;
 
-    [SwaggerSchemaCustomString("Start link")]
+    [SwaggerSchemaCustom("Start link")]
     public string Link { get; set; } = product.StartURL;
 
-    [SwaggerSchemaCustomString("Icon URL")]
+    [SwaggerSchemaCustom("Icon URL")]
     public string IconUrl { get; set; } = product.Context.IconFileName;
 
-    [SwaggerSchemaCustomString("Large image URL")]
+    [SwaggerSchemaCustom("Large image URL")]
     public string ImageUrl { get; set; } = product.Context.LargeIconFileName;
 
-    [SwaggerSchemaCustomString("Help URL")]
+    [SwaggerSchemaCustom("Help URL")]
     public string HelpUrl { get; set; } = product.HelpURL;
 
-    [SwaggerSchemaCustomString("Description")]
+    [SwaggerSchemaCustom("Description")]
     public string Description { get; set; } = product.Description;
 
     [SwaggerSchemaCustom("Specifies if the module is primary or not")]

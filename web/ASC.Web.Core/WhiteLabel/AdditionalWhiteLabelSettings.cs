@@ -45,31 +45,31 @@ public class AdditionalWhiteLabelSettings : ISettings<AdditionalWhiteLabelSettin
     [SwaggerSchemaCustom("Specifies if feedback and support are available or not")]
     public bool FeedbackAndSupportEnabled { get; init; }
 
-    [SwaggerSchemaCustomString("Feedback and support URL")]
+    [SwaggerSchemaCustom("Feedback and support URL")]
     public string FeedbackAndSupportUrl { get; init; }
 
     [SwaggerSchemaCustom("Specifies if the user forum is enabled or not")]
     public bool UserForumEnabled { get; init; }
 
-    [SwaggerSchemaCustomString("User forum URL")]
+    [SwaggerSchemaCustom("User forum URL")]
     public string UserForumUrl { get; init; }
 
     [SwaggerSchemaCustom("Specifies if the video guides are enabled or not")]
     public bool VideoGuidesEnabled { get; init; }
 
-    [SwaggerSchemaCustomString("Video guides URL")]
+    [SwaggerSchemaCustom("Video guides URL")]
     public string VideoGuidesUrl { get; init; }
 
-    [SwaggerSchemaCustomString("Sales email")]
+    [SwaggerSchemaCustom("Sales email")]
     public string SalesEmail { get; init; }
 
-    [SwaggerSchemaCustomString("URL to pay for the portal")]
+    [SwaggerSchemaCustom("URL to pay for the portal")]
     public string BuyUrl { get; init; }
 
     [SwaggerSchemaCustom("Specifies if the license agreements are enabled or not")]
     public bool LicenseAgreementsEnabled { get; init; }
 
-    [SwaggerSchemaCustomString("License agreements URL")]
+    [SwaggerSchemaCustom("License agreements URL")]
     public string LicenseAgreementsUrl { get; init; }
 
     [JsonIgnore]
@@ -140,7 +140,7 @@ public class AdditionalWhiteLabelSettingsHelper(AdditionalWhiteLabelSettingsHelp
 [Singleton]
 public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration)
 {
-    [SwaggerSchemaCustomString("Default help center URL")]
+    [SwaggerSchemaCustom("Default help center URL")]
     public string DefaultHelpCenterUrl
     {
         get
@@ -150,7 +150,7 @@ public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration
         }
     }
 
-    [SwaggerSchemaCustomString("Default feedback and support URL")]
+    [SwaggerSchemaCustom("Default feedback and support URL")]
     public string DefaultFeedbackAndSupportUrl
     {
         get
@@ -160,7 +160,7 @@ public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration
         }
     }
 
-    [SwaggerSchemaCustomString("Default user forum URL")]
+    [SwaggerSchemaCustom("Default user forum URL")]
     public string DefaultUserForumUrl
     {
         get
@@ -170,7 +170,7 @@ public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration
         }
     }
 
-    [SwaggerSchemaCustomString("Default video guides URL")]
+    [SwaggerSchemaCustom("Default video guides URL")]
     public string DefaultVideoGuidesUrl
     {
         get
@@ -180,7 +180,7 @@ public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration
         }
     }
 
-    [SwaggerSchemaCustomString("Default sales email")]
+    [SwaggerSchemaCustom("Default sales email")]
     public string DefaultMailSalesEmail
     {
         get
@@ -190,7 +190,7 @@ public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration
         }
     }
 
-    [SwaggerSchemaCustomString("Default URL to pay for the portal")]
+    [SwaggerSchemaCustom("Default URL to pay for the portal")]
     public string DefaultBuyUrl
     {
         get

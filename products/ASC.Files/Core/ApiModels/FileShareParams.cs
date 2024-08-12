@@ -31,7 +31,7 @@ public class FileShareParams
     [SwaggerSchemaCustom("ID of the user with whom we want to share a file")]
     public Guid ShareTo { get; set; }
 
-    [SwaggerSchemaCustomString("User email address")]
+    [SwaggerSchemaCustom("User email address")]
     public string Email { get; set; }
 
     [SwaggerSchemaCustomString("Sharing rights", Example = "None")]

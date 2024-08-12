@@ -46,25 +46,25 @@ public class FileDto<T> : FileEntryDto<T>
     [SwaggerSchemaCustomString("File status", Example = "None")]
     public FileStatus FileStatus { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Muted or not", Example = false)]
+    [SwaggerSchemaCustom("Muted or not", Example = false)]
     public bool Mute { get; set; }
 
-    [SwaggerSchemaCustomString("URL to view a file", Example = "https://www.onlyoffice.com/viewfile?fileid=2221", Format = "uri")]
+    [SwaggerSchemaCustom("URL to view a file", Example = "https://www.onlyoffice.com/viewfile?fileid=2221", Format = "uri")]
     public string ViewUrl { get; set; }
 
-    [SwaggerSchemaCustomString("Web URL", Format = "uri")]
+    [SwaggerSchemaCustom("Web URL", Format = "uri")]
     public string WebUrl { get; set; }
 
     [SwaggerSchemaCustomString("File type", Example = "Document")]
     public FileType FileType { get; set; }
 
-    [SwaggerSchemaCustomString("File extension", Example = ".txt")]
+    [SwaggerSchemaCustom("File extension", Example = ".txt")]
     public string FileExst { get; set; }
 
     [SwaggerSchemaCustomString("Comment")]
     public string Comment { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Encrypted or not", Example = false, Nullable = true)]
+    [SwaggerSchemaCustom("Encrypted or not", Example = false)]
     public bool? Encrypted { get; set; }
 
     [SwaggerSchemaCustomString("Thumbnail URL", Format = "uri")]
@@ -73,22 +73,22 @@ public class FileDto<T> : FileEntryDto<T>
     [SwaggerSchemaCustomString("Thumbnail status", Example = "Created")]
     public Thumbnail ThumbnailStatus { get; set; }
 
-    [SwaggerSchemaCustom("Locked or not", Nullable = true)]
+    [SwaggerSchemaCustom("Locked or not")]
     public bool? Locked { get; set; }
 
     [SwaggerSchemaCustomString("User ID who locked a file")]
     public string LockedBy { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Denies file downloading or not", Example = false)]
+    [SwaggerSchemaCustom("Denies file downloading or not", Example = false)]
     public bool DenyDownload { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Is there a draft or not", Example = false, Nullable = true)]
+    [SwaggerSchemaCustom("Is there a draft or not", Example = false)]
     public bool? HasDraft { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Is there a form or not", Example = false, Nullable = true)]
+    [SwaggerSchemaCustom("Is there a form or not", Example = false)]
     public bool? IsForm { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Specifies if the filling has started or not", Example = false, Nullable = true)]
+    [SwaggerSchemaCustom("Specifies if the filling has started or not", Example = false)]
     public bool? StartFilling { get; set; }
 
     [SwaggerSchemaCustom("InProcess folder ID")]
@@ -100,7 +100,7 @@ public class FileDto<T> : FileEntryDto<T>
     [SwaggerSchemaCustom<DraftLocation<int>>("Draft info")]
     public DraftLocation<T> DraftLocation { get; set; }
 
-    [SwaggerSchemaCustomBoolean("Denies file sharing or not", Example = false)]
+    [SwaggerSchemaCustom("Denies file sharing or not", Example = false)]
     public bool DenySharing { get; set; }
 
     [SwaggerSchemaCustom<IDictionary<Accessibility, bool>>("File accessibility")]

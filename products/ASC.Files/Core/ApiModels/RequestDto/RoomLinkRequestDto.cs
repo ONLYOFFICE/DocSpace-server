@@ -30,14 +30,14 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class RoomLinkRequestDto : LinkRequestDtoBase
 {
-    [SwaggerSchemaCustomString("Link name")]
+    [SwaggerSchemaCustom("Link name")]
     [StringLength(255)]
     public string Title { get; set; }
 
     [SwaggerSchemaCustomString("Link type (Invitation or External)", Example = "Invitation")]
     public LinkType LinkType { get; set; }
 
-    [SwaggerSchemaCustomString("Link password")]
+    [SwaggerSchemaCustom("Link password")]
     [StringLength(255)]
     public string Password { get; set; }
 

@@ -28,28 +28,28 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 public class AuthRequestsDto
 {
-    [SwaggerSchemaCustomString("Username / email")]
+    [SwaggerSchemaCustom("Username / email")]
     public string UserName { get; set; }
 
-    [SwaggerSchemaCustomString("Password")]
+    [SwaggerSchemaCustom("Password")]
     public string Password { get; set; }
 
-    [SwaggerSchemaCustomString("Password hash")]
+    [SwaggerSchemaCustom("Password hash")]
     public string PasswordHash { get; set; }
 
-    [SwaggerSchemaCustomString("Provider type")]
+    [SwaggerSchemaCustom("Provider type")]
     public string Provider { get; set; }
 
-    [SwaggerSchemaCustomString("Provider access token")]
+    [SwaggerSchemaCustom("Provider access token")]
     public string AccessToken { get; set; }
 
-    [SwaggerSchemaCustomString("Serialized user profile")]
+    [SwaggerSchemaCustom("Serialized user profile")]
     public string SerializedProfile { get; set; }
 
-    [SwaggerSchemaCustomString("Two-factor authentication code")]
+    [SwaggerSchemaCustom("Two-factor authentication code")]
     public string Code { get; set; }
 
-    [SwaggerSchemaCustomString("Code for getting a token")]
+    [SwaggerSchemaCustom("Code for getting a token")]
     public string CodeOAuth { get; set; }
 
     [SwaggerSchemaCustom("Session based authentication or not")]
@@ -61,27 +61,27 @@ public class AuthRequestsDto
     [SwaggerSchemaCustomString("Type of captcha", Example = "Default")]
     public RecaptchaType RecaptchaType { get; set; }
 
-    [SwaggerSchemaCustomString("reCAPTCHA response")]
+    [SwaggerSchemaCustom("reCAPTCHA response")]
     public string RecaptchaResponse { get; set; }
 
-    [SwaggerSchemaCustomString("Culture")]
+    [SwaggerSchemaCustom("Culture")]
     public string Culture { get; set; }
 }
 
 public class MobileRequestsDto
 {
-    [SwaggerSchemaCustomString("Mobile phone")]
+    [SwaggerSchemaCustom("Mobile phone")]
     public string MobilePhone { get; set; }
 }
 
 public class ConfirmData
 {
-    [SwaggerSchemaCustomString("Email address")]
+    [SwaggerSchemaCustom("Email address")]
     public string Email { get; set; }
 
-    [SwaggerSchemaCustom("Access an account for the first time or not", Nullable = true)]
+    [SwaggerSchemaCustom("Access an account for the first time or not")]
     public bool? First { get; set; }
 
-    [SwaggerSchemaCustomString("Key")]
+    [SwaggerSchemaCustom("Key")]
     public string Key { get; set; }
 }

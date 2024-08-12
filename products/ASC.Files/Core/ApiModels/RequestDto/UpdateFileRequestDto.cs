@@ -28,7 +28,7 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class UpdateFileRequestDto
 {
-    [SwaggerSchemaCustomString("File title")]
+    [SwaggerSchemaCustom("File title")]
     public string Title { get; set; }
 
     [SwaggerSchemaCustom("Number of the latest file version")]

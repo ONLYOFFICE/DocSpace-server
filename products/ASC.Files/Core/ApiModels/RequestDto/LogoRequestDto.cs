@@ -28,7 +28,7 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class LogoRequestDto
 {
-    [SwaggerSchemaCustomString("The path to the temporary image file")]
+    [SwaggerSchemaCustom("The path to the temporary image file")]
     public string TmpFile { get; set; }
 
     [SwaggerSchemaCustom("The X coordinate of the rectangle starting point")]

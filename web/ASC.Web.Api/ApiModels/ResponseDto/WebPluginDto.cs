@@ -28,31 +28,31 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class WebPluginDto: IMapFrom<WebPlugin>
 {
-    [SwaggerSchemaCustomString("Name")]
+    [SwaggerSchemaCustom("Name")]
     public string Name { get; set; }
 
-    [SwaggerSchemaCustomString("Version")]
+    [SwaggerSchemaCustom("Version")]
     public string Version { get; set; }
 
-    [SwaggerSchemaCustomString("Description")]
+    [SwaggerSchemaCustom("Description")]
     public string Description { get; set; }
 
-    [SwaggerSchemaCustomString("License")]
+    [SwaggerSchemaCustom("License")]
     public string License { get; set; }
 
-    [SwaggerSchemaCustomString("Author")]
+    [SwaggerSchemaCustom("Author")]
     public string Author { get; set; }
 
-    [SwaggerSchemaCustomString("Home page")]
+    [SwaggerSchemaCustom("Home page")]
     public string HomePage { get; set; }
 
-    [SwaggerSchemaCustomString("PluginName")]
+    [SwaggerSchemaCustom("PluginName")]
     public string PluginName { get; set; }
 
-    [SwaggerSchemaCustomString("Scopes")]
+    [SwaggerSchemaCustom("Scopes")]
     public string Scopes { get; set; }
 
-    [SwaggerSchemaCustomString("Image")]
+    [SwaggerSchemaCustom("Image")]
     public string Image { get; set; }
 
     [SwaggerSchemaCustom<EmployeeDto>("Create by")]
@@ -67,10 +67,10 @@ public class WebPluginDto: IMapFrom<WebPlugin>
     [SwaggerSchemaCustom("System")]
     public bool System { get; set; }
 
-    [SwaggerSchemaCustomString("Url", Format = "uri")]
+    [SwaggerSchemaCustom("Url", Format = "uri")]
     public string Url { get; set; }
 
-    [SwaggerSchemaCustomString("Settings")]
+    [SwaggerSchemaCustom("Settings")]
     public string Settings { get; set; }
 
     public void Mapping(Profile profile)

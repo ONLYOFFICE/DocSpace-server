@@ -37,25 +37,25 @@ public class AdditionalWhiteLabelSettingsDto: IMapFrom<AdditionalWhiteLabelSetti
     [SwaggerSchemaCustom("Specifies if feedback and support are available or not")]
     public bool FeedbackAndSupportEnabled { get; set; }
 
-    [SwaggerSchemaCustomString("Feedback and support URL")]
+    [SwaggerSchemaCustom("Feedback and support URL")]
     public string FeedbackAndSupportUrl { get; set; }
 
     [SwaggerSchemaCustom("Specifies if the user forum is enabled or not")]
     public bool UserForumEnabled { get; set; }
 
-    [SwaggerSchemaCustomString("User forum URL", Format = "uri")]
+    [SwaggerSchemaCustom("User forum URL", Format = "uri")]
     public string UserForumUrl { get; set; }
 
     [SwaggerSchemaCustom("Specifies if the video guides are enabled or not")]
     public bool VideoGuidesEnabled { get; set; }
 
-    [SwaggerSchemaCustomString("Video guides URL", Format = "uri")]
+    [SwaggerSchemaCustom("Video guides URL", Format = "uri")]
     public string VideoGuidesUrl { get; set; }
 
-    [SwaggerSchemaCustomString("Sales email")]
+    [SwaggerSchemaCustom("Sales email")]
     public string SalesEmail { get; set; }
 
-    [SwaggerSchemaCustomString("URL to pay for the portal", Format = "uri")]
+    [SwaggerSchemaCustom("URL to pay for the portal", Format = "uri")]
     public string BuyUrl { get; set; }
 
     [SwaggerSchemaCustom("Specifies if the license agreements are enabled or not")]
@@ -64,7 +64,7 @@ public class AdditionalWhiteLabelSettingsDto: IMapFrom<AdditionalWhiteLabelSetti
     [SwaggerSchemaCustom("Specifies if these settings are default or not")]
     public bool IsDefault { get; set; }
 
-    [SwaggerSchemaCustomString("License agreements URL")]
+    [SwaggerSchemaCustom("License agreements URL")]
     public string LicenseAgreementsUrl { get; set; }
 
     public void Mapping(Profile profile)

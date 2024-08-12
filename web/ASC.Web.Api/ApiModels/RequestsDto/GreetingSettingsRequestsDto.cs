@@ -28,6 +28,6 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 public class GreetingSettingsRequestsDto
 {
-    [SwaggerSchemaCustomString("Tenant name")]
+    [SwaggerSchemaCustom("Tenant name")]
     public string Title { get; set; }
 }

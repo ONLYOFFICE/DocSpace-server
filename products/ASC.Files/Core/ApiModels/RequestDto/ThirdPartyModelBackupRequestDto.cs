@@ -28,10 +28,10 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class ThirdPartyBackupRequestDto
 {
-    [SwaggerSchemaCustomString("Connection URL for the sharepoint", Format = "uri")]
+    [SwaggerSchemaCustom("Connection URL for the sharepoint", Format = "uri")]
     public string Url { get; set; }
 
-    [SwaggerSchemaCustomString("Login")]
+    [SwaggerSchemaCustom("Login")]
     public string Login { get; set; }
 
     [SwaggerSchemaCustomString("Password")]

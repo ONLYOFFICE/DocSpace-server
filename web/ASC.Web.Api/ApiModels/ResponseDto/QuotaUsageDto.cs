@@ -117,7 +117,7 @@ public class QuotaUsageDto
 
 public class QuotaUsage
 {
-    [SwaggerSchemaCustomString("Path to the storage")]
+    [SwaggerSchemaCustom("Path to the storage")]
     public string Path { get; set; }
 
     [SwaggerSchemaCustom("Storage size")]

@@ -30,7 +30,7 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class WhiteLabelItemDto
 {
-    [SwaggerSchemaCustomString("File name")]
+    [SwaggerSchemaCustom("File name")]
     public string Name { get; set; }
 
     [SwaggerSchemaCustom<Size>("Size")]
@@ -42,9 +42,9 @@ public class WhiteLabelItemDto
 
 public class WhiteLabelItemPathDto
 {
-    [SwaggerSchemaCustomString("Path to the light theme logo")]
+    [SwaggerSchemaCustom("Path to the light theme logo")]
     public string Light { get; set; }
 
-    [SwaggerSchemaCustomString("Path to the dark theme logo")]
+    [SwaggerSchemaCustom("Path to the dark theme logo")]
     public string Dark { get; set; }
 }

@@ -28,6 +28,6 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 public class ShortenLinkRequestsDto
 {
-    [SwaggerSchemaCustomString("Link", Format = "uri")]
+    [SwaggerSchemaCustom("Link", Format = "uri")]
     public string Link { get; set; }
 }

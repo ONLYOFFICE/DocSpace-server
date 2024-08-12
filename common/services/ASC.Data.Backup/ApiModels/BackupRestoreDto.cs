@@ -28,7 +28,7 @@ namespace ASC.Data.Backup.ApiModels;
 
 public class BackupRestoreDto
 {
-    [SwaggerSchemaCustomString("Backup ID")]
+    [SwaggerSchemaCustom("Backup ID")]
     public string BackupId { get; set; }
 
     [SwaggerSchemaCustomString("Storage type")]

@@ -28,7 +28,7 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public record ProviderDto(string Name, string Key, bool Connected, bool Oauth = false, string RedirectUrl = null, bool RequiredConnectionUrl = false)
 {
-    [SwaggerSchemaCustomString("Provider name")]
+    [SwaggerSchemaCustom("Provider name")]
     public string Name { get; init; } = Name;
 
     [SwaggerSchemaCustomString("Provider key")]

@@ -44,7 +44,7 @@ public class Tariff
     [SwaggerSchemaCustom("License date")]
     public DateTime LicenseDate { get; set; }
 
-    [SwaggerSchemaCustomString("Customer ID")]
+    [SwaggerSchemaCustom("Customer ID")]
     public string CustomerId { get; set; }
 
     [SwaggerSchemaCustom<List<Quota>>("List of quotas")]

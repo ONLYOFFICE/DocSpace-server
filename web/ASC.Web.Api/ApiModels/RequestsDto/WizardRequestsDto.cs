@@ -28,19 +28,19 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 public class WizardRequestsDto
 {
-    [SwaggerSchemaCustomString("Email")]
+    [SwaggerSchemaCustom("Email")]
     public string Email { get; set; }
 
-    [SwaggerSchemaCustomString("Password hash")]
+    [SwaggerSchemaCustom("Password hash")]
     public string PasswordHash { get; set; }
 
-    [SwaggerSchemaCustomString("Language")]
+    [SwaggerSchemaCustom("Language")]
     public string Lng { get; set; }
 
-    [SwaggerSchemaCustomString("Time zone")]
+    [SwaggerSchemaCustom("Time zone")]
     public string TimeZone { get; set; }
 
-    [SwaggerSchemaCustomString("AMI ID")]
+    [SwaggerSchemaCustom("AMI ID")]
     public string AmiId { get; set; }
 
     [SwaggerSchemaCustom("Subscribed from the site or not")]

@@ -35,7 +35,7 @@ public class RoomInvitationRequestDto
     [SwaggerSchemaCustom("Notifies users about the shared room or not")]
     public bool Notify { get; set; }
 
-    [SwaggerSchemaCustomString("Message to send when notifying about the shared room")]
+    [SwaggerSchemaCustom("Message to send when notifying about the shared room")]
     public string Message { get; set; }
 
     [SwaggerSchemaCustomString("Culture")]

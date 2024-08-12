@@ -28,22 +28,22 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class TenantDto : IMapFrom<Tenant>
 {
-    [SwaggerSchemaCustomString("Affiliate ID")]
+    [SwaggerSchemaCustom("Affiliate ID")]
     public string AffiliateId { get; set; }
 
-    [SwaggerSchemaCustomString("Tenant alias")]
+    [SwaggerSchemaCustom("Tenant alias")]
     public string TenantAlias { get; set; }
 
     [SwaggerSchemaCustom("Specifies if the calls are available for this tenant or not")]
     public bool Calls { get; set; }
 
-    [SwaggerSchemaCustomString("Campaign")]
+    [SwaggerSchemaCustom("Campaign")]
     public string Campaign { get; set; }
 
     [SwaggerSchemaCustom("Creation date and time")]
     public DateTime CreationDateTime { get; internal set; }
 
-    [SwaggerSchemaCustomString("Hosted region")]
+    [SwaggerSchemaCustom("Hosted region")]
     public string HostedRegion { get; set; }
 
     [SwaggerSchemaCustom("Tenant ID")]
@@ -52,22 +52,22 @@ public class TenantDto : IMapFrom<Tenant>
     [SwaggerSchemaCustomString("Tenant industry", Example = "Other")]
     public TenantIndustry Industry { get; set; }
 
-    [SwaggerSchemaCustomString("Language")]
+    [SwaggerSchemaCustom("Language")]
     public string Language { get; set; }
 
     [SwaggerSchemaCustom("Last modified date")]
     public DateTime LastModified { get; set; }
 
-    [SwaggerSchemaCustomString("Mapped domain")]
+    [SwaggerSchemaCustom("Mapped domain")]
     public string MappedDomain { get; set; }
 
-    [SwaggerSchemaCustomString("Name")]
+    [SwaggerSchemaCustom("Name")]
     public string Name { get; set; }
 
     [SwaggerSchemaCustom("Owner ID")]
     public Guid OwnerId { get; set; }
 
-    [SwaggerSchemaCustomString("Payment ID")]
+    [SwaggerSchemaCustom("Payment ID")]
     public string PaymentId { get; set; }
 
     [SwaggerSchemaCustom("Specifies if the ONLYOFFICE newsletter is allowed or not")]
@@ -79,13 +79,13 @@ public class TenantDto : IMapFrom<Tenant>
     [SwaggerSchemaCustom("The date and time when the tenant status was changed")]
     public DateTime StatusChangeDate { get; internal set; }
 
-    [SwaggerSchemaCustomString("Time zone")]
+    [SwaggerSchemaCustom("Time zone")]
     public string TimeZone { get; set; }
 
     [SwaggerSchemaCustomString("List of trusted domains")]
     public List<string> TrustedDomains { get; set; }
 
-    [SwaggerSchemaCustomString("Trusted domains in the string format")]
+    [SwaggerSchemaCustom("Trusted domains in the string format")]
     public string TrustedDomainsRaw { get; set; }
 
     [SwaggerSchemaCustomString("Trusted domains type", Example = "None")]

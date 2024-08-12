@@ -28,7 +28,7 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class CreateFileRequestDto<T>
 {
-    [SwaggerSchemaCustomString("File title")]
+    [SwaggerSchemaCustom("File title")]
     public string Title { get; set; }
 
     [SwaggerSchemaCustomInt("Template file ID")]

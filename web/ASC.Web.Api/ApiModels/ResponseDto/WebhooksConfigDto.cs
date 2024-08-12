@@ -31,13 +31,13 @@ public class WebhooksConfigDto : IMapFrom<WebhooksConfig>
     [SwaggerSchemaCustom("ID")]
     public int Id { get; set; }
 
-    [SwaggerSchemaCustomString("Name")]
+    [SwaggerSchemaCustom("Name")]
     public string Name { get; set; }
 
-    [SwaggerSchemaCustomString("URI")]
+    [SwaggerSchemaCustom("URI")]
     public string Uri { get; set; }
 
-    [SwaggerSchemaCustomString("Secret key")]
+    [SwaggerSchemaCustom("Secret key")]
     public string SecretKey { get; set; }
 
     [SwaggerSchemaCustom("Specifies if the webhooks are enabled or not")]

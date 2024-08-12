@@ -31,15 +31,15 @@ public class GetReferenceDataDto<T>
     [SwaggerSchemaCustomInt("The unique document identifier used by the service to get a link to the file")]
     public T FileKey { get; set; }
 
-    [SwaggerSchemaCustomString("The unique system identifier", Nullable = true)]
+    [SwaggerSchemaCustom("The unique system identifier", Nullable = true)]
     public string InstanceId { get; set; }
 
     [SwaggerSchemaCustomInt("Source file ID")]
     public T SourceFileId { get; set; }
 
-    [SwaggerSchemaCustomString("The file name or relative path for the formula editor", Nullable = true)]
+    [SwaggerSchemaCustom("The file name or relative path for the formula editor", Nullable = true)]
     public string Path { get; set; }
 
-    [SwaggerSchemaCustomString("Link to file", Format = "uri")]
+    [SwaggerSchemaCustom("Link to file", Format = "uri")]
     public string Link { get; set; }
 }

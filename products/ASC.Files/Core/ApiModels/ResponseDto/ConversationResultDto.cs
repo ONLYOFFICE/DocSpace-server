@@ -31,7 +31,7 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 /// </summary>
 public class ConversationResultDto
 {
-    [SwaggerSchemaCustomString("Operation ID")]
+    [SwaggerSchemaCustom("Operation ID")]
     public string Id { get; set; }
 
     [SwaggerSchemaCustomString("Operation type", Example = "Move")]

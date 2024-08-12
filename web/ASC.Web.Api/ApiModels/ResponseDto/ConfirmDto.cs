@@ -31,9 +31,9 @@ public class ConfirmDto : IMapFrom<Validation>
     [SwaggerSchemaCustomString("Result", Example = "Ok")]
     public ValidationResult Result { get; set; }
 
-    [SwaggerSchemaCustomString("Room id")]
+    [SwaggerSchemaCustom("Room id")]
     public string RoomId { get; set; }
 
-    [SwaggerSchemaCustomString("Title")]
+    [SwaggerSchemaCustom("Title")]
     public string Title { get; set; }
 }

@@ -37,7 +37,7 @@ public class IPRestriction : IpRestrictionBase, IMapFrom<TenantIpRestrictions>
 
 public class IpRestrictionBase
 {
-    [SwaggerSchemaCustomString("IP address")]
+    [SwaggerSchemaCustom("IP address")]
     public string Ip { get; set; }
 
     [SwaggerSchemaCustom("Specifies if this address is for administrator users only or not")]

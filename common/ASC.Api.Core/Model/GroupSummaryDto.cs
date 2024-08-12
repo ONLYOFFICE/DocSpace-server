@@ -33,10 +33,10 @@ public class GroupSummaryDto
     [SwaggerSchemaCustom("ID")]
     public Guid Id { get; set; }
 
-    [SwaggerSchemaCustomString("Name")]
+    [SwaggerSchemaCustom("Name")]
     public string Name { get; init; }
 
-    [SwaggerSchemaCustomString("Manager")]
+    [SwaggerSchemaCustom("Manager")]
     public string Manager { get; set; }
 
     public static GroupSummaryDto GetSample()

@@ -42,7 +42,7 @@ public partial class FileEntryDtoContext : JsonSerializerContext;
 [JsonDerivedType(typeof(FolderDto<string>))]
 public abstract class FileEntryDto
 {
-    [SwaggerSchemaCustomString("Title")]
+    [SwaggerSchemaCustom("Title")]
     public string Title { get; set; }
 
     [SwaggerSchemaCustomString("Access rights", Example = "None")]
@@ -81,7 +81,7 @@ public abstract class FileEntryDto
     [SwaggerSchemaCustom("Provider is specified or not")]
     public bool? ProviderItem { get; set; }
 
-    [SwaggerSchemaCustomString("Provider key")]
+    [SwaggerSchemaCustom("Provider key")]
     public string ProviderKey { get; set; }
 
     [SwaggerSchemaCustom("Provider ID")]

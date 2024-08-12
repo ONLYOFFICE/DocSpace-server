@@ -34,10 +34,10 @@ public class ExternalShareDto : IMapFrom<ValidationInfo>
     [SwaggerSchemaCustomString("External data status", Example = "Ok")]
     public Status Status { get; set; }
 
-    [SwaggerSchemaCustomString("External data ID")]
+    [SwaggerSchemaCustom("External data ID")]
     public string Id { get; set; }
 
-    [SwaggerSchemaCustomString("External data title")]
+    [SwaggerSchemaCustom("External data title")]
     public string Title { get; set; }
 
     [SwaggerSchemaCustom("Tenant ID")]

@@ -33,19 +33,19 @@ public class DbTenant : IMapFrom<Tenant>
     [SwaggerSchemaCustom("Id")]
     public int Id { get; set; }
 
-    [SwaggerSchemaCustomString("Name")]
+    [SwaggerSchemaCustom("Name")]
     public string Name { get; set; }
 
-    [SwaggerSchemaCustomString("Alias")]
+    [SwaggerSchemaCustom("Alias")]
     public string Alias { get; set; }
 
-    [SwaggerSchemaCustomString("Mapped domain")]
+    [SwaggerSchemaCustom("Mapped domain")]
     public string MappedDomain { get; set; }
 
     [SwaggerSchemaCustom("Version")]
     public int Version { get; set; }
 
-    [SwaggerSchemaCustom("Version_changed", Nullable = true)]
+    [SwaggerSchemaCustom("Version_changed")]
     public DateTime? Version_Changed { get; set; }
 
     [SwaggerSchemaCustom("Version changed")]
@@ -55,13 +55,13 @@ public class DbTenant : IMapFrom<Tenant>
         set => Version_Changed = value;
     }
 
-    [SwaggerSchemaCustomString("Language")]
+    [SwaggerSchemaCustom("Language")]
     public string Language { get; set; }
 
-    [SwaggerSchemaCustomString("Time zone")]
+    [SwaggerSchemaCustom("Time zone")]
     public string TimeZone { get; set; }
 
-    [SwaggerSchemaCustomString("Trusted domains raw")]
+    [SwaggerSchemaCustom("Trusted domains raw")]
     public string TrustedDomainsRaw { get; set; }
 
     [SwaggerSchemaCustomString("Trusted domains enabled", Example = "None")]
@@ -70,7 +70,7 @@ public class DbTenant : IMapFrom<Tenant>
     [SwaggerSchemaCustomString("Status", Example = "Active")]
     public TenantStatus Status { get; set; }
 
-    [SwaggerSchemaCustom("Status changed", Nullable = true)]
+    [SwaggerSchemaCustom("Status changed")]
     public DateTime? StatusChanged { get; set; }
     //hack for DateTime?
 
@@ -84,10 +84,10 @@ public class DbTenant : IMapFrom<Tenant>
     [SwaggerSchemaCustom("Creation date time")]
     public DateTime CreationDateTime { get; set; }
 
-    [SwaggerSchemaCustom("Owner id", Nullable = true)]
+    [SwaggerSchemaCustom("Owner id")]
     public Guid? OwnerId { get; set; }
 
-    [SwaggerSchemaCustomString("Payment id")]
+    [SwaggerSchemaCustom("Payment id")]
     public string PaymentId { get; set; }
 
     [SwaggerSchemaCustomString("Industry", Example = "Other")]

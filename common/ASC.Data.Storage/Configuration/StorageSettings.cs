@@ -75,7 +75,7 @@ public class BaseStorageSettingsListener(IServiceProvider serviceProvider, ICach
 /// <typeparam name="T"></typeparam>
 public abstract class BaseStorageSettings<T> : ISettings<BaseStorageSettings<T>> where T : class, ISettings<T>, new()
 {
-    [SwaggerSchemaCustomString("Storage name")]
+    [SwaggerSchemaCustom("Storage name")]
     public string Module { get; set; }
 
     [SwaggerSchemaCustom<Dictionary<string, string>>("Storage properties")]

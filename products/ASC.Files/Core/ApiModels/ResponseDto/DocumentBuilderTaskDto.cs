@@ -28,10 +28,10 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public class DocumentBuilderTaskDto
 {
-    [SwaggerSchemaCustomString("Id")]
+    [SwaggerSchemaCustom("Id")]
     public string Id { get; set; }
 
-    [SwaggerSchemaCustomString("Error")]
+    [SwaggerSchemaCustom("Error")]
     public string Error { get; set; }
 
     [SwaggerSchemaCustom("Percentage")]

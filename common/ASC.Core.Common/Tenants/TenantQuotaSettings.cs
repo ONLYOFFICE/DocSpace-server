@@ -41,7 +41,7 @@ public class TenantQuotaSettings : ISettings<TenantQuotaSettings>
     [SwaggerSchemaCustom("Quota")]
     public long Quota { get; set; }
 
-    [SwaggerSchemaCustom("Date of the last quota recalculation", Nullable = true)]
+    [SwaggerSchemaCustom("Date of the last quota recalculation")]
     public DateTime? LastRecalculateDate { get; set; }
 
     public TenantQuotaSettings GetDefault()

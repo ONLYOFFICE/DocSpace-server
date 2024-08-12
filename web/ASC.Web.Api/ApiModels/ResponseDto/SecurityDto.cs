@@ -28,7 +28,7 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 
 public class SecurityDto
 {
-    [SwaggerSchemaCustomString("Module ID")]
+    [SwaggerSchemaCustom("Module ID")]
     public string WebItemId { get; set; }
 
     [SwaggerSchemaCustom<List<EmployeeDto>>("List of users with the access to the module")]

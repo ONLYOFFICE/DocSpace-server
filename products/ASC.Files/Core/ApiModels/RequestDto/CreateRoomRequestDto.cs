@@ -56,7 +56,7 @@ public enum RoomType
 
 public class CreateRoomRequestDto
 {
-    [SwaggerSchemaCustomString("Room name")]
+    [SwaggerSchemaCustom("Room name")]
     public string Title { get; set; }
 
     [SwaggerSchemaCustomString("Room type", Example = "CustomRoom")]

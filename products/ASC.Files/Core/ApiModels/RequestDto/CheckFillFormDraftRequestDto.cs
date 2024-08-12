@@ -31,7 +31,7 @@ public class CheckFillFormDraftRequestDto
     [SwaggerSchemaCustom("File version")]
     public int Version { get; set; }
 
-    [SwaggerSchemaCustomString("Action with a form")]
+    [SwaggerSchemaCustom("Action with a form")]
     public string Action { get; set; }
 
     [SwaggerSchemaCustom("Specifies whether to request a form for viewing or not")]

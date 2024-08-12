@@ -40,20 +40,20 @@ public class LdapSettingsDto : IMapFrom<LdapSettings>
     [SwaggerSchemaCustom("Specifies if the welcome email is sent or not")]
     public bool SendWelcomeEmail { get; set; }
 
-    [SwaggerSchemaCustomString("LDAP server URL address")]
+    [SwaggerSchemaCustom("LDAP server URL address")]
     public string Server { get; set; }
 
-    [SwaggerSchemaCustomString("Absolute path to the top level directory containing users for the import")]
+    [SwaggerSchemaCustom("Absolute path to the top level directory containing users for the import")]
     // ReSharper disable once InconsistentNaming
     public string UserDN { get; set; }
 
     [SwaggerSchemaCustom("Port number")]
     public int PortNumber { get; set; }
 
-    [SwaggerSchemaCustomString("User filter value to import the users who correspond to the specified search criteria. The default filter value (uid=*) allows importing all users")]
+    [SwaggerSchemaCustom("User filter value to import the users who correspond to the specified search criteria. The default filter value (uid=*) allows importing all users")]
     public string UserFilter { get; set; }
 
-    [SwaggerSchemaCustomString("Attribute in a user record that corresponds to the login that LDAP server users will use to log in to ONLYOFFICE")]
+    [SwaggerSchemaCustom("Attribute in a user record that corresponds to the login that LDAP server users will use to log in to ONLYOFFICE")]
     public string LoginAttribute { get; set; }
 
     [SwaggerSchemaCustom<Dictionary<MappingFields, string>>("Correspondence between the user data fields on the portal and the attributes in the LDAP server user record")]
@@ -66,29 +66,29 @@ public class LdapSettingsDto : IMapFrom<LdapSettings>
     [SwaggerSchemaCustom("Specifies if the groups from the LDAP server are added to the portal or not")]
     public bool GroupMembership { get; set; }
 
-    [SwaggerSchemaCustomString("The absolute path to the top level directory containing groups for the import")]
+    [SwaggerSchemaCustom("The absolute path to the top level directory containing groups for the import")]
     // ReSharper disable once InconsistentNaming
     public string GroupDN { get; set; }
 
-    [SwaggerSchemaCustomString("Attribute that determines whether this user is a member of the groups")]
+    [SwaggerSchemaCustom("Attribute that determines whether this user is a member of the groups")]
     public string UserAttribute { get; set; }
 
-    [SwaggerSchemaCustomString("Group filter value to import the groups who correspond to the specified search criteria. The default filter value (objectClass=posixGroup) allows importing all users")]
+    [SwaggerSchemaCustom("Group filter value to import the groups who correspond to the specified search criteria. The default filter value (objectClass=posixGroup) allows importing all users")]
     public string GroupFilter { get; set; }
 
-    [SwaggerSchemaCustomString("Attribute that specifies the users that the group includes")]
+    [SwaggerSchemaCustom("Attribute that specifies the users that the group includes")]
     public string GroupAttribute { get; set; }
 
-    [SwaggerSchemaCustomString("Attribute that corresponds to a name of the group where the user is included")]
+    [SwaggerSchemaCustom("Attribute that corresponds to a name of the group where the user is included")]
     public string GroupNameAttribute { get; set; }
 
     [SwaggerSchemaCustom("Specifies if the user has rights to read data from LDAP server or not")]
     public bool Authentication { get; set; }
 
-    [SwaggerSchemaCustomString("Login")]
+    [SwaggerSchemaCustom("Login")]
     public string Login { get; set; }
 
-    [SwaggerSchemaCustomString("Password")]
+    [SwaggerSchemaCustom("Password")]
     public string Password { get; set; }
 
     [SwaggerSchemaCustom("Specifies if the certificate is accepted or not")]

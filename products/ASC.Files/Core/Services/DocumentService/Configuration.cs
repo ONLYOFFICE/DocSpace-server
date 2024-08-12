@@ -52,11 +52,11 @@ public class ActionLinkConfig
 
     public class ActionConfig
     {
-        [SwaggerSchemaCustomString("Comment data")]
+        [SwaggerSchemaCustom("Comment data")]
         [JsonPropertyName("data")]
         public string Data { get; set; }
 
-        [SwaggerSchemaCustomString("Action type")]
+        [SwaggerSchemaCustom("Action type")]
         [JsonPropertyName("type")]
         public string Type { get; set; }
     }

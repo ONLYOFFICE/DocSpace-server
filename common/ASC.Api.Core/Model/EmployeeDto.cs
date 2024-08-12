@@ -33,28 +33,28 @@ public class EmployeeDto
     [SwaggerSchemaCustom("ID")]
     public Guid Id { get; set; }
 
-    [SwaggerSchemaCustomString("Display name")]
+    [SwaggerSchemaCustom("Display name")]
     public string DisplayName { get; set; }
 
-    [SwaggerSchemaCustomString("Title")]
+    [SwaggerSchemaCustom("Title")]
     public string Title { get; set; }
 
-    [SwaggerSchemaCustomString("Avatar")]
+    [SwaggerSchemaCustom("Avatar")]
     public string Avatar { get; set; }
 
-    [SwaggerSchemaCustomString("Original size avatar")]
+    [SwaggerSchemaCustom("Original size avatar")]
     public string AvatarOriginal { get; set; }
 
-    [SwaggerSchemaCustomString("Maximum size avatar")]
+    [SwaggerSchemaCustom("Maximum size avatar")]
     public string AvatarMax { get; set; }
 
-    [SwaggerSchemaCustomString("Medium size avatar")]
+    [SwaggerSchemaCustom("Medium size avatar")]
     public string AvatarMedium { get; set; }
 
-    [SwaggerSchemaCustomString("Small avatar")]
+    [SwaggerSchemaCustom("Small avatar")]
     public string AvatarSmall { get; set; }
 
-    [SwaggerSchemaCustomString("Profile URL")]
+    [SwaggerSchemaCustom("Profile URL")]
     public string ProfileUrl { get; set; }
 
     [SwaggerSchemaCustom("Specifies if the user has an avatar or not")]

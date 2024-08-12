@@ -44,7 +44,7 @@ public class MemberRequestDto : MemberBaseRequestDto
     [SwaggerSchemaCustomString("Employee type (All, RoomAdmin, User, DocSpaceAdmin, Collaborator)", Example = "All")]
     public EmployeeType Type { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if this is a guest or a user", Nullable = true)]
+    [SwaggerSchemaCustom("Specifies if this is a guest or a user")]
     public bool? IsUser { get; set; }
 
     [SwaggerSchemaCustomString("First name")]
@@ -98,7 +98,7 @@ public class UpdateMemberRequestDto : MemberRequestDto
     [SwaggerSchemaCustomString("User ID")]
     public string UserId { get; set; }
 
-    [SwaggerSchemaCustom("Specifies whether to disable a user or not", Nullable = true)]
+    [SwaggerSchemaCustom("Specifies whether to disable a user or not")]
     public bool? Disable { get; set; }
 }
 

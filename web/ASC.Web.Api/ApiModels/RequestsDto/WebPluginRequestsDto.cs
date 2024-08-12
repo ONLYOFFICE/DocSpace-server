@@ -31,6 +31,6 @@ public class WebPluginRequestsDto
     [SwaggerSchemaCustom("Enabled")]
     public bool Enabled { get; set; }
 
-    [SwaggerSchemaCustomString("Settings")]
+    [SwaggerSchemaCustom("Settings")]
     public string Settings { get; set; }
 }

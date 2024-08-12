@@ -33,20 +33,20 @@ public class WebhooksConfigRequestsDto
     [SwaggerSchemaCustom("ID")]
     public int Id { get; set; }
 
-    [SwaggerSchemaCustomString("Name")]
+    [SwaggerSchemaCustom("Name")]
     [StringLength(50)]
     public string Name { get; set; }
 
-    [SwaggerSchemaCustomString("URI", Format = "uri")]
+    [SwaggerSchemaCustom("URI", Format = "uri")]
     [Url]
     public string Uri { get; set; }
 
-    [SwaggerSchemaCustomString("Secret key")]
+    [SwaggerSchemaCustom("Secret key")]
     public string SecretKey { get; set; }
 
-    [SwaggerSchemaCustom("Enabled or not", Nullable = true)]
+    [SwaggerSchemaCustom("Enabled or not")]
     public bool? Enabled { get; set; }
 
-    [SwaggerSchemaCustom("SSL", Nullable = true)]
+    [SwaggerSchemaCustom("SSL")]
     public bool? SSL { get; set;}
 }

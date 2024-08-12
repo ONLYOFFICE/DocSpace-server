@@ -31,6 +31,6 @@ public class SaveAsPdfRequestDto<T>
     [SwaggerSchemaCustomInt("Folder ID")]
     public T FolderId { get; set; }
 
-    [SwaggerSchemaCustomString("File title")]
+    [SwaggerSchemaCustom("File title")]
     public string Title { get; set; }
 }

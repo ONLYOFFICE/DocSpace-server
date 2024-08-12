@@ -28,10 +28,10 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 
 public class StorageDto
 {
-    [SwaggerSchemaCustomString("ID")]
+    [SwaggerSchemaCustom("ID")]
     public string Id { get; set; }
 
-    [SwaggerSchemaCustomString("Title")]
+    [SwaggerSchemaCustom("Title")]
     public string Title { get; set; }
 
     [SwaggerSchemaCustom<List<AuthKey>>("List of authentication keys")]

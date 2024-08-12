@@ -31,7 +31,7 @@ public class EditHistoryDto
     [SwaggerSchemaCustom("File ID")]
     public int ID { get; set; }
 
-    [SwaggerSchemaCustomString("Key")]
+    [SwaggerSchemaCustom("Key")]
     public string Key { get; set; }
 
     [SwaggerSchemaCustom("File version")]
@@ -46,7 +46,7 @@ public class EditHistoryDto
     [SwaggerSchemaCustom<ApiDateTime>("Creation time")]
     public ApiDateTime Created { get; set; }
 
-    [SwaggerSchemaCustomString("History changes in the string format")]
+    [SwaggerSchemaCustom("History changes in the string format")]
     public string ChangesHistory { get; set; }
 
     [SwaggerSchemaCustom<List<EditHistoryChangesWrapper>>("List of history changes")]

@@ -28,10 +28,10 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 public class TfaSettingsDto
 {
-    [SwaggerSchemaCustomString("ID")]
+    [SwaggerSchemaCustom("ID")]
     public string Id { get; set; }
 
-    [SwaggerSchemaCustomString("Title")]
+    [SwaggerSchemaCustom("Title")]
     public string Title { get; set; }
 
     [SwaggerSchemaCustom("Specifies if the TFA settings are enabled or not")]
@@ -40,7 +40,7 @@ public class TfaSettingsDto
     [SwaggerSchemaCustom("Specifies if the TFA settings are available or not")]
     public bool Avaliable { get; set; }
 
-    [SwaggerSchemaCustomString("List of trusted IP addresses")]
+    [SwaggerSchemaCustom("List of trusted IP addresses")]
     public List<string> TrustedIps { get; set; }
 
     [SwaggerSchemaCustom("List of users who must use the TFA verification")]

@@ -31,7 +31,7 @@ public class CreateThirdPartyRoomRequestDto
     [SwaggerSchemaCustom("Create as new folder")]
     public bool CreateAsNewFolder { get; set; }
 
-    [SwaggerSchemaCustomString("Room name")]
+    [SwaggerSchemaCustom("Room name")]
     public string Title { get; set; }
 
     [SwaggerSchemaCustomString("Room type", Example = "CustomRoom")]

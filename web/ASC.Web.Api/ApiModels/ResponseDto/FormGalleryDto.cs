@@ -28,24 +28,24 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 
 public class FormGalleryDto : IMapFrom<OFormSettings>
 {
-    [SwaggerSchemaCustomString("Path")]
+    [SwaggerSchemaCustom("Path")]
     public string Path { get; set; }
 
-    [SwaggerSchemaCustomString("Domain")]
+    [SwaggerSchemaCustom("Domain")]
     public string Domain { get; set; }
 
-    [SwaggerSchemaCustomString("Ext")]
+    [SwaggerSchemaCustom("Ext")]
     public string Ext { get; set; }
 
-    [SwaggerSchemaCustomString("Upload path")]
+    [SwaggerSchemaCustom("Upload path")]
     public string UploadPath { get; set; }
 
-    [SwaggerSchemaCustomString("Upload domain")]
+    [SwaggerSchemaCustom("Upload domain")]
     public string UploadDomain { get; set; }
 
-    [SwaggerSchemaCustomString("Upload ext")]
+    [SwaggerSchemaCustom("Upload ext")]
     public string UploadExt { get; set; }
 
-    [SwaggerSchemaCustomString("Upload dashboard")]
+    [SwaggerSchemaCustom("Upload dashboard")]
     public string UploadDashboard { get; set; }
 }

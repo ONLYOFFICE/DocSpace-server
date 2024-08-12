@@ -50,9 +50,9 @@ public  class DefaultProductRequestDto
 
 public class TimeZoneRequestDto
 {
-    [SwaggerSchemaCustomString("Language")]
+    [SwaggerSchemaCustom("Language")]
     public string Lng { get; set; }
 
-    [SwaggerSchemaCustomString("Time zone ID")]
+    [SwaggerSchemaCustom("Time zone ID")]
     public string TimeZoneID { get; set; }
 }

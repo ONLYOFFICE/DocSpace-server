@@ -34,37 +34,37 @@ public class LoginEventDto
     [SwaggerSchemaCustom<ApiDateTime>("Date")]
     public ApiDateTime Date { get; set; }
 
-    [SwaggerSchemaCustomString("User")]
+    [SwaggerSchemaCustom("User")]
     public string User { get; set; }
 
     [SwaggerSchemaCustom("User ID")]
     public Guid UserId { get; set; }
 
-    [SwaggerSchemaCustomString("Login")]
+    [SwaggerSchemaCustom("Login")]
     public string Login { get; set; }
 
-    [SwaggerSchemaCustomString("Action")]
+    [SwaggerSchemaCustom("Action")]
     public string Action { get; set; }
 
     [SwaggerSchemaCustomString("Action ID", Example = "None")]
     public MessageAction ActionId { get; set; }
 
-    [SwaggerSchemaCustomString("IP")]
+    [SwaggerSchemaCustom("IP")]
     public string IP { get; set; }
 
-    [SwaggerSchemaCustomString("Country")]
+    [SwaggerSchemaCustom("Country")]
     public string Country { get; set; }
 
-    [SwaggerSchemaCustomString("City")]
+    [SwaggerSchemaCustom("City")]
     public string City { get; set; }
 
-    [SwaggerSchemaCustomString("Browser")]
+    [SwaggerSchemaCustom("Browser")]
     public string Browser { get; set; }
 
-    [SwaggerSchemaCustomString("Platform")]
+    [SwaggerSchemaCustom("Platform")]
     public string Platform { get; set; }
 
-    [SwaggerSchemaCustomString("Page")]
+    [SwaggerSchemaCustom("Page")]
     public string Page { get; set; }
 
     public LoginEventDto(LoginEvent loginEvent)

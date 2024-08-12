@@ -89,7 +89,7 @@ public class SsoSettingsV2 : ISettings<SsoSettingsV2>
         };
     }
 
-    [SwaggerSchemaCustom("Specifies if SSO is enabled or not", Nullable = true)]
+    [SwaggerSchemaCustom("Specifies if SSO is enabled or not")]
     public bool? EnableSso { get; set; }
 
     [SwaggerSchemaCustom<SsoIdpSettings>("IDP settings")]
@@ -101,7 +101,7 @@ public class SsoSettingsV2 : ISettings<SsoSettingsV2>
     [SwaggerSchemaCustom<SsoIdpCertificateAdvanced>("IDP advanced certificate")]
     public SsoIdpCertificateAdvanced IdpCertificateAdvanced { get; set; }
 
-    [SwaggerSchemaCustomString("SP login label")]
+    [SwaggerSchemaCustom("SP login label")]
     public string SpLoginLabel { get; set; }
 
     [SwaggerSchemaCustom<List<SsoCertificate>>("List of SP certificates")]
@@ -122,22 +122,22 @@ public class SsoSettingsV2 : ISettings<SsoSettingsV2>
 
 public class SsoIdpSettings
 {
-    [SwaggerSchemaCustomString("Entity ID")]
+    [SwaggerSchemaCustom("Entity ID")]
     public string EntityId { get; init; }
 
-    [SwaggerSchemaCustomString("SSO URL")]
+    [SwaggerSchemaCustom("SSO URL")]
     public string SsoUrl { get; init; }
 
-    [SwaggerSchemaCustomString("SSO binding")]
+    [SwaggerSchemaCustom("SSO binding")]
     public string SsoBinding { get; init; }
 
-    [SwaggerSchemaCustomString("SLO URL")]
+    [SwaggerSchemaCustom("SLO URL")]
     public string SloUrl { get; init; }
 
-    [SwaggerSchemaCustomString("SLO binding")]
+    [SwaggerSchemaCustom("SLO binding")]
     public string SloBinding { get; init; }
 
-    [SwaggerSchemaCustomString("Name ID format")]
+    [SwaggerSchemaCustom("Name ID format")]
     public string NameIdFormat { get; set; }
 }
 
@@ -148,22 +148,22 @@ public class SsoIdpSettings
 
 public class SsoFieldMapping
 {
-    [SwaggerSchemaCustomString("First name")]
+    [SwaggerSchemaCustom("First name")]
     public string FirstName { get; init; }
 
-    [SwaggerSchemaCustomString("Last name")]
+    [SwaggerSchemaCustom("Last name")]
     public string LastName { get; init; }
 
-    [SwaggerSchemaCustomString("Email")]
+    [SwaggerSchemaCustom("Email")]
     public string Email { get; init; }
 
-    [SwaggerSchemaCustomString("Title")]
+    [SwaggerSchemaCustom("Title")]
     public string Title { get; set; }
 
-    [SwaggerSchemaCustomString("Location")]
+    [SwaggerSchemaCustom("Location")]
     public string Location { get; set; }
 
-    [SwaggerSchemaCustomString("Phone")]
+    [SwaggerSchemaCustom("Phone")]
     public string Phone { get; set; }
 }
 
@@ -177,16 +177,16 @@ public class SsoCertificate
     [SwaggerSchemaCustom("Specifies if a certificate is self-signed or not")]
     public bool SelfSigned { get; set; }
 
-    [SwaggerSchemaCustomString("Certificate")]
+    [SwaggerSchemaCustom("Certificate")]
     public string Crt { get; set; }
 
-    [SwaggerSchemaCustomString("Key")]
+    [SwaggerSchemaCustom("Key")]
     public string Key { get; set; }
 
-    [SwaggerSchemaCustomString("Action")]
+    [SwaggerSchemaCustom("Action")]
     public string Action { get; set; }
 
-    [SwaggerSchemaCustomString("Domain name")]
+    [SwaggerSchemaCustom("Domain name")]
     public string DomainName { get; set; }
 
     [SwaggerSchemaCustom("Start date")]
@@ -198,7 +198,7 @@ public class SsoCertificate
 
 public class SsoIdpCertificateAdvanced
 {
-    [SwaggerSchemaCustomString("Verification algorithm")]
+    [SwaggerSchemaCustom("Verification algorithm")]
     public string VerifyAlgorithm { get; set; }
 
     [SwaggerSchemaCustom("Specifies if the signatures of the SAML authentication responses sent to SP will be verified or not")]
@@ -210,7 +210,7 @@ public class SsoIdpCertificateAdvanced
     [SwaggerSchemaCustom("Specifies if the signatures of the SAML logout responses sent to SP will be verified or not")]
     public bool VerifyLogoutResponsesSign { get; set; }
 
-    [SwaggerSchemaCustomString("Decryption algorithm")]
+    [SwaggerSchemaCustom("Decryption algorithm")]
     public string DecryptAlgorithm { get; set; }
 
     [SwaggerSchemaCustom("Specifies if the assertions will be decrypted or not")]
@@ -219,7 +219,7 @@ public class SsoIdpCertificateAdvanced
 
 public class SsoSpCertificateAdvanced
 {
-    [SwaggerSchemaCustomString("Signing algorithm")]
+    [SwaggerSchemaCustom("Signing algorithm")]
     public string SigningAlgorithm { get; set; }
 
     [SwaggerSchemaCustom("Specifies if SP will sign the SAML authentication requests sent to IdP or not")]
@@ -231,10 +231,10 @@ public class SsoSpCertificateAdvanced
     [SwaggerSchemaCustom("Specifies if sign the SAML logout responses sent to IdP or not")]
     public bool SignLogoutResponses { get; set; }
 
-    [SwaggerSchemaCustomString("Encryption algorithm")]
+    [SwaggerSchemaCustom("Encryption algorithm")]
     public string EncryptAlgorithm { get; set; }
 
-    [SwaggerSchemaCustomString("Decryption algorithm")]
+    [SwaggerSchemaCustom("Decryption algorithm")]
     public string DecryptAlgorithm { get; set; }
    
     [SwaggerSchemaCustom("Specifies if the assertions will be encrypted or not")]

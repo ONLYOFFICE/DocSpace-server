@@ -31,7 +31,7 @@ public class InsertFileRequestDto : IModelWithFile, IDisposable
     [SwaggerSchemaCustomString("File", Format = "file", Example = null)]
     public IFormFile File { get; set; }
 
-    [SwaggerSchemaCustomString("File name")]
+    [SwaggerSchemaCustom("File name")]
     public string Title { get; set; }
 
     [SwaggerSchemaCustom("Specifies whether to create a new file if it already exists or not")]

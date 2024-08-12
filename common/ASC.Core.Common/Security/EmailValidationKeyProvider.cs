@@ -181,25 +181,25 @@ public class EmailValidationKeyProvider
 
 public class EmailValidationKeyModel
 {
-    [SwaggerSchemaCustomString("Key")]
+    [SwaggerSchemaCustom("Key")]
     public string Key { get; set; }
 
     [SwaggerSchemaCustomString("Employee type", Example = "All", Nullable = true)]
     public EmployeeType? EmplType { get; init; }
 
-    [SwaggerSchemaCustomString("Email")]
+    [SwaggerSchemaCustom("Email")]
     public string Email { get; init; }
 
-    [SwaggerSchemaCustom("User ID", Nullable = true)]
+    [SwaggerSchemaCustom("User ID")]
     public Guid? UiD { get; init; }
 
     [SwaggerSchemaCustomString("Confirmation email type", Example = "LinkInvite", Nullable = true)]
     public ConfirmType? Type { get; init; }
 
-    [SwaggerSchemaCustomString("Access an account for the first time or not")]
+    [SwaggerSchemaCustom("Access an account for the first time or not")]
     public string First { get; init; }
 
-    [SwaggerSchemaCustomString("Room ID")]
+    [SwaggerSchemaCustom("Room ID")]
     public string RoomId { get; init; }
 
     public void Deconstruct(out string key, out EmployeeType? emplType, out string email, out Guid? uiD, out ConfirmType? type, out string first)

@@ -64,7 +64,7 @@ public class BackupHistoryRecord
     [SwaggerSchemaCustom("Backup ID")]
     public Guid Id { get; set; }
 
-    [SwaggerSchemaCustomString("File name")]
+    [SwaggerSchemaCustom("File name")]
     public string FileName { get; set; }
 
     [SwaggerSchemaCustomString("Storage type", Example = "Documents")]

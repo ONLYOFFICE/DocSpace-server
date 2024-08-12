@@ -43,7 +43,7 @@ public class UploadRequestDto : IModelWithFile, IDisposable
     [SwaggerSchemaCustom("Specifies whether to create a new file if it already exists or not")]
     public bool CreateNewIfExist { get; set; }
 
-    [SwaggerSchemaCustom("Specifies whether to upload documents in the original formats as well or not", Nullable = true)]
+    [SwaggerSchemaCustom("Specifies whether to upload documents in the original formats as well or not")]
     public bool? StoreOriginalFileFlag { get; set; }
 
     [SwaggerSchemaCustom("Specifies whether to keep the file converting status or not")]

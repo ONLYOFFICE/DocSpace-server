@@ -439,7 +439,7 @@ public class BackupAjaxHandler(
         [SwaggerSchemaCustom("Last backup creation time")]
         public DateTime LastBackupTime { get; set; }
 
-        [SwaggerSchemaCustomBoolean("Dump", Example = false)]
+        [SwaggerSchemaCustom("Dump", Example = false)]
         public bool Dump { get; set; }
     }
 

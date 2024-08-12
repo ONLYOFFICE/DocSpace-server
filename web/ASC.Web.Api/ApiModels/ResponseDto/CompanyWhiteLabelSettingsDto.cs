@@ -28,19 +28,19 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class CompanyWhiteLabelSettingsDto: IMapFrom<CompanyWhiteLabelSettings>
 {
-    [SwaggerSchemaCustomString("Company name")]
+    [SwaggerSchemaCustom("Company name")]
     public string CompanyName { get; set; }
 
-    [SwaggerSchemaCustomString("Site")]
+    [SwaggerSchemaCustom("Site")]
     public string Site { get; set; }
 
-    [SwaggerSchemaCustomString("Email")]
+    [SwaggerSchemaCustom("Email")]
     public string Email { get; set; }
 
-    [SwaggerSchemaCustomString("Address")]
+    [SwaggerSchemaCustom("Address")]
     public string Address { get; set; }
 
-    [SwaggerSchemaCustomString("Phone number")]
+    [SwaggerSchemaCustom("Phone number")]
     public string Phone { get; set; }
 
     [SwaggerSchemaCustom("Specifies if a company is a licensor or not")]

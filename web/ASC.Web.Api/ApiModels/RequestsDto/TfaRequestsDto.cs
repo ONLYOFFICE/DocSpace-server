@@ -31,10 +31,10 @@ public class TfaRequestsDto
     [SwaggerSchemaCustomString("TFA type (None, Sms, or App)", Example = "None")]
     public string Type { get; set; }
 
-    [SwaggerSchemaCustom("User ID", Nullable = true)]
+    [SwaggerSchemaCustom("User ID")]
     public Guid? Id { get; set; }
 
-    [SwaggerSchemaCustomString("List of trusted IP addresses")]
+    [SwaggerSchemaCustom("List of trusted IP addresses")]
     public List<string> TrustedIps { get; set; }
 
     [SwaggerSchemaCustom("List of users who must use the TFA verification")]
@@ -46,6 +46,6 @@ public class TfaRequestsDto
 
 public class TfaValidateRequestsDto
 {
-    [SwaggerSchemaCustomString("TFA code")]
+    [SwaggerSchemaCustom("TFA code")]
     public string Code { get; set; }
 }

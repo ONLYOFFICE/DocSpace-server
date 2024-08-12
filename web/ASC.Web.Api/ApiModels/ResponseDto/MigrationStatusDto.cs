@@ -30,10 +30,10 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class MigrationStatusDto
 {
-    [SwaggerSchemaCustomDouble("Migration progress", Example = 1.0)]
+    [SwaggerSchemaCustom("Migration progress", Example = 1.0)]
     public double Progress { get; set; }
 
-    [SwaggerSchemaCustomString("Migration error")]
+    [SwaggerSchemaCustom("Migration error")]
     public string Error { get; set; }
 
     [SwaggerSchemaCustom<InfoConfigDto>("Migration API information")]

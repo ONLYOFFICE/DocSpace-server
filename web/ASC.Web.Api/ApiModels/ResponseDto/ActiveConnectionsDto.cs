@@ -49,24 +49,24 @@ public class ActiveConnectionsItemDto
     [SwaggerSchemaCustom("Mobile")]
     public bool Mobile {  get; set; }
 
-    [SwaggerSchemaCustomString("Ip")]
+    [SwaggerSchemaCustom("Ip")]
     public string Ip { get; set; }
 
-    [SwaggerSchemaCustomString("Country")]
+    [SwaggerSchemaCustom("Country")]
     public string Country { get; set; }
 
-    [SwaggerSchemaCustomString("City")]
+    [SwaggerSchemaCustom("City")]
     public string City { get; set; }
 
-    [SwaggerSchemaCustomString("Browser")]
+    [SwaggerSchemaCustom("Browser")]
     public string Browser { get; set; }
 
-    [SwaggerSchemaCustomString("Platform")]
+    [SwaggerSchemaCustom("Platform")]
     public string Platform { get; set; }
 
     [SwaggerSchemaCustom<ApiDateTime>("Date")]
     public ApiDateTime Date { get; set; }
 
-    [SwaggerSchemaCustomString("Page")]
+    [SwaggerSchemaCustom("Page")]
     public string Page { get; set; }
 }

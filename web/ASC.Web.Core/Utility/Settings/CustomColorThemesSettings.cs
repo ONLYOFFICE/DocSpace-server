@@ -57,10 +57,10 @@ public class CustomColorThemesSettings : ISettings<CustomColorThemesSettings>
 
 public class CustomColorThemesSettingsItem
 {
-    [SwaggerSchemaCustomInt("Theme ID", Example = 1)]
+    [SwaggerSchemaCustom("Theme ID", Example = 1)]
     public int Id { get; set; }
 
-    [SwaggerSchemaCustomString("Theme name", Example = "blue")]
+    [SwaggerSchemaCustom("Theme name", Example = "blue")]
     public string Name { get; set; }
 
     [SwaggerSchemaCustom<CustomColorThemesSettingsColorItem>("Main colors")]
@@ -123,9 +123,9 @@ public class CustomColorThemesSettingsItem
 
 public class CustomColorThemesSettingsColorItem
 {
-    [SwaggerSchemaCustomString("Accent color", Example = "#4781D1")]
+    [SwaggerSchemaCustom("Accent color", Example = "#4781D1")]
     public string Accent { get; init; }
     
-    [SwaggerSchemaCustomString("Button color", Example = "#5299E0")]
+    [SwaggerSchemaCustom("Button color", Example = "#5299E0")]
     public string Buttons { get; init; }
 }

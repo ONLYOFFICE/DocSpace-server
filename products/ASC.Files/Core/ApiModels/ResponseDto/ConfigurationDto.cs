@@ -31,7 +31,7 @@ public class ConfigurationDto<T>
     [SwaggerSchemaCustom<DocumentConfigDto>("Document config")]
     public DocumentConfigDto Document { get; set; }
 
-    [SwaggerSchemaCustomString("Document type")]
+    [SwaggerSchemaCustom("Document type")]
     public string DocumentType { get; set; }
 
     [SwaggerSchemaCustom<EditorConfigurationDto<int>>("Editor config")]
@@ -40,31 +40,31 @@ public class ConfigurationDto<T>
     [SwaggerSchemaCustomString("Editor type", Example = "Desktop")]
     public EditorType EditorType { get; set; }
 
-    [SwaggerSchemaCustomString("Editor URL", Format = "uri")]
+    [SwaggerSchemaCustom("Editor URL", Format = "uri")]
     public string EditorUrl { get; set; }
 
-    [SwaggerSchemaCustomString("Token")]
+    [SwaggerSchemaCustom("Token")]
     public string Token { get; set; }
 
-    [SwaggerSchemaCustomString("Platform type")]
+    [SwaggerSchemaCustom("Platform type")]
     public string Type { get; set; }
 
     [SwaggerSchemaCustom<FileDto<int>>("File parameters")]
     public FileDto<T> File { get; set; }
 
-    [SwaggerSchemaCustomString("Error message")]
+    [SwaggerSchemaCustom("Error message")]
     public string ErrorMessage { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the filling has started or not", Nullable = true)]
+    [SwaggerSchemaCustom("Specifies if the filling has started or not")]
     public bool? StartFilling { get; set; }
 
-    [SwaggerSchemaCustomString("Filling session Id")]
+    [SwaggerSchemaCustom("Filling session Id")]
     public string FillingSessionId { get; set; }
 }
 
 public class EditorConfigurationDto<T>
 {
-    [SwaggerSchemaCustomString("Callback url", Format = "uri")]
+    [SwaggerSchemaCustom("Callback url", Format = "uri")]
     public string CallbackUrl { get; set; }
 
     [SwaggerSchemaCustom<CoEditingConfig>("Co editing")]
@@ -82,10 +82,10 @@ public class EditorConfigurationDto<T>
     [SwaggerSchemaCustom<EncryptionKeysConfig>("Encryption keys")]
     public EncryptionKeysConfig EncryptionKeys { get; set; }
 
-    [SwaggerSchemaCustomString("Lang")]
+    [SwaggerSchemaCustom("Lang")]
     public string Lang { get; set; }
 
-    [SwaggerSchemaCustomString("Mode")]
+    [SwaggerSchemaCustom("Mode")]
     public string Mode { get; set; }
 
     [SwaggerSchemaCustom("Mode write")]
@@ -117,7 +117,7 @@ public class CustomizationConfigDto<T>
     [SwaggerSchemaCustom<FeedbackConfig>("Feedback")]
     public FeedbackConfig Feedback  { get; set; }
 
-    [SwaggerSchemaCustom("Forcesave", Nullable = true)]
+    [SwaggerSchemaCustom("Forcesave")]
     public bool? Forcesave { get; set; }
 
     [SwaggerSchemaCustom<GobackConfig>("Go back")]
@@ -129,7 +129,7 @@ public class CustomizationConfigDto<T>
     [SwaggerSchemaCustom("MentionShare")]
     public bool MentionShare { get; set; }
 
-    [SwaggerSchemaCustomString("Review display")]
+    [SwaggerSchemaCustom("Review display")]
     public string ReviewDisplay { get; set; }
 
     [SwaggerSchemaCustom("Submit form")]
@@ -138,16 +138,16 @@ public class CustomizationConfigDto<T>
 
 public class LogoConfigDto
 {
-    [SwaggerSchemaCustomString("Image")]
+    [SwaggerSchemaCustom("Image")]
     public string Image { get; set; }
 
-    [SwaggerSchemaCustomString("Image dark")]
+    [SwaggerSchemaCustom("Image dark")]
     public string ImageDark { get; set; }
 
-    [SwaggerSchemaCustomString("Image embedded")]
+    [SwaggerSchemaCustom("Image embedded")]
     public string ImageEmbedded { get; set; }
 
-    [SwaggerSchemaCustomString("Url", Format = "uri")]
+    [SwaggerSchemaCustom("Url", Format = "uri")]
     public string Url { get; set; }
 
     [SwaggerSchemaCustom("Visible")]
@@ -162,27 +162,27 @@ public class AnonymousConfigDto
 
 public class CustomerConfigDto
 {
-    [SwaggerSchemaCustomString("Address")]
+    [SwaggerSchemaCustom("Address")]
     public string Address { get; set; }
 
-    [SwaggerSchemaCustomString("Logo")]
+    [SwaggerSchemaCustom("Logo")]
     public string Logo { get; set; }
 
     public string LogoDark { get; set; }
 
-    [SwaggerSchemaCustomString("Mail")]
+    [SwaggerSchemaCustom("Mail")]
     public string Mail { get; set; }
 
-    [SwaggerSchemaCustomString("Name")]
+    [SwaggerSchemaCustom("Name")]
     public string Name  { get; set; }
 
-    [SwaggerSchemaCustomString("Www")]
+    [SwaggerSchemaCustom("Www")]
     public string Www  { get; set; }
 }
 
 public class DocumentConfigDto
 {
-    [SwaggerSchemaCustomString("File type")]
+    [SwaggerSchemaCustom("File type")]
     public string FileType  { get; set; }
 
     [SwaggerSchemaCustom<InfoConfigDto>("Info")]
@@ -191,37 +191,37 @@ public class DocumentConfigDto
     [SwaggerSchemaCustom("Is linked for me")]
     public bool IsLinkedForMe { get; set; }
 
-    [SwaggerSchemaCustomString("Key")]
+    [SwaggerSchemaCustom("Key")]
     public string Key { get; set; }
 
     [SwaggerSchemaCustom<PermissionsConfig>("Permissions")]
     public PermissionsConfig Permissions { get; set; }
 
-    [SwaggerSchemaCustomString("Shared link param")]
+    [SwaggerSchemaCustom("Shared link param")]
     public string SharedLinkParam { get; set; }
 
-    [SwaggerSchemaCustomString("Shared link key")]
+    [SwaggerSchemaCustom("Shared link key")]
     public string SharedLinkKey { get; set; }
 
     [SwaggerSchemaCustom<FileReferenceData>("Reference data")]
     public FileReferenceData ReferenceData { get; set; }
 
-    [SwaggerSchemaCustomString("Title")]
+    [SwaggerSchemaCustom("Title")]
     public string Title { get; set; }
 
-    [SwaggerSchemaCustomString("Url", Format = "uri")]
+    [SwaggerSchemaCustom("Url", Format = "uri")]
     public string Url { get; set; }
 }
 
 public class InfoConfigDto
 {
-    [SwaggerSchemaCustom("Favorite", Nullable = true)]
+    [SwaggerSchemaCustom("Favorite")]
     public bool? Favorite { get; set; }
 
-    [SwaggerSchemaCustomString("Folder")]
+    [SwaggerSchemaCustom("Folder")]
     public string Folder { get; set; }
 
-    [SwaggerSchemaCustomString("Owner")]
+    [SwaggerSchemaCustom("Owner")]
     public string Owner { get; set; }
 
     [SwaggerSchemaCustom<List<AceShortWrapper>>("Sharing settings")]
@@ -230,7 +230,7 @@ public class InfoConfigDto
     [SwaggerSchemaCustomString("Type", Example = "Desktop")]
     public EditorType Type { get; set; }
 
-    [SwaggerSchemaCustomString("Uploaded")]
+    [SwaggerSchemaCustom("Uploaded")]
     public string Uploaded { get; set; }
 }
 

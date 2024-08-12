@@ -31,6 +31,6 @@ public class SendCongratulationsDto
     [SwaggerSchemaCustom("User ID")]
     public Guid Userid { get; set; }
 
-    [SwaggerSchemaCustomString("Email key")]
+    [SwaggerSchemaCustom("Email key")]
     public string Key { get; set; }
 }

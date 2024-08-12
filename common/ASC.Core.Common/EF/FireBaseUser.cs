@@ -37,13 +37,13 @@ public class FireBaseUser : BaseEntity
     [SwaggerSchemaCustom("Tenant ID")]
     public int TenantId { get; set; }
 
-    [SwaggerSchemaCustomString("Firebase device token")]
+    [SwaggerSchemaCustom("Firebase device token")]
     public string FirebaseDeviceToken { get; set; }
 
-    [SwaggerSchemaCustomString("Application")]
+    [SwaggerSchemaCustom("Application")]
     public string Application { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the user is subscribed to the push notifications or not", Nullable = true)]
+    [SwaggerSchemaCustom("Specifies if the user is subscribed to the push notifications or not")]
     public bool? IsSubscribed { get; set; }
 
     [SwaggerSchemaCustom<DbTenant>("Tenant")]

@@ -28,7 +28,7 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 public class WebItemSecurityRequestsDto
 {
-    [SwaggerSchemaCustomString("Module ID")]
+    [SwaggerSchemaCustom("Module ID")]
     public string Id { get; set; }
 
     [SwaggerSchemaCustom("Specifies if the module security settings are enabled or not")]

@@ -28,12 +28,12 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class CheckDocServiceUrlRequestDto
 {
-    [SwaggerSchemaCustomString("The Document Server address", Format = "uri")]
+    [SwaggerSchemaCustom("The Document Server address", Format = "uri")]
     public string DocServiceUrl { get; set; }
 
-    [SwaggerSchemaCustomString("The Document Server address in the local private network", Format = "uri")]
+    [SwaggerSchemaCustom("The Document Server address in the local private network", Format = "uri")]
     public string DocServiceUrlInternal { get; set; }
 
-    [SwaggerSchemaCustomString("The Community Server address", Format = "uri")]
+    [SwaggerSchemaCustom("The Community Server address", Format = "uri")]
     public string DocServiceUrlPortal { get; set; }
 }

@@ -35,7 +35,7 @@ public class EmailInvitationsDto
 
 public class EmailInvitationDto
 {
-    [SwaggerSchemaCustomString("Email address")]
+    [SwaggerSchemaCustom("Email address")]
     public string Email { get; set; }
 }
 

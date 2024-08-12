@@ -624,11 +624,11 @@ public static class DocumentService
 
     public class FileLink
     {
-        [SwaggerSchemaCustomString("File type")]
+        [SwaggerSchemaCustom("File type")]
         [JsonPropertyName("filetype")]
         public string FileType { get; set; }
 
-        [SwaggerSchemaCustomString("Token")]
+        [SwaggerSchemaCustom("Token")]
         public string Token { get; set; }
 
         [SwaggerSchemaCustomString("Url", Format = "uri")]

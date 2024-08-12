@@ -33,10 +33,10 @@ public class MentionWrapper
     [SwaggerSchemaCustom<UserInfo>("User information")]
     public UserInfo User { get; internal set; }
 
-    [SwaggerSchemaCustomString("User email")]
+    [SwaggerSchemaCustom("User email")]
     public string Email { get; internal set; }
 
-    [SwaggerSchemaCustomString("User ID")]
+    [SwaggerSchemaCustom("User ID")]
     public string Id { get; internal set; }
 
     [SwaggerSchemaCustomString("User image")]
