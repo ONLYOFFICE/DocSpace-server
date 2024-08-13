@@ -218,14 +218,14 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
 
             var linkedIdTask = linkDao.GetLinkedAsync(file.Id);
             var propertiesTask = daoFactory.GetFileDao<T>().GetProperties(file.Id);
-            var currentFolderTask = folderDao.GetFolderAsync((T)Convert.ChangeType(file.ParentId, typeof(T)));
+            var currentFolderTask = folderDao.GetFolderAsync(file.ParentId);
             await Task.WhenAll(linkedIdTask, propertiesTask, currentFolderTask);
 
             var linkedId = await linkedIdTask;
             var properties = await propertiesTask;
             var currentFolder = await currentFolderTask;
 
-            Folder<T> currentRoom = null;
+            Folder<T> currentRoom;
             if (!DocSpaceHelper.IsRoom(currentFolder.FolderType))
             {
                 var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(currentFolder);
@@ -242,10 +242,10 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
             {
                 currentRoom = currentFolder;
             }
-            if (currentRoom != null && properties != null)
+            
+            if (currentRoom is { FolderType: FolderType.FillingFormsRoom } && properties != null && properties.FormFilling.StartFilling)
             {
-                if (currentRoom.FolderType == FolderType.FillingFormsRoom && properties.FormFilling.StartFilling)
-                    result.Security[FileSecurity.FilesSecurityActions.Lock] = false;
+                result.Security[FileSecurity.FilesSecurityActions.Lock] = false;
             }
 
             var ace = await fileSharing.GetPureSharesAsync(currentRoom, new List<Guid> { authContext.CurrentAccount.ID }).FirstOrDefaultAsync();
@@ -259,9 +259,7 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
                 result.IsForm = file.IsForm;
             }
 
-            if (ace is { Access: FileShare.FillForms } || 
-                result.IsForm == null || result.IsForm == false || 
-                currentFolder.FolderType == FolderType.FormFillingFolderInProgress)
+            if (ace is { Access: FileShare.FillForms } || result.IsForm == false || currentFolder.FolderType == FolderType.FormFillingFolderInProgress)
             {
                 result.Security[FileSecurity.FilesSecurityActions.EditForm] = false;
             }
@@ -274,15 +272,15 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
                 result.StartFilling = formFilling.StartFilling;
                 if (!Equals(linkedId, default(T)))
                 {
-                    var draftLocation = new DraftLocation<T>()
+                    var draftLocation = new DraftLocation<T>
                     {
                         FolderId = formFilling.ToFolderId,
                         FolderTitle = formFilling.Title,
-                        FileId = (T)Convert.ChangeType(linkedId, typeof(T))
+                        FileId = linkedId
                     };
 
                     var fileDao = daoFactory.GetFileDao<T>();
-                    var draft = await fileDao.GetFileAsync((T)Convert.ChangeType(linkedId, typeof(T)));
+                    var draft = await fileDao.GetFileAsync(linkedId);
                     if (draft != null)
                     {
                         draftLocation.FileTitle = draft.Title;
