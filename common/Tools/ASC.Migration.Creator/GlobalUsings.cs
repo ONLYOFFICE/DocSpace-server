@@ -25,15 +25,15 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 global using ASC.Common.Logging;
-global using ASC.Core.Common.EF;
 global using ASC.Core.Common.EF.Teamlabsite.Context;
+global using ASC.Migrations;
+global using ASC.Migrations.Core;
+global using ASC.Migrations.Core.Identity;
+global using ASC.Migrations.Core.Models;
+global using ASC.Migrations.Core.Utils;
 
 global using Microsoft.Extensions.Hosting.WindowsServices;
 
-global using ASC.Migrations.Core.Models;
-global using ASC.Migrations.Core.Utils;
 global using Migration.Creator;
-global using ASC.Migrations.Core;
-global using ASC.Migrations;
 
 global using DbContextActivator = ASC.Migrations.Core.Utils.DbContextActivator;

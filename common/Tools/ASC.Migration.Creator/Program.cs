@@ -37,6 +37,7 @@ builder.Configuration.AddJsonFile($"appsettings.creator.json", true)
 
 builder.Services.AddScoped<EFLoggerFactory>();
 builder.Services.AddBaseDbContext<MigrationContext>();
+builder.Services.AddBaseDbContext<IdentityContext>();
 builder.Services.AddBaseDbContext<TeamlabSiteContext>();
 
 var app = builder.Build();

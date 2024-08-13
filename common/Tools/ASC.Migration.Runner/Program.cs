@@ -37,6 +37,7 @@ builder.Configuration.AddJsonFile($"appsettings.runner.json", true)
 
 builder.Services.AddScoped<EFLoggerFactory>();
 builder.Services.AddBaseDbContext<MigrationContext>();
+builder.Services.AddBaseDbContext<IdentityContext>();
 builder.Services.AddBaseDbContext<TeamlabSiteContext>();
 
 var app = builder.Build();
@@ -48,5 +49,19 @@ var targetMigration = app.Configuration["targetMigration"];
 foreach (var providerInfo in providersInfo.Providers)
 {
     var migrationCreator = new MigrationRunner(app.Services);
-    migrationCreator.RunApplyMigrations(AppContext.BaseDirectory, providerInfo, providersInfo.TeamlabsiteProviders.SingleOrDefault(q => q.Provider == providerInfo.Provider), configurationInfo, targetMigration);
+    migrationCreator.RunApplyMigrations(providerInfo, configurationInfo, typeof(MigrationContext), targetMigration);
 }
+
+foreach (var providerInfo in providersInfo.TeamlabsiteProviders)
+{
+    var migrationCreator = new MigrationRunner(app.Services);
+    migrationCreator.RunApplyMigrations(providerInfo, configurationInfo, typeof(TeamlabSiteContext), targetMigration);
+}
+
+foreach (var providerInfo in providersInfo.IdentityProviders)
+{
+    var migrationCreator = new MigrationRunner(app.Services);
+    migrationCreator.RunApplyMigrations(providerInfo, configurationInfo, typeof(IdentityContext), targetMigration);
+}
+
+Console.WriteLine("Migrations applied");
