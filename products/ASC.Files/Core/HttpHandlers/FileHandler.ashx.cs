@@ -1027,7 +1027,15 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                 return;
             }
 
-            await TryMarkAsRecentByLink(file);
+            
+            var view = bool.TryParse(context.Request.Query[FilesLinkUtility.View].FirstOrDefault(), out var v) && v;
+            if (view)
+            {
+                var t1 = TryMarkAsRecentByLink(file);
+                var t2 = fileMarker.RemoveMarkAsNewAsync(file).AsTask();
+                
+                await Task.WhenAll(t1, t2);
+            }
 
             if (force)
             {
@@ -1091,7 +1099,6 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
         try
         {
             var defaultSize = thumbnailSettings.Sizes.FirstOrDefault();
-
             if (defaultSize == null)
             {
                 context.Response.StatusCode = (int)HttpStatusCode.NotFound;
@@ -1113,6 +1120,13 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             context.Response.ContentType = MimeMapping.GetMimeMapping("." + global.ThumbnailExtension);
 
             var fileDao = daoFactory.GetFileDao<string>();
+            
+            var view = bool.TryParse(context.Request.Query[FilesLinkUtility.View].FirstOrDefault(), out var v) && v;
+            if (view)
+            {
+                var file = await fileDao.GetFileAsync(id);
+                await fileMarker.RemoveMarkAsNewAsync(file);
+            }
 
             await using var stream = await fileDao.GetThumbnailAsync(id, width, height);
             await stream.CopyToAsync(context.Response.Body);
