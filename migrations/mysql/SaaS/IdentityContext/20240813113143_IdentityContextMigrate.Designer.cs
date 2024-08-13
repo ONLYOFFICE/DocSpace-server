@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     [DbContext(typeof(IdentityContext))]
-    [Migration("20240813112045_IdentityContextMigrate")]
+    [Migration("20240813113143_IdentityContextMigrate")]
     partial class IdentityContextMigrate
     {
         /// <inheritdoc />
@@ -433,6 +433,62 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasName("PRIMARY");
 
                     b.ToTable("identity_scopes", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Name = "accounts:read",
+                            Group = "accounts",
+                            Type = "read"
+                        },
+                        new
+                        {
+                            Name = "accounts:write",
+                            Group = "accounts",
+                            Type = "write"
+                        },
+                        new
+                        {
+                            Name = "accounts.self:read",
+                            Group = "profiles",
+                            Type = "read"
+                        },
+                        new
+                        {
+                            Name = "accounts.self:write",
+                            Group = "profiles",
+                            Type = "write"
+                        },
+                        new
+                        {
+                            Name = "files:read",
+                            Group = "files",
+                            Type = "read"
+                        },
+                        new
+                        {
+                            Name = "files:write",
+                            Group = "files",
+                            Type = "write"
+                        },
+                        new
+                        {
+                            Name = "openid",
+                            Group = "openid",
+                            Type = "openid"
+                        },
+                        new
+                        {
+                            Name = "rooms:read",
+                            Group = "rooms",
+                            Type = "read"
+                        },
+                        new
+                        {
+                            Name = "rooms:write",
+                            Group = "rooms",
+                            Type = "write"
+                        });
                 });
 
             modelBuilder.Entity("ASC.Migrations.Core.Identity.IdentityAuthorization", b =>

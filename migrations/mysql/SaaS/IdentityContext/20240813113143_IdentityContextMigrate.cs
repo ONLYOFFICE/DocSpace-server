@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     /// <inheritdoc />
@@ -281,6 +283,22 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.InsertData(
+                table: "identity_scopes",
+                columns: new[] { "name", "group", "type" },
+                values: new object[,]
+                {
+                    { "accounts:read", "accounts", "read" },
+                    { "accounts:write", "accounts", "write" },
+                    { "accounts.self:read", "profiles", "read" },
+                    { "accounts.self:write", "profiles", "write" },
+                    { "files:read", "files", "read" },
+                    { "files:write", "files", "write" },
+                    { "openid", "openid", "openid" },
+                    { "rooms:read", "rooms", "read" },
+                    { "rooms:write", "rooms", "write" }
+                });
 
             migrationBuilder.CreateIndex(
                 name: "idx_identity_authorizations_is_invalidated",

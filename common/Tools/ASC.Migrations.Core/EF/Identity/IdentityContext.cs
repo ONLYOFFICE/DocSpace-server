@@ -357,6 +357,69 @@ public partial class IdentityContext : DbContext
             entity.Property(e => e.Type)
                 .HasMaxLength(255)
                 .HasColumnName("type");
+
+            entity.HasData(new IdentityScope
+            {
+                Name = "accounts:read",
+                Group = "accounts",
+                Type = "read"
+            });
+
+            entity.HasData(new IdentityScope
+            {
+                Name = "accounts:write",
+                Group = "accounts",
+                Type = "write"
+            });
+            
+            entity.HasData(new IdentityScope
+            {
+                Name = "accounts.self:read",
+                Group = "profiles",
+                Type = "read"
+            });
+
+            entity.HasData(new IdentityScope
+            {
+                Name = "accounts.self:write",
+                Group = "profiles",
+                Type = "write"
+            });
+            
+            entity.HasData(new IdentityScope
+            {
+                Name = "files:read",
+                Group = "files",
+                Type = "read"
+            });
+            
+            entity.HasData(new IdentityScope
+            {
+                Name = "files:write",
+                Group = "files",
+                Type = "write"
+            });
+            
+            entity.HasData(new IdentityScope
+            {
+                Name = "openid",
+                Group = "openid",
+                Type = "openid"
+            });
+            
+            entity.HasData(new IdentityScope
+            {
+                Name = "rooms:read",
+                Group = "rooms",
+                Type = "read"
+            });
+
+            entity.HasData(new IdentityScope
+            {
+                Name = "rooms:write",
+                Group = "rooms",
+                Type = "write"
+            });
         });
 
         OnModelCreatingPartial(modelBuilder);
