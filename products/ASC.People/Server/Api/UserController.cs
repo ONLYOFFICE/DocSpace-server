@@ -216,6 +216,11 @@ public class UserController(
             await userInvitationLimitHelper.IncreaseLimit();
         }
 
+        if (!byEmail)
+        {
+            user.CreatedBy = model?.UiD;
+        }
+
         inDto.PasswordHash = (inDto.PasswordHash ?? "").Trim();
         if (string.IsNullOrEmpty(inDto.PasswordHash))
         {
@@ -264,8 +269,8 @@ public class UserController(
         
         try
         {
-        user = await userManagerWrapper.AddUserAsync(user, inDto.PasswordHash, inDto.FromInviteLink, true, inDto.Type,
-            inDto.FromInviteLink && linkData is { IsCorrect: true, ConfirmType: not ConfirmType.EmpInvite }, true, true, byEmail);
+            user = await userManagerWrapper.AddUserAsync(user, inDto.PasswordHash, inDto.FromInviteLink, true, inDto.Type,
+                inDto.FromInviteLink && linkData is { IsCorrect: true, ConfirmType: not ConfirmType.EmpInvite }, true, true, byEmail);
         }
         catch (TenantQuotaException)
         {
@@ -284,7 +289,7 @@ public class UserController(
         if (linkData is { LinkType: InvitationLinkType.CommonToRoom })
         {
             await invitationService.AddUserToRoomByInviteAsync(linkData, user, quotaLimit);
-                }
+        }
 
         if (inDto.IsUser.GetValueOrDefault(false))
         {
