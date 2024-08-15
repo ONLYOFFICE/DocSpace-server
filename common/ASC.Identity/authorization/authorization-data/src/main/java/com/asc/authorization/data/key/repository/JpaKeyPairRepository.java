@@ -28,7 +28,12 @@
 package com.asc.authorization.data.key.repository;
 
 import com.asc.authorization.data.key.entity.KeyPair;
+import java.time.ZonedDateTime;
+import java.util.Set;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 
 /**
  * Repository interface for performing CRUD operations on {@link KeyPair} entities.
@@ -36,4 +41,11 @@ import org.springframework.data.repository.CrudRepository;
  * <p>This interface extends {@link CrudRepository} and provides methods for interacting with the
  * KeyPair entities stored in the database.
  */
-public interface JpaKeyPairRepository extends CrudRepository<KeyPair, String> {}
+public interface JpaKeyPairRepository extends CrudRepository<KeyPair, String> {
+  @Query("SELECT kp FROM KeyPair kp WHERE kp.createdAt > :cutoff")
+  Set<KeyPair> findActiveKeyPairs(@Param("cutoff") ZonedDateTime cutoff);
+
+  @Modifying
+  @Query("DELETE FROM KeyPair kp WHERE kp.createdAt < :cutoff")
+  void invalidateKeyPairs(@Param("cutoff") ZonedDateTime cutoff);
+}

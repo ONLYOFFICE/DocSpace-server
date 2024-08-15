@@ -33,7 +33,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
@@ -60,6 +59,7 @@ public class AscAuthenticationManager implements AuthenticationManager {
   public Authentication authenticate(Authentication authentication) throws AuthenticationException {
     for (AuthenticationProvider provider : providers) {
       MDC.put("provider", provider.getClass().getName());
+      MDC.put("authentication", authentication.getClass().toString());
       log.debug("Checking an authentication provider");
 
       if (provider.supports(authentication.getClass())) {
@@ -72,7 +72,7 @@ public class AscAuthenticationManager implements AuthenticationManager {
       MDC.clear();
     }
 
-    log.error(UNSUPPORTED_ERROR);
-    throw new BadCredentialsException(UNSUPPORTED_ERROR);
+    log.debug(UNSUPPORTED_ERROR);
+    return null;
   }
 }

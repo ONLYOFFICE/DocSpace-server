@@ -28,6 +28,7 @@
 package com.asc.registration.application.transfer;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
 import lombok.*;
 
@@ -65,5 +66,6 @@ import lombok.*;
 public class ChangeTenantClientActivationCommandRequest implements Serializable {
   /** Indicates whether the client's activation status is enabled or disabled. */
   @JsonProperty("status")
+  @NotNull
   private boolean enabled;
 }

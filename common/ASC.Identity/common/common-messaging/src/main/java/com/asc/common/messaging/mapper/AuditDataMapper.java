@@ -25,7 +25,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-package com.asc.registration.messaging.mapper;
+package com.asc.common.messaging.mapper;
 
 import com.asc.common.core.domain.entity.Audit;
 import com.asc.common.core.domain.value.enums.AuditCode;
