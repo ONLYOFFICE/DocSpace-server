@@ -118,8 +118,14 @@ public final class PersonalAccessTokenAuthenticationConverter implements Authent
       throwError(OAuth2ErrorCodes.INVALID_REQUEST, OAuth2ParameterNames.RESOURCE);
     }
 
+    var cookies = request.getCookies();
+    if (cookies == null) {
+      log.error("Cookies not found");
+      throwError(OAuth2ErrorCodes.UNAUTHORIZED_CLIENT, OAuth2ParameterNames.PASSWORD);
+    }
+
     var authCookie =
-        Arrays.stream(request.getCookies())
+        Arrays.stream(cookies)
             .filter(c -> c.getName().equalsIgnoreCase(ASC_AUTH_COOKIE))
             .findFirst()
             .orElse(null);
