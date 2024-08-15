@@ -38,7 +38,6 @@ import com.asc.common.service.ports.output.message.publisher.AuditMessagePublish
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import jakarta.servlet.RequestDispatcher;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.context.annotation.Bean;
@@ -55,12 +54,10 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
-import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthorizationCodeAuthenticationProvider;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
 import org.springframework.security.oauth2.server.authorization.token.*;
-import org.springframework.security.oauth2.server.authorization.web.authentication.OAuth2AuthorizationCodeAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.channel.ChannelProcessingFilter;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
@@ -120,20 +117,15 @@ public class AscOAuth2AuthorizationServerConfiguration {
             t ->
                 t.accessTokenRequestConverters(
                         converters ->
-                            converters.addAll(
-                                List.of(
-                                    new OAuth2AuthorizationCodeAuthenticationConverter(),
-                                    new PersonalAccessTokenAuthenticationConverter(ascApiClient))))
+                            converters.add(
+                                new PersonalAccessTokenAuthenticationConverter(ascApiClient)))
                     .authenticationProviders(
                         providers ->
-                            providers.addAll(
-                                List.of(
-                                    new OAuth2AuthorizationCodeAuthenticationProvider(
-                                        authorizationService, tokenGenerator()),
-                                    new AscPersonalAccessTokenAuthenticationProvider(
-                                        auditMessagePublisher,
-                                        authorizationService,
-                                        tokenGenerator())))))
+                            providers.add(
+                                new AscPersonalAccessTokenAuthenticationProvider(
+                                    auditMessagePublisher,
+                                    authorizationService,
+                                    tokenGenerator()))))
         .authorizationEndpoint(
             e -> {
               e.consentPage(formConfiguration.getConsent());
