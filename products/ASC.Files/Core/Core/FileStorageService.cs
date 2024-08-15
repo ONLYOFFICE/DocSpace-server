@@ -2714,10 +2714,9 @@ public class FileStorageService //: IFileStorageService
 
     public async Task<List<AceWrapper>> GetSharedInfoAsync<T>(
         IEnumerable<T> fileIds,
-        IEnumerable<T> folderIds,
-        IEnumerable<SubjectType> subjectTypes = null)
+        IEnumerable<T> folderIds)
     {
-        return await fileSharing.GetSharedInfoAsync(fileIds, folderIds, subjectTypes);
+        return await fileSharing.GetSharedInfoAsync(fileIds, folderIds);
     }
 
     public async IAsyncEnumerable<AceWrapper> GetPureSharesAsync<T>(T entryId, FileEntryType entryType, ShareFilterType filterType, string text, int offset, int count)
