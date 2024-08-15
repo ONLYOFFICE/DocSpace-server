@@ -41,6 +41,12 @@ public class DaoFactory(IServiceProvider serviceProvider, IProviderDao providerD
         return serviceProvider.GetService<IFolderDao<T>>();
     }
 
+    public IFolderDao<T> GetCacheFolderDao<T>()
+    {
+        return serviceProvider.GetService<ICacheFolderDao<T>>() ?? 
+               serviceProvider.GetService<IFolderDao<T>>();
+    }
+
     public ITagDao<T> GetTagDao<T>()
     {
         return serviceProvider.GetService<ITagDao<T>>();
