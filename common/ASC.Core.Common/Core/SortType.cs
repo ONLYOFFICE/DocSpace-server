@@ -37,6 +37,8 @@ public enum GroupSortType
 public enum UserSortType
 {
     FirstName,
+    LastName,
+    DisplayName,
     Type,
     Email,
     Department,

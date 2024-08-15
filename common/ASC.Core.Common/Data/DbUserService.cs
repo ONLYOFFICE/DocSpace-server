@@ -378,6 +378,13 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
             case UserSortType.Email:
                 q = (sortOrderAsc ? q.OrderBy(u => u.Email) : q.OrderByDescending(u => u.Email));
                 break;
+            case UserSortType.LastName:
+                q = sortOrderAsc
+                    ? q.OrderBy(r => r.Status == EmployeeStatus.Active ? 0 : r.Status == EmployeeStatus.Pending ? 1 : 2)
+                       .ThenBy(u => u.Status == EmployeeStatus.Pending ? u.Email : u.LastName)
+                    : q.OrderBy(r => r.Status == EmployeeStatus.Active ? 0 : r.Status == EmployeeStatus.Pending ? 1 : 2)
+                       .ThenByDescending(u => u.Status == EmployeeStatus.Pending ? u.Email : u.LastName);
+                break;
             case UserSortType.FirstName:
             default:
                 q = sortOrderAsc
