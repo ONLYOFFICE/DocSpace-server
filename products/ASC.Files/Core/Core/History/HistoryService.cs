@@ -94,7 +94,7 @@ public class HistoryService(
                 );
         }
 
-        if (!await fileSecurity.CanReadAsync(entry))
+        if (!await fileSecurity.CanReadLogAsync(entry))
         {
             throw new SecurityException(entryType == FileEntryType.File 
                 ? FilesCommonResource.ErrorMessage_SecurityException_ReadFile 
