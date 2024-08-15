@@ -119,12 +119,11 @@ CREATE TABLE identity_client_scopes (
 
 -- Create table for identity consents
 CREATE TABLE identity_consents (
-    principal_id varchar(255) not null,
     registered_client_id varchar(36) not null,
+    principal_id varchar(255) not null,
     is_invalidated tinyint(1) default false,
     modified_at datetime(6),
-    primary key (principal_id, registered_client_id),
-    unique key UK_consent_client_principal (registered_client_id, principal_id),
+    primary key (registered_client_id, principal_id),
     index idx_identity_consents_registered_client_id (registered_client_id),
     index idx_identity_consents_principal_id (principal_id),
     index idx_identity_consents_is_invalidated (is_invalidated),
