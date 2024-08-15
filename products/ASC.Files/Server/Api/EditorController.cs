@@ -297,7 +297,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
 
             if (linkId != default && file.RootFolderType == FolderType.USER && file.CreateBy != authContext.CurrentAccount.ID)
             {
-                await entryManager.MarkAsRecentByLink(file, linkId);
+                await entryManager.MarkFileAsRecentByLink(file, linkId);
             }
             else
             {

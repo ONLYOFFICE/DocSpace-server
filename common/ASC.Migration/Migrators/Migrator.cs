@@ -470,7 +470,7 @@ public abstract class Migrator : IAsyncDisposable
                         {
                             var userForShare = await UserManager.GetUsersAsync(MigrationInfo.Users[security.Subject].Info.Id);
                             await SecurityContext.AuthenticateMeAsync(userForShare.Id);
-                            await EntryManager.MarkAsRecentByLink(matchingFilesIds[key] as File<int>, ace.Id);
+                            await EntryManager.MarkFileAsRecentByLink(matchingFilesIds[key] as File<int>, ace.Id);
                         }
                         else
                         {
@@ -481,7 +481,7 @@ public abstract class Migrator : IAsyncDisposable
                             await foreach (var u in users)
                             {
                                 await SecurityContext.AuthenticateMeAsync(u.Id);
-                                await EntryManager.MarkAsRecentByLink(matchingFilesIds[key] as File<int>, ace.Id);
+                                await EntryManager.MarkFileAsRecentByLink(matchingFilesIds[key] as File<int>, ace.Id);
                             }
                         }
                     }
