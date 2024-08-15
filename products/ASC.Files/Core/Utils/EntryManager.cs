@@ -56,7 +56,7 @@ public class BreadCrumbsManager(
         var result = breadcrumbs.Skip(2).Select(r => r.Order.ToString()).ToList();
 
         return result.Count != 0 ? result.Aggregate((first, second) => $"{first}.{second}") : null;
-        }
+    }
 
     public async Task<List<FileEntry>> GetBreadCrumbsAsync<T>(T folderId)
     {
@@ -82,7 +82,7 @@ public class BreadCrumbsManager(
         }
         else if (firstVisible.ProviderMapped && (firstVisible.RootFolderType is FolderType.VirtualRooms or FolderType.Archive))
         {
-            if (authContext.IsAuthenticated && firstVisible.ShareRecord is not { IsLink: true })
+            if (authContext.IsAuthenticated)
             {
                 rootId = firstVisible.RootFolderType == FolderType.VirtualRooms 
                     ? await globalFolderHelper.FolderVirtualRoomsAsync
@@ -90,14 +90,6 @@ public class BreadCrumbsManager(
             }
                 
             breadCrumbs = breadCrumbs.SkipWhile(f => f is Folder<T> folder && !DocSpaceHelper.IsRoom(folder.FolderType)).ToList();
-        }
-        else if (!firstVisible.ProviderEntry && firstVisible.RootFolderType is FolderType.VirtualRooms or FolderType.Archive && authContext.IsAuthenticated)
-        {
-            var room = breadCrumbs.FirstOrDefault(e => e is Folder<T> folder && DocSpaceHelper.IsRoom(folder.FolderType));
-            if (room is Folder<int> { ShareRecord.IsLink: true })
-            {
-                breadCrumbs = breadCrumbs.SkipWhile(f => f is Folder<T> folder && !DocSpaceHelper.IsRoom(folder.FolderType)).ToList();
-            }
         }
         else
         {
@@ -2010,35 +2002,13 @@ public class EntryManager(IDaoFactory daoFactory,
         };
     }
 
-    public async Task MarkAsRecentByLink<T>(File<T> file, Guid linkId)
+    public async Task MarkFileAsRecentByLink<T>(File<T> file, Guid linkId)
     {
-        if (await globalFolderHelper.FolderMyAsync == default)
-        {
-            return;
-        }
-        
-        var tagDao = daoFactory.GetTagDao<T>();
-        var userId = authContext.CurrentAccount.ID;
-        var linkIdString = linkId.ToString();
-
-        var tags = await tagDao.GetTagsAsync(userId, TagType.RecentByLink, [file])
-            .ToDictionaryAsync(k => k.Name);
-
-        if (tags.Count > 0)
-        {
-            var toRemove = tags.Values.Where(t => t.Name != linkIdString);
-
-            await tagDao.RemoveTagsAsync(toRemove);
-        }
-
-        if (!tags.ContainsKey(linkIdString))
-        {
-            var tag = Tag.RecentByLink(authContext.CurrentAccount.ID, linkId, file);
-
-            await tagDao.SaveTagsAsync(tag);
-
-            file.FolderIdDisplay = await globalFolderHelper.GetFolderRecentAsync<T>();
-            await socketManager.CreateFileAsync(file, [userId]);
+        var marked = await fileMarker.MarkAsRecentByLink(file, linkId);
+        if (marked == MarkResult.Marked)
+        { 
+            file.FolderIdDisplay = await globalFolderHelper.GetFolderRecentAsync<T>(); 
+            await socketManager.CreateFileAsync(file, [authContext.CurrentAccount.ID]);
         }
     }
 
