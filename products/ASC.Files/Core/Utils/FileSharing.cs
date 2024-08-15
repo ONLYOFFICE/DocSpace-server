@@ -563,14 +563,15 @@ public class FileSharing(
         return defaultAces + sharesCount;
     }
 
-    public async Task<List<AceWrapper>> GetSharedInfoAsync<T>(FileEntry<T> entry, IEnumerable<SubjectType> subjectsTypes = null)
+    public async Task<List<AceWrapper>> GetSharedInfoAsync<T>(FileEntry<T> entry)
     {
         if (entry == null)
         {
             throw new ArgumentNullException(FilesCommonResource.ErrorMessage_BadRequest);
         }
-
-        if (!await fileSecurity.CanReadAsync(entry))
+        
+        var canRead = await fileSecurity.CanReadAsync(entry);
+        if (!canRead)
         {
             logger.ErrorUserCanTGetSharedInfo(authContext.CurrentAccount.ID, entry.FileEntryType, entry.Id.ToString());
 
@@ -581,6 +582,7 @@ public class FileSharing(
         var shares = await fileSecurity.GetSharesAsync(entry);
         var canEditAccess = await fileSecurity.CanEditAccessAsync(entry);
         var canReadLinks = await fileSecurity.CanReadLinksAsync(entry);
+        var canReadMembers = await fileSecurity.CanReadMembersAsync(entry);
 
         var records = shares
             .GroupBy(r => r.Subject)
@@ -599,8 +601,8 @@ public class FileSharing(
             {
                 continue;
             }
-
-            if (subjectsTypes != null && !subjectsTypes.Contains(r.SubjectType))
+            
+            if (r.SubjectType is SubjectType.User or SubjectType.Group && !canReadMembers)
             {
                 continue;
             }
@@ -621,7 +623,7 @@ public class FileSharing(
             result.Add(ace);
         }
 
-        if (!result.Exists(w => w.Owner) && (subjectsTypes == null || subjectsTypes.Contains(SubjectType.User) || subjectsTypes.Contains(SubjectType.Group)))
+        if (!result.Exists(w => w.Owner))
         {
             var ownerId = entry.RootFolderType == FolderType.USER ? entry.RootCreateBy : entry.CreateBy;
             var w = new AceWrapper
@@ -683,7 +685,7 @@ public class FileSharing(
         return result;
     }
 
-    public async Task<List<AceWrapper>> GetSharedInfoAsync<T>(IEnumerable<T> fileIds, IEnumerable<T> folderIds, IEnumerable<SubjectType> subjectTypes = null)
+    public async Task<List<AceWrapper>> GetSharedInfoAsync<T>(IEnumerable<T> fileIds, IEnumerable<T> folderIds)
     {
         if (!authContext.IsAuthenticated)
         {
@@ -705,7 +707,7 @@ public class FileSharing(
             IEnumerable<AceWrapper> acesForObject;
             try
             {
-                acesForObject = await GetSharedInfoAsync(entry, subjectTypes);
+                acesForObject = await GetSharedInfoAsync(entry);
             }
             catch (Exception e)
             {
@@ -838,16 +840,12 @@ public class FileSharing(
 
     private async Task<bool> CheckAccessAsync<T>(FileEntry<T> entry, ShareFilterType filterType)
     {
-        if (!await fileSecurity.CanReadAsync(entry))
-        {
-            return false;
-        }
-
         switch (filterType)
         {
             case ShareFilterType.User or ShareFilterType.Group or ShareFilterType.UserOrGroup:
+                return await fileSecurity.CanReadMembersAsync(entry);
             case ShareFilterType.PrimaryExternalLink when entry.RootFolderType is FolderType.VirtualRooms:
-                return true;
+                return await fileSecurity.CanReadAsync(entry);
             default:
                 return await fileSecurity.CanReadLinksAsync(entry);
         }
