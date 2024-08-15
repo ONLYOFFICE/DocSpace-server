@@ -496,12 +496,31 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                         }
                         else
                         {
-                            var title = await global.GetAvailableTitleAsync(folder.Title, toFolderId, folderDao.IsExistAsync, FileEntryType.Folder);
-                            newFolder = await FolderDao.CopyFolderAsync(folder.Id, toFolderId, CancellationToken);
-                            newFolder.Title = title;
-                            newFolder.Id = await folderDao.SaveFolderAsync(newFolder);
-
                             var isRoomCopying = isRoom && Equals(folder.ParentId ?? default, toFolderId);
+
+                            IDistributedLockHandle roomsCountCheckLock = null;
+
+                            try
+                            {
+                                if (isRoomCopying)
+                                {
+                                    roomsCountCheckLock = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetRoomsCountCheckKey(CurrentTenantId));
+                                    await countRoomChecker.CheckAppend();
+                                }
+ 
+                                var title = await global.GetAvailableTitleAsync(folder.Title, toFolderId, folderDao.IsExistAsync, FileEntryType.Folder);
+                                newFolder = await FolderDao.CopyFolderAsync(folder.Id, toFolderId, CancellationToken);
+                                newFolder.Title = title;
+                                newFolder.Id = await folderDao.SaveFolderAsync(newFolder);
+                            }
+                            finally
+                            {
+                                if (roomsCountCheckLock != null)
+                                {
+                                    await roomsCountCheckLock.ReleaseAsync();
+                                }
+                            }
+
                             if (isRoomCopying)
                             {
                                 if (await roomLogoManager.CopyAsync(folder, newFolder))
