@@ -169,7 +169,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         {
 
             var fromRoomId = default(T);
-            var toRoom = parentFolders.Where(parent => parent.FolderType == FolderType.FillingFormsRoom).FirstOrDefault();
+            var toRoom = parentFolders.FirstOrDefault(parent => parent.FolderType == FolderType.FillingFormsRoom);
 
             FileEntry<T> fileEntry = Folders.Count > 0 ? await FolderDao.GetFolderAsync(Folders.FirstOrDefault()) : 
                                   Files.Count > 1 ? await FileDao.GetFileAsync(Files.FirstOrDefault()) : null;
@@ -182,19 +182,19 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                 int.TryParse(toRoom.Id.ToString(), out var trId) &&
                 trId != frId)
             {
-            if (Folders.Count > 0)
-            {
-                this[Err] = FilesCommonResource.ErrorMessage_FolderMoveFormFillingError;
+                if (Folders.Count > 0)
+                {
+                    this[Err] = FilesCommonResource.ErrorMessage_FolderMoveFormFillingError;
 
-                return;
-            }
-            if (Files.Count > 1)
-            {
-                this[Err] = FilesCommonResource.ErrorMessage_FilesMoveFormFillingError;
+                    return;
+                }
+                if (Files.Count > 1)
+                {
+                    this[Err] = FilesCommonResource.ErrorMessage_FilesMoveFormFillingError;
 
-                return;
+                    return;
+                }
             }
-        }
         }
 
         var isRoom = false;
@@ -771,11 +771,10 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                 if (newFolder != null)
                                 {
                                     await filesMessageService.SendMoveMessageAsync(newFolder, parentFolder, toFolder, toFolderParents, true, _headers, [folder.Title, parentFolder.Title, toFolder.Title, toFolder.Id.ToString()]);
-                            }
+                                }
                             }
 
-
-                            if (isToFolder)
+                            if (isToFolder && !EqualityComparer<TTo>.Default.Equals(newFolderId, default))
                             {
                                 newFolder = await folderDao.GetFolderAsync(newFolderId);
                                 needToMark.Add(newFolder);
