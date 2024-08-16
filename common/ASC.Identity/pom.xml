@@ -50,6 +50,7 @@
         <caffeine.caching.version>3.1.7</caffeine.caching.version>
         <dependency.maven.check.plugin.version>9.2.0</dependency.maven.check.plugin.version>
         <depgraph.maven.plugin.version>4.0.3</depgraph.maven.plugin.version>
+        <flyway.version>10.17.1</flyway.version>
         <hazelcast.version>5.4.0</hazelcast.version>
         <jackson.version>2.13.4</jackson.version>
         <jsystemd.version>3.1.1</jsystemd.version>
