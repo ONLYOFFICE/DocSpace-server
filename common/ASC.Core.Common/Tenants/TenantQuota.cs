@@ -325,7 +325,7 @@ public class TenantQuota : IMapFrom<DbQuota>
         _ldapFeature = new TenantQuotaFeatureFlag(this) { Name = "ldap", Order = 3 };
         _ssoFeature = new TenantQuotaFeatureFlag(this) { Name = "sso", Order = 5 };
         _whiteLabelFeature = new TenantQuotaFeatureFlag(this) { Name = "whitelabel", Order = 4 };
-        _customizationFeature = new TenantQuotaFeatureFlag(this) { Name = "customization", Visible = false };
+        _customizationFeature = new TenantQuotaFeatureFlag(this) { Name = "customization", Order = 11 };
         _customFeature = new TenantQuotaFeatureFlag(this) { Name = "custom", Visible = false };
         _autoBackupRestoreFeature = new TenantQuotaFeatureFlag(this) { Name = "restore", Order = 6 };
         _oauthFeature = new TenantQuotaFeatureFlag(this) { Name = "oauth" };
