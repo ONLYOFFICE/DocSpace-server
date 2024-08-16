@@ -171,7 +171,7 @@ public class UserController(
     {
         await _apiContext.AuthByClaimAsync();
         var model = emailValidationKeyModelHelper.GetModel();
-        var linkData = inDto.FromInviteLink ? await invitationService.GetLinkDataAsync(inDto.Key, inDto.Email, inDto.Type, model?.UiD) : null;
+        var linkData = inDto.FromInviteLink ? await invitationService.GetLinkDataAsync(inDto.Key, inDto.Email, model.Type, inDto.Type, model?.UiD) : null;
         if (linkData is { IsCorrect: false })
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_InvintationLink);
@@ -190,8 +190,7 @@ public class UserController(
 
         var user = new UserInfo();
 
-        var byEmail = linkData?.LinkType == InvitationLinkType.Individual;
-
+        var byEmail = linkData is { LinkType: InvitationLinkType.Individual, ConfirmType: not ConfirmType.EmpInvite };
         if (byEmail)
         {
             user = await _userManager.GetUserByEmailAsync(inDto.Email);
@@ -200,7 +199,10 @@ public class UserController(
             {
                 throw new SecurityException(FilesCommonResource.ErrorMessage_InvintationLink);
             }
+        }
 
+        if (byEmail || linkData?.ConfirmType is ConfirmType.EmpInvite)
+        {
             await userInvitationLimitHelper.IncreaseLimit();
         }
 
