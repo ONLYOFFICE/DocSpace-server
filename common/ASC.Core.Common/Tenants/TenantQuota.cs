@@ -236,16 +236,6 @@ public class TenantQuota : IMapFrom<DbQuota>
         set => _statisticFeature.Value = value;
     }
 
-    private readonly TenantQuotaFeatureFlag _whiteLabelFeature;
-
-    /// <summary>Specifies if the white label settings are available or not</summary>
-    /// <type>System.Boolean, System</type>
-    public bool WhiteLabel
-    {
-        get => _whiteLabelFeature.Value;
-        set => _whiteLabelFeature.Value = value;
-    }
-
     private readonly TenantQuotaFeatureFlag _customizationFeature;
 
     /// <summary>Specifies if the customization settings are available or not</summary>
@@ -324,8 +314,7 @@ public class TenantQuota : IMapFrom<DbQuota>
         _docsEditionFeature = new TenantQuotaFeatureFlag(this) { Name = "docs", Visible = false };
         _ldapFeature = new TenantQuotaFeatureFlag(this) { Name = "ldap", Order = 3 };
         _ssoFeature = new TenantQuotaFeatureFlag(this) { Name = "sso", Order = 5 };
-        _whiteLabelFeature = new TenantQuotaFeatureFlag(this) { Name = "whitelabel", Order = 4 };
-        _customizationFeature = new TenantQuotaFeatureFlag(this) { Name = "customization", Visible = false };
+        _customizationFeature = new TenantQuotaFeatureFlag(this) { Name = "customization", Order = 4 };
         _customFeature = new TenantQuotaFeatureFlag(this) { Name = "custom", Visible = false };
         _autoBackupRestoreFeature = new TenantQuotaFeatureFlag(this) { Name = "restore", Order = 6 };
         _oauthFeature = new TenantQuotaFeatureFlag(this) { Name = "oauth" };
@@ -349,7 +338,6 @@ public class TenantQuota : IMapFrom<DbQuota>
             _docsEditionFeature,
             _ldapFeature,
             _ssoFeature,
-            _whiteLabelFeature,
             _customizationFeature,
             _customFeature,
             _autoBackupRestoreFeature,

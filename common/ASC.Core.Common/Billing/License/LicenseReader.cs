@@ -188,7 +188,6 @@ public class LicenseReader(
             Audit = true,
             Ldap = true,
             Sso = true,
-            WhiteLabel = true,
             ThirdParty = true,
             AutoBackupRestore = true,
             Oauth = true,
