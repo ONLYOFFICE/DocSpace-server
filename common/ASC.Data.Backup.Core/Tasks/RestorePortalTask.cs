@@ -123,7 +123,7 @@ public class RestorePortalTask(DbFactory dbFactory,
             }
         }
 
-        if (coreBaseSettings.Standalone)
+        if (coreBaseSettings.Standalone && Dump)
         {
             options.DebugRefreshLicense();
             try
