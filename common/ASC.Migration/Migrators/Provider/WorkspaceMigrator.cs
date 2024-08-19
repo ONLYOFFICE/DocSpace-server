@@ -257,28 +257,28 @@ public class WorkspaceMigrator : Migrator
 
             if (!(await UserManager.GetUserByEmailAsync(u.Info.Email)).Equals(Constants.LostUser))
             {
-                if (MigrationInfo.ExistUsers.Any(eu=> eu.Value.Info.Email == u.Info.Email))
-                {
-                    var user = MigrationInfo.ExistUsers.Single(eu => eu.Value.Info.Email == u.Info.Email).Value;
-                    ParseAndUnionStorage(u.Storage, user.Storage, key);
-                }
-                else
+                var user = MigrationInfo.ExistUsers.SingleOrDefault(eu => eu.Value.Info.Email == u.Info.Email);
+                if (user.Value == null)
                 {
                     ParseStorage(u.Storage, key);
                     MigrationInfo.ExistUsers.Add(key, u);
                 }
+                else
+                {
+                    ParseAndUnionStorage(u.Storage, user.Value.Storage, key);
+                }
             }
             else
             {
-                if (MigrationInfo.Users.Any(eu => eu.Value.Info.Email == u.Info.Email))
-                {
-                    var user = MigrationInfo.Users.Single(eu => eu.Value.Info.Email == u.Info.Email).Value;
-                    ParseAndUnionStorage(u.Storage, user.Storage, key);
-                }
-                else
+                var user = MigrationInfo.Users.SingleOrDefault(eu => eu.Value.Info.Email == u.Info.Email);
+                if (user.Value == null)
                 {
                     ParseStorage(u.Storage, key);
                     MigrationInfo.Users.Add(key, u);
+                }
+                else
+                {
+                    ParseAndUnionStorage(u.Storage, user.Value.Storage, key);
                 }
             }
         }
