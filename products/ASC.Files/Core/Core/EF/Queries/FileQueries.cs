@@ -131,9 +131,9 @@ public partial class FilesDbContext
     }
     
     [PreCompileQuery([PreCompileQuery.DefaultInt, null, TagType.Custom])]
-    public Task<int> DeleteTagLinksByTypeAsync(int tenantId, string fileId, TagType type)
+    public Task<int> DeleteTagLinksByTypeAsync(int tenantId, string entryId, FileEntryType entryType, TagType type)
     {
-        return FileQueries.DeleteTagLinksByTypeAsync(this, tenantId, fileId, type);
+        return FileQueries.DeleteTagLinksByTypeAsync(this, tenantId, entryId, entryType, type);
     }
     
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
@@ -527,17 +527,16 @@ static file class FileQueries
                     .Where(r => r.EntryId == fileId && r.EntryType == FileEntryType.File)
                     .ExecuteDelete());
 
-    public static readonly Func<FilesDbContext, int, string, TagType, Task<int>> DeleteTagLinksByTypeAsync =
+    public static readonly Func<FilesDbContext, int, string, FileEntryType, TagType, Task<int>> DeleteTagLinksByTypeAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, string fileId, TagType type) =>
+            (FilesDbContext ctx, int tenantId, string entryId, FileEntryType entryType, TagType type) =>
                 ctx.Tag
                     .Where(t => t.TenantId == tenantId)
                     .Where(t => t.Type == type)
                     .Join(ctx.TagLink, t => t.Id, l => l.TagId, (t, l) => l)
-                    .Where(l => l.EntryId == fileId)
-                    .Where(l => l.EntryType == FileEntryType.File)
+                    .Where(l => l.EntryId == entryId)
+                    .Where(l => l.EntryType == entryType)
                     .ExecuteDelete());
-                
 
     public static readonly Func<FilesDbContext, int, int, IAsyncEnumerable<DbFile>> DbFilesAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

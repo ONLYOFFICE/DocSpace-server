@@ -126,6 +126,12 @@ internal abstract class SecurityBaseDao<T>(
                     await context.DeleteForSetShareAsync(r.TenantId, r.Subject, files, FileEntryType.File);
                 }
 
+                if (r.SubjectType is SubjectType.PrimaryExternalLink or SubjectType.ExternalLink)
+                {
+                    await context.DeleteTagLinksByTypeAsync(tenantId, entryId, r.EntryType, TagType.RecentByLink);
+                    await context.DeleteTagsAsync(tenantId);
+                }
+
                 await context.SaveChangesAsync();
                 await tr.CommitAsync();
             });
