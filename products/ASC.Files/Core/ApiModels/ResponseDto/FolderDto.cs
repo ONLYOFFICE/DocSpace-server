@@ -95,6 +95,9 @@ public class FolderDto<T> : FileEntryDto<T>
     /// <summary>Counter</summary>
     /// <type>System.Nullable{System.Int64}, System</type>
     public long? UsedSpace { get; set; }
+    
+    public bool? External { get; set; }
+    public bool? PasswordProtected { get; set; }
 
     public override FileEntryType FileEntryType { get => FileEntryType.Folder; }
 
@@ -201,6 +204,11 @@ public class FolderDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
                     result.QuotaLimit = folder.SettingsQuota > -2 ? folder.SettingsQuota : quotaRoomSettings.DefaultQuota;
                 }
             }
+
+            result.External = folder.ShareRecord?.IsLink;
+            result.PasswordProtected = !string.IsNullOrEmpty(folder.ShareRecord?.Options?.Password) && 
+                                       folder.Security.TryGetValue(FileSecurity.FilesSecurityActions.Read, out var canRead) && 
+                                       !canRead;
         }
 
         if (folder.Order != 0)
