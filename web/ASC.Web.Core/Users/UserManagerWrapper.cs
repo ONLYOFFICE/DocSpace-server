@@ -117,7 +117,8 @@ public sealed class UserManagerWrapper(
             FirstName = string.Empty,
             ActivationStatus = EmployeeActivationStatus.Pending,
             Status = EmployeeStatus.Pending,
-            CultureName = culture
+            CultureName = culture,
+            CreatedBy = securityContext.CurrentAccount.ID
         };
 
         user.UserName = await MakeUniqueNameAsync(user);

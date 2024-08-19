@@ -25,28 +25,21 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-package com.asc.registration.messaging.publisher;
+package com.asc.common.messaging.publisher;
 
+import com.asc.common.messaging.configuration.RabbitMQConfiguration;
+import com.asc.common.service.ports.output.message.publisher.AuditMessagePublisher;
 import com.asc.common.service.transfer.message.AuditMessage;
-import com.asc.registration.messaging.configuration.RabbitMQConfiguration;
-import com.asc.registration.service.ports.output.message.publisher.ClientAuditMessagePublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.stereotype.Component;
 
-/**
- * RabbitClientAuditMessagePublisher publishes audit messages to RabbitMQ.
- *
- * <p>This class implements the {@link ClientAuditMessagePublisher} interface and uses RabbitMQ to
- * send audit messages. It logs the message publishing process and handles any exceptions that occur
- * during message sending.
- */
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class RabbitClientAuditMessagePublisher implements ClientAuditMessagePublisher {
+public class RabbitAuthorizationAuditMessagePublisher implements AuditMessagePublisher {
   private final RabbitMQConfiguration configuration;
   private final AmqpTemplate amqpClient;
 

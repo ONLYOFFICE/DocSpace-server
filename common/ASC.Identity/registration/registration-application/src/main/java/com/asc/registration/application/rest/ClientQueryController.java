@@ -30,10 +30,11 @@ package com.asc.registration.application.rest;
 import com.asc.common.application.client.AscApiClient;
 import com.asc.common.application.transfer.response.AscPersonResponse;
 import com.asc.common.application.transfer.response.AscResponseWrapper;
-import com.asc.common.application.transfer.response.AscSettingsResponse;
 import com.asc.common.application.transfer.response.AscTenantResponse;
 import com.asc.common.service.transfer.response.ClientResponse;
 import com.asc.common.utilities.HttpUtils;
+import com.asc.registration.application.security.authentications.AscAuthenticationTokenPrincipal;
+import com.asc.registration.application.transfer.ErrorResponse;
 import com.asc.registration.core.domain.exception.ClientDomainException;
 import com.asc.registration.service.ports.input.service.ClientApplicationService;
 import com.asc.registration.service.transfer.request.fetch.*;
@@ -41,6 +42,11 @@ import com.asc.registration.service.transfer.response.ClientInfoResponse;
 import com.asc.registration.service.transfer.response.ConsentResponse;
 import com.asc.registration.service.transfer.response.PageableResponse;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -54,6 +60,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 /** Controller class for managing client-related queries. */
@@ -88,26 +95,41 @@ public class ClientQueryController {
    * Retrieves the details of a specific client.
    *
    * @param clientId the client ID
-   * @param person the person information
-   * @param tenant the tenant information
-   * @param settings the settings information
+   * @param principal the authenticated principal
    * @return the response entity containing the client details
    */
   @RateLimiter(name = "globalRateLimiter")
   @GetMapping("/{clientId}")
+  @Operation(
+      summary = "Retrieves the details of a specific client",
+      tags = {"ClientQueryController"},
+      security = @SecurityRequirement(name = "ascAuthAdmin"),
+      responses = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved the client"),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Bad request",
+            content = {@Content}),
+        @ApiResponse(
+            responseCode = "429",
+            description = "Too many requests",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "500",
+            description = "Internal server error",
+            content = @Content)
+      })
   public ResponseEntity<ClientResponse> getClient(
       @PathVariable @NotBlank String clientId,
-      @RequestAttribute("person") AscPersonResponse person,
-      @RequestAttribute("tenant") AscTenantResponse tenant,
-      @RequestAttribute("settings") AscSettingsResponse settings) {
+      @AuthenticationPrincipal AscAuthenticationTokenPrincipal principal) {
     try {
-      setLoggingParameters(person, tenant);
-      var zone = ZoneId.of(settings.getTimezone());
+      setLoggingParameters(principal.me(), principal.tenant());
+      var zone = ZoneId.of(principal.settings().getTimezone());
       var client =
           clientApplicationService.getClient(
               TenantClientQuery.builder()
                   .clientId(clientId)
-                  .tenantId(tenant.getTenantId())
+                  .tenantId(principal.tenant().getTenantId())
                   .build());
       client.setCreatedOn(client.getCreatedOn().toInstant().atZone(zone));
       client.setModifiedOn(client.getModifiedOn().toInstant().atZone(zone));
@@ -121,9 +143,7 @@ public class ClientQueryController {
    * Retrieves a pageable list of clients.
    *
    * @param request the HTTP request
-   * @param person the person information
-   * @param tenant the tenant information
-   * @param settings the settings information
+   * @param principal the authenticated principal
    * @param page the page number
    * @param limit the page size
    * @return the response entity containing a pageable list of clients
@@ -132,22 +152,39 @@ public class ClientQueryController {
    */
   @RateLimiter(name = "globalRateLimiter")
   @GetMapping
+  @Operation(
+      summary = "Retrieves a pageable list of clients",
+      tags = {"ClientQueryController"},
+      security = @SecurityRequirement(name = "ascAuthAdmin"),
+      responses = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved clients"),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Bad request",
+            content = {@Content}),
+        @ApiResponse(
+            responseCode = "429",
+            description = "Too many requests",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "500",
+            description = "Internal server error",
+            content = @Content)
+      })
   public ResponseEntity<PageableResponse<ClientResponse>> getClients(
       HttpServletRequest request,
-      @RequestAttribute("person") AscPersonResponse person,
-      @RequestAttribute("tenant") AscTenantResponse tenant,
-      @RequestAttribute("settings") AscSettingsResponse settings,
+      @AuthenticationPrincipal AscAuthenticationTokenPrincipal principal,
       @RequestParam(value = "page") @Min(value = 0) int page,
       @RequestParam(value = "limit") @Min(value = 1) @Max(value = 100) int limit)
       throws ExecutionException, InterruptedException {
     try {
-      setLoggingParameters(person, tenant);
+      setLoggingParameters(principal.me(), principal.tenant());
       var clients =
           clientApplicationService.getClients(
               TenantClientsPaginationQuery.builder()
                   .limit(limit)
                   .page(page)
-                  .tenantId(tenant.getTenantId())
+                  .tenantId(principal.tenant().getTenantId())
                   .build());
       var tasks = new HashSet<CompletableFuture<AscResponseWrapper<AscPersonResponse>>>();
       clients
@@ -155,7 +192,7 @@ public class ClientQueryController {
           .forEach(
               clientResponse ->
                   tasks.add(
-                      (CompletableFuture.supplyAsync(
+                      CompletableFuture.supplyAsync(
                           () ->
                               ascApiClient.getProfile(
                                   URI.create(
@@ -165,13 +202,13 @@ public class ClientQueryController {
                                                   new ClientDomainException(
                                                       "Could not retrieve host address from request"))),
                                   request.getHeader("Cookie"),
-                                  clientResponse.getCreatedBy())))));
-      CompletableFuture.allOf(new HashSet<>(tasks).toArray(new CompletableFuture[tasks.size()]));
-      var zone = ZoneId.of(settings.getTimezone());
+                                  clientResponse.getCreatedBy()))));
+      CompletableFuture.allOf(tasks.toArray(new CompletableFuture[0])).join();
+      var zone = ZoneId.of(principal.settings().getTimezone());
       for (CompletableFuture<AscResponseWrapper<AscPersonResponse>> task : tasks) {
         var response = task.get();
         if (response == null) continue;
-        var author = task.get().getResponse();
+        var author = response.getResponse();
         if (author == null) continue;
         clients
             .getData()
@@ -195,24 +232,42 @@ public class ClientQueryController {
   /**
    * Retrieves detailed information for a specific client.
    *
-   * @param person the person information
-   * @param tenant the tenant information
-   * @param settings the settings information
+   * @param principal the authenticated principal
    * @param clientId the client ID
    * @return the response entity containing the client information
    */
   @RateLimiter(name = "globalRateLimiter")
   @GetMapping("/{clientId}/info")
+  @Operation(
+      summary = "Retrieves detailed information for a specific client",
+      tags = {"ClientQueryController"},
+      security = @SecurityRequirement(name = "ascAuth"),
+      responses = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved client info"),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Bad request",
+            content = {@Content}),
+        @ApiResponse(
+            responseCode = "429",
+            description = "Too many requests",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "500",
+            description = "Internal server error",
+            content = @Content)
+      })
   public ResponseEntity<ClientInfoResponse> getClientInfo(
-      @RequestAttribute("person") AscPersonResponse person,
-      @RequestAttribute("tenant") AscTenantResponse tenant,
-      @RequestAttribute("settings") AscSettingsResponse settings,
+      @AuthenticationPrincipal AscAuthenticationTokenPrincipal principal,
       @PathVariable @NotBlank String clientId) {
     try {
-      setLoggingParameters(person, tenant);
+      setLoggingParameters(principal.me(), principal.tenant());
       return ResponseEntity.ok(
           clientApplicationService.getClientInfo(
-              ClientInfoQuery.builder().tenantId(tenant.getTenantId()).clientId(clientId).build()));
+              ClientInfoQuery.builder()
+                  .tenantId(principal.tenant().getTenantId())
+                  .clientId(clientId)
+                  .build()));
     } finally {
       MDC.clear();
     }
@@ -229,6 +284,26 @@ public class ClientQueryController {
    */
   @RateLimiter(name = "publicRateLimiter")
   @GetMapping("/{clientId}/public/info")
+  @Operation(
+      summary = "Handles the GET request for public client information",
+      tags = {"ClientQueryController"},
+      responses = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Successfully retrieved public client info"),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Bad request",
+            content = {@Content}),
+        @ApiResponse(
+            responseCode = "429",
+            description = "Too many requests",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "500",
+            description = "Internal server error",
+            content = @Content)
+      })
   public ResponseEntity<ClientInfoResponse> getPublicClientInfo(
       @PathVariable @NotBlank String clientId) {
     try {
@@ -242,32 +317,47 @@ public class ClientQueryController {
    * Retrieves a pageable list of client information.
    *
    * @param request the HTTP request
-   * @param person the person information
-   * @param tenant the tenant information
-   * @param settings the settings information
+   * @param principal the authenticated principal
    * @param page the page number
    * @param limit the page size
    * @return the response entity containing a pageable list of client information
    */
   @RateLimiter(name = "globalRateLimiter")
   @GetMapping("/info")
+  @Operation(
+      summary = "Retrieves a pageable list of client information",
+      tags = {"ClientQueryController"},
+      security = @SecurityRequirement(name = "ascAuth"),
+      responses = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved clients info"),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Bad request",
+            content = {@Content}),
+        @ApiResponse(
+            responseCode = "429",
+            description = "Too many requests",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "500",
+            description = "Internal server error",
+            content = @Content)
+      })
   public ResponseEntity<PageableResponse<ClientInfoResponse>> getClientsInfo(
       HttpServletRequest request,
-      @RequestAttribute("person") AscPersonResponse person,
-      @RequestAttribute("tenant") AscTenantResponse tenant,
-      @RequestAttribute("settings") AscSettingsResponse settings,
+      @AuthenticationPrincipal AscAuthenticationTokenPrincipal principal,
       @RequestParam(value = "page") @Min(value = 0) int page,
       @RequestParam(value = "limit") @Min(value = 1) @Max(value = 100) int limit) {
     try {
-      setLoggingParameters(person, tenant);
+      setLoggingParameters(principal.me(), principal.tenant());
       var clients =
           clientApplicationService.getClientsInfo(
               ClientInfoPaginationQuery.builder()
-                  .tenantId(tenant.getTenantId())
+                  .tenantId(principal.tenant().getTenantId())
                   .page(page)
                   .limit(limit)
                   .build());
-      var zone = ZoneId.of(settings.getTimezone());
+      var zone = ZoneId.of(principal.settings().getTimezone());
       clients
           .getData()
           .forEach(
@@ -284,30 +374,45 @@ public class ClientQueryController {
   /**
    * Retrieves a pageable list of consents.
    *
-   * @param person the person information
-   * @param tenant the tenant information
-   * @param settings the settings information
+   * @param principal the authenticated principal
    * @param page the page number
    * @param limit the page size
    * @return the response entity containing a pageable list of consents
    */
   @RateLimiter(name = "globalRateLimiter")
   @GetMapping("/consents")
+  @Operation(
+      summary = "Retrieves a pageable list of consents",
+      tags = {"ClientQueryController"},
+      security = @SecurityRequirement(name = "ascAuth"),
+      responses = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved user consents"),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Bad request",
+            content = {@Content}),
+        @ApiResponse(
+            responseCode = "429",
+            description = "Too many requests",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "500",
+            description = "Internal server error",
+            content = @Content)
+      })
   public ResponseEntity<PageableResponse<ConsentResponse>> getConsents(
-      @RequestAttribute("person") AscPersonResponse person,
-      @RequestAttribute("tenant") AscTenantResponse tenant,
-      @RequestAttribute("settings") AscSettingsResponse settings,
+      @AuthenticationPrincipal AscAuthenticationTokenPrincipal principal,
       @RequestParam(value = "page") @Min(value = 0) int page,
       @RequestParam(value = "limit") @Min(value = 1) @Max(value = 100) int limit) {
     try {
-      setLoggingParameters(person, tenant);
-      var zone = ZoneId.of(settings.getTimezone());
+      setLoggingParameters(principal.me(), principal.tenant());
+      var zone = ZoneId.of(principal.settings().getTimezone());
       var consents =
           clientApplicationService.getConsents(
               ConsentsPaginationQuery.builder()
                   .limit(limit)
                   .page(page)
-                  .principalId(person.getId())
+                  .principalId(principal.me().getId())
                   .build());
       consents.getData().forEach(c -> c.setModifiedOn(c.getModifiedOn().toInstant().atZone(zone)));
       return ResponseEntity.ok(consents);

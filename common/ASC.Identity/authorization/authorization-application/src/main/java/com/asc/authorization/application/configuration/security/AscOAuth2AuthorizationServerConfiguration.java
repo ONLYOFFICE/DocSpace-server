@@ -29,7 +29,12 @@ package com.asc.authorization.application.configuration.security;
 
 import com.asc.authorization.application.security.filters.AnonymousReplacerAuthenticationFilter;
 import com.asc.authorization.application.security.filters.RateLimiterFilter;
-import com.asc.authorization.application.security.oauth.providers.AscAuthenticationProvider;
+import com.asc.authorization.application.security.oauth.converters.PersonalAccessTokenAuthenticationConverter;
+import com.asc.authorization.application.security.oauth.providers.AscCodeAuthenticationProvider;
+import com.asc.authorization.application.security.oauth.providers.AscPersonalAccessTokenAuthenticationProvider;
+import com.asc.authorization.application.security.oauth.providers.AscTokenIntrospectionAuthenticationProvider;
+import com.asc.common.application.client.AscApiClient;
+import com.asc.common.service.ports.output.message.publisher.AuditMessagePublisher;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import jakarta.servlet.RequestDispatcher;
@@ -44,12 +49,15 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.OAuth2Token;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
+import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
+import org.springframework.security.oauth2.server.authorization.token.*;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.channel.ChannelProcessingFilter;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
@@ -62,7 +70,18 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @RequiredArgsConstructor
 public class AscOAuth2AuthorizationServerConfiguration {
   private final AscOAuth2AuthorizationFormConfiguration formConfiguration;
-  private final AscAuthenticationProvider authenticationProvider;
+
+  private final AscApiClient ascApiClient;
+  private final AuditMessagePublisher auditMessagePublisher;
+
+  private final OAuth2TokenCustomizer<JwtEncodingContext> jwtCustomizer;
+  private final JWKSource<SecurityContext> jwkSource;
+
+  private final OAuth2AuthorizationService authorizationService;
+
+  private final AscCodeAuthenticationProvider codeAuthenticationProvider;
+  private final AscTokenIntrospectionAuthenticationProvider
+      tokenIntrospectionAuthenticationProvider;
 
   private final AuthenticationSuccessHandler authenticationSuccessHandler;
   private final AuthenticationFailureHandler authenticationFailureHandler;
@@ -80,17 +99,42 @@ public class AscOAuth2AuthorizationServerConfiguration {
   @Order(Ordered.HIGHEST_PRECEDENCE)
   @SneakyThrows
   public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) {
-    OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
+    var authorizationServerConfigurer = new OAuth2AuthorizationServerConfigurer();
+    var endpointsMatcher = authorizationServerConfigurer.getEndpointsMatcher();
+
+    http.securityMatcher(endpointsMatcher)
+        .authorizeHttpRequests(
+            authorize -> {
+              authorize.requestMatchers("oauth2/introspect").permitAll();
+              authorize.anyRequest().authenticated();
+            })
+        .csrf(csrf -> csrf.ignoringRequestMatchers(endpointsMatcher))
+        .apply(authorizationServerConfigurer);
 
     http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
         .oidc(Customizer.withDefaults())
+        .tokenEndpoint(
+            t ->
+                t.accessTokenRequestConverters(
+                        converters ->
+                            converters.add(
+                                new PersonalAccessTokenAuthenticationConverter(ascApiClient)))
+                    .authenticationProviders(
+                        providers ->
+                            providers.add(
+                                new AscPersonalAccessTokenAuthenticationProvider(
+                                    auditMessagePublisher,
+                                    authorizationService,
+                                    tokenGenerator()))))
         .authorizationEndpoint(
             e -> {
               e.consentPage(formConfiguration.getConsent());
-              e.authenticationProvider(authenticationProvider);
+              e.authenticationProvider(codeAuthenticationProvider);
               e.authorizationResponseHandler(authenticationSuccessHandler);
               e.errorResponseHandler(authenticationFailureHandler);
-            });
+            })
+        .tokenIntrospectionEndpoint(
+            i -> i.authenticationProvider(tokenIntrospectionAuthenticationProvider));
 
     http.exceptionHandling(
         e ->
@@ -126,22 +170,20 @@ public class AscOAuth2AuthorizationServerConfiguration {
   /**
    * Creates the JWT encoder bean using the provided JWK source.
    *
-   * @param jwkSource the {@link JWKSource} of {@link SecurityContext}.
    * @return the {@link JwtEncoder} bean.
    */
   @Bean
-  public JwtEncoder jwtEncoder(JWKSource<SecurityContext> jwkSource) {
+  public JwtEncoder jwtEncoder() {
     return new NimbusJwtEncoder(jwkSource);
   }
 
   /**
    * Creates the JWT decoder bean using the provided JWK source.
    *
-   * @param jwkSource the {@link JWKSource} of {@link SecurityContext}.
    * @return the {@link JwtDecoder} bean.
    */
   @Bean
-  public JwtDecoder jwtDecoder(JWKSource<SecurityContext> jwkSource) {
+  public JwtDecoder jwtDecoder() {
     return OAuth2AuthorizationServerConfiguration.jwtDecoder(jwkSource);
   }
 
@@ -153,5 +195,20 @@ public class AscOAuth2AuthorizationServerConfiguration {
   @Bean
   public PasswordEncoder passwordEncoder() {
     return NoOpPasswordEncoder.getInstance();
+  }
+
+  /**
+   * Creates the token generator bean.
+   *
+   * @return the {@link OAuth2TokenGenerator} bean.
+   */
+  @Bean
+  public OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator() {
+    var generator = new JwtGenerator(jwtEncoder());
+    generator.setJwtCustomizer(jwtCustomizer);
+    var accessTokenGenerator = new OAuth2AccessTokenGenerator();
+    var refreshTokenGenerator = new OAuth2RefreshTokenGenerator();
+    return new DelegatingOAuth2TokenGenerator(
+        generator, accessTokenGenerator, refreshTokenGenerator);
   }
 }

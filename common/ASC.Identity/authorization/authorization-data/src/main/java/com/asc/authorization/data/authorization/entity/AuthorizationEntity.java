@@ -169,5 +169,6 @@ public class AuthorizationEntity {
     private static final long serialVersionUID = 1L;
     private String registeredClientId;
     private String principalId;
+    private String authorizationGrantType;
   }
 }
