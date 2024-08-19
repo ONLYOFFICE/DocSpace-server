@@ -89,7 +89,7 @@ public class WorkspaceMigrator : Migrator
             }
 
             var folders =  _dataReader.GetDirectories("");
-            if (folders.Any(f=> Path.GetFileNameWithoutExtension(f).Contains("files")))
+            if (folders.Any(f=> Path.GetFileNameWithoutExtension(f).Contains("databases")))
             {
                 await InnerParseAsync(reportProgress);
             }
