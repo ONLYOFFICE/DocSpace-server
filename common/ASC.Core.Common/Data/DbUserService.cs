@@ -68,24 +68,41 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
             q = BuildUserGroupSearch(userId, manager, q, userDbContext);
         }
 
-        if (sortBy == GroupSortType.Manager)
+        switch (sortBy)
         {
-            var q1 = q.Select(g => new
-            {
-                Group = g,
-                Manager = userDbContext.UserGroups
-                    .Where(ug => ug.TenantId == tenant && !ug.Removed && ug.UserGroupId == g.Id && ug.RefType == UserGroupRefType.Manager)
-                    .Join(userDbContext.Users, ug => ug.Userid, u => u.Id, (ug, u) => u)
-                    .FirstOrDefault()
-            });
+            case GroupSortType.Manager:
+                {
+                    var q1 = q.Select(g => new
+                    {
+                        Group = g,
+                        Manager = userDbContext.UserGroups
+                            .Where(ug => ug.TenantId == tenant && !ug.Removed && ug.UserGroupId == g.Id && ug.RefType == UserGroupRefType.Manager)
+                            .Join(userDbContext.Users, ug => ug.Userid, u => u.Id, (ug, u) => u)
+                            .FirstOrDefault()
+                    });
 
-            q = (sortOrderAsc ?
-                q1.OrderBy(r => r.Manager.FirstName) :
-                q1.OrderByDescending(r => r.Manager.FirstName)).Select(r => r.Group);
-        }
-        else
-        {
-            q = sortOrderAsc ? q.OrderBy(g => g.Name) : q.OrderByDescending(g => g.Name);
+                    q = (sortOrderAsc ?
+                        q1.OrderBy(r => r.Manager.FirstName) :
+                        q1.OrderByDescending(r => r.Manager.FirstName)).Select(r => r.Group);
+                    break;
+                }
+            case GroupSortType.MembersCount:
+                {
+                    var q1 = q.Select(g => new
+                    {
+                        Group = g,
+                        MembersCount = userDbContext.UserGroups
+                            .Count(ug => ug.TenantId == tenant && ug.UserGroupId == g.Id && ug.RefType == UserGroupRefType.Contains && !ug.Removed)
+                    });
+
+                    q = (sortOrderAsc ?
+                        q1.OrderBy(r => r.MembersCount) :
+                        q1.OrderByDescending(r => r.MembersCount)).Select(r => r.Group);
+                    break;
+                }
+            default:
+                q = sortOrderAsc ? q.OrderBy(g => g.Name) : q.OrderByDescending(g => g.Name);
+                break;
         }
 
         if (offset > 0)
