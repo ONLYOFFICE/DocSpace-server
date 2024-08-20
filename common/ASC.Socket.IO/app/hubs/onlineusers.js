@@ -24,92 +24,49 @@ module.exports = async (io) => {
       const userId = socket.handshake.session?.user?.id;
       const userName = (socket.handshake.session?.user?.userName || "").toLowerCase();
       const tenantId = socket.handshake.session?.portal?.tenantId;
-      var _roomId;
       let id;
-      let sessionId = socket.handshake.session?.user?.connection;
       let idInRoom;
+      let roomId;
+      let sessionId = socket.handshake.session?.user?.connection;
       
-      var user = getUser(portalUsers, userId, tenantId);
-      var session;
-      if (!user) 
-      {
-        var sessions = new Map();
-        sessions.set(
-          1,
-          {
-            id: sessionId,
-            platform: operationSystem,
-            browser: parser.browser.name + " " + browserVersion,
-            ip: ipAddress,
-            status: "online"
-          });
-        id = 1;
-
-        var offSess = await redisClient.get(userId);
-        if(offSess && offSess != '{}')
-        {
-          offSess = new Map(JSON.parse(offSess).map(i => [i[0], i[1]]));
-        }
-        else
-        {
-          offSess = new Map();
-        }
-        user = {
-          id: userId,
-          displayName: userName,
-          page: session?.user?.profileUrl,
-          sessions: sessions,
-          status: "online",
-          offlineSessions: offSess
-        };
-      }
-      else
-      {
-        user.status = "online";
-
-        var keys = Array.from(user.sessions.keys());
-        id = keys.length == 0 ? 1 : keys[keys.length - 1] + 1;
-        session = {
-          id: sessionId,
-          platform: operationSystem,
-          browser: parser.browser.name + " " + browserVersion,
-          ip: ipAddress
-        };
-        user.sessions.set(
-          id,
-          session
-        );
-      }
-      
-      user.offlineSessions.delete(sessionId);
-      if(user.offlineSessions.size != 0)
-      {
-        await redisClient.set(userId, JSON.stringify(Array.from(user.offlineSessions)));
-      }
-      else{
-        await redisClient.del(userId);
-      }
-      if(user.sessions.size == 1)
-      {
-        var stringUser = serialize(user);
-        onlineIO.to(`p-${tenantId}`).emit("enter-in-portal", stringUser );
-      }
-      else
-      {
-        onlineIO.to(`p-${tenantId}`).emit("enter-session-in-portal", {userId, session} );
-      }
-
-      updateUser(portalUsers, user, userId, tenantId);
-
+      id = await EnterAsync(portalUsers, tenantId, userId, `p-${tenantId}`, "portal");
       socket.on("disconnect", async (reason) => {
-        var user = getUser(portalUsers, userId, tenantId);
+        await LeaveAsync(portalUsers, tenantId, userId, `p-${tenantId}`, "portal", id);
+        await LeaveAsync(roomUsers, roomId, `r-${userId}`, roomId, "room", idInRoom);
+      });
+
+      socket.on("getSessionsInPortal", async () => {
+        var users = [];
+        Object.values(portalUsers[tenantId]).forEach(function(entry) {
+          users.push(serialize(entry));
+        });
+        onlineIO.to(socket.id).emit("statuses-in-portal",  users );
+      });
+      
+      socket.on("subscribeToPortal", () => {
+        logger.info(`client ${socket.id} subscribe portal ${tenantId}`);
+        socket.join(`p-${tenantId}`);
+      });
+  
+      socket.on("unsubscribeToPortal", () => {
+        logger.info(`client ${socket.id} unsubscribe portal ${tenantId}`);
+        socket.leave(`p-${tenantId}`);
+      });
+
+      var getRoom = (roomPart) => {
+        return `${tenantId}-${roomPart}`;
+      };
+
+      async function LeaveAsync(usersList, key, redisKey, socketKey, socketDest, sessionId) 
+      {
+        var user = getUser(usersList, userId, key);
         if (user) 
         {
-          var session = user.sessions.get(id);
-          user.sessions.delete(id);
+          var session = user.sessions.get(sessionId);
+          user.sessions.delete(sessionId);
           var array = Array.from(user.sessions, ([name, value]) => {
             return value;
-          })
+          });
           if(!array.find(e=> e.id == session.id))
           {
             user.offlineSessions.set(session.id,
@@ -122,54 +79,28 @@ module.exports = async (io) => {
                 date: new Date().toString()
             });
             
-            await redisClient.set(userId, JSON.stringify(Array.from(user.offlineSessions)));
+            await redisClient.set(redisKey, JSON.stringify(Array.from(user.offlineSessions)));
             
             var date = new Date().toString();
             if(user.sessions.size <= 0)
             {
               user.status = "offline";
               updateUser(portalUsers, user, userId, tenantId);
-              onlineIO.to(`p-${tenantId}`).emit("leave-in-portal",  {userId, date} );
+              onlineIO.to(socketKey).emit(`leave-in-${socketDest}`, {userId, date} );
             }
             else
             {
               updateUser(portalUsers, user, userId, tenantId);
-              onlineIO.to(`p-${tenantId}`).emit("leave-session-in-portal",  {userId, sessionId, date} );
+              onlineIO.to(socketKey).emit(`leave-session-in-${socketDest}`, {userId, sessionId, date} );
             }
           }
-          id = -1;
-          sessionId = -1;
         }
+      }
 
-        if(!_roomId)
-        {
-          return;
-        }
-
-        /*****************************/
-
-        var user = getUser(roomUsers, userId, _roomId);
-        if (user) 
-        {
-          user.sessions.delete(idInRoom);
-          idInRoom = -1;
-
-          if(user.sessions.size <= 0)
-          {
-            user.status = "offline";
-            updateUser(roomUsers, user, userId, _roomId);
-            onlineIO.to(_roomId).emit("leave-in-room",  userId );
-          }
-          else
-          { 
-            updateUser(roomUsers, user, userId, _roomId);
-          }
-        }
-      });
-  
-      socket.on("enterInRoom", async ({ roomPart, status }) => {
-        const roomId = getRoom(roomPart);
-        var user = getUser(roomUsers, userId, roomId);
+      async function EnterAsync(usersList, key, redisKey, socketKey, socketDest) {
+        var user = getUser(usersList, userId, key);
+        var session;
+        var id = 0;
         if (!user) 
         {
           var sessions = new Map();
@@ -180,137 +111,98 @@ module.exports = async (io) => {
               platform: operationSystem,
               browser: parser.browser.name + " " + browserVersion,
               ip: ipAddress,
-              status: status
+              status: "online"
             });
-          idInRoom = 1;
+          id = 1;
+
+          var offSess = await redisClient.get(redisKey);
+          if(offSess && offSess != '{}')
+          {
+            offSess = new Map(JSON.parse(offSess).map(i => [i[0], i[1]]));
+          }
+          else
+          {
+            offSess = new Map();
+          }
           user = {
             id: userId,
             displayName: userName,
             page: session?.user?.profileUrl,
             sessions: sessions,
-            status: "online"
+            status: "online",
+            offlineSessions: offSess
           };
         }
         else
         {
           user.status = "online";
-          var keys = user.sessions.keys();
-          idInRoom = keys.length == 0 ? 1 : Array.from(keys).pop() + 1;
-          sessions.set(
-            idInRoom,
-            {
-              id: sessionId,
-              platform: operationSystem,
-              browser: parser.browser.name + " " + browserVersion,
-              ip: ipAddress,
-              status: status
-            });
+
+          var keys = Array.from(user.sessions.keys());
+          id = keys.length == 0 ? 1 : keys[keys.length - 1] + 1;
+          session = {
+            id: sessionId,
+            platform: operationSystem,
+            browser: parser.browser.name + " " + browserVersion,
+            ip: ipAddress
+          };
+          user.sessions.set(
+            id,
+            session
+          );
         }
-        _roomId = roomId
+        
+        user.offlineSessions.delete(sessionId);
+        if(user.offlineSessions.size != 0)
+        {
+          await redisClient.set(redisKey, JSON.stringify(Array.from(user.offlineSessions)));
+        }
+        else{
+          await redisClient.del(redisKey);
+        }
         if(user.sessions.size == 1)
         {
           var stringUser = serialize(user);
-          onlineIO.to(roomId).emit("enter-in-room", stringUser );
+          onlineIO.to(socketKey).emit(`enter-in-${socketDest}`, stringUser );
         }
-        updateUser(roomUsers, user, userId, roomId);
-      });
-
-      socket.on("changeStatus", async ({ roomPart, status }) => {
-        const roomId = getRoom(roomPart);
-        var user = getUser(roomUsers, userId, roomId);
-        if (!user) 
+        else
         {
-          return;
-        }
-        
-        user.sessions[idInRoom].status = status;
-        updateUser(roomUsers, user, userId, roomId);
-        var stringUser = serialize(user);
-        onlineIO.to(roomId).emit("user-status",  stringUser );
-      });
-
-      socket.on("removeStatus", async ({ roomPart }) => {
-        const roomId = getRoom(roomPart);
-        var user = getUser(roomUsers, userId, roomId);
-        if (!user) 
-        {
-          return;
+          onlineIO.to(socketKey).emit(`enter-session-in-${socketDest}`, {userId, session} );
         }
 
-        user.sessions[idInRoom].status = null;
-        updateUser(roomUsers, user, userId, roomId);
-        var stringUser = serialize(user);
-        onlineIO.to(roomId).emit("user-status",  stringUser );
+        updateUser(usersList, user, userId, key);
+        return id;
+      }
+
+      socket.on("enterInRoom", async(roomPart)=>{
+          roomId = getRoom(roomPart);
+          idInRoom = await EnterAsync(roomUsers, roomId, `r-${userId}`, roomId, "room");
       });
 
-      socket.on("getSessionsInRoom", async ({ roomPart }) => {
-        const roomId = getRoom(roomPart);
+      socket.on("leaveRoom", async()=>{
+        await LeaveAsync(roomUsers, roomId, `r-${userId}`, roomId, "room", idInRoom);
+        idInRoom = -1;
+    });
+
+      socket.on("getSessionsInRoom", async (roomPart) => {
         var users = [];
+        var roomId = getRoom(roomPart);
         Object.values(roomUsers[roomId]).forEach(function(entry) {
           users.push(serialize(entry));
         });
         onlineIO.to(socket.id).emit("statuses-in-room",  users );
       });
 
-      socket.on("getSessionsInPortal", async () => {
-        var users = [];
-        Object.values(portalUsers[tenantId]).forEach(function(entry) {
-          users.push(serialize(entry));
-        });
-        onlineIO.to(socket.id).emit("statuses-in-portal",  users );
-      });
-
-      socket.on("leaveRoom", async ({ roomPart }) => {
-        const roomId = getRoom(roomPart);
-        var user = getUser(roomUsers, userId, roomId);
-        if (user) 
-        {
-          user.sessions.delete(idInRoom);
-          idInRoom = -1;
-
-          if(user.sessions.length <= 0)
-          {
-            updateUser(roomUsers, user, userId, roomId);
-            _roomId = undefined;
-            onlineIO.to(roomId).emit("leave-in-room", userId );
-          }
-          else
-          { 
-            updateUser(roomUsers, user, userId, roomId);
-            _roomId = undefined;
-          }
-        }
-      });
-
-      socket.on("subscribeToRoom", ({ roomPart }) => {
-        if (!roomPart) return;
-  
-        const room = getRoom(roomPart);
-        logger.info(`client ${socket.id} subscribe room ${room}`);
-        socket.join(room);
+      socket.on("subscribeToRoom", (roomPart) => {
+        var roomId = getRoom(roomPart);
+        logger.info(`client ${socket.id} subscribe room ${roomId}`);
+        socket.join(roomId);
       });
   
-      socket.on("unsubscribeToRoom", ({ roomPart }) => {
-        if (!roomPart) return;
-  
-        const room = getRoom(roomPart);
-        logger.info(`client ${socket.id} unsubscribe room ${room}`);
-        socket.leave(room);
+      socket.on("unsubscribeToRoom", (roomPart) => {
+        var roomId = getRoom(roomPart);
+        logger.info(`client ${socket.id} unsubscribe room ${roomId}`);
+        socket.leave(roomId);
       });
-
-      socket.on("subscribeToPortal", () => {
-        logger.info(`client ${socket.id} subscribe portal ${tenantId}`);
-        socket.join(`p-${tenantId}`);
-      });
-  
-      socket.on("unsubscribeToPortal", () => {
-        logger.info(`client ${socket.id} unsubscribe room ${tenantId}`);
-        socket.leave(`p-${tenantId}`);
-      });
-
-      getRoom = (roomPart) => {
-        return `${tenantId}-${roomPart}`;
-      };
 
       function getCleanIP (ipAddress) {
         if(typeof(ipAddress) == "undefined"){
