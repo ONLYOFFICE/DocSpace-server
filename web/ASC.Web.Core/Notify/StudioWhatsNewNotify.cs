@@ -164,7 +164,7 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
                     await client.SendNoticeAsync(
                         action, null, user,
                         new TagValue(Tags.Activities, userActivities),
-                        new TagValue(Tags.Date, DateToString(scheduleDate, whatsNewType, culture)),
+                        new TagValue(Tags.Date, DateToString(scheduleDate, whatsNewType)),
                         new TagValue(CommonTags.Priority, 1)
                     );
                 }
@@ -320,15 +320,10 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
         return currentTime.Hour == hourToSend;
     }
 
-    private static string DateToString(DateTime d, WhatsNewType type, CultureInfo c)
+    private static string DateToString(DateTime d, WhatsNewType type)
     {
         d = type == WhatsNewType.DailyFeed ? d.AddDays(-1) : d.AddHours(-1);
 
-        if (c.TwoLetterISOLanguageName == "ru")
-        {
-            return d.ToString("d MMMM", c);
-        }
-        
         return d.ConvertNumerals("M");
     }
 }
