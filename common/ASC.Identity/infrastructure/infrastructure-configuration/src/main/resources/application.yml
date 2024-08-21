@@ -43,8 +43,6 @@ management:
       enabled: true
     refresh:
       enabled: false
-  server:
-    port: ${SERVER_MANAGEMENT_PORT:0}
 
 server:
   servlet:
