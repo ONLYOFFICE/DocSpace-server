@@ -75,6 +75,11 @@ public class AscCookieAuthenticationFilter extends OncePerRequestFilter {
       MDC.put("request_uri", request.getRequestURI());
       log.debug("Validating user");
 
+      if (request.getCookies() == null) {
+        chain.doFilter(request, response);
+        return;
+      }
+
       var authCookie =
           Arrays.stream(request.getCookies())
               .filter(c -> AUTH_COOKIE_NAME.equalsIgnoreCase(c.getName()))
