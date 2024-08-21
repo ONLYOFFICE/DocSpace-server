@@ -25,14 +25,17 @@ module.exports = async (io) => {
       const userName = (socket.handshake.session?.user?.userName || "").toLowerCase();
       const tenantId = socket.handshake.session?.portal?.tenantId;
       let id;
-      let idInRoom;
-      let roomId;
+      let idInRoom = -1;
+      let roomId = -1;
       let sessionId = socket.handshake.session?.user?.connection;
       
       id = await EnterAsync(portalUsers, tenantId, userId, `p-${tenantId}`, "portal");
       socket.on("disconnect", async (reason) => {
         await LeaveAsync(portalUsers, tenantId, userId, `p-${tenantId}`, "portal", id);
         await LeaveAsync(roomUsers, roomId, `r-${userId}`, roomId, "room", idInRoom);
+        id = -1;
+        idInRoom = -1;
+        sessionId = -1;
       });
 
       socket.on("getSessionsInPortal", async () => {
@@ -193,15 +196,15 @@ module.exports = async (io) => {
       });
 
       socket.on("subscribeToRoom", (roomPart) => {
-        var roomId = getRoom(roomPart);
+        roomId = getRoom(roomPart);
         logger.info(`client ${socket.id} subscribe room ${roomId}`);
         socket.join(roomId);
       });
   
-      socket.on("unsubscribeToRoom", (roomPart) => {
-        var roomId = getRoom(roomPart);
+      socket.on("unsubscribeToRoom", () => {
         logger.info(`client ${socket.id} unsubscribe room ${roomId}`);
         socket.leave(roomId);
+        roomId = -1;
       });
 
       function getCleanIP (ipAddress) {
