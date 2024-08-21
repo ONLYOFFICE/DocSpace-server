@@ -55,6 +55,37 @@ module.exports = async (io) => {
         logger.info(`client ${socket.id} unsubscribe portal ${tenantId}`);
         socket.leave(`p-${tenantId}`);
       });
+     /******************************* */
+      socket.on("enterInRoom", async(roomPart)=>{
+        roomId = getRoom(roomPart);
+        idInRoom = await EnterAsync(roomUsers, roomId, `r-${userId}`, roomId, "room");
+    });
+
+    socket.on("leaveRoom", async()=>{
+      await LeaveAsync(roomUsers, roomId, `r-${userId}`, roomId, "room", idInRoom);
+      idInRoom = -1;
+  });
+
+    socket.on("getSessionsInRoom", async (roomPart) => {
+      var users = [];
+      var roomId = getRoom(roomPart);
+      Object.values(roomUsers[roomId]).forEach(function(entry) {
+        users.push(serialize(entry));
+      });
+      onlineIO.to(socket.id).emit("statuses-in-room",  users );
+    });
+
+    socket.on("subscribeToRoom", (roomPart) => {
+      roomId = getRoom(roomPart);
+      logger.info(`client ${socket.id} subscribe room ${roomId}`);
+      socket.join(roomId);
+    });
+
+    socket.on("unsubscribeToRoom", () => {
+      logger.info(`client ${socket.id} unsubscribe room ${roomId}`);
+      socket.leave(roomId);
+      roomId = -1;
+    });
 
       var getRoom = (roomPart) => {
         return `${tenantId}-${roomPart}`;
@@ -175,37 +206,6 @@ module.exports = async (io) => {
         updateUser(usersList, user, userId, key);
         return id;
       }
-
-      socket.on("enterInRoom", async(roomPart)=>{
-          roomId = getRoom(roomPart);
-          idInRoom = await EnterAsync(roomUsers, roomId, `r-${userId}`, roomId, "room");
-      });
-
-      socket.on("leaveRoom", async()=>{
-        await LeaveAsync(roomUsers, roomId, `r-${userId}`, roomId, "room", idInRoom);
-        idInRoom = -1;
-    });
-
-      socket.on("getSessionsInRoom", async (roomPart) => {
-        var users = [];
-        var roomId = getRoom(roomPart);
-        Object.values(roomUsers[roomId]).forEach(function(entry) {
-          users.push(serialize(entry));
-        });
-        onlineIO.to(socket.id).emit("statuses-in-room",  users );
-      });
-
-      socket.on("subscribeToRoom", (roomPart) => {
-        roomId = getRoom(roomPart);
-        logger.info(`client ${socket.id} subscribe room ${roomId}`);
-        socket.join(roomId);
-      });
-  
-      socket.on("unsubscribeToRoom", () => {
-        logger.info(`client ${socket.id} unsubscribe room ${roomId}`);
-        socket.leave(roomId);
-        roomId = -1;
-      });
 
       function getCleanIP (ipAddress) {
         if(typeof(ipAddress) == "undefined"){
