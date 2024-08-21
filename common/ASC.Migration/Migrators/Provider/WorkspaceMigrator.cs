@@ -82,42 +82,26 @@ public class WorkspaceMigrator : Migrator
         {
             var currentUser = SecurityContext.CurrentAccount;
             _dataReader = DataOperatorFactory.GetReadOperator(_backup, reportProgress ? _cancellationToken : CancellationToken.None, false);
+
             if (_cancellationToken.IsCancellationRequested && reportProgress)
             {
                 return null;
             }
 
-            if (reportProgress)
+            var folders =  _dataReader.GetDirectories("");
+            if (folders.Any(f=> Path.GetFileNameWithoutExtension(f).Contains("databases")))
             {
-                await ReportProgressAsync(30, MigrationResource.UnzippingFinished);
+                await InnerParseAsync(reportProgress);
             }
-            await ParseUsersAsync();
+            else
+            {
+                foreach (var folder in folders)
+                {
+                    _dataReader.SetFolder(folder);
+                    await InnerParseAsync(reportProgress, folders.Count());
+                }
+            }
 
-            if (reportProgress)
-            {
-                await ReportProgressAsync(70, MigrationResource.DataProcessing);
-            }
-            ParseGroup();
-
-            if (reportProgress)
-            {
-                await ReportProgressAsync(80, MigrationResource.DataProcessing);
-            }
-            MigrationInfo.CommonStorage = new()
-            {
-                Type = FolderType.COMMON
-            };
-            ParseStorage(MigrationInfo.CommonStorage);
-
-            if (reportProgress)
-            {
-                await ReportProgressAsync(90, MigrationResource.DataProcessing);
-            }
-            MigrationInfo.ProjectStorage = new()
-            {
-                Type = FolderType.BUNCH
-            };
-            ParseStorage(MigrationInfo.ProjectStorage);
         }
         catch(Exception e)
         {
@@ -133,14 +117,109 @@ public class WorkspaceMigrator : Migrator
         return MigrationInfo.ToApiInfo();
     }
 
-    public async Task ParseUsersAsync()
+    private async Task InnerParseAsync(bool reportProgress, int count = 1)
+    {
+        if (reportProgress)
+        {
+            await ReportProgressAsync(_lastProgressUpdate + (double)25 / count, MigrationResource.UnzippingFinished);
+        }
+        await ParseUsersAsync(reportProgress, count);
+
+        if (reportProgress)
+        {
+            await ReportProgressAsync(_lastProgressUpdate + (double)10 / count, MigrationResource.DataProcessing);
+        }
+        ParseGroup();
+
+        if (reportProgress)
+        {
+            await ReportProgressAsync(_lastProgressUpdate + (double)10 / count, MigrationResource.DataProcessing);
+        }
+
+        if (MigrationInfo.CommonStorage == null)
+        {
+            MigrationInfo.CommonStorage = new MigrationStorage()
+            {
+                Type = FolderType.COMMON
+            };
+            ParseStorage(MigrationInfo.CommonStorage);
+        }
+        else
+        {
+            var commonStorage = new MigrationStorage()
+            {
+                Type = FolderType.COMMON
+            };
+            ParseAndUnionStorage(commonStorage, MigrationInfo.CommonStorage);
+        }
+
+        if (reportProgress)
+        {
+            await ReportProgressAsync(_lastProgressUpdate + (double)10 / count, MigrationResource.DataProcessing);
+        }
+        if (MigrationInfo.ProjectStorage == null) 
+        {
+            MigrationInfo.ProjectStorage = new MigrationStorage()
+            {
+                Type = FolderType.BUNCH
+            };
+            ParseStorage(MigrationInfo.ProjectStorage);
+        }
+        else
+        {
+            var projectStorage = new MigrationStorage()
+            {
+                Type = FolderType.BUNCH
+            };
+            ParseAndUnionStorage(projectStorage, MigrationInfo.ProjectStorage);
+        }
+    }
+
+    private void ParseAndUnionStorage(MigrationStorage newStorage, MigrationStorage destinationStorage, string key = "")
+    {
+        if (destinationStorage == null)
+        {
+            throw new ArgumentNullException("destinationStorage is null");
+        }
+
+        ParseStorage(newStorage, key);
+
+        newStorage.Folders = newStorage.Folders.Select(f =>
+        {
+            if (f.ParentId.ToString() == newStorage.RootKey)
+            {
+                f.ParentId = int.Parse(destinationStorage.RootKey);
+            }
+            return f;
+        }).ToList();
+
+        newStorage.Files = newStorage.Files.Select(f =>
+        {
+            if (f.Folder.ToString() == newStorage.RootKey)
+            {
+                f.Folder = int.Parse(destinationStorage.RootKey);
+            }
+            return f;
+        }).ToList();
+
+        destinationStorage.BytesTotal += newStorage.BytesTotal;
+        destinationStorage.Securities = destinationStorage.Securities.Union(newStorage.Securities).ToList();
+        destinationStorage.Files = destinationStorage.Files.Union(newStorage.Files).ToList();
+        destinationStorage.Folders = destinationStorage.Folders.Union(newStorage.Folders).ToList();
+    }
+
+    public async Task ParseUsersAsync(bool reportProgress, int count)
     {
         await using var stream = _dataReader.GetEntry("databases/core/core_user");
         var data = new DataTable();
         data.ReadXml(stream);
-        var progressStep = 50 / data.Rows.Count;
+        var progressStep = (double)30 / count / data.Rows.Count;
         foreach (var row in data.Rows.Cast<DataRow>())
         {
+            if (reportProgress)
+            {
+                await ReportProgressAsync(_lastProgressUpdate + progressStep, MigrationResource.DataProcessing);
+            }
             if (row["removed"].ToString() == "1" || row["removed"].ToString() == "True")
             {
                 continue;
@@ -176,15 +255,31 @@ public class WorkspaceMigrator : Migrator
 
             u.Storage = new MigrationStorage { Type = FolderType.USER };
 
-            ParseStorage(u.Storage, key);
-
             if (!(await UserManager.GetUserByEmailAsync(u.Info.Email)).Equals(Constants.LostUser))
             {
-                MigrationInfo.ExistUsers.Add(key, u);
+                var user = MigrationInfo.ExistUsers.SingleOrDefault(eu => eu.Value.Info.Email == u.Info.Email);
+                if (user.Value == null)
+                {
+                    ParseStorage(u.Storage, key);
+                    MigrationInfo.ExistUsers.Add(key, u);
+                }
+                else
+                {
+                    ParseAndUnionStorage(u.Storage, user.Value.Storage, key);
+                }
             }
             else
             {
-                MigrationInfo.Users.Add(key, u);
+                var user = MigrationInfo.Users.SingleOrDefault(eu => eu.Value.Info.Email == u.Info.Email);
+                if (user.Value == null)
+                {
+                    ParseStorage(u.Storage, key);
+                    MigrationInfo.Users.Add(key, u);
+                }
+                else
+                {
+                    ParseAndUnionStorage(u.Storage, user.Value.Storage, key);
+                }
             }
         }
     }

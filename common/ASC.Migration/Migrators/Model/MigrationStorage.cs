@@ -27,9 +27,9 @@
 namespace ASC.Migration.Core.Migrators.Model;
 public class MigrationStorage
 {
-    public List<MigrationFolder> Folders { get; } = new List<MigrationFolder>();
-    public List<MigrationFile> Files { get; } = new List<MigrationFile>();
-    public List<MigrationSecurity> Securities { get; } = new List<MigrationSecurity>();
+    public List<MigrationFolder> Folders { get; set; } = new List<MigrationFolder>();
+    public List<MigrationFile> Files { get; set; } = new List<MigrationFile>();
+    public List<MigrationSecurity> Securities { get; set; } = new List<MigrationSecurity>();
     public long BytesTotal { get; set; }
     public FolderType Type { get; set; } = FolderType.USER;
     public string RootKey { get; set; }
