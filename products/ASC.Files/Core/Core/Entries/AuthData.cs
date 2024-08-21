@@ -35,13 +35,13 @@ public class AuthData(string url = null, string login = null, string password = 
     [SwaggerSchemaCustom("Password")]
     public string Password { get; init; } = password ?? string.Empty;
 
-    [SwaggerSchemaCustomString("Raw token")]
+    [SwaggerSchemaCustom("Raw token")]
     public string RawToken { get; init; } = token ?? string.Empty;
 
-    [SwaggerSchemaCustomString("Url", Format = "uri")]
+    [SwaggerSchemaCustom("Url", Format = "uri")]
     public string Url { get; set; } = url ?? string.Empty;
 
-    [SwaggerSchemaCustomString("Provider")]
+    [SwaggerSchemaCustom("Provider")]
     public string Provider { get; init; } = provider ?? string.Empty;
 
     [SwaggerSchemaCustom<OAuth20Token>("Token")]

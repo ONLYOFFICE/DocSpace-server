@@ -31,7 +31,7 @@ public class SaveEditingRequestDto : IModelWithFile
     [SwaggerSchemaCustom("File extension")]
     public string FileExtension { get; set; }
 
-    [SwaggerSchemaCustomString("URI to download a file", Format = "uri")]
+    [SwaggerSchemaCustom("URI to download a file", Format = "uri")]
     public string DownloadUri { get; set; }
 
     [SwaggerSchemaCustom<IFormFile>("Request file stream", Format = "binary")]

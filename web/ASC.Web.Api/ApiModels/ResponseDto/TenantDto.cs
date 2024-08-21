@@ -82,7 +82,7 @@ public class TenantDto : IMapFrom<Tenant>
     [SwaggerSchemaCustom("Time zone")]
     public string TimeZone { get; set; }
 
-    [SwaggerSchemaCustomString("List of trusted domains")]
+    [SwaggerSchemaCustom("List of trusted domains")]
     public List<string> TrustedDomains { get; set; }
 
     [SwaggerSchemaCustom("Trusted domains in the string format")]

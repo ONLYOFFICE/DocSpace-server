@@ -29,11 +29,11 @@ namespace ASC.FederatedLogin;
 [DebuggerDisplay("{AccessToken} (expired: {IsExpired})")]
 public class OAuth20Token
 {
-    [SwaggerSchemaCustomString("Access token")]
+    [SwaggerSchemaCustom("Access token")]
     [JsonPropertyName("access_token")]
     public string AccessToken { get; set; }
 
-    [SwaggerSchemaCustomString("Refresh token")]
+    [SwaggerSchemaCustom("Refresh token")]
     [JsonPropertyName("refresh_token")]
     public string RefreshToken { get; set; }
 
@@ -42,15 +42,15 @@ public class OAuth20Token
     [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
     public long ExpiresIn { get; set; }
 
-    [SwaggerSchemaCustomString("Client id")]
+    [SwaggerSchemaCustom("Client id")]
     [JsonPropertyName("client_id")]
     public string ClientID { get; set; }
 
-    [SwaggerSchemaCustomString("Client secret")]
+    [SwaggerSchemaCustom("Client secret")]
     [JsonPropertyName("client_secret")]
     public string ClientSecret { get; set; }
 
-    [SwaggerSchemaCustomString("Redirect uri", Format = "uri")]
+    [SwaggerSchemaCustom("Redirect uri", Format = "uri")]
     [JsonPropertyName("redirect_uri")]
     public string RedirectUri { get; set; }
 
@@ -58,7 +58,7 @@ public class OAuth20Token
     [JsonPropertyName("timestamp")]
     public DateTime Timestamp { get; set; }
 
-    [SwaggerSchemaCustomString("Origin json")]
+    [SwaggerSchemaCustom("Origin json")]
     [System.Text.Json.Serialization.JsonIgnore]
     public string OriginJson { get; set; }
 

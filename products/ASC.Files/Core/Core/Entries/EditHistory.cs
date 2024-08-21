@@ -190,12 +190,12 @@ public class EditHistoryDataDto
 [DebuggerDisplay("{Key} - {Url}")]
 public class EditHistoryUrl
 {
-    [SwaggerSchemaCustomString("Key")]
+    [SwaggerSchemaCustom("Key")]
     public string Key { get; init; }
 
-    [SwaggerSchemaCustomString("Url", Format = "uri")]
+    [SwaggerSchemaCustom("Url", Format = "uri")]
     public string Url { get; init; }
 
-    [SwaggerSchemaCustomString("File type")]
+    [SwaggerSchemaCustom("File type")]
     public string FileType { get; set; }
 }

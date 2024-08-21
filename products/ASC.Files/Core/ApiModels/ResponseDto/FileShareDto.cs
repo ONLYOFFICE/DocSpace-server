@@ -63,10 +63,10 @@ public class FileShareLink
     [SwaggerSchemaCustom("Id")]
     public Guid Id { get; set; }
 
-    [SwaggerSchemaCustomString("Title")]
+    [SwaggerSchemaCustom("Title")]
     public string Title { get; set; }
 
-    [SwaggerSchemaCustomString("Share link")]
+    [SwaggerSchemaCustom("Share link")]
     public string ShareLink { get; set; }
 
     [SwaggerSchemaCustom<ApiDateTime>("Expiration date")]

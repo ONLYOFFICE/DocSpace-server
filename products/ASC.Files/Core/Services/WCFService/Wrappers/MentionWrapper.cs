@@ -39,13 +39,13 @@ public class MentionWrapper
     [SwaggerSchemaCustom("User ID")]
     public string Id { get; internal set; }
 
-    [SwaggerSchemaCustomString("User image")]
+    [SwaggerSchemaCustom("User image")]
     public string Image { get; internal set; }
 
     [SwaggerSchemaCustom("Specifies if the user has the access to the file or not")]
     public bool HasAccess { get; internal set; }
 
-    [SwaggerSchemaCustomString("User display name")]
+    [SwaggerSchemaCustom("User display name")]
     public string Name { get; internal set; }
 }
 
@@ -55,9 +55,9 @@ public class MentionMessageWrapper
     [SwaggerSchemaCustom<ActionLinkConfig>("The config parameter which contains the information about the comment in the document that will be scrolled to")]
     public ActionLinkConfig ActionLink { get; set; }
 
-    [SwaggerSchemaCustomString("A list of emails which will receive the mention message")]
+    [SwaggerSchemaCustom("A list of emails which will receive the mention message")]
     public List<string> Emails { get; set; }
 
-    [SwaggerSchemaCustomString("The comment message")]
+    [SwaggerSchemaCustom("The comment message")]
     public string Message { get; set; }
 }

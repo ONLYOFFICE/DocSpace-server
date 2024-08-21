@@ -48,11 +48,11 @@ public record BackupProgress
     [ProtoMember(2)]
     public int Progress { get; set; }
 
-    [SwaggerSchemaCustomString("Error")]
+    [SwaggerSchemaCustom("Error")]
     [ProtoMember(3)]
     public string Error { get; set; }
 
-    [SwaggerSchemaCustomString("Link", Format = "uri")]
+    [SwaggerSchemaCustom("Link", Format = "uri")]
     [ProtoMember(4)]
     public string Link { get; set; }
 
@@ -64,7 +64,7 @@ public record BackupProgress
     [ProtoMember(6)]
     public BackupProgressEnum BackupProgressEnum { get; set;}
 
-    [SwaggerSchemaCustomString("Task id")]
+    [SwaggerSchemaCustom("Task id")]
     [ProtoMember(7)]
     public string TaskId { get; set; }
 }

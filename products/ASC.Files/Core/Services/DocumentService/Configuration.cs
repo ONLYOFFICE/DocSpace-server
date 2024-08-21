@@ -518,34 +518,34 @@ public class FileReference
     [SwaggerSchemaCustom<FileReferenceData>("File reference data")]
     public FileReferenceData ReferenceData { get; set; }
 
-    [SwaggerSchemaCustomString("Error")]
+    [SwaggerSchemaCustom("Error")]
     public string Error { get; set; }
 
-    [SwaggerSchemaCustomString("Path")]
+    [SwaggerSchemaCustom("Path")]
     public string Path { get; set; }
 
-    [SwaggerSchemaCustomString("URL", Format = "uri")]
+    [SwaggerSchemaCustom("URL", Format = "uri")]
     public string Url { get; set; }
 
-    [SwaggerSchemaCustomString("File type")]
+    [SwaggerSchemaCustom("File type")]
     public string FileType { get; set; }
 
-    [SwaggerSchemaCustomString("Key")]
+    [SwaggerSchemaCustom("Key")]
     public string Key { get; set; }
 
-    [SwaggerSchemaCustomString("Link")]
+    [SwaggerSchemaCustom("Link")]
     public string Link { get; set; }
 
-    [SwaggerSchemaCustomString("Token")]
+    [SwaggerSchemaCustom("Token")]
     public string Token { get; set; }
 }
 
 public class FileReferenceData
 {
-    [SwaggerSchemaCustomString("File key")]
+    [SwaggerSchemaCustom("File key")]
     public string FileKey { get; set; }
 
-    [SwaggerSchemaCustomString("Instance ID")]
+    [SwaggerSchemaCustom("Instance ID")]
     public string InstanceId { get; set; }
 }
 
@@ -706,37 +706,37 @@ public class CustomizationConfig<T>(
 [Transient]
 public class EmbeddedConfig(BaseCommonLinkUtility baseCommonLinkUtility, FilesLinkUtility filesLinkUtility)
 {
-    [SwaggerSchemaCustomString("Embed url", Format = "uri")]
+    [SwaggerSchemaCustom("Embed url", Format = "uri")]
     public string EmbedUrl => baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=embedded" + ShareLinkParam);
 
-    [SwaggerSchemaCustomString("Save url", Format = "uri")]
+    [SwaggerSchemaCustom("Save url", Format = "uri")]
     public string SaveUrl => baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FileHandlerPath + "?" + FilesLinkUtility.Action + "=download" + ShareLinkParam);
 
-    [SwaggerSchemaCustomString("Share link param")]
+    [SwaggerSchemaCustom("Share link param")]
     public string ShareLinkParam { get; set; }
 
-    [SwaggerSchemaCustomString("Share url", Format = "uri")]
+    [SwaggerSchemaCustom("Share url", Format = "uri")]
     public string ShareUrl => baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=view" + ShareLinkParam);
 
-    [SwaggerSchemaCustomString("Toolbar docked", Format = "uri")]
+    [SwaggerSchemaCustom("Toolbar docked", Format = "uri")]
     public string ToolbarDocked => "top";
 }
 
 public class EncryptionKeysConfig
 {
-    [SwaggerSchemaCustomString("Crypto engine id")]
+    [SwaggerSchemaCustom("Crypto engine id")]
     public string CryptoEngineId => "{FFF0E1EB-13DB-4678-B67D-FF0A41DBBCEF}";
 
-    [SwaggerSchemaCustomString("Private key enc")]
+    [SwaggerSchemaCustom("Private key enc")]
     public string PrivateKeyEnc { get; set; }
 
-    [SwaggerSchemaCustomString("Public key")]
+    [SwaggerSchemaCustom("Public key")]
     public string PublicKey { get; set; }
 }
 
 public class FeedbackConfig
 {
-    [SwaggerSchemaCustomString("Url", Format = "uri")]
+    [SwaggerSchemaCustom("Url", Format = "uri")]
     public string Url { get; set; }
 
     [SwaggerSchemaCustom("Visible")]
@@ -745,7 +745,7 @@ public class FeedbackConfig
 
 public class GobackConfig
 {
-    [SwaggerSchemaCustomString("Url", Format = "uri")]
+    [SwaggerSchemaCustom("Url", Format = "uri")]
     public string Url { get; set; }
 }
 
@@ -831,36 +831,36 @@ public class PluginsConfig
 
 public class RecentConfig
 {
-    [SwaggerSchemaCustomString("Folder")]
+    [SwaggerSchemaCustom("Folder")]
     public string Folder { get; set; }
 
-    [SwaggerSchemaCustomString("Title")]
+    [SwaggerSchemaCustom("Title")]
     public string Title { get; set; }
 
-    [SwaggerSchemaCustomString("Url", Format = "uri")]
+    [SwaggerSchemaCustom("Url", Format = "uri")]
     public string Url { get; set; }
 }
 
 public class TemplatesConfig
 {
-    [SwaggerSchemaCustomString("Image")]
+    [SwaggerSchemaCustom("Image")]
     public string Image { get; set; }
 
-    [SwaggerSchemaCustomString("Title")]
+    [SwaggerSchemaCustom("Title")]
     public string Title { get; set; }
 
-    [SwaggerSchemaCustomString("Url", Format = "uri")]
+    [SwaggerSchemaCustom("Url", Format = "uri")]
     public string Url { get; set; }
 }
 
 public class UserConfig
 {
-    [SwaggerSchemaCustomString("Id")]
+    [SwaggerSchemaCustom("Id")]
     public string Id { get; set; }
 
-    [SwaggerSchemaCustomString("Name")]
+    [SwaggerSchemaCustom("Name")]
     public string Name { get; set; }
 
-    [SwaggerSchemaCustomString("Image")]
+    [SwaggerSchemaCustom("Image")]
     public string Image { get; set; }
 }

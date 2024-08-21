@@ -38,7 +38,7 @@ public class FileOperationDto
     [SwaggerSchemaCustom("Operation progress")]
     public int Progress { get; set; }
 
-    [SwaggerSchemaCustomString("Error")]
+    [SwaggerSchemaCustom("Error")]
     public string Error { get; set; }
 
     [SwaggerSchemaCustomString("Processing status", Example = "1")]
@@ -47,7 +47,7 @@ public class FileOperationDto
     [SwaggerSchemaCustom("Specifies if the operation is finished or not")]
     public bool Finished { get; set; }
 
-    [SwaggerSchemaCustomString("URL", Format = "uri")]
+    [SwaggerSchemaCustom("URL", Format = "uri")]
     public string Url { get; set; }
 
     [SwaggerSchemaCustom<List<FileEntryDto>>("List of files")]

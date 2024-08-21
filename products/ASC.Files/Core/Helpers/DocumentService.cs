@@ -626,7 +626,7 @@ public static class DocumentService
         [SwaggerSchemaCustom("Token")]
         public string Token { get; set; }
 
-        [SwaggerSchemaCustomString("Url", Format = "uri")]
+        [SwaggerSchemaCustom("Url", Format = "uri")]
         public string Url { get; set; }
     }
 

@@ -38,6 +38,6 @@ public class RoomInvitationRequestDto
     [SwaggerSchemaCustom("Message to send when notifying about the shared room")]
     public string Message { get; set; }
 
-    [SwaggerSchemaCustomString("Culture")]
+    [SwaggerSchemaCustom("Culture")]
     public string Culture { get; set; }
 }

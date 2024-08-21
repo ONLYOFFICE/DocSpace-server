@@ -45,22 +45,22 @@ public class ThumbnailsDataDto
         };
     }
 
-    [SwaggerSchemaCustomString("Original photo")]
+    [SwaggerSchemaCustom("Original photo")]
     public string Original { get; set; }
 
-    [SwaggerSchemaCustomString("Retina")]
+    [SwaggerSchemaCustom("Retina")]
     public string Retina { get; set; }
 
-    [SwaggerSchemaCustomString("Maximum size")]
+    [SwaggerSchemaCustom("Maximum size")]
     public string Max { get; set; }
 
-    [SwaggerSchemaCustomString("Big")]
+    [SwaggerSchemaCustom("Big")]
     public string Big { get; set; }
 
-    [SwaggerSchemaCustomString("Medium")]
+    [SwaggerSchemaCustom("Medium")]
     public string Medium { get; set; }
 
-    [SwaggerSchemaCustomString("Small")]
+    [SwaggerSchemaCustom("Small")]
     public string Small { get; set; }
 
     public static ThumbnailsDataDto GetSample()

@@ -32,7 +32,7 @@ public class InviteUsersRequestDto
     [MaxEmailInvitations]
     public IEnumerable<UserInvitation> Invitations { get; set; }
 
-    [SwaggerSchemaCustomString("Culture")]
+    [SwaggerSchemaCustom("Culture")]
     public string Culture { get; set; }
 }
 

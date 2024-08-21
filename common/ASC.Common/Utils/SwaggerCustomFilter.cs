@@ -35,7 +35,7 @@ public class SwaggerSchemaCustomStringAttribute : SwaggerSchemaCustomAttribute<s
     public SwaggerSchemaCustomStringAttribute(string description = null)
     {
         Description = description;
-        Example = "some text";
+        Example = DefaultExample;
     }
 }
 
@@ -45,7 +45,7 @@ public class SwaggerSchemaCustomIntAttribute : SwaggerSchemaCustomAttribute<int>
     public SwaggerSchemaCustomIntAttribute(string description = null)
     {
         Description = description;
-        Example = 1234;
+        Example = DefaultExample;
     }
 }
 
@@ -171,6 +171,10 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
             var (arrayExample, _, _) = GetExample(checkType);
             array.Add(arrayExample);
             example = array;
+        }
+        else if(checkType == typeof(JsonElement))
+        {
+            
         }
 
         return (example, nullable, format);

@@ -70,7 +70,7 @@ public class EditorConfigurationDto<T>
     [SwaggerSchemaCustom<CoEditingConfig>("Co editing")]
     public CoEditingConfig CoEditing { get; set; }
 
-    [SwaggerSchemaCustomString("Create url", Format = "uri")]
+    [SwaggerSchemaCustom("Create url", Format = "uri")]
     public string CreateUrl { get; set; }
 
     [SwaggerSchemaCustom<CustomizationConfigDto<int>>("Customization")]

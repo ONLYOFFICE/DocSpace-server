@@ -61,13 +61,13 @@ public class FileDto<T> : FileEntryDto<T>
     [SwaggerSchemaCustom("File extension", Example = ".txt")]
     public string FileExst { get; set; }
 
-    [SwaggerSchemaCustomString("Comment")]
+    [SwaggerSchemaCustom("Comment")]
     public string Comment { get; set; }
 
     [SwaggerSchemaCustom("Encrypted or not", Example = false)]
     public bool? Encrypted { get; set; }
 
-    [SwaggerSchemaCustomString("Thumbnail URL", Format = "uri")]
+    [SwaggerSchemaCustom("Thumbnail URL", Format = "uri")]
     public string ThumbnailUrl { get; set; }
 
     [SwaggerSchemaCustomString("Thumbnail status", Example = "Created")]
@@ -76,7 +76,7 @@ public class FileDto<T> : FileEntryDto<T>
     [SwaggerSchemaCustom("Locked or not")]
     public bool? Locked { get; set; }
 
-    [SwaggerSchemaCustomString("User ID who locked a file")]
+    [SwaggerSchemaCustom("User ID who locked a file")]
     public string LockedBy { get; set; }
 
     [SwaggerSchemaCustom("Denies file downloading or not", Example = false)]
@@ -94,7 +94,7 @@ public class FileDto<T> : FileEntryDto<T>
     [SwaggerSchemaCustom("InProcess folder ID")]
     public int? InProcessFolderId { get; set; }
 
-    [SwaggerSchemaCustomString("InProcess folder title")]
+    [SwaggerSchemaCustom("InProcess folder title")]
     public string InProcessFolderTitle { get; set; }
 
     [SwaggerSchemaCustom<DraftLocation<int>>("Draft info")]
@@ -109,7 +109,7 @@ public class FileDto<T> : FileEntryDto<T>
     [SwaggerSchemaCustom<IDictionary<string, bool>>("Available external rights")]
     public IDictionary<string, bool> AvailableExternalRights { get; set; }
 
-    [SwaggerSchemaCustomString("Request token")]
+    [SwaggerSchemaCustom("Request token")]
     public string RequestToken { get; set; }
 
     [SwaggerSchemaCustom<ApiDateTime>(Description = "Last opened")]
@@ -336,12 +336,12 @@ public class DraftLocation<T>
     [SwaggerSchemaCustomInt("InProcess folder ID")]
     public T FolderId { get; set; }
 
-    [SwaggerSchemaCustomString("InProcess folder title")]
+    [SwaggerSchemaCustom("InProcess folder title")]
     public string FolderTitle { get; set; }
 
     [SwaggerSchemaCustomInt("Draft ID")]
     public T FileId { get; set; }
 
-    [SwaggerSchemaCustomString("Draft title")]
+    [SwaggerSchemaCustom("Draft title")]
     public string FileTitle { get; set; }
 }

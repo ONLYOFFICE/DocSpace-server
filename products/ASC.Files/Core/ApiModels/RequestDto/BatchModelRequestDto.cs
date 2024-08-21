@@ -28,21 +28,21 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class FileBaseBatchRequestDto
 {
-    [SwaggerSchemaCustomString("List of file IDs")]
+    [SwaggerSchemaCustom("List of file IDs")]
     public IEnumerable<JsonElement> FileIds { get; set; } = new List<JsonElement>();
 }
 public class BaseBatchRequestDto
 {
-    [SwaggerSchemaCustomString("List of folder IDs")]
+    [SwaggerSchemaCustom("List of folder IDs")]
     public IEnumerable<JsonElement> FolderIds { get; set; } = new List<JsonElement>();
 
-    [SwaggerSchemaCustomString("List of file IDs")]
+    [SwaggerSchemaCustom("List of file IDs")]
     public IEnumerable<JsonElement> FileIds { get; set; } = new List<JsonElement>();
 }
 
 public class DownloadRequestDto : BaseBatchRequestDto
 {
-    [SwaggerSchemaCustomString("List of file IDs which will be converted")]
+    [SwaggerSchemaCustom("List of file IDs which will be converted")]
     public IEnumerable<ItemKeyValuePair<JsonElement, string>> FileConvertIds { get; set; } = new List<ItemKeyValuePair<JsonElement, string>>();
 }
 
@@ -66,7 +66,7 @@ public class DeleteRequestDto
 
 public class BatchRequestDto : BaseBatchRequestDto
 {
-    [SwaggerSchemaCustomString("Destination folder ID", Format = "json")]
+    [SwaggerSchemaCustom("Destination folder ID", Format = "json")]
     public JsonElement DestFolderId { get; set; }
 
     [SwaggerSchemaCustomString("Overwriting behavior", Example = "Skip")]
@@ -81,6 +81,6 @@ public class BatchRequestDto : BaseBatchRequestDto
 
 public class BatchSimpleRequestDto : BaseBatchRequestDto
 {
-    [SwaggerSchemaCustomString("Destination folder ID", Format = "json")]
+    [SwaggerSchemaCustom("Destination folder ID", Format = "json")]
     public JsonElement DestFolderId { get; set; }
 }

@@ -31,6 +31,6 @@ public abstract class GroupRequestDtoBase
     [SwaggerSchemaCustom("Group manager ID")]
     public Guid GroupManager { get; set; }
 
-    [SwaggerSchemaCustomString("Group name")]
+    [SwaggerSchemaCustom("Group name")]
     public string GroupName { get; set; }
 }

@@ -30,7 +30,7 @@ namespace ASC.People.ApiModels.ResponseDto;
 
 public class GroupDto
 {
-    [SwaggerSchemaCustomString("Name")]
+    [SwaggerSchemaCustom("Name")]
     public string Name { get; set; }
 
     [SwaggerSchemaCustom("Parent")]

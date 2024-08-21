@@ -46,10 +46,10 @@ public class DocumentBuilderTaskDto
     [SwaggerSchemaCustom<object>("Result file id")]
     public object ResultFileId { get; set; }
 
-    [SwaggerSchemaCustomString("Result file name")]
+    [SwaggerSchemaCustom("Result file name")]
     public string ResultFileName { get; set; }
 
-    [SwaggerSchemaCustomString("Result file url", Format = "uri")]
+    [SwaggerSchemaCustom("Result file url", Format = "uri")]
     public string ResultFileUrl { get; set; }
 
     public static DocumentBuilderTaskDto Get(DistributedTaskProgress task)

@@ -31,16 +31,16 @@ public class Logo
     [SwaggerSchemaCustom("Original")]
     public string Original { get; set; }
 
-    [SwaggerSchemaCustomString("Large")]
+    [SwaggerSchemaCustom("Large")]
     public string Large { get; set; }
 
-    [SwaggerSchemaCustomString("Medium")]
+    [SwaggerSchemaCustom("Medium")]
     public string Medium { get; set; }
 
-    [SwaggerSchemaCustomString("Small")]
+    [SwaggerSchemaCustom("Small")]
     public string Small { get; set; }
 
-    [SwaggerSchemaCustomString("Color")]
+    [SwaggerSchemaCustom("Color")]
     public string Color { get; set; }
 
     public bool IsDefault()

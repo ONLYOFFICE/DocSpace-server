@@ -87,7 +87,7 @@ public abstract class FileEntryDto
     [SwaggerSchemaCustom("Provider ID")]
     public int? ProviderId { get; set; }
 
-    [SwaggerSchemaCustomString("Order")]
+    [SwaggerSchemaCustom("Order")]
     public string Order { get; set; }
     
     public abstract FileEntryType FileEntryType { get; }
@@ -123,10 +123,10 @@ public abstract class FileEntryDto<T> : FileEntryDto
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public T OriginRoomId { get; set; }
 
-    [SwaggerSchemaCustomString("Origin title")]
+    [SwaggerSchemaCustom("Origin title")]
     public string OriginTitle { get; set; }
 
-    [SwaggerSchemaCustomString("Origin room title")]
+    [SwaggerSchemaCustom("Origin room title")]
     public string OriginRoomTitle { get; set; }
 
     [SwaggerSchemaCustom("Can share")]

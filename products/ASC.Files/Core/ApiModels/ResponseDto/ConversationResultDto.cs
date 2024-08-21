@@ -41,16 +41,16 @@ public class ConversationResultDto
     [SwaggerSchemaCustom("Operation progress")]
     public int Progress { get; set; }
 
-    [SwaggerSchemaCustomString("Source file")]
+    [SwaggerSchemaCustom("Source file")]
     public string Source { get; set; }
 
     [SwaggerSchemaCustom<object>("Resulting file")]
     [JsonPropertyName("result")]
     public object File { get; set; }
 
-    [SwaggerSchemaCustomString("Error")]
+    [SwaggerSchemaCustom("Error")]
     public string Error { get; set; }
 
-    [SwaggerSchemaCustomString("Specifies if the operation is processed or not")]
+    [SwaggerSchemaCustom("Specifies if the operation is processed or not")]
     public string Processed { get; set; }
 }

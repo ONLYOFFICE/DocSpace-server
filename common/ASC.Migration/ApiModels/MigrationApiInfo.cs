@@ -29,15 +29,15 @@ namespace ASC.Migration.Core.Models.Api;
 [ProtoContract]
 public class MigrationApiInfo
 {
-    [SwaggerSchemaCustomString("Migrator name")]
+    [SwaggerSchemaCustom("Migrator name")]
     [ProtoMember(1)]
     public string MigratorName { get; set; }
 
-    [SwaggerSchemaCustomString("Operation")]
+    [SwaggerSchemaCustom("Operation")]
     [ProtoMember(2)]
     public string Operation { get; set; }
 
-    [SwaggerSchemaCustomString("Failed archives")]
+    [SwaggerSchemaCustom("Failed archives")]
     [ProtoMember(3)]
     public List<string> FailedArchives { get; set; } = new List<string>();
 
@@ -89,11 +89,11 @@ public class MigrationApiInfo
     [ProtoMember(15)]
     public int FailedUsers { get; set; }
 
-    [SwaggerSchemaCustomString("Files")]
+    [SwaggerSchemaCustom("Files")]
     [ProtoMember(16)]
     public List<string> Files { get; set; }
 
-    [SwaggerSchemaCustomString("Errors")]
+    [SwaggerSchemaCustom("Errors")]
     [ProtoMember(17)]
     public List<string> Errors { get; set; }
 }

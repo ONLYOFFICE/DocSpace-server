@@ -28,10 +28,10 @@ namespace ASC.People.ApiModels.ResponseDto;
 
 public class TaskProgressResponseDto
 {
-    [SwaggerSchemaCustomString("ID")]
+    [SwaggerSchemaCustom("ID")]
     public string Id { get; set; }
 
-    [SwaggerSchemaCustomString("Error")]
+    [SwaggerSchemaCustom("Error")]
     public string Error { get; set; }
 
     [SwaggerSchemaCustom("Percentage")]

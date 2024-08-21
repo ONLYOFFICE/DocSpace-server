@@ -31,19 +31,19 @@ public class Webhook : IMapFrom<DbWebhook>
     [SwaggerSchemaCustom("ID")]
     public int Id { get; set; }
 
-    [SwaggerSchemaCustomString("Route")]
+    [SwaggerSchemaCustom("Route")]
     public string Route { get; init; }
 
-    [SwaggerSchemaCustomString("Method")]
+    [SwaggerSchemaCustom("Method")]
     public string Method { get; init; }
 
     [SwaggerSchemaCustom("Specifies if a webhook is disabled or not")]
     public bool Disable { get; set; }
 
-    [SwaggerSchemaCustomString("Name")]
+    [SwaggerSchemaCustom("Name")]
     public string Name { get => WebHookResource.ResourceManager.GetString(Endpoint) ?? ""; }
 
-    [SwaggerSchemaCustomString("Description")]
+    [SwaggerSchemaCustom("Description")]
     public string Description { get => WebHookResource.ResourceManager.GetString($"{Endpoint}_Description") ?? ""; }
 
     private string Endpoint { get => $"{Method}|{Route}"; }

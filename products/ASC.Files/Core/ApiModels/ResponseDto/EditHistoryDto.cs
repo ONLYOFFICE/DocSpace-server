@@ -52,7 +52,7 @@ public class EditHistoryDto
     [SwaggerSchemaCustom<List<EditHistoryChangesWrapper>>("List of history changes")]
     public List<EditHistoryChangesWrapper> Changes { get; set; }
 
-    [SwaggerSchemaCustomString("Server version")]
+    [SwaggerSchemaCustom("Server version")]
     public string ServerVersion { get; set; }
 
     public EditHistoryDto(EditHistory editHistory, ApiDateTimeHelper apiDateTimeHelper, UserManager userManager, DisplayUserSettingsHelper displayUserSettingsHelper)

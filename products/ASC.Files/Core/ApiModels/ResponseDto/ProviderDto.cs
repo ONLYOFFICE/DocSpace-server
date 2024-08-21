@@ -31,7 +31,7 @@ public record ProviderDto(string Name, string Key, bool Connected, bool Oauth = 
     [SwaggerSchemaCustom("Provider name")]
     public string Name { get; init; } = Name;
 
-    [SwaggerSchemaCustomString("Provider key")]
+    [SwaggerSchemaCustom("Provider key")]
     public string Key { get; init; } = Key;
 
     [SwaggerSchemaCustom("Connected flag")]
@@ -40,7 +40,7 @@ public record ProviderDto(string Name, string Key, bool Connected, bool Oauth = 
     [SwaggerSchemaCustom("Oauth flag")]
     public bool Oauth { get; init; } = Oauth;
 
-    [SwaggerSchemaCustomString("Redirect url", Format = "uri")]
+    [SwaggerSchemaCustom("Redirect url", Format = "uri")]
     public string RedirectUrl { get; init; } = RedirectUrl;
 
     [SwaggerSchemaCustom("Required connection url flag")]

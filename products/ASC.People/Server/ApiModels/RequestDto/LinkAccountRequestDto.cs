@@ -28,7 +28,7 @@ namespace ASC.People.ApiModels.RequestDto;
 
 public class LinkAccountRequestDto
 {
-    [SwaggerSchemaCustomString("Third-party profile in the serialized format")]
+    [SwaggerSchemaCustom("Third-party profile in the serialized format")]
     public string SerializedProfile { get; set; }
 }
 
@@ -37,19 +37,19 @@ public class SignupAccountRequestDto : LinkAccountRequestDto
     [SwaggerSchemaCustomString("Employee type (All, RoomAdmin, User, DocSpaceAdmin, Collaborator)", Example = "All")]
     public EmployeeType? EmployeeType { get; set; }
 
-    [SwaggerSchemaCustomString("First name")]
+    [SwaggerSchemaCustom("First name")]
     public string FirstName { get; set; }
 
-    [SwaggerSchemaCustomString("Last name")]
+    [SwaggerSchemaCustom("Last name")]
     public string LastName { get; set; }
 
-    [SwaggerSchemaCustomString("Email address")]
+    [SwaggerSchemaCustom("Email address")]
     public string Email { get; set; }
 
-    [SwaggerSchemaCustomString("Password hash")]
+    [SwaggerSchemaCustom("Password hash")]
     public string PasswordHash { get; set; }
 
-    [SwaggerSchemaCustomString("Link key")]
+    [SwaggerSchemaCustom("Link key")]
     public string Key { get; set; }
 
     [SwaggerSchemaCustom("Culture")]

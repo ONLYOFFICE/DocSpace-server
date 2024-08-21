@@ -77,7 +77,7 @@ public sealed class UserInfo : IDirectRecipient, ICloneable, IMapFrom<User>
         }
     }
 
-    [SwaggerSchemaCustomString("List of contacts")]
+    [SwaggerSchemaCustom("List of contacts")]
     public List<string> ContactsList { get; set; }
 
     [SwaggerSchemaCustom("Location")]

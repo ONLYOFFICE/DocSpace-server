@@ -29,23 +29,23 @@ namespace ASC.Migration.Core.Models.Api;
 [ProtoContract]
 public class MigratingApiUser : ImportableApiEntity
 {
-    [SwaggerSchemaCustomString("Key")]
+    [SwaggerSchemaCustom("Key")]
     [ProtoMember(2)]
     public string Key { get; set; }
 
-    [SwaggerSchemaCustomString("Email")]
+    [SwaggerSchemaCustom("Email")]
     [ProtoMember(3)]
     public string Email { get; set; }
 
-    [SwaggerSchemaCustomString("Display name")]
+    [SwaggerSchemaCustom("Display name")]
     [ProtoMember(4)]
     public string DisplayName { get; set; }
 
-    [SwaggerSchemaCustomString("First name")]
+    [SwaggerSchemaCustom("First name")]
     [ProtoMember(5)]
     public string FirstName { get; set; }
 
-    [SwaggerSchemaCustomString("Last name")]
+    [SwaggerSchemaCustom("Last name")]
     [ProtoMember(6)]
     public string LastName { get; set; }
 

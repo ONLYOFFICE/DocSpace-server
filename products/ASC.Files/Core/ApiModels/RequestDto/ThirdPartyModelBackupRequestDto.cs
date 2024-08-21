@@ -34,15 +34,15 @@ public class ThirdPartyBackupRequestDto
     [SwaggerSchemaCustom("Login")]
     public string Login { get; set; }
 
-    [SwaggerSchemaCustomString("Password")]
+    [SwaggerSchemaCustom("Password")]
     public string Password { get; set; }
 
-    [SwaggerSchemaCustomString("Authentication token")]
+    [SwaggerSchemaCustom("Authentication token")]
     public string Token { get; set; }
 
-    [SwaggerSchemaCustomString("Customer title")]
+    [SwaggerSchemaCustom("Customer title")]
     public string CustomerTitle { get; set; }
 
-    [SwaggerSchemaCustomString("Provider key")]
+    [SwaggerSchemaCustom("Provider key")]
     public string ProviderKey { get; set; }
 }

@@ -28,100 +28,100 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public class FilesSettingsDto
 {
-    [SwaggerSchemaCustomString("Exts image previewed")]
+    [SwaggerSchemaCustom("Exts image previewed")]
     public List<string> ExtsImagePreviewed { get; set; }
 
-    [SwaggerSchemaCustomString("Exts media previewed")]
+    [SwaggerSchemaCustom("Exts media previewed")]
     public List<string> ExtsMediaPreviewed { get; set; }
 
-    [SwaggerSchemaCustomString("Exts web previewed")]
+    [SwaggerSchemaCustom("Exts web previewed")]
     public List<string> ExtsWebPreviewed { get; set; }
 
-    [SwaggerSchemaCustomString("Exts web edited")]
+    [SwaggerSchemaCustom("Exts web edited")]
     public List<string> ExtsWebEdited { get; set; }
 
-    [SwaggerSchemaCustomString("Exts web encrypt")]
+    [SwaggerSchemaCustom("Exts web encrypt")]
     public List<string> ExtsWebEncrypt { get; set; }
 
-    [SwaggerSchemaCustomString("Exts web reviewed")]
+    [SwaggerSchemaCustom("Exts web reviewed")]
     public List<string> ExtsWebReviewed { get; set; }
 
-    [SwaggerSchemaCustomString("Exts web custom filter editing")]
+    [SwaggerSchemaCustom("Exts web custom filter editing")]
     public List<string> ExtsWebCustomFilterEditing { get; set; }
 
-    [SwaggerSchemaCustomString("Exts web restricted editing")]
+    [SwaggerSchemaCustom("Exts web restricted editing")]
     public List<string> ExtsWebRestrictedEditing { get; set; }
 
-    [SwaggerSchemaCustomString("Exts web commented")]
+    [SwaggerSchemaCustom("Exts web commented")]
     public List<string> ExtsWebCommented { get; set; }
 
-    [SwaggerSchemaCustomString("Exts web template")]
+    [SwaggerSchemaCustom("Exts web template")]
     public List<string> ExtsWebTemplate { get; set; }
 
-    [SwaggerSchemaCustomString("Exts co authoring")]
+    [SwaggerSchemaCustom("Exts co authoring")]
     public List<string> ExtsCoAuthoring { get; set; }
 
-    [SwaggerSchemaCustomString("Exts must convert")]
+    [SwaggerSchemaCustom("Exts must convert")]
     public List<string> ExtsMustConvert { get; set; }
 
     [SwaggerSchemaCustom<IDictionary<string, List<string>>>("Exts convertible")]
     public IDictionary<string, List<string>> ExtsConvertible { get; set; }
 
-    [SwaggerSchemaCustomString("Exts uploadable")]
+    [SwaggerSchemaCustom("Exts uploadable")]
     public List<string> ExtsUploadable { get; set; }
 
-    [SwaggerSchemaCustomString("Exts archive")]
+    [SwaggerSchemaCustom("Exts archive")]
     public ImmutableList<string> ExtsArchive { get; set; }
 
-    [SwaggerSchemaCustomString("Exts video")]
+    [SwaggerSchemaCustom("Exts video")]
     public ImmutableList<string> ExtsVideo { get; set; }
 
-    [SwaggerSchemaCustomString("Exts audio")]
+    [SwaggerSchemaCustom("Exts audio")]
     public ImmutableList<string> ExtsAudio { get; set; }
 
-    [SwaggerSchemaCustomString("Exts image")]
+    [SwaggerSchemaCustom("Exts image")]
     public ImmutableList<string> ExtsImage { get; set; }
 
-    [SwaggerSchemaCustomString("Exts spreadsheet")]
+    [SwaggerSchemaCustom("Exts spreadsheet")]
     public ImmutableList<string> ExtsSpreadsheet { get; set; }
 
-    [SwaggerSchemaCustomString("Exts presentation")]
+    [SwaggerSchemaCustom("Exts presentation")]
     public ImmutableList<string> ExtsPresentation { get; set; }
 
-    [SwaggerSchemaCustomString("Exts document")]
+    [SwaggerSchemaCustom("Exts document")]
     public ImmutableList<string> ExtsDocument { get; set; }
 
     [SwaggerSchemaCustom<Dictionary<FileType, string>>("Internal formats")]
     public Dictionary<FileType, string> InternalFormats { get; set; }
 
-    [SwaggerSchemaCustomString("Master form extension")]
+    [SwaggerSchemaCustom("Master form extension")]
     public string MasterFormExtension { get; set; }
 
-    [SwaggerSchemaCustomString("Param version")]
+    [SwaggerSchemaCustom("Param version")]
     public string ParamVersion { get; set; }
 
-    [SwaggerSchemaCustomString("Param out type")]
+    [SwaggerSchemaCustom("Param out type")]
     public string ParamOutType { get; set; }
 
-    [SwaggerSchemaCustomString("File download url string", Format = "uri")]
+    [SwaggerSchemaCustom("File download url string", Format = "uri")]
     public string FileDownloadUrlString { get; set; }
 
-    [SwaggerSchemaCustomString("File web viewer url string", Format = "uri")]
+    [SwaggerSchemaCustom("File web viewer url string", Format = "uri")]
     public string FileWebViewerUrlString { get; set; }
 
-    [SwaggerSchemaCustomString("File web viewer external url string", Format = "uri")]
+    [SwaggerSchemaCustom("File web viewer external url string", Format = "uri")]
     public string FileWebViewerExternalUrlString { get; set; }
 
-    [SwaggerSchemaCustomString("File web editor url string", Format = "uri")]
+    [SwaggerSchemaCustom("File web editor url string", Format = "uri")]
     public string FileWebEditorUrlString { get; set; }
 
-    [SwaggerSchemaCustomString("File web editor external url string", Format = "uri")]
+    [SwaggerSchemaCustom("File web editor external url string", Format = "uri")]
     public string FileWebEditorExternalUrlString { get; set; }
 
-    [SwaggerSchemaCustomString("File redirect preview url string", Format = "uri")]
+    [SwaggerSchemaCustom("File redirect preview url string", Format = "uri")]
     public string FileRedirectPreviewUrlString { get; set; }
 
-    [SwaggerSchemaCustomString("File thumbnail url string", Format = "uri")]
+    [SwaggerSchemaCustom("File thumbnail url string", Format = "uri")]
     public string FileThumbnailUrlString { get; set; }
 
     [SwaggerSchemaCustom("Confirm delete")]

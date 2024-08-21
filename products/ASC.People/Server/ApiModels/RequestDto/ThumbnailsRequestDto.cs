@@ -28,7 +28,7 @@ namespace ASC.People.ApiModels.RequestDto;
 
 public class ThumbnailsRequestDto
 {
-    [SwaggerSchemaCustomString("Path to the temporary file")]
+    [SwaggerSchemaCustom("Path to the temporary file")]
     public string TmpFile { get; set; }
 
     [SwaggerSchemaCustom("Horizontal coordinate")]

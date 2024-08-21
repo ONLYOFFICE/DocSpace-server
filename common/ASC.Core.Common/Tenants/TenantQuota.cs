@@ -44,7 +44,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     [SwaggerSchemaCustom("Tenant ID")]
     public int TenantId { get; set; }
 
-    [SwaggerSchemaCustomString("Name", Example = "Default")]
+    [SwaggerSchemaCustom("Name", Example = "Default")]
     public string Name { get; set; }
 
     [SwaggerSchemaCustomString("Price", Example = "10.0")]

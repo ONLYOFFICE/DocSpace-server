@@ -73,7 +73,7 @@ public class AuditEventDto
     [SwaggerSchemaCustomString("Module type", Example = "None")]
     public ModuleType Module { get; set; }
 
-    [SwaggerSchemaCustomString("List of targets")]
+    [SwaggerSchemaCustom("List of targets")]
     public IEnumerable<string> Target { get; set; }
 
     [SwaggerSchemaCustomString("List of entry types", Example = "None")]
