@@ -30,7 +30,8 @@ namespace ASC.Core.Common.Core;
 public enum GroupSortType
 {
     Title,
-    Manager
+    Manager,
+    MembersCount
 }
 
 [EnumExtensions]
