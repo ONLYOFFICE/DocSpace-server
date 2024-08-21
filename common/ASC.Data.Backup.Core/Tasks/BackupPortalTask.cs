@@ -602,10 +602,10 @@ public class BackupPortalTask(
         var storages = new Dictionary<string, IDataStore>();
         await foreach (var file in files)
         {
-            if (!storages.TryGetValue(file.Module, out var storage))
+            if (!storages.TryGetValue(file.Module + file.Tenant, out var storage))
             {
-                storage = await StorageFactory.GetStorageAsync(TenantId, file.Module);
-                storages.Add(file.Module, storage);
+                storage = await StorageFactory.GetStorageAsync(file.Tenant, file.Module);
+                storages.Add(file.Module + file.Tenant, storage);
             }
             var path = file.GetZipKey();
             if (dump) 

@@ -24,10 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.ComponentModel.DataAnnotations;
+
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class CreateTagRequestDto
 {
     [SwaggerSchemaCustom("Tag name")]
+    [StringLength(255)]
     public string Name { get; set; }
 }

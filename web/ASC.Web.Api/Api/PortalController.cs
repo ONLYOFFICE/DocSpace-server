@@ -282,9 +282,21 @@ public class PortalController(
     [AllowNotPayment]
     [HttpGet("quota")]
     public async Task<TenantQuota> GetQuotaAsync()
-    {
+    {        
+        if (await userManager.IsUserAsync(securityContext.CurrentAccount.ID))
+        {
+            throw new SecurityException();
+        }
+        
         var tenant = await tenantManager.GetCurrentTenantAsync();
-        return await tenantManager.GetTenantQuotaAsync(tenant.Id);
+        var result = await tenantManager.GetTenantQuotaAsync(tenant.Id);
+
+        if (await userManager.IsCollaboratorAsync(authContext.CurrentAccount.ID))
+        {
+            result.MaxTotalSize = 0;
+        }
+        
+        return result;
     }
 
     /// <summary>
@@ -437,7 +449,7 @@ public class PortalController(
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var alias = inDto.Alias;
-        if (string.IsNullOrEmpty(alias))
+        if (string.IsNullOrEmpty(alias) || alias.Any(Char.IsWhiteSpace))
         {
             throw new ArgumentException(nameof(alias));
         }
@@ -447,7 +459,7 @@ public class PortalController(
 
         var localhost = coreSettings.BaseDomain == "localhost" || tenant.Alias == "localhost";
 
-        var newAlias = string.Concat(alias.Where(c => !Char.IsWhiteSpace(c))).ToLowerInvariant();
+        var newAlias = alias.Trim().ToLowerInvariant();
         var oldAlias = tenant.Alias;
         var oldVirtualRootPath = commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/');
 
@@ -464,7 +476,7 @@ public class PortalController(
             }
 
             var oldDomain = tenant.GetTenantDomain(coreSettings);
-            tenant.Alias = alias;
+            tenant.Alias = newAlias;
             tenant = await tenantManager.SaveTenantAsync(tenant);
             tenantManager.SetCurrentTenant(tenant);
             

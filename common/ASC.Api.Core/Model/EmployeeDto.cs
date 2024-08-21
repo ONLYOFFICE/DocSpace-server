@@ -109,6 +109,11 @@ public class EmployeeDtoHelper(
     {
         try
         {
+            if (_dictionary.TryGetValue(userId, out var employee))
+            {
+                return employee;
+            }
+            
             return await GetAsync(await _userManager.GetUsersAsync(userId));
         }
         catch (Exception e)

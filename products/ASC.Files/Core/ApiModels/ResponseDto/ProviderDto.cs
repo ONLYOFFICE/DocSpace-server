@@ -26,7 +26,7 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
-public record ProviderDto(string Name, string Key, bool Connected, bool Oauth = false, string RedirectUrl = null, bool RequiredConnectionUrl = false)
+public record ProviderDto(string Name, string Key, bool Connected, bool Oauth = false, string RedirectUrl = null, bool RequiredConnectionUrl = false, string ClientId = null)
 {
     [SwaggerSchemaCustom("Provider name")]
     public string Name { get; init; } = Name;
@@ -45,4 +45,8 @@ public record ProviderDto(string Name, string Key, bool Connected, bool Oauth = 
 
     [SwaggerSchemaCustom("Required connection url flag")]
     public bool RequiredConnectionUrl { get; init; } = RequiredConnectionUrl;
+    
+    /// <summary>Oauth client id</summary>
+    /// <type>System.String, System</type>
+    public string ClientId { get; init; } = ClientId;
 }

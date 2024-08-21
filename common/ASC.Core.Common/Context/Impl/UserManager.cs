@@ -176,6 +176,18 @@ public class UserManager(
             sortType = UserSortType.FirstName;
         }
 
+        if (sortType == UserSortType.DisplayName)
+        {
+            if (UserFormatter.GetUserDisplayDefaultOrder() == DisplayUserNameFormat.FirstLast)
+            {
+                sortType = UserSortType.FirstName;
+            }
+            else
+            {
+                sortType = UserSortType.LastName;
+            }
+        }
+
         return userService.GetUsers(Tenant.Id, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, quotaFilter, text, withoutGroup, Tenant.OwnerId, sortType, sortOrderAsc, limit, offset);
     }
 

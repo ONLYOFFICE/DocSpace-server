@@ -144,7 +144,8 @@ public class FileDto<T> : FileEntryDto<T>
 }
 
 [Scope]
-public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
+public class FileDtoHelper(
+    ApiDateTimeHelper apiDateTimeHelper,
         EmployeeDtoHelper employeeWrapperHelper,
         AuthContext authContext,
         IDaoFactory daoFactory,
@@ -182,6 +183,7 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         return result;
     }
 
+    private Dictionary<string, AceWrapper> shareCache = new();
     private async Task<FileDto<T>> GetFileWrapperAsync<T>(File<T> file, int foldersCount, string order)
     {
         var result = await GetAsync<FileDto<T>, T>(file);
@@ -193,18 +195,19 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         if (fileType == FileType.Pdf)
         {
             var linkDao = daoFactory.GetLinkDao<T>();
-            var folderDao = daoFactory.GetFolderDao<T>();
+            var folderDao = daoFactory.GetCacheFolderDao<T>();
+            var fileDao = daoFactory.GetFileDao<T>();
 
             var linkedIdTask = linkDao.GetLinkedAsync(file.Id);
-            var propertiesTask = daoFactory.GetFileDao<T>().GetProperties(file.Id);
-            var currentFolderTask = folderDao.GetFolderAsync((T)Convert.ChangeType(file.ParentId, typeof(T)));
+            var propertiesTask = fileDao.GetProperties(file.Id);
+            var currentFolderTask = folderDao.GetFolderAsync(file.ParentId);
             await Task.WhenAll(linkedIdTask, propertiesTask, currentFolderTask);
 
-            var linkedId = await linkedIdTask;
-            var properties = await propertiesTask;
-            var currentFolder = await currentFolderTask;
+            var linkedId = linkedIdTask.Result;
+            var properties = propertiesTask.Result;
+            var currentFolder = currentFolderTask.Result;
 
-            Folder<T> currentRoom = null;
+            Folder<T> currentRoom;
             if (!DocSpaceHelper.IsRoom(currentFolder.FolderType))
             {
                 var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(currentFolder);
@@ -221,13 +224,24 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
             {
                 currentRoom = currentFolder;
             }
-            if (currentRoom != null && properties != null)
+
+            if (currentRoom is { FolderType: FolderType.FillingFormsRoom } && properties != null && properties.FormFilling.StartFilling)
             {
-                if (currentRoom.FolderType == FolderType.FillingFormsRoom && properties.FormFilling.StartFilling)
                     result.Security[FileSecurity.FilesSecurityActions.Lock] = false;
             }
 
-            var ace = await fileSharing.GetPureSharesAsync(currentRoom, new List<Guid> { authContext.CurrentAccount.ID }).FirstOrDefaultAsync();
+            if (currentRoom.Security == null)
+            {
+                _ = await _fileSecurity.SetSecurity(new[] { currentRoom }.ToAsyncEnumerable()).ToListAsync();
+            }
+
+            AceWrapper ace = null;
+            var currentRoomId = currentRoom.Id?.ToString();
+            if (currentRoomId != null && !shareCache.TryGetValue(currentRoomId, out ace))
+            {
+                ace = await fileSharing.GetPureSharesAsync(currentRoom, [authContext.CurrentAccount.ID]).FirstOrDefaultAsync();
+                shareCache.TryAdd(currentRoomId, ace);
+            }
 
             if (!file.IsForm && (FilterType)file.Category == FilterType.None)
             {
@@ -238,9 +252,7 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
                 result.IsForm = file.IsForm;
             }
 
-            if (ace is { Access: FileShare.FillForms } || 
-                result.IsForm == null || result.IsForm == false || 
-                currentFolder.FolderType == FolderType.FormFillingFolderInProgress)
+            if (ace is { Access: FileShare.FillForms } || result.IsForm == false || currentFolder.FolderType == FolderType.FormFillingFolderInProgress)
             {
                 result.Security[FileSecurity.FilesSecurityActions.EditForm] = false;
             }
@@ -253,19 +265,13 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
                 result.StartFilling = formFilling.StartFilling;
                 if (!Equals(linkedId, default(T)))
                 {
-                    var draftLocation = new DraftLocation<T>()
-                    {
-                        FolderId = formFilling.ToFolderId,
-                        FolderTitle = formFilling.Title,
-                        FileId = (T)Convert.ChangeType(linkedId, typeof(T))
-                    };
-
-                    var fileDao = daoFactory.GetFileDao<T>();
-                    var draft = await fileDao.GetFileAsync((T)Convert.ChangeType(linkedId, typeof(T)));
+                    var draftLocation = new DraftLocation<T> { FolderId = formFilling.ToFolderId, FolderTitle = formFilling.Title, FileId = linkedId };
+                    var draft = await fileDao.GetFileAsync(linkedId);
                     if (draft != null)
                     {
                         draftLocation.FileTitle = draft.Title;
                     }
+
                     result.DraftLocation = draftLocation;
                 }
             }
@@ -305,8 +311,7 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
             
             result.ViewUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(file.DownloadUrl), result.RequestToken);
 
-            result.WebUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id, file.Version, externalMediaAccess)),
-                result.RequestToken);
+            result.WebUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id, file.Version, externalMediaAccess)), result.RequestToken);
 
             result.ThumbnailStatus = file.ThumbnailStatus;
 
@@ -314,9 +319,7 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
 
             if (file.ThumbnailStatus == Thumbnail.Created)
             {
-                result.ThumbnailUrl =
-                    externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileThumbnailUrl(file.Id, file.Version)) +
-                                                              $"&hash={cacheKey}", result.RequestToken);
+                result.ThumbnailUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileThumbnailUrl(file.Id, file.Version)) + $"&hash={cacheKey}", result.RequestToken);
             }
         }
         catch (Exception)

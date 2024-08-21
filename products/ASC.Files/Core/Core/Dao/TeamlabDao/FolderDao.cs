@@ -68,7 +68,7 @@ internal class FolderDao(
     private const string VirtualRooms = "virtualrooms";
     private const string Archive = "archive";
 
-    public async Task<Folder<int>> GetFolderAsync(int folderId)
+    public virtual async Task<Folder<int>> GetFolderAsync(int folderId)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
@@ -1786,4 +1786,57 @@ public class OriginData
     public DbFolder OriginRoom { get; init; }
     public DbFolder OriginFolder { get; init; }
     public HashSet<KeyValuePair<string, FileEntryType>> Entries { get; init; }
+}
+
+[Scope(typeof(ICacheFolderDao<int>))]
+internal class CacheFolderDao(
+    FactoryIndexerFolder factoryIndexer,
+    UserManager userManager,
+    IDbContextFactory<FilesDbContext> dbContextManager,
+    TenantManager tenantManager,
+    TenantUtil tenantUtil,
+    SetupInfo setupInfo,
+    MaxTotalSizeStatistic maxTotalSizeStatistic,
+    SettingsManager settingsManager,
+    AuthContext authContext,
+    IServiceProvider serviceProvider,
+    IDaoFactory daoFactory,
+    SelectorFactory selectorFactory,
+    CrossDao crossDao,
+    IMapper mapper,
+    GlobalStore globalStore,
+    GlobalFolder globalFolder,
+    IDistributedLockProvider distributedLockProvider,
+    StorageFactory storageFactory)
+    : FolderDao(
+        factoryIndexer,
+        userManager,
+        dbContextManager,
+        tenantManager,
+        tenantUtil,
+        setupInfo,
+        maxTotalSizeStatistic,
+        settingsManager,
+        authContext,
+        serviceProvider,
+        daoFactory,
+        selectorFactory,
+        crossDao,
+        mapper,
+        globalStore,
+        globalFolder,
+        distributedLockProvider,
+        storageFactory), ICacheFolderDao<int>
+{
+    private readonly ConcurrentDictionary<int, Folder<int>> _cache = new();
+    public override async Task<Folder<int>> GetFolderAsync(int folderId)
+    {
+        if (!_cache.TryGetValue(folderId, out var result))
+        {
+            result = await base.GetFolderAsync(folderId);
+            _cache.TryAdd(folderId, result);
+        }
+        
+        return result;
+    }
 }

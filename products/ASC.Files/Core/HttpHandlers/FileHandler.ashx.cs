@@ -265,13 +265,10 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                 return;
             }
 
-            if (!await fileSecurity.CanDownloadAsync(file))
-            {                
-                if (!(fileUtility.CanImageView(file.Title) || fileUtility.CanMediaView(file.Title)))
-                {
-                    context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
-                    return;
-                }
+            if (!await CanDownloadAsync(file))
+            {
+                context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+                return;
             }
 
             if (!string.IsNullOrEmpty(file.Error))
@@ -287,9 +284,10 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                 return;
             }
             
-            await TryMarkAsRecentByLink(file);
-
-            await fileMarker.RemoveMarkAsNewAsync(file);
+            var t1 = TryMarkAsRecentByLink(file);
+            var t2 = fileMarker.RemoveMarkAsNewAsync(file).AsTask();
+            
+            await Task.WhenAll(t1, t2);
 
             context.Response.Clear();
             context.Response.Headers.Clear();
@@ -452,6 +450,17 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                 await context.Response.WriteAsync(HttpUtility.HtmlEncode(ex.Message));
             }
         }
+    }
+
+    private async Task<bool> CanDownloadAsync<T>(File<T> file)
+    {
+        if (await fileSecurity.CanDownloadAsync(file))
+        {
+            return true;
+        }
+
+        return (fileUtility.CanImageView(file.Title) || fileUtility.CanMediaView(file.Title)) &&
+               file.ShareRecord is { IsLink: true, Share: not FileShare.Restrict };
     }
 
     private async Task TryMarkAsRecentByLink<T>(File<T> file)
@@ -1008,7 +1017,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                 return;
             }
 
-            if (!await fileSecurity.CanReadAsync(file))
+            if (!await CanDownloadAsync(file))
             {
                 context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
                 return;
@@ -1027,7 +1036,15 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                 return;
             }
 
-            await TryMarkAsRecentByLink(file);
+            
+            var view = bool.TryParse(context.Request.Query[FilesLinkUtility.View].FirstOrDefault(), out var v) && v;
+            if (view)
+            {
+                var t1 = TryMarkAsRecentByLink(file);
+                var t2 = fileMarker.RemoveMarkAsNewAsync(file).AsTask();
+                
+                await Task.WhenAll(t1, t2);
+            }
 
             if (force)
             {
@@ -1091,10 +1108,24 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
         try
         {
             var defaultSize = thumbnailSettings.Sizes.FirstOrDefault();
-
             if (defaultSize == null)
             {
                 context.Response.StatusCode = (int)HttpStatusCode.NotFound;
+                return;
+            }
+            
+            var fileDao = daoFactory.GetFileDao<string>();
+            var file = await fileDao.GetFileAsync(id);
+            
+            if (file == null)
+            {
+                context.Response.StatusCode = (int)HttpStatusCode.NotFound;
+                return;
+            }
+            
+            if (!await CanDownloadAsync(file))
+            {
+                context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
                 return;
             }
 
@@ -1111,8 +1142,12 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
 
             context.Response.Headers.Append("Content-Disposition", ContentDispositionUtil.GetHeaderValue("." + global.ThumbnailExtension));
             context.Response.ContentType = MimeMapping.GetMimeMapping("." + global.ThumbnailExtension);
-
-            var fileDao = daoFactory.GetFileDao<string>();
+            
+            var view = bool.TryParse(context.Request.Query[FilesLinkUtility.View].FirstOrDefault(), out var v) && v;
+            if (view)
+            {
+                await fileMarker.RemoveMarkAsNewAsync(file);
+            }
 
             await using var stream = await fileDao.GetThumbnailAsync(id, width, height);
             await stream.CopyToAsync(context.Response.Body);

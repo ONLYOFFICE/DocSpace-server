@@ -221,7 +221,7 @@ public class MessageSettingsController(MessageService messageService,
                         var address = new MailAddress(email);
                         if (tenant.TrustedDomains.Any(d => address.Address.EndsWith("@" + d.Replace("*", ""), StringComparison.InvariantCultureIgnoreCase)))
                         {
-                            await studioNotifyService.SendJoinMsgAsync(email, emplType, inDto.Culture);
+                            await studioNotifyService.SendJoinMsgAsync(email, emplType, inDto.Culture, true);
                             await messageService.SendAsync(MessageInitiator.System, MessageAction.SentInviteInstructions, email);
                             return Resource.FinishInviteJoinEmailMessage;
                         }
@@ -230,7 +230,7 @@ public class MessageSettingsController(MessageService messageService,
                     }
                 case TenantTrustedDomainsType.All:
                     {
-                        await studioNotifyService.SendJoinMsgAsync(email, emplType, inDto.Culture);
+                        await studioNotifyService.SendJoinMsgAsync(email, emplType, inDto.Culture, true);
                         await messageService.SendAsync(MessageInitiator.System, MessageAction.SentInviteInstructions, email);
                         return Resource.FinishInviteJoinEmailMessage;
                     }
