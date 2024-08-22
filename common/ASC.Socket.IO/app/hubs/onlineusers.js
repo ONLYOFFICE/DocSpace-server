@@ -93,6 +93,9 @@ module.exports = async (io) => {
 
       async function LeaveAsync(usersList, key, redisKey, socketKey, socketDest, sessionId) 
       {
+        if(sessionId == -1 ){
+          return;
+        }
         var user = getUser(usersList, userId, key);
         if (user) 
         {
@@ -164,7 +167,7 @@ module.exports = async (io) => {
           user = {
             id: userId,
             displayName: userName,
-            page: session?.user?.profileUrl,
+            page: socket.handshake.session?.user?.profileUrl,
             sessions: sessions,
             status: "online",
             offlineSessions: offSess
@@ -237,7 +240,6 @@ module.exports = async (io) => {
       {
         var serUser = {
           userId: user.id,
-          displayName: user.displayName,
           page: user.page,
           sessions: Array.from(user.sessions, ([name, value]) => {
             return value;
