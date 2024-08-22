@@ -44,7 +44,7 @@ public class AuditInterpreter(IServiceProvider serviceProvider)
         { (int)MessageAction.FileCreated, new FileCreateInterpreter() },
         { (int)MessageAction.FileUploaded, new FileUploadedInterpreter() },
         { (int)MessageAction.FileUploadedWithOverwriting, new FileUploadedInterpreter() },
-        { (int)MessageAction.UserFileUpdated, new FileUpdatedInterpreter() },
+        { (int)MessageAction.UserFileUpdated, new UserFileUpdatedInterpreter() },
         { (int)MessageAction.FileRenamed, new FileRenamedInterpreter() },
         { (int)MessageAction.FileMoved, _fileMovedInterpreter },
         { (int)MessageAction.FileMovedWithOverwriting, _fileMovedInterpreter },
