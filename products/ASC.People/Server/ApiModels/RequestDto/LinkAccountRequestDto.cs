@@ -34,7 +34,7 @@ public class LinkAccountRequestDto
 
 public class SignupAccountRequestDto : LinkAccountRequestDto
 {
-    [SwaggerSchemaCustomString("Employee type (All, RoomAdmin, User, DocSpaceAdmin, Collaborator)", Example = "All")]
+    [SwaggerSchemaCustom("Employee type")]
     public EmployeeType? EmployeeType { get; set; }
 
     [SwaggerSchemaCustom("First name")]

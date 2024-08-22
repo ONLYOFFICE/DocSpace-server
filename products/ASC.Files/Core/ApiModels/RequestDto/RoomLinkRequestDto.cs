@@ -34,7 +34,7 @@ public class RoomLinkRequestDto : LinkRequestDtoBase
     [StringLength(255)]
     public string Title { get; set; }
 
-    [SwaggerSchemaCustomString("Link type (Invitation or External)", Example = "Invitation")]
+    [SwaggerSchemaCustom("Link type")]
     public LinkType LinkType { get; set; }
 
     [SwaggerSchemaCustom("Link password")]

@@ -46,7 +46,7 @@ public class LoginEventDto
     [SwaggerSchemaCustom("Action")]
     public string Action { get; set; }
 
-    [SwaggerSchemaCustomString("Action ID", Example = "None")]
+    [SwaggerSchemaCustom("Action ID")]
     public MessageAction ActionId { get; set; }
 
     [SwaggerSchemaCustom("IP")]

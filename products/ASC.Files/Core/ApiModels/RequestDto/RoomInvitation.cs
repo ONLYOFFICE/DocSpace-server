@@ -31,6 +31,6 @@ public class RoomInvitation : EmailInvitationDto
     [SwaggerSchemaCustom("ID of the user with whom we want to share a room")]
     public Guid Id { get; set; }
 
-    [SwaggerSchemaCustomString("Sharing rights (None, ReadWrite, Read, Restrict, Varies, Review, Comment, FillForms, CustomFilter, RoomAdmin, Editing)", Example = "None")]
+    [SwaggerSchemaCustom("Sharing rights")]
     public FileShare Access { get; set; }
 }

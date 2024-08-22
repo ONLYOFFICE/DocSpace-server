@@ -40,7 +40,7 @@ public class DocumentBuilderTaskDto
     [SwaggerSchemaCustom("Is completed")]
     public bool IsCompleted { get; set; }
 
-    [SwaggerSchemaCustomString("Status", Example = "Created")]
+    [SwaggerSchemaCustom("Status")]
     public DistributedTaskStatus Status { get; set; }
 
     [SwaggerSchemaCustom<object>("Result file id")]

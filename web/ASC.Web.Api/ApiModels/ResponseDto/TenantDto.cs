@@ -49,7 +49,7 @@ public class TenantDto : IMapFrom<Tenant>
     [SwaggerSchemaCustom("Tenant ID")]
     public int TenantId { get; internal set; }
 
-    [SwaggerSchemaCustomString("Tenant industry", Example = "Other")]
+    [SwaggerSchemaCustom("Tenant industry")]
     public TenantIndustry Industry { get; set; }
 
     [SwaggerSchemaCustom("Language")]
@@ -73,7 +73,7 @@ public class TenantDto : IMapFrom<Tenant>
     [SwaggerSchemaCustom("Specifies if the ONLYOFFICE newsletter is allowed or not")]
     public bool Spam { get; set; }
 
-    [SwaggerSchemaCustomString("Tenant status", Example = "Active")]
+    [SwaggerSchemaCustom("Tenant status")]
     public TenantStatus Status { get; internal set; }
 
     [SwaggerSchemaCustom("The date and time when the tenant status was changed")]
@@ -88,7 +88,7 @@ public class TenantDto : IMapFrom<Tenant>
     [SwaggerSchemaCustom("Trusted domains in the string format")]
     public string TrustedDomainsRaw { get; set; }
 
-    [SwaggerSchemaCustomString("Trusted domains type", Example = "None")]
+    [SwaggerSchemaCustom("Trusted domains type")]
     public TenantTrustedDomainsType TrustedDomainsType { get; set; }
 
     [SwaggerSchemaCustom("Version")]

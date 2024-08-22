@@ -31,10 +31,10 @@ public class GroupMemberSecurityDto
     [SwaggerSchemaCustom<EmployeeFullDto>("User")]
     public EmployeeFullDto User { get; init; }
 
-    [SwaggerSchemaCustomString("Group access", Example = "None")]
+    [SwaggerSchemaCustom("Group access")]
     public FileShare GroupAccess { get; init; }
 
-    [SwaggerSchemaCustomString("User access", Example = "None", Nullable = true)]
+    [SwaggerSchemaCustom("User access")]
     public FileShare? UserAccess { get; init; }
 
     [SwaggerSchemaCustom("Overridden")]

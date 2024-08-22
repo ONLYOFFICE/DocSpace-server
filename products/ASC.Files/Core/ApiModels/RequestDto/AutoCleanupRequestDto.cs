@@ -31,6 +31,6 @@ public class AutoCleanupRequestDto
     [SwaggerSchemaCustom("Enables the auto-clearing or not")]
     public bool Set { get; set; }
 
-    [SwaggerSchemaCustomString("A time interval when the auto-clearing will be performed", Example = "OneWeek")]
+    [SwaggerSchemaCustom("A time interval when the auto-clearing will be performed")]
     public DateToAutoCleanUp Gap { get; set; }
 }

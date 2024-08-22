@@ -28,7 +28,7 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 public class MailDomainSettingsRequestsDto
 {
-    [SwaggerSchemaCustomString("Trusted domain type", Example = "None")]
+    [SwaggerSchemaCustom("Trusted domain type")]
     public TenantTrustedDomainsType Type { get; set; }
 
     [SwaggerSchemaCustom("List of trusted domains")]

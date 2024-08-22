@@ -31,7 +31,7 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public class ExternalShareDto : IMapFrom<ValidationInfo>
 {
-    [SwaggerSchemaCustomString("External data status", Example = "Ok")]
+    [SwaggerSchemaCustom("External data status")]
     public Status Status { get; set; }
 
     [SwaggerSchemaCustom("External data ID")]

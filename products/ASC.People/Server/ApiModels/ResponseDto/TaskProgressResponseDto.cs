@@ -40,7 +40,7 @@ public class TaskProgressResponseDto
     [SwaggerSchemaCustom("IsCompleted")]
     public bool IsCompleted { get; set; }
 
-    [SwaggerSchemaCustomString("Status", Example = "Completed")]
+    [SwaggerSchemaCustom("Status", Example = "Completed")]
     public DistributedTaskStatus Status { get; set; }
 
     public static TaskProgressResponseDto Get(DistributedTaskProgress progressItem)

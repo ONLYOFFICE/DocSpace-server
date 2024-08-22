@@ -58,7 +58,7 @@ public class AuthRequestsDto
     [SwaggerSchemaCustom<ConfirmData>("Confirmation data")]
     public ConfirmData ConfirmData { get; set; }
 
-    [SwaggerSchemaCustomString("Type of captcha", Example = "Default")]
+    [SwaggerSchemaCustom("Type of captcha")]
     public RecaptchaType RecaptchaType { get; set; }
 
     [SwaggerSchemaCustom("reCAPTCHA response")]

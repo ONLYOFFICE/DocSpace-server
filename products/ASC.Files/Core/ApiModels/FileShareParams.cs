@@ -34,7 +34,7 @@ public class FileShareParams
     [SwaggerSchemaCustom("User email address")]
     public string Email { get; set; }
 
-    [SwaggerSchemaCustomString("Sharing rights", Example = "None")]
+    [SwaggerSchemaCustom("Sharing rights")]
     public FileShare Access { get; set; }
 }
 

@@ -58,7 +58,7 @@ public class FolderDto<T> : FileEntryDto<T>
     [SwaggerSchemaCustom("Specifies if a folder is pinned or not")]
     public bool Pinned { get; set; }
 
-    [SwaggerSchemaCustomString("Room type", Example = "PublicRoom", Nullable = true)]
+    [SwaggerSchemaCustom("Room type")]
     public RoomType? RoomType { get; set; }
 
     [SwaggerSchemaCustom("Specifies if a folder is private or not")]

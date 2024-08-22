@@ -95,7 +95,7 @@ public class LdapRequestsDto : IMapFrom<LdapSettings>
     [SwaggerSchemaCustom("Specifies if the certificate is accepted or not")]
     public bool AcceptCertificate { get; set; }
 
-    [SwaggerSchemaCustomString("Users type (All, RoomAdmin, User, DocSpaceAdmin, Collaborator)", Example = "All")]
+    [SwaggerSchemaCustom("Users type")]
     public EmployeeType UsersType { get; set; }
 
     public void Mapping(Profile profile)

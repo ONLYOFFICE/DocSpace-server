@@ -47,7 +47,6 @@ public static class OpenApiExtension
 
             c.SwaggerDoc("common", new OpenApiInfo { Title = assemblyName, Version = "v2" });
             c.SchemaFilter<SwaggerSchemaCustomFilter>();
-            c.SchemaFilter<SwaggerEnumFilter>();
             c.EnableAnnotations();
             
             // ToDo: add security definitions

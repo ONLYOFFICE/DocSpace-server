@@ -31,7 +31,7 @@ public class FileOperationDto
     [SwaggerSchemaCustom("Operation ID")]
     public string Id { get; set; }
 
-    [SwaggerSchemaCustomString("Operation type", Example = "Move")]
+    [SwaggerSchemaCustom("Operation type")]
     [JsonPropertyName("Operation")]
     public FileOperationType OperationType { get; init; }
 

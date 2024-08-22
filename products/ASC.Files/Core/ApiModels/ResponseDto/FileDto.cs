@@ -43,7 +43,7 @@ public class FileDto<T> : FileEntryDto<T>
     [SwaggerSchemaCustom("Pure content length")]
     public long? PureContentLength { get; set; }
 
-    [SwaggerSchemaCustomString("File status", Example = "None")]
+    [SwaggerSchemaCustom("File status")]
     public FileStatus FileStatus { get; set; }
 
     [SwaggerSchemaCustom("Muted or not", Example = false)]
@@ -55,7 +55,7 @@ public class FileDto<T> : FileEntryDto<T>
     [SwaggerSchemaCustom("Web URL", Format = "uri")]
     public string WebUrl { get; set; }
 
-    [SwaggerSchemaCustomString("File type", Example = "Document")]
+    [SwaggerSchemaCustom("File type")]
     public FileType FileType { get; set; }
 
     [SwaggerSchemaCustom("File extension", Example = ".txt")]
@@ -70,7 +70,7 @@ public class FileDto<T> : FileEntryDto<T>
     [SwaggerSchemaCustom("Thumbnail URL", Format = "uri")]
     public string ThumbnailUrl { get; set; }
 
-    [SwaggerSchemaCustomString("Thumbnail status", Example = "Created")]
+    [SwaggerSchemaCustom("Thumbnail status")]
     public Thumbnail ThumbnailStatus { get; set; }
 
     [SwaggerSchemaCustom("Locked or not")]

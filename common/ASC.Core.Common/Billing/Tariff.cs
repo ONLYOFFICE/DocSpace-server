@@ -32,7 +32,7 @@ public class Tariff
     [SwaggerSchemaCustom("ID")]
     public int Id { get; set; }
 
-    [SwaggerSchemaCustomString("Tariff state", Example = "Trial")]
+    [SwaggerSchemaCustom("Tariff state")]
     public TariffState State { get; set; }
 
     [SwaggerSchemaCustom("Due date")]

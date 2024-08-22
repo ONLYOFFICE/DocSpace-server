@@ -64,10 +64,10 @@ public class DbTenant : IMapFrom<Tenant>
     [SwaggerSchemaCustom("Trusted domains raw")]
     public string TrustedDomainsRaw { get; set; }
 
-    [SwaggerSchemaCustomString("Trusted domains enabled", Example = "None")]
+    [SwaggerSchemaCustom("Trusted domains enabled")]
     public TenantTrustedDomainsType TrustedDomainsEnabled { get; set; }
 
-    [SwaggerSchemaCustomString("Status", Example = "Active")]
+    [SwaggerSchemaCustom("Status")]
     public TenantStatus Status { get; set; }
 
     [SwaggerSchemaCustom("Status changed")]

@@ -43,7 +43,7 @@ public class AuditEventDto
     [SwaggerSchemaCustom("Action")]
     public string Action { get; set; }
 
-    [SwaggerSchemaCustomString("Action ID", Example = "None")]
+    [SwaggerSchemaCustom("Action ID")]
     public MessageAction ActionId { get; set; }
 
     [SwaggerSchemaCustom("IP")]
@@ -64,19 +64,19 @@ public class AuditEventDto
     [SwaggerSchemaCustom("Page")]
     public string Page { get; set; }
 
-    [SwaggerSchemaCustomString("Action type", Example = "None")]
+    [SwaggerSchemaCustom("Action type")]
     public ActionType ActionType { get; set; }
 
-    [SwaggerSchemaCustomString("Product type", Example = "None")]
+    [SwaggerSchemaCustom("Product type")]
     public ProductType Product { get; set; }
 
-    [SwaggerSchemaCustomString("Module type", Example = "None")]
+    [SwaggerSchemaCustom("Module type")]
     public ModuleType Module { get; set; }
 
     [SwaggerSchemaCustom("List of targets")]
     public IEnumerable<string> Target { get; set; }
 
-    [SwaggerSchemaCustomString("List of entry types", Example = "None")]
+    [SwaggerSchemaCustom("List of entry types")]
     public IEnumerable<EntryType> Entries { get; set; }
 
     [SwaggerSchemaCustom("Context")]

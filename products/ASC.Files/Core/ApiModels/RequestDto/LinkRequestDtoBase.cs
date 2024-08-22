@@ -31,7 +31,7 @@ public abstract class LinkRequestDtoBase
     [SwaggerSchemaCustom("Link ID")]
     public Guid LinkId { get; set; }
 
-    [SwaggerSchemaCustomString("Sharing rights", Example = "None")]
+    [SwaggerSchemaCustom("Sharing rights")]
     public FileShare Access { get; set; }
 
     [SwaggerSchemaCustom<ApiDateTime>("Link expiration date")]

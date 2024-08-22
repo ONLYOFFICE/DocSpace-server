@@ -1,4 +1,5 @@
-﻿using Microsoft.OpenApi.Any;
+﻿using Microsoft.OpenApi;
+using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 
 using Swashbuckle.AspNetCore.Annotations;
@@ -53,6 +54,12 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
 {
     public void Apply(OpenApiSchema schema, SchemaFilterContext context)
     {
+        if (schema.Enum is { Count: > 0 } && context.Type is { IsEnum: true })
+        {
+            UpdateSchema(context.Type, schema);
+            return;
+        }
+        
         if (context.MemberInfo is not PropertyInfo propertyInfo)
         {
             return;
@@ -62,22 +69,11 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
 
         if (swaggerSchemaCustomAttribute != null)
         {
-            var (defaultExample, nullable, format) = GetExample(propertyInfo.PropertyType);
+            UpdateSchema(propertyInfo.PropertyType, schema);
             if (swaggerSchemaCustomAttribute.Example != null)
             {
-                schema.Example = GetExample(swaggerSchemaCustomAttribute.Example) ?? defaultExample;
+                schema.Example = GetExample(swaggerSchemaCustomAttribute.Example);
             }
-            else
-            {
-                schema.Example = defaultExample;
-            }
-
-            schema.Nullable = nullable;
-            if (!string.IsNullOrEmpty(format))
-            {
-                schema.Format = format;
-            }
-            
             return;
         }
             
@@ -112,49 +108,41 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
         return exampleProperty == null ? null : exampleProperty.GetValue(attribute);
     }
 
-    private (IOpenApiAny, bool, string) GetExample(Type checkType)
+    private OpenApiSchema UpdateSchema(Type checkType, OpenApiSchema result)
     {
-        IOpenApiAny example = null;
-        var nullable = false;
-        string format = null;
-        
         var nullableType = Nullable.GetUnderlyingType(checkType);
         if (nullableType != null)
         {
-            nullable = true;
             checkType = nullableType;
         }
             
         if (checkType == typeof(int))
         {
-            example = new OpenApiInteger(SwaggerSchemaCustomIntAttribute.DefaultExample);
-            format = "int32";
+            result.Example = new OpenApiInteger(SwaggerSchemaCustomIntAttribute.DefaultExample);
         } 
         else if (checkType == typeof(long) || checkType == typeof(ulong))
         {
-            example = new OpenApiLong(1234);
-            format = "int64";
+            result.Example = new OpenApiLong(1234);
         }
         else if (checkType == typeof(string))
         {
-            example = new OpenApiString(SwaggerSchemaCustomStringAttribute.DefaultExample);
+            result.Example = new OpenApiString(SwaggerSchemaCustomStringAttribute.DefaultExample);
         }
         else if (checkType == typeof(bool))
         {
-            example = new OpenApiBoolean(true);
+            result.Example = new OpenApiBoolean(true);
         }
         else if (checkType == typeof(double))
         {
-            example = new OpenApiDouble(-8.5);
-            format = "double";
+            result.Example = new OpenApiDouble(-8.5);
         }
         else if (checkType == typeof(DateTime))
         {
-            example = new OpenApiDateTime(new DateTime(2008, 4, 10, 06, 30, 00));
+            result.Example = new OpenApiDateTime(new DateTime(2008, 4, 10, 06, 30, 00));
         }
         else if (checkType == typeof(Guid))
         {
-            example = new OpenApiString(new Guid("{75A5F745-F697-4418-B38D-0FE0D277E258}").ToString());
+            result.Example = new OpenApiString(new Guid("{75A5F745-F697-4418-B38D-0FE0D277E258}").ToString());
         }
         else if(typeof(IEnumerable).IsAssignableFrom(checkType))
         {
@@ -168,16 +156,45 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
                 checkType = checkType.GetElementType();
             }
             
-            var (arrayExample, _, _) = GetExample(checkType);
-            array.Add(arrayExample);
-            example = array;
+            var arraySchema = UpdateSchema(checkType, new OpenApiSchema());
+            array.Add(arraySchema.Example);
+            result.Example = array;
         }
         else if(checkType == typeof(JsonElement))
         {
             
         }
+        else if (checkType.IsEnum)
+        {
+            var enumData = new List<IOpenApiAny>();
+            var enumDescription = new List<string>();
+            
+            foreach(var enumValue in Enum.GetValues(checkType))
+            {
+                var value = checkType.GetMember(enumValue.ToString())[0];
+                var enumAttribute = value.GetCustomAttributes<SwaggerEnumAttribute>().FirstOrDefault();
+                if (enumAttribute is { Ignore: false })
+                {
+                    enumData.Add(new OpenApiString(enumValue.ToString()));
+                    enumDescription.Add($"{Convert.ToInt32(enumValue)} - {enumAttribute.Description}");
+                }
+            }
 
-        return (example, nullable, format);
+            if(enumData.Count > 0)
+            {
+                result.Format = null;
+                result.Type = "string";
+                result.Enum = enumData;
+                result.Description = $"[{string.Join(", ", enumDescription)}]";
+                result.Example = enumData[0];
+            }
+        }
+        else
+        {
+            
+        }
+
+        return result;
     }
     
     private IOpenApiAny GetExample(object exampleValue)

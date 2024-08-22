@@ -38,6 +38,6 @@ public class InviteUsersRequestDto
 
 public class UserInvitation : EmailInvitationDto
 {
-    [SwaggerSchemaCustomString("Employee type", Example = "All")]
+    [SwaggerSchemaCustom("Employee type")]
     public EmployeeType Type { get; set; }
 }

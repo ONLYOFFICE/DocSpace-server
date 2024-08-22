@@ -28,7 +28,7 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public class FileShareDto
 {
-    [SwaggerSchemaCustomString("Sharing rights", Example = "None")]
+    [SwaggerSchemaCustom("Sharing rights")]
     public FileShare Access { get; set; }
 
     [SwaggerSchemaCustom<object>("A user who has the access to the specified file")]
@@ -43,7 +43,7 @@ public class FileShareDto
     [SwaggerSchemaCustom("Spceifies if this user can edit the access to the specified file or not")]
     public bool CanEditAccess { get; set; }
 
-    [SwaggerSchemaCustomString("Subject type", Example = "User")]
+    [SwaggerSchemaCustom("Subject type")]
     public SubjectType SubjectType { get; set; }
 
     public static FileShareDto GetSample()
@@ -72,7 +72,7 @@ public class FileShareLink
     [SwaggerSchemaCustom<ApiDateTime>("Expiration date")]
     public ApiDateTime ExpirationDate { get; set; }
 
-    [SwaggerSchemaCustomString("link type", Example = "Invitation")]
+    [SwaggerSchemaCustom("link type")]
     public LinkType LinkType { get; set; }
     public string Password { get; set; }
     public bool? DenyDownload { get; set; }

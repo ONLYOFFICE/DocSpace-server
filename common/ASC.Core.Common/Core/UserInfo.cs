@@ -46,10 +46,10 @@ public sealed class UserInfo : IDirectRecipient, ICloneable, IMapFrom<User>
     [SwaggerSchemaCustom("Sex (male or female)")]
     public bool? Sex { get; set; }
 
-    [SwaggerSchemaCustomString("Status", Example = "Active")]
+    [SwaggerSchemaCustom("Status")]
     public EmployeeStatus Status { get; set; } = EmployeeStatus.Active;
 
-    [SwaggerSchemaCustomString("Activation status", Example = "Activated")]
+    [SwaggerSchemaCustom("Activation status")]
     public EmployeeActivationStatus ActivationStatus { get; set; } = EmployeeActivationStatus.NotActivated;
 
     [SwaggerSchemaCustom("The date and time when the user account was terminated")]
@@ -104,7 +104,7 @@ public sealed class UserInfo : IDirectRecipient, ICloneable, IMapFrom<User>
     [SwaggerSchemaCustom("Mobile phone")]
     public string MobilePhone { get; set; }
 
-    [SwaggerSchemaCustomString("Mobile phone activation status", Example = "NotActivated")]
+    [SwaggerSchemaCustom("Mobile phone activation status")]
     public MobilePhoneActivationStatus MobilePhoneActivationStatus { get; set; }
 
     [SwaggerSchemaCustom("LDAP user identificator")]

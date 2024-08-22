@@ -49,7 +49,7 @@ public class MigratingApiUser : ImportableApiEntity
     [ProtoMember(6)]
     public string LastName { get; set; }
 
-    [SwaggerSchemaCustomString("User type", Example = "All")]
+    [SwaggerSchemaCustom("User type")]
     [ProtoMember(7)]
     public EmployeeType UserType { get; set; }
 

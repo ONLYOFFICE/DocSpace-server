@@ -178,7 +178,7 @@ public class FilesSettingsDto
     [SwaggerSchemaCustom("Can search by content")]
     public bool CanSearchByContent { get; set; }
 
-    [SwaggerSchemaCustomString("Default sharing access rights", Example = "None")]
+    [SwaggerSchemaCustom("Default sharing access rights")]
     public List<FileShare> DefaultSharingAccessRights { get; set; }
 
 

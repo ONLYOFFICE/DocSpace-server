@@ -67,7 +67,7 @@ public class BackupHistoryRecord
     [SwaggerSchemaCustom("File name")]
     public string FileName { get; set; }
 
-    [SwaggerSchemaCustomString("Storage type", Example = "Documents")]
+    [SwaggerSchemaCustom("Storage type")]
     public BackupStorageType StorageType { get; set; }
 
     [SwaggerSchemaCustom("Creation date")]

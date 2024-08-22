@@ -45,7 +45,7 @@ public abstract class FileEntryDto
     [SwaggerSchemaCustom("Title")]
     public string Title { get; set; }
 
-    [SwaggerSchemaCustomString("Access rights", Example = "None")]
+    [SwaggerSchemaCustom("Access rights")]
     public FileShare Access { get; set; }
 
     [SwaggerSchemaCustom("Specifies if the file is shared or not")]
@@ -69,10 +69,10 @@ public abstract class FileEntryDto
     [SwaggerSchemaCustom<ApiDateTime>("Time when the file will be automatically deleted")]
     public ApiDateTime AutoDelete { get; set; }
 
-    [SwaggerSchemaCustomString("Root folder type", Example = "DEFAULT")]
+    [SwaggerSchemaCustom("Root folder type")]
     public FolderType RootFolderType { get; set; }
 
-    [SwaggerSchemaCustomString("First parent folder type", Example = "DEFAULT", Nullable = true)]
+    [SwaggerSchemaCustom("First parent folder type")]
     public FolderType? ParentRoomType { get; set; }
 
     [SwaggerSchemaCustom<EmployeeDto>("A user who updated a file")]

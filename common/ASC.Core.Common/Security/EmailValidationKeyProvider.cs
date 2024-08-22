@@ -184,7 +184,7 @@ public class EmailValidationKeyModel
     [SwaggerSchemaCustom("Key")]
     public string Key { get; set; }
 
-    [SwaggerSchemaCustomString("Employee type", Example = "All", Nullable = true)]
+    [SwaggerSchemaCustom("Employee type")]
     public EmployeeType? EmplType { get; init; }
 
     [SwaggerSchemaCustom("Email")]
@@ -193,7 +193,7 @@ public class EmailValidationKeyModel
     [SwaggerSchemaCustom("User ID")]
     public Guid? UiD { get; init; }
 
-    [SwaggerSchemaCustomString("Confirmation email type", Example = "LinkInvite", Nullable = true)]
+    [SwaggerSchemaCustom("Confirmation email type")]
     public ConfirmType? Type { get; init; }
 
     [SwaggerSchemaCustom("Access an account for the first time or not")]

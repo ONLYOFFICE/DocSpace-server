@@ -76,7 +76,7 @@ public class OrderBy(SortedByType sortedByType, bool isAsc)
     [JsonPropertyName("is_asc")]
     public bool IsAsc { get; init; } = isAsc;
 
-    [SwaggerSchemaCustomString("Sorted by", Example = "DateAndTime")]
+    [SwaggerSchemaCustom("Sorted by")]
     [JsonPropertyName("property")]
     public SortedByType SortedBy { get; set; } = sortedByType;
 }

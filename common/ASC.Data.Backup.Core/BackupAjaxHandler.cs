@@ -429,7 +429,7 @@ public class BackupAjaxHandler(
 
     public class Schedule
     {
-        [SwaggerSchemaCustomString("Storage type", Example = "Documents")]
+        [SwaggerSchemaCustom("Storage type")]
         public BackupStorageType StorageType { get; set; }
 
         [SwaggerSchemaCustom<Dictionary<string, string>>("Storage parameters")]
@@ -450,7 +450,7 @@ public class BackupAjaxHandler(
 
     public class CronParams
     {
-        [SwaggerSchemaCustomString("Period", Example = "EveryWeek")]
+        [SwaggerSchemaCustom("Period")]
         public BackupPeriod Period { get; init; }
 
         [SwaggerSchemaCustom("Hour")]

@@ -69,7 +69,7 @@ public class BatchRequestDto : BaseBatchRequestDto
     [SwaggerSchemaCustom("Destination folder ID", Format = "json")]
     public JsonElement DestFolderId { get; set; }
 
-    [SwaggerSchemaCustomString("Overwriting behavior", Example = "Skip")]
+    [SwaggerSchemaCustom("Overwriting behavior")]
     public FileConflictResolveType ConflictResolveType { get; set; }
 
     [SwaggerSchemaCustom("Specifies whether to delete a folder after the editing session is finished or not")]

@@ -54,7 +54,7 @@ public class AutoCleanUpData
     [SwaggerSchemaCustom("Specifies if the auto-clearing setting is enabled or not")]
     public bool IsAutoCleanUp { get; init; }
 
-    [SwaggerSchemaCustomString("The period when the trash bin will be cleared", Example = "OneWeek")]
+    [SwaggerSchemaCustom("The period when the trash bin will be cleared")]
     public DateToAutoCleanUp Gap { get; init; }
 
     public static AutoCleanUpData GetDefault()

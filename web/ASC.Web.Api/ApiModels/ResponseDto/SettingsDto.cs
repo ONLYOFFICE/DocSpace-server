@@ -34,7 +34,7 @@ public class SettingsDto
     [SwaggerSchemaCustomString("List of trusted domains", Example = "mydomain.com")]
     public List<string> TrustedDomains { get; set; }
 
-    [SwaggerSchemaCustomString("Trusted domains type", Example = "None")]
+    [SwaggerSchemaCustom("Trusted domains type")]
     public TenantTrustedDomainsType TrustedDomainsType { get; set; }
 
     [SwaggerSchemaCustom("Language", Example = "en-US")]
@@ -85,7 +85,7 @@ public class SettingsDto
     [SwaggerSchemaCustom("Version")]
     public string Version { get; set; }
 
-    [SwaggerSchemaCustomString("Type of captcha", Example = "Default")]
+    [SwaggerSchemaCustom("Type of captcha")]
     public RecaptchaType RecaptchaType { get; set; }
 
     [SwaggerSchemaCustom("ReCAPTCHA public key")]
@@ -97,7 +97,7 @@ public class SettingsDto
     [SwaggerSchemaCustom("Socket URL")]
     public string SocketUrl { get; set; }
 
-    [SwaggerSchemaCustomString("Tenant status", Example = "Active")]
+    [SwaggerSchemaCustom("Tenant status")]
     public TenantStatus TenantStatus { get; set; }
 
     [SwaggerSchemaCustom("Tenant alias")]

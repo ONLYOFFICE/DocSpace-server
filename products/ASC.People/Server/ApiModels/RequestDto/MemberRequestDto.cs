@@ -41,7 +41,7 @@ public class MemberBaseRequestDto : EmailMemberRequestDto
 }
 public class MemberRequestDto : MemberBaseRequestDto
 {
-    [SwaggerSchemaCustomString("Employee type (All, RoomAdmin, User, DocSpaceAdmin, Collaborator)", Example = "All")]
+    [SwaggerSchemaCustom("Employee type")]
     public EmployeeType Type { get; set; }
 
     [SwaggerSchemaCustom("Specifies if this is a guest or a user")]

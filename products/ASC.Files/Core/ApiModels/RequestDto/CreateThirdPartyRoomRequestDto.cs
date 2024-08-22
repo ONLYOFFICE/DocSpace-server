@@ -34,7 +34,7 @@ public class CreateThirdPartyRoomRequestDto
     [SwaggerSchemaCustom("Room name")]
     public string Title { get; set; }
 
-    [SwaggerSchemaCustomString("Room type", Example = "CustomRoom")]
+    [SwaggerSchemaCustom("Room type")]
     public RoomType RoomType { get; set; }
 
     [SwaggerSchemaCustom("Private")]

@@ -49,10 +49,10 @@ public class EmployeeFullDto : EmployeeDto
     [SwaggerSchemaCustom("Sex")]
     public string Sex { get; set; }
 
-    [SwaggerSchemaCustomString("Employee status", Example = "Active")]
+    [SwaggerSchemaCustom("Employee status")]
     public EmployeeStatus Status { get; set; }
 
-    [SwaggerSchemaCustomString("Employee activation status", Example = "Activated")]
+    [SwaggerSchemaCustom("Employee activation status")]
     public EmployeeActivationStatus ActivationStatus { get; set; }
 
     [SwaggerSchemaCustom<ApiDateTime>("The date when the user account was terminated")]
@@ -100,13 +100,13 @@ public class EmployeeFullDto : EmployeeDto
     [SwaggerSchemaCustom("Mobile phone number")]
     public string MobilePhone { get; set; }
 
-    [SwaggerSchemaCustomString("Mobile phone activation status", Example = "NotActivated")]
+    [SwaggerSchemaCustom("Mobile phone activation status")]
     public MobilePhoneActivationStatus MobilePhoneActivationStatus { get; set; }
 
     [SwaggerSchemaCustom("Specifies if the SSO settings are enabled for the user or not")]
     public bool IsSSO { get; set; }
 
-    [SwaggerSchemaCustomString("Theme", Example = "Base", Nullable = true)]
+    [SwaggerSchemaCustom("Theme")]
     public DarkThemeSettingsType? Theme { get; set; }
 
     [SwaggerSchemaCustom("Quota limit")]

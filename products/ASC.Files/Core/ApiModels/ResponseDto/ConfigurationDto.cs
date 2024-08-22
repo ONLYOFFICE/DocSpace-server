@@ -37,7 +37,7 @@ public class ConfigurationDto<T>
     [SwaggerSchemaCustom<EditorConfigurationDto<int>>("Editor config")]
     public EditorConfigurationDto<T> EditorConfig { get; set; }
 
-    [SwaggerSchemaCustomString("Editor type", Example = "Desktop")]
+    [SwaggerSchemaCustom("Editor type")]
     public EditorType EditorType { get; set; }
 
     [SwaggerSchemaCustom("Editor URL", Format = "uri")]
@@ -227,7 +227,7 @@ public class InfoConfigDto
     [SwaggerSchemaCustom<List<AceShortWrapper>>("Sharing settings")]
     public List<AceShortWrapper> SharingSettings{ get; set; }
 
-    [SwaggerSchemaCustomString("Type", Example = "Desktop")]
+    [SwaggerSchemaCustom("Type")]
     public EditorType Type { get; set; }
 
     [SwaggerSchemaCustom("Uploaded")]
