@@ -32,7 +32,7 @@ module.exports = async (io) => {
       id = await EnterAsync(portalUsers, tenantId, userId, `p-${tenantId}`, "portal");
       socket.on("disconnect", async (reason) => {
         await LeaveAsync(portalUsers, tenantId, userId, `p-${tenantId}`, "portal", id);
-        await LeaveAsync(roomUsers, roomId, `r-${userId}`, roomId, "room", idInRoom);
+        await LeaveAsync(roomUsers, roomId, `${roomId}-${userId}`, roomId, "room", idInRoom);
         id = -1;
         idInRoom = -1;
         sessionId = -1;
@@ -40,9 +40,12 @@ module.exports = async (io) => {
 
       socket.on("getSessionsInPortal", async () => {
         var users = [];
-        Object.values(portalUsers[tenantId]).forEach(function(entry) {
-          users.push(serialize(entry));
-        });
+        if(portalUsers[tenantId])
+        {
+          Object.values(portalUsers[tenantId]).forEach(function(entry) {
+            users.push(serialize(entry));
+          });
+        }
         onlineIO.to(socket.id).emit("statuses-in-portal",  users );
       });
       
@@ -58,20 +61,23 @@ module.exports = async (io) => {
      /******************************* */
       socket.on("enterInRoom", async(roomPart)=>{
         roomId = getRoom(roomPart);
-        idInRoom = await EnterAsync(roomUsers, roomId, `r-${userId}`, roomId, "room");
+        idInRoom = await EnterAsync(roomUsers, roomId, `${roomId}-${userId}`, roomId, "room");
     });
 
     socket.on("leaveRoom", async()=>{
-      await LeaveAsync(roomUsers, roomId, `r-${userId}`, roomId, "room", idInRoom);
+      await LeaveAsync(roomUsers, roomId, `${roomId}-${userId}`, roomId, "room", idInRoom);
       idInRoom = -1;
   });
 
     socket.on("getSessionsInRoom", async (roomPart) => {
       var users = [];
       var roomId = getRoom(roomPart);
-      Object.values(roomUsers[roomId]).forEach(function(entry) {
-        users.push(serialize(entry));
-      });
+      if(roomUsers[roomId])
+      {
+        Object.values(roomUsers[roomId]).forEach(function(entry) {
+          users.push(serialize(entry));
+        });
+      }
       onlineIO.to(socket.id).emit("statuses-in-room",  users );
     });
 
