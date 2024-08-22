@@ -40,10 +40,24 @@ public class HistoryDtoHelper(EmployeeFullDtoHelper employeeFullDtoHelper, UserM
 {
     public async Task<HistoryDto> GetAsync(HistoryEntry entry)
     {
+        EmployeeDto initiator;
+        
+        if (string.IsNullOrEmpty(entry.InitiatorName))
+        {
+            initiator = await employeeFullDtoHelper.GetAsync(await userManager.GetUsersAsync(entry.InitiatorId));
+        }
+        else
+        {
+            initiator = new EmployeeDto
+            {
+                DisplayName = entry.InitiatorName
+            };
+        }
+        
         return new HistoryDto
         {
             Action = entry.Action,
-            Initiator = await employeeFullDtoHelper.GetAsync(await userManager.GetUsersAsync(entry.InitiatorId)),
+            Initiator = initiator,
             Date = apiDateTimeHelper.Get(entry.Date),
             Data = entry.Data
         };
