@@ -20,13 +20,13 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 name: "identity_certs",
                 columns: table => new
                 {
-                    id = table.Column<string>(type: "varchar(255)", nullable: false)
+                    id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     created_at = table.Column<DateTime>(type: "datetime(6)", maxLength: 6, nullable: true),
                     pair_type = table.Column<sbyte>(type: "tinyint", nullable: false),
-                    private_key = table.Column<string>(type: "text", nullable: true)
+                    private_key = table.Column<string>(type: "text", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    public_key = table.Column<string>(type: "text", nullable: true)
+                    public_key = table.Column<string>(type: "text", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
@@ -42,7 +42,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     client_id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     tenant_id = table.Column<int>(type: "int", nullable: false),
-                    client_secret = table.Column<string>(type: "varchar(255)", nullable: true)
+                    client_secret = table.Column<string>(type: "varchar(255)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     name = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -80,9 +80,26 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 {
                     name = table.Column<string>(type: "varchar(255)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    group = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
+                    group = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    type = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
+                    type = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PRIMARY", x => x.name);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "identity_shedlock",
+                columns: table => new
+                {
+                    name = table.Column<string>(type: "varchar(64)", maxLength: 64, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    lock_until = table.Column<DateTime>(type: "timestamp(3)", nullable: false),
+                    locked_at = table.Column<DateTime>(type: "timestamp(3)", nullable: false),
+                    locked_by = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
@@ -99,14 +116,14 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     principal_id = table.Column<string>(type: "varchar(255)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    authorization_grant_type = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     id = table.Column<string>(type: "varchar(255)", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     tenant_id = table.Column<int>(type: "int", nullable: false),
                     state = table.Column<string>(type: "varchar(500)", maxLength: 500, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     attributes = table.Column<string>(type: "text", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    authorization_grant_type = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     authorized_scopes = table.Column<string>(type: "text", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -141,7 +158,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PRIMARY", x => new { x.principal_id, x.registered_client_id });
+                    table.PrimaryKey("PRIMARY", x => new { x.principal_id, x.registered_client_id, x.authorization_grant_type });
                     table.ForeignKey(
                         name: "FK_authorization_client_id",
                         column: x => x.registered_client_id,
@@ -155,9 +172,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 name: "identity_client_allowed_origins",
                 columns: table => new
                 {
-                    client_id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: true)
+                    client_id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    allowed_origin = table.Column<string>(type: "tinytext", nullable: true)
+                    allowed_origin = table.Column<string>(type: "tinytext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
@@ -166,7 +183,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         name: "identity_client_allowed_origins_ibfk_1",
                         column: x => x.client_id,
                         principalTable: "identity_clients",
-                        principalColumn: "client_id");
+                        principalColumn: "client_id",
+                        onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -174,9 +192,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 name: "identity_client_authentication_methods",
                 columns: table => new
                 {
-                    client_id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: true)
+                    client_id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    authentication_method = table.Column<string>(type: "enum('client_secret_post','none')", nullable: true)
+                    authentication_method = table.Column<string>(type: "enum('client_secret_post','none')", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
@@ -185,7 +203,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         name: "identity_client_authentication_methods_ibfk_1",
                         column: x => x.client_id,
                         principalTable: "identity_clients",
-                        principalColumn: "client_id");
+                        principalColumn: "client_id",
+                        onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -193,9 +212,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 name: "identity_client_redirect_uris",
                 columns: table => new
                 {
-                    client_id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: true)
+                    client_id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    redirect_uri = table.Column<string>(type: "tinytext", nullable: true)
+                    redirect_uri = table.Column<string>(type: "tinytext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
@@ -204,7 +223,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         name: "identity_client_redirect_uris_ibfk_1",
                         column: x => x.client_id,
                         principalTable: "identity_clients",
-                        principalColumn: "client_id");
+                        principalColumn: "client_id",
+                        onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -212,9 +232,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 name: "identity_consents",
                 columns: table => new
                 {
-                    principal_id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: false)
+                    principal_id = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    registered_client_id = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
+                    registered_client_id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     is_invalidated = table.Column<bool>(type: "tinyint(1)", nullable: true, defaultValueSql: "'0'"),
                     modified_at = table.Column<DateTime>(type: "datetime(6)", maxLength: 6, nullable: true)
@@ -235,9 +255,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 name: "identity_client_scopes",
                 columns: table => new
                 {
-                    client_id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: true)
+                    client_id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    scope_name = table.Column<string>(type: "varchar(255)", nullable: true)
+                    scope_name = table.Column<string>(type: "varchar(255)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
@@ -246,12 +266,14 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         name: "identity_client_scopes_ibfk_1",
                         column: x => x.client_id,
                         principalTable: "identity_clients",
-                        principalColumn: "client_id");
+                        principalColumn: "client_id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "identity_client_scopes_ibfk_2",
                         column: x => x.scope_name,
                         principalTable: "identity_scopes",
-                        principalColumn: "name");
+                        principalColumn: "name",
+                        onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -261,7 +283,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 {
                     registered_client_id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    principal_id = table.Column<string>(type: "varchar(255)", nullable: false)
+                    principal_id = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     scope_name = table.Column<string>(type: "varchar(255)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4")
@@ -299,6 +321,11 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     { "rooms:read", "rooms", "read" },
                     { "rooms:write", "rooms", "write" }
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "idx_identity_authorizations_grant_type",
+                table: "identity_authorizations",
+                column: "authorization_grant_type");
 
             migrationBuilder.CreateIndex(
                 name: "idx_identity_authorizations_is_invalidated",
@@ -426,6 +453,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
             migrationBuilder.DropTable(
                 name: "identity_consent_scopes");
+
+            migrationBuilder.DropTable(
+                name: "identity_shedlock");
 
             migrationBuilder.DropTable(
                 name: "identity_consents");

@@ -31,11 +31,13 @@ public partial class IdentityContext : DbContext
 
     public virtual DbSet<IdentityScope> IdentityScopes { get; set; }
 
+    public virtual DbSet<IdentityShedlock> IdentityShedlocks { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<IdentityAuthorization>(entity =>
         {
-            entity.HasKey(e => new { e.PrincipalId, e.RegisteredClientId }).HasName("PRIMARY");
+            entity.HasKey(e => new { e.PrincipalId, e.RegisteredClientId, e.AuthorizationGrantType }).HasName("PRIMARY");
 
             entity.ToTable("identity_authorizations");
 
@@ -44,6 +46,8 @@ public partial class IdentityContext : DbContext
             entity.HasIndex(e => e.IsInvalidated, "idx_identity_authorizations_is_invalidated");
 
             entity.HasIndex(e => e.PrincipalId, "idx_identity_authorizations_principal_id");
+
+            entity.HasIndex(e => e.AuthorizationGrantType, "idx_identity_authorizations_grant_type");
 
             entity.HasIndex(e => e.RegisteredClientId, "idx_identity_authorizations_registered_client_id");
 
@@ -129,17 +133,21 @@ public partial class IdentityContext : DbContext
 
             entity.ToTable("identity_certs");
 
-            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Id)
+                .HasColumnName("id")
+                .HasMaxLength(36);
             entity.Property(e => e.CreatedAt)
                 .HasMaxLength(6)
                 .HasColumnName("created_at");
             entity.Property(e => e.PairType).HasColumnName("pair_type");
             entity.Property(e => e.PrivateKey)
                 .HasColumnType("text")
-                .HasColumnName("private_key");
+                .HasColumnName("private_key")
+                .IsRequired();
             entity.Property(e => e.PublicKey)
                 .HasColumnType("text")
-                .HasColumnName("public_key");
+                .HasColumnName("public_key")
+                .IsRequired();
         });
 
         modelBuilder.Entity<IdentityClient>(entity =>
@@ -159,7 +167,9 @@ public partial class IdentityContext : DbContext
             entity.Property(e => e.ClientId)
                 .HasMaxLength(36)
                 .HasColumnName("client_id");
-            entity.Property(e => e.ClientSecret).HasColumnName("client_secret");
+            entity.Property(e => e.ClientSecret)
+                .HasColumnName("client_secret")
+                .IsRequired();
             entity.Property(e => e.CreatedBy)
                 .HasMaxLength(255)
                 .HasColumnName("created_by");
@@ -211,10 +221,12 @@ public partial class IdentityContext : DbContext
 
             entity.Property(e => e.AllowedOrigin)
                 .HasColumnType("tinytext")
-                .HasColumnName("allowed_origin");
+                .HasColumnName("allowed_origin")
+                .IsRequired();
             entity.Property(e => e.ClientId)
                 .HasMaxLength(36)
-                .HasColumnName("client_id");
+                .HasColumnName("client_id")
+                .IsRequired();
 
             entity.HasOne(d => d.Client).WithMany()
                 .HasForeignKey(d => d.ClientId)
@@ -231,10 +243,12 @@ public partial class IdentityContext : DbContext
 
             entity.Property(e => e.AuthenticationMethod)
                 .HasColumnType("enum('client_secret_post','none')")
-                .HasColumnName("authentication_method");
+                .HasColumnName("authentication_method")
+                .IsRequired();
             entity.Property(e => e.ClientId)
                 .HasMaxLength(36)
-                .HasColumnName("client_id");
+                .HasColumnName("client_id")
+                .IsRequired();
 
             entity.HasOne(d => d.Client).WithMany()
                 .HasForeignKey(d => d.ClientId)
@@ -251,10 +265,12 @@ public partial class IdentityContext : DbContext
 
             entity.Property(e => e.ClientId)
                 .HasMaxLength(36)
-                .HasColumnName("client_id");
+                .HasColumnName("client_id")
+                .IsRequired();
             entity.Property(e => e.RedirectUri)
                 .HasColumnType("tinytext")
-                .HasColumnName("redirect_uri");
+                .HasColumnName("redirect_uri")
+                .IsRequired();
 
             entity.HasOne(d => d.Client).WithMany()
                 .HasForeignKey(d => d.ClientId)
@@ -273,8 +289,11 @@ public partial class IdentityContext : DbContext
 
             entity.Property(e => e.ClientId)
                 .HasMaxLength(36)
-                .HasColumnName("client_id");
-            entity.Property(e => e.ScopeName).HasColumnName("scope_name");
+                .HasColumnName("client_id")
+                .IsRequired();
+            entity.Property(e => e.ScopeName)
+                .HasColumnName("scope_name")
+                .IsRequired();
 
             entity.HasOne(d => d.Client).WithMany()
                 .HasForeignKey(d => d.ClientId)
@@ -298,10 +317,10 @@ public partial class IdentityContext : DbContext
             entity.HasIndex(e => e.RegisteredClientId, "idx_identity_consents_registered_client_id");
 
             entity.Property(e => e.PrincipalId)
-            .HasMaxLength(36)
+            .HasMaxLength(255)
             .HasColumnName("principal_id");
             entity.Property(e => e.RegisteredClientId)
-            .HasMaxLength(255)
+            .HasMaxLength(36)
             .HasColumnName("registered_client_id");
             entity.Property(e => e.IsInvalidated)
                 .HasDefaultValueSql("'0'")
@@ -330,7 +349,8 @@ public partial class IdentityContext : DbContext
             entity.Property(e => e.RegisteredClientId)
                 .HasMaxLength(36)
                 .HasColumnName("registered_client_id");
-            entity.Property(e => e.PrincipalId).HasColumnName("principal_id");
+            entity.Property(e => e.PrincipalId).HasColumnName("principal_id")
+                .HasMaxLength(255);
             entity.Property(e => e.ScopeName).HasColumnName("scope_name");
 
             entity.HasOne(d => d.Consent)
@@ -353,10 +373,12 @@ public partial class IdentityContext : DbContext
             entity.Property(e => e.Name).HasColumnName("name");
             entity.Property(e => e.Group)
                 .HasMaxLength(255)
-                .HasColumnName("group");
+                .HasColumnName("group")
+                .IsRequired();
             entity.Property(e => e.Type)
                 .HasMaxLength(255)
-                .HasColumnName("type");
+                .HasColumnName("type")
+                .IsRequired();
 
             entity.HasData(new IdentityScope
             {
@@ -420,6 +442,27 @@ public partial class IdentityContext : DbContext
                 Group = "rooms",
                 Type = "write"
             });
+        });
+
+        modelBuilder.Entity<IdentityShedlock>(entity =>
+        {
+            entity.HasKey(e => e.Name).HasName("PRIMARY");
+
+            entity.ToTable("identity_shedlock");
+
+            entity.Property(e => e.Name)
+                .HasMaxLength(64)
+                .HasColumnName("name");
+            entity.Property(e => e.LockUntil)
+                .HasColumnType("timestamp(3)")
+                .HasColumnName("lock_until");
+            entity.Property(e => e.LockedAt)
+                .HasColumnType("timestamp(3)")
+                .HasColumnName("locked_at");
+            entity.Property(e => e.LockedBy)
+                .HasMaxLength(255)
+                .HasColumnName("locked_by")
+                .IsRequired();
         });
 
         OnModelCreatingPartial(modelBuilder);

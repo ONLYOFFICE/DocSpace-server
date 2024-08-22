@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     [DbContext(typeof(IdentityContext))]
-    [Migration("20240813113143_IdentityContextMigrate")]
+    [Migration("20240822112702_IdentityContextMigrate")]
     partial class IdentityContextMigrate
     {
         /// <inheritdoc />
@@ -33,6 +33,11 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Property<string>("RegisteredClientId")
                         .HasColumnType("varchar(36)")
                         .HasColumnName("registered_client_id");
+
+                    b.Property<string>("AuthorizationGrantType")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("authorization_grant_type");
 
                     b.Property<DateTime?>("AccessTokenExpiresAt")
                         .HasMaxLength(6)
@@ -88,11 +93,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("text")
                         .HasColumnName("authorization_code_value");
 
-                    b.Property<string>("AuthorizationGrantType")
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)")
-                        .HasColumnName("authorization_grant_type");
-
                     b.Property<string>("AuthorizedScopes")
                         .HasColumnType("text")
                         .HasColumnName("authorized_scopes");
@@ -143,11 +143,13 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("int")
                         .HasColumnName("tenant_id");
 
-                    b.HasKey("PrincipalId", "RegisteredClientId")
+                    b.HasKey("PrincipalId", "RegisteredClientId", "AuthorizationGrantType")
                         .HasName("PRIMARY");
 
                     b.HasIndex(new[] { "Id" }, "UK_id")
                         .IsUnique();
+
+                    b.HasIndex(new[] { "AuthorizationGrantType" }, "idx_identity_authorizations_grant_type");
 
                     b.HasIndex(new[] { "IsInvalidated" }, "idx_identity_authorizations_is_invalidated");
 
@@ -161,7 +163,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
             modelBuilder.Entity("ASC.Migrations.Core.Identity.IdentityCert", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("varchar(255)")
+                        .HasMaxLength(36)
+                        .HasColumnType("varchar(36)")
                         .HasColumnName("id");
 
                     b.Property<DateTime?>("CreatedAt")
@@ -174,10 +177,12 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("pair_type");
 
                     b.Property<string>("PrivateKey")
+                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("private_key");
 
                     b.Property<string>("PublicKey")
+                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("public_key");
 
@@ -195,6 +200,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("client_id");
 
                     b.Property<string>("ClientSecret")
+                        .IsRequired()
                         .HasColumnType("varchar(255)")
                         .HasColumnName("client_secret");
 
@@ -288,10 +294,12 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
             modelBuilder.Entity("ASC.Migrations.Core.Identity.IdentityClientAllowedOrigin", b =>
                 {
                     b.Property<string>("AllowedOrigin")
+                        .IsRequired()
                         .HasColumnType("tinytext")
                         .HasColumnName("allowed_origin");
 
                     b.Property<string>("ClientId")
+                        .IsRequired()
                         .HasMaxLength(36)
                         .HasColumnType("varchar(36)")
                         .HasColumnName("client_id");
@@ -304,10 +312,12 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
             modelBuilder.Entity("ASC.Migrations.Core.Identity.IdentityClientAuthenticationMethod", b =>
                 {
                     b.Property<string>("AuthenticationMethod")
+                        .IsRequired()
                         .HasColumnType("enum('client_secret_post','none')")
                         .HasColumnName("authentication_method");
 
                     b.Property<string>("ClientId")
+                        .IsRequired()
                         .HasMaxLength(36)
                         .HasColumnType("varchar(36)")
                         .HasColumnName("client_id");
@@ -320,11 +330,13 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
             modelBuilder.Entity("ASC.Migrations.Core.Identity.IdentityClientRedirectUri", b =>
                 {
                     b.Property<string>("ClientId")
+                        .IsRequired()
                         .HasMaxLength(36)
                         .HasColumnType("varchar(36)")
                         .HasColumnName("client_id");
 
                     b.Property<string>("RedirectUri")
+                        .IsRequired()
                         .HasColumnType("tinytext")
                         .HasColumnName("redirect_uri");
 
@@ -336,11 +348,13 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
             modelBuilder.Entity("ASC.Migrations.Core.Identity.IdentityClientScope", b =>
                 {
                     b.Property<string>("ClientId")
+                        .IsRequired()
                         .HasMaxLength(36)
                         .HasColumnType("varchar(36)")
                         .HasColumnName("client_id");
 
                     b.Property<string>("ScopeName")
+                        .IsRequired()
                         .HasColumnType("varchar(255)")
                         .HasColumnName("scope_name");
 
@@ -354,13 +368,13 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
             modelBuilder.Entity("ASC.Migrations.Core.Identity.IdentityConsent", b =>
                 {
                     b.Property<string>("PrincipalId")
-                        .HasMaxLength(36)
-                        .HasColumnType("varchar(36)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("principal_id");
 
                     b.Property<string>("RegisteredClientId")
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)")
+                        .HasMaxLength(36)
+                        .HasColumnType("varchar(36)")
                         .HasColumnName("registered_client_id");
 
                     b.Property<bool?>("IsInvalidated")
@@ -394,6 +408,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("registered_client_id");
 
                     b.Property<string>("PrincipalId")
+                        .HasMaxLength(255)
                         .HasColumnType("varchar(255)")
                         .HasColumnName("principal_id");
 
@@ -420,11 +435,13 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("name");
 
                     b.Property<string>("Group")
+                        .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)")
                         .HasColumnName("group");
 
                     b.Property<string>("Type")
+                        .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)")
                         .HasColumnName("type");
@@ -491,6 +508,33 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         });
                 });
 
+            modelBuilder.Entity("ASC.Migrations.Core.Identity.IdentityShedlock", b =>
+                {
+                    b.Property<string>("Name")
+                        .HasMaxLength(64)
+                        .HasColumnType("varchar(64)")
+                        .HasColumnName("name");
+
+                    b.Property<DateTime>("LockUntil")
+                        .HasColumnType("timestamp(3)")
+                        .HasColumnName("lock_until");
+
+                    b.Property<DateTime>("LockedAt")
+                        .HasColumnType("timestamp(3)")
+                        .HasColumnName("locked_at");
+
+                    b.Property<string>("LockedBy")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("locked_by");
+
+                    b.HasKey("Name")
+                        .HasName("PRIMARY");
+
+                    b.ToTable("identity_shedlock", (string)null);
+                });
+
             modelBuilder.Entity("ASC.Migrations.Core.Identity.IdentityAuthorization", b =>
                 {
                     b.HasOne("ASC.Migrations.Core.Identity.IdentityClient", "RegisteredClient")
@@ -508,6 +552,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasOne("ASC.Migrations.Core.Identity.IdentityClient", "Client")
                         .WithMany()
                         .HasForeignKey("ClientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
                         .HasConstraintName("identity_client_allowed_origins_ibfk_1");
 
                     b.Navigation("Client");
@@ -518,6 +564,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasOne("ASC.Migrations.Core.Identity.IdentityClient", "Client")
                         .WithMany()
                         .HasForeignKey("ClientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
                         .HasConstraintName("identity_client_authentication_methods_ibfk_1");
 
                     b.Navigation("Client");
@@ -528,6 +576,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasOne("ASC.Migrations.Core.Identity.IdentityClient", "Client")
                         .WithMany()
                         .HasForeignKey("ClientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
                         .HasConstraintName("identity_client_redirect_uris_ibfk_1");
 
                     b.Navigation("Client");
@@ -538,11 +588,15 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasOne("ASC.Migrations.Core.Identity.IdentityClient", "Client")
                         .WithMany()
                         .HasForeignKey("ClientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
                         .HasConstraintName("identity_client_scopes_ibfk_1");
 
                     b.HasOne("ASC.Migrations.Core.Identity.IdentityScope", "ScopeNameNavigation")
                         .WithMany()
                         .HasForeignKey("ScopeName")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
                         .HasConstraintName("identity_client_scopes_ibfk_2");
 
                     b.Navigation("Client");
