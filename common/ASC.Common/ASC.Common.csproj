@@ -60,8 +60,8 @@
     <PackageReference Include="RabbitMQ.Client" Version="6.8.1" />
     <PackageReference Include="StackExchange.Redis" Version="2.8.0" />
     <PackageReference Include="StackExchange.Redis.Extensions.Core" Version="10.2.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.6.2" />
-    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.6.2" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.7.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.7.1" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ASC.EventBus\ASC.EventBus.csproj" />
