@@ -177,7 +177,8 @@ module.exports = async (io) => {
             id: sessionId,
             platform: operationSystem,
             browser: parser.browser.name + " " + browserVersion,
-            ip: ipAddress
+            ip: ipAddress,
+            status:"online"
           };
           user.sessions.set(
             id,
@@ -225,7 +226,7 @@ module.exports = async (io) => {
       function serialize(user)
       {
         var serUser = {
-          id: user.id,
+          userId: user.id,
           displayName: user.displayName,
           page: user.page,
           sessions: Array.from(user.sessions, ([name, value]) => {
