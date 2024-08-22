@@ -87,8 +87,8 @@ module.exports = async (io) => {
       roomId = -1;
     });
 
-      var getRoom = (roomPart) => {
-        return `${tenantId}-${roomPart}`;
+      var getRoom = (obj) => {
+        return `${tenantId}-${obj.roomPart}`;
       };
 
       async function LeaveAsync(usersList, key, redisKey, socketKey, socketDest, sessionId) 
@@ -114,8 +114,8 @@ module.exports = async (io) => {
             });
             
             await redisClient.set(redisKey, JSON.stringify(Array.from(user.offlineSessions)));
-            
-            var date = new Date().toString();
+          }
+          var date = new Date().toString();
             if(user.sessions.size <= 0)
             {
               user.status = "offline";
@@ -125,9 +125,12 @@ module.exports = async (io) => {
             else
             {
               updateUser(portalUsers, user, userId, tenantId);
+              if(array.find(e=> e.browser == session.browser && e.platform == session.platform && e.ip == session.ip))
+              {
+                return;
+              }
               onlineIO.to(socketKey).emit(`leave-session-in-${socketDest}`, {userId, sessionId, date} );
             }
-          }
         }
       }
 
@@ -201,6 +204,13 @@ module.exports = async (io) => {
         }
         else
         {
+          var array = Array.from(user.sessions, ([name, value]) => {
+            return value;
+          });
+          if(array.filter(e=> e.browser == session.browser && e.platform == session.platform && e.ip == session.ip).size != 1)
+          {
+            return;
+          }
           onlineIO.to(socketKey).emit(`enter-session-in-${socketDest}`, {userId, session} );
         }
 
