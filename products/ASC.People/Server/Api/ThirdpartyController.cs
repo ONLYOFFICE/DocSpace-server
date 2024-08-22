@@ -209,7 +209,7 @@ public class ThirdpartyController(
                 GetEmailAddress(inDto, thirdPartyProfile), 
                 passwordHash, 
                 employeeType, 
-                true, 
+                false, 
                 invitedByEmail,
                 inDto.Culture);
             
