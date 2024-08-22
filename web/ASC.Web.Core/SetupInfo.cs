@@ -61,6 +61,7 @@ public class SetupInfo
     public long ProviderMaxUploadSize { get; private set; }
     public bool ThirdPartyAuthEnabled { get; private set; }
     public string LegalTerms { get; private set; }
+    public string LicenseUrl { get; private set; }
     public string NoTenantRedirectURL { get; private set; }
     public string NotifyAddress { get; private set; }
     public string TipsAddress { get; private set; }
@@ -140,6 +141,7 @@ public class SetupInfo
         ThirdPartyAuthEnabled = string.Equals(GetAppSettings("web:thirdparty-auth", "true"), "true");
         NoTenantRedirectURL = GetAppSettings("web.notenant-url", "");
         LegalTerms = GetAppSettings("web:legalterms", "");
+        LicenseUrl = GetAppSettings("web:license-url", "");
 
         NotifyAddress = GetAppSettings("web.promo-url", string.Empty);
         TipsAddress = GetAppSettings("web.promo-tips-url", string.Empty);
