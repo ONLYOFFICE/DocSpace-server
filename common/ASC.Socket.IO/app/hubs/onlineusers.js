@@ -209,7 +209,7 @@ module.exports = async (io) => {
           });
           if(array.filter(e=> e.browser == session.browser && e.platform == session.platform && e.ip == session.ip).size != 1)
           {
-            return;
+            return id;
           }
           onlineIO.to(socketKey).emit(`enter-session-in-${socketDest}`, {userId, session} );
         }
