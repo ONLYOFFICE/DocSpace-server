@@ -37,6 +37,11 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
 
     public virtual async Task ConfigureServices(IServiceCollection services)
     {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            AppContext.SetSwitch("System.Net.Security.UseManagedNtlm", true);
+        }
+        
         services.AddHttpContextAccessor();
         services.AddCustomHealthCheck(Configuration);
 
