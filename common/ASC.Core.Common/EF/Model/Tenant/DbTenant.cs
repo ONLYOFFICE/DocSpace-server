@@ -90,7 +90,7 @@ public class DbTenant : IMapFrom<Tenant>
     [SwaggerSchemaCustom("Payment id")]
     public string PaymentId { get; set; }
 
-    [SwaggerSchemaCustomString("Industry", Example = "Other")]
+    [SwaggerSchemaCustom("Industry")]
     public TenantIndustry Industry { get; set; }
 
     [SwaggerSchemaCustom("Last modified")]

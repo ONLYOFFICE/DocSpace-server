@@ -60,7 +60,7 @@ public record BackupProgress
     [ProtoMember(5)]
     public int TenantId { get; set; }
 
-    [SwaggerSchemaCustomString("Backup progress item (Backup, Restore, Transfer)", Example = "Backup")]
+    [SwaggerSchemaCustom("Backup progress item")]
     [ProtoMember(6)]
     public BackupProgressEnum BackupProgressEnum { get; set;}
 

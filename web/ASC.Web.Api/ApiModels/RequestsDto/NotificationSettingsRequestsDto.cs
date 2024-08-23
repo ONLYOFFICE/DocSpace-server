@@ -28,7 +28,7 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 public class NotificationSettingsRequestsDto
 {
-    [SwaggerSchemaCustomString("Notification type (Badges, RoomsActivity, DailyFeed, UsefullTips)", Example = "Badges")]
+    [SwaggerSchemaCustom("Notification type")]
     public NotificationType Type { get; set; }
 
     [SwaggerSchemaCustom("Specifies if the notification type is enabled or not")]
