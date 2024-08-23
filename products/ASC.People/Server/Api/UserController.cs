@@ -563,15 +563,20 @@ public class UserController(
     public async Task<EmployeeFullDto> GetByEmailAsync([FromQuery] string email)
     {
         var user = await _userManager.GetUserByEmailAsync(email);
-        
+
         var isInvite = _httpContextAccessor.HttpContext!.User.Claims
             .Any(role => role.Type == ClaimTypes.Role && ConfirmTypeExtensions.TryParse(role.Value, out var confirmType) && confirmType == ConfirmType.LinkInvite);
-        if (user.Id == Constants.LostUser.Id || (isInvite && user.Id != authContext.CurrentAccount.ID))
+
+        if (user.Id == Constants.LostUser.Id)
         {
             throw new ItemNotFoundException("User not found");
         }
-        
-        
+
+        if (isInvite)
+        {
+            return await employeeFullDtoHelper.GetSimple(user);
+        }
+
         return await employeeFullDtoHelper.GetFullAsync(user);
     }
 

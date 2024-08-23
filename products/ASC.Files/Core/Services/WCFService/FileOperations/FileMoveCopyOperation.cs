@@ -920,7 +920,12 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                 var title = await global.GetAvailableTitleAsync(file.Title, toFolderId, fileDao.IsExistAsync, FileEntryType.File);
                                 newFile = await FileDao.CopyFileAsync(file.Id, toFolderId); //Stream copy will occur inside dao
                                 newFile.Title = title;
-                                await fileDao.SaveFileAsync(newFile, null);
+
+                                if (!newFile.ProviderEntry)
+                                {
+                                    await fileDao.SaveFileAsync(newFile, null);
+                                }
+                                
                                 await filesMessageService.SendCopyMessageAsync(newFile, parentFolder, toFolder, toParentFolders, false, _headers, [newFile.Title, parentFolder.Title, toFolder.Title, toFolder.Id.ToString()]);
 
                                 needToMark.Add(newFile);

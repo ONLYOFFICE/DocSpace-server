@@ -130,6 +130,10 @@ public class SettingsDto
     [SwaggerSchemaCustom("Legal terms")]
     public string LegalTerms { get; set; }
 
+    /// <summary>License url</summary>
+    /// <type>System.String, System</type>
+    public string LicenseUrl { get; set; }
+
     [SwaggerSchemaCustom("Specifies whether the cookie settings are enabled")]
     public bool CookieSettingsEnabled { get; set; }
 
