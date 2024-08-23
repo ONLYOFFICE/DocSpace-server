@@ -128,12 +128,10 @@ module.exports = async (io) => {
             if(user.sessions.size <= 0)
             {
               user.status = "offline";
-              updateUser(portalUsers, user, userId, tenantId);
               onlineIO.to(socketKey).emit(`leave-in-${socketDest}`, {userId, date} );
             }
             else
             {
-              updateUser(portalUsers, user, userId, tenantId);
               if(array.find(e=> e.browser == session.browser && e.platform == session.platform && e.ip == session.ip))
               {
                 return;
@@ -209,6 +207,7 @@ module.exports = async (io) => {
         if(user.sessions.size == 1)
         {
           var stringUser = serialize(user);
+          addUser(usersList, user, userId, key);
           onlineIO.to(socketKey).emit(`enter-in-${socketDest}`, stringUser );
         }
         else
@@ -223,7 +222,6 @@ module.exports = async (io) => {
           onlineIO.to(socketKey).emit(`enter-session-in-${socketDest}`, {userId, session} );
         }
 
-        updateUser(usersList, user, userId, key);
         return id;
       }
 
@@ -286,12 +284,10 @@ module.exports = async (io) => {
           if(user.sessions.size <= 0)
           {
             user.status = "offline";
-            updateUser(portalUsers, user, userId, tenantId);
             onlineIO.to(`p-${tenantId}`).emit("leave-in-portal",  {userId, date} );
           }
           else
           {
-            updateUser(portalUsers, user, userId, tenantId);
             var session = array.find(e=> e.id == id);
             if(session)
             {
@@ -312,7 +308,6 @@ module.exports = async (io) => {
 
           var date = new Date().toString();
           user.status = "offline";
-          updateUser(portalUsers, user, userId, tenantId);
           onlineIO.to(`p-${tenantId}`).emit("leave-in-portal",  {userId, date} );
         }
     }
@@ -351,12 +346,10 @@ module.exports = async (io) => {
           if(user.sessions.size <= 0)
           {
             user.status = "offline";
-            updateUser(portalUsers, user, userId, tenantId);
             onlineIO.to(`p-${tenantId}`).emit("leave-in-portal",  {userId, date} );
           }
           else
           {
-            updateUser(portalUsers, user, userId, tenantId);
             Object.values(setIds).forEach(function(entry) {
               onlineIO.to(`p-${tenantId}`).emit("leave-session-in-portal",  {userId, entry, date} );
             });
@@ -373,7 +366,7 @@ module.exports = async (io) => {
       return list[id][userId];
     }
 
-    function updateUser(list, user, userId, id){
+    function addUser(list, user, userId, id){
       if(!list[id])
       {
         list[id] = [];
