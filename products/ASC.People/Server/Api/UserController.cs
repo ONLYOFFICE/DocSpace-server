@@ -126,13 +126,9 @@ public class UserController(
         user.Location = inDto.Location;
         user.Notes = inDto.Comment;
 
-        if ("male".Equals(inDto.Sex, StringComparison.OrdinalIgnoreCase))
+        if (inDto.Sex.HasValue)
         {
-            user.Sex = true;
-        }
-        else if ("female".Equals(inDto.Sex, StringComparison.OrdinalIgnoreCase))
-        {
-            user.Sex =  false;
+            user.Sex = inDto.Sex.Value == SexEnum.Male;
         }
         
         user.BirthDate = inDto.Birthday != null ? tenantUtil.DateTimeFromUtc(inDto.Birthday) : null;
@@ -233,13 +229,9 @@ public class UserController(
         user.Location = inDto.Location;
         user.Notes = inDto.Comment;
 
-        if ("male".Equals(inDto.Sex, StringComparison.OrdinalIgnoreCase))
+        if (inDto.Sex.HasValue)
         {
-            user.Sex = true;
-        }
-        else if ("female".Equals(inDto.Sex, StringComparison.OrdinalIgnoreCase))
-        {
-            user.Sex =  false;
+            user.Sex = inDto.Sex.Value == SexEnum.Male;
         }
         
         user.BirthDate = inDto.Birthday != null && inDto.Birthday != DateTime.MinValue ? tenantUtil.DateTimeFromUtc(inDto.Birthday) : null;
@@ -1283,8 +1275,8 @@ public class UserController(
 
             user.Sex = inDto.Sex switch
             {
-                "male" => true,
-                "female" => false,
+                SexEnum.Male => true,
+                SexEnum.Female => false,
                 _ => user.Sex
             };
 
@@ -1564,11 +1556,6 @@ public class UserController(
     [HttpPut("userquota")]
     public async IAsyncEnumerable<EmployeeFullDto> UpdateUserQuotaAsync(UpdateMembersQuotaRequestDto inDto)
     {
-        if (!inDto.Quota.TryGetInt64(out var quota))
-        {
-            throw new Exception(Resource.QuotaGreaterPortalError);
-        }
-
         await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var users = await inDto.UserIds.ToAsyncEnumerable()
@@ -1580,7 +1567,7 @@ public class UserController(
         var tenantSpaceQuota = await tenantManager.GetTenantQuotaAsync(tenant.Id);
         var maxTotalSize = tenantSpaceQuota?.MaxTotalSize ?? -1;
         
-        if (maxTotalSize < quota)
+        if (maxTotalSize < inDto.Quota)
         {
             throw new Exception(Resource.QuotaGreaterPortalError);
         }
@@ -1589,7 +1576,7 @@ public class UserController(
             var tenantQuotaSetting = await settingsManager.LoadAsync<TenantQuotaSettings>();
             if (tenantQuotaSetting.EnableQuota)
             {
-                if (tenantQuotaSetting.Quota < quota)
+                if (tenantQuotaSetting.Quota < inDto.Quota)
                 {
                     throw new Exception(Resource.QuotaGreaterPortalError);
                 }
@@ -1598,18 +1585,18 @@ public class UserController(
 
         foreach (var user in users)
         {
-            await settingsManager.SaveAsync(new UserQuotaSettings { UserQuota = quota }, user);
+            await settingsManager.SaveAsync(new UserQuotaSettings { UserQuota = inDto.Quota }, user);
 
             var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenant.Id, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
             var quotaUserSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
-            _ = quotaSocketManager.ChangeCustomQuotaUsedValueAsync(tenant.Id, customQuota.GetFeature<UserCustomQuotaFeature>().Name, quotaUserSettings.EnableQuota, userUsedSpace, quota, [user.Id]);
+            _ = quotaSocketManager.ChangeCustomQuotaUsedValueAsync(tenant.Id, customQuota.GetFeature<UserCustomQuotaFeature>().Name, quotaUserSettings.EnableQuota, userUsedSpace, inDto.Quota, [user.Id]);
 
             yield return await employeeFullDtoHelper.GetFullAsync(user);
         }
 
-        if(quota >= 0)
+        if(inDto.Quota >= 0)
         {
-            await messageService.SendAsync(MessageAction.CustomQuotaPerUserChanged, quota.ToString(),
+            await messageService.SendAsync(MessageAction.CustomQuotaPerUserChanged, inDto.Quota.ToString(),
                         users.Select(x => HttpUtility.HtmlDecode(displayUserSettingsHelper.GetFullUserName(x))));
         }
         else

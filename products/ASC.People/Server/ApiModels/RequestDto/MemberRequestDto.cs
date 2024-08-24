@@ -64,7 +64,7 @@ public class MemberRequestDto
 
     /// <summary>Sex (male or female)</summary>
     /// <type>System.String, System</type>
-    public string Sex { get; set; }
+    public SexEnum? Sex { get; set; }
 
     /// <summary>Birthday</summary>
     /// <type>ASC.Api.Core.ApiDateTime, ASC.Api.Core</type>
@@ -122,4 +122,10 @@ public class UpdateMemberRequestDto : MemberRequestDto
     /// <summary>Specifies whether to disable a user or not</summary>
     /// <type>System.Nullable{System.Boolean}, System</type>
     public bool? Disable { get; set; }
+}
+
+public enum SexEnum
+{
+    Female = 0,
+    Male = 1,
 }

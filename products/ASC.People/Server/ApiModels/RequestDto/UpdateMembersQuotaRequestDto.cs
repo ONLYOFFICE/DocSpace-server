@@ -36,5 +36,5 @@ public class UpdateMembersQuotaRequestDto
 
     /// <summary>User quota</summary>
     /// <type>System.Int64, System</type>
-    public JsonElement Quota { get; set; }
+    public long Quota { get; set; }
 }

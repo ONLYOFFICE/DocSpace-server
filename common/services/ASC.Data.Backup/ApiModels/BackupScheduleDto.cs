@@ -33,7 +33,7 @@ public class BackupScheduleDto
     /// <summary>Storage type</summary>
     /// <type>System.String, System</type>
     /// <example>Documents</example>
-    public string StorageType { get; set; }
+    public BackupStorageType? StorageType { get; set; }
 
     /// <summary>Storage parameters</summary>
     /// <type>System.Collections.Generic.IEnumerable{ASC.Api.Collections.ItemKeyValuePair{System.Object, System.Object}}, System.Collections.Generic</type>
@@ -41,7 +41,7 @@ public class BackupScheduleDto
 
     /// <summary>Maximum number of the stored backup copies</summary>
     /// <type>System.String, System</type>
-    public string BackupsStored { get; set; }
+    public int? BackupsStored { get; set; }
 
     /// <summary>Cron parameters</summary>
     /// <type>ASC.Data.Backup.ApiModels.Cron, ASC.Data.Backup</type>

@@ -75,9 +75,9 @@ public class BackupController(
             await tenantExtra.DemandAccessSpacePermissionAsync();
         }
 
-        var storageType = inDto.StorageType == null ? BackupStorageType.Documents : (BackupStorageType)Int32.Parse(inDto.StorageType);
+        var storageType = inDto.StorageType ?? BackupStorageType.Documents;
         var storageParams = inDto.StorageParams == null ? new Dictionary<string, string>() : inDto.StorageParams.ToDictionary(r => r.Key.ToString(), r => r.Value.ToString());
-        var backupStored = inDto.BackupsStored == null ? 1 : Int32.Parse(inDto.BackupsStored);
+        var backupStored = inDto.BackupsStored ?? 1;
         var cron = new CronParams
         {
             Period = inDto.CronParams.Period == null ? BackupPeriod.EveryDay : (BackupPeriod)Int32.Parse(inDto.CronParams.Period),
@@ -137,7 +137,7 @@ public class BackupController(
             await tenantExtra.DemandAccessSpacePermissionAsync();
         }
 
-        var storageType = inDto.StorageType == null ? BackupStorageType.Documents : (BackupStorageType)Int32.Parse(inDto.StorageType);
+        var storageType =  inDto.StorageType ?? BackupStorageType.Documents;
         var storageParams = inDto.StorageParams == null ? new Dictionary<string, string>() : inDto.StorageParams.ToDictionary(r => r.Key.ToString(), r => r.Value.ToString());
 
         var canParse = false;
@@ -268,7 +268,7 @@ public class BackupController(
         
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
-        var storageType = inDto.StorageType == null ? BackupStorageType.Documents : (BackupStorageType)Int32.Parse(inDto.StorageType.ToString());
+        var storageType = inDto.StorageType == null ? BackupStorageType.Documents : (BackupStorageType)(inDto.StorageType.Value);
         if (storageType is BackupStorageType.Documents or BackupStorageType.ThridpartyDocuments)
         {
             if (int.TryParse(storageParams["filePath"], out var fId))
@@ -285,7 +285,7 @@ public class BackupController(
                              tenantId: tenantId,
                              createBy: CurrentUserId,
                              storageParams: storageParams,
-                             storageType: (BackupStorageType)Int32.Parse(inDto.StorageType.ToString()),
+                             storageType: storageType,
                              notify: inDto.Notify,
                              backupId: inDto.BackupId,
                              serverBaseUri: serverBaseUri

@@ -37,7 +37,7 @@ public class BackupRestoreDto
     /// <summary>Storage type</summary>
     /// <type>System.Object, System</type>
     /// <example>Documents</example>
-    public object StorageType { get; set; }
+    public int? StorageType { get; set; }
 
     /// <summary>Storage parameters</summary>
     /// <type>System.Collections.Generic.IEnumerable{ASC.Api.Collections.ItemKeyValuePair{System.Object, System.Object}}, System.Collections.Generic</type>
