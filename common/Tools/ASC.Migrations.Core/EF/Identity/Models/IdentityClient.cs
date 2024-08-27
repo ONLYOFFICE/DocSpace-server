@@ -9,7 +9,7 @@ public partial class IdentityClient
 
     public int TenantId { get; set; }
 
-    public string ClientSecret { get; set; } = null!;
+    public string? ClientSecret { get; set; } = null!;
 
     public string? Name { get; set; }
 
@@ -42,4 +42,6 @@ public partial class IdentityClient
     public virtual ICollection<IdentityAuthorization> IdentityAuthorizations { get; set; } = new List<IdentityAuthorization>();
 
     public virtual ICollection<IdentityConsent> IdentityConsents { get; set; } = new List<IdentityConsent>();
+
+    public DbTenant Tenant { get; set; }
 }

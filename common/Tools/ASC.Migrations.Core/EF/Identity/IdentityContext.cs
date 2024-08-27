@@ -35,6 +35,9 @@ public partial class IdentityContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        ModelBuilderWrapper
+            .From(modelBuilder, Database)
+            .AddDbTenant();
         modelBuilder.Entity<IdentityAuthorization>(entity =>
         {
             entity.HasKey(e => new { e.PrincipalId, e.RegisteredClientId, e.AuthorizationGrantType }).HasName("PRIMARY");
@@ -52,7 +55,8 @@ public partial class IdentityContext : DbContext
             entity.HasIndex(e => e.RegisteredClientId, "idx_identity_authorizations_registered_client_id");
 
             entity.Property(e => e.PrincipalId).HasColumnName("principal_id");
-            entity.Property(e => e.RegisteredClientId).HasColumnName("registered_client_id");
+            entity.Property(e => e.RegisteredClientId)
+            .HasColumnName("registered_client_id");
             entity.Property(e => e.AccessTokenExpiresAt)
                 .HasMaxLength(6)
                 .HasColumnName("access_token_expires_at");
@@ -120,11 +124,18 @@ public partial class IdentityContext : DbContext
             entity.Property(e => e.State)
                 .HasMaxLength(500)
                 .HasColumnName("state");
-            entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+            entity.Property(e => e.TenantId)
+            .HasColumnName("tenant_id")
+            .IsRequired();
 
             entity.HasOne(d => d.RegisteredClient).WithMany(p => p.IdentityAuthorizations)
                 .HasForeignKey(d => d.RegisteredClientId)
                 .HasConstraintName("FK_authorization_client_id");
+
+            entity.HasOne(e => e.Tenant)
+                   .WithOne()
+                   .HasForeignKey<IdentityAuthorization>(b => b.TenantId)
+                   .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<IdentityCert>(entity =>
@@ -158,8 +169,6 @@ public partial class IdentityContext : DbContext
 
             entity.HasIndex(e => e.ClientId, "UK_client_id").IsUnique();
 
-            entity.HasIndex(e => e.ClientSecret, "UK_client_secret").IsUnique();
-
             entity.HasIndex(e => e.IsInvalidated, "idx_identity_clients_is_invalidated");
 
             entity.HasIndex(e => e.TenantId, "idx_identity_clients_tenant_id");
@@ -168,6 +177,7 @@ public partial class IdentityContext : DbContext
                 .HasMaxLength(36)
                 .HasColumnName("client_id");
             entity.Property(e => e.ClientSecret)
+                .HasMaxLength(255)
                 .HasColumnName("client_secret")
                 .IsRequired();
             entity.Property(e => e.CreatedBy)
@@ -209,6 +219,11 @@ public partial class IdentityContext : DbContext
             entity.Property(e => e.WebsiteUrl)
                 .HasColumnType("tinytext")
                 .HasColumnName("website_url");
+
+            entity.HasOne(e => e.Tenant)
+                   .WithOne()
+                   .HasForeignKey<IdentityClient>(b => b.TenantId)
+                   .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<IdentityClientAllowedOrigin>(entity =>
@@ -336,7 +351,7 @@ public partial class IdentityContext : DbContext
 
         modelBuilder.Entity<IdentityConsentScope>(entity =>
         {
-            entity.HasKey(e => new { e.RegisteredClientId, e.PrincipalId, e.ScopeName }).HasName("PRIMARY");
+            entity.HasKey(e => new { e.PrincipalId, e.RegisteredClientId, e.ScopeName }).HasName("PRIMARY");
 
             entity.ToTable("identity_consent_scopes");
 
@@ -346,20 +361,26 @@ public partial class IdentityContext : DbContext
 
             entity.HasIndex(e => e.ScopeName, "idx_identity_consent_scopes_scope_name");
 
+
+            entity.Property(e => e.PrincipalId)
+                .HasColumnName("principal_id")
+                .HasMaxLength(255);
+
             entity.Property(e => e.RegisteredClientId)
                 .HasMaxLength(36)
                 .HasColumnName("registered_client_id");
-            entity.Property(e => e.PrincipalId).HasColumnName("principal_id")
-                .HasMaxLength(255);
-            entity.Property(e => e.ScopeName).HasColumnName("scope_name");
+
+            entity.Property(e => e.ScopeName)
+                .HasColumnName("scope_name");
 
             entity.HasOne(d => d.Consent)
                 .WithMany(p => p.IdentityConsentScopes)
-                .HasForeignKey(d => new { d.RegisteredClientId, d.PrincipalId })
+                .HasForeignKey(d => new { d.PrincipalId, d.RegisteredClientId })
                 .HasConstraintName("identity_consent_scopes_ibfk_1");
 
 
-            entity.HasOne(d => d.ScopeNameNavigation).WithMany(p => p.IdentityConsentScopes)
+            entity.HasOne(d => d.ScopeNameNavigation)
+            .WithMany(p => p.IdentityConsentScopes)
                 .HasForeignKey(d => d.ScopeName)
                 .HasConstraintName("identity_consent_scopes_ibfk_2");
         });

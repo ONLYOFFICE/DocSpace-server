@@ -21,6 +21,203 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 .HasAnnotation("ProductVersion", "8.0.4")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
+            modelBuilder.Entity("ASC.Core.Common.EF.Model.DbTenant", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id")
+                        .HasAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Alias")
+                        .IsRequired()
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("alias")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<bool>("Calls")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("calls")
+                        .HasDefaultValueSql("'1'");
+
+                    b.Property<DateTime>("CreationDateTime")
+                        .HasColumnType("datetime")
+                        .HasColumnName("creationdatetime");
+
+                    b.Property<int>("Industry")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("industry")
+                        .HasDefaultValueSql("'0'");
+
+                    b.Property<string>("Language")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(10)")
+                        .HasColumnName("language")
+                        .HasDefaultValueSql("'en-US'")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<DateTime>("LastModified")
+                        .HasColumnType("timestamp")
+                        .HasColumnName("last_modified");
+
+                    b.Property<string>("MappedDomain")
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("mappeddomain")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("name")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<string>("OwnerId")
+                        .HasColumnType("varchar(38)")
+                        .HasColumnName("owner_id")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<string>("PaymentId")
+                        .HasColumnType("varchar(38)")
+                        .HasColumnName("payment_id")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<bool>("Spam")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("spam")
+                        .HasDefaultValueSql("'1'");
+
+                    b.Property<int>("Status")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("status")
+                        .HasDefaultValueSql("'0'");
+
+                    b.Property<DateTime?>("StatusChanged")
+                        .HasColumnType("datetime")
+                        .HasColumnName("statuschanged");
+
+                    b.Property<string>("TimeZone")
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("timezone")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<int>("TrustedDomainsEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("trusteddomainsenabled")
+                        .HasDefaultValueSql("'1'");
+
+                    b.Property<string>("TrustedDomainsRaw")
+                        .HasColumnType("varchar(1024)")
+                        .HasColumnName("trusteddomains")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<int>("Version")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("version")
+                        .HasDefaultValueSql("'2'");
+
+                    b.Property<DateTime?>("Version_Changed")
+                        .HasColumnType("datetime")
+                        .HasColumnName("version_changed");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Alias")
+                        .IsUnique()
+                        .HasDatabaseName("alias");
+
+                    b.HasIndex("LastModified")
+                        .HasDatabaseName("last_modified");
+
+                    b.HasIndex("MappedDomain")
+                        .HasDatabaseName("mappeddomain");
+
+                    b.HasIndex("Version")
+                        .HasDatabaseName("version");
+
+                    b.ToTable("tenants_tenants", (string)null);
+
+                    b.HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Alias = "localhost",
+                            Calls = false,
+                            CreationDateTime = new DateTime(2021, 3, 9, 17, 46, 59, 97, DateTimeKind.Utc).AddTicks(4317),
+                            Industry = 0,
+                            LastModified = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "Web Office",
+                            OwnerId = "66faa6e4-f133-11ea-b126-00ffeec8b4ef",
+                            Spam = false,
+                            Status = 0,
+                            TrustedDomainsEnabled = 0,
+                            Version = 0
+                        },
+                        new
+                        {
+                            Id = -1,
+                            Alias = "settings",
+                            Calls = false,
+                            CreationDateTime = new DateTime(2021, 3, 9, 17, 46, 59, 97, DateTimeKind.Utc).AddTicks(4317),
+                            Industry = 0,
+                            LastModified = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "Web Office",
+                            OwnerId = "00000000-0000-0000-0000-000000000000",
+                            Spam = false,
+                            Status = 1,
+                            TrustedDomainsEnabled = 0,
+                            Version = 0
+                        });
+                });
+
+            modelBuilder.Entity("ASC.Core.Common.EF.Model.DbTenantPartner", b =>
+                {
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("AffiliateId")
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("affiliate_id")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<string>("Campaign")
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("campaign")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<string>("PartnerId")
+                        .HasColumnType("varchar(36)")
+                        .HasColumnName("partner_id")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.HasKey("TenantId")
+                        .HasName("PRIMARY");
+
+                    b.ToTable("tenants_partners", (string)null);
+
+                    b.HasAnnotation("MySql:CharSet", "utf8");
+                });
+
             modelBuilder.Entity("ASC.Migrations.Core.Identity.IdentityAuthorization", b =>
                 {
                     b.Property<string>("PrincipalId")
@@ -143,6 +340,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasKey("PrincipalId", "RegisteredClientId", "AuthorizationGrantType")
                         .HasName("PRIMARY");
 
+                    b.HasIndex("TenantId")
+                        .IsUnique();
+
                     b.HasIndex(new[] { "Id" }, "UK_id")
                         .IsUnique();
 
@@ -198,6 +398,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.Property<string>("ClientSecret")
                         .IsRequired()
+                        .HasMaxLength(255)
                         .HasColumnType("varchar(255)")
                         .HasColumnName("client_secret");
 
@@ -275,10 +476,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasKey("ClientId")
                         .HasName("PRIMARY");
 
-                    b.HasIndex(new[] { "ClientId" }, "UK_client_id")
+                    b.HasIndex("TenantId")
                         .IsUnique();
 
-                    b.HasIndex(new[] { "ClientSecret" }, "UK_client_secret")
+                    b.HasIndex(new[] { "ClientId" }, "UK_client_id")
                         .IsUnique();
 
                     b.HasIndex(new[] { "IsInvalidated" }, "idx_identity_clients_is_invalidated");
@@ -399,21 +600,21 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
             modelBuilder.Entity("ASC.Migrations.Core.Identity.IdentityConsentScope", b =>
                 {
-                    b.Property<string>("RegisteredClientId")
-                        .HasMaxLength(36)
-                        .HasColumnType("varchar(36)")
-                        .HasColumnName("registered_client_id");
-
                     b.Property<string>("PrincipalId")
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)")
                         .HasColumnName("principal_id");
 
+                    b.Property<string>("RegisteredClientId")
+                        .HasMaxLength(36)
+                        .HasColumnType("varchar(36)")
+                        .HasColumnName("registered_client_id");
+
                     b.Property<string>("ScopeName")
                         .HasColumnType("varchar(255)")
                         .HasColumnName("scope_name");
 
-                    b.HasKey("RegisteredClientId", "PrincipalId", "ScopeName")
+                    b.HasKey("PrincipalId", "RegisteredClientId", "ScopeName")
                         .HasName("PRIMARY");
 
                     b.HasIndex(new[] { "PrincipalId" }, "idx_identity_consent_scopes_principal_id");
@@ -532,6 +733,17 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.ToTable("identity_shedlock", (string)null);
                 });
 
+            modelBuilder.Entity("ASC.Core.Common.EF.Model.DbTenantPartner", b =>
+                {
+                    b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
+                        .WithOne("Partner")
+                        .HasForeignKey("ASC.Core.Common.EF.Model.DbTenantPartner", "TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tenant");
+                });
+
             modelBuilder.Entity("ASC.Migrations.Core.Identity.IdentityAuthorization", b =>
                 {
                     b.HasOne("ASC.Migrations.Core.Identity.IdentityClient", "RegisteredClient")
@@ -541,7 +753,26 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_authorization_client_id");
 
+                    b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
+                        .WithOne()
+                        .HasForeignKey("ASC.Migrations.Core.Identity.IdentityAuthorization", "TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("RegisteredClient");
+
+                    b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("ASC.Migrations.Core.Identity.IdentityClient", b =>
+                {
+                    b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
+                        .WithOne()
+                        .HasForeignKey("ASC.Migrations.Core.Identity.IdentityClient", "TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tenant");
                 });
 
             modelBuilder.Entity("ASC.Migrations.Core.Identity.IdentityClientAllowedOrigin", b =>
@@ -624,7 +855,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.HasOne("ASC.Migrations.Core.Identity.IdentityConsent", "Consent")
                         .WithMany("IdentityConsentScopes")
-                        .HasForeignKey("RegisteredClientId", "PrincipalId")
+                        .HasForeignKey("PrincipalId", "RegisteredClientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("identity_consent_scopes_ibfk_1");
@@ -632,6 +863,11 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Navigation("Consent");
 
                     b.Navigation("ScopeNameNavigation");
+                });
+
+            modelBuilder.Entity("ASC.Core.Common.EF.Model.DbTenant", b =>
+                {
+                    b.Navigation("Partner");
                 });
 
             modelBuilder.Entity("ASC.Migrations.Core.Identity.IdentityClient", b =>

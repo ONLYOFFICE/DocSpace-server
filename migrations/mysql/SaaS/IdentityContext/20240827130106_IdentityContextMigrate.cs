@@ -1,4 +1,5 @@
 using System;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -36,45 +37,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "identity_clients",
-                columns: table => new
-                {
-                    client_id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    tenant_id = table.Column<int>(type: "int", nullable: false),
-                    client_secret = table.Column<string>(type: "varchar(255)", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    name = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    description = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    logo = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    website_url = table.Column<string>(type: "tinytext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    terms_url = table.Column<string>(type: "tinytext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    policy_url = table.Column<string>(type: "tinytext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    logout_redirect_uri = table.Column<string>(type: "tinytext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    is_public = table.Column<bool>(type: "tinyint(1)", nullable: true, defaultValueSql: "'0'"),
-                    is_enabled = table.Column<bool>(type: "tinyint(1)", nullable: true, defaultValueSql: "'1'"),
-                    is_invalidated = table.Column<bool>(type: "tinyint(1)", nullable: true, defaultValueSql: "'0'"),
-                    created_on = table.Column<DateTime>(type: "datetime(6)", maxLength: 6, nullable: true),
-                    created_by = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    modified_on = table.Column<DateTime>(type: "datetime(6)", maxLength: 6, nullable: true),
-                    modified_by = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PRIMARY", x => x.client_id);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
                 name: "identity_scopes",
                 columns: table => new
                 {
@@ -107,6 +69,114 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     table.PrimaryKey("PRIMARY", x => x.name);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "tenants_tenants",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    name = table.Column<string>(type: "varchar(255)", nullable: false, collation: "utf8_general_ci")
+                        .Annotation("MySql:CharSet", "utf8"),
+                    alias = table.Column<string>(type: "varchar(100)", nullable: false, collation: "utf8_general_ci")
+                        .Annotation("MySql:CharSet", "utf8"),
+                    mappeddomain = table.Column<string>(type: "varchar(100)", nullable: true, collation: "utf8_general_ci")
+                        .Annotation("MySql:CharSet", "utf8"),
+                    version = table.Column<int>(type: "int", nullable: false, defaultValueSql: "'2'"),
+                    version_changed = table.Column<DateTime>(type: "datetime", nullable: true),
+                    language = table.Column<string>(type: "char(10)", nullable: false, defaultValueSql: "'en-US'", collation: "utf8_general_ci")
+                        .Annotation("MySql:CharSet", "utf8"),
+                    timezone = table.Column<string>(type: "varchar(50)", nullable: true, collation: "utf8_general_ci")
+                        .Annotation("MySql:CharSet", "utf8"),
+                    trusteddomains = table.Column<string>(type: "varchar(1024)", nullable: true, collation: "utf8_general_ci")
+                        .Annotation("MySql:CharSet", "utf8"),
+                    trusteddomainsenabled = table.Column<int>(type: "int", nullable: false, defaultValueSql: "'1'"),
+                    status = table.Column<int>(type: "int", nullable: false, defaultValueSql: "'0'"),
+                    statuschanged = table.Column<DateTime>(type: "datetime", nullable: true),
+                    creationdatetime = table.Column<DateTime>(type: "datetime", nullable: false),
+                    owner_id = table.Column<string>(type: "varchar(38)", nullable: true, collation: "utf8_general_ci")
+                        .Annotation("MySql:CharSet", "utf8"),
+                    payment_id = table.Column<string>(type: "varchar(38)", nullable: true, collation: "utf8_general_ci")
+                        .Annotation("MySql:CharSet", "utf8"),
+                    industry = table.Column<int>(type: "int", nullable: false, defaultValueSql: "'0'"),
+                    last_modified = table.Column<DateTime>(type: "timestamp", nullable: false),
+                    spam = table.Column<bool>(type: "tinyint(1)", nullable: false, defaultValueSql: "'1'"),
+                    calls = table.Column<bool>(type: "tinyint(1)", nullable: false, defaultValueSql: "'1'")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_tenants_tenants", x => x.id);
+                })
+                .Annotation("MySql:CharSet", "utf8");
+
+            migrationBuilder.CreateTable(
+                name: "identity_clients",
+                columns: table => new
+                {
+                    client_id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    tenant_id = table.Column<int>(type: "int", nullable: false),
+                    client_secret = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    name = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    description = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    logo = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    website_url = table.Column<string>(type: "tinytext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    terms_url = table.Column<string>(type: "tinytext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    policy_url = table.Column<string>(type: "tinytext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    logout_redirect_uri = table.Column<string>(type: "tinytext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    is_public = table.Column<bool>(type: "tinyint(1)", nullable: true, defaultValueSql: "'0'"),
+                    is_enabled = table.Column<bool>(type: "tinyint(1)", nullable: true, defaultValueSql: "'1'"),
+                    is_invalidated = table.Column<bool>(type: "tinyint(1)", nullable: true, defaultValueSql: "'0'"),
+                    created_on = table.Column<DateTime>(type: "datetime(6)", maxLength: 6, nullable: true),
+                    created_by = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    modified_on = table.Column<DateTime>(type: "datetime(6)", maxLength: 6, nullable: true),
+                    modified_by = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PRIMARY", x => x.client_id);
+                    table.ForeignKey(
+                        name: "FK_identity_clients_tenants_tenants_tenant_id",
+                        column: x => x.tenant_id,
+                        principalTable: "tenants_tenants",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "tenants_partners",
+                columns: table => new
+                {
+                    tenant_id = table.Column<int>(type: "int", nullable: false),
+                    partner_id = table.Column<string>(type: "varchar(36)", nullable: true, collation: "utf8_general_ci")
+                        .Annotation("MySql:CharSet", "utf8"),
+                    affiliate_id = table.Column<string>(type: "varchar(50)", nullable: true, collation: "utf8_general_ci")
+                        .Annotation("MySql:CharSet", "utf8"),
+                    campaign = table.Column<string>(type: "varchar(50)", nullable: true, collation: "utf8_general_ci")
+                        .Annotation("MySql:CharSet", "utf8")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PRIMARY", x => x.tenant_id);
+                    table.ForeignKey(
+                        name: "FK_tenants_partners_tenants_tenants_tenant_id",
+                        column: x => x.tenant_id,
+                        principalTable: "tenants_tenants",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8");
 
             migrationBuilder.CreateTable(
                 name: "identity_authorizations",
@@ -164,6 +234,12 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         column: x => x.registered_client_id,
                         principalTable: "identity_clients",
                         principalColumn: "client_id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_identity_authorizations_tenants_tenants_tenant_id",
+                        column: x => x.tenant_id,
+                        principalTable: "tenants_tenants",
+                        principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
@@ -229,29 +305,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "identity_consents",
-                columns: table => new
-                {
-                    principal_id = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    registered_client_id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    is_invalidated = table.Column<bool>(type: "tinyint(1)", nullable: true, defaultValueSql: "'0'"),
-                    modified_at = table.Column<DateTime>(type: "datetime(6)", maxLength: 6, nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PRIMARY", x => new { x.principal_id, x.registered_client_id });
-                    table.ForeignKey(
-                        name: "identity_consents_ibfk_1",
-                        column: x => x.registered_client_id,
-                        principalTable: "identity_clients",
-                        principalColumn: "client_id",
-                        onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
                 name: "identity_client_scopes",
                 columns: table => new
                 {
@@ -278,22 +331,45 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "identity_consents",
+                columns: table => new
+                {
+                    principal_id = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    registered_client_id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    is_invalidated = table.Column<bool>(type: "tinyint(1)", nullable: true, defaultValueSql: "'0'"),
+                    modified_at = table.Column<DateTime>(type: "datetime(6)", maxLength: 6, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PRIMARY", x => new { x.principal_id, x.registered_client_id });
+                    table.ForeignKey(
+                        name: "identity_consents_ibfk_1",
+                        column: x => x.registered_client_id,
+                        principalTable: "identity_clients",
+                        principalColumn: "client_id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "identity_consent_scopes",
                 columns: table => new
                 {
-                    registered_client_id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
                     principal_id = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    registered_client_id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     scope_name = table.Column<string>(type: "varchar(255)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PRIMARY", x => new { x.registered_client_id, x.principal_id, x.scope_name });
+                    table.PrimaryKey("PRIMARY", x => new { x.principal_id, x.registered_client_id, x.scope_name });
                     table.ForeignKey(
                         name: "identity_consent_scopes_ibfk_1",
-                        columns: x => new { x.registered_client_id, x.principal_id },
+                        columns: x => new { x.principal_id, x.registered_client_id },
                         principalTable: "identity_consents",
                         principalColumns: new[] { "principal_id", "registered_client_id" },
                         onDelete: ReferentialAction.Cascade);
@@ -322,6 +398,16 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     { "rooms:write", "rooms", "write" }
                 });
 
+            migrationBuilder.InsertData(
+                table: "tenants_tenants",
+                columns: new[] { "id", "alias", "creationdatetime", "last_modified", "mappeddomain", "name", "owner_id", "payment_id", "status", "statuschanged", "timezone", "trusteddomains", "version_changed" },
+                values: new object[] { -1, "settings", new DateTime(2021, 3, 9, 17, 46, 59, 97, DateTimeKind.Utc).AddTicks(4317), new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "Web Office", "00000000-0000-0000-0000-000000000000", null, 1, null, null, null, null });
+
+            migrationBuilder.InsertData(
+                table: "tenants_tenants",
+                columns: new[] { "id", "alias", "creationdatetime", "last_modified", "mappeddomain", "name", "owner_id", "payment_id", "statuschanged", "timezone", "trusteddomains", "version_changed" },
+                values: new object[] { 1, "localhost", new DateTime(2021, 3, 9, 17, 46, 59, 97, DateTimeKind.Utc).AddTicks(4317), new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "Web Office", "66faa6e4-f133-11ea-b126-00ffeec8b4ef", null, null, null, null, null });
+
             migrationBuilder.CreateIndex(
                 name: "idx_identity_authorizations_grant_type",
                 table: "identity_authorizations",
@@ -341,6 +427,12 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 name: "idx_identity_authorizations_registered_client_id",
                 table: "identity_authorizations",
                 column: "registered_client_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_identity_authorizations_tenant_id",
+                table: "identity_authorizations",
+                column: "tenant_id",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "UK_id",
@@ -384,15 +476,15 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 column: "tenant_id");
 
             migrationBuilder.CreateIndex(
-                name: "UK_client_id",
+                name: "IX_identity_clients_tenant_id",
                 table: "identity_clients",
-                column: "client_id",
+                column: "tenant_id",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "UK_client_secret",
+                name: "UK_client_id",
                 table: "identity_clients",
-                column: "client_secret",
+                column: "client_id",
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -424,6 +516,27 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 name: "idx_identity_consents_registered_client_id",
                 table: "identity_consents",
                 column: "registered_client_id");
+
+            migrationBuilder.CreateIndex(
+                name: "alias",
+                table: "tenants_tenants",
+                column: "alias",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "last_modified",
+                table: "tenants_tenants",
+                column: "last_modified");
+
+            migrationBuilder.CreateIndex(
+                name: "mappeddomain",
+                table: "tenants_tenants",
+                column: "mappeddomain");
+
+            migrationBuilder.CreateIndex(
+                name: "version",
+                table: "tenants_tenants",
+                column: "version");
 
             migrationBuilder.Sql("CREATE EVENT IF NOT EXISTS identity_delete_invalidated_authorization\r\nON SCHEDULE EVERY 1 hour\r\nON COMPLETION PRESERVE\r\n    DO\r\nDELETE FROM identity_authorizations ia WHERE ia.is_invalidated = 1;");
             migrationBuilder.Sql("CREATE EVENT IF NOT EXISTS identity_delete_invalidated_clients\r\nON SCHEDULE EVERY 1 hour\r\nON COMPLETION PRESERVE\r\n    DO\r\nDELETE FROM identity_clients ic WHERE ic.is_invalidated = 1;");
@@ -458,6 +571,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 name: "identity_shedlock");
 
             migrationBuilder.DropTable(
+                name: "tenants_partners");
+
+            migrationBuilder.DropTable(
                 name: "identity_consents");
 
             migrationBuilder.DropTable(
@@ -465,6 +581,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
             migrationBuilder.DropTable(
                 name: "identity_clients");
+
+            migrationBuilder.DropTable(
+                name: "tenants_tenants");
         }
     }
 }

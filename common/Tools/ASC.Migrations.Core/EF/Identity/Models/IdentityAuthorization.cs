@@ -58,4 +58,6 @@ public partial class IdentityAuthorization
     public DateTime? ModifiedAt { get; set; }
 
     public virtual IdentityClient RegisteredClient { get; set; } = null!;
+
+    public DbTenant Tenant { get; set; }
 }
