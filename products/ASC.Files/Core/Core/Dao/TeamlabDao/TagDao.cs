@@ -128,27 +128,26 @@ internal abstract class BaseTagDao<T>(
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var q = (await Query(filesDbContext.Tag)).Where(r => r.Type == tagType);
 
-        if (byName)
-        {
-            q = q.Where(r => r.Name == searchText);
-        }
-        else if (!string.IsNullOrEmpty(searchText))
-        {
-            var lowerText = searchText.ToLower().Trim().Replace("%", "\\%").Replace("_", "\\_");
-            q = q.Where(r => r.Name.ToLower().Contains(lowerText));
-        }
-
-        if (count != 0)
-        {
-            q = q.Take(count);
-        }
-
-        q = q.Skip(from);
-
+        q = FilterByText(searchText, byName, q);
+        
+        q = q.OrderBy(r => r.Name)
+            .Skip(from)
+            .Take(count);
+        
         await foreach (var tag in q.AsAsyncEnumerable())
         {
             yield return mapper.Map<DbFilesTag, TagInfo>(tag);
         }
+    }
+
+    public async Task<int> GetTagsInfoTotalCountAsync(string searchText, TagType tagType, bool byName)
+    {
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        var q = (await Query(filesDbContext.Tag)).Where(r => r.Type == tagType);
+
+        q = FilterByText(searchText, byName, q);
+
+        return await q.CountAsync();
     }
 
     public async IAsyncEnumerable<TagInfo> GetTagsInfoAsync(IEnumerable<string> names)
@@ -665,6 +664,21 @@ internal abstract class BaseTagDao<T>(
         }
 
         return result;
+    }
+    
+    private static IQueryable<DbFilesTag> FilterByText(string searchText, bool byName, IQueryable<DbFilesTag> q)
+    {
+        if (byName)
+        {
+            q = q.Where(r => r.Name == searchText);
+        }
+        else if (!string.IsNullOrEmpty(searchText))
+        {
+            var lowerText = searchText.ToLower().Trim().Replace("%", "\\%").Replace("_", "\\_");
+            q = q.Where(r => r.Name.ToLower().Contains(lowerText));
+        }
+
+        return q;
     }
 }
 

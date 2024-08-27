@@ -145,11 +145,24 @@ public class CustomTagsService(
         return folder;
     }
 
-    public async IAsyncEnumerable<object> GetTagsInfoAsync<T>(string searchText, TagType tagType, int from, int count)
+    public async Task<(List<string> Tags, int Count, int TotalCount)> GetTagsInfoAsync(string searchText, TagType tagType, int from, int count)
     {
         if (!await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID))
         {
-            var rooms = await fileSecurity.GetVirtualRoomsAsync(FilterType.None, Guid.Empty, string.Empty, false, false, SearchArea.Active, false, [], false, ProviderFilter.None, SubjectFilter.Member, QuotaFilter.All, StorageFilter.None);
+            var rooms = await fileSecurity.GetVirtualRoomsAsync(FilterType.None,
+                Guid.Empty,
+                string.Empty,
+                false,
+                false,
+                SearchArea.Active,
+                false,
+                [],
+                false,
+                ProviderFilter.None,
+                SubjectFilter.Member,
+                QuotaFilter.All,
+                StorageFilter.None);
+            
             var tags = rooms.SelectMany(r => r.Tags)
                 .Where(r => r.Type == tagType);
 
@@ -160,17 +173,20 @@ public class CustomTagsService(
                 tags = tags.Where(r => r.Name.Contains(lowerText, StringComparison.CurrentCultureIgnoreCase));
             }
             
-            foreach (var tagInfo in tags.Skip(from).Take(count))
-            { 
-                yield return tagInfo.Name;
-            }
+            var tagNames = tags
+                .OrderBy(x => x.Name)
+                .Skip(from)
+                .Take(count)
+                .Select(x => x.Name)
+                .ToList();
             
-            yield break;
+            return (tagNames, tagNames.Count, tags.Count());
         }
-
-        await foreach (var tagInfo in daoFactory.GetTagDao<T>().GetTagsInfoAsync(searchText, tagType, false, from, count))
-        {
-            yield return tagInfo.Name;
-        }
+        
+        var tagDao = daoFactory.GetTagDao<int>();
+        var tagsCountTask = tagDao.GetTagsInfoTotalCountAsync(searchText, tagType, true);
+        var tags1 = await tagDao.GetTagsInfoAsync(searchText, tagType, true, from, count).Select(x => x.Name).ToListAsync();
+        
+        return (tags1, tags1.Count, await tagsCountTask);
     }
 }

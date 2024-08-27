@@ -712,7 +712,11 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         var from = Convert.ToInt32(apiContext.StartIndex);
         var count = Convert.ToInt32(apiContext.Count);
 
-        await foreach (var tag in customTagsService.GetTagsInfoAsync<int>(apiContext.FilterValue, TagType.Custom, from, count))
+        var (tags, count1, total) = await customTagsService.GetTagsInfoAsync(apiContext.FilterValue, TagType.Custom, from, count);
+        
+        apiContext.SetCount(count1).SetTotalCount(total);
+        
+        foreach (var tag in tags)
         {
             yield return tag;
         }
