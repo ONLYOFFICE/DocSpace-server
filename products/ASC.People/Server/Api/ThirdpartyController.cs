@@ -186,7 +186,7 @@ public class ThirdpartyController(
         }
         
         var model = emailValidationKeyModelHelper.GetModel();
-        var linkData = await invitationService.GetLinkDataAsync(inDto.Key, inDto.Email, inDto.EmployeeType ?? EmployeeType.RoomAdmin, model?.UiD);
+        var linkData = await invitationService.GetLinkDataAsync(inDto.Key, inDto.Email, null, inDto.EmployeeType ?? EmployeeType.RoomAdmin, model?.UiD);
 
         if (!linkData.IsCorrect)
         {
@@ -209,7 +209,7 @@ public class ThirdpartyController(
                 GetEmailAddress(inDto, thirdPartyProfile), 
                 passwordHash, 
                 employeeType, 
-                true, 
+                false, 
                 invitedByEmail,
                 inDto.Culture,
                 model?.UiD);

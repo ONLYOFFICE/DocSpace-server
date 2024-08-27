@@ -42,7 +42,8 @@ public class InvitationService(
     FilesMessageService filesMessageService,
     DisplayUserSettingsHelper displayUserSettingsHelper,
     IDistributedLockProvider distributedLockProvider,
-    UsersInRoomChecker usersInRoomChecker)
+    UsersInRoomChecker usersInRoomChecker,
+    EmailValidationKeyModelHelper validationHelper)
 {
     public string GetInvitationLink(Guid linkId, Guid createdBy)
     {
@@ -64,7 +65,7 @@ public class InvitationService(
             throw new SecurityException();
         }
 
-        var data = await GetLinkDataAsync(key, email, employeeType, userId);
+        var data = await GetLinkDataAsync(key, email, null, employeeType, userId);
         var validation = new Validation { Result = data.Result };
         
         if (data.Result is EmailValidationKeyProvider.ValidationResult.Invalid or EmailValidationKeyProvider.ValidationResult.Expired)
@@ -192,8 +193,26 @@ public class InvitationService(
         return validation;
     }
 
-    public async Task<InvitationLinkData> GetLinkDataAsync(string key, string email, EmployeeType employeeType = EmployeeType.All, Guid? userId = default)
+    public async Task<InvitationLinkData> GetLinkDataAsync(string key, string email, ConfirmType? confirmType, EmployeeType employeeType = EmployeeType.All, Guid? userId = default)
     {
+        if (confirmType is ConfirmType.EmpInvite)
+        {
+            return new InvitationLinkData
+            {
+                Result = await validationHelper.ValidateAsync(new EmailValidationKeyModel
+                {
+                    Key = key,
+                    Email = email,
+                    Type = ConfirmType.EmpInvite,
+                    EmplType = employeeType,
+                    UiD = userId
+                }),
+                ConfirmType = confirmType,
+                EmployeeType = employeeType,
+                LinkType = InvitationLinkType.Individual
+            };
+        }
+        
         var result = await invitationValidator.ValidateAsync(key, email, employeeType, userId);
         var data = new InvitationLinkData
         {

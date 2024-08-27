@@ -56,6 +56,16 @@ public class FileMovedInterpreter : ActionInterpreter
     }
 }
 
+public class UserFileUpdatedInterpreter : ActionInterpreter
+{
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
+    {
+        var desc = GetAdditionalDescription(description);
+
+        return new ValueTask<HistoryData>(new UserFileUpdateData(target, description[1], desc.ParentId, desc.ParentTitle, desc.ParentType, description[0]));
+    }
+}
+
 public class FileUpdatedInterpreter : ActionInterpreter
 {
     protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)

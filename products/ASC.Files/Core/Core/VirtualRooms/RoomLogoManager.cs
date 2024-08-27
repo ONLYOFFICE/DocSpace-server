@@ -185,7 +185,7 @@ public class RoomLogoManager(
     {
         data = UserPhotoThumbnailManager.TryParseImage(data, maxFileSize, _originalLogoSize.Item2);
 
-        var fileName = $"{Guid.NewGuid()}.png";
+        var fileName = $"{Guid.NewGuid()}{LogosPathSplitter}{securityContext.CurrentAccount.ID}.png";
 
         using var stream = new MemoryStream(data);
         var store = await GetDataStoreAsync();
@@ -318,8 +318,19 @@ public class RoomLogoManager(
         return fileName;
     }
 
-    private static async Task<byte[]> GetTempAsync(IDataStore store, string fileName)
+    private async Task<byte[]> GetTempAsync(IDataStore store, string fileName)
     {
+        var index = fileName.LastIndexOf('.');
+        var fileNameWithoutExt = (index != -1) ? fileName[..index] : fileName;
+        
+        var fileNameParts = fileNameWithoutExt.Split(LogosPathSplitter);
+        
+        var userIdString = fileNameParts.Length > 1 ? fileNameParts[1] : string.Empty;
+        if (!Guid.TryParse(userIdString, out var userId) || userId != securityContext.CurrentAccount.ID)
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+        
         await using var stream = await store.GetReadStreamAsync(TempDomainPath, fileName);
 
         var data = new MemoryStream();

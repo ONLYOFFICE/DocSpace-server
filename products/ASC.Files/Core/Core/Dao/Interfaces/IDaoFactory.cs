@@ -31,6 +31,7 @@ public interface IDaoFactory
     IProviderDao ProviderDao { get; }
 
     IFolderDao<T> GetFolderDao<T>();
+    IFolderDao<T> GetCacheFolderDao<T>();
     IFileDao<T> GetFileDao<T>();
     ITagDao<T> GetTagDao<T>();
     ISecurityDao<T> GetSecurityDao<T>();

@@ -93,10 +93,14 @@ public class ThirdpartyConfiguration(ThirdpartyConfigurationData configuration, 
 
         var providers = new List<ProviderDto>
         {
-            new("Box", ProviderTypes.Box.ToStringFast(), BoxLoginProvider.IsEnabled, true, BoxLoginProvider.RedirectUri),
-            new("Dropbox", ProviderTypes.DropboxV2.ToStringFast(), DropboxLoginProvider.IsEnabled, true, DropboxLoginProvider.RedirectUri),
-            new("GoogleDrive", ProviderTypes.GoogleDrive.ToStringFast(), GoogleLoginProvider.IsEnabled, true, GoogleLoginProvider.RedirectUri),
-            new("OneDrive", ProviderTypes.OneDrive.ToStringFast(), OneDriveLoginProvider.IsEnabled, true, OneDriveLoginProvider.RedirectUri),
+            new("Box", ProviderTypes.Box.ToStringFast(), BoxLoginProvider.IsEnabled, true, BoxLoginProvider.RedirectUri, 
+                ClientId: BoxLoginProvider.ClientID),
+            new("Dropbox", ProviderTypes.DropboxV2.ToStringFast(), DropboxLoginProvider.IsEnabled, true, DropboxLoginProvider.RedirectUri, 
+                ClientId: DropboxLoginProvider.ClientID),
+            new("GoogleDrive", ProviderTypes.GoogleDrive.ToStringFast(), GoogleLoginProvider.IsEnabled, true, GoogleLoginProvider.RedirectUri, 
+                ClientId: GoogleLoginProvider.ClientID),
+            new("OneDrive", ProviderTypes.OneDrive.ToStringFast(), OneDriveLoginProvider.IsEnabled, true, OneDriveLoginProvider.RedirectUri, 
+                ClientId: OneDriveLoginProvider.ClientID),
             new("kDrive", webDavKey, true),
             new("WebDav", webDavKey, true, RequiredConnectionUrl: true),
             new("Nextcloud", webDavKey, true, RequiredConnectionUrl: true),

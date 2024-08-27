@@ -129,7 +129,15 @@ public class EmailValidationKeyModelHelper(
                 checkKeyResult = (await invitationValidator.ValidateAsync(key, email, emplType ?? default, uiD)).Status;
                 break;
 
-            case ConfirmType.PortalOwnerChange:                
+            case ConfirmType.PortalOwnerChange:
+                var tenantOwnerId = (await tenantManager.GetCurrentTenantAsync()).OwnerId;
+                var oldOwner = await userManager.GetUserByEmailAsync(email);
+                if (!tenantOwnerId.Equals(oldOwner.Id))
+                {
+                    checkKeyResult = ValidationResult.Invalid;
+                    break;
+                }
+
                 var newOwner = await userManager.GetUsersAsync(uiD.GetValueOrDefault());
                 if(Equals(newOwner, Constants.LostUser) || newOwner.Status == EmployeeStatus.Terminated)
                 {
