@@ -195,6 +195,7 @@ public class LicenseReader(
             MaxFileSize = defaultQuota.MaxFileSize,
             DocsEdition = true,
             Customization = license.Customization,
+            Lifetime = !license.TimeLimited,
             Statistic = true
         };
 

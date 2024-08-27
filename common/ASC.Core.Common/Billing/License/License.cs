@@ -39,6 +39,10 @@ public class License
     /// <type>System.Boolean, System</type>
     public bool Customization { get; set; }
 
+    /// <summary>Specifies if the license is time limited or not</summary>
+    /// <type>System.Boolean, System</type>
+    public bool TimeLimited { get; set; }
+
     /// <summary>License due date</summary>
     /// <type>System.DateTime, System</type>
     [JsonPropertyName("end_date")]

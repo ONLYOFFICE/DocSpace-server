@@ -246,6 +246,16 @@ public class TenantQuota : IMapFrom<DbQuota>
         set => _customizationFeature.Value = value;
     }
 
+    private readonly TenantQuotaFeatureFlag _lifetimeFeature;
+
+    /// <summary>Specifies if the license is lifetime or not</summary>
+    /// <type>System.Boolean, System</type>
+    public bool Lifetime
+    {
+        get => _lifetimeFeature.Value;
+        set => _lifetimeFeature.Value = value;
+    }
+
     private readonly TenantQuotaFeatureFlag _customFeature;
 
     /// <summary>Specifies if the custom domain URL is available or not</summary>
@@ -315,6 +325,7 @@ public class TenantQuota : IMapFrom<DbQuota>
         _ldapFeature = new TenantQuotaFeatureFlag(this) { Name = "ldap", Order = 3 };
         _ssoFeature = new TenantQuotaFeatureFlag(this) { Name = "sso", Order = 5 };
         _customizationFeature = new TenantQuotaFeatureFlag(this) { Name = "customization", Order = 4 };
+        _lifetimeFeature = new TenantQuotaFeatureFlag(this) { Name = "lifetime", Standalone = true };
         _customFeature = new TenantQuotaFeatureFlag(this) { Name = "custom", Visible = false };
         _autoBackupRestoreFeature = new TenantQuotaFeatureFlag(this) { Name = "restore", Order = 6 };
         _oauthFeature = new TenantQuotaFeatureFlag(this) { Name = "oauth" };
@@ -339,6 +350,7 @@ public class TenantQuota : IMapFrom<DbQuota>
             _ldapFeature,
             _ssoFeature,
             _customizationFeature,
+            _lifetimeFeature,
             _customFeature,
             _autoBackupRestoreFeature,
             _oauthFeature,
