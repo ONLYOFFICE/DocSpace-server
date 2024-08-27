@@ -184,8 +184,8 @@ public class CustomTagsService(
         }
         
         var tagDao = daoFactory.GetTagDao<int>();
-        var tagsCountTask = tagDao.GetTagsInfoTotalCountAsync(searchText, tagType, true);
-        var tags1 = await tagDao.GetTagsInfoAsync(searchText, tagType, true, from, count).Select(x => x.Name).ToListAsync();
+        var tagsCountTask = tagDao.GetTagsInfoTotalCountAsync(searchText, tagType, false);
+        var tags1 = await tagDao.GetTagsInfoAsync(searchText, tagType, false, from, count).Select(x => x.Name).ToListAsync();
         
         return (tags1, tags1.Count, await tagsCountTask);
     }
