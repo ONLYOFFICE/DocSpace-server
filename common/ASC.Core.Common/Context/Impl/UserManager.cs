@@ -374,7 +374,7 @@ public class UserManager(
             oldUserData.Status != u.Status && notifyWebSocket)
         {
             (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountPaidUserFeature, int>();
-            value = oldUserData.Status > u.Status ? ++value : --value;//crutch: data race
+            value = oldUserData.Status == EmployeeStatus.Terminated ? ++value : --value;//crutch: data race
         }
 
         var newUserData = await userService.SaveUserAsync(tenant.Id, u);
