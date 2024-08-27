@@ -31,10 +31,10 @@ public class SecurityDto
     [SwaggerSchemaCustom("Module ID")]
     public string WebItemId { get; set; }
 
-    [SwaggerSchemaCustom<List<EmployeeDto>>("List of users with the access to the module")]
+    [SwaggerSchemaCustom("List of users with the access to the module")]
     public List<EmployeeDto> Users { get; set; }
 
-    [SwaggerSchemaCustom<List<GroupSummaryDto>>("List of groups with the access to the module")]
+    [SwaggerSchemaCustom("List of groups with the access to the module")]
     public List<GroupSummaryDto> Groups { get; init; }
 
     [SwaggerSchemaCustom("Specifies if the security settings are enabled or not")]

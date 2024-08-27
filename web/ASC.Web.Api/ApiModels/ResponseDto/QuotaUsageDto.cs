@@ -92,7 +92,7 @@ public class QuotaUsageDto
         set { throw new NotImplementedException(); }
     }
 
-    [SwaggerSchemaCustom<IList<QuotaUsage>>("Storage usage")]
+    [SwaggerSchemaCustom("Storage usage")]
     public IList<QuotaUsage> StorageUsage { get; set; }
 
     [SwaggerSchemaCustom("User storage size")]

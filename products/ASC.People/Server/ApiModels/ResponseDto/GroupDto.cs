@@ -45,10 +45,10 @@ public class GroupDto
     [SwaggerSchemaCustom("Specifies if the LDAP settings are enabled for the group or not")]
     public bool IsLDAP { get; set; }
 
-    [SwaggerSchemaCustom<EmployeeFullDto>("Manager")]
+    [SwaggerSchemaCustom("Manager")]
     public EmployeeFullDto Manager { get; set; }
 
-    [SwaggerSchemaCustom<List<EmployeeFullDto>>(Description = "List of members")]
+    [SwaggerSchemaCustom(Description = "List of members")]
     public List<EmployeeFullDto> Members { get; set; }
 
     [SwaggerSchemaCustom("Shared")]

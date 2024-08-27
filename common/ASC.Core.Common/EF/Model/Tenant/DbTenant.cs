@@ -102,7 +102,7 @@ public class DbTenant : IMapFrom<Tenant>
     [SwaggerSchemaCustom("Calls")]
     public bool Calls { get; set; }
 
-    [SwaggerSchemaCustom<DbTenantPartner>("Partner")]
+    [SwaggerSchemaCustom("Partner")]
     public DbTenantPartner Partner { get; set; }
 
     public void Mapping(Profile profile)

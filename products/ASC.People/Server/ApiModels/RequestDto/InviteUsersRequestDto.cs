@@ -28,7 +28,7 @@ namespace ASC.People.ApiModels.RequestDto;
 
 public class InviteUsersRequestDto
 {
-    [SwaggerSchemaCustom<IEnumerable<UserInvitation>>("List of user invitations")]
+    [SwaggerSchemaCustom("List of user invitations")]
     [MaxEmailInvitations]
     public IEnumerable<UserInvitation> Invitations { get; set; }
 

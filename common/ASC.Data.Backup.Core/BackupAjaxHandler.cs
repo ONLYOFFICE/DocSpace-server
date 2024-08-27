@@ -432,10 +432,10 @@ public class BackupAjaxHandler(
         [SwaggerSchemaCustom("Storage type")]
         public BackupStorageType StorageType { get; set; }
 
-        [SwaggerSchemaCustom<Dictionary<string, string>>("Storage parameters")]
+        [SwaggerSchemaCustom("Storage parameters")]
         public Dictionary<string, string> StorageParams { get; set; }
 
-        [SwaggerSchemaCustom<CronParams>("Cron parameters")]
+        [SwaggerSchemaCustom("Cron parameters")]
         public CronParams CronParams { get; init; }
 
         [SwaggerSchemaCustom("Maximum number of the stored backup copies")]

@@ -40,7 +40,7 @@ public class SettingsDto
     [SwaggerSchemaCustom("Language", Example = "en-US")]
     public string Culture { get; set; }
 
-    [SwaggerSchemaCustom<TimeSpan>("UTC offset")]
+    [SwaggerSchemaCustom("UTC offset")]
     public TimeSpan UtcOffset { get; set; }
 
     [SwaggerSchemaCustom("UTC hours offset")]
@@ -76,10 +76,10 @@ public class SettingsDto
     [SwaggerSchemaCustom("Wizard token")]
     public string WizardToken { get; set; }
 
-    [SwaggerSchemaCustom<PasswordHasher>("Password hash")]
+    [SwaggerSchemaCustom("Password hash")]
     public PasswordHasher PasswordHash { get; set; }
 
-    [SwaggerSchemaCustom<FirebaseDto>("Firebase parameters")]
+    [SwaggerSchemaCustom("Firebase parameters")]
     public FirebaseDto Firebase { get; set; }
 
     [SwaggerSchemaCustom("Version")]
@@ -112,7 +112,7 @@ public class SettingsDto
     [SwaggerSchemaCustom("API documentation link")]
     public string ApiDocsLink { get; set; }
 
-    [SwaggerSchemaCustom<TenantDomainValidator>("Domain validator")]
+    [SwaggerSchemaCustom("Domain validator")]
     public TenantDomainValidator DomainValidator { get; set; }
 
     [SwaggerSchemaCustom("Zendesk key")]
@@ -146,13 +146,13 @@ public class SettingsDto
     [SwaggerSchemaCustom("Invitation limit")]
     public int? InvitationLimit { get; set; }
 
-    [SwaggerSchemaCustom<PluginsDto>("Plugins")]
+    [SwaggerSchemaCustom("Plugins")]
     public PluginsDto Plugins { get; set; }
 
-    [SwaggerSchemaCustom<DeepLinkDto>("Deep link")]
+    [SwaggerSchemaCustom("Deep link")]
     public DeepLinkDto DeepLink { get; set; }
 
-    [SwaggerSchemaCustom<FormGalleryDto>("Form gallery")]
+    [SwaggerSchemaCustom("Form gallery")]
     public FormGalleryDto FormGallery { get; set; }
 
     [SwaggerSchemaCustom("Max image upload size")]

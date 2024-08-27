@@ -57,10 +57,10 @@ public class LdapRequestsDto : IMapFrom<LdapSettings>
     [SwaggerSchemaCustom("Attribute in a user record that corresponds to the login that LDAP server users will use to log in to ONLYOFFICE")]
     public string LoginAttribute { get; set; }
 
-    [SwaggerSchemaCustom<Dictionary<MappingFields, string>>("Correspondence between the user data fields on the portal and the attributes in the LDAP server user record")]
+    [SwaggerSchemaCustom("Correspondence between the user data fields on the portal and the attributes in the LDAP server user record")]
     public Dictionary<MappingFields, string> LdapMapping { get; set; }
 
-    [SwaggerSchemaCustom<Dictionary<AccessRight, string>>("Group access rights")]
+    [SwaggerSchemaCustom("Group access rights")]
     //ToDo: use SId instead of group name
     public Dictionary<AccessRight, string> AccessRights { get; set; }
 

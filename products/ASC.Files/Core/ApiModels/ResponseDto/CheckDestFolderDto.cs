@@ -31,7 +31,7 @@ public class CheckDestFolderDto
     [SwaggerSchemaCustom("Result")]
     public CheckDestFolderResult Result { get; set; }
 
-    [SwaggerSchemaCustom<List<FileEntryDto>>("Files")]
+    [SwaggerSchemaCustom("Files")]
     public List<FileEntryDto> Files { get; set; }
 }
 

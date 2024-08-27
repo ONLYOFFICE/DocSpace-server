@@ -92,25 +92,25 @@ public class SsoSettingsV2 : ISettings<SsoSettingsV2>
     [SwaggerSchemaCustom("Specifies if SSO is enabled or not")]
     public bool? EnableSso { get; set; }
 
-    [SwaggerSchemaCustom<SsoIdpSettings>("IDP settings")]
+    [SwaggerSchemaCustom("IDP settings")]
     public SsoIdpSettings IdpSettings { get; set; }
 
-    [SwaggerSchemaCustom<List<SsoCertificate>>("List of IDP certificates")]
+    [SwaggerSchemaCustom("List of IDP certificates")]
     public List<SsoCertificate> IdpCertificates { get; set; }
 
-    [SwaggerSchemaCustom<SsoIdpCertificateAdvanced>("IDP advanced certificate")]
+    [SwaggerSchemaCustom("IDP advanced certificate")]
     public SsoIdpCertificateAdvanced IdpCertificateAdvanced { get; set; }
 
     [SwaggerSchemaCustom("SP login label")]
     public string SpLoginLabel { get; set; }
 
-    [SwaggerSchemaCustom<List<SsoCertificate>>("List of SP certificates")]
+    [SwaggerSchemaCustom("List of SP certificates")]
     public List<SsoCertificate> SpCertificates { get; set; }
 
-    [SwaggerSchemaCustom<SsoSpCertificateAdvanced>("SP advanced certificate")]
+    [SwaggerSchemaCustom("SP advanced certificate")]
     public SsoSpCertificateAdvanced SpCertificateAdvanced { get; set; }
 
-    [SwaggerSchemaCustom<SsoFieldMapping>("Field mapping")]
+    [SwaggerSchemaCustom("Field mapping")]
     public SsoFieldMapping FieldMapping { get; set; }
 
     [SwaggerSchemaCustom("Specifies if the authentication page will be hidden or not")]

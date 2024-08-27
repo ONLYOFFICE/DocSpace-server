@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Swashbuckle.AspNetCore.Annotations;
+
 namespace ASC.Core.Common.EF.Model;
 
 public class DbTenantPartner : BaseEntity
@@ -40,7 +42,7 @@ public class DbTenantPartner : BaseEntity
     [SwaggerSchemaCustom("Campaign")]
     public string Campaign { get; set; }
 
-    [SwaggerSchemaCustom<DbTenant>("Tenant")]
+    [SwaggerIgnore]
     public DbTenant Tenant { get; set; }
 
     public override object[] GetKeys()

@@ -144,6 +144,26 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
         {
             result.Example = new OpenApiString(new Guid("{75A5F745-F697-4418-B38D-0FE0D277E258}").ToString());
         }
+        else if(checkType.IsClosedTypeOf(typeof(IDictionary<,>)))
+        {
+            var array = new OpenApiArray();
+            if (checkType.IsGenericType)
+            {
+                var dictSchema = new OpenApiObject();
+                for (var index = 0; index < checkType.GenericTypeArguments.Length; index++)
+                {
+                    var t = checkType.GenericTypeArguments[index];
+                    var arraySchema = UpdateSchema(t, new OpenApiSchema());
+                    if (arraySchema is { Example: not null })
+                    {
+                        dictSchema.Add(index == 0 ? "key" : "value", arraySchema.Example);
+                    }
+                }
+
+                array.Add(dictSchema);
+            }
+            result.Example = array;
+        }
         else if(typeof(IEnumerable).IsAssignableFrom(checkType))
         {
             var array = new OpenApiArray();
@@ -157,8 +177,11 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
             }
             
             var arraySchema = UpdateSchema(checkType, new OpenApiSchema());
-            array.Add(arraySchema.Example);
-            result.Example = array;
+            if (arraySchema is { Example: not null })
+            {
+                array.Add(arraySchema.Example);
+                result.Example = array;
+            }
         }
         else if(checkType == typeof(JsonElement))
         {

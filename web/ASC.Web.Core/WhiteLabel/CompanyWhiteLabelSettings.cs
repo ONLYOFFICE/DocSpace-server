@@ -30,7 +30,7 @@ namespace ASC.Web.Core.WhiteLabel;
 
 public class CompanyWhiteLabelSettingsWrapper
 {
-    [SwaggerSchemaCustom<CompanyWhiteLabelSettings>("Company white label settings")]
+    [SwaggerSchemaCustom("Company white label settings")]
     public CompanyWhiteLabelSettings Settings { get; set; }
 }
 

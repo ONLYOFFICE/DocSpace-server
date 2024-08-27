@@ -34,7 +34,7 @@ public class BackupRestoreDto
     [SwaggerSchemaCustomString("Storage type")]
     public object StorageType { get; set; }
 
-    [SwaggerSchemaCustom<IEnumerable<ItemKeyValuePair<object, object>>>("Storage parameters")]
+    [SwaggerSchemaCustom("Storage parameters")]
     public IEnumerable<ItemKeyValuePair<object, object>> StorageParams { get; set; }
 
     [SwaggerSchemaCustom("Notifies users about portal restoring process or not")]

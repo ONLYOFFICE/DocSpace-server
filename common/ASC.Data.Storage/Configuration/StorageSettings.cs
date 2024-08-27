@@ -78,7 +78,7 @@ public abstract class BaseStorageSettings<T> : ISettings<BaseStorageSettings<T>>
     [SwaggerSchemaCustom("Storage name")]
     public string Module { get; set; }
 
-    [SwaggerSchemaCustom<Dictionary<string, string>>("Storage properties")]
+    [SwaggerSchemaCustom("Storage properties")]
     public Dictionary<string, string> Props { get; set; }
     public virtual Func<DataStoreConsumer, DataStoreConsumer> Switch => d => d;
     public abstract Guid ID { get; }

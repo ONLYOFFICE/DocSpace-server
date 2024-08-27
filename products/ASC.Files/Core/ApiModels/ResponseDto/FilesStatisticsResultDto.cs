@@ -28,16 +28,16 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public class FilesStatisticsResultDto
 {
-    [SwaggerSchemaCustom<FilesStatisticsFolder>("Used space of files in the \"My Documents\" section")]
+    [SwaggerSchemaCustom("Used space of files in the \"My Documents\" section")]
     public FilesStatisticsFolder MyDocumentsUsedSpace { get; set; }
 
-    [SwaggerSchemaCustom<FilesStatisticsFolder>("Used space of files in the \"Trash\" section")]
+    [SwaggerSchemaCustom("Used space of files in the \"Trash\" section")]
     public FilesStatisticsFolder TrashUsedSpace { get; set; }
 
-    [SwaggerSchemaCustom<FilesStatisticsFolder>("Used space of files in the \"Archive\" section")]
+    [SwaggerSchemaCustom("Used space of files in the \"Archive\" section")]
     public FilesStatisticsFolder ArchiveUsedSpace { get; set; }
 
-    [SwaggerSchemaCustom<FilesStatisticsFolder>("Used space of files in the \"Rooms\" section")]
+    [SwaggerSchemaCustom("Used space of files in the \"Rooms\" section")]
     public FilesStatisticsFolder RoomsUsedSpace { get; set; }
 }
 

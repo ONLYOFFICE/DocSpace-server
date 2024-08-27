@@ -52,7 +52,7 @@ public class FolderDto<T> : FileEntryDto<T>
     [SwaggerSchemaCustom("List of tags")]
     public IEnumerable<string> Tags { get; set; }
 
-    [SwaggerSchemaCustom<Logo>("Logo")]
+    [SwaggerSchemaCustom("Logo")]
     public Logo Logo { get; set; }
 
     [SwaggerSchemaCustom("Specifies if a folder is pinned or not")]

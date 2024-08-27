@@ -34,7 +34,7 @@ public class QuotaDto
     [SwaggerSchemaCustom("Title")]
     public string Title { get; set; }
 
-    [SwaggerSchemaCustom<PriceDto>("Price")]
+    [SwaggerSchemaCustom("Price")]
     public PriceDto Price { get; set; }
 
     [SwaggerSchemaCustom("Specifies if the quota is nonprofit or not")]
@@ -46,16 +46,16 @@ public class QuotaDto
     [SwaggerSchemaCustom("Specifies if the quota is trial or not")]
     public bool Trial { get; set; }
 
-    [SwaggerSchemaCustom<IEnumerable<TenantQuotaFeatureDto>>("List of quota features")]
+    [SwaggerSchemaCustom("List of quota features")]
     public IEnumerable<TenantQuotaFeatureDto> Features { get; set; }
 
-    [SwaggerSchemaCustom<TenantEntityQuotaSettings>("User quota")]
+    [SwaggerSchemaCustom("User quota")]
     public TenantEntityQuotaSettings UsersQuota {  get; set; }
 
-    [SwaggerSchemaCustom<TenantEntityQuotaSettings>("Room quota")]
+    [SwaggerSchemaCustom("Room quota")]
     public TenantEntityQuotaSettings RoomsQuota {  get; set; }
 
-    [SwaggerSchemaCustom<TenantQuotaSettings>("Tenant custom quota")]
+    [SwaggerSchemaCustom("Tenant custom quota")]
     public TenantQuotaSettings TenantCustomQuota { get; set; }
 }
 
@@ -70,13 +70,13 @@ public class TenantQuotaFeatureDto : IEquatable<TenantQuotaFeatureDto>
     [SwaggerSchemaCustom("Image URL")]
     public string Image { get; set; }
 
-    [SwaggerSchemaCustom<object>("Value")]
+    [SwaggerSchemaCustom("Value")]
     public object Value { get; set; }
 
     [SwaggerSchemaCustom("Type")]
     public string Type { get; set; }
 
-    [SwaggerSchemaCustom<FeatureUsedDto>("Used feature parameters")]
+    [SwaggerSchemaCustom("Used feature parameters")]
     public FeatureUsedDto Used { get; set; }
 
     [SwaggerSchemaCustom("Price title")]
@@ -107,7 +107,7 @@ public class PriceDto
 
 public class FeatureUsedDto
 {
-    [SwaggerSchemaCustom<object>("Value")]
+    [SwaggerSchemaCustom("Value")]
     public object Value { get; set; }
 
     [SwaggerSchemaCustom("Title")]

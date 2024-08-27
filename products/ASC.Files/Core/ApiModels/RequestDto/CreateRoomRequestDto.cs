@@ -65,7 +65,7 @@ public class CreateRoomRequestDto
     [SwaggerSchemaCustom("Private")]
     public bool Private { get; set; }
 
-    [SwaggerSchemaCustom<IEnumerable<FileShareParams>>("Collection of sharing parameters")]
+    [SwaggerSchemaCustom("Collection of sharing parameters")]
     public IEnumerable<FileShareParams> Share { get; set; }
 
     [SwaggerSchemaCustom("Room quota")]

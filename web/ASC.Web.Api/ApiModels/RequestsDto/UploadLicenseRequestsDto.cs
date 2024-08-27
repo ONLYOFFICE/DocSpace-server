@@ -28,6 +28,6 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 public class UploadLicenseRequestsDto
 {
-    [SwaggerSchemaCustom<IEnumerable<IFormFile>>("License attachments")]
+    [SwaggerSchemaCustom("License attachments")]
     public IEnumerable<IFormFile> Files { get; set; }
 }

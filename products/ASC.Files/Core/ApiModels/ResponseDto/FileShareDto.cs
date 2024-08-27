@@ -69,7 +69,7 @@ public class FileShareLink
     [SwaggerSchemaCustom("Share link")]
     public string ShareLink { get; set; }
 
-    [SwaggerSchemaCustom<ApiDateTime>("Expiration date")]
+    [SwaggerSchemaCustom("Expiration date")]
     public ApiDateTime ExpirationDate { get; set; }
 
     [SwaggerSchemaCustom("link type")]

@@ -171,7 +171,7 @@ public class EditHistoryDataDto
     [SwaggerSchemaCustom("Key")]
     public string Key { get; set; }
 
-    [SwaggerSchemaCustom<EditHistoryUrl>("Previous version")]
+    [SwaggerSchemaCustom("Previous version")]
     public EditHistoryUrl Previous { get; set; }
 
     [SwaggerSchemaCustom("Token")]

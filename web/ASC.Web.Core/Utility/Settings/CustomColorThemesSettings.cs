@@ -63,10 +63,10 @@ public class CustomColorThemesSettingsItem
     [SwaggerSchemaCustom("Theme name", Example = "blue")]
     public string Name { get; set; }
 
-    [SwaggerSchemaCustom<CustomColorThemesSettingsColorItem>("Main colors")]
+    [SwaggerSchemaCustom("Main colors")]
     public CustomColorThemesSettingsColorItem Main { get; set; }
 
-    [SwaggerSchemaCustom<CustomColorThemesSettingsColorItem>("Text colors")]
+    [SwaggerSchemaCustom("Text colors")]
     public CustomColorThemesSettingsColorItem Text { get; set; }
 
     public static List<CustomColorThemesSettingsItem> Default =>

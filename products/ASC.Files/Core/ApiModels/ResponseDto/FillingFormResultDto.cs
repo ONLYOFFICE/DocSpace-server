@@ -38,7 +38,7 @@ public class FillingFormResultDto<T>
     [SwaggerSchemaCustom<FileDto<int>>("Original form")]
     public FileDto<T> OriginalForm { get; set; }
 
-    [SwaggerSchemaCustom<EmployeeFullDto>("Manager")]
+    [SwaggerSchemaCustom("Manager")]
     public EmployeeFullDto Manager { get; set; }
 
     [SwaggerSchemaCustomInt("Room Id")]

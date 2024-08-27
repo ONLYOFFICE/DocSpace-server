@@ -28,7 +28,7 @@ namespace ASC.Web.Core.WhiteLabel;
 
 public class AdditionalWhiteLabelSettingsWrapper
 {
-    [SwaggerSchemaCustom<AdditionalWhiteLabelSettings>("Additional white label settings")]
+    [SwaggerSchemaCustom("Additional white label settings")]
     public AdditionalWhiteLabelSettings Settings { get; set; }
 }
 

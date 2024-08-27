@@ -97,22 +97,22 @@ public class FileDto<T> : FileEntryDto<T>
     [SwaggerSchemaCustom("InProcess folder title")]
     public string InProcessFolderTitle { get; set; }
 
-    [SwaggerSchemaCustom<DraftLocation<int>>("Draft info")]
+    [SwaggerSchemaCustom("Draft info")]
     public DraftLocation<T> DraftLocation { get; set; }
 
     [SwaggerSchemaCustom("Denies file sharing or not", Example = false)]
     public bool DenySharing { get; set; }
 
-    [SwaggerSchemaCustom<IDictionary<Accessibility, bool>>("File accessibility")]
+    [SwaggerSchemaCustom("File accessibility")]
     public IDictionary<Accessibility, bool> ViewAccessibility { get; set; }
 
-    [SwaggerSchemaCustom<IDictionary<string, bool>>("Available external rights")]
+    [SwaggerSchemaCustom("Available external rights")]
     public IDictionary<string, bool> AvailableExternalRights { get; set; }
 
     [SwaggerSchemaCustom("Request token")]
     public string RequestToken { get; set; }
 
-    [SwaggerSchemaCustom<ApiDateTime>(Description = "Last opened")]
+    [SwaggerSchemaCustom(Description = "Last opened")]
     public ApiDateTime LastOpened { get; set; }
     
     public override FileEntryType FileEntryType { get => FileEntryType.File; }

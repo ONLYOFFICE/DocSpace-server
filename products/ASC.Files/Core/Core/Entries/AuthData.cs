@@ -44,7 +44,7 @@ public class AuthData(string url = null, string login = null, string password = 
     [SwaggerSchemaCustom("Provider")]
     public string Provider { get; init; } = provider ?? string.Empty;
 
-    [SwaggerSchemaCustom<OAuth20Token>("Token")]
+    [SwaggerSchemaCustom("Token")]
     public OAuth20Token Token
     {
         get

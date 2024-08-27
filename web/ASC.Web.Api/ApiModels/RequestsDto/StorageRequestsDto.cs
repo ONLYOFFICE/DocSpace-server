@@ -31,6 +31,6 @@ public class StorageRequestsDto
     [SwaggerSchemaCustom("Storage name")]
     public string Module { get; set; }
 
-    [SwaggerSchemaCustom<IEnumerable<ItemKeyValuePair<string, string>>>("Storage properties")]
+    [SwaggerSchemaCustom("Storage properties")]
     public IEnumerable<ItemKeyValuePair<string, string>> Props { get; set; }
 }

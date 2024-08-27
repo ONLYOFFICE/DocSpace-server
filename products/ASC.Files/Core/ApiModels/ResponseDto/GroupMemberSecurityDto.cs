@@ -28,7 +28,7 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public class GroupMemberSecurityDto
 {
-    [SwaggerSchemaCustom<EmployeeFullDto>("User")]
+    [SwaggerSchemaCustom("User")]
     public EmployeeFullDto User { get; init; }
 
     [SwaggerSchemaCustom("Group access")]

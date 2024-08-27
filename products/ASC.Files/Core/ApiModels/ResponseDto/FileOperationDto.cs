@@ -50,10 +50,10 @@ public class FileOperationDto
     [SwaggerSchemaCustom("URL", Format = "uri")]
     public string Url { get; set; }
 
-    [SwaggerSchemaCustom<List<FileEntryDto>>("List of files")]
+    [SwaggerSchemaCustom("List of files")]
     public List<FileEntryDto> Files { get; set; }
 
-    [SwaggerSchemaCustom<List<FileEntryDto>>("List of folders")]
+    [SwaggerSchemaCustom("List of folders")]
     public List<FileEntryDto> Folders { get; set; }
 
     public static FileOperationDto GetSample()

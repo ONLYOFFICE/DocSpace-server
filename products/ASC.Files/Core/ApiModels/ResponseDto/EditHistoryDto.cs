@@ -40,16 +40,16 @@ public class EditHistoryDto
     [SwaggerSchemaCustom("Version group")]
     public int VersionGroup { get; set; }
 
-    [SwaggerSchemaCustom<EditHistoryAuthor>("A user who updated a file")]
+    [SwaggerSchemaCustom("A user who updated a file")]
     public EditHistoryAuthor User { get; set; }
 
-    [SwaggerSchemaCustom<ApiDateTime>("Creation time")]
+    [SwaggerSchemaCustom("Creation time")]
     public ApiDateTime Created { get; set; }
 
     [SwaggerSchemaCustom("History changes in the string format")]
     public string ChangesHistory { get; set; }
 
-    [SwaggerSchemaCustom<List<EditHistoryChangesWrapper>>("List of history changes")]
+    [SwaggerSchemaCustom("List of history changes")]
     public List<EditHistoryChangesWrapper> Changes { get; set; }
 
     [SwaggerSchemaCustom("Server version")]
@@ -71,9 +71,9 @@ public class EditHistoryDto
 
 public class EditHistoryChangesWrapper(EditHistoryChanges historyChanges, ApiDateTimeHelper apiDateTimeHelper)
 {
-    [SwaggerSchemaCustom<EditHistoryAuthor>("User")]
+    [SwaggerSchemaCustom("User")]
     public EditHistoryAuthor User { get; set; } = historyChanges.Author;
 
-    [SwaggerSchemaCustom<ApiDateTime>("Created")]
+    [SwaggerSchemaCustom("Created")]
     public ApiDateTime Created { get; set; } = apiDateTimeHelper.Get(historyChanges.Date);
 }

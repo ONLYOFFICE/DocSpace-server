@@ -28,7 +28,7 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class CustomColorThemesSettingsDto
 {
-    [SwaggerSchemaCustom<IEnumerable<CustomColorThemesSettingsItem>>("Themes")]
+    [SwaggerSchemaCustom("Themes")]
     public IEnumerable<CustomColorThemesSettingsItem> Themes { get; set; }
 
     [SwaggerSchemaCustom("Selected")]

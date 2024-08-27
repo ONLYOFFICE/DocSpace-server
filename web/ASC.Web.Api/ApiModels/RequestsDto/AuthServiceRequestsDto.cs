@@ -43,7 +43,7 @@ public class AuthServiceRequestsDto
     [SwaggerSchemaCustom("Specifies if the authentication service can be set or not")]
     public bool CanSet { get; set; }
 
-    [SwaggerSchemaCustom<List<AuthKey>>("List of authorization keys")]
+    [SwaggerSchemaCustom("List of authorization keys")]
     public List<AuthKey> Props { get; set; }
 
     public static async Task<AuthServiceRequestsDto> From(Consumer consumer)

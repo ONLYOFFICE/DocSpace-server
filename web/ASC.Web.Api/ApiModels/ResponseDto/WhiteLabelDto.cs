@@ -33,10 +33,10 @@ public class WhiteLabelItemDto
     [SwaggerSchemaCustom("File name")]
     public string Name { get; set; }
 
-    [SwaggerSchemaCustom<Size>("Size")]
+    [SwaggerSchemaCustom("Size")]
     public Size Size { get; set; }
 
-    [SwaggerSchemaCustom<WhiteLabelItemPathDto>("Path")]
+    [SwaggerSchemaCustom("Path")]
     public WhiteLabelItemPathDto Path { get; set; }
 }
 

@@ -46,7 +46,7 @@ public class FireBaseUser : BaseEntity
     [SwaggerSchemaCustom("Specifies if the user is subscribed to the push notifications or not")]
     public bool? IsSubscribed { get; set; }
 
-    [SwaggerSchemaCustom<DbTenant>("Tenant")]
+    [SwaggerSchemaCustom("Tenant")]
     public DbTenant Tenant { get; set; }
 
     public override object[] GetKeys()

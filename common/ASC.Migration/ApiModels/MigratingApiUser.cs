@@ -53,7 +53,7 @@ public class MigratingApiUser : ImportableApiEntity
     [ProtoMember(7)]
     public EmployeeType UserType { get; set; }
 
-    [SwaggerSchemaCustom<MigratingApiFiles>("Migrating files")]
+    [SwaggerSchemaCustom("Migrating files")]
     [ProtoMember(8)]
     public MigratingApiFiles MigratingFiles { get; set; }
 }

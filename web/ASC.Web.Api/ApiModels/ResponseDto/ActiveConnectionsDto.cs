@@ -31,7 +31,7 @@ public class ActiveConnectionsDto
     [SwaggerSchemaCustom("Login event")]
     public int LoginEvent { get; set; }
 
-    [SwaggerSchemaCustom<List<ActiveConnectionsItemDto>>("Items")]
+    [SwaggerSchemaCustom("Items")]
     public List<ActiveConnectionsItemDto> Items { get; set; }
 }
 
@@ -64,7 +64,7 @@ public class ActiveConnectionsItemDto
     [SwaggerSchemaCustom("Platform")]
     public string Platform { get; set; }
 
-    [SwaggerSchemaCustom<ApiDateTime>("Date")]
+    [SwaggerSchemaCustom("Date")]
     public ApiDateTime Date { get; set; }
 
     [SwaggerSchemaCustom("Page")]

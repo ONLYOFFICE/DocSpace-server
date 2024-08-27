@@ -41,7 +41,7 @@ public enum EditorType
 
 public class ActionLinkConfig
 {
-    [SwaggerSchemaCustom<ActionConfig>("The information about the comment in the document that will be scrolled to")]
+    [SwaggerSchemaCustom("The information about the comment in the document that will be scrolled to")]
     [JsonPropertyName("action")]
     public ActionConfig Action { get; set; }
 
@@ -515,7 +515,7 @@ public class PermissionsConfig
 
 public class FileReference
 {
-    [SwaggerSchemaCustom<FileReferenceData>("File reference data")]
+    [SwaggerSchemaCustom("File reference data")]
     public FileReferenceData ReferenceData { get; set; }
 
     [SwaggerSchemaCustom("Error")]

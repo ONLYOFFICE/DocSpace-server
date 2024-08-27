@@ -34,7 +34,7 @@ public class SaveEditingRequestDto : IModelWithFile
     [SwaggerSchemaCustom("URI to download a file", Format = "uri")]
     public string DownloadUri { get; set; }
 
-    [SwaggerSchemaCustom<IFormFile>("Request file stream", Format = "binary")]
+    [SwaggerSchemaCustom("Request file stream")]
     public IFormFile File { get; set; }
 
     [SwaggerSchemaCustom("Specifies whether to force save a file or not")]

@@ -28,19 +28,19 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public record HistoryDto
 {
-    [SwaggerSchemaCustom<HistoryAction>("Action")]
+    [SwaggerSchemaCustom("Action")]
     public HistoryAction Action { get; init; }
 
-    [SwaggerSchemaCustom<EmployeeDto>("Initiator")]
+    [SwaggerSchemaCustom("Initiator")]
     public EmployeeDto Initiator { get; init; }
 
-    [SwaggerSchemaCustom<ApiDateTime>("Date")]
+    [SwaggerSchemaCustom("Date")]
     public ApiDateTime Date { get; init; }
 
-    [SwaggerSchemaCustom<HistoryData>("Data")]
+    [SwaggerSchemaCustom("Data")]
     public HistoryData Data { get; init; }
 
-    [SwaggerSchemaCustom<List<HistoryDto>>("Related")]
+    [SwaggerSchemaCustom("Related")]
     public List<HistoryDto> Related { get; set; }
 }
 

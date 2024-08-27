@@ -37,7 +37,7 @@ public class SessionRequestDto
     [SwaggerSchemaCustom("Relative path to the folder")]
     public string RelativePath { get; set; }
 
-    [SwaggerSchemaCustom<ApiDateTime>("Creation time")]
+    [SwaggerSchemaCustom("Creation time")]
     public ApiDateTime CreateOn { get; set; }
 
     [SwaggerSchemaCustom("Specifies whether to encrypt a file or not")]

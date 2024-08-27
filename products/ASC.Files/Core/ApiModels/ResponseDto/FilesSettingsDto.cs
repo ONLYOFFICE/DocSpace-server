@@ -64,7 +64,7 @@ public class FilesSettingsDto
     [SwaggerSchemaCustom("Exts must convert")]
     public List<string> ExtsMustConvert { get; set; }
 
-    [SwaggerSchemaCustom<IDictionary<string, List<string>>>("Exts convertible")]
+    [SwaggerSchemaCustom("Exts convertible")]
     public IDictionary<string, List<string>> ExtsConvertible { get; set; }
 
     [SwaggerSchemaCustom("Exts uploadable")]
@@ -91,7 +91,7 @@ public class FilesSettingsDto
     [SwaggerSchemaCustom("Exts document")]
     public ImmutableList<string> ExtsDocument { get; set; }
 
-    [SwaggerSchemaCustom<Dictionary<FileType, string>>("Internal formats")]
+    [SwaggerSchemaCustom("Internal formats")]
     public Dictionary<FileType, string> InternalFormats { get; set; }
 
     [SwaggerSchemaCustom("Master form extension")]
@@ -151,7 +151,7 @@ public class FilesSettingsDto
     [SwaggerSchemaCustom("Hide confirm convert open")]
     public bool HideConfirmConvertOpen { get; set; }
 
-    [SwaggerSchemaCustom<OrderBy>("DefaultO order")]
+    [SwaggerSchemaCustom("Default order")]
     public OrderBy DefaultOrder { get; set; }
 
     [SwaggerSchemaCustom("Forcesave")]
@@ -172,7 +172,7 @@ public class FilesSettingsDto
     [SwaggerSchemaCustom("Download tar gz")]
     public bool DownloadTarGz { get; set; }
 
-    [SwaggerSchemaCustom<AutoCleanUpData>("Automatically clean up")]
+    [SwaggerSchemaCustom("Automatically clean up")]
     public AutoCleanUpData AutomaticallyCleanUp { get; set; }
 
     [SwaggerSchemaCustom("Can search by content")]

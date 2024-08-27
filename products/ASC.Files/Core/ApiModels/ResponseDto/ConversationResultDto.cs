@@ -44,7 +44,7 @@ public class ConversationResultDto
     [SwaggerSchemaCustom("Source file")]
     public string Source { get; set; }
 
-    [SwaggerSchemaCustom<object>("Resulting file")]
+    [SwaggerSchemaCustom("Resulting file")]
     [JsonPropertyName("result")]
     public object File { get; set; }
 

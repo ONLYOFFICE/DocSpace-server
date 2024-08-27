@@ -28,7 +28,7 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class RoomInvitationRequestDto
 {
-    [SwaggerSchemaCustom<IEnumerable<RoomInvitation>>("Collection of invitation parameters")]
+    [SwaggerSchemaCustom("Collection of invitation parameters")]
     [MaxEmailInvitations]
     public IEnumerable<RoomInvitation> Invitations { get; set; }
 

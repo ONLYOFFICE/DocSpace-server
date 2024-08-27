@@ -35,6 +35,6 @@ public class UpdateRoomsQuotaRequestDto<T> : UpdateRoomsRoomIdsRequestDto<T>
 
 public class UpdateRoomsRoomIdsRequestDto<T>
 {
-    [SwaggerSchemaCustom<IEnumerable<JsonElement>>("List of room IDs", Format = "json")]
+    [SwaggerSchemaCustom("List of room IDs", Format = "json")]
     public IEnumerable<JsonElement> RoomIds { get; set; } = new List<JsonElement>();
 }

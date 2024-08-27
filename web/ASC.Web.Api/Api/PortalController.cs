@@ -521,7 +521,6 @@ public class PortalController(
     /// <path>api/2.0/portal/deleteportalimmediately</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Portal / Settings")]
-    /// <visible>false</visible>
     [HttpDelete("deleteportalimmediately")]
     public async Task DeletePortalImmediatelyAsync()
     {

@@ -47,7 +47,7 @@ public class Tariff
     [SwaggerSchemaCustom("Customer ID")]
     public string CustomerId { get; set; }
 
-    [SwaggerSchemaCustom<List<Quota>>("List of quotas")]
+    [SwaggerSchemaCustom("List of quotas")]
     public List<Quota> Quotas { get; set; }
 
     public override int GetHashCode()

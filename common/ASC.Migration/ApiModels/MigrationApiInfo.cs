@@ -41,19 +41,19 @@ public class MigrationApiInfo
     [ProtoMember(3)]
     public List<string> FailedArchives { get; set; } = new List<string>();
 
-    [SwaggerSchemaCustom<List<MigratingApiUser>>("Users")]
+    [SwaggerSchemaCustom("Users")]
     [ProtoMember(4)]
     public List<MigratingApiUser> Users { get; set; } = new List<MigratingApiUser>();
 
-    [SwaggerSchemaCustom<List<MigratingApiUser>>("Without email users")]
+    [SwaggerSchemaCustom("Without email users")]
     [ProtoMember(5)]
     public List<MigratingApiUser> WithoutEmailUsers { get; set; } = new List<MigratingApiUser>();
 
-    [SwaggerSchemaCustom<List<MigratingApiUser>>("Exist users")]
+    [SwaggerSchemaCustom("Exist users")]
     [ProtoMember(6)]
     public List<MigratingApiUser> ExistUsers { get; set; } = new List<MigratingApiUser>();
 
-    [SwaggerSchemaCustom<List<MigratingApiUser>>("Groups")]
+    [SwaggerSchemaCustom("Groups")]
     [ProtoMember(7)]
     public List<MigratingApiGroup> Groups { get; set; } = new List<MigratingApiGroup>();
 

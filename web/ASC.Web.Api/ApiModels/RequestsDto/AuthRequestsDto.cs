@@ -55,7 +55,7 @@ public class AuthRequestsDto
     [SwaggerSchemaCustom("Session based authentication or not")]
     public bool Session { get; set; }
 
-    [SwaggerSchemaCustom<ConfirmData>("Confirmation data")]
+    [SwaggerSchemaCustom("Confirmation data")]
     public ConfirmData ConfirmData { get; set; }
 
     [SwaggerSchemaCustom("Type of captcha")]

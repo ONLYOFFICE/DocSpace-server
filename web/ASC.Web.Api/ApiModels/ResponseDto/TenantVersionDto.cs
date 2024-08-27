@@ -31,7 +31,7 @@ public class TenantVersionDto
     [SwaggerSchemaCustom("Current portal version")]
     public int Current { get; set; }
 
-    [SwaggerSchemaCustom<IEnumerable<TenantVersion>>("List of available portal versions")]
+    [SwaggerSchemaCustom("List of available portal versions")]
     public IEnumerable<TenantVersion> Versions { get; set; }
 
     public TenantVersionDto(int version, IEnumerable<TenantVersion> tenantVersions)

@@ -40,10 +40,10 @@ public class EmployeeFullDto : EmployeeDto
     [SwaggerSchemaCustom("Email")]
     public string Email { get; set; }
 
-    [SwaggerSchemaCustom<List<Contact>>("List of contacts")]
+    [SwaggerSchemaCustom("List of contacts")]
     public List<Contact> Contacts { get; set; }
 
-    [SwaggerSchemaCustom<ApiDateTime>("Birthday")]
+    [SwaggerSchemaCustom("Birthday")]
     public ApiDateTime Birthday { get; set; }
 
     [SwaggerSchemaCustom("Sex")]
@@ -55,16 +55,16 @@ public class EmployeeFullDto : EmployeeDto
     [SwaggerSchemaCustom("Employee activation status")]
     public EmployeeActivationStatus ActivationStatus { get; set; }
 
-    [SwaggerSchemaCustom<ApiDateTime>("The date when the user account was terminated")]
+    [SwaggerSchemaCustom("The date when the user account was terminated")]
     public ApiDateTime Terminated { get; set; }
 
     [SwaggerSchemaCustom("Department")]
     public string Department { get; set; }
 
-    [SwaggerSchemaCustom<ApiDateTime>("Registration date")]
+    [SwaggerSchemaCustom("Registration date")]
     public ApiDateTime WorkFrom { get; set; }
 
-    [SwaggerSchemaCustom<List<GroupSummaryDto>>("List of groups")]
+    [SwaggerSchemaCustom("List of groups")]
     public List<GroupSummaryDto> Groups { get; set; }
 
     [SwaggerSchemaCustom("Location")]

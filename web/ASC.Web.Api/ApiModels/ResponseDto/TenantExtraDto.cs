@@ -37,10 +37,10 @@ public class TenantExtraDto
     [SwaggerSchemaCustom("Specifies if the extra tenant license is Enterprise or not")]
     public bool Enterprise { get; set; }
 
-    [SwaggerSchemaCustom<Tariff>("License tariff")]
+    [SwaggerSchemaCustom("License tariff")]
     public Tariff Tariff { get; set; }
 
-    [SwaggerSchemaCustom<QuotaDto>("License quota")]
+    [SwaggerSchemaCustom("License quota")]
     public QuotaDto Quota { get; set; }
 
     [SwaggerSchemaCustom("Specifies if the license is paid or not")]
@@ -52,9 +52,9 @@ public class TenantExtraDto
     [SwaggerSchemaCustom("Specifies if the tariff page is enabled or not")]
     public bool EnableTariffPage { get; set; }
 
-    [SwaggerSchemaCustom<Dictionary<string, DateTime>>("Document server user quotas")]
+    [SwaggerSchemaCustom("Document server user quotas")]
     public Dictionary<string, DateTime> DocServerUserQuota { get; set; }
 
-    [SwaggerSchemaCustom<License>("Document server license")]
+    [SwaggerSchemaCustom("Document server license")]
     public License DocServerLicense { get; set; }
 }

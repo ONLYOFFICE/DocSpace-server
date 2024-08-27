@@ -34,6 +34,6 @@ public class PaymentUrlRequestsDto : QuantityRequestDto
 
 public class QuantityRequestDto
 {
-    [SwaggerSchemaCustom<Dictionary<string, int>>("The quantity of payment")]
+    [SwaggerSchemaCustom("The quantity of payment")]
     public Dictionary<string, int> Quantity { get; set; }
 }

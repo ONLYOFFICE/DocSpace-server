@@ -28,7 +28,7 @@ namespace ASC.Web.Files.Services.WCFService;
 
 public class ThirdPartyParams
 {
-    [SwaggerSchemaCustom<AuthData>("Authentication data")]
+    [SwaggerSchemaCustom("Authentication data")]
     [JsonPropertyName("auth_data")]
     public AuthData AuthData { get; init; }
 

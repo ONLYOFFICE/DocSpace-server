@@ -28,13 +28,13 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public class ConfigurationDto<T>
 {
-    [SwaggerSchemaCustom<DocumentConfigDto>("Document config")]
+    [SwaggerSchemaCustom("Document config")]
     public DocumentConfigDto Document { get; set; }
 
     [SwaggerSchemaCustom("Document type")]
     public string DocumentType { get; set; }
 
-    [SwaggerSchemaCustom<EditorConfigurationDto<int>>("Editor config")]
+    [SwaggerSchemaCustom("Editor config")]
     public EditorConfigurationDto<T> EditorConfig { get; set; }
 
     [SwaggerSchemaCustom("Editor type")]
@@ -49,7 +49,7 @@ public class ConfigurationDto<T>
     [SwaggerSchemaCustom("Platform type")]
     public string Type { get; set; }
 
-    [SwaggerSchemaCustom<FileDto<int>>("File parameters")]
+    [SwaggerSchemaCustom("File parameters")]
     public FileDto<T> File { get; set; }
 
     [SwaggerSchemaCustom("Error message")]
@@ -67,19 +67,19 @@ public class EditorConfigurationDto<T>
     [SwaggerSchemaCustom("Callback url", Format = "uri")]
     public string CallbackUrl { get; set; }
 
-    [SwaggerSchemaCustom<CoEditingConfig>("Co editing")]
+    [SwaggerSchemaCustom("Co editing")]
     public CoEditingConfig CoEditing { get; set; }
 
     [SwaggerSchemaCustom("Create url", Format = "uri")]
     public string CreateUrl { get; set; }
 
-    [SwaggerSchemaCustom<CustomizationConfigDto<int>>("Customization")]
+    [SwaggerSchemaCustom("Customization")]
     public CustomizationConfigDto<T> Customization { get; set; }
 
-    [SwaggerSchemaCustom<EmbeddedConfig>("Embedded")]
+    [SwaggerSchemaCustom("Embedded")]
     public EmbeddedConfig Embedded { get; set; }
 
-    [SwaggerSchemaCustom<EncryptionKeysConfig>("Encryption keys")]
+    [SwaggerSchemaCustom("Encryption keys")]
     public EncryptionKeysConfig EncryptionKeys { get; set; }
 
     [SwaggerSchemaCustom("Lang")]
@@ -91,16 +91,16 @@ public class EditorConfigurationDto<T>
     [SwaggerSchemaCustom("Mode write")]
     public bool ModeWrite { get; set; }
 
-    [SwaggerSchemaCustom<PluginsConfig>("Plugins")]
+    [SwaggerSchemaCustom("Plugins")]
     public PluginsConfig Plugins { get; set; }
 
-    [SwaggerSchemaCustom<List<RecentConfig>>("Recent")]
+    [SwaggerSchemaCustom("Recent")]
     public List<RecentConfig> Recent { get; set; }
 
-    [SwaggerSchemaCustom<List<TemplatesConfig>>("Templates")]
+    [SwaggerSchemaCustom("Templates")]
     public List<TemplatesConfig> Templates { get; set; }
 
-    [SwaggerSchemaCustom<UserConfig>("User")]
+    [SwaggerSchemaCustom("User")]
     public UserConfig User { get; set; }
 }
 public class CustomizationConfigDto<T>
@@ -108,22 +108,22 @@ public class CustomizationConfigDto<T>
     [SwaggerSchemaCustom("About")]
     public bool About { get; set; }
 
-    [SwaggerSchemaCustom<CustomerConfigDto>("Customer")]
+    [SwaggerSchemaCustom("Customer")]
     public CustomerConfigDto Customer { get; set; }
 
-    [SwaggerSchemaCustom<AnonymousConfigDto>("Anonymous")]
+    [SwaggerSchemaCustom("Anonymous")]
     public AnonymousConfigDto Anonymous { get; set; }
 
-    [SwaggerSchemaCustom<FeedbackConfig>("Feedback")]
+    [SwaggerSchemaCustom("Feedback")]
     public FeedbackConfig Feedback  { get; set; }
 
     [SwaggerSchemaCustom("Forcesave")]
     public bool? Forcesave { get; set; }
 
-    [SwaggerSchemaCustom<GobackConfig>("Go back")]
+    [SwaggerSchemaCustom("Go back")]
     public GobackConfig Goback { get; set; }
 
-    [SwaggerSchemaCustom<LogoConfigDto>("Logo")]
+    [SwaggerSchemaCustom("Logo")]
     public LogoConfigDto Logo { get; set; }
 
     [SwaggerSchemaCustom("MentionShare")]
@@ -185,7 +185,7 @@ public class DocumentConfigDto
     [SwaggerSchemaCustom("File type")]
     public string FileType  { get; set; }
 
-    [SwaggerSchemaCustom<InfoConfigDto>("Info")]
+    [SwaggerSchemaCustom("Info")]
     public InfoConfigDto Info { get; set; }
 
     [SwaggerSchemaCustom("Is linked for me")]
@@ -194,7 +194,7 @@ public class DocumentConfigDto
     [SwaggerSchemaCustom("Key")]
     public string Key { get; set; }
 
-    [SwaggerSchemaCustom<PermissionsConfig>("Permissions")]
+    [SwaggerSchemaCustom("Permissions")]
     public PermissionsConfig Permissions { get; set; }
 
     [SwaggerSchemaCustom("Shared link param")]
@@ -203,7 +203,7 @@ public class DocumentConfigDto
     [SwaggerSchemaCustom("Shared link key")]
     public string SharedLinkKey { get; set; }
 
-    [SwaggerSchemaCustom<FileReferenceData>("Reference data")]
+    [SwaggerSchemaCustom("Reference data")]
     public FileReferenceData ReferenceData { get; set; }
 
     [SwaggerSchemaCustom("Title")]
@@ -224,7 +224,7 @@ public class InfoConfigDto
     [SwaggerSchemaCustom("Owner")]
     public string Owner { get; set; }
 
-    [SwaggerSchemaCustom<List<AceShortWrapper>>("Sharing settings")]
+    [SwaggerSchemaCustom("Sharing settings")]
     public List<AceShortWrapper> SharingSettings{ get; set; }
 
     [SwaggerSchemaCustom("Type")]

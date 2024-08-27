@@ -28,16 +28,16 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class UploadRequestDto : IModelWithFile, IDisposable
 {
-    [SwaggerSchemaCustom<IFormFile>("File", Format = "file")]
+    [SwaggerSchemaCustom("File")]
     public IFormFile File { get; set; }
 
-    [SwaggerSchemaCustom<ContentType>("Content-Type header")]
+    [SwaggerSchemaCustom("Content-Type header")]
     public ContentType ContentType { get; set; }
 
-    [SwaggerSchemaCustom<ContentDisposition>("Content-Disposition header")]
+    [SwaggerSchemaCustom("Content-Disposition header")]
     public ContentDisposition ContentDisposition { get; set; }
 
-    [SwaggerSchemaCustom<IEnumerable<IFormFile>>("List of files when specified as multipart/form-data", Format = "file")]
+    [SwaggerSchemaCustom("List of files when specified as multipart/form-data", Format = "file")]
     public IEnumerable<IFormFile> Files { get; set; }
 
     [SwaggerSchemaCustom("Specifies whether to create a new file if it already exists or not")]
@@ -52,7 +52,7 @@ public class UploadRequestDto : IModelWithFile, IDisposable
     private Stream _stream;
     private bool _disposedValue;
 
-    [SwaggerSchemaCustom<Stream>("Request input stream")]
+    [SwaggerSchemaCustom("Request input stream")]
     public Stream Stream
     {
         get => File?.OpenReadStream() ?? _stream;

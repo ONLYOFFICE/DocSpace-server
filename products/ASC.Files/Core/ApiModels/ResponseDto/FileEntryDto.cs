@@ -51,22 +51,22 @@ public abstract class FileEntryDto
     [SwaggerSchemaCustom("Specifies if the file is shared or not")]
     public bool Shared { get; set; }
 
-    [SwaggerSchemaCustom<ApiDateTime>("Creation time")]
+    [SwaggerSchemaCustom("Creation time")]
     public ApiDateTime Created { get; set; }
 
-    [SwaggerSchemaCustom<EmployeeDto>("Author")]
+    [SwaggerSchemaCustom("Author")]
     public EmployeeDto CreatedBy { get; set; }
 
     private ApiDateTime _updated;
 
-    [SwaggerSchemaCustom<ApiDateTime>("Time of the last file update")]
+    [SwaggerSchemaCustom("Time of the last file update")]
     public ApiDateTime Updated
     {
         get => _updated < Created ? Created : _updated;
         set => _updated = value;
     }
 
-    [SwaggerSchemaCustom<ApiDateTime>("Time when the file will be automatically deleted")]
+    [SwaggerSchemaCustom("Time when the file will be automatically deleted")]
     public ApiDateTime AutoDelete { get; set; }
 
     [SwaggerSchemaCustom("Root folder type")]
@@ -75,7 +75,7 @@ public abstract class FileEntryDto
     [SwaggerSchemaCustom("First parent folder type")]
     public FolderType? ParentRoomType { get; set; }
 
-    [SwaggerSchemaCustom<EmployeeDto>("A user who updated a file")]
+    [SwaggerSchemaCustom("A user who updated a file")]
     public EmployeeDto UpdatedBy { get; set; }
 
     [SwaggerSchemaCustom("Provider is specified or not")]
@@ -132,7 +132,7 @@ public abstract class FileEntryDto<T> : FileEntryDto
     [SwaggerSchemaCustom("Can share")]
     public bool CanShare { get; set; }
 
-    [SwaggerSchemaCustom<IDictionary<FilesSecurityActions, bool>>("Security")]
+    [SwaggerSchemaCustom("Security")]
     public IDictionary<FilesSecurityActions, bool> Security { get; set; }
 
     protected FileEntryDto(FileEntry<T> entry)

@@ -31,7 +31,7 @@ public class AuditEventDto
     [SwaggerSchemaCustom("ID")]
     public int Id { get; set; }
 
-    [SwaggerSchemaCustom<ApiDateTime>("Date")]
+    [SwaggerSchemaCustom("Date")]
     public ApiDateTime Date { get; set; }
 
     [SwaggerSchemaCustom("User")]

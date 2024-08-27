@@ -34,7 +34,7 @@ public class StorageDto
     [SwaggerSchemaCustom("Title")]
     public string Title { get; set; }
 
-    [SwaggerSchemaCustom<List<AuthKey>>("List of authentication keys")]
+    [SwaggerSchemaCustom("List of authentication keys")]
     public List<AuthKey> Properties { get; set; }
 
     [SwaggerSchemaCustom("Specifies if this is the current storage or not")]

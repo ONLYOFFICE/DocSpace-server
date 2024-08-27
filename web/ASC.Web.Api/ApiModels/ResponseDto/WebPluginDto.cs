@@ -55,7 +55,7 @@ public class WebPluginDto: IMapFrom<WebPlugin>
     [SwaggerSchemaCustom("Image")]
     public string Image { get; set; }
 
-    [SwaggerSchemaCustom<EmployeeDto>("Create by")]
+    [SwaggerSchemaCustom("Create by")]
     public EmployeeDto CreateBy { get; set; }
 
     [SwaggerSchemaCustom("Create on")]

@@ -30,7 +30,7 @@ public class MentionWrapper
 {
     internal MentionWrapper() { }
 
-    [SwaggerSchemaCustom<UserInfo>("User information")]
+    [SwaggerSchemaCustom("User information")]
     public UserInfo User { get; internal set; }
 
     [SwaggerSchemaCustom("User email")]
@@ -52,7 +52,7 @@ public class MentionWrapper
 
 public class MentionMessageWrapper
 {
-    [SwaggerSchemaCustom<ActionLinkConfig>("The config parameter which contains the information about the comment in the document that will be scrolled to")]
+    [SwaggerSchemaCustom("The config parameter which contains the information about the comment in the document that will be scrolled to")]
     public ActionLinkConfig ActionLink { get; set; }
 
     [SwaggerSchemaCustom("A list of emails which will receive the mention message")]

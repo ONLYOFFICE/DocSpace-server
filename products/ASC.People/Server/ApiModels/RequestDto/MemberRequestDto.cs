@@ -65,16 +65,16 @@ public class MemberRequestDto : MemberBaseRequestDto
     [SwaggerSchemaCustom("Sex (male or female)")]
     public string Sex { get; set; }
 
-    [SwaggerSchemaCustom<ApiDateTime>("Birthday")]
+    [SwaggerSchemaCustom("Birthday")]
     public ApiDateTime Birthday { get; set; }
 
-    [SwaggerSchemaCustom<ApiDateTime>("Registration date (if it is not specified, then the current date will be set)")]
+    [SwaggerSchemaCustom("Registration date (if it is not specified, then the current date will be set)")]
     public ApiDateTime Worksfrom { get; set; }
 
     [SwaggerSchemaCustom("Comment")]
     public string Comment { get; set; }
 
-    [SwaggerSchemaCustom<IEnumerable<Contact>>("List of user contacts")]
+    [SwaggerSchemaCustom("List of user contacts")]
     public IEnumerable<Contact> Contacts { get; set; }
 
     [SwaggerSchemaCustom("Avatar photo URL", Format ="uri")]
@@ -115,6 +115,6 @@ public class UpdateMemberSimpleRequestDto
 
 public class ContactsRequestDto
 {
-    [SwaggerSchemaCustom<IEnumerable<Contact>>("List of user contacts")]
+    [SwaggerSchemaCustom("List of user contacts")]
     public IEnumerable<Contact> Contacts { get; set; }
 }

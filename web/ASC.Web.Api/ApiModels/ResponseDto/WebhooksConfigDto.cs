@@ -49,7 +49,7 @@ public class WebhooksConfigDto : IMapFrom<WebhooksConfig>
 
 public class WebhooksConfigWithStatusDto : IMapFrom<WebhooksConfigWithStatus>
 {
-    [SwaggerSchemaCustom<WebhooksConfigDto>("Configs")]
+    [SwaggerSchemaCustom("Configs")]
     public WebhooksConfigDto Configs { get; set; }
 
     [SwaggerSchemaCustom("Status")]

@@ -31,13 +31,13 @@ public class BackupScheduleDto
     [SwaggerSchemaCustom("Storage type")]
     public string StorageType { get; set; }
 
-    [SwaggerSchemaCustom<IEnumerable<ItemKeyValuePair<object, object>>>("Storage parameters")]
+    [SwaggerSchemaCustom("Storage parameters")]
     public IEnumerable<ItemKeyValuePair<object, object>> StorageParams { get; set; }
 
     [SwaggerSchemaCustom("Maximum number of the stored backup copies")]
     public string BackupsStored { get; set; }
 
-    [SwaggerSchemaCustom<Cron>("Cron parameters")]
+    [SwaggerSchemaCustom("Cron parameters")]
     public Cron CronParams { get; set; }
 
     [SwaggerSchemaCustom("Specifies if a dump will be created or not")]
