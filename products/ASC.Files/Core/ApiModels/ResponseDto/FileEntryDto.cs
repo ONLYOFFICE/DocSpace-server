@@ -103,6 +103,8 @@ public abstract class FileEntryDto
     public int? ProviderId { get; set; }
 
     public string Order { get; set; }
+    
+    public abstract FileEntryType FileEntryType { get; }
 
     protected FileEntryDto(FileEntry entry)
     {
@@ -203,15 +205,17 @@ public class FileEntryDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         };
     }
 
-    private async Task<DateTime> GetDeletedPermanentlyOn<T>(FileEntry<T> entry)
+    private async ValueTask<DateTime> GetDeletedPermanentlyOn<T>(FileEntry<T> entry)
     {
-        if (!entry.ModifiedOn.Equals(default) && Equals(entry.FolderIdDisplay, await _globalFolderHelper.FolderTrashAsync))
+        if (entry.ModifiedOn.Equals(default) || !Equals(entry.FolderIdDisplay, await _globalFolderHelper.FolderTrashAsync))
         {
-            var settings = await filesSettingsHelper.GetAutomaticallyCleanUp();
-            if (settings.IsAutoCleanUp)
-            {
-                return fileDateTime.GetModifiedOnWithAutoCleanUp(entry.ModifiedOn, settings.Gap);
-            }
+            return default;
+        }
+
+        var settings = await filesSettingsHelper.GetAutomaticallyCleanUp();
+        if (settings.IsAutoCleanUp)
+        {
+            return fileDateTime.GetModifiedOnWithAutoCleanUp(entry.ModifiedOn, settings.Gap);
         }
 
         return default;

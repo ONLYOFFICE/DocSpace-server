@@ -778,4 +778,28 @@
   <data name="SendJoinInvite" xml:space="preserve">
     <value>Ο χρήστης {0} έστειλε πρόσκληση στον {1} να συμμετάσχει σε αυτό το DocSpace</value>
   </data>
+  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
+    <value>Δωμάτια [{0}]. Ορισμός προσαρμοσμένης ποσόστωσης αποθήκευσης για δωμάτια: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
+    <value>Δωμάτια [{0}]. Ορισμός προεπιλεγμένης ποσόστωσης αποθήκευσης για δωμάτια: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
+    <value>Δωμάτια [{0}]. Απενεργοποιημένη ποσόστωση αποθήκευσης για δωμάτια</value>
+  </data>
+  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
+    <value>Χρήστες [{0}]. Ορισμός προσαρμοσμένης ποσόστωσης αποθήκευσης για χρήστες: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
+    <value>Χρήστες [{0}]. Ορισμός προεπιλεγμένης ποσόστωσης αποθήκευσης για χρήστες: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
+    <value>Χρήστες [{0}]. Απενεργοποιημένη ποσόστωση αποθήκευσης για χρήστες</value>
+  </data>
+  <data name="FormOpenedForFilling" xml:space="preserve">
+    <value>Ανοιχτό αρχείο για συμπλήρωση: {0}</value>
+  </data>
+  <data name="FormSubmit" xml:space="preserve">
+    <value>Χρήστες [{0}]. Φόρμα που υποβλήθηκε: {1}</value>
+  </data>
 </root>

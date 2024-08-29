@@ -62,35 +62,3 @@ public class UsageSpaceStatItemDto
         };
     }
 }
-
-/// <summary>
-/// </summary>
-public class ChartPointDto
-{
-    /// <summary>Display date</summary>
-    /// <type>System.String, System</type>
-    public string DisplayDate { get; set; }
-
-    /// <summary>Date</summary>
-    /// <type>System.DateTime, System</type>
-    public DateTime Date { get; init; }
-
-    /// <summary>Hosts</summary>
-    /// <type>System.Int32, System</type>
-    public int Hosts { get; set; }
-
-    /// <summary>Hits</summary>
-    /// <type>System.Int32, System</type>
-    public int Hits { get; set; }
-
-    public static ChartPointDto GetSample()
-    {
-        return new ChartPointDto
-        {
-            DisplayDate = DateTime.Now.ToShortDateString(),
-            Date = DateTime.Now,
-            Hosts = 0,
-            Hits = 0
-        };
-    }
-}

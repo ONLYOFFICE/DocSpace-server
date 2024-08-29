@@ -778,4 +778,28 @@
   <data name="SendJoinInvite" xml:space="preserve">
     <value>Користувач {0} надіслав {1} запрошення приєднатися до цього простору DocSpace</value>
   </data>
+  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
+    <value>Кімнати [{0}]. Установлена налаштовувана квота пам'яті для кімнат: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
+    <value>Кімнати [{0}]. Установлена квота пам'яті за замовчуванням для кімнат: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
+    <value>Кімнати [{0}]. Вимкнута квота пам'яті для кімнат</value>
+  </data>
+  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
+    <value>Користувачі [{0}]. Установлена налаштовувана квота пам'яті для користувачів: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
+    <value>Користувачі [{0}]. Установлена квота пам'яті за замовчуванням для користувачів: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
+    <value>Користувачі [{0}]. Вимкнута квота пам'яті для користувачів</value>
+  </data>
+  <data name="FormOpenedForFilling" xml:space="preserve">
+    <value>Файл, відкритий для заповнення: {0}</value>
+  </data>
+  <data name="FormSubmit" xml:space="preserve">
+    <value>Користувачі [{0}]. Форму надіслано: {1}</value>
+  </data>
 </root>

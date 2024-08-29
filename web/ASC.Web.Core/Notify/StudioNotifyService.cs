@@ -341,7 +341,7 @@ public class StudioNotifyService(
         await studioNotifyServiceHelper.SendNoticeAsync(Actions.UserHasJoin);
     }
 
-    public async Task SendJoinMsgAsync(string email, EmployeeType emplType, string culture)
+    public async Task SendJoinMsgAsync(string email, EmployeeType emplType, string culture, bool limitation = false)
     {
         var inviteUrl = await commonLinkUtility.GetConfirmationEmailUrlAsync(email, ConfirmType.EmpInvite, (int)emplType + "trust") + $"&emplType={(int)emplType}";
         var shortLink = await urlShortener.GetShortenLinkAsync(inviteUrl);
@@ -364,6 +364,11 @@ public class StudioNotifyService(
             await studioNotifyHelper.RecipientFromEmailAsync(email, false),
             [EMailSenderName],
             tags.ToArray());
+        
+        if (limitation)
+        {
+            await userInvitationLimitHelper.ReduceLimit();
+        }
     }
 
     public async Task UserInfoAddedAfterInviteAsync(UserInfo newUserInfo)

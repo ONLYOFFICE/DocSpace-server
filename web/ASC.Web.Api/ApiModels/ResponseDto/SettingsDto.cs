@@ -166,6 +166,10 @@ public class SettingsDto
     /// <type>System.String, System</type>
     public string LegalTerms { get; set; }
 
+    /// <summary>License url</summary>
+    /// <type>System.String, System</type>
+    public string LicenseUrl { get; set; }
+
     /// <summary>Specifies whether the cookie settings are enabled</summary>
     /// <type>System.Boolean, System</type>
     public bool CookieSettingsEnabled { get; set; }

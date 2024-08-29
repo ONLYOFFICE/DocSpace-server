@@ -28,14 +28,15 @@
 package com.asc.registration.application.rest;
 
 import com.asc.common.application.transfer.response.AscPersonResponse;
-import com.asc.common.application.transfer.response.AscSettingsResponse;
 import com.asc.common.application.transfer.response.AscTenantResponse;
 import com.asc.common.core.domain.entity.Audit;
 import com.asc.common.core.domain.value.enums.AuditCode;
 import com.asc.common.service.transfer.response.ClientResponse;
 import com.asc.common.utilities.HttpUtils;
+import com.asc.registration.application.security.authentications.AscAuthenticationTokenPrincipal;
 import com.asc.registration.application.transfer.ChangeTenantClientActivationCommandRequest;
 import com.asc.registration.application.transfer.CreateTenantClientCommandRequest;
+import com.asc.registration.application.transfer.ErrorResponse;
 import com.asc.registration.application.transfer.UpdateTenantClientCommandRequest;
 import com.asc.registration.service.ports.input.service.ClientApplicationService;
 import com.asc.registration.service.ports.input.service.ScopeApplicationService;
@@ -44,6 +45,11 @@ import com.asc.registration.service.transfer.request.update.*;
 import com.asc.registration.service.transfer.response.ClientSecretResponse;
 import com.asc.registration.service.transfer.response.ScopeResponse;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -55,6 +61,7 @@ import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 /** Controller class for handling client-related commands. */
@@ -63,6 +70,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RequestMapping(value = "${web.api}/clients")
 public class ClientCommandController {
+
   /** The name of the current service. */
   @Value("${spring.application.name}")
   private String serviceName;
@@ -92,31 +100,48 @@ public class ClientCommandController {
    * Creates a new client.
    *
    * @param request the HTTP request
-   * @param person the person information
-   * @param tenant the tenant information
-   * @param settings the settings information
+   * @param principal the authenticated principal
    * @param command the create client command
    * @return the response entity containing the created client details
    */
   @RateLimiter(name = "globalRateLimiter")
   @PostMapping
+  @Operation(
+      summary = "Creates a new client",
+      tags = {"ClientCommandController"},
+      security = @SecurityRequirement(name = "ascAuthAdmin"),
+      responses = {
+        @ApiResponse(responseCode = "201", description = "Successfully created"),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Bad request",
+            content = {@Content}),
+        @ApiResponse(
+            responseCode = "429",
+            description = "Too many requests",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "500",
+            description = "Internal server error",
+            content = @Content)
+      })
   public ResponseEntity<ClientResponse> createClient(
       HttpServletRequest request,
-      @RequestAttribute("person") AscPersonResponse person,
-      @RequestAttribute("tenant") AscTenantResponse tenant,
-      @RequestAttribute("settings") AscSettingsResponse settings,
+      @AuthenticationPrincipal AscAuthenticationTokenPrincipal principal,
       @RequestBody @Valid CreateTenantClientCommandRequest command) {
     try {
-      setLoggingParameters(person, tenant);
+      setLoggingParameters(principal.me(), principal.tenant());
       if (!scopeApplicationService.getScopes().stream()
           .map(ScopeResponse::getName)
           .collect(Collectors.toSet())
-          .containsAll(command.getScopes()))
+          .containsAll(command.getScopes())) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+      }
       return ResponseEntity.status(HttpStatus.CREATED)
           .body(
               clientApplicationService.createClient(
-                  buildAudit(null, request, tenant, person, AuditCode.CREATE_CLIENT),
+                  buildAudit(
+                      null, request, principal.tenant(), principal.me(), AuditCode.CREATE_CLIENT),
                   CreateTenantClientCommand.builder()
                       .name(command.getName())
                       .description(command.getDescription())
@@ -130,7 +155,7 @@ public class ClientCommandController {
                       .allowedOrigins(command.getAllowedOrigins())
                       .logoutRedirectUri(command.getLogoutRedirectUri())
                       .scopes(command.getScopes())
-                      .tenantId(tenant.getTenantId())
+                      .tenantId(principal.tenant().getTenantId())
                       .build()));
     } finally {
       MDC.clear();
@@ -141,26 +166,45 @@ public class ClientCommandController {
    * Updates an existing client.
    *
    * @param request the HTTP request
-   * @param person the person information
-   * @param tenant the tenant information
-   * @param settings the settings information
+   * @param principal the authenticated principal
    * @param clientId the client ID
    * @param command the update client command
    * @return the response entity indicating the status of the update
    */
   @RateLimiter(name = "globalRateLimiter")
   @PutMapping("/{clientId}")
+  @Operation(
+      summary = "Updated an existing client",
+      tags = {"ClientCommandController"},
+      security = @SecurityRequirement(name = "ascAuthAdmin"),
+      responses = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Successfully updated",
+            content = @Content),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Bad request",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "429",
+            description = "Too many requests",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "500",
+            description = "Internal server error",
+            content = @Content)
+      })
   public ResponseEntity<?> updateClient(
       HttpServletRequest request,
-      @RequestAttribute("person") AscPersonResponse person,
-      @RequestAttribute("tenant") AscTenantResponse tenant,
-      @RequestAttribute("settings") AscSettingsResponse settings,
+      @AuthenticationPrincipal AscAuthenticationTokenPrincipal principal,
       @PathVariable @NotBlank String clientId,
       @RequestBody @Valid UpdateTenantClientCommandRequest command) {
     try {
-      setLoggingParameters(person, tenant);
+      setLoggingParameters(principal.me(), principal.tenant());
       clientApplicationService.updateClient(
-          buildAudit(clientId, request, tenant, person, AuditCode.UPDATE_CLIENT),
+          buildAudit(
+              clientId, request, principal.tenant(), principal.me(), AuditCode.UPDATE_CLIENT),
           UpdateTenantClientCommand.builder()
               .name(command.getName())
               .description(command.getDescription())
@@ -169,7 +213,7 @@ public class ClientCommandController {
               .isPublic(true)
               .allowedOrigins(command.getAllowedOrigins())
               .clientId(clientId)
-              .tenantId(tenant.getTenantId())
+              .tenantId(principal.tenant().getTenantId())
               .build());
       return ResponseEntity.status(HttpStatus.OK).build();
     } finally {
@@ -181,28 +225,48 @@ public class ClientCommandController {
    * Regenerates the secret for a specific client.
    *
    * @param request the HTTP request
-   * @param person the person information
-   * @param tenant the tenant information
-   * @param settings the settings information
+   * @param principal the authenticated principal
    * @param clientId the client ID
    * @return the response entity containing the new client secret
    */
   @RateLimiter(name = "globalRateLimiter")
   @PatchMapping("/{clientId}/regenerate")
+  @Operation(
+      summary = "Regenerates the secret for a specific client",
+      tags = {"ClientCommandController"},
+      security = @SecurityRequirement(name = "ascAuthAdmin"),
+      responses = {
+        @ApiResponse(responseCode = "200", description = "Successfully regenerated"),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Bad request",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "429",
+            description = "Too many requests",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "500",
+            description = "Internal server error",
+            content = @Content)
+      })
   public ResponseEntity<ClientSecretResponse> regenerateSecret(
       HttpServletRequest request,
-      @RequestAttribute("person") AscPersonResponse person,
-      @RequestAttribute("tenant") AscTenantResponse tenant,
-      @RequestAttribute("settings") AscSettingsResponse settings,
+      @AuthenticationPrincipal AscAuthenticationTokenPrincipal principal,
       @PathVariable @NotBlank String clientId) {
     try {
-      setLoggingParameters(person, tenant);
+      setLoggingParameters(principal.me(), principal.tenant());
       return ResponseEntity.ok(
           clientApplicationService.regenerateSecret(
-              buildAudit(clientId, request, tenant, person, AuditCode.REGENERATE_SECRET),
+              buildAudit(
+                  clientId,
+                  request,
+                  principal.tenant(),
+                  principal.me(),
+                  AuditCode.REGENERATE_SECRET),
               RegenerateTenantClientSecretCommand.builder()
                   .clientId(clientId)
-                  .tenantId(tenant.getTenantId())
+                  .tenantId(principal.tenant().getTenantId())
                   .build()));
     } finally {
       MDC.clear();
@@ -213,27 +277,46 @@ public class ClientCommandController {
    * Revokes the consent for a specific client.
    *
    * @param request the HTTP request
-   * @param person the person information
-   * @param tenant the tenant information
-   * @param settings the settings information
+   * @param principal the authenticated principal
    * @param clientId the client ID
    * @return the response entity indicating the status of the revocation
    */
   @RateLimiter(name = "globalRateLimiter")
   @DeleteMapping("/{clientId}/revoke")
+  @Operation(
+      summary = "Revokes the consent for a specific client",
+      tags = {"ClientCommandController"},
+      security = @SecurityRequirement(name = "ascAuthAdmin"),
+      responses = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Successfully revoked",
+            content = @Content),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Bad request",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "429",
+            description = "Too many requests",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "500",
+            description = "Internal server error",
+            content = @Content)
+      })
   public ResponseEntity<?> revokeUserClient(
       HttpServletRequest request,
-      @RequestAttribute("person") AscPersonResponse person,
-      @RequestAttribute("tenant") AscTenantResponse tenant,
-      @RequestAttribute("settings") AscSettingsResponse settings,
+      @AuthenticationPrincipal AscAuthenticationTokenPrincipal principal,
       @PathVariable @NotBlank String clientId) {
     try {
-      setLoggingParameters(person, tenant);
+      setLoggingParameters(principal.me(), principal.tenant());
       clientApplicationService.revokeClientConsent(
-          buildAudit(clientId, request, tenant, person, AuditCode.REVOKE_USER_CLIENT),
+          buildAudit(
+              clientId, request, principal.tenant(), principal.me(), AuditCode.REVOKE_USER_CLIENT),
           RevokeClientConsentCommand.builder()
               .clientId(clientId)
-              .principalId(person.getId())
+              .principalId(principal.me().getId())
               .build());
       return ResponseEntity.status(HttpStatus.OK).build();
     } finally {
@@ -245,27 +328,46 @@ public class ClientCommandController {
    * Deletes a specific client.
    *
    * @param request the HTTP request
-   * @param person the person information
-   * @param tenant the tenant information
-   * @param settings the settings information
+   * @param principal the authenticated principal
    * @param clientId the client ID
    * @return the response entity indicating the status of the deletion
    */
   @RateLimiter(name = "globalRateLimiter")
   @DeleteMapping("/{clientId}")
+  @Operation(
+      summary = "Deletes a specific client",
+      tags = {"ClientCommandController"},
+      security = @SecurityRequirement(name = "ascAuthAdmin"),
+      responses = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Successfully deleted",
+            content = @Content),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Bad request",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "429",
+            description = "Too many requests",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "500",
+            description = "Internal server error",
+            content = @Content)
+      })
   public ResponseEntity<?> deleteClient(
       HttpServletRequest request,
-      @RequestAttribute("person") AscPersonResponse person,
-      @RequestAttribute("tenant") AscTenantResponse tenant,
-      @RequestAttribute("settings") AscSettingsResponse settings,
+      @AuthenticationPrincipal AscAuthenticationTokenPrincipal principal,
       @PathVariable @NotEmpty String clientId) {
     try {
-      setLoggingParameters(person, tenant);
+      setLoggingParameters(principal.me(), principal.tenant());
       clientApplicationService.deleteClient(
-          buildAudit(clientId, request, tenant, person, AuditCode.DELETE_CLIENT),
+          buildAudit(
+              clientId, request, principal.tenant(), principal.me(), AuditCode.DELETE_CLIENT),
           DeleteTenantClientCommand.builder()
               .clientId(clientId)
-              .tenantId(tenant.getTenantId())
+              .tenantId(principal.tenant().getTenantId())
               .build());
       return ResponseEntity.status(HttpStatus.OK).build();
     } finally {
@@ -277,29 +379,52 @@ public class ClientCommandController {
    * Changes the activation status of a specific client.
    *
    * @param request the HTTP request
-   * @param person the person information
-   * @param tenant the tenant information
-   * @param settings the settings information
+   * @param principal the authenticated principal
    * @param clientId the client ID
    * @param command the change activation command
    * @return the response entity indicating the status of the activation change
    */
   @RateLimiter(name = "globalRateLimiter")
   @PatchMapping("/{clientId}/activation")
+  @Operation(
+      summary = "Changes the activation status of a specific client",
+      tags = {"ClientCommandController"},
+      security = @SecurityRequirement(name = "ascAuthAdmin"),
+      responses = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Successfully changed activation",
+            content = @Content),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Bad request",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "429",
+            description = "Too many requests",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "500",
+            description = "Internal server error",
+            content = @Content)
+      })
   public ResponseEntity<?> changeActivation(
       HttpServletRequest request,
-      @RequestAttribute("person") AscPersonResponse person,
-      @RequestAttribute("tenant") AscTenantResponse tenant,
-      @RequestAttribute("settings") AscSettingsResponse settings,
+      @AuthenticationPrincipal AscAuthenticationTokenPrincipal principal,
       @PathVariable @NotBlank String clientId,
       @RequestBody @Valid ChangeTenantClientActivationCommandRequest command) {
     try {
-      setLoggingParameters(person, tenant);
+      setLoggingParameters(principal.me(), principal.tenant());
       clientApplicationService.changeActivation(
-          buildAudit(clientId, request, tenant, person, AuditCode.CHANGE_CLIENT_ACTIVATION),
+          buildAudit(
+              clientId,
+              request,
+              principal.tenant(),
+              principal.me(),
+              AuditCode.CHANGE_CLIENT_ACTIVATION),
           ChangeTenantClientActivationCommand.builder()
               .clientId(clientId)
-              .tenantId(tenant.getTenantId())
+              .tenantId(principal.tenant().getTenantId())
               .enabled(command.isEnabled())
               .build());
       return ResponseEntity.status(HttpStatus.OK).build();
@@ -311,6 +436,7 @@ public class ClientCommandController {
   /**
    * Builds an audit object for logging purposes.
    *
+   * @param clientId the client ID
    * @param request the HTTP request
    * @param tenant the tenant information
    * @param person the person information

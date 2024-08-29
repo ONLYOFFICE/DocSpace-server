@@ -83,7 +83,7 @@ public class UpdateTenantClientCommandRequest implements Serializable {
   @NotBlank private String name;
 
   /** The description of the client. This field must not be blank. */
-  @NotBlank private String description;
+  private String description;
 
   /**
    * The logo of the client in base64 format. The client logo is expected to be passed as base64.

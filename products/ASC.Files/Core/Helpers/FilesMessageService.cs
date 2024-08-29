@@ -142,7 +142,7 @@ public class FilesMessageService(
         }
     }
     
-    public async Task SendMoveMessageAsync<T1, T2>(FileEntry<T1> target, Folder<T1> from, Folder<T2> to, List<Folder<T2>> toParents, bool overwrite,
+    public async Task SendMoveMessageAsync<T1, T2>(FileEntry<T2> target, Folder<T1> from, Folder<T2> to, List<Folder<T2>> toParents, bool overwrite,
         IDictionary<string, StringValues> headers, string[] description)
     {
         var action = target switch
@@ -322,7 +322,7 @@ public class FilesMessageService(
             return;
         }
 
-        await messageService.SendAsync(action, MessageTarget.Create(entry.Id), [d1, d2, additionalParam.DescriptionPart], additionalParam.References);
+        await messageService.SendAsync(action, MessageTarget.Create(entry.Id), [d1, d2, additionalParam?.DescriptionPart], additionalParam?.References);
     }
 
     public async Task SendAsync<T>(MessageAction action, FileEntry<T> entry, MessageInitiator initiator, params string[] description)
@@ -340,7 +340,12 @@ public class FilesMessageService(
 
     private async Task<FileEntryData> GetAdditionalEntryDataAsync<T>(FileEntry<T> entry, MessageAction action, string oldTitle = null, Guid userid = default,
         FileShare userRole = FileShare.None, FolderType? parentType = null)
-    { 
+    {
+        if (action is MessageAction.ThirdPartyDeleted)
+        {
+            return null;
+        }
+        
         return entry switch
         {
             FileEntry<int> entryInt => await GetAdditionalEntryDataAsync(entryInt, action, oldTitle, userid, userRole, parentType),

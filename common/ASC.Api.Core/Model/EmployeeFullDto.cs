@@ -151,6 +151,12 @@ public class EmployeeFullDto : EmployeeDto
     /// <type>System.Boolean, System</type>
     public bool? IsCustomQuota { get; set; }
 
+    /// <summary>Current login event ID</summary>
+    /// <type>System.Int32, System</type>
+    public int? LoginEventId { get; set; }
+    
+    public EmployeeDto CreatedBy { get; set; }
+
     public static new EmployeeFullDto GetSample()
     {
         return new EmployeeFullDto
@@ -372,6 +378,11 @@ public class EmployeeFullDtoHelper(
             {
                 result.ListAdminModules = listAdminModules;
             }
+        }
+        
+        if (userInfo.CreatedBy.HasValue)
+        {
+            result.CreatedBy = await GetAsync(await userManager.GetUsersAsync(userInfo.CreatedBy.Value));
         }
 
         return result;

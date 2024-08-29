@@ -162,4 +162,52 @@
   <data name="MigrationProjectFiles" xml:space="preserve">
     <value>ترحيل ملفات المشروع</value>
   </data>
+  <data name="CanNotAddUserInGroup" xml:space="preserve">
+    <value>لم يتم إضافة مستخدم {0} للمجموعة {1}</value>
+  </data>
+  <data name="CanNotCreateFile" xml:space="preserve">
+    <value>لم يتم إنشاء ملف {0}</value>
+  </data>
+  <data name="CanNotImportUser" xml:space="preserve">
+    <value>لم يتم استيراد المستخدم</value>
+  </data>
+  <data name="CanNotImportUserFiles" xml:space="preserve">
+    <value>لم يتم استيراد ملفات المستخدم</value>
+  </data>
+  <data name="CanNotParseArchive" xml:space="preserve">
+    <value>لم يتم تحليل {0} أرشيف</value>
+  </data>
+  <data name="CanNotParseArchives" xml:space="preserve">
+    <value>لم يتم تحليل الأرشيفات</value>
+  </data>
+  <data name="CanNotParseUser" xml:space="preserve">
+    <value>لم يتم تحليل المستخدم {0}</value>
+  </data>
+  <data name="CanNotReadInfoFile" xml:space="preserve">
+    <value>لم يتم قراءة ملف المعلومات من {0}</value>
+  </data>
+  <data name="CanNotShare" xml:space="preserve">
+    <value>لم يتم مشاركة المدخل {0} مع {1}</value>
+  </data>
+  <data name="CanNotToUnzip" xml:space="preserve">
+    <value>لم يتم فك ضغط {0}</value>
+  </data>
+  <data name="CreateFile" xml:space="preserve">
+    <value>إنشاء ملف {0}</value>
+  </data>
+  <data name="CreateFolder" xml:space="preserve">
+    <value>إنشاء مجلد {0}</value>
+  </data>
+  <data name="CreateShareRoom" xml:space="preserve">
+    <value>إنشاء غرفة مشاركة {0}</value>
+  </data>
+  <data name="СanNotImportCommonFiles" xml:space="preserve">
+    <value>لم يتم استيراد الملفات المشتركة</value>
+  </data>
+  <data name="СanNotImportProjectFiles" xml:space="preserve">
+    <value>لم يتم استيراد ملفات المشروع</value>
+  </data>
+  <data name="СreateRootFolder" xml:space="preserve">
+    <value>إنشاء مجلد الرئيسي</value>
+  </data>
 </root>

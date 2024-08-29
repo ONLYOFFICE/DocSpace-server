@@ -1723,11 +1723,8 @@ internal class FileDao(
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        if(await filesDbContext.DataAsync(tenantId, fileId.ToString()) != null)
-        {
-            return EntryProperties<int>.Deserialize(await filesDbContext.DataAsync(tenantId, fileId.ToString()), logger);
-        }
-        return null;
+        var data = await filesDbContext.DataAsync(tenantId, fileId.ToString());
+        return data != null ? EntryProperties<int>.Deserialize(data, logger) : null;
     }
 
     public async Task SaveProperties(int fileId, EntryProperties<int> entryProperties)

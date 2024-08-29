@@ -122,6 +122,24 @@ public class DocumentServiceTracker
         }
     }
 
+    public class History
+    {
+        public string ServerVersion { get; set; }
+        public List<Change> Changes { get; set; }
+    }
+
+    public class Change
+    {
+        public DateTime Created { get; set; }
+        public User User { get; set; }
+    }
+
+    public class User
+    {
+        public string Id { get; set; }
+        public string Name { get; set; }
+    }
+
     #endregion
 }
 
@@ -425,21 +443,62 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
             await socketManager.StopEditAsync(fileId);
         }
 
-        if (file != null)
+        if (file == null)
         {
-            if (user != null)
-            {
-                await filesMessageService.SendAsync(MessageAction.UserFileUpdated, file, MessageInitiator.DocsService, user.DisplayUserName(false, displayUserSettingsHelper), file.Title);
-            }
+            return new TrackResponse { Message = saveMessage };
+        }
 
-            if (!forceSave)
-            {
-                await SaveHistoryAsync(file, (fileData.History ?? "").ToString(), documentServiceConnector.ReplaceDocumentAddress(fileData.ChangesUrl));
-            }
+        string userName;
 
+        if (user != null)
+        {
+            userName = user?.DisplayUserName(false, displayUserSettingsHelper);
+        }
+        else
+        {
+            try
+            {
+                var nameInEditor = JsonConvert.DeserializeObject<History>(fileData.History.ToString()).Changes
+                    .OrderByDescending(x => x.Created)
+                    .Select(x => x.User.Name)
+                    .FirstOrDefault();
+
+                nameInEditor = RemoveGuestPart(nameInEditor);
+                
+                userName = string.IsNullOrEmpty(nameInEditor) 
+                    ? AuditReportResource.GuestAccount 
+                    : nameInEditor;
+            }
+            catch
+            {
+                userName = AuditReportResource.GuestAccount;
+            }
+        }
+        
+        await filesMessageService.SendAsync(MessageAction.UserFileUpdated, file, MessageInitiator.DocsService, userName, file.Title);
+
+        if (!forceSave)
+        {
+            await SaveHistoryAsync(file, (fileData.History ?? "").ToString(), documentServiceConnector.ReplaceDocumentAddress(fileData.ChangesUrl));
         }
 
         return new TrackResponse { Message = saveMessage };
+        
+        string RemoveGuestPart(string name)
+        {
+            if (string.IsNullOrEmpty(name))
+            {
+                return name;
+            }
+            
+            var index = name.LastIndexOf('(');
+            if (index != -1)
+            {
+                name = name[..index].Trim();
+            }
+
+            return name;
+        }
     }
 
     private async Task<TrackResponse> ProcessMailMergeAsync<T>(T fileId, TrackerData fileData)

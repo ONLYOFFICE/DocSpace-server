@@ -32,11 +32,8 @@ public enum RoomType
 {
     FillingFormsRoom = 1,
     EditingRoom = 2,
-    ReviewRoom = 3,
-    ReadOnlyRoom = 4,
     CustomRoom = 5,
-    PublicRoom = 6,
-    FormRoom = 7
+    PublicRoom = 6
 }
 
 /// <summary>

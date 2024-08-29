@@ -162,4 +162,52 @@
   <data name="MigrationProjectFiles" xml:space="preserve">
     <value>Di chuyển tập tin dự án</value>
   </data>
+  <data name="CanNotAddUserInGroup" xml:space="preserve">
+    <value>Không thể thêm người dùng {0} vào nhóm {1}</value>
+  </data>
+  <data name="CanNotCreateFile" xml:space="preserve">
+    <value>Không thể tạo tập tin {0}</value>
+  </data>
+  <data name="CanNotImportUser" xml:space="preserve">
+    <value>Không thể nhập dữ liệu người dùng</value>
+  </data>
+  <data name="CanNotImportUserFiles" xml:space="preserve">
+    <value>Không thể nhập tập tin của người dùng</value>
+  </data>
+  <data name="CanNotParseArchive" xml:space="preserve">
+    <value>Không thể phân tích lưu trữ {0}</value>
+  </data>
+  <data name="CanNotParseArchives" xml:space="preserve">
+    <value>Không thể phân tích lưu trữ</value>
+  </data>
+  <data name="CanNotParseUser" xml:space="preserve">
+    <value>Không thể phân tích người dùng {0}</value>
+  </data>
+  <data name="CanNotReadInfoFile" xml:space="preserve">
+    <value>Không thể đọc tập tin thông tin từ {0}</value>
+  </data>
+  <data name="CanNotShare" xml:space="preserve">
+    <value>Không thể chia sẻ mục {0} cho {1}</value>
+  </data>
+  <data name="CanNotToUnzip" xml:space="preserve">
+    <value>Không thể giải nén {0}</value>
+  </data>
+  <data name="CreateFile" xml:space="preserve">
+    <value>Tạo tập tin {0}</value>
+  </data>
+  <data name="CreateFolder" xml:space="preserve">
+    <value>Tạo thư mục {0}</value>
+  </data>
+  <data name="CreateShareRoom" xml:space="preserve">
+    <value>tạo phòng chia sẻ {0}</value>
+  </data>
+  <data name="СanNotImportCommonFiles" xml:space="preserve">
+    <value>Không thể nhập các tập tin chung</value>
+  </data>
+  <data name="СanNotImportProjectFiles" xml:space="preserve">
+    <value>Không thể nhập tập tin dự án</value>
+  </data>
+  <data name="СreateRootFolder" xml:space="preserve">
+    <value>Tạo thư mục gốc</value>
+  </data>
 </root>

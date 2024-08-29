@@ -32,9 +32,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.asc.common.core.domain.entity.Audit;
+import com.asc.common.messaging.mapper.AuditDataMapper;
 import com.asc.common.service.AuditCreateCommandHandler;
 import com.asc.common.service.transfer.message.AuditMessage;
-import com.asc.registration.messaging.mapper.AuditDataMapper;
 import com.rabbitmq.client.Channel;
 import java.util.List;
 import java.util.stream.Collectors;

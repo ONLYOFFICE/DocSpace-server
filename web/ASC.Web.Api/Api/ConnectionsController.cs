@@ -46,6 +46,7 @@ public class ConnectionsController(
     MessageService messageService,
     CookiesManager cookiesManager,
     CookieStorage cookieStorage,
+    QuotaSocketManager quotaSocketManager,
     GeolocationHelper geolocationHelper,
     ApiDateTimeHelper apiDateTimeHelper,
     TenantManager tenantManager,
@@ -291,7 +292,12 @@ public class ConnectionsController(
             var userName = user.DisplayUserName(false, displayUserSettingsHelper);
             var loginEventFromCookie = GetLoginEventIdFromCookie();
 
-            await dbLoginEventsManager.LogOutAllActiveConnectionsExceptThisAsync(loginEventFromCookie, user.TenantId, user.Id);
+            var loginEvents = await dbLoginEventsManager.LogOutAllActiveConnectionsExceptThisAsync(loginEventFromCookie, user.TenantId, user.Id);
+
+            foreach (var loginEvent in loginEvents)
+            {
+                await quotaSocketManager.LogoutSession(user.Id, loginEvent.Id);
+            }
 
             await messageService.SendAsync(MessageAction.UserLogoutActiveConnections, userName);
             await socketManager.LogoutExceptThisAsync(loginEventFromCookie, user.Id);
@@ -377,6 +383,11 @@ public class ConnectionsController(
 
             await dbLoginEventsManager.LogOutEventAsync(loginEvent.TenantId, loginEvent.Id);
 
+            if (loginEvent.UserId.HasValue)
+            {
+                await quotaSocketManager.LogoutSession(loginEvent.UserId.Value, loginEvent.Id);
+            }
+
             await messageService.SendAsync(MessageAction.UserLogoutActiveConnection, userName);
             await socketManager.LogoutSessionAsync(loginEventId, loginEvent.UserId.Value);
             return true;
@@ -396,7 +407,7 @@ public class ConnectionsController(
         var auditEventDate = DateTime.UtcNow;
 
         await messageService.SendAsync(currentUserId.Equals(user.Id) ? MessageAction.UserLogoutActiveConnections : MessageAction.UserLogoutActiveConnectionsForUser, MessageTarget.Create(user.Id), auditEventDate, userName);
-        await cookiesManager.ResetUserCookieAsync(user.Id, false);
+        await cookiesManager.ResetUserCookieAsync(user.Id);
         await socketManager.LogoutUserAsync(user.Id);
         if (changePassword)
         {

@@ -184,6 +184,13 @@ public interface IFolderDao<T>
     Task<T> UpdateFolderAsync(Folder<T> folder, string newTitle, long newQuota);
 
     /// <summary>
+    ///    Change folder type
+    /// </summary>
+    /// <param name="folder"></param>
+    /// <param name="folderType">new name</param>
+    Task<T> ChangeFolderTypeAsync(Folder<T> folder, FolderType folderType);
+
+    /// <summary>
     ///    Gets the number of files and folders to the container in your
     /// </summary>
     /// <param name="folderId">folder id</param>
@@ -404,3 +411,5 @@ public interface IFolderDao<T>
     
     #endregion
 }
+
+public interface ICacheFolderDao<T> : IFolderDao<T>;

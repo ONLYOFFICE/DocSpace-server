@@ -1771,57 +1771,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         });
                 });
 
-            modelBuilder.Entity("ASC.Core.Common.EF.Model.DbWebstudioUserVisit", b =>
-                {
-                    b.Property<int>("TenantId")
-                        .HasColumnType("int")
-                        .HasColumnName("tenantid");
-
-                    b.Property<DateTime>("VisitDate")
-                        .HasColumnType("datetime")
-                        .HasColumnName("visitdate");
-
-                    b.Property<string>("ProductId")
-                        .HasColumnType("varchar(38)")
-                        .HasColumnName("productid")
-                        .UseCollation("utf8_general_ci")
-                        .HasAnnotation("MySql:CharSet", "utf8");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("varchar(38)")
-                        .HasColumnName("userid")
-                        .UseCollation("utf8_general_ci")
-                        .HasAnnotation("MySql:CharSet", "utf8");
-
-                    b.Property<DateTime?>("FirstVisitTime")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
-                        .HasColumnName("firstvisittime")
-                        .HasDefaultValueSql("NULL");
-
-                    b.Property<DateTime?>("LastVisitTime")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
-                        .HasColumnName("lastvisittime")
-                        .HasDefaultValueSql("NULL");
-
-                    b.Property<int>("VisitCount")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("visitcount")
-                        .HasDefaultValueSql("'0'");
-
-                    b.HasKey("TenantId", "VisitDate", "ProductId", "UserId")
-                        .HasName("PRIMARY");
-
-                    b.HasIndex("VisitDate")
-                        .HasDatabaseName("visitdate");
-
-                    b.ToTable("webstudio_uservisit", (string)null);
-
-                    b.HasAnnotation("MySql:CharSet", "utf8");
-                });
-
             modelBuilder.Entity("ASC.Core.Common.EF.Model.FilesConverts", b =>
                 {
                     b.Property<string>("Input")
@@ -5066,6 +5015,12 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("timestamp")
                         .HasColumnName("create_on");
 
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("varchar(36)")
+                        .HasColumnName("created_by")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
                     b.Property<string>("CultureName")
                         .HasColumnType("varchar(20)")
                         .HasColumnName("culture")
@@ -6796,17 +6751,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 });
 
             modelBuilder.Entity("ASC.Core.Common.EF.Model.DbWebstudioSettings", b =>
-                {
-                    b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
-                        .WithMany()
-                        .HasForeignKey("TenantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Tenant");
-                });
-
-            modelBuilder.Entity("ASC.Core.Common.EF.Model.DbWebstudioUserVisit", b =>
                 {
                     b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
                         .WithMany()

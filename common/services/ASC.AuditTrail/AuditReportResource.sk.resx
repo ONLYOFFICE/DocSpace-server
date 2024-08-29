@@ -778,4 +778,28 @@
   <data name="SendJoinInvite" xml:space="preserve">
     <value>Používateľ {0} poslal pozvánku {1}, aby sa pripojil k tomuto priestoru DocSpace</value>
   </data>
+  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
+    <value>Miestnosti [{0}]. Nastaviť vlastnú kvótu úložiska pre miestnosti: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
+    <value>Miestnosti [{0}]. Nastaviť predvolenú kvótu úložiska pre miestnosti: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
+    <value>Miestnosti [{0}]. Vypnúť kvótu úložiska pre miestnosti</value>
+  </data>
+  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
+    <value>Používatelia [{0}]. Nastaviť vlastnú kvótu úložiska pre používateľov: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
+    <value>Používatelia [{0}]. Nastaviť predvolenú kvótu úložiska pre používateľov: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
+    <value>Používatelia [{0}]. Vypnúť kvótu úložiska pre používateľov</value>
+  </data>
+  <data name="FormOpenedForFilling" xml:space="preserve">
+    <value>Súbor otvorený na vyplnenie: {0}</value>
+  </data>
+  <data name="FormSubmit" xml:space="preserve">
+    <value>Používatelia [{0}]. Formulár odoslaný: {1}</value>
+  </data>
 </root>
