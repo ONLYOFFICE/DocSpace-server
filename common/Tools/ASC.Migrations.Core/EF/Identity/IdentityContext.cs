@@ -133,8 +133,8 @@ public partial class IdentityContext : DbContext
                 .HasConstraintName("FK_authorization_client_id");
 
             entity.HasOne(e => e.Tenant)
-                   .WithOne()
-                   .HasForeignKey<IdentityAuthorization>(b => b.TenantId)
+                   .WithMany()
+                   .HasForeignKey(b => b.TenantId)
                    .OnDelete(DeleteBehavior.Cascade);
         });
 
@@ -221,8 +221,8 @@ public partial class IdentityContext : DbContext
                 .HasColumnName("website_url");
 
             entity.HasOne(e => e.Tenant)
-                   .WithOne()
-                   .HasForeignKey<IdentityClient>(b => b.TenantId)
+                   .WithMany()
+                   .HasForeignKey(b => b.TenantId)
                    .OnDelete(DeleteBehavior.Cascade);
         });
 

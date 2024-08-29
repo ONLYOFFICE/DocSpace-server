@@ -431,8 +431,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_identity_authorizations_tenant_id",
                 table: "identity_authorizations",
-                column: "tenant_id",
-                unique: true);
+                column: "tenant_id");
 
             migrationBuilder.CreateIndex(
                 name: "UK_id",
@@ -474,12 +473,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 name: "idx_identity_clients_tenant_id",
                 table: "identity_clients",
                 column: "tenant_id");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_identity_clients_tenant_id",
-                table: "identity_clients",
-                column: "tenant_id",
-                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "UK_client_id",
@@ -537,10 +530,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 name: "version",
                 table: "tenants_tenants",
                 column: "version");
-
-            migrationBuilder.Sql("CREATE EVENT IF NOT EXISTS identity_delete_invalidated_authorization\r\nON SCHEDULE EVERY 1 hour\r\nON COMPLETION PRESERVE\r\n    DO\r\nDELETE FROM identity_authorizations ia WHERE ia.is_invalidated = 1;");
-            migrationBuilder.Sql("CREATE EVENT IF NOT EXISTS identity_delete_invalidated_clients\r\nON SCHEDULE EVERY 1 hour\r\nON COMPLETION PRESERVE\r\n    DO\r\nDELETE FROM identity_clients ic WHERE ic.is_invalidated = 1;");
-            migrationBuilder.Sql("CREATE EVENT IF NOT EXISTS identity_delete_invalidated_consents\r\nON SCHEDULE EVERY 1 hour\r\nON COMPLETION PRESERVE\r\n    DO\r\nDELETE FROM identity_consents ic WHERE ic.is_invalidated = 1;");
         }
 
         /// <inheritdoc />

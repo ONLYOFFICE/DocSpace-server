@@ -340,8 +340,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasKey("PrincipalId", "RegisteredClientId", "AuthorizationGrantType")
                         .HasName("PRIMARY");
 
-                    b.HasIndex("TenantId")
-                        .IsUnique();
+                    b.HasIndex("TenantId");
 
                     b.HasIndex(new[] { "Id" }, "UK_id")
                         .IsUnique();
@@ -475,9 +474,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.HasKey("ClientId")
                         .HasName("PRIMARY");
-
-                    b.HasIndex("TenantId")
-                        .IsUnique();
 
                     b.HasIndex(new[] { "ClientId" }, "UK_client_id")
                         .IsUnique();
@@ -754,8 +750,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasConstraintName("FK_authorization_client_id");
 
                     b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
-                        .WithOne()
-                        .HasForeignKey("ASC.Migrations.Core.Identity.IdentityAuthorization", "TenantId")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -767,8 +763,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
             modelBuilder.Entity("ASC.Migrations.Core.Identity.IdentityClient", b =>
                 {
                     b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
-                        .WithOne()
-                        .HasForeignKey("ASC.Migrations.Core.Identity.IdentityClient", "TenantId")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
