@@ -476,7 +476,7 @@ public abstract class Migrator : IAsyncDisposable
                         {
                             var users = UserManager.GetUsers(false, EmployeeStatus.Active,
                                 [[MigrationInfo.Groups[security.Subject].Info.ID]],
-                                [], [], null, null, null, "", false, "firstname",
+                                [], [], null, null, null, "", null, false, "firstname",
                                 true, 100000, 0).Where(u => u.Id != user.Info.Id);
                             await foreach (var u in users)
                             {

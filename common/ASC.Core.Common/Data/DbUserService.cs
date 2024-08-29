@@ -290,13 +290,15 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
         AccountLoginType? accountLoginType,
         QuotaFilter? quotaFilter,
         string text,
+        string separator,
         bool withoutGroup)
     {
         await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
 
         var q = GetUserQuery(userDbContext, tenant);
 
-        q = GetUserQueryForFilter(userDbContext, q, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, quotaFilter, text, withoutGroup);
+        q = GetUserQueryForFilter(userDbContext, q, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, quotaFilter, 
+            text, separator, withoutGroup);
 
         return await q.CountAsync();
     }
@@ -312,6 +314,7 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
         AccountLoginType? accountLoginType,
         QuotaFilter? quotaFilter,
         string text,
+        string separator,
         bool withoutGroup,
         Guid ownerId,
         UserSortType sortBy,
@@ -328,7 +331,8 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
 
         var q = GetUserQuery(userDbContext, tenant);
 
-        q = GetUserQueryForFilter(userDbContext, q, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, quotaFilter, text, withoutGroup);
+        q = GetUserQueryForFilter(userDbContext, q, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, quotaFilter, 
+            text, separator, withoutGroup);
 
         switch (sortBy)
         {
@@ -705,6 +709,7 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
         AccountLoginType? accountLoginType,
         QuotaFilter? quotaFilter,
         string text,
+        string separator,
         bool withoutGroup)
     {
         q = q.Where(r => !r.Removed);
@@ -814,11 +819,7 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
             q = q.Where(r => r.ActivationStatus == activationStatus.Value);
         }
 
-        if (!string.IsNullOrEmpty(text))
-        {
-            var splittedText = text.Trim().ToLower().Split(" ");
-            q = splittedText.Aggregate(q, (current, t) => current.Where(u => u.FirstName.ToLower().Contains(t) || u.LastName.ToLower().Contains(t) || u.Title.ToLower().Contains(t) || u.Location.ToLower().Contains(t) || u.Email.ToLower().Contains(t)));
-        }
+        q = UserQueryHelper.FilterByText(q, text, separator);
 
         q = accountLoginType switch
         {
