@@ -337,15 +337,10 @@ public sealed class UserManagerWrapper(
             throw new Exception(Resource.ErrorPasswordEmpty);
         }
 
-        var passwordSettingsObj = await settingsManager.LoadAsync<PasswordSettings>();
+        var passwordSettings = await settingsManager.LoadAsync<PasswordSettings>();
 
-        if (!passwordSettingsManager.CheckPasswordRegex(passwordSettingsObj, password) || !passwordSettingsManager.CheckLengthInRange(password.Length))
-        {
-            throw new Exception(GetPasswordHelpMessage(passwordSettingsObj));
-        }
+        passwordSettingsManager.CheckPassword(password, passwordSettings);
     }
-
-
 
     public async Task<string> SendUserPasswordAsync(string email)
     {
