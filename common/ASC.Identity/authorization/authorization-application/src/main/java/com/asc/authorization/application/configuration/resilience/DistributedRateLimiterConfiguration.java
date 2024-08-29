@@ -60,6 +60,7 @@ public class DistributedRateLimiterConfiguration {
         RedisURI.builder()
             .withHost(bucket4jConfiguration.getRedis().getHost())
             .withPort(bucket4jConfiguration.getRedis().getPort())
+            .withDatabase(bucket4jConfiguration.getRedis().getDatabase())
             .withSsl(bucket4jConfiguration.getRedis().isSsl())
             .withAuthentication(
                 bucket4jConfiguration.getRedis().getUsername(),
