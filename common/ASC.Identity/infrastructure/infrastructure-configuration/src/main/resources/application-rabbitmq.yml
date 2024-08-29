@@ -1,6 +1,7 @@
 spring:
   rabbitmq:
     addresses: ${RABBIT_URI:amqp://guest:guest@localhost/}
+    host: ${RABBIT_HOST:localhost}
     listener:
       simple:
         retry:
@@ -9,6 +10,10 @@ spring:
           max-attempts: ${RABBIT_LISTENER_RETRY_MAX_ATTEMPTS:3}
           max-interval: ${RABBIT_LISTENER_RETRY_MAX_INTERVAL:3000}
           multiplier: ${RABBIT_LISTENER_RETRY_MULTIPLIER:3}
+    password: ${RABBIT_PASSWORD:guest}
+    port: ${RABBIT_PORT:5672}
+    username: ${RABBIT_USER_NAME:guest}
+    virtual-host: ${RABBIT_VIRTUAL_HOST:}
     ssl:
       enabled: ${RABBIT_SSL_ENABLED:false}
       key-store: ${RABBIT_SSL_KEYSTORE:}
