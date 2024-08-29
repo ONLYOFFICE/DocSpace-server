@@ -176,10 +176,17 @@ public class FileStorageService //: IFileStorageService
         try
         {
             parent = await folderDao.GetFolderAsync(parentId);
+            
+            if (parent == null)
+            {
+                throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+            }
+            
             if (parent != null && !string.IsNullOrEmpty(parent.Error))
             {
                 throw new Exception(parent.Error);
             }
+            
             if (parent.RootFolderType == FolderType.VirtualRooms && !DocSpaceHelper.IsRoom(parent.FolderType) && parent.FolderType != FolderType.VirtualRooms && !parent.ProviderEntry)
             {
                 parent.ParentRoomType = await folderDao.GetFirstParentTypeFromFileEntryAsync(parent);
@@ -193,11 +200,6 @@ public class FileStorageService //: IFileStorageService
             }
 
             throw GenerateException(e);
-        }
-
-        if (parent == null)
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FolderNotFound);
         }
 
         if (!await fileSecurity.CanReadAsync(parent))
@@ -3707,7 +3709,7 @@ public class FileStorageService //: IFileStorageService
         return [.. users];
     }
 
-    private InvalidOperationException GenerateException(Exception error, bool warning = false)
+    private Exception GenerateException(Exception error, bool warning = false)
     {
         if (warning)
         {
@@ -3716,6 +3718,13 @@ public class FileStorageService //: IFileStorageService
         else
         {
             _logger.ErrorFileStorageService(error);
+        }
+
+        if (error is ItemNotFoundException)
+        {
+            return !authContext.CurrentAccount.IsAuthenticated 
+                ? new SecurityException(FilesCommonResource.ErrorMessage_SecurityException) 
+                : error;
         }
 
         return new InvalidOperationException(error.Message, error);
