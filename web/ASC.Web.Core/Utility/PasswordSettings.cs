@@ -142,7 +142,7 @@ public sealed class PasswordSettingsManager(IConfiguration configuration)
     {
         if (!CheckPasswordRegex(passwordSettings, password) || !CheckLengthInRange(password.Length))
         {
-            throw new Exception(GetPasswordHelpMessage(passwordSettings));
+            throw new ArgumentException(GetPasswordHelpMessage(passwordSettings));
         }
     }
 
