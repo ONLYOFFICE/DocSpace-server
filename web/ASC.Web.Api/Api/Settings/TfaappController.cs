@@ -188,7 +188,7 @@ public class TfaappController(
 
         switch (inDto.Type)
         {
-            case "sms":
+            case TfaRequestsDtoType.Sms:
                 if (!await studioSmsNotificationSettingsHelper.IsVisibleAndAvailableSettingsAsync())
                 {
                     throw new Exception(Resource.SmsNotAvailable);
@@ -214,7 +214,7 @@ public class TfaappController(
 
                 break;
 
-            case "app":
+            case TfaRequestsDtoType.App:
                 if (!tfaAppAuthSettingsHelper.IsVisibleSettings)
                 {
                     throw new Exception(Resource.TfaAppNotAvailable);

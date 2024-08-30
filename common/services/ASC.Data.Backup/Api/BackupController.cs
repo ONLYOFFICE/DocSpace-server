@@ -80,9 +80,9 @@ public class BackupController(
         var backupStored = inDto.BackupsStored ?? 1;
         var cron = new CronParams
         {
-            Period = inDto.CronParams.Period == null ? BackupPeriod.EveryDay : (BackupPeriod)Int32.Parse(inDto.CronParams.Period),
-            Hour = inDto.CronParams.Hour == null ? 0 : Int32.Parse(inDto.CronParams.Hour),
-            Day = inDto.CronParams.Day == null ? 0 : Int32.Parse(inDto.CronParams.Day)
+            Period = inDto.CronParams.Period ?? BackupPeriod.EveryDay,
+            Hour = inDto.CronParams.Hour,
+            Day = inDto.CronParams.Day
         };
         if(backupStored > 30 || backupStored < 1)
         {

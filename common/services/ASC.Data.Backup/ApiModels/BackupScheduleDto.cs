@@ -60,15 +60,15 @@ public class Cron
     /// <summary>Period</summary>
     /// <type>System.String, System</type>
     /// <example>0</example>
-    public string Period { get; set; }
+    public BackupPeriod? Period { get; set; }
 
     /// <summary>Hour</summary>
     /// <type>System.String, System</type>
     /// <example>0</example>
-    public string Hour { get; set; }
+    public int Hour { get; set; }
 
     /// <summary>Day</summary>
     /// <type>System.String, System</type>
     /// <example>0</example>
-    public string Day { get; set; }
+    public int Day { get; set; }
 }

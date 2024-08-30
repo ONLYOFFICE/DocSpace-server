@@ -32,7 +32,7 @@ public class TfaRequestsDto
 {
     /// <summary>TFA type (None, Sms, or App)</summary>
     /// <type>System.String, System</type>
-    public string Type { get; set; }
+    public TfaRequestsDtoType? Type { get; set; }
 
     /// <summary>User ID</summary>
     /// <type>System.Nullable{System.Guid}, System</type>
@@ -54,6 +54,13 @@ public class TfaRequestsDto
     /// <example>9924256A-739C-462b-AF15-E652A3B1B6EB</example>
 	/// <collection>list</collection>
     public List<Guid> MandatoryGroups { get; set; }
+}
+
+public enum TfaRequestsDtoType
+{
+    None = 0,
+    Sms = 1,
+    App = 2
 }
 
 /// <summary>
