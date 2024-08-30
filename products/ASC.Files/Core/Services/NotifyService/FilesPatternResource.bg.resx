@@ -152,4 +152,31 @@ $__AuthorName изтри стаята: $RoomTitle</value>
   <data name="subject_ShareDocument_tg" xml:space="preserve">
     <value>Документи. Предоставен е достъп до криптирания документ [$DocumentTitle]($DocumentURL)</value>
   </data>
+  <data name="button_CheckReadyForms" xml:space="preserve">
+    <value>Проверете готовите форми</value>
+  </data>
+  <data name="pattern_FormReceived" xml:space="preserve">
+    <value>h1. Формулярът $Message е попълнен
+
+Нов формуляр "$DocumentTitle":"$DocumentURL" се попълва в стаята "$RoomTitle":"$RoomURL"
+
+Подател на формуляра: "$FromUserName":"$FromUserLink"
+
+$OrangeButton</value>
+  </data>
+  <data name="pattern_FormSubmitted" xml:space="preserve">
+    <value>h1. Попълнихте формуляра $Message
+
+Попълнихте формуляра "$DocumentTitle":"$DocumentURL" в стаята "$RoomTitle":"$RoomURL"
+
+Управител: "$ToUserName":"$ToUserLink"
+
+$OrangeButton</value>
+  </data>
+  <data name="subject_FormReceived" xml:space="preserve">
+    <value>DocSpace известие. Формулярът е попълнен</value>
+  </data>
+  <data name="subject_FormSubmitted" xml:space="preserve">
+    <value>DocSpace известие. Формулярът е попълнен</value>
+  </data>
 </root>

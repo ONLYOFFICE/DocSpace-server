@@ -29,9 +29,10 @@ package com.asc.registration.messaging.publisher;
 
 import static org.mockito.Mockito.*;
 
+import com.asc.common.messaging.configuration.RabbitMQConfiguration;
+import com.asc.common.messaging.configuration.RabbitMQGenericQueueConfiguration;
+import com.asc.common.messaging.publisher.RabbitAuthorizationAuditMessagePublisher;
 import com.asc.common.service.transfer.message.AuditMessage;
-import com.asc.registration.messaging.configuration.RabbitMQConfiguration;
-import com.asc.registration.messaging.configuration.RabbitMQGenericQueueConfiguration;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,7 +44,7 @@ import org.springframework.amqp.core.AmqpTemplate;
 
 @ExtendWith(MockitoExtension.class)
 public class RabbitClientAuditMessagePublisherTest {
-  @InjectMocks private RabbitClientAuditMessagePublisher publisher;
+  @InjectMocks private RabbitAuthorizationAuditMessagePublisher publisher;
   @Mock private RabbitMQConfiguration configuration;
   @Mock private AmqpTemplate amqpClient;
   @Mock private AuditMessage auditMessage;

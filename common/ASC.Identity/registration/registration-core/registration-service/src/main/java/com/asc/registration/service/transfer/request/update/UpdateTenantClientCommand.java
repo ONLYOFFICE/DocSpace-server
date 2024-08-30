@@ -63,8 +63,7 @@ public class UpdateTenantClientCommand implements Serializable {
   @NotBlank(message = "name must not be blank")
   private String name;
 
-  /** The description of the client. Must not be blank. */
-  @NotBlank(message = "description must not be blank")
+  /** The description of the client. */
   private String description;
 
   /** The logo of the client, expected to be passed as a base64 string. Must not be blank. */

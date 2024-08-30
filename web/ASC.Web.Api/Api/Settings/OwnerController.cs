@@ -42,7 +42,8 @@ public class OwnerController(
     DisplayUserSettingsHelper displayUserSettingsHelper,
     IMemoryCache memoryCache,
     IHttpContextAccessor httpContextAccessor,
-    IUrlShortener urlShortener)
+    IUrlShortener urlShortener,
+    UserManagerWrapper userManagerWrapper)
     : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
@@ -108,7 +109,9 @@ public class OwnerController(
         }
         catch
         {
+            // ignored
         }
+
         if (Constants.LostUser.Equals(newOwner))
         {
             throw new Exception(Resource.ErrorUserNotFound);
@@ -122,6 +125,11 @@ public class OwnerController(
         if (newOwner.Status != EmployeeStatus.Active)
         {
             throw new Exception(Resource.ErrorAccessDenied);
+        }
+
+        if (!await userManagerWrapper.UpdateUserTypeAsync(newOwner, EmployeeType.DocSpaceAdmin))
+        {
+            throw new InvalidOperationException();
         }
 
         var curTenant = await tenantManager.GetCurrentTenantAsync();

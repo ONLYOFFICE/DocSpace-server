@@ -183,7 +183,7 @@ public class UserController(
     {
         await _apiContext.AuthByClaimAsync();
         var model = emailValidationKeyModelHelper.GetModel();
-        var linkData = inDto.FromInviteLink ? await invitationService.GetLinkDataAsync(inDto.Key, inDto.Email, inDto.Type, model?.UiD) : null;
+        var linkData = inDto.FromInviteLink ? await invitationService.GetLinkDataAsync(inDto.Key, inDto.Email, model.Type, inDto.Type, model?.UiD) : null;
         if (linkData is { IsCorrect: false })
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_InvintationLink);
@@ -202,8 +202,7 @@ public class UserController(
 
         var user = new UserInfo();
 
-        var byEmail = linkData?.LinkType == InvitationLinkType.Individual;
-
+        var byEmail = linkData is { LinkType: InvitationLinkType.Individual, ConfirmType: not ConfirmType.EmpInvite };
         if (byEmail)
         {
             user = await _userManager.GetUserByEmailAsync(inDto.Email);
@@ -212,8 +211,16 @@ public class UserController(
             {
                 throw new SecurityException(FilesCommonResource.ErrorMessage_InvintationLink);
             }
+        }
 
+        if (byEmail || linkData?.ConfirmType is ConfirmType.EmpInvite)
+        {
             await userInvitationLimitHelper.IncreaseLimit();
+        }
+
+        if (!byEmail)
+        {
+            user.CreatedBy = model?.UiD;
         }
 
         inDto.PasswordHash = (inDto.PasswordHash ?? "").Trim();
@@ -264,8 +271,8 @@ public class UserController(
         
         try
         {
-        user = await userManagerWrapper.AddUserAsync(user, inDto.PasswordHash, inDto.FromInviteLink, true, inDto.Type,
-            inDto.FromInviteLink && linkData is { IsCorrect: true, ConfirmType: not ConfirmType.EmpInvite }, true, true, byEmail);
+            user = await userManagerWrapper.AddUserAsync(user, inDto.PasswordHash, inDto.FromInviteLink, true, inDto.Type,
+                inDto.FromInviteLink && linkData is { IsCorrect: true, ConfirmType: not ConfirmType.EmpInvite }, true, true, byEmail);
         }
         catch (TenantQuotaException)
         {
@@ -284,7 +291,7 @@ public class UserController(
         if (linkData is { LinkType: InvitationLinkType.CommonToRoom })
         {
             await invitationService.AddUserToRoomByInviteAsync(linkData, user, quotaLimit);
-                }
+        }
 
         if (inDto.IsUser.GetValueOrDefault(false))
         {
@@ -585,11 +592,16 @@ public class UserController(
         
         var isInvite = _httpContextAccessor.HttpContext!.User.Claims
             .Any(role => role.Type == ClaimTypes.Role && ConfirmTypeExtensions.TryParse(role.Value, out var confirmType) && confirmType == ConfirmType.LinkInvite);
-        if (user.Id == Constants.LostUser.Id || (isInvite && user.Id != authContext.CurrentAccount.ID))
+
+        if (user.Id == Constants.LostUser.Id)
         {
             throw new ItemNotFoundException("User not found");
         }
 
+        if (isInvite)
+        {
+            return await employeeFullDtoHelper.GetSimple(user);
+        }
         
         return await employeeFullDtoHelper.GetFullAsync(user);
     }

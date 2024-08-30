@@ -778,4 +778,28 @@
   <data name="SendJoinInvite" xml:space="preserve">
     <value>Потребител {0} изпрати покана до {1} да се присъедини към този DocSpace</value>
   </data>
+  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
+    <value>Стаи [{0}]. Задайте персонализирана квота за съхранение на стаи: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
+    <value>Стаи [{0}]. Задайте квота за съхранение по подразбиране на стаи: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
+    <value>Стаи [{0}]. Деактивирана квота за съхранение на стаи</value>
+  </data>
+  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
+    <value>Потребители [{0}]. Задайте персонализирана квота за съхранение на потребители: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
+    <value>Потребители [{0}]. Задайте квота за съхранение по подразбиране на потребители: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
+    <value>Потребители [{0}]. Деактивирана квота за съхранение на потребители</value>
+  </data>
+  <data name="FormOpenedForFilling" xml:space="preserve">
+    <value>Файлът е отворен за попълване: {0}</value>
+  </data>
+  <data name="FormSubmit" xml:space="preserve">
+    <value>Потребители [{0}]. Формулярът е изпратен: {1}</value>
+  </data>
 </root>

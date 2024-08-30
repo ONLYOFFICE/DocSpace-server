@@ -33,6 +33,8 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
  * Main class for the Authorization Service application.
@@ -41,6 +43,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
  * scanning, JPA repositories, Feign clients, and the base packages to be scanned.
  */
 @EnableCaching
+@EnableScheduling
+@EnableTransactionManagement
 @EntityScan(basePackages = {"com.asc.authorization.data", "com.asc.common.data"})
 @EnableJpaRepositories(basePackages = {"com.asc.authorization.data", "com.asc.common.data"})
 @SpringBootApplication(scanBasePackages = {"com.asc.authorization", "com.asc.common"})

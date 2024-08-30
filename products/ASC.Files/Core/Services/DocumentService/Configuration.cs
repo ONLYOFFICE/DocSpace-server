@@ -736,7 +736,7 @@ public class LogoConfig(
 
     public async Task<string> GetImageDark()
     {
-        return commonLinkUtility.GetFullAbsolutePath(await tenantLogoHelper.GetLogo(WhiteLabelLogoType.DocsEditor, false, true));
+        return commonLinkUtility.GetFullAbsolutePath(await tenantLogoHelper.GetLogo(WhiteLabelLogoType.DocsEditor));
     }
 
     public async Task<string> GetImageEmbedded(EditorType editorType)

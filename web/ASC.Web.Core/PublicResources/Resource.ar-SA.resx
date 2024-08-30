@@ -1107,4 +1107,13 @@
   <data name="MessagePasswordSendedToEmail" xml:space="preserve">
     <value>تم إرسال تعليمات تغيير كلمة المرور إلى عنوان البريد الإلكتروني {0}.</value>
   </data>
+  <data name="ErrorEmailLinked" xml:space="preserve">
+    <value>تم إرفاق هذا البريد الإلكتروني للمستخدم {0} كمزود طرف ثالث</value>
+  </data>
+  <data name="TariffsFeature_statistic" xml:space="preserve">
+    <value>حصص التخزين والإحصائيات</value>
+  </data>
+  <data name="TariffsFeature_total_size" xml:space="preserve">
+    <value>{0} لكل مسؤول/مستخدم مميز إمكانية إضافة مساحة عند الطلب</value>
+  </data>
 </root>

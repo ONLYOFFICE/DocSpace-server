@@ -101,6 +101,7 @@ public partial class SettingsController(MessageService messageService,
             TenantAlias = tenant.Alias,
             EnableAdmMess = studioAdminMessageSettings.Enable || await tenantExtra.IsNotPaidAsync(),
             LegalTerms = setupInfo.LegalTerms,
+            LicenseUrl = setupInfo.LicenseUrl,
             CookieSettingsEnabled = tenantCookieSettings.Enabled,
             UserNameRegex = userFormatter.UserNameRegex.ToString(),
             ForumLink = await commonLinkUtility.GetUserForumLinkAsync(settingsManager)
@@ -1050,7 +1051,8 @@ public partial class SettingsController(MessageService messageService,
     [AllowNotPayment]
     [HttpGet("payment")]
     public async Task<object> PaymentSettingsAsync()
-    {
+    {        
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         var settings = await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>();
         var currentQuota = await tenantManager.GetCurrentTenantQuotaAsync();
         var currentTariff = await tenantExtra.GetCurrentTariffAsync();

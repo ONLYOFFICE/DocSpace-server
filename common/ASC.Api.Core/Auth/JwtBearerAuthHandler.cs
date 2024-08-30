@@ -25,6 +25,8 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 
+using System.Net.Http.Json;
+
 using ASC.Core.Common;
 
 using Microsoft.IdentityModel.Logging;
@@ -36,13 +38,14 @@ using SecurityContext = ASC.Core.SecurityContext;
 namespace ASC.Api.Core.Auth;
 
 [Scope]
-public class JwtBearerAuthHandler: AuthenticationHandler<AuthenticationSchemeOptions>
+public class JwtBearerAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
 {
     private readonly SecurityContext _securityContext;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IConfiguration _configuration;
     private readonly BaseCommonLinkUtility _linkUtility;
     private readonly ILogger<JwtBearerAuthHandler> _logger;
+    private readonly IHttpClientFactory _httpClientFactory;
 
     public JwtBearerAuthHandler(
         IOptionsMonitor<AuthenticationSchemeOptions> options,
@@ -51,7 +54,8 @@ public class JwtBearerAuthHandler: AuthenticationHandler<AuthenticationSchemeOpt
         SecurityContext securityContext,
         IHttpContextAccessor httpContextAccessor,
         BaseCommonLinkUtility baseCommonLinkUtility,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        IHttpClientFactory httpClientFactory)
         : base(options, logger, encoder)
     {
         _securityContext = securityContext;
@@ -59,6 +63,7 @@ public class JwtBearerAuthHandler: AuthenticationHandler<AuthenticationSchemeOpt
         _configuration = configuration;
         _linkUtility = baseCommonLinkUtility;
         _logger = logger.CreateLogger<JwtBearerAuthHandler>();
+        _httpClientFactory = httpClientFactory;
     }
 
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
@@ -114,14 +119,12 @@ public class JwtBearerAuthHandler: AuthenticationHandler<AuthenticationSchemeOpt
         else
         {
             _logger.WarningDisableTokenValidation();
-           
+
             validatedToken = new JwtSecurityToken(accessToken);
-        }      
+        }
 
         if (validatedToken == null)
         {
-            _logger.DebugValidatedTokenIsNull();
-
             return AuthenticateResult.Fail(new AuthenticationException(nameof(HttpStatusCode.Unauthorized)));
         }
 
@@ -153,9 +156,9 @@ public class JwtBearerAuthHandler: AuthenticationHandler<AuthenticationSchemeOpt
         ArgumentNullException.ThrowIfNull(issuer);
         ArgumentNullException.ThrowIfNull(audience);
 
-        _logger.DebugValidateTokenInfo(token, issuer, audience);
+        _logger.TraceValidateTokenInfo(token, issuer, audience);
 
-        var discoveryDocument = await configurationManager.GetConfigurationAsync(); 
+        var discoveryDocument = await configurationManager.GetConfigurationAsync();
         var signingKeys = discoveryDocument.SigningKeys;
 
         var validationParameters = new TokenValidationParameters
@@ -171,10 +174,9 @@ public class JwtBearerAuthHandler: AuthenticationHandler<AuthenticationSchemeOpt
             ValidateAudience = true,
             ValidAudience = audience,
 
-
             ValidateIssuer = true,
             ValidIssuer = issuer,
-            ValidAlgorithms = new[] { SecurityAlgorithms.RsaSha256 },
+            ValidAlgorithms = [SecurityAlgorithms.EcdsaSha256, SecurityAlgorithms.RsaSha256],
 
             ClockSkew = TimeSpan.FromMinutes(2),
         };
@@ -185,15 +187,26 @@ public class JwtBearerAuthHandler: AuthenticationHandler<AuthenticationSchemeOpt
             var principal = new JwtSecurityTokenHandler()
                                  .ValidateToken(token, validationParameters, out var rawValidatedToken);
 
-            return (JwtSecurityToken)rawValidatedToken;
+            var httpClient = _httpClientFactory.CreateClient();
 
+            var response = await httpClient.IntrospectTokenAsync(new TokenIntrospectionRequest
+            {
+                Address = discoveryDocument.IntrospectionEndpoint,
+                Token = token
+            });
+
+            if (!response.IsActive)
+            {
+                throw new SecurityTokenValidationException("Response from IntrospectionEndpoint: 'Token is not active'.");
+            }
+
+            return (JwtSecurityToken)rawValidatedToken;
         }
         catch (SecurityTokenValidationException ex)
         {
-            _logger.WarningTokenValidationException(ex);
+            _logger.InformationTokenValidationException(ex);
 
             return null;
         }
-    }
-
+    }  
 }

@@ -25,19 +25,19 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-package com.asc.registration.service.ports.output.message.publisher;
+package com.asc.registration.application.security.authentications;
 
-import com.asc.common.service.transfer.message.AuditMessage;
+import com.asc.common.application.transfer.response.AscPersonResponse;
+import com.asc.common.application.transfer.response.AscSettingsResponse;
+import com.asc.common.application.transfer.response.AscTenantResponse;
 
 /**
- * ClientAuditMessagePublisher defines the contract for publishing audit messages. This interface
- * handles the publishing of audit messages related to client operations.
+ * Represents the principal in ASC authentication token, holding information about the person,
+ * tenant, and settings.
+ *
+ * @param me the asc person response.
+ * @param tenant the asc tenant response.
+ * @param settings the asc settings response.
  */
-public interface ClientAuditMessagePublisher {
-  /**
-   * Publishes an audit message.
-   *
-   * @param message The audit message to be published.
-   */
-  void publish(AuditMessage message);
-}
+public record AscAuthenticationTokenPrincipal(
+    AscPersonResponse me, AscTenantResponse tenant, AscSettingsResponse settings) {}

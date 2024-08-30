@@ -29,21 +29,10 @@ using Polly.Extensions.Http;
 
 namespace ASC.Files.Core.Helpers;
 
-/// <summary>
-/// Class service connector
-/// </summary>
 public static class DocumentService
 {
-    /// <summary>
-    /// Timeout to request conversion
-    /// </summary>
-    public static readonly int Timeout = 120000;
-    //public static int Timeout = Convert.ToInt32(ConfigurationManagerExtension.AppSettings["files.docservice.timeout"] ?? "120000");
-
-    /// <summary>
-    /// Number of tries request conversion
-    /// </summary>
-    public static readonly int MaxTry = 3;
+    private const int Timeout = 120000;
+    
 
     private static readonly JsonSerializerOptions _bodySettings = new()
     {
@@ -246,8 +235,7 @@ public static class DocumentService
             Method = HttpMethod.Post
         };
 
-        var httpClient = clientFactory.CreateClient();
-        httpClient.Timeout = TimeSpan.FromMilliseconds(commandTimeout);
+        var httpClient = clientFactory.CreateClient(nameof(DocumentService));
 
         var body = new CommandBody
         {
@@ -284,11 +272,19 @@ public static class DocumentService
         var bodyString = JsonSerializer.Serialize(body, _bodySettings);
 
         request.Content = new StringContent(bodyString, Encoding.UTF8, "application/json");
-
         string dataResponse;
-        using (var response = await httpClient.SendAsync(request, cancellationTokenSource.Token))
+        try
         {
+            using var response = await httpClient.SendAsync(request, cancellationTokenSource.Token);
             dataResponse = await response.Content.ReadAsStringAsync(cancellationTokenSource.Token);
+        }
+        catch (HttpRequestException e) when (e.HttpRequestError == HttpRequestError.NameResolutionError)
+        {
+            return new CommandResponse
+            {
+                Error = ErrorTypes.UnknownError,
+                ErrorString = e.Message
+            };
         }
         
         try
@@ -340,8 +336,7 @@ public static class DocumentService
             Method = HttpMethod.Post
         };
 
-        var httpClient = clientFactory.CreateClient();
-        httpClient.Timeout = TimeSpan.FromMilliseconds(Timeout);
+        var httpClient = clientFactory.CreateClient(nameof(DocumentService));
 
         var body = new BuilderBody
         {
@@ -722,19 +717,17 @@ public static class DocumentService
 
 public static class DocumentServiceHttpClientExtension
 {
-    public static void AddDocumentServiceHttpClient(this IServiceCollection services)
+    public static void AddDocumentServiceHttpClient(this IServiceCollection services, IConfiguration configuration)
     {
+        
         services.AddHttpClient(nameof(DocumentService))
-            .SetHandlerLifetime(TimeSpan.FromMilliseconds(DocumentService.Timeout))
+            .SetHandlerLifetime(TimeSpan.FromMilliseconds(Convert.ToInt32(configuration["files:docservice:timeout"] ?? "5000")))
             .AddPolicyHandler((_, _) => 
                 HttpPolicyExtensions
-                .HandleTransientHttpError()
-                .OrResult(response =>
-                {
-                    return response.IsSuccessStatusCode
-                        ? false
-                        : throw new HttpRequestException($"Response status code: {response.StatusCode}", null, response.StatusCode);
-                })
-                .WaitAndRetryAsync(MaxTry, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))));
+                .HandleTransientHttpError() 
+                .OrResult(response => response.IsSuccessStatusCode
+                    ? false
+                    : throw new HttpRequestException($"Response status code: {response.StatusCode}", null, response.StatusCode))
+                .WaitAndRetryAsync(Convert.ToInt32(configuration["files:docservice:try"] ?? "3"), retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))));
     }
 }
