@@ -305,6 +305,21 @@ public class SettingsController(
     {
         return await filesSettingsHelper.SetKeepNewFileName(inDto.Set);
     }
+    
+    /// <summary>
+    /// Specifies whether to display a file extension or not.
+    /// </summary>
+    /// <short>Display a file extension</short>
+    /// <param type="ASC.Files.Core.ApiModels.RequestDto.SettingsRequestDto, ASC.Files.Core" name="inDto">Settings request parameters</param>
+    /// <category>Settings</category>
+    /// <returns type="System.Boolean, System">Boolean value: true if the parameter is enabled</returns>
+    /// <path>api/2.0/files/displayfileextension</path>
+    /// <httpMethod>PUT</httpMethod>
+    [HttpPut("displayfileextension")]
+    public async Task<bool> DisplayFileExtension(SettingsRequestDto inDto)
+    {
+        return await filesSettingsHelper.SetDisplayFileExtension(inDto.Set);
+    }
 
     /// <summary>
     /// Updates a file version if a file with such a name already exists.
