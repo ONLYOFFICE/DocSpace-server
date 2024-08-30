@@ -64,7 +64,7 @@ public class FolderDto<T> : FileEntryDto<T>
     [SwaggerSchemaCustom("Specifies if a folder is private or not")]
     public bool Private { get; set; }
 
-    [SwaggerSchemaCustomString("Folder type", Example = "DEFAULT", Nullable = true)]
+    [SwaggerSchemaCustom("Folder type")]
     public FolderType? Type { get; set; }
 
     [SwaggerSchemaCustom("InRoom")]

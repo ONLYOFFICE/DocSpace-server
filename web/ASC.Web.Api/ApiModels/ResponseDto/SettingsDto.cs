@@ -31,7 +31,7 @@ public class SettingsDto
     [SwaggerSchemaCustom("Time zone")]
     public string Timezone { get; set; }
 
-    [SwaggerSchemaCustomString("List of trusted domains", Example = "mydomain.com")]
+    [SwaggerSchemaCustom("List of trusted domains")]
     public List<string> TrustedDomains { get; set; }
 
     [SwaggerSchemaCustom("Trusted domains type")]

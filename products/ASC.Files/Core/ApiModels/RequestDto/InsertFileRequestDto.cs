@@ -28,7 +28,7 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class InsertFileRequestDto : IModelWithFile, IDisposable
 {
-    [SwaggerSchemaCustomString("File", Format = "file", Example = null)]
+    [SwaggerSchemaCustom("File")]
     public IFormFile File { get; set; }
 
     [SwaggerSchemaCustom("File name")]
@@ -44,7 +44,7 @@ public class InsertFileRequestDto : IModelWithFile, IDisposable
     private Stream _stream;
     private bool _disposedValue;
 
-    [SwaggerSchemaCustomString("Request input stream", Example = "N/A")]
+    [SwaggerSchemaCustom("Request input stream")]
     public Stream Stream
     {
         get => File?.OpenReadStream() ?? _stream;

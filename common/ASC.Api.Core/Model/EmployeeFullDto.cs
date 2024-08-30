@@ -58,7 +58,7 @@ public class EmployeeFullDto : EmployeeDto
     [SwaggerSchemaCustom("The date when the user account was terminated")]
     public ApiDateTime Terminated { get; set; }
 
-    [SwaggerSchemaCustom("Department")]
+    [SwaggerSchemaCustom("Department", Example = "Marketing")]
     public string Department { get; set; }
 
     [SwaggerSchemaCustom("Registration date")]
