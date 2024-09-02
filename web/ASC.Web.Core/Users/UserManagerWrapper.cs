@@ -451,11 +451,6 @@ public sealed class UserManagerWrapper(
         return text.ToString();
     }
 
-    public async Task<string> GetPasswordHelpMessageAsync()
-    {
-        return GetPasswordHelpMessage(await settingsManager.LoadAsync<PasswordSettings>());
-    }
-
     #endregion
 
     public static bool ValidateEmail(string email)
