@@ -40,6 +40,7 @@ public interface IUserService
         AccountLoginType? accountLoginType,
         QuotaFilter? quotaFilter,
         string text,
+        string separatorm,
         bool withoutGroup);
     IAsyncEnumerable<UserInfo> GetUsers(
         int tenant,
@@ -52,6 +53,7 @@ public interface IUserService
         AccountLoginType? accountLoginType,
         QuotaFilter? quotaFilter,
         string text,
+        string separator,
         bool withoutGroup,
         Guid ownerId,
         UserSortType sortBy,

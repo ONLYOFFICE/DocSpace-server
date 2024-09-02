@@ -3189,7 +3189,8 @@ public class FileStorageService //: IFileStorageService
     private async Task<List<Guid>> WhoCanRead<T>(FileEntry<T> entry)
     {
         var whoCanReadTask = (await fileSecurity.WhoCanReadAsync(entry, true)).ToList();
-        whoCanReadTask.AddRange(await userManager.GetUsers(true, EmployeeStatus.Active, null, null, null, null, null, null, null, false, null, true, 0, 0)
+        whoCanReadTask.AddRange(await userManager.GetUsers(true, EmployeeStatus.Active, null, null, null, null, 
+                null, null, null, null, false, null, true, 0, 0)
             .Select(r=> r.Id)
             .ToListAsync());
         

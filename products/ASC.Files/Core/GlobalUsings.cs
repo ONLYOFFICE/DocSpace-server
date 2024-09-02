@@ -80,6 +80,7 @@ global using ASC.Core.Common.Quota;
 global using ASC.Core.Common.Quota.Features;
 global using ASC.Core.Common.Security;
 global using ASC.Core.Common.Settings;
+global using ASC.Core.Common.Users;
 global using ASC.Core.Notify.Socket;
 global using ASC.Core.Tenants;
 global using ASC.Core.Users;
