@@ -46,8 +46,13 @@ public class TfaRequestsDto
 
 public enum TfaRequestsDtoType
 {
+    [SwaggerEnum("None")]
     None = 0,
+
+    [SwaggerEnum("Sms")]
     Sms = 1,
+
+    [SwaggerEnum("App")]
     App = 2
 }
 

@@ -31,7 +31,7 @@ public class BackupRestoreDto
     [SwaggerSchemaCustom("Backup ID")]
     public string BackupId { get; set; }
 
-    [SwaggerSchemaCustomString("Storage type")]
+    [SwaggerSchemaCustom("Storage type")]
     public int? StorageType { get; set; }
 
     [SwaggerSchemaCustom("Storage parameters")]

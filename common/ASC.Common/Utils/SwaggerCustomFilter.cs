@@ -185,7 +185,21 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
         }
         else if(checkType == typeof(JsonElement))
         {
-            
+            var oneOfSchema = new List<OpenApiSchema>
+            {
+                new OpenApiSchema
+                {
+                    Type = "integer",
+                    Example = new OpenApiInteger(SwaggerSchemaCustomIntAttribute.DefaultExample)
+                },
+                new OpenApiSchema
+                {
+                    Type = "string",
+                    Example = new OpenApiString(SwaggerSchemaCustomStringAttribute.DefaultExample)
+                }
+            };
+
+            result.OneOf = oneOfSchema;
         }
         else if (checkType.IsEnum)
         {

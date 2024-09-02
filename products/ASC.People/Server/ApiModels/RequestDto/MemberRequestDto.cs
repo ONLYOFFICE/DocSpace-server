@@ -104,7 +104,10 @@ public class UpdateMemberRequestDto : MemberRequestDto
 
 public enum SexEnum
 {
+    [SwaggerEnum("Female")]
     Female = 0,
+
+    [SwaggerEnum("Male")]
     Male = 1,
 }
 

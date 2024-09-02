@@ -46,12 +46,12 @@ public class BackupScheduleDto
 
 public class Cron
 {
-    [SwaggerSchemaCustomString("Period", Example = "0")]
+    [SwaggerSchemaCustom("Period")]
     public BackupPeriod? Period { get; set; }
 
-    [SwaggerSchemaCustomString("Hour", Example = "0")]
+    [SwaggerSchemaCustom("Hour", Example = 0)]
     public int Hour { get; set; }
 
-    [SwaggerSchemaCustomString("Day", Example = "0")]
+    [SwaggerSchemaCustom("Day", Example = 0)]
     public int Day { get; set; }
 }
