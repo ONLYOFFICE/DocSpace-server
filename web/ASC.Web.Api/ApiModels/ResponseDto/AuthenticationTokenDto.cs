@@ -37,28 +37,15 @@ public class AuthenticationTokenDto
     [SwaggerSchemaCustom("Specifies if the authentication code is sent by SMS or not", Example = false)]
     public bool Sms { get; set; }
 
-    [SwaggerSchemaCustom("Phone number", Example = "null")]
+    [SwaggerSchemaCustom("Phone number", Example = "")]
     public string PhoneNoise { get; set; }
 
     [SwaggerSchemaCustom("Specifies if the two-factor application is used or not", Example = false)]
     public bool Tfa { get; set; }
 
-    [SwaggerSchemaCustom("Two-factor authentication key", Example = "null")]
+    [SwaggerSchemaCustom("Two-factor authentication key", Example = "")]
     public string TfaKey { get; set; }
 
     [SwaggerSchemaCustom("Confirmation email URL", Format = "uri")]
     public string ConfirmUrl { get; set; }
-
-    public static AuthenticationTokenDto GetSample()
-    {
-        return new AuthenticationTokenDto
-        {
-            Expires = DateTime.UtcNow,
-            Token = "abcde12345",
-            Sms = false,
-            PhoneNoise = null,
-            Tfa = false,
-            TfaKey = null
-        };
-    }
 }

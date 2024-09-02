@@ -45,34 +45,21 @@ public class ThumbnailsDataDto
         };
     }
 
-    [SwaggerSchemaCustom("Original photo")]
+    [SwaggerSchemaCustom("Original photo", Example = "default_user_photo_size_1280-1280.png")]
     public string Original { get; set; }
 
-    [SwaggerSchemaCustom("Retina")]
+    [SwaggerSchemaCustom("Retina", Example = "default_user_photo_size_360-360.png")]
     public string Retina { get; set; }
 
-    [SwaggerSchemaCustom("Maximum size")]
+    [SwaggerSchemaCustom("Maximum size", Example = "default_user_photo_size_200-200.png")]
     public string Max { get; set; }
 
-    [SwaggerSchemaCustom("Big")]
+    [SwaggerSchemaCustom("Big", Example = "default_user_photo_size_82-82.png")]
     public string Big { get; set; }
 
-    [SwaggerSchemaCustom("Medium")]
+    [SwaggerSchemaCustom("Medium", Example = "default_user_photo_size_48-48.png")]
     public string Medium { get; set; }
 
-    [SwaggerSchemaCustom("Small")]
+    [SwaggerSchemaCustom("Small", Example = "default_user_photo_size_32-32.png")]
     public string Small { get; set; }
-
-    public static ThumbnailsDataDto GetSample()
-    {
-        return new ThumbnailsDataDto
-        {
-            Original = "default_user_photo_size_1280-1280.png",
-            Retina = "default_user_photo_size_360-360.png",
-            Max = "default_user_photo_size_200-200.png",
-            Big = "default_user_photo_size_82-82.png",
-            Medium = "default_user_photo_size_48-48.png",
-            Small = "default_user_photo_size_32-32.png"
-        };
-    }
 }

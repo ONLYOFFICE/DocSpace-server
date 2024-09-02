@@ -30,13 +30,13 @@ namespace ASC.Web.Api.Models;
 
 public class EmployeeDto
 {
-    [SwaggerSchemaCustom("ID")]
+    [SwaggerSchemaCustom("ID", Example = "{00000000-0000-0000-0000-000000000000}")]
     public Guid Id { get; set; }
 
-    [SwaggerSchemaCustom("Display name")]
+    [SwaggerSchemaCustom("Display name", Example = "Mike Zanyatski")]
     public string DisplayName { get; set; }
 
-    [SwaggerSchemaCustom("Title")]
+    [SwaggerSchemaCustom("Title", Example = "Manager")]
     public string Title { get; set; }
 
     [SwaggerSchemaCustom("Avatar")]
@@ -51,7 +51,7 @@ public class EmployeeDto
     [SwaggerSchemaCustom("Medium size avatar")]
     public string AvatarMedium { get; set; }
 
-    [SwaggerSchemaCustom("Small avatar")]
+    [SwaggerSchemaCustom("Small avatar", Example = "url to small avatar")]
     public string AvatarSmall { get; set; }
 
     [SwaggerSchemaCustom("Profile URL")]
@@ -62,17 +62,6 @@ public class EmployeeDto
 
     [SwaggerSchemaCustom("Specifies if the user is an anonim or not")]
     public bool IsAnonim { get; set; }
-
-    public static EmployeeDto GetSample()
-    {
-        return new EmployeeDto
-        {
-            Id = Guid.Empty,
-            DisplayName = "Mike Zanyatski",
-            Title = "Manager",
-            AvatarSmall = "url to small avatar"
-        };
-    }
 }
 
 [Scope]

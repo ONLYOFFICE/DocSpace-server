@@ -28,7 +28,7 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 
 public class CapabilitiesDto
 {
-    [SwaggerSchemaCustom("Specifies if the LDAP settings are enabled or not")]
+    [SwaggerSchemaCustom("Specifies if the LDAP settings are enabled or not", Example = false)]
     public bool LdapEnabled { get; set; }
 
     [SwaggerSchemaCustom("Ldap domain")]
@@ -37,23 +37,12 @@ public class CapabilitiesDto
     [SwaggerSchemaCustom("List of providers")]
     public List<string> Providers { get; set; }
 
-    [SwaggerSchemaCustom("SP login label")]
+    [SwaggerSchemaCustom("SP login label", Example = "")]
     public string SsoLabel { get; set; }
 
     [SwaggerSchemaCustom("Specifies if OAuth is enabled or not")]
     public bool OauthEnabled { get; init; }
 
-    [SwaggerSchemaCustom("SSO URL. If this parameter is empty, then the SSO settings are disabled", Format = "uri")]
+    [SwaggerSchemaCustom("SSO URL. If this parameter is empty, then the SSO settings are disabled", Example = "", Format = "uri")]
     public string SsoUrl { get; set; }
-
-    public static CapabilitiesDto GetSample()
-    {
-        return new CapabilitiesDto
-        {
-            LdapEnabled = false,
-            // Providers = AccountLinkControl.AuthProviders,
-            SsoLabel = string.Empty,
-            SsoUrl = string.Empty
-        };
-    }
 }

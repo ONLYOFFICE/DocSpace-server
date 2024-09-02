@@ -45,17 +45,6 @@ public class FileShareDto
 
     [SwaggerSchemaCustom("Subject type")]
     public SubjectType SubjectType { get; set; }
-
-    public static FileShareDto GetSample()
-    {
-        return new FileShareDto
-        {
-            Access = FileShare.ReadWrite,
-            IsLocked = false,
-            IsOwner = true
-            //SharedTo = EmployeeWraper.GetSample()
-        };
-    }
 }
 
 public class FileShareLink

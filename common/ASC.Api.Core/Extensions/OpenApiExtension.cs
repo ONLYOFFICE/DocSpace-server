@@ -43,6 +43,12 @@ public static class OpenApiExtension
             var assemblyName = Assembly.GetEntryAssembly().FullName.Split(',').First();
 
             c.ResolveConflictingActions(a => a.First());
+            c.CustomOperationIds(r =>
+            {
+                var actionName = r.ActionDescriptor.RouteValues["action"];
+
+                return char.ToLower(actionName[0]) + actionName.Substring(1); ;
+            });
             c.CustomSchemaIds(CustomSchemaId);
 
             c.SwaggerDoc("common", new OpenApiInfo { Title = assemblyName, Version = "v2" });

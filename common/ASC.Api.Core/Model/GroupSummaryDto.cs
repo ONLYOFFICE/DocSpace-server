@@ -30,24 +30,14 @@ namespace ASC.Web.Api.Models;
 
 public class GroupSummaryDto
 {
-    [SwaggerSchemaCustom("ID")]
+    [SwaggerSchemaCustom("ID", Example = "{00000000-0000-0000-0000-000000000000}")]
     public Guid Id { get; set; }
 
-    [SwaggerSchemaCustom("Name")]
+    [SwaggerSchemaCustom("Name", Example = "Group Name")]
     public string Name { get; init; }
 
-    [SwaggerSchemaCustom("Manager")]
+    [SwaggerSchemaCustom("Manager", Example = "Jake.Zazhitski")]
     public string Manager { get; set; }
-
-    public static GroupSummaryDto GetSample()
-    {
-        return new GroupSummaryDto
-        {
-            Id = Guid.Empty,
-            Manager = "Jake.Zazhitski",
-            Name = "Group Name"
-        };
-    }
 }
 
 [Scope]

@@ -28,10 +28,10 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 
 public class SettingsDto
 {
-    [SwaggerSchemaCustom("Time zone")]
+    [SwaggerSchemaCustom("Time zone", Example = "UTC")]
     public string Timezone { get; set; }
 
-    [SwaggerSchemaCustom("List of trusted domains")]
+    [SwaggerSchemaCustom("List of trusted domains", Example = "mydomain.com")]
     public List<string> TrustedDomains { get; set; }
 
     [SwaggerSchemaCustom("Trusted domains type")]
@@ -40,7 +40,7 @@ public class SettingsDto
     [SwaggerSchemaCustom("Language", Example = "en-US")]
     public string Culture { get; set; }
 
-    [SwaggerSchemaCustom("UTC offset")]
+    [SwaggerSchemaCustom("UTC offset", Example = "-8.5")]
     public TimeSpan UtcOffset { get; set; }
 
     [SwaggerSchemaCustom("UTC hours offset")]
@@ -130,8 +130,7 @@ public class SettingsDto
     [SwaggerSchemaCustom("Legal terms")]
     public string LegalTerms { get; set; }
 
-    /// <summary>License url</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("License url")]
     public string LicenseUrl { get; set; }
 
     [SwaggerSchemaCustom("Specifies whether the cookie settings are enabled")]
@@ -157,18 +156,4 @@ public class SettingsDto
 
     [SwaggerSchemaCustom("Max image upload size")]
     public long MaxImageUploadSize { get; set; }
-
-    public static SettingsDto GetSample()
-    {
-        return new SettingsDto
-        {
-            Culture = "en-US",
-            Timezone = TimeZoneInfo.Utc.ToString(),
-            TrustedDomains = ["mydomain.com"],
-            UtcHoursOffset = -8.5,
-            UtcOffset = TimeSpan.FromHours(-8.5),
-            GreetingSettings = "Web Office Applications",
-            OwnerId = new Guid()
-        };
-    }
 }

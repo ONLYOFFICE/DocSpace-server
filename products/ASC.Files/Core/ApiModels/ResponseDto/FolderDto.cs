@@ -37,10 +37,10 @@ public class FolderDto<T> : FileEntryDto<T>
     [SwaggerSchemaCustomInt("Number of folders", Example = 7)]
     public int FoldersCount { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if a folder is shareable or not", Example = false)]
+    [SwaggerSchemaCustom("Specifies if a folder is shareable or not")]
     public bool? IsShareable { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if a folder is favorite or not", Example = false)]
+    [SwaggerSchemaCustom("Specifies if a folder is favorite or not")]
     public bool? IsFavorite { get; set; }
 
     [SwaggerSchemaCustom("Number for a new folder")]
@@ -80,27 +80,6 @@ public class FolderDto<T> : FileEntryDto<T>
     public long? UsedSpace { get; set; }
 
     public override FileEntryType FileEntryType { get => FileEntryType.Folder; }
-
-    public static FolderDto<int> GetSample()
-    {
-        return new FolderDto<int>
-        {
-            Access = FileShare.ReadWrite,
-            //Updated = ApiDateTime.GetSample(),
-            //Created = ApiDateTime.GetSample(),
-            //CreatedBy = EmployeeWraper.GetSample(),
-            Id = 10,
-            RootFolderType = FolderType.BUNCH,
-            Shared = false,
-            Title = "Some titile",
-            //UpdatedBy = EmployeeWraper.GetSample(),
-            FilesCount = 5,
-            FoldersCount = 7,
-            ParentId = 10,
-            IsShareable = null,
-            IsFavorite = null
-        };
-    }
 }
 
 [Scope]

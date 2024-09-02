@@ -42,13 +42,13 @@ public partial class FileEntryDtoContext : JsonSerializerContext;
 [JsonDerivedType(typeof(FolderDto<string>))]
 public abstract class FileEntryDto
 {
-    [SwaggerSchemaCustom("Title")]
+    [SwaggerSchemaCustom("Title", Example = "Some titile.txt/ Some title")]
     public string Title { get; set; }
 
     [SwaggerSchemaCustom("Access rights")]
     public FileShare Access { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the file is shared or not")]
+    [SwaggerSchemaCustom("Specifies if the file is shared or not", Example = false)]
     public bool Shared { get; set; }
 
     [SwaggerSchemaCustom("Creation time")]
@@ -109,7 +109,7 @@ public abstract class FileEntryDto
 
 public abstract class FileEntryDto<T> : FileEntryDto
 {
-    [SwaggerSchemaCustomInt("Id")]
+    [SwaggerSchemaCustomInt("Id", Example = 10)]
     public T Id { get; set; }
 
     [SwaggerSchemaCustomInt("Root folder id")]

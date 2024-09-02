@@ -37,39 +37,20 @@ public class FolderContentDto<T>
     [SwaggerSchemaCustom<FolderDto<int>>("Current folder information")]
     public FolderDto<T> Current { get; set; }
 
-    [SwaggerSchemaCustom<object>("Folder path")]
+    [SwaggerSchemaCustom("Folder path", Example = "{key = \"Key\", path = \"//path//to//folder\"}")]
     public object PathParts { get; set; }
 
-    [SwaggerSchemaCustom("Folder start index")]
+    [SwaggerSchemaCustom("Folder start index", Example = 0)]
     public int StartIndex { get; set; }
 
-    [SwaggerSchemaCustom("Number of folder elements")]
+    [SwaggerSchemaCustom("Number of folder elements", Example = 4)]
     public int Count { get; set; }
 
-    [SwaggerSchemaCustom("Total number of elements in the folder")]
+    [SwaggerSchemaCustom("Total number of elements in the folder", Example = 4)]
     public int Total { get; set; }
 
     [SwaggerSchemaCustom("New element index")]
     public int New { get; set; }
-
-    public static FolderContentDto<int> GetSample()
-    {
-        return new FolderContentDto<int>
-        {
-            Current = FolderDto<int>.GetSample(),
-            //Files = new List<FileEntryDto>(new[] { FileDto<int>.GetSample(), FileDto<int>.GetSample() }),
-            //Folders = new List<FileEntryDto>(new[] { FolderDto<int>.GetSample(), FolderDto<int>.GetSample() }),
-            PathParts = new
-            {
-                key = "Key",
-                path = "//path//to//folder"
-            },
-
-            StartIndex = 0,
-            Count = 4,
-            Total = 4
-        };
-    }
 }
 
 [Scope]

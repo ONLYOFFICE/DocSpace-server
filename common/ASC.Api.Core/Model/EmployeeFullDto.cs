@@ -28,16 +28,16 @@ namespace ASC.Web.Api.Models;
 
 public class EmployeeFullDto : EmployeeDto
 {
-    [SwaggerSchemaCustom("First name")]
+    [SwaggerSchemaCustom("First name", Example = "Mike")]
     public string FirstName { get; set; }
 
-    [SwaggerSchemaCustom("Last name")]
+    [SwaggerSchemaCustom("Last name", Example = "Zanyatski")]
     public string LastName { get; set; }
 
-    [SwaggerSchemaCustom("Username")]
+    [SwaggerSchemaCustom("Username", Example = "Mike.Zanyatski")]
     public string UserName { get; set; }
 
-    [SwaggerSchemaCustom("Email")]
+    [SwaggerSchemaCustom("Email", Example = "my@gmail.com")]
     public string Email { get; set; }
 
     [SwaggerSchemaCustom("List of contacts")]
@@ -46,7 +46,7 @@ public class EmployeeFullDto : EmployeeDto
     [SwaggerSchemaCustom("Birthday")]
     public ApiDateTime Birthday { get; set; }
 
-    [SwaggerSchemaCustom("Sex")]
+    [SwaggerSchemaCustom("Sex", Example = "male")]
     public string Sex { get; set; }
 
     [SwaggerSchemaCustom("Employee status")]
@@ -67,10 +67,10 @@ public class EmployeeFullDto : EmployeeDto
     [SwaggerSchemaCustom("List of groups")]
     public List<GroupSummaryDto> Groups { get; set; }
 
-    [SwaggerSchemaCustom("Location")]
+    [SwaggerSchemaCustom("Location", Example = "Palo Alto")]
     public string Location { get; set; }
 
-    [SwaggerSchemaCustom("Notes")]
+    [SwaggerSchemaCustom("Notes", Example = "Notes to worker")]
     public string Notes { get; set; }
 
     [SwaggerSchemaCustom("Specifies if the user is an administrator or not", Example = false)]
@@ -79,10 +79,10 @@ public class EmployeeFullDto : EmployeeDto
     [SwaggerSchemaCustom("Specifies if the user is a room administrator or not")]
     public bool IsRoomAdmin { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the LDAP settings are enabled for the user or not")]
+    [SwaggerSchemaCustom("Specifies if the LDAP settings are enabled for the user or not", Example = false)]
     public bool IsLDAP { get; set; }
 
-    [SwaggerSchemaCustom("List of administrator modules")]
+    [SwaggerSchemaCustom("List of administrator modules", Example = "[\"projects\", \"crm\"]")]
     public List<string> ListAdminModules { get; set; }
 
     [SwaggerSchemaCustom("Specifies if the user is a portal owner or not")]
@@ -94,7 +94,7 @@ public class EmployeeFullDto : EmployeeDto
     [SwaggerSchemaCustom("Specifies if the user is a portal collaborator or not")]
     public bool IsCollaborator { get; set; }
 
-    [SwaggerSchemaCustom("Language")]
+    [SwaggerSchemaCustom("Language", Example = "en-EN")]
     public string CultureName { get; set; }
 
     [SwaggerSchemaCustom("Mobile phone number")]
@@ -103,7 +103,7 @@ public class EmployeeFullDto : EmployeeDto
     [SwaggerSchemaCustom("Mobile phone activation status")]
     public MobilePhoneActivationStatus MobilePhoneActivationStatus { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the SSO settings are enabled for the user or not")]
+    [SwaggerSchemaCustom("Specifies if the SSO settings are enabled for the user or not", Example = false)]
     public bool IsSSO { get; set; }
 
     [SwaggerSchemaCustom("Theme")]
@@ -121,42 +121,8 @@ public class EmployeeFullDto : EmployeeDto
     [SwaggerSchemaCustom("Specifies if the user has a custom quota or not")]
     public bool? IsCustomQuota { get; set; }
 
-    /// <summary>Current login event ID</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustom("Current login event ID")]
     public int? LoginEventId { get; set; }
-
-    public static new EmployeeFullDto GetSample()
-    {
-        return new EmployeeFullDto
-        {
-            Avatar = "url to big avatar",
-            AvatarSmall = "url to small avatar",
-            AvatarMax = "url to max avatar",
-            AvatarOriginal = "url to original avatar",
-            Contacts = [Contact.GetSample()],
-            Email = "my@gmail.com",
-            FirstName = "Mike",
-            Id = Guid.Empty,
-            IsAdmin = false,
-            ListAdminModules = ["projects", "crm"],
-            UserName = "Mike.Zanyatski",
-            LastName = "Zanyatski",
-            Title = "Manager",
-            Groups = [GroupSummaryDto.GetSample()],
-            AvatarMedium = "url to medium avatar",
-            Birthday = ApiDateTime.GetSample(),
-            Department = "Marketing",
-            Location = "Palo Alto",
-            Notes = "Notes to worker",
-            Sex = "male",
-            Status = EmployeeStatus.Active,
-            WorkFrom = ApiDateTime.GetSample(),
-            Terminated = ApiDateTime.GetSample(),
-            CultureName = "en-EN",
-            IsLDAP = false,
-            IsSSO = false
-        };
-    }
 }
 
 [Scope]

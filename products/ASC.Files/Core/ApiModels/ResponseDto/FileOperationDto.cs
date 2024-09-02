@@ -35,10 +35,10 @@ public class FileOperationDto
     [JsonPropertyName("Operation")]
     public FileOperationType OperationType { get; init; }
 
-    [SwaggerSchemaCustom("Operation progress")]
+    [SwaggerSchemaCustom("Operation progress", Example = 100)]
     public int Progress { get; set; }
 
-    [SwaggerSchemaCustom("Error")]
+    [SwaggerSchemaCustom("Error", Example = "")]
     public string Error { get; set; }
 
     [SwaggerSchemaCustomString("Processing status", Example = "1")]
@@ -55,22 +55,6 @@ public class FileOperationDto
 
     [SwaggerSchemaCustom("List of folders")]
     public List<FileEntryDto> Folders { get; set; }
-
-    public static FileOperationDto GetSample()
-    {
-        return new FileOperationDto
-        {
-            Id = Guid.NewGuid().ToString(),
-            OperationType = FileOperationType.Move,
-            Progress = 100,
-            //Source = "folder_1,file_1",
-            //Result = "folder_1,file_1",
-            Error = "",
-            Processed = "1",
-            Files = [FileDto<int>.GetSample()],
-            Folders = [FolderDto<int>.GetSample()]
-        };
-    }
 }
 
 [Scope]

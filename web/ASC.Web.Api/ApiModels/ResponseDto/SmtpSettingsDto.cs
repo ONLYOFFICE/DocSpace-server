@@ -46,10 +46,10 @@ public class SmtpSettingsDto : IMapFrom<SmtpSettings>
     [SwaggerSchemaCustom("Credentials user password", Example = "{password}")]
     public string CredentialsUserPassword { get; set; }
 
-    [SwaggerSchemaCustom("Enables SSL or not")]
+    [SwaggerSchemaCustom("Enables SSL or not", Example = false)]
     public bool EnableSSL { get; set; }
 
-    [SwaggerSchemaCustom("Enables authentication or not", Example = false)]
+    [SwaggerSchemaCustom("Enables authentication or not")]
     public bool EnableAuth { get; set; }
 
     [SwaggerSchemaCustom("Specifies whether to use NTLM or not", Example = false)]
@@ -57,21 +57,6 @@ public class SmtpSettingsDto : IMapFrom<SmtpSettings>
 
     [SwaggerSchemaCustom("Specifies if the current settings are default or not", Example = false)]
     public bool IsDefaultSettings { get; set; }
-
-    public static SmtpSettingsDto GetSample()
-    {
-        return new SmtpSettingsDto
-        {
-            Host = "mail.example.com",
-            Port = 25,
-            CredentialsUserName = "notify@example.com",
-            CredentialsUserPassword = "{password}",
-            EnableAuth = true,
-            EnableSSL = false,
-            SenderAddress = "notify@example.com",
-            SenderDisplayName = "Postman"
-        };
-    }
 
     public void Mapping(Profile profile)
     {

@@ -37,7 +37,7 @@ public class FileDto<T> : FileEntryDto<T>
     [SwaggerSchemaCustomInt("Version group", Example = 1)]
     public int VersionGroup { get; set; }
 
-    [SwaggerSchemaCustomInt("Content length")]
+    [SwaggerSchemaCustom("Content length", Example = "12345")]
     public string ContentLength { get; set; }
 
     [SwaggerSchemaCustom("Pure content length")]
@@ -116,31 +116,6 @@ public class FileDto<T> : FileEntryDto<T>
     public ApiDateTime LastOpened { get; set; }
     
     public override FileEntryType FileEntryType { get => FileEntryType.File; }
-
-
-    public static FileDto<int> GetSample()
-    {
-        return new FileDto<int>
-        {
-            Access = FileShare.ReadWrite,
-            //Updated = ApiDateTime.GetSample(),
-            //Created = ApiDateTime.GetSample(),
-            //CreatedBy = EmployeeWraper.GetSample(),
-            Id = 10,
-            RootFolderType = FolderType.BUNCH,
-            Shared = false,
-            Title = "Some titile.txt",
-            FileExst = ".txt",
-            FileType = FileType.Document,
-            //UpdatedBy = EmployeeWraper.GetSample(),
-            ContentLength = 12345.ToString(CultureInfo.InvariantCulture),
-            FileStatus = FileStatus.IsNew,
-            FolderId = 12334,
-            Version = 3,
-            VersionGroup = 1,
-            ViewUrl = "https://www.onlyoffice.com/viewfile?fileid=2221"
-        };
-    }
 }
 
 [Scope]

@@ -28,7 +28,7 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class SaveEditingRequestDto : IModelWithFile
 {
-    [SwaggerSchemaCustom("File extension")]
+    [SwaggerSchemaCustom("File extension", Example = ".txt")]
     public string FileExtension { get; set; }
 
     [SwaggerSchemaCustom("URI to download a file", Format = "uri")]

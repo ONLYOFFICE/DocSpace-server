@@ -42,9 +42,4 @@ public class Contact
         Type = type;
         Value = value;
     }
-
-    public static Contact GetSample()
-    {
-        return new Contact("GTalk", "my@gmail.com");
-    }
 }

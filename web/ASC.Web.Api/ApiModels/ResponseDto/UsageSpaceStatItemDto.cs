@@ -42,23 +42,11 @@ public class UsageSpaceStatItemDto
 
     [SwaggerSchemaCustom("URL", Example = "Item url", Format = "uri")]
     public string Url { get; set; }
-
-    public static UsageSpaceStatItemDto GetSample()
-    {
-        return new UsageSpaceStatItemDto
-        {
-            Name = "Item name",
-            Icon = "Item icon path",
-            Disabled = false,
-            Size = "0 Byte",
-            Url = "Item url"
-        };
-    }
 }
 
 public class ChartPointDto
 {
-    [SwaggerSchemaCustom("Display date")]
+    [SwaggerSchemaCustom("Display date", Example = "6/1/2024")]
     public string DisplayDate { get; set; }
 
     [SwaggerSchemaCustom("Date")]
@@ -69,15 +57,4 @@ public class ChartPointDto
 
     [SwaggerSchemaCustom("Hits", Example = 0)]
     public int Hits { get; set; }
-
-    public static ChartPointDto GetSample()
-    {
-        return new ChartPointDto
-        {
-            DisplayDate = DateTime.Now.ToShortDateString(),
-            Date = DateTime.Now,
-            Hosts = 0,
-            Hits = 0
-        };
-    }
 }

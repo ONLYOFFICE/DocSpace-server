@@ -32,15 +32,6 @@ public class TaskProgressDto
 
     [SwaggerSchemaCustom("Progress percentage", Example = 0)]
     public int Progress { get; set; }
-
-    public static TaskProgressDto GetSample()
-    {
-        return new TaskProgressDto
-        {
-            IsCompleted = true,
-            Progress = 0
-        };
-    }
 }
 
 

@@ -28,7 +28,7 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 
 public class SecurityDto
 {
-    [SwaggerSchemaCustom("Module ID")]
+    [SwaggerSchemaCustom("Module ID", Example = "{00000000-0000-0000-0000-000000000000}")]
     public string WebItemId { get; set; }
 
     [SwaggerSchemaCustom("List of users with the access to the module")]
@@ -37,21 +37,9 @@ public class SecurityDto
     [SwaggerSchemaCustom("List of groups with the access to the module")]
     public List<GroupSummaryDto> Groups { get; init; }
 
-    [SwaggerSchemaCustom("Specifies if the security settings are enabled or not")]
+    [SwaggerSchemaCustom("Specifies if the security settings are enabled or not", Example = true)]
     public bool Enabled { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if this module is a subitem or not")]
+    [SwaggerSchemaCustom("Specifies if this module is a subitem or not", Example = false)]
     public bool IsSubItem { get; set; }
-
-    public static SecurityDto GetSample()
-    {
-        return new SecurityDto
-        {
-            WebItemId = Guid.Empty.ToString(),
-            Enabled = true,
-            IsSubItem = false,
-            Groups = [GroupSummaryDto.GetSample()],
-            Users = [EmployeeDto.GetSample()]
-        };
-    }
 }
