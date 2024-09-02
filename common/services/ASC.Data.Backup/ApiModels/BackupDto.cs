@@ -32,7 +32,7 @@ public class BackupDto
     public BackupStorageType? StorageType { get; set; }
 
     [SwaggerSchemaCustom("Storage parameters")]
-    public IEnumerable<ItemKeyValuePair<object, object>> StorageParams { get; set; }
+    public IDictionary<object, object> StorageParams { get; set; }
 
     [SwaggerSchemaCustom("Specifies if a dump will be created or not")]
     public bool Dump { get; set; }

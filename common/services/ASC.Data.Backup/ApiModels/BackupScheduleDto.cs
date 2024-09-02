@@ -32,7 +32,7 @@ public class BackupScheduleDto
     public BackupStorageType? StorageType { get; set; }
 
     [SwaggerSchemaCustom("Storage parameters")]
-    public IEnumerable<ItemKeyValuePair<object, object>> StorageParams { get; set; }
+    public IDictionary<object, object> StorageParams { get; set; }
 
     [SwaggerSchemaCustom("Maximum number of the stored backup copies")]
     public int? BackupsStored { get; set; }

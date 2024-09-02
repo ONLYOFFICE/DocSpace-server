@@ -26,41 +26,29 @@
 
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
-/// <summary>
-/// </summary>
 public class WhiteLabelRequestsDto
 {
-    /// <summary>Logo text</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Logo text")]
     public string LogoText { get; set; }
 
-    /// <summary>Tenant IDs with their logos (light or dark)</summary>
-    /// <type>System.Collections.Generic.IEnumerable{ASC.Api.Collections.ItemKeyValuePair{System.String, ASC.Web.Api.ApiModel.RequestsDto.LogoRequestsDto}}, System.Collections.Generic</type>
-    public IEnumerable<ItemKeyValuePair<string, LogoRequestsDto>> Logo { get; set; }
+    [SwaggerSchemaCustom("Tenant IDs with their logos (light or dark)")]
+    public IDictionary<string, LogoRequestsDto> Logo { get; set; }
 }
 
-/// <summary>
-/// </summary>
 public class LogoRequestsDto
 {
-    /// <summary>Light theme logo</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Light theme logo")]
     public string Light { get; set; }
 
-    /// <summary>Dark theme logo</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Dark theme logo")]
     public string Dark { get; set; }
 }
 
-/// <summary>
-/// </summary>
 public class WhiteLabelQueryRequestsDto
 {
-    /// <summary>Specifies if the logo is for a dark theme or not</summary>
-    /// <type>System.Nullable{System.Boolean}, System</type>
+    [SwaggerSchemaCustom("Specifies if the logo is for a dark theme or not")]
     public bool? IsDark { get; set; }
 
-    /// <summary>Specifies if the logo is for a default tenant or not</summary>
-    /// <type>System.Nullable{System.Boolean}, System</type>
+    [SwaggerSchemaCustom("Specifies if the logo is for a default tenant or not")]
     public bool? IsDefault { get; set; }
 }

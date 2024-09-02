@@ -41,5 +41,5 @@ public class WebItemSecurityRequestsDto
 public class WebItemsSecurityRequestsDto
 {
     [SwaggerSchemaCustom("Products with security information")]
-    public IEnumerable<ItemKeyValuePair<string, bool>> Items { get; set; }
+    public IDictionary<string, bool> Items { get; set; }
 }

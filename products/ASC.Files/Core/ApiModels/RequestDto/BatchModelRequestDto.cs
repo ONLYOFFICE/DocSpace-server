@@ -43,7 +43,7 @@ public class BaseBatchRequestDto
 public class DownloadRequestDto : BaseBatchRequestDto
 {
     [SwaggerSchemaCustom("List of file IDs which will be converted")]
-    public IEnumerable<ItemKeyValuePair<JsonElement, string>> FileConvertIds { get; set; } = new List<ItemKeyValuePair<JsonElement, string>>();
+    public IDictionary<JsonElement, string> FileConvertIds { get; set; } = new Dictionary<JsonElement, string>();
 }
 
 public class DeleteBatchRequestDto : BaseBatchRequestDto
