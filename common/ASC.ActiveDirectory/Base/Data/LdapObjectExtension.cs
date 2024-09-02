@@ -141,7 +141,7 @@ public class LdapObjectExtension(TenantUtil tenantUtil, SettingsManager settings
         if (settings.LdapMapping.TryGetValue(Mapping.UserQuotaLimit, out var value8))
         {
             var quotaAttr = GetAttribute(ldapUser, value8);
-            if (int.TryParse(quotaAttr, out var resultQuota))
+            if (long.TryParse(quotaAttr, out var resultQuota))
             {
                 quota = resultQuota;
             }

@@ -804,17 +804,19 @@ public class FileSharing(
 
         var securityDao = daoFactory.GetSecurityDao<T>();
         var canEditAccess = await fileSecurity.CanEditAccessAsync(entry);
+        var userId = authContext.CurrentAccount.ID;
 
         await foreach (var member in securityDao.GetGroupMembersWithSecurityAsync(entry, groupId, text, offset, count))
         {
             var isOwner = entry.CreateBy == member.UserId;
+            var isDocSpaceAdmin = await userManager.IsDocSpaceAdminAsync(member.UserId);
             
             yield return new GroupMemberSecurity
             {
                 User = await userManager.GetUsersAsync(member.UserId),
                 GroupShare = member.GroupShare,
-                UserShare = member.UserShare,
-                CanEditAccess = canEditAccess && !isOwner,
+                UserShare = isOwner || isDocSpaceAdmin ? FileShare.RoomAdmin : member.UserShare,
+                CanEditAccess = canEditAccess && !isOwner && userId != member.UserId && !isDocSpaceAdmin,
                 Owner = isOwner
             };
         }
