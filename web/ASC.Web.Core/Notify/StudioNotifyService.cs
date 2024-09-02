@@ -114,6 +114,39 @@ public class StudioNotifyService(
         await messageService.SendAsync(MessageAction.UserSentPasswordChangeInstructions, MessageTarget.Create(userInfo.Id), auditEventDate, displayUserName);
     }
 
+    public async Task UserPasswordResetAsync(UserInfo userInfo)
+    {
+        var auditEventDate = DateTime.UtcNow;
+
+        auditEventDate = new DateTime(
+            auditEventDate.Year,
+            auditEventDate.Month,
+            auditEventDate.Day,
+            auditEventDate.Hour,
+            auditEventDate.Minute,
+            auditEventDate.Second,
+            0,
+            DateTimeKind.Utc);
+
+        var hash = auditEventDate.ToString("s", CultureInfo.InvariantCulture);
+
+        var confirmationUrl = await commonLinkUtility.GetConfirmationEmailUrlAsync(userInfo.Email, ConfirmType.PasswordChange, hash, userInfo.Id);
+
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonSetPassword", await GetCulture(userInfo));
+
+        var action = Actions.PasswordReset;
+
+        await studioNotifyServiceHelper.SendNoticeToAsync(
+                action,
+                    await studioNotifyHelper.RecipientFromEmailAsync(userInfo.Email, false),
+                    [EMailSenderName],
+                TagValues.OrangeButton(orangeButtonText, await urlShortener.GetShortenLinkAsync(confirmationUrl)));
+
+        var displayUserName = userInfo.DisplayUserName(false, displayUserSettingsHelper);
+
+        await messageService.SendAsync(MessageAction.UserSentPasswordChangeInstructions, MessageTarget.Create(userInfo.Id), auditEventDate, displayUserName);
+    }
+
     #endregion
 
     #region User Email

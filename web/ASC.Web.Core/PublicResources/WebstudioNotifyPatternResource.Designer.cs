@@ -457,6 +457,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Set password.
+        /// </summary>
+        public static string ButtonSetPassword {
+            get {
+                return ResourceManager.GetString("ButtonSetPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Start free trial.
         /// </summary>
         public static string ButtonStartFreeTrial {
@@ -1405,6 +1414,21 @@ namespace ASC.Web.Core.PublicResources {
         public static string pattern_request_tariff1 {
             get {
                 return ResourceManager.GetString("pattern_request_tariff1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The DocSpace administrator noticed suspicious activity from your account and disabled all active sessions. Your password was reset. 
+        ///
+        ///Please click the button below to set a new password for your DocSpace account.
+        ///
+        ///$OrangeButton
+        ///
+        ///The link is valid for 7 days..
+        /// </summary>
+        public static string pattern_reset_password {
+            get {
+                return ResourceManager.GetString("pattern_reset_password", resourceCulture);
             }
         }
         
@@ -2384,6 +2408,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string subject_request_tariff {
             get {
                 return ResourceManager.GetString("subject_request_tariff", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reset your password.
+        /// </summary>
+        public static string subject_reset_password {
+            get {
+                return ResourceManager.GetString("subject_reset_password", resourceCulture);
             }
         }
         

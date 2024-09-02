@@ -123,6 +123,7 @@ global using ASC.Web.Api.Mapping;
 global using ASC.Web.Api.Models;
 global using ASC.Web.Api.Routing;
 global using ASC.Web.Core;
+global using ASC.Web.Core.Connection;
 global using ASC.Web.Core.Files;
 global using ASC.Web.Core.Helpers;
 global using ASC.Web.Core.Mobile;
@@ -141,7 +142,6 @@ global using ASC.Web.Files.Services.DocumentService;
 global using ASC.Web.Studio.Core;
 global using ASC.Web.Studio.Core.Notify;
 global using ASC.Web.Studio.Core.SMS;
-global using ASC.Web.Studio.Core.Statistic;
 global using ASC.Web.Studio.Core.TFA;
 global using ASC.Web.Studio.UserControls.FirstTime;
 global using ASC.Web.Studio.UserControls.Management;
@@ -164,7 +164,6 @@ global using Microsoft.AspNetCore.WebUtilities;
 global using Microsoft.Extensions.Caching.Distributed;
 global using Microsoft.Extensions.Caching.Memory;
 global using Microsoft.Extensions.Hosting.WindowsServices;
-global using Microsoft.IdentityModel.Tokens;
 
 global using MimeKit;
 

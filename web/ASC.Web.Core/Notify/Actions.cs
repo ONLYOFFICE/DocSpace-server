@@ -59,6 +59,7 @@ public static class Actions
     public static readonly INotifyAction ActivateEmail = new NotifyAction("activate_email", "activate_email");
     public static readonly INotifyAction EmailChangeV115 = new NotifyAction("change_email_v115", "change_email_v115");
     public static readonly INotifyAction PasswordChangeV115 = new NotifyAction("change_password_v115", "change_password_v115");
+    public static readonly INotifyAction PasswordReset = new NotifyAction("reset_password", "reset_password");
     public static readonly INotifyAction PhoneChange = new NotifyAction("change_phone", "change_phone");
     public static readonly INotifyAction TfaChange = new NotifyAction("change_tfa", "change_tfa");
     public static readonly INotifyAction MigrationPortalStart = new NotifyAction("migration_start", "migration start");

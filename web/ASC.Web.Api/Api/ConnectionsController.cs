@@ -48,7 +48,12 @@ public class ConnectionsController(
     CookieStorage cookieStorage,
     QuotaSocketManager quotaSocketManager,
     GeolocationHelper geolocationHelper,
-    ApiDateTimeHelper apiDateTimeHelper)
+    ApiDateTimeHelper apiDateTimeHelper,
+    TenantManager tenantManager,
+    UserPhotoManager userPhotoManager,
+    DisplayUserSettingsHelper displayUserSettings,
+    ConnectionSocket socketManager,
+    StudioNotifyService studioNotifyService)
     : ControllerBase
 {
     /// <summary>
@@ -65,6 +70,49 @@ public class ConnectionsController(
     public async Task<ActiveConnectionsDto> GetAllActiveConnections()
     {
         var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
+        return await GetAllActiveConnectionsInnerAsync(user);
+    }
+
+    /// <summary>
+    /// Returns all the active connections to the portal.
+    /// </summary>
+    /// <short>
+    /// Get active connections
+    /// </short>
+    /// <category>Active connections</category>=
+    /// <param type="System.Guid, System" method="url" name="userId">User ID</param>
+    /// <returns type="System.Object, System">Active portal connections</returns>
+    /// <path>api/2.0/security/activeconnections/{userId}</path>
+    /// <httpMethod>GET</httpMethod>
+    [HttpGet("user/{userId:guid}")]
+    public async Task<ActiveConnectionsForUserDto> GetAllActiveConnections(Guid userId)
+    {
+        var user = await userManager.GetUsersAsync(userId);
+        var connections = await GetAllActiveConnectionsInnerAsync(user);
+        var currentType = await userManager.GetUserTypeAsync(userId);
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var cacheKey = Math.Abs(user.LastModified.GetHashCode());
+
+        var dto = new ActiveConnectionsForUserDto();
+
+        dto.Id = user.Id;
+        dto.DisplayName = user.DisplayUserName(displayUserSettings);
+
+        dto.IsOwner = user.IsOwner(tenant);
+        dto.IsVisitor = await userManager.IsUserAsync(user);
+        dto.IsAdmin = currentType is EmployeeType.DocSpaceAdmin;
+        dto.IsRoomAdmin = currentType is EmployeeType.RoomAdmin;
+        dto.IsOwner = user.IsOwner(tenant);
+        dto.IsCollaborator = currentType is EmployeeType.Collaborator;
+
+        dto.Avatar = await userPhotoManager.GetPhotoAbsoluteWebPath(user.Id) + $"?hash={cacheKey}";
+
+        dto.Connections = connections.Items;
+        return dto;
+    }
+
+    private async Task<ActiveConnectionsDto> GetAllActiveConnectionsInnerAsync(UserInfo user)
+    {
         var loginEvents = await dbLoginEventsManager.GetLoginEventsAsync(user.TenantId, user.Id);
         var tasks = loginEvents.ConvertAll(async r => await geolocationHelper.AddGeolocationAsync(r));
         var listLoginEvents = (await Task.WhenAll(tasks)).ToList();
@@ -188,21 +236,41 @@ public class ConnectionsController(
     /// </short>
     /// <category>Active connections</category>
     /// <param type="System.Guid, System" method="url" name="userId">User ID</param>
+    /// <param name="dto"></param>
     /// <path>api/2.0/security/activeconnections/logoutall/{userId}</path>
     /// <httpMethod>PUT</httpMethod>
     /// <returns></returns>
     [HttpPut("logoutall/{userId:guid}")]
-    public async Task LogOutAllActiveConnectionsForUserAsync(Guid userId)
+    public async Task LogOutAllActiveConnectionsForUserAsync(Guid userId, LogoutUserDto dto)
     {
         var currentUserId = securityContext.CurrentAccount.ID;
-        if (!await userManager.IsDocSpaceAdminAsync(currentUserId) && 
-            !await webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, currentUserId) || 
-            (currentUserId != userId && await userManager.IsDocSpaceAdminAsync(userId)))
+        var currentUser = await userManager.GetUsersAsync(currentUserId);
+        if (!await userManager.IsDocSpaceAdminAsync(currentUserId) &&
+            !await webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, currentUserId) ||
+            (currentUserId != userId && await userManager.IsDocSpaceAdminAsync(userId) && !currentUser.IsOwner(await tenantManager.GetCurrentTenantAsync())))
         {
             throw new SecurityException("Method not available");
         }
 
-        await LogOutAllActiveConnections(userId);
+        await LogOutAllActiveConnections(userId, dto.ChangePassword);
+    }
+
+    [HttpPut("logoutall")]
+    public async Task LogOutAllActiveConnectionsForUsersAsync(LogoutUsersDto dto)
+    {
+        var currentUserId = securityContext.CurrentAccount.ID;
+        var currentUser = await userManager.GetUsersAsync(currentUserId);
+        foreach (var userId in dto.UserIds)
+        {
+            if (!await userManager.IsDocSpaceAdminAsync(currentUserId) &&
+                !await webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, currentUserId) ||
+                (currentUserId != userId && await userManager.IsDocSpaceAdminAsync(userId) && !currentUser.IsOwner(await tenantManager.GetCurrentTenantAsync())))
+            {
+                throw new SecurityException("Method not available");
+            }
+
+            await LogOutAllActiveConnections(userId, dto.ChangePassword);
+        }
     }
 
     /// <summary>
@@ -232,6 +300,7 @@ public class ConnectionsController(
             }
 
             await messageService.SendAsync(MessageAction.UserLogoutActiveConnections, userName);
+            await socketManager.LogoutExceptThisAsync(loginEventFromCookie, user.Id);
             return userName;
         }
         catch (Exception ex)
@@ -239,6 +308,44 @@ public class ConnectionsController(
             logger.ErrorWithException(ex);
             return null;
         }
+    }
+
+    /// <summary>
+    /// Logs out from all the active connections except the current connection.
+    /// </summary>
+    /// <short>
+    /// Log out from all connections
+    /// </short>
+    /// <category>Active connections</category>
+    /// <returns type="System.Object, System">Current user name</returns>
+    /// <path>api/2.0/security/activeconnections/logoutallexceptthis</path>
+    /// <httpMethod>PUT</httpMethod>
+    [HttpPut("logoutallexceptthis/{loginEventId:int}")]
+    public async Task<object> LogOutAllExceptThisConnection(int loginEventId)
+    {
+        try
+        {
+            var userId = await dbLoginEventsManager.LogOutAllActiveConnectionsExceptThisAsync(loginEventId, await tenantManager.GetCurrentTenantIdAsync());
+
+            var user = await userManager.GetUsersAsync(userId);
+            var userName = user.DisplayUserName(false, displayUserSettingsHelper);
+
+            await messageService.SendAsync(MessageAction.UserLogoutActiveConnections, userName);
+            await socketManager.LogoutExceptThisAsync(loginEventId, userId);
+            return userName;
+        }
+        catch (Exception ex)
+        {
+            logger.ErrorWithException(ex);
+            return null;
+        }
+    }
+
+    [HttpGet("getthisconnection")]
+    public int GetThisConnection()
+    {
+        var auth = httpContextAccessor.HttpContext?.Request.Headers["Authorization"];
+        return cookieStorage.GetLoginEventIdFromCookie(auth);
     }
 
     /// <summary>
@@ -282,6 +389,7 @@ public class ConnectionsController(
             }
 
             await messageService.SendAsync(MessageAction.UserLogoutActiveConnection, userName);
+            await socketManager.LogoutSessionAsync(loginEventId, loginEvent.UserId.Value);
             return true;
         }
         catch (Exception ex)
@@ -291,7 +399,7 @@ public class ConnectionsController(
         }
     }
 
-    private async Task LogOutAllActiveConnections(Guid? userId = null)
+    private async Task LogOutAllActiveConnections(Guid? userId = null, bool changePassword = false)
     {
         var currentUserId = securityContext.CurrentAccount.ID;
         var user = await userManager.GetUsersAsync(userId ?? currentUserId);
@@ -300,8 +408,14 @@ public class ConnectionsController(
 
         await messageService.SendAsync(currentUserId.Equals(user.Id) ? MessageAction.UserLogoutActiveConnections : MessageAction.UserLogoutActiveConnectionsForUser, MessageTarget.Create(user.Id), auditEventDate, userName);
         await cookiesManager.ResetUserCookieAsync(user.Id);
-
-        await quotaSocketManager.LogoutSession(user.Id);
+        await socketManager.LogoutUserAsync(user.Id);
+        if (changePassword)
+        {
+            await messageService.SendAsync(MessageAction.UserResetPassword, MessageTarget.Create(user.Id));
+            var password = UserManagerWrapper.GeneratePassword();
+            await securityContext.SetUserPasswordHashAsync(user.Id, password);
+            await studioNotifyService.UserPasswordResetAsync(user);
+        }
     }
 
     private int GetLoginEventIdFromCookie()

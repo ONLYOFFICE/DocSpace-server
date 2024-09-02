@@ -118,6 +118,28 @@ io.use(sharedsession(session, secretCookieParser, { autoSave: true }))
   })
   .use((socket, next) => {
     auth(socket, next);
+  })
+  .use((socket, next) =>{
+    const session = socket.handshake.session;
+
+    if (!session) {
+      next(new Error("empty session"));
+      return;
+    }
+
+    if(!session.system)
+    {
+      if (!session.user && !session.anonymous) {
+        next(new Error("invalid session: unknown user"));
+        return;
+      }
+  
+      if (!session.portal) {
+        next(new Error("invalid session: unknown portal"));
+        return;
+      }
+    }
+    next();
   });
 
 if (redisClient != null) 
@@ -135,9 +157,11 @@ app.get("/", (req, res) => {
   res.send("<h1>Invalid Endpoint</h1>");
 });
 
-const filesHub = require("./app/hubs/files.js")(io);
+  const systemHub = require("./app/hubs/system.js")(io);
+  const filesHub = require("./app/hubs/files.js")(io);
+  const usersHub = await require("./app/hubs/onlineusers.js")(io);
 
-app.use("/controller", require("./app/controllers")(filesHub));
+  app.use("/controller", require("./app/controllers")(filesHub, usersHub));
 
 httpServer.listen(port, () => winston.info(`Server started on port: ${port}`));
 

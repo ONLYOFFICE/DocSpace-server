@@ -26,41 +26,11 @@
 
 module.exports = (io) => {
   const logger = require("../log.js");
-  const moment = require("moment");
-  const filesIO = io; //TODO: Restore .of("/files");
+  const filesIO = io;
 
   filesIO.on("connection", (socket) => {
     const session = socket.handshake.session;
-
-    if (!session) {
-      logger.error("empty session");
-      return;
-    }
-
     if (session.system) {
-      logger.info(`connect system as socketId='${socket.id}'`);
-
-      socket.on("ping", (date) => {
-        logger.info(`ping (client ${socket.id}) at ${date}`);
-        filesIO.to(socket.id).emit("pong", moment.utc());
-      });
-
-      socket.on("disconnect", (reason) => {
-        logger.info(
-          `disconnect system as socketId='${socket.id}' due to ${reason}`
-        );
-      });
-
-      return;
-    }
-
-    if (!session.user && !session.anonymous) {
-      logger.error("invalid session: unknown user");
-      return;
-    }
-
-    if (!session.portal) {
-      logger.error("invalid session: unknown portal");
       return;
     }
 
