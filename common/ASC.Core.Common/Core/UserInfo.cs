@@ -26,62 +26,47 @@
 
 namespace ASC.Core.Users;
 
-/// <summary>
-/// </summary>
 public sealed class UserInfo : IDirectRecipient, ICloneable, IMapFrom<User>
 {
-    /// <summary>ID</summary>
-    /// <type>System.Guid, System</type>
+    [SwaggerSchemaCustom("ID")]
     public Guid Id { get; set; }
 
-    /// <summary>First name</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("First name")]
     public string FirstName { get; set; }
 
-    /// <summary>Last name</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Last name")]
     public string LastName { get; set; }
 
-    /// <summary>Username</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Username")]
     public string UserName { get; set; }
 
-    /// <summary>Birthday</summary>
-    /// <type>System.Nullable{System.DateTime}, System</type>
+    [SwaggerSchemaCustom("Birthday")]
     public DateTime? BirthDate { get; set; }
 
-    /// <summary>Sex (male or female)</summary>
-    /// <type>System.Nullable{System.Boolean}, System</type>
+    [SwaggerSchemaCustom("Sex (male or female)")]
     public bool? Sex { get; set; }
 
-    /// <summary>Status</summary>
-    /// <type>ASC.Core.Users.EmployeeStatus, ASC.Core.Common</type>
+    [SwaggerSchemaCustom("Status")]
     public EmployeeStatus Status { get; set; } = EmployeeStatus.Active;
 
-    /// <summary>Activation status</summary>
-    /// <type>ASC.Core.Users.EmployeeActivationStatus, ASC.Core.Common</type>
+    [SwaggerSchemaCustom("Activation status")]
     public EmployeeActivationStatus ActivationStatus { get; set; } = EmployeeActivationStatus.NotActivated;
 
-    /// <summary>The date and time when the user account was terminated</summary>
-    /// <type>System.Nullable{System.DateTime}, System</type>
+    [SwaggerSchemaCustom("The date and time when the user account was terminated")]
     public DateTime? TerminatedDate { get; set; }
 
-    /// <summary>Title</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Title")]
     public string Title { get; set; }
 
-    /// <summary>Registration date</summary>
-    /// <type>System.Nullable{System.DateTime}, System</type>
+    [SwaggerSchemaCustom("Registration date")]
     public DateTime? WorkFromDate { get; set; }
 
-    /// <summary>Email</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Email")]
     public string Email { get; set; }
 
     private string _contacts;
 
-    /// <summary>List of contacts in the string format</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("List of contacts in the string format")]
     public string Contacts
     {
         get => _contacts;
@@ -92,64 +77,49 @@ public sealed class UserInfo : IDirectRecipient, ICloneable, IMapFrom<User>
         }
     }
 
-    /// <summary>List of contacts</summary>
-    /// <type>System.Collections.Generic.List{System.String}, System.Collections.Generic</type>
+    [SwaggerSchemaCustom("List of contacts")]
     public List<string> ContactsList { get; set; }
 
-    /// <summary>Location</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Location")]
     public string Location { get; set; }
 
-    /// <summary>Notes</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Notes")]
     public string Notes { get; set; }
 
-    /// <summary>Specifies if the user account was removed or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if the user account was removed or not")]
     public bool Removed { get; set; }
 
-    /// <summary>Last modified date</summary>
-    /// <type>System.DateTime, System</type>
+    [SwaggerSchemaCustom("Last modified date")]
     public DateTime LastModified { get; set; } = DateTime.UtcNow;
 
-    /// <summary>Tenant ID</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustom("Tenant ID")]
     public int TenantId { get; set; }
 
-    /// <summary>Spceifies if the user is active or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Spceifies if the user is active or not")]
     public bool IsActive => ActivationStatus.HasFlag(EmployeeActivationStatus.Activated);
 
-    /// <summary>Language</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Language")]
     public string CultureName { get; set; }
 
-    /// <summary>Mobile phone</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Mobile phone")]
     public string MobilePhone { get; set; }
 
-    /// <summary>Mobile phone activation status</summary>
-    /// <type>ASC.Core.Users.MobilePhoneActivationStatus, ASC.Core.Common</type>
+    [SwaggerSchemaCustom("Mobile phone activation status")]
     public MobilePhoneActivationStatus MobilePhoneActivationStatus { get; set; }
 
-    /// <summary>LDAP user identificator</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("LDAP user identificator")]
     public string Sid { get; set; } // LDAP user identificator
 
-    /// <summary>LDAP user quota attribute</summary>
-    /// <type>System.Int64, System</type>
+    [SwaggerSchemaCustom("LDAP user quota attribute")]
     public long LdapQouta { get; init; } // LDAP user quota attribute
 
-    /// <summary>SSO SAML user identificator</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("SSO SAML user identificator")]
     public string SsoNameId { get; set; } // SSO SAML user identificator
 
-    /// <summary>SSO SAML user session identificator</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("SSO SAML user session identificator")]
     public string SsoSessionId { get; set; } // SSO SAML user session identificator
 
-    /// <summary>Creation date</summary>
-    /// <type>System.DateTime, System</type>
+    [SwaggerSchemaCustom("Creation date")]
     public DateTime CreateDate { get; set; }
 
     public override string ToString()

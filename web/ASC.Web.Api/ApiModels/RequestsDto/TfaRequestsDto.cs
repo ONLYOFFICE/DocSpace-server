@@ -26,33 +26,21 @@
 
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
-/// <summary>
-/// </summary>
 public class TfaRequestsDto
 {
-    /// <summary>TFA type (None, Sms, or App)</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustomString("TFA type (None, Sms, or App)", Example = "None")]
     public TfaRequestsDtoType? Type { get; set; }
 
-    /// <summary>User ID</summary>
-    /// <type>System.Nullable{System.Guid}, System</type>
-    /// <example>9924256A-739C-462b-AF15-E652A3B1B6EB</example>
+    [SwaggerSchemaCustom("User ID")]
     public Guid? Id { get; set; }
 
-    /// <summary>List of trusted IP addresses</summary>
-    /// <type>System.Collections.Generic.List{System.String}, System.Collections.Generic</type>
+    [SwaggerSchemaCustom("List of trusted IP addresses")]
     public List<string> TrustedIps { get; set; }
 
-    /// <summary>List of users who must use the TFA verification</summary>
-    /// <type>System.Collections.Generic.List{System.Guid}, System.Collections.Generic</type>
-    /// <example>9924256A-739C-462b-AF15-E652A3B1B6EB</example>
-	/// <collection>list</collection>
+    [SwaggerSchemaCustom("List of users who must use the TFA verification")]
     public List<Guid> MandatoryUsers { get; set; }
 
-    /// <summary>List of groups who must use the TFA verification</summary>
-    /// <type>System.Collections.Generic.List{System.Guid}, System.Collections.Generic</type>
-    /// <example>9924256A-739C-462b-AF15-E652A3B1B6EB</example>
-	/// <collection>list</collection>
+    [SwaggerSchemaCustom("List of groups who must use the TFA verification")]
     public List<Guid> MandatoryGroups { get; set; }
 }
 
@@ -63,11 +51,8 @@ public enum TfaRequestsDtoType
     App = 2
 }
 
-/// <summary>
-/// </summary>
 public class TfaValidateRequestsDto
 {
-    /// <summary>TFA code</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("TFA code")]
     public string Code { get; set; }
 }

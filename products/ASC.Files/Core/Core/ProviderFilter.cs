@@ -29,14 +29,33 @@ namespace ASC.Files.Core;
 [EnumExtensions]
 public enum ProviderFilter
 {
+    [SwaggerEnum("None")]
     None,
+
+    [SwaggerEnum("Box")]
     Box,
+
+    [SwaggerEnum("DropBox")]
     DropBox,
+
+    [SwaggerEnum("GoogleDrive")]
     GoogleDrive,
+
+    [SwaggerEnum("kDrive")]
     kDrive,
+
+    [SwaggerEnum("OneDrive")]
     OneDrive,
+
+    [SwaggerEnum("SharePoint")]
     SharePoint,
+
+    [SwaggerEnum("WebDav")]
     WebDav,
+
+    [SwaggerEnum("Yandex")]
     Yandex,
+
+    [SwaggerEnum("Storage")]
     Storage
 }

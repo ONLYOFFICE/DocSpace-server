@@ -38,6 +38,7 @@ namespace ASC.Web.Api.Controllers;
 [ApiController]
 [AllowAnonymous]
 [WebhookDisable]
+[ControllerName("authentication")]
 public class AuthenticationController(
     UserManager userManager,
     LdapUserManager ldapUserManager,
@@ -79,10 +80,10 @@ public class AuthenticationController(
     /// Checks if the current user is authenticated or not.
     /// </summary>
     /// <short>Check authentication</short>
-    /// <httpMethod>GET</httpMethod>
     /// <path>api/2.0/authentication</path>
-    /// <returns type="System.Boolean, System">Boolean value: true if the current user is authenticated</returns>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Authentication")]
+    [SwaggerResponse(200, "Boolean value: true if the current user is authenticated", typeof(bool))]
     [AllowNotPayment]
     [HttpGet]
     public bool GetIsAuthentificated()
@@ -97,10 +98,10 @@ public class AuthenticationController(
     /// Authenticate a user by code
     /// </short>
     /// <param type="ASC.Web.Api.ApiModel.RequestsDto.AuthRequestsDto, ASC.Web.Api" name="inDto">Authentication request parameters</param>
-    /// <httpMethod>POST</httpMethod>
     /// <path>api/2.0/authentication/{code}</path>
-    /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.AuthenticationTokenDto, ASC.Web.Api">Authentication data</returns>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Authentication")]
+    [SwaggerResponse(200, "Authentication data", typeof(AuthenticationTokenDto))]
     [AllowNotPayment]
     [HttpPost("{code}", Order = 1)]
     public async Task<AuthenticationTokenDto> AuthenticateMeFromBodyWithCode(AuthRequestsDto inDto)
@@ -171,10 +172,10 @@ public class AuthenticationController(
     /// Authenticate a user
     /// </short>
     /// <param type="ASC.Web.Api.ApiModel.RequestsDto.AuthRequestsDto, ASC.Web.Api" name="inDto">Authentication request parameters</param>
-    /// <httpMethod>POST</httpMethod>
     /// <path>api/2.0/authentication</path>
-    /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.AuthenticationTokenDto, ASC.Web.Api">Authentication data</returns>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Authentication")]
+    [SwaggerResponse(200, "Authentication data", typeof(AuthenticationTokenDto))]
     [AllowNotPayment]
     [HttpPost]
     public async Task<AuthenticationTokenDto> AuthenticateMeAsync(AuthRequestsDto inDto)
@@ -283,10 +284,10 @@ public class AuthenticationController(
     /// <short>
     /// Log out
     /// </short>
-    /// <httpMethod>POST</httpMethod>
     /// <path>api/2.0/authentication/logout</path>
-    /// <returns></returns>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Authentication")]
+    [SwaggerResponse(200, "Ok", typeof(object))]
     [AllowNotPayment]
     [HttpPost("logout")]
     [HttpGet("logout")]// temp fix
@@ -334,10 +335,10 @@ public class AuthenticationController(
     /// Open confirmation email URL
     /// </short>
     /// <param type="ASC.Security.Cryptography.EmailValidationKeyModel, ASC.Core.Common" name="inDto">Confirmation email parameters</param>
-    /// <httpMethod>POST</httpMethod>
     /// <path>api/2.0/authentication/confirm</path>
-    /// <returns type="ASC.Security.Cryptography.EmailValidationKeyProvider.ValidationResult, ASC.Security.Cryptography">Validation result: Ok, Invalid, or Expired</returns>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Authentication")]
+    [SwaggerResponse(200, "Validation result: Ok, Invalid, or Expired", typeof(ConfirmDto))]
     [AllowNotPayment, AllowSuspended]
     [HttpPost("confirm")]
     public async Task<ConfirmDto> CheckConfirm(EmailValidationKeyModel inDto)
@@ -364,10 +365,10 @@ public class AuthenticationController(
     /// Set a mobile phone
     /// </short>
     /// <param type="ASC.Web.Api.ApiModel.RequestsDto.MobileRequestsDto, ASC.Web.Api" name="inDto">Mobile phone request parameters</param>
-    /// <httpMethod>POST</httpMethod>
     /// <path>api/2.0/authentication/setphone</path>
-    /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.AuthenticationTokenDto, ASC.Web.Api">Authentication data</returns>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Authentication")]
+    [SwaggerResponse(200, "Authentication data", typeof(AuthenticationTokenDto))]
     [AllowNotPayment]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PhoneActivation")]
     [HttpPost("setphone")]
@@ -393,10 +394,10 @@ public class AuthenticationController(
     /// Send SMS code
     /// </short>
     /// <param type="ASC.Web.Api.ApiModel.RequestsDto.AuthRequestsDto, ASC.Web.Api" name="inDto">Authentication request parameters</param>
-    /// <httpMethod>POST</httpMethod>
     /// <path>api/2.0/authentication/sendsms</path>
-    /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.AuthenticationTokenDto, ASC.Web.Api">Authentication data</returns>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Authentication")]
+    [SwaggerResponse(200, "Authentication data", typeof(AuthenticationTokenDto))]
     [AllowNotPayment]
     [HttpPost("sendsms")]
     public async Task<AuthenticationTokenDto> SendSmsCodeAsync(AuthRequestsDto inDto)

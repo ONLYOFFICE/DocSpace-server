@@ -26,35 +26,26 @@
 
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
-/// <summary>
-/// </summary>
 public class TfaSettingsDto
 {
-    /// <summary>ID</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("ID")]
     public string Id { get; set; }
 
-    /// <summary>Title</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Title")]
     public string Title { get; set; }
 
-    /// <summary>Specifies if the TFA settings are enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if the TFA settings are enabled or not")]
     public bool Enabled { get; set; }
 
-    /// <summary>Specifies if the TFA settings are available or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if the TFA settings are available or not")]
     public bool Avaliable { get; set; }
 
-    /// <summary>List of trusted IP addresses</summary>
-    /// <type>System.Collections.Generic.List{System.String}, System.Collections.Generic</type>
+    [SwaggerSchemaCustom("List of trusted IP addresses")]
     public List<string> TrustedIps { get; set; }
 
-    /// <summary>List of users who must use the TFA verification</summary>
-    /// <type>System.Collections.Generic.List{System.Guid}, System.Collections.Generic</type>
+    [SwaggerSchemaCustom("List of users who must use the TFA verification")]
     public List<Guid> MandatoryUsers { get; set; }
 
-    /// <summary>List of groups who must use the TFA verification</summary>
-    /// <type>System.Collections.Generic.List{System.Guid}, System.Collections.Generic</type>
+    [SwaggerSchemaCustom("List of groups who must use the TFA verification")]
     public List<Guid> MandatoryGroups { get; set; }
 }

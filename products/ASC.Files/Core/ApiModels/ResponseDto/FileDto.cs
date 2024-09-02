@@ -26,164 +26,117 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
-/// <summary>
-/// </summary>
 public class FileDto<T> : FileEntryDto<T>
 {
-    /// <summary>Folder ID</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustomInt("Folder ID", Example = 12334)]
     public T FolderId { get; set; }
 
-    /// <summary>Version</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustomInt("Version", Example = 3)]
     public int Version { get; set; }
 
-    /// <summary>Version group</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustomInt("Version group", Example = 1)]
     public int VersionGroup { get; set; }
 
-    /// <summary>Content length</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Content length", Example = "12345")]
     public string ContentLength { get; set; }
 
-    /// <summary>Pure content length</summary>
-    /// <type>System.Nullable{System.Int64}, System</type>
+    [SwaggerSchemaCustom("Pure content length")]
     public long? PureContentLength { get; set; }
 
-    /// <summary>File status</summary>
-    /// <type>ASC.Files.Core.FileStatus, ASC.Files.Core</type>
+    [SwaggerSchemaCustom("File status")]
     public FileStatus FileStatus { get; set; }
 
-    /// <summary>Muted or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Muted or not", Example = false)]
     public bool Mute { get; set; }
 
-    /// <summary>URL to view a file</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("URL to view a file", Example = "https://www.onlyoffice.com/viewfile?fileid=2221", Format = "uri")]
     public string ViewUrl { get; set; }
 
-    /// <summary>Web URL</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Web URL", Format = "uri")]
     public string WebUrl { get; set; }
 
-    /// <summary>File type</summary>
-    /// <type>ASC.Web.Core.Files.FileType, ASC.Web.Core</type>
+    [SwaggerSchemaCustom("File type")]
     public FileType FileType { get; set; }
 
-    /// <summary>File extension</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("File extension", Example = ".txt")]
     public string FileExst { get; set; }
 
-    /// <summary>Comment</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Comment")]
     public string Comment { get; set; }
 
-    /// <summary>Encrypted or not</summary>
-    /// <type>System.Nullable{System.Boolean}, System</type>
+    [SwaggerSchemaCustom("Encrypted or not", Example = false)]
     public bool? Encrypted { get; set; }
 
-    /// <summary>Thumbnail URL</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Thumbnail URL", Format = "uri")]
     public string ThumbnailUrl { get; set; }
 
-    /// <summary>Thumbnail status</summary>
-    /// <type>ASC.Files.Core.Thumbnail, ASC.Files.Core</type>
+    [SwaggerSchemaCustom("Thumbnail status")]
     public Thumbnail ThumbnailStatus { get; set; }
 
-    /// <summary>Locked or not</summary>
-    /// <type>System.Nullable{System.Boolean}, System</type>
+    [SwaggerSchemaCustom("Locked or not")]
     public bool? Locked { get; set; }
 
-    /// <summary>User ID who locked a file</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("User ID who locked a file")]
     public string LockedBy { get; set; }
 
-    /// <summary>Denies file downloading or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Denies file downloading or not", Example = false)]
     public bool DenyDownload { get; set; }
 
-    /// <summary>Is there a draft or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Is there a draft or not", Example = false)]
     public bool? HasDraft { get; set; }
 
-    /// <summary>Is there a form or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Is there a form or not", Example = false)]
     public bool? IsForm { get; set; }
 
-    /// <summary>Specifies if the filling has started or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if the filling has started or not", Example = false)]
     public bool? StartFilling { get; set; }
 
-    /// <summary>InProcess folder ID</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustom("InProcess folder ID")]
     public int? InProcessFolderId { get; set; }
 
-    /// <summary>InProcess folder title</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("InProcess folder title")]
     public string InProcessFolderTitle { get; set; }
 
-    /// <summary>Draft info</summary>
-    /// <type>ASC.File.Core.ApiModels.ResponseDto.DraftLocation, ASC.Files.Core</type>
+    [SwaggerSchemaCustom("Draft info")]
     public DraftLocation<T> DraftLocation { get; set; }
 
-    /// <summary>Denies file sharing or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Denies file sharing or not", Example = false)]
     public bool DenySharing { get; set; }
 
-    /// <summary>File accessibility</summary>
-    /// <type>System.Collections.IDictionary{ASC.Files.Core.Helpers.Accessibility, System.Boolean}, System.Collections</type>
+    [SwaggerSchemaCustom("File accessibility")]
     public IDictionary<Accessibility, bool> ViewAccessibility { get; set; }
 
+    [SwaggerSchemaCustom("Available external rights")]
     public IDictionary<string, bool> AvailableExternalRights { get; set; }
+
+    [SwaggerSchemaCustom("Request token")]
     public string RequestToken { get; set; }
+
+    [SwaggerSchemaCustom(Description = "Last opened")]
     public ApiDateTime LastOpened { get; set; }
-
+    
     public override FileEntryType FileEntryType { get => FileEntryType.File; }
-
-    public static FileDto<int> GetSample()
-    {
-        return new FileDto<int>
-        {
-            Access = FileShare.ReadWrite,
-            //Updated = ApiDateTime.GetSample(),
-            //Created = ApiDateTime.GetSample(),
-            //CreatedBy = EmployeeWraper.GetSample(),
-            Id = 10,
-            RootFolderType = FolderType.BUNCH,
-            Shared = false,
-            Title = "Some titile.txt",
-            FileExst = ".txt",
-            FileType = FileType.Document,
-            //UpdatedBy = EmployeeWraper.GetSample(),
-            ContentLength = 12345.ToString(CultureInfo.InvariantCulture),
-            FileStatus = FileStatus.IsNew,
-            FolderId = 12334,
-            Version = 3,
-            VersionGroup = 1,
-            ViewUrl = "https://www.onlyoffice.com/viewfile?fileid=2221"
-        };
-    }
 }
 
 [Scope]
 public class FileDtoHelper(
     ApiDateTimeHelper apiDateTimeHelper,
-    EmployeeDtoHelper employeeWrapperHelper,
-    AuthContext authContext,
-    IDaoFactory daoFactory,
-    FileSecurity fileSecurity,
-    GlobalFolderHelper globalFolderHelper,
-    CommonLinkUtility commonLinkUtility,
-    FilesLinkUtility filesLinkUtility,
-    FileUtility fileUtility,
-    FileSharingHelper fileSharingHelper,
-    BadgesSettingsHelper badgesSettingsHelper,
-    FilesSettingsHelper filesSettingsHelper,
-    FileDateTime fileDateTime,
-    ExternalShare externalShare,
-    FileSharing fileSharing,
-    FileChecker fileChecker)
-    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime)
+        EmployeeDtoHelper employeeWrapperHelper,
+        AuthContext authContext,
+        IDaoFactory daoFactory,
+        FileSecurity fileSecurity,
+        GlobalFolderHelper globalFolderHelper,
+        CommonLinkUtility commonLinkUtility,
+        FilesLinkUtility filesLinkUtility,
+        FileUtility fileUtility,
+        FileSharingHelper fileSharingHelper,
+        BadgesSettingsHelper badgesSettingsHelper,
+        FilesSettingsHelper filesSettingsHelper,
+        FileDateTime fileDateTime,
+        ExternalShare externalShare,
+        FileSharing fileSharing,
+        FileChecker fileChecker)
+    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime) 
 {
     private readonly ApiDateTimeHelper _apiDateTimeHelper = apiDateTimeHelper;
 
@@ -192,16 +145,16 @@ public class FileDtoHelper(
         var result = await GetFileWrapperAsync(file, foldersCount, order);
 
         result.FolderId = file.ParentId;
-
+        
         if (file.RootFolderType == FolderType.USER && authContext.IsAuthenticated && !Equals(file.RootCreateBy, authContext.CurrentAccount.ID))
         {
             result.RootFolderType = FolderType.Recent;
             result.FolderId = await _globalFolderHelper.GetFolderRecentAsync<T>();
         }
-
+        
         result.ViewAccessibility = await fileUtility.GetAccessibility(file);
         result.AvailableExternalRights = _fileSecurity.GetFileAccesses(file, SubjectType.ExternalLink);
-
+        
         return result;
     }
 
@@ -249,7 +202,7 @@ public class FileDtoHelper(
 
             if (currentRoom is { FolderType: FolderType.FillingFormsRoom } && properties != null && properties.FormFilling.StartFilling)
             {
-                result.Security[FileSecurity.FilesSecurityActions.Lock] = false;
+                    result.Security[FileSecurity.FilesSecurityActions.Lock] = false;
             }
 
             if (currentRoom.Security == null)
@@ -325,12 +278,12 @@ public class FileDtoHelper(
         try
         {
             var externalMediaAccess = file.ShareRecord is { SubjectType: SubjectType.PrimaryExternalLink or SubjectType.ExternalLink };
-
+            
             if (externalMediaAccess)
             {
                 result.RequestToken = await externalShare.CreateShareKeyAsync(file.ShareRecord.Subject);
             }
-
+            
             result.ViewUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(file.DownloadUrl), result.RequestToken);
 
             result.WebUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id, file.Version, externalMediaAccess)), result.RequestToken);
@@ -355,19 +308,15 @@ public class FileDtoHelper(
 
 public class DraftLocation<T>
 {
-    /// <summary>InProcess folder ID</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustomInt("InProcess folder ID")]
     public T FolderId { get; set; }
 
-    /// <summary>InProcess folder title</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("InProcess folder title")]
     public string FolderTitle { get; set; }
 
-    /// <summary>Draft ID</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustomInt("Draft ID")]
     public T FileId { get; set; }
 
-    /// <summary>Draft title</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Draft title")]
     public string FileTitle { get; set; }
 }

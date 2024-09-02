@@ -40,12 +40,11 @@ public class NotificationController(
     /// <summary>
     /// Checks if the notification type specified in the request is enabled or not.
     /// </summary>
-    /// <category>Notifications</category>
     /// <short>Check notification availability</short>
     /// <param type="ASC.Web.Core.Notify.NotificationType, ASC.Web.Core" method="url" name="type">Notification type (Badges, RoomsActivity, DailyFeed, UsefullTips)</param>
-    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.NotificationSettingsDto, ASC.Web.Api">Notification settings</returns>
     /// <path>api/2.0/settings/notification/{type}</path>
-    /// <httpMethod>GET</httpMethod>
+    [Tags("Settings / Notifications")]
+    [SwaggerResponse(200, "Notification settings", typeof(NotificationSettingsDto))]
     [HttpGet("{type}")]
     public async Task<NotificationSettingsDto> GetSettingsAsync(NotificationType type)
     {
@@ -57,12 +56,11 @@ public class NotificationController(
     /// <summary>
     /// Enables the notification type specified in the request.
     /// </summary>
-    /// <category>Notifications</category>
     /// <short>Enable notifications</short>
     /// <param type="ASC.Web.Api.ApiModels.RequestsDto.NotificationSettingsRequestsDto, ASC.Web.Api" name="inDto">Notification settings request parameters</param>
-    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.NotificationSettingsDto, ASC.Web.Api">Notification settings</returns>
     /// <path>api/2.0/settings/notification</path>
-    /// <httpMethod>POST</httpMethod>
+    [Tags("Settings / Notifications")]
+    [SwaggerResponse(200, "Notification settings", typeof(NotificationSettingsDto))]
     [HttpPost("")]
     public async Task<NotificationSettingsDto> SetSettingsAsync(NotificationSettingsRequestsDto inDto)
     {
@@ -74,11 +72,10 @@ public class NotificationController(
     /// <summary>
     /// Returns a list of rooms with the disabled notifications
     /// </summary>
-    /// <category>Notifications</category>
     /// <short>Get room notification settings</short>
-    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.RoomsNotificationSettingsDto, ASC.Web.Api">Room notification settings</returns>
     /// <path>api/2.0/settings/notification/rooms</path>
-    /// <httpMethod>GET</httpMethod>
+    [Tags("Settings / Notifications")]
+    [SwaggerResponse(200, "Room notification settings", typeof(RoomsNotificationSettingsDto))]
     [HttpGet("rooms")]
     public async Task<RoomsNotificationSettingsDto> GetRoomsNotificationSettings()
     {
@@ -89,12 +86,11 @@ public class NotificationController(
     /// <summary>
     /// Sets a notification status for a room with the ID specified in the request.
     /// </summary>
-    /// <category>Notifications</category>
     /// <short>Set room notification status</short>
     /// <param type="ASC.Web.Api.ApiModels.RequestsDto.RoomsNotificationsSettingsRequestDto, ASC.Web.Api" name="inDto">Request parameters for the room notification settings</param>
-    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.RoomsNotificationSettingsDto, ASC.Web.Api">Room notification settings</returns>
     /// <path>api/2.0/settings/notification/rooms</path>
-    /// <httpMethod>POST</httpMethod>
+    [Tags("Settings / Notifications")]
+    [SwaggerResponse(200, "Room notification settings", typeof(RoomsNotificationSettingsDto))]
     [HttpPost("rooms")]
     public async Task<RoomsNotificationSettingsDto> SetRoomsNotificationStatus(RoomsNotificationsSettingsRequestDto inDto)
     {

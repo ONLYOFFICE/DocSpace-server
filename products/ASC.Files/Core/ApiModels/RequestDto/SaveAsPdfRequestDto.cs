@@ -26,15 +26,11 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
-/// <summary>
-/// </summary>
 public class SaveAsPdfRequestDto<T>
 {
-    /// <summary>Folder ID</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustomInt("Folder ID")]
     public T FolderId { get; set; }
 
-    /// <summary>File title</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("File title")]
     public string Title { get; set; }
 }

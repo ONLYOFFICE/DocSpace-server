@@ -26,15 +26,11 @@
 
 namespace ASC.People.ApiModels.RequestDto;
 
-/// <summary>
-/// </summary>
 public class UpdateMembersQuotaRequestDto
 {
-    /// <summary>List of user IDs</summary>
-    /// <type>System.Collections.Generic.IEnumerable{System.Guid}, System.Collections.Generic</type>
+    [SwaggerSchemaCustom("List of user IDs")]
     public IEnumerable<Guid> UserIds { get; set; }
 
-    /// <summary>User quota</summary>
-    /// <type>System.Int64, System</type>
+    [SwaggerSchemaCustomString("List of user IDs", Example = "User quota", Format = "int64")]
     public long Quota { get; set; }
 }

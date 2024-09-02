@@ -28,5 +28,6 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 public class FinishDto
 {
+    [SwaggerSchemaCustom("Is send welcome email")]
     public bool IsSendWelcomeEmail { get; set; }
 }

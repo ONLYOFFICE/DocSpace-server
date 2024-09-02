@@ -28,20 +28,49 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class WebPluginDto: IMapFrom<WebPlugin>
 {
+    [SwaggerSchemaCustom("Name")]
     public string Name { get; set; }
+
+    [SwaggerSchemaCustom("Version")]
     public string Version { get; set; }
+
+    [SwaggerSchemaCustom("Description")]
     public string Description { get; set; }
+
+    [SwaggerSchemaCustom("License")]
     public string License { get; set; }
+
+    [SwaggerSchemaCustom("Author")]
     public string Author { get; set; }
+
+    [SwaggerSchemaCustom("Home page")]
     public string HomePage { get; set; }
+
+    [SwaggerSchemaCustom("PluginName")]
     public string PluginName { get; set; }
+
+    [SwaggerSchemaCustom("Scopes")]
     public string Scopes { get; set; }
+
+    [SwaggerSchemaCustom("Image")]
     public string Image { get; set; }
+
+    [SwaggerSchemaCustom("Create by")]
     public EmployeeDto CreateBy { get; set; }
+
+    [SwaggerSchemaCustom("Create on")]
     public DateTime CreateOn { get; set; }
+
+    [SwaggerSchemaCustom("Enabled")]
     public bool Enabled { get; set; }
+
+    [SwaggerSchemaCustom("System")]
     public bool System { get; set; }
+
+    [SwaggerSchemaCustom("Url", Format = "uri")]
     public string Url { get; set; }
+
+    [SwaggerSchemaCustom("Settings")]
     public string Settings { get; set; }
 
     public void Mapping(Profile profile)

@@ -26,35 +26,33 @@
 
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
-/// <summary>
-/// </summary>
+public class OwnerIdSettingsRequestDto
+{
+    [SwaggerSchemaCustom("Owner ID")]
+    public Guid OwnerId { get; set; }
+}
 public class SettingsRequestsDto
 {
-    /// <summary>Default product ID</summary>
-    /// <type>System.Guid, System</type>
-    public Guid DefaultProductID { get; set; }
+    [SwaggerSchemaCustom("Version ID")]
+    public int VersionId { get; set; }
+}
 
-    /// <summary>Language</summary>
-    /// <type>System.String, System</type>
+public class TipsRequestDto
+{
+    [SwaggerSchemaCustom("Specifies whether to show tips for the user or not")]
+    public bool Show { get; set; } //tips
+}
+public  class DefaultProductRequestDto
+{
+    [SwaggerSchemaCustom("Default product ID")]
+    public Guid DefaultProductID { get; set; }
+}
+
+public class TimeZoneRequestDto
+{
+    [SwaggerSchemaCustom("Language")]
     public string Lng { get; set; }
 
-    /// <summary>Time zone ID</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Time zone ID")]
     public string TimeZoneID { get; set; }
-
-    /// <summary>Theme</summary>
-    /// <type>System.String, System</type>
-    public string Theme { get; set; }
-
-    /// <summary>Specifies whether to show tips for the user or not</summary>
-    /// <type>System.Boolean, System</type>
-    public bool Show { get; set; } //tips
-
-    /// <summary>Version ID</summary>
-    /// <type>System.Int32, System</type>
-    public int VersionId { get; set; }
-
-    /// <summary>Owner ID</summary>
-    /// <type>System.Guid, System</type>
-    public Guid OwnerId { get; set; }
 }

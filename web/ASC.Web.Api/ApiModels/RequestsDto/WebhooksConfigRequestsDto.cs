@@ -28,33 +28,25 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
-/// <summary>
-/// </summary>
 public class WebhooksConfigRequestsDto
 {
-    /// <summary>ID</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustom("ID")]
     public int Id { get; set; }
 
-    /// <summary>Name</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Name")]
     [StringLength(50)]
     public string Name { get; set; }
 
-    /// <summary>URI</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("URI", Format = "uri")]
     [Url]
     public string Uri { get; set; }
 
-    /// <summary>Secret key</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Secret key")]
     public string SecretKey { get; set; }
 
-    /// <summary>Enabled or not</summary>
-    /// <type>System.Nullable{System.Boolean}, System</type>
+    [SwaggerSchemaCustom("Enabled or not")]
     public bool? Enabled { get; set; }
 
-    /// <summary>SSL</summary>
-    /// <type>System.Nullable{System.Boolean}, System</type>
+    [SwaggerSchemaCustom("SSL")]
     public bool? SSL { get; set;}
 }

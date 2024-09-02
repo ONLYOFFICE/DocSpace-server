@@ -26,69 +26,50 @@
 
 namespace ASC.Web.Core.WhiteLabel;
 
-/// <summary>
-/// </summary>
 public class AdditionalWhiteLabelSettingsWrapper
 {
-    /// <summary>Additional white label settings</summary>
-    /// <type>ASC.Web.Core.WhiteLabel.AdditionalWhiteLabelSettings, ASC.Web.Core</type>
+    [SwaggerSchemaCustom("Additional white label settings")]
     public AdditionalWhiteLabelSettings Settings { get; set; }
 }
 
-/// <summary>
-/// </summary>
 public class AdditionalWhiteLabelSettings : ISettings<AdditionalWhiteLabelSettings>
 {
-    /// <summary>Additional white label settings helper</summary>
-    /// <type>ASC.Web.Core.WhiteLabel.AdditionalWhiteLabelSettingsHelperInit, ASC.Web.Core</type>
     public AdditionalWhiteLabelSettingsHelperInit AdditionalWhiteLabelSettingsHelper;
 
-    /// <summary>Specifies if the start document is enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if the start document is enabled or not")]
     public bool StartDocsEnabled { get; init; }
 
-    /// <summary>Specifies if the help center is enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if the help center is enabled or not")]
     public bool HelpCenterEnabled { get; init; }
 
-    /// <summary>Specifies if feedback and support are available or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if feedback and support are available or not")]
     public bool FeedbackAndSupportEnabled { get; init; }
 
-    /// <summary>Feedback and support URL</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Feedback and support URL")]
     public string FeedbackAndSupportUrl { get; init; }
 
-    /// <summary>Specifies if the user forum is enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if the user forum is enabled or not")]
     public bool UserForumEnabled { get; init; }
 
-    /// <summary>User forum URL</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("User forum URL")]
     public string UserForumUrl { get; init; }
 
-    /// <summary>Specifies if the video guides are enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if the video guides are enabled or not")]
     public bool VideoGuidesEnabled { get; init; }
 
-    /// <summary>Video guides URL</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Video guides URL")]
     public string VideoGuidesUrl { get; init; }
 
-    /// <summary>Sales email</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Sales email")]
     public string SalesEmail { get; init; }
 
-    /// <summary>URL to pay for the portal</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("URL to pay for the portal")]
     public string BuyUrl { get; init; }
 
-    /// <summary>Specifies if the license agreements are enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if the license agreements are enabled or not")]
     public bool LicenseAgreementsEnabled { get; init; }
 
-    /// <summary>License agreements URL</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("License agreements URL")]
     public string LicenseAgreementsUrl { get; init; }
 
     [JsonIgnore]
@@ -156,13 +137,10 @@ public class AdditionalWhiteLabelSettingsHelper(AdditionalWhiteLabelSettingsHelp
     }
 }
 
-/// <summary>
-/// </summary>
 [Singleton]
 public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration)
 {
-    /// <summary>Default help center URL</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Default help center URL")]
     public string DefaultHelpCenterUrl
     {
         get
@@ -172,8 +150,7 @@ public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration
         }
     }
 
-    /// <summary>Default feedback and support URL</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Default feedback and support URL")]
     public string DefaultFeedbackAndSupportUrl
     {
         get
@@ -183,8 +160,7 @@ public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration
         }
     }
 
-    /// <summary>Default user forum URL</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Default user forum URL")]
     public string DefaultUserForumUrl
     {
         get
@@ -194,8 +170,7 @@ public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration
         }
     }
 
-    /// <summary>Default video guides URL</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Default video guides URL")]
     public string DefaultVideoGuidesUrl
     {
         get
@@ -205,8 +180,7 @@ public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration
         }
     }
 
-    /// <summary>Default sales email</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Default sales email")]
     public string DefaultMailSalesEmail
     {
         get
@@ -216,8 +190,7 @@ public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration
         }
     }
 
-    /// <summary>Default URL to pay for the portal</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Default URL to pay for the portal")]
     public string DefaultBuyUrl
     {
         get

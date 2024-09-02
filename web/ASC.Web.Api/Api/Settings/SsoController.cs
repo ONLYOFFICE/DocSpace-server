@@ -46,11 +46,10 @@ public class SsoController(TenantManager tenantManager,
     /// <short>
     /// Get the SSO settings
     /// </short>
-    /// <category>SSO</category>
-    /// <returns type="ASC.Web.Studio.UserControls.Management.SingleSignOnSettings.SsoSettingsV2, ASC.Web.Core">SSO settings</returns>
     /// <path>api/2.0/settings/ssov2</path>
-    /// <httpMethod>GET</httpMethod>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Settings / SSO")]
+    [SwaggerResponse(200, "SSO settings", typeof(SsoSettingsV2))]
     [HttpGet("")]
     [AllowAnonymous, AllowNotPayment]
     public async Task<SsoSettingsV2> GetSsoSettingsV2()
@@ -92,10 +91,9 @@ public class SsoController(TenantManager tenantManager,
     /// <short>
     /// Get the default SSO settings
     /// </short>
-    /// <category>SSO</category>
-    /// <returns type="ASC.Web.Studio.UserControls.Management.SingleSignOnSettings.SsoSettingsV2, ASC.Web.Core">Default SSO settings</returns>
     /// <path>api/2.0/settings/ssov2/default</path>
-    /// <httpMethod>GET</httpMethod>
+    [Tags("Settings / SSO")]
+    [SwaggerResponse(200, "Default SSO settings", typeof(SsoSettingsV2))]
     [HttpGet("default")]
     public async Task<SsoSettingsV2> GetDefaultSsoSettingsV2Async()
     {
@@ -109,10 +107,9 @@ public class SsoController(TenantManager tenantManager,
     /// <short>
     /// Get the SSO settings constants
     /// </short>
-    /// <category>SSO</category>
-    /// <returns type="System.Object, System">The SSO settings constants: SSO name ID format type, SSO binding type, SSO signing algorithm type, SSO SP certificate action type, SSO IDP certificate action type</returns>
     /// <path>api/2.0/settings/ssov2/constants</path>
-    /// <httpMethod>GET</httpMethod>
+    [Tags("Settings / SSO")]
+    [SwaggerResponse(200, "The SSO settings constants: SSO name ID format type, SSO binding type, SSO signing algorithm type, SSO SP certificate action type, SSO IDP certificate action type", typeof(object))]
     [HttpGet("constants")]
     public object GetSsoSettingsV2Constants()
     {
@@ -133,11 +130,10 @@ public class SsoController(TenantManager tenantManager,
     /// <short>
     /// Save the SSO settings
     /// </short>
-    /// <category>SSO</category>
     /// <param type="ASC.Web.Api.ApiModel.RequestsDto.SsoSettingsRequestsDto, ASC.Web.Api" name="inDto">SSO settings request parameters</param>
-    /// <returns type="ASC.Web.Studio.UserControls.Management.SingleSignOnSettings.SsoSettingsV2, ASC.Web.Core">SSO settings</returns>
     /// <path>api/2.0/settings/ssov2</path>
-    /// <httpMethod>POST</httpMethod>
+    [Tags("Settings / SSO")]
+    [SwaggerResponse(200, "SSO settings", typeof(SsoSettingsV2))]
     [HttpPost("")]
     public async Task<SsoSettingsV2> SaveSsoSettingsV2Async(SsoSettingsRequestsDto inDto)
     {
@@ -218,10 +214,9 @@ public class SsoController(TenantManager tenantManager,
     /// <short>
     /// Reset the SSO settings
     /// </short>
-    /// <category>SSO</category>
-    /// <returns type="ASC.Web.Studio.UserControls.Management.SingleSignOnSettings.SsoSettingsV2, ASC.Web.Core">Default SSO settings</returns>
     /// <path>api/2.0/settings/ssov2</path>
-    /// <httpMethod>DELETE</httpMethod>
+    [Tags("Settings / SSO")]
+    [SwaggerResponse(200, "Default SSO settings", typeof(SsoSettingsV2))]
     [HttpDelete("")]
     public async Task<SsoSettingsV2> ResetSsoSettingsV2Async()
     {

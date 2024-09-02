@@ -26,8 +26,6 @@
 
 namespace ASC.People.ApiModels.ResponseDto;
 
-/// <summary>
-/// </summary>
 public class ThumbnailsDataDto
 {
     private ThumbnailsDataDto() { }
@@ -47,40 +45,21 @@ public class ThumbnailsDataDto
         };
     }
 
-    /// <summary>Original photo</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Original photo", Example = "default_user_photo_size_1280-1280.png")]
     public string Original { get; set; }
 
-    /// <summary>Retina</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Retina", Example = "default_user_photo_size_360-360.png")]
     public string Retina { get; set; }
 
-    /// <summary>Maximum size</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Maximum size", Example = "default_user_photo_size_200-200.png")]
     public string Max { get; set; }
 
-    /// <summary>Big</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Big", Example = "default_user_photo_size_82-82.png")]
     public string Big { get; set; }
 
-    /// <summary>Medium</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Medium", Example = "default_user_photo_size_48-48.png")]
     public string Medium { get; set; }
 
-    /// <summary>Small</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Small", Example = "default_user_photo_size_32-32.png")]
     public string Small { get; set; }
-
-    public static ThumbnailsDataDto GetSample()
-    {
-        return new ThumbnailsDataDto
-        {
-            Original = "default_user_photo_size_1280-1280.png",
-            Retina = "default_user_photo_size_360-360.png",
-            Max = "default_user_photo_size_200-200.png",
-            Big = "default_user_photo_size_82-82.png",
-            Medium = "default_user_photo_size_48-48.png",
-            Small = "default_user_photo_size_32-32.png"
-        };
-    }
 }

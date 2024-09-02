@@ -31,47 +31,26 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 /// </summary>
 public class ConversationResultDto
 {
-    /// <summary>
-    /// Operation ID
-    /// </summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Operation ID")]
     public string Id { get; set; }
 
-    /// <summary>
-    /// Operation type
-    /// </summary>
-    /// <type>ASC.Web.Files.Services.WCFService.FileOperations.FileOperationType, ASC.Files.Core</type>
+    [SwaggerSchemaCustom("Operation type", Example = "Move")]
     [JsonPropertyName("Operation")]
     public FileOperationType OperationType { get; set; }
 
-    /// <summary>
-    /// Operation progress
-    /// </summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustom("Operation progress")]
     public int Progress { get; set; }
 
-    /// <summary>
-    /// Source file
-    /// </summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Source file")]
     public string Source { get; set; }
 
-    /// <summary>
-    /// Resulting file
-    /// </summary>
-    /// <type>System.Object, System</type>
+    [SwaggerSchemaCustom("Resulting file")]
     [JsonPropertyName("result")]
     public object File { get; set; }
 
-    /// <summary>
-    /// Error
-    /// </summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Error")]
     public string Error { get; set; }
 
-    /// <summary>
-    /// Specifies if the operation is processed or not
-    /// </summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Specifies if the operation is processed or not")]
     public string Processed { get; set; }
 }

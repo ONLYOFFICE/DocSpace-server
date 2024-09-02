@@ -37,6 +37,7 @@ namespace ASC.Web.Api.Controllers;
 [Scope]
 [DefaultRoute]
 [ApiController]
+[ControllerName("portal")]
 public class PortalController(
     ILogger<PortalController> logger,
     UserManager userManager,
@@ -78,17 +79,16 @@ public class PortalController(
     /// <short>
     /// Get a portal
     /// </short>
-    /// <category>Settings</category>
-    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.TenantDto, ASC.Web.Api">Current portal information</returns>
     /// <path>api/2.0/portal</path>
-    /// <httpMethod>GET</httpMethod>
+    [Tags("Portal / Settings")]
+    [SwaggerResponse(200, "Current portal information", typeof(TenantDto))]
     [AllowNotPayment]
     [HttpGet("")]
     public async Task<TenantDto> Get()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-        var tenant = await tenantManager.GetCurrentTenantAsync();
-        return  mapper.Map<TenantDto>(tenant);
+        var tenant = await tenantManager.GetCurrentTenantAsync();   
+        return mapper.Map<TenantDto>(tenant);
     }
 
     /// <summary>
@@ -97,11 +97,10 @@ public class PortalController(
     /// <short>
     /// Get a user by ID
     /// </short>
-    /// <category>Users</category>
-    /// <param type="System.Guid, System" method="url" name="userID">User ID</param>
-    /// <returns type="ASC.Core.Users.UserInfo, ASC.Core.Common">User information</returns>
+    /// <param type="System.Guid, System" method="url" name="userID" example="9924256A-739C-462b-AF15-E652A3B1B6EB">User ID</param>
     /// <path>api/2.0/portal/users/{userID}</path>
-    /// <httpMethod>GET</httpMethod>
+    [Tags("Portal / Users")]
+    [SwaggerResponse(200, "User information", typeof(UserInfo))]
     [HttpGet("users/{userID:guid}")]
     public async Task<UserInfo> GetUserAsync(Guid userID)
     {
@@ -114,11 +113,10 @@ public class PortalController(
     /// <short>
     /// Get an invitation link
     /// </short>
-    /// <param type="ASC.Core.Users.EmployeeType, ASC.Core.Common" method="url" name="employeeType">Employee type (All, RoomAdmin, User, DocSpaceAdmin)</param>
-    /// <category>Users</category>
-    /// <returns type="System.Object, System">Invitation link</returns>
+    /// <param type="ASC.Core.Users.EmployeeType, ASC.Core.Common" method="url" name="employeeType" example="All">Employee type (All, RoomAdmin, User, DocSpaceAdmin)</param>
     /// <path>api/2.0/portal/users/invite/{employeeType}</path>
-    /// <httpMethod>GET</httpMethod>
+    [Tags("Portal / Users")]
+    [SwaggerResponse(200, "Invitation link", typeof(object))]
     [HttpGet("users/invite/{employeeType}")]
     public async Task<object> GeInviteLinkAsync(EmployeeType employeeType)
     {
@@ -140,11 +138,10 @@ public class PortalController(
     /// Returns a link specified in the request in the shortened format.
     /// </summary>
     /// <short>Get a shortened link</short>
-    /// <category>Settings</category>
     /// <param type="ASC.Web.Api.ApiModel.RequestsDto.ShortenLinkRequestsDto, ASC.Web.Api" name="inDto">Shortened link request parameters</param>
-    /// <returns type="System.Object, System">Shortened link</returns>
     /// <path>api/2.0/portal/getshortenlink</path>
-    /// <httpMethod>PUT</httpMethod>
+    [Tags("Portal / Settings")]
+    [SwaggerResponse(200, "Shortened link", typeof(object))]
     [HttpPut("getshortenlink")]
     public async Task<object> GetShortenLinkAsync(ShortenLinkRequestsDto inDto)
     {
@@ -165,12 +162,11 @@ public class PortalController(
     /// <short>
     /// Get an extra tenant license
     /// </short>
-    /// <category>Quota</category>
-    /// <param type="System.Boolean, System" name="refresh">Specifies whether the tariff will be refreshed</param>
-    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto, ASC.Web.Api">Extra tenant license information</returns>
+    /// <param type="System.Boolean, System" name="refresh" example="true">Specifies whether the tariff will be refreshed</param>
     /// <path>api/2.0/portal/tenantextra</path>
-    /// <httpMethod>GET</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Portal / Quota")]
+    [SwaggerResponse(200, "Extra tenant license information", typeof(TenantExtraDto))]
     [AllowNotPayment]
     [HttpGet("tenantextra")]
     public async Task<TenantExtraDto> GetTenantExtra(bool refresh)
@@ -206,10 +202,9 @@ public class PortalController(
     /// <short>
     /// Get the used portal space
     /// </short>
-    /// <category>Quota</category>
-    /// <returns type="System.Double, System">Used portal space</returns>
     /// <path>api/2.0/portal/usedspace</path>
-    /// <httpMethod>GET</httpMethod>
+    [Tags("Portal / Quota")]
+    [SwaggerResponse(200, "Used portal space", typeof(double))]
     [HttpGet("usedspace")]
     public async Task<double> GetUsedSpaceAsync()
     {
@@ -228,13 +223,12 @@ public class PortalController(
     /// <short>
     /// Get a number of portal users
     /// </short>
-    /// <category>Users</category>
-    /// <returns type="System.Int64, System">Number of portal users</returns>
     /// <path>api/2.0/portal/userscount</path>
-    /// <httpMethod>GET</httpMethod>
+    [Tags("Portal / Users")]
+    [SwaggerResponse(200, "Number of portal users", typeof(long))]
     [HttpGet("userscount")]
     public async Task<long> GetUsersCountAsync()
-    {        
+    {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         return (await userManager.GetUserNamesAsync(EmployeeStatus.Active)).Length;
     }
@@ -245,15 +239,14 @@ public class PortalController(
     /// <short>
     /// Get a portal tariff
     /// </short>
-    /// <category>Quota</category>
-    /// <param type="System.Boolean, System" name="refresh">Specifies whether the tariff will be refreshed</param>
-    /// <returns type="ASC.Core.Billing.Tariff, ASC.Core.Common">Current portal tariff</returns>
+    /// <param type="System.Boolean, System" name="refresh" example="true">Specifies whether the tariff will be refreshed</param>
     /// <path>api/2.0/portal/tariff</path>
-    /// <httpMethod>GET</httpMethod>
+    [Tags("Portal / Quota")]
+    [SwaggerResponse(200, "Current portal tariff", typeof(Tariff))]
     [AllowNotPayment]
     [HttpGet("tariff")]
     public async Task<TariffDto> GetTariffAsync(bool refresh)
-    {        
+    {
         var tenant = await tenantManager.GetCurrentTenantAsync();
         var source = await tariffService.GetTariffAsync(tenant.Id, refresh: refresh);
 
@@ -272,8 +265,8 @@ public class PortalController(
         {
             result.OpenSource = tenantExtra.Opensource;
             result.Enterprise = tenantExtra.Enterprise;
-        }
-        
+    }
+
         return result;
     }
 
@@ -283,10 +276,9 @@ public class PortalController(
     /// <short>
     /// Get a portal quota
     /// </short>
-    /// <category>Quota</category>
-    /// <returns type="ASC.Core.Tenants.TenantQuota, ASC.Core.Common">Current portal quota</returns>
     /// <path>api/2.0/portal/quota</path>
-    /// <httpMethod>GET</httpMethod>
+    [Tags("Portal / Quota")]
+    [SwaggerResponse(200, "Current portal quota", typeof(TenantQuota))]
     [AllowNotPayment]
     [HttpGet("quota")]
     public async Task<TenantQuota> GetQuotaAsync()
@@ -313,10 +305,9 @@ public class PortalController(
     /// <short>
     /// Get the recommended quota
     /// </short>
-    /// <category>Quota</category>
-    /// <returns type="ASC.Core.Tenants.TenantQuota, ASC.Core.Common">Recommended portal quota</returns>
     /// <path>api/2.0/portal/quota/right</path>
-    /// <httpMethod>GET</httpMethod>
+    [Tags("Portal / Quota")]
+    [SwaggerResponse(200, "Recommended portal quota", typeof(TenantQuota))]
     [HttpGet("quota/right")]
     public async Task<TenantQuota> GetRightQuotaAsync()
     {
@@ -336,11 +327,10 @@ public class PortalController(
     /// <short>
     /// Get a path to the portal
     /// </short>
-    /// <category>Settings</category>
-    /// <param type="System.String, System" name="virtualPath">Portal virtual path</param>
-    /// <returns type="System.Object, System">Portal path</returns>
+    /// <param type="System.String, System" name="virtualPath" example="some text">Portal virtual path</param>
     /// <path>api/2.0/portal/path</path>
-    /// <httpMethod>GET</httpMethod>
+    [Tags("Portal / Settings")]
+    [SwaggerResponse(200, "Portal path", typeof(object))]
     [HttpGet("path")]
     public object GetFullAbsolutePath(string virtualPath)
     {
@@ -353,12 +343,11 @@ public class PortalController(
     /// <short>
     /// Get a bookmark thumbnail
     /// </short>
-    /// <category>Settings</category>
-    /// <param type="System.String, System" name="url">Bookmark URL</param>
-    /// <returns type="Microsoft.AspNetCore.Mvc.FileResult, Microsoft.AspNetCore.Mvc">Thumbnail</returns>
+    /// <param type="System.String, System" name="url" example="some text">Bookmark URL</param>
     /// <path>api/2.0/portal/thumb</path>
-    /// <httpMethod>GET</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Portal / Settings")]
+    [SwaggerResponse(200, "Thumbnail", typeof(FileResult))]
     [HttpGet("thumb")]
     public async Task<FileResult> GetThumb(string url)
     {
@@ -389,10 +378,8 @@ public class PortalController(
     /// <short>
     /// Mark a gift message as read
     /// </short>
-    /// <category>Users</category>
-    /// <returns></returns>
     /// <path>api/2.0/portal/present/mark</path>
-    /// <httpMethod>POST</httpMethod>
+    [Tags("Portal / Users")]
     [HttpPost("present/mark")]
     public async Task MarkPresentAsReadedAsync()
     {
@@ -414,12 +401,10 @@ public class PortalController(
     /// <short>
     /// Register the mobile app installation
     /// </short>
-    /// <category>Settings</category>
     /// <param type="ASC.Web.Api.ApiModel.RequestsDto.MobileAppRequestsDto, ASC.Web.Api" name="inDto">Mobile app request parameters</param>
-    /// <returns></returns>
     /// <path>api/2.0/portal/mobile/registration</path>
-    /// <httpMethod>POST</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Portal / Settings")]
     [HttpPost("mobile/registration")]
     public async Task RegisterMobileAppInstallAsync(MobileAppRequestsDto inDto)
     {
@@ -433,12 +418,10 @@ public class PortalController(
     /// <short>
     /// Register the mobile app installation by mobile app type
     /// </short>
-    /// <category>Settings</category>
     /// <param type="ASC.Core.Common.Notify.Push.MobileAppType, ASC.Core.Common" name="type">Mobile app type (IosProjects, AndroidProjects, IosDocuments, AndroidDocuments, or DesktopEditor)</param>
-    /// <returns></returns>
     /// <path>api/2.0/portal/mobile/registration</path>
-    /// <httpMethod>POST</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Portal / Settings")]
     [HttpPost("mobile/registration")]
     public async Task RegisterMobileAppInstallAsync(MobileAppType type)
     {
@@ -450,12 +433,11 @@ public class PortalController(
     /// Updates a portal name with a new one specified in the request.
     /// </summary>
     /// <short>Update a portal name</short>
-    /// <category>Settings</category>
     /// <param type="ASC.Web.Api.ApiModels.RequestsDto.PortalRenameRequestsDto, ASC.Web.Api" name="inDto">Request parameters for portal renaming</param>
-    /// <returns type="System.Object, System">Confirmation email about authentication to the portal with a new name</returns>
     /// <path>api/2.0/portal/portalrename</path>
-    /// <httpMethod>PUT</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Portal / Settings")]
+    [SwaggerResponse(200, "Confirmation email about authentication to the portal with a new name", typeof(object))]
     [HttpPut("portalrename")]
     public async Task<object> UpdatePortalName(PortalRenameRequestsDto inDto)
     {
@@ -536,11 +518,9 @@ public class PortalController(
     /// Deletes the current portal immediately.
     /// </summary>
     /// <short>Delete a portal immediately</short>
-    /// <category>Settings</category>
-    /// <returns></returns>
     /// <path>api/2.0/portal/deleteportalimmediately</path>
-    /// <httpMethod>DELETE</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Portal / Settings")]
     [HttpDelete("deleteportalimmediately")]
     public async Task DeletePortalImmediatelyAsync()
     {
@@ -576,10 +556,8 @@ public class PortalController(
     /// Sends the instructions to suspend the current portal.
     /// </summary>
     /// <short>Send suspension instructions</short>
-    /// <category>Settings</category>
-    /// <returns></returns>
     /// <path>api/2.0/portal/suspend</path>
-    /// <httpMethod>POST</httpMethod>
+    [Tags("Portal / Settings")]
     [AllowNotPayment]
     [HttpPost("suspend")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
@@ -604,10 +582,8 @@ public class PortalController(
     /// Sends the instructions to remove the current portal.
     /// </summary>
     /// <short>Send removal instructions</short>
-    /// <category>Settings</category>
-    /// <returns></returns>
     /// <path>api/2.0/portal/delete</path>
-    /// <httpMethod>POST</httpMethod>
+    [Tags("Portal / Settings")]
     [AllowNotPayment]
     [HttpPost("delete")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
@@ -634,10 +610,8 @@ public class PortalController(
     /// Restores the current portal.
     /// </summary>
     /// <short>Restore a portal</short>
-    /// <category>Settings</category>
-    /// <returns></returns>
     /// <path>api/2.0/portal/continue</path>
-    /// <httpMethod>PUT</httpMethod>
+    [Tags("Portal / Settings")]
     [AllowSuspended]
     [HttpPut("continue")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PortalContinue")]
@@ -654,10 +628,8 @@ public class PortalController(
     /// Deactivates the current portal.
     /// </summary>
     /// <short>Deactivate a portal</short>
-    /// <category>Settings</category>
-    /// <returns></returns>
     /// <path>api/2.0/portal/suspend</path>
-    /// <httpMethod>PUT</httpMethod>
+    [Tags("Portal / Settings")]
     [HttpPut("suspend")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PortalSuspend")]
     public async Task SuspendPortalAsync()
@@ -677,10 +649,9 @@ public class PortalController(
     /// Deletes the current portal.
     /// </summary>
     /// <short>Delete a portal</short>
-    /// <category>Settings</category>
-    /// <returns type="System.Object, System">URL to the feedback form about removing a portal</returns>
     /// <path>api/2.0/portal/delete</path>
-    /// <httpMethod>DELETE</httpMethod>
+    [Tags("Portal / Settings")]
+    [SwaggerResponse(200, "URL to the feedback form about removing a portal", typeof(object))]
     [AllowNotPayment]
     [HttpDelete("delete")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PortalRemove")]
@@ -721,12 +692,10 @@ public class PortalController(
     /// Sends congratulations to the user after registering the portal.
     /// </summary>
     /// <short>Send congratulations</short>
-    /// <category>Users</category>
     /// <param type="ASC.Web.Api.ApiModels.RequestsDto.SendCongratulationsDto, ASC.Web.Api" name="inDto">Congratulations request parameters</param>
-    /// <returns></returns>
     /// <path>api/2.0/portal/sendcongratulations</path>
-    /// <httpMethod>POST</httpMethod>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Portal / Users")]
     [AllowAnonymous]
     [HttpPost("sendcongratulations")]
     public async Task SendCongratulationsAsync([FromQuery] SendCongratulationsDto inDto)

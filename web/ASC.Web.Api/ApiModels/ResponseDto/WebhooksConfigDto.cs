@@ -26,38 +26,33 @@
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
-/// <summary>
-/// </summary>
 public class WebhooksConfigDto : IMapFrom<WebhooksConfig>
 {
-    /// <summary>ID</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustom("ID")]
     public int Id { get; set; }
 
-    /// <summary>Name</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Name")]
     public string Name { get; set; }
 
-    /// <summary>URI</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("URI")]
     public string Uri { get; set; }
 
-    /// <summary>Secret key</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Secret key")]
     public string SecretKey { get; set; }
 
-    /// <summary>Specifies if the webhooks are enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if the webhooks are enabled or not")]
     public bool Enabled { get; set; }
 
-    /// <summary>SSL</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("SSL")]
     public bool SSL { get; set; }
 }
 
 public class WebhooksConfigWithStatusDto : IMapFrom<WebhooksConfigWithStatus>
 {
+    [SwaggerSchemaCustom("Configs")]
     public WebhooksConfigDto Configs { get; set; }
+
+    [SwaggerSchemaCustom("Status")]
     public int Status { get; set; }
 
     public void Mapping(Profile profile)

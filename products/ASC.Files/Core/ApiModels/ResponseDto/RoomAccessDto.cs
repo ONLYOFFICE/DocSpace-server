@@ -26,15 +26,11 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
-/// <summary>
-/// </summary>
 public class RoomSecurityDto
 {
-    /// <summary>List of room members</summary>
-    /// <type>System.Collections.Generic.IEnumerable{ASC.Files.Core.ApiModels.ResponseDto.FileShareDto}, System.Collections.Generic</type>
+    [SwaggerSchemaCustom("List of room members")]
     public IEnumerable<FileShareDto> Members { get; set; }
 
-    /// <summary>Warning</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Warning")]
     public string Warning { get; set; }
 }

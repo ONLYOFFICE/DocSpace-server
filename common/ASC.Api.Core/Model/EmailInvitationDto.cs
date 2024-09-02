@@ -35,8 +35,7 @@ public class EmailInvitationsDto
 
 public class EmailInvitationDto
 {
-    /// <summary>Email address</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Email address")]
     public string Email { get; set; }
 }
 

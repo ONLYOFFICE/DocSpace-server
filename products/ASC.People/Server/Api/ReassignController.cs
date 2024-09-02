@@ -41,11 +41,10 @@ public class ReassignController(
     /// Returns the progress of the started data reassignment for the user with the ID specified in the request.
     /// </summary>
     /// <short>Get the reassignment progress</short>
-    /// <param type="System.Guid, System" name="userId">User ID whose data is reassigned</param>
-    /// <category>User data</category>
-    /// <returns type="ASC.People.ApiModels.ResponseDto.TaskProgressResponseDto, ASC.People">Reassignment progress</returns>
+    /// <param type="System.Guid, System" name="userId" example="9924256A-739C-462b-AF15-E652A3B1B6EB">User ID whose data is reassigned</param>
     /// <path>api/2.0/people/reassign/progress/{userid}</path>
-    /// <httpMethod>GET</httpMethod>
+    [Tags("People / User data")]
+    [SwaggerResponse(200, "Reassignment progress", typeof(TaskProgressResponseDto))]
     [HttpGet("progress/{userid:guid}")]
     public async Task<TaskProgressResponseDto> GetReassignProgressAsync(Guid userId)
     {
@@ -62,10 +61,9 @@ public class ReassignController(
     /// </summary>
     /// <short>Start the data reassignment</short>
     /// <param type="ASC.People.ApiModels.RequestDto.StartReassignRequestDto, ASC.People" name="inDto">Request parameters for starting the reassignment process</param>
-    /// <category>User data</category>
-    /// <returns type="ASC.People.ApiModels.ResponseDto.TaskProgressResponseDto, ASC.People">Reassignment progress</returns>
     /// <path>api/2.0/people/reassign/start</path>
-    /// <httpMethod>POST</httpMethod>
+    [Tags("People / User data")]
+    [SwaggerResponse(200, "Reassignment progress", typeof(TaskProgressResponseDto))]
     [HttpPost("start")]
     public async Task<TaskProgressResponseDto> StartReassignAsync(StartReassignRequestDto inDto)
     {
@@ -106,10 +104,9 @@ public class ReassignController(
     /// </summary>
     /// <short>Terminate the data reassignment</short>
     /// <param type="ASC.People.ApiModels.RequestDto.TerminateRequestDto, ASC.People" name="inDto">Request parameters for terminating the reassignment process</param>
-    /// <category>User data</category>
     /// <path>api/2.0/people/reassign/terminate</path>
-    /// <httpMethod>PUT</httpMethod>
-    /// <returns></returns>
+    [Tags("People / User data")]
+    [SwaggerResponse(200, "Reassignment progress", typeof(TaskProgressResponseDto))]
     [HttpPut("terminate")]
     public async Task<TaskProgressResponseDto> TerminateReassignAsync(TerminateRequestDto inDto)
     {

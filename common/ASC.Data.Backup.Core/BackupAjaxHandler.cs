@@ -427,36 +427,36 @@ public class BackupAjaxHandler(
         return Path.Combine(folder, $"{tenantId}-{BackupFileName}");
     }
 
-    /// <summary>
-    /// </summary>
     public class Schedule
     {
-        /// <summary>Storage type</summary>
-        /// <type>ASC.Data.Backup.Contracts.BackupStorageType, ASC.Data.Backup.Core</type>
+        [SwaggerSchemaCustom("Storage type")]
         public BackupStorageType StorageType { get; set; }
 
-        /// <summary>Storage parameters</summary>
-        /// <type>System.Collections.Generic.Dictionary{System.String, System.String}, System.Collections.Generic</type>
+        [SwaggerSchemaCustom("Storage parameters")]
         public Dictionary<string, string> StorageParams { get; set; }
 
-        /// <summary>Cron parameters</summary>
-        /// <type>ASC.Data.Backup.BackupAjaxHandler.CronParams, ASC.Data.Backup.Core</type>
+        [SwaggerSchemaCustom("Cron parameters")]
         public CronParams CronParams { get; init; }
 
-        /// <summary>Maximum number of the stored backup copies</summary>
-        /// <type>System.Nullable{System.Int32}, System</type>
+        [SwaggerSchemaCustom("Maximum number of the stored backup copies")]
         public int? BackupsStored { get; init; }
 
-        /// <summary>Last backup creation time</summary>
-        /// <type>System.DateTime, System</type>
+        [SwaggerSchemaCustom("Last backup creation time")]
         public DateTime LastBackupTime { get; set; }
+
+        [SwaggerSchemaCustom("Dump", Example = false)]
         public bool Dump { get; set; }
     }
 
     public class CronParams
     {
+        [SwaggerSchemaCustom("Period")]
         public BackupPeriod Period { get; init; }
+
+        [SwaggerSchemaCustom("Hour")]
         public int Hour { get; init; }
+
+        [SwaggerSchemaCustom("Day")]
         public int Day { get; init; }
 
         public CronParams() { }
@@ -495,8 +495,13 @@ public class BackupAjaxHandler(
 
     public enum BackupPeriod
     {
+        [SwaggerEnum(Description = "Every day")]
         EveryDay = 0,
+
+        [SwaggerEnum(Description = "Every week")]
         EveryWeek = 1,
+
+        [SwaggerEnum(Description = "Every month")]
         EveryMonth = 2
     }
 }

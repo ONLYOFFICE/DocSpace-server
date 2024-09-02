@@ -26,36 +26,26 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
-/// <summary>
-/// </summary>
 public class FilesStatisticsResultDto
 {
-    /// <summary>Used space of files in the "My Documents" section</summary>
-    /// <type>ASC.Files.Core.ApiModels.ResponseDto.FilesStatisticsFolder, ASC.Files.Core</type>
+    [SwaggerSchemaCustom("Used space of files in the \"My Documents\" section")]
     public FilesStatisticsFolder MyDocumentsUsedSpace { get; set; }
 
-    /// <summary>Used space of files in the "Trash" section</summary>
-    /// <type>ASC.Files.Core.ApiModels.ResponseDto.FilesStatisticsFolder, ASC.Files.Core</type>
+    [SwaggerSchemaCustom("Used space of files in the \"Trash\" section")]
     public FilesStatisticsFolder TrashUsedSpace { get; set; }
 
-    /// <summary>Used space of files in the "Archive" section</summary>
-    /// <type>ASC.Files.Core.ApiModels.ResponseDto.FilesStatisticsFolder, ASC.Files.Core</type>
+    [SwaggerSchemaCustom("Used space of files in the \"Archive\" section")]
     public FilesStatisticsFolder ArchiveUsedSpace { get; set; }
 
-    /// <summary>Used space of files in the "Rooms" section</summary>
-    /// <type>ASC.Files.Core.ApiModels.ResponseDto.FilesStatisticsFolder, ASC.Files.Core</type>
+    [SwaggerSchemaCustom("Used space of files in the \"Rooms\" section")]
     public FilesStatisticsFolder RoomsUsedSpace { get; set; }
 }
 
-/// <summary>
-/// </summary>
 public class FilesStatisticsFolder
 {
-    /// <summary>Folder title</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Folder title")]
     public string Title { get; set; }
 
-    /// <summary>Used space</summary>
-    /// <type>System.Int64, System</type>
+    [SwaggerSchemaCustom("Used space")]
     public long UsedSpace { get; set; }
 }

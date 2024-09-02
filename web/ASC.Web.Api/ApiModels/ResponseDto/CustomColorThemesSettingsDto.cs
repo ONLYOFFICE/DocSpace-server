@@ -26,20 +26,15 @@
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
-/// <summary>
-/// </summary>
 public class CustomColorThemesSettingsDto
 {
-    /// <summary>Room name</summary>
-    /// <type>System.Collections.Generic.IEnumerable{ASC.Web.Core.Utility.Settings.CustomColorThemesSettingsItem}, System.Collections.Generic</type>
+    [SwaggerSchemaCustom("Themes")]
     public IEnumerable<CustomColorThemesSettingsItem> Themes { get; set; }
 
-    /// <summary>Room name</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustom("Selected")]
     public int Selected { get; set; }
 
-    /// <summary>Room name</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustom("Limit")]
     public int Limit { get; set; }
 
     public CustomColorThemesSettingsDto(CustomColorThemesSettings customColorThemesSettings, int limit)

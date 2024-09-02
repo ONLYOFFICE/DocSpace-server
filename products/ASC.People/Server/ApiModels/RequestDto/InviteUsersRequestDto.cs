@@ -26,22 +26,18 @@
 
 namespace ASC.People.ApiModels.RequestDto;
 
-/// <summary>
-/// </summary>
 public class InviteUsersRequestDto
 {
-    /// <summary>List of user invitations</summary>
-    /// <type>System.Collections.Generic.IEnumerable{ASC.People.ApiModels.RequestDto.UserInvitation}, System.Collections.Generic</type>
+    [SwaggerSchemaCustom("List of user invitations")]
     [MaxEmailInvitations]
     public IEnumerable<UserInvitation> Invitations { get; set; }
+
+    [SwaggerSchemaCustom("Culture")]
     public string Culture { get; set; }
 }
 
-/// <summary>
-/// </summary>
 public class UserInvitation : EmailInvitationDto
 {
-    /// <summary>Employee type</summary>
-    /// <type>ASC.Core.Users.EmployeeType, ASC.Core.Common</type>
+    [SwaggerSchemaCustom("Employee type")]
     public EmployeeType Type { get; set; }
 }

@@ -25,13 +25,11 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using System.Xml.XPath;
-
 using Microsoft.OpenApi;
 using Microsoft.OpenApi.Extensions;
 using Microsoft.OpenApi.Interfaces;
 using Microsoft.OpenApi.Models;
 using Microsoft.OpenApi.Writers;
-
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace ASC.Api.Core.Extensions;
@@ -45,10 +43,18 @@ public static class OpenApiExtension
             var assemblyName = Assembly.GetEntryAssembly().FullName.Split(',').First();
 
             c.ResolveConflictingActions(a => a.First());
+            c.CustomOperationIds(r =>
+            {
+                var actionName = r.ActionDescriptor.RouteValues["action"];
+
+                return char.ToLower(actionName[0]) + actionName.Substring(1); ;
+            });
             c.CustomSchemaIds(CustomSchemaId);
 
             c.SwaggerDoc("common", new OpenApiInfo { Title = assemblyName, Version = "v2" });
-
+            c.SchemaFilter<SwaggerSchemaCustomFilter>();
+            c.EnableAnnotations();
+            
             // ToDo: add security definitions
             c.AddSecurityDefinition(CookiesManager.AuthCookiesName, new OpenApiSecurityScheme
             {
@@ -131,6 +137,10 @@ public static class OpenApiExtension
                 .Union(context.MethodInfo.GetCustomAttributes(true))
                 .OfType<AllowAnonymousAttribute>();
 
+            //var authorizeAttribute = context.MethodInfo.DeclaringType.GetCustomAttributes(true)
+            //    .Union (context.MethodInfo.GetCustomAttributes(true)) .OfType<AuthorizeAttribute>();
+
+
             if (allowAnonymous.Any())
             {
                 operation.Security.Clear();
@@ -150,6 +160,32 @@ public static class OpenApiExtension
 
                 operation.Responses.Add("401", new OpenApiResponse { Description = "Unauthorized" });
                 operation.Responses.Add("403", new OpenApiResponse { Description = "Forbidden" });
+            }
+
+            //if(authorizeAttribute.Any())
+            //{
+            //    var authorizationDescription = new StringBuilder(" (Auth:");
+            //    var policySelector = authorizeAttribute.Where(a => !string.IsNullOrEmpty(a.Policy)).Select(a => a.Policy);
+            //    var schemaSelector = authorizeAttribute.Where(a => !string.IsNullOrEmpty(a.AuthenticationSchemes)).Select(a => a.AuthenticationSchemes);
+            //    var rolesSelector = authorizeAttribute.Where(a => !string.IsNullOrEmpty(a.Roles)).Select(a => a.Roles);
+            //    ApplyAuthorizeAttribute(authorizationDescription, policySelector, schemaSelector, rolesSelector);
+            //    operation.Summary += authorizationDescription.ToString().TrimEnd(';') + ")";
+            //}
+        }
+
+        private void ApplyAuthorizeAttribute(StringBuilder authorizationDescription, IEnumerable<string> policySelector, IEnumerable<string> schemaSelector, IEnumerable<string> rolesSelector)
+        {
+            if (policySelector.Any())
+            {
+                authorizationDescription.Append($" Policy: {string.Join(", ", policySelector)};");
+            }
+            if (schemaSelector.Any())
+            {
+                authorizationDescription.Append($" Schema: {string.Join(", ", schemaSelector)};");
+            }
+            if (rolesSelector.Any())
+            {
+                authorizationDescription.Append($" Roles: {string.Join(", ", rolesSelector)};");
             }
         }
     }

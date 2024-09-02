@@ -26,15 +26,11 @@
 
 namespace ASC.Web.Api.Models;
 
-/// <summary>
-/// </summary>
 public class CookieSettingsRequestsDto
 {
-    /// <summary>Lifetime value in minutes</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustom("Lifetime value in minutes")]
     public int LifeTime { get; set; }
 
-    /// <summary>Specifies if the cookie settings are enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if the cookie settings are enabled or not")]
     public bool Enabled { get; set; }
 }

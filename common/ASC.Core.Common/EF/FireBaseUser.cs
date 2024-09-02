@@ -26,34 +26,27 @@
 
 namespace ASC.Core.Common.EF;
 
-/// <summary>
-/// </summary>
 public class FireBaseUser : BaseEntity
 {
-    /// <summary>ID</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustom("ID")]
     public int Id { get; set; }
 
-    /// <summary>User ID</summary>
-    /// <type>System.Guid, System</type>
+    [SwaggerSchemaCustom("User ID")]
     public Guid UserId { get; set; }
 
-    /// <summary>Tenant ID</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustom("Tenant ID")]
     public int TenantId { get; set; }
 
-    /// <summary>Firebase device token</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Firebase device token")]
     public string FirebaseDeviceToken { get; set; }
 
-    /// <summary>Application</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Application")]
     public string Application { get; set; }
 
-    /// <summary>Specifies if the user is subscribed to the push notifications or not</summary>
-    /// <type>System.Nullable{System.Boolean}, System</type>
+    [SwaggerSchemaCustom("Specifies if the user is subscribed to the push notifications or not")]
     public bool? IsSubscribed { get; set; }
 
+    [SwaggerSchemaCustom("Tenant")]
     public DbTenant Tenant { get; set; }
 
     public override object[] GetKeys()

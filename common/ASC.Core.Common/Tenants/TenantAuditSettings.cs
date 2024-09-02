@@ -26,18 +26,14 @@
 
 namespace ASC.Core.Tenants;
 
-/// <summary>
-/// </summary>
 public class TenantAuditSettings : ISettings<TenantAuditSettings>
 {
     public const int MaxLifeTime = 180;
 
-    /// <summary>Login history lifetime</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustom("Login history lifetime")]
     public int LoginHistoryLifeTime { get; init; }
 
-    /// <summary>Audit trail lifetime</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustom("Audit trail lifetime")]
     public int AuditTrailLifeTime { get; init; }
 
     public static readonly Guid Guid = new("{8337D0FB-AD67-4552-8297-802312E7F503}");
@@ -55,11 +51,8 @@ public class TenantAuditSettings : ISettings<TenantAuditSettings>
     }
 }
 
-/// <summary>
-/// </summary>
 public class TenantAuditSettingsWrapper
 {
-    /// <summary>Audit trail settingse</summary>
-    /// <type>ASC.Core.Tenants.TenantAuditSettings, ASC.Core.Common</type>
+    [SwaggerSchemaCustom("Audit trail settingse")]
     public TenantAuditSettings Settings { get; set; }
 }

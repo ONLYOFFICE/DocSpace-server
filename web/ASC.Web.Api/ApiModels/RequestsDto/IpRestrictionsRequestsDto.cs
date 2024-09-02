@@ -26,15 +26,13 @@
 
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
-/// <summary>
-/// </summary>
+public class IpRestrictionsBaseRequestsDto
+{
+    [SwaggerSchemaCustom("List of IP addresses")]
+    public IEnumerable<IpRestrictionBase> IpRestrictions { get; set; }
+}
 public class IpRestrictionsRequestsDto
 {
-    /// <summary>List of IP addresses</summary>
-    /// <type>System.Collections.Generic.IEnumerable{ASC.IPSecurity.IpRestrictionBase}, System.Collections.Generic</type>
-    public IEnumerable<IpRestrictionBase> IpRestrictions { get; set; }
-
-    /// <summary>Enables IP restrictions or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Enables IP restrictions or not")]
     public bool Enable { get; set; }
 }

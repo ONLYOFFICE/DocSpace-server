@@ -26,11 +26,8 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
-/// <summary>
-/// </summary>
 public class BatchTagsRequestDto
 {
-    /// <summary>Tag names</summary>
-    /// <type>System.Collections.Generic.IEnumerable{System.String}, System.Collections.Generic</type>
+    [SwaggerSchemaCustom("Tag names")]
     public IEnumerable<string> Names { get; set; }
 }

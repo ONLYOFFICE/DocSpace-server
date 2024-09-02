@@ -26,43 +26,32 @@
 
 namespace ASC.Api.Core;
 
-/// <summary>
-/// </summary>
 public class Module(Product product)
 {
-    /// <summary>ID</summary>
-    /// <type>System.Guid, System</type>
+    [SwaggerSchemaCustom("ID")]
     public Guid Id { get; set; } = product.ProductID;
 
-    /// <summary>Product class name</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Product class name")]
     public string AppName { get; set; } = product.ProductClassName;
 
-    /// <summary>Title</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Title")]
     public string Title { get; set; } = product.Name;
 
-    /// <summary>Start link</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Start link")]
     public string Link { get; set; } = product.StartURL;
 
-    /// <summary>Icon URL</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Icon URL")]
     public string IconUrl { get; set; } = product.Context.IconFileName;
 
-    /// <summary>Large image URL</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Large image URL")]
     public string ImageUrl { get; set; } = product.Context.LargeIconFileName;
 
-    /// <summary>Help URL</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Help URL")]
     public string HelpUrl { get; set; } = product.HelpURL;
 
-    /// <summary>Description</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Description")]
     public string Description { get; set; } = product.Description;
 
-    /// <summary>Specifies if the module is primary or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if the module is primary or not")]
     public bool IsPrimary { get; set; } = product.IsPrimary;
 }

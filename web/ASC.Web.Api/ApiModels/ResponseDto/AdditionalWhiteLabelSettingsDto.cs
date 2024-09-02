@@ -26,60 +26,45 @@
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
-/// <summary>
-/// </summary>
 public class AdditionalWhiteLabelSettingsDto: IMapFrom<AdditionalWhiteLabelSettings>
 {
-    /// <summary>Specifies if the start document is enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if the start document is enabled or not")]
     public bool StartDocsEnabled { get; set; }
 
-    /// <summary>Specifies if the help center is enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if the help center is enabled or not")]
     public bool HelpCenterEnabled { get; set; }
 
-    /// <summary>Specifies if feedback and support are available or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if feedback and support are available or not")]
     public bool FeedbackAndSupportEnabled { get; set; }
 
-    /// <summary>Feedback and support URL</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Feedback and support URL")]
     public string FeedbackAndSupportUrl { get; set; }
 
-    /// <summary>Specifies if the user forum is enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if the user forum is enabled or not")]
     public bool UserForumEnabled { get; set; }
 
-    /// <summary>User forum URL</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("User forum URL", Format = "uri")]
     public string UserForumUrl { get; set; }
 
-    /// <summary>Specifies if the video guides are enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if the video guides are enabled or not")]
     public bool VideoGuidesEnabled { get; set; }
 
-    /// <summary>Video guides URL</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Video guides URL", Format = "uri")]
     public string VideoGuidesUrl { get; set; }
 
-    /// <summary>Sales email</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Sales email")]
     public string SalesEmail { get; set; }
 
-    /// <summary>URL to pay for the portal</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("URL to pay for the portal", Format = "uri")]
     public string BuyUrl { get; set; }
 
-    /// <summary>Specifies if the license agreements are enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if the license agreements are enabled or not")]
     public bool LicenseAgreementsEnabled { get; set; }
 
-    /// <summary>Specifies if these settings are default or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if these settings are default or not")]
     public bool IsDefault { get; set; }
 
-    /// <summary>License agreements URL</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("License agreements URL")]
     public string LicenseAgreementsUrl { get; set; }
 
     public void Mapping(Profile profile)

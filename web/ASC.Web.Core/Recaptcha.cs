@@ -28,9 +28,16 @@ namespace ASC.Web.Core;
 
 public enum RecaptchaType
 {
+    [SwaggerEnum("Default")]
     Default = 0,
+
+    [SwaggerEnum("AndroidV2")]
     AndroidV2 = 1,
+
+    [SwaggerEnum("iOSV2")]
     iOSV2 = 2,
+
+    [SwaggerEnum("hCaptcha")]
     hCaptcha = 3
 }
 

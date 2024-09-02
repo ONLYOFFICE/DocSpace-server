@@ -26,11 +26,8 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
-/// <summary>
-/// </summary>
 public class HideConfirmConvertRequestDto
 {
-    /// <summary>Specifies whether to set the specified settings or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies whether to set the specified settings or not")]
     public bool Save { get; set; }
 }

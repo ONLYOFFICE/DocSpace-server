@@ -26,184 +26,134 @@
 
 namespace ASC.Web.Api.ApiModel.ResponseDto;
 
-/// <summary>
-/// </summary>
 public class SettingsDto
 {
-    /// <summary>Time zone</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Time zone", Example = "UTC")]
     public string Timezone { get; set; }
 
-    /// <summary>List of trusted domains</summary>
-    /// <type>System.Collections.Generic.List{System.String}, System.Collections.Generic</type>
+    [SwaggerSchemaCustom("List of trusted domains", Example = "mydomain.com")]
     public List<string> TrustedDomains { get; set; }
 
-    /// <summary>Trusted domains type</summary>
-    /// <type>ASC.Core.Tenants.TenantTrustedDomainsType, ASC.Core.Common</type>
+    [SwaggerSchemaCustom("Trusted domains type")]
     public TenantTrustedDomainsType TrustedDomainsType { get; set; }
 
-    /// <summary>Language</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Language", Example = "en-US")]
     public string Culture { get; set; }
 
-    /// <summary>UTC offset</summary>
-    /// <type>System.TimeSpan, System</type>
+    [SwaggerSchemaCustom("UTC offset", Example = "-8.5")]
     public TimeSpan UtcOffset { get; set; }
 
-    /// <summary>UTC hours offset</summary>
-    /// <type>System.Double, System</type>
+    [SwaggerSchemaCustom("UTC hours offset")]
     public double UtcHoursOffset { get; set; }
 
-    /// <summary>Greeting settings</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Greeting settings", Example = "Web Office Applications")]
     public string GreetingSettings { get; set; }
 
-    /// <summary>Owner ID</summary>
-    /// <type>System.Guid, System</type>
+    [SwaggerSchemaCustom("Owner ID")]
     public Guid OwnerId { get; set; }
 
-    /// <summary>Team template ID</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Team template ID")]
     public string NameSchemaId { get; set; }
 
-    /// <summary>Specifies if a user can join to the portal or not</summary>
-    /// <type>System.Nullable{System.Boolean}, System</type>
+    [SwaggerSchemaCustom("Specifies if a user can join to the portal or not")]
     public bool? EnabledJoin { get; set; }
 
-    /// <summary>Specifies if a user can send a message to the administrator or not</summary>
-    /// <type>System.Nullable{System.Boolean}, System</type>
+    [SwaggerSchemaCustom("Specifies if a user can send a message to the administrator or not")]
     public bool? EnableAdmMess { get; set; }
 
-    /// <summary>Specifies if a user can connect third-party providers or not</summary>
-    /// <type>System.Nullable{System.Boolean}, System</type>
+    [SwaggerSchemaCustom("Specifies if a user can connect third-party providers or not")]
     public bool? ThirdpartyEnable { get; set; }
 
-    /// <summary>Specifies if this is a DocSpace portal or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if this is a DocSpace portal or not")]
     public bool DocSpace { get; set; }
 
-    /// <summary>Specifies if this is a standalone portal or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if this is a standalone portal or not")]
     public bool Standalone { get; set; }
 
-    /// <summary>Base domain</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Base domain")]
     public string BaseDomain { get; set; }
 
-    /// <summary>Wizard token</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Wizard token")]
     public string WizardToken { get; set; }
 
-    /// <summary>Password hash</summary>
-    /// <type>ASC.Security.Cryptography.PasswordHasher, ASC.Common</type>
+    [SwaggerSchemaCustom("Password hash")]
     public PasswordHasher PasswordHash { get; set; }
 
-    /// <summary>Firebase parameters</summary>
-    /// <type>ASC.Web.Api.ApiModel.ResponseDto.FirebaseDto, ASC.Web.Api</type>
+    [SwaggerSchemaCustom("Firebase parameters")]
     public FirebaseDto Firebase { get; set; }
 
-    /// <summary>Version</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Version")]
     public string Version { get; set; }
 
-    /// <summary>Type of captcha</summary>
-    /// <type>ASC.Web.Core.RecaptchaType, ASC.Web.Core</type>
+    [SwaggerSchemaCustom("Type of captcha")]
     public RecaptchaType RecaptchaType { get; set; }
 
-    /// <summary>ReCAPTCHA public key</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("ReCAPTCHA public key")]
     public string RecaptchaPublicKey { get; set; }
 
-    /// <summary>Specifies if the debug information will be sent or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if the debug information will be sent or not")]
     public bool DebugInfo { get; set; }
 
-    /// <summary>Socket URL</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Socket URL")]
     public string SocketUrl { get; set; }
 
-    /// <summary>Tenant status</summary>
-    /// <type>ASC.Core.Tenants.TenantStatus, ASC.Core.Common</type>
+    [SwaggerSchemaCustom("Tenant status")]
     public TenantStatus TenantStatus { get; set; }
 
-    /// <summary>Tenant alias</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Tenant alias")]
     public string TenantAlias { get; set; }
 
-    /// <summary>Link to the help</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Link to the help")]
     public string HelpLink { get; set; }
-    
-    /// <summary>Link to the forum</summary>
-    /// <type>System.String, System</type>
+
+    [SwaggerSchemaCustom("Link to the forum")]
     public string ForumLink { get; set; }
 
-    /// <summary>API documentation link</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("API documentation link")]
     public string ApiDocsLink { get; set; }
 
-    /// <summary>Domain validator</summary>
-    /// <type>ASC.Core.Tenants.TenantDomainValidator, ASC.Core.Common</type>
+    [SwaggerSchemaCustom("Domain validator")]
     public TenantDomainValidator DomainValidator { get; set; }
 
-    /// <summary>Zendesk key</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Zendesk key")]
     public string ZendeskKey { get; set; }
 
-    /// <summary>Tag manager ID</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Tag manager ID")]
     public string TagManagerId { get; set; }
 
-    /// <summary>Email for training booking</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Email for training booking")]
     public string BookTrainingEmail { get; set; }
 
-    /// <summary>Documentation email</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Documentation email")]
     public string DocumentationEmail { get; set; }
 
-    /// <summary>Legal terms</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Legal terms")]
     public string LegalTerms { get; set; }
 
-    /// <summary>License url</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("License url")]
     public string LicenseUrl { get; set; }
 
-    /// <summary>Specifies whether the cookie settings are enabled</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies whether the cookie settings are enabled")]
     public bool CookieSettingsEnabled { get; set; }
+
+    [SwaggerSchemaCustom("Limited access space")]
     public bool LimitedAccessSpace { get; set; }
 
-    /// <summary>User name validation regex</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("User name validation regex")]
     public string UserNameRegex { get; set; }
 
-    /// <summary>Invitation limit</summary>
-    /// <type>System.Nullable{System.Int32}, System</type>
+    [SwaggerSchemaCustom("Invitation limit")]
     public int? InvitationLimit { get; set; }
 
-    /// <summary>Plugins</summary>
-    /// <type>ASC.Web.Api.ApiModel.ResponseDto.PluginsDto, ASC.Web.Api</type>
+    [SwaggerSchemaCustom("Plugins")]
     public PluginsDto Plugins { get; set; }
 
+    [SwaggerSchemaCustom("Deep link")]
     public DeepLinkDto DeepLink { get; set; }
 
+    [SwaggerSchemaCustom("Form gallery")]
     public FormGalleryDto FormGallery { get; set; }
-    
-    public long MaxImageUploadSize { get; set; }
 
-    public static SettingsDto GetSample()
-    {
-        return new SettingsDto
-        {
-            Culture = "en-US",
-            Timezone = TimeZoneInfo.Utc.ToString(),
-            TrustedDomains = ["mydomain.com"],
-            UtcHoursOffset = -8.5,
-            UtcOffset = TimeSpan.FromHours(-8.5),
-            GreetingSettings = "Web Office Applications",
-            OwnerId = new Guid()
-        };
-    }
+    [SwaggerSchemaCustom("Max image upload size")]
+    public long MaxImageUploadSize { get; set; }
 }

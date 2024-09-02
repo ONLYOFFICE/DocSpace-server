@@ -31,12 +31,25 @@ public class EmailValidationKeyProvider
 {
     public enum ValidationResult
     {
+        [SwaggerEnum("Ok")]
         Ok,
+
+        [SwaggerEnum("Invalid")]
         Invalid,
+
+        [SwaggerEnum("Expired")]
         Expired,
+
+        [SwaggerEnum("Tariff limit")]
         TariffLimit,
+
+        [SwaggerEnum("User existed")]
         UserExisted,
+
+        [SwaggerEnum("User excluded")]
         UserExcluded,
+
+        [SwaggerEnum("Quota failed")]
         QuotaFailed
     }
 
@@ -166,36 +179,27 @@ public class EmailValidationKeyProvider
     }
 }
 
-/// <summary>
-/// </summary>
 public class EmailValidationKeyModel
 {
-    /// <summary>Key</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Key")]
     public string Key { get; set; }
 
-    /// <summary>Employee type</summary>
-    /// <type>System.Nullabel{ASC.Core.Users.EmployeeType}, System</type>
+    [SwaggerSchemaCustom("Employee type")]
     public EmployeeType? EmplType { get; init; }
 
-    /// <summary>Email</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Email")]
     public string Email { get; init; }
 
-    /// <summary>User ID</summary>
-    /// <type>System.Nullabel{System.Guid}, System</type>
+    [SwaggerSchemaCustom("User ID")]
     public Guid? UiD { get; init; }
 
-    /// <summary>Confirmation email type</summary>
-    /// <type>System.Nullabel{ASC.Web.Studio.Utility.ConfirmType}, System</type>
+    [SwaggerSchemaCustom("Confirmation email type")]
     public ConfirmType? Type { get; init; }
 
-    /// <summary>Access an account for the first time or not</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Access an account for the first time or not")]
     public string First { get; init; }
 
-    /// <summary>Room ID</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Room ID")]
     public string RoomId { get; init; }
 
     public void Deconstruct(out string key, out EmployeeType? emplType, out string email, out Guid? uiD, out ConfirmType? type, out string first)

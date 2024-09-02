@@ -24,26 +24,21 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.ApiModels.ResponseDto;
+
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
-/// <summary>
-/// 
-/// </summary>
 public class MigrationStatusDto
 {
-    /// <summary>Migration progress</summary>
-    /// <type>System.Double, System</type>
+    [SwaggerSchemaCustom("Migration progress", Example = 1.0)]
     public double Progress { get; set; }
 
-    /// <summary>Migration error</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Migration error")]
     public string Error { get; set; }
 
-    /// <summary>Migration API information</summary>
-    /// <type>ASC.Migration.Core.Models.Api.MigrationApiInfo, ASC.Migration</type>
+    [SwaggerSchemaCustom("Migration API information")]
     public MigrationApiInfo ParseResult { get; set; }
 
-    /// <summary>Specifies whether the migration is completed</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies whether the migration is completed")]
     public bool IsCompleted { get; set; }
 }

@@ -36,72 +36,58 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 public partial class FileEntryDtoContext : JsonSerializerContext;
 
 
-/// <summary>
-/// </summary>
 [JsonDerivedType(typeof(FileDto<int>))]
 [JsonDerivedType(typeof(FileDto<string>))]
 [JsonDerivedType(typeof(FolderDto<int>))]
 [JsonDerivedType(typeof(FolderDto<string>))]
 public abstract class FileEntryDto
 {
-    /// <summary>Title</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Title", Example = "Some titile.txt/ Some title")]
     public string Title { get; set; }
 
-    /// <summary>Access rights</summary>
-    /// <type>ASC.Files.Core.Security.FileShare, ASC.Files.Core</type>
+    [SwaggerSchemaCustom("Access rights")]
     public FileShare Access { get; set; }
 
-    /// <summary>Specifies if the file is shared or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if the file is shared or not", Example = false)]
     public bool Shared { get; set; }
 
-    /// <summary>Creation time</summary>
-    /// <type>ASC.Api.Core.ApiDateTime, ASC.Api.Core</type>
+    [SwaggerSchemaCustom("Creation time")]
     public ApiDateTime Created { get; set; }
 
-    /// <summary>Author</summary>
-    /// <type>ASC.Web.Api.Models.EmployeeDto, ASC.Api.Core</type>
+    [SwaggerSchemaCustom("Author")]
     public EmployeeDto CreatedBy { get; set; }
 
     private ApiDateTime _updated;
 
-    /// <summary>Time of the last file update</summary>
-    /// <type>ASC.Api.Core.ApiDateTime, ASC.Api.Core</type>
+    [SwaggerSchemaCustom("Time of the last file update")]
     public ApiDateTime Updated
     {
         get => _updated < Created ? Created : _updated;
         set => _updated = value;
     }
 
-    /// <summary>Time when the file will be automatically deleted</summary>
-    /// <type>ASC.Api.Core.ApiDateTime, ASC.Api.Core</type>
+    [SwaggerSchemaCustom("Time when the file will be automatically deleted")]
     public ApiDateTime AutoDelete { get; set; }
 
-    /// <summary>Root folder type</summary>
-    /// <type>ASC.Files.Core.FolderType, ASC.Files.Core</type>
+    [SwaggerSchemaCustom("Root folder type")]
     public FolderType RootFolderType { get; set; }
 
-    /// <summary>First parent folder type</summary>
-    /// <type>ASC.Files.Core.FolderType, ASC.Files.Core</type>
+    [SwaggerSchemaCustom("First parent folder type")]
     public FolderType? ParentRoomType { get; set; }
 
-    /// <summary>A user who updated a file</summary>
-    /// <type>ASC.Web.Api.Models.EmployeeDto, ASC.Api.Core</type>
+    [SwaggerSchemaCustom("A user who updated a file")]
     public EmployeeDto UpdatedBy { get; set; }
 
-    /// <summary>Provider is specified or not</summary>
-    /// <type>System.Nullable{System.Boolean}, System</type>
+    [SwaggerSchemaCustom("Provider is specified or not")]
     public bool? ProviderItem { get; set; }
 
-    /// <summary>Provider key</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Provider key")]
     public string ProviderKey { get; set; }
 
-    /// <summary>Provider ID</summary>
-    /// <type>System.Nullable{System.Int32}, System</type>
+    [SwaggerSchemaCustom("Provider ID")]
     public int? ProviderId { get; set; }
 
+    [SwaggerSchemaCustom("Order")]
     public string Order { get; set; }
     
     public abstract FileEntryType FileEntryType { get; }
@@ -123,17 +109,30 @@ public abstract class FileEntryDto
 
 public abstract class FileEntryDto<T> : FileEntryDto
 {
+    [SwaggerSchemaCustomInt("Id", Example = 10)]
     public T Id { get; set; }
+
+    [SwaggerSchemaCustomInt("Root folder id")]
     public T RootFolderId { get; set; }
 
+    [SwaggerSchemaCustomInt("Origin id")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public T OriginId { get; set; }
 
+    [SwaggerSchemaCustomInt("Origin room id")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public T OriginRoomId { get; set; }
+
+    [SwaggerSchemaCustom("Origin title")]
     public string OriginTitle { get; set; }
+
+    [SwaggerSchemaCustom("Origin room title")]
     public string OriginRoomTitle { get; set; }
+
+    [SwaggerSchemaCustom("Can share")]
     public bool CanShare { get; set; }
+
+    [SwaggerSchemaCustom("Security")]
     public IDictionary<FilesSecurityActions, bool> Security { get; set; }
 
     protected FileEntryDto(FileEntry<T> entry)

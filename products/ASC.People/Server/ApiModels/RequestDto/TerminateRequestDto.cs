@@ -26,12 +26,8 @@
 
 namespace ASC.People.ApiModels.RequestDto;
 
-/// <summary>
-/// </summary>
 public class TerminateRequestDto
 {
-    /// <summary>User ID whose data is reassigned/removed</summary>
-    /// <type>System.Guid, System</type>
-    /// <example>9924256A-739C-462b-AF15-E652A3B1B6EB</example>
+    [SwaggerSchemaCustom("User ID whose data is reassigned/removed")]
     public Guid UserId { get; set; }
 }

@@ -29,39 +29,27 @@ using Status = ASC.Files.Core.Security.Status;
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
-/// <summary>
-/// </summary>
 public class ExternalShareDto : IMapFrom<ValidationInfo>
 {
-    /// <summary>External data status</summary>
-    /// <type>ASC.Files.Core.Security.Status, ASC.Files.Core</type>
+    [SwaggerSchemaCustom("External data status")]
     public Status Status { get; set; }
 
-    /// <summary>External data ID</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("External data ID")]
     public string Id { get; set; }
 
-    /// <summary>External data title</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("External data title")]
     public string Title { get; set; }
-    
-    /// <summary>Entity ID</summary>
-    /// <type>System.String, System</type>
-    public string EntityId { get; set; }
-   
-    /// <summary>Entity title</summary>
-    /// <type>System.String, System</type>
-    public string EntryTitle { get; set; }
-    
-    /// <summary>Tenant ID</summary>
-    /// <type>System.Int32, System</type>
+
+    [SwaggerSchemaCustom("Tenant ID")]
     public int TenantId { get; set; }
 
-    /// <summary>Specifies whether to share the external data or not</summary>
-    /// <type>System.Boolean, System</type>
+    public string EntityId { get; set; }
+   
+    public string EntryTitle { get; set; }
+
+    [SwaggerSchemaCustom("Specifies whether to share the external data or not")]
     public bool Shared { get; set; }
-    
-    /// <summary>Link ID</summary>
-    /// <type>System.Guid, System</type>
+
+    [SwaggerSchemaCustom("Link ID")]
     public Guid LinkId { get; set; }
 }

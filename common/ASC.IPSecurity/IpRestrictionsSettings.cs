@@ -28,12 +28,9 @@ using System.Text.Json.Serialization;
 
 namespace ASC.IPSecurity;
 
-/// <summary>
-/// </summary>
 public class IPRestrictionsSettings : ISettings<IPRestrictionsSettings>
 {
-    /// <summary>Specifies if the IP restrictions are enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if the IP restrictions are enabled or not")]
     public bool Enable { get; init; }
 
     [JsonIgnore]

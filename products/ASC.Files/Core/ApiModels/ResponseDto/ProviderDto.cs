@@ -28,28 +28,22 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public record ProviderDto(string Name, string Key, bool Connected, bool Oauth = false, string RedirectUrl = null, bool RequiredConnectionUrl = false, string ClientId = null)
 {
-    /// <summary>Provider name</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Provider name")]
     public string Name { get; init; } = Name;
 
-    /// <summary>Provider key</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Provider key")]
     public string Key { get; init; } = Key;
 
-    /// <summary>Connected flag</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Connected flag")]
     public bool Connected { get; init; } = Connected;
 
-    /// <summary>Oauth flag</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Oauth flag")]
     public bool Oauth { get; init; } = Oauth;
 
-    /// <summary>Redirect url</summary>
-    // <type>System.String, System</type>
+    [SwaggerSchemaCustom("Redirect url", Format = "uri")]
     public string RedirectUrl { get; init; } = RedirectUrl;
 
-    /// <summary>Required connection url flag</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Required connection url flag")]
     public bool RequiredConnectionUrl { get; init; } = RequiredConnectionUrl;
     
     /// <summary>Oauth client id</summary>

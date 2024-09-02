@@ -77,12 +77,11 @@ public partial class SettingsController(MessageService messageService,
     /// <short>
     /// Get the portal settings
     /// </short>
-    /// <category>Common settings</category>
-    /// <param type="System.Boolean, System" name="withpassword">Specifies if the password hasher settings will be returned or not</param>
-    /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.SettingsDto, ASC.Web.Api">Settings</returns>
+    /// <param type="System.Boolean, System" name="withpassword" example="true">Specifies if the password hasher settings will be returned or not</param>
     /// <path>api/2.0/settings</path>
-    /// <httpMethod>GET</httpMethod>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Settings / Common settings")]
+    [SwaggerResponse(200, "Settings", typeof(SettingsDto))]
     [HttpGet("")]
     [AllowNotPayment, AllowSuspended, AllowAnonymous]
     public async Task<SettingsDto> GetSettingsAsync(bool? withpassword)
@@ -223,11 +222,10 @@ public partial class SettingsController(MessageService messageService,
     /// <short>
     /// Save the mail domain settings
     /// </short>
-    /// <category>Common settings</category>
     /// <param type="ASC.Web.Api.ApiModel.RequestsDto.MailDomainSettingsRequestsDto, ASC.Web.Api" name="inDto">Request parameters for mail domain settings</param>
-    /// <returns type="System.Object, System">Message about the result of saving the mail domain settings</returns>
     /// <path>api/2.0/settings/maildomainsettings</path>
-    /// <httpMethod>POST</httpMethod>
+    [Tags("Settings / Common settings")]
+    [SwaggerResponse(200, "Message about the result of saving the mail domain settings", typeof(object))]
     [HttpPost("maildomainsettings")]
     public async Task<object> SaveMailDomainSettingsAsync(MailDomainSettingsRequestsDto inDto)
     {
@@ -272,11 +270,10 @@ public partial class SettingsController(MessageService messageService,
     /// <short>
     /// Get the space usage
     /// </short>
-    /// <category>Quota</category>
-    /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.QuotaUsageDto, ASC.Web.Api">Space usage and limits for upload</returns>
     /// <path>api/2.0/settings/quota</path>
-    /// <httpMethod>GET</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Settings / Quota")]
+    [SwaggerResponse(200, "Space usage and limits for upload", typeof(QuotaUsageDto))]
     [HttpGet("quota")]
     public async Task<QuotaUsageDto> GetQuotaUsed()
     {
@@ -289,12 +286,11 @@ public partial class SettingsController(MessageService messageService,
     /// <short>
     /// Save the user quota settings
     /// </short>
-    /// <category>Quota</category>
     /// <param type="ASC.Web.Api.ApiModel.RequestsDto.UserQuotaSettingsRequestsDto, ASC.Web.Api" name="inDto">Request parameters for the user quota settings</param>
-    /// <returns type="System.Object, System">Message about the result of saving the user quota settings</returns>
     /// <path>api/2.0/settings/userquotasettings</path>
-    /// <httpMethod>POST</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Settings / Quota")]
+    [SwaggerResponse(200, "Message about the result of saving the user quota settings", typeof(TenantUserQuotaSettings))]
     [HttpPost("userquotasettings")]
     public async Task<TenantUserQuotaSettings> SaveUserQuotaSettingsAsync(QuotaSettingsRequestsDto inDto)
     {
@@ -343,6 +339,8 @@ public partial class SettingsController(MessageService messageService,
         return quotaSettings;
     }
 
+    [Tags("Settings / Quota")]
+    [SwaggerResponse(200, "Ok", typeof(object))]
     [HttpGet("userquotasettings")]
     public async Task<object> GetUserQuotaSettings()
     {
@@ -357,11 +355,10 @@ public partial class SettingsController(MessageService messageService,
     /// <short>
     /// Save the room quota settings
     /// </short>
-    /// <category>Quota</category>
     /// <param type="ASC.Web.Api.ApiModel.RequestsDto.QuotaSettingsRequestsDto, ASC.Web.Api" name="inDto">Request parameters for the quota settings</param>
-    /// <returns type="ASC.Core.Tenants.TenantRoomQuotaSettings, ASC.Core.Common">Tenant room quota settings</returns>
     /// <path>api/2.0/settings/roomquotasettings</path>
-    /// <httpMethod>POST</httpMethod>
+    [Tags("Settings / Quota")]
+    [SwaggerResponse(200, "Tenant room quota settings", typeof(TenantRoomQuotaSettings))]
     [HttpPost("roomquotasettings")]
     public async Task<TenantRoomQuotaSettings> SaveRoomQuotaSettingsAsync(QuotaSettingsRequestsDto inDto)
     {
@@ -416,11 +413,10 @@ public partial class SettingsController(MessageService messageService,
     /// <short>
     /// Save the tenant quota settings
     /// </short>
-    /// <category>Quota</category>
     /// <param type="ASC.Web.Api.ApiModel.RequestsDto.TenantQuotaSettingsRequestsDto, ASC.Web.Api" name="inDto">Request parameters for the tenant quota settings</param>
-    /// <returns type="ASC.Core.Tenants.TenantQuotaSettings, ASC.Core.Common">Tenant quota settings</returns>
     /// <path>api/2.0/settings/tenantquotasettings</path>
-    /// <httpMethod>PUT</httpMethod>
+    [Tags("Settings / Quota")]
+    [SwaggerResponse(200, "Tenant quota settings", typeof(TenantQuotaSettings))]
     [HttpPut("tenantquotasettings")]
     public async Task<TenantQuotaSettings> SetTenantQuotaSettingsAsync(TenantQuotaSettingsRequestsDto inDto)
     {
@@ -467,12 +463,11 @@ public partial class SettingsController(MessageService messageService,
     /// Returns a list of all the available portal languages in the format of a two-letter or four-letter language code (e.g. "de", "en-US", etc.).
     /// </summary>
     /// <short>Get supported languages</short>
-    /// <category>Common settings</category>
-    /// <returns type="System.Object, System">List of all the available portal languages</returns>
     /// <path>api/2.0/settings/cultures</path>
-    /// <httpMethod>GET</httpMethod>
     /// <requiresAuthorization>false</requiresAuthorization>
     /// <collection>list</collection>
+    [Tags("Settings / Common settings")]
+    [SwaggerResponse(200, "List of all the available portal languages", typeof(string))]
     [AllowAnonymous]
     [AllowNotPayment]
     [HttpGet("cultures")]
@@ -485,11 +480,10 @@ public partial class SettingsController(MessageService messageService,
     /// Returns a list of all the available portal time zones.
     /// </summary>
     /// <short>Get time zones</short>
-    /// <category>Common settings</category>
-    /// <returns type="ASC.Web.Api.ApiModel.RequestsDto.TimezonesRequestsDto, ASC.Web.Api">List of all the available time zones with their IDs and display names</returns>
     /// <path>api/2.0/settings/timezones</path>
-    /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    [Tags("Settings / Common settings")]
+    [SwaggerResponse(200, "List of all the available time zones with their IDs and display names", typeof(TimezonesRequestsDto))]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Wizard,Administrators")]
     [HttpGet("timezones")]
     [AllowNotPayment]
@@ -521,10 +515,9 @@ public partial class SettingsController(MessageService messageService,
     /// Returns the portal hostname.
     /// </summary>
     /// <short>Get hostname</short>
-    /// <category>Common settings</category>
-    /// <returns type="System.Object, System">Portal hostname</returns>
     /// <path>api/2.0/settings/machine</path>
-    /// <httpMethod>GET</httpMethod>
+    [Tags("Settings / Common settings")]
+    [SwaggerResponse(200, "Portal hostname", typeof(object))]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Wizard")]
     [HttpGet("machine")]
     [AllowNotPayment]
@@ -537,11 +530,10 @@ public partial class SettingsController(MessageService messageService,
     /// Saves the DNS settings specified in the request to the current portal.
     /// </summary>
     /// <short>Save the DNS settings</short>
-    /// <category>Common settings</category>
     /// <param type="ASC.Web.Api.Models.DnsSettingsRequestsDto, ASC.Web.Api" name="inDto">DNS settings request parameters</param>
-    /// <returns type="System.Object, System">Message about changing DNS</returns>
     /// <path>api/2.0/settings/dns</path>
-    /// <httpMethod>PUT</httpMethod>
+    [Tags("Settings / Common settings")]
+    [SwaggerResponse(200, "Message about changing DNS", typeof(object))]
     [HttpPut("dns")]
     public async Task<object> SaveDnsSettingsAsync(DnsSettingsRequestsDto inDto)
     {
@@ -554,11 +546,9 @@ public partial class SettingsController(MessageService messageService,
     /// <short>
     /// Recalculate quota 
     /// </short>
-    /// <category>Quota</category>
     /// <path>api/2.0/settings/recalculatequota</path>
-    /// <httpMethod>GET</httpMethod>
-    /// <returns></returns>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Settings / Quota")]
     [HttpGet("recalculatequota")]
     public async Task RecalculateQuotaAsync()
     {
@@ -573,11 +563,10 @@ public partial class SettingsController(MessageService messageService,
     /// <short>
     /// Check quota recalculation
     /// </short>
-    /// <category>Quota</category>
-    /// <returns type="System.Boolean, System">Boolean value: true - quota recalculation process is enabled, false - quota recalculation process is disabled</returns>
     /// <path>api/2.0/settings/checkrecalculatequota</path>
-    /// <httpMethod>GET</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Settings / Quota")]
+    [SwaggerResponse(200, "Boolean value: true - quota recalculation process is enabled, false - quota recalculation process is disabled", typeof(bool))]
     [HttpGet("checkrecalculatequota")]
     public async Task<bool> CheckRecalculateQuotaAsync()
     {
@@ -593,10 +582,9 @@ public partial class SettingsController(MessageService messageService,
     /// <short>
     /// Get a portal logo
     /// </short>
-    /// <category>Common settings</category>
-    /// <returns type="System.Object, System">Portal logo image URL</returns>
     /// <path>api/2.0/settings/logo</path>
-    /// <httpMethod>GET</httpMethod>
+    [Tags("Settings / Common settings")]
+    [SwaggerResponse(200, "Portal logo image URL", typeof(object))]
     [HttpGet("logo")]
     public async Task<object> GetLogoAsync()
     {
@@ -607,11 +595,10 @@ public partial class SettingsController(MessageService messageService,
     /// Completes the Wizard settings.
     /// </summary>
     /// <short>Complete the Wizard settings</short>
-    /// <category>Common settings</category>
     /// <param type="ASC.Web.Api.ApiModel.RequestsDto.WizardRequestsDto, ASC.Web.Api" name="inDto">Wizard settings request parameters</param>
-    /// <returns type="ASC.Web.Core.Utility.Settings.WizardSettings, ASC.Web.Core">Wizard settings</returns>
     /// <path>api/2.0/settings/wizard/complete</path>
-    /// <httpMethod>PUT</httpMethod>
+    [Tags("Settings / Common settings")]
+    [SwaggerResponse(200, "Wizard settings", typeof(WizardSettings))]
     [AllowNotPayment]
     [HttpPut("wizard/complete")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Wizard")]
@@ -628,11 +615,9 @@ public partial class SettingsController(MessageService messageService,
     /// Closes the welcome pop-up notification.
     /// </summary>
     /// <short>Close the welcome pop-up notification</short>
-    /// <category>Common settings</category>
-    /// <returns></returns>
     /// <path>api/2.0/settings/welcome/close</path>
-    /// <httpMethod>PUT</httpMethod>
-    ///<visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Settings / Common settings")]
     [HttpPut("welcome/close")]
     public async Task CloseWelcomePopupAsync()
     {
@@ -653,11 +638,10 @@ public partial class SettingsController(MessageService messageService,
     /// Returns the portal color theme.
     /// </summary>
     /// <short>Get a color theme</short>
-    /// <category>Common settings</category>
-    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.CustomColorThemesSettingsDto, ASC.Web.Api">Settings of the portal themes</returns>
     /// <path>api/2.0/settings/colortheme</path>
-    /// <httpMethod>GET</httpMethod>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Settings / Common settings")]
+    [SwaggerResponse(200, "Settings of the portal themes", typeof(CustomColorThemesSettingsDto))]
     [AllowAnonymous, AllowNotPayment, AllowSuspended]
     [HttpGet("colortheme")]
     public async Task<CustomColorThemesSettingsDto> GetColorThemeAsync()
@@ -669,11 +653,10 @@ public partial class SettingsController(MessageService messageService,
     /// Saves the portal color theme specified in the request.
     /// </summary>
     /// <short>Save a color theme</short>
-    /// <category>Common settings</category>
     /// <param type="ASC.Web.Api.ApiModels.RequestsDto.CustomColorThemesSettingsRequestsDto, ASC.Web.Api" name="inDto">Portal theme settings</param>
-    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.CustomColorThemesSettingsDto, ASC.Web.Api">Portal theme settings</returns>
     /// <path>api/2.0/settings/colortheme</path>
-    /// <httpMethod>PUT</httpMethod>
+    [Tags("Settings / Common settings")]
+    [SwaggerResponse(200, "Portal theme settings", typeof(CustomColorThemesSettingsDto))]
     [HttpPut("colortheme")]
     public async Task<CustomColorThemesSettingsDto> SaveColorThemeAsync(CustomColorThemesSettingsRequestsDto inDto)
     {
@@ -743,11 +726,10 @@ public partial class SettingsController(MessageService messageService,
     /// Deletes the portal color theme with the ID specified in the request.
     /// </summary>
     /// <short>Delete a color theme</short>
-    /// <category>Common settings</category>
-    /// <param ype="System.Int32, System" name="id">Portal theme ID</param>
-    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.CustomColorThemesSettingsDto, ASC.Web.Api">Portal theme settings: custom color theme settings, selected or not, limit</returns>
+    /// <param ype="System.Int32, System" name="id" example="1234">Portal theme ID</param>
     /// <path>api/2.0/settings/colortheme</path>
-    /// <httpMethod>DELETE</httpMethod>
+    [Tags("Settings / Common settings")]
+    [SwaggerResponse(200, "Portal theme settings: custom color theme settings, selected or not, limit", typeof(CustomColorThemesSettingsDto))]
     [HttpDelete("colortheme")]
     public async Task<CustomColorThemesSettingsDto> DeleteColorThemeAsync(int id)
     {
@@ -777,10 +759,8 @@ public partial class SettingsController(MessageService messageService,
     /// Closes the admin helper notification.
     /// </summary>
     /// <short>Close the admin helper notification</short>
-    /// <category>Common settings</category>
-    /// <returns></returns>
     /// <path>api/2.0/settings/closeadminhelper</path>
-    /// <httpMethod>PUT</httpMethod>
+    [Tags("Settings / Common settings")]
     [HttpPut("closeadminhelper")]
     public async Task CloseAdminHelperAsync()
     {
@@ -798,14 +778,13 @@ public partial class SettingsController(MessageService messageService,
     /// Sets the portal time zone and language specified in the request.
     /// </summary>
     /// <short>Set time zone and language</short>
-    /// <category>Common settings</category>
     /// <param type="ASC.Web.Api.ApiModel.RequestsDto.SettingsRequestsDto, ASC.Web.Api" name="inDto">Settings request parameters</param>
-    /// <returns type="System.Object, System">Message about saving settings successfully</returns>
     /// <path>api/2.0/settings/timeandlanguage</path>
-    /// <httpMethod>PUT</httpMethod>
-    ///<visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Settings / Common settings")]
+    [SwaggerResponse(200, "Message about saving settings successfully", typeof(object))]
     [HttpPut("timeandlanguage")]
-    public async Task<object> TimaAndLanguageAsync(SettingsRequestsDto inDto)
+    public async Task<object> TimaAndLanguageAsync(TimeZoneRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -848,14 +827,13 @@ public partial class SettingsController(MessageService messageService,
     /// Sets the default product page.
     /// </summary>
     /// <short>Set the default product page</short>
-    /// <category>Common settings</category>
     /// <param type="ASC.Web.Api.ApiModel.RequestsDto.SettingsRequestsDto, ASC.Web.Api" name="inDto">Settings request parameters</param>
-    /// <returns type="System.Object, System">Message about saving settings successfully</returns>
     /// <path>api/2.0/settings/defaultpage</path>
-    /// <httpMethod>PUT</httpMethod>
-    ///<visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Settings / Common settings")]
+    [SwaggerResponse(200, "Message about saving settings successfully", typeof(object))]
     [HttpPut("defaultpage")]
-    public async Task<object> SaveDefaultPageSettingAsync(SettingsRequestsDto inDto)
+    public async Task<object> SaveDefaultPageSettingAsync(DefaultProductRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -870,11 +848,10 @@ public partial class SettingsController(MessageService messageService,
     /// Updates the email activation settings.
     /// </summary>
     /// <short>Update the email activation settings</short>
-    /// <category>Common settings</category>
     /// <param type="ASC.Web.Studio.Core.EmailActivationSettings, ASC.Web.Studio.Core" name="inDto">Email activation settings</param>
-    /// <returns type="ASC.Web.Studio.Core.EmailActivationSettings, ASC.Web.Studio.Core">Updated email activation settings</returns>
     /// <path>api/2.0/settings/emailactivation</path>
-    /// <httpMethod>PUT</httpMethod>
+    [Tags("Settings / Common settings")]
+    [SwaggerResponse(200, "Updated email activation settings", typeof(EmailActivationSettings))]
     [HttpPut("emailactivation")]
     public async Task<EmailActivationSettings> UpdateEmailActivationSettingsAsync(EmailActivationSettings inDto)
     {
@@ -885,13 +862,12 @@ public partial class SettingsController(MessageService messageService,
     /// <summary>
     /// Returns the space usage statistics of the module with the ID specified in the request.
     /// </summary>
-    /// <category>Statistics</category>
     /// <short>Get the space usage statistics</short>
-    /// <param ype="System.Guid, System" method="url" name="id">Module ID</param>
-    /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.UsageSpaceStatItemDto, ASC.Web.Api">Module space usage statistics</returns>
+    /// <param ype="System.Guid, System" method="url" name="id" example="9924256A-739C-462b-AF15-E652A3B1B6EB">Module ID</param>
     /// <path>api/2.0/settings/statistics/spaceusage/{id}</path>
-    /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    [Tags("Settings / Statistics")]
+    [SwaggerResponse(200, "Module space usage statistics", typeof(UsageSpaceStatItemDto))]
     [HttpGet("statistics/spaceusage/{id:guid}")]
     public async Task<List<UsageSpaceStatItemDto>> GetSpaceUsageStatistics(Guid id)
     {
@@ -923,14 +899,13 @@ public partial class SettingsController(MessageService messageService,
     /// <summary>
     /// Returns the user visit statistics for the period specified in the request.
     /// </summary>
-    /// <category>Statistics</category>
     /// <short>Get the visit statistics</short>
-    /// <param type="ASC.Api.Core.ApiDateTime, ASC.Api.Core" name="fromDate">Start period date</param>
-    /// <param type="ASC.Api.Core.ApiDateTime, ASC.Api.Core" name="toDate">End period date</param>
-    /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.ChartPointDto, ASC.Web.Api">List of point charts</returns>
+    /// <param type="ASC.Api.Core.ApiDateTime, ASC.Api.Core" name="fromDate" example="2008-04-10T06-30-00.000Z">Start period date</param>
+    /// <param type="ASC.Api.Core.ApiDateTime, ASC.Api.Core" name="toDate" example="2008-04-10T06-30-00.000Z">End period date</param>
     /// <path>api/2.0/settings/statistics/visit</path>
-    /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    [Tags("Settings / Statistics")]
+    [SwaggerResponse(200, "List of point charts", typeof(ChartPointDto))]
     [HttpGet("statistics/visit")]
     public async Task<List<ChartPointDto>> GetVisitStatisticsAsync(ApiDateTime fromDate, ApiDateTime toDate)
     {
@@ -989,11 +964,10 @@ public partial class SettingsController(MessageService messageService,
     /// <summary>
     /// Returns the socket settings.
     /// </summary>
-    /// <category>Common settings</category>
     /// <short>Get the socket settings</short>
     /// <path>api/2.0/settings/socket</path>
-    /// <httpMethod>GET</httpMethod>
-    /// <returns type="System.Object, System">Socket settings: hub URL</returns>
+    [Tags("Settings / Common settings")]
+    [SwaggerResponse(200, "Socket settings: hub URL", typeof(object))]
     [HttpGet("socket")]
     public object GetSocketSettings()
     {
@@ -1012,12 +986,11 @@ public partial class SettingsController(MessageService messageService,
     /*/// <summary>
     /// Returns the tenant Control Panel settings.
     /// </summary>
-    /// <category>Common settings</category>
     /// <short>Get the tenant Control Panel settings</short>
-    /// <returns type="ASC.Core.Tenants.TenantControlPanelSettings, ASC.Core.Common">Tenant Control Panel settings</returns>
+
     /// <path>api/2.0/settings/controlpanel</path>
-    /// <httpMethod>GET</httpMethod>
-    ///<visible>false</visible>
+
+    [ApiExplorerSettings(IgnoreApi = true)]
     [HttpGet("controlpanel")]
     public TenantControlPanelSettings GetTenantControlPanelSettings()
     {
@@ -1027,12 +1000,11 @@ public partial class SettingsController(MessageService messageService,
     /// <summary>
     /// Returns the authorization services.
     /// </summary>
-    /// <category>Authorization</category>
     /// <short>Get the authorization services</short>
     /// <path>api/2.0/settings/authservice</path>
-    /// <httpMethod>GET</httpMethod>
-    /// <returns type="ASC.Web.Api.ApiModel.RequestsDto.AuthServiceRequestsDto, ASC.Web.Api">Authorization services</returns>
     /// <collection>list</collection>
+    [Tags("Settings / Authorization")]
+    [SwaggerResponse(200, "Authorization services", typeof(AuthServiceRequestsDto))]
     [HttpGet("authservice")]
     public async Task<IEnumerable<AuthServiceRequestsDto>> GetAuthServices()
     {
@@ -1049,12 +1021,11 @@ public partial class SettingsController(MessageService messageService,
     /// <summary>
     /// Saves the authorization keys.
     /// </summary>
-    /// <category>Authorization</category>
     /// <short>Save the authorization keys</short>
     /// <param type="ASC.Web.Api.ApiModel.RequestsDto.AuthServiceRequestsDto, ASC.Web.Api" name="inDto">Request parameters for authorization service</param>
     /// <path>api/2.0/settings/authservice</path>
-    /// <httpMethod>POST</httpMethod>
-    /// <returns type="System.Boolean, System">Boolean value: true if the authorization keys are changed</returns>
+    [Tags("Settings / Authorization")]
+    [SwaggerResponse(200, "Boolean value: true if the authorization keys are changed", typeof(bool))]
     [HttpPost("authservice")]
     public async Task<bool> SaveAuthKeys(AuthServiceRequestsDto inDto)
     {
@@ -1111,11 +1082,10 @@ public partial class SettingsController(MessageService messageService,
     /// <summary>
     /// Returns the portal payment settings.
     /// </summary>
-    /// <category>Common settings</category>
     /// <short>Get the payment settings</short>
     /// <path>api/2.0/settings/payment</path>
-    /// <httpMethod>GET</httpMethod>
-    /// <returns type="System.Object, System">Payment settings: sales email, feedback and support URL, link to pay for a portal, Standalone or not, current license, maximum quota quantity</returns>
+    [Tags("Settings / Common settings")]
+    [SwaggerResponse(200, "Payment settings: sales email, feedback and support URL, link to pay for a portal, Standalone or not, current license, maximum quota quantity", typeof(object))]
     [AllowNotPayment]
     [HttpGet("payment")]
     public async Task<object> PaymentSettingsAsync()
@@ -1149,12 +1119,11 @@ public partial class SettingsController(MessageService messageService,
     /// <summary>
     /// Returns a link that will connect TelegramBot to your account.
     /// </summary>
-    /// <category>Telegram</category>
     /// <short>Get the Telegram link</short>
     /// <path>api/2.0/settings/telegramlink</path>
-    /// <httpMethod>GET</httpMethod>
-    /// <returns type="System.Object, System">Telegram link</returns>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Settings / Telegram")]
+    [SwaggerResponse(200, "Telegram link", typeof(object))]
     [HttpGet("telegramlink")]
     public async Task<object> TelegramLink()
     {
@@ -1173,12 +1142,11 @@ public partial class SettingsController(MessageService messageService,
     /// <summary>
     /// Checks if the user has connected to TelegramBot.
     /// </summary>
-    /// <category>Telegram</category>
     /// <short>Check the Telegram connection</short>
     /// <path>api/2.0/settings/telegramisconnected</path>
-    /// <httpMethod>GET</httpMethod>
-    /// <returns type="System.Object, System">Operation result: 0 - not connected, 1 - connected, 2 - awaiting confirmation</returns>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Settings / Telegram")]
+    [SwaggerResponse(200, "Operation result: 0 - not connected, 1 - connected, 2 - awaiting confirmation", typeof(object))]
     [HttpGet("telegramisconnected")]
     public async Task<object> TelegramIsConnectedAsync()
     {
@@ -1189,12 +1157,10 @@ public partial class SettingsController(MessageService messageService,
     /// <summary>
     /// Unlinks TelegramBot from your account.
     /// </summary>
-    /// <category>Telegram</category>
     /// <short>Unlink Telegram</short>
     /// <path>api/2.0/settings/telegramdisconnect</path>
-    /// <httpMethod>DELETE</httpMethod>
-    /// <returns></returns>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Settings / Telegram")]
     [HttpDelete("telegramdisconnect")]
     public async Task TelegramDisconnectAsync()
     {

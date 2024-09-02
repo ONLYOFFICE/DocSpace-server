@@ -29,6 +29,7 @@ namespace ASC.Migration.Core.Models.Api;
 [ProtoContract]
 public abstract class ImportableApiEntity
 {
+    [SwaggerSchemaCustom("Should import")]
     [ProtoMember(1)]
     public bool ShouldImport { get; set; }
 }

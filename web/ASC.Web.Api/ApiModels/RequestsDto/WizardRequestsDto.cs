@@ -26,32 +26,24 @@
 
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
-/// <summary>
-/// </summary>
 public class WizardRequestsDto
 {
-    /// <summary>Email</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Email")]
     public string Email { get; set; }
 
-    /// <summary>Password hash</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Password hash")]
     public string PasswordHash { get; set; }
 
-    /// <summary>Language</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Language")]
     public string Lng { get; set; }
 
-    /// <summary>Time zone</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Time zone")]
     public string TimeZone { get; set; }
 
-    /// <summary>AMI ID</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("AMI ID")]
     public string AmiId { get; set; }
 
-    /// <summary>Subscribed from the site or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Subscribed from the site or not")]
     public bool SubscribeFromSite { get; set; }
 
     public void Deconstruct(out string email, out string passwordHash, out string lng, out string timeZone, out string amiid, out bool subscribeFromSite)

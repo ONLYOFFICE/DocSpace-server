@@ -26,85 +26,62 @@
 
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
-/// <summary>
-/// </summary>
 public class AuthRequestsDto
 {
-    /// <summary>Username / email</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Username / email")]
     public string UserName { get; set; }
 
-    /// <summary>Password</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Password")]
     public string Password { get; set; }
 
-    /// <summary>Password hash</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Password hash")]
     public string PasswordHash { get; set; }
 
-    /// <summary>Provider type</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Provider type")]
     public string Provider { get; set; }
 
-    /// <summary>Provider access token</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Provider access token")]
     public string AccessToken { get; set; }
 
-    /// <summary>Serialized user profile</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Serialized user profile")]
     public string SerializedProfile { get; set; }
 
-    /// <summary>Two-factor authentication code</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Two-factor authentication code")]
     public string Code { get; set; }
 
-    /// <summary>Code for getting a token</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Code for getting a token")]
     public string CodeOAuth { get; set; }
 
-    /// <summary>Session based authentication or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Session based authentication or not")]
     public bool Session { get; set; }
 
-    /// <summary>Confirmation data</summary>
-    /// <type>ASC.Web.Api.ApiModel.RequestsDto.ConfirmData, ASC.Web.Api</type>
+    [SwaggerSchemaCustom("Confirmation data")]
     public ConfirmData ConfirmData { get; set; }
 
-    /// <summary>Type of captcha</summary>
-    /// <type>ASC.Web.Core.RecaptchaType, ASC.Web.Core</type>
+    [SwaggerSchemaCustom("Type of captcha")]
     public RecaptchaType RecaptchaType { get; set; }
 
-    /// <summary>reCAPTCHA response</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("reCAPTCHA response")]
     public string RecaptchaResponse { get; set; }
-    
-    /// <summary>Culture</summary>
-    /// <type>System.String, System</type>
+
+    [SwaggerSchemaCustom("Culture")]
     public string Culture { get; set; }
 }
 
-/// <summary>
-/// </summary>
 public class MobileRequestsDto
 {
-    /// <summary>Mobile phone</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Mobile phone")]
     public string MobilePhone { get; set; }
 }
 
-/// <summary>
-/// </summary>
 public class ConfirmData
 {
-    /// <summary>Email address</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Email address")]
     public string Email { get; set; }
 
-    /// <summary>Access an account for the first time or not</summary>
-    /// <type>System.Nullable{System.Boolean}, System</type>
+    [SwaggerSchemaCustom("Access an account for the first time or not")]
     public bool? First { get; set; }
 
-    /// <summary>Key</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Key")]
     public string Key { get; set; }
 }

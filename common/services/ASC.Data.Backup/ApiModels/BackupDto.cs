@@ -26,21 +26,14 @@
 
 namespace ASC.Data.Backup.ApiModels;
 
-/// <summary>
-/// </summary>
 public class BackupDto
 {
-    /// <summary>Storage type</summary>
-    /// <type>System.String, System</type>
-    /// <example>Documents</example>
+    [SwaggerSchemaCustom("Storage type")]
     public BackupStorageType? StorageType { get; set; }
 
-    /// <summary>Storage parameters</summary>
-    /// <type>System.Collections.Generic.IEnumerable{ASC.Api.Collections.ItemKeyValuePair{System.Object, System.Object}}, System.Collections.Generic</type>
+    [SwaggerSchemaCustom("Storage parameters")]
     public IEnumerable<ItemKeyValuePair<object, object>> StorageParams { get; set; }
 
-    /// <summary>Specifies if a dump will be created or not</summary>
-    /// <type>System.Boolean, System</type>
-    /// <example>true</example>
+    [SwaggerSchemaCustom("Specifies if a dump will be created or not")]
     public bool Dump { get; set; }
 }

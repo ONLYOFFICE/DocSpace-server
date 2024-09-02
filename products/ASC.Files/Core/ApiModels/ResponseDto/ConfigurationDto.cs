@@ -26,172 +26,211 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
-/// <summary>
-/// </summary>
 public class ConfigurationDto<T>
 {
-    /// <summary>Document config</summary>
-    /// <type>ASC.Web.Files.Services.DocumentService.DocumentConfig, ASC.Files.Core</type>
+    [SwaggerSchemaCustom("Document config")]
     public DocumentConfigDto Document { get; set; }
 
-    /// <summary>Document type</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Document type")]
     public string DocumentType { get; set; }
 
-    /// <summary>Editor config</summary>
-    /// <type>ASC.Web.Files.Services.DocumentService.EditorConfiguration, ASC.Files.Core</type>
+    [SwaggerSchemaCustom("Editor config")]
     public EditorConfigurationDto<T> EditorConfig { get; set; }
 
-    /// <summary>Editor type</summary>
-    /// <type>ASC.Web.Files.Services.DocumentService.EditorType, ASC.Files.Core</type>
+    [SwaggerSchemaCustom("Editor type")]
     public EditorType EditorType { get; set; }
 
-    /// <summary>Editor URL</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Editor URL", Format = "uri")]
     public string EditorUrl { get; set; }
 
-    /// <summary>Token</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Token")]
     public string Token { get; set; }
 
-    /// <summary>Platform type</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Platform type")]
     public string Type { get; set; }
 
-    /// <summary>File parameters</summary>
-    /// <type>ASC.Files.Core.ApiModels.ResponseDto.FileDto, ASC.Files.Core</type>
+    [SwaggerSchemaCustom("File parameters")]
     public FileDto<T> File { get; set; }
 
-    /// <summary>Error message</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Error message")]
     public string ErrorMessage { get; set; }
 
-    /// <summary>Specifies if the filling has started or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if the filling has started or not")]
     public bool? StartFilling { get; set; }
 
-    /// <summary>Filling session Id</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Filling session Id")]
     public string FillingSessionId { get; set; }
 }
 
 public class EditorConfigurationDto<T>
 {
+    [SwaggerSchemaCustom("Callback url", Format = "uri")]
     public string CallbackUrl { get; set; }
 
+    [SwaggerSchemaCustom("Co editing")]
     public CoEditingConfig CoEditing { get; set; }
 
+    [SwaggerSchemaCustom("Create url", Format = "uri")]
     public string CreateUrl { get; set; }
 
+    [SwaggerSchemaCustom("Customization")]
     public CustomizationConfigDto<T> Customization { get; set; }
 
+    [SwaggerSchemaCustom("Embedded")]
     public EmbeddedConfig Embedded { get; set; }
 
+    [SwaggerSchemaCustom("Encryption keys")]
     public EncryptionKeysConfig EncryptionKeys { get; set; }
-    
+
+    [SwaggerSchemaCustom("Lang")]
     public string Lang { get; set; }
 
+    [SwaggerSchemaCustom("Mode")]
     public string Mode { get; set; }
-    
+
+    [SwaggerSchemaCustom("Mode write")]
     public bool ModeWrite { get; set; }
 
+    [SwaggerSchemaCustom("Plugins")]
     public PluginsConfig Plugins { get; set; }
 
+    [SwaggerSchemaCustom("Recent")]
     public List<RecentConfig> Recent { get; set; }
-    
+
+    [SwaggerSchemaCustom("Templates")]
     public List<TemplatesConfig> Templates { get; set; }
 
+    [SwaggerSchemaCustom("User")]
     public UserConfig User { get; set; }
 }
 public class CustomizationConfigDto<T>
 {
+    [SwaggerSchemaCustom("About")]
     public bool About { get; set; }
 
+    [SwaggerSchemaCustom("Customer")]
     public CustomerConfigDto Customer { get; set; }
+
+    [SwaggerSchemaCustom("Anonymous")]
     public AnonymousConfigDto Anonymous { get; set; }
 
+    [SwaggerSchemaCustom("Feedback")]
     public FeedbackConfig Feedback  { get; set; }
 
+    [SwaggerSchemaCustom("Forcesave")]
     public bool? Forcesave { get; set; }
 
+    [SwaggerSchemaCustom("Go back")]
     public GobackConfig Goback { get; set; }
 
+    [SwaggerSchemaCustom("Logo")]
     public LogoConfigDto Logo { get; set; }
 
+    [SwaggerSchemaCustom("MentionShare")]
     public bool MentionShare { get; set; }
 
+    [SwaggerSchemaCustom("Review display")]
     public string ReviewDisplay { get; set; }
 
+    [SwaggerSchemaCustom("Submit form")]
     public bool SubmitForm { get; set; }
 }
 
 public class LogoConfigDto
 {
+    [SwaggerSchemaCustom("Image")]
     public string Image { get; set; }
 
+    [SwaggerSchemaCustom("Image dark")]
     public string ImageDark { get; set; }
 
+    [SwaggerSchemaCustom("Image embedded")]
     public string ImageEmbedded { get; set; }
 
+    [SwaggerSchemaCustom("Url", Format = "uri")]
     public string Url { get; set; }
+
+    [SwaggerSchemaCustom("Visible")]
     public bool Visible { get; set; }
 }
 
 public class AnonymousConfigDto
 {
+    [SwaggerSchemaCustom("Request")]
     public bool Request { get; set; }
 }
 
 public class CustomerConfigDto
 {
+    [SwaggerSchemaCustom("Address")]
     public string Address { get; set; }
 
+    [SwaggerSchemaCustom("Logo")]
     public string Logo { get; set; }
 
     public string LogoDark { get; set; }
 
+    [SwaggerSchemaCustom("Mail")]
     public string Mail { get; set; }
 
+    [SwaggerSchemaCustom("Name")]
     public string Name  { get; set; }
 
+    [SwaggerSchemaCustom("Www")]
     public string Www  { get; set; }
 }
 
 public class DocumentConfigDto
 {
+    [SwaggerSchemaCustom("File type")]
     public string FileType  { get; set; }
-    
+
+    [SwaggerSchemaCustom("Info")]
     public InfoConfigDto Info { get; set; }
-    
+
+    [SwaggerSchemaCustom("Is linked for me")]
     public bool IsLinkedForMe { get; set; }
 
+    [SwaggerSchemaCustom("Key")]
     public string Key { get; set; }
 
+    [SwaggerSchemaCustom("Permissions")]
     public PermissionsConfig Permissions { get; set; }
-    
+
+    [SwaggerSchemaCustom("Shared link param")]
     public string SharedLinkParam { get; set; }
-    
+
+    [SwaggerSchemaCustom("Shared link key")]
     public string SharedLinkKey { get; set; }
-    
+
+    [SwaggerSchemaCustom("Reference data")]
     public FileReferenceData ReferenceData { get; set; }
 
+    [SwaggerSchemaCustom("Title")]
     public string Title { get; set; }
 
+    [SwaggerSchemaCustom("Url", Format = "uri")]
     public string Url { get; set; }
 }
 
 public class InfoConfigDto
 {
+    [SwaggerSchemaCustom("Favorite")]
     public bool? Favorite { get; set; }
 
+    [SwaggerSchemaCustom("Folder")]
     public string Folder { get; set; }
 
+    [SwaggerSchemaCustom("Owner")]
     public string Owner { get; set; }
 
+    [SwaggerSchemaCustom("Sharing settings")]
     public List<AceShortWrapper> SharingSettings{ get; set; }
-    
+
+    [SwaggerSchemaCustom("Type")]
     public EditorType Type { get; set; }
 
+    [SwaggerSchemaCustom("Uploaded")]
     public string Uploaded { get; set; }
 }
 

@@ -26,69 +26,61 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
-/// <summary>
-/// </summary>
+public class FileBaseBatchRequestDto
+{
+    [SwaggerSchemaCustom("List of file IDs")]
+    public IEnumerable<JsonElement> FileIds { get; set; } = new List<JsonElement>();
+}
 public class BaseBatchRequestDto
 {
-    /// <summary>List of folder IDs</summary>
-    /// <type>System.Collections.Generic.IEnumerable{System.Text.Json.JsonElement}, System.Collections.Generic</type>
+    [SwaggerSchemaCustom("List of folder IDs")]
     public IEnumerable<JsonElement> FolderIds { get; set; } = new List<JsonElement>();
 
-    /// <summary>List of file IDs</summary>
-    /// <type>System.Collections.Generic.IEnumerable{System.Text.Json.JsonElement}, System.Collections.Generic</type>
+    [SwaggerSchemaCustom("List of file IDs")]
     public IEnumerable<JsonElement> FileIds { get; set; } = new List<JsonElement>();
 }
 
-/// <summary>
-/// </summary>
 public class DownloadRequestDto : BaseBatchRequestDto
 {
-    /// <summary>List of file IDs which will be converted</summary>
-    /// <type>System.Collections.Generic.IEnumerable{ASC.Api.Collections.ItemKeyValuePair{System.Text.Json.JsonElement, System.String}}, System.Collections.Generic</type>
+    [SwaggerSchemaCustom("List of file IDs which will be converted")]
     public IEnumerable<ItemKeyValuePair<JsonElement, string>> FileConvertIds { get; set; } = new List<ItemKeyValuePair<JsonElement, string>>();
 }
 
-/// <summary>
-/// </summary>
 public class DeleteBatchRequestDto : BaseBatchRequestDto
 {
-    /// <summary>Specifies whether to delete a file after the editing session is finished or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies whether to delete a file after the editing session is finished or not")]
     public bool DeleteAfter { get; set; }
 
-    /// <summary>Specifies whether to move a file to the "Trash" folder or delete it immediately</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies whether to move a file to the \"Trash\" folder or delete it immediately")]
     public bool Immediately { get; set; }
 }
 
-/// <summary>
-/// </summary>
 public class DeleteRequestDto
 {
-    /// <summary>Specifies whether to delete a file after the editing session is finished or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies whether to delete a file after the editing session is finished or not")]
     public bool DeleteAfter { get; set; }
 
-    /// <summary>Specifies whether to move a file to the "Trash" folder or delete it immediately</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies whether to move a file to the \"Trash\" folder or delete it immediately")]
     public bool Immediately { get; set; }
 }
 
-/// <summary>
-/// </summary>
 public class BatchRequestDto : BaseBatchRequestDto
 {
-    /// <summary>Destination folder ID</summary>
-    /// <type>System.Text.Json.JsonElement, System.Text.Json</type>
+    [SwaggerSchemaCustom("Destination folder ID", Format = "json")]
     public JsonElement DestFolderId { get; set; }
 
-    /// <summary>Overwriting behavior</summary>
-    /// <type>ASC.Web.Files.Services.WCFService.FileOperations.FileConflictResolveType, ASC.Files.Core</type>
+    [SwaggerSchemaCustom("Overwriting behavior")]
     public FileConflictResolveType ConflictResolveType { get; set; }
 
-    /// <summary>Specifies whether to delete a folder after the editing session is finished or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies whether to delete a folder after the editing session is finished or not")]
     public bool DeleteAfter { get; set; }
 
+    [SwaggerSchemaCustom("Content")]
     public bool Content { get; set; }
+}
+
+public class BatchSimpleRequestDto : BaseBatchRequestDto
+{
+    [SwaggerSchemaCustom("Destination folder ID", Format = "json")]
+    public JsonElement DestFolderId { get; set; }
 }

@@ -45,3 +45,4 @@ global using Microsoft.AspNetCore.Http.Extensions;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.Logging;
+global using ASC.Api.Core.Extensions;

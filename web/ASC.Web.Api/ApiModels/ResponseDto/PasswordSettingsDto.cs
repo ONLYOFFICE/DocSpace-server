@@ -28,20 +28,28 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class PasswordSettingsDto
 {
+    [SwaggerSchemaCustom("Min length")]
     public int MinLength { get; set; }
-    
+
+    [SwaggerSchemaCustom("Upper case")]
     public bool UpperCase { get; set; }
 
+    [SwaggerSchemaCustom("Digits")]
     public bool Digits { get; set; }
-    
+
+    [SwaggerSchemaCustom("Spec symbols")]
     public bool SpecSymbols { get; set; }
-    
+
+    [SwaggerSchemaCustom("Allowed characters regex str")]
     public string AllowedCharactersRegexStr { get; set; }
-    
+
+    [SwaggerSchemaCustom("Digits regex str")]
     public string DigitsRegexStr { get; set; }
 
+    [SwaggerSchemaCustom("Upper case regex str")]
     public string UpperCaseRegexStr { get; set; }
 
+    [SwaggerSchemaCustom("Spec symbols regex str")]
     public string SpecSymbolsRegexStr { get; set; }
 }
 

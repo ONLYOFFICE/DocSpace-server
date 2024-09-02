@@ -26,100 +26,75 @@
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
-/// <summary>
-/// </summary>
 public class TenantDto : IMapFrom<Tenant>
 {
-    /// <summary>Affiliate ID</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Affiliate ID")]
     public string AffiliateId { get; set; }
 
-    /// <summary>Tenant alias</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Tenant alias")]
     public string TenantAlias { get; set; }
 
-    /// <summary>Specifies if the calls are available for this tenant or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if the calls are available for this tenant or not")]
     public bool Calls { get; set; }
 
-    /// <summary>Campaign</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Campaign")]
     public string Campaign { get; set; }
 
-    /// <summary>Creation date and time</summary>
-    /// <type>System.DateTime, System</type>
+    [SwaggerSchemaCustom("Creation date and time")]
     public DateTime CreationDateTime { get; internal set; }
 
-    /// <summary>Hosted region</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Hosted region")]
     public string HostedRegion { get; set; }
 
-    /// <summary>Tenant ID</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustom("Tenant ID")]
     public int TenantId { get; internal set; }
 
-    /// <summary>Tenant industry</summary>
-    /// <type>ASC.Core.Tenants.TenantIndustry, ASC.Core.Common</type>
+    [SwaggerSchemaCustom("Tenant industry")]
     public TenantIndustry Industry { get; set; }
 
-    /// <summary>Language</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Language")]
     public string Language { get; set; }
 
-    /// <summary>Last modified date</summary>
-    /// <type>System.DateTime, System</type>
+    [SwaggerSchemaCustom("Last modified date")]
     public DateTime LastModified { get; set; }
 
-    /// <summary>Mapped domain</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Mapped domain")]
     public string MappedDomain { get; set; }
 
-    /// <summary>Name</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Name")]
     public string Name { get; set; }
 
-    /// <summary>Owner ID</summary>
-    /// <type>System.Guid, System</type>
+    [SwaggerSchemaCustom("Owner ID")]
     public Guid OwnerId { get; set; }
 
-    /// <summary>Payment ID</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Payment ID")]
     public string PaymentId { get; set; }
 
-    /// <summary>Specifies if the ONLYOFFICE newsletter is allowed or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if the ONLYOFFICE newsletter is allowed or not")]
     public bool Spam { get; set; }
 
-    /// <summary>Tenant status</summary>
-    /// <type>ASC.Core.Tenants;.TenantStatus, ASC.Core.Common</type>
+    [SwaggerSchemaCustom("Tenant status")]
     public TenantStatus Status { get; internal set; }
 
-    /// <summary>The date and time when the tenant status was changed</summary>
-    /// <type>System.DateTime, System</type>
+    [SwaggerSchemaCustom("The date and time when the tenant status was changed")]
     public DateTime StatusChangeDate { get; internal set; }
 
-    /// <summary>Time zone</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Time zone")]
     public string TimeZone { get; set; }
 
-    /// <summary>List of trusted domains</summary>
-    /// <type>System.Collections.Generic.List{System.String}, System.Collections.Generic</type>
+    [SwaggerSchemaCustom("List of trusted domains")]
     public List<string> TrustedDomains { get; set; }
 
-    /// <summary>Trusted domains in the string format</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Trusted domains in the string format")]
     public string TrustedDomainsRaw { get; set; }
 
-    /// <summary>Trusted domains type</summary>
-    /// <type>ASC.Core.Tenants.TenantTrustedDomainsType, ASC.Core.Common</type>
+    [SwaggerSchemaCustom("Trusted domains type")]
     public TenantTrustedDomainsType TrustedDomainsType { get; set; }
 
-    /// <summary>Version</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustom("Version")]
     public int Version { get; set; }
 
-    /// <summary>The date and time when the tenant version was changed</summary>
-    /// <type>System.DateTime, System</type>
+    [SwaggerSchemaCustom("The date and time when the tenant version was changed")]
     public DateTime VersionChanged { get; set; }
 
     public void Mapping(Profile profile)

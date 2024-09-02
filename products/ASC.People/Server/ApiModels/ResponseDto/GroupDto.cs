@@ -24,41 +24,37 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.ComponentModel;
+
 namespace ASC.People.ApiModels.ResponseDto;
 
-/// <summary>
-/// </summary>
 public class GroupDto
 {
-    /// <summary>Name</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Name")]
     public string Name { get; set; }
 
-    /// <summary>Parent</summary>
-    /// <type>System.Nullable{System.Guid}, System</type>
+    [SwaggerSchemaCustom("Parent")]
     public Guid? Parent { get; set; }
 
-    /// <summary>Category</summary>
-    /// <type>System.Guid, System</type>
+    [SwaggerSchemaCustom("Category")]
     public Guid Category { get; set; }
 
-    /// <summary>ID</summary>
-    /// <type>System.Guid, System</type>
+    [SwaggerSchemaCustom("ID")]
     public Guid Id { get; set; }
 
-    /// <summary>Specifies if the LDAP settings are enabled for the group or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if the LDAP settings are enabled for the group or not")]
     public bool IsLDAP { get; set; }
 
-    /// <summary>Manager</summary>
-    /// <type>ASC.Web.Api.Models.EmployeeDto, ASC.Api.Core</type>
+    [SwaggerSchemaCustom("Manager")]
     public EmployeeFullDto Manager { get; set; }
 
-    /// <summary>List of members</summary>
-    /// <type>System.Collections.Generic.List{ASC.Web.Api.Models.EmployeeDto,}, System.Collections.Generic</type>
+    [SwaggerSchemaCustom(Description = "List of members")]
     public List<EmployeeFullDto> Members { get; set; }
-    
+
+    [SwaggerSchemaCustom("Shared")]
     public bool? Shared { get; set; }
+
+    [SwaggerSchemaCustom("Members count")]
     public int MembersCount { get; set; }
 }
 

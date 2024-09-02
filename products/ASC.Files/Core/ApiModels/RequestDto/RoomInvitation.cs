@@ -26,13 +26,11 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
-/// <summary>
-/// </summary>
 public class RoomInvitation : EmailInvitationDto
 {
-    /// <summary>ID of the user with whom we want to share a room</summary>
+    [SwaggerSchemaCustom("ID of the user with whom we want to share a room")]
     public Guid Id { get; set; }
 
-    /// <summary>Sharing rights (None, ReadWrite, Read, Restrict, Varies, Review, Comment, FillForms, CustomFilter, RoomAdmin, Editing)</summary>
+    [SwaggerSchemaCustom("Sharing rights")]
     public FileShare Access { get; set; }
 }

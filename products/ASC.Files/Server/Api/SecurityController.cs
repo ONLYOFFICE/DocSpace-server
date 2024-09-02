@@ -61,13 +61,12 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// Returns the detailed information about the shared file with the ID specified in the request.
     /// </summary>
     /// <short>Get the shared file information</short>
-    /// <category>Sharing</category>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">List of shared file information</returns>
+    /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
     /// <path>api/2.0/files/file/{fileId}/share</path>
-    /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Files / Sharing")]
+    [SwaggerResponse(200, "List of shared file information", typeof(FileShareDto))]
     [HttpGet("file/{fileId}/share")]
     public async IAsyncEnumerable<FileShareDto> GetFileSecurityInfoAsync(T fileId)
     {
@@ -81,13 +80,12 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// Returns the detailed information about the shared folder with the ID specified in the request.
     /// </summary>
     /// <short>Get the shared folder information</short>
-    /// <param type="System.Int32, System" method="url" name="folderId">Folder ID</param>
-    /// <category>Sharing</category>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">List of shared folder information</returns>
+    /// <param type="System.Int32, System" method="url" name="folderId" example="1234">Folder ID</param>
     /// <path>api/2.0/files/folder/{folderId}/share</path>
-    /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Files / Sharing")]
+    [SwaggerResponse(200, "List of shared file information", typeof(FileShareDto))]
     [HttpGet("folder/{folderId}/share")]
     public async IAsyncEnumerable<FileShareDto> GetFolderSecurityInfoAsync(T folderId)
     {
@@ -100,17 +98,16 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// <summary>
     /// Sets the sharing settings to a file with the ID specified in the request.
     /// </summary>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
+    /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.SecurityInfoRequestDto, ASC.Files.Core" name="inDto">Security information request parameters</param>
     /// <short>Share a file</short>
-    /// <category>Sharing</category>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">List of shared file information: sharing rights, a user who has the access to the specified file, the file is locked by this user or not, this user is an owner of the specified file or not, this user can edit the access to the specified file or not</returns>
     /// <path>api/2.0/files/file/{fileId}/share</path>
-    /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Files / Sharing")]
+    [SwaggerResponse(200, "List of shared file information: sharing rights, a user who has the access to the specified file, the file is locked by this user or not, this user is an owner of the specified file or not, this user can edit the access to the specified file or not", typeof(FileShareDto))]
     [HttpPut("file/{fileId}/share")]
-    public async IAsyncEnumerable<FileShareDto> SetFileSecurityInfoAsync(T fileId, SecurityInfoRequestDto inDto)
+    public async IAsyncEnumerable<FileShareDto> SetFileSecurityInfoAsync(T fileId, SecurityInfoSimpeRequestDto inDto)
     {
         await foreach (var s in securityControllerHelper.SetSecurityInfoAsync(new List<T> { fileId }, new List<T>(), inDto.Share, inDto.Notify, inDto.SharingMessage))
         {
@@ -121,17 +118,16 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// <summary>
     /// Sets the sharing settings to a folder with the ID specified in the request.
     /// </summary>
-    /// <param type="System.Int32, System" method="url" name="folderId">Folder ID</param>
+    /// <param type="System.Int32, System" method="url" name="folderId" example="1234">Folder ID</param>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.SecurityInfoRequestDto, ASC.Files.Core" name="inDto">Security information request parameters</param>
     /// <short>Share a folder</short>
-    /// <category>Sharing</category>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto}, ASC.Files.Core">List of shared folder information: sharing rights, a user who has the access to the specified folder, the folder is locked by this user or not, this user is an owner of the specified folder or not, this user can edit the access to the specified folder or not</returns>
     /// <path>api/2.0/files/folder/{folderId}/share</path>
-    /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Files / Sharing")]
+    [SwaggerResponse(200, "List of shared folder information: sharing rights, a user who has the access to the specified folder, the folder is locked by this user or not, this user is an owner of the specified folder or not, this user can edit the access to the specified folder or not", typeof(FileShareDto))]
     [HttpPut("folder/{folderId}/share")]
-    public async IAsyncEnumerable<FileShareDto> SetFolderSecurityInfoAsync(T folderId, SecurityInfoRequestDto inDto)
+    public async IAsyncEnumerable<FileShareDto> SetFolderSecurityInfoAsync(T folderId, SecurityInfoSimpeRequestDto inDto)
     {
         await foreach (var s in securityControllerHelper.SetSecurityInfoAsync(new List<T>(), new List<T> { folderId }, inDto.Share, inDto.Notify, inDto.SharingMessage))
         {
@@ -143,13 +139,12 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// Returns the encryption keys to access a file with the ID specified in the request.
     /// </summary>
     /// <short>Get file encryption keys</short>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
-    /// <category>Sharing</category>
-    /// <returns type="ASC.Web.Files.Core.Entries.EncryptionKeyPairDto, ASC.Files.Core">List of encryption key pairs: encrypted private key, public key, user ID</returns>
+    /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
     /// <path>api/2.0/files/file/{fileId}/publickeys</path>
-    /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Files / Sharing")]
+    [SwaggerResponse(200, "List of encryption key pairs: encrypted private key, public key, user ID", typeof(List<EncryptionKeyPairDto>))]
     [HttpGet("file/{fileId}/publickeys")]
     public async Task<List<EncryptionKeyPairDto>> GetEncryptionAccess(T fileId)
     {
@@ -159,21 +154,22 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// <summary>
     /// Sends a message to the users who are mentioned in the file with the ID specified in the request.
     /// </summary>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
+    /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
     /// <param type="ASC.Web.Files.Services.WCFService.MentionMessageWrapper, ASC.Files.Core" name="mentionMessage">Mention message request parameters</param>
     /// <short>Send the mention message</short>
-    /// <category>Sharing</category>
-    /// <returns type="ASC.Web.Files.Services.WCFService.AceShortWrapper, ASC.Files.Core">List of access rights information</returns>
     /// <path>api/2.0/files/file/{fileId}/sendeditornotify</path>
-    /// <httpMethod>POST</httpMethod>
     /// <collection>list</collection>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Files / Sharing")]
+    [SwaggerResponse(200, "List of access rights information", typeof(List<AceShortWrapper>))]
     [HttpPost("file/{fileId}/sendeditornotify")]
     public async Task<List<AceShortWrapper>> SendEditorNotify(T fileId, MentionMessageWrapper mentionMessage)
     {
         return await fileStorageService.SendEditorNotifyAsync(fileId, mentionMessage);
     }
-    
+
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Files / Sharing")]
     [HttpGet("folder/{folderId}/group/{groupId:guid}/share")]
     public async IAsyncEnumerable<GroupMemberSecurityDto> GetGroupsMembersWithFolderSecurityAsync(T folderId, Guid groupId)
     {
@@ -215,12 +211,11 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// </summary>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.ChangeOwnerRequestDto, ASC.Files.Core" name="inDto">Request parameters for changing the file owner</param>
     /// <short>Change the file owner</short>
-    /// <category>Sharing</category>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileEntryDto, ASC.Files.Core">File entry information</returns>
     /// <path>api/2.0/files/owner</path>
-    /// <httpMethod>POST</httpMethod>
     /// <collection>list</collection>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Files / Sharing")]
+    [SwaggerResponse(200, "File entry information", typeof(FileEntryDto))]
     [HttpPost("owner")]
     public async IAsyncEnumerable<FileEntryDto> ChangeOwnerAsync(ChangeOwnerRequestDto inDto)
     {
@@ -241,13 +236,12 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// Returns the sharing rights for all the files and folders specified in the request.
     /// </summary>
     /// <short>Get the sharing rights</short>
-    /// <category>Sharing</category>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.BaseBatchRequestDto, ASC.Files.Core" name="inDto">Base batch request parameters</param>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">List of shared files and folders information</returns>
     /// <path>api/2.0/files/share</path>
-    /// <httpMethod>POST</httpMethod>
     /// <collection>list</collection>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Files / Sharing")]
+    [SwaggerResponse(200, "List of shared files and folders information", typeof(FileShareDto))]
     [HttpPost("share")]
     public async IAsyncEnumerable<FileShareDto> GetSecurityInfoAsync(BaseBatchRequestDto inDto)
     {
@@ -267,12 +261,11 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// Removes the sharing rights from all the files and folders specified in the request.
     /// </summary>
     /// <short>Remove the sharing rights</short>
-    /// <category>Sharing</category>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.BaseBatchRequestDto, ASC.Files.Core" name="inDto">Base batch request parameters</param>
-    /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
     /// <path>api/2.0/files/share</path>
-    /// <httpMethod>DELETE</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Files / Sharing")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpDelete("share")]
     public async Task<bool> RemoveSecurityInfoAsync(BaseBatchRequestDto inDto)
     {
@@ -290,13 +283,12 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// Sets the sharing rights to all the files and folders specified in the request.
     /// </summary>
     /// <short>Set the sharing rights</short>
-    /// <category>Sharing</category>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.SecurityInfoRequestDto, ASC.Files.Core" name="inDto">Security information request parameters</param>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">List of shared files and folders information: sharing rights, a user who has the access to the specified folder, the folder is locked by this user or not, this user is an owner of the specified folder or not, this user can edit the access to the specified folder or not</returns>
     /// <path>api/2.0/files/share</path>
-    /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Files / Sharing")]
+    [SwaggerResponse(200, "List of shared files and folders information: sharing rights, a user who has the access to the specified folder, the folder is locked by this user or not, this user is an owner of the specified folder or not, this user can edit the access to the specified folder or not", typeof(FileShareDto))]
     [HttpPut("share")]
     public async IAsyncEnumerable<FileShareDto> SetSecurityInfoAsync(SecurityInfoRequestDto inDto)
     {
@@ -316,14 +308,12 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// Returns the external data by the key specified in the request.
     /// </summary>
     /// <short>Get the external data</short>
-    /// <category>Sharing</category>
-    /// <param type="System.String, System" name="key" method="url">The unique key</param>
-    /// <param type="System.String, System" name="fileId">The unique document identifier</param>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.ExternalShareDto, ASC.Files.Core">External data</returns>
-    /// <path>api/2.0/files/share/{key}</path>
-    /// <httpMethod>GET</httpMethod>
-    /// <visible>false</visible>
+    /// <param type="System.String, System" name="key" method="url" example="some text">The unique document identifier</param>
+    /// <param type="System.String, System" name="fileId">The unique document identifier</param>    /// <path>api/2.0/files/share/{key}</path>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Files / Sharing")]
+    [SwaggerResponse(200, "External data", typeof(ExternalShareDto))]
     [AllowAnonymous]
     [HttpGet("share/{key}")]
     public async Task<ExternalShareDto> GetExternalShareDataAsync(string key, string fileId = null)
@@ -337,14 +327,13 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// Applies a password specified in the request to get the external data.
     /// </summary>
     /// <short>Apply external data password</short>
-    /// <category>Sharing</category>
-    /// <param type="System.String, System" name="key" method="url">The unique document identifier</param>
+    /// <param type="System.String, System" name="key" method="url" example="some text">The unique document identifier</param>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.ExternalShareRequestDto, ASC.Files.Core" name="inDto">External data request parameters</param>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.ExternalShareDto, ASC.Files.Core">External data</returns>
     /// <path>api/2.0/files/share/{key}/password</path>
-    /// <httpMethod>POST</httpMethod>
-    /// <visible>false</visible>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Files / Sharing")]
+    [SwaggerResponse(200, "External data", typeof(ExternalShareDto))]
     [AllowAnonymous]
     [HttpPost("share/{key}/password")]
     public async Task<ExternalShareDto> ApplyExternalSharePasswordAsync(string key, ExternalShareRequestDto inDto)

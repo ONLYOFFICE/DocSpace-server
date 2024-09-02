@@ -28,59 +28,167 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public class FilesSettingsDto
 {
+    [SwaggerSchemaCustom("Exts image previewed")]
     public List<string> ExtsImagePreviewed { get; set; }
+
+    [SwaggerSchemaCustom("Exts media previewed")]
     public List<string> ExtsMediaPreviewed { get; set; }
+
+    [SwaggerSchemaCustom("Exts web previewed")]
     public List<string> ExtsWebPreviewed { get; set; }
+
+    [SwaggerSchemaCustom("Exts web edited")]
     public List<string> ExtsWebEdited { get; set; }
+
+    [SwaggerSchemaCustom("Exts web encrypt")]
     public List<string> ExtsWebEncrypt { get; set; }
+
+    [SwaggerSchemaCustom("Exts web reviewed")]
     public List<string> ExtsWebReviewed { get; set; }
+
+    [SwaggerSchemaCustom("Exts web custom filter editing")]
     public List<string> ExtsWebCustomFilterEditing { get; set; }
+
+    [SwaggerSchemaCustom("Exts web restricted editing")]
     public List<string> ExtsWebRestrictedEditing { get; set; }
+
+    [SwaggerSchemaCustom("Exts web commented")]
     public List<string> ExtsWebCommented { get; set; }
+
+    [SwaggerSchemaCustom("Exts web template")]
     public List<string> ExtsWebTemplate { get; set; }
+
+    [SwaggerSchemaCustom("Exts co authoring")]
     public List<string> ExtsCoAuthoring { get; set; }
+
+    [SwaggerSchemaCustom("Exts must convert")]
     public List<string> ExtsMustConvert { get; set; }
+
+    [SwaggerSchemaCustom("Exts convertible")]
     public IDictionary<string, List<string>> ExtsConvertible { get; set; }
+
+    [SwaggerSchemaCustom("Exts uploadable")]
     public List<string> ExtsUploadable { get; set; }
+
+    [SwaggerSchemaCustom("Exts archive")]
     public ImmutableList<string> ExtsArchive { get; set; }
+
+    [SwaggerSchemaCustom("Exts video")]
     public ImmutableList<string> ExtsVideo { get; set; }
+
+    [SwaggerSchemaCustom("Exts audio")]
     public ImmutableList<string> ExtsAudio { get; set; }
+
+    [SwaggerSchemaCustom("Exts image")]
     public ImmutableList<string> ExtsImage { get; set; }
+
+    [SwaggerSchemaCustom("Exts spreadsheet")]
     public ImmutableList<string> ExtsSpreadsheet { get; set; }
+
+    [SwaggerSchemaCustom("Exts presentation")]
     public ImmutableList<string> ExtsPresentation { get; set; }
+
+    [SwaggerSchemaCustom("Exts document")]
     public ImmutableList<string> ExtsDocument { get; set; }
+
+    [SwaggerSchemaCustom("Internal formats")]
     public Dictionary<FileType, string> InternalFormats { get; set; }
+
+    [SwaggerSchemaCustom("Master form extension")]
     public string MasterFormExtension { get; set; }
+
+    [SwaggerSchemaCustom("Param version")]
     public string ParamVersion { get; set; }
+
+    [SwaggerSchemaCustom("Param out type")]
     public string ParamOutType { get; set; }
+
+    [SwaggerSchemaCustom("File download url string", Format = "uri")]
     public string FileDownloadUrlString { get; set; }
+
+    [SwaggerSchemaCustom("File web viewer url string", Format = "uri")]
     public string FileWebViewerUrlString { get; set; }
+
+    [SwaggerSchemaCustom("File web viewer external url string", Format = "uri")]
     public string FileWebViewerExternalUrlString { get; set; }
+
+    [SwaggerSchemaCustom("File web editor url string", Format = "uri")]
     public string FileWebEditorUrlString { get; set; }
+
+    [SwaggerSchemaCustom("File web editor external url string", Format = "uri")]
     public string FileWebEditorExternalUrlString { get; set; }
+
+    [SwaggerSchemaCustom("File redirect preview url string", Format = "uri")]
     public string FileRedirectPreviewUrlString { get; set; }
+
+    [SwaggerSchemaCustom("File thumbnail url string", Format = "uri")]
     public string FileThumbnailUrlString { get; set; }
+
+    [SwaggerSchemaCustom("Confirm delete")]
     public bool ConfirmDelete { get; set; }
+
+    [SwaggerSchemaCustom("EnableT third party")]
     public bool EnableThirdParty { get; set; }
+
+    [SwaggerSchemaCustom("External share")]
     public bool ExternalShare { get; set; }
+
+    [SwaggerSchemaCustom("External share social media")]
     public bool ExternalShareSocialMedia { get; set; }
+
+    [SwaggerSchemaCustom("Store original files")]
     public bool StoreOriginalFiles { get; set; }
+
+    [SwaggerSchemaCustom("Keep new file name")]
     public bool KeepNewFileName { get; set; }
+
+    [SwaggerSchemaCustom("Convert notify")]
     public bool ConvertNotify { get; set; }
+
+    [SwaggerSchemaCustom("HideC confirm convert save")]
     public bool HideConfirmConvertSave { get; set; }
+
+    [SwaggerSchemaCustom("Hide confirm convert open")]
     public bool HideConfirmConvertOpen { get; set; }
+
+    [SwaggerSchemaCustom("Default order")]
     public OrderBy DefaultOrder { get; set; }
+
+    [SwaggerSchemaCustom("Forcesave")]
     public bool Forcesave { get; set; }
+
+    [SwaggerSchemaCustom("Store forcesave")]
     public bool StoreForcesave { get; set; }
+
+    [SwaggerSchemaCustom("Recent section")]
     public bool RecentSection { get; set; }
+
+    [SwaggerSchemaCustom("Favorites section")]
     public bool FavoritesSection { get; set; }
+
+    [SwaggerSchemaCustom("Templates section")]
     public bool TemplatesSection { get; set; }
+
+    [SwaggerSchemaCustom("Download tar gz")]
     public bool DownloadTarGz { get; set; }
+
+    [SwaggerSchemaCustom("Automatically clean up")]
     public AutoCleanUpData AutomaticallyCleanUp { get; set; }
+
+    [SwaggerSchemaCustom("Can search by content")]
     public bool CanSearchByContent { get; set; }
+
+    [SwaggerSchemaCustom("Default sharing access rights")]
     public List<FileShare> DefaultSharingAccessRights { get; set; }
+
+
+    [SwaggerSchemaCustom("Max upload thread count")]    
     public int MaxUploadThreadCount { get; set; }
+
+    [SwaggerSchemaCustom("Chunk upload size")]    
     public long ChunkUploadSize { get; set; }
+
+    [SwaggerSchemaCustom("Open editor in same tab")]
     public bool OpenEditorInSameTab { get; set; }
 }
 

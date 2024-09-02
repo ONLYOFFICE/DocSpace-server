@@ -28,21 +28,45 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class ActiveConnectionsDto
 {
+    [SwaggerSchemaCustom("Login event")]
     public int LoginEvent { get; set; }
+
+    [SwaggerSchemaCustom("Items")]
     public List<ActiveConnectionsItemDto> Items { get; set; }
 }
 
 public class ActiveConnectionsItemDto
 {
+    [SwaggerSchemaCustom("Id")]
     public int Id { get; set; }
+
+    [SwaggerSchemaCustom("Tenant id")]
     public int TenantId { get; set; }
+
+    [SwaggerSchemaCustom("User id")]
     public Guid UserId { get; set; }
+
+    [SwaggerSchemaCustom("Mobile")]
     public bool Mobile {  get; set; }
+
+    [SwaggerSchemaCustom("Ip")]
     public string Ip { get; set; }
+
+    [SwaggerSchemaCustom("Country")]
     public string Country { get; set; }
+
+    [SwaggerSchemaCustom("City")]
     public string City { get; set; }
+
+    [SwaggerSchemaCustom("Browser")]
     public string Browser { get; set; }
+
+    [SwaggerSchemaCustom("Platform")]
     public string Platform { get; set; }
+
+    [SwaggerSchemaCustom("Date")]
     public ApiDateTime Date { get; set; }
+
+    [SwaggerSchemaCustom("Page")]
     public string Page { get; set; }
 }

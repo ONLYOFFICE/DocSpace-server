@@ -30,7 +30,7 @@ namespace ASC.Web.Api.Controllers;
 /// Portal information access.
 ///</summary>
 ///<name>portal</name>
-///<visible>false</visible>
+[ApiExplorerSettings(IgnoreApi = true)]
 [Scope]
 [DefaultRoute("payment")]
 [ApiController]
@@ -57,11 +57,10 @@ public class PaymentController(UserManager userManager,
     /// <short>
     /// Get the payment page URL
     /// </short>
-    /// <category>Payment</category>
     /// <param type="ASC.Web.Api.Models.PaymentUrlRequestsDto, ASC.Web.Api" name="inDto">Payment URL request parameters</param>
-    /// <returns type="System.Uri, System">The URL to the payment page</returns>
     /// <path>api/2.0/portal/payment/url</path>
-    /// <httpMethod>PUT</httpMethod>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The URL to the payment page", typeof(Uri))]
     [HttpPut("url")]
     public async Task<Uri> GetPaymentUrlAsync(PaymentUrlRequestsDto inDto)
     {
@@ -92,13 +91,12 @@ public class PaymentController(UserManager userManager,
     /// <short>
     /// Update the payment quantity
     /// </short>
-    /// <category>Payment</category>
     /// <param type="ASC.Web.Api.Models.PaymentUrlRequestsDto, ASC.Web.Api" name="inDto">Payment URL request parameters</param>
-    /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
     /// <path>api/2.0/portal/payment/update</path>
-    /// <httpMethod>PUT</httpMethod>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpPut("update")]
-    public async Task<bool> PaymentUpdateAsync(PaymentUrlRequestsDto inDto)
+    public async Task<bool> PaymentUpdateAsync(QuantityRequestDto inDto)
     {
         var tenant = await tenantManager.GetCurrentTenantAsync();
         var payerId = (await tariffService.GetTariffAsync(tenant.Id)).CustomerId;
@@ -119,11 +117,10 @@ public class PaymentController(UserManager userManager,
     /// <short>
     /// Get the payment account
     /// </short>
-    /// <category>Payment</category>
-    /// <param type="System.String, System" name="backUrl">Back URL</param>
-    /// <returns type="System.Object, System">The URL to the payment account</returns>
+    /// <param type="System.String, System" name="backUrl" example="some text">Back URL</param>
     /// <path>api/2.0/portal/payment/account</path>
-    /// <httpMethod>GET</httpMethod>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The URL to the payment account", typeof(object))]
     [HttpGet("account")]
     public async Task<object> GetPaymentAccountAsync(string backUrl)
     {
@@ -152,10 +149,9 @@ public class PaymentController(UserManager userManager,
     /// <short>
     /// Get prices
     /// </short>
-    /// <category>Payment</category>
-    /// <returns type="System.Object, System">List of available portal prices</returns>
     /// <path>api/2.0/portal/payment/prices</path>
-    /// <httpMethod>GET</httpMethod>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "List of available portal prices", typeof(object))]
     [HttpGet("prices")]
     public async Task<object> GetPricesAsync()
     {
@@ -172,11 +168,10 @@ public class PaymentController(UserManager userManager,
     /// <short>
     /// Get currencies
     /// </short>
-    /// <category>Payment</category>
-    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.CurrenciesDto, ASC.Web.Api">List of available portal currencies</returns>
     /// <path>api/2.0/portal/payment/currencies</path>
-    /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "List of available portal currencies", typeof(CurrenciesDto))]
     [HttpGet("currencies")]
     public async IAsyncEnumerable<CurrenciesDto> GetCurrenciesAsync()
     {
@@ -197,11 +192,10 @@ public class PaymentController(UserManager userManager,
     /// <short>
     /// Get quotas
     /// </short>
-    /// <category>Quota</category>
-    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.QuotaDto, ASC.Web.Api">List of available portal quotas</returns>
     /// <path>api/2.0/portal/payment/quotas</path>
-    /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "List of available portal quotas", typeof(QuotaDto))]
     [HttpGet("quotas")]
     public async Task<IEnumerable<QuotaDto>> GetQuotasAsync()
     {
@@ -214,10 +208,10 @@ public class PaymentController(UserManager userManager,
     /// <short>
     /// Get quota payment information
     /// </short>
-    /// <category>Payment</category>
-    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.QuotaDto, ASC.Web.Api">Payment information about the current portal quota</returns>
+    /// <param type="System.Boolean, System" name="refresh" example="true"></param>
     /// <path>api/2.0/portal/payment/quota</path>
-    /// <httpMethod>GET</httpMethod>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "Payment information about the current portal quota", typeof(QuotaDto))]
     [HttpGet("quota")]
     public async Task<QuotaDto> GetQuotaAsync(bool refresh)
     {
@@ -235,11 +229,9 @@ public class PaymentController(UserManager userManager,
     /// <short>
     /// Send a payment request
     /// </short>
-    /// <category>Payment</category>
     /// <param type="ASC.Web.Api.ApiModels.RequestsDto.SalesRequestsDto, ASC.Web.Api" name="inDto">Portal payment request parameters</param>
-    /// <returns></returns>
     /// <path>api/2.0/portal/payment/request</path>
-    /// <httpMethod>POST</httpMethod>
+    [Tags("Portal / Payment")]
     [HttpPost("request")]
     public async Task SendSalesRequestAsync(SalesRequestsDto inDto)
     {

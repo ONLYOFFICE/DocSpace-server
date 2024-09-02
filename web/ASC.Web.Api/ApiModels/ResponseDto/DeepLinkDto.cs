@@ -28,7 +28,12 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 
 public class DeepLinkDto
 {
+    [SwaggerSchemaCustom("Android package name")]
     public string AndroidPackageName { get; set; }
+
+    [SwaggerSchemaCustom("Url", Format = "uri")]
     public string Url { get; set; }
+
+    [SwaggerSchemaCustom("Ios package id")]
     public string IosPackageId { get; set; }
 }

@@ -26,23 +26,44 @@
 
 namespace ASC.Files.Core.Security;
 
-/// <summary>
-/// </summary>
 [EnumExtensions]
 [JsonConverter(typeof(FileShareConverter))]
 public enum FileShare
 {
+    [SwaggerEnum(Description = "None")]
     None,
+
+    [SwaggerEnum(Description = "Read and write")]
     ReadWrite,
+
+    [SwaggerEnum(Description = "Read")]
     Read,
+
+    [SwaggerEnum(Description = "Restrict")]
     Restrict,
+
+    [SwaggerEnum(Description = "Varies")]
     Varies,
+
+    [SwaggerEnum(Description = "Review")]
     Review,
+
+    [SwaggerEnum(Description = "Comment")]
     Comment,
+
+    [SwaggerEnum(Description = "Fill forms")]
     FillForms,
+
+    [SwaggerEnum(Description = "Custom filter")]
     CustomFilter,
+
+    [SwaggerEnum(Description = "Room admin")]
     RoomAdmin,
+
+    [SwaggerEnum(Description = "Editing")]
     Editing,
+
+    [SwaggerEnum(Description = "Power user")]
     PowerUser
 }
 

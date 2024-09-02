@@ -26,49 +26,42 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
-/// <summary>
-/// </summary>
 public class FileShareDto
 {
-    /// <summary>Sharing rights</summary>
-    /// <type>ASC.Files.Core.Security.FileShare, ASC.Files.Core</type>
+    [SwaggerSchemaCustom("Sharing rights")]
     public FileShare Access { get; set; }
 
-    /// <summary>A user who has the access to the specified file</summary>
-    /// <type>System.Object, System</type>
+    [SwaggerSchemaCustom<object>("A user who has the access to the specified file")]
     public object SharedTo { get; set; }
 
-    /// <summary>Specifies if the file is locked by this user or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if the file is locked by this user or not", Example = false)]
     public bool IsLocked { get; set; }
 
-    /// <summary>Specifies if this user is an owner of the specified file or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if this user is an owner of the specified file or not")]
     public bool IsOwner { get; set; }
 
-    /// <summary>Spceifies if this user can edit the access to the specified file or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Spceifies if this user can edit the access to the specified file or not")]
     public bool CanEditAccess { get; set; }
-    public SubjectType SubjectType { get; set; }
 
-    public static FileShareDto GetSample()
-    {
-        return new FileShareDto
-        {
-            Access = FileShare.ReadWrite,
-            IsLocked = false,
-            IsOwner = true
-            //SharedTo = EmployeeWraper.GetSample()
-        };
-    }
+    [SwaggerSchemaCustom("Subject type")]
+    public SubjectType SubjectType { get; set; }
 }
 
 public class FileShareLink
 {
+    [SwaggerSchemaCustom("Id")]
     public Guid Id { get; set; }
+
+    [SwaggerSchemaCustom("Title")]
     public string Title { get; set; }
+
+    [SwaggerSchemaCustom("Share link")]
     public string ShareLink { get; set; }
+
+    [SwaggerSchemaCustom("Expiration date")]
     public ApiDateTime ExpirationDate { get; set; }
+
+    [SwaggerSchemaCustom("link type")]
     public LinkType LinkType { get; set; }
     public string Password { get; set; }
     public bool? DenyDownload { get; set; }
@@ -78,11 +71,12 @@ public class FileShareLink
     public string RequestToken { get; set; }
 }
 
-/// <summary>
-/// </summary>
 public enum LinkType
 {
+    [SwaggerEnum(Description = "Invitation")]
     Invitation,
+
+    [SwaggerEnum(Description = "External")]
     External
 }
 

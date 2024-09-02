@@ -26,11 +26,8 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
-/// <summary>
-/// </summary>
 public class StartEditRequestDto
 {
-    /// <summary>Specifies whether to share a file with other users for editing or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies whether to share a file with other users for editing or not")]
     public bool EditingAlone { get; set; }
 }

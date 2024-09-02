@@ -26,15 +26,11 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
-/// <summary>
-/// </summary>
 public class UpdateFileRequestDto
 {
-    /// <summary>File title</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("File title")]
     public string Title { get; set; }
 
-    /// <summary>Number of the latest file version</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustom("Number of the latest file version")]
     public int LastVersion { get; set; }
 }

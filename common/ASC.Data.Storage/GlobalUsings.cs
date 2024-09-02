@@ -102,3 +102,4 @@ global using ProtoBuf;
 global using static Google.Cloud.Storage.V1.UrlSigner;
 
 global using MimeMapping = ASC.Common.Web.MimeMapping;
+global using ASC.Api.Core.Extensions;

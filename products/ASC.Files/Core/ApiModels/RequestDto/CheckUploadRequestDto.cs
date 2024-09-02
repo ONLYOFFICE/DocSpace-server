@@ -27,5 +27,6 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 public class CheckUploadRequestDto
 {
+    [SwaggerSchemaCustom("File title")]
     public IEnumerable<string> FilesTitle { get; set; }
 }

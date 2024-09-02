@@ -26,11 +26,8 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
-/// <summary>
-/// </summary>
 public class AcceptInvitationDto
 {
-    /// <summary>Link key</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Link key")]
     public string Key { get; set; }
 }

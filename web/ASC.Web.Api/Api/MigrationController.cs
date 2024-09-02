@@ -28,6 +28,7 @@ namespace ASC.Api.Migration;
 
 [DefaultRoute]
 [ApiController]
+[ControllerName("migration")]
 public class MigrationController(
     UserManager userManager,
     AuthContext authContext,
@@ -36,6 +37,7 @@ public class MigrationController(
     MigrationCore migrationCore,
     MigrationLogger migrationLogger) : ControllerBase
 {
+    [Tags("Migration")]
     [HttpGet("list")]
     public async Task<string[]> List()
     {
@@ -43,6 +45,10 @@ public class MigrationController(
         return migrationCore.GetAvailableMigrations();
     }
 
+    /// <summary>
+    /// </summary>
+    /// <param name="migratorName" example="some text"></param>
+    [Tags("Migration")]
     [HttpPost("init/{migratorName}")]
     public async Task UploadAndInitAsync(string migratorName)
     {
@@ -51,6 +57,8 @@ public class MigrationController(
         await migrationCore.StartParseAsync(migratorName);
     }
 
+    [Tags("Migration")]
+    [SwaggerResponse(200, "Ok", typeof(MigrationStatusDto))]
     [HttpGet("status")]
     public async Task<MigrationStatusDto> Status()
     {
@@ -77,6 +85,7 @@ public class MigrationController(
         return null;
     }
 
+    [Tags("Migration")]
     [HttpPost("cancel")]
     public async Task CancelAsync()
     {
@@ -85,6 +94,7 @@ public class MigrationController(
         await migrationCore.StopAsync();
     }
 
+    [Tags("Migration")]
     [HttpPost("clear")]
     public async Task ClearAsync()
     {
@@ -93,6 +103,7 @@ public class MigrationController(
         await migrationCore.ClearAsync();
     }
 
+    [Tags("Migration")]
     [HttpPost("migrate")]
     public async Task MigrateAsync(MigrationApiInfo info)
     {
@@ -101,6 +112,7 @@ public class MigrationController(
         await migrationCore.StartAsync(info);
     }
 
+    [Tags("Migration")]
     [HttpGet("logs")]
     public async Task LogsAsync()
     {
@@ -119,6 +131,7 @@ public class MigrationController(
         await (await migrationLogger.GetStreamAsync()).CopyToAsync(httpContextAccessor.HttpContext.Response.Body);
     }
 
+    [Tags("Migration")]
     [HttpPost("finish")]
     public async Task FinishAsync(FinishDto inDto)
     {

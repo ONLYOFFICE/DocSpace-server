@@ -23,37 +23,48 @@
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
-
 namespace ASC.Data.Backup.Contracts;
 
 public enum BackupProgressEnum
 {
+    [SwaggerEnum(Description = "Backup")]
     Backup,
+
+    [SwaggerEnum(Description = "Restore")]
     Restore,
+
+    [SwaggerEnum(Description = "Transfer")]
     Transfer
 }
 
 [ProtoContract]
 public record BackupProgress
 {
+    [SwaggerSchemaCustom("Completed or not")]
     [ProtoMember(1)]
     public bool IsCompleted { get; set; }
 
+    [SwaggerSchemaCustom("Progress")]
     [ProtoMember(2)]
     public int Progress { get; set; }
 
+    [SwaggerSchemaCustom("Error")]
     [ProtoMember(3)]
     public string Error { get; set; }
 
+    [SwaggerSchemaCustom("Link", Format = "uri")]
     [ProtoMember(4)]
     public string Link { get; set; }
 
+    [SwaggerSchemaCustom("Tenant id")]
     [ProtoMember(5)]
     public int TenantId { get; set; }
 
+    [SwaggerSchemaCustom("Backup progress item")]
     [ProtoMember(6)]
     public BackupProgressEnum BackupProgressEnum { get; set;}
-    
+
+    [SwaggerSchemaCustom("Task id")]
     [ProtoMember(7)]
     public string TaskId { get; set; }
 }

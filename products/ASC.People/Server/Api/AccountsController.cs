@@ -54,6 +54,7 @@ public class AccountsController<T>(
     ApiContext apiContext,
     FileSecurity fileSecurity) : ControllerBase
 {
+    [Tags("People / Search")]
     [HttpGet("room/{id}/search")]
     public async IAsyncEnumerable<object> GetAccountsEntriesWithSharedAsync(T id,
         EmployeeStatus? employeeStatus,

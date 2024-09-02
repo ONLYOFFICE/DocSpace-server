@@ -41,11 +41,10 @@ public class CustomSchemasController(MessageService messageService,
     /// Returns all portal team templates that allow users to name their organization (or group), add members, and define their activities within the portal.
     /// </summary>
     /// <short>Get team templates</short>
-    /// <category>Team templates</category>
-    /// <returns type="ASC.Web.Api.ApiModel.RequestsDto.SchemaRequestsDto, ASC.Web.Api">List of team templates with the following parameters</returns>
     /// <path>api/2.0/settings/customschemas</path>
-    /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    [Tags("Settings / Team templates")]
+    [SwaggerResponse(200, "List of team templates with the following parameters", typeof(SchemaRequestsDto))]
     [HttpGet("")]
     public async Task<List<SchemaRequestsDto>> PeopleSchemasAsync()
     {
@@ -77,13 +76,12 @@ public class CustomSchemasController(MessageService messageService,
     /// Saves the names from the team template with the ID specified in the request.
     /// </summary>
     /// <short>Save the naming settings</short>
-    /// <category>Team templates</category>
     /// <param type="ASC.Web.Api.ApiModel.RequestsDto.SchemaRequestsDto, ASC.Web.Api" name="inDto">Team template parameters</param>
-    /// <returns type="ASC.Web.Api.ApiModel.RequestsDto.SchemaRequestsDto, ASC.Web.Api">Team template with the following parameters</returns>
     /// <path>api/2.0/settings/customschemas</path>
-    /// <httpMethod>POST</httpMethod>
+    [Tags("Settings / Team templates")]
+    [SwaggerResponse(200, "Team template with the following parameters", typeof(SchemaRequestsDto))]
     [HttpPost("")]
-    public async Task<SchemaRequestsDto> SaveNamingSettingsAsync(SchemaRequestsDto inDto)
+    public async Task<SchemaRequestsDto> SaveNamingSettingsAsync(SchemaBaseRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -100,11 +98,10 @@ public class CustomSchemasController(MessageService messageService,
     /// Creates a custom team template with the parameters specified in the request.
     /// </summary>
     /// <short>Create a custom team template</short>
-    /// <category>Team templates</category>
     /// <param type="ASC.Web.Api.ApiModel.RequestsDto.SchemaRequestsDto, ASC.Web.Api" name="inDto">Team template parameters</param>
-    /// <returns type="ASC.Web.Api.ApiModel.RequestsDto.SchemaRequestsDto, ASC.Web.Api">Custom team template with the following parameters</returns>
     /// <path>api/2.0/settings/customschemas</path>
-    /// <httpMethod>PUT</httpMethod>
+    [Tags("Settings / Team templates")]
+    [SwaggerResponse(200, "Custom team template with the following parameters", typeof(SchemaRequestsDto))]
     [HttpPut("")]
     public async Task<SchemaRequestsDto> SaveCustomNamingSettingsAsync(SchemaRequestsDto inDto)
     {
@@ -160,11 +157,10 @@ public class CustomSchemasController(MessageService messageService,
     /// Returns a team template by the ID specified in the request.
     /// </summary>
     /// <short>Get a team template by ID</short>
-    /// <category>Team templates</category>
-    /// <param type="System.String, System" method="url" name="id">Team template ID</param>
-    /// <returns type="ASC.Web.Api.ApiModel.RequestsDto.SchemaRequestsDto, ASC.Web.Api">Team template with the following parameters</returns>
+    /// <param type="System.String, System" method="url" name="id" example="some text">Team template ID</param>
     /// <path>api/2.0/settings/customschemas/{id}</path>
-    /// <httpMethod>GET</httpMethod>
+    [Tags("Settings / Team templates")]
+    [SwaggerResponse(200, "Team template with the following parameters", typeof(SchemaRequestsDto))]
     [HttpGet("{id}")]
     public async Task<SchemaRequestsDto> PeopleSchemaAsync(string id)
     {

@@ -26,11 +26,14 @@
 
 namespace ASC.People.ApiModels.RequestDto;
 
-/// <summary>
-/// </summary>
 public class GroupRequestDto : GroupRequestDtoBase
 {
-    /// <summary>List of group member IDs</summary>
-    /// <type>System.Collections.Generic.IEnumerable{System.Guid}, System.Collections.Generic</type>
+    [SwaggerSchemaCustom("List of group member IDs")]
+    public IEnumerable<Guid> Members { get; init; }
+}
+
+public class MembersRequestDto
+{
+    [SwaggerSchemaCustom("List of group member IDs")]
     public IEnumerable<Guid> Members { get; init; }
 }

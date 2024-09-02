@@ -26,8 +26,6 @@
 
 namespace ASC.Web.Studio.UserControls.Management.SingleSignOnSettings;
 
-/// <summary>
-/// </summary>
 public class SsoSettingsV2 : ISettings<SsoSettingsV2>
 {
     [JsonIgnore]
@@ -91,72 +89,55 @@ public class SsoSettingsV2 : ISettings<SsoSettingsV2>
         };
     }
 
-    /// <summary>Specifies if SSO is enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if SSO is enabled or not")]
     public bool? EnableSso { get; set; }
 
-    /// <summary>IDP settings</summary>
-    /// <type>ASC.Web.Studio.UserControls.Management.SingleSignOnSettings.SsoIdpSettings, ASC.Web.Core</type>
+    [SwaggerSchemaCustom("IDP settings")]
     public SsoIdpSettings IdpSettings { get; set; }
 
-    /// <summary>List of IDP certificates</summary>
-    /// <type>System.Collections.Generic.List{ASC.Web.Studio.UserControls.Management.SingleSignOnSettings.SsoCertificate}, System.Collections.Generic</type>
+    [SwaggerSchemaCustom("List of IDP certificates")]
     public List<SsoCertificate> IdpCertificates { get; set; }
 
-    /// <summary>IDP advanced certificate</summary>
-    /// <type>ASC.Web.Studio.UserControls.Management.SingleSignOnSettings.SsoIdpCertificateAdvanced, ASC.Web.Core</type>
+    [SwaggerSchemaCustom("IDP advanced certificate")]
     public SsoIdpCertificateAdvanced IdpCertificateAdvanced { get; set; }
 
-    /// <summary>SP login label</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("SP login label")]
     public string SpLoginLabel { get; set; }
 
-    /// <summary>List of SP certificates</summary>
-    /// <type>System.Collections.Generic.List{ASC.Web.Studio.UserControls.Management.SingleSignOnSettings.SsoCertificate}, System.Collections.Generic</type>
+    [SwaggerSchemaCustom("List of SP certificates")]
     public List<SsoCertificate> SpCertificates { get; set; }
 
-    /// <summary>SP advanced certificate</summary>
-    /// <type>ASC.Web.Studio.UserControls.Management.SingleSignOnSettings.SsoSpCertificateAdvanced, ASC.Web.Core</type>
+    [SwaggerSchemaCustom("SP advanced certificate")]
     public SsoSpCertificateAdvanced SpCertificateAdvanced { get; set; }
 
-    /// <summary>Field mapping</summary>
-    /// <type>ASC.Web.Studio.UserControls.Management.SingleSignOnSettings.SsoFieldMapping, ASC.Web.Core</type>
+    [SwaggerSchemaCustom("Field mapping")]
     public SsoFieldMapping FieldMapping { get; set; }
 
-    /// <summary>Specifies if the authentication page will be hidden or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if the authentication page will be hidden or not")]
     public bool HideAuthPage { get; set; }
 }
 
 
 #region SpSettings
 
-/// <summary>
-/// </summary>
 public class SsoIdpSettings
 {
-    /// <summary>Entity ID</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Entity ID")]
     public string EntityId { get; init; }
 
-    /// <summary>SSO URL</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("SSO URL")]
     public string SsoUrl { get; init; }
 
-    /// <summary>SSO binding</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("SSO binding")]
     public string SsoBinding { get; init; }
 
-    /// <summary>SLO URL</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("SLO URL")]
     public string SloUrl { get; init; }
 
-    /// <summary>SLO binding</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("SLO binding")]
     public string SloBinding { get; init; }
 
-    /// <summary>Name ID format</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Name ID format")]
     public string NameIdFormat { get; set; }
 }
 
@@ -167,16 +148,22 @@ public class SsoIdpSettings
 
 public class SsoFieldMapping
 {
+    [SwaggerSchemaCustom("First name")]
     public string FirstName { get; init; }
 
+    [SwaggerSchemaCustom("Last name")]
     public string LastName { get; init; }
 
+    [SwaggerSchemaCustom("Email")]
     public string Email { get; init; }
 
+    [SwaggerSchemaCustom("Title")]
     public string Title { get; set; }
 
+    [SwaggerSchemaCustom("Location")]
     public string Location { get; set; }
 
+    [SwaggerSchemaCustom("Phone")]
     public string Phone { get; set; }
 }
 
@@ -185,98 +172,72 @@ public class SsoFieldMapping
 
 #region Certificates
 
-/// <summary>
-/// </summary>
 public class SsoCertificate
 {
-    /// <summary>Specifies if a certificate is self-signed or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if a certificate is self-signed or not")]
     public bool SelfSigned { get; set; }
 
-    /// <summary>Certificate</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Certificate")]
     public string Crt { get; set; }
 
-    /// <summary>Key</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Key")]
     public string Key { get; set; }
 
-    /// <summary>Action</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Action")]
     public string Action { get; set; }
 
-    /// <summary>Domain name</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Domain name")]
     public string DomainName { get; set; }
 
-    /// <summary>Start date</summary>
-    /// <type>System.DateTime, System</type>
+    [SwaggerSchemaCustom("Start date")]
     public DateTime StartDate { get; set; }
 
-    /// <summary>Expiration date</summary>
-    /// <type>System.DateTime, System</type>
+    [SwaggerSchemaCustom("Expiration date")]
     public DateTime ExpiredDate { get; set; }
 }
 
-/// <summary>
-/// </summary>
 public class SsoIdpCertificateAdvanced
 {
-    /// <summary>Verification algorithm</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Verification algorithm")]
     public string VerifyAlgorithm { get; set; }
 
-    /// <summary>Specifies if the signatures of the SAML authentication responses sent to SP will be verified or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if the signatures of the SAML authentication responses sent to SP will be verified or not")]
     public bool VerifyAuthResponsesSign { get; set; }
 
-    /// <summary>Specifies if the signatures of the SAML logout requests sent to SP will be verified or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if the signatures of the SAML logout requests sent to SP will be verified or not")]
     public bool VerifyLogoutRequestsSign { get; set; }
 
-    /// <summary>Specifies if the signatures of the SAML logout responses sent to SP will be verified or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if the signatures of the SAML logout responses sent to SP will be verified or not")]
     public bool VerifyLogoutResponsesSign { get; set; }
 
-    /// <summary>Decryption algorithm</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Decryption algorithm")]
     public string DecryptAlgorithm { get; set; }
 
-    /// <summary>Specifies if the assertions will be decrypted or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if the assertions will be decrypted or not")]
     public bool DecryptAssertions { get; set; }
 }
 
-/// <summary>
-/// </summary>
 public class SsoSpCertificateAdvanced
 {
-    /// <summary>Signing algorithm</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Signing algorithm")]
     public string SigningAlgorithm { get; set; }
 
-    /// <summary>Specifies if SP will sign the SAML authentication requests sent to IdP or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if SP will sign the SAML authentication requests sent to IdP or not")]
     public bool SignAuthRequests { get; set; }
 
-    /// <summary>Specifies if SP will sign the SAML logout requests sent to IdP or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if SP will sign the SAML logout requests sent to IdP or not")]
     public bool SignLogoutRequests { get; set; }
 
-    /// <summary>Specifies if sign the SAML logout responses sent to IdP or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if sign the SAML logout responses sent to IdP or not")]
     public bool SignLogoutResponses { get; set; }
 
-    /// <summary>Encryption algorithm</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Encryption algorithm")]
     public string EncryptAlgorithm { get; set; }
 
-    /// <summary>Decryption algorithm</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Decryption algorithm")]
     public string DecryptAlgorithm { get; set; }
-
-    /// <summary>Specifies if the assertions will be encrypted or not</summary>
-    /// <type>System.Boolean, System</type>
+   
+    [SwaggerSchemaCustom("Specifies if the assertions will be encrypted or not")]
     public bool EncryptAssertions { get; set; }
 }
 

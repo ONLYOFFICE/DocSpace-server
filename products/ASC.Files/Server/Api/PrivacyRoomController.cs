@@ -52,12 +52,12 @@ public abstract class PrivacyRoomController<T>(SettingsManager settingsManager,
     /// Returns all the key pairs of the users who have access to the file with the ID specified in the request.
     /// </summary>
     /// <short>Get file key pairs</short>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
-    /// <returns type="ASC.Web.Files.Core.Entries.EncryptionKeyPairDto, ASC.Files.Core">List of encryption key pairs</returns>
+    /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
     /// <path>api/2.0/privacyroom/access/{fileId}</path>
-    /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Files / Private room")]
+    [SwaggerResponse(200, "List of encryption key pairs", typeof(EncryptionKeyPairDto))]
     [HttpGet("access/{fileId}")]
     public async Task<IEnumerable<EncryptionKeyPairDto>> GetPublicKeysWithAccess(T fileId)
     {
@@ -88,10 +88,10 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
     /// Returns a key pair for the current user.
     /// </summary>
     /// <short>Get encryption keys</short>
-    /// <returns type="ASC.Web.Files.Core.Entries.EncryptionKeyPairDto, ASC.Files.Core">Encryption key pair: private key, public key, user ID</returns>
     /// <path>api/2.0/privacyroom/keys</path>
-    /// <httpMethod>GET</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Files / Private room")]
+    [SwaggerResponse(200, "Encryption key pair: private key, public key, user ID", typeof(EncryptionKeyPairDto))]
     [HttpGet("keys")]
     public async Task<EncryptionKeyPairDto> GetKeysAsync()
     {
@@ -110,10 +110,10 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
     /// Checks if the Private Room settings are enabled or not.
     /// </summary>
     /// <short>Check the Private Room settings</short>
-    /// <returns type="System.Boolean, System">Boolean value: true - the Private Room settings are enabled, false - the Private Room settings are disabled</returns>
     /// <path>api/2.0/privacyroom</path>
-    /// <httpMethod>GET</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Files / Private room")]
+    [SwaggerResponse(200, "Boolean value: true - the Private Room settings are enabled, false - the Private Room settings are disabled", typeof(bool))]
     [HttpGet("")]
     public async Task<bool> PrivacyRoomAsync()
     {
@@ -127,10 +127,10 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
     /// </summary>
     /// <short>Set encryption keys</short>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.PrivacyRoomRequestDto, ASC.Files.Core" name="inDto">Request parameters for setting encryption keys</param>
-    /// <returns type="System.Object, System">Boolean value: true - the key pair is set</returns>
     /// <path>api/2.0/privacyroom/keys</path>
-    /// <httpMethod>PUT</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Files / Private room")]
+    [SwaggerResponse(200, "Boolean value: true - the key pair is set", typeof(object))]
     [HttpPut("keys")]
     public async Task<object> SetKeysAsync(PrivacyRoomRequestDto inDto)
     {
@@ -165,12 +165,12 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
     /// </summary>
     /// <short>Enable the Private Room settings</short>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.PrivacyRoomRequestDto, ASC.Files.Core" name="inDto">Request parameters for setting encryption keys</param>
-    /// <returns type="System.Boolean, System">Boolean value: true - the Private Room settings are enabled, false - the Private Room settings are disabled</returns>
     /// <path>api/2.0/privacyroom</path>
-    /// <httpMethod>PUT</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Files / Private room")]
+    [SwaggerResponse(200, "Boolean value: true - the Private Room settings are enabled, false - the Private Room settings are disabled", typeof(bool))]
     [HttpPut("")]
-    public async Task<bool> SetPrivacyRoomAsync(PrivacyRoomRequestDto inDto)
+    public async Task<bool> SetPrivacyRoomAsync(PrivacyRoomEnableRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 

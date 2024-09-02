@@ -48,8 +48,7 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     /// Creates a session to upload large files in multiple chunks to the folder with the ID specified in the request.
     /// </summary>
     /// <short>Chunked upload</short>
-    /// <category>Operations</category>
-    /// <param type="System.Int32, System" name="folderId">Folder ID</param>
+    /// <param type="System.Int32, System" name="folderId" example="1234">Folder ID</param>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.SessionRequestDto, ASC.Files.Core" name="inDto">Session request parameters</param>
     /// <remarks>
     /// <![CDATA[
@@ -74,7 +73,8 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     /// ]]>
     /// </returns>
     /// <path>api/2.0/files/{folderId}/upload/create_session</path>
-    /// <httpMethod>POST</httpMethod>
+    [Tags("Files / Operations")]
+    [SwaggerResponse(200, "Information about created session", typeof(object))]
     [HttpPost("{folderId}/upload/create_session")]
     public async Task<object> CreateUploadSessionAsync(T folderId, SessionRequestDto inDto)
     {
@@ -85,9 +85,8 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     /// Creates a session to edit the existing file with multiple chunks (needed for WebDAV).
     /// </summary>
     /// <short>Create the editing session</short>
-    /// <category>Files</category>
-    /// <param type="System.Int32, System" name="fileId">File ID</param>
-    /// <param type="System.Int64, System" name="fileSize">File size in bytes</param>
+    /// <param type="System.Int32, System" name="fileId" example="1234">File ID</param>
+    /// <param type="System.Int64, System" name="fileSize" example="1234">File size in bytes</param>
     /// <returns type="System.Object, System">
     /// <![CDATA[
     /// Information about created session which includes:
@@ -102,13 +101,20 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     /// ]]>
     /// </returns>
     /// <path>api/2.0/files/file/{fileId}/edit_session</path>
-    /// <httpMethod>POST</httpMethod>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "Information about created session", typeof(object))]
     [HttpPost("file/{fileId}/edit_session")]
     public async Task<object> CreateEditSession(T fileId, long fileSize)
     {
         return await filesControllerHelper.CreateEditSessionAsync(fileId, fileSize);
     }
 
+    /// <summary>
+    /// </summary>
+    /// <param type="System.Int32, System" name="folderId" example="1234"></param>
+    /// <param type="ASC.Files.Core.ApiModels.RequestDto.CheckUploadRequestDto, ASC.Files.Core"  name="model"></param>
+    [Tags("Files / Folders")]
+    [SwaggerResponse(200, "Inserted file", typeof(List<string>))]
     [HttpPost("{folderId}/upload/check")]
     public Task<List<string>> CheckUploadAsync(T folderId, CheckUploadRequestDto model)
     {
@@ -119,12 +125,11 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     /// Inserts a file specified in the request to the selected folder by single file uploading.
     /// </summary>
     /// <short>Insert a file</short>
-    /// <param type="System.Int32, System" name="folderId">Folder ID</param>
+    /// <param type="System.Int32, System" name="folderId" example="1234">Folder ID</param>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.InsertFileRequestDto, ASC.Files.Core" name="inDto">Request parameters for inserting a file</param>
-    /// <category>Folders</category>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileDto, ASC.Files.Core">Inserted file informationy</returns>
     /// <path>api/2.0/files/{folderId}/insert</path>
-    /// <httpMethod>POST</httpMethod>
+    [Tags("Files / Folders")]
+    [SwaggerResponse(200, "Inserted file", typeof(FileDto<int>))]
     [HttpPost("{folderId}/insert", Order = 1)]
     public async Task<FileDto<T>> InsertFileAsync(T folderId, [FromForm][ModelBinder(BinderType = typeof(InsertFileModelBinder))] InsertFileRequestDto inDto)
     {
@@ -136,7 +141,6 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     /// Uploads a file specified in the request to the selected folder by single file uploading or standart multipart/form-data method.
     /// </summary>
     /// <short>Upload a file</short>
-    /// <category>Folders</category>
     /// <remarks>
     /// <![CDATA[
     ///  You can upload files in two different ways:
@@ -147,9 +151,9 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     /// </remarks>
     /// <param type="System.Int32, System" name="folderId">Folder ID</param>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.UploadRequestDto, ASC.Files.Core" name="inDto">Request parameters for uploading a file</param>
-    /// <returns type="System.Object, System">Uploaded file(s)</returns>
     /// <path>api/2.0/files/{folderId}/upload</path>
-    /// <httpMethod>POST</httpMethod>
+    [Tags("Files / Folders")]
+    [SwaggerResponse(200, "Inserted file", typeof(FileDto<int>))]
     [HttpPost("{folderId}/upload", Order = 1)]
     public async Task<object> UploadFileAsync(T folderId, [ModelBinder(BinderType = typeof(UploadModelBinder))] UploadRequestDto inDto)
     {
@@ -168,11 +172,10 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
     /// </summary>
     /// <short>Insert a file to the "Common" section</short>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.InsertFileRequestDto, ASC.Files.Core" name="inDto">Request parameters for inserting a file</param>
-    /// <category>Folders</category>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileDto, ASC.Files.Core">Inserted file</returns>
     /// <path>api/2.0/files/@common/insert</path>
-    /// <httpMethod>POST</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Files / Folders")]
+    [SwaggerResponse(200, "Inserted file", typeof(FileDto<int>))]
     [HttpPost("@common/insert")]
     public async Task<FileDto<int>> InsertFileToCommonFromBodyAsync([FromForm][ModelBinder(BinderType = typeof(InsertFileModelBinder))] InsertFileRequestDto inDto)
     {
@@ -184,10 +187,9 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
     /// </summary>
     /// <short>Insert a file to the "My documents" section</short>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.InsertFileRequestDto, ASC.Files.Core" name="inDto">Request parameters for inserting a file</param>
-    /// <category>Folders</category>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileDto, ASC.Files.Core">Inserted file</returns>
     /// <path>api/2.0/files/@my/insert</path>
-    /// <httpMethod>POST</httpMethod>
+    [Tags("Files / Folders")]
+    [SwaggerResponse(200, "Inserted file", typeof(FileDto<int>))]
     [HttpPost("@my/insert")]
     public async Task<FileDto<int>> InsertFileToMyFromBodyAsync([FromForm][ModelBinder(BinderType = typeof(InsertFileModelBinder))] InsertFileRequestDto inDto)
     {
@@ -198,7 +200,6 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
     /// Uploads a file specified in the request to the "Common" section by single file uploading or standart multipart/form-data method.
     /// </summary>
     /// <short>Upload a file to the "Common" section</short>
-    /// <category>Folders</category>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.UploadRequestDto, ASC.Files.Core" name="inDto">Request parameters for uploading a file</param>
     /// <remarks>
     /// <![CDATA[
@@ -208,10 +209,10 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
     /// <li>Using standart multipart/form-data method.</li>
     /// </ol>]]>
     /// </remarks>
-    /// <returns type="System.Object, System">Uploaded file(s)</returns>
     /// <path>api/2.0/files/@common/upload</path>
-    /// <httpMethod>POST</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Files / Folders")]
+    [SwaggerResponse(200, "Uploaded file(s)", typeof(object))]
     [HttpPost("@common/upload")]
     public async Task<object> UploadFileToCommonAsync([ModelBinder(BinderType = typeof(UploadModelBinder))] UploadRequestDto inDto)
     {
@@ -224,7 +225,6 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
     /// Uploads a file specified in the request to the "My documents" section by single file uploading or standart multipart/form-data method.
     /// </summary>
     /// <short>Upload a file to the "My documents" section</short>
-    /// <category>Folders</category>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.UploadRequestDto, ASC.Files.Core" name="inDto">Request parameters for uploading a file</param>
     /// <remarks>
     /// <![CDATA[
@@ -234,9 +234,9 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
     /// <li>Using standart multipart/form-data method.</li>
     /// </ol>]]>
     /// </remarks>
-    /// <returns type="System.Object, System">Uploaded file(s)</returns>
     /// <path>api/2.0/files/@my/upload</path>
-    /// <httpMethod>POST</httpMethod>
+    [Tags("Files / Folders")]
+    [SwaggerResponse(200, "Uploaded file(s)", typeof(object))]
     [HttpPost("@my/upload")]
     public async Task<object> UploadFileToMyAsync([ModelBinder(BinderType = typeof(UploadModelBinder))] UploadRequestDto inDto)
     {

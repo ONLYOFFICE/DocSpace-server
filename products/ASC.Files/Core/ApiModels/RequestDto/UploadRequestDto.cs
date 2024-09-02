@@ -26,43 +26,33 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
-/// <summary>
-/// </summary>
 public class UploadRequestDto : IModelWithFile, IDisposable
 {
-    /// <summary>File</summary>
-    /// <type>Microsoft.AspNetCore.Http.IFormFile, Microsoft.AspNetCore.Http</type>
+    [SwaggerSchemaCustom("File")]
     public IFormFile File { get; set; }
 
-    /// <summary>Content-Type header</summary>
-    /// <type>System.Net.Mime.ContentType, System.Net.Mime</type>
+    [SwaggerSchemaCustom("Content-Type header")]
     public ContentType ContentType { get; set; }
 
-    /// <summary>Content-Disposition header</summary>
-    /// <type>System.Net.Mime.ContentDisposition, System.Net.Mime</type>
+    [SwaggerSchemaCustom("Content-Disposition header")]
     public ContentDisposition ContentDisposition { get; set; }
 
-    /// <summary>List of files when specified as multipart/form-data</summary>
-    /// <type>System.Collections.Generic.IEnumerable{Microsoft.AspNetCore.Http.IFormFile}, System.Collections.Generic</type>
+    [SwaggerSchemaCustom("List of files when specified as multipart/form-data", Format = "file")]
     public IEnumerable<IFormFile> Files { get; set; }
 
-    /// <summary>Specifies whether to create a new file if it already exists or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies whether to create a new file if it already exists or not")]
     public bool CreateNewIfExist { get; set; }
 
-    /// <summary>Specifies whether to upload documents in the original formats as well or not</summary>
-    /// <type>System.Nullable{System.Boolean}, System</type>
+    [SwaggerSchemaCustom("Specifies whether to upload documents in the original formats as well or not")]
     public bool? StoreOriginalFileFlag { get; set; }
 
-    /// <summary>Specifies whether to keep the file converting status or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies whether to keep the file converting status or not")]
     public bool KeepConvertStatus { get; set; }
 
     private Stream _stream;
     private bool _disposedValue;
 
-    /// <summary>Request input stream</summary>
-    /// <type>System.IO.Stream, System.IO</type>
+    [SwaggerSchemaCustom("Request input stream")]
     public Stream Stream
     {
         get => File?.OpenReadStream() ?? _stream;

@@ -29,16 +29,19 @@ namespace ASC.Web.Files.Services.DocumentService;
 [EnumExtensions]
 public enum EditorType
 {
+    [SwaggerEnum(Description = "Desktop")]
     Desktop,
+
+    [SwaggerEnum(Description = "Mobile")]
     Mobile,
+
+    [SwaggerEnum(Description = "Embedded")]
     Embedded
 }
 
-/// <summary>
-/// </summary>
 public class ActionLinkConfig
 {
-    /// <summary>The information about the comment in the document that will be scrolled to</summary>
+    [SwaggerSchemaCustom("The information about the comment in the document that will be scrolled to")]
     [JsonPropertyName("action")]
     public ActionConfig Action { get; set; }
 
@@ -47,15 +50,13 @@ public class ActionLinkConfig
         return JsonSerializer.Serialize(actionLinkConfig);
     }
 
-    /// <summary>
-    /// </summary>
     public class ActionConfig
     {
-        /// <summary>Comment data</summary>
+        [SwaggerSchemaCustom("Comment data")]
         [JsonPropertyName("data")]
         public string Data { get; set; }
 
-        /// <summary>Action type</summary>
+        [SwaggerSchemaCustom("Action type")]
         [JsonPropertyName("type")]
         public string Type { get; set; }
     }
@@ -63,9 +64,13 @@ public class ActionLinkConfig
 
 public class CoEditingConfig
 {
+    [SwaggerSchemaCustom("Change")]
     public bool Change { get; set; }
+
+    [SwaggerSchemaCustom("Fast")]
     public bool Fast { get; init; }
 
+    [SwaggerSchemaCustomString("Mode", Example = "fast")]
     public string Mode
     {
         get { return Fast ? CoEditingConfigMode.Fast.ToStringLowerFast() : CoEditingConfigMode.Strict.ToStringLowerFast(); }
@@ -479,67 +484,76 @@ public class InfoConfig<T>(
 
 public class PermissionsConfig
 {
+    [SwaggerSchemaCustom("Change history")]
     public bool ChangeHistory { get; set; }
+
+    [SwaggerSchemaCustom("Comment")]
     public bool Comment { get; set; } = true;
+
+    [SwaggerSchemaCustom("Chat")]
     public bool Chat { get; set; } = true;
+
+    [SwaggerSchemaCustom("Download")]
     public bool Download { get; set; } = true;
+
+    [SwaggerSchemaCustom("Edit")]
     public bool Edit { get; set; } = true;
+
+    [SwaggerSchemaCustom("FillForms")]
     public bool FillForms { get; set; } = true;
+
+    [SwaggerSchemaCustom("ModifyFilter")]
     public bool ModifyFilter { get; set; } = true;
+
+    [SwaggerSchemaCustom("Protect")]
     public bool Protect { get; set; } = true;
+
+    [SwaggerSchemaCustom("Print")]
     public bool Print { get; set; } = true;
+
+    [SwaggerSchemaCustom("Rename")]
     public bool Rename { get; set; }
+
+    [SwaggerSchemaCustom("Review")]
     public bool Review { get; set; } = true;
+
+    [SwaggerSchemaCustom("Copy")]
     public bool Copy { get; set; } = true;
 }
 
-/// <summary>
-/// </summary>
 public class FileReference
 {
-    /// <summary>File reference data</summary>
-    /// <type>ASC.Web.Files.Services.DocumentService.FileReferenceData, ASC.Files.Core</type>
+    [SwaggerSchemaCustom("File reference data")]
     public FileReferenceData ReferenceData { get; set; }
 
-    /// <summary>Error</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Error")]
     public string Error { get; set; }
 
-    /// <summary>Path</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Path")]
     public string Path { get; set; }
 
-    /// <summary>URL</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("URL", Format = "uri")]
     public string Url { get; set; }
 
-    /// <summary>File type</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("File type")]
     public string FileType { get; set; }
 
-    /// <summary>Key</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Key")]
     public string Key { get; set; }
 
-    /// <summary>Link</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Link")]
     public string Link { get; set; }
 
-    /// <summary>Token</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Token")]
     public string Token { get; set; }
 }
 
-/// <summary>
-/// </summary>
 public class FileReferenceData
 {
-    /// <summary>File key</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("File key")]
     public string FileKey { get; set; }
 
-    /// <summary>Instance ID</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Instance ID")]
     public string InstanceId { get; set; }
 }
 
@@ -700,32 +714,46 @@ public class CustomizationConfig<T>(
 [Transient]
 public class EmbeddedConfig(BaseCommonLinkUtility baseCommonLinkUtility, FilesLinkUtility filesLinkUtility)
 {
+    [SwaggerSchemaCustom("Embed url", Format = "uri")]
     public string EmbedUrl => baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=embedded" + ShareLinkParam);
 
+    [SwaggerSchemaCustom("Save url", Format = "uri")]
     public string SaveUrl => baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FileHandlerPath + "?" + FilesLinkUtility.Action + "=download" + ShareLinkParam);
 
+    [SwaggerSchemaCustom("Share link param")]
     public string ShareLinkParam { get; set; }
 
+    [SwaggerSchemaCustom("Share url", Format = "uri")]
     public string ShareUrl => baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=view" + ShareLinkParam);
 
+    [SwaggerSchemaCustom("Toolbar docked", Format = "uri")]
     public string ToolbarDocked => "top";
 }
 
 public class EncryptionKeysConfig
 {
+    [SwaggerSchemaCustom("Crypto engine id")]
     public string CryptoEngineId => "{FFF0E1EB-13DB-4678-B67D-FF0A41DBBCEF}";
+
+    [SwaggerSchemaCustom("Private key enc")]
     public string PrivateKeyEnc { get; set; }
+
+    [SwaggerSchemaCustom("Public key")]
     public string PublicKey { get; set; }
 }
 
 public class FeedbackConfig
 {
+    [SwaggerSchemaCustom("Url", Format = "uri")]
     public string Url { get; set; }
+
+    [SwaggerSchemaCustom("Visible")]
     public bool Visible { get => true; }
 }
 
 public class GobackConfig
 {
+    [SwaggerSchemaCustom("Url", Format = "uri")]
     public string Url { get; set; }
 }
 
@@ -811,21 +839,36 @@ public class PluginsConfig
 
 public class RecentConfig
 {
+    [SwaggerSchemaCustom("Folder")]
     public string Folder { get; set; }
+
+    [SwaggerSchemaCustom("Title")]
     public string Title { get; set; }
+
+    [SwaggerSchemaCustom("Url", Format = "uri")]
     public string Url { get; set; }
 }
 
 public class TemplatesConfig
 {
+    [SwaggerSchemaCustom("Image")]
     public string Image { get; set; }
+
+    [SwaggerSchemaCustom("Title")]
     public string Title { get; set; }
+
+    [SwaggerSchemaCustom("Url", Format = "uri")]
     public string Url { get; set; }
 }
 
 public class UserConfig
 {
+    [SwaggerSchemaCustom("Id")]
     public string Id { get; set; }
+
+    [SwaggerSchemaCustom("Name")]
     public string Name { get; set; }
+
+    [SwaggerSchemaCustom("Image")]
     public string Image { get; set; }
 }

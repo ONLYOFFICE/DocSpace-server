@@ -26,35 +26,27 @@
 
 namespace ASC.Web.Files.Services.WCFService;
 
-/// <summary>
-/// </summary>
 public class ThirdPartyParams
 {
-    /// <summary>Authentication data</summary>
-    /// <type>ASC.Files.Core.AuthData, ASC.Files.Core</type>
+    [SwaggerSchemaCustom("Authentication data")]
     [JsonPropertyName("auth_data")]
     public AuthData AuthData { get; init; }
 
-    /// <summary>Specifies if this is a corporate account or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if this is a corporate account or not")]
     public bool Corporate { get; init; }
 
-    /// <summary>Specifies if this is a room storage or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if this is a room storage or not")]
     public bool RoomsStorage { get; init; }
 
-    /// <summary>Customer title</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Customer title")]
     [JsonPropertyName("customer_title")]
     public string CustomerTitle { get; set; }
 
-    /// <summary>Provider ID</summary>
-    /// <type>System.Nullable{System.Int32}, System</type>
+    [SwaggerSchemaCustom("Provider ID")]
     [JsonPropertyName("provider_id")]
     public int? ProviderId { get; init; }
 
-    /// <summary>Provider key</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Provider key")]
     [JsonPropertyName("provider_key")]
     public string ProviderKey { get; init; }
 }

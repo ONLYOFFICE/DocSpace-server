@@ -26,98 +26,60 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
-/// <summary>
-/// </summary>
 public class FolderDto<T> : FileEntryDto<T>
 {
-    /// <summary>Parent folder ID</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustomInt("Parent folder ID", Example = 10)]
     public T ParentId { get; set; }
 
-    /// <summary>Number of files</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustomInt("Number of files", Example = 5)]
     public int FilesCount { get; set; }
 
-    /// <summary>Number of folders</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustomInt("Number of folders", Example = 7)]
     public int FoldersCount { get; set; }
 
-    /// <summary>Specifies if a folder is shareable or not</summary>
-    /// <type>System.Nullable{System.Boolean}, System</type>
+    [SwaggerSchemaCustom("Specifies if a folder is shareable or not")]
     public bool? IsShareable { get; set; }
 
-    /// <summary>Specifies if a folder is favorite or not</summary>
-    /// <type>System.Nullable{System.Boolean}, System</type>
+    [SwaggerSchemaCustom("Specifies if a folder is favorite or not")]
     public bool? IsFavorite { get; set; }
 
-    /// <summary>Number for a new folder</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustom("Number for a new folder")]
     public int New { get; set; }
 
-    /// <summary>Specifies if a folder is muted or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if a folder is muted or not")]
     public bool Mute { get; set; }
 
-    /// <summary>List of tags</summary>
-    /// <type>System.Collections.Generic.IEnumerable{System.String}, System.Collections.Generic</type>
+    [SwaggerSchemaCustom("List of tags")]
     public IEnumerable<string> Tags { get; set; }
 
-    /// <summary>Logo</summary>
-    /// <type>ASC.Files.Core.VirtualRooms.Logo, ASC.Files.Core</type>
+    [SwaggerSchemaCustom("Logo")]
     public Logo Logo { get; set; }
 
-    /// <summary>Specifies if a folder is pinned or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if a folder is pinned or not")]
     public bool Pinned { get; set; }
 
-    /// <summary>Room type</summary>
-    /// <type>System.Nullable{ASC.Files.Core.ApiModels.RequestDto.RoomType}, System</type>
+    [SwaggerSchemaCustom("Room type")]
     public RoomType? RoomType { get; set; }
 
-    /// <summary>Specifies if a folder is private or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if a folder is private or not")]
     public bool Private { get; set; }
 
-    /// <summary>Folder type</summary>
-    /// <type>System.Nullable{ASC.Files.Core.FolderType}, System</type>
+    [SwaggerSchemaCustom("Folder type")]
     public FolderType? Type { get; set; }
 
+    [SwaggerSchemaCustom("InRoom")]
     public bool? InRoom { get; set; }
 
-    /// <summary>Quota</summary>
-    /// <type>System.Nullable{System.Int64}, System</type>
+    [SwaggerSchemaCustom("Quota")]
     public long? QuotaLimit { get; set; }
 
-    /// <summary>Specifies if the room has a custom quota or not</summary>
-    /// <type>System.Nullable{System.Boolean}, System</type>
+    [SwaggerSchemaCustom("Specifies if the room has a custom quota or not")]
     public bool? IsCustomQuota { get; set; }
 
-    /// <summary>Counter</summary>
-    /// <type>System.Nullable{System.Int64}, System</type>
+    [SwaggerSchemaCustom("Counter")]
     public long? UsedSpace { get; set; }
 
     public override FileEntryType FileEntryType { get => FileEntryType.Folder; }
-
-    public static FolderDto<int> GetSample()
-    {
-        return new FolderDto<int>
-        {
-            Access = FileShare.ReadWrite,
-            //Updated = ApiDateTime.GetSample(),
-            //Created = ApiDateTime.GetSample(),
-            //CreatedBy = EmployeeWraper.GetSample(),
-            Id = 10,
-            RootFolderType = FolderType.BUNCH,
-            Shared = false,
-            Title = "Some titile",
-            //UpdatedBy = EmployeeWraper.GetSample(),
-            FilesCount = 5,
-            FoldersCount = 7,
-            ParentId = 10,
-            IsShareable = null,
-            IsFavorite = null
-        };
-    }
 }
 
 [Scope]

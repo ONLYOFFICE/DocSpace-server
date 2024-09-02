@@ -26,43 +26,26 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
-/// <summary>
-/// </summary>
 public class ThirdPartyRequestDto
 {
-    /// <summary>Connection URL for the sharepoint</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Connection URL for the sharepoint", Format = "uri")]
     public string Url { get; set; }
 
-    /// <summary>Login</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Login")]
     public string Login { get; set; }
 
-    /// <summary>Password</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Password")]
     public string Password { get; set; }
 
-    /// <summary>Authentication token</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Authentication token")]
     public string Token { get; set; }
 
-    /// <summary>Specifies if this is a corporate account or not</summary>
-    /// <type>System.Boolean, System</type>
-    public bool IsCorporate { get; set; }
-
-    /// <summary>Specifies if this is a room storage or not</summary>
-    /// <type>System.Boolean, System</type>
-    public bool IsRoomsStorage { get; set; }
-
-    /// <summary>Customer title</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Customer title")]
     public string CustomerTitle { get; set; }
 
-    /// <summary>Provider key</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Provider key")]
     public string ProviderKey { get; set; }
 
-    /// <summary>Provider ID</summary>
-    /// <type>System.Nullable{System.Int32}, System</type>
+    [SwaggerSchemaCustom("Provider ID")]
     public int? ProviderId { get; set; }
 }

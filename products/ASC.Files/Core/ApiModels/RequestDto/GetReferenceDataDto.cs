@@ -26,27 +26,20 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
-/// <summary>
-/// </summary>
 public class GetReferenceDataDto<T>
 {
-    /// <summary>The unique document identifier used by the service to get a link to the file</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustomInt("The unique document identifier used by the service to get a link to the file")]
     public T FileKey { get; set; }
 
-    /// <summary>The unique system identifier</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("The unique system identifier", Nullable = true)]
     public string InstanceId { get; set; }
 
-    /// <summary>Source file ID</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustomInt("Source file ID")]
     public T SourceFileId { get; set; }
 
-    /// <summary>The file name or relative path for the formula editor</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("The file name or relative path for the formula editor", Nullable = true)]
     public string Path { get; set; }
 
-    /// <summary>Link to file</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Link to file", Format = "uri")]
     public string Link { get; set; }
 }

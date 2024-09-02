@@ -26,11 +26,8 @@
 
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
-/// <summary>
-/// </summary>
 public class SsoSettingsRequestsDto
 {
-    /// <summary>Serialized SSO settings</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Serialized SSO settings")]
     public string SerializeSettings { get; set; }
 }

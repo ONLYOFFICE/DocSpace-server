@@ -28,13 +28,28 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public class DocumentBuilderTaskDto
 {
+    [SwaggerSchemaCustom("Id")]
     public string Id { get; set; }
+
+    [SwaggerSchemaCustom("Error")]
     public string Error { get; set; }
+
+    [SwaggerSchemaCustom("Percentage")]
     public int Percentage { get; set; }
+
+    [SwaggerSchemaCustom("Is completed")]
     public bool IsCompleted { get; set; }
+
+    [SwaggerSchemaCustom("Status")]
     public DistributedTaskStatus Status { get; set; }
+
+    [SwaggerSchemaCustom<object>("Result file id")]
     public object ResultFileId { get; set; }
+
+    [SwaggerSchemaCustom("Result file name")]
     public string ResultFileName { get; set; }
+
+    [SwaggerSchemaCustom("Result file url", Format = "uri")]
     public string ResultFileUrl { get; set; }
 
     public static DocumentBuilderTaskDto Get(DistributedTaskProgress task)

@@ -26,16 +26,14 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
-/// <summary>
-/// </summary>
 public class CreateTextOrHtmlFileRequestDto
 {
-    /// <summary>File title</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("File title")]
     public string Title { get; set; }
 
-    /// <summary>File contents</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("File contents")]
     public string Content { get; set; }
+
+    [SwaggerSchemaCustom("Create new if exist")]
     public bool CreateNewIfExist { get; set; }
 }

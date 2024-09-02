@@ -26,101 +26,79 @@
 
 namespace ASC.People.ApiModels.RequestDto;
 
-/// <summary>
-/// </summary>
-public class MemberRequestDto
+public class EmailMemberRequestDto
 {
-    /// <summary>Employee type (All, RoomAdmin, User, DocSpaceAdmin, Collaborator)</summary>
-    /// <type>ASC.Core.Users.EmployeeType, ASC.Core.Common</type>
-    public EmployeeType Type { get; set; }
-
-    /// <summary>Specifies if this is a guest or a user</summary>
-    /// <type>System.Boolean, System</type>
-    public bool? IsUser { get; set; }
-
-    /// <summary>Email</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Email")]
     public string Email { get; set; }
-
-    /// <summary>First name</summary>
-    /// <type>System.String, System</type>
-    public string Firstname { get; set; }
-
-    /// <summary>Last name</summary>
-    /// <type>System.String, System</type>
-    public string Lastname { get; set; }
-
-    /// <summary>List of user departments</summary>
-    /// <type>System.Guid[], System</type>
-    public Guid[] Department { get; set; }
-
-    /// <summary>Title</summary>
-    /// <type>System.String, System</type>
-    public string Title { get; set; }
-
-    /// <summary>Location</summary>
-    /// <type>System.String, System</type>
-    public string Location { get; set; }
-
-    /// <summary>Sex (male or female)</summary>
-    /// <type>System.String, System</type>
-    public SexEnum? Sex { get; set; }
-
-    /// <summary>Birthday</summary>
-    /// <type>ASC.Api.Core.ApiDateTime, ASC.Api.Core</type>
-    public ApiDateTime Birthday { get; set; }
-
-    /// <summary>Registration date (if it is not specified, then the current date will be set)</summary>
-    /// <type>ASC.Api.Core.ApiDateTime, ASC.Api.Core</type>
-    public ApiDateTime Worksfrom { get; set; }
-
-    /// <summary>Comment</summary>
-    /// <type>System.String, System</type>
-    public string Comment { get; set; }
-
-    /// <summary>List of user contacts</summary>
-    /// <type>System.Collections.Generic.IEnumerable{ASC.Web.Api.Models.Contact}, System.Collections.Generic</type>
-    public IEnumerable<Contact> Contacts { get; set; }
-
-    /// <summary>Avatar photo URL</summary>
-    /// <type>System.String, System</type>
-    public string Files { get; set; }
-
-    /// <summary>Password</summary>
-    /// <type>System.String, System</type>
+}
+public class MemberBaseRequestDto : EmailMemberRequestDto
+{
+    [SwaggerSchemaCustom("Password")]
     public string Password { get; set; }
 
-    /// <summary>Password hash</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Password hash")]
     public string PasswordHash { get; set; }
+}
+public class MemberRequestDto : MemberBaseRequestDto
+{
+    [SwaggerSchemaCustom("Employee type")]
+    public EmployeeType Type { get; set; }
 
-    /// <summary>Specifies if the user is added via the invitation link or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if this is a guest or a user")]
+    public bool? IsUser { get; set; }
+
+    [SwaggerSchemaCustom("First name")]
+    public string Firstname { get; set; }
+
+    [SwaggerSchemaCustom("Last name")]
+    public string Lastname { get; set; }
+
+    [SwaggerSchemaCustom("List of user departments")]
+    public Guid[] Department { get; set; }
+
+    [SwaggerSchemaCustom("Title")]
+    public string Title { get; set; }
+
+    [SwaggerSchemaCustom("Location")]
+    public string Location { get; set; }
+
+    [SwaggerSchemaCustom("Sex (male or female)")]
+    public SexEnum? Sex { get; set; }
+
+    [SwaggerSchemaCustom("Birthday")]
+    public ApiDateTime Birthday { get; set; }
+
+    [SwaggerSchemaCustom("Registration date (if it is not specified, then the current date will be set)")]
+    public ApiDateTime Worksfrom { get; set; }
+
+    [SwaggerSchemaCustom("Comment")]
+    public string Comment { get; set; }
+
+    [SwaggerSchemaCustom("List of user contacts")]
+    public IEnumerable<Contact> Contacts { get; set; }
+
+    [SwaggerSchemaCustom("Avatar photo URL", Format ="uri")]
+    public string Files { get; set; }
+
+    [SwaggerSchemaCustom("Specifies if the user is added via the invitation link or not")]
     public bool FromInviteLink { get; set; }
 
-    /// <summary>Key</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Key")]
     public string Key { get; set; }
 
-    /// <summary>Language</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Language")]
     public string CultureName { get; set; }
 
-    /// <summary>Target</summary>
-    /// <type>System.Guid, System</type>
+    [SwaggerSchemaCustom("Target")]
     public Guid Target { get; set; }
 }
 
-/// <summary>
-/// </summary>
 public class UpdateMemberRequestDto : MemberRequestDto
 {
-    /// <summary>User ID</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("User ID")]
     public string UserId { get; set; }
 
-    /// <summary>Specifies whether to disable a user or not</summary>
-    /// <type>System.Nullable{System.Boolean}, System</type>
+    [SwaggerSchemaCustom("Specifies whether to disable a user or not")]
     public bool? Disable { get; set; }
 }
 
@@ -128,4 +106,21 @@ public enum SexEnum
 {
     Female = 0,
     Male = 1,
+}
+
+public class UpdatePhotoMemberRequestDto
+{
+    [SwaggerSchemaCustom("Avatar photo URL", Format = "uri")]
+    public string Files { get; set; }
+}
+public class UpdateMemberSimpleRequestDto
+{
+    [SwaggerSchemaCustom("User ID")]
+    public string UserId { get; set; }
+}
+
+public class ContactsRequestDto
+{
+    [SwaggerSchemaCustom("List of user contacts")]
+    public IEnumerable<Contact> Contacts { get; set; }
 }

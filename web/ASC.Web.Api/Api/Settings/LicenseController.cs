@@ -50,10 +50,9 @@ public class LicenseController(ILoggerProvider option,
     /// Refreshes the license.
     /// </summary>
     /// <short>Refresh the license</short>
-    /// <category>License</category>
-    /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
     /// <path>api/2.0/settings/license/refresh</path>
-    /// <httpMethod>GET</httpMethod>
+    [Tags("Settings / License")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpGet("refresh")]
     [AllowNotPayment]
     public async Task<bool> RefreshLicenseAsync()
@@ -73,10 +72,9 @@ public class LicenseController(ILoggerProvider option,
     /// <short>
     /// Activate a license
     /// </short>
-    /// <category>License</category>
-    /// <returns type="System.Object, System">Message about the result of activating license</returns>
     /// <path>api/2.0/settings/license/accept</path>
-    /// <httpMethod>POST</httpMethod>
+    [Tags("Settings / License")]
+    [SwaggerResponse(200, "Message about the result of activating license", typeof(object))]
     [AllowNotPayment]
     [HttpPost("accept")]
     public async Task<object> AcceptLicenseAsync()
@@ -119,11 +117,10 @@ public class LicenseController(ILoggerProvider option,
     /// <short>
     /// Activate a trial license
     /// </short>
-    /// <category>License</category>
-    /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
     /// <path>api/2.0/settings/license/trial</path>
-    /// <httpMethod>POST</httpMethod>
-    ///<visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Settings / License")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpPost("trial")]
     public async Task<bool> ActivateTrialAsync()
     {
@@ -187,11 +184,10 @@ public class LicenseController(ILoggerProvider option,
     /// <short>
     /// Request a license
     /// </short>
-    /// <category>License</category>
-    /// <returns type="System.Boolean, System">Boolean value: true if the license is required</returns>
     /// <path>api/2.0/settings/license/required</path>
-    /// <httpMethod>GET</httpMethod>
-    /// <requiresAuthorization>false</requiresAuthorization>
+    /// <requiresAuthorization>false</requiresAuthorization>\
+    [Tags("Settings / License")]
+    [SwaggerResponse(200, "Boolean value: true if the license is required", typeof(bool))]
     [AllowAnonymous]
     [AllowNotPayment]
     [HttpGet("required")]
@@ -208,10 +204,9 @@ public class LicenseController(ILoggerProvider option,
     /// Upload a license
     /// </short>
     /// <param type="ASC.Web.Api.ApiModel.RequestsDto.UploadLicenseRequestsDto, ASC.Web.Api" name="inDto">Request parameters to upload a license</param>
-    /// <category>License</category>
-    /// <returns type="System.Object, System">License</returns>
     /// <path>api/2.0/settings/license</path>
-    /// <httpMethod>POST</httpMethod>
+    [Tags("Settings / License")]
+    [SwaggerResponse(200, "License", typeof(object))]
     [AllowNotPayment]
     [HttpPost("")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Wizard, Administrators")]

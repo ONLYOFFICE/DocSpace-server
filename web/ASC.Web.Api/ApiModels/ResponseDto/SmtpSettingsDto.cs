@@ -26,74 +26,37 @@
 
 namespace ASC.Web.Api.ApiModel.ResponseDto;
 
-/// <summary>
-/// </summary>
 public class SmtpSettingsDto : IMapFrom<SmtpSettings>
 {
-    /// <summary>Host</summary>
-    /// <type>System.String, System</type>
-    /// <example>mail.example.com</example>
+    [SwaggerSchemaCustom("Host", Example = "mail.example.com")]
     public string Host { get; set; }
 
-    /// <summary>Port</summary>
-    /// <type>System.Nullable{System.Int32}, System</type>
-    /// <example>25</example>
+    [SwaggerSchemaCustom("Port", Example = 25)]
     public int? Port { get; set; }
 
-    /// <summary>Sender address</summary>
-    /// <type>System.String, System</type>
-    /// <example>notify@example.com</example>
+    [SwaggerSchemaCustom("Sender address", Example = "notify@example.com")]
     public string SenderAddress { get; set; }
 
-    /// <summary>Sender display name</summary>
-    /// <type>System.String, System</type>
-    /// <example>Postman</example>
+    [SwaggerSchemaCustom("Sender display name", Example = "Postman")]
     public string SenderDisplayName { get; set; }
 
-    /// <summary>Credentials username</summary>
-    /// <type>System.String, System</type>
-    /// <example>notify@example.com</example>
+    [SwaggerSchemaCustom("Credentials username", Example = "notify@example.com")]
     public string CredentialsUserName { get; set; }
 
-    /// <summary>Credentials user password</summary>
-    /// <type>System.String, System</type>
-    /// <example>{password}</example>
+    [SwaggerSchemaCustom("Credentials user password", Example = "{password}")]
     public string CredentialsUserPassword { get; set; }
 
-    /// <summary>Enables SSL or not</summary>
-    /// <type>System.Boolean, System</type>
-    /// <example>true</example>
+    [SwaggerSchemaCustom("Enables SSL or not", Example = false)]
     public bool EnableSSL { get; set; }
 
-    /// <summary>Enables authentication or not</summary>
-    /// <type>System.Boolean, System</type>
-    /// <example>false</example>
+    [SwaggerSchemaCustom("Enables authentication or not")]
     public bool EnableAuth { get; set; }
 
-    /// <summary>Specifies whether to use NTLM or not</summary>
-    /// <type>System.Boolean, System</type>
-    /// <example>false</example>
+    [SwaggerSchemaCustom("Specifies whether to use NTLM or not", Example = false)]
     public bool UseNtlm { get; set; }
 
-    /// <summary>Specifies if the current settings are default or not</summary>
-    /// <type>System.Boolean, System</type>
-    /// <example>false</example>
+    [SwaggerSchemaCustom("Specifies if the current settings are default or not", Example = false)]
     public bool IsDefaultSettings { get; set; }
-
-    public static SmtpSettingsDto GetSample()
-    {
-        return new SmtpSettingsDto
-        {
-            Host = "mail.example.com",
-            Port = 25,
-            CredentialsUserName = "notify@example.com",
-            CredentialsUserPassword = "{password}",
-            EnableAuth = true,
-            EnableSSL = false,
-            SenderAddress = "notify@example.com",
-            SenderDisplayName = "Postman"
-        };
-    }
 
     public void Mapping(Profile profile)
     {

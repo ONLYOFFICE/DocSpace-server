@@ -26,23 +26,17 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
-/// <summary>
-/// </summary>
 public class CreateFileRequestDto<T>
 {
-    /// <summary>File title</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("File title")]
     public string Title { get; set; }
 
-    /// <summary>Template file ID</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustomInt("Template file ID")]
     public T TemplateId { get; set; }
 
-    /// <summary>Specifies whether to allow the creation of external extension files or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies whether to allow the creation of external extension files or not")]
     public bool EnableExternalExt { get; set; }
 
-    /// <summary>Form ID</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustom("Form ID")]
     public int FormId { get; set; }
 }

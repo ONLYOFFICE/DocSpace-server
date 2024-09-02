@@ -24,6 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Api.Core.Convention;
+
+using Swashbuckle.AspNetCore.Annotations;
+
 namespace ASC.Data.Backup.Controllers;
 
 /// <summary>
@@ -33,6 +37,7 @@ namespace ASC.Data.Backup.Controllers;
 [Scope]
 [DefaultRoute]
 [ApiController]
+[ControllerName("backup")]
 public class BackupController(
     BackupAjaxHandler backupAjaxHandler,
     TenantManager tenantManager,
@@ -50,9 +55,9 @@ public class BackupController(
     /// Returns the backup schedule of the current portal.
     /// </summary>
     /// <short>Get the backup schedule</short>
-    /// <returns type="ASC.Data.Backup.BackupAjaxHandler.Schedule, ASC.Data.Backup">Backup schedule</returns>
-    /// <httpMethod>GET</httpMethod>
     /// <path>api/2.0/backup/getbackupschedule</path>
+    [Tags("Backup")]
+    [SwaggerResponse(200, "Backup schedule", typeof(BackupAjaxHandler.Schedule))]
     [HttpGet("getbackupschedule")]
     public async Task<BackupAjaxHandler.Schedule> GetBackupSchedule()
     {
@@ -64,9 +69,9 @@ public class BackupController(
     /// </summary>
     /// <short>Create the backup schedule</short>
     /// <param type="ASC.Data.Backup.ApiModels.BackupScheduleDto, ASC.Data.Backup" name="inDto">Backup schedule parameters</param>
-    /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
-    /// <httpMethod>POST</httpMethod>
     /// <path>api/2.0/backup/createbackupschedule</path>
+    [Tags("Backup")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpPost("createbackupschedule")]
     public async Task<bool> CreateBackupScheduleAsync(BackupScheduleDto inDto)
     {
@@ -109,9 +114,9 @@ public class BackupController(
     /// Deletes the backup schedule of the current portal.
     /// </summary>
     /// <short>Delete the backup schedule</short>
-    /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
-    /// <httpMethod>DELETE</httpMethod>
     /// <path>api/2.0/backup/deletebackupschedule</path>
+    [Tags("Backup")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpDelete("deletebackupschedule")]
     public async Task<bool> DeleteBackupSchedule()
     {
@@ -125,9 +130,9 @@ public class BackupController(
     /// </summary>
     /// <short>Start the backup</short>
     /// <param type="ASC.Data.Backup.ApiModels.BackupDto, ASC.Data.Backup" name="inDto">Backup parameters</param>
-    /// <returns type="System.Object, System">Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link</returns>
-    /// <httpMethod>POST</httpMethod>
     /// <path>api/2.0/backup/startbackup</path>
+    [Tags("Backup")]
+    [SwaggerResponse(200, "Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link", typeof(BackupProgress))]
     [AllowNotPayment]
     [HttpPost("startbackup")]
     public async Task<BackupProgress> StartBackupAsync(BackupDto inDto)
@@ -194,9 +199,9 @@ public class BackupController(
     /// Returns the progress of the started backup.
     /// </summary>
     /// <short>Get the backup progress</short>
-    /// <returns type="System.Object, System">Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link</returns>
-    /// <httpMethod>GET</httpMethod>
     /// <path>api/2.0/backup/getbackupprogress</path>
+    [Tags("Backup")]
+    [SwaggerResponse(200, "Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link", typeof(BackupProgress))]
     [AllowNotPayment]
     [HttpGet("getbackupprogress")]
     public async Task<BackupProgress> GetBackupProgressAsync()
@@ -208,10 +213,10 @@ public class BackupController(
     /// Returns the history of the started backup.
     /// </summary>
     /// <short>Get the backup history</short>
-    /// <returns type="ASC.Data.Backup.Contracts.BackupHistoryRecord, ASC.Data.Backup.Core">List of backup history records</returns>
-    /// <httpMethod>GET</httpMethod>
     /// <path>api/2.0/backup/getbackuphistory</path>
     /// <collection>list</collection>
+    [Tags("Backup")]
+    [SwaggerResponse(200, "List of backup history records", typeof(BackupHistoryRecord))]
     [HttpGet("getbackuphistory")]
     public async Task<List<BackupHistoryRecord>> GetBackupHistory()
     {
@@ -222,10 +227,10 @@ public class BackupController(
     /// Deletes the backup with the ID specified in the request.
     /// </summary>
     /// <short>Delete the backup</short>
-    /// <param type="System.Guid, System" method="url" name="id">Backup ID</param>
-    /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
-    /// <httpMethod>DELETE</httpMethod>
+    /// <param type="System.Guid, System" method="url" name="id" example="9924256A-739C-462b-AF15-E652A3B1B6EB">Backup ID</param>
     /// <path>api/2.0/backup/deletebackup/{id}</path>
+    [Tags("Backup")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpDelete("deletebackup/{id:guid}")]
     public async Task<bool> DeleteBackup(Guid id)
     {
@@ -237,9 +242,9 @@ public class BackupController(
     /// Deletes the backup history of the current portal.
     /// </summary>
     /// <short>Delete the backup history</short>
-    /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
-    /// <httpMethod>DELETE</httpMethod>
     /// <path>api/2.0/backup/deletebackuphistory</path>
+    [Tags("Backup")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful")]
     [HttpDelete("deletebackuphistory")]
     public async Task<bool> DeleteBackupHistory()
     {
@@ -252,9 +257,9 @@ public class BackupController(
     /// </summary>
     /// <short>Start the restoring process</short>
     /// <param type="ASC.Data.Backup.ApiModels.BackupRestoreDto, ASC.Data.Backup" name="inDto">Restoring parameters</param>
-    /// <returns type="System.Object, System">Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link</returns>
-    /// <httpMethod>POST</httpMethod>
     /// <path>api/2.0/backup/startrestore</path>
+    [Tags("Backup")]
+    [SwaggerResponse(200, "Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link", typeof(BackupProgress))]
     [HttpPost("startrestore")]
     public async Task<BackupProgress> StartBackupRestoreAsync(BackupRestoreDto inDto)
     {
@@ -299,10 +304,10 @@ public class BackupController(
     /// Returns the progress of the started restoring process.
     /// </summary>
     /// <short>Get the restoring progress</short>
-    /// <returns type="System.Object, System">Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link</returns>
-    /// <httpMethod>GET</httpMethod>
     /// <path>api/2.0/backup/getrestoreprogress</path>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Backup")]
+    [SwaggerResponse(200, "Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link", typeof(BackupProgress))]
     [HttpGet("getrestoreprogress")]  //NOTE: this method doesn't check payment!!!
     [AllowAnonymous]
     [AllowNotPayment]
@@ -315,11 +320,11 @@ public class BackupController(
     /// Returns a path to the temporary folder with the stored backup.
     /// </summary>
     /// <short>Get the temporary backup folder</short>
-    /// <returns type="System.Object, System">Path to the temporary folder with the stored backup</returns>
-    /// <httpMethod>GET</httpMethod>
     /// <path>api/2.0/backup/backuptmp</path>
-    ///<visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Backup")]
     [HttpGet("backuptmp")]
+    [SwaggerResponse(200, "Path to the temporary folder with the stored backup")]
     public object GetTempPath()
     {
         return backupAjaxHandler.GetTmpFolder();

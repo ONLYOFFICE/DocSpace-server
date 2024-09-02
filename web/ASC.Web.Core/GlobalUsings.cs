@@ -148,3 +148,4 @@ global using Twilio.Types;
 
 global using SecurityContext = ASC.Core.SecurityContext;
 global using JsonIgnoreAttribute = System.Text.Json.Serialization.JsonIgnoreAttribute;
+global using ASC.Api.Core.Extensions;

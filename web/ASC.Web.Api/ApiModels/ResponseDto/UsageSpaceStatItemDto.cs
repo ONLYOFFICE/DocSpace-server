@@ -26,71 +26,35 @@
 
 namespace ASC.Web.Api.ApiModel.ResponseDto;
 
-/// <summary>
-/// </summary>
 public class UsageSpaceStatItemDto
 {
-    /// <summary>Name</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Name", Example = "Item name")]
     public string Name { get; set; }
 
-    /// <summary>Icon</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Icon", Example = "Item icon path")]
     public string Icon { get; set; }
 
-    /// <summary>Specifies if the module space is disabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if the module space is disabled or not", Example = false)]
     public bool Disabled { get; set; }
 
-    /// <summary>Size</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Size", Example = "0 Byte")]
     public string Size { get; set; }
 
-    /// <summary>URL</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("URL", Example = "Item url", Format = "uri")]
     public string Url { get; set; }
-
-    public static UsageSpaceStatItemDto GetSample()
-    {
-        return new UsageSpaceStatItemDto
-        {
-            Name = "Item name",
-            Icon = "Item icon path",
-            Disabled = false,
-            Size = "0 Byte",
-            Url = "Item url"
-        };
-    }
 }
 
-/// <summary>
-/// </summary>
 public class ChartPointDto
 {
-    /// <summary>Display date</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Display date", Example = "6/1/2024")]
     public string DisplayDate { get; set; }
 
-    /// <summary>Date</summary>
-    /// <type>System.DateTime, System</type>
+    [SwaggerSchemaCustom("Date")]
     public DateTime Date { get; init; }
 
-    /// <summary>Hosts</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustom("Hosts", Example = 0)]
     public int Hosts { get; set; }
 
-    /// <summary>Hits</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustom("Hits", Example = 0)]
     public int Hits { get; set; }
-
-    public static ChartPointDto GetSample()
-    {
-        return new ChartPointDto
-        {
-            DisplayDate = DateTime.Now.ToShortDateString(),
-            Date = DateTime.Now,
-            Hosts = 0,
-            Hits = 0
-        };
-    }
 }

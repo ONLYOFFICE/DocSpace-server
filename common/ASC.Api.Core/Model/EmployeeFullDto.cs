@@ -26,167 +26,103 @@
 
 namespace ASC.Web.Api.Models;
 
-/// <summary>
-/// </summary>
 public class EmployeeFullDto : EmployeeDto
 {
-    /// <summary>First name</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("First name", Example = "Mike")]
     public string FirstName { get; set; }
 
-    /// <summary>Last name</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Last name", Example = "Zanyatski")]
     public string LastName { get; set; }
 
-    /// <summary>Username</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Username", Example = "Mike.Zanyatski")]
     public string UserName { get; set; }
 
-    /// <summary>Email</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Email", Example = "my@gmail.com")]
     public string Email { get; set; }
 
-    /// <summary>List of contacts</summary>
-    /// <type>System.Collections.Generic.List{ASC.Web.Api.Models.Contact}, System.Collections.Generic</type>
+    [SwaggerSchemaCustom("List of contacts")]
     public List<Contact> Contacts { get; set; }
 
-    /// <summary>Birthday</summary>
-    /// <type>ASC.Api.Core.ApiDateTime, ASC.Api.Core</type>
+    [SwaggerSchemaCustom("Birthday")]
     public ApiDateTime Birthday { get; set; }
 
-    /// <summary>Sex (male or female)</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Sex", Example = "male")]
     public string Sex { get; set; }
 
-    /// <summary>Employee status</summary>
-    /// <type>ASC.Core.Users.EmployeeStatus, ASC.Core.Common</type>
+    [SwaggerSchemaCustom("Employee status")]
     public EmployeeStatus Status { get; set; }
 
-    /// <summary>Employee activation status</summary>
-    /// <type>ASC.Core.Users.EmployeeActivationStatus, ASC.Core.Common</type>
+    [SwaggerSchemaCustom("Employee activation status")]
     public EmployeeActivationStatus ActivationStatus { get; set; }
 
-    /// <summary>The date when the user account was terminated</summary>
-    /// <type>ASC.Api.Core.ApiDateTime, ASC.Api.Core</type>
+    [SwaggerSchemaCustom("The date when the user account was terminated")]
     public ApiDateTime Terminated { get; set; }
 
-    /// <summary>Department</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Department", Example = "Marketing")]
     public string Department { get; set; }
 
-    /// <summary>Registration date</summary>
-    /// <type>ASC.Api.Core.ApiDateTime, ASC.Api.Core</type>
+    [SwaggerSchemaCustom("Registration date")]
     public ApiDateTime WorkFrom { get; set; }
 
-    /// <summary>List of groups</summary>
-    /// <type>System.Collections.Generic.List{ASC.Web.Api.Models.GroupSummaryDto}, System.Collections.Generic</type>
+    [SwaggerSchemaCustom("List of groups")]
     public List<GroupSummaryDto> Groups { get; set; }
 
-    /// <summary>Location</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Location", Example = "Palo Alto")]
     public string Location { get; set; }
 
-    /// <summary>Notes</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Notes", Example = "Notes to worker")]
     public string Notes { get; set; }
 
-    /// <summary>Specifies if the user is an administrator or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if the user is an administrator or not", Example = false)]
     public bool IsAdmin { get; set; }
 
-    /// <summary>Specifies if the user is a room administrator or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if the user is a room administrator or not")]
     public bool IsRoomAdmin { get; set; }
 
-    /// <summary>Specifies if the LDAP settings are enabled for the user or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if the LDAP settings are enabled for the user or not", Example = false)]
     public bool IsLDAP { get; set; }
 
-    /// <summary>List of administrator modules</summary>
-    /// <type>System.Collections.Generic.List{System.String}, System.Collections.Generic</type>
+    [SwaggerSchemaCustom("List of administrator modules", Example = "[\"projects\", \"crm\"]")]
     public List<string> ListAdminModules { get; set; }
 
-    /// <summary>Specifies if the user is a portal owner or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if the user is a portal owner or not")]
     public bool IsOwner { get; set; }
 
-    /// <summary>Specifies if the user is a portal visitor or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if the user is a portal visitor or not")]
     public bool IsVisitor { get; set; }
 
-    /// <summary>Specifies if the user is a portal collaborator or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if the user is a portal collaborator or not")]
     public bool IsCollaborator { get; set; }
 
-    /// <summary>Language</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Language", Example = "en-EN")]
     public string CultureName { get; set; }
 
-    /// <summary>Mobile phone number</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("Mobile phone number")]
     public string MobilePhone { get; set; }
 
-    /// <summary>Mobile phone activation status</summary>
-    /// <type>ASC.Core.Users.MobilePhoneActivationStatus, ASC.Core.Common</type>
+    [SwaggerSchemaCustom("Mobile phone activation status")]
     public MobilePhoneActivationStatus MobilePhoneActivationStatus { get; set; }
 
-    /// <summary>Specifies if the SSO settings are enabled for the user or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if the SSO settings are enabled for the user or not", Example = false)]
     public bool IsSSO { get; set; }
 
-    /// <summary>Theme</summary>
-    /// <type>System.Nullable{ASC.Web.Core.Users.DarkThemeSettingsType}, System</type>
+    [SwaggerSchemaCustom("Theme")]
     public DarkThemeSettingsType? Theme { get; set; }
 
-    /// <summary>Quota limit</summary>
-    /// <type>System.Int64, System</type>
+    [SwaggerSchemaCustom("Quota limit")]
     public long? QuotaLimit { get; set; }
 
-    /// <summary>Portal used space</summary>
-    /// <type>System.Double, System</type>
+    [SwaggerSchemaCustom("Portal used space", Example = 12345)]
     public double? UsedSpace { get; set; }
+
+    [SwaggerSchemaCustom("Shared")]
     public bool? Shared { get; set; }
 
-    /// <summary>Specifies if the user has a custom quota or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies if the user has a custom quota or not")]
     public bool? IsCustomQuota { get; set; }
 
-    /// <summary>Current login event ID</summary>
-    /// <type>System.Int32, System</type>
+    [SwaggerSchemaCustom("Current login event ID")]
     public int? LoginEventId { get; set; }
-
-    public static new EmployeeFullDto GetSample()
-    {
-        return new EmployeeFullDto
-        {
-            Avatar = "url to big avatar",
-            AvatarSmall = "url to small avatar",
-            AvatarMax = "url to max avatar",
-            AvatarOriginal = "url to original avatar",
-            Contacts = [Contact.GetSample()],
-            Email = "my@gmail.com",
-            FirstName = "Mike",
-            Id = Guid.Empty,
-            IsAdmin = false,
-            ListAdminModules = ["projects", "crm"],
-            UserName = "Mike.Zanyatski",
-            LastName = "Zanyatski",
-            Title = "Manager",
-            Groups = [GroupSummaryDto.GetSample()],
-            AvatarMedium = "url to medium avatar",
-            Birthday = ApiDateTime.GetSample(),
-            Department = "Marketing",
-            Location = "Palo Alto",
-            Notes = "Notes to worker",
-            Sex = "male",
-            Status = EmployeeStatus.Active,
-            WorkFrom = ApiDateTime.GetSample(),
-            Terminated = ApiDateTime.GetSample(),
-            CultureName = "en-EN",
-            IsLDAP = false,
-            IsSSO = false
-        };
-    }
 }
 
 [Scope]
