@@ -424,33 +424,6 @@ public sealed class UserManagerWrapper(
         return (false, Guid.Empty);
     }
 
-    private static string GetPasswordHelpMessage(PasswordSettings passwordSettings)
-    {
-        var text = new StringBuilder();
-
-        text.Append($"{Resource.ErrorPasswordMessage} ");
-        text.AppendFormat(Resource.ErrorPasswordLength, passwordSettings.MinLength, PasswordSettingsManager.MaxLength);
-        text.Append($", {Resource.ErrorPasswordOnlyLatinLetters}");
-        text.Append($", {Resource.ErrorPasswordNoSpaces}");
-
-        if (passwordSettings.UpperCase)
-        {
-            text.Append($", {Resource.ErrorPasswordNoUpperCase}");
-        }
-
-        if (passwordSettings.Digits)
-        {
-            text.Append($", {Resource.ErrorPasswordNoDigits}");
-        }
-
-        if (passwordSettings.SpecSymbols)
-        {
-            text.Append($", {Resource.ErrorPasswordNoSpecialSymbols}");
-        }
-
-        return text.ToString();
-    }
-
     #endregion
 
     public static bool ValidateEmail(string email)
