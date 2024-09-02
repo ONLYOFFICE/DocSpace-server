@@ -29,7 +29,7 @@ namespace ASC.Data.Backup.ApiModels;
 public class BackupDto
 {
     [SwaggerSchemaCustom("Storage type")]
-    public string StorageType { get; set; }
+    public BackupStorageType? StorageType { get; set; }
 
     [SwaggerSchemaCustom("Storage parameters")]
     public IEnumerable<ItemKeyValuePair<object, object>> StorageParams { get; set; }

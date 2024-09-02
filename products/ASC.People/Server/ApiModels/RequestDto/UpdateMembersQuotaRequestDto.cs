@@ -32,5 +32,5 @@ public class UpdateMembersQuotaRequestDto
     public IEnumerable<Guid> UserIds { get; set; }
 
     [SwaggerSchemaCustomString("List of user IDs", Example = "User quota", Format = "int64")]
-    public JsonElement Quota { get; set; }
+    public long Quota { get; set; }
 }

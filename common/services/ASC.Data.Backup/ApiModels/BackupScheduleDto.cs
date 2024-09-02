@@ -29,13 +29,13 @@ namespace ASC.Data.Backup.ApiModels;
 public class BackupScheduleDto
 {
     [SwaggerSchemaCustom("Storage type")]
-    public string StorageType { get; set; }
+    public BackupStorageType? StorageType { get; set; }
 
     [SwaggerSchemaCustom("Storage parameters")]
     public IEnumerable<ItemKeyValuePair<object, object>> StorageParams { get; set; }
 
     [SwaggerSchemaCustom("Maximum number of the stored backup copies")]
-    public string BackupsStored { get; set; }
+    public int? BackupsStored { get; set; }
 
     [SwaggerSchemaCustom("Cron parameters")]
     public Cron CronParams { get; set; }
@@ -47,11 +47,11 @@ public class BackupScheduleDto
 public class Cron
 {
     [SwaggerSchemaCustomString("Period", Example = "0")]
-    public string Period { get; set; }
+    public BackupPeriod? Period { get; set; }
 
     [SwaggerSchemaCustomString("Hour", Example = "0")]
-    public string Hour { get; set; }
+    public int Hour { get; set; }
 
     [SwaggerSchemaCustomString("Day", Example = "0")]
-    public string Day { get; set; }
+    public int Day { get; set; }
 }

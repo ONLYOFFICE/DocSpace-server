@@ -29,7 +29,7 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 public class TfaRequestsDto
 {
     [SwaggerSchemaCustomString("TFA type (None, Sms, or App)", Example = "None")]
-    public string Type { get; set; }
+    public TfaRequestsDtoType? Type { get; set; }
 
     [SwaggerSchemaCustom("User ID")]
     public Guid? Id { get; set; }
@@ -42,6 +42,13 @@ public class TfaRequestsDto
 
     [SwaggerSchemaCustom("List of groups who must use the TFA verification")]
     public List<Guid> MandatoryGroups { get; set; }
+}
+
+public enum TfaRequestsDtoType
+{
+    None = 0,
+    Sms = 1,
+    App = 2
 }
 
 public class TfaValidateRequestsDto

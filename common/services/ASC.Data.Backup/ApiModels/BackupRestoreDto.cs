@@ -32,7 +32,7 @@ public class BackupRestoreDto
     public string BackupId { get; set; }
 
     [SwaggerSchemaCustomString("Storage type")]
-    public object StorageType { get; set; }
+    public int? StorageType { get; set; }
 
     [SwaggerSchemaCustom("Storage parameters")]
     public IEnumerable<ItemKeyValuePair<object, object>> StorageParams { get; set; }

@@ -73,9 +73,17 @@ public class CoEditingConfig
     [SwaggerSchemaCustomString("Mode", Example = "fast")]
     public string Mode
     {
-        get { return Fast ? "fast" : "strict"; }
+        get { return Fast ? CoEditingConfigMode.Fast.ToStringLowerFast() : CoEditingConfigMode.Strict.ToStringLowerFast(); }
     }
 }
+
+[EnumExtensions]
+public enum CoEditingConfigMode
+{
+    Fast,
+    Strict
+}
+
 
 [Scope(GenericArguments = [typeof(int)])]
 [Scope(GenericArguments = [typeof(string)])]

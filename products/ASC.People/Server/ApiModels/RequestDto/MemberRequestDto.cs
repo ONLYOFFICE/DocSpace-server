@@ -63,7 +63,7 @@ public class MemberRequestDto : MemberBaseRequestDto
     public string Location { get; set; }
 
     [SwaggerSchemaCustom("Sex (male or female)")]
-    public string Sex { get; set; }
+    public SexEnum? Sex { get; set; }
 
     [SwaggerSchemaCustom("Birthday")]
     public ApiDateTime Birthday { get; set; }
@@ -100,6 +100,12 @@ public class UpdateMemberRequestDto : MemberRequestDto
 
     [SwaggerSchemaCustom("Specifies whether to disable a user or not")]
     public bool? Disable { get; set; }
+}
+
+public enum SexEnum
+{
+    Female = 0,
+    Male = 1,
 }
 
 public class UpdatePhotoMemberRequestDto
