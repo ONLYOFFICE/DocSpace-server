@@ -86,7 +86,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
     {
         _ignoreException = fileOperationData.IgnoreException;
         _immediately = fileOperationData.Immediately;
-        _headers = fileOperationData.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value));
+        _headers = fileOperationData.Headers?.ToDictionary(x => x.Key, x => new StringValues(x.Value));
         _isEmptyTrash = fileOperationData.IsEmptyTrash;
         this[OpType] = (int)FileOperationType.Delete;
     }

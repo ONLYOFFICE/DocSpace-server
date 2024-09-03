@@ -116,7 +116,8 @@ public class FileDto<T> : FileEntryDto<T>
     public IDictionary<string, bool> AvailableExternalRights { get; set; }
     public string RequestToken { get; set; }
     public ApiDateTime LastOpened { get; set; }
-    
+    public ApiDateTime Expired { get; set; }
+
     public static FileDto<int> GetSample()
     {
         return new FileDto<int>
@@ -162,9 +163,9 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
 {
     private readonly ApiDateTimeHelper _apiDateTimeHelper = apiDateTimeHelper;
 
-    public async Task<FileDto<T>> GetAsync<T>(File<T> file, string order = null)
+    public async Task<FileDto<T>> GetAsync<T>(File<T> file, string order = null, TimeSpan? expiration = null)
     {
-        var result = await GetFileWrapperAsync(file, order);
+        var result = await GetFileWrapperAsync(file, order, expiration);
 
         result.FolderId = file.ParentId;
         
@@ -173,7 +174,7 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
             result.RootFolderType = FolderType.Recent;
             result.FolderId = await _globalFolderHelper.GetFolderRecentAsync<T>();
         }
-        
+
         result.ViewAccessibility = await fileUtility.GetAccessibility(file);
         result.AvailableExternalRights = _fileSecurity.GetFileAccesses(file, SubjectType.ExternalLink);
         result.FileEntryType = FileEntryType.File;
@@ -181,7 +182,7 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         return result;
     }
 
-    private async Task<FileDto<T>> GetFileWrapperAsync<T>(File<T> file, string order)
+    private async Task<FileDto<T>> GetFileWrapperAsync<T>(File<T> file, string order, TimeSpan? expiration)
     {
         var result = await GetAsync<FileDto<T>, T>(file);
         var isEnabledBadges = await badgesSettingsHelper.GetEnabledForCurrentUserAsync();
@@ -212,6 +213,23 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         result.DenySharing = file.DenySharing;
         result.Access = file.Access;
         result.LastOpened = _apiDateTimeHelper.Get(file.LastOpened);
+
+        if (file.RootFolderType == FolderType.VirtualRooms && !expiration.HasValue)
+        {
+            var folderDao = daoFactory.GetFolderDao<T>();
+            var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(file);
+            var room = await folderDao.GetFolderAsync(roomId).NotFoundIfNull();
+            var lifetime = RoomDataLifetimeDto.Deserialize(room.SettingsLifetime);
+            if (lifetime != null)
+            {
+                expiration = DateTime.UtcNow - lifetime.GetExpirationUtc();
+            }
+        }
+
+        if (expiration.HasValue && expiration.Value != TimeSpan.MaxValue)
+        {
+            result.Expired = new ApiDateTime(result.Updated.UtcTime + expiration.Value, result.Updated.TimeZoneOffset);
+        }
 
         if (file.Order != 0)
         {            

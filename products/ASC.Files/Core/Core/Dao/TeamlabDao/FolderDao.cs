@@ -158,7 +158,8 @@ internal class FolderDao(
         bool excludeSubject, 
         ProviderFilter provider,
         SubjectFilter subjectFilter,
-        IEnumerable<string> subjectEntriesIds, QuotaFilter quotaFilter = QuotaFilter.All)
+        IEnumerable<string> subjectEntriesIds,
+        QuotaFilter quotaFilter = QuotaFilter.All)
     {
         if (CheckInvalidFilter(filterType) || (provider != ProviderFilter.None && provider != ProviderFilter.Storage))
         {
@@ -475,7 +476,8 @@ internal class FolderDao(
                     HasLogo = folder.SettingsHasLogo,
                     Color = folder.SettingsColor,
                     Indexing = folder.SettingsIndexing,
-                    Quota = folder.SettingsQuota
+                    Quota = folder.SettingsQuota,
+                    Lifetime = folder.SettingsLifetime
                 };
             }
 
@@ -514,7 +516,8 @@ internal class FolderDao(
                     HasLogo = folder.SettingsHasLogo,
                     Color = folder.SettingsColor,
                     Indexing = folder.SettingsIndexing,
-                    Quota = folder.SettingsQuota
+                    Quota = folder.SettingsQuota,
+                    Lifetime = folder.SettingsLifetime
                 };
             }
             
@@ -933,7 +936,8 @@ internal class FolderDao(
                 HasLogo = folder.SettingsHasLogo,
                 Color = folder.SettingsColor,
                 Indexing = folder.SettingsIndexing,
-                Quota = quota >= TenantEntityQuotaSettings.NoQuota ? quota : TenantEntityQuotaSettings.DefaultQuotaValue
+                Quota = quota >= TenantEntityQuotaSettings.NoQuota ? quota : TenantEntityQuotaSettings.DefaultQuotaValue,
+                Lifetime = folder.SettingsLifetime
             };
         };
         
@@ -1743,14 +1747,9 @@ internal class FolderDao(
 
         if (quotaFilter != QuotaFilter.All)
         {
-            if (quotaFilter == QuotaFilter.Default)
-            {
-                query = query.Where(f => f.Settings.Quota == TenantEntityQuotaSettings.DefaultQuotaValue);
-            }
-            else
-            {
-                query = query.Where(f => f.Settings.Quota != TenantEntityQuotaSettings.DefaultQuotaValue);
-            }
+            query = quotaFilter == QuotaFilter.Default
+                ? query.Where(f => f.Settings.Quota == TenantEntityQuotaSettings.DefaultQuotaValue)
+                : query.Where(f => f.Settings.Quota != TenantEntityQuotaSettings.DefaultQuotaValue);
         }
 
         if (withoutTags)

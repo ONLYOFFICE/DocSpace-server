@@ -24,55 +24,39 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core.ApiModels.RequestDto;
+namespace ASC.Files.AutoCleanUp;
 
-/// <summary>
-/// </summary>
-public enum RoomType
+[Singleton]
+public class CleanupLifetimeExpiredEntriesLauncher(ILogger<CleanupLifetimeExpiredEntriesLauncher> logger, CleanupLifetimeExpiredEntriesWorker worker, IConfiguration configuration)
+    : BackgroundService
 {
-    FillingFormsRoom = 1,
-    EditingRoom = 2,
-    ReviewRoom = 3,
-    ReadOnlyRoom = 4,
-    CustomRoom = 5,
-    PublicRoom = 6,
-    FormRoom = 7,
-    VirtualDataRoom = 8
-}
+    private readonly TimeSpan _period = TimeSpan.Parse(configuration.GetValue<string>("files:cleanupLifetimeExpiredEntries:period") ?? "0:5:0");
 
-/// <summary>
-/// </summary>
-public class CreateRoomRequestDto
-{
-    /// <summary>Room name</summary>
-    /// <type>System.String, System</type>
-    public string Title { get; set; }
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        logger.InformationCleanupLifetimeExpiredEntriesWorkerRunning();
 
-    /// <summary>Room type</summary>
-    /// <type>ASC.Files.Core.ApiModels.RequestDto.RoomType, ASC.Files.Core</type>
-    public RoomType RoomType { get; set; }
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            await Procedure(stoppingToken);
+        }
 
-    /// <summary>Private room or not</summary>
-    /// <type>System.Boolean, System</type>
-    public bool Private { get; set; }
+        logger.InformationCleanupLifetimeExpiredEntriesWorkerStopping();
+    }
 
-    /// <summary>Collection of sharing parameters</summary>
-    /// <type>System.Collections.Generic.IEnumerable{ASC.Files.Core.ApiModels.FileShareParams}, System.Collections.Generic</type>
-    public IEnumerable<FileShareParams> Share { get; set; }
+    private async Task Procedure(CancellationToken stoppingToken)
+    {
+        logger.TraceCleanupLifetimeExpiredEntriesProcedureStart();
 
-    /// <summary>Notifies users about the shared room or not</summary>
-    /// <type>System.Boolean, System</type>
-    public bool Notify { get; set; }
+        if (stoppingToken.IsCancellationRequested)
+        {
+            return;
+        }
 
-    /// <summary>Message to send when notifying about the shared room</summary>
-    /// <type>System.String, System</type>
-    public string SharingMessage { get; set; }
+        await worker.DeleteLifetimeExpiredEntries(stoppingToken);
 
-    /// <summary>Room quota</summary>
-    /// <type>System.Int64, System</type>
-    public long Quota { get; set; }
+        logger.TraceCleanupLifetimeExpiredEntriesProcedureFinish();
 
-    public bool Indexing { get; set; }
-
-    public RoomDataLifetimeDto Lifetime { get; set; }
+        await Task.Delay(_period, stoppingToken);
+    }
 }
