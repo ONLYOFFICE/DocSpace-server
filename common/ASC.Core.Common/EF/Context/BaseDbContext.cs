@@ -65,6 +65,8 @@ public class InstallerOptionsAction(string region, string nameConnectionString)
 
                     //Configuring Connection Resiliency: https://docs.microsoft.com/en-us/ef/core/miscellaneous/connection-resiliency 
                     providerOptions.EnableRetryOnFailure(maxRetryCount: 15, maxRetryDelay: TimeSpan.FromSeconds(30), errorNumbersToAdd: null);
+
+                    providerOptions.UseMicrosoftJson();
                 });
                 break;
             case Provider.PostgreSql:
