@@ -30,6 +30,7 @@ package com.asc.registration.application.transfer;
 import com.asc.common.utilities.validation.URLCollection;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.io.Serializable;
@@ -104,6 +105,7 @@ public class CreateTenantClientCommandRequest implements Serializable {
   /**
    * The logo of the client in base64 format. The client logo is expected to be passed as base64.
    */
+  @NotEmpty
   @Pattern(
       regexp = "^data:image\\/(?:png|jpeg|jpg|svg\\+xml);base64,.*.{1,}",
       message = "client logo is expected to be passed as base64")
@@ -119,6 +121,7 @@ public class CreateTenantClientCommandRequest implements Serializable {
 
   /** The website URL of the client. The website URL is expected to be passed as a URL. */
   @JsonProperty("website_url")
+  @NotEmpty
   @Pattern(
       regexp =
           "https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)",
@@ -127,6 +130,7 @@ public class CreateTenantClientCommandRequest implements Serializable {
 
   /** The terms URL of the client. The terms URL is expected to be passed as a URL. */
   @JsonProperty("terms_url")
+  @NotEmpty
   @Pattern(
       regexp =
           "https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)",
@@ -135,6 +139,7 @@ public class CreateTenantClientCommandRequest implements Serializable {
 
   /** The policy URL of the client. The policy URL is expected to be passed as a URL. */
   @JsonProperty("policy_url")
+  @NotEmpty
   @Pattern(
       regexp =
           "https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)",
@@ -143,11 +148,13 @@ public class CreateTenantClientCommandRequest implements Serializable {
 
   /** The redirect URIs for the client. */
   @JsonProperty("redirect_uris")
+  @NotNull
   @URLCollection
   private Set<String> redirectUris;
 
   /** The allowed origins for the client. */
   @JsonProperty("allowed_origins")
+  @NotNull
   @URLCollection
   private Set<String> allowedOrigins;
 
@@ -156,6 +163,7 @@ public class CreateTenantClientCommandRequest implements Serializable {
    * URL.
    */
   @JsonProperty("logout_redirect_uri")
+  @NotEmpty
   @Pattern(
       regexp =
           "https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)",

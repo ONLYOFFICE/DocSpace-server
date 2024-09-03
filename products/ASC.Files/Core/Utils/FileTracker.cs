@@ -44,7 +44,7 @@ public class FileTrackerHelper
     {
         _cacheNotify = cacheNotify;
         _cache = cache;
-        _cacheNotify.Subscribe(a => _cache.Insert(GetCacheKey(a.FileId), a.FileTracker, _cacheTimeout), CacheNotifyAction.InsertOrUpdate);
+        _cacheNotify.Subscribe(a => _cache.Insert(GetCacheKey(a.FileId), a.FileTracker, _cacheTimeout, _callbackAction), CacheNotifyAction.InsertOrUpdate);
         _cacheNotify.Subscribe(a => _cache.Remove(GetCacheKey(a.FileId)), CacheNotifyAction.Remove);
         
         _serviceProvider = serviceProvider;

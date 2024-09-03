@@ -5015,6 +5015,12 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("timestamp")
                         .HasColumnName("create_on");
 
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("varchar(36)")
+                        .HasColumnName("created_by")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
                     b.Property<string>("CultureName")
                         .HasColumnType("varchar(20)")
                         .HasColumnName("culture")

@@ -54,6 +54,11 @@ public class BackupAjaxHandler(
     {
         await DemandPermissionsBackupAsync();
 
+        if (!coreBaseSettings.Standalone && dump)
+        {
+            throw new ArgumentException("backup can not start as dump");
+        }
+
         var backupRequest = new StartBackupRequest
         {
             TenantId = await GetCurrentTenantIdAsync(),

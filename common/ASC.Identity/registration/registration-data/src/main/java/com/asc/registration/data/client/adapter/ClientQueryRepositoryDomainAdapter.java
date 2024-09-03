@@ -35,11 +35,13 @@ import com.asc.registration.core.domain.entity.Client;
 import com.asc.registration.data.client.mapper.ClientDataAccessMapper;
 import com.asc.registration.service.ports.output.repository.ClientQueryRepository;
 import com.asc.registration.service.transfer.response.PageableResponse;
+import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -94,7 +96,7 @@ public class ClientQueryRepositoryDomainAdapter implements ClientQueryRepository
     log.debug("Querying all public and private clients by tenant id with pagination");
     var clients =
         jpaClientRepository.findAllPublicAndPrivateByTenant(
-            tenant.getValue(), Pageable.ofSize(limit).withPage(page));
+            tenant.getValue(), PageRequest.of(page, limit, Sort.by("createdOn").descending()));
 
     var builder =
         PageableResponse.<Client>builder()
@@ -104,7 +106,7 @@ public class ClientQueryRepositoryDomainAdapter implements ClientQueryRepository
                 clients.stream()
                     .filter(c -> !c.isInvalidated())
                     .map(clientDataAccessMapper::toDomain)
-                    .collect(Collectors.toSet()));
+                    .collect(Collectors.toCollection(LinkedHashSet::new)));
 
     if (clients.hasPrevious()) builder.previous(page - 1);
     if (clients.hasNext()) builder.next(page + 1);
@@ -124,7 +126,7 @@ public class ClientQueryRepositoryDomainAdapter implements ClientQueryRepository
     log.debug("Querying clients by tenant id with pagination");
     var clients =
         jpaClientRepository.findAllByTenantId(
-            tenant.getValue(), Pageable.ofSize(limit).withPage(page));
+            tenant.getValue(), PageRequest.of(page, limit, Sort.by("createdOn").descending()));
 
     var builder =
         PageableResponse.<Client>builder()
@@ -134,7 +136,7 @@ public class ClientQueryRepositoryDomainAdapter implements ClientQueryRepository
                 clients.stream()
                     .filter(c -> !c.isInvalidated())
                     .map(clientDataAccessMapper::toDomain)
-                    .collect(Collectors.toSet()));
+                    .collect(Collectors.toCollection(LinkedHashSet::new)));
 
     if (clients.hasPrevious()) builder.previous(page - 1);
     if (clients.hasNext()) builder.next(page + 1);

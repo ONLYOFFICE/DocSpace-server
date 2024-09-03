@@ -47,13 +47,25 @@ public abstract class ActionInterpreter
         var key = processedAction != MessageAction.None ? processedAction.ToStringFast() : null;
         
         var description = JsonSerializer.Deserialize<List<string>>(@event.DescriptionRaw);
+        var data = await GetDataAsync(serviceProvider, @event.Target, description);
+        
+        var initiatorId = @event.UserId ?? ASC.Core.Configuration.Constants.Guest.ID;
+        string initiatorName = null;
+
+        if (!string.IsNullOrEmpty(data.InitiatorName))
+        {
+            initiatorName = initiatorId == ASC.Core.Configuration.Constants.Guest.ID && data.InitiatorName != AuditReportResource.GuestAccount 
+                ? $"{data.InitiatorName} ({FilesCommonResource.ExternalUser})" 
+                : data.InitiatorName;
+        }
         
         var entry = new HistoryEntry
         {
             Action = new HistoryAction(processedAction, key),
-            InitiatorId = @event.UserId ?? ASC.Core.Configuration.Constants.Guest.ID,
+            InitiatorId = initiatorId,
+            InitiatorName = initiatorName,
             Date = @event.Date,
-            Data = await GetDataAsync(serviceProvider, @event.Target, description)
+            Data = data
         };
 
         return entry;
@@ -144,4 +156,25 @@ public record EntryOperationData : HistoryData
     {
         return FromFolderId.HasValue ? HashCode.Combine(ToFolderId, FromFolderId) : ToFolderId.GetHashCode();
     }
+}
+
+public record UserFileUpdateData : EntryData
+{
+    public string UserName { get; }
+
+    public UserFileUpdateData(string id,
+        string title,
+        int? parentId = null,
+        string parentTitle = null,
+        int? parentType = null,
+        string userName = null) : base(id,
+        title,
+        parentId,
+        parentTitle,
+        parentType)
+    {
+        UserName = userName;
+    }
+    
+    public override string InitiatorName => UserName;
 }

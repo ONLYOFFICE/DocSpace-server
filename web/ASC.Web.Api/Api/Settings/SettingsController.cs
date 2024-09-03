@@ -101,6 +101,7 @@ public partial class SettingsController(MessageService messageService,
             TenantAlias = tenant.Alias,
             EnableAdmMess = studioAdminMessageSettings.Enable || await tenantExtra.IsNotPaidAsync(),
             LegalTerms = setupInfo.LegalTerms,
+            LicenseUrl = setupInfo.LicenseUrl,
             CookieSettingsEnabled = tenantCookieSettings.Enabled,
             UserNameRegex = userFormatter.UserNameRegex.ToString(),
             ForumLink = await commonLinkUtility.GetUserForumLinkAsync(settingsManager)

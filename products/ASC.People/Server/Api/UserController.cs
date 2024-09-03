@@ -183,7 +183,7 @@ public class UserController(
     {
         await _apiContext.AuthByClaimAsync();
         var model = emailValidationKeyModelHelper.GetModel();
-        var linkData = inDto.FromInviteLink ? await invitationService.GetLinkDataAsync(inDto.Key, inDto.Email, inDto.Type, model?.UiD) : null;
+        var linkData = inDto.FromInviteLink ? await invitationService.GetLinkDataAsync(inDto.Key, inDto.Email, model.Type, inDto.Type, model?.UiD) : null;
         if (linkData is { IsCorrect: false })
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_InvintationLink);
@@ -202,8 +202,7 @@ public class UserController(
 
         var user = new UserInfo();
 
-        var byEmail = linkData?.LinkType == InvitationLinkType.Individual;
-
+        var byEmail = linkData is { LinkType: InvitationLinkType.Individual, ConfirmType: not ConfirmType.EmpInvite };
         if (byEmail)
         {
             user = await _userManager.GetUserByEmailAsync(inDto.Email);
@@ -212,8 +211,16 @@ public class UserController(
             {
                 throw new SecurityException(FilesCommonResource.ErrorMessage_InvintationLink);
             }
+        }
 
+        if (byEmail || linkData?.ConfirmType is ConfirmType.EmpInvite)
+        {
             await userInvitationLimitHelper.IncreaseLimit();
+        }
+
+        if (!byEmail)
+        {
+            user.CreatedBy = model?.UiD;
         }
 
         inDto.PasswordHash = (inDto.PasswordHash ?? "").Trim();
@@ -264,8 +271,8 @@ public class UserController(
         
         try
         {
-        user = await userManagerWrapper.AddUserAsync(user, inDto.PasswordHash, inDto.FromInviteLink, true, inDto.Type,
-            inDto.FromInviteLink && linkData is { IsCorrect: true, ConfirmType: not ConfirmType.EmpInvite }, true, true, byEmail);
+            user = await userManagerWrapper.AddUserAsync(user, inDto.PasswordHash, inDto.FromInviteLink, true, inDto.Type,
+                inDto.FromInviteLink && linkData is { IsCorrect: true, ConfirmType: not ConfirmType.EmpInvite }, true, true, byEmail);
         }
         catch (TenantQuotaException)
         {
@@ -284,7 +291,7 @@ public class UserController(
         if (linkData is { LinkType: InvitationLinkType.CommonToRoom })
         {
             await invitationService.AddUserToRoomByInviteAsync(linkData, user, quotaLimit);
-                }
+        }
 
         if (inDto.IsUser.GetValueOrDefault(false))
         {
@@ -585,11 +592,16 @@ public class UserController(
         
         var isInvite = _httpContextAccessor.HttpContext!.User.Claims
             .Any(role => role.Type == ClaimTypes.Role && ConfirmTypeExtensions.TryParse(role.Value, out var confirmType) && confirmType == ConfirmType.LinkInvite);
-        if (user.Id == Constants.LostUser.Id || (isInvite && user.Id != authContext.CurrentAccount.ID))
+
+        if (user.Id == Constants.LostUser.Id)
         {
             throw new ItemNotFoundException("User not found");
         }
 
+        if (isInvite)
+        {
+            return await employeeFullDtoHelper.GetSimple(user);
+        }
         
         return await employeeFullDtoHelper.GetFullAsync(user);
     }
@@ -1798,17 +1810,21 @@ public class UserController(
             {
                     Constants.GroupAdmin.ID
             };
+            
             var products = webItemManager.GetItemsAll().Where(i => i is IProduct || i.ID == WebItemManager.MailProductID);
             adminGroups.AddRange(products.Select(r => r.ID));
 
             includeGroups.Add(adminGroups);
         }
 
+        var filterValue = _apiContext.FilterValue;
+        var filterSeparator = _apiContext.FilterSeparator;
+
         var totalCountTask = _userManager.GetUsersCountAsync(isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, quotaFilter,
-            _apiContext.FilterValue, withoutGroup ?? false);
+            filterValue, filterSeparator, withoutGroup ?? false);
 
         var users = _userManager.GetUsers(isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, quotaFilter,
-            _apiContext.FilterValue, withoutGroup ?? false, _apiContext.SortBy, !_apiContext.SortDescending, _apiContext.Count, _apiContext.StartIndex);
+            filterValue, filterSeparator, withoutGroup ?? false, _apiContext.SortBy, !_apiContext.SortDescending, _apiContext.Count, _apiContext.StartIndex);
 
         var counter = 0;
 
@@ -1943,15 +1959,17 @@ public class UserControllerAdditional<T>(EmployeeFullDtoHelper employeeFullDtoHe
         
         var offset = Convert.ToInt32(apiContext.StartIndex);
         var count = Convert.ToInt32(apiContext.Count);
+        var filterValue = apiContext.FilterValue;
+        var filterSeparator = apiContext.FilterSeparator;
 
         var securityDao = daoFactory.GetSecurityDao<T>();
 
-        var totalUsers = await securityDao.GetUsersWithSharedCountAsync(room, apiContext.FilterValue, employeeStatus, activationStatus, excludeShared ?? false);
+        var totalUsers = await securityDao.GetUsersWithSharedCountAsync(room, filterValue, employeeStatus, activationStatus, excludeShared ?? false, filterSeparator);
 
         apiContext.SetCount(Math.Min(Math.Max(totalUsers - offset, 0), count)).SetTotalCount(totalUsers);
 
-        await foreach (var u in securityDao.GetUsersWithSharedAsync(room, apiContext.FilterValue, employeeStatus, activationStatus, excludeShared ?? false, offset, 
-                           count))
+        await foreach (var u in securityDao.GetUsersWithSharedAsync(room, filterValue, employeeStatus, activationStatus, excludeShared ?? false, filterSeparator, 
+                           offset, count))
         {
             yield return await employeeFullDtoHelper.GetFullAsync(u.UserInfo, u.Shared);
         }

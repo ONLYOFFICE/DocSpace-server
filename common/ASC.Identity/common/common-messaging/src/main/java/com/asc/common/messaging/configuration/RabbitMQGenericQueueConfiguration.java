@@ -25,7 +25,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-package com.asc.registration.messaging.configuration;
+package com.asc.common.messaging.configuration;
 
 import lombok.Getter;
 import lombok.Setter;

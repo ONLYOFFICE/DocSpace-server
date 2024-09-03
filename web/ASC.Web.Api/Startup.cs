@@ -57,6 +57,7 @@ public class Startup : BaseStartup
                    .TryAddSingleton(services);
                 
         services.AddActivePassiveHostedService<NotifySchedulerService>(_configuration, "WebApiNotifySchedulerService");
+        services.AddDocumentServiceHttpClient(_configuration);
     }
 
     public override void Configure(IApplicationBuilder app, IWebHostEnvironment env)

@@ -27,9 +27,12 @@
 
 package com.asc.registration.application.configuration;
 
-import com.asc.registration.application.security.AscCookieAuthenticationFilter;
-import com.asc.registration.application.security.RateLimiterFilter;
+import com.asc.registration.application.security.filters.AscCookieAuthenticationFilter;
+import com.asc.registration.application.security.filters.RateLimiterFilter;
+import com.asc.registration.application.security.providers.AscAuthenticationProvider;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -37,14 +40,22 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 /** The SecurityConfiguration class provides security configuration for the application. */
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfiguration {
-  private final RateLimiterFilter rateLimiterFilter;
+  @Value("${server.port}")
+  private int serverPort;
+
+  @Value("${web.api}")
+  private String webApi;
+
+  private final AscAuthenticationProvider ascAuthenticationProvider;
   private final AscCookieAuthenticationFilter ascCookieAuthenticationFilter;
+  private final RateLimiterFilter rateLimiterFilter;
 
   /**
    * Configures the security filter chain for HTTP requests.
@@ -56,11 +67,35 @@ public class SecurityConfiguration {
   @Bean
   SecurityFilterChain configureSecurityFilterChain(HttpSecurity http) throws Exception {
     return http.authorizeHttpRequests(
-            authorizeRequests -> authorizeRequests.anyRequest().permitAll())
+            authorizeRequests ->
+                authorizeRequests
+                    .requestMatchers(checkManagementPort())
+                    .permitAll()
+                    .requestMatchers(
+                        String.format("%s/clients/*/public/info", webApi), "/docs", "/health/**")
+                    .permitAll()
+                    .requestMatchers(
+                        String.format("%s/scopes", webApi),
+                        String.format("%s/clients/.*?/info", webApi),
+                        String.format("%s/clients/info", webApi),
+                        String.format("%s/clients/consents", webApi))
+                    .hasAnyRole("ADMIN", "USER")
+                    .anyRequest()
+                    .hasRole("ADMIN"))
         .addFilterAt(ascCookieAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
         .addFilterAfter(rateLimiterFilter, UsernamePasswordAuthenticationFilter.class)
+        .authenticationProvider(ascAuthenticationProvider)
         .csrf(AbstractHttpConfigurer::disable)
         .cors(AbstractHttpConfigurer::disable)
         .build();
+  }
+
+  /**
+   * This method verifies whether a request port is equal to the management server port
+   *
+   * @return Returns a request matcher object with port comparison
+   */
+  private RequestMatcher checkManagementPort() {
+    return (HttpServletRequest request) -> request.getLocalPort() != serverPort;
   }
 }

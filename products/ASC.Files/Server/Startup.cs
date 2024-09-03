@@ -56,7 +56,7 @@ public class Startup : BaseStartup
         services.AddBaseDbContextPool<FilesDbContext>();
         services.RegisterQuotaFeature();
         services.AddScoped<IWebItem, ProductEntryPoint>();
-        services.AddDocumentServiceHttpClient();
+        services.AddDocumentServiceHttpClient(_configuration);
 
         services.AddStartupTask<CheckPdfStartupTask>()
            .TryAddSingleton(services);

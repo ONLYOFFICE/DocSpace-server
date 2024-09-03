@@ -54,7 +54,8 @@ server:
 
 springdoc:
   api-docs:
-    path: ${web.api}/oauth/info
+    path: /docs
+  use-management-port: false
 
 feign:
   client:

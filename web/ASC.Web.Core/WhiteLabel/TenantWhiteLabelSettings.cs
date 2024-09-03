@@ -536,7 +536,7 @@ public class TenantWhiteLabelSettingsHelper(
                 canvas.DrawPicture(svg.Picture);
 
                 using (var image = SKImage.FromBitmap(bitMap))
-                using (var pngData = image.Encode(SKEncodedImageFormat.Png, 100))
+                using (var pngData = image.Encode())
                 {
                     return pngData.ToArray();
                 }
@@ -546,7 +546,7 @@ public class TenantWhiteLabelSettingsHelper(
         byte[] GetLogoDataFromJpg()
         {
             using var image = SKImage.FromEncodedData(logoData);
-            using var pngData = image.Encode(SKEncodedImageFormat.Png, 100);
+            using var pngData = image.Encode();
             return pngData.ToArray();
         }
     }

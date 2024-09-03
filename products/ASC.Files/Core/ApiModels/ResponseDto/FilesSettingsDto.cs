@@ -66,6 +66,7 @@ public class FilesSettingsDto
     public bool ExternalShareSocialMedia { get; set; }
     public bool StoreOriginalFiles { get; set; }
     public bool KeepNewFileName { get; set; }
+    public bool DisplayFileExtension { get; set; }
     public bool ConvertNotify { get; set; }
     public bool HideConfirmConvertSave { get; set; }
     public bool HideConfirmConvertOpen { get; set; }
@@ -135,6 +136,7 @@ public class FilesSettingsDtoConverter(
             ExternalShareSocialMedia = await filesSettingsHelper.GetExternalShareSocialMedia(),
             StoreOriginalFiles = await filesSettingsHelper.GetStoreOriginalFiles(),
             KeepNewFileName = await filesSettingsHelper.GetKeepNewFileName(),
+            DisplayFileExtension = await filesSettingsHelper.GetDisplayFileExtension(),
             ConvertNotify = await filesSettingsHelper.GetConvertNotify(),
             HideConfirmConvertSave = await filesSettingsHelper.GetHideConfirmConvertSave(),
             HideConfirmConvertOpen = await filesSettingsHelper.GetHideConfirmConvertOpen(),
