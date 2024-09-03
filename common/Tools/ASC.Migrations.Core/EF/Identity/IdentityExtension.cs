@@ -1,43 +1,19 @@
 ﻿namespace ASC.Migrations.Core.Identity;
 
-public partial class IdentityContext : DbContext
+public static class IdentityExtension
 {
-    public IdentityContext()
+    public static ModelBuilderWrapper AddIdentity(this ModelBuilderWrapper modelBuilder)
     {
+        modelBuilder.Entity<IdentityAuthorization>().Navigation(e => e.Tenant).AutoInclude(false);
+
+        modelBuilder
+            .Add(MySqlAddIdentity, Provider.MySql);
+
+        return modelBuilder;
     }
 
-    public IdentityContext(DbContextOptions<IdentityContext> options)
-        : base(options)
+    public static void MySqlAddIdentity(this ModelBuilder modelBuilder)
     {
-    }
-
-    public virtual DbSet<IdentityAuthorization> IdentityAuthorizations { get; set; }
-
-    public virtual DbSet<IdentityCert> IdentityCerts { get; set; }
-
-    public virtual DbSet<IdentityClient> IdentityClients { get; set; }
-
-    public virtual DbSet<IdentityClientAllowedOrigin> IdentityClientAllowedOrigins { get; set; }
-
-    public virtual DbSet<IdentityClientAuthenticationMethod> IdentityClientAuthenticationMethods { get; set; }
-
-    public virtual DbSet<IdentityClientRedirectUri> IdentityClientRedirectUris { get; set; }
-
-    public virtual DbSet<IdentityClientScope> IdentityClientScopes { get; set; }
-
-    public virtual DbSet<IdentityConsent> IdentityConsents { get; set; }
-
-    public virtual DbSet<IdentityConsentScope> IdentityConsentScopes { get; set; }
-
-    public virtual DbSet<IdentityScope> IdentityScopes { get; set; }
-
-    public virtual DbSet<IdentityShedlock> IdentityShedlocks { get; set; }
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        ModelBuilderWrapper
-            .From(modelBuilder, Database)
-            .AddDbTenant();
         modelBuilder.Entity<IdentityAuthorization>(entity =>
         {
             entity.HasKey(e => new { e.PrincipalId, e.RegisteredClientId, e.AuthorizationGrantType }).HasName("PRIMARY");
@@ -485,9 +461,5 @@ public partial class IdentityContext : DbContext
                 .HasColumnName("locked_by")
                 .IsRequired();
         });
-
-        OnModelCreatingPartial(modelBuilder);
     }
-
-    partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
 }
