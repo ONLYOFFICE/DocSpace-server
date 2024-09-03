@@ -126,10 +126,14 @@ public class OwnerController(
         {
             throw new Exception(Resource.ErrorAccessDenied);
         }
-
-        if (!await userManagerWrapper.UpdateUserTypeAsync(newOwner, EmployeeType.DocSpaceAdmin))
+        
+        var newOwnerType = await userManager.GetUserTypeAsync(newOwner);
+        if (newOwnerType != EmployeeType.DocSpaceAdmin)
         {
-            throw new InvalidOperationException();
+            if (!await userManagerWrapper.UpdateUserTypeAsync(newOwner, EmployeeType.DocSpaceAdmin))
+            {
+                throw new InvalidOperationException();
+            }
         }
 
         var curTenant = await tenantManager.GetCurrentTenantAsync();
