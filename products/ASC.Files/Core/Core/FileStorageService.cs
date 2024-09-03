@@ -679,11 +679,22 @@ public class FileStorageService //: IFileStorageService
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
         var tenantSpaceQuota = await tenantManager.GetTenantQuotaAsync(tenantId);
-        var maxTotalSize = tenantSpaceQuota?.MaxTotalSize ?? -1;
+        var maxTotalSize = tenantSpaceQuota != null ? tenantSpaceQuota.MaxTotalSize : -1;
 
         if (updateData.Quota != null && maxTotalSize < updateData.Quota)
         {
             throw new InvalidOperationException(Resource.RoomQuotaGreaterPortalError);
+        }
+        if (coreBaseSettings.Standalone)
+        {
+            var tenantQuotaSetting = await settingsManager.LoadAsync<TenantQuotaSettings>();
+            if (tenantQuotaSetting.EnableQuota)
+            {
+                if (tenantQuotaSetting.Quota < updateData.Quota)
+                {
+                    throw new InvalidOperationException(Resource.RoomQuotaGreaterPortalError);
+                }
+            }
         }
 
         var tagDao = daoFactory.GetTagDao<T>();
@@ -717,7 +728,8 @@ public class FileStorageService //: IFileStorageService
         if (!string.Equals(folder.Title, updateData.Title, StringComparison.Ordinal) || (folder.SettingsQuota != updateData.Quota && updateData.Quota != null))
         {
             var oldTitle = folder.Title;
-            
+            var oldQuota = folder.SettingsQuota;
+
             var newFolderId = await folderDao.UpdateFolderAsync(
                  folder,
                  !string.Equals(folder.Title, updateData.Title, StringComparison.Ordinal) && updateData.Title != null ? updateData.Title : folder.Title,
@@ -735,6 +747,22 @@ public class FileStorageService //: IFileStorageService
                 else
                 {
                     _ = filesMessageService.SendAsync(MessageAction.FolderRenamed, folder, folder.Title);
+                }
+            }
+            if (DocSpaceHelper.IsRoom(folder.FolderType) && oldQuota != updateData.Quota && updateData.Quota != null)
+            {
+                if (updateData.Quota >= 0)
+                {
+                    _ = filesMessageService.SendAsync(MessageAction.CustomQuotaPerRoomChanged, updateData.Quota.ToString(), [folder.Title]);
+                }
+                else if(updateData.Quota == -1)
+                {
+                    _ = filesMessageService.SendAsync(MessageAction.CustomQuotaPerRoomDisabled, string.Join(", ", [folder.Title]));
+                }
+                else
+                {
+                    var quotaRoomSettings = await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
+                    _ = filesMessageService.SendAsync(MessageAction.CustomQuotaPerRoomDefault, quotaRoomSettings.DefaultQuota.ToString(), [folder.Title]);
                 }
             }
         }
