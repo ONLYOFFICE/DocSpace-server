@@ -219,10 +219,9 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
             var folderDao = daoFactory.GetFolderDao<T>();
             var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(file);
             var room = await folderDao.GetFolderAsync(roomId).NotFoundIfNull();
-            var lifetime = RoomDataLifetimeDto.Deserialize(room.SettingsLifetime);
-            if (lifetime != null)
+            if (room.SettingsLifetime != null)
             {
-                expiration = DateTime.UtcNow - lifetime.GetExpirationUtc();
+                expiration = DateTime.UtcNow - room.SettingsLifetime.GetExpirationUtc();
             }
         }
 

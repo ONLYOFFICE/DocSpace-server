@@ -134,13 +134,13 @@ static file class Queries
                 ctx.RoomSettings
                     .Join(ctx.Folders, a => a.RoomId, b => b.Id,
                         (settings, room) => new { settings, room })
-                    .Where(x => !string.IsNullOrEmpty(x.settings.Lifetime))
+                    .Where(x => x.settings.Lifetime != null)
                     .Select(r => new LifetimeEnabledRoom
                     {
                         TenantId = r.settings.TenantId,
                         RoomId = r.settings.RoomId,
                         UserId = r.room.CreateBy,
-                        Lifetime = RoomDataLifetimeDto.Deserialize(r.settings.Lifetime)
+                        Lifetime = r.settings.Lifetime
                     }));
 
     public static readonly Func<FilesDbContext, int, int, DateTime, IAsyncEnumerable<int>>

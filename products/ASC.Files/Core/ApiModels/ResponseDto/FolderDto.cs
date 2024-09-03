@@ -220,7 +220,7 @@ public class FolderDtoHelper(
             result.Type = folder.FolderType;
         }
 
-        result.Lifetime = RoomDataLifetimeDto.Deserialize(folder.SettingsLifetime);
+        result.Lifetime = folder.SettingsLifetime;
 
         return result;
     }
