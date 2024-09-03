@@ -1566,7 +1566,7 @@ public class UserController(
     {
         if (!inDto.Quota.TryGetInt64(out var quota))
         {
-            throw new Exception(Resource.QuotaGreaterPortalError);
+            throw new Exception(Resource.UserQuotaGreaterPortalError);
         }
 
         await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
@@ -1582,7 +1582,7 @@ public class UserController(
         
         if (maxTotalSize < quota)
         {
-            throw new Exception(Resource.QuotaGreaterPortalError);
+            throw new Exception(Resource.UserQuotaGreaterPortalError);
         }
         if (coreBaseSettings.Standalone)
         {
@@ -1591,7 +1591,7 @@ public class UserController(
             {
                 if (tenantQuotaSetting.Quota < quota)
                 {
-                    throw new Exception(Resource.QuotaGreaterPortalError);
+                    throw new Exception(Resource.UserQuotaGreaterPortalError);
                 }
             }
         }

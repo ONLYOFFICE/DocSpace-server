@@ -569,7 +569,7 @@ public class FileStorageService //: IFileStorageService
 
         if (maxTotalSize < quota)
         {
-            throw new InvalidOperationException(Resource.QuotaGreaterPortalError);
+            throw new InvalidOperationException(Resource.RoomQuotaGreaterPortalError);
         }
         try
         {
@@ -621,7 +621,7 @@ public class FileStorageService //: IFileStorageService
 
         if (maxTotalSize < quota)
         {
-            throw new InvalidOperationException(Resource.QuotaGreaterPortalError);
+            throw new InvalidOperationException(Resource.RoomQuotaGreaterPortalError);
         }
         if (coreBaseSettings.Standalone)
         {
@@ -630,7 +630,7 @@ public class FileStorageService //: IFileStorageService
             {
                 if (tenantQuotaSetting.Quota < quota)
                 {
-                    throw new InvalidOperationException(Resource.QuotaGreaterPortalError);
+                    throw new InvalidOperationException(Resource.RoomQuotaGreaterPortalError);
                 }
             }
         }
@@ -683,7 +683,7 @@ public class FileStorageService //: IFileStorageService
 
         if (updateData.Quota != null && maxTotalSize < updateData.Quota)
         {
-            throw new InvalidOperationException(Resource.QuotaGreaterPortalError);
+            throw new InvalidOperationException(Resource.RoomQuotaGreaterPortalError);
         }
 
         var tagDao = daoFactory.GetTagDao<T>();
