@@ -702,30 +702,29 @@ public class FileStorageService //: IFileStorageService
 
         var folderAccess = folder.Access;
 
-        if (!string.Equals(folder.Title, updateData.Title, StringComparison.Ordinal) || (folder.SettingsQuota != updateData.Quota && updateData.Quota != null))
+        var titleChanged = !string.Equals(folder.Title, updateData.Title, StringComparison.Ordinal) && updateData.Title != null;
+        var quotaChanged = folder.SettingsQuota != updateData.Quota && updateData.Quota != null;
+        
+        if (titleChanged || quotaChanged)
         {
             var oldTitle = folder.Title;
             
             var newFolderId = await folderDao.UpdateFolderAsync(
                  folder,
-                 !string.Equals(folder.Title, updateData.Title, StringComparison.Ordinal) && updateData.Title != null ? updateData.Title : folder.Title,
-                 folder.SettingsQuota != updateData.Quota && updateData.Quota != null ? (long)updateData.Quota : folder.SettingsQuota);
+                 titleChanged ? updateData.Title : folder.Title,
+                 quotaChanged ? (long)updateData.Quota : folder.SettingsQuota);
 
             folder = await folderDao.GetFolderAsync(newFolderId);
             folder.Access = folderAccess;
             
-            if (!string.Equals(oldTitle, updateData.Title, StringComparison.Ordinal))
+            if (titleChanged)
             {
-                if (DocSpaceHelper.IsRoom(folder.FolderType))
-                {
-                    _ = filesMessageService.SendAsync(MessageAction.RoomRenamed, oldTitle, folder, folder.Title);
-                }
-                else
-                {
-                    _ = filesMessageService.SendAsync(MessageAction.FolderRenamed, folder, folder.Title);
-                }
+                _ = DocSpaceHelper.IsRoom(folder.FolderType) ? 
+                    filesMessageService.SendAsync(MessageAction.RoomRenamed, oldTitle, folder, folder.Title) : 
+                    filesMessageService.SendAsync(MessageAction.FolderRenamed, folder, folder.Title);
             }
         }
+        
 
         var newTags = tagDao.GetNewTagsAsync(authContext.CurrentAccount.ID, folder);
         var tag = await newTags.FirstOrDefaultAsync();

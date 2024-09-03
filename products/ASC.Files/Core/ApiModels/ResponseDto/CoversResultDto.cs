@@ -24,19 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core.VirtualRooms;
+namespace ASC.Files.Core.ApiModels.ResponseDto;
 
-public class Logo
+public class CoversResultDto
 {
-    public string Original { get; set; }
-    public string Large { get; set; }
-    public string Medium { get; set; }
-    public string Small { get; set; }
-    public string Color { get; set; }
-    public string Cover { get; set; }
-
-    public bool IsDefault()
-    {
-        return string.IsNullOrEmpty(Original);
-    }
+    public string Id { get; set; }
+    public string Data { get; set; }
 }

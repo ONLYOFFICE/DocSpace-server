@@ -164,6 +164,42 @@
     <EmbeddedResource Update="Services\NotifyService\FilesPatternResource.ru.resx">
       <DependentUpon>FilesPatternResource.resx</DependentUpon>
     </EmbeddedResource>
+    <None Remove="Covers\1.svg" />
+    <EmbeddedResource Include="Covers\1.svg" />
+    <None Remove="Covers\2.svg" />
+    <EmbeddedResource Include="Covers\2.svg" />
+    <None Remove="Covers\3.svg" />
+    <EmbeddedResource Include="Covers\3.svg" />
+    <None Remove="Covers\4.svg" />
+    <EmbeddedResource Include="Covers\4.svg" />
+    <None Remove="Covers\5.svg" />
+    <EmbeddedResource Include="Covers\5.svg" />
+    <None Remove="Covers\6.svg" />
+    <EmbeddedResource Include="Covers\6.svg" />
+    <None Remove="Covers\7.svg" />
+    <EmbeddedResource Include="Covers\7.svg" />
+    <None Remove="Covers\8.svg" />
+    <EmbeddedResource Include="Covers\8.svg" />
+    <None Remove="Covers\9.svg" />
+    <EmbeddedResource Include="Covers\9.svg" />
+    <None Remove="Covers\10.svg" />
+    <EmbeddedResource Include="Covers\10.svg" />
+    <None Remove="Covers\11.svg" />
+    <EmbeddedResource Include="Covers\11.svg" />
+    <None Remove="Covers\12.svg" />
+    <EmbeddedResource Include="Covers\12.svg" />
+    <None Remove="Covers\13.svg" />
+    <EmbeddedResource Include="Covers\13.svg" />
+    <None Remove="Covers\14.svg" />
+    <EmbeddedResource Include="Covers\14.svg" />
+    <None Remove="Covers\15.svg" />
+    <EmbeddedResource Include="Covers\15.svg" />
+    <None Remove="Covers\16.svg" />
+    <EmbeddedResource Include="Covers\16.svg" />
+    <None Remove="Covers\17.svg" />
+    <EmbeddedResource Include="Covers\17.svg" />
+    <None Remove="Covers\18.svg" />
+    <EmbeddedResource Include="Covers\18.svg" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="Services\NotifyService\patterns.xml" />
