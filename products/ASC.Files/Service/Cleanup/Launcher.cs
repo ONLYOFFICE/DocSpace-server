@@ -30,13 +30,13 @@ namespace ASC.Files.AutoCleanUp;
 public class Launcher(ILogger<Launcher> logger, Worker worker, IConfiguration configuration)
     : BackgroundService
 {
-    private readonly TimeSpan _period = TimeSpan.Parse(configuration.GetValue<string>("files:autoCleanUp:period") ?? "0:5:0");
+    private readonly PeriodicTimer _timer = new(TimeSpan.Parse(configuration.GetValue<string>("files:autoCleanUp:period") ?? "0:5:0"));
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         logger.InformationAutoCleanUpWorkerRunning();
 
-        while (!stoppingToken.IsCancellationRequested)
+        while (await _timer.WaitForNextTickAsync(stoppingToken) && !stoppingToken.IsCancellationRequested)
         {
             await Procedure(stoppingToken);
         }
@@ -48,15 +48,8 @@ public class Launcher(ILogger<Launcher> logger, Worker worker, IConfiguration co
     {
         logger.TraceAutoCleanUpStart();
 
-        if (stoppingToken.IsCancellationRequested)
-        {
-            return;
-        }
-
         await worker.DeleteExpiredFilesInTrash(stoppingToken);
 
         logger.TraceAutoCleanUpProcedureFinish();
-
-        await Task.Delay(_period, stoppingToken);
     }
 }

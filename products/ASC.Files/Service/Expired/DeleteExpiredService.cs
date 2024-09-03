@@ -32,13 +32,13 @@ public class DeleteExpiredService(ILogger<DeleteExpiredService> log,
         IConfiguration configuration)
     : BackgroundService
 {
-    private readonly TimeSpan _launchFrequency = TimeSpan.Parse(configuration["files:deleteExpired"] ?? "1", CultureInfo.InvariantCulture);
+    private readonly PeriodicTimer _timer = new(TimeSpan.Parse(configuration["files:deleteExpired"] ?? "1", CultureInfo.InvariantCulture));
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var dataStore = await globalStore.GetStoreAsync(false);
 
-        while (!stoppingToken.IsCancellationRequested)
+        while (await _timer.WaitForNextTickAsync(stoppingToken) && !stoppingToken.IsCancellationRequested)
         {
             try
             {
@@ -48,8 +48,6 @@ public class DeleteExpiredService(ILogger<DeleteExpiredService> log,
             {
                 log.ErrorDeleteExpired(err);
             }
-
-            await Task.Delay(_launchFrequency, stoppingToken);
         }
     }
 }
