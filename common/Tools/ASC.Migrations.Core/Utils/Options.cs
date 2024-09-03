@@ -31,5 +31,6 @@ public class Options
 {
     public string Path { get; set; }
     public IEnumerable<ProviderInfo> Providers { get; set; }
+    public IEnumerable<ProviderInfo> IdentityProviders { get; set; }
     public IEnumerable<ProviderInfo> TeamlabsiteProviders { get; set; }
 }
