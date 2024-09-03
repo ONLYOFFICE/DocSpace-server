@@ -80,8 +80,12 @@ public class NovellLdapSettingsChecker(ILogger<LdapSettingsChecker> logger) : Ld
             }
             catch (Exception ex)
             {
-                _logger.ErrorCheckSettingsException(ex);
-                return false;
+                if (ex.Message.StartsWith("Connect Error") || ex.Message.StartsWith("Unavailable"))
+                {
+                    _logger.ErrorCheckSettingsException(ex);
+                    return false;
+                }
+                return true;
             }
             finally
             {
