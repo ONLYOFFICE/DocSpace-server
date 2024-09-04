@@ -36,7 +36,7 @@ public class DbRoomSettings
     public bool Indexing { get; set; }
     public long Quota { get; set; }
     public string Watermark { get; set; }
-    public RoomDataLifetimeDto Lifetime { get; set; }
+    public DbRoomDataLifetime Lifetime { get; set; }
     public DbTenant Tenant { get; set; }
     public DbFolder Room { get; set; }
 }

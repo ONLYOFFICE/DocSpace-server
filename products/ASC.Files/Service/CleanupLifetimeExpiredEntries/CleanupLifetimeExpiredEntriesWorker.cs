@@ -24,10 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.VirtualRooms;
+using AutoMapper;
+
 namespace ASC.Files.AutoCleanUp;
 
 [Singleton]
-public class CleanupLifetimeExpiredEntriesWorker(ILogger<CleanupLifetimeExpiredEntriesWorker> logger, IServiceScopeFactory serviceScopeFactory)
+public class CleanupLifetimeExpiredEntriesWorker(ILogger<CleanupLifetimeExpiredEntriesWorker> logger, IServiceScopeFactory serviceScopeFactory, IMapper mapper)
 {
     public async Task DeleteLifetimeExpiredEntries(CancellationToken cancellationToken)
     {
@@ -51,7 +54,9 @@ public class CleanupLifetimeExpiredEntriesWorker(ILogger<CleanupLifetimeExpiredE
 
             foreach (var room in lifetimeEnabledRooms)
             {
-                var expiration = room.Lifetime.GetExpirationUtc();
+                var lifetime = mapper.Map<DbRoomDataLifetime, RoomDataLifetime>(room.Lifetime);
+
+                var expiration = lifetime.GetExpirationUtc();
 
                 room.ExipiredFiles = await GetExpiredFilesAsync(dbContext, room.TenantId, room.RoomId, expiration);
 

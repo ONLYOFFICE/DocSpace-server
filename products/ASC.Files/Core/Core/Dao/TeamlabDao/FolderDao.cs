@@ -477,7 +477,7 @@ internal class FolderDao(
                     Color = folder.SettingsColor,
                     Indexing = folder.SettingsIndexing,
                     Quota = folder.SettingsQuota,
-                    Lifetime = folder.SettingsLifetime
+                    Lifetime = mapper.Map<RoomDataLifetime, DbRoomDataLifetime>(folder.SettingsLifetime)
                 };
             }
 
@@ -517,7 +517,7 @@ internal class FolderDao(
                     Color = folder.SettingsColor,
                     Indexing = folder.SettingsIndexing,
                     Quota = folder.SettingsQuota,
-                    Lifetime = folder.SettingsLifetime
+                    Lifetime = mapper.Map<RoomDataLifetime, DbRoomDataLifetime>(folder.SettingsLifetime)
                 };
             }
             
@@ -937,7 +937,7 @@ internal class FolderDao(
                 Color = folder.SettingsColor,
                 Indexing = folder.SettingsIndexing,
                 Quota = quota >= TenantEntityQuotaSettings.NoQuota ? quota : TenantEntityQuotaSettings.DefaultQuotaValue,
-                Lifetime = folder.SettingsLifetime
+                Lifetime = mapper.Map<RoomDataLifetime, DbRoomDataLifetime>(folder.SettingsLifetime)
             };
         };
         

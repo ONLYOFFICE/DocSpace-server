@@ -78,6 +78,9 @@ public class FolderDto<T> : FileEntryDto<T>
     /// <type>System.Boolean, System</type>
     public bool Private { get; set; }
     public bool Indexing { get; set; }
+
+    /// <summary>Room data lifetime settings</summary>
+    /// <type>ASC.Files.Core.ApiModels.RoomDataLifetimeDto, ASC.Files.Core</type>
     public RoomDataLifetimeDto Lifetime { get; set; }
 
     /// <summary>Folder type</summary>
@@ -136,7 +139,8 @@ public class FolderDtoHelper(
     SettingsManager settingsManager,
     CoreBaseSettings coreBaseSettings,
     BreadCrumbsManager breadCrumbsManager,
-    TenantManager tenantManager)
+    TenantManager tenantManager,
+    IMapper mapper)
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime)
     {
 
@@ -220,7 +224,7 @@ public class FolderDtoHelper(
             result.Type = folder.FolderType;
         }
 
-        result.Lifetime = folder.SettingsLifetime;
+        result.Lifetime = mapper.Map<RoomDataLifetime, RoomDataLifetimeDto>(folder.SettingsLifetime);
 
         return result;
     }

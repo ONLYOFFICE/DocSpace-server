@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,25 +24,12 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.ComponentModel.DataAnnotations;
+namespace ASC.Files.Core.VirtualRooms;
 
-namespace ASC.Files.Core.ApiModels;
-
-/// <summary>
-/// </summary>
-public class RoomDataLifetimeDto
+public class RoomDataLifetime : IMapFrom<DbRoomDataLifetime>, IMapFrom<RoomDataLifetimeDto>
 {
-    /// <summary>Specifies action</summary>
-    /// <type>System.Boolean, System</type>
     public bool DeletePermanently { get; set; }
-
-    /// <summary>Specifies time period type</summary>
-    /// <type>ASC.Files.Core.ApiModels.RoomDataLifetimePeriod, ASC.Files.Core</type>
     public RoomDataLifetimePeriod Period { get; set; }
-
-    /// <summary>Specifies time period value</summary>
-    /// <type>System.Int32, System</type>
-    [Range(1, 9999)]
     public int Value { get; set; }
 
     public DateTime GetExpirationUtc()
@@ -58,16 +45,6 @@ public class RoomDataLifetimeDto
         };
 
         return expiration;
-    }
-
-    public string Serialize()
-    {
-        return JsonSerializer.Serialize(this);
-    }
-
-    public static RoomDataLifetimeDto Deserialize(string json)
-    {
-        return string.IsNullOrEmpty(json) ? null : JsonSerializer.Deserialize<RoomDataLifetimeDto>(json);
     }
 }
 
