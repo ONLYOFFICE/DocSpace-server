@@ -142,10 +142,10 @@ public partial class FilesDbContext
         return TagQueries.DeleteTagAsync(this);
     }
     
-    [PreCompileQuery([PreCompileQuery.DefaultGuid, null, TagType.Custom])]
-    public Task<int> TagIdAsync(Guid owner, string name, TagType type)
+    [PreCompileQuery([PreCompileQuery.DefaultGuid, null, TagType.Custom, PreCompileQuery.DefaultInt])]
+    public Task<int> TagIdAsync(Guid owner, string name, TagType type, int tenantId)
     {
-        return TagQueries.TagIdAsync(this,  owner, name, type);
+        return TagQueries.TagIdAsync(this,  owner, name, type, tenantId);
     }
     
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, FileEntryType.File, null, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultDateTime, PreCompileQuery.DefaultInt])]
@@ -486,10 +486,11 @@ static file class TagQueries
                     where ftl == null
                     select ft).ExecuteDelete());
 
-    public static readonly Func<FilesDbContext, Guid, string, TagType, Task<int>> TagIdAsync =
+    public static readonly Func<FilesDbContext, Guid, string, TagType, int, Task<int>> TagIdAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, Guid owner, string name, TagType type) =>
+            (FilesDbContext ctx, Guid owner, string name, TagType type, int tenantId) =>
                 ctx.Tag
+                    .Where(r => r.TenantId == tenantId)
                     .Where(r => r.Owner == owner)
                     .Where(r => r.Name == name)
                     .Where(r => r.Type == type)
