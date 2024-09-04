@@ -429,14 +429,16 @@ public class EntryManager(IDaoFactory daoFactory,
                 var folders = folderDao.GetFoldersAsync(parent.Id, orderBy, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders, excludeSubject, 0, -1, roomId);
                 var files = fileDao.GetFilesAsync(parent.Id, orderBy, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders, excludeSubject, 0, -1, roomId, withShared);
                 
-                entries = await files.Concat(folders.Cast<FileEntry>())
+                var temp = files.Concat(folders.Cast<FileEntry>())
                     .OrderBy(r => r.Order)
-                    .Skip(from)
-                    .Take(count)
+                    .Skip(from);
 
-
-
-                    .ToListAsync();
+                if (count > 0)
+                {
+                    temp = temp.Take(count);
+                }
+                
+                entries = await temp.ToListAsync();
                 
 
                 filesToUpdate = entries.OfType<File<T>>().ToList();
