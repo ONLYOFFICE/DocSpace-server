@@ -464,4 +464,40 @@ docx, xlsx, pptx ilə ən yüksək uyğunluq.</value>
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>Növ</value>
   </data>
+  <data name="Date" xml:space="preserve">
+    <value>Tarix</value>
+  </data>
+  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
+    <value>Ekspert istifadəçi</value>
+  </data>
+  <data name="RoleEnum_PowerUser" xml:space="preserve">
+    <value>Ekspert istifadəçi</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>İstifadəçi</value>
+  </data>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>Birdən çox faylın Forma Doldurma otağına köçürülməsi dəstəklənmir. Hər dəfə bir ONLYOFFICE PDF formasını köçürün.</value>
+  </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>Qovluqların Forma Doldurma otağına köçürülməsi dəstəklənmir. Hər dəfə bir ONLYOFFICE PDF formasını köçürün.</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>Fayl bu otağa köçürülə bilməz. Lütfən, ONLYOFFICE PDF formasını köçürməyə cəhd edin.</value>
+  </data>
+  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
+    <value>Fayl bu otağa yüklənə bilməz. Lütfən, ONLYOFFICE PDF formasını yükləməyə cəhd edin.</value>
+  </data>
+  <data name="FillOutExternalLinkTitle" xml:space="preserve">
+    <value>Doldurmaq üçün link</value>
+  </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>Forma üçün link</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Formanı açın</value>
+  </data>
+  <data name="FormNumber" xml:space="preserve">
+    <value>Forma nömrəsi</value>
+  </data>
 </root>

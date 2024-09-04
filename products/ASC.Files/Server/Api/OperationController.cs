@@ -187,7 +187,54 @@ public class OperationController(
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
     }
+    
+    [HttpPut("duplicate")]
+    public async IAsyncEnumerable<FileOperationDto> DuplicateBatchItems(DuplicateRequestDto inDto)
+    {
+        await fileOperationsManager.DuplicateAsync(inDto.FolderIds, inDto.FileIds);
+        
+        foreach (var e in await fileOperationsManager.GetOperationResults())
+        {
+            yield return await fileOperationDtoHelper.GetAsync(e);
+        }
+    }
+    
+    [HttpGet("checkdestfolder")]
+    public async Task<CheckDestFolderDto> MoveOrCopyDestFolderCheckAsync([ModelBinder(BinderType = typeof(BatchModelBinder))] BatchRequestDto inDto)
+    {
+        List<object> checkedFiles;
 
+        if (inDto.DestFolderId.ValueKind == JsonValueKind.Number)
+        {
+            checkedFiles = await fileStorageService.MoveOrCopyDestFolderCheckAsync(inDto.FileIds.ToList(), inDto.DestFolderId.GetInt32());
+        }
+        else
+        {
+            checkedFiles = await fileStorageService.MoveOrCopyDestFolderCheckAsync(inDto.FileIds.ToList(), inDto.DestFolderId.GetString());
+        }
+
+        var entries = await fileStorageService.GetItemsAsync(checkedFiles.Select(c => Convert.ToInt32(c)), checkedFiles.Select(c => Convert.ToInt32(c)), FilterType.FilesOnly, false);
+        entries.AddRange(await fileStorageService.GetItemsAsync(checkedFiles.OfType<string>(), [], FilterType.FilesOnly, false));
+
+        var filesTask = GetFilesDto(entries).ToListAsync();
+
+        var result = inDto.FileIds.Count() - entries.Count != 0 ?
+                     (entries.Count != 0 ? CheckDestFolderResult.PartAllowed : CheckDestFolderResult.NoneAllowed) : CheckDestFolderResult.AllAllowed;
+
+        return new CheckDestFolderDto
+        {
+            Result = result,
+            Files = await filesTask
+        };
+
+        async IAsyncEnumerable<FileEntryDto> GetFilesDto(IEnumerable<FileEntry> fileEntries)
+        {
+            foreach (var entry in fileEntries)
+            {
+                yield return await GetFileEntryWrapperAsync(entry);
+            }
+        }
+    }
     /// <summary>
     /// Checks a batch of files and folders for conflicts when moving or copying them to the folder with the ID specified in the request.
     /// </summary>
@@ -202,20 +249,20 @@ public class OperationController(
     public async IAsyncEnumerable<FileEntryDto> MoveOrCopyBatchCheckAsync([ModelBinder(BinderType = typeof(BatchModelBinder))] BatchRequestDto inDto)
     {
         List<object> checkedFiles;
+        List<object> checkedFolders;
 
         if (inDto.DestFolderId.ValueKind == JsonValueKind.Number)
         {
-            (checkedFiles, _) = await fileStorageService.MoveOrCopyFilesCheckAsync(inDto.FileIds.ToList(), inDto.FolderIds.ToList(), inDto.DestFolderId.GetInt32());
+            (checkedFiles, checkedFolders) = await fileStorageService.MoveOrCopyFilesCheckAsync(inDto.FileIds.ToList(), inDto.FolderIds.ToList(), inDto.DestFolderId.GetInt32());
         }
         else
         {
-            (checkedFiles, _) = await fileStorageService.MoveOrCopyFilesCheckAsync(inDto.FileIds.ToList(), inDto.FolderIds.ToList(), inDto.DestFolderId.GetString());
+            (checkedFiles, checkedFolders) = await fileStorageService.MoveOrCopyFilesCheckAsync(inDto.FileIds.ToList(), inDto.FolderIds.ToList(), inDto.DestFolderId.GetString());
         }
 
-        var entries = await fileStorageService.GetItemsAsync(checkedFiles.OfType<int>().Select(Convert.ToInt32), checkedFiles.OfType<int>().Select(Convert.ToInt32), FilterType.FilesOnly, false);
-
-        entries.AddRange(await fileStorageService.GetItemsAsync(checkedFiles.OfType<string>(), [], FilterType.FilesOnly, false));
-
+        var entries = await fileStorageService.GetItemsAsync(checkedFiles.OfType<int>().Select(Convert.ToInt32), checkedFolders.OfType<int>().Select(Convert.ToInt32), FilterType.None, false);
+        entries.AddRange(await fileStorageService.GetItemsAsync(checkedFiles.OfType<string>(), checkedFolders.OfType<string>(), FilterType.None, false));
+        
         foreach (var e in entries)
         {
             yield return await GetFileEntryWrapperAsync(e);

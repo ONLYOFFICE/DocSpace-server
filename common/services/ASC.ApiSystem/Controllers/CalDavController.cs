@@ -64,9 +64,10 @@ public class CalDavController(CommonMethods commonMethods,
 
         try
         {
+            var scheme = commonMethods.GetRequestScheme();
             var validationKey = emailValidationKeyProvider.GetEmailKey(tenant.Id, change + ConfirmType.Auth);
 
-            await SendToApi(Request.Scheme, tenant, "calendar/change_to_storage", new Dictionary<string, string> { { "change", change }, { "key", validationKey } });
+            await SendToApi(scheme, tenant, "calendar/change_to_storage", new Dictionary<string, string> { { "change", change }, { "key", validationKey } });
         }
         catch (Exception ex)
         {
@@ -94,9 +95,10 @@ public class CalDavController(CommonMethods commonMethods,
 
         try
         {
+            var scheme = commonMethods.GetRequestScheme();
             var validationKey = emailValidationKeyProvider.GetEmailKey(tenant.Id, eventInfo + ConfirmType.Auth);
 
-            await SendToApi(Request.Scheme, tenant, "calendar/caldav_delete_event", new Dictionary<string, string> { { "eventInfo", eventInfo }, { "key", validationKey } });
+            await SendToApi(scheme, tenant, "calendar/caldav_delete_event", new Dictionary<string, string> { { "eventInfo", eventInfo }, { "key", validationKey } });
         }
         catch (Exception ex)
         {
@@ -138,7 +140,7 @@ public class CalDavController(CommonMethods commonMethods,
         {
             logger.LogInformation(string.Format("Caldav auth user: {0}, tenant: {1}", email, tenant.Id));
 
-            if (instanceCrypto.Encrypt(email) == userPassword.Password)
+            if (await instanceCrypto.EncryptAsync(email) == userPassword.Password)
             {
                 return Ok(new
                 {
@@ -150,7 +152,9 @@ public class CalDavController(CommonMethods commonMethods,
 
             var authData = $"userName={HttpUtility.UrlEncode(email)}&password={HttpUtility.UrlEncode(userPassword.Password)}&key={HttpUtility.UrlEncode(validationKey)}";
 
-            await SendToApi(Request.Scheme, tenant, "authentication/login", null, WebRequestMethods.Http.Post, authData);
+            var scheme = commonMethods.GetRequestScheme();
+
+            await SendToApi(scheme, tenant, "authentication/login", null, WebRequestMethods.Http.Post, authData);
 
             return Ok(new
             {

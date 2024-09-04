@@ -75,39 +75,6 @@ public static class ServiceCollectionExtension
 
     public static IServiceCollection AddDistributedLock(this IServiceCollection services, IConfiguration configuration)
     {
-        var zooKeeperConfiguration = configuration.GetSection("Zookeeper").Get<ZooKeeperConfiguration>();
-
-        if (zooKeeperConfiguration != null)
-        {
-            services.AddSingleton<Medallion.Threading.IDistributedLockProvider>(_ =>
-            {
-                return new ZooKeeperDistributedSynchronizationProvider(new ZooKeeperPath(zooKeeperConfiguration.DirectoryPath), zooKeeperConfiguration.Connection,
-                    options =>
-                {
-                    if (zooKeeperConfiguration.ConnectionTimeout.HasValue)
-                    {
-                        options.ConnectTimeout(zooKeeperConfiguration.ConnectionTimeout.Value);
-                    }
-
-                    if (zooKeeperConfiguration.SessionTimeout.HasValue)
-                    {
-                        options.SessionTimeout(zooKeeperConfiguration.SessionTimeout.Value);
-                    }
-                });
-            });
-
-            return services.AddSingleton<IDistributedLockProvider, ZooKeeperDistributedLockProvider>(sp =>
-            {
-                var internalProvider = sp.GetRequiredService<Medallion.Threading.IDistributedLockProvider>();
-                var logger = sp.GetRequiredService<ILogger<ZooKeeperDistributedLockProvider>>();
-                var cfg = sp.GetRequiredService<IConfiguration>();
-                
-                return TimeSpan.TryParse(cfg["core:lock:minTimeout"], out var minTimeout) 
-                    ? new ZooKeeperDistributedLockProvider(internalProvider, logger, minTimeout) 
-                    : new ZooKeeperDistributedLockProvider(internalProvider, logger);
-            });
-        }
-        
         var redisConfiguration = configuration.GetSection("Redis").Get<RedisConfiguration>();
 
         if (redisConfiguration != null)
@@ -166,6 +133,39 @@ public static class ServiceCollectionExtension
                         opt.MinTimeout(minTimeout);
                     }
                 });
+            });
+        }
+
+        var zooKeeperConfiguration = configuration.GetSection("Zookeeper").Get<ZooKeeperConfiguration>();
+
+        if (zooKeeperConfiguration != null)
+        {
+            services.AddSingleton<Medallion.Threading.IDistributedLockProvider>(_ =>
+            {
+                return new ZooKeeperDistributedSynchronizationProvider(new ZooKeeperPath(zooKeeperConfiguration.DirectoryPath), zooKeeperConfiguration.Connection,
+                    options =>
+                    {
+                        if (zooKeeperConfiguration.ConnectionTimeout.HasValue)
+                        {
+                            options.ConnectTimeout(zooKeeperConfiguration.ConnectionTimeout.Value);
+                        }
+
+                        if (zooKeeperConfiguration.SessionTimeout.HasValue)
+                        {
+                            options.SessionTimeout(zooKeeperConfiguration.SessionTimeout.Value);
+                        }
+                    });
+            });
+
+            return services.AddSingleton<IDistributedLockProvider, ZooKeeperDistributedLockProvider>(sp =>
+            {
+                var internalProvider = sp.GetRequiredService<Medallion.Threading.IDistributedLockProvider>();
+                var logger = sp.GetRequiredService<ILogger<ZooKeeperDistributedLockProvider>>();
+                var cfg = sp.GetRequiredService<IConfiguration>();
+                
+                return TimeSpan.TryParse(cfg["core:lock:minTimeout"], out var minTimeout) 
+                    ? new ZooKeeperDistributedLockProvider(internalProvider, logger, minTimeout) 
+                    : new ZooKeeperDistributedLockProvider(internalProvider, logger);
             });
         }
 
@@ -291,9 +291,10 @@ public static class ServiceCollectionExtension
     /// Add a IHostedService for given type. 
     /// Only one copy of this instance type will active in multi process architecture.
     /// </remarks>
-    public static void AddActivePassiveHostedService<T>(this IServiceCollection services, DIHelper diHelper, 
-                                                                                          IConfiguration configuration,
-                                                                                          string workerTypeName = null) where T : ActivePassiveBackgroundService<T>
+    public static void AddActivePassiveHostedService<T>(
+        this IServiceCollection services,
+        IConfiguration configuration, 
+        string workerTypeName = null) where T : ActivePassiveBackgroundService<T>
     {
         var typeName = workerTypeName ?? typeof(T).GetFormattedName();
 
@@ -307,17 +308,15 @@ public static class ServiceCollectionExtension
             _registeredActivePassiveHostedService.Add(typeName);
         }
 
-        diHelper.TryAdd<IRegisterInstanceDao<T>, RegisterInstanceDao<T>>();
-        diHelper.TryAdd<IRegisterInstanceManager<T>, RegisterInstanceManager<T>>();
+        services.AddScoped<IRegisterInstanceDao<T>, RegisterInstanceDao<T>>();
+        services.AddScoped<IRegisterInstanceManager<T>, RegisterInstanceManager<T>>();
         services.AddHostedService<RegisterInstanceWorkerService<T>>();
         services.Configure<InstanceWorkerOptions<T>>(x =>
         {
             configuration.GetSection("core:hosting").Bind(x);
             x.WorkerTypeName = workerTypeName ?? typeof(T).GetFormattedName();
         });
-
-
-        diHelper.TryAdd<T>();
+        
         services.AddHostedService<T>();
     }
 

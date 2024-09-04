@@ -24,6 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.MessagingSystem;
+using ASC.MessagingSystem.Data;
+
 using NLog;
 
 var options = new WebApplicationOptions
@@ -54,7 +57,7 @@ try
     builder.Host.ConfigureDefault();
     builder.WebHost.ConfigureDefaultKestrel();
 
-    var startup = new Startup(builder.Configuration, builder.Environment);
+    var startup = new Startup(builder.Configuration);
 
     await startup.ConfigureServices(builder.Services);
 
@@ -66,12 +69,13 @@ try
 
     var eventBus = ((IApplicationBuilder)app).ApplicationServices.GetRequiredService<IEventBus>();
 
-    eventBus.Subscribe<RemovePortalIntegrationEvent, RemovePortalIntegrationEventHandler>();
-    eventBus.Subscribe<MigrationParseIntegrationEvent, MigrationIntegrationEventHandler>();
-    eventBus.Subscribe<MigrationIntegrationEvent, MigrationIntegrationEventHandler>();
-    eventBus.Subscribe<MigrationCancelIntegrationEvent, MigrationIntegrationEventHandler>();
-    eventBus.Subscribe<MigrationClearIntegrationEvent, MigrationIntegrationEventHandler>();
-
+    await eventBus.SubscribeAsync<RemovePortalIntegrationEvent, RemovePortalIntegrationEventHandler>();
+    await eventBus.SubscribeAsync<MigrationParseIntegrationEvent, MigrationIntegrationEventHandler>();
+    await eventBus.SubscribeAsync<MigrationIntegrationEvent, MigrationIntegrationEventHandler>();
+    await eventBus.SubscribeAsync<MigrationCancelIntegrationEvent, MigrationIntegrationEventHandler>();
+    await eventBus.SubscribeAsync<MigrationClearIntegrationEvent, MigrationIntegrationEventHandler>();
+    await eventBus.SubscribeAsync<EventDataIntegrationEvent, EventDataIntegrationEventHandler>();
+    
     logger.Info("Starting web host ({applicationContext})...", AppName);
     await app.RunWithTasksAsync();
 }

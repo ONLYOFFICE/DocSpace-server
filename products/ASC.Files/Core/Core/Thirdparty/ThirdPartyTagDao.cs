@@ -24,13 +24,21 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using DriveFile = Google.Apis.Drive.v3.Data.File;
+
 namespace ASC.Files.Core.Core.Thirdparty;
 
-[Scope]
-internal class ThirdPartyTagDao<TFile, TFolder, TItem>(IDbContextFactory<FilesDbContext> dbContextFactory,
-        IDaoSelector<TFile, TFolder, TItem> daoSelector,
-        IDaoBase<TFile, TFolder, TItem> dao,
-        TenantManager tenantManager)
+[Scope(GenericArguments = [typeof(BoxFile), typeof(BoxFolder), typeof(BoxItem)])]
+[Scope(GenericArguments = [typeof(FileMetadata), typeof(FolderMetadata), typeof(Metadata)])]
+[Scope(GenericArguments = [typeof(DriveFile), typeof(DriveFile), typeof(DriveFile)])]
+[Scope(GenericArguments = [typeof(Item), typeof(Item), typeof(Item)])]
+[Scope(GenericArguments = [typeof(WebDavEntry), typeof(WebDavEntry), typeof(WebDavEntry)])]
+internal class ThirdPartyTagDao<TFile, TFolder, TItem>(
+    IDaoFactory daoFactory,
+    IDbContextFactory<FilesDbContext> dbContextFactory,
+    IDaoSelector<TFile, TFolder, TItem> daoSelector,
+    IDaoBase<TFile, TFolder, TItem> dao,
+    TenantManager tenantManager)
     : IThirdPartyTagDao
     where TFile : class, TItem
     where TFolder : class, TItem
@@ -45,6 +53,7 @@ internal class ThirdPartyTagDao<TFile, TFolder, TItem>(IDbContextFactory<FilesDb
 
     public async IAsyncEnumerable<Tag> GetNewTagsAsync(Guid subject, Folder<string> parentFolder, bool deepSearch)
     {
+        var mapping = daoFactory.GetMapping<string>();
         var folderId = daoSelector.ConvertId(parentFolder.Id);
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         
@@ -67,7 +76,7 @@ internal class ThirdPartyTagDao<TFile, TFolder, TItem>(IDbContextFactory<FilesDb
                 Name = r.Tag.Name,
                 Type = r.Tag.Type,
                 Owner = r.Tag.Owner,
-                EntryId = await dao.MappingIDAsync(r.TagLink.EntryId),
+                EntryId = await mapping.MappingIdAsync(r.TagLink.EntryId),
                 EntryType = r.TagLink.EntryType,
                 Count = r.TagLink.Count,
                 Id = r.Tag.Id

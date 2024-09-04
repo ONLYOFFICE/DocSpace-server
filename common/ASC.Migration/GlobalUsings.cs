@@ -52,9 +52,6 @@ global using ASC.Files.Core.Resources;
 global using ASC.Migration.Core.Core;
 global using ASC.Migration.Core.Migrators;
 global using ASC.Migration.Core.Migrators.Model;
-global using ASC.Migration.Core.Migrators.Provider;
-global using ASC.Migration.Core.Migrators.Provider.Google;
-global using ASC.Migration.Core.Migrators.Provider.NC;
 global using ASC.Migration.Core.Models.Api;
 global using ASC.Migration.Core.Resources;
 global using ASC.Migration.GoogleWorkspace.Models.Parse;
@@ -72,5 +69,6 @@ global using Microsoft.AspNetCore.Http;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Logging;
+global using Microsoft.Extensions.Caching.Distributed;
 
 global using ProtoBuf;

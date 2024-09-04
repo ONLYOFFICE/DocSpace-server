@@ -26,12 +26,13 @@
 
 namespace ASC.Files.Thirdparty.ProviderDao;
 
-[Scope]
-internal class ProviderFileDao(IServiceProvider serviceProvider,
-        TenantManager tenantManager,
-        CrossDao crossDao,
-        SelectorFactory selectorFactory,
-        ISecurityDao<string> securityDao)
+[Scope(typeof(IFileDao<string>))]
+internal class ProviderFileDao(
+    IServiceProvider serviceProvider,
+    TenantManager tenantManager,
+    CrossDao crossDao,
+    SelectorFactory selectorFactory,
+    ISecurityDao<string> securityDao)
     : ProviderDaoBase(serviceProvider, tenantManager, crossDao, selectorFactory, securityDao), IFileDao<string>
 {
     public async Task InvalidateCacheAsync(string fileId)
@@ -248,7 +249,10 @@ internal class ProviderFileDao(IServiceProvider serviceProvider,
 
         return streamUri;
     }
-
+    public async Task<File<string>> SaveFileAsync(File<string> file, Stream fileStream, bool checkFolder)
+    {
+        return await SaveFileAsync(file, fileStream);
+    }
     public async Task<File<string>> SaveFileAsync(File<string> file, Stream fileStream)
     {
         ArgumentNullException.ThrowIfNull(file);
@@ -325,13 +329,13 @@ internal class ProviderFileDao(IServiceProvider serviceProvider,
         await fileDao.DeleteFileAsync(selector.ConvertId(fileId), ownerId);
     }
 
-    public async Task<bool> IsExistAsync(string title, object folderId)
+    public async Task<bool> IsExistAsync(string title, string folderId)
     {
-        var selector = _selectorFactory.GetSelector(folderId.ToString());
+        var selector = _selectorFactory.GetSelector(folderId);
 
-        var fileDao = selector.GetFileDao(folderId.ToString());
+        var fileDao = selector.GetFileDao(folderId);
 
-        return await fileDao.IsExistAsync(title, selector.ConvertId(folderId.ToString()));
+        return await fileDao.IsExistAsync(title, selector.ConvertId(folderId));
     }
 
     public async Task<TTo> MoveFileAsync<TTo>(string fileId, TTo toFolderId, bool deleteLinks = false)

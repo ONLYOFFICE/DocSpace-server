@@ -153,9 +153,6 @@
   <data name="MigrationCommonFiles" xml:space="preserve">
     <value>Migrace společných souborů</value>
   </data>
-  <data name="MigrationInitException" xml:space="preserve">
-    <value>Chyba při inicializaci migrátoru {0}</value>
-  </data>
   <data name="MigrationNotFoundException" xml:space="preserve">
     <value>Žádný takový poskytovatel migrace</value>
   </data>
@@ -165,10 +162,52 @@
   <data name="MigrationProjectFiles" xml:space="preserve">
     <value>Soubory projektu migrace</value>
   </data>
-  <data name="MigrationStartException" xml:space="preserve">
-    <value>Rozbor stále probíhá</value>
+  <data name="CanNotAddUserInGroup" xml:space="preserve">
+    <value>Nelze přidat uživatele {0} do skupiny {1}</value>
   </data>
-  <data name="MigrationUploadException" xml:space="preserve">
-    <value>Migrace již probíhá</value>
+  <data name="CanNotCreateFile" xml:space="preserve">
+    <value>Nelze vytvořit soubor {0}</value>
+  </data>
+  <data name="CanNotImportUser" xml:space="preserve">
+    <value>Nelze importovat uživatele</value>
+  </data>
+  <data name="CanNotImportUserFiles" xml:space="preserve">
+    <value>Nelze importovat uživatelské soubory</value>
+  </data>
+  <data name="CanNotParseArchive" xml:space="preserve">
+    <value>Nebylo možné analyzovat archiv {0}</value>
+  </data>
+  <data name="CanNotParseArchives" xml:space="preserve">
+    <value>Nelze analyzovat archivy</value>
+  </data>
+  <data name="CanNotParseUser" xml:space="preserve">
+    <value>Nelze analyzovat uživatele {0}</value>
+  </data>
+  <data name="CanNotReadInfoFile" xml:space="preserve">
+    <value>Nelze přečíst informační soubor z {0}</value>
+  </data>
+  <data name="CanNotShare" xml:space="preserve">
+    <value>Nelze sdílet záznam {0} do {1}</value>
+  </data>
+  <data name="CanNotToUnzip" xml:space="preserve">
+    <value>Nelze rozbalit {0}</value>
+  </data>
+  <data name="CreateFile" xml:space="preserve">
+    <value>Vytvořit soubor {0}</value>
+  </data>
+  <data name="CreateFolder" xml:space="preserve">
+    <value>Vytvořit složku {0}</value>
+  </data>
+  <data name="CreateShareRoom" xml:space="preserve">
+    <value>vytvořit sdílenou místnost {0}</value>
+  </data>
+  <data name="СanNotImportCommonFiles" xml:space="preserve">
+    <value>Nelze importovat společné soubory</value>
+  </data>
+  <data name="СanNotImportProjectFiles" xml:space="preserve">
+    <value>Nelze importovat soubory projektu</value>
+  </data>
+  <data name="СreateRootFolder" xml:space="preserve">
+    <value>Vytvořit kořenovou složku</value>
   </data>
 </root>

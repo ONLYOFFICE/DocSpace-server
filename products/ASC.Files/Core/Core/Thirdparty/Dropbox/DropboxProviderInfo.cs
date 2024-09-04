@@ -26,7 +26,7 @@
 
 namespace ASC.Files.Thirdparty.Dropbox;
 
-[Transient]
+[Transient(typeof(IProviderInfo<FileMetadata, FolderMetadata, Metadata>))]
 [DebuggerDisplay("{CustomerTitle}")]
 internal class DropboxProviderInfo(DisposableWrapper wrapper, ProviderInfoHelper providerInfoHelper)
     : AbstractProviderInfo<FileMetadata, FolderMetadata, Metadata, DropboxLoginProvider>(wrapper, providerInfoHelper)

@@ -203,7 +203,7 @@
     <value>Ομάδα Που Ενημερώθηκε: {0}</value>
   </data>
   <data name="GuestAccount" xml:space="preserve">
-    <value>Λογαριασμός Επισκέπτη</value>
+    <value>Ανώνυμος</value>
   </data>
   <data name="GuestCreated" xml:space="preserve">
     <value>Επισκέπτης Που Δημιουργήθηκε: {0}</value>
@@ -738,5 +738,68 @@
   </data>
   <data name="PortalRenamed" xml:space="preserve">
     <value>Η πύλη μετονομάστηκε</value>
+  </data>
+  <data name="FileSizePostfix" xml:space="preserve">
+    <value>b, KB, MB, GB</value>
+  </data>
+  <data name="FileUploadedWithOverwriting" xml:space="preserve">
+    <value>Μεταφόρτωση αρχείου με αντικατάσταση: {0}</value>
+  </data>
+  <data name="QuotaPerPortalChanged" xml:space="preserve">
+    <value>Ορισμός προεπιλεγμένης ποσόστωσης αποθήκευσης: {0}</value>
+  </data>
+  <data name="QuotaPerPortalDisabled" xml:space="preserve">
+    <value>Απενεργοποιημένη προεπιλεγμένη ποσόστωση αποθήκευσης</value>
+  </data>
+  <data name="QuotaPerRoomChanged" xml:space="preserve">
+    <value>Ορισμός προεπιλεγμένης ποσόστωσης αποθήκευσης για δωμάτια: {0}</value>
+  </data>
+  <data name="QuotaPerRoomDisabled" xml:space="preserve">
+    <value>Απενεργοποιημένη προεπιλεγμένη ποσόστωση αποθήκευσης για δωμάτια</value>
+  </data>
+  <data name="QuotaPerUserChanged" xml:space="preserve">
+    <value>Ορισμός προεπιλεγμένης ποσόστωσης αποθήκευσης για χρήστες: {0}</value>
+  </data>
+  <data name="QuotaPerUserDisabled" xml:space="preserve">
+    <value>Απενεργοποιημένη προεπιλεγμένη ποσόστωση αποθήκευσης για χρήστες</value>
+  </data>
+  <data name="RoomCopied" xml:space="preserve">
+    <value>Το δωμάτιο αντιγράφηκε: {0}</value>
+  </data>
+  <data name="RoomGroupAdded" xml:space="preserve">
+    <value>Η ομάδα προστέθηκε: {0}. Ρόλος: {1}</value>
+  </data>
+  <data name="RoomGroupRemove" xml:space="preserve">
+    <value>Η ομάδα διαγράφηκε: {0}</value>
+  </data>
+  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
+    <value>Ορίστηκε {0}: {1}</value>
+  </data>
+  <data name="SendJoinInvite" xml:space="preserve">
+    <value>Ο χρήστης {0} έστειλε πρόσκληση στον {1} να συμμετάσχει σε αυτό το DocSpace</value>
+  </data>
+  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
+    <value>Δωμάτια [{0}]. Ορισμός προσαρμοσμένης ποσόστωσης αποθήκευσης για δωμάτια: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
+    <value>Δωμάτια [{0}]. Ορισμός προεπιλεγμένης ποσόστωσης αποθήκευσης για δωμάτια: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
+    <value>Δωμάτια [{0}]. Απενεργοποιημένη ποσόστωση αποθήκευσης για δωμάτια</value>
+  </data>
+  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
+    <value>Χρήστες [{0}]. Ορισμός προσαρμοσμένης ποσόστωσης αποθήκευσης για χρήστες: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
+    <value>Χρήστες [{0}]. Ορισμός προεπιλεγμένης ποσόστωσης αποθήκευσης για χρήστες: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
+    <value>Χρήστες [{0}]. Απενεργοποιημένη ποσόστωση αποθήκευσης για χρήστες</value>
+  </data>
+  <data name="FormOpenedForFilling" xml:space="preserve">
+    <value>Ανοιχτό αρχείο για συμπλήρωση: {0}</value>
+  </data>
+  <data name="FormSubmit" xml:space="preserve">
+    <value>Χρήστες [{0}]. Φόρμα που υποβλήθηκε: {1}</value>
   </data>
 </root>

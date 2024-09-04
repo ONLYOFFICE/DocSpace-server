@@ -36,7 +36,7 @@ public class PeopleController(
         ICache cache,
         CoreSettings coreSettings,
         CommonLinkUtility commonLinkUtility,
-        IHttpContextAccessor httpContextAccessor)
+        CommonMethods commonMethods)
     : ControllerBase
 {
     #region For TEST api
@@ -99,12 +99,14 @@ public class PeopleController(
 
     private async Task<string> GetUserProfileLinkAsync(UserInfo user)
     {
+        var scheme = commonMethods.GetRequestScheme();
         var tenantDomain = await GetTenantDomainAsync(user.TenantId);
-        return string.Format("{0}{1}{2}/{3}",
-                             httpContextAccessor.HttpContext.Request.Scheme,
+        var profileUrl = await commonLinkUtility.GetUserProfileAsync(user.Id);
+        return string.Format("{0}{1}{2}{3}",
+                             scheme,
                              Uri.SchemeDelimiter,
                              tenantDomain,
-                             "Products/People/Profile.aspx?" + commonLinkUtility.GetUserParamsPair(user));
+                             profileUrl.TrimStart('~'));
     }
 
     #endregion

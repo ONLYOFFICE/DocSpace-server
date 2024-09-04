@@ -26,7 +26,7 @@
 
 namespace ASC.Files.Thirdparty.ProviderDao;
 
-[Scope]
+[Scope(typeof(IThirdPartyTagDao))]
 internal class ProviderTagDao(IServiceProvider serviceProvider,
         TenantManager tenantManager,
         CrossDao crossDao,

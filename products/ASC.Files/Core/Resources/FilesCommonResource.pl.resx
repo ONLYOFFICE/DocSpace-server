@@ -272,7 +272,7 @@
     <value>Dokumenty</value>
   </data>
   <data name="ProductUserOpportunities" xml:space="preserve">
-    <value>Twórz i edytuj własne dokumenty, jak również dokumenty udostępnione innym, posiadające właściwe prawa dostępu|Nadawaj innym prawa do przeglądania i edycji dokumentów i folderów|Powiąż konta Dropbox, Box i inne do działu 'Moje dokumenty'</value>
+    <value>Twórz i edytuj własne dokumenty, jak również dokumenty udostępnione innym, posiadające właściwe prawa dostępu|Nadawaj innym prawa do przeglądania i edycji dokumentów i folderów|Powiąż konta Dropbox, Box i inne do działu 'Dokumenty'</value>
   </data>
   <data name="UnknownFirstName" xml:space="preserve">
     <value>Imię</value>
@@ -463,5 +463,41 @@ Najwyższy poziom kompatybilności z docx, xlsx, pptx.</value>
   </data>
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>Rodzaj</value>
+  </data>
+  <data name="Date" xml:space="preserve">
+    <value>Data</value>
+  </data>
+  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
+    <value>Użytkownik z większą liczbą uprawnień</value>
+  </data>
+  <data name="RoleEnum_PowerUser" xml:space="preserve">
+    <value>Użytkownik z większą liczbą uprawnień</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>Użytkownik</value>
+  </data>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>Przenoszenie kilku plików do Pokoju do wypełniania formularzy nie jest obsługiwane. Przenoś po jednym formularzu PDF ONLYOFFICE na raz.</value>
+  </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>Przenoszenie katalogów do Pokoju wypełniania formularzy nie jest obsługiwane. Przenoś po jednym formularzu PDF ONLYOFFICE na raz.</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>Plik nie może zostać przeniesiony do tego pokoju. Spróbuj przenieść formularz PDF ONLYOFFICE.</value>
+  </data>
+  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
+    <value>Plik nie może zostać przesłany do tego pokoju. Spróbuj przesłać formularz PDF ONLYOFFICE.</value>
+  </data>
+  <data name="FillOutExternalLinkTitle" xml:space="preserve">
+    <value>Link do wypełnienia</value>
+  </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>Link do formularza</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Otwórz formularz</value>
+  </data>
+  <data name="FormNumber" xml:space="preserve">
+    <value>Numer formularza</value>
   </data>
 </root>

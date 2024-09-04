@@ -27,7 +27,8 @@
 namespace ASC.Web.Api.Core;
 
 [Scope]
-public class CspSettingsHelper(SettingsManager settingsManager,
+public class CspSettingsHelper(
+    SettingsManager settingsManager,
     FilesLinkUtility filesLinkUtility,
     TenantManager tenantManager,
     CoreSettings coreSettings,
@@ -37,11 +38,21 @@ public class CspSettingsHelper(SettingsManager settingsManager,
     IHttpContextAccessor httpContextAccessor,
     IConfiguration configuration)
 {
-    public async Task<string> SaveAsync(IEnumerable<string> domains)
+    public async Task<string> SaveAsync(IEnumerable<string> domains, bool updateInDb = true)
     {
         var tenant = await tenantManager.GetCurrentTenantAsync();
         var domain = tenant.GetTenantDomain(coreSettings);
         HashSet<string> headerKeys = [GetKey(domain)];
+
+        var baseDomain = await coreSettings.GetSettingAsync("BaseDomain");
+        if (coreBaseSettings.Standalone && !string.IsNullOrEmpty(baseDomain))
+        {
+            var tenantWithoutAlias = await tenantManager.GetTenantAsync(baseDomain);
+            if (tenant.Id == tenantWithoutAlias.Id)
+            {
+                _ = headerKeys.Add(GetKey(baseDomain));
+            }
+        }
 
         if (domain == Tenant.LocalHost && tenant.Alias == Tenant.LocalHost)
         {
@@ -93,10 +104,13 @@ public class CspSettingsHelper(SettingsManager settingsManager,
             await Parallel.ForEachAsync(headerKeys, async (headerKey, cs) => await distributedCache.RemoveAsync(headerKey, cs));
         }
 
-        await settingsManager.ManageAsync<CspSettings>(current =>
+        if (updateInDb)
         {
-            current.Domains = domains;
-        });
+            await settingsManager.ManageAsync<CspSettings>(current =>
+            {
+                current.Domains = domains;
+            });
+        }
 
         return headerValue;
     }
@@ -117,9 +131,31 @@ public class CspSettingsHelper(SettingsManager settingsManager,
         }
     }
 
+    public async Task UpdateBaseDomain()
+    {
+        if (!coreBaseSettings.Standalone)
+        {
+            return;
+        }
+
+        var baseDomain = await coreSettings.GetSettingAsync("BaseDomain");
+        if (string.IsNullOrEmpty(baseDomain))
+        {
+            return;
+        }
+
+        var tenantWithoutAlias = await tenantManager.GetTenantAsync(baseDomain);
+
+        var domain = tenantWithoutAlias.GetTenantDomain(coreSettings);
+
+        var val = await distributedCache.GetStringAsync(GetKey(domain));
+
+        await distributedCache.SetStringAsync(GetKey(baseDomain), val);
+    }
+
     public async Task<string> CreateHeaderAsync(IEnumerable<string> domains, bool currentTenant = true)
     {
-        domains ??= Enumerable.Empty<string>();
+        domains ??= [];
 
         var options = domains.Select(r => new CspOptions(r)).ToList();
 
@@ -150,13 +186,13 @@ public class CspSettingsHelper(SettingsManager settingsManager,
 
         options.Add(defaultOptions);
 
-        if (Uri.IsWellFormedUriString(filesLinkUtility.DocServiceUrl, UriKind.Absolute))
+        if (Uri.IsWellFormedUriString(filesLinkUtility.GetDocServiceUrl(), UriKind.Absolute))
         {
             options.Add(new CspOptions
             {
-                Script = [filesLinkUtility.DocServiceUrl],
-                Frame = [filesLinkUtility.DocServiceUrl],
-                Connect = [filesLinkUtility.DocServiceUrl]
+                Script = [filesLinkUtility.GetDocServiceUrl()],
+                Frame = [filesLinkUtility.GetDocServiceUrl()],
+                Connect = [filesLinkUtility.GetDocServiceUrl()]
             });
         }
 
@@ -182,6 +218,15 @@ public class CspSettingsHelper(SettingsManager settingsManager,
         if (!string.IsNullOrEmpty(configuration["files:oform:domain"]))
         {
             var oformOptions = configuration.GetSection("csp:oform").Get<CspOptions>();
+            if (oformOptions != null)
+            {
+                options.Add(oformOptions);
+            }
+        }
+
+        if (!string.IsNullOrEmpty(configuration["web:recaptcha:public-key"]) || !string.IsNullOrEmpty(configuration["web:hcaptcha:public-key"]))
+        {
+            var oformOptions = configuration.GetSection("csp:captcha").Get<CspOptions>();
             if (oformOptions != null)
             {
                 options.Add(oformOptions);

@@ -46,11 +46,9 @@ public class ThirdpartyController(
     UserManager userManager,
     StudioNotifyService studioNotifyService,
     TenantManager tenantManager,
-    InvitationLinkService invitationLinkService,
-    FileSecurity fileSecurity,
-    UsersInRoomChecker usersInRoomChecker, 
-    IDistributedLockProvider distributedLockProvider,
-    LoginProfileTransport loginProfileTransport)
+    InvitationService invitationService,
+    LoginProfileTransport loginProfileTransport,
+    EmailValidationKeyModelHelper emailValidationKeyModelHelper)
     : ApiControllerBase
     {
     
@@ -186,8 +184,9 @@ public class ThirdpartyController(
         {
             throw new Exception(Resource.ErrorNotCorrectEmail);
         }
-
-        var linkData = await invitationLinkService.GetProcessedLinkDataAsync(inDto.Key, inDto.Email, inDto.EmployeeType ?? EmployeeType.RoomAdmin);
+        
+        var model = emailValidationKeyModelHelper.GetModel();
+        var linkData = await invitationService.GetLinkDataAsync(inDto.Key, inDto.Email, null, inDto.EmployeeType ?? EmployeeType.RoomAdmin, model?.UiD);
 
         if (!linkData.IsCorrect)
         {
@@ -195,6 +194,7 @@ public class ThirdpartyController(
         }
 
         var employeeType = linkData.EmployeeType;
+        bool quotaLimit;
 
         Guid userId;
         try
@@ -203,9 +203,19 @@ public class ThirdpartyController(
 
             var invitedByEmail = linkData.LinkType == InvitationLinkType.Individual;
 
-            var newUser = await CreateNewUser(GetFirstName(inDto, thirdPartyProfile), GetLastName(inDto, thirdPartyProfile), GetEmailAddress(inDto, thirdPartyProfile), passwordHash, employeeType, true, invitedByEmail);
+            (var newUser, quotaLimit) = await CreateNewUser(
+                GetFirstName(inDto, thirdPartyProfile), 
+                GetLastName(inDto, thirdPartyProfile), 
+                GetEmailAddress(inDto, thirdPartyProfile), 
+                passwordHash, 
+                employeeType, 
+                false, 
+                invitedByEmail,
+                inDto.Culture,
+                model?.UiD);
+            
             var messageAction = employeeType == EmployeeType.RoomAdmin ? MessageAction.UserCreatedViaInvite : MessageAction.GuestCreatedViaInvite;
-            await messageService.SendAsync(MessageInitiator.System, messageAction, MessageTarget.Create(newUser.Id), newUser.DisplayUserName(false, displayUserSettingsHelper));
+            await messageService.SendAsync(MessageInitiator.System, messageAction, MessageTarget.Create(newUser.Id), description: newUser.DisplayUserName(false, displayUserSettingsHelper));
             userId = newUser.Id;
             if (!string.IsNullOrEmpty(thirdPartyProfile.Avatar))
             {
@@ -232,24 +242,9 @@ public class ThirdpartyController(
 
         await userHelpTourHelper.SetIsNewUser(true);
 
-        if (linkData is { LinkType: InvitationLinkType.CommonWithRoom })
+        if (linkData is { LinkType: InvitationLinkType.CommonToRoom })
         {
-            var success = int.TryParse(linkData.RoomId, out var id);
-            var tenantId = await tenantManager.GetCurrentTenantIdAsync();
-
-            await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetUsersInRoomCountCheckKey(tenantId)))
-            {
-                if (success)
-                {
-                    await usersInRoomChecker.CheckAppend();
-                    await fileSecurity.ShareAsync(id, FileEntryType.Folder, user.Id, linkData.Share);
-                }
-                else
-                {
-                    await usersInRoomChecker.CheckAppend();
-                    await fileSecurity.ShareAsync(linkData.RoomId, FileEntryType.Folder, user.Id, linkData.Share);
-                }
-            }
+            await invitationService.AddUserToRoomByInviteAsync(linkData, user, quotaLimit);
         }
     }
 
@@ -272,7 +267,8 @@ public class ThirdpartyController(
         await messageService.SendAsync(MessageAction.UserUnlinkedSocialAccount, GetMeaningfulProviderName(provider));
     }
 
-    private async Task<UserInfo> CreateNewUser(string firstName, string lastName, string email, string passwordHash, EmployeeType employeeType, bool fromInviteLink, bool inviteByEmail)
+    private async Task<(UserInfo, bool)> CreateNewUser(string firstName, string lastName, string email, string passwordHash, EmployeeType employeeType, bool fromInviteLink, 
+        bool inviteByEmail, string cultureName, Guid? invitedBy)
     {
         if (SetupInfo.IsSecretEmail(email))
         {
@@ -291,11 +287,33 @@ public class ThirdpartyController(
             }
         }
 
+        if (!inviteByEmail)
+        {
+            user.CreatedBy = invitedBy;
+        }
+
         user.FirstName = string.IsNullOrEmpty(firstName) ? UserControlsCommonResource.UnknownFirstName : firstName;
         user.LastName = string.IsNullOrEmpty(lastName) ? UserControlsCommonResource.UnknownLastName : lastName;
         user.Email = email;
+        
+        if (coreBaseSettings.EnabledCultures.Find(c => string.Equals(c.Name, cultureName, StringComparison.InvariantCultureIgnoreCase)) != null)
+        {
+            user.CultureName = cultureName;
+        }
 
-        return await userManagerWrapper.AddUserAsync(user, passwordHash, true, true, employeeType, fromInviteLink, updateExising: inviteByEmail);
+        var quotaLimit = false;
+
+        try
+        {
+            user = await userManagerWrapper.AddUserAsync(user, passwordHash, true, true, employeeType, fromInviteLink, updateExising: inviteByEmail);
+        }
+        catch (TenantQuotaException)
+        {
+            quotaLimit = true;
+            user = await userManagerWrapper.AddUserAsync(user, passwordHash, true, true, EmployeeType.User, fromInviteLink, updateExising: inviteByEmail);
+        }
+
+        return (user, quotaLimit);
     }
 
     private async Task SaveContactImage(Guid userID, string url)

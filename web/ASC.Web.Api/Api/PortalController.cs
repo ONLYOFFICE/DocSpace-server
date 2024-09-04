@@ -86,8 +86,9 @@ public class PortalController(
     [HttpGet("")]
     public async Task<TenantDto> Get()
     {
-        var tenant = await tenantManager.GetCurrentTenantAsync();   
-        return mapper.Map<TenantDto>(tenant);
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        return  mapper.Map<TenantDto>(tenant);
     }
 
     /// <summary>
@@ -129,7 +130,7 @@ public class PortalController(
             return string.Empty;
         }
 
-        var link = await commonLinkUtility.GetConfirmationEmailUrlAsync(string.Empty, ConfirmType.LinkInvite, (int)employeeType, authContext.CurrentAccount.ID)
+        var link = await commonLinkUtility.GetConfirmationEmailUrlAsync(string.Empty, ConfirmType.LinkInvite, (int)employeeType + authContext.CurrentAccount.ID.ToString(), authContext.CurrentAccount.ID)
                 + $"&emplType={employeeType:d}";
 
         return await urlShortener.GetShortenLinkAsync(link);
@@ -174,7 +175,7 @@ public class PortalController(
     [HttpGet("tenantextra")]
     public async Task<TenantExtraDto> GetTenantExtra(bool refresh)
     {
-        //await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         var quota = await quotaHelper.GetCurrentQuotaAsync(refresh);
         var docServiceQuota = await documentServiceLicense.GetLicenseQuotaAsync();
         
@@ -233,7 +234,8 @@ public class PortalController(
     /// <httpMethod>GET</httpMethod>
     [HttpGet("userscount")]
     public async Task<long> GetUsersCountAsync()
-    {
+    {        
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         return (await userManager.GetUserNamesAsync(EmployeeStatus.Active)).Length;
     }
 
@@ -250,10 +252,29 @@ public class PortalController(
     /// <httpMethod>GET</httpMethod>
     [AllowNotPayment]
     [HttpGet("tariff")]
-    public async Task<Tariff> GetTariffAsync(bool refresh)
-    {
+    public async Task<TariffDto> GetTariffAsync(bool refresh)
+    {        
         var tenant = await tenantManager.GetCurrentTenantAsync();
-        return await tariffService.GetTariffAsync(tenant.Id, refresh: refresh);
+        var source = await tariffService.GetTariffAsync(tenant.Id, refresh: refresh);
+
+        var result = new TariffDto
+        {
+            Id = source.Id,
+            State = source.State,
+            DueDate = source.DueDate,
+            DelayDueDate = source.DelayDueDate,
+            LicenseDate = source.LicenseDate,
+            CustomerId = source.CustomerId,
+            Quotas = source.Quotas,
+        };
+
+        if (await permissionContext.CheckPermissionsAsync(SecurityConstants.EditPortalSettings))
+        {
+            result.OpenSource = tenantExtra.Opensource;
+            result.Enterprise = tenantExtra.Enterprise;
+        }
+        
+        return result;
     }
 
     /// <summary>
@@ -269,9 +290,21 @@ public class PortalController(
     [AllowNotPayment]
     [HttpGet("quota")]
     public async Task<TenantQuota> GetQuotaAsync()
-    {
+    {        
+        if (await userManager.IsUserAsync(securityContext.CurrentAccount.ID))
+        {
+            throw new SecurityException();
+        }
+        
         var tenant = await tenantManager.GetCurrentTenantAsync();
-        return await tenantManager.GetTenantQuotaAsync(tenant.Id);
+        var result = await tenantManager.GetTenantQuotaAsync(tenant.Id);
+
+        if (await userManager.IsCollaboratorAsync(authContext.CurrentAccount.ID))
+        {
+            result.MaxTotalSize = 0;
+        }
+        
+        return result;
     }
 
     /// <summary>
@@ -434,7 +467,7 @@ public class PortalController(
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var alias = inDto.Alias;
-        if (string.IsNullOrEmpty(alias))
+        if (string.IsNullOrEmpty(alias) || alias.Any(Char.IsWhiteSpace))
         {
             throw new ArgumentException(nameof(alias));
         }
@@ -448,6 +481,8 @@ public class PortalController(
         var oldAlias = tenant.Alias;
         var oldVirtualRootPath = commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/');
 
+        var now = DateTime.UtcNow;
+        var messageDate = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, now.Second, DateTimeKind.Utc);
         if (!string.Equals(newAlias, oldAlias, StringComparison.InvariantCultureIgnoreCase))
         {
             if (!string.IsNullOrEmpty(apiSystemHelper.ApiSystemUrl))
@@ -460,11 +495,11 @@ public class PortalController(
             }
 
             var oldDomain = tenant.GetTenantDomain(coreSettings);
-            tenant.Alias = alias;
+            tenant.Alias = newAlias;
             tenant = await tenantManager.SaveTenantAsync(tenant);
             tenantManager.SetCurrentTenant(tenant);
-
-            await messageService.SendAsync(MessageAction.PortalRenamed, MessageTarget.Create(tenant.Id), oldAlias, newAlias);
+            
+            await messageService.SendAsync(MessageAction.PortalRenamed, MessageTarget.Create(tenant.Id), oldAlias, newAlias, dateTime: messageDate);
             await cspSettingsHelper.RenameDomain(oldDomain, tenant.GetTenantDomain(coreSettings));
 
             if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
@@ -488,7 +523,7 @@ public class PortalController(
                                 Uri.SchemeDelimiter,
                                 tenant.GetTenantDomain(coreSettings),
                                 rewriter != null && !rewriter.IsDefaultPort ? $":{rewriter.Port}" : "",
-                                commonLinkUtility.GetConfirmationUrlRelative(tenant.Id, user.Email, ConfirmType.Auth)
+                                commonLinkUtility.GetConfirmationUrlRelative(tenant.Id, user.Email, ConfirmType.Auth, messageDate.ToString(CultureInfo.InvariantCulture))
                );
 
         cookiesManager.ClearCookies(CookiesType.AuthKey);
@@ -506,6 +541,7 @@ public class PortalController(
     /// <returns></returns>
     /// <path>api/2.0/portal/deleteportalimmediately</path>
     /// <httpMethod>DELETE</httpMethod>
+    /// <visible>false</visible>
     [HttpDelete("deleteportalimmediately")]
     public async Task DeletePortalImmediatelyAsync()
     {
@@ -532,6 +568,7 @@ public class PortalController(
         }
         finally
         {
+            await eventBus.PublishAsync(new RemovePortalIntegrationEvent(securityContext.CurrentAccount.ID, tenant.Id));
             securityContext.Logout();
         }
     }
@@ -559,7 +596,7 @@ public class PortalController(
         var suspendUrl = await commonLinkUtility.GetConfirmationEmailUrlAsync(owner.Email, ConfirmType.PortalSuspend);
         var continueUrl = await commonLinkUtility.GetConfirmationEmailUrlAsync(owner.Email, ConfirmType.PortalContinue);
 
-        await studioNotifyService.SendMsgPortalDeactivationAsync(tenant, suspendUrl, continueUrl);
+        await studioNotifyService.SendMsgPortalDeactivationAsync(tenant, await urlShortener.GetShortenLinkAsync(suspendUrl), await urlShortener.GetShortenLinkAsync(continueUrl));
 
         await messageService.SendAsync(MessageAction.OwnerSentPortalDeactivationInstructions, MessageTarget.Create(owner.Id), owner.DisplayUserName(false, displayUserSettingsHelper));
     }
@@ -589,7 +626,9 @@ public class PortalController(
                         (await tariffService.GetPaymentsAsync(tenant.Id)).Any() &&
                         !(await tenantManager.GetCurrentTenantQuotaAsync()).Trial;
 
-        await studioNotifyService.SendMsgPortalDeletionAsync(tenant, await commonLinkUtility.GetConfirmationEmailUrlAsync(owner.Email, ConfirmType.PortalRemove), showAutoRenewText);
+        var confirmLink = await commonLinkUtility.GetConfirmationEmailUrlAsync(owner.Email, ConfirmType.PortalRemove);
+            
+        await studioNotifyService.SendMsgPortalDeletionAsync(tenant, await urlShortener.GetShortenLinkAsync(confirmLink), showAutoRenewText);
     }
 
     /// <summary>
@@ -608,6 +647,8 @@ public class PortalController(
         var tenant = await tenantManager.GetCurrentTenantAsync();
         tenant.SetStatus(TenantStatus.Active);
         await tenantManager.SaveTenantAsync(tenant);
+
+        await cspSettingsHelper.UpdateBaseDomain();
     }
 
     /// <summary>
@@ -629,6 +670,8 @@ public class PortalController(
         tenant.SetStatus(TenantStatus.Suspended);
         await tenantManager.SaveTenantAsync(tenant);
         await messageService.SendAsync(MessageAction.PortalDeactivated);
+
+        await cspSettingsHelper.UpdateBaseDomain();
     }
 
     /// <summary>
@@ -664,26 +707,12 @@ public class PortalController(
 
         redirectLink += HttpUtility.UrlEncode(parameters);
 
-        var authed = false;
-        try
-        {
-            if (!securityContext.IsAuthenticated)
-            {
-                await securityContext.AuthenticateMeAsync(ASC.Core.Configuration.Constants.CoreSystem);
-                authed = true;
-            }
-        }
-        finally
-        {
-            if (authed)
-            {
-                securityContext.Logout();
-            }
-        }
-
-        eventBus.Publish(new RemovePortalIntegrationEvent(securityContext.CurrentAccount.ID, tenant.Id));
-
         await studioNotifyService.SendMsgPortalDeletionSuccessAsync(owner, redirectLink);
+
+        await messageService.SendAsync(MessageAction.PortalDeleted);
+
+        await cspSettingsHelper.UpdateBaseDomain();
+        await eventBus.PublishAsync(new RemovePortalIntegrationEvent(securityContext.CurrentAccount.ID, tenant.Id));
 
         return redirectLink;
     }

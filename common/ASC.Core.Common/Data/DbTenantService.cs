@@ -141,9 +141,9 @@ public class DbTenantService(
     {
         await using var tenantDbContext = await dbContextFactory.CreateDbContextAsync();
 
-        var oldTenant = await InnerRemoveTenantAsync(tenantDbContext, oldId, false);
+        _ = await InnerRemoveTenantAsync(tenantDbContext, oldId);
 
-        var dbtenant = await InnerSaveTenantAsync(tenantDbContext, coreSettings, newTenant);
+        _ = await InnerSaveTenantAsync(tenantDbContext, coreSettings, newTenant);
 
         await tenantDbContext.SaveChangesAsync();
 
@@ -167,7 +167,7 @@ public class DbTenantService(
 
         await using var tenantDbContext = await dbContextFactory.CreateDbContextAsync();
 
-        return mapper.Map<Tenant>(await Queries.TenantByDomainAsync(tenantDbContext, domain));
+        return mapper.Map<Tenant>(await tenantDbContext.TenantByDomainAsync(domain));
     }
     
     public Tenant GetTenant(string domain)
@@ -191,6 +191,7 @@ public class DbTenantService(
         using var tenantDbContext = dbContextFactory.CreateDbContext();
 
         return tenantDbContext.Tenants
+             .Where(t => t.Id != -1)
             .OrderBy(a => a.Status)
             .ThenBy(a => a.Id)
             .ProjectTo<Tenant>(mapper.ConfigurationProvider)
@@ -202,6 +203,8 @@ public class DbTenantService(
         await using var tenantDbContext = await dbContextFactory.CreateDbContextAsync();
 
         return await tenantDbContext.Tenants
+            .Where(t => t.Id != -1)
+            .Where(t => t.Status != TenantStatus.Suspended && t.Status != TenantStatus.RemovePending)
             .OrderBy(a => a.Status)
             .ThenBy(a => a.Id)
             .ProjectTo<Tenant>(mapper.ConfigurationProvider)
@@ -245,20 +248,20 @@ public class DbTenantService(
     public async Task<IEnumerable<TenantVersion>> GetTenantVersionsAsync()
     {
         await using var tenantDbContext = await dbContextFactory.CreateDbContextAsync();
-        return await Queries.TenantVersionsAsync(tenantDbContext).ToListAsync();
+        return await tenantDbContext.TenantVersionsAsync().ToListAsync();
     }
 
 
     public async Task<byte[]> GetTenantSettingsAsync(int tenant, string key)
     {
         await using var tenantDbContext = await dbContextFactory.CreateDbContextAsync();
-        return await Queries.SettingValueAsync(tenantDbContext, tenant, key);
+        return await tenantDbContext.SettingValueAsync(tenant, key);
     }
 
     public byte[] GetTenantSettings(int tenant, string key)
     {
         using var tenantDbContext = dbContextFactory.CreateDbContext();
-        return Queries.SettingValue(tenantDbContext, tenant, key);
+        return tenantDbContext.SettingValue(tenant, key);
     }
 
 
@@ -267,7 +270,7 @@ public class DbTenantService(
         await using var tenantDbContext = await dbContextFactory.CreateDbContextAsync();
         if (data == null || data.Length == 0)
         {
-            var settings = await Queries.CoreSettingsAsync(tenantDbContext, tenant, key);
+            var settings = await tenantDbContext.CoreSettingsAsync(tenant, key);
 
             if (settings != null)
             {
@@ -290,34 +293,6 @@ public class DbTenantService(
         await tenantDbContext.SaveChangesAsync();
     }
 
-    public void SetTenantSettings(int tenant, string key, byte[] data)
-    {
-        using var tenantDbContext = dbContextFactory.CreateDbContext();
-        if (data == null || data.Length == 0)
-        {
-            var settings = Queries.CoreSettings(tenantDbContext, tenant, key);
-
-            if (settings != null)
-            {
-                tenantDbContext.CoreSettings.Remove(settings);
-            }
-        }
-        else
-        {
-            var settings = new DbCoreSettings
-            {
-                Id = key,
-                TenantId = tenant,
-                Value = data,
-                LastModified = DateTime.UtcNow
-            };
-
-            tenantDbContext.AddOrUpdate(tenantDbContext.CoreSettings, settings);
-        }
-
-        tenantDbContext.SaveChanges();
-    }
-
     private async Task ValidateDomainAsync(string domain, int tenantId, bool validateCharacters)
     {
         // size
@@ -333,13 +308,13 @@ public class DbTenantService(
         // forbidden or exists
 
         domain = domain.ToLowerInvariant();
-        _forbiddenDomains ??= await Queries.AddressAsync(tenantDbContext).ToListAsync();
+        _forbiddenDomains ??= await tenantDbContext.AddressAsync().ToListAsync();
 
         var exists = tenantId != 0 && _forbiddenDomains.Contains(domain);
 
         if (!exists)
         {
-            exists = await Queries.AnyTenantsAsync(tenantDbContext, tenantId, domain);
+            exists = await tenantDbContext.AnyTenantsAsync(tenantId, domain);
         }
         if (exists)
         {
@@ -390,7 +365,7 @@ public class DbTenantService(
 
         if (tenant.Id == Tenant.DefaultTenant)
         {
-            tenant.Version = await Queries.VersionIdAsync(tenantDbContext);
+            tenant.Version = await tenantDbContext.VersionIdAsync();
 
             tenant.LastModified = DateTime.UtcNow;
 
@@ -405,7 +380,7 @@ public class DbTenantService(
         }
         else
         {
-            dbTenant = await Queries.TenantAsync(tenantDbContext, tenant.Id);
+            dbTenant = await tenantDbContext.TenantAsync(tenant.Id);
 
             if (dbTenant != null)
             {
@@ -440,11 +415,11 @@ public class DbTenantService(
     {
         var postfix = auto ? "_auto_deleted" : "_deleted";
 
-        var alias = await Queries.GetAliasAsync(tenantDbContext, id);
+        var alias = await tenantDbContext.GetAliasAsync(id);
 
-        var count = await Queries.TenantsCountAsync(tenantDbContext, alias + postfix);
+        var count = await tenantDbContext.TenantsCountAsync(alias + postfix);
 
-        var tenant = await Queries.TenantAsync(tenantDbContext, id);
+        var tenant = await tenantDbContext.TenantAsync(id);
 
         if (tenant != null)
         {
@@ -464,92 +439,4 @@ public class TenantUserSecurity
     public DbTenant DbTenant { get; init; }
     public User User { get; init; }
     public UserSecurity UserSecurity { get; init; }
-}
-
-static file class Queries
-{
-    public static readonly Func<TenantDbContext, string, Task<DbTenant>> TenantByDomainAsync =
-        EF.CompileAsyncQuery(
-            (TenantDbContext ctx, string domain) =>
-                ctx.Tenants
-                    .Where(r => r.Alias == domain || r.MappedDomain == domain)
-                    .OrderBy(a => a.Status == TenantStatus.Restoring ? TenantStatus.Active : a.Status)
-                    .ThenByDescending(a => a.Status == TenantStatus.Restoring ? 0 : a.Id)
-                    .FirstOrDefault());
-    
-    
-    public static readonly Func<TenantDbContext, Task<int>> VersionIdAsync =
-        EF.CompileAsyncQuery(
-            (TenantDbContext ctx) =>
-                ctx.TenantVersion
-                    .Where(r => r.DefaultVersion == 1 || r.Id == 0)
-                    .OrderByDescending(r => r.Id)
-                    .Select(r => r.Id)
-                    .FirstOrDefault());
-
-    public static readonly Func<TenantDbContext, int, Task<DbTenant>> TenantAsync =
-        EF.CompileAsyncQuery(
-            (TenantDbContext ctx, int tenantId) =>
-                ctx.Tenants.FirstOrDefault(r => r.Id == tenantId));
-
-    public static readonly Func<TenantDbContext, int, Task<string>> GetAliasAsync =
-        EF.CompileAsyncQuery(
-            (TenantDbContext ctx, int tenantId) =>
-                ctx.Tenants
-                    .Where(r => r.Id == tenantId)
-                    .Select(r => r.Alias)
-                    .FirstOrDefault());
-
-    public static readonly Func<TenantDbContext, string, Task<int>> TenantsCountAsync = EF.CompileAsyncQuery(
-    (TenantDbContext ctx, string startAlias) =>
-        ctx.Tenants
-            .Count(r => r.Alias.StartsWith(startAlias)));
-
-    public static readonly Func<TenantDbContext, IAsyncEnumerable<TenantVersion>> TenantVersionsAsync =
-        EF.CompileAsyncQuery(
-            (TenantDbContext ctx) =>
-                ctx.TenantVersion
-                    .Where(r => r.Visible)
-                    .Select(r => new TenantVersion(r.Id, r.Version)));
-
-    public static readonly Func<TenantDbContext, int, string, Task<byte[]>> SettingValueAsync =
-        EF.CompileAsyncQuery(
-            (TenantDbContext ctx, int tenantId, string id) =>
-                ctx.CoreSettings
-                    .Where(r => r.TenantId == tenantId)
-                    .Where(r => r.Id == id)
-                    .Select(r => r.Value)
-                    .FirstOrDefault());
-
-    public static readonly Func<TenantDbContext, int, string, byte[]> SettingValue =
-        EF.CompileQuery(
-            (TenantDbContext ctx, int tenantId, string id) =>
-                ctx.CoreSettings
-                    .Where(r => r.TenantId == tenantId)
-                    .Where(r => r.Id == id)
-                    .Select(r => r.Value)
-                    .FirstOrDefault());
-
-    public static readonly Func<TenantDbContext, int, string, Task<DbCoreSettings>> CoreSettingsAsync =
-        EF.CompileAsyncQuery(
-            (TenantDbContext ctx, int tenantId, string id) =>
-                ctx.CoreSettings.FirstOrDefault(r => r.TenantId == tenantId && r.Id == id));
-
-    public static readonly Func<TenantDbContext, int, string, DbCoreSettings> CoreSettings =
-        EF.CompileQuery(
-            (TenantDbContext ctx, int tenantId, string id) =>
-                ctx.CoreSettings.FirstOrDefault(r => r.TenantId == tenantId && r.Id == id));
-
-    public static readonly Func<TenantDbContext, IAsyncEnumerable<string>> AddressAsync =
-        EF.CompileAsyncQuery(
-            (TenantDbContext ctx) => ctx.TenantForbiden.Select(r => r.Address));
-
-    public static readonly Func<TenantDbContext, int, string, Task<bool>> AnyTenantsAsync =
-        EF.CompileAsyncQuery(
-            (TenantDbContext ctx, int tenantId, string domain) =>
-                ctx.Tenants
-                    .Any(r => (r.Alias == domain ||
-                              r.MappedDomain == domain && !(r.Status == TenantStatus.RemovePending ||
-                                                           r.Status == TenantStatus.Restoring))
-                                                       && r.Id != tenantId));
 }

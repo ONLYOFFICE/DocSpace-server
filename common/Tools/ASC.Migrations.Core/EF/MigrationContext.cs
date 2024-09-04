@@ -64,7 +64,6 @@ public class MigrationContext : DbContext
     public DbSet<UserDav> UsersDav { get; set; }
 
     public DbSet<DbWebstudioSettings> WebstudioSettings { get; set; }
-    public DbSet<DbWebstudioUserVisit> WebstudioUserVisit { get; set; }
     public DbSet<DbWebstudioIndex> WebstudioIndex { get; set; }
 
     public DbSet<InstanceRegistration> InstanceRegistrations { get; set; }
@@ -76,11 +75,6 @@ public class MigrationContext : DbContext
     public DbSet<BackupSchedule> Schedules { get; set; }
 
     public DbSet<IntegrationEventLogEntry> IntegrationEventLogs { get; set; }
-
-    public DbSet<FeedLast> FeedLast { get; set; }
-    public DbSet<FeedAggregate> FeedAggregates { get; set; }
-    public DbSet<FeedUsers> FeedUsers { get; set; }
-    public DbSet<FeedReaded> FeedReaded { get; set; }
 
     public DbSet<WebhooksConfig> WebhooksConfigs { get; set; }
     public DbSet<WebhooksLog> WebhooksLogs { get; set; }
@@ -102,6 +96,31 @@ public class MigrationContext : DbContext
     public DbSet<DbFileOrder> FileOrder { get; set; }
     public DbSet<DbRoomSettings> RoomSettings { get; set; }
     public DbSet<ShortLink> ShortLink { get; set; }
+    public DbSet<DbFilesAuditReference> FilesAuditReferences { get; set; }
+
+
+    public DbSet<IdentityAuthorization> IdentityAuthorizations { get; set; }
+
+    public DbSet<IdentityCert> IdentityCerts { get; set; }
+
+    public DbSet<IdentityClient> IdentityClients { get; set; }
+
+    public DbSet<IdentityClientAllowedOrigin> IdentityClientAllowedOrigins { get; set; }
+
+    public DbSet<IdentityClientAuthenticationMethod> IdentityClientAuthenticationMethods { get; set; }
+
+    public DbSet<IdentityClientRedirectUri> IdentityClientRedirectUris { get; set; }
+
+    public DbSet<IdentityClientScope> IdentityClientScopes { get; set; }
+
+    public DbSet<IdentityConsent> IdentityConsents { get; set; }
+
+    public DbSet<IdentityConsentScope> IdentityConsentScopes { get; set; }
+
+    public DbSet<IdentityScope> IdentityScopes { get; set; }
+
+    public DbSet<IdentityShedlock> IdentityShedlocks { get; set; }
+
     public MigrationContext(DbContextOptions<MigrationContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -135,7 +154,6 @@ public class MigrationContext : DbContext
             .AddSubscription()
             .AddUserDav()
             .AddWebstudioSettings()
-            .AddWebstudioUserVisit()
             .AddDbWebstudioIndex()
             .AddDbFiles()
             .AddDbFolder()
@@ -156,16 +174,14 @@ public class MigrationContext : DbContext
             .AddBackupSchedule()
             .AddBackupRecord()
             .AddIntegrationEventLog()
-            .AddFeedUsers()
-            .AddFeedReaded()
-            .AddFeedAggregate()
-            .AddFeedLast()
             .AddDbWebhooks()
             .AddWebhooksConfig()
             .AddWebhooksLog()
             .AddShortLinks()
             .AddDbFileOrder()
             .AddDbRoomSettings()
+            .AddFilesAuditReference()
+            .AddIdentity()
             .AddDbFunctions();
     }
 }

@@ -815,7 +815,7 @@
     <value>Die Einstellungen wurden erfolgreich aktualisiert</value>
   </data>
   <data name="SuccessfullySentNotificationDeleteUserInfoMessage" xml:space="preserve">
-    <value>Die Hinweise zum Löschen Ihres Profils wurden an Ihre E-Mail-Adresse {0} verschickt</value>
+    <value>Die Hinweise zum Deaktivieren Ihres Profils wurden an Ihre E-Mail-Adresse {0} verschickt</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>Falscher Code</value>
@@ -848,7 +848,7 @@
     <value>Die Anzahl der Admins sollte {0} nicht überschreiten</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Anzahl der Administratoren</value>
+    <value>Die Anzahl der Admins/Power-User</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Automatische Sicherung &amp; Wiederherstellung</value>
@@ -888,9 +888,6 @@
   </data>
   <data name="TariffsFeature_usersInRoom_exception" xml:space="preserve">
     <value>Die Anzahl der Benutzer im Raum sollte {0} nicht überschreiten</value>
-  </data>
-  <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Die Anzahl der Admins/Power-User:</value>
   </data>
   <data name="ConsumersAppleId" xml:space="preserve">
     <value>Apple ID</value>
@@ -1038,5 +1035,26 @@
   </data>
   <data name="UserFreeSpaceException" xml:space="preserve">
     <value>Benutzerkontingent überschritten</value>
+  </data>
+  <data name="TariffsFeature_total_size" xml:space="preserve">
+    <value>{0} pro Administrator/Power-User und die Möglichkeit, den Speicherplatz auf Anfrage zu erweitern</value>
+  </data>
+  <data name="TariffsFeature_statistic" xml:space="preserve">
+    <value>Speicherplatzkontingente &amp; Statistik</value>
+  </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>Benutzer deaktiviert</value>
+  </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>Administratoren/Power-User hinzugefügt:</value>
+  </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>Einladungsgrenze ist überschritten</value>
+  </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>Die Anweisung zur Passwortänderung wurde an die E-Mail-Adresse {0} gesendet.</value>
+  </data>
+  <data name="ErrorEmailLinked" xml:space="preserve">
+    <value>Diese E-Mail ist dem Benutzer {0} als Drittanbieter zugeordnet</value>
   </data>
 </root>

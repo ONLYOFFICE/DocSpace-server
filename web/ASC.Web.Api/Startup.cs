@@ -30,7 +30,7 @@ namespace ASC.Web.Api;
 
 public class Startup : BaseStartup
 {
-    public Startup(IConfiguration configuration, IHostEnvironment hostEnvironment) : base(configuration, hostEnvironment)
+    public Startup(IConfiguration configuration) : base(configuration)
     {
         WebhooksEnabled = true;
 
@@ -47,21 +47,17 @@ public class Startup : BaseStartup
         if (!_configuration.GetValue<bool>("disableLdapNotifyService"))
         {
             services.AddHostedService<LdapNotifyService>();
-            DIHelper.TryAdd<LdapNotifyService>();
         }
 
         services.AddBaseDbContextPool<FilesDbContext>();
         services.AddBaseDbContextPool<BackupsContext>();
-
-        MigrationCore.Register(DIHelper);
         services.RegisterQuotaFeature();
-
-        DIHelper.TryAdd<AdditionalWhiteLabelSettingsConverter>();
 
         services.AddStartupTask<CspStartupTask>()
                    .TryAddSingleton(services);
                 
-        services.AddActivePassiveHostedService<NotifySchedulerService>(DIHelper, _configuration, "WebApiNotifySchedulerService");
+        services.AddActivePassiveHostedService<NotifySchedulerService>(_configuration, "WebApiNotifySchedulerService");
+        services.AddDocumentServiceHttpClient(_configuration);
     }
 
     public override void Configure(IApplicationBuilder app, IWebHostEnvironment env)

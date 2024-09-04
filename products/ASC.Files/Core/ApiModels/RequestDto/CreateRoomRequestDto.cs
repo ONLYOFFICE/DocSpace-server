@@ -32,11 +32,8 @@ public enum RoomType
 {
     FillingFormsRoom = 1,
     EditingRoom = 2,
-    ReviewRoom = 3,
-    ReadOnlyRoom = 4,
     CustomRoom = 5,
     PublicRoom = 6,
-    FormRoom = 7,
     VirtualDataRoom = 8
 }
 
@@ -52,8 +49,6 @@ public class CreateRoomRequestDto
     /// <type>ASC.Files.Core.ApiModels.RequestDto.RoomType, ASC.Files.Core</type>
     public RoomType RoomType { get; set; }
 
-    /// <summary>Private room or not</summary>
-    /// <type>System.Boolean, System</type>
     public bool Private { get; set; }
 
     /// <summary>Collection of sharing parameters</summary>

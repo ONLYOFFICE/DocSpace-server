@@ -106,6 +106,26 @@ public class FileDto<T> : FileEntryDto<T>
     /// <type>System.Boolean, System</type>
     public bool? HasDraft { get; set; }
 
+    /// <summary>Is there a form or not</summary>
+    /// <type>System.Boolean, System</type>
+    public bool? IsForm { get; set; }
+
+    /// <summary>Specifies if the filling has started or not</summary>
+    /// <type>System.Boolean, System</type>
+    public bool? StartFilling { get; set; }
+
+    /// <summary>InProcess folder ID</summary>
+    /// <type>System.Int32, System</type>
+    public int? InProcessFolderId { get; set; }
+
+    /// <summary>InProcess folder title</summary>
+    /// <type>System.String, System</type>
+    public string InProcessFolderTitle { get; set; }
+
+    /// <summary>Draft info</summary>
+    /// <type>ASC.File.Core.ApiModels.ResponseDto.DraftLocation, ASC.Files.Core</type>
+    public DraftLocation<T> DraftLocation { get; set; }
+
     /// <summary>Denies file sharing or not</summary>
     /// <type>System.Boolean, System</type>
     public bool DenySharing { get; set; }
@@ -113,10 +133,13 @@ public class FileDto<T> : FileEntryDto<T>
     /// <summary>File accessibility</summary>
     /// <type>System.Collections.IDictionary{ASC.Files.Core.Helpers.Accessibility, System.Boolean}, System.Collections</type>
     public IDictionary<Accessibility, bool> ViewAccessibility { get; set; }
+
     public IDictionary<string, bool> AvailableExternalRights { get; set; }
     public string RequestToken { get; set; }
     public ApiDateTime LastOpened { get; set; }
     public ApiDateTime Expired { get; set; }
+
+    public override FileEntryType FileEntryType { get => FileEntryType.File; }
 
     public static FileDto<int> GetSample()
     {
@@ -144,7 +167,8 @@ public class FileDto<T> : FileEntryDto<T>
 }
 
 [Scope]
-public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
+public class FileDtoHelper(
+    ApiDateTimeHelper apiDateTimeHelper,
         EmployeeDtoHelper employeeWrapperHelper,
         AuthContext authContext,
         IDaoFactory daoFactory,
@@ -158,7 +182,9 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         FilesSettingsHelper filesSettingsHelper,
         FileDateTime fileDateTime,
         ExternalShare externalShare,
-        BreadCrumbsManager breadCrumbsManager)
+        BreadCrumbsManager breadCrumbsManager,
+        FileSharing fileSharing,
+        FileChecker fileChecker)
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime) 
 {
     private readonly ApiDateTimeHelper _apiDateTimeHelper = apiDateTimeHelper;
@@ -169,7 +195,7 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
 
         result.FolderId = file.ParentId;
         
-        if (file.RootFolderType == FolderType.USER && !Equals(file.RootCreateBy, authContext.CurrentAccount.ID))
+        if (file.RootFolderType == FolderType.USER && authContext.IsAuthenticated && !Equals(file.RootCreateBy, authContext.CurrentAccount.ID))
         {
             result.RootFolderType = FolderType.Recent;
             result.FolderId = await _globalFolderHelper.GetFolderRecentAsync<T>();
@@ -177,11 +203,11 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
 
         result.ViewAccessibility = await fileUtility.GetAccessibility(file);
         result.AvailableExternalRights = _fileSecurity.GetFileAccesses(file, SubjectType.ExternalLink);
-        result.FileEntryType = FileEntryType.File;
         
         return result;
     }
 
+    private Dictionary<string, AceWrapper> shareCache = new();
     private async Task<FileDto<T>> GetFileWrapperAsync<T>(File<T> file, string order, TimeSpan? expiration)
     {
         var result = await GetAsync<FileDto<T>, T>(file);
@@ -192,11 +218,89 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
 
         if (fileType == FileType.Pdf)
         {
-            var linkDao = daoFactory.GetLinkDao();
-            var linkedId = await linkDao.GetLinkedAsync(file.Id.ToString());
-            result.HasDraft = linkedId != null;
+            var linkDao = daoFactory.GetLinkDao<T>();
+            var folderDao = daoFactory.GetCacheFolderDao<T>();
+            var fileDao = daoFactory.GetFileDao<T>();
+
+            var linkedIdTask = linkDao.GetLinkedAsync(file.Id);
+            var propertiesTask = fileDao.GetProperties(file.Id);
+            var currentFolderTask = folderDao.GetFolderAsync(file.ParentId);
+            await Task.WhenAll(linkedIdTask, propertiesTask, currentFolderTask);
+
+            var linkedId = linkedIdTask.Result;
+            var properties = propertiesTask.Result;
+            var currentFolder = currentFolderTask.Result;
+
+            Folder<T> currentRoom;
+            if (!DocSpaceHelper.IsRoom(currentFolder.FolderType))
+            {
+                var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(currentFolder);
+                if (int.TryParse(roomId?.ToString(), out var curRoomId) && curRoomId != -1)
+                {
+                    currentRoom = await folderDao.GetFolderAsync(roomId);
         }
+                else
+                {
+                    currentRoom = currentFolder;
+                }
+            }
+            else
+            {
+                currentRoom = currentFolder;
+            }
         
+            if (currentRoom is { FolderType: FolderType.FillingFormsRoom } && properties != null && properties.FormFilling.StartFilling)
+            {
+                result.Security[FileSecurity.FilesSecurityActions.Lock] = false;
+            }
+
+            if (currentRoom.Security == null)
+            {
+                _ = await _fileSecurity.SetSecurity(new[] { currentRoom }.ToAsyncEnumerable()).ToListAsync();
+            }
+
+            AceWrapper ace = null;
+            var currentRoomId = currentRoom.Id?.ToString();
+            if (currentRoomId != null && !shareCache.TryGetValue(currentRoomId, out ace))
+            {
+                ace = await fileSharing.GetPureSharesAsync(currentRoom, [authContext.CurrentAccount.ID]).FirstOrDefaultAsync();
+                shareCache.TryAdd(currentRoomId, ace);
+            }
+
+            if (!file.IsForm && (FilterType)file.Category == FilterType.None)
+            {
+                result.IsForm = await fileChecker.CheckExtendedPDF(file);
+            }
+            else
+            {
+                result.IsForm = file.IsForm;
+            }
+
+            if (ace is { Access: FileShare.FillForms } || result.IsForm == false || currentFolder.FolderType == FolderType.FormFillingFolderInProgress)
+            {
+                result.Security[FileSecurity.FilesSecurityActions.EditForm] = false;
+            }
+
+            result.HasDraft = result.IsForm == true ? !Equals(linkedId, default(T)) : null;
+
+            var formFilling = properties?.FormFilling;
+            if (formFilling != null)
+            {
+                result.StartFilling = formFilling.StartFilling;
+                if (!Equals(linkedId, default(T)))
+                {
+                    var draftLocation = new DraftLocation<T> { FolderId = formFilling.ToFolderId, FolderTitle = formFilling.Title, FileId = linkedId };
+                    var draft = await fileDao.GetFileAsync(linkedId);
+                    if (draft != null)
+                    {
+                        draftLocation.FileTitle = draft.Title;
+                    }
+
+                    result.DraftLocation = draftLocation;
+                }
+            }
+        }
+
         result.FileExst = extension;
         result.FileType = fileType;
         result.Version = file.Version;
@@ -243,15 +347,16 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
 
         try
         {
-            if (file.ShareRecord is { SubjectType: SubjectType.PrimaryExternalLink or SubjectType.ExternalLink })
+            var externalMediaAccess = file.ShareRecord is { SubjectType: SubjectType.PrimaryExternalLink or SubjectType.ExternalLink };
+
+            if (externalMediaAccess)
             {
                 result.RequestToken = await externalShare.CreateShareKeyAsync(file.ShareRecord.Subject);
             }
             
             result.ViewUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(file.DownloadUrl), result.RequestToken);
 
-            result.WebUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id, file.Version)),
-                result.RequestToken);
+            result.WebUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id, file.Version, externalMediaAccess)), result.RequestToken);
 
             result.ThumbnailStatus = file.ThumbnailStatus;
 
@@ -259,9 +364,7 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
 
             if (file.ThumbnailStatus == Thumbnail.Created)
             {
-                result.ThumbnailUrl =
-                    externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileThumbnailUrl(file.Id, file.Version)) +
-                                                              $"&hash={cacheKey}", result.RequestToken);
+                result.ThumbnailUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileThumbnailUrl(file.Id, file.Version)) + $"&hash={cacheKey}", result.RequestToken);
             }
         }
         catch (Exception)
@@ -271,4 +374,23 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
 
         return result;
     }
+}
+
+public class DraftLocation<T>
+{
+    /// <summary>InProcess folder ID</summary>
+    /// <type>System.Int32, System</type>
+    public T FolderId { get; set; }
+
+    /// <summary>InProcess folder title</summary>
+    /// <type>System.String, System</type>
+    public string FolderTitle { get; set; }
+
+    /// <summary>Draft ID</summary>
+    /// <type>System.Int32, System</type>
+    public T FileId { get; set; }
+
+    /// <summary>Draft title</summary>
+    /// <type>System.String, System</type>
+    public string FileTitle { get; set; }
 }

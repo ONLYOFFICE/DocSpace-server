@@ -24,7 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-global using System.Globalization;
 global using System.Net.Mail;
 global using System.Security;
 global using System.Security.Claims;
@@ -33,6 +32,7 @@ global using System.Text.Json;
 global using System.Web;
 
 global using ASC.Api.Core;
+global using ASC.Api.Core.Core;
 global using ASC.Api.Core.Convention;
 global using ASC.Core.Common;
 global using ASC.Api.Core.Extensions;
@@ -52,7 +52,6 @@ global using ASC.Core.Billing;
 global using ASC.Core.Common.EF;
 global using ASC.Core.Common.Quota;
 global using ASC.Core.Common.Quota.Custom;
-global using ASC.Core.Common.Quota.Features;
 global using ASC.Core.Common.Settings;
 global using ASC.Core.Tenants;
 global using ASC.Core.Users;
@@ -66,6 +65,7 @@ global using ASC.Files.Core.EF;
 global using ASC.Files.Core.Resources;
 global using ASC.Files.Core.Security;
 global using ASC.Files.Core.VirtualRooms;
+global using ASC.Web.Files.Helpers;
 global using ASC.MessagingSystem.Core;
 global using ASC.MessagingSystem.EF.Model;
 global using ASC.People;

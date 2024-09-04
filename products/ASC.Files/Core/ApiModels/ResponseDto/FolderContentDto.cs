@@ -100,23 +100,11 @@ public class FolderContentDtoHelper(
 
         return folderContentWrapper.NotFoundIfNull();
     }
-    
+
     public async Task<FolderContentDto<T>> GetAsync<T>(T parentId, DataWrapper<T> folderItems, int startIndex)
     {
-        var result = new FolderContentDto<T>
-        {
-            PathParts = folderItems.FolderPathParts, 
-            StartIndex = startIndex, 
-            Total = folderItems.Total, 
-            Count = folderItems.Entries.Count
-        };
-
-        List<FileShareRecord> currentUsersRecords = null;
-        if (folderItems.FolderInfo.FolderType == FolderType.VirtualRooms && await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID))
-        {
-            currentUsersRecords = await fileSecurity.GetUserRecordsAsync<T>().ToListAsync();
-        }
-
+        var result = new FolderContentDto<T> { PathParts = folderItems.FolderPathParts, StartIndex = startIndex, Total = folderItems.Total, Count = folderItems.Entries.Count };
+        
         var expiration = TimeSpan.MaxValue;
         if (folderItems.ParentRoom is { SettingsLifetime: not null })
         {
@@ -126,14 +114,21 @@ public class FolderContentDtoHelper(
                 expiration = DateTime.UtcNow - lifetime.GetExpirationUtc();
             }
         }
-
+        
+        List<FileShareRecord<string>> currentUsersRecords = null;
+        if (await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID))
+        {
+            currentUsersRecords = await fileSecurity.GetUserRecordsAsync().ToListAsync();
+        }
+        
         if (folderItems.ParentRoom is { FolderType: FolderType.VirtualDataRoom, SettingsIndexing: true })
         {
-            var order = await breadCrumbsManager.GetBreadCrumbsOrderAsync(parentId);
-            var entries = await GetEntriesDto(folderItems.Entries, order, expiration).ToListAsync();
             
-            result.Files = entries.Where(r=> r.FileEntryType == FileEntryType.File).ToList();
-            result.Folders = entries.Where(r=> r.FileEntryType == FileEntryType.Folder).ToList();
+            var order = await breadCrumbsManager.GetBreadCrumbsOrderAsync(parentId);
+            var entries = await GetEntriesDto(folderItems.Entries, order).ToListAsync();
+
+            result.Files = entries.Where(r => r.FileEntryType == FileEntryType.File).ToList();
+            result.Folders = entries.Where(r => r.FileEntryType == FileEntryType.Folder).ToList();
         }
         else
         {
@@ -153,13 +148,13 @@ public class FolderContentDtoHelper(
                 }
             }
 
-            var foldersTask = GetFoldersDto(folders, null).ToListAsync();
-            var filesTask = GetFilesDto(files, null, expiration).ToListAsync();
+            var foldersTask = GetFoldersDto(folders).ToListAsync();
+            var filesTask = GetFilesDto(files).ToListAsync();
             result.Files = await filesTask;
             result.Folders = await foldersTask;
         }
-        
-        var currentTask = GetFolderDto(folderItems.FolderInfo, null);
+
+        var currentTask = GetFolderDto(folderItems.FolderInfo);
         var isEnableBadges = badgesSettingsHelper.GetEnabledForCurrentUserAsync();
 
         result.PathParts = folderItems.FolderPathParts;
@@ -167,16 +162,16 @@ public class FolderContentDtoHelper(
         result.Total = folderItems.Total;
         result.New = (await isEnableBadges) ? folderItems.New : 0;
         result.Current = (FolderDto<T>)(await currentTask);
-        
+
         return result;
 
-        async IAsyncEnumerable<FileEntryDto> GetEntriesDto(IEnumerable<FileEntry> fileEntries, string entriesOrder, TimeSpan expiration)
+        async IAsyncEnumerable<FileEntryDto> GetEntriesDto(IEnumerable<FileEntry> fileEntries, string entriesOrder = null)
         {
             foreach (var e in fileEntries)
             {
                 if (e.FileEntryType == FileEntryType.File)
                 {
-                    yield return await GetFileDto(e, entriesOrder, expiration);
+                    yield return await GetFileDto(e, entriesOrder);
                 }
                 else
                 {
@@ -184,16 +179,16 @@ public class FolderContentDtoHelper(
                 }
             }
         }
-        
-        async IAsyncEnumerable<FileEntryDto> GetFilesDto(IEnumerable<FileEntry> fileEntries, string entriesOrder, TimeSpan expiration)
+
+        async IAsyncEnumerable<FileEntryDto> GetFilesDto(IEnumerable<FileEntry> fileEntries, string entriesOrder = null)
         {
             foreach (var r in fileEntries)
             {
-                yield return await GetFileDto(r, entriesOrder, expiration);
+                yield return await GetFileDto(r, entriesOrder);
             }
         }
 
-        async Task<FileEntryDto> GetFileDto(FileEntry fileEntry, string entriesOrder, TimeSpan expiration)
+        async Task<FileEntryDto> GetFileDto(FileEntry fileEntry, string entriesOrder = null)
         {
             switch (fileEntry)
             {
@@ -206,29 +201,33 @@ public class FolderContentDtoHelper(
             return null;
         }
 
-        async IAsyncEnumerable<FileEntryDto> GetFoldersDto(IEnumerable<FileEntry> folderEntries, string entriesOrder)
+        async IAsyncEnumerable<FileEntryDto> GetFoldersDto(IEnumerable<FileEntry> folderEntries, string entriesOrder = null)
         {
             foreach (var r in folderEntries)
             {
-                switch (r)
-                {
-                    case Folder<int> fol1:
-                        yield return await folderWrapperHelper.GetAsync(fol1, currentUsersRecords, entriesOrder);
-                        break;
-                    case Folder<string> fol2:
-                        yield return await folderWrapperHelper.GetAsync(fol2, currentUsersRecords, entriesOrder);
-                        break;
-                }
+                yield return await GetFolderDto(r, entriesOrder);
             }
         }
-
-        async Task<FileEntryDto> GetFolderDto(FileEntry folderEntry, string entriesOrder)
+        
+        async Task<FileEntryDto> GetFolderDto(FileEntry folderEntry, string entriesOrder = null)
         {
             switch (folderEntry)
             {
                 case Folder<int> fol1:
+                    if (currentUsersRecords == null &&
+                        DocSpaceHelper.IsRoom(fol1.FolderType) &&
+                        await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID))
+                    {
+                        currentUsersRecords = await fileSecurity.GetUserRecordsAsync().ToListAsync();
+                    }
                     return await folderWrapperHelper.GetAsync(fol1, currentUsersRecords, entriesOrder);
                 case Folder<string> fol2:
+                    if (currentUsersRecords == null &&
+                        DocSpaceHelper.IsRoom(fol2.FolderType) &&
+                        await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID))
+                    {
+                        currentUsersRecords = await fileSecurity.GetUserRecordsAsync().ToListAsync();
+                    }
                     return await folderWrapperHelper.GetAsync(fol2, currentUsersRecords, entriesOrder);
             }
 

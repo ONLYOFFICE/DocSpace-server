@@ -437,7 +437,7 @@
     <value>Броят администратори не трябва да надвишава {0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Брой администратори</value>
+    <value>Брой администратори/опитни потребители</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Автоматичен бекъп и възстановяване</value>
@@ -480,9 +480,6 @@
   </data>
   <data name="TariffsFeature_whitelabel" xml:space="preserve">
     <value>Брандинг и персонализиране</value>
-  </data>
-  <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Брой администратори/опитни потребители:</value>
   </data>
   <data name="ConsumersBitly" xml:space="preserve">
     <value>Bitly</value>
@@ -1038,5 +1035,26 @@
   </data>
   <data name="UserFreeSpaceException" xml:space="preserve">
     <value>Квотата за потребителс пространство е надвишена</value>
+  </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>Добавени са Администратори/Опитни потребители:</value>
+  </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>Лимитът за покани е надвишен</value>
+  </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>Потребителят е деактивиран</value>
+  </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>Инструкцията за промяна на паролата е изпратена до имейл адреса на {0}.</value>
+  </data>
+  <data name="ErrorEmailLinked" xml:space="preserve">
+    <value>Този имейл е прикачен към потребителя {0} като доставчик трета страна</value>
+  </data>
+  <data name="TariffsFeature_statistic" xml:space="preserve">
+    <value>Квоти и статистики за съхранение</value>
+  </data>
+  <data name="TariffsFeature_total_size" xml:space="preserve">
+    <value>{0} за администратор/опитен потребител и възможност за добавяне на място по заявка</value>
   </data>
 </root>

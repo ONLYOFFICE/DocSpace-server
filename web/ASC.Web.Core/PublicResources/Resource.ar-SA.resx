@@ -976,7 +976,7 @@
     <value>لا ينبغي أن يتجاوز عدد المسؤولين {0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>عدد المديرين</value>
+    <value>عدد الإداريين/مستخدمي الطاقة</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>النسخ الاحتياطي التلقائي والاسترداد</value>
@@ -995,9 +995,6 @@
   </data>
   <data name="TariffsFeature_total_size_price_count" xml:space="preserve">
     <value>مساحة التخزين</value>
-  </data>
-  <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>عدد الإداريين/مستخدمي الطاقة:</value>
   </data>
   <data name="TariffsFeature_used_room" xml:space="preserve">
     <value>الغرف:</value>
@@ -1097,5 +1094,26 @@
   </data>
   <data name="UserFreeSpaceException" xml:space="preserve">
     <value>تم تجاوز حصة مساحة المستخدم</value>
+  </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>تمت إضافة المشرفين/المستخدمين المتميزين:</value>
+  </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>لقد تجاوزت حد الدعوات المسموح به</value>
+  </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>تعطيل المستخدم</value>
+  </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>تم إرسال تعليمات تغيير كلمة المرور إلى عنوان البريد الإلكتروني {0}.</value>
+  </data>
+  <data name="ErrorEmailLinked" xml:space="preserve">
+    <value>تم إرفاق هذا البريد الإلكتروني للمستخدم {0} كمزود طرف ثالث</value>
+  </data>
+  <data name="TariffsFeature_statistic" xml:space="preserve">
+    <value>حصص التخزين والإحصائيات</value>
+  </data>
+  <data name="TariffsFeature_total_size" xml:space="preserve">
+    <value>{0} لكل مسؤول/مستخدم مميز إمكانية إضافة مساحة عند الطلب</value>
   </data>
 </root>

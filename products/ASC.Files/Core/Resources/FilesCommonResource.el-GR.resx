@@ -408,7 +408,7 @@
     <value>Κάντε το ίδιο ως χρήστης|Συνδεθείτε σε Dropbox, Box και άλλους λογαριασμούς στην ενότητα «Κοινά»|Ρυθμίστε τα δικαιώματα πρόσβασης στα έγγραφα και τους φακέλους στην ενότητα "Κοινά»</value>
   </data>
   <data name="ProductUserOpportunities" xml:space="preserve">
-    <value>Δημιουργήστε και επεξεργαστείτε τα δικά σας έγγραφα καθώς και τα κοινόχρηστα έγγραφα με τα κατάλληλα δικαιώματα πρόσβασης|Δώστε πρόσβαση ανάγνωσης/επεξεργασίας σε άλλους χρήστες στα έγγραφα και τους φακέλους|Συνδεθείτε σε Dropbox, Box και άλλους λογαριασμούς στην ενότητα «Τα έγγραφά μου»</value>
+    <value>Δημιουργήστε και επεξεργαστείτε τα δικά σας έγγραφα καθώς και τα κοινόχρηστα έγγραφα με τα κατάλληλα δικαιώματα πρόσβασης|Δώστε πρόσβαση ανάγνωσης/επεξεργασίας σε άλλους χρήστες στα έγγραφα και τους φακέλους|Συνδεθείτε σε Dropbox, Box και άλλους λογαριασμούς στην ενότητα «Τα έγγραφά»</value>
   </data>
   <data name="DefaultExternalLinkTitle" xml:space="preserve">
     <value>Κοινόχρηστος σύνδεσμος</value>
@@ -463,5 +463,41 @@
   </data>
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>Τύπος</value>
+  </data>
+  <data name="Date" xml:space="preserve">
+    <value>Ημερομηνία</value>
+  </data>
+  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
+    <value>Χρήστης ισχύος</value>
+  </data>
+  <data name="RoleEnum_PowerUser" xml:space="preserve">
+    <value>Χρήστης ισχύος</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>Χρήστης</value>
+  </data>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>Η μετακίνηση πολλών αρχείων στο δωμάτιο Συμπλήρωσης Φορμών δεν υποστηρίζεται. Μετακινήστε μία φόρμα PDF του ONLYOFFICE κάθε φορά.</value>
+  </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>Η μετακίνηση φακέλων στο δωμάτιο Συμπλήρωσης Φορμών δεν υποστηρίζεται. Μετακινήστε μία φόρμα PDF του ONLYOFFICE κάθε φορά.</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>Το αρχείο δεν μπορεί να μετακινηθεί σε αυτό το δωμάτιο. Προσπαθήστε να μετακινήσετε τη φόρμα PDF του ONLYOFFICE.</value>
+  </data>
+  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
+    <value>Το αρχείο δεν μπορεί να μεταφορτωθεί σε αυτό το δωμάτιο. Προσπαθήστε να μεταφορτώσετε τη φόρμα PDF του ONLYOFFICE.</value>
+  </data>
+  <data name="FillOutExternalLinkTitle" xml:space="preserve">
+    <value>Σύνδεσμος για συμπλήρωση</value>
+  </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>Σύνδεσμος προς τη φόρμα</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Άνοιγμα φόρμας</value>
+  </data>
+  <data name="FormNumber" xml:space="preserve">
+    <value>Αριθμός φόρμας</value>
   </data>
 </root>

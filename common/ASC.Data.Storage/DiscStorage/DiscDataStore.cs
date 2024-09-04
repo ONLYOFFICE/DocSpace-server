@@ -48,9 +48,11 @@ public class DiscDataStore(TempStream tempStream,
     public override bool IsSupportInternalUri => false;
     public override bool IsSupportedPreSignedUri => false;
     public override bool IsSupportChunking => true;
+    public override bool ContentAsAttachment => _contentAsAttachment;
 
     private readonly Dictionary<string, MappedPath> _mappedPaths = new();
     private ICrypt _crypt;
+    private bool _contentAsAttachment;
 
     public override IDataStore Configure(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props, IDataStoreValidator validator)
     {
@@ -58,6 +60,8 @@ public class DiscDataStore(TempStream tempStream,
         //Fill map path
         Modulename = moduleConfig.Name;
         DataList = new DataList(moduleConfig);
+
+        _contentAsAttachment = moduleConfig.ContentAsAttachment;
 
         foreach (var domain in moduleConfig.Domain)
         {
@@ -162,46 +166,55 @@ public class DiscDataStore(TempStream tempStream,
     {
         Logger.DebugSavePath(path);
 
-        var buffered = await _tempStream.GetBufferedAsync(stream);
-            
-        if (EnableQuotaCheck(domain))
+        var (buffered, isNew) = await _tempStream.TryGetBufferedAsync(stream);
+        try
         {
-            await QuotaController.QuotaUsedCheckAsync(buffered.Length, ownerId);
+            if (EnableQuotaCheck(domain))
+            {
+                await QuotaController.QuotaUsedCheckAsync(buffered.Length, ownerId);
+            }
+
+            ArgumentNullException.ThrowIfNull(path);
+            ArgumentNullException.ThrowIfNull(stream);
+
+            //Try seek to start
+            if (buffered.CanSeek)
+            {
+                buffered.Seek(0, SeekOrigin.Begin);
+            }
+
+            //Lookup domain
+            var target = GetTarget(domain, path);
+            CreateDirectory(target);
+            //Copy stream
+
+            //optimaze disk file copy
+            long fslen;
+            if (buffered is FileStream fileStream)
+            {
+                File.Copy(fileStream.Name, target, true);
+                fslen = fileStream.Length;
+            }
+            else
+            {
+                await using var fs = File.Open(target, FileMode.Create);
+                await buffered.CopyToAsync(fs);
+                fslen = fs.Length;
+            }
+
+            await QuotaUsedAddAsync(domain, fslen, ownerId);
+
+            _crypt.EncryptFile(target);
+
+            return await GetUriAsync(domain, path);
         }
-
-        ArgumentNullException.ThrowIfNull(path);
-        ArgumentNullException.ThrowIfNull(stream);
-
-        //Try seek to start
-        if (buffered.CanSeek)
+        finally
         {
-            buffered.Seek(0, SeekOrigin.Begin);
+            if (isNew)
+            {
+                await buffered.DisposeAsync();
+            }
         }
-
-        //Lookup domain
-        var target = GetTarget(domain, path);
-        CreateDirectory(target);
-        //Copy stream
-
-        //optimaze disk file copy
-        long fslen;
-        if (buffered is FileStream fileStream)
-        {
-            File.Copy(fileStream.Name, target, true);
-            fslen = fileStream.Length;
-        }
-        else
-        {
-            await using var fs = File.Open(target, FileMode.Create);
-            await buffered.CopyToAsync(fs);
-            fslen = fs.Length;
-        }
-
-        await QuotaUsedAddAsync(domain, fslen, ownerId);
-
-        _crypt.EncryptFile(target);
-
-        return await GetUriAsync(domain, path);
     }
 
     public override Task<Uri> SaveAsync(string domain, string path, Stream stream, ACL acl)
@@ -220,7 +233,6 @@ public class DiscDataStore(TempStream tempStream,
     public override async Task<string> UploadChunkAsync(string domain, string path, string uploadId, Stream stream, long defaultChunkSize, int chunkNumber, long chunkLength)
     {
         var target = GetTarget(domain, path + "chunks");
-        var mode = chunkNumber == 0 ? FileMode.Create : FileMode.Append;
 
         if (!Directory.Exists(target))
         {
@@ -565,6 +577,17 @@ public class DiscDataStore(TempStream tempStream,
         throw new NotSupportedException("This operation supported only on s3 storage");
     }
 
+    public override string GetRootDirectory(string domain)
+    {
+        var targetDir = GetTarget(domain , "");
+        var dir = GetTarget("", "");
+        if (!string.IsNullOrEmpty(targetDir) && !targetDir.EndsWith(Path.DirectorySeparatorChar.ToString()))
+        {
+            return targetDir[dir.Length..].Trim('\\');
+        }
+        return string.Empty;
+    }
+
     public override IAsyncEnumerable<string> ListDirectoriesRelativeAsync(string domain, string path, bool recursive)
     {
         ArgumentNullException.ThrowIfNull(path);
@@ -578,11 +601,9 @@ public class DiscDataStore(TempStream tempStream,
 
         if (Directory.Exists(targetDir))
         {
-            var entries = Directory.GetDirectories(targetDir, "*", recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
-            var tmp = Array.ConvertAll(
-            entries,
-            x => x[targetDir.Length..]);
-            return tmp.ToAsyncEnumerable();
+            var entries = Directory.EnumerateDirectories(targetDir, "*", recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)
+                .Select(e => e[targetDir.Length..]);
+            return entries.ToAsyncEnumerable();
         }
         return AsyncEnumerable.Empty<string>();
     }
@@ -600,11 +621,9 @@ public class DiscDataStore(TempStream tempStream,
 
         if (Directory.Exists(targetDir))
         {
-            var entries = Directory.GetFiles(targetDir, pattern, recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
-            var tmp = Array.ConvertAll(
-            entries,
-            x => x[targetDir.Length..]);
-            return tmp.ToAsyncEnumerable();
+            var entries = Directory.EnumerateFiles(targetDir, pattern, recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)
+                .Select(e=> e[targetDir.Length..]);
+            return entries.ToAsyncEnumerable();
         }
         return AsyncEnumerable.Empty<string>();
     }

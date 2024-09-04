@@ -153,9 +153,6 @@
   <data name="MigrationCommonFiles" xml:space="preserve">
     <value>Загальні файли перенесення</value>
   </data>
-  <data name="MigrationInitException" xml:space="preserve">
-    <value>Помилка під час ініціалізації засобу перенесення {0}</value>
-  </data>
   <data name="MigrationNotFoundException" xml:space="preserve">
     <value>Немає такого постачальника перенесення</value>
   </data>
@@ -165,10 +162,52 @@
   <data name="MigrationProjectFiles" xml:space="preserve">
     <value>Файли проєкту перенесення</value>
   </data>
-  <data name="MigrationStartException" xml:space="preserve">
-    <value>Аналіз ще виконується</value>
+  <data name="CanNotAddUserInGroup" xml:space="preserve">
+    <value>Не вдалося додати користувача {0} до групи {1}</value>
   </data>
-  <data name="MigrationUploadException" xml:space="preserve">
-    <value>Перенесення вже виконується</value>
+  <data name="CanNotCreateFile" xml:space="preserve">
+    <value>Не вдалося створити файл {0}</value>
+  </data>
+  <data name="CanNotImportUser" xml:space="preserve">
+    <value>Не вдалося імпортувати користувача</value>
+  </data>
+  <data name="CanNotImportUserFiles" xml:space="preserve">
+    <value>Не вдалося імпортувати файли користувача</value>
+  </data>
+  <data name="CanNotParseArchive" xml:space="preserve">
+    <value>Не вдалося проаналізувати архів {0}</value>
+  </data>
+  <data name="CanNotParseArchives" xml:space="preserve">
+    <value>Не вдалося проаналізувати архіви</value>
+  </data>
+  <data name="CanNotParseUser" xml:space="preserve">
+    <value>Не вдалося проаналізувати користувача {0}</value>
+  </data>
+  <data name="CanNotReadInfoFile" xml:space="preserve">
+    <value>Не вдалося прочитати інформаційний файл з {0}</value>
+  </data>
+  <data name="CanNotShare" xml:space="preserve">
+    <value>Не вдалося поділитися записом {0} з {1}</value>
+  </data>
+  <data name="CanNotToUnzip" xml:space="preserve">
+    <value>Не вдалося розархівувати {0}</value>
+  </data>
+  <data name="CreateFile" xml:space="preserve">
+    <value>Створити файл {0}</value>
+  </data>
+  <data name="CreateFolder" xml:space="preserve">
+    <value>Створити папку {0}</value>
+  </data>
+  <data name="CreateShareRoom" xml:space="preserve">
+    <value>створити спільну кімнату {0}</value>
+  </data>
+  <data name="СanNotImportCommonFiles" xml:space="preserve">
+    <value>Не вдалося імпортувати загальні файли</value>
+  </data>
+  <data name="СanNotImportProjectFiles" xml:space="preserve">
+    <value>Не вдалося імпортувати файли проєкту</value>
+  </data>
+  <data name="СreateRootFolder" xml:space="preserve">
+    <value>Створити кореневу папку</value>
   </data>
 </root>

@@ -129,10 +129,10 @@ public class CookieStorage(InstanceCrypto instanceCrypto,
         var expires = await tenantCookieSettingsHelper.GetExpiresTimeAsync(tenant);
         var settingsUser = await tenantCookieSettingsHelper.GetForUserAsync(tenant, userid);
 
-        return EncryptCookie(tenant, userid, settingsTenant.Index, expires, settingsUser.Index, loginEventId);
+        return await EncryptCookieAsync(tenant, userid, settingsTenant.Index, expires, settingsUser.Index, loginEventId);
     }
 
-    public string EncryptCookie(int tenant, Guid userid, int indexTenant, DateTime expires, int indexUser, int loginEventId)
+    public async Task<string> EncryptCookieAsync(int tenant, Guid userid, int indexTenant, DateTime expires, int indexUser, int loginEventId)
     {
         var s = string.Format("{0}${1}${2}${3}${4}${5}${6}${7}${8}",
             string.Empty, //login
@@ -145,7 +145,7 @@ public class CookieStorage(InstanceCrypto instanceCrypto,
             indexUser,
             loginEventId != 0 ? loginEventId.ToString() : null);
 
-        return instanceCrypto.Encrypt(s);
+        return await instanceCrypto.EncryptAsync(s);
     }
 
     private string GetUserDependencySalt()

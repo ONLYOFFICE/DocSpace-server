@@ -28,8 +28,9 @@ using ThumbnailSize = Dropbox.Api.Files.ThumbnailSize;
 
 namespace ASC.Files.Thirdparty.Dropbox;
 
-[Transient]
-internal class DropboxStorage(TempStream tempStream, IHttpClientFactory httpClientFactory) : IThirdPartyStorage<FileMetadata, FolderMetadata, Metadata>,
+[Transient(typeof(IThirdPartyStorage<FileMetadata, FolderMetadata, Metadata>))]
+internal class DropboxStorage(TempStream tempStream, IHttpClientFactory httpClientFactory) : 
+    IThirdPartyStorage<FileMetadata, FolderMetadata, Metadata>,
     IDisposable
 {
     public bool IsOpened { get; private set; }
@@ -94,13 +95,13 @@ internal class DropboxStorage(TempStream tempStream, IHttpClientFactory httpClie
 
             return metadata.AsFolder;
         }
-        catch (AggregateException ex)
+        catch (ApiException<GetMetadataError> ex)
         {
-            if (ex.InnerException is ApiException<GetMetadataError>
-                && ex.InnerException.Message.StartsWith("path/not_found/"))
+            if (ex.Message.StartsWith("path/not_found/"))
             {
                 return null;
             }
+            
             throw;
         }
     }
@@ -131,8 +132,20 @@ internal class DropboxStorage(TempStream tempStream, IHttpClientFactory httpClie
 
     public async Task<List<Metadata>> GetItemsAsync(string folderId)
     {
-        var data = await _dropboxClient.Files.ListFolderAsync(folderId);
-        return [..data.Entries];
+        try
+        {
+            var data = await _dropboxClient.Files.ListFolderAsync(folderId);
+            return [..data.Entries];
+        }
+        catch (ApiException<ListFolderError> ex)
+        {
+            if (ex.Message.StartsWith("path/not_found/"))
+            {
+                return [];
+            }
+            
+            throw;
+        }
     }
 
     public async Task<Stream> GetThumbnailAsync(string fileId, int width, int height)

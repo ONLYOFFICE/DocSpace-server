@@ -26,7 +26,7 @@
 
 namespace ASC.Files.Core.Data;
 
-[Scope]
+[Scope(typeof(IDaoFactory))]
 public class DaoFactory(IServiceProvider serviceProvider, IProviderDao providerDao) : IDaoFactory
 {
     public IProviderDao ProviderDao { get; } = providerDao;
@@ -41,6 +41,12 @@ public class DaoFactory(IServiceProvider serviceProvider, IProviderDao providerD
         return serviceProvider.GetService<IFolderDao<T>>();
     }
 
+    public IFolderDao<T> GetCacheFolderDao<T>()
+    {
+        return serviceProvider.GetService<ICacheFolderDao<T>>() ?? 
+               serviceProvider.GetService<IFolderDao<T>>();
+    }
+
     public ITagDao<T> GetTagDao<T>()
     {
         return serviceProvider.GetService<ITagDao<T>>();
@@ -51,40 +57,13 @@ public class DaoFactory(IServiceProvider serviceProvider, IProviderDao providerD
         return serviceProvider.GetService<ISecurityDao<T>>();
     }
 
-    public ILinkDao GetLinkDao()
+    public ILinkDao<T> GetLinkDao<T>()
     {
-        return serviceProvider.GetService<ILinkDao>();
+        return serviceProvider.GetService<ILinkDao<T>>();
     }
-}
 
-public static class DaoFactoryExtension
-{
-    public static void Register(DIHelper services)
+    public IMappingId<T> GetMapping<T>()
     {
-        services.TryAdd<TenantDateTimeConverter>();
-        services.TryAdd<FilesMappingAction>();
-
-        services.TryAdd<File<int>>();
-        services.TryAdd<IFileDao<int>, FileDao>();
-
-        services.TryAdd<File<string>>();
-        services.TryAdd<IFileDao<string>, ProviderFileDao>();
-
-        services.TryAdd<Folder<int>>();
-        services.TryAdd<IFolderDao<int>, FolderDao>();
-
-        services.TryAdd<Folder<string>>();
-        services.TryAdd<IFolderDao<string>, ProviderFolderDao>();
-
-        services.TryAdd<ISecurityDao<int>, SecurityDao>();
-        services.TryAdd<ISecurityDao<string>, ThirdPartySecurityDao>();
-
-        services.TryAdd<ITagDao<int>, TagDao>();
-        services.TryAdd<ITagDao<string>, ThirdPartyTagDao>();
-
-        services.TryAdd<ILinkDao, LinkDao>();
-
-        services.TryAdd<EditHistory>();
-        services.TryAdd<FormFillingProperties>();
+        return serviceProvider.GetService<IMappingId<T>>();
     }
 }

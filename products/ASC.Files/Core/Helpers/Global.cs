@@ -96,14 +96,15 @@ public enum DocThumbnailExtension
 }
 
 [Scope]
-public class Global(
+public partial class Global(
     IConfiguration configuration,
     AuthContext authContext,
     UserManager userManager,
     CoreSettings coreSettings,
     DisplayUserSettingsHelper displayUserSettingsHelper,
     CustomNamingPeople customNamingPeople,
-    FileSecurityCommon fileSecurityCommon)
+    FileSecurityCommon fileSecurityCommon,
+    IDistributedLockProvider distributedLockProvider)
 {
     #region Property
 
@@ -172,17 +173,28 @@ public class Global(
     public async Task<string> GetDocDbKeyAsync()
     {
         const string dbKey = "UniqueDocument";
+        
+        // check without lock
         var resultKey = await coreSettings.GetSettingAsync(dbKey);
-
         if (!string.IsNullOrEmpty(resultKey))
         {
             return resultKey;
         }
+        
+        await using (await distributedLockProvider.TryAcquireFairLockAsync(dbKey))
+        {
+            // check again with lock
+            resultKey = await coreSettings.GetSettingAsync(dbKey);
+            if (!string.IsNullOrEmpty(resultKey))
+            {
+                return resultKey;
+            }
+            
+            resultKey = Guid.NewGuid().ToString();
+            await coreSettings.SaveSettingAsync(dbKey, resultKey);
 
-        resultKey = Guid.NewGuid().ToString();
-        await coreSettings.SaveSettingAsync(dbKey, resultKey);
-
-        return resultKey;
+            return resultKey;
+        }
     }
 
     #endregion
@@ -231,6 +243,42 @@ public class Global(
 
         return userInfo.DisplayUserName(false, displayUserSettingsHelper);
     }
+    
+    public async Task<string> GetAvailableTitleAsync<T>(string requestTitle, T parentFolderId, Func<string, T, Task<bool>> isExist, FileEntryType fileEntryType)
+    {
+        if (!await isExist(requestTitle, parentFolderId))
+        {
+            return requestTitle;
+        }
+
+        var re = MyRegex();
+        
+        var insertIndex = requestTitle.Length;
+        if (fileEntryType == FileEntryType.File && requestTitle.LastIndexOf('.') != -1)
+        {
+            insertIndex = requestTitle.LastIndexOf('.');
+        }
+
+        requestTitle = requestTitle.Insert(insertIndex, " (1)");
+
+        while (await isExist(requestTitle, parentFolderId))
+        {
+            requestTitle = re.Replace(requestTitle, MatchEvaluator);
+        }
+
+        return requestTitle;
+    }
+    
+    private static string MatchEvaluator(Match match)
+    {
+        var index = Convert.ToInt32(match.Groups[2].Value);
+        var staticText = match.Value[$" ({index})".Length..];
+
+        return $" ({index + 1}){staticText}";
+    }
+
+    [GeneratedRegex(@"( \(((?<index>[0-9])+)\)(\.[^\.]*)?)$")]
+    private static partial Regex MyRegex();
 }
 
 [Scope]
@@ -685,10 +733,16 @@ public class GlobalFolder(
             newFile.ParentId = folderId;
             newFile.Comment = FilesCommonResource.CommentCreate;
 
+            var fileType = FileUtility.GetFileTypeByFileName(fileName);
+            if (fileType == FileType.Pdf)
+            {
+                newFile.Category = (int)FilterType.PdfForm;
+            }
+           
             await using (var stream = await storeTemplate.GetReadStreamAsync("", filePath))
             {
                 newFile.ContentLength = stream.CanSeek ? stream.Length : await storeTemplate.GetFileSizeAsync("", filePath);
-                newFile = await fileDao.SaveFileAsync(newFile, stream, false);
+                newFile = await fileDao.SaveFileAsync(newFile, stream, false, true);
             }
 
             await fileMarker.MarkAsNewAsync(newFile);

@@ -26,6 +26,9 @@
 
 namespace ASC.People.ApiModels.RequestDto;
 
+/// <summary>
+/// 
+/// </summary>
 public abstract class GroupRequestDtoBase
 {
     /// <summary>Group manager ID</summary>

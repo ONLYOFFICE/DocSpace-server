@@ -29,9 +29,9 @@ using Status = ASC.Files.Core.Security.Status;
 namespace ASC.Files.Core.Helpers;
 
 [Scope]
-public class ExternalLinkHelper(ExternalShare externalShare, RoomLogoManager roomLogoManager, SecurityContext securityContext, IDaoFactory daoFactory)
+public class ExternalLinkHelper(ExternalShare externalShare, SecurityContext securityContext, IDaoFactory daoFactory, UserManager userManager, FileSecurity fileSecurity)
 {
-    public async Task<ValidationInfo> ValidateAsync(string key, string password = null)
+    public async Task<ValidationInfo> ValidateAsync(string key, string password = null, string fileId = null)
     {
         var result = new ValidationInfo
         {
@@ -40,10 +40,9 @@ public class ExternalLinkHelper(ExternalShare externalShare, RoomLogoManager roo
         };
 
         var linkId = await externalShare.ParseShareKeyAsync(key);
-        var securityDao = daoFactory.GetSecurityDao<int>();
+        var securityDao = daoFactory.GetSecurityDao<string>();
 
         var record = await securityDao.GetSharesAsync(new[] { linkId }).FirstOrDefaultAsync();
-
         if (record == null)
         {
             return result;
@@ -57,11 +56,23 @@ public class ExternalLinkHelper(ExternalShare externalShare, RoomLogoManager roo
             return result;
         }
 
-        var entryId = record.EntryId.ToString();
+        var entryId = record.EntryId;
 
         var entry = int.TryParse(entryId, out var id)
-            ? await GetEntryAndProcessAsync(id, result)
-            : await GetEntryAndProcessAsync(entryId, result);
+            ? await GetEntryAndProcessAsync(id, record.EntryType, result)
+            : await GetEntryAndProcessAsync(entryId, record.EntryType, result);
+
+        if (!string.IsNullOrEmpty(fileId))
+        {
+            if (int.TryParse(fileId, out var entityId))
+            {
+                await GetSubEntryAndProcessAsync(entityId, entryId, result);
+            }
+            else
+            {
+                await GetSubEntryAndProcessAsync(fileId, entryId, result);
+            }
+        }
 
         if (entry == null || entry.RootFolderType is FolderType.TRASH or FolderType.Archive)
         {
@@ -80,16 +91,20 @@ public class ExternalLinkHelper(ExternalShare externalShare, RoomLogoManager roo
 
         if (securityContext.IsAuthenticated)
         {
-            if (entry.CreateBy.Equals(securityContext.CurrentAccount.ID))
+            var userId = securityContext.CurrentAccount.ID;
+            
+            if (entry.CreateBy.Equals(userId) || await userManager.IsDocSpaceAdminAsync(userId))
             {
                 result.Shared = true;
             }
             else
             {
-                var existedRecord = await securityDao.GetSharesAsync(new[] { securityContext.CurrentAccount.ID })
-                    .FirstOrDefaultAsync(r => r.EntryId.ToString() == entryId);
-
-                result.Shared = existedRecord != null;
+                result.Shared = (entry switch
+                {
+                    FileEntry<int> entryInt => await fileSecurity.CanReadAsync(entryInt) && !entryInt.ShareRecord.IsLink,
+                    FileEntry<string> entryString => await fileSecurity.CanReadAsync(entryString) && !entryString.ShareRecord.IsLink,
+                    _ => false
+                });
             }
         }
 
@@ -97,32 +112,55 @@ public class ExternalLinkHelper(ExternalShare externalShare, RoomLogoManager roo
         {
             return result;
         }
-        
-        await externalShare.SetAnonymousSessionKeyAsync();
 
+        await externalShare.SetAnonymousSessionKeyAsync();
+        
         return result;
     }
 
-    private async Task<FileEntry> GetEntryAndProcessAsync<T>(T id, ValidationInfo info)
+    private async Task<FileEntry> GetEntryAndProcessAsync<T>(T id, FileEntryType entryType, ValidationInfo info)
     {
-        var folder = await daoFactory.GetFolderDao<T>().GetFolderAsync(id);
+        if (entryType == FileEntryType.Folder)
+        {
+            var folder = await daoFactory.GetFolderDao<T>().GetFolderAsync(id);
+            if (folder == null)
+            {
+                return null;
+            }
 
-        if (folder == null)
+            info.Id = folder.Id.ToString();
+            info.Title = folder.Title;
+        
+            return folder;
+        }
+        
+        var file = await daoFactory.GetFileDao<T>().GetFileAsync(id);
+        if (file == null)
         {
             return null;
         }
-
-        info.Id = folder.Id.ToString();
-        info.Title = folder.Title;
-        info.FolderType = folder.FolderType;
         
-        var logo = await roomLogoManager.GetLogoAsync(folder);
+        info.Id = file.Id.ToString();
+        info.Title = file.Title;
 
-        if (!logo.IsDefault())
+        return file;
+    }
+    
+    private async Task GetSubEntryAndProcessAsync<T>(T id, string rootId, ValidationInfo info)
+    {
+        var file = await daoFactory.GetFileDao<T>().GetFileAsync(id);
+        if (file == null)
         {
-            info.Logo = logo;
+            return;
+        }
+        var (currentRoomId, _) = await daoFactory.GetFolderDao<T>().GetParentRoomInfoFromFileEntryAsync(file);
+        
+        if (Equals(currentRoomId, default) || !string.Equals(currentRoomId.ToString(), rootId))
+        {
+            return;
         }
         
-        return folder;
+        info.EntityId = file.Id.ToString();
+        info.EntryTitle = file.Title;
     }
 }

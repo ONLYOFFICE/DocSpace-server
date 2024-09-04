@@ -66,6 +66,7 @@ public class FilesSettingsDto
     public bool ExternalShareSocialMedia { get; set; }
     public bool StoreOriginalFiles { get; set; }
     public bool KeepNewFileName { get; set; }
+    public bool DisplayFileExtension { get; set; }
     public bool ConvertNotify { get; set; }
     public bool HideConfirmConvertSave { get; set; }
     public bool HideConfirmConvertOpen { get; set; }
@@ -79,7 +80,9 @@ public class FilesSettingsDto
     public AutoCleanUpData AutomaticallyCleanUp { get; set; }
     public bool CanSearchByContent { get; set; }
     public List<FileShare> DefaultSharingAccessRights { get; set; }
+    public int MaxUploadThreadCount { get; set; }
     public long ChunkUploadSize { get; set; }
+    public bool OpenEditorInSameTab { get; set; }
 }
 
 
@@ -133,6 +136,7 @@ public class FilesSettingsDtoConverter(
             ExternalShareSocialMedia = await filesSettingsHelper.GetExternalShareSocialMedia(),
             StoreOriginalFiles = await filesSettingsHelper.GetStoreOriginalFiles(),
             KeepNewFileName = await filesSettingsHelper.GetKeepNewFileName(),
+            DisplayFileExtension = await filesSettingsHelper.GetDisplayFileExtension(),
             ConvertNotify = await filesSettingsHelper.GetConvertNotify(),
             HideConfirmConvertSave = await filesSettingsHelper.GetHideConfirmConvertSave(),
             HideConfirmConvertOpen = await filesSettingsHelper.GetHideConfirmConvertOpen(),
@@ -146,7 +150,9 @@ public class FilesSettingsDtoConverter(
             AutomaticallyCleanUp = await filesSettingsHelper.GetAutomaticallyCleanUp(),
             CanSearchByContent = await searchSettingsHelper.CanSearchByContentAsync<DbFile>(),
             DefaultSharingAccessRights = await filesSettingsHelper.GetDefaultSharingAccessRights(),
-            ChunkUploadSize = setupInfo.ChunkUploadSize
+            MaxUploadThreadCount = setupInfo.MaxUploadThreadCount,
+            ChunkUploadSize = setupInfo.ChunkUploadSize,
+            OpenEditorInSameTab = await filesSettingsHelper.GetOpenEditorInSameTabAsync()
         };
     }
 }

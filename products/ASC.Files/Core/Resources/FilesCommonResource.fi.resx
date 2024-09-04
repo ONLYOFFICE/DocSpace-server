@@ -257,7 +257,7 @@
     <value>Asiakirjat</value>
   </data>
   <data name="ProductUserOpportunities" xml:space="preserve">
-    <value>Luo ja muokkaa omia ja yhteisiä asiakirjoja sopivilla käyttöoikeuksilla|Myönnä muille käyttäjille asiakirjojen ja kansioiden luku- ja muokkausoikeuksia|Yhdistä Dropbox, Box ja muita pilvipalveluita/tilejä 'Omat Asiakirjat'  -osiossa</value>
+    <value>Luo ja muokkaa omia ja yhteisiä asiakirjoja sopivilla käyttöoikeuksilla|Myönnä muille käyttäjille asiakirjojen ja kansioiden luku- ja muokkausoikeuksia|Yhdistä Dropbox, Box ja muita pilvipalveluita/tilejä 'Asiakirjat'  -osiossa</value>
   </data>
   <data name="UnknownFirstName" xml:space="preserve">
     <value>Etunimi</value>
@@ -463,5 +463,41 @@ Paras yhteensopivuus docx:n, xlsx:n, pptx:n kanssa.</value>
   </data>
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>Tyyppi</value>
+  </data>
+  <data name="Date" xml:space="preserve">
+    <value>Päivämäärä</value>
+  </data>
+  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
+    <value>Tehokäyttäjä</value>
+  </data>
+  <data name="RoleEnum_PowerUser" xml:space="preserve">
+    <value>Tehokäyttäjä</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>Käyttäjä</value>
+  </data>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>Useiden tiedostojen siirtämistä Lomakkeen täyttöhuoneeseen ei tueta. Siirrä yksi ONLYOFFICE PDF-lomake kerrallaan.</value>
+  </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>Kansioiden siirtämistä Lomakkeen täyttöhuoneeseen ei tueta. Siirrä yksi ONLYOFFICE PDF-lomake kerrallaan.</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>Tiedostoa ei voi siirtää tähän huoneeseen. Kokeile siirtää ONLYOFFICE PDF-lomake.</value>
+  </data>
+  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
+    <value>Tiedostoa ei voi ladata tähän huoneeseen. Kokeile ladata ONLYOFFICE PDF-lomake.</value>
+  </data>
+  <data name="FillOutExternalLinkTitle" xml:space="preserve">
+    <value>Linkki täyttämiseen</value>
+  </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>Linkki lomakkeeseen</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Avaa lomake</value>
+  </data>
+  <data name="FormNumber" xml:space="preserve">
+    <value>Lomakkeen numero</value>
   </data>
 </root>

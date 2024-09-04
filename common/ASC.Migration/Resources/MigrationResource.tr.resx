@@ -153,9 +153,6 @@
   <data name="MigrationCommonFiles" xml:space="preserve">
     <value>Migrasyon ortak dosyaları</value>
   </data>
-  <data name="MigrationInitException" xml:space="preserve">
-    <value>{0} migrasyon aracı başlatılırken hata oluştu</value>
-  </data>
   <data name="MigrationNotFoundException" xml:space="preserve">
     <value>Böyle bir migrasyon sağlayıcısı yok</value>
   </data>
@@ -165,10 +162,52 @@
   <data name="MigrationProjectFiles" xml:space="preserve">
     <value>Migrasyon projesi dosyaları</value>
   </data>
-  <data name="MigrationStartException" xml:space="preserve">
-    <value>Ayrıştırma hâlâ devam ediyor</value>
+  <data name="CanNotAddUserInGroup" xml:space="preserve">
+    <value>{0} kullanıcısı {1} grubuna eklenemedi</value>
   </data>
-  <data name="MigrationUploadException" xml:space="preserve">
-    <value>Migrasyon hâlihazırda devam ediyor</value>
+  <data name="CanNotCreateFile" xml:space="preserve">
+    <value>{0} dosyası oluşturulamadı</value>
+  </data>
+  <data name="CanNotImportUser" xml:space="preserve">
+    <value>Kullanıcı içe aktarılamadı</value>
+  </data>
+  <data name="CanNotImportUserFiles" xml:space="preserve">
+    <value>Kullanıcı dosyaları içe aktarılamadı</value>
+  </data>
+  <data name="CanNotParseArchive" xml:space="preserve">
+    <value>{0} arşivi çözümlenemedi</value>
+  </data>
+  <data name="CanNotParseArchives" xml:space="preserve">
+    <value>Arşivler çözümlenemedi</value>
+  </data>
+  <data name="CanNotParseUser" xml:space="preserve">
+    <value>Kullanıcı {0} çözümlenemedi</value>
+  </data>
+  <data name="CanNotReadInfoFile" xml:space="preserve">
+    <value>{0} konumundan bilgi dosyası okunamadı</value>
+  </data>
+  <data name="CanNotShare" xml:space="preserve">
+    <value>{0} girdisi {1} ile paylaşılamadı</value>
+  </data>
+  <data name="CanNotToUnzip" xml:space="preserve">
+    <value>{0} açılamadı</value>
+  </data>
+  <data name="CreateFile" xml:space="preserve">
+    <value>{0} dosyasını oluştur</value>
+  </data>
+  <data name="CreateFolder" xml:space="preserve">
+    <value>{0} klasörünü oluştur</value>
+  </data>
+  <data name="CreateShareRoom" xml:space="preserve">
+    <value>{0} ortak odasını oluştur</value>
+  </data>
+  <data name="СanNotImportCommonFiles" xml:space="preserve">
+    <value>Ortak dosyalar içe aktarılamadı</value>
+  </data>
+  <data name="СanNotImportProjectFiles" xml:space="preserve">
+    <value>Proje dosyaları içe aktarılamadı</value>
+  </data>
+  <data name="СreateRootFolder" xml:space="preserve">
+    <value>Kök klasör oluştur</value>
   </data>
 </root>

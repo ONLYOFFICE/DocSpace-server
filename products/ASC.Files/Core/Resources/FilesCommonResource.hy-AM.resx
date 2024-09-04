@@ -431,7 +431,7 @@
     <value>Փաստաթղթեր</value>
   </data>
   <data name="ProductUserOpportunities" xml:space="preserve">
-    <value>Ստեղծեք և խմբագրեք ձեր սեփական փաստաթղթերը, ինչպես նաև համօգտագործվող փաստաթղթերը՝ համապատասխան մուտքի իրավունքով|Տրամադրեք այլ օգտատերերին կարդալու/խմբագրելու հնարավորություն փաստաթղթեր և թղթապանակներ|Կցել Dropbox-ը, Box-ը և այլ հաշիվները «Իմ փաստաթղթերը» բաժնում</value>
+    <value>Ստեղծեք և խմբագրեք ձեր սեփական փաստաթղթերը, ինչպես նաև համօգտագործվող փաստաթղթերը՝ համապատասխան մուտքի իրավունքով|Տրամադրեք այլ օգտատերերին կարդալու/խմբագրելու հնարավորություն փաստաթղթեր և թղթապանակներ|Կցել Dropbox-ը, Box-ը և այլ հաշիվները «Փաստաթղթեր» բաժնում</value>
   </data>
   <data name="RoleEnum_Collaborator" xml:space="preserve">
     <value>Համագործակցող</value>
@@ -522,5 +522,41 @@
   </data>
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>Տեսակ</value>
+  </data>
+  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
+    <value>Հզոր օգտագործող</value>
+  </data>
+  <data name="Date" xml:space="preserve">
+    <value>Ամսաթիվ</value>
+  </data>
+  <data name="RoleEnum_PowerUser" xml:space="preserve">
+    <value>Հզոր օգտագործող</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>Օգտատեր</value>
+  </data>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>Մի քանի ֆայլ տեղափոխելը Ձևաթղթերի լրացման սենյակ չի աջակցվում: Միանգամից տեղափոխեք մեկ ONLYOFFICE PDF ձև:</value>
+  </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>Թղթապանակների տեղափոխումը Ձևաթղթերի լրացման սենյակ չի աջակցվում: Միանգամից տեղափոխեք մեկ ONLYOFFICE PDF ձև:</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>Ֆայլը չի կարող տեղափոխվել այս սենյակ: Խնդրում ենք փորձել տեղափոխել ONLYOFFICE PDF ձևը:</value>
+  </data>
+  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
+    <value>Ֆայլը չի կարող վերբեռնվել այս սենյակ: Խնդրում ենք փորձել վերբեռնել ONLYOFFICE PDF ձևը:</value>
+  </data>
+  <data name="FillOutExternalLinkTitle" xml:space="preserve">
+    <value>Հղում լրացնելու համար</value>
+  </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>Հղում դեպի ձև</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Բացել ձևը</value>
+  </data>
+  <data name="FormNumber" xml:space="preserve">
+    <value>Ձևի համարը</value>
   </data>
 </root>

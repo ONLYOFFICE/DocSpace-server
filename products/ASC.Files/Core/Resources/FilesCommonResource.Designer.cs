@@ -18,7 +18,7 @@ namespace ASC.Files.Core.Resources {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class FilesCommonResource {
@@ -110,6 +110,15 @@ namespace ASC.Files.Core.Resources {
         public static string AceStatusEnum_FillForms {
             get {
                 return ResourceManager.GetString("AceStatusEnum_FillForms", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Power User.
+        /// </summary>
+        public static string AceStatusEnum_PowerUser {
+            get {
+                return ResourceManager.GetString("AceStatusEnum_PowerUser", resourceCulture);
             }
         }
         
@@ -330,6 +339,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Date.
+        /// </summary>
+        public static string Date {
+            get {
+                return ResourceManager.GetString("Date", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Shared link.
         /// </summary>
         public static string DefaultExternalLinkTitle {
@@ -483,6 +501,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Moving several files to the Form Filling room is not supported. Move one ONLYOFFICE PDF form at a time..
+        /// </summary>
+        public static string ErrorMessage_FilesMoveFormFillingError {
+            get {
+                return ResourceManager.GetString("ErrorMessage_FilesMoveFormFillingError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The new version cannot be the same as the current one.
         /// </summary>
         public static string ErrorMessage_FileUpdateToVersion {
@@ -497,6 +524,15 @@ namespace ASC.Files.Core.Resources {
         public static string ErrorMessage_FolderCopyError {
             get {
                 return ResourceManager.GetString("ErrorMessage_FolderCopyError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Moving folders to the Form Filling room is not supported. Move one ONLYOFFICE PDF form at a time..
+        /// </summary>
+        public static string ErrorMessage_FolderMoveFormFillingError {
+            get {
+                return ResourceManager.GetString("ErrorMessage_FolderMoveFormFillingError", resourceCulture);
             }
         }
         
@@ -578,6 +614,15 @@ namespace ASC.Files.Core.Resources {
         public static string ErrorMessage_MaxLinksCount {
             get {
                 return ResourceManager.GetString("ErrorMessage_MaxLinksCount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The file cannot be moved to this room. Please try to move the ONLYOFFICE PDF form..
+        /// </summary>
+        public static string ErrorMessage_MoveToFormRoom {
+            get {
+                return ResourceManager.GetString("ErrorMessage_MoveToFormRoom", resourceCulture);
             }
         }
         
@@ -897,6 +942,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The file cannot be uploaded to this room. Please try to upload the ONLYOFFICE PDF form..
+        /// </summary>
+        public static string ErrorMessage_UploadToFormRoom {
+            get {
+                return ResourceManager.GetString("ErrorMessage_UploadToFormRoom", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to User could not be found.
         /// </summary>
         public static string ErrorMessage_UserNotFound {
@@ -933,6 +987,33 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to External user.
+        /// </summary>
+        public static string ExternalUser {
+            get {
+                return ResourceManager.GetString("ExternalUser", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Link to fill out.
+        /// </summary>
+        public static string FillOutExternalLinkTitle {
+            get {
+                return ResourceManager.GetString("FillOutExternalLinkTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Form number.
+        /// </summary>
+        public static string FormNumber {
+            get {
+                return ResourceManager.GetString("FormNumber", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Anonymous.
         /// </summary>
         public static string Guest {
@@ -947,6 +1028,15 @@ namespace ASC.Files.Core.Resources {
         public static string IndexTitle {
             get {
                 return ResourceManager.GetString("IndexTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Link to form.
+        /// </summary>
+        public static string LinkToForm {
+            get {
+                return ResourceManager.GetString("LinkToForm", resourceCulture);
             }
         }
         
@@ -983,6 +1073,15 @@ namespace ASC.Files.Core.Resources {
         public static string MessageFillFormDraftDiscard {
             get {
                 return ResourceManager.GetString("MessageFillFormDraftDiscard", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Open form.
+        /// </summary>
+        public static string OpenForm {
+            get {
+                return ResourceManager.GetString("OpenForm", resourceCulture);
             }
         }
         
@@ -1033,7 +1132,7 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Create and edit own documents as well as the shared documents with the proper access rights|Give reading/editing access to other users to the documents and folders|Link Dropbox, Box and other accounts in the &apos;My documents&apos; section.
+        ///   Looks up a localized string similar to Create and edit own documents as well as the shared documents with the proper access rights|Give reading/editing access to other users to the documents and folders|Link Dropbox, Box and other accounts in the &apos;Documents&apos; section.
         /// </summary>
         public static string ProductUserOpportunities {
             get {
@@ -1083,6 +1182,15 @@ namespace ASC.Files.Core.Resources {
         public static string RoleEnum_FillForms {
             get {
                 return ResourceManager.GetString("RoleEnum_FillForms", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Power User.
+        /// </summary>
+        public static string RoleEnum_PowerUser {
+            get {
+                return ResourceManager.GetString("RoleEnum_PowerUser", resourceCulture);
             }
         }
         
@@ -1272,6 +1380,15 @@ namespace ASC.Files.Core.Resources {
         public static string UnlockComment {
             get {
                 return ResourceManager.GetString("UnlockComment", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User.
+        /// </summary>
+        public static string User {
+            get {
+                return ResourceManager.GetString("User", resourceCulture);
             }
         }
     }

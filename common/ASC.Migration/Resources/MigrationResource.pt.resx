@@ -153,9 +153,6 @@
   <data name="MigrationCommonFiles" xml:space="preserve">
     <value>Arquivos comuns de migração</value>
   </data>
-  <data name="MigrationInitException" xml:space="preserve">
-    <value>Erro ao inicializar o migrador {0}</value>
-  </data>
   <data name="MigrationNotFoundException" xml:space="preserve">
     <value>Nenhum provedor de migração</value>
   </data>
@@ -165,10 +162,52 @@
   <data name="MigrationProjectFiles" xml:space="preserve">
     <value>Arquivos de projeto de migração</value>
   </data>
-  <data name="MigrationStartException" xml:space="preserve">
-    <value>A análise ainda está em andamento</value>
+  <data name="CanNotAddUserInGroup" xml:space="preserve">
+    <value>Não foi possível adicionar o usuário {0} ao grupo {1}</value>
   </data>
-  <data name="MigrationUploadException" xml:space="preserve">
-    <value>A migração já está em andamento</value>
+  <data name="CanNotCreateFile" xml:space="preserve">
+    <value>Não foi possível criar o arquivo {0}</value>
+  </data>
+  <data name="CanNotImportUser" xml:space="preserve">
+    <value>Não foi possível importar o usuário</value>
+  </data>
+  <data name="CanNotImportUserFiles" xml:space="preserve">
+    <value>Não foi possível importar os arquivos do usuário</value>
+  </data>
+  <data name="CanNotParseArchive" xml:space="preserve">
+    <value>Não foi possível analisar o arquivo {0}</value>
+  </data>
+  <data name="CanNotParseArchives" xml:space="preserve">
+    <value>Não foi possível analisar os arquivos</value>
+  </data>
+  <data name="CanNotParseUser" xml:space="preserve">
+    <value>Não foi possível analisar o usuário {0}</value>
+  </data>
+  <data name="CanNotReadInfoFile" xml:space="preserve">
+    <value>Não foi possível ler o arquivo de informações de {0}</value>
+  </data>
+  <data name="CanNotShare" xml:space="preserve">
+    <value>Não foi possível compartilhar a entrada {0} com {1}</value>
+  </data>
+  <data name="CanNotToUnzip" xml:space="preserve">
+    <value>Não foi possível descompactar {0}</value>
+  </data>
+  <data name="CreateFile" xml:space="preserve">
+    <value>Criar arquivo {0}</value>
+  </data>
+  <data name="CreateFolder" xml:space="preserve">
+    <value>Criar pasta {0}</value>
+  </data>
+  <data name="CreateShareRoom" xml:space="preserve">
+    <value>criar sala compartilhada {0}</value>
+  </data>
+  <data name="СanNotImportCommonFiles" xml:space="preserve">
+    <value>Não foi possível importar arquivos comuns</value>
+  </data>
+  <data name="СanNotImportProjectFiles" xml:space="preserve">
+    <value>Não foi possível importar os arquivos do projeto</value>
+  </data>
+  <data name="СreateRootFolder" xml:space="preserve">
+    <value>Criar pasta raiz</value>
   </data>
 </root>

@@ -48,6 +48,7 @@ public abstract class BaseStorage(TempStream tempStream,
     public virtual bool IsSupportCdnUri => false;
     public virtual bool IsSupportedPreSignedUri => true;
     public virtual bool IsSupportChunking => false;
+    public virtual bool ContentAsAttachment => false;
     internal string Modulename { get; set; }
     internal bool Cache { get; set; }
     internal DataList DataList { get; set; }
@@ -232,6 +233,10 @@ public abstract class BaseStorage(TempStream tempStream,
     public abstract Task<Uri> MoveAsync(string srcDomain, string srcPath, string newDomain, string newPath, bool quotaCheckFileSize = true);
     public abstract Task<Uri> MoveAsync(string srcdomain, string srcpath, string newdomain, string newpath, Guid ownerId, bool quotaCheckFileSize = true);
     public abstract Task<(Uri, string)> SaveTempAsync(string domain, Stream stream);
+    public virtual string GetRootDirectory(string domain)
+    {
+        return domain;
+    }
     public abstract IAsyncEnumerable<string> ListDirectoriesRelativeAsync(string domain, string path, bool recursive);
     public abstract IAsyncEnumerable<string> ListFilesRelativeAsync(string domain, string path, string pattern, bool recursive);
 
@@ -396,7 +401,7 @@ public abstract class BaseStorage(TempStream tempStream,
             var userQuotaLimit = userQuotaData.UserQuota == userQuotaData.GetDefault().UserQuota ? quotaUserSettings.DefaultQuota : userQuotaData.UserQuota;
             var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(currentTenant.Id, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
 
-            _ = quotaSocketManager.ChangeCustomQuotaUsedValueAsync(currentTenant.Id, customQuota.GetFeature<UserCustomQuotaFeature>().Name, quotaUserSettings.EnableQuota, userUsedSpace, userQuotaLimit, new List<Guid> { user.Id });
+            _ = quotaSocketManager.ChangeCustomQuotaUsedValueAsync(currentTenant.Id, customQuota.GetFeature<UserCustomQuotaFeature>().Name, quotaUserSettings.EnableQuota, userUsedSpace, userQuotaLimit, [user.Id]);
         }
     }
 

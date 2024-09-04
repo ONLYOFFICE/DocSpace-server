@@ -152,4 +152,31 @@ $__AuthorName verwijderde de kamer: $RoomTitle</value>
   <data name="subject_ShareDocument_push" xml:space="preserve">
     <value>Toegang verleend tot document: $DocumentTitle</value>
   </data>
+  <data name="button_CheckReadyForms" xml:space="preserve">
+    <value>Controleer bereide formulieren</value>
+  </data>
+  <data name="pattern_FormReceived" xml:space="preserve">
+    <value>h1. Formulier $Message is ingevuld
+
+Een nieuw formulier "$DocumentTitle":"$DocumentURL" is ingevuld in de kamer "$RoomTitle":"$RoomURL".
+
+Indiener van formulier: "$FromUserName":"$FromUserLink".
+
+$OrangeButton</value>
+  </data>
+  <data name="pattern_FormSubmitted" xml:space="preserve">
+    <value>h1. U heeft het formulier ingevuld $Message
+
+U heeft het formulier "$DocumentTitle":"$DocumentURL" ingevuld in de kamer "$RoomTitle":"$RoomURL".
+
+Beheerder: "$ToUserName":"$ToUserLink"
+
+$OrangeButton</value>
+  </data>
+  <data name="subject_FormReceived" xml:space="preserve">
+    <value>DocSpace melding. Het formulier is ingevuld</value>
+  </data>
+  <data name="subject_FormSubmitted" xml:space="preserve">
+    <value>DocSpace melding. Het formulier is ingevuld</value>
+  </data>
 </root>

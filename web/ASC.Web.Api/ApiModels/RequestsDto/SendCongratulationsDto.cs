@@ -30,7 +30,7 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 /// </summary>
 public class SendCongratulationsDto
 {
-    /// <summary>Uer ID,e</summary>
+    /// <summary>Uer ID</summary>
     /// <type>System.Guid, System</type>
     public Guid Userid { get; set; }
 

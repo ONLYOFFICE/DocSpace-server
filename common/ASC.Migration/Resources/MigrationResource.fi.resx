@@ -153,9 +153,6 @@
   <data name="MigrationCommonFiles" xml:space="preserve">
     <value>Yleisten tiedostojen siirto</value>
   </data>
-  <data name="MigrationInitException" xml:space="preserve">
-    <value>Virhe aloittaessa {0} siirtoa</value>
-  </data>
   <data name="MigrationNotFoundException" xml:space="preserve">
     <value>Annettua siirtopalveluntarjoajaa ei löydy</value>
   </data>
@@ -165,10 +162,52 @@
   <data name="MigrationProjectFiles" xml:space="preserve">
     <value>Siirtoprojektitiedostot</value>
   </data>
-  <data name="MigrationStartException" xml:space="preserve">
-    <value>Jäsentäminen on vielä käynnissä</value>
+  <data name="CanNotAddUserInGroup" xml:space="preserve">
+    <value>Käyttäjän {0} lisääminen ryhmään {1} ei onnistunut</value>
   </data>
-  <data name="MigrationUploadException" xml:space="preserve">
-    <value>Siirto on jo käynnissä</value>
+  <data name="CanNotCreateFile" xml:space="preserve">
+    <value>Tiedoston {0} luonti ei onnistunut</value>
+  </data>
+  <data name="CanNotImportUser" xml:space="preserve">
+    <value>Käyttäjän tuonti ei onnistunut</value>
+  </data>
+  <data name="CanNotImportUserFiles" xml:space="preserve">
+    <value>Käyttäjätiedostojen tuonti ei onnistunut</value>
+  </data>
+  <data name="CanNotParseArchive" xml:space="preserve">
+    <value>Arkiston {0} jäsennys ei onnistunut</value>
+  </data>
+  <data name="CanNotParseArchives" xml:space="preserve">
+    <value>Arkistojen jäsennys ei onnistunut</value>
+  </data>
+  <data name="CanNotParseUser" xml:space="preserve">
+    <value>Käyttäjän jäsennys ei onnistunut {0}</value>
+  </data>
+  <data name="CanNotReadInfoFile" xml:space="preserve">
+    <value>Info-tiedoston luku {0}:sta ei onnistunut</value>
+  </data>
+  <data name="CanNotShare" xml:space="preserve">
+    <value>{0}:sta {1}:een pääsy ei onnistunut</value>
+  </data>
+  <data name="CanNotToUnzip" xml:space="preserve">
+    <value>Purkaminen ei onnistunut {0}</value>
+  </data>
+  <data name="CreateFile" xml:space="preserve">
+    <value>Luo tiedosto {0}</value>
+  </data>
+  <data name="CreateFolder" xml:space="preserve">
+    <value>Luo kansio {0}</value>
+  </data>
+  <data name="CreateShareRoom" xml:space="preserve">
+    <value>luo jaettu huone {0}</value>
+  </data>
+  <data name="СanNotImportCommonFiles" xml:space="preserve">
+    <value>Yleisten tiedostojen tuonti ei onnistunut</value>
+  </data>
+  <data name="СanNotImportProjectFiles" xml:space="preserve">
+    <value>Projektitiedostojen tuonti ei onnistunut</value>
+  </data>
+  <data name="СreateRootFolder" xml:space="preserve">
+    <value>Luo juuritiedosto</value>
   </data>
 </root>

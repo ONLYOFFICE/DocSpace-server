@@ -152,4 +152,31 @@ $__AuthorName smazal místnost: $RoomTitle</value>
   <data name="subject_ShareFolder_tg" xml:space="preserve">
     <value>Dokumenty. Přístup udělen do složky: [$DocumentTitle]($DocumentURL)</value>
   </data>
+  <data name="button_CheckReadyForms" xml:space="preserve">
+    <value>Zkontrolujte připravené formuláře</value>
+  </data>
+  <data name="subject_FormReceived" xml:space="preserve">
+    <value>Upozornění pro DocSpace. Formulář je vyplněn</value>
+  </data>
+  <data name="subject_FormSubmitted" xml:space="preserve">
+    <value>Upozornění pro DocSpace. Formulář je vyplněn</value>
+  </data>
+  <data name="pattern_FormReceived" xml:space="preserve">
+    <value>h1. Formulář $Message je vyplněn
+ 
+V místnosti "$RoomTitle":"$RoomURL" je vyplněn nový formulář "$DocumentTitle":"$DocumentURL"
+ 
+Odesílatel formuláře: "$FromUserName":"$FromUserLink"
+ 
+$OrangeButton</value>
+  </data>
+  <data name="pattern_FormSubmitted" xml:space="preserve">
+    <value>h1. Vyplnili jste formulář $Message
+ 
+Vyplnili jste formulář "$DocumentTitle":"$DocumentURL" v místnosti "$RoomTitle":"$RoomURL"
+ 
+Manažer: "$ToUserName":"$ToUserLink"
+ 
+$OrangeButton</value>
+  </data>
 </root>

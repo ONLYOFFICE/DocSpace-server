@@ -26,12 +26,11 @@
 
 namespace ASC.Files.Core;
 
-[Scope]
-public interface ILinkDao
+public interface ILinkDao<T>
 {
-    Task AddLinkAsync(string sourceId, string linkedId);
-    Task<string> GetSourceAsync(string linkedId);
-    Task<string> GetLinkedAsync(string sourceId);
-    Task DeleteLinkAsync(string sourceId);
-    Task DeleteAllLinkAsync(string sourceId);
+    Task AddLinkAsync(T sourceId, T linkedId);
+    Task<T> GetSourceAsync(T linkedId);
+    Task<T> GetLinkedAsync(T sourceId);
+    Task DeleteLinkAsync(T sourceId);
+    Task DeleteAllLinkAsync(T sourceId);
 }

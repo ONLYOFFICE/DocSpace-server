@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Api.Core.Extensions;
+
 namespace ASC.Common.Mapping;
 
 public class DefaultMappingProfile : Profile
@@ -45,9 +47,7 @@ public class DefaultMappingProfile : Profile
 
         var mappingMethodName = nameof(IMapFrom<object>.Mapping);
 
-        bool HasInterface(Type t) => t.IsGenericType && t.GetGenericTypeDefinition() == mapFromType;
-
-        var types = assembly.GetExportedTypes().Where(t => t.GetInterfaces().Any(HasInterface)).ToList();
+        var types = assembly.GetExportedTypes().Where(t => t.GetInterfaces().Any(r => HasInterface(r, mapFromType))).ToList();
 
         var argumentTypes = new[] { typeof(Profile) };
 
@@ -68,16 +68,16 @@ public class DefaultMappingProfile : Profile
             }
             else
             {
-                var interfaces = type.GetInterfaces().Where(HasInterface).ToList();
+                var interfaces = type.GetInterfaces().Where(r => HasInterface(r, mapFromType)).ToList();
 
-                if (interfaces.Count > 0)
+                if (interfaces.Count <= 0)
                 {
-                    foreach (var @interface in interfaces)
-                    {
-                        var interfaceMethodInfo = @interface.GetMethod(mappingMethodName, argumentTypes);
+                    continue;
+                }
 
-                        interfaceMethodInfo?.Invoke(instance, [this]);
-                    }
+                foreach (var interfaceMethodInfo in interfaces.Select(@interface => @interface.GetMethod(mappingMethodName, argumentTypes)))
+                {
+                    interfaceMethodInfo?.Invoke(instance, [this]);
                 }
             }
         }
@@ -87,5 +87,59 @@ public class DefaultMappingProfile : Profile
     {
         CreateMap<long, DateTime>().ReverseMap()
             .ConvertUsing<TimeConverter>();
+    }
+    
+    internal static bool HasInterface(Type t, Type mapFromType) => t.IsGenericType && t.GetGenericTypeDefinition() == mapFromType;
+}
+
+public class WarmupMappingStartupTask(ILogger<WarmupMappingStartupTask> logger, IMapper mapper) : IStartupTask
+{
+    public Task ExecuteAsync(CancellationToken cancellationToken = default)
+    {
+        var assemblies = AppDomain.CurrentDomain.GetAssemblies().Where(x =>
+        {
+            var name = x.GetName().Name;
+            return !string.IsNullOrEmpty(name) && name.StartsWith("ASC.");
+        });
+        
+        var mapFromType = typeof(IMapFrom<>);
+        
+        foreach (var assembly in assemblies)
+        {
+            var types = assembly.GetExportedTypes().Where(t => t.GetInterfaces().Any(r => DefaultMappingProfile.HasInterface(r, mapFromType))).ToList();
+        
+            foreach (var type in types)
+            {
+                if (type.ContainsGenericParameters)
+                {
+                    throw new Exception("Denied for using type with generic parameters.");
+                }
+        
+                var instance = Activator.CreateInstance(type);
+                
+                var interfaces = type.GetInterfaces().Where(r => DefaultMappingProfile.HasInterface(r, mapFromType)).ToList();
+                
+                foreach (var i in interfaces)
+                {
+                    var mapSource = i.GetGenericArguments().FirstOrDefault();
+    
+                    if (mapSource != null)
+                    {
+                        try
+                        {
+                            mapper.Map(Activator.CreateInstance(mapSource), instance);
+                        }
+                        catch (Exception e)
+                        {
+                            logger.LogTrace(e, mapSource.FullName);
+                        }
+                    }
+                }
+            }
+        }
+        var configuration = new MapperConfiguration(_ => {});
+        configuration.CompileMappings();
+        
+        return Task.CompletedTask;
     }
 }

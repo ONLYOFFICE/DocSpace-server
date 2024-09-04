@@ -290,7 +290,7 @@
     <value>Qrup Yeniləndi: {0}</value>
   </data>
   <data name="GuestAccount" xml:space="preserve">
-    <value>Qonaq Hesabı</value>
+    <value>Qonaq</value>
   </data>
   <data name="GuestActivated" xml:space="preserve">
     <value>Qonaq Aktivləşdirildi: {0}</value>
@@ -738,5 +738,68 @@
   </data>
   <data name="PortalRenamed" xml:space="preserve">
     <value>Portalın adı dəyişdirildi</value>
+  </data>
+  <data name="FileSizePostfix" xml:space="preserve">
+    <value>bayt, kilobayt, meqabayt, giqabayt</value>
+  </data>
+  <data name="FileUploadedWithOverwriting" xml:space="preserve">
+    <value>Üzərinə yazılmaqla yüklənmiş fayl: {0}</value>
+  </data>
+  <data name="QuotaPerPortalChanged" xml:space="preserve">
+    <value>Defolt yaddaş kvotası təyin edin: {0}</value>
+  </data>
+  <data name="QuotaPerPortalDisabled" xml:space="preserve">
+    <value>Defolt yaddaş kvotası deaktiv edilib</value>
+  </data>
+  <data name="QuotaPerRoomChanged" xml:space="preserve">
+    <value>Otaqlar üçün defolt yaddaş kvotası təyin edin: {0}</value>
+  </data>
+  <data name="QuotaPerRoomDisabled" xml:space="preserve">
+    <value>Otaqlar üçün defolt yaddaş kvotası deaktiv edildi</value>
+  </data>
+  <data name="QuotaPerUserChanged" xml:space="preserve">
+    <value>İstifadəçilər üçün defolt yaddaş kvotası təyin edin: {0}</value>
+  </data>
+  <data name="QuotaPerUserDisabled" xml:space="preserve">
+    <value>Defolt yaddaş kvotası istifadəçilər üçün deaktiv edilib</value>
+  </data>
+  <data name="RoomGroupAdded" xml:space="preserve">
+    <value>Əlavə edilmiş qrup: {0}. Rol: {1}</value>
+  </data>
+  <data name="RoomGroupRemove" xml:space="preserve">
+    <value>Silinmiş qrup: {0}</value>
+  </data>
+  <data name="RoomCopied" xml:space="preserve">
+    <value>Otaq kopyalandı: {0}</value>
+  </data>
+  <data name="SendJoinInvite" xml:space="preserve">
+    <value>İstifadəçi {0} bu DocSpace-ə qoşulmaq üçün {1} ünvanına dəvət göndərdi</value>
+  </data>
+  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
+    <value>{0} təyin edildi: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
+    <value>Otaqlar [{0}]. Otaqlar üçün fərdi yaddaş kvotası təyin edin: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
+    <value>Otaqlar [{0}]. Otaqlar üçün defolt yaddaş kvotası təyin edin: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
+    <value>Otaqlar [{0}]. Otaqlar üçün deaktiv edilmiş yaddaş kvotası</value>
+  </data>
+  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
+    <value>İstifadəçilər [{0}]. İstifadəçilər üçün fərdi yaddaş kvotası təyin edin: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
+    <value>İstifadəçilər [{0}]. İstifadəçilər üçün defolt yaddaş kvotası təyin edin: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
+    <value>İstifadəçilər [{0}]. İstifadəçilər üçün deaktiv edilmiş yaddaş kvotası</value>
+  </data>
+  <data name="FormOpenedForFilling" xml:space="preserve">
+    <value>Fayl Doldurulmaq üçün Açıldı: {0}</value>
+  </data>
+  <data name="FormSubmit" xml:space="preserve">
+    <value>İstifadəçilər [{0}]. Forma əlavə edildi: {1}</value>
   </data>
 </root>

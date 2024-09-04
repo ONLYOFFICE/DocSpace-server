@@ -201,9 +201,9 @@ public class DocuSignHelper(DocuSignToken docuSignToken,
             var buffer = new byte[16 * 1024];
             using var ms = new MemoryStream();
             int read;
-            while ((read = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+            while ((read = await stream.ReadAsync(buffer)) > 0)
             {
-                await ms.WriteAsync(buffer, 0, read);
+                await ms.WriteAsync(buffer.AsMemory(0, read));
             }
 
             fileBytes = ms.ToArray();
@@ -298,10 +298,11 @@ public class DocuSignHelper(DocuSignToken docuSignToken,
         logger.DebugDocuSingCreatedEnvelope(envelopeSummary.EnvelopeId);
 
         var envelopeId = envelopeSummary.EnvelopeId;
-        var url = await envelopesApi.CreateSenderViewAsync(accountId, envelopeId, new ReturnUrlRequest
+        var url = await envelopesApi.CreateSenderViewAsync(accountId, envelopeId, new EnvelopeViewRequest
         {
             ReturnUrl = baseCommonLinkUtility.GetFullAbsolutePath(DocuSignHandlerService.Path(filesLinkUtility) + "?" + FilesLinkUtility.Action + "=redirect")
         });
+
         logger.DebugDocuSingSenderView(url.Url);
 
         return url.Url;

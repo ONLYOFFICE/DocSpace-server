@@ -48,6 +48,7 @@ public class S3Storage(TempStream tempStream,
     public override bool IsSupportCdnUri => true;
     public static long ChunkSize => 1000 * 1024 * 1024;
     public override bool IsSupportChunking => true;
+    public override bool ContentAsAttachment => _contentAsAttachment;
 
     private readonly List<string> _domains = new();
     private Dictionary<string, S3CannedACL> _domainsAcl;
@@ -73,6 +74,8 @@ public class S3Storage(TempStream tempStream,
 
     private EncryptionMethod _encryptionMethod = EncryptionMethod.None;
     private string _encryptionKey;
+
+    private bool _contentAsAttachment;
 
     public Uri GetUriInternal(string path)
     {
@@ -255,21 +258,19 @@ public class S3Storage(TempStream tempStream,
         try
         {
             using var client = GetClient();
-
             return new ResponseStreamWrapper(await client.GetObjectAsync(request));
         }
         catch (AmazonS3Exception ex)
         {
             if (ex.ErrorCode == "NoSuchKey")
             {
-                throw new FileNotFoundException("File not found", path);
+                throw new FileNotFoundException("File not found", request.Key);
             }
 
             throw;
         }
     }
-    public override Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string contentType,
-                string contentDisposition)
+    public override Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string contentType, string contentDisposition)
     {
         return SaveAsync(domain, path, ownerId, stream, contentType, contentDisposition, ACL.Auto);
     }
@@ -293,67 +294,77 @@ public class S3Storage(TempStream tempStream,
     public async Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string contentType,
                          string contentDisposition, ACL acl, string contentEncoding = null, int cacheDays = 5)
     {
-        var buffered = await _tempStream.GetBufferedAsync(stream);
+        var (buffered, isNew) = await _tempStream.TryGetBufferedAsync(stream);
 
-        if (EnableQuotaCheck(domain))
+        try
         {
-            await QuotaController.QuotaUsedCheckAsync(buffered.Length, ownerId);
+            if (EnableQuotaCheck(domain))
+            {
+                await QuotaController.QuotaUsedCheckAsync(buffered.Length, ownerId);
+            }
+
+            using var client = GetClient();
+            using var uploader = new TransferUtility(client);
+            var mime = string.IsNullOrEmpty(contentType)
+                ? MimeMapping.GetMimeMapping(Path.GetFileName(path))
+                : contentType;
+
+            var request = new TransferUtilityUploadRequest
+            {
+                BucketName = _bucket,
+                Key = MakePath(domain, path),
+                ContentType = mime,
+                ServerSideEncryptionMethod = _sse,
+                InputStream = buffered,
+                AutoCloseStream = false
+            };
+
+            if (client is not IAmazonS3Encryption)
+            {
+                request.ServerSideEncryptionMethod = GetServerSideEncryptionMethod(out var kmsKeyId);
+                request.ServerSideEncryptionKeyManagementServiceKeyId = kmsKeyId;
+            }
+
+            switch (acl)
+            {
+                case ACL.Auto:
+                    request.CannedACL = GetDomainACL(domain);
+                    break;
+                case ACL.Read:
+                case ACL.Private:
+                    request.CannedACL = GetS3Acl(acl);
+                    break;
+            }
+
+            if (!string.IsNullOrEmpty(contentDisposition))
+            {
+                request.Headers.ContentDisposition = contentDisposition;
+            }
+            else if (mime == "application/octet-stream")
+            {
+                request.Headers.ContentDisposition = "attachment";
+            }
+
+            if (!string.IsNullOrEmpty(contentEncoding))
+            {
+                request.Headers.ContentEncoding = contentEncoding;
+            }
+
+            await uploader.UploadAsync(request);
+
+            //await InvalidateCloudFrontAsync(MakePath(domain, path));
+
+            await QuotaUsedAddAsync(domain, buffered.Length, ownerId);
+
+            return await GetUriAsync(domain, path);
         }
-
-        using var client = GetClient();
-        using var uploader = new TransferUtility(client);
-        var mime = string.IsNullOrEmpty(contentType)
-            ? MimeMapping.GetMimeMapping(Path.GetFileName(path))
-            : contentType;
-
-        var request = new TransferUtilityUploadRequest
+        finally
         {
-            BucketName = _bucket,
-            Key = MakePath(domain, path),
-            ContentType = mime,
-            ServerSideEncryptionMethod = _sse,
-            InputStream = buffered,
-            AutoCloseStream = false
-        };
-
-        if (client is not IAmazonS3Encryption)
-        {
-            request.ServerSideEncryptionMethod = GetServerSideEncryptionMethod(out var kmsKeyId);
-            request.ServerSideEncryptionKeyManagementServiceKeyId = kmsKeyId;
+            if (isNew)
+            {
+                await buffered.DisposeAsync();
+            }
         }
-
-        switch (acl)
-        {
-            case ACL.Auto:
-                request.CannedACL = GetDomainACL(domain);
-                break;
-            case ACL.Read:
-            case ACL.Private:
-                request.CannedACL = GetS3Acl(acl);
-                break;
-        }
-
-        if (!string.IsNullOrEmpty(contentDisposition))
-        {
-            request.Headers.ContentDisposition = contentDisposition;
-        }
-        else if (mime == "application/octet-stream")
-        {
-            request.Headers.ContentDisposition = "attachment";
-        }
-
-        if (!string.IsNullOrEmpty(contentEncoding))
-        {
-            request.Headers.ContentEncoding = contentEncoding;
-        }
-
-        await uploader.UploadAsync(request);
-
-        //await InvalidateCloudFrontAsync(MakePath(domain, path));
-
-        await QuotaUsedAddAsync(domain, buffered.Length, ownerId);
-
-        return await GetUriAsync(domain, path);
     }
 
     public override Task<Uri> SaveAsync(string domain, string path, Stream stream, Guid ownerId)
@@ -721,25 +732,35 @@ public class S3Storage(TempStream tempStream,
         using var client = GetClient();
         using var uploader = new TransferUtility(client);
         var objectKey = MakePath(domain, path);
-        var buffered = await _tempStream.GetBufferedAsync(stream);
-        var request = new TransferUtilityUploadRequest
+        var (buffered, isNew) = await _tempStream.TryGetBufferedAsync(stream);
+        try
         {
-            BucketName = _bucket,
-            Key = objectKey,
-            CannedACL = S3CannedACL.BucketOwnerFullControl,
-            ContentType = "application/octet-stream",
-            InputStream = buffered,
-            Headers =
+            var request = new TransferUtilityUploadRequest
+            {
+                BucketName = _bucket,
+                Key = objectKey,
+                CannedACL = S3CannedACL.BucketOwnerFullControl,
+                ContentType = "application/octet-stream",
+                InputStream = buffered,
+                Headers =
                     {
                         CacheControl = string.Format("public, maxage={0}", (int)TimeSpan.FromDays(5).TotalSeconds),
                         ExpiresUtc = DateTime.UtcNow.Add(TimeSpan.FromDays(5)),
                         ContentDisposition = "attachment"
                     }
-        };
+            };
 
-        request.Metadata.Add("private-expire", expires.ToFileTimeUtc().ToString(CultureInfo.InvariantCulture));
+            request.Metadata.Add("private-expire", expires.ToFileTimeUtc().ToString(CultureInfo.InvariantCulture));
 
-        await uploader.UploadAsync(request);
+            await uploader.UploadAsync(request);
+        }
+        finally
+        {
+            if (isNew)
+            {
+                await buffered.DisposeAsync();
+            }
+        }
 
         //Get presigned url                
         var pUrlRequest = new GetPreSignedUrlRequest
@@ -1020,6 +1041,8 @@ public class S3Storage(TempStream tempStream,
         {
             Modulename = moduleConfig.Name;
             DataList = new DataList(moduleConfig);
+
+            _contentAsAttachment = moduleConfig.ContentAsAttachment;
             _domains.AddRange(moduleConfig.Domain.Select(x => $"{x.Name}/"));
 
             //Make expires
@@ -1789,6 +1812,16 @@ public class S3Storage(TempStream tempStream,
             return _response.ResponseStream.Read(buffer, offset, count);
         }
 
+        public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            return _response.ResponseStream.ReadAsync(buffer, offset, count, cancellationToken);
+        }
+
+        public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return _response.ResponseStream.ReadAsync(buffer, cancellationToken);
+        }
+
         public override long Seek(long offset, SeekOrigin origin)
         {
             return _response.ResponseStream.Seek(offset, origin);
@@ -1804,9 +1837,34 @@ public class S3Storage(TempStream tempStream,
             _response.ResponseStream.Write(buffer, offset, count);
         }
 
+        public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            return _response.ResponseStream.WriteAsync(buffer, offset, count, cancellationToken);
+        }
+
+        public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return _response.ResponseStream.WriteAsync(buffer, cancellationToken);
+        }
+        
+        public override Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken)
+        {
+            return _response.ResponseStream.CopyToAsync(destination, bufferSize, cancellationToken);
+        }
+        
         public override void Flush()
         {
             _response.ResponseStream.Flush();
+        }
+
+        public override Task FlushAsync(CancellationToken cancellationToken)
+        {
+            return _response.ResponseStream.FlushAsync(cancellationToken);
+        }
+
+        public override ValueTask DisposeAsync()
+        {
+            return _response?.ResponseStream?.DisposeAsync() ?? ValueTask.CompletedTask;
         }
 
         protected override void Dispose(bool disposing)

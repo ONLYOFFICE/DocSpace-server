@@ -26,11 +26,10 @@
 
 namespace ASC.Files.Core;
 
-[Scope]
 public interface ITagDao<T>
 {
     IAsyncEnumerable<Tag> GetTagsAsync(Guid subject, TagType tagType, IEnumerable<FileEntry<T>> fileEntries);
-    IAsyncEnumerable<Tag> GetTagsAsync(T entryID, FileEntryType entryType, TagType? tagType);
+    IAsyncEnumerable<Tag> GetTagsAsync(T entryId, FileEntryType entryType, TagType? tagType);
     IAsyncEnumerable<Tag> GetTagsAsync(TagType tagType, IEnumerable<FileEntry<T>> fileEntries);
     IAsyncEnumerable<Tag> GetTagsAsync(Guid owner, TagType tagType);
     IAsyncEnumerable<Tag> GetNewTagsAsync(Guid subject, Folder<T> parentFolder, bool deepSearch);

@@ -54,6 +54,11 @@ public class BackupAjaxHandler(
     {
         await DemandPermissionsBackupAsync();
 
+        if (!coreBaseSettings.Standalone && dump)
+        {
+            throw new ArgumentException("backup can not start as dump");
+        }
+
         var backupRequest = new StartBackupRequest
         {
             TenantId = await GetCurrentTenantIdAsync(),
@@ -118,6 +123,30 @@ public class BackupAjaxHandler(
         await DemandPermissionsBackupAsync();
 
         return await backupService.GetBackupHistoryAsync(await GetCurrentTenantIdAsync());
+    }
+
+    public async Task CheckAccessToFileAsync<T>(T fileId)
+    {
+        var fileDao = daoFactory.GetFileDao<T>();
+        var file = await fileDao.GetFileAsync(fileId);
+
+        if (file == null)
+        {
+            throw new DirectoryNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+
+        var folderDao = daoFactory.GetFolderDao<T>();
+        var folder = await folderDao.GetFolderAsync(file.ParentId);
+
+        if (folder == null)
+        {
+            throw new DirectoryNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
+
+        if (folder.FolderType == FolderType.VirtualRooms || folder.FolderType == FolderType.Archive || !await fileSecurity.CanCreateAsync(folder))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
+        }
     }
 
     public async Task CheckAccessToFolderAsync<T>(T folderId)
@@ -207,17 +236,21 @@ public class BackupAjaxHandler(
             var amazonSettings = await coreConfiguration.GetSectionAsync<AmazonS3Settings>();
 
             var consumer = consumerFactory.GetByKey<DataStoreConsumer>("s3");
-            if (!consumer.IsSet)
+            if (!await consumer.GetIsSetAsync())
             {
-                consumer["acesskey"] = amazonSettings.AccessKeyId;
-                consumer["secretaccesskey"] = amazonSettings.SecretAccessKey;
+                await consumer.SetAsync("acesskey", amazonSettings.AccessKeyId);
+                await consumer.SetAsync("secretaccesskey", amazonSettings.SecretAccessKey);
 
-                consumer["bucket"] = amazonSettings.Bucket;
-                consumer["region"] = amazonSettings.Region;
+                await consumer.SetAsync("bucket", amazonSettings.Bucket);
+                await consumer.SetAsync("region", amazonSettings.Region);
             }
 
             schedule.StorageType = BackupStorageType.ThirdPartyConsumer;
-            schedule.StorageParams = consumer.AdditionalKeys.ToDictionary(r => r, r => consumer[r]);
+            schedule.StorageParams = new();
+            foreach (var r in consumer.AdditionalKeys)
+            {
+                schedule.StorageParams.Add(r, await consumer.GetAsync(r));
+            }
             schedule.StorageParams.Add("module", "S3");
 
             var scheduleRequest = new CreateScheduleRequest

@@ -26,19 +26,18 @@
 
 namespace ASC.Files.Thirdparty.Box;
 
-[Scope]
+[Scope(typeof(IDaoBase<BoxFile, BoxFolder, BoxItem>))]
 internal class BoxDaoBase(
+    IDaoFactory daoFactory,
     IServiceProvider serviceProvider,
     UserManager userManager,
     TenantManager tenantManager,
     TenantUtil tenantUtil,
     IDbContextFactory<FilesDbContext> dbContextFactory,
-    SetupInfo setupInfo,
     FileUtility fileUtility,
-    TempPath tempPath,
     RegexDaoSelectorBase<BoxFile, BoxFolder, BoxItem> regexDaoSelectorBase)
-    : ThirdPartyProviderDao<BoxFile, BoxFolder, BoxItem>(serviceProvider, userManager, tenantManager, tenantUtil,
-        dbContextFactory, setupInfo, fileUtility, tempPath, regexDaoSelectorBase), IDaoBase<BoxFile, BoxFolder, BoxItem>
+    : ThirdPartyProviderDao<BoxFile, BoxFolder, BoxItem>(daoFactory, serviceProvider, userManager, tenantManager, tenantUtil,
+        dbContextFactory, fileUtility, regexDaoSelectorBase), IDaoBase<BoxFile, BoxFolder, BoxItem>
 {
     private BoxProviderInfo _providerInfo;
 
@@ -204,6 +203,7 @@ internal class BoxDaoBase(
         file.Title = MakeFileTitle(boxFile);
         file.ThumbnailStatus = Thumbnail.Created;
         file.Encrypted = ProviderInfo.Private;
+        file.Shared = ProviderInfo.FolderType is FolderType.PublicRoom;
 
         return file;
     }
@@ -296,42 +296,5 @@ internal class BoxDaoBase(
                 Error = e.Message;
             }
         }
-    }
-
-    public async Task<string> GetAvailableTitleAsync(string requestTitle, string parentFolderId, Func<string, string, Task<bool>> isExist)
-    {
-        if (!await isExist(requestTitle, parentFolderId))
-        {
-            return requestTitle;
-        }
-
-        var re = new Regex(@"( \(((?<index>[0-9])+)\)(\.[^\.]*)?)$");
-        var match = re.Match(requestTitle);
-
-        if (!match.Success)
-        {
-            var insertIndex = requestTitle.Length;
-            if (requestTitle.LastIndexOf('.') != -1)
-            {
-                insertIndex = requestTitle.LastIndexOf('.');
-            }
-
-            requestTitle = requestTitle.Insert(insertIndex, " (1)");
-        }
-
-        while (await isExist(requestTitle, parentFolderId))
-        {
-            requestTitle = re.Replace(requestTitle, MatchEvaluator);
-        }
-
-        return requestTitle;
-    }
-
-    private static string MatchEvaluator(Match match)
-    {
-        var index = Convert.ToInt32(match.Groups[2].Value);
-        var staticText = match.Value[$" ({index})".Length..];
-
-        return $" ({index + 1}){staticText}";
     }
 }

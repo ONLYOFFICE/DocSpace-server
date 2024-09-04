@@ -27,7 +27,10 @@
 namespace ASC.Files.Core;
 
 [Scope]
-public class FileHelper(FileTrackerHelper fileTracker, FilesLinkUtility filesLinkUtility, FileUtility fileUtility, FileConverter fileConverter)
+public class FileHelper(FileTrackerHelper fileTracker, 
+                        FilesLinkUtility filesLinkUtility, 
+                        FileUtility fileUtility, 
+                        FileConverter fileConverter)
 {
     internal string GetTitle<T>(File<T> file)
     {
@@ -38,14 +41,17 @@ public class FileHelper(FileTrackerHelper fileTracker, FilesLinkUtility filesLin
 
     internal async Task<FileStatus> GetFileStatus<T>(File<T> file, FileStatus currentStatus)
     {
-        if (fileTracker.IsEditing(file.Id))
+        if (fileUtility.CanWebEdit(file.Title))
         {
-            currentStatus |= FileStatus.IsEditing;
-        }
+            if (await fileTracker.IsEditingAsync(file.Id))
+            {
+                currentStatus |= FileStatus.IsEditing;
+            }
 
-        if (fileTracker.IsEditingAlone(file.Id))
-        {
-            currentStatus |= FileStatus.IsEditingAlone;
+            if (fileTracker.IsEditingAlone(file.Id))
+            {
+                currentStatus |= FileStatus.IsEditingAlone;
+            }
         }
 
         if (await fileConverter.IsConverting(file))

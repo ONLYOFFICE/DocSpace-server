@@ -31,10 +31,10 @@ public class NotifyServiceSender(NotifyServiceClient notifyServiceClient) : INot
 {
     public void Init(IDictionary<string, string> properties) { }
 
-    public Task<NoticeSendResult> SendAsync(NotifyMessage m)
+    public async Task<NoticeSendResult> SendAsync(NotifyMessage m)
     {
-        notifyServiceClient.SendNotifyMessage(m);
+        await notifyServiceClient.SendNotifyMessageAsync(m);
 
-        return Task.FromResult(NoticeSendResult.OK);
+        return NoticeSendResult.OK;
     }
 }

@@ -44,18 +44,18 @@ public class ExternalShareDto : IMapFrom<ValidationInfo>
     /// <summary>External data title</summary>
     /// <type>System.String, System</type>
     public string Title { get; set; }
-
-    /// <summary>Type of a room where the external data is located</summary>
-    /// <type>System.Nullable{ASC.Files.Core.ApiModels.RequestDto.RoomType}, System</type>
-    public RoomType? RoomType { get; set; }
-
+    
+    /// <summary>Entity ID</summary>
+    /// <type>System.String, System</type>
+    public string EntityId { get; set; }
+   
+    /// <summary>Entity title</summary>
+    /// <type>System.String, System</type>
+    public string EntryTitle { get; set; }
+    
     /// <summary>Tenant ID</summary>
     /// <type>System.Int32, System</type>
     public int TenantId { get; set; }
-
-    /// <summary>Room logo</summary>
-    /// <type>ASC.Files.Core.VirtualRooms.Logo, ASC.Files.Core</type>
-    public Logo Logo { get; set; }
 
     /// <summary>Specifies whether to share the external data or not</summary>
     /// <type>System.Boolean, System</type>
@@ -64,11 +64,4 @@ public class ExternalShareDto : IMapFrom<ValidationInfo>
     /// <summary>Link ID</summary>
     /// <type>System.Guid, System</type>
     public Guid LinkId { get; set; }
-
-    public void Mapping(Profile profile)
-    {
-        profile.CreateMap<ValidationInfo, ExternalShareDto>()
-            .ForMember(dest => dest.RoomType, opt =>
-                opt.MapFrom(source => DocSpaceHelper.MapToRoomType(source.FolderType)));
-    }
 }

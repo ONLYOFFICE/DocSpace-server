@@ -28,7 +28,7 @@ using Tenant = ASC.Core.Tenants.Tenant;
 
 namespace ASC.Data.Storage.Encryption;
 
-[Transient(Additional = typeof(EncryptionOperationExtension))]
+[Transient]
 public class EncryptionOperation(IServiceScopeFactory serviceScopeFactory) : DistributedTaskProgress
 {
     private const string ProgressFileName = "EncryptionProgress.tmp";
@@ -292,11 +292,11 @@ public class EncryptionOperation(IServiceScopeFactory serviceScopeFactory) : Dis
                     {
                         if (_isEncryption)
                         {
-                            notifyHelper.SendStorageEncryptionSuccess(tenant.Id);
+                           await notifyHelper.SendStorageEncryptionSuccess(tenant.Id);
                         }
                         else
                         {
-                            notifyHelper.SendStorageDecryptionSuccess(tenant.Id);
+                           await notifyHelper.SendStorageDecryptionSuccess(tenant.Id);
                         }
                         log.DebugTenantSendStorageEncryptionSuccess(tenant.Alias);
                     }
@@ -305,11 +305,11 @@ public class EncryptionOperation(IServiceScopeFactory serviceScopeFactory) : Dis
                 {
                     if (_isEncryption)
                     {
-                        notifyHelper.SendStorageEncryptionError(tenant.Id);
+                        await notifyHelper.SendStorageEncryptionError(tenant.Id);
                     }
                     else
                     {
-                        notifyHelper.SendStorageDecryptionError(tenant.Id);
+                        await notifyHelper.SendStorageDecryptionError(tenant.Id);
                     }
 
                     log.DebugTenantSendStorageEncryptionError(tenant.Alias);
@@ -329,11 +329,3 @@ public record EncryptionOperationScope(
     NotifyHelper NotifyHelper,
     EncryptionSettingsHelper EncryptionSettingsHelper,
     IConfiguration Configuration);
-
-public static class EncryptionOperationExtension
-{
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<EncryptionOperationScope>();
-    }
-}

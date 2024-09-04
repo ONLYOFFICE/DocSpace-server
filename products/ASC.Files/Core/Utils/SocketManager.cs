@@ -63,7 +63,7 @@ public class SocketManager(
 
     public async Task CreateFormAsync<T>(File<T> file, Guid user, bool isOneMember)
     {
-        await MakeCreateFormRequest("create-form", file, user, isOneMember);
+        await MakeCreateFormRequest("create-form", file, new List<Guid> { user }, isOneMember);
     }
 
     public async Task CreateFolderAsync<T>(Folder<T> folder, IEnumerable<Guid> users = null)
@@ -121,7 +121,7 @@ public class SocketManager(
         
         await MakeRequest("mark-as-new-folder", result);
     }
-    private async Task MakeCreateFormRequest<T>(string method, FileEntry<T> entry, Guid user, bool isOneMember)
+    private async Task MakeCreateFormRequest<T>(string method, FileEntry<T> entry, IEnumerable<Guid> userIds, bool isOneMember)
     {
         var room = await FolderRoomAsync(entry.FolderIdDisplay);
         var data = await Serialize(entry);
@@ -131,7 +131,7 @@ public class SocketManager(
             room,
             entry.Id,
             data,
-            user,
+            userIds,
             isOneMember
         });
     }
@@ -217,7 +217,8 @@ public class SocketManager(
     
     private async Task<IEnumerable<Guid>> AdminsFromDb()
     {
-        _admins = await userManager.GetUsers(true, EmployeeStatus.Active, null, null, null, null, null, null, null, false, null, true, 0, 0)
+        _admins = await userManager.GetUsers(true, EmployeeStatus.Active, null, null, null, null, 
+                null, null, null, null, false, null, true, 0, 0)
             .Select(r=> r.Id)
             .ToListAsync();
         

@@ -287,7 +287,7 @@
     <value>管理者の数は {0} を超えないこと</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>管理者数</value>
+    <value>管理者/パワーユーザー数</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>自動バックアップ＆回復</value>
@@ -327,9 +327,6 @@
   </data>
   <data name="TariffsFeature_usersInRoom_exception" xml:space="preserve">
     <value>ルーム内のユーザー数は {0} を超えないこと</value>
-  </data>
-  <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>管理者/パワーユーザー数:</value>
   </data>
   <data name="Consumersacesskey" xml:space="preserve">
     <value>Ｓ３アクセスキー</value>
@@ -1038,5 +1035,26 @@
   </data>
   <data name="UserFreeSpaceException" xml:space="preserve">
     <value>ユーザーの容量制限を超えています</value>
+  </data>
+  <data name="TariffsFeature_total_size" xml:space="preserve">
+    <value>{0} 管理者/パワーユーザーごとに、リクエストに応じて容量を追加できる</value>
+  </data>
+  <data name="TariffsFeature_statistic" xml:space="preserve">
+    <value>ストレージ容量制限と統計</value>
+  </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>ユーザーが無効化されました</value>
+  </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>招待上限を超えています</value>
+  </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>パスワード変更指示が{0}メールアドレスに送信されました。</value>
+  </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>管理者/パワーユーザーが追加されました：</value>
+  </data>
+  <data name="ErrorEmailLinked" xml:space="preserve">
+    <value>このメールアドレスはサードパーティプロバイダとしてユーザー {0} に添付されます</value>
   </data>
 </root>

@@ -40,6 +40,7 @@ namespace ASC.Web.Api.Controllers;
 [WebhookDisable]
 public class AuthenticationController(
     UserManager userManager,
+    LdapUserManager ldapUserManager,
     TenantManager tenantManager,
     SecurityContext securityContext,
     TenantCookieSettingsHelper tenantCookieSettingsHelper,
@@ -51,9 +52,7 @@ public class AuthenticationController(
     ProviderManager providerManager,
     AccountLinker accountLinker,
     CoreBaseSettings coreBaseSettings,
-    StudioNotifyService studioNotifyService,
     UserManagerWrapper userManagerWrapper,
-    UserHelpTourHelper userHelpTourHelper,
     Signature signature,
     DisplayUserSettingsHelper displayUserSettingsHelper,
     StudioSmsNotificationSettingsHelper studioSmsNotificationSettingsHelper,
@@ -66,12 +65,12 @@ public class AuthenticationController(
     ApiContext apiContext,
     AuthContext authContext,
     CookieStorage cookieStorage,
+    QuotaSocketManager quotaSocketManager,
     DbLoginEventsManager dbLoginEventsManager,
     BruteForceLoginManager bruteForceLoginManager,
     TfaAppAuthSettingsHelper tfaAppAuthSettingsHelper,
-    EmailValidationKeyProvider emailValidationKeyProvider,
     ILogger<AuthenticationController> logger,
-    InvitationLinkService invitationLinkService,
+    InvitationService invitationService,
     LoginProfileTransport loginProfileTransport,
     IMapper mapper)
     : ControllerBase
@@ -185,9 +184,14 @@ public class AuthenticationController(
         var user = wrapper.UserInfo;
         var session = inDto.Session;
 
-        if (user == null || Equals(user, Constants.LostUser) || user.Status != EmployeeStatus.Active)
+        if (user == null || Equals(user, Constants.LostUser))
         {
             throw new Exception(Resource.ErrorUserNotFound);
+        }
+
+        if (user.Status != EmployeeStatus.Active)
+        {
+            throw new Exception(Resource.ErrorUserDisabled);
         }
 
         if (await studioSmsNotificationSettingsHelper.IsVisibleAndAvailableSettingsAsync() && await studioSmsNotificationSettingsHelper.TfaEnabledForUserAsync(user.Id))
@@ -240,6 +244,12 @@ public class AuthenticationController(
             var action = viaEmail ? MessageAction.LoginSuccessViaApi : MessageAction.LoginSuccessViaApiSocialAccount;
             var token = await cookiesManager.AuthenticateMeAndSetCookiesAsync(user.Id, action, session);
 
+            if (!string.IsNullOrEmpty(inDto.Culture))
+            {
+                await userManager.ChangeUserCulture(user, inDto.Culture);
+                await messageService.SendAsync(MessageAction.UserUpdatedLanguage, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
+            }
+
             var outDto = new AuthenticationTokenDto
             {
                 Token = token
@@ -286,6 +296,7 @@ public class AuthenticationController(
         var loginEventId = cookieStorage.GetLoginEventIdFromCookie(cookie);
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         await dbLoginEventsManager.LogOutEventAsync(tenantId, loginEventId);
+        await quotaSocketManager.LogoutSession(securityContext.CurrentAccount.ID, loginEventId);
 
         var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
         var loginName = user.DisplayUserName(false, displayUserSettingsHelper);
@@ -341,7 +352,7 @@ public class AuthenticationController(
             return new ConfirmDto { Result = await emailValidationKeyModelHelper.ValidateAsync(inDto)};
         }
 
-        var result = await invitationLinkService.ValidateAsync(inDto.Key, inDto.Email, inDto.EmplType ?? default, inDto.RoomId);
+        var result = await invitationService.ConfirmAsync(inDto.Key, inDto.Email, inDto.EmplType ?? default, inDto.RoomId, inDto.UiD);
 
         return mapper.Map<Validation, ConfirmDto>(result);
     }
@@ -416,8 +427,8 @@ public class AuthenticationController(
             if (inDto.ConfirmData != null)
             {
                 var email = inDto.ConfirmData.Email;
-
-                var checkKeyResult = await emailValidationKeyProvider.ValidateEmailKeyAsync(email + ConfirmType.Auth + inDto.ConfirmData.First, inDto.ConfirmData.Key, setupInfo.ValidAuthKeyInterval);
+                    
+                var checkKeyResult = await emailValidationKeyModelHelper.ValidateAsync(new EmailValidationKeyModel { Key = inDto.ConfirmData.Key, Email = email, Type = ConfirmType.Auth, First = inDto.ConfirmData.First.ToString() });
 
                 if (checkKeyResult == ValidationResult.Ok)
                 {
@@ -456,12 +467,19 @@ public class AuthenticationController(
                         inDto.PasswordHash = passwordHasher.GetClientPassword(inDto.Password);
                     }
                 }
+                var ldapSettings = await settingsManager.LoadAsync<LdapSettings>();
 
-                user = await bruteForceLoginManager.AttemptAsync(inDto.UserName, inDto.RecaptchaResponse, async () => 
-                    await userManager.GetUsersByPasswordHashAsync(
-                    await tenantManager.GetCurrentTenantIdAsync(),
-                    inDto.UserName,
-                    inDto.PasswordHash));
+                if (ldapSettings.EnableLdapAuthentication)
+                {
+                    user = await ldapUserManager.TryGetAndSyncLdapUserInfo(inDto.UserName, inDto.Password);  
+                }
+
+                if(user == null || Equals(user, Constants.LostUser))
+                {
+                    user = await userManager.GetUsersByPasswordHashAsync(await tenantManager.GetCurrentTenantIdAsync(), inDto.UserName, inDto.PasswordHash);
+                }
+
+                user = await bruteForceLoginManager.AttemptAsync(inDto.UserName, inDto.RecaptchaType, inDto.RecaptchaResponse, user);
             }
             else
             {
@@ -477,7 +495,7 @@ public class AuthenticationController(
 
                 inDto.UserName = thirdPartyProfile.EMail;
                 
-                user = await bruteForceLoginManager.AttemptAsync(inDto.UserName, inDto.RecaptchaResponse, async () => await GetUserByThirdParty(thirdPartyProfile));
+                user = await bruteForceLoginManager.AttemptAsync(inDto.UserName, inDto.RecaptchaType, inDto.RecaptchaResponse, await GetUserByThirdParty(thirdPartyProfile));
             }
         }
         catch (BruteForceCredentialException)
@@ -522,35 +540,35 @@ public class AuthenticationController(
                 userInfo = await userManager.GetUsersAsync(userId);
             }
 
-            var isNew = false;
-
-            if (isNew)
-            {
-                //TODO:
-                //var spam = HttpContext.Current.Request["spam"];
-                //if (spam != "on")
-                //{
-                //    try
-                //    {
-                //        const string _databaseID = "com";
-                //        using (var db = DbManager.FromHttpContext(_databaseID))
-                //        {
-                //            db.ExecuteNonQuery(new SqlInsert("template_unsubscribe", false)
-                //                                   .InColumnValue("email", userInfo.Email.ToLowerInvariant())
-                //                                   .InColumnValue("reason", "personal")
-                //                );
-                //            Log.Debug(string.Format("Write to template_unsubscribe {0}", userInfo.Email.ToLowerInvariant()));
-                //        }
-                //    }
-                //    catch (Exception ex)
-                //    {
-                //        Log.Debug(string.Format("ERROR write to template_unsubscribe {0}, email:{1}", ex.Message, userInfo.Email.ToLowerInvariant()));
-                //    }
-                //}
-
-                await studioNotifyService.UserHasJoinAsync();
-                await userHelpTourHelper.SetIsNewUser(true); 
-            }
+            // var isNew = false;
+            //
+            // if (isNew)
+            // {
+            //     //TODO:
+            //     //var spam = HttpContext.Current.Request["spam"];
+            //     //if (spam != "on")
+            //     //{
+            //     //    try
+            //     //    {
+            //     //        const string _databaseID = "com";
+            //     //        using (var db = DbManager.FromHttpContext(_databaseID))
+            //     //        {
+            //     //            db.ExecuteNonQuery(new SqlInsert("template_unsubscribe", false)
+            //     //                                   .InColumnValue("email", userInfo.Email.ToLowerInvariant())
+            //     //                                   .InColumnValue("reason", "personal")
+            //     //                );
+            //     //            Log.Debug(string.Format("Write to template_unsubscribe {0}", userInfo.Email.ToLowerInvariant()));
+            //     //        }
+            //     //    }
+            //     //    catch (Exception ex)
+            //     //    {
+            //     //        Log.Debug(string.Format("ERROR write to template_unsubscribe {0}, email:{1}", ex.Message, userInfo.Email.ToLowerInvariant()));
+            //     //    }
+            //     //}
+            //
+            //     await studioNotifyService.UserHasJoinAsync();
+            //     await userHelpTourHelper.SetIsNewUser(true); 
+            // }
 
             return userInfo;
         }
@@ -632,10 +650,14 @@ public class AuthenticationController(
         }
 
         var linkedProfiles = await accountLinker.GetLinkedObjectsByHashIdAsync(hashId);
-        var tmp = Guid.Empty;
-        if (linkedProfiles.Any(profileId => Guid.TryParse(profileId, out tmp) && userManager.UserExists(tmp)))
+        
+        foreach (var profileId in linkedProfiles)
         {
-            userId = tmp;
+            if (Guid.TryParse(profileId, out var tmp) && await userManager.UserExistsAsync(tmp))
+            {
+                userId = tmp;
+                break;
+            }
         }
 
         return (true, userId);
