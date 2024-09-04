@@ -235,7 +235,7 @@ public class AbstractDao
 
             if (order == 0 || fileOrder?.ParentFolderId != parentFolderId)
             {
-                var lastOrder = await filesDbContext.GetLastFileOrderAsync(tenantId, parentFolderId, fileEntryType);
+                var lastOrder = await filesDbContext.GetLastFileOrderAsync(tenantId, parentFolderId);
                 order = ++lastOrder;
             }
 
