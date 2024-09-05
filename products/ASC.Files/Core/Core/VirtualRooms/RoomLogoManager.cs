@@ -261,6 +261,8 @@ public class RoomLogoManager(
             {
                 yield return (c.Key, c.Value);
             }
+
+            yield break;
         }
         
         var assembly = Assembly.GetExecutingAssembly();
