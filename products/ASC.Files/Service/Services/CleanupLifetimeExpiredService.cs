@@ -1,46 +1,54 @@
 ﻿// (c) Copyright Ascensio System SIA 2009-2024
-// 
+//
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
+//
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
+//
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-// 
+//
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.AutoCleanUp;
+namespace ASC.Files.Service.Services;
 
 [Singleton]
-public class CleanupLifetimeExpiredEntriesWorker(ILogger<CleanupLifetimeExpiredEntriesWorker> logger, IServiceScopeFactory serviceScopeFactory)
+internal class CleanupLifetimeExpiredService(
+    IServiceScopeFactory scopeFactory,
+    IConfiguration configuration,
+    ILogger<CleanupLifetimeExpiredService> logger)
+    : ActivePassiveBackgroundService<CleanupLifetimeExpiredService>(logger, scopeFactory)
 {
-    public async Task DeleteLifetimeExpiredEntries(CancellationToken cancellationToken)
+    private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
+
+    protected override TimeSpan ExecuteTaskPeriod { get; set; } = TimeSpan.Parse(configuration.GetValue<string>("files:cleanupLifetimeExpired:period") ?? "0:5:0");
+
+    protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
-        if (cancellationToken.IsCancellationRequested)
+        if (stoppingToken.IsCancellationRequested)
         {
             return;
         }
 
         List<LifetimeEnabledRoom> lifetimeEnabledRooms;
 
-        await using (var scope = serviceScopeFactory.CreateAsyncScope())
+        await using (var scope = _scopeFactory.CreateAsyncScope())
         {
-            await using var dbContext = await scope.ServiceProvider.GetRequiredService<IDbContextFactory<FilesDbContext>>().CreateDbContextAsync(cancellationToken);
+            await using var dbContext = await scope.ServiceProvider.GetRequiredService<IDbContextFactory<FilesDbContext>>().CreateDbContextAsync(stoppingToken);
 
             lifetimeEnabledRooms = await GetLifetimeEnabledRoomsAsync(dbContext);
 
@@ -55,12 +63,12 @@ public class CleanupLifetimeExpiredEntriesWorker(ILogger<CleanupLifetimeExpiredE
 
                 room.ExipiredFiles = await GetExpiredFilesAsync(dbContext, room.TenantId, room.RoomId, expiration);
 
-                logger.InfoCleanupLifetimeExpiredEntriesFound(room.TenantId, room.RoomId, room.ExipiredFiles.Count);
+                logger.InfoCleanupLifetimeExpiredFound(room.TenantId, room.RoomId, room.ExipiredFiles.Count);
             }
         }
 
         await Parallel.ForEachAsync(lifetimeEnabledRooms.Where(x => x.ExipiredFiles.Count > 0),
-                                    new ParallelOptions { MaxDegreeOfParallelism = 3, CancellationToken = cancellationToken }, //System.Environment.ProcessorCount
+                                    new ParallelOptions { MaxDegreeOfParallelism = 3, CancellationToken = stoppingToken }, //System.Environment.ProcessorCount
                                     DeleteExpiredFiles);
     }
 
@@ -73,7 +81,7 @@ public class CleanupLifetimeExpiredEntriesWorker(ILogger<CleanupLifetimeExpiredE
 
         try
         {
-            await using var scope = serviceScopeFactory.CreateAsyncScope();
+            await using var scope = _scopeFactory.CreateAsyncScope();
             var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
             var authManager = scope.ServiceProvider.GetRequiredService<AuthManager>();
             var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
@@ -89,11 +97,11 @@ public class CleanupLifetimeExpiredEntriesWorker(ILogger<CleanupLifetimeExpiredE
 
             await securityContext.AuthenticateMeWithoutCookieAsync(userAccount);
 
-            logger.InfoCleanupLifetimeExpiredEntriesStart(data.TenantId, data.RoomId, userAccount.ID, string.Join(',', data.ExipiredFiles));
+            logger.InfoCleanupLifetimeExpiredStart(data.TenantId, data.RoomId, userAccount.ID, string.Join(',', data.ExipiredFiles));
 
             await fileOperationsManager.PublishDelete([], data.ExipiredFiles, true, true, data.Lifetime.DeletePermanently);
 
-            logger.InfoCleanupLifetimeExpiredEntriesWait(data.TenantId, data.RoomId, userAccount.ID);
+            logger.InfoCleanupLifetimeExpiredWait(data.TenantId, data.RoomId, userAccount.ID);
 
             while (true)
             {
@@ -107,7 +115,7 @@ public class CleanupLifetimeExpiredEntriesWorker(ILogger<CleanupLifetimeExpiredE
                 await Task.Delay(100, cancellationToken);
             }
 
-            logger.InfoCleanupLifetimeExpiredEntriesFinish(data.TenantId, data.RoomId, userAccount.ID);
+            logger.InfoCleanupLifetimeExpiredFinish(data.TenantId, data.RoomId, userAccount.ID);
         }
         catch (Exception ex)
         {
@@ -125,6 +133,7 @@ public class CleanupLifetimeExpiredEntriesWorker(ILogger<CleanupLifetimeExpiredE
         return await Queries.ExpiredFilesAsync(dbContext, tenantId, roomId, expiration).ToListAsync();
     }
 }
+
 
 static file class Queries
 {
@@ -150,4 +159,13 @@ static file class Queries
                     .Join(ctx.Files, a => a.FolderId, b => b.ParentId, (tree, file) => new { tree, file })
                     .Where(x => x.tree.ParentId == roomId && x.file.TenantId == tenantId && x.file.ModifiedOn < expiration)
                     .Select(r => r.file.Id));
+}
+
+public class LifetimeEnabledRoom
+{
+    public int TenantId { get; init; }
+    public int RoomId { get; init; }
+    public Guid UserId { get; init; }
+    public RoomDataLifetimeDto Lifetime { get; init; }
+    public List<int> ExipiredFiles { get; set; }
 }

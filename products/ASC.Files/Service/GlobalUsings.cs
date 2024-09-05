@@ -55,7 +55,6 @@ global using ASC.Files.Core.Resources;
 global using ASC.Files.Core.Security;
 global using ASC.Files.Core.Services.DocumentBuilderService;
 global using ASC.Files.Service;
-global using ASC.Files.Service.CleanupLifetimeExpiredEntries;
 global using ASC.Files.Service.Extension;
 global using ASC.Files.Service.Log;
 global using ASC.Files.ThumbnailBuilder;
