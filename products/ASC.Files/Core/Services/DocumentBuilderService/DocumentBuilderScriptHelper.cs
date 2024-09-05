@@ -125,7 +125,7 @@ public class DocumentBuilderScriptHelper(UserManager userManager,
         foreach (var entry in typedEntries)
         {
             var isFolder = entry.FileEntryType == FileEntryType.Folder;
-            var index = isFolder ? foldersIndex[entry.Id].Order : string.Join(".", foldersIndex[entry.ParentId].Order, foldersIndex[entry.ParentId].ChildFoldersCount + entry.Order);
+            var index = isFolder ? foldersIndex[entry.Id].Order : string.Join(".", foldersIndex[entry.ParentId].Order, entry.Order);
             var url = isFolder ? pathProvider.GetRoomsUrl(entry.Id.ToString()) : filesLinkUtility.GetFileWebPreviewUrl(fileUtility, entry.Title, entry.Id);
 
             items.Add(new
@@ -173,7 +173,7 @@ public class DocumentBuilderScriptHelper(UserManager userManager,
 
             info = new
             {
-                company = tenantWhiteLabelSettings.LogoText,
+                company = tenantWhiteLabelSettings.LogoText ?? TenantWhiteLabelSettings.DefaultLogoText,
                 room = room.Title,
                 exportAuthor = user.DisplayUserName(displayUserSettingsHelper),
                 dateGenerated = tenantUtil.DateTimeNow().ConvertNumerals("g")
