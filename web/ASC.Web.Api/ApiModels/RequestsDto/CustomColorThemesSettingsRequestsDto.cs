@@ -26,6 +26,9 @@
 
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
+/// <summary>
+/// Portal theme settings
+/// </summary>
 public class CustomColorThemesSettingsRequestsDto
 {
     [SwaggerSchemaCustom("Custom color theme settings")]

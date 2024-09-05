@@ -77,7 +77,6 @@ public class VersionController(PermissionContext permissionContext,
     /// <short>
     /// Change the portal version
     /// </short>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.SettingsRequestsDto, ASC.Web.Api" name="inDto">Settings request parameters</param>
     /// <path>api/2.0/settings/version</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Versions")]

@@ -26,11 +26,17 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// Base batch request parameters
+/// </summary>
 public class FileBaseBatchRequestDto
 {
     [SwaggerSchemaCustom("List of file IDs")]
     public IEnumerable<JsonElement> FileIds { get; set; } = new List<JsonElement>();
 }
+/// <summary>
+/// Base batch request parameters
+/// </summary>
 public class BaseBatchRequestDto
 {
     [SwaggerSchemaCustom("List of folder IDs")]
@@ -40,12 +46,18 @@ public class BaseBatchRequestDto
     public IEnumerable<JsonElement> FileIds { get; set; } = new List<JsonElement>();
 }
 
+/// <summary>
+/// Request parameters for downloading files
+/// </summary>
 public class DownloadRequestDto : BaseBatchRequestDto
 {
     [SwaggerSchemaCustom("List of file IDs which will be converted")]
     public IDictionary<JsonElement, string> FileConvertIds { get; set; } = new Dictionary<JsonElement, string>();
 }
 
+/// <summary>
+/// Request parameters for deleting files
+/// </summary>
 public class DeleteBatchRequestDto : BaseBatchRequestDto
 {
     [SwaggerSchemaCustom("Specifies whether to delete a file after the editing session is finished or not")]
@@ -55,6 +67,9 @@ public class DeleteBatchRequestDto : BaseBatchRequestDto
     public bool Immediately { get; set; }
 }
 
+/// <summary>
+/// Request parameters for deleting a file
+/// </summary>
 public class DeleteRequestDto
 {
     [SwaggerSchemaCustom("Specifies whether to delete a file after the editing session is finished or not")]
@@ -64,6 +79,9 @@ public class DeleteRequestDto
     public bool Immediately { get; set; }
 }
 
+/// <summary>
+/// Request parameters for copying/moving files
+/// </summary>
 public class BatchRequestDto : BaseBatchRequestDto
 {
     [SwaggerSchemaCustom("Destination folder ID", Format = "json")]
@@ -78,7 +96,9 @@ public class BatchRequestDto : BaseBatchRequestDto
     [SwaggerSchemaCustom("Content")]
     public bool Content { get; set; }
 }
-
+/// <summary>
+/// Request parameters for checking files and folders for conflicts
+/// </summary>
 public class BatchSimpleRequestDto : BaseBatchRequestDto
 {
     [SwaggerSchemaCustom("Destination folder ID", Format = "json")]

@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// Request parameters for creating a folder: Title (string) - new folder title
+/// </summary>
 public class CreateFolderRequestDto
 {
     [SwaggerSchemaCustom("Folder title")]

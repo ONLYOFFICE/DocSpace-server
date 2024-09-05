@@ -26,6 +26,9 @@
 
 namespace ASC.People.ApiModels.RequestDto;
 
+/// <summary>
+/// Request parameters for inviting users
+/// </summary>
 public class InviteUsersRequestDto
 {
     [SwaggerSchemaCustom("List of user invitations")]

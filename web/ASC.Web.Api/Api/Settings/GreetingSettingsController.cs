@@ -70,7 +70,6 @@ public class GreetingSettingsController(TenantInfoSettingsHelper tenantInfoSetti
     /// Saves the greeting settings specified in the request to the current portal.
     /// </summary>
     /// <short>Save the greeting settings</short>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.GreetingSettingsRequestsDto, ASC.Web.Api" name="inDto">Greeting settings</param>
     /// <path>api/2.0/settings/greetingsettings</path>
     [Tags("Settings / Greeting settings")]
     [SwaggerResponse(200, "Message about saving greeting settings successfully", typeof(object))]

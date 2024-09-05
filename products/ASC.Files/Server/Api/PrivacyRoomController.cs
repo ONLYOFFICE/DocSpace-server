@@ -126,7 +126,6 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
     /// Sets the key pair for the current user.
     /// </summary>
     /// <short>Set encryption keys</short>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.PrivacyRoomRequestDto, ASC.Files.Core" name="inDto">Request parameters for setting encryption keys</param>
     /// <path>api/2.0/privacyroom/keys</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Private room")]
@@ -164,7 +163,6 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
     /// Enables the Private Room settings.
     /// </summary>
     /// <short>Enable the Private Room settings</short>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.PrivacyRoomRequestDto, ASC.Files.Core" name="inDto">Request parameters for setting encryption keys</param>
     /// <path>api/2.0/privacyroom</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Private room")]

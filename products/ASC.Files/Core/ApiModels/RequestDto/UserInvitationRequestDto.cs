@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// User invitation request parameters
+/// </summary>
 public class UserInvitationRequestDto
 {
     [SwaggerSchemaCustom("List of user IDs")]

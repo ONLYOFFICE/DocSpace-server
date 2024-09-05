@@ -28,6 +28,9 @@ using Amqp.Types;
 
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
+/// <summary>
+/// LDAP settings
+/// </summary>
 public class LdapRequestsDto : IMapFrom<LdapSettings>
 {
     [SwaggerSchemaCustom("Specifies if the LDAP authentication is enabled or not")]

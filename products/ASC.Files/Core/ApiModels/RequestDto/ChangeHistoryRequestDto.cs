@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// Request parameters for changing version history
+/// </summary>
 public class ChangeHistoryRequestDto
 {
     [SwaggerSchemaCustom("File version")]

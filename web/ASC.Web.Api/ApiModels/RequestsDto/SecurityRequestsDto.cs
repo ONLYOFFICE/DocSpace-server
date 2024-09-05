@@ -26,6 +26,9 @@
 
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
+/// <summary>
+/// Security request parameters
+/// </summary>
 public class SecurityRequestsDto
 {
     [SwaggerSchemaCustom("Product ID")]

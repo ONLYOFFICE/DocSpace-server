@@ -174,7 +174,6 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     /// Removes files with the IDs specified in the request from the "Recent" section.
     /// </summary>
     /// <short>Delete recent files</short>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.BaseBatchRequestDto, ASC.Files.Core" name="inDto">Base batch request parameters</param>
     /// <path>api/2.0/files/recent</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "No content", typeof(NoContentResult))]

@@ -26,6 +26,9 @@
 
 namespace ASC.Web.Studio.Core;
 
+/// <summary>
+/// Email activation settings
+/// </summary>
 public class EmailActivationSettings : ISettings<EmailActivationSettings>
 {
     [SwaggerSchemaCustom("Shown or hidden")]

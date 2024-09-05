@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// Request parameters for inviting users to a room
+/// </summary>
 public class RoomInvitationRequestDto
 {
     [SwaggerSchemaCustom("Collection of invitation parameters")]

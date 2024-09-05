@@ -26,6 +26,9 @@
 
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
+/// <summary>
+/// Wizard settings request parameters
+/// </summary>
 public class WizardRequestsDto
 {
     [SwaggerSchemaCustom("Email")]

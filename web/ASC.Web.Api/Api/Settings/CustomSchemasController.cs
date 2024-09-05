@@ -76,7 +76,6 @@ public class CustomSchemasController(MessageService messageService,
     /// Saves the names from the team template with the ID specified in the request.
     /// </summary>
     /// <short>Save the naming settings</short>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.SchemaRequestsDto, ASC.Web.Api" name="inDto">Team template parameters</param>
     /// <path>api/2.0/settings/customschemas</path>
     [Tags("Settings / Team templates")]
     [SwaggerResponse(200, "Team template with the following parameters", typeof(SchemaRequestsDto))]
@@ -98,7 +97,6 @@ public class CustomSchemasController(MessageService messageService,
     /// Creates a custom team template with the parameters specified in the request.
     /// </summary>
     /// <short>Create a custom team template</short>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.SchemaRequestsDto, ASC.Web.Api" name="inDto">Team template parameters</param>
     /// <path>api/2.0/settings/customschemas</path>
     [Tags("Settings / Team templates")]
     [SwaggerResponse(200, "Custom team template with the following parameters", typeof(SchemaRequestsDto))]

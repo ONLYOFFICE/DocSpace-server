@@ -28,6 +28,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ASC.Web.Core.WhiteLabel;
 
+/// <summary>
+/// Company white label settings
+/// </summary>
 public class CompanyWhiteLabelSettingsWrapper
 {
     [SwaggerSchemaCustom("Company white label settings")]

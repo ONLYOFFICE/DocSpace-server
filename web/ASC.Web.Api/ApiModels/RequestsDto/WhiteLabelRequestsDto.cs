@@ -26,6 +26,9 @@
 
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
+/// <summary>
+/// Request parameters for white label settings
+/// </summary>
 public class WhiteLabelRequestsDto
 {
     [SwaggerSchemaCustom("Logo text")]
@@ -44,6 +47,9 @@ public class LogoRequestsDto
     public string Dark { get; set; }
 }
 
+/// <summary>
+/// White label request parameters
+/// </summary>
 public class WhiteLabelQueryRequestsDto
 {
     [SwaggerSchemaCustom("Specifies if the logo is for a dark theme or not")]

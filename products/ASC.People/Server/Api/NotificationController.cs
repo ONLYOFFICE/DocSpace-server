@@ -40,7 +40,6 @@ public class NotificationController(UserManager userManager,
     /// <short>
     /// Send a notification to change a phone
     /// </short>
-    /// <param type="ASC.People.ApiModels.RequestDto.UpdateMemberRequestDto, ASC.People" name="inDto">Request parameters for updating user contacts</param>
     /// <path>api/2.0/people/phone</path>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "Notification", typeof(object))]

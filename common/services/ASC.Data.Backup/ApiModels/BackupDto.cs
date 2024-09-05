@@ -26,6 +26,9 @@
 
 namespace ASC.Data.Backup.ApiModels;
 
+/// <summary>
+/// Backup parameters
+/// </summary>
 public class BackupDto
 {
     [SwaggerSchemaCustom("Storage type")]

@@ -118,7 +118,6 @@ public class LdapController(
     /// Set the LDAP cron expression
     /// </short>
     /// <path>api/2.0/settings/ldap/cron</path>
-    /// <param type="ASC.Web.Api.ApiModels.RequestsDto.LdapCronRequestDto, ASC.Web.Api" name="inDto">LDAP cron request parameters</param>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / LDAP")]
     [HttpPost("cron")]
@@ -211,7 +210,6 @@ public class LdapController(
     /// <short>
     /// Save the LDAP settings
     /// </short>
-    /// <param type="ASC.Web.Api.ApiModels.RequestsDto.LdapRequestsDto, ASC.Web.Api" name="inDto">LDAP settings</param>
     /// <path>api/2.0/settings/ldap</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / LDAP")]
@@ -243,7 +241,6 @@ public class LdapController(
     /// <short>
     /// Test the LDAP saving process
     /// </short>
-    /// <param type="ASC.ActiveDirectory.Base.Settings.LdapSettings, ASC.ActiveDirectory.Base.Settings" name="inDto">LDAP settings</param>
     /// <path>api/2.0/settings/ldap/save/test</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / LDAP")]

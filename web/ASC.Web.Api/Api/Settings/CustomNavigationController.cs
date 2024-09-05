@@ -82,7 +82,6 @@ public class CustomNavigationController(MessageService messageService,
     /// Adds a custom navigation item with the parameters specified in the request.
     /// </summary>
     /// <short>Add a custom navigation item</short>
-    /// <param type="ASC.Web.Studio.Core.CustomNavigationItem, ASC.Web.Core" name="inDto">Custom navigation parameters</param>
     /// <path>api/2.0/settings/customnavigation/create</path>
     [Tags("Settings / Custom Navigation")]
     [SwaggerResponse(200, "Custom navigation item", typeof(CustomNavigationItem))]

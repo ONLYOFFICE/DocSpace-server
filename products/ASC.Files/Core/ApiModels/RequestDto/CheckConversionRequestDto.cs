@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// Request parameters for starting file conversion
+/// </summary>
 public class CheckConversionRequestDto<T>
 {
     [SwaggerSchemaCustom("File ID")]

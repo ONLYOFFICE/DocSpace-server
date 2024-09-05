@@ -130,7 +130,6 @@ public class SsoController(TenantManager tenantManager,
     /// <short>
     /// Save the SSO settings
     /// </short>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.SsoSettingsRequestsDto, ASC.Web.Api" name="inDto">SSO settings request parameters</param>
     /// <path>api/2.0/settings/ssov2</path>
     [Tags("Settings / SSO")]
     [SwaggerResponse(200, "SSO settings", typeof(SsoSettingsV2))]

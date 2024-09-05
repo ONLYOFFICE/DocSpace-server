@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// Request parameters for updating a room
+/// </summary>
 public class UpdateRoomRequestDto
 {
     [SwaggerSchemaCustom("Room name")]

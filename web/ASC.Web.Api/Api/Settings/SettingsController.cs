@@ -222,7 +222,6 @@ public partial class SettingsController(MessageService messageService,
     /// <short>
     /// Save the mail domain settings
     /// </short>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.MailDomainSettingsRequestsDto, ASC.Web.Api" name="inDto">Request parameters for mail domain settings</param>
     /// <path>api/2.0/settings/maildomainsettings</path>
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Message about the result of saving the mail domain settings", typeof(object))]
@@ -286,7 +285,6 @@ public partial class SettingsController(MessageService messageService,
     /// <short>
     /// Save the user quota settings
     /// </short>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.UserQuotaSettingsRequestsDto, ASC.Web.Api" name="inDto">Request parameters for the user quota settings</param>
     /// <path>api/2.0/settings/userquotasettings</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Quota")]
@@ -355,7 +353,6 @@ public partial class SettingsController(MessageService messageService,
     /// <short>
     /// Save the room quota settings
     /// </short>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.QuotaSettingsRequestsDto, ASC.Web.Api" name="inDto">Request parameters for the quota settings</param>
     /// <path>api/2.0/settings/roomquotasettings</path>
     [Tags("Settings / Quota")]
     [SwaggerResponse(200, "Tenant room quota settings", typeof(TenantRoomQuotaSettings))]
@@ -413,7 +410,6 @@ public partial class SettingsController(MessageService messageService,
     /// <short>
     /// Save the tenant quota settings
     /// </short>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.TenantQuotaSettingsRequestsDto, ASC.Web.Api" name="inDto">Request parameters for the tenant quota settings</param>
     /// <path>api/2.0/settings/tenantquotasettings</path>
     [Tags("Settings / Quota")]
     [SwaggerResponse(200, "Tenant quota settings", typeof(TenantQuotaSettings))]
@@ -530,7 +526,6 @@ public partial class SettingsController(MessageService messageService,
     /// Saves the DNS settings specified in the request to the current portal.
     /// </summary>
     /// <short>Save the DNS settings</short>
-    /// <param type="ASC.Web.Api.Models.DnsSettingsRequestsDto, ASC.Web.Api" name="inDto">DNS settings request parameters</param>
     /// <path>api/2.0/settings/dns</path>
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Message about changing DNS", typeof(object))]
@@ -595,7 +590,6 @@ public partial class SettingsController(MessageService messageService,
     /// Completes the Wizard settings.
     /// </summary>
     /// <short>Complete the Wizard settings</short>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.WizardRequestsDto, ASC.Web.Api" name="inDto">Wizard settings request parameters</param>
     /// <path>api/2.0/settings/wizard/complete</path>
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Wizard settings", typeof(WizardSettings))]
@@ -653,7 +647,6 @@ public partial class SettingsController(MessageService messageService,
     /// Saves the portal color theme specified in the request.
     /// </summary>
     /// <short>Save a color theme</short>
-    /// <param type="ASC.Web.Api.ApiModels.RequestsDto.CustomColorThemesSettingsRequestsDto, ASC.Web.Api" name="inDto">Portal theme settings</param>
     /// <path>api/2.0/settings/colortheme</path>
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Portal theme settings", typeof(CustomColorThemesSettingsDto))]
@@ -778,7 +771,6 @@ public partial class SettingsController(MessageService messageService,
     /// Sets the portal time zone and language specified in the request.
     /// </summary>
     /// <short>Set time zone and language</short>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.SettingsRequestsDto, ASC.Web.Api" name="inDto">Settings request parameters</param>
     /// <path>api/2.0/settings/timeandlanguage</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Common settings")]
@@ -827,7 +819,6 @@ public partial class SettingsController(MessageService messageService,
     /// Sets the default product page.
     /// </summary>
     /// <short>Set the default product page</short>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.SettingsRequestsDto, ASC.Web.Api" name="inDto">Settings request parameters</param>
     /// <path>api/2.0/settings/defaultpage</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Common settings")]
@@ -848,7 +839,6 @@ public partial class SettingsController(MessageService messageService,
     /// Updates the email activation settings.
     /// </summary>
     /// <short>Update the email activation settings</short>
-    /// <param type="ASC.Web.Studio.Core.EmailActivationSettings, ASC.Web.Studio.Core" name="inDto">Email activation settings</param>
     /// <path>api/2.0/settings/emailactivation</path>
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Updated email activation settings", typeof(EmailActivationSettings))]
@@ -1022,7 +1012,6 @@ public partial class SettingsController(MessageService messageService,
     /// Saves the authorization keys.
     /// </summary>
     /// <short>Save the authorization keys</short>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.AuthServiceRequestsDto, ASC.Web.Api" name="inDto">Request parameters for authorization service</param>
     /// <path>api/2.0/settings/authservice</path>
     [Tags("Settings / Authorization")]
     [SwaggerResponse(200, "Boolean value: true if the authorization keys are changed", typeof(bool))]

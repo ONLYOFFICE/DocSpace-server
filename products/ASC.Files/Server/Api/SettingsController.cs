@@ -41,7 +41,6 @@ public class SettingsController(
     /// Changes the access to the third-party settings.
     /// </summary>
     /// <short>Change the third-party settings access</short>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.SettingsRequestDto, ASC.Files.Core" name="inDto">Settings request parameters</param>
     /// <path>api/2.0/files/thirdparty</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
@@ -57,7 +56,6 @@ public class SettingsController(
     /// Specifies whether to confirm the file deletion or not.
     /// </summary>
     /// <short>Confirm the file deletion</short>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.SettingsRequestDto, ASC.Files.Core" name="inDto">Settings request parameters</param>
     /// <path>api/2.0/files/changedeleteconfim</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
@@ -72,7 +70,6 @@ public class SettingsController(
     /// Changes the format of the downloaded archive from .zip to .tar.gz. This method uses the body parameters.
     /// </summary>
     /// <short>Change the archive format (using body parameters)</short>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.DisplayRequestDto, ASC.Files.Core" name="inDto">Settings request parameters</param>
     /// <path>api/2.0/files/settings/downloadtargz</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Archive", typeof(ICompress))]
@@ -87,7 +84,6 @@ public class SettingsController(
     /// Changes the format of the downloaded archive from .zip to .tar.gz. This method uses the form parameters.
     /// </summary>
     /// <short>Change the archive format (using form parameters)</short>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.DisplayRequestDto, ASC.Files.Core" name="inDto">Settings request parameters</param>
     /// <path>api/2.0/files/settings/downloadtargz</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Settings")]
@@ -103,7 +99,6 @@ public class SettingsController(
     /// Displays the "Favorites" folder.
     /// </summary>
     /// <short>Display the "Favorites" folder</short>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.DisplayRequestDto, ASC.Files.Core" name="inDto">Settings request parameters</param>
     /// <path>api/2.0/files/settings/favorites</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Settings")]
@@ -119,7 +114,6 @@ public class SettingsController(
     /// Displays the "Recent" folder.
     /// </summary>
     /// <short>Display the "Recent" folder</short>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.DisplayRequestDto, ASC.Files.Core" name="inDto">Settings request parameters</param>
     /// <path>api/2.0/files/displayRecent</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Settings")]
@@ -135,7 +129,6 @@ public class SettingsController(
     /// Displays the "Templates" folder.
     /// </summary>
     /// <short>Display the "Templates" folder</short>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.DisplayRequestDto, ASC.Files.Core" name="inDto">Settings request parameters</param>
     /// <path>api/2.0/files/settings/templates</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Settings")]
@@ -151,7 +144,6 @@ public class SettingsController(
     /// Changes the ability to share a file externally.
     /// </summary>
     /// <short>Change the external sharing ability</short>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.DisplayRequestDto, ASC.Files.Core" name="inDto">Settings request parameters</param>
     /// <path>api/2.0/files/settings/external</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
@@ -165,7 +157,6 @@ public class SettingsController(
     /// Changes the ability to share a file externally on social networks.
     /// </summary>
     /// <short>Change the external sharing ability on social networks</short>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.DisplayRequestDto, ASC.Files.Core" name="inDto">Settings request parameters</param>
     /// <path>api/2.0/files/settings/externalsocialmedia</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
@@ -222,7 +213,6 @@ public class SettingsController(
     /// Hides the confirmation dialog for saving the file copy in the original format when converting a file.
     /// </summary>
     /// <short>Hide the confirmation dialog when converting</short>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.HideConfirmConvertRequestDto, ASC.Files.Core" name="inDto">Request parameters for hiding the confirmation dialog</param>
     /// <path>api/2.0/files/hideconfirmconvert</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Settings")]
@@ -264,7 +254,6 @@ public class SettingsController(
     /// Changes the ability to upload documents in the original formats as well.
     /// </summary>
     /// <short>Change the ability to upload original formats</short>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.SettingsRequestDto, ASC.Files.Core" name="inDto">Settings request parameters</param>
     /// <path>api/2.0/files/storeoriginal</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
@@ -279,7 +268,6 @@ public class SettingsController(
     /// Specifies whether to ask a user for a file name on creation or not.
     /// </summary>
     /// <short>Ask a new file name</short>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.SettingsRequestDto, ASC.Files.Core" name="inDto">Settings request parameters</param>
     /// <path>api/2.0/files/keepnewfilename</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
@@ -293,7 +281,6 @@ public class SettingsController(
     /// Updates a file version if a file with such a name already exists.
     /// </summary>
     /// <short>Update a file version if it exists</short>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.SettingsRequestDto, ASC.Files.Core" name="inDto">Settings request parameters</param>
     /// <path>api/2.0/files/updateifexist</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
@@ -320,7 +307,6 @@ public class SettingsController(
     /// Updates the trash bin auto-clearing setting.
     /// </summary>
     /// <short>Update the trash bin auto-clearing setting</short>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.AutoCleanupRequestDto, ASC.Files.Core" name="inDto">Auto-clearing request parameters</param>
     /// <path>api/2.0/files/settings/autocleanup</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "The auto-clearing setting properties: auto-clearing or not, a time interval when the auto-clearing will be performed", typeof(AutoCleanUpData))]
@@ -351,7 +337,6 @@ public class SettingsController(
     /// Change the ability to open in a document in the same browser tab
     /// </summary>
     /// <short>Open document in same browser tab</short>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.SettingsRequestDto, ASC.Files.Core" name="inDto">Settings request parameters</param>
     /// <path>api/2.0/files/settings/openeditorinsametab</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]

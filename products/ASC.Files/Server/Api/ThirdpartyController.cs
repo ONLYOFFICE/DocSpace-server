@@ -65,7 +65,6 @@ public class ThirdpartyController(
     /// Creates a WordPress post with the parameters specified in the request.
     /// </summary>
     /// <short>Create a WordPress post</short>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.CreateWordpressPostRequestDto, ASC.Files.Core" name="inDto">Request parameters for creating a WordPress post</param>
     /// <path>api/2.0/files/wordpress</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / WordPress")]
@@ -229,7 +228,6 @@ public class ThirdpartyController(
     /// Saves the third-party storage service account. For WebDav, Yandex, kDrive and SharePoint, the login and password are used for authentication. For other providers, the authentication is performed using a token received via OAuth 2.0.
     /// </summary>
     /// <short>Save a third-party account</short>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.ThirdPartyRequestDto, ASC.Files.Core" name="inDto">Third-party request parameters</param>
     /// <remarks>List of provider keys: DropboxV2, Box, WebDav, Yandex, OneDrive, SharePoint, GoogleDrive, kDrive.</remarks>
     /// <path>api/2.0/files/thirdparty</path>
     /// <exception cref="ArgumentException"></exception>
@@ -256,7 +254,6 @@ public class ThirdpartyController(
     /// Saves a backup of the connected third-party account.
     /// </summary>
     /// <short>Save a third-party account backup</short>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.ThirdPartyBackupRequestDto, ASC.Files.Core" name="inDto">Third-party backup request parameters</param>
     /// <remarks>List of provider key: DropboxV2, Box, WebDav, Yandex, OneDrive, SharePoint, GoogleDrive, kDrive</remarks>
     /// <path>api/2.0/files/thirdparty/backup</path>
     /// <exception cref="ArgumentException"></exception>
@@ -286,7 +283,6 @@ public class ThirdpartyController(
     /// Saves the user WordPress information when logging in.
     /// </summary>
     /// <short>Save the user WordPress information</short>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.WordpressSaveRequestDto, ASC.Files.Core" name="inDto">Request parameters for saving WordPress information</param>
     /// <path>api/2.0/files/wordpress-save</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / WordPress")]

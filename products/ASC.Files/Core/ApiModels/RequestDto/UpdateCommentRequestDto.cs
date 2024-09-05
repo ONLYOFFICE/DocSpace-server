@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// Request parameters for updating a comment
+/// </summary>
 public class UpdateCommentRequestDto
 {
     [SwaggerSchemaCustom("File version")]

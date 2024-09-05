@@ -26,6 +26,9 @@
 
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
+/// <summary>
+/// Request parameters to upload a license
+/// </summary>
 public class UploadLicenseRequestsDto
 {
     [SwaggerSchemaCustom("License attachments")]

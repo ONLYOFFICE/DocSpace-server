@@ -25,6 +25,10 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
+
+/// <summary>
+/// Base batch request parameters
+/// </summary>
 public class GetInfoUsersRequestDto
 {
     [SwaggerSchemaCustom("List of user ids")]

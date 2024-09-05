@@ -26,6 +26,9 @@
 
 namespace ASC.People.ApiModels.RequestDto;
 
+/// <summary>
+/// Request parameters for starting the reassignment process
+/// </summary>
 public class StartReassignRequestDto
 {
     [SwaggerSchemaCustom("User ID whose data will be reassigned to another user")]

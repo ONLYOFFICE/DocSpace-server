@@ -26,6 +26,9 @@
 
 namespace ASC.Web.Api.Models;
 
+/// <summary>
+/// Password settings
+/// </summary>
 public class PasswordSettingsRequestsDto
 {
     [SwaggerSchemaCustom("Minimum password length")]

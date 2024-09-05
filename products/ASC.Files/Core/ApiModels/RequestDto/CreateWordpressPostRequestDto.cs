@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// Request parameters for creating a WordPress post
+/// </summary>
 public class CreateWordpressPostRequestDto
 {
     [SwaggerSchemaCustom("Post title")]

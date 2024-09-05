@@ -53,7 +53,9 @@ public enum RoomType
     FormRoom = 7
 }
 
-
+/// <summary>
+/// Request parameters for creating a room
+/// </summary>
 public class CreateRoomRequestDto
 {
     [SwaggerSchemaCustom("Room name")]

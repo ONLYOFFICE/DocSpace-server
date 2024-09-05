@@ -26,6 +26,9 @@
 
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
+/// <summary>
+/// Storage settings request parameters
+/// </summary>
 public class StorageRequestsDto
 {
     [SwaggerSchemaCustom("Storage name")]

@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// Security information request parameters
+/// </summary>
 public class SecurityInfoRequestDto : BaseBatchRequestDto
 {
     [SwaggerSchemaCustom("Collection of sharing parameters")]
@@ -38,6 +41,9 @@ public class SecurityInfoRequestDto : BaseBatchRequestDto
     public string SharingMessage { get; set; }
 }
 
+/// <summary>
+/// Security information request parameters
+/// </summary>
 public class SecurityInfoSimpeRequestDto
 {
     [SwaggerSchemaCustom("Collection of sharing parameters")]

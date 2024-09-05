@@ -26,6 +26,9 @@
 
 namespace ASC.Web.Api.ApiModel.ResponseDto;
 
+/// <summary>
+/// SMTP settings
+/// </summary>
 public class SmtpSettingsDto : IMapFrom<SmtpSettings>
 {
     [SwaggerSchemaCustom("Host", Example = "mail.example.com")]

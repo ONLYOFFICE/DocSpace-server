@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// Auto-clearing request parameters
+/// </summary>
 public class AutoCleanupRequestDto
 {
     [SwaggerSchemaCustom("Enables the auto-clearing or not")]

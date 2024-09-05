@@ -50,8 +50,6 @@ public class WhitelabelController(ApiContext apiContext,
     /// <short>
     /// Save the white label settings
     /// </short>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.WhiteLabelRequestsDto, ASC.Web.Api" name="inDto">Request parameters for white label settings</param>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.WhiteLabelQueryRequestsDto, ASC.Web.Api" name="inQueryDto">White label request parameters</param>
     /// <path>api/2.0/settings/whitelabel/save</path>
     [Tags("Settings / Rebranding")]
     [SwaggerResponse(200, "Boolean value: true if the operation is sucessful", typeof(bool))]
@@ -121,7 +119,6 @@ public class WhitelabelController(ApiContext apiContext,
     /// <short>
     /// Save the white label settings from files
     /// </short>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.WhiteLabelQueryRequestsDto, ASC.Web.Api" name="inQueryDto">White label request parameters</param>
     /// <path>api/2.0/settings/whitelabel/savefromfiles</path>
     [Tags("Settings / Rebranding")]
     [SwaggerResponse(200, "Boolean value: true if the operation is sucessful", typeof(bool))]
@@ -203,7 +200,6 @@ public class WhitelabelController(ApiContext apiContext,
     /// <short>
     /// Get the white label logos
     /// </short>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.WhiteLabelQueryRequestsDto, ASC.Web.Api" name="inQueryDto">White label request parameters</param>
     /// <path>api/2.0/settings/whitelabel/logos</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     /// <collection>list</collection>
@@ -319,7 +315,6 @@ public class WhitelabelController(ApiContext apiContext,
     /// <short>
     /// Get the white label logo text
     /// </short>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.WhiteLabelQueryRequestsDto, ASC.Web.Api" name="inQueryDto">White label request parameters</param>
     /// <path>api/2.0/settings/whitelabel/logotext</path>
     [Tags("Settings / Rebranding")]
     [SwaggerResponse(200, "Logo text", typeof(object))]
@@ -343,7 +338,6 @@ public class WhitelabelController(ApiContext apiContext,
     /// <short>
     /// Restore the white label options
     /// </short>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.WhiteLabelQueryRequestsDto, ASC.Web.Api" name="inQueryDto">White label request parameters</param>
     /// <path>api/2.0/settings/whitelabel/restore</path>
     [Tags("Settings / Rebranding")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
@@ -423,7 +417,6 @@ public class WhitelabelController(ApiContext apiContext,
     /// Saves the company white label settings specified in the request.
     /// </summary>
     /// <short>Save the company white label settings</short>
-    /// <param type="ASC.Web.Core.WhiteLabel.CompanyWhiteLabelSettingsWrapper, ASC.Web.Core" name="companyWhiteLabelSettingsWrapper">Company white label settings</param>
     /// <path>api/2.0/settings/rebranding/company</path>
     [Tags("Settings / Rebranding")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
@@ -487,7 +480,6 @@ public class WhitelabelController(ApiContext apiContext,
     /// Saves the additional white label settings specified in the request.
     /// </summary>
     /// <short>Save the additional white label settings</short>
-    /// <param type="ASC.Web.Core.WhiteLabel.AdditionalWhiteLabelSettingsWrapper, ASC.Web.Core" name="wrapper">Additional white label settings</param>
     /// <path>api/2.0/settings/rebranding/additional</path>
     [Tags("Settings / Rebranding")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
@@ -549,7 +541,6 @@ public class WhitelabelController(ApiContext apiContext,
     /// Saves the mail white label settings specified in the request.
     /// </summary>
     /// <short>Save the mail white label settings</short>
-    /// <param type="ASC.Web.Core.WhiteLabel.MailWhiteLabelSettings, ASC.Web.Core" name="settings">Mail white label settings</param>
     /// <path>api/2.0/settings/rebranding/mail</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
@@ -572,7 +563,6 @@ public class WhitelabelController(ApiContext apiContext,
     /// Updates the mail white label settings with a paramater specified in the request.
     /// </summary>
     /// <short>Update the mail white label settings</short>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.MailWhiteLabelSettingsRequestsDto, ASC.Web.Api" name="inDto">Request parameters for mail white label settings</param>
     /// <path>api/2.0/settings/rebranding/mail</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Rebranding")]

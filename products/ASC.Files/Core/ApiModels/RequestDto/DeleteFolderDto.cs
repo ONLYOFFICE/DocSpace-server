@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// Request parameters for deleting a folder
+/// </summary>
 public class DeleteFolderDto
 {
     [SwaggerSchemaCustom("Specifies whether to delete a folder after the editing session is finished or not")]

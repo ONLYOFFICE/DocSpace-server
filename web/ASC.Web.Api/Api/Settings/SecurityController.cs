@@ -159,7 +159,6 @@ public class SecurityController(
     /// <short>
     /// Set the password settings
     /// </short>
-    /// <param type="ASC.Web.Api.Models.PasswordSettingsRequestsDto, ASC.Web.Api" name="inDto">Password settings</param>
     /// <path>api/2.0/settings/security/password</path>
     [Tags("Settings / Security")]
     [SwaggerResponse(200, "Password settings", typeof(PasswordSettingsDto))]
@@ -193,7 +192,6 @@ public class SecurityController(
     /// <short>
     /// Set the module security settings
     /// </short>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.WebItemSecurityRequestsDto, ASC.Web.Api" name="inDto">Module request parameters</param>
     /// <path>api/2.0/settings/security</path>
     /// <collection>list</collection>
     [Tags("Settings / Security")]
@@ -244,7 +242,6 @@ public class SecurityController(
     /// <short>
     /// Set the access settings to products
     /// </short>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.WebItemSecurityRequestsDto, ASC.Web.Api" name="inDto">Module request parameters</param>
     /// <path>api/2.0/settings/security/access</path>
     /// <collection>list</collection>
     [Tags("Settings / Security")]
@@ -341,7 +338,6 @@ public class SecurityController(
     /// <short>
     /// Set a product administrator
     /// </short>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.SecurityRequestsDto, ASC.Web.Api" name="inDto">Security request parameters</param>
     /// <path>api/2.0/settings/security/administrator</path>
     [Tags("Settings / Security")]
     [SwaggerResponse(200, "Object with the user security information: product ID, user ID, administrator or not", typeof(object))]
@@ -387,7 +383,6 @@ public class SecurityController(
     /// <short>
     /// Update login settings
     /// </short>
-    /// <param type="ASC.Web.Api.ApiModels.RequestsDto.LoginSettingsRequestDto, ASC.Web.Api" name="inDto">Login settings request parameters</param>
     /// <path>api/2.0/settings/security/loginsettings</path>
     [Tags("Settings / Login settings")]
     [SwaggerResponse(200, "Updated login settings", typeof(LoginSettingsDto))]

@@ -324,7 +324,6 @@ public class SecurityController(PermissionContext permissionContext,
     /// <short>
     /// Set the audit trail settings
     /// </short>
-    /// <param type="ASC.Core.Tenants.TenantAuditSettingsWrapper, ASC.Core.Common" name="inDto">Audit trail settings</param>
     /// <path>api/2.0/security/audit/settings/lifetime</path>
     [Tags("Security / Audit trail data")]
     [SwaggerResponse(200, "Audit trail settings", typeof(TenantAuditSettings))]

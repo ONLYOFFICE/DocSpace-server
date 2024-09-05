@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// Request parameters for checking the document service location
+/// </summary>
 public class CheckDocServiceUrlRequestDto
 {
     [SwaggerSchemaCustom("The Document Server address", Format = "uri")]

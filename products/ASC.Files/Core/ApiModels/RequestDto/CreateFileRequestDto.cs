@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// Request parameters for creating a file
+/// </summary>
 public class CreateFileRequestDto<T>
 {
     [SwaggerSchemaCustom("File title")]

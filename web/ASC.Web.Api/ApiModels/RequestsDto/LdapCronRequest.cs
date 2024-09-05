@@ -26,6 +26,9 @@
 
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
+/// <summary>
+/// LDAP cron request parameters
+/// </summary>
 public class LdapCronRequestDto
 {
     [SwaggerSchemaCustom("Cron expression")]

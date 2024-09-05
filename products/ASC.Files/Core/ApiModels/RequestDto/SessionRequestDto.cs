@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// Session request parameters
+/// </summary>
 public class SessionRequestDto
 {
     [SwaggerSchemaCustom("File name")]

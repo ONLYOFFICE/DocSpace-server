@@ -26,6 +26,9 @@
 
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
+/// <summary>
+/// Request parameters for mail domain settings
+/// </summary>
 public class MailDomainSettingsRequestsDto
 {
     [SwaggerSchemaCustom("Trusted domain type")]
@@ -38,6 +41,9 @@ public class MailDomainSettingsRequestsDto
     public bool InviteUsersAsVisitors { get; set; }
 }
 
+/// <summary>
+/// Request parameters for administrator message settings
+/// </summary>
 public class AdminMessageBaseSettingsRequestsDto
 {
     [SwaggerSchemaCustom("Email")]
@@ -46,12 +52,19 @@ public class AdminMessageBaseSettingsRequestsDto
     [SwaggerSchemaCustom("Culture")]
     public string Culture { get; set; }
 }
+
+/// <summary>
+/// Request parameters for administrator message settings
+/// </summary>
 public class AdminMessageSettingsRequestsDto : AdminMessageBaseSettingsRequestsDto
 {
     [SwaggerSchemaCustom("Message")]
     public string Message { get; set; }
 }
 
+/// <summary>
+/// Request parameters for administrator message settings
+/// </summary>
 public class TurnOnAdminMessageSettingsRequestDto
 {
     [SwaggerSchemaCustom("Specifies if the administrator messages are enabled or not")]

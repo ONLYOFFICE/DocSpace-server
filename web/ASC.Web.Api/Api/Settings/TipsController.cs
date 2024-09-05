@@ -46,7 +46,6 @@ public class TipsController(ILoggerProvider option,
     /// Updates the tip settings with a parameter specified in the request.
     /// </summary>
     /// <short>Update the tip settings</short>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.SettingsRequestsDto, ASC.Web.Api" name="inDto">Settings request parameters</param>
     /// <path>api/2.0/settings/tips</path>
     [Tags("Settings / Tips")]
     [SwaggerResponse(200, "Updated tip settings", typeof(TipsSettings))]

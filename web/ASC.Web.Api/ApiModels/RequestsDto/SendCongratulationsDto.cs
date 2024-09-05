@@ -26,6 +26,9 @@
 
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
+/// <summary>
+/// Congratulations request parameters
+/// </summary>
 public class SendCongratulationsDto
 {
     [SwaggerSchemaCustom("User ID")]

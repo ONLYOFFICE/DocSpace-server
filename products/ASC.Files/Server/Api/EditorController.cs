@@ -82,7 +82,6 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// </summary>
     /// <short>Save file edits</short>
     /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.SaveEditingRequestDto, ASC.Files.Core" name="inDto">Request parameters for saving file edits</param>
     /// <path>api/2.0/files/file/{fileId}/saveediting</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Saved file parameters", typeof(FileDto<int>))]
@@ -99,7 +98,6 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// </summary>
     /// <short>Start file editing</short>
     /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.StartEditRequestDto, ASC.Files.Core" name="inDto">Request parameters for starting file editing</param>
     /// <path>api/2.0/files/file/{fileId}/startedit</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "File key for Document Service", typeof(object))]
@@ -323,7 +321,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     [Tags("Files / Files")]
     [SwaggerResponse(200, "File download link", typeof(DocumentService.FileLink))]
     [HttpGet("{fileId}/presigned")]
-    public async Task<DocumentService.FileLink> GetPresignedUriAsync(T fileId)
+    public async Task<DocumentService.FileLink> GetPresignedFileUriAsync(T fileId)
     {
         return await fileStorageService.GetPresignedUriAsync(fileId);
     }
@@ -348,7 +346,6 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// Return list of users with their access rights to the file
     /// </summary>
     /// <short>Return list of users with their access rights to the file</short>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.GetInfoUsersRequestDto, ASC.Files.Core" name="inDto">Base batch request parameters</param>
     /// <path>api/2.0/files/infousers</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Files")]
@@ -363,7 +360,6 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// Returns the reference data to uniquely identify a file in its system and check the availability of insering data into the destination spreadsheet by the external link.
     /// </summary>
     /// <short>Get reference data</short>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.GetReferenceDataDto, ASC.Files.Core" name="inDto">Request parameters for getting reference data</param>
     /// <path>api/2.0/files/file/referencedata</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "File reference data", typeof(FileReference))]
@@ -403,7 +399,6 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
     /// Checks the document service location.
     /// </summary>
     /// <short>Check the document service URL</short>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.CheckDocServiceUrlRequestDto, ASC.Files.Core" name="inDto">Request parameters for checking the document service location</param>
     /// <path>api/2.0/files/docservice</path>
     /// <collection>list</collection>
     [Tags("Files / Settings")]

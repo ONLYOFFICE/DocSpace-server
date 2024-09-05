@@ -26,6 +26,9 @@
 
 namespace ASC.Data.Backup.ApiModels;
 
+/// <summary>
+/// Restoring parameters
+/// </summary>
 public class BackupRestoreDto
 {
     [SwaggerSchemaCustom("Backup ID")]

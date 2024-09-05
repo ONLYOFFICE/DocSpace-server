@@ -26,6 +26,9 @@
 
 namespace ASC.People.ApiModels.RequestDto;
 
+/// <summary>
+/// Thumbnail request parameters
+/// </summary>
 public class ThumbnailsRequestDto
 {
     [SwaggerSchemaCustom("Path to the temporary file")]

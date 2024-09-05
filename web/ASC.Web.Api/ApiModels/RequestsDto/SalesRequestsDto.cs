@@ -26,6 +26,9 @@
 
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
+/// <summary>
+/// Portal payment request parameters
+/// </summary>
 public class SalesRequestsDto
 {
     [SwaggerSchemaCustom("User name")]

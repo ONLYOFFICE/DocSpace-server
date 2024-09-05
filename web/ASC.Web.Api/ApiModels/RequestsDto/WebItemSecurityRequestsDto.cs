@@ -26,6 +26,9 @@
 
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
+/// <summary>
+/// Module request parameters
+/// </summary>
 public class WebItemSecurityRequestsDto
 {
     [SwaggerSchemaCustom("Module ID")]
@@ -38,6 +41,9 @@ public class WebItemSecurityRequestsDto
     public IEnumerable<Guid> Subjects { get; set; }
 }
 
+/// <summary>
+/// Module request parameters
+/// </summary>
 public class WebItemsSecurityRequestsDto
 {
     [SwaggerSchemaCustom("Products with security information")]

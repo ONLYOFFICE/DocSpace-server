@@ -76,7 +76,6 @@ public class SmtpSettingsController(
     /// <short>
     /// Save the SMTP settings
     /// </short>
-    /// <param type="ASC.Web.Api.ApiModel.ResponseDto.SmtpSettingsDto, ASC.Web.Api" name="inDto">SMTP settings</param>
     /// <path>api/2.0/smtpsettings/smtp</path>
     [Tags("Security / SMTP settings")]
     [SwaggerResponse(200, "SMTP settings", typeof(SmtpSettingsDto))]

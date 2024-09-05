@@ -27,22 +27,19 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
+/// Request parameters for updating file contents
 /// </summary>
 public class FileStreamRequestDto : IModelWithFile
 {
-    /// <summary>Request input stream</summary>
-    /// <type>Microsoft.AspNetCore.Http.IFormFile, Microsoft.AspNetCore.Http</type>
+    [SwaggerSchemaCustom("Request input stream")]
     public IFormFile File { get; set; }
 
-    /// <summary>Specifies whether to encrypt a file or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies whether to encrypt a file or not")]
     public bool Encrypted { get; set; }
 
-    /// <summary>Specifies whether to force save a file or not</summary>
-    /// <type>System.Boolean, System</type>
+    [SwaggerSchemaCustom("Specifies whether to force save a file or not")]
     public bool Forcesave { get; set; }
 
-    /// <summary>File extension</summary>
-    /// <type>System.String, System</type>
+    [SwaggerSchemaCustom("File extension")]
     public string FileExtension { get; set; }
 }

@@ -57,7 +57,6 @@ public class IpRestrictionsController(ApiContext apiContext,
     /// Saves the new portal IP restrictions specified in the request.
     /// </summary>
     /// <short>Save the IP restrictions</short>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.IpRestrictionsRequestsDto, ASC.Web.Api" name="inDto">IP restrictions request parameters</param>
     /// <path>api/2.0/settings/iprestrictions</path>
     /// <collection>list</collection>
     [Tags("Settings / IP restrictions")]
@@ -95,7 +94,6 @@ public class IpRestrictionsController(ApiContext apiContext,
     /// Updates the IP restriction settings with a parameter specified in the request.
     /// </summary>
     /// <short>Update the IP restriction settings</short>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.IpRestrictionsRequestsDto, ASC.Web.Api" name="inDto">New IP restriction settings</param>
     /// <path>api/2.0/settings/iprestrictions/settings</path>
     [Tags("Settings / IP restrictions")]
     [SwaggerResponse(200, "Updated IP restriction settings", typeof(IPRestrictionsSettings))]

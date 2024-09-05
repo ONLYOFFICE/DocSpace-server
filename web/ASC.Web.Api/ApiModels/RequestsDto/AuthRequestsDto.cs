@@ -26,6 +26,9 @@
 
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
+/// <summary>
+/// Authentication request parameters
+/// </summary>
 public class AuthRequestsDto
 {
     [SwaggerSchemaCustom("Username / email")]
@@ -68,6 +71,9 @@ public class AuthRequestsDto
     public string Culture { get; set; }
 }
 
+/// <summary>
+/// Mobile phone request parameters
+/// </summary>
 public class MobileRequestsDto
 {
     [SwaggerSchemaCustom("Mobile phone")]

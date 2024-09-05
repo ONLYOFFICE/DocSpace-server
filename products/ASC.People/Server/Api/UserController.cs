@@ -86,7 +86,6 @@ public class UserController(
     /// <short>
     /// Add an activated user
     /// </short>
-    /// <param type="ASC.People.ApiModels.RequestDto.MemberRequestDto, ASC.People" name="inDto">Member request parameters</param>
     /// <path>api/2.0/people/active</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("People / Profiles")]
@@ -155,7 +154,6 @@ public class UserController(
     /// <short>
     /// Add a user
     /// </short>
-    /// <param type="ASC.People.ApiModels.RequestDto.MemberRequestDto, ASC.People" name="inDto">Member request parameters</param>
     /// <path>api/2.0/people</path>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "Newly added user with the detailed information", typeof(EmployeeFullDto))]
@@ -284,7 +282,6 @@ public class UserController(
     /// <short>
     /// Invite users
     /// </short>
-    /// <param type="ASC.People.ApiModels.RequestDto.InviteUsersRequestDto, ASC.People" name="inDto">Request parameters for inviting users</param>
     /// <path>api/2.0/people/invite</path>
     /// <collection>list</collection>
     [Tags("People / Profiles")]
@@ -333,7 +330,6 @@ public class UserController(
     /// </summary>
     /// <short>Change a user password</short>
     /// <param type="System.Guid, System" method="url" name="userid" example="9924256A-739C-462b-AF15-E652A3B1B6EB">User ID</param>
-    /// <param type="ASC.People.ApiModels.RequestDto.MemberRequestDto, ASC.People" name="inDto">Request parameters for setting new password</param>
     /// <path>api/2.0/people/{userid}/password</path>
     [Tags("People / Password")]
     [SwaggerResponse(200, "Detailed user information", typeof(EmployeeFullDto))]
@@ -584,24 +580,24 @@ public class UserController(
     [SwaggerResponse(200, "Detailed profile information", typeof(EmployeeFullDto))]
     [AllowNotPayment]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "LinkInvite,Everyone")]
-    [HttpGet("{username}", Order = 1)]
-    public async Task<EmployeeFullDto> GetById(string username)
+    [HttpGet("{userid}", Order = 1)]
+    public async Task<EmployeeFullDto> GetById(string userid)
     {
         var isInvite = _httpContextAccessor.HttpContext!.User.Claims
                .Any(role => role.Type == ClaimTypes.Role && ConfirmTypeExtensions.TryParse(role.Value, out var confirmType) && confirmType == ConfirmType.LinkInvite);
 
         await _apiContext.AuthByClaimAsync();
 
-        var user = await _userManager.GetUserByUserNameAsync(username);
+        var user = await _userManager.GetUserByUserNameAsync(userid);
         if (user.Id == Constants.LostUser.Id)
         {
-            if (Guid.TryParse(username, out var userId))
+            if (Guid.TryParse(userid, out var userId))
             {
                 user = await _userManager.GetUsersAsync(userId);
             }
             else
             {
-                logger.ErrorCouldNotGetUserByName(securityContext.CurrentAccount.ID, username);
+                logger.ErrorCouldNotGetUserByName(securityContext.CurrentAccount.ID, userid);
             }
         }
 
@@ -790,7 +786,6 @@ public class UserController(
     /// <short>
     /// Delete users
     /// </short>
-    /// <param type="ASC.People.ApiModels.RequestDto.UpdateMembersRequestDto, ASC.People" name="inDto">Request parameters for updating portal users</param>
     /// <path>api/2.0/people/delete</path>
     /// <collection>list</collection>
     [Tags("People / Profiles")]
@@ -835,7 +830,6 @@ public class UserController(
     /// <short>
     /// Resend activation emails
     /// </short>
-    /// <param type="ASC.People.ApiModels.RequestDto.UpdateMembersRequestDto, ASC.People" name="inDto">Request parameters for updating portal users</param>
     /// <path>api/2.0/people/invite</path>
     /// <collection>list</collection>
     [Tags("People / Profiles")]
@@ -949,7 +943,6 @@ public class UserController(
     /// <short>
     /// Change portal theme
     /// </short>
-    /// <param type="ASC.People.ApiModels.RequestDto.DarkThemeSettingsRequestDto, ASC.People" name="inDto">Theme settings request parameters</param>
     /// <path>api/2.0/people/theme</path>
     [Tags("People / Theme")]
     [SwaggerResponse(200, "Theme", typeof(DarkThemeSettings))]
@@ -996,7 +989,6 @@ public class UserController(
     /// <short>
     /// Send instructions to change email
     /// </short>
-    /// <param type="ASC.People.ApiModels.RequestDto.UpdateMemberRequestDto, ASC.People" name="inDto">Request parameters for updating user information</param>
     /// <path>api/2.0/people/email</path>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "Message text", typeof(object))]
@@ -1084,7 +1076,6 @@ public class UserController(
     /// <short>
     /// Remind a user password
     /// </short>
-    /// <param type="ASC.People.ApiModels.RequestDto.MemberRequestDto, ASC.People" name="inDto">Member request parameters</param>
     /// <path>api/2.0/people/password</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("People / Password")]
@@ -1121,7 +1112,6 @@ public class UserController(
     /// Set an activation status to the users
     /// </short>
     /// <param type="ASC.Core.Users.EmployeeActivationStatus, ASC.Core.Common" method="url" name="activationstatus" example="NotActivated">Activation status</param>
-    /// <param type="ASC.People.ApiModels.RequestDto.UpdateMembersRequestDto, ASC.People" name="inDto">Request parameters for updating user information</param>
     /// <path>api/2.0/people/activationstatus/{activationstatus}</path>
     /// <collection>list</collection>
     [Tags("People / User status")]
@@ -1169,7 +1159,6 @@ public class UserController(
     /// Update user language
     /// </short>
     /// <param type="System.String, System" method="url" name="userid" example="some text">User ID</param>
-    /// <param type="ASC.People.ApiModels.RequestDto.UpdateMemberRequestDto, ASC.People" name="inDto">Request parameters for updating user information</param>
     /// <path>api/2.0/people/{userid}/culture</path>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "Detailed user information", typeof(EmployeeFullDto))]
@@ -1197,7 +1186,6 @@ public class UserController(
     /// Update a user
     /// </short>
     /// <param type="System.String, System" method="url" name="userid" example="some text">User ID</param>
-    /// <param type="ASC.People.ApiModels.RequestDto.UpdateMemberRequestDto, ASC.People" name="inDto">Member request parameters</param>
     /// <path>api/2.0/people/{userid}</path>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "Updated user with the detailed information", typeof(EmployeeFullDto))]
@@ -1352,8 +1340,6 @@ public class UserController(
     /// <short>
     /// Change a user status
     /// </short>
-    /// <param type="ASC.Core.Users.EmployeeStatus, ASC.Core.Common" method="url" name="status" example="Active">New user status</param>
-    /// <param type="ASC.People.ApiModels.RequestDto.UpdateMembersRequestDto, ASC.People" name="inDto">Request parameters for updating user information</param>
     /// <path>api/2.0/people/status/{status}</path>
     /// <collection>list</collection>
     [Tags("People / User status")]
@@ -1446,7 +1432,6 @@ public class UserController(
     /// Change a user type
     /// </short>
     /// <param type="ASC.Core.Users.EmployeeType, ASC.Core.Common" method="url" name="type" example="All">New user type</param>
-    /// <param type="ASC.People.ApiModels.RequestDto.UpdateMembersRequestDto, ASC.People" name="inDto">Request parameters for updating user information</param>
     /// <path>api/2.0/people/type/{type}</path>
     /// <collection>list</collection>
     [Tags("People / User type")]
@@ -1516,7 +1501,6 @@ public class UserController(
     /// <short>
     /// Change a user quota limit
     /// </short>
-    /// <param type="ASC.People.ApiModels.RequestDto.UpdateMembersRequestDto, ASC.People" name="inDto">Request parameters for updating user information</param>
     /// <path>api/2.0/people/userquota</path>
     /// <collection>list</collection>
     [Tags("People / Quota")]
@@ -1581,7 +1565,6 @@ public class UserController(
     /// <short>
     /// Reset a user quota limit
     /// </short>
-    /// <param type="ASC.People.ApiModels.RequestDto.UpdateMembersQuotaRequestDto, ASC.People" name="inDto">Request parameters for updating user information</param>
     /// <path>api/2.0/people/resetquota</path>
     /// <collection>list</collection>
     [Tags("People / Quota")]

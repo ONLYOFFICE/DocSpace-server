@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// Request parameters for checking a form draft
+/// </summary>
 public class CheckFillFormDraftRequestDto
 {
     [SwaggerSchemaCustom("File version")]

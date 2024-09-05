@@ -26,12 +26,18 @@
 
 namespace ASC.Web.Api.Models;
 
+/// <summary>
+/// Payment URL request parameters
+/// </summary>
 public class PaymentUrlRequestsDto : QuantityRequestDto
 {
     [SwaggerSchemaCustom("Back URL", Format = "uri")]
     public string BackUrl { get; set; }
 }
 
+/// <summary>
+/// Payment URL request parameters
+/// </summary>
 public class QuantityRequestDto
 {
     [SwaggerSchemaCustom("The quantity of payment")]

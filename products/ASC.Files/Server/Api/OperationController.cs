@@ -40,7 +40,6 @@ public class OperationController(
     /// Starts the download process of files and folders with the IDs specified in the request.
     /// </summary>
     /// <short>Bulk download</short>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.DownloadRequestDto, ASC.Files.Core" name="inDto">Request parameters for downloading files</param>
     /// <path>api/2.0/files/fileops/bulkdownload</path>
     /// <collection>list</collection>
     /// <requiresAuthorization>false</requiresAuthorization>
@@ -65,7 +64,6 @@ public class OperationController(
     /// Copies all the selected files and folders to the folder with the ID specified in the request.
     /// </summary>
     /// <short>Copy to a folder</short>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.BatchRequestDto, ASC.Files.Core" name="inDto">Request parameters for copying files</param>
     /// <path>api/2.0/files/fileops/copy</path>
     /// <collection>list</collection>
     [Tags("Files / Operations")]
@@ -84,7 +82,6 @@ public class OperationController(
     /// <summary>
     /// Deletes the files and folders with the IDs specified in the request.
     /// </summary>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.DeleteBatchRequestDto, ASC.Files.Core" name="inDto">Request parameters for deleting files</param>
     /// <short>Delete files and folders</short>
     /// <path>api/2.0/files/fileops/delete</path>
     /// <collection>list</collection>
@@ -145,7 +142,6 @@ public class OperationController(
     /// Marks the files and folders with the IDs specified in the request as read.
     /// </summary>
     /// <short>Mark as read</short>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.BaseBatchRequestDto, ASC.Files.Core" name="inDto">Base batch request parameters</param>
     /// <path>api/2.0/files/fileops/markasread</path>
     /// <collection>list</collection>
     [Tags("Files / Operations")]
@@ -165,7 +161,6 @@ public class OperationController(
     /// Moves all the selected files and folders to the folder with the ID specified in the request.
     /// </summary>
     /// <short>Move to a folder</short>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.BatchRequestDto, ASC.Files.Core" name="inDto">Request parameters for moving files and folders</param>
     /// <path>api/2.0/files/fileops/move</path>
     /// <collection>list</collection>
     [Tags("Files / Operations")]
@@ -236,7 +231,6 @@ public class OperationController(
     /// Checks a batch of files and folders for conflicts when moving or copying them to the folder with the ID specified in the request.
     /// </summary>
     /// <short>Check files and folders for conflicts</short>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.BatchRequestDto, ASC.Files.Core" name="inDto">Request parameters for checking files and folders for conflicts</param>
     /// <path>api/2.0/files/fileops/move</path>
     /// <collection>list</collection>
     [Tags("Files / Operations")]

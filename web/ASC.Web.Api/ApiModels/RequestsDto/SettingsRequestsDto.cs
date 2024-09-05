@@ -26,28 +26,45 @@
 
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
+/// <summary>
+/// Settings request parameters
+/// </summary>
 public class OwnerIdSettingsRequestDto
 {
     [SwaggerSchemaCustom("Owner ID")]
     public Guid OwnerId { get; set; }
 }
+
+/// <summary>
+/// Settings request parameters
+/// </summary>
 public class SettingsRequestsDto
 {
     [SwaggerSchemaCustom("Version ID")]
     public int VersionId { get; set; }
 }
 
+/// <summary>
+/// Settings request parameters
+/// </summary>
 public class TipsRequestDto
 {
     [SwaggerSchemaCustom("Specifies whether to show tips for the user or not")]
     public bool Show { get; set; } //tips
 }
-public  class DefaultProductRequestDto
+
+/// <summary>
+/// Settings request parameters
+/// </summary>
+public class DefaultProductRequestDto
 {
     [SwaggerSchemaCustom("Default product ID")]
     public Guid DefaultProductID { get; set; }
 }
 
+/// <summary>
+/// Settings request parameters
+/// </summary>
 public class TimeZoneRequestDto
 {
     [SwaggerSchemaCustom("Language")]

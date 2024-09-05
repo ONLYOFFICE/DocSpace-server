@@ -26,6 +26,9 @@
 
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
+/// <summary>
+/// Request parameters for mail white label settings
+/// </summary>
 public class MailWhiteLabelSettingsRequestsDto
 {
     [SwaggerSchemaCustom("Specifies if the mail footer will be enabled or note")]

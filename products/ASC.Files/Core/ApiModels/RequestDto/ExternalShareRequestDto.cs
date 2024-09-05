@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// External data request parameters
+/// </summary>
 public class ExternalShareRequestDto
 {
     [SwaggerSchemaCustom("Password")]

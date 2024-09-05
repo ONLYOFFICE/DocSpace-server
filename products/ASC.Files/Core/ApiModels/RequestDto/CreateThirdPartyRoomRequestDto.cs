@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// Request parameters for creating a room
+/// </summary>
 public class CreateThirdPartyRoomRequestDto
 {
     [SwaggerSchemaCustom("Create as new folder")]

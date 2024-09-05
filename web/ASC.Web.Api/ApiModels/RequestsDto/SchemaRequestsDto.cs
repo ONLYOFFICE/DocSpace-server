@@ -26,11 +26,18 @@
 
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
+/// <summary>
+/// Team template parameters
+/// </summary>
 public class SchemaBaseRequestsDto
 {
     [SwaggerSchemaCustom("Team template ID")]
     public string Id { get; init; }
 }
+
+/// <summary>
+/// Team template parameters
+/// </summary>
 public class SchemaRequestsDto : SchemaBaseRequestsDto
 {
     [SwaggerSchemaCustom("Team template name")]

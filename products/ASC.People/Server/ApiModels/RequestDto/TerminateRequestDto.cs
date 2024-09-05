@@ -26,6 +26,9 @@
 
 namespace ASC.People.ApiModels.RequestDto;
 
+/// <summary>
+/// Request parameters for terminating the reassignment process
+/// </summary>
 public class TerminateRequestDto
 {
     [SwaggerSchemaCustom("User ID whose data is reassigned/removed")]

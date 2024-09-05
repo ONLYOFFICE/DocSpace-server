@@ -26,6 +26,9 @@
 
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
+/// <summary>
+/// TFA settings request parameters
+/// </summary>
 public class TfaRequestsDto
 {
     [SwaggerSchemaCustomString("TFA type (None, Sms, or App)", Example = "None")]
@@ -56,6 +59,9 @@ public enum TfaRequestsDtoType
     App = 2
 }
 
+/// <summary>
+/// TFA validation request parameters
+/// </summary>
 public class TfaValidateRequestsDto
 {
     [SwaggerSchemaCustom("TFA code")]

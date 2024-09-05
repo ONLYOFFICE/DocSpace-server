@@ -51,7 +51,6 @@ public class OwnerController(
     /// <short>
     /// Send the owner change instructions
     /// </short>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.SettingsRequestsDto, ASC.Web.Api" name="inDto">Settings request parameters</param>
     /// <path>api/2.0/settings/owner</path>
     [Tags("Settings / Owner")]
     [SwaggerResponse(200, "Message about changing the portal owner", typeof(object))]
@@ -91,7 +90,6 @@ public class OwnerController(
     /// <short>
     /// Update the portal owner
     /// </short>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.SettingsRequestsDto, ASC.Web.Api" name="inDto">Settings request parameters</param>
     /// <path>api/2.0/settings/owner</path>
     [Tags("Settings / Owner")]
     [HttpPut("")]

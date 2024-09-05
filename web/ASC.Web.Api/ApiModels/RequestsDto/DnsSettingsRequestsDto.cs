@@ -26,6 +26,9 @@
 
 namespace ASC.Web.Api.Models;
 
+/// <summary>
+/// DNS settings request parameters
+/// </summary>
 public class DnsSettingsRequestsDto
 {
     [SwaggerSchemaCustom("DNS")]

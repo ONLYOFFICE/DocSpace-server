@@ -57,7 +57,6 @@ public class NotificationController(
     /// Enables the notification type specified in the request.
     /// </summary>
     /// <short>Enable notifications</short>
-    /// <param type="ASC.Web.Api.ApiModels.RequestsDto.NotificationSettingsRequestsDto, ASC.Web.Api" name="inDto">Notification settings request parameters</param>
     /// <path>api/2.0/settings/notification</path>
     [Tags("Settings / Notifications")]
     [SwaggerResponse(200, "Notification settings", typeof(NotificationSettingsDto))]
@@ -87,7 +86,6 @@ public class NotificationController(
     /// Sets a notification status for a room with the ID specified in the request.
     /// </summary>
     /// <short>Set room notification status</short>
-    /// <param type="ASC.Web.Api.ApiModels.RequestsDto.RoomsNotificationsSettingsRequestDto, ASC.Web.Api" name="inDto">Request parameters for the room notification settings</param>
     /// <path>api/2.0/settings/notification/rooms</path>
     [Tags("Settings / Notifications")]
     [SwaggerResponse(200, "Room notification settings", typeof(RoomsNotificationSettingsDto))]

@@ -26,6 +26,9 @@
 
 namespace ASC.Data.Backup.ApiModels;
 
+/// <summary>
+/// Backup schedule parameters
+/// </summary>
 public class BackupScheduleDto
 {
     [SwaggerSchemaCustom("Storage type")]
@@ -44,6 +47,9 @@ public class BackupScheduleDto
     public bool Dump { get; set; }
 }
 
+/// <summary>
+/// Cron parameters
+/// </summary>
 public class Cron
 {
     [SwaggerSchemaCustom("Period")]

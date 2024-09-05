@@ -26,6 +26,9 @@
 
 namespace ASC.People.ApiModels.RequestDto;
 
+/// <summary>
+/// Group request parameters
+/// </summary>
 public class UpdateGroupRequestDto : GroupRequestDtoBase
 {
     [SwaggerSchemaCustom("List of user IDs to add to the group")]

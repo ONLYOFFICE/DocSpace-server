@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// Request parameters for archiving a room
+/// </summary>
 public class ArchiveRoomRequestDto
 {
     [SwaggerSchemaCustom("Specifies whether to archive a room after the editing session is finished or not")]

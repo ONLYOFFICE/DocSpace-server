@@ -60,7 +60,6 @@ public class VirtualRoomsInternalController(GlobalFolderHelper globalFolderHelpe
     /// Creates a room in the "Rooms" section.
     /// </summary>
     /// <short>Create a room</short>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.CreateRoomRequestDto, ASC.Files.Core" name="inDto">Request parameters for creating a room</param>
     /// <path>api/2.0/files/rooms</path>
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
@@ -107,12 +106,11 @@ public class VirtualRoomsThirdPartyController(GlobalFolderHelper globalFolderHel
     /// </summary>
     /// <short>Create a third-party room</short>
     /// <param type="System.String, System" method="url" name="id" example="1234">ID of the folder in the third-party storage in which the contents of the room will be stored</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.CreateRoomRequestDto, ASC.Files.Core" name="inDto">Request parameters for creating a room</param>
     /// <path>api/2.0/files/rooms/thirdparty/{id}</path>
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "Room information", typeof(FolderDto<string>))]
     [HttpPost("thirdparty/{id}")]
-    public async Task<FolderDto<string>> CreateRoomAsync(string id, CreateThirdPartyRoomRequestDto inDto)
+    public async Task<FolderDto<string>> CreateRoomThirdPartyAsync(string id, CreateThirdPartyRoomRequestDto inDto)
     {
         var room = await _fileStorageService.CreateThirdPartyRoomAsync(inDto.Title, inDto.RoomType, id, inDto.Private, inDto.Indexing, inDto.CreateAsNewFolder);
 
@@ -164,7 +162,6 @@ public abstract class VirtualRoomsController<T>(
     /// </summary>
     /// <short>Rename a room</short>
     /// <param type="System.Int32, System" method="url" name="id" example="1234">Room ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.UpdateRoomRequestDto, ASC.Files.Core" name="inDto">Request parameters for updating a room</param>
     /// <path>api/2.0/files/rooms/{id}</path>
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "Updated room information", typeof(FolderDto<int>))]
@@ -182,7 +179,6 @@ public abstract class VirtualRoomsController<T>(
     /// <short>
     /// Change a room quota limit
     /// </short>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.UpdateRoomsQuotaRequestDto, ASC.Files.Core" name="inDto">Request parameters for updating room</param>
     /// <path>api/2.0/files/rooms/roomquota</path>
     /// <collection>list</collection>
     [Tags("Files / Quota")]
@@ -219,7 +215,6 @@ public abstract class VirtualRoomsController<T>(
     /// <short>
     /// Reset a room quota limit
     /// </short>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.UpdateRoomsQuotaRequestDto, ASC.Files.Core" name="inDto">Request parameters for updating room</param>
     /// <path>api/2.0/files/rooms/resetquota</path>
     /// <collection>list</collection>
     [Tags("Files / Quota")]
@@ -248,7 +243,6 @@ public abstract class VirtualRoomsController<T>(
     /// </summary>
     /// <short>Remove a room</short>
     /// <param type="System.Int32, System" method="url" name="id" example="1234">Room ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.DeleteRoomRequestDto, ASC.Files.Core" name="inDto">Request parameters for deleting a room</param>
     /// <path>api/2.0/files/rooms/{id}</path>
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "File operation", typeof(FileOperationDto))]
@@ -265,7 +259,6 @@ public abstract class VirtualRoomsController<T>(
     /// </summary>
     /// <short>Archive a room</short>
     /// <param type="System.Int32, System" method="url" name="id" example="1234">Room ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.ArchiveRoomRequestDto, ASC.Files.Core" name="inDto">Request parameters for archiving a room</param>
     /// <path>api/2.0/files/rooms/{id}/archive</path>
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "File operation", typeof(FileOperationDto))]
@@ -285,7 +278,6 @@ public abstract class VirtualRoomsController<T>(
     /// </summary>
     /// <short>Unarchive a room</short>
     /// <param type="System.Int32, System" method="url" name="id" example="1234">Room ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.ArchiveRoomRequestDto, ASC.Files.Core" name="inDto">Request parameters for unarchiving a room</param>
     /// <path>api/2.0/files/rooms/{id}/unarchive</path>
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "File operation", typeof(FileOperationDto))]
@@ -304,7 +296,6 @@ public abstract class VirtualRoomsController<T>(
     /// </summary>
     /// <short>Set room access rights</short>
     /// <param type="System.Int32, System" method="url" name="id" example="1234">Room ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.RoomInvitationRequestDto, ASC.Files.Core" name="inDto">Request parameters for inviting users to a room</param>
     /// <path>api/2.0/files/rooms/{id}/share</path>
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "Room security information", typeof(RoomSecurityDto))]
@@ -370,7 +361,6 @@ public abstract class VirtualRoomsController<T>(
     /// </summary>
     /// <short>Set an external or invitation link</short>
     /// <param type="System.Int32, System" method="url" name="id" example="1234">Room ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.LinkRequestDto, ASC.Files.Core" name="inDto">Link request parameters</param>
     /// <path>api/2.0/files/rooms/{id}/links</path>
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "Room security information", typeof(FileShareDto))]
@@ -399,7 +389,7 @@ public abstract class VirtualRoomsController<T>(
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "Room security information", typeof(FileShareDto))]
     [HttpGet("{id}/links")]
-    public async IAsyncEnumerable<FileShareDto> GetLinksAsync(T id, LinkType? type)
+    public async IAsyncEnumerable<FileShareDto> GetRoomLinksAsync(T id, LinkType? type)
     {
         var filterType = type.HasValue ? type.Value switch
         {
@@ -430,7 +420,7 @@ public abstract class VirtualRoomsController<T>(
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "Room security information", typeof(FileShareDto))]
     [HttpGet("{id}/link")]
-    public async Task<FileShareDto> GetPrimaryExternalLinkAsync(T id)
+    public async Task<FileShareDto> GetRoomsPrimaryExternalLinkAsync(T id)
     {
         var linkAce = await _fileStorageService.GetPrimaryExternalLinkAsync(id, FileEntryType.Folder);
 
@@ -442,7 +432,6 @@ public abstract class VirtualRoomsController<T>(
     /// </summary>
     /// <short>Add room tags</short>
     /// <param type="System.Int32, System" method="url" name="id" example="1234">Room ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.BatchTagsRequestDto, ASC.Files.Core" name="inDto">Request parameters for adding tags</param>
     /// <path>api/2.0/files/rooms/{id}/tags</path>
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
@@ -459,7 +448,6 @@ public abstract class VirtualRoomsController<T>(
     /// </summary>
     /// <short>Remove room tags</short>
     /// <param type="System.Int32, System" method="url" name="id" example="1234">Room ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.BatchTagsRequestDto, ASC.Files.Core" name="inDto">Request parameters for removing tags</param>
     /// <path>api/2.0/files/rooms/{id}/tags</path>
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
@@ -476,7 +464,6 @@ public abstract class VirtualRoomsController<T>(
     /// </summary>
     /// <short>Create a room logo</short>
     /// <param type="System.Int32, System" method="url" name="id" example="1234">Room ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.LogoRequestDto, ASC.Files.Core" name="inDto">Logo request parameters</param>
     /// <path>api/2.0/files/rooms/{id}/logo</path>
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
@@ -545,7 +532,6 @@ public abstract class VirtualRoomsController<T>(
     /// </summary>
     /// <short>Resend room invitations</short>
     /// <param type="System.Int32, System" method="url" name="id" example="1234">Room ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.UserInvintationRequestDto, ASC.Files.Core" name="inDto">User invitation request parameters</param>
     /// <path>api/2.0/files/rooms/{id}/resend</path>
     [Tags("Files / Rooms")]
     [HttpPost("{id}/resend")]
@@ -676,7 +662,6 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     /// Creates a custom tag with the parameters specified in the request.
     /// </summary>
     /// <short>Create a tag</short>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.CreateTagRequestDto, ASC.Files.Core" name="inDto">Request parameters for creating a tag</param>
     /// <path>api/2.0/files/tags</path>
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "New tag name", typeof(object))]
@@ -714,7 +699,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     /// <path>api/2.0/files/tags</path>
     [Tags("Files / Rooms")]
     [HttpDelete("tags")]
-    public async Task DeleteTagsAsync(BatchTagsRequestDto inDto)
+    public async Task DeleteCustomTagsAsync(BatchTagsRequestDto inDto)
     {
         await customTagsService.DeleteTagsAsync<int>(inDto.Names);
     }

@@ -26,6 +26,9 @@
 
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
+/// <summary>
+/// Request parameters to retry webhooks
+/// </summary>
 public class WebhookRetryRequestsDto
 {
     [SwaggerSchemaCustom("List of webhook IDs")]

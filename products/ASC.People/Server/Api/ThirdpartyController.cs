@@ -113,7 +113,6 @@ public class ThirdpartyController(
     /// <short>
     /// Link a third-pary account
     /// </short>
-    /// <param type="ASC.People.ApiModels.RequestDto.LinkAccountRequestDto, ASC.People" name="inDto">Request parameters for linking accounts</param>
     /// <path>api/2.0/people/thirdparty/linkaccount</path>
     [Tags("People / Third-party accounts")]
     [HttpPut("linkaccount")]
@@ -147,7 +146,6 @@ public class ThirdpartyController(
     /// <short>
     /// Create a third-pary account
     /// </short>
-    /// <param type="ASC.People.ApiModels.RequestDto.SignupAccountRequestDto, ASC.People" name="inDto">Request parameters for creating a third-party account</param>
     /// <path>api/2.0/people/thirdparty/signup</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("People / Third-party accounts")]

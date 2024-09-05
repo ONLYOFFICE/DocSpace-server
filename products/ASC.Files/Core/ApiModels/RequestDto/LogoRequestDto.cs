@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// Logo request parameters
+/// </summary>
 public class LogoRequestDto
 {
     [SwaggerSchemaCustom("The path to the temporary image file")]

@@ -64,7 +64,7 @@ public class FilesControllerInternal(
     [Tags("Files / Files")]
     [SwaggerResponse(200, "List of actions performed on the file", typeof(HistoryDto))]
     [HttpGet("file/{fileId:int}/log")]
-    public IAsyncEnumerable<HistoryDto> GetHistoryAsync(int fileId)
+    public IAsyncEnumerable<HistoryDto> GetFileHistoryAsync(int fileId)
     {
         return historyApiHelper.GetFileHistoryAsync(fileId);
     }
@@ -106,7 +106,6 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// </summary>
     /// <short>Change version history</short>
     /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.ChangeHistoryRequestDto, ASC.Files.Core" name="inDto">Request parameters for changing version history</param>
     /// <path>api/2.0/files/file/{fileId}/history</path>
     /// <collection>list</collection>
     [Tags("Files / Files")]
@@ -173,7 +172,6 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// </summary>
     /// <short>Copy a file</short>
     /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.CopyAsRequestDto{System.Text.Json.JsonElement}, ASC.Files.Core" name="inDto">Request parameters for copying a file</param>
     /// <path>api/2.0/files/file/{fileId}/copyas</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Copied file entry information", typeof(FileEntryDto))]
@@ -198,7 +196,6 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// </summary>
     /// <short>Create a file</short>
     /// <param type="System.Int32, System" method="url" name="folderId" example="1234">Folder ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.CreateFileRequestDto{System.Text.Json.JsonElement}, ASC.Files.Core" name="inDto">Request parameters for creating a file</param>
     /// <remarks>If a file extension is different from DOCX/XLSX/PPTX and refers to one of the known text, spreadsheet, or presentation formats, it will be changed to DOCX/XLSX/PPTX accordingly. If the file extension is not specified or is unknown, the DOCX extension will be added to the file title.</remarks>
     /// <path>api/2.0/files/{folderId}/file</path>
     [Tags("Files / Files")]
@@ -214,7 +211,6 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// </summary>
     /// <short>Create an HTML file</short>
     /// <param type="System.Int32, System" method="url" name="folderId" example="1234">Folder ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.CreateTextOrHtmlFileRequestDto, ASC.Files.Core" name="inDto">Request parameters for creating an HTML file</param>
     /// <path>api/2.0/files/{folderId}/html</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
@@ -229,7 +225,6 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// </summary>
     /// <short>Create a txt file</short>
     /// <param type="System.Int32, System" method="url" name="folderId" example="1234">Folder ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.CreateTextOrHtmlFileRequestDto, ASC.Files.Core" name="inDto">Request parameters for creating a text file</param>
     /// <path>api/2.0/files/{folderId}/text</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
@@ -244,7 +239,6 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// </summary>
     /// <short>Delete a file</short>
     /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.DeleteRequestDto, ASC.Files.Core" name="inDto">Request parameters for deleting a file</param>
     /// <path>api/2.0/files/file/{fileId}</path>
     /// <collection>list</collection>
     [Tags("Files / Files")]
@@ -345,7 +339,6 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// </summary>
     /// <short>Lock a file</short>
     /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.LockFileRequestDto, ASC.Files.Core" name="inDto">Request parameters for locking a file</param>
     /// <path>api/2.0/files/file/{fileId}/lock</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Locked file information", typeof(FileDto<int>))]
@@ -379,7 +372,6 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// </summary>
     /// <short>Start file conversion</short>
     /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.CheckConversionRequestDto, ASC.Files.Core" name="inDto">Request parameters for starting file conversion</param>
     /// <path>api/2.0/files/file/{fileId}/checkconversion</path>
     /// <collection>list</collection>
     [Tags("Files / Operations")]
@@ -398,7 +390,6 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// </summary>
     /// <short>Update a comment</short>
     /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.UpdateCommentRequestDto, ASC.Files.Core" name="inDto">Request parameters for updating a comment</param>
     /// <path>api/2.0/files/file/{fileId}/comment</path>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "Updated comment", typeof(object))]
@@ -430,7 +421,6 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// </summary>
     /// <short>Update file contents</short>
     /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.FileStreamRequestDto, ASC.Files.Core" name="inDto">Request parameters for updating file contents</param>
     /// <path>api/2.0/files/{fileId}/update</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Files")]
@@ -451,7 +441,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     [SwaggerResponse(200, "File security information", typeof(FileShareDto))]
     [AllowAnonymous]
     [HttpGet("file/{id}/link")]
-    public async Task<FileShareDto> GetPrimaryExternalLinkAsync(T id)
+    public async Task<FileShareDto> GetFilePrimaryExternalLinkAsync(T id)
     {
         var linkAce = await fileStorageService.GetPrimaryExternalLinkAsync(id, FileEntryType.File);
 
@@ -469,22 +459,22 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// Returns the external links of a file with the ID specified in the request.
     /// </summary>
     /// <short>Get file external links</short>
-    /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
-    /// <path>api/2.0/files/file/{fileId}/links</path>
+    /// <param type="System.Int32, System" method="url" name="id" example="1234">File ID</param>
+    /// <path>api/2.0/files/file/{id}/links</path>
     /// <collection>list</collection>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "File security information", typeof(FileShareDto))]
-    [HttpGet("file/{fileId}/links")]
-    public async IAsyncEnumerable<FileShareDto> GetLinksAsync(T fileId)
+    [HttpGet("file/{id}/links")]
+    public async IAsyncEnumerable<FileShareDto> GetLinksAsync(T id)
     {
         var offset = Convert.ToInt32(apiContext.StartIndex);
         var count = Convert.ToInt32(apiContext.Count);
 
-        var totalCount = await fileStorageService.GetPureSharesCountAsync(fileId, FileEntryType.File, ShareFilterType.ExternalLink, null);
+        var totalCount = await fileStorageService.GetPureSharesCountAsync(id, FileEntryType.File, ShareFilterType.ExternalLink, null);
 
         apiContext.SetCount(Math.Min(totalCount - offset, count)).SetTotalCount(totalCount);
 
-        await foreach (var ace in fileStorageService.GetPureSharesAsync(fileId, FileEntryType.File, ShareFilterType.ExternalLink, null, offset, count))
+        await foreach (var ace in fileStorageService.GetPureSharesAsync(id, FileEntryType.File, ShareFilterType.ExternalLink, null, offset, count))
         {
             yield return await fileShareDtoHelper.Get(ace);
         }
@@ -495,7 +485,6 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// </summary>
     /// <short>Set an external link</short>
     /// <param type="System.Int32, System" method="url" name="id" example="1234">File ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.FileLinkRequestDto, ASC.Files.Core" name="inDto">External link request parameters</param>
     /// <path>api/2.0/files/file/{id}/links</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "File security information", typeof(FileShareDto))]
@@ -513,7 +502,6 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     /// </summary>
     /// <short>Save as pdf</short>
     /// <param type="System.Int32, System" method="url" name="id" example="1234">File ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.SaveAsPdfRequestDto, ASC.Files.Core" name="inDto">Request parameters</param>
     /// <path>api/2.0/files/file/{id}/saveaspdf</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
@@ -536,13 +524,12 @@ public class FilesControllerCommon(
     /// Creates a new file in the "My documents" section with the title specified in the request.
     /// </summary>
     /// <short>Create a file in the "My documents" section</short>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.CreateFileRequestDto{System.Text.Json.JsonElement}, ASC.Files.Core" name="inDto">Request parameters for creating a file</param>
     /// <remarks>If a file extension is different from DOCX/XLSX/PPTX and refers to one of the known text, spreadsheet, or presentation formats, it will be changed to DOCX/XLSX/PPTX accordingly. If the file extension is not specified or is unknown, the DOCX extension will be added to the file title.</remarks>
     /// <path>api/2.0/files/@my/file</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
     [HttpPost("@my/file")]
-    public async Task<FileDto<int>> CreateFileAsync(CreateFileRequestDto<JsonElement> inDto)
+    public async Task<FileDto<int>> CreateFileMyDocumentsAsync(CreateFileRequestDto<JsonElement> inDto)
     {
         return await filesControllerHelperInternal.CreateFileAsync(await globalFolderHelper.FolderMyAsync, inDto.Title, inDto.TemplateId, inDto.FormId, inDto.EnableExternalExt);
     }
@@ -551,7 +538,6 @@ public class FilesControllerCommon(
     /// Creates an HTML (.html) file in the "Common" section with the title and contents specified in the request.
     /// </summary>
     /// <short>Create an HTML file in the "Common" section</short>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.CreateTextOrHtmlFileRequestDto, ASC.Files.Core" name="inDto">Request parameters for creating an HTML file</param>
     /// <path>api/2.0/files/@common/html</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Files")]
@@ -566,7 +552,6 @@ public class FilesControllerCommon(
     /// Creates an HTML (.html) file in the "My documents" section with the title and contents specified in the request.
     /// </summary>
     /// <short>Create an HTML file in the "My documents" section</short>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.CreateTextOrHtmlFileRequestDto, ASC.Files.Core" name="inDto">Request parameters for creating an HTML file</param>
     /// <path>api/2.0/files/@my/html</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
@@ -580,7 +565,6 @@ public class FilesControllerCommon(
     /// Creates a text (.txt) file in the "Common" section with the title and contents specified in the request.
     /// </summary>
     /// <short>Create a text file in the "Common" section</short>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.CreateTextOrHtmlFileRequestDto, ASC.Files.Core" name="inDto">Request parameters for creating a text file</param>
     /// <path>api/2.0/files/@common/text</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Files")]
@@ -595,7 +579,6 @@ public class FilesControllerCommon(
     /// Creates a text (.txt) file in the "My documents" section with the title and contents specified in the request.
     /// </summary>
     /// <short>Create a text file in the "My documents" section</short>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.CreateTextOrHtmlFileRequestDto, ASC.Files.Core" name="inDto">Request parameters for creating a text file</param>
     /// <path>api/2.0/files/@my/text</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
@@ -609,7 +592,6 @@ public class FilesControllerCommon(
     /// Creates thumbnails for the files with the IDs specified in the request.
     /// </summary>
     /// <short>Create thumbnails</short>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.BaseBatchRequestDto, ASC.Files.Core" name="inDto">Base batch request parameters</param>
     /// <path>api/2.0/files/thumbnails</path>
     /// <collection>list</collection>
     /// <requiresAuthorization>false</requiresAuthorization>

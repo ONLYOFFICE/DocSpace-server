@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// Request parameters for updating room
+/// </summary>
 public class UpdateRoomsQuotaRequestDto<T> : UpdateRoomsRoomIdsRequestDto<T>
 {
     [SwaggerSchemaCustom("Room quota")]
@@ -33,6 +36,9 @@ public class UpdateRoomsQuotaRequestDto<T> : UpdateRoomsRoomIdsRequestDto<T>
 
 }
 
+/// <summary>
+/// Request parameters for updating room
+/// </summary>
 public class UpdateRoomsRoomIdsRequestDto<T>
 {
     [SwaggerSchemaCustom("List of room IDs", Format = "json")]

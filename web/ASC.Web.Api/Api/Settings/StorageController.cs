@@ -109,7 +109,6 @@ public class StorageController(ILoggerProvider option,
     /// Starts the storage encryption process.
     /// </summary>
     /// <short>Start the storage encryption process</short>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.StorageEncryptionRequestsDto, ASC.Web.Api" name="inDto">Storage encryption request parameters</param>
     /// <path>api/2.0/settings/encryption/start</path>
     [Tags("Settings / Encryption")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
@@ -307,7 +306,6 @@ public class StorageController(ILoggerProvider option,
     /// Updates a storage with the parameters specified in the request.
     /// </summary>
     /// <short>Update a storage</short>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.StorageRequestsDto, ASC.Web.Api" name="inDto">Storage settings request parameters</param>
     /// <path>api/2.0/settings/storage</path>
     [Tags("Settings / Storage")]
     [SwaggerResponse(200, "Updated storage settings", typeof(StorageSettings))]
@@ -404,7 +402,6 @@ public class StorageController(ILoggerProvider option,
     /// Updates the CDN storage with the parameters specified in the request.
     /// </summary>
     /// <short>Update the CDN storage</short>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.StorageRequestsDto, ASC.Web.Api" name="inDto">CDN storage settings request parameters</param>
     /// <path>api/2.0/settings/storage/cdn</path>
     [Tags("Settings / Storage")]
     [SwaggerResponse(200, "Updated CDN storage", typeof(CdnStorageSettings))]

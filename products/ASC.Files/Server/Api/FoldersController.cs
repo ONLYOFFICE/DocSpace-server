@@ -105,7 +105,6 @@ public abstract class FoldersController<T>(
     /// Create a folder
     /// </short>
     /// <param type="System.Int32, System" method="url" name="folderId" example="1234">Parent folder ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.CreateFolderRequestDto, ASC.Files.Core" name="inDto">Request parameters for creating a folder</param>
     /// <path>api/2.0/files/folder/{folderId}</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "New folder parameters", typeof(FolderDto<int>))]
@@ -122,7 +121,6 @@ public abstract class FoldersController<T>(
     /// </summary>
     /// <short>Delete a folder</short>
     /// <param type="System.Int32, System" method="url" name="folderId" example="1234">Folder ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.DeleteFolderDto, ASC.Files.Core" name="inDto">Request parameters for deleting a folder</param>
     /// <path>api/2.0/files/folder/{folderId}</path>
     /// <collection>list</collection>
     [Tags("Files / Folders")]
@@ -141,10 +139,9 @@ public abstract class FoldersController<T>(
     /// <summary>
     /// </summary>
     /// <param type="System.Int32, System" name="folderId" example="1234">Folder ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.OrderRequestDto, ASC.Files.Core" name="inDto"></param>
     [Tags("Files / Folders")]
     [HttpPut("folder/{folderId}/order")]
-    public async Task SetOrder(T folderId, OrderRequestDto inDto)
+    public async Task SetFileOrder(T folderId, OrderRequestDto inDto)
     {
         await fileStorageService.SetFolderOrder(folderId, inDto.Order);
     }
@@ -265,7 +262,6 @@ public abstract class FoldersController<T>(
     /// Rename a folder
     /// </short>
     /// <param type="System.Int32, System" method="url" name="folderId" example="1234">Folder ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.CreateFolderRequestDto, ASC.Files.Core" name="inDto">Request parameters for creating a folder: Title (string) - new folder title</param>
     /// <path>api/2.0/files/folder/{folderId}</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "Folder parameters", typeof(FolderDto<int>))]
@@ -302,7 +298,7 @@ public abstract class FoldersController<T>(
     [SwaggerResponse(200, "Folder security information", typeof(FileShareDto))]
     [AllowAnonymous]
     [HttpGet("folder/{id}/link")]
-    public async Task<FileShareDto> GetPrimaryExternalLinkAsync(T id)
+    public async Task<FileShareDto> GetFolderPrimaryExternalLinkAsync(T id)
     {
         var linkAce = await fileStorageService.GetPrimaryExternalLinkAsync(id, FileEntryType.Folder);
 

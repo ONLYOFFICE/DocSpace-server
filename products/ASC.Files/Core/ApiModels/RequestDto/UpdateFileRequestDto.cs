@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// Request parameters for updating a file
+/// </summary>
 public class UpdateFileRequestDto
 {
     [SwaggerSchemaCustom("File title")]

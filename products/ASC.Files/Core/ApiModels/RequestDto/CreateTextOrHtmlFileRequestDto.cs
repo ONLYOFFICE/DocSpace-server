@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// Request parameters for creating an HTML file
+/// </summary>
 public class CreateTextOrHtmlFileRequestDto
 {
     [SwaggerSchemaCustom("File title")]

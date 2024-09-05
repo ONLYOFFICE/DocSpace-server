@@ -42,6 +42,9 @@ public class CustomNavigationSettings : ISettings<CustomNavigationSettings>
     }
 }
 
+/// <summary>
+/// Custom navigation parameters
+/// </summary>
 public class CustomNavigationItem
 {
     [SwaggerSchemaCustom("Id")]

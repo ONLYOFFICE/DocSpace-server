@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// Request parameters for hiding the confirmation dialog
+/// </summary>
 public class HideConfirmConvertRequestDto
 {
     [SwaggerSchemaCustom("Specifies whether to set the specified settings or not")]

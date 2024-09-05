@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// Request parameters for copying a file
+/// </summary>
 public class CopyAsRequestDto<T>
 {
     [SwaggerSchemaCustom("Destination file title")]

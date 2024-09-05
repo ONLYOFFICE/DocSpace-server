@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// External link request parameters
+/// </summary>
 public class FileLinkRequestDto : LinkRequestDtoBase
 {
     [SwaggerSchemaCustom("Link scope")]

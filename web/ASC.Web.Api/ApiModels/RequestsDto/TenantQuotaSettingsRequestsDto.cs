@@ -26,6 +26,9 @@
 
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
+/// <summary>
+/// Request parameters for the tenant quota settings
+/// </summary>
 public class TenantQuotaSettingsRequestsDto
 {
     [SwaggerSchemaCustom("Tenant ID")]

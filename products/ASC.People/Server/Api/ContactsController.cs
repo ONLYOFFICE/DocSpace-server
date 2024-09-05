@@ -42,7 +42,6 @@ public class ContactsController(UserManager userManager,
     /// Delete user contacts
     /// </short>
     /// <param type="System.String, System" method="url" name="userid" example="some text">User ID</param>
-    /// <param type="ASC.People.ApiModels.RequestDto.UpdateMemberRequestDto, ASC.People" name="inDto">Request parameters for updating user contacts</param>
     /// <path>api/2.0/people/{userid}/contacts</path>
     [Tags("People / Contacts")]
     [SwaggerResponse(200, "Deleted user profile with the detailed information", typeof(EmployeeFullDto))]
@@ -69,7 +68,6 @@ public class ContactsController(UserManager userManager,
     /// Set user contacts
     /// </short>
     /// <param type="System.String, System" method="url" name="userid" example="some text">User ID</param>
-    /// <param type="ASC.People.ApiModels.RequestDto.UpdateMemberRequestDto, ASC.People" name="inDto">Request parameters for updating user contacts</param>
     /// <path>api/2.0/people/{userid}/contacts</path>
     [Tags("People / Contacts")]
     [SwaggerResponse(200, "Updated user profile with the detailed information", typeof(EmployeeFullDto))]
@@ -97,7 +95,6 @@ public class ContactsController(UserManager userManager,
     /// Update user contacts
     /// </short>
     /// <param type="System.String, System" method="url" name="userid" example="some text">User ID</param>
-    /// <param type="ASC.People.ApiModels.RequestDto.UpdateMemberRequestDto, ASC.People" name="inDto">Request parameters for updating user contacts</param>
     /// <path>api/2.0/people/{userid}/contacts</path>
     [Tags("People / Contacts")]
     [SwaggerResponse(200, "Updated user profile with the detailed information", typeof(EmployeeFullDto))]

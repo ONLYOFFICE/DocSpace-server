@@ -26,6 +26,9 @@
 
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
+/// <summary>
+/// Request parameters for portal renaming
+/// </summary>
 public class PortalRenameRequestsDto
 {
     [SwaggerSchemaCustom("Portal name")]

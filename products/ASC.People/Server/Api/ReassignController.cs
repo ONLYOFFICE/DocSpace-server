@@ -41,17 +41,17 @@ public class ReassignController(
     /// Returns the progress of the started data reassignment for the user with the ID specified in the request.
     /// </summary>
     /// <short>Get the reassignment progress</short>
-    /// <param type="System.Guid, System" name="userId" example="9924256A-739C-462b-AF15-E652A3B1B6EB">User ID whose data is reassigned</param>
+    /// <param type="System.Guid, System" name="userid" example="9924256A-739C-462b-AF15-E652A3B1B6EB">User ID whose data is reassigned</param>
     /// <path>api/2.0/people/reassign/progress/{userid}</path>
     [Tags("People / User data")]
     [SwaggerResponse(200, "Reassignment progress", typeof(TaskProgressResponseDto))]
     [HttpGet("progress/{userid:guid}")]
-    public async Task<TaskProgressResponseDto> GetReassignProgressAsync(Guid userId)
+    public async Task<TaskProgressResponseDto> GetReassignProgressAsync(Guid userid)
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_EditUser);
 
         var tenant = await tenantManager.GetCurrentTenantAsync();
-        var progressItem = await queueWorkerReassign.GetProgressItemStatus(tenant.Id, userId);
+        var progressItem = await queueWorkerReassign.GetProgressItemStatus(tenant.Id, userid);
 
         return TaskProgressResponseDto.Get(progressItem);
     }
@@ -60,7 +60,6 @@ public class ReassignController(
     /// Starts the data reassignment for the user with the ID specified in the request.
     /// </summary>
     /// <short>Start the data reassignment</short>
-    /// <param type="ASC.People.ApiModels.RequestDto.StartReassignRequestDto, ASC.People" name="inDto">Request parameters for starting the reassignment process</param>
     /// <path>api/2.0/people/reassign/start</path>
     [Tags("People / User data")]
     [SwaggerResponse(200, "Reassignment progress", typeof(TaskProgressResponseDto))]
@@ -103,7 +102,6 @@ public class ReassignController(
     /// Terminates the data reassignment for the user with the ID specified in the request.
     /// </summary>
     /// <short>Terminate the data reassignment</short>
-    /// <param type="ASC.People.ApiModels.RequestDto.TerminateRequestDto, ASC.People" name="inDto">Request parameters for terminating the reassignment process</param>
     /// <path>api/2.0/people/reassign/terminate</path>
     [Tags("People / User data")]
     [SwaggerResponse(200, "Reassignment progress", typeof(TaskProgressResponseDto))]

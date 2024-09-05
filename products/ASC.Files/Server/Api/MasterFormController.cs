@@ -47,7 +47,6 @@ public abstract class MasterFormController<T>(FileStorageService fileStorageServ
     /// </summary>
     /// <short>Check the form draft</short>
     /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.CheckFillFormDraftRequestDto, ASC.Files.Core" name="inDto">Request parameters for checking a form draft</param>
     /// <path>api/2.0/files/masterform/{fileId}/checkfillformdraft</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]

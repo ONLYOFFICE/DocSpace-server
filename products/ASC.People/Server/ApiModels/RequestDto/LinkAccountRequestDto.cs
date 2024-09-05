@@ -26,12 +26,18 @@
 
 namespace ASC.People.ApiModels.RequestDto;
 
+/// <summary>
+/// Request parameters for linking accounts
+/// </summary>
 public class LinkAccountRequestDto
 {
     [SwaggerSchemaCustom("Third-party profile in the serialized format")]
     public string SerializedProfile { get; set; }
 }
 
+/// <summary>
+/// Request parameters for creating a third-party account
+/// </summary>
 public class SignupAccountRequestDto : LinkAccountRequestDto
 {
     [SwaggerSchemaCustom("Employee type")]

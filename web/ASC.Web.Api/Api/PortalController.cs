@@ -138,7 +138,6 @@ public class PortalController(
     /// Returns a link specified in the request in the shortened format.
     /// </summary>
     /// <short>Get a shortened link</short>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.ShortenLinkRequestsDto, ASC.Web.Api" name="inDto">Shortened link request parameters</param>
     /// <path>api/2.0/portal/getshortenlink</path>
     [Tags("Portal / Settings")]
     [SwaggerResponse(200, "Shortened link", typeof(object))]
@@ -401,7 +400,6 @@ public class PortalController(
     /// <short>
     /// Register the mobile app installation
     /// </short>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.MobileAppRequestsDto, ASC.Web.Api" name="inDto">Mobile app request parameters</param>
     /// <path>api/2.0/portal/mobile/registration</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Portal / Settings")]
@@ -433,7 +431,6 @@ public class PortalController(
     /// Updates a portal name with a new one specified in the request.
     /// </summary>
     /// <short>Update a portal name</short>
-    /// <param type="ASC.Web.Api.ApiModels.RequestsDto.PortalRenameRequestsDto, ASC.Web.Api" name="inDto">Request parameters for portal renaming</param>
     /// <path>api/2.0/portal/portalrename</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Portal / Settings")]
@@ -692,7 +689,6 @@ public class PortalController(
     /// Sends congratulations to the user after registering the portal.
     /// </summary>
     /// <short>Send congratulations</short>
-    /// <param type="ASC.Web.Api.ApiModels.RequestsDto.SendCongratulationsDto, ASC.Web.Api" name="inDto">Congratulations request parameters</param>
     /// <path>api/2.0/portal/sendcongratulations</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Portal / Users")]

@@ -179,6 +179,9 @@ public class EmailValidationKeyProvider
     }
 }
 
+/// <summary>
+/// Confirmation email parameters
+/// </summary>
 public class EmailValidationKeyModel
 {
     [SwaggerSchemaCustom("Key")]

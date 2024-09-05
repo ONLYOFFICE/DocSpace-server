@@ -97,7 +97,6 @@ public class AuthenticationController(
     /// <short>
     /// Authenticate a user by code
     /// </short>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.AuthRequestsDto, ASC.Web.Api" name="inDto">Authentication request parameters</param>
     /// <path>api/2.0/authentication/{code}</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]
@@ -171,7 +170,6 @@ public class AuthenticationController(
     /// <short>
     /// Authenticate a user
     /// </short>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.AuthRequestsDto, ASC.Web.Api" name="inDto">Authentication request parameters</param>
     /// <path>api/2.0/authentication</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]
@@ -334,7 +332,6 @@ public class AuthenticationController(
     /// <short>
     /// Open confirmation email URL
     /// </short>
-    /// <param type="ASC.Security.Cryptography.EmailValidationKeyModel, ASC.Core.Common" name="inDto">Confirmation email parameters</param>
     /// <path>api/2.0/authentication/confirm</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]
@@ -364,7 +361,6 @@ public class AuthenticationController(
     /// <short>
     /// Set a mobile phone
     /// </short>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.MobileRequestsDto, ASC.Web.Api" name="inDto">Mobile phone request parameters</param>
     /// <path>api/2.0/authentication/setphone</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]
@@ -393,7 +389,6 @@ public class AuthenticationController(
     /// <short>
     /// Send SMS code
     /// </short>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.AuthRequestsDto, ASC.Web.Api" name="inDto">Authentication request parameters</param>
     /// <path>api/2.0/authentication/sendsms</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]

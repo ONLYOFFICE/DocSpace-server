@@ -26,6 +26,9 @@
 
 namespace ASC.Web.Api.Models;
 
+/// <summary>
+/// Cookies settings request parameters
+/// </summary>
 public class CookieSettingsRequestsDto
 {
     [SwaggerSchemaCustom("Lifetime value in minutes")]

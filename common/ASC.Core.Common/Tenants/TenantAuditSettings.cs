@@ -51,6 +51,9 @@ public class TenantAuditSettings : ISettings<TenantAuditSettings>
     }
 }
 
+/// <summary>
+/// Audit trail settings
+/// </summary>
 public class TenantAuditSettingsWrapper
 {
     [SwaggerSchemaCustom("Audit trail settingse")]

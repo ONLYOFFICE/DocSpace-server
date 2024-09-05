@@ -26,6 +26,9 @@
 
 namespace ASC.People.ApiModels.RequestDto;
 
+/// <summary>
+/// Request parameters for setting a group manager
+/// </summary>
 public class SetManagerRequestDto
 {
     [SwaggerSchemaCustom("User ID")]

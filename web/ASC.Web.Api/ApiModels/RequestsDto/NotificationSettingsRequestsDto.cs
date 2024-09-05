@@ -26,6 +26,9 @@
 
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
+/// <summary>
+/// Notification settings request parameters
+/// </summary>
 public class NotificationSettingsRequestsDto
 {
     [SwaggerSchemaCustom("Notification type")]

@@ -40,7 +40,6 @@ public class PushController(ApiContext apiContext,
     /// Saves the Firebase device token specified in the request for the Documents application.
     /// </summary>
     /// <short>Save the Documents Firebase device token</short>
-    /// <param type="ASC.Web.Api.ApiModels.RequestsDto.FirebaseRequestsDto, ASC.Web.Api" name="inDto">Firebase request parameters</param>
     /// <path>api/2.0/settings/push/docregisterdevice</path>
     [Tags("Security / Firebase")]
     [SwaggerResponse(200, "FireBase user", typeof(FireBaseUser))]
@@ -54,7 +53,6 @@ public class PushController(ApiContext apiContext,
     /// Subscribes to the Documents push notification.
     /// </summary>
     /// <short>Subscribe to Documents push notification</short>
-    /// <param type="ASC.Web.Api.ApiModels.RequestsDto.FirebaseRequestsDto, ASC.Web.Api" name="inDto">Firebase request parameters</param>
     /// <path>api/2.0/settings/push/docsubscribe</path>
     [Tags("Security / Firebase")]
     [SwaggerResponse(200, "FireBase user", typeof(FireBaseUser))]

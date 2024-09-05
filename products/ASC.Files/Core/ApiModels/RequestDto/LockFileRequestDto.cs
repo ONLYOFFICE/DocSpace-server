@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// Request parameters for locking a file
+/// </summary>
 public class LockFileRequestDto
 {
     [SwaggerSchemaCustom("Specifies whether to lock a file or not")]

@@ -51,7 +51,6 @@ public class PhotoController(
     /// Create photo thumbnails
     /// </short>
     /// <param type="System.String, System" method="url" name="userid" example="some text">User ID</param>
-    /// <param type="ASC.People.ApiModels.RequestDto.ThumbnailsRequestDto, ASC.People" name="inDto">Thumbnail request parameters</param>
     /// <path>api/2.0/people/{userid}/photo/thumbnails</path>
     [Tags("People / Photos")]
     [SwaggerResponse(200, "Thumbnail parameters", typeof(ThumbnailsDataDto))]
@@ -165,7 +164,6 @@ public class PhotoController(
     /// Update a user photo
     /// </short>
     /// <param type="System.String, System" method="url" name="userid" example="some text">User ID</param>
-    /// <param type="ASC.People.ApiModels.RequestDto.UpdateMemberRequestDto, ASC.People" name="inDto">Request parameters for updating user photo</param>
     /// <path>api/2.0/people/{userid}/photo</path>
     [Tags("People / Photos")]
     [SwaggerResponse(200, "Updated thumbnail parameters: original photo, retina, maximum size photo, big, medium, small", typeof(ThumbnailsDataDto))]

@@ -26,6 +26,9 @@
 
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
+/// <summary>
+/// Firebase request parameters
+/// </summary>
 public class FirebaseRequestsDto
 {
     [SwaggerSchemaCustom("Firebase device token")]

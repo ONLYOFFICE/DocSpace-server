@@ -28,6 +28,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
+/// <summary>
+/// Login settings request parameters
+/// </summary>
 public class LoginSettingsRequestDto
 {
     [SwaggerSchemaCustom("Maximum number of the user attempts to log in")]

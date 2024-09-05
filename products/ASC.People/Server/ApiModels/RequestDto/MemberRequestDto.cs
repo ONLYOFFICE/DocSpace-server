@@ -26,11 +26,18 @@
 
 namespace ASC.People.ApiModels.RequestDto;
 
+/// <summary>
+/// Member request parameters
+/// </summary>
 public class EmailMemberRequestDto
 {
     [SwaggerSchemaCustom("Email")]
     public string Email { get; set; }
 }
+
+/// <summary>
+/// Request parameters for setting new password
+/// </summary>
 public class MemberBaseRequestDto : EmailMemberRequestDto
 {
     [SwaggerSchemaCustom("Password")]
@@ -39,6 +46,10 @@ public class MemberBaseRequestDto : EmailMemberRequestDto
     [SwaggerSchemaCustom("Password hash")]
     public string PasswordHash { get; set; }
 }
+
+/// <summary>
+/// Member request parameters
+/// </summary>
 public class MemberRequestDto : MemberBaseRequestDto
 {
     [SwaggerSchemaCustom("Employee type")]
@@ -93,6 +104,9 @@ public class MemberRequestDto : MemberBaseRequestDto
     public Guid Target { get; set; }
 }
 
+/// <summary>
+/// Request parameters for updating user information
+/// </summary>
 public class UpdateMemberRequestDto : MemberRequestDto
 {
     [SwaggerSchemaCustom("User ID")]
@@ -111,17 +125,27 @@ public enum SexEnum
     Male = 1,
 }
 
+/// <summary>
+/// Request parameters for updating user photo
+/// </summary>
 public class UpdatePhotoMemberRequestDto
 {
     [SwaggerSchemaCustom("Avatar photo URL", Format = "uri")]
     public string Files { get; set; }
 }
+
+/// <summary>
+/// Request parameters for updating user contacts
+/// </summary>
 public class UpdateMemberSimpleRequestDto
 {
     [SwaggerSchemaCustom("User ID")]
     public string UserId { get; set; }
 }
 
+/// <summary>
+/// Request parameters for updating user contacts
+/// </summary>
 public class ContactsRequestDto
 {
     [SwaggerSchemaCustom("List of user contacts")]

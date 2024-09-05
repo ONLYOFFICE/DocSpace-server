@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// Request parameters for getting reference data
+/// </summary>
 public class GetReferenceDataDto<T>
 {
     [SwaggerSchemaCustomInt("The unique document identifier used by the service to get a link to the file")]

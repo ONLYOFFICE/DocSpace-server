@@ -28,6 +28,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
+/// <summary>
+/// Webhook request parameters
+/// </summary>
 public class WebhooksConfigRequestsDto
 {
     [SwaggerSchemaCustom("ID")]

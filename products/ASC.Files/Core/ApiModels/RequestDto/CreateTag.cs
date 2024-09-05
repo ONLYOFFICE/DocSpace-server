@@ -28,6 +28,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// Request parameters for creating a tag
+/// </summary>
 public class CreateTagRequestDto
 {
     [SwaggerSchemaCustom("Tag name")]

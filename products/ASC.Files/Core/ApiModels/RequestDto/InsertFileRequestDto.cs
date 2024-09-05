@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// Request parameters for inserting a file
+/// </summary>
 public class InsertFileRequestDto : IModelWithFile, IDisposable
 {
     [SwaggerSchemaCustom("File")]

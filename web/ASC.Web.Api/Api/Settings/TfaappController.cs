@@ -107,7 +107,6 @@ public class TfaappController(
     /// Validates the two-factor authentication code specified in the request.
     /// </summary>
     /// <short>Validate the TFA code</short>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.TfaValidateRequestsDto, ASC.Web.Api" name="inDto">TFA validation request parameters</param>
     ///<path>api/2.0/settings/tfaapp/validate</path>
     [Tags("Settings / TFA settings")]
     [SwaggerResponse(200, "True if the code is valid", typeof(bool))]
@@ -169,7 +168,6 @@ public class TfaappController(
     /// Updates the two-factor authentication settings with the parameters specified in the request.
     /// </summary>
     /// <short>Update the TFA settings</short>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.TfaRequestsDto, ASC.Web.Api" name="inDto">TFA settings request parameters</param>
     ///<path>api/2.0/settings/tfaapp</path>
     [Tags("Settings / TFA settings")]
     [SwaggerResponse(200, "True if the operation is successful", typeof(bool))]
@@ -269,7 +267,6 @@ public class TfaappController(
     /// Returns the confirmation email URL for updating TFA settings.
     /// </summary>
     /// <short>Get confirmation email for updating TFA settings</short>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.TfaRequestsDto, ASC.Web.Api" name="inDto">TFA settings request parameters</param>
     /// <path>api/2.0/settings/tfaappwithlink</path>
     [Tags("Settings / TFA settings")]
     [SwaggerResponse(200, "Confirmation email URL", typeof(object))]
@@ -371,7 +368,6 @@ public class TfaappController(
     /// Unlinks the current two-factor authentication application from the user account specified in the request.
     /// </summary>
     /// <short>Unlink the TFA application</short>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.TfaRequestsDto, ASC.Web.Api" name="inDto">TFA settings request parameters</param>
     /// <path>api/2.0/settings/tfaappnewapp</path>
     [Tags("Settings / TFA settings")]
     [SwaggerResponse(200, "Login URL", typeof(object))]

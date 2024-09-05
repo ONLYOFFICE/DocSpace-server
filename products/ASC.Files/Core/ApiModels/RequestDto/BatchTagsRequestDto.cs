@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// Request parameters for adding tags
+/// </summary>
 public class BatchTagsRequestDto
 {
     [SwaggerSchemaCustom("Tag names")]

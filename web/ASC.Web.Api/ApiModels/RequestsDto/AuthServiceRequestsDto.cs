@@ -26,6 +26,9 @@
 
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
+/// <summary>
+/// Request parameters for authorization service
+/// </summary>
 public class AuthServiceRequestsDto
 {
     [SwaggerSchemaCustom("Name")]

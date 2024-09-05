@@ -28,6 +28,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// Link request parameters
+/// </summary>
 public class RoomLinkRequestDto : LinkRequestDtoBase
 {
     [SwaggerSchemaCustom("Link name")]

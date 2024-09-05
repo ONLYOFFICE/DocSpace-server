@@ -49,7 +49,9 @@ public class MentionWrapper
     public string Name { get; internal set; }
 }
 
-
+/// <summary>
+/// Mention message request parameters
+/// </summary>
 public class MentionMessageWrapper
 {
     [SwaggerSchemaCustom("The config parameter which contains the information about the comment in the document that will be scrolled to")]

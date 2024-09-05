@@ -49,7 +49,6 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     /// </summary>
     /// <short>Chunked upload</short>
     /// <param type="System.Int32, System" name="folderId" example="1234">Folder ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.SessionRequestDto, ASC.Files.Core" name="inDto">Session request parameters</param>
     /// <remarks>
     /// <![CDATA[
     /// Each chunk can have different length but the length should be multiple of <b>512</b> and greater or equal to <b>10 mb</b>. Last chunk can have any size.
@@ -112,7 +111,6 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     /// <summary>
     /// </summary>
     /// <param type="System.Int32, System" name="folderId" example="1234"></param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.CheckUploadRequestDto, ASC.Files.Core"  name="model"></param>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "Inserted file", typeof(List<string>))]
     [HttpPost("{folderId}/upload/check")]
@@ -126,7 +124,6 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     /// </summary>
     /// <short>Insert a file</short>
     /// <param type="System.Int32, System" name="folderId" example="1234">Folder ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.InsertFileRequestDto, ASC.Files.Core" name="inDto">Request parameters for inserting a file</param>
     /// <path>api/2.0/files/{folderId}/insert</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "Inserted file", typeof(FileDto<int>))]
@@ -150,7 +147,6 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     /// </ol>]]>
     /// </remarks>
     /// <param type="System.Int32, System" name="folderId">Folder ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.UploadRequestDto, ASC.Files.Core" name="inDto">Request parameters for uploading a file</param>
     /// <path>api/2.0/files/{folderId}/upload</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "Inserted file", typeof(FileDto<int>))]
@@ -171,7 +167,6 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
     /// Inserts a file specified in the request to the "Common" section by single file uploading.
     /// </summary>
     /// <short>Insert a file to the "Common" section</short>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.InsertFileRequestDto, ASC.Files.Core" name="inDto">Request parameters for inserting a file</param>
     /// <path>api/2.0/files/@common/insert</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Folders")]
@@ -186,7 +181,6 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
     /// Inserts a file specified in the request to the "My documents" section by single file uploading.
     /// </summary>
     /// <short>Insert a file to the "My documents" section</short>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.InsertFileRequestDto, ASC.Files.Core" name="inDto">Request parameters for inserting a file</param>
     /// <path>api/2.0/files/@my/insert</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "Inserted file", typeof(FileDto<int>))]
@@ -200,7 +194,6 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
     /// Uploads a file specified in the request to the "Common" section by single file uploading or standart multipart/form-data method.
     /// </summary>
     /// <short>Upload a file to the "Common" section</short>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.UploadRequestDto, ASC.Files.Core" name="inDto">Request parameters for uploading a file</param>
     /// <remarks>
     /// <![CDATA[
     ///  You can upload files in two different ways:
@@ -225,7 +218,6 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
     /// Uploads a file specified in the request to the "My documents" section by single file uploading or standart multipart/form-data method.
     /// </summary>
     /// <short>Upload a file to the "My documents" section</short>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.UploadRequestDto, ASC.Files.Core" name="inDto">Request parameters for uploading a file</param>
     /// <remarks>
     /// <![CDATA[
     ///  You can upload files in two different ways:

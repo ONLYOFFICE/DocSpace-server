@@ -57,7 +57,6 @@ public class PaymentController(UserManager userManager,
     /// <short>
     /// Get the payment page URL
     /// </short>
-    /// <param type="ASC.Web.Api.Models.PaymentUrlRequestsDto, ASC.Web.Api" name="inDto">Payment URL request parameters</param>
     /// <path>api/2.0/portal/payment/url</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The URL to the payment page", typeof(Uri))]
@@ -91,7 +90,6 @@ public class PaymentController(UserManager userManager,
     /// <short>
     /// Update the payment quantity
     /// </short>
-    /// <param type="ASC.Web.Api.Models.PaymentUrlRequestsDto, ASC.Web.Api" name="inDto">Payment URL request parameters</param>
     /// <path>api/2.0/portal/payment/update</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
@@ -229,7 +227,6 @@ public class PaymentController(UserManager userManager,
     /// <short>
     /// Send a payment request
     /// </short>
-    /// <param type="ASC.Web.Api.ApiModels.RequestsDto.SalesRequestsDto, ASC.Web.Api" name="inDto">Portal payment request parameters</param>
     /// <path>api/2.0/portal/payment/request</path>
     [Tags("Portal / Payment")]
     [HttpPost("request")]

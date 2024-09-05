@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// Third-party request parameters
+/// </summary>
 public class ThirdPartyRequestDto
 {
     [SwaggerSchemaCustom("Connection URL for the sharepoint", Format = "uri")]

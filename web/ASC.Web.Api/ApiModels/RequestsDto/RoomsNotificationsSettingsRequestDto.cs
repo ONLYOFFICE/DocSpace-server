@@ -26,6 +26,9 @@
 
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
+/// <summary>
+/// Request parameters for the room notification settings
+/// </summary>
 public class RoomsNotificationsSettingsRequestDto
 {
     [SwaggerSchemaCustomInt("Room ID")]

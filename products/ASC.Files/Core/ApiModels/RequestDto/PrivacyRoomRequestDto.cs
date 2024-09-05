@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// Request parameters for setting encryption keys
+/// </summary>
 public class PrivacyRoomRequestDto
 {
     [SwaggerSchemaCustom("Public key")]
@@ -38,6 +41,9 @@ public class PrivacyRoomRequestDto
     public bool Update { get; set; }
 }
 
+/// <summary>
+/// Request parameters for setting encryption keys
+/// </summary>
 public class PrivacyRoomEnableRequestDto
 {
     [SwaggerSchemaCustom("Specifies whether to enable the Private Room settings or not")]

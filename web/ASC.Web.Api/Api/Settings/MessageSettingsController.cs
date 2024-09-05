@@ -50,7 +50,6 @@ public class MessageSettingsController(MessageService messageService,
     /// <short>
     /// Enable the administrator message settings
     /// </short>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.AdminMessageSettingsRequestsDto, ASC.Web.Api" name="inDto">Request parameters for administrator message settings</param>
     /// <path>api/2.0/settings/messagesettings</path>
     [Tags("Settings / Messages")]
     [SwaggerResponse(200, "Message about the result of saving new settings", typeof(object))]
@@ -93,7 +92,6 @@ public class MessageSettingsController(MessageService messageService,
     /// <short>
     /// Update cookies lifetime
     /// </short>
-    /// <param type="ASC.Web.Api.Models.CookieSettingsRequestsDto, ASC.Web.Api" name="inDto">Cookies settings request parameters</param>
     /// <path>api/2.0/settings/cookiesettings</path>
     [Tags("Settings / Cookies")]
     [SwaggerResponse(200, "Message about the result of saving new settings", typeof(object))]
@@ -120,7 +118,6 @@ public class MessageSettingsController(MessageService messageService,
     /// <short>
     /// Send a message to the administrator
     /// </short>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.AdminMessageSettingsRequestsDto, ASC.Web.Api" name="inDto">Request parameters for administrator message settings</param>
     /// <path>api/2.0/settings/sendadmmail</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Settings / Messages")]
@@ -163,7 +160,6 @@ public class MessageSettingsController(MessageService messageService,
     /// <short>
     /// Sends an invitation email
     /// </short>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.AdminMessageSettingsRequestsDto, ASC.Web.Api" name="inDto">Request parameters for administrator message settings</param>
     /// <path>api/2.0/settings/sendjoininvite</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Settings / Messages")]

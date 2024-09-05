@@ -26,6 +26,9 @@
 
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
+/// <summary>
+/// Storage encryption request parameters
+/// </summary>
 public class StorageEncryptionRequestsDto
 {
     [SwaggerSchemaCustom("Specifies if the users will be notified about the encryption process or note")]

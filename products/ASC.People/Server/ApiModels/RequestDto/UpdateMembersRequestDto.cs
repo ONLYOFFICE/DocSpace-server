@@ -26,6 +26,9 @@
 
 namespace ASC.People.ApiModels.RequestDto;
 
+/// <summary>
+/// Request parameters for updating user information
+/// </summary>
 public class UpdateMembersRequestDto
 {
     [SwaggerSchemaCustom("List of user IDs")]

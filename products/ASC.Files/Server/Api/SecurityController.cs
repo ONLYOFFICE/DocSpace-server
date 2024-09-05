@@ -99,7 +99,6 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// Sets the sharing settings to a file with the ID specified in the request.
     /// </summary>
     /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.SecurityInfoRequestDto, ASC.Files.Core" name="inDto">Security information request parameters</param>
     /// <short>Share a file</short>
     /// <path>api/2.0/files/file/{fileId}/share</path>
     /// <collection>list</collection>
@@ -119,7 +118,6 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// Sets the sharing settings to a folder with the ID specified in the request.
     /// </summary>
     /// <param type="System.Int32, System" method="url" name="folderId" example="1234">Folder ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.SecurityInfoRequestDto, ASC.Files.Core" name="inDto">Security information request parameters</param>
     /// <short>Share a folder</short>
     /// <path>api/2.0/files/folder/{folderId}/share</path>
     /// <collection>list</collection>
@@ -155,7 +153,6 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// Sends a message to the users who are mentioned in the file with the ID specified in the request.
     /// </summary>
     /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
-    /// <param type="ASC.Web.Files.Services.WCFService.MentionMessageWrapper, ASC.Files.Core" name="mentionMessage">Mention message request parameters</param>
     /// <short>Send the mention message</short>
     /// <path>api/2.0/files/file/{fileId}/sendeditornotify</path>
     /// <collection>list</collection>
@@ -236,7 +233,6 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// Returns the sharing rights for all the files and folders specified in the request.
     /// </summary>
     /// <short>Get the sharing rights</short>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.BaseBatchRequestDto, ASC.Files.Core" name="inDto">Base batch request parameters</param>
     /// <path>api/2.0/files/share</path>
     /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
@@ -261,7 +257,6 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// Removes the sharing rights from all the files and folders specified in the request.
     /// </summary>
     /// <short>Remove the sharing rights</short>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.BaseBatchRequestDto, ASC.Files.Core" name="inDto">Base batch request parameters</param>
     /// <path>api/2.0/files/share</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
@@ -283,7 +278,6 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// Sets the sharing rights to all the files and folders specified in the request.
     /// </summary>
     /// <short>Set the sharing rights</short>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.SecurityInfoRequestDto, ASC.Files.Core" name="inDto">Security information request parameters</param>
     /// <path>api/2.0/files/share</path>
     /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
@@ -328,7 +322,6 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// </summary>
     /// <short>Apply external data password</short>
     /// <param type="System.String, System" name="key" method="url" example="some text">The unique document identifier</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.ExternalShareRequestDto, ASC.Files.Core" name="inDto">External data request parameters</param>
     /// <path>api/2.0/files/share/{key}/password</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [ApiExplorerSettings(IgnoreApi = true)]
