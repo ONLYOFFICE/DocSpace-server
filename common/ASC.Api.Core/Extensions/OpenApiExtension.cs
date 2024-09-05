@@ -47,8 +47,9 @@ public static class OpenApiExtension
             {
                 var actionName = r.ActionDescriptor.RouteValues["action"];
 
-                return char.ToLower(actionName[0]) + actionName.Substring(1); ;
+                return (char.ToLower(actionName[0]) + actionName.Substring(1));
             });
+
             c.CustomSchemaIds(CustomSchemaId);
 
             c.SwaggerDoc("common", new OpenApiInfo { Title = assemblyName, Version = "v2" });
@@ -120,7 +121,7 @@ public static class OpenApiExtension
         
         if (type.IsGenericType)
         {
-            name = $"{name.Split('`')[0]}<{string.Join(", ", type.GenericTypeArguments.Select(CustomSchemaId))}>";
+            name = $"{name.Split('`')[0]}.{string.Join(".", type.GenericTypeArguments.Select(CustomSchemaId))}";
         }
 
         // Fix for nested classes
