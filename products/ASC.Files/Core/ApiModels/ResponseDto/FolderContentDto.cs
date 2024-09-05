@@ -108,11 +108,7 @@ public class FolderContentDtoHelper(
         var expiration = TimeSpan.MaxValue;
         if (folderItems.ParentRoom is { SettingsLifetime: not null })
         {
-            var lifetime = RoomDataLifetimeDto.Deserialize(folderItems.ParentRoom.SettingsLifetime);
-            if (lifetime != null)
-            {
-                expiration = DateTime.UtcNow - lifetime.GetExpirationUtc();
-            }
+            expiration = DateTime.UtcNow - folderItems.ParentRoom.SettingsLifetime.GetExpirationUtc();
         }
         
         List<FileShareRecord<string>> currentUsersRecords = null;

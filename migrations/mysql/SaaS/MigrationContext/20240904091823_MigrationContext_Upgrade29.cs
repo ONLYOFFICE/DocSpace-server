@@ -13,7 +13,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
             migrationBuilder.AddColumn<string>(
                 name: "lifetime",
                 table: "files_room_settings",
-                type: "varchar(100)",
+                type: "json",
                 nullable: true,
                 collation: "utf8_general_ci")
                 .Annotation("MySql:CharSet", "utf8");

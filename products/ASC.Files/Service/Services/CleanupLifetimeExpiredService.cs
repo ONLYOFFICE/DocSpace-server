@@ -30,7 +30,8 @@ namespace ASC.Files.Service.Services;
 internal class CleanupLifetimeExpiredService(
     IServiceScopeFactory scopeFactory,
     IConfiguration configuration,
-    ILogger<CleanupLifetimeExpiredService> logger)
+    ILogger<CleanupLifetimeExpiredService> logger,
+    IMapper mapper)
     : ActivePassiveBackgroundService<CleanupLifetimeExpiredService>(logger, scopeFactory)
 {
     private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
@@ -59,7 +60,9 @@ internal class CleanupLifetimeExpiredService(
 
             foreach (var room in lifetimeEnabledRooms)
             {
-                var expiration = room.Lifetime.GetExpirationUtc();
+                var lifetime = mapper.Map<DbRoomDataLifetime, RoomDataLifetime>(room.Lifetime);
+
+                var expiration = lifetime.GetExpirationUtc();
 
                 room.ExipiredFiles = await GetExpiredFilesAsync(dbContext, room.TenantId, room.RoomId, expiration);
 
@@ -143,13 +146,13 @@ static file class Queries
                 ctx.RoomSettings
                     .Join(ctx.Folders, a => a.RoomId, b => b.Id,
                         (settings, room) => new { settings, room })
-                    .Where(x => !string.IsNullOrEmpty(x.settings.Lifetime))
+                    .Where(x => x.settings.Lifetime != null)
                     .Select(r => new LifetimeEnabledRoom
                     {
                         TenantId = r.settings.TenantId,
                         RoomId = r.settings.RoomId,
                         UserId = r.room.CreateBy,
-                        Lifetime = RoomDataLifetimeDto.Deserialize(r.settings.Lifetime)
+                        Lifetime = r.settings.Lifetime
                     }));
 
     public static readonly Func<FilesDbContext, int, int, DateTime, IAsyncEnumerable<int>>
@@ -166,6 +169,6 @@ public class LifetimeEnabledRoom
     public int TenantId { get; init; }
     public int RoomId { get; init; }
     public Guid UserId { get; init; }
-    public RoomDataLifetimeDto Lifetime { get; init; }
+    public DbRoomDataLifetime Lifetime { get; init; }
     public List<int> ExipiredFiles { get; set; }
 }

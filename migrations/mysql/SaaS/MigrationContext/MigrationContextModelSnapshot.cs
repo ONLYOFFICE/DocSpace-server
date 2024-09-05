@@ -6301,7 +6301,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasDefaultValueSql("0");
 
                     b.Property<string>("Lifetime")
-                        .HasColumnType("varchar(100)")
+                        .HasColumnType("json")
                         .HasColumnName("lifetime")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");

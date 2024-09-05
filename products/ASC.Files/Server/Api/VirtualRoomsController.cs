@@ -72,7 +72,9 @@ public class VirtualRoomsInternalController(GlobalFolderHelper globalFolderHelpe
     [HttpPost("")]
     public async Task<FolderDto<int>> CreateRoomAsync(CreateRoomRequestDto inDto)
     {
-        var room = await _fileStorageService.CreateRoomAsync(inDto.Title, inDto.RoomType, inDto.Private, inDto.Indexing, inDto.Share, inDto.Quota, inDto.Lifetime?.Serialize());
+        var lifetime = _mapper.Map<RoomDataLifetimeDto, RoomDataLifetime>(inDto.Lifetime);
+
+        var room = await _fileStorageService.CreateRoomAsync(inDto.Title, inDto.RoomType, inDto.Private, inDto.Indexing, inDto.Share, inDto.Quota, lifetime);
 
         return await _folderDtoHelper.GetAsync(room);
     }
@@ -152,6 +154,7 @@ public abstract class VirtualRoomsController<T>(
     {
     protected readonly FileStorageService _fileStorageService = fileStorageService;
     protected readonly FilesMessageService _filesMessageService = filesMessageService;
+    protected readonly IMapper _mapper = mapper;
 
     /// <summary>
     /// Returns the room information.
@@ -341,7 +344,7 @@ public abstract class VirtualRoomsController<T>(
             return result;
         }
 
-        var wrappers = mapper.Map<IEnumerable<RoomInvitation>, List<AceWrapper>>(inDto.Invitations);
+        var wrappers = _mapper.Map<IEnumerable<RoomInvitation>, List<AceWrapper>>(inDto.Invitations);
 
         var aceCollection = new AceCollection<T>
         {
@@ -648,7 +651,9 @@ public abstract class VirtualRoomsController<T>(
     [HttpPut("{id}/lifetime")]
     public async Task<FolderDto<T>> UpdateLifetimeSettingsAsync(T id, RoomDataLifetimeDto inDto = null)
     {
-        var room = await _fileStorageService.SetRoomLifetimeSettingsAsync(id, inDto?.Serialize());
+        var lifetime = _mapper.Map<RoomDataLifetimeDto, RoomDataLifetime>(inDto);
+
+        var room = await _fileStorageService.SetRoomLifetimeSettingsAsync(id, lifetime);
 
         return await _folderDtoHelper.GetAsync(room);
     }

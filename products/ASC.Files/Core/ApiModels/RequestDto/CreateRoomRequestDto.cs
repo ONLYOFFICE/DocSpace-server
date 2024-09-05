@@ -69,5 +69,7 @@ public class CreateRoomRequestDto
 
     public bool Indexing { get; set; }
 
+    /// <summary>Room data lifetime settings</summary>
+    /// <type>ASC.Files.Core.ApiModels.RoomDataLifetimeDto, ASC.Files.Core</type>
     public RoomDataLifetimeDto Lifetime { get; set; }
 }

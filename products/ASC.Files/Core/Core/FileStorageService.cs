@@ -421,7 +421,7 @@ public class FileStorageService //: IFileStorageService
         return folder;
     }
 
-    public async Task<Folder<int>> CreateRoomAsync(string title, RoomType roomType, bool privacy, bool indexing, IEnumerable<FileShareParams> share, long quota, string lifetime)
+    public async Task<Folder<int>> CreateRoomAsync(string title, RoomType roomType, bool privacy, bool indexing, IEnumerable<FileShareParams> share, long quota, RoomDataLifetime lifetime)
     {
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         var parentId = await globalFolderHelper.GetFolderVirtualRooms();
@@ -537,7 +537,7 @@ public class FileStorageService //: IFileStorageService
         return folder;
     }
 
-    private async Task<Folder<T>> InternalCreateFolderAsync<T>(T parentId, string title, FolderType folderType = FolderType.DEFAULT, bool privacy = false, bool indexing = false, long quota = TenantEntityQuotaSettings.DefaultQuotaValue, string lifetime = null)
+    private async Task<Folder<T>> InternalCreateFolderAsync<T>(T parentId, string title, FolderType folderType = FolderType.DEFAULT, bool privacy = false, bool indexing = false, long quota = TenantEntityQuotaSettings.DefaultQuotaValue, RoomDataLifetime lifetime = null)
         {
         ArgumentException.ThrowIfNullOrEmpty(title);
         ArgumentNullException.ThrowIfNull(parentId);
@@ -3300,7 +3300,7 @@ public class FileStorageService //: IFileStorageService
         return room;
     }
 
-    public async Task<Folder<T>> SetRoomLifetimeSettingsAsync<T>(T folderId, string lifetime)
+    public async Task<Folder<T>> SetRoomLifetimeSettingsAsync<T>(T folderId, RoomDataLifetime lifetime)
     {
         var folderDao = daoFactory.GetFolderDao<T>();
         var room = await folderDao.GetFolderAsync(folderId);
@@ -3317,12 +3317,9 @@ public class FileStorageService //: IFileStorageService
 
         if (DocSpaceHelper.IsRoom(room.FolderType))
         {
-            if (room.SettingsLifetime != lifetime)
-            {
-                room.SettingsLifetime = lifetime;
+            room.SettingsLifetime = lifetime;
 
-                await folderDao.SaveFolderAsync(room);
-            }
+            await folderDao.SaveFolderAsync(room);
         }
 
         return room;

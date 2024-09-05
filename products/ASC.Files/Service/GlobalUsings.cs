@@ -54,6 +54,7 @@ global using ASC.Files.Core.Log;
 global using ASC.Files.Core.Resources;
 global using ASC.Files.Core.Security;
 global using ASC.Files.Core.Services.DocumentBuilderService;
+global using ASC.Files.Core.VirtualRooms;
 global using ASC.Files.Service;
 global using ASC.Files.Service.Extension;
 global using ASC.Files.Service.Log;
@@ -67,6 +68,8 @@ global using ASC.Web.Files.Utils;
 global using ASC.Web.Studio.Utility;
 
 global using Autofac;
+
+global using AutoMapper;
 
 global using Microsoft.AspNetCore.Builder;
 global using Microsoft.EntityFrameworkCore;
