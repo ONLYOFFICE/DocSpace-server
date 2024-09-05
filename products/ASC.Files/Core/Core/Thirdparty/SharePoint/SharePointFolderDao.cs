@@ -24,27 +24,26 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using File = Microsoft.SharePoint.Client.File;
 using Folder = Microsoft.SharePoint.Client.Folder;
 
 namespace ASC.Files.Thirdparty.SharePoint;
 
 [Scope]
-internal class SharePointFolderDao(IServiceProvider serviceProvider,
-        UserManager userManager,
-        TenantManager tenantManager,
-        TenantUtil tenantUtil,
-        IDbContextFactory<FilesDbContext> dbContextManager,
-        SetupInfo setupInfo,
-        FileUtility fileUtility,
-        CrossDao crossDao,
-        SharePointDaoSelector sharePointDaoSelector,
-        IFileDao<int> fileDao,
-        IFolderDao<int> folderDao,
-        TempPath tempPath,
-        RegexDaoSelectorBase<File, Folder, ClientObject> regexDaoSelectorBase)
-    : SharePointDaoBase(serviceProvider, userManager, tenantManager, tenantUtil, dbContextManager, setupInfo,
-        fileUtility, tempPath, regexDaoSelectorBase), IFolderDao<string>
+internal class SharePointFolderDao(
+    IDaoFactory daoFactory,
+    IServiceProvider serviceProvider,
+    UserManager userManager,
+    TenantManager tenantManager,
+    TenantUtil tenantUtil,
+    IDbContextFactory<FilesDbContext> dbContextManager,
+    FileUtility fileUtility,
+    CrossDao crossDao,
+    SharePointDaoSelector sharePointDaoSelector,
+    IFileDao<int> fileDao,
+    IFolderDao<int> folderDao,
+    SharePointDaoSelector regexDaoSelectorBase,
+    Global global)
+    : SharePointDaoBase(daoFactory, serviceProvider, userManager, tenantManager, tenantUtil, dbContextManager, fileUtility, regexDaoSelectorBase), IFolderDao<string>
     {
         private readonly TenantManager _tenantManager1 = tenantManager;
 
@@ -123,7 +122,7 @@ internal class SharePointFolderDao(IServiceProvider serviceProvider,
     }
 
     public IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, 
-        bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default)
+        bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default, bool containingMyFiles = false)
     {
         if (CheckInvalidFilter(filterType))
         {
@@ -217,7 +216,7 @@ internal class SharePointFolderDao(IServiceProvider serviceProvider,
         {
             var parentFolder = await SharePointProviderInfo.GetFolderByIdAsync(folder.ParentId);
 
-            folder.Title = await GetAvailableTitleAsync(folder.Title, parentFolder, IsExistAsync);
+            folder.Title = await global.GetAvailableTitleAsync(folder.Title, parentFolder.ServerRelativeUrl, IsExistAsync, FileEntryType.Folder);
 
             var newFolder = await SharePointProviderInfo.CreateFolderAsync(parentFolder.ServerRelativeUrl + "/" + folder.Title);
 
@@ -227,9 +226,9 @@ internal class SharePointFolderDao(IServiceProvider serviceProvider,
         return null;
     }
 
-    public async Task<bool> IsExistAsync(string title, Folder folder)
+    public async Task<bool> IsExistAsync(string title, string folder)
     {
-        var folderFolders = await SharePointProviderInfo.GetFolderFoldersAsync(folder.ServerRelativeUrl);
+        var folderFolders = await SharePointProviderInfo.GetFolderFoldersAsync(folder);
 
         return folderFolders.Any(item => item.Name.Equals(title, StringComparison.InvariantCultureIgnoreCase));
     }
@@ -358,6 +357,10 @@ internal class SharePointFolderDao(IServiceProvider serviceProvider,
     public async Task<string> UpdateFolderAsync(Folder<string> folder, string newTitle, long newQuota)
     {
         return await RenameFolderAsync(folder, newTitle);
+    }
+    public Task<string> ChangeFolderTypeAsync(Folder<string> folder, FolderType folderType)
+    {
+        return Task.FromResult<string>(null);
     }
     public async Task<string> RenameFolderAsync(Folder<string> folder, string newTitle)
     {

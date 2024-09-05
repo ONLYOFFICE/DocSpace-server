@@ -44,13 +44,10 @@ public enum FolderType
     VirtualRooms = 14,
     FillingFormsRoom = 15,
     EditingRoom = 16,
-    ReviewRoom = 17,
-    ReadOnlyRoom = 18,
     CustomRoom = 19,
     Archive = 20,
     ThirdpartyBackup = 21,
     PublicRoom = 22,
-    FormRoom = 24,
     ReadyFormFolder = 25,
     InProcessFormFolder = 26,
     FormFillingFolderDone = 27,
@@ -71,7 +68,8 @@ public interface IFolder
 }
 
 [DebuggerDisplay("{Title} ({Id})")]
-[Transient]
+[Transient(GenericArguments = [typeof(int)])]
+[Transient(GenericArguments = [typeof(string)])]
 public class Folder<T> : FileEntry<T>, IFolder
 {
     public FolderType FolderType { get; set; }
@@ -114,4 +112,5 @@ public class Folder<T> : FileEntry<T>, IFolder
     }
 
     public override string UniqID => $"folder_{Id}";
+    public bool IsRoot => FolderType == RootFolderType;
 }

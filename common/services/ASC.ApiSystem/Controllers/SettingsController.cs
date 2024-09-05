@@ -108,6 +108,18 @@ public class SettingsController(CommonMethods commonMethods,
             });
         }
 
+        if (model.Key.Equals("BaseDomain", StringComparison.InvariantCultureIgnoreCase))
+        {
+            if (Uri.CheckHostName(model.Value) != UriHostNameType.Dns)
+            {
+                return BadRequest(new
+                {
+                    error = "params",
+                    message = "BaseDomain is not valid"
+                });
+            }
+        }
+
         Log.LogDebug("Set {0} value {1} for {2}", model.Key, model.Value, tenantId.ToString());
 
         await CoreSettings.SaveSettingAsync(model.Key, model.Value, tenantId);

@@ -380,7 +380,7 @@
     <value>Administratoru skaits nedrīkst pārsniegt {0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Administratoru skaits</value>
+    <value>Administratoru/prasmīgo lietotāju skaits</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Automātiska dublēšana un atkopšana</value>
@@ -973,9 +973,6 @@
   <data name="TariffsFeature_thirdparty" xml:space="preserve">
     <value>Trešo pušu integrācija</value>
   </data>
-  <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Administratoru/prasmīgo lietotāju skaits:</value>
-  </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>Nepareizs kods</value>
   </data>
@@ -1038,5 +1035,26 @@
   </data>
   <data name="UserFreeSpaceException" xml:space="preserve">
     <value>Pārsniegta lietotāja vietas kvota</value>
+  </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>Uzaicinājumu ierobežojums ir pārsniegts</value>
+  </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>Lietotājs ir atspējots</value>
+  </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>Paroles maiņas instrukcija ir nosūtīta uz {0} e-pasta adresi.</value>
+  </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>Pievienoti administratori/prasmīgi lietotāji:</value>
+  </data>
+  <data name="ErrorEmailLinked" xml:space="preserve">
+    <value>Šī e-pasta adrese ir pievienota lietotājam {0} kā trešās puses pakalpojumu sniedzējam</value>
+  </data>
+  <data name="TariffsFeature_statistic" xml:space="preserve">
+    <value>Glabāšanas kvotas un statistika</value>
+  </data>
+  <data name="TariffsFeature_total_size" xml:space="preserve">
+    <value>{0} katram administratoram/galvenajam lietotājam un iespēja pievienot vietu pēc pieprasījuma</value>
   </data>
 </root>

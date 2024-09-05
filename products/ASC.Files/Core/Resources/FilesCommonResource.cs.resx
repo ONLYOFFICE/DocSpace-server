@@ -273,7 +273,7 @@ Je garantována 100% kompatibilita s MS Office formáty.</value>
     <value>Dokumenty</value>
   </data>
   <data name="ProductUserOpportunities" xml:space="preserve">
-    <value>Vytvořit a upravit vlastní dokumenty stejně tak jako sdílené dokumenty se správnými přístupními právy|Udělit přístup ke čtení/upravování dalším uživatelům k dokumentům a složkám|Odkaz na Dropbox, Box nebo další účty v sekci "Moje dokumenty"</value>
+    <value>Vytvořit a upravit vlastní dokumenty stejně tak jako sdílené dokumenty se správnými přístupními právy|Udělit přístup ke čtení/upravování dalším uživatelům k dokumentům a složkám|Odkaz na Dropbox, Box nebo další účty v sekci "Dokumenty"</value>
   </data>
   <data name="UnknownFirstName" xml:space="preserve">
     <value>Křestní jméno</value>
@@ -463,5 +463,41 @@ Je garantována 100% kompatibilita s MS Office formáty.</value>
   </data>
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>Typ</value>
+  </data>
+  <data name="Date" xml:space="preserve">
+    <value>Datum</value>
+  </data>
+  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
+    <value>Mocný uživatel</value>
+  </data>
+  <data name="RoleEnum_PowerUser" xml:space="preserve">
+    <value>Mocný uživatel</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>Uživatel</value>
+  </data>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>Přesun několika souborů do místnosti pro vyplňování formulářů není podporován. Přesouvejte vždy jen jeden formulář ONLYOFFICE PDF.</value>
+  </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>Přesun složek do místnosti pro vyplňování formulářů není podporován. Přesouvejte vždy jeden PDF formulář aplikace ONLYOFFICE.</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>Soubor nelze do této místnosti přesunout. Zkuste prosím přesunout PDF formulář ONLYOFFICE.</value>
+  </data>
+  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
+    <value>Soubor nelze do této místnosti nahrát. Zkuste prosím nahrát PDF formulář ONLYOFFICE.</value>
+  </data>
+  <data name="FillOutExternalLinkTitle" xml:space="preserve">
+    <value>Odkaz k vyplnění</value>
+  </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>Odkaz na formulář</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Otevřený formulář</value>
+  </data>
+  <data name="FormNumber" xml:space="preserve">
+    <value>Číslo formuláře</value>
   </data>
 </root>

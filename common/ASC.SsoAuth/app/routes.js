@@ -1,19 +1,28 @@
-/*
- *
- * (c) Copyright Ascensio System Limited 2010-2021
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * http://www.apache.org/licenses/LICENSE-2.0
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
-*/
-
+// (c) Copyright Ascensio System SIA 2009-2024
+// 
+// This program is a free software product.
+// You can redistribute it and/or modify it under the terms
+// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
+// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
+// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
+// any third-party rights.
+// 
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
+// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
+// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// 
+// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// 
+// The  interactive user interfaces in modified source and object code versions of the Program must
+// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// 
+// Pursuant to Section 7(b) of the License you must retain the original Product logo when
+// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
+// trademark law for use of our trademarks.
+// 
+// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
+// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
+// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 "use strict";
 
@@ -33,7 +42,8 @@ module.exports = function (app, config) {
   const UserModel = require("./model/user");
   const LogoutModel = require("./model/logout");
   const fs = require('fs');
-  
+  const crypto = require('crypto');
+
   let uploadDir = "";
   const selfSignedDomain = "myselfsigned.crt";
   const machineKey = config["core"].machinekey ? config["core"].machinekey : config.app.machinekey;
@@ -84,7 +94,7 @@ module.exports = function (app, config) {
         res.status(200).send(validateCertificate(req.body.certs));
     }
     catch (error) {
-        res.status(500).send("Invalid certificate");
+        res.status(500).send(error);
     }
   }
   function onUploadMetadata(req, res) {
@@ -190,10 +200,37 @@ module.exports = function (app, config) {
         key: key
     };
   }
+
+    function getCert(publicKey) {
+        try {
+            return new crypto.X509Certificate(publicKey);
+        } catch (error) {
+            logger.error(error.message);
+            return null;
+        }
+    }
+
+    function isPrivateKeyValid(privateKey) {
+        try {
+            const pk = crypto.createPrivateKey(privateKey);
+            return pk.asymmetricKeyType != null;
+        } catch (error) {
+            logger.error(error.message);
+            return false;
+        }
+    }
+    function getField(cnString, paramName) {
+        const cnPattern = new RegExp(`${paramName}=(.+)`);
+        const match = cnString.match(cnPattern);
+
+        if (match && match[1]) {
+            return match[1];
+        } else {
+            return null;
+        }
+    }
   function validateCertificate(certs){
     const result = [];
-    const pki = forge.pki;
-
     certs.forEach(function (data) {
         if (!data.crt)
             throw "Empty public certificate";
@@ -201,32 +238,34 @@ module.exports = function (app, config) {
         if (data.crt[0] !== "-")
             data.crt = "-----BEGIN CERTIFICATE-----\n" + data.crt + "\n-----END CERTIFICATE-----";
 
-        const cert = pki.certificateFromPem(data.crt);
-
-        const publicKey = cert.publicKey;
-        if (!publicKey)
+        const cert = getCert(data.crt);
+        if (cert == null) 
             throw "Invalid public cert";
 
+
         if (data.key) {
-            const privateKey = pki.privateKeyFromPem(data.key);
-            if (!privateKey)
+            if (!isPrivateKeyValid(data.key)) {
                 throw "Invalid private key";
+            }
 
-            const md = forge.md.sha1.create();
-            md.update('sign this', 'utf8');
-            const signature = privateKey.sign(md);
+            const certificate = crypto.createPublicKey(data.crt);
+            const privateKey = crypto.createPrivateKey(data.key);
 
-            // verify data with a public key
-            // (defaults to RSASSA PKCS#1 v1.5)
-            const verified = publicKey.verify(md.digest().bytes(), signature);
+            const signData = 'sign this';
 
-            if (!verified)
+            const signature = crypto.sign(null, Buffer.from(signData), privateKey);
+            const isVerified = crypto.verify(null, Buffer.from(signData), certificate, signature);
+
+            if (!isVerified) {
                 throw "Invalid key-pair (unverified signed data test)";
+            }
         }
+        const validFrom = new Date(cert.validFrom);
+        const validTo = new Date(cert.validTo);
+        const domainName = getField(cert.subject, "CN") || getField(cert.issuer, "CN");
+        const startDate = validFrom.toISOString().split(".")[0] + "Z";
+        const expiredDate = validTo.toISOString().split(".")[0] + "Z";
 
-        const domainName = cert.subject.getField("CN").value || cert.issuer.getField("CN").value;
-        const startDate = cert.validity.notBefore.toISOString().split(".")[0] + "Z";
-        const expiredDate = cert.validity.notAfter.toISOString().split(".")[0] + "Z";
 
         result.push({
             selfSigned: domainName === selfSignedDomain,
@@ -650,20 +689,24 @@ module.exports = function (app, config) {
       const isResponse = req.query.SAMLResponse || req.body.SAMLResponse;
 
       if (isResponse) {
-        const responseInfo = await sp.parseLogoutResponse(idp, method, req);
+        try {
+            const responseInfo = await sp.parseLogoutResponse(idp, method, req);
 
-        if (config.app.logSamlData) {
-          logger.debug(`onLogout->response ${JSON.stringify(responseInfo)}`);
+            if (config.app.logSamlData) {
+                logger.debug(`onLogout->response ${JSON.stringify(responseInfo)}`);
+            }
+        } catch (e) {
+            logger.debug(`ERROR: ${getError(e)}`);
         }
 
         return res.redirect(urlResolver.getPortalAuthUrl(req));
       } else {
-        const requestInfo = await sp.parseLogoutRequest(idp, method, req);
+            const requestInfo = await sp.parseLogoutRequest(idp, method, req);
 
-        if (config.app.logSamlData) {
-          logger.debug(`onLogout->request ${JSON.stringify(requestInfo)}`);
-        }
-
+            if (config.app.logSamlData) {
+                logger.debug(`onLogout->request ${JSON.stringify(requestInfo)}`);
+            }
+        
         const nameID = getNameId(requestInfo);
         const sessionIndex = getSessionIndex(requestInfo);
 

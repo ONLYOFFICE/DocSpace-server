@@ -136,7 +136,7 @@
     <value>In process</value>
   </data>
   <data name="MyFiles" xml:space="preserve">
-    <value>My documents</value>
+    <value>Documents</value>
   </data>
   <data name="Personal" xml:space="preserve">
     <value>Personal</value>
@@ -148,7 +148,7 @@
     <value>In projects</value>
   </data>
   <data name="ReadyFormFolder" xml:space="preserve">
-    <value>Ready</value>
+    <value>Complete</value>
   </data>
   <data name="Recent" xml:space="preserve">
     <value>Recent</value>

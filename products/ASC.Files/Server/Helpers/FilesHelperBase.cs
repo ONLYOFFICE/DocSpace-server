@@ -26,26 +26,24 @@
 
 namespace ASC.Files.Helpers;
 
-[Scope]
-public abstract class FilesHelperBase(FilesSettingsHelper filesSettingsHelper,
-        FileUploader fileUploader,
-        SocketManager socketManager,
-        FileDtoHelper fileDtoHelper,
-        ApiContext apiContext,
+public abstract class FilesHelperBase(
+    FilesSettingsHelper filesSettingsHelper,
+    FileUploader fileUploader,
+    SocketManager socketManager,
+    FileDtoHelper fileDtoHelper,
     FileStorageService fileStorageService,
-        FolderContentDtoHelper folderContentDtoHelper,
-        IHttpContextAccessor httpContextAccessor,
-        FolderDtoHelper folderDtoHelper)
+    FileChecker fileChecker,
+    IHttpContextAccessor httpContextAccessor,
+    IDistributedCache distributedCache)
     {
     protected readonly FilesSettingsHelper _filesSettingsHelper = filesSettingsHelper;
     protected readonly FileUploader _fileUploader = fileUploader;
-    protected readonly SocketManager _socketManager = socketManager;
     protected readonly FileDtoHelper _fileDtoHelper = fileDtoHelper;
-    protected readonly ApiContext _apiContext = apiContext;
     protected readonly FileStorageService _fileStorageService = fileStorageService;
-    protected readonly FolderContentDtoHelper _folderContentDtoHelper = folderContentDtoHelper;
+    protected readonly IDistributedCache _distributedCache = distributedCache;
+
+    protected readonly FileChecker _fileChecker = fileChecker;
     protected readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
-    protected readonly FolderDtoHelper _folderDtoHelper = folderDtoHelper;
 
     public async Task<FileDto<T>> InsertFileAsync<T>(T folderId, Stream file, string title, bool createNewIfExist, bool keepConvertStatus = false)
     {
@@ -53,7 +51,7 @@ public abstract class FilesHelperBase(FilesSettingsHelper filesSettingsHelper,
         {
             var resultFile = await _fileUploader.ExecAsync(folderId, title, file.Length, file, !createNewIfExist, !keepConvertStatus);
 
-            await _socketManager.CreateFileAsync(resultFile);
+            await socketManager.CreateFileAsync(resultFile);
 
             return await _fileDtoHelper.GetAsync(resultFile);
         }

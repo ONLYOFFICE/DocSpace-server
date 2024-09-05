@@ -34,8 +34,7 @@ public class MigrationOperation(
     MigrationCore migrationCore,
     TenantManager tenantManager,
     SecurityContext securityContext,
-    IServiceProvider serviceProvider,
-    StorageFactory storageFactory)
+    IDistributedCache cache)
     : DistributedTaskProgress
 {
     private string _migratorName;
@@ -55,22 +54,22 @@ public class MigrationOperation(
     private MigrationApiInfo _migrationApiInfo;
     public MigrationApiInfo MigrationApiInfo
     {
-        get => _migrationApiInfo ?? System.Text.Json.JsonSerializer.Deserialize<MigrationApiInfo>(this[nameof(_migrationApiInfo)]);
+        get => _migrationApiInfo ?? JsonSerializer.Deserialize<MigrationApiInfo>(this[nameof(_migrationApiInfo)]);
         set
         {
             _migrationApiInfo = value;
-            this[nameof(_migrationApiInfo)] = System.Text.Json.JsonSerializer.Serialize(value);
+            this[nameof(_migrationApiInfo)] = JsonSerializer.Serialize(value);
         }
     }
 
     private List<string> _importedUsers;
     public List<string> ImportedUsers
     {
-        get => _importedUsers ?? System.Text.Json.JsonSerializer.Deserialize<List<string>>(this[nameof(_importedUsers)]);
+        get => _importedUsers ?? JsonSerializer.Deserialize<List<string>>(this[nameof(_importedUsers)]);
         set
         {
             _importedUsers = value;
-            this[nameof(_importedUsers)] = System.Text.Json.JsonSerializer.Serialize(value);
+            this[nameof(_importedUsers)] = JsonSerializer.Serialize(value);
         }
     }
 
@@ -123,15 +122,18 @@ public class MigrationOperation(
                 throw new ItemNotFoundException(MigrationResource.MigrationNotFoundException);
             }
 
-            var discStore = await storageFactory.GetStorageAsync(TenantId, "migration", (IQuotaController)null) as DiscDataStore;
-            var folder = discStore.GetPhysicalPath("", "");
+            var folder = await cache.GetStringAsync($"migration folder - {TenantId}");
             await migrator.InitAsync(folder, CancellationToken, onlyParse ? OperationType.Parse : OperationType.Migration);
 
-            var result = await migrator.ParseAsync(onlyParse);
+            await migrator.ParseAsync(onlyParse);
             if (!onlyParse)
             {
                 await migrator.MigrateAsync(copyInfo);
             }
+        }
+        catch (DirectoryNotFoundException)
+        {
+            Exception = new Exception(FilesCommonResource.ErrorMessage_FileNotFound);
         }
         catch (Exception e)
         {
@@ -148,9 +150,9 @@ public class MigrationOperation(
             {
                 ImportedUsers = migrator.GetGuidImportedUsers();
                 LogName = migrator.GetLogName();
-                migrator.Dispose();
+                await migrator.DisposeAsync();
             }
-            if (!CancellationToken.IsCancellationRequested) 
+            if (!CancellationToken.IsCancellationRequested)
             {
                 IsCompleted = true;
                 await PublishChanges();
@@ -166,12 +168,5 @@ public class MigrationOperation(
             }
             await PublishChanges();
         }
-    }
-
-    public async Task CopyLogsAsync(Stream stream)
-    {
-        using var logger = serviceProvider.GetService<MigrationLogger>();
-        await logger.InitAsync(LogName);
-        await logger.GetStream().CopyToAsync(stream);
     }
 }

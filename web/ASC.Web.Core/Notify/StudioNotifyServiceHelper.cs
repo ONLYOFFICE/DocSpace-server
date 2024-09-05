@@ -97,7 +97,7 @@ public class StudioNotifyServiceHelper(StudioNotifyHelper studioNotifyHelper,
             item.Tags = args.Where(r => r.Value != null).Select(r => new Tag { Key = r.Tag, Value = r.Value.ToString() }).ToList();
         }
 
-        eventBus.Publish(item);
+        await eventBus.PublishAsync(item);
     }
     
     public async Task SendNoticeAsync(INotifyAction action, params ITagValue[] args)

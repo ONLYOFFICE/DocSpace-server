@@ -343,9 +343,6 @@
   <data name="Owner" xml:space="preserve">
     <value>创建者</value>
   </data>
-  <data name="PersonalFreeSpaceException" xml:space="preserve">
-    <value>超过磁盘空间配额</value>
-  </data>
   <data name="PortalSecurity" xml:space="preserve">
     <value>门户访问</value>
   </data>
@@ -395,7 +392,7 @@
     <value>设置已更新</value>
   </data>
   <data name="SuccessfullySentNotificationDeleteUserInfoMessage" xml:space="preserve">
-    <value>有关删除个人账号的详细指引已发送到您提供的 {0} 邮件地址中</value>
+    <value>有关禁用个人账号的详细指引已发送至 {0} 邮件地址</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>验证码有误</value>
@@ -419,7 +416,7 @@
     <value>管理员的数量不应超过{0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>管理员的数量</value>
+    <value>管理员/高级用户数量</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>自动备份与恢复</value>
@@ -434,7 +431,7 @@
     <value>SSO单点登录</value>
   </data>
   <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} 存储空间</value>
+    <value>每个管理员/高级用户 {0}，并且能够请求增加空间</value>
   </data>
   <data name="TariffsFeature_total_size_exception" xml:space="preserve">
     <value>使用的存储空间大小不应超过{0}</value>
@@ -465,9 +462,6 @@
   </data>
   <data name="TariffsFeature_whitelabel" xml:space="preserve">
     <value>品牌化&amp;个性定制</value>
-  </data>
-  <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>管理员/高级用户数量:</value>
   </data>
   <data name="ConsumersBitly" xml:space="preserve">
     <value>比特利</value>
@@ -1044,5 +1038,23 @@
   </data>
   <data name="UserFreeSpaceException" xml:space="preserve">
     <value>已超出用户空间配额</value>
+  </data>
+  <data name="TariffsFeature_statistic" xml:space="preserve">
+    <value>存储配额 &amp; 统计</value>
+  </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>禁用用户</value>
+  </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>管理员/高级用户已添加：</value>
+  </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>邀请人数已超过上限</value>
+  </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>密码更改说明已发送至 {0} 电子邮件地址。</value>
+  </data>
+  <data name="ErrorEmailLinked" xml:space="preserve">
+    <value>此电子邮件已作为第三方提供商附加到用户 {0}</value>
   </data>
 </root>

@@ -32,7 +32,7 @@ public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : new()
     private IConnection _connection;
     private readonly ConnectionFactory _factory;
 
-    private IModel _consumerChannel;
+    private IChannel _consumerChannel;
     private readonly string _exchangeName;
     private readonly string _queueName;
 
@@ -41,6 +41,8 @@ public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : new()
 
     private readonly object _lock = new();
     private bool _disposed;
+
+    private readonly Task _initializeTask;
 
     public RabbitMQCache(IConfiguration configuration, ILogger<RabbitMQCache<T>> logger)
     {
@@ -53,45 +55,54 @@ public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : new()
         var rabbitMQConfiguration = configuration.GetSection("rabbitmq").Get<RabbitMQSettings>();
 
         _factory = rabbitMQConfiguration.GetConnectionFactory();
-
-        _connection = _factory.CreateConnection();
-        _consumerChannel = CreateConsumerChannel();
-
-        StartBasicConsume();
+        _initializeTask = InitializeAsync();
     }
 
-    private IModel CreateConsumerChannel()
+    private async Task InitializeAsync()
     {
-        TryConnect();
+        if (_connection is not null) return;
+
+        _connection = await _factory.CreateConnectionAsync();
+        _consumerChannel = await CreateConsumerChannelAsync();
+
+        await StartBasicConsumeAsync();
+
+        //diligently initializing
+        await Task.Delay(100);
+    }
+
+    private async Task<IChannel> CreateConsumerChannelAsync()
+    {
+        await TryConnect();
 
         _logger.TraceCreatingRabbitMQ();
 
-        var channel = _connection.CreateModel();
+        var channel = await _connection.CreateChannelAsync();
 
-        channel.ExchangeDeclare(exchange: _exchangeName, type: ExchangeType.Fanout);
-        channel.QueueDeclare(queue: _queueName,
-            durable: false,
-            exclusive: false,
-            autoDelete: true,
-            arguments: null);
+        await channel.ExchangeDeclareAsync(exchange: _exchangeName, type: ExchangeType.Fanout);
+        await channel.QueueDeclareAsync(queue: _queueName,
+                                        durable: false,
+                                        exclusive: false,
+                                        autoDelete: true,
+                                        arguments: null);
 
-        channel.QueueBind(_queueName, _exchangeName, string.Empty, null);
+        await channel.QueueBindAsync(_queueName, _exchangeName, string.Empty, null);
 
-        channel.CallbackException += (_, ea) =>
+        channel.CallbackException += async (_, ea) =>
         {
             _logger.WarningRecreatingRabbitMQ(ea.Exception);
 
             _consumerChannel.Dispose();
-            _consumerChannel = CreateConsumerChannel();
+            _consumerChannel = await CreateConsumerChannelAsync();
 
-            StartBasicConsume();
+            await StartBasicConsumeAsync();
 
         };
 
         return channel;
     }
 
-    private void StartBasicConsume()
+    private async Task StartBasicConsumeAsync()
     {
         _logger.TraceStartingRabbitMQ();
 
@@ -101,28 +112,26 @@ public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : new()
 
             consumer.Received += OnMessageReceived;
 
-            _consumerChannel.BasicConsume(queue: _queueName, autoAck: true, consumer: consumer);
+            await _consumerChannel.BasicConsumeAsync(queue: _queueName, autoAck: true, consumer: consumer);
         }
         else
         {
             _logger.ErrorStartBasicConsumeCanNotCall();
         }
     }
-    
-    private void TryConnect()
-    {
-        lock (_lock)
-        {
-            if (IsConnected)
-            {
-                return;
-            }
 
-            _connection = _factory.CreateConnection();
-            _connection.ConnectionShutdown += (_, _) => TryConnect();
-            _connection.CallbackException += (_, _) => TryConnect();
-            _connection.ConnectionBlocked += (_, _) => TryConnect();
+    private async Task TryConnect()
+    {
+        if (IsConnected)
+        {
+            return;
         }
+
+        _connection = await _factory.CreateConnectionAsync();
+        _connection.ConnectionShutdown += async (_, _) => await TryConnect();
+        _connection.CallbackException += async (_, _) =>  await TryConnect();
+        _connection.ConnectionBlocked += async (_, _) => await TryConnect();
+
     }
 
 
@@ -144,8 +153,10 @@ public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : new()
         }
     }
 
-    public void Publish(T obj, CacheNotifyAction action)
+    public async Task PublishAsync(T obj, CacheNotifyAction action)
     {
+        await _initializeTask;
+
         var objAsByteArray = BaseProtobufSerializer.Serialize(obj);
 
         var body = new byte[objAsByteArray.Length + 1];
@@ -153,20 +164,13 @@ public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : new()
         objAsByteArray.CopyTo(body, 0);
 
         body[body.Length - 1] = (byte)action;
-
-        _consumerChannel.BasicPublish(
+     
+        await _consumerChannel.BasicPublishAsync(
                              exchange: _exchangeName,
                              routingKey: string.Empty,
                              mandatory: true,
-                             basicProperties: _consumerChannel.CreateBasicProperties(),
+                             basicProperties: new BasicProperties(),
                              body: body);
-    }
-
-    public Task PublishAsync(T obj, CacheNotifyAction action)
-    {
-        Publish(obj, action);
-
-        return Task.CompletedTask;
     }
 
 

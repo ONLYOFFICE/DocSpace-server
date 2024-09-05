@@ -50,10 +50,11 @@ public static class OpenApiExtension
             c.SwaggerDoc("common", new OpenApiInfo { Title = assemblyName, Version = "v2" });
 
             // ToDo: add security definitions
-            c.AddSecurityDefinition("asc_auth_key", new OpenApiSecurityScheme
+            c.AddSecurityDefinition(CookiesManager.AuthCookiesName, new OpenApiSecurityScheme
             {
                 Type = SecuritySchemeType.ApiKey,
-                In = ParameterLocation.Cookie
+                In = ParameterLocation.Cookie,
+                Name = CookiesManager.AuthCookiesName
             });
 
             var xmlPath = Path.Combine(AppContext.BaseDirectory, $"{assemblyName}.xml");
@@ -75,7 +76,7 @@ public static class OpenApiExtension
 
         app.UseSwagger(c =>
         {
-            c.RouteTemplate = $"openapi/{assemblyName.ToLower()}/{{documentName}}.yaml";
+            c.RouteTemplate = $"openapi/{assemblyName.ToLower()}/{{documentName}}.{{extension:regex(^(json|ya?ml)$)}}";
         });
         
         return app;

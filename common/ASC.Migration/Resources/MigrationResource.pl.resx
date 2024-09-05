@@ -153,9 +153,6 @@
   <data name="MigrationCommonFiles" xml:space="preserve">
     <value>Migracja wspólnych plików</value>
   </data>
-  <data name="MigrationInitException" xml:space="preserve">
-    <value>Błąd podczas inicjowania migratora {0}</value>
-  </data>
   <data name="MigrationNotFoundException" xml:space="preserve">
     <value>Nie ma takiego dostawcy migracji</value>
   </data>
@@ -165,10 +162,52 @@
   <data name="MigrationProjectFiles" xml:space="preserve">
     <value>Migracja plików z projektów</value>
   </data>
-  <data name="MigrationStartException" xml:space="preserve">
-    <value>Parsowanie jest nadal w toku</value>
+  <data name="CanNotAddUserInGroup" xml:space="preserve">
+    <value>Nie udało się dodać użytkownika {0} do grupy {1}</value>
   </data>
-  <data name="MigrationUploadException" xml:space="preserve">
-    <value>Migracja jest już w toku</value>
+  <data name="CanNotCreateFile" xml:space="preserve">
+    <value>Nie udało się utworzyć pliku {0}</value>
+  </data>
+  <data name="CanNotImportUser" xml:space="preserve">
+    <value>Nie udało się zaimportować użytkownika</value>
+  </data>
+  <data name="CanNotImportUserFiles" xml:space="preserve">
+    <value>Nie udało się zaimportować plików użytkownika</value>
+  </data>
+  <data name="CanNotParseArchive" xml:space="preserve">
+    <value>Nie udało się przeanalizować archiwum {0}</value>
+  </data>
+  <data name="CanNotParseArchives" xml:space="preserve">
+    <value>Nie udało się przeanalizować archiwów</value>
+  </data>
+  <data name="CanNotParseUser" xml:space="preserve">
+    <value>Nie udało się się przeanalizować użytkownika {0}</value>
+  </data>
+  <data name="CanNotReadInfoFile" xml:space="preserve">
+    <value>Nie udało się odczytać pliku danych z {0}</value>
+  </data>
+  <data name="CanNotShare" xml:space="preserve">
+    <value>Nie udało się udostępnić wpisu {0} {1}</value>
+  </data>
+  <data name="CanNotToUnzip" xml:space="preserve">
+    <value>Nie udało się rozpakować {0}</value>
+  </data>
+  <data name="CreateFile" xml:space="preserve">
+    <value>Utwórz plik {0}</value>
+  </data>
+  <data name="CreateFolder" xml:space="preserve">
+    <value>Utwórz katalog {0}</value>
+  </data>
+  <data name="CreateShareRoom" xml:space="preserve">
+    <value>utwórz pokój współdzielony {0}</value>
+  </data>
+  <data name="СanNotImportCommonFiles" xml:space="preserve">
+    <value>Nie udało się zaimportować wspólnych plików</value>
+  </data>
+  <data name="СanNotImportProjectFiles" xml:space="preserve">
+    <value>Nie udało się zaimportować plików projektu</value>
+  </data>
+  <data name="СreateRootFolder" xml:space="preserve">
+    <value>Utwórz katalog główny</value>
   </data>
 </root>

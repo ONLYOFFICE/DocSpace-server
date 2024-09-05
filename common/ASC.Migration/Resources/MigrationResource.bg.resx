@@ -153,9 +153,6 @@
   <data name="MigrationCommonFiles" xml:space="preserve">
     <value>Общи файлове за миграция</value>
   </data>
-  <data name="MigrationInitException" xml:space="preserve">
-    <value>Грешка при инициализиране мигратора на {0}</value>
-  </data>
   <data name="MigrationNotFoundException" xml:space="preserve">
     <value>Няма такъв доставчик на миграция</value>
   </data>
@@ -165,10 +162,52 @@
   <data name="MigrationProjectFiles" xml:space="preserve">
     <value>Проектни файлове за миграция</value>
   </data>
-  <data name="MigrationStartException" xml:space="preserve">
-    <value>Анализът все още се изпълнява</value>
+  <data name="CanNotAddUserInGroup" xml:space="preserve">
+    <value>Не можахме да добавим потребител {0} към група {1}</value>
   </data>
-  <data name="MigrationUploadException" xml:space="preserve">
-    <value>Миграцията вече се изпълнява</value>
+  <data name="CanNotCreateFile" xml:space="preserve">
+    <value>Не можахме да се създадем файл {0}</value>
+  </data>
+  <data name="CanNotImportUser" xml:space="preserve">
+    <value>Не можахме да импортираме потребител</value>
+  </data>
+  <data name="CanNotImportUserFiles" xml:space="preserve">
+    <value>Не можахме да импортираме потребителски файлове</value>
+  </data>
+  <data name="CanNotParseArchive" xml:space="preserve">
+    <value>Не можахме да анализираме {0} архив</value>
+  </data>
+  <data name="CanNotParseArchives" xml:space="preserve">
+    <value>Не можахме да анализираме архиви</value>
+  </data>
+  <data name="CanNotParseUser" xml:space="preserve">
+    <value>Не можахме да анализираме потребител {0}</value>
+  </data>
+  <data name="CanNotReadInfoFile" xml:space="preserve">
+    <value>Не можахме да прочетем информационен файл от {0}</value>
+  </data>
+  <data name="CanNotShare" xml:space="preserve">
+    <value>Не можахме да споделим запис {0} до {1}</value>
+  </data>
+  <data name="CanNotToUnzip" xml:space="preserve">
+    <value>Не можахме да разархивираме {0}</value>
+  </data>
+  <data name="CreateFile" xml:space="preserve">
+    <value>Създайте файл {0}</value>
+  </data>
+  <data name="CreateFolder" xml:space="preserve">
+    <value>Създайте папка {0}</value>
+  </data>
+  <data name="CreateShareRoom" xml:space="preserve">
+    <value>създайте споделена стая {0}</value>
+  </data>
+  <data name="СreateRootFolder" xml:space="preserve">
+    <value>Създайте основна папка</value>
+  </data>
+  <data name="СanNotImportCommonFiles" xml:space="preserve">
+    <value>Не можахме да импортираме файлове на проекта</value>
+  </data>
+  <data name="СanNotImportProjectFiles" xml:space="preserve">
+    <value>Не можахме да импортираме файлове на проекта</value>
   </data>
 </root>

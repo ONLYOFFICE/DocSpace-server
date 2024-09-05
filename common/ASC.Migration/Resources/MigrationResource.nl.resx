@@ -153,9 +153,6 @@
   <data name="MigrationCommonFiles" xml:space="preserve">
     <value>Algemene bestanden voor migratie</value>
   </data>
-  <data name="MigrationInitException" xml:space="preserve">
-    <value>Fout bij het initialiseren van {0} migrator</value>
-  </data>
   <data name="MigrationNotFoundException" xml:space="preserve">
     <value>Geen dergelijke migratieprovider</value>
   </data>
@@ -165,10 +162,52 @@
   <data name="MigrationProjectFiles" xml:space="preserve">
     <value>Migratie projectbestanden</value>
   </data>
-  <data name="MigrationStartException" xml:space="preserve">
-    <value>Parsing is nog bezig</value>
+  <data name="CanNotAddUserInGroup" xml:space="preserve">
+    <value>Kan gebruiker {0} niet toevoegen aan groep {1}</value>
   </data>
-  <data name="MigrationUploadException" xml:space="preserve">
-    <value>Migratie is al bezig</value>
+  <data name="CanNotCreateFile" xml:space="preserve">
+    <value>Kon bestand {0} niet aanmaken</value>
+  </data>
+  <data name="CanNotImportUser" xml:space="preserve">
+    <value>Kon gebruiker niet importeren</value>
+  </data>
+  <data name="CanNotImportUserFiles" xml:space="preserve">
+    <value>Kon gebruikersbestanden niet importeren</value>
+  </data>
+  <data name="CanNotParseArchive" xml:space="preserve">
+    <value>Kon {0} archief niet parsen</value>
+  </data>
+  <data name="CanNotParseArchives" xml:space="preserve">
+    <value>Kon archieven niet parsen</value>
+  </data>
+  <data name="CanNotParseUser" xml:space="preserve">
+    <value>Kon gebruiker {0} niet parsen</value>
+  </data>
+  <data name="CanNotReadInfoFile" xml:space="preserve">
+    <value>Kon infobestand van {0} niet lezen</value>
+  </data>
+  <data name="CanNotShare" xml:space="preserve">
+    <value>Kon item {0} niet delen met {1}</value>
+  </data>
+  <data name="CanNotToUnzip" xml:space="preserve">
+    <value>Kon {0} niet uitpakken</value>
+  </data>
+  <data name="CreateFile" xml:space="preserve">
+    <value>Maak bestand {0} aan</value>
+  </data>
+  <data name="CreateFolder" xml:space="preserve">
+    <value>Maak map {0} aan</value>
+  </data>
+  <data name="CreateShareRoom" xml:space="preserve">
+    <value>maak gedeelde kamer {0}</value>
+  </data>
+  <data name="СanNotImportCommonFiles" xml:space="preserve">
+    <value>Kon algemene bestanden niet importeren</value>
+  </data>
+  <data name="СanNotImportProjectFiles" xml:space="preserve">
+    <value>Kan projectbestanden niet importeren</value>
+  </data>
+  <data name="СreateRootFolder" xml:space="preserve">
+    <value>Hoofdmap aanmaken</value>
   </data>
 </root>

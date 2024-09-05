@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Service.IntegrationEvents.EventHandling;
+
 using NLog;
 
 var options = new WebApplicationOptions
@@ -54,7 +56,7 @@ try
     builder.Host.ConfigureDefault();
     builder.Host.ConfigureContainer<ContainerBuilder>((context, containerBuilder) =>
     {
-        containerBuilder.Register(context.Configuration, true, "search.json", "feed.json");
+        containerBuilder.Register(context.Configuration);
     });
 
     var startup = new Startup(builder.Configuration, builder.Environment);
@@ -67,13 +69,14 @@ try
 
     var eventBus = ((IApplicationBuilder)app).ApplicationServices.GetRequiredService<IEventBus>();
 
-    eventBus.Subscribe<ThumbnailRequestedIntegrationEvent, ThumbnailRequestedIntegrationEventHandler>();
-    eventBus.Subscribe<RoomIndexExportIntegrationEvent, RoomIndexExportIntegrationEventHandler>();
-    eventBus.Subscribe<DeleteIntegrationEvent, DeleteIntegrationEventHandler>();
-    eventBus.Subscribe<MoveOrCopyIntegrationEvent, MoveOrCopyIntegrationEventHandler>();
-    eventBus.Subscribe<BulkDownloadIntegrationEvent, BulkDownloadIntegrationEventHandler>();
-    eventBus.Subscribe<MarkAsReadIntegrationEvent, MarkAsReadIntegrationEventHandler>();
-    eventBus.Subscribe<EmptyTrashIntegrationEvent, EmptyTrashIntegrationEventHandler>();
+    await eventBus.SubscribeAsync<ThumbnailRequestedIntegrationEvent, ThumbnailRequestedIntegrationEventHandler>();
+    await eventBus.SubscribeAsync<RoomIndexExportIntegrationEvent, RoomIndexExportIntegrationEventHandler>();
+    await eventBus.SubscribeAsync<DeleteIntegrationEvent, DeleteIntegrationEventHandler>();
+    await eventBus.SubscribeAsync<MoveOrCopyIntegrationEvent, MoveOrCopyIntegrationEventHandler>();
+    await eventBus.SubscribeAsync<DuplicateIntegrationEvent, DuplicateIntegrationEventHandler>();
+    await eventBus.SubscribeAsync<BulkDownloadIntegrationEvent, BulkDownloadIntegrationEventHandler>();
+    await eventBus.SubscribeAsync<MarkAsReadIntegrationEvent, MarkAsReadIntegrationEventHandler>();
+    await eventBus.SubscribeAsync<EmptyTrashIntegrationEvent, EmptyTrashIntegrationEventHandler>();
 
     logger.Info("Starting web host ({applicationContext})...", AppName);
     await app.RunWithTasksAsync();

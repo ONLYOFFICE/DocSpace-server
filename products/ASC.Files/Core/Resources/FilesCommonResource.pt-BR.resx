@@ -315,7 +315,7 @@
     <value>Documentos</value>
   </data>
   <data name="ProductUserOpportunities" xml:space="preserve">
-    <value>Crie e edite documentos próprios bem como documentos compartilhados com os direitos de acesso adequados|Forneça acesso de leitura/gravação para outros usuários aos documentos e pastas|Conecte a Dropbox, Box e outras contas na seção "Meus documentos"</value>
+    <value>Crie e edite documentos próprios bem como documentos compartilhados com os direitos de acesso adequados|Forneça acesso de leitura/gravação para outros usuários aos documentos e pastas|Conecte a Dropbox, Box e outras contas na seção "Documentos"</value>
   </data>
   <data name="UnknownFirstName" xml:space="preserve">
     <value>Nome</value>
@@ -463,5 +463,41 @@
   </data>
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>Tipo</value>
+  </data>
+  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
+    <value>Usuário avançado</value>
+  </data>
+  <data name="Date" xml:space="preserve">
+    <value>Data</value>
+  </data>
+  <data name="RoleEnum_PowerUser" xml:space="preserve">
+    <value>Usuário avançado</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>Usuário</value>
+  </data>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>Não é possível mover vários arquivos para a sala Preenchimento de formulários. Mova um formulário PDF do ONLYOFFICE por vez.</value>
+  </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>Não há suporte para mover pastas para a sala Preenchimento de formulários. Mova um formulário PDF do ONLYOFFICE por vez.</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>O arquivo não pode ser movido para esta sala. Tente mover o formulário PDF do ONLYOFFICE.</value>
+  </data>
+  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
+    <value>O arquivo não pode ser carregado nesta sala. Tente fazer upload do formulário PDF do ONLYOFFICE.</value>
+  </data>
+  <data name="FillOutExternalLinkTitle" xml:space="preserve">
+    <value>Link para preencher</value>
+  </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>Link para formulário</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Abrir formulário</value>
+  </data>
+  <data name="FormNumber" xml:space="preserve">
+    <value>Número do formulário</value>
   </data>
 </root>

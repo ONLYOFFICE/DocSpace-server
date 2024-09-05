@@ -150,7 +150,7 @@ public class FileDownloadOperation(IServiceProvider serviceProvider) : ComposeFi
                 MimeMapping.GetMimeMapping(path),
                 "attachment; filename=\"" + Uri.EscapeDataString(fileName) + "\"");
 
-            this[Res] = $"{filesLinkUtility.FileHandlerPath}?{FilesLinkUtility.Action}=bulk&filename={Uri.EscapeDataString(instanceCrypto.Encrypt(fileName))}";
+            this[Res] = $"{filesLinkUtility.FileHandlerPath}?{FilesLinkUtility.Action}=bulk&filename={Uri.EscapeDataString(await instanceCrypto.EncryptAsync(fileName))}";
 
             if (!isAuthenticated)
             {

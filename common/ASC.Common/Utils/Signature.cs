@@ -67,8 +67,6 @@ public class Signature(MachinePseudoKeys machinePseudoKeys)
 
     private static string GetHashBase64(string str)
     {
-        using var sha256 = SHA256.Create();
-
-        return Convert.ToBase64String(sha256.ComputeHash(Encoding.UTF8.GetBytes(str)));
+        return Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(str)));
     }
 }

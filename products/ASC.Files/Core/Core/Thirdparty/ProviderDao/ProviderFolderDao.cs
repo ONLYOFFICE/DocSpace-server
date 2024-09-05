@@ -27,7 +27,7 @@
 
 namespace ASC.Files.Thirdparty.ProviderDao;
 
-[Scope]
+[Scope(typeof(IFolderDao<string>))]
 internal class ProviderFolderDao(SetupInfo setupInfo,
         IServiceProvider serviceProvider,
         TenantManager tenantManager,
@@ -176,7 +176,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
     }
 
     public async IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
-        bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default)
+        bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default, bool containingMyFiles = false)
     {
         var selector = _selectorFactory.GetSelector(parentId);
         var folderDao = selector.GetFolderDao(parentId);
@@ -377,6 +377,10 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
     {
         return await RenameFolderAsync(folder, newTitle);
     }
+    public Task<string> ChangeFolderTypeAsync(Folder<string> folder, FolderType folderType)
+    {
+        return Task.FromResult<string>(null);
+    }
     public async Task<string> RenameFolderAsync(Folder<string> folder, string newTitle)
     {
         var folderId = folder.Id;
@@ -481,6 +485,13 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         var selector = _selectorFactory.GetSelector(folderId);
         var folderDao = selector.GetFolderDao(folderId);
         return await folderDao.GetBackupExtensionAsync(folderId);
+    }
+    
+    public Task<bool> IsExistAsync(string title, string folderId)
+    {
+        var selector = _selectorFactory.GetSelector(folderId);
+        var folderDao = selector.GetFolderDao(folderId);
+        return folderDao.IsExistAsync(title, folderId);
     }
 
     private static IAsyncEnumerable<Folder<string>> FilterByProvider(IAsyncEnumerable<Folder<string>> folders, ProviderFilter provider)

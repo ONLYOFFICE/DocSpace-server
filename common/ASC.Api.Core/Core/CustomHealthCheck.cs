@@ -51,7 +51,7 @@ public static class CustomHealthCheck
     public static IHealthChecksBuilder AddDistibutedCache(
         this IHealthChecksBuilder hcBuilder, IConfiguration configuration)
     {
-        var redisConfiguration = configuration.GetSection("Redis");
+        var redisConfiguration = configuration.GetSection("Redis").Get<RedisConfiguration>();
 
         if (redisConfiguration != null)
         {
@@ -90,22 +90,21 @@ public static class CustomHealthCheck
     }
 
 
-    public static IHealthChecksBuilder AddMessageQueue(
-               this IHealthChecksBuilder hcBuilder, IConfiguration configuration)
+    public static IHealthChecksBuilder AddMessageQueue(this IHealthChecksBuilder hcBuilder, IConfiguration configuration)
     {
         var rabbitMQConfiguration = configuration.GetSection("RabbitMQ").Get<RabbitMQSettings>();
 
         if (rabbitMQConfiguration != null)
         {
-            hcBuilder.AddRabbitMQ(x => x.ConnectionFactory = rabbitMQConfiguration.GetConnectionFactory(),
-                              name: "rabbitMQ",
-                              tags: new[] { "rabbitMQ", "services" },
-                              timeout: new TimeSpan(0, 0, 15));
+            // TODO: add healthcheck for rabbitmq
+            //hcBuilder.AddRabbitMQ(x => x.ConnectionFactory = rabbitMQConfiguration.GetConnectionFactory(),
+            //                  name: "rabbitMQ",
+            //                  tags: new[] { "rabbitMQ", "services" },
+            //                  timeout: new TimeSpan(0, 0, 15));
         }
         else
         {
-            var configurationExtension = new ConfigurationExtension(configuration);
-            var kafkaSettings = configurationExtension.GetSetting<KafkaSettings>("kafka");
+            var kafkaSettings = configuration.GetSection("kafka").Get<KafkaSettings>();
 
             if (kafkaSettings != null && !string.IsNullOrEmpty(kafkaSettings.BootstrapServers))
             {

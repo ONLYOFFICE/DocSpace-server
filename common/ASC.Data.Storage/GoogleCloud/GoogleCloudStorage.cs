@@ -46,6 +46,7 @@ public class GoogleCloudStorage(TempStream tempStream,
     : BaseStorage(tempStream, tenantManager, pathUtils, emailValidationKeyProvider, httpContextAccessor, factory, options, clientFactory, tenantQuotaFeatureStatHelper, quotaSocketManager, settingsManager, quotaService, userManager, customQuota)
 {
     public override bool IsSupportChunking => true;
+    public override bool ContentAsAttachment => _contentAsAttachment;
 
     private string _subDir = string.Empty;
     private Dictionary<string, PredefinedObjectAcl> _domainsAcl;
@@ -55,6 +56,7 @@ public class GoogleCloudStorage(TempStream tempStream,
     private Uri _bucketRoot;
     private Uri _bucketSSlRoot;
     private bool _lowerCasing = true;
+    private bool _contentAsAttachment;
 
     public override IDataStore Configure(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props, IDataStoreValidator dataStoreValidator)
     {
@@ -64,6 +66,8 @@ public class GoogleCloudStorage(TempStream tempStream,
         {
             Modulename = moduleConfig.Name;
             DataList = new DataList(moduleConfig);
+
+            _contentAsAttachment = moduleConfig.ContentAsAttachment;
 
             DomainsExpires = moduleConfig.Domain.Where(x => x.Expires != TimeSpan.Zero).ToDictionary(x => x.Name, y => y.Expires);
 
@@ -223,51 +227,60 @@ public class GoogleCloudStorage(TempStream tempStream,
                   string contentDisposition, ACL acl, string contentEncoding = null, int cacheDays = 5)
     {
 
-        var buffered = await _tempStream.GetBufferedAsync(stream);
-
-        if (EnableQuotaCheck(domain))
+        var (buffered, isNew) = await _tempStream.TryGetBufferedAsync(stream);
+        try
         {
-            await QuotaController.QuotaUsedCheckAsync(buffered.Length, ownerId);
+            if (EnableQuotaCheck(domain))
+            {
+                await QuotaController.QuotaUsedCheckAsync(buffered.Length, ownerId);
+            }
+
+            var mime = string.IsNullOrEmpty(contentType)
+                        ? MimeMapping.GetMimeMapping(Path.GetFileName(path))
+                        : contentType;
+
+            using var storage = await GetStorageAsync();
+
+            var uploadObjectOptions = new UploadObjectOptions
+            {
+                PredefinedAcl = acl == ACL.Auto ? GetDomainACL(domain) : GetGoogleCloudAcl(acl)
+            };
+
+            buffered.Position = 0;
+
+            var uploaded = await storage.UploadObjectAsync(_bucket, MakePath(domain, path), mime, buffered, uploadObjectOptions);
+
+            uploaded.ContentEncoding = contentEncoding;
+            uploaded.CacheControl = string.Format("public, maxage={0}", (int)TimeSpan.FromDays(cacheDays).TotalSeconds);
+
+            uploaded.Metadata ??= new Dictionary<string, string>();
+
+            uploaded.Metadata["Expires"] = DateTime.UtcNow.Add(TimeSpan.FromDays(cacheDays)).ToString("R", CultureInfo.InvariantCulture);
+
+            if (!string.IsNullOrEmpty(contentDisposition))
+            {
+                uploaded.ContentDisposition = contentDisposition;
+            }
+            else if (mime == "application/octet-stream")
+            {
+                uploaded.ContentDisposition = "attachment";
+            }
+
+            await storage.UpdateObjectAsync(uploaded);
+
+            //           InvalidateCloudFront(MakePath(domain, path));
+
+            await QuotaUsedAddAsync(domain, buffered.Length);
+
+            return await GetUriAsync(domain, path);
         }
-
-        var mime = string.IsNullOrEmpty(contentType)
-                    ? MimeMapping.GetMimeMapping(Path.GetFileName(path))
-                    : contentType;
-
-        using var storage = await GetStorageAsync();
-
-        var uploadObjectOptions = new UploadObjectOptions
+        finally
         {
-            PredefinedAcl = acl == ACL.Auto ? GetDomainACL(domain) : GetGoogleCloudAcl(acl)
-        };
-
-        buffered.Position = 0;
-
-        var uploaded = await storage.UploadObjectAsync(_bucket, MakePath(domain, path), mime, buffered, uploadObjectOptions);
-
-        uploaded.ContentEncoding = contentEncoding;
-        uploaded.CacheControl = string.Format("public, maxage={0}", (int)TimeSpan.FromDays(cacheDays).TotalSeconds);
-
-        uploaded.Metadata ??= new Dictionary<string, string>();
-
-        uploaded.Metadata["Expires"] = DateTime.UtcNow.Add(TimeSpan.FromDays(cacheDays)).ToString("R", CultureInfo.InvariantCulture);
-
-        if (!string.IsNullOrEmpty(contentDisposition))
-        {
-            uploaded.ContentDisposition = contentDisposition;
+            if (isNew)
+            {
+                await buffered.DisposeAsync();
+            }
         }
-        else if (mime == "application/octet-stream")
-        {
-            uploaded.ContentDisposition = "attachment";
-        }
-
-        await storage.UpdateObjectAsync(uploaded);
-
-        //           InvalidateCloudFront(MakePath(domain, path));
-
-        await QuotaUsedAddAsync(domain, buffered.Length);
-
-        return await GetUriAsync(domain, path);
     }
 
     public override async Task DeleteAsync(string domain, string path)
@@ -612,24 +625,34 @@ public class GoogleCloudStorage(TempStream tempStream,
     {
         using var storage = await GetStorageAsync();
 
-        var buffered = await _tempStream.GetBufferedAsync(stream);
+        var (buffered, isNew) = await _tempStream.TryGetBufferedAsync(stream);
 
-        var uploadObjectOptions = new UploadObjectOptions
+        try
         {
-            PredefinedAcl = PredefinedObjectAcl.BucketOwnerFullControl
-        };
+            var uploadObjectOptions = new UploadObjectOptions
+            {
+                PredefinedAcl = PredefinedObjectAcl.BucketOwnerFullControl
+            };
 
-        buffered.Position = 0;
+            buffered.Position = 0;
 
-        var uploaded = await storage.UploadObjectAsync(_bucket, MakePath(domain, path), "application/octet-stream", buffered, uploadObjectOptions);
+            var uploaded = await storage.UploadObjectAsync(_bucket, MakePath(domain, path), "application/octet-stream", buffered, uploadObjectOptions);
 
-        uploaded.CacheControl = string.Format("public, maxage={0}", (int)TimeSpan.FromDays(5).TotalSeconds);
-        uploaded.ContentDisposition = "attachment";
-        uploaded.Metadata ??= new Dictionary<string, string>();
-        uploaded.Metadata["Expires"] = DateTime.UtcNow.Add(TimeSpan.FromDays(5)).ToString("R", CultureInfo.InvariantCulture);
-        uploaded.Metadata.Add("private-expire", expires.ToFileTimeUtc().ToString(CultureInfo.InvariantCulture));
+            uploaded.CacheControl = string.Format("public, maxage={0}", (int)TimeSpan.FromDays(5).TotalSeconds);
+            uploaded.ContentDisposition = "attachment";
+            uploaded.Metadata ??= new Dictionary<string, string>();
+            uploaded.Metadata["Expires"] = DateTime.UtcNow.Add(TimeSpan.FromDays(5)).ToString("R", CultureInfo.InvariantCulture);
+            uploaded.Metadata.Add("private-expire", expires.ToFileTimeUtc().ToString(CultureInfo.InvariantCulture));
 
-        await storage.UpdateObjectAsync(uploaded);
+            await storage.UpdateObjectAsync(uploaded);
+        }
+        finally
+        {
+            if (isNew)
+            {
+                await buffered.DisposeAsync();
+            }
+        }
 
         using var mStream = new MemoryStream(Encoding.UTF8.GetBytes(_json ?? ""));
         var signDuration = expires.Date == DateTime.MinValue ? expires.TimeOfDay : expires.Subtract(DateTime.UtcNow);

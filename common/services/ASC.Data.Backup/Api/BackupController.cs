@@ -56,11 +56,6 @@ public class BackupController(
     [HttpGet("getbackupschedule")]
     public async Task<BackupAjaxHandler.Schedule> GetBackupSchedule()
     {
-        if (coreBaseSettings.Standalone)
-        {
-            await tenantExtra.DemandAccessSpacePermissionAsync();
-        }
-
         return await backupAjaxHandler.GetScheduleAsync();
     }
 
@@ -75,22 +70,26 @@ public class BackupController(
     [HttpPost("createbackupschedule")]
     public async Task<bool> CreateBackupScheduleAsync(BackupScheduleDto inDto)
     {
-        if (coreBaseSettings.Standalone)
+        if (inDto.Dump) 
         {
             await tenantExtra.DemandAccessSpacePermissionAsync();
         }
 
         var storageType = inDto.StorageType == null ? BackupStorageType.Documents : (BackupStorageType)Int32.Parse(inDto.StorageType);
         var storageParams = inDto.StorageParams == null ? new Dictionary<string, string>() : inDto.StorageParams.ToDictionary(r => r.Key.ToString(), r => r.Value.ToString());
-        var backupStored = inDto.BackupsStored == null ? 0 : Int32.Parse(inDto.BackupsStored);
+        var backupStored = inDto.BackupsStored == null ? 1 : Int32.Parse(inDto.BackupsStored);
         var cron = new CronParams
         {
             Period = inDto.CronParams.Period == null ? BackupPeriod.EveryDay : (BackupPeriod)Int32.Parse(inDto.CronParams.Period),
             Hour = inDto.CronParams.Hour == null ? 0 : Int32.Parse(inDto.CronParams.Hour),
             Day = inDto.CronParams.Day == null ? 0 : Int32.Parse(inDto.CronParams.Day)
         };
+        if(backupStored > 30 || backupStored < 1)
+        {
+            throw new ArgumentException("backupStored must be 1 - 30");
+        }
 
-        if (storageType == BackupStorageType.Documents)
+        if (storageType is BackupStorageType.Documents or BackupStorageType.ThridpartyDocuments)
         {
 
             if (int.TryParse(storageParams["folderId"], out var fId))
@@ -116,11 +115,6 @@ public class BackupController(
     [HttpDelete("deletebackupschedule")]
     public async Task<bool> DeleteBackupSchedule()
     {
-        if (coreBaseSettings.Standalone)
-        {
-            await tenantExtra.DemandAccessSpacePermissionAsync();
-        }
-
         await backupAjaxHandler.DeleteScheduleAsync();
 
         return true;
@@ -138,7 +132,7 @@ public class BackupController(
     [HttpPost("startbackup")]
     public async Task<BackupProgress> StartBackupAsync(BackupDto inDto)
     {
-        if (coreBaseSettings.Standalone)
+        if (inDto.Dump)
         {
             await tenantExtra.DemandAccessSpacePermissionAsync();
         }
@@ -162,7 +156,7 @@ public class BackupController(
             throw new ArgumentException("backup can`t start as dump");
         }
 
-        if (storageType == BackupStorageType.Documents)
+        if (storageType is BackupStorageType.Documents or BackupStorageType.ThridpartyDocuments)
         {
 
             if (int.TryParse(storageParams["folderId"], out var fId))
@@ -183,7 +177,7 @@ public class BackupController(
         var taskId = await backupAjaxHandler.StartBackupAsync(storageType, storageParams, serverBaseUri, inDto.Dump, false);
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         
-        eventBus.Publish(new BackupRequestIntegrationEvent(
+        await eventBus.PublishAsync(new BackupRequestIntegrationEvent(
              tenantId: tenantId,
              storageParams: storageParams,
              storageType: storageType,
@@ -207,11 +201,6 @@ public class BackupController(
     [HttpGet("getbackupprogress")]
     public async Task<BackupProgress> GetBackupProgressAsync()
     {
-        if (coreBaseSettings.Standalone)
-        {
-            await tenantExtra.DemandAccessSpacePermissionAsync();
-        }
-
         return await backupAjaxHandler.GetBackupProgressAsync();
     }
 
@@ -226,11 +215,6 @@ public class BackupController(
     [HttpGet("getbackuphistory")]
     public async Task<List<BackupHistoryRecord>> GetBackupHistory()
     {
-        if (coreBaseSettings.Standalone)
-        {
-            await tenantExtra.DemandAccessSpacePermissionAsync();
-        }
-
         return await backupAjaxHandler.GetBackupHistory();
     }
 
@@ -245,11 +229,6 @@ public class BackupController(
     [HttpDelete("deletebackup/{id:guid}")]
     public async Task<bool> DeleteBackup(Guid id)
     {
-        if (coreBaseSettings.Standalone)
-        {
-            await tenantExtra.DemandAccessSpacePermissionAsync();
-        }
-
         await backupAjaxHandler.DeleteBackupAsync(id);
         return true;
     }
@@ -264,10 +243,6 @@ public class BackupController(
     [HttpDelete("deletebackuphistory")]
     public async Task<bool> DeleteBackupHistory()
     {
-        if (coreBaseSettings.Standalone)
-        {
-            await tenantExtra.DemandAccessSpacePermissionAsync();
-        }
         await backupAjaxHandler.DeleteAllBackupsAsync();
         return true;
     }
@@ -283,11 +258,6 @@ public class BackupController(
     [HttpPost("startrestore")]
     public async Task<BackupProgress> StartBackupRestoreAsync(BackupRestoreDto inDto)
     {
-        if (coreBaseSettings.Standalone)
-        {
-            await tenantExtra.DemandAccessSpacePermissionAsync();
-        }
-
         await backupAjaxHandler.DemandPermissionsRestoreAsync();
 
         var storageParams = inDto.StorageParams == null ? new Dictionary<string, string>() : inDto.StorageParams.ToDictionary(r => r.Key.ToString(), r => r.Value.ToString());
@@ -297,8 +267,21 @@ public class BackupController(
             : default;
         
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+
+        var storageType = inDto.StorageType == null ? BackupStorageType.Documents : (BackupStorageType)Int32.Parse(inDto.StorageType.ToString());
+        if (storageType is BackupStorageType.Documents or BackupStorageType.ThridpartyDocuments && storageParams.ContainsKey("filePath"))
+        {
+            if (int.TryParse(storageParams["filePath"], out var fId))
+            {
+                await backupAjaxHandler.CheckAccessToFileAsync(fId);
+            }
+            else
+            {
+                await backupAjaxHandler.CheckAccessToFileAsync(storageParams["filePath"]);
+            }
+        }
         
-        eventBus.Publish(new BackupRestoreRequestIntegrationEvent(
+        await eventBus.PublishAsync(new BackupRestoreRequestIntegrationEvent(
                              tenantId: tenantId,
                              createBy: CurrentUserId,
                              storageParams: storageParams,
@@ -325,11 +308,6 @@ public class BackupController(
     [AllowNotPayment]
     public async Task<BackupProgress> GetRestoreProgressAsync()
     {
-        if (coreBaseSettings.Standalone)
-        {
-            await tenantExtra.DemandAccessSpacePermissionAsync();
-        }
-
         return await backupAjaxHandler.GetRestoreProgressAsync();
     }
 
@@ -342,13 +320,8 @@ public class BackupController(
     /// <path>api/2.0/backup/backuptmp</path>
     ///<visible>false</visible>
     [HttpGet("backuptmp")]
-    public async Task<object> GetTempPath()
+    public object GetTempPath()
     {
-        if (coreBaseSettings.Standalone)
-        {
-            await tenantExtra.DemandAccessSpacePermissionAsync();
-        }
-
         return backupAjaxHandler.GetTmpFolder();
     }
 }

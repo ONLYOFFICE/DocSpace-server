@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Api.Core.Extensions;
+
 namespace ASC.Core.Common.EF;
 
 public enum Provider
@@ -122,9 +124,124 @@ public static class BaseDbContextExtension
         b.Entry(existingBlog).State = EntityState.Modified;
         return entity;
     }
+    
+    
+    public static async Task<T> AddOrUpdateAsync<T>(this DbSet<T> dbSet, T entity) where T : BaseEntity
+    {
+        var existingBlog = await dbSet.FindAsync(entity.GetKeys());
+        if (existingBlog == null)
+        {
+            var entityEntry = await dbSet.AddAsync(entity);
+
+            return entityEntry.Entity;
+        }
+
+        dbSet.Update(entity);
+        return entity;
+    }
 }
 
 public abstract class BaseEntity
 {
     public abstract object[] GetKeys();
+}
+
+public class WarmupBaseDbContextStartupTask(IServiceProvider provider, ILogger<WarmupBaseDbContextStartupTask> logger) : IStartupTaskNotAwaitable
+{
+    public async Task ExecuteAsync(CancellationToken cancellationToken = default)
+    {
+        var assemblies = AppDomain.CurrentDomain.GetAssemblies().Where(x =>
+        {
+            var name = x.GetName().Name;
+            return !string.IsNullOrEmpty(name) && name.StartsWith("ASC.");
+        });
+
+        var types = assemblies.SelectMany(r => r.GetTypes().Where(t => t.IsSubclassOf(typeof(DbContext))));
+
+        foreach (var t in types)
+        {
+            using var scope = provider.CreateScope();
+            var dbContextFactory = scope.ServiceProvider.GetService(typeof(IDbContextFactory<>).MakeGenericType(t));
+            var createDbContextMethod = dbContextFactory?.GetType().GetMethod("CreateDbContext");
+            if (createDbContextMethod == null)
+            {
+                continue;
+            }
+
+            var queries = t.GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public)
+                .Where(r => !r.IsSpecialName);
+
+            foreach (var q in queries)
+            {
+                try
+                {
+                    var @params = q.GetParameters();
+                    var paramsAttr = q.GetCustomAttribute<PreCompileQuery>();
+                    
+                    if (paramsAttr == null || paramsAttr.Data.Length != @params.Length)
+                    {
+                        continue;
+                    }
+                    
+                    var paramsToInvoke = new List<object>(@params.Length);
+                    
+                    for (var i = 0; i < @params.Length; i++)
+                    {
+                        var p = paramsAttr.Data[i];
+                        if (@params[i].ParameterType == typeof(Guid))
+                        {
+                            if (Guid.TryParse(p.ToString(), out var g))
+                            {
+                                paramsToInvoke.Add(g);
+                            }
+                        }
+                        else if (@params[i].ParameterType == typeof(DateTime))
+                        {
+                            if (DateTime.TryParse(p.ToString(), CultureInfo.InvariantCulture, out var d))
+                            {
+                                paramsToInvoke.Add(d);
+                            }
+                        }
+                        else
+                        {
+                            paramsToInvoke.Add(p);
+                        }
+                    }
+                    
+                    var context = createDbContextMethod.Invoke(dbContextFactory, null);
+                    if (context == null)
+                    {
+                        continue;
+                    }
+                    
+                    var res = q.Invoke(context, paramsToInvoke.ToArray());
+                    if (res is Task task)
+                    {
+                        await task.ConfigureAwait(false);
+                    }
+                    
+                    var disposeContext = context.GetType().GetMethod("Dispose");
+                    if (disposeContext == null)
+                    {
+                        continue;
+                    }
+                    disposeContext.Invoke(context, null);
+                }
+                catch (Exception e)
+                {
+                    logger.LogDebug(e, q.Name);
+                }
+            }
+        }
+    }
+}
+
+[AttributeUsage(AttributeTargets.Method)]
+public class PreCompileQuery(object[] data) : Attribute
+{
+    public object[] Data { get; } = data;
+
+    public const int DefaultInt = int.MaxValue;
+    public const string DefaultGuid = "00000000-0000-0000-0000-000000000000";
+    public const string DefaultDateTime = "01/01/0001 00:00:00";
 }

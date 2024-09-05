@@ -39,7 +39,5 @@ public enum FileType
     Spreadsheet = 5,
     Presentation = 6,
     Document = 7,
-    OFormTemplate = 8,
-    OForm = 9,
     Pdf = 10
 }

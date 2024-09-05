@@ -33,25 +33,74 @@ public static class TagValues
         return new TagValue(CommonTags.WithoutUnsubscribe, true);
     }
 
-    public static ITagValue OrangeButton(string btnText, string btnUrl)
+    public static ITagValue OrangeButton(string btnText, string btnUrl, string tag = null)
     {
-        const string td = "<td style=\"height: 48px; width: 80px; margin:0; padding-bottom:56px;\">&nbsp;</td>";
-        const string color = "background-color:#FF6F3D; border:1px solid #FF6F3D; border-radius: 3px; color:#ffffff; display: inline-block; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; font-weight: 600; padding-top: 15px; padding-right: 25px; padding-bottom: 15px; padding-left: 25px; text-align: center; text-decoration: none; text-transform: uppercase; -webkit-text-size-adjust: none; letter-spacing: 0.04em;";
+        var sb = new StringBuilder();
 
-        var action = $@"<table style=""border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;""><tbody><tr cellpadding=""0"" cellspacing=""0"" border=""0"">{td}<td style=""height: 48px; width: 380px; margin:0; padding:0; text-align:center;""><a style=""{color}"" target=""_blank"" href=""{btnUrl}"">{btnText}</a></td>{td}</tr></tbody></table>";
+        sb.Append(@"<table cellspacing=""0"" cellpadding=""0"" style=""border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"">");
+        sb.Append("<tbody>");
+        sb.Append(@"<tr border=""0"" cellspacing=""0"" cellpadding=""0"">");
+        sb.Append(@"<td style=""width: 180px;""></td>");
+        sb.Append("<!--[if mso]>");
+        sb.Append(@"<td class=""body-text"" border=""0"" style=""margin: 0; padding: 0; text-align: center; width: 230px;"">");
+        sb.Append($@"<v:roundrect xmlns:v=""urn:schemas-microsoft-com:vml"" xmlns:w=""urn:schemas-microsoft-com:office:word"" href=""{btnUrl}"" style=""v-text-anchor: middle; box-sizing: border-box; font-weight: 600; font-size: 12px; height: 56px; text-decoration: none; width: 230px;"" arcsize=""5%"" strokecolor=""#FF6F3D"" fillcolor=""#FF6F3D"" alt=""{btnText}"" target=""_blank"">");
+        sb.Append("<w:anchorlock/>");
+        sb.Append($@"<center class=""fol"" style=""color:#ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-weight: 600; font-size: 12px; letter-spacing: 0.04em; text-align: center; text-decoration: none; text-transform: uppercase; white-space: nowrap;"">{btnText}</center>");
+        sb.Append("</v:roundrect>");
+        sb.Append("</td>");
+        sb.Append("<![endif]-->");
+        sb.Append("<!--[if !mso]> <!-->");
+        sb.Append("<td style=\"text-align: center;\">");
+        sb.Append($@"<a class=""fol"" href=""{btnUrl}"" style=""background-color:#FF6F3D; border:1px solid #FF6F3D; border-radius: 3px; color:#ffffff; display: inline-block; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 12px; font-weight: 600; padding-top: 15px; padding-right: 83px; padding-bottom: 15px; padding-left: 83px; text-align: center; text-decoration: none; text-transform: uppercase; -webkit-text-size-adjust: none; mso-hide: all; white-space: nowrap; letter-spacing: 0.04em;"" alt=""{btnText}"" target=""_blank"">{btnText}</a>");
+        sb.Append("</td>");
+        sb.Append("<!-- <![endif]-->");
+        sb.Append(@"<td style=""width: 180px;""></td>");
+        sb.Append("</tr>");
+        sb.Append("</tbody>");
+        sb.Append("</table>");
 
-        return new TagValue("OrangeButton", action);
+        if(string.IsNullOrEmpty(tag))
+        {
+            return new TagValue("OrangeButton", sb.ToString());
+        }
+        else
+        {
+            return new TagValue(tag, sb.ToString());
+        }
     }
 
-    public static ITagValue TrulyYours(StudioNotifyHelper studioNotifyHelper, string text)
+    public static ITagValue TrulyYours(StudioNotifyHelper studioNotifyHelper, string text, bool asTableRow = false)
     {
+        var sb = new StringBuilder();
         var url = studioNotifyHelper.SiteLink;
         var urlText = new Uri(url).Host;
-        const string tdStyle = "color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 1.6em; margin: 0; padding: 0px 190px 40px; vertical-align: top; text-align: center;";
-        const string astyle = "color: #FF6F3D; text-decoration: none;";
-        var action = $@"<tr border=""0"" cellspacing=""0"" cellpadding=""0""><td class=""fol"" style=""{tdStyle}"">{text} <br /><a style=""{astyle}"" target=""_blank"" href=""{url}"">{urlText}</a></td></tr>";
-        return new TagValue("TrulyYours", action);
+
+        if (asTableRow)
+        {
+            sb.Append(@"<tr border=""0"" cellspacing=""0"" cellpadding=""0"">");
+            sb.Append(@"<td class=""fol"" style=""color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 1.6em; Margin: 0; padding: 0px 40px 32px; vertical-align: top; text-align: center;"">");
+        }
+        else
+        {
+            sb.Append(@"<p style=""font-size: 14px;line-height: 21px;margin: 20px 0 32px;word-wrap: break-word !important;"">");
+        }
+
+        sb.Append($@"{text} <br />");
+        sb.Append($@"<a style=""color: #FF6F3D; text-decoration: none;"" target=""_blank"" href=""{url}"">{urlText}</a>");
+
+        if (asTableRow)
+        {
+            sb.Append("</td>");
+            sb.Append("</tr>");
+        }
+        else
+        {
+            sb.Append("</p>");
+        }
+
+        return new TagValue("TrulyYours", sb.ToString());
     }
+
     public static ITagValue TableTop()
     {
         return new TagValue("TableItemsTop",

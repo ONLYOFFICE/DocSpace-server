@@ -26,7 +26,7 @@
 
 namespace ASC.Core.Notify.Senders;
 
-[Singleton(Additional = typeof(FirebaseSenderExtension))]
+[Singleton]
 public class PushSender(ILoggerProvider options, IServiceProvider serviceProvider) : INotifySender
 {
     private readonly ILogger _logger = options.CreateLogger("ASC.Notify");
@@ -53,12 +53,5 @@ public class PushSender(ILoggerProvider options, IServiceProvider serviceProvide
         }
 
         return NoticeSendResult.OK;
-    }
-}
-public static class FirebaseSenderExtension
-{
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<FirebaseHelper>();
     }
 }

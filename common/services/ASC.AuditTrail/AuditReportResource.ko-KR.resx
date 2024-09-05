@@ -556,7 +556,7 @@
     <value>게스트가 활성화되었습니다: {0}</value>
   </data>
   <data name="GuestAccount" xml:space="preserve">
-    <value>게스트 계정</value>
+    <value>게스트</value>
   </data>
   <data name="GroupsModule" xml:space="preserve">
     <value>그룹</value>
@@ -797,5 +797,68 @@
   </data>
   <data name="PortalRenamed" xml:space="preserve">
     <value>포털 이름이 변경되었습니다</value>
+  </data>
+  <data name="FileSizePostfix" xml:space="preserve">
+    <value>bytes,KB,MB,GB</value>
+  </data>
+  <data name="FileUploadedWithOverwriting" xml:space="preserve">
+    <value>덮어쓰기로 업로드된 파일: {0}</value>
+  </data>
+  <data name="QuotaPerPortalChanged" xml:space="preserve">
+    <value>기본 스토리지 할당량 설정: {0}</value>
+  </data>
+  <data name="QuotaPerPortalDisabled" xml:space="preserve">
+    <value>비활성화된 기본 스토리지 할당량</value>
+  </data>
+  <data name="QuotaPerRoomChanged" xml:space="preserve">
+    <value>룸에 대한 기본 스토리지 할당량 설정: {0}</value>
+  </data>
+  <data name="QuotaPerRoomDisabled" xml:space="preserve">
+    <value>비활성화된 룸에 대한 기본 스토리지 할당량</value>
+  </data>
+  <data name="QuotaPerUserChanged" xml:space="preserve">
+    <value>사용자에 대한 기본 스토리지 할당량 설정: {0}</value>
+  </data>
+  <data name="QuotaPerUserDisabled" xml:space="preserve">
+    <value>비활성화된 사용자에 대한 기본 스토리지 할당량</value>
+  </data>
+  <data name="RoomCopied" xml:space="preserve">
+    <value>복사된 방: {0}</value>
+  </data>
+  <data name="RoomGroupAdded" xml:space="preserve">
+    <value>추가된 그룹: {0}. 역할: {1}</value>
+  </data>
+  <data name="RoomGroupRemove" xml:space="preserve">
+    <value>삭제된 그룹: {0}</value>
+  </data>
+  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
+    <value>{0} 지정 완료: {1}</value>
+  </data>
+  <data name="SendJoinInvite" xml:space="preserve">
+    <value>사용자 {0}님이 {1}님에게 이 DocSpace에 참여하라는 초대장을 보냈습니다</value>
+  </data>
+  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
+    <value>[{0}] 룸. 룸에 대한 커스텀 스토리지 할당량 설정: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
+    <value>[{0}] 룸. 룸에 대한 기본 스토리지 할당량 설정: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
+    <value>[{0}] 룸. 룸에 대한 스토리지 할당량 비활성화</value>
+  </data>
+  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
+    <value>[{0}] 사용자. 사용자에 대한 커스텀 스토리지 할당량 설정: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
+    <value>[{0}] 사용자. 사용자에 대한 기본 스토리지 할당량 설정: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
+    <value>[{0}] 사용자. 사용자에 대한 스토리지 할당량 비활성화</value>
+  </data>
+  <data name="FormOpenedForFilling" xml:space="preserve">
+    <value>작성을 위해 열린 파일: {0}</value>
+  </data>
+  <data name="FormSubmit" xml:space="preserve">
+    <value>[{0}] 사용자. 제출된 양식: {1}</value>
   </data>
 </root>

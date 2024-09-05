@@ -153,9 +153,6 @@
   <data name="MigrationCommonFiles" xml:space="preserve">
     <value>Migrácia spoločných súborov</value>
   </data>
-  <data name="MigrationInitException" xml:space="preserve">
-    <value>Chyba pri inicializácii {0} migrátora</value>
-  </data>
   <data name="MigrationNotFoundException" xml:space="preserve">
     <value>Žiadny takýto poskytovateľ migrácie</value>
   </data>
@@ -165,10 +162,52 @@
   <data name="MigrationProjectFiles" xml:space="preserve">
     <value>Súbory projektu migrácie</value>
   </data>
-  <data name="MigrationStartException" xml:space="preserve">
-    <value>Parsovanie stále prebieha</value>
+  <data name="CanNotAddUserInGroup" xml:space="preserve">
+    <value>Nepodarilo sa pridať používateľa {0} do skupiny {1}</value>
   </data>
-  <data name="MigrationUploadException" xml:space="preserve">
-    <value>Migrácia už prebieha</value>
+  <data name="CanNotCreateFile" xml:space="preserve">
+    <value>Nepodarilo sa vytvoriť súbor {0}</value>
+  </data>
+  <data name="CanNotImportUser" xml:space="preserve">
+    <value>Nepodarilo sa importovať používateľa</value>
+  </data>
+  <data name="CanNotImportUserFiles" xml:space="preserve">
+    <value>Nepodarilo sa importovať súbory používateľov</value>
+  </data>
+  <data name="CanNotParseArchive" xml:space="preserve">
+    <value>Nepodarilo sa parsovať archív {0}</value>
+  </data>
+  <data name="CanNotParseArchives" xml:space="preserve">
+    <value>Nepodarilo sa parsovať archívy</value>
+  </data>
+  <data name="CanNotParseUser" xml:space="preserve">
+    <value>Nepodarilo sa parsovať používateľa {0}</value>
+  </data>
+  <data name="CanNotReadInfoFile" xml:space="preserve">
+    <value>Nepodarilo sa prečítať informačný súbor z {0}</value>
+  </data>
+  <data name="CanNotShare" xml:space="preserve">
+    <value>Nepodarilo sa zdieľať záznam {0} do {1}</value>
+  </data>
+  <data name="CanNotToUnzip" xml:space="preserve">
+    <value>Nepodarilo sa rozbaliť {0}</value>
+  </data>
+  <data name="CreateFile" xml:space="preserve">
+    <value>Vytvoriť súbor {0}</value>
+  </data>
+  <data name="CreateFolder" xml:space="preserve">
+    <value>Vytvoriť priečinok {0}</value>
+  </data>
+  <data name="CreateShareRoom" xml:space="preserve">
+    <value>Vytvoriť zdieľanú miestnosť {0}</value>
+  </data>
+  <data name="СanNotImportCommonFiles" xml:space="preserve">
+    <value>Nepodarilo sa importovať spoločné súbory</value>
+  </data>
+  <data name="СanNotImportProjectFiles" xml:space="preserve">
+    <value>Nepodarilo sa importovať súbory projektu</value>
+  </data>
+  <data name="СreateRootFolder" xml:space="preserve">
+    <value>Vytvoriť koreňový priečinok</value>
   </data>
 </root>

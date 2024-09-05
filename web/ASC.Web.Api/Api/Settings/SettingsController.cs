@@ -37,13 +37,12 @@ public partial class SettingsController(MessageService messageService,
         WebItemManager webItemManager,
         WebItemManagerSecurity webItemManagerSecurity,
         TenantInfoSettingsHelper tenantInfoSettingsHelper,
-        TenantUtil tenantUtil,
         CoreSettings coreSettings,
         CoreBaseSettings coreBaseSettings,
         CommonLinkUtility commonLinkUtility,
         IConfiguration configuration,
         SetupInfo setupInfo,
-        StatisticManager statisticManager,
+        GeolocationHelper geolocationHelper,
         ConsumerFactory consumerFactory,
         TimeZoneConverter timeZoneConverter,
         CustomNamingPeople customNamingPeople,
@@ -54,13 +53,11 @@ public partial class SettingsController(MessageService messageService,
         PasswordHasher passwordHasher,
         IHttpContextAccessor httpContextAccessor,
         DnsSettings dnsSettings,
-        AdditionalWhiteLabelSettingsHelperInit additionalWhiteLabelSettingsHelper,
         CustomColorThemesSettingsHelper customColorThemesSettingsHelper,
-        QuotaSyncOperation quotaSyncOperation,
+        UserInvitationLimitHelper userInvitationLimitHelper,
         QuotaUsageManager quotaUsageManager,
         TenantDomainValidator tenantDomainValidator,
         ExternalShare externalShare,
-        ConfigurationExtension configurationExtension,
         IMapper mapper,
         UserFormatter userFormatter,
         IDistributedLockProvider distributedLockProvider,
@@ -94,7 +91,7 @@ public partial class SettingsController(MessageService messageService,
 
         var settings = new SettingsDto
         {
-            Culture = tenant.GetCulture().ToString(),
+            Culture = coreBaseSettings.GetRightCultureName(tenant.GetCulture()),
             GreetingSettings = tenant.Name == "" ? Resource.PortalName : tenant.Name,
             DocSpace = true,
             Standalone = coreBaseSettings.Standalone,
@@ -104,9 +101,10 @@ public partial class SettingsController(MessageService messageService,
             TenantAlias = tenant.Alias,
             EnableAdmMess = studioAdminMessageSettings.Enable || await tenantExtra.IsNotPaidAsync(),
             LegalTerms = setupInfo.LegalTerms,
+            LicenseUrl = setupInfo.LicenseUrl,
             CookieSettingsEnabled = tenantCookieSettings.Enabled,
             UserNameRegex = userFormatter.UserNameRegex.ToString(),
-            ForumLink = await commonLinkUtility.GetUserForumLinkAsync(settingsManager, additionalWhiteLabelSettingsHelper)
+            ForumLink = await commonLinkUtility.GetUserForumLinkAsync(settingsManager)
         };
 
         if (!authContext.IsAuthenticated && await externalShare.GetLinkIdAsync() != default)
@@ -151,7 +149,7 @@ public partial class SettingsController(MessageService messageService,
                 IosPackageId = configuration["deeplink:iospackageid"] ?? ""
             };
 
-            settings.HelpLink = await commonLinkUtility.GetHelpLinkAsync(settingsManager, additionalWhiteLabelSettingsHelper);
+            settings.HelpLink = await commonLinkUtility.GetHelpLinkAsync(settingsManager);
             settings.ApiDocsLink = configuration["web:api-docs"];
 
             if (bool.TryParse(configuration["debug-info:enabled"], out var debugInfo))
@@ -176,8 +174,11 @@ public partial class SettingsController(MessageService messageService,
                 settings.Plugins.Delete = pluginsDelete;
             }
 
-            var formGallerySettings = configurationExtension.GetSetting<OFormSettings>("files:oform");
+            var formGallerySettings = configuration.GetSection("files:oform").Get<OFormSettings>();
             settings.FormGallery = mapper.Map<FormGalleryDto>(formGallerySettings);
+
+            settings.InvitationLimit = await userInvitationLimitHelper.GetLimit();
+            settings.MaxImageUploadSize = setupInfo.MaxImageUploadSize;
         }
         else
         {
@@ -199,7 +200,11 @@ public partial class SettingsController(MessageService messageService,
 
             settings.ThirdpartyEnable = setupInfo.ThirdPartyAuthEnabled && providerManager.IsNotEmpty;
 
-            settings.RecaptchaPublicKey = setupInfo.RecaptchaPublicKey;
+            var country = (await geolocationHelper.GetIPGeolocationFromHttpContextAsync()).Key;
+
+            settings.RecaptchaType = country == "CN" ? RecaptchaType.hCaptcha : RecaptchaType.Default;
+
+            settings.RecaptchaPublicKey = settings.RecaptchaType is RecaptchaType.hCaptcha ? setupInfo.HcaptchaPublicKey : setupInfo.RecaptchaPublicKey;
         }
 
         if (!authContext.IsAuthenticated || (withpassword.HasValue && withpassword.Value))
@@ -291,13 +296,18 @@ public partial class SettingsController(MessageService messageService,
     [HttpPost("userquotasettings")]
     public async Task<TenantUserQuotaSettings> SaveUserQuotaSettingsAsync(QuotaSettingsRequestsDto inDto)
     {
-        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        await DemandStatisticPermissionAsync();
+
+        if (!inDto.DefaultQuota.TryGetInt64(out var quota))
+        {
+            throw new Exception(Resource.QuotaGreaterPortalError);
+        }
 
         var tenant = await tenantManager.GetCurrentTenantAsync();
         var tenantSpaceQuota = await tenantManager.GetTenantQuotaAsync(tenant.Id);
         var maxTotalSize = tenantSpaceQuota?.MaxTotalSize ?? -1;
 
-        if (maxTotalSize < inDto.DefaultQuota)
+        if (maxTotalSize < quota)
         {
             throw new Exception(Resource.QuotaGreaterPortalError);
         }
@@ -307,7 +317,7 @@ public partial class SettingsController(MessageService messageService,
             var tenantQuotaSetting = await settingsManager.LoadAsync<TenantQuotaSettings>();
             if (tenantQuotaSetting.EnableQuota)
             {
-                if (tenantQuotaSetting.Quota < inDto.DefaultQuota)
+                if (tenantQuotaSetting.Quota < quota)
                 {
                     throw new Exception(Resource.QuotaGreaterPortalError);
                 }
@@ -315,10 +325,19 @@ public partial class SettingsController(MessageService messageService,
         }
         var quotaSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
         quotaSettings.EnableQuota = inDto.EnableQuota;
-        quotaSettings.DefaultQuota = inDto.DefaultQuota > 0 ? inDto.DefaultQuota : 0;
+        quotaSettings.DefaultQuota = quota > 0 ? quota : 0;
 
         await settingsManager.SaveAsync(quotaSettings);
-
+        
+        if (inDto.EnableQuota)
+        {
+            await messageService.SendAsync(MessageAction.QuotaPerUserChanged, quota.ToString());
+        }
+        else
+        {
+            await messageService.SendAsync(MessageAction.QuotaPerUserDisabled);
+        }
+        
         return quotaSettings;
     }
 
@@ -337,8 +356,8 @@ public partial class SettingsController(MessageService messageService,
     /// Save the room quota settings
     /// </short>
     /// <category>Quota</category>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.UserQuotaSettingsRequestsDto, ASC.Web.Api" name="inDto">Request parameters for the user quota settings</param>
-    /// <returns type="System.Object, System">Message about the result of saving the room quota settings</returns>
+    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.QuotaSettingsRequestsDto, ASC.Web.Api" name="inDto">Request parameters for the quota settings</param>
+    /// <returns type="ASC.Core.Tenants.TenantRoomQuotaSettings, ASC.Core.Common">Tenant room quota settings</returns>
     /// <path>api/2.0/settings/roomquotasettings</path>
     /// <httpMethod>POST</httpMethod>
     [HttpPost("roomquotasettings")]
@@ -346,11 +365,16 @@ public partial class SettingsController(MessageService messageService,
     {
         await DemandStatisticPermissionAsync();
 
+        if (!inDto.DefaultQuota.TryGetInt64(out var quota))
+        {
+            throw new Exception(Resource.QuotaGreaterPortalError);
+        }
+
         var tenant = await tenantManager.GetCurrentTenantAsync();
         var tenantSpaceQuota = await tenantManager.GetTenantQuotaAsync(tenant.Id);
         var maxTotalSize = tenantSpaceQuota?.MaxTotalSize ?? -1;
 
-        if (maxTotalSize < inDto.DefaultQuota)
+        if (maxTotalSize < quota)
         {
             throw new Exception(Resource.QuotaGreaterPortalError);
         }
@@ -359,7 +383,7 @@ public partial class SettingsController(MessageService messageService,
             var tenantQuotaSetting = await settingsManager.LoadAsync<TenantQuotaSettings>();
             if (tenantQuotaSetting.EnableQuota)
             {
-                if (tenantQuotaSetting.Quota < inDto.DefaultQuota)
+                if (tenantQuotaSetting.Quota < quota)
                 {
                     throw new Exception(Resource.QuotaGreaterPortalError);
                 }
@@ -368,22 +392,31 @@ public partial class SettingsController(MessageService messageService,
 
         var quotaSettings = await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
         quotaSettings.EnableQuota = inDto.EnableQuota;
-        quotaSettings.DefaultQuota = inDto.DefaultQuota > 0 ? inDto.DefaultQuota : 0;
+        quotaSettings.DefaultQuota = quota > 0 ? quota : 0;
 
         await settingsManager.SaveAsync(quotaSettings);
+        
+        if (inDto.EnableQuota)
+        {
+            await messageService.SendAsync(MessageAction.QuotaPerRoomChanged, quota.ToString());
+        }
+        else
+        {
+            await messageService.SendAsync(MessageAction.QuotaPerRoomDisabled);
+        }
 
         return quotaSettings;
     }
 
     /// <summary>
-    /// Saves the tenant quota settings.
+    /// Saves the tenant quota settings specified in the request to the current portal.
     /// </summary>
     /// <short>
     /// Save the tenant quota settings
     /// </short>
     /// <category>Quota</category>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.UserQuotaSettingsRequestsDto, ASC.Web.Api" name="inDto">Request parameters for the user quota settings</param>
-    /// <returns type="System.Object, System">Message about the result of saving the tenant quota settings</returns>
+    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.TenantQuotaSettingsRequestsDto, ASC.Web.Api" name="inDto">Request parameters for the tenant quota settings</param>
+    /// <returns type="ASC.Core.Tenants.TenantQuotaSettings, ASC.Core.Common">Tenant quota settings</returns>
     /// <path>api/2.0/settings/tenantquotasettings</path>
     /// <httpMethod>PUT</httpMethod>
     [HttpPut("tenantquotasettings")]
@@ -415,14 +448,23 @@ public partial class SettingsController(MessageService messageService,
         var admins = (await userManager.GetUsersByGroupAsync(ASC.Core.Users.Constants.GroupAdmin.ID)).Select(u => u.Id).ToList();
 
         _ = quotaSocketManager.ChangeCustomQuotaUsedValueAsync(inDto.TenantId, customQuota.GetFeature<TenantCustomQuotaFeature>().Name, tenantQuotaSetting.EnableQuota, usedSize, tenantQuotaSetting.Quota, admins);
-
+        
+        if (tenantQuotaSetting.EnableQuota)
+        {
+            await messageService.SendAsync(MessageAction.QuotaPerPortalChanged, tenantQuotaSetting.Quota.ToString());
+        }
+        else
+        {
+            await messageService.SendAsync(MessageAction.QuotaPerPortalDisabled);
+        }
+        
         return tenantQuotaSetting;
     }
 
     /// <summary>
     /// Returns a list of all the available portal languages in the format of a two-letter or four-letter language code (e.g. "de", "en-US", etc.).
     /// </summary>
-    /// <short>Get supporrted languages</short>
+    /// <short>Get supported languages</short>
     /// <category>Common settings</category>
     /// <returns type="System.Object, System">List of all the available portal languages</returns>
     /// <path>api/2.0/settings/cultures</path>
@@ -434,7 +476,7 @@ public partial class SettingsController(MessageService messageService,
     [HttpGet("cultures")]
     public IEnumerable<string> GetSupportedCultures()
     {
-        return setupInfo.EnabledCultures.Select(r => r.Name).ToList();
+        return coreBaseSettings.EnabledCultures.Select(r => r.Name).ToList();
     }
 
     /// <summary>
@@ -539,7 +581,8 @@ public partial class SettingsController(MessageService messageService,
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        return await quotaSyncOperation.CheckRecalculateQuota(await tenantManager.GetCurrentTenantAsync());
+        var result = await usersQuotaSyncOperation.CheckRecalculateQuota(await tenantManager.GetCurrentTenantAsync());
+        return !result.IsCompleted;
     }
 
     /// <summary>
@@ -768,7 +811,7 @@ public partial class SettingsController(MessageService messageService,
         var tenant = await tenantManager.GetCurrentTenantAsync();
 
         var changelng = false;
-        if (setupInfo.EnabledCultures.Find(c => string.Equals(c.Name, culture.Name, StringComparison.InvariantCultureIgnoreCase)) != null && !string.Equals(tenant.Language, culture.Name, StringComparison.InvariantCultureIgnoreCase))
+        if (coreBaseSettings.EnabledCultures.Find(c => string.Equals(c.Name, culture.Name, StringComparison.InvariantCultureIgnoreCase)) != null && !string.Equals(tenant.Language, culture.Name, StringComparison.InvariantCultureIgnoreCase))
         {
             tenant.Language = culture.Name;
             changelng = true;
@@ -876,72 +919,6 @@ public partial class SettingsController(MessageService messageService,
     }
 
     /// <summary>
-    /// Returns the user visit statistics for the period specified in the request.
-    /// </summary>
-    /// <category>Statistics</category>
-    /// <short>Get the visit statistics</short>
-    /// <param type="ASC.Api.Core.ApiDateTime, ASC.Api.Core" name="fromDate">Start period date</param>
-    /// <param type="ASC.Api.Core.ApiDateTime, ASC.Api.Core" name="toDate">End period date</param>
-    /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.ChartPointDto, ASC.Web.Api">List of point charts</returns>
-    /// <path>api/2.0/settings/statistics/visit</path>
-    /// <httpMethod>GET</httpMethod>
-    /// <collection>list</collection>
-    [HttpGet("statistics/visit")]
-    public async Task<List<ChartPointDto>> GetVisitStatisticsAsync(ApiDateTime fromDate, ApiDateTime toDate)
-    {
-        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-
-        var from = tenantUtil.DateTimeFromUtc(fromDate);
-        var to = tenantUtil.DateTimeFromUtc(toDate);
-
-        var points = new List<ChartPointDto>();
-
-        if (from.CompareTo(to) >= 0)
-        {
-            return points;
-        }
-
-        for (var d = new DateTime(from.Ticks); d.Date.CompareTo(to.Date) <= 0; d = d.AddDays(1))
-        {
-            points.Add(new ChartPointDto
-            {
-                DisplayDate = d.Date.ToShortDateString(),
-                Date = d.Date,
-                Hosts = 0,
-                Hits = 0
-            });
-        }
-
-        var tenant = await tenantManager.GetCurrentTenantAsync();
-        var hits = await statisticManager.GetHitsByPeriodAsync(tenant.Id, from, to);
-        var hosts = await statisticManager.GetHostsByPeriodAsync(tenant.Id, from, to);
-
-        if (hits.Count == 0 || hosts.Count == 0)
-        {
-            return points;
-        }
-
-        hits.Sort((x, y) => x.VisitDate.CompareTo(y.VisitDate));
-        hosts.Sort((x, y) => x.VisitDate.CompareTo(y.VisitDate));
-
-        for (int i = 0, n = points.Count, hitsNum = 0, hostsNum = 0; i < n; i++)
-        {
-            while (hitsNum < hits.Count && points[i].Date.CompareTo(hits[hitsNum].VisitDate.Date) == 0)
-            {
-                points[i].Hits += hits[hitsNum].VisitCount;
-                hitsNum++;
-            }
-            while (hostsNum < hosts.Count && points[i].Date.CompareTo(hosts[hostsNum].VisitDate.Date) == 0)
-            {
-                points[i].Hosts++;
-                hostsNum++;
-            }
-        }
-
-        return points;
-    }
-
-    /// <summary>
     /// Returns the socket settings.
     /// </summary>
     /// <category>Common settings</category>
@@ -993,11 +970,12 @@ public partial class SettingsController(MessageService messageService,
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        return consumerFactory.GetAll<Consumer>()
+        return await consumerFactory.GetAll<Consumer>()
             .Where(consumer => consumer.ManagedKeys.Any())
             .OrderBy(services => services.Order)
-            .Select(r => new AuthServiceRequestsDto(r))
-            .ToList();
+            .ToAsyncEnumerable()
+            .SelectAwait(async r => await AuthServiceRequestsDto.From(r))
+            .ToListAsync();
     }
 
     /// <summary>
@@ -1028,15 +1006,18 @@ public partial class SettingsController(MessageService messageService,
 
         if (inDto.Props.All(r => string.IsNullOrEmpty(r.Value)))
         {
-            consumer.Clear();
+            await consumer.ClearAsync();
             changed = true;
         }
         else
         {
-            foreach (var authKey in inDto.Props.Where(authKey => consumer[authKey.Name] != authKey.Value))
+            foreach (var authKey in inDto.Props)
             {
-                consumer[authKey.Name] = authKey.Value;
-                changed = true;
+                if (await consumer.GetAsync(authKey.Name) != authKey.Value)
+                {
+                    await consumer.SetAsync(authKey.Name, authKey.Value);
+                    changed = true;
+                }
             }
         }
 
@@ -1047,7 +1028,7 @@ public partial class SettingsController(MessageService messageService,
 
         if (validateKeyProvider != null && !await validateKeyProvider.ValidateKeysAsync() && !allPropsIsEmpty)
         {
-            consumer.Clear();
+            await consumer.ClearAsync();
             throw new ArgumentException(Resource.ErrorBadKeys);
         }
 
@@ -1070,7 +1051,8 @@ public partial class SettingsController(MessageService messageService,
     [AllowNotPayment]
     [HttpGet("payment")]
     public async Task<object> PaymentSettingsAsync()
-    {
+    {        
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         var settings = await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>();
         var currentQuota = await tenantManager.GetCurrentTenantQuotaAsync();
         var currentTariff = await tenantExtra.GetCurrentTariffAsync();
@@ -1113,7 +1095,7 @@ public partial class SettingsController(MessageService messageService,
 
         if (string.IsNullOrEmpty(currentLink))
         {
-            var url = telegramHelper.RegisterUser(authContext.CurrentAccount.ID, tenant.Id);
+            var url = await telegramHelper.RegisterUserAsync(authContext.CurrentAccount.ID, tenant.Id);
             return url;
         }
 

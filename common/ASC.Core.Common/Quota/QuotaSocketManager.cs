@@ -58,6 +58,20 @@ public class QuotaSocketManager(
         await MakeRequest("change-quota-feature-value", new { room, featureId, value });
     }
 
+    public async Task ChangeInvitationLimitValue(int value)
+    {
+        var room = await GetQuotaRoom();
+
+        await MakeRequest("change-invitation-limit-value", new { room, value });
+    }
+
+    public async Task LogoutSession(Guid userId, int loginEventId = 0)
+    {
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+
+        await MakeRequest("logout-session", new { room = $"{tenantId}-{userId}", loginEventId });
+    }
+
     private async Task<string> GetQuotaRoom()
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();

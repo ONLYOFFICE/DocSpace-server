@@ -262,9 +262,11 @@ public class PortalController(
         var isFirst = true;
         string sendCongratulationsAddress = null;
 
+        var scheme = commonMethods.GetRequestScheme();
+
         if (!string.IsNullOrEmpty(model.PasswordHash))
         {
-            sendCongratulationsAddress = await commonMethods.SendCongratulations(Request.Scheme, t, model.SkipWelcome);
+            sendCongratulationsAddress = await commonMethods.SendCongratulations(scheme, t, model.SkipWelcome);
             isFirst = sendCongratulationsAddress != null;
         }
         else if (configuration["core:base-domain"] == "localhost")
@@ -286,7 +288,7 @@ public class PortalController(
             }
         }
 
-        var reference = commonMethods.CreateReference(t.Id, Request.Scheme, t.GetTenantDomain(coreSettings), info.Email, isFirst);
+        var reference = commonMethods.CreateReference(t.Id, scheme, t.GetTenantDomain(coreSettings), info.Email, isFirst);
         option.LogDebug("PortalName = {0}; Elapsed ms. CreateReferenceByCookie...: {1}", model.PortalName, sw.ElapsedMilliseconds);
 
         sw.Stop();
@@ -470,6 +472,64 @@ public class PortalController(
         }
     }
 
+    [HttpPost("signin")]
+    [AllowCrossSiteJson]
+    [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
+    public async Task<IActionResult> SignInToPortalAsync(TenantModel model)
+    {
+        try
+        {
+            var sw = Stopwatch.StartNew();
+
+            var clientIP = commonMethods.GetClientIp();
+
+            if (commonMethods.CheckMuchRegistration(model, clientIP, sw))
+            {
+                if (string.IsNullOrEmpty(model.RecaptchaResponse))
+                {
+                    return StatusCode(StatusCodes.Status403Forbidden, new
+                    {
+                        error = "tooMuchAttempts",
+                        message = "Too much attempts already"
+                    });
+                }
+                else
+                {
+                    var error = await GetRecaptchaError(model, clientIP, sw);
+
+                    return StatusCode(StatusCodes.Status401Unauthorized, error);
+                }
+            }
+
+            var tenants = await commonMethods.GetTenantsAsync(model.Email, model.PasswordHash);
+
+            var scheme = commonMethods.GetRequestScheme();
+
+            var tenantsWrapper = from tenant in tenants
+                                 let domain = tenant.GetTenantDomain(coreSettings)
+                                 select new
+                                 {
+                                     portalName = $"{scheme}{Uri.SchemeDelimiter}{domain}",
+                                     portalLink = commonMethods.CreateReference(tenant.Id, scheme, domain, model.Email)
+                                 };
+            return Ok(new
+            {
+                tenants = tenantsWrapper
+            });
+        }
+        catch (Exception ex)
+        {
+            option.LogError(ex, "SignInToPortalAsync");
+
+            return StatusCode(StatusCodes.Status500InternalServerError, new
+            {
+                error = "error",
+                message = ex.Message,
+                stacktrace = ex.StackTrace
+            });
+        }
+    }
+
     #endregion
 
     #region Validate Method
@@ -591,7 +651,7 @@ public class PortalController(
             var data = $"{model.PortalName} {model.FirstName} {model.LastName} {model.Email} {model.Phone} {model.RecaptchaType}";
 
             /*** validate recaptcha ***/
-            if (!await commonMethods.ValidateRecaptcha(model.RecaptchaResponse, model.RecaptchaType, clientIP))
+            if (!await commonMethods.ValidateRecaptcha(model.RecaptchaType, model.RecaptchaResponse, clientIP))
             {
                 option.LogDebug("PortalName = {0}; Elapsed ms. ValidateRecaptcha error: {1} {2}", model.PortalName, sw.ElapsedMilliseconds, data);
                 sw.Stop();

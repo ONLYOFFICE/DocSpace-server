@@ -54,7 +54,7 @@ try
     builder.Host.ConfigureDefault();
     builder.WebHost.ConfigureDefaultKestrel();
 
-    var startup = new Startup(builder.Configuration, builder.Environment);
+    var startup = new Startup(builder.Configuration);
 
     await startup.ConfigureServices(builder.Services);
 
@@ -66,9 +66,9 @@ try
 
     var eventBus = ((IApplicationBuilder)app).ApplicationServices.GetRequiredService<IEventBus>();
 
-    eventBus.Subscribe<BackupRequestIntegrationEvent, BackupRequestedIntegrationEventHandler>();
-    eventBus.Subscribe<BackupRestoreRequestIntegrationEvent, BackupRestoreRequestedIntegrationEventHandler>();
-    eventBus.Subscribe<IntegrationEvent, BackupDeleteScheldureRequestedIntegrationEventHandler>();
+    await eventBus.SubscribeAsync<BackupRequestIntegrationEvent, BackupRequestedIntegrationEventHandler>();
+    await eventBus.SubscribeAsync<BackupRestoreRequestIntegrationEvent, BackupRestoreRequestedIntegrationEventHandler>();
+    await eventBus.SubscribeAsync<IntegrationEvent, BackupDeleteScheldureRequestedIntegrationEventHandler>();
 
     logger.Info("Starting web host ({applicationContext})...", AppName);
     await app.RunWithTasksAsync();

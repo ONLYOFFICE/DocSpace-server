@@ -74,7 +74,7 @@
     <value>‎I file verranno compressi nel file {0}.zip{1}‎</value>
   </data>
   <data name="MyFiles" xml:space="preserve">
-    <value>I miei documenti</value>
+    <value>Documenti</value>
   </data>
   <data name="PrivacyRoom" xml:space="preserve">
     <value>Stanza Privata</value>
@@ -101,6 +101,6 @@
     <value>In corso</value>
   </data>
   <data name="ReadyFormFolder" xml:space="preserve">
-    <value>Pronto</value>
+    <value>Completo</value>
   </data>
 </root>

@@ -51,14 +51,13 @@ public class BaseIndexerHelper
         }, CacheNotifyAction.Any);
     }
 
-    public void Clear<T>(T t) where T : class, ISearchItem
+    public async Task ClearAsync<T>(T t) where T : class, ISearchItem
     {
-        _notify.Publish(new ClearIndexAction { Id = t.IndexName }, CacheNotifyAction.Any);
+        await _notify.PublishAsync(new ClearIndexAction { Id = t.IndexName }, CacheNotifyAction.Any);
     }
 }
 
-[Scope]
-public class BaseIndexer<T>(Client client,
+public abstract class BaseIndexer<T>(Client client,
         ILogger<BaseIndexer<T>> logger,
         IDbContextFactory<WebstudioDbContext> dbContextFactory,
         TenantManager tenantManager,
@@ -66,7 +65,7 @@ public class BaseIndexer<T>(Client client,
         Settings settings,
         IServiceProvider serviceProvider)
     where T : class, ISearchItem
-    {
+{
     public const int QueryLimit = 10000;
 
     protected internal T Wrapper => serviceProvider.GetService<T>();
@@ -394,7 +393,7 @@ public class BaseIndexer<T>(Client client,
         var tenant = await _tenantManager.GetCurrentTenantAsync();
         var descriptor = func(selector).Where(r => r.TenantId, tenant.Id);
 
-        return client.Instance.Search(descriptor.GetDescriptor(this, onlyId)).Documents;
+        return (await client.Instance.SearchAsync(descriptor.GetDescriptor(this, onlyId))).Documents;
     }
 
     internal async Task<(IReadOnlyCollection<T>, long)> SelectWithTotalAsync(Expression<Func<Selector<T>, Selector<T>>> expression, bool onlyId)
@@ -427,7 +426,7 @@ public class BaseIndexer<T>(Client client,
 
         _logger.DebugIndexDeleted(Wrapper.IndexName);
         await client.Instance.Indices.DeleteAsync(Wrapper.IndexName);
-        baseIndexerHelper.Clear(Wrapper);
+        await baseIndexerHelper.ClearAsync(Wrapper);
         CreateIfNotExist(Wrapper);
     }
 

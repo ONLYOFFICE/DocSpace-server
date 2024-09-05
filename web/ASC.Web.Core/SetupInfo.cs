@@ -44,7 +44,6 @@ public class SetupInfo
     public string UserVoiceURL { get; private set; }
     public string MainLogoURL { get; private set; }
     public string MainLogoMailTmplURL { get; private set; }
-    public List<CultureInfo> EnabledCultures { get; private set; }
     public long MaxImageUploadSize { get; private set; }
 
     /// <summary>
@@ -57,17 +56,17 @@ public class SetupInfo
 
     public long AvailableFileSize { get; }
     public string TeamlabSiteRedirect { get; private set; }
+    public int MaxUploadThreadCount { get; set; }
     public long ChunkUploadSize { get; set; }
     public long ProviderMaxUploadSize { get; private set; }
     public bool ThirdPartyAuthEnabled { get; private set; }
     public string LegalTerms { get; private set; }
+    public string LicenseUrl { get; private set; }
     public string NoTenantRedirectURL { get; private set; }
     public string NotifyAddress { get; private set; }
     public string TipsAddress { get; private set; }
     public string SupportFeedback { get; private set; }
     public string WebApiBaseUrl { get { return VirtualPathUtility.ToAbsolute(GetAppSettings("api.url", "~/api/2.0/")); } }
-    public TimeSpan ValidEmailKeyInterval { get; private set; }
-    public TimeSpan ValidAuthKeyInterval { get; private set; }
     public string SalesEmail { get; private set; }
     public static bool IsSecretEmail(string email)
     {
@@ -105,7 +104,12 @@ public class SetupInfo
     public string RecaptchaPublicKey { get; private set; }
     public string RecaptchaPrivateKey { get; private set; }
     public string RecaptchaVerifyUrl { get; private set; }
+    public string HcaptchaPublicKey { get; private set; }
+    public string HcaptchaPrivateKey { get; private set; }
+    public string HcaptchaVerifyUrl { get; private set; }
     public string AmiMetaUrl { get; private set; }
+    public int InvitationLimit { get; private set; }
+
     private readonly IConfiguration _configuration;
 
     public SetupInfo(IConfiguration configuration)
@@ -126,29 +130,22 @@ public class SetupInfo
         DownloadForIosDocuments = GetAppSettings("web.download.for.ios.doc", "https://itunes.apple.com/app/onlyoffice-documents/id944896972");
         DownloadForIosProjects = GetAppSettings("web.download.for.ios.proj", "https://itunes.apple.com/app/onlyoffice-projects/id1353395928?mt=8");
         DownloadForAndroidDocuments = GetAppSettings("web.download.for.android.doc", "https://play.google.com/store/apps/details?id=com.onlyoffice.documents");
-
-        EnabledCultures = GetAppSettings("web:cultures", "en-US")
-            .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
-            .Distinct()
-            .Select(l => CultureInfo.GetCultureInfo(l.Trim()))
-            .ToList();
-
+        
         MaxImageUploadSize = GetAppSettings<long>("web:max-upload-size", 1024 * 1024);
         AvailableFileSize = GetAppSettings("web:available-file-size", 100L * 1024L * 1024L);
 
         TeamlabSiteRedirect = GetAppSettings("web:teamlab-site", string.Empty);
+        MaxUploadThreadCount = GetAppSettings("core:hosting:rateLimiterOptions:defaultConcurrencyWriteRequests", 15);
         ChunkUploadSize = GetAppSettings("files:uploader:chunk-size", 10 * 1024 * 1024);
         ProviderMaxUploadSize = GetAppSettings("files:provider:max-upload-size", 1024L * 1024L * 1024L);
         ThirdPartyAuthEnabled = string.Equals(GetAppSettings("web:thirdparty-auth", "true"), "true");
         NoTenantRedirectURL = GetAppSettings("web.notenant-url", "");
         LegalTerms = GetAppSettings("web:legalterms", "");
+        LicenseUrl = GetAppSettings("web:license-url", "");
 
         NotifyAddress = GetAppSettings("web.promo-url", string.Empty);
         TipsAddress = GetAppSettings("web.promo-tips-url", string.Empty);
         SupportFeedback = GetAppSettings("web.support-feedback", string.Empty);
-
-        ValidEmailKeyInterval = GetAppSettings("email.validinterval", TimeSpan.FromDays(7));
-        ValidAuthKeyInterval = GetAppSettings("auth.validinterval", TimeSpan.FromHours(1));
 
         SalesEmail = GetAppSettings("web.payment.email", "sales@onlyoffice.com");
         _webAutotestSecretEmail = (configuration["web:autotest:secret-email"] ?? "").Trim();
@@ -156,6 +153,10 @@ public class SetupInfo
         RecaptchaPublicKey = GetAppSettings("web:recaptcha:public-key", null);
         RecaptchaPrivateKey = GetAppSettings("web:recaptcha:private-key", null);
         RecaptchaVerifyUrl = GetAppSettings("web:recaptcha:verify-url", "https://www.recaptcha.net/recaptcha/api/siteverify");
+
+        HcaptchaPublicKey = GetAppSettings("web:hcaptcha:public-key", null);
+        HcaptchaPrivateKey = GetAppSettings("web:hcaptcha:private-key", null);
+        HcaptchaVerifyUrl = GetAppSettings("web:hcaptcha:verify-url", "https://api.hcaptcha.com/siteverify");
 
         _webDisplayMobappsBanner = (configuration["web.display.mobapps.banner"] ?? "").Trim().Split(new[] { ',', ';', ' ' }, StringSplitOptions.RemoveEmptyEntries);
         ShareTwitterUrl = GetAppSettings("web.share.twitter", "https://twitter.com/intent/tweet?text={0}");
@@ -166,7 +167,7 @@ public class SetupInfo
         SsoSamlLoginUrl = GetAppSettings("web:sso:saml:login:url", "");
         SsoSamlLogoutUrl = GetAppSettings("web:sso:saml:logout:url", "");
 
-        _hideSettings = GetAppSettings("web.hide-settings", string.Empty).Split(new[] { ',', ';', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+        _hideSettings = GetAppSettings("web:hide-settings", string.Empty).Split(new[] { ',', ';', ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
         SmsTrial = GetAppSettings("core.sms.trial", false);
 
@@ -177,6 +178,8 @@ public class SetupInfo
         TfaAppSender = GetAppSettings("web.tfaapp.backup.title", "ONLYOFFICE");
 
         AmiMetaUrl = GetAppSettings("web:ami:meta", "");
+
+        InvitationLimit = GetAppSettings("web:invitation-limit", int.MaxValue);
     }
 
 

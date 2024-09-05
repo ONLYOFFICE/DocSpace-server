@@ -317,7 +317,7 @@
     <value>Adminlərin sayı {0}-dan çox olmamalıdır</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Adminlərin sayı</value>
+    <value>Admin/ekspert istifadəçilərin sayı</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Avtomatik ehtiyat nüsxə və bərpa</value>
@@ -357,9 +357,6 @@
   </data>
   <data name="TariffsFeature_usersInRoom_exception" xml:space="preserve">
     <value>Otaqdakı istifadəçilərin sayı {0}-dan çox olmamalıdır</value>
-  </data>
-  <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Admin/ekspert istifadəçilərin sayı:</value>
   </data>
   <data name="ConsumersAppleIdDescription" xml:space="preserve">
     <value>Apple ID hesabından istifadə edərək portala daxil olmaq üçün tətbiqi aktivləşdirin.</value>
@@ -1038,5 +1035,26 @@
   </data>
   <data name="UserFreeSpaceException" xml:space="preserve">
     <value>İstifadəçi məkanı kvota limitini keçib</value>
+  </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>Administratorlar/Güclü istifadəçilər əlavə edildi:</value>
+  </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>Dəvət limiti keçib</value>
+  </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>İstifadəçi deaktiv edilib</value>
+  </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>Şifrə dəyişdirilməsi təlimatı {0} e-poçt ünvanına göndərildi.</value>
+  </data>
+  <data name="ErrorEmailLinked" xml:space="preserve">
+    <value>Bu e-poçt üçüncü tərəf provayderi kimi {0} istifadəçisinə əlavə edildi</value>
+  </data>
+  <data name="TariffsFeature_statistic" xml:space="preserve">
+    <value>Saxlama kvotaları və statistika</value>
+  </data>
+  <data name="TariffsFeature_total_size" xml:space="preserve">
+    <value>Hər admin/ekspert istifadəçi üçün {0} və sorğu əsasında sahələr əlavə etmək imkanı</value>
   </data>
 </root>

@@ -34,18 +34,18 @@ public class TelegramServiceClient(IEventBus eventBus,
         ICache cache)
     : ITelegramService
 {
-    public void SendMessage(NotifyMessage m)
+    public async void SendMessage(NotifyMessage m)
     {
-        eventBus.Publish(new NotifySendTelegramMessageRequestedIntegrationEvent(Guid.Empty, m.TenantId)
+        await eventBus.PublishAsync(new NotifySendTelegramMessageRequestedIntegrationEvent(Guid.Empty, m.TenantId)
         {
             NotifyMessage = m
         });
     }
 
-    public void RegisterUser(string userId, int tenantId, string token)
+    public async Task RegisterUserAsync(string userId, int tenantId, string token)
     {
         cache.Insert(GetCacheTokenKey(tenantId, userId), token, DateTime.MaxValue);
-        cacheRegisterUser.Publish(new RegisterUserProto
+        await cacheRegisterUser.PublishAsync(new RegisterUserProto
         {
             UserId = userId,
             TenantId = tenantId,
@@ -53,9 +53,9 @@ public class TelegramServiceClient(IEventBus eventBus,
         }, CacheNotifyAction.Insert);
     }
 
-    public void CreateOrUpdateClient(int tenantId, string token, int tokenLifespan, string proxy)
+    public async Task CreateOrUpdateClientAsync(int tenantId, string token, int tokenLifespan, string proxy)
     {
-        cacheCreateClient.Publish(new CreateClientProto
+        await cacheCreateClient.PublishAsync(new CreateClientProto
         {
             TenantId = tenantId,
             Token = token,
@@ -64,9 +64,9 @@ public class TelegramServiceClient(IEventBus eventBus,
         }, CacheNotifyAction.Insert);
     }
 
-    public void DisableClient(int tenantId)
+    public async Task DisableClientAsync(int tenantId)
     {
-        cacheDisableClient.Publish(new DisableClientProto { TenantId = tenantId }, CacheNotifyAction.Insert);
+        await cacheDisableClient.PublishAsync(new DisableClientProto { TenantId = tenantId }, CacheNotifyAction.Insert);
     }
 
     public string RegistrationToken(string userId, int tenantId)

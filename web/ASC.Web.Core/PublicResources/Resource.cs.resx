@@ -380,7 +380,7 @@
     <value>Počet administrátorů by neměl překročit {0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Počet administrátorů</value>
+    <value>Počet správců/oprávněných uživatelů</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Automatické zálohování a obnovení</value>
@@ -423,9 +423,6 @@
   </data>
   <data name="TariffsFeature_whitelabel" xml:space="preserve">
     <value>Branding a přizpůsobení</value>
-  </data>
-  <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Počet správců/oprávněných uživatelů:</value>
   </data>
   <data name="ConsumersBitly" xml:space="preserve">
     <value>Bitly</value>
@@ -1038,5 +1035,26 @@
   </data>
   <data name="UserFreeSpaceException" xml:space="preserve">
     <value>Překročení kvóty uživatelského prostoru</value>
+  </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>Přidání administrátorů/správců:</value>
+  </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>Limit pozvánek je překročen</value>
+  </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>Uživatel zakázán</value>
+  </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>Pokyn ke změně hesla byl odeslán na e-mailovou adresu {0}.</value>
+  </data>
+  <data name="ErrorEmailLinked" xml:space="preserve">
+    <value>Tento e-mail je připojen k uživateli {0} jako poskytovateli třetí strany</value>
+  </data>
+  <data name="TariffsFeature_statistic" xml:space="preserve">
+    <value>Úložné kvóty a statistiky</value>
+  </data>
+  <data name="TariffsFeature_total_size" xml:space="preserve">
+    <value>{0} na správce/oprávněného uživatele a možnost přidat prostor na vyžádání</value>
   </data>
 </root>

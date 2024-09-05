@@ -35,8 +35,37 @@ public class FoldersControllerInternal(
     FileOperationDtoHelper fileOperationDtoHelper,
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
-    PermissionContext permissionContext)
-    : FoldersController<int>(breadCrumbsManager, folderContentDtoHelper, fileStorageService, fileOperationsManager, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper, permissionContext);
+    PermissionContext permissionContext,
+    FileShareDtoHelper fileShareDtoHelper,
+    HistoryApiHelper historyApiHelper)
+    : FoldersController<int>(breadCrumbsManager,
+        folderContentDtoHelper,
+        fileStorageService,
+        fileOperationsManager,
+        fileOperationDtoHelper,
+        folderDtoHelper,
+        fileDtoHelper,
+        permissionContext,
+        fileShareDtoHelper)
+{
+    /// <summary>
+    /// Get the activity history of a folder with a specified identifier
+    /// </summary>
+    /// <short>
+    /// Get folder history
+    /// </short>
+    /// <category>Folders</category>
+    /// <param type="System.Int32, System" name="folderId">Folder ID</param>
+    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.HistoryDto, ASC.Files.Core">List of actions in the folder</returns>
+    /// <path>api/2.0/files/folder/{folderId}/log</path>
+    /// <httpMethod>GET</httpMethod>
+    /// <collection>list</collection>
+    [HttpGet("folder/{folderId:int}/log")]
+    public IAsyncEnumerable<HistoryDto> GetHistoryAsync(int folderId)
+    {
+        return historyApiHelper.GetFolderHistoryAsync(folderId);
+    }
+}
 
 public class FoldersControllerThirdparty(
     BreadCrumbsManager breadCrumbsManager,
@@ -46,8 +75,17 @@ public class FoldersControllerThirdparty(
     FileOperationDtoHelper fileOperationDtoHelper,
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
-    PermissionContext permissionContext)
-    : FoldersController<string>(breadCrumbsManager, folderContentDtoHelper, fileStorageService, fileOperationsManager, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper, permissionContext);
+    PermissionContext permissionContext,
+    FileShareDtoHelper fileShareDtoHelper)
+    : FoldersController<string>(breadCrumbsManager,
+        folderContentDtoHelper,
+        fileStorageService,
+        fileOperationsManager,
+        fileOperationDtoHelper,
+        folderDtoHelper,
+        fileDtoHelper,
+        permissionContext,
+        fileShareDtoHelper);
 
 public abstract class FoldersController<T>(
     BreadCrumbsManager breadCrumbsManager,
@@ -57,7 +95,8 @@ public abstract class FoldersController<T>(
     FileOperationDtoHelper fileOperationDtoHelper,
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
-    PermissionContext permissionContext)
+    PermissionContext permissionContext,
+    FileShareDtoHelper fileShareDtoHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -124,7 +163,7 @@ public abstract class FoldersController<T>(
     /// <param type="System.Nullable{System.Boolean}, System" name="excludeSubject">Specifies whether to exclude a subject or not</param>
     /// <param type="System.Nullable{ASC.Files.Core.Core.ApplyFilterOption}, System" name="applyFilterOption">Specifies whether to return only files, only folders or all elements from the specified folder</param>
     /// <param type="System.String, System" name="extension">Specifies whether to search for a specific file extension</param>
-    /// <param type="System.Nullable{ASC.Files.Core.VirtualRooms.SearchArea}, ASC.Files.Core" name="searchArea" optional="true" remark="Allowed values: Active (0), Archive (1), Any (2), RecentByLinks (3)">Search area</param>
+    /// <param type="ASC.Files.Core.VirtualRooms.SearchArea, ASC.Files.Core" name="searchArea" optional="true" remark="Allowed values: Active (0), Archive (1), Any (2), RecentByLinks (3)">Search area</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FolderContentDto, ASC.Files.Core">Folder contents</returns>
     /// <path>api/2.0/files/{folderId}</path>
     /// <httpMethod>GET</httpMethod>
@@ -243,11 +282,11 @@ public abstract class FoldersController<T>(
     }
 
     /// <summary>
-    /// Returns the used space in root folders.
+    /// Returns the used space of files in the root folders.
     /// </summary>
-    /// <short>Returns the used space in root foldersю</short>
+    /// <short>Get used space of files</short>
     /// <category>Folders</category>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FilesStatisticsResultDto, ASC.Files.Core">Used space in root folders</returns>
+    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FilesStatisticsResultDto, ASC.Files.Core">Used space of files in the root folders</returns>
     /// <path>api/2.0/files/filesusedspace</path>
     /// <httpMethod>GET</httpMethod>
     [HttpGet("filesusedspace")]
@@ -256,6 +295,24 @@ public abstract class FoldersController<T>(
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         return await fileStorageService.GetFilesUsedSpace();
+    }
+    
+    /// <summary>
+    /// Returns the primary external link by the identifier specified in the request.
+    /// </summary>
+    /// <short>Get primary external link</short>
+    /// <category>Folders</category>
+    /// <param type="System.Int32, System" method="url" name="id">Folder Id</param>
+    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">Folder security information</returns>
+    /// <path>api/2.0/files/folder/{id}/link</path>
+    /// <httpMethod>GET</httpMethod>
+    [AllowAnonymous]
+    [HttpGet("folder/{id}/link")]
+    public async Task<FileShareDto> GetPrimaryExternalLinkAsync(T id)
+    {
+        var linkAce = await fileStorageService.GetPrimaryExternalLinkAsync(id, FileEntryType.Folder);
+
+        return await fileShareDtoHelper.Get(linkAce);
     }
 }
 

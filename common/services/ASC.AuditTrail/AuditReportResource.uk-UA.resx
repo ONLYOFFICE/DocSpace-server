@@ -275,7 +275,7 @@
     <value>Група оновлена: {0}</value>
   </data>
   <data name="GuestAccount" xml:space="preserve">
-    <value>Аккаунт гостя</value>
+    <value>Гість</value>
   </data>
   <data name="GuestActivated" xml:space="preserve">
     <value>Гість активований: {0}</value>
@@ -738,5 +738,68 @@
   </data>
   <data name="PortalRenamed" xml:space="preserve">
     <value>Портал перейменовано</value>
+  </data>
+  <data name="FileSizePostfix" xml:space="preserve">
+    <value>байт,Кб,Мб,Гб,Тб</value>
+  </data>
+  <data name="FileUploadedWithOverwriting" xml:space="preserve">
+    <value>Файл, переданий із перезаписом: {0}</value>
+  </data>
+  <data name="QuotaPerPortalChanged" xml:space="preserve">
+    <value>Установлена квота пам'яті за замовчуванням: {0}</value>
+  </data>
+  <data name="QuotaPerPortalDisabled" xml:space="preserve">
+    <value>Вимкнута квота пам'яті за замовчуванням</value>
+  </data>
+  <data name="QuotaPerRoomChanged" xml:space="preserve">
+    <value>Установлена квота пам'яті за замовчуванням для кімнат: {0}</value>
+  </data>
+  <data name="QuotaPerRoomDisabled" xml:space="preserve">
+    <value>Вимкнута квота пам'яті за замовчуванням для кімнат</value>
+  </data>
+  <data name="QuotaPerUserChanged" xml:space="preserve">
+    <value>Установлена квота пам'яті за замовчуванням для користувачів: {0}</value>
+  </data>
+  <data name="QuotaPerUserDisabled" xml:space="preserve">
+    <value>Вимкнута квота пам'яті за замовчуванням для користувачів</value>
+  </data>
+  <data name="RoomCopied" xml:space="preserve">
+    <value>Кімната скопійовано: {0}</value>
+  </data>
+  <data name="RoomGroupAdded" xml:space="preserve">
+    <value>Додана група: {0}. Роль: {1}</value>
+  </data>
+  <data name="RoomGroupRemove" xml:space="preserve">
+    <value>Видалена група: {0}</value>
+  </data>
+  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
+    <value>{0} призначені: {1}</value>
+  </data>
+  <data name="SendJoinInvite" xml:space="preserve">
+    <value>Користувач {0} надіслав {1} запрошення приєднатися до цього простору DocSpace</value>
+  </data>
+  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
+    <value>Кімнати [{0}]. Установлена налаштовувана квота пам'яті для кімнат: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
+    <value>Кімнати [{0}]. Установлена квота пам'яті за замовчуванням для кімнат: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
+    <value>Кімнати [{0}]. Вимкнута квота пам'яті для кімнат</value>
+  </data>
+  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
+    <value>Користувачі [{0}]. Установлена налаштовувана квота пам'яті для користувачів: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
+    <value>Користувачі [{0}]. Установлена квота пам'яті за замовчуванням для користувачів: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
+    <value>Користувачі [{0}]. Вимкнута квота пам'яті для користувачів</value>
+  </data>
+  <data name="FormOpenedForFilling" xml:space="preserve">
+    <value>Файл, відкритий для заповнення: {0}</value>
+  </data>
+  <data name="FormSubmit" xml:space="preserve">
+    <value>Користувачі [{0}]. Форму надіслано: {1}</value>
   </data>
 </root>

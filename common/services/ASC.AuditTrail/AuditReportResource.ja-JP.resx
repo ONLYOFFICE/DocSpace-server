@@ -287,7 +287,7 @@
     <value>グループは更新されました：{0}</value>
   </data>
   <data name="GuestAccount" xml:space="preserve">
-    <value>お客様アカウント</value>
+    <value>匿名の</value>
   </data>
   <data name="GuestActivated" xml:space="preserve">
     <value>お客様は有効されました：{0}</value>
@@ -738,5 +738,68 @@
   </data>
   <data name="PortalRenamed" xml:space="preserve">
     <value>ポータル名が変更されました</value>
+  </data>
+  <data name="FileSizePostfix" xml:space="preserve">
+    <value>bytes,KB,MB,GB</value>
+  </data>
+  <data name="FileUploadedWithOverwriting" xml:space="preserve">
+    <value>上書きでファイルがアップロードされました：{0}</value>
+  </data>
+  <data name="QuotaPerPortalChanged" xml:space="preserve">
+    <value>デフォルトのストレージ容量制限が設定されました：{0}</value>
+  </data>
+  <data name="QuotaPerPortalDisabled" xml:space="preserve">
+    <value>デフォルトストレージ容量制限の無効化</value>
+  </data>
+  <data name="QuotaPerRoomChanged" xml:space="preserve">
+    <value>ルームのデフォルトストレージ容量制限を設定：{0}</value>
+  </data>
+  <data name="QuotaPerRoomDisabled" xml:space="preserve">
+    <value>ルームのデフォルトストレージ容量制限を無効化</value>
+  </data>
+  <data name="QuotaPerUserChanged" xml:space="preserve">
+    <value>ユーザーのストレージ容量制限が設定されました：{0}</value>
+  </data>
+  <data name="QuotaPerUserDisabled" xml:space="preserve">
+    <value>ユーザーのデフォルトストレージ容量制限が無効化されました</value>
+  </data>
+  <data name="RoomCopied" xml:space="preserve">
+    <value>部屋をコピーしました: {0}</value>
+  </data>
+  <data name="RoomGroupAdded" xml:space="preserve">
+    <value>グループが追加されました：{0}。役割：{1}</value>
+  </data>
+  <data name="RoomGroupRemove" xml:space="preserve">
+    <value>グループが削除されました：{0}</value>
+  </data>
+  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
+    <value>{0}が任命されました: {1}</value>
+  </data>
+  <data name="SendJoinInvite" xml:space="preserve">
+    <value>ユーザー{0}は{1}にこのDocSpaceへの招待を送信しました</value>
+  </data>
+  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
+    <value>ルーム [{0}]。ルームにカスタムなストレージ容量を設定する：{1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
+    <value>ルーム [{0}]。ルームにデフォルトのストレージ容量を設定する：{1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
+    <value>ルーム [{0}]。ルームのストレージ容量を無効</value>
+  </data>
+  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
+    <value>ユーザー [{0}]。ユーザーにカスタムなストレージ容量を設定する：{1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
+    <value>ユーザー [{0}]。ユーザーにデフォルトのストレージ容量を設定する：{1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
+    <value>ユーザー [{0}]。ユーザーのストレージ容量を無効</value>
+  </data>
+  <data name="FormOpenedForFilling" xml:space="preserve">
+    <value>記入するために開かれたファイル：{0}</value>
+  </data>
+  <data name="FormSubmit" xml:space="preserve">
+    <value>ユーザー [{0}]。フォームが送信された：{1}</value>
   </data>
 </root>

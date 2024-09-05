@@ -106,8 +106,6 @@ public class BackupWorker(
                 }
             }
 
-            await item.PublishChanges();
-
             return ToBackupProgress(item);
         }
     }
@@ -154,7 +152,7 @@ public class BackupWorker(
     {
         await using (await distributedLockProvider.TryAcquireLockAsync(LockKey))
         {
-            return ToBackupProgress((await _progressQueue.GetAllTasks<RestoreProgressItem>()).FirstOrDefault(t => t.TenantId == tenantId && t.BackupProgressItemType == BackupProgressItemType.Restore));
+            return ToBackupProgress((await _progressQueue.GetAllTasks<RestoreProgressItem>()).FirstOrDefault(t => (t.TenantId == tenantId || t.NewTenantId == tenantId) && t.BackupProgressItemType == BackupProgressItemType.Restore));
         }
     }
 
@@ -235,10 +233,9 @@ public class BackupWorker(
         return BitConverter.ToString(hash).Replace("-", string.Empty);
     }
 
-    internal static string GetBackupHashMD5(string path, long chunkSize)
+    internal static async Task<string> GetBackupHashMD5Async(string path, long chunkSize)
     {
-        using var md5 = MD5.Create();
-        using var fileStream = File.OpenRead(path);
+        await using var fileStream = File.OpenRead(path);
         var multipartSplitCount = 0;
         var splitCount = fileStream.Length / chunkSize;
         var mod = (int)(fileStream.Length - chunkSize * splitCount);
@@ -247,27 +244,27 @@ public class BackupWorker(
         for (var i = 0; i < splitCount; i++)
         {
             var offset = i == 0 ? 0 : chunkSize * i;
-            var chunk = GetChunk(fileStream, offset, (int)chunkSize);
-            var hash = md5.ComputeHash(chunk);
+            var chunk = await GetChunkAsync(fileStream, offset, (int)chunkSize);
+            var hash = MD5.HashData(chunk);
             concatHash = concatHash.Concat(hash);
             multipartSplitCount++;
         }
         if (mod != 0)
         {
-            var chunk = GetChunk(fileStream, chunkSize * splitCount, mod);
-            var hash = md5.ComputeHash(chunk);
+            var chunk = await GetChunkAsync(fileStream, chunkSize * splitCount, mod);
+            var hash = MD5.HashData(chunk);
             concatHash = concatHash.Concat(hash);
             multipartSplitCount++;
         }
-        var multipartHash = BitConverter.ToString(md5.ComputeHash(concatHash.ToArray())).Replace("-", string.Empty);
+        var multipartHash = BitConverter.ToString(MD5.HashData(concatHash.ToArray())).Replace("-", string.Empty);
         return multipartHash + "-" + multipartSplitCount;
     }
 
-    private static byte[] GetChunk(Stream sourceStream, long offset, int count)
+    private static async Task<byte[]> GetChunkAsync(Stream sourceStream, long offset, int count)
     {
         var buffer = new byte[count];
         sourceStream.Position = offset;
-        _ = sourceStream.Read(buffer, 0, count);
+        _ = await sourceStream.ReadAsync(buffer.AsMemory(0, count));
         return buffer;
     }
 

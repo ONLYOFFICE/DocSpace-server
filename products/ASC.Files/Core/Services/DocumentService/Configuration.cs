@@ -72,7 +72,8 @@ public class CoEditingConfig
     }
 }
 
-[Scope]
+[Scope(GenericArguments = [typeof(int)])]
+[Scope(GenericArguments = [typeof(string)])]
 public class Configuration<T>(
     DocumentConfig<T> document,
     EditorConfiguration<T> editorConfig)
@@ -135,7 +136,8 @@ public class Configuration<T>(
 
 #region Nested Classes
 
-[Transient]
+[Transient(GenericArguments = [typeof(int)])]
+[Transient(GenericArguments = [typeof(string)])]
 public class DocumentConfig<T>(
     DocumentServiceConnector documentServiceConnector, 
     PathProvider pathProvider, 
@@ -144,7 +146,7 @@ public class DocumentConfig<T>(
 {
     private string _fileUri;
     private string _key = string.Empty;
-    private FileReferenceData<T> _referenceData;
+    private FileReferenceData _referenceData;
     public string GetFileType(File<T> file) => file.ConvertedExtension.Trim('.');
     public InfoConfig<T> Info { get; set; } = infoConfig;
     public bool IsLinkedForMe { get; set; }
@@ -160,11 +162,11 @@ public class DocumentConfig<T>(
 	public Options Options { get; set; }
     public string SharedLinkParam { get; set; }
     public string SharedLinkKey { get; set; }
-    public async Task<FileReferenceData<T>> GetReferenceData(File<T> file)
+    public async Task<FileReferenceData> GetReferenceData(File<T> file)
     {
-        return _referenceData ??= new FileReferenceData<T>
+        return _referenceData ??= new FileReferenceData
         {
-            FileKey = file.Id, 
+            FileKey = file.Id.ToString(), 
             InstanceId = (await tenantManager.GetCurrentTenantIdAsync()).ToString()
         };
     }
@@ -184,13 +186,14 @@ public class DocumentConfig<T>(
         }
 
         var last = Permissions.Edit || Permissions.Review || Permissions.Comment;
-        _fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(pathProvider.GetFileStreamUrl(file, SharedLinkKey, SharedLinkParam, last));
+        _fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(await pathProvider.GetFileStreamUrlAsync(file, last));
 
         return _fileUri;
     }
 }
 
-[Transient]
+[Transient(GenericArguments = [typeof(int)])]
+[Transient(GenericArguments = [typeof(string)])]
 public class EditorConfiguration<T>(
     UserManager userManager,
     AuthContext authContext,
@@ -243,7 +246,7 @@ public class EditorConfiguration<T>(
         return _user;
     }
 
-    public async Task<string> GetCallbackUrl(string fileId)
+    public async Task<string> GetCallbackUrl(string fileId, string fillingSessionId)
     {
         if (!ModeWrite)
         {
@@ -251,6 +254,8 @@ public class EditorConfiguration<T>(
         }
 
         var callbackUrl = await documentServiceTrackerHelper.GetCallbackUrlAsync(fileId);
+
+        callbackUrl = !string.IsNullOrEmpty(fillingSessionId) ? QueryHelpers.AddQueryString(callbackUrl, FilesLinkUtility.FillingSessionId, fillingSessionId) : callbackUrl;
 
         return externalShare.GetUrlWithShare(callbackUrl);
     }
@@ -281,8 +286,6 @@ public class EditorConfiguration<T>(
         switch (fileType)
         {
             case FileType.Document:
-            case FileType.OForm:
-            case FileType.OFormTemplate:
                 title = FilesJSResource.TitleNewFileText;
                 break;
 
@@ -326,8 +329,7 @@ public class EditorConfiguration<T>(
         var filter = fileType switch
         {
             FileType.Document => FilterType.DocumentsOnly,
-            FileType.OForm => FilterType.OFormOnly,
-            FileType.OFormTemplate => FilterType.OFormTemplateOnly,
+            FileType.Pdf => FilterType.Pdf,
             FileType.Spreadsheet => FilterType.SpreadsheetsOnly,
             FileType.Presentation => FilterType.PresentationsOnly,
             _ => FilterType.FilesOnly
@@ -369,8 +371,7 @@ public class EditorConfiguration<T>(
             var filter = fileType switch
             {
                 FileType.Document => FilterType.DocumentsOnly,
-                FileType.OForm => FilterType.OFormOnly,
-                FileType.OFormTemplate => FilterType.OFormTemplateOnly,
+                FileType.Pdf => FilterType.Pdf,
                 FileType.Spreadsheet => FilterType.SpreadsheetsOnly,
                 FileType.Presentation => FilterType.PresentationsOnly,
                 _ => FilterType.FilesOnly
@@ -391,7 +392,8 @@ public class EditorConfiguration<T>(
     }
 }
 
-[Transient]
+[Transient(GenericArguments = [typeof(int)])]
+[Transient(GenericArguments = [typeof(string)])]
 public class InfoConfig<T>(
     BreadCrumbsManager breadCrumbsManager,
     FileSharing fileSharing,
@@ -597,11 +599,11 @@ public class Run
 
 /// <summary>
 /// </summary>
-public class FileReference<T>
+public class FileReference
 {
     /// <summary>File reference data</summary>
     /// <type>ASC.Web.Files.Services.DocumentService.FileReferenceData, ASC.Files.Core</type>
-    public FileReferenceData<T> ReferenceData { get; set; }
+    public FileReferenceData ReferenceData { get; set; }
 
     /// <summary>Error</summary>
     /// <type>System.String, System</type>
@@ -634,11 +636,11 @@ public class FileReference<T>
 
 /// <summary>
 /// </summary>
-public class FileReferenceData<T>
+public class FileReferenceData
 {
     /// <summary>File key</summary>
-    /// <type>System.Int32, System</type>
-    public T FileKey { get; set; }
+    /// <type>System.String, System</type>
+    public string FileKey { get; set; }
 
     /// <summary>Instance ID</summary>
     /// <type>System.String, System</type>
@@ -655,7 +657,9 @@ public class CustomerConfig(
 {
     public async Task<string> GetAddress() => (await settingsManager.LoadForDefaultTenantAsync<CompanyWhiteLabelSettings>()).Address;
 
-    public async Task<string> GetLogo() => baseCommonLinkUtility.GetFullAbsolutePath(await tenantWhiteLabelSettingsHelper.GetAbsoluteDefaultLogoPathAsync(WhiteLabelLogoType.LoginPage, false));
+    public async Task<string> GetLogo() => baseCommonLinkUtility.GetFullAbsolutePath(await tenantWhiteLabelSettingsHelper.GetAbsoluteDefaultLogoPathAsync(WhiteLabelLogoType.AboutPage, false));
+
+    public async Task<string> GetLogoDark() => baseCommonLinkUtility.GetFullAbsolutePath(await tenantWhiteLabelSettingsHelper.GetAbsoluteDefaultLogoPathAsync(WhiteLabelLogoType.AboutPage, true));
 
     public async Task<string> GetMail() => (await settingsManager.LoadForDefaultTenantAsync<CompanyWhiteLabelSettings>()).Email;
 
@@ -664,7 +668,8 @@ public class CustomerConfig(
     public async Task<string> GetWww() => (await settingsManager.LoadForDefaultTenantAsync<CompanyWhiteLabelSettings>()).Site;
 }
 
-[Transient]
+[Transient(GenericArguments = [typeof(int)])]
+[Transient(GenericArguments = [typeof(string)])]
 public class CustomizationConfig<T>(
     CoreBaseSettings coreBaseSettings,
     SettingsManager settingsManager,
@@ -787,24 +792,10 @@ public class CustomizationConfig<T>(
 
     public async Task<bool> GetSubmitForm(File<T> file, bool modeWrite)
     {
-        if (!modeWrite || FileUtility.GetFileTypeByFileName(file.Title) != FileType.Pdf)
-        {
-            return false;
-        }
 
-        var linkDao = daoFactory.GetLinkDao();
-        var sourceId = await linkDao.GetSourceAsync(file.Id.ToString());
+        var properties = await daoFactory.GetFileDao<T>().GetProperties(file.Id);
 
-        if (sourceId == null)
-        {
-            return false;
-        }
-
-        var properties = int.TryParse(sourceId, out var sourceInt)
-            ? await daoFactory.GetFileDao<int>().GetProperties(sourceInt)
-            : await daoFactory.GetFileDao<string>().GetProperties(sourceId);
-
-        return properties is { FormFilling.CollectFillForm: true };
+        return properties is { FormFilling.CollectFillForm: true } && file.RootFolderType != FolderType.Archive;
     }
 
     private FileSharing FileSharing { get; } = fileSharing;
@@ -871,10 +862,15 @@ public class LogoConfig(
     {
         get => commonLinkUtility.GetFullAbsolutePath(commonLinkUtility.GetDefault());
     }
+
+    public bool GetVisible(EditorType editorType)
+    {
+        return editorType != EditorType.Mobile;
+    }
 }
 
 [Transient]
-public class PluginsConfig()
+public class PluginsConfig
     // ConsumerFactory consumerFactory,
     // BaseCommonLinkUtility baseCommonLinkUtility,
     // CoreBaseSettings coreBaseSettings,
@@ -936,33 +932,4 @@ public class UserConfig
     public string Id { get; set; }
     public string Name { get; set; }
     public string Image { get; set; }
-}
-
-public static class ConfigurationFilesExtension
-{
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<Configuration<int>>();
-        services.TryAdd<Configuration<string>>();
-        
-        services.TryAdd<DocumentConfig<string>>();
-        services.TryAdd<DocumentConfig<int>>();
-
-        services.TryAdd<InfoConfig<string>>();
-        services.TryAdd<InfoConfig<int>>();
-
-        services.TryAdd<EditorConfiguration<string>>();
-        services.TryAdd<EditorConfiguration<int>>();
-
-        services.TryAdd<EmbeddedConfig>();
-
-        services.TryAdd<CustomizationConfig<string>>();
-        services.TryAdd<CustomizationConfig<int>>();
-
-        services.TryAdd<CustomerConfig>();
-        services.TryAdd<CustomerConfig>();
-
-        services.TryAdd<LogoConfig>();
-        services.TryAdd<LogoConfig>();
-    }
 }

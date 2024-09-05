@@ -89,11 +89,9 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
     {
         return whatsNewType switch
         {
-            WhatsNewType.DailyFeed => await auditEventsRepository.GetTenantsAsync(date.Date.AddDays(-1),
-                date.Date.AddSeconds(-1)),
-            WhatsNewType.RoomsActivity => await auditEventsRepository.GetTenantsAsync(date.AddHours(-1),
-                date.AddSeconds(-1)),
-            _ => Enumerable.Empty<int>()
+            WhatsNewType.DailyFeed => await auditEventsRepository.GetTenantsAsync(date.Date.AddDays(-1), date.Date.AddSeconds(-1)),
+            WhatsNewType.RoomsActivity => await auditEventsRepository.GetTenantsAsync(date.AddHours(-1), date.AddSeconds(-1)),
+            _ => []
         };
     }
 
@@ -158,13 +156,15 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
 
                 _log.Debug($"SendMsgWhatsNew userActivities count : {userActivities.Count}");//temp
 
+                var action = whatsNewType == WhatsNewType.RoomsActivity ? Actions.RoomsActivity : Actions.SendWhatsNew;
+
                 if (userActivities.Any())
                 {
                     _log.InformationSendWhatsNewTo(user.Email);
                     await client.SendNoticeAsync(
-                        Actions.SendWhatsNew, null, user,
+                        action, null, user,
                         new TagValue(Tags.Activities, userActivities),
-                        new TagValue(Tags.Date, DateToString(scheduleDate, whatsNewType, culture)),
+                        new TagValue(Tags.Date, DateToString(scheduleDate, whatsNewType)),
                         new TagValue(CommonTags.Priority, 1)
                     );
                 }
@@ -183,7 +183,7 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
 
         var user = userManager.GetUsers(activityInfo.UserId);
 
-        var date = activityInfo.Data.ConvertNumerals("g");
+        var date = activityInfo.Data.ConvertNumerals("g", false);
         var userName = user.DisplayUserName(displayUserSettingsHelper);
         var userRole = activityInfo.UserRole;
         var fileUrl = activityInfo.FileUrl;
@@ -320,16 +320,11 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
         return currentTime.Hour == hourToSend;
     }
 
-    private static string DateToString(DateTime d, WhatsNewType type, CultureInfo c)
+    private static string DateToString(DateTime d, WhatsNewType type)
     {
         d = type == WhatsNewType.DailyFeed ? d.AddDays(-1) : d.AddHours(-1);
 
-        if (c.TwoLetterISOLanguageName == "ru")
-        {
-            return d.ToString("d MMMM", c);
-        }
-        
-        return d.ConvertNumerals("M");
+        return d.ConvertNumerals("M", false);
     }
 }
 

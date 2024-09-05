@@ -38,37 +38,37 @@ public class NotifyHelper(ILogger<NotifyHelper> logger, NotifyServiceClient noti
         _serverRootPath = serverRootPath;
     }
 
-    public void SendStorageEncryptionStart(int tenantId)
+    public async Task SendStorageEncryptionStart(int tenantId)
     {
-        SendStorageEncryptionNotification("SendStorageEncryptionStart", tenantId);
+        await SendStorageEncryptionNotification("SendStorageEncryptionStart", tenantId);
     }
 
-    public void SendStorageEncryptionSuccess(int tenantId)
+    public async Task SendStorageEncryptionSuccess(int tenantId)
     {
-        SendStorageEncryptionNotification("SendStorageEncryptionSuccess", tenantId);
+        await SendStorageEncryptionNotification("SendStorageEncryptionSuccess", tenantId);
     }
 
-    public void SendStorageEncryptionError(int tenantId)
+    public async Task SendStorageEncryptionError(int tenantId)
     {
-        SendStorageEncryptionNotification("SendStorageEncryptionError", tenantId);
+        await SendStorageEncryptionNotification("SendStorageEncryptionError", tenantId);
     }
 
-    public void SendStorageDecryptionStart(int tenantId)
+    public async Task SendStorageDecryptionStart(int tenantId)
     {
-        SendStorageEncryptionNotification("SendStorageDecryptionStart", tenantId);
+        await SendStorageEncryptionNotification("SendStorageDecryptionStart", tenantId);
     }
 
-    public void SendStorageDecryptionSuccess(int tenantId)
+    public async Task SendStorageDecryptionSuccess(int tenantId)
     {
-        SendStorageEncryptionNotification("SendStorageDecryptionSuccess", tenantId);
+        await SendStorageEncryptionNotification("SendStorageDecryptionSuccess", tenantId);
     }
 
-    public void SendStorageDecryptionError(int tenantId)
+    public async Task SendStorageDecryptionError(int tenantId)
     {
-        SendStorageEncryptionNotification("SendStorageDecryptionError", tenantId);
+       await SendStorageEncryptionNotification("SendStorageDecryptionError", tenantId);
     }
 
-    private void SendStorageEncryptionNotification(string method, int tenantId)
+    private async Task SendStorageEncryptionNotification(string method, int tenantId)
     {
         var notifyInvoke = new NotifyInvoke
         {
@@ -80,7 +80,7 @@ public class NotifyHelper(ILogger<NotifyHelper> logger, NotifyServiceClient noti
 
         try
         {
-            notifyServiceClient.InvokeSendMethod(notifyInvoke);
+           await notifyServiceClient.InvokeSendMethodAsync(notifyInvoke);
         }
         catch (Exception error)
         {

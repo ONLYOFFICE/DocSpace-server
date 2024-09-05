@@ -41,7 +41,9 @@ public class OwnerController(
     WebItemManager webItemManager,
     DisplayUserSettingsHelper displayUserSettingsHelper,
     IMemoryCache memoryCache,
-    IHttpContextAccessor httpContextAccessor)
+    IHttpContextAccessor httpContextAccessor,
+    IUrlShortener urlShortener,
+    UserManagerWrapper userManagerWrapper)
     : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
@@ -69,13 +71,15 @@ public class OwnerController(
             throw new SecurityException("Collaborator can not be an owner");
         }
 
-        if (!owner.Id.Equals(authContext.CurrentAccount.ID) || Guid.Empty.Equals(newOwner.Id))
+        if (!owner.Id.Equals(authContext.CurrentAccount.ID) || 
+            Guid.Empty.Equals(newOwner.Id) || 
+            newOwner.Status != EmployeeStatus.Active)
         {
             return new { Status = 0, Message = Resource.ErrorAccessDenied };
         }
 
         var confirmLink = await commonLinkUtility.GetConfirmationEmailUrlAsync(owner.Email, ConfirmType.PortalOwnerChange, newOwner.Id, newOwner.Id);
-        await studioNotifyService.SendMsgConfirmChangeOwnerAsync(owner, newOwner, confirmLink);
+        await studioNotifyService.SendMsgConfirmChangeOwnerAsync(owner, newOwner, await urlShortener.GetShortenLinkAsync(confirmLink));
 
         await messageService.SendAsync(MessageAction.OwnerSentChangeOwnerInstructions, MessageTarget.Create(owner.Id), owner.DisplayUserName(false, displayUserSettingsHelper));
 
@@ -105,7 +109,9 @@ public class OwnerController(
         }
         catch
         {
+            // ignored
         }
+
         if (Constants.LostUser.Equals(newOwner))
         {
             throw new Exception(Resource.ErrorUserNotFound);
@@ -114,6 +120,16 @@ public class OwnerController(
         if (await userManager.IsUserInGroupAsync(newOwner.Id, Constants.GroupUser.ID))
         {
             throw new Exception(Resource.ErrorUserNotFound);
+        }
+
+        if (newOwner.Status != EmployeeStatus.Active)
+        {
+            throw new Exception(Resource.ErrorAccessDenied);
+        }
+
+        if (!await userManagerWrapper.UpdateUserTypeAsync(newOwner, EmployeeType.DocSpaceAdmin))
+        {
+            throw new InvalidOperationException();
         }
 
         var curTenant = await tenantManager.GetCurrentTenantAsync();

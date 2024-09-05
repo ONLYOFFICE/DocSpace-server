@@ -281,7 +281,7 @@
     <value>小组已更新：{0}</value>
   </data>
   <data name="GuestAccount" xml:space="preserve">
-    <value>宾客账户</value>
+    <value>访客</value>
   </data>
   <data name="GuestActivated" xml:space="preserve">
     <value>访客已激活：{0}</value>
@@ -738,5 +738,68 @@
   </data>
   <data name="PortalRenamed" xml:space="preserve">
     <value>门户已被重命名</value>
+  </data>
+  <data name="FileSizePostfix" xml:space="preserve">
+    <value>字节、KB、MB、GB、TB</value>
+  </data>
+  <data name="FileUploadedWithOverwriting" xml:space="preserve">
+    <value>上传文件并覆盖：{0}</value>
+  </data>
+  <data name="QuotaPerPortalChanged" xml:space="preserve">
+    <value>设置默认存储配额：{0}</value>
+  </data>
+  <data name="QuotaPerPortalDisabled" xml:space="preserve">
+    <value>禁用默认存储配额</value>
+  </data>
+  <data name="QuotaPerRoomChanged" xml:space="preserve">
+    <value>设置房间默认存储配额：{0}</value>
+  </data>
+  <data name="QuotaPerRoomDisabled" xml:space="preserve">
+    <value>禁用房间默认存储配额</value>
+  </data>
+  <data name="QuotaPerUserChanged" xml:space="preserve">
+    <value>设置用户默认存储配额：{0}</value>
+  </data>
+  <data name="QuotaPerUserDisabled" xml:space="preserve">
+    <value>禁用用户默认存储配额</value>
+  </data>
+  <data name="RoomGroupAdded" xml:space="preserve">
+    <value>添加群组：{0}。角色：{1}</value>
+  </data>
+  <data name="RoomCopied" xml:space="preserve">
+    <value>房间复制： {0}</value>
+  </data>
+  <data name="RoomGroupRemove" xml:space="preserve">
+    <value>删除群组：{0}</value>
+  </data>
+  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
+    <value>{0}已指定：{1}</value>
+  </data>
+  <data name="SendJoinInvite" xml:space="preserve">
+    <value>用户 {0} 向 {1} 发送邀请加入此协作空间</value>
+  </data>
+  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
+    <value>房间 [{0}]。为房间设置自定义存储空间额度：{1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
+    <value>房间 [{0}]。为房间设置默认存储空间额度：{1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
+    <value>房间 [{0}]。禁用房间的存储空间额度</value>
+  </data>
+  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
+    <value>用户 [{0}]。为用户设置自定义存储空间额度：{1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
+    <value>用户 [{0}]。为用户设置默认存储空间额度：{1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
+    <value>用户 [{0}]。禁用用户的存储空间额度</value>
+  </data>
+  <data name="FormOpenedForFilling" xml:space="preserve">
+    <value>文件已打开以填写：{0}</value>
+  </data>
+  <data name="FormSubmit" xml:space="preserve">
+    <value>用户 [{0}]。表单已提交：{1}</value>
   </data>
 </root>

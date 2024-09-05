@@ -26,10 +26,11 @@
 
 namespace ASC.Migration.Core;
 
-[Singleton(Additional = typeof(MigrationWorkerExtension))]
+[Singleton]
 public class MigrationWorker(
     IDistributedTaskQueueFactory queueFactory,
-    IServiceProvider serviceProvider)
+    IServiceProvider serviceProvider,
+    ILogger<MigrationWorker> logger)
 {
     private static readonly SemaphoreSlim _semaphoreSlim = new(1);
     private readonly DistributedTaskQueue _queue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME, 60 * 60 * 24); // 1 day
@@ -98,14 +99,7 @@ public class MigrationWorker(
 
     public async Task<MigrationOperation> GetStatusAsync(int tenantId)
     {
+        logger.Debug($"try get status {tenantId}");
         return (await _queue.GetAllTasks<MigrationOperation>()).FirstOrDefault(t => t.TenantId == tenantId);
-    }
-}
-
-public static class MigrationWorkerExtension
-{
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<MigrationOperation>();
     }
 }

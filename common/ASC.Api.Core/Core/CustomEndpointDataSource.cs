@@ -25,7 +25,6 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Api.Core.Core;
-
 public class CustomEndpointDataSource : EndpointDataSource
 {
     private readonly EndpointDataSource _source;
@@ -77,7 +76,8 @@ public static class EndpointExtension
 {
     public static async Task<IEndpointRouteBuilder> MapCustomAsync(this IEndpointRouteBuilder endpoints, bool webhooksEnabled = false, IServiceProvider serviceProvider = null)
     {
-        endpoints.MapControllers();
+        endpoints.MapControllers()
+                 .WithRequirementAuthorization();
 
         if (webhooksEnabled && serviceProvider != null)
         {
@@ -91,7 +91,7 @@ public static class EndpointExtension
         return endpoints;
     }
 
-    private static async Task<IEndpointRouteBuilder> RegisterWebhooks(this IEndpointRouteBuilder endpoints, IServiceProvider serviceProvider)
+    private static async Task RegisterWebhooks(this IEndpointRouteBuilder endpoints, IServiceProvider serviceProvider)
     {
         var toRegister = endpoints.DataSources.First().Endpoints
             .Cast<RouteEndpoint>()
@@ -117,7 +117,5 @@ public static class EndpointExtension
         {
             await dbWorker.Register(toRegister);
         }
-
-        return endpoints;
     }
 }

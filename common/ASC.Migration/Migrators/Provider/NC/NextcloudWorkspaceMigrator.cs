@@ -29,7 +29,7 @@ using ASCShare = ASC.Files.Core.Security.FileShare;
 
 namespace ASC.Migration.Core.Migrators.Provider.NC;
 
-[Transient]
+[Transient(typeof(Migrator))]
 public class NextcloudWorkspaceMigrator : Migrator
 {
     private CancellationToken _cancellationToken;
@@ -57,7 +57,7 @@ public class NextcloudWorkspaceMigrator : Migrator
 
     public override async Task InitAsync(string path, CancellationToken cancellationToken, OperationType operation)
     {
-        await MigrationLogger.InitAsync();
+        MigrationLogger.Init();
         _cancellationToken = cancellationToken;
 
         MigrationInfo.Operation = operation;
@@ -76,8 +76,9 @@ public class NextcloudWorkspaceMigrator : Migrator
                 break;
             }
         }
-        MigrationInfo.Files = new List<string> { Path.GetFileName(_takeout) };
+        MigrationInfo.Files = [Path.GetFileName(_takeout)];
         TmpFolder = path;
+        await ReportProgressAsync(1, "start");
     }
 
     public override async Task<MigrationApiInfo> ParseAsync(bool reportProgress = true)
@@ -91,32 +92,30 @@ public class NextcloudWorkspaceMigrator : Migrator
             double progress = 5;
             try
             {
-                using (var archive = ZipFile.OpenRead(_takeout))
+                using var archive = ZipFile.OpenRead(_takeout);
+                foreach (var entry in archive.Entries)
                 {
-                    foreach (var entry in archive.Entries)
+                    if (reportProgress)
                     {
-                        if (reportProgress)
+                        progress += 45d / archive.Entries.Count;
+                        await ReportProgressAsync(progress, MigrationResource.Unzipping);
+                    }
+                    if (string.IsNullOrEmpty(entry.Name))
+                    {
+                        Directory.CreateDirectory(Path.Combine(TmpFolder, entry.FullName));
+                    }
+                    else
+                    {
+                        var dir = Path.GetDirectoryName(Path.Combine(TmpFolder, entry.FullName));
+                        if (!Directory.Exists(dir))
                         {
-                            progress += 45d / archive.Entries.Count;
-                            await ReportProgressAsync(progress, MigrationResource.Unzipping);
+                            Directory.CreateDirectory(dir);
                         }
-                        if (string.IsNullOrEmpty(entry.Name))
-                        {
-                            Directory.CreateDirectory(Path.Combine(TmpFolder, entry.FullName));
-                        }
-                        else
-                        {
-                            var dir = Path.GetDirectoryName(Path.Combine(TmpFolder, entry.FullName));
-                            if (!Directory.Exists(dir))
-                            {
-                                Directory.CreateDirectory(dir);
-                            }
-                            entry.ExtractToFile(Path.Combine(TmpFolder, entry.FullName));
-                        }
-                        if (_cancellationToken.IsCancellationRequested && reportProgress)
-                        {
-                            return null;
-                        }
+                        entry.ExtractToFile(Path.Combine(TmpFolder, entry.FullName));
+                    }
+                    if (_cancellationToken.IsCancellationRequested && reportProgress)
+                    {
+                        return null;
                     }
                 }
             }
@@ -130,10 +129,11 @@ public class NextcloudWorkspaceMigrator : Migrator
                 await ReportProgressAsync(50, MigrationResource.UnzippingFinished);
             }
 
-            var dbFile = Directory.GetFiles(Directory.GetDirectories(TmpFolder)[0], "*.bak")[0];
+            var dbFile = Directory.GetFiles(Directory.GetDirectories(TmpFolder)[0]).Where(f=> f.EndsWith(".bak") || f.EndsWith(".sql")).FirstOrDefault();
+            dbFile = dbFile ?? Directory.GetFiles(TmpFolder).Where(f => f.EndsWith(".bak") || f.EndsWith(".sql")).FirstOrDefault();
             if (dbFile == null)
             {
-                throw new Exception();
+                throw new Exception("*.bak file not found");
             }
             if (reportProgress)
             {
@@ -166,7 +166,7 @@ public class NextcloudWorkspaceMigrator : Migrator
                         else
                         {
                             user.Value.PathToPhoto = File.Exists(Path.Combine(drivePath, "avatar_upload")) ? Directory.GetFiles(drivePath, "avatar_upload")[0] : null;
-                            user.Value.HasPhoto = user.Value.PathToPhoto != null ? true : false;
+                            user.Value.HasPhoto = user.Value.PathToPhoto != null;
                         }
 
                         if (!user.Value.HasPhoto)
@@ -176,7 +176,7 @@ public class NextcloudWorkspaceMigrator : Migrator
                             {
                                 var pathToAvatarDir = Path.Combine(appdataDir, "avatar", user.Key);
                                 user.Value.PathToPhoto = File.Exists(Path.Combine(pathToAvatarDir, "generated")) ? null : Path.Combine(pathToAvatarDir, "avatar.jpg");
-                                user.Value.HasPhoto = user.Value.PathToPhoto != null ? true : false;
+                                user.Value.HasPhoto = user.Value.PathToPhoto != null;
                             }
                         }
                         ParseStorage(user.Key, user.Value, dbFile);
@@ -205,12 +205,12 @@ public class NextcloudWorkspaceMigrator : Migrator
             }
             DbExtractGroup(dbFile);
         }
-        catch
+        catch(Exception e)
         {
             MigrationInfo.FailedArchives.Add(Path.GetFileName(_takeout));
             var error = string.Format(MigrationResource.CanNotParseArchive, Path.GetFileNameWithoutExtension(_takeout));
             await ReportProgressAsync(100, error);
-            throw new Exception(error);
+            throw new Exception(error, e);
         }
         if (reportProgress)
         {
@@ -256,8 +256,7 @@ public class NextcloudWorkspaceMigrator : Migrator
 
         var entryRegex = new Regex(@"(\(.*?\))[,;]");
         var accountDataMatches = entryRegex.Matches(match.Groups[1].Value + ";");
-        return accountDataMatches.Cast<Match>()
-            .Select(m => m.Groups[1].Value.Trim(new[] { '(', ')' }));
+        return accountDataMatches.Select(m => m.Groups[1].Value.Trim(['(', ')']));
     }
 
     private Dictionary<string, MigrationUser> DbExtractUser(string dbFile)
@@ -346,7 +345,7 @@ public class NextcloudWorkspaceMigrator : Migrator
         }
         else
         {
-            throw new Exception();
+            throw new Exception("accounts_data not found");
         }
 
         var storages = GetDumpChunk("oc_storages", sqlFile);
@@ -518,16 +517,16 @@ public class NextcloudWorkspaceMigrator : Migrator
                 return ASCShare.Read;
             }
 
-            return ASCShare.ReadWrite;//permission = 19 => denySharing = true, permission = 3 => denySharing = false; ASCShare.ReadWrite
+            return ASCShare.Editing;//permission = 19 => denySharing = true, permission = 3 => denySharing = false; ASCShare.ReadWrite
         }
         else
         {
-            if (Array.Exists(new int[] { 1, 17, 9, 25, 5, 21, 13, 29, 3, 19, 11, 27 }, el => el == role))
+            if (Array.Exists([1, 17, 9, 25, 5, 21, 13, 29, 3, 19, 11, 27], el => el == role))
             {
                 return ASCShare.Read;
             }
 
-            return ASCShare.ReadWrite;//permission = 19||23 => denySharing = true, permission = 7||15 => denySharing = false; ASCShare.ReadWrite
+            return ASCShare.Editing;//permission = 19||23 => denySharing = true, permission = 7||15 => denySharing = false; ASCShare.ReadWrite
         }
     }
 }

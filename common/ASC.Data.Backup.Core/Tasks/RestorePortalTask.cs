@@ -37,7 +37,8 @@ public class RestorePortalTask(DbFactory dbFactory,
         TenantManager tenantManager,
         AscCacheNotify ascCacheNotify,
         ModuleProvider moduleProvider,
-        BackupRepository backupRepository)
+        BackupRepository backupRepository,
+        TenantExtra tenantExtra)
     : PortalTaskBase(dbFactory, options, storageFactory, storageFactoryConfig, moduleProvider)
 {
     public bool ReplaceDate { get; set; }
@@ -80,6 +81,7 @@ public class RestorePortalTask(DbFactory dbFactory,
 
             if (Dump)
             {
+                await tenantExtra.DemandAccessSpacePermissionAsync();
                 await RestoreFromDump(dataReader);
             }
             else
@@ -111,7 +113,7 @@ public class RestorePortalTask(DbFactory dbFactory,
                 if (coreBaseSettings.Standalone)
                 {
                     options.DebugClearCache();
-                    ascCacheNotify.ClearCache();
+                    await ascCacheNotify.ClearCacheAsync();
                 }
 
                 await DoRestoreStorage(dataReader);
@@ -123,7 +125,7 @@ public class RestorePortalTask(DbFactory dbFactory,
             }
         }
 
-        if (coreBaseSettings.Standalone)
+        if (coreBaseSettings.Standalone && Dump)
         {
             options.DebugRefreshLicense();
             try
@@ -136,7 +138,7 @@ public class RestorePortalTask(DbFactory dbFactory,
             }
 
             options.DebugClearCache();
-            ascCacheNotify.ClearCache();
+            await ascCacheNotify.ClearCacheAsync();
         }
 
         options.DebugEndRestorePortal();
@@ -379,7 +381,7 @@ public class RestorePortalTask(DbFactory dbFactory,
             foreach (var module in storageModules)
             {
                 var storage = await StorageFactory.GetStorageAsync(tenant.Id, module, _region);
-                var domains = StorageFactoryConfig.GetDomainList(module, _region).ToList();
+                var domains = StorageFactoryConfig.GetDomainList(module, region:_region).ToList();
 
                 domains.Add(string.Empty); //instead storage.DeleteFiles("\\", "*.*", true);
 
@@ -411,7 +413,7 @@ public class RestorePortalTask(DbFactory dbFactory,
         using var stream = dataReader.GetEntry(KeyHelper.GetStorageRestoreInfoZipKey());
         if (stream == null)
         {
-            return Enumerable.Empty<BackupFileInfo>();
+            return [];
         }
 
         var restoreInfo = XElement.Load(new StreamReader(stream));

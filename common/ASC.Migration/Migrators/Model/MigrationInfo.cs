@@ -90,6 +90,8 @@ public class MigrationInfo
         if (ProjectStorage != null)
         { 
             ProjectStorage.ShouldImport = apiInfo.ImportSharedFolders;
+            ProjectStorage.ShouldImportSharedFiles = true;
+            ProjectStorage.ShouldImportSharedFolders = true;
         }
 
         foreach (var group in Groups)

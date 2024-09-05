@@ -65,7 +65,7 @@
     <value>Общи документи</value>
   </data>
   <data name="MyFiles" xml:space="preserve">
-    <value>Моите документи</value>
+    <value>Документи</value>
   </data>
   <data name="ProjectFiles" xml:space="preserve">
     <value>Документи по проекта</value>
@@ -101,6 +101,6 @@
     <value>В процес</value>
   </data>
   <data name="ReadyFormFolder" xml:space="preserve">
-    <value>Готов</value>
+    <value>Завършен</value>
   </data>
 </root>

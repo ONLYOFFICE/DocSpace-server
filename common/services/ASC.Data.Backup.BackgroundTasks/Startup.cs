@@ -24,12 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.Core;
+
 namespace ASC.Data.Backup.BackgroundTasks;
 
 public class Startup : BaseStartup
 {
-    public Startup(IConfiguration configuration, IHostEnvironment hostEnvironment)
-        : base(configuration, hostEnvironment)
+    public Startup(IConfiguration configuration) : base(configuration)
     {
         if (String.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
         {
@@ -45,35 +46,17 @@ public class Startup : BaseStartup
         {
             x.MaxThreadsCount = 5;
         });
-
-
-        DIHelper.TryAdd<BackupProgressItem>();
-        DIHelper.TryAdd<RestoreProgressItem>();
-        DIHelper.TryAdd<TransferProgressItem>();
-
-        DIHelper.TryAdd<BackupPortalTask>();
-
-        DIHelper.TryAdd<BackupWorkerService>();
-
-        NotifyConfigurationExtension.Register(DIHelper);
-
-        DIHelper.TryAdd<Schedule>();
-        DIHelper.TryAdd<BackupDeleteScheldureRequestedIntegrationEventHandler>();
-        DIHelper.TryAdd<BackupRequestedIntegrationEventHandler>();
-        DIHelper.TryAdd<BackupRestoreRequestedIntegrationEventHandler>();
-
-        DIHelper.TryAdd<BackupListenerService>();
+        
         services.AddHostedService<BackupListenerService>();
-
-        DIHelper.TryAdd<BackupCleanerTempFileService>();
         services.AddHostedService<BackupCleanerTempFileService>();
 
         services.AddHostedService<BackupWorkerService>();
-        services.AddActivePassiveHostedService<BackupCleanerService>(DIHelper, _configuration);
-        services.AddActivePassiveHostedService<BackupSchedulerService>(DIHelper, _configuration);
+        services.AddActivePassiveHostedService<BackupCleanerService>(_configuration);
+        services.AddActivePassiveHostedService<BackupSchedulerService>(_configuration);
 
         services.AddBaseDbContextPool<BackupsContext>();
         services.AddBaseDbContextPool<FilesDbContext>();
+        services.RegisterQuotaFeature();
 
     }
 }

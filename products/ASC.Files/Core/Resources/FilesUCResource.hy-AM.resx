@@ -133,7 +133,7 @@
     <value>Ֆայլերը կսեղմվեն {0}.zip ֆայլի մեջ{1}</value>
   </data>
   <data name="MyFiles" xml:space="preserve">
-    <value>Իմ փաստաթղթերը</value>
+    <value>Փաստաթղթեր</value>
   </data>
   <data name="Personal" xml:space="preserve">
     <value>Անձնական</value>
@@ -160,6 +160,6 @@
     <value>Ընթացքի մեջ</value>
   </data>
   <data name="ReadyFormFolder" xml:space="preserve">
-    <value>Պատրաստ</value>
+    <value>Ամբողջական</value>
   </data>
 </root>

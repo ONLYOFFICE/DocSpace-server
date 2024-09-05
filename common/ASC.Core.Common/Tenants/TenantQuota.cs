@@ -322,7 +322,7 @@ public class TenantQuota : IMapFrom<DbQuota>
         _updateFeature = new TenantQuotaFeatureFlag(this) { Name = "update", Standalone = true };
         _auditFeature = new TenantQuotaFeatureFlag(this) { Name = "audit", Order = 7 };
         _docsEditionFeature = new TenantQuotaFeatureFlag(this) { Name = "docs", Visible = false };
-        _ldapFeature = new TenantQuotaFeatureFlag(this) { Name = "ldap", Visible = false };
+        _ldapFeature = new TenantQuotaFeatureFlag(this) { Name = "ldap", Order = 3 };
         _ssoFeature = new TenantQuotaFeatureFlag(this) { Name = "sso", Order = 5 };
         _whiteLabelFeature = new TenantQuotaFeatureFlag(this) { Name = "whitelabel", Order = 4 };
         _customizationFeature = new TenantQuotaFeatureFlag(this) { Name = "customization", Visible = false };

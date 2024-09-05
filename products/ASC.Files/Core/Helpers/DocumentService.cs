@@ -29,21 +29,10 @@ using Polly.Extensions.Http;
 
 namespace ASC.Files.Core.Helpers;
 
-/// <summary>
-/// Class service connector
-/// </summary>
 public static class DocumentService
 {
-    /// <summary>
-    /// Timeout to request conversion
-    /// </summary>
-    public static readonly int Timeout = 120000;
-    //public static int Timeout = Convert.ToInt32(ConfigurationManagerExtension.AppSettings["files.docservice.timeout"] ?? "120000");
+    private const int Timeout = 120000;
 
-    /// <summary>
-    /// Number of tries request conversion
-    /// </summary>
-    public static readonly int MaxTry = 3;
 
     private static readonly JsonSerializerOptions _bodySettings = new()
     {
@@ -65,10 +54,9 @@ public static class DocumentService
     {
         expectedKey ??= "";
         const int maxLength = 128;
-        using var sha256 = SHA256.Create();
         if (expectedKey.Length > maxLength)
         {
-            expectedKey = Convert.ToBase64String(sha256.ComputeHash(Encoding.UTF8.GetBytes(expectedKey)));
+            expectedKey = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(expectedKey)));
         }
 
         var key = Regex.Replace(expectedKey, "[^0-9a-zA-Z_]", "_");
@@ -92,6 +80,7 @@ public static class DocumentService
     /// <param name="isAsync">Perform conversions asynchronously</param>
     /// <param name="signatureSecret">Secret key to generate the token</param>
     /// <param name="clientFactory"></param>
+    /// <param name="toForm"></param>
     /// <returns>The percentage of completion of conversion</returns>
     /// <example>
     /// string convertedDocumentUri;
@@ -114,7 +103,8 @@ public static class DocumentService
         Options options,
         bool isAsync,
         string signatureSecret,
-       IHttpClientFactory clientFactory)
+       IHttpClientFactory clientFactory,
+       bool toForm)
     {
         fromExtension = string.IsNullOrEmpty(fromExtension) ? Path.GetExtension(documentUri) : fromExtension;
         if (string.IsNullOrEmpty(fromExtension))
@@ -127,7 +117,7 @@ public static class DocumentService
             throw new ArgumentNullException(nameof(toExtension), "Extension for conversion is not known");
         }
 
-        return InternalGetConvertedUriAsync(fileUtility, documentConverterUrl, documentUri, fromExtension, toExtension, documentRevisionId, password, region, thumbnail, spreadsheetLayout, options, isAsync, signatureSecret, clientFactory);
+        return InternalGetConvertedUriAsync(fileUtility, documentConverterUrl, documentUri, fromExtension, toExtension, documentRevisionId, password, region, thumbnail, spreadsheetLayout, options, isAsync, signatureSecret, clientFactory, toForm);
     }
 
     private static async Task<(int ResultPercent, string ConvertedDocumentUri, string convertedFileType)> InternalGetConvertedUriAsync(
@@ -144,7 +134,8 @@ public static class DocumentService
        Options options,
        bool isAsync,
        string signatureSecret,
-       IHttpClientFactory clientFactory)
+       IHttpClientFactory clientFactory,
+       bool toForm)
     {
         var title = Path.GetFileName(documentUri ?? "");
         title = string.IsNullOrEmpty(title) || title.Contains('?') ? Guid.NewGuid().ToString() : title;
@@ -176,6 +167,10 @@ public static class DocumentService
             Url = documentUri,
             Region = region
         };
+        if (toForm)
+        {
+            body.Pdf = new PdfData { Form = true };
+        }
 
         if (!string.IsNullOrEmpty(password))
         {
@@ -244,8 +239,7 @@ public static class DocumentService
             Method = HttpMethod.Post
         };
 
-        var httpClient = clientFactory.CreateClient();
-        httpClient.Timeout = TimeSpan.FromMilliseconds(commandTimeout);
+        var httpClient = clientFactory.CreateClient(nameof(DocumentService));
 
         var body = new CommandBody
         {
@@ -282,12 +276,20 @@ public static class DocumentService
         var bodyString = JsonSerializer.Serialize(body, _bodySettings);
 
         request.Content = new StringContent(bodyString, Encoding.UTF8, "application/json");
-
         string dataResponse;
-        using (var response = await httpClient.SendAsync(request, cancellationTokenSource.Token))
+        try
         {
+            using var response = await httpClient.SendAsync(request, cancellationTokenSource.Token);
             dataResponse = await response.Content.ReadAsStringAsync(cancellationTokenSource.Token);
             }
+        catch (HttpRequestException e) when (e.HttpRequestError == HttpRequestError.NameResolutionError)
+        {
+            return new CommandResponse
+            {
+                Error = ErrorTypes.UnknownError,
+                ErrorString = e.Message
+            };
+        }
 
         try
         {
@@ -338,8 +340,7 @@ public static class DocumentService
             Method = HttpMethod.Post
         };
 
-        var httpClient = clientFactory.CreateClient();
-        httpClient.Timeout = TimeSpan.FromMilliseconds(Timeout);
+        var httpClient = clientFactory.CreateClient(nameof(DocumentService));
 
         var body = new BuilderBody
         {
@@ -539,6 +540,11 @@ public static class DocumentService
         public string UserData { get; set; }
     }
 
+    public class PdfData
+    {
+        public bool Form { get; set; }
+    }
+
     [DebuggerDisplay("{Title}")]
     public class MetaData
     {
@@ -602,6 +608,8 @@ public static class DocumentService
         public required string Url { get; set; }
         public required string Region { get; set; }
         public WatermarkOnDraw Watermark { get; set; }        public string Token { get; set; }
+        public PdfData Pdf { get; set; }
+
     }
 
     [DebuggerDisplay("{Key}")]
@@ -628,12 +636,13 @@ public static class DocumentService
 
         public static void ProcessResponseError(string errorCode)
         {
-            if (!ErrorCodeExtensions.TryParse(errorCode, true, out var code))
+            if (!ErrorCodeExtensions.TryParse(errorCode, true, out var code) && CultureInfo.CurrentCulture.Name == "ar-SA" && !Enum.TryParse(errorCode, out code))
             {
                 code = ErrorCode.Unknown;
             }
             var errorMessage = code switch
             {
+                ErrorCode.SizeLimit => "size limit exceeded",
                 ErrorCode.OutputType => "output format not defined",
                 ErrorCode.Vkey => "document signature",
                 ErrorCode.TaskQueue => "database",
@@ -650,6 +659,7 @@ public static class DocumentService
         [EnumExtensions]
         public enum ErrorCode
         {
+            SizeLimit = -10,
             OutputType = -9,
             Vkey = -8,
             TaskQueue = -6,
@@ -711,13 +721,17 @@ public static class DocumentService
 
 public static class DocumentServiceHttpClientExtension
 {
-    public static void AddDocumentServiceHttpClient(this IServiceCollection services)
+    public static void AddDocumentServiceHttpClient(this IServiceCollection services, IConfiguration configuration)
     {
+        
         services.AddHttpClient(nameof(DocumentService))
-            .SetHandlerLifetime(TimeSpan.FromMilliseconds(DocumentService.Timeout))
+            .SetHandlerLifetime(TimeSpan.FromMilliseconds(Convert.ToInt32(configuration["files:docservice:timeout"] ?? "5000")))
             .AddPolicyHandler((_, _) => 
                 HttpPolicyExtensions
                 .HandleTransientHttpError()
-                .WaitAndRetryAsync(MaxTry, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))));
+                .OrResult(response => response.IsSuccessStatusCode
+                    ? false
+                    : throw new HttpRequestException($"Response status code: {response.StatusCode}", null, response.StatusCode))
+                .WaitAndRetryAsync(Convert.ToInt32(configuration["files:docservice:try"] ?? "3"), retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))));
     }
 }

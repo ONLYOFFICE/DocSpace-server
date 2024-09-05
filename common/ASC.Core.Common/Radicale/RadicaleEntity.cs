@@ -56,14 +56,14 @@ public abstract class RadicaleEntity(IConfiguration configuration, InstanceCrypt
         }
         return requestUrl;
     }
-
-    public string GetSystemAuthorization()
+    
+    public async Task<string> GetSystemAuthorizationAsync()
     {   
         if(configuration["radicale:admin"] == null || configuration["radicale:admin"] == "")
         {
             return null;
         }
-        return configuration["radicale:admin"] + ":" + instanceCrypto.Encrypt(configuration["radicale:admin"]);
+        return configuration["radicale:admin"] + ":" + await instanceCrypto.EncryptAsync(configuration["radicale:admin"]);
     }
 
     protected string GetData(string sample, string name, string description, string backgroundColor)

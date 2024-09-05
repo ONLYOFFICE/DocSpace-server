@@ -655,10 +655,7 @@
     <value>Mențiune: dimensiunea fișierului nu poate depăși {1}{0}{2}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Numărul de administratori</value>
-  </data>
-  <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Numărul de administratori/utilizatori avansați:</value>
+    <value>Numărul de administratori/utilizatori avansați</value>
   </data>
   <data name="ConsumersSkyDrive" xml:space="preserve">
     <value>OneDrive</value>
@@ -1097,5 +1094,26 @@
   </data>
   <data name="RoomFreeSpaceException" xml:space="preserve">
     <value>Spațiu de stocare pentru sala  a fost depășit</value>
+  </data>
+  <data name="TariffsFeature_statistic" xml:space="preserve">
+    <value>Cote de stocare și statistici</value>
+  </data>
+  <data name="TariffsFeature_total_size" xml:space="preserve">
+    <value>{0} per adminastrator/utilizator avansat și posibilitatea de a adăuga mai mult spațiu de stocare la cerere</value>
+  </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>Utilizatorul este dezactivat</value>
+  </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>Administratori/Utilizatori avansați adăugați:</value>
+  </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>Instrucțiuni de schimbare a parolei au fost trimise la adresa de e-mail {0}.</value>
+  </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>S-a atins limita de invitații</value>
+  </data>
+  <data name="ErrorEmailLinked" xml:space="preserve">
+    <value>Această adresă de email este înregistrată de utilizatorul {0} ca furnizor terță parte</value>
   </data>
 </root>

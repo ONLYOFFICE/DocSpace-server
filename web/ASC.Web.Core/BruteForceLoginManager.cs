@@ -105,14 +105,12 @@ public class BruteForceLoginManager(
         }
     }
 
-    public async Task<UserInfo> AttemptAsync(string login,  string recaptchaResponse,  Func<Task<UserInfo>> getUser)
+    public async Task<UserInfo> AttemptAsync(string login, RecaptchaType recaptchaType, string recaptchaResponse, UserInfo user)
     {
-        UserInfo user;
-
         var requestIp = MessageSettings.GetIP(httpContextAccessor.HttpContext?.Request);
         var secretEmail = SetupInfo.IsSecretEmail(login);
 
-        var recaptchaPassed = secretEmail || await CheckRecaptchaAsync(recaptchaResponse, requestIp);
+        var recaptchaPassed = secretEmail || await CheckRecaptchaAsync(recaptchaType, recaptchaResponse, requestIp);
 
         var blockCacheKey = GetBlockCacheKey(login, requestIp);
 
@@ -154,8 +152,6 @@ public class BruteForceLoginManager(
                 await SetToCache(historyCacheKey, history, now.Add(settings.CheckPeriod));
             }
 
-            user = await getUser();
-
             if (user == null || !userManager.UserExists(user))
             {
                 throw new Exception("user not found");
@@ -174,15 +170,19 @@ public class BruteForceLoginManager(
         return user;
     }
 
-    private async Task<bool> CheckRecaptchaAsync(string recaptchaResponse, string requestIp)
+    private async Task<bool> CheckRecaptchaAsync(RecaptchaType recaptchaType, string recaptchaResponse, string requestIp)
     {
         var recaptchaPassed = false;
 
-        if (!string.IsNullOrEmpty(setupInfo.RecaptchaPublicKey) &&
-            !string.IsNullOrEmpty(setupInfo.RecaptchaPrivateKey) &&
-            !string.IsNullOrEmpty(recaptchaResponse))
+        var validate = !string.IsNullOrEmpty(recaptchaResponse);
+
+        validate = recaptchaType is RecaptchaType.hCaptcha
+            ? validate && !string.IsNullOrEmpty(setupInfo.HcaptchaPublicKey) && !string.IsNullOrEmpty(setupInfo.HcaptchaPrivateKey)
+            : validate && !string.IsNullOrEmpty(setupInfo.RecaptchaPublicKey) && !string.IsNullOrEmpty(setupInfo.RecaptchaPrivateKey);
+
+        if (validate)
         {
-            recaptchaPassed = await recaptcha.ValidateRecaptchaAsync(recaptchaResponse, requestIp);
+            recaptchaPassed = await recaptcha.ValidateRecaptchaAsync(recaptchaType, recaptchaResponse, requestIp);
 
             if (!recaptchaPassed)
             {

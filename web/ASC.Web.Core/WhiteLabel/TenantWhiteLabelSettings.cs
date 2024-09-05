@@ -314,11 +314,14 @@ public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
 }
 
 [Scope]
-public class TenantWhiteLabelSettingsHelper(WebImageSupplier webImageSupplier,
+public class TenantWhiteLabelSettingsHelper(
+    WebImageSupplier webImageSupplier,
     UserPhotoManager userPhotoManager,
     StorageFactory storageFactory,
     WhiteLabelHelper whiteLabelHelper,
     TenantManager tenantManager,
+    AuthContext authContext,
+    UserManager userManager,
     SettingsManager settingsManager,
     IConfiguration configuration,
     ILogger<TenantWhiteLabelSettingsHelper> logger)
@@ -464,12 +467,11 @@ public class TenantWhiteLabelSettingsHelper(WebImageSupplier webImageSupplier,
                 }
         };
 
-        string ext = null;
-
         if (!string.IsNullOrEmpty(logo))
         {
             byte[] data;
             var format = supportedFormats.FirstOrDefault(r => logo.StartsWith($"data:{r.mime};base64,"));
+            string ext;
             if (format == null)
             {
                 var fileName = Path.GetFileName(logo);
@@ -494,7 +496,7 @@ public class TenantWhiteLabelSettingsHelper(WebImageSupplier webImageSupplier,
             return (data, ext);
         }
 
-        return (null, ext);
+        return (null, null);
     }
 
     private (byte[], string) GetNotificationLogoData(byte[] logoData, string extLogo, TenantWhiteLabelSettings tenantWhiteLabelSettings)
@@ -534,7 +536,7 @@ public class TenantWhiteLabelSettingsHelper(WebImageSupplier webImageSupplier,
                 canvas.DrawPicture(svg.Picture);
 
                 using (var image = SKImage.FromBitmap(bitMap))
-                using (var pngData = image.Encode(SKEncodedImageFormat.Png, 100))
+                using (var pngData = image.Encode())
                 {
                     return pngData.ToArray();
                 }
@@ -544,7 +546,7 @@ public class TenantWhiteLabelSettingsHelper(WebImageSupplier webImageSupplier,
         byte[] GetLogoDataFromJpg()
         {
             using var image = SKImage.FromEncodedData(logoData);
-            using var pngData = image.Encode(SKEncodedImageFormat.Png, 100);
+            using var pngData = image.Encode();
             return pngData.ToArray();
         }
     }
@@ -582,17 +584,17 @@ public class TenantWhiteLabelSettingsHelper(WebImageSupplier webImageSupplier,
 
     #region Get logo path
 
-    public async Task<string> GetAbsoluteLogoPathAsync(TenantWhiteLabelSettings tenantWhiteLabelSettings, WhiteLabelLogoType type, bool dark = false)
+    public async Task<string> GetAbsoluteLogoPathAsync(TenantWhiteLabelSettings tenantWhiteLabelSettings, WhiteLabelLogoType type, bool dark = false, string culture = default)
     {
         if (tenantWhiteLabelSettings.GetIsDefault(type))
         {
-            return await GetAbsoluteDefaultLogoPathAsync(type, dark);
+            return await GetAbsoluteDefaultLogoPathAsync(type, dark, culture);
         }
 
-        return await GetAbsoluteStorageLogoPath(tenantWhiteLabelSettings, type, dark);
+        return await GetAbsoluteStorageLogoPath(tenantWhiteLabelSettings, type, dark, culture);
     }
 
-    private async Task<string> GetAbsoluteStorageLogoPath(TenantWhiteLabelSettings tenantWhiteLabelSettings, WhiteLabelLogoType type, bool dark)
+    private async Task<string> GetAbsoluteStorageLogoPath(TenantWhiteLabelSettings tenantWhiteLabelSettings, WhiteLabelLogoType type, bool dark, string culture = default)
     {
         var store = await storageFactory.GetStorageAsync(await tenantManager.GetCurrentTenantIdAsync(), ModuleName);
         var fileName = BuildLogoFileName(type, tenantWhiteLabelSettings.GetExt(type, dark), dark);
@@ -601,10 +603,10 @@ public class TenantWhiteLabelSettingsHelper(WebImageSupplier webImageSupplier,
         {
             return await store.GetUrlWithHashAsync(string.Empty, fileName);
         }
-        return await GetAbsoluteDefaultLogoPathAsync(type, dark);
+        return await GetAbsoluteDefaultLogoPathAsync(type, dark, culture);
     }
 
-    public async Task<string> GetAbsoluteDefaultLogoPathAsync(WhiteLabelLogoType type, bool dark)
+    public async Task<string> GetAbsoluteDefaultLogoPathAsync(WhiteLabelLogoType type, bool dark, string culture = default)
     {
         var partnerLogoPath = await GetPartnerStorageLogoPathAsync(type, dark);
         if (!string.IsNullOrEmpty(partnerLogoPath))
@@ -619,10 +621,12 @@ public class TenantWhiteLabelSettingsHelper(WebImageSupplier webImageSupplier,
             _ => "svg"
         };
 
+        var regionalPath = await GetCustomRegionalPath(culture);
+
         var path = type switch
         {
             WhiteLabelLogoType.Notification => "notifications/",
-            _ => "logo/"
+            _ => $"logo/{regionalPath}"
         };
 
         var fileName = BuildLogoFileName(type, ext, dark);
@@ -653,6 +657,28 @@ public class TenantWhiteLabelSettingsHelper(WebImageSupplier webImageSupplier,
         var logoPath = BuildLogoFileName(type, partnerSettings.GetExt(type, dark), dark);
 
         return (await partnerStorage.IsFileAsync(logoPath)) ? (await partnerStorage.GetUrlWithHashAsync(string.Empty, logoPath)) : null;
+    }
+
+    private async Task<string> GetCustomRegionalPath(string culture)
+    {
+        var customCultures = configuration.GetSection("web:logo:custom-cultures").Get<string[]>() ?? [];
+
+        if (customCultures.Length == 0)
+        {
+            return string.Empty;
+        }
+
+        if (string.IsNullOrEmpty(culture) && authContext.IsAuthenticated)
+        {
+            culture = (await userManager.GetUsersAsync(authContext.CurrentAccount.ID)).CultureName;
+        }
+
+        if (string.IsNullOrEmpty(culture))
+        {
+            culture = (await tenantManager.GetCurrentTenantAsync()).Language;
+        }
+
+        return customCultures.Contains(culture, StringComparer.InvariantCultureIgnoreCase) ? $"{culture.ToLower()}/" : string.Empty;
     }
 
     #endregion

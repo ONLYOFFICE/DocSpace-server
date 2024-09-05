@@ -152,4 +152,31 @@ $__AuthorName usunął pokój: $RoomTitle</value>
   <data name="subject_ShareFolder_tg" xml:space="preserve">
     <value>Dokumenty. Przyznano dostęp do katalogu: [$DocumentTitle]($DocumentURL)</value>
   </data>
+  <data name="button_CheckReadyForms" xml:space="preserve">
+    <value>Sprawdź gotowe formularze</value>
+  </data>
+  <data name="pattern_FormReceived" xml:space="preserve">
+    <value>h1. Formularz $Message został wypełniony.
+
+Nowy formularz "$DocumentTitle":"$DocumentURL" został wypełniony w pokoju "RoomTitle":"$RoomURL"
+
+Wypełniający formularz: "$FromUserName":"$FromUserLink"
+
+$OrangeButton</value>
+  </data>
+  <data name="pattern_FormSubmitted" xml:space="preserve">
+    <value>h1. Wypełniono formularz $Message
+
+Formularz "$DocumentTitle":"$DocumentURL" w pokoju "$RoomTitle":"$RoomURL" został wypełniony
+
+Menedżer: "$ToUserName":"$ToUserLink"
+
+$OrangeButton</value>
+  </data>
+  <data name="subject_FormReceived" xml:space="preserve">
+    <value>Powiadomienie DocSpace. Formularz został wypełniony</value>
+  </data>
+  <data name="subject_FormSubmitted" xml:space="preserve">
+    <value>Powiadomienie DocSpace. Formularz został wypełniony</value>
+  </data>
 </root>

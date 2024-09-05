@@ -33,12 +33,13 @@ public class MentionWrapperCreator(DisplayUserSettingsHelper displayUserSettings
 {
     public async Task<MentionWrapper> CreateMentionWrapperAsync(UserInfo user)
     {
-        var wrapper = new MentionWrapper();
-        wrapper.User = user;
-        wrapper.Email = user.Email;
-        wrapper.Id = user.Id.ToString();
-        wrapper.Name = user.DisplayUserName(false, displayUserSettingsHelper);
-        wrapper.Image = commonLinkUtility.GetFullAbsolutePath(await user.GetMediumPhotoURLAsync(userPhotoManager));
+        var wrapper = new MentionWrapper { 
+            User = user, 
+            Email = user.Email, 
+            Id = user.Id.ToString(), 
+            Name = user.DisplayUserName(false, displayUserSettingsHelper),
+            Image = commonLinkUtility.GetFullAbsolutePath(await user.GetMediumPhotoURLAsync(userPhotoManager))
+        };
 
         return wrapper;
     }

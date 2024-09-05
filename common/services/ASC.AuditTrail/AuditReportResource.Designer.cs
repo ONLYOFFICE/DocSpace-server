@@ -250,6 +250,60 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Rooms [{0}]. Set custom storage quota for rooms: {1}.
+        /// </summary>
+        public static string CustomQuotaPerRoomChanged {
+            get {
+                return ResourceManager.GetString("CustomQuotaPerRoomChanged", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Rooms [{0}]. Set default storage quota for rooms: {1}.
+        /// </summary>
+        public static string CustomQuotaPerRoomDefault {
+            get {
+                return ResourceManager.GetString("CustomQuotaPerRoomDefault", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Rooms [{0}]. Disabled storage quota for rooms.
+        /// </summary>
+        public static string CustomQuotaPerRoomDisabled {
+            get {
+                return ResourceManager.GetString("CustomQuotaPerRoomDisabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Users [{0}]. Set custom storage quota for users: {1}.
+        /// </summary>
+        public static string CustomQuotaPerUserChanged {
+            get {
+                return ResourceManager.GetString("CustomQuotaPerUserChanged", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Users [{0}]. Set default storage quota for users: {1}.
+        /// </summary>
+        public static string CustomQuotaPerUserDefault {
+            get {
+                return ResourceManager.GetString("CustomQuotaPerUserDefault", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Users [{0}]. Disabled storage quota for users.
+        /// </summary>
+        public static string CustomQuotaPerUserDisabled {
+            get {
+                return ResourceManager.GetString("CustomQuotaPerUserDisabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Date.
         /// </summary>
         public static string DateCol {
@@ -574,6 +628,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to bytes,KB,MB,GB,TB.
+        /// </summary>
+        public static string FileSizePostfix {
+            get {
+                return ResourceManager.GetString("FileSizePostfix", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Files.
         /// </summary>
         public static string FilesModule {
@@ -633,6 +696,15 @@ namespace ASC.AuditTrail {
         public static string FileUploaded {
             get {
                 return ResourceManager.GetString("FileUploaded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to File uploaded with overwriting: {0}.
+        /// </summary>
+        public static string FileUploadedWithOverwriting {
+            get {
+                return ResourceManager.GetString("FileUploadedWithOverwriting", resourceCulture);
             }
         }
         
@@ -736,6 +808,24 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to File Opened For Filling: {0}.
+        /// </summary>
+        public static string FormOpenedForFilling {
+            get {
+                return ResourceManager.GetString("FormOpenedForFilling", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Users [{0}]. Form submitted: {1}.
+        /// </summary>
+        public static string FormSubmit {
+            get {
+                return ResourceManager.GetString("FormSubmit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Sphinx settings updated.
         /// </summary>
         public static string FullTextSearchSetting {
@@ -799,7 +889,7 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Guest Account.
+        ///   Looks up a localized string similar to Anonymous.
         /// </summary>
         public static string GuestAccount {
             get {
@@ -1375,6 +1465,60 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Set default storage quota: {0}.
+        /// </summary>
+        public static string QuotaPerPortalChanged {
+            get {
+                return ResourceManager.GetString("QuotaPerPortalChanged", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Disabled default storage quota.
+        /// </summary>
+        public static string QuotaPerPortalDisabled {
+            get {
+                return ResourceManager.GetString("QuotaPerPortalDisabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Set default storage quota for rooms: {0}.
+        /// </summary>
+        public static string QuotaPerRoomChanged {
+            get {
+                return ResourceManager.GetString("QuotaPerRoomChanged", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Disabled default storage quota for rooms.
+        /// </summary>
+        public static string QuotaPerRoomDisabled {
+            get {
+                return ResourceManager.GetString("QuotaPerRoomDisabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Set default storage quota for users: {0}.
+        /// </summary>
+        public static string QuotaPerUserChanged {
+            get {
+                return ResourceManager.GetString("QuotaPerUserChanged", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Disabled default storage quota for users.
+        /// </summary>
+        public static string QuotaPerUserDisabled {
+            get {
+                return ResourceManager.GetString("QuotaPerUserDisabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Reassigns.
         /// </summary>
         public static string ReassignsActionType {
@@ -1389,6 +1533,15 @@ namespace ASC.AuditTrail {
         public static string RoomArchived {
             get {
                 return ResourceManager.GetString("RoomArchived", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Room copied: {0}.
+        /// </summary>
+        public static string RoomCopied {
+            get {
+                return ResourceManager.GetString("RoomCopied", resourceCulture);
             }
         }
         
@@ -1443,6 +1596,24 @@ namespace ASC.AuditTrail {
         public static string RoomExternalLinkUpdated {
             get {
                 return ResourceManager.GetString("RoomExternalLinkUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Added group: {0}. Role: {1}.
+        /// </summary>
+        public static string RoomGroupAdded {
+            get {
+                return ResourceManager.GetString("RoomGroupAdded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Deleted group: {0}.
+        /// </summary>
+        public static string RoomGroupRemove {
+            get {
+                return ResourceManager.GetString("RoomGroupRemove", resourceCulture);
             }
         }
         
@@ -1530,6 +1701,15 @@ namespace ASC.AuditTrail {
         /// <summary>
         ///   Looks up a localized string similar to {0} appointed: {1}.
         /// </summary>
+        public static string RoomUpdateAccessForGroup {
+            get {
+                return ResourceManager.GetString("RoomUpdateAccessForGroup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} appointed: {1}.
+        /// </summary>
         public static string RoomUpdateAccessForUser {
             get {
                 return ResourceManager.GetString("RoomUpdateAccessForUser", resourceCulture);
@@ -1542,6 +1722,15 @@ namespace ASC.AuditTrail {
         public static string SendActionType {
             get {
                 return ResourceManager.GetString("SendActionType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User {0} sent an invitation to {1} to join this DocSpace.
+        /// </summary>
+        public static string SendJoinInvite {
+            get {
+                return ResourceManager.GetString("SendJoinInvite", resourceCulture);
             }
         }
         

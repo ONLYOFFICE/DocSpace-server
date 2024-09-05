@@ -84,22 +84,25 @@ public class FolderDto<T> : FileEntryDto<T>
     public RoomDataLifetimeDto Lifetime { get; set; }
 
     /// <summary>Folder type</summary>
-    /// <type>ASC.Files.Core.FolderType, ASC.Files.Core</type>
+    /// <type>System.Nullable{ASC.Files.Core.FolderType}, System</type>
     public FolderType? Type { get; set; }
 
     public bool? InRoom { get; set; }
 
     /// <summary>Quota</summary>
-    /// <type>System.Int32, System</type>
+    /// <type>System.Nullable{System.Int64}, System</type>
     public long? QuotaLimit { get; set; }
 
-    /// <summary>Specifies if the room has a custom quota or not.</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>Specifies if the room has a custom quota or not</summary>
+    /// <type>System.Nullable{System.Boolean}, System</type>
     public bool? IsCustomQuota { get; set; }
 
     /// <summary>Counter</summary>
-    /// <type>System.Int32, System</type>
+    /// <type>System.Nullable{System.Int64}, System</type>
     public long? UsedSpace { get; set; }
+
+    public override FileEntryType FileEntryType { get => FileEntryType.Folder; }
+
     public static FolderDto<int> GetSample()
     {
         return new FolderDto<int>
@@ -144,11 +147,9 @@ public class FolderDtoHelper(
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime)
     {
 
-    public async Task<FolderDto<T>> GetAsync<T>(Folder<T> folder, List<FileShareRecord> currentUserRecords = null, string order = null)
+    public async Task<FolderDto<T>> GetAsync<T>(Folder<T> folder, List<FileShareRecord<string>> currentUserRecords = null, string order = null)
     {
         var result = await GetFolderWrapperAsync(folder);
-
-        result.FileEntryType = FileEntryType.Folder;
         result.ParentId = folder.ParentId;
 
         if (DocSpaceHelper.IsRoom(folder.FolderType))
@@ -188,10 +189,10 @@ public class FolderDtoHelper(
             }
             else
             {
-                currentUserRecords ??= await _fileSecurity.GetUserRecordsAsync<T>().ToListAsync();
+                currentUserRecords ??= await _fileSecurity.GetUserRecordsAsync().ToListAsync();
 
-                result.InRoom = currentUserRecords.Exists(c => c.EntryId.Equals(folder.Id) && c.SubjectType == SubjectType.User)
-                    && !currentUserRecords.Exists(c => c.EntryId.Equals(folder.Id) && c.SubjectType == SubjectType.Group);
+                result.InRoom = currentUserRecords.Exists(c => c.EntryId.Equals(folder.Id.ToString()) && c.SubjectType == SubjectType.User) && 
+                                !currentUserRecords.Exists(c => c.EntryId.Equals(folder.Id.ToString()) && c.SubjectType == SubjectType.Group);
             }
 
             if ((coreBaseSettings.Standalone || (await tenantManager.GetCurrentTenantQuotaAsync()).Statistic) && 
@@ -219,7 +220,7 @@ public class FolderDtoHelper(
             result.Order = !string.IsNullOrEmpty(order) ? string.Join('.', order, folder.Order) : folder.Order.ToString();
         }
 
-        if (folder.FolderType is FolderType.InProcessFormFolder or FolderType.ReadyFormFolder or FolderType.FormFillingFolderDone or FolderType.FormFillingFolderInProgress)
+        if (DocSpaceHelper.IsFormsFillingSystemFolder(folder.FolderType))
         {
             result.Type = folder.FolderType;
         }

@@ -27,9 +27,9 @@
 namespace ASC.Migration.Core.Migrators.Model;
 public class MigrationStorage
 {
-    public List<MigrationFolder> Folders { get; } = new List<MigrationFolder>();
-    public List<MigrationFile> Files { get; } = new List<MigrationFile>();
-    public List<MigrationSecurity> Securities { get; } = new List<MigrationSecurity>();
+    public List<MigrationFolder> Folders { get; set; } = new List<MigrationFolder>();
+    public List<MigrationFile> Files { get; set; } = new List<MigrationFile>();
+    public List<MigrationSecurity> Securities { get; set; } = new List<MigrationSecurity>();
     public long BytesTotal { get; set; }
     public FolderType Type { get; set; } = FolderType.USER;
     public string RootKey { get; set; }
@@ -43,8 +43,8 @@ public class MigrationStorage
         return new MigratingApiFiles
         {
             BytesTotal = BytesTotal,
-            FilesCount = Files.Count(),
-            FoldersCount = Folders.Count()
+            FilesCount = Files.Count,
+            FoldersCount = Folders.Count
         };
     }
 }
@@ -64,6 +64,8 @@ public class MigrationFile
     public string Comment { get; set; }
     public int Folder { get; set; }
     public string Path { get; set; }
+    public DateTime Created { get; set; }
+    public DateTime Modified { get; set; }
 }
 
 public class MigrationFolder
@@ -72,6 +74,11 @@ public class MigrationFolder
     public int ParentId { get; set; }
     public string Title { get; set; }
     public int Level { get; set; }
+
+    /*only projects*/
+
+    public bool Private { get; set; }
+    public string Owner { get; set; }
 }
 
 public class MigrationSecurity

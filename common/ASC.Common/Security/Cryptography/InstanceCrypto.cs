@@ -36,7 +36,7 @@ public class InstanceCrypto(MachinePseudoKeys machinePseudoKeys)
         return Convert.ToBase64String(Encrypt(Encoding.UTF8.GetBytes(data)));
     }
 
-    public byte[] Encrypt(byte[] data)
+    private byte[] Encrypt(byte[] data)
     {
         using var hasher = Aes.Create();
         hasher.Key = _eKey;
@@ -48,6 +48,31 @@ public class InstanceCrypto(MachinePseudoKeys machinePseudoKeys)
 
         plainTextStream.CopyTo(ss);
         ss.FlushFinalBlock();
+        hasher.Clear();
+
+        return ms.ToArray();
+    }
+
+    public async Task<string> EncryptAsync(string data)
+    {
+        return Convert.ToBase64String(await EncryptAsync(Encoding.UTF8.GetBytes(data)));
+    }
+    
+    public async Task<byte[]> EncryptAsync(byte[] data)
+    {
+        using var hasher = Aes.Create();
+        hasher.Key = _eKey;
+        hasher.IV = new byte[hasher.BlockSize >> 3];
+
+        using var ms = new MemoryStream();
+        await using (var ss = new CryptoStream(ms, hasher.CreateEncryptor(), CryptoStreamMode.Write))
+        {
+            using var plainTextStream = new MemoryStream(data);
+
+            await plainTextStream.CopyToAsync(ss);
+            await ss.FlushFinalBlockAsync();
+        }
+
         hasher.Clear();
 
         return ms.ToArray();
@@ -68,5 +93,22 @@ public class InstanceCrypto(MachinePseudoKeys machinePseudoKeys)
         // Read the decrypted bytes from the decrypting stream
         // and place them in a string.
         return srDecrypt.ReadToEnd();
+    }
+    
+    public Task<string> DecryptAsync(string data) => DecryptAsync(Convert.FromBase64String(data));
+
+    public async Task<string> DecryptAsync(byte[] data, Encoding encoding = null)
+    {
+        using var hasher = Aes.Create();
+        hasher.Key = _eKey;
+        hasher.IV = new byte[hasher.BlockSize >> 3];
+
+        using var msDecrypt = new MemoryStream(data);
+        await using var csDecrypt = new CryptoStream(msDecrypt, hasher.CreateDecryptor(), CryptoStreamMode.Read);
+        using var srDecrypt = new StreamReader(csDecrypt, encoding);
+
+        // Read the decrypted bytes from the decrypting stream
+        // and place them in a string.
+        return await srDecrypt.ReadToEndAsync();
     }
 }

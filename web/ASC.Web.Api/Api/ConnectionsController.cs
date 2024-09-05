@@ -46,6 +46,7 @@ public class ConnectionsController(
     MessageService messageService,
     CookiesManager cookiesManager,
     CookieStorage cookieStorage,
+    QuotaSocketManager quotaSocketManager,
     GeolocationHelper geolocationHelper,
     ApiDateTimeHelper apiDateTimeHelper)
     : ControllerBase
@@ -74,6 +75,18 @@ public class ConnectionsController(
             if (loginEvent != null)
             {
                 listLoginEvents.Remove(loginEvent);
+
+                if (httpContextAccessor.HttpContext != null)
+                {
+                    var baseEvent = await GetBaseEvent();
+
+                    loginEvent.Platform = baseEvent.Platform;
+                    loginEvent.Browser = baseEvent.Browser;
+                    loginEvent.IP = baseEvent.IP;
+                    loginEvent.City = baseEvent.City;
+                    loginEvent.Country = baseEvent.Country;
+                }
+
                 listLoginEvents.Insert(0, loginEvent);
             }
         }
@@ -81,23 +94,9 @@ public class ConnectionsController(
         {
             if (listLoginEvents.Count == 0 && httpContextAccessor.HttpContext != null)
             {
-                var request = httpContextAccessor.HttpContext.Request;
-                var uaHeader = MessageSettings.GetUAHeader(request);
-                var clientInfo = MessageSettings.GetClientInfo(uaHeader);
-                var platformAndDevice = MessageSettings.GetPlatformAndDevice(clientInfo);
-                var browser = MessageSettings.GetBrowser(clientInfo);
-                var ip = MessageSettings.GetIP(request);
+                var baseEvent = await GetBaseEvent();
 
-                var baseEvent = new BaseEvent
-                {
-                    Id = 0,
-                    Platform = platformAndDevice,
-                    Browser = browser,
-                    Date = DateTime.Now,
-                    IP = ip
-                };
-
-                listLoginEvents.Add(await geolocationHelper.AddGeolocationAsync(baseEvent));
+                listLoginEvents.Add(baseEvent);
             }
         }
 
@@ -120,6 +119,26 @@ public class ConnectionsController(
 
             }).ToList()
         };
+
+        async Task<BaseEvent> GetBaseEvent()
+        {
+            var request = httpContextAccessor.HttpContext.Request;
+            var uaHeader = MessageSettings.GetUAHeader(request);
+            var clientInfo = MessageSettings.GetClientInfo(uaHeader);
+            var platformAndDevice = MessageSettings.GetPlatformAndDevice(clientInfo);
+            var browser = MessageSettings.GetBrowser(clientInfo);
+            var ip = MessageSettings.GetIP(request);
+
+            var baseEvent = new BaseEvent
+            {
+                Platform = platformAndDevice,
+                Browser = browser,
+                Date = DateTime.Now,
+                IP = ip
+            };
+
+            return await geolocationHelper.AddGeolocationAsync(baseEvent);
+        }
     }
 
     /// <summary>
@@ -205,7 +224,12 @@ public class ConnectionsController(
             var userName = user.DisplayUserName(false, displayUserSettingsHelper);
             var loginEventFromCookie = GetLoginEventIdFromCookie();
 
-            await dbLoginEventsManager.LogOutAllActiveConnectionsExceptThisAsync(loginEventFromCookie, user.TenantId, user.Id);
+            var loginEvents = await dbLoginEventsManager.LogOutAllActiveConnectionsExceptThisAsync(loginEventFromCookie, user.TenantId, user.Id);
+
+            foreach (var loginEvent in loginEvents)
+            {
+                await quotaSocketManager.LogoutSession(user.Id, loginEvent.Id);
+            }
 
             await messageService.SendAsync(MessageAction.UserLogoutActiveConnections, userName);
             return userName;
@@ -252,6 +276,11 @@ public class ConnectionsController(
 
             await dbLoginEventsManager.LogOutEventAsync(loginEvent.TenantId, loginEvent.Id);
 
+            if (loginEvent.UserId.HasValue)
+            {
+                await quotaSocketManager.LogoutSession(loginEvent.UserId.Value, loginEvent.Id);
+            }
+
             await messageService.SendAsync(MessageAction.UserLogoutActiveConnection, userName);
             return true;
         }
@@ -271,6 +300,8 @@ public class ConnectionsController(
 
         await messageService.SendAsync(currentUserId.Equals(user.Id) ? MessageAction.UserLogoutActiveConnections : MessageAction.UserLogoutActiveConnectionsForUser, MessageTarget.Create(user.Id), auditEventDate, userName);
         await cookiesManager.ResetUserCookieAsync(user.Id);
+
+        await quotaSocketManager.LogoutSession(user.Id);
     }
 
     private int GetLoginEventIdFromCookie()

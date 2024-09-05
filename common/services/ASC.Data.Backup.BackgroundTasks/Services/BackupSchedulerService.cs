@@ -29,17 +29,18 @@ using ASC.Core.Configuration;
 namespace ASC.Data.Backup.Services;
 
 [Singleton]
-public sealed class BackupSchedulerService(ILogger<BackupSchedulerService> logger,
-        IServiceScopeFactory scopeFactory,
-        ConfigurationExtension configuration,
-        CoreBaseSettings coreBaseSettings,
-        IEventBus eventBus)
+public sealed class BackupSchedulerService(
+    ILogger<BackupSchedulerService> logger,
+    IServiceScopeFactory scopeFactory,
+    IConfiguration configuration,
+    CoreBaseSettings coreBaseSettings,
+    IEventBus eventBus)
      : ActivePassiveBackgroundService<BackupSchedulerService>(logger, scopeFactory)
 {
     private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
     private readonly IEventBus _eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
 
-    protected override TimeSpan ExecuteTaskPeriod { get; set; } = configuration.GetSetting<BackupSettings>("backup").Scheduler.Period;
+    protected override TimeSpan ExecuteTaskPeriod { get; set; } = configuration.GetSection("backup").Get<BackupSettings>().Scheduler.Period;
 
     protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
@@ -80,7 +81,7 @@ public sealed class BackupSchedulerService(ILogger<BackupSchedulerService> logge
 
                         logger.DebugStartScheduledBackup(schedule.TenantId, schedule.StorageType, schedule.StorageBasePath);
 
-                        _eventBus.Publish(new BackupRequestIntegrationEvent(
+                        await _eventBus.PublishAsync(new BackupRequestIntegrationEvent(
                                                  tenantId: schedule.TenantId,
                                                  storageBasePath: schedule.StorageBasePath,
                                                  storageParams: JsonConvert.DeserializeObject<Dictionary<string, string>>(schedule.StorageParams),

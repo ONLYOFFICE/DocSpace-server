@@ -33,12 +33,18 @@ public static class DocSpaceHelper
         return folderType is 
             FolderType.CustomRoom or 
             FolderType.EditingRoom or 
-            FolderType.ReviewRoom or 
-            FolderType.ReadOnlyRoom or 
             FolderType.FillingFormsRoom or
             FolderType.PublicRoom or 
-            FolderType.VirtualDataRoom or
-            FolderType.FormRoom;
+            FolderType.VirtualDataRoom;
+    }
+
+    public static bool IsFormsFillingSystemFolder(FolderType folderType)
+    {
+        return folderType is
+            FolderType.FormFillingFolderDone or
+            FolderType.FormFillingFolderInProgress or
+            FolderType.InProcessFormFolder or
+            FolderType.ReadyFormFolder;
     }
 
     public static RoomType? MapToRoomType(FolderType folderType)
@@ -47,12 +53,9 @@ public static class DocSpaceHelper
         {
             FolderType.FillingFormsRoom => RoomType.FillingFormsRoom,
             FolderType.EditingRoom => RoomType.EditingRoom,
-            FolderType.ReviewRoom => RoomType.ReviewRoom,
-            FolderType.ReadOnlyRoom => RoomType.ReadOnlyRoom,
             FolderType.CustomRoom => RoomType.CustomRoom,
             FolderType.PublicRoom => RoomType.PublicRoom,
             FolderType.VirtualDataRoom => RoomType.VirtualDataRoom,
-            FolderType.FormRoom => RoomType.FormRoom,
             _ => null
         };
     }
@@ -63,13 +66,22 @@ public static class DocSpaceHelper
         {
             RoomType.FillingFormsRoom => FolderType.FillingFormsRoom,
             RoomType.EditingRoom => FolderType.EditingRoom,
-            RoomType.ReviewRoom => FolderType.ReviewRoom,
-            RoomType.ReadOnlyRoom => FolderType.ReadOnlyRoom,
             RoomType.CustomRoom => FolderType.CustomRoom,
             RoomType.PublicRoom => FolderType.PublicRoom,
-            RoomType.FormRoom => FolderType.FormRoom,
             RoomType.VirtualDataRoom => FolderType.VirtualDataRoom,
             _ => throw new ArgumentOutOfRangeException(nameof(roomType), roomType, null)
+        };
+    }
+
+    public static FolderType? MapToFolderType(FilterType filterType)
+    {
+        return filterType switch
+        {
+            FilterType.FillingFormsRooms => FolderType.FillingFormsRoom,
+            FilterType.EditingRooms => FolderType.EditingRoom,
+            FilterType.CustomRooms => FolderType.CustomRoom,
+            FilterType.PublicRooms => FolderType.PublicRoom,
+            _ => null
         };
     }
 

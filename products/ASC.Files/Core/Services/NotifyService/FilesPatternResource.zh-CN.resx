@@ -152,4 +152,31 @@ $__AuthorName 删除了房间： $RoomTitle</value>
   <data name="subject_ShareFolder_push" xml:space="preserve">
     <value>已提供文件夹访问权限：$DocumentTitle</value>
   </data>
+  <data name="button_CheckReadyForms" xml:space="preserve">
+    <value>检查已准备完毕的表单</value>
+  </data>
+  <data name="pattern_FormReceived" xml:space="preserve">
+    <value>h1. 表单 $Message 已填写完成
+
+在"$RoomTitle":"$RoomURL"房间中填写了一份新表单："$DocumentTitle":"$DocumentURL"
+
+表单提交者："$FromUserName":"$FromUserLink"
+
+$OrangeButton</value>
+  </data>
+  <data name="pattern_FormSubmitted" xml:space="preserve">
+    <value>h1. 您已填写表单 $Message
+
+您在"$RoomTitle":"$RoomURL"房间中填写了表单："$DocumentTitle":"$DocumentURL"
+
+经理："$ToUserName":"$ToUserLink"
+
+$OrangeButton</value>
+  </data>
+  <data name="subject_FormReceived" xml:space="preserve">
+    <value>协作空间通知。表单已填写完毕</value>
+  </data>
+  <data name="subject_FormSubmitted" xml:space="preserve">
+    <value>协作空间通知。表单已填写完毕</value>
+  </data>
 </root>

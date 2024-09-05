@@ -65,7 +65,8 @@ public class UserManager(
     UserFormatter userFormatter,
     QuotaSocketManager quotaSocketManager,
     TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
-    IDistributedLockProvider distributedLockProvider)
+    IDistributedLockProvider distributedLockProvider,
+    CoreBaseSettings coreBaseSettings)
 {    
     private IDictionary<Guid, UserInfo> SystemUsers => userManagerConstants.SystemUsers;
 
@@ -149,9 +150,11 @@ public class UserManager(
         AccountLoginType? accountLoginType,
         QuotaFilter? quotaFilter,
         string text,
+        string separator,
         bool withoutGroup)
     {
-        return userService.GetUsersCountAsync(Tenant.Id, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, quotaFilter, text, withoutGroup);
+        return userService.GetUsersCountAsync(Tenant.Id, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, 
+            quotaFilter, text, separator, withoutGroup);
     }
 
     public IAsyncEnumerable<UserInfo> GetUsers(
@@ -164,6 +167,7 @@ public class UserManager(
         AccountLoginType? accountLoginType,
         QuotaFilter? quotaFilter,
         string text,
+        string separator,
         bool withoutGroup,
         string sortBy,
         bool sortOrderAsc,
@@ -175,7 +179,20 @@ public class UserManager(
             sortType = UserSortType.FirstName;
         }
 
-        return userService.GetUsers(Tenant.Id, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, quotaFilter, text, withoutGroup, Tenant.OwnerId, sortType, sortOrderAsc, limit, offset);
+        if (sortType == UserSortType.DisplayName)
+        {
+            if (UserFormatter.GetUserDisplayDefaultOrder() == DisplayUserNameFormat.FirstLast)
+            {
+                sortType = UserSortType.FirstName;
+            }
+            else
+            {
+                sortType = UserSortType.LastName;
+            }
+        }
+
+        return userService.GetUsers(Tenant.Id, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, quotaFilter, 
+            text, separator, withoutGroup, Tenant.OwnerId, sortType, sortOrderAsc, limit, offset);
     }
 
     public UserInfo GetUsers(Guid id)
@@ -361,7 +378,7 @@ public class UserManager(
             oldUserData.Status != u.Status && notifyWebSocket)
         {
             (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountPaidUserFeature, int>();
-            value = oldUserData.Status > u.Status ? ++value : --value;//crutch: data race
+            value = oldUserData.Status == EmployeeStatus.Terminated ? ++value : --value;//crutch: data race
         }
 
         var newUserData = await userService.SaveUserAsync(tenant.Id, u);
@@ -443,7 +460,7 @@ public class UserManager(
                     (cache.Get<string>("REWRITE_URL" + tenant.Id) != null) ?
                     new Uri(cache.Get<string>("REWRITE_URL" + tenant.Id)).ToString() : tenant.GetTenantDomain(coreSettings);
 
-        var rootAuthorization = cardDavAddressBook.GetSystemAuthorization();
+        var rootAuthorization = await cardDavAddressBook.GetSystemAuthorizationAsync();
 
         if (rootAuthorization != null)
         {
@@ -451,7 +468,7 @@ public class UserManager(
 
             if (oldUserData != null && oldUserData.Status != newUser.Status && newUser.Status == EmployeeStatus.Terminated)
             {
-                var userAuthorization = oldUserData.Email.ToLower() + ":" + instanceCrypto.Encrypt(oldUserData.Email);
+                var userAuthorization = oldUserData.Email.ToLower() + ":" + await instanceCrypto.EncryptAsync(oldUserData.Email);
                 var requestUrlBook = cardDavAddressBook.GetRadicaleUrl(myUri, newUser.Email.ToLower(), true, true);
                 var collection = await cardDavAddressBook.GetCollection(requestUrlBook, userAuthorization, myUri);
                 if (collection.Completed && collection.StatusCode != 404)
@@ -504,11 +521,6 @@ public class UserManager(
         return await userService.GetDavUserEmailsAsync(await tenantManager.GetCurrentTenantIdAsync());
     }
 
-    public async Task<IEnumerable<int>> GetTenantsWithFeedsAsync(DateTime from)
-    {
-        return await userService.GetTenantsWithFeedsAsync(from);
-    }
-
     public async Task DeleteUserAsync(Guid id)
     {
         if (IsSystemUser(id))
@@ -529,9 +541,9 @@ public class UserManager(
         try
         {
             var currentMail = delUser.Email.ToLower();
-            var currentAccountPassword = instanceCrypto.Encrypt(currentMail);
+            var currentAccountPassword = await instanceCrypto.EncryptAsync(currentMail);
             var userAuthorization = currentMail + ":" + currentAccountPassword;
-            var rootAuthorization = cardDavAddressBook.GetSystemAuthorization();
+            var rootAuthorization = await cardDavAddressBook.GetSystemAuthorizationAsync();
             var myUri = (httpContextAccessor?.HttpContext != null) ? httpContextAccessor.HttpContext.Request.GetDisplayUrl() :
                 (cache.Get<string>("REWRITE_URL" + tenant.Id) != null) ?
                 new Uri(cache.Get<string>("REWRITE_URL" + tenant.Id)).ToString() : tenant.GetTenantDomain(coreSettings);
@@ -668,11 +680,6 @@ public class UserManager(
         return IsUserInGroupInternal(userId, groupId, await GetRefsInternalAsync());
     }
 
-    public bool IsUserInGroup(Guid userId, Guid groupId)
-    {
-        return IsUserInGroupInternal(userId, groupId, GetRefsInternal());
-    }
-
     public async Task<UserInfo[]> GetUsersByGroupAsync(Guid groupId, EmployeeStatus employeeStatus = EmployeeStatus.Default)
     {
         var refs = await GetRefsInternalAsync();
@@ -732,6 +739,7 @@ public class UserManager(
             return;
         }
 
+        var managerIdTask = GetDepartmentManagerAsync(groupId);
         var user = await GetUsersAsync(userId);
         var isUserBefore = await this.IsUserAsync(user);
         var isPaidUserBefore = await IsPaidUserAsync(user);
@@ -740,6 +748,12 @@ public class UserManager(
             Constants.Action_EditGroups);
 
         await userService.RemoveUserGroupRefAsync(Tenant.Id, userId, groupId, UserGroupRefType.Contains);
+        
+        var managerId = await managerIdTask;
+        if (managerId == userId)
+        {
+            await userService.RemoveUserGroupRefAsync(Tenant.Id, userId, groupId, UserGroupRefType.Manager);
+        }
 
         ResetGroupCache(userId);
 
@@ -760,38 +774,35 @@ public class UserManager(
         new HttpRequestDictionary<List<Guid>>(httpContextAccessor?.HttpContext, "GroupInfoID").Reset(userID.ToString());
     }
 
+    public async Task ChangeUserCulture(UserInfo user, string cultureName)
+    {        
+        var curLng = user.CultureName;
+         if (coreBaseSettings.EnabledCultures.Find(c => string.Equals(c.Name, cultureName, StringComparison.InvariantCultureIgnoreCase)) != null && curLng != cultureName)
+         {
+             user.CultureName = cultureName;
+        
+             try
+             {
+                 await UpdateUserInfoAsync(user);
+             }
+             catch
+             {
+                 user.CultureName = curLng;
+                 throw;
+             }
+         }
+    }
+    
     #endregion Users
 
 
     #region Company
-
-    public async Task<GroupInfo[]> GetDepartmentsAsync()
-    {
-        return await GetGroupsAsync();
-    }
-
+    
     public async Task<Guid> GetDepartmentManagerAsync(Guid deparmentID)
     {
         var groupRef = await userService.GetUserGroupRefAsync(Tenant.Id, deparmentID, UserGroupRefType.Manager);
 
-        if (groupRef == null)
-        {
-            return Guid.Empty;
-        }
-
-        return groupRef.UserId;
-    }
-
-    public Guid GetDepartmentManager(Guid deparmentID)
-    {
-        var groupRef = userService.GetUserGroupRef(Tenant.Id, deparmentID, UserGroupRefType.Manager);
-
-        if (groupRef == null)
-        {
-            return Guid.Empty;
-        }
-
-        return groupRef.UserId;
+        return groupRef?.UserId ?? Guid.Empty;
     }
 
     public async Task SetDepartmentManagerAsync(Guid deparmentID, Guid userID)
@@ -811,17 +822,6 @@ public class UserManager(
         }
     }
 
-    public async Task<UserInfo> GetCompanyCEOAsync()
-    {
-        var id = await GetDepartmentManagerAsync(Guid.Empty);
-
-        return id != Guid.Empty ? await GetUsersAsync(id) : null;
-    }
-
-    public async Task SetCompanyCEOAsync(Guid userId)
-    {
-        await SetDepartmentManagerAsync(Guid.Empty, userId);
-    }
 
     #endregion Company
 
@@ -871,7 +871,8 @@ public class UserManager(
             ID = group.Id,
             CategoryID = group.CategoryId,
             Name = group.Name,
-            Sid = group.Sid
+            Sid = group.Sid,
+            Removed = group.Removed
         };
     }
 
@@ -958,14 +959,9 @@ public class UserManager(
             .ToList();
     }
 
-    private async Task<IDictionary<string, UserGroupRef>> GetRefsInternalAsync()
+    private Task<IDictionary<string, UserGroupRef>> GetRefsInternalAsync()
     {
-        return await userService.GetUserGroupRefsAsync(Tenant.Id);
-    }
-
-    private IDictionary<string, UserGroupRef> GetRefsInternal()
-    {
-        return userService.GetUserGroupRefs(Tenant.Id);
+        return userService.GetUserGroupRefsAsync(Tenant.Id);
     }
 
     private bool IsUserInGroupInternal(Guid userId, Guid groupId, IDictionary<string, UserGroupRef> refs)
@@ -1020,7 +1016,8 @@ public class UserManager(
             Name = g.Name,
             ParentId = g.Parent?.ID ?? Guid.Empty,
             CategoryId = g.CategoryID,
-            Sid = g.Sid
+            Sid = g.Sid,
+            Removed = g.Removed
         };
     }
 

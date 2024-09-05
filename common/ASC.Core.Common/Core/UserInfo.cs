@@ -151,6 +151,8 @@ public sealed class UserInfo : IDirectRecipient, ICloneable, IMapFrom<User>
     /// <summary>Creation date</summary>
     /// <type>System.DateTime, System</type>
     public DateTime CreateDate { get; set; }
+    
+    public Guid? CreatedBy { get; set; }
 
     public override string ToString()
     {

@@ -72,6 +72,7 @@ public enum MessageAction
     GuestCreated = 4001,
     UserCreatedViaInvite = 4002,
     GuestCreatedViaInvite = 4003,
+    SendJoinInvite = 4037,
 
     UserActivated = 4004,
     GuestActivated = 4005,
@@ -145,6 +146,7 @@ public enum MessageAction
 
     FileUploaded = 5011,
     FileImported = 5012,
+    FileUploadedWithOverwriting = 5099,
 
     FileCopied = 5013,
     FileCopiedWithOverwriting = 5014,
@@ -168,6 +170,9 @@ public enum MessageAction
 
     FolderDownloaded = 5057,
 
+    FormSubmit = 6046,
+    FormOpenedForFilling = 6047,
+
     ThirdPartyCreated = 5028,
     ThirdPartyUpdated = 5029,
     ThirdPartyDeleted = 5030,
@@ -179,6 +184,7 @@ public enum MessageAction
     DocumentsUploadingFormatsSettingsUpdated = 5033,
     DocumentsExternalShareSettingsUpdated = 5069,
     DocumentsKeepNewFileNameSettingsUpdated = 5083,
+    DocumentsDisplayFileExtensionUpdated = 5101, //last
 
     FileConverted = 5035,
 
@@ -201,13 +207,19 @@ public enum MessageAction
     RoomArchived = 5072,
     RoomUnarchived = 5073,
     RoomDeleted = 5074,
+    RoomCopied = 5100,
     
     RoomUpdateAccessForUser = 5075,
     RoomRemoveUser = 5084,
     RoomCreateUser = 5085,
+    
     RoomInvitationLinkUpdated = 5082,
     RoomInvitationLinkCreated = 5086,
     RoomInvitationLinkDeleted = 5087,
+    
+    RoomGroupAdded = 5094,
+    RoomUpdateAccessForGroup = 5095,
+    RoomGroupRemove = 5096,
 
     TagCreated = 5076,
     TagsDeleted = 5077,
@@ -220,10 +232,12 @@ public enum MessageAction
     RoomExternalLinkCreated = 5088,
     RoomExternalLinkUpdated = 5089,
     RoomExternalLinkDeleted = 5090,
+    RoomExternalLinkRevoked = 5097, 
+    RoomExternalLinkRenamed = 5098,
     
     FileExternalLinkCreated = 5091,
     FileExternalLinkUpdated = 5092,
-    FileExternalLinkDeleted = 5093,  // last
+    FileExternalLinkDeleted = 5093,
 
     #endregion
 
@@ -286,6 +300,20 @@ public enum MessageAction
     TwoFactorAuthenticationEnabledByTfaApp = 6038,
 
     PortalRenamed = 6039,
+
+    QuotaPerRoomChanged = 6040,
+    QuotaPerRoomDisabled = 6041,
+    QuotaPerUserChanged = 6042,
+    QuotaPerUserDisabled = 6043,
+    QuotaPerPortalChanged = 6044,
+    QuotaPerPortalDisabled = 6045,
+
+    CustomQuotaPerRoomDefault = 6048,
+    CustomQuotaPerRoomChanged = 6049,
+    CustomQuotaPerRoomDisabled = 6050,
+    CustomQuotaPerUserDefault = 6051,
+    CustomQuotaPerUserChanged = 6052,
+    CustomQuotaPerUserDisabled = 6053,
 
     DocumentServiceLocationSetting = 5037,
     AuthorizationKeysSetting = 5038,

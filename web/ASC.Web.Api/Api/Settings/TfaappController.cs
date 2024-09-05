@@ -304,12 +304,7 @@ public class TfaappController(
         await ApiContext.AuthByClaimAsync();
         var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
 
-        if (!tfaAppAuthSettingsHelper.IsVisibleSettings ||
-            !(await settingsManager.LoadAsync<TfaAppAuthSettings>()).EnableSetting ||
-            await TfaAppUserSettings.EnableForUserAsync(settingsManager, currentUser.Id))
-        {
-            throw new Exception(Resource.TfaAppNotAvailable);
-        }
+        await CheckTfa(currentUser);
 
         if (await userManager.IsOutsiderAsync(currentUser))
         {
@@ -333,10 +328,7 @@ public class TfaappController(
     {
         var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
 
-        if (!tfaAppAuthSettingsHelper.IsVisibleSettings || !await TfaAppUserSettings.EnableForUserAsync(settingsManager, currentUser.Id))
-        {
-            throw new Exception(Resource.TfaAppNotAvailable);
-        }
+        await CheckTfa(currentUser);
 
         if (await userManager.IsOutsiderAsync(currentUser))
         {
@@ -360,10 +352,7 @@ public class TfaappController(
     {
         var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
 
-        if (!tfaAppAuthSettingsHelper.IsVisibleSettings || !await TfaAppUserSettings.EnableForUserAsync(settingsManager, currentUser.Id))
-        {
-            throw new Exception(Resource.TfaAppNotAvailable);
-        }
+        await CheckTfa(currentUser);
 
         if (await userManager.IsOutsiderAsync(currentUser))
         {
@@ -403,10 +392,7 @@ public class TfaappController(
             throw new SecurityAccessDeniedException(Resource.ErrorAccessDenied);
         }
 
-        if (!tfaAppAuthSettingsHelper.IsVisibleSettings || !await TfaAppUserSettings.EnableForUserAsync(settingsManager, user.Id))
-        {
-            throw new Exception(Resource.TfaAppNotAvailable);
-        }
+        await CheckTfa(user);
 
         if (await userManager.IsOutsiderAsync(user))
         {
@@ -426,5 +412,15 @@ public class TfaappController(
 
         await studioNotifyService.SendMsgTfaResetAsync(user);
         return string.Empty;
+    }
+
+    private async Task CheckTfa(UserInfo currentUser)
+    {
+        if (!tfaAppAuthSettingsHelper.IsVisibleSettings ||
+            !(await settingsManager.LoadAsync<TfaAppAuthSettings>()).EnableSetting ||
+            await TfaAppUserSettings.EnableForUserAsync(settingsManager, currentUser.Id))
+        {
+            throw new Exception(Resource.TfaAppNotAvailable);
+        }
     }
 }

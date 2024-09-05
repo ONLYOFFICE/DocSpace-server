@@ -281,7 +281,7 @@
     <value>Število skrbnikov ne sme presegati {0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Število skrbnikov</value>
+    <value>Število skrbnikov/naprednih uporabnikov</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Samodejno varnostno kopiranje &amp; obnovitev</value>
@@ -324,9 +324,6 @@
   </data>
   <data name="TariffsFeature_whitelabel" xml:space="preserve">
     <value>Blagovna znamka &amp; prilagoditve</value>
-  </data>
-  <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Število skrbnikov/naprednih uporabnikov:</value>
   </data>
   <data name="ConsumersBox" xml:space="preserve">
     <value>Box</value>
@@ -1038,5 +1035,23 @@
   </data>
   <data name="ErrorWebPluginToManyInputFiles" xml:space="preserve">
     <value>Para muitos arquivos de entrada</value>
+  </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>Dodani skrbniki/Super uporabniki:</value>
+  </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>Kvota povabil je presežena</value>
+  </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>Uporabnik onemogočen</value>
+  </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>Navodilo za spremembo gesla je bilo poslano na e-poštni naslov {0}.</value>
+  </data>
+  <data name="ErrorEmailLinked" xml:space="preserve">
+    <value>To e-mail sporočilo je priloženo uporabniku {0} kot tretjemu ponudniku</value>
+  </data>
+  <data name="TariffsFeature_statistic" xml:space="preserve">
+    <value>Kvote za shranjevanje in statistika</value>
   </data>
 </root>

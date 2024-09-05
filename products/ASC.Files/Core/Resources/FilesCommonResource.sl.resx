@@ -185,7 +185,7 @@
     <value>Dokumenti</value>
   </data>
   <data name="ProductUserOpportunities" xml:space="preserve">
-    <value>Svoje dokumente ustvarjajte in urejajte ter deljene dokumente s ustreznimi pravicami dostopa|Drugim uporabnikom dajte pravice branja/urejanja za dokumente in mape|Povežite Dropbox, Box in druge račune v oddelku 'Moji Dokumenti'</value>
+    <value>Svoje dokumente ustvarjajte in urejajte ter deljene dokumente s ustreznimi pravicami dostopa|Drugim uporabnikom dajte pravice branja/urejanja za dokumente in mape|Povežite Dropbox, Box in druge račune v oddelku 'Dokumenti'</value>
   </data>
   <data name="UnknownFirstName" xml:space="preserve">
     <value>Ime</value>
@@ -463,5 +463,41 @@ Najvišja združljivost z docx, xlsx, pptx.</value>
   </data>
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>Tip</value>
+  </data>
+  <data name="Date" xml:space="preserve">
+    <value>Datum</value>
+  </data>
+  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
+    <value>Napredni uporabnik</value>
+  </data>
+  <data name="RoleEnum_PowerUser" xml:space="preserve">
+    <value>Napredni uporabnik</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>Uporabnik</value>
+  </data>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>Premikanje več datotek hkrati v prostor za izpolnjevanje obrazcev ni podprto. Premaknite po en obrazec ONLYOFFICE PDF hkrati.</value>
+  </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>Premikanje map v sobo za izpolnjevanje obrazcev ni podprto. Premaknite samo en obrazec ONLYOFFICE PDF hkrati.</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>Datoteke ni mogoče premakniti v to sobo. Poskusite premakniti obrazec ONLYOFFICE PDF.</value>
+  </data>
+  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
+    <value>Datoteke ni mogoče naložiti v to sobo. Poskusite naložiti obrazec ONLYOFFICE PDF.</value>
+  </data>
+  <data name="FillOutExternalLinkTitle" xml:space="preserve">
+    <value>Povezava za izpolnitev</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Odpri obrazec</value>
+  </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>Povezava do obrazca</value>
+  </data>
+  <data name="FormNumber" xml:space="preserve">
+    <value>Številka obrazca</value>
   </data>
 </root>

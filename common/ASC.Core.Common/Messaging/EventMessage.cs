@@ -40,6 +40,7 @@ public class EventMessage
     public MessageAction Action { get; init; }
     public IList<string> Description { get; init; }
     public MessageTarget Target { get; init; }
-    public string UAHeader { get; set; }
+    public string UaHeader { get; set; }
     public bool Active { get; init; }
+    public IEnumerable<FilesAuditReference> References { get; init; }
 }

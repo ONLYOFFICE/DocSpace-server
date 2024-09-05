@@ -57,6 +57,6 @@ public abstract class MasterFormController<T>(FileStorageService fileStorageServ
     [HttpPost("masterform/{fileId}/checkfillformdraft")]
     public async Task<object> CheckFillFormDraftAsync(T fileId, CheckFillFormDraftRequestDto inDto)
     {
-        return await fileStorageService.CheckFillFormDraftAsync(fileId, inDto.Version, inDto.Doc, !inDto.RequestEmbedded, inDto.RequestView);
+        return await fileStorageService.CheckFillFormDraftAsync(fileId, inDto.Version,!inDto.RequestEmbedded, inDto.RequestView);
     }
 }
