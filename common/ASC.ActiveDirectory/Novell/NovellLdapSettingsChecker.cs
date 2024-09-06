@@ -41,7 +41,55 @@ public class NovellLdapSettingsChecker(ILogger<LdapSettingsChecker> logger) : Ld
         base.Init(importer);
     }
 
-    public override LdapSettingsStatus CheckSettings()
+    public async Task<bool> CheckConnection()
+    {
+        const int timeoutMilliseconds = 5000;
+
+        using (var ldapConnection = new LdapConnection())
+        {
+            try
+            {
+                if (Settings.Ssl)
+                {
+                    ldapConnection.SecureSocketLayer = true;
+                }
+
+                ldapConnection.ConnectionTimeout = timeoutMilliseconds;
+                ldapConnection.Connect(Settings.Server["LDAP://".Length..], Settings.PortNumber);
+
+                using (var cts = new CancellationTokenSource(timeoutMilliseconds))
+                {
+                    var bindTask = Task.Run(() => ldapConnection.Bind(Settings.Login, Settings.Password), cts.Token);
+
+                    if (await Task.WhenAny(bindTask, Task.Delay(timeoutMilliseconds, cts.Token)) == bindTask)
+                    {
+                        return !bindTask.IsFaulted;
+                    }
+                    return false;
+                }
+            }
+            catch (LdapException ex)
+            {
+                _logger.ErrorSocketException(ex);
+                return false;
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.StartsWith("Connect Error") || ex.Message.StartsWith("Unavailable"))
+                {
+                    _logger.ErrorCheckSettingsException(ex);
+                    return false;
+                }
+                return true;
+            }
+            finally
+            {
+                ldapConnection.Disconnect();
+            }
+        }
+    }
+
+    public async override Task<LdapSettingsStatus> CheckSettings()
     {
         if (!Settings.EnableLdapAuthentication)
         {
@@ -51,6 +99,11 @@ public class NovellLdapSettingsChecker(ILogger<LdapSettingsChecker> logger) : Ld
         if (Settings.Server.Equals("LDAP://", StringComparison.InvariantCultureIgnoreCase))
         {
             return LdapSettingsStatus.WrongServerOrPort;
+        }
+
+        if (!await CheckConnection())
+        {
+            return LdapSettingsStatus.ConnectError;
         }
 
         if (!LdapHelper.IsConnected)
@@ -77,13 +130,26 @@ public class NovellLdapSettingsChecker(ILogger<LdapSettingsChecker> logger) : Ld
             }
             catch (ArgumentException ex)
             {
-                _logger.ErrorArgumentException( ex);
+                _logger.ErrorArgumentException(ex);
                 return LdapSettingsStatus.WrongServerOrPort;
             }
             catch (SecurityException ex)
             {
                 _logger.ErrorSecurityException(ex);
                 return LdapSettingsStatus.StrongAuthRequired;
+            }
+            catch (LdapException ex) {
+
+                if (ex.ResultCode == LdapException.InvalidCredentials)
+                {
+                    _logger.ErrorCheckSettingsException(ex);
+                    return LdapSettingsStatus.CredentialsNotValid;
+                }
+                else
+                {
+                    _logger.ErrorSocketException(ex);
+                    return LdapSettingsStatus.ConnectError;
+                }
             }
             catch (SystemException ex)
             {
@@ -93,7 +159,7 @@ public class NovellLdapSettingsChecker(ILogger<LdapSettingsChecker> logger) : Ld
             catch (Exception ex)
             {
                 _logger.ErrorCheckSettingsException(ex);
-                return LdapSettingsStatus.CredentialsNotValid;
+                return LdapSettingsStatus.ConnectError;
             }
         }
 

@@ -55,7 +55,7 @@ public abstract class ActionInterpreter
         if (!string.IsNullOrEmpty(data.InitiatorName))
         {
             initiatorName = initiatorId == ASC.Core.Configuration.Constants.Guest.ID && data.InitiatorName != AuditReportResource.GuestAccount 
-                ? $"{data.InitiatorName} ({AuditReportResource.GuestAccount})" 
+                ? $"{data.InitiatorName} ({FilesCommonResource.ExternalUser})" 
                 : data.InitiatorName;
         }
         
