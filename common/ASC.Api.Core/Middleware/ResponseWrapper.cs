@@ -48,9 +48,9 @@ public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IE
                 status = HttpStatusCode.NotFound;
                 message = "The record could not be found";
                 break;
-            case ArgumentException:
+            case ArgumentException e:
                 status = HttpStatusCode.BadRequest;
-                message = "Invalid arguments";
+                message = e.Message;
                 break;
             case SecurityException:
                 status = HttpStatusCode.Forbidden;

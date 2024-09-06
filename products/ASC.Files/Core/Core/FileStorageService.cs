@@ -92,7 +92,8 @@ public class FileStorageService //: IFileStorageService
     FileChecker fileChecker,
     CommonLinkUtility commonLinkUtility,
     ShortUrl shortUrl,
-    IDbContextFactory<UrlShortenerDbContext> dbContextFactory)
+    IDbContextFactory<UrlShortenerDbContext> dbContextFactory,
+    PasswordSettingsManager passwordSettingsManager)
 {
     private readonly ILogger _logger = optionMonitor.CreateLogger("ASC.Files");
 
@@ -3763,6 +3764,9 @@ public class FileStorageService //: IFileStorageService
 
         if (!string.IsNullOrEmpty(password))
         {
+            var settings = await settingsManager.LoadAsync<PasswordSettings>();
+            passwordSettingsManager.CheckPassword(password, settings);
+            
             options.Password = await externalShare.CreatePasswordKeyAsync(password);
         }
 
