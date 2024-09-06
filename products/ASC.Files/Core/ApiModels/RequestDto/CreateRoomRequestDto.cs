@@ -72,4 +72,6 @@ public class CreateRoomRequestDto
     /// <summary>Room data lifetime settings</summary>
     /// <type>ASC.Files.Core.ApiModels.RoomDataLifetimeDto, ASC.Files.Core</type>
     public RoomDataLifetimeDto Lifetime { get; set; }
+    
+    public bool DenyDownload { get; set; }
 }

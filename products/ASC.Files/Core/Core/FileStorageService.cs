@@ -421,23 +421,23 @@ public class FileStorageService //: IFileStorageService
         return folder;
     }
 
-    public async Task<Folder<int>> CreateRoomAsync(string title, RoomType roomType, bool privacy, bool indexing, IEnumerable<FileShareParams> share, long quota, RoomDataLifetime lifetime)
+    public async Task<Folder<int>> CreateRoomAsync(string title, RoomType roomType, bool privacy, bool indexing, IEnumerable<FileShareParams> share, long quota, RoomDataLifetime lifetime, bool denyDownload)
     {
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         var parentId = await globalFolderHelper.GetFolderVirtualRooms();
 
         return await CreateRoomAsync(async () =>
         {
-        await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetRoomsCountCheckKey(tenantId)))
-        {
-            await countRoomChecker.CheckAppend();
-                return await InternalCreateFolderAsync(parentId, title, DocSpaceHelper.MapToFolderType(roomType), privacy, indexing, quota, lifetime);
+            await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetRoomsCountCheckKey(tenantId)))
+            {
+                await countRoomChecker.CheckAppend();
+                return await InternalCreateFolderAsync(parentId, title, DocSpaceHelper.MapToFolderType(roomType), privacy, indexing, quota, lifetime, denyDownload);
             }
         }, privacy, share);
-            }
+    }
 
-    public async Task<Folder<string>> CreateThirdPartyRoomAsync(string title, RoomType roomType, string parentId, bool privacy, bool indexing, bool createAsNewFolder)
-            {
+    public async Task<Folder<string>> CreateThirdPartyRoomAsync(string title, RoomType roomType, string parentId, bool privacy, bool indexing, bool createAsNewFolder, bool denyDownload)
+    {
         var folderDao = daoFactory.GetFolderDao<string>();
         var providerDao = daoFactory.ProviderDao;
 
@@ -445,9 +445,9 @@ public class FileStorageService //: IFileStorageService
         var providerInfo = await providerDao.GetProviderInfoAsync(parent.ProviderId);
 
         if (providerInfo.RootFolderType != FolderType.VirtualRooms)
-            {
+        {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_InvalidProvider);
-            }
+        }
 
         if (providerInfo.FolderId != null)
         {
@@ -457,33 +457,33 @@ public class FileStorageService //: IFileStorageService
         var folderType = DocSpaceHelper.MapToFolderType(roomType);
 
         var room = await CreateRoomAsync(async () =>
-            {
+        {
             var folder = parent;
 
             if (createAsNewFolder)
             {
                 try
                 {
-                    folder = await InternalCreateFolderAsync(parentId, title, folderType, false, indexing);
+                    folder = await InternalCreateFolderAsync(parentId, title, folderType, false, indexing, denyDownload: denyDownload);
                 }
                 catch
                 {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_InvalidThirdPartyFolder);
-        }
+                    throw new InvalidOperationException(FilesCommonResource.ErrorMessage_InvalidThirdPartyFolder);
+                }
             }
 
-                await providerDao.UpdateRoomProviderInfoAsync(new ProviderData
-                {
-                    Id = providerInfo.ProviderId,
-                    Title = title,
+            await providerDao.UpdateRoomProviderInfoAsync(new ProviderData
+            {
+                Id = providerInfo.ProviderId,
+                Title = title,
                 FolderId = folder.Id, 
-                    FolderType = folderType,
-                    Private = privacy
-                });
+                FolderType = folderType,
+                Private = privacy
+            });
 
-                folder.FolderType = folderType;
-                folder.Shared = folderType == FolderType.PublicRoom;
-                folder.RootFolderType = FolderType.VirtualRooms;
+            folder.FolderType = folderType;
+            folder.Shared = folderType == FolderType.PublicRoom;
+            folder.RootFolderType = FolderType.VirtualRooms;
             folder.FolderIdDisplay = IdConverter.Convert<string>(await globalFolderHelper.FolderVirtualRoomsAsync);
 
             return folder;
@@ -491,7 +491,7 @@ public class FileStorageService //: IFileStorageService
         }, false, null);
 
         return room;
-            }
+    }
 
     private async Task<Folder<T>> CreateRoomAsync<T>(Func<Task<Folder<T>>> folderFactory, bool privacy, IEnumerable<FileShareParams> shares)
     {
@@ -537,7 +537,7 @@ public class FileStorageService //: IFileStorageService
         return folder;
     }
 
-    private async Task<Folder<T>> InternalCreateFolderAsync<T>(T parentId, string title, FolderType folderType = FolderType.DEFAULT, bool privacy = false, bool indexing = false, long quota = TenantEntityQuotaSettings.DefaultQuotaValue, RoomDataLifetime lifetime = null)
+    private async Task<Folder<T>> InternalCreateFolderAsync<T>(T parentId, string title, FolderType folderType = FolderType.DEFAULT, bool privacy = false, bool indexing = false, long quota = TenantEntityQuotaSettings.DefaultQuotaValue, RoomDataLifetime lifetime = null, bool denyDownload = false)
         {
         ArgumentException.ThrowIfNullOrEmpty(title);
         ArgumentNullException.ThrowIfNull(parentId);
@@ -590,6 +590,7 @@ public class FileStorageService //: IFileStorageService
             newFolder.SettingsPrivate = parent.SettingsPrivate ? parent.SettingsPrivate : privacy;
             newFolder.SettingsColor = roomLogoManager.GetRandomColour();
             newFolder.SettingsIndexing = indexing;
+            newFolder.SettingsDenyDownload = denyDownload;
             newFolder.SettingsQuota = quota;
             newFolder.SettingsLifetime = lifetime;
 
@@ -3268,7 +3269,7 @@ public class FileStorageService //: IFileStorageService
         return room;
     }
 
-    public async Task<Folder<T>> SetRoomSettingsAsync<T>(T folderId, bool indexing)
+    public async Task<Folder<T>> SetRoomSettingsAsync<T>(T folderId, bool indexing, bool denyDownload)
     {
         var folderDao = daoFactory.GetFolderDao<T>();
         var room = await folderDao.GetFolderAsync(folderId);
@@ -3293,6 +3294,12 @@ public class FileStorageService //: IFileStorageService
                 }
                 
                 room.SettingsIndexing = indexing;
+                await folderDao.SaveFolderAsync(room);
+            }
+            
+            if (room.SettingsDenyDownload != denyDownload)
+            {
+                room.SettingsDenyDownload = denyDownload;
                 await folderDao.SaveFolderAsync(room);
             }
         }
