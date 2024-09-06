@@ -368,12 +368,6 @@ public class FileSharingAceHelper(
             }
         }
 
-        if (advancedSettings != null && entryType == FileEntryType.File && ownerId == authContext.CurrentAccount.ID && fileUtility.CanWebView(entry.Title) && !entry.ProviderEntry)
-        {
-            await fileSecurity.ShareAsync(entry.Id, entryType, FileConstant.DenyDownloadId, advancedSettings.DenyDownload ? FileShare.Restrict : FileShare.None);
-            await fileSecurity.ShareAsync(entry.Id, entryType, FileConstant.DenySharingId, advancedSettings.DenySharing ? FileShare.Restrict : FileShare.None);
-        }
-
         foreach (var userId in usersWithoutRight)
         {
             await fileMarker.RemoveMarkAsNewAsync(entry, userId);
@@ -597,11 +591,6 @@ public class FileSharing(
             }
 
             if (subjectsTypes != null && !subjectsTypes.Contains(r.SubjectType))
-            {
-                continue;
-            }
-
-            if (r.Subject == FileConstant.DenyDownloadId || r.Subject == FileConstant.DenySharingId)
             {
                 continue;
             }

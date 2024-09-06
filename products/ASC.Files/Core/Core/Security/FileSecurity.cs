@@ -368,22 +368,12 @@ public class FileSecurity(IDaoFactory daoFactory,
 
     public async Task<bool> CanDownloadAsync<T>(FileEntry<T> entry, Guid userId)
     {
-        if (!await CanAsync(entry, userId, FilesSecurityActions.Download))
-        {
-            return false;
-        }
-
-        return CheckDenyDownload(entry);
+        return await CanAsync(entry, userId, FilesSecurityActions.Download);
     }
 
     public async Task<bool> CanShareAsync<T>(FileEntry<T> entry, Guid userId)
     {
-        if (!await CanEditAsync(entry, userId))
-        {
-            return false;
-        }
-
-        return CheckDenySharing(entry);
+        return await CanEditAsync(entry, userId);
     }
 
     public async Task<bool> CanShareAsync<T>(FileEntry<T> entry)
@@ -713,7 +703,7 @@ public class FileSecurity(IDaoFactory daoFactory,
 
     public IAsyncEnumerable<FileEntry<T>> FilterDownloadAsync<T>(IAsyncEnumerable<FileEntry<T>> entries)
     {
-        return FilterReadAsync(entries).Where(CheckDenyDownload);
+        return FilterReadAsync(entries);
     }
 
     public static FileShare GetHighFreeRole(FolderType folderType)
@@ -736,16 +726,6 @@ public class FileSecurity(IDaoFactory daoFactory,
             FileShare.PowerUser => EmployeeType.Collaborator,
             _ => EmployeeType.User
         };
-    }
-
-    private bool CheckDenyDownload<T>(FileEntry<T> entry)
-    {
-        return !entry.DenyDownload || entry.Access != FileShare.Read && entry.Access != FileShare.Comment;
-    }
-
-    private bool CheckDenySharing<T>(FileEntry<T> entry)
-    {
-        return !entry.DenySharing || entry.Access != FileShare.ReadWrite;
     }
 
     private async Task<bool> CanAsync<T>(FileEntry<T> entry, Guid userId, FilesSecurityActions action, IEnumerable<FileShareRecord<T>> shares = null, bool setEntryAccess = true)

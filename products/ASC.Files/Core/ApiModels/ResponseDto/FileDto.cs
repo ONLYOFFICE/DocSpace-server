@@ -98,10 +98,6 @@ public class FileDto<T> : FileEntryDto<T>
     /// <type>System.String, System</type>
     public string LockedBy { get; set; }
 
-    /// <summary>Denies file downloading or not</summary>
-    /// <type>System.Boolean, System</type>
-    public bool DenyDownload { get; set; }
-
     /// <summary>Is there a draft or not</summary>
     /// <type>System.Boolean, System</type>
     public bool? HasDraft { get; set; }
@@ -125,10 +121,6 @@ public class FileDto<T> : FileEntryDto<T>
     /// <summary>Draft info</summary>
     /// <type>ASC.File.Core.ApiModels.ResponseDto.DraftLocation, ASC.Files.Core</type>
     public DraftLocation<T> DraftLocation { get; set; }
-
-    /// <summary>Denies file sharing or not</summary>
-    /// <type>System.Boolean, System</type>
-    public bool DenySharing { get; set; }
 
     /// <summary>File accessibility</summary>
     /// <type>System.Collections.IDictionary{ASC.Files.Core.Helpers.Accessibility, System.Boolean}, System.Collections</type>
@@ -313,8 +305,6 @@ public class FileDtoHelper(
         result.Encrypted = file.Encrypted.NullIfDefault();
         result.Locked = file.Locked.NullIfDefault();
         result.LockedBy = file.LockedBy;
-        result.DenyDownload = file.DenyDownload;
-        result.DenySharing = file.DenySharing;
         result.Access = file.Access;
         result.LastOpened = _apiDateTimeHelper.Get(file.LastOpened);
 
