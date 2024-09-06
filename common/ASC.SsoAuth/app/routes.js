@@ -94,7 +94,7 @@ module.exports = function (app, config) {
         res.status(200).send(validateCertificate(req.body.certs));
     }
     catch (error) {
-        res.status(500).send("Invalid certificate");
+        res.status(500).send(error);
     }
   }
   function onUploadMetadata(req, res) {
@@ -247,22 +247,16 @@ module.exports = function (app, config) {
             if (!isPrivateKeyValid(data.key)) {
                 throw "Invalid private key";
             }
-            const privateKey = data.key;
+
+            const certificate = crypto.createPublicKey(data.crt);
+            const privateKey = crypto.createPrivateKey(data.key);
 
             const signData = 'sign this';
-            const sign = crypto.createSign('SHA256');
-            sign.update(signData);
-            sign.end();
-            const signature = sign.sign(privateKey, 'hex');
 
-            const verify = crypto.createVerify('SHA256');
-            verify.update(signData);
-            verify.end();
-            try {
-                verify.verify(data.crt, signature, 'hex');
-            }
-            catch (error) {
-                logger.error(error.message);
+            const signature = crypto.sign(null, Buffer.from(signData), privateKey);
+            const isVerified = crypto.verify(null, Buffer.from(signData), certificate, signature);
+
+            if (!isVerified) {
                 throw "Invalid key-pair (unverified signed data test)";
             }
         }

@@ -217,7 +217,8 @@ public class SocketManager(
     
     private async Task<IEnumerable<Guid>> AdminsFromDb()
     {
-        _admins = await userManager.GetUsers(true, EmployeeStatus.Active, null, null, null, null, null, null, null, false, null, true, 0, 0)
+        _admins = await userManager.GetUsers(true, EmployeeStatus.Active, null, null, null, null, 
+                null, null, null, null, false, null, true, 0, 0)
             .Select(r=> r.Id)
             .ToListAsync();
         

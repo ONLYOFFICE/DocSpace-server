@@ -1,3 +1,18 @@
+-- Drop all if exist
+DROP EVENT IF EXISTS identity_delete_invalidated_clients;
+DROP EVENT IF EXISTS identity_delete_invalidated_consents;
+DROP EVENT IF EXISTS identity_delete_invalidated_authorization;
+
+DROP TABLE IF EXISTS identity_authorizations CASCADE;
+DROP TABLE IF EXISTS identity_client_authentication_methods CASCADE;
+DROP TABLE IF EXISTS identity_client_redirect_uris CASCADE;
+DROP TABLE IF EXISTS identity_client_allowed_origins CASCADE;
+DROP TABLE IF EXISTS identity_client_scopes CASCADE;
+DROP TABLE IF EXISTS identity_consent_scopes CASCADE;
+DROP TABLE IF EXISTS identity_consents CASCADE;
+DROP TABLE IF EXISTS identity_clients CASCADE;
+DROP TABLE IF EXISTS identity_scopes CASCADE;
+
 -- Create table for identity clients
 CREATE TABLE identity_clients (
     client_id varchar(36) not null,

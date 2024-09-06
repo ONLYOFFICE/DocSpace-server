@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS identity_certs;
 CREATE TABLE identity_certs (
 	id varchar(36) not null,
 	created_at datetime(6),
