@@ -57,11 +57,6 @@ public class NovellLdapSettingsChecker(ILogger<LdapSettingsChecker> logger) : Ld
                 ldapConnection.ConnectionTimeout = timeoutMilliseconds;
                 ldapConnection.Connect(Settings.Server["LDAP://".Length..], Settings.PortNumber);
 
-                if (Settings.StartTls)
-                {
-                    ldapConnection.StartTls();
-                }
-
                 using (var cts = new CancellationTokenSource(timeoutMilliseconds))
                 {
                     var bindTask = Task.Run(() => ldapConnection.Bind(Settings.Login, Settings.Password), cts.Token);
