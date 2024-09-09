@@ -26,6 +26,7 @@
 
 using ASC.AuditTrail.Repositories;
 using ASC.AuditTrail.Types;
+using ASC.Core.Common.Quota.Features;
 using ASC.Core.Security.Authentication;
 
 namespace ASC.People.Api;
@@ -75,7 +76,8 @@ public class UserController(
     IQuotaService quotaService,
     CustomQuota customQuota,
     AuditEventsRepository auditEventsRepository,
-    EmailValidationKeyModelHelper emailValidationKeyModelHelper)
+    EmailValidationKeyModelHelper emailValidationKeyModelHelper,
+    CountPaidUserStatistic countPaidUserStatistic)
     : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
 {
 
@@ -328,6 +330,8 @@ public class UserController(
 
         var tenant = await tenantManager.GetCurrentTenantAsync();
 
+        var quotaAffecting = new List<UserInvitation>();
+
         foreach (var invite in inDto.Invitations)
         {
             if ((invite.Type == EmployeeType.DocSpaceAdmin && !currentUser.IsOwner(tenant)) ||
@@ -336,12 +340,31 @@ public class UserController(
                 continue;
             }
 
-            var user = await userManagerWrapper.AddInvitedUserAsync(invite.Email, invite.Type, inDto.Culture);
-            var link = await commonLinkUtility.GetInvitationLinkAsync(user.Email, invite.Type, authContext.CurrentAccount.ID, inDto.Culture);
-            var shortenLink = await urlShortener.GetShortenLinkAsync(link);
+            if (invite.Type is EmployeeType.DocSpaceAdmin or EmployeeType.RoomAdmin or EmployeeType.Collaborator)
+            {
+                quotaAffecting.Add(invite);
+                continue;
+            }
 
-            await studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink, inDto.Culture, true);
-            await messageService.SendAsync(MessageAction.SendJoinInvite, MessageTarget.Create(user.Id), currentUser.DisplayUserName(displayUserSettingsHelper), user.Email);
+            await InviteAsync(invite);
+        }
+
+        if (quotaAffecting.Count != 0)
+        {
+            var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+            var quota = await tenantManager.GetTenantQuotaAsync(tenantId);
+            var maxCount = quota.GetFeature<CountPaidUserFeature>().Value;
+            var paidUsersCount = await countPaidUserStatistic.GetValueAsync();
+            
+            if (maxCount < paidUsersCount + quotaAffecting.Count)
+            {
+                throw new TenantQuotaException(string.Format(Resource.TariffsFeature_manager_exceeded, paidUsersCount + quotaAffecting.Count, maxCount));
+            }
+            
+            foreach (var invite in quotaAffecting)
+            {
+                await InviteAsync(invite);
+            }
         }
 
         var result = new List<EmployeeDto>();
@@ -354,6 +377,16 @@ public class UserController(
         }
 
         return result;
+
+        async Task InviteAsync(UserInvitation invite)
+        {
+            var user = await userManagerWrapper.AddInvitedUserAsync(invite.Email, invite.Type, inDto.Culture);
+            var link = await commonLinkUtility.GetInvitationLinkAsync(user.Email, invite.Type, authContext.CurrentAccount.ID, inDto.Culture);
+            var shortenLink = await urlShortener.GetShortenLinkAsync(link);
+
+            await studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink, inDto.Culture, true);
+            await messageService.SendAsync(MessageAction.SendJoinInvite, MessageTarget.Create(user.Id), currentUser.DisplayUserName(displayUserSettingsHelper), user.Email);
+        }
     }
 
     /// <summary>
