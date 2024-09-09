@@ -348,6 +348,11 @@ public class NotifyClient(WorkContext notifyContext,
 
             var recipient = await recipientsProvider.GetRecipientAsync(recepientId.ToString());
 
+            if (recipient == null)
+            {
+                continue;
+            }
+
             await client.SendNoticeAsync(
                 NotifyConstants.EventRoomRemoved,
                 folder.UniqID,
