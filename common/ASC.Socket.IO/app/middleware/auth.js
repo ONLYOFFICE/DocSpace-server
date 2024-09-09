@@ -87,7 +87,7 @@ module.exports = (socket, next) => {
     const getPortal = () => {
       return request({
         method: "get",
-        url: "/portal/id?fields=tenantId,tenantDomain",
+        url: "/portal?fields=tenantId,tenantDomain",
         headers,
         basePath,
       });
@@ -102,10 +102,10 @@ module.exports = (socket, next) => {
     }
 
     return Promise.all([getUser(), getPortal(), validateLink()])
-      .then(([user, portalId, { status, linkId } = { }]) => {
-        logger.info(`WS: save account info in sessionId='sess:${session.id}'`, { user, portalId });
+      .then(([user, portal, { status, linkId } = { }]) => {
+        logger.info(`WS: save account info in sessionId='sess:${session.id}'`, { user, portal });
         session.user = user;
-        session.portalId = portalId;
+        session.portal = portal;
         
         if (status === 0){
           session.linkId = linkId;
@@ -150,7 +150,7 @@ module.exports = (socket, next) => {
 
         logger.info(`WS: share key validation successful: key='${share}' sessionId='sess:${session.id}'`);
         session.anonymous = true;
-        session.portalId = tenantId;
+        session.portal = { tenantId };
         session.user = { id: linkId }
         session.save();
         next();

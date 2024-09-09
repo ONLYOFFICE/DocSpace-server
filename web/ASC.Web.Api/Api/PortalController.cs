@@ -86,27 +86,15 @@ public class PortalController(
     [HttpGet("")]
     public async Task<TenantDto> Get()
     {
-        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         var tenant = await tenantManager.GetCurrentTenantAsync();
-        return  mapper.Map<TenantDto>(tenant);
-    }
+        var result = mapper.Map<TenantDto>(tenant);
 
-    /// <summary>
-    /// Returns the current id portal.
-    /// </summary>
-    /// <short>
-    /// Get a id portal
-    /// </short>
-    /// <category>Settings</category>
-    /// <returns type="System.Int32, System">Current id portal</returns>
-    /// <path>api/2.0/portal/id</path>
-    /// <httpMethod>GET</httpMethod>
-    [AllowNotPayment]
-    [HttpGet("id")]
-    public async Task<int> GetId()
-    {
-        var tenant = await tenantManager.GetCurrentTenantAsync();
-        return tenant.Id;
+        if (!await permissionContext.CheckPermissionsAsync(SecurityConstants.EditPortalSettings))
+        {
+            result.PaymentId = null;
+        }
+
+        return result;
     }
 
     /// <summary>
