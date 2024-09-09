@@ -382,7 +382,7 @@ public class EmployeeFullDtoHelper(
         
         if (userInfo.CreatedBy.HasValue)
         {
-            result.CreatedBy = await GetAsync(await userManager.GetUsersAsync(userInfo.CreatedBy.Value));
+            result.CreatedBy = await GetAsync(await _userManager.GetUsersAsync(userInfo.CreatedBy.Value));
         }
 
         return result;
