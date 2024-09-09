@@ -92,6 +92,24 @@ public class PortalController(
     }
 
     /// <summary>
+    /// Returns the current id portal.
+    /// </summary>
+    /// <short>
+    /// Get a id portal
+    /// </short>
+    /// <category>Settings</category>
+    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.TenantDto, ASC.Web.Api">Current id portal</returns>
+    /// <path>api/2.0/portal/id</path>
+    /// <httpMethod>GET</httpMethod>
+    [AllowNotPayment]
+    [HttpGet("id")]
+    public async Task<int> GetId()
+    {
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        return tenant.Id;
+    }
+
+    /// <summary>
     /// Returns a user with the ID specified in the request from the current portal.
     /// </summary>
     /// <short>

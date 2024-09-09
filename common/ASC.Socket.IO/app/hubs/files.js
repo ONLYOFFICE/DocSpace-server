@@ -59,7 +59,7 @@ module.exports = (io) => {
       return;
     }
 
-    if (!session.portal) {
+    if (!session.portalId) {
       logger.error("invalid session: unknown portal");
       return;
     }
@@ -68,7 +68,7 @@ module.exports = (io) => {
       return socket.handshake.session?.user?.id;
     }
     const tenantId = () => {
-      return socket.handshake.session?.portal?.tenantId;
+      return socket.handshake.session?.portalId;
     }
     
     const linkId = () => {
@@ -110,7 +110,7 @@ module.exports = (io) => {
     socket.on("restore-backup", () => {
       const room = getRoom("backup-restore");
       const sess = socket.handshake.session;
-      const tenant = sess?.portal?.tenantId || "unknown";
+      const tenant = sess?.portalId || "unknown";
       const user = sess?.user?.id || "unknown";
       const sessId = sess?.id;
 
