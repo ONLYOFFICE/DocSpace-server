@@ -520,9 +520,9 @@ public abstract class VirtualRoomsController<T>(
     [HttpGet("covers")]
     public async IAsyncEnumerable<CoversResultDto> GetCovers()
     {
-        await foreach (var c in RoomLogoManager.GetCoversAsync())
+        foreach (var c in await RoomLogoManager.GetCoversAsync())
         {
-            yield return new CoversResultDto { Id = c.id, Data = c.data };
+            yield return new CoversResultDto { Id = c.Key, Data = c.Value };
         }
     }
 

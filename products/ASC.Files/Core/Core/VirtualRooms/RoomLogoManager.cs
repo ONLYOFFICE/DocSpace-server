@@ -51,7 +51,8 @@ public class RoomLogoManager(
     private const string LogosPath = $"{{0}}{LogosPathSplitter}{{1}}.png";
     private const string LogoModuleName = "room_logos";
     private const string TempDomainPath = "logos_temp";
-
+    private static readonly SemaphoreSlim _semaphore = new(1);
+    
     private static readonly (SizeName, Size) _originalLogoSize = (SizeName.Original, new Size(1280, 1280));
     private static readonly (SizeName, Size) _largeLogoSize = (SizeName.Large, new Size(96, 96));
     private static readonly (SizeName, Size) _mediumLogoSize = (SizeName.Medium, new Size(32, 32));
@@ -163,10 +164,14 @@ public class RoomLogoManager(
                 await SaveRoomAsync(daoFactory.GetFolderDao<T>(), room);
             }
 
-            string cover = null;
-            if (!string.IsNullOrEmpty(room.SettingsCover))
+            LogoCover cover = null;
+            if (!string.IsNullOrEmpty(room.SettingsCover) && (await GetCoversAsync()).TryGetValue(room.SettingsCover, out var fromDict))
             {
-                cover = (await GetCoversAsync().FirstOrDefaultAsync(r=> r.id == room.SettingsCover)).data;
+                cover = new LogoCover
+                {
+                    Id = room.SettingsCover,
+                    Data = fromDict
+                };
             }
             
             return new Logo
@@ -253,33 +258,35 @@ public class RoomLogoManager(
     }
     
     private static readonly ConcurrentDictionary<string, string> _covers = new();
-    public static async IAsyncEnumerable<(string id, string data)> GetCoversAsync()
+    public static async Task<ConcurrentDictionary<string, string>> GetCoversAsync()
     {
-        if (!_covers.IsEmpty)
+        try
         {
-            foreach (var c in _covers)
+            await _semaphore.WaitAsync();
+            if (_covers.IsEmpty)
             {
-                yield return (c.Key, c.Value);
+                var assembly = Assembly.GetExecutingAssembly();
+                var assemblyName = assembly.GetName().Name;
+                var coverNameSpace = $"{assemblyName}.Covers.";
+                foreach (var f in assembly.GetManifestResourceNames().Where(r => r.StartsWith(coverNameSpace)))
+                {
+                    var img = assembly.GetManifestResourceStream(f);
+                    if (img != null)
+                    {
+                        using var memoryStream = new MemoryStream();
+                        await img.CopyToAsync(memoryStream);
+                        var r = (Path.GetFileNameWithoutExtension(f).Substring(coverNameSpace.Length), Encoding.UTF8.GetString(memoryStream.ToArray()));
+                        _covers.TryAdd(r.Item1, r.Item2);
+                    }
+                }
             }
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
 
-            yield break;
-        }
-        
-        var assembly = Assembly.GetExecutingAssembly();
-        var assemblyName = assembly.GetName().Name;
-        var coverNameSpace = $"{assemblyName}.Covers.";
-        foreach (var f in assembly.GetManifestResourceNames().Where(r=> r.StartsWith(coverNameSpace)))
-        {          
-            var img = assembly.GetManifestResourceStream(f);
-            if (img != null)
-            {
-                using var memoryStream = new MemoryStream();
-                await img.CopyToAsync(memoryStream);
-                var r = (Path.GetFileNameWithoutExtension(f).Substring(coverNameSpace.Length), Encoding.UTF8.GetString(memoryStream.ToArray()));
-                _covers.TryAdd(r.Item1, r.Item2);
-                yield return r;
-            }
-        }
+        return _covers;
     }
     
     public async Task<Folder<T>> ChangeCoverAsync<T>(T id, string color, string cover)
@@ -344,13 +351,18 @@ public class RoomLogoManager(
         var coverChanged = false;
         if (!string.IsNullOrEmpty(cover))
         {
-            var covers = await GetCoversAsync().ToDictionaryAsync(r => r.Item1, r=> r.Item2);
+            var covers = await GetCoversAsync();
             if (!covers.ContainsKey(cover))
             {
                 throw new AggregateException(nameof(cover));
             }
 
             room.SettingsCover = cover;
+            coverChanged = true;
+        }
+        else if(!string.IsNullOrEmpty(room.SettingsCover))
+        {
+            room.SettingsCover = null;
             coverChanged = true;
         }
 
