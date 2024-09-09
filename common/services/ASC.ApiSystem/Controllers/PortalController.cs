@@ -474,7 +474,6 @@ public class PortalController(
 
     [HttpPost("signin")]
     [AllowCrossSiteJson]
-    [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
     public async Task<IActionResult> SignInToPortalAsync(TenantModel model)
     {
         try
