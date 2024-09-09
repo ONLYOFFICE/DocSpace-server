@@ -47,9 +47,7 @@ public class FileSharingAceHelper(
     SocketManager socketManager,
     FilesLinkUtility filesLinkUtility,
     CountPaidUserStatistic paidUserStatistic,
-    IQuotaService quotaService,
-    TenantManager tenantManager,
-    CountPaidUserChecker countPaidUserChecker)
+    TenantManager tenantManager)
 {
     private const int MaxInvitationLinks = 1;
     private const int MaxAdditionalExternalLinks = 5;
@@ -474,12 +472,12 @@ public class FileSharingAceHelper(
         }
         
         var paidUsersCount = await paidUserStatistic.GetValueAsync();
-        var quota = await quotaService.GetTenantQuotaAsync(tenantId);
+        var quota = await tenantManager.GetTenantQuotaAsync(tenantId);
 
         var maxCount = quota.GetFeature<CountPaidUserFeature>().Value;
         if (maxCount < paidUsersCount + quotaAffecting.Count)
         {
-            warning = countPaidUserChecker.GetExceptionMessage(paidUsersCount);
+            warning = string.Format(Resource.TariffsFeature_manager_exceeded, paidUsersCount + quotaAffecting.Count, maxCount);
             return (result, warning);
         }
 

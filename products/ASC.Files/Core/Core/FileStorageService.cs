@@ -2817,7 +2817,13 @@ public class FileStorageService //: IFileStorageService
         return link;
     }
 
-    public async Task<string> SetAceObjectAsync<T>(AceCollection<T> aceCollection, bool notify, string culture = null, bool socket = true, bool beforeOwnerChange = false)
+    public async Task<string> SetAceObjectAsync<T>(
+        AceCollection<T> aceCollection,
+        bool notify,
+        string culture = null,
+        bool socket = true,
+        bool beforeOwnerChange = false,
+        bool quotaSensitive = false)
     {
         var fileDao = daoFactory.GetFileDao<T>();
         var folderDao = daoFactory.GetFolderDao<T>();
@@ -2839,7 +2845,7 @@ public class FileStorageService //: IFileStorageService
         {
             try
             {
-                var result = await fileSharingAceHelper.SetAceObjectAsync(aceCollection.Aces, entry, notify, aceCollection.Message, culture, socket, beforeOwnerChange);
+                var result = await fileSharingAceHelper.SetAceObjectAsync(aceCollection.Aces, entry, notify, aceCollection.Message, culture, socket, beforeOwnerChange, quotaSensitive);
                 warning ??= result.Warning;
 
                 if (!result.Changed)

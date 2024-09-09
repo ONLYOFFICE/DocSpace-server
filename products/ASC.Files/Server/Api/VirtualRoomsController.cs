@@ -341,7 +341,7 @@ public abstract class VirtualRoomsController<T>(
             Message = inDto.Message
         };
 
-        result.Warning = await _fileStorageService.SetAceObjectAsync(aceCollection, inDto.Notify, inDto.Culture);
+        result.Warning = await _fileStorageService.SetAceObjectAsync(aceCollection, inDto.Notify, inDto.Culture, quotaSensitive: true);
         result.Members = await _fileStorageService.GetRoomSharedInfoAsync(id, inDto.Invitations.Select(s => s.Id))
             .SelectAwait(async a => await fileShareDtoHelper.Get(a))
             .ToListAsync();
