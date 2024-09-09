@@ -553,7 +553,7 @@ internal abstract class SecurityBaseDao<T>(
     }
 
     public async IAsyncEnumerable<UserInfoWithShared> GetUsersWithSharedAsync(FileEntry<T> entry, string text, EmployeeStatus? employeeStatus, EmployeeActivationStatus? activationStatus, 
-        bool excludeShared, int offset, int count)
+        bool excludeShared, string separator, int offset, int count)
     {
         if (entry == null || count == 0)
         {
@@ -564,7 +564,7 @@ internal abstract class SecurityBaseDao<T>(
         var mappedId = await daoFactory.GetMapping<T>().MappingIdAsync(entry.Id);
         
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        var q1 = GetUsersWithSharedQuery(tenantId, mappedId, entry, text, employeeStatus, activationStatus, excludeShared, filesDbContext);
+        var q1 = GetUsersWithSharedQuery(tenantId, mappedId, entry, text, employeeStatus, activationStatus, excludeShared, filesDbContext, separator);
 
         if (offset > 0)
         {
@@ -583,7 +583,7 @@ internal abstract class SecurityBaseDao<T>(
     }
 
     public async Task<int> GetUsersWithSharedCountAsync(FileEntry<T> entry, string text, EmployeeStatus? employeeStatus, EmployeeActivationStatus? activationStatus,
-        bool excludeShared)
+        bool excludeShared, string separator)
     {
         if (entry == null)
         {
@@ -594,13 +594,13 @@ internal abstract class SecurityBaseDao<T>(
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var mappedId = await daoFactory.GetMapping<T>().MappingIdAsync(entry.Id);
         
-        var q1 = GetUsersWithSharedQuery(tenantId, mappedId, entry, text, employeeStatus, activationStatus, excludeShared, filesDbContext);
+        var q1 = GetUsersWithSharedQuery(tenantId, mappedId, entry, text, employeeStatus, activationStatus, excludeShared, filesDbContext, separator);
 
         return await q1.CountAsync();
     }
 
     private static IQueryable<UserWithShared> GetUsersWithSharedQuery(int tenantId, string entryId, FileEntry entry, string text, EmployeeStatus? employeeStatus, 
-        EmployeeActivationStatus? activationStatus, bool excludeShared, FilesDbContext filesDbContext)
+        EmployeeActivationStatus? activationStatus, bool excludeShared, FilesDbContext filesDbContext, string separator)
     {
         var q = filesDbContext.Users.AsNoTracking().Where(u => u.TenantId == tenantId && !u.Removed);
 
@@ -614,13 +614,7 @@ internal abstract class SecurityBaseDao<T>(
             q = q.Where(u => u.ActivationStatus == activationStatus.Value);
         }
 
-        if (!string.IsNullOrEmpty(text))
-        {
-            text = GetSearchText(text);
-            
-            var splittedText = text.Split(" ");
-            q = splittedText.Aggregate(q, (current, t) => current.Where(u => u.FirstName.ToLower().Contains(t) || u.LastName.ToLower().Contains(t) || u.Email.ToLower().Contains(t)));
-        }
+        q = UserQueryHelper.FilterByText(q, text, separator);
 
         var q1 = excludeShared
             ? q.Where(u => !filesDbContext.Security.Any(s => s.TenantId == tenantId && s.EntryType == entry.FileEntryType && s.EntryId == entryId && s.Subject == u.Id) &&

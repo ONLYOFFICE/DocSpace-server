@@ -92,7 +92,8 @@ public class FileStorageService //: IFileStorageService
     FileChecker fileChecker,
     CommonLinkUtility commonLinkUtility,
     ShortUrl shortUrl,
-    IDbContextFactory<UrlShortenerDbContext> dbContextFactory)
+    IDbContextFactory<UrlShortenerDbContext> dbContextFactory,
+    PasswordSettingsManager passwordSettingsManager)
 {
     private readonly ILogger _logger = optionMonitor.CreateLogger("ASC.Files");
 
@@ -557,7 +558,7 @@ public class FileStorageService //: IFileStorageService
 
         if (maxTotalSize < quota)
         {
-            throw new InvalidOperationException(Resource.QuotaGreaterPortalError);
+            throw new InvalidOperationException(Resource.RoomQuotaGreaterPortalError);
         }
         try
         {
@@ -609,7 +610,7 @@ public class FileStorageService //: IFileStorageService
 
         if (maxTotalSize < quota)
         {
-            throw new InvalidOperationException(Resource.QuotaGreaterPortalError);
+            throw new InvalidOperationException(Resource.RoomQuotaGreaterPortalError);
         }
         if (coreBaseSettings.Standalone)
         {
@@ -618,7 +619,7 @@ public class FileStorageService //: IFileStorageService
             {
                 if (tenantQuotaSetting.Quota < quota)
                 {
-                    throw new InvalidOperationException(Resource.QuotaGreaterPortalError);
+                    throw new InvalidOperationException(Resource.RoomQuotaGreaterPortalError);
                 }
             }
         }
@@ -667,11 +668,22 @@ public class FileStorageService //: IFileStorageService
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
         var tenantSpaceQuota = await tenantManager.GetTenantQuotaAsync(tenantId);
-        var maxTotalSize = tenantSpaceQuota?.MaxTotalSize ?? -1;
+        var maxTotalSize = tenantSpaceQuota != null ? tenantSpaceQuota.MaxTotalSize : -1;
 
         if (updateData.Quota != null && maxTotalSize < updateData.Quota)
         {
-            throw new InvalidOperationException(Resource.QuotaGreaterPortalError);
+            throw new InvalidOperationException(Resource.RoomQuotaGreaterPortalError);
+        }
+        if (coreBaseSettings.Standalone)
+        {
+            var tenantQuotaSetting = await settingsManager.LoadAsync<TenantQuotaSettings>();
+            if (tenantQuotaSetting.EnableQuota)
+            {
+                if (tenantQuotaSetting.Quota < updateData.Quota)
+                {
+                    throw new InvalidOperationException(Resource.RoomQuotaGreaterPortalError);
+                }
+            }
         }
 
         var tagDao = daoFactory.GetTagDao<T>();
@@ -708,7 +720,8 @@ public class FileStorageService //: IFileStorageService
         if (titleChanged || quotaChanged)
         {
             var oldTitle = folder.Title;
-            
+            var oldQuota = folder.SettingsQuota;
+
             var newFolderId = await folderDao.UpdateFolderAsync(
                  folder,
                  titleChanged ? updateData.Title : folder.Title,
@@ -722,6 +735,22 @@ public class FileStorageService //: IFileStorageService
                 _ = DocSpaceHelper.IsRoom(folder.FolderType) ? 
                     filesMessageService.SendAsync(MessageAction.RoomRenamed, oldTitle, folder, folder.Title) : 
                     filesMessageService.SendAsync(MessageAction.FolderRenamed, folder, folder.Title);
+            }
+            if (DocSpaceHelper.IsRoom(folder.FolderType) && oldQuota != updateData.Quota && updateData.Quota != null)
+            {
+                if (updateData.Quota >= 0)
+                {
+                    _ = filesMessageService.SendAsync(MessageAction.CustomQuotaPerRoomChanged, updateData.Quota.ToString(), [folder.Title]);
+                }
+                else if(updateData.Quota == -1)
+                {
+                    _ = filesMessageService.SendAsync(MessageAction.CustomQuotaPerRoomDisabled, string.Join(", ", [folder.Title]));
+                }
+                else
+                {
+                    var quotaRoomSettings = await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
+                    _ = filesMessageService.SendAsync(MessageAction.CustomQuotaPerRoomDefault, quotaRoomSettings.DefaultQuota.ToString(), [folder.Title]);
+                }
             }
         }
         
@@ -3188,7 +3217,8 @@ public class FileStorageService //: IFileStorageService
     private async Task<List<Guid>> WhoCanRead<T>(FileEntry<T> entry)
     {
         var whoCanReadTask = (await fileSecurity.WhoCanReadAsync(entry, true)).ToList();
-        whoCanReadTask.AddRange(await userManager.GetUsers(true, EmployeeStatus.Active, null, null, null, null, null, null, null, false, null, true, 0, 0)
+        whoCanReadTask.AddRange(await userManager.GetUsers(true, EmployeeStatus.Active, null, null, null, null, 
+                null, null, null, null, false, null, true, 0, 0)
             .Select(r=> r.Id)
             .ToListAsync());
         
@@ -3733,6 +3763,9 @@ public class FileStorageService //: IFileStorageService
 
         if (!string.IsNullOrEmpty(password))
         {
+            var settings = await settingsManager.LoadAsync<PasswordSettings>();
+            passwordSettingsManager.CheckPassword(password, settings);
+            
             options.Password = await externalShare.CreatePasswordKeyAsync(password);
         }
 

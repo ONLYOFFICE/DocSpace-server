@@ -52,10 +52,10 @@ public abstract class ActionInterpreter
         var initiatorId = @event.UserId ?? ASC.Core.Configuration.Constants.Guest.ID;
         string initiatorName = null;
 
-        if (!string.IsNullOrEmpty(data.InitiatorName))
+        if (!string.IsNullOrEmpty(data?.InitiatorName))
         {
             initiatorName = initiatorId == ASC.Core.Configuration.Constants.Guest.ID && data.InitiatorName != AuditReportResource.GuestAccount 
-                ? $"{data.InitiatorName} ({AuditReportResource.GuestAccount})" 
+                ? $"{data.InitiatorName} ({FilesCommonResource.ExternalUser})" 
                 : data.InitiatorName;
         }
         

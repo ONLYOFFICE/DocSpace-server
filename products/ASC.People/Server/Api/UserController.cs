@@ -1583,7 +1583,7 @@ public class UserController(
     {
         if (!inDto.Quota.TryGetInt64(out var quota))
         {
-            throw new Exception(Resource.QuotaGreaterPortalError);
+            throw new Exception(Resource.UserQuotaGreaterPortalError);
         }
 
         await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
@@ -1599,7 +1599,7 @@ public class UserController(
         
         if (maxTotalSize < quota)
         {
-            throw new Exception(Resource.QuotaGreaterPortalError);
+            throw new Exception(Resource.UserQuotaGreaterPortalError);
         }
         if (coreBaseSettings.Standalone)
         {
@@ -1608,7 +1608,7 @@ public class UserController(
             {
                 if (tenantQuotaSetting.Quota < quota)
                 {
-                    throw new Exception(Resource.QuotaGreaterPortalError);
+                    throw new Exception(Resource.UserQuotaGreaterPortalError);
                 }
             }
         }
@@ -1810,17 +1810,21 @@ public class UserController(
             {
                     Constants.GroupAdmin.ID
             };
+            
             var products = webItemManager.GetItemsAll().Where(i => i is IProduct || i.ID == WebItemManager.MailProductID);
             adminGroups.AddRange(products.Select(r => r.ID));
 
             includeGroups.Add(adminGroups);
         }
 
+        var filterValue = _apiContext.FilterValue;
+        var filterSeparator = _apiContext.FilterSeparator;
+
         var totalCountTask = _userManager.GetUsersCountAsync(isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, quotaFilter,
-            _apiContext.FilterValue, withoutGroup ?? false);
+            filterValue, filterSeparator, withoutGroup ?? false);
 
         var users = _userManager.GetUsers(isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, quotaFilter,
-            _apiContext.FilterValue, withoutGroup ?? false, _apiContext.SortBy, !_apiContext.SortDescending, _apiContext.Count, _apiContext.StartIndex);
+            filterValue, filterSeparator, withoutGroup ?? false, _apiContext.SortBy, !_apiContext.SortDescending, _apiContext.Count, _apiContext.StartIndex);
 
         var counter = 0;
 
@@ -1955,15 +1959,17 @@ public class UserControllerAdditional<T>(EmployeeFullDtoHelper employeeFullDtoHe
         
         var offset = Convert.ToInt32(apiContext.StartIndex);
         var count = Convert.ToInt32(apiContext.Count);
+        var filterValue = apiContext.FilterValue;
+        var filterSeparator = apiContext.FilterSeparator;
 
         var securityDao = daoFactory.GetSecurityDao<T>();
 
-        var totalUsers = await securityDao.GetUsersWithSharedCountAsync(room, apiContext.FilterValue, employeeStatus, activationStatus, excludeShared ?? false);
+        var totalUsers = await securityDao.GetUsersWithSharedCountAsync(room, filterValue, employeeStatus, activationStatus, excludeShared ?? false, filterSeparator);
 
         apiContext.SetCount(Math.Min(Math.Max(totalUsers - offset, 0), count)).SetTotalCount(totalUsers);
 
-        await foreach (var u in securityDao.GetUsersWithSharedAsync(room, apiContext.FilterValue, employeeStatus, activationStatus, excludeShared ?? false, offset, 
-                           count))
+        await foreach (var u in securityDao.GetUsersWithSharedAsync(room, filterValue, employeeStatus, activationStatus, excludeShared ?? false, filterSeparator, 
+                           offset, count))
         {
             yield return await employeeFullDtoHelper.GetFullAsync(u.UserInfo, u.Shared);
         }
