@@ -496,7 +496,10 @@ public class PortalController(
                 {
                     var error = await GetRecaptchaError(model, clientIP, sw);
 
-                    return StatusCode(StatusCodes.Status401Unauthorized, error);
+                    if (error != null)
+                    {
+                        return StatusCode(StatusCodes.Status401Unauthorized, error);
+                    }
                 }
             }
 
