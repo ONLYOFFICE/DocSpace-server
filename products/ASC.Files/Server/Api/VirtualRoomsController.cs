@@ -68,7 +68,7 @@ public class VirtualRoomsInternalController(GlobalFolderHelper globalFolderHelpe
     [HttpPost("")]
     public async Task<FolderDto<int>> CreateRoomAsync(CreateRoomRequestDto inDto)
     {
-        var room = await _fileStorageService.CreateRoomAsync(inDto.Title, inDto.RoomType, inDto.Private, inDto.Indexing, inDto.Share, inDto.Quota);
+        var room = await _fileStorageService.CreateRoomAsync(inDto.Title, inDto.RoomType, inDto.Private, inDto.Indexing, inDto.Share, inDto.Quota, inDto.Color, inDto.Cover);
 
         return await _folderDtoHelper.GetAsync(room);
     }
@@ -116,7 +116,7 @@ public class VirtualRoomsThirdPartyController(GlobalFolderHelper globalFolderHel
     [HttpPost("thirdparty/{id}")]
     public async Task<FolderDto<string>> CreateRoomAsync(string id, CreateThirdPartyRoomRequestDto inDto)
     {
-        var room = await _fileStorageService.CreateThirdPartyRoomAsync(inDto.Title, inDto.RoomType, id, inDto.Private, inDto.Indexing, inDto.CreateAsNewFolder);
+        var room = await _fileStorageService.CreateThirdPartyRoomAsync(inDto.Title, inDto.RoomType, id, inDto.Private, inDto.Indexing, inDto.CreateAsNewFolder, inDto.Color, inDto.Cover);
 
         return await _folderDtoHelper.GetAsync(room);
     }

@@ -67,4 +67,8 @@ public class CreateRoomRequestDto
     public long Quota { get; set; }
     
     public bool Indexing { get; set; }
+    
+    public string Color { get; set; }
+    
+    public string Cover { get; set; }
 }

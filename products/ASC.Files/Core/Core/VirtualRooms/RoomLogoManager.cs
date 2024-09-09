@@ -297,30 +297,9 @@ public class RoomLogoManager(
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
         }
 
-        var colorChanged = false;
-        if (!string.IsNullOrEmpty(color))
-        {
-            if (!Color.TryParse(color, out _))
-            {
-                throw new AggregateException(nameof(color));
-            }
-            
-            room.SettingsColor = color;
-            colorChanged = true;
-        }
-        
-        var coverChanged = false;
-        if (!string.IsNullOrEmpty(cover))
-        {
-            var covers = await GetCoversAsync().ToDictionaryAsync(r => r.Item1, r=> r.Item2);
-            if (!covers.ContainsKey(cover))
-            {
-                throw new AggregateException(nameof(cover));
-            }
+        var colorChanged = ColorChanged(color, room);
 
-            room.SettingsCover = cover;
-            coverChanged = true;
-        }
+        var coverChanged = await CoverChanged(cover, room);
 
         if (colorChanged || coverChanged)
         {
@@ -342,7 +321,42 @@ public class RoomLogoManager(
 
         return room;
     }
-    
+
+    public static bool ColorChanged<T>(string color, Folder<T> room)
+    {
+        var colorChanged = false;
+        if (!string.IsNullOrEmpty(color))
+        {
+            if (!Color.TryParse(color, out _))
+            {
+                throw new AggregateException(nameof(color));
+            }
+            
+            room.SettingsColor = color;
+            colorChanged = true;
+        }
+
+        return colorChanged;
+    }
+
+    public static async Task<bool> CoverChanged<T>(string cover, Folder<T> room)
+    {
+        var coverChanged = false;
+        if (!string.IsNullOrEmpty(cover))
+        {
+            var covers = await GetCoversAsync().ToDictionaryAsync(r => r.Item1, r=> r.Item2);
+            if (!covers.ContainsKey(cover))
+            {
+                throw new AggregateException(nameof(cover));
+            }
+
+            room.SettingsCover = cover;
+            coverChanged = true;
+        }
+
+        return coverChanged;
+    }
+
     internal string GetRandomColour()
     {
         var rand = new Random();
