@@ -115,6 +115,13 @@ public class FileSharingAceHelper(
                     : EventType.Update 
                 : EventType.Create;
 
+            if (!string.IsNullOrEmpty(w.Email))
+            {
+                w.SubjectType = SubjectType.User;
+                preprocessed.Add(new ProcessedItem<T>(eventType, existedShare, w));
+                continue;
+            }
+
             if ((existedShare == null && w.SubjectType == default) || w.SubjectType == SubjectType.User)
             {
                 var currentUser = await userManager.GetUsersAsync(w.Id);
@@ -126,7 +133,7 @@ public class FileSharingAceHelper(
                 if (!currentUser.Equals(Constants.LostUser))
                 {
                     w.SubjectType = SubjectType.User;
-                    preprocessed.Add(new ProcessedUserItem<T>(w, eventType, existedShare, currentUser));
+                    preprocessed.Add(new ProcessedUserItem<T>(eventType, existedShare, w, currentUser));
                 }
             }
             
@@ -153,7 +160,7 @@ public class FileSharingAceHelper(
         var usersWithoutRight = new List<Guid>();
 
         var (userItems, warning) = await ProcessUserAcesAsync(entry,
-            preprocessed.Where(x => x.Ace.SubjectType == SubjectType.User).Cast<ProcessedUserItem<T>>(),
+            preprocessed.Where(x => x.Ace.SubjectType == SubjectType.User),
             culture,
             socket,
             notify,
@@ -388,7 +395,7 @@ public class FileSharingAceHelper(
 
     private async Task<(List<ProcessedItem<T>> Items, string Warning)> ProcessUserAcesAsync<T>(
         FileEntry<T> entry,
-        IEnumerable<ProcessedUserItem<T>> preprocessedAces,
+        IEnumerable<ProcessedItem<T>> preprocessedAces,
         string culture,
         bool socket,
         bool notify,
@@ -404,13 +411,13 @@ public class FileSharingAceHelper(
         var result = new List<ProcessedItem<T>>();
 
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
-        var quotaAffecting = new List<ProcessedUserItem<T>>();
+        var quotaAffecting = new List<ProcessedItem<T>>();
         var roomUrl = pathProvider.GetRoomsUrl(room.Id.ToString());
         string warning = null;
 
         foreach (var preprocessedAce in preprocessedAces)
         {
-            var (ace, eventType, _, user) = preprocessedAce;
+            var (eventType, _, ace) = preprocessedAce;
 
             if (ace.SubjectType != SubjectType.User)
             {
@@ -443,13 +450,13 @@ public class FileSharingAceHelper(
                 continue;
             }
             
-            if (quotaSensitive && isPaidAccess && !await userManager.IsPaidUserAsync(user.Id))
+            if (quotaSensitive && isPaidAccess && !await userManager.IsPaidUserAsync(ace.Id))
             {
                 quotaAffecting.Add(preprocessedAce);
                 continue;
             }
             
-            await fileSecurity.ShareAsync(room.Id, FileEntryType.Folder, user.Id, ace.Access);
+            await fileSecurity.ShareAsync(room.Id, FileEntryType.Folder, ace.Id, ace.Access);
 
             if (entry.FileEntryType == FileEntryType.File)
             {
@@ -478,7 +485,7 @@ public class FileSharingAceHelper(
 
         foreach (var preprocessedAce in quotaAffecting)
         {
-            var (ace, eventType, _, user) = preprocessedAce;
+            var (eventType, _, ace) = preprocessedAce;
             var userType = FileSecurity.GetTypeByShare(ace.Access);
             
             if (!string.IsNullOrEmpty(ace.Email))
@@ -493,7 +500,12 @@ public class FileSharingAceHelper(
 
             try
             {
-                await userManagerWrapper.UpdateUserTypeAsync(user, userType);
+                if (preprocessedAce is not ProcessedUserItem<T> userItem)
+                {
+                    continue;
+                }
+                
+                await userManagerWrapper.UpdateUserTypeAsync(userItem.User, userType);
             }
             catch (TenantQuotaException e)
             {
@@ -506,7 +518,7 @@ public class FileSharingAceHelper(
                 continue;
             }
             
-            await fileSecurity.ShareAsync(room.Id, FileEntryType.Folder, user.Id, ace.Access);
+            await fileSecurity.ShareAsync(room.Id, FileEntryType.Folder, ace.Id, ace.Access);
             
             if (entry.FileEntryType == FileEntryType.File)
             {
@@ -1152,5 +1164,5 @@ public enum EventType
 
 public record AceProcessingResult<T>(bool Changed, string Warning, IEnumerable<ProcessedItem<T>> ProcessedItems);
 public record ProcessedItem<T>(EventType EventType, FileShareRecord<T> Record, AceWrapper Ace);
-public record ProcessedUserItem<T>(AceWrapper Ace, EventType EventType, FileShareRecord<T> Record, UserInfo User) 
+public record ProcessedUserItem<T>(EventType EventType, FileShareRecord<T> Record, AceWrapper Ace, UserInfo User) 
     : ProcessedItem<T>(EventType, Record, Ace);
