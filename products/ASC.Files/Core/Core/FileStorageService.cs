@@ -2839,7 +2839,7 @@ public class FileStorageService //: IFileStorageService
         {
             try
             {
-                var result = await fileSharingAceHelper.SetAceObjectAsync(aceCollection.Aces, entry, notify, aceCollection.Message, aceCollection.AdvancedSettings, culture, socket, beforeOwnerChange);
+                var result = await fileSharingAceHelper.SetAceObjectAsync(aceCollection.Aces, entry, notify, aceCollection.Message, culture, socket, beforeOwnerChange);
                 warning ??= result.Warning;
 
                 if (!result.Changed)
@@ -3858,9 +3858,7 @@ public class FileStorageService //: IFileStorageService
                 throw GenerateException(new InvalidOperationException(result.Warning));
             }
 
-            var processedItem = result.ProcessedItems[0];
-            
-            return !result.Changed ? processedItem : result.ProcessedItems[0];
+            return result.ProcessedItems.FirstOrDefault();
         }
         catch (Exception e)
         {

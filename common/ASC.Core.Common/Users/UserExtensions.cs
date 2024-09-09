@@ -96,6 +96,12 @@ public static class UserExtensions
     {
         return await userManager.IsUserAsync(ui) && ui.Id == Constants.OutsideUser.Id;
     }
+    
+    public static async Task<bool> IsPaidUserAsync(this UserManager userManager, Guid id)
+    {
+        var userType = await userManager.GetUserTypeAsync(id);
+        return userType != EmployeeType.User;
+    }
 
     public static bool IsLDAP(this UserInfo ui)
     {
