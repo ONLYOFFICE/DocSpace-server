@@ -87,14 +87,13 @@ public class PortalController(
     public async Task<TenantDto> Get()
     {
         var tenant = await tenantManager.GetCurrentTenantAsync();
-        var result = mapper.Map<TenantDto>(tenant);
 
         if (!await permissionContext.CheckPermissionsAsync(SecurityConstants.EditPortalSettings))
         {
-            result.PaymentId = null;
+            return new TenantDto { TenantId = tenant.Id };
         }
 
-        return result;
+        return mapper.Map<TenantDto>(tenant);
     }
 
     /// <summary>
