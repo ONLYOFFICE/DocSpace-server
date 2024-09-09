@@ -98,7 +98,7 @@ public class PortalController(
     /// Get a id portal
     /// </short>
     /// <category>Settings</category>
-    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.TenantDto, ASC.Web.Api">Current id portal</returns>
+    /// <returns type="System.Int32, System">Current id portal</returns>
     /// <path>api/2.0/portal/id</path>
     /// <httpMethod>GET</httpMethod>
     [AllowNotPayment]
