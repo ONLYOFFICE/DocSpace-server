@@ -465,7 +465,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
         }
 
         return (fileUtility.CanImageView(file.Title) || fileUtility.CanMediaView(file.Title)) &&
-               file.ShareRecord is { IsLink: true, Share: not FileShare.Restrict };
+               file.ShareRecord is { IsLink: true, Share: not FileShare.Restrict } or { IsLink: false, Share: FileShare.Read, SubjectType: SubjectType.User  };
     }
 
     private async Task TryMarkAsRecentByLink<T>(File<T> file)

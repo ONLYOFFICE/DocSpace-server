@@ -1474,16 +1474,19 @@ public class FileSecurity(IDaoFactory daoFactory,
             case FilesSecurityActions.Download:
                 if (e.Access != FileShare.Restrict && ace?.Options is not { DenyDownload: true })
                 {
-                    if (file == null)
+                    if (e.Access == FileShare.Read)
                     {
-                        return true;
-                    }
+                        if (file == null)
+                        {
+                            return true;
+                        }
 
-                    var parentFolders = await GetFileParentFolders(file.ParentId);
-                    var room = parentFolders.FirstOrDefault(r => DocSpaceHelper.IsRoom(r.FolderType));
-                    if (room is { SettingsDenyDownload: true })
-                    {
-                        return false;
+                        var parentFolders = await GetFileParentFolders(file.ParentId);
+                        var room = parentFolders.FirstOrDefault(r => DocSpaceHelper.IsRoom(r.FolderType));
+                        if (room is { SettingsDenyDownload: true })
+                        {
+                            return false;
+                        }
                     }
 
                     return true;
