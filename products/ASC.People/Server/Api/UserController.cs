@@ -29,6 +29,8 @@ using ASC.AuditTrail.Types;
 using ASC.Core.Common.Quota.Features;
 using ASC.Core.Security.Authentication;
 
+using Tweetinvi.Core.Extensions;
+
 namespace ASC.People.Api;
 
 public class UserController(
@@ -321,17 +323,43 @@ public class UserController(
     /// <collection>list</collection>
     [HttpPost("invite")]
     [EnableRateLimiting(RateLimiterPolicy.EmailInvitationApi)]
-    public async Task<List<EmployeeDto>> InviteUsersAsync(InviteUsersRequestDto inDto)
+    public async Task<InviteUsersDto> InviteUsersAsync(InviteUsersRequestDto inDto)
     {
         ArgumentNullException.ThrowIfNull(inDto);
         ArgumentNullException.ThrowIfNull(inDto.Invitations);
 
         var currentUser = await _userManager.GetUsersAsync(authContext.CurrentAccount.ID);
-
         var tenant = await tenantManager.GetCurrentTenantAsync();
 
-        var quotaAffecting = new List<UserInvitation>();
+        var quotaIncreaseBy = 0;
+        
+        inDto.Invitations.ForEach(x =>
+        {
+            if (x.Type is EmployeeType.DocSpaceAdmin or EmployeeType.RoomAdmin or EmployeeType.Collaborator)
+            {
+                quotaIncreaseBy++;
+            }
+        });
 
+        if (quotaIncreaseBy > 0)
+        {
+            var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+            var quota = await tenantManager.GetTenantQuotaAsync(tenantId);
+            var maxCount = quota.GetFeature<CountPaidUserFeature>().Value;
+            var currentCount = await countPaidUserStatistic.GetValueAsync();
+            
+            var expectedQuotaValue = currentCount + quotaIncreaseBy;
+            
+            if (maxCount < expectedQuotaValue)
+            {
+                return new InviteUsersDto
+                {
+                    Users = [],
+                    OverflowedQuotaValue = expectedQuotaValue
+                };
+            }
+        }
+        
         foreach (var invite in inDto.Invitations)
         {
             if ((invite.Type == EmployeeType.DocSpaceAdmin && !currentUser.IsOwner(tenant)) ||
@@ -339,47 +367,7 @@ public class UserController(
             {
                 continue;
             }
-
-            if (invite.Type is EmployeeType.DocSpaceAdmin or EmployeeType.RoomAdmin or EmployeeType.Collaborator)
-            {
-                quotaAffecting.Add(invite);
-                continue;
-            }
-
-            await InviteAsync(invite);
-        }
-
-        if (quotaAffecting.Count != 0)
-        {
-            var tenantId = await tenantManager.GetCurrentTenantIdAsync();
-            var quota = await tenantManager.GetTenantQuotaAsync(tenantId);
-            var maxCount = quota.GetFeature<CountPaidUserFeature>().Value;
-            var paidUsersCount = await countPaidUserStatistic.GetValueAsync();
             
-            if (maxCount < paidUsersCount + quotaAffecting.Count)
-            {
-                throw new TenantQuotaException(string.Format(Resource.TariffsFeature_manager_exceeded, paidUsersCount + quotaAffecting.Count, maxCount));
-            }
-            
-            foreach (var invite in quotaAffecting)
-            {
-                await InviteAsync(invite);
-            }
-        }
-
-        var result = new List<EmployeeDto>();
-
-        var users = (await _userManager.GetUsersAsync()).Where(u => u.ActivationStatus == EmployeeActivationStatus.Pending);
-
-        foreach (var user in users)
-        {
-            result.Add(await employeeDtoHelper.GetAsync(user));
-        }
-
-        return result;
-
-        async Task InviteAsync(UserInvitation invite)
-        {
             var user = await userManagerWrapper.AddInvitedUserAsync(invite.Email, invite.Type, inDto.Culture);
             var link = await commonLinkUtility.GetInvitationLinkAsync(user.Email, invite.Type, authContext.CurrentAccount.ID, inDto.Culture);
             var shortenLink = await urlShortener.GetShortenLinkAsync(link);
@@ -387,6 +375,18 @@ public class UserController(
             await studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink, inDto.Culture, true);
             await messageService.SendAsync(MessageAction.SendJoinInvite, MessageTarget.Create(user.Id), currentUser.DisplayUserName(displayUserSettingsHelper), user.Email);
         }
+
+        var result = new List<EmployeeDto>();
+
+        var users = (await _userManager.GetUsersAsync())
+            .Where(u => u.ActivationStatus == EmployeeActivationStatus.Pending);
+
+        foreach (var user in users)
+        {
+            result.Add(await employeeDtoHelper.GetAsync(user));
+        }
+
+        return new InviteUsersDto { Users = result };
     }
 
     /// <summary>

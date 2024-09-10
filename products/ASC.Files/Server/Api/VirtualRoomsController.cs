@@ -324,11 +324,11 @@ public abstract class VirtualRoomsController<T>(
     {
         ArgumentNullException.ThrowIfNull(inDto);
 
-        var result = new RoomSecurityDto();
+        var responseDto = new RoomSecurityDto();
 
         if (inDto.Invitations == null || !inDto.Invitations.Any())
         {
-            return result;
+            return responseDto;
         }
 
         var wrappers = mapper.Map<IEnumerable<RoomInvitation>, List<AceWrapper>>(inDto.Invitations);
@@ -336,17 +336,22 @@ public abstract class VirtualRoomsController<T>(
         var aceCollection = new AceCollection<T>
         {
             Files = Array.Empty<T>(),
-            Folders = new[] { id },
+            Folders = [id],
             Aces = wrappers,
             Message = inDto.Message
         };
+        
+        var (warning, overflowedQuotaValue) = await _fileStorageService.SetAceObjectAsync(aceCollection, inDto.Notify, inDto.Culture, quotaSensitive: true);
 
-        result.Warning = await _fileStorageService.SetAceObjectAsync(aceCollection, inDto.Notify, inDto.Culture, quotaSensitive: true);
-        result.Members = await _fileStorageService.GetRoomSharedInfoAsync(id, inDto.Invitations.Select(s => s.Id))
+        responseDto.Warning = warning;
+        responseDto.OverflowedQuotaValue = overflowedQuotaValue != default 
+            ? overflowedQuotaValue 
+            : null;
+        responseDto.Members = await _fileStorageService.GetRoomSharedInfoAsync(id, inDto.Invitations.Select(s => s.Id))
             .SelectAwait(async a => await fileShareDtoHelper.Get(a))
             .ToListAsync();
 
-        return result;
+        return responseDto;
     }
 
     /// <summary>

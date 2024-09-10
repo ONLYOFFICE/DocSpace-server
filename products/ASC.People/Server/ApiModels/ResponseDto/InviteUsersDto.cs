@@ -24,19 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core.ApiModels.ResponseDto;
+namespace ASC.People.ApiModels.ResponseDto;
 
-/// <summary>
-/// </summary>
-public class RoomSecurityDto
+public class InviteUsersDto
 {
-    /// <summary>List of room members</summary>
-    /// <type>System.Collections.Generic.IEnumerable{ASC.Files.Core.ApiModels.ResponseDto.FileShareDto}, System.Collections.Generic</type>
-    public IEnumerable<FileShareDto> Members { get; set; }
-
-    /// <summary>Warning</summary>
-    /// <type>System.String, System</type>
-    public string Warning { get; set; }
-    
-    public int? OverflowedQuotaValue { get; set; }
+    public IEnumerable<EmployeeDto> Users { get; init; }
+    public int? OverflowedQuotaValue { get; init; }
 }

@@ -2817,7 +2817,7 @@ public class FileStorageService //: IFileStorageService
         return link;
     }
 
-    public async Task<string> SetAceObjectAsync<T>(
+    public async Task<(string Warning, int OverflowedQuotaValue)> SetAceObjectAsync<T>(
         AceCollection<T> aceCollection,
         bool notify,
         string culture = null,
@@ -2830,6 +2830,7 @@ public class FileStorageService //: IFileStorageService
 
         var entries = new List<FileEntry<T>>();
         string warning = null;
+        var overflowedQuotaValue = 0;
 
         foreach (var fileId in aceCollection.Files)
         {
@@ -2847,6 +2848,7 @@ public class FileStorageService //: IFileStorageService
             {
                 var result = await fileSharingAceHelper.SetAceObjectAsync(aceCollection.Aces, entry, notify, aceCollection.Message, culture, socket, beforeOwnerChange, quotaSensitive);
                 warning ??= result.Warning;
+                overflowedQuotaValue = result.OverflowedQuotaValue;
 
                 if (!result.Changed)
                 {
@@ -2928,7 +2930,7 @@ public class FileStorageService //: IFileStorageService
             }
         }
 
-        return warning;
+        return (warning, overflowedQuotaValue);
     }
 
     public async Task RemoveAceAsync<T>(List<T> filesId, List<T> foldersId)
