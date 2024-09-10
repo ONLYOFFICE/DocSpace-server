@@ -2832,15 +2832,6 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The number of admins/power users exceeds the limit: {0} / {1}.
-        /// </summary>
-        public static string TariffsFeature_manager_exceeded {
-            get {
-                return ResourceManager.GetString("TariffsFeature_manager_exceeded", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The number of admins should not exceed {0}.
         /// </summary>
         public static string TariffsFeature_manager_exception {
