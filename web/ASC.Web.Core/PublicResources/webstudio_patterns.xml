@@ -229,13 +229,19 @@ $activity.Key
     <subject resource="|subject_change_email_v115|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_change_email_v115|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
-	
-	<!-- change_password v115 -->
-	<pattern id="change_password_v115">
-		<subject resource="|subject_change_password_v115|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-		<body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_change_password_v115|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-	</pattern>
-	
+
+  <!-- change_password v115 -->
+  <pattern id="change_password_v115">
+    <subject resource="|subject_change_password_v115|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_change_password_v115|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+  </pattern>
+
+  <!-- set_password -->
+  <pattern id="set_password">
+    <subject resource="|subject_set_password|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_set_password|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+  </pattern>
+
   <!-- change_phone -->
   <pattern id="change_phone">
     <subject resource="|subject_change_phone|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
