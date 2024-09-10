@@ -31,16 +31,22 @@ namespace ASC.People.ApiModels.RequestDto;
 /// </summary>
 public class InviteUsersRequestDto
 {
-    [SwaggerSchemaCustom("List of user invitations")]
+    /// <summary>
+    /// List of user invitations
+    /// </summary>
     [MaxEmailInvitations]
     public IEnumerable<UserInvitation> Invitations { get; set; }
 
-    [SwaggerSchemaCustom("Culture")]
+    /// <summary>
+    /// Culture
+    /// </summary>
     public string Culture { get; set; }
 }
 
 public class UserInvitation : EmailInvitationDto
 {
-    [SwaggerSchemaCustom("Employee type")]
+    /// <summary>
+    /// Employee type
+    /// </summary>
     public EmployeeType Type { get; set; }
 }

@@ -33,12 +33,18 @@ public class MigrationStatusDto
     [SwaggerSchemaCustom("Migration progress", Example = 1.0)]
     public double Progress { get; set; }
 
-    [SwaggerSchemaCustom("Migration error")]
+    /// <summary>
+    /// Migration error
+    /// </summary>
     public string Error { get; set; }
 
-    [SwaggerSchemaCustom("Migration API information")]
+    /// <summary>
+    /// Migration API information
+    /// </summary>
     public MigrationApiInfo ParseResult { get; set; }
 
-    [SwaggerSchemaCustom("Specifies whether the migration is completed")]
+    /// <summary>
+    /// Specifies whether the migration is completed
+    /// </summary>
     public bool IsCompleted { get; set; }
 }

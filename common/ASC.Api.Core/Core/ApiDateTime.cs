@@ -32,7 +32,9 @@ namespace ASC.Api.Core;
 [JsonConverter(typeof(ApiDateTimeConverter))]
 public sealed class ApiDateTime : IComparable<ApiDateTime>, IComparable
 {
-    [SwaggerSchemaCustom("UtcTime")]
+    /// <summary>
+    /// UtcTime
+    /// </summary>
     public DateTime UtcTime { get; private set; }
 
     [SwaggerSchemaCustom("TimeZoneOffset", Example = "00:00:00")]

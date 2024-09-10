@@ -31,21 +31,33 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// </summary>
 public class SessionRequestDto
 {
-    [SwaggerSchemaCustom("File name")]
+    /// <summary>
+    /// File name
+    /// </summary>
     public string FileName { get; set; }
 
-    [SwaggerSchemaCustom("File length in bytes")]
+    /// <summary>
+    /// File length in bytes
+    /// </summary>
     public long FileSize { get; set; }
 
-    [SwaggerSchemaCustom("Relative path to the folder")]
+    /// <summary>
+    /// Relative path to the folder
+    /// </summary>
     public string RelativePath { get; set; }
 
-    [SwaggerSchemaCustom("Creation time")]
+    /// <summary>
+    /// Creation time
+    /// </summary>
     public ApiDateTime CreateOn { get; set; }
 
-    [SwaggerSchemaCustom("Specifies whether to encrypt a file or not")]
+    /// <summary>
+    /// Specifies whether to encrypt a file or not
+    /// </summary>
     public bool Encrypted { get; set; }
 
-    [SwaggerSchemaCustom("Create new if exists")]
+    /// <summary>
+    /// Create new if exists
+    /// </summary>
     public bool CreateNewIfExist { get; set; }
 }

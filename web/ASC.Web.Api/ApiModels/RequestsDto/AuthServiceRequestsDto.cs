@@ -31,22 +31,34 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 /// </summary>
 public class AuthServiceRequestsDto
 {
-    [SwaggerSchemaCustom("Name")]
+    /// <summary>
+    /// Name
+    /// </summary>
     public string Name { get; set; }
 
-    [SwaggerSchemaCustom("Title")]
+    /// <summary>
+    /// Title
+    /// </summary>
     public string Title { get; set; }
 
-    [SwaggerSchemaCustom("Description")]
+    /// <summary>
+    /// Description
+    /// </summary>
     public string Description { get; set; }
 
-    [SwaggerSchemaCustom("Instruction")]
+    /// <summary>
+    /// Instruction
+    /// </summary>
     public string Instruction { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the authentication service can be set or not")]
+    /// <summary>
+    /// Specifies if the authentication service can be set or not
+    /// </summary>
     public bool CanSet { get; set; }
 
-    [SwaggerSchemaCustom("List of authorization keys")]
+    /// <summary>
+    /// List of authorization keys
+    /// </summary>
     public List<AuthKey> Props { get; set; }
 
     public static async Task<AuthServiceRequestsDto> From(Consumer consumer)

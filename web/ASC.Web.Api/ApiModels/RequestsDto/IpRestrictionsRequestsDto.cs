@@ -31,7 +31,9 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 /// </summary>
 public class IpRestrictionsBaseRequestsDto
 {
-    [SwaggerSchemaCustom("List of IP addresses")]
+    /// <summary>
+    /// List of IP addresses
+    /// </summary>
     public IEnumerable<IpRestrictionBase> IpRestrictions { get; set; }
 }
 
@@ -40,6 +42,8 @@ public class IpRestrictionsBaseRequestsDto
 /// </summary>
 public class IpRestrictionsRequestsDto
 {
-    [SwaggerSchemaCustom("Enables IP restrictions or not")]
+    /// <summary>
+    /// Enables IP restrictions or not
+    /// </summary>
     public bool Enable { get; set; }
 }

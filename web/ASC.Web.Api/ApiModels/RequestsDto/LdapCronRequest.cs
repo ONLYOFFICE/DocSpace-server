@@ -31,6 +31,8 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 /// </summary>
 public class LdapCronRequestDto
 {
-    [SwaggerSchemaCustom("Cron expression")]
+    /// <summary>
+    /// Cron expression
+    /// </summary>
     public string Cron { get; set; }
 }

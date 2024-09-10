@@ -31,6 +31,8 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 /// </summary>
 public class PortalRenameRequestsDto
 {
-    [SwaggerSchemaCustom("Portal name")]
+    /// <summary>
+    /// Portal name
+    /// </summary>
     public string Alias { get; set; }
 }

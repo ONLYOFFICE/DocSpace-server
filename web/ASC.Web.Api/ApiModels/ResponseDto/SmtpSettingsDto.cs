@@ -52,7 +52,9 @@ public class SmtpSettingsDto : IMapFrom<SmtpSettings>
     [SwaggerSchemaCustom("Enables SSL or not", Example = false)]
     public bool EnableSSL { get; set; }
 
-    [SwaggerSchemaCustom("Enables authentication or not")]
+    /// <summary>
+    /// Enables authentication or not
+    /// </summary>
     public bool EnableAuth { get; set; }
 
     [SwaggerSchemaCustom("Specifies whether to use NTLM or not", Example = false)]

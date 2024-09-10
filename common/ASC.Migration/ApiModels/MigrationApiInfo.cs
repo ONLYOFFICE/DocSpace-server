@@ -29,71 +29,105 @@ namespace ASC.Migration.Core.Models.Api;
 [ProtoContract]
 public class MigrationApiInfo
 {
-    [SwaggerSchemaCustom("Migrator name")]
+    /// <summary>
+    /// Migrator name
+    /// </summary>
     [ProtoMember(1)]
     public string MigratorName { get; set; }
 
-    [SwaggerSchemaCustom("Operation")]
+    /// <summary>
+    /// Operation
+    /// </summary>
     [ProtoMember(2)]
     public string Operation { get; set; }
 
-    [SwaggerSchemaCustom("Failed archives")]
+    /// <summary>
+    /// Failed archives
+    /// </summary>
     [ProtoMember(3)]
     public List<string> FailedArchives { get; set; } = new List<string>();
 
-    [SwaggerSchemaCustom("Users")]
+    /// <summary>
+    /// Users
+    /// </summary>
     [ProtoMember(4)]
     public List<MigratingApiUser> Users { get; set; } = new List<MigratingApiUser>();
 
-    [SwaggerSchemaCustom("Without email users")]
+    /// <summary>
+    /// Without email users
+    /// </summary>
     [ProtoMember(5)]
     public List<MigratingApiUser> WithoutEmailUsers { get; set; } = new List<MigratingApiUser>();
 
-    [SwaggerSchemaCustom("Exist users")]
+    /// <summary>
+    /// Exist users
+    /// </summary>
     [ProtoMember(6)]
     public List<MigratingApiUser> ExistUsers { get; set; } = new List<MigratingApiUser>();
 
-    [SwaggerSchemaCustom("Groups")]
+    /// <summary>
+    /// Groups
+    /// </summary>
     [ProtoMember(7)]
     public List<MigratingApiGroup> Groups { get; set; } = new List<MigratingApiGroup>();
 
-    [SwaggerSchemaCustom("Import personal files")]
+    /// <summary>
+    /// Import personal files
+    /// </summary>
     [ProtoMember(8)]
     public bool ImportPersonalFiles { get; set; }
 
-    [SwaggerSchemaCustom("Import shared files")]
+    /// <summary>
+    /// Import shared files
+    /// </summary>
     [ProtoMember(9)]
     public bool ImportSharedFiles { get; set; }
 
-    [SwaggerSchemaCustom("Import shared folders")]
+    /// <summary>
+    /// Import shared folders
+    /// </summary>
     [ProtoMember(10)]
     public bool ImportSharedFolders { get; set; }
 
-    [SwaggerSchemaCustom("Import common files")]
+    /// <summary>
+    /// Import common files
+    /// </summary>
     [ProtoMember(11)]
     public bool ImportCommonFiles { get; set; }
 
-    [SwaggerSchemaCustom("Import project files")]
+    /// <summary>
+    /// Import project files
+    /// </summary>
     [ProtoMember(12)]
     public bool ImportProjectFiles { get; set; }
 
-    [SwaggerSchemaCustom("Import groups")]
+    /// <summary>
+    /// Import groups
+    /// </summary>
     [ProtoMember(13)]
     public bool ImportGroups { get; set; }
 
-    [SwaggerSchemaCustom("Successed users")]
+    /// <summary>
+    /// Successed users
+    /// </summary>
     [ProtoMember(14)]
     public int SuccessedUsers { get; set; }
 
-    [SwaggerSchemaCustom("Failed users")]
+    /// <summary>
+    /// Failed users
+    /// </summary>
     [ProtoMember(15)]
     public int FailedUsers { get; set; }
 
-    [SwaggerSchemaCustom("Files")]
+    /// <summary>
+    /// Files
+    /// </summary>
     [ProtoMember(16)]
     public List<string> Files { get; set; }
 
-    [SwaggerSchemaCustom("Errors")]
+    /// <summary>
+    /// Errors
+    /// </summary>
     [ProtoMember(17)]
     public List<string> Errors { get; set; }
 }

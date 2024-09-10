@@ -40,15 +40,21 @@ public enum BackupProgressEnum
 [ProtoContract]
 public record BackupProgress
 {
-    [SwaggerSchemaCustom("Completed or not")]
+    /// <summary>
+    /// Completed or not
+    /// </summary>
     [ProtoMember(1)]
     public bool IsCompleted { get; set; }
 
-    [SwaggerSchemaCustom("Progress")]
+    /// <summary>
+    /// Progress
+    /// </summary>
     [ProtoMember(2)]
     public int Progress { get; set; }
 
-    [SwaggerSchemaCustom("Error")]
+    /// <summary>
+    /// Error
+    /// </summary>
     [ProtoMember(3)]
     public string Error { get; set; }
 
@@ -56,15 +62,21 @@ public record BackupProgress
     [ProtoMember(4)]
     public string Link { get; set; }
 
-    [SwaggerSchemaCustom("Tenant id")]
+    /// <summary>
+    /// Tenant id
+    /// </summary>
     [ProtoMember(5)]
     public int TenantId { get; set; }
 
-    [SwaggerSchemaCustom("Backup progress item")]
+    /// <summary>
+    /// Backup progress item
+    /// </summary>
     [ProtoMember(6)]
     public BackupProgressEnum BackupProgressEnum { get; set;}
 
-    [SwaggerSchemaCustom("Task id")]
+    /// <summary>
+    /// Task id
+    /// </summary>
     [ProtoMember(7)]
     public string TaskId { get; set; }
 }

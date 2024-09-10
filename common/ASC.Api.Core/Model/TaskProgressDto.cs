@@ -27,7 +27,9 @@
 namespace ASC.Api.Core.Model;
 public class TaskProgressDto
 {
-    [SwaggerSchemaCustom("Specifies if the operation is completed or not")]
+    /// <summary>
+    /// Specifies if the operation is completed or not
+    /// </summary>
     public bool IsCompleted { get; set; }
 
     [SwaggerSchemaCustom("Progress percentage", Example = 0)]

@@ -31,15 +31,23 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// </summary>
 public class FileStreamRequestDto : IModelWithFile
 {
-    [SwaggerSchemaCustom("Request input stream")]
+    /// <summary>
+    /// Request input stream
+    /// </summary>
     public IFormFile File { get; set; }
 
-    [SwaggerSchemaCustom("Specifies whether to encrypt a file or not")]
+    /// <summary>
+    /// Specifies whether to encrypt a file or not
+    /// </summary>
     public bool Encrypted { get; set; }
 
-    [SwaggerSchemaCustom("Specifies whether to force save a file or not")]
+    /// <summary>
+    /// Specifies whether to force save a file or not
+    /// </summary>
     public bool Forcesave { get; set; }
 
-    [SwaggerSchemaCustom("File extension")]
+    /// <summary>
+    /// File extension
+    /// </summary>
     public string FileExtension { get; set; }
 }

@@ -28,12 +28,16 @@ namespace ASC.People.ApiModels.ResponseDto;
 
 public class FileUploadResultDto
 {
-    [SwaggerSchemaCustom("Specifies if the operation is successful or not")]
+    /// <summary>
+    /// Specifies if the operation is successful or not
+    /// </summary>
     public bool Success { get; set; }
 
     [SwaggerSchemaCustom<object>("Data")]
     public object Data { get; set; }
 
-    [SwaggerSchemaCustom("Message")]
+    /// <summary>
+    /// Message
+    /// </summary>
     public string Message { get; set; }
 }

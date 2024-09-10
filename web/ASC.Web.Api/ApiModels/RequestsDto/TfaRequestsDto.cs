@@ -34,16 +34,24 @@ public class TfaRequestsDto
     [SwaggerSchemaCustomString("TFA type (None, Sms, or App)", Example = "None")]
     public TfaRequestsDtoType? Type { get; set; }
 
-    [SwaggerSchemaCustom("User ID")]
+    /// <summary>
+    /// User ID
+    /// </summary>
     public Guid? Id { get; set; }
 
-    [SwaggerSchemaCustom("List of trusted IP addresses")]
+    /// <summary>
+    /// List of trusted IP addresses
+    /// </summary>
     public List<string> TrustedIps { get; set; }
 
-    [SwaggerSchemaCustom("List of users who must use the TFA verification")]
+    /// <summary>
+    /// List of users who must use the TFA verification
+    /// </summary>
     public List<Guid> MandatoryUsers { get; set; }
 
-    [SwaggerSchemaCustom("List of groups who must use the TFA verification")]
+    /// <summary>
+    /// List of groups who must use the TFA verification
+    /// </summary>
     public List<Guid> MandatoryGroups { get; set; }
 }
 
@@ -64,6 +72,8 @@ public enum TfaRequestsDtoType
 /// </summary>
 public class TfaValidateRequestsDto
 {
-    [SwaggerSchemaCustom("TFA code")]
+    /// <summary>
+    /// TFA code
+    /// </summary>
     public string Code { get; set; }
 }

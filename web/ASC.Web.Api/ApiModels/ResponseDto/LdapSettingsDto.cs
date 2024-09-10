@@ -28,73 +28,117 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class LdapSettingsDto : IMapFrom<LdapSettings>
 {
-    [SwaggerSchemaCustom("Specifies if the LDAP authentication is enabled or not")]
+    /// <summary>
+    /// Specifies if the LDAP authentication is enabled or not
+    /// </summary>
     public bool EnableLdapAuthentication { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the StartTLS is enabled or not")]
+    /// <summary>
+    /// Specifies if the StartTLS is enabled or not
+    /// </summary>
     public bool StartTls { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the SSL is enabled or not")]
+    /// <summary>
+    /// Specifies if the SSL is enabled or not
+    /// </summary>
     public bool Ssl { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the welcome email is sent or not")]
+    /// <summary>
+    /// Specifies if the welcome email is sent or not
+    /// </summary>
     public bool SendWelcomeEmail { get; set; }
 
-    [SwaggerSchemaCustom("LDAP server URL address")]
+    /// <summary>
+    /// LDAP server URL address
+    /// </summary>
     public string Server { get; set; }
 
-    [SwaggerSchemaCustom("Absolute path to the top level directory containing users for the import")]
+    /// <summary>
+    /// Absolute path to the top level directory containing users for the import
+    /// </summary>
     // ReSharper disable once InconsistentNaming
     public string UserDN { get; set; }
 
-    [SwaggerSchemaCustom("Port number")]
+    /// <summary>
+    /// Port number
+    /// </summary>
     public int PortNumber { get; set; }
 
-    [SwaggerSchemaCustom("User filter value to import the users who correspond to the specified search criteria. The default filter value (uid=*) allows importing all users")]
+    /// <summary>
+    /// User filter value to import the users who correspond to the specified search criteria. The default filter value (uid=*) allows importing all users
+    /// </summary>
     public string UserFilter { get; set; }
 
-    [SwaggerSchemaCustom("Attribute in a user record that corresponds to the login that LDAP server users will use to log in to ONLYOFFICE")]
+    /// <summary>
+    /// Attribute in a user record that corresponds to the login that LDAP server users will use to log in to ONLYOFFICE
+    /// </summary>
     public string LoginAttribute { get; set; }
 
-    [SwaggerSchemaCustom("Correspondence between the user data fields on the portal and the attributes in the LDAP server user record")]
+    /// <summary>
+    /// Correspondence between the user data fields on the portal and the attributes in the LDAP server user record
+    /// </summary>
     public Dictionary<MappingFields, string> LdapMapping { get; set; }
 
-    [SwaggerSchemaCustom("Group access rights")]
+    /// <summary>
+    /// Group access rights
+    /// </summary>
     //ToDo: use SId instead of group name
     public Dictionary<AccessRight, string> AccessRights { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the groups from the LDAP server are added to the portal or not")]
+    /// <summary>
+    /// Specifies if the groups from the LDAP server are added to the portal or not
+    /// </summary>
     public bool GroupMembership { get; set; }
 
-    [SwaggerSchemaCustom("The absolute path to the top level directory containing groups for the import")]
+    /// <summary>
+    /// The absolute path to the top level directory containing groups for the import
+    /// </summary>
     // ReSharper disable once InconsistentNaming
     public string GroupDN { get; set; }
 
-    [SwaggerSchemaCustom("Attribute that determines whether this user is a member of the groups")]
+    /// <summary>
+    /// Attribute that determines whether this user is a member of the groups
+    /// </summary>
     public string UserAttribute { get; set; }
 
-    [SwaggerSchemaCustom("Group filter value to import the groups who correspond to the specified search criteria. The default filter value (objectClass=posixGroup) allows importing all users")]
+    /// <summary>
+    /// Group filter value to import the groups who correspond to the specified search criteria. The default filter value (objectClass=posixGroup) allows importing all users
+    /// </summary>
     public string GroupFilter { get; set; }
 
-    [SwaggerSchemaCustom("Attribute that specifies the users that the group includes")]
+    /// <summary>
+    /// Attribute that specifies the users that the group includes
+    /// </summary>
     public string GroupAttribute { get; set; }
 
-    [SwaggerSchemaCustom("Attribute that corresponds to a name of the group where the user is included")]
+    /// <summary>
+    /// Attribute that corresponds to a name of the group where the user is included
+    /// </summary>
     public string GroupNameAttribute { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the user has rights to read data from LDAP server or not")]
+    /// <summary>
+    /// Specifies if the user has rights to read data from LDAP server or not
+    /// </summary>
     public bool Authentication { get; set; }
 
-    [SwaggerSchemaCustom("Login")]
+    /// <summary>
+    /// Login
+    /// </summary>
     public string Login { get; set; }
 
-    [SwaggerSchemaCustom("Password")]
+    /// <summary>
+    /// Password
+    /// </summary>
     public string Password { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the certificate is accepted or not")]
+    /// <summary>
+    /// Specifies if the certificate is accepted or not
+    /// </summary>
     public bool AcceptCertificate { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the default LDAP settings are used or not")]
+    /// <summary>
+    /// Specifies if the default LDAP settings are used or not
+    /// </summary>
     public bool IsDefault { get; set; }
 
     public void Mapping(Profile profile)

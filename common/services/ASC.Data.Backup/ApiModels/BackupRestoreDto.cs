@@ -31,15 +31,23 @@ namespace ASC.Data.Backup.ApiModels;
 /// </summary>
 public class BackupRestoreDto
 {
-    [SwaggerSchemaCustom("Backup ID")]
+    /// <summary>
+    /// Backup ID
+    /// </summary>
     public string BackupId { get; set; }
 
-    [SwaggerSchemaCustom("Storage type")]
+    /// <summary>
+    /// Storage type
+    /// </summary>
     public int? StorageType { get; set; }
 
-    [SwaggerSchemaCustom("Storage parameters")]
+    /// <summary>
+    /// Storage parameters
+    /// </summary>
     public IDictionary<object, object> StorageParams { get; set; }
 
-    [SwaggerSchemaCustom("Notifies users about portal restoring process or not")]
+    /// <summary>
+    /// Notifies users about portal restoring process or not
+    /// </summary>
     public bool Notify { get; set; }
 }

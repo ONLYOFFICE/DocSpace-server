@@ -28,24 +28,38 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 public class TfaSettingsDto
 {
-    [SwaggerSchemaCustom("ID")]
+    /// <summary>
+    /// ID
+    /// </summary>
     public string Id { get; set; }
 
-    [SwaggerSchemaCustom("Title")]
+    /// <summary>
+    /// Title
+    /// </summary>
     public string Title { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the TFA settings are enabled or not")]
+    /// <summary>
+    /// Specifies if the TFA settings are enabled or not
+    /// </summary>
     public bool Enabled { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the TFA settings are available or not")]
+    /// <summary>
+    /// Specifies if the TFA settings are available or not
+    /// </summary>
     public bool Avaliable { get; set; }
 
-    [SwaggerSchemaCustom("List of trusted IP addresses")]
+    /// <summary>
+    /// List of trusted IP addresses
+    /// </summary>
     public List<string> TrustedIps { get; set; }
 
-    [SwaggerSchemaCustom("List of users who must use the TFA verification")]
+    /// <summary>
+    /// List of users who must use the TFA verification
+    /// </summary>
     public List<Guid> MandatoryUsers { get; set; }
 
-    [SwaggerSchemaCustom("List of groups who must use the TFA verification")]
+    /// <summary>
+    /// List of groups who must use the TFA verification
+    /// </summary>
     public List<Guid> MandatoryGroups { get; set; }
 }

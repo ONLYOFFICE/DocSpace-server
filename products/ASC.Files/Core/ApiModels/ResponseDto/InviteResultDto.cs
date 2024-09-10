@@ -28,12 +28,18 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public class InviteResultDto
 {
-    [SwaggerSchemaCustom("Email")]
+    /// <summary>
+    /// Email
+    /// </summary>
     public string Email { get; set; }
 
-    [SwaggerSchemaCustom("Success")]
+    /// <summary>
+    /// Success
+    /// </summary>
     public bool Success { get; set; }
 
-    [SwaggerSchemaCustom("Message")]
+    /// <summary>
+    /// Message
+    /// </summary>
     public string Message { get; set; }
 }

@@ -28,9 +28,13 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 public class WebPluginRequestsDto
 {
-    [SwaggerSchemaCustom("Enabled")]
+    /// <summary>
+    /// Enabled
+    /// </summary>
     public bool Enabled { get; set; }
 
-    [SwaggerSchemaCustom("Settings")]
+    /// <summary>
+    /// Settings
+    /// </summary>
     public string Settings { get; set; }
 }

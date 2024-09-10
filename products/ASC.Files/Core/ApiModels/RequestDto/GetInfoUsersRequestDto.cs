@@ -31,6 +31,8 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// </summary>
 public class GetInfoUsersRequestDto
 {
-    [SwaggerSchemaCustom("List of user ids")]
+    /// <summary>
+    /// List of user ids
+    /// </summary>
     public List<Guid> UserIds { get; set; }
 }

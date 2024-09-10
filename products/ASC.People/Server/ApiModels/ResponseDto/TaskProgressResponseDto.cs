@@ -28,16 +28,24 @@ namespace ASC.People.ApiModels.ResponseDto;
 
 public class TaskProgressResponseDto
 {
-    [SwaggerSchemaCustom("ID")]
+    /// <summary>
+    /// ID
+    /// </summary>
     public string Id { get; set; }
 
-    [SwaggerSchemaCustom("Error")]
+    /// <summary>
+    /// Error
+    /// </summary>
     public string Error { get; set; }
 
-    [SwaggerSchemaCustom("Percentage")]
+    /// <summary>
+    /// Percentage
+    /// </summary>
     public int Percentage { get; set; }
 
-    [SwaggerSchemaCustom("IsCompleted")]
+    /// <summary>
+    /// IsCompleted
+    /// </summary>
     public bool IsCompleted { get; set; }
 
     [SwaggerSchemaCustom("Status", Example = "Completed")]

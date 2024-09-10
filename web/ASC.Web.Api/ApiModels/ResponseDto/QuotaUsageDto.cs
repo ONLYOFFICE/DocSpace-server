@@ -63,63 +63,93 @@ public class QuotaUsageManager(
 
 public class QuotaUsageDto
 {
-    [SwaggerSchemaCustom("Storage size")]
+    /// <summary>
+    /// Storage size
+    /// </summary>
     public ulong StorageSize { get; init; }
 
-    [SwaggerSchemaCustom("Maximum file size")]
+    /// <summary>
+    /// Maximum file size
+    /// </summary>
     public ulong MaxFileSize { get; set; }
 
-    [SwaggerSchemaCustom("Used size")]
+    /// <summary>
+    /// Used size
+    /// </summary>
     public ulong UsedSize { get; init; }
 
-    [SwaggerSchemaCustom("maximum number of room administrators")]
+    /// <summary>
+    /// maximum number of room administrators
+    /// </summary>
     public int MaxRoomAdminsCount { get; init; }
 
-    [SwaggerSchemaCustom("Number of room administrators")]
+    /// <summary>
+    /// Number of room administrators
+    /// </summary>
     public int RoomAdminCount { get; init; }
 
-    [SwaggerSchemaCustom("Available size")]
+    /// <summary>
+    /// Available size
+    /// </summary>
     public ulong AvailableSize
     {
         get { return Math.Max(0, StorageSize > UsedSize ? StorageSize - UsedSize : 0); }
         set { throw new NotImplementedException(); }
     }
 
-    [SwaggerSchemaCustom("Available number of users")]
+    /// <summary>
+    /// Available number of users
+    /// </summary>
     public int AvailableUsersCount
     {
         get { return Math.Max(0, MaxRoomAdminsCount - RoomAdminCount); }
         set { throw new NotImplementedException(); }
     }
 
-    [SwaggerSchemaCustom("Storage usage")]
+    /// <summary>
+    /// Storage usage
+    /// </summary>
     public IList<QuotaUsage> StorageUsage { get; set; }
 
-    [SwaggerSchemaCustom("User storage size")]
+    /// <summary>
+    /// User storage size
+    /// </summary>
     public long UserStorageSize { get; set; }
 
-    [SwaggerSchemaCustom("User used size")]
+    /// <summary>
+    /// User used size
+    /// </summary>
     public long UserUsedSize { get; set; }
 
-    [SwaggerSchemaCustom("User available size")]
+    /// <summary>
+    /// User available size
+    /// </summary>
     public long UserAvailableSize
     {
         get { return Math.Max(0, UserStorageSize - UserUsedSize); }
         set { throw new NotImplementedException(); }
     }
 
-    [SwaggerSchemaCustom("Maximum number of users")]
+    /// <summary>
+    /// Maximum number of users
+    /// </summary>
     public long MaxUsers { get; set; }
 
-    [SwaggerSchemaCustom("Number of users")]
+    /// <summary>
+    /// Number of users
+    /// </summary>
     public long UsersCount { get; set; }
 }
 
 public class QuotaUsage
 {
-    [SwaggerSchemaCustom("Path to the storage")]
+    /// <summary>
+    /// Path to the storage
+    /// </summary>
     public string Path { get; set; }
 
-    [SwaggerSchemaCustom("Storage size")]
+    /// <summary>
+    /// Storage size
+    /// </summary>
     public long Size { get; set; }
 }

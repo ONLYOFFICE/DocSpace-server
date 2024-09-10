@@ -28,58 +28,94 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 
 public class AuditEventDto
 {
-    [SwaggerSchemaCustom("ID")]
+    /// <summary>
+    /// ID
+    /// </summary>
     public int Id { get; set; }
 
-    [SwaggerSchemaCustom("Date")]
+    /// <summary>
+    /// Date
+    /// </summary>
     public ApiDateTime Date { get; set; }
 
-    [SwaggerSchemaCustom("User")]
+    /// <summary>
+    /// User
+    /// </summary>
     public string User { get; set; }
 
-    [SwaggerSchemaCustom("User ID")]
+    /// <summary>
+    /// User ID
+    /// </summary>
     public Guid UserId { get; set; }
 
-    [SwaggerSchemaCustom("Action")]
+    /// <summary>
+    /// Action
+    /// </summary>
     public string Action { get; set; }
 
-    [SwaggerSchemaCustom("Action ID")]
+    /// <summary>
+    /// Action ID
+    /// </summary>
     public MessageAction ActionId { get; set; }
 
-    [SwaggerSchemaCustom("IP")]
+    /// <summary>
+    /// IP
+    /// </summary>
     public string IP { get; set; }
 
-    [SwaggerSchemaCustom("Country")]
+    /// <summary>
+    /// Country
+    /// </summary>
     public string Country { get; set; }
 
-    [SwaggerSchemaCustom("City")]
+    /// <summary>
+    /// City
+    /// </summary>
     public string City { get; set; }
 
-    [SwaggerSchemaCustom("Browser")]
+    /// <summary>
+    /// Browser
+    /// </summary>
     public string Browser { get; set; }
 
-    [SwaggerSchemaCustom("Platform")]
+    /// <summary>
+    /// Platform
+    /// </summary>
     public string Platform { get; set; }
 
-    [SwaggerSchemaCustom("Page")]
+    /// <summary>
+    /// Page
+    /// </summary>
     public string Page { get; set; }
 
-    [SwaggerSchemaCustom("Action type")]
+    /// <summary>
+    /// Action type
+    /// </summary>
     public ActionType ActionType { get; set; }
 
-    [SwaggerSchemaCustom("Product type")]
+    /// <summary>
+    /// Product type
+    /// </summary>
     public ProductType Product { get; set; }
 
-    [SwaggerSchemaCustom("Module type")]
+    /// <summary>
+    /// Module type
+    /// </summary>
     public ModuleType Module { get; set; }
 
-    [SwaggerSchemaCustom("List of targets")]
+    /// <summary>
+    /// List of targets
+    /// </summary>
     public IEnumerable<string> Target { get; set; }
 
-    [SwaggerSchemaCustom("List of entry types")]
+    /// <summary>
+    /// List of entry types
+    /// </summary>
     public IEnumerable<EntryType> Entries { get; set; }
 
-    [SwaggerSchemaCustom("Context")]
+    /// <summary>
+    /// Context
+    /// </summary>
     public string Context { get; set; }
 
     public AuditEventDto(AuditEvent auditEvent, AuditActionMapper auditActionMapper)

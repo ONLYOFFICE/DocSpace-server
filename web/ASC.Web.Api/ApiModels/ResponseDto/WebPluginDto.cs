@@ -28,49 +28,77 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class WebPluginDto: IMapFrom<WebPlugin>
 {
-    [SwaggerSchemaCustom("Name")]
+    /// <summary>
+    /// Name
+    /// </summary>
     public string Name { get; set; }
 
-    [SwaggerSchemaCustom("Version")]
+    /// <summary>
+    /// Version
+    /// </summary>
     public string Version { get; set; }
 
-    [SwaggerSchemaCustom("Description")]
+    /// <summary>
+    /// Description
+    /// </summary>
     public string Description { get; set; }
 
-    [SwaggerSchemaCustom("License")]
+    /// <summary>
+    /// License
+    /// </summary>
     public string License { get; set; }
 
-    [SwaggerSchemaCustom("Author")]
+    /// <summary>
+    /// Author
+    /// </summary>
     public string Author { get; set; }
 
-    [SwaggerSchemaCustom("Home page")]
+    /// <summary>
+    /// Home page
+    /// </summary>
     public string HomePage { get; set; }
 
-    [SwaggerSchemaCustom("PluginName")]
+    /// <summary>
+    /// PluginName
+    /// </summary>
     public string PluginName { get; set; }
 
-    [SwaggerSchemaCustom("Scopes")]
+    /// <summary>
+    /// Scopes
+    /// </summary>
     public string Scopes { get; set; }
 
-    [SwaggerSchemaCustom("Image")]
+    /// <summary>
+    /// Image
+    /// </summary>
     public string Image { get; set; }
 
-    [SwaggerSchemaCustom("Create by")]
+    /// <summary>
+    /// Create by
+    /// </summary>
     public EmployeeDto CreateBy { get; set; }
 
-    [SwaggerSchemaCustom("Create on")]
+    /// <summary>
+    /// Create on
+    /// </summary>
     public DateTime CreateOn { get; set; }
 
-    [SwaggerSchemaCustom("Enabled")]
+    /// <summary>
+    /// Enabled
+    /// </summary>
     public bool Enabled { get; set; }
 
-    [SwaggerSchemaCustom("System")]
+    /// <summary>
+    /// System
+    /// </summary>
     public bool System { get; set; }
 
     [SwaggerSchemaCustom("Url", Format = "uri")]
     public string Url { get; set; }
 
-    [SwaggerSchemaCustom("Settings")]
+    /// <summary>
+    /// Settings
+    /// </summary>
     public string Settings { get; set; }
 
     public void Mapping(Profile profile)

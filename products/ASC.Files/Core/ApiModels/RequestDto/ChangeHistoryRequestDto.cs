@@ -31,9 +31,13 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// </summary>
 public class ChangeHistoryRequestDto
 {
-    [SwaggerSchemaCustom("File version")]
+    /// <summary>
+    /// File version
+    /// </summary>
     public int Version { get; set; }
 
-    [SwaggerSchemaCustom("Marks as a version or revision")]
+    /// <summary>
+    /// Marks as a version or revision
+    /// </summary>
     public bool ContinueVersion { get; set; }
 }

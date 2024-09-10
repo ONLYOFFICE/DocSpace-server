@@ -28,73 +28,119 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class TenantDto : IMapFrom<Tenant>
 {
-    [SwaggerSchemaCustom("Affiliate ID")]
+    /// <summary>
+    /// Affiliate ID
+    /// </summary>
     public string AffiliateId { get; set; }
 
-    [SwaggerSchemaCustom("Tenant alias")]
+    /// <summary>
+    /// Tenant alias
+    /// </summary>
     public string TenantAlias { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the calls are available for this tenant or not")]
+    /// <summary>
+    /// Specifies if the calls are available for this tenant or not
+    /// </summary>
     public bool Calls { get; set; }
 
-    [SwaggerSchemaCustom("Campaign")]
+    /// <summary>
+    /// Campaign
+    /// </summary>
     public string Campaign { get; set; }
 
-    [SwaggerSchemaCustom("Creation date and time")]
+    /// <summary>
+    /// Creation date and time
+    /// </summary>
     public DateTime CreationDateTime { get; internal set; }
 
-    [SwaggerSchemaCustom("Hosted region")]
+    /// <summary>
+    /// Hosted region
+    /// </summary>
     public string HostedRegion { get; set; }
 
-    [SwaggerSchemaCustom("Tenant ID")]
+    /// <summary>
+    /// Tenant ID
+    /// </summary>
     public int TenantId { get; internal set; }
 
-    [SwaggerSchemaCustom("Tenant industry")]
+    /// <summary>
+    /// Tenant industry
+    /// </summary>
     public TenantIndustry Industry { get; set; }
 
-    [SwaggerSchemaCustom("Language")]
+    /// <summary>
+    /// Language
+    /// </summary>
     public string Language { get; set; }
 
-    [SwaggerSchemaCustom("Last modified date")]
+    /// <summary>
+    /// Last modified date
+    /// </summary>
     public DateTime LastModified { get; set; }
 
-    [SwaggerSchemaCustom("Mapped domain")]
+    /// <summary>
+    /// Mapped domain
+    /// </summary>
     public string MappedDomain { get; set; }
 
-    [SwaggerSchemaCustom("Name")]
+    /// <summary>
+    /// Name
+    /// </summary>
     public string Name { get; set; }
 
-    [SwaggerSchemaCustom("Owner ID")]
+    /// <summary>
+    /// Owner ID
+    /// </summary>
     public Guid OwnerId { get; set; }
 
-    [SwaggerSchemaCustom("Payment ID")]
+    /// <summary>
+    /// Payment ID
+    /// </summary>
     public string PaymentId { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the ONLYOFFICE newsletter is allowed or not")]
+    /// <summary>
+    /// Specifies if the ONLYOFFICE newsletter is allowed or not
+    /// </summary>
     public bool Spam { get; set; }
 
-    [SwaggerSchemaCustom("Tenant status")]
+    /// <summary>
+    /// Tenant status
+    /// </summary>
     public TenantStatus Status { get; internal set; }
 
-    [SwaggerSchemaCustom("The date and time when the tenant status was changed")]
+    /// <summary>
+    /// The date and time when the tenant status was changed
+    /// </summary>
     public DateTime StatusChangeDate { get; internal set; }
 
-    [SwaggerSchemaCustom("Time zone")]
+    /// <summary>
+    /// Time zone
+    /// </summary>
     public string TimeZone { get; set; }
 
-    [SwaggerSchemaCustom("List of trusted domains")]
+    /// <summary>
+    /// List of trusted domains
+    /// </summary>
     public List<string> TrustedDomains { get; set; }
 
-    [SwaggerSchemaCustom("Trusted domains in the string format")]
+    /// <summary>
+    /// Trusted domains in the string format
+    /// </summary>
     public string TrustedDomainsRaw { get; set; }
 
-    [SwaggerSchemaCustom("Trusted domains type")]
+    /// <summary>
+    /// Trusted domains type
+    /// </summary>
     public TenantTrustedDomainsType TrustedDomainsType { get; set; }
 
-    [SwaggerSchemaCustom("Version")]
+    /// <summary>
+    /// Version
+    /// </summary>
     public int Version { get; set; }
 
-    [SwaggerSchemaCustom("The date and time when the tenant version was changed")]
+    /// <summary>
+    /// The date and time when the tenant version was changed
+    /// </summary>
     public DateTime VersionChanged { get; set; }
 
     public void Mapping(Profile profile)

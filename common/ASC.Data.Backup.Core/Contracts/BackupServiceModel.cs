@@ -61,19 +61,29 @@ public class StartBackupRequest
 
 public class BackupHistoryRecord
 {
-    [SwaggerSchemaCustom("Backup ID")]
+    /// <summary>
+    /// Backup ID
+    /// </summary>
     public Guid Id { get; set; }
 
-    [SwaggerSchemaCustom("File name")]
+    /// <summary>
+    /// File name
+    /// </summary>
     public string FileName { get; set; }
 
-    [SwaggerSchemaCustom("Storage type")]
+    /// <summary>
+    /// Storage type
+    /// </summary>
     public BackupStorageType StorageType { get; set; }
 
-    [SwaggerSchemaCustom("Creation date")]
+    /// <summary>
+    /// Creation date
+    /// </summary>
     public DateTime CreatedOn { get; set; }
 
-    [SwaggerSchemaCustom("Expiration date")]
+    /// <summary>
+    /// Expiration date
+    /// </summary>
     public DateTime ExpiresOn { get; set; }
 }
 

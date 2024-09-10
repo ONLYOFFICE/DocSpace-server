@@ -31,7 +31,9 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// </summary>
 public class UpdateRoomsQuotaRequestDto<T> : UpdateRoomsRoomIdsRequestDto<T>
 {
-    [SwaggerSchemaCustom("Room quota")]
+    /// <summary>
+    /// Room quota
+    /// </summary>
     public long Quota { get; set; }
 
 }

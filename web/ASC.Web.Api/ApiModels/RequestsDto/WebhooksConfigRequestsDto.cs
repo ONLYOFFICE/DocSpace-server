@@ -33,10 +33,14 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 /// </summary>
 public class WebhooksConfigRequestsDto
 {
-    [SwaggerSchemaCustom("ID")]
+    /// <summary>
+    /// ID
+    /// </summary>
     public int Id { get; set; }
 
-    [SwaggerSchemaCustom("Name")]
+    /// <summary>
+    /// Name
+    /// </summary>
     [StringLength(50)]
     public string Name { get; set; }
 
@@ -44,12 +48,18 @@ public class WebhooksConfigRequestsDto
     [Url]
     public string Uri { get; set; }
 
-    [SwaggerSchemaCustom("Secret key")]
+    /// <summary>
+    /// Secret key
+    /// </summary>
     public string SecretKey { get; set; }
 
-    [SwaggerSchemaCustom("Enabled or not")]
+    /// <summary>
+    /// Enabled or not
+    /// </summary>
     public bool? Enabled { get; set; }
 
-    [SwaggerSchemaCustom("SSL")]
+    /// <summary>
+    /// SSL
+    /// </summary>
     public bool? SSL { get; set;}
 }

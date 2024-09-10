@@ -69,13 +69,19 @@ public class AceWrapper : IMapFrom<RoomInvitation>
 
 public class AceShortWrapper(string subjectName, string permission, bool isLink)
 {
-    [SwaggerSchemaCustom("User")]
+    /// <summary>
+    /// User
+    /// </summary>
     public string User { get; init; } = subjectName;
 
-    [SwaggerSchemaCustom("User access rights to the file")]
+    /// <summary>
+    /// User access rights to the file
+    /// </summary>
     public string Permissions { get; init; } = permission;
 
-    [SwaggerSchemaCustom("Is link")]
+    /// <summary>
+    /// Is link
+    /// </summary>
     public bool isLink { get; init; } = isLink;
 }
 

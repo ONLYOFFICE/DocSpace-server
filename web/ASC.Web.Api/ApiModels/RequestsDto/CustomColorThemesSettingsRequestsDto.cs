@@ -31,9 +31,13 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 /// </summary>
 public class CustomColorThemesSettingsRequestsDto
 {
-    [SwaggerSchemaCustom("Custom color theme settings")]
+    /// <summary>
+    /// Custom color theme settings
+    /// </summary>
     public CustomColorThemesSettingsItem Theme { get; set; }
 
-    [SwaggerSchemaCustom("Selected or not")]
+    /// <summary>
+    /// Selected or not
+    /// </summary>
     public int? Selected { get; set; }
 }

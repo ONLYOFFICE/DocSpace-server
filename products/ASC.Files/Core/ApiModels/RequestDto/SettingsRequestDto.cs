@@ -31,6 +31,8 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// </summary>
 public class SettingsRequestDto
 {
-    [SwaggerSchemaCustom("Specifies whether to set the specified settings or not")]
+    /// <summary>
+    /// Specifies whether to set the specified settings or not
+    /// </summary>
     public bool Set { get; set; }
 }

@@ -32,10 +32,14 @@ public class TenantDomainValidator
     private readonly Regex _validDomain;
     private readonly Regex _validName;
 
-    [SwaggerSchemaCustom("Regex")]
+    /// <summary>
+    /// Regex
+    /// </summary>
     public string Regex { get; }
 
-    [SwaggerSchemaCustom("Min length")]
+    /// <summary>
+    /// Min length
+    /// </summary>
     public int MinLength { get; }
 
     [SwaggerSchemaCustom("Max length", Example = 63)]

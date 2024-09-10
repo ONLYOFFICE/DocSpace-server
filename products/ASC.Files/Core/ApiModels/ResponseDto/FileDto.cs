@@ -40,10 +40,14 @@ public class FileDto<T> : FileEntryDto<T>
     [SwaggerSchemaCustom("Content length", Example = "12345")]
     public string ContentLength { get; set; }
 
-    [SwaggerSchemaCustom("Pure content length")]
+    /// <summary>
+    /// Pure content length
+    /// </summary>
     public long? PureContentLength { get; set; }
 
-    [SwaggerSchemaCustom("File status")]
+    /// <summary>
+    /// File status
+    /// </summary>
     public FileStatus FileStatus { get; set; }
 
     [SwaggerSchemaCustom("Muted or not", Example = false)]
@@ -55,13 +59,17 @@ public class FileDto<T> : FileEntryDto<T>
     [SwaggerSchemaCustom("Web URL", Format = "uri")]
     public string WebUrl { get; set; }
 
-    [SwaggerSchemaCustom("File type")]
+    /// <summary>
+    /// File type
+    /// </summary>
     public FileType FileType { get; set; }
 
     [SwaggerSchemaCustom("File extension", Example = ".txt")]
     public string FileExst { get; set; }
 
-    [SwaggerSchemaCustom("Comment")]
+    /// <summary>
+    /// Comment
+    /// </summary>
     public string Comment { get; set; }
 
     [SwaggerSchemaCustom("Encrypted or not", Example = false)]
@@ -70,13 +78,19 @@ public class FileDto<T> : FileEntryDto<T>
     [SwaggerSchemaCustom("Thumbnail URL", Format = "uri")]
     public string ThumbnailUrl { get; set; }
 
-    [SwaggerSchemaCustom("Thumbnail status")]
+    /// <summary>
+    /// Thumbnail status
+    /// </summary>
     public Thumbnail ThumbnailStatus { get; set; }
 
-    [SwaggerSchemaCustom("Locked or not")]
+    /// <summary>
+    /// Locked or not
+    /// </summary>
     public bool? Locked { get; set; }
 
-    [SwaggerSchemaCustom("User ID who locked a file")]
+    /// <summary>
+    /// User ID who locked a file
+    /// </summary>
     public string LockedBy { get; set; }
 
     [SwaggerSchemaCustom("Denies file downloading or not", Example = false)]
@@ -91,25 +105,37 @@ public class FileDto<T> : FileEntryDto<T>
     [SwaggerSchemaCustom("Specifies if the filling has started or not", Example = false)]
     public bool? StartFilling { get; set; }
 
-    [SwaggerSchemaCustom("InProcess folder ID")]
+    /// <summary>
+    /// InProcess folder ID
+    /// </summary>
     public int? InProcessFolderId { get; set; }
 
-    [SwaggerSchemaCustom("InProcess folder title")]
+    /// <summary>
+    /// InProcess folder title
+    /// </summary>
     public string InProcessFolderTitle { get; set; }
 
-    [SwaggerSchemaCustom("Draft info")]
+    /// <summary>
+    /// Draft info
+    /// </summary>
     public DraftLocation<T> DraftLocation { get; set; }
 
     [SwaggerSchemaCustom("Denies file sharing or not", Example = false)]
     public bool DenySharing { get; set; }
 
-    [SwaggerSchemaCustom("File accessibility")]
+    /// <summary>
+    /// File accessibility
+    /// </summary>
     public IDictionary<Accessibility, bool> ViewAccessibility { get; set; }
 
-    [SwaggerSchemaCustom("Available external rights")]
+    /// <summary>
+    /// Available external rights
+    /// </summary>
     public IDictionary<string, bool> AvailableExternalRights { get; set; }
 
-    [SwaggerSchemaCustom("Request token")]
+    /// <summary>
+    /// Request token
+    /// </summary>
     public string RequestToken { get; set; }
 
     [SwaggerSchemaCustom(Description = "Last opened")]
@@ -311,12 +337,16 @@ public class DraftLocation<T>
     [SwaggerSchemaCustomInt("InProcess folder ID")]
     public T FolderId { get; set; }
 
-    [SwaggerSchemaCustom("InProcess folder title")]
+    /// <summary>
+    /// InProcess folder title
+    /// </summary>
     public string FolderTitle { get; set; }
 
     [SwaggerSchemaCustomInt("Draft ID")]
     public T FileId { get; set; }
 
-    [SwaggerSchemaCustom("Draft title")]
+    /// <summary>
+    /// Draft title
+    /// </summary>
     public string FileTitle { get; set; }
 }

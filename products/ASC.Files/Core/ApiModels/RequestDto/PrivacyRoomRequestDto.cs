@@ -31,13 +31,19 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// </summary>
 public class PrivacyRoomRequestDto
 {
-    [SwaggerSchemaCustom("Public key")]
+    /// <summary>
+    /// Public key
+    /// </summary>
     public string PublicKey { get; set; }
 
-    [SwaggerSchemaCustom("Private key")]
+    /// <summary>
+    /// Private key
+    /// </summary>
     public string PrivateKeyEnc { get; set; }
 
-    [SwaggerSchemaCustom("Encryption keys need to be updated or not")]
+    /// <summary>
+    /// Encryption keys need to be updated or not
+    /// </summary>
     public bool Update { get; set; }
 }
 
@@ -46,6 +52,8 @@ public class PrivacyRoomRequestDto
 /// </summary>
 public class PrivacyRoomEnableRequestDto
 {
-    [SwaggerSchemaCustom("Specifies whether to enable the Private Room settings or not")]
+    /// <summary>
+    /// Specifies whether to enable the Private Room settings or not
+    /// </summary>
     public bool Enable { get; set; }
 }

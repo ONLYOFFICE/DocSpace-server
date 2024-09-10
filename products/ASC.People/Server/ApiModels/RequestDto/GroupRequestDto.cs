@@ -31,7 +31,9 @@ namespace ASC.People.ApiModels.RequestDto;
 /// </summary>
 public class GroupRequestDto : GroupRequestDtoBase
 {
-    [SwaggerSchemaCustom("List of group member IDs")]
+    /// <summary>
+    /// List of group member IDs
+    /// </summary>
     public IEnumerable<Guid> Members { get; init; }
 }
 
@@ -40,6 +42,8 @@ public class GroupRequestDto : GroupRequestDtoBase
 /// </summary>
 public class MembersRequestDto
 {
-    [SwaggerSchemaCustom("List of group member IDs")]
+    /// <summary>
+    /// List of group member IDs
+    /// </summary>
     public IEnumerable<Guid> Members { get; init; }
 }

@@ -31,12 +31,18 @@ namespace ASC.Data.Backup.ApiModels;
 /// </summary>
 public class BackupDto
 {
-    [SwaggerSchemaCustom("Storage type")]
+    /// <summary>
+    /// Storage type
+    /// </summary>
     public BackupStorageType? StorageType { get; set; }
 
-    [SwaggerSchemaCustom("Storage parameters")]
+    /// <summary>
+    /// Storage parameters
+    /// </summary>
     public IDictionary<object, object> StorageParams { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if a dump will be created or not")]
+    /// <summary>
+    /// Specifies if a dump will be created or not
+    /// </summary>
     public bool Dump { get; set; }
 }

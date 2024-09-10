@@ -31,43 +31,69 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 /// </summary>
 public class AuthRequestsDto
 {
-    [SwaggerSchemaCustom("Username / email")]
+    /// <summary>
+    /// Username / email
+    /// </summary>
     public string UserName { get; set; }
 
-    [SwaggerSchemaCustom("Password")]
+    /// <summary>
+    /// Password
+    /// </summary>
     public string Password { get; set; }
 
-    [SwaggerSchemaCustom("Password hash")]
+    /// <summary>
+    /// Password hash
+    /// </summary>
     public string PasswordHash { get; set; }
 
-    [SwaggerSchemaCustom("Provider type")]
+    /// <summary>
+    /// Provider type
+    /// </summary>
     public string Provider { get; set; }
 
-    [SwaggerSchemaCustom("Provider access token")]
+    /// <summary>
+    /// Provider access token
+    /// </summary>
     public string AccessToken { get; set; }
 
-    [SwaggerSchemaCustom("Serialized user profile")]
+    /// <summary>
+    /// Serialized user profile
+    /// </summary>
     public string SerializedProfile { get; set; }
 
-    [SwaggerSchemaCustom("Two-factor authentication code")]
+    /// <summary>
+    /// Two-factor authentication code
+    /// </summary>
     public string Code { get; set; }
 
-    [SwaggerSchemaCustom("Code for getting a token")]
+    /// <summary>
+    /// Code for getting a token
+    /// </summary>
     public string CodeOAuth { get; set; }
 
-    [SwaggerSchemaCustom("Session based authentication or not")]
+    /// <summary>
+    /// Session based authentication or not
+    /// </summary>
     public bool Session { get; set; }
 
-    [SwaggerSchemaCustom("Confirmation data")]
+    /// <summary>
+    /// Confirmation data
+    /// </summary>
     public ConfirmData ConfirmData { get; set; }
 
-    [SwaggerSchemaCustom("Type of captcha")]
+    /// <summary>
+    /// Type of captcha
+    /// </summary>
     public RecaptchaType RecaptchaType { get; set; }
 
-    [SwaggerSchemaCustom("reCAPTCHA response")]
+    /// <summary>
+    /// reCAPTCHA response
+    /// </summary>
     public string RecaptchaResponse { get; set; }
 
-    [SwaggerSchemaCustom("Culture")]
+    /// <summary>
+    /// Culture
+    /// </summary>
     public string Culture { get; set; }
 }
 
@@ -76,18 +102,26 @@ public class AuthRequestsDto
 /// </summary>
 public class MobileRequestsDto
 {
-    [SwaggerSchemaCustom("Mobile phone")]
+    /// <summary>
+    /// Mobile phone
+    /// </summary>
     public string MobilePhone { get; set; }
 }
 
 public class ConfirmData
 {
-    [SwaggerSchemaCustom("Email address")]
+    /// <summary>
+    /// Email address
+    /// </summary>
     public string Email { get; set; }
 
-    [SwaggerSchemaCustom("Access an account for the first time or not")]
+    /// <summary>
+    /// Access an account for the first time or not
+    /// </summary>
     public bool? First { get; set; }
 
-    [SwaggerSchemaCustom("Key")]
+    /// <summary>
+    /// Key
+    /// </summary>
     public string Key { get; set; }
 }

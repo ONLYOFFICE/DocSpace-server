@@ -31,13 +31,19 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// </summary>
 public class SecurityInfoRequestDto : BaseBatchRequestDto
 {
-    [SwaggerSchemaCustom("Collection of sharing parameters")]
+    /// <summary>
+    /// Collection of sharing parameters
+    /// </summary>
     public IEnumerable<FileShareParams> Share { get; set; }
 
-    [SwaggerSchemaCustom("Notifies users about the shared file or not")]
+    /// <summary>
+    /// Notifies users about the shared file or not
+    /// </summary>
     public bool Notify { get; set; }
 
-    [SwaggerSchemaCustom("Message to send when notifying about the shared file")]
+    /// <summary>
+    /// Message to send when notifying about the shared file
+    /// </summary>
     public string SharingMessage { get; set; }
 }
 
@@ -46,12 +52,18 @@ public class SecurityInfoRequestDto : BaseBatchRequestDto
 /// </summary>
 public class SecurityInfoSimpeRequestDto
 {
-    [SwaggerSchemaCustom("Collection of sharing parameters")]
+    /// <summary>
+    /// Collection of sharing parameters
+    /// </summary>
     public IEnumerable<FileShareParams> Share { get; set; }
 
-    [SwaggerSchemaCustom("Notifies users about the shared file or not")]
+    /// <summary>
+    /// Notifies users about the shared file or not
+    /// </summary>
     public bool Notify { get; set; }
 
-    [SwaggerSchemaCustom("Message to send when notifying about the shared file")]
+    /// <summary>
+    /// Message to send when notifying about the shared file
+    /// </summary>
     public string SharingMessage { get; set; }
 }

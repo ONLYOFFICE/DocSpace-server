@@ -28,10 +28,14 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public class FileOperationDto
 {
-    [SwaggerSchemaCustom("Operation ID")]
+    /// <summary>
+    /// Operation ID
+    /// </summary>
     public string Id { get; set; }
 
-    [SwaggerSchemaCustom("Operation type")]
+    /// <summary>
+    /// Operation type
+    /// </summary>
     [JsonPropertyName("Operation")]
     public FileOperationType OperationType { get; init; }
 
@@ -44,16 +48,22 @@ public class FileOperationDto
     [SwaggerSchemaCustomString("Processing status", Example = "1")]
     public string Processed { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the operation is finished or not")]
+    /// <summary>
+    /// Specifies if the operation is finished or not
+    /// </summary>
     public bool Finished { get; set; }
 
     [SwaggerSchemaCustom("URL", Format = "uri")]
     public string Url { get; set; }
 
-    [SwaggerSchemaCustom("List of files")]
+    /// <summary>
+    /// List of files
+    /// </summary>
     public List<FileEntryDto> Files { get; set; }
 
-    [SwaggerSchemaCustom("List of folders")]
+    /// <summary>
+    /// List of folders
+    /// </summary>
     public List<FileEntryDto> Folders { get; set; }
 }
 

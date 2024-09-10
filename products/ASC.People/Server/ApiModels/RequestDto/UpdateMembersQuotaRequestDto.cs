@@ -31,9 +31,13 @@ namespace ASC.People.ApiModels.RequestDto;
 /// </summary>
 public class UpdateMembersQuotaRequestDto
 {
-    [SwaggerSchemaCustom("List of user IDs")]
+    /// <summary>
+    /// List of user IDs
+    /// </summary>
     public IEnumerable<Guid> UserIds { get; set; }
 
-    [SwaggerSchemaCustomString("List of user IDs", Example = "User quota", Format = "int64")]
+    /// <summary>
+    /// Quota
+    /// </summary>
     public long Quota { get; set; }
 }

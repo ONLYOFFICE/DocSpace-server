@@ -28,9 +28,13 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class CspDto
 {
-    [SwaggerSchemaCustom("Domains")]
+    /// <summary>
+    /// Domains
+    /// </summary>
     public IEnumerable<string> Domains { get; set; }
 
-    [SwaggerSchemaCustom("Header")]
+    /// <summary>
+    /// Header
+    /// </summary>
     public string Header { get; set; }
 }

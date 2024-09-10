@@ -31,21 +31,33 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// </summary>
 public class CheckConversionRequestDto<T>
 {
-    [SwaggerSchemaCustom("File ID")]
+    /// <summary>
+    /// File ID
+    /// </summary>
     public T FileId { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the conversion process is synchronous or not")]
+    /// <summary>
+    /// Specifies if the conversion process is synchronous or not
+    /// </summary>
     public bool Sync { get; set; }
 
-    [SwaggerSchemaCustom("Specifies whether to start a conversion process or not")]
+    /// <summary>
+    /// Specifies whether to start a conversion process or not
+    /// </summary>
     public bool StartConvert { get; set; }
 
-    [SwaggerSchemaCustom("File version")]
+    /// <summary>
+    /// File version
+    /// </summary>
     public int Version { get; set; }
 
-    [SwaggerSchemaCustom("Password")]
+    /// <summary>
+    /// Password
+    /// </summary>
     public string Password { get; set; }
 
-    [SwaggerSchemaCustom("Create new if exists")]
+    /// <summary>
+    /// Create new if exists
+    /// </summary>
     public bool CreateNewIfExist { get; set; }
 }

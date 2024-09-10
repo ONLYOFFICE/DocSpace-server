@@ -28,9 +28,13 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class IsDefaultWhiteLabelLogosDto
 {
-    [SwaggerSchemaCustom("White label logo name")]
+    /// <summary>
+    /// White label logo name
+    /// </summary>
     public string Name { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the white label logo is default or not")]
+    /// <summary>
+    /// Specifies if the white label logo is default or not
+    /// </summary>
     public bool Default { get; set; }
 }

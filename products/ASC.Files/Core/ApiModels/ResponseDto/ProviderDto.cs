@@ -28,22 +28,32 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public record ProviderDto(string Name, string Key, bool Connected, bool Oauth = false, string RedirectUrl = null, bool RequiredConnectionUrl = false, string ClientId = null)
 {
-    [SwaggerSchemaCustom("Provider name")]
+    /// <summary>
+    /// Provider name
+    /// </summary>
     public string Name { get; init; } = Name;
 
-    [SwaggerSchemaCustom("Provider key")]
+    /// <summary>
+    /// Provider key
+    /// </summary>
     public string Key { get; init; } = Key;
 
-    [SwaggerSchemaCustom("Connected flag")]
+    /// <summary>
+    /// Connected flag
+    /// </summary>
     public bool Connected { get; init; } = Connected;
 
-    [SwaggerSchemaCustom("Oauth flag")]
+    /// <summary>
+    /// Oauth flag
+    /// </summary>
     public bool Oauth { get; init; } = Oauth;
 
     [SwaggerSchemaCustom("Redirect url", Format = "uri")]
     public string RedirectUrl { get; init; } = RedirectUrl;
 
-    [SwaggerSchemaCustom("Required connection url flag")]
+    /// <summary>
+    /// Required connection url flag
+    /// </summary>
     public bool RequiredConnectionUrl { get; init; } = RequiredConnectionUrl;
     
     /// <summary>Oauth client id</summary>

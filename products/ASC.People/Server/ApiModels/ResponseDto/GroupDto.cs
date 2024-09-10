@@ -30,31 +30,47 @@ namespace ASC.People.ApiModels.ResponseDto;
 
 public class GroupDto
 {
-    [SwaggerSchemaCustom("Name")]
+    /// <summary>
+    /// Name
+    /// </summary>
     public string Name { get; set; }
 
-    [SwaggerSchemaCustom("Parent")]
+    /// <summary>
+    /// Parent
+    /// </summary>
     public Guid? Parent { get; set; }
 
-    [SwaggerSchemaCustom("Category")]
+    /// <summary>
+    /// Category
+    /// </summary>
     public Guid Category { get; set; }
 
-    [SwaggerSchemaCustom("ID")]
+    /// <summary>
+    /// ID
+    /// </summary>
     public Guid Id { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the LDAP settings are enabled for the group or not")]
+    /// <summary>
+    /// Specifies if the LDAP settings are enabled for the group or not
+    /// </summary>
     public bool IsLDAP { get; set; }
 
-    [SwaggerSchemaCustom("Manager")]
+    /// <summary>
+    /// Manager
+    /// </summary>
     public EmployeeFullDto Manager { get; set; }
 
     [SwaggerSchemaCustom(Description = "List of members")]
     public List<EmployeeFullDto> Members { get; set; }
 
-    [SwaggerSchemaCustom("Shared")]
+    /// <summary>
+    /// Shared
+    /// </summary>
     public bool? Shared { get; set; }
 
-    [SwaggerSchemaCustom("Members count")]
+    /// <summary>
+    /// Members count
+    /// </summary>
     public int MembersCount { get; set; }
 }
 

@@ -30,22 +30,34 @@ public class MentionWrapper
 {
     internal MentionWrapper() { }
 
-    [SwaggerSchemaCustom("User information")]
+    /// <summary>
+    /// User information
+    /// </summary>
     public UserInfo User { get; internal set; }
 
-    [SwaggerSchemaCustom("User email")]
+    /// <summary>
+    /// User email
+    /// </summary>
     public string Email { get; internal set; }
 
-    [SwaggerSchemaCustom("User ID")]
+    /// <summary>
+    /// User ID
+    /// </summary>
     public string Id { get; internal set; }
 
-    [SwaggerSchemaCustom("User image")]
+    /// <summary>
+    /// User image
+    /// </summary>
     public string Image { get; internal set; }
 
-    [SwaggerSchemaCustom("Specifies if the user has the access to the file or not")]
+    /// <summary>
+    /// Specifies if the user has the access to the file or not
+    /// </summary>
     public bool HasAccess { get; internal set; }
 
-    [SwaggerSchemaCustom("User display name")]
+    /// <summary>
+    /// User display name
+    /// </summary>
     public string Name { get; internal set; }
 }
 
@@ -54,12 +66,18 @@ public class MentionWrapper
 /// </summary>
 public class MentionMessageWrapper
 {
-    [SwaggerSchemaCustom("The config parameter which contains the information about the comment in the document that will be scrolled to")]
+    /// <summary>
+    /// The config parameter which contains the information about the comment in the document that will be scrolled to
+    /// </summary>
     public ActionLinkConfig ActionLink { get; set; }
 
-    [SwaggerSchemaCustom("A list of emails which will receive the mention message")]
+    /// <summary>
+    /// A list of emails which will receive the mention message
+    /// </summary>
     public List<string> Emails { get; set; }
 
-    [SwaggerSchemaCustom("The comment message")]
+    /// <summary>
+    /// The comment message
+    /// </summary>
     public string Message { get; set; }
 }

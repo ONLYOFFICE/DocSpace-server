@@ -29,15 +29,21 @@ namespace ASC.Migration.Core.Models.Api;
 [ProtoContract]
 public class MigratingApiFiles
 {
-    [SwaggerSchemaCustom("FoldersCount")]
+    /// <summary>
+    /// FoldersCount
+    /// </summary>
     [ProtoMember(1)]
     public int FoldersCount { get; set; }
 
-    [SwaggerSchemaCustom("FilesCount")]
+    /// <summary>
+    /// FilesCount
+    /// </summary>
     [ProtoMember(2)]
     public int FilesCount { get; set; }
 
-    [SwaggerSchemaCustom("BytesTotal")]
+    /// <summary>
+    /// BytesTotal
+    /// </summary>
     [ProtoMember(3)]
     public long BytesTotal { get; set; }
 }

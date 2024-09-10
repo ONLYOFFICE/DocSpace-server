@@ -31,9 +31,13 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 /// </summary>
 public class StorageRequestsDto
 {
-    [SwaggerSchemaCustom("Storage name")]
+    /// <summary>
+    /// Storage name
+    /// </summary>
     public string Module { get; set; }
 
-    [SwaggerSchemaCustom("Storage properties")]
+    /// <summary>
+    /// Storage properties
+    /// </summary>
     public IDictionary<string, string> Props { get; set; }
 }

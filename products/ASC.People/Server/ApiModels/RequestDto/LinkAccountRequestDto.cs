@@ -31,7 +31,9 @@ namespace ASC.People.ApiModels.RequestDto;
 /// </summary>
 public class LinkAccountRequestDto
 {
-    [SwaggerSchemaCustom("Third-party profile in the serialized format")]
+    /// <summary>
+    /// Third-party profile in the serialized format
+    /// </summary>
     public string SerializedProfile { get; set; }
 }
 
@@ -40,24 +42,38 @@ public class LinkAccountRequestDto
 /// </summary>
 public class SignupAccountRequestDto : LinkAccountRequestDto
 {
-    [SwaggerSchemaCustom("Employee type")]
+    /// <summary>
+    /// Employee type
+    /// </summary>
     public EmployeeType? EmployeeType { get; set; }
 
-    [SwaggerSchemaCustom("First name")]
+    /// <summary>
+    /// First name
+    /// </summary>
     public string FirstName { get; set; }
 
-    [SwaggerSchemaCustom("Last name")]
+    /// <summary>
+    /// Last name
+    /// </summary>
     public string LastName { get; set; }
 
-    [SwaggerSchemaCustom("Email address")]
+    /// <summary>
+    /// Email address
+    /// </summary>
     public string Email { get; set; }
 
-    [SwaggerSchemaCustom("Password hash")]
+    /// <summary>
+    /// Password hash
+    /// </summary>
     public string PasswordHash { get; set; }
 
-    [SwaggerSchemaCustom("Link key")]
+    /// <summary>
+    /// Link key
+    /// </summary>
     public string Key { get; set; }
 
-    [SwaggerSchemaCustom("Culture")]
+    /// <summary>
+    /// Culture
+    /// </summary>
     public string Culture { get; set; }
 }

@@ -31,12 +31,18 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// </summary>
 public class CreateWordpressPostRequestDto
 {
-    [SwaggerSchemaCustom("Post title")]
+    /// <summary>
+    /// Post title
+    /// </summary>
     public string Title { get; set; }
 
-    [SwaggerSchemaCustom("Post contents")]
+    /// <summary>
+    /// Post contents
+    /// </summary>
     public string Content { get; set; }
 
-    [SwaggerSchemaCustom("Operation status")]
+    /// <summary>
+    /// Operation status
+    /// </summary>
     public int Status { get; set; }
 }

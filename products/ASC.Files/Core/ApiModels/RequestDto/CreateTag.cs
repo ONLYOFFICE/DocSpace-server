@@ -33,7 +33,9 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// </summary>
 public class CreateTagRequestDto
 {
-    [SwaggerSchemaCustom("Tag name")]
+    /// <summary>
+    /// Tag name
+    /// </summary>
     [StringLength(255)]
     public string Name { get; set; }
 }

@@ -34,18 +34,28 @@ public class ThirdPartyBackupRequestDto
     [SwaggerSchemaCustom("Connection URL for the sharepoint", Format = "uri")]
     public string Url { get; set; }
 
-    [SwaggerSchemaCustom("Login")]
+    /// <summary>
+    /// Login
+    /// </summary>
     public string Login { get; set; }
 
-    [SwaggerSchemaCustom("Password")]
+    /// <summary>
+    /// Password
+    /// </summary>
     public string Password { get; set; }
 
-    [SwaggerSchemaCustom("Authentication token")]
+    /// <summary>
+    /// Authentication token
+    /// </summary>
     public string Token { get; set; }
 
-    [SwaggerSchemaCustom("Customer title")]
+    /// <summary>
+    /// Customer title
+    /// </summary>
     public string CustomerTitle { get; set; }
 
-    [SwaggerSchemaCustom("Provider key")]
+    /// <summary>
+    /// Provider key
+    /// </summary>
     public string ProviderKey { get; set; }
 }

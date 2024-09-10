@@ -28,10 +28,14 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public class CheckDestFolderDto
 {
-    [SwaggerSchemaCustom("Result")]
+    /// <summary>
+    /// Result
+    /// </summary>
     public CheckDestFolderResult Result { get; set; }
 
-    [SwaggerSchemaCustom("Files")]
+    /// <summary>
+    /// Files
+    /// </summary>
     public List<FileEntryDto> Files { get; set; }
 }
 

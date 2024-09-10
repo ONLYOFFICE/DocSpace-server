@@ -31,15 +31,21 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// </summary>
 public class CreateFileRequestDto<T>
 {
-    [SwaggerSchemaCustom("File title")]
+    /// <summary>
+    /// File title
+    /// </summary>
     public string Title { get; set; }
 
     [SwaggerSchemaCustomInt("Template file ID")]
     public T TemplateId { get; set; }
 
-    [SwaggerSchemaCustom("Specifies whether to allow the creation of external extension files or not")]
+    /// <summary>
+    /// Specifies whether to allow the creation of external extension files or not
+    /// </summary>
     public bool EnableExternalExt { get; set; }
 
-    [SwaggerSchemaCustom("Form ID")]
+    /// <summary>
+    /// Form ID
+    /// </summary>
     public int FormId { get; set; }
 }

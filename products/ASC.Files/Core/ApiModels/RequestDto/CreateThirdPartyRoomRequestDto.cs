@@ -31,18 +31,28 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// </summary>
 public class CreateThirdPartyRoomRequestDto
 {
-    [SwaggerSchemaCustom("Create as new folder")]
+    /// <summary>
+    /// Create as new folder
+    /// </summary>
     public bool CreateAsNewFolder { get; set; }
 
-    [SwaggerSchemaCustom("Room name")]
+    /// <summary>
+    /// Room name
+    /// </summary>
     public string Title { get; set; }
 
-    [SwaggerSchemaCustom("Room type")]
+    /// <summary>
+    /// Room type
+    /// </summary>
     public RoomType RoomType { get; set; }
 
-    [SwaggerSchemaCustom("Private")]
+    /// <summary>
+    /// Private
+    /// </summary>
     public bool Private { get; set; }
 
-    [SwaggerSchemaCustom("Indexing")]
+    /// <summary>
+    /// Indexing
+    /// </summary>
     public bool Indexing { get; set; }
 }

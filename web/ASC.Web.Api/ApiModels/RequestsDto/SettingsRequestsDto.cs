@@ -31,7 +31,9 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 /// </summary>
 public class OwnerIdSettingsRequestDto
 {
-    [SwaggerSchemaCustom("Owner ID")]
+    /// <summary>
+    /// Owner ID
+    /// </summary>
     public Guid OwnerId { get; set; }
 }
 
@@ -40,7 +42,9 @@ public class OwnerIdSettingsRequestDto
 /// </summary>
 public class SettingsRequestsDto
 {
-    [SwaggerSchemaCustom("Version ID")]
+    /// <summary>
+    /// Version ID
+    /// </summary>
     public int VersionId { get; set; }
 }
 
@@ -49,7 +53,9 @@ public class SettingsRequestsDto
 /// </summary>
 public class TipsRequestDto
 {
-    [SwaggerSchemaCustom("Specifies whether to show tips for the user or not")]
+    /// <summary>
+    /// Specifies whether to show tips for the user or not
+    /// </summary>
     public bool Show { get; set; } //tips
 }
 
@@ -58,7 +64,9 @@ public class TipsRequestDto
 /// </summary>
 public class DefaultProductRequestDto
 {
-    [SwaggerSchemaCustom("Default product ID")]
+    /// <summary>
+    /// Default product ID
+    /// </summary>
     public Guid DefaultProductID { get; set; }
 }
 
@@ -67,9 +75,13 @@ public class DefaultProductRequestDto
 /// </summary>
 public class TimeZoneRequestDto
 {
-    [SwaggerSchemaCustom("Language")]
+    /// <summary>
+    /// Language
+    /// </summary>
     public string Lng { get; set; }
 
-    [SwaggerSchemaCustom("Time zone ID")]
+    /// <summary>
+    /// Time zone ID
+    /// </summary>
     public string TimeZoneID { get; set; }
 }

@@ -28,21 +28,33 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public class GroupMemberSecurityDto
 {
-    [SwaggerSchemaCustom("User")]
+    /// <summary>
+    /// User
+    /// </summary>
     public EmployeeFullDto User { get; init; }
 
-    [SwaggerSchemaCustom("Group access")]
+    /// <summary>
+    /// Group access
+    /// </summary>
     public FileShare GroupAccess { get; init; }
 
-    [SwaggerSchemaCustom("User access")]
+    /// <summary>
+    /// User access
+    /// </summary>
     public FileShare? UserAccess { get; init; }
 
-    [SwaggerSchemaCustom("Overridden")]
+    /// <summary>
+    /// Overridden
+    /// </summary>
     public bool Overridden { get; init; }
 
-    [SwaggerSchemaCustom("Can edit access")]
+    /// <summary>
+    /// Can edit access
+    /// </summary>
     public bool CanEditAccess { get; init; }
 
-    [SwaggerSchemaCustom("Owner")]
+    /// <summary>
+    /// Owner
+    /// </summary>
     public bool Owner { get; init; }
 }

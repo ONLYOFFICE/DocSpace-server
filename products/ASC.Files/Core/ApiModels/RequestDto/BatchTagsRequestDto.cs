@@ -31,6 +31,8 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// </summary>
 public class BatchTagsRequestDto
 {
-    [SwaggerSchemaCustom("Tag names")]
+    /// <summary>
+    /// Tag names
+    /// </summary>
     public IEnumerable<string> Names { get; set; }
 }

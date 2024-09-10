@@ -34,7 +34,9 @@ public class SettingsDto
     [SwaggerSchemaCustom("List of trusted domains", Example = "mydomain.com")]
     public List<string> TrustedDomains { get; set; }
 
-    [SwaggerSchemaCustom("Trusted domains type")]
+    /// <summary>
+    /// Trusted domains type
+    /// </summary>
     public TenantTrustedDomainsType TrustedDomainsType { get; set; }
 
     [SwaggerSchemaCustom("Language", Example = "en-US")]
@@ -43,117 +45,191 @@ public class SettingsDto
     [SwaggerSchemaCustom("UTC offset", Example = "-8.5")]
     public TimeSpan UtcOffset { get; set; }
 
-    [SwaggerSchemaCustom("UTC hours offset")]
+    /// <summary>
+    /// UTC hours offset
+    /// </summary>
     public double UtcHoursOffset { get; set; }
 
     [SwaggerSchemaCustom("Greeting settings", Example = "Web Office Applications")]
     public string GreetingSettings { get; set; }
 
-    [SwaggerSchemaCustom("Owner ID")]
+    /// <summary>
+    /// Owner ID
+    /// </summary>
     public Guid OwnerId { get; set; }
 
-    [SwaggerSchemaCustom("Team template ID")]
+    /// <summary>
+    /// Team template ID
+    /// </summary>
     public string NameSchemaId { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if a user can join to the portal or not")]
+    /// <summary>
+    /// Specifies if a user can join to the portal or not
+    /// </summary>
     public bool? EnabledJoin { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if a user can send a message to the administrator or not")]
+    /// <summary>
+    /// Specifies if a user can send a message to the administrator or not
+    /// </summary>
     public bool? EnableAdmMess { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if a user can connect third-party providers or not")]
+    /// <summary>
+    /// Specifies if a user can connect third-party providers or not
+    /// </summary>
     public bool? ThirdpartyEnable { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if this is a DocSpace portal or not")]
+    /// <summary>
+    /// Specifies if this is a DocSpace portal or not
+    /// </summary>
     public bool DocSpace { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if this is a standalone portal or not")]
+    /// <summary>
+    /// Specifies if this is a standalone portal or not
+    /// </summary>
     public bool Standalone { get; set; }
 
-    [SwaggerSchemaCustom("Base domain")]
+    /// <summary>
+    /// Base domain
+    /// </summary>
     public string BaseDomain { get; set; }
 
-    [SwaggerSchemaCustom("Wizard token")]
+    /// <summary>
+    /// Wizard token
+    /// </summary>
     public string WizardToken { get; set; }
 
-    [SwaggerSchemaCustom("Password hash")]
+    /// <summary>
+    /// Password hash
+    /// </summary>
     public PasswordHasher PasswordHash { get; set; }
 
-    [SwaggerSchemaCustom("Firebase parameters")]
+    /// <summary>
+    /// Firebase parameters
+    /// </summary>
     public FirebaseDto Firebase { get; set; }
 
-    [SwaggerSchemaCustom("Version")]
+    /// <summary>
+    /// Version
+    /// </summary>
     public string Version { get; set; }
 
-    [SwaggerSchemaCustom("Type of captcha")]
+    /// <summary>
+    /// Type of captcha
+    /// </summary>
     public RecaptchaType RecaptchaType { get; set; }
 
-    [SwaggerSchemaCustom("ReCAPTCHA public key")]
+    /// <summary>
+    /// ReCAPTCHA public key
+    /// </summary>
     public string RecaptchaPublicKey { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the debug information will be sent or not")]
+    /// <summary>
+    /// Specifies if the debug information will be sent or not
+    /// </summary>
     public bool DebugInfo { get; set; }
 
-    [SwaggerSchemaCustom("Socket URL")]
+    /// <summary>
+    /// Socket URL
+    /// </summary>
     public string SocketUrl { get; set; }
 
-    [SwaggerSchemaCustom("Tenant status")]
+    /// <summary>
+    /// Tenant status
+    /// </summary>
     public TenantStatus TenantStatus { get; set; }
 
-    [SwaggerSchemaCustom("Tenant alias")]
+    /// <summary>
+    /// Tenant alias
+    /// </summary>
     public string TenantAlias { get; set; }
 
-    [SwaggerSchemaCustom("Link to the help")]
+    /// <summary>
+    /// Link to the help
+    /// </summary>
     public string HelpLink { get; set; }
 
-    [SwaggerSchemaCustom("Link to the forum")]
+    /// <summary>
+    /// Link to the forum
+    /// </summary>
     public string ForumLink { get; set; }
 
-    [SwaggerSchemaCustom("API documentation link")]
+    /// <summary>
+    /// API documentation link
+    /// </summary>
     public string ApiDocsLink { get; set; }
 
-    [SwaggerSchemaCustom("Domain validator")]
+    /// <summary>
+    /// Domain validator
+    /// </summary>
     public TenantDomainValidator DomainValidator { get; set; }
 
-    [SwaggerSchemaCustom("Zendesk key")]
+    /// <summary>
+    /// Zendesk key
+    /// </summary>
     public string ZendeskKey { get; set; }
 
-    [SwaggerSchemaCustom("Tag manager ID")]
+    /// <summary>
+    /// Tag manager ID
+    /// </summary>
     public string TagManagerId { get; set; }
 
-    [SwaggerSchemaCustom("Email for training booking")]
+    /// <summary>
+    /// Email for training booking
+    /// </summary>
     public string BookTrainingEmail { get; set; }
 
-    [SwaggerSchemaCustom("Documentation email")]
+    /// <summary>
+    /// Documentation email
+    /// </summary>
     public string DocumentationEmail { get; set; }
 
-    [SwaggerSchemaCustom("Legal terms")]
+    /// <summary>
+    /// Legal terms
+    /// </summary>
     public string LegalTerms { get; set; }
 
-    [SwaggerSchemaCustom("License url")]
+    /// <summary>
+    /// License url
+    /// </summary>
     public string LicenseUrl { get; set; }
 
-    [SwaggerSchemaCustom("Specifies whether the cookie settings are enabled")]
+    /// <summary>
+    /// Specifies whether the cookie settings are enabled
+    /// </summary>
     public bool CookieSettingsEnabled { get; set; }
 
-    [SwaggerSchemaCustom("Limited access space")]
+    /// <summary>
+    /// Limited access space
+    /// </summary>
     public bool LimitedAccessSpace { get; set; }
 
-    [SwaggerSchemaCustom("User name validation regex")]
+    /// <summary>
+    /// User name validation regex
+    /// </summary>
     public string UserNameRegex { get; set; }
 
-    [SwaggerSchemaCustom("Invitation limit")]
+    /// <summary>
+    /// Invitation limit
+    /// </summary>
     public int? InvitationLimit { get; set; }
 
-    [SwaggerSchemaCustom("Plugins")]
+    /// <summary>
+    /// Plugins
+    /// </summary>
     public PluginsDto Plugins { get; set; }
 
-    [SwaggerSchemaCustom("Deep link")]
+    /// <summary>
+    /// Deep link
+    /// </summary>
     public DeepLinkDto DeepLink { get; set; }
 
-    [SwaggerSchemaCustom("Form gallery")]
+    /// <summary>
+    /// Form gallery
+    /// </summary>
     public FormGalleryDto FormGallery { get; set; }
 
-    [SwaggerSchemaCustom("Max image upload size")]
+    /// <summary>
+    /// Max image upload size
+    /// </summary>
     public long MaxImageUploadSize { get; set; }
 }

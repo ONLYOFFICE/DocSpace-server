@@ -28,45 +28,71 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class ActiveConnectionsDto
 {
-    [SwaggerSchemaCustom("Login event")]
+    /// <summary>
+    /// Login event
+    /// </summary>
     public int LoginEvent { get; set; }
 
-    [SwaggerSchemaCustom("Items")]
+    /// <summary>
+    /// Items
+    /// </summary>
     public List<ActiveConnectionsItemDto> Items { get; set; }
 }
 
 public class ActiveConnectionsItemDto
 {
-    [SwaggerSchemaCustom("Id")]
+    /// <summary>
+    /// Id
+    /// </summary>
     public int Id { get; set; }
 
-    [SwaggerSchemaCustom("Tenant id")]
+    /// <summary>
+    /// Tenant id
+    /// </summary>
     public int TenantId { get; set; }
 
-    [SwaggerSchemaCustom("User id")]
+    /// <summary>
+    /// User id
+    /// </summary>
     public Guid UserId { get; set; }
 
-    [SwaggerSchemaCustom("Mobile")]
+    /// <summary>
+    /// Mobile
+    /// </summary>
     public bool Mobile {  get; set; }
 
-    [SwaggerSchemaCustom("Ip")]
+    /// <summary>
+    /// Ip
+    /// </summary>
     public string Ip { get; set; }
 
-    [SwaggerSchemaCustom("Country")]
+    /// <summary>
+    /// Country
+    /// </summary>
     public string Country { get; set; }
 
-    [SwaggerSchemaCustom("City")]
+    /// <summary>
+    /// City
+    /// </summary>
     public string City { get; set; }
 
-    [SwaggerSchemaCustom("Browser")]
+    /// <summary>
+    /// Browser
+    /// </summary>
     public string Browser { get; set; }
 
-    [SwaggerSchemaCustom("Platform")]
+    /// <summary>
+    /// Platform
+    /// </summary>
     public string Platform { get; set; }
 
-    [SwaggerSchemaCustom("Date")]
+    /// <summary>
+    /// Date
+    /// </summary>
     public ApiDateTime Date { get; set; }
 
-    [SwaggerSchemaCustom("Page")]
+    /// <summary>
+    /// Page
+    /// </summary>
     public string Page { get; set; }
 }

@@ -47,7 +47,9 @@ public class CustomNavigationSettings : ISettings<CustomNavigationSettings>
 /// </summary>
 public class CustomNavigationItem
 {
-    [SwaggerSchemaCustom("Id")]
+    /// <summary>
+    /// Id
+    /// </summary>
     public Guid Id { get; set; }
 
     [SwaggerSchemaCustom("Label", Example = "Label")]
@@ -62,10 +64,14 @@ public class CustomNavigationItem
     [SwaggerSchemaCustom("Small image", Example = "data:image\\/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8\\/9hAAAAUUlEQVR4AWMY\\/KC5o\\/cAEP9HxxgKcSpCGELYADyu2E6mAQjNxBlAWPNxkHdwGkBIM3KYYDUAr2ZCAE+oH8eujrAXDsA0k2EAAtDXAGLx4MpsADUgvkRKUlqfAAAAAElFTkSuQmCC")]
     public string SmallImg { get; set; }
 
-    [SwaggerSchemaCustom("Show in menu or not")]
+    /// <summary>
+    /// Show in menu or not
+    /// </summary>
     public bool ShowInMenu { get; set; }
     
-    [SwaggerSchemaCustom("Show on home page or not")]
+    /// <summary>
+    /// Show on home page or not
+    /// </summary>
     public bool ShowOnHomePage { get; set; }
 
     private static string GetDefaultBigImg()

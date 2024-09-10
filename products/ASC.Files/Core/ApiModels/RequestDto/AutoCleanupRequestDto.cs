@@ -31,9 +31,13 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// </summary>
 public class AutoCleanupRequestDto
 {
-    [SwaggerSchemaCustom("Enables the auto-clearing or not")]
+    /// <summary>
+    /// Enables the auto-clearing or not
+    /// </summary>
     public bool Set { get; set; }
 
-    [SwaggerSchemaCustom("A time interval when the auto-clearing will be performed")]
+    /// <summary>
+    /// A time interval when the auto-clearing will be performed
+    /// </summary>
     public DateToAutoCleanUp Gap { get; set; }
 }

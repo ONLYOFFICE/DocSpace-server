@@ -88,12 +88,18 @@ public static class ConsumerExtension
 [DebuggerDisplay("({Name},{Value})")]
 public class AuthKey
 {
-    [SwaggerSchemaCustom("Name")]
+    /// <summary>
+    /// Name
+    /// </summary>
     public string Name { get; init; }
 
-    [SwaggerSchemaCustom("Value")]
+    /// <summary>
+    /// Value
+    /// </summary>
     public string Value { get; init; }
 
-    [SwaggerSchemaCustom("Title")]
+    /// <summary>
+    /// Title
+    /// </summary>
     public string Title { get; set; }
 }

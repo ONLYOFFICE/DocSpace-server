@@ -28,18 +28,26 @@ namespace ASC.IPSecurity;
 
 public class IPRestriction : IpRestrictionBase, IMapFrom<TenantIpRestrictions>
 {
-    [SwaggerSchemaCustom("Restiction ID")]
+    /// <summary>
+    /// Restiction ID
+    /// </summary>
     public int Id { get; set; }
 
-    [SwaggerSchemaCustom("Tenant ID")]
+    /// <summary>
+    /// Tenant ID
+    /// </summary>
     public int TenantId { get; set; }
 }
 
 public class IpRestrictionBase
 {
-    [SwaggerSchemaCustom("IP address")]
+    /// <summary>
+    /// IP address
+    /// </summary>
     public string Ip { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if this address is for administrator users only or not")]
+    /// <summary>
+    /// Specifies if this address is for administrator users only or not
+    /// </summary>
     public bool ForAdmin { get; set; }
 }

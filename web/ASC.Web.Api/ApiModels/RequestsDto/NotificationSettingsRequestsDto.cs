@@ -31,10 +31,14 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 /// </summary>
 public class NotificationSettingsRequestsDto
 {
-    [SwaggerSchemaCustom("Notification type")]
+    /// <summary>
+    /// Notification type
+    /// </summary>
     public NotificationType Type { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the notification type is enabled or not")]
+    /// <summary>
+    /// Specifies if the notification type is enabled or not
+    /// </summary>
     public bool IsEnabled { get; set; }
 }
 

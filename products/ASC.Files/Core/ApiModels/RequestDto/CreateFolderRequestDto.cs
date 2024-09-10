@@ -31,6 +31,8 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// </summary>
 public class CreateFolderRequestDto
 {
-    [SwaggerSchemaCustom("Folder title")]
+    /// <summary>
+    /// Folder title
+    /// </summary>
     public string Title { get; set; }
 }

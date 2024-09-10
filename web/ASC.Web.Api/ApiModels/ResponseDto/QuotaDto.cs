@@ -28,58 +28,92 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class QuotaDto
 {
-    [SwaggerSchemaCustom("ID")]
+    /// <summary>
+    /// ID
+    /// </summary>
     public int Id { get; set; }
 
-    [SwaggerSchemaCustom("Title")]
+    /// <summary>
+    /// Title
+    /// </summary>
     public string Title { get; set; }
 
-    [SwaggerSchemaCustom("Price")]
+    /// <summary>
+    /// Price
+    /// </summary>
     public PriceDto Price { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the quota is nonprofit or not")]
+    /// <summary>
+    /// Specifies if the quota is nonprofit or not
+    /// </summary>
     public bool NonProfit { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the quota is free or not")]
+    /// <summary>
+    /// Specifies if the quota is free or not
+    /// </summary>
     public bool Free { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the quota is trial or not")]
+    /// <summary>
+    /// Specifies if the quota is trial or not
+    /// </summary>
     public bool Trial { get; set; }
 
-    [SwaggerSchemaCustom("List of quota features")]
+    /// <summary>
+    /// List of quota features
+    /// </summary>
     public IEnumerable<TenantQuotaFeatureDto> Features { get; set; }
 
-    [SwaggerSchemaCustom("User quota")]
+    /// <summary>
+    /// User quota
+    /// </summary>
     public TenantEntityQuotaSettings UsersQuota {  get; set; }
 
-    [SwaggerSchemaCustom("Room quota")]
+    /// <summary>
+    /// Room quota
+    /// </summary>
     public TenantEntityQuotaSettings RoomsQuota {  get; set; }
 
-    [SwaggerSchemaCustom("Tenant custom quota")]
+    /// <summary>
+    /// Tenant custom quota
+    /// </summary>
     public TenantQuotaSettings TenantCustomQuota { get; set; }
 }
 
 public class TenantQuotaFeatureDto : IEquatable<TenantQuotaFeatureDto>
 {
-    [SwaggerSchemaCustom("ID")]
+    /// <summary>
+    /// ID
+    /// </summary>
     public string Id { get; set; }
 
-    [SwaggerSchemaCustom("Title")]
+    /// <summary>
+    /// Title
+    /// </summary>
     public string Title { get; set; }
 
-    [SwaggerSchemaCustom("Image URL")]
+    /// <summary>
+    /// Image URL
+    /// </summary>
     public string Image { get; set; }
 
-    [SwaggerSchemaCustom("Value")]
+    /// <summary>
+    /// Value
+    /// </summary>
     public object Value { get; set; }
 
-    [SwaggerSchemaCustom("Type")]
+    /// <summary>
+    /// Type
+    /// </summary>
     public string Type { get; set; }
 
-    [SwaggerSchemaCustom("Used feature parameters")]
+    /// <summary>
+    /// Used feature parameters
+    /// </summary>
     public FeatureUsedDto Used { get; set; }
 
-    [SwaggerSchemaCustom("Price title")]
+    /// <summary>
+    /// Price title
+    /// </summary>
     public string PriceTitle { get; set; }
 
     public bool Equals(TenantQuotaFeatureDto other)
@@ -101,15 +135,21 @@ public class PriceDto
     [SwaggerSchemaCustom("Value", Example = 10.0)]
     public decimal? Value { get; set; }
 
-    [SwaggerSchemaCustom("Currency symbol")]
+    /// <summary>
+    /// Currency symbol
+    /// </summary>
     public string CurrencySymbol { get; set; }
 }
 
 public class FeatureUsedDto
 {
-    [SwaggerSchemaCustom("Value")]
+    /// <summary>
+    /// Value
+    /// </summary>
     public object Value { get; set; }
 
-    [SwaggerSchemaCustom("Title")]
+    /// <summary>
+    /// Title
+    /// </summary>
     public string Title { get; set; }
 }

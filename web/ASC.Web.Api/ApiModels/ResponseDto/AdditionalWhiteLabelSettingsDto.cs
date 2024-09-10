@@ -28,43 +28,63 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class AdditionalWhiteLabelSettingsDto: IMapFrom<AdditionalWhiteLabelSettings>
 {
-    [SwaggerSchemaCustom("Specifies if the start document is enabled or not")]
+    /// <summary>
+    /// Specifies if the start document is enabled or not
+    /// </summary>
     public bool StartDocsEnabled { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the help center is enabled or not")]
+    /// <summary>
+    /// Specifies if the help center is enabled or not
+    /// </summary>
     public bool HelpCenterEnabled { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if feedback and support are available or not")]
+    /// <summary>
+    /// Specifies if feedback and support are available or not
+    /// </summary>
     public bool FeedbackAndSupportEnabled { get; set; }
 
-    [SwaggerSchemaCustom("Feedback and support URL")]
+    /// <summary>
+    /// Feedback and support URL
+    /// </summary>
     public string FeedbackAndSupportUrl { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the user forum is enabled or not")]
+    /// <summary>
+    /// Specifies if the user forum is enabled or not
+    /// </summary>
     public bool UserForumEnabled { get; set; }
 
     [SwaggerSchemaCustom("User forum URL", Format = "uri")]
     public string UserForumUrl { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the video guides are enabled or not")]
+    /// <summary>
+    /// Specifies if the video guides are enabled or not
+    /// </summary>
     public bool VideoGuidesEnabled { get; set; }
 
     [SwaggerSchemaCustom("Video guides URL", Format = "uri")]
     public string VideoGuidesUrl { get; set; }
 
-    [SwaggerSchemaCustom("Sales email")]
+    /// <summary>
+    /// Sales email
+    /// </summary>
     public string SalesEmail { get; set; }
 
     [SwaggerSchemaCustom("URL to pay for the portal", Format = "uri")]
     public string BuyUrl { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the license agreements are enabled or not")]
+    /// <summary>
+    /// Specifies if the license agreements are enabled or not
+    /// </summary>
     public bool LicenseAgreementsEnabled { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if these settings are default or not")]
+    /// <summary>
+    /// Specifies if these settings are default or not
+    /// </summary>
     public bool IsDefault { get; set; }
 
-    [SwaggerSchemaCustom("License agreements URL")]
+    /// <summary>
+    /// License agreements URL
+    /// </summary>
     public string LicenseAgreementsUrl { get; set; }
 
     public void Mapping(Profile profile)

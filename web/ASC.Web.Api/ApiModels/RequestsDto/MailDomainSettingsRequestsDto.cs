@@ -31,13 +31,19 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 /// </summary>
 public class MailDomainSettingsRequestsDto
 {
-    [SwaggerSchemaCustom("Trusted domain type")]
+    /// <summary>
+    /// Trusted domain type
+    /// </summary>
     public TenantTrustedDomainsType Type { get; set; }
 
-    [SwaggerSchemaCustom("List of trusted domains")]
+    /// <summary>
+    /// List of trusted domains
+    /// </summary>
     public List<string> Domains { get; set; }
 
-    [SwaggerSchemaCustom("Invites as a user or not")]
+    /// <summary>
+    /// Invites as a user or not
+    /// </summary>
     public bool InviteUsersAsVisitors { get; set; }
 }
 
@@ -46,10 +52,14 @@ public class MailDomainSettingsRequestsDto
 /// </summary>
 public class AdminMessageBaseSettingsRequestsDto
 {
-    [SwaggerSchemaCustom("Email")]
+    /// <summary>
+    /// Email
+    /// </summary>
     public string Email { get; set; }
 
-    [SwaggerSchemaCustom("Culture")]
+    /// <summary>
+    /// Culture
+    /// </summary>
     public string Culture { get; set; }
 }
 
@@ -58,7 +68,9 @@ public class AdminMessageBaseSettingsRequestsDto
 /// </summary>
 public class AdminMessageSettingsRequestsDto : AdminMessageBaseSettingsRequestsDto
 {
-    [SwaggerSchemaCustom("Message")]
+    /// <summary>
+    /// Message
+    /// </summary>
     public string Message { get; set; }
 }
 
@@ -67,6 +79,8 @@ public class AdminMessageSettingsRequestsDto : AdminMessageBaseSettingsRequestsD
 /// </summary>
 public class TurnOnAdminMessageSettingsRequestDto
 {
-    [SwaggerSchemaCustom("Specifies if the administrator messages are enabled or not")]
+    /// <summary>
+    /// Specifies if the administrator messages are enabled or not
+    /// </summary>
     public bool TurnOn { get; set; }
 }

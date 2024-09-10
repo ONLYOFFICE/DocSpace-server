@@ -31,26 +31,38 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 /// </summary>
 public class ConversationResultDto
 {
-    [SwaggerSchemaCustom("Operation ID")]
+    /// <summary>
+    /// Operation ID
+    /// </summary>
     public string Id { get; set; }
 
     [SwaggerSchemaCustom("Operation type", Example = "Move")]
     [JsonPropertyName("Operation")]
     public FileOperationType OperationType { get; set; }
 
-    [SwaggerSchemaCustom("Operation progress")]
+    /// <summary>
+    /// Operation progress
+    /// </summary>
     public int Progress { get; set; }
 
-    [SwaggerSchemaCustom("Source file")]
+    /// <summary>
+    /// Source file
+    /// </summary>
     public string Source { get; set; }
 
-    [SwaggerSchemaCustom("Resulting file")]
+    /// <summary>
+    /// Resulting file
+    /// </summary>
     [JsonPropertyName("result")]
     public object File { get; set; }
 
-    [SwaggerSchemaCustom("Error")]
+    /// <summary>
+    /// Error
+    /// </summary>
     public string Error { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the operation is processed or not")]
+    /// <summary>
+    /// Specifies if the operation is processed or not
+    /// </summary>
     public string Processed { get; set; }
 }

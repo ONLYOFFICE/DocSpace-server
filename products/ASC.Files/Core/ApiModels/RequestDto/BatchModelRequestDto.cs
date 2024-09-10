@@ -31,7 +31,9 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// </summary>
 public class FileBaseBatchRequestDto
 {
-    [SwaggerSchemaCustom("List of file IDs")]
+    /// <summary>
+    /// List of file IDs
+    /// </summary>
     public IEnumerable<JsonElement> FileIds { get; set; } = new List<JsonElement>();
 }
 /// <summary>
@@ -39,10 +41,14 @@ public class FileBaseBatchRequestDto
 /// </summary>
 public class BaseBatchRequestDto
 {
-    [SwaggerSchemaCustom("List of folder IDs")]
+    /// <summary>
+    /// List of folder IDs
+    /// </summary>
     public IEnumerable<JsonElement> FolderIds { get; set; } = new List<JsonElement>();
 
-    [SwaggerSchemaCustom("List of file IDs")]
+    /// <summary>
+    /// List of file IDs
+    /// </summary>
     public IEnumerable<JsonElement> FileIds { get; set; } = new List<JsonElement>();
 }
 
@@ -51,7 +57,9 @@ public class BaseBatchRequestDto
 /// </summary>
 public class DownloadRequestDto : BaseBatchRequestDto
 {
-    [SwaggerSchemaCustom("List of file IDs which will be converted")]
+    /// <summary>
+    /// List of file IDs which will be converted
+    /// </summary>
     public IDictionary<JsonElement, string> FileConvertIds { get; set; } = new Dictionary<JsonElement, string>();
 }
 
@@ -60,7 +68,9 @@ public class DownloadRequestDto : BaseBatchRequestDto
 /// </summary>
 public class DeleteBatchRequestDto : BaseBatchRequestDto
 {
-    [SwaggerSchemaCustom("Specifies whether to delete a file after the editing session is finished or not")]
+    /// <summary>
+    /// Specifies whether to delete a file after the editing session is finished or not
+    /// </summary>
     public bool DeleteAfter { get; set; }
 
     [SwaggerSchemaCustom("Specifies whether to move a file to the \"Trash\" folder or delete it immediately")]
@@ -72,7 +82,9 @@ public class DeleteBatchRequestDto : BaseBatchRequestDto
 /// </summary>
 public class DeleteRequestDto
 {
-    [SwaggerSchemaCustom("Specifies whether to delete a file after the editing session is finished or not")]
+    /// <summary>
+    /// Specifies whether to delete a file after the editing session is finished or not
+    /// </summary>
     public bool DeleteAfter { get; set; }
 
     [SwaggerSchemaCustom("Specifies whether to move a file to the \"Trash\" folder or delete it immediately")]
@@ -87,13 +99,19 @@ public class BatchRequestDto : BaseBatchRequestDto
     [SwaggerSchemaCustom("Destination folder ID", Format = "json")]
     public JsonElement DestFolderId { get; set; }
 
-    [SwaggerSchemaCustom("Overwriting behavior")]
+    /// <summary>
+    /// Overwriting behavior
+    /// </summary>
     public FileConflictResolveType ConflictResolveType { get; set; }
 
-    [SwaggerSchemaCustom("Specifies whether to delete a folder after the editing session is finished or not")]
+    /// <summary>
+    /// Specifies whether to delete a folder after the editing session is finished or not
+    /// </summary>
     public bool DeleteAfter { get; set; }
 
-    [SwaggerSchemaCustom("Content")]
+    /// <summary>
+    /// Content
+    /// </summary>
     public bool Content { get; set; }
 }
 /// <summary>

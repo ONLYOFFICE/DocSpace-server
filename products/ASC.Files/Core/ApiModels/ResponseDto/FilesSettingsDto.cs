@@ -28,79 +28,129 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public class FilesSettingsDto
 {
-    [SwaggerSchemaCustom("Exts image previewed")]
+    /// <summary>
+    /// Exts image previewed
+    /// </summary>
     public List<string> ExtsImagePreviewed { get; set; }
 
-    [SwaggerSchemaCustom("Exts media previewed")]
+    /// <summary>
+    /// Exts media previewed
+    /// </summary>
     public List<string> ExtsMediaPreviewed { get; set; }
 
-    [SwaggerSchemaCustom("Exts web previewed")]
+    /// <summary>
+    /// Exts web previewed
+    /// </summary>
     public List<string> ExtsWebPreviewed { get; set; }
 
-    [SwaggerSchemaCustom("Exts web edited")]
+    /// <summary>
+    /// Exts web edited
+    /// </summary>
     public List<string> ExtsWebEdited { get; set; }
 
-    [SwaggerSchemaCustom("Exts web encrypt")]
+    /// <summary>
+    /// Exts web encrypt
+    /// </summary>
     public List<string> ExtsWebEncrypt { get; set; }
 
-    [SwaggerSchemaCustom("Exts web reviewed")]
+    /// <summary>
+    /// Exts web reviewed
+    /// </summary>
     public List<string> ExtsWebReviewed { get; set; }
 
-    [SwaggerSchemaCustom("Exts web custom filter editing")]
+    /// <summary>
+    /// Exts web custom filter editing
+    /// </summary>
     public List<string> ExtsWebCustomFilterEditing { get; set; }
 
-    [SwaggerSchemaCustom("Exts web restricted editing")]
+    /// <summary>
+    /// Exts web restricted editing
+    /// </summary>
     public List<string> ExtsWebRestrictedEditing { get; set; }
 
-    [SwaggerSchemaCustom("Exts web commented")]
+    /// <summary>
+    /// Exts web commented
+    /// </summary>
     public List<string> ExtsWebCommented { get; set; }
 
-    [SwaggerSchemaCustom("Exts web template")]
+    /// <summary>
+    /// Exts web template
+    /// </summary>
     public List<string> ExtsWebTemplate { get; set; }
 
-    [SwaggerSchemaCustom("Exts co authoring")]
+    /// <summary>
+    /// Exts co authoring
+    /// </summary>
     public List<string> ExtsCoAuthoring { get; set; }
 
-    [SwaggerSchemaCustom("Exts must convert")]
+    /// <summary>
+    /// Exts must convert
+    /// </summary>
     public List<string> ExtsMustConvert { get; set; }
 
-    [SwaggerSchemaCustom("Exts convertible")]
+    /// <summary>
+    /// Exts convertible
+    /// </summary>
     public IDictionary<string, List<string>> ExtsConvertible { get; set; }
 
-    [SwaggerSchemaCustom("Exts uploadable")]
+    /// <summary>
+    /// Exts uploadable
+    /// </summary>
     public List<string> ExtsUploadable { get; set; }
 
-    [SwaggerSchemaCustom("Exts archive")]
+    /// <summary>
+    /// Exts archive
+    /// </summary>
     public ImmutableList<string> ExtsArchive { get; set; }
 
-    [SwaggerSchemaCustom("Exts video")]
+    /// <summary>
+    /// Exts video
+    /// </summary>
     public ImmutableList<string> ExtsVideo { get; set; }
 
-    [SwaggerSchemaCustom("Exts audio")]
+    /// <summary>
+    /// Exts audio
+    /// </summary>
     public ImmutableList<string> ExtsAudio { get; set; }
 
-    [SwaggerSchemaCustom("Exts image")]
+    /// <summary>
+    /// Exts image
+    /// </summary>
     public ImmutableList<string> ExtsImage { get; set; }
 
-    [SwaggerSchemaCustom("Exts spreadsheet")]
+    /// <summary>
+    /// Exts spreadsheet
+    /// </summary>
     public ImmutableList<string> ExtsSpreadsheet { get; set; }
 
-    [SwaggerSchemaCustom("Exts presentation")]
+    /// <summary>
+    /// Exts presentation
+    /// </summary>
     public ImmutableList<string> ExtsPresentation { get; set; }
 
-    [SwaggerSchemaCustom("Exts document")]
+    /// <summary>
+    /// Exts document
+    /// </summary>
     public ImmutableList<string> ExtsDocument { get; set; }
 
-    [SwaggerSchemaCustom("Internal formats")]
+    /// <summary>
+    /// Internal formats
+    /// </summary>
     public Dictionary<FileType, string> InternalFormats { get; set; }
 
-    [SwaggerSchemaCustom("Master form extension")]
+    /// <summary>
+    /// Master form extension
+    /// </summary>
     public string MasterFormExtension { get; set; }
 
-    [SwaggerSchemaCustom("Param version")]
+    /// <summary>
+    /// Param version
+    /// </summary>
     public string ParamVersion { get; set; }
 
-    [SwaggerSchemaCustom("Param out type")]
+    /// <summary>
+    /// Param out type
+    /// </summary>
     public string ParamOutType { get; set; }
 
     [SwaggerSchemaCustom("File download url string", Format = "uri")]
@@ -124,71 +174,115 @@ public class FilesSettingsDto
     [SwaggerSchemaCustom("File thumbnail url string", Format = "uri")]
     public string FileThumbnailUrlString { get; set; }
 
-    [SwaggerSchemaCustom("Confirm delete")]
+    /// <summary>
+    /// Confirm delete
+    /// </summary>
     public bool ConfirmDelete { get; set; }
 
-    [SwaggerSchemaCustom("EnableT third party")]
+    /// <summary>
+    /// EnableT third party
+    /// </summary>
     public bool EnableThirdParty { get; set; }
 
-    [SwaggerSchemaCustom("External share")]
+    /// <summary>
+    /// External share
+    /// </summary>
     public bool ExternalShare { get; set; }
 
-    [SwaggerSchemaCustom("External share social media")]
+    /// <summary>
+    /// External share social media
+    /// </summary>
     public bool ExternalShareSocialMedia { get; set; }
 
-    [SwaggerSchemaCustom("Store original files")]
+    /// <summary>
+    /// Store original files
+    /// </summary>
     public bool StoreOriginalFiles { get; set; }
 
-    [SwaggerSchemaCustom("Keep new file name")]
+    /// <summary>
+    /// Keep new file name
+    /// </summary>
     public bool KeepNewFileName { get; set; }
 
-    [SwaggerSchemaCustom("Convert notify")]
+    /// <summary>
+    /// Convert notify
+    /// </summary>
     public bool ConvertNotify { get; set; }
 
-    [SwaggerSchemaCustom("HideC confirm convert save")]
+    /// <summary>
+    /// HideC confirm convert save
+    /// </summary>
     public bool HideConfirmConvertSave { get; set; }
 
-    [SwaggerSchemaCustom("Hide confirm convert open")]
+    /// <summary>
+    /// Hide confirm convert open
+    /// </summary>
     public bool HideConfirmConvertOpen { get; set; }
 
-    [SwaggerSchemaCustom("Default order")]
+    /// <summary>
+    /// Default order
+    /// </summary>
     public OrderBy DefaultOrder { get; set; }
 
-    [SwaggerSchemaCustom("Forcesave")]
+    /// <summary>
+    /// Forcesave
+    /// </summary>
     public bool Forcesave { get; set; }
 
-    [SwaggerSchemaCustom("Store forcesave")]
+    /// <summary>
+    /// Store forcesave
+    /// </summary>
     public bool StoreForcesave { get; set; }
 
-    [SwaggerSchemaCustom("Recent section")]
+    /// <summary>
+    /// Recent section
+    /// </summary>
     public bool RecentSection { get; set; }
 
-    [SwaggerSchemaCustom("Favorites section")]
+    /// <summary>
+    /// Favorites section
+    /// </summary>
     public bool FavoritesSection { get; set; }
 
-    [SwaggerSchemaCustom("Templates section")]
+    /// <summary>
+    /// Templates section
+    /// </summary>
     public bool TemplatesSection { get; set; }
 
-    [SwaggerSchemaCustom("Download tar gz")]
+    /// <summary>
+    /// Download tar gz
+    /// </summary>
     public bool DownloadTarGz { get; set; }
 
-    [SwaggerSchemaCustom("Automatically clean up")]
+    /// <summary>
+    /// Automatically clean up
+    /// </summary>
     public AutoCleanUpData AutomaticallyCleanUp { get; set; }
 
-    [SwaggerSchemaCustom("Can search by content")]
+    /// <summary>
+    /// Can search by content
+    /// </summary>
     public bool CanSearchByContent { get; set; }
 
-    [SwaggerSchemaCustom("Default sharing access rights")]
+    /// <summary>
+    /// Default sharing access rights
+    /// </summary>
     public List<FileShare> DefaultSharingAccessRights { get; set; }
 
 
-    [SwaggerSchemaCustom("Max upload thread count")]    
+    /// <summary>
+    /// Max upload thread count
+    /// </summary>    
     public int MaxUploadThreadCount { get; set; }
 
-    [SwaggerSchemaCustom("Chunk upload size")]    
+    /// <summary>
+    /// Chunk upload size
+    /// </summary>    
     public long ChunkUploadSize { get; set; }
 
-    [SwaggerSchemaCustom("Open editor in same tab")]
+    /// <summary>
+    /// Open editor in same tab
+    /// </summary>
     public bool OpenEditorInSameTab { get; set; }
 }
 

@@ -72,11 +72,15 @@ public enum SortedByType
 [DebuggerDisplay("{SortedBy} {IsAsc}")]
 public class OrderBy(SortedByType sortedByType, bool isAsc)
 {
-    [SwaggerSchemaCustom("Is asc")]
+    /// <summary>
+    /// Is asc
+    /// </summary>
     [JsonPropertyName("is_asc")]
     public bool IsAsc { get; init; } = isAsc;
 
-    [SwaggerSchemaCustom("Sorted by")]
+    /// <summary>
+    /// Sorted by
+    /// </summary>
     [JsonPropertyName("property")]
     public SortedByType SortedBy { get; set; } = sortedByType;
 }

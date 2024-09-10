@@ -28,43 +28,69 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 
 public class LoginEventDto
 {
-    [SwaggerSchemaCustom("ID")]
+    /// <summary>
+    /// ID
+    /// </summary>
     public int Id { get; set; }
 
-    [SwaggerSchemaCustom("Date")]
+    /// <summary>
+    /// Date
+    /// </summary>
     public ApiDateTime Date { get; set; }
 
-    [SwaggerSchemaCustom("User")]
+    /// <summary>
+    /// User
+    /// </summary>
     public string User { get; set; }
 
-    [SwaggerSchemaCustom("User ID")]
+    /// <summary>
+    /// User ID
+    /// </summary>
     public Guid UserId { get; set; }
 
-    [SwaggerSchemaCustom("Login")]
+    /// <summary>
+    /// Login
+    /// </summary>
     public string Login { get; set; }
 
-    [SwaggerSchemaCustom("Action")]
+    /// <summary>
+    /// Action
+    /// </summary>
     public string Action { get; set; }
 
-    [SwaggerSchemaCustom("Action ID")]
+    /// <summary>
+    /// Action ID
+    /// </summary>
     public MessageAction ActionId { get; set; }
 
-    [SwaggerSchemaCustom("IP")]
+    /// <summary>
+    /// IP
+    /// </summary>
     public string IP { get; set; }
 
-    [SwaggerSchemaCustom("Country")]
+    /// <summary>
+    /// Country
+    /// </summary>
     public string Country { get; set; }
 
-    [SwaggerSchemaCustom("City")]
+    /// <summary>
+    /// City
+    /// </summary>
     public string City { get; set; }
 
-    [SwaggerSchemaCustom("Browser")]
+    /// <summary>
+    /// Browser
+    /// </summary>
     public string Browser { get; set; }
 
-    [SwaggerSchemaCustom("Platform")]
+    /// <summary>
+    /// Platform
+    /// </summary>
     public string Platform { get; set; }
 
-    [SwaggerSchemaCustom("Page")]
+    /// <summary>
+    /// Page
+    /// </summary>
     public string Page { get; set; }
 
     public LoginEventDto(LoginEvent loginEvent)

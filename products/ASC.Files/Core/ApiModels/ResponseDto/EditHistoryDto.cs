@@ -28,31 +28,49 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public class EditHistoryDto
 {
-    [SwaggerSchemaCustom("File ID")]
+    /// <summary>
+    /// File ID
+    /// </summary>
     public int ID { get; set; }
 
-    [SwaggerSchemaCustom("Key")]
+    /// <summary>
+    /// Key
+    /// </summary>
     public string Key { get; set; }
 
-    [SwaggerSchemaCustom("File version")]
+    /// <summary>
+    /// File version
+    /// </summary>
     public int Version { get; set; }
 
-    [SwaggerSchemaCustom("Version group")]
+    /// <summary>
+    /// Version group
+    /// </summary>
     public int VersionGroup { get; set; }
 
-    [SwaggerSchemaCustom("A user who updated a file")]
+    /// <summary>
+    /// A user who updated a file
+    /// </summary>
     public EditHistoryAuthor User { get; set; }
 
-    [SwaggerSchemaCustom("Creation time")]
+    /// <summary>
+    /// Creation time
+    /// </summary>
     public ApiDateTime Created { get; set; }
 
-    [SwaggerSchemaCustom("History changes in the string format")]
+    /// <summary>
+    /// History changes in the string format
+    /// </summary>
     public string ChangesHistory { get; set; }
 
-    [SwaggerSchemaCustom("List of history changes")]
+    /// <summary>
+    /// List of history changes
+    /// </summary>
     public List<EditHistoryChangesWrapper> Changes { get; set; }
 
-    [SwaggerSchemaCustom("Server version")]
+    /// <summary>
+    /// Server version
+    /// </summary>
     public string ServerVersion { get; set; }
 
     public EditHistoryDto(EditHistory editHistory, ApiDateTimeHelper apiDateTimeHelper, UserManager userManager, DisplayUserSettingsHelper displayUserSettingsHelper)
@@ -71,9 +89,13 @@ public class EditHistoryDto
 
 public class EditHistoryChangesWrapper(EditHistoryChanges historyChanges, ApiDateTimeHelper apiDateTimeHelper)
 {
-    [SwaggerSchemaCustom("User")]
+    /// <summary>
+    /// User
+    /// </summary>
     public EditHistoryAuthor User { get; set; } = historyChanges.Author;
 
-    [SwaggerSchemaCustom("Created")]
+    /// <summary>
+    /// Created
+    /// </summary>
     public ApiDateTime Created { get; set; } = apiDateTimeHelper.Get(historyChanges.Date);
 }

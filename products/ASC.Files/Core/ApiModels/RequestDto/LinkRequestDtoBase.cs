@@ -28,12 +28,18 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public abstract class LinkRequestDtoBase
 {
-    [SwaggerSchemaCustom("Link ID")]
+    /// <summary>
+    /// Link ID
+    /// </summary>
     public Guid LinkId { get; set; }
 
-    [SwaggerSchemaCustom("Sharing rights")]
+    /// <summary>
+    /// Sharing rights
+    /// </summary>
     public FileShare Access { get; set; }
 
-    [SwaggerSchemaCustom("Link expiration date")]
+    /// <summary>
+    /// Link expiration date
+    /// </summary>
     public ApiDateTime ExpirationDate { get; set; }
 }

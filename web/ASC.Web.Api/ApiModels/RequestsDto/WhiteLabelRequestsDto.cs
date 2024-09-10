@@ -31,19 +31,27 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 /// </summary>
 public class WhiteLabelRequestsDto
 {
-    [SwaggerSchemaCustom("Logo text")]
+    /// <summary>
+    /// Logo text
+    /// </summary>
     public string LogoText { get; set; }
 
-    [SwaggerSchemaCustom("Tenant IDs with their logos (light or dark)")]
+    /// <summary>
+    /// Tenant IDs with their logos (light or dark)
+    /// </summary>
     public IDictionary<string, LogoRequestsDto> Logo { get; set; }
 }
 
 public class LogoRequestsDto
 {
-    [SwaggerSchemaCustom("Light theme logo")]
+    /// <summary>
+    /// Light theme logo
+    /// </summary>
     public string Light { get; set; }
 
-    [SwaggerSchemaCustom("Dark theme logo")]
+    /// <summary>
+    /// Dark theme logo
+    /// </summary>
     public string Dark { get; set; }
 }
 
@@ -52,9 +60,13 @@ public class LogoRequestsDto
 /// </summary>
 public class WhiteLabelQueryRequestsDto
 {
-    [SwaggerSchemaCustom("Specifies if the logo is for a dark theme or not")]
+    /// <summary>
+    /// Specifies if the logo is for a dark theme or not
+    /// </summary>
     public bool? IsDark { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the logo is for a default tenant or not")]
+    /// <summary>
+    /// Specifies if the logo is for a default tenant or not
+    /// </summary>
     public bool? IsDefault { get; set; }
 }

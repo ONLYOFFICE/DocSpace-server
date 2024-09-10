@@ -30,79 +30,123 @@ namespace ASC.Core.Common.EF.Model;
 
 public class DbTenant : IMapFrom<Tenant>
 {
-    [SwaggerSchemaCustom("Id")]
+    /// <summary>
+    /// Id
+    /// </summary>
     public int Id { get; set; }
 
-    [SwaggerSchemaCustom("Name")]
+    /// <summary>
+    /// Name
+    /// </summary>
     public string Name { get; set; }
 
-    [SwaggerSchemaCustom("Alias")]
+    /// <summary>
+    /// Alias
+    /// </summary>
     public string Alias { get; set; }
 
-    [SwaggerSchemaCustom("Mapped domain")]
+    /// <summary>
+    /// Mapped domain
+    /// </summary>
     public string MappedDomain { get; set; }
 
-    [SwaggerSchemaCustom("Version")]
+    /// <summary>
+    /// Version
+    /// </summary>
     public int Version { get; set; }
 
-    [SwaggerSchemaCustom("Version_changed")]
+    /// <summary>
+    /// Version_changed
+    /// </summary>
     public DateTime? Version_Changed { get; set; }
 
-    [SwaggerSchemaCustom("Version changed")]
+    /// <summary>
+    /// Version changed
+    /// </summary>
     public DateTime VersionChanged
     {
         get => Version_Changed ?? DateTime.MinValue;
         set => Version_Changed = value;
     }
 
-    [SwaggerSchemaCustom("Language")]
+    /// <summary>
+    /// Language
+    /// </summary>
     public string Language { get; set; }
 
-    [SwaggerSchemaCustom("Time zone")]
+    /// <summary>
+    /// Time zone
+    /// </summary>
     public string TimeZone { get; set; }
 
-    [SwaggerSchemaCustom("Trusted domains raw")]
+    /// <summary>
+    /// Trusted domains raw
+    /// </summary>
     public string TrustedDomainsRaw { get; set; }
 
-    [SwaggerSchemaCustom("Trusted domains enabled")]
+    /// <summary>
+    /// Trusted domains enabled
+    /// </summary>
     public TenantTrustedDomainsType TrustedDomainsEnabled { get; set; }
 
-    [SwaggerSchemaCustom("Status")]
+    /// <summary>
+    /// Status
+    /// </summary>
     public TenantStatus Status { get; set; }
 
-    [SwaggerSchemaCustom("Status changed")]
+    /// <summary>
+    /// Status changed
+    /// </summary>
     public DateTime? StatusChanged { get; set; }
     //hack for DateTime?
 
-    [SwaggerSchemaCustom("Status changed hack")]
+    /// <summary>
+    /// Status changed hack
+    /// </summary>
     public DateTime StatusChangedHack
     {
         get => StatusChanged ?? DateTime.MinValue;
         set { StatusChanged = value; }
     }
 
-    [SwaggerSchemaCustom("Creation date time")]
+    /// <summary>
+    /// Creation date time
+    /// </summary>
     public DateTime CreationDateTime { get; set; }
 
-    [SwaggerSchemaCustom("Owner id")]
+    /// <summary>
+    /// Owner id
+    /// </summary>
     public Guid? OwnerId { get; set; }
 
-    [SwaggerSchemaCustom("Payment id")]
+    /// <summary>
+    /// Payment id
+    /// </summary>
     public string PaymentId { get; set; }
 
-    [SwaggerSchemaCustom("Industry")]
+    /// <summary>
+    /// Industry
+    /// </summary>
     public TenantIndustry Industry { get; set; }
 
-    [SwaggerSchemaCustom("Last modified")]
+    /// <summary>
+    /// Last modified
+    /// </summary>
     public DateTime LastModified { get; set; }
 
-    [SwaggerSchemaCustom("Spam")]
+    /// <summary>
+    /// Spam
+    /// </summary>
     public bool Spam { get; set; }
 
-    [SwaggerSchemaCustom("Calls")]
+    /// <summary>
+    /// Calls
+    /// </summary>
     public bool Calls { get; set; }
 
-    [SwaggerSchemaCustom("Partner")]
+    /// <summary>
+    /// Partner
+    /// </summary>
     public DbTenantPartner Partner { get; set; }
 
     public void Mapping(Profile profile)

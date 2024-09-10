@@ -31,7 +31,9 @@ namespace ASC.People.ApiModels.RequestDto;
 /// </summary>
 public class EmailMemberRequestDto
 {
-    [SwaggerSchemaCustom("Email")]
+    /// <summary>
+    /// Email
+    /// </summary>
     public string Email { get; set; }
 }
 
@@ -40,10 +42,14 @@ public class EmailMemberRequestDto
 /// </summary>
 public class MemberBaseRequestDto : EmailMemberRequestDto
 {
-    [SwaggerSchemaCustom("Password")]
+    /// <summary>
+    /// Password
+    /// </summary>
     public string Password { get; set; }
 
-    [SwaggerSchemaCustom("Password hash")]
+    /// <summary>
+    /// Password hash
+    /// </summary>
     public string PasswordHash { get; set; }
 }
 
@@ -52,55 +58,87 @@ public class MemberBaseRequestDto : EmailMemberRequestDto
 /// </summary>
 public class MemberRequestDto : MemberBaseRequestDto
 {
-    [SwaggerSchemaCustom("Employee type")]
+    /// <summary>
+    /// Employee type
+    /// </summary>
     public EmployeeType Type { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if this is a guest or a user")]
+    /// <summary>
+    /// Specifies if this is a guest or a user
+    /// </summary>
     public bool? IsUser { get; set; }
 
-    [SwaggerSchemaCustom("First name")]
+    /// <summary>
+    /// First name
+    /// </summary>
     public string Firstname { get; set; }
 
-    [SwaggerSchemaCustom("Last name")]
+    /// <summary>
+    /// Last name
+    /// </summary>
     public string Lastname { get; set; }
 
-    [SwaggerSchemaCustom("List of user departments")]
+    /// <summary>
+    /// List of user departments
+    /// </summary>
     public Guid[] Department { get; set; }
 
-    [SwaggerSchemaCustom("Title")]
+    /// <summary>
+    /// Title
+    /// </summary>
     public string Title { get; set; }
 
-    [SwaggerSchemaCustom("Location")]
+    /// <summary>
+    /// Location
+    /// </summary>
     public string Location { get; set; }
 
-    [SwaggerSchemaCustom("Sex (male or female)")]
+    /// <summary>
+    /// Sex (male or female)
+    /// </summary>
     public SexEnum? Sex { get; set; }
 
-    [SwaggerSchemaCustom("Birthday")]
+    /// <summary>
+    /// Birthday
+    /// </summary>
     public ApiDateTime Birthday { get; set; }
 
-    [SwaggerSchemaCustom("Registration date (if it is not specified, then the current date will be set)")]
+    /// <summary>
+    /// Registration date (if it is not specified, then the current date will be set)
+    /// </summary>
     public ApiDateTime Worksfrom { get; set; }
 
-    [SwaggerSchemaCustom("Comment")]
+    /// <summary>
+    /// Comment
+    /// </summary>
     public string Comment { get; set; }
 
-    [SwaggerSchemaCustom("List of user contacts")]
+    /// <summary>
+    /// List of user contacts
+    /// </summary>
     public IEnumerable<Contact> Contacts { get; set; }
 
     [SwaggerSchemaCustom("Avatar photo URL", Format ="uri")]
     public string Files { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the user is added via the invitation link or not")]
+    /// <summary>
+    /// Specifies if the user is added via the invitation link or not
+    /// </summary>
     public bool FromInviteLink { get; set; }
 
-    [SwaggerSchemaCustom("Key")]
+    /// <summary>
+    /// Key
+    /// </summary>
     public string Key { get; set; }
 
-    [SwaggerSchemaCustom("Language")]
+    /// <summary>
+    /// Language
+    /// </summary>
     public string CultureName { get; set; }
 
-    [SwaggerSchemaCustom("Target")]
+    /// <summary>
+    /// Target
+    /// </summary>
     public Guid Target { get; set; }
 }
 
@@ -109,10 +147,14 @@ public class MemberRequestDto : MemberBaseRequestDto
 /// </summary>
 public class UpdateMemberRequestDto : MemberRequestDto
 {
-    [SwaggerSchemaCustom("User ID")]
+    /// <summary>
+    /// User ID
+    /// </summary>
     public string UserId { get; set; }
 
-    [SwaggerSchemaCustom("Specifies whether to disable a user or not")]
+    /// <summary>
+    /// Specifies whether to disable a user or not
+    /// </summary>
     public bool? Disable { get; set; }
 }
 
@@ -139,7 +181,9 @@ public class UpdatePhotoMemberRequestDto
 /// </summary>
 public class UpdateMemberSimpleRequestDto
 {
-    [SwaggerSchemaCustom("User ID")]
+    /// <summary>
+    /// User ID
+    /// </summary>
     public string UserId { get; set; }
 }
 
@@ -148,6 +192,8 @@ public class UpdateMemberSimpleRequestDto
 /// </summary>
 public class ContactsRequestDto
 {
-    [SwaggerSchemaCustom("List of user contacts")]
+    /// <summary>
+    /// List of user contacts
+    /// </summary>
     public IEnumerable<Contact> Contacts { get; set; }
 }

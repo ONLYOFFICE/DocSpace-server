@@ -33,7 +33,9 @@ namespace ASC.Web.Core.WhiteLabel;
 /// </summary>
 public class CompanyWhiteLabelSettingsWrapper
 {
-    [SwaggerSchemaCustom("Company white label settings")]
+    /// <summary>
+    /// Company white label settings
+    /// </summary>
     public CompanyWhiteLabelSettings Settings { get; set; }
 }
 
@@ -41,25 +43,35 @@ public class CompanyWhiteLabelSettings : ISettings<CompanyWhiteLabelSettings>
 {
     public CoreSettings CoreSettings;
 
-    [SwaggerSchemaCustom("Company name")]
+    /// <summary>
+    /// Company name
+    /// </summary>
     public string CompanyName { get; set; }
 
     [SwaggerSchemaCustom("Site", Format = "uri")]
     [Url]
     public string Site { get; set; }
 
-    [SwaggerSchemaCustom("Email address")]
+    /// <summary>
+    /// Email address
+    /// </summary>
     [EmailAddress]
     public string Email { get; set; }
 
-    [SwaggerSchemaCustom("Address")]
+    /// <summary>
+    /// Address
+    /// </summary>
     public string Address { get; set; }
 
-    [SwaggerSchemaCustom("Phone")]
+    /// <summary>
+    /// Phone
+    /// </summary>
     [Phone]
     public string Phone { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if a company is a licensor or not")]
+    /// <summary>
+    /// Specifies if a company is a licensor or not
+    /// </summary>
     [JsonPropertyName("IsLicensor")]
     public bool IsLicensor { get; set; }
 

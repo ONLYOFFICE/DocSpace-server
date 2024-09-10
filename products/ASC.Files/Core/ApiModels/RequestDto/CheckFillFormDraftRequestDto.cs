@@ -31,15 +31,23 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// </summary>
 public class CheckFillFormDraftRequestDto
 {
-    [SwaggerSchemaCustom("File version")]
+    /// <summary>
+    /// File version
+    /// </summary>
     public int Version { get; set; }
 
-    [SwaggerSchemaCustom("Action with a form")]
+    /// <summary>
+    /// Action with a form
+    /// </summary>
     public string Action { get; set; }
 
-    [SwaggerSchemaCustom("Specifies whether to request a form for viewing or not")]
+    /// <summary>
+    /// Specifies whether to request a form for viewing or not
+    /// </summary>
     public bool RequestView => (Action ?? "").Equals("view", StringComparison.InvariantCultureIgnoreCase);
 
-    [SwaggerSchemaCustom("Specifies whether to request an embedded form or not")]
+    /// <summary>
+    /// Specifies whether to request an embedded form or not
+    /// </summary>
     public bool RequestEmbedded => (Action ?? "").Equals("embedded", StringComparison.InvariantCultureIgnoreCase);
 }

@@ -31,9 +31,13 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// </summary>
 public class FileLinkRequestDto : LinkRequestDtoBase
 {
-    [SwaggerSchemaCustom("Link scope")]
+    /// <summary>
+    /// Link scope
+    /// </summary>
     public bool Internal { get; set; }
 
-    [SwaggerSchemaCustom("Primary link flag")]
+    /// <summary>
+    /// Primary link flag
+    /// </summary>
     public bool Primary { get; set; }
 }

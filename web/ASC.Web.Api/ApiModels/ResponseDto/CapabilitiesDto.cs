@@ -31,16 +31,22 @@ public class CapabilitiesDto
     [SwaggerSchemaCustom("Specifies if the LDAP settings are enabled or not", Example = false)]
     public bool LdapEnabled { get; set; }
 
-    [SwaggerSchemaCustom("Ldap domain")]
+    /// <summary>
+    /// Ldap domain
+    /// </summary>
     public string LdapDomain { get; set; }
 
-    [SwaggerSchemaCustom("List of providers")]
+    /// <summary>
+    /// List of providers
+    /// </summary>
     public List<string> Providers { get; set; }
 
     [SwaggerSchemaCustom("SP login label", Example = "")]
     public string SsoLabel { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if OAuth is enabled or not")]
+    /// <summary>
+    /// Specifies if OAuth is enabled or not
+    /// </summary>
     public bool OauthEnabled { get; init; }
 
     [SwaggerSchemaCustom("SSO URL. If this parameter is empty, then the SSO settings are disabled", Example = "", Format = "uri")]

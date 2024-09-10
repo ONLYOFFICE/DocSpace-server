@@ -28,25 +28,37 @@ namespace ASC.Web.Files.Services.WCFService;
 
 public class ThirdPartyParams
 {
-    [SwaggerSchemaCustom("Authentication data")]
+    /// <summary>
+    /// Authentication data
+    /// </summary>
     [JsonPropertyName("auth_data")]
     public AuthData AuthData { get; init; }
 
-    [SwaggerSchemaCustom("Specifies if this is a corporate account or not")]
+    /// <summary>
+    /// Specifies if this is a corporate account or not
+    /// </summary>
     public bool Corporate { get; init; }
 
-    [SwaggerSchemaCustom("Specifies if this is a room storage or not")]
+    /// <summary>
+    /// Specifies if this is a room storage or not
+    /// </summary>
     public bool RoomsStorage { get; init; }
 
-    [SwaggerSchemaCustom("Customer title")]
+    /// <summary>
+    /// Customer title
+    /// </summary>
     [JsonPropertyName("customer_title")]
     public string CustomerTitle { get; set; }
 
-    [SwaggerSchemaCustom("Provider ID")]
+    /// <summary>
+    /// Provider ID
+    /// </summary>
     [JsonPropertyName("provider_id")]
     public int? ProviderId { get; init; }
 
-    [SwaggerSchemaCustom("Provider key")]
+    /// <summary>
+    /// Provider key
+    /// </summary>
     [JsonPropertyName("provider_key")]
     public string ProviderKey { get; init; }
 }

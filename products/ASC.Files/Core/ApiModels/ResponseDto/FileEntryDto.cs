@@ -45,49 +45,73 @@ public abstract class FileEntryDto
     [SwaggerSchemaCustom("Title", Example = "Some titile.txt/ Some title")]
     public string Title { get; set; }
 
-    [SwaggerSchemaCustom("Access rights")]
+    /// <summary>
+    /// Access rights
+    /// </summary>
     public FileShare Access { get; set; }
 
     [SwaggerSchemaCustom("Specifies if the file is shared or not", Example = false)]
     public bool Shared { get; set; }
 
-    [SwaggerSchemaCustom("Creation time")]
+    /// <summary>
+    /// Creation time
+    /// </summary>
     public ApiDateTime Created { get; set; }
 
-    [SwaggerSchemaCustom("Author")]
+    /// <summary>
+    /// Author
+    /// </summary>
     public EmployeeDto CreatedBy { get; set; }
 
     private ApiDateTime _updated;
 
-    [SwaggerSchemaCustom("Time of the last file update")]
+    /// <summary>
+    /// Time of the last file update
+    /// </summary>
     public ApiDateTime Updated
     {
         get => _updated < Created ? Created : _updated;
         set => _updated = value;
     }
 
-    [SwaggerSchemaCustom("Time when the file will be automatically deleted")]
+    /// <summary>
+    /// Time when the file will be automatically deleted
+    /// </summary>
     public ApiDateTime AutoDelete { get; set; }
 
-    [SwaggerSchemaCustom("Root folder type")]
+    /// <summary>
+    /// Root folder type
+    /// </summary>
     public FolderType RootFolderType { get; set; }
 
-    [SwaggerSchemaCustom("First parent folder type")]
+    /// <summary>
+    /// First parent folder type
+    /// </summary>
     public FolderType? ParentRoomType { get; set; }
 
-    [SwaggerSchemaCustom("A user who updated a file")]
+    /// <summary>
+    /// A user who updated a file
+    /// </summary>
     public EmployeeDto UpdatedBy { get; set; }
 
-    [SwaggerSchemaCustom("Provider is specified or not")]
+    /// <summary>
+    /// Provider is specified or not
+    /// </summary>
     public bool? ProviderItem { get; set; }
 
-    [SwaggerSchemaCustom("Provider key")]
+    /// <summary>
+    /// Provider key
+    /// </summary>
     public string ProviderKey { get; set; }
 
-    [SwaggerSchemaCustom("Provider ID")]
+    /// <summary>
+    /// Provider ID
+    /// </summary>
     public int? ProviderId { get; set; }
 
-    [SwaggerSchemaCustom("Order")]
+    /// <summary>
+    /// Order
+    /// </summary>
     public string Order { get; set; }
     
     public abstract FileEntryType FileEntryType { get; }
@@ -123,16 +147,24 @@ public abstract class FileEntryDto<T> : FileEntryDto
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public T OriginRoomId { get; set; }
 
-    [SwaggerSchemaCustom("Origin title")]
+    /// <summary>
+    /// Origin title
+    /// </summary>
     public string OriginTitle { get; set; }
 
-    [SwaggerSchemaCustom("Origin room title")]
+    /// <summary>
+    /// Origin room title
+    /// </summary>
     public string OriginRoomTitle { get; set; }
 
-    [SwaggerSchemaCustom("Can share")]
+    /// <summary>
+    /// Can share
+    /// </summary>
     public bool CanShare { get; set; }
 
-    [SwaggerSchemaCustom("Security")]
+    /// <summary>
+    /// Security
+    /// </summary>
     public IDictionary<FilesSecurityActions, bool> Security { get; set; }
 
     protected FileEntryDto(FileEntry<T> entry)

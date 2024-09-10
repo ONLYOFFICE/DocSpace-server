@@ -29,25 +29,39 @@ namespace ASC.Core.Billing;
 [DebuggerDisplay("{State} before {DueDate}")]
 public class Tariff
 {
-    [SwaggerSchemaCustom("ID")]
+    /// <summary>
+    /// ID
+    /// </summary>
     public int Id { get; set; }
 
-    [SwaggerSchemaCustom("Tariff state")]
+    /// <summary>
+    /// Tariff state
+    /// </summary>
     public TariffState State { get; set; }
 
-    [SwaggerSchemaCustom("Due date")]
+    /// <summary>
+    /// Due date
+    /// </summary>
     public DateTime DueDate { get; set; }
 
-    [SwaggerSchemaCustom("Delay due date")]
+    /// <summary>
+    /// Delay due date
+    /// </summary>
     public DateTime DelayDueDate { get; set; }
 
-    [SwaggerSchemaCustom("License date")]
+    /// <summary>
+    /// License date
+    /// </summary>
     public DateTime LicenseDate { get; set; }
 
-    [SwaggerSchemaCustom("Customer ID")]
+    /// <summary>
+    /// Customer ID
+    /// </summary>
     public string CustomerId { get; set; }
 
-    [SwaggerSchemaCustom("List of quotas")]
+    /// <summary>
+    /// List of quotas
+    /// </summary>
     public List<Quota> Quotas { get; set; }
 
     public override int GetHashCode()
@@ -72,10 +86,14 @@ public class Tariff
 
 public class Quota(int id, int quantity) : IEquatable<Quota>
 {
-    [SwaggerSchemaCustom("ID")]
+    /// <summary>
+    /// ID
+    /// </summary>
     public int Id { get; set; } = id;
 
-    [SwaggerSchemaCustom("Quantity")]
+    /// <summary>
+    /// Quantity
+    /// </summary>
     public int Quantity { get; set; } = quantity;
 
     public bool Equals(Quota other)

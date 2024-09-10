@@ -43,9 +43,13 @@ public class FilesStatisticsResultDto
 
 public class FilesStatisticsFolder
 {
-    [SwaggerSchemaCustom("Folder title")]
+    /// <summary>
+    /// Folder title
+    /// </summary>
     public string Title { get; set; }
 
-    [SwaggerSchemaCustom("Used space")]
+    /// <summary>
+    /// Used space
+    /// </summary>
     public long UsedSpace { get; set; }
 }

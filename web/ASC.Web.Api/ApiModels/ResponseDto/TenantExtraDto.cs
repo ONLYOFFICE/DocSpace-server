@@ -28,33 +28,53 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class TenantExtraDto
 {
-    [SwaggerSchemaCustom("Specifies if the extra tenant license is customizable or not")]
+    /// <summary>
+    /// Specifies if the extra tenant license is customizable or not
+    /// </summary>
     public bool CustomMode { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the extra tenant license is Opensource or not")]
+    /// <summary>
+    /// Specifies if the extra tenant license is Opensource or not
+    /// </summary>
     public bool Opensource { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the extra tenant license is Enterprise or not")]
+    /// <summary>
+    /// Specifies if the extra tenant license is Enterprise or not
+    /// </summary>
     public bool Enterprise { get; set; }
 
-    [SwaggerSchemaCustom("License tariff")]
+    /// <summary>
+    /// License tariff
+    /// </summary>
     public Tariff Tariff { get; set; }
 
-    [SwaggerSchemaCustom("License quota")]
+    /// <summary>
+    /// License quota
+    /// </summary>
     public QuotaDto Quota { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the license is paid or not")]
+    /// <summary>
+    /// Specifies if the license is paid or not
+    /// </summary>
     public bool NotPaid { get; set; }
 
-    [SwaggerSchemaCustom("The time when the license was accepted")]
+    /// <summary>
+    /// The time when the license was accepted
+    /// </summary>
     public string LicenseAccept { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the tariff page is enabled or not")]
+    /// <summary>
+    /// Specifies if the tariff page is enabled or not
+    /// </summary>
     public bool EnableTariffPage { get; set; }
 
-    [SwaggerSchemaCustom("Document server user quotas")]
+    /// <summary>
+    /// Document server user quotas
+    /// </summary>
     public Dictionary<string, DateTime> DocServerUserQuota { get; set; }
 
-    [SwaggerSchemaCustom("Document server license")]
+    /// <summary>
+    /// Document server license
+    /// </summary>
     public License DocServerLicense { get; set; }
 }

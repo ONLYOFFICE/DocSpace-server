@@ -37,46 +37,74 @@ public class FolderDto<T> : FileEntryDto<T>
     [SwaggerSchemaCustomInt("Number of folders", Example = 7)]
     public int FoldersCount { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if a folder is shareable or not")]
+    /// <summary>
+    /// Specifies if a folder is shareable or not
+    /// </summary>
     public bool? IsShareable { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if a folder is favorite or not")]
+    /// <summary>
+    /// Specifies if a folder is favorite or not
+    /// </summary>
     public bool? IsFavorite { get; set; }
 
-    [SwaggerSchemaCustom("Number for a new folder")]
+    /// <summary>
+    /// Number for a new folder
+    /// </summary>
     public int New { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if a folder is muted or not")]
+    /// <summary>
+    /// Specifies if a folder is muted or not
+    /// </summary>
     public bool Mute { get; set; }
 
-    [SwaggerSchemaCustom("List of tags")]
+    /// <summary>
+    /// List of tags
+    /// </summary>
     public IEnumerable<string> Tags { get; set; }
 
-    [SwaggerSchemaCustom("Logo")]
+    /// <summary>
+    /// Logo
+    /// </summary>
     public Logo Logo { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if a folder is pinned or not")]
+    /// <summary>
+    /// Specifies if a folder is pinned or not
+    /// </summary>
     public bool Pinned { get; set; }
 
-    [SwaggerSchemaCustom("Room type")]
+    /// <summary>
+    /// Room type
+    /// </summary>
     public RoomType? RoomType { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if a folder is private or not")]
+    /// <summary>
+    /// Specifies if a folder is private or not
+    /// </summary>
     public bool Private { get; set; }
 
-    [SwaggerSchemaCustom("Folder type")]
+    /// <summary>
+    /// Folder type
+    /// </summary>
     public FolderType? Type { get; set; }
 
-    [SwaggerSchemaCustom("InRoom")]
+    /// <summary>
+    /// InRoom
+    /// </summary>
     public bool? InRoom { get; set; }
 
-    [SwaggerSchemaCustom("Quota")]
+    /// <summary>
+    /// Quota
+    /// </summary>
     public long? QuotaLimit { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the room has a custom quota or not")]
+    /// <summary>
+    /// Specifies if the room has a custom quota or not
+    /// </summary>
     public bool? IsCustomQuota { get; set; }
 
-    [SwaggerSchemaCustom("Counter")]
+    /// <summary>
+    /// Counter
+    /// </summary>
     public long? UsedSpace { get; set; }
 
     public override FileEntryType FileEntryType { get => FileEntryType.Folder; }

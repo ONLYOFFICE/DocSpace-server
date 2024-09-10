@@ -28,6 +28,8 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class TemplatesRequestDto
 {
-    [SwaggerSchemaCustom("List of file IDs")]
+    /// <summary>
+    /// List of file IDs
+    /// </summary>
     public IEnumerable<int> FileIds { get; set; }
 }

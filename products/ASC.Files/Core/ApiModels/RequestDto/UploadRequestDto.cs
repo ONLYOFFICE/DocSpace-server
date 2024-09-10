@@ -31,31 +31,45 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// </summary>
 public class UploadRequestDto : IModelWithFile, IDisposable
 {
-    [SwaggerSchemaCustom("File")]
+    /// <summary>
+    /// File
+    /// </summary>
     public IFormFile File { get; set; }
 
-    [SwaggerSchemaCustom("Content-Type header")]
+    /// <summary>
+    /// Content-Type header
+    /// </summary>
     public ContentType ContentType { get; set; }
 
-    [SwaggerSchemaCustom("Content-Disposition header")]
+    /// <summary>
+    /// Content-Disposition header
+    /// </summary>
     public ContentDisposition ContentDisposition { get; set; }
 
     [SwaggerSchemaCustom("List of files when specified as multipart/form-data", Format = "file")]
     public IEnumerable<IFormFile> Files { get; set; }
 
-    [SwaggerSchemaCustom("Specifies whether to create a new file if it already exists or not")]
+    /// <summary>
+    /// Specifies whether to create a new file if it already exists or not
+    /// </summary>
     public bool CreateNewIfExist { get; set; }
 
-    [SwaggerSchemaCustom("Specifies whether to upload documents in the original formats as well or not")]
+    /// <summary>
+    /// Specifies whether to upload documents in the original formats as well or not
+    /// </summary>
     public bool? StoreOriginalFileFlag { get; set; }
 
-    [SwaggerSchemaCustom("Specifies whether to keep the file converting status or not")]
+    /// <summary>
+    /// Specifies whether to keep the file converting status or not
+    /// </summary>
     public bool KeepConvertStatus { get; set; }
 
     private Stream _stream;
     private bool _disposedValue;
 
-    [SwaggerSchemaCustom("Request input stream")]
+    /// <summary>
+    /// Request input stream
+    /// </summary>
     public Stream Stream
     {
         get => File?.OpenReadStream() ?? _stream;

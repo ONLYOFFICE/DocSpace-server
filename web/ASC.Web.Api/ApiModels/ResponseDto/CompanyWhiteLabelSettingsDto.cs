@@ -28,25 +28,39 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class CompanyWhiteLabelSettingsDto: IMapFrom<CompanyWhiteLabelSettings>
 {
-    [SwaggerSchemaCustom("Company name")]
+    /// <summary>
+    /// Company name
+    /// </summary>
     public string CompanyName { get; set; }
 
-    [SwaggerSchemaCustom("Site")]
+    /// <summary>
+    /// Site
+    /// </summary>
     public string Site { get; set; }
 
-    [SwaggerSchemaCustom("Email")]
+    /// <summary>
+    /// Email
+    /// </summary>
     public string Email { get; set; }
 
-    [SwaggerSchemaCustom("Address")]
+    /// <summary>
+    /// Address
+    /// </summary>
     public string Address { get; set; }
 
-    [SwaggerSchemaCustom("Phone number")]
+    /// <summary>
+    /// Phone number
+    /// </summary>
     public string Phone { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if a company is a licensor or not")]
+    /// <summary>
+    /// Specifies if a company is a licensor or not
+    /// </summary>
     public bool IsLicensor { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if these settings are default or not")]
+    /// <summary>
+    /// Specifies if these settings are default or not
+    /// </summary>
     public bool IsDefault { get; set; }
 
     public void Mapping(Profile profile)

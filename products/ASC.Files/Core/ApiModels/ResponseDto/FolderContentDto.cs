@@ -28,10 +28,14 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public class FolderContentDto<T>
 {
-    [SwaggerSchemaCustom("List of files")]
+    /// <summary>
+    /// List of files
+    /// </summary>
     public List<FileEntryDto> Files { get; set; }
 
-    [SwaggerSchemaCustom("List of folders")]
+    /// <summary>
+    /// List of folders
+    /// </summary>
     public List<FileEntryDto> Folders { get; set; }
 
     [SwaggerSchemaCustom<FolderDto<int>>("Current folder information")]
@@ -49,7 +53,9 @@ public class FolderContentDto<T>
     [SwaggerSchemaCustom("Total number of elements in the folder", Example = 4)]
     public int Total { get; set; }
 
-    [SwaggerSchemaCustom("New element index")]
+    /// <summary>
+    /// New element index
+    /// </summary>
     public int New { get; set; }
 }
 

@@ -31,6 +31,8 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// </summary>
 public class DeleteRoomRequestDto
 {
-    [SwaggerSchemaCustom("Specifies whether to delete a room after the editing session is finished or not")]
+    /// <summary>
+    /// Specifies whether to delete a room after the editing session is finished or not
+    /// </summary>
     public bool DeleteAfter { get; set; }
 }

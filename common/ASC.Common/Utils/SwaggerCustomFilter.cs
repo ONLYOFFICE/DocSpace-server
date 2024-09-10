@@ -64,12 +64,13 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
         {
             return;
         }
-
+        
+        UpdateSchema(propertyInfo.PropertyType, schema);
+        
         var swaggerSchemaCustomAttribute = propertyInfo.GetCustomAttributes(true).OfType<SwaggerSchemaCustomAttribute>().FirstOrDefault();
 
         if (swaggerSchemaCustomAttribute != null)
         {
-            UpdateSchema(propertyInfo.PropertyType, schema);
             if (swaggerSchemaCustomAttribute.Example != null)
             {
                 schema.Example = GetExample(swaggerSchemaCustomAttribute.Example);
@@ -187,12 +188,12 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
         {
             var oneOfSchema = new List<OpenApiSchema>
             {
-                new OpenApiSchema
+                new()
                 {
                     Type = "integer",
                     Example = new OpenApiInteger(SwaggerSchemaCustomIntAttribute.DefaultExample)
                 },
-                new OpenApiSchema
+                new()
                 {
                     Type = "string",
                     Example = new OpenApiString(SwaggerSchemaCustomStringAttribute.DefaultExample)

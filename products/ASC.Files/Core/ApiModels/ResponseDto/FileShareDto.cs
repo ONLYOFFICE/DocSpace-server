@@ -28,7 +28,9 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public class FileShareDto
 {
-    [SwaggerSchemaCustom("Sharing rights")]
+    /// <summary>
+    /// Sharing rights
+    /// </summary>
     public FileShare Access { get; set; }
 
     [SwaggerSchemaCustom<object>("A user who has the access to the specified file")]
@@ -37,31 +39,47 @@ public class FileShareDto
     [SwaggerSchemaCustom("Specifies if the file is locked by this user or not", Example = false)]
     public bool IsLocked { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if this user is an owner of the specified file or not")]
+    /// <summary>
+    /// Specifies if this user is an owner of the specified file or not
+    /// </summary>
     public bool IsOwner { get; set; }
 
-    [SwaggerSchemaCustom("Spceifies if this user can edit the access to the specified file or not")]
+    /// <summary>
+    /// Spceifies if this user can edit the access to the specified file or not
+    /// </summary>
     public bool CanEditAccess { get; set; }
 
-    [SwaggerSchemaCustom("Subject type")]
+    /// <summary>
+    /// Subject type
+    /// </summary>
     public SubjectType SubjectType { get; set; }
 }
 
 public class FileShareLink
 {
-    [SwaggerSchemaCustom("Id")]
+    /// <summary>
+    /// Id
+    /// </summary>
     public Guid Id { get; set; }
 
-    [SwaggerSchemaCustom("Title")]
+    /// <summary>
+    /// Title
+    /// </summary>
     public string Title { get; set; }
 
-    [SwaggerSchemaCustom("Share link")]
+    /// <summary>
+    /// Share link
+    /// </summary>
     public string ShareLink { get; set; }
 
-    [SwaggerSchemaCustom("Expiration date")]
+    /// <summary>
+    /// Expiration date
+    /// </summary>
     public ApiDateTime ExpirationDate { get; set; }
 
-    [SwaggerSchemaCustom("link type")]
+    /// <summary>
+    /// link type
+    /// </summary>
     public LinkType LinkType { get; set; }
     public string Password { get; set; }
     public bool? DenyDownload { get; set; }

@@ -28,30 +28,48 @@ namespace ASC.Api.Core;
 
 public class Module(Product product)
 {
-    [SwaggerSchemaCustom("ID")]
+    /// <summary>
+    /// ID
+    /// </summary>
     public Guid Id { get; set; } = product.ProductID;
 
-    [SwaggerSchemaCustom("Product class name")]
+    /// <summary>
+    /// Product class name
+    /// </summary>
     public string AppName { get; set; } = product.ProductClassName;
 
-    [SwaggerSchemaCustom("Title")]
+    /// <summary>
+    /// Title
+    /// </summary>
     public string Title { get; set; } = product.Name;
 
-    [SwaggerSchemaCustom("Start link")]
+    /// <summary>
+    /// Start link
+    /// </summary>
     public string Link { get; set; } = product.StartURL;
 
-    [SwaggerSchemaCustom("Icon URL")]
+    /// <summary>
+    /// Icon URL
+    /// </summary>
     public string IconUrl { get; set; } = product.Context.IconFileName;
 
-    [SwaggerSchemaCustom("Large image URL")]
+    /// <summary>
+    /// Large image URL
+    /// </summary>
     public string ImageUrl { get; set; } = product.Context.LargeIconFileName;
 
-    [SwaggerSchemaCustom("Help URL")]
+    /// <summary>
+    /// Help URL
+    /// </summary>
     public string HelpUrl { get; set; } = product.HelpURL;
 
-    [SwaggerSchemaCustom("Description")]
+    /// <summary>
+    /// Description
+    /// </summary>
     public string Description { get; set; } = product.Description;
 
-    [SwaggerSchemaCustom("Specifies if the module is primary or not")]
+    /// <summary>
+    /// Specifies if the module is primary or not
+    /// </summary>
     public bool IsPrimary { get; set; } = product.IsPrimary;
 }

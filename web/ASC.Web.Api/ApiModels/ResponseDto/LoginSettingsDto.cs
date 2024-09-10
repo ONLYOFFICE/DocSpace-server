@@ -28,12 +28,18 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class LoginSettingsDto : IMapFrom<LoginSettings>
 {
-    [SwaggerSchemaCustom("Maximum number of the user attempts to log in")]
+    /// <summary>
+    /// Maximum number of the user attempts to log in
+    /// </summary>
     public int AttemptCount { get; set; }
 
-    [SwaggerSchemaCustom("The time for which the user will be blocked after unsuccessful login attempts")]
+    /// <summary>
+    /// The time for which the user will be blocked after unsuccessful login attempts
+    /// </summary>
     public int BlockTime { get; set; }
 
-    [SwaggerSchemaCustom("The time to wait for a response from the server")]
+    /// <summary>
+    /// The time to wait for a response from the server
+    /// </summary>
     public int CheckPeriod { get; set; }
 }

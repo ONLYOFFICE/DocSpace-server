@@ -58,21 +58,33 @@ public enum RoomType
 /// </summary>
 public class CreateRoomRequestDto
 {
-    [SwaggerSchemaCustom("Room name")]
+    /// <summary>
+    /// Room name
+    /// </summary>
     public string Title { get; set; }
 
-    [SwaggerSchemaCustom("Room type")]
+    /// <summary>
+    /// Room type
+    /// </summary>
     public RoomType RoomType { get; set; }
 
-    [SwaggerSchemaCustom("Private")]
+    /// <summary>
+    /// Private
+    /// </summary>
     public bool Private { get; set; }
 
-    [SwaggerSchemaCustom("Collection of sharing parameters")]
+    /// <summary>
+    /// Collection of sharing parameters
+    /// </summary>
     public IEnumerable<FileShareParams> Share { get; set; }
 
-    [SwaggerSchemaCustom("Room quota")]
+    /// <summary>
+    /// Room quota
+    /// </summary>
     public long Quota { get; set; }
 
-    [SwaggerSchemaCustom("Indexing")]
+    /// <summary>
+    /// Indexing
+    /// </summary>
     public bool Indexing { get; set; }
 }

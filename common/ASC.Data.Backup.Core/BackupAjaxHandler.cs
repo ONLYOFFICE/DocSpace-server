@@ -429,19 +429,29 @@ public class BackupAjaxHandler(
 
     public class Schedule
     {
-        [SwaggerSchemaCustom("Storage type")]
+        /// <summary>
+    /// Storage type
+    /// </summary>
         public BackupStorageType StorageType { get; set; }
 
-        [SwaggerSchemaCustom("Storage parameters")]
+        /// <summary>
+    /// Storage parameters
+    /// </summary>
         public Dictionary<string, string> StorageParams { get; set; }
 
-        [SwaggerSchemaCustom("Cron parameters")]
+        /// <summary>
+    /// Cron parameters
+    /// </summary>
         public CronParams CronParams { get; init; }
 
-        [SwaggerSchemaCustom("Maximum number of the stored backup copies")]
+        /// <summary>
+    /// Maximum number of the stored backup copies
+    /// </summary>
         public int? BackupsStored { get; init; }
 
-        [SwaggerSchemaCustom("Last backup creation time")]
+        /// <summary>
+    /// Last backup creation time
+    /// </summary>
         public DateTime LastBackupTime { get; set; }
 
         [SwaggerSchemaCustom("Dump", Example = false)]
@@ -450,13 +460,19 @@ public class BackupAjaxHandler(
 
     public class CronParams
     {
-        [SwaggerSchemaCustom("Period")]
+        /// <summary>
+    /// Period
+    /// </summary>
         public BackupPeriod Period { get; init; }
 
-        [SwaggerSchemaCustom("Hour")]
+        /// <summary>
+    /// Hour
+    /// </summary>
         public int Hour { get; init; }
 
-        [SwaggerSchemaCustom("Day")]
+        /// <summary>
+    /// Day
+    /// </summary>
         public int Day { get; init; }
 
         public CronParams() { }

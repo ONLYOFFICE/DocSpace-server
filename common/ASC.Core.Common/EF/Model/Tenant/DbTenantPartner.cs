@@ -30,16 +30,24 @@ namespace ASC.Core.Common.EF.Model;
 
 public class DbTenantPartner : BaseEntity
 {
-    [SwaggerSchemaCustom("Tenant id")]
+    /// <summary>
+    /// Tenant id
+    /// </summary>
     public int TenantId { get; set; }
 
-    [SwaggerSchemaCustom("Partner id")]
+    /// <summary>
+    /// Partner id
+    /// </summary>
     public string PartnerId { get; set; }
 
-    [SwaggerSchemaCustom("Affiliate id")]
+    /// <summary>
+    /// Affiliate id
+    /// </summary>
     public string AffiliateId { get; set; }
 
-    [SwaggerSchemaCustom("Campaign")]
+    /// <summary>
+    /// Campaign
+    /// </summary>
     public string Campaign { get; set; }
 
     [SwaggerIgnore]

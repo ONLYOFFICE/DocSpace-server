@@ -51,10 +51,14 @@ public enum DateToAutoCleanUp
 
 public class AutoCleanUpData
 {
-    [SwaggerSchemaCustom("Specifies if the auto-clearing setting is enabled or not")]
+    /// <summary>
+    /// Specifies if the auto-clearing setting is enabled or not
+    /// </summary>
     public bool IsAutoCleanUp { get; init; }
 
-    [SwaggerSchemaCustom("The period when the trash bin will be cleared")]
+    /// <summary>
+    /// The period when the trash bin will be cleared
+    /// </summary>
     public DateToAutoCleanUp Gap { get; init; }
 
     public static AutoCleanUpData GetDefault()

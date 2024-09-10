@@ -28,45 +28,71 @@ namespace ASC.Core.Users;
 
 public sealed class UserInfo : IDirectRecipient, ICloneable, IMapFrom<User>
 {
-    [SwaggerSchemaCustom("ID")]
+    /// <summary>
+    /// ID
+    /// </summary>
     public Guid Id { get; set; }
 
-    [SwaggerSchemaCustom("First name")]
+    /// <summary>
+    /// First name
+    /// </summary>
     public string FirstName { get; set; }
 
-    [SwaggerSchemaCustom("Last name")]
+    /// <summary>
+    /// Last name
+    /// </summary>
     public string LastName { get; set; }
 
-    [SwaggerSchemaCustom("Username")]
+    /// <summary>
+    /// Username
+    /// </summary>
     public string UserName { get; set; }
 
-    [SwaggerSchemaCustom("Birthday")]
+    /// <summary>
+    /// Birthday
+    /// </summary>
     public DateTime? BirthDate { get; set; }
 
-    [SwaggerSchemaCustom("Sex (male or female)")]
+    /// <summary>
+    /// Sex (male or female)
+    /// </summary>
     public bool? Sex { get; set; }
 
-    [SwaggerSchemaCustom("Status")]
+    /// <summary>
+    /// Status
+    /// </summary>
     public EmployeeStatus Status { get; set; } = EmployeeStatus.Active;
 
-    [SwaggerSchemaCustom("Activation status")]
+    /// <summary>
+    /// Activation status
+    /// </summary>
     public EmployeeActivationStatus ActivationStatus { get; set; } = EmployeeActivationStatus.NotActivated;
 
-    [SwaggerSchemaCustom("The date and time when the user account was terminated")]
+    /// <summary>
+    /// The date and time when the user account was terminated
+    /// </summary>
     public DateTime? TerminatedDate { get; set; }
 
-    [SwaggerSchemaCustom("Title")]
+    /// <summary>
+    /// Title
+    /// </summary>
     public string Title { get; set; }
 
-    [SwaggerSchemaCustom("Registration date")]
+    /// <summary>
+    /// Registration date
+    /// </summary>
     public DateTime? WorkFromDate { get; set; }
 
-    [SwaggerSchemaCustom("Email")]
+    /// <summary>
+    /// Email
+    /// </summary>
     public string Email { get; set; }
 
     private string _contacts;
 
-    [SwaggerSchemaCustom("List of contacts in the string format")]
+    /// <summary>
+    /// List of contacts in the string format
+    /// </summary>
     public string Contacts
     {
         get => _contacts;
@@ -77,49 +103,79 @@ public sealed class UserInfo : IDirectRecipient, ICloneable, IMapFrom<User>
         }
     }
 
-    [SwaggerSchemaCustom("List of contacts")]
+    /// <summary>
+    /// List of contacts
+    /// </summary>
     public List<string> ContactsList { get; set; }
 
-    [SwaggerSchemaCustom("Location")]
+    /// <summary>
+    /// Location
+    /// </summary>
     public string Location { get; set; }
 
-    [SwaggerSchemaCustom("Notes")]
+    /// <summary>
+    /// Notes
+    /// </summary>
     public string Notes { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the user account was removed or not")]
+    /// <summary>
+    /// Specifies if the user account was removed or not
+    /// </summary>
     public bool Removed { get; set; }
 
-    [SwaggerSchemaCustom("Last modified date")]
+    /// <summary>
+    /// Last modified date
+    /// </summary>
     public DateTime LastModified { get; set; } = DateTime.UtcNow;
 
-    [SwaggerSchemaCustom("Tenant ID")]
+    /// <summary>
+    /// Tenant ID
+    /// </summary>
     public int TenantId { get; set; }
 
-    [SwaggerSchemaCustom("Spceifies if the user is active or not")]
+    /// <summary>
+    /// Spceifies if the user is active or not
+    /// </summary>
     public bool IsActive => ActivationStatus.HasFlag(EmployeeActivationStatus.Activated);
 
-    [SwaggerSchemaCustom("Language")]
+    /// <summary>
+    /// Language
+    /// </summary>
     public string CultureName { get; set; }
 
-    [SwaggerSchemaCustom("Mobile phone")]
+    /// <summary>
+    /// Mobile phone
+    /// </summary>
     public string MobilePhone { get; set; }
 
-    [SwaggerSchemaCustom("Mobile phone activation status")]
+    /// <summary>
+    /// Mobile phone activation status
+    /// </summary>
     public MobilePhoneActivationStatus MobilePhoneActivationStatus { get; set; }
 
-    [SwaggerSchemaCustom("LDAP user identificator")]
+    /// <summary>
+    /// LDAP user identificator
+    /// </summary>
     public string Sid { get; set; } // LDAP user identificator
 
-    [SwaggerSchemaCustom("LDAP user quota attribute")]
+    /// <summary>
+    /// LDAP user quota attribute
+    /// </summary>
     public long LdapQouta { get; init; } // LDAP user quota attribute
 
-    [SwaggerSchemaCustom("SSO SAML user identificator")]
+    /// <summary>
+    /// SSO SAML user identificator
+    /// </summary>
     public string SsoNameId { get; set; } // SSO SAML user identificator
 
-    [SwaggerSchemaCustom("SSO SAML user session identificator")]
+    /// <summary>
+    /// SSO SAML user session identificator
+    /// </summary>
     public string SsoSessionId { get; set; } // SSO SAML user session identificator
 
-    [SwaggerSchemaCustom("Creation date")]
+    /// <summary>
+    /// Creation date
+    /// </summary>
     public DateTime CreateDate { get; set; }
 
     public override string ToString()

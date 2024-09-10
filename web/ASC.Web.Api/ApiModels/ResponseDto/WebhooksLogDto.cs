@@ -28,36 +28,58 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class WebhooksLogDto : IMapFrom<WebhooksLog>
 {
-    [SwaggerSchemaCustom("ID")]
+    /// <summary>
+    /// ID
+    /// </summary>
     public int Id { get; set; }
 
-    [SwaggerSchemaCustom("Config name")]
+    /// <summary>
+    /// Config name
+    /// </summary>
     public string ConfigName { get; set; }
 
-    [SwaggerSchemaCustom("Creation time")]
+    /// <summary>
+    /// Creation time
+    /// </summary>
     public DateTime CreationTime { get; set; }
 
-    [SwaggerSchemaCustom("Method")]
+    /// <summary>
+    /// Method
+    /// </summary>
     public string Method { get; set; }
 
-    [SwaggerSchemaCustom("Route")]
+    /// <summary>
+    /// Route
+    /// </summary>
     public string Route { get; set; }
 
-    [SwaggerSchemaCustom("Request headers")]
+    /// <summary>
+    /// Request headers
+    /// </summary>
     public string RequestHeaders { get; set; }
 
-    [SwaggerSchemaCustom("Request payload")]
+    /// <summary>
+    /// Request payload
+    /// </summary>
     public string RequestPayload { get; set; }
 
-    [SwaggerSchemaCustom("Response headers")]
+    /// <summary>
+    /// Response headers
+    /// </summary>
     public string ResponseHeaders { get; set; }
 
-    [SwaggerSchemaCustom("Response payload")]
+    /// <summary>
+    /// Response payload
+    /// </summary>
     public string ResponsePayload { get; set; }
 
-    [SwaggerSchemaCustom("Status")]
+    /// <summary>
+    /// Status
+    /// </summary>
     public int Status { get; set; }
 
-    [SwaggerSchemaCustom("Delivery time")]
+    /// <summary>
+    /// Delivery time
+    /// </summary>
     public DateTime? Delivery { get; set; }
 }

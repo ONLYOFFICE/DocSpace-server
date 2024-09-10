@@ -31,9 +31,13 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 /// </summary>
 public class TenantQuotaSettingsRequestsDto
 {
-    [SwaggerSchemaCustom("Tenant ID")]
+    /// <summary>
+    /// Tenant ID
+    /// </summary>
     public int TenantId { get; set; }
 
-    [SwaggerSchemaCustom("Quota")]
+    /// <summary>
+    /// Quota
+    /// </summary>
     public long Quota { get; set; }
 }

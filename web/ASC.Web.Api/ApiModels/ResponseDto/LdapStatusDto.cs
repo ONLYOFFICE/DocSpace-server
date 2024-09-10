@@ -28,31 +28,49 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class LdapStatusDto : IMapFrom<LdapOperationStatus>
 {
-    [SwaggerSchemaCustom("Specifies if the LDAP operation is completed or not")]
+    /// <summary>
+    /// Specifies if the LDAP operation is completed or not
+    /// </summary>
     public bool Completed { get; set; }
 
-    [SwaggerSchemaCustom("ID")]
+    /// <summary>
+    /// ID
+    /// </summary>
     public string Id { get; set; }
 
-    [SwaggerSchemaCustom("Status")]
+    /// <summary>
+    /// Status
+    /// </summary>
     public string Status { get; set; }
 
-    [SwaggerSchemaCustom("Error")]
+    /// <summary>
+    /// Error
+    /// </summary>
     public string Error { get; set; }
 
-    [SwaggerSchemaCustom("Warning")]
+    /// <summary>
+    /// Warning
+    /// </summary>
     public string Warning { get; set; }
 
-    [SwaggerSchemaCustom("Percentage of completion")]
+    /// <summary>
+    /// Percentage of completion
+    /// </summary>
     public int Percents { get; set; }
 
-    [SwaggerSchemaCustom("Certificate confirmation request")]
+    /// <summary>
+    /// Certificate confirmation request
+    /// </summary>
     public string CertificateConfirmRequest { get; set; }
 
-    [SwaggerSchemaCustom("Source")]
+    /// <summary>
+    /// Source
+    /// </summary>
     public string Source { get; set; }
 
-    [SwaggerSchemaCustom("Operation type")]
+    /// <summary>
+    /// Operation type
+    /// </summary>
     public string OperationType { get; set; }
 
     public void Mapping(Profile profile)

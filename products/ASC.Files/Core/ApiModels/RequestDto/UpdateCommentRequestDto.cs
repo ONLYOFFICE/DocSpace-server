@@ -31,9 +31,13 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// </summary>
 public class UpdateCommentRequestDto
 {
-    [SwaggerSchemaCustom("File version")]
+    /// <summary>
+    /// File version
+    /// </summary>
     public int Version { get; set; }
 
-    [SwaggerSchemaCustom("Comment text")]
+    /// <summary>
+    /// Comment text
+    /// </summary>
     public string Comment { get; set; }
 }

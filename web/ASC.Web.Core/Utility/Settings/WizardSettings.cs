@@ -28,7 +28,9 @@ namespace ASC.Web.Core.Utility.Settings;
 
 public class WizardSettings : ISettings<WizardSettings>
 {
-    [SwaggerSchemaCustom("Specifies if the Wizard settings are completed or not")]
+    /// <summary>
+    /// Specifies if the Wizard settings are completed or not
+    /// </summary>
     public bool Completed { get; set; }
 
     [JsonIgnore]

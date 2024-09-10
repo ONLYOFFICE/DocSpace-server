@@ -29,7 +29,9 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public class FillingFormResultDto<T>
 {
-    [SwaggerSchemaCustom("Form number")]
+    /// <summary>
+    /// Form number
+    /// </summary>
     public int FormNumber { get; set; }
 
     [SwaggerSchemaCustom<FileDto<int>>("Completed form")]
@@ -38,13 +40,17 @@ public class FillingFormResultDto<T>
     [SwaggerSchemaCustom<FileDto<int>>("Original form")]
     public FileDto<T> OriginalForm { get; set; }
 
-    [SwaggerSchemaCustom("Manager")]
+    /// <summary>
+    /// Manager
+    /// </summary>
     public EmployeeFullDto Manager { get; set; }
 
     [SwaggerSchemaCustomInt("Room Id")]
     public T RoomId { get; set; }
 
-    [SwaggerSchemaCustom("Is room member")]
+    /// <summary>
+    /// Is room member
+    /// </summary>
     public bool isRoomMember { get; set; }
 
 }

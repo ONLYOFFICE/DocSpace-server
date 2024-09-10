@@ -40,31 +40,45 @@ public class EmployeeFullDto : EmployeeDto
     [SwaggerSchemaCustom("Email", Example = "my@gmail.com")]
     public string Email { get; set; }
 
-    [SwaggerSchemaCustom("List of contacts")]
+    /// <summary>
+    /// List of contacts
+    /// </summary>
     public List<Contact> Contacts { get; set; }
 
-    [SwaggerSchemaCustom("Birthday")]
+    /// <summary>
+    /// Birthday
+    /// </summary>
     public ApiDateTime Birthday { get; set; }
 
     [SwaggerSchemaCustom("Sex", Example = "male")]
     public string Sex { get; set; }
 
-    [SwaggerSchemaCustom("Employee status")]
+    /// <summary>
+    /// Employee status
+    /// </summary>
     public EmployeeStatus Status { get; set; }
 
-    [SwaggerSchemaCustom("Employee activation status")]
+    /// <summary>
+    /// Employee activation status
+    /// </summary>
     public EmployeeActivationStatus ActivationStatus { get; set; }
 
-    [SwaggerSchemaCustom("The date when the user account was terminated")]
+    /// <summary>
+    /// The date when the user account was terminated
+    /// </summary>
     public ApiDateTime Terminated { get; set; }
 
     [SwaggerSchemaCustom("Department", Example = "Marketing")]
     public string Department { get; set; }
 
-    [SwaggerSchemaCustom("Registration date")]
+    /// <summary>
+    /// Registration date
+    /// </summary>
     public ApiDateTime WorkFrom { get; set; }
 
-    [SwaggerSchemaCustom("List of groups")]
+    /// <summary>
+    /// List of groups
+    /// </summary>
     public List<GroupSummaryDto> Groups { get; set; }
 
     [SwaggerSchemaCustom("Location", Example = "Palo Alto")]
@@ -76,7 +90,9 @@ public class EmployeeFullDto : EmployeeDto
     [SwaggerSchemaCustom("Specifies if the user is an administrator or not", Example = false)]
     public bool IsAdmin { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the user is a room administrator or not")]
+    /// <summary>
+    /// Specifies if the user is a room administrator or not
+    /// </summary>
     public bool IsRoomAdmin { get; set; }
 
     [SwaggerSchemaCustom("Specifies if the LDAP settings are enabled for the user or not", Example = false)]
@@ -85,43 +101,63 @@ public class EmployeeFullDto : EmployeeDto
     [SwaggerSchemaCustom("List of administrator modules", Example = "[\"projects\", \"crm\"]")]
     public List<string> ListAdminModules { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the user is a portal owner or not")]
+    /// <summary>
+    /// Specifies if the user is a portal owner or not
+    /// </summary>
     public bool IsOwner { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the user is a portal visitor or not")]
+    /// <summary>
+    /// Specifies if the user is a portal visitor or not
+    /// </summary>
     public bool IsVisitor { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the user is a portal collaborator or not")]
+    /// <summary>
+    /// Specifies if the user is a portal collaborator or not
+    /// </summary>
     public bool IsCollaborator { get; set; }
 
     [SwaggerSchemaCustom("Language", Example = "en-EN")]
     public string CultureName { get; set; }
 
-    [SwaggerSchemaCustom("Mobile phone number")]
+    /// <summary>
+    /// Mobile phone number
+    /// </summary>
     public string MobilePhone { get; set; }
 
-    [SwaggerSchemaCustom("Mobile phone activation status")]
+    /// <summary>
+    /// Mobile phone activation status
+    /// </summary>
     public MobilePhoneActivationStatus MobilePhoneActivationStatus { get; set; }
 
     [SwaggerSchemaCustom("Specifies if the SSO settings are enabled for the user or not", Example = false)]
     public bool IsSSO { get; set; }
 
-    [SwaggerSchemaCustom("Theme")]
+    /// <summary>
+    /// Theme
+    /// </summary>
     public DarkThemeSettingsType? Theme { get; set; }
 
-    [SwaggerSchemaCustom("Quota limit")]
+    /// <summary>
+    /// Quota limit
+    /// </summary>
     public long? QuotaLimit { get; set; }
 
     [SwaggerSchemaCustom("Portal used space", Example = 12345)]
     public double? UsedSpace { get; set; }
 
-    [SwaggerSchemaCustom("Shared")]
+    /// <summary>
+    /// Shared
+    /// </summary>
     public bool? Shared { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the user has a custom quota or not")]
+    /// <summary>
+    /// Specifies if the user has a custom quota or not
+    /// </summary>
     public bool? IsCustomQuota { get; set; }
 
-    [SwaggerSchemaCustom("Current login event ID")]
+    /// <summary>
+    /// Current login event ID
+    /// </summary>
     public int? LoginEventId { get; set; }
 }
 

@@ -31,6 +31,8 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// </summary>
 public class OrderRequestDto
 {
-    [SwaggerSchemaCustom("Order")]
+    /// <summary>
+    /// Order
+    /// </summary>
     public int Order { get; set; }
 }

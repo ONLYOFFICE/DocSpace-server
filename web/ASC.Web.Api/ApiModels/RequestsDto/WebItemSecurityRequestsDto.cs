@@ -31,13 +31,19 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 /// </summary>
 public class WebItemSecurityRequestsDto
 {
-    [SwaggerSchemaCustom("Module ID")]
+    /// <summary>
+    /// Module ID
+    /// </summary>
     public string Id { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the module security settings are enabled or not")]
+    /// <summary>
+    /// Specifies if the module security settings are enabled or not
+    /// </summary>
     public bool Enabled { get; set; }
 
-    [SwaggerSchemaCustom("List of user/group IDs with the access to the module")]
+    /// <summary>
+    /// List of user/group IDs with the access to the module
+    /// </summary>
     public IEnumerable<Guid> Subjects { get; set; }
 }
 
@@ -46,6 +52,8 @@ public class WebItemSecurityRequestsDto
 /// </summary>
 public class WebItemsSecurityRequestsDto
 {
-    [SwaggerSchemaCustom("Products with security information")]
+    /// <summary>
+    /// Products with security information
+    /// </summary>
     public IDictionary<string, bool> Items { get; set; }
 }

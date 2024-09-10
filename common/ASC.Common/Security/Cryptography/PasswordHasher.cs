@@ -29,13 +29,19 @@ namespace ASC.Security.Cryptography;
 [Singleton]
 public class PasswordHasher
 {
-    [SwaggerSchemaCustom("Size")]
+    /// <summary>
+    /// Size
+    /// </summary>
     public int Size { get; private set; }
 
-    [SwaggerSchemaCustom("Iterations")]
+    /// <summary>
+    /// Iterations
+    /// </summary>
     public int Iterations { get; private set; }
 
-    [SwaggerSchemaCustom("Salt")]
+    /// <summary>
+    /// Salt
+    /// </summary>
     public string Salt { get; private set; }
 
     public PasswordHasher(IConfiguration configuration, MachinePseudoKeys machinePseudoKeys)

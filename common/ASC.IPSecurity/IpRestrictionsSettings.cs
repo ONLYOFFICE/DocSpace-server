@@ -30,7 +30,9 @@ namespace ASC.IPSecurity;
 
 public class IPRestrictionsSettings : ISettings<IPRestrictionsSettings>
 {
-    [SwaggerSchemaCustom("Specifies if the IP restrictions are enabled or not")]
+    /// <summary>
+    /// Specifies if the IP restrictions are enabled or not
+    /// </summary>
     public bool Enable { get; init; }
 
     [JsonIgnore]

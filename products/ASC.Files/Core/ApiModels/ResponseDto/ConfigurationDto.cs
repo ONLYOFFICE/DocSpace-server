@@ -28,37 +28,57 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public class ConfigurationDto<T>
 {
-    [SwaggerSchemaCustom("Document config")]
+    /// <summary>
+    /// Document config
+    /// </summary>
     public DocumentConfigDto Document { get; set; }
 
-    [SwaggerSchemaCustom("Document type")]
+    /// <summary>
+    /// Document type
+    /// </summary>
     public string DocumentType { get; set; }
 
-    [SwaggerSchemaCustom("Editor config")]
+    /// <summary>
+    /// Editor config
+    /// </summary>
     public EditorConfigurationDto<T> EditorConfig { get; set; }
 
-    [SwaggerSchemaCustom("Editor type")]
+    /// <summary>
+    /// Editor type
+    /// </summary>
     public EditorType EditorType { get; set; }
 
     [SwaggerSchemaCustom("Editor URL", Format = "uri")]
     public string EditorUrl { get; set; }
 
-    [SwaggerSchemaCustom("Token")]
+    /// <summary>
+    /// Token
+    /// </summary>
     public string Token { get; set; }
 
-    [SwaggerSchemaCustom("Platform type")]
+    /// <summary>
+    /// Platform type
+    /// </summary>
     public string Type { get; set; }
 
-    [SwaggerSchemaCustom("File parameters")]
+    /// <summary>
+    /// File parameters
+    /// </summary>
     public FileDto<T> File { get; set; }
 
-    [SwaggerSchemaCustom("Error message")]
+    /// <summary>
+    /// Error message
+    /// </summary>
     public string ErrorMessage { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the filling has started or not")]
+    /// <summary>
+    /// Specifies if the filling has started or not
+    /// </summary>
     public bool? StartFilling { get; set; }
 
-    [SwaggerSchemaCustom("Filling session Id")]
+    /// <summary>
+    /// Filling session Id
+    /// </summary>
     public string FillingSessionId { get; set; }
 }
 
@@ -67,146 +87,226 @@ public class EditorConfigurationDto<T>
     [SwaggerSchemaCustom("Callback url", Format = "uri")]
     public string CallbackUrl { get; set; }
 
-    [SwaggerSchemaCustom("Co editing")]
+    /// <summary>
+    /// Co editing
+    /// </summary>
     public CoEditingConfig CoEditing { get; set; }
 
     [SwaggerSchemaCustom("Create url", Format = "uri")]
     public string CreateUrl { get; set; }
 
-    [SwaggerSchemaCustom("Customization")]
+    /// <summary>
+    /// Customization
+    /// </summary>
     public CustomizationConfigDto<T> Customization { get; set; }
 
-    [SwaggerSchemaCustom("Embedded")]
+    /// <summary>
+    /// Embedded
+    /// </summary>
     public EmbeddedConfig Embedded { get; set; }
 
-    [SwaggerSchemaCustom("Encryption keys")]
+    /// <summary>
+    /// Encryption keys
+    /// </summary>
     public EncryptionKeysConfig EncryptionKeys { get; set; }
 
-    [SwaggerSchemaCustom("Lang")]
+    /// <summary>
+    /// Lang
+    /// </summary>
     public string Lang { get; set; }
 
-    [SwaggerSchemaCustom("Mode")]
+    /// <summary>
+    /// Mode
+    /// </summary>
     public string Mode { get; set; }
 
-    [SwaggerSchemaCustom("Mode write")]
+    /// <summary>
+    /// Mode write
+    /// </summary>
     public bool ModeWrite { get; set; }
 
-    [SwaggerSchemaCustom("Plugins")]
+    /// <summary>
+    /// Plugins
+    /// </summary>
     public PluginsConfig Plugins { get; set; }
 
-    [SwaggerSchemaCustom("Recent")]
+    /// <summary>
+    /// Recent
+    /// </summary>
     public List<RecentConfig> Recent { get; set; }
 
-    [SwaggerSchemaCustom("Templates")]
+    /// <summary>
+    /// Templates
+    /// </summary>
     public List<TemplatesConfig> Templates { get; set; }
 
-    [SwaggerSchemaCustom("User")]
+    /// <summary>
+    /// User
+    /// </summary>
     public UserConfig User { get; set; }
 }
 public class CustomizationConfigDto<T>
 {
-    [SwaggerSchemaCustom("About")]
+    /// <summary>
+    /// About
+    /// </summary>
     public bool About { get; set; }
 
-    [SwaggerSchemaCustom("Customer")]
+    /// <summary>
+    /// Customer
+    /// </summary>
     public CustomerConfigDto Customer { get; set; }
 
-    [SwaggerSchemaCustom("Anonymous")]
+    /// <summary>
+    /// Anonymous
+    /// </summary>
     public AnonymousConfigDto Anonymous { get; set; }
 
-    [SwaggerSchemaCustom("Feedback")]
+    /// <summary>
+    /// Feedback
+    /// </summary>
     public FeedbackConfig Feedback  { get; set; }
 
-    [SwaggerSchemaCustom("Forcesave")]
+    /// <summary>
+    /// Forcesave
+    /// </summary>
     public bool? Forcesave { get; set; }
 
-    [SwaggerSchemaCustom("Go back")]
+    /// <summary>
+    /// Go back
+    /// </summary>
     public GobackConfig Goback { get; set; }
 
-    [SwaggerSchemaCustom("Logo")]
+    /// <summary>
+    /// Logo
+    /// </summary>
     public LogoConfigDto Logo { get; set; }
 
-    [SwaggerSchemaCustom("MentionShare")]
+    /// <summary>
+    /// MentionShare
+    /// </summary>
     public bool MentionShare { get; set; }
 
-    [SwaggerSchemaCustom("Review display")]
+    /// <summary>
+    /// Review display
+    /// </summary>
     public string ReviewDisplay { get; set; }
 
-    [SwaggerSchemaCustom("Submit form")]
+    /// <summary>
+    /// Submit form
+    /// </summary>
     public bool SubmitForm { get; set; }
 }
 
 public class LogoConfigDto
 {
-    [SwaggerSchemaCustom("Image")]
+    /// <summary>
+    /// Image
+    /// </summary>
     public string Image { get; set; }
 
-    [SwaggerSchemaCustom("Image dark")]
+    /// <summary>
+    /// Image dark
+    /// </summary>
     public string ImageDark { get; set; }
 
-    [SwaggerSchemaCustom("Image embedded")]
+    /// <summary>
+    /// Image embedded
+    /// </summary>
     public string ImageEmbedded { get; set; }
 
     [SwaggerSchemaCustom("Url", Format = "uri")]
     public string Url { get; set; }
 
-    [SwaggerSchemaCustom("Visible")]
+    /// <summary>
+    /// Visible
+    /// </summary>
     public bool Visible { get; set; }
 }
 
 public class AnonymousConfigDto
 {
-    [SwaggerSchemaCustom("Request")]
+    /// <summary>
+    /// Request
+    /// </summary>
     public bool Request { get; set; }
 }
 
 public class CustomerConfigDto
 {
-    [SwaggerSchemaCustom("Address")]
+    /// <summary>
+    /// Address
+    /// </summary>
     public string Address { get; set; }
 
-    [SwaggerSchemaCustom("Logo")]
+    /// <summary>
+    /// Logo
+    /// </summary>
     public string Logo { get; set; }
 
     public string LogoDark { get; set; }
 
-    [SwaggerSchemaCustom("Mail")]
+    /// <summary>
+    /// Mail
+    /// </summary>
     public string Mail { get; set; }
 
-    [SwaggerSchemaCustom("Name")]
+    /// <summary>
+    /// Name
+    /// </summary>
     public string Name  { get; set; }
 
-    [SwaggerSchemaCustom("Www")]
+    /// <summary>
+    /// Www
+    /// </summary>
     public string Www  { get; set; }
 }
 
 public class DocumentConfigDto
 {
-    [SwaggerSchemaCustom("File type")]
+    /// <summary>
+    /// File type
+    /// </summary>
     public string FileType  { get; set; }
 
-    [SwaggerSchemaCustom("Info")]
+    /// <summary>
+    /// Info
+    /// </summary>
     public InfoConfigDto Info { get; set; }
 
-    [SwaggerSchemaCustom("Is linked for me")]
+    /// <summary>
+    /// Is linked for me
+    /// </summary>
     public bool IsLinkedForMe { get; set; }
 
-    [SwaggerSchemaCustom("Key")]
+    /// <summary>
+    /// Key
+    /// </summary>
     public string Key { get; set; }
 
-    [SwaggerSchemaCustom("Permissions")]
+    /// <summary>
+    /// Permissions
+    /// </summary>
     public PermissionsConfig Permissions { get; set; }
 
-    [SwaggerSchemaCustom("Shared link param")]
+    /// <summary>
+    /// Shared link param
+    /// </summary>
     public string SharedLinkParam { get; set; }
 
-    [SwaggerSchemaCustom("Shared link key")]
+    /// <summary>
+    /// Shared link key
+    /// </summary>
     public string SharedLinkKey { get; set; }
 
-    [SwaggerSchemaCustom("Reference data")]
+    /// <summary>
+    /// Reference data
+    /// </summary>
     public FileReferenceData ReferenceData { get; set; }
 
-    [SwaggerSchemaCustom("Title")]
+    /// <summary>
+    /// Title
+    /// </summary>
     public string Title { get; set; }
 
     [SwaggerSchemaCustom("Url", Format = "uri")]
@@ -215,22 +315,34 @@ public class DocumentConfigDto
 
 public class InfoConfigDto
 {
-    [SwaggerSchemaCustom("Favorite")]
+    /// <summary>
+    /// Favorite
+    /// </summary>
     public bool? Favorite { get; set; }
 
-    [SwaggerSchemaCustom("Folder")]
+    /// <summary>
+    /// Folder
+    /// </summary>
     public string Folder { get; set; }
 
-    [SwaggerSchemaCustom("Owner")]
+    /// <summary>
+    /// Owner
+    /// </summary>
     public string Owner { get; set; }
 
-    [SwaggerSchemaCustom("Sharing settings")]
+    /// <summary>
+    /// Sharing settings
+    /// </summary>
     public List<AceShortWrapper> SharingSettings{ get; set; }
 
-    [SwaggerSchemaCustom("Type")]
+    /// <summary>
+    /// Type
+    /// </summary>
     public EditorType Type { get; set; }
 
-    [SwaggerSchemaCustom("Uploaded")]
+    /// <summary>
+    /// Uploaded
+    /// </summary>
     public string Uploaded { get; set; }
 }
 

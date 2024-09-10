@@ -39,28 +39,42 @@ public class EmployeeDto
     [SwaggerSchemaCustom("Title", Example = "Manager")]
     public string Title { get; set; }
 
-    [SwaggerSchemaCustom("Avatar")]
+    /// <summary>
+    /// Avatar
+    /// </summary>
     public string Avatar { get; set; }
 
-    [SwaggerSchemaCustom("Original size avatar")]
+    /// <summary>
+    /// Original size avatar
+    /// </summary>
     public string AvatarOriginal { get; set; }
 
-    [SwaggerSchemaCustom("Maximum size avatar")]
+    /// <summary>
+    /// Maximum size avatar
+    /// </summary>
     public string AvatarMax { get; set; }
 
-    [SwaggerSchemaCustom("Medium size avatar")]
+    /// <summary>
+    /// Medium size avatar
+    /// </summary>
     public string AvatarMedium { get; set; }
 
     [SwaggerSchemaCustom("Small avatar", Example = "url to small avatar")]
     public string AvatarSmall { get; set; }
 
-    [SwaggerSchemaCustom("Profile URL")]
+    /// <summary>
+    /// Profile URL
+    /// </summary>
     public string ProfileUrl { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the user has an avatar or not")]
+    /// <summary>
+    /// Specifies if the user has an avatar or not
+    /// </summary>
     public bool HasAvatar { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the user is an anonim or not")]
+    /// <summary>
+    /// Specifies if the user is an anonim or not
+    /// </summary>
     public bool IsAnonim { get; set; }
 }
 

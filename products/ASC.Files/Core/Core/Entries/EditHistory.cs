@@ -126,12 +126,16 @@ class ChangesUserData
 public class EditHistoryAuthor(UserManager userManager,
     DisplayUserSettingsHelper displayUserSettingsHelper)
 {
-    [SwaggerSchemaCustom("Id")]
+    /// <summary>
+    /// Id
+    /// </summary>
     public string Id { get; init; }
 
     private string _name;
 
-    [SwaggerSchemaCustom("Name")]
+    /// <summary>
+    /// Name
+    /// </summary>
     public string Name
     {
         get
@@ -168,34 +172,48 @@ public class EditHistoryDataDto
     [SwaggerSchemaCustom("URL to the file changes", Format = "uri")]
     public string ChangesUrl { get; set; }
 
-    [SwaggerSchemaCustom("Key")]
+    /// <summary>
+    /// Key
+    /// </summary>
     public string Key { get; set; }
 
-    [SwaggerSchemaCustom("Previous version")]
+    /// <summary>
+    /// Previous version
+    /// </summary>
     public EditHistoryUrl Previous { get; set; }
 
-    [SwaggerSchemaCustom("Token")]
+    /// <summary>
+    /// Token
+    /// </summary>
     public string Token { get; set; }
 
     [SwaggerSchemaCustom("File URL", Format = "uri")]
     public string Url { get; set; }
 
-    [SwaggerSchemaCustom("File version")]
+    /// <summary>
+    /// File version
+    /// </summary>
     public int Version { get; init; }
 
-    [SwaggerSchemaCustom("File type")]
+    /// <summary>
+    /// File type
+    /// </summary>
     public string FileType { get; set; }
 }
 
 [DebuggerDisplay("{Key} - {Url}")]
 public class EditHistoryUrl
 {
-    [SwaggerSchemaCustom("Key")]
+    /// <summary>
+    /// Key
+    /// </summary>
     public string Key { get; init; }
 
     [SwaggerSchemaCustom("Url", Format = "uri")]
     public string Url { get; init; }
 
-    [SwaggerSchemaCustom("File type")]
+    /// <summary>
+    /// File type
+    /// </summary>
     public string FileType { get; set; }
 }

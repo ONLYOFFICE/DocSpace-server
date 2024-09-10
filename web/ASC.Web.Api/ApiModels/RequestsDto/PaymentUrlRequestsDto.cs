@@ -40,6 +40,8 @@ public class PaymentUrlRequestsDto : QuantityRequestDto
 /// </summary>
 public class QuantityRequestDto
 {
-    [SwaggerSchemaCustom("The quantity of payment")]
+    /// <summary>
+    /// The quantity of payment
+    /// </summary>
     public Dictionary<string, int> Quantity { get; set; }
 }

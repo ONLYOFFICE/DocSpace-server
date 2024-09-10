@@ -31,16 +31,24 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// </summary>
 public class RoomInvitationRequestDto
 {
-    [SwaggerSchemaCustom("Collection of invitation parameters")]
+    /// <summary>
+    /// Collection of invitation parameters
+    /// </summary>
     [MaxEmailInvitations]
     public IEnumerable<RoomInvitation> Invitations { get; set; }
 
-    [SwaggerSchemaCustom("Notifies users about the shared room or not")]
+    /// <summary>
+    /// Notifies users about the shared room or not
+    /// </summary>
     public bool Notify { get; set; }
 
-    [SwaggerSchemaCustom("Message to send when notifying about the shared room")]
+    /// <summary>
+    /// Message to send when notifying about the shared room
+    /// </summary>
     public string Message { get; set; }
 
-    [SwaggerSchemaCustom("Culture")]
+    /// <summary>
+    /// Culture
+    /// </summary>
     public string Culture { get; set; }
 }

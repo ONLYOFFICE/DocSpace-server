@@ -49,7 +49,9 @@ public class ChartPointDto
     [SwaggerSchemaCustom("Display date", Example = "6/1/2024")]
     public string DisplayDate { get; set; }
 
-    [SwaggerSchemaCustom("Date")]
+    /// <summary>
+    /// Date
+    /// </summary>
     public DateTime Date { get; init; }
 
     [SwaggerSchemaCustom("Hosts", Example = 0)]

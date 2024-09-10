@@ -28,19 +28,29 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 
 public class StorageDto
 {
-    [SwaggerSchemaCustom("ID")]
+    /// <summary>
+    /// ID
+    /// </summary>
     public string Id { get; set; }
 
-    [SwaggerSchemaCustom("Title")]
+    /// <summary>
+    /// Title
+    /// </summary>
     public string Title { get; set; }
 
-    [SwaggerSchemaCustom("List of authentication keys")]
+    /// <summary>
+    /// List of authentication keys
+    /// </summary>
     public List<AuthKey> Properties { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if this is the current storage or not")]
+    /// <summary>
+    /// Specifies if this is the current storage or not
+    /// </summary>
     public bool Current { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if this storage can be set or not")]
+    /// <summary>
+    /// Specifies if this storage can be set or not
+    /// </summary>
     public bool IsSet { get; set; }
 
     public static async Task<StorageDto> StorageWrapperInit<T>(DataStoreConsumer consumer, BaseStorageSettings<T> current) where T : class, ISettings<T>, new()

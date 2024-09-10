@@ -31,18 +31,28 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// </summary>
 public class LogoRequestDto
 {
-    [SwaggerSchemaCustom("The path to the temporary image file")]
+    /// <summary>
+    /// The path to the temporary image file
+    /// </summary>
     public string TmpFile { get; set; }
 
-    [SwaggerSchemaCustom("The X coordinate of the rectangle starting point")]
+    /// <summary>
+    /// The X coordinate of the rectangle starting point
+    /// </summary>
     public int X { get; set; }
 
-    [SwaggerSchemaCustom("The Y coordinate of the rectangle starting point")]
+    /// <summary>
+    /// The Y coordinate of the rectangle starting point
+    /// </summary>
     public int Y { get; set; }
 
-    [SwaggerSchemaCustom("The rectangle width")]
+    /// <summary>
+    /// The rectangle width
+    /// </summary>
     public int Width { get; set; }
 
-    [SwaggerSchemaCustom("The rectangle height")]
+    /// <summary>
+    /// The rectangle height
+    /// </summary>
     public int Height { get; set; }
 }
