@@ -474,7 +474,6 @@ public class PortalController(
 
     [HttpPost("signin")]
     [AllowCrossSiteJson]
-    [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
     public async Task<IActionResult> SignInToPortalAsync(TenantModel model)
     {
         try
@@ -497,7 +496,10 @@ public class PortalController(
                 {
                     var error = await GetRecaptchaError(model, clientIP, sw);
 
-                    return StatusCode(StatusCodes.Status401Unauthorized, error);
+                    if (error != null)
+                    {
+                        return StatusCode(StatusCodes.Status401Unauthorized, error);
+                    }
                 }
             }
 
