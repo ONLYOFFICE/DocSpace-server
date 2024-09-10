@@ -381,7 +381,7 @@ public sealed class UserManagerWrapper(
             return null;
         }
         
-        await studioNotifyService.UserPasswordChangeAsync(userInfo);
+        await studioNotifyService.UserPasswordChangeAsync(userInfo, false);
         return null;
     }
 
