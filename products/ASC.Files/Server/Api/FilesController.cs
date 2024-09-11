@@ -330,6 +330,23 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
         return await filesControllerHelper.GetFileInfoAsync(fileId, version);
     }
 
+    /// <summary>
+    /// Returns the detailed information about a file with the ID specified in the request.
+    /// </summary>
+    /// <short>Get file information</short>
+    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
+    /// <param type="System.Int32, System" name="version">File version</param>
+    /// <category>Files</category>
+    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileDto, ASC.Files.Core">File information</returns>
+    /// <path>api/2.0/files/file/{fileId}</path>
+    /// <httpMethod>GET</httpMethod>
+    /// <requiresAuthorization>false</requiresAuthorization>
+    [AllowAnonymous]
+    [HttpGet("file/{fileId}/room")]
+    public async Task<T> GetRoomId(T fileId)
+    {
+        return await filesControllerHelper.GetRoomIdAsync(fileId);
+    }
 
     /// <summary>
     /// Returns the detailed information about all the available file versions with the ID specified in the request.

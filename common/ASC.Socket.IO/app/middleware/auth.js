@@ -36,6 +36,10 @@ module.exports = (socket, next) => {
   const cookie = req?.cookies?.authorization || req?.cookies?.asc_auth_key;
   const token = req?.headers?.authorization;
   const share = socket.handshake.query?.share;
+  const page = socket.handshake.query?.page;
+  const url = new URL(page);
+  const params = url.searchParams;
+  const fileId = params.get('fileId');
 
   if (!cookie && !token && !share) {
     const err = new Error(
@@ -101,6 +105,28 @@ module.exports = (socket, next) => {
         basePath,
       });
     };
+
+    const getFile = () => {
+      if(page.includes("/doceditor") && fileId){
+        return request({
+          method: "get",
+          url: `/files/file/${fileId}`,
+          headers,
+          basePath,
+        });
+      }
+    };
+
+    const getRoomId = () => {
+      if(page.includes("/doceditor") && fileId){
+        return request({
+          method: "get",
+          url: `/files/file/${fileId}/room`,
+          headers,
+          basePath,
+        });
+      }
+    };
     
     const validateLink = () => {
       if (!share) {
@@ -110,14 +136,19 @@ module.exports = (socket, next) => {
       return validateExternalLink();
     }
 
-    return Promise.all([getUser(), getPortal(), getConnection(), validateLink()])
-      .then(([user, portal, connection, { status, linkId } = { }]) => {
+    return Promise.all([getUser(), getPortal(), getConnection(), validateLink(), getFile(), getRoomId()])
+      .then(([user, portal, connection, { status, linkId }, file, roomId = { }]) => {
         logger.info(`WS: save account info in sessionId='sess:${session.id}'`, { user, portal });
         session.user = user;
         session.portal = portal;
         session.user.connection = connection;
         if (status === 0){
           session.linkId = linkId;
+        }
+        if(page.includes("/doceditor") && file && roomId != -1)
+        {
+          session.file = file;
+          session.file.roomId = roomId;
         }
         
         session.save(function (err){

@@ -1499,7 +1499,7 @@ internal class FolderDao(
         var rootFolderId = Convert.ToInt32(entry.RootId);
         var entryId = Convert.ToInt32(entry.Id);
 
-        if (rootFolderId == entryId)
+        if (entry is Folder<int> && rootFolderId == entryId)
         {
             return Task.FromResult((-1, ""));
         }

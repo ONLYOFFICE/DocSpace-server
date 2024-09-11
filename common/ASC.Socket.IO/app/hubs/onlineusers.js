@@ -8,6 +8,7 @@ module.exports = async (io) => {
     const onlineIO = io;
     const portalUsers =[];
     const roomUsers =[];
+    const editFiles =[];
     const redisOptions = config.get("Redis");
     var redisClient = redis.createClient(redisOptions);
     await redisClient.connect();
@@ -27,15 +28,54 @@ module.exports = async (io) => {
       let id;
       let idInRoom = -1;
       let roomId = -1;
+      let file;
       let sessionId = socket.handshake.session?.user?.connection;
       
       id = await EnterAsync(portalUsers, tenantId, userId, `p-${tenantId}`, "portal");
+
+      if(socket.handshake.session.file)
+      {
+        roomId = `${tenantId}-${socket.handshake.session.file.roomId}`;
+        file = socket.handshake.session.file.title;
+        if(!editFiles[roomId])
+        {
+          editFiles[roomId] = [];
+        }
+        if(!editFiles[roomId][userId])
+        {
+          editFiles[roomId][userId] = [];
+        }
+        var user = getUser(roomUsers, userId, roomId);
+        if(editFiles[roomId][userId].length == 0 && user && user.status == "online")
+        {
+          onlineIO.to(roomId).emit(`start-edit-file-in-room`, {userId, file} );
+        }
+        editFiles[roomId][userId].push(file);
+        idInRoom = await EnterAsync(roomUsers, roomId, `${roomId}-${userId}`, roomId, "room", true);
+      }
       socket.on("disconnect", async (reason) => {
         await LeaveAsync(portalUsers, tenantId, userId, `p-${tenantId}`, "portal", id);
-        await LeaveAsync(roomUsers, roomId, `${roomId}-${userId}`, roomId, "room", idInRoom);
+        await LeaveAsync(roomUsers, roomId, `${roomId}-${userId}`, roomId, "room", idInRoom, true);
+        if(file)
+        {
+          var index = editFiles[roomId][userId].indexOf(file);
+          editFiles[roomId][userId].splice(index, 1);
+          var user = getUser(roomUsers, userId, roomId);
+          if(!editFiles[roomId][userId].includes(file) && user.status == "online")
+          {
+            onlineIO.to(roomId).emit(`stop-edit-file-in-room`, {userId, file} );
+            if(editFiles[roomId][userId].length > 0)
+            {
+              file = editFiles[roomId][userId][0];
+              onlineIO.to(roomId).emit(`start-edit-file-in-room`, {userId, file} );
+            }
+          }
+        }
         id = -1;
         idInRoom = -1;
         sessionId = -1;
+        roomId = -1;
+        file = null;
       });
 
       socket.on("getSessionsInPortal", async () => {
@@ -61,21 +101,21 @@ module.exports = async (io) => {
      /******************************* */
       socket.on("enterInRoom", async(roomPart)=>{
         roomId = getRoom(roomPart);
-        idInRoom = await EnterAsync(roomUsers, roomId, `${roomId}-${userId}`, roomId, "room");
+        idInRoom = await EnterAsync(roomUsers, roomId, `${roomId}-${userId}`, roomId, "room", true);
     });
 
     socket.on("leaveRoom", async()=>{
-      await LeaveAsync(roomUsers, roomId, `${roomId}-${userId}`, roomId, "room", idInRoom);
+      await LeaveAsync(roomUsers, roomId, `${roomId}-${userId}`, roomId, "room", idInRoom, true);
       idInRoom = -1;
   });
 
     socket.on("getSessionsInRoom", async (roomPart) => {
       var users = [];
-      var roomId = getRoom(roomPart);
+      roomId = getRoom(roomPart);
       if(roomUsers[roomId])
       {
         Object.values(roomUsers[roomId]).forEach(function(entry) {
-          users.push(serialize(entry));
+          users.push(serialize(entry, true));
         });
       }
       onlineIO.to(socket.id).emit("statuses-in-room",  users );
@@ -97,7 +137,7 @@ module.exports = async (io) => {
         return `${tenantId}-${obj.roomPart}`;
       };
 
-      async function LeaveAsync(usersList, key, redisKey, socketKey, socketDest, sessionId) 
+      async function LeaveAsync(usersList, key, redisKey, socketKey, socketDest, sessionId, isRoom = false) 
       {
         if(sessionId == -1 ){
           return;
@@ -132,7 +172,7 @@ module.exports = async (io) => {
             }
             else
             {
-              if(array.find(e=> e.browser == session.browser && e.platform == session.platform && e.ip == session.ip))
+              if(isRoom || array.find(e=> e.browser == session.browser && e.platform == session.platform && e.ip == session.ip))
               {
                 return;
               }
@@ -141,7 +181,7 @@ module.exports = async (io) => {
         }
       }
 
-      async function EnterAsync(usersList, key, redisKey, socketKey, socketDest) {
+      async function EnterAsync(usersList, key, redisKey, socketKey, socketDest, isRoom = false) {
         var user = getUser(usersList, userId, key);
         var session;
         var id = 0;
@@ -206,12 +246,16 @@ module.exports = async (io) => {
         }
         if(user.sessions.size == 1)
         {
-          var stringUser = serialize(user);
+          var stringUser = serialize(user, isRoom);
           addUser(usersList, user, userId, key);
           onlineIO.to(socketKey).emit(`enter-in-${socketDest}`, stringUser );
         }
         else
         {
+          if(isRoom)
+          {
+            return id;
+          }
           var array = Array.from(user.sessions, ([name, value]) => {
             return value;
           });
@@ -240,19 +284,27 @@ module.exports = async (io) => {
               }
       }
 
-      function serialize(user)
+      function serialize(user, isRoom)
       {
         var serUser = {
           userId: user.id,
           page: user.page,
-          sessions: Array.from(user.sessions, ([name, value]) => {
-            return value;
-          }),
           status: user.status
         };
-        serUser.sessions = serUser.sessions.concat(Array.from(user.offlineSessions, ([name, value]) => {
-          return value;
-        }));
+        if(isRoom && editFiles[roomId] && editFiles[roomId][user.id] && editFiles[roomId][user.id].length != 0)
+        {
+          serUser.file = editFiles[roomId][user.id][0];
+          serUser.status = "edit";
+        }
+        else
+        {  
+          serUser.sessions = Array.from(user.sessions, ([name, value]) => {
+            return value;
+          });
+          serUser.sessions = serUser.sessions.concat(Array.from(user.offlineSessions, ([name, value]) => {
+            return value;
+          }));
+        }
         return serUser;
       }
     });

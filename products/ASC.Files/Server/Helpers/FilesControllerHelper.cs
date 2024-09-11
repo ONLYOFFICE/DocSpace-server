@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Web.Files.Utils;
-
 namespace ASC.Files.Helpers;
 
 [Scope]
@@ -44,7 +42,8 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         PathProvider pathProvider,
         FileChecker fileChecker,
         IDistributedCache distributedCache,
-        FillingFormResultDtoHelper fillingFormResultDtoHelper)
+        FillingFormResultDtoHelper fillingFormResultDtoHelper,
+        IDaoFactory daoFactory)
     : FilesHelperBase(filesSettingsHelper,
             fileUploader,
             socketManager,
@@ -297,5 +296,15 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         await using var fileStream = await fileConverter.ExecAsync(file, destExt, password, toForm);
         var controller = serviceProvider.GetService<FilesControllerHelper>();
         return await controller.InsertFileAsync(destFolderId, fileStream, destTitle, true);
+    }
+
+    public async Task<T> GetRoomIdAsync<T>(T fileId)
+    {
+        var file = await _fileStorageService.GetFileAsync(fileId, -1);
+        var folderDao = daoFactory.GetFolderDao<T>();
+
+        (var roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(file);
+
+        return roomId;
     }
 }
