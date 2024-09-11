@@ -362,7 +362,7 @@ public class FileSharingAceHelper(
                 continue;
             }
 
-            await fileSecurity.ShareAsync(room.Id, FileEntryType.Folder, ace.Id, ace.Access);
+            await fileSecurity.ShareAsync(room.Id, FileEntryType.Folder, ace.Id, ace.Access, SubjectType.Group);
 
             if (entry.FileEntryType == FileEntryType.File)
             {
