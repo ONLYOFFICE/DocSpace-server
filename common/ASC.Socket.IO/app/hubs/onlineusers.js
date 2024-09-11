@@ -315,104 +315,45 @@ module.exports = async (io) => {
       }
     }
 
-    async function leaveSessionInPortal({id, userId, tenantId} = {}) {
-
+    async function leaveSessionInPortal({id, userId, tenantId} = {}) 
+    {
       var user = getUser(portalUsers, userId, tenantId);
-        if (user) 
-        {
-          var array = Array.from(user.sessions, ([name, value]) => {
-            value.innerId = name;
-            return value;
-          });
-          var sessions = array.filter(e=> e.id == id);
-
-          Object.values(sessions).forEach(function(entry) {
-            user.sessions.delete(entry.innerId);
-          });
-
-          user.offlineSessions.delete(id);
-          if(user.offlineSessions.size != 0)
+      if (user) 
+      {
+        Object.values(user.sessions).forEach(function(entry) {
+          if(entry.id == id)
           {
-            await redisClient.set(userId, JSON.stringify(Array.from(user.offlineSessions)));
+            onlineIO.to(`${tenantId}-${userId}`).emit("s:logout-session", entry.id);
           }
-          else{
-            await redisClient.del(userId);
-          }
-          var date = new Date().toString();
-          if(user.sessions.size <= 0)
-          {
-            user.status = "offline";
-            onlineIO.to(`p-${tenantId}`).emit("leave-in-portal",  {userId, date} );
-          }
-          else
-          {
-            var session = array.find(e=> e.id == id);
-            if(session)
-            {
-              var sessionId = session.Id;
-              onlineIO.to(`p-${tenantId}`).emit("leave-session-in-portal",  {userId, sessionId, date} );
-            }
-          }
-        }
+        });
+      }
     }
 
-    function leaveInPortal({userId, tenantId} = {}) {
-
+    function leaveInPortal({userId, tenantId} = {}) 
+    {
       var user = getUser(portalUsers, userId, tenantId);
-        if (user) 
+      if (user) 
+      {
+        user.sessions.forEach(
+        function(entry) 
         {
-          user.offlineSessions = new Map();
-          user.sessions = new Map();
-
-          var date = new Date().toString();
-          user.status = "offline";
-          onlineIO.to(`p-${tenantId}`).emit("leave-in-portal",  {userId, date} );
-        }
+          onlineIO.to(`${tenantId}-${userId}`).emit("s:logout-session", entry.id);
+        });
+      }
     }
 
-    async function leaveExceptThisInPortal({id, userId, tenantId} = {}) {
-
+    async function leaveExceptThisInPortal({id, userId, tenantId} = {}) 
+    {
       var user = getUser(portalUsers, userId, tenantId);
-        if (user) 
-        {
-          var array = Array.from(user.sessions, ([name, value]) => {
-            value.innerId = name;
-            return value;
-          });
-          var sessions = array.filter(e=> e.id != id);
-
-          var setIds= new Set();
-          Object.values(sessions).forEach(function(entry) {
-            user.sessions.delete(entry.innerId);
-            setIds.add(entry.id);
-          });
-
-          array = Array.from(user.offlineSessions, ([name, value]) => {
-            return value;
-          });
-          Object.values(array.filter(e=> e.id != id)).forEach(function(entry) {
-            user.offlineSessions.delete(entry.id);
-          });
-          if(user.offlineSessions.size != 0)
+      if (user) 
+      {
+        Object.values(user.sessions).forEach(function(entry) {
+          if(entry.id != id)
           {
-            await redisClient.set(userId, JSON.stringify(Array.from(user.offlineSessions)));
+            onlineIO.to(`${tenantId}-${userId}`).emit("s:logout-session", entry.id);
           }
-          else{
-            await redisClient.del(userId);
-          }
-          var date = new Date().toString();
-          if(user.sessions.size <= 0)
-          {
-            user.status = "offline";
-            onlineIO.to(`p-${tenantId}`).emit("leave-in-portal",  {userId, date} );
-          }
-          else
-          {
-            Object.values(setIds).forEach(function(entry) {
-              onlineIO.to(`p-${tenantId}`).emit("leave-session-in-portal",  {userId, entry, date} );
-            });
-          }
-        }
+        });
+      }
     }
 
     function getUser(list, userId, id){
