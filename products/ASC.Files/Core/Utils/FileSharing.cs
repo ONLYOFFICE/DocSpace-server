@@ -300,6 +300,8 @@ public class FileSharingAceHelper(
                 }
         }
 
+        yield break;
+
         async Task ShareLinkAsync(ProcessedItem<T> item)
         {
             IDistributedLockHandle handle = null;
