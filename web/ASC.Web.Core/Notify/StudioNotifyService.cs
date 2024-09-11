@@ -124,7 +124,7 @@ public class StudioNotifyService(
             auditEventDate.Day,
             auditEventDate.Hour,
             auditEventDate.Minute,
-            auditEventDate.Second,
+            auditEventDate.Second + 2,
             0,
             DateTimeKind.Utc);
 
