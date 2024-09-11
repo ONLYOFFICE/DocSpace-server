@@ -238,6 +238,9 @@ public enum MessageAction
     FileExternalLinkCreated = 5091,
     FileExternalLinkUpdated = 5092,
     FileExternalLinkDeleted = 5093,
+    
+    RoomIndexingEnabled = 5102,
+    RoomIndexingDisabled = 5103,
 
     #endregion
 

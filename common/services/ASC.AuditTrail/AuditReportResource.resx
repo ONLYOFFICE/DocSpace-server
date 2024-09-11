@@ -861,4 +861,10 @@
   <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
     <value>Users [{0}]. Disabled storage quota for users</value>
   </data>
+  <data name="RoomIndexingEnabled" xml:space="preserve">
+    <value>Room indexing enabled</value>
+  </data>
+  <data name="RoomIndexingDisabled" xml:space="preserve">
+    <value>Room indexing disabled</value>
+  </data>
 </root>

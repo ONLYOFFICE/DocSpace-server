@@ -432,12 +432,12 @@ public class FileStorageService //: IFileStorageService
         {
             await countRoomChecker.CheckAppend();
                 return await InternalCreateFolderAsync(parentId, title, DocSpaceHelper.MapToFolderType(roomType), privacy, indexing, quota, lifetime);
-            }
+        }
         }, privacy, share);
             }
 
     public async Task<Folder<string>> CreateThirdPartyRoomAsync(string title, RoomType roomType, string parentId, bool privacy, bool indexing, bool createAsNewFolder)
-            {
+    {
         var folderDao = daoFactory.GetFolderDao<string>();
         var providerDao = daoFactory.ProviderDao;
 
@@ -445,9 +445,9 @@ public class FileStorageService //: IFileStorageService
         var providerInfo = await providerDao.GetProviderInfoAsync(parent.ProviderId);
 
         if (providerInfo.RootFolderType != FolderType.VirtualRooms)
-            {
+        {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_InvalidProvider);
-            }
+        }
 
         if (providerInfo.FolderId != null)
         {
@@ -457,7 +457,7 @@ public class FileStorageService //: IFileStorageService
         var folderType = DocSpaceHelper.MapToFolderType(roomType);
 
         var room = await CreateRoomAsync(async () =>
-            {
+        {
             var folder = parent;
 
             if (createAsNewFolder)
@@ -468,30 +468,29 @@ public class FileStorageService //: IFileStorageService
                 }
                 catch
                 {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_InvalidThirdPartyFolder);
-        }
+                    throw new InvalidOperationException(FilesCommonResource.ErrorMessage_InvalidThirdPartyFolder);
+                }
             }
 
-                await providerDao.UpdateRoomProviderInfoAsync(new ProviderData
-                {
-                    Id = providerInfo.ProviderId,
-                    Title = title,
-                FolderId = folder.Id, 
-                    FolderType = folderType,
-                    Private = privacy
-                });
+            await providerDao.UpdateRoomProviderInfoAsync(new ProviderData
+            {
+                Id = providerInfo.ProviderId,
+                Title = title,
+                FolderId = folder.Id,
+                FolderType = folderType,
+                Private = privacy
+            });
 
-                folder.FolderType = folderType;
-                folder.Shared = folderType == FolderType.PublicRoom;
-                folder.RootFolderType = FolderType.VirtualRooms;
+            folder.FolderType = folderType;
+            folder.Shared = folderType == FolderType.PublicRoom;
+            folder.RootFolderType = FolderType.VirtualRooms;
             folder.FolderIdDisplay = IdConverter.Convert<string>(await globalFolderHelper.FolderVirtualRoomsAsync);
 
             return folder;
-
         }, false, null);
 
         return room;
-            }
+    }
 
     private async Task<Folder<T>> CreateRoomAsync<T>(Func<Task<Folder<T>>> folderFactory, bool privacy, IEnumerable<FileShareParams> shares)
     {
@@ -504,20 +503,20 @@ public class FileStorageService //: IFileStorageService
             if (shares == null || !shares.Any())
             {
                 throw new ArgumentNullException(nameof(shares));
-        }
+            }
 
             aces = await GetFullAceWrappersAsync(shares);
             await CheckEncryptionKeysAsync(aces);
-    }
+        }
 
         var folder = await folderFactory();
         if (folder == null)
-    {
+        {
             return null;
-    }
+        }
 
         switch (folder.FolderType)
-    {
+        {
             case FolderType.PublicRoom:
                 await SetExternalLinkAsync(folder, Guid.NewGuid(), FileShare.Read, FilesCommonResource.DefaultExternalLinkTitle, primary: true);
                 break;
@@ -3294,6 +3293,8 @@ public class FileStorageService //: IFileStorageService
                 
                 room.SettingsIndexing = indexing;
                 await folderDao.SaveFolderAsync(room);
+
+                await filesMessageService.SendAsync(indexing ? MessageAction.RoomIndexingEnabled : MessageAction.RoomIndexingDisabled, room);
             }
         }
 

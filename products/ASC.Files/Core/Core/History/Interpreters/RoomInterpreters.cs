@@ -195,6 +195,15 @@ public class RoomCopiedInterpreter : ActionInterpreter
     }
 }
 
+public class RoomIndexingInterpreter : ActionInterpreter
+{
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
+    {
+        var desc = GetAdditionalDescription(description);
+        return ValueTask.FromResult<HistoryData>(new EntryData(target, desc.RoomTitle));
+    }
+}
+
 public record UserHistoryData : HistoryData
 {
     public EmployeeDto User { get; set; }

@@ -74,7 +74,9 @@ public class HistoryService(
         MessageAction.RoomExternalLinkCreated,
         MessageAction.RoomExternalLinkRenamed,
         MessageAction.RoomExternalLinkDeleted,
-        MessageAction.RoomExternalLinkRevoked
+        MessageAction.RoomExternalLinkRevoked,
+        MessageAction.RoomIndexingEnabled,
+        MessageAction.RoomIndexingDisabled
     ];
     
     public async IAsyncEnumerable<HistoryEntry> GetHistoryAsync(int entryId, FileEntryType entryType, int offset, int count)

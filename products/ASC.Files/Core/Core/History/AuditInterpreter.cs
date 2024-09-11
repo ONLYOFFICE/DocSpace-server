@@ -38,6 +38,7 @@ public class AuditInterpreter(IServiceProvider serviceProvider)
     private static readonly RoomLogoChangedInterpreter _roomLogoChangedInterpreter = new();
     private static readonly FileUpdatedInterpreter _fileUpdatedInterpreter = new();
     private static readonly RoomTagsInterpreter _roomTagsInterpreter = new();
+    private static readonly RoomIndexingInterpreter _roomIndexingInterpreter = new();
     
     private static readonly FrozenDictionary<int, ActionInterpreter> _interpreters = new Dictionary<int, ActionInterpreter>
     {
@@ -78,7 +79,9 @@ public class AuditInterpreter(IServiceProvider serviceProvider)
         { (int)MessageAction.RoomExternalLinkCreated, new RoomExternalLinkCreatedInterpreter() },
         { (int)MessageAction.RoomExternalLinkRenamed, new RoomExternalLinkRenamedInterpreter() },
         { (int)MessageAction.RoomExternalLinkDeleted, new RoomExternalLinkDeletedInterpreter() },
-        { (int)MessageAction.RoomExternalLinkRevoked, new RoomExternalLinkRevokedInterpreter() }
+        { (int)MessageAction.RoomExternalLinkRevoked, new RoomExternalLinkRevokedInterpreter() },
+        { (int)MessageAction.RoomIndexingEnabled, _roomIndexingInterpreter },
+        { (int)MessageAction.RoomIndexingDisabled, _roomIndexingInterpreter }
     }.ToFrozenDictionary();
     
     public ValueTask<HistoryEntry> ToHistoryAsync(DbAuditEvent @event)

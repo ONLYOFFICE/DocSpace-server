@@ -165,7 +165,9 @@ internal class RoomsActionMapper : IModuleActionMapper
                             MessageAction.RoomExternalLinkDeleted,
                             MessageAction.RoomGroupAdded,
                             MessageAction.RoomUpdateAccessForGroup,
-                            MessageAction.RoomGroupRemove
+                            MessageAction.RoomGroupRemove,
+                            MessageAction.RoomIndexingEnabled,
+                            MessageAction.RoomIndexingDisabled
                         ]
                     },
                     {
