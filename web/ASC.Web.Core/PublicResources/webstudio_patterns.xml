@@ -240,6 +240,11 @@ $activity.Key
 		<subject resource="|subject_reset_password|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
 		<body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_reset_password|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
 	</pattern>
+
+  <pattern id="set_password">
+    <subject resource="|subject_set_password|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_set_password|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+  </pattern>
 	
   <!-- change_phone -->
   <pattern id="change_phone">

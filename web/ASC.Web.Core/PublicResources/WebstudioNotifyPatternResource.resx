@@ -2364,7 +2364,7 @@ $activity
     <value>What's new on your portal ${__VirtualRootPath} for the last hour</value>
   </data>
   <data name="ButtonSetPassword" xml:space="preserve">
-    <value>Set password</value>
+    <value>Set up password</value>
   </data>
   <data name="pattern_reset_password" xml:space="preserve">
     <value>The DocSpace administrator noticed suspicious activity from your account and disabled all active sessions. Your password was reset. 
@@ -2377,5 +2377,15 @@ The link is valid for 7 days.</value>
   </data>
   <data name="subject_reset_password" xml:space="preserve">
     <value>Reset your password</value>
+  </data>
+  <data name="subject_set_password" xml:space="preserve">
+    <value>Set up a password for ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="pattern_set_password" xml:space="preserve">
+    <value>Hello! Please set up a password for your ONLYOFFICE DocSpace account. Just click the button below:
+
+$OrangeButton
+
+The link is valid for 7 days.</value>
   </data>
 </root>

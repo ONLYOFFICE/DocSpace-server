@@ -457,7 +457,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Set password.
+        ///   Looks up a localized string similar to Set up password.
         /// </summary>
         public static string ButtonSetPassword {
             get {
@@ -901,7 +901,8 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///      Outgoing Mail (SMTP): 
         ///      Server: &lt;b&gt;$Server&lt;/b&gt;
-        ///      Port: &lt;b&gt;$SmtpPort&lt;/b&gt;        /// [rest of string was truncated]&quot;;.
+        ///      Port: &lt;b&gt;$SmtpPort&lt;/b&gt;
+        /// [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_mailbox_created {
             get {
@@ -1793,6 +1794,19 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Hello! Please set up a password for your ONLYOFFICE DocSpace account. Just click the button below:
+        ///
+        ///$OrangeButton
+        ///
+        ///The link is valid for 7 days..
+        /// </summary>
+        public static string pattern_set_password {
+            get {
+                return ResourceManager.GetString("pattern_set_password", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to SMTP test message
         ///
         ///This message was generated automatically to test your SMTP settings. If you are viewing it this means that the settings are correct and you can use them on your portal.
@@ -2642,6 +2656,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string subject_send_whats_new {
             get {
                 return ResourceManager.GetString("subject_send_whats_new", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Set up a password for ONLYOFFICE DocSpace.
+        /// </summary>
+        public static string subject_set_password {
+            get {
+                return ResourceManager.GetString("subject_set_password", resourceCulture);
             }
         }
         

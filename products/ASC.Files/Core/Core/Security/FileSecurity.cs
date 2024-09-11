@@ -49,8 +49,7 @@ public class FileSecurity(IDaoFactory daoFactory,
         StudioNotifyHelper studioNotifyHelper,
         BadgesSettingsHelper badgesSettingsHelper,
         ExternalShare externalShare,
-        AuthManager authManager,
-        ICache cache)
+        AuthManager authManager)
     : IFileSecurity
 {
     public readonly FileShare DefaultMyShare = FileShare.Restrict;
@@ -2238,16 +2237,9 @@ public class FileSecurity(IDaoFactory daoFactory,
 
     private async Task<List<Folder<T>>> GetFileParentFolders<T>(T fileParentId)
     {
-        var folderParentsCacheKey = "FileFolderParents" + fileParentId;
-
-        var parentFolders = cache.Get<List<Folder<T>>>(folderParentsCacheKey);
-
-        if (parentFolders == null)
-        {
-            var folderDao = daoFactory.GetFolderDao<T>();
-            parentFolders = await folderDao.GetParentFoldersAsync(fileParentId).ToListAsync();
-            cache.Insert(folderParentsCacheKey, parentFolders, TimeSpan.FromMinutes(5));
-        }
+        var folderDao = daoFactory.GetCacheFolderDao<T>();
+        
+        var parentFolders = await folderDao.GetParentFoldersAsync(fileParentId).ToListAsync();
 
         return parentFolders;
     }
