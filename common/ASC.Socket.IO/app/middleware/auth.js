@@ -36,10 +36,7 @@ module.exports = (socket, next) => {
   const cookie = req?.cookies?.authorization || req?.cookies?.asc_auth_key;
   const token = req?.headers?.authorization;
   const share = socket.handshake.query?.share;
-  const page = socket.handshake.query?.page;
-  const url = new URL(page);
-  const params = url.searchParams;
-  const fileId = params.get('fileId');
+  const fileId = socket.handshake.query?.openFileId;
 
   if (!cookie && !token && !share) {
     const err = new Error(
@@ -107,7 +104,7 @@ module.exports = (socket, next) => {
     };
 
     const getFile = () => {
-      if(page.includes("/doceditor") && fileId){
+      if(fileId){
         return request({
           method: "get",
           url: `/files/file/${fileId}`,
@@ -118,7 +115,7 @@ module.exports = (socket, next) => {
     };
 
     const getRoomId = () => {
-      if(page.includes("/doceditor") && fileId){
+      if(fileId){
         return request({
           method: "get",
           url: `/files/file/${fileId}/room`,
@@ -145,7 +142,7 @@ module.exports = (socket, next) => {
         if (status === 0){
           session.linkId = linkId;
         }
-        if(page.includes("/doceditor") && file && roomId != -1)
+        if(file && roomId != -1)
         {
           session.file = file;
           session.file.roomId = roomId;
