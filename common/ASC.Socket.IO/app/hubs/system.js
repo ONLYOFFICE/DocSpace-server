@@ -1,4 +1,4 @@
-module.exports = (io) => {
+module.exports = (io, filesHub, usersHub) => {
     const logger = require("../log.js");
     const moment = require("moment");
     const systemIO = io;
@@ -21,5 +21,7 @@ module.exports = (io) => {
               );
             });
         }
+        filesHub.start(socket);
+        usersHub.startAsync(socket);
     });
 }

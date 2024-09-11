@@ -13,7 +13,8 @@ module.exports = async (io) => {
     var redisClient = redis.createClient(redisOptions);
     await redisClient.connect();
 
-    onlineIO.on("connection", async (socket) => {
+    async function startAsync(socket)
+    {
       if (socket.handshake.session.system) {
         return;
       }
@@ -312,7 +313,7 @@ module.exports = async (io) => {
         }
         return serUser;
       }
-    });
+    }
 
     async function leaveSessionInPortal({id, userId, tenantId} = {}) {
 
@@ -432,6 +433,7 @@ module.exports = async (io) => {
     }
     
     return {
+      startAsync,
       leaveSessionInPortal,
       leaveInPortal,
       leaveExceptThisInPortal

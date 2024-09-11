@@ -157,9 +157,9 @@ app.get("/", (req, res) => {
   res.send("<h1>Invalid Endpoint</h1>");
 });
 
-  const systemHub = require("./app/hubs/system.js")(io);
   const filesHub = require("./app/hubs/files.js")(io);
   const usersHub = await require("./app/hubs/onlineusers.js")(io);
+  const systemHub = require("./app/hubs/system.js")(io, filesHub, usersHub);
 
   app.use("/controller", require("./app/controllers")(filesHub, usersHub));
 

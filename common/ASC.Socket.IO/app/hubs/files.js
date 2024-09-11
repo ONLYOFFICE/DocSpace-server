@@ -28,117 +28,117 @@ module.exports = (io) => {
   const logger = require("../log.js");
   const filesIO = io;
 
-  filesIO.on("connection", (socket) => {
+  function start(socket){
     const session = socket.handshake.session;
-    if (session.system) {
-      return;
-    }
-
-    const userId = () => {
-      return socket.handshake.session?.user?.id;
-    }
-    const tenantId = () => {
-      return socket.handshake.session?.portal?.tenantId;
-    }
-    
-    const linkId = () => {
-      return socket.handshake.session?.linkId;
-    }
-
-    const getRoom = (roomPart) => {
-      return `${tenantId()}-${roomPart}`;
-    };
-
-    const connectMessage = !session.anonymous ? 
-      `connect user='${userId()}' on tenant='${tenantId()}' socketId='${socket.id}'` : 
-      `connect anonymous user by share key on tenant='${tenantId()}' socketId='${socket.id}'`;
-
-    logger.info(connectMessage);
-
-    socket.on("disconnect", (reason) => {
-      const disconnectMessage = !session.anonymous ? 
-        `disconnect user='${userId()}' on tenant='${tenantId()}' socketId='${socket.id}' due to ${reason}` :
-        `disconnect anonymous user by share key on tenant='${tenantId()}' socketId='${socket.id}' due to ${reason}`;
-
-      logger.info(disconnectMessage)
-    });
-
-    socket.on("subscribe", ({ roomParts, individual }) => {
-      changeSubscription(roomParts, individual, subscribe);
-    });
-
-    socket.on("unsubscribe", ({ roomParts, individual }) => {
-      changeSubscription(roomParts, individual, unsubscribe);
-    });
-
-    socket.on("refresh-folder", (folderId) => {
-      const room = getRoom(`DIR-${folderId}`);
-      logger.info(`refresh folder ${folderId} in room ${room}`);
-      socket.to(room).emit("refresh-folder", folderId);
-    });
-
-    socket.on("restore-backup", () => {
-      const room = getRoom("backup-restore");
-      const sess = socket.handshake.session;
-      const tenant = sess?.portal?.tenantId || "unknown";
-      const user = sess?.user?.id || "unknown";
-      const sessId = sess?.id;
-
-      logger.info(`WS: restore backup in room ${room} session=[sessionId='sess:${sessId}' tenantId=${tenant}|${tenantId()} userId='${user}'|'${userId()}']`);
-      socket.to(room).emit("restore-backup");
-    });
-
-    function changeSubscription(roomParts, individual, changeFunc) {
-      if (!roomParts) return;
-
-      changeFunc(roomParts);
-
-      if (individual) {
-        if (Array.isArray(roomParts)) {
-          changeFunc(roomParts.map((p) => `${p}-${userId()}`));
-          
-          if (linkId()) {
-            changeFunc(roomParts.map((p) => `${p}-${linkId()}`));
-          }
-          
-        } else {
-          changeFunc(`${roomParts}-${userId()}`);
-          
-          if (linkId()) {
-            changeFunc(`${roomParts}-${linkId()}`);
+      if (session.system) {
+        return;
+      }
+  
+      const userId = () => {
+        return socket.handshake.session?.user?.id;
+      }
+      const tenantId = () => {
+        return socket.handshake.session?.portal?.tenantId;
+      }
+      
+      const linkId = () => {
+        return socket.handshake.session?.linkId;
+      }
+  
+      const getRoom = (roomPart) => {
+        return `${tenantId()}-${roomPart}`;
+      };
+  
+      const connectMessage = !session.anonymous ? 
+        `connect user='${userId()}' on tenant='${tenantId()}' socketId='${socket.id}'` : 
+        `connect anonymous user by share key on tenant='${tenantId()}' socketId='${socket.id}'`;
+  
+      logger.info(connectMessage);
+  
+      socket.on("disconnect", (reason) => {
+        const disconnectMessage = !session.anonymous ? 
+          `disconnect user='${userId()}' on tenant='${tenantId()}' socketId='${socket.id}' due to ${reason}` :
+          `disconnect anonymous user by share key on tenant='${tenantId()}' socketId='${socket.id}' due to ${reason}`;
+  
+        logger.info(disconnectMessage)
+      });
+  
+      socket.on("subscribe", ({ roomParts, individual }) => {
+        changeSubscription(roomParts, individual, subscribe);
+      });
+  
+      socket.on("unsubscribe", ({ roomParts, individual }) => {
+        changeSubscription(roomParts, individual, unsubscribe);
+      });
+  
+      socket.on("refresh-folder", (folderId) => {
+        const room = getRoom(`DIR-${folderId}`);
+        logger.info(`refresh folder ${folderId} in room ${room}`);
+        socket.to(room).emit("refresh-folder", folderId);
+      });
+  
+      socket.on("restore-backup", () => {
+        const room = getRoom("backup-restore");
+        const sess = socket.handshake.session;
+        const tenant = sess?.portal?.tenantId || "unknown";
+        const user = sess?.user?.id || "unknown";
+        const sessId = sess?.id;
+  
+        logger.info(`WS: restore backup in room ${room} session=[sessionId='sess:${sessId}' tenantId=${tenant}|${tenantId()} userId='${user}'|'${userId()}']`);
+        socket.to(room).emit("restore-backup");
+      });
+  
+      function changeSubscription(roomParts, individual, changeFunc) {
+        if (!roomParts) return;
+  
+        changeFunc(roomParts);
+  
+        if (individual) {
+          if (Array.isArray(roomParts)) {
+            changeFunc(roomParts.map((p) => `${p}-${userId()}`));
+            
+            if (linkId()) {
+              changeFunc(roomParts.map((p) => `${p}-${linkId()}`));
+            }
+            
+          } else {
+            changeFunc(`${roomParts}-${userId()}`);
+            
+            if (linkId()) {
+              changeFunc(`${roomParts}-${linkId()}`);
+            }
           }
         }
       }
-    }
-
-    function subscribe(roomParts) {
-      if (!roomParts) return;
-
-      if (Array.isArray(roomParts)) {
-        const rooms = roomParts.map((p) => getRoom(p));
-        logger.info(`client ${socket.id} join rooms [${rooms.join(",")}]`);
-        socket.join(rooms);
-      } else {
-        const room = getRoom(roomParts);
-        logger.info(`client ${socket.id} join room ${room}`);
-        socket.join(room);
+  
+      function subscribe(roomParts) {
+        if (!roomParts) return;
+  
+        if (Array.isArray(roomParts)) {
+          const rooms = roomParts.map((p) => getRoom(p));
+          logger.info(`client ${socket.id} join rooms [${rooms.join(",")}]`);
+          socket.join(rooms);
+        } else {
+          const room = getRoom(roomParts);
+          logger.info(`client ${socket.id} join room ${room}`);
+          socket.join(room);
+        }
       }
-    }
-
-    function unsubscribe(roomParts) {
-      if (!roomParts) return;
-
-      if (Array.isArray(roomParts)) {
-        const rooms = roomParts.map((p) => getRoom(p));
-        logger.info(`client ${socket.id} leave rooms [${rooms.join(",")}]`);
-        socket.leave(rooms);
-      } else {
-        const room = getRoom(roomParts);
-        logger.info(`client ${socket.id} leave room ${room}`);
-        socket.leave(room);
+  
+      function unsubscribe(roomParts) {
+        if (!roomParts) return;
+  
+        if (Array.isArray(roomParts)) {
+          const rooms = roomParts.map((p) => getRoom(p));
+          logger.info(`client ${socket.id} leave rooms [${rooms.join(",")}]`);
+          socket.leave(rooms);
+        } else {
+          const room = getRoom(roomParts);
+          logger.info(`client ${socket.id} leave room ${room}`);
+          socket.leave(room);
+        }
       }
-    }
-  });
+  }
 
   function startEdit({ fileId, room } = {}) {
     logger.info(`start edit file ${fileId} in room ${room}`);
@@ -313,6 +313,7 @@ module.exports = (io) => {
   }
 
   return {
+    start,
     startEdit,
     stopEdit,
     createFile,
