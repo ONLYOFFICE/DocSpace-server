@@ -296,6 +296,10 @@ module.exports = async (io) => {
             serUser.file = editFiles[roomId][user.id][0];
             serUser.status = "edit";
           }
+          if(serUser.status == "offline")
+          {
+            serUser.date = Array.from(user.offlineSessions)[user.offlineSessions.size-1][1].date;
+          }
         }
         else
         {  
