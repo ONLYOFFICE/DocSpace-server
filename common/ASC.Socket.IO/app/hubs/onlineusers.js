@@ -211,7 +211,6 @@ module.exports = async (io) => {
           user = {
             id: userId,
             displayName: userName,
-            page: socket.handshake.session?.user?.profileUrl,
             sessions: sessions,
             status: "online",
             offlineSessions: offSess
@@ -288,7 +287,6 @@ module.exports = async (io) => {
       {
         var serUser = {
           userId: user.id,
-          page: user.page,
           status: user.status
         };
         if(isRoom && editFiles[roomId] && editFiles[roomId][user.id] && editFiles[roomId][user.id].length != 0)
