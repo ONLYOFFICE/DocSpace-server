@@ -867,4 +867,10 @@
   <data name="RoomIndexingDisabled" xml:space="preserve">
     <value>Room indexing disabled</value>
   </data>
+  <data name="RoomLifeTimeSet" xml:space="preserve">
+    <value>Life time is set. Value: {0}. Period: {1}. Permanently Delete: {2}</value>
+  </data>
+  <data name="RoomLifeTimeDisabled" xml:space="preserve">
+    <value>LifeTime disabled</value>
+  </data>
 </root>

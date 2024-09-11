@@ -241,6 +241,9 @@ public enum MessageAction
     
     RoomIndexingEnabled = 5102,
     RoomIndexingDisabled = 5103,
+    
+    RoomLifeTimeSet = 5104,
+    RoomLifeTimeDisabled = 5105,
 
     #endregion
 

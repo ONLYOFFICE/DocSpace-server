@@ -1662,6 +1662,24 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to LifeTime disabled.
+        /// </summary>
+        public static string RoomLifeTimeDisabled {
+            get {
+                return ResourceManager.GetString("RoomLifeTimeDisabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Life time is set. Value: {0}. Period: {1}. Permanently Delete: {2}.
+        /// </summary>
+        public static string RoomLifeTimeSet {
+            get {
+                return ResourceManager.GetString("RoomLifeTimeSet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Logo created.
         /// </summary>
         public static string RoomLogoCreated {

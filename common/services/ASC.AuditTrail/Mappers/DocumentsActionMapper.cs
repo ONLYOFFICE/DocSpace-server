@@ -167,7 +167,9 @@ internal class RoomsActionMapper : IModuleActionMapper
                             MessageAction.RoomUpdateAccessForGroup,
                             MessageAction.RoomGroupRemove,
                             MessageAction.RoomIndexingEnabled,
-                            MessageAction.RoomIndexingDisabled
+                            MessageAction.RoomIndexingDisabled,
+                            MessageAction.RoomLifeTimeSet,
+                            MessageAction.RoomLifeTimeDisabled
                         ]
                     },
                     {

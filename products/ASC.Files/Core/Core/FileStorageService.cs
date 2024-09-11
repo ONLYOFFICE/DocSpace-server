@@ -3316,11 +3316,27 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
-        if (DocSpaceHelper.IsRoom(room.FolderType))
+        if (!DocSpaceHelper.IsRoom(room.FolderType))
         {
-            room.SettingsLifetime = lifetime;
+            return room;
+        }
+        
+        if (Equals(room.SettingsLifetime, lifetime))
+        {
+            return room;
+        }
 
-            await folderDao.SaveFolderAsync(room);
+        room.SettingsLifetime = lifetime;
+        await folderDao.SaveFolderAsync(room);
+
+        if (lifetime != null)
+        {
+            await filesMessageService.SendAsync(MessageAction.RoomLifeTimeSet, room, lifetime.Value.ToString(), lifetime.Period.ToStringFast(), 
+                lifetime.DeletePermanently.ToString());
+        }
+        else
+        {
+            await filesMessageService.SendAsync(MessageAction.RoomLifeTimeDisabled, room);
         }
 
         return room;

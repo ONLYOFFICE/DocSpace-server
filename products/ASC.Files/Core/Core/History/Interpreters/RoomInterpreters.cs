@@ -204,6 +204,32 @@ public class RoomIndexingInterpreter : ActionInterpreter
     }
 }
 
+public class RoomLifeTimeSetInterpreter : ActionInterpreter
+{
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
+    {
+        var desc = GetAdditionalDescription(description);
+        
+        var lifetime = new RoomDataLifetime
+        {
+            Value = int.Parse(description[0]),
+            Period = RoomDataLifetimePeriodExtensions.TryParse(description[1], out var period) ? period : default,
+            DeletePermanently = bool.Parse(description[2])
+        };
+        
+        return ValueTask.FromResult<HistoryData>(new LifeTimeHistoryData(lifetime, target, desc.RoomTitle));
+    }
+}
+
+public class RoomLifeTimeDisabledInterpreter : ActionInterpreter
+{
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
+    {
+        var desc = GetAdditionalDescription(description);
+        return ValueTask.FromResult<HistoryData>(new LifeTimeHistoryData(null, target, desc.RoomTitle));
+    }
+}
+
 public record UserHistoryData : HistoryData
 {
     public EmployeeDto User { get; set; }
@@ -219,3 +245,14 @@ public record GroupHistoryData : HistoryData
 }
 
 public record TagData(string[] Tags) : HistoryData;
+
+public record LifeTimeHistoryData : EntryData
+{
+    public LifeTimeHistoryData(RoomDataLifetime lifeTime, string id, string title, int? parentId = null, string parentTitle = null, int? parentType = null) 
+        : base(id, title, parentId, parentTitle, parentType)
+    {
+        LifeTime = lifeTime;
+    }
+
+    public RoomDataLifetime LifeTime { get; set; }
+}

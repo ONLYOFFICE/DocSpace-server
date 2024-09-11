@@ -81,7 +81,9 @@ public class AuditInterpreter(IServiceProvider serviceProvider)
         { (int)MessageAction.RoomExternalLinkDeleted, new RoomExternalLinkDeletedInterpreter() },
         { (int)MessageAction.RoomExternalLinkRevoked, new RoomExternalLinkRevokedInterpreter() },
         { (int)MessageAction.RoomIndexingEnabled, _roomIndexingInterpreter },
-        { (int)MessageAction.RoomIndexingDisabled, _roomIndexingInterpreter }
+        { (int)MessageAction.RoomIndexingDisabled, _roomIndexingInterpreter },
+        { (int)MessageAction.RoomLifeTimeSet, new RoomLifeTimeSetInterpreter() },
+        { (int)MessageAction.RoomLifeTimeDisabled, new RoomLifeTimeDisabledInterpreter() },
     }.ToFrozenDictionary();
     
     public ValueTask<HistoryEntry> ToHistoryAsync(DbAuditEvent @event)
