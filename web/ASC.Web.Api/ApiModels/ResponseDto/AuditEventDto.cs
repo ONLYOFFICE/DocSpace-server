@@ -28,7 +28,7 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 
 /// <summary>
 /// </summary>
-public class AuditEventDto
+public class AuditEventDto : IMapFrom<AuditEvent>
 {
     /// <summary>ID</summary>
     /// <type>System.Int32, System</type>
@@ -102,46 +102,19 @@ public class AuditEventDto
     /// <type>System.String, System</type>
     public string Context { get; set; }
 
-    public AuditEventDto(AuditEvent auditEvent, AuditActionMapper auditActionMapper)
+    public void Mapping(Profile profile)
     {
-        Id = auditEvent.Id;
-        Date = new ApiDateTime(auditEvent.Date, TimeSpan.Zero);
-        User = auditEvent.UserName;
-        UserId = auditEvent.UserId;
-        Action = auditEvent.ActionText;
-        ActionId = (MessageAction)auditEvent.Action;
-        IP = auditEvent.IP;
-        Country = auditEvent.Country;
-        City = auditEvent.City;
-        Browser = auditEvent.Browser;
-        Platform = auditEvent.Platform;
-        Page = auditEvent.Page;
-
-        var maps = auditActionMapper.GetMessageMaps(auditEvent.Action);
-
-        ActionType = maps.ActionType;
-        Product = maps.ProductType;
-        Module = maps.ModuleType;
-
-        var list = new List<EntryType>(2);
-
-        if (maps.EntryType1 != EntryType.None)
-        {
-            list.Add(maps.EntryType1);
-        }
-
-        if (maps.EntryType2 != EntryType.None)
-        {
-            list.Add(maps.EntryType2);
-        }
-
-        Entries = list;
-
-        if (auditEvent.Target != null)
-        {
-            Target = auditEvent.Target.GetItems();
-        }
-
-        Context = auditEvent.Context;
+        profile.CreateMap<AuditEvent, AuditEventDto>()
+            .ForMember(x => x.User, opt => 
+                opt.MapFrom(x => x.UserName))
+            .ForMember(x => x.Action, opt => 
+                opt.MapFrom(x => x.ActionText))
+            .ForMember(x => x.ActionId, opt => 
+                opt.MapFrom(x => (MessageAction)x.Action))
+            .ForMember(x => x.Date, opt => 
+                opt.ConvertUsing<ApiDateTimeMappingConverter, DateTime>())
+            .ForMember(x => x.Target, opt => 
+                opt.MapFrom(x => x.Target != null ? x.Target.GetItems() : null))
+            .AfterMap<AuditEventMapperAction>();
     }
 }
