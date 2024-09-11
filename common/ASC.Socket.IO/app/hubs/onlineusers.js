@@ -289,10 +289,13 @@ module.exports = async (io) => {
           userId: user.id,
           status: user.status
         };
-        if(isRoom && editFiles[roomId] && editFiles[roomId][user.id] && editFiles[roomId][user.id].length != 0)
+        if(isRoom)
         {
-          serUser.file = editFiles[roomId][user.id][0];
-          serUser.status = "edit";
+          if(editFiles[roomId] && editFiles[roomId][user.id] && editFiles[roomId][user.id].length != 0)
+          {
+            serUser.file = editFiles[roomId][user.id][0];
+            serUser.status = "edit";
+          }
         }
         else
         {  
