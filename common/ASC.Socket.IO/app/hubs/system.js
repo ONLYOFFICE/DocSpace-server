@@ -3,7 +3,7 @@ module.exports = (io, filesHub, usersHub) => {
     const moment = require("moment");
     const systemIO = io;
 
-    systemIO.on("connection", async (socket) => 
+    systemIO.on("connection", (socket) => 
     {
         const session = socket.handshake.session;
         if (session.system) 
@@ -22,6 +22,6 @@ module.exports = (io, filesHub, usersHub) => {
             });
         }
         filesHub.start(socket);
-        await usersHub.startAsync(socket);
+        usersHub.startAsync(socket);
     });
 }
