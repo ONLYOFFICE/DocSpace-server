@@ -873,4 +873,10 @@
   <data name="RoomLifeTimeDisabled" xml:space="preserve">
     <value>LifeTime disabled</value>
   </data>
+  <data name="FolderIndexChanged" xml:space="preserve">
+    <value>Folder: {0}. Index changed from {1} to {2}</value>
+  </data>
+  <data name="FileIndexChanged" xml:space="preserve">
+    <value>File: {0}. Index changed from {1} to {2}</value>
+  </data>
 </root>

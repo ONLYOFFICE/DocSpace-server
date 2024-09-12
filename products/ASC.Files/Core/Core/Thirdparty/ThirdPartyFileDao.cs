@@ -741,9 +741,9 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         throw new NotImplementedException();
     }
 
-    public Task SetCustomOrder(string fileId, string parentFolderId, int order)
+    public Task<bool> SetCustomOrder(string fileId, string parentFolderId, int order)
     {
-        return Task.CompletedTask;
+        return Task.FromResult(false);
     }
 
     public Task InitCustomOrder(Dictionary<string, int> fileIds, string parentFolderId)

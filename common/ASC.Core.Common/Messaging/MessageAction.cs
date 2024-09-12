@@ -154,6 +154,7 @@ public enum MessageAction
     FileMovedWithOverwriting = 5016,
     FileMovedToTrash = 5017,
     FileDeleted = 5018,
+    FileIndexChanged = 5106,
 
     FolderCreated = 5019,
     FolderRenamed = 5020,
@@ -167,6 +168,7 @@ public enum MessageAction
     FolderMovedToTrash = 5026,
     FolderDeleted = 5027,
     FolderRemovedFromList = 5059,
+    FolderIndexChanged = 5107,
 
     FolderDownloaded = 5057,
 

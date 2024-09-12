@@ -58,7 +58,8 @@ internal class FilesActionMapper : IModuleActionMapper
                         ActionType.Update, [
                             MessageAction.FileRenamed, MessageAction.FileUpdated, MessageAction.UserFileUpdated, MessageAction.FileUpdatedRevisionComment,
                             MessageAction.FileLocked, MessageAction.FileUnlocked, MessageAction.FileOpenedForChange, MessageAction.FileMarkedAsFavorite,
-                            MessageAction.FileRemovedFromFavorite, MessageAction.FileMarkedAsRead, MessageAction.FileReaded, MessageAction.FormSubmit, MessageAction.FormOpenedForFilling
+                            MessageAction.FileRemovedFromFavorite, MessageAction.FileMarkedAsRead, MessageAction.FileReaded, MessageAction.FormSubmit, MessageAction.FormOpenedForFilling,
+                            MessageAction.FileIndexChanged
                         ]
                     },
                     { ActionType.Delete, [MessageAction.FileDeletedVersion, MessageAction.FileDeleted, MessageAction.TrashEmptied
@@ -106,7 +107,7 @@ internal class FoldersActionMapper : IModuleActionMapper
             {
                 EntryType.Folder, new Dictionary<ActionType, MessageAction[]>
                 {
-                    { ActionType.Update, [MessageAction.FolderRenamed, MessageAction.FolderMarkedAsRead] },
+                    { ActionType.Update, [MessageAction.FolderRenamed, MessageAction.FolderMarkedAsRead, MessageAction.FolderIndexChanged] },
                     { ActionType.UpdateAccess, [MessageAction.FolderUpdatedAccess, MessageAction.FolderUpdatedAccessFor, MessageAction.FolderRemovedFromList
                         ]
                     }

@@ -49,7 +49,8 @@ public class HistoryService(
         MessageAction.FileCopiedWithOverwriting, 
         MessageAction.FileDeleted, 
         MessageAction.FileConverted, 
-        MessageAction.FileRestoreVersion, 
+        MessageAction.FileRestoreVersion,
+        MessageAction.FileIndexChanged,
         MessageAction.FolderCreated,
         MessageAction.FolderRenamed,
         MessageAction.FolderMoved,
@@ -58,6 +59,7 @@ public class HistoryService(
         MessageAction.FolderCopiedWithOverwriting,
         MessageAction.FolderMovedToTrash,
         MessageAction.FolderDeleted,
+        MessageAction.FolderIndexChanged,
         MessageAction.RoomCreateUser,
         MessageAction.RoomUpdateAccessForUser,
         MessageAction.RoomRemoveUser,
@@ -78,7 +80,7 @@ public class HistoryService(
         MessageAction.RoomIndexingEnabled,
         MessageAction.RoomIndexingDisabled,
         MessageAction.RoomLifeTimeSet,
-        MessageAction.RoomLifeTimeDisabled,
+        MessageAction.RoomLifeTimeDisabled
     ];
     
     public async IAsyncEnumerable<HistoryEntry> GetHistoryAsync(int entryId, FileEntryType entryType, int offset, int count)

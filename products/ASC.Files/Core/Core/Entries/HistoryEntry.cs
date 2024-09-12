@@ -45,9 +45,11 @@ public record HistoryEntry
         MessageAction.FolderCopied,
         MessageAction.FileDeleted,
         MessageAction.FileConverted,
+        MessageAction.FileIndexChanged,
         MessageAction.FolderDeleted,
+        MessageAction.FolderIndexChanged,
         MessageAction.RoomCreateUser,
-        MessageAction.RoomGroupAdded
+        MessageAction.RoomGroupAdded,
     ];
     
     private int _groupId;
@@ -77,6 +79,7 @@ public record HistoryEntry
 [JsonDerivedType(typeof(UserHistoryData))]
 [JsonDerivedType(typeof(UserFileUpdateData))]
 [JsonDerivedType(typeof(LifeTimeHistoryData))]
+[JsonDerivedType(typeof(IndexChangedData))]
 public abstract record HistoryData
 {
     public virtual int GetId() => 0;

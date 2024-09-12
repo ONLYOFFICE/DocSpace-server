@@ -1703,7 +1703,10 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
-        await fileDao.SetCustomOrder(fileId, file.ParentId, order);
+        if (await fileDao.SetCustomOrder(fileId, file.ParentId, order))
+        {
+            await filesMessageService.SendAsync(MessageAction.FileIndexChanged, file, file.Title, file.Order.ToString(), order.ToString());
+        }
     }
 
     public async Task SetFolderOrder<T>(T folderId, int order)
@@ -1716,7 +1719,10 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
-        await folderDao.SetCustomOrder(folderId, folder.ParentId, order);
+        if (await folderDao.SetCustomOrder(folderId, folder.ParentId, order))
+        {
+            await filesMessageService.SendAsync(MessageAction.FolderIndexChanged, folder, folder.Title, folder.Order.ToString(), order.ToString());
+        }
     }
 
     public async Task<List<FileEntry>> GetNewItemsAsync<T>(T folderId)

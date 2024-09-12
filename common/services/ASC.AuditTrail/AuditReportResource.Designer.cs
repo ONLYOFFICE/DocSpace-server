@@ -546,6 +546,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to File: {0}. Index changed from {1} to {2}.
+        /// </summary>
+        public static string FileIndexChanged {
+            get {
+                return ResourceManager.GetString("FileIndexChanged", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to File Locked: {0}.
         /// </summary>
         public static string FileLocked {
@@ -740,6 +749,15 @@ namespace ASC.AuditTrail {
         public static string FolderDeleted {
             get {
                 return ResourceManager.GetString("FolderDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Folder: {0}. Index changed from {1} to {2}.
+        /// </summary>
+        public static string FolderIndexChanged {
+            get {
+                return ResourceManager.GetString("FolderIndexChanged", resourceCulture);
             }
         }
         

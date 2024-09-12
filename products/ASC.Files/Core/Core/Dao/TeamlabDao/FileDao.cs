@@ -1746,10 +1746,10 @@ internal class FileDao(
         await filesDbContext.SaveChangesAsync();
     }
 
-    public async Task SetCustomOrder(int fileId, int parentFolderId, int order = 0)
+    public async Task<bool> SetCustomOrder(int fileId, int parentFolderId, int order = 0)
     {
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        await SetCustomOrder(filesDbContext, fileId, parentFolderId, order);
+        return await SetCustomOrder(filesDbContext, fileId, parentFolderId, order);
     }
     
     public async Task InitCustomOrder(Dictionary<int, int> fileIds, int parentFolderId)
@@ -1757,9 +1757,9 @@ internal class FileDao(
         await InitCustomOrder(fileIds, parentFolderId, FileEntryType.File);
     }
     
-    private async Task SetCustomOrder(FilesDbContext filesDbContext, int fileId, int parentFolderId, int order = 0)
+    private async Task<bool> SetCustomOrder(FilesDbContext filesDbContext, int fileId, int parentFolderId, int order = 0)
     {
-        await SetCustomOrder(filesDbContext, fileId, parentFolderId, FileEntryType.File, order);
+        return await SetCustomOrder(filesDbContext, fileId, parentFolderId, FileEntryType.File, order);
     }
 
     private async Task DeleteCustomOrder(FilesDbContext filesDbContext, int fileId)
