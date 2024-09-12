@@ -3117,10 +3117,13 @@ public class FileStorageService //: IFileStorageService
             file = await list.FirstOrDefaultAsync(fileItem => fileItem.Title == path);
         }
 
-        if (file == null
-                    && !string.IsNullOrEmpty(link)
-                    && link.StartsWith(baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath)))
+        if (file == null && !string.IsNullOrEmpty(link))
         {
+            if (!link.StartsWith(baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath)))
+            {
+                return new FileReference { Url = link };
+            }
+
             var start = commonLinkUtility.ServerRootPath + "/s/";
             if (link.StartsWith(start))
             {
