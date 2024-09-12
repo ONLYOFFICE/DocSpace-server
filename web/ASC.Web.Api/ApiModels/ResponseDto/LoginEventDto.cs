@@ -28,7 +28,7 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 
 /// <summary>
 /// </summary>
-public class LoginEventDto
+public class LoginEventDto : IMapFrom<LoginEvent>
 {
     /// <summary>ID</summary>
     /// <type>System.Int32, System</type>
@@ -82,20 +82,16 @@ public class LoginEventDto
     /// <type>System.String, System</type>
     public string Page { get; set; }
 
-    public LoginEventDto(LoginEvent loginEvent)
+    public void Mapping(Profile profile)
     {
-        Id = loginEvent.Id;
-        Date = new ApiDateTime(loginEvent.Date, TimeSpan.Zero);
-        User = loginEvent.UserName;
-        UserId = loginEvent.UserId;
-        Login = loginEvent.Login;
-        Action = loginEvent.ActionText;
-        ActionId = (MessageAction)loginEvent.Action;
-        IP = loginEvent.IP;
-        Country = loginEvent.Country;
-        City = loginEvent.City;
-        Browser = loginEvent.Browser;
-        Platform = loginEvent.Platform;
-        Page = loginEvent.Page;
+        profile.CreateMap<LoginEvent, LoginEventDto>()
+            .ForMember(x => x.User, opt => 
+                opt.MapFrom(x => x.UserName))
+            .ForMember(x => x.Action, opt => 
+                opt.MapFrom(x => x.ActionText))
+            .ForMember(x => x.ActionId, opt => 
+                opt.MapFrom(x => (MessageAction)x.Action))
+            .ForMember(x => x.Date, opt => 
+                opt.ConvertUsing<ApiDateTimeMappingConverter, DateTime>());
     }
 }
