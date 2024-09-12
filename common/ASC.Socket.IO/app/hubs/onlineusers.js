@@ -38,6 +38,7 @@ module.exports = async (io) => {
       {
         roomId = `${tenantId}-${socket.handshake.session.file.roomId}`;
         file = socket.handshake.session.file.title;
+        idInRoom = await EnterAsync(roomUsers, roomId, `${roomId}-${userId}`, roomId, "room", true);
         if(!editFiles[roomId])
         {
           editFiles[roomId] = [];
@@ -47,12 +48,11 @@ module.exports = async (io) => {
           editFiles[roomId][userId] = [];
         }
         var user = getUser(roomUsers, userId, roomId);
-        if(editFiles[roomId][userId].length == 0 && user && user.status == "online")
+        if(editFiles[roomId][userId].length == 0)
         {
           onlineIO.to(roomId).emit(`start-edit-file-in-room`, {userId, file} );
         }
         editFiles[roomId][userId].push(file);
-        idInRoom = await EnterAsync(roomUsers, roomId, `${roomId}-${userId}`, roomId, "room", true);
       }
       socket.on("disconnect", async (reason) => {
         await LeaveAsync(portalUsers, tenantId, userId, `p-${tenantId}`, "portal", id);
