@@ -9,6 +9,7 @@ module.exports = async (io) => {
     const portalUsers =[];
     const roomUsers =[];
     const editFiles =[];
+    let targetFile = [];
     const redisOptions = config.get("Redis");
     var redisClient = redis.createClient(redisOptions);
     await redisClient.connect();
@@ -47,10 +48,10 @@ module.exports = async (io) => {
         {
           editFiles[roomId][userId] = [];
         }
-        var user = getUser(roomUsers, userId, roomId);
         if(editFiles[roomId][userId].length == 0)
         {
           onlineIO.to(roomId).emit(`start-edit-file-in-room`, {userId, file} );
+          targetFile[roomId] = file;
         }
         editFiles[roomId][userId].push(file);
       }
@@ -62,12 +63,13 @@ module.exports = async (io) => {
           var index = editFiles[roomId][userId].indexOf(file);
           editFiles[roomId][userId].splice(index, 1);
           var user = getUser(roomUsers, userId, roomId);
-          if(!editFiles[roomId][userId].includes(file) && user.status == "online")
+          if(!editFiles[roomId][userId].includes(file) && user.status == "online" && targetFile[roomId] == file)
           {
             onlineIO.to(roomId).emit(`stop-edit-file-in-room`, {userId, file} );
             if(editFiles[roomId][userId].length > 0)
             {
               file = editFiles[roomId][userId][0];
+              targetFile[roomId] = file;
               onlineIO.to(roomId).emit(`start-edit-file-in-room`, {userId, file} );
             }
           }
@@ -241,7 +243,8 @@ module.exports = async (io) => {
         {
           await redisClient.set(redisKey, JSON.stringify(Array.from(user.offlineSessions)));
         }
-        else{
+        else
+        {
           await redisClient.del(redisKey);
         }
         if(user.sessions.size == 1)
