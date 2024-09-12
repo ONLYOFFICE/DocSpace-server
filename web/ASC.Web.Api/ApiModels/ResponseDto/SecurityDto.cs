@@ -28,7 +28,10 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 
 public class SecurityDto
 {
-    [SwaggerSchemaCustom("Module ID", Example = "{00000000-0000-0000-0000-000000000000}")]
+    /// <summary>
+    /// Module ID
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "{00000000-0000-0000-0000-000000000000}")]
     public string WebItemId { get; set; }
 
     /// <summary>
@@ -41,9 +44,15 @@ public class SecurityDto
     /// </summary>
     public List<GroupSummaryDto> Groups { get; init; }
 
-    [SwaggerSchemaCustom("Specifies if the security settings are enabled or not", Example = true)]
+    /// <summary>
+    /// Specifies if the security settings are enabled or not
+    /// </summary>
+    [SwaggerSchemaCustom(Example = true)]
     public bool Enabled { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if this module is a subitem or not", Example = false)]
+    /// <summary>
+    /// Specifies if this module is a subitem or not
+    /// </summary>
+    [SwaggerSchemaCustom(Example = false)]
     public bool IsSubItem { get; set; }
 }

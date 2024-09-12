@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Microsoft.AspNetCore.Mvc;
+
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
@@ -31,10 +33,15 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// </summary>
 public class SaveEditingRequestDto : IModelWithFile
 {
-    [SwaggerSchemaCustom("File extension", Example = ".txt")]
+    /// <summary>
+    /// File extension
+    /// </summary>
+    [SwaggerSchemaCustom(Example = ".txt")]
     public string FileExtension { get; set; }
 
-    [SwaggerSchemaCustom("URI to download a file", Format = "uri")]
+    /// <summary>
+    /// URI to download a file
+    /// </summary>
     public string DownloadUri { get; set; }
 
     /// <summary>
@@ -46,4 +53,11 @@ public class SaveEditingRequestDto : IModelWithFile
     /// Specifies whether to force save a file or not
     /// </summary>
     public bool Forcesave { get; set; }
+}
+
+
+public class FileID<T>
+{
+    [FromRoute(Name = "fileId")]
+    public T FileId { get; set; }
 }

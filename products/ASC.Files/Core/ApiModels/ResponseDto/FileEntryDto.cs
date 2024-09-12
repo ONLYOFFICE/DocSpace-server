@@ -42,7 +42,10 @@ public partial class FileEntryDtoContext : JsonSerializerContext;
 [JsonDerivedType(typeof(FolderDto<string>))]
 public abstract class FileEntryDto
 {
-    [SwaggerSchemaCustom("Title", Example = "Some titile.txt/ Some title")]
+    /// <summary>
+    /// Title
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "Some titile.txt/ Some title")]
     public string Title { get; set; }
 
     /// <summary>
@@ -50,7 +53,10 @@ public abstract class FileEntryDto
     /// </summary>
     public FileShare Access { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the file is shared or not", Example = false)]
+    /// <summary>
+    /// Specifies if the file is shared or not
+    /// </summary>
+    [SwaggerSchemaCustom(Example = false)]
     public bool Shared { get; set; }
 
     /// <summary>
@@ -133,17 +139,26 @@ public abstract class FileEntryDto
 
 public abstract class FileEntryDto<T> : FileEntryDto
 {
-    [SwaggerSchemaCustomInt("Id", Example = 10)]
+    /// <summary>
+    /// Id
+    /// </summary>
+    [SwaggerSchemaCustom(Example = 10)]
     public T Id { get; set; }
 
-    [SwaggerSchemaCustomInt("Root folder id")]
+    /// <summary>
+    /// Root folder id
+    /// </summary>
     public T RootFolderId { get; set; }
 
-    [SwaggerSchemaCustomInt("Origin id")]
+    /// <summary>
+    /// Origin id
+    /// </summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public T OriginId { get; set; }
 
-    [SwaggerSchemaCustomInt("Origin room id")]
+    /// <summary>
+    /// Origin room id
+    /// </summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public T OriginRoomId { get; set; }
 

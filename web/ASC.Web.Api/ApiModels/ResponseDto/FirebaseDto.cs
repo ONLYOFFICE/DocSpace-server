@@ -63,6 +63,8 @@ public class FirebaseDto
     /// </summary>
     public string MeasurementId { get; set; }
 
-    [SwaggerSchemaCustom("Database URL", Format = "uri")]
+    /// <summary>
+    /// Database URL
+    /// </summary>
     public string DatabaseURL { get; set; }
 }

@@ -73,7 +73,9 @@ public class DeleteBatchRequestDto : BaseBatchRequestDto
     /// </summary>
     public bool DeleteAfter { get; set; }
 
-    [SwaggerSchemaCustom("Specifies whether to move a file to the \"Trash\" folder or delete it immediately")]
+    /// <summary>
+    /// Specifies whether to move a file to the \"Trash\" folder or delete it immediately
+    /// </summary>
     public bool Immediately { get; set; }
 }
 
@@ -87,7 +89,9 @@ public class DeleteRequestDto
     /// </summary>
     public bool DeleteAfter { get; set; }
 
-    [SwaggerSchemaCustom("Specifies whether to move a file to the \"Trash\" folder or delete it immediately")]
+    /// <summary>
+    /// Specifies whether to move a file to the \"Trash\" folder or delete it immediately
+    /// </summary>
     public bool Immediately { get; set; }
 }
 
@@ -96,7 +100,9 @@ public class DeleteRequestDto
 /// </summary>
 public class BatchRequestDto : BaseBatchRequestDto
 {
-    [SwaggerSchemaCustom("Destination folder ID", Format = "json")]
+    /// <summary>
+    /// Destination folder ID
+    /// </summary>
     public JsonElement DestFolderId { get; set; }
 
     /// <summary>
@@ -119,6 +125,8 @@ public class BatchRequestDto : BaseBatchRequestDto
 /// </summary>
 public class BatchSimpleRequestDto : BaseBatchRequestDto
 {
-    [SwaggerSchemaCustom("Destination folder ID", Format = "json")]
+    /// <summary>
+    /// Destination folder ID
+    /// </summary>
     public JsonElement DestFolderId { get; set; }
 }

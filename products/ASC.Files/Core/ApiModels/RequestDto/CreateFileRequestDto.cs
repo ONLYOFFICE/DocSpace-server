@@ -36,7 +36,9 @@ public class CreateFileRequestDto<T>
     /// </summary>
     public string Title { get; set; }
 
-    [SwaggerSchemaCustomInt("Template file ID")]
+    /// <summary>
+    /// Template file ID
+    /// </summary>
     public T TemplateId { get; set; }
 
     /// <summary>

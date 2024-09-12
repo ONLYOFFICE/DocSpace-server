@@ -34,10 +34,14 @@ public class FillingFormResultDto<T>
     /// </summary>
     public int FormNumber { get; set; }
 
-    [SwaggerSchemaCustom<FileDto<int>>("Completed form")]
+    /// <summary>
+    /// Completed form
+    /// </summary>
     public FileDto<T> CompletedForm { get; set; }
 
-    [SwaggerSchemaCustom<FileDto<int>>("Original form")]
+    /// <summary>
+    /// Original form
+    /// </summary>
     public FileDto<T> OriginalForm { get; set; }
 
     /// <summary>
@@ -45,7 +49,9 @@ public class FillingFormResultDto<T>
     /// </summary>
     public EmployeeFullDto Manager { get; set; }
 
-    [SwaggerSchemaCustomInt("Room Id")]
+    /// <summary>
+    /// Room Id
+    /// </summary>
     public T RoomId { get; set; }
 
     /// <summary>

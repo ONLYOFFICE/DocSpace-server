@@ -48,7 +48,9 @@ public record ProviderDto(string Name, string Key, bool Connected, bool Oauth = 
     /// </summary>
     public bool Oauth { get; init; } = Oauth;
 
-    [SwaggerSchemaCustom("Redirect url", Format = "uri")]
+    /// <summary>
+    /// Redirect url
+    /// </summary>
     public string RedirectUrl { get; init; } = RedirectUrl;
 
     /// <summary>

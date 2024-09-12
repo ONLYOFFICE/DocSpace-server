@@ -36,7 +36,10 @@ public class ConversationResultDto
     /// </summary>
     public string Id { get; set; }
 
-    [SwaggerSchemaCustom("Operation type", Example = "Move")]
+    /// <summary>
+    /// Operation type
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "Move")]
     [JsonPropertyName("Operation")]
     public FileOperationType OperationType { get; set; }
 

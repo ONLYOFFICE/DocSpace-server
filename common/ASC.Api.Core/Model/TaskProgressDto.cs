@@ -32,7 +32,10 @@ public class TaskProgressDto
     /// </summary>
     public bool IsCompleted { get; set; }
 
-    [SwaggerSchemaCustom("Progress percentage", Example = 0)]
+    /// <summary>
+    /// Progress percentage
+    /// </summary>
+    [SwaggerSchemaCustom(Example = 0)]
     public int Progress { get; set; }
 }
 

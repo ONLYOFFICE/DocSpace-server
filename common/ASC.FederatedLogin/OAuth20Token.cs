@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+
 namespace ASC.FederatedLogin;
 
 [DebuggerDisplay("{AccessToken} (expired: {IsExpired})")]
@@ -60,7 +61,10 @@ public class OAuth20Token
     [JsonPropertyName("client_secret")]
     public string ClientSecret { get; set; }
 
-    [SwaggerSchemaCustom("Redirect uri", Format = "uri")]
+    /// <summary>
+    /// Redirect uri
+    /// </summary>
+    [Url]
     [JsonPropertyName("redirect_uri")]
     public string RedirectUri { get; set; }
 

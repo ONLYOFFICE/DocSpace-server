@@ -132,7 +132,10 @@ public class TenantQuotaFeatureDto : IEquatable<TenantQuotaFeatureDto>
 
 public class PriceDto
 {
-    [SwaggerSchemaCustom("Value", Example = 10.0)]
+    /// <summary>
+    /// Value
+    /// </summary>
+    [SwaggerSchemaCustom(Example = 10.0)]
     public decimal? Value { get; set; }
 
     /// <summary>

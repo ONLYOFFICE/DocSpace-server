@@ -60,7 +60,9 @@ public class GroupDto
     /// </summary>
     public EmployeeFullDto Manager { get; set; }
 
-    [SwaggerSchemaCustom(Description = "List of members")]
+    /// <summary>
+    /// List of members
+    /// </summary>
     public List<EmployeeFullDto> Members { get; set; }
 
     /// <summary>

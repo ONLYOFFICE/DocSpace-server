@@ -10,6 +10,8 @@ namespace ASC.Api.Core.Extensions;
 [AttributeUsage(AttributeTargets.Property)]
 public class SwaggerSchemaCustomAttribute : SwaggerSchemaAttribute
 {
+    internal static readonly string DefaultStringExample = "some text";
+    internal static readonly int DefaultIntExample = 1234;
     public SwaggerSchemaCustomAttribute(string description = null)
     {
         Description = description;
@@ -28,26 +30,6 @@ public class SwaggerSchemaCustomAttribute<T> : SwaggerSchemaAttribute
     }
 
     public T Example { get; set; }
-}
-
-public class SwaggerSchemaCustomStringAttribute : SwaggerSchemaCustomAttribute<string>
-{
-    internal static readonly string DefaultExample = "some text";
-    public SwaggerSchemaCustomStringAttribute(string description = null)
-    {
-        Description = description;
-        Example = DefaultExample;
-    }
-}
-
-public class SwaggerSchemaCustomIntAttribute : SwaggerSchemaCustomAttribute<int>
-{
-    internal static readonly int DefaultExample = 1234;
-    public SwaggerSchemaCustomIntAttribute(string description = null)
-    {
-        Description = description;
-        Example = DefaultExample;
-    }
 }
 
 public class SwaggerSchemaCustomFilter : ISchemaFilter
@@ -119,7 +101,7 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
             
         if (checkType == typeof(int))
         {
-            result.Example = new OpenApiInteger(SwaggerSchemaCustomIntAttribute.DefaultExample);
+            result.Example = new OpenApiInteger(SwaggerSchemaCustomAttribute.DefaultIntExample);
         } 
         else if (checkType == typeof(long) || checkType == typeof(ulong))
         {
@@ -127,7 +109,7 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
         }
         else if (checkType == typeof(string))
         {
-            result.Example = new OpenApiString(SwaggerSchemaCustomStringAttribute.DefaultExample);
+            result.Example = new OpenApiString(SwaggerSchemaCustomAttribute.DefaultStringExample);
         }
         else if (checkType == typeof(bool))
         {
@@ -191,12 +173,12 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
                 new()
                 {
                     Type = "integer",
-                    Example = new OpenApiInteger(SwaggerSchemaCustomIntAttribute.DefaultExample)
+                    Example = new OpenApiInteger(SwaggerSchemaCustomAttribute.DefaultIntExample)
                 },
                 new()
                 {
                     Type = "string",
-                    Example = new OpenApiString(SwaggerSchemaCustomStringAttribute.DefaultExample)
+                    Example = new OpenApiString(SwaggerSchemaCustomAttribute.DefaultStringExample)
                 }
             };
 
@@ -227,9 +209,44 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
                 result.Example = enumData[0];
             }
         }
+        else if(checkType == typeof(object))
+        {
+            var openApiSchema = new OpenApiSchema
+            {
+                Properties = new Dictionary<string, OpenApiSchema>
+                {
+                    { 
+                        "key1", new ()
+                        {
+                            Type = "integer",
+                            Example = new OpenApiInteger(SwaggerSchemaCustomAttribute.DefaultIntExample)
+                        }
+                    },
+                    { 
+                        "key2", new ()
+                        {
+                            Type = "string",
+                            Example = new OpenApiString(SwaggerSchemaCustomAttribute.DefaultStringExample)
+                        }
+                    },
+                    { 
+                        "key3", new ()
+                        {
+                            Type = "boolean",
+                            Example = new OpenApiBoolean(false)
+                        }
+                    }
+                }
+            };
+            result.Properties = openApiSchema.Properties;
+        }
+        else if(checkType == typeof(TimeSpan))
+        {
+            var timeSpan = TimeSpan.Zero.ToString();
+            result.Example = new OpenApiString(timeSpan);
+        }
         else
         {
-            
         }
 
         return result;
@@ -247,5 +264,23 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
             DateTime _dateTime => new OpenApiDateTime(_dateTime),
             _ => null
         };
+    }
+}
+
+public class HideRouteDocumentFilter : IDocumentFilter
+{
+    private readonly string _routeToHide;
+
+    public HideRouteDocumentFilter(string RouteToHide)
+    {
+        _routeToHide = RouteToHide;
+    }
+
+    public void Apply(OpenApiDocument document, DocumentFilterContext context)
+    {
+        if (document.Paths.ContainsKey(_routeToHide))
+        {
+            document.Paths.Remove(_routeToHide);
+        }
     }
 }

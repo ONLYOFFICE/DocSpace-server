@@ -118,7 +118,9 @@ public class MemberRequestDto : MemberBaseRequestDto
     /// </summary>
     public IEnumerable<Contact> Contacts { get; set; }
 
-    [SwaggerSchemaCustom("Avatar photo URL", Format ="uri")]
+    /// <summary>
+    /// Avatar photo URL
+    /// </summary>
     public string Files { get; set; }
 
     /// <summary>
@@ -172,7 +174,9 @@ public enum SexEnum
 /// </summary>
 public class UpdatePhotoMemberRequestDto
 {
-    [SwaggerSchemaCustom("Avatar photo URL", Format = "uri")]
+    /// <summary>
+    /// Avatar photo URL
+    /// </summary>
     public string Files { get; set; }
 }
 

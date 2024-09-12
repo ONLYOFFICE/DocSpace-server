@@ -42,7 +42,10 @@ public class TenantDomainValidator
     /// </summary>
     public int MinLength { get; }
 
-    [SwaggerSchemaCustom("Max length", Example = 63)]
+    /// <summary>
+    /// Max length
+    /// </summary>
+    [SwaggerSchemaCustom(Example = 63)]
     public int MaxLength { get; }
 
     public TenantDomainValidator(IConfiguration configuration, CoreBaseSettings coreBaseSettings)

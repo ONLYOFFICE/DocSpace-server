@@ -107,3 +107,4 @@ global using HttpGetAttribute = Microsoft.AspNetCore.Mvc.HttpGetAttribute;
 global using HttpPostAttribute = Microsoft.AspNetCore.Mvc.HttpPostAttribute;
 global using HttpPutAttribute = Microsoft.AspNetCore.Mvc.HttpPutAttribute;
 global using Swashbuckle.AspNetCore.Annotations;
+global using System.ComponentModel.DataAnnotations;

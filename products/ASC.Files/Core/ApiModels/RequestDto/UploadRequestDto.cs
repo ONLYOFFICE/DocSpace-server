@@ -46,7 +46,9 @@ public class UploadRequestDto : IModelWithFile, IDisposable
     /// </summary>
     public ContentDisposition ContentDisposition { get; set; }
 
-    [SwaggerSchemaCustom("List of files when specified as multipart/form-data", Format = "file")]
+    /// <summary>
+    /// List of files when specified as multipart/form-data
+    /// </summary>
     public IEnumerable<IFormFile> Files { get; set; }
 
     /// <summary>

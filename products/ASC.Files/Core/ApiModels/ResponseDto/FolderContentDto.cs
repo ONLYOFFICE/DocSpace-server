@@ -38,19 +38,33 @@ public class FolderContentDto<T>
     /// </summary>
     public List<FileEntryDto> Folders { get; set; }
 
-    [SwaggerSchemaCustom<FolderDto<int>>("Current folder information")]
+    /// <summary>
+    /// Current folder information
+    /// </summary>
     public FolderDto<T> Current { get; set; }
 
-    [SwaggerSchemaCustom("Folder path", Example = "{key = \"Key\", path = \"//path//to//folder\"}")]
+    /// <summary>
+    /// Folder path
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "{key = \"Key\", path = \"//path//to//folder\"}")]
     public object PathParts { get; set; }
 
-    [SwaggerSchemaCustom("Folder start index", Example = 0)]
+    /// <summary>
+    /// Folder start index
+    /// </summary>
+    [SwaggerSchemaCustom(Example = 0)]
     public int StartIndex { get; set; }
 
-    [SwaggerSchemaCustom("Number of folder elements", Example = 4)]
+    /// <summary>
+    /// Number of folder elements
+    /// </summary>
+    [SwaggerSchemaCustom(Example = 4)]
     public int Count { get; set; }
 
-    [SwaggerSchemaCustom("Total number of elements in the folder", Example = 4)]
+    /// <summary>
+    /// Total number of elements in the folder
+    /// </summary>
+    [SwaggerSchemaCustom(Example = 4)]
     public int Total { get; set; }
 
     /// <summary>

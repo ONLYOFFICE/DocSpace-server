@@ -406,7 +406,7 @@ public class FoldersControllerCommon(
     /// <path>api/2.0/files/@projects</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Folders")]
-    [SwaggerResponse(200, "The \"In projects\" section contents", typeof(FolderContentDto<int>))]
+    [SwaggerResponse(200, "The \"In projects\" section contents", typeof(FolderContentDto<string>))]
     [HttpGet("@projects")]
     public async Task<FolderContentDto<string>> GetProjectsFolderAsync(Guid? userIdOrGroupId, FilterType? filterType, bool? searchInContent, bool? withsubfolders)
     {

@@ -48,7 +48,9 @@ public class CompanyWhiteLabelSettings : ISettings<CompanyWhiteLabelSettings>
     /// </summary>
     public string CompanyName { get; set; }
 
-    [SwaggerSchemaCustom("Site", Format = "uri")]
+    /// <summary>
+    /// Site
+    /// </summary>
     [Url]
     public string Site { get; set; }
 

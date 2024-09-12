@@ -48,7 +48,10 @@ public class ConfigurationDto<T>
     /// </summary>
     public EditorType EditorType { get; set; }
 
-    [SwaggerSchemaCustom("Editor URL", Format = "uri")]
+    /// <summary>
+    /// Editor URL
+    /// </summary>
+    [Url]
     public string EditorUrl { get; set; }
 
     /// <summary>
@@ -84,7 +87,10 @@ public class ConfigurationDto<T>
 
 public class EditorConfigurationDto<T>
 {
-    [SwaggerSchemaCustom("Callback url", Format = "uri")]
+    /// <summary>
+    /// Callback url
+    /// </summary>
+    [Url]
     public string CallbackUrl { get; set; }
 
     /// <summary>
@@ -92,7 +98,9 @@ public class EditorConfigurationDto<T>
     /// </summary>
     public CoEditingConfig CoEditing { get; set; }
 
-    [SwaggerSchemaCustom("Create url", Format = "uri")]
+    /// <summary>
+    /// Create url
+    /// </summary>
     public string CreateUrl { get; set; }
 
     /// <summary>
@@ -215,7 +223,9 @@ public class LogoConfigDto
     /// </summary>
     public string ImageEmbedded { get; set; }
 
-    [SwaggerSchemaCustom("Url", Format = "uri")]
+    /// <summary>
+    /// Url
+    /// </summary>
     public string Url { get; set; }
 
     /// <summary>
@@ -309,7 +319,10 @@ public class DocumentConfigDto
     /// </summary>
     public string Title { get; set; }
 
-    [SwaggerSchemaCustom("Url", Format = "uri")]
+    /// <summary>
+    /// Url
+    /// </summary>
+    [Url]
     public string Url { get; set; }
 }
 

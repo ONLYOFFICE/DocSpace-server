@@ -44,7 +44,10 @@ public class AuthData(string url = null, string login = null, string password = 
     /// </summary>
     public string RawToken { get; init; } = token ?? string.Empty;
 
-    [SwaggerSchemaCustom("Url", Format = "uri")]
+    /// <summary>
+    /// Url
+    /// </summary>
+    [Url]
     public string Url { get; set; } = url ?? string.Empty;
 
     /// <summary>

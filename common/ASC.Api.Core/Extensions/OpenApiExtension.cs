@@ -54,6 +54,7 @@ public static class OpenApiExtension
 
             c.SwaggerDoc("common", new OpenApiInfo { Title = assemblyName, Version = "v2" });
             c.SchemaFilter<SwaggerSchemaCustomFilter>();
+            c.DocumentFilter<HideRouteDocumentFilter>("/api/2.0/capabilities.json");
             c.EnableAnnotations();
             
             // ToDo: add security definitions

@@ -31,7 +31,9 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 /// </summary>
 public class TfaRequestsDto
 {
-    [SwaggerSchemaCustomString("TFA type (None, Sms, or App)", Example = "None")]
+    /// <summary>
+    /// TFA type (None, Sms, or App)
+    /// </summary>
     public TfaRequestsDtoType? Type { get; set; }
 
     /// <summary>

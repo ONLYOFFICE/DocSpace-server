@@ -28,13 +28,22 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public class FolderDto<T> : FileEntryDto<T>
 {
-    [SwaggerSchemaCustomInt("Parent folder ID", Example = 10)]
+    /// <summary>
+    /// Parent folder ID
+    /// </summary>
+    [SwaggerSchemaCustom(Example = 10)]
     public T ParentId { get; set; }
 
-    [SwaggerSchemaCustomInt("Number of files", Example = 5)]
+    /// <summary>
+    /// "Number of files
+    /// </summary>
+    [SwaggerSchemaCustom(Example = 5)]
     public int FilesCount { get; set; }
 
-    [SwaggerSchemaCustomInt("Number of folders", Example = 7)]
+    /// <summary>
+    /// Number of folders
+    /// </summary>
+    [SwaggerSchemaCustom(Example = 7)]
     public int FoldersCount { get; set; }
 
     /// <summary>

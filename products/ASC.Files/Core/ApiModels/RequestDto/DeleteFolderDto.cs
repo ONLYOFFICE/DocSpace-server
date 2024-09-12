@@ -36,6 +36,8 @@ public class DeleteFolderDto
     /// </summary>
     public bool DeleteAfter { get; set; }
 
-    [SwaggerSchemaCustom("Specifies whether to move a folder to the \"Trash\" folder or delete it immediately")]
+    /// <summary>
+    /// Specifies whether to move a folder to the \"Trash\" folder or delete it immediately
+    /// </summary>
     public bool Immediately { get; set; }
 }

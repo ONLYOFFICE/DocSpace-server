@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.ApiModels.RequestDto;
 using ASC.Web.Api.Core;
 
 namespace ASC.Files.Api;
@@ -81,16 +82,15 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// Saves edits to a file with the ID specified in the request.
     /// </summary>
     /// <short>Save file edits</short>
-    /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
     /// <path>api/2.0/files/file/{fileId}/saveediting</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Saved file parameters", typeof(FileDto<int>))]
     [HttpPut("{fileId}/saveediting")]
-    public async Task<FileDto<T>> SaveEditingFromFormAsync(T fileId, [FromForm] SaveEditingRequestDto inDto)
+    public async Task<FileDto<T>> SaveEditingFromFormAsync([FromRoute] FileID<T> fileID, [FromForm] SaveEditingRequestDto inDto)
     {
         await using var stream = httpContextAccessor.HttpContext.Request.Body;
 
-        return await _fileDtoHelper.GetAsync(await fileStorageService.SaveEditingAsync(fileId, inDto.FileExtension, inDto.DownloadUri, stream, inDto.Forcesave));
+        return await _fileDtoHelper.GetAsync(await fileStorageService.SaveEditingAsync(fileID.FileId, inDto.FileExtension, inDto.DownloadUri, stream, inDto.Forcesave));
     }
 
     /// <summary>

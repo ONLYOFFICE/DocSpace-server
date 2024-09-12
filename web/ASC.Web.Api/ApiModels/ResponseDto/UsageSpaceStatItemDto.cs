@@ -28,25 +28,43 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 
 public class UsageSpaceStatItemDto
 {
-    [SwaggerSchemaCustom("Name", Example = "Item name")]
+    /// <summary>
+    /// Name
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "Item name")]
     public string Name { get; set; }
 
-    [SwaggerSchemaCustom("Icon", Example = "Item icon path")]
+    /// <summary>
+    /// Icon
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "Item icon path")]
     public string Icon { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the module space is disabled or not", Example = false)]
+    /// <summary>
+    /// Specifies if the module space is disabled or not
+    /// </summary>
+    [SwaggerSchemaCustom(Example = false)]
     public bool Disabled { get; set; }
 
-    [SwaggerSchemaCustom("Size", Example = "0 Byte")]
+    /// <summary>
+    /// Size
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "0 Byte")]
     public string Size { get; set; }
 
-    [SwaggerSchemaCustom("URL", Example = "Item url", Format = "uri")]
+    /// <summary>
+    /// URL
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "Item url")]
     public string Url { get; set; }
 }
 
 public class ChartPointDto
 {
-    [SwaggerSchemaCustom("Display date", Example = "6/1/2024")]
+    /// <summary>
+    /// Display date
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "6/1/2024")]
     public string DisplayDate { get; set; }
 
     /// <summary>
@@ -54,9 +72,15 @@ public class ChartPointDto
     /// </summary>
     public DateTime Date { get; init; }
 
-    [SwaggerSchemaCustom("Hosts", Example = 0)]
+    /// <summary>
+    /// Hosts
+    /// </summary>
+    [SwaggerSchemaCustom(Example = 0)]
     public int Hosts { get; set; }
 
-    [SwaggerSchemaCustom("Hits", Example = 0)]
+    /// <summary>
+    /// Hits
+    /// </summary>
+    [SwaggerSchemaCustom(Example = 0)]
     public int Hits { get; set; }
 }

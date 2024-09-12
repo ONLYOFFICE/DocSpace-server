@@ -31,25 +31,46 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 /// </summary>
 public class SmtpSettingsDto : IMapFrom<SmtpSettings>
 {
-    [SwaggerSchemaCustom("Host", Example = "mail.example.com")]
+    /// <summary>
+    /// Host
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "mail.example.com")]
     public string Host { get; set; }
 
-    [SwaggerSchemaCustom("Port", Example = 25)]
+    /// <summary>
+    /// Port
+    /// </summary>
+    [SwaggerSchemaCustom(Example = 25)]
     public int? Port { get; set; }
 
-    [SwaggerSchemaCustom("Sender address", Example = "notify@example.com")]
+    /// <summary>
+    /// Sender address
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "notify@example.com")]
     public string SenderAddress { get; set; }
 
-    [SwaggerSchemaCustom("Sender display name", Example = "Postman")]
+    /// <summary>
+    /// Sender display name
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "Postman")]
     public string SenderDisplayName { get; set; }
 
-    [SwaggerSchemaCustom("Credentials username", Example = "notify@example.com")]
+    /// <summary>
+    /// Credentials username
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "notify@example.com")]
     public string CredentialsUserName { get; set; }
 
-    [SwaggerSchemaCustom("Credentials user password", Example = "{password}")]
+    /// <summary>
+    /// Credentials user password
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "{password}")]
     public string CredentialsUserPassword { get; set; }
 
-    [SwaggerSchemaCustom("Enables SSL or not", Example = false)]
+    /// <summary>
+    /// Enables SSL or not
+    /// </summary>
+    [SwaggerSchemaCustom(Example = false)]
     public bool EnableSSL { get; set; }
 
     /// <summary>
@@ -57,10 +78,16 @@ public class SmtpSettingsDto : IMapFrom<SmtpSettings>
     /// </summary>
     public bool EnableAuth { get; set; }
 
-    [SwaggerSchemaCustom("Specifies whether to use NTLM or not", Example = false)]
+    /// <summary>
+    /// Specifies whether to use NTLM or not
+    /// </summary>
+    [SwaggerSchemaCustom(Example = false)]
     public bool UseNtlm { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the current settings are default or not", Example = false)]
+    /// <summary>
+    /// Specifies if the current settings are default or not
+    /// </summary>
+    [SwaggerSchemaCustom(Example = false)]
     public bool IsDefaultSettings { get; set; }
 
     public void Mapping(Profile profile)

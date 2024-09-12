@@ -30,13 +30,22 @@ namespace ASC.Web.Api.Models;
 
 public class EmployeeDto
 {
-    [SwaggerSchemaCustom("ID", Example = "{00000000-0000-0000-0000-000000000000}")]
+    /// <summary>
+    /// ID
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "{00000000-0000-0000-0000-000000000000}")]
     public Guid Id { get; set; }
 
-    [SwaggerSchemaCustom("Display name", Example = "Mike Zanyatski")]
+    /// <summary>
+    /// Display name
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "Mike Zanyatski")]
     public string DisplayName { get; set; }
 
-    [SwaggerSchemaCustom("Title", Example = "Manager")]
+    /// <summary>
+    /// Title
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "Manager")]
     public string Title { get; set; }
 
     /// <summary>
@@ -59,7 +68,10 @@ public class EmployeeDto
     /// </summary>
     public string AvatarMedium { get; set; }
 
-    [SwaggerSchemaCustom("Small avatar", Example = "url to small avatar")]
+    /// <summary>
+    /// Small avatar
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "url to small avatar")]
     public string AvatarSmall { get; set; }
 
     /// <summary>

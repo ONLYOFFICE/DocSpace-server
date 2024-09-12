@@ -36,6 +36,8 @@ public class QuotaSettingsRequestsDto
     /// </summary>
     public bool EnableQuota { get; set; }
 
-    [SwaggerSchemaCustomInt("Default quota value", Format = "int64")]
+    /// <summary>
+    /// Default quota value
+    /// </summary>
     public JsonElement DefaultQuota { get; set; }
 }

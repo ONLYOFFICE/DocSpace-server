@@ -288,7 +288,6 @@ public class AuthenticationController(
     [SwaggerResponse(200, "Ok", typeof(object))]
     [AllowNotPayment]
     [HttpPost("logout")]
-    [HttpGet("logout")]// temp fix
     public async Task<object> LogoutAsync()
     {
         var cookie = cookiesManager.GetCookies(CookiesType.AuthKey);
@@ -426,7 +425,7 @@ public class AuthenticationController(
                     
                 var checkKeyResult = await emailValidationKeyModelHelper.ValidateAsync(new EmailValidationKeyModel { Key = inDto.ConfirmData.Key, Email = email, Type = ConfirmType.Auth, First = inDto.ConfirmData.First.ToString() });
 
-                if (checkKeyResult == ValidationResult.Ok)
+                if (checkKeyResult == Security.Cryptography.EmailValidationKeyProvider.ValidationResult.Ok)
                 {
                     user = email.Contains("@")
                                    ? await userManager.GetUserByEmailAsync(email)

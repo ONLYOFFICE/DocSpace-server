@@ -701,7 +701,7 @@ public class PortalController(
 
         switch (checkKeyResult)
         {
-            case ValidationResult.Ok:
+            case EmailValidationKeyProvider.ValidationResult.Ok:
                 var currentUser = await userManager.GetUsersAsync(inDto.Userid);
 
                 await studioNotifyService.SendCongratulationsAsync(currentUser);

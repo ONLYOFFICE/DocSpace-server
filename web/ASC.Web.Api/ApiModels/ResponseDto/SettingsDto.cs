@@ -28,10 +28,16 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 
 public class SettingsDto
 {
-    [SwaggerSchemaCustom("Time zone", Example = "UTC")]
+    /// <summary>
+    /// Time zone
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "UTC")]
     public string Timezone { get; set; }
 
-    [SwaggerSchemaCustom("List of trusted domains", Example = "mydomain.com")]
+    /// <summary>
+    /// List of trusted domains
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "mydomain.com")]
     public List<string> TrustedDomains { get; set; }
 
     /// <summary>
@@ -39,10 +45,16 @@ public class SettingsDto
     /// </summary>
     public TenantTrustedDomainsType TrustedDomainsType { get; set; }
 
-    [SwaggerSchemaCustom("Language", Example = "en-US")]
+    /// <summary>
+    /// Language
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "en-US")]
     public string Culture { get; set; }
 
-    [SwaggerSchemaCustom("UTC offset", Example = "-8.5")]
+    /// <summary>
+    /// UTC offset
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "-8.5")]
     public TimeSpan UtcOffset { get; set; }
 
     /// <summary>
@@ -50,7 +62,10 @@ public class SettingsDto
     /// </summary>
     public double UtcHoursOffset { get; set; }
 
-    [SwaggerSchemaCustom("Greeting settings", Example = "Web Office Applications")]
+    /// <summary>
+    /// Greeting settings
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "Web Office Applications")]
     public string GreetingSettings { get; set; }
 
     /// <summary>

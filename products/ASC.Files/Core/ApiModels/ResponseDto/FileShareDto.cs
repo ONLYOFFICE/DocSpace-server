@@ -33,10 +33,15 @@ public class FileShareDto
     /// </summary>
     public FileShare Access { get; set; }
 
-    [SwaggerSchemaCustom<object>("A user who has the access to the specified file")]
+    /// <summary>
+    /// A user who has the access to the specified file
+    /// </summary>
     public object SharedTo { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the file is locked by this user or not", Example = false)]
+    /// <summary>
+    /// Specifies if the file is locked by this user or not
+    /// </summary>
+    [SwaggerSchemaCustom(Example = false)]
     public bool IsLocked { get; set; }
 
     /// <summary>

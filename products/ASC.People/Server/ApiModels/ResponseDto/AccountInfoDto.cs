@@ -33,7 +33,10 @@ public class AccountInfoDto
     /// </summary>
     public string Provider { get; set; }
 
-    [SwaggerSchemaCustom("URL", Format = "uri")]
+    /// <summary>
+    /// URL
+    /// </summary>
+    [Url]
     public string Url { get; set; }
 
     /// <summary>

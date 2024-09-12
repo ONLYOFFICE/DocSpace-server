@@ -153,25 +153,44 @@ public class FilesSettingsDto
     /// </summary>
     public string ParamOutType { get; set; }
 
-    [SwaggerSchemaCustom("File download url string", Format = "uri")]
+    /// <summary>
+    /// File download url string
+    /// </summary>
+    [Url]
     public string FileDownloadUrlString { get; set; }
 
-    [SwaggerSchemaCustom("File web viewer url string", Format = "uri")]
+    /// <summary>
+    /// File web viewer url string
+    /// </summary>
     public string FileWebViewerUrlString { get; set; }
 
-    [SwaggerSchemaCustom("File web viewer external url string", Format = "uri")]
+    /// <summary>
+    /// File web viewer external url string
+    /// </summary>
+    [Url]
     public string FileWebViewerExternalUrlString { get; set; }
 
-    [SwaggerSchemaCustom("File web editor url string", Format = "uri")]
+    /// <summary>
+    /// File web editor url string
+    /// </summary>
     public string FileWebEditorUrlString { get; set; }
 
-    [SwaggerSchemaCustom("File web editor external url string", Format = "uri")]
+    /// <summary>
+    /// File web editor external url string
+    /// </summary>
+    [Url]
     public string FileWebEditorExternalUrlString { get; set; }
 
-    [SwaggerSchemaCustom("File redirect preview url string", Format = "uri")]
+    /// <summary>
+    /// File redirect preview url string
+    /// </summary>
+    [Url]
     public string FileRedirectPreviewUrlString { get; set; }
 
-    [SwaggerSchemaCustom("File thumbnail url string", Format = "uri")]
+    /// <summary>
+    /// File thumbnail url string
+    /// </summary>
+    [Url]
     public string FileThumbnailUrlString { get; set; }
 
     /// <summary>

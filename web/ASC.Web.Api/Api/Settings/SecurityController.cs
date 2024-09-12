@@ -62,7 +62,7 @@ public class SecurityController(
     [Tags("Settings / Security")]
     [SwaggerResponse(200, "Security settings", typeof(SecurityDto))]
     [HttpGet("")]
-    public async IAsyncEnumerable<SecurityDto> GetWebItemSecurityInfo([FromQuery] IEnumerable<string> ids)
+    public async IAsyncEnumerable<SecurityDto> GetWebItemSettingsSecurityInfo([FromQuery] IEnumerable<string> ids)
     {
         if (ids == null || !ids.Any())
         {
@@ -202,7 +202,7 @@ public class SecurityController(
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         await webItemSecurity.SetSecurityAsync(inDto.Id, inDto.Enabled, inDto.Subjects?.ToArray());
-        var securityInfo = await GetWebItemSecurityInfo(new List<string> { inDto.Id }).ToListAsync();
+        var securityInfo = await GetWebItemSettingsSecurityInfo(new List<string> { inDto.Id }).ToListAsync();
 
         if (inDto.Subjects == null)
         {
@@ -289,7 +289,7 @@ public class SecurityController(
 
         await messageService.SendAsync(MessageAction.ProductsListUpdated);
 
-        return await GetWebItemSecurityInfo(itemList.Keys.ToList()).ToListAsync();
+        return await GetWebItemSettingsSecurityInfo(itemList.Keys.ToList()).ToListAsync();
     }
 
     /// <summary>

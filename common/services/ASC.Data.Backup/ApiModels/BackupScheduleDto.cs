@@ -67,9 +67,15 @@ public class Cron
     /// </summary>
     public BackupPeriod? Period { get; set; }
 
-    [SwaggerSchemaCustom("Hour", Example = 0)]
+    /// <summary>
+    /// Hour
+    /// </summary>
+    [SwaggerSchemaCustom(Example = 0)]
     public int Hour { get; set; }
 
-    [SwaggerSchemaCustom("Day", Example = 0)]
+    /// <summary>
+    /// Day
+    /// </summary>
+    [SwaggerSchemaCustom(Example = 0)]
     public int Day { get; set; }
 }

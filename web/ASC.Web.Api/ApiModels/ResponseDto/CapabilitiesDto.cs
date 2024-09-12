@@ -28,7 +28,10 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 
 public class CapabilitiesDto
 {
-    [SwaggerSchemaCustom("Specifies if the LDAP settings are enabled or not", Example = false)]
+    /// <summary>
+    /// Specifies if the LDAP settings are enabled or not
+    /// </summary>
+    [SwaggerSchemaCustom(Example = false)]
     public bool LdapEnabled { get; set; }
 
     /// <summary>
@@ -41,7 +44,10 @@ public class CapabilitiesDto
     /// </summary>
     public List<string> Providers { get; set; }
 
-    [SwaggerSchemaCustom("SP login label", Example = "")]
+    /// <summary>
+    /// SP login label
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "")]
     public string SsoLabel { get; set; }
 
     /// <summary>
@@ -49,6 +55,10 @@ public class CapabilitiesDto
     /// </summary>
     public bool OauthEnabled { get; init; }
 
-    [SwaggerSchemaCustom("SSO URL. If this parameter is empty, then the SSO settings are disabled", Example = "", Format = "uri")]
+    /// <summary>
+    /// SSO URL. If this parameter is empty, then the SSO settings are disabled
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "")]
+    [Url]
     public string SsoUrl { get; set; }
 }

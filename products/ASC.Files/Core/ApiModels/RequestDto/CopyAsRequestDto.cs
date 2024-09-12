@@ -36,7 +36,9 @@ public class CopyAsRequestDto<T>
     /// </summary>
     public string DestTitle { get; set; }
 
-    [SwaggerSchemaCustomInt("Destination folder ID")]
+    /// <summary>
+    /// Destination folder ID
+    /// </summary>
     public T DestFolderId { get; set; }
 
     /// <summary>

@@ -33,7 +33,9 @@ public class DeepLinkDto
     /// </summary>
     public string AndroidPackageName { get; set; }
 
-    [SwaggerSchemaCustom("Url", Format = "uri")]
+    /// <summary>
+    /// Url
+    /// </summary>
     public string Url { get; set; }
 
     /// <summary>

@@ -53,7 +53,9 @@ public class AdditionalWhiteLabelSettingsDto: IMapFrom<AdditionalWhiteLabelSetti
     /// </summary>
     public bool UserForumEnabled { get; set; }
 
-    [SwaggerSchemaCustom("User forum URL", Format = "uri")]
+    /// <summary>
+    /// User forum URL
+    /// </summary>
     public string UserForumUrl { get; set; }
 
     /// <summary>
@@ -61,7 +63,9 @@ public class AdditionalWhiteLabelSettingsDto: IMapFrom<AdditionalWhiteLabelSetti
     /// </summary>
     public bool VideoGuidesEnabled { get; set; }
 
-    [SwaggerSchemaCustom("Video guides URL", Format = "uri")]
+    /// <summary>
+    /// Video guides URL
+    /// </summary>
     public string VideoGuidesUrl { get; set; }
 
     /// <summary>
@@ -69,7 +73,9 @@ public class AdditionalWhiteLabelSettingsDto: IMapFrom<AdditionalWhiteLabelSetti
     /// </summary>
     public string SalesEmail { get; set; }
 
-    [SwaggerSchemaCustom("URL to pay for the portal", Format = "uri")]
+    /// <summary>
+    /// URL to pay for the portal
+    /// </summary>
     public string BuyUrl { get; set; }
 
     /// <summary>

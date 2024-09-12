@@ -604,6 +604,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     /// <param type="System.Nullable{ASC.Core.StorageFilter}, ASC.Files.Core" name="storageFilter" example="None">Filter by storage (Internal - 1, ThirdParty - 2)</param>
     /// <path>api/2.0/files/rooms</path>
     [Tags("Files / Rooms")]
+    [SwaggerResponse(200, "Returns the contents of the \"Rooms\" section", typeof(FolderContentDto<int>))]
     [HttpGet("rooms")]
     public async Task<FolderContentDto<int>> GetRoomsFolderAsync(
         RoomType? type,

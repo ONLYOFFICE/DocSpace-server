@@ -45,21 +45,39 @@ public class ThumbnailsDataDto
         };
     }
 
-    [SwaggerSchemaCustom("Original photo", Example = "default_user_photo_size_1280-1280.png")]
+    /// <summary>
+    /// Original photo
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "default_user_photo_size_1280-1280.png")]
     public string Original { get; set; }
 
-    [SwaggerSchemaCustom("Retina", Example = "default_user_photo_size_360-360.png")]
+    /// <summary>
+    /// Retina
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "default_user_photo_size_360-360.png")]
     public string Retina { get; set; }
 
-    [SwaggerSchemaCustom("Maximum size", Example = "default_user_photo_size_200-200.png")]
+    /// <summary>
+    /// Maximum size
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "default_user_photo_size_200-200.png")]
     public string Max { get; set; }
 
-    [SwaggerSchemaCustom("Big", Example = "default_user_photo_size_82-82.png")]
+    /// <summary>
+    /// Big
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "default_user_photo_size_82-82.png")]
     public string Big { get; set; }
 
-    [SwaggerSchemaCustom("Medium", Example = "default_user_photo_size_48-48.png")]
+    /// <summary>
+    /// Medium
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "default_user_photo_size_48-48.png")]
     public string Medium { get; set; }
 
-    [SwaggerSchemaCustom("Small", Example = "default_user_photo_size_32-32.png")]
+    /// <summary>
+    /// Small
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "default_user_photo_size_32-32.png")]
     public string Small { get; set; }
 }

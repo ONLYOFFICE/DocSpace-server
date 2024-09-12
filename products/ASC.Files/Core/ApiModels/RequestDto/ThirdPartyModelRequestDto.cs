@@ -31,7 +31,9 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// </summary>
 public class ThirdPartyRequestDto
 {
-    [SwaggerSchemaCustom("Connection URL for the sharepoint", Format = "uri")]
+    /// <summary>
+    /// Connection URL for the sharepoint
+    /// </summary>
     public string Url { get; set; }
 
     /// <summary>

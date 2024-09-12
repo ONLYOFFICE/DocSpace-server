@@ -28,16 +28,27 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public class FileDto<T> : FileEntryDto<T>
 {
-    [SwaggerSchemaCustomInt("Folder ID", Example = 12334)]
+    /// <summary>
+    /// Folder ID
+    /// </summary>
     public T FolderId { get; set; }
 
-    [SwaggerSchemaCustomInt("Version", Example = 3)]
+    /// <summary>
+    /// Version
+    /// </summary>
+    [SwaggerSchemaCustom(Example = 3)]
     public int Version { get; set; }
 
-    [SwaggerSchemaCustomInt("Version group", Example = 1)]
+    /// <summary>
+    /// Version group
+    /// </summary>
+    [SwaggerSchemaCustom(Example = 1)]
     public int VersionGroup { get; set; }
 
-    [SwaggerSchemaCustom("Content length", Example = "12345")]
+    /// <summary>
+    /// Content length
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "12345")]
     public string ContentLength { get; set; }
 
     /// <summary>
@@ -50,13 +61,23 @@ public class FileDto<T> : FileEntryDto<T>
     /// </summary>
     public FileStatus FileStatus { get; set; }
 
-    [SwaggerSchemaCustom("Muted or not", Example = false)]
+    /// <summary>
+    /// Muted or not
+    /// </summary>
+    [SwaggerSchemaCustom(Example = false)]
     public bool Mute { get; set; }
 
-    [SwaggerSchemaCustom("URL to view a file", Example = "https://www.onlyoffice.com/viewfile?fileid=2221", Format = "uri")]
+    /// <summary>
+    /// URL to view a file
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "https://www.onlyoffice.com/viewfile?fileid=2221")]
+    [Url]
     public string ViewUrl { get; set; }
 
-    [SwaggerSchemaCustom("Web URL", Format = "uri")]
+    /// <summary>
+    /// Web URL
+    /// </summary>
+    [Url]
     public string WebUrl { get; set; }
 
     /// <summary>
@@ -64,7 +85,10 @@ public class FileDto<T> : FileEntryDto<T>
     /// </summary>
     public FileType FileType { get; set; }
 
-    [SwaggerSchemaCustom("File extension", Example = ".txt")]
+    /// <summary>
+    /// File extension
+    /// </summary>
+    [SwaggerSchemaCustom(Example = ".txt")]
     public string FileExst { get; set; }
 
     /// <summary>
@@ -72,10 +96,16 @@ public class FileDto<T> : FileEntryDto<T>
     /// </summary>
     public string Comment { get; set; }
 
-    [SwaggerSchemaCustom("Encrypted or not", Example = false)]
+    /// <summary>
+    /// Encrypted or not
+    /// </summary>
+    [SwaggerSchemaCustom(Example = false)]
     public bool? Encrypted { get; set; }
 
-    [SwaggerSchemaCustom("Thumbnail URL", Format = "uri")]
+    /// <summary>
+    /// Thumbnail URL
+    /// </summary>
+    [Url]
     public string ThumbnailUrl { get; set; }
 
     /// <summary>
@@ -93,16 +123,28 @@ public class FileDto<T> : FileEntryDto<T>
     /// </summary>
     public string LockedBy { get; set; }
 
-    [SwaggerSchemaCustom("Denies file downloading or not", Example = false)]
+    /// <summary>
+    /// Denies file downloading or not
+    /// </summary>
+    [SwaggerSchemaCustom(Example = false)]
     public bool DenyDownload { get; set; }
 
-    [SwaggerSchemaCustom("Is there a draft or not", Example = false)]
+    /// <summary>
+    /// Is there a draft or not
+    /// </summary>
+    [SwaggerSchemaCustom(Example = false)]
     public bool? HasDraft { get; set; }
 
-    [SwaggerSchemaCustom("Is there a form or not", Example = false)]
+    /// <summary>
+    /// Is there a form or not
+    /// </summary>
+    [SwaggerSchemaCustom(Example = false)]
     public bool? IsForm { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the filling has started or not", Example = false)]
+    /// <summary>
+    /// Specifies if the filling has started or not
+    /// </summary>
+    [SwaggerSchemaCustom(Example = false)]
     public bool? StartFilling { get; set; }
 
     /// <summary>
@@ -120,7 +162,10 @@ public class FileDto<T> : FileEntryDto<T>
     /// </summary>
     public DraftLocation<T> DraftLocation { get; set; }
 
-    [SwaggerSchemaCustom("Denies file sharing or not", Example = false)]
+    /// <summary>
+    /// Denies file sharing or not
+    /// </summary>
+    [SwaggerSchemaCustom(Example = false)]
     public bool DenySharing { get; set; }
 
     /// <summary>
@@ -138,7 +183,9 @@ public class FileDto<T> : FileEntryDto<T>
     /// </summary>
     public string RequestToken { get; set; }
 
-    [SwaggerSchemaCustom(Description = "Last opened")]
+    /// <summary>
+    /// Last opened
+    /// </summary>
     public ApiDateTime LastOpened { get; set; }
     
     public override FileEntryType FileEntryType { get => FileEntryType.File; }
@@ -334,7 +381,9 @@ public class FileDtoHelper(
 
 public class DraftLocation<T>
 {
-    [SwaggerSchemaCustomInt("InProcess folder ID")]
+    /// <summary>
+    /// InProcess folder ID
+    /// </summary> 
     public T FolderId { get; set; }
 
     /// <summary>
@@ -342,7 +391,9 @@ public class DraftLocation<T>
     /// </summary>
     public string FolderTitle { get; set; }
 
-    [SwaggerSchemaCustomInt("Draft ID")]
+    /// <summary>
+    /// Draft ID
+    /// </summary>
     public T FileId { get; set; }
 
     /// <summary>

@@ -31,7 +31,9 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 /// </summary>
 public class RoomsNotificationsSettingsRequestDto
 {
-    [SwaggerSchemaCustomInt("Room ID")]
+    /// <summary>
+    /// Room ID
+    /// </summary>
     public object RoomsId { get; set; }
 
     /// <summary>

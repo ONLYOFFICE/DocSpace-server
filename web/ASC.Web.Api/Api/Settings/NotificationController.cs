@@ -46,7 +46,7 @@ public class NotificationController(
     [Tags("Settings / Notifications")]
     [SwaggerResponse(200, "Notification settings", typeof(NotificationSettingsDto))]
     [HttpGet("{type}")]
-    public async Task<NotificationSettingsDto> GetSettingsAsync(NotificationType type)
+    public async Task<NotificationSettingsDto> GetNotificationSettingsAsync(NotificationType type)
     {
         var isEnabled = await notificationControllerHelper.GetNotificationStatusAsync(type);
 

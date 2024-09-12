@@ -58,7 +58,9 @@ public record BackupProgress
     [ProtoMember(3)]
     public string Error { get; set; }
 
-    [SwaggerSchemaCustom("Link", Format = "uri")]
+    /// <summary>
+    /// Link
+    /// </summary>
     [ProtoMember(4)]
     public string Link { get; set; }
 

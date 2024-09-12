@@ -620,17 +620,20 @@ public static class DocumentService
     public class FileLink
     {
         /// <summary>
-    /// File type
-    /// </summary>
+        /// File type
+        /// </summary>
         [JsonPropertyName("filetype")]
         public string FileType { get; set; }
 
         /// <summary>
-    /// Token
-    /// </summary>
+        /// Token
+        /// </summary>
         public string Token { get; set; }
 
-        [SwaggerSchemaCustom("Url", Format = "uri")]
+        /// <summary>
+        /// Url
+        /// </summary>
+        [Url]
         public string Url { get; set; }
     }
 

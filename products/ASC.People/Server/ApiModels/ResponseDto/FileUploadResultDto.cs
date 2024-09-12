@@ -26,6 +26,9 @@
 
 namespace ASC.People.ApiModels.ResponseDto;
 
+/// <summary>
+/// File upload result dto
+/// </summary>
 public class FileUploadResultDto
 {
     /// <summary>
@@ -33,7 +36,9 @@ public class FileUploadResultDto
     /// </summary>
     public bool Success { get; set; }
 
-    [SwaggerSchemaCustom<object>("Data")]
+    /// <summary>
+    /// Data
+    /// </summary>
     public object Data { get; set; }
 
     /// <summary>

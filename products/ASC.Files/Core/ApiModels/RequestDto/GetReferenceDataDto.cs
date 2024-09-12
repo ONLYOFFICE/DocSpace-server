@@ -31,18 +31,28 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// </summary>
 public class GetReferenceDataDto<T>
 {
-    [SwaggerSchemaCustomInt("The unique document identifier used by the service to get a link to the file")]
+    /// <summary>
+    /// The unique document identifier used by the service to get a link to the file
+    /// </summary>
     public T FileKey { get; set; }
 
-    [SwaggerSchemaCustom("The unique system identifier", Nullable = true)]
+    /// <summary>
+    /// The unique system identifier
+    /// </summary>
     public string InstanceId { get; set; }
 
-    [SwaggerSchemaCustomInt("Source file ID")]
+    /// <summary>
+    /// Source file ID
+    /// </summary>
     public T SourceFileId { get; set; }
 
-    [SwaggerSchemaCustom("The file name or relative path for the formula editor", Nullable = true)]
+    /// <summary>
+    /// The file name or relative path for the formula editor
+    /// </summary>
     public string Path { get; set; }
 
-    [SwaggerSchemaCustom("Link to file", Format = "uri")]
+    /// <summary>
+    /// Link to file
+    /// </summary>
     public string Link { get; set; }
 }

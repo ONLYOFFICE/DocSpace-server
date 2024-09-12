@@ -93,7 +93,9 @@ public class WebPluginDto: IMapFrom<WebPlugin>
     /// </summary>
     public bool System { get; set; }
 
-    [SwaggerSchemaCustom("Url", Format = "uri")]
+    /// <summary>
+    /// Url
+    /// </summary>
     public string Url { get; set; }
 
     /// <summary>

@@ -31,7 +31,9 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// </summary>
 public class SaveAsPdfRequestDto<T>
 {
-    [SwaggerSchemaCustomInt("Folder ID")]
+    /// <summary>
+    /// Folder ID
+    /// </summary>
     public T FolderId { get; set; }
 
     /// <summary>

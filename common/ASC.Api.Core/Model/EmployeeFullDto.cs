@@ -28,16 +28,28 @@ namespace ASC.Web.Api.Models;
 
 public class EmployeeFullDto : EmployeeDto
 {
-    [SwaggerSchemaCustom("First name", Example = "Mike")]
+    /// <summary>
+    /// First name
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "Mike")]
     public string FirstName { get; set; }
 
-    [SwaggerSchemaCustom("Last name", Example = "Zanyatski")]
+    /// <summary>
+    /// Last name
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "Zanyatski")]
     public string LastName { get; set; }
 
-    [SwaggerSchemaCustom("Username", Example = "Mike.Zanyatski")]
+    /// <summary>
+    /// Username
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "Mike.Zanyatski")]
     public string UserName { get; set; }
 
-    [SwaggerSchemaCustom("Email", Example = "my@gmail.com")]
+    /// <summary>
+    /// Email
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "my@gmail.com")]
     public string Email { get; set; }
 
     /// <summary>
@@ -50,7 +62,10 @@ public class EmployeeFullDto : EmployeeDto
     /// </summary>
     public ApiDateTime Birthday { get; set; }
 
-    [SwaggerSchemaCustom("Sex", Example = "male")]
+    /// <summary>
+    /// Sex
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "male")]
     public string Sex { get; set; }
 
     /// <summary>
@@ -68,7 +83,10 @@ public class EmployeeFullDto : EmployeeDto
     /// </summary>
     public ApiDateTime Terminated { get; set; }
 
-    [SwaggerSchemaCustom("Department", Example = "Marketing")]
+    /// <summary>
+    /// Department
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "Marketing")]
     public string Department { get; set; }
 
     /// <summary>
@@ -81,13 +99,22 @@ public class EmployeeFullDto : EmployeeDto
     /// </summary>
     public List<GroupSummaryDto> Groups { get; set; }
 
-    [SwaggerSchemaCustom("Location", Example = "Palo Alto")]
+    /// <summary>
+    /// Location
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "Palo Alto")]
     public string Location { get; set; }
 
-    [SwaggerSchemaCustom("Notes", Example = "Notes to worker")]
+    /// <summary>
+    /// Notes
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "Notes to worker")]
     public string Notes { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the user is an administrator or not", Example = false)]
+    /// <summary>
+    /// Specifies if the user is an administrator or not
+    /// </summary>
+    [SwaggerSchemaCustom(Example = false)]
     public bool IsAdmin { get; set; }
 
     /// <summary>
@@ -95,10 +122,16 @@ public class EmployeeFullDto : EmployeeDto
     /// </summary>
     public bool IsRoomAdmin { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the LDAP settings are enabled for the user or not", Example = false)]
+    /// <summary>
+    /// Specifies if the LDAP settings are enabled for the user or not
+    /// </summary>
+    [SwaggerSchemaCustom(Example = false)]
     public bool IsLDAP { get; set; }
 
-    [SwaggerSchemaCustom("List of administrator modules", Example = "[\"projects\", \"crm\"]")]
+    /// <summary>
+    /// List of administrator modules
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "[\"projects\", \"crm\"]")]
     public List<string> ListAdminModules { get; set; }
 
     /// <summary>
@@ -116,7 +149,10 @@ public class EmployeeFullDto : EmployeeDto
     /// </summary>
     public bool IsCollaborator { get; set; }
 
-    [SwaggerSchemaCustom("Language", Example = "en-EN")]
+    /// <summary>
+    /// Language
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "en-EN")]
     public string CultureName { get; set; }
 
     /// <summary>
@@ -129,7 +165,10 @@ public class EmployeeFullDto : EmployeeDto
     /// </summary>
     public MobilePhoneActivationStatus MobilePhoneActivationStatus { get; set; }
 
-    [SwaggerSchemaCustom("Specifies if the SSO settings are enabled for the user or not", Example = false)]
+    /// <summary>
+    /// Specifies if the SSO settings are enabled for the user or not
+    /// </summary>
+    [SwaggerSchemaCustom(Example = false)]
     public bool IsSSO { get; set; }
 
     /// <summary>
@@ -142,7 +181,10 @@ public class EmployeeFullDto : EmployeeDto
     /// </summary>
     public long? QuotaLimit { get; set; }
 
-    [SwaggerSchemaCustom("Portal used space", Example = 12345)]
+    /// <summary>
+    /// Portal used space
+    /// </summary>
+    [SwaggerSchemaCustom(Example = 12345)]
     public double? UsedSpace { get; set; }
 
     /// <summary>

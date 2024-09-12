@@ -46,10 +46,16 @@ public class TenantQuota : IMapFrom<DbQuota>
     /// </summary>
     public int TenantId { get; set; }
 
-    [SwaggerSchemaCustom("Name", Example = "Default")]
+    /// <summary>
+    /// Name
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "Default")]
     public string Name { get; set; }
 
-    [SwaggerSchemaCustomString("Price", Example = "10.0")]
+    /// <summary>
+    /// Price
+    /// </summary>
+    [SwaggerSchemaCustom(Example = 10.0)]
     public decimal Price { get; set; }
 
     /// <summary>
@@ -89,7 +95,10 @@ public class TenantQuota : IMapFrom<DbQuota>
 
     private readonly MaxFileSizeFeature _maxFileSizeFeature;
 
-    [SwaggerSchemaCustom("Maximum file size", Example = 25 * 1024 * 1024)]
+    /// <summary>
+    /// Maximum file size
+    /// </summary>
+    [SwaggerSchemaCustom(Example = 25 * 1024 * 1024)]
     public long MaxFileSize
     {
         get => _maxFileSizeFeature.Value;
@@ -98,7 +107,10 @@ public class TenantQuota : IMapFrom<DbQuota>
 
     private readonly MaxTotalSizeFeature _maxTotalSizeFeature;
 
-    [SwaggerSchemaCustom("Maximum total size", Example = long.MaxValue)]
+    /// <summary>
+    /// Maximum total size
+    /// </summary>
+    [SwaggerSchemaCustom(Example = long.MaxValue)]
     public long MaxTotalSize
     {
         get => _maxTotalSizeFeature.Value;

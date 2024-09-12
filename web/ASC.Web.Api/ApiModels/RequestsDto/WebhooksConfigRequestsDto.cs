@@ -44,7 +44,9 @@ public class WebhooksConfigRequestsDto
     [StringLength(50)]
     public string Name { get; set; }
 
-    [SwaggerSchemaCustom("URI", Format = "uri")]
+    /// <summary>
+    /// URI
+    /// </summary>
     [Url]
     public string Uri { get; set; }
 

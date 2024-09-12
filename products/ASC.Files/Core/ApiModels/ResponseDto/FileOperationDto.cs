@@ -39,13 +39,22 @@ public class FileOperationDto
     [JsonPropertyName("Operation")]
     public FileOperationType OperationType { get; init; }
 
-    [SwaggerSchemaCustom("Operation progress", Example = 100)]
+    /// <summary>
+    /// Operation progress
+    /// </summary>
+    [SwaggerSchemaCustom(Example = 100)]
     public int Progress { get; set; }
 
-    [SwaggerSchemaCustom("Error", Example = "")]
+    /// <summary>
+    /// Error
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "")]
     public string Error { get; set; }
 
-    [SwaggerSchemaCustomString("Processing status", Example = "1")]
+    /// <summary>
+    /// Processing status
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "1")]
     public string Processed { get; set; }
 
     /// <summary>
@@ -53,7 +62,10 @@ public class FileOperationDto
     /// </summary>
     public bool Finished { get; set; }
 
-    [SwaggerSchemaCustom("URL", Format = "uri")]
+    /// <summary>
+    /// URL
+    /// </summary>
+    [Url]
     public string Url { get; set; }
 
     /// <summary>

@@ -169,7 +169,10 @@ public class EditHistoryChanges
 [DebuggerDisplay("{Version}")]
 public class EditHistoryDataDto
 {
-    [SwaggerSchemaCustom("URL to the file changes", Format = "uri")]
+    /// <summary>
+    /// URL to the file changes
+    /// </summary>
+    [Url]
     public string ChangesUrl { get; set; }
 
     /// <summary>
@@ -187,7 +190,10 @@ public class EditHistoryDataDto
     /// </summary>
     public string Token { get; set; }
 
-    [SwaggerSchemaCustom("File URL", Format = "uri")]
+    /// <summary>
+    /// File URL
+    /// </summary>
+    [Url]
     public string Url { get; set; }
 
     /// <summary>
@@ -209,7 +215,10 @@ public class EditHistoryUrl
     /// </summary>
     public string Key { get; init; }
 
-    [SwaggerSchemaCustom("Url", Format = "uri")]
+    /// <summary>
+    /// Url
+    /// </summary>
+    [Url]
     public string Url { get; init; }
 
     /// <summary>

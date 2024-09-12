@@ -574,7 +574,10 @@ public class FileReference
     /// </summary>
     public string Path { get; set; }
 
-    [SwaggerSchemaCustom("URL", Format = "uri")]
+    /// <summary>
+    /// URL
+    /// </summary>
+    [Url]
     public string Url { get; set; }
 
     /// <summary>
@@ -768,10 +771,14 @@ public class CustomizationConfig<T>(
 [Transient]
 public class EmbeddedConfig(BaseCommonLinkUtility baseCommonLinkUtility, FilesLinkUtility filesLinkUtility)
 {
-    [SwaggerSchemaCustom("Embed url", Format = "uri")]
+    /// <summary>
+    /// Embed url
+    /// </summary>
     public string EmbedUrl => baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=embedded" + ShareLinkParam);
 
-    [SwaggerSchemaCustom("Save url", Format = "uri")]
+    /// <summary>
+    /// Save url
+    /// </summary>
     public string SaveUrl => baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FileHandlerPath + "?" + FilesLinkUtility.Action + "=download" + ShareLinkParam);
 
     /// <summary>
@@ -779,10 +786,14 @@ public class EmbeddedConfig(BaseCommonLinkUtility baseCommonLinkUtility, FilesLi
     /// </summary>
     public string ShareLinkParam { get; set; }
 
-    [SwaggerSchemaCustom("Share url", Format = "uri")]
+    /// <summary>
+    /// Share url
+    /// </summary>
     public string ShareUrl => baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=view" + ShareLinkParam);
 
-    [SwaggerSchemaCustom("Toolbar docked", Format = "uri")]
+    /// <summary>
+    /// Toolbar docked
+    /// </summary>
     public string ToolbarDocked => "top";
 }
 
@@ -806,7 +817,9 @@ public class EncryptionKeysConfig
 
 public class FeedbackConfig
 {
-    [SwaggerSchemaCustom("Url", Format = "uri")]
+    /// <summary>
+    /// Url
+    /// </summary>
     public string Url { get; set; }
 
     /// <summary>
@@ -817,7 +830,9 @@ public class FeedbackConfig
 
 public class GobackConfig
 {
-    [SwaggerSchemaCustom("Url", Format = "uri")]
+    /// <summary>
+    /// Url
+    /// </summary>
     public string Url { get; set; }
 }
 
@@ -913,7 +928,10 @@ public class RecentConfig
     /// </summary>
     public string Title { get; set; }
 
-    [SwaggerSchemaCustom("Url", Format = "uri")]
+    /// <summary>
+    /// Url
+    /// </summary>
+    [Url]
     public string Url { get; set; }
 }
 
@@ -929,7 +947,10 @@ public class TemplatesConfig
     /// </summary>
     public string Title { get; set; }
 
-    [SwaggerSchemaCustom("Url", Format = "uri")]
+    /// <summary>
+    /// Url
+    /// </summary>
+    [Url]
     public string Url { get; set; }
 }
 
