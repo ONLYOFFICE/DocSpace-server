@@ -197,7 +197,7 @@ public class SocketManager(
         
         var userIds = whoCanRead
             .SelectMany(r => r)
-            .Concat(new []{ entry.CreateBy })
+            .Concat([entry.CreateBy])
             .Distinct()
             .ToList();
 

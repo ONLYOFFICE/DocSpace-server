@@ -47,7 +47,7 @@ public class ScopesAuthorizationHandler : AuthorizationHandler<ScopesRequirement
 
         var requirementScopes = requirement.Scopes.Split(",", StringSplitOptions.RemoveEmptyEntries);
 
-        if (requirementScopes?.Any() != true)
+        if (requirementScopes.Any() != true)
         {
             return Task.CompletedTask;
         }
@@ -59,9 +59,9 @@ public class ScopesAuthorizationHandler : AuthorizationHandler<ScopesRequirement
             return Task.CompletedTask;
         }
 
-        var userScopeClaims = context.User.Claims?.Where(c => string.Equals(c.Type, "scope", StringComparison.OrdinalIgnoreCase));
+        var userScopeClaims = context.User.Claims.Where(c => string.Equals(c.Type, "scope", StringComparison.OrdinalIgnoreCase));
 
-        foreach (var claim in userScopeClaims ?? Enumerable.Empty<Claim>())
+        foreach (var claim in userScopeClaims)
         {
             var match = expectedRequirements
                 .Where(r => string.Equals(r, claim.Value, StringComparison.OrdinalIgnoreCase) ||

@@ -239,7 +239,7 @@ public class BackupWorker(
         var multipartSplitCount = 0;
         var splitCount = fileStream.Length / chunkSize;
         var mod = (int)(fileStream.Length - chunkSize * splitCount);
-        IEnumerable<byte> concatHash = new byte[] { };
+        IEnumerable<byte> concatHash = Array.Empty<byte>();
 
         for (var i = 0; i < splitCount; i++)
         {

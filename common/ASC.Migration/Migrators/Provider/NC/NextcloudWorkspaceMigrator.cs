@@ -35,8 +35,8 @@ public class NextcloudWorkspaceMigrator : Migrator
     private CancellationToken _cancellationToken;
     private string _takeout;
 
-    private readonly Regex _emailRegex = new Regex(@"(\S*@\S*\.\S*)");
-    private readonly Regex _phoneRegex = new Regex(@"(\+?\d+)");
+    private readonly Regex _emailRegex = new(@"(\S*@\S*\.\S*)");
+    private readonly Regex _phoneRegex = new(@"(\+?\d+)");
 
     public NextcloudWorkspaceMigrator(SecurityContext securityContext,
         UserManager userManager,
@@ -129,8 +129,8 @@ public class NextcloudWorkspaceMigrator : Migrator
                 await ReportProgressAsync(50, MigrationResource.UnzippingFinished);
             }
 
-            var dbFile = Directory.GetFiles(Directory.GetDirectories(TmpFolder)[0]).Where(f=> f.EndsWith(".bak") || f.EndsWith(".sql")).FirstOrDefault();
-            dbFile = dbFile ?? Directory.GetFiles(TmpFolder).Where(f => f.EndsWith(".bak") || f.EndsWith(".sql")).FirstOrDefault();
+            var dbFile = Directory.GetFiles(Directory.GetDirectories(TmpFolder)[0]).FirstOrDefault(f => f.EndsWith(".bak") || f.EndsWith(".sql"));
+            dbFile ??= Directory.GetFiles(TmpFolder).FirstOrDefault(f => f.EndsWith(".bak") || f.EndsWith(".sql"));
             if (dbFile == null)
             {
                 throw new Exception("*.bak file not found");
@@ -256,7 +256,7 @@ public class NextcloudWorkspaceMigrator : Migrator
 
         var entryRegex = new Regex(@"(\(.*?\))[,;]");
         var accountDataMatches = entryRegex.Matches(match.Groups[1].Value + ";");
-        return accountDataMatches.Select(m => m.Groups[1].Value.Trim(['(', ')']));
+        return accountDataMatches.Select(m => m.Groups[1].Value.Trim('(', ')'));
     }
 
     private Dictionary<string, MigrationUser> DbExtractUser(string dbFile)

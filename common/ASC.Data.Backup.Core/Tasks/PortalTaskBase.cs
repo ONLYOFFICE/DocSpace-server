@@ -298,13 +298,13 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
                         newline = await reader.ReadLineAsync();
                         if (string.IsNullOrEmpty(newline))
                         {
-                        break;
+                            break;
+                        }
+
+                        sb.Append(newline);
                     }
 
-                    sb.Append(newline);
-                }
-
-                commandText = sb.ToString();
+                    commandText = sb.ToString();
                 }
 
                 try
@@ -321,7 +321,7 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
                             command = connection.CreateCommand();
                             command.CommandText = commandText;
                             await command.ExecuteNonQueryAsync();
-                        }
+                    }
                     catch (Exception ex)
                     {
                         Logger.ErrorRestore(ex);

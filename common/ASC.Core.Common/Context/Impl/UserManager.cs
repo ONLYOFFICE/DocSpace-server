@@ -313,7 +313,7 @@ public class UserManager(
             return [];
         }
 
-        var words = text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+        var words = text.Split([' '], StringSplitOptions.RemoveEmptyEntries);
         if (words.Length == 0)
         {
             return [];
@@ -637,7 +637,7 @@ public class UserManager(
             return result;
         }
 
-        result = new List<GroupInfo>();
+        result = [];
         var distinctUserGroups = new List<GroupInfo>();
 
         var refs = await GetRefsInternalAsync();

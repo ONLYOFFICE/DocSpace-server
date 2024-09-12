@@ -38,8 +38,6 @@ public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : new()
 
     private readonly ILogger _logger;
     private readonly ConcurrentDictionary<string, List<Action<T>>> _actions;
-
-    private readonly object _lock = new();
     private bool _disposed;
 
     private readonly Task _initializeTask;
@@ -60,7 +58,10 @@ public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : new()
 
     private async Task InitializeAsync()
     {
-        if (_connection is not null) return;
+        if (_connection is not null)
+        {
+            return;
+        }
 
         _connection = await _factory.CreateConnectionAsync();
         _consumerChannel = await CreateConsumerChannelAsync();
@@ -86,7 +87,7 @@ public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : new()
                                         autoDelete: true,
                                         arguments: null);
 
-        await channel.QueueBindAsync(_queueName, _exchangeName, string.Empty, null);
+        await channel.QueueBindAsync(_queueName, _exchangeName, string.Empty);
 
         channel.CallbackException += async (_, ea) =>
         {
@@ -145,7 +146,7 @@ public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : new()
 
         var obj = BaseProtobufSerializer.Deserialize<T>(data.ToArray());
 
-        var action = (CacheNotifyAction)body[body.Length - 1];
+        var action = (CacheNotifyAction)body[^1];
 
         if (_actions.TryGetValue(GetKey(action), out var onchange) && onchange != null)
         {
@@ -163,7 +164,7 @@ public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : new()
 
         objAsByteArray.CopyTo(body, 0);
 
-        body[body.Length - 1] = (byte)action;
+        body[^1] = (byte)action;
      
         await _consumerChannel.BasicPublishAsync(
                              exchange: _exchangeName,

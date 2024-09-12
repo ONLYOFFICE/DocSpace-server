@@ -46,12 +46,7 @@ public class AzRecord : IMapFrom<Acl>
 
     public AzRecord() { }
 
-    public AzRecord(Guid subjectId, Guid actionId, AceType reaction)
-        : this(subjectId, actionId, reaction, default(string))
-    {
-    }
-
-    public AzRecord(Guid subjectId, Guid actionId, AceType reaction, string fullId)
+    public AzRecord(Guid subjectId, Guid actionId, AceType reaction, string fullId = default)
     {
         Subject = subjectId;
         Action = actionId;

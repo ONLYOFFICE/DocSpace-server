@@ -133,7 +133,7 @@ public class SecurityContext(
                 }
             }
 
-            var claims = new List<Claim>()
+            var claims = new List<Claim>
             {
                 AuthConstants.Claim_ScopeRootWrite
             };

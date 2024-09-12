@@ -50,23 +50,23 @@ public class PeopleNamesItem
 
     private string _schemaName;
 
-    private string _userCaption;
+    private readonly string _userCaption;
 
-    private string _usersCaption;
+    private readonly string _usersCaption;
 
-    private string _groupCaption;
+    private readonly string _groupCaption;
 
-    private string _groupsCaption;
+    private readonly string _groupsCaption;
 
-    private string _userPostCaption;
+    private readonly string _userPostCaption;
 
-    private string _groupHeadCaption;
+    private readonly string _groupHeadCaption;
 
-    private string _regDateCaption;
+    private readonly string _regDateCaption;
 
-    private string _guestCaption;
+    private readonly string _guestCaption;
 
-    private string _guestsCaption;
+    private readonly string _guestsCaption;
 
 
     public static string DefaultID

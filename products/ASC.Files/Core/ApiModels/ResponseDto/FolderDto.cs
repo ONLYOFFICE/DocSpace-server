@@ -150,7 +150,7 @@ public class FolderDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
             if (folder.Tags == null)
             {
                 var tagDao = daoFactory.GetTagDao<T>();
-                result.Tags = await tagDao.GetTagsAsync(TagType.Custom, new[] { folder }).Select(t => t.Name).ToListAsync();
+                result.Tags = await tagDao.GetTagsAsync(TagType.Custom, [folder]).Select(t => t.Name).ToListAsync();
             }
             else
             {

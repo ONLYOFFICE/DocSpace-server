@@ -239,7 +239,7 @@ public abstract class ModuleSpecificsBase(Helpers helpers) : IModuleSpecifics
             }
 
             var val = row[columnName];
-            if (!parentRelations.ContainsKey(columnName))
+            if (!parentRelations.TryGetValue(columnName, out var relation))
             {
                 if (!TryPrepareValue(connection, columnMapper, table, columnName, ref val))
                 {
@@ -248,7 +248,7 @@ public abstract class ModuleSpecificsBase(Helpers helpers) : IModuleSpecifics
             }
             else
             {
-                if (!TryPrepareValue(dump, connection, columnMapper, table, columnName, parentRelations[columnName], ref val))
+                if (!TryPrepareValue(dump, connection, columnMapper, table, columnName, relation, ref val))
                 {
                     return Task.FromResult((false, (Dictionary<string, object>)null));
                 }

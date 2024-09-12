@@ -1817,7 +1817,7 @@ public class S3Storage(TempStream tempStream,
             return _response.ResponseStream.ReadAsync(buffer, offset, count, cancellationToken);
         }
 
-        public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = new CancellationToken())
+        public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = new())
         {
             return _response.ResponseStream.ReadAsync(buffer, cancellationToken);
         }
@@ -1842,7 +1842,7 @@ public class S3Storage(TempStream tempStream,
             return _response.ResponseStream.WriteAsync(buffer, offset, count, cancellationToken);
         }
 
-        public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = new CancellationToken())
+        public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = new())
         {
             return _response.ResponseStream.WriteAsync(buffer, cancellationToken);
         }

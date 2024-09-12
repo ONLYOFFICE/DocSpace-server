@@ -141,9 +141,9 @@ public class BackupController(
         var storageParams = inDto.StorageParams == null ? new Dictionary<string, string>() : inDto.StorageParams.ToDictionary(r => r.Key.ToString(), r => r.Value.ToString());
 
         var canParse = false;
-        if (storageParams.ContainsKey("folderId"))
+        if (storageParams.TryGetValue("folderId", out var param))
         {
-            canParse = int.TryParse(storageParams["folderId"], out _);
+            canParse = int.TryParse(param, out _);
         }
         if (storageType == BackupStorageType.Documents && !canParse
             || storageType == BackupStorageType.ThridpartyDocuments && canParse)

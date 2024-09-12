@@ -80,7 +80,6 @@ public class WorkspaceMigrator : Migrator
         }
         try
         {
-            var currentUser = SecurityContext.CurrentAccount;
             _dataReader = DataOperatorFactory.GetReadOperator(_backup, reportProgress ? _cancellationToken : CancellationToken.None, false);
 
             if (_cancellationToken.IsCancellationRequested && reportProgress)
@@ -138,7 +137,7 @@ public class WorkspaceMigrator : Migrator
 
         if (MigrationInfo.CommonStorage == null)
         {
-            MigrationInfo.CommonStorage = new MigrationStorage()
+            MigrationInfo.CommonStorage = new MigrationStorage
             {
                 Type = FolderType.COMMON
             };
@@ -146,7 +145,7 @@ public class WorkspaceMigrator : Migrator
         }
         else
         {
-            var commonStorage = new MigrationStorage()
+            var commonStorage = new MigrationStorage
             {
                 Type = FolderType.COMMON
             };
@@ -159,7 +158,7 @@ public class WorkspaceMigrator : Migrator
         }
         if (MigrationInfo.ProjectStorage == null) 
         {
-            MigrationInfo.ProjectStorage = new MigrationStorage()
+            MigrationInfo.ProjectStorage = new MigrationStorage
             {
                 Type = FolderType.BUNCH
             };
@@ -167,7 +166,7 @@ public class WorkspaceMigrator : Migrator
         }
         else
         {
-            var projectStorage = new MigrationStorage()
+            var projectStorage = new MigrationStorage
             {
                 Type = FolderType.BUNCH
             };
@@ -544,9 +543,8 @@ public class WorkspaceMigrator : Migrator
                 continue;
             }
             var groupId = row["groupid"].ToString();
-            if (MigrationInfo.Groups.ContainsKey(groupId))
+            if (MigrationInfo.Groups.TryGetValue(groupId, out var g))
             {
-                var g = MigrationInfo.Groups[groupId];
                 g.UserKeys.Add(row["userid"].ToString());
                 if (string.Equals(row["ref_type"].ToString(), "1"))
                 {

@@ -944,10 +944,10 @@ public class EntryManager(IDaoFactory daoFactory,
             SortedByType.UsedSpace => (x, y) =>
             {
                 var cmp = 0;
-                if (x is Folder<T> x1 && DocSpaceHelper.IsRoom(x1.FolderType) && !x1.ProviderEntry
-                     && y is Folder<T> x2 && DocSpaceHelper.IsRoom(x2.FolderType) && !x2.ProviderEntry)
+                if (x is Folder<T> x1 && DocSpaceHelper.IsRoom(x1.FolderType) && !x1.ProviderEntry && 
+                    y is Folder<T> y1 && DocSpaceHelper.IsRoom(y1.FolderType) && !y1.ProviderEntry)
                 {
-                    cmp = c * ((Folder<T>)x).Counter.CompareTo(((Folder<T>)y).Counter);
+                    cmp = c * x1.Counter.CompareTo(y1.Counter);
                 }
 
                 return cmp == 0 ? x.Title.EnumerableComparer(y.Title) : cmp;
@@ -1170,7 +1170,7 @@ public class EntryManager(IDaoFactory daoFactory,
                     if (inProcessFormFolder == null && readyFormFolder == null)
                     {
                         (readyFormFolderId, inProcessFormFolderId) = await InitSystemFormFillingFolders(folderId, folderDao);
-                        var systemFormFillingFolders = new List<Folder<T>>()
+                        var systemFormFillingFolders = new List<Folder<T>>
                         {
                             await folderDao.GetFolderAsync(readyFormFolderId),
                             await folderDao.GetFolderAsync(inProcessFormFolderId)
@@ -1512,7 +1512,7 @@ public class EntryManager(IDaoFactory daoFactory,
                         var sourceTitle = Path.GetFileNameWithoutExtension(file.Title);
 
                         var dateTimeNow = tenantUtil.DateTimeNow();
-                        pdfFile.Title = $"{properties.FormFilling.ResultFormNumber} - {sourceTitle} ({$"{dateTimeNow.ToString("dd-MM-yyyy H-mm")}"}){ext}";
+                        pdfFile.Title = $"{properties.FormFilling.ResultFormNumber} - {sourceTitle} ({dateTimeNow:dd-MM-yyyy H-mm}){ext}";
                         pdfFile.ParentId = properties.FormFilling.ResultsFolderId;
                         pdfFile.Comment = string.IsNullOrEmpty(comment) ? null : comment;
                         pdfFile.Category = (int)FilterType.Pdf;
@@ -1556,9 +1556,9 @@ public class EntryManager(IDaoFactory daoFactory,
                         {
                             var linkDao = daoFactory.GetLinkDao<T>();
 
-                            var resProp = new EntryProperties<T>()
+                            var resProp = new EntryProperties<T>
                             {
-                                FormFilling = new FormFillingProperties<T>()
+                                FormFilling = new FormFillingProperties<T>
                                 {
                                     CollectFillForm = properties.FormFilling.CollectFillForm,
                                     StartFilling = false,
@@ -2074,7 +2074,7 @@ public class EntryManager(IDaoFactory daoFactory,
             readyFormFolderId = readyFormFolder.Id;
         }
 
-        var systemFormFillingFolders = new List<Folder<T>>()
+        var systemFormFillingFolders = new List<Folder<T>>
         {
             await folderDao.GetFolderAsync(readyFormFolderId),
             await folderDao.GetFolderAsync(inProcessFormFolderId)
@@ -2118,21 +2118,14 @@ public class EntryManager(IDaoFactory daoFactory,
     }
     private async Task<T> CreateCsvResult<T>(T resultsFolderId, Guid createBy, string sourceTitle, T sourceFileId, IFileDao<T> fileDao)
     {
-        using (var textStream = new MemoryStream(Encoding.UTF8.GetBytes("")))
-        {
+        using var textStream = new MemoryStream(Encoding.UTF8.GetBytes(""));
+        var csvFile = serviceProvider.GetService<File<T>>();
+        csvFile.ParentId = resultsFolderId;
+        csvFile.Title = Global.ReplaceInvalidCharsAndTruncate(sourceTitle + ".csv");
+        csvFile.CreateBy = createBy;
 
-            var csvFile = serviceProvider.GetService<File<T>>();
-            csvFile.ParentId = resultsFolderId;
-            csvFile.Title = Global.ReplaceInvalidCharsAndTruncate(sourceTitle + ".csv");
-            csvFile.CreateBy = createBy;
-
-            var file = await fileDao.SaveFileAsync(csvFile, textStream, false);
-            var csvProp = new EntryProperties<T>() { FormFilling = new FormFillingProperties<T>() };
-            csvProp.FormFilling.ResultsFolderId = resultsFolderId;
-            csvProp.FormFilling.OriginalFormId = sourceFileId;
-
-            return file.Id;
-        }
+        var file = await fileDao.SaveFileAsync(csvFile, textStream, false);
+        return file.Id;
     }
     private async Task<EntryProperties<T>> InitFormFillingProperties<T>(T roomId, string sourceTitle, T sourceFileId, T inProcessFormFolderId, T readyFormFolderId, Guid createBy, EntryProperties<T> properties, IFileDao<T> fileDao, IFolderDao<T> folderDao)
     {

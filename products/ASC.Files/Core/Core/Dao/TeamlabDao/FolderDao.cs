@@ -504,7 +504,7 @@ internal class FolderDao(
             //itself link
             List<DbFolderTree> treeToAdd =
             [
-                new DbFolderTree { FolderId = folder.Id, ParentId = folder.Id, Level = 0 }
+                new() { FolderId = folder.Id, ParentId = folder.Id, Level = 0 }
             ];
             
             //full path to root
@@ -864,8 +864,8 @@ internal class FolderDao(
                 Indexing = folder.SettingsIndexing,
                 Quota = quota >= TenantEntityQuotaSettings.NoQuota ? quota : TenantEntityQuotaSettings.DefaultQuotaValue
             };
-        };
-        
+        }
+
         filesDbContext.Update(toUpdate);
         await filesDbContext.SaveChangesAsync();
 

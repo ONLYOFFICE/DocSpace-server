@@ -33,13 +33,13 @@ public class SubscriptionManager(CachedSubscriptionService service, TenantManage
 {
     private readonly CachedSubscriptionService _service = service ?? throw new ArgumentNullException(nameof(service));
     private static readonly SemaphoreSlim _semaphore = new(1);
-    public static readonly List<Guid> Groups = Groups = new List<Guid>
-    {
+    public static readonly List<Guid> Groups = Groups =
+    [
         AuthConstants.DocSpaceAdmin.ID,
         AuthConstants.Everyone.ID,
         AuthConstants.RoomAdmin.ID,
-        AuthConstants.Collaborator.ID,
-    };
+        AuthConstants.Collaborator.ID
+    ];
 
     public async Task SubscribeAsync(string sourceID, string actionID, string objectID, string recipientID)
     {

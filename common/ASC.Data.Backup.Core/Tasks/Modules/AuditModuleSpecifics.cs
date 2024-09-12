@@ -35,14 +35,14 @@ public class AuditModuleSpecifics(Helpers helpers) : ModuleSpecificsBase(helpers
 
     private readonly TableInfo[] _tables =
     [
-        new TableInfo("audit_events", "tenant_id", "id") { UserIDColumns = ["user_id"] },
-        new TableInfo("login_events", "tenant_id", "id") { UserIDColumns = ["user_id"] },
-        new TableInfo("files_audit_reference")
+        new("audit_events", "tenant_id", "id") { UserIDColumns = ["user_id"] },
+        new("login_events", "tenant_id", "id") { UserIDColumns = ["user_id"] },
+        new("files_audit_reference")
     ];
 
     private readonly RelationInfo[] _tableRelations =
     [
-        new RelationInfo("audit_events", "id", "files_audit_reference", "audit_event_id")
+        new("audit_events", "id", "files_audit_reference", "audit_event_id")
     ];
 
     protected override string GetSelectCommandConditionText(int tenantId, TableInfo table)

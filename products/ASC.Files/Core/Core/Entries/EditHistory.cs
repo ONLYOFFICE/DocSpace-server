@@ -123,12 +123,11 @@ class ChangesUserData
 
 [Transient]
 [DebuggerDisplay("{Id} {Name}")]
-public class EditHistoryAuthor(UserManager userManager,
-    DisplayUserSettingsHelper displayUserSettingsHelper)
+public class EditHistoryAuthor(UserManager userManager, DisplayUserSettingsHelper displayUserSettingsHelper)
 {
     public string Id { get; init; }
 
-    private string _name;
+    private readonly string _name;
     public string Name
     {
         get

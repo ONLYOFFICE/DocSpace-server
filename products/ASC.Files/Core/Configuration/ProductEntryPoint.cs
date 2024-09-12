@@ -33,7 +33,6 @@ public class ProductEntryPoint : Product
 
     private readonly FilesSpaceUsageStatManager _filesSpaceUsageStatManager;
     private readonly CoreBaseSettings _coreBaseSettings;
-    private readonly AuthContext _authContext;
     private readonly UserManager _userManager;
     private readonly NotifyConfiguration _notifyConfiguration;
     private readonly AuditEventsRepository _auditEventsRepository;
@@ -54,7 +53,6 @@ public class ProductEntryPoint : Product
     public ProductEntryPoint(
         FilesSpaceUsageStatManager filesSpaceUsageStatManager,
         CoreBaseSettings coreBaseSettings,
-        AuthContext authContext,
         UserManager userManager,
         NotifyConfiguration notifyConfiguration,
         AuditEventsRepository auditEventsRepository,
@@ -72,7 +70,6 @@ public class ProductEntryPoint : Product
     {
         _filesSpaceUsageStatManager = filesSpaceUsageStatManager;
         _coreBaseSettings = coreBaseSettings;
-        _authContext = authContext;
         _userManager = userManager;
         _notifyConfiguration = notifyConfiguration;
         _auditEventsRepository = auditEventsRepository;

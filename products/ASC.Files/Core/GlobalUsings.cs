@@ -207,7 +207,6 @@ global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.Primitives;
 global using Microsoft.Graph;
-global using Microsoft.IdentityModel.Tokens;
 global using Microsoft.OneDrive.Sdk;
 global using Microsoft.SharePoint.Client;
 

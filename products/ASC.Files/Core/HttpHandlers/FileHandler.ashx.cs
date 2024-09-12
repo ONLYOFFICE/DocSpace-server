@@ -670,10 +670,8 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             long offset = 0;
             var length = ProcessRangeHeader(context, fullLength, ref offset);
 
-            await using (var stream = await fileDao.GetFileStreamAsync(file, offset, length))
-            {
-                await SendStreamByChunksAsync(context, length, offset, fullLength, file.Title, stream);
-            }
+            await using var stream = await fileDao.GetFileStreamAsync(file, offset, length);
+            await SendStreamByChunksAsync(context, length, offset, fullLength, file.Title, stream);
         }
         catch (Exception ex)
         {
@@ -1298,8 +1296,8 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
     private async Task FormWriteOk<T>(HttpContext context, Folder<T> folder, File<T> file)
     {
         await context.Response.WriteAsync(
-            JsonSerializer.Serialize(new CreatedFormData<T>()
-                    {
+            JsonSerializer.Serialize(new CreatedFormData<T>
+                {
                         Message = string.Format(FilesCommonResource.MessageFileCreatedForm, folder.Title),
                         Form = await fileDtoHelper.GetAsync(file)
             },

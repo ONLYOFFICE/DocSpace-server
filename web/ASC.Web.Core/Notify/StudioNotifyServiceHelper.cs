@@ -25,7 +25,6 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Common.IntegrationEvents.Events;
-using ASC.EventBus.Abstractions;
 
 namespace ASC.Web.Core.Notify;
 

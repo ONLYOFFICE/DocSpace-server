@@ -320,7 +320,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
             CancellationToken.ThrowIfCancellationRequested();
 
             var file = await FileDao.GetFileAsync(fileId);
-            var (isError, message) = await WithErrorAsync(scope, new[] { file }, false, checkPermissions);
+            var (isError, message) = await WithErrorAsync(scope, [file], false, checkPermissions);
             if (file == null)
             {
                 this[Err] = FilesCommonResource.ErrorMessage_FileNotFound;

@@ -27,21 +27,21 @@
 namespace ASC.Migration.Core.Migrators.Model;
 public class MigrationInfo
 {
-    public Dictionary<string, MigrationUser> Users = new Dictionary<string, MigrationUser>();
-    public Dictionary<string, MigrationUser> WithoutEmailUsers = new Dictionary<string, MigrationUser>();
-    public Dictionary<string, MigrationUser> ExistUsers = new Dictionary<string, MigrationUser>();
+    public readonly Dictionary<string, MigrationUser> Users = new();
+    public readonly Dictionary<string, MigrationUser> WithoutEmailUsers = new();
+    public readonly Dictionary<string, MigrationUser> ExistUsers = new();
     public string Name { get; set; }
     public OperationType Operation { get; set; }
     public List<string> Files { get; set; }
-    public List<string> FailedArchives = new List<string>();
-    public Dictionary<string, MigrationGroup> Groups = new Dictionary<string, MigrationGroup>();
+    public List<string> FailedArchives = new();
+    public readonly Dictionary<string, MigrationGroup> Groups = new();
 
     public MigrationStorage CommonStorage { get; set; }
     public MigrationStorage ProjectStorage { get; set; }
 
     public int SuccessedUsers { get; set; }
     public int FailedUsers { get; set; }
-    public List<string> Errors { get; set; } = new List<string>();
+    public List<string> Errors { get; set; } = new();
 
     public virtual MigrationApiInfo ToApiInfo()
     {
@@ -67,11 +67,11 @@ public class MigrationInfo
         Users.AddRange(WithoutEmailUsers);
         foreach (var apiUser in apiInfo.Users)
         {
-            if (!Users.ContainsKey(apiUser.Key))
+            if (!Users.TryGetValue(apiUser.Key, out var user))
             {
                 continue;
             }
-            var user = Users[apiUser.Key];
+
             user.ShouldImport = apiUser.ShouldImport;
             if (string.IsNullOrEmpty(user.Info.Email))
             {

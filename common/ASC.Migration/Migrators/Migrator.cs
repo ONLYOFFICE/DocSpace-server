@@ -28,21 +28,35 @@ using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Migration.Core.Migrators;
 
-public abstract class Migrator : IAsyncDisposable
+public abstract class Migrator(
+    SecurityContext securityContext,
+    UserManager userManager,
+    TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
+    QuotaSocketManager quotaSocketManager,
+    FileStorageService fileStorageService,
+    GlobalFolderHelper globalFolderHelper,
+    IServiceProvider serviceProvider,
+    IDaoFactory daoFactory,
+    EntryManager entryManager,
+    MigrationLogger migrationLogger,
+    AuthContext authContext,
+    DisplayUserSettingsHelper displayUserSettingsHelper,
+    UserManagerWrapper userManagerWrapper)
+    : IAsyncDisposable
 {
-    protected SecurityContext SecurityContext { get; }
-    protected UserManager UserManager { get; }
-    protected TenantQuotaFeatureStatHelper TenantQuotaFeatureStatHelper { get; }
-    protected QuotaSocketManager QuotaSocketManager { get; }
-    protected FileStorageService FileStorageService { get; }
-    protected GlobalFolderHelper GlobalFolderHelper { get; }
-    protected IServiceProvider ServiceProvider { get; }
-    protected IDaoFactory DaoFactory { get; }
-    protected EntryManager EntryManager { get; }
-    protected MigrationLogger MigrationLogger { get; }
-    protected AuthContext AuthContext { get; }
-    protected DisplayUserSettingsHelper DisplayUserSettingsHelper { get; }
-    protected UserManagerWrapper UserManagerWrapper { get; }
+    protected SecurityContext SecurityContext { get; } = securityContext;
+    protected UserManager UserManager { get; } = userManager;
+    protected TenantQuotaFeatureStatHelper TenantQuotaFeatureStatHelper { get; } = tenantQuotaFeatureStatHelper;
+    protected QuotaSocketManager QuotaSocketManager { get; } = quotaSocketManager;
+    protected FileStorageService FileStorageService { get; } = fileStorageService;
+    protected GlobalFolderHelper GlobalFolderHelper { get; } = globalFolderHelper;
+    protected IServiceProvider ServiceProvider { get; } = serviceProvider;
+    protected IDaoFactory DaoFactory { get; } = daoFactory;
+    protected EntryManager EntryManager { get; } = entryManager;
+    protected MigrationLogger MigrationLogger { get; } = migrationLogger;
+    protected AuthContext AuthContext { get; } = authContext;
+    protected DisplayUserSettingsHelper DisplayUserSettingsHelper { get; } = displayUserSettingsHelper;
+    protected UserManagerWrapper UserManagerWrapper { get; } = userManagerWrapper;
 
     public MigrationInfo MigrationInfo { get; set; }
     protected IAccount _currentUser;
@@ -59,35 +73,6 @@ public abstract class Migrator : IAsyncDisposable
 
     public Func<double, string, Task> OnProgressUpdateAsync { get; set; }
 
-    public Migrator(SecurityContext securityContext,
-        UserManager userManager, 
-        TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
-        QuotaSocketManager quotaSocketManager, 
-        FileStorageService fileStorageService,
-        GlobalFolderHelper globalFolderHelper,
-        IServiceProvider serviceProvider, 
-        IDaoFactory daoFactory,
-        EntryManager entryManager,
-        MigrationLogger migrationLogger, 
-        AuthContext authContext,
-        DisplayUserSettingsHelper displayUserSettingsHelper,
-        UserManagerWrapper userManagerWrapper)
-    {
-        SecurityContext = securityContext;
-        UserManager = userManager;
-        TenantQuotaFeatureStatHelper = tenantQuotaFeatureStatHelper;
-        QuotaSocketManager = quotaSocketManager;
-        FileStorageService = fileStorageService;
-        GlobalFolderHelper = globalFolderHelper;
-        ServiceProvider = serviceProvider;
-        DaoFactory = daoFactory;
-        EntryManager = entryManager;
-        MigrationLogger = migrationLogger;
-        AuthContext = authContext;
-        DisplayUserSettingsHelper = displayUserSettingsHelper;
-        UserManagerWrapper = userManagerWrapper;
-    }
-    
     public abstract Task InitAsync(string path, CancellationToken cancellationToken, OperationType operation);
     public abstract Task<MigrationApiInfo> ParseAsync(bool reportProgress = true);
 
@@ -124,7 +109,6 @@ public abstract class Migrator : IAsyncDisposable
         _importedUsers = new();
         _failedUsers = new();
 
-        var currentUser = SecurityContext.CurrentAccount;
         MigrationInfo.Merge(migrationInfo);
 
         _usersForImport = MigrationInfo.Users.Where(u => u.Value.ShouldImport).ToDictionary();
@@ -273,7 +257,6 @@ public abstract class Migrator : IAsyncDisposable
         var progressStep = MigrationInfo.Groups.Count == 0 ? 20 : 20 / MigrationInfo.Groups.Count;
         foreach (var kv in MigrationInfo.Groups)
         {
-            var key = kv.Key;
             var group = kv.Value;
 
             await ReportProgressAsync(_lastProgressUpdate + progressStep, string.Format(MigrationResource.GroupMigration, group.Info.Name, i++, MigrationInfo.Groups.Count));
@@ -297,7 +280,7 @@ public abstract class Migrator : IAsyncDisposable
             {
                 try
                 {
-                    var user = _usersForImport.ContainsKey(userGuid) ? _usersForImport[userGuid].Info : Constants.LostUser;
+                    var user = _usersForImport.TryGetValue(userGuid, out var value) ? value.Info : Constants.LostUser;
                     if (user.Equals(Constants.LostUser))
                     {
                         continue;
@@ -337,7 +320,7 @@ public abstract class Migrator : IAsyncDisposable
         }
 
         var matchingFilesIds = new Dictionary<string, FileEntry<int>>();
-        Folder<int> newFolder = null;
+        Folder<int> newFolder;
         if (storage.Type != FolderType.BUNCH) 
         {
             newFolder = storage.Type == FolderType.USER
@@ -445,7 +428,7 @@ public abstract class Migrator : IAsyncDisposable
                         continue;
                     }
                     await SecurityContext.AuthenticateMeAsync(user.Info.Id);
-                    AceWrapper ace = null;
+                    AceWrapper ace;
                     if (!aces.ContainsKey($"{security.Security}{matchingFilesIds[key].Id}"))
                     {
                         try
@@ -466,9 +449,9 @@ public abstract class Migrator : IAsyncDisposable
                     }
                     if (ace != null)
                     {
-                        if (MigrationInfo.Users.ContainsKey(security.Subject))
+                        if (MigrationInfo.Users.TryGetValue(security.Subject, out var infoUser))
                         {
-                            var userForShare = await UserManager.GetUsersAsync(MigrationInfo.Users[security.Subject].Info.Id);
+                            var userForShare = await UserManager.GetUsersAsync(infoUser.Info.Id);
                             await SecurityContext.AuthenticateMeAsync(userForShare.Id);
                             await EntryManager.MarkAsRecentByLink(matchingFilesIds[key] as File<int>, ace.Id);
                         }
@@ -523,7 +506,7 @@ public abstract class Migrator : IAsyncDisposable
                         {
                             var aceList = new List<AceWrapper>
                             {
-                                new AceWrapper
+                                new()
                                 {
                                     Access = Files.Core.Security.FileShare.PowerUser,
                                     Id = user.Info.Id
@@ -588,11 +571,11 @@ public abstract class Migrator : IAsyncDisposable
 
                     var list = new List<AceWrapper>
                     {
-                        new AceWrapper
+                        new()
                         {
                             Access = access,
-                            Id = MigrationInfo.Users.ContainsKey(security.Subject) 
-                                ? MigrationInfo.Users[security.Subject].Info.Id 
+                            Id = MigrationInfo.Users.TryGetValue(security.Subject, out var infoUser) 
+                                ? infoUser.Info.Id 
                                 : MigrationInfo.Groups[security.Subject].Info.ID
                         }
                     };
@@ -623,7 +606,7 @@ public abstract class Migrator : IAsyncDisposable
             return 0;
         }
         var folder = storage.Folders.FirstOrDefault(f => f.Id == security.EntryId);
-        return folder == null ? 0 : folder.Level;
+        return folder?.Level ?? 0;
     }
 
     public async ValueTask DisposeAsync()
