@@ -762,6 +762,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Folder: {0}. Indexes reordered.
+        /// </summary>
+        public static string FolderIndexReordered {
+            get {
+                return ResourceManager.GetString("FolderIndexReordered", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Folders [{0}]. Moved To Folder: {1}.
         /// </summary>
         public static string FolderMoved {

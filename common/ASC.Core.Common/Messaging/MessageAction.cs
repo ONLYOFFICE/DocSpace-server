@@ -169,6 +169,7 @@ public enum MessageAction
     FolderDeleted = 5027,
     FolderRemovedFromList = 5059,
     FolderIndexChanged = 5107,
+    FolderIndexReordered = 5108,
 
     FolderDownloaded = 5057,
 

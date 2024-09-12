@@ -94,3 +94,30 @@ public class FolderDeletedInterpreter : ActionInterpreter
         return new ValueTask<HistoryData>(new EntryData(target, description[0]));
     }
 }
+
+public class FolderIndexReorderedInterpreter : ActionInterpreter
+{
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
+    {
+        var desc = GetAdditionalDescription(description);
+        var title = description[0];
+
+        var folderType = desc.ParentType.HasValue 
+            ? (FolderType)desc.ParentType
+            : FolderType.DEFAULT;
+        
+        var parentType = folderType is FolderType.VirtualRooms or FolderType.Archive 
+            ? null : 
+            desc.ParentType;
+        
+        var parentId = parentType.HasValue 
+            ? int.Parse(target)
+            : (int?)null;
+        
+        var parentTitle = parentType.HasValue 
+            ? title 
+            : null;
+        
+        return new ValueTask<HistoryData>(new EntryData(target, title, parentId, parentTitle, parentType));
+    }
+}

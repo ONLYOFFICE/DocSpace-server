@@ -3409,6 +3409,8 @@ public class FileStorageService //: IFileStorageService
             }
         }
 
+        await filesMessageService.SendAsync(MessageAction.FolderIndexReordered, room, room.Title);
+
         return room;
     }
     

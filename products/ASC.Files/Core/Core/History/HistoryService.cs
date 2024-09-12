@@ -60,6 +60,7 @@ public class HistoryService(
         MessageAction.FolderMovedToTrash,
         MessageAction.FolderDeleted,
         MessageAction.FolderIndexChanged,
+        MessageAction.FolderIndexReordered,
         MessageAction.RoomCreateUser,
         MessageAction.RoomUpdateAccessForUser,
         MessageAction.RoomRemoveUser,

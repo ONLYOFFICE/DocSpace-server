@@ -86,7 +86,8 @@ public class AuditInterpreter(IServiceProvider serviceProvider)
         { (int)MessageAction.RoomLifeTimeSet, new RoomLifeTimeSetInterpreter() },
         { (int)MessageAction.RoomLifeTimeDisabled, new RoomLifeTimeDisabledInterpreter() },
         { (int)MessageAction.FolderIndexChanged, _indexChangedInterpreter },
-        { (int)MessageAction.FileIndexChanged, _indexChangedInterpreter }
+        { (int)MessageAction.FileIndexChanged, _indexChangedInterpreter },
+        { (int)MessageAction.FolderIndexReordered, new FolderIndexReorderedInterpreter() }
     }.ToFrozenDictionary();
     
     public ValueTask<HistoryEntry> ToHistoryAsync(DbAuditEvent @event)
