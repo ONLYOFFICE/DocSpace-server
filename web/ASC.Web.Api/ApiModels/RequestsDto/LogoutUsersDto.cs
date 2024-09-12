@@ -28,11 +28,18 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 public class LogoutUsersDto
 {
+    /// <summary>List of user ids</summary>
+    /// <type>System.Collections.Generic.List{System.Guid}, System.Collections.Generic</type>
     public List<Guid> UserIds { get; set; }
+
+    /// <summary>change password or not</summary>
+    /// <type>System.Boolean, System</type>
     public bool ChangePassword { get; set; }
 }
 
 public class LogoutUserDto
 {
+    /// <summary>change password or not</summary>
+    /// <type>System.Boolean, System</type>
     public bool ChangePassword { get; set; }
 }

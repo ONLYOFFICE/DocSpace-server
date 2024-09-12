@@ -79,7 +79,7 @@ public class ConnectionsController(
     /// <short>
     /// Get active connections
     /// </short>
-    /// <category>Active connections</category>=
+    /// <category>Active connections</category>
     /// <param type="System.Guid, System" method="url" name="userId">User ID</param>
     /// <returns type="System.Object, System">Active portal connections</returns>
     /// <path>api/2.0/security/activeconnections/{userId}</path>
@@ -232,11 +232,11 @@ public class ConnectionsController(
     /// Logs out from all the active connections of the user with the ID specified in the request.
     /// </summary>
     /// <short>
-    /// Log out for the user by ID
+    /// Log out for the user by Id
     /// </short>
     /// <category>Active connections</category>
     /// <param type="System.Guid, System" method="url" name="userId">User ID</param>
-    /// <param name="dto"></param>
+    /// <param type="ASC.Web.Api.ApiModels.RequestsDto, ASC.Web.Api" name="dto">logout user parameters</param>
     /// <path>api/2.0/security/activeconnections/logoutall/{userId}</path>
     /// <httpMethod>PUT</httpMethod>
     /// <returns></returns>
@@ -255,6 +255,17 @@ public class ConnectionsController(
         await LogOutAllActiveConnections(userId, dto.ChangePassword);
     }
 
+    /// <summary>
+    /// Logs out from all the active connections of the users with the ID specified in the request.
+    /// </summary>
+    /// <short>
+    /// Log out for the users by Id
+    /// </short>
+    /// <category>Active connections</category>
+    /// <param type="ASC.Web.Api.ApiModels.RequestsDto, ASC.Web.Api" name="dto">logout users parameters</param>
+    /// <path>api/2.0/security/activeconnections/logoutall</path>
+    /// <httpMethod>PUT</httpMethod>
+    /// <returns></returns>
     [HttpPut("logoutall")]
     public async Task LogOutAllActiveConnectionsForUsersAsync(LogoutUsersDto dto)
     {
@@ -311,14 +322,15 @@ public class ConnectionsController(
     }
 
     /// <summary>
-    /// Logs out from all the active connections except the current connection.
+    /// Logs out from all the active connections except the connection by Id.
     /// </summary>
     /// <short>
-    /// Log out from all connections
+    /// Log out from all connections 
     /// </short>
     /// <category>Active connections</category>
+    /// <param type="System.Int32, System" method="url" name="loginEventId">Login event ID</param>
     /// <returns type="System.Object, System">Current user name</returns>
-    /// <path>api/2.0/security/activeconnections/logoutallexceptthis</path>
+    /// <path>api/2.0/security/activeconnections/logoutallexceptthis/{loginEventId}</path>
     /// <httpMethod>PUT</httpMethod>
     [HttpPut("logoutallexceptthis/{loginEventId:int}")]
     public async Task<object> LogOutAllExceptThisConnection(int loginEventId)
@@ -341,6 +353,16 @@ public class ConnectionsController(
         }
     }
 
+    /// <summary>
+    /// Get current login event id
+    /// </summary>
+    /// <short>
+    /// Get login event id
+    /// </short>
+    /// <category>Active connections</category>
+    /// <returns type="System.Int32, System">Current login event id</returns>
+    /// <path>api/2.0/security/activeconnections/getthisconnection</path>
+    /// <httpMethod>GET</httpMethod>
     [HttpGet("getthisconnection")]
     public int GetThisConnection()
     {

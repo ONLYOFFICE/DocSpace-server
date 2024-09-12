@@ -331,17 +331,14 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     }
 
     /// <summary>
-    /// Returns the detailed information about a file with the ID specified in the request.
+    /// Get the Id of the room where the file is located.
     /// </summary>
-    /// <short>Get file information</short>
+    /// <short>Get room id</short>
     /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
-    /// <param type="System.Int32, System" name="version">File version</param>
     /// <category>Files</category>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileDto, ASC.Files.Core">File information</returns>
-    /// <path>api/2.0/files/file/{fileId}</path>
+    /// <returns type="System.Int32, System">room id</returns>
+    /// <path>api/2.0/files/file/{fileId}/room</path>
     /// <httpMethod>GET</httpMethod>
-    /// <requiresAuthorization>false</requiresAuthorization>
-    [AllowAnonymous]
     [HttpGet("file/{fileId}/room")]
     public async Task<T> GetRoomId(T fileId)
     {
