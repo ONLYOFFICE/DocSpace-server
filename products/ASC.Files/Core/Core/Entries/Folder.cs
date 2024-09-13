@@ -86,6 +86,7 @@ public class Folder<T> : FileEntry<T>, IFolder
     public bool SettingsIndexing { get; set; }
     public long SettingsQuota { get; set; }
     public RoomDataLifetime SettingsLifetime { get; set; }
+    public bool SettingsDenyDownload { get; set; }
     public long Counter { get; set; }
     public override bool IsNew
     {

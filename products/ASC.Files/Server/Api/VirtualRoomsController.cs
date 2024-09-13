@@ -74,7 +74,7 @@ public class VirtualRoomsInternalController(GlobalFolderHelper globalFolderHelpe
     {
         var lifetime = _mapper.Map<RoomDataLifetimeDto, RoomDataLifetime>(inDto.Lifetime);
 
-        var room = await _fileStorageService.CreateRoomAsync(inDto.Title, inDto.RoomType, inDto.Private, inDto.Indexing, inDto.Share, inDto.Quota, lifetime);
+        var room = await _fileStorageService.CreateRoomAsync(inDto.Title, inDto.RoomType, inDto.Private, inDto.Indexing, inDto.Share, inDto.Quota, lifetime, inDto.DenyDownload);
 
         return await _folderDtoHelper.GetAsync(room);
     }
@@ -126,7 +126,7 @@ public class VirtualRoomsThirdPartyController(GlobalFolderHelper globalFolderHel
     [HttpPost("thirdparty/{id}")]
     public async Task<FolderDto<string>> CreateRoomAsync(string id, CreateThirdPartyRoomRequestDto inDto)
     {
-        var room = await _fileStorageService.CreateThirdPartyRoomAsync(inDto.Title, inDto.RoomType, id, inDto.Private, inDto.Indexing, inDto.CreateAsNewFolder);
+        var room = await _fileStorageService.CreateThirdPartyRoomAsync(inDto.Title, inDto.RoomType, id, inDto.Private, inDto.Indexing, inDto.CreateAsNewFolder, inDto.DenyDownload);
 
         return await _folderDtoHelper.GetAsync(room);
     }
@@ -643,7 +643,7 @@ public abstract class VirtualRoomsController<T>(
     [HttpPut("{id}/settings")]
     public async Task<FolderDto<T>> UpdateSettingsAsync(T id, SettingsRoomRequestDto inDto)
     {
-        var room = await _fileStorageService.SetRoomSettingsAsync(id, inDto.Indexing);
+        var room = await _fileStorageService.SetRoomSettingsAsync(id, inDto.Indexing, inDto.DenyDownload);
 
         return await _folderDtoHelper.GetAsync(room);
     }

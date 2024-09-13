@@ -458,6 +458,7 @@ internal class FolderDao(
                     HasLogo = folder.SettingsHasLogo,
                     Color = folder.SettingsColor,
                     Indexing = folder.SettingsIndexing,
+                    DenyDownload = folder.SettingsDenyDownload,
                     Quota = folder.SettingsQuota,
                     Lifetime = mapper.Map<RoomDataLifetime, DbRoomDataLifetime>(folder.SettingsLifetime)
                 };
@@ -498,6 +499,7 @@ internal class FolderDao(
                     HasLogo = folder.SettingsHasLogo,
                     Color = folder.SettingsColor,
                     Indexing = folder.SettingsIndexing,
+                    DenyDownload = folder.SettingsDenyDownload,
                     Quota = folder.SettingsQuota,
                     Lifetime = mapper.Map<RoomDataLifetime, DbRoomDataLifetime>(folder.SettingsLifetime)
                 };
@@ -903,6 +905,7 @@ internal class FolderDao(
                 HasLogo = folder.SettingsHasLogo,
                 Color = folder.SettingsColor,
                 Indexing = folder.SettingsIndexing,
+                DenyDownload = folder.SettingsDenyDownload,
                 Quota = quota >= TenantEntityQuotaSettings.NoQuota ? quota : TenantEntityQuotaSettings.DefaultQuotaValue,
                 Lifetime = mapper.Map<RoomDataLifetime, DbRoomDataLifetime>(folder.SettingsLifetime)
             };
