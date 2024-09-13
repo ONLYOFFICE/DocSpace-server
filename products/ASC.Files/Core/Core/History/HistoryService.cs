@@ -81,7 +81,9 @@ public class HistoryService(
         MessageAction.RoomIndexingEnabled,
         MessageAction.RoomIndexingDisabled,
         MessageAction.RoomLifeTimeSet,
-        MessageAction.RoomLifeTimeDisabled
+        MessageAction.RoomLifeTimeDisabled,
+        MessageAction.RoomArchived,
+        MessageAction.RoomUnarchived
     ];
     
     public async IAsyncEnumerable<HistoryEntry> GetHistoryAsync(int entryId, FileEntryType entryType, int offset, int count)
