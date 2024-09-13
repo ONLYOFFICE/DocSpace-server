@@ -314,7 +314,7 @@ public class NotifyClient(WorkContext notifyContext,
 
     public async Task SendRoomRemovedAsync<T>(FileEntry<T> folder, List<AceWrapper> aces, Guid userId)
     {
-        if (folder == null || folder.FileEntryType != FileEntryType.Folder || aces.Count == 0)
+        if (folder is not { FileEntryType: FileEntryType.Folder } || aces.Count == 0)
         {
             return;
         }

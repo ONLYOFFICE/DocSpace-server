@@ -231,7 +231,7 @@ public class NextcloudWorkspaceMigrator : Migrator
 
         foreach (var g in groupList)
         {
-            var group = new MigrationGroup { Info = new(), UserKeys = new HashSet<string>() };
+            var group = new MigrationGroup { Info = new(), UserKeys = [] };
             group.Info.Name = g.Split(',').First().Trim('\'');
             MigrationInfo.Groups.Add(group.Info.Name, group);
         }
@@ -398,7 +398,7 @@ public class NextcloudWorkspaceMigrator : Migrator
                 {
                     FileId = int.Parse(values[0]),
                     Path = values[2],
-                    Share = new List<NCShare>()
+                    Share = []
                 });
             }
         }
@@ -512,21 +512,9 @@ public class NextcloudWorkspaceMigrator : Migrator
     {
         if (entryType)
         {
-            if (role == 1 || role == 17)
-            {
-                return ASCShare.Read;
-            }
-
-            return ASCShare.Editing;//permission = 19 => denySharing = true, permission = 3 => denySharing = false; ASCShare.ReadWrite
+            return role is 1 or 17 ? ASCShare.Read : ASCShare.Editing; //permission = 19 => denySharing = true, permission = 3 => denySharing = false; ASCShare.ReadWrite
         }
-        else
-        {
-            if (Array.Exists([1, 17, 9, 25, 5, 21, 13, 29, 3, 19, 11, 27], el => el == role))
-            {
-                return ASCShare.Read;
-            }
 
-            return ASCShare.Editing;//permission = 19||23 => denySharing = true, permission = 7||15 => denySharing = false; ASCShare.ReadWrite
-        }
+        return Array.Exists([1, 17, 9, 25, 5, 21, 13, 29, 3, 19, 11, 27], el => el == role) ? ASCShare.Read : ASCShare.Editing; //permission = 19||23 => denySharing = true, permission = 7||15 => denySharing = false; ASCShare.ReadWrite
     }
 }

@@ -762,10 +762,12 @@ internal class FolderDao(
         copy.RootCreateBy = toFolder.RootCreateBy;
         copy.RootFolderType = toFolder.RootFolderType;
         copy.Title = folder.Title;
-        copy.FolderType = (folder.FolderType == FolderType.ReadyFormFolder || 
-            folder.FolderType == FolderType.InProcessFormFolder ||
-            folder.FolderType == FolderType.FormFillingFolderDone || 
-            folder.FolderType == FolderType.FormFillingFolderInProgress) ? FolderType.DEFAULT : folder.FolderType;
+        copy.FolderType = folder.FolderType is 
+            FolderType.ReadyFormFolder or 
+            FolderType.InProcessFormFolder or 
+            FolderType.FormFillingFolderDone or 
+            FolderType.FormFillingFolderInProgress ? 
+            FolderType.DEFAULT : folder.FolderType;
 
         copy = await GetFolderAsync(await SaveFolderAsync(copy));
         var tagDao = daoFactory.GetTagDao<int>();

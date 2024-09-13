@@ -157,7 +157,7 @@ public class CustomNamingPeople(SettingsManager settingsManager)
     private static readonly object _locked = new();
     private static bool _loaded;
 
-    private static readonly List<PeopleNamesItem> _items = new();
+    private static readonly List<PeopleNamesItem> _items = [];
 
     public async Task<PeopleNamesItem> GetCurrent()
     {

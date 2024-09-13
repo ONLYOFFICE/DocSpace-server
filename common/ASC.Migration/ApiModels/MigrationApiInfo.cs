@@ -36,19 +36,19 @@ public class MigrationApiInfo
     public string Operation { get; set; }
 
     [ProtoMember(3)]
-    public List<string> FailedArchives { get; set; } = new();
+    public List<string> FailedArchives { get; set; } = [];
 
     [ProtoMember(4)]
-    public List<MigratingApiUser> Users { get; set; } = new();
+    public List<MigratingApiUser> Users { get; set; } = [];
 
     [ProtoMember(5)]
-    public List<MigratingApiUser> WithoutEmailUsers { get; set; } = new();
+    public List<MigratingApiUser> WithoutEmailUsers { get; set; } = [];
 
     [ProtoMember(6)]
-    public List<MigratingApiUser> ExistUsers { get; set; } = new();
+    public List<MigratingApiUser> ExistUsers { get; set; } = [];
     
     [ProtoMember(7)]
-    public List<MigratingApiGroup> Groups { get; set; } = new();
+    public List<MigratingApiGroup> Groups { get; set; } = [];
 
     [ProtoMember(8)]
     public bool ImportPersonalFiles { get; set; } 

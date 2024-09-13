@@ -47,7 +47,7 @@ public class ScopesAuthorizationHandler : AuthorizationHandler<ScopesRequirement
 
         var requirementScopes = requirement.Scopes.Split(",", StringSplitOptions.RemoveEmptyEntries);
 
-        if (requirementScopes.Any() != true)
+        if (requirementScopes.Length == 0)
         {
             return Task.CompletedTask;
         }

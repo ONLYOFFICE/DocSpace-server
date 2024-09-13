@@ -60,9 +60,9 @@ public record NotifyItemIntegrationEvent : IntegrationEvent
     public NotifyItemIntegrationEvent(Guid createBy, int tenantId) : base(createBy, tenantId)
     {
         ObjectId = "";
-        Recipients = new List<Recipient>();
-        SenderNames = new List<string>();
-        Tags = new List<Tag>();
+        Recipients = [];
+        SenderNames = [];
+        Tags = [];
         BaseUrl = "";
     }
 }

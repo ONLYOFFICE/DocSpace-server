@@ -390,7 +390,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
             if (!isRoom &&
                 toFolderRoom == null &&
                 (int.TryParse(parentRoomId, out var curRId) && curRId != -1) &&
-                (toFolder.FolderType == FolderType.USER || toFolder.FolderType == FolderType.DEFAULT))
+                toFolder.FolderType is FolderType.USER or FolderType.DEFAULT)
             {
                 var tenantId = await tenantManager.GetCurrentTenantIdAsync();
                 var quotaUserSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();

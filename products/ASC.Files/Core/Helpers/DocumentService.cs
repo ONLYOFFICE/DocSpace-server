@@ -220,8 +220,7 @@ public static class DocumentService
         string signatureSecret,
         IHttpClientFactory clientFactory)
     {
-        var defaultTimeout = Timeout;
-        var commandTimeout = defaultTimeout;
+        var commandTimeout = Timeout;
 
         if (method == CommandMethod.Version)
         {

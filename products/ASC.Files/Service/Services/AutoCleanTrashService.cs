@@ -50,7 +50,7 @@ public class AutoCleanTrashService(
             activeTenantsUsers = await Queries.DefaultTenantUserSettingsAsync(userDbContext).ToListAsync(stoppingToken);
         }
 
-        if (!activeTenantsUsers.Any())
+        if (activeTenantsUsers.Count == 0)
         {
             return;
         }

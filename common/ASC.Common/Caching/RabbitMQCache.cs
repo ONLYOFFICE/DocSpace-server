@@ -177,8 +177,7 @@ public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : new()
 
     public void Subscribe(Action<T> onchange, CacheNotifyAction action)
     {
-        _actions.GetOrAdd(GetKey(action), new List<Action<T>>())
-            .Add(onchange);
+        _actions.GetOrAdd(GetKey(action), []).Add(onchange);
     }
 
     public void Unsubscribe(CacheNotifyAction action)

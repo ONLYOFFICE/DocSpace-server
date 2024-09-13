@@ -289,7 +289,7 @@ public abstract class BaseIndexer<T>(Client client,
                     }
 
                     portionStart = i;
-                    portion = new List<T>();
+                    portion = [];
                     currentLength = 0L;
                     GC.Collect();
                 }

@@ -806,8 +806,7 @@ public class FileSecurity(IDaoFactory daoFactory,
         }
 
         if (file != null &&
-            (action == FilesSecurityActions.EditForm ||
-            action == FilesSecurityActions.FillForms) &&
+            action is FilesSecurityActions.EditForm or FilesSecurityActions.FillForms &&
             !file.IsForm)
         {
             return false;
@@ -874,10 +873,12 @@ public class FileSecurity(IDaoFactory daoFactory,
                 return false;
             }
 
-            if(userId.Equals(ASC.Core.Configuration.Constants.Guest.ID) && (folder.FolderType == FolderType.ReadyFormFolder ||
-                    folder.FolderType == FolderType.InProcessFormFolder ||
-                    folder.FolderType == FolderType.FormFillingFolderDone ||
-                    folder.FolderType == FolderType.FormFillingFolderInProgress))
+            if(userId.Equals(ASC.Core.Configuration.Constants.Guest.ID) && 
+               folder.FolderType is 
+                   FolderType.ReadyFormFolder or 
+                   FolderType.InProcessFormFolder or 
+                   FolderType.FormFillingFolderDone or 
+                   FolderType.FormFillingFolderInProgress)
             {
                 return false;
             }
@@ -885,8 +886,7 @@ public class FileSecurity(IDaoFactory daoFactory,
             if (action != FilesSecurityActions.Read)
             {
                 if (action is FilesSecurityActions.Delete &&
-                    (folder.FolderType == FolderType.ReadyFormFolder ||
-                    folder.FolderType == FolderType.InProcessFormFolder))
+                    folder.FolderType is FolderType.ReadyFormFolder or FolderType.InProcessFormFolder)
                 {
                     return false;
                 }
@@ -897,16 +897,16 @@ public class FileSecurity(IDaoFactory daoFactory,
                               FilesSecurityActions.MoveTo or
                               FilesSecurityActions.Rename or
                               FilesSecurityActions.Create
-                    && (folder.FolderType == FolderType.ReadyFormFolder || 
-                    folder.FolderType == FolderType.InProcessFormFolder || 
-                    folder.FolderType == FolderType.FormFillingFolderDone ||
-                    folder.FolderType == FolderType.FormFillingFolderInProgress))
+                    && folder.FolderType is 
+                        FolderType.ReadyFormFolder or 
+                        FolderType.InProcessFormFolder or 
+                        FolderType.FormFillingFolderDone or 
+                        FolderType.FormFillingFolderInProgress)
                 {
                     return false;
                 }
                 
-                if (action is FilesSecurityActions.Pin or FilesSecurityActions.EditAccess or FilesSecurityActions.Mute &&
-                    !isRoom)
+                if (action is FilesSecurityActions.Pin or FilesSecurityActions.EditAccess or FilesSecurityActions.Mute && !isRoom)
                 {
                     return false;
                 }
@@ -1023,13 +1023,15 @@ public class FileSecurity(IDaoFactory daoFactory,
                         }
                     }
                 }
-                if((action == FilesSecurityActions.Rename ||
-                    action == FilesSecurityActions.Lock ||
-                    action == FilesSecurityActions.Move ||
-                    action == FilesSecurityActions.Duplicate ||
-                    action == FilesSecurityActions.EditHistory ||
-                    action == FilesSecurityActions.SubmitToFormGallery ||
-                    action == FilesSecurityActions.Embed) && file != null )
+                if(action is 
+                       FilesSecurityActions.Rename or 
+                       FilesSecurityActions.Lock or 
+                       FilesSecurityActions.Move or 
+                       FilesSecurityActions.Duplicate or 
+                       FilesSecurityActions.EditHistory or 
+                       FilesSecurityActions.SubmitToFormGallery or 
+                       FilesSecurityActions.Embed && 
+                   file != null )
                 {
                     var parentFolders = await GetFileParentFolders(file.ParentId);
                     if (parentFolders != null)

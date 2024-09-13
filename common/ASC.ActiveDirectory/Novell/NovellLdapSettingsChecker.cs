@@ -85,7 +85,7 @@ public class NovellLdapSettingsChecker(ILogger<LdapSettingsChecker> logger) : Ld
         }
     }
 
-    public async override Task<LdapSettingsStatus> CheckSettings()
+    public override async Task<LdapSettingsStatus> CheckSettings()
     {
         if (!Settings.EnableLdapAuthentication)
         {

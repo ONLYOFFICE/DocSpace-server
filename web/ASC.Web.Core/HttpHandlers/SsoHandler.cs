@@ -379,7 +379,7 @@ public class SsoHandlerService
             userInfo.Location = location;
             userInfo.Title = title;
 
-            var portalUserContacts = userInfo.ContactsList ?? new List<string>();
+            var portalUserContacts = userInfo.ContactsList ?? [];
 
             var newContacts = new List<string>();
             var phones = new List<string>();

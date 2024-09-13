@@ -418,14 +418,14 @@ public class WorkspaceMigrator : Migrator
             }
         }
 
-        if (storage.Type == FolderType.USER)
+        switch (storage.Type)
         {
-            DbExtractFilesSecurity(storage, createBy);
-        }
-
-        if (storage.Type == FolderType.BUNCH)
-        {
-            ExtractProjectSecurity(storage);
+            case FolderType.USER:
+                DbExtractFilesSecurity(storage, createBy);
+                break;
+            case FolderType.BUNCH:
+                ExtractProjectSecurity(storage);
+                break;
         }
     }
 
@@ -527,7 +527,7 @@ public class WorkspaceMigrator : Migrator
                 {
                     Name = row["name"].ToString()
                 },
-                UserKeys = new HashSet<string>()
+                UserKeys = []
             };
             MigrationInfo.Groups.Add(row["id"].ToString(), group);
         }

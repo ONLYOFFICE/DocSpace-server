@@ -945,7 +945,7 @@ internal class FileDao(
             }
         }
         else if (fromRoomId != -1 &&
-                (toFolder.FolderType == FolderType.USER || toFolder.FolderType == FolderType.DEFAULT) &&
+                toFolder.FolderType is FolderType.USER or FolderType.DEFAULT &&
                 toRoomId == -1 ||
                 (fromFolder.Id == trashId && fromRoomTag != null))
         {
@@ -1278,13 +1278,13 @@ internal class FileDao(
         {
             var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
-            if (toFolder.FolderType == FolderType.USER || toFolder.FolderType == FolderType.DEFAULT)
+            if (toFolder.FolderType is FolderType.USER or FolderType.DEFAULT)
             {
                 file.RootCreateBy = toFolder.RootCreateBy;
                 file.RootFolderType = toFolder.FolderType;
                 await storageFactory.QuotaUsedAddAsync(tenantId, FileConstant.ModuleId, "", WebItemManager.DocumentsProductID.ToString(), size, file.GetFileQuotaOwner());
             }
-            if (fromFolder.FolderType == FolderType.USER || fromFolder.FolderType == FolderType.DEFAULT)
+            if (fromFolder.FolderType is FolderType.USER or FolderType.DEFAULT)
             {
                 await storageFactory.QuotaUsedDeleteAsync(tenantId, FileConstant.ModuleId, "", WebItemManager.DocumentsProductID.ToString(), size, file.GetFileQuotaOwner());
             }

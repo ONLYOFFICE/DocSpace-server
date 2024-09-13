@@ -29,7 +29,7 @@ namespace ASC.Notify.Recipients;
 public class DirectRecipient
     : IDirectRecipient
 {
-    private readonly List<string> _addresses = new();
+    private readonly List<string> _addresses = [];
 
     public DirectRecipient(string id, string name)
     {

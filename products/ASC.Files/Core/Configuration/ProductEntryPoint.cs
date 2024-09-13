@@ -353,32 +353,28 @@ public class ProductEntryPoint : Product
 
     private static string GetDocSpaceRoleString(EmployeeType employeeType)
     {
-        switch (employeeType)
+        return employeeType switch
         {
-            case EmployeeType.User:
-            case EmployeeType.RoomAdmin:
-            case EmployeeType.DocSpaceAdmin:
-            case EmployeeType.Collaborator:
-                return FilesCommonResource.ResourceManager.GetString("RoleEnum_" + employeeType.ToStringFast());
-            default:
-                return string.Empty;
-        }
+            EmployeeType.User or 
+            EmployeeType.RoomAdmin or 
+            EmployeeType.DocSpaceAdmin or 
+            EmployeeType.Collaborator => FilesCommonResource.ResourceManager.GetString("RoleEnum_" + employeeType.ToStringFast()),
+            _ => string.Empty
+        };
     }
 
     private static string GetRoomRoleString(FileShare userRoomRole)
     {
-        switch (userRoomRole)
+        return userRoomRole switch
         {
-            case FileShare.Read:
-            case FileShare.Review:
-            case FileShare.Comment:
-            case FileShare.FillForms:
-            case FileShare.RoomAdmin:
-            case FileShare.Editing:
-            case FileShare.PowerUser:
-                return FilesCommonResource.ResourceManager.GetString("RoleEnum_" + userRoomRole.ToStringFast());
-            default:
-                return string.Empty;
-        }
+            FileShare.Read or 
+            FileShare.Review or 
+            FileShare.Comment or 
+            FileShare.FillForms or 
+            FileShare.RoomAdmin or 
+            FileShare.Editing or 
+            FileShare.PowerUser => FilesCommonResource.ResourceManager.GetString("RoleEnum_" + userRoomRole.ToStringFast()),
+            _ => string.Empty
+        };
     }
 }

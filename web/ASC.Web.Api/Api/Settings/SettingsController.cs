@@ -903,7 +903,7 @@ public partial class SettingsController(MessageService messageService,
 
         if (webitem == null)
         {
-            return new List<UsageSpaceStatItemDto>();
+            return [];
         }
 
         var statData = await webitem.Context.SpaceUsageStatManager.GetStatDataAsync();

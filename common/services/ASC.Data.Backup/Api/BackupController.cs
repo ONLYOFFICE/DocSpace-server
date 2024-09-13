@@ -84,7 +84,7 @@ public class BackupController(
             Hour = inDto.CronParams.Hour == null ? 0 : Int32.Parse(inDto.CronParams.Hour),
             Day = inDto.CronParams.Day == null ? 0 : Int32.Parse(inDto.CronParams.Day)
         };
-        if(backupStored > 30 || backupStored < 1)
+        if(backupStored is > 30 or < 1)
         {
             throw new ArgumentException("backupStored must be 1 - 30");
         }

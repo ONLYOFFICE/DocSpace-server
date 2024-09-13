@@ -501,7 +501,7 @@ internal class ItemNameValueCollection<T>
     {
         if (!_dic.ContainsKey(name))
         {
-            _dic.Add(name, new List<T>());
+            _dic.Add(name, []);
         }
 
         _dic[name].Add(value);
@@ -522,7 +522,7 @@ internal class ItemNameValueCollection<T>
     {
         if (!_dic.ContainsKey(name))
         {
-            _dic.Add(name, new List<T>());
+            _dic.Add(name, []);
         }
 
         _dic[name].AddRange(values);

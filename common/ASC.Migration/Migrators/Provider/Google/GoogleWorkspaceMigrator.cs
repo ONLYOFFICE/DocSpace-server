@@ -198,7 +198,7 @@ public class GoogleWorkspaceMigrator : Migrator
     }
     private void ParseGroup(string tmpFolder)
     {
-        var group = new MigrationGroup { Info = new(), UserKeys = new HashSet<string>() };
+        var group = new MigrationGroup { Info = new GroupInfo(), UserKeys = [] };
         var groupsFolder = Path.Combine(tmpFolder, "Groups");
         var groupInfo = Path.Combine(groupsFolder, "info.csv");
         using (var sr = new StreamReader(groupInfo))
@@ -356,14 +356,7 @@ public class GoogleWorkspaceMigrator : Migrator
                     return ASCShare.Read;
                 }
 
-                if (fileInfo.AdditionalRoles.Contains("commenter"))
-                {
-                    return ASCShare.Comment;
-                }
-                else
-                {
-                    return ASCShare.Read;
-                }
+                return fileInfo.AdditionalRoles.Contains("commenter") ? ASCShare.Comment : ASCShare.Read;
 
             default:
                 return null;
@@ -510,20 +503,12 @@ public class GoogleWorkspaceMigrator : Migrator
 
         if (googleProfile.Gender != null)
         {
-            switch (googleProfile.Gender.Type)
+            user.Info.Sex = googleProfile.Gender.Type switch
             {
-                case "male":
-                    user.Info.Sex = true;
-                    break;
-
-                case "female":
-                    user.Info.Sex = false;
-                    break;
-
-                default:
-                    user.Info.Sex = null;
-                    break;
-            }
+                "male" => true,
+                "female" => false,
+                _ => null
+            };
         }
 
         user.Info.FirstName = googleProfile.Name.GivenName;

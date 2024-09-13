@@ -621,7 +621,7 @@ public class FileMarker(
 
         var socketManager = serviceProvider.GetRequiredService<SocketManager>();
 
-        var toRemove = removeTags.Select(r => new Tag(r.Name, r.Type, r.Owner, 0) { EntryId = r.EntryId, EntryType = r.EntryType });
+        var toRemove = removeTags.Select(r => new Tag(r.Name, r.Type, r.Owner) { EntryId = r.EntryId, EntryType = r.EntryType });
 
         await SendChangeNoticeAsync(updateTags.Concat(toRemove).ToList(), socketManager);
     }

@@ -33,7 +33,7 @@ public class MigrationInfo
     public string Name { get; set; }
     public OperationType Operation { get; set; }
     public List<string> Files { get; set; }
-    public List<string> FailedArchives = new();
+    public List<string> FailedArchives = [];
     public readonly Dictionary<string, MigrationGroup> Groups = new();
 
     public MigrationStorage CommonStorage { get; set; }
@@ -41,7 +41,7 @@ public class MigrationInfo
 
     public int SuccessedUsers { get; set; }
     public int FailedUsers { get; set; }
-    public List<string> Errors { get; set; } = new();
+    public List<string> Errors { get; set; } = [];
 
     public virtual MigrationApiInfo ToApiInfo()
     {

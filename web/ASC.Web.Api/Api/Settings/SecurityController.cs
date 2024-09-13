@@ -227,13 +227,13 @@ public class SecurityController(
         {
             foreach (var info in securityInfo)
             {
-                if (info.Groups.Any())
+                if (info.Groups.Count != 0)
                 {
                     await messageService.SendAsync(MessageAction.GroupsOpenedProductAccess, productName,
                         info.Groups.Select(x => x.Name));
                 }
 
-                if (info.Users.Any())
+                if (info.Users.Count != 0)
                 {
                     await messageService.SendAsync(MessageAction.UsersOpenedProductAccess, productName,
                         info.Users.Select(x => HttpUtility.HtmlDecode(x.DisplayName)));

@@ -806,8 +806,8 @@ public class EntryManager(IDaoFactory daoFactory,
         var asyncFolders = folderDao.GetFoldersAsync(folderIds, filter, subjectGroup, subjectId, searchText, false, false);
         var asyncFiles = fileDao.GetFilesFilteredAsync(fileIds, filter, subjectGroup, subjectId, searchText, extension, searchInContent, true);
 
-        List<FileEntry<T>> files = new();
-        List<FileEntry<T>> folders = new();
+        List<FileEntry<T>> files = [];
+        List<FileEntry<T>> folders = [];
 
         if (filter is FilterType.None or FilterType.FoldersOnly)
         {
@@ -1197,7 +1197,7 @@ public class EntryManager(IDaoFactory daoFactory,
                         var initFormFillingProperties = await InitFormFillingProperties(folderIfNew.Id, sourceTitle, sourceFile.Id, inProcessFormFolderId, readyFormFolderId, folderIfNew.CreateBy, properties, fileDao, folderDao);
                         linkedFile.ParentId = initFormFillingProperties.FormFilling.ToFolderId;
                     }
-                    else if (resultFolder == null || resultFolder.FolderType != FolderType.FormFillingFolderInProgress)
+                    else if (resultFolder is not { FolderType: FolderType.FormFillingFolderInProgress })
                     {
                         properties.FormFilling.ToFolderId = await CreateFormFillingFolder(sourceTitle, inProcessFormFolderId, FolderType.FormFillingFolderInProgress, folderIfNew.CreateBy, folderDao);
                         linkedFile.ParentId = properties.FormFilling.ToFolderId;
@@ -1491,7 +1491,7 @@ public class EntryManager(IDaoFactory daoFactory,
                         var resultFolder = await folderDao.GetFolderAsync(properties.FormFilling.ResultsFolderId);
                         var originalForm = await fileDao.GetFileAsync(properties.FormFilling.OriginalFormId);
 
-                        if (resultFolder == null || resultFolder.FolderType != FolderType.FormFillingFolderDone)
+                        if (resultFolder is not { FolderType: FolderType.FormFillingFolderDone })
                         {
                             var title = Path.GetFileNameWithoutExtension(originalForm.Title);
                             var readyFormFolder = await folderDao.GetFoldersAsync(roomId, FolderType.ReadyFormFolder).FirstOrDefaultAsync();

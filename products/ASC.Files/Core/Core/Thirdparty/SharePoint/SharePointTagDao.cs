@@ -48,7 +48,7 @@ internal class SharePointTagDao(
         var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var entryIds = await Queries.HashIdsAsync(filesDbContext, PathPrefix).ToListAsync();
 
-        if (!entryIds.Any())
+        if (entryIds.Count == 0)
         {
             yield break;
         }
