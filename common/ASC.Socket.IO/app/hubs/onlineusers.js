@@ -9,6 +9,7 @@ module.exports = async (io) => {
     const portalUsers =[];
     const roomUsers =[];
     const editFiles =[];
+    var allUsers = [];
     let targetFile = [];
     const redisOptions = config.get("Redis");
     var redisClient = redis.createClient(redisOptions);
@@ -33,11 +34,12 @@ module.exports = async (io) => {
       let file;
       let sessionId = socket.handshake.session?.user?.connection;
       
+      await InitUsersAsync(tenantId, portalUsers);
       id = await EnterAsync(portalUsers, tenantId, userId, `p-${tenantId}`, "portal");
-
       if(socket.handshake.session.file)
       {
         roomId = `${tenantId}-${socket.handshake.session.file.roomId}`;
+        await InitUsersAsync(roomId, roomUsers);
         file = socket.handshake.session.file.title;
         idInRoom = await EnterAsync(roomUsers, roomId, `${roomId}-${userId}`, roomId, "room", true);
         if(!editFiles[roomId])
@@ -102,10 +104,12 @@ module.exports = async (io) => {
         socket.leave(`p-${tenantId}`);
       });
      /******************************* */
-      socket.on("enterInRoom", async(roomPart)=>{
+      socket.on("enterInRoom", async(roomPart)=>
+      {
         roomId = getRoom(roomPart);
+        await InitUsersAsync(roomId, roomUsers);
         idInRoom = await EnterAsync(roomUsers, roomId, `${roomId}-${userId}`, roomId, "room", true);
-    });
+      });
 
     socket.on("leaveRoom", async()=>{
       await LeaveAsync(roomUsers, roomId, `${roomId}-${userId}`, roomId, "room", idInRoom, true);
@@ -115,6 +119,7 @@ module.exports = async (io) => {
     socket.on("getSessionsInRoom", async (roomPart) => {
       var users = [];
       roomId = getRoom(roomPart);
+      await InitUsersAsync(roomId, roomUsers);
       if(roomUsers[roomId])
       {
         Object.values(roomUsers[roomId]).forEach(function(entry) {
@@ -139,6 +144,46 @@ module.exports = async (io) => {
       var getRoom = (obj) => {
         return `${tenantId}-${obj.roomPart}`;
       };
+
+      async function InitUsersAsync(key, list)
+      {
+        if(!allUsers[key])
+        {
+          allUsers[key] = JSON.parse(await redisClient.get(`allusers-${key}`));
+          if(!allUsers[key])
+          {
+            allUsers[key]= [];
+          }
+          else
+          {
+            for(var i = 0; i < allUsers[key].length; i++)
+            {
+              var id = allUsers[key][i];
+              var u = {};
+              u.id = id;
+  
+              var offSess = await redisClient.get(id);
+              if(offSess && offSess != '{}')
+              {
+                offSess = new Map(JSON.parse(offSess).map(i => [i[0], i[1]]));
+              }
+              else
+              {
+                offSess = new Map();
+              }
+              u.offlineSessions = offSess;
+              u.status = "offline";
+              u.sessions = new Map();
+              addUser(list, u, id, key);
+            }
+          }
+        }
+        if(!allUsers[key].includes(userId))
+        {
+          allUsers[key].push(userId);
+          await redisClient.set(`allusers-${key}`, JSON.stringify(allUsers[key]));
+        }
+      }
 
       async function LeaveAsync(usersList, key, redisKey, socketKey, socketDest, sessionId, isRoom = false) 
       {
