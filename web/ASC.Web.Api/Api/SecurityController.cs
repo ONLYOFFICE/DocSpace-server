@@ -44,8 +44,8 @@ public class SecurityController(PermissionContext permissionContext,
         AuditActionMapper auditActionMapper,
         CoreBaseSettings coreBaseSettings,
         ApiContext apiContext,
-        CspSettingsHelper cspSettingsHelper,
-        IMapper mapper)
+        CspSettingsHelper cspSettingsHelper, 
+        ApiDateTimeHelper apiDateTimeHelper)
     : ControllerBase
 {
     /// <summary>
@@ -66,8 +66,7 @@ public class SecurityController(PermissionContext permissionContext,
 
         DemandBaseAuditPermission();
         
-        var events = await loginEventsRepository.GetByFilterAsync(startIndex: 0, limit: 20);
-        return mapper.Map<IEnumerable<LoginEventDto>>(events);
+        return (await loginEventsRepository.GetByFilterAsync(startIndex: 0, limit: 20)).Select(x => new LoginEventDto(x, apiDateTimeHelper));
     }
 
     /// <summary>
@@ -88,8 +87,7 @@ public class SecurityController(PermissionContext permissionContext,
 
         DemandBaseAuditPermission();
         
-        var events = await auditEventsRepository.GetByFilterAsync(startIndex: 0, limit: 20);
-        return mapper.Map<IEnumerable<AuditEventDto>>(events);
+        return (await auditEventsRepository.GetByFilterAsync(startIndex: 0, limit: 20)).Select(x => new AuditEventDto(x, auditActionMapper, apiDateTimeHelper));
     }
 
     /// <summary>
@@ -128,8 +126,7 @@ public class SecurityController(PermissionContext permissionContext,
 
         await DemandAuditPermissionAsync();
         
-        var events = await loginEventsRepository.GetByFilterAsync(userId, action, from, to, startIndex, limit);
-        return mapper.Map<IEnumerable<LoginEventDto>>(events);
+        return (await loginEventsRepository.GetByFilterAsync(userId, action, from, to, startIndex, limit)).Select(x => new LoginEventDto(x, apiDateTimeHelper));
     }
 
     /// <summary>
@@ -178,8 +175,8 @@ public class SecurityController(PermissionContext permissionContext,
 
         await DemandAuditPermissionAsync();
         
-        var events = await auditEventsRepository.GetByFilterAsync(userId, productType, moduleType, actionType, action, entryType, target, from, to, startIndex, limit);
-        return mapper.Map<IEnumerable<AuditEventDto>>(events);
+        return (await auditEventsRepository.GetByFilterAsync(userId, productType, moduleType, actionType, action, entryType, target, from, to, startIndex, limit))
+            .Select(x => new AuditEventDto(x, auditActionMapper, apiDateTimeHelper));
     }
 
     /// <summary>
