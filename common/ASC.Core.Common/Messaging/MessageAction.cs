@@ -247,6 +247,9 @@ public enum MessageAction
     
     RoomLifeTimeSet = 5104,
     RoomLifeTimeDisabled = 5105,
+    
+    RoomDenyDownloadEnabled = 5109,
+    RoomDenyDownloadDisabled = 5110,
 
     #endregion
 

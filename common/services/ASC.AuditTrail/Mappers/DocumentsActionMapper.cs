@@ -170,7 +170,9 @@ internal class RoomsActionMapper : IModuleActionMapper
                             MessageAction.RoomIndexingEnabled,
                             MessageAction.RoomIndexingDisabled,
                             MessageAction.RoomLifeTimeSet,
-                            MessageAction.RoomLifeTimeDisabled
+                            MessageAction.RoomLifeTimeDisabled,
+                            MessageAction.RoomDenyDownloadEnabled,
+                            MessageAction.RoomDenyDownloadDisabled
                         ]
                     },
                     {

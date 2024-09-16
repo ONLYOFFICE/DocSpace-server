@@ -882,4 +882,10 @@
   <data name="FolderIndexReordered" xml:space="preserve">
     <value>Folder: {0}. Indexes reordered</value>
   </data>
+  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
+    <value>Room: {0}. Deny download enabled</value>
+  </data>
+  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
+    <value>Room: {0}. Deny download disabled</value>
+  </data>
 </root>

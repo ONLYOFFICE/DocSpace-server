@@ -238,6 +238,14 @@ public class RoomArchivingInterpreter : ActionInterpreter
     }
 }
 
+public class RoomDenyDownloadInterpreter : ActionInterpreter
+{
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
+    {
+        return ValueTask.FromResult<HistoryData>(new EntryData(target, description[0]));
+    }
+}
+
 public record UserHistoryData : HistoryData
 {
     public EmployeeDto User { get; set; }

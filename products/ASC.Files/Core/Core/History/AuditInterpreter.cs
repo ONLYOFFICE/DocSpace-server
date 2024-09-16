@@ -42,6 +42,7 @@ public class AuditInterpreter(IServiceProvider serviceProvider)
     private static readonly IndexChangedInterpreter _indexChangedInterpreter = new();
     private static readonly RoomArchivingInterpreter _roomArchivingInterpreter = new();
     private static readonly FileLockInterpreter _fileLockInterpreter = new();
+    private static readonly RoomDenyDownloadInterpreter _roomDenyDownloadInterpreter = new();
     
     private static readonly FrozenDictionary<int, ActionInterpreter> _interpreters = new Dictionary<int, ActionInterpreter>
     {
@@ -93,7 +94,9 @@ public class AuditInterpreter(IServiceProvider serviceProvider)
         { (int)MessageAction.RoomArchived, _roomArchivingInterpreter },
         { (int)MessageAction.RoomUnarchived, _roomArchivingInterpreter },
         { (int)MessageAction.FileLocked, _fileLockInterpreter },
-        { (int)MessageAction.FileUnlocked, _fileLockInterpreter }
+        { (int)MessageAction.FileUnlocked, _fileLockInterpreter },
+        { (int)MessageAction.RoomDenyDownloadEnabled, _roomDenyDownloadInterpreter },
+        { (int)MessageAction.RoomDenyDownloadDisabled, _roomDenyDownloadInterpreter }
     }.ToFrozenDictionary();
     
     public ValueTask<HistoryEntry> ToHistoryAsync(DbAuditEvent @event)

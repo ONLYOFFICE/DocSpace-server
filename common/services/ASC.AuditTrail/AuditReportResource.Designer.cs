@@ -1599,6 +1599,24 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Room: {0}. Deny download disabled.
+        /// </summary>
+        public static string RoomDenyDownloadDisabled {
+            get {
+                return ResourceManager.GetString("RoomDenyDownloadDisabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Room: {0}. Deny download enabled.
+        /// </summary>
+        public static string RoomDenyDownloadEnabled {
+            get {
+                return ResourceManager.GetString("RoomDenyDownloadEnabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to External link created: {0}. Role: {1}.
         /// </summary>
         public static string RoomExternalLinkCreated {

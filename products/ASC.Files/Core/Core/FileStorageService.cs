@@ -3261,8 +3261,8 @@ public class FileStorageService //: IFileStorageService
                     throw new InvalidOperationException(FilesCommonResource.ErrorrMessage_PinRoom);
                 }
                 
-            await tagDao.SaveTagsAsync(tag);
-        }
+                await tagDao.SaveTagsAsync(tag);
+            }
         }
         else
         {
@@ -3289,26 +3289,30 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
-        if (DocSpaceHelper.IsRoom(room.FolderType))
+        if (!DocSpaceHelper.IsRoom(room.FolderType))
         {
-            if (room.SettingsIndexing != indexing)
-            {
-                if (indexing)
-                {
-                    await ReOrderAsync(room.Id, true);
-                }
-                
-                room.SettingsIndexing = indexing;
-                await folderDao.SaveFolderAsync(room);
+            return room;
+        }
 
-                await filesMessageService.SendAsync(indexing ? MessageAction.RoomIndexingEnabled : MessageAction.RoomIndexingDisabled, room);
-            }
-            
-            if (room.SettingsDenyDownload != denyDownload)
+        if (room.SettingsIndexing != indexing)
+        {
+            if (indexing)
             {
-                room.SettingsDenyDownload = denyDownload;
-                await folderDao.SaveFolderAsync(room);
+                await ReOrderAsync(room.Id, true);
             }
+                
+            room.SettingsIndexing = indexing;
+            await folderDao.SaveFolderAsync(room);
+
+            await filesMessageService.SendAsync(indexing ? MessageAction.RoomIndexingEnabled : MessageAction.RoomIndexingDisabled, room);
+        }
+            
+        if (room.SettingsDenyDownload != denyDownload)
+        {
+            room.SettingsDenyDownload = denyDownload;
+            await folderDao.SaveFolderAsync(room);
+                
+            await filesMessageService.SendAsync(denyDownload ? MessageAction.RoomDenyDownloadEnabled : MessageAction.RoomDenyDownloadDisabled, room, room.Title);
         }
 
         return room;
