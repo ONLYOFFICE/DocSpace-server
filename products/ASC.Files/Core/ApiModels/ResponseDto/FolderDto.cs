@@ -78,6 +78,7 @@ public class FolderDto<T> : FileEntryDto<T>
     /// <type>System.Boolean, System</type>
     public bool Private { get; set; }
     public bool Indexing { get; set; }
+    public bool DenyDownload { get; set; }
 
     /// <summary>Room data lifetime settings</summary>
     /// <type>ASC.Files.Core.ApiModels.RoomDataLifetimeDto, ASC.Files.Core</type>
@@ -253,6 +254,7 @@ public class FolderDtoHelper(
         result.Pinned = folder.Pinned;
         result.Private = folder.SettingsPrivate;
         result.Indexing = folder.SettingsIndexing;
+        result.DenyDownload = folder.SettingsDenyDownload;
 
         return result;
     }

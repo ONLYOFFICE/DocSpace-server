@@ -36,6 +36,7 @@ public class DbRoomSettings
     public bool Indexing { get; set; }
     public long Quota { get; set; }
     public string Watermark { get; set; }
+    public bool DenyDownload { get; set; }
     public DbRoomDataLifetime Lifetime { get; set; }
     public DbTenant Tenant { get; set; }
     public DbFolder Room { get; set; }
@@ -94,6 +95,8 @@ public static class DbRoomSettingsExtension
                 .HasColumnType("json")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
+            
+            entity.Property(e => e.DenyDownload).HasColumnName("deny_download").HasDefaultValueSql("0");
         });
     }
 

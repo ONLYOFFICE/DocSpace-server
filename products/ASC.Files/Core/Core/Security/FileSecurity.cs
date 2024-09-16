@@ -701,9 +701,15 @@ public class FileSecurity(IDaoFactory daoFactory,
         }
     }
 
-    public IAsyncEnumerable<FileEntry<T>> FilterDownloadAsync<T>(IAsyncEnumerable<FileEntry<T>> entries)
-    {
-        return FilterReadAsync(entries);
+    public async IAsyncEnumerable<FileEntry<T>> FilterDownloadAsync<T>(IAsyncEnumerable<FileEntry<T>> entries)
+    {        
+        await foreach (var e in CanAsync(entries.Where(f => f != null), authContext.CurrentAccount.ID, FilesSecurityActions.Download))
+        {
+            if (e.Item2)
+            {
+                yield return e.Item1;
+            }
+        }
     }
 
     public static FileShare GetHighFreeRole(FolderType folderType)
@@ -1468,6 +1474,21 @@ public class FileSecurity(IDaoFactory daoFactory,
             case FilesSecurityActions.Download:
                 if (e.Access != FileShare.Restrict && ace?.Options is not { DenyDownload: true })
                 {
+                    if (e.Access == FileShare.Read)
+                    {
+                        if (file == null)
+                        {
+                            return true;
+                        }
+
+                        var parentFolders = await GetFileParentFolders(file.ParentId);
+                        var room = parentFolders.FirstOrDefault(r => DocSpaceHelper.IsRoom(r.FolderType));
+                        if (room is { SettingsDenyDownload: true })
+                        {
+                            return false;
+                        }
+                    }
+
                     return true;
                 }
                 break;
