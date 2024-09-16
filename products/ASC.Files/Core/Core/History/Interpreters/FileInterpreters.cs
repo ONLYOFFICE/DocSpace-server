@@ -134,3 +134,13 @@ public class FileConvertedInterpreter : ActionInterpreter
         return new ValueTask<HistoryData>(new EntryData(target, description[0], desc.ParentId, desc.ParentTitle, desc.ParentType));
     }
 }
+
+public class FileLockInterpreter : ActionInterpreter
+{
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
+    {
+        var desc = GetAdditionalDescription(description);
+
+        return new ValueTask<HistoryData>(new EntryData(target, description[0], desc.ParentId, desc.ParentTitle, desc.ParentType));
+    }
+}
