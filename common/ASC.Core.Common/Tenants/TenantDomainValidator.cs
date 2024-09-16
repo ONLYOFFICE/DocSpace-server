@@ -31,6 +31,7 @@ public class TenantDomainValidator
 {
     private readonly Regex _validDomain;
     private readonly Regex _validName;
+    private const string DomainContainsInvalidCharacters = "Domain contains invalid characters.";
 
     public string Regex { get; }
     public int MinLength { get; }
@@ -82,7 +83,16 @@ public class TenantDomainValidator
     {
         if (!_validDomain.IsMatch(domain))
         {
-            throw new TenantIncorrectCharsException("Domain contains invalid characters.");
+            throw new TenantIncorrectCharsException(DomainContainsInvalidCharacters);
+        }
+        
+        var idn = new IdnMapping();
+        var punyCode = idn.GetAscii(domain);
+        var domain2 = idn.GetUnicode(punyCode);
+
+        if (!string.Equals(punyCode, domain2))
+        {
+            throw new TenantIncorrectCharsException(DomainContainsInvalidCharacters);
         }
     }
 
