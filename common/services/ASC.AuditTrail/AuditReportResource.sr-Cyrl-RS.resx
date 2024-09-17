@@ -801,4 +801,64 @@
   <data name="FileSizePostfix" xml:space="preserve">
     <value>бајтови,КБ,МБ,ГБ,ТБ</value>
   </data>
+  <data name="FileUploadedWithOverwriting" xml:space="preserve">
+    <value>Датотека отпремљена са преписивањем: {0}</value>
+  </data>
+  <data name="QuotaPerPortalChanged" xml:space="preserve">
+    <value>Постави подразумевану складишну квоту: {0}</value>
+  </data>
+  <data name="QuotaPerPortalDisabled" xml:space="preserve">
+    <value>Онемогућена подразумевана складишна квота</value>
+  </data>
+  <data name="QuotaPerRoomChanged" xml:space="preserve">
+    <value>Постави подразумевану складишну квоту за просторије: {0}</value>
+  </data>
+  <data name="QuotaPerRoomDisabled" xml:space="preserve">
+    <value>Онемогућена подразумевана складишна квота за просторије</value>
+  </data>
+  <data name="QuotaPerUserChanged" xml:space="preserve">
+    <value>Постави подразумевану складишну квоту за кориснике: {0}</value>
+  </data>
+  <data name="QuotaPerUserDisabled" xml:space="preserve">
+    <value>Онемогућена подразумевана складишна квота за кориснике</value>
+  </data>
+  <data name="RoomCopied" xml:space="preserve">
+    <value>Соба је копирана: {0}</value>
+  </data>
+  <data name="RoomGroupAdded" xml:space="preserve">
+    <value>Додата група: {0}. Улога: {1}</value>
+  </data>
+  <data name="RoomGroupRemove" xml:space="preserve">
+    <value>Обрисана група: {0}</value>
+  </data>
+  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
+    <value>{0} именован: {1}</value>
+  </data>
+  <data name="SendJoinInvite" xml:space="preserve">
+    <value>Корисник {0} је послао позивницу {1} да се придружи овом DocSpace-у</value>
+  </data>
+  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
+    <value>Просторије [{0}]. Постави прилагођену складишну квоту за просторије: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
+    <value>Просторије [{0}]. Постави подразумевану складишну квоту за просторије: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
+    <value>Просторије [{0}]. Онемогућена складишна квота за просторије</value>
+  </data>
+  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
+    <value>Корисници [{0}]. Постави прилагођену складишну квоту за кориснике: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
+    <value>Корисници [{0}]. Постави подразумевану складишну квоту за кориснике: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
+    <value>Корисници [{0}]. Онемогућена складишна квота за кориснике</value>
+  </data>
+  <data name="FormOpenedForFilling" xml:space="preserve">
+    <value>Датотека отворена за попуњавање: {0}</value>
+  </data>
+  <data name="FormSubmit" xml:space="preserve">
+    <value>Корисници [{0}]. Формулар достављен: {1}</value>
+  </data>
 </root>

@@ -152,4 +152,31 @@ $__AuthorName otağı sildi: $RoomTitle</value>
   <data name="subject_ShareFolder_push" xml:space="preserve">
     <value>Qovluğa giriş icazəsi verildi: $DocumentTitle</value>
   </data>
+  <data name="button_CheckReadyForms" xml:space="preserve">
+    <value>Hazır formaları yoxlayın</value>
+  </data>
+  <data name="pattern_FormReceived" xml:space="preserve">
+    <value>h1. $Message Forması dolduruldu
+
+Yeni "$DocumentTitle":"$DocumentURL" forması "$RoomTitle":"$RoomURL" otağında doldurulur.
+
+Formu əlavə edən: "$FromUserName":"$FromUserLink"
+
+$OrangeButton</value>
+  </data>
+  <data name="pattern_FormSubmitted" xml:space="preserve">
+    <value>h1. $Message formasını doldurmusunuz
+
+Siz "$RoomTitle":"$RoomURL" otağında "$DocumentTitle":"$DocumentURL" formasını doldurmusunuz
+
+Administrator: "$ToUserName":"$ToUserLink"
+
+$OrangeButton</value>
+  </data>
+  <data name="subject_FormReceived" xml:space="preserve">
+    <value>DocSpace bildirişi. Forma dolduruldu</value>
+  </data>
+  <data name="subject_FormSubmitted" xml:space="preserve">
+    <value>DocSpace bildirişi. Forma dolduruldu</value>
+  </data>
 </root>

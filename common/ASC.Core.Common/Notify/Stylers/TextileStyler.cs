@@ -240,7 +240,7 @@ public class TextileStyler(CoreBaseSettings coreBaseSettings,
         {
             footerContent =
                 NotifyTemplateResource.FooterCommonV10
-                .Replace("%SUPPORTURL%", string.IsNullOrEmpty(settings.SupportUrl) ? "mailto:" + settings.SalesEmail : settings.SupportUrl)
+                .Replace("%SUPPORTURL%", string.IsNullOrEmpty(settings.SupportUrl) ? "mailto:" + settings.SupportEmail : settings.SupportUrl)
                 .Replace("%SALESEMAIL%", settings.SalesEmail)
                 .Replace("%DEMOURL%", string.IsNullOrEmpty(settings.DemoUrl) ? "mailto:" + settings.SalesEmail : settings.DemoUrl);
 
@@ -276,7 +276,9 @@ public class TextileStyler(CoreBaseSettings coreBaseSettings,
 
         var rootPath = message.GetArgument("__VirtualRootPath").Value;
 
-        return string.Format(NotifyTemplateResource.TextForFooterUnsubsribe, rootPath, unsubscribeLink);
+        return string.Format(NotifyTemplateResource.TextForFooterUnsubsribe, rootPath, unsubscribeLink)
+            .Replace("%SUPPORTURL%", string.IsNullOrEmpty(settings.SupportUrl) ? "mailto:" + settings.SupportEmail : settings.SupportUrl)
+            .Replace("%SALESEMAIL%", settings.SalesEmail);
     }
 
     private async Task<string> GetPortalUnsubscribeLinkAsync(NoticeMessage message, MailWhiteLabelSettings settings)

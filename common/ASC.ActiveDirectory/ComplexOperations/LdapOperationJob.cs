@@ -160,7 +160,7 @@ public class LdapOperationJob(
 
                         await SetProgress(5, _resource.LdapSettingsStatusLoadingBaseInfo);
 
-                        var result = novellLdapSettingsChecker.CheckSettings();
+                        var result = await novellLdapSettingsChecker.CheckSettings();
 
                         if (result != LdapSettingsStatus.Ok)
                         {

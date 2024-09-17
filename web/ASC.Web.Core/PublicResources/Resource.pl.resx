@@ -1048,4 +1048,13 @@
   <data name="MessagePasswordSendedToEmail" xml:space="preserve">
     <value>Instrukcje dotyczące zmiany hasła zostały wysłane na adres e-mail {0}.</value>
   </data>
+  <data name="ErrorEmailLinked" xml:space="preserve">
+    <value>Dany e-mail jest przypisany do użytkownika {0} jako zewnętrzny dostawca</value>
+  </data>
+  <data name="TariffsFeature_statistic" xml:space="preserve">
+    <value>Limity pamięci i statystyki</value>
+  </data>
+  <data name="TariffsFeature_total_size" xml:space="preserve">
+    <value>{0} n administratora/ użytkownika z większą liczbą uprawnień i możliwość dodawania pamięci na żądanie</value>
+  </data>
 </root>

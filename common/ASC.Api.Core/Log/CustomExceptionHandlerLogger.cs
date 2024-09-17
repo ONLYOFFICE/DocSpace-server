@@ -24,46 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Data.Storage.DataOperators;
-public abstract class BaseReadOperator: IDataReadOperator
+namespace ASC.Api.Core.Log;
+
+internal static partial class CustomExceptionHandlerLogger
 {
-    internal string _tmpdir;
-
-    public string GetFolder()
-    {
-        return _tmpdir;
-    }
-
-    public void SetFolder(string folder)
-    {
-        _tmpdir = folder;
-    }
-
-    public Stream GetEntry(string key)
-    {
-        var filePath = Path.Combine(_tmpdir, key);
-        return File.Exists(filePath) ? File.Open(filePath, FileMode.Open, FileAccess.ReadWrite, FileShare.Read) : null;
-    }
-
-    public IEnumerable<string> GetEntries(string key)
-    {
-        var path = Path.Combine(_tmpdir, key);
-        var files = Directory.EnumerateFiles(path);
-        return files;
-    }
-
-    public IEnumerable<string> GetDirectories(string key)
-    {
-        var path = Path.Combine(_tmpdir, key);
-        var files = Directory.EnumerateDirectories(path);
-        return files;
-    }
-
-    public void Dispose()
-    {
-        if (Directory.Exists(_tmpdir))
-        {
-            Directory.Delete(_tmpdir, true);
-        }
-    }
+    [LoggerMessage(LogLevel.Critical, "error during executing {RequestMethod}: {PathValue}")]
+    public static partial void CriticalError(this ILogger<CustomExceptionHandler> logger, string RequestMethod, string PathValue, Exception exception);
 }

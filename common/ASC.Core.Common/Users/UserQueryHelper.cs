@@ -24,35 +24,47 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core.ApiModels.ResponseDto;
+namespace ASC.Core.Common.Users;
 
-public record ProviderDto(string Name, string Key, bool Connected, bool Oauth = false, string RedirectUrl = null, bool RequiredConnectionUrl = false, string ClientId = null)
+public static class UserQueryHelper
 {
-    /// <summary>Provider name</summary>
-    /// <type>System.String, System</type>
-    public string Name { get; init; } = Name;
+    public static T FilterByText<T>(T query, string text, string separator) where T : IQueryable<User>, IEnumerable<User>
+    {
+        if (string.IsNullOrEmpty(text))
+        {
+            return query;
+        }
+        
+        var processedText = text.ToLower().Trim();
 
-    /// <summary>Provider key</summary>
-    /// <type>System.String, System</type>
-    public string Key { get; init; } = Key;
+        if (string.IsNullOrEmpty(separator))
+        {
+            var split = processedText.Split(" ");
+            return split.Aggregate(query, (current, t) => (T)current.Where(u => 
+                u.FirstName.ToLower().Contains(t) || 
+                u.LastName.ToLower().Contains(t) || 
+                u.Email.ToLower().Contains(t)));
+        }
+        else
+        {
+            var split = processedText.Split(separator);
+            var expression = split
+                .Select(x => 
+                    (Expression<Func<User, bool>>)(u => 
+                        u.FirstName.ToLower().Contains(x) || 
+                        u.LastName.ToLower().Contains(x) || 
+                        u.Email.ToLower().Contains(x)))
+                .Aggregate<Expression<Func<User, bool>>, Expression<Func<User, bool>>>(null, (current, combinedPartLambda) => 
+                    current == null 
+                        ? combinedPartLambda 
+                        : current.Or(combinedPartLambda));
 
-    /// <summary>Connected flag</summary>
-    /// <type>System.Boolean, System</type>
-    public bool Connected { get; init; } = Connected;
+            if (expression != null)
+            {
+                return (T)query.Where(expression);
+            }
+        }
 
-    /// <summary>Oauth flag</summary>
-    /// <type>System.Boolean, System</type>
-    public bool Oauth { get; init; } = Oauth;
-
-    /// <summary>Redirect url</summary>
-    // <type>System.String, System</type>
-    public string RedirectUrl { get; init; } = RedirectUrl;
-
-    /// <summary>Required connection url flag</summary>
-    /// <type>System.Boolean, System</type>
-    public bool RequiredConnectionUrl { get; init; } = RequiredConnectionUrl;
-    
-    /// <summary>Oauth client id</summary>
-    /// <type>System.String, System</type>
-    public string ClientId { get; init; } = ClientId;
+        return query;
+    }
 }

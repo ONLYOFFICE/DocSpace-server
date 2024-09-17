@@ -497,4 +497,7 @@ Het beste geschikt voor docx, xlsx, pptx.</value>
   <data name="OpenForm" xml:space="preserve">
     <value>Open formulier</value>
   </data>
+  <data name="FormNumber" xml:space="preserve">
+    <value>Formuliernummer</value>
+  </data>
 </root>

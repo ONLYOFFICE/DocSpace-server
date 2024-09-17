@@ -211,4 +211,31 @@ $Message</value>
   <data name="subject_ShareFolder_tg" xml:space="preserve">
     <value>Документи. Приступ дозвољен фолдеру: [$DocumentTitle]($DocumentURL)</value>
   </data>
+  <data name="button_CheckReadyForms" xml:space="preserve">
+    <value>Провери спремне формуларе</value>
+  </data>
+  <data name="pattern_FormReceived" xml:space="preserve">
+    <value>h1. Формулар $Message је попуњен
+
+Нови формулар "$DocumentTitle":"$DocumentURL" је попуњен у просторији "$RoomTitle":"$RoomURL"
+
+Подносилац формулара: "$FromUserName":"$FromUserLink"
+
+$OrangeButton</value>
+  </data>
+  <data name="pattern_FormSubmitted" xml:space="preserve">
+    <value>h1. Попунили сте формулар $Message
+
+Попунили сте формулар "$DocumentTitle":"$DocumentURL" у просторији "$RoomTitle":"$RoomURL"
+
+Менаџер: "$ToUserName":"$ToUserLink"
+ 
+$OrangeButton</value>
+  </data>
+  <data name="subject_FormReceived" xml:space="preserve">
+    <value>DocSpace нотификација. Формулар је попуњен</value>
+  </data>
+  <data name="subject_FormSubmitted" xml:space="preserve">
+    <value>DocSpace нотификација. Формулар је попуњен</value>
+  </data>
 </root>

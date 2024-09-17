@@ -775,4 +775,31 @@
   <data name="RoomUpdateAccessForGroup" xml:space="preserve">
     <value>{0} designado: {1}</value>
   </data>
+  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
+    <value>Salas [{0}]. Establecer cuota de almacenamiento personalizada para salas: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
+    <value>Salas [{0}]. Establecer cuota de almacenamiento predeterminada para salas: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
+    <value>Salas [{0}]. Se ha desactivado la cuota de almacenamiento para salas</value>
+  </data>
+  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
+    <value>Usuarios [{0}]. Establecer cuota de almacenamiento personalizada para usuarios: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
+    <value>Usuarios [{0}]. Establecer cuota de almacenamiento predeterminada para usuarios: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
+    <value>Usuarios [{0}]. Se ha desactivado la cuota de almacenamiento para usuarios</value>
+  </data>
+  <data name="FormOpenedForFilling" xml:space="preserve">
+    <value>Archivo abierto para rellenar: {0}</value>
+  </data>
+  <data name="FormSubmit" xml:space="preserve">
+    <value>Usuarios [{0}]. Formulario enviado: {1}</value>
+  </data>
+  <data name="SendJoinInvite" xml:space="preserve">
+    <value>El usuario {0} ha enviado una invitación a {1} para que se una a este DocSpace</value>
+  </data>
 </root>

@@ -92,6 +92,7 @@ public class GroupController(
     /// Get a group
     /// </short>
     /// <param type="System.Guid, System" method="url" name="id">Group ID</param>
+    /// <param type="System.Boolean, System" name="includeMembers">Include members</param>
     /// <returns type="ASC.People.ApiModels.ResponseDto.GroupDto, ASC.People">Group with the detailed information</returns>
     /// <remarks>
     /// This method returns full group information.
@@ -99,11 +100,11 @@ public class GroupController(
     /// <path>api/2.0/groups/{id}</path>
     /// <httpMethod>GET</httpMethod>
     [HttpGet("{id:guid}")]
-    public async Task<GroupDto> GetGroupAsync(Guid id)
+    public async Task<GroupDto> GetGroupAsync(Guid id, bool includeMembers = true)
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_ReadGroups);
         
-        return await groupFullDtoHelper.Get(await GetGroupInfoAsync(id), true);
+        return await groupFullDtoHelper.Get(await GetGroupInfoAsync(id), includeMembers);
     }
 
     /// <summary>
@@ -365,7 +366,7 @@ public class GroupController(
     private async Task<GroupInfo> GetGroupInfoAsync(Guid id)
     {
         var group = await userManager.GetGroupInfoAsync(id);
-        if (group == null || group.ID == Constants.LostGroupInfo.ID)
+        if (group == null || group.Removed || group.ID == Constants.LostGroupInfo.ID)
         {
             throw new ItemNotFoundException("group not found");
         }
@@ -376,7 +377,7 @@ public class GroupController(
     private async Task TransferUserToDepartmentAsync(Guid userId, GroupInfo group, bool setAsManager)
     {
         var user = await userManager.GetUsersAsync(userId);
-        if (userId == Guid.Empty || !userManager.UserExists(user) || user.Status != EmployeeStatus.Active)
+        if (userId == Guid.Empty || !userManager.UserExists(user) || user.Status == EmployeeStatus.Terminated)
         {
             return;
         }

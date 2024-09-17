@@ -801,4 +801,64 @@
   <data name="FileSizePostfix" xml:space="preserve">
     <value>bajtovi,KB,MB,GB,TB</value>
   </data>
+  <data name="FileUploadedWithOverwriting" xml:space="preserve">
+    <value>Datoteka otpremljena sa prepisivanjem: {0}</value>
+  </data>
+  <data name="RoomCopied" xml:space="preserve">
+    <value>Soba je kopirana: {0}</value>
+  </data>
+  <data name="RoomGroupAdded" xml:space="preserve">
+    <value>Dodata grupa: {0}. Uloga: {1}</value>
+  </data>
+  <data name="RoomGroupRemove" xml:space="preserve">
+    <value>Obrisana grupa: {0}</value>
+  </data>
+  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
+    <value>{0} imenovan: {1}</value>
+  </data>
+  <data name="SendJoinInvite" xml:space="preserve">
+    <value>Korisnik {0} je poslao pozivnicu {1} da se pridruži ovom DocSpace-u</value>
+  </data>
+  <data name="QuotaPerPortalChanged" xml:space="preserve">
+    <value>Postavi podrazumevanu skladišnu kvotu: {0}</value>
+  </data>
+  <data name="QuotaPerPortalDisabled" xml:space="preserve">
+    <value>Onemogućena podrazumevana skladišna kvota</value>
+  </data>
+  <data name="QuotaPerRoomChanged" xml:space="preserve">
+    <value>Postavi podrazumevanu skladišnu kvotu za prostorije: {0}</value>
+  </data>
+  <data name="QuotaPerRoomDisabled" xml:space="preserve">
+    <value>Onemogućena podrazumevana skladišna kvota za prostorije</value>
+  </data>
+  <data name="QuotaPerUserChanged" xml:space="preserve">
+    <value>Postavi podrazumevanu skladišnu kvotu za korisnike: {0}</value>
+  </data>
+  <data name="QuotaPerUserDisabled" xml:space="preserve">
+    <value>Onemogućena podrazumevana skladišna kvota za korisnike</value>
+  </data>
+  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
+    <value>Prostorije [{0}]. Postavi prilagođenu skladišnu kvotu za prostorije: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
+    <value>Prostorije [{0}]. Postavi podrazumevanu skladišnu kvotu za prostorije: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
+    <value>Prostorije [{0}]. Onemogućena skladišna kvota za prostorije</value>
+  </data>
+  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
+    <value>Korisnici [{0}]. Postavi prilagođenu skladišnu kvotu za korisnike: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
+    <value>Korisnici [{0}]. Postavi podrazumevanu skladišnu kvotu za korisnike: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
+    <value>Korisnici [{0}]. Onemogućena skladišna kvota za korisnike</value>
+  </data>
+  <data name="FormOpenedForFilling" xml:space="preserve">
+    <value>Datoteka otvorena za popunjavanje: {0}</value>
+  </data>
+  <data name="FormSubmit" xml:space="preserve">
+    <value>Korisnici [{0}]. Formular dostavljen: {1}</value>
+  </data>
 </root>

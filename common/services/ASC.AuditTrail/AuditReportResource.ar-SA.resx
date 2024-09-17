@@ -801,4 +801,64 @@
   <data name="FileSizePostfix" xml:space="preserve">
     <value>بايت، كيلوبايت، ميجابايت، جيجابايت، تيرابايت</value>
   </data>
+  <data name="FileUploadedWithOverwriting" xml:space="preserve">
+    <value>تم تحميل ملف مع الكتابة فوقه: {0}</value>
+  </data>
+  <data name="RoomCopied" xml:space="preserve">
+    <value>تم نسخ الغرفة: {0}</value>
+  </data>
+  <data name="RoomGroupAdded" xml:space="preserve">
+    <value>مجموعة مضافة: {0}. المهام: {1}</value>
+  </data>
+  <data name="RoomGroupRemove" xml:space="preserve">
+    <value>المجموعة المحذوفة: {0}</value>
+  </data>
+  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
+    <value>{0} قام بتعيين: {1}</value>
+  </data>
+  <data name="SendJoinInvite" xml:space="preserve">
+    <value>أرسل المستخدم {0} دعوة إلى {1} للانضمام إلى DocSpace</value>
+  </data>
+  <data name="QuotaPerPortalChanged" xml:space="preserve">
+    <value>ضبط حصة التخزين الافتراضية: {0}</value>
+  </data>
+  <data name="QuotaPerPortalDisabled" xml:space="preserve">
+    <value>تعطيل حصة التخزين الافتراضية</value>
+  </data>
+  <data name="QuotaPerRoomChanged" xml:space="preserve">
+    <value>ضبط حصة التخزين الافتراضية للغرف: {0}</value>
+  </data>
+  <data name="QuotaPerRoomDisabled" xml:space="preserve">
+    <value>تعطيل حصة التخزين الافتراضية للغرف</value>
+  </data>
+  <data name="QuotaPerUserChanged" xml:space="preserve">
+    <value>ضبط حصة التخزين الافتراضية للمستخدمين: {0}</value>
+  </data>
+  <data name="QuotaPerUserDisabled" xml:space="preserve">
+    <value>تعطيل حصة التخزين الافتراضية للمستخدمين</value>
+  </data>
+  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
+    <value>الغرف [{0}]. تعيين حصة تخزين مخصصة للغرف: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
+    <value>الغرف [{0}]. تعيين حصة تخزين افتراضية للغرف: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
+    <value>الغرف [{0}]. حصة التخزين المعطلة للغرف</value>
+  </data>
+  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
+    <value>المستخدمين [{0}]. تعيين حصة تخزين مخصصة للمستخدمين: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
+    <value>المستخدمين [{0}]. تعيين حصة تخزين افتراضية للمستخدمين: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
+    <value>المستخدمين [{0}]. حصة التخزين المعطلة للمستخدمين</value>
+  </data>
+  <data name="FormOpenedForFilling" xml:space="preserve">
+    <value>تم فتح الملف للتعبئة: {0}</value>
+  </data>
+  <data name="FormSubmit" xml:space="preserve">
+    <value>المستخدمين [{0}]. النموذج المعتمد: {1}</value>
+  </data>
 </root>

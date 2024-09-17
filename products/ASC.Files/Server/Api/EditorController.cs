@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Web.Api.Core;
+
 namespace ASC.Files.Api;
 
 [ConstraintRoute("int")]
@@ -40,10 +42,8 @@ public class EditorControllerInternal(FileStorageService fileStorageService,
         AuthContext authContext,
         ConfigurationConverter<int> configurationConverter,
         IDaoFactory daoFactory,
-        FileMarker fileMarker,
-        SocketManager socketManager,
         SecurityContext securityContext)
-        : EditorController<int>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, daoFactory, fileMarker, socketManager, securityContext);
+        : EditorController<int>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, daoFactory, securityContext);
 
 [DefaultRoute("file")]
 public class EditorControllerThirdparty(FileStorageService fileStorageService,
@@ -58,10 +58,8 @@ public class EditorControllerThirdparty(FileStorageService fileStorageService,
         AuthContext authContext,
         ConfigurationConverter<string> configurationConverter,
         IDaoFactory daoFactory,
-        FileMarker fileMarker,
-        SocketManager socketManager,
         SecurityContext securityContext)
-        : EditorController<string>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, daoFactory, fileMarker, socketManager, securityContext);
+        : EditorController<string>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, daoFactory, securityContext);
 
 public abstract class EditorController<T>(FileStorageService fileStorageService,
         DocumentServiceHelper documentServiceHelper,
@@ -75,8 +73,6 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
         AuthContext authContext,
         ConfigurationConverter<T> configurationConverter,
         IDaoFactory daoFactory,
-        FileMarker fileMarker,
-        SocketManager socketManager,
         SecurityContext securityContext)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
@@ -237,10 +233,6 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                                 canEdit = false;
                                 canFill = true;
                                 editorType = EditorType.Embedded;
-
-                                await fileMarker.MarkAsNewAsync(formDraft);
-                                await socketManager.CreateFileAsync(formDraft);
-                                await socketManager.UpdateFileAsync(file);
 
                                 file = formDraft;
                                 fillingSessionId = Guid.NewGuid().ToString("N");
@@ -413,6 +405,7 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
         CommonLinkUtility commonLinkUtility,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
+        CspSettingsHelper cspSettingsHelper,
         PermissionContext permissionContext)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
@@ -454,17 +447,21 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
         }
 
         try
-        {        
+        {
             await documentServiceConnector.CheckDocServiceUrlAsync();
 
             await messageService.SendAsync(MessageAction.DocumentServiceLocationSetting);
+
+            var settings = await cspSettingsHelper.LoadAsync();
+
+            _ = await cspSettingsHelper.SaveAsync(settings.Domains ?? []);
         }
         catch (Exception)
-        {        
+        {
             await filesLinkUtility.SetDocServiceUrlAsync(currentDocServiceUrl);
             await filesLinkUtility.SetDocServiceUrlInternalAsync(currentDocServiceUrlInternal);
             await filesLinkUtility.SetDocServicePortalUrlAsync(currentDocServicePortalUrl);
-          
+
             throw new Exception("Unable to establish a connection with the Document Server.");
         }
 

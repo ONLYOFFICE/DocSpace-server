@@ -34,20 +34,24 @@ public class InvitationValidator(
     IDbContextFactory<MessagesContext> dbContextFactory,
     EmailValidationKeyProvider emailValidationKeyProvider,
     UserManager userManager,
-    AuthManager authManager)
+    AuthManager authManager,
+    TenantManager tenantManager)
 {
     public TimeSpan IndividualLinkExpirationInterval => emailValidationKeyProvider.ValidEmailKeyInterval;
 
-    public string MakeIndividualLinkKey(Guid linkId)
+    public string MakeIndividualLinkKey(Guid linkId, Guid createBy)
     {
-        return signature.Create(linkId);
+        return signature.Create(linkId + "." + createBy);
     }
 
-    public async Task<LinkValidationResult> ValidateAsync(string key, string email, EmployeeType employeeType)
+    public async Task<LinkValidationResult> ValidateAsync(string key, string email, EmployeeType employeeType, Guid? userId = default)
     {
-        var result = new LinkValidationResult { Status = EmailValidationKeyProvider.ValidationResult.Invalid };
+        var result = new LinkValidationResult
+        {
+            Status = EmailValidationKeyProvider.ValidationResult.Invalid
+        };
 
-        var (commonWithRoomLinkResult, linkId) = ValidateCommonWithRoomLink(key);
+        var (commonWithRoomLinkResult, linkId) = ValidateCommonWithRoomLink(key, userId);
 
         if (commonWithRoomLinkResult != EmailValidationKeyProvider.ValidationResult.Invalid)
         {
@@ -58,20 +62,46 @@ public class InvitationValidator(
             return result;
         }
 
-        var commonLinkResult = await emailValidationKeyProvider.ValidateEmailKeyAsync(ConfirmType.LinkInvite.ToStringFast() + (int)employeeType,
-            key, emailValidationKeyProvider.ValidEmailKeyInterval);
-
+        var commonLinkResult = await emailValidationKeyProvider.ValidateEmailKeyAsync(ConfirmType.LinkInvite.ToStringFast() + (int)employeeType, key, emailValidationKeyProvider.ValidEmailKeyInterval);
+        if (commonLinkResult == EmailValidationKeyProvider.ValidationResult.Invalid && userId.HasValue)
+        {
+            commonLinkResult = await emailValidationKeyProvider.ValidateEmailKeyAsync(ConfirmType.LinkInvite.ToStringFast() + (int)employeeType + userId.Value, key, emailValidationKeyProvider.ValidEmailKeyInterval);
+        }
+        
         if (commonLinkResult != EmailValidationKeyProvider.ValidationResult.Invalid)
         {
             result.Status = commonLinkResult;
             result.LinkType = InvitationLinkType.Common;
             result.ConfirmType = ConfirmType.LinkInvite;
 
+            if (!userId.HasValue)
+            {
+                return result;
+            }
+            
+            if (employeeType is not EmployeeType.DocSpaceAdmin)
+            {
+                return result;
+            }
+
+            var initiator = await userManager.GetUsersAsync(userId.Value);
+            if (initiator == null || initiator.Equals(Constants.LostUser))
+            {
+                result.Status = EmailValidationKeyProvider.ValidationResult.Invalid;
+                return result;
+            }
+
+            var tenant = await tenantManager.GetCurrentTenantAsync();
+            if (tenant != null && initiator.IsOwner(tenant))
+            {
+                return result;
+            }
+
+            result.Status = EmailValidationKeyProvider.ValidationResult.Invalid;
             return result;
         }
 
-        commonLinkResult = await emailValidationKeyProvider.ValidateEmailKeyAsync(email + ConfirmType.EmpInvite.ToStringFast() + (int)employeeType,
-            key, emailValidationKeyProvider.ValidEmailKeyInterval);
+        commonLinkResult = await emailValidationKeyProvider.ValidateEmailKeyAsync(email + ConfirmType.EmpInvite.ToStringFast() + (int)employeeType, key, emailValidationKeyProvider.ValidEmailKeyInterval);
 
         if (commonLinkResult != EmailValidationKeyProvider.ValidationResult.Invalid)
         {
@@ -99,8 +129,7 @@ public class InvitationValidator(
 
     private async Task<(EmailValidationKeyProvider.ValidationResult, UserInfo)> ValidateIndividualLinkAsync(string email, string key, EmployeeType employeeType)
     {
-        var result = await emailValidationKeyProvider.ValidateEmailKeyAsync(email + ConfirmType.LinkInvite.ToStringFast() + employeeType.ToStringFast(),
-            key, IndividualLinkExpirationInterval);
+        var result = await emailValidationKeyProvider.ValidateEmailKeyAsync(email + ConfirmType.LinkInvite.ToStringFast() + employeeType.ToStringFast(), key, IndividualLinkExpirationInterval);
 
         if (result != EmailValidationKeyProvider.ValidationResult.Ok)
         {
@@ -131,10 +160,22 @@ public class InvitationValidator(
         return (result, user);
     }
 
-    private (EmailValidationKeyProvider.ValidationResult, Guid) ValidateCommonWithRoomLink(string key)
+    private (EmailValidationKeyProvider.ValidationResult, Guid) ValidateCommonWithRoomLink(string key,Guid? userId = null)
     {
         var linkId = signature.Read<Guid>(key);
-
+        if (linkId == default && userId.HasValue)
+        {
+            var combined = signature.Read<string>(key);
+            if (!string.IsNullOrEmpty(combined))
+            {
+                var split = combined.Split('.');
+                if (split.Length == 2 && Guid.TryParse(split[0], out linkId) && Guid.TryParse(split[1], out var uId) && !Equals(uId, userId.Value))
+                {
+                    linkId = default;
+                }
+            }
+        }
+        
         return linkId == default ? (EmailValidationKeyProvider.ValidationResult.Invalid, default) : (EmailValidationKeyProvider.ValidationResult.Ok, linkId);
     }
 

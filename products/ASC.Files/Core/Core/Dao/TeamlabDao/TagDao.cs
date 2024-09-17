@@ -217,7 +217,7 @@ internal abstract class BaseTagDao<T>(
                         continue;
                     }
 
-                    var id = await internalFilesDbContext.TagIdAsync(t.Owner, t.Name, t.Type);
+                    var id = await internalFilesDbContext.TagIdAsync(t.Owner, t.Name, t.Type, tenantId);
 
                     var toAdd = new DbFilesTag
                     {
@@ -312,7 +312,7 @@ internal abstract class BaseTagDao<T>(
 
         if (!cacheTagId.TryGetValue(cacheTagIdKey, out var id))
         {
-            id = await filesDbContext.TagIdAsync(t.Owner, t.Name, t.Type);
+            id = await filesDbContext.TagIdAsync(t.Owner, t.Name, t.Type, tenantId);
 
             if (id == 0)
             {
@@ -612,7 +612,7 @@ internal abstract class BaseTagDao<T>(
     }
     private string GetCacheKey(Tag tag, int tenantId)
     {
-        return string.Join("/", tenantId.ToString(), tag.Owner.ToString(), tag.Name, ((int)tag.Type).ToString(CultureInfo.InvariantCulture));
+        return string.Join("/", tenantId.ToString(), tag.Owner.ToString(), tag.Name, ((int)tag.Type).ToString(CultureInfo.InvariantCulture), tag.EntryId, tag.EntryType);
     }
 
     private static string GetLockKey(int tenantId)

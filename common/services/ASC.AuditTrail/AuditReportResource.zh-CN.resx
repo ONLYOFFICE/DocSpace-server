@@ -778,4 +778,28 @@
   <data name="SendJoinInvite" xml:space="preserve">
     <value>用户 {0} 向 {1} 发送邀请加入此协作空间</value>
   </data>
+  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
+    <value>房间 [{0}]。为房间设置自定义存储空间额度：{1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
+    <value>房间 [{0}]。为房间设置默认存储空间额度：{1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
+    <value>房间 [{0}]。禁用房间的存储空间额度</value>
+  </data>
+  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
+    <value>用户 [{0}]。为用户设置自定义存储空间额度：{1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
+    <value>用户 [{0}]。为用户设置默认存储空间额度：{1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
+    <value>用户 [{0}]。禁用用户的存储空间额度</value>
+  </data>
+  <data name="FormOpenedForFilling" xml:space="preserve">
+    <value>文件已打开以填写：{0}</value>
+  </data>
+  <data name="FormSubmit" xml:space="preserve">
+    <value>用户 [{0}]。表单已提交：{1}</value>
+  </data>
 </root>

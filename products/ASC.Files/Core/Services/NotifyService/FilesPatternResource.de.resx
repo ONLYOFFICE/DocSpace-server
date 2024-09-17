@@ -152,4 +152,31 @@ $__AuthorName hat den Raum gelöscht: $RoomTitle</value>
   <data name="subject_ShareFolder_push" xml:space="preserve">
     <value>Zugriff auf den Ordner: $DocumentTitle</value>
   </data>
+  <data name="button_CheckReadyForms" xml:space="preserve">
+    <value>Fertige Formulare prüfen</value>
+  </data>
+  <data name="pattern_FormReceived" xml:space="preserve">
+    <value>h1. Das Formular $Message ist ausgefüllt
+ 
+Ein neues Formular "$DocumentTitle":"$DocumentURL" ist im Raum "$RoomTitle":"$RoomURL" ausgefüllt
+ 
+Einreicher des Formulars: "$FromUserName":"$FromUserLink"
+ 
+$OrangeButton</value>
+  </data>
+  <data name="pattern_FormSubmitted" xml:space="preserve">
+    <value>h1. Sie haben das Formular $Message ausgefüllt
+ 
+Sie haben das Formular "$DocumentTitle":"$DocumentURL" im Raum "$RoomTitle":"$RoomURL" ausgefüllt
+ 
+Manager: "$ToUserName":"$ToUserLink"
+ 
+$OrangeButton</value>
+  </data>
+  <data name="subject_FormReceived" xml:space="preserve">
+    <value>DocSpace-Benachrichtigung. Das Formular ist ausgefüllt</value>
+  </data>
+  <data name="subject_FormSubmitted" xml:space="preserve">
+    <value>DocSpace-Benachrichtigung. Das Formular ist ausgefüllt</value>
+  </data>
 </root>

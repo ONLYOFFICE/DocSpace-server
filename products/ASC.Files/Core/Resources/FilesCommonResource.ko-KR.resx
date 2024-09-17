@@ -497,4 +497,7 @@ docx, xlsx, pptx와 최고의 호환성이 보장됩니다.</value>
   <data name="OpenForm" xml:space="preserve">
     <value>양식 열기</value>
   </data>
+  <data name="FormNumber" xml:space="preserve">
+    <value>양식 번호</value>
+  </data>
 </root>

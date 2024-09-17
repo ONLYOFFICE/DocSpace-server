@@ -150,9 +150,11 @@ public class UserManager(
         AccountLoginType? accountLoginType,
         QuotaFilter? quotaFilter,
         string text,
+        string separator,
         bool withoutGroup)
     {
-        return userService.GetUsersCountAsync(Tenant.Id, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, quotaFilter, text, withoutGroup);
+        return userService.GetUsersCountAsync(Tenant.Id, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, 
+            quotaFilter, text, separator, withoutGroup);
     }
 
     public IAsyncEnumerable<UserInfo> GetUsers(
@@ -165,6 +167,7 @@ public class UserManager(
         AccountLoginType? accountLoginType,
         QuotaFilter? quotaFilter,
         string text,
+        string separator,
         bool withoutGroup,
         string sortBy,
         bool sortOrderAsc,
@@ -176,7 +179,20 @@ public class UserManager(
             sortType = UserSortType.FirstName;
         }
 
-        return userService.GetUsers(Tenant.Id, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, quotaFilter, text, withoutGroup, Tenant.OwnerId, sortType, sortOrderAsc, limit, offset);
+        if (sortType == UserSortType.DisplayName)
+        {
+            if (UserFormatter.GetUserDisplayDefaultOrder() == DisplayUserNameFormat.FirstLast)
+            {
+                sortType = UserSortType.FirstName;
+            }
+            else
+            {
+                sortType = UserSortType.LastName;
+            }
+        }
+
+        return userService.GetUsers(Tenant.Id, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, quotaFilter, 
+            text, separator, withoutGroup, Tenant.OwnerId, sortType, sortOrderAsc, limit, offset);
     }
 
     public UserInfo GetUsers(Guid id)
@@ -362,7 +378,7 @@ public class UserManager(
             oldUserData.Status != u.Status && notifyWebSocket)
         {
             (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountPaidUserFeature, int>();
-            value = oldUserData.Status > u.Status ? ++value : --value;//crutch: data race
+            value = oldUserData.Status == EmployeeStatus.Terminated ? ++value : --value;//crutch: data race
         }
 
         var newUserData = await userService.SaveUserAsync(tenant.Id, u);
@@ -723,6 +739,7 @@ public class UserManager(
             return;
         }
 
+        var managerIdTask = GetDepartmentManagerAsync(groupId);
         var user = await GetUsersAsync(userId);
         var isUserBefore = await this.IsUserAsync(user);
         var isPaidUserBefore = await IsPaidUserAsync(user);
@@ -731,6 +748,12 @@ public class UserManager(
             Constants.Action_EditGroups);
 
         await userService.RemoveUserGroupRefAsync(Tenant.Id, userId, groupId, UserGroupRefType.Contains);
+        
+        var managerId = await managerIdTask;
+        if (managerId == userId)
+        {
+            await userService.RemoveUserGroupRefAsync(Tenant.Id, userId, groupId, UserGroupRefType.Manager);
+        }
 
         ResetGroupCache(userId);
 
@@ -848,7 +871,8 @@ public class UserManager(
             ID = group.Id,
             CategoryID = group.CategoryId,
             Name = group.Name,
-            Sid = group.Sid
+            Sid = group.Sid,
+            Removed = group.Removed
         };
     }
 
@@ -992,7 +1016,8 @@ public class UserManager(
             Name = g.Name,
             ParentId = g.Parent?.ID ?? Guid.Empty,
             CategoryId = g.CategoryID,
-            Sid = g.Sid
+            Sid = g.Sid,
+            Removed = g.Removed
         };
     }
 

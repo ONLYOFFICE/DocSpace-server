@@ -68,7 +68,7 @@ internal class FolderDao(
     private const string VirtualRooms = "virtualrooms";
     private const string Archive = "archive";
 
-    public async Task<Folder<int>> GetFolderAsync(int folderId)
+    public virtual async Task<Folder<int>> GetFolderAsync(int folderId)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
@@ -614,7 +614,7 @@ internal class FolderDao(
             var folder = await GetFolderAsync(folderId);
             var oldParentId = folder.ParentId;
 
-            if (folder.FolderType != FolderType.DEFAULT && !DocSpaceHelper.IsRoom(folder.FolderType))
+            if ((folder.FolderType is not (FolderType.DEFAULT or FolderType.FormFillingFolderInProgress or FolderType.FormFillingFolderDone)) && !DocSpaceHelper.IsRoom(folder.FolderType))
             {
                 throw new ArgumentException("It is forbidden to move the System folder.", nameof(folderId));
             }
@@ -809,11 +809,15 @@ internal class FolderDao(
         }
 
     public async Task<IDictionary<int, string>> CanMoveOrCopyAsync(IEnumerable<int> folderIds, int to)
-    {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-
+    {        
         var result = new Dictionary<int, string>();
-
+        if (!folderIds.Any())
+        {
+            return result;
+        }
+        
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         foreach (var folderId in folderIds)
         {
@@ -828,19 +832,7 @@ internal class FolderDao(
 
             if (conflict != 0)
             {
-                var files = filesDbContext.DbFilesAsync(tenantId, folderId, conflict);
-
-                await foreach (var file in files)
-                {
-                    result[file.Id] = file.Title;
-                }
-
-                var children = await filesDbContext.ArrayAsync(tenantId, folderId).ToListAsync();
-
-                foreach (var pair in await CanMoveOrCopyAsync(children, conflict))
-                {
-                    result.Add(pair.Key, pair.Value);
-                }
+                result[folderId] = "";
             }
         }
 
@@ -912,6 +904,25 @@ internal class FolderDao(
         var toUpdate = await filesDbContext.FolderAsync(tenantId, folder.Id);
 
         toUpdate.Title = Global.ReplaceInvalidCharsAndTruncate(newTitle);
+        toUpdate.ModifiedOn = DateTime.UtcNow;
+        toUpdate.ModifiedBy = _authContext.CurrentAccount.ID;
+        filesDbContext.Update(toUpdate);
+
+        await filesDbContext.SaveChangesAsync();
+
+        _ = factoryIndexer.IndexAsync(toUpdate);
+
+        return folder.Id;
+    }
+
+    public async Task<int> ChangeFolderTypeAsync(Folder<int> folder, FolderType folderType)
+    {
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        var toUpdate = await filesDbContext.FolderAsync(tenantId, folder.Id);
+
+        toUpdate.FolderType = folderType;
         toUpdate.ModifiedOn = DateTime.UtcNow;
         toUpdate.ModifiedBy = _authContext.CurrentAccount.ID;
         filesDbContext.Update(toUpdate);
@@ -1775,4 +1786,57 @@ public class OriginData
     public DbFolder OriginRoom { get; init; }
     public DbFolder OriginFolder { get; init; }
     public HashSet<KeyValuePair<string, FileEntryType>> Entries { get; init; }
+}
+
+[Scope(typeof(ICacheFolderDao<int>))]
+internal class CacheFolderDao(
+    FactoryIndexerFolder factoryIndexer,
+    UserManager userManager,
+    IDbContextFactory<FilesDbContext> dbContextManager,
+    TenantManager tenantManager,
+    TenantUtil tenantUtil,
+    SetupInfo setupInfo,
+    MaxTotalSizeStatistic maxTotalSizeStatistic,
+    SettingsManager settingsManager,
+    AuthContext authContext,
+    IServiceProvider serviceProvider,
+    IDaoFactory daoFactory,
+    SelectorFactory selectorFactory,
+    CrossDao crossDao,
+    IMapper mapper,
+    GlobalStore globalStore,
+    GlobalFolder globalFolder,
+    IDistributedLockProvider distributedLockProvider,
+    StorageFactory storageFactory)
+    : FolderDao(
+        factoryIndexer,
+        userManager,
+        dbContextManager,
+        tenantManager,
+        tenantUtil,
+        setupInfo,
+        maxTotalSizeStatistic,
+        settingsManager,
+        authContext,
+        serviceProvider,
+        daoFactory,
+        selectorFactory,
+        crossDao,
+        mapper,
+        globalStore,
+        globalFolder,
+        distributedLockProvider,
+        storageFactory), ICacheFolderDao<int>
+{
+    private readonly ConcurrentDictionary<int, Folder<int>> _cache = new();
+    public override async Task<Folder<int>> GetFolderAsync(int folderId)
+    {
+        if (!_cache.TryGetValue(folderId, out var result))
+        {
+            result = await base.GetFolderAsync(folderId);
+            _cache.TryAdd(folderId, result);
+        }
+        
+        return result;
+    }
 }

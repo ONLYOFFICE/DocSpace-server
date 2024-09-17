@@ -308,7 +308,7 @@ public class StudioNotifyService(
         await studioNotifyServiceHelper.SendNoticeAsync(Actions.UserHasJoin);
     }
 
-    public async Task SendJoinMsgAsync(string email, EmployeeType emplType, string culture)
+    public async Task SendJoinMsgAsync(string email, EmployeeType emplType, string culture, bool limitation = false)
     {
         var inviteUrl = await commonLinkUtility.GetConfirmationEmailUrlAsync(email, ConfirmType.EmpInvite, (int)emplType + "trust") + $"&emplType={(int)emplType}";
         var shortLink = await urlShortener.GetShortenLinkAsync(inviteUrl);
@@ -331,6 +331,11 @@ public class StudioNotifyService(
             await studioNotifyHelper.RecipientFromEmailAsync(email, false),
             [EMailSenderName],
             tags.ToArray());
+        
+        if (limitation)
+        {
+            await userInvitationLimitHelper.ReduceLimit();
+        }
     }
 
     public async Task UserInfoAddedAfterInviteAsync(UserInfo newUserInfo)
@@ -950,7 +955,7 @@ public class StudioNotifyService(
 
     #region Zoom
 
-    public async Task SendZoomWelcomeAsync(UserInfo u)
+    public async Task SendZoomWelcomeAsync(UserInfo u, string portalUrl = null)
     {
         try
         {
@@ -961,6 +966,7 @@ public class StudioNotifyService(
                 Actions.ZoomWelcome,
                 await studioNotifyHelper.RecipientFromEmailAsync(u.Email, false),
                 [EMailSenderName],
+                portalUrl ??= commonLinkUtility.GetFullAbsolutePath(""),
                 new TagValue(CommonTags.Culture, culture.Name),
                 new TagValue(Tags.UserName, u.FirstName.HtmlEncode()),
                 new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("welcome.gif")),

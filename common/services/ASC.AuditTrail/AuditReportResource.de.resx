@@ -778,4 +778,28 @@
   <data name="SendJoinInvite" xml:space="preserve">
     <value>Benutzer {0} hat eine Einladung an {1} geschickt, diesem DocSpace beizutreten</value>
   </data>
+  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
+    <value>Räume [{0}]. Benutzerdefinierte Speicherquote für Räume festgelegt: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
+    <value>Räume [{0}]. Standard-Speicherquote für Räume festgelegt: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
+    <value>Räume [{0}]. Speicherquote für Räume deaktiviert</value>
+  </data>
+  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
+    <value>Benutzer [{0}]. Benutzerdefinierte Speicherquote für Benutzer festgelegt: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
+    <value>Benutzer [{0}]. Standard-Speicherquote für Benutzer festgelegt: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
+    <value>Benutzer [{0}]. Speicherquote für Benutzer deaktiviert</value>
+  </data>
+  <data name="FormOpenedForFilling" xml:space="preserve">
+    <value>Datei zum Ausfüllen geöffnet: {0}</value>
+  </data>
+  <data name="FormSubmit" xml:space="preserve">
+    <value>Benutzer [{0}]. Formular abgeschickt: {1}</value>
+  </data>
 </root>

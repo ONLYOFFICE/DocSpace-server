@@ -928,8 +928,13 @@ public class FileSecurity(IDaoFactory daoFactory,
 
             if (action != FilesSecurityActions.Read)
             {
+                if (action is FilesSecurityActions.Delete &&
+                    (folder.FolderType == FolderType.ReadyFormFolder ||
+                    folder.FolderType == FolderType.InProcessFormFolder))
+                {
+                    return false;
+                }
                 if (action is FilesSecurityActions.Duplicate or
-                              FilesSecurityActions.Delete or
                               FilesSecurityActions.EditAccess or
                               FilesSecurityActions.Edit or
                               FilesSecurityActions.Move or
@@ -1066,7 +1071,9 @@ public class FileSecurity(IDaoFactory daoFactory,
                     action == FilesSecurityActions.Lock ||
                     action == FilesSecurityActions.Move ||
                     action == FilesSecurityActions.Duplicate ||
-                    action == FilesSecurityActions.EditHistory) && file != null )
+                    action == FilesSecurityActions.EditHistory ||
+                    action == FilesSecurityActions.SubmitToFormGallery ||
+                    action == FilesSecurityActions.Embed) && file != null )
                 {
                     var parentFolders = await GetFileParentFolders(file.ParentId);
                     if (parentFolders != null)
@@ -1077,18 +1084,6 @@ public class FileSecurity(IDaoFactory daoFactory,
                             return false;
                         }
                     }  
-                }
-                if (action == FilesSecurityActions.Delete && file != null)
-                {
-                    var parentFolders = await GetFileParentFolders(file.ParentId);
-                    if (parentFolders != null)
-                    {
-                        var fileFolder = parentFolders.LastOrDefault();
-                        if (fileFolder.FolderType == FolderType.FormFillingFolderDone && FileUtility.GetFileTypeByFileName(file.Title) is not FileType.Pdf)
-                        {
-                            return false;
-                        }
-                    }
                 }
                 if (action == FilesSecurityActions.CopyLink && file != null)
                 {
@@ -1329,7 +1324,17 @@ public class FileSecurity(IDaoFactory daoFactory,
                                 return true;
                             }
 
-                            if (folder is { RootFolderType: FolderType.VirtualRooms, FolderType: FolderType.DEFAULT })
+                            if (folder is { RootFolderType: FolderType.VirtualRooms, FolderType: FolderType.DEFAULT or FolderType.FormFillingFolderDone or FolderType.FormFillingFolderInProgress })
+                            {
+                                return true;
+                            }
+                        }
+                        else if (file != null && e.Access == FileShare.FillForms && e.CreateBy == userId)
+                        {
+                            var folderDao = daoFactory.GetFolderDao<T>();
+                            var parentFolder = await folderDao.GetFolderAsync(file.ParentId);
+
+                            if (parentFolder.FolderType is FolderType.FormFillingFolderDone or FolderType.FormFillingFolderInProgress)
                             {
                                 return true;
                             }
@@ -2230,6 +2235,13 @@ public class FileSecurity(IDaoFactory daoFactory,
         }
 
         return result;
+    }
+
+    public static bool IsAvailableAccess(FileShare share, SubjectType subjectType, FolderType roomType)
+    {
+        return AvailableRoomAccesses.TryGetValue(roomType, out var availableRoles) &&
+            availableRoles.TryGetValue(subjectType, out var availableRolesBySubject) &&
+            availableRolesBySubject.Contains(share);
     }
     
     private async Task<List<Guid>> GetUserSubjectsAsync<T>(Guid userId, FileEntry<T> entry)

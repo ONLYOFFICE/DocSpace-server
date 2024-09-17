@@ -317,7 +317,8 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// </summary>
     /// <short>Get the external data</short>
     /// <category>Sharing</category>
-    /// <param type="System.String, System" name="key" method="url">The unique document identifier</param>
+    /// <param type="System.String, System" name="key" method="url">The unique key</param>
+    /// <param type="System.String, System" name="fileId">The unique document identifier</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.ExternalShareDto, ASC.Files.Core">External data</returns>
     /// <path>api/2.0/files/share/{key}</path>
     /// <httpMethod>GET</httpMethod>
@@ -325,9 +326,9 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// <requiresAuthorization>false</requiresAuthorization>
     [AllowAnonymous]
     [HttpGet("share/{key}")]
-    public async Task<ExternalShareDto> GetExternalShareDataAsync(string key)
+    public async Task<ExternalShareDto> GetExternalShareDataAsync(string key, string fileId = null)
     {
-        var validationInfo = await externalLinkHelper.ValidateAsync(key);
+        var validationInfo = await externalLinkHelper.ValidateAsync(key, fileId: fileId);
 
         return mapper.Map<ValidationInfo, ExternalShareDto>(validationInfo);
     }

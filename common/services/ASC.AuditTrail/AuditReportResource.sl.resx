@@ -742,4 +742,64 @@
   <data name="FileSizePostfix" xml:space="preserve">
     <value>bajtov,KB,MB,GB,TB</value>
   </data>
+  <data name="FileUploadedWithOverwriting" xml:space="preserve">
+    <value>Datoteka, naložena s prepisom: {0}</value>
+  </data>
+  <data name="QuotaPerPortalChanged" xml:space="preserve">
+    <value>Nastavitev privzete kvote prostora za shranjevanje: {0}</value>
+  </data>
+  <data name="QuotaPerPortalDisabled" xml:space="preserve">
+    <value>Onemogočena privzeta kvota prostora za shranjevanje</value>
+  </data>
+  <data name="QuotaPerRoomChanged" xml:space="preserve">
+    <value>Nastavitev privzete kvote prostora za shranjevanje: {0}</value>
+  </data>
+  <data name="QuotaPerRoomDisabled" xml:space="preserve">
+    <value>Onemogočena privzeta kvota prostora za shranjevanje</value>
+  </data>
+  <data name="QuotaPerUserChanged" xml:space="preserve">
+    <value>Nastavitev privzete kvote prostora za shranjevanje za uporabnike: {0}</value>
+  </data>
+  <data name="QuotaPerUserDisabled" xml:space="preserve">
+    <value>Onemogočena privzeta kvota prostora za shranjevanje za uporabnike</value>
+  </data>
+  <data name="RoomCopied" xml:space="preserve">
+    <value>Soba kopirana: {0}</value>
+  </data>
+  <data name="RoomGroupAdded" xml:space="preserve">
+    <value>Dodanih skupin: {0}. Vloga: {1}</value>
+  </data>
+  <data name="RoomGroupRemove" xml:space="preserve">
+    <value>Izbrisanih skupin: {0}</value>
+  </data>
+  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
+    <value>{0} dodeljen: {1}</value>
+  </data>
+  <data name="SendJoinInvite" xml:space="preserve">
+    <value>Uporabnik {0} je poslal povabilo na {1} za pridružitev temu prostoru DocSpace</value>
+  </data>
+  <data name="FormSubmit" xml:space="preserve">
+    <value>Uporabniki [{0}]. Obrazec oddan: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
+    <value>Sobe [{0}]. Nastavi kvoto prostora za shranjevanje po meri: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
+    <value>Sobe [{0}]. Nastavi privzeto kvoto prostora za shranjevanje: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
+    <value>Sobe [{0}]. Onemogoči kvoto prostora za shranjevanje</value>
+  </data>
+  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
+    <value>Uporabniki [{0}]. Nastavi privzeto kvoto prostora za shranjevanje za uporabnike: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
+    <value>Uporabniki [{0}]. Nastavi kvoto shranjevanja po meri za uporabnike: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
+    <value>Uporabniki [{0}]. Onemogoči kvoto prostora za shranjevanje za uporabnike</value>
+  </data>
+  <data name="FormOpenedForFilling" xml:space="preserve">
+    <value>Datoteka odprta za izpolnjevanje: {0}</value>
+  </data>
 </root>
