@@ -3301,7 +3301,7 @@ public class FileStorageService //: IFileStorageService
         return room;
     }
 
-    public async Task<Folder<T>> SetRoomSettingsAsync<T>(T folderId, bool indexing, bool denyDownload)
+    public async Task<Folder<T>> SetRoomSettingsAsync<T>(T folderId, bool? indexing, bool? denyDownload)
     {
         var folderDao = daoFactory.GetFolderDao<T>();
         var room = await folderDao.GetFolderAsync(folderId);
@@ -3318,20 +3318,20 @@ public class FileStorageService //: IFileStorageService
 
         if (DocSpaceHelper.IsRoom(room.FolderType))
         {
-            if (room.SettingsIndexing != indexing)
+            if (indexing.HasValue && room.SettingsIndexing != indexing)
             {
-                if (indexing)
+                if (indexing.Value)
                 {
                     await ReOrderAsync(room.Id, true);
                 }
                 
-                room.SettingsIndexing = indexing;
+                room.SettingsIndexing = indexing.Value;
                 await folderDao.SaveFolderAsync(room);
             }
             
-            if (room.SettingsDenyDownload != denyDownload)
+            if (denyDownload.HasValue && room.SettingsDenyDownload != denyDownload)
             {
-                room.SettingsDenyDownload = denyDownload;
+                room.SettingsDenyDownload = denyDownload.Value;
                 await folderDao.SaveFolderAsync(room);
             }
         }
