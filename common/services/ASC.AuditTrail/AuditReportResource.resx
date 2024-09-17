@@ -888,4 +888,7 @@
   <data name="RoomDenyDownloadDisabled" xml:space="preserve">
     <value>Room: {0}. Deny download disabled</value>
   </data>
+  <data name="PrimaryExternalLinkCopied" xml:space="preserve">
+    <value>Primary link copied: {1}</value>
+  </data>
 </root>

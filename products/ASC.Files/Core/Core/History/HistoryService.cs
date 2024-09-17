@@ -87,7 +87,8 @@ public class HistoryService(
         MessageAction.RoomArchived,
         MessageAction.RoomUnarchived,
         MessageAction.RoomDenyDownloadEnabled,
-        MessageAction.RoomDenyDownloadDisabled
+        MessageAction.RoomDenyDownloadDisabled,
+        MessageAction.PrimaryExternalLinkCopied
     ];
     
     public async IAsyncEnumerable<HistoryEntry> GetHistoryAsync(int entryId, FileEntryType entryType, int offset, int count)

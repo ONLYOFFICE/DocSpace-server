@@ -219,3 +219,25 @@ public class IndexChangedInterpreter : ActionInterpreter
         return new ValueTask<HistoryData>(new IndexChangedData(oldIndex, newIndex, target, description[0], desc.ParentId, desc.ParentTitle, desc.ParentType));
     }
 }
+
+public class PrimaryLinkCopiedInterpreter : ActionInterpreter
+{
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
+    {
+        var desc = GetAdditionalDescription(description);
+
+        var parentType = desc.ParentType is (int)FolderType.VirtualRooms or (int)FolderType.Archive
+            ? null
+            : desc.ParentType;
+        
+        var parentTitle = parentType != null 
+            ? desc.ParentTitle
+            : null;
+        
+        var parentId = parentType != null 
+            ? desc.ParentId 
+            : (int?)null;
+        
+        return new ValueTask<HistoryData>(new EntryData(target, description[0], parentId, parentTitle, parentType));
+    }
+}

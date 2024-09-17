@@ -250,6 +250,8 @@ public enum MessageAction
     
     RoomDenyDownloadEnabled = 5109,
     RoomDenyDownloadDisabled = 5110,
+    
+    PrimaryExternalLinkCopied = 5111,
 
     #endregion
 

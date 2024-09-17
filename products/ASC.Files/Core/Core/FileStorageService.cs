@@ -2788,9 +2788,12 @@ public class FileStorageService //: IFileStorageService
 
         if ((entry is File<T> || entry is Folder<T> folder && !DocSpaceHelper.IsRoom(folder.FolderType)) && entry.RootFolderType == FolderType.VirtualRooms)
         {
-            var room = await daoFactory.GetFolderDao<T>().GetParentFoldersAsync(entry.ParentId).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
+            var room = await daoFactory.GetFolderDao<T>().GetParentFoldersAsync(entry.ParentId)
+                .FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
             
-            var parentLink = await fileSharing.GetPureSharesAsync(room, ShareFilterType.PrimaryExternalLink, null, null, 0, 1).FirstOrDefaultAsync();
+            var parentLink = await fileSharing.GetPureSharesAsync(room, ShareFilterType.PrimaryExternalLink, null, null, 0, 1)
+                .FirstOrDefaultAsync();
+            
             if (parentLink == null)
             {
                 throw new ItemNotFoundException();
@@ -2798,21 +2801,35 @@ public class FileStorageService //: IFileStorageService
             
             var data = await externalShare.GetLinkDataAsync(entry, parentLink.Id, entryType == FileEntryType.File);
             parentLink.Link = await urlShortener.GetShortenLinkAsync(data.Url);
+            
+            await filesMessageService.SendAsync(MessageAction.PrimaryExternalLinkCopied, entry, entry.Title, parentLink.FileShareOptions?.Title);
 
             return parentLink;
         }
 
-        var link = await fileSharing.GetPureSharesAsync(entry, ShareFilterType.PrimaryExternalLink, null, null, 0, 1).FirstOrDefaultAsync();
+        var link = await fileSharing.GetPureSharesAsync(entry, ShareFilterType.PrimaryExternalLink, null, null, 0, 1)
+            .FirstOrDefaultAsync();
+        
         if (link == null)
         {
-            return await SetExternalLinkAsync(entry, Guid.NewGuid(), FileShare.Read, FilesCommonResource.DefaultExternalLinkTitle, primary: true);
+            var primaryLink = await SetExternalLinkAsync(entry, Guid.NewGuid(), FileShare.Read, FilesCommonResource.DefaultExternalLinkTitle, primary: true);
+            
+            await filesMessageService.SendAsync(MessageAction.PrimaryExternalLinkCopied, entry, entry.Title, primaryLink.FileShareOptions?.Title);
+            
+            return primaryLink;
         }
 
         if (link.FileShareOptions.IsExpired && entry.RootFolderType == FolderType.USER && entry.FileEntryType == FileEntryType.File)
         {
-            return await SetExternalLinkAsync(entry, link.Id, link.Access, FilesCommonResource.DefaultExternalLinkTitle, 
+            var primaryLink = await SetExternalLinkAsync(entry, link.Id, link.Access, FilesCommonResource.DefaultExternalLinkTitle, 
                 DateTime.UtcNow.Add(filesLinkUtility.DefaultLinkLifeTime), requiredAuth: link.FileShareOptions.Internal, primary: true);
+            
+            await filesMessageService.SendAsync(MessageAction.PrimaryExternalLinkCopied, entry, entry.Title, primaryLink.FileShareOptions?.Title);
+            
+            return primaryLink;
         }
+        
+        await filesMessageService.SendAsync(MessageAction.PrimaryExternalLinkCopied, entry, entry.Title, link.FileShareOptions?.Title);
 
         return link;
     }

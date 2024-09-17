@@ -96,7 +96,8 @@ public class AuditInterpreter(IServiceProvider serviceProvider)
         { (int)MessageAction.FileLocked, _fileLockInterpreter },
         { (int)MessageAction.FileUnlocked, _fileLockInterpreter },
         { (int)MessageAction.RoomDenyDownloadEnabled, _roomDenyDownloadInterpreter },
-        { (int)MessageAction.RoomDenyDownloadDisabled, _roomDenyDownloadInterpreter }
+        { (int)MessageAction.RoomDenyDownloadDisabled, _roomDenyDownloadInterpreter },
+        { (int)MessageAction.PrimaryExternalLinkCopied, new PrimaryLinkCopiedInterpreter() }
     }.ToFrozenDictionary();
     
     public ValueTask<HistoryEntry> ToHistoryAsync(DbAuditEvent @event)
