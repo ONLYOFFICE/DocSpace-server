@@ -81,11 +81,11 @@ public class LoginEventDto
     /// <summary>Page</summary>
     /// <type>System.String, System</type>
     public string Page { get; set; }
-
-    public LoginEventDto(LoginEvent loginEvent)
+    
+    public LoginEventDto(LoginEvent loginEvent, ApiDateTimeHelper apiDateTimeHelper)
     {
         Id = loginEvent.Id;
-        Date = new ApiDateTime(loginEvent.Date, TimeSpan.Zero);
+        Date = apiDateTimeHelper.Get(loginEvent.Date);
         User = loginEvent.UserName;
         UserId = loginEvent.UserId;
         Login = loginEvent.Login;

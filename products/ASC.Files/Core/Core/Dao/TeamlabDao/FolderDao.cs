@@ -372,7 +372,7 @@ internal class FolderDao(
         }
     }
 
-    public async IAsyncEnumerable<Folder<int>> GetParentFoldersAsync(int folderId)
+    public virtual async IAsyncEnumerable<Folder<int>> GetParentFoldersAsync(int folderId)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
@@ -809,7 +809,6 @@ internal class FolderDao(
             folder.FolderType == FolderType.InProcessFormFolder ||
             folder.FolderType == FolderType.FormFillingFolderDone || 
             folder.FolderType == FolderType.FormFillingFolderInProgress) ? FolderType.DEFAULT : folder.FolderType;
-
         copy = await GetFolderAsync(await SaveFolderAsync(copy));
         var tagDao = daoFactory.GetTagDao<int>();
         var tags = await tagDao.GetTagsAsync(folder.Id, FileEntryType.Folder, TagType.Custom).ToListAsync();
@@ -1864,4 +1863,19 @@ internal class CacheFolderDao(
 
         return result;
                         }
+    
+    private readonly ConcurrentDictionary<int, IEnumerable<Folder<int>>> _parentFoldersCache = new();
+    public override async IAsyncEnumerable<Folder<int>> GetParentFoldersAsync(int folderId)
+    {
+        if (!_parentFoldersCache.TryGetValue(folderId, out var result))
+        {
+            result = await base.GetParentFoldersAsync(folderId).ToListAsync();
+            _parentFoldersCache.TryAdd(folderId, result);
+        }
+
+        foreach (var folder in result)
+        {
+            yield return folder;
+        }
+    }
 }

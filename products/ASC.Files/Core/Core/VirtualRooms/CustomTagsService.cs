@@ -45,11 +45,11 @@ public class CustomTagsService(
         ArgumentException.ThrowIfNullOrEmpty(name);
 
         var tagDao = daoFactory.GetTagDao<int>();
-        var tags = await tagDao.GetTagsInfoAsync(name, TagType.Custom, true).ToListAsync();
+        var existedTag = await tagDao.GetTagsInfoAsync(name, TagType.Custom, true).FirstOrDefaultAsync();
 
-        if (tags.Count != 0)
+        if (existedTag != null)
         {
-            throw new InvalidOperationException();
+            return existedTag.Name;
         }
 
         var tagInfo = new TagInfo
@@ -151,18 +151,18 @@ public class CustomTagsService(
         {
             var rooms = await fileSecurity.GetVirtualRoomsAsync(FilterType.None, Guid.Empty, string.Empty, false, false, SearchArea.Active, false, [], false, ProviderFilter.None, SubjectFilter.Member, QuotaFilter.All, StorageFilter.None);
             var tags = rooms.SelectMany(r => r.Tags)
-                .Where(r => r.Type == tagType);
+                .Where(r => r.Type == tagType).Select(r => r.Name).Distinct();
 
             if (!string.IsNullOrEmpty(searchText))
             {
                 var lowerText = searchText.ToLower().Trim().Replace("%", "\\%").Replace("_", "\\_");
                 
-                tags = tags.Where(r => r.Name.Contains(lowerText, StringComparison.CurrentCultureIgnoreCase));
+                tags = tags.Where(r => r.Contains(lowerText, StringComparison.CurrentCultureIgnoreCase));
             }
             
-            foreach (var tagInfo in tags.Skip(from).Take(count))
+            foreach (var tag in tags.Skip(from).Take(count))
             { 
-                yield return tagInfo.Name;
+                yield return tag;
             }
             
             yield break;

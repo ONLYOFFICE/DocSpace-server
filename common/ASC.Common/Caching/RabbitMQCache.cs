@@ -108,9 +108,9 @@ public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : new()
 
         if (_consumerChannel != null)
         {
-            var consumer = new EventingBasicConsumer(_consumerChannel);
+            var consumer = new AsyncEventingBasicConsumer(_consumerChannel);
 
-            consumer.Received += OnMessageReceived;
+            consumer.Received += AsyncConsumerOnReceived;
 
             await _consumerChannel.BasicConsumeAsync(queue: _queueName, autoAck: true, consumer: consumer);
         }
@@ -137,7 +137,7 @@ public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : new()
 
     public bool IsConnected => _connection is { IsOpen: true } && !_disposed;
 
-    private void OnMessageReceived(object sender, BasicDeliverEventArgs e)
+    private async Task AsyncConsumerOnReceived(object sender, BasicDeliverEventArgs e)
     {
         var body = e.Body.Span.ToArray();
 
@@ -151,6 +151,8 @@ public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : new()
         {
             Parallel.ForEach(onchange, a => a(obj));
         }
+
+        await Task.CompletedTask;
     }
 
     public async Task PublishAsync(T obj, CacheNotifyAction action)

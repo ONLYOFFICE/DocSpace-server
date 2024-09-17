@@ -237,7 +237,7 @@ public class ThirdpartyController(
 
         if (mustChangePassword)
         {
-            await studioNotifyService.UserPasswordChangeAsync(user);
+            await studioNotifyService.UserPasswordChangeAsync(user, true);
         }
 
         await userHelpTourHelper.SetIsNewUser(true);

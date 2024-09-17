@@ -34,7 +34,8 @@ public class InvitationValidator(
     IDbContextFactory<MessagesContext> dbContextFactory,
     EmailValidationKeyProvider emailValidationKeyProvider,
     UserManager userManager,
-    AuthManager authManager)
+    AuthManager authManager,
+    TenantManager tenantManager)
 {
     public TimeSpan IndividualLinkExpirationInterval => emailValidationKeyProvider.ValidEmailKeyInterval;
 
@@ -73,6 +74,30 @@ public class InvitationValidator(
             result.LinkType = InvitationLinkType.Common;
             result.ConfirmType = ConfirmType.LinkInvite;
 
+            if (!userId.HasValue)
+            {
+                return result;
+            }
+            
+            if (employeeType is not EmployeeType.DocSpaceAdmin)
+            {
+                return result;
+            }
+
+            var initiator = await userManager.GetUsersAsync(userId.Value);
+            if (initiator == null || initiator.Equals(Constants.LostUser))
+            {
+                result.Status = EmailValidationKeyProvider.ValidationResult.Invalid;
+                return result;
+            }
+
+            var tenant = await tenantManager.GetCurrentTenantAsync();
+            if (tenant != null && initiator.IsOwner(tenant))
+            {
+                return result;
+            }
+
+            result.Status = EmailValidationKeyProvider.ValidationResult.Invalid;
             return result;
         }
 

@@ -337,15 +337,10 @@ public sealed class UserManagerWrapper(
             throw new Exception(Resource.ErrorPasswordEmpty);
         }
 
-        var passwordSettingsObj = await settingsManager.LoadAsync<PasswordSettings>();
+        var passwordSettings = await settingsManager.LoadAsync<PasswordSettings>();
 
-        if (!passwordSettingsManager.CheckPasswordRegex(passwordSettingsObj, password) || !passwordSettingsManager.CheckLengthInRange(password.Length))
-        {
-            throw new Exception(GetPasswordHelpMessage(passwordSettingsObj));
-        }
+        passwordSettingsManager.CheckPassword(password, passwordSettings);
     }
-
-
 
     public async Task<string> SendUserPasswordAsync(string email)
     {
@@ -386,7 +381,7 @@ public sealed class UserManagerWrapper(
             return null;
         }
         
-        await studioNotifyService.UserPasswordChangeAsync(userInfo);
+        await studioNotifyService.UserPasswordChangeAsync(userInfo, false);
         return null;
     }
 
@@ -427,38 +422,6 @@ public sealed class UserManagerWrapper(
 
         await accountLinker.RemoveProviderAsync(profile.LinkId, profile.Provider, profile.HashId);
         return (false, Guid.Empty);
-    }
-
-    private static string GetPasswordHelpMessage(PasswordSettings passwordSettings)
-    {
-        var text = new StringBuilder();
-
-        text.Append($"{Resource.ErrorPasswordMessage} ");
-        text.AppendFormat(Resource.ErrorPasswordLength, passwordSettings.MinLength, PasswordSettingsManager.MaxLength);
-        text.Append($", {Resource.ErrorPasswordOnlyLatinLetters}");
-        text.Append($", {Resource.ErrorPasswordNoSpaces}");
-
-        if (passwordSettings.UpperCase)
-        {
-            text.Append($", {Resource.ErrorPasswordNoUpperCase}");
-        }
-
-        if (passwordSettings.Digits)
-        {
-            text.Append($", {Resource.ErrorPasswordNoDigits}");
-        }
-
-        if (passwordSettings.SpecSymbols)
-        {
-            text.Append($", {Resource.ErrorPasswordNoSpecialSymbols}");
-        }
-
-        return text.ToString();
-    }
-
-    public async Task<string> GetPasswordHelpMessageAsync()
-    {
-        return GetPasswordHelpMessage(await settingsManager.LoadAsync<PasswordSettings>());
     }
 
     #endregion
