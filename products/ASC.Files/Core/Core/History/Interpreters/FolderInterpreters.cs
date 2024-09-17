@@ -28,7 +28,7 @@ namespace ASC.Files.Core.Core.History.Interpreters;
 
 public class FolderCreatedInterpreter : ActionInterpreter
 {
-    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
     {
         var desc = GetAdditionalDescription(description);
 
@@ -38,7 +38,7 @@ public class FolderCreatedInterpreter : ActionInterpreter
 
 public class FolderMovedInterpreter : ActionInterpreter
 {
-    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
     {
         var splitTarget = target.Split(',');
         var desc = GetAdditionalDescription(description);
@@ -58,7 +58,7 @@ public class FolderMovedInterpreter : ActionInterpreter
 
 public class FolderRenamedInterpreter : ActionInterpreter
 {
-    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
     {
         var desc = GetAdditionalDescription(description);
         
@@ -69,7 +69,7 @@ public class FolderRenamedInterpreter : ActionInterpreter
 
 public class FolderCopiedInterpreter : ActionInterpreter
 {
-    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
     {
         var splitTarget = target.Split(',');
         var desc = GetAdditionalDescription(description);
@@ -89,7 +89,7 @@ public class FolderCopiedInterpreter : ActionInterpreter
 
 public class FolderDeletedInterpreter : ActionInterpreter
 {
-    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
     {
         return new ValueTask<HistoryData>(new EntryData(target, description[0]));
     }
@@ -97,7 +97,7 @@ public class FolderDeletedInterpreter : ActionInterpreter
 
 public class FolderIndexReorderedInterpreter : ActionInterpreter
 {
-    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
     {
         var desc = GetAdditionalDescription(description);
         var title = description[0];

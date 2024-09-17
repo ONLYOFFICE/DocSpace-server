@@ -45,27 +45,19 @@ public class WatermarkSettings
     public double ImageHeight { get; set; }
     public string ImageUrl { get; set; }
     public int ImageScale { get; set; }
+    public DateTime Created { get; set; }
 }
 
 [Scope]
-public class WatermarkManager
+public class WatermarkManager(
+    IDaoFactory daoFactory,
+    FileSecurity fileSecurity,
+    RoomLogoManager roomLogoManager,
+    FilesMessageService filesMessageService)
 {
-    private readonly IDaoFactory _daoFactory;
-    private readonly FileSecurity _fileSecurity;
-    private readonly RoomLogoManager _roomLogoManager;
-    public WatermarkManager(
-        IDaoFactory daoFactory,
-        FileSecurity fileSecurity,
-        RoomLogoManager roomLogoManager)
-    {
-        _daoFactory = daoFactory;
-        _fileSecurity = fileSecurity;
-        _roomLogoManager = roomLogoManager;
-    }
-
     public async Task<WatermarkSettings> SetWatermarkAsync<T>(T roomId, WatermarkRequestDto<T> watermarkRequestDto)
     {
-        var folderDao = _daoFactory.GetFolderDao<T>();
+        var folderDao = daoFactory.GetFolderDao<T>();
 
         var room = await folderDao.GetFolderAsync(roomId);
 
@@ -74,17 +66,18 @@ public class WatermarkManager
             throw new ItemNotFoundException();
         }
 
-        if (room.RootFolderType == FolderType.Archive || !await _fileSecurity.CanEditRoomAsync(room))
+        if (room.RootFolderType == FolderType.Archive || !await fileSecurity.CanEditRoomAsync(room))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
         }
 
-        var watermarkSettings = new WatermarkSettings()
+        var watermarkSettings = new WatermarkSettings
         {
             Enabled = watermarkRequestDto.Enabled,
             Text = watermarkRequestDto.Text,
             Additions = watermarkRequestDto.Additions,
-            Rotate = watermarkRequestDto.Rotate
+            Rotate = watermarkRequestDto.Rotate,
+            Created = DateTime.UtcNow
         };
 
         string imageUrl = null;
@@ -97,19 +90,19 @@ public class WatermarkManager
             }
             else
             {
-                imageUrl = await _roomLogoManager.CreateWatermarkImageAsync(room, watermarkRequestDto.ImageUrl);
+                imageUrl = await roomLogoManager.CreateWatermarkImageAsync(room, watermarkRequestDto.ImageUrl);
             }
         }
         else if (!Equals(watermarkRequestDto.ImageId, default(T)))
         {
-            var fileDao = _daoFactory.GetFileDao<T>();
+            var fileDao = daoFactory.GetFileDao<T>();
             var file = await fileDao.GetFileAsync(watermarkRequestDto.ImageId);
 
-            if (file != null && await _fileSecurity.CanReadAsync(file))
+            if (file != null && await fileSecurity.CanReadAsync(file))
             {
                 await using var stream = await fileDao.GetFileStreamAsync(file);
 
-                imageUrl = await _roomLogoManager.CreateWatermarkImageAsync(room, stream);
+                imageUrl = await roomLogoManager.CreateWatermarkImageAsync(room, stream);
             }
         }
 
@@ -123,6 +116,15 @@ public class WatermarkManager
 
         await folderDao.SetWatermarkSettings(watermarkSettings, room);
 
+        if (watermarkSettings.Enabled)
+        {
+            await filesMessageService.SendAsync(MessageAction.RoomWatermarkSet, room, room.Title, watermarkSettings.Created.GetHashCode().ToString());
+        }
+        else
+        {
+            await filesMessageService.SendAsync(MessageAction.RoomWatermarkDisabled, room, room.Title);
+        }
+
         return watermarkSettings;
     }
 
@@ -133,12 +135,12 @@ public class WatermarkManager
             throw new ItemNotFoundException();
         }
 
-        if (room.RootFolderType == FolderType.Archive || !await _fileSecurity.CanEditRoomAsync(room))
+        if (room.RootFolderType == FolderType.Archive || !await fileSecurity.CanEditRoomAsync(room))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
         }
 
-        var folderDao = _daoFactory.GetFolderDao<T>();
+        var folderDao = daoFactory.GetFolderDao<T>();
 
         var watermarkSettings = await folderDao.GetWatermarkSettings(room);
 
@@ -147,7 +149,7 @@ public class WatermarkManager
 
     public async Task<Folder<T>> DeleteWatermarkAsync<T>(T roomId)
     {
-        var folderDao = _daoFactory.GetFolderDao<T>();
+        var folderDao = daoFactory.GetFolderDao<T>();
 
         var room = await folderDao.GetFolderAsync(roomId);
 
@@ -156,14 +158,14 @@ public class WatermarkManager
             throw new ItemNotFoundException();
         }
 
-        if (room.RootFolderType == FolderType.Archive || !await _fileSecurity.CanEditRoomAsync(room))
+        if (room.RootFolderType == FolderType.Archive || !await fileSecurity.CanEditRoomAsync(room))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
         }
 
         await folderDao.DeleteWatermarkSettings(room);
 
-        await _roomLogoManager.DeleteWatermarkImageAsync(room);
+        await roomLogoManager.DeleteWatermarkImageAsync(room);
 
         return room;
     }

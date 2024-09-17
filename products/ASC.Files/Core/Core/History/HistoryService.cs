@@ -88,6 +88,8 @@ public class HistoryService(
         MessageAction.RoomUnarchived,
         MessageAction.RoomDenyDownloadEnabled,
         MessageAction.RoomDenyDownloadDisabled,
+        MessageAction.RoomWatermarkSet,
+        MessageAction.RoomWatermarkDisabled,
         MessageAction.PrimaryExternalLinkCopied
     ];
     
@@ -136,7 +138,7 @@ public class HistoryService(
         var history = query
             .Select(x => x.Event)
             .ToAsyncEnumerable()
-            .SelectAwait(interpreter.ToHistoryAsync);
+            .SelectAwait(x => interpreter.ToHistoryAsync(x, entry));
 
         await foreach (var hEntry in history)
         {

@@ -40,14 +40,14 @@ public abstract class ActionInterpreter
         { MessageAction.FileUploadedWithOverwriting, MessageAction.UserFileUpdated }
     }.ToFrozenDictionary();
     
-    public async ValueTask<HistoryEntry> InterpretAsync(DbAuditEvent @event, IServiceProvider serviceProvider)
+    public async ValueTask<HistoryEntry> InterpretAsync(DbAuditEvent @event, FileEntry<int> entry, IServiceProvider serviceProvider)
     {
         var messageAction = @event.Action.HasValue ? (MessageAction)@event.Action.Value : MessageAction.None;
         var processedAction = _aliases.GetValueOrDefault(messageAction, messageAction);
         var key = processedAction != MessageAction.None ? processedAction.ToStringFast() : null;
         
         var description = JsonSerializer.Deserialize<List<string>>(@event.DescriptionRaw);
-        var data = await GetDataAsync(serviceProvider, @event.Target, description);
+        var data = await GetDataAsync(serviceProvider, @event.Target, description, entry);
         
         var initiatorId = @event.UserId ?? ASC.Core.Configuration.Constants.Guest.ID;
         string initiatorName = null;
@@ -59,7 +59,7 @@ public abstract class ActionInterpreter
                 : data.InitiatorName;
         }
         
-        var entry = new HistoryEntry
+        var historyEntry = new HistoryEntry
         {
             Action = new HistoryAction(processedAction, key),
             InitiatorId = initiatorId,
@@ -68,7 +68,7 @@ public abstract class ActionInterpreter
             Data = data
         };
 
-        return entry;
+        return historyEntry;
     }
     
     protected static EventDescription<int> GetAdditionalDescription(List<string> description)
@@ -76,7 +76,7 @@ public abstract class ActionInterpreter
         return JsonSerializer.Deserialize<EventDescription<int>>(description.Last());
     }
 
-    protected abstract ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description);
+    protected abstract ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry);
 }
 
 public record EntryData : HistoryData
@@ -209,7 +209,7 @@ public record IndexChangedData : EntryData
 
 public class IndexChangedInterpreter : ActionInterpreter
 {
-    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
     {
         var oldIndex = int.Parse(description[1]);
         var newIndex = int.Parse(description[2]);
@@ -222,7 +222,7 @@ public class IndexChangedInterpreter : ActionInterpreter
 
 public class PrimaryLinkCopiedInterpreter : ActionInterpreter
 {
-    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
     {
         var desc = GetAdditionalDescription(description);
 

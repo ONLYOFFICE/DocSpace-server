@@ -891,4 +891,10 @@
   <data name="PrimaryExternalLinkCopied" xml:space="preserve">
     <value>Primary link copied: {1}</value>
   </data>
+  <data name="RoomWatermarkSet" xml:space="preserve">
+    <value>Room: {0}. Watermark enabled</value>
+  </data>
+  <data name="RoomWatermarkDisabled" xml:space="preserve">
+    <value>Room: {0}. Watermark disabled</value>
+  </data>
 </root>

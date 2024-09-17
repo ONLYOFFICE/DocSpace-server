@@ -80,6 +80,7 @@ public record HistoryEntry
 [JsonDerivedType(typeof(UserFileUpdateData))]
 [JsonDerivedType(typeof(LifeTimeHistoryData))]
 [JsonDerivedType(typeof(IndexChangedData))]
+[JsonDerivedType(typeof(WatermarkData))]
 public abstract record HistoryData
 {
     public virtual int GetId() => 0;

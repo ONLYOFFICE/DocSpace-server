@@ -68,6 +68,8 @@ internal class FolderDao(
     private const string Projects = "projects";
     private const string VirtualRooms = "virtualrooms";
     private const string Archive = "archive";
+    
+    private static readonly JsonSerializerOptions _serializerOptions = new() { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault };
 
     public virtual async Task<Folder<int>> GetFolderAsync(int folderId)
     {
@@ -546,7 +548,7 @@ internal class FolderDao(
 
         var toUpdate = await filesDbContext.RoomSettingsAsync(tenantId, room.Id);
 
-        toUpdate.Watermark = JsonSerializer.Serialize(watermarkSettings);
+        toUpdate.Watermark = JsonSerializer.Serialize(watermarkSettings, _serializerOptions);
         filesDbContext.Update(toUpdate);
 
         await filesDbContext.SaveChangesAsync();

@@ -252,6 +252,9 @@ public enum MessageAction
     RoomDenyDownloadDisabled = 5110,
     
     PrimaryExternalLinkCopied = 5111,
+    
+    RoomWatermarkSet = 5112,
+    RoomWatermarkDisabled = 5113,
 
     #endregion
 

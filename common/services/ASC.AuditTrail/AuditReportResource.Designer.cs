@@ -1806,6 +1806,24 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Room: {0}. Watermark disabled.
+        /// </summary>
+        public static string RoomWatermarkDisabled {
+            get {
+                return ResourceManager.GetString("RoomWatermarkDisabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Room: {0}. Watermark enabled.
+        /// </summary>
+        public static string RoomWatermarkSet {
+            get {
+                return ResourceManager.GetString("RoomWatermarkSet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Send.
         /// </summary>
         public static string SendActionType {

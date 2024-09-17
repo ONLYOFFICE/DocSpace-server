@@ -97,13 +97,15 @@ public class AuditInterpreter(IServiceProvider serviceProvider)
         { (int)MessageAction.FileUnlocked, _fileLockInterpreter },
         { (int)MessageAction.RoomDenyDownloadEnabled, _roomDenyDownloadInterpreter },
         { (int)MessageAction.RoomDenyDownloadDisabled, _roomDenyDownloadInterpreter },
-        { (int)MessageAction.PrimaryExternalLinkCopied, new PrimaryLinkCopiedInterpreter() }
+        { (int)MessageAction.PrimaryExternalLinkCopied, new PrimaryLinkCopiedInterpreter() },
+        { (int)MessageAction.RoomWatermarkSet, new RoomWatermarkSetInterpreter() },
+        { (int)MessageAction.RoomWatermarkDisabled, new RoomWatermarkDisabledInterpreter() }
     }.ToFrozenDictionary();
     
-    public ValueTask<HistoryEntry> ToHistoryAsync(DbAuditEvent @event)
+    public ValueTask<HistoryEntry> ToHistoryAsync(DbAuditEvent @event, FileEntry<int> entry)
     {
         return !_interpreters.TryGetValue(@event.Action ?? -1, out var interpreter) 
             ? ValueTask.FromResult<HistoryEntry>(null) 
-            : interpreter.InterpretAsync(@event, serviceProvider);
+            : interpreter.InterpretAsync(@event, entry, serviceProvider);
     }
 }
