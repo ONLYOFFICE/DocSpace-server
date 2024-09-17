@@ -65,26 +65,34 @@ public class HistoryDtoHelper(EmployeeFullDtoHelper employeeFullDtoHelper, UserM
 }
 
 [Scope]
-public class HistoryApiHelper(HistoryService historyService, HistoryDtoHelper historyDtoHelper, ApiContext apiContext)
+public class HistoryApiHelper(HistoryService historyService, HistoryDtoHelper historyDtoHelper, ApiContext apiContext, TenantUtil tenantUtil)
 {
-    public IAsyncEnumerable<HistoryDto> GetFileHistoryAsync(int fileId)
+    public IAsyncEnumerable<HistoryDto> GetFileHistoryAsync(int fileId, ApiDateTime fromDate, ApiDateTime toDate)
     {
-        return GetEntryHistoryAsync(fileId, FileEntryType.File);
+        return GetEntryHistoryAsync(fileId, FileEntryType.File, fromDate, toDate);
     }
 
-    public IAsyncEnumerable<HistoryDto> GetFolderHistoryAsync(int folderId)
+    public IAsyncEnumerable<HistoryDto> GetFolderHistoryAsync(int folderId, ApiDateTime fromDate, ApiDateTime toDate)
     {
-        return GetEntryHistoryAsync(folderId, FileEntryType.Folder);
+        return GetEntryHistoryAsync(folderId, FileEntryType.Folder, fromDate, toDate);
     }
     
-    private async IAsyncEnumerable<HistoryDto> GetEntryHistoryAsync(int entryId, FileEntryType entryType)
+    private async IAsyncEnumerable<HistoryDto> GetEntryHistoryAsync(int entryId, FileEntryType entryType, ApiDateTime fromDate, ApiDateTime toDate)
     {
         var offset = Convert.ToInt32(apiContext.StartIndex);
         var count = Convert.ToInt32(apiContext.Count);
         
-        var totalCountTask = historyService.GetHistoryCountAsync(entryId, entryType);
+        var fromDateUtc = fromDate != null 
+            ? tenantUtil.DateTimeToUtc(fromDate) 
+            : (DateTime?)null;
+        
+        var toDateUtc = toDate != null 
+            ? tenantUtil.DateTimeToUtc(toDate) 
+            : (DateTime?)null;
+        
+        var totalCountTask = historyService.GetHistoryCountAsync(entryId, entryType, fromDateUtc, toDateUtc);
 
-        var histories = historyService.GetHistoryAsync(entryId, entryType, offset, count)
+        var histories = historyService.GetHistoryAsync(entryId, entryType, fromDateUtc, toDateUtc, offset, count)
             .GroupByAwait(x => ValueTask.FromResult(x.GetGroupId()),
                 async (_, group) =>
                 {

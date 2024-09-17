@@ -91,7 +91,7 @@ public class HistoryService(
         MessageAction.PrimaryExternalLinkCopied
     ];
     
-    public async IAsyncEnumerable<HistoryEntry> GetHistoryAsync(int entryId, FileEntryType entryType, int offset, int count)
+    public async IAsyncEnumerable<HistoryEntry> GetHistoryAsync(int entryId, FileEntryType entryType, DateTime? fromDate, DateTime? toDate, int offset, int count)
     {
         FileEntry<int> entry = entryType switch
         {
@@ -119,19 +119,71 @@ public class HistoryService(
         var messageDbContext = await dbContextFactory.CreateDbContextAsync();
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
-        var events = messageDbContext.GetAuditEventsByReferences(tenantId, entryId, (byte)entryType, offset, count);
+        var query = GetHistoryEventQuery(entryId, entryType, fromDate, toDate, messageDbContext, tenantId);
 
-        await foreach (var hEntry in events.SelectAwait(interpreter.ToHistoryAsync).Where(x => x != null))
+        query = query.OrderByDescending(x => x.Event.Date);
+        
+        if (offset > 0)
+        {
+            query = query.Skip(offset);
+        }
+        
+        if (count > 0)
+        {
+            query = query.Take(count);
+        }
+
+        var history = query
+            .Select(x => x.Event)
+            .ToAsyncEnumerable()
+            .SelectAwait(interpreter.ToHistoryAsync);
+
+        await foreach (var hEntry in history)
         {
             yield return hEntry;
         }
     }
 
-    public async Task<int> GetHistoryCountAsync(int entryId, FileEntryType entryType)
+    public async Task<int> GetHistoryCountAsync(int entryId, FileEntryType entryType, DateTime? fromDate, DateTime? toDate)
     {
         var messageDbContext = await dbContextFactory.CreateDbContextAsync();
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        
+        var query = GetHistoryEventQuery(entryId, entryType, fromDate, toDate, messageDbContext, tenantId);
+        
+        return await query.CountAsync();
+    }
+    
+    private static IQueryable<HistoryEvent> GetHistoryEventQuery(
+        int entryId,
+        FileEntryType entryType,
+        DateTime? fromDate,
+        DateTime? toDate,
+        MessagesContext messageDbContext,
+        int tenantId)
+    {
+        var query = messageDbContext.AuditEvents.Join(
+                messageDbContext.FilesAuditReferences,
+                e => e.Id,
+                r => r.AuditEventId, (@event, reference) => new HistoryEvent { Event = @event, Reference = reference })
+            .Where(x => x.Event.TenantId == tenantId && x.Reference.EntryId == entryId && x.Reference.EntryType == (byte)entryType);
+        
+        if (fromDate.HasValue)
+        {
+            query = query.Where(x => x.Event.Date >= fromDate.Value);
+        }
+        
+        if (toDate.HasValue)
+        {
+            query = query.Where(x => x.Event.Date <= toDate.Value);
+        }
 
-        return await messageDbContext.GetAuditEventsByReferencesTotalCount(tenantId, entryId, (byte)entryType);
+        return query;
+    }
+
+    private record HistoryEvent
+    {
+        public DbAuditEvent Event { get; init; }
+        public DbFilesAuditReference Reference { get; init; }
     }
 }

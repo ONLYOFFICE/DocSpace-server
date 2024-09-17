@@ -56,14 +56,16 @@ public class FoldersControllerInternal(
     /// </short>
     /// <category>Folders</category>
     /// <param type="System.Int32, System" name="folderId">Folder ID</param>
+    /// <param type="ASC.Api.Core.ApiDateTime, ASC.Api.Core" name="fromDate">Start date</param>
+    /// <param type="ASC.Api.Core.ApiDateTime, ASC.Api.Core" name="toDate">End date</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.HistoryDto, ASC.Files.Core">List of actions in the folder</returns>
     /// <path>api/2.0/files/folder/{folderId}/log</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [HttpGet("folder/{folderId:int}/log")]
-    public IAsyncEnumerable<HistoryDto> GetHistoryAsync(int folderId)
+    public IAsyncEnumerable<HistoryDto> GetHistoryAsync(int folderId, ApiDateTime fromDate, ApiDateTime toDate)
     {
-        return historyApiHelper.GetFolderHistoryAsync(folderId);
+        return historyApiHelper.GetFolderHistoryAsync(folderId, fromDate, toDate);
     }
 }
 
