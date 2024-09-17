@@ -38,7 +38,7 @@ public class DbHelper(IDbContextFactory<WebstudioDbContext> activeDirectoryDbCon
         var data = await activeDirectoryDbContext.WebstudioSettings
             .Where(r => r.Id == id)
             .Join(activeDirectoryDbContext.Tenants, r => r.TenantId, r => r.Id, (settings, tenant) => new { settings, tenant })
-            .Select(r => DbFunctionsExtension.JsonValue(nameof(r.settings.Data).ToLower(), enableLdapAuthentication.ToString()))
+            .Select(r => DbFunctionsExtension.JsonExtract(nameof(r.settings.Data).ToLower(), enableLdapAuthentication.ToString()))
             .Distinct()
             .Select(r => r != null ? Convert.ToInt32(r) : 0)
             .ToListAsync();
