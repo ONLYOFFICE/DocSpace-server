@@ -459,6 +459,7 @@ internal class FolderDao(
                     Color = folder.SettingsColor,
                     Indexing = folder.SettingsIndexing,
                     DenyDownload = folder.SettingsDenyDownload,
+                    Watermark = folder.SettingsWatermark,
                     Quota = folder.SettingsQuota,
                     Lifetime = mapper.Map<RoomDataLifetime, DbRoomDataLifetime>(folder.SettingsLifetime)
                 };
@@ -500,6 +501,7 @@ internal class FolderDao(
                     Color = folder.SettingsColor,
                     Indexing = folder.SettingsIndexing,
                     DenyDownload = folder.SettingsDenyDownload,
+                    Watermark = folder.SettingsWatermark,
                     Quota = folder.SettingsQuota,
                     Lifetime = mapper.Map<RoomDataLifetime, DbRoomDataLifetime>(folder.SettingsLifetime)
                 };
@@ -809,6 +811,13 @@ internal class FolderDao(
             folder.FolderType == FolderType.InProcessFormFolder ||
             folder.FolderType == FolderType.FormFillingFolderDone || 
             folder.FolderType == FolderType.FormFillingFolderInProgress) ? FolderType.DEFAULT : folder.FolderType;
+        copy.SettingsColor = folder.SettingsColor;
+        copy.SettingsIndexing = folder.SettingsIndexing;
+        copy.SettingsLifetime = folder.SettingsLifetime;
+        copy.SettingsQuota = folder.SettingsQuota;
+        copy.SettingsWatermark = folder.SettingsWatermark;
+        copy.SettingsDenyDownload = folder.SettingsDenyDownload;
+        copy.SettingsHasLogo = folder.SettingsHasLogo;
         copy = await GetFolderAsync(await SaveFolderAsync(copy));
         var tagDao = daoFactory.GetTagDao<int>();
         var tags = await tagDao.GetTagsAsync(folder.Id, FileEntryType.Folder, TagType.Custom).ToListAsync();
