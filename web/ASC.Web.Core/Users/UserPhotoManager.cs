@@ -427,7 +427,7 @@ public class UserPhotoManager(UserManager userManager,
         {
             try
             {
-                var listFileNames = await (await GetDataStoreAsync()).ListFilesRelativeAsync("", "", "*", false).ToArrayAsync();
+                var listFileNames = await (await GetDataStoreAsync()).ListFilesRelativeAsync("", "", "*.*", false).ToArrayAsync();
                 foreach (var fileName in listFileNames)
                 {
                     //Try parse fileName
