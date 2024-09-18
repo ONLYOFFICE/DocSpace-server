@@ -32,7 +32,7 @@ public static class ArabicNumeralHelper
     {
         if (!new[] { "ar-lb", "ar-SA" }.Contains(Thread.CurrentThread.CurrentCulture.Name))
         {
-            return input.ToString(format, CultureInfo.InvariantCulture);
+            return input.ToString(format, Thread.CurrentThread.CurrentCulture);
         }
         
         var result = input.ToString(format, new CultureInfo("ar"));

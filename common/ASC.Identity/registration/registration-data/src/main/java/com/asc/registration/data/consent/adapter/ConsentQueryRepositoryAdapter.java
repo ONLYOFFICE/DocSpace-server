@@ -34,10 +34,12 @@ import com.asc.registration.data.client.mapper.ClientDataAccessMapper;
 import com.asc.registration.data.consent.mapper.ConsentDataAccessMapper;
 import com.asc.registration.service.ports.output.repository.ConsentQueryRepository;
 import com.asc.registration.service.transfer.response.PageableResponse;
+import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -66,7 +68,7 @@ public class ConsentQueryRepositoryAdapter implements ConsentQueryRepository {
 
     var consents =
         jpaConsentRepository.findAllConsentsByPrincipalId(
-            principalId, Pageable.ofSize(limit).withPage(page));
+            principalId, PageRequest.of(page, limit, Sort.by("modifiedAt").descending()));
 
     var builder =
         PageableResponse.<ClientConsent>builder()
@@ -78,7 +80,7 @@ public class ConsentQueryRepositoryAdapter implements ConsentQueryRepository {
                         c ->
                             consentDataAccessMapper.toClientConsent(
                                 c, clientDataAccessMapper.toDomain(c.getClient())))
-                    .collect(Collectors.toSet()));
+                    .collect(Collectors.toCollection(LinkedHashSet::new)));
 
     if (consents.hasPrevious()) builder.previous(page - 1);
 
@@ -102,7 +104,9 @@ public class ConsentQueryRepositoryAdapter implements ConsentQueryRepository {
 
     var consents =
         jpaConsentRepository.findAllConsentsByPrincipalIdAndTenant(
-            principalId, tenantId.getValue(), Pageable.ofSize(limit).withPage(page));
+            principalId,
+            tenantId.getValue(),
+            PageRequest.of(page, limit, Sort.by("modifiedAt").descending()));
 
     var builder =
         PageableResponse.<ClientConsent>builder()
@@ -114,7 +118,7 @@ public class ConsentQueryRepositoryAdapter implements ConsentQueryRepository {
                         c ->
                             consentDataAccessMapper.toClientConsent(
                                 c, clientDataAccessMapper.toDomain(c.getClient())))
-                    .collect(Collectors.toSet()));
+                    .collect(Collectors.toCollection(LinkedHashSet::new)));
 
     if (consents.hasPrevious()) builder.previous(page - 1);
 

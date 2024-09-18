@@ -81,7 +81,7 @@ public class StudioNotifyService(
 
     #region User Password
 
-    public async Task UserPasswordChangeAsync(UserInfo userInfo)
+    public async Task UserPasswordChangeAsync(UserInfo userInfo, bool initialPasswordAssignment)
     {
         var auditEventDate = DateTime.UtcNow;
 
@@ -99,9 +99,9 @@ public class StudioNotifyService(
 
         var confirmationUrl = await commonLinkUtility.GetConfirmationEmailUrlAsync(userInfo.Email, ConfirmType.PasswordChange, hash, userInfo.Id);
 
-        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonChangePassword", await GetCulture(userInfo));
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString(initialPasswordAssignment ? "ButtonSetPassword" : "ButtonChangePassword", await GetCulture(userInfo));
 
-        var action = Actions.PasswordChangeV115;
+        var action = initialPasswordAssignment ? Actions.PasswordSet : Actions.PasswordChangeV115;
 
         await studioNotifyServiceHelper.SendNoticeToAsync(
                 action,
@@ -308,7 +308,7 @@ public class StudioNotifyService(
         await studioNotifyServiceHelper.SendNoticeAsync(Actions.UserHasJoin);
     }
 
-    public async Task SendJoinMsgAsync(string email, EmployeeType emplType, string culture)
+    public async Task SendJoinMsgAsync(string email, EmployeeType emplType, string culture, bool limitation = false)
     {
         var inviteUrl = await commonLinkUtility.GetConfirmationEmailUrlAsync(email, ConfirmType.EmpInvite, (int)emplType + "trust") + $"&emplType={(int)emplType}";
         var shortLink = await urlShortener.GetShortenLinkAsync(inviteUrl);
@@ -331,6 +331,11 @@ public class StudioNotifyService(
             await studioNotifyHelper.RecipientFromEmailAsync(email, false),
             [EMailSenderName],
             tags.ToArray());
+        
+        if (limitation)
+        {
+            await userInvitationLimitHelper.ReduceLimit();
+        }
     }
 
     public async Task UserInfoAddedAfterInviteAsync(UserInfo newUserInfo)

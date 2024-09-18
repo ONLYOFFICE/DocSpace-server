@@ -186,7 +186,7 @@ public class ThirdpartyController(
         }
         
         var model = emailValidationKeyModelHelper.GetModel();
-        var linkData = await invitationService.GetLinkDataAsync(inDto.Key, inDto.Email, inDto.EmployeeType ?? EmployeeType.RoomAdmin, model?.UiD);
+        var linkData = await invitationService.GetLinkDataAsync(inDto.Key, inDto.Email, null, inDto.EmployeeType ?? EmployeeType.RoomAdmin, model?.UiD);
 
         if (!linkData.IsCorrect)
         {
@@ -209,7 +209,7 @@ public class ThirdpartyController(
                 GetEmailAddress(inDto, thirdPartyProfile), 
                 passwordHash, 
                 employeeType, 
-                true, 
+                false, 
                 invitedByEmail,
                 inDto.Culture,
                 model?.UiD);
@@ -237,7 +237,7 @@ public class ThirdpartyController(
 
         if (mustChangePassword)
         {
-            await studioNotifyService.UserPasswordChangeAsync(user);
+            await studioNotifyService.UserPasswordChangeAsync(user, true);
         }
 
         await userHelpTourHelper.SetIsNewUser(true);
@@ -385,19 +385,13 @@ public class ThirdpartyController(
 
     private static string GetMeaningfulProviderName(string providerName)
     {
-        switch (providerName)
+        return providerName switch
         {
-            case "google":
-            case "openid":
-                return "Google";
-            case "facebook":
-                return "Facebook";
-            case "twitter":
-                return "Twitter";
-            case "linkedin":
-                return "LinkedIn";
-            default:
-                return "Unknown Provider";
-        }
+            "google" or "openid" => "Google",
+            "facebook" => "Facebook",
+            "twitter" => "Twitter",
+            "linkedin" => "LinkedIn",
+            _ => "Unknown Provider"
+        };
     }
 }

@@ -100,9 +100,7 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
         try
         {
             var tenant = await tenantManager.GetTenantAsync(tenantId);
-            if (tenant == null ||
-                tenant.Status != TenantStatus.Active ||
-                !TimeToSendWhatsNew(tenantUtil.DateTimeFromUtc(tenant.TimeZone, scheduleDate), whatsNewType))
+            if (tenant is not { Status: TenantStatus.Active } || !TimeToSendWhatsNew(tenantUtil.DateTimeFromUtc(tenant.TimeZone, scheduleDate), whatsNewType))
             {
                 return;
             }
@@ -158,13 +156,13 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
 
                 var action = whatsNewType == WhatsNewType.RoomsActivity ? Actions.RoomsActivity : Actions.SendWhatsNew;
 
-                if (userActivities.Any())
+                if (userActivities.Count != 0)
                 {
                     _log.InformationSendWhatsNewTo(user.Email);
                     await client.SendNoticeAsync(
                         action, null, user,
                         new TagValue(Tags.Activities, userActivities),
-                        new TagValue(Tags.Date, DateToString(scheduleDate, whatsNewType, culture)),
+                        new TagValue(Tags.Date, DateToString(scheduleDate, whatsNewType)),
                         new TagValue(CommonTags.Priority, 1)
                     );
                 }
@@ -320,15 +318,10 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
         return currentTime.Hour == hourToSend;
     }
 
-    private static string DateToString(DateTime d, WhatsNewType type, CultureInfo c)
+    private static string DateToString(DateTime d, WhatsNewType type)
     {
         d = type == WhatsNewType.DailyFeed ? d.AddDays(-1) : d.AddHours(-1);
 
-        if (c.TwoLetterISOLanguageName == "ru")
-        {
-            return d.ToString("d MMMM", c);
-        }
-        
         return d.ConvertNumerals("M");
     }
 }

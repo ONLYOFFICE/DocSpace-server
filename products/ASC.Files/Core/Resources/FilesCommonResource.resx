@@ -559,4 +559,7 @@ Highest compatibility with docx, xlsx, pptx.</value>
   <data name="FormNumber" xml:space="preserve">
     <value>Form number</value>
   </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>External user</value>
+  </data>
 </root>

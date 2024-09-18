@@ -68,7 +68,10 @@ public class EventBusActiveMQ : IEventBus, IDisposable
 
     private async Task InitializeAsync()
     {
-        if (_consumerSession is not null) return;
+        if (_consumerSession is not null)
+        {
+            return;
+        }
 
         _consumerSession = await CreateConsumerSessionAsync();
     }
@@ -240,7 +243,7 @@ public class EventBusActiveMQ : IEventBus, IDisposable
 
             await ProcessEventAsync(eventName, @event);
                
-            streamMessage.Acknowledge();
+            await streamMessage.AcknowledgeAsync();
         }
         catch (IntegrationEventRejectExeption ex)
         {
@@ -249,7 +252,7 @@ public class EventBusActiveMQ : IEventBus, IDisposable
             if (_rejectedEvents.TryPeek(out var result) && result.Equals(ex.EventId))
             {
                 _rejectedEvents.TryDequeue(out _);
-                streamMessage.Acknowledge();
+                await streamMessage.AcknowledgeAsync();
             }
             else
             {
@@ -261,7 +264,7 @@ public class EventBusActiveMQ : IEventBus, IDisposable
         {
             _logger.WarningProcessingMessage(message, ex);
 
-            streamMessage.Acknowledge();
+            await streamMessage.AcknowledgeAsync();
         }
     }
 

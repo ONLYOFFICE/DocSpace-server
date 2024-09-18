@@ -36,8 +36,8 @@ public class LdapUserImporter(
         LdapObjectExtension ldapObjectExtension)
     : IDisposable
 {
-    public List<LdapObject> AllDomainUsers { get; private set; } = new();
-    public List<LdapObject> AllDomainGroups { get; private set; } = new();
+    public List<LdapObject> AllDomainUsers { get; private set; } = [];
+    public List<LdapObject> AllDomainGroups { get; private set; } = [];
 
     public Dictionary<LdapObject, LdapSettingsStatus> AllSkipedDomainUsers { get; private set; } = new();
     public Dictionary<LdapObject, LdapSettingsStatus> AllSkipedDomainGroups { get; private set; } = new();
@@ -73,7 +73,7 @@ public class LdapUserImporter(
     public LdapHelper LdapHelper { get; private set; } = novellLdapHelper;
     public LdapLocalization Resource { get; private set; }
 
-    private List<string> _watchedNestedGroups = new();
+    private List<string> _watchedNestedGroups = [];
 
     private UserManager UserManager { get; set; } = userManager;
 
@@ -103,12 +103,12 @@ public class LdapUserImporter(
     {
         if (!Settings.GroupMembership)
         {
-            return new List<GroupInfo>();
+            return [];
         }
 
         if (AllDomainGroups.Count == 0 && !TryLoadLDAPGroups())
         {
-            return new List<GroupInfo>();
+            return [];
         }
 
         var groups = new List<GroupInfo>();
@@ -164,7 +164,7 @@ public class LdapUserImporter(
 
                     if (clearCache)
                     {
-                        _watchedNestedGroups = new List<string>();
+                        _watchedNestedGroups = [];
                     }
 
                     if (_watchedNestedGroups.Contains(nestedLdapGroup.DistinguishedName))
@@ -862,22 +862,17 @@ public class LdapUserImporter(
 
             logger.DebugFindLdapUsers(login, ldapUsers.Count);
 
-            foreach (var ldapUser in ldapUsers)
+            foreach (var (ldapUserInfo, ldapUserObject) in ldapUsers)
             {
                 string currentLogin = null;
                 try
                 {
-                    var ldapUserInfo = ldapUser.Item1;
-                    var ldapUserObject = ldapUser.Item2;
-
-                    if (ldapUserInfo.Equals(Constants.LostUser)
-                        || ldapUserObject == null)
+                    if (ldapUserInfo.Equals(Constants.LostUser) || ldapUserObject == null)
                     {
                         continue;
                     }
 
-                    if (string.IsNullOrEmpty(ldapUserObject.DistinguishedName)
-                        || string.IsNullOrEmpty(ldapUserObject.Sid))
+                    if (string.IsNullOrEmpty(ldapUserObject.DistinguishedName) || string.IsNullOrEmpty(ldapUserObject.Sid))
                     {
                         logger.DebugLdapUserImporterFailed(login, ldapUserObject.Sid);
                         continue;

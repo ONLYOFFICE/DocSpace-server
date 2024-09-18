@@ -137,7 +137,15 @@ public class LdapObjectExtension(TenantUtil tenantUtil, SettingsManager settings
         var skype = GetContacts(ldapUser, Mapping.Skype, settings);
 
         var quotaSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
-        var quota = settings.LdapMapping.TryGetValue(Mapping.UserQuotaLimit, out var value8) ? ByteConverter.ConvertSizeToBytes(GetAttribute(ldapUser, value8)) : quotaSettings.DefaultQuota;
+        var quota = quotaSettings.DefaultQuota;
+        if (settings.LdapMapping.TryGetValue(Mapping.UserQuotaLimit, out var value8))
+        {
+            var quotaAttr = GetAttribute(ldapUser, value8);
+            if (long.TryParse(quotaAttr, out var resultQuota))
+            {
+                quota = resultQuota;
+            }
+        }
 
         if (string.IsNullOrEmpty(userName))
         {
@@ -203,17 +211,12 @@ public class LdapObjectExtension(TenantUtil tenantUtil, SettingsManager settings
             }
             else
             {
-                switch (gender.ToLowerInvariant())
+                user.Sex = gender.ToLowerInvariant() switch
                 {
-                    case "male":
-                    case "m":
-                        user.Sex = true;
-                        break;
-                    case "female":
-                    case "f":
-                        user.Sex = false;
-                        break;
-                }
+                    "male" or "m" => true,
+                    "female" or "f" => false,
+                    _ => user.Sex
+                };
             }
         }
 

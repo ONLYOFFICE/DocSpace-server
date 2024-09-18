@@ -372,7 +372,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                     if (payer.Id != Constants.LostUser.Id && !users.Any(u => u.Id == payer.Id))
                     {
-                        users = users.Concat(new[] { payer });
+                        users = users.Concat([payer]);
                     }
                 }
                 var asyncUsers = users.ToAsyncEnumerable();

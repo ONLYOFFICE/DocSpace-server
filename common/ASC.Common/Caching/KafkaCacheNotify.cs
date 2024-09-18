@@ -120,15 +120,14 @@ public class KafkaCacheNotify<T> : IDisposable, ICacheNotify<T> where T : new()
                 {
                     //TODO: must add checking exist
                     await adminClient.CreateTopicsAsync(
-                        new TopicSpecification[]
-                        {
-                            new()
+                    [
+                        new()
                             {
                                 Name = channelName,
                                 NumPartitions = 1,
                                 ReplicationFactor = 1
                             }
-                        });
+                    ]);
                 }
                 catch (AggregateException) { }
             }

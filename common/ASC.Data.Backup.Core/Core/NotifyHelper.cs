@@ -143,7 +143,7 @@ public class NotifyHelper(UserManager userManager,
             .Where(u => u.ActivationStatus.HasFlag(EmployeeActivationStatus.Activated))
             .ToArray();
 
-        if (users.Any())
+        if (users.Length != 0)
         {
             var args = CreateArgsAsync(region, url);
             if (action.Equals(Actions.MigrationPortalSuccessV115))

@@ -169,7 +169,7 @@ public class ReassignProgressItem(IServiceScopeFactory serviceScopeFactory) : Di
 
         if (_httpHeaders != null)
         {
-            await messageService.SendHeadersMessageAsync(MessageAction.UserDataReassigns, MessageTarget.Create(FromUser), _httpHeaders, new[] { fromUserName, toUserName });
+            await messageService.SendHeadersMessageAsync(MessageAction.UserDataReassigns, MessageTarget.Create(FromUser), _httpHeaders, [fromUserName, toUserName]);
         }
         else
         {

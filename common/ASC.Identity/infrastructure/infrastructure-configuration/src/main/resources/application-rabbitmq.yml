@@ -1,5 +1,6 @@
 spring:
   rabbitmq:
+    addresses: ${RABBIT_URI:amqp://guest:guest@localhost/}
     host: ${RABBIT_HOST:localhost}
     listener:
       simple:

@@ -411,3 +411,5 @@ public interface IFolderDao<T>
     
     #endregion
 }
+
+public interface ICacheFolderDao<T> : IFolderDao<T>;

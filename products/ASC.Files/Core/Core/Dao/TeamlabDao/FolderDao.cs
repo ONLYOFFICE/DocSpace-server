@@ -68,7 +68,7 @@ internal class FolderDao(
     private const string VirtualRooms = "virtualrooms";
     private const string Archive = "archive";
 
-    public async Task<Folder<int>> GetFolderAsync(int folderId)
+    public virtual async Task<Folder<int>> GetFolderAsync(int folderId)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
@@ -361,7 +361,7 @@ internal class FolderDao(
         }
     }
 
-    public async IAsyncEnumerable<Folder<int>> GetParentFoldersAsync(int folderId)
+    public virtual async IAsyncEnumerable<Folder<int>> GetParentFoldersAsync(int folderId)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
@@ -504,7 +504,7 @@ internal class FolderDao(
             //itself link
             List<DbFolderTree> treeToAdd =
             [
-                new DbFolderTree { FolderId = folder.Id, ParentId = folder.Id, Level = 0 }
+                new() { FolderId = folder.Id, ParentId = folder.Id, Level = 0 }
             ];
             
             //full path to root
@@ -762,10 +762,12 @@ internal class FolderDao(
         copy.RootCreateBy = toFolder.RootCreateBy;
         copy.RootFolderType = toFolder.RootFolderType;
         copy.Title = folder.Title;
-        copy.FolderType = (folder.FolderType == FolderType.ReadyFormFolder || 
-            folder.FolderType == FolderType.InProcessFormFolder ||
-            folder.FolderType == FolderType.FormFillingFolderDone || 
-            folder.FolderType == FolderType.FormFillingFolderInProgress) ? FolderType.DEFAULT : folder.FolderType;
+        copy.FolderType = folder.FolderType is 
+            FolderType.ReadyFormFolder or 
+            FolderType.InProcessFormFolder or 
+            FolderType.FormFillingFolderDone or 
+            FolderType.FormFillingFolderInProgress ? 
+            FolderType.DEFAULT : folder.FolderType;
 
         copy = await GetFolderAsync(await SaveFolderAsync(copy));
         var tagDao = daoFactory.GetTagDao<int>();
@@ -864,8 +866,8 @@ internal class FolderDao(
                 Indexing = folder.SettingsIndexing,
                 Quota = quota >= TenantEntityQuotaSettings.NoQuota ? quota : TenantEntityQuotaSettings.DefaultQuotaValue
             };
-        };
-        
+        }
+
         filesDbContext.Update(toUpdate);
         await filesDbContext.SaveChangesAsync();
 
@@ -1776,4 +1778,72 @@ public class OriginData
     public DbFolder OriginRoom { get; init; }
     public DbFolder OriginFolder { get; init; }
     public HashSet<KeyValuePair<string, FileEntryType>> Entries { get; init; }
+}
+
+[Scope(typeof(ICacheFolderDao<int>))]
+internal class CacheFolderDao(
+    FactoryIndexerFolder factoryIndexer,
+    UserManager userManager,
+    IDbContextFactory<FilesDbContext> dbContextManager,
+    TenantManager tenantManager,
+    TenantUtil tenantUtil,
+    SetupInfo setupInfo,
+    MaxTotalSizeStatistic maxTotalSizeStatistic,
+    SettingsManager settingsManager,
+    AuthContext authContext,
+    IServiceProvider serviceProvider,
+    IDaoFactory daoFactory,
+    SelectorFactory selectorFactory,
+    CrossDao crossDao,
+    IMapper mapper,
+    GlobalStore globalStore,
+    GlobalFolder globalFolder,
+    IDistributedLockProvider distributedLockProvider,
+    StorageFactory storageFactory)
+    : FolderDao(
+        factoryIndexer,
+        userManager,
+        dbContextManager,
+        tenantManager,
+        tenantUtil,
+        setupInfo,
+        maxTotalSizeStatistic,
+        settingsManager,
+        authContext,
+        serviceProvider,
+        daoFactory,
+        selectorFactory,
+        crossDao,
+        mapper,
+        globalStore,
+        globalFolder,
+        distributedLockProvider,
+        storageFactory), ICacheFolderDao<int>
+{
+    private readonly ConcurrentDictionary<int, Folder<int>> _cache = new();
+    public override async Task<Folder<int>> GetFolderAsync(int folderId)
+    {
+        if (!_cache.TryGetValue(folderId, out var result))
+        {
+            result = await base.GetFolderAsync(folderId);
+            _cache.TryAdd(folderId, result);
+        }
+        
+        return result;
+    }
+    
+    private readonly ConcurrentDictionary<int, IEnumerable<Folder<int>>> _parentFoldersCache = new();
+    public override async IAsyncEnumerable<Folder<int>> GetParentFoldersAsync(int folderId)
+    {
+        if (!_parentFoldersCache.TryGetValue(folderId, out var result))
+        {
+            result = await base.GetParentFoldersAsync(folderId).ToListAsync();
+            _parentFoldersCache.TryAdd(folderId, result);
+        }
+
+        foreach (var folder in result)
+        {
+            yield return folder;
+        }
+    }
 }

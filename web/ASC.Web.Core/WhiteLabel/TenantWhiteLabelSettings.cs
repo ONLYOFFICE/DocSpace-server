@@ -503,20 +503,13 @@ public class TenantWhiteLabelSettingsHelper(
     {
         var extNotification = tenantWhiteLabelSettings.GetExt(WhiteLabelLogoType.Notification, false);
 
-        switch (extLogo)
+        return extLogo switch
         {
-            case "png":
-                return (logoData, extNotification);
-            case "svg":
-                return (GetLogoDataFromSvg(), extNotification);
-            case "bmp":
-            case "jpg":
-            case "jpeg":
-            case "ico":
-                return (GetLogoDataFromJpg(), extNotification);
-            default:
-                return (null, extNotification);
-        }
+            "png" => (logoData, extNotification),
+            "svg" => (GetLogoDataFromSvg(), extNotification),
+            "bmp" or "jpg" or "jpeg" or "ico" => (GetLogoDataFromJpg(), extNotification),
+            _ => ((byte[], string))(null, extNotification)
+        };
 
         byte[] GetLogoDataFromSvg()
         {
@@ -536,7 +529,7 @@ public class TenantWhiteLabelSettingsHelper(
                 canvas.DrawPicture(svg.Picture);
 
                 using (var image = SKImage.FromBitmap(bitMap))
-                using (var pngData = image.Encode(SKEncodedImageFormat.Png, 100))
+                using (var pngData = image.Encode())
                 {
                     return pngData.ToArray();
                 }
@@ -546,7 +539,7 @@ public class TenantWhiteLabelSettingsHelper(
         byte[] GetLogoDataFromJpg()
         {
             using var image = SKImage.FromEncodedData(logoData);
-            using var pngData = image.Encode(SKEncodedImageFormat.Png, 100);
+            using var pngData = image.Encode();
             return pngData.ToArray();
         }
     }
@@ -763,7 +756,7 @@ public class TenantWhiteLabelSettingsHelper(
 
     #region Save for Resource replacement
 
-    private static readonly List<int> _appliedTenants = new();
+    private static readonly List<int> _appliedTenants = [];
 
     public async Task ApplyAsync(TenantWhiteLabelSettings tenantWhiteLabelSettings, int tenantId)
     {

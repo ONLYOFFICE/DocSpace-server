@@ -25,7 +25,6 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Core.Notify.Socket;
-using ASC.MessagingSystem.Data;
 
 namespace ASC.Api.Core;
 
@@ -37,6 +36,11 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
 
     public virtual async Task ConfigureServices(IServiceCollection services)
     {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            AppContext.SetSwitch("System.Net.Security.UseManagedNtlm", true);
+        }
+        
         services.AddHttpContextAccessor();
         services.AddCustomHealthCheck(Configuration);
 

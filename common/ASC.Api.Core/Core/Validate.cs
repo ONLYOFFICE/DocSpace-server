@@ -43,12 +43,7 @@ public static class Validate
         return item.IfNull(() => throw e);
     }
 
-    public static T NotFoundIfNull<T>(this T item) where T : class
-    {
-        return NotFoundIfNull(item, "Item not found");
-    }
-
-    public static T NotFoundIfNull<T>(this T item, string message) where T : class
+    public static T NotFoundIfNull<T>(this T item, string message = "Item not found") where T : class
     {
         return item.IfNull(() => throw new ItemNotFoundException(message));
     }

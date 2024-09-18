@@ -32,6 +32,7 @@ public record HistoryEntry
 {
     public HistoryAction Action { get; init; }
     public Guid InitiatorId { get; init; }
+    public string InitiatorName { get; init; }
     public DateTime Date { get; init; }
     public HistoryData Data { get; init; }
     
@@ -74,9 +75,11 @@ public record HistoryEntry
 [JsonDerivedType(typeof(RenameEntryData))]
 [JsonDerivedType(typeof(TagData))]
 [JsonDerivedType(typeof(UserHistoryData))]
+[JsonDerivedType(typeof(UserFileUpdateData))]
 public abstract record HistoryData
 {
     public virtual int GetId() => 0;
+    public virtual string InitiatorName => null;
 }
 
 public record HistoryAction(MessageAction Id, string Key);

@@ -60,7 +60,7 @@ internal class ThirdPartyTagDao<TFile, TFolder, TItem>(
         await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
         var entryIds = await Queries.HashIdsAsync(filesDbContext, PathPrefix).ToListAsync();
 
-        if (!entryIds.Any())
+        if (entryIds.Count == 0)
         {
             yield break;
         }

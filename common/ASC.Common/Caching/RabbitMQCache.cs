@@ -38,8 +38,6 @@ public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : new()
 
     private readonly ILogger _logger;
     private readonly ConcurrentDictionary<string, List<Action<T>>> _actions;
-
-    private readonly object _lock = new();
     private bool _disposed;
 
     private readonly Task _initializeTask;
@@ -60,7 +58,10 @@ public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : new()
 
     private async Task InitializeAsync()
     {
-        if (_connection is not null) return;
+        if (_connection is not null)
+        {
+            return;
+        }
 
         _connection = await _factory.CreateConnectionAsync();
         _consumerChannel = await CreateConsumerChannelAsync();
@@ -86,7 +87,7 @@ public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : new()
                                         autoDelete: true,
                                         arguments: null);
 
-        await channel.QueueBindAsync(_queueName, _exchangeName, string.Empty, null);
+        await channel.QueueBindAsync(_queueName, _exchangeName, string.Empty);
 
         channel.CallbackException += async (_, ea) =>
         {
@@ -108,9 +109,9 @@ public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : new()
 
         if (_consumerChannel != null)
         {
-            var consumer = new EventingBasicConsumer(_consumerChannel);
+            var consumer = new AsyncEventingBasicConsumer(_consumerChannel);
 
-            consumer.Received += OnMessageReceived;
+            consumer.Received += AsyncConsumerOnReceived;
 
             await _consumerChannel.BasicConsumeAsync(queue: _queueName, autoAck: true, consumer: consumer);
         }
@@ -137,7 +138,7 @@ public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : new()
 
     public bool IsConnected => _connection is { IsOpen: true } && !_disposed;
 
-    private void OnMessageReceived(object sender, BasicDeliverEventArgs e)
+    private async Task AsyncConsumerOnReceived(object sender, BasicDeliverEventArgs e)
     {
         var body = e.Body.Span.ToArray();
 
@@ -145,12 +146,14 @@ public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : new()
 
         var obj = BaseProtobufSerializer.Deserialize<T>(data.ToArray());
 
-        var action = (CacheNotifyAction)body[body.Length - 1];
+        var action = (CacheNotifyAction)body[^1];
 
         if (_actions.TryGetValue(GetKey(action), out var onchange) && onchange != null)
         {
             Parallel.ForEach(onchange, a => a(obj));
         }
+
+        await Task.CompletedTask;
     }
 
     public async Task PublishAsync(T obj, CacheNotifyAction action)
@@ -163,7 +166,7 @@ public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : new()
 
         objAsByteArray.CopyTo(body, 0);
 
-        body[body.Length - 1] = (byte)action;
+        body[^1] = (byte)action;
      
         await _consumerChannel.BasicPublishAsync(
                              exchange: _exchangeName,
@@ -176,8 +179,7 @@ public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : new()
 
     public void Subscribe(Action<T> onchange, CacheNotifyAction action)
     {
-        _actions.GetOrAdd(GetKey(action), new List<Action<T>>())
-            .Add(onchange);
+        _actions.GetOrAdd(GetKey(action), []).Add(onchange);
     }
 
     public void Unsubscribe(CacheNotifyAction action)

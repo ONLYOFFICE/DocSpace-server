@@ -41,6 +41,7 @@ import com.asc.registration.service.transfer.request.fetch.TenantClientQuery;
 import com.asc.registration.service.transfer.request.fetch.TenantClientsPaginationQuery;
 import com.asc.registration.service.transfer.response.ClientInfoResponse;
 import com.asc.registration.service.transfer.response.PageableResponse;
+import java.util.LinkedHashSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -135,7 +136,7 @@ public class ClientQueryHandler {
         .data(
             StreamSupport.stream(result.getData().spliterator(), false)
                 .map(clientDataMapper::toClientInfoResponse)
-                .collect(Collectors.toSet()))
+                .collect(Collectors.toCollection(LinkedHashSet::new)))
         .next(result.getNext())
         .previous(result.getPrevious())
         .build();
@@ -182,7 +183,7 @@ public class ClientQueryHandler {
             StreamSupport.stream(result.getData().spliterator(), false)
                 .map(clientDataMapper::toClientResponse)
                 .peek(c -> c.setClientSecret(encryptionService.decrypt(c.getClientSecret())))
-                .collect(Collectors.toSet()))
+                .collect(Collectors.toCollection(LinkedHashSet::new)))
         .next(result.getNext())
         .previous(result.getPrevious())
         .build();

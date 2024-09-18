@@ -62,6 +62,7 @@ public class StudioNotifySource(UserManager userManager, IRecipientProvider reci
                 Actions.ActivateEmail,
                 Actions.EmailChangeV115,
                 Actions.PasswordChangeV115,
+                Actions.PasswordSet,
                 Actions.PhoneChange,
                 Actions.TfaChange,
                 Actions.MigrationPortalStart,
