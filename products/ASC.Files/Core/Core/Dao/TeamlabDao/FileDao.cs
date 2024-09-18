@@ -2253,7 +2253,6 @@ internal class FileDao(
                     entryType = l.EntryType
                 },
                 (f, l) => new { f, l })
-            .Where(x => x.l.EntryType == FileEntryType.File)
             .Join(filesDbContext.Tag, 
                 x => x.l.TagId, 
                 t => t.Id,
