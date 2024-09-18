@@ -82,7 +82,7 @@ public class TenantQuota : IMapFrom<DbQuota>
         }
         set
         {
-            _featuresList = value != null ? value.Split(' ', ',', ';').ToList() : new List<string>();
+            _featuresList = value != null ? value.Split(' ', ',', ';').ToList() : [];
         }
     }
 

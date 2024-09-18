@@ -581,7 +581,7 @@ internal class FileDao(
                             {
                                 await SaveFileStreamAsync(file, streamChange ? cloneStreamForSave : fileStream, currentFolder);
 
-                                var properties = fileProp ?? new EntryProperties<int>() { FormFilling = new FormFillingProperties<int>() };
+                                var properties = fileProp ?? new EntryProperties<int> { FormFilling = new FormFillingProperties<int>() };
                                 if (!properties.FormFilling.CollectFillForm)
                                 {
                                     properties.FormFilling.StartFilling = true;
@@ -945,7 +945,7 @@ internal class FileDao(
             }
         }
         else if (fromRoomId != -1 &&
-                (toFolder.FolderType == FolderType.USER || toFolder.FolderType == FolderType.DEFAULT) &&
+                toFolder.FolderType is FolderType.USER or FolderType.DEFAULT &&
                 toRoomId == -1 ||
                 (fromFolder.Id == trashId && fromRoomTag != null))
         {
@@ -1068,8 +1068,7 @@ internal class FileDao(
                         oldFolder,
                         toFolder,
                         file,
-                        fileContentLength,
-                        trashId);
+                        fileContentLength);
                 }
                 
                 await IncrementCountAsync(context, toFolderId, tenantId, FileEntryType.File);
@@ -1267,7 +1266,7 @@ internal class FileDao(
                    : null;
     }
 
-    private async Task UpdateUsedFileSpace(IFolderDao<int> folderDao, Folder<int> fromFolder, Folder<int> toFolder, File<int> file, long size, int trashId)
+    private async Task UpdateUsedFileSpace(IFolderDao<int> folderDao, Folder<int> fromFolder, Folder<int> toFolder, File<int> file, long size)
     {
         var (toFolderRoomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(toFolder);
         var (oldFolderRoomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(fromFolder);
@@ -1279,13 +1278,13 @@ internal class FileDao(
         {
             var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
-            if (toFolder.FolderType == FolderType.USER || toFolder.FolderType == FolderType.DEFAULT)
+            if (toFolder.FolderType is FolderType.USER or FolderType.DEFAULT)
             {
                 file.RootCreateBy = toFolder.RootCreateBy;
                 file.RootFolderType = toFolder.FolderType;
                 await storageFactory.QuotaUsedAddAsync(tenantId, FileConstant.ModuleId, "", WebItemManager.DocumentsProductID.ToString(), size, file.GetFileQuotaOwner());
             }
-            if (fromFolder.FolderType == FolderType.USER || fromFolder.FolderType == FolderType.DEFAULT)
+            if (fromFolder.FolderType is FolderType.USER or FolderType.DEFAULT)
             {
                 await storageFactory.QuotaUsedDeleteAsync(tenantId, FileConstant.ModuleId, "", WebItemManager.DocumentsProductID.ToString(), size, file.GetFileQuotaOwner());
             }
@@ -1521,7 +1520,7 @@ internal class FileDao(
         if (success)
         {
             var files = filesDbContext.DbFileQueriesByFileIdsAsync(tenantId, ids)
-                .Select(e => mapper.Map<DbFileQuery, File<int>>(e))
+                .Select(mapper.Map<DbFileQuery, File<int>>)
                 .Where(
                     f =>
                     bunch
@@ -1535,7 +1534,7 @@ internal class FileDao(
         else
         {
             var files = filesDbContext.DbFileQueriesByTextAsync(tenantId, GetSearchText(searchText))
-                .Select(e => mapper.Map<DbFileQuery, File<int>>(e))
+                .Select(mapper.Map<DbFileQuery, File<int>>)
                 .Where(f =>
                        bunch
                             ? f.RootFolderType == FolderType.BUNCH
@@ -1802,7 +1801,7 @@ internal class FileDao(
                 }
                 else
                 {
-                    result.InAll(a => a.Folders.Select(r => r.ParentId), new[] { parentId });
+                    result.InAll(a => a.Folders.Select(r => r.ParentId), [parentId]);
                 }
             }
 

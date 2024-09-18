@@ -67,7 +67,7 @@ public class MigrationLogger(
             {
                 logger.Information(msg);
             }
-            _migrationLog.WriteLine($"{DateTime.Now.ToString("s")}: {msg}");
+            _migrationLog.WriteLine($"{DateTime.Now:s}: {msg}");
             if (exception != null)
             {
                 _migrationLog.WriteLine($"{exception.Message}");

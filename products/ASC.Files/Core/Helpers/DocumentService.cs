@@ -229,8 +229,7 @@ public static class DocumentService
             { FilesLinkUtility.ShardKey, documentRevisionId }
         });
 
-        var defaultTimeout = Timeout;
-        var commandTimeout = defaultTimeout;
+        var commandTimeout = Timeout;
 
         if (method == CommandMethod.Version)
         {

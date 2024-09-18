@@ -427,7 +427,7 @@ public class FilesSettingsHelper(
     {
         List<FileShare> GetNormalizedList(List<FileShare> src)
         {
-            if (src == null || !src.Any())
+            if (src == null || src.Count == 0)
             {
                 return null;
             }

@@ -84,7 +84,7 @@ public class BackupController(
             Hour = inDto.CronParams.Hour == null ? 0 : Int32.Parse(inDto.CronParams.Hour),
             Day = inDto.CronParams.Day == null ? 0 : Int32.Parse(inDto.CronParams.Day)
         };
-        if(backupStored > 30 || backupStored < 1)
+        if(backupStored is > 30 or < 1)
         {
             throw new ArgumentException("backupStored must be 1 - 30");
         }
@@ -141,9 +141,9 @@ public class BackupController(
         var storageParams = inDto.StorageParams == null ? new Dictionary<string, string>() : inDto.StorageParams.ToDictionary(r => r.Key.ToString(), r => r.Value.ToString());
 
         var canParse = false;
-        if (storageParams.ContainsKey("folderId"))
+        if (storageParams.TryGetValue("folderId", out var param))
         {
-            canParse = int.TryParse(storageParams["folderId"], out _);
+            canParse = int.TryParse(param, out _);
         }
         if (storageType == BackupStorageType.Documents && !canParse
             || storageType == BackupStorageType.ThridpartyDocuments && canParse)

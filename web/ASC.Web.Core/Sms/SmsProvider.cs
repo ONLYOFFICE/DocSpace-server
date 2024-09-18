@@ -361,13 +361,11 @@ public class TwilioProvider : SmsProvider, IValidateKeysProvider
     protected string AccountSid
     {
         get { return this["twilioAccountSid"]; }
-        set { }
     }
 
     protected string AuthToken
     {
         get { return this["twilioAuthToken"]; }
-        set { }
     }
 
     protected override string Sender

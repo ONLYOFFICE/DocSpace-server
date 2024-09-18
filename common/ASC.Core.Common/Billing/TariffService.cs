@@ -283,7 +283,7 @@ public class TariffService(
 
     public async Task<bool> PaymentChangeAsync(int tenantId, Dictionary<string, int> quantity)
     {
-        if (quantity == null || !quantity.Any()
+        if (quantity == null || quantity.Count == 0
             || !billingClient.Configured)
         {
             return false;
@@ -462,7 +462,7 @@ public class TariffService(
             }
         }
 
-        var hasQuantity = quantity != null && quantity.Any();
+        var hasQuantity = quantity != null && quantity.Count != 0;
         var keyBuilder = new StringBuilder("shopingurl_");
         keyBuilder.Append(hasQuantity ? string.Join('_', quantity.Keys.ToArray()) : "all");
         if (!string.IsNullOrEmpty(affiliateId))

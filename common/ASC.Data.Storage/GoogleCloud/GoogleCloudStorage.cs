@@ -879,10 +879,10 @@ public class GoogleCloudStorage(TempStream tempStream,
         return new Uri(uri.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase) ? _bucketSSlRoot : _bucketRoot, signedPart);
     }
 
-    private void InvalidateCloudFront(params string[] paths)
-    {
-        throw new NotImplementedException();
-    }
+    // private void InvalidateCloudFront(params string[] paths)
+    // {
+    //     throw new NotImplementedException();
+    // }
 
     private PredefinedObjectAcl GetGoogleCloudAcl(ACL _)
     {

@@ -47,13 +47,10 @@ public class AutoCleanTrashService(
         await using (var scope = _scopeFactory.CreateAsyncScope())
         {
             await using var userDbContext = await scope.ServiceProvider.GetRequiredService<IDbContextFactory<UserDbContext>>().CreateDbContextAsync(stoppingToken);
-
-            var filesSettingsId = new FilesSettings().ID;
-
             activeTenantsUsers = await Queries.DefaultTenantUserSettingsAsync(userDbContext).ToListAsync(stoppingToken);
         }
 
-        if (!activeTenantsUsers.Any())
+        if (activeTenantsUsers.Count == 0)
         {
             return;
         }

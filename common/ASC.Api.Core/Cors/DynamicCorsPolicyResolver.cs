@@ -84,9 +84,8 @@ public class DynamicCorsPolicyResolver(
         // Validated token early in JwtBearerAuthHandler
         var token = new JwtSecurityToken(accessToken);
         var subject = token.Subject;
-        var userId = Guid.Parse(subject);
 
-        if (!Guid.TryParse(subject, out userId))
+        if (!Guid.TryParse(subject, out var userId))
         {
             return new List<string>();
         }

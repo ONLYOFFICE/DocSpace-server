@@ -57,7 +57,7 @@ public static class CustomHealthCheck
         {
             hcBuilder.AddRedis(x => x.GetRequiredService<RedisPersistentConnection>().GetConnection(),
                                name: "redis",
-                               tags: new[] { "redis", "services" },
+                               tags: ["redis", "services"],
                                timeout: new TimeSpan(0, 0, 15));
         }
 
@@ -75,14 +75,14 @@ public static class CustomHealthCheck
         {
             hcBuilder.AddMySql(connectionString.ConnectionString,
                                name: "mysqldb",
-                               tags: new[] { "mysqldb", "services" },
+                               tags: ["mysqldb", "services"],
                                timeout: new TimeSpan(0, 0, 15));
         }
         else if (string.Equals(connectionString.ProviderName, "Npgsql"))
         {
             hcBuilder.AddNpgSql(connectionString.ConnectionString,
                                name: "postgredb",
-                               tags: new[] { "postgredb", "services" },
+                               tags: ["postgredb", "services"],
                                timeout: new TimeSpan(0, 0, 15));
         }
 
@@ -112,7 +112,7 @@ public static class CustomHealthCheck
 
                 hcBuilder.AddKafka(new ProducerConfig(clientConfig),
                                name: "kafka",
-                               tags: new[] { "kafka", "services" },
+                               tags: ["kafka", "services"],
                                timeout: new TimeSpan(0, 0, 15)
                                );
 

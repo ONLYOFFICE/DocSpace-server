@@ -50,7 +50,7 @@ public class S3Storage(TempStream tempStream,
     public override bool IsSupportChunking => true;
     public override bool ContentAsAttachment => _contentAsAttachment;
 
-    private readonly List<string> _domains = new();
+    private readonly List<string> _domains = [];
     private Dictionary<string, S3CannedACL> _domainsAcl;
     private S3CannedACL _moduleAcl;
     private string _accessKeyId = string.Empty;
@@ -325,16 +325,12 @@ public class S3Storage(TempStream tempStream,
                 request.ServerSideEncryptionKeyManagementServiceKeyId = kmsKeyId;
             }
 
-            switch (acl)
+            request.CannedACL = acl switch
             {
-                case ACL.Auto:
-                    request.CannedACL = GetDomainACL(domain);
-                    break;
-                case ACL.Read:
-                case ACL.Private:
-                    request.CannedACL = GetS3Acl(acl);
-                    break;
-            }
+                ACL.Auto => GetDomainACL(domain),
+                ACL.Read or ACL.Private => GetS3Acl(acl),
+                _ => request.CannedACL
+            };
 
             if (!string.IsNullOrEmpty(contentDisposition))
             {
@@ -1820,7 +1816,7 @@ public class S3Storage(TempStream tempStream,
             return _response.ResponseStream.ReadAsync(buffer, offset, count, cancellationToken);
         }
 
-        public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = new CancellationToken())
+        public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = new())
         {
             return _response.ResponseStream.ReadAsync(buffer, cancellationToken);
         }
@@ -1845,7 +1841,7 @@ public class S3Storage(TempStream tempStream,
             return _response.ResponseStream.WriteAsync(buffer, offset, count, cancellationToken);
         }
 
-        public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = new CancellationToken())
+        public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = new())
         {
             return _response.ResponseStream.WriteAsync(buffer, cancellationToken);
         }

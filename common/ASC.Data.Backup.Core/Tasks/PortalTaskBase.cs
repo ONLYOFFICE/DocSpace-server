@@ -45,8 +45,8 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
     protected ModuleProvider ModuleProvider { get; set; } = moduleProvider;
     protected DbFactory DbFactory { get; init; } = dbFactory;
 
-    protected readonly List<ModuleName> _ignoredModules = new();
-    protected readonly List<string> _ignoredTables = new(); //todo: add using to backup and transfer tasks
+    protected readonly List<ModuleName> _ignoredModules = [];
+    protected readonly List<string> _ignoredTables = []; //todo: add using to backup and transfer tasks
 
     public void Init(int tenantId)
     {
@@ -175,17 +175,16 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
 
     protected async Task SetCurrentStepProgress(int value)
     {
-        if (value is < 0 or > 100)
+        switch (value)
         {
-            throw new ArgumentOutOfRangeException(nameof(value));
-        }
-        if (value == 100)
-        {
-            await SetStepCompleted();
-        }
-        else
-        {
-            await SetProgress((100 * _stepsCompleted + value) / _stepsCount);
+            case < 0 or > 100:
+                throw new ArgumentOutOfRangeException(nameof(value));
+            case 100:
+                await SetStepCompleted();
+                break;
+            default:
+                await SetProgress((100 * _stepsCompleted + value) / _stepsCount);
+                break;
         }
     }
 
@@ -298,13 +297,13 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
                         newline = await reader.ReadLineAsync();
                         if (string.IsNullOrEmpty(newline))
                         {
-                        break;
+                            break;
+                        }
+
+                        sb.Append(newline);
                     }
 
-                    sb.Append(newline);
-                }
-
-                commandText = sb.ToString();
+                    commandText = sb.ToString();
                 }
 
                 try
@@ -321,7 +320,7 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
                             command = connection.CreateCommand();
                             command.CommandText = commandText;
                             await command.ExecuteNonQueryAsync();
-                        }
+                    }
                     catch (Exception ex)
                     {
                         Logger.ErrorRestore(ex);
