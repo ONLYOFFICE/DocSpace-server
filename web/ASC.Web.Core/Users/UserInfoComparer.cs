@@ -26,21 +26,15 @@
 
 namespace ASC.Web.Core.Users;
 
-public class UserInfoComparer(UserSortOrder sortOrder, bool descending) : IComparer<UserInfo>
+public class UserInfoComparer(UserSortOrder sortOrder, bool descending = false) : IComparer<UserInfo>
 {
-    public static readonly IComparer<UserInfo> Default = new UserInfoComparer(UserSortOrder.DisplayName, false);
-    public static readonly IComparer<UserInfo> FirstName = new UserInfoComparer(UserSortOrder.FirstName, false);
-    public static readonly IComparer<UserInfo> LastName = new UserInfoComparer(UserSortOrder.LastName, false);
+    public static readonly IComparer<UserInfo> Default = new UserInfoComparer(UserSortOrder.DisplayName);
+    public static readonly IComparer<UserInfo> FirstName = new UserInfoComparer(UserSortOrder.FirstName);
+    public static readonly IComparer<UserInfo> LastName = new UserInfoComparer(UserSortOrder.LastName);
 
 
     public UserSortOrder SortOrder { get; set; } = sortOrder;
     public bool Descending { get; set; } = descending;
-
-
-    public UserInfoComparer(UserSortOrder sortOrder)
-        : this(sortOrder, false)
-    {
-    }
 
 
     public int Compare(UserInfo x, UserInfo y)

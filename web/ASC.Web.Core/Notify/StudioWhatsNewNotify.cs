@@ -100,9 +100,7 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
         try
         {
             var tenant = await tenantManager.GetTenantAsync(tenantId);
-            if (tenant == null ||
-                tenant.Status != TenantStatus.Active ||
-                !TimeToSendWhatsNew(tenantUtil.DateTimeFromUtc(tenant.TimeZone, scheduleDate), whatsNewType))
+            if (tenant is not { Status: TenantStatus.Active } || !TimeToSendWhatsNew(tenantUtil.DateTimeFromUtc(tenant.TimeZone, scheduleDate), whatsNewType))
             {
                 return;
             }
@@ -158,7 +156,7 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
 
                 var action = whatsNewType == WhatsNewType.RoomsActivity ? Actions.RoomsActivity : Actions.SendWhatsNew;
 
-                if (userActivities.Any())
+                if (userActivities.Count != 0)
                 {
                     _log.InformationSendWhatsNewTo(user.Email);
                     await client.SendNoticeAsync(

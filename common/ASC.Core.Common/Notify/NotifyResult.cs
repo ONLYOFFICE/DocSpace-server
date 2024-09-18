@@ -34,7 +34,7 @@ public class NotifyResult
     internal NotifyResult(SendResult result, List<SendResponse> responses)
     {
         Result = result;
-        Responses = responses ?? new List<SendResponse>();
+        Responses = responses ?? [];
     }
 
     public override string ToString()

@@ -25,8 +25,6 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 
-using System.Net.Http.Json;
-
 using ASC.Core.Common;
 
 using Microsoft.IdentityModel.Logging;
@@ -132,7 +130,7 @@ public class JwtBearerAuthHandler : AuthenticationHandler<AuthenticationSchemeOp
 
         if (String.IsNullOrEmpty(subject) || !Guid.TryParse(subject, out var userId))
         {
-            throw new AuthenticationException($"Claim 'sub' is not present in JWT");
+            throw new AuthenticationException("Claim 'sub' is not present in JWT");
         }
 
         try
@@ -183,8 +181,7 @@ public class JwtBearerAuthHandler : AuthenticationHandler<AuthenticationSchemeOp
 
         try
         {
-
-            var principal = new JwtSecurityTokenHandler()
+            _ = new JwtSecurityTokenHandler()
                                  .ValidateToken(token, validationParameters, out var rawValidatedToken);
 
             var httpClient = _httpClientFactory.CreateClient();

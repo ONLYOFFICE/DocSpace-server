@@ -521,7 +521,7 @@ internal class FolderDao(
             //itself link
             List<DbFolderTree> treeToAdd =
             [
-                new DbFolderTree { FolderId = folder.Id, ParentId = folder.Id, Level = 0 }
+                new() { FolderId = folder.Id, ParentId = folder.Id, Level = 0 }
             ];
 
             //full path to root
@@ -807,10 +807,12 @@ internal class FolderDao(
         copy.RootCreateBy = toFolder.RootCreateBy;
         copy.RootFolderType = toFolder.RootFolderType;
         copy.Title = folder.Title;
-        copy.FolderType = (folder.FolderType == FolderType.ReadyFormFolder || 
-            folder.FolderType == FolderType.InProcessFormFolder ||
-            folder.FolderType == FolderType.FormFillingFolderDone || 
-            folder.FolderType == FolderType.FormFillingFolderInProgress) ? FolderType.DEFAULT : folder.FolderType;
+        copy.FolderType = folder.FolderType is 
+            FolderType.ReadyFormFolder or 
+            FolderType.InProcessFormFolder or 
+            FolderType.FormFillingFolderDone or 
+            FolderType.FormFillingFolderInProgress ? 
+            FolderType.DEFAULT : folder.FolderType;
         copy.SettingsColor = folder.SettingsColor;
         copy.SettingsIndexing = folder.SettingsIndexing;
         copy.SettingsLifetime = folder.SettingsLifetime;
@@ -917,7 +919,7 @@ internal class FolderDao(
                 Quota = quota >= TenantEntityQuotaSettings.NoQuota ? quota : TenantEntityQuotaSettings.DefaultQuotaValue,
                 Lifetime = mapper.Map<RoomDataLifetime, DbRoomDataLifetime>(folder.SettingsLifetime)
             };
-        };
+        }
         
         filesDbContext.Update(toUpdate);
         await filesDbContext.SaveChangesAsync();

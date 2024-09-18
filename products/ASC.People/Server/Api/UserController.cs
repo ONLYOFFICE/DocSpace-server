@@ -183,7 +183,7 @@ public class UserController(
     {
         await _apiContext.AuthByClaimAsync();
         var model = emailValidationKeyModelHelper.GetModel();
-        var linkData = inDto.FromInviteLink ? await invitationService.GetLinkDataAsync(inDto.Key, inDto.Email, model.Type, inDto.Type, model?.UiD) : null;
+        var linkData = inDto.FromInviteLink ? await invitationService.GetLinkDataAsync(inDto.Key, inDto.Email, model.Type, inDto.Type, model.UiD) : null;
         if (linkData is { IsCorrect: false })
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_InvintationLink);
@@ -457,7 +457,7 @@ public class UserController(
             throw new SecurityException();
         }
         
-        await CheckReassignProcessAsync(new[] { user.Id });
+        await CheckReassignProcessAsync([user.Id]);
 
         var userName = user.DisplayUserName(false, displayUserSettingsHelper);
         await _userPhotoManager.RemovePhotoAsync(user.Id);
@@ -1458,7 +1458,7 @@ public class UserController(
                             }
                             else
                             {
-                            user.Status = EmployeeStatus.Active;
+                                user.Status = EmployeeStatus.Active;
                             }
 
                             await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
@@ -1628,7 +1628,7 @@ public class UserController(
         {
             await messageService.SendAsync(MessageAction.CustomQuotaPerUserChanged, quota.ToString(),
                         users.Select(x => HttpUtility.HtmlDecode(displayUserSettingsHelper.GetFullUserName(x))));
-    }
+        }
         else
         {
             await messageService.SendAsync(MessageAction.CustomQuotaPerUserDisabled, MessageTarget.Create(users.Select(x => x.Id)), users.Select(x => HttpUtility.HtmlDecode(displayUserSettingsHelper.GetFullUserName(x))));
@@ -1772,8 +1772,8 @@ public class UserController(
             }
             else
             {
-            includeGroups.Add([groupId.Value]);
-        }
+                includeGroups.Add([groupId.Value]);
+            }
         }
 
         if (employeeType.HasValue)

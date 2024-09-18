@@ -59,9 +59,7 @@ public class FirebaseHelper(AuthContext authContext,
 
         var user = await _userManager.GetUserByUserNameAsync(msg.Reciever);
 
-        Guid productID;
-
-        if (!Guid.TryParse(msg.ProductID, out productID))
+        if (!Guid.TryParse(msg.ProductID, out var productID))
         {
             return;
         }

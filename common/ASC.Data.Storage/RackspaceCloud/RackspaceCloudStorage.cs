@@ -61,7 +61,7 @@ public class RackspaceCloudStorage(TempPath tempPath,
     private bool _lowerCasing = true;
     private Uri _cname;
     private Uri _cnameSSL;
-    private readonly List<string> _domains = new();
+    private readonly List<string> _domains = [];
     private bool _contentAsAttachment;
 
     public override IDataStore Configure(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props, IDataStoreValidator dataStoreValidator)

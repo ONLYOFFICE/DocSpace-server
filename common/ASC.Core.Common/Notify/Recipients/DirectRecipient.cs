@@ -29,7 +29,7 @@ namespace ASC.Notify.Recipients;
 public class DirectRecipient
     : IDirectRecipient
 {
-    private readonly List<string> _addresses = new();
+    private readonly List<string> _addresses = [];
 
     public DirectRecipient(string id, string name)
     {
@@ -37,12 +37,7 @@ public class DirectRecipient
         Name = name;
     }
 
-    public DirectRecipient(string id, string name, string[] addresses)
-        : this(id, name, addresses, true)
-    {
-    }
-
-    public DirectRecipient(string id, string name, string[] addresses, bool checkActivation)
+    public DirectRecipient(string id, string name, string[] addresses, bool checkActivation = true)
     {
         ID = id;
         Name = name;

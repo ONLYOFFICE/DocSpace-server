@@ -40,7 +40,7 @@ public class LdapChange(string sid, string name, string email, LdapChangeType ty
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public LdapChangeType Type { get; private set; } = type;
 
-    public List<LdapItemChange> Changes { get; private set; } = changes ?? new List<LdapItemChange>();
+    public List<LdapItemChange> Changes { get; private set; } = changes ?? [];
 
     public LdapChange(string sid, string name, LdapChangeType type, LdapChangeAction action,
         List<LdapItemChange> changes = null) : this(sid, name, null, type, action, changes)

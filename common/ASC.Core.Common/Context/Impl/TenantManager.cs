@@ -40,7 +40,7 @@ public class TenantManager(
 
     private const string CurrentTenant = "CURRENT_TENANT";
 
-    private static readonly List<string> _thisCompAddresses = new();
+    private static readonly List<string> _thisCompAddresses = [];
     
 
     static TenantManager()

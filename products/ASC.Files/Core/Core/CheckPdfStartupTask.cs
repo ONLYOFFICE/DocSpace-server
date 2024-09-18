@@ -31,7 +31,6 @@ public class CheckPdfStartupTask(IServiceProvider provider) : IStartupTask
     public async Task ExecuteAsync(CancellationToken cancellationToken = default)
     {
         var tenantService = provider.GetService<ITenantService>();
-        var checkPdfExecutor = provider.GetService<CheckPdfExecutor>();
 
         var tenants = await tenantService.GetTenantsAsync((DateTime)default);
         var t = Task.Run(async () =>

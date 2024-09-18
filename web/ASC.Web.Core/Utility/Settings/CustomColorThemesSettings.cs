@@ -77,7 +77,7 @@ public class CustomColorThemesSettingsItem
 
     public static List<CustomColorThemesSettingsItem> Default =>
     [
-        new CustomColorThemesSettingsItem
+        new()
         {
             Id = 1,
             Name = "blue",
@@ -85,7 +85,7 @@ public class CustomColorThemesSettingsItem
             Text = new CustomColorThemesSettingsColorItem { Accent = "#FFFFFF", Buttons = "#FFFFFF" }
         },
 
-        new CustomColorThemesSettingsItem
+        new()
         {
             Id = 2,
             Name = "orange",
@@ -93,7 +93,7 @@ public class CustomColorThemesSettingsItem
             Text = new CustomColorThemesSettingsColorItem { Accent = "#FFFFFF", Buttons = "#FFFFFF" }
         },
 
-        new CustomColorThemesSettingsItem
+        new()
         {
             Id = 3,
             Name = "green",
@@ -101,7 +101,7 @@ public class CustomColorThemesSettingsItem
             Text = new CustomColorThemesSettingsColorItem { Accent = "#FFFFFF", Buttons = "#FFFFFF" }
         },
 
-        new CustomColorThemesSettingsItem
+        new()
         {
             Id = 4,
             Name = "red",
@@ -109,7 +109,7 @@ public class CustomColorThemesSettingsItem
             Text = new CustomColorThemesSettingsColorItem { Accent = "#FFFFFF", Buttons = "#FFFFFF" }
         },
 
-        new CustomColorThemesSettingsItem
+        new()
         {
             Id = 5,
             Name = "purple",
@@ -117,7 +117,7 @@ public class CustomColorThemesSettingsItem
             Text = new CustomColorThemesSettingsColorItem { Accent = "#FFFFFF", Buttons = "#FFFFFF" }
         },
 
-        new CustomColorThemesSettingsItem
+        new()
         {
             Id = 6,
             Name = "light-blue",

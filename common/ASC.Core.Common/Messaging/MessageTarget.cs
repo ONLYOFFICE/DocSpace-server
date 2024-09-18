@@ -73,7 +73,7 @@ public class MessageTarget
             _items = items
         };
     }
-    public IEnumerable<string> GetItems() { return _items ?? new [] { _item }; }
+    public IEnumerable<string> GetItems() { return _items ?? [_item]; }
     public override string ToString()
     {
         if (!string.IsNullOrEmpty(_item))
