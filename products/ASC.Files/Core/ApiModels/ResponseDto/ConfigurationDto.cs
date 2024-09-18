@@ -221,7 +221,11 @@ public class ConfigurationConverter<T>(
             EditorUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.DocServiceApiUrl),
             ErrorMessage = source.Error
         };
-        
+
+        result.EditorUrl = FilesLinkUtility.AddQueryString(result.EditorUrl, new Dictionary<string, string>() {
+            { FilesLinkUtility.ShardKey, result.Document?.Key }
+        });
+
         result.Token = documentServiceHelper.GetSignature(result);
         result.File = await fileDtoHelper.GetAsync(file);
         result.Type = source.Type;
