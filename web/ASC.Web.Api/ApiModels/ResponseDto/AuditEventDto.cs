@@ -28,7 +28,7 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 
 /// <summary>
 /// </summary>
-public class AuditEventDto : IMapFrom<AuditEvent>
+public class AuditEventDto
 {
     /// <summary>ID</summary>
     /// <type>System.Int32, System</type>
@@ -101,20 +101,47 @@ public class AuditEventDto : IMapFrom<AuditEvent>
     /// <summary>Context</summary>
     /// <type>System.String, System</type>
     public string Context { get; set; }
-
-    public void Mapping(Profile profile)
+    
+    public AuditEventDto(AuditEvent auditEvent, AuditActionMapper auditActionMapper, ApiDateTimeHelper apiDateTimeHelper)
     {
-        profile.CreateMap<AuditEvent, AuditEventDto>()
-            .ForMember(x => x.User, opt => 
-                opt.MapFrom(x => x.UserName))
-            .ForMember(x => x.Action, opt => 
-                opt.MapFrom(x => x.ActionText))
-            .ForMember(x => x.ActionId, opt => 
-                opt.MapFrom(x => (MessageAction)x.Action))
-            .ForMember(x => x.Date, opt => 
-                opt.ConvertUsing<ApiDateTimeMappingConverter, DateTime>())
-            .ForMember(x => x.Target, opt => 
-                opt.MapFrom(x => x.Target != null ? x.Target.GetItems() : null))
-            .AfterMap<AuditEventMapperAction>();
+        Id = auditEvent.Id;
+        Date = apiDateTimeHelper.Get(auditEvent.Date);
+        User = auditEvent.UserName;
+        UserId = auditEvent.UserId;
+        Action = auditEvent.ActionText;
+        ActionId = (MessageAction)auditEvent.Action;
+        IP = auditEvent.IP;
+        Country = auditEvent.Country;
+        City = auditEvent.City;
+        Browser = auditEvent.Browser;
+        Platform = auditEvent.Platform;
+        Page = auditEvent.Page;
+
+        var maps = auditActionMapper.GetMessageMaps(auditEvent.Action);
+
+        ActionType = maps.ActionType;
+        Product = maps.ProductType;
+        Module = maps.ModuleType;
+
+        var list = new List<EntryType>(2);
+
+        if (maps.EntryType1 != EntryType.None)
+        {
+            list.Add(maps.EntryType1);
+        }
+
+        if (maps.EntryType2 != EntryType.None)
+        {
+            list.Add(maps.EntryType2);
+        }
+
+        Entries = list;
+
+        if (auditEvent.Target != null)
+        {
+            Target = auditEvent.Target.GetItems();
+        }
+
+        Context = auditEvent.Context;
     }
 }

@@ -181,7 +181,7 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
 
         var user = userManager.GetUsers(activityInfo.UserId);
 
-        var date = activityInfo.Data.ConvertNumerals("g", false);
+        var date = activityInfo.Data.ConvertNumerals("g");
         var userName = user.DisplayUserName(displayUserSettingsHelper);
         var userRole = activityInfo.UserRole;
         var fileUrl = activityInfo.FileUrl;
@@ -322,7 +322,7 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
     {
         d = type == WhatsNewType.DailyFeed ? d.AddDays(-1) : d.AddHours(-1);
 
-        return d.ConvertNumerals("M", false);
+        return d.ConvertNumerals("M");
     }
 }
 

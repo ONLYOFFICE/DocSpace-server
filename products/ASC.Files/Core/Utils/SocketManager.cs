@@ -25,7 +25,6 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using System.Threading.Channels;
-
 using ASC.Core.Billing;
 
 namespace ASC.Web.Files.Utils;
@@ -207,23 +206,19 @@ public class SocketManager(
     private List<Guid> _admins;
     private Task<IEnumerable<Guid>> Admins()
     {
-        if (_admins != null)
-        {
-            return Task.FromResult<IEnumerable<Guid>>(_admins);
-        }
-
-        return AdminsFromDb();
+        return _admins != null 
+            ? Task.FromResult<IEnumerable<Guid>>(_admins) 
+            : AdminsFromDb();
     }
     
     private async Task<IEnumerable<Guid>> AdminsFromDb()
     {
-        _admins = await userManager.GetUsers(true, EmployeeStatus.Active, null, null, null, null, 
-                null, null, null, null, false, null, true, 0, 0)
-            .Select(r=> r.Id)
-            .ToListAsync();
+        _admins = (await userManager.GetUsersByGroupAsync(Constants.GroupAdmin.ID))
+            .Select(x => x.Id)
+            .ToList();
         
         _admins.Add((await _tenantManager.GetCurrentTenantAsync()).OwnerId);
 
         return _admins;
-}
     }
+}
