@@ -686,10 +686,10 @@ public class FileSecurity(IDaoFactory daoFactory,
         var user = await userManager.GetUsersAsync(userId);
         var isOutsider = await userManager.IsOutsiderAsync(user);
         var userType = await userManager.GetUserTypeAsync(user);
-        var isUser = userType is EmployeeType.Guest;
+        var isGuest = userType is EmployeeType.Guest;
         var isAuthenticated =  authContext.IsAuthenticated;
         var isDocSpaceAdmin = userType is EmployeeType.DocSpaceAdmin;
-        var isCollaborator = userType is EmployeeType.User;
+        var isUser = userType is EmployeeType.User;
         
         await foreach (var entry in entries)
         {
@@ -702,7 +702,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 .Where(r => _securityEntries[entry.FileEntryType].Contains(r))
                 .Select(async e =>
                 {
-                    var t = await FilterEntryAsync(entry, e, userId, null, isOutsider, isUser, isAuthenticated, isDocSpaceAdmin, isCollaborator);
+                    var t = await FilterEntryAsync(entry, e, userId, null, isOutsider, isGuest, isAuthenticated, isDocSpaceAdmin, isUser);
                     return new KeyValuePair<FilesSecurityActions, bool>(e, t);
                 });
 
@@ -764,14 +764,14 @@ public class FileSecurity(IDaoFactory daoFactory,
         }
 
         var userType = await userManager.GetUserTypeAsync(user);
-        var isUser = userType is EmployeeType.Guest;
+        var isGuest = userType is EmployeeType.Guest;
         var isDocSpaceAdmin = userType is EmployeeType.DocSpaceAdmin;
-        var isCollaborator = userType is EmployeeType.User;
+        var isUser = userType is EmployeeType.User;
         var isAuthenticated =  authContext.IsAuthenticated || (await authManager.GetAccountByIDAsync(await tenantManager.GetCurrentTenantIdAsync(), userId)).IsAuthenticated;
         
         var accessSnapshot = entry.Access;
         
-        var haveAccess = await FilterEntryAsync(entry, action, userId, shares, isOutsider, isUser, isAuthenticated, isDocSpaceAdmin, isCollaborator);
+        var haveAccess = await FilterEntryAsync(entry, action, userId, shares, isOutsider, isGuest, isAuthenticated, isDocSpaceAdmin, isUser);
 
         if (!setEntryAccess)
         {
@@ -796,8 +796,8 @@ public class FileSecurity(IDaoFactory daoFactory,
         }
     }
 
-    private async Task<bool> FilterEntryAsync<T>(FileEntry<T> e, FilesSecurityActions action, Guid userId, IEnumerable<FileShareRecord<T>> shares, bool isOutsider, bool isUser, 
-        bool isAuthenticated, bool isDocSpaceAdmin, bool isCollaborator)
+    private async Task<bool> FilterEntryAsync<T>(FileEntry<T> e, FilesSecurityActions action, Guid userId, IEnumerable<FileShareRecord<T>> shares, bool isOutsider, bool isGuest, 
+        bool isAuthenticated, bool isDocSpaceAdmin, bool isUser)
     {
         var file = e as File<T>;
         var folder = e as Folder<T>;
@@ -845,7 +845,7 @@ public class FileSecurity(IDaoFactory daoFactory,
 
         if (action == FilesSecurityActions.CreateRoomFrom)
         {
-            return e.RootFolderType == FolderType.USER && e.RootCreateBy == userId && !isCollaborator && (folder is { FolderType: FolderType.DEFAULT } || file != null);
+            return e.RootFolderType == FolderType.USER && e.RootCreateBy == userId && !isUser && (folder is { FolderType: FolderType.DEFAULT } || file != null);
         }
 
         if (action == FilesSecurityActions.Embed)
@@ -873,7 +873,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 return false;
             }
 
-            if (folder.FolderType == FolderType.Recent && isUser)
+            if (folder.FolderType == FolderType.Recent && isGuest)
             {
                 return false;
             }
@@ -941,7 +941,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                     return false;
                 }
 
-                if (!isUser)
+                if (!isGuest)
                 {
                     if (folder.FolderType == FolderType.USER)
                     {
@@ -953,7 +953,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                         return true;
                     }
 
-                    if (folder.FolderType == FolderType.VirtualRooms && !isCollaborator)
+                    if (folder.FolderType == FolderType.VirtualRooms && !isUser)
                     {
                         return action is FilesSecurityActions.Create or FilesSecurityActions.MoveTo;
                     }
@@ -1001,7 +1001,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 }
                 break;
             case FolderType.USER:
-                if (isOutsider || action == FilesSecurityActions.Lock || (isUser && !e.Shared))
+                if (isOutsider || action == FilesSecurityActions.Lock || (isGuest && !e.Shared))
                 {
                     return false;
                 }
@@ -1057,7 +1057,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                         return false;
                     }
                 }
-                if (await HasFullAccessAsync(e, userId, isUser, isDocSpaceAdmin, isRoom, isCollaborator))
+                if (await HasFullAccessAsync(e, userId, isGuest, isDocSpaceAdmin, isRoom, isUser))
                 {
                     return true;
                 }
@@ -1081,7 +1081,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                     return false;
                 }
 
-                if (await HasFullAccessAsync(e, userId, isUser, isDocSpaceAdmin, isRoom, isCollaborator))
+                if (await HasFullAccessAsync(e, userId, isGuest, isDocSpaceAdmin, isRoom, isUser))
                 {
                     return true;
                 }
@@ -1421,7 +1421,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 switch (e.RootFolderType)
                 {
                     case FolderType.USER:
-                        if (e.Access != FileShare.Restrict && isAuthenticated && !isUser)
+                        if (e.Access != FileShare.Restrict && isAuthenticated && !isGuest)
                         {
                             return true;
                         }
@@ -2249,9 +2249,9 @@ public class FileSecurity(IDaoFactory daoFactory,
         return parentFolders;
     }
 
-    private async Task<bool> HasFullAccessAsync<T>(FileEntry<T> entry, Guid userId, bool isUser, bool isDocSpaceAdmin, bool isRoom, bool isCollaborator)
+    private async Task<bool> HasFullAccessAsync<T>(FileEntry<T> entry, Guid userId, bool isGuest, bool isDocSpaceAdmin, bool isRoom, bool isUser)
     {
-        if (isUser || isCollaborator)
+        if (isGuest || isUser)
         {
             return false;
         }
