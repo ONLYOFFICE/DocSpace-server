@@ -159,7 +159,7 @@ public class MigrateOperation : DistributedTaskProgress
                 {
                     //Status = module + domain;
                     _logger.DebugDomain(domain);
-                    files = await oldStore.ListFilesRelativeAsync(domain, "\\", "*.*", true).ToArrayAsync();
+                    files = await oldStore.ListFilesRelativeAsync(domain, "\\", "*", true).ToArrayAsync();
 
                     foreach (var file in files)
                     {
@@ -168,7 +168,7 @@ public class MigrateOperation : DistributedTaskProgress
                     }
                 }
 
-                files = (await oldStore.ListFilesRelativeAsync(string.Empty, "\\", "*.*", true).ToArrayAsync())
+                files = (await oldStore.ListFilesRelativeAsync(string.Empty, "\\", "*", true).ToArrayAsync())
                 .Where(path => domains.TrueForAll(domain => !path.Contains(domain + "/")))
                 .ToArray();
 

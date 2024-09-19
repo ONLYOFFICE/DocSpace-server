@@ -140,7 +140,12 @@ public static class DocumentService
         documentRevisionId = string.IsNullOrEmpty(documentRevisionId)
                                  ? documentUri
                                  : documentRevisionId;
+
         documentRevisionId = GenerateRevisionId(documentRevisionId);
+
+        documentConverterUrl = FilesLinkUtility.AddQueryString(documentConverterUrl, new Dictionary<string, string>() {
+            { FilesLinkUtility.ShardKey, documentRevisionId }
+        });
 
         var request = new HttpRequestMessage
         {
@@ -220,8 +225,11 @@ public static class DocumentService
         string signatureSecret,
         IHttpClientFactory clientFactory)
     {
-        var defaultTimeout = Timeout;
-        var commandTimeout = defaultTimeout;
+        documentTrackerUrl = FilesLinkUtility.AddQueryString(documentTrackerUrl, new Dictionary<string, string>() {
+            { FilesLinkUtility.ShardKey, documentRevisionId }
+        });
+
+        var commandTimeout = Timeout;
 
         if (method == CommandMethod.Version)
         {
@@ -330,6 +338,10 @@ public static class DocumentService
        string signatureSecret,
        IHttpClientFactory clientFactory)
     {
+        docbuilderUrl = FilesLinkUtility.AddQueryString(docbuilderUrl, new Dictionary<string, string>() {
+            { FilesLinkUtility.ShardKey, requestKey }
+        });
+
         var request = new HttpRequestMessage
         {
             RequestUri = new Uri(docbuilderUrl),

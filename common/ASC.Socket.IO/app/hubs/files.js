@@ -208,7 +208,6 @@ module.exports = (io) => {
 
   function updateFolder({ id, room, data, userIds } = {}) {
     logger.info(`update folder ${id} in room ${room}`);
-    modifyFolder(room, "update", id, "folder", data);
 
     if(userIds)
     {

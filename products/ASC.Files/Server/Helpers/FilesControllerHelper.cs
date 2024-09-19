@@ -160,7 +160,7 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         if (!string.IsNullOrEmpty(content) && Regex.IsMatch(content, @"<([^\s>]*)(\s[^<]*)>"))
         {
                 extension = ".html";
-            }
+        }
 
         return await CreateFileAsync(folderId, title, content, extension, updateIfExist);
     }

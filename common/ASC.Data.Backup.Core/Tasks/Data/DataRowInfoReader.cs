@@ -74,15 +74,12 @@ internal static class DataRowInfoReader
         {
             return null;
         }
-        if (schemaType == "xs:boolean")
-        {
-            return Convert.ToBoolean(str);
-        }
-        if (schemaType == "xs:base64Binary")
-        {
-            return Convert.FromBase64String(str);
-        }
 
-        return str;
+        return schemaType switch
+        {
+            "xs:boolean" => Convert.ToBoolean(str),
+            "xs:base64Binary" => Convert.FromBase64String(str),
+            _ => str
+        };
     }
 }

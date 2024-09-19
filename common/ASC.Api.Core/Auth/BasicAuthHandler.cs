@@ -65,7 +65,7 @@ public class BasicAuthHandler(
             var userInfo = await userManager.GetUserByEmailAsync(authUsername);
             var passwordHash = passwordHasher.GetClientPassword(authPassword);
 
-            var claims = new List<Claim>()
+            var claims = new List<Claim>
             {
                 AuthConstants.Claim_ScopeRootWrite
             };

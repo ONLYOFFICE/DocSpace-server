@@ -38,7 +38,7 @@ public class CustomNavigationSettings : ISettings<CustomNavigationSettings>
 
     public CustomNavigationSettings GetDefault()
     {
-        return new CustomNavigationSettings { Items = new List<CustomNavigationItem>() };
+        return new CustomNavigationSettings { Items = [] };
     }
 }
 

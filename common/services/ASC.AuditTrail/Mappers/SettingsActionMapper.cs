@@ -34,7 +34,7 @@ internal class SettingsActionsMapper : IProductActionMapper
         new ProductsActionMapper()
     ];
 
-    public ProductType Product { get; } = ProductType.Settings;
+    public ProductType Product => ProductType.Settings;
 }
 
 internal class GeneralActionMapper : IModuleActionMapper
@@ -49,12 +49,11 @@ internal class GeneralActionMapper : IModuleActionMapper
         Actions = new MessageMapsDictionary(productType, Module)
         {
             {
-                ActionType.Update, new[]
-                {
+                ActionType.Update, [
                     MessageAction.LanguageSettingsUpdated, MessageAction.TimeZoneSettingsUpdated, MessageAction.DnsSettingsUpdated,
                     MessageAction.TrustedMailDomainSettingsUpdated,MessageAction.PasswordStrengthSettingsUpdated,MessageAction.TwoFactorAuthenticationSettingsUpdated,
                     MessageAction.AdministratorMessageSettingsUpdated,MessageAction.DefaultStartPageSettingsUpdated
-                }
+                ]
             }
         };
 
@@ -77,8 +76,7 @@ internal class ProductsActionMapper : IModuleActionMapper
         Actions = new MessageMapsDictionary(ProductType.Settings, Module)
         {
             {
-                ActionType.Update, new[]
-                {
+                ActionType.Update, [
                     MessageAction.ProductsListUpdated,
                     MessageAction.GreetingSettingsUpdated,MessageAction.TeamTemplateChanged,MessageAction.ColorThemeChanged,
                     MessageAction.OwnerSentPortalDeactivationInstructions, MessageAction.PortalDeactivated, MessageAction.PortalRenamed,
@@ -91,37 +89,32 @@ internal class ProductsActionMapper : IModuleActionMapper
                     MessageAction.PrivacyRoomDisable, 
                     MessageAction.QuotaPerRoomChanged, MessageAction.QuotaPerRoomDisabled, MessageAction.QuotaPerUserChanged, MessageAction.QuotaPerUserDisabled, MessageAction.QuotaPerPortalChanged, MessageAction.QuotaPerPortalDisabled,
                     MessageAction.CustomQuotaPerRoomDefault, MessageAction.CustomQuotaPerRoomChanged, MessageAction.CustomQuotaPerRoomDisabled, MessageAction.CustomQuotaPerUserDefault, MessageAction.CustomQuotaPerUserChanged, MessageAction.CustomQuotaPerUserDisabled
-                }
+                ]
             },
             {
-                ActionType.Create, new[]
-                {
+                ActionType.Create, [
                     MessageAction.AdministratorAdded, MessageAction.ProductAddedAdministrator
-                }
+                ]
             },
             {
-                ActionType.UpdateAccess, new[]
-                {
+                ActionType.UpdateAccess, [
                     MessageAction.ProductAccessOpened,MessageAction.ProductAccessRestricted,MessageAction.AdministratorDeleted, MessageAction.AdministratorOpenedFullAccess
-                }
+                ]
             },
             {
-                ActionType.Delete, new[]
-                {
+                ActionType.Delete, [
                     MessageAction.ProductDeletedAdministrator,MessageAction.PortalDeleted
-                }
+                ]
             },
             {
-                ActionType.Send, new[]
-                {
+                ActionType.Send, [
                     MessageAction.OwnerSentPortalDeleteInstructions, MessageAction.OwnerSentChangeOwnerInstructions
-                }
+                ]
             },
             {
-                ActionType.Download, new[]
-                {
+                ActionType.Download, [
                     MessageAction.LoginHistoryReportDownloaded, MessageAction.AuditTrailReportDownloaded
-                }
+                ]
             }
         };
 

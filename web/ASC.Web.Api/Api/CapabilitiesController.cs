@@ -63,7 +63,7 @@ public class CapabilitiesController(CoreBaseSettings coreBaseSettings,
         {
             LdapEnabled = false,
             OauthEnabled = coreBaseSettings.Standalone || quota.Oauth,
-            Providers = new List<string>(0),
+            Providers = [],
             SsoLabel = string.Empty,
             SsoUrl = string.Empty,
             IdentityServerEnabled = false

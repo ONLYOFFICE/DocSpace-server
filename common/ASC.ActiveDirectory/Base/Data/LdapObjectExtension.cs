@@ -211,17 +211,12 @@ public class LdapObjectExtension(TenantUtil tenantUtil, SettingsManager settings
             }
             else
             {
-                switch (gender.ToLowerInvariant())
+                user.Sex = gender.ToLowerInvariant() switch
                 {
-                    case "male":
-                    case "m":
-                        user.Sex = true;
-                        break;
-                    case "female":
-                    case "f":
-                        user.Sex = false;
-                        break;
-                }
+                    "male" or "m" => true,
+                    "female" or "f" => false,
+                    _ => user.Sex
+                };
             }
         }
 

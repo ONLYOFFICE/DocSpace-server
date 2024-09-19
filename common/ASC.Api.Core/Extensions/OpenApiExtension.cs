@@ -144,7 +144,7 @@ public static class OpenApiExtension
                         {
                             Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = CookiesManager.AuthCookiesName }
                         },
-                        new[] { "read", "write" }
+                        ["read", "write"]
                     }
                 });
 

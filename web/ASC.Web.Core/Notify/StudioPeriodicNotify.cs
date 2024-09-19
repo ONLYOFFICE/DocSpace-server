@@ -372,7 +372,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                     if (payer.Id != Constants.LostUser.Id && !users.Any(u => u.Id == payer.Id))
                     {
-                        users = users.Concat(new[] { payer });
+                        users = users.Concat([payer]);
                     }
                 }
                 var asyncUsers = users.ToAsyncEnumerable();
@@ -442,11 +442,11 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                 await tenantManager.SetCurrentTenantAsync(tenant.Id);
                 var client = workContext.RegisterClient(serviceProvider, studioNotifyHelper.NotifySource);
 
-                var tariff = await tariffService.GetTariffAsync(tenant.Id);
+                //var tariff = await tariffService.GetTariffAsync(tenant.Id);
                 var quota = await tenantManager.GetTenantQuotaAsync(tenant.Id);
                 var createdDate = tenant.CreationDateTime.Date;
 
-                var actualEndDate = tariff.DueDate != DateTime.MaxValue ? tariff.DueDate : tariff.LicenseDate;
+                //var actualEndDate = tariff.DueDate != DateTime.MaxValue ? tariff.DueDate : tariff.LicenseDate;
                 // var dueDate = actualEndDate.Date;
                 //
                 // var delayDueDateIsNotMax = tariff.DelayDueDate != DateTime.MaxValue;
