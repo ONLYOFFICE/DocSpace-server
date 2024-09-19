@@ -140,7 +140,12 @@ public class FileSecurity(IDaoFactory daoFactory,
 
     public static readonly FrozenDictionary<EmployeeType, HashSet<FileShare>> AvailableUserAccesses = new Dictionary<EmployeeType, HashSet<FileShare>>
     {
-        { EmployeeType.DocSpaceAdmin, [FileShare.RoomManager, FileShare.None] },
+        { 
+            EmployeeType.DocSpaceAdmin, [
+                FileShare.RoomManager, FileShare.ContentCreator, FileShare.Editing, FileShare.FillForms, FileShare.Review, 
+                FileShare.Comment, FileShare.Read, FileShare.None
+            ] 
+        },
         {
             EmployeeType.RoomAdmin, [
                 FileShare.RoomManager, FileShare.ContentCreator, FileShare.Editing, FileShare.Review, FileShare.Comment,
@@ -155,8 +160,8 @@ public class FileSecurity(IDaoFactory daoFactory,
         },
         {
             EmployeeType.Guest, [
-                FileShare.Editing, FileShare.Review, FileShare.Comment, FileShare.FillForms, FileShare.Read,
-                FileShare.None
+                FileShare.ContentCreator, FileShare.Editing, FileShare.Review, FileShare.Comment, FileShare.FillForms, 
+                FileShare.Read, FileShare.None
             ]
         }
     }.ToFrozenDictionary();
