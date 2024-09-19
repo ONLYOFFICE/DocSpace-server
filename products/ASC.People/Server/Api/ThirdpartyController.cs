@@ -310,7 +310,7 @@ public class ThirdpartyController(
         catch (TenantQuotaException)
         {
             quotaLimit = true;
-            user = await userManagerWrapper.AddUserAsync(user, passwordHash, true, true, EmployeeType.Guest, fromInviteLink, updateExising: inviteByEmail);
+            user = await userManagerWrapper.AddUserAsync(user, passwordHash, true, true, EmployeeType.User, fromInviteLink, updateExising: inviteByEmail);
         }
 
         return (user, quotaLimit);

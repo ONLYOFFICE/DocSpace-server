@@ -90,7 +90,7 @@ public class FileSharingAceHelper(
                 continue;
             }
             var currentUserType = await userManager.GetUserTypeAsync(currentUser);
-            var userType = EmployeeType.Guest;
+            var userType = EmployeeType.User;
             var existedShare = shares.Get(w.Id);
             var eventType = existedShare != null ? w.Access == FileShare.None ? EventType.Remove : EventType.Update : EventType.Create;
 

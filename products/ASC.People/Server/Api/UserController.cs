@@ -277,7 +277,7 @@ public class UserController(
         catch (TenantQuotaException)
         {
             quotaLimit = true;
-            user = await userManagerWrapper.AddUserAsync(user, inDto.PasswordHash, inDto.FromInviteLink, true, EmployeeType.Guest,
+            user = await userManagerWrapper.AddUserAsync(user, inDto.PasswordHash, inDto.FromInviteLink, true, EmployeeType.User,
                 inDto.FromInviteLink && linkData is { IsCorrect: true, ConfirmType: not ConfirmType.EmpInvite }, true, true, byEmail);
         }
 

@@ -203,7 +203,7 @@ public class MessageSettingsController(MessageService messageService,
             }
 
             var trustedDomainSettings = await settingsManager.LoadAsync<StudioTrustedDomainSettings>();
-            var emplType = trustedDomainSettings.InviteAsUsers ? EmployeeType.Guest : EmployeeType.RoomAdmin;
+            var employeeType = trustedDomainSettings.InviteAsUsers ? EmployeeType.User : EmployeeType.RoomAdmin;
             var enableInviteUsers = true;
             try
             {
@@ -216,7 +216,7 @@ public class MessageSettingsController(MessageService messageService,
 
             if (!enableInviteUsers)
             {
-                emplType = EmployeeType.Guest;
+                employeeType = EmployeeType.User;
             }
 
             switch (tenant.TrustedDomainsType)
@@ -226,7 +226,7 @@ public class MessageSettingsController(MessageService messageService,
                         var address = new MailAddress(email);
                         if (tenant.TrustedDomains.Any(d => address.Address.EndsWith("@" + d.Replace("*", ""), StringComparison.InvariantCultureIgnoreCase)))
                         {
-                            await studioNotifyService.SendJoinMsgAsync(email, emplType, inDto.Culture, true);
+                            await studioNotifyService.SendJoinMsgAsync(email, employeeType, inDto.Culture, true);
                             await messageService.SendAsync(MessageInitiator.System, MessageAction.SentInviteInstructions, email);
                             return Resource.FinishInviteJoinEmailMessage;
                         }
@@ -235,7 +235,7 @@ public class MessageSettingsController(MessageService messageService,
                     }
                 case TenantTrustedDomainsType.All:
                     {
-                        await studioNotifyService.SendJoinMsgAsync(email, emplType, inDto.Culture, true);
+                        await studioNotifyService.SendJoinMsgAsync(email, employeeType, inDto.Culture, true);
                         await messageService.SendAsync(MessageInitiator.System, MessageAction.SentInviteInstructions, email);
                         return Resource.FinishInviteJoinEmailMessage;
                     }
