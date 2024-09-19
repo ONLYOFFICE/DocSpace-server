@@ -423,7 +423,7 @@ public class UserManager(
 
         try
         {
-            if (type is EmployeeType.Guest)
+            if (type is EmployeeType.Guest or EmployeeType.User)
             {
                 lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetUsersCountCheckKey(Tenant.Id));
                 
@@ -1023,6 +1023,7 @@ public class UserManager(
 
     private async Task<bool> IsPaidUserAsync(UserInfo userInfo)
     {
-        return await this.IsUserAsync(userInfo) || await this.IsDocSpaceAdminAsync(userInfo);
+        var type = await this.GetUserTypeAsync(userInfo.Id);
+        return type is EmployeeType.DocSpaceAdmin or EmployeeType.RoomAdmin;
     }
 }

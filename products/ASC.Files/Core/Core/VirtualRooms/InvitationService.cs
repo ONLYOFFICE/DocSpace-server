@@ -138,8 +138,10 @@ public class InvitationService(
                         validation.Result = EmailValidationKeyProvider.ValidationResult.UserExcluded;
                         return false;
                     }
+
+                    var type = await userManager.GetUserTypeAsync(currentUserId);
                     
-                    if (FileSecurity.PaidShares.Contains(data.Share) && await userManager.GetUserTypeAsync(currentUserId) is EmployeeType.Guest)
+                    if (FileSecurity.PaidShares.Contains(data.Share) && type is EmployeeType.Guest or EmployeeType.User)
                     {
                         data.Share = FileSecurity.GetHighFreeRole(folder.FolderType);
 

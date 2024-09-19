@@ -247,10 +247,17 @@ public class WebItemSecurity(UserManager userManager,
 
             await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenantId)))
             {
-                if (await userManager.IsUserInGroupAsync(userid, Constants.GroupGuest.ID))
+                var type = await userManager.GetUserTypeAsync(userid);
+                switch (type)
                 {
-                    await countPaidUserChecker.CheckAppend();
-                    await userManager.RemoveUserFromGroupAsync(userid, Constants.GroupGuest.ID);
+                    case EmployeeType.Guest:
+                        await countPaidUserChecker.CheckAppend();
+                        await userManager.RemoveUserFromGroupAsync(userid, Constants.GroupGuest.ID);
+                        break;
+                    case EmployeeType.User:
+                        await countPaidUserChecker.CheckAppend();
+                        await userManager.RemoveUserFromGroupAsync(userid, Constants.GroupUser.ID);
+                        break;
                 }
 
                 if (productId == WebItemManager.PeopleProductID)

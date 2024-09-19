@@ -268,6 +268,9 @@ public sealed class UserManagerWrapper(
                 }
                 else if (currentType is EmployeeType.User)
                 {
+                    lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenant.Id));
+                    
+                    await countPaidUserChecker.CheckAppend();
                     await userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupUser.ID);
                     await userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupAdmin.ID);
                     webItemSecurityCache.ClearCache(tenant.Id);
@@ -294,6 +297,9 @@ public sealed class UserManagerWrapper(
                 }
                 else if (currentType is EmployeeType.User)
                 {
+                    lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenant.Id));
+                    
+                    await countPaidUserChecker.CheckAppend();
                     await userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupUser.ID);
                     webItemSecurityCache.ClearCache(tenant.Id);
                     changed = true;
@@ -310,9 +316,6 @@ public sealed class UserManagerWrapper(
             }
             else if (type is EmployeeType.User && currentType is EmployeeType.Guest)
             {
-                lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenant.Id));
-                
-                await countPaidUserChecker.CheckAppend();
                 await userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupGuest.ID);
                 await userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupUser.ID);
                 webItemSecurityCache.ClearCache(tenant.Id);

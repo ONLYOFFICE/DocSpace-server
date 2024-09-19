@@ -1356,9 +1356,9 @@ public class UserController(
 
         if (inDto.IsUser.HasValue)
         {
-            var isUser = inDto.IsUser.Value;
+            var isGuest = inDto.IsUser.Value;
             
-            if (isUser && canBeGuestFlag && !await _userManager.IsGuestAsync(user))
+            if (isGuest && canBeGuestFlag && !await _userManager.IsGuestAsync(user))
             {
                 await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetUsersCountCheckKey(tenant.Id)))
                 {
@@ -1368,7 +1368,7 @@ public class UserController(
                     changed = true;
                 }
             }
-            else if (!self && !isUser && await _userManager.IsGuestAsync(user))
+            else if (!self && !isGuest && await _userManager.IsGuestAsync(user))
             {
                 await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenant.Id)))
                 {
@@ -1433,9 +1433,11 @@ public class UserController(
                     {
                         IDistributedLockHandle lockHandle = null;
                         
+                        var type = await _userManager.GetUserTypeAsync(user.Id);
+                        
                         try
                         {
-                            if (!await _userManager.IsGuestAsync(user))
+                            if (type is EmployeeType.DocSpaceAdmin or EmployeeType.RoomAdmin)
                             {
                                 lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenant.Id));
                                 
@@ -1797,9 +1799,10 @@ public class UserController(
             {
                 case Payments.Paid:
                     excludeGroups.Add(Constants.GroupGuest.ID);
+                    excludeGroups.Add(Constants.GroupUser.ID);
                     break;
                 case Payments.Free:
-                    includeGroups.Add([Constants.GroupGuest.ID]);
+                    includeGroups.Add([Constants.GroupGuest.ID, Constants.GroupUser.ID]);
                     break;
             }
         }
