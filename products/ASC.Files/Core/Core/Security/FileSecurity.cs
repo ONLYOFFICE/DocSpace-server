@@ -58,7 +58,7 @@ public class FileSecurity(IDaoFactory daoFactory,
     public readonly FileShare DefaultArchiveShare = FileShare.Restrict;
     public readonly FileShare DefaultVirtualRoomsShare = FileShare.Restrict;
 
-    public static readonly HashSet<FileShare> PaidShares = [FileShare.RoomManager, FileShare.ContentCreator];
+    public static readonly HashSet<FileShare> PaidShares = [FileShare.RoomManager];
 
     public static readonly FrozenDictionary<FolderType, FrozenDictionary<SubjectType, HashSet<FileShare>>> AvailableFileAccesses =
         new Dictionary<FolderType, FrozenDictionary<SubjectType, HashSet<FileShare>>>
@@ -716,9 +716,10 @@ public class FileSecurity(IDaoFactory daoFactory,
     {
         return folderType switch
         {
-            FolderType.CustomRoom => FileShare.Editing,
-            FolderType.FillingFormsRoom => FileShare.FillForms,
-            FolderType.EditingRoom => FileShare.Editing,
+            FolderType.CustomRoom => FileShare.ContentCreator,
+            FolderType.FillingFormsRoom => FileShare.ContentCreator,
+            FolderType.EditingRoom => FileShare.ContentCreator,
+            FolderType.PublicRoom => FileShare.ContentCreator,
             _ => FileShare.None
         };
     }
