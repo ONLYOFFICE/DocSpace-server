@@ -277,7 +277,7 @@ public class UserController(
         catch (TenantQuotaException)
         {
             quotaLimit = true;
-            user = await userManagerWrapper.AddUserAsync(user, inDto.PasswordHash, inDto.FromInviteLink, true, EmployeeType.User,
+            user = await userManagerWrapper.AddUserAsync(user, inDto.PasswordHash, inDto.FromInviteLink, true, EmployeeType.Guest,
                 inDto.FromInviteLink && linkData is { IsCorrect: true, ConfirmType: not ConfirmType.EmpInvite }, true, true, byEmail);
         }
 
@@ -892,7 +892,7 @@ public class UserController(
 
         if (inDto.ResendAll)
         {
-            await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(Guid.Empty, EmployeeType.User), Constants.Action_AddRemoveUser);
+            await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(Guid.Empty, EmployeeType.Guest), Constants.Action_AddRemoveUser);
             users = (await _userManager.GetUsersAsync())
                 .Where(u => u.ActivationStatus == EmployeeActivationStatus.Pending)
                 .ToList();
@@ -1358,22 +1358,22 @@ public class UserController(
         {
             var isUser = inDto.IsUser.Value;
             
-            if (isUser && canBeGuestFlag && !await _userManager.IsUserAsync(user))
+            if (isUser && canBeGuestFlag && !await _userManager.IsGuestAsync(user))
             {
                 await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetUsersCountCheckKey(tenant.Id)))
                 {
                     await activeUsersChecker.CheckAppend();
-                    await _userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupUser.ID);
+                    await _userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupGuest.ID);
                     webItemSecurityCache.ClearCache(tenant.Id);
                     changed = true;
                 }
             }
-            else if (!self && !isUser && await _userManager.IsUserAsync(user))
+            else if (!self && !isUser && await _userManager.IsGuestAsync(user))
             {
                 await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenant.Id)))
                 {
                     await countPaidUserChecker.CheckAppend();
-                    await _userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupUser.ID);
+                    await _userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupGuest.ID);
                     webItemSecurityCache.ClearCache(tenant.Id);
                     changed = true;
                 }
@@ -1435,7 +1435,7 @@ public class UserController(
                         
                         try
                         {
-                            if (!await _userManager.IsUserAsync(user))
+                            if (!await _userManager.IsGuestAsync(user))
                             {
                                 lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenant.Id));
                                 
@@ -1796,10 +1796,10 @@ public class UserController(
             switch (payments)
             {
                 case Payments.Paid:
-                    excludeGroups.Add(Constants.GroupUser.ID);
+                    excludeGroups.Add(Constants.GroupGuest.ID);
                     break;
                 case Payments.Free:
-                    includeGroups.Add([Constants.GroupUser.ID]);
+                    includeGroups.Add([Constants.GroupGuest.ID]);
                     break;
             }
         }
@@ -1847,15 +1847,15 @@ public class UserController(
                     iGroups.Add([Constants.GroupAdmin.ID]);
                     break;
                 case EmployeeType.RoomAdmin:
-                    eGroups.Add(Constants.GroupUser.ID);
+                    eGroups.Add(Constants.GroupGuest.ID);
                     eGroups.Add(Constants.GroupAdmin.ID);
-                    eGroups.Add(Constants.GroupCollaborator.ID);
-                    break;
-                case EmployeeType.Collaborator:
-                    iGroups.Add([Constants.GroupCollaborator.ID]);
+                    eGroups.Add(Constants.GroupUser.ID);
                     break;
                 case EmployeeType.User:
                     iGroups.Add([Constants.GroupUser.ID]);
+                    break;
+                case EmployeeType.Guest:
+                    iGroups.Add([Constants.GroupGuest.ID]);
                     break;
             }
         }

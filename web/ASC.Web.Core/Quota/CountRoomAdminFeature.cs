@@ -57,8 +57,8 @@ public class CountPaidUserStatistic(IServiceProvider serviceProvider) : ITenantQ
     public async Task<int> GetValueAsync()
     {
         var userManager = serviceProvider.GetService<UserManager>();
-        var adminsCount = (await userManager.GetUsersByGroupAsync(Constants.GroupManager.ID)).Length;
-        var collaboratorsCount = (await userManager.GetUsersByGroupAsync(Constants.GroupCollaborator.ID)).Length;
+        var adminsCount = (await userManager.GetUsersByGroupAsync(Constants.GroupRoomAdmin.ID)).Length;
+        var collaboratorsCount = (await userManager.GetUsersByGroupAsync(Constants.GroupUser.ID)).Length;
 
         return adminsCount + collaboratorsCount;
     }

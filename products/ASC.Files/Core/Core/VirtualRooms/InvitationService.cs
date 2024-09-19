@@ -139,7 +139,7 @@ public class InvitationService(
                         return false;
                     }
                     
-                    if (FileSecurity.PaidShares.Contains(data.Share) && await userManager.GetUserTypeAsync(currentUserId) is EmployeeType.User)
+                    if (FileSecurity.PaidShares.Contains(data.Share) && await userManager.GetUserTypeAsync(currentUserId) is EmployeeType.Guest)
                     {
                         data.Share = FileSecurity.GetHighFreeRole(folder.FolderType);
 

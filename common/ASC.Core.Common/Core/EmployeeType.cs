@@ -35,7 +35,7 @@ public enum EmployeeType
 {
     All = 0,
     RoomAdmin = 1,
-    User = 2,
+    Guest = 2,
     DocSpaceAdmin = 3,
-    Collaborator = 4
+    User = 4
 }

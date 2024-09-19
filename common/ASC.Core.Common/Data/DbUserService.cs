@@ -340,8 +340,8 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
                 {
                     var q1 = (from user in q
                               join userGroup in userDbContext.UserGroups.Where(g =>
-                                  !g.Removed && (g.UserGroupId == Constants.GroupAdmin.ID || g.UserGroupId == Constants.GroupUser.ID ||
-                                                 g.UserGroupId == Constants.GroupCollaborator.ID)) on user.Id equals userGroup.Userid into joinedGroup
+                                  !g.Removed && (g.UserGroupId == Constants.GroupAdmin.ID || g.UserGroupId == Constants.GroupGuest.ID ||
+                                                 g.UserGroupId == Constants.GroupUser.ID)) on user.Id equals userGroup.Userid into joinedGroup
                               from @group in joinedGroup.DefaultIfEmpty()
                               select new UserWithGroup { User = user, Group = @group });
 
@@ -349,7 +349,7 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
                         u.User.Id == ownerId ? 0 :
                         u.Group == null ? 2 :
                         u.Group.UserGroupId == Constants.GroupAdmin.ID ? 1 :
-                        u.Group.UserGroupId == Constants.GroupCollaborator.ID ? 3 : 4;
+                        u.Group.UserGroupId == Constants.GroupUser.ID ? 3 : 4;
 
                     q = (sortOrderAsc ? q1.OrderBy(orderByUserType).ThenBy(x => x.User.FirstName) 
                         : q1.OrderByDescending(orderByUserType)).ThenBy(x => x.User.FirstName).Select(r => r.User);

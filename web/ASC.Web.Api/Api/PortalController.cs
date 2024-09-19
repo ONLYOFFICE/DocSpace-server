@@ -296,7 +296,7 @@ public class PortalController(
     [HttpGet("quota")]
     public async Task<TenantQuota> GetQuotaAsync()
     {        
-        if (await userManager.IsUserAsync(securityContext.CurrentAccount.ID))
+        if (await userManager.IsGuestAsync(securityContext.CurrentAccount.ID))
         {
             throw new SecurityException();
         }
@@ -304,7 +304,7 @@ public class PortalController(
         var tenant = await tenantManager.GetCurrentTenantAsync();
         var result = await tenantManager.GetTenantQuotaAsync(tenant.Id);
 
-        if (await userManager.IsCollaboratorAsync(authContext.CurrentAccount.ID))
+        if (await userManager.IsUserAsync(authContext.CurrentAccount.ID))
         {
             result.MaxTotalSize = 0;
         }

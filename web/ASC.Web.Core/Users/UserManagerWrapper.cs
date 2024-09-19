@@ -127,9 +127,9 @@ public sealed class UserManagerWrapper(
 
         var groupId = type switch
         {
-            EmployeeType.User => Constants.GroupUser.ID,
+            EmployeeType.Guest => Constants.GroupGuest.ID,
             EmployeeType.DocSpaceAdmin => Constants.GroupAdmin.ID,
-            EmployeeType.Collaborator => Constants.GroupCollaborator.ID,
+            EmployeeType.User => Constants.GroupUser.ID,
             _ => Guid.Empty
         };
 
@@ -190,7 +190,7 @@ public sealed class UserManagerWrapper(
             //NOTE: Notify user only if it's active
             if (afterInvite)
             {
-                if (type is EmployeeType.User)
+                if (type is EmployeeType.Guest)
                 {
                     await studioNotifyService.GuestInfoAddedAfterInviteAsync(newUserInfo);
                 }
@@ -207,7 +207,7 @@ public sealed class UserManagerWrapper(
             else
             {
                 //Send user invite
-                if (type is EmployeeType.User)
+                if (type is EmployeeType.Guest)
                 {
                     await studioNotifyService.GuestInfoActivationAsync(newUserInfo);
                 }
@@ -226,14 +226,14 @@ public sealed class UserManagerWrapper(
 
         switch (type)
         {
-            case EmployeeType.User:
-                await userManager.AddUserIntoGroupAsync(newUserInfo.Id, Constants.GroupUser.ID, true);
+            case EmployeeType.Guest:
+                await userManager.AddUserIntoGroupAsync(newUserInfo.Id, Constants.GroupGuest.ID, true);
                 break;
             case EmployeeType.DocSpaceAdmin:
                 await userManager.AddUserIntoGroupAsync(newUserInfo.Id, Constants.GroupAdmin.ID, true);
                 break;
-            case EmployeeType.Collaborator:
-                await userManager.AddUserIntoGroupAsync(newUserInfo.Id, Constants.GroupCollaborator.ID, true);
+            case EmployeeType.User:
+                await userManager.AddUserIntoGroupAsync(newUserInfo.Id, Constants.GroupUser.ID, true);
                 break;
         }
 
@@ -266,19 +266,19 @@ public sealed class UserManagerWrapper(
                     webItemSecurityCache.ClearCache(tenant.Id);
                     changed = true;
                 }
-                else if (currentType is EmployeeType.Collaborator)
+                else if (currentType is EmployeeType.User)
                 {
-                    await userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupCollaborator.ID);
+                    await userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupUser.ID);
                     await userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupAdmin.ID);
                     webItemSecurityCache.ClearCache(tenant.Id);
                     changed = true;
                 }
-                else if (currentType is EmployeeType.User)
+                else if (currentType is EmployeeType.Guest)
                 {
                     lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenant.Id));
                     
                     await countPaidUserChecker.CheckAppend();
-                    await userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupUser.ID);
+                    await userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupGuest.ID);
                     await userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupAdmin.ID);
                     webItemSecurityCache.ClearCache(tenant.Id);
                     changed = true;
@@ -292,29 +292,29 @@ public sealed class UserManagerWrapper(
                     webItemSecurityCache.ClearCache(tenant.Id);
                     changed = true;
                 }
-                else if (currentType is EmployeeType.Collaborator)
-                {
-                    await userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupCollaborator.ID);
-                    webItemSecurityCache.ClearCache(tenant.Id);
-                    changed = true;
-                }
                 else if (currentType is EmployeeType.User)
                 {
-                    lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenant.Id));
-                    
-                    await countPaidUserChecker.CheckAppend();
                     await userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupUser.ID);
                     webItemSecurityCache.ClearCache(tenant.Id);
                     changed = true;
                 }
+                else if (currentType is EmployeeType.Guest)
+                {
+                    lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenant.Id));
+                    
+                    await countPaidUserChecker.CheckAppend();
+                    await userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupGuest.ID);
+                    webItemSecurityCache.ClearCache(tenant.Id);
+                    changed = true;
+                }
             }
-            else if (type is EmployeeType.Collaborator && currentType is EmployeeType.User)
+            else if (type is EmployeeType.User && currentType is EmployeeType.Guest)
             {
                 lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenant.Id));
                 
                 await countPaidUserChecker.CheckAppend();
-                await userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupUser.ID);
-                await userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupCollaborator.ID);
+                await userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupGuest.ID);
+                await userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupUser.ID);
                 webItemSecurityCache.ClearCache(tenant.Id);
                 changed = true;
             }

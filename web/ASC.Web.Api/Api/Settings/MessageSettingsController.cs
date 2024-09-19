@@ -203,7 +203,7 @@ public class MessageSettingsController(MessageService messageService,
             }
 
             var trustedDomainSettings = await settingsManager.LoadAsync<StudioTrustedDomainSettings>();
-            var emplType = trustedDomainSettings.InviteAsUsers ? EmployeeType.User : EmployeeType.RoomAdmin;
+            var emplType = trustedDomainSettings.InviteAsUsers ? EmployeeType.Guest : EmployeeType.RoomAdmin;
             var enableInviteUsers = true;
             try
             {
@@ -216,7 +216,7 @@ public class MessageSettingsController(MessageService messageService,
 
             if (!enableInviteUsers)
             {
-                emplType = EmployeeType.User;
+                emplType = EmployeeType.Guest;
             }
 
             switch (tenant.TrustedDomainsType)

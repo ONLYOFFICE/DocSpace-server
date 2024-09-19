@@ -100,16 +100,16 @@ public class UserManager(
         switch (type)
         {
             case EmployeeType.RoomAdmin:
-                users = users.WhereAwait(async u => !await this.IsUserAsync(u) && !await this.IsCollaboratorAsync(u) && !await this.IsDocSpaceAdminAsync(u));
+                users = users.WhereAwait(async u => !await this.IsGuestAsync(u) && !await this.IsUserAsync(u) && !await this.IsDocSpaceAdminAsync(u));
                 break;
             case EmployeeType.DocSpaceAdmin:
                 users = users.WhereAwait(async u => await this.IsDocSpaceAdminAsync(u));
                 break;
-            case EmployeeType.Collaborator:
-                users = users.WhereAwait(async u => await this.IsCollaboratorAsync(u));
-                break;
             case EmployeeType.User:
                 users = users.WhereAwait(async u => await this.IsUserAsync(u));
+                break;
+            case EmployeeType.Guest:
+                users = users.WhereAwait(async u => await this.IsGuestAsync(u));
                 break;
         }
 
@@ -374,7 +374,7 @@ public class UserManager(
 
         var (name, value) = ("", -1);
 
-        if (!await IsUserInGroupAsync(oldUserData.Id, Constants.GroupUser.ID) &&
+        if (!await IsUserInGroupAsync(oldUserData.Id, Constants.GroupGuest.ID) &&
             oldUserData.Status != u.Status && notifyWebSocket)
         {
             (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountPaidUserFeature, int>();
@@ -423,7 +423,7 @@ public class UserManager(
 
         try
         {
-            if (type is EmployeeType.User)
+            if (type is EmployeeType.Guest)
             {
                 lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetUsersCountCheckKey(Tenant.Id));
                 
@@ -695,7 +695,7 @@ public class UserManager(
         }
 
         var user = await GetUsersAsync(userId);
-        var isUser = await this.IsUserAsync(user);
+        var isUser = await this.IsGuestAsync(user);
         var isPaidUser = await IsPaidUserAsync(user);
 
         await permissionContext.DemandPermissionsAsync(new UserGroupObject(new UserAccount(user, await tenantManager.GetCurrentTenantIdAsync(), userFormatter), groupId),
@@ -705,7 +705,7 @@ public class UserManager(
 
         ResetGroupCache(userId);
 
-        if (groupId == Constants.GroupUser.ID)
+        if (groupId == Constants.GroupGuest.ID)
         {
             var tenant = await tenantManager.GetCurrentTenantAsync();
             var myUri = (httpContextAccessor?.HttpContext != null) ? httpContextAccessor.HttpContext.Request.GetDisplayUrl() :
@@ -724,8 +724,8 @@ public class UserManager(
         }
 
         if (await this.IsSystemGroup(groupId) &&
-            (isUser && groupId != Constants.GroupUser.ID ||
-            !isUser && !isPaidUser && groupId != Constants.GroupUser.ID))
+            (isUser && groupId != Constants.GroupGuest.ID ||
+            !isUser && !isPaidUser && groupId != Constants.GroupGuest.ID))
         {
             var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountPaidUserFeature, int>();
             _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
@@ -741,7 +741,7 @@ public class UserManager(
 
         var managerIdTask = GetDepartmentManagerAsync(groupId);
         var user = await GetUsersAsync(userId);
-        var isUserBefore = await this.IsUserAsync(user);
+        var isUserBefore = await this.IsGuestAsync(user);
         var isPaidUserBefore = await IsPaidUserAsync(user);
 
         await permissionContext.DemandPermissionsAsync(new UserGroupObject(new UserAccount(user, await tenantManager.GetCurrentTenantIdAsync(), userFormatter), groupId),
@@ -757,7 +757,7 @@ public class UserManager(
 
         ResetGroupCache(userId);
 
-        var isUserAfter = await this.IsUserAsync(user);
+        var isUserAfter = await this.IsGuestAsync(user);
         var isPaidUserAfter = await IsPaidUserAsync(user);
 
         if (isPaidUserBefore && !isPaidUserAfter && isUserAfter ||
@@ -974,29 +974,29 @@ public class UserManager(
         {
             return true;
         }
-        if (groupId == Constants.GroupUser.ID && userId == Constants.OutsideUser.Id)
+        if (groupId == Constants.GroupGuest.ID && userId == Constants.OutsideUser.Id)
         {
             return true;
         }
 
         UserGroupRef r;
-        if (groupId == Constants.GroupManager.ID || groupId == Constants.GroupUser.ID || groupId == Constants.GroupCollaborator.ID)
+        if (groupId == Constants.GroupRoomAdmin.ID || groupId == Constants.GroupGuest.ID || groupId == Constants.GroupUser.ID)
         {
+            var isGuest = refs.TryGetValue(UserGroupRef.CreateKey(Tenant.Id, userId, Constants.GroupGuest.ID, UserGroupRefType.Contains), out r) && !r.Removed;
+            if (groupId == Constants.GroupGuest.ID)
+            {
+                return isGuest;
+            }
+
             var isUser = refs.TryGetValue(UserGroupRef.CreateKey(Tenant.Id, userId, Constants.GroupUser.ID, UserGroupRefType.Contains), out r) && !r.Removed;
             if (groupId == Constants.GroupUser.ID)
             {
                 return isUser;
             }
 
-            var isCollaborator = refs.TryGetValue(UserGroupRef.CreateKey(Tenant.Id, userId, Constants.GroupCollaborator.ID, UserGroupRefType.Contains), out r) && !r.Removed;
-            if (groupId == Constants.GroupCollaborator.ID)
+            if (groupId == Constants.GroupRoomAdmin.ID)
             {
-                return isCollaborator;
-            }
-
-            if (groupId == Constants.GroupManager.ID)
-            {
-                return !isUser && !isCollaborator;
+                return !isGuest && !isUser;
             }
         }
 
@@ -1023,6 +1023,6 @@ public class UserManager(
 
     private async Task<bool> IsPaidUserAsync(UserInfo userInfo)
     {
-        return await this.IsCollaboratorAsync(userInfo) || await this.IsDocSpaceAdminAsync(userInfo);
+        return await this.IsUserAsync(userInfo) || await this.IsDocSpaceAdminAsync(userInfo);
     }
 }

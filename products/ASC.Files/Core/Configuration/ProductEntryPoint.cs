@@ -355,10 +355,10 @@ public class ProductEntryPoint : Product
     {
         return employeeType switch
         {
-            EmployeeType.User or 
+            EmployeeType.Guest or 
             EmployeeType.RoomAdmin or 
             EmployeeType.DocSpaceAdmin or 
-            EmployeeType.Collaborator => FilesCommonResource.ResourceManager.GetString("RoleEnum_" + employeeType.ToStringFast()),
+            EmployeeType.User => FilesCommonResource.ResourceManager.GetString("RoleEnum_" + employeeType.ToStringFast()),
             _ => string.Empty
         };
     }

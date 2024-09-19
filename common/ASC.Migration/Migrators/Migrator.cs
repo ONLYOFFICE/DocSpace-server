@@ -193,9 +193,9 @@ public abstract class Migrator(
                     saved = await UserManager.SaveUserInfo(user.Info, user.UserType);
                     var groupId = user.UserType switch
                     {
-                        EmployeeType.Collaborator => Constants.GroupCollaborator.ID,
+                        EmployeeType.User => Constants.GroupUser.ID,
                         EmployeeType.DocSpaceAdmin => Constants.GroupAdmin.ID,
-                        EmployeeType.RoomAdmin => Constants.GroupManager.ID,
+                        EmployeeType.RoomAdmin => Constants.GroupRoomAdmin.ID,
                         _ => Guid.Empty
                     };
 
@@ -483,7 +483,7 @@ public abstract class Migrator(
                             user = MigrationInfo.Users[owner];
                         }
 
-                        if (user.UserType == EmployeeType.Collaborator)
+                        if (user.UserType == EmployeeType.User)
                         {
                             await SecurityContext.AuthenticateMeAsync(_currentUser);
                         }
@@ -499,7 +499,7 @@ public abstract class Migrator(
                         localMatchingRoomIds.Add(security.EntryId, room);
                         Log(string.Format(MigrationResource.CreateShareRoom, room.Title));
 
-                        if (user.UserType == EmployeeType.Collaborator)
+                        if (user.UserType == EmployeeType.User)
                         {
                             var aceList = new List<AceWrapper>
                             {

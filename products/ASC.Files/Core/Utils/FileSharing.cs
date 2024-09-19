@@ -90,7 +90,7 @@ public class FileSharingAceHelper(
                 continue;
             }
             var currentUserType = await userManager.GetUserTypeAsync(currentUser);
-            var userType = EmployeeType.User;
+            var userType = EmployeeType.Guest;
             var existedShare = shares.Get(w.Id);
             var eventType = existedShare != null ? w.Access == FileShare.None ? EventType.Remove : EventType.Update : EventType.Create;
 
@@ -443,7 +443,7 @@ public class FileSharingHelper(
             return true;
         }
 
-        if (await userManager.IsUserAsync(authContext.CurrentAccount.ID))
+        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
         {
             return false;
         }

@@ -791,7 +791,7 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_RenameFolder);
         }
 
-        if (await userManager.IsUserAsync(authContext.CurrentAccount.ID))
+        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_RenameFolder);
         }
@@ -1487,7 +1487,7 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
-        if (!await fileSecurity.CanLockAsync(file) || lockfile && await userManager.IsUserAsync(authContext.CurrentAccount.ID))
+        if (!await fileSecurity.CanLockAsync(file) || lockfile && await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
         }
@@ -2040,7 +2040,7 @@ public class FileStorageService //: IFileStorageService
 
     public async Task<bool> SaveDocuSignAsync(string code)
     {
-        if (!authContext.IsAuthenticated || await userManager.IsUserAsync(authContext.CurrentAccount.ID) || !await filesSettingsHelper.GetEnableThirdParty() || !thirdpartyConfiguration.SupportDocuSignInclusion)
+        if (!authContext.IsAuthenticated || await userManager.IsGuestAsync(authContext.CurrentAccount.ID) || !await filesSettingsHelper.GetEnableThirdParty() || !thirdpartyConfiguration.SupportDocuSignInclusion)
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_Create);
         }
@@ -2061,7 +2061,7 @@ public class FileStorageService //: IFileStorageService
     {
         try
         {
-            if (await userManager.IsUserAsync(authContext.CurrentAccount.ID) || !await filesSettingsHelper.GetEnableThirdParty() || !thirdpartyConfiguration.SupportDocuSignInclusion)
+            if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID) || !await filesSettingsHelper.GetEnableThirdParty() || !thirdpartyConfiguration.SupportDocuSignInclusion)
             {
                 throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_Create);
             }
@@ -2383,7 +2383,7 @@ public class FileStorageService //: IFileStorageService
         }
 
         //check user can have personal data
-        if (await userManager.IsUserAsync(userTo))
+        if (await userManager.IsGuestAsync(userTo))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
         }
@@ -2411,7 +2411,7 @@ public class FileStorageService //: IFileStorageService
         }
 
         //check user have personal data
-        if (await userManager.IsUserAsync(userFrom))
+        if (await userManager.IsGuestAsync(userFrom))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
         }
@@ -2614,7 +2614,7 @@ public class FileStorageService //: IFileStorageService
 
     public async ValueTask<List<FileEntry<T>>> AddToFavoritesAsync<T>(IEnumerable<T> foldersId, IEnumerable<T> filesId)
     {
-        if (await userManager.IsUserAsync(authContext.CurrentAccount.ID))
+        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
@@ -2677,7 +2677,7 @@ public class FileStorageService //: IFileStorageService
 
     public async ValueTask<List<FileEntry<T>>> AddToTemplatesAsync<T>(IEnumerable<T> filesId)
     {
-        if (await userManager.IsUserAsync(authContext.CurrentAccount.ID))
+        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
@@ -3431,8 +3431,8 @@ public class FileStorageService //: IFileStorageService
         var userInfo = await userManager.GetUsersAsync(userId);
         if (Equals(userInfo, Constants.LostUser) ||
             userInfo.Status != EmployeeStatus.Active ||
-            await userManager.IsUserAsync(userInfo) ||
-            await userManager.IsCollaboratorAsync(userInfo))
+            await userManager.IsGuestAsync(userInfo) ||
+            await userManager.IsUserAsync(userInfo))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_ChangeOwner);
         }

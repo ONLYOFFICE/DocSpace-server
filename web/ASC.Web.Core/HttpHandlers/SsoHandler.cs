@@ -287,7 +287,7 @@ public class SsoHandlerService
                 }
                 catch (Exception)
                 {
-                    type = EmployeeType.User;
+                    type = EmployeeType.Guest;
                 }
 
                 newUserInfo = await _userManagerWrapper.AddUserAsync(newUserInfo, UserManagerWrapper.GeneratePassword(), true, false, type);

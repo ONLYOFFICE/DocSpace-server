@@ -291,11 +291,11 @@ public class EmployeeFullDtoHelper(
             Terminated = apiDateTimeHelper.Get(userInfo.TerminatedDate),
             WorkFrom = apiDateTimeHelper.Get(userInfo.WorkFromDate),
             Email = userInfo.Email,
-            IsVisitor = await _userManager.IsUserAsync(userInfo),
+            IsVisitor = await _userManager.IsGuestAsync(userInfo),
             IsAdmin = currentType is EmployeeType.DocSpaceAdmin,
             IsRoomAdmin = currentType is EmployeeType.RoomAdmin,
             IsOwner = userInfo.IsOwner(tenant),
-            IsCollaborator = currentType is EmployeeType.Collaborator,
+            IsCollaborator = currentType is EmployeeType.User,
             IsLDAP = userInfo.IsLDAP(),
             IsSSO = userInfo.IsSSO(),
             Shared = shared

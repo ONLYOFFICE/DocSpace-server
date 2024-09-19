@@ -390,7 +390,7 @@ public class GlobalFolder(
             return default;
         }
 
-        if (await userManager.IsUserAsync(authContext.CurrentAccount.ID))
+        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
         {
             return default;
         }
@@ -517,7 +517,7 @@ public class GlobalFolder(
             return 0;
         }
 
-        if (await userManager.IsUserAsync(authContext.CurrentAccount.ID))
+        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
         {
             return 0;
         }
@@ -551,7 +551,7 @@ public class GlobalFolder(
             return 0;
         }
 
-        if (await userManager.IsUserAsync(authContext.CurrentAccount.ID))
+        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
         {
             return 0;
         }

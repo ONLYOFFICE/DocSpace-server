@@ -148,13 +148,13 @@ public class FileSecurity(IDaoFactory daoFactory,
             ]
         },
         {
-            EmployeeType.Collaborator, [
+            EmployeeType.User, [
                 FileShare.PowerUser, FileShare.Editing, FileShare.Review, FileShare.Comment, FileShare.FillForms,
                 FileShare.Read, FileShare.None
             ]
         },
         {
-            EmployeeType.User, [
+            EmployeeType.Guest, [
                 FileShare.Editing, FileShare.Review, FileShare.Comment, FileShare.FillForms, FileShare.Read,
                 FileShare.None
             ]
@@ -681,10 +681,10 @@ public class FileSecurity(IDaoFactory daoFactory,
         var user = await userManager.GetUsersAsync(userId);
         var isOutsider = await userManager.IsOutsiderAsync(user);
         var userType = await userManager.GetUserTypeAsync(user);
-        var isUser = userType is EmployeeType.User;
+        var isUser = userType is EmployeeType.Guest;
         var isAuthenticated =  authContext.IsAuthenticated;
         var isDocSpaceAdmin = userType is EmployeeType.DocSpaceAdmin;
-        var isCollaborator = userType is EmployeeType.Collaborator;
+        var isCollaborator = userType is EmployeeType.User;
         
         await foreach (var entry in entries)
         {
@@ -728,8 +728,8 @@ public class FileSecurity(IDaoFactory daoFactory,
         return share switch
         {
             FileShare.RoomAdmin => EmployeeType.RoomAdmin,
-            FileShare.PowerUser => EmployeeType.Collaborator,
-            _ => EmployeeType.User
+            FileShare.PowerUser => EmployeeType.User,
+            _ => EmployeeType.Guest
         };
     }
 
@@ -759,9 +759,9 @@ public class FileSecurity(IDaoFactory daoFactory,
         }
 
         var userType = await userManager.GetUserTypeAsync(user);
-        var isUser = userType is EmployeeType.User;
+        var isUser = userType is EmployeeType.Guest;
         var isDocSpaceAdmin = userType is EmployeeType.DocSpaceAdmin;
-        var isCollaborator = userType is EmployeeType.Collaborator;
+        var isCollaborator = userType is EmployeeType.User;
         var isAuthenticated =  authContext.IsAuthenticated || (await authManager.GetAccountByIDAsync(await tenantManager.GetCurrentTenantIdAsync(), userId)).IsAuthenticated;
         
         var accessSnapshot = entry.Access;
@@ -1934,7 +1934,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                                 && f.RootCreateBy != authContext.CurrentAccount.ID // don't show my files
             );
 
-        if (await userManager.IsUserAsync(authContext.CurrentAccount.ID))
+        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
         {
             data = data.Where(r => !r.ProviderEntry);
         }
