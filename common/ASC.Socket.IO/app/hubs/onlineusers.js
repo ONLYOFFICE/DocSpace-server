@@ -138,7 +138,6 @@ module.exports = async (io) => {
     socket.on("unsubscribeToRoom", () => {
       logger.info(`client ${socket.id} unsubscribe room ${roomId}`);
       socket.leave(roomId);
-      roomId = -1;
     });
 
       var getRoom = (obj) => {
