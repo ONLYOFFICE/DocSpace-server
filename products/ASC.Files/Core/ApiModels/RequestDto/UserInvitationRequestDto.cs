@@ -27,9 +27,9 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// User invitation request parameters
+/// User invitation parameters
 /// </summary>
-public class UserInvitationRequestDto
+public class UserInvitation
 {
     /// <summary>
     /// List of user IDs
@@ -40,4 +40,22 @@ public class UserInvitationRequestDto
     /// Resend all
     /// </summary>
     public bool ResendAll { get; set; }
+}
+
+/// <summary>
+/// User invitation request parameters
+/// </summary>
+public class UserInvitationRequestDto<T>
+{
+    /// <summary>
+    /// Room Id
+    /// </summary>
+    [FromRoute(Name = "id")]
+    public T Id { get; set; }
+
+    /// <summary>
+    /// User invitation
+    /// </summary>
+    [FromBody]
+    public UserInvitation UserInvitation { get; set; }
 }

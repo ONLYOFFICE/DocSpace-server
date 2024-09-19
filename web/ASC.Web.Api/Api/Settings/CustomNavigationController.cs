@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Web.Api.ApiModels.RequestsDto;
+
 namespace ASC.Web.Api.Controllers.Settings;
 
 [DefaultRoute("customnavigation")]
@@ -68,14 +70,13 @@ public class CustomNavigationController(MessageService messageService,
     /// Returns a custom navigation item by the ID specified in the request.
     /// </summary>
     /// <short>Get a custom navigation item by ID</short>
-    /// <param type="System.Guid, System" method="url" name="id" example="9924256A-739C-462b-AF15-E652A3B1B6EB">Custom navigation item ID</param>
     /// <path>api/2.0/settings/customnavigation/get/{id}</path>
     [Tags("Settings / Custom Navigation")]
     [SwaggerResponse(200, "Custom navigation item", typeof(CustomNavigationItem))]
     [HttpGet("get/{id:guid}")]
-    public async Task<CustomNavigationItem> GetCustomNavigationItemAsync(Guid id)
+    public async Task<CustomNavigationItem> GetCustomNavigationItemAsync(IdRequestDto<Guid> inDto)
     {
-        return (await settingsManager.LoadAsync<CustomNavigationSettings>()).Items.Find(item => item.Id == id);
+        return (await settingsManager.LoadAsync<CustomNavigationSettings>()).Items.Find(item => item.Id == inDto.Id);
     }
 
     /// <summary>
@@ -142,17 +143,16 @@ public class CustomNavigationController(MessageService messageService,
     /// Deletes a custom navigation item with the ID specified in the request.
     /// </summary>
     /// <short>Delete a custom navigation item</short>
-    /// <param type="System.Guid, System" method="url" name="id">Custom navigation item ID</param>
     /// <path>api/2.0/settings/customnavigation/delete/{id}</path>
     [Tags("Settings / Custom Navigation")]
     [HttpDelete("delete/{id:guid}")]
-    public async Task DeleteCustomNavigationItem(Guid id)
+    public async Task DeleteCustomNavigationItem(IdRequestDto<Guid> inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var settings = await settingsManager.LoadAsync<CustomNavigationSettings>();
 
-        var target = settings.Items.Find(item => item.Id == id);
+        var target = settings.Items.Find(item => item.Id == inDto.Id);
 
         if (target == null)
         {

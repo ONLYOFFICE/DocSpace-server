@@ -47,14 +47,13 @@ public class MigrationController(
 
     /// <summary>
     /// </summary>
-    /// <param name="migratorName" example="some text"></param>
     [Tags("Migration")]
     [HttpPost("init/{migratorName}")]
-    public async Task UploadAndInitAsync(string migratorName)
+    public async Task UploadAndInitAsync(MigratorNameRequestDto inDto)
     {
         await DemandPermissionAsync();
 
-        await migrationCore.StartParseAsync(migratorName);
+        await migrationCore.StartParseAsync(inDto.MigratorName);
     }
 
     [Tags("Migration")]

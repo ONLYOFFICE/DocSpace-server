@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using static Dropbox.Api.Team.MobileClientPlatform;
+
 namespace ASC.Web.Api.Controllers.Settings;
 
 [DefaultRoute("customschemas")]
@@ -90,7 +92,9 @@ public class CustomSchemasController(MessageService messageService,
 
         await messageService.SendAsync(MessageAction.TeamTemplateChanged);
 
-        return await PeopleSchemaAsync(inDto.Id);
+        var people = new IdRequestDto<string> { Id = inDto.Id };
+
+        return await PeopleSchemaAsync(people);
     }
 
     /// <summary>
@@ -148,21 +152,21 @@ public class CustomSchemasController(MessageService messageService,
 
         await messageService.SendAsync(MessageAction.TeamTemplateChanged);
 
-        return await PeopleSchemaAsync(PeopleNamesItem.CustomID);
+        var people = new IdRequestDto<string> { Id = PeopleNamesItem.CustomID };
+        return await PeopleSchemaAsync(people);
     }
 
     /// <summary>
     /// Returns a team template by the ID specified in the request.
     /// </summary>
     /// <short>Get a team template by ID</short>
-    /// <param type="System.String, System" method="url" name="id" example="some text">Team template ID</param>
     /// <path>api/2.0/settings/customschemas/{id}</path>
     [Tags("Settings / Team templates")]
     [SwaggerResponse(200, "Team template with the following parameters", typeof(SchemaRequestsDto))]
     [HttpGet("{id}")]
-    public async Task<SchemaRequestsDto> PeopleSchemaAsync(string id)
+    public async Task<SchemaRequestsDto> PeopleSchemaAsync(IdRequestDto<string> inDto)
     {
-        var names = await customNamingPeople.GetPeopleNamesAsync(id);
+        var names = await customNamingPeople.GetPeopleNamesAsync(inDto.Id);
         var schemaItem = new SchemaRequestsDto
         {
             Id = names.Id,

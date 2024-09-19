@@ -27,12 +27,30 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// External data request parameters
+/// External data parameters
 /// </summary>
-public class ExternalShareRequestDto
+public class ExternalShareRequestParam
 {
     /// <summary>
     /// Password
     /// </summary>
     public string Password { get; set; }
+}
+
+/// <summary>
+/// External data request parameters
+/// </summary>
+public class ExternalShareRequestDto
+{
+    /// <summary>
+    /// File ID
+    /// </summary>
+    [FromRoute(Name = "key")]
+    public string Key { get; set; }
+
+    /// <summary>
+    /// Request param
+    /// </summary>
+    [FromBody]
+    public ExternalShareRequestParam RequestParam { get; set; }
 }

@@ -110,16 +110,15 @@ public class WebhooksController(ApiContext context,
     /// <short>
     /// Remove a webhook
     /// </short>
-    /// <param type="System.Int32, System" method="url" name="id" example="1234">Webhook ID</param>
     /// <path>api/2.0/settings/webhook</path>
     [Tags("Settings / Webhooks")]
     [SwaggerResponse(200, "Tenant webhook with its config parameters", typeof(WebhooksConfigDto))]
     [HttpDelete("webhook/{id:int}")]
-    public async Task<WebhooksConfigDto> RemoveWebhook(int id)
+    public async Task<WebhooksConfigDto> RemoveWebhook(IdRequestDto<int> inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var webhook = await dbWorker.RemoveWebhookConfigAsync(id);
+        var webhook = await dbWorker.RemoveWebhookConfigAsync(inDto.Id);
 
         return mapper.Map<WebhooksConfig, WebhooksConfigDto>(webhook);
     }
@@ -130,28 +129,21 @@ public class WebhooksController(ApiContext context,
     /// <short>
     /// Get webhook logs
     /// </short>
-    /// <param type="System.Nullable{System.DateTime}, System" name="deliveryFrom" example="2008-04-10T06-30-00.000Z">Delivey start time</param>
-    /// <param type="System.Nullable{System.DateTime}, System" name="deliveryTo" example="2008-04-10T06-30-00.000Z">Delivey end time</param>
-    /// <param type="System.String, System" name="hookUri" example="some text">Hook URI</param>
-    /// <param type="System.Nullable{System.Int32}, System" name="webhookId" example="1234">Webhook ID</param>
-    /// <param type="System.Nullable{System.Int32}, System" name="configId" example="1234">Config ID</param>
-    /// <param type="System.Nullable{System.Int32}, System" name="eventId" example="1234">Event ID</param>
-    /// <param type="System.Nullable{ASC.Webhooks.Core.WebhookGroupStatus}, System" name="groupStatus" example="None">Webhook group status</param>
     /// <path>api/2.0/settings/webhooks/log</path>
     /// <collection>list</collection>
     [Tags("Settings / Webhooks")]
     [SwaggerResponse(200, "Logs of the webhook activities", typeof(WebhooksLogDto))]
     [HttpGet("webhooks/log")]
-    public async IAsyncEnumerable<WebhooksLogDto> GetJournal(DateTime? deliveryFrom, DateTime? deliveryTo, string hookUri, int? webhookId, int? configId, int? eventId, WebhookGroupStatus? groupStatus)
+    public async IAsyncEnumerable<WebhooksLogDto> GetJournal(WebhookLogsRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        context.SetTotalCount(await dbWorker.GetTotalByQuery(deliveryFrom, deliveryTo, hookUri, webhookId, configId, eventId, groupStatus));
+        context.SetTotalCount(await dbWorker.GetTotalByQuery(inDto.DeliveryFrom, inDto.DeliveryTo, inDto.HookUri, inDto.WebhookId, inDto.ConfigId, inDto.EventId, inDto.GroupStatus));
 
         var startIndex = Convert.ToInt32(context.StartIndex);
         var count = Convert.ToInt32(context.Count);
 
-        await foreach (var j in dbWorker.ReadJournal(startIndex, count, deliveryFrom, deliveryTo, hookUri, webhookId, configId, eventId, groupStatus))
+        await foreach (var j in dbWorker.ReadJournal(startIndex, count, inDto.DeliveryFrom, inDto.DeliveryTo, inDto.HookUri, inDto.WebhookId, inDto.ConfigId, inDto.EventId, inDto.GroupStatus))
         {
             j.Log.Config = j.Config;
             yield return mapper.Map<WebhooksLog, WebhooksLogDto>(j.Log);
@@ -164,21 +156,20 @@ public class WebhooksController(ApiContext context,
     /// <short>
     /// Retry a webhook
     /// </short>
-    /// <param type="System.Int32, System" method="url" name="id" example="1234">Webhook ID</param>
     /// <path>api/2.0/settings/webhook/{id}/retry</path>
     [Tags("Settings / Webhooks")]
     [SwaggerResponse(200, "Logs of the webhook activities", typeof(WebhooksLogDto))]
     [HttpPut("webhook/{id:int}/retry")]
-    public async Task<WebhooksLogDto> RetryWebhook(int id)
+    public async Task<WebhooksLogDto> RetryWebhook(IdRequestDto<int> inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        if (id == 0)
+        if (inDto.Id == 0)
         {
-            throw new ArgumentException(nameof(id));
+            throw new ArgumentException(nameof(inDto.Id));
         }
 
-        var item = await dbWorker.ReadJournal(id);
+        var item = await dbWorker.ReadJournal(inDto.Id);
 
         if (item == null)
         {
@@ -248,20 +239,19 @@ public class WebhooksController(ApiContext context,
     /// <short>
     /// Disable a webhook
     /// </short>
-    /// <param type="System.Int32, System" method="url" name="id" example="1234">Webhook ID</param>
     /// <path>api/2.0/settings/webhook/{id}</path>
     [Tags("Settings / Webhooks")]
     [SwaggerResponse(200, "Webhook settings", typeof(Webhook))]
     [HttpPut("webhook/{id:int}")]
-    public async Task<Webhook> DisableWebHook(int id)
+    public async Task<Webhook> DisableWebHook(IdRequestDto<int> inDto)
     {
         var settings = await settingsManager.LoadAsync<WebHooksSettings>();
 
         Webhook result = null;
 
-        if (!settings.Ids.Contains(id) && (result = await dbWorker.GetWebhookAsync(id)) != null)
+        if (!settings.Ids.Contains(inDto.Id) && (result = await dbWorker.GetWebhookAsync(inDto.Id)) != null)
         {
-            settings.Ids.Add(id);
+            settings.Ids.Add(inDto.Id);
         }
 
         if (result != null)

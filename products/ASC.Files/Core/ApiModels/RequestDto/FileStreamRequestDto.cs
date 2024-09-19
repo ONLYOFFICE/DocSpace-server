@@ -27,9 +27,9 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Request parameters for updating file contents
+/// Parameters for updating file contents
 /// </summary>
-public class FileStreamRequestDto : IModelWithFile
+public class FileStreamRequest : IModelWithFile
 {
     /// <summary>
     /// Request input stream
@@ -50,4 +50,22 @@ public class FileStreamRequestDto : IModelWithFile
     /// File extension
     /// </summary>
     public string FileExtension { get; set; }
+}
+
+/// <summary>
+/// Request parameters for updating file contents
+/// </summary>
+public class FileStreamRequestDto<T>
+{
+    /// <summary>
+    /// File ID
+    /// </summary>
+    [FromRoute(Name = "fileId")]
+    public T FileId { get; set; }
+
+    /// <summary>
+    /// File
+    /// </summary>
+    [FromForm]
+    public FileStreamRequest File { get; set; }
 }

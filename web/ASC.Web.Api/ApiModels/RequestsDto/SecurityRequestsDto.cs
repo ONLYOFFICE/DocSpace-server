@@ -46,3 +46,15 @@ public class SecurityRequestsDto
     /// </summary>
     public bool Administrator { get; set; }
 }
+
+/// <summary>
+/// 
+/// </summary>
+public class SecuritySettingsRequestDto
+{
+    /// <summary>
+    /// List of module IDs
+    /// </summary>
+    [FromQuery(Name = "ids")]
+    public IEnumerable<string> Ids { get; set; }
+}

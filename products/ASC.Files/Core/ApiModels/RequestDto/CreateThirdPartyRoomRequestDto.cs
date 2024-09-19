@@ -27,9 +27,9 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Request parameters for creating a room
+/// Parameters for creating a room
 /// </summary>
-public class CreateThirdPartyRoomRequestDto
+public class CreateThirdPartyRoom
 {
     /// <summary>
     /// Create as new folder
@@ -55,4 +55,23 @@ public class CreateThirdPartyRoomRequestDto
     /// Indexing
     /// </summary>
     public bool Indexing { get; set; }
+}
+
+
+/// <summary>
+/// Request parameters for creating a room
+/// </summary>
+public class CreateThirdPartyRoomRequestDto
+{
+    /// <summary>
+    /// ID of the folder in the third-party storage in which the contents of the room will be stored
+    /// </summary>
+    [FromRoute(Name = "id")]
+    public string Id { get; set; }
+
+    /// <summary>
+    /// ThirdParty room
+    /// </summary>
+    [FromBody]
+    public CreateThirdPartyRoom Room { get; set; }
 }

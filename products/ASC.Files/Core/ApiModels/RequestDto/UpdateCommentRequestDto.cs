@@ -27,9 +27,9 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Request parameters for updating a comment
+/// Parameters for updating a comment
 /// </summary>
-public class UpdateCommentRequestDto
+public class UpdateComment
 {
     /// <summary>
     /// File version
@@ -40,4 +40,22 @@ public class UpdateCommentRequestDto
     /// Comment text
     /// </summary>
     public string Comment { get; set; }
+}
+
+/// <summary>
+/// Request parameters for updating a comment
+/// </summary>
+public class UpdateCommentRequestDto<T>
+{
+    /// <summary>
+    /// File ID
+    /// </summary>
+    [FromRoute(Name = "fileId")]
+    public T FileId { get; set; }
+
+    /// <summary>
+    /// File
+    /// </summary>
+    [FromBody]
+    public UpdateComment File { get; set; }
 }

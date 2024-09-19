@@ -29,7 +29,7 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// <summary>
 /// Request parameters for inviting users to a room
 /// </summary>
-public class RoomInvitationRequestDto
+public class RoomInvitationRequest
 {
     /// <summary>
     /// Collection of invitation parameters
@@ -51,4 +51,19 @@ public class RoomInvitationRequestDto
     /// Culture
     /// </summary>
     public string Culture { get; set; }
+}
+
+public class RoomInvitationRequestDto<T>
+{
+    /// <summary>
+    /// Room ID
+    /// </summary>
+    [FromRoute(Name = "id")]
+    public T Id { get; set; }
+
+    /// <summary>
+    /// Room invitation
+    /// </summary>
+    [FromBody]
+    public RoomInvitationRequest RoomInvitation { get; set; }
 }

@@ -52,21 +52,20 @@ public abstract class PrivacyRoomController<T>(SettingsManager settingsManager,
     /// Returns all the key pairs of the users who have access to the file with the ID specified in the request.
     /// </summary>
     /// <short>Get file key pairs</short>
-    /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
     /// <path>api/2.0/privacyroom/access/{fileId}</path>
     /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Private room")]
     [SwaggerResponse(200, "List of encryption key pairs", typeof(EncryptionKeyPairDto))]
     [HttpGet("access/{fileId}")]
-    public async Task<IEnumerable<EncryptionKeyPairDto>> GetPublicKeysWithAccess(T fileId)
+    public async Task<IEnumerable<EncryptionKeyPairDto>> GetPublicKeysWithAccess(FileIdRequestDto<T> inDto)
     {
         if (!await PrivacyRoomSettings.GetEnabledAsync(settingsManager))
         {
             throw new SecurityException();
         }
 
-        return await encryptionKeyPairHelper.GetKeyPairAsync(fileId, fileStorageService);
+        return await encryptionKeyPairHelper.GetKeyPairAsync(inDto.FileId, fileStorageService);
     }
 }
 

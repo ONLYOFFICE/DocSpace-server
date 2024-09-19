@@ -29,7 +29,7 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// <summary>
 /// Request parameters for deleting a folder
 /// </summary>
-public class DeleteFolderDto
+public class DeleteFolder
 {
     /// <summary>
     /// Specifies whether to delete a folder after the editing session is finished or not
@@ -40,4 +40,19 @@ public class DeleteFolderDto
     /// Specifies whether to move a folder to the \"Trash\" folder or delete it immediately
     /// </summary>
     public bool Immediately { get; set; }
+}
+
+public class DeleteFolder<T>
+{
+    /// <summary>
+    /// Folder ID
+    /// </summary>
+    [FromRoute(Name = "folderId")]
+    public T FolderId { get; set; }
+
+    /// <summary>
+    /// Delete
+    /// </summary>
+    [FromBody]
+    public DeleteFolder Delete { get; set; }
 }

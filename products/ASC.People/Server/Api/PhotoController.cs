@@ -50,14 +50,13 @@ public class PhotoController(
     /// <short>
     /// Create photo thumbnails
     /// </short>
-    /// <param type="System.String, System" method="url" name="userid" example="some text">User ID</param>
     /// <path>api/2.0/people/{userid}/photo/thumbnails</path>
     [Tags("People / Photos")]
     [SwaggerResponse(200, "Thumbnail parameters", typeof(ThumbnailsDataDto))]
     [HttpPost("{userid}/photo/thumbnails")]
-    public async Task<ThumbnailsDataDto> CreateMemberPhotoThumbnails(string userid, ThumbnailsRequestDto inDto)
+    public async Task<ThumbnailsDataDto> CreateMemberPhotoThumbnails(ThumbnailsRequestDto inDto)
     {
-        var user = await GetUserInfoAsync(userid);
+        var user = await GetUserInfoAsync(inDto.UserId);
 
         if (_userManager.IsSystemUser(user.Id))
         {
@@ -66,21 +65,21 @@ public class PhotoController(
 
         await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(user.Id), Constants.Action_EditUser);
 
-        if (!string.IsNullOrEmpty(inDto.TmpFile))
+        if (!string.IsNullOrEmpty(inDto.Thumbnails.TmpFile))
         {
-            var fileName = Path.GetFileName(inDto.TmpFile);
+            var fileName = Path.GetFileName(inDto.Thumbnails.TmpFile);
             var data = await _userPhotoManager.GetTempPhotoData(fileName);
 
             UserPhotoThumbnailSettings settings;
 
-            if (inDto.Width == 0 && inDto.Height == 0)
+            if (inDto.Thumbnails.Width == 0 && inDto.Thumbnails.Height == 0)
             {
                 using var img = Image.Load(data);
-                settings = new UserPhotoThumbnailSettings(inDto.X, inDto.Y, img.Width, img.Height);
+                settings = new UserPhotoThumbnailSettings(inDto.Thumbnails.X, inDto.Thumbnails.Y, img.Width, img.Height);
             }
             else
             {
-                settings = new UserPhotoThumbnailSettings(inDto.X, inDto.Y, inDto.Width, inDto.Height);
+                settings = new UserPhotoThumbnailSettings(inDto.Thumbnails.X, inDto.Thumbnails.Y, inDto.Thumbnails.Width, inDto.Thumbnails.Height);
             }
 
             await settingsManager.SaveAsync(settings, user.Id);
@@ -91,7 +90,7 @@ public class PhotoController(
         }
         else
         {
-            await UserPhotoThumbnailManager.SaveThumbnails(_userPhotoManager, settingsManager, inDto.X, inDto.Y, inDto.Width, inDto.Height, user.Id);
+            await UserPhotoThumbnailManager.SaveThumbnails(_userPhotoManager, settingsManager, inDto.Thumbnails.X, inDto.Thumbnails.Y, inDto.Thumbnails.Width, inDto.Thumbnails.Height, user.Id);
         }
 
         await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
@@ -105,14 +104,13 @@ public class PhotoController(
     /// <short>
     /// Delete a user photo
     /// </short>
-    /// <param type="System.String, System" method="url" name="userid" example="some text">User ID</param>
     /// <path>api/2.0/people/{userid}/photo</path>
     [Tags("People / Photos")]
     [SwaggerResponse(200, "Thumbnail parameters: original photo, retina, maximum size photo, big, medium, small", typeof(ThumbnailsDataDto))]
     [HttpDelete("{userid}/photo")]
-    public async Task<ThumbnailsDataDto> DeleteMemberPhotoAsync(string userid)
+    public async Task<ThumbnailsDataDto> DeleteMemberPhotoAsync(GetUserPhotoRequestDto inDto)
     {
-        var user = await GetUserInfoAsync(userid);
+        var user = await GetUserInfoAsync(inDto.UserId);
 
         if (_userManager.IsSystemUser(user.Id))
         {
@@ -140,14 +138,13 @@ public class PhotoController(
     /// <short>
     /// Get a user photo
     /// </short>
-    /// <param type="System.String, System" method="url" name="userid" example="some text">User ID</param>
     /// <path>api/2.0/people/{userid}/photo</path>
     [Tags("People / Photos")]
     [SwaggerResponse(200, "Thumbnail parameters: original photo, retina, maximum size photo, big, medium, small", typeof(ThumbnailsDataDto))]
     [HttpGet("{userid}/photo")]
-    public async Task<ThumbnailsDataDto> GetMemberPhoto(string userid)
+    public async Task<ThumbnailsDataDto> GetMemberPhoto(GetUserPhotoRequestDto inDto)
     {
-        var user = await GetUserInfoAsync(userid);
+        var user = await GetUserInfoAsync(inDto.UserId);
 
         if (_userManager.IsSystemUser(user.Id))
         {
@@ -163,14 +160,13 @@ public class PhotoController(
     /// <short>
     /// Update a user photo
     /// </short>
-    /// <param type="System.String, System" method="url" name="userid" example="some text">User ID</param>
     /// <path>api/2.0/people/{userid}/photo</path>
     [Tags("People / Photos")]
     [SwaggerResponse(200, "Updated thumbnail parameters: original photo, retina, maximum size photo, big, medium, small", typeof(ThumbnailsDataDto))]
     [HttpPut("{userid}/photo")]
-    public async Task<ThumbnailsDataDto> UpdateMemberPhoto(string userid, UpdatePhotoMemberRequestDto inDto)
+    public async Task<ThumbnailsDataDto> UpdateMemberPhoto(UpdatePhotoMemberRequestDto inDto)
     {
-        var user = await GetUserInfoAsync(userid);
+        var user = await GetUserInfoAsync(inDto.UserId);
 
         if (_userManager.IsSystemUser(user.Id))
         {
@@ -183,9 +179,9 @@ public class PhotoController(
             throw new Exception(Resource.ErrorAccessDenied);
         }
 
-        if (inDto.Files != await _userPhotoManager.GetPhotoAbsoluteWebPath(user.Id))
+        if (inDto.UpdatePhoto.Files != await _userPhotoManager.GetPhotoAbsoluteWebPath(user.Id))
         {
-            await UpdatePhotoUrlAsync(inDto.Files, user);
+            await UpdatePhotoUrlAsync(inDto.UpdatePhoto.Files, user);
         }
 
         await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
@@ -200,25 +196,23 @@ public class PhotoController(
     /// <short>
     /// Upload a user photo
     /// </short>
-    /// <param type="System.String, System" method="url" name="userid" example="some text">User ID</param>
-    /// <param type="Microsoft.AspNetCore.Http.IFormCollection, Microsoft.AspNetCore.Http" name="formCollection">Image data</param>
     /// <path>api/2.0/people/{userid}/photo</path>
     [Tags("People / Photos")]
     [SwaggerResponse(200, "Result of file uploading", typeof(FileUploadResultDto))]
     [HttpPost("{userid}/photo")]
-    public async Task<FileUploadResultDto> UploadMemberPhoto(string userid, IFormCollection formCollection)
+    public async Task<FileUploadResultDto> UploadMemberPhoto(UploadMemberPhotoRequestDto inDto)
     {
         var result = new FileUploadResultDto();
-        var autosave = bool.Parse(formCollection["Autosave"]);
+        var autosave = bool.Parse(inDto.FormCollection["Autosave"]);
 
         try
         {
-            if (formCollection.Files.Count != 0)
+            if (inDto.FormCollection.Files.Count != 0)
             {
                 Guid userId;
                 try
                 {
-                    userId = new Guid(userid);
+                    userId = new Guid(inDto.UserId);
                 }
                 catch
                 {
@@ -233,7 +227,7 @@ public class PhotoController(
                     throw new Exception(Resource.ErrorAccessDenied);
                 }
 
-                var userPhoto = formCollection.Files[0];
+                var userPhoto = inDto.FormCollection.Files[0];
 
                 if (userPhoto.Length > setupInfo.MaxImageUploadSize)
                 {

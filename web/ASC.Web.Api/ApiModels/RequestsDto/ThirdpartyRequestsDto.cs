@@ -26,8 +26,47 @@
 
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
+/// <summary>
+/// 
+/// </summary>
 public class ThirdpartyRequestsDto
 {
     public string Code { get; set; }
     public string Redirect { get; set; }
+}
+
+/// <summary>
+/// 
+/// </summary>
+public class ConfirmationCodeRequestDto
+{
+    /// <summary>
+    /// URL where the user will be redirected to after they have granted the application access
+    /// </summary>
+    [FromQuery(Name = "redirect")]
+    public string Redirect { get; set; }
+
+    /// <summary>
+    /// Confirmation code that can be exchanged for an OAuth token
+    /// </summary>
+    [FromQuery(Name = "code")]
+    public string Code { get; set; }
+
+    /// <summary>
+    /// Error
+    /// </summary>
+    [FromQuery(Name = "error")]
+    public string Error { get; set; }
+}
+
+/// <summary>
+/// 
+/// </summary>
+public class ConfirmationCodeUrlRequestDto
+{
+    /// <summary>
+    /// Provider
+    /// </summary>
+    [FromRoute(Name = "provider")]
+    public LoginProvider Provider { get; set; }
 }

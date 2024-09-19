@@ -40,12 +40,11 @@ public class WebPluginsController(ApiContext apiContext,
 {
     /// <summary>
     /// </summary>
-    /// <param type="System.Boolean, System" name="system" example="true"></param>
     /// <exception cref="CustomHttpException"></exception>
     [Tags("Settings / Webplugins")]
     [SwaggerResponse(200, "Web plugin", typeof(WebPluginDto))]
     [HttpPost("")]
-    public async Task<WebPluginDto> AddWebPluginFromFile(bool system)
+    public async Task<WebPluginDto> AddWebPluginFromFile(WebPluginFromFileRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -63,7 +62,7 @@ public class WebPluginsController(ApiContext apiContext,
 
         var tenant = await tenantManager.GetCurrentTenantAsync();
 
-        var webPlugin = await webPluginManager.AddWebPluginFromFileAsync(tenant.Id, file, system);
+        var webPlugin = await webPluginManager.AddWebPluginFromFileAsync(tenant.Id, file, inDto.System);
 
         await ChangeCspSettings(webPlugin, webPlugin.Enabled);
 
@@ -74,11 +73,10 @@ public class WebPluginsController(ApiContext apiContext,
 
     /// <summary>
     /// </summary>
-    /// <param type="System.Boolean, System" name="enabled" example="true"></param>
     [Tags("Settings / Webplugins")]
     [SwaggerResponse(200, "Web plugin", typeof(WebPluginDto))]
     [HttpGet("")]
-    public async Task<IEnumerable<WebPluginDto>> GetWebPluginsAsync(bool? enabled = null)
+    public async Task<IEnumerable<WebPluginDto>> GetWebPluginsAsync(GetWebPluginsRequestDto inDto)
     {
         var tenant = await tenantManager.GetCurrentTenantAsync();
 
@@ -86,9 +84,9 @@ public class WebPluginsController(ApiContext apiContext,
 
         var outDto = mapper.Map<List<WebPlugin>, List<WebPluginDto>>(webPlugins);
 
-        if (enabled.HasValue)
+        if (inDto.Enabled.HasValue)
         {
-            outDto = outDto.Where(i => i.Enabled == enabled).ToList();
+            outDto = outDto.Where(i => i.Enabled == inDto.Enabled).ToList();
         }
 
         return outDto;
@@ -96,15 +94,14 @@ public class WebPluginsController(ApiContext apiContext,
 
     /// <summary>
     /// </summary>
-    /// <param type="System.String, System" name="name" example="some text"></param>
     [Tags("Settings / Webplugins")]
     [SwaggerResponse(200, "Web plugin", typeof(WebPluginDto))]
     [HttpGet("{name}")]
-    public async Task<WebPluginDto> GetWebPluginAsync(string name)
+    public async Task<WebPluginDto> GetWebPluginAsync(WebPluginNameRequestDto inDto)
     {
         var tenant = await tenantManager.GetCurrentTenantAsync();
 
-        var webPlugin = await webPluginManager.GetWebPluginByNameAsync(tenant.Id, name);
+        var webPlugin = await webPluginManager.GetWebPluginByNameAsync(tenant.Id, inDto.Name);
 
         var outDto = mapper.Map<WebPlugin, WebPluginDto>(webPlugin);
 
@@ -113,33 +110,30 @@ public class WebPluginsController(ApiContext apiContext,
 
     /// <summary>
     /// </summary>
-    /// <param type="System.String, System" name="name" example="some text"></param>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.WebPluginRequestsDto, ASC.Web.Api" name="inDto"></param>
     [Tags("Settings / Webplugins")]
     [HttpPut("{name}")]
-    public async Task UpdateWebPluginAsync(string name, WebPluginRequestsDto inDto)
+    public async Task UpdateWebPluginAsync(WebPluginRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var tenant = await tenantManager.GetCurrentTenantAsync();
 
-        var webPlugin = await webPluginManager.UpdateWebPluginAsync(tenant.Id, name, inDto.Enabled, inDto.Settings);
+        var webPlugin = await webPluginManager.UpdateWebPluginAsync(tenant.Id, inDto.Name, inDto.WebPlugin.Enabled, inDto.WebPlugin.Settings);
 
-        await ChangeCspSettings(webPlugin, inDto.Enabled);
+        await ChangeCspSettings(webPlugin, inDto.WebPlugin.Enabled);
     }
 
     /// <summary>
     /// </summary>
-    /// <param type="System.String, System" name="name" example="some text"></param>
     [Tags("Settings / Webplugins")]
     [HttpDelete("{name}")]
-    public async Task DeleteWebPluginAsync(string name)
+    public async Task DeleteWebPluginAsync(WebPluginNameRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var tenant = await tenantManager.GetCurrentTenantAsync();
 
-        var webPlugin = await webPluginManager.DeleteWebPluginAsync(tenant.Id, name);
+        var webPlugin = await webPluginManager.DeleteWebPluginAsync(tenant.Id, inDto.Name);
 
         await ChangeCspSettings(webPlugin, false);
     }

@@ -27,9 +27,9 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Request parameters
+/// Parameters
 /// </summary>
-public class SaveAsPdfRequestDto<T>
+public class SaveAsPdf<T>
 {
     /// <summary>
     /// Folder ID
@@ -40,4 +40,23 @@ public class SaveAsPdfRequestDto<T>
     /// File title
     /// </summary>
     public string Title { get; set; }
+}
+
+
+/// <summary>
+/// Request parameters
+/// </summary>
+public class SaveAsPdfRequestDto<T>
+{
+    /// <summary>
+    /// File ID
+    /// </summary>
+    [FromRoute(Name = "id")]
+    public T Id { get; set; }
+
+    /// <summary>
+    /// File
+    /// </summary>
+    [FromBody]
+    public SaveAsPdf<T> File { get; set; }
 }

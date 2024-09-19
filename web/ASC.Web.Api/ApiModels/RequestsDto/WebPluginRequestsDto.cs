@@ -26,7 +26,10 @@
 
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
-public class WebPluginRequestsDto
+/// <summary>
+/// 
+/// </summary>
+public class WebPluginRequests
 {
     /// <summary>
     /// Enabled
@@ -37,4 +40,59 @@ public class WebPluginRequestsDto
     /// Settings
     /// </summary>
     public string Settings { get; set; }
+}
+
+/// <summary>
+/// 
+/// </summary>
+public class WebPluginRequestsDto
+{
+    /// <summary>
+    /// Name
+    /// </summary>
+    [FromRoute(Name = "name")]
+    public string Name { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [FromBody]
+    public WebPluginRequests WebPlugin { get; set; }
+}
+
+/// <summary>
+/// 
+/// </summary>
+public class WebPluginNameRequestDto
+{
+    /// <summary>
+    /// Name
+    /// </summary>
+    [FromRoute(Name = "name")]
+    public string Name { get; set; }
+}
+
+/// <summary>
+/// 
+/// </summary>
+public class WebPluginFromFileRequestDto
+{
+    /// <summary>
+    /// System
+    /// </summary>
+    [FromQuery(Name = "system")]
+    public bool System { get; set; }
+}
+
+
+/// <summary>
+/// 
+/// </summary>
+public class GetWebPluginsRequestDto
+{
+    /// <summary>
+    /// Enabled
+    /// </summary>
+    [FromQuery(Name = "enabled")]
+    public bool? Enabled { get; set; }
 }

@@ -86,66 +86,55 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Saved file parameters", typeof(FileDto<int>))]
     [HttpPut("{fileId}/saveediting")]
-    public async Task<FileDto<T>> SaveEditingFromFormAsync([FromRoute] FileID<T> fileID, [FromForm] SaveEditingRequestDto inDto)
+    public async Task<FileDto<T>> SaveEditingFromFormAsync(SaveEditingRequestDto<T> inDto)
     {
         await using var stream = httpContextAccessor.HttpContext.Request.Body;
 
-        return await _fileDtoHelper.GetAsync(await fileStorageService.SaveEditingAsync(fileID.FileId, inDto.FileExtension, inDto.DownloadUri, stream, inDto.Forcesave));
+        return await _fileDtoHelper.GetAsync(await fileStorageService.SaveEditingAsync(inDto.FileId, inDto.File.FileExtension, inDto.File.DownloadUri, stream, inDto.File.Forcesave));
     }
 
     /// <summary>
     /// Informs about opening a file with the ID specified in the request for editing, locking it from being deleted or moved (this method is called by the mobile editors).
     /// </summary>
     /// <short>Start file editing</short>
-    /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
     /// <path>api/2.0/files/file/{fileId}/startedit</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "File key for Document Service", typeof(object))]
     [HttpPost("{fileId}/startedit")]
-    public async Task<object> StartEditAsync(T fileId, StartEditRequestDto inDto)
+    public async Task<object> StartEditAsync(StartEditRequestDto<T> inDto)
     {
-        return await fileStorageService.StartEditAsync(fileId, inDto.EditingAlone);
+        return await fileStorageService.StartEditAsync(inDto.FileId, inDto.File.EditingAlone);
     }
 
     /// <summary>
     /// Starts filling a file with the ID specified in the request.
     /// </summary>
     /// <short>Starts filling</short>
-    /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
     /// <path>api/2.0/files/file/{fileId}/startfilling</path>
     [Tags("Files / Files")]
     [HttpPut("{fileId}/startfilling")]
-    public async Task StartFillingAsync(T fileId)
+    public async Task StartFillingAsync(StartFillingRequestDto<T> inDto)
     {
-        await fileStorageService.StartFillingAsync(fileId);
+        await fileStorageService.StartFillingAsync(inDto.FileId);
     }
 
     /// <summary>
     /// Tracks file changes when editing.
     /// </summary>
     /// <short>Track file editing</short>
-    /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
-    /// <param type="System.Guid, System" name="tabId" example="9924256A-739C-462b-AF15-E652A3B1B6EB">Tab ID</param>
-    /// <param type="System.String, System" name="docKeyForTrack" example="some text">Document key for tracking</param>
-    /// <param type="System.Boolean, System" name="isFinish" example="true">Specifies whether to finish file tracking or not</param>
     /// <path>api/2.0/files/file/{fileId}/trackeditfile</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "File changes", typeof(KeyValuePair<bool, string>))]
     [HttpGet("{fileId}/trackeditfile")]
-    public async Task<KeyValuePair<bool, string>> TrackEditFileAsync(T fileId, Guid tabId, string docKeyForTrack, bool isFinish)
+    public async Task<KeyValuePair<bool, string>> TrackEditFileAsync(TrackEditFileRequestDto<T> inDto)
     {
-        return await fileStorageService.TrackEditFileAsync(fileId, tabId, docKeyForTrack, isFinish);
+        return await fileStorageService.TrackEditFileAsync(inDto.FileId, inDto.File.TabId, inDto.File.DocKeyForTrack, inDto.File.IsFinish);
     }
 
     /// <summary>
     /// Returns the initialization configuration of a file to open it in the editor.
     /// </summary>
     /// <short>Open a file</short>
-    /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
-    /// <param type="System.Int32, System" name="version" example="1234">File version</param>
-    /// <param type="System.Boolean, System" name="view" example="true">Specifies if a document will be opened for viewing only or not</param>
-    /// <param type="ASC.Web.Files.Services.DocumentService.EditorType, ASC.Files.Core" name="editorType">Editor type (Desktop, Mobile, Embedded)</param>
-    /// <param type="System.Boolean, System" name="edit" example="true"></param>
     /// <path>api/2.0/files/file/{fileId}/openedit</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
@@ -153,9 +142,9 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     [AllowAnonymous]
     [AllowNotPayment]
     [HttpGet("{fileId}/openedit")]
-    public async Task<ConfigurationDto<T>> OpenEditAsync(T fileId, int version, bool view, EditorType editorType, bool edit)
+    public async Task<ConfigurationDto<T>> OpenEditAsync(OpenEditRequestDto<T> inDto)
     {
-        var (file, lastVersion) = await documentServiceHelper.GetCurFileInfoAsync(fileId, version);
+        var (file, lastVersion) = await documentServiceHelper.GetCurFileInfoAsync(inDto.FileId, inDto.File.Version);
         var extension = FileUtility.GetFileExtension(file.Title);
         var fileType = FileUtility.GetFileTypeByExtention(extension);
 
@@ -195,13 +184,13 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                         canEdit = false;
                         canFill = true;
                         isSubmitOnly = true;
-                        editorType = EditorType.Embedded;
+                        inDto.File.EditorType = EditorType.Embedded;
                         fillingSessionId = Guid.NewGuid().ToString("N");
                         break;
                     }
 
                    
-                    if (edit)
+                    if (inDto.File.Edit)
                     {
                         await linkDao.DeleteAllLinkAsync(file.Id);
                         await fileDao.SaveProperties(file.Id, null);
@@ -225,7 +214,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
 
                                 canEdit = false;
                                 canFill = true;
-                                editorType = EditorType.Embedded;
+                                inDto.File.EditorType = EditorType.Embedded;
 
                                 file = formDraft;
                                 fillingSessionId = Guid.NewGuid().ToString("N");
@@ -243,19 +232,19 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                 case FolderType.FormFillingFolderInProgress:
                     canEdit = false;
                     canFill = true;
-                    editorType = EditorType.Embedded;
+                    inDto.File.EditorType = EditorType.Embedded;
                     fillingSessionId = Guid.NewGuid().ToString("N");
                     break;
 
                 case FolderType.FormFillingFolderDone:
-                    editorType = EditorType.Embedded;
+                    inDto.File.EditorType = EditorType.Embedded;
                     canEdit = false;
                     canFill = false;
                     break;
 
                 default:
-                    canEdit = edit;
-                    canFill = !edit;
+                    canEdit = inDto.File.Edit;
+                    canFill = !inDto.File.Edit;
                     break;
             }
         }
@@ -265,7 +254,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
             canFill = true;
         }
 
-        var docParams = await documentServiceHelper.GetParamsAsync(file, lastVersion, canEdit, !view, true, canFill, editorType, isSubmitOnly);
+        var docParams = await documentServiceHelper.GetParamsAsync(file, lastVersion, canEdit, !inDto.File.View, true, canFill, inDto.File.EditorType, isSubmitOnly);
         var configuration = docParams.Configuration;
         file = docParams.File;
 
@@ -316,30 +305,28 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// Returns a link to download a file with the ID specified in the request asynchronously.
     /// </summary>
     /// <short>Get file download link asynchronously</short>
-    /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
     /// <path>api/2.0/files/file/{fileId}/presigned</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "File download link", typeof(DocumentService.FileLink))]
     [HttpGet("{fileId}/presigned")]
-    public async Task<DocumentService.FileLink> GetPresignedFileUriAsync(T fileId)
+    public async Task<DocumentService.FileLink> GetPresignedFileUriAsync(FileIdRequestDto<T> inDto)
     {
-        return await fileStorageService.GetPresignedUriAsync(fileId);
+        return await fileStorageService.GetPresignedUriAsync(inDto.FileId);
     }
 
     /// <summary>
     /// Returns a list of users with their access rights to the file with the ID specified in the request.
     /// </summary>
     /// <short>Get shared users</short>
-    /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
     /// <path>api/2.0/files/file/{fileId}/sharedusers</path>
     /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "List of users with their access rights to the file", typeof(List<MentionWrapper>))]
     [HttpGet("{fileId}/sharedusers")]
-    public async Task<List<MentionWrapper>> SharedUsers(T fileId)
+    public async Task<List<MentionWrapper>> SharedUsers(FileIdRequestDto<T> inDto)
     {
-        return await fileStorageService.SharedUsersAsync(fileId);
+        return await fileStorageService.SharedUsersAsync(inDto.FileId);
     }
 
     /// <summary>
@@ -373,15 +360,14 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// Returns a list of users with their access rights to the protected file with the ID specified in the request.
     /// </summary>
     /// <short>Get users with the access to the protected file</short>
-    /// <param type="System.Int32, System" name="fileId" example="1234">File ID</param>
     /// <path>api/2.0/files/file/{fileId}/protectusers</path>
     /// <collection>list</collection>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "List of users with their access rights to the protected file", typeof(List<MentionWrapper>))]
     [HttpGet("{fileId}/protectusers")]
-    public async Task<List<MentionWrapper>> ProtectUsers(T fileId)
+    public async Task<List<MentionWrapper>> ProtectUsers(FileIdRequestDto<T> inDto)
     {
-        return await fileStorageService.ProtectUsersAsync(fileId);
+        return await fileStorageService.ProtectUsersAsync(inDto.FileId);
     }
 }
 
@@ -448,8 +434,8 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
 
             throw new Exception("Unable to establish a connection with the Document Server.");
         }
-
-        return await GetDocServiceUrlAsync(false);
+        var version = new DocServiceUrlRequestDto { Version = false };
+        return await GetDocServiceUrlAsync(version);
 
         bool ValidateUrl(string url)
         {
@@ -473,7 +459,6 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
     /// Returns the address of the connected editors.
     /// </summary>
     /// <short>Get the document service URL</short>
-    /// <param type="System.Boolean, System" name="version" example="true">Specifies the editor version or not</param>
     /// <path>api/2.0/files/docservice</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [ApiExplorerSettings(IgnoreApi = true)]
@@ -481,13 +466,13 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
     [SwaggerResponse(200, "The document service URL with the editor version specified", typeof(DocServiceUrlDto))]
     [AllowAnonymous]
     [HttpGet("docservice")]
-    public async Task<DocServiceUrlDto> GetDocServiceUrlAsync(bool version)
+    public async Task<DocServiceUrlDto> GetDocServiceUrlAsync(DocServiceUrlRequestDto inDto)
     {
         var url = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.DocServiceApiUrl);
 
         var dsVersion = "";
 
-        if (version)
+        if (inDto.Version)
         {
             dsVersion = await documentServiceConnector.GetVersionAsync();
         }

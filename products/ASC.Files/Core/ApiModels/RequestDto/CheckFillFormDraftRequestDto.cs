@@ -27,9 +27,9 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Request parameters for checking a form draft
+/// Parameters for checking a form draft
 /// </summary>
-public class CheckFillFormDraftRequestDto
+public class CheckFillFormDraft
 {
     /// <summary>
     /// File version
@@ -50,4 +50,23 @@ public class CheckFillFormDraftRequestDto
     /// Specifies whether to request an embedded form or not
     /// </summary>
     public bool RequestEmbedded => (Action ?? "").Equals("embedded", StringComparison.InvariantCultureIgnoreCase);
+}
+
+
+/// <summary>
+/// Request parameters for checking a form draft
+/// </summary>
+public class CheckFillFormDraftRequestDto<T>
+{
+    /// <summary>
+    /// File ID
+    /// </summary>
+    [FromRoute(Name = "fileId")]
+    public T FileId { get; set; }
+
+    /// <summary>
+    /// File
+    /// </summary>
+    [FromBody]
+    public CheckFillFormDraft File {  get; set; }
 }

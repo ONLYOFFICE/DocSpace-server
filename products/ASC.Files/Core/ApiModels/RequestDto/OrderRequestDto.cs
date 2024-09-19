@@ -36,3 +36,39 @@ public class OrderRequestDto
     /// </summary>
     public int Order { get; set; }
 }
+
+/// <summary>
+/// 
+/// </summary>
+public class OrderFileRequestDto<T>
+{
+    /// <summary>
+    /// File ID
+    /// </summary>
+    [FromRoute(Name = "fileId")]
+    public T FileId { get; set; }
+
+    /// <summary>
+    /// Order
+    /// </summary>
+    [FromBody]
+    public OrderRequestDto Order { get; set; }
+}
+
+/// <summary>
+/// 
+/// </summary>
+public class OrderFolderRequestDto<T>
+{
+    /// <summary>
+    /// Folder ID
+    /// </summary>
+    [FromRoute(Name = "folderId")]
+    public T FolderId { get; set; }
+
+    /// <summary>
+    /// Order
+    /// </summary>
+    [FromBody]
+    public OrderRequestDto Order { get; set; }
+}

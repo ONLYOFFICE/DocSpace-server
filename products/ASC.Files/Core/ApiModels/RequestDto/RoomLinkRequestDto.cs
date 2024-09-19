@@ -29,9 +29,9 @@ using System.ComponentModel.DataAnnotations;
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Link request parameters
+/// Link parameters
 /// </summary>
-public class RoomLinkRequestDto : LinkRequestDtoBase
+public class RoomLinkRequest : LinkRequestDtoBase
 {
     /// <summary>
     /// Link name
@@ -54,4 +54,24 @@ public class RoomLinkRequestDto : LinkRequestDtoBase
     /// Specifies whether downloading a file from a link is disabled or not
     /// </summary>
     public bool DenyDownload { get; set; }
+}
+
+
+
+/// <summary>
+/// Link request parameters
+/// </summary>
+public class RoomLinkRequestDto<T>
+{
+    /// <summary>
+    /// Room ID
+    /// </summary>
+    [FromRoute(Name = "id")]
+    public T Id { get; set; }
+
+    /// <summary>
+    /// Room link
+    /// </summary>
+    [FromBody]
+    public RoomLinkRequest RoomLink { get; set; }
 }

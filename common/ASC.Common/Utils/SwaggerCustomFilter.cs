@@ -147,24 +147,37 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
             }
             result.Example = array;
         }
-        else if(typeof(IEnumerable).IsAssignableFrom(checkType))
+        else if (typeof(IEnumerable).IsAssignableFrom(checkType))
         {
             var array = new OpenApiArray();
-            if (checkType.IsGenericType)
-            {
-                checkType = checkType.GenericTypeArguments.FirstOrDefault();
-            }
-            else if(checkType.IsArray)
+
+            if (checkType.IsArray)
             {
                 checkType = checkType.GetElementType();
             }
-            
+            else if (checkType.IsGenericType && checkType.GetGenericTypeDefinition() == typeof(IEnumerable<>) && IsSimpleType(checkType.GetGenericArguments().FirstOrDefault()))
+            {
+                checkType = checkType.GetGenericArguments().FirstOrDefault();
+            }
+            else
+            {
+                checkType = checkType.GetInterfaces()
+                    .FirstOrDefault(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+                    ?.GetGenericArguments()
+                    .FirstOrDefault() ?? typeof(object);
+            }
+
             var arraySchema = UpdateSchema(checkType, new OpenApiSchema());
-            if (arraySchema is { Example: not null })
+            if (arraySchema?.Example != null)
             {
                 array.Add(arraySchema.Example);
-                result.Example = array;
             }
+            result.Example = array;
+            if(arraySchema.OneOf != null)
+            {
+                result.Items = new OpenApiSchema { AnyOf = arraySchema.OneOf };
+            }
+
         }
         else if(checkType == typeof(JsonElement))
         {
@@ -264,6 +277,16 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
             DateTime _dateTime => new OpenApiDateTime(_dateTime),
             _ => null
         };
+    }
+
+    private bool IsSimpleType(Type type)
+    {
+        return type.IsPrimitive ||
+               type == typeof(string) ||
+               type == typeof(decimal) ||
+               type == typeof(DateTime) ||
+               type == typeof(Guid) ||
+               type == typeof(JsonElement);
     }
 }
 

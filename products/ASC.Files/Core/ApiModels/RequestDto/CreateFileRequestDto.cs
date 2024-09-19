@@ -27,9 +27,9 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Request parameters for creating a file
+/// Parameters for creating a file
 /// </summary>
-public class CreateFileRequestDto<T>
+public class CreateFile<T>
 {
     /// <summary>
     /// File title
@@ -50,4 +50,22 @@ public class CreateFileRequestDto<T>
     /// Form ID
     /// </summary>
     public int FormId { get; set; }
+}
+
+/// <summary>
+/// Request parameters for creating a file
+/// </summary>
+public class CreateFileRequestDto<T>
+{
+    /// <summary>
+    /// Folder ID
+    /// </summary>
+    [FromRoute(Name = "folderId")]
+    public T FolderId { get; set; }
+
+    /// <summary>
+    /// File
+    /// </summary>
+    [FromBody]
+    public CreateFile<JsonElement> File { get; set; }
 }

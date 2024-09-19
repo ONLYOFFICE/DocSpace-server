@@ -321,15 +321,14 @@ public class SettingsController(
     /// Changes the default access rights in the sharing settings.
     /// </summary>
     /// <short>Change the default access rights</short>
-    /// <param type="System.Collections.Generic.List{ASC.Files.Core.Security.FileShare}, System.Collections.Generic" name="value" example="None">Sharing rights (None, ReadWrite, Read, Restrict, Varies, Review, Comment, FillForms, CustomFilter, RoomAdmin, Editing, Collaborator)</param>
     /// <path>api/2.0/files/settings/dafaultaccessrights</path>
     /// <collection>list</collection>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Updated sharing rights (None, ReadWrite, Read, Restrict, Varies, Review, Comment, FillForms, CustomFilter, RoomAdmin, Editing, Collaborator)", typeof(List<FileShare>))]
     [HttpPut("settings/dafaultaccessrights")]
-    public async Task<List<FileShare>> ChangeDefaultAccessRights(List<FileShare> value)
+    public async Task<List<FileShare>> ChangeDefaultAccessRights(DefaultAccessRightsrequestDto inDto)
     {        
-        await filesSettingsHelper.SetDefaultSharingAccessRights(value);
+        await filesSettingsHelper.SetDefaultSharingAccessRights(inDto.Value);
         return await filesSettingsHelper.GetDefaultSharingAccessRights();
     }
 

@@ -42,17 +42,16 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     /// Returns the progress of the started data deletion for the user with the ID specified in the request.
     /// </summary>
     /// <short>Get the deletion progress</short>
-    /// <param type="System.Guid, System" name="userid" example="9924256A-739C-462b-AF15-E652A3B1B6EB">User ID</param>
     /// <path>api/2.0/people/remove/progress/{userid}</path>
     [Tags("People / User data")]
     [SwaggerResponse(200, "Deletion progress", typeof(TaskProgressResponseDto))]
     [HttpGet("remove/progress/{userid:guid}")]
-    public async Task<TaskProgressResponseDto> GetRemoveProgressAsync(Guid userid)
+    public async Task<TaskProgressResponseDto> GetRemoveProgressAsync(ProgressRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_EditUser);
 
         var tenant = await tenantManager.GetCurrentTenantAsync();
-        var progressItem = await queueWorkerRemove.GetProgressItemStatus(tenant.Id, userid);
+        var progressItem = await queueWorkerRemove.GetProgressItemStatus(tenant.Id, inDto.UserId);
 
         return TaskProgressResponseDto.Get(progressItem);
     }

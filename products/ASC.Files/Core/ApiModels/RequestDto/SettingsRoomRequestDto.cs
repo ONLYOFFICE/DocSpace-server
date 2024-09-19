@@ -26,10 +26,25 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
-public class SettingsRoomRequestDto
+public class SettingsRoom
 {
     /// <summary>
     /// Indexing
     /// </summary>
     public bool Indexing { get; set; }
+}
+
+public class SettingsRoomRequestDto<T>
+{
+    /// <summary>
+    /// Room Id
+    /// </summary>
+    [FromRoute(Name = "id")]
+    public T Id { get; set; }
+
+    /// <summary>
+    /// Room settings
+    /// </summary>
+    [FromBody]
+    public SettingsRoom SettingsRoom { get; set; }
 }

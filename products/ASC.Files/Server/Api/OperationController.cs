@@ -262,7 +262,6 @@ public class OperationController(
     /// Finishes an operation with the ID specified in the request or all the active operations.
     /// </summary>
     /// <short>Finish active operations</short>
-    /// <param type="System.String, System" name="id" method="url" example="1234">Operation ID</param>
     /// <path>api/2.0/files/fileops/terminate/{id}</path>
     /// <collection>list</collection>
     /// <requiresAuthorization>false</requiresAuthorization>
@@ -270,9 +269,9 @@ public class OperationController(
     [SwaggerResponse(200, "List of file operations", typeof(FileOperationDto))]
     [AllowAnonymous]
     [HttpPut("terminate/{id?}")]
-    public async IAsyncEnumerable<FileOperationDto> TerminateTasks(string id = null)
+    public async IAsyncEnumerable<FileOperationDto> TerminateTasks(OperationIdRequestDto inDto)
     {
-        var tasks = await fileOperationsManager.CancelOperations(id);
+        var tasks = await fileOperationsManager.CancelOperations(inDto.Id);
 
         foreach (var e in tasks)
         {

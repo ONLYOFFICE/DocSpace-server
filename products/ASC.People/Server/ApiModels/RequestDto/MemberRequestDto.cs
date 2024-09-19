@@ -54,6 +54,24 @@ public class MemberBaseRequestDto : EmailMemberRequestDto
 }
 
 /// <summary>
+/// Request parameters for setting new password
+/// </summary>
+public class MemberBaseByIdRequestDto
+{
+    /// <summary>
+    /// User ID
+    /// </summary>
+    [FromRoute(Name = "userid")]
+    public Guid UserId { get; set; }
+
+    /// <summary>
+    /// Member base
+    /// </summary>
+    [FromBody]
+    public MemberBaseRequestDto MemberBase { get; set; }
+}
+
+/// <summary>
 /// Member request parameters
 /// </summary>
 public class MemberRequestDto : MemberBaseRequestDto
@@ -160,6 +178,24 @@ public class UpdateMemberRequestDto : MemberRequestDto
     public bool? Disable { get; set; }
 }
 
+/// <summary>
+/// 
+/// </summary>
+public class UpdateMemberByIdRequestDto
+{
+    /// <summary>
+    /// User ID
+    /// </summary>
+    [FromRoute(Name = "userid")]
+    public string UserId { get; set; }
+
+    /// <summary>
+    /// Update member
+    /// </summary>
+    [FromBody]
+    public UpdateMemberRequestDto UpdateMember { get; set; }
+}
+
 public enum SexEnum
 {
     [SwaggerEnum("Female")]
@@ -172,12 +208,79 @@ public enum SexEnum
 /// <summary>
 /// Request parameters for updating user photo
 /// </summary>
-public class UpdatePhotoMemberRequestDto
+public class UpdatePhotoMemberRequest
 {
     /// <summary>
     /// Avatar photo URL
     /// </summary>
     public string Files { get; set; }
+}
+
+/// <summary>
+/// Request parameters for updating user photo
+/// </summary>
+public class UpdatePhotoMemberRequestDto
+{
+    /// <summary>
+    /// User ID
+    /// </summary>
+    [FromRoute(Name = "userid")]
+    public string UserId { get; set; }
+
+    /// <summary>
+    /// Update photo
+    /// </summary>
+    [FromBody]
+    public UpdatePhotoMemberRequest UpdatePhoto { get; set; }
+}
+
+
+/// <summary>
+/// 
+/// </summary>
+public class GetMemberByIdRequestDto
+{
+    /// <summary>
+    /// User ID
+    /// </summary>
+    [FromRoute(Name = "userid")]
+    public string UserId { get; set; }
+}
+
+/// <summary>
+/// 
+/// </summary>
+public class GetMemberByEmailRequestDto
+{
+    /// <summary>
+    /// User email address
+    /// </summary>
+    [FromQuery(Name = "email")] 
+    public string Email { get; set; }
+}
+
+/// <summary>
+/// 
+/// </summary>
+public class GetMemberByQueryRequestDto
+{
+    /// <summary>
+    /// Search query
+    /// </summary>
+    [FromRoute(Name = "query")]
+    public string Query { get; set; }
+}
+
+/// <summary>
+/// 
+/// </summary>
+public class GetPeopleByQueryRequestDto
+{
+    /// <summary>
+    /// Search query
+    /// </summary>
+    [FromQuery(Name = "query")]
+    public string Query { get; set; }
 }
 
 /// <summary>
@@ -192,12 +295,31 @@ public class UpdateMemberSimpleRequestDto
 }
 
 /// <summary>
-/// Request parameters for updating user contacts
+/// Parameters for updating user contacts
 /// </summary>
-public class ContactsRequestDto
+public class ContactsRequest
 {
     /// <summary>
     /// List of user contacts
     /// </summary>
     public IEnumerable<Contact> Contacts { get; set; }
+}
+
+
+/// <summary>
+/// Request parameters for updating user contacts
+/// </summary>
+public class ContactsRequestDto
+{
+    /// <summary>
+    /// User ID
+    /// </summary>
+    [FromRoute(Name = "userid")]
+    public string UserId { get; set; }
+
+    /// <summary>
+    /// Contacts
+    /// </summary>
+    [FromBody]
+    public ContactsRequest Contacts { get; set; }
 }

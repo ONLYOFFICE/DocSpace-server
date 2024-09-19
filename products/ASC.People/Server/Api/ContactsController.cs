@@ -41,21 +41,20 @@ public class ContactsController(UserManager userManager,
     /// <short>
     /// Delete user contacts
     /// </short>
-    /// <param type="System.String, System" method="url" name="userid" example="some text">User ID</param>
     /// <path>api/2.0/people/{userid}/contacts</path>
     [Tags("People / Contacts")]
     [SwaggerResponse(200, "Deleted user profile with the detailed information", typeof(EmployeeFullDto))]
     [HttpDelete("{userid}/contacts")]
-    public async Task<EmployeeFullDto> DeleteMemberContacts(string userid, ContactsRequestDto inDto)
+    public async Task<EmployeeFullDto> DeleteMemberContacts(ContactsRequestDto inDto)
     {
-        var user = await GetUserInfoAsync(userid);
+        var user = await GetUserInfoAsync(inDto.UserId);
 
         if (_userManager.IsSystemUser(user.Id))
         {
             throw new SecurityException();
         }
 
-        await DeleteContactsAsync(inDto.Contacts, user);
+        await DeleteContactsAsync(inDto.Contacts.Contacts, user);
         await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
 
         return await employeeFullDtoHelper.GetFullAsync(user);
@@ -67,14 +66,13 @@ public class ContactsController(UserManager userManager,
     /// <short>
     /// Set user contacts
     /// </short>
-    /// <param type="System.String, System" method="url" name="userid" example="some text">User ID</param>
     /// <path>api/2.0/people/{userid}/contacts</path>
     [Tags("People / Contacts")]
     [SwaggerResponse(200, "Updated user profile with the detailed information", typeof(EmployeeFullDto))]
     [HttpPost("{userid}/contacts")]
-    public async Task<EmployeeFullDto> SetMemberContacts(string userid, ContactsRequestDto inDto)
+    public async Task<EmployeeFullDto> SetMemberContacts(ContactsRequestDto inDto)
     {
-        var user = await GetUserInfoAsync(userid);
+        var user = await GetUserInfoAsync(inDto.UserId);
 
         if (_userManager.IsSystemUser(user.Id))
         {
@@ -82,7 +80,7 @@ public class ContactsController(UserManager userManager,
         }
 
         user.ContactsList.Clear();
-        await UpdateContactsAsync(inDto.Contacts, user);
+        await UpdateContactsAsync(inDto.Contacts.Contacts, user);
         await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
 
         return await employeeFullDtoHelper.GetFullAsync(user);
@@ -94,21 +92,20 @@ public class ContactsController(UserManager userManager,
     /// <short>
     /// Update user contacts
     /// </short>
-    /// <param type="System.String, System" method="url" name="userid" example="some text">User ID</param>
     /// <path>api/2.0/people/{userid}/contacts</path>
     [Tags("People / Contacts")]
     [SwaggerResponse(200, "Updated user profile with the detailed information", typeof(EmployeeFullDto))]
     [HttpPut("{userid}/contacts")]
-    public async Task<EmployeeFullDto> UpdateMemberContacts(string userid, ContactsRequestDto inDto)
+    public async Task<EmployeeFullDto> UpdateMemberContacts(ContactsRequestDto inDto)
     {
-        var user = await GetUserInfoAsync(userid);
+        var user = await GetUserInfoAsync(inDto.UserId);
 
         if (_userManager.IsSystemUser(user.Id))
         {
             throw new SecurityException();
         }
 
-        await UpdateContactsAsync(inDto.Contacts, user);
+        await UpdateContactsAsync(inDto.Contacts.Contacts, user);
         await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
 
         return await employeeFullDtoHelper.GetFullAsync(user);

@@ -97,14 +97,13 @@ public class PortalController(
     /// <short>
     /// Get a user by ID
     /// </short>
-    /// <param type="System.Guid, System" method="url" name="userID" example="9924256A-739C-462b-AF15-E652A3B1B6EB">User ID</param>
     /// <path>api/2.0/portal/users/{userID}</path>
     [Tags("Portal / Users")]
     [SwaggerResponse(200, "User information", typeof(UserInfo))]
     [HttpGet("users/{userID:guid}")]
-    public async Task<UserInfo> GetUserAsync(Guid userID)
+    public async Task<UserInfo> GetUserAsync(UserIdRequestDto inDto)
     {
-        return await userManager.GetUsersAsync(userID);
+        return await userManager.GetUsersAsync(inDto.Id);
     }
 
     /// <summary>
@@ -113,23 +112,22 @@ public class PortalController(
     /// <short>
     /// Get an invitation link
     /// </short>
-    /// <param type="ASC.Core.Users.EmployeeType, ASC.Core.Common" method="url" name="employeeType" example="All">Employee type (All, RoomAdmin, User, DocSpaceAdmin)</param>
     /// <path>api/2.0/portal/users/invite/{employeeType}</path>
     [Tags("Portal / Users")]
     [SwaggerResponse(200, "Invitation link", typeof(object))]
     [HttpGet("users/invite/{employeeType}")]
-    public async Task<object> GeInviteLinkAsync(EmployeeType employeeType)
+    public async Task<object> GeInviteLinkAsync(InvitationLinkRequestDto inDto)
     {
         var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
 
-        if ((employeeType == EmployeeType.DocSpaceAdmin && !currentUser.IsOwner(await tenantManager.GetCurrentTenantAsync()))
-            || !await permissionContext.CheckPermissionsAsync(new UserSecurityProvider(Guid.Empty, employeeType), Constants.Action_AddRemoveUser))
+        if ((inDto.EmployeeType == EmployeeType.DocSpaceAdmin && !currentUser.IsOwner(await tenantManager.GetCurrentTenantAsync()))
+            || !await permissionContext.CheckPermissionsAsync(new UserSecurityProvider(Guid.Empty, inDto.EmployeeType), Constants.Action_AddRemoveUser))
         {
             return string.Empty;
         }
 
-        var link = await commonLinkUtility.GetConfirmationEmailUrlAsync(string.Empty, ConfirmType.LinkInvite, (int)employeeType + authContext.CurrentAccount.ID.ToString(), authContext.CurrentAccount.ID)
-                + $"&emplType={employeeType:d}";
+        var link = await commonLinkUtility.GetConfirmationEmailUrlAsync(string.Empty, ConfirmType.LinkInvite, (int)inDto.EmployeeType + authContext.CurrentAccount.ID.ToString(), authContext.CurrentAccount.ID)
+                + $"&emplType={inDto.EmployeeType:d}";
 
         return await urlShortener.GetShortenLinkAsync(link);
     }
@@ -161,17 +159,16 @@ public class PortalController(
     /// <short>
     /// Get an extra tenant license
     /// </short>
-    /// <param type="System.Boolean, System" name="refresh" example="true">Specifies whether the tariff will be refreshed</param>
     /// <path>api/2.0/portal/tenantextra</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Portal / Quota")]
     [SwaggerResponse(200, "Extra tenant license information", typeof(TenantExtraDto))]
     [AllowNotPayment]
     [HttpGet("tenantextra")]
-    public async Task<TenantExtraDto> GetTenantExtra(bool refresh)
+    public async Task<TenantExtraDto> GetTenantExtra(PortalExtraTenantRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-        var quota = await quotaHelper.GetCurrentQuotaAsync(refresh);
+        var quota = await quotaHelper.GetCurrentQuotaAsync(inDto.Refresh);
         var docServiceQuota = await documentServiceLicense.GetLicenseQuotaAsync();
         
         var result = new TenantExtraDto
@@ -238,16 +235,15 @@ public class PortalController(
     /// <short>
     /// Get a portal tariff
     /// </short>
-    /// <param type="System.Boolean, System" name="refresh" example="true">Specifies whether the tariff will be refreshed</param>
     /// <path>api/2.0/portal/tariff</path>
     [Tags("Portal / Quota")]
     [SwaggerResponse(200, "Current portal tariff", typeof(Tariff))]
     [AllowNotPayment]
     [HttpGet("tariff")]
-    public async Task<TariffDto> GetTariffAsync(bool refresh)
+    public async Task<TariffDto> GetTariffAsync(CurrentPortalTariffRequestDto inDto)
     {
         var tenant = await tenantManager.GetCurrentTenantAsync();
-        var source = await tariffService.GetTariffAsync(tenant.Id, refresh: refresh);
+        var source = await tariffService.GetTariffAsync(tenant.Id, refresh: inDto.Refresh);
 
         var result = new TariffDto
         {
@@ -326,14 +322,13 @@ public class PortalController(
     /// <short>
     /// Get a path to the portal
     /// </short>
-    /// <param type="System.String, System" name="virtualPath" example="some text">Portal virtual path</param>
     /// <path>api/2.0/portal/path</path>
     [Tags("Portal / Settings")]
     [SwaggerResponse(200, "Portal path", typeof(object))]
     [HttpGet("path")]
-    public object GetFullAbsolutePath(string virtualPath)
+    public object GetFullAbsolutePath(PortalPathRequestDto inDto)
     {
-        return commonLinkUtility.GetFullAbsolutePath(virtualPath);
+        return commonLinkUtility.GetFullAbsolutePath(inDto.VirtualPath);
     }
 
     /// <summary>
@@ -342,25 +337,24 @@ public class PortalController(
     /// <short>
     /// Get a bookmark thumbnail
     /// </short>
-    /// <param type="System.String, System" name="url" example="some text">Bookmark URL</param>
     /// <path>api/2.0/portal/thumb</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Portal / Settings")]
     [SwaggerResponse(200, "Thumbnail", typeof(FileResult))]
     [HttpGet("thumb")]
-    public async Task<FileResult> GetThumb(string url)
+    public async Task<FileResult> GetThumb(PortalThumbnailRequestDto inDto)
     {
         if (!securityContext.IsAuthenticated || configuration["bookmarking:thumbnail-url"] == null)
         {
             return null;
         }
 
-        url = url.Replace("&amp;", "&");
-        url = WebUtility.UrlEncode(url);
+        inDto.Url = inDto.Url.Replace("&amp;", "&");
+        inDto.Url = WebUtility.UrlEncode(inDto.Url);
 
         var request = new HttpRequestMessage
         {
-            RequestUri = new Uri(string.Format(configuration["bookmarking:thumbnail-url"], url))
+            RequestUri = new Uri(string.Format(configuration["bookmarking:thumbnail-url"], inDto.Url))
         };
 
         var httpClient = clientFactory.CreateClient();
@@ -416,15 +410,14 @@ public class PortalController(
     /// <short>
     /// Register the mobile app installation by mobile app type
     /// </short>
-    /// <param type="ASC.Core.Common.Notify.Push.MobileAppType, ASC.Core.Common" name="type">Mobile app type (IosProjects, AndroidProjects, IosDocuments, AndroidDocuments, or DesktopEditor)</param>
     /// <path>api/2.0/portal/mobile/registration</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Portal / Settings")]
     [HttpPost("mobile/registration")]
-    public async Task RegisterMobileAppInstallAsync(MobileAppType type)
+    public async Task RegisterMobileAppInstallAsync(PortalMobileAppRequestDto inDto)
     {
         var currentUser = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
-        await mobileAppInstallRegistrator.RegisterInstallAsync(currentUser.Email, type);
+        await mobileAppInstallRegistrator.RegisterInstallAsync(currentUser.Email, inDto.Type);
     }
 
     /// <summary>

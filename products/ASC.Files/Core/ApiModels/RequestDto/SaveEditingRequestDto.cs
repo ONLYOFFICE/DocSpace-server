@@ -24,14 +24,12 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Microsoft.AspNetCore.Mvc;
-
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Request parameters for saving file edits
+/// Parameters for saving file edits
 /// </summary>
-public class SaveEditingRequestDto : IModelWithFile
+public class SaveEditing : IModelWithFile
 {
     /// <summary>
     /// File extension
@@ -55,9 +53,20 @@ public class SaveEditingRequestDto : IModelWithFile
     public bool Forcesave { get; set; }
 }
 
-
-public class FileID<T>
+/// <summary>
+/// Request parameters for saving file edits
+/// </summary>
+public class SaveEditingRequestDto<T>
 {
+    /// <summary>
+    /// File ID
+    /// </summary>
     [FromRoute(Name = "fileId")]
     public T FileId { get; set; }
+
+    /// <summary>
+    /// Parameters for saving file edits
+    /// </summary>
+    [FromForm]
+    public SaveEditing File { get; set; }
 }

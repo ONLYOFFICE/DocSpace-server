@@ -90,3 +90,22 @@ public class InsertFileRequestDto : IModelWithFile, IDisposable
         GC.SuppressFinalize(this);
     }
 }
+
+/// <summary>
+/// 
+/// </summary>
+public class InsertWithFileRequestDto<T>
+{
+    /// <summary>
+    /// Folder ID
+    /// </summary>
+    [FromRoute(Name = "folderId")]
+    public T FolderId { get; set; }
+
+    /// <summary>
+    /// Insert file
+    /// </summary>
+    [FromForm]
+    [ModelBinder(BinderType = typeof(InsertFileModelBinder))]
+    public InsertFileRequestDto InsertFile { get; set; }
+}

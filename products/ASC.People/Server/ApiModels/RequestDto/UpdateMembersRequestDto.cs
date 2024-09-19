@@ -41,3 +41,57 @@ public class UpdateMembersRequestDto
     /// </summary>
     public bool ResendAll { get; set; }
 }
+
+/// <summary>
+/// 
+/// </summary>
+public class UpdateMemberStatusRequestDto
+{
+    /// <summary>
+    /// New user status
+    /// </summary>
+    [FromRoute(Name = "status")]
+    public EmployeeStatus Status { get; set; }
+
+    /// <summary>
+    /// Update members
+    /// </summary>
+    [FromBody]
+    public UpdateMembersRequestDto UpdateMembers { get; set; }
+}
+
+/// <summary>
+/// 
+/// </summary>
+public class UpdateMemberTypeRequestDto
+{
+    /// <summary>
+    /// New user type
+    /// </summary>
+    [FromRoute(Name = "type")]
+    public EmployeeType Type { get; set; }
+
+    /// <summary>
+    /// Update members
+    /// </summary>
+    [FromBody]
+    public UpdateMembersRequestDto UpdateMembers { get; set; }
+}
+
+/// <summary>
+/// 
+/// </summary>
+public class UpdateMemberActivationStatusRequestDto
+{
+    /// <summary>
+    /// Activation status
+    /// </summary>
+    [FromRoute(Name = "activationstatus")]
+    public EmployeeActivationStatus ActivationStatus { get; set; }
+
+    /// <summary>
+    /// Update members
+    /// </summary>
+    [FromBody]
+    public UpdateMembersRequestDto UpdateMembers { get; set; }
+}

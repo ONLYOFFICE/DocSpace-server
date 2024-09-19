@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.ApiModels.RequestDto;
+
 namespace ASC.Files.Api;
 
 [ConstraintRoute("int")]
@@ -54,15 +56,14 @@ public class FoldersControllerInternal(
     /// <short>
     /// Get folder history
     /// </short>
-    /// <param type="System.Int32, System" name="folderId" example="1234">Folder ID</param>
     /// <path>api/2.0/files/folder/{folderId}/log</path>
     /// <collection>list</collection>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "List of actions in the folder", typeof(HistoryDto))]
     [HttpGet("folder/{folderId:int}/log")]
-    public IAsyncEnumerable<HistoryDto> GetHistoryAsync(int folderId)
+    public IAsyncEnumerable<HistoryDto> GetHistoryAsync(FolderIdRequestDto<int> inDto)
     {
-        return historyApiHelper.GetFolderHistoryAsync(folderId);
+        return historyApiHelper.GetFolderHistoryAsync(inDto.FolderId);
     }
 }
 
@@ -104,14 +105,13 @@ public abstract class FoldersController<T>(
     /// <short>
     /// Create a folder
     /// </short>
-    /// <param type="System.Int32, System" method="url" name="folderId" example="1234">Parent folder ID</param>
     /// <path>api/2.0/files/folder/{folderId}</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "New folder parameters", typeof(FolderDto<int>))]
     [HttpPost("folder/{folderId}")]
-    public async Task<FolderDto<T>> CreateFolderAsync(T folderId, CreateFolderRequestDto inDto)
+    public async Task<FolderDto<T>> CreateFolderAsync(CreateFolderRequestDto<T> inDto)
     {
-        var folder = await fileStorageService.CreateFolderAsync(folderId, inDto.Title);
+        var folder = await fileStorageService.CreateFolderAsync(inDto.FolderId, inDto.Folder.Title);
 
         return await _folderDtoHelper.GetAsync(folder);
     }
@@ -120,15 +120,14 @@ public abstract class FoldersController<T>(
     /// Deletes a folder with the ID specified in the request.
     /// </summary>
     /// <short>Delete a folder</short>
-    /// <param type="System.Int32, System" method="url" name="folderId" example="1234">Folder ID</param>
     /// <path>api/2.0/files/folder/{folderId}</path>
     /// <collection>list</collection>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "List of file operations", typeof(FileOperationDto))]
     [HttpDelete("folder/{folderId}")]
-    public async IAsyncEnumerable<FileOperationDto> DeleteFolder(T folderId, DeleteFolderDto inDto)
+    public async IAsyncEnumerable<FileOperationDto> DeleteFolder(DeleteFolder<T> inDto)
     {
-        await fileOperationsManager.PublishDelete(new List<T> { folderId }, new List<T>(), false, !inDto.DeleteAfter, inDto.Immediately);
+        await fileOperationsManager.PublishDelete(new List<T> { inDto.FolderId }, new List<T>(), false, !inDto.Delete.DeleteAfter, inDto.Delete.Immediately);
         
         foreach (var e in await fileOperationsManager.GetOperationResults())
         {
@@ -138,12 +137,11 @@ public abstract class FoldersController<T>(
 
     /// <summary>
     /// </summary>
-    /// <param type="System.Int32, System" name="folderId" example="1234">Folder ID</param>
     [Tags("Files / Folders")]
     [HttpPut("folder/{folderId}/order")]
-    public async Task SetFileOrder(T folderId, OrderRequestDto inDto)
+    public async Task SetFileOrder(OrderFolderRequestDto<T> inDto)
     {
-        await fileStorageService.SetFolderOrder(folderId, inDto.Order);
+        await fileStorageService.SetFolderOrder(inDto.FolderId, inDto.Order.Order);
     }
 
     /// <summary>
@@ -152,28 +150,17 @@ public abstract class FoldersController<T>(
     /// <short>
     /// Get a folder by ID
     /// </short>
-    /// <param type="System.Int32, System" method="url" name="folderId" example="1234">Folder ID</param>
-    /// <param type="System.Nullable{System.Guid}, System" name="userIdOrGroupId" optional="true" example="9924256A-739C-462b-AF15-E652A3B1B6EB">User or group ID</param>
-    /// <param type="System.Nullable{ASC.Files.Core.FilterType}, System" name="filterType" optional="true" remark="Allowed values: None (0), FilesOnly (1), FoldersOnly (2), DocumentsOnly (3), PresentationsOnly (4), SpreadsheetsOnly (5), ImagesOnly (7), ByUser (8), ByDepartment (9), ArchiveOnly (10), ByExtension (11), MediaOnly (12), EditingRooms (14), CustomRooms (17), OFormTemplateOnly (18), OFormOnly (19)" example="None">Filter type</param>
-    /// <param type="System.Int32, System" name="roomId" example="1234">Room ID</param>
-    /// <param type="System.Nullable{System.Boolean}, System" name="searchInContent" example="true">Specifies whether to search within the section contents or not</param>
-    /// <param type="System.Nullable{System.Boolean}, System" name="withsubfolders" example="true">Specifies whether to return sections with or without subfolders</param>
-    /// <param type="System.Nullable{System.Boolean}, System" name="excludeSubject" example="true">Specifies whether to exclude a subject or not</param>
-    /// <param type="System.Nullable{ASC.Files.Core.Core.ApplyFilterOption}, System" name="applyFilterOption" example="All">Specifies whether to return only files, only folders or all elements from the specified folder</param>
-    /// <param type="System.String, System" name="extension" example="some text">Specifies whether to search for a specific file extension</param>
-    /// <param type="ASC.Files.Core.VirtualRooms.SearchArea, ASC.Files.Core" name="searchArea" optional="true" remark="Allowed values: Active (0), Archive (1), Any (2), RecentByLinks (3)" example="Active">Search area</param>
     /// <path>api/2.0/files/{folderId}</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "Folder contents", typeof(FolderContentDto<int>))]
     [AllowAnonymous]
     [HttpGet("{folderId}")]
-    public async Task<FolderContentDto<T>> GetFolderAsync(T folderId, Guid? userIdOrGroupId, FilterType? filterType, T roomId, bool? searchInContent, bool? withsubfolders, bool? excludeSubject,
-        ApplyFilterOption? applyFilterOption, string extension, SearchArea searchArea)
+    public async Task<FolderContentDto<T>> GetFolderAsync(GetFolderRequestDto<T> inDto)
     {
 
-        var split = extension == null ? [] : extension.Split(",");
-        var folder = await folderContentDtoHelper.GetAsync(folderId, userIdOrGroupId, filterType, roomId, searchInContent, withsubfolders, excludeSubject, applyFilterOption, searchArea, split);
+        var split = inDto.Extension == null ? [] : inDto.Extension.Split(",");
+        var folder = await folderContentDtoHelper.GetAsync(inDto.FolderId, inDto.UserIdOrGroupId, inDto.FilterType, inDto.RoomId, inDto.SearchInContent, inDto.Withsubfolders, inDto.ExcludeSubject, inDto.ApplyFilterOption, inDto.SearchArea, split);
 
         return folder.NotFoundIfNull();
     }
@@ -182,16 +169,15 @@ public abstract class FoldersController<T>(
     /// Returns the detailed information about a folder with the ID specified in the request.
     /// </summary>
     /// <short>Get folder information</short>
-    /// <param type="System.Int32, System" method="url" name="folderId" example="1234">Folder ID</param>
     /// <path>api/2.0/files/folder/{folderId}</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "Folder parameters", typeof(FolderDto<int>))]
     [AllowAnonymous]
     [HttpGet("folder/{folderId}")]
-    public async Task<FolderDto<T>> GetFolderInfoAsync(T folderId)
+    public async Task<FolderDto<T>> GetFolderInfoAsync(FolderIdRequestDto<T> inDto)
     {        
-        var folder = await fileStorageService.GetFolderAsync(folderId).NotFoundIfNull("Folder not found");
+        var folder = await fileStorageService.GetFolderAsync(inDto.FolderId).NotFoundIfNull("Folder not found");
 
         return await _folderDtoHelper.GetAsync(folder);
     }
@@ -200,15 +186,14 @@ public abstract class FoldersController<T>(
     /// Returns a path to the folder with the ID specified in the request.
     /// </summary>
     /// <short>Get the folder path</short>
-    /// <param type="System.Int32, System" method="url" name="folderId" example="1234">Folder ID</param>
     /// <path>api/2.0/files/folder/{folderId}/path</path>
     /// <collection>list</collection>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "List of file entry information", typeof(FileEntryDto))]
     [HttpGet("folder/{folderId}/path")]
-    public async IAsyncEnumerable<FileEntryDto> GetFolderPathAsync(T folderId)
+    public async IAsyncEnumerable<FileEntryDto> GetFolderPathAsync(FolderIdRequestDto<T> inDto)
     {
-        var breadCrumbs = await breadCrumbsManager.GetBreadCrumbsAsync(folderId);
+        var breadCrumbs = await breadCrumbsManager.GetBreadCrumbsAsync(inDto.FolderId);
 
         foreach (var e in breadCrumbs)
         {
@@ -220,15 +205,14 @@ public abstract class FoldersController<T>(
     /// Returns a list of all the subfolders from a folder with the ID specified in the request.
     /// </summary>
     /// <short>Get subfolders</short>
-    /// <param type="System.Int32, System" method="url" name="folderId" example="1234">Folder ID</param>
     /// <path>api/2.0/files/{folderId}/subfolders</path>
     /// <collection>list</collection>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "List of file entry information", typeof(FileEntryDto))]
     [HttpGet("{folderId}/subfolders")]
-    public async IAsyncEnumerable<FileEntryDto> GetFoldersAsync(T folderId)
+    public async IAsyncEnumerable<FileEntryDto> GetFoldersAsync(FolderIdRequestDto<T> inDto)
     {
-        var folders = await fileStorageService.GetFoldersAsync(folderId);
+        var folders = await fileStorageService.GetFoldersAsync(inDto.FolderId);
         foreach (var folder in folders)
         {
             yield return await GetFileEntryWrapperAsync(folder);
@@ -239,15 +223,14 @@ public abstract class FoldersController<T>(
     /// Returns a list of all the new items from a folder with the ID specified in the request.
     /// </summary>
     /// <short>Get new folder items</short>
-    /// <param type="System.Int32, System" method="url" name="folderId" example="1234">Folder ID</param>
     /// <path>api/2.0/files/{folderId}/news</path>
     /// <collection>list</collection>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "List of file entry information", typeof(FileEntryDto))]
     [HttpGet("{folderId}/news")]
-    public async IAsyncEnumerable<FileEntryDto> GetNewItemsAsync(T folderId)
+    public async IAsyncEnumerable<FileEntryDto> GetNewItemsAsync(FolderIdRequestDto<T> inDto)
     {
-        var newItems = await fileStorageService.GetNewItemsAsync(folderId);
+        var newItems = await fileStorageService.GetNewItemsAsync(inDto.FolderId);
 
         foreach (var e in newItems)
         {
@@ -261,14 +244,13 @@ public abstract class FoldersController<T>(
     /// <short>
     /// Rename a folder
     /// </short>
-    /// <param type="System.Int32, System" method="url" name="folderId" example="1234">Folder ID</param>
     /// <path>api/2.0/files/folder/{folderId}</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "Folder parameters", typeof(FolderDto<int>))]
     [HttpPut("folder/{folderId}")]
-    public async Task<FolderDto<T>> RenameFolderAsync(T folderId, CreateFolderRequestDto inDto)
+    public async Task<FolderDto<T>> RenameFolderAsync(CreateFolderRequestDto<T> inDto)
     {        
-        var folder = await fileStorageService.FolderRenameAsync(folderId, inDto.Title);
+        var folder = await fileStorageService.FolderRenameAsync(inDto.FolderId, inDto.Folder.Title);
 
         return await _folderDtoHelper.GetAsync(folder);
     }
@@ -292,15 +274,14 @@ public abstract class FoldersController<T>(
     /// Returns the primary external link by the identifier specified in the request.
     /// </summary>
     /// <short>Get primary external link</short>
-    /// <param type="System.Int32, System" method="url" name="id" example="1234">Folder Id</param>
     /// <path>api/2.0/files/folder/{id}/link</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "Folder security information", typeof(FileShareDto))]
     [AllowAnonymous]
     [HttpGet("folder/{id}/link")]
-    public async Task<FileShareDto> GetFolderPrimaryExternalLinkAsync(T id)
+    public async Task<FileShareDto> GetFolderPrimaryExternalLinkAsync(FolderPrimaryIdRequestDto<T> inDto)
     {
-        var linkAce = await fileStorageService.GetPrimaryExternalLinkAsync(id, FileEntryType.Folder);
+        var linkAce = await fileStorageService.GetPrimaryExternalLinkAsync(inDto.Id, FileEntryType.Folder);
 
         return await fileShareDtoHelper.Get(linkAce);
     }
@@ -319,18 +300,14 @@ public class FoldersControllerCommon(
     /// Returns the detailed list of files and folders located in the "Common" section.
     /// </summary>
     /// <short>Get the "Common" section</short>
-    /// <param type="System.Nullable{System.Guid}, System" name="userIdOrGroupId" optional="true" example="9924256A-739C-462b-AF15-E652A3B1B6EB">User or group ID</param>
-    /// <param type="System.Nullable{ASC.Files.Core.FilterType}, System" name="filterType" optional="true" remark="Allowed values: None (0), FilesOnly (1), FoldersOnly (2), DocumentsOnly (3), PresentationsOnly (4), SpreadsheetsOnly (5), ImagesOnly (7), ByUser (8), ByDepartment (9), ArchiveOnly (10), ByExtension (11), MediaOnly (12), EditingRooms (14), CustomRooms (17), OFormTemplateOnly (18), OFormOnly (19)" example="None">Filter type</param>
-    /// <param type="System.Nullable{System.Boolean}, System" name="searchInContent" example="true">Specifies whether to search within the section contents or not</param>
-    /// <param type="System.Nullable{System.Boolean}, System" name="withsubfolders" example="true">Specifies whether to return sections with or without subfolders</param>
     /// <path>api/2.0/files/@common</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"Common\" section contents", typeof(FolderContentDto<int>))]
     [HttpGet("@common")]
-    public async Task<FolderContentDto<int>> GetCommonFolderAsync(Guid? userIdOrGroupId, FilterType? filterType, bool? searchInContent, bool? withsubfolders)
+    public async Task<FolderContentDto<int>> GetCommonFolderAsync(GetCommonFolderRequestDto inDto)
     {
-        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderCommonAsync, userIdOrGroupId, filterType, default, searchInContent, withsubfolders,
+        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderCommonAsync, inDto.UserIdOrGroupId, inDto.FilterType, default, inDto.SearchInContent, inDto.Withsubfolders,
             false, ApplyFilterOption.All, null);
     }
 
@@ -338,18 +315,14 @@ public class FoldersControllerCommon(
     /// Returns the detailed list of files and folders located in the "Favorites" section.
     /// </summary>
     /// <short>Get the "Favorites" section</short>
-    /// <param type="System.Nullable{System.Guid}, System" name="userIdOrGroupId" optional="true" example="9924256A-739C-462b-AF15-E652A3B1B6EB">User or group ID</param>
-    /// <param type="System.Nullable{ASC.Files.Core.FilterType}, System" name="filterType" optional="true" remark="Allowed values: None (0), FilesOnly (1), FoldersOnly (2), DocumentsOnly (3), PresentationsOnly (4), SpreadsheetsOnly (5), ImagesOnly (7), ByUser (8), ByDepartment (9), ArchiveOnly (10), ByExtension (11), MediaOnly (12), EditingRooms (14), CustomRooms (17), OFormTemplateOnly (18), OFormOnly (19)" example="None">Filter type</param>
-    /// <param type="System.Nullable{System.Boolean}, System" name="searchInContent" example="true">Specifies whether to search within the section contents or not</param>
-    /// <param type="System.Nullable{System.Boolean}, System" name="withsubfolders" example="true">Specifies whether to return sections with or without subfolders</param>
     /// <path>api/2.0/files/@favorites</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"Favorites\" section contents", typeof(FolderContentDto<int>))]
     [HttpGet("@favorites")]
-    public async Task<FolderContentDto<int>> GetFavoritesFolderAsync(Guid? userIdOrGroupId, FilterType? filterType, bool? searchInContent, bool? withsubfolders)
+    public async Task<FolderContentDto<int>> GetFavoritesFolderAsync(GetCommonFolderRequestDto inDto)
     {
-        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderFavoritesAsync, userIdOrGroupId, filterType, default, searchInContent, withsubfolders,
+        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderFavoritesAsync, inDto.UserIdOrGroupId, inDto.FilterType, default, inDto.SearchInContent, inDto.Withsubfolders,
             false, ApplyFilterOption.All, null);
     }
 
@@ -357,41 +330,32 @@ public class FoldersControllerCommon(
     /// Returns the detailed list of files and folders located in the "My documents" section.
     /// </summary>
     /// <short>Get the "My documents" section</short>
-    /// <param type="System.Nullable{System.Guid}, System" name="userIdOrGroupId" optional="true" example="9924256A-739C-462b-AF15-E652A3B1B6EB">User or group ID</param>
-    /// <param type="System.Nullable{ASC.Files.Core.FilterType}, System" name="filterType" optional="true" remark="Allowed values: None (0), FilesOnly (1), FoldersOnly (2), DocumentsOnly (3), PresentationsOnly (4), SpreadsheetsOnly (5), ImagesOnly (7), ByUser (8), ByDepartment (9), ArchiveOnly (10), ByExtension (11), MediaOnly (12), EditingRooms (14), CustomRooms (17), OFormTemplateOnly (18), OFormOnly (19)" example="None">Filter type</param>
-    /// <param type="System.Nullable{System.Boolean}, System" name="searchInContent" example="true">Specifies whether to search within the section contents or not</param>
-    /// <param type="System.Nullable{System.Boolean}, System" name="withsubfolders" example="true">Specifies whether to return sections with or without subfolders</param>
-    /// <param type="System.Nullable{ASC.Files.Core.Core.ApplyFilterOption}, System" name="applyFilterOption" example="All">Specifies whether to return only files, only folders or all elements from the specified folder</param>
     /// <path>api/2.0/files/@my</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"My documents\" section contents", typeof(FolderContentDto<int>))]
     [HttpGet("@my")]
-    public async Task<FolderContentDto<int>> GetMyFolderAsync(Guid? userIdOrGroupId, FilterType? filterType, bool? searchInContent, bool? withsubfolders, ApplyFilterOption? applyFilterOption)
+    public async Task<FolderContentDto<int>> GetMyFolderAsync(GetMyTrashFolderRequestDto inDto)
     {
-        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderMyAsync, userIdOrGroupId, filterType, default, searchInContent, withsubfolders,
-            false, applyFilterOption, null);
+        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderMyAsync, inDto.UserIdOrGroupId, inDto.FilterType, default, inDto.SearchInContent, inDto.Withsubfolders,
+            false, inDto.ApplyFilterOption, null);
     }
 
     /// <summary>
     /// Returns the detailed list of files and folders located in the "Private Room" section.
     /// </summary>
     /// <short>Get the "Private Room" section</short>
-    /// <param type="System.Nullable{System.Guid}, System" name="userIdOrGroupId" optional="true" example="9924256A-739C-462b-AF15-E652A3B1B6EB">User or group ID</param>
-    /// <param type="System.Nullable{ASC.Files.Core.FilterType}, System" name="filterType" optional="true" remark="Allowed values: None (0), FilesOnly (1), FoldersOnly (2), DocumentsOnly (3), PresentationsOnly (4), SpreadsheetsOnly (5), ImagesOnly (7), ByUser (8), ByDepartment (9), ArchiveOnly (10), ByExtension (11), MediaOnly (12), EditingRooms (14), CustomRooms (17), OFormTemplateOnly (18), OFormOnly (19)" example="None">Filter type</param>
-    /// <param type="System.Nullable{System.Boolean}, System" name="searchInContent" example="true">Specifies whether to search within the section contents or not</param>
-    /// <param type="System.Nullable{System.Boolean}, System" name="withsubfolders" example="true">Specifies whether to return sections with or without subfolders</param>
     /// <path>api/2.0/files/@privacy</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"Private Room\" section contents", typeof(FolderContentDto<int>))]
     [HttpGet("@privacy")]
-    public async Task<FolderContentDto<int>> GetPrivacyFolderAsync(Guid? userIdOrGroupId, FilterType? filterType, bool? searchInContent, bool? withsubfolders)
+    public async Task<FolderContentDto<int>> GetPrivacyFolderAsync(GetCommonFolderRequestDto inDto)
     {
         if (PrivacyRoomSettings.IsAvailable())
         {
             throw new SecurityException();
         }
 
-        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderPrivacyAsync, userIdOrGroupId, filterType, default, searchInContent, withsubfolders,
+        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderPrivacyAsync, inDto.UserIdOrGroupId, inDto.FilterType, default, inDto.SearchInContent, inDto.Withsubfolders,
             false, ApplyFilterOption.All, null);
     }
 
@@ -399,18 +363,14 @@ public class FoldersControllerCommon(
     /// Returns the detailed list of files and folders located in the "In projects" section.
     /// </summary>
     /// <short>Get the "In projects" section</short>
-    /// <param type="System.Nullable{System.Guid}, System" name="userIdOrGroupId" optional="true" example="9924256A-739C-462b-AF15-E652A3B1B6EB">User or group ID</param>
-    /// <param type="System.Nullable{ASC.Files.Core.FilterType}, System" name="filterType" optional="true" remark="Allowed values: None (0), FilesOnly (1), FoldersOnly (2), DocumentsOnly (3), PresentationsOnly (4), SpreadsheetsOnly (5), ImagesOnly (7), ByUser (8), ByDepartment (9), ArchiveOnly (10), ByExtension (11), MediaOnly (12), EditingRooms (14), CustomRooms (17), OFormTemplateOnly (18), OFormOnly (19)" example="None">Filter type</param>
-    /// <param type="System.Nullable{System.Boolean}, System" name="searchInContent" example="true">Specifies whether to search within the section contents or not</param>
-    /// <param type="System.Nullable{System.Boolean}, System" name="withsubfolders" example="true">Specifies whether to return sections with or without subfolders</param>
     /// <path>api/2.0/files/@projects</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"In projects\" section contents", typeof(FolderContentDto<string>))]
     [HttpGet("@projects")]
-    public async Task<FolderContentDto<string>> GetProjectsFolderAsync(Guid? userIdOrGroupId, FilterType? filterType, bool? searchInContent, bool? withsubfolders)
+    public async Task<FolderContentDto<string>> GetProjectsFolderAsync(GetCommonFolderRequestDto inDto)
     {
-        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.GetFolderProjectsAsync<string>(), userIdOrGroupId, filterType, default, searchInContent, withsubfolders,
+        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.GetFolderProjectsAsync<string>(), inDto.UserIdOrGroupId, inDto.FilterType, default, inDto.SearchInContent, inDto.Withsubfolders,
             false, ApplyFilterOption.All, null);
     }
 
@@ -418,47 +378,33 @@ public class FoldersControllerCommon(
     /// Returns the detailed list of files located in the "Recent" section.
     /// </summary>
     /// <short>Get the "Recent" section</short>
-    /// <param type="System.Nullable{System.Guid}, System" name="userIdOrGroupId" optional="true" example="9924256A-739C-462b-AF15-E652A3B1B6EB">User or group ID</param>
-    /// <param type="System.Nullable{ASC.Files.Core.FilterType}, ASC.Files.Core" name="filterType" optional="true" remark="Allowed values: None (0), FilesOnly (1), FoldersOnly (2), DocumentsOnly (3), PresentationsOnly (4), SpreadsheetsOnly (5), ImagesOnly (7), ByUser (8), ByDepartment (9), ArchiveOnly (10), ByExtension (11), MediaOnly (12), EditingRooms (14), CustomRooms (17), OFormTemplateOnly (18), OFormOnly (19)" example="None">Filter type</param>
-    /// <param type="System.Nullable{System.Boolean}, System" name="searchInContent" example="true">Specifies whether to search within the section contents or not</param>
-    /// <param type="System.Nullable{System.Boolean}, System" name="withsubfolders" example="true">Specifies whether to return sections with or without subfolders</param>
-    /// <param type="System.Nullable{System.Boolean}, System" name="excludeSubject" example="true">Exclude a subject from the search</param>
-    /// <param type="System.Nullable{ASC.Files.Core.Core.ApplyFilterOption}, ASC.Files.Core" name="applyFilterOption" optional="true" remark="Allowed values: All (0), Files (1), Folders (2)" example="All">Scope of filters</param>
-    /// <param type="System.Nullable{ASC.Files.Core.VirtualRooms.SearchArea}, ASC.Files.Core" name="searchArea" optional="true" remark="Allowed values: Any (2), RecentByLinks (3)" example="Any">Search area</param>
-    /// <param type="System.String, System" name="extension">Specifies whether to search for a specific file extension</param>
     /// <path>api/2.0/files/@recent</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"Recent\" section contents", typeof(FolderContentDto<int>))]
     [HttpGet("recent")]
-    public async Task<FolderContentDto<int>> GetRecentFolderAsync(Guid? userIdOrGroupId, FilterType? filterType, bool? searchInContent, bool? withsubfolders, bool? excludeSubject, 
-        ApplyFilterOption? applyFilterOption, SearchArea? searchArea, string[] extension)
+    public async Task<FolderContentDto<int>> GetRecentFolderAsync(GetRecentFolderRequestDto inDto)
     {
-        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderRecentAsync, userIdOrGroupId, filterType, default, searchInContent, withsubfolders,
-            excludeSubject, applyFilterOption, searchArea, extension);
+        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderRecentAsync, inDto.UserIdOrGroupId, inDto.FilterType, default, inDto.SearchInContent, inDto.Withsubfolders,
+            inDto.ExcludeSubject, inDto.ApplyFilterOption, inDto.SearchArea, inDto.Extension);
     }
 
     /// <summary>
     /// Returns all the sections matching the parameters specified in the request.
     /// </summary>
     /// <short>Get filtered sections</short>
-    /// <param type="System.Nullable{System.Guid}, System" name="userIdOrGroupId" optional="true" example="9924256A-739C-462b-AF15-E652A3B1B6EB">User or group ID</param>
-    /// <param type="System.Nullable{ASC.Files.Core.FilterType}, System" name="filterType" optional="true" remark="Allowed values: None (0), FilesOnly (1), FoldersOnly (2), DocumentsOnly (3), PresentationsOnly (4), SpreadsheetsOnly (5), ImagesOnly (7), ByUser (8), ByDepartment (9), ArchiveOnly (10), ByExtension (11), MediaOnly (12), EditingRooms (14), CustomRooms (17), OFormTemplateOnly (18), OFormOnly (19)" example="None">Filter type</param>
-    /// <param type="System.Nullable{System.Boolean}, System" name="withsubfolders" example="true">Specifies whether to return sections with or without subfolders</param>
-    /// <param type="System.Nullable{System.Boolean}, System" name="withoutTrash" example="true">Specifies whether to return the "Trash" section or not</param>
-    /// <param type="System.Nullable{System.Boolean}, System" name="searchInContent" example="true">Specifies whether to search within the section contents or not</param>
     /// <path>api/2.0/files/@root</path>
     /// <collection>list</collection>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "List of section contents with the following parameters", typeof(FolderContentDto<int>))]
     [HttpGet("@root")]
-    public async IAsyncEnumerable<FolderContentDto<int>> GetRootFoldersAsync(Guid? userIdOrGroupId, FilterType? filterType, bool? withsubfolders, bool? withoutTrash, bool? searchInContent)
+    public async IAsyncEnumerable<FolderContentDto<int>> GetRootFoldersAsync(GetRootFolderRequestDto inDto)
     {
-        var foldersIds = GetRootFoldersIdsAsync(withoutTrash ?? false);
+        var foldersIds = GetRootFoldersIdsAsync(inDto.WithoutTrash ?? false);
 
         await foreach (var folder in foldersIds)
         {
-            yield return await folderContentDtoHelper.GetAsync(folder, userIdOrGroupId, filterType, default, searchInContent, withsubfolders, false, ApplyFilterOption.All, null);
+            yield return await folderContentDtoHelper.GetAsync(folder, inDto.UserIdOrGroupId, inDto.FilterType, default, inDto.SearchInContent, inDto.Withsubfolders, false, ApplyFilterOption.All, null);
         }
     }
 
@@ -466,18 +412,14 @@ public class FoldersControllerCommon(
     /// Returns the detailed list of files and folders located in the "Shared with me" section.
     /// </summary>
     /// <short>Get the "Shared with me" section</short>
-    /// <param type="System.Nullable{System.Guid}, System" name="userIdOrGroupId" optional="true" example="9924256A-739C-462b-AF15-E652A3B1B6EB">User or group ID</param>
-    /// <param type="System.Nullable{ASC.Files.Core.FilterType}, System" name="filterType" optional="true" remark="Allowed values: None (0), FilesOnly (1), FoldersOnly (2), DocumentsOnly (3), PresentationsOnly (4), SpreadsheetsOnly (5), ImagesOnly (7), ByUser (8), ByDepartment (9), ArchiveOnly (10), ByExtension (11), MediaOnly (12), EditingRooms (14), CustomRooms (17), OFormTemplateOnly (18), OFormOnly (19)" example="None">Filter type</param>
-    /// <param type="System.Nullable{System.Boolean}, System" name="searchInContent" example="true">Specifies whether to search within the section contents or not</param>
-    /// <param type="System.Nullable{System.Boolean}, System" name="withsubfolders" example="true">Specifies whether to return sections with or without subfolders</param>
     /// <path>api/2.0/files/@share</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"Shared with me\" section contents", typeof(FolderContentDto<int>))]
     [HttpGet("@share")]
-    public async Task<FolderContentDto<int>> GetShareFolderAsync(Guid? userIdOrGroupId, FilterType? filterType, bool? searchInContent, bool? withsubfolders)
+    public async Task<FolderContentDto<int>> GetShareFolderAsync(GetCommonFolderRequestDto inDto)
     {
-        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderShareAsync, userIdOrGroupId, filterType, default, searchInContent, withsubfolders,
+        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderShareAsync, inDto.UserIdOrGroupId, inDto.FilterType, default, inDto.SearchInContent, inDto.Withsubfolders,
             false, ApplyFilterOption.All, null);
     }
 
@@ -485,18 +427,14 @@ public class FoldersControllerCommon(
     /// Returns the detailed list of files located in the "Templates" section.
     /// </summary>
     /// <short>Get the "Templates" section</short>
-    /// <param type="System.Nullable{System.Guid}, System" name="userIdOrGroupId" optional="true" example="9924256A-739C-462b-AF15-E652A3B1B6EB">User or group ID</param>
-    /// <param type="System.Nullable{ASC.Files.Core.FilterType}, System" name="filterType" optional="true" remark="Allowed values: None (0), FilesOnly (1), FoldersOnly (2), DocumentsOnly (3), PresentationsOnly (4), SpreadsheetsOnly (5), ImagesOnly (7), ByUser (8), ByDepartment (9), ArchiveOnly (10), ByExtension (11), MediaOnly (12), EditingRooms (14), CustomRooms (17), OFormTemplateOnly (18), OFormOnly (19)" example="None">Filter type</param>
-    /// <param type="System.Nullable{System.Boolean}, System" name="searchInContent" example="true">Specifies whether to search within the section contents or not</param>
-    /// <param type="System.Nullable{System.Boolean}, System" name="withsubfolders" example="true">Specifies whether to return sections with or without subfolders</param>
     /// <path>api/2.0/files/@templates</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"Templates\" section contents", typeof(FolderContentDto<int>))]
     [HttpGet("@templates")]
-    public async Task<FolderContentDto<int>> GetTemplatesFolderAsync(Guid? userIdOrGroupId, FilterType? filterType, bool? searchInContent, bool? withsubfolders)
+    public async Task<FolderContentDto<int>> GetTemplatesFolderAsync(GetCommonFolderRequestDto inDto)
     {
-        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderTemplatesAsync, userIdOrGroupId, filterType, default, searchInContent, withsubfolders,
+        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderTemplatesAsync, inDto.UserIdOrGroupId, inDto.FilterType, default, inDto.SearchInContent, inDto.Withsubfolders,
             false, ApplyFilterOption.All, null);
     }
 
@@ -504,19 +442,14 @@ public class FoldersControllerCommon(
     /// Returns the detailed list of files and folders located in the "Trash" section.
     /// </summary>
     /// <short>Get the "Trash" section</short>
-    /// <param type="System.Nullable{System.Guid}, System" name="userIdOrGroupId" optional="true" example="9924256A-739C-462b-AF15-E652A3B1B6EB">User or group ID</param>
-    /// <param type="System.Nullable{ASC.Files.Core.FilterType}, System" name="filterType" optional="true" remark="Allowed values: None (0), FilesOnly (1), FoldersOnly (2), DocumentsOnly (3), PresentationsOnly (4), SpreadsheetsOnly (5), ImagesOnly (7), ByUser (8), ByDepartment (9), ArchiveOnly (10), ByExtension (11), MediaOnly (12), EditingRooms (14), CustomRooms (17), OFormTemplateOnly (18), OFormOnly (19)" example="None">Filter type</param>
-    /// <param type="System.Nullable{System.Boolean}, System" name="searchInContent" example="true">Specifies whether to search within the section contents or not</param>
-    /// <param type="System.Nullable{System.Boolean}, System" name="withsubfolders" example="true">Specifies whether to return sections with or without subfolders</param>
-    /// <param type="System.Nullable{ASC.Files.Core.Core.ApplyFilterOption}, System" name="applyFilterOption" example="All">Specifies whether to return only files, only folders or all elements from the specified folder</param>
     /// <path>api/2.0/files/@trash</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"Trash\" section contents", typeof(FolderContentDto<int>))]
     [HttpGet("@trash")]
-    public async Task<FolderContentDto<int>> GetTrashFolderAsync(Guid? userIdOrGroupId, FilterType? filterType, bool? searchInContent, bool? withsubfolders, ApplyFilterOption? applyFilterOption)
+    public async Task<FolderContentDto<int>> GetTrashFolderAsync(GetMyTrashFolderRequestDto inDto)
     {
-        return await folderContentDtoHelper.GetAsync(Convert.ToInt32(await globalFolderHelper.FolderTrashAsync), userIdOrGroupId, filterType, default, searchInContent, withsubfolders,
-            false, applyFilterOption, null);
+        return await folderContentDtoHelper.GetAsync(Convert.ToInt32(await globalFolderHelper.FolderTrashAsync), inDto.UserIdOrGroupId, inDto.FilterType, default, inDto.SearchInContent, inDto.Withsubfolders,
+            false, inDto.ApplyFilterOption, null);
     }
     
     private async IAsyncEnumerable<int> GetRootFoldersIdsAsync(bool withoutTrash)

@@ -672,7 +672,7 @@ public class FileStorageService //: IFileStorageService
 
         return folder;
     }
-    public async Task<Folder<T>> UpdateRoomAsync<T>(T folderId, UpdateRoomRequestDto updateData)
+    public async Task<Folder<T>> UpdateRoomAsync<T>(T folderId, UpdateRoomRequest updateData)
     {
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 

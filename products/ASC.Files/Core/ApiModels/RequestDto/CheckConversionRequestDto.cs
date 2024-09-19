@@ -61,3 +61,39 @@ public class CheckConversionRequestDto<T>
     /// </summary>
     public bool CreateNewIfExist { get; set; }
 }
+
+/// <summary>
+/// 
+/// </summary>
+public class StartConversionRequestDto<T>
+{
+    /// <summary>
+    /// File ID
+    /// </summary>
+    [FromRoute(Name = "fileId")]
+    public T FileId { get; set; }
+
+    /// <summary>
+    /// Check conversion  
+    /// </summary>
+    [FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)]
+    public CheckConversionRequestDto<T> CheckConversion { get; set; }
+}
+
+/// <summary>
+/// 
+/// </summary>
+public class CheckConversionStatusRequestDto<T>
+{
+    /// <summary>
+    /// File ID
+    /// </summary>
+    [FromRoute(Name = "fileId")]
+    public T FileId { get; set; }
+
+    /// <summary>
+    /// Specifies if a conversion operation is started or not
+    /// </summary>
+    [FromQuery(Name = "start")]
+    public bool Start { get; set; }
+}

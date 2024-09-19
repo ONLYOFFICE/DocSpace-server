@@ -80,9 +80,9 @@ public class DeleteBatchRequestDto : BaseBatchRequestDto
 }
 
 /// <summary>
-/// Request parameters for deleting a file
+/// Parameters for deleting a file
 /// </summary>
-public class DeleteRequestDto
+public class Delete
 {
     /// <summary>
     /// Specifies whether to delete a file after the editing session is finished or not
@@ -93,6 +93,24 @@ public class DeleteRequestDto
     /// Specifies whether to move a file to the \"Trash\" folder or delete it immediately
     /// </summary>
     public bool Immediately { get; set; }
+}
+
+/// <summary>
+/// Request parameters for deleting a file
+/// </summary>
+public class DeleteRequestDto<T>
+{
+    /// <summary>
+    /// File ID
+    /// </summary>
+    [FromRoute(Name = "fileId")]
+    public T FileId { get; set; }
+
+    /// <summary>
+    /// File
+    /// </summary>
+    [FromBody]
+    public Delete File {  get; set; }
 }
 
 /// <summary>

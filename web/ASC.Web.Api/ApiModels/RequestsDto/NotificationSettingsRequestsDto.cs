@@ -43,3 +43,14 @@ public class NotificationSettingsRequestsDto
 }
 
 
+/// <summary>
+/// 
+/// </summary>
+public class NotificationTypeRequestsDto
+{
+    /// <summary>
+    /// Notification type (Badges, RoomsActivity, DailyFeed, UsefullTips)
+    /// </summary>
+    [FromRoute(Name = "type")]
+    public NotificationType Type { get; set; }
+}

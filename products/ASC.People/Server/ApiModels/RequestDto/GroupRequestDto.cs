@@ -40,10 +40,28 @@ public class GroupRequestDto : GroupRequestDtoBase
 /// <summary>
 /// Group request parameters
 /// </summary>
-public class MembersRequestDto
+public class MembersRequest
 {
     /// <summary>
     /// List of group member IDs
     /// </summary>
     public IEnumerable<Guid> Members { get; init; }
+}
+
+/// <summary>
+/// Group request parameters
+/// </summary>
+public class MembersRequestDto
+{
+    /// <summary>
+    /// Group ID
+    /// </summary>
+    [FromRoute(Name = "id")]
+    public Guid Id { get; set; }
+
+    /// <summary>
+    /// Members
+    /// </summary>
+    [FromBody]
+    public MembersRequest Members { get; set; }
 }

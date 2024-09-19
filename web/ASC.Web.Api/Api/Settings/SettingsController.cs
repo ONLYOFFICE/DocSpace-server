@@ -77,14 +77,13 @@ public partial class SettingsController(MessageService messageService,
     /// <short>
     /// Get the portal settings
     /// </short>
-    /// <param type="System.Boolean, System" name="withpassword" example="true">Specifies if the password hasher settings will be returned or not</param>
     /// <path>api/2.0/settings</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Settings", typeof(SettingsDto))]
     [HttpGet("")]
     [AllowNotPayment, AllowSuspended, AllowAnonymous]
-    public async Task<SettingsDto> GetSettingsAsync(bool? withpassword)
+    public async Task<SettingsDto> GetSettingsAsync(PortalSettingsrequestDto inDto)
     {
         var studioAdminMessageSettings = await settingsManager.LoadAsync<StudioAdminMessageSettings>();
         var tenantCookieSettings = await settingsManager.LoadAsync<TenantCookieSettings>();
@@ -208,7 +207,7 @@ public partial class SettingsController(MessageService messageService,
             settings.RecaptchaPublicKey = settings.RecaptchaType is RecaptchaType.hCaptcha ? setupInfo.HcaptchaPublicKey : setupInfo.RecaptchaPublicKey;
         }
 
-        if (!authContext.IsAuthenticated || (withpassword.HasValue && withpassword.Value))
+        if (!authContext.IsAuthenticated || (inDto.WithPassword.HasValue && inDto.WithPassword.Value))
         {
             settings.PasswordHash = passwordHasher;
         }
@@ -719,25 +718,24 @@ public partial class SettingsController(MessageService messageService,
     /// Deletes the portal color theme with the ID specified in the request.
     /// </summary>
     /// <short>Delete a color theme</short>
-    /// <param ype="System.Int32, System" name="id" example="1234">Portal theme ID</param>
     /// <path>api/2.0/settings/colortheme</path>
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Portal theme settings: custom color theme settings, selected or not, limit", typeof(CustomColorThemesSettingsDto))]
     [HttpDelete("colortheme")]
-    public async Task<CustomColorThemesSettingsDto> DeleteColorThemeAsync(int id)
+    public async Task<CustomColorThemesSettingsDto> DeleteColorThemeAsync(DeleteColorThemeRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var settings = await settingsManager.LoadAsync<CustomColorThemesSettings>();
 
-        if (CustomColorThemesSettingsItem.Default.Any(r => r.Id == id))
+        if (CustomColorThemesSettingsItem.Default.Any(r => r.Id == inDto.Id))
         {
             return new CustomColorThemesSettingsDto(settings, customColorThemesSettingsHelper.Limit);
         }
 
-        settings.Themes = settings.Themes.Where(r => r.Id != id).ToList();
+        settings.Themes = settings.Themes.Where(r => r.Id != inDto.Id).ToList();
 
-        if (settings.Selected == id)
+        if (settings.Selected == inDto.Id)
         {
             settings.Selected = settings.Themes.Min(r => r.Id);
             await messageService.SendAsync(MessageAction.ColorThemeChanged);
@@ -853,20 +851,19 @@ public partial class SettingsController(MessageService messageService,
     /// Returns the space usage statistics of the module with the ID specified in the request.
     /// </summary>
     /// <short>Get the space usage statistics</short>
-    /// <param ype="System.Guid, System" method="url" name="id" example="9924256A-739C-462b-AF15-E652A3B1B6EB">Module ID</param>
     /// <path>api/2.0/settings/statistics/spaceusage/{id}</path>
     /// <collection>list</collection>
     [Tags("Settings / Statistics")]
     [SwaggerResponse(200, "Module space usage statistics", typeof(UsageSpaceStatItemDto))]
     [HttpGet("statistics/spaceusage/{id:guid}")]
-    public async Task<List<UsageSpaceStatItemDto>> GetSpaceUsageStatistics(Guid id)
+    public async Task<List<UsageSpaceStatItemDto>> GetSpaceUsageStatistics(IdRequestDto<Guid> inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var webitem = webItemManagerSecurity.GetItems(WebZoneType.All, ItemAvailableState.All)
                                    .FirstOrDefault(item =>
                                                    item != null &&
-                                                   item.ID == id &&
+                                                   item.ID == inDto.Id &&
                                                    item.Context is { SpaceUsageStatManager: not null });
 
         if (webitem == null)
@@ -890,19 +887,17 @@ public partial class SettingsController(MessageService messageService,
     /// Returns the user visit statistics for the period specified in the request.
     /// </summary>
     /// <short>Get the visit statistics</short>
-    /// <param type="ASC.Api.Core.ApiDateTime, ASC.Api.Core" name="fromDate" example="2008-04-10T06-30-00.000Z">Start period date</param>
-    /// <param type="ASC.Api.Core.ApiDateTime, ASC.Api.Core" name="toDate" example="2008-04-10T06-30-00.000Z">End period date</param>
     /// <path>api/2.0/settings/statistics/visit</path>
     /// <collection>list</collection>
     [Tags("Settings / Statistics")]
     [SwaggerResponse(200, "List of point charts", typeof(ChartPointDto))]
     [HttpGet("statistics/visit")]
-    public async Task<List<ChartPointDto>> GetVisitStatisticsAsync(ApiDateTime fromDate, ApiDateTime toDate)
+    public async Task<List<ChartPointDto>> GetVisitStatisticsAsync(VisitStatisticsRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var from = tenantUtil.DateTimeFromUtc(fromDate);
-        var to = tenantUtil.DateTimeFromUtc(toDate);
+        var from = tenantUtil.DateTimeFromUtc(inDto.FromDate);
+        var to = tenantUtil.DateTimeFromUtc(inDto.ToDate);
 
         var points = new List<ChartPointDto>();
 

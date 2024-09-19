@@ -29,7 +29,7 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// <summary>
 /// Logo request parameters
 /// </summary>
-public class LogoRequestDto
+public class LogoRequest
 {
     /// <summary>
     /// The path to the temporary image file
@@ -55,4 +55,22 @@ public class LogoRequestDto
     /// The rectangle height
     /// </summary>
     public int Height { get; set; }
+}
+
+/// <summary>
+/// Logo request parameters
+/// </summary>
+public class LogoRequest<T>
+{
+    /// <summary>
+    /// Room Id
+    /// </summary>
+    [FromRoute(Name = "id")]
+    public T Id { get; set; }
+
+    /// <summary>
+    /// Logo
+    /// </summary>
+    [FromBody]
+    public LogoRequest Logo { get; set; }
 }

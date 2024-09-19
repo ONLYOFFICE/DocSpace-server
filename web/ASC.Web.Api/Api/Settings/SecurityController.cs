@@ -56,22 +56,21 @@ public class SecurityController(
     /// <short>
     /// Get the security settings
     /// </short>
-    /// <param type="System.Collections.Generic.IEnumerable{System.String}, System.Collections.Generic" name="ids" example="some text">List of module IDs</param>
     /// <path>api/2.0/settings/security</path>
     /// <collection>list</collection>
     [Tags("Settings / Security")]
     [SwaggerResponse(200, "Security settings", typeof(SecurityDto))]
     [HttpGet("")]
-    public async IAsyncEnumerable<SecurityDto> GetWebItemSettingsSecurityInfo([FromQuery] IEnumerable<string> ids)
+    public async IAsyncEnumerable<SecurityDto> GetWebItemSettingsSecurityInfo(SecuritySettingsRequestDto inDto)
     {
-        if (ids == null || !ids.Any())
+        if (inDto.Ids == null || !inDto.Ids.Any())
         {
-            ids = WebItemManager.GetItemsAll().Select(i => i.ID.ToString());
+            inDto.Ids = WebItemManager.GetItemsAll().Select(i => i.ID.ToString());
         }
 
         var subItemList = WebItemManager.GetItemsAll().Where(item => item.IsSubItem()).Select(i => i.ID.ToString());
 
-        foreach (var r in ids)
+        foreach (var r in inDto.Ids)
         {
             var i = await webItemSecurity.GetSecurityInfoAsync(r);
 
@@ -104,14 +103,13 @@ public class SecurityController(
     /// <short>
     /// Get the module availability
     /// </short>
-    /// <param type="System.Guid, System" method="url" name="id" example="9924256A-739C-462b-AF15-E652A3B1B6EB">Module ID</param>
     /// <path>api/2.0/settings/security/{id}</path>
     [Tags("Settings / Security")]
     [SwaggerResponse(200, "Boolean value: true - module is enabled, false - module is disabled", typeof(bool))]
     [HttpGet("{id:guid}")]
-    public async Task<bool> GetWebItemSecurityInfoAsync(Guid id)
+    public async Task<bool> GetWebItemSecurityInfoAsync(IdRequestDto<Guid> inDto)
     {
-        var module = WebItemManager[id];
+        var module = WebItemManager[inDto.Id];
 
         return module != null && !await module.IsDisabledAsync(webItemSecurity, authContext);
     }
@@ -202,7 +200,7 @@ public class SecurityController(
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         await webItemSecurity.SetSecurityAsync(inDto.Id, inDto.Enabled, inDto.Subjects?.ToArray());
-        var securityInfo = await GetWebItemSettingsSecurityInfo(new List<string> { inDto.Id }).ToListAsync();
+        var securityInfo = await GetWebItemSettingsSecurityInfo(new SecuritySettingsRequestDto { Ids = new List<string> { inDto.Id } }).ToListAsync();
 
         if (inDto.Subjects == null)
         {
@@ -289,7 +287,7 @@ public class SecurityController(
 
         await messageService.SendAsync(MessageAction.ProductsListUpdated);
 
-        return await GetWebItemSettingsSecurityInfo(itemList.Keys.ToList()).ToListAsync();
+        return await GetWebItemSettingsSecurityInfo(new SecuritySettingsRequestDto { Ids = itemList.Keys.ToList() }).ToListAsync();
     }
 
     /// <summary>
@@ -298,15 +296,14 @@ public class SecurityController(
     /// <short>
     /// Get the product administrators
     /// </short>
-    /// <param type="System.Guid, System" method="url" name="productid" example="9924256A-739C-462b-AF15-E652A3B1B6EB">Product ID</param>
     /// <path>api/2.0/settings/security/administrator/{productid}</path>
     /// <collection>list</collection>
     [Tags("Settings / Security")]
     [SwaggerResponse(200, "List of product administrators with the following parameters", typeof(EmployeeDto))]
     [HttpGet("administrator/{productid:guid}")]
-    public async IAsyncEnumerable<EmployeeDto> GetProductAdministrators(Guid productid)
+    public async IAsyncEnumerable<EmployeeDto> GetProductAdministrators(ProductIdRequestDto inDto)
     {
-        var admins = await webItemSecurity.GetProductAdministratorsAsync(productid);
+        var admins = await webItemSecurity.GetProductAdministratorsAsync(inDto.ProductId);
 
         foreach (var a in admins)
         {
@@ -320,16 +317,14 @@ public class SecurityController(
     /// <short>
     /// Check a product administrator
     /// </short>
-    /// <param type="System.Guid, System" name="productid" example="9924256A-739C-462b-AF15-E652A3B1B6EB">Product ID</param>
-    /// <param type="System.Guid, System" name="userid" example="9924256A-739C-462b-AF15-E652A3B1B6EB">User ID</param>
     /// <path>api/2.0/settings/security/administrator</path>
     [Tags("Settings / Security")]
     [SwaggerResponse(200, "Object with the user security information: product ID, user ID, administrator or not", typeof(object))]
     [HttpGet("administrator")]
-    public async Task<object> IsProductAdministratorAsync(Guid productid, Guid userid)
+    public async Task<object> IsProductAdministratorAsync(UserProductIdsRequestDto inDto)
     {
-        var result = await webItemSecurity.IsProductAdministratorAsync(productid, userid);
-        return new { ProductId = productid, UserId = userid, Administrator = result };
+        var result = await webItemSecurity.IsProductAdministratorAsync(inDto.ProductId, inDto.UserId);
+        return new { ProductId = inDto.ProductId, UserId = inDto.UserId, Administrator = result };
     }
 
     /// <summary>

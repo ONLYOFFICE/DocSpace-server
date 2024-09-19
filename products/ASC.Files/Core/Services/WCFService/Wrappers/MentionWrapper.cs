@@ -62,7 +62,7 @@ public class MentionWrapper
 }
 
 /// <summary>
-/// Mention message request parameters
+/// Mention message parameters
 /// </summary>
 public class MentionMessageWrapper
 {
@@ -80,4 +80,22 @@ public class MentionMessageWrapper
     /// The comment message
     /// </summary>
     public string Message { get; set; }
+}
+
+/// <summary>
+/// Mention message request parameters
+/// </summary>
+public class MentionMessageWrapperRequestDto<T>
+{
+    /// <summary>
+    /// File ID
+    /// </summary>
+    [FromRoute(Name = "fileId")]
+    public T FileId { get; set; }
+
+    /// <summary>
+    /// Mention message
+    /// </summary>
+    [FromBody]
+    public MentionMessageWrapper MentionMessage {  get; set; }
 }

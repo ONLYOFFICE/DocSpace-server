@@ -57,10 +57,6 @@ public class ThirdpartyController(
     /// Returns a list of the available third-party accounts.
     /// </summary>
     /// <short>Get third-party accounts</short>
-    /// <param type="System.Boolean, System" name="inviteView" example="true">Specifies whether to return providers that are available for invitation links, i.e. the user can login or register through these providers</param>
-    /// <param type="System.Boolean, System" name="settingsView" example="true">Specifies whether to return URLs in the format that is used on the Settings page</param>
-    /// <param type="System.String, System" name="clientCallback" example="some text">Method that is called after authorization</param>
-    /// <param type="System.String, System" name="fromOnly" example="some text">Provider name if the response only from this provider is needed</param>
     /// <path>api/2.0/people/thirdparty/providers</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     /// <collection>list</collection>
@@ -68,7 +64,7 @@ public class ThirdpartyController(
     [SwaggerResponse(200, "List of third-party accounts", typeof(AccountInfoDto))]
     [AllowAnonymous, AllowNotPayment]
     [HttpGet("providers")]
-    public async Task<ICollection<AccountInfoDto>> GetAuthProvidersAsync(bool inviteView, bool settingsView, string clientCallback, string fromOnly)
+    public async Task<ICollection<AccountInfoDto>> GetAuthProvidersAsync(AuthProvidersRequestDto inDto)
     {
         var infos = new List<AccountInfoDto>();
         IEnumerable<LoginProfile> linkedAccounts = new List<LoginProfile>();
@@ -78,11 +74,11 @@ public class ThirdpartyController(
             linkedAccounts = await accountLinker.GetLinkedProfilesAsync(authContext.CurrentAccount.ID.ToString());
         }
 
-        fromOnly = string.IsNullOrWhiteSpace(fromOnly) ? string.Empty : fromOnly.ToLower();
+        inDto.FromOnly = string.IsNullOrWhiteSpace(inDto.FromOnly) ? string.Empty : inDto.FromOnly.ToLower();
 
-        foreach (var provider in ProviderManager.AuthProviders.Where(provider => string.IsNullOrEmpty(fromOnly) || fromOnly == provider || (provider == "google" && fromOnly == "openid")))
+        foreach (var provider in ProviderManager.AuthProviders.Where(provider => string.IsNullOrEmpty(inDto.FromOnly) || inDto.FromOnly == provider || (provider == "google" && inDto.FromOnly == "openid")))
         {
-            if (inviteView && ProviderManager.InviteExceptProviders.Contains(provider))
+            if (inDto.InviteView && ProviderManager.InviteExceptProviders.Contains(provider))
             {
                 continue;
             }
@@ -91,8 +87,8 @@ public class ThirdpartyController(
             {
 
                 var url = VirtualPathUtility.ToAbsolute("~/login.ashx") + $"?auth={provider}";
-                var mode = settingsView || inviteView || (!mobileDetector.IsMobile() && !Request.DesktopApp())
-                        ? $"&mode=popup&callback={clientCallback}"
+                var mode = inDto.SettingsView || inDto.InviteView || (!mobileDetector.IsMobile() && !Request.DesktopApp())
+                        ? $"&mode=popup&callback={inDto.ClientCallback}"
                         : "&mode=Redirect&desktop=true";
 
                 infos.Add(new AccountInfoDto
@@ -246,15 +242,14 @@ public class ThirdpartyController(
     /// <short>
     /// Unlink a third-pary account
     /// </short>
-    /// <param type="System.String, System" name="provider" example="some text">Provider name</param>
     /// <path>api/2.0/people/thirdparty/unlinkaccount</path>
     [Tags("People / Third-party accounts")]
     [HttpDelete("unlinkaccount")]
-    public async Task UnlinkAccountAsync(string provider)
+    public async Task UnlinkAccountAsync(UnlinkAccountRequestDto inDto)
     {
-        await accountLinker.RemoveProviderAsync(securityContext.CurrentAccount.ID.ToString(), provider);
+        await accountLinker.RemoveProviderAsync(securityContext.CurrentAccount.ID.ToString(), inDto.Provider);
 
-        await messageService.SendAsync(MessageAction.UserUnlinkedSocialAccount, GetMeaningfulProviderName(provider));
+        await messageService.SendAsync(MessageAction.UserUnlinkedSocialAccount, GetMeaningfulProviderName(inDto.Provider));
     }
 
     private async Task<(UserInfo, bool)> CreateNewUser(string firstName, string lastName, string email, string passwordHash, EmployeeType employeeType, bool fromInviteLink, bool inviteByEmail, string cultureName)

@@ -27,9 +27,9 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Session request parameters
+/// Session parameters
 /// </summary>
-public class SessionRequestDto
+public class SessionRequest
 {
     /// <summary>
     /// File name
@@ -60,4 +60,20 @@ public class SessionRequestDto
     /// Create new if exists
     /// </summary>
     public bool CreateNewIfExist { get; set; }
+}
+
+
+public class SessionRequestDto<T>
+{
+    /// <summary>
+    /// Folder ID
+    /// </summary>
+    [FromRoute(Name = "folderId")]
+    public T FolderId { get; set; }
+
+    /// <summary>
+    /// Session
+    /// </summary>
+    [FromBody]
+    public SessionRequest Session {  get; set; }
 }

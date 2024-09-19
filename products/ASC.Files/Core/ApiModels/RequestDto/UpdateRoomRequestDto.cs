@@ -27,9 +27,9 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Request parameters for updating a room
+/// Parameters for updating a room
 /// </summary>
-public class UpdateRoomRequestDto
+public class UpdateRoomRequest
 {
     /// <summary>
     /// Room name
@@ -40,4 +40,22 @@ public class UpdateRoomRequestDto
     /// Room quota
     /// </summary>
     public long? Quota { get; set; }
+}
+
+/// <summary>
+/// Request parameters for updating a room
+/// </summary>
+public class UpdateRoomRequestDto<T>
+{
+    /// <summary>
+    /// Room ID
+    /// </summary>
+    [FromRoute(Name = "id")]
+    public T Id { get; set; }
+
+    /// <summary>
+    /// Update room
+    /// </summary>
+    [FromBody]
+    public UpdateRoomRequest UpdateRoom { get; set; }
 }

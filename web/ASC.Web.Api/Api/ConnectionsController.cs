@@ -184,21 +184,20 @@ public class ConnectionsController(
     /// <short>
     /// Log out for the user by ID
     /// </short>
-    /// <param type="System.Guid, System" method="url" name="userId" example="9924256A-739C-462b-AF15-E652A3B1B6EB">User ID</param>
     /// <path>api/2.0/security/activeconnections/logoutall/{userId}</path>
     [Tags("Security / Active connections")]
     [HttpPut("logoutall/{userId:guid}")]
-    public async Task LogOutAllActiveConnectionsForUserAsync(Guid userId)
+    public async Task LogOutAllActiveConnectionsForUserAsync(UserIdRequestDto inDto)
     {
         var currentUserId = securityContext.CurrentAccount.ID;
         if (!await userManager.IsDocSpaceAdminAsync(currentUserId) && 
             !await webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, currentUserId) || 
-            (currentUserId != userId && await userManager.IsDocSpaceAdminAsync(userId)))
+            (currentUserId != inDto.Id && await userManager.IsDocSpaceAdminAsync(inDto.Id)))
         {
             throw new SecurityException("Method not available");
         }
 
-        await LogOutAllActiveConnections(userId);
+        await LogOutAllActiveConnections(inDto.Id);
     }
 
     /// <summary>
@@ -242,19 +241,18 @@ public class ConnectionsController(
     /// <short>
     /// Log out from the connection
     /// </short>
-    /// <param type="System.Int32, System" method="url" name="loginEventId" example="1234">Login event ID</param>
     /// <path>api/2.0/security/activeconnections/logout/{loginEventId}</path>
     [Tags("Security / Active connections")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpPut("logout/{loginEventId:int}")]
-    public async Task<bool> LogOutActiveConnection(int loginEventId)
+    public async Task<bool> LogOutActiveConnection(LoginEvenrIdRequestDto inDto)
     {
         try
         {
             var currentUserId = securityContext.CurrentAccount.ID;
             var user = await userManager.GetUsersAsync(currentUserId);
 
-            var loginEvent = await dbLoginEventsManager.GetByIdAsync(user.TenantId, loginEventId);
+            var loginEvent = await dbLoginEventsManager.GetByIdAsync(user.TenantId, inDto.Id);
 
             if (loginEvent == null)
             {

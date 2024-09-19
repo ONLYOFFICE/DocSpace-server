@@ -94,19 +94,12 @@ public class SecurityController(PermissionContext permissionContext,
     /// <short>
     /// Get filtered login events
     /// </short>
-    /// <param type="System.Guid, System" name="userId" example="9924256A-739C-462b-AF15-E652A3B1B6EB">User ID</param>
-    /// <param type="ASC.MessagingSystem.Core.MessageAction, ASC.MessagingSystem.Core" name="action" example="null">Action</param>
-    /// <param type="ASC.Api.Core.ApiDateTime, ASC.Api.Core" name="from" example="2008-04-10T06-30-00.000Z">Start date</param>
-    /// <param type="ASC.Api.Core.ApiDateTime, ASC.Api.Core" name="to" example="2008-04-10T06-30-00.000Z">End date</param>
     /// <path>api/2.0/security/audit/login/filter</path>
     /// <collection>list</collection>
     [Tags("Security / Login history")]
     [SwaggerResponse(200, "List of filtered login events", typeof(LoginEventDto))]
     [HttpGet("audit/login/filter")]
-    public async Task<IEnumerable<LoginEventDto>> GetLoginEventsByFilterAsync(Guid userId,
-    MessageAction action,
-    ApiDateTime from,
-    ApiDateTime to)
+    public async Task<IEnumerable<LoginEventDto>> GetLoginEventsByFilterAsync(LoginEventRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -114,7 +107,7 @@ public class SecurityController(PermissionContext permissionContext,
         var limit = (int)apiContext.Count;
         apiContext.SetDataPaginated();
 
-        action = action == 0 ? MessageAction.None : action;
+        inDto.Action = inDto.Action == 0 ? MessageAction.None : inDto.Action;
 
         if (!(await tenantManager.GetCurrentTenantQuotaAsync()).Audit || !SetupInfo.IsVisibleSettings(ManagementType.LoginHistory.ToString()))
         {
@@ -123,7 +116,7 @@ public class SecurityController(PermissionContext permissionContext,
 
         await DemandAuditPermissionAsync();
 
-        return (await loginEventsRepository.GetByFilterAsync(userId, action, from, to, startIndex, limit)).Select(x => new LoginEventDto(x));
+        return (await loginEventsRepository.GetByFilterAsync(inDto.UserId, inDto.Action, inDto.From, inDto.To, startIndex, limit)).Select(x => new LoginEventDto(x));
     }
 
     /// <summary>
@@ -132,29 +125,12 @@ public class SecurityController(PermissionContext permissionContext,
     /// <short>
     /// Get filtered audit trail data
     /// </short>
-    /// <param type="System.Guid, System" name="userId" example="9924256A-739C-462b-AF15-E652A3B1B6EB">User ID</param>
-    /// <param type="ASC.AuditTrail.Types.ProductType, ASC.AuditTrail.Types" name="productType" example="None">Product</param>
-    /// <param type="ASC.AuditTrail.Types.ModuleType, ASC.AuditTrail.Types" name="moduleType" example="None">Module</param>
-    /// <param type="ASC.AuditTrail.Types.ActionType, ASC.AuditTrail.Types" name="actionType" example="None">Action type</param>
-    /// <param type="ASC.MessagingSystem.Core.MessageAction, ASC.MessagingSystem.Core" name="action" example="null">Action</param>
-    /// <param type="ASC.AuditTrail.Types.EntryType, ASC.AuditTrail.Types" name="entryType" example="None">Entry</param>
-    /// <param type="System.String, System" name="target" example="some text">Target</param>
-    /// <param type="ASC.Api.Core.ApiDateTime, ASC.Api.Core" name="from" example="2008-04-10T06-30-00.000Z">Start date</param>
-    /// <param type="ASC.Api.Core.ApiDateTime, ASC.Api.Core" name="to" example="2008-04-10T06-30-00.000Z">End date</param>
     /// <path>api/2.0/security/audit/events/filter</path>
     /// <collection>list</collection>
     [Tags("Security / Audit trail data")]
     [SwaggerResponse(200, "List of filtered audit trail data", typeof(AuditEventDto))]
     [HttpGet("audit/events/filter")]
-    public async Task<IEnumerable<AuditEventDto>> GetAuditEventsByFilterAsync(Guid userId,
-            ProductType productType,
-            ModuleType moduleType,
-            ActionType actionType,
-            MessageAction action,
-            EntryType entryType,
-            string target,
-            ApiDateTime from,
-            ApiDateTime to)
+    public async Task<IEnumerable<AuditEventDto>> GetAuditEventsByFilterAsync(AuditEventRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -162,7 +138,7 @@ public class SecurityController(PermissionContext permissionContext,
         var limit = (int)apiContext.Count;
         apiContext.SetDataPaginated();
 
-        action = action == 0 ? MessageAction.None : action;
+        inDto.Action = inDto.Action == 0 ? MessageAction.None : inDto.Action;
 
         if (!(await tenantManager.GetCurrentTenantQuotaAsync()).Audit || !SetupInfo.IsVisibleSettings(ManagementType.LoginHistory.ToString()))
         {
@@ -171,7 +147,7 @@ public class SecurityController(PermissionContext permissionContext,
 
         await DemandAuditPermissionAsync();
 
-        return (await auditEventsRepository.GetByFilterAsync(userId, productType, moduleType, actionType, action, entryType, target, from, to, startIndex, limit)).Select(x => new AuditEventDto(x, auditActionMapper));
+        return (await auditEventsRepository.GetByFilterAsync(inDto.UserId, inDto.ProductType, inDto.ModuleType, inDto.ActionType, inDto.Action, inDto.EntryType, inDto.Target, inDto.From, inDto.To, startIndex, limit)).Select(x => new AuditEventDto(x, auditActionMapper));
     }
 
     /// <summary>
@@ -204,23 +180,21 @@ public class SecurityController(PermissionContext permissionContext,
     /// <short>
     /// Get audit trail mappers
     /// </short>
-    /// <param type="System.Nullable{ASC.AuditTrail.Types.ProductType}, System" name="productType" example="None">Product</param>
-    /// <param type="System.Nullable{ASC.AuditTrail.Types.ModuleType}, System" name="moduleType" example="None">Module</param>
     /// <path>api/2.0/security/audit/mappers</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Security / Audit trail data")]
     [SwaggerResponse(200, "Audit trail mappers", typeof(object))]
     [AllowAnonymous]
     [HttpGet("audit/mappers")]
-    public object GetMappers(ProductType? productType, ModuleType? moduleType)
+    public object GetMappers(AuditTrailTypesRequestDto inDto)
     {
         return auditActionMapper.Mappers
-            .Where(r => !productType.HasValue || r.Product == productType.Value)
+            .Where(r => !inDto.ProductType.HasValue || r.Product == inDto.ProductType.Value)
             .Select(r => new
             {
                 ProductType = r.Product.ToString(),
                 Modules = r.Mappers
-                .Where(m => !moduleType.HasValue || m.Module == moduleType.Value)
+                .Where(m => !inDto.ModuleType.HasValue || m.Module == inDto.ModuleType.Value)
                 .Select(x => new
                 {
                     ModuleType = x.Module.ToString(),

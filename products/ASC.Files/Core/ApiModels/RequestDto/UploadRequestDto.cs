@@ -104,3 +104,22 @@ public class UploadRequestDto : IModelWithFile, IDisposable
         GC.SuppressFinalize(this);
     }
 }
+
+/// <summary>
+/// 
+/// </summary>
+public class UploadWithFolderRequestDto<T>
+{
+    /// <summary>
+    /// Folder ID
+    /// </summary>
+    [FromRoute(Name = "folderId")]
+    public T FolderId { get; set; }
+
+    /// <summary>
+    /// Upload data
+    /// </summary>
+    [FromBody]
+    [ModelBinder(BinderType = typeof(UploadModelBinder))]
+    public UploadRequestDto UploadData { get; set; }
+}

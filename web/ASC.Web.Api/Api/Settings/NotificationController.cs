@@ -41,16 +41,15 @@ public class NotificationController(
     /// Checks if the notification type specified in the request is enabled or not.
     /// </summary>
     /// <short>Check notification availability</short>
-    /// <param type="ASC.Web.Core.Notify.NotificationType, ASC.Web.Core" method="url" name="type">Notification type (Badges, RoomsActivity, DailyFeed, UsefullTips)</param>
     /// <path>api/2.0/settings/notification/{type}</path>
     [Tags("Settings / Notifications")]
     [SwaggerResponse(200, "Notification settings", typeof(NotificationSettingsDto))]
     [HttpGet("{type}")]
-    public async Task<NotificationSettingsDto> GetNotificationSettingsAsync(NotificationType type)
+    public async Task<NotificationSettingsDto> GetNotificationSettingsAsync(NotificationTypeRequestsDto inDto)
     {
-        var isEnabled = await notificationControllerHelper.GetNotificationStatusAsync(type);
+        var isEnabled = await notificationControllerHelper.GetNotificationStatusAsync(inDto.Type);
 
-        return new NotificationSettingsDto { Type = type, IsEnabled = isEnabled };
+        return new NotificationSettingsDto { Type = inDto.Type, IsEnabled = isEnabled };
     }
 
     /// <summary>

@@ -26,7 +26,7 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
-public class GroupMemberSecurityDto
+public class GroupMemberSecurityRequestDto
 {
     /// <summary>
     /// User

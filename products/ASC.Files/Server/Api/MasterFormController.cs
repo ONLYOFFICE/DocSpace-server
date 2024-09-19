@@ -46,15 +46,14 @@ public abstract class MasterFormController<T>(FileStorageService fileStorageServ
     /// Checks if the current file is a form draft which can be filled out.
     /// </summary>
     /// <short>Check the form draft</short>
-    /// <param type="System.Int32, System" method="url" name="fileId" example="1234">File ID</param>
     /// <path>api/2.0/files/masterform/{fileId}/checkfillformdraft</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Link to the form", typeof(object))] 
     [AllowAnonymous]
     [HttpPost("masterform/{fileId}/checkfillformdraft")]
-    public async Task<object> CheckFillFormDraftAsync(T fileId, CheckFillFormDraftRequestDto inDto)
+    public async Task<object> CheckFillFormDraftAsync(CheckFillFormDraftRequestDto<T> inDto)
     {
-        return await fileStorageService.CheckFillFormDraftAsync(fileId, inDto.Version,!inDto.RequestEmbedded, inDto.RequestView);
+        return await fileStorageService.CheckFillFormDraftAsync(inDto.FileId, inDto.File.Version,!inDto.File.RequestEmbedded, inDto.File.RequestView);
     }
 }

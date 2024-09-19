@@ -29,7 +29,7 @@ namespace ASC.People.ApiModels.RequestDto;
 /// <summary>
 /// Thumbnail request parameters
 /// </summary>
-public class ThumbnailsRequestDto
+public class ThumbnailsRequest
 {
     /// <summary>
     /// Path to the temporary file
@@ -55,4 +55,22 @@ public class ThumbnailsRequestDto
     /// Thumbnail height
     /// </summary>
     public int Height { get; set; }
+}
+
+/// <summary>
+/// Thumbnail request parameters
+/// </summary>
+public class ThumbnailsRequestDto
+{
+    /// <summary>
+    /// User ID
+    /// </summary>
+    [FromRoute(Name = "userid")]
+    public string UserId { get; set; }
+
+    /// <summary>
+    /// Thumbnails
+    /// </summary>
+    [FromBody]
+    public ThumbnailsRequest Thumbnails { get; set; }
 }

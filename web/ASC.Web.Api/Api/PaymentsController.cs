@@ -115,12 +115,11 @@ public class PaymentController(UserManager userManager,
     /// <short>
     /// Get the payment account
     /// </short>
-    /// <param type="System.String, System" name="backUrl" example="some text">Back URL</param>
     /// <path>api/2.0/portal/payment/account</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The URL to the payment account", typeof(object))]
     [HttpGet("account")]
-    public async Task<object> GetPaymentAccountAsync(string backUrl)
+    public async Task<object> GetPaymentAccountAsync(PaymentUrlRequestDto inDto)
     {
         if (!tariffService.IsConfigured())
         {
@@ -138,7 +137,7 @@ public class PaymentController(UserManager userManager,
         }
 
         var result = "payment.ashx";
-        return !string.IsNullOrEmpty(backUrl) ? $"{result}?backUrl={backUrl}" : result;
+        return !string.IsNullOrEmpty(inDto.BackUrl) ? $"{result}?backUrl={inDto.BackUrl}" : result;
     }
 
     /// <summary>
@@ -206,19 +205,18 @@ public class PaymentController(UserManager userManager,
     /// <short>
     /// Get quota payment information
     /// </short>
-    /// <param type="System.Boolean, System" name="refresh" example="true"></param>
     /// <path>api/2.0/portal/payment/quota</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "Payment information about the current portal quota", typeof(QuotaDto))]
     [HttpGet("quota")]
-    public async Task<QuotaDto> GetQuotaAsync(bool refresh)
+    public async Task<QuotaDto> GetQuotaAsync(PaymentInformationRequestDto inDto)
     {
         if (await userManager.IsUserAsync(securityContext.CurrentAccount.ID))
         {
             throw new SecurityException();
         }
         
-        return await tariffHelper.GetCurrentQuotaAsync(refresh);
+        return await tariffHelper.GetCurrentQuotaAsync(inDto.Refresh);
     }
 
     /// <summary>

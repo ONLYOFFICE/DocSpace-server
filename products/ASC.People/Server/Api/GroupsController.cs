@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using static Dropbox.Api.Team.MobileClientPlatform;
+
 namespace ASC.People.Api;
 
 ///<summary>
@@ -50,8 +52,6 @@ public class GroupController(
     /// <short>
     /// Get groups
     /// </short>
-    /// <param type="System.Nullable{System.Guid}, System" name="userId" example="9924256A-739C-462b-AF15-E652A3B1B6EB">User ID</param>
-    /// <param type="System.Nullable{System.Boolean}, System" name="manager" example="true">Specifies if the user is a manager or not</param>
     /// <remarks>
     /// This method returns partial group information.
     /// </remarks>
@@ -60,7 +60,7 @@ public class GroupController(
     [Tags("Group")]
     [SwaggerResponse(200, "List of groups", typeof(GroupDto))]
     [HttpGet]
-    public async IAsyncEnumerable<GroupDto> GetGroupsAsync(Guid? userId, bool? manager)
+    public async IAsyncEnumerable<GroupDto> GetGroupsAsync(GeneralInformationRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_ReadGroups);
         
@@ -68,8 +68,8 @@ public class GroupController(
         var count = Convert.ToInt32(apiContext.Count);
         var text = apiContext.FilterValue;
 
-        var memberId = userId ?? Guid.Empty;
-        var asManager = manager ?? false;
+        var memberId = inDto.UserId ?? Guid.Empty;
+        var asManager = inDto.Manager ?? false;
 
         if (!GroupSortTypeExtensions.TryParse(apiContext.SortBy, true, out var sortBy))
         {
@@ -92,8 +92,6 @@ public class GroupController(
     /// <short>
     /// Get a group
     /// </short>
-    /// <param type="System.Guid, System" method="url" name="id" example="9924256A-739C-462b-AF15-E652A3B1B6EB">Group ID</param>
-    /// <param type="System.Boolean, System" name="includeMembers">Include members</param>
     /// <remarks>
     /// This method returns full group information.
     /// </remarks>
@@ -101,11 +99,11 @@ public class GroupController(
     [Tags("Group")]
     [SwaggerResponse(200, "Group with the detailed information", typeof(GroupDto))]
     [HttpGet("{id:guid}")]
-    public async Task<GroupDto> GetGroupAsync(Guid id, bool includeMembers = true)
+    public async Task<GroupDto> GetGroupAsync(DetailedInformationRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_ReadGroups);
         
-        return await groupFullDtoHelper.Get(await GetGroupInfoAsync(id), includeMembers);
+        return await groupFullDtoHelper.Get(await GetGroupInfoAsync(inDto.Id), inDto.IncludeMembers);
     }
 
     /// <summary>
@@ -114,16 +112,15 @@ public class GroupController(
     /// <short>
     /// Get user groups
     /// </short>
-    /// <param type="System.Guid, System" method="url" name="userid" example="9924256A-739C-462b-AF15-E652A3B1B6EB">User ID</param>
     /// <path>api/2.0/groups/user/{userid}</path>
     /// <collection>list</collection>
     [Tags("Group")]
     [SwaggerResponse(200, "List of groups", typeof(GroupSummaryDto))]
     [HttpGet("user/{userid:guid}")]
-    public async Task<IEnumerable<GroupSummaryDto>> GetByUserIdAsync(Guid userid)
+    public async Task<IEnumerable<GroupSummaryDto>> GetByUserIdAsync(GetGroupByUserIdRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_ReadGroups);
-        var groups = await userManager.GetUserGroupsAsync(userid);
+        var groups = await userManager.GetUserGroupsAsync(inDto.UserId);
         List<GroupSummaryDto> result = new(groups.Count);
         
         foreach (var g in groups)
@@ -171,41 +168,40 @@ public class GroupController(
     /// <short>
     /// Update a group
     /// </short>
-    /// <param type="System.Guid, System" method="url" name="id" example="9924256A-739C-462b-AF15-E652A3B1B6EB">Group ID</param>
     /// <path>api/2.0/groups/{id}</path>
     [Tags("Group")]
     [SwaggerResponse(200, "Updated group with the detailed information", typeof(GroupDto))]
     [HttpPut("{id:guid}")]
-    public async Task<GroupDto> UpdateGroupAsync(Guid id, UpdateGroupRequestDto inDto)
+    public async Task<GroupDto> UpdateGroupAsync(UpdateGroupRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_EditGroups, Constants.Action_AddRemoveUser);
 
-        var group = await GetGroupInfoAsync(id);
+        var group = await GetGroupInfoAsync(inDto.Id);
 
-        group.Name = inDto.GroupName ?? group.Name;
+        group.Name = inDto.Update.GroupName ?? group.Name;
         await userManager.SaveGroupInfoAsync(group);
         
-        await TransferUserToDepartmentAsync(inDto.GroupManager, group, true);
+        await TransferUserToDepartmentAsync(inDto.Update.GroupManager, group, true);
 
-        if (inDto.MembersToAdd != null)
+        if (inDto.Update.MembersToAdd != null)
         {
-            foreach (var memberToAdd in inDto.MembersToAdd)
+            foreach (var memberToAdd in inDto.Update.MembersToAdd)
             {
                 await TransferUserToDepartmentAsync(memberToAdd, group, false);
             }
         }
         
-        if (inDto.MembersToRemove != null)
+        if (inDto.Update.MembersToRemove != null)
         {
-            foreach (var memberToRemove in inDto.MembersToRemove)
+            foreach (var memberToRemove in inDto.Update.MembersToRemove)
             {
                 await RemoveUserFromDepartmentAsync(memberToRemove, group);
             }
         }
 
-        await messageService.SendAsync(MessageAction.GroupUpdated, MessageTarget.Create(id), group.Name);
+        await messageService.SendAsync(MessageAction.GroupUpdated, MessageTarget.Create(inDto.Id), group.Name);
 
-        return await GetGroupAsync(id);
+        return await GetGroupAsync(new DetailedInformationRequestDto { Id = inDto.Id });
     }
 
     /// <summary>
@@ -214,19 +210,18 @@ public class GroupController(
     /// <short>
     /// Delete a group
     /// </short>
-    /// <param type="System.Guid, System" method="url" name="id" example="9924256A-739C-462b-AF15-E652A3B1B6EB">Group ID</param>
     /// <path>api/2.0/groups/{id}</path>
     [Tags("Group")]
     [SwaggerResponse(200, "No content", typeof(NoContentResult))]
     [HttpDelete("{id:guid}")]
-    public async Task<NoContentResult> DeleteGroupAsync(Guid id)
+    public async Task<NoContentResult> DeleteGroupAsync(GetGroupByIdRequestDto inDto)
     { 
         await permissionContext.DemandPermissionsAsync(Constants.Action_EditGroups, Constants.Action_AddRemoveUser);
 
-        var group = await GetGroupInfoAsync(id);
+        var group = await GetGroupInfoAsync(inDto.Id);
 
-        await userManager.DeleteGroupAsync(id);
-        await fileSecurity.RemoveSubjectAsync(id, false);
+        await userManager.DeleteGroupAsync(inDto.Id);
+        await fileSecurity.RemoveSubjectAsync(inDto.Id, false);
 
         await messageService.SendAsync(MessageAction.GroupDeleted, MessageTarget.Create(group.ID), group.Name);
 
@@ -239,18 +234,16 @@ public class GroupController(
     /// <short>
     /// Move group members
     /// </short>
-    /// <param type="System.Guid, System" method="url" name="fromId" example="9924256A-739C-462b-AF15-E652A3B1B6EB">Group ID to move from</param>
-    /// <param type="System.Guid, System" method="url" name="toId" example="9924256A-739C-462b-AF15-E652A3B1B6EB">Group ID to move to</param>
     /// <path>api/2.0/groups/{fromId}/members/{toId}</path>
     [Tags("Group")]
     [SwaggerResponse(200, "Group with the detailed information", typeof(GroupDto))]
     [HttpPut("{fromId:guid}/members/{toId:guid}")]
-    public async Task<GroupDto> TransferMembersToAsync(Guid fromId, Guid toId)
+    public async Task<GroupDto> TransferMembersToAsync(MoveGroupMemebersRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_EditGroups, Constants.Action_AddRemoveUser);
 
-        var fromGroup = await GetGroupInfoAsync(fromId);
-        var toGroup = await GetGroupInfoAsync(toId);
+        var fromGroup = await GetGroupInfoAsync(inDto.FromId);
+        var toGroup = await GetGroupInfoAsync(inDto.ToId);
 
         var users = await userManager.GetUsersByGroupAsync(fromGroup.ID);
         
@@ -259,7 +252,7 @@ public class GroupController(
             await TransferUserToDepartmentAsync(userInfo.Id, toGroup, false);
         }
 
-        return await GetGroupAsync(toId);
+        return await GetGroupAsync(new DetailedInformationRequestDto { Id = inDto.ToId });
     }
 
     /// <summary>
@@ -268,17 +261,16 @@ public class GroupController(
     /// <short>
     /// Replace group members
     /// </short>
-    /// <param type="System.Guid, System" method="url" name="id" example="9924256A-739C-462b-AF15-E652A3B1B6EB">Group ID</param>
     /// <path>api/2.0/groups/{id}/members</path>
     [Tags("Group")]
     [SwaggerResponse(200, "Group with the detailed information", typeof(GroupDto))]
     [HttpPost("{id:guid}/members")]
-    public async Task<GroupDto> SetMembersToAsync(Guid id, MembersRequestDto inDto)
+    public async Task<GroupDto> SetMembersToAsync(MembersRequestDto inDto)
     {
-        await RemoveMembersFromAsync(id, new MembersRequestDto { Members = (await userManager.GetUsersByGroupAsync(id)).Select(x => x.Id) });
-        await AddMembersToAsync(id, inDto);
+        await RemoveMembersFromAsync(new MembersRequestDto { Id = inDto.Id, Members = new MembersRequest { Members = (await userManager.GetUsersByGroupAsync(inDto.Id)).Select(x => x.Id) } });
+        await AddMembersToAsync(inDto);
         
-        return await GetGroupAsync(id);
+        return await GetGroupAsync(new DetailedInformationRequestDto { Id = inDto.Id });
     }
 
     /// <summary>
@@ -287,23 +279,22 @@ public class GroupController(
     /// <short>
     /// Add group members
     /// </short>
-    /// <param type="System.Guid, System" method="url" name="id" example="9924256A-739C-462b-AF15-E652A3B1B6EB">Group ID</param>
     /// <path>api/2.0/groups/{id}/members</path>
     [Tags("Group")]
     [SwaggerResponse(200, "Group with the detailed information", typeof(GroupDto))]
     [HttpPut("{id:guid}/members")]
-    public async Task<GroupDto> AddMembersToAsync(Guid id, MembersRequestDto inDto)
+    public async Task<GroupDto> AddMembersToAsync(MembersRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_EditGroups, Constants.Action_AddRemoveUser);
 
-        var group = await GetGroupInfoAsync(id);
+        var group = await GetGroupInfoAsync(inDto.Id);
 
-        foreach (var userId in inDto.Members)
+        foreach (var userId in inDto.Members.Members)
         {
             await TransferUserToDepartmentAsync(userId, group, false);
         }
 
-        return await GetGroupAsync(group.ID);
+        return await GetGroupAsync(new DetailedInformationRequestDto { Id = group.ID });
     }
 
     /// <summary>
@@ -312,25 +303,24 @@ public class GroupController(
     /// <short>
     /// Set a group manager
     /// </short>
-    /// <param type="System.Guid, System" method="url" name="id" example="9924256A-739C-462b-AF15-E652A3B1B6EB">Group ID</param>
     /// <path>api/2.0/groups/{id}/manager</path>
     [Tags("Group")]
     [SwaggerResponse(200, "Group with the detailed information", typeof(GroupDto))]
     [HttpPut("{id:guid}/manager")]
-    public async Task<GroupDto> SetManagerAsync(Guid id, SetManagerRequestDto inDto)
+    public async Task<GroupDto> SetManagerAsync(SetManagerRequestDto inDto)
     {
-        var group = await GetGroupInfoAsync(id);
+        var group = await GetGroupInfoAsync(inDto.Id);
         
-        if (await userManager.UserExistsAsync(inDto.UserId))
+        if (await userManager.UserExistsAsync(inDto.SetManager.UserId))
         {
-            await TransferUserToDepartmentAsync(inDto.UserId, group, true);
+            await TransferUserToDepartmentAsync(inDto.SetManager.UserId, group, true);
         }
         else
         {
             throw new ItemNotFoundException("user not found");
         }
 
-        return await GetGroupAsync(id);
+        return await GetGroupAsync(new DetailedInformationRequestDto { Id = inDto.Id });
     }
 
     /// <summary>
@@ -339,23 +329,22 @@ public class GroupController(
     /// <short>
     /// Remove group members
     /// </short>
-    /// <param type="System.Guid, System" method="url" name="id" example="9924256A-739C-462b-AF15-E652A3B1B6EB">Group ID</param>
     /// <path>api/2.0/groups/{id}/members</path>
     [Tags("Group")]
     [SwaggerResponse(200, "Group with the detailed information", typeof(GroupDto))]
     [HttpDelete("{id:guid}/members")]
-    public async Task<GroupDto> RemoveMembersFromAsync(Guid id, MembersRequestDto inDto)
+    public async Task<GroupDto> RemoveMembersFromAsync(MembersRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_EditGroups, Constants.Action_AddRemoveUser);
 
-        var group = await GetGroupInfoAsync(id);
+        var group = await GetGroupInfoAsync(inDto.Id);
 
-        foreach (var userId in inDto.Members)
+        foreach (var userId in inDto.Members.Members)
         {
             await RemoveUserFromDepartmentAsync(userId, group);
         }
 
-        return await GetGroupAsync(group.ID);
+        return await GetGroupAsync(new DetailedInformationRequestDto { Id = group.ID });
     }
 
     private async Task<GroupInfo> GetGroupInfoAsync(Guid id)
@@ -425,9 +414,9 @@ public class GroupControllerAdditional<T>(
 {
     [Tags("Group / Rooms")]
     [HttpGet("room/{id}")]
-    public async IAsyncEnumerable<GroupDto> GetGroupsWithSharedAsync(T id, bool? excludeShared)
+    public async IAsyncEnumerable<GroupDto> GetGroupsWithSharedAsync(GetGroupsWithSharedRequestDto<T> inDto)
     {
-        var room = (await daoFactory.GetFolderDao<T>().GetFolderAsync(id)).NotFoundIfNull();
+        var room = (await daoFactory.GetFolderDao<T>().GetFolderAsync(inDto.Id)).NotFoundIfNull();
 
         if (!await fileSecurity.CanEditAccessAsync(room))
         {
@@ -440,11 +429,11 @@ public class GroupControllerAdditional<T>(
         
         var securityDao = daoFactory.GetSecurityDao<T>();
 
-        var totalGroups = await securityDao.GetGroupsWithSharedCountAsync(room, text, excludeShared ?? false);
+        var totalGroups = await securityDao.GetGroupsWithSharedCountAsync(room, text, inDto.ExcludeShared ?? false);
 
         apiContext.SetCount(Math.Min(Math.Max(totalGroups - offset, 0), count)).SetTotalCount(totalGroups);
 
-        await foreach (var item in securityDao.GetGroupsWithSharedAsync(room, text, excludeShared ?? false, offset, count))
+        await foreach (var item in securityDao.GetGroupsWithSharedAsync(room, text, inDto.ExcludeShared ?? false, offset, count))
         {
             yield return await groupFullDtoHelper.Get(item.GroupInfo, false, item.Shared);
         }

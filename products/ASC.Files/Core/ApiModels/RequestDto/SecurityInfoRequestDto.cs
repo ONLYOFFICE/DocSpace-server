@@ -67,3 +67,39 @@ public class SecurityInfoSimpeRequestDto
     /// </summary>
     public string SharingMessage { get; set; }
 }
+
+/// <summary>
+/// Security information request parameters
+/// </summary>
+public class FileSecurityInfoSimpeRequestDto<T>
+{
+    /// <summary>
+    /// File ID
+    /// </summary>
+    [FromRoute(Name = "fileId")]
+    public T FileId { get; set; }
+
+    /// <summary>
+    /// Security info simpe
+    /// </summary>
+    [FromBody]
+    public SecurityInfoSimpeRequestDto SecurityInfoSimpe { get; set; }
+}
+
+/// <summary>
+/// Security information request parameters
+/// </summary>
+public class FolderSecurityInfoSimpeRequestDto<T>
+{
+    /// <summary>
+    /// Folder ID
+    /// </summary>
+    [FromRoute(Name = "folderId")]
+    public T FolderId { get; set; }
+
+    /// <summary>
+    /// Security info simpe
+    /// </summary>
+    [FromBody]
+    public SecurityInfoSimpeRequestDto SecurityInfoSimpe { get; set; }
+}

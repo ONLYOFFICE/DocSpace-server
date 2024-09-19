@@ -48,7 +48,6 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     /// Creates a session to upload large files in multiple chunks to the folder with the ID specified in the request.
     /// </summary>
     /// <short>Chunked upload</short>
-    /// <param type="System.Int32, System" name="folderId" example="1234">Folder ID</param>
     /// <remarks>
     /// <![CDATA[
     /// Each chunk can have different length but the length should be multiple of <b>512</b> and greater or equal to <b>10 mb</b>. Last chunk can have any size.
@@ -58,7 +57,6 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     /// When the number of bytes uploaded is equal to the number of bytes you sent in the initial request, the server responds with the <b>201 Created</b> status and sends you information about the uploaded file.
     /// ]]>
     /// </remarks>
-    /// <returns type="System.Object, System">
     /// <![CDATA[
     /// Information about created session which includes:
     /// <ul>
@@ -70,23 +68,19 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     /// <li><b>bytes_total:</b> total number of bytes which will be uploaded.</li>
     /// </ul>
     /// ]]>
-    /// </returns>
     /// <path>api/2.0/files/{folderId}/upload/create_session</path>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "Information about created session", typeof(object))]
     [HttpPost("{folderId}/upload/create_session")]
-    public async Task<object> CreateUploadSessionAsync(T folderId, SessionRequestDto inDto)
+    public async Task<object> CreateUploadSessionAsync(SessionRequestDto<T> inDto)
     {
-        return await filesControllerHelper.CreateUploadSessionAsync(folderId, inDto.FileName, inDto.FileSize, inDto.RelativePath, inDto.Encrypted, inDto.CreateOn, inDto.CreateNewIfExist);
+        return await filesControllerHelper.CreateUploadSessionAsync(inDto.FolderId, inDto.Session.FileName, inDto.Session.FileSize, inDto.Session.RelativePath, inDto.Session.Encrypted, inDto.Session.CreateOn, inDto.Session.CreateNewIfExist);
     }
 
     /// <summary>
     /// Creates a session to edit the existing file with multiple chunks (needed for WebDAV).
     /// </summary>
     /// <short>Create the editing session</short>
-    /// <param type="System.Int32, System" name="fileId" example="1234">File ID</param>
-    /// <param type="System.Int64, System" name="fileSize" example="1234">File size in bytes</param>
-    /// <returns type="System.Object, System">
     /// <![CDATA[
     /// Information about created session which includes:
     /// <ul>
@@ -98,39 +92,36 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     /// <li><b>bytes_total:</b> total number of bytes which will be uploaded.</li>
     /// </ul>
     /// ]]>
-    /// </returns>
     /// <path>api/2.0/files/file/{fileId}/edit_session</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Information about created session", typeof(object))]
     [HttpPost("file/{fileId}/edit_session")]
-    public async Task<object> CreateEditSession(T fileId, long fileSize)
+    public async Task<object> CreateEditSession(CreateEditSessionRequestDto<T> inDto)
     {
-        return await filesControllerHelper.CreateEditSessionAsync(fileId, fileSize);
+        return await filesControllerHelper.CreateEditSessionAsync(inDto.FileId, inDto.FileSize);
     }
 
     /// <summary>
     /// </summary>
-    /// <param type="System.Int32, System" name="folderId" example="1234"></param>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "Inserted file", typeof(List<string>))]
     [HttpPost("{folderId}/upload/check")]
-    public Task<List<string>> CheckUploadAsync(T folderId, CheckUploadRequestDto model)
+    public Task<List<string>> CheckUploadAsync(CheckUploadRequestDto<T> model)
     {
-        return filesControllerHelper.CheckUploadAsync(folderId, model.FilesTitle);
+        return filesControllerHelper.CheckUploadAsync(model.FolderId, model.Check.FilesTitle);
     }
 
     /// <summary>
     /// Inserts a file specified in the request to the selected folder by single file uploading.
     /// </summary>
     /// <short>Insert a file</short>
-    /// <param type="System.Int32, System" name="folderId" example="1234">Folder ID</param>
     /// <path>api/2.0/files/{folderId}/insert</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "Inserted file", typeof(FileDto<int>))]
     [HttpPost("{folderId}/insert", Order = 1)]
-    public async Task<FileDto<T>> InsertFileAsync(T folderId, [FromForm][ModelBinder(BinderType = typeof(InsertFileModelBinder))] InsertFileRequestDto inDto)
+    public async Task<FileDto<T>> InsertFileAsync(InsertWithFileRequestDto<T> inDto)
     {
-        return await filesControllerHelper.InsertFileAsync(folderId, inDto.Stream, inDto.Title, inDto.CreateNewIfExist, inDto.KeepConvertStatus);
+        return await filesControllerHelper.InsertFileAsync(inDto.FolderId, inDto.InsertFile.Stream, inDto.InsertFile.Title, inDto.InsertFile.CreateNewIfExist, inDto.InsertFile.KeepConvertStatus);
     }
 
 
@@ -146,14 +137,13 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     /// <li>Using standart multipart/form-data method.</li>
     /// </ol>]]>
     /// </remarks>
-    /// <param type="System.Int32, System" name="folderId">Folder ID</param>
     /// <path>api/2.0/files/{folderId}/upload</path>
     [Tags("Files / Folders")]
-    [SwaggerResponse(200, "Inserted file", typeof(FileDto<int>))]
+    [SwaggerResponse(200, "Inserted file", typeof(object))]
     [HttpPost("{folderId}/upload", Order = 1)]
-    public async Task<object> UploadFileAsync(T folderId, [ModelBinder(BinderType = typeof(UploadModelBinder))] UploadRequestDto inDto)
+    public async Task<object> UploadFileAsync(UploadWithFolderRequestDto<T> inDto)
     {
-        return await filesControllerHelper.UploadFileAsync(folderId, inDto);
+        return await filesControllerHelper.UploadFileAsync(inDto.FolderId, inDto.UploadData);
     }
 }
 

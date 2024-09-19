@@ -229,9 +229,9 @@ public class BackupController(
     [Tags("Backup")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpDelete("deletebackup/{id:guid}")]
-    public async Task<bool> DeleteBackup(Guid id)
+    public async Task<bool> DeleteBackup([FromRoute] DeleteBackupDto inDto)
     {
-        await backupAjaxHandler.DeleteBackupAsync(id);
+        await backupAjaxHandler.DeleteBackupAsync(inDto.BackupId);
         return true;
     }
 

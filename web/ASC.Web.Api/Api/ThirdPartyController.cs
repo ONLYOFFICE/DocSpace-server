@@ -41,13 +41,12 @@ public class ThirdPartyController(OAuth20TokenHelper oAuth20TokenHelper) : Contr
     /// Returns a request to get the confirmation code from URL.
     /// </summary>
     /// <short>Get the code request</short>
-    /// <param type="ASC.FederatedLogin.LoginProviders.LoginProvider, ASC.FederatedLogin.LoginProviders" method="url" name="provider">Provider</param>
     /// <remarks>List of providers: Google, Dropbox, Docusign, Box, OneDrive, Wordpress.</remarks>
     /// <path>api/2.0/thirdparty/{provider}</path>
     [Tags("ThirdParty")]
     [SwaggerResponse(200, "Code request", typeof(object))]
     [HttpGet("{provider}")]
-    public object Get(LoginProvider provider)
+    public object Get(ConfirmationCodeUrlRequestDto inDto)
     {
         var desktop = HttpContext.Request.Query["desktop"] == "true";
         var additionals = new Dictionary<string, string>();
@@ -57,7 +56,7 @@ public class ThirdPartyController(OAuth20TokenHelper oAuth20TokenHelper) : Contr
             additionals = HttpContext.Request.Query.ToDictionary(r => r.Key, r => r.Value.FirstOrDefault());
         }
 
-        return provider switch
+        return inDto.Provider switch
         {
             LoginProvider.Google => oAuth20TokenHelper.RequestCode<GoogleLoginProvider>(
                 GoogleLoginProvider.GoogleScopeDrive,
@@ -84,41 +83,38 @@ public class ThirdPartyController(OAuth20TokenHelper oAuth20TokenHelper) : Contr
     /// Returns the confirmation code for requesting an OAuth token.
     /// </summary>
     /// <short>Get the confirmation code</short>
-    /// <param type="System.String, System" name="redirect" example="some text">URL where the user will be redirected to after they have granted the application access</param>
-    /// <param type="System.String, System" method="url" name="code" example="some text">Confirmation code that can be exchanged for an OAuth token</param>
-    /// <param type="System.String, System" name="error" example="some text">Error</param>
     /// <path>api/2.0/thirdparty/{provider}/code</path>
     [Tags("ThirdParty")]
     [SwaggerResponse(200, "Confirmation code", typeof(object))]
     [HttpGet("{provider}/code")]
-    public object GetCode(string redirect, string code, string error)
+    public object GetCode(ConfirmationCodeRequestDto inDto)
     {
         try
         {
-            if (!string.IsNullOrEmpty(error))
+            if (!string.IsNullOrEmpty(inDto.Error))
             {
-                if (error == "access_denied")
+                if (inDto.Error == "access_denied")
                 {
-                    error = "Canceled at provider";
+                    inDto.Error = "Canceled at provider";
                 }
-                throw new Exception(error);
+                throw new Exception(inDto.Error);
             }
 
-            if (!string.IsNullOrEmpty(redirect))
+            if (!string.IsNullOrEmpty(inDto.Redirect))
             {
-                return AppendCode(redirect, code);
+                return AppendCode(inDto.Redirect, inDto.Code);
             }
 
-            return code;
+            return inDto.Code;
         }
         catch (ThreadAbortException)
         {
         }
         catch (Exception ex)
         {
-            if (!string.IsNullOrEmpty(redirect))
+            if (!string.IsNullOrEmpty(inDto.Redirect))
             {
-                return AppendCode(redirect, error: ex.Message);
+                return AppendCode(inDto.Redirect, error: ex.Message);
             }
 
             return ex.Message;

@@ -97,16 +97,15 @@ public class ThirdpartyController(
     /// <summary>
     /// Removes the third-party storage service account with the ID specified in the request.
     /// </summary>
-    /// <param type="System.Int32, System" method="url" name="providerId" example="1234">Provider ID. It is a part of the folder ID. Example: folder ID is "sbox-123", then provider ID is "123"</param>
     /// <short>Remove a third-party account</short>
     /// <path>api/2.0/files/thirdparty/{providerId}</path>
     /// <exception cref="ArgumentException"></exception>
     [Tags("Files / Third-party integration")]
     [SwaggerResponse(200, "Third-party folder ID", typeof(object))]
     [HttpDelete("thirdparty/{providerId:int}")]
-    public async Task<object> DeleteThirdPartyAsync(int providerId)
+    public async Task<object> DeleteThirdPartyAsync(ProviderIdRequestDto inDto)
     {
-        return await fileStorageService.DeleteThirdPartyAsync(providerId.ToString(CultureInfo.InvariantCulture));
+        return await fileStorageService.DeleteThirdPartyAsync(inDto.ProviderId.ToString(CultureInfo.InvariantCulture));
     }
 
     /// <summary>
