@@ -287,9 +287,6 @@ Khả năng tương thích cao nhất với docx, xlsx, pptx.</value>
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Biên tập viên</value>
   </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>Quản trị viên phòng</value>
-  </data>
   <data name="RoleEnum_User" xml:space="preserve">
     <value>Người dùng</value>
   </data>
@@ -364,9 +361,6 @@ Khả năng tương thích cao nhất với docx, xlsx, pptx.</value>
   </data>
   <data name="AceStatusEnum_Editing" xml:space="preserve">
     <value>Biên tập viên</value>
-  </data>
-  <data name="AceStatusEnum_RoomAdmin" xml:space="preserve">
-    <value>Quản trị viên phòng</value>
   </data>
   <data name="AceStatusEnum_Comment" xml:space="preserve">
     <value>Nhận xét</value>
@@ -464,14 +458,8 @@ Khả năng tương thích cao nhất với docx, xlsx, pptx.</value>
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>Loại</value>
   </data>
-  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
-    <value>Người dùng cấp cao</value>
-  </data>
   <data name="Date" xml:space="preserve">
     <value>Ngày</value>
-  </data>
-  <data name="RoleEnum_PowerUser" xml:space="preserve">
-    <value>Người dùng cấp cao</value>
   </data>
   <data name="User" xml:space="preserve">
     <value>Người dùng</value>

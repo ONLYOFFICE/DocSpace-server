@@ -3471,7 +3471,7 @@ public class FileStorageService //: IFileStorageService
                     Aces =
                     [
                         new AceWrapper { Access = FileShare.None, Id = userInfo.Id },
-                        new AceWrapper { Access = FileShare.RoomAdmin, Id = createBy }
+                        new AceWrapper { Access = FileShare.RoomManager, Id = createBy }
                     ]
                 }, false, socket: false, beforeOwnerChange: true);
 

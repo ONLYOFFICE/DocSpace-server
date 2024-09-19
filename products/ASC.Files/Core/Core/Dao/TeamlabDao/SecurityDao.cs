@@ -427,7 +427,7 @@ internal abstract class SecurityBaseDao<T>(
                     var userQuery1 = userQuery.Select(r => new SecurityOrderRecord
                     {
                         Security = r.security, 
-                        Order = r.user.ActivationStatus == EmployeeActivationStatus.Pending ? 3 : r.security.Share == FileShare.RoomAdmin ? 0 : 2,
+                        Order = r.user.ActivationStatus == EmployeeActivationStatus.Pending ? 3 : r.security.Share == FileShare.RoomManager ? 0 : 2,
                         Name = r.user.ActivationStatus == EmployeeActivationStatus.Pending ? r.user.Email : r.user.FirstName
                     });
                     

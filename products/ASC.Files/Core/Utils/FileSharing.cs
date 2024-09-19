@@ -78,7 +78,7 @@ public class FileSharingAceHelper(
 
         foreach (var w in aceWrappers.OrderByDescending(ace => ace.SubjectGroup))
         {
-            if (entry.CreateBy == w.Id && (!beforeOwnerChange || w.Access != FileShare.RoomAdmin))
+            if (entry.CreateBy == w.Id && (!beforeOwnerChange || w.Access != FileShare.RoomManager))
             {
                 continue;
             }
@@ -325,9 +325,9 @@ public class FileSharingAceHelper(
                                || share == FileShare.Review
                                || share == FileShare.FillForms
                                || share == FileShare.Comment
-                               || share == FileShare.RoomAdmin
+                               || share == FileShare.RoomManager
                                || share == FileShare.Editing
-                               || share == FileShare.PowerUser
+                               || share == FileShare.ContentCreator
                                || (share == FileShare.None && entry.RootFolderType == FolderType.COMMON);
 
             var removeNew = share == FileShare.Restrict || (share == FileShare.None
@@ -815,7 +815,7 @@ public class FileSharing(
             {
                 User = await userManager.GetUsersAsync(member.UserId),
                 GroupShare = member.GroupShare,
-                UserShare = isOwner || isDocSpaceAdmin ? FileShare.RoomAdmin : member.UserShare,
+                UserShare = isOwner || isDocSpaceAdmin ? FileShare.RoomManager : member.UserShare,
                 CanEditAccess = canEditAccess && !isOwner && userId != member.UserId && !isDocSpaceAdmin,
                 Owner = isOwner
             };

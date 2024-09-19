@@ -317,9 +317,6 @@
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Редактор</value>
   </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>Администратор на стаята</value>
-  </data>
   <data name="RoleEnum_User" xml:space="preserve">
     <value>Потребител</value>
   </data>
@@ -346,9 +343,6 @@
   </data>
   <data name="AceStatusEnum_Editing" xml:space="preserve">
     <value>Редактор</value>
-  </data>
-  <data name="AceStatusEnum_RoomAdmin" xml:space="preserve">
-    <value>Администратор на стаята</value>
   </data>
   <data name="CommentSubmitFillForm" xml:space="preserve">
     <value>Изпратен формуляр</value>
@@ -466,12 +460,6 @@
   </data>
   <data name="Date" xml:space="preserve">
     <value>Дата</value>
-  </data>
-  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
-    <value>Опитен потребител</value>
-  </data>
-  <data name="RoleEnum_PowerUser" xml:space="preserve">
-    <value>Опитен потребител</value>
   </data>
   <data name="User" xml:space="preserve">
     <value>Потребител</value>

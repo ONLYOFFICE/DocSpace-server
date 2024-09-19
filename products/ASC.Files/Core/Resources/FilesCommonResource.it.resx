@@ -335,9 +335,6 @@ Massima compatibilità con docx, xlsx, pptx.</value>
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Editore</value>
   </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>Amministratore di stanza</value>
-  </data>
   <data name="RoleEnum_User" xml:space="preserve">
     <value>Utente</value>
   </data>
@@ -361,9 +358,6 @@ Massima compatibilità con docx, xlsx, pptx.</value>
   </data>
   <data name="AceStatusEnum_Editing" xml:space="preserve">
     <value>Editore</value>
-  </data>
-  <data name="AceStatusEnum_RoomAdmin" xml:space="preserve">
-    <value>Amministratore di stanza</value>
   </data>
   <data name="ErrorMessage_FileUpdateToVersion" xml:space="preserve">
     <value>La nuova versione non può essere uguale a quella attuale</value>
@@ -464,14 +458,8 @@ Massima compatibilità con docx, xlsx, pptx.</value>
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>Tipo</value>
   </data>
-  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
-    <value>Utente esperto</value>
-  </data>
   <data name="Date" xml:space="preserve">
     <value>Data</value>
-  </data>
-  <data name="RoleEnum_PowerUser" xml:space="preserve">
-    <value>Utente esperto</value>
   </data>
   <data name="User" xml:space="preserve">
     <value>Utente</value>

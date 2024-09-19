@@ -505,7 +505,7 @@ public abstract class Migrator(
                             {
                                 new()
                                 {
-                                    Access = Files.Core.Security.FileShare.PowerUser,
+                                    Access = Files.Core.Security.FileShare.ContentCreator,
                                     Id = user.Info.Id
                                 }
                             };

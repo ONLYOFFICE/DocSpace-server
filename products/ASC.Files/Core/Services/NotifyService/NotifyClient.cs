@@ -331,7 +331,7 @@ public class NotifyClient(WorkContext notifyContext,
 
             if (ace.SubjectGroup
                 || recepientId == userId
-                || ace.Access != FileShare.RoomAdmin && ace.Owner != true)
+                || ace.Access != FileShare.RoomManager && ace.Owner != true)
             {
                 continue;
             }
