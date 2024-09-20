@@ -34,15 +34,43 @@ public class ActiveConnectionsDto
 
 public class ActiveConnectionsItemDto
 {
+    /// <summary>Login event id</summary>
+    /// <type>System.Int32, System</type>
     public int Id { get; set; }
-    public int TenantId { get; set; }
+
+    /// <summary>User id</summary>
+    /// <type>System.Guid, System</type>
     public Guid UserId { get; set; }
+
+    /// <summary>Mobile</summary>
+    /// <type>System.Boolean, System</type>
     public bool Mobile {  get; set; }
+
+    /// <summary>Ip</summary>
+    /// <type>System.String, System</type>
     public string Ip { get; set; }
+
+    /// <summary>Country</summary>
+    /// <type>System.String, System</type>
     public string Country { get; set; }
+
+    /// <summary>City</summary>
+    /// <type>System.String, System</type>
     public string City { get; set; }
+
+    /// <summary>Browser</summary>
+    /// <type>System.String, System</type>
     public string Browser { get; set; }
+
+    /// <summary>Platform</summary>
+    /// <type>System.String, System</type>
     public string Platform { get; set; }
+
+    /// <summary>Date</summary>
+    /// <type>ASC.Api.Core.ApiDateTime, ASC.Api.Core</type>
     public ApiDateTime Date { get; set; }
+
+    /// <summary>Page</summary>
+    /// <type>System.String, System</type>
     public string Page { get; set; }
 }

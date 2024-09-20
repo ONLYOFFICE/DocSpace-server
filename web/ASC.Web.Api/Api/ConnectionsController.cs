@@ -161,7 +161,6 @@ public class ConnectionsController(
                 Ip = q.IP,
                 Mobile = q.Mobile,
                 Page = q.Page,
-                TenantId = q.TenantId,
                 Platform = q.Platform,
                 UserId = q.UserId
 
