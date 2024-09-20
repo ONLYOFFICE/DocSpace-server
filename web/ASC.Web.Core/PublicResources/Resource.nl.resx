@@ -412,7 +412,7 @@
   <data name="TariffsFeature_usersInRoom_exception" xml:space="preserve">
     <value>Het aantal gebruikers in de kamer mag niet groter zijn dan {0}</value>
   </data>
-  <data name="TariffsFeature_whitelabel" xml:space="preserve">
+  <data name="TariffsFeature_customization" xml:space="preserve">
     <value>Branding &amp; aanpassing</value>
   </data>
   <data name="ConsumersBitly" xml:space="preserve">
