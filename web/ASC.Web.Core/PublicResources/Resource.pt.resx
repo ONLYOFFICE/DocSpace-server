@@ -217,7 +217,7 @@
   <data name="TariffsFeature_usersInRoom_exception" xml:space="preserve">
     <value>O número de utilizadores na sala não deve exceder {0}</value>
   </data>
-  <data name="TariffsFeature_whitelabel" xml:space="preserve">
+  <data name="TariffsFeature_customization" xml:space="preserve">
     <value>Imagem de Marca e personalização</value>
   </data>
   <data name="ConsumersBox" xml:space="preserve">

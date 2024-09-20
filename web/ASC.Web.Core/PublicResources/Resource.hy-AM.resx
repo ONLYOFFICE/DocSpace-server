@@ -177,7 +177,7 @@
   <data name="TariffsFeature_usersInRoom_exception" xml:space="preserve">
     <value>Սենյակում օգտվողների թիվը չպետք է գերազանցի {0}-ը</value>
   </data>
-  <data name="TariffsFeature_whitelabel" xml:space="preserve">
+  <data name="TariffsFeature_customization" xml:space="preserve">
     <value>Բրենդինգ &amp; հարմարեցում</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">

@@ -144,4 +144,17 @@ public static class Actions
     public static readonly INotifyAction ZoomWelcome = new NotifyAction("zoom_welcome");
 
     public static readonly INotifyAction MigrationPersonalToDocspace = new NotifyAction("migration_personal_to_docspace");
-} 
+
+    public static readonly INotifyAction EnterpriseAdminPaymentWarningGracePeriodBeforeActivation = new NotifyAction("enterprise_admin_payment_warning_grace_period_before_activation");
+    public static readonly INotifyAction EnterpriseAdminPaymentWarningGracePeriodActivation = new NotifyAction("enterprise_admin_payment_warning_grace_period_activation");
+    public static readonly INotifyAction EnterpriseAdminPaymentWarningGracePeriodBeforeExpiration = new NotifyAction("enterprise_admin_payment_warning_grace_period_before_expiration");
+    public static readonly INotifyAction EnterpriseAdminPaymentWarningGracePeriodExpiration = new NotifyAction("enterprise_admin_payment_warning_grace_period_expiration");
+
+    public static readonly INotifyAction EnterpriseAdminPaymentWarningLifetimeBeforeExpiration = new NotifyAction("enterprise_admin_payment_warning_lifetime_before_expiration");
+    public static readonly INotifyAction EnterpriseAdminPaymentWarningLifetimeExpiration = new NotifyAction("enterprise_admin_payment_warning_lifetime_expiration");
+
+    public static readonly INotifyAction DeveloperAdminPaymentWarningGracePeriodBeforeActivation = new NotifyAction("developer_admin_payment_warning_grace_period_before_activation");
+    public static readonly INotifyAction DeveloperAdminPaymentWarningGracePeriodActivation = new NotifyAction("developer_admin_payment_warning_grace_period_activation");
+    public static readonly INotifyAction DeveloperAdminPaymentWarningGracePeriodBeforeExpiration = new NotifyAction("developer_admin_payment_warning_grace_period_before_expiration");
+    public static readonly INotifyAction DeveloperAdminPaymentWarningGracePeriodExpiration = new NotifyAction("developer_admin_payment_warning_grace_period_expiration");
+}
