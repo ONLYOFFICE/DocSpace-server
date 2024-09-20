@@ -1,4 +1,29 @@
-﻿using Microsoft.OpenApi;
+﻿// (c) Copyright Ascensio System SIA 2009-2024
+// 
+// This program is a free software product.
+// You can redistribute it and/or modify it under the terms
+// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
+// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
+// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
+// any third-party rights.
+// 
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
+// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
+// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// 
+// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// 
+// The  interactive user interfaces in modified source and object code versions of the Program must
+// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// 
+// Pursuant to Section 7(b) of the License you must retain the original Product logo when
+// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
+// trademark law for use of our trademarks.
+// 
+// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
+// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
+// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 
@@ -199,27 +224,44 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
         }
         else if (checkType.IsEnum)
         {
-            var enumData = new List<IOpenApiAny>();
-            var enumDescription = new List<string>();
-            
-            foreach(var enumValue in Enum.GetValues(checkType))
+            var enumDataString = new List<IOpenApiAny>();
+            var enumDescriptionString = new List<string>();
+            var enumDataInt = new List<IOpenApiAny>();
+            var enumDescriptionInt = new List<string>();
+
+            foreach (var enumValue in Enum.GetValues(checkType))
             {
                 var value = checkType.GetMember(enumValue.ToString())[0];
                 var enumAttribute = value.GetCustomAttributes<SwaggerEnumAttribute>().FirstOrDefault();
                 if (enumAttribute is { Ignore: false })
                 {
-                    enumData.Add(new OpenApiString(enumValue.ToString()));
-                    enumDescription.Add($"{Convert.ToInt32(enumValue)} - {enumAttribute.Description}");
+                    enumDataString.Add(new OpenApiString(enumValue.ToString()));
+                    enumDataInt.Add(new OpenApiInteger(Convert.ToInt32(enumValue)));
+                    enumDescriptionString.Add($"{enumValue} - {enumAttribute.Description}");
+                    enumDescriptionInt.Add($"{Convert.ToInt32(enumValue)} - {enumAttribute.Description}");
                 }
             }
 
-            if(enumData.Count > 0)
+            if (enumDataString.Count > 0)
             {
+                result.OneOf = new List<OpenApiSchema>()
+                {
+                    new()
+                    {
+                        Type = "string",
+                        Description = $"[{string.Join(", ", enumDescriptionString)}]",
+                        Example = enumDataString[0]
+                    },
+                    new()
+                    {
+                        Type = "integer",
+                        Description = $"[{string.Join(", ", enumDescriptionInt)}]",
+                        Example = enumDataInt[0]
+                    }
+                };
+                result.Type = null;
+                result.Enum = enumDataString;
                 result.Format = null;
-                result.Type = "string";
-                result.Enum = enumData;
-                result.Description = $"[{string.Join(", ", enumDescription)}]";
-                result.Example = enumData[0];
             }
         }
         else if(checkType == typeof(object))
@@ -279,7 +321,7 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
         };
     }
 
-    private bool IsSimpleType(Type type)
+    private static bool IsSimpleType(Type type)
     {
         return type.IsPrimitive ||
                type == typeof(string) ||

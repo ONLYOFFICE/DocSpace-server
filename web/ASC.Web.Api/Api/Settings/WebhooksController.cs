@@ -73,9 +73,7 @@ public class WebhooksController(ApiContext context,
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        ArgumentNullException.ThrowIfNull(inDto.Uri);
         ArgumentNullException.ThrowIfNull(inDto.SecretKey);
-        ArgumentNullException.ThrowIfNull(inDto.Name);
 
         var webhook = await dbWorker.AddWebhookConfig(inDto.Uri, inDto.Name, inDto.SecretKey, inDto.Enabled, inDto.SSL);
 
@@ -95,9 +93,6 @@ public class WebhooksController(ApiContext context,
     public async Task<WebhooksConfigDto> UpdateWebhook(WebhooksConfigRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-
-        ArgumentNullException.ThrowIfNull(inDto.Uri);
-        ArgumentNullException.ThrowIfNull(inDto.Name);
 
         var webhook = await dbWorker.UpdateWebhookConfig(inDto.Id, inDto.Name, inDto.Uri, inDto.SecretKey, inDto.Enabled, inDto.SSL);
 

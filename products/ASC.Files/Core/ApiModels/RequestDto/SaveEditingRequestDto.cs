@@ -27,46 +27,38 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Parameters for saving file edits
-/// </summary>
-public class SaveEditing : IModelWithFile
-{
-    /// <summary>
-    /// File extension
-    /// </summary>
-    [SwaggerSchemaCustom(Example = ".txt")]
-    public string FileExtension { get; set; }
-
-    /// <summary>
-    /// URI to download a file
-    /// </summary>
-    public string DownloadUri { get; set; }
-
-    /// <summary>
-    /// Request file stream
-    /// </summary>
-    public IFormFile File { get; set; }
-
-    /// <summary>
-    /// Specifies whether to force save a file or not
-    /// </summary>
-    public bool Forcesave { get; set; }
-}
-
-/// <summary>
 /// Request parameters for saving file edits
 /// </summary>
-public class SaveEditingRequestDto<T>
+public class SaveEditingRequestDto<T> : IModelWithFile
 {
     /// <summary>
     /// File ID
     /// </summary>
     [FromRoute(Name = "fileId")]
     public T FileId { get; set; }
+    /// <summary>
+    /// File extension
+    /// </summary>
+    [FromForm(Name = "FileExtension")]
+    [SwaggerSchemaCustom(Example = ".txt")]
+    public string FileExtension { get; set; }
 
     /// <summary>
-    /// Parameters for saving file edits
+    /// URI to download a file
     /// </summary>
-    [FromForm]
-    public SaveEditing File { get; set; }
+    [FromForm(Name = "DownloadUri")]
+    public string DownloadUri { get; set; }
+
+    /// <summary>
+    /// Request file stream
+    /// </summary>
+    [FromForm(Name = "File")]
+    public IFormFile File { get; set; }
+
+    /// <summary>
+    /// Specifies whether to force save a file or not
+    /// </summary>
+    [FromForm(Name = "Forcesave")]
+    public bool Forcesave { get; set; }
 }
+

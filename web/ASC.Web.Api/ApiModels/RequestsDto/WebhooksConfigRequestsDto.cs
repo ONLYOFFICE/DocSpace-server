@@ -42,12 +42,14 @@ public class WebhooksConfigRequestsDto
     /// Name
     /// </summary>
     [StringLength(50)]
+    [Required]
     public string Name { get; set; }
 
     /// <summary>
     /// URI
     /// </summary>
     [Url]
+    [Required]
     public string Uri { get; set; }
 
     /// <summary>

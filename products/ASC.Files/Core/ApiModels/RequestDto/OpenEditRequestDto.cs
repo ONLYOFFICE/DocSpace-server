@@ -70,6 +70,5 @@ public class OpenEditRequestDto<T>
     /// <summary>
     /// File
     /// </summary>
-    [FromQuery]
     public OpenEdit File { get; set; }
 }

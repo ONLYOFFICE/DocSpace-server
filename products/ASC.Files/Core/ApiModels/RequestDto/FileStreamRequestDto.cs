@@ -27,35 +27,9 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Parameters for updating file contents
-/// </summary>
-public class FileStreamRequest : IModelWithFile
-{
-    /// <summary>
-    /// Request input stream
-    /// </summary>
-    public IFormFile File { get; set; }
-
-    /// <summary>
-    /// Specifies whether to encrypt a file or not
-    /// </summary>
-    public bool Encrypted { get; set; }
-
-    /// <summary>
-    /// Specifies whether to force save a file or not
-    /// </summary>
-    public bool Forcesave { get; set; }
-
-    /// <summary>
-    /// File extension
-    /// </summary>
-    public string FileExtension { get; set; }
-}
-
-/// <summary>
 /// Request parameters for updating file contents
 /// </summary>
-public class FileStreamRequestDto<T>
+public class FileStreamRequestDto<T> : IModelWithFile
 {
     /// <summary>
     /// File ID
@@ -64,8 +38,26 @@ public class FileStreamRequestDto<T>
     public T FileId { get; set; }
 
     /// <summary>
-    /// File
+    /// Request input stream
     /// </summary>
-    [FromForm]
-    public FileStreamRequest File { get; set; }
+    [FromForm(Name = "File")]
+    public IFormFile File { get; set; }
+
+    /// <summary>
+    /// Specifies whether to encrypt a file or not
+    /// </summary>
+    [FromForm(Name = "Encrypted")]
+    public bool Encrypted { get; set; }
+
+    /// <summary>
+    /// Specifies whether to force save a file or not
+    /// </summary>
+    [FromForm(Name = "Forcesave")]
+    public bool Forcesave { get; set; }
+
+    /// <summary>
+    /// File extension
+    /// </summary>
+    [FromForm(Name = "FileExtension")]
+    public string FileExtension { get; set; }
 }

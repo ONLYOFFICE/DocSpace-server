@@ -53,6 +53,15 @@ public class UserIdRequestDto
     public Guid Id { get; set; }
 }
 
+public class UserIDRequestDto
+{
+    /// <summary>
+    /// User ID
+    /// </summary>
+    [FromRoute(Name = "userID")]
+    public Guid Id { get; set; }
+}
+
 public class ProductIdRequestDto
 {
     /// <summary>

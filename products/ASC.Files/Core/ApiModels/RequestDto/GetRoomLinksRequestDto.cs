@@ -52,6 +52,5 @@ public class GetRoomLinksRequestDto<T>
     /// <summary>
     /// Room links
     /// </summary>
-    [FromQuery]
     public GetRoomLinksRequest RoomLinks { get; set; }
 }

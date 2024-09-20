@@ -101,7 +101,7 @@ public class PortalController(
     [Tags("Portal / Users")]
     [SwaggerResponse(200, "User information", typeof(UserInfo))]
     [HttpGet("users/{userID:guid}")]
-    public async Task<UserInfo> GetUserAsync(UserIdRequestDto inDto)
+    public async Task<UserInfo> GetUserAsync(UserIDRequestDto inDto)
     {
         return await userManager.GetUsersAsync(inDto.Id);
     }

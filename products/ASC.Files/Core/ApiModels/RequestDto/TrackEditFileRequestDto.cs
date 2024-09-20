@@ -64,6 +64,5 @@ public class TrackEditFileRequestDto<T>
     /// <summary>
     /// File
     /// </summary>
-    [FromQuery]
     public TrackEditFile File { get; set; }
 }
