@@ -695,8 +695,7 @@ public class UserManager(
         }
 
         var user = await GetUsersAsync(userId);
-        var isUser = await this.IsGuestAsync(user);
-        var isPaidUser = await IsPaidUserAsync(user);
+        var isPaidUserBefore = await IsPaidUserAsync(user);
 
         await permissionContext.DemandPermissionsAsync(new UserGroupObject(new UserAccount(user, await tenantManager.GetCurrentTenantIdAsync(), userFormatter), groupId),
             Constants.Action_EditGroups);
@@ -722,17 +721,17 @@ public class UserManager(
         {
             return;
         }
+        
+        var isPaidUserAfter = await IsPaidUserAsync(user);
 
-        if (await this.IsSystemGroup(groupId) &&
-            (isUser && groupId != Constants.GroupGuest.ID ||
-            !isUser && !isPaidUser && groupId != Constants.GroupGuest.ID))
+        if (await this.IsSystemGroup(groupId) && ((isPaidUserBefore && !isPaidUserAfter) || (!isPaidUserBefore && isPaidUserAfter)))
         {
             var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountPaidUserFeature, int>();
             _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
         }
     }
 
-    public async Task RemoveUserFromGroupAsync(Guid userId, Guid groupId)
+    public async Task RemoveUserFromGroupAsync(Guid userId, Guid groupId, bool notifyWebSocket = true)
     {
         if (Constants.LostUser.Id == userId || Constants.LostGroupInfo.ID == groupId)
         {
@@ -741,7 +740,7 @@ public class UserManager(
 
         var managerIdTask = GetDepartmentManagerAsync(groupId);
         var user = await GetUsersAsync(userId);
-        var isUserBefore = await this.IsGuestAsync(user);
+
         var isPaidUserBefore = await IsPaidUserAsync(user);
 
         await permissionContext.DemandPermissionsAsync(new UserGroupObject(new UserAccount(user, await tenantManager.GetCurrentTenantIdAsync(), userFormatter), groupId),
@@ -756,12 +755,15 @@ public class UserManager(
         }
 
         ResetGroupCache(userId);
-
-        var isUserAfter = await this.IsGuestAsync(user);
+        
+        if (!notifyWebSocket)
+        {
+            return;
+        }
+        
         var isPaidUserAfter = await IsPaidUserAsync(user);
 
-        if (isPaidUserBefore && !isPaidUserAfter && isUserAfter ||
-            isUserBefore && !isUserAfter)
+        if (await this.IsSystemGroup(groupId) && ((isPaidUserBefore && !isPaidUserAfter) || (!isPaidUserBefore && isPaidUserAfter)))
         {
             var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountPaidUserFeature, int>();
             _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
