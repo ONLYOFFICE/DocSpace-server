@@ -53,7 +53,7 @@ public class DarkThemeSettings : ISettings<DarkThemeSettings>
 
 /// <summary>
 /// </summary>
-[System.Text.Json.Serialization.JsonConverter(typeof(JsonStringEnumConverter))]
+[System.Text.Json.Serialization.JsonConverter(typeof(JsonStringEnumConverter<DarkThemeSettingsType>))]
 public enum DarkThemeSettingsType
 {
     Base,
