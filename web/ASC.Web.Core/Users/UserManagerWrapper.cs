@@ -245,10 +245,11 @@ public sealed class UserManagerWrapper(
     public async Task<bool> UpdateUserTypeAsync(UserInfo user, EmployeeType type)
     {
         var tenant = await tenantManager.GetCurrentTenantAsync();
-        var currentUser = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
+        var initiator = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
+        var initiatorType = await userManager.GetUserTypeAsync(initiator.Id);
         var changed = false;
 
-        if (user.IsOwner(tenant) || user.IsMe(currentUser.Id))
+        if (user.IsOwner(tenant) || user.IsMe(initiator.Id) || initiatorType is EmployeeType.Guest)
         {
             return await Task.FromResult(false);
         }
@@ -258,7 +259,7 @@ public sealed class UserManagerWrapper(
 
         try
         {
-            if (type is EmployeeType.DocSpaceAdmin && currentUser.IsOwner(tenant))
+            if (type is EmployeeType.DocSpaceAdmin && initiator.IsOwner(tenant))
             {
                 if (currentType is EmployeeType.RoomAdmin)
                 {
@@ -287,9 +288,9 @@ public sealed class UserManagerWrapper(
                     changed = true;
                 }
             }
-            else if (type is EmployeeType.RoomAdmin)
+            else if (type is EmployeeType.RoomAdmin && initiatorType is EmployeeType.DocSpaceAdmin)
             {
-                if (currentType is EmployeeType.DocSpaceAdmin && currentUser.IsOwner(tenant))
+                if (currentType is EmployeeType.DocSpaceAdmin && initiator.IsOwner(tenant))
                 {
                     await userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupAdmin.ID);
                     webItemSecurityCache.ClearCache(tenant.Id);
@@ -314,13 +315,38 @@ public sealed class UserManagerWrapper(
                     changed = true;
                 }
             }
-            else if (type is EmployeeType.User && currentType is EmployeeType.Guest)
+            else if (type is EmployeeType.User)
             {
-                await userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupGuest.ID);
-                await userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupUser.ID);
-                webItemSecurityCache.ClearCache(tenant.Id);
-                changed = true;
+                if (currentType is EmployeeType.DocSpaceAdmin && initiator.IsOwner(tenant))
+                {
+                    await userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupAdmin.ID);
+                    await userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupUser.ID);
+                    webItemSecurityCache.ClearCache(tenant.Id);
+                    changed = true;
+                }
+                else if (currentType is EmployeeType.RoomAdmin && initiatorType is EmployeeType.DocSpaceAdmin)
+                {
+                    await userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupUser.ID);
+                    webItemSecurityCache.ClearCache(tenant.Id);
+                    changed = true;
+                }
+                else if (currentType is EmployeeType.Guest)
+                {
+                    await userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupGuest.ID);
+                    await userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupUser.ID);
+                    webItemSecurityCache.ClearCache(tenant.Id);
+                    changed = true;
+                }
             }
+            // uncomment when guest support appears
+            
+            // else if (type is EmployeeType.Guest && currentType is EmployeeType.User)
+            // {
+            //     await userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupUser.ID);
+            //     await userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupGuest.ID);
+            //     webItemSecurityCache.ClearCache(tenant.Id);
+            //     changed = true;
+            // }
         }
         finally
         {

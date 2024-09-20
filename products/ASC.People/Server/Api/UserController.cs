@@ -303,7 +303,7 @@ public class UserController(
         }
 
         return await employeeFullDtoHelper.GetFullAsync(user);
-        }
+    }
 
     /// <summary>
     /// Invites users specified in the request to the current portal.
@@ -325,15 +325,23 @@ public class UserController(
         ArgumentNullException.ThrowIfNull(inDto.Invitations);
 
         var currentUser = await _userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+        var currentUserType = await _userManager.GetUserTypeAsync(currentUser.Id); 
 
         var tenant = await tenantManager.GetCurrentTenantAsync();
+        
+        if (currentUserType is EmployeeType.User or EmployeeType.Guest)
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
 
         foreach (var invite in inDto.Invitations)
         {
-            if ((invite.Type == EmployeeType.DocSpaceAdmin && !currentUser.IsOwner(tenant)) ||
-                !await _permissionContext.CheckPermissionsAsync(new UserSecurityProvider(Guid.Empty, invite.Type), Constants.Action_AddRemoveUser))
+            switch (invite.Type)
             {
-                continue;
+                case EmployeeType.Guest:
+                case EmployeeType.RoomAdmin when currentUserType is not EmployeeType.DocSpaceAdmin:
+                case EmployeeType.DocSpaceAdmin when !currentUser.IsOwner(tenant):
+                    continue;
             }
 
             var user = await userManagerWrapper.AddInvitedUserAsync(invite.Email, invite.Type, inDto.Culture);
@@ -889,10 +897,18 @@ public class UserController(
     public async IAsyncEnumerable<EmployeeFullDto> ResendUserInvitesAsync(UpdateMembersRequestDto inDto)
     {
         List<UserInfo> users;
+        
+        var currentUserType = await _userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
+        
+        var tenant = await tenantManager.GetCurrentTenantAsync();
 
         if (inDto.ResendAll)
         {
-            await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(Guid.Empty, EmployeeType.Guest), Constants.Action_AddRemoveUser);
+            if (currentUserType is EmployeeType.User or EmployeeType.Guest)
+            {
+                throw new SecurityException(Resource.ErrorAccessDenied);
+            }
+            
             users = (await _userManager.GetUsersAsync())
                 .Where(u => u.ActivationStatus == EmployeeActivationStatus.Pending)
                 .ToList();
@@ -912,14 +928,13 @@ public class UserController(
                 continue;
             }
 
-            var viewer = await _userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
-
-            if (viewer == null)
+            var currentUser = await _userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
+            if (currentUser == null || currentUser.Equals(Constants.LostUser))
             {
                 throw new Exception(Resource.ErrorAccessDenied);
             }
 
-            if (await _userManager.IsDocSpaceAdminAsync(viewer) || viewer.Id == user.Id)
+            if (currentUserType == EmployeeType.DocSpaceAdmin || currentUser.Id == user.Id)
             {
                 if (user.ActivationStatus == EmployeeActivationStatus.Activated)
                 {
@@ -936,24 +951,22 @@ public class UserController(
             if (user.ActivationStatus == EmployeeActivationStatus.Pending)
             {
                 var type = await _userManager.GetUserTypeAsync(user.Id);
-
-                if (!await _permissionContext.CheckPermissionsAsync(new UserSecurityProvider(type), Constants.Action_AddRemoveUser))
+                if (currentUser.Id != user.Id && !HasAccessInvite(type, currentUser))
                 {
                     continue;
                 }
 
                 var link = await commonLinkUtility.GetInvitationLinkAsync(user.Email, type, authContext.CurrentAccount.ID, user.GetCulture()?.Name);
                 var shortenLink = await urlShortener.GetShortenLinkAsync(link);
-                await messageService.SendAsync(MessageAction.SendJoinInvite, MessageTarget.Create(user.Id), viewer.DisplayUserName(displayUserSettingsHelper), user.Email);
+                await messageService.SendAsync(MessageAction.SendJoinInvite, MessageTarget.Create(user.Id), currentUser.DisplayUserName(displayUserSettingsHelper), user.Email);
                 await studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink);
             }
             else
             {
-                if (viewer.Id != user.Id)
+                if (currentUser.Id != user.Id)
                 {
                     var type = await _userManager.GetUserTypeAsync(user.Id);
-
-                    if (!await _permissionContext.CheckPermissionsAsync(new UserSecurityProvider(type), Constants.Action_AddRemoveUser))
+                    if (!HasAccessInvite(type, currentUser))
                     {
                         continue;
                     }
@@ -963,11 +976,26 @@ public class UserController(
             }
         }
 
-        await messageService.SendAsync(MessageAction.UsersSentActivationInstructions, MessageTarget.Create(users.Select(x => x.Id)), users.Select(x => x.DisplayUserName(false, displayUserSettingsHelper)));
+        await messageService.SendAsync(MessageAction.UsersSentActivationInstructions, MessageTarget.Create(users.Select(x => x.Id)), 
+            users.Select(x => x.DisplayUserName(false, displayUserSettingsHelper)));
 
         foreach (var user in users)
         {
             yield return await employeeFullDtoHelper.GetFullAsync(user);
+        }
+
+        yield break;
+
+        bool HasAccessInvite(EmployeeType type, UserInfo currentUser)
+        {
+            switch (type)
+            {
+                case EmployeeType.RoomAdmin when currentUserType is EmployeeType.DocSpaceAdmin:
+                case EmployeeType.DocSpaceAdmin when currentUser.IsOwner(tenant):
+                    return true;
+            }
+
+            return false;
         }
     }
 
