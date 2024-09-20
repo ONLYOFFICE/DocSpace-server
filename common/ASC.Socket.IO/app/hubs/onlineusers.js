@@ -24,6 +24,7 @@ module.exports = async (io) => {
       const parser = uap(socket.request.headers['user-agent']);
       const operationSystem = parser.os.version !== undefined ?  `${parser.os.name} ${parser.os.version}` : `${parser.os.name}`;  
       const browserVersion = parser.browser.version ? parser.browser.version : '';
+      const browser = parser.browser.name + " " + browserVersion
   
       const userId = socket.handshake.session?.user?.id;
       const userName = (socket.handshake.session?.user?.userName || "").toLowerCase();
@@ -240,7 +241,7 @@ module.exports = async (io) => {
             {
               id: sessionId,
               platform: operationSystem,
-              browser: parser.browser.name + " " + browserVersion,
+              browser: browser,
               ip: ipAddress,
               status: "online"
             });
@@ -265,7 +266,7 @@ module.exports = async (io) => {
           session = {
             id: sessionId,
             platform: operationSystem,
-            browser: parser.browser.name + " " + browserVersion,
+            browser: browser,
             ip: ipAddress,
             status:"online"
           };
@@ -274,8 +275,14 @@ module.exports = async (io) => {
             session
           );
         }
-        
-        user.offlineSessions.delete(sessionId);
+  
+        for (let k of user.offlineSessions.keys()) {
+          var value = user.offlineSessions.get(k);
+          if (!(value.id == ipAddress && value.browser == browser && value.platform == operationSystem))
+          {
+            user.offlineSessions.delete(k);
+          }
+        }
         if(user.offlineSessions.size != 0)
         {
           await redisClient.set(redisKey, JSON.stringify(Array.from(user.offlineSessions)));
