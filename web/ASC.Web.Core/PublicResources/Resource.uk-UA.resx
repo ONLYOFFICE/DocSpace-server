@@ -304,7 +304,7 @@
   <data name="TariffsFeature_usersInRoom_exception" xml:space="preserve">
     <value>Кількість користувачів у кімнаті не повинна перевищувати {0}</value>
   </data>
-  <data name="TariffsFeature_whitelabel" xml:space="preserve">
+  <data name="TariffsFeature_customization" xml:space="preserve">
     <value>Брендинг та налаштування</value>
   </data>
   <data name="ConsumersBitly" xml:space="preserve">

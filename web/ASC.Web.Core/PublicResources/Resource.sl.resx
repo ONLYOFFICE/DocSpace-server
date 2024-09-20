@@ -322,7 +322,7 @@
   <data name="TariffsFeature_usersInRoom_exception" xml:space="preserve">
     <value>Število uporabnikov v sobi ne sme presegati {0}</value>
   </data>
-  <data name="TariffsFeature_whitelabel" xml:space="preserve">
+  <data name="TariffsFeature_customization" xml:space="preserve">
     <value>Blagovna znamka &amp; prilagoditve</value>
   </data>
   <data name="ConsumersBox" xml:space="preserve">
