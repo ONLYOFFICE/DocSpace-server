@@ -412,6 +412,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Purchase now.
+        /// </summary>
+        public static string ButtonPurchaseNow {
+            get {
+                return ResourceManager.GetString("ButtonPurchaseNow", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Register.
         /// </summary>
         public static string ButtonRegister {
@@ -654,6 +663,74 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Hello, $UserName!
+        ///
+        ///Your license for ONLYOFFICE DocSpace Developer expires today.
+        ///
+        ///We have activated a grace period of $PaymentDelay days for you. During this time, access to document editing is limited to 20 simultaneous connections (support and updates are no longer provided).
+        ///
+        ///To update the license, please contact your dedicated sales manager directly or reach out to us via &quot;${__SalesEmail}&quot;:&quot;mailto:${__SalesEmail}&quot;.
+        ///
+        ///For payment questions, contact us at &quot;${__SalesEmail}&quot;:&quot;mailto:${__SalesEmail}&quot;. [rest of string was truncated]&quot;;.
+        /// </summary>
+        public static string pattern_developer_admin_payment_warning_grace_period_activation {
+            get {
+                return ResourceManager.GetString("pattern_developer_admin_payment_warning_grace_period_activation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Hello, $UserName!
+        ///
+        ///Your license for ONLYOFFICE DocSpace Developer will expire in 7 days.
+        ///
+        ///To update the license, please contact your dedicated sales manager directly or reach out to us via &quot;${__SalesEmail}&quot;:&quot;mailto:${__SalesEmail}&quot;.
+        ///
+        ///For payment questions, contact us at &quot;${__SalesEmail}&quot;:&quot;mailto:${__SalesEmail}&quot;. For solving any technical problems, use &quot;${__SupportLink}&quot;:&quot;${__SupportLink}&quot;.
+        ///
+        ///$TrulyYours.
+        /// </summary>
+        public static string pattern_developer_admin_payment_warning_grace_period_before_activation {
+            get {
+                return ResourceManager.GetString("pattern_developer_admin_payment_warning_grace_period_before_activation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Hello, $UserName!
+        ///
+        ///The grace period for your ONLYOFFICE DocSpace Developer license will expire in 7 days. It means DocSpace will become unavailable.
+        ///
+        ///To update the license, please contact your dedicated sales manager directly or reach out to us via &quot;${__SalesEmail}&quot;:&quot;mailto:${__SalesEmail}&quot;.
+        ///
+        ///For payment questions, contact us at &quot;${__SalesEmail}&quot;:&quot;mailto:${__SalesEmail}&quot;. For solving any technical problems, use &quot;${__SupportLink}&quot;:&quot;${__SupportLink}&quot;.
+        ///
+        ///$TrulyYours.
+        /// </summary>
+        public static string pattern_developer_admin_payment_warning_grace_period_before_expiration {
+            get {
+                return ResourceManager.GetString("pattern_developer_admin_payment_warning_grace_period_before_expiration", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Hello, $UserName!
+        ///
+        ///The grace period for your ONLYOFFICE DocSpace Developer license expires today. It means DocSpace will be no longer available.
+        ///
+        ///To update the license, please contact your dedicated sales manager directly or reach out to us via &quot;${__SalesEmail}&quot;:&quot;mailto:${__SalesEmail}&quot;.
+        ///
+        ///For payment questions, contact us at &quot;${__SalesEmail}&quot;:&quot;mailto:${__SalesEmail}&quot;. For solving any technical problems, use &quot;${__SupportLink}&quot;:&quot;${__SupportLink}&quot;.
+        ///
+        ///$TrulyYours.
+        /// </summary>
+        public static string pattern_developer_admin_payment_warning_grace_period_expiration {
+            get {
+                return ResourceManager.GetString("pattern_developer_admin_payment_warning_grace_period_expiration", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0 40px 32px; text-align: center;&quot;&gt;to &lt;span style=&quot;color: #FF6F3D;&quot;&gt;ONLYOFFICE&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
         ///
         ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; [rest of string was truncated]&quot;;.
@@ -661,6 +738,114 @@ namespace ASC.Web.Core.PublicResources {
         public static string pattern_enterprise_admin_activation_v1 {
             get {
                 return ResourceManager.GetString("pattern_enterprise_admin_activation_v1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Hello, $UserName!
+        ///
+        ///Your license for ONLYOFFICE DocSpace Enterprise expires today.
+        ///
+        ///We have activated *a grace period of $PaymentDelay‎ days* for you. During this time, access to DocSpace is provided for 3 named users* (support and updates are no longer provided).
+        ///
+        ///To be able to use all the features available at the moment of the purchase for an *unlimited period of time*, we recommend you *obtain a LIFETIME license* for ONLYOFFICE DocSpace Enterprise (with 3 years of support and updates included):
+        ///
+        /// [rest of string was truncated]&quot;;.
+        /// </summary>
+        public static string pattern_enterprise_admin_payment_warning_grace_period_activation {
+            get {
+                return ResourceManager.GetString("pattern_enterprise_admin_payment_warning_grace_period_activation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Hello, $UserName!
+        ///
+        ///Your license for ONLYOFFICE DocSpace Enterprise will expire in 7 days.
+        ///
+        ///To be able to use all the features available at the moment of the purchase for an *unlimited period of time*, we recommend you *obtain a LIFETIME license* for ONLYOFFICE DocSpace Enterprise (with 3 years of support and updates included).
+        ///
+        ///$OrangeButton
+        ///
+        ///You are also welcome to contact your dedicated sales manager directly for the license update.
+        ///
+        ///For payment questions, contact us at &quot;${__SalesEmail}&quot;:&quot;mailto [rest of string was truncated]&quot;;.
+        /// </summary>
+        public static string pattern_enterprise_admin_payment_warning_grace_period_before_activation {
+            get {
+                return ResourceManager.GetString("pattern_enterprise_admin_payment_warning_grace_period_before_activation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Hello, $UserName!
+        ///
+        ///The grace period for your ONLYOFFICE DocSpace Enterprise license will expire in 7 days. It means DocSpace will become unavailable.
+        ///
+        ///To be able to use all the features available at the moment of the purchase for an *unlimited period of time*, we recommend you *obtain a LIFETIME license* for ONLYOFFICE DocSpace Enterprise (with 3 years of support and updates included):
+        ///
+        ///$OrangeButton
+        ///
+        ///You are also welcome to contact your dedicated sales manager directly for the license update.
+        ///
+        ///Fo [rest of string was truncated]&quot;;.
+        /// </summary>
+        public static string pattern_enterprise_admin_payment_warning_grace_period_before_expiration {
+            get {
+                return ResourceManager.GetString("pattern_enterprise_admin_payment_warning_grace_period_before_expiration", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Hello, $UserName!
+        ///
+        ///The grace period for your ONLYOFFICE DocSpace Enterprise license expires today. It means DocSpace will be no longer available.
+        ///
+        ///To be able to use all the features available at the moment of the purchase for an *unlimited period of time*, we recommend you *obtain a LIFETIME license* for ONLYOFFICE DocSpace Enterprise (with 3 years of support and updates included):
+        ///
+        ///$OrangeButton
+        ///
+        ///You are also welcome to contact your dedicated sales manager directly for the license update. 
+        ///
+        ///For p [rest of string was truncated]&quot;;.
+        /// </summary>
+        public static string pattern_enterprise_admin_payment_warning_grace_period_expiration {
+            get {
+                return ResourceManager.GetString("pattern_enterprise_admin_payment_warning_grace_period_expiration", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Hello, $UserName!
+        ///
+        ///Your license for ONLYOFFICE DocSpace Enterprise will expire in 7 days. It means updates and support will be no longer available.*
+        ///
+        ///To update the license, please contact your dedicated sales manager directly or reach out to us via &quot;${__SalesEmail}&quot;:&quot;mailto:${__SalesEmail}&quot;.
+        ///
+        ///For payment questions, contact us at sales@onlyoffice.com. For solving any technical problems, use &quot;${__SupportLink}&quot;:&quot;${__SupportLink}&quot;.
+        ///
+        ///*You can use all the features available at the moment of the license pu [rest of string was truncated]&quot;;.
+        /// </summary>
+        public static string pattern_enterprise_admin_payment_warning_lifetime_before_expiration {
+            get {
+                return ResourceManager.GetString("pattern_enterprise_admin_payment_warning_lifetime_before_expiration", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Hello, $UserName!
+        ///
+        ///Your license for ONLYOFFICE DocSpace Enterprise expires today. It means updates and support are no longer available.*
+        ///
+        ///To update the license, please contact your dedicated sales manager directly or reach out to us via &quot;${__SalesEmail}&quot;:&quot;mailto:${__SalesEmail}&quot;.
+        ///
+        ///For payment questions, contact us at sales@onlyoffice.com. For solving any technical problems, use &quot;${__SupportLink}&quot;:&quot;${__SupportLink}&quot;.
+        ///
+        ///*You can use all the features available at the moment of the license purchase for a [rest of string was truncated]&quot;;.
+        /// </summary>
+        public static string pattern_enterprise_admin_payment_warning_lifetime_expiration {
+            get {
+                return ResourceManager.GetString("pattern_enterprise_admin_payment_warning_lifetime_expiration", resourceCulture);
             }
         }
         
@@ -1417,7 +1602,7 @@ namespace ASC.Web.Core.PublicResources {
                 return ResourceManager.GetString("pattern_request_tariff1", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to The DocSpace administrator noticed suspicious activity from your account and disabled all active sessions. Your password was reset. 
         ///
@@ -2030,11 +2215,101 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Grace period for your ONLYOFFICE DocSpace Developer activated.
+        /// </summary>
+        public static string subject_developer_admin_payment_warning_grace_period_activation {
+            get {
+                return ResourceManager.GetString("subject_developer_admin_payment_warning_grace_period_activation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your ONLYOFFICE DocSpace Developer license will expire soon.
+        /// </summary>
+        public static string subject_developer_admin_payment_warning_grace_period_before_activation {
+            get {
+                return ResourceManager.GetString("subject_developer_admin_payment_warning_grace_period_before_activation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Grace period for your ONLYOFFICE DocSpace Developer will expire soon.
+        /// </summary>
+        public static string subject_developer_admin_payment_warning_grace_period_before_expiration {
+            get {
+                return ResourceManager.GetString("subject_developer_admin_payment_warning_grace_period_before_expiration", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your ONLYOFFICE DocSpace Developer no longer available.
+        /// </summary>
+        public static string subject_developer_admin_payment_warning_grace_period_expiration {
+            get {
+                return ResourceManager.GetString("subject_developer_admin_payment_warning_grace_period_expiration", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Welcome to ONLYOFFICE DocSpace!.
         /// </summary>
         public static string subject_enterprise_admin_activation_v1 {
             get {
                 return ResourceManager.GetString("subject_enterprise_admin_activation_v1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Grace period for your ONLYOFFICE DocSpace Enterprise activated .
+        /// </summary>
+        public static string subject_enterprise_admin_payment_warning_grace_period_activation {
+            get {
+                return ResourceManager.GetString("subject_enterprise_admin_payment_warning_grace_period_activation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your ONLYOFFICE DocSpace Enterprise license will expire soon.
+        /// </summary>
+        public static string subject_enterprise_admin_payment_warning_grace_period_before_activation {
+            get {
+                return ResourceManager.GetString("subject_enterprise_admin_payment_warning_grace_period_before_activation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Grace period for your ONLYOFFICE DocSpace Enterprise will expire soon.
+        /// </summary>
+        public static string subject_enterprise_admin_payment_warning_grace_period_before_expiration {
+            get {
+                return ResourceManager.GetString("subject_enterprise_admin_payment_warning_grace_period_before_expiration", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your ONLYOFFICE DocSpace Enterprise no longer available.
+        /// </summary>
+        public static string subject_enterprise_admin_payment_warning_grace_period_expiration {
+            get {
+                return ResourceManager.GetString("subject_enterprise_admin_payment_warning_grace_period_expiration", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your ONLYOFFICE DocSpace Enterprise license will expire soon.
+        /// </summary>
+        public static string subject_enterprise_admin_payment_warning_lifetime_before_expiration {
+            get {
+                return ResourceManager.GetString("subject_enterprise_admin_payment_warning_lifetime_before_expiration", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your ONLYOFFICE DocSpace Enterprise license expires today.
+        /// </summary>
+        public static string subject_enterprise_admin_payment_warning_lifetime_expiration {
+            get {
+                return ResourceManager.GetString("subject_enterprise_admin_payment_warning_lifetime_expiration", resourceCulture);
             }
         }
         
@@ -2424,7 +2699,7 @@ namespace ASC.Web.Core.PublicResources {
                 return ResourceManager.GetString("subject_request_tariff", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Reset your password.
         /// </summary>

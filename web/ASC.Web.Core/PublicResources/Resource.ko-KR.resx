@@ -217,7 +217,7 @@
   <data name="TariffsFeature_usersInRoom_exception" xml:space="preserve">
     <value>최대 방 사용자 수는 {0}입니다</value>
   </data>
-  <data name="TariffsFeature_whitelabel" xml:space="preserve">
+  <data name="TariffsFeature_customization" xml:space="preserve">
     <value>브랜딩 &amp; 맞춤화</value>
   </data>
   <data name="Tariffs_startup" xml:space="preserve">

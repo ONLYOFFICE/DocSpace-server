@@ -147,7 +147,18 @@ public class StudioNotifySource(UserManager userManager, IRecipientProvider reci
 
                 Actions.ZoomWelcome,
 
-                Actions.MigrationPersonalToDocspace
+                Actions.MigrationPersonalToDocspace,
+
+                Actions.EnterpriseAdminPaymentWarningGracePeriodBeforeActivation,
+                Actions.EnterpriseAdminPaymentWarningGracePeriodActivation,
+                Actions.EnterpriseAdminPaymentWarningGracePeriodBeforeExpiration,
+                Actions.EnterpriseAdminPaymentWarningGracePeriodExpiration,
+                Actions.EnterpriseAdminPaymentWarningLifetimeBeforeExpiration,
+                Actions.EnterpriseAdminPaymentWarningLifetimeExpiration,
+                Actions.DeveloperAdminPaymentWarningGracePeriodBeforeActivation,
+                Actions.DeveloperAdminPaymentWarningGracePeriodActivation,
+                Actions.DeveloperAdminPaymentWarningGracePeriodBeforeExpiration,
+                Actions.DeveloperAdminPaymentWarningGracePeriodExpiration
             );
     }
 

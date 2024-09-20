@@ -1451,8 +1451,8 @@ public class UserController(
 
                             if (user.Status == EmployeeStatus.Terminated && string.IsNullOrEmpty(user.FirstName) && string.IsNullOrEmpty(user.LastName))
                             {
-                                var emailChangeEvent = (await auditEventsRepository.GetByFilterAsync(action: MessageAction.SendJoinInvite, entry: EntryType.User, target: MessageTarget.Create(user.Id).ToString(), limit: 1)).FirstOrDefault() ?? 
-                                                       (await auditEventsRepository.GetByFilterAsync(action: MessageAction.RoomInviteLinkUsed, entry: EntryType.User, target: MessageTarget.Create(user.Id).ToString(), limit: 1)).FirstOrDefault();
+                                var emailChangeEvent = (await auditEventsRepository.GetByFilterWithActionsAsync(actions: [MessageAction.SendJoinInvite, MessageAction.RoomInviteLinkUsed, MessageAction.RoomCreateUser], entry: EntryType.User, target: MessageTarget.Create(user.Id).ToString(), limit: 1)).FirstOrDefault() ??
+                                                       (await auditEventsRepository.GetByFilterWithActionsAsync(actions: [MessageAction.RoomCreateUser], limit: 1, description: user.Email)).FirstOrDefault();
 
                                 user.Status = emailChangeEvent != null ? EmployeeStatus.Pending : EmployeeStatus.Active;
                             }

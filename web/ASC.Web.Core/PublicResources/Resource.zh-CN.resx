@@ -460,7 +460,7 @@
   <data name="TariffsFeature_usersInRoom_exception" xml:space="preserve">
     <value>房间里的用户数量不应超过 {0}</value>
   </data>
-  <data name="TariffsFeature_whitelabel" xml:space="preserve">
+  <data name="TariffsFeature_customization" xml:space="preserve">
     <value>品牌化&amp;个性定制</value>
   </data>
   <data name="ConsumersBitly" xml:space="preserve">
