@@ -23,5 +23,6 @@ module.exports = (io, filesHub, usersHub) => {
         }
         filesHub.start(socket);
         await usersHub.startAsync(socket);
+        systemIO.to(socket.id).emit("connection-init");
     });
 }
